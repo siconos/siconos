@@ -22,10 +22,9 @@
 
 #ifndef CONVEXQP_H
 #define CONVEXQP_H
-
-#include "NumericsFwd.h"
-#include <stdio.h>
-#include "SiconosConfig.h"
+#include <stdio.h>        // for FILE
+#include "NumericsFwd.h"  // for ConvexQP, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 
 /** \struct ConvexQP ConvexQP.h

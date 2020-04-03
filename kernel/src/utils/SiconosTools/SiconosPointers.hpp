@@ -52,21 +52,12 @@ More documentation on smart pointers and reference counting:
 
  */
 
-#include <SiconosConfig.h>
 
-// Case 1 : ref == shared pointers from c++ (>=11) standard
-// SICONOS_STD_SHARED_PTR is automatically set by cmake (CXXCompilerSetup.cmake)
-// while SICONOS_USE_BOOST_FOR_CXX11 is a user option.
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
-#include <memory>
-namespace std11 = std;
-#else
-// Case 2 : ref == boost shared pointers
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/enable_shared_from_this.hpp>
-namespace std11 = boost;
-#endif
+#include <memory> // Def of std::shared_ptr
+
+// boost shared_arrays : at the time required
+// only in HEM5 and LSodar
+#include <boost/shared_array.hpp>
 
 namespace SP {}
 namespace SPC {}
@@ -119,23 +110,20 @@ struct nullDeleter
 /* template typedef : no */
 
 #define TYPEDEF_SPTR(X) \
-  typedef std11::shared_ptr<X> SPtr##X; \
-  typedef std11::shared_ptr<const X> SPtrConst##X; \
+  typedef std::shared_ptr<X> SPtr##X; \
+  typedef std::shared_ptr<const X> SPtrConst##X; \
   inline SPtr##X create##SPtr##X(X &x) \
   { \
-    std11::shared_ptr<X> px(&x, nullDeleter()); \
+    std::shared_ptr<X> px(&x, nullDeleter()); \
     return px; \
   } \
   inline SPtrConst##X create##SPtrConst##X(const X &x) \
   { \
-    std11::shared_ptr<const X> px(&x, nullDeleter()); \
+    std::shared_ptr<const X> px(&x, nullDeleter()); \
     return px; \
   } \
   NAME_SPACE_SPTR(X)
 
-// boost shared_arrays : at the time required
-// only in HEM5 and LSodar
-#include <boost/shared_array.hpp>
 #define TYPEDEF_SAPTR(X)                        \
   typedef boost::shared_array<X> X##SAPtr ;     \
   NAME_SPACE_SAPTR(X)
@@ -167,16 +155,16 @@ struct nullDeleter
   }
 
 #define TYPEDEF_TPL1_SPTR(N,X,Y)                           \
-  typedef std11::shared_ptr<X<Y> > SPtr##N;                \
-  typedef std11::shared_ptr<const X<Y> > SPtrConst##N;     \
+  typedef std::shared_ptr<X<Y> > SPtr##N;                \
+  typedef std::shared_ptr<const X<Y> > SPtrConst##N;     \
   inline SPtr##N create##SPtr##N(X<Y> &x)                  \
   {                                                        \
-    std11::shared_ptr<X<Y> > px(&x, nullDeleter());        \
+    std::shared_ptr<X<Y> > px(&x, nullDeleter());        \
     return px;                                             \
   }                                                        \
   inline SPtrConst##N create##SPtrConst##N(const X<Y> &x)  \
   {                                                        \
-    std11::shared_ptr<const X<Y> > px(&x, nullDeleter());  \
+    std::shared_ptr<const X<Y> > px(&x, nullDeleter());  \
     return px;                                             \
   }                                                        \
   NAME_SPACE_TPL1_SPTR(N,X,Y)

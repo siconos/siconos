@@ -30,57 +30,6 @@
 typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int size_z,  double* z);
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
-
-void computeRotationMatrix(double q0, double q1, double q2, double q3, SP::SimpleMatrix rotationMatrix);
-
-void computeRotationMatrix(SP::SiconosVector q,  SP::SimpleMatrix rotationMatrix);
-void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix);
-
-/* For a given position vector q, performs the rotation of the vector v
- * w.r.t the quaternion that parametrize the rotation in q, that is the
- * rotation of the body fixed frame with respect to the inertial frame.
- * \param[in] q the position vector
- * \param[in,out] v the vector to be rotated
- */
-void rotateAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
-
-/* For a given position vector q, performs the rotation of the matrix m
- * w.r.t the quaternion that parametrize the rotation in q, that is the
- * rotation of the body fixed frame with respect to the inertial frame.
- * \param[in] q the position vector
- * \param[in,out] m the vector to be rotated
- */
-void rotateAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
-void rotateAbsToBody(double q0, double q1, double q2, double q3, SiconosVector& v);
-void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SiconosVector v);
-void rotateAbsToBody(double q0, double q1, double q2, double q3, SP::SimpleMatrix m);
-
-
-/* For a given position vector q, express the vector v given in
- * the inertial frame into to the body frame
- * w.r.t the quaternion that parametrize the rotation in q.
- * The operation amounts to multiplying by the transposed rotation matrix.
- * the result is return in v
- * \param[in] q the position vector
- * \param[in,out] v the vector to be reexpressed
- */
-void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v);
-void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
-void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
-
-void changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v);
-void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
-void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
-
-void normalizeq(SP::SiconosVector q);
-double axisAngleFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector axis);
-double axisAngleFromQuaternion(SP::SiconosVector q, SP::SiconosVector axis);
-void rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector rotationVector);
-void rotationVectorFromQuaternion(SP::SiconosVector q, SP::SiconosVector rotationVector);
-
-void quaternionFromAxisAngle(SP::SiconosVector axis, double angle, SP::SiconosVector q);
-void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q);
-
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 
 /** Compute the force and moment vectors applied to a body with state
@@ -100,12 +49,14 @@ void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFra
   .. math::
      :nowrap:
 
+      \verbatim
       \left\{\begin{array}{rcl}
       M \\dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \             \
       I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \ \
       \dot q &=& T(q) [ v, \Omega] \                                    \
       \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
       \end{array}\right.
+      \endverbatim
  \endrst
 
  with
@@ -155,11 +106,6 @@ protected:
    *      to the body-fixed frame
    */
   SP::SiconosVector _q;
-
-  //SP::SiconosVector _deltaq;
-
-  /** Initial position */
-  SP::SiconosVector _q0;
 
   /** Dimension of _q, is not necessary equal to _ndof. In our case, _qDim = 7 and  _ndof =6*/
   unsigned int _qDim;
@@ -467,14 +413,6 @@ public:
    *  \param newPtr
    */
   virtual void setQPtr(SP::SiconosVector newPtr);
-
-  /** get initial state (pointer link)
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector q0() const
-  {
-    return _q0;
-  }
 
   /** set initial state (copy)
    *  \param newValue
@@ -970,7 +908,7 @@ public:
    * \param force A force vector to be added.
    * \param forceAbsRef If true, force is in inertial frame, otherwise
    *                    it is in body frame.
-   * \param pos A position at which force should be applied.  If NULL,
+   * \param pos A position at which force should be applied.  If nullptr,
    *            the center of mass is assumed.
    * \param posAbsRef If true, pos is in inertial frame, otherwise it
    *                  is in body frame.

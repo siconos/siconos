@@ -27,9 +27,12 @@
  */
 #define LEVELMAX 999
 
-#ifndef NULL
-const int NULL = 0;
-#endif
+/** double precision machine */
+#define MACHINE_PREC std::numeric_limits<double>::epsilon()
+
+// #ifndef nullptr
+// const int nullptr = 0;
+// #endif
 
 #endif
 

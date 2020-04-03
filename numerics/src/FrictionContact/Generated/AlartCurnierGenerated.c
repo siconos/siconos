@@ -1,6 +1,12 @@
 #include "AlartCurnierGenerated.h"
-#include "assert.h"
-#include "op3x3.h"
+#include "assert.h"                                   // for assert
+#include "fc3d_AlartCurnierABGenerated.h"             // for fc3d_AlartCurni...
+#include "fc3d_AlartCurnierFABGenerated.h"            // for fc3d_AlartCurni...
+#include "fc3d_AlartCurnierFGenerated.h"              // for fc3d_AlartCurni...
+#include "fc3d_AlartCurnierJeanMoreauABGenerated.h"   // for fc3d_AlartCurni...
+#include "fc3d_AlartCurnierJeanMoreauFABGenerated.h"  // for fc3d_AlartCurni...
+#include "fc3d_AlartCurnierJeanMoreauFGenerated.h"    // for fc3d_AlartCurni...
+#include "op3x3.h"                                    // for cpy3x3, cpy3, SET3
 
 void fc3d_AlartCurnierFunctionGenerated(
   double *reaction,
@@ -22,7 +28,7 @@ void fc3d_AlartCurnierFunctionGenerated(
   SET3(rho);
 
 
-  if (f && A && B)
+  if(f && A && B)
   {
 
     fc3d_AlartCurnierFABGenerated(
@@ -38,7 +44,7 @@ void fc3d_AlartCurnierFunctionGenerated(
 
   else
   {
-    if (f)
+    if(f)
     {
       fc3d_AlartCurnierFGenerated(
         *reaction0, *reaction1, *reaction2,
@@ -49,7 +55,7 @@ void fc3d_AlartCurnierFunctionGenerated(
       cpy3(result, f);
     }
 
-    if (A && B)
+    if(A && B)
     {
       fc3d_AlartCurnierABGenerated(
         *reaction0, *reaction1, *reaction2,
@@ -83,7 +89,7 @@ void fc3d_AlartCurnierJeanMoreauFunctionGenerated(
   SET3(rho);
 
 
-  if (f && A && B)
+  if(f && A && B)
   {
 
     fc3d_AlartCurnierJeanMoreauFABGenerated(
@@ -99,7 +105,7 @@ void fc3d_AlartCurnierJeanMoreauFunctionGenerated(
 
   else
   {
-    if (f)
+    if(f)
     {
       fc3d_AlartCurnierJeanMoreauFGenerated(
         *reaction0, *reaction1, *reaction2,
@@ -110,7 +116,7 @@ void fc3d_AlartCurnierJeanMoreauFunctionGenerated(
       cpy3(result, f);
     }
 
-    if (A && B)
+    if(A && B)
     {
       fc3d_AlartCurnierJeanMoreauABGenerated(
         *reaction0, *reaction1, *reaction2,

@@ -24,12 +24,7 @@
  *
  */
 
-#include "PathSearch.h"
-
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-#include "NonlinearComplementarityProblem.h"
-#include "LinearComplementarityProblem.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus)
 #undef restrict
@@ -59,36 +54,6 @@ extern "C"
       else
         x[i] = z[i];
     }
-  }
-
-
-  /** update the lcp subproblem: M, q and r
-   * \param problem the NCP problem to solve
-   * \param lcp_subproblem the lcp problem to fill
-   * \param n size of the NCP problem
-   * \param x_plus positive part of x
-   * \param x current newton iterate
-   * \param r value of the normal map
-   */
-  static inline void ncp_pathsearch_update_lcp_data(NonlinearComplementarityProblem* problem, LinearComplementarityProblem* lcp_subproblem, unsigned n, double* restrict x_plus, double* restrict x, double* restrict r)
-  {
-    /* compute M = nabla F(x_plus) */
-    problem->compute_nabla_F(problem->env, n, x_plus, problem->nabla_F);
-
-    /* r = F_+(x) = F(x_+) + x - x_+ */
-    /* the real q = q - r = x_+ - x - M x_plus */
-    /* q = -M x_plus */
-    NM_gemv(-1.0, problem->nabla_F, x_plus, 0.0, lcp_subproblem->q);
-
-    /* first compute r = x - x_+ */
-    cblas_dcopy(n, x, 1, r, 1); /* r = x */
-    cblas_daxpy(n, -1.0, x_plus, 1, r, 1); /* r -= x_plus */
-    /* we factorized computations */
-    cblas_daxpy(n, -1.0, r, 1, lcp_subproblem->q, 1); /* q -= x - x_plus */
-    /* Finish r */
-    problem->compute_F(problem->env, n, x_plus, x); /* compute F(x_plus) */
-    cblas_daxpy(n, 1.0, x, 1, r, 1); /* r += F(x_plus) */
-
   }
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

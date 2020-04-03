@@ -64,32 +64,24 @@ extern "C"
 {
 #endif
 
-/** set the default solver parameters and perform memory allocation for soclcp
-    \param options the pointer to the options to set
-    \param solverId the identifier of the solver
-*/
-int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId);
-
 /** Non-Smooth Gauss Seidel solver for SOCLCP problem
     \param problem the SOCLCP problem to solve
     \param v global vector (n), in-out parameter
     \param r global vector (n), in-out parameters
     \param info return 0 if the solution is found
     \param options the solver options :
-    [in] iparam[0] : Maximum iteration number
-    [in] iparam[1] : error computation method :
-        0 : Complete error computation with v computation
-        1: Light error computation with incremental values on r verification of absolute error at the end
-        2: only light error computation (v not computed)
+    [in] iparam[SICONOS_IPARAM_MAX_ITER] : Maximum iteration number
+    [in] iparam[SICONOS_IPARAM_ERROR_EVALUATION] : error computation method :
+          SICONOS_ERROR_FULL_EVALUATION Complete error computation with v computation (Default)
+          SICONOS_ERROR_LIGHT_EVALUATION for Light error computation with incremental values on r verification of absolute error at the end 
+          SICONOS_ERROR_LIGHT_EVALUATION_NO_UPDATE for light error computation, without update for v
     [out]iparam[7] = iter number of performed iterations
-    [in] iparam[8] : method uses overrelaxation
-    [in] iparam[9] : shuffle the contact indices in the loop
+    [in] iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] : method uses overrelaxation
+    [in] iparam[SICONOS_IPARAM_NSGS_SHUFFLE] : shuffle the contact indices in the loop
 
-    [in]  dparam[0]  user tolerance on the loop
-    [in]  dparam[8]  the relaxation parameter omega
-    [out] dparam[1]  reached error
-
-    The internal (local) solver must set by the SolverOptions options[1]
+    [in]  dparam[SICONOS_DPARAM_TOL]  user tolerance on the loop
+    [in]  dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION]  the relaxation parameter omega
+    [out] dparam[SICONOS_DPARAM_RESIDU]  reached error
 
 */
   void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options);
@@ -99,30 +91,15 @@ int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId);
   void soclcp_nsgs_computeqLocal(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, double * r, int contact, SolverOptions * options);
 
 
-/** set the default solver parameters and perform memory allocation for NSGS
-    \param options the pointer to the array of options to set
-*/
-int soclcp_nsgs_setDefaultSolverOptions(SolverOptions* options);
-
-
-
-
 /* /\** Non-Smooth Gauss Seidel in v solver for SOCLCP problem */
 /*    \param problem the SOCLCP problem to solve */
 /*    \param v global vector (n), in-out parameter */
 /*    \param r global vector (n), in-out parameters */
 /*    \param info return 0 if the solution is found */
 /*    \param options the solver options : */
-/*    iparam[0] : Maximum iteration number */
-/*    The internal (local) solver must set by the SolverOptions options[1] */
 /* *\/ */
 
 /* void soclcp_nsgs_v(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
-
-/* /\** set the default solver parameters and perform memory allocation for NSGSV */
-/*     \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_nsgs_v_setDefaultSolverOptions(SolverOptions* options); */
 
 /* /\** Proximal point solver for SOCLCP problem */
 /*     \param problem the SOCLCP problem to solve */
@@ -130,15 +107,8 @@ int soclcp_nsgs_setDefaultSolverOptions(SolverOptions* options);
 /*     \param r global vector (n), in-out parameters */
 /*     \param info return 0 if the solution is found */
 /*     \param options the solver options : */
-/*     iparam[0] : Maximum iteration number */
-/*     The internal (local) solver must set by the SolverOptions options[1] */
 /* *\/ */
 /* void soclcp_proximal(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
-
-/* /\** set the default solver parameters and perform memory allocation for PROX */
-/*   \param  options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_proximal_setDefaultSolverOptions(SolverOptions* options); */
 
 /* /\** Fixed point solver for SOCLCP problem based on the Tresca */
 /* problem with fixed friction threshold */
@@ -147,16 +117,9 @@ int soclcp_nsgs_setDefaultSolverOptions(SolverOptions* options);
 /*   \param r global vector (n), in-out parameters */
 /*   \param info return 0 if the solution is found */
 /*   \param options the solver options : */
-/*   iparam[0] : Maximum iteration number */
-/*   The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS. */
 /* *\/ */
 /* void soclcp_TrescaFixedPoint(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
 
-
-/* /\** set the default solver parameters and perform memory allocation for TFP */
-/*  *  \param options the pointer to the array of options to set */
-/*  *\/ */
-/* int soclcp_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options); */
 
 /* /\** Projected Gradient on Cylinder solver for  Friction-contact 3D problem */
 /*  * \param problem the SOCLCP problem to solve */
@@ -173,11 +136,6 @@ int soclcp_nsgs_setDefaultSolverOptions(SolverOptions* options);
 
 void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options);
 
-/** set the default solver parameters and perform memory allocation for DSFP
-  \param options the pointer to the array of options to set
-*/
-int soclcp_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
-
 /**Extra Gradient solver (VI_EG) for SOCLCP problem based on a VI reformulation
     \param problem the SOCLCP problem to solve
     \param v global vector (n), in-out parameter
@@ -188,11 +146,6 @@ int soclcp_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* option
     dparam[3] : rho >0
 */
 void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options);
-
-/** set the default solver parameters and perform memory allocation for VI_EG
-  \param options the pointer to the array of options to set
-*/
- int soclcp_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
 
 /* /\** Hyperplane Projection solver for SOCLCP problem based on the De Saxce Formulation */
 /*     \param problem the SOCLCP problem to solve */
@@ -205,16 +158,6 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
 /* *\/ */
 /* void soclcp_HyperplaneProjection(SecondOrderConeLinearComplementarityProblem* problem, double *r, double *v, int* info, SolverOptions* options); */
 
-/* /\** set the default solver parameters and perform memory allocation for EG */
-/*   \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options); */
-
-/* /\** set the default solver parameters and perform memory allocation for AlartCurnierNewton */
-/*   \param options the pointer to the array of options to set */
-/* *\/ */
-/* int soclcp_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* options); */
-
 /** Check for trivial solution in the SOCLCP problem
     \param problem SecondOrderConeLinearComplementarityProblem*  the problem
     \param v global vector (n), in-out parameter
@@ -222,8 +165,17 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
     \param options the pointer to the array of options to set
     \return info  =0 if a trivial solution has been found, else = -1
 */
-int soclcp_checkTrivialCase(SecondOrderConeLinearComplementarityProblem* problem , double* v, double* r, SolverOptions* options);
+  int soclcp_checkTrivialCase(SecondOrderConeLinearComplementarityProblem* problem , double* v, double* r, SolverOptions* options);
+  
+  /** \addtogroup SetSolverOptions @{
+   */
+  void soclcp_nsgs_set_default(SolverOptions* options);
+  void soclcp_projection_set_default(SolverOptions* options);
 
+  
+  /** @} */
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

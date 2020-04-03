@@ -22,7 +22,7 @@
 #include <debug.h>
 
 #include "BulletR.hpp"
-#include <BodyDS.hpp>
+#include <RigidBodyDS.hpp>
 #include <Interaction.hpp>
 
 #if defined(__clang__)
@@ -47,14 +47,14 @@
 
 #include <boost/math/quaternion.hpp>
 
-static
-void copyQuatRot(boost::math::quaternion<double>& from, SiconosVector& to)
-{
-  to(3) = from.R_component_1();
-  to(4) = from.R_component_2();
-  to(5) = from.R_component_3();
-  to(6) = from.R_component_4();
-}
+//static
+//void copyQuatRot(boost::math::quaternion<double>& from, SiconosVector& to)
+//{
+//  to(3) = from.R_component_1();
+//  to(4) = from.R_component_2();
+//  to(5) = from.R_component_3();
+//  to(6) = from.R_component_4();
+//}
 
 static
 void copyQuatRot(const SiconosVector& from, boost::math::quaternion<double>& to)
@@ -95,27 +95,30 @@ BulletR::BulletR()
 }
 
 void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-                                                   const btManifoldPoint& point,
-                                                   bool flip, double scaling,
-                                                   SP::NewtonEulerDS ds1,
-                                                   SP::NewtonEulerDS ds2)
+    const btManifoldPoint& point,
+    bool flip, double scaling,
+    SP::NewtonEulerDS ds1,
+    SP::NewtonEulerDS ds2)
 {
   // Get new world positions of contact points and calculate relative
   // to ds1 and ds2
 
   ::boost::math::quaternion<double> rq1, rq2, posa;
   ::boost::math::quaternion<double> pq1, pq2, posb;
+
   copyQuatPos(*ds1->q(), pq1);
-  copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
   copyQuatRot(*ds1->q(), rq1);
-  if (ds2)
+
+  if(ds2)
   {
     copyQuatPos(*ds2->q(), pq2);
-    copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
     copyQuatRot(*ds2->q(), rq2);
   }
 
-  if (flip)
+  copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
+  copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
+
+  if(flip)
   {
     ::boost::math::quaternion<double> tmp = posa;
     posa = posb;
@@ -123,26 +126,31 @@ void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& m
   }
 
   SiconosVector va(3), vb(3), vn(3);
-  if (flip) {
-    copyQuatPos((1.0/rq1) * (posb - pq1) * rq1, va);
-    if (ds2)
-      copyQuatPos((1.0/rq2) * (posa - pq2) * rq2, vb);
-    else {
+  if(flip)
+  {
+    copyQuatPos((1.0/rq1) * (posa - pq1) * rq1, va);
+    if(ds2)
+      copyQuatPos((1.0/rq2) * (posb - pq2) * rq2, vb);
+    else
+    {
       // If no body2, position is relative to 0,0,0
       copyBtVector3(point.getPositionWorldOnA() / scaling, vb);
     }
-  } else {
+  }
+  else
+  {
     copyQuatPos((1.0/rq1) * (posa - pq1) * rq1, va);
-    if (ds2)
+    if(ds2)
       copyQuatPos((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else {
+    else
+    {
       // If no body2, position is relative to 0,0,0
       copyBtVector3(point.getPositionWorldOnB() / scaling, vb);
     }
   }
 
   // Get new normal
-  if (ds2)
+  if(ds2)
   {
     btQuaternion qn(point.m_normalWorldOnB.x(),
                     point.m_normalWorldOnB.y(),

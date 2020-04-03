@@ -1,12 +1,10 @@
 """
 Tools used during configuration and build process
-(most of them used in CMake files)
+(most of them used in CMake files, during build or runtime).
 
 This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
-(it needs preprocessing, see global variables on top.)
-"""
 
-""" Siconos is a program dedicated to modeling, simulation and control
+ Siconos is a program dedicated to modeling, simulation and control
  of non smooth dynamical systems.
 
  Copyright 2018 INRIA.
@@ -24,18 +22,18 @@ This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
  limitations under the License.
 """
 
+
 def parse_cmake_list(var):
-    """Transform cmake list-like variables 
-    into python list.
-    
+    """Transform cmake list-like variables
+    into python lists.
+
     Parameters
     ----------
     var : string
         like "a;b;c"
-        
 
     Returns python list
-    
+
     If var is already a list, does nothing.
 
     Example::
@@ -53,7 +51,5 @@ def parse_cmake_list(var):
         if res.count(''):
             res.remove('')
         return res
-    else:
-        return []
 
-
+    return []

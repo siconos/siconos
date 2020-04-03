@@ -53,13 +53,13 @@ To check what will be executed by the command above, just try::
 The output will look like::
 
   Would call:
-  - cmake -DMODE=Continuous -DCI_CONFIG=with_documentation -DWITH_DOCKER=1 -DBUILD_CONFIGURATION=Release -DDOCKER_DISTRIB=ubuntu:16.10 -DDOCKER_TEMPLATES=build-base,gcc,gfortran,gnu-c++,atlas-lapack,lpsolve,python-env,documentation -DDOCKER_TEMPLATE=gcc-atlas-lapack-documentation -DDOCKER_PROJECT_SOURCE_DIR=/home/perignon/Softs/siconos/. -DDOCKER_SHARED_DIRECTORIES= /home/perignon/Softs/siconos/./CI
+  - cmake -DMODE=Continuous -DCI_CONFIG=with_documentation -DWITH_DOCKER=1 -DBUILD_CONFIGURATION=Release -DDOCKER_DISTRIB=ubuntu:16.10 -DDOCKER_TEMPLATES=build-base,gcc,gfortran,gnu-c++,lpsolve,python-env,documentation -DDOCKER_TEMPLATE=gcc-openblas-lapacke-documentation -DDOCKER_PROJECT_SOURCE_DIR=/home/perignon/Softs/siconos/. -DDOCKER_SHARED_DIRECTORIES= /home/perignon/Softs/siconos/./CI
   - make - ki target,
   for target in docker-build docker-cmake docker-make docker-make-install docker-make-doc docker-make-upload
   both from path _ubuntu-16.10_with_documentation
 
   Would call:
-  - cmake -DMODE=Continuous -DCI_CONFIG=no_cxx -DWITH_DOCKER=1 -DBUILD_CONFIGURATION=Release -DDOCKER_DISTRIB=ubuntu:16.10 -DDOCKER_TEMPLATES=build-base,gcc,gfortran,atlas-lapack,lpsolve,python-env -DDOCKER_TEMPLATE=gcc-atlas-lapack -DDOCKER_PROJECT_SOURCE_DIR=/home/perignon/Softs/siconos/. -DDOCKER_SHARED_DIRECTORIES= /home/perignon/Softs/siconos/./CI
+  - cmake -DMODE=Continuous -DCI_CONFIG=no_cxx -DWITH_DOCKER=1 -DBUILD_CONFIGURATION=Release -DDOCKER_DISTRIB=ubuntu:16.10 -DDOCKER_TEMPLATES=build-base,gcc,gfortran,lpsolve,python-env -DDOCKER_TEMPLATE=openblas-lapacke -DDOCKER_PROJECT_SOURCE_DIR=/home/perignon/Softs/siconos/. -DDOCKER_SHARED_DIRECTORIES= /home/perignon/Softs/siconos/./CI
   - make - ki target,
   for target in docker-build docker-ctest
   both from path _ubuntu-16.10_no_cxx
@@ -70,7 +70,7 @@ Which means that (for numerics_only), in dir _ubuntu-16.10_no_cxx
 * the 'cmake -DMODE ...' line will be executed to configure the ci project and its targets
 
 The following targets will be executed:
-* make docker-build, to create a docker image, based on ubuntu 16.10 with packages gcc, atlas ... will be created, with some associated volumes
+* make docker-build, to create a docker image, based on ubuntu 16.10 with packages gcc, ... will be created, with some associated volumes
 * make docker-ctest : call cmake, make, make test on Siconos sources inside a docker container, based on the image created with make docker-build.
 
 A report will be sent to siconos cdash.

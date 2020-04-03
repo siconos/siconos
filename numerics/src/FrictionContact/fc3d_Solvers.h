@@ -63,15 +63,6 @@ extern "C"
 {
 #endif
 
-  /** set the default solver parameters and perform memory allocation for fc3d
-      \param options the pointer to the options to set
-      \param solverId the identifier of the solver
-  */
-  int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
-
-
-
-
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
@@ -118,34 +109,21 @@ extern "C"
                                          FrictionContactProblem* problem, FrictionContactProblem* localproblem,
                                          SolverOptions * options);
 
-  /** set the default solver parameters and perform memory allocation for NSGS
-      \param options the pointer to the array of options to set
-  */
-  int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options);
-
   void fc3d_admm(FrictionContactProblem*  problem, double*  reaction,
                  double*  velocity,
                  int*  info, SolverOptions*  options);
 
   void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options);
   void fc3d_admm_free(FrictionContactProblem* problem, SolverOptions* options);
-  int fc3d_admm_setDefaultSolverOptions(SolverOptions* options);
   /** Non-Smooth Gauss Seidel in velocity solver for friction-contact 3D problem
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
      \param info return 0 if the solution is found
-     \param options the solver options :
-     iparam[0] : Maximum iteration number
-     The internal (local) solver must set by the SolverOptions options[1]
+     \param options the solver options
   */
 
   void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for NSGSV
-      \param options the pointer to the array of options to set
-  */
-  int fc3d_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options);
 
   /** Proximal point solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
@@ -153,21 +131,8 @@ extern "C"
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
       \param options the solver options :
-      iparam[0] : Maximum iteration number
-      The internal (local) solver must set by the SolverOptions options[1]
   */
   void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for PROX
-    \param  options the pointer to the array of options to set
-  */
-  int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options);
-
-
-  void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
-                                         SolverOptions* options,
-                                         SolverOptions* internalsolver_options,
-                                         double error);
 
   
   /** Fixed point solver for friction-contact 3D problem based on the Tresca
@@ -177,16 +142,9 @@ extern "C"
     \param reaction global vector (n), in-out parameters
     \param info return 0 if the solution is found
     \param options the solver options :
-    iparam[0] : Maximum iteration number
-    The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS.
   */
   void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-
-  /** set the default solver parameters and perform memory allocation for TFP
-   *  \param options the pointer to the array of options to set
-   */
-  int fc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** Fixed point solver for friction-contact 3D problem based on the Panagiotopoulos
   method based on an alternative technique between the normal problem and the tangential one.
@@ -194,22 +152,10 @@ extern "C"
     \param velocity global vector (n), in-out parameter
     \param reaction global vector (n), in-out parameters
     \param info return 0 if the solution is found
-    \param options the solver options :
-    iparam[0] : Maximum iteration number
-    The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS.
+    \param options the solver options
   */
   void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-
-  /** set the default solver parameters and perform memory allocation for PFP
-   *  \param options the pointer to the array of options to set
-   */
-  int fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for SOCLCP
-   *  \param options the pointer to the array of options to set
-   */
-  int fc3d_SOCLCP_setDefaultSolverOptions(SolverOptions* options);
 
   void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
   
@@ -219,16 +165,9 @@ extern "C"
     \param reaction global vector (n), in-out parameters
     \param info return 0 if the solution is found
     \param options the solver options :
-    iparam[0] : Maximum iteration number
-    The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS.
   */
   void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-
-  /** set the default solver parameters and perform memory allocation for ACLM
-   *  \param options the pointer to the array of options to set
-   */
-  int fc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** Projected Gradient on Cylinder solver for  Friction-contact 3D problem
    * \param problem the friction-contact 3D problem to solve
@@ -236,49 +175,31 @@ extern "C"
    *   \param reaction global vector (n), in-out parameters
    *   \param info return 0 if the solution is found
    *   \param options the solver options :
-   *   iparam[0] : Maximum iteration number
    *   if dparam[3] >0 = rho
    *   if dparam[3] <= 0 then  a line-search is performed. iparam[2] is the maximum number of iteration is the line--search.
    *   The internal (local) solver must set by the SolverOptions options->internalsolvers.
   */
   void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for NSGS
-      \param options the pointer to the array of options to set
-  */
-  int fc3d_ConvexQP_ProjectedGradient_Cylinder_setDefaultSolverOptions(SolverOptions* options);
-  
   /**Fixed Point solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem : the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
       \param options the solver options :
-      iparam[0] : Maximum iteration number
       dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed.
   */
   void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for DSFP
-    \param options the pointer to the array of options to set
-  */
-  int fc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
- 
   /**Fixed Point Projection solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem : the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
       \param options the solver options :
-      iparam[0] : Maximum iteration number
       dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed.
   */
   void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for DSFP
-    \param options the pointer to the array of options to set
-  */
-  int fc3d_fixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
 
   /**Fixed Point solver for friction-contact 3D problem based on the VI reformulation
       \param problem : the friction-contact 3D problem to solve
@@ -286,58 +207,35 @@ extern "C"
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
       \param options the solver options :
-      iparam[0] : Maximum iteration number
-      dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed.
   */
   void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  
   void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for DSFP
-    \param options the pointer to the array of options to set
-  */
-  int fc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
-  int fc3d_VI_FixedPointProjection_Cylinder_setDefaultSolverOptions(SolverOptions* options);
 
   /**Extra Gradient solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
-      \param options the solver options :
-      iparam[0] : Maximum iteration number
-      dparam[3] : rho >0
+      \param options the solver options
   */
   void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for EG
-    \param options the pointer to the array of options to set
-  */
-  int fc3d_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
 
   /**Extra Gradient solver (VI_EG) for friction-contact 3D problem based on a VI reformulation
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
-      \param options the solver options :
-      iparam[0] : Maximum iteration number
-      dparam[3] : rho >0
+      \param options the solver options
   */
   void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for VI_EG
-    \param options the pointer to the array of options to set
-  */
-  int fc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
 
   /** Hyperplane Projection solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
       \param info return 0 if the solution is found
-      \param options the solver options :
-      iparam[0] : Maximum iteration number
-      dparam[3] : rho >0
+      \param options the solver options
   */
   void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
@@ -377,11 +275,6 @@ extern "C"
   */
   void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for EG
-    \param options the pointer to the array of options to set
-  */
-  int fc3d_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options);
-
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param problem FrictionContactProblem*  the problem
@@ -394,6 +287,37 @@ extern "C"
 
 
   void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+
+  void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
+                                         SolverOptions* options,
+                                         SolverOptions* internalsolver_options,
+                                         double error);
+
+
+  /** \addtogroup SetSolverOptions @{
+   */
+  void fc3d_nsgs_set_default(SolverOptions* options);
+  void fc3d_nsgs_velocity_set_default(SolverOptions* options);
+  void fc3d_proximal_set_default(SolverOptions* options);
+  void fc3d_tfp_set_default(SolverOptions* options);
+  void fc3d_nsn_ac_set_default(SolverOptions* options);
+  void fc3d_dsfp_set_default(SolverOptions* options);
+  void fc3d_hp_set_default(SolverOptions* options);
+  void fc3d_fpp_set_default(SolverOptions* options);
+  void fc3d_eg_set_default(SolverOptions* options);
+  void fc3d_nsn_fb_set_default(SolverOptions* options);
+  void fc3d_aclmfp_set_default(SolverOptions* options);
+  void fc3d_nsn_nm_set_default(SolverOptions* options);
+  void fc3d_pfp_set_default(SolverOptions* options);
+  void fc3d_admm_set_default(SolverOptions* options);
+  void fc3d_onecontact_nsn_set_default(SolverOptions* options);
+  void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options);
+  void fc3d_poc_set_default(SolverOptions* options);
+
+
+
+  /** @} */
 
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

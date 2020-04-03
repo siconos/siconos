@@ -1,31 +1,21 @@
 #include "ConvexQP.h"
-#include "stdlib.h"
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "CSparseMatrix.h"
-#include "ConvexQP_cst.h"
-#include "ConvexQP_Solvers.h"
-
-#include "SolverOptions.h"
-#include "numerics_verbose.h"
-
-
-//#define DEBUG_NOCOLOR
-//#define DEBUG_MESSAGES
-//#define DEBUG_STDOUT
-#include "debug.h"
-
+#include <stdlib.h>                // for malloc, free
+#include "ConvexQP_Solvers.h"      // for convexQP_ADMM, convexQP_ADMM_setDe...
+#include "ConvexQP_cst.h"          // for SICONOS_CONVEXQP_ADMM_RHO, SICONOS...
+#include "NumericsMatrix.h"        // for NM_create, NM_triplet_alloc, NM_ze...
+#include "NumericsSparseMatrix.h"  // for NSM_TRIPLET, NumericsSparseMatrix
+#include "SolverOptions.h"         // for SolverOptions, solver_options_delete
 
 
 static void PXtest_0(void *cqpIn, double *x, double *PX)
 {
-  ConvexQP * cqp = (ConvexQP* ) cqpIn;
+  ConvexQP * cqp = (ConvexQP*) cqpIn;
   printf("Size of cqp :%i\n", cqp->size);
   int i;
-  for (i =0; i< cqp->size ; i++)
+  for(i =0; i< cqp->size ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] <0) PX[i]=0.0;
+    if(PX[i] <0) PX[i]=0.0;
   }
 }
 
@@ -49,7 +39,7 @@ static int test_0(void)
   NM_triplet_alloc(M,0);
   M->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     NM_zentry(M, k, k, 1);
   }
@@ -57,7 +47,7 @@ static int test_0(void)
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     q[k]=k;
   }
@@ -75,14 +65,15 @@ static int test_0(void)
   /* Call the callback */
   double x[10],  PX[10];
   int i, n=cqp.size;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     x[i] = i-5;
   }
   cqp.ProjectionOnC(&cqp,x,PX);
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);   printf("PX[%i]=%f\n",i,PX[i]);
+    printf("x[%i]=%f\t",i,x[i]);
+    printf("PX[%i]=%f\n",i,PX[i]);
   }
 
   return 0;
@@ -91,12 +82,12 @@ static int test_0(void)
 
 static void PXtest_1(void *cqpIn, double *x, double *PX)
 {
-  ConvexQP * cqp = (ConvexQP* ) cqpIn;
+  ConvexQP * cqp = (ConvexQP*) cqpIn;
   int i;
-  for (i =0; i< cqp->m ; i++)
+  for(i =0; i< cqp->m ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] < 3.0) PX[i]=3.0;
+    if(PX[i] < 3.0) PX[i]=3.0;
   }
 }
 
@@ -112,11 +103,11 @@ static int test_1(void)
 
   cqp.env = &cqp;
 
-   NumericsMatrix * M  = NM_create(NM_SPARSE,cqp.size, cqp.size);
+  NumericsMatrix * M  = NM_create(NM_SPARSE,cqp.size, cqp.size);
   NM_triplet_alloc(M,0);
   M->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     NM_zentry(M, k, k, 1);
   }
@@ -124,7 +115,7 @@ static int test_1(void)
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     q[k]=-k-1;
   }
@@ -140,47 +131,44 @@ static int test_1(void)
   /* Call the callback */
   double x[10], w[10], PX[10];
   int i, n=10;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     x[i] = i-5;
   }
 
 
   cqp.ProjectionOnC(&cqp,x,PX);
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);     printf("PX[%i]=%f\n",i,PX[i]);
+    printf("x[%i]=%f\t",i,x[i]);
+    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_PG);
   /* verbose=1; */
-  int info = convexQP_ProjectedGradient_setDefaultSolverOptions(options);
-
-  options->dparam[0]=1e-12;
-  options->dparam[3]=1.0;
-
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+  options->dparam[SICONOS_CONVEXQP_PGOC_RHO] = 1.0;
+  int info;
   convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=w[%i]=%f\n",i,i,w[i]);
+    printf("x[%i]=%f\t",i,x[i]);
+    printf("w[%i]=w[%i]=%f\n",i,i,w[i]);
   }
 
   solver_options_delete(options);
-  free(options);
-
   return info;
 }
 
 static void PXtest_2(void *cqpIn, double *x, double *PX)
 {
-  ConvexQP * cqp = (ConvexQP* ) cqpIn;
+  ConvexQP * cqp = (ConvexQP*) cqpIn;
   int i;
-  for (i =0; i< cqp->m ; i++)
+  for(i =0; i< cqp->m ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] < 3.0) PX[i]=3.0;
+    if(PX[i] < 3.0) PX[i]=3.0;
   }
 }
 
@@ -199,7 +187,7 @@ static int test_2(void)
   NM_triplet_alloc(M,0);
   M->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     NM_zentry(M, k, k, 1);
   }
@@ -207,7 +195,7 @@ static int test_2(void)
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     q[k]=-k-1;
   }
@@ -223,7 +211,7 @@ static int test_2(void)
   /* Call the callback */
   double z[10], w[10], u[10], xi[10], PX[10];
   int i, n=cqp.size;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     z[i] = i-5;
     u[i] = 0.0;
@@ -233,46 +221,45 @@ static int test_2(void)
 
   cqp.ProjectionOnC(&cqp,z,PX);
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("z[%i]=%f\t",i,z[i]);     printf("PX[%i]=%f\n",i,PX[i]);
+    printf("z[%i]=%f\t",i,z[i]);
+    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  /* verbose=1; */
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   printf("test step 1\n");
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("z[%i]=%f\t",i,z[i]); printf("w[%i]=%f\t",i,w[i]);    printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
+    printf("z[%i]=%f\t",i,z[i]);
+    printf("w[%i]=%f\t",i,w[i]);
+    printf("u[%i]=%f\t",i,u[i]);
+    printf("xi[%i]=%f\n",i,xi[i]);
   }
 
   solver_options_delete(options);
-  free(options);
-
   return info;
 }
 
 static void PXtest_3(void *cqpIn, double *x, double *PX)
 {
-  ConvexQP * cqp = (ConvexQP* ) cqpIn;
+  ConvexQP * cqp = (ConvexQP*) cqpIn;
   int i;
-  for (i =0; i< cqp->m ; i++)
+  for(i =0; i< cqp->m ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] < 4.0) PX[i]=4.0;
+    if(PX[i] < 4.0) PX[i]=4.0;
   }
 }
 
@@ -291,7 +278,7 @@ static int test_3(void)
   NM_triplet_alloc(M,0);
   M->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     NM_zentry(M, k, k, 1);
   }
@@ -299,7 +286,7 @@ static int test_3(void)
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     q[k]=-k-1;
   }
@@ -310,7 +297,7 @@ static int test_3(void)
   NM_triplet_alloc(A,0);
   A->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.m; k++)
+  for(int k =0; k< cqp.m; k++)
   {
     NM_zentry(A, k, k, 1);
   }
@@ -318,7 +305,7 @@ static int test_3(void)
 
 
   double * b = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.m; k++)
+  for(int k =0; k< cqp.m; k++)
   {
     b[k]=1.0;
   }
@@ -335,7 +322,7 @@ static int test_3(void)
   /* Call the callback */
   double z[10], u[10], xi[10], w[10], PX[10];
   int i, n=cqp.size;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     z[i] = i-5;
     u[i] = 0.0;
@@ -345,52 +332,51 @@ static int test_3(void)
 
   cqp.ProjectionOnC(&cqp,z,PX);
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("z[%i]=%f\t",i,z[i]);     printf("PX[%i]=%f\n",i,PX[i]);
+    printf("z[%i]=%f\t",i,z[i]);
+    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  /* verbose=1; */
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
 
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION]=SICONOS_CONVEXQP_ADMM_NO_ACCELERATION;
   printf("test step 1\n");
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("z[%i]=%f\t",i,z[i]);printf("w[%i]=%f\n",i,w[i]);
+    printf("z[%i]=%f\t",i,z[i]);
+    printf("w[%i]=%f\n",i,w[i]);
   }
-  for (i =0; i< cqp.m ; i++)
+  for(i =0; i< cqp.m ; i++)
   {
-    printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
+    printf("u[%i]=%f\t",i,u[i]);
+    printf("xi[%i]=%f\n",i,xi[i]);
   }
 
   solver_options_delete(options);
-  free(options);
-
   return info;
 }
 
 
 static void PXtest_4(void *cqpIn, double *x, double *PX)
 {
-  ConvexQP * cqp = (ConvexQP* ) cqpIn;
+  ConvexQP * cqp = (ConvexQP*) cqpIn;
   int i;
-  for (i =0; i< cqp->m ; i++)
+  for(i =0; i< cqp->m ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] < 4.0) PX[i]=4.0;
+    if(PX[i] < 4.0) PX[i]=4.0;
   }
 }
 
@@ -409,7 +395,7 @@ static int test_4(void)
   NM_triplet_alloc(M,0);
   M->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     NM_zentry(M, k, k, 1);
   }
@@ -417,7 +403,7 @@ static int test_4(void)
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     q[k]=-k-1;
   }
@@ -428,7 +414,7 @@ static int test_4(void)
   NM_triplet_alloc(A,0);
   A->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.m; k++)
+  for(int k =0; k< cqp.m; k++)
   {
     NM_zentry(A, k, k, 1);
   }
@@ -436,7 +422,7 @@ static int test_4(void)
 
 
   double * b = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.m; k++)
+  for(int k =0; k< cqp.m; k++)
   {
     b[k]=1.0;
   }
@@ -453,7 +439,7 @@ static int test_4(void)
   /* Call the callback */
   double z[10], u[10], xi[10], w[10], PX[10];
   int i, n=cqp.size;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     z[i] = i-5;
     u[i] = 0.0;
@@ -463,51 +449,49 @@ static int test_4(void)
 
   cqp.ProjectionOnC(&cqp,z,PX);
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("z[%i]=%f\t",i,z[i]);     printf("PX[%i]=%f\n",i,PX[i]);
+    printf("z[%i]=%f\t",i,z[i]);
+    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  /* verbose=1; */
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION;
   printf("test step 1\n");
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("z[%i]=%f\t",i,z[i]);printf("w[%i]=%f\n",i,w[i]);
+    printf("z[%i]=%f\t",i,z[i]);
+    printf("w[%i]=%f\n",i,w[i]);
   }
-  for (i =0; i< cqp.m ; i++)
+  for(i =0; i< cqp.m ; i++)
   {
-    printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
+    printf("u[%i]=%f\t",i,u[i]);
+    printf("xi[%i]=%f\n",i,xi[i]);
   }
 
   solver_options_delete(options);
-  free(options);
-
   return info;
 }
 
 static void PXtest_5(void *cqpIn, double *x, double *PX)
 {
-  ConvexQP * cqp = (ConvexQP* ) cqpIn;
+  ConvexQP * cqp = (ConvexQP*) cqpIn;
   int i;
-  for (i =0; i< cqp->m ; i++)
+  for(i =0; i< cqp->m ; i++)
   {
     PX[i] = x[i];
-    if (PX[i] < 4.0) PX[i]=4.0;
+    if(PX[i] < 4.0) PX[i]=4.0;
   }
 }
 
@@ -526,7 +510,7 @@ static int test_5(void)
   NM_triplet_alloc(M,0);
   M->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     NM_zentry(M, k, k, 1);
   }
@@ -534,7 +518,7 @@ static int test_5(void)
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.size; k++)
+  for(int k =0; k< cqp.size; k++)
   {
     q[k]=-k-1;
   }
@@ -545,7 +529,7 @@ static int test_5(void)
   NM_triplet_alloc(A,0);
   A->matrix2->origin= NSM_TRIPLET;
 
-  for (int k =0; k< cqp.m; k++)
+  for(int k =0; k< cqp.m; k++)
   {
     NM_zentry(A, k, k, 1);
   }
@@ -553,7 +537,7 @@ static int test_5(void)
 
 
   double * b = (double *) malloc(cqp.size*sizeof(double));
-  for (int k =0; k< cqp.m; k++)
+  for(int k =0; k< cqp.m; k++)
   {
     b[k]=1.0;
   }
@@ -570,7 +554,7 @@ static int test_5(void)
   /* Call the callback */
   double z[10], u[10], xi[10], w[10], PX[10];
   int i, n=cqp.size;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     z[i] = i-5;
     u[i] = 0.0;
@@ -580,50 +564,53 @@ static int test_5(void)
 
   cqp.ProjectionOnC(&cqp,z,PX);
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("z[%i]=%f\t",i,z[i]);     printf("PX[%i]=%f\n",i,PX[i]);
+    printf("z[%i]=%f\t",i,z[i]);
+    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  /* verbose=1; */
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART;
   printf("test step 1\n");
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("z[%i]=%f\t",i,z[i]);printf("w[%i]=%f\n",i,w[i]);
+    printf("z[%i]=%f\t",i,z[i]);
+    printf("w[%i]=%f\n",i,w[i]);
   }
-  for (i =0; i< cqp.m ; i++)
+  for(i =0; i< cqp.m ; i++)
   {
-    printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
+    printf("u[%i]=%f\t",i,u[i]);
+    printf("xi[%i]=%f\n",i,xi[i]);
   }
 
   solver_options_delete(options);
-  free(options);
-
+  options = NULL;
   return info;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+
+#ifdef SICONOS_HAS_MPI
+  MPI_Init(&argc, &argv);
+#endif
 
   int i=0;
   printf("start test #%i\n",i);
   int info = test_0();
-  if (!info)
+  if(!info)
   {
     printf("end test #%i successful\n",i);
   }
@@ -636,7 +623,7 @@ int main(void)
   printf("start test #%i\n",i);
   int info_test = test_1();
   info += info_test;
-  if (!info_test)
+  if(!info_test)
   {
     printf("end test #%i successful\n",i);
   }
@@ -653,7 +640,7 @@ int main(void)
 #ifndef WITH_MUMPS
   info += info_test;
 #endif
-  if (!info_test)
+  if(!info_test)
   {
     printf("end test #%i successful\n",i);
   }
@@ -672,7 +659,7 @@ int main(void)
   printf("start test #%i ConvexQP_ADDM\n",i);
   info_test = test_3();
   info += info_test;
-  if (!info_test)
+  if(!info_test)
   {
     printf("end test #%i successful\n",i);
   }
@@ -686,7 +673,7 @@ int main(void)
   printf("start test #%i ConvexQP_ADDM_ACCELERATION\n",i);
   info_test = test_4();
   info += info_test;
-  if (!info)
+  if(!info)
   {
     printf("end test #%i successful\n",i);
   }
@@ -699,7 +686,7 @@ int main(void)
   printf("start test #%i ConvexQP_ADDM_ACCELERATION_AND_RESTART\n",i);
   info_test = test_5();
   info += info_test;
-  if (!info)
+  if(!info)
   {
     printf("end test #%i successful\n",i);
   }
@@ -708,9 +695,9 @@ int main(void)
     printf("end test #%i  not  successful\n",i);
   }
 
+#ifdef SICONOS_HAS_MPI
+  MPI_Finalize();
+#endif
 
   return info;
-
-
-
 }

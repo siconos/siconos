@@ -13,54 +13,22 @@ Build html documentation in siconos/build_dir/docs/build/html
 make latex
 ```
 
---> to create tex files
+--> to create tex files (experimental !)
 
 
-# Transfer to Gforge: 
+# To publish web site and documentation :
 
+* just add [doc-build] in your commit message. This will automatically activate a job of continuous integration that will create and publish the html documentation.
 
-scp -pr siconos_build_dir/build/docs/build/html/* login@scm.gforge.inria.fr:/home/groups/siconos/htdocs
+* /!\ Push to gricad-gitlab project, not to github, the mirroring process will do the job /!\
 
--p option for first commit only => allow to keep same files permissions (rw|rw|r) after sending. 
+* Check CI status: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/pipelines
 
-Warning: if you generate latex or xml do not transfer it! 
+* Check (public) website : https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos
 
+Note for developers:
 
+the whole documentation concerning the documentation process is in the developers' manual,
 
-# Tests: use gitlab to create and publish siconos doc
+https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/devel_guide/write_and_build_doc.html
 
-!! Only in update_doc branch
-
-## Details:
-
-* A mirror of siconos project on gricad-gitlab : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror
-* CI is configured to build and publish documentation (see files .gitlab-ci.yml and CI/make_siconos_doc.sh)
-
-	* gitlab-ci.yml : two jobs (make_doc and publish)
-	* make_siconos_doc.sh : describe building process (apt + install python packages from requirements.txt + cmake and make doc)
-	 Siconos conf is described in CI/siconos_docs.cmake
-
-
-* Check CI status : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror/pipelines
-* Check (public) website : https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-mirror
-
-
-## Usage:
-
-* Add remote repo:
-
-```
-git remote add gitlab_for_doc git@gricad-gitlab.univ-grenoble-alpes.fr:nonsmooth/siconos-mirror.git
-```
-
-* To publish doc:
-
-```
-git checkout update_doc
-git push gitlab_for_doc update_doc
-
-
-
-
-Remark : automatic mirroring between github and gitlab (i.e. push to github -> trigger push to gitlab) is something
-that is supposed to be available "soon" ...

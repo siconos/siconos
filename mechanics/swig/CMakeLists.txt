@@ -15,8 +15,22 @@ set(${COMPONENT}_PYTHON_MODULES
   "mechanics/collision/native"
   "mechanics/collision/bodies")
 
+list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/kernel/swig)
+# TMP fix 
+if(${CMAKE_VERSION} VERSION_LESS "3.13")
+  # Notice that with last cmake versions, it's possible to propagate includes to swig in a better way.
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/numerics/src/tools")
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIR}")
+endif()
+
 if(WITH_OCE)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "mechanics/occ")
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
+    set_property(SOURCE occ.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
+  else() #USE_TARGET_INCLUDE property is not available in old cmake versions.
+    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${OCE_INCLUDE_DIRS}")
+    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/mechanics/src/occ")
+  endif()
 endif()
 
 if(WITH_BULLET)
@@ -31,19 +45,45 @@ if(WITH_BULLET)
   if(BULLET_USE_DOUBLE_PRECISION)
     list(APPEND ${COMPONENT}_SWIG_DEFS "-DBT_USE_DOUBLE_PRECISION")
   endif()
+
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
+    set_property(SOURCE bullet.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
+  else() #USE_TARGET_INCLUDE property is not available in old cmake versions.
+    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${BULLET_INCLUDE_DIR}")
+    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet")
+  endif()
+
 endif()
 
-set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
-  ${CMAKE_SOURCE_DIR}/kernel/swig)
 
 configure_file(mechanics/collision/tools.py ${SICONOS_SWIG_ROOT_DIR}/mechanics/collision/tools.py)
 configure_file(mechanics/collision/convexhull.py  ${SICONOS_SWIG_ROOT_DIR}/mechanics/collision/convexhull.py )
 configure_file(mechanics/collision/__init__.py  ${SICONOS_SWIG_ROOT_DIR}/mechanics/collision/__init__.py )
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
-if(NOT WITH_OCE)
-  list(APPEND ${COMPONENT}_python_excluded_tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_occ_inertia.py)
-endif()
-build_python_tests()
 
+if(WITH_FREECAD)
+  # -- FreeCAD --
+  # For python bindings.
+  find_package(FeedCAD COMPONENTS Part REQUIRED)
+  #  FP : which swig module needs freecad? Is this part outdated? 
+  # target_link_libraries(?? PRIVATE ${FreeCAD_LIBRARIES})
+endif()
+
+
+# --- Tests ---
+if(WITH_${COMPONENT}_TESTING)
+  if(NOT WITH_OCE)
+    list(APPEND python_excluded_tests tests/test_occ_inertia.py)
+  else()
+    find_python_module(OCC REQUIRED)
+  endif()
+  build_python_tests(
+    # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
+    EXCLUDE ${python_excluded_tests})
+endif()
+
+if(NOT NO_RUNTIME_BUILD_DEP)
+  find_python_module(pyhull)
+endif()
+ 

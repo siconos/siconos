@@ -22,7 +22,7 @@
 #include <BlockVector.hpp>
 
 SphereNEDSPlanR::SphereNEDSPlanR(double r, double A, double B, double C, double D)
-  : NewtonEulerFrom3DLocalFrameR(), r(r), A(A), B(B), C(C), D(D)
+  : NewtonEuler3DR(), r(r), A(A), B(B), C(C), D(D)
 {
   nN = sqrt(A * A + B * B + C * C);
 

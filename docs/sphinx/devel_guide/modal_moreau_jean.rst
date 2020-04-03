@@ -55,7 +55,7 @@ In the following, we will use k for space (bottom) indices and i for time (top) 
    
 MJ is based on a theta-scheme, for :math:`\theta \in [0,1]`
 
-.. math::
+
 MJ we consider diagonal stiffness and damping, 
 
 .. math::

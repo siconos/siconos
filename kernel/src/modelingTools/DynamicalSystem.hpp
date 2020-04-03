@@ -45,8 +45,6 @@ This class is used to describe dynamical systems of the form :
    
 \f$ g(\dot x, x, t, z) = 0\f$
 
-\endverbatim
-
 where
     
 - \f$ x \in R^{n} \f$ is the state.
@@ -115,8 +113,8 @@ protected:
   /** Arbitrary algebraic values vector, z, discrete state of the
       system. */
   SP::SiconosVector _z;
-  
-  /** the  previous state vectors stored in memory 
+
+  /** the  previous state vectors stored in memory
    */
   SiconosMemory _xMemory;
 

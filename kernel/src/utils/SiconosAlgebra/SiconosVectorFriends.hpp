@@ -28,9 +28,9 @@
  *  of vOut (from index startOut)
  * \param vIn block to copy
  * \param vOut vector to change (destination)
- * \param sizeB size of the block to copy
- * \param startIn starting position for the block (vIn)
- * \param startOut starting position for the destination (vOut)
+ * \param sizeB number of the elements to copy
+ * \param startIn the beginning of the range of elements to copy from
+ * \param startOut the beginning of the destination range
  */
 void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut);
 

@@ -16,14 +16,17 @@
  * limitations under the License.
 */
 
-#include "NCP_FixedP.h"
-#include "NonSmoothNewton.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_2NCP_Glocker.h"
-#include "SiconosBlas.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include "numerics_verbose.h"
+#include <stdio.h>                      // for NULL, fprintf, stderr
+#include <stdlib.h>                     // for exit, EXIT_FAILURE
+#include "Friction_cst.h"               // for SICONOS_FRICTION_3D_NCPGlocke...
+#include "NCP_FixedP.h"                 // for Fixe
+#include "NumericsFwd.h"                // for SolverOptions, FrictionContac...
+#include "SolverOptions.h"              // for SolverOptions
+#include "fc3d_2NCP_Glocker.h"          // for NCPGlocker_initialize, comput...
+#include "fc3d_NCPGlockerFixedPoint.h"  // for F_GlockerFixedP, fc3d_FixedP_...
+#include "fc3d_Solvers.h"               // for FreeSolverPtr, PostSolverPtr
+#include "SiconosBlas.h"                      // for cblas_dcopy
+
 /* Pointer to function used to update the solver, to formalize the local problem for example. */
 typedef void (*UpdateSolverPtr)(int, double*);
 
@@ -46,7 +49,7 @@ void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date)
   */
 
   /* TMP COPY: review memory management for FGlocker ...*/
-  cblas_dcopy(sizeF , FGlocker , 1, FVector , 1);
+  cblas_dcopy(sizeF, FGlocker, 1, FVector, 1);
   FGlocker = NULL;
 }
 
@@ -62,7 +65,7 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem, FrictionContactProb
   */
 
   /* Glocker formulation */
-  if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint)
+  if(localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint)
   {
     Fsize = 5;
     NCPGlocker_initialize(problem, localproblem);
@@ -77,7 +80,7 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem, FrictionContactProb
   }
 }
 
-int fc3d_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
+int fc3d_FixedP_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options)
 {
   int * iparam = options->iparam;
   double * dparam = options->dparam;
@@ -86,9 +89,9 @@ int fc3d_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, 
 
   int info = Fixe(Fsize, reactionBlock, iparam, dparam);
 
-  if (info > 0)
+  if(info > 0)
   {
-    fprintf(stderr, "Numerics, fc3d_FixedP failed, reached max. number of iterations without convergence. Residual = %f\n", dparam[1]);
+    fprintf(stderr, "Numerics, fc3d_FixedP failed, reached max. number of iterations without convergence. Residual = %f\n", dparam[SICONOS_DPARAM_RESIDU]);
     exit(EXIT_FAILURE);
   }
   return info;

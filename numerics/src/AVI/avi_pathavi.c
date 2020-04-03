@@ -16,17 +16,20 @@
  * limitations under the License.
 */
 
+#include "AVI_Solvers.h"       // for avi_pathavi
+#include "NumericsFwd.h"       // for AffineVariationalInequalities, SolverO...
+#include "numerics_verbose.h"  // for numerics_error_nonfatal
+
+
+
+#ifdef HAVE_PATHVI
 
 #include <string.h>
 
 #include "CSparseMatrix_internal.h"
 #include "AffineVariationalInequalities.h"
-#include "AVI_Solvers.h"
 #include "NumericsMatrix.h"
-#include "numerics_verbose.h"
 #include "SiconosSets.h"
-
-#ifdef HAVE_PATHVI
 
 #include "PATHVI_helpers.h"
 #include "PATHVI_SDK/include/vi_consts.h"
@@ -44,14 +47,14 @@ static void pathvi_csc_transfert(struct csc_matrix *primjac, CSparseMatrix* M)
   memcpy(primjac->x, M->x, nnz * sizeof(double));
 
   /*  we may have to change the behavior based on the type used for integers */
-  if (sizeof(primjac->i) != sizeof(CS_INT))
+  if(sizeof(primjac->i) != sizeof(CS_INT))
   {
-    for (size_t i = 0; i < nnz; ++i)
+    for(size_t i = 0; i < nnz; ++i)
     {
       primjac->i[i] = (PATHVI_INDX_TYPE)M->i[i];
     }
 
-    for (size_t i = 0; i <= n; ++i)
+    for(size_t i = 0; i <= n; ++i)
     {
       primjac->j[i] = (PATHVI_INDX_TYPE)M->p[i];
     }
@@ -83,7 +86,7 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
 
   size_t n = AVI->size;
 
-  switch (AVI->M->storageType)
+  switch(AVI->M->storageType)
   {
   case NM_DENSE:
   {
@@ -97,9 +100,13 @@ static int pathvi_evaluate_jacobian(struct vi_desc *desc, double *primvar, doubl
     CS_INT nnz = M->p[n];
 
     /* check dimenstions */
-    if (M->n > primjac->max_n) { primjac->max_n = M->n; primjac->j = (PATHVI_INDX_TYPE*)realloc(primjac->j, (M->n+1) * sizeof(primjac->j)); }
+    if(M->n > primjac->max_n)
+    {
+      primjac->max_n = M->n;
+      primjac->j = (PATHVI_INDX_TYPE*)realloc(primjac->j, (M->n+1) * sizeof(primjac->j));
+    }
 
-    if (nnz > primjac->max_nnz)
+    if(nnz > primjac->max_nnz)
     {
       primjac->max_nnz = nnz;
       primjac->i = (PATHVI_INDX_TYPE*)realloc(primjac->i, nnz * sizeof(primjac->i));
@@ -134,13 +141,16 @@ static int pathavi_get_jacobian_structure(struct vi_desc *desc, struct csc_matri
 
   CSparseMatrix* Mcsc = NM_csc(M);
 
-  if ((primjac->struct_mask & CSC_STRUCT_FIXED) &&
-      !(primjac->struct_mask & CSC_STRUCT_FILLED)) {
-    for (size_t i = 0; i <= env->n; ++i) {
+  if((primjac->struct_mask & CSC_STRUCT_FIXED) &&
+      !(primjac->struct_mask & CSC_STRUCT_FILLED))
+  {
+    for(size_t i = 0; i <= env->n; ++i)
+    {
       primjac->j[i] = Mcsc->p[i];
     }
 
-    for (size_t i = 0; i < Mcsc->p[env->n]; ++i) {
+    for(size_t i = 0; i < Mcsc->p[env->n]; ++i)
+    {
       primjac->i[i] = Mcsc->i[i];
     }
 
@@ -160,7 +170,7 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
   int nnz_H = 0;
   double* lambda = NULL;
 
-  if (problem->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
+  if(problem->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
   {
     nb_cstr = problem->poly.unif->A->size0;
     nnz_H = (int)NM_nnz(problem->poly.unif->A);
@@ -172,7 +182,8 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
     return -1;
   }
 
-  SN_generic_pathvi_env env = {
+  SN_generic_pathvi_env env =
+  {
     .problem = problem,
     .n = problem->size,
     .m = nb_cstr,
@@ -181,7 +192,8 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
     .lambda = lambda
   };
 
-  struct vi_desc_operations vi_ops = {
+  struct vi_desc_operations vi_ops =
+  {
     .get_row_name           = &pathvi_get_row_name,
     .get_col_name           = &pathvi_get_col_name,
     .get_primvar            = &pathvi_get_z,
@@ -196,7 +208,8 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
     .get_jacobian_structure = &pathavi_get_jacobian_structure
   };
 
-  struct printv_operations printv_ops = {
+  struct printv_operations printv_ops =
+  {
     .print       = &pathvi_print
   };
 
@@ -205,36 +218,36 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
   struct vi_desc * pathvi_obj = vi_desc_create(nb_cstr, problem->size, NM_nnz(problem->M), nnz_H, &env, &vi_ops);
   pathvi_obj->nlflag = 0;
 
-  if (problem->lb)
+  if(problem->lb)
   {
     memcpy(pathvi_obj->primlower, problem->lb, env.n*sizeof(double));
   }
   else
   {
-    for (size_t i = 0; i < env.n; ++i) pathvi_obj->primlower[i] = -INF;
+    for(size_t i = 0; i < env.n; ++i) pathvi_obj->primlower[i] = -INF;
   }
 
-  if (problem->ub)
+  if(problem->ub)
   {
     memcpy(pathvi_obj->primupper, problem->ub, env.n*sizeof(double));
   }
   else
   {
-    for (size_t i = 0; i < env.n; ++i) pathvi_obj->primupper[i] = INF;
+    for(size_t i = 0; i < env.n; ++i) pathvi_obj->primupper[i] = INF;
   }
 
-  if (problem->poly.set)
+  if(problem->poly.set)
   {
-    if (problem->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
+    if(problem->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
     {
       polyhedron_unified* p = problem->poly.unif;
       pathvi_csc_transfert(pathvi_obj->A, NM_csc(p->A));
 
       memcpy(pathvi_obj->b, p->b, env.m*sizeof(double));
 
-      for (size_t i = 0; i < env.m; ++i)
+      for(size_t i = 0; i < env.m; ++i)
       {
-        switch (p->type[i])
+        switch(p->type[i])
         {
         case SICONOS_LE:
         {
@@ -281,11 +294,11 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
   // bug youngdae
   pathvi_register_options(pathvi_obj->opt);
 
-  option_set_d(pathvi_obj->opt, "convergence_tolerance", options->dparam[0]);
+  option_set_d(pathvi_obj->opt, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
 
 
   // Solve the problem
-  if (use_scheduler)
+  if(use_scheduler)
   {
     struct vi_scheduler *sched = vi_scheduler_create(VI_SOLVER_PATHVI, pathvi_obj);
     int sinfo = vi_scheduler_run(sched);

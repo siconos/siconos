@@ -80,25 +80,6 @@ extern "C"
     if(EXPR){};                                                         \
   } while (0)
 
-#ifdef HAVE_MPI
-#define CHECK_MPI(EXPR)                                                 \
-  do                                                                    \
-  {                                                                     \
-    int error_code = EXPR;                                                  \
-    MPI_Errhandler_set(MPI_COMM_WORLD, MPI_ERRORS_RETURN);              \
-    if (error_code != MPI_SUCCESS) {                                    \
-      char error_string[1024];                                          \
-      int length_of_error_string, error_class;                          \
-      MPI_Error_class(error_code, &error_class);                        \
-      MPI_Error_string(error_class, error_string, &length_of_error_string); \
-      fprintf(stderr, "%3d: %s\n", 0, error_string);                    \
-      MPI_Error_string(error_code, error_string, &length_of_error_string); \
-      fprintf(stderr, "%3d: %s\n", 0, error_string);                    \
-      MPI_Abort(MPI_COMM_WORLD, error_code);                            \
-    };                                                                  \
-  } while(0)
-#endif
-
 #ifdef __clang_analyzer__
 #define NO_RETURN  __attribute__((analyzer_noreturn))
 #else
@@ -137,7 +118,7 @@ extern "C"
    * \param fn_name name of the function where warning occurs
    * \param msg formatted output message
    */
-  void numerics_warning(const char * fn_name, char* msg, ...);
+  void numerics_warning(const char * fn_name, const char* msg, ...);
 
   /** log message (if verbosity is on)
    *

@@ -29,7 +29,7 @@
  */
 
 
-class Disk : public CircularDS, public std11::enable_shared_from_this<Disk>
+class Disk : public CircularDS, public std::enable_shared_from_this<Disk>
 {
 private:
   /** serialization hooks

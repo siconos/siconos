@@ -250,7 +250,7 @@ S )\002)";
   /*     Read names of subroutines and flags which indicate whether */
   /*     they are to be tested. */
 
-  for (i = 1; i <= 9; ++i)
+  for(i = 1; i <= 9; ++i)
   {
     ltest[i - 1] = FALSE_;
     /* L10: */
@@ -260,9 +260,9 @@ L20:
   do_fio(&c__1, snamet, 6L);
   do_fio(&c__1, (char *)&ltestt, (ftnlen)sizeof(logical));
   e_rsfe();
-  for (i = 1; i <= 9; ++i)
+  for(i = 1; i <= 9; ++i)
   {
-    if (lsamen_(&c__6, snamet, snames + (i - 1) * 6, 6L, 6L))
+    if(lsamen_(&c__6, snamet, snames + (i - 1) * 6, 6L, 6L))
     {
       goto L40;
     }
@@ -274,7 +274,7 @@ L20:
   s_stop("", 0L);
 L40:
   ltest[i - 1] = ltestt;
-  if (i < 9)
+  if(i < 9)
   {
     goto L20;
   }
@@ -296,35 +296,35 @@ L40:
   /*     Read names of subroutines and flags which indicate whether */
   /*     they are to be tested. */
 
-  for (i = 1; i <= 9; ++i)
+  for(i = 1; i <= 9; ++i)
   {
     ltest[i - 1] = FALSE_;
     /* L60: */
   }
 L70:
   i__1 = s_rsfe(&io___24);
-  if (i__1 != 0)
+  if(i__1 != 0)
   {
     goto L100;
   }
   i__1 = do_fio(&c__1, snamet, 6L);
-  if (i__1 != 0)
+  if(i__1 != 0)
   {
     goto L100;
   }
   i__1 = do_fio(&c__1, (char *)&ltestt, (ftnlen)sizeof(logical));
-  if (i__1 != 0)
+  if(i__1 != 0)
   {
     goto L100;
   }
   i__1 = e_rsfe();
-  if (i__1 != 0)
+  if(i__1 != 0)
   {
     goto L100;
   }
-  for (i = 4; i <= 8; ++i)
+  for(i = 4; i <= 8; ++i)
   {
-    if (lsamen_(&c__6, snamet, snames + (i - 1) * 6, 6L, 6L))
+    if(lsamen_(&c__6, snamet, snames + (i - 1) * 6, 6L, 6L))
     {
       goto L90;
     }
@@ -336,7 +336,7 @@ L70:
   s_stop("", 0L);
 L90:
   ltest[i - 1] = ltestt;
-  if (i < 8)
+  if(i < 8)
   {
     goto L70;
   }
@@ -367,7 +367,7 @@ L100:
 
   s_wsle(&io___29);
   e_wsle();
-  if (spdres && nsyres)
+  if(spdres && nsyres)
   {
 
     /*        All tests passed. */
@@ -377,13 +377,13 @@ L100:
     e_wsle();
     s_wsle(&io___31);
     e_wsle();
-    if (spdtests > 0)
+    if(spdtests > 0)
     {
       s_wsfe(&io___32);
       do_fio(&c__1, (char *)&spdtests, (ftnlen)sizeof(integer));
       e_wsfe();
     }
-    if (nsytests > 0)
+    if(nsytests > 0)
     {
       s_wsfe(&io___33);
       do_fio(&c__1, (char *)&nsytests, (ftnlen)sizeof(integer));
@@ -392,10 +392,10 @@ L100:
   }
   else
   {
-    if (spdres)
+    if(spdres)
     {
 
-      if (spdtests > 0)
+      if(spdtests > 0)
       {
 
         /*              SPD tests passed. */
@@ -435,10 +435,10 @@ L100:
     }
     s_wsle(&io___42);
     e_wsle();
-    if (nsyres)
+    if(nsyres)
     {
 
-      if (spdtests > 0)
+      if(spdtests > 0)
       {
 
         /*              Nonsymmetric tests passed. */
@@ -527,32 +527,32 @@ ftnlen form_len;
   /* Function Body */
   *info = 0;
 
-  if (lsamen_(&c__3, form, "ONES", 4L, 4L))
+  if(lsamen_(&c__3, form, "ONES", 4L, 4L))
   {
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       b[i] = 1.;
       /* L10: */
     }
   }
-  else if (lsamen_(&c__3, form, "ZEROS", 4L, 5L))
+  else if(lsamen_(&c__3, form, "ZEROS", 4L, 5L))
   {
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       b[i] = 0.;
       /* L20: */
     }
   }
-  else if (lsamen_(&c__3, form, "SUMROW", 4L, 6L))
+  else if(lsamen_(&c__3, form, "SUMROW", 4L, 6L))
   {
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       tmp = 0.;
       i__2 = *n;
-      for (j = 1; j <= i__2; ++j)
+      for(j = 1; j <= i__2; ++j)
       {
         tmp += a[i + j * a_dim1];
         /* L30: */
@@ -630,7 +630,7 @@ ftnlen pform_len;
   a -= a_offset;
 
   /* Function Body */
-  if (lsamen_(&c__5, pform, "IDENT", 5L, 5L))
+  if(lsamen_(&c__5, pform, "IDENT", 5L, 5L))
   {
 
     /*         Identity matrix need not be formed, since the solve involvi
@@ -642,7 +642,7 @@ ftnlen pform_len;
     return 0;
 
   }
-  else if (lsamen_(&c__5, pform, "JACBI", 5L, 5L))
+  else if(lsamen_(&c__5, pform, "JACBI", 5L, 5L))
   {
 
     /*        Diagonal Scaling: diag(A). Note that we actually form inv(M)
@@ -650,7 +650,7 @@ ftnlen pform_len;
     /*         solver can use multiplication. */
 
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       m[i] = a[i + i * a_dim1];
       /* L10: */
@@ -768,11 +768,11 @@ integer *lda;
   /* Function Body */
   temp = 0.;
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     rowsum = 0.;
     i__2 = *n;
-    for (j = 1; j <= i__2; ++j)
+    for(j = 1; j <= i__2; ++j)
     {
       rowsum += (d__1 = a[i + j * a_dim1], abs(d__1));
       /* L10: */
@@ -928,7 +928,7 @@ e8.2,\002   \002,i5,\002    \002,i3)";
 
   /*     Compare algorithm reported residual with |b-AX|/(|A||x|n*TOL) */
 
-  if (lsame_(mattype, "SPD", 3L, 3L))
+  if(lsame_(mattype, "SPD", 3L, 3L))
   {
     firstalg = 1;
     numalg = 9;
@@ -939,9 +939,9 @@ e8.2,\002   \002,i5,\002    \002,i3)";
     numalg = 8;
   }
   i__1 = numalg;
-  for (i = firstalg; i <= i__1; ++i)
+  for(i = firstalg; i <= i__1; ++i)
   {
-    if (resid[i] != 0.)
+    if(resid[i] != 0.)
     {
       dcopy_(n, &b[1], &c__1, &rk[1], &c__1);
       dgemv_("N", n, n, &c_b125, &a[a_offset], lda, &x[i * x_dim1 + 1],
@@ -952,9 +952,9 @@ e8.2,\002   \002,i5,\002    \002,i3)";
     /* L10: */
   }
 
-  if (lsamen_(&c__4, aform, "F2SH", 4L, 4L))
+  if(lsamen_(&c__4, aform, "F2SH", 4L, 4L))
   {
-    if (lsamen_(&c__2, pform, "IDENT", 5L, 5L))
+    if(lsamen_(&c__2, pform, "IDENT", 5L, 5L))
     {
       s_wsfe(&io___75);
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
@@ -963,7 +963,7 @@ e8.2,\002   \002,i5,\002    \002,i3)";
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
       e_wsfe();
     }
-    else if (lsamen_(&c__2, pform, "JACBI", 5L, 5L))
+    else if(lsamen_(&c__2, pform, "JACBI", 5L, 5L))
     {
       s_wsfe(&io___77);
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
@@ -973,9 +973,9 @@ e8.2,\002   \002,i5,\002    \002,i3)";
       e_wsfe();
     }
   }
-  else if (lsamen_(&c__4, aform, "F3SH", 4L, 4L))
+  else if(lsamen_(&c__4, aform, "F3SH", 4L, 4L))
   {
-    if (lsamen_(&c__2, pform, "IDENT", 5L, 5L))
+    if(lsamen_(&c__2, pform, "IDENT", 5L, 5L))
     {
       s_wsfe(&io___79);
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
@@ -984,7 +984,7 @@ e8.2,\002   \002,i5,\002    \002,i3)";
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
       e_wsfe();
     }
-    else if (lsamen_(&c__2, pform, "JACBI", 5L, 5L))
+    else if(lsamen_(&c__2, pform, "JACBI", 5L, 5L))
     {
       s_wsfe(&io___81);
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
@@ -994,9 +994,9 @@ e8.2,\002   \002,i5,\002    \002,i3)";
       e_wsfe();
     }
   }
-  else if (lsamen_(&c__4, aform, "WATH", 4L, 4L))
+  else if(lsamen_(&c__4, aform, "WATH", 4L, 4L))
   {
-    if (lsamen_(&c__2, pform, "IDENT", 5L, 5L))
+    if(lsamen_(&c__2, pform, "IDENT", 5L, 5L))
     {
       s_wsfe(&io___83);
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
@@ -1005,7 +1005,7 @@ e8.2,\002   \002,i5,\002    \002,i3)";
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
       e_wsfe();
     }
-    else if (lsamen_(&c__2, pform, "JACBI", 5L, 5L))
+    else if(lsamen_(&c__2, pform, "JACBI", 5L, 5L))
     {
       s_wsfe(&io___85);
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
@@ -1015,9 +1015,9 @@ e8.2,\002   \002,i5,\002    \002,i3)";
       e_wsfe();
     }
   }
-  else if (lsamen_(&c__3, aform, "PDE", 4L, 3L))
+  else if(lsamen_(&c__3, aform, "PDE", 4L, 3L))
   {
-    if (lsamen_(&c__2, pform, "IDENT", 5L, 5L))
+    if(lsamen_(&c__2, pform, "IDENT", 5L, 5L))
     {
       s_wsfe(&io___87);
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
@@ -1028,7 +1028,7 @@ e8.2,\002   \002,i5,\002    \002,i3)";
       do_fio(&c__1, aform, 4L);
       e_wsfe();
     }
-    else if (lsamen_(&c__2, pform, "JACBI", 5L, 5L))
+    else if(lsamen_(&c__2, pform, "JACBI", 5L, 5L))
     {
       s_wsfe(&io___89);
       do_fio(&c__1, (char *) & (*n), (ftnlen)sizeof(integer));
@@ -1046,20 +1046,20 @@ e8.2,\002   \002,i5,\002    \002,i3)";
   /*     Loop over the algorithms, with a final error check. */
 
   i__1 = numalg;
-  for (i = firstalg; i <= i__1; ++i)
+  for(i = firstalg; i <= i__1; ++i)
   {
 
     /*        Check updated residual vs. scaled residual. */
 
-    if (ltest[i])
+    if(ltest[i])
     {
-      if (info[i] == 0)
+      if(info[i] == 0)
       {
 
         /*              Method claims to have found solution. */
         /*              Check scaled residual. */
 
-        if (sresid[i - 1] <= *scaledtol)
+        if(sresid[i - 1] <= *scaledtol)
         {
 
           /*                 Scaled residual check passed. */
@@ -1103,7 +1103,7 @@ e8.2,\002   \002,i5,\002    \002,i3)";
           e_wsfe();
         }
       }
-      else if (info[i] == 100)
+      else if(info[i] == 100)
       {
         goto L30;
       }

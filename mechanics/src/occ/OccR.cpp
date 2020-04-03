@@ -14,14 +14,14 @@
 OccR::OccR(const ContactPoint& contact1,
            const ContactPoint& contact2,
            const DistanceCalculatorType& distance_calculator) :
-  NewtonEulerFrom3DLocalFrameR(),
+  NewtonEuler3DR(),
   _contact1(contact1),
   _contact2(contact2),
   _geometer(),
   _offset1(0.),
   _offset2(0.)
 {
-  switch (Type::value(distance_calculator))
+  switch(Type::value(distance_calculator))
   {
   case Type::OccDistanceType:
     this->_geometer = ask<WhichGeometer<OccDistanceType> >(contact1.contactShape());

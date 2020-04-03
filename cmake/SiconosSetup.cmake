@@ -4,97 +4,68 @@
 # ===================================================
 include(SiconosTools)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE RELEASE CACHE STRING
-    "Choose the type of build, options are: None Debug Release."
-    FORCE)
-endif()
-
 # =========== Windows stuff ... ===========
 include(WindowsSiconosSetup)
 
 # --------- CMake project internal variables ---------
-
 # Siconos current version
 include(SiconosVersion)
 
-# File used to print tests setup messages.
-set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
-# get system architecture 
-# https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
-include(TargetArch)
-target_architecture(SYSTEM_ARCHITECTURE)
-if(WITH_SYSTEM_INFO)
-  include(CMakePrintSystemInformation)
-  message(STATUS "SYSTEM ARCHITECTURE: ${SYSTEM_ARCHITECTURE}")
-endif()
+# -- Set include directories that are required by ALL components
+# and only those!
+# Other includes must be specified to individual targets only.
+# Current binary dir, for generated headers. Only at build time!
+include_directories($<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 
-# extensions of headers files that must be taken into account
-set(HDR_EXTS h hpp)
-
-# To include or not unstable source files
-set(WITH_UNSTABLE FALSE)
-
-# dirs of 'local' headers. Must be filled by each component.
-set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
-  CACHE INTERNAL "Local include directories.")
-
-set(SICONOS_INCLUDE_DIRECTORIES
-  CACHE INTERNAL "Include directories for external dependencies.")
-
-set(SICONOS_LINK_LIBRARIES
-  CACHE INTERNAL "List of external libraries.")
-
-set(${PROJECT_NAME}_LOCAL_LIBRARIES
-  CACHE INTERNAL "List of siconos components libraries.")
-
-set(installed_targets ${installed_targets}
-  CACHE INTERNAL "List of installed libraries for the siconos project.")
-
-set(PRIVATE PRIVATE CACHE INTERNAL "")
-set(PUBLIC PUBLIC CACHE INTERNAL "")
-
-set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
-
-# extensions of source files that must be taken into account
-get_standard_ext()
-set(SRC_EXTS ${ALL_EXTS})
-
-if(WITH_GIT)
+if(WITH_GIT) # User defined option, default = off
+  # Check if git is available
+  # and get last commit id (long and short).
+  # Saved in SOURCE_ABBREV_GIT_SHA1 and SOURCE_GIT_SHA1
+  # These vars are useful for tests logs and 'write_notes' macro.
   find_package(Git)
-  MESSAGE(STATUS "git executable : ${GIT_EXECUTABLE}")
-  MESSAGE(STATUS "git command : ${GITCOMMAND}")
-  MESSAGE(STATUS "git update options : ${GIT_UPDATE_OPTIONS}")
-     
-  SET(CTEST_GIT_COMMAND "${GIT_EXECUTABLE}" )
-  SET(UPDATE_COMMAND "${GITCOMMAND}")
-  SET(UPDATE_OPTIONS "${GIT_UPDATE_OPTIONS}")
-      
-  EXECUTE_PROCESS(COMMAND 
-    ${GIT_EXECUTABLE} log -n 1 --pretty=format:%h 
-    OUTPUT_VARIABLE SOURCE_ABBREV_GIT_SHA1
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-  
-  EXECUTE_PROCESS(COMMAND 
-    ${GIT_EXECUTABLE} log -n 1 --pretty=format:%H
-    OUTPUT_VARIABLE SOURCE_GIT_SHA1
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  if(GIT_FOUND)
+    set(CTEST_GIT_COMMAND "${GIT_EXECUTABLE}" )     
+    execute_process(COMMAND 
+      ${GIT_EXECUTABLE} log -n 1 --pretty=format:%h 
+      OUTPUT_VARIABLE SOURCE_ABBREV_GIT_SHA1
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+    
+    execute_process(COMMAND 
+      ${GIT_EXECUTABLE} log -n 1 --pretty=format:%H
+      OUTPUT_VARIABLE SOURCE_GIT_SHA1
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  endif()
 endif()
 
+# Save date/time into BUILD_TIMESTAMP var
 string(TIMESTAMP BUILD_TIMESTAMP)
 
-# ---- Python ---
-# (interp and lib)
-# Warning FP : python is always required, at least
-# for siconos script.
-if(WITH_PYTHON_WRAPPER)
-  find_package(PythonFull REQUIRED)
-else()
-  find_package(PythonInterp REQUIRED)
+# ---- PYTHON SETUP ----
+# Python interpreter is always required.
+# We force Python3!
+# In addition, when WITH_PYTHON_WRAPPER is ON,
+# we need python libraries and numpy.
+if(${CMAKE_VERSION} VERSION_LESS "3.14")
+  # Our FindPython3 is just a copy of the one distributed
+  # with cmake = 3.14
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/extras)
 endif()
+
+# determine the order of preference between Apple-style and unix-style package components
+#  --> look for python framework when all other possibilities failed.
+set(Python3_FIND_FRAMEWORK LAST)
+if(WITH_PYTHON_WRAPPER)
+  find_package(Python3 COMPONENTS Development Interpreter NumPy REQUIRED)
+else()
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+endif()
+# For backward compat ...
+set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+include(FindPythonModule)
+find_python_module(packaging REQUIRED) # for siconos runtime
+
 get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
-  include(FindPythonModule)
   # --- xml schema. Used in tests. ---
   if(WITH_XML)
     set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/kernel/swig/SiconosModelSchema-V3.7.xsd")
@@ -104,47 +75,22 @@ if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   endif()
 endif()
 
-# Choice of CSparse/CXSparse integer size
-IF(NOT DEFINED SICONOS_INT64)
-  IF(NOT SIZE_OF_CSI)
-    INCLUDE(CheckTypeSize)
-    CHECK_TYPE_SIZE("size_t" SIZE_OF_CSI)
-    IF(NOT SIZE_OF_CSI)
-      message(FATAL_ERROR
-        "Could not get size of size_t, please specify SICONOS_INT64.")
-    ENDIF(NOT SIZE_OF_CSI)
-  ENDIF(NOT SIZE_OF_CSI)
-
-  IF ("${SIZE_OF_CSI}" EQUAL 8)
-    SET(SICONOS_INT64 TRUE)
-  ELSE ("${SIZE_OF_CSI}" EQUAL 8)
-    SET(SICONOS_INT64 FALSE)
-  ENDIF ("${SIZE_OF_CSI}" EQUAL 8)
-ENDIF()
-
+# --- End of python conf ---
 
 # =========== install setup ===========
 
-# Install lib directory 32, 64 etc. on Fedora, Debian 
-# http://public.kitware.com/Bug/view.php?id=11964
-# See also http://www.cmake.org/cmake/help/v3.0/module/GNUInstallDirs.html?highlight=gnuinstalldirs
-include(GNUInstallDirs)
-# Set prefix path for libraries installation
-# --> means that any library target will be installed
-# in CMAKE_INSTALL_PREFIX/_install_lib
-if(${PROJECT_NAME}_INSTALL_LIB_DIR)
-  set(_install_lib ${${PROJECT_NAME}_INSTALL_LIB_DIR})
-else()
-  ASSERT(CMAKE_INSTALL_LIBDIR)
-  set(_install_lib ${CMAKE_INSTALL_LIBDIR})
-  set(${PROJECT_NAME}_INSTALL_LIB_DIR ${_install_lib})
-endif()
+# Set directory used to save cmake config files
+# required to use Siconos (e.g. to call find_package(siconos) )
+set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})
 
+# Provides install directory variables as defined by the GNU Coding Standards.
+include(GNUInstallDirs)  # It defines CMAKE_INSTALL_LIBDIR
 
 # --- RPATH stuff ---
-# See https://cmake.org/Wiki/CMake_RPATH_handling
 # Warning: RPATH settings must be defined before install(...) settings.
-if(FORCE_SKIP_RPATH)
+# Source : https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
+
+if(FORCE_SKIP_RPATH) # Build with no RPATH. Do we really need this option??
   set(CMAKE_SKIP_BUILD_RPATH TRUE)
 else()
   set(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -164,47 +110,10 @@ endif(NOT FORCE_SKIP_RPATH)
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# The following settings were copied from
-# https://cmake.org/Wiki/CMake_RPATH_handling
-# to avoid the rpath issue that appears on OS X El Capitan
-
 # the RPATH to be used when installing, but only if it's not a system directory
 list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
 if("${isSystemDir}" STREQUAL "-1")
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${_install_lib}")
-endif()
-
-# List of cmake macros that will be distributed with siconos software.
-# They may be required during call to siconos script
-# or to configure projects depending on Siconos (e.g. siconos-tutorials)
-set(cmake_macros
-  SiconosTools.cmake
-  FindQGLViewer.cmake
-  OutOfSourcesBuild.cmake
-  FindPythonModule.cmake
-  valgrind.supp
-  SiconosTools.cmake
-  )
-foreach(file ${cmake_macros})
-  install(FILES cmake/${file} DESTINATION share/${PROJECT_NAME}/cmake)
-endforeach()
-
-# =========== uninstall target ===========
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-  IMMEDIATE @ONLY)
-
-
-if(WITH_PYTHON_WRAPPER)
-  add_custom_target(uninstall
-    echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
-    COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/python_install_manifest.txt >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-else()
-  add_custom_target(uninstall
-    echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif()
 
 # init all common options for enabled components
@@ -213,36 +122,138 @@ set(common_options DOCUMENTATION TESTING UNSTABLE PYTHON_WRAPPER
 foreach(opt ${common_options})
   init_to_default_option(${opt})
 endforeach()
+
 # ========= Documentation =========
-if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS)
+if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS OR WITH_GENERATION)
   set(USE_DOXYGEN TRUE)
-  add_custom_target(upload
-    COMMENT documentation upload
-    COMMAND ${CMAKE_SOURCE_DIR}/Build/tools/publish.py -u ${GFORGE_USER} -s ${CMAKE_SOURCE_DIR} -b ${CMAKE_BINARY_DIR} -m)
 endif()
 
-if(WITH_DOCUMENTATION)
-  # temporary option?
-  set(USE_SPHINX TRUE)
+# ----- Required dependencies (whatever Siconos components are) -----
+
+# =========== Blas/Lapack ===========
+# Find package stuff provided by cmake deals
+# only with blas/lapack libraries.
+# Since headers are also required for Siconos
+# we use our own cmake "find package" stuff.
+find_package(LAPACKDEV REQUIRED)
+
+# =========== Boost ===========
+# check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
+if(WITH_CXX)
+
+  # From boost 1.71, something is wrong in cmake and boost support for multithread 
+  # https://github.com/boostorg/boost_install/issues/13
+  # https://gitlab.kitware.com/cmake/cmake/issues/19714
+  # set(Boost_USE_MULTITHREADED ON)
+  set(Boost_NO_BOOST_CMAKE 1)
+  set(boost_min_version 1.61)
+  # Set the list of required boost components
+  if(WITH_SERIALIZATION)
+    list(APPEND boost_required_components serialization filesystem)
+  endif()
+  if(HAVE_SICONOS_CONTROL)
+    # Should we always look for timer ? This a requirement for many examples
+    # but not for siconos components, except control.
+    list(APPEND boost_required_components timer)
+  endif()
+  if(boost_required_components)
+    set(boost_opts COMPONENTS ${boost_required_components})
+  endif()
+
+  # Search boost ...
+  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED)
+
+  if(WITH_SERIALIZATION)
+    set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
+  endif()
 endif()
+
+# -- Open Cascade Community Edition --
+if(WITH_OCE)
+  include(oce_setup)
+endif()
+
+# -- Python bindings --
+if(WITH_PYTHON_WRAPPER)
+  find_package(SWIG 3.0 REQUIRED)
+  include(${SWIG_USE_FILE})
+endif()
+
+# ---- Extra 'developers only' options ----
+# -- The options below should be used with caution
+# and preferably by developers or advanced users --
 
 # =========== OpenMP ==========
-OPTION (WITH_OPENMP "Use OpenMP" OFF)
-IF(WITH_OPENMP)
-  FIND_PACKAGE(OpenMP)
-  IF(OPENMP_FOUND)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    # Only applies to numerics code, which is in C (for now)
-    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  ENDIF()
-ENDIF()
+option(WITH_OPENMP "Use OpenMP" OFF)
 
 # =========== use ccache if available ===========
-OPTION (WITH_CCACHE "Use ccache" OFF)
-IF(WITH_CCACHE)
+option(WITH_CCACHE "Use ccache" OFF)
+if(WITH_CCACHE)
   find_program(CCACHE_FOUND ccache)
   if(CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-  endif(CCACHE_FOUND)
-ENDIF()
+  endif()
+endif()
+
+# =========== MPI ==========
+option(WITH_MPI "Use MPI" OFF)
+if(WITH_MPI)
+  find_package(MPI REQUIRED)
+  # https://cmake.org/cmake/help/v3.10/module/FindMPI.html
+  if(MPI_CXX_FOUND)
+    print_mpi_info(CXX)
+    set(SICONOS_HAS_MPI TRUE) # for config.h
+  endif()
+  # if(MPI_Fortran_FOUND) # Do we need mpi fortran ?
+  #   print_mpi_info(Fortran)
+  # endif()
+endif()
+
+# =========== Tests env ==========
+if(WITH_TESTING)
+  # File used to print tests setup messages.
+  set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
+
+  set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
+  if(HAVE_SICONOS_KERNEL)
+    find_package(CPPUNIT REQUIRED)
+    # File used as main driver for cppunit tests
+    set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/tests-common/TestMain.cpp CACHE INTERNAL "")
+  endif()
+  if(WITH_PYTHON_WRAPPER)
+    find_python_module(pytest REQUIRED)
+    if(WITH_AGGRESSIVE_PYTHON_TESTS)
+      set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")
+    else()
+      set(pytest_opt "-v" CACHE INTERNAL "extra options for py.test")
+    endif()
+  endif()
+endif()
+
+
+# ==== Python symlinks ===
+# Useful during io installation, to use links for python scripts rather
+# that copying files.
+# FP : in which case do we need this ? If anyone knows, please document it ...
+option(INSTALL_PYTHON_SYMLINKS "Install Python .py files as symlinks" OFF)
+
+# For SiconosConfig.h
+option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
+
+# Check Siconos compilation with include-what-you-use
+# See https://github.com/include-what-you-use/include-what-you-use
+# Set WITH_IWYU=path/to/iwyu binary file
+if(WITH_IWYU)
+  # Clang is required for iwyu. This is a devel option, so we assume that
+  # you know what you are doing and that you use the same version of clang
+  # for both iwyu and Siconos.
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+    message(FATAL_ERROR "You must compile Siconos with clang to use include-what-you-use.")
+  endif()
+  if(NOT CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT CMAKE_C_COMPILER_ID STREQUAL AppleClang)
+    message(FATAL_ERROR "You must compile Siconos with clang to use include-what-you-use.")
+  endif()
+  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${WITH_IWYU};-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args" CACHE INTERNAL "iwyu setup")
+  set(CMAKE_C_INCLUDE_WHAT_YOU_USE "${WITH_IWYU};-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args" CACHE INTERNAL "iwyu setup")
+endif()

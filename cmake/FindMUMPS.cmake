@@ -1,103 +1,124 @@
-# Find MUMPS includes and libraries.
-# The following variables are set if MUMPS is found.  If MUMPS is not
-# found, MUMPS_FOUND is set to false.
-#  MUMPS_FOUND        - True when the MUMPS include directory is found.
-#  MUMPS_INCLUDE_DIRS - the path to where the Siconos MUMPS include files are.
-#  MUMPS_LIBRARY_DIRS - The path to where the Siconos library files are.
-#  MUMPS_LIBRARIES    - The libraries to link against Siconos MUMPS
+#  Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2019 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# --
+#[=======================================================================[.rst:
+FindMUMPS
+-----------
 
-# One may want to use a specific MUMPS Library by setting
-# MUMPS_LIBRARY_DIRECTORY before FIND_PACKAGE(MUMPS)
-INCLUDE(FindPackageHandleStandardArgs)
+Find mumps libraries and headers
 
-# On debian and Suse, both mpi and mpi-free version of MUMPS can be installed in parallel
-# The latter have a "_seq" suffix
-IF(IDONTWANTMPI)
-  SET(__MUMPS_NAMES dmumps_seq dmumps)
-ELSE(IDONTWANTMPI)
-  SET(__MUMPS_NAMES dmumps)
-ENDIF(IDONTWANTMPI)
+Usage :
+ 
+find_package(MUMPS REQUIRED  COMPONENTS <name>)
+target_link_libraries(yourlib PRIVATE MUMPS::MUMPS)
 
-IF(MUMPS_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(MUMPS_LIBRARY NAMES ${__MUMPS_NAMES} PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
-  IF(NOT MUMPS_LIBRARY)
-    SET(_MUMPS_DEFAULT_SEARCH_DIR TRUE)
-    MESSAGE("Could not find MUMPS in directory ${MUMPS_LIBRARY_DIRECTORY}")
-    FIND_LIBRARY(MUMPS_LIBRARY NAMES ${__MUMPS_NAMES})
-  ENDIF()
-ELSE(MUMPS_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(MUMPS_LIBRARY NAMES ${__MUMPS_NAMES})
-ENDIF(MUMPS_LIBRARY_DIRECTORY)
+with name among :
+- SEQ for sequential version of mumps
+- PAR for paralle version
 
+If COMPONENTS is not set, SEQ version is searched.
+Warning : do not use several components in your build.
 
-# Try to be smart and detect whether the MUMPS lib file has a "_seq" suffix. If yes, we add it to all the other library
-IF(IDONTWANTMPI AND MUMPS_LIBRARY MATCHES "dmumps_seq")
-  SET(__SUFFIX "_seq")
-ELSE()
-  SET(__SUFFIX "")
-ENDIF()
+Notice that some extra libs are also searched for : ptscotch scotch metis pord.
 
+Set MUMPS_ROOT=<where mumps is installed>
+if it's not in a "classic" place or if you want a specific version
 
+header : dmumps_c.h
+libs : see MUMPS_NAME var below.
 
-IF(MUMPS_LIBRARY_DIRECTORY AND NOT _MUMPS_DEFAULT_SEARCH_DIR)
-  FIND_LIBRARY(MUMPS_COMMON_LIBRARY mumps_common${__SUFFIX} PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
-ELSE()
-  FIND_LIBRARY(MUMPS_COMMON_LIBRARY mumps_common${__SUFFIX})
-ENDIF()
+#]=======================================================================]
 
-IF(MUMPS_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(METIS_LIBRARY metis PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
-  IF(NOT METIS_LIBRARY)
-    FIND_LIBRARY(METIS_LIBRARY metis)
-  ENDIF()
-ELSE(MUMPS_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(METIS_LIBRARY metis)
-ENDIF(MUMPS_LIBRARY_DIRECTORY)
+include(FindPackageHandleStandardArgs)
 
-IF(MUMPS_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(PORD_LIBRARY pord${__SUFFIX} PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
-  IF(NOT PORD_LIBRARY)
-    FIND_LIBRARY(PORD_LIBRARY pord${__SUFFIX})
-  ENDIF()
-ELSE(MUMPS_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(PORD_LIBRARY pord${__SUFFIX})
-ENDIF(MUMPS_LIBRARY_DIRECTORY)
+list(LENGTH MUMPS_FIND_COMPONENTS nb_comp)
+if(nb_comp GREATER 1)
+  message(FATAL_ERROR "Try to find several MUMPS conflicting components : ${MUMPS_FIND_COMPONENTS}.")
+endif()
+if(NOT MUMPS_FIND_COMPONENTS)
+  set(MUMPS_FIND_COMPONENTS SEQ)
+endif()
 
-IF((NOT MUMPS_INCLUDE_DIR) AND MUMPS_LIBRARY)
-  GET_FILENAME_COMPONENT(MUMPS_LIBRARY_DIR ${MUMPS_LIBRARY} PATH)
-  GET_FILENAME_COMPONENT(MUMPS_LIBRARY_DIR_DIR ${MUMPS_LIBRARY_DIR} PATH)
-
-  # Suse uses /usr/include/mumps
-  # Debian has /usr/include/mumps_seq for the MPI-free version
-  find_path(MUMPS_INCLUDE_DIR dmumps_c.h
-    HINTS
-    ${MUMPS_LIBRARY_DIR_DIR}/include
-    $ENV{MPI_INCLUDE}
-    PATH_SUFFIXES MUMPS mumps mumps${__SUFFIX}
-    )
-ENDIF()
+if(${MUMPS_FIND_COMPONENTS} STREQUAL SEQ)
+  set(__MUMPS_NAMES dmumps_seq dmumps)
+  set(__SUFFIX seq)
+  # on debian systems one may have mumps+[pt]scotch packages also
+  set(__MUMPS_COMMON_NAMES mumps_common_seq mumps_common)
+elseif(${MUMPS_FIND_COMPONENTS} STREQUAL PAR)
+  set(__MUMPS_NAMES dmumps_ptscotch dmumps_scotch dmumps)
+  set(__MUMPS_COMMON_NAMES mumps_common_ptscotch mumps_common_scotch mumps_common)
+else()
+  message(FATAL_ERROR "Unknown MUMPS component ${MUMPS_FIND_COMPONENTS}. Search failed.")
+endif()
 
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(MUMPS 
-  REQUIRED_VARS MUMPS_LIBRARY MUMPS_INCLUDE_DIR)
 
-IF(MUMPS_LIBRARY)
-  GET_FILENAME_COMPONENT(MUMPS_LIBRARY_DIRS ${MUMPS_LIBRARY} PATH)
-  SET(MUMPS_LIBRARIES ${MUMPS_LIBRARY} ${MUMPS_COMMON_LIBRARY})
+if(NOT MUMPS_ROOT)
+  set(MUMPS_ROOT $ENV{MUMPS_ROOT})
+endif()
 
-  IF(METIS_LIBRARY)
-    SET(MUMPS_LIBRARIES ${MUMPS_LIBRARIES} ${METIS_LIBRARY})
-  ENDIF(METIS_LIBRARY)
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME MUMPS MODULE mumps)
 
-  IF(PORD_LIBRARY)
-    SET(MUMPS_LIBRARIES ${MUMPS_LIBRARIES} ${PORD_LIBRARY})
-  ENDIF()
+find_path(MUMPS_INCLUDE_DIR NAMES dmumps_c.h
+  PATH_SUFFIXES include mumps mumps${__SUFFIX}
+  ${_MUMPS_INC_SEARCH_OPTS}
+  )
 
-  SET(MUMPS_INCLUDE_DIRS ${MUMPS_INCLUDE_DIR})
+if(NOT MUMPS_LIBRARIES)
+  find_library(MUMPS_LIBRARY NAMES ${__MUMPS_NAMES}
+    ${_MUMPS_SEARCH_OPTS}
+    PATH_SUFFIXES lib lib64)
+  if(MUMPS_LIBRARY)
+    list(APPEND MUMPS_LIBRARIES ${MUMPS_LIBRARY})
+  endif()
+  find_library(MUMPS_COMMON_LIBRARY NAMES ${__MUMPS_COMMON_NAMES}
+    ${_MUMPS_SEARCH_OPTS}
+    PATH_SUFFIXES lib lib64)
+  if(MUMPS_COMMON_LIBRARY)
+    list(APPEND MUMPS_LIBRARIES ${MUMPS_COMMON_LIBRARY})
+  endif()
+endif()
 
-ELSE(MUMPS_LIBRARY)
-  IF(MUMPS_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR
-      "Required MUMPS library not found. Please specify library location in MUMPS_LIBRARY_DIRECTORY")
-  ENDIF(MUMPS_FIND_REQUIRED)
-ENDIF(MUMPS_LIBRARY)
+# -- Library setup --
+find_package_handle_standard_args(MUMPS
+  REQUIRED_VARS MUMPS_LIBRARIES MUMPS_INCLUDE_DIR)
+
+# Extras
+set(extras_libs ptscotch scotch metis pord${__SUFFIX})
+foreach(extra IN LISTS extras_libs)
+  find_library(MUMPS_${extra}_LIBRARY NAMES ${extra}
+    ${_MUMPS_SEARCH_OPTS}
+    PATH_SUFFIXES lib lib64)
+  if(MUMPS_${extra}_LIBRARY)
+    list(APPEND ${MUMPS_LIBRARIES} ${MUMPS_${extra}_LIBRARY})
+  endif()
+    
+endforeach()
+
+if(MUMPS_FOUND)
+  
+  if(NOT TARGET MUMPS::MUMPS)
+    add_library(MUMPS::MUMPS IMPORTED INTERFACE)
+    set_property(TARGET MUMPS::MUMPS PROPERTY INTERFACE_LINK_LIBRARIES ${MUMPS_LIBRARIES})
+    if(MUMPS_INCLUDE_DIR)
+      set_target_properties(MUMPS::MUMPS PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${MUMPS_INCLUDE_DIR}")
+    endif()
+  endif()
+endif()
+

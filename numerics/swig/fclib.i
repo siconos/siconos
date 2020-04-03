@@ -45,41 +45,38 @@ extern "C"
 %apply (double *v) { (double *r) }
 %apply (double *v) { (double *l) }
 
-%{
-  static int convert_fcsol_array(PyObject *input, struct fclib_solution *ptr) {
+%define convert_fcsol_array(input, ptr) {
     void *argp1=0;
     int res1=0;
     int newmem=0;
     int i;
     if (!PySequence_Check(input)) {
       PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
-      return 0;
+      SWIG_fail;
     }
     for (i =0; i <  PyObject_Length(input); i++) {
       PyObject *o = PySequence_GetItem(input,i);
-      res1 = SWIG_ConvertPtrAndOwn(o, &argp1, SWIGTYPE_p_fclib_solution, 0 |  0 , &newmem);
+      res1 = SWIG_ConvertPtrAndOwn(o, &argp1, $descriptor(fclib_solution *), 0 |  0 , &newmem);
       if (!SWIG_IsOK(res1)) {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of fclib_solution");
-        return 0;
+        SWIG_fail;
       }
       ptr[i] = *(struct fclib_solution*)(argp1);
 
 //      if (ptr[i] == -1 && PyErr_Occurred())
-//        return 0;
+//        SWIG_fail;
       Py_DECREF(o);
   }
-  return 1;
   }
-%}
+%enddef
 
 %typemap(in) (int number_of_guesses,  fclib_solution *guesses) (struct fclib_solution* temp) {
 
   temp = NULL;
   temp = (fclib_solution *) malloc(sizeof(fclib_solution)*PyObject_Length($input));
-  if (!convert_fcsol_array($input,temp)) {
-    SWIG_fail;
-  }
+  convert_fcsol_array($input,temp);
+
   $1 = PyObject_Length($input);
   $2 = &temp[0];
  }

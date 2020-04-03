@@ -25,6 +25,8 @@
 DEFINE_SPTR(btCollisionShape);
 DEFINE_SPTR(btBoxShape);
 DEFINE_SPTR(btCylinderShape);
+DEFINE_SPTR(btConeShape);
+DEFINE_SPTR(btCapsuleShape);
 DEFINE_SPTR(btManifoldPoint);
 DEFINE_SPTR(btStaticPlaneShape);
 DEFINE_SPTR(btSphereShape);
@@ -38,6 +40,13 @@ DEFINE_SPTR(btBvhTriangleMeshShape);
 DEFINE_SPTR(btSiconosMeshData);
 // extension of btHeightfieldTerrainShape used in Siconos to store height data
 DEFINE_SPTR(btSiconosHeightData);
+
+
+DEFINE_SPTR(btBox2dShape);
+DEFINE_SPTR(btConvex2dShape);
+DEFINE_SPTR(btConvexShape);
+
+
 
 DEFINE_SPTR(btCollisionObject);
 DEFINE_SAPTR(btCollisionObject);
@@ -53,7 +62,7 @@ DEFINE_SPTR(btPersistentManifold);
 DEFINE_SPTR(btBroadphaseInterface);
 
 //DEFINE_SPTR(BulletR);
-//DEFINE_SPTR(BulletFrom1DLocalFrameR);
+//DEFINE_SPTR(Bullet1DR);
 DEFINE_SPTR(CollisionObjects);
 DEFINE_SPTR_STRUCT(StaticObjects);
 

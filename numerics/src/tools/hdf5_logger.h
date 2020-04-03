@@ -27,12 +27,15 @@
 #ifndef HDF5_LOGGER_H
 #define HDF5_LOGGER_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stddef.h>
-
-#include "NumericsMatrix.h"
-#include "sn_logger.h"
+#ifndef __cplusplus
+#include <stdbool.h>        // for bool
+#endif
+#include <stddef.h>         // for size_t, ptrdiff_t
+#include <stdint.h>         // for int32_t, int64_t, uint64_t
+#include "CSparseMatrix.h"  // for CSparseMatrix, cs
+#include "NumericsFwd.h"    // for NumericsMatrix
+#include "sn_logger.h"      // for SN_loglevels, SN_LOGLEVEL_NO
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #ifdef WITH_HDF5
 #include <hdf5.h>

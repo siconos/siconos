@@ -31,7 +31,7 @@ struct SiconosVectorIteratorTypeTpl
 {
   V* v;
   size_t p;
-  SiconosVectorIteratorTypeTpl() : v(0), p(0) {};
+  SiconosVectorIteratorTypeTpl() : v(nullptr), p(0) {};
   SiconosVectorIteratorTypeTpl(V& _v, size_t _p) : v(&_v), p(_p) {};
   bool operator!=(const SiconosVectorIteratorTypeTpl& it)
     { return v != it.v || p != it.p; }

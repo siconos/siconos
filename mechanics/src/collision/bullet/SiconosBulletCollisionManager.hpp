@@ -35,10 +35,24 @@
 
 DEFINE_SPTR(SiconosBulletCollisionManager_impl);
 
+
+enum SiconosBulletDimension
+{
+  SICONOS_BULLET_3D=0,
+  SICONOS_BULLET_2D=1
+};
+
 struct SiconosBulletOptions
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletOptions);
+
+public:
   SiconosBulletOptions();
 
+  int dimension;
   double contactBreakingThreshold;
   double contactProcessingThreshold;
   double worldScale;
@@ -52,6 +66,12 @@ struct SiconosBulletOptions
 
 struct SiconosBulletStatistics
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletStatistics);
+
+public:
   SiconosBulletStatistics()
     : new_interactions_created(0)
     , existing_interactions_processed(0)
@@ -65,7 +85,12 @@ struct SiconosBulletStatistics
 class SiconosBulletCollisionManager : public SiconosCollisionManager
 {
 protected:
-  SP::SiconosBulletCollisionManager_impl impl;
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletCollisionManager);
+
+protected:
+  SP::SiconosBulletCollisionManager_impl _impl;
 
   void initialize_impl();
 
@@ -79,14 +104,33 @@ public:
   virtual ~SiconosBulletCollisionManager();
 
 protected:
+  bool _with_equality_constraints;
   SiconosBulletOptions _options;
   SiconosBulletStatistics _stats;
 
   /** Provided so that creation of collision points can be overridden.
    * See modify_normals.py in examples/Mechanics/Hacks */
-  virtual SP::BulletR makeBulletR(SP::BodyDS ds1, SP::SiconosShape shape1,
-                                  SP::BodyDS ds2, SP::SiconosShape shape2,
+  virtual SP::BulletR makeBulletR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
+                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
                                   const btManifoldPoint &);
+  
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet5DR makeBullet5DR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
+                                      SP::RigidBodyDS ds2, SP::SiconosShape shape2,
+                                      const btManifoldPoint &);
+
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet2dR makeBullet2dR(SP::RigidBody2dDS ds1, SP::SiconosShape shape1,
+                                      SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
+                                      const btManifoldPoint &);
+
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet2d3DR makeBullet2d3DR(SP::RigidBody2dDS ds1, SP::SiconosShape shape1,
+                                          SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
+                                          const btManifoldPoint &);
 
 public:
   StaticContactorSetID insertStaticContactorSet(
@@ -94,7 +138,8 @@ public:
 
   bool removeStaticContactorSet(StaticContactorSetID id);
 
-  void removeBody(const SP::BodyDS& body);
+  void removeBody(const SP::RigidBodyDS& body);
+  void removeBody(const SP::RigidBody2dDS& body);
 
   void updateInteractions(SP::Simulation simulation);
 
@@ -107,6 +152,15 @@ public:
   const SiconosBulletOptions &options() const { return _options; }
   const SiconosBulletStatistics &statistics() const { return _stats; }
   void resetStatistics() { _stats = SiconosBulletStatistics(); }
+
+  /** Set the usage of equality constraints. When the number
+      of objects is huge as in granular material, the usage
+      of equality constraint breaks scalability.
+      This have to be fixed.
+   * \param choice a boolean, default is True.
+   */
+  void useEqualityConstraints(bool choice=true)
+  { _with_equality_constraints = choice; };
 };
 
 #endif /* SiconosBulletCollisionManager.hpp */

@@ -15,17 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "fc3d_Solvers.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "Friction_cst.h"
-#include "op3x3.h"
-#include "SiconosBlas.h"
-#include "AlartCurnierGenerated.h"
-#include "NumericsVector.h"
+#include <assert.h>                                    // for assert
+#include <math.h>                                      // for sqrt
+#include "FrictionContactProblem.h"                    // for FrictionContac...
+#include "NumericsFwd.h"                               // for FrictionContac...
+#include "NumericsMatrix.h"                            // for NumericsMatrix
+#include "debug.h"                                     // for DEBUG_PRINTF
+#include "fc3d_AlartCurnier_functions.h"               // for computeAlartCu...
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
+#include "numerics_verbose.h"                          // for numerics_printf
+#include "op3x3.h"                                     // for SET3, eig_3x3
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -36,10 +35,6 @@ extern computeNonsmoothFunction Function;
 /* #define AC_Generated */
 /* #define AC_JeanMoreau  Christensen & Pang */
 
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
 
 /*Static variables */
 /* Local problem operators */
@@ -353,7 +348,7 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
   RV = sqrt(RVT * RVT + RVS * RVS);
   //Radius = mu*R[0];
 
-  if (A)
+  if(A)
   {
     A[0 + 3 * 1] = 0.;
     A[0 + 3 * 2] = 0.;
@@ -361,7 +356,7 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
     A[2 + 3 * 0] = 0.;
   }
 
-  if (B)
+  if(B)
   {
     B[0 + 3 * 1] = 0.;
     B[0 + 3 * 2] = 0.;
@@ -369,16 +364,12 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
     B[2 + 3 * 0] = 0.;
   }
 
-  if (RVN >= 0.0)
+  if(RVN >= 0.0)
   {
-#ifdef VERBOSE_DEBUG
-    printf("Normal part in the cone\n");
-#endif
-
-
+    DEBUG_PRINT("Normal part in the cone\n");
     Radius = mu * RVN;
     F[0] = RhoN * (velocity[0]);
-    if (A && B)
+    if(A && B)
     {
       A[0 + 3 * 0] =  RhoN;
       B[0 + 3 * 0] = 0.0;
@@ -386,12 +377,10 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
   }
   else
   {
-#ifdef VERBOSE_DEBUG
-    printf("Normal part out the cone\n");
-#endif
+    DEBUG_PRINT("Normal part out the cone\n");
     Radius = 0.0;
     F[0] = R[0];
-    if (A && B)
+    if(A && B)
     {
       A[0 + 3 * 0] = 0.0;
       B[0 + 3 * 0] = 1.0;
@@ -401,18 +390,15 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
   // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
 
 
-#ifdef VERBOSE_DEBUG
-  printf("Radius=%le\n", Radius);
-  printf("RV=%le\n", RV);
-#endif
-  if (RV <= Radius) // We are in the disk and Radius is positive
+  DEBUG_PRINTF("Radius=%le\n", Radius);
+  DEBUG_PRINTF("RV=%le\n", RV);
+
+  if(RV <= Radius)  // We are in the disk and Radius is positive
   {
-#ifdef VERBOSE_DEBUG
-    printf("We are in the disk\n");
-#endif
+    DEBUG_PRINT("We are in the disk\n");
     F[1] = RhoT * (velocity[1]);
     F[2] = RhoT * (velocity[2]);
-    if (A && B)
+    if(A && B)
     {
       A[1 + 3 * 1] = RhoT;
       A[1 + 3 * 2] = 0.0;
@@ -426,18 +412,16 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
       B[2 + 3 * 2] = 0.0;
     }
   }
-  else if (RV > Radius) // We are out the disk and Radius is postive
+  else if(RV > Radius)  // We are out the disk and Radius is postive
   {
 
-    if (Radius > 0)
+    if(Radius > 0)
     {
-#ifdef VERBOSE_DEBUG
-      printf("We are out the disk and Radius is positive\n");
-#endif
+      DEBUG_PRINT("We are out the disk and Radius is positive\n");
       RV1 = 1.0 / RV;
       F[1] = R[1] - Radius * RVT * RV1;
       F[2] = R[2] - Radius * RVS * RV1;
-      if (A && B)
+      if(A && B)
       {
         RV3 = RV1 * RV1 * RV1;
         GammaTT = RV1 - RVT * RVT * RV3;
@@ -469,13 +453,11 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
     }
     else
     {
-#ifdef VERBOSE_DEBUG
-      printf("We are out the disk and Radius is zero\n");
-#endif
+      DEBUG_PRINT("We are out the disk and Radius is zero\n");
 
       F[1] = R[1] ;
       F[2] = R[2] ;
-      if (A && B)
+      if(A && B)
       {
         A[1 + 3 * 1] = 0.0;
         A[1 + 3 * 2] = 0.0;
@@ -515,45 +497,28 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
   /*    B[2+3*2]=1.0;} */
   /*     } */
 
-#ifdef VERBOSE_DEBUG
-  printf("F[0] = %le\t", F[0]);
-  printf("F[1] = %le\t", F[1]);
-  printf("F[2] = %le\n", F[2]);
+  DEBUG_PRINTF("F[0] = %le\t", F[0]);
+  DEBUG_PRINTF("F[1] = %le\t", F[1]);
+  DEBUG_PRINTF("F[2] = %le\n", F[2]);
 
-  if (A && B)
-  {
-    for (int l = 0; l < 3; l++)
+  DEBUG_EXPR(if(A) NM_dense_display(A, 3, 3, 3););
+  DEBUG_EXPR(if(B) NM_dense_display(B, 3, 3, 3););
+  DEBUG_EXPR(
+    if(B)
+{
+  double diago = 0.0;
+  for(int l = 0; l < 3; l++)
     {
-      for (int k = 0; k < 3; k++)
+      for(int k = 0; k < 3; k++)
       {
-        printf("A[%i+3*%i] = %le\t", l, k, A[l + 3 * k]);
-      }
-      printf("\n");
-    }
-    for (int l = 0; l < 3; l++)
-    {
-      for (int k = 0; k < 3; k++)
-      {
-        printf("B[%i+3*%i] = %le\t", l, k, B[l + 3 * k]);
-      }
-      printf("\n");
-    }
-    double diago = 0.0;
-    for (int l = 0; l < 3; l++)
-    {
-      for (int k = 0; k < 3; k++)
-      {
-        if (k == l)  diago = 1.0;
+        if(k == l)  diago = 1.0;
         else diago = 0.0;
         printf("I-B[%i+3*%i] = %le\t", l, k, diago - B[l + 3 * k]);
       }
       printf("\n");
     }
   }
-#endif
-
-
-
+  );
 }
 
 
@@ -561,7 +526,7 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
 void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
 {
   DEBUG_PRINT("computeAlartCurnierSTD starts\n");
-  DEBUG_EXPR_WE(for (int i =0 ; i < 3; i++)printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",i,R[i],i,velocity[i]););
+  DEBUG_EXPR_WE(for(int i =0 ; i < 3; i++)printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",i,R[i],i,velocity[i]););
 
   SET3(R);
   SET3(velocity);
@@ -582,7 +547,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   RV = sqrt(RVT * RVT + RVS * RVS);
   //Radius = mu*R[0];
 
-  if (A00)
+  if(A00)
   {
     // always true
     *A01 = 0.;
@@ -593,7 +558,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
     *A20 = 0.;
   }
 
-  if (B00)
+  if(B00)
   {
     // always true
     *B01 = 0.;
@@ -604,13 +569,13 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
     *B20 = 0.;
   }
 
-  if (RVN > 0.0)
+  if(RVN > 0.0)
   {
     DEBUG_PRINT("Normal part in the cone\n");
 
     Radius = mu * RVN;
     *F0 = RhoN * *velocity0;
-    if (A00 && B00)
+    if(A00 && B00)
     {
       *A00 =  RhoN;
       *B00 = 0.0;
@@ -621,7 +586,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
     DEBUG_PRINT("Normal part out the cone\n");
     Radius = 0.0;
     *F0 = *R0;
-    if (A00 && B00)
+    if(A00 && B00)
     {
       *A00 = 0.0;
       *B00 = 1.0;
@@ -634,14 +599,14 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   DEBUG_PRINTF("Radius=%le\n", Radius);
   DEBUG_PRINTF("RV=%le\n", RV);
 
-  if (RV <= Radius) // We are in the disk and Radius is positive
+  if(RV <= Radius)  // We are in the disk and Radius is positive
   {
 
     DEBUG_PRINT("We are in the disk\n");
 
     *F1 = RhoT * *velocity1;
     *F2 = RhoT * *velocity2;
-    if (A00 && B00)
+    if(A00 && B00)
     {
       *A11 = RhoT;
       *A12 = 0.0;
@@ -655,17 +620,17 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
       *B22 = 0.0;
     }
   }
-  else if (RV > Radius) // We are out the disk and Radius is positive
+  else if(RV > Radius)  // We are out the disk and Radius is positive
   {
 
-    if (Radius > 0)
+    if(Radius > 0)
     {
 
       DEBUG_PRINT("We are out the disk and Radius is positive\n");
       RV1 = 1.0 / RV;
       *F1 = *R1 - Radius * RVT * RV1;
       *F2 = *R2 - Radius * RVS * RV1;
-      if (A00 && B00)
+      if(A00 && B00)
       {
         RV3 = RV1 * RV1 * RV1;
         GammaTT = RV1 - RVT * RVT * RV3;
@@ -704,7 +669,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
 
       *F1 = *R1 ;
       *F2 = *R2 ;
-      if (A00 && B00)
+      if(A00 && B00)
       {
         *A11 = 0.0;
         *A12 = 0.0;
@@ -721,67 +686,6 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
     }
 
   }
-  /*   else // We are out the disk and Radius is negative */
-  /*     { */
-  /* #ifdef VERBOSE_DEBUG */
-  /*       printf("We are out the disk and Radius is negative\n"); */
-  /* #endif */
-
-  /*       /\*Version original *\/ */
-  /*       F[1] = R[1] ; */
-  /*       F[2] = R[2] ; */
-  /*       if (A && B){ */
-  /*    A[1+3*1]=0.0; */
-  /*    A[1+3*2]=0.0; */
-  /*    A[2+3*1]=0.0; */
-  /*    A[2+3*2]=0.0; */
-
-  /*    B[1+3*0]=0.0; */
-  /*    B[1+3*1]=1.0; */
-  /*    B[1+3*2]=0.0; */
-  /*    B[2+3*0]=0.0; */
-  /*    B[2+3*1]=0.0; */
-  /*    B[2+3*2]=1.0;} */
-  /*     }
-
-  #ifdef VERBOSE_DEBUG
-  printf("F[0] = %le\t", F[0]);
-  printf("F[1] = %le\t", F[1]);
-  printf("F[2] = %le\n", F[2]);
-
-  if (A && B)
-  {
-    for (int l=0; l<3; l++)
-    {
-      for (int k=0; k<3; k++)
-      {
-        printf("A[%i+3*%i] = %le\t", l,k, A[l+3*k]);
-      }
-      printf("\n");
-    }
-    for (int l=0; l<3; l++)
-    {
-      for (int k=0; k<3; k++)
-      {
-        printf("B[%i+3*%i] = %le\t", l,k, B[l+3*k]);
-      }
-      printf("\n");
-    }
-    double diago =0.0;
-    for (int l=0; l<3; l++)
-    {
-      for (int k=0; k<3; k++)
-      {
-        if (k==l)  diago = 1.0;
-        else diago=0.0;
-        printf("I-B[%i+3*%i] = %le\t", l,k,diago- B[l+3*k]);
-      }
-      printf("\n");
-    }
-  }
-  #endif
-  */
-
 }
 
 
@@ -802,11 +706,11 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 
   // Compute the value of the Alart--Curnier Function and its gradient for the normal part
   DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - RVN = %e\n", RVN);
-  if (RVN >= 0.0)
+  if(RVN >= 0.0)
   {
     DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - Normal part in the cone\n");
     F[0] = RhoN * (velocity[0]);
-    if (A && B)
+    if(A && B)
     {
       A[0 + 3 * 0] =  RhoN;
       B[0 + 3 * 0] = 0.0;
@@ -816,7 +720,7 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
   {
     DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - Normal part out the cone\n");
     F[0] = R[0];
-    if (A && B)
+    if(A && B)
     {
       A[0 + 3 * 0] = 0.0;
       B[0 + 3 * 0] = 1.0;
@@ -827,14 +731,14 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 
   DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - Radius=%le\n", Radius);
   DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - RV=%le\n", RV);
-  if (RV < Radius || RV < 1e-20)  // We are in the disk
+  if(RV < Radius || RV < 1e-20)   // We are in the disk
   {
 
     DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - We are in the disk \n");
 
     F[1] = RhoT * (velocity[1]);
     F[2] = RhoT * (velocity[2]);
-    if (A && B)
+    if(A && B)
     {
       A[1 + 3 * 1] = RhoT;
       A[1 + 3 * 2] = 0.0;
@@ -867,7 +771,7 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
     RV1 = 1.0 / RV;
     F[1] = R[1] - Radius * RVT * RV1;
     F[2] = R[2] - Radius * RVS * RV1;
-    if (A && B)
+    if(A && B)
     {
       RV3 = RV1 * RV1 * RV1;
       GammaTT = RV1 - RVT * RVT * RV3;
@@ -900,44 +804,9 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 
   DEBUG_EXPR(NV_display(F,3););
 
-  DEBUG_EXPR(if (A && B)
-             {
-               NV_display(A,9);
-               NV_display(B,9);
-             }
-    );
+  DEBUG_EXPR(if(A) NM_dense_display(A, 3, 3, 3););
+  DEBUG_EXPR(if(B) NM_dense_display(B, 3, 3, 3););
 
-
-
-#ifdef VERBOSE_DEBUG
-
-
-
-
-  printf("F[0] = %le\n", F[0]);
-  printf("F[1] = %le\n", F[1]);
-  printf("F[2] = %le\n", F[2]);
-  if (A && B)
-  {
-    for (int l = 0; l < 3; l++)
-    {
-      for (int k = 0; k < 3; k++)
-      {
-        printf("A[%i+3*%i] = %le\t", l, k, A[l + 3 * k]);
-      }
-      printf("\n");
-    }
-    for (int l = 0; l < 3; l++)
-    {
-      for (int k = 0; k < 3; k++)
-      {
-        printf("B[%i+3*%i] = %le\t", l, k, B[l + 3 * k]);
-      }
-      printf("\n");
-    }
-  }
-
-#endif
 }
 
 
@@ -951,7 +820,7 @@ void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, 
 
   double dw = sw * sw - 4.0 * (sw -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
   DEBUG_PRINTF("dw = %e\n",dw);
-  if (dw > 0.0) dw = sqrt(dw);
+  if(dw > 0.0) dw = sqrt(dw);
   else dw = 0.0;
 
   rho[0] = 1.0 / MLocal[0 + 0 * 3];
@@ -980,7 +849,7 @@ void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, doubl
 
   double dw = sw * sw - 4.0 * (sw -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
   DEBUG_PRINTF("dw = %e\n",dw);
-  if (dw > 0.0) dw = sqrt(dw);
+  if(dw > 0.0) dw = sqrt(dw);
   else dw = 0.0;
 
   rho[0] = 1.0 / MLocal[0 + 0 * 3];
@@ -1006,8 +875,8 @@ void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double * rh
   double * MLocal = localproblem->M->matrix0;
   double worktmp[9] = {0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0};
   double eig[3]= {0.0, 0.0, 0.0};
-  int info_eig;
-  info_eig = eig_3x3(MLocal, worktmp, eig);
+  if(eig_3x3(MLocal, worktmp, eig))
+    numerics_printf("compute_rho_spectral_norm : failed");
   DEBUG_PRINTF("eig[0] = %4.2e, eig[1] = %4.2e, eig[2] = %4.2e", eig[0], eig[1], eig[2]);
   DEBUG_PRINTF("1/eig[0] = %4.2e, 1/eig[1] = %4.2e, 1/eig[2] = %4.2e", 1.0/eig[0], 1.0/eig[1], 1.0/eig[2]);
   rho[0]=1.0/eig[0];
@@ -1019,4 +888,3 @@ void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double * rh
   DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
 
 }
-

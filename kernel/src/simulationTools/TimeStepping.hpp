@@ -148,6 +148,11 @@ public:
    */
   TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb =0);
 
+  /** insert an Integrator into the simulation list of integrators
+   *  \param osi the OneStepIntegrator to add
+   */
+  virtual void insertIntegrator(SP::OneStepIntegrator osi);
+
   /** Destructor.
   */
   virtual ~TimeStepping();
@@ -240,16 +245,28 @@ public:
   {
     return _isNewtonConverge;
   };
-
+  
+  bool displayNewtonConvergence()
+  {
+    return _displayNewtonConvergence;
+  };
   void setDisplayNewtonConvergence(bool newval)
   {
     _displayNewtonConvergence = newval;
   };
+  
   void setWarnOnNonConvergence(bool newval)
   {
     _warnOnNonConvergence = newval;
   };
-
+  bool warnOnNonConvergence()
+  {
+    return _warnOnNonConvergence;
+  };
+  void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
+  
+  void displayNewtonConvergenceInTheLoop();
+  
   void setResetAllLambda(bool newval)
   {
     _resetAllLambda = newval;
@@ -317,8 +334,9 @@ public:
   /** get the maximum number of Newton iteration
    *  \return maximum number of Newton solver iterations
    */
-  double newtonMaxIteration()
+  unsigned int newtonMaxIteration()
   {
+
     return _newtonMaxIteration;
   };
 

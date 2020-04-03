@@ -16,166 +16,101 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_EG, SICO...
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "VI_cst.h"                      // for SICONOS_VI_DPARAM_RHO, SICON...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  *number_of_tests = 8; //n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  int n =0;
-  int e=0;
+  int current = 0;
+  int d;
+  // ========== FC3D_Example1_SBM.dat ========
+  d = 0;
+  // rho = -1
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -1.;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  current++;
 
-  int d=2;/* "./data/Confeti-ex13-4contact-Fc3D-SBM.dat"; */
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_EG);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "-3e-3";
-  test_nsgs[n][e++] = "---";
-  n++;
+  // rho = 1
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = 1.;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  current++;
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_EG);
-  test_nsgs[n][e++] = "1e-10";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "-1.0";
-  test_nsgs[n][e++] = "---";
-  n++;
+  // ========== Confeti-ex13-4contact-Fc3D-SBM.dat ========
+  d = 2;
+  // EG, rho = -3e-3
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -3.e-3;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
-
-
-  d=0;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_EG);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "-1.0";
-  test_nsgs[n][e++] = "---";
-  n++;
+  // EG, rho = -1
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -1;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  current++;
 
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_EG);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "1.0";
-  test_nsgs[n][e++] = "---";
-  n++;
+  // HP
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_HP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // ========== Capsules-i101-404.dat ========
+  d = 6;
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_VI_FPP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000000;
+  collection[current].options->iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 1;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_FPP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
 
-  d=2;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_HP);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "1000";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "2";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "2";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "-10.0";
-  test_nsgs[n][e++] = "---";
-  test_nsgs[n][e++] = "---";
-  n++;
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_VI_EG);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+  collection[current].options->iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 1;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
 
-  d=6;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_VI_FPP);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "100000";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "2";
-  test_nsgs[n][e++] = "1";  
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_FPP);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "100000";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_VI_EG);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "100000";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "2";
-  test_nsgs[n][e++] = "1";  
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  *number_of_tests = current;
+  return collection;
 
 }

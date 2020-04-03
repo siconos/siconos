@@ -51,7 +51,7 @@
  * the system.
  *
  */
-class Topology : public std11::enable_shared_from_this<Topology>
+class Topology : public std::enable_shared_from_this<Topology>
 {
 
 private:
@@ -59,8 +59,6 @@ private:
   */
   ACCEPT_SERIALIZATION(Topology);
 
-
-  // --- MEMBERS ---
   /** dynamical systems graphs */
   std::vector<SP::DynamicalSystemsGraph> _DSG;
 
@@ -69,14 +67,14 @@ private:
   std::vector<SP::InteractionsGraph> _IG;
 
   /** check if topology is static or  not */
-  bool _hasChanged;
+  bool _hasChanged = true;
 
   /** Total number of (scalar) constraints in the problem, ie sum of
       all nslaw sizes of Interactions of IndexSet0.*/
-  unsigned int _numberOfConstraints;
+  unsigned int _numberOfConstraints = 0;
 
   /** symmetry in the blocks computation */
-  bool _symmetric;
+  bool _symmetric = false;
 
   /** initializations ( time invariance) from non
       smooth laws kind */
@@ -106,17 +104,19 @@ private:
    */
   void __removeDynamicalSystemFromIndexSet(SP::DynamicalSystem ds);
 
+  /* forbid copy and assignment */
+  Topology(const Topology&) = delete;
+  Topology& operator=(const Topology&) = delete;
+  
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
-  /** default constructor
-  */
+  /** default constructor */
   Topology();
 
   /** destructor */
   ~Topology();
-
 
   // === GETTERS/SETTERS ===
 
@@ -131,7 +131,7 @@ public:
    *  \return true if inter is in the graph
    */
   bool hasInteraction(SP::Interaction inter) const;
-  
+
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Interactions Graph.
    *  The interaction is not removed from actives subgraphs : see updateIndexSet
@@ -218,15 +218,7 @@ public:
    * \param num the number of indexSet
    * \return a SP::InteractionsGraph
    */
-  inline SP::InteractionsGraph indexSet(unsigned int num) const
-  {
-    if (num >= _IG.size())
-    {
-      RuntimeException::selfThrow("Topology::indexSet: indexSet does not exist");
-    }
-    assert(num < _IG.size()) ;
-    return _IG[num];
-  };
+  SP::InteractionsGraph indexSet(unsigned int num) const;
 
   /** get a pointer to the graph at level num of Interactions
    *  \return a SP::InteractionsGraph
@@ -338,6 +330,10 @@ public:
    * \return a DynamicalSystem
    */
   SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber) const;
+
+  /** list and display all dynamical systems
+   */
+  void displayDynamicalSystems() const;
 
   /** Get a dynamical system using its name
    *  \warning O(n) complexity

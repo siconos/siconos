@@ -291,7 +291,7 @@
 #define set_existing_dense_mat_from_target(dest, src, dim0, dim1, FAILED_ACTION) \
 { \
   if (CHECK_ARRAY_MATRIX((SN_ARRAY_TYPE*)src)) { SWIG_Error(SWIG_RuntimeError, "object is not a matrix"); FAILED_ACTION; } \
-  sn_check_size_mat(dim0, dim1, (SN_ARRAY_TYPE*)src, FAILED_ACTION); \
+  sn_check_size_mat(dim0, dim1, (SN_ARRAY_TYPE*)src, FAILED_ACTION);    \
   if (!dest) { SWIG_Error(SWIG_RuntimeError, "destination (dense) matrix is not allocated"); FAILED_ACTION; } \
-  memcpy(dest, array_data((SN_ARRAY_TYPE*)src), dim0 * dim1 * sizeof(double)); \
+  memcpy(dest, array_data((SN_ARRAY_TYPE*)src), dim0 * dim1 * sizeof(double));\
 }

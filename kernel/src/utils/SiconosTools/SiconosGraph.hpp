@@ -19,7 +19,7 @@
 /*! \file SiconosGraph.hpp
   Template class to define a graph of Siconos object.
 
-  Note: this need documentation
+  Note: this needs documentation
 
 */
 
@@ -30,53 +30,23 @@
 #define BOOST_NO_HASH
 #endif
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable"
-#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
-#endif
-
 #include <boost/config.hpp>
 #include <boost/version.hpp>
 
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
+#if !defined(SICONOS_USE_MAP_FOR_HASH)
 #include <unordered_map>
 #else
 #include <map>
 #endif
 
 #include <limits>
-
-/* gccxml 0.9 complains about ambiguous usage of size_t or std::size_t
- * in some boost headers, so we specify which one we want. It seems
- * that there is no difference anyway:
- * http://stackoverflow.com/questions/5813700/difference-between-size-t-and-stdsize-t */
-using std::size_t;
-
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_concepts.hpp>
 #include <boost/graph/directed_graph.hpp>
-
-#if (BOOST_VERSION >= 104000)
 #include <boost/property_map/property_map.hpp>
-#else
-#include <boost/property_map.hpp>
-#endif
-
 #include <boost/static_assert.hpp>
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-
-#if defined(SICONOS_STD_TUPLE) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
-namespace std11 = std;
-#else
-namespace std11 = boost;
-#endif
-
 #include "SiconosSerialization.hpp"
 
 enum vertex_properties_t { vertex_properties };
@@ -91,11 +61,13 @@ enum edge_siconos_bundle_t { edge_siconos_bundle };
 
 namespace boost
 {
-BOOST_INSTALL_PROPERTY(vertex, properties);
-BOOST_INSTALL_PROPERTY(edge, properties);
-BOOST_INSTALL_PROPERTY(graph, properties);
-BOOST_INSTALL_PROPERTY(vertex, siconos_bundle);
-BOOST_INSTALL_PROPERTY(edge, siconos_bundle);
+  using std::size_t;
+
+  BOOST_INSTALL_PROPERTY(vertex, properties);
+  BOOST_INSTALL_PROPERTY(edge, properties);
+  BOOST_INSTALL_PROPERTY(graph, properties);
+  BOOST_INSTALL_PROPERTY(vertex, siconos_bundle);
+  BOOST_INSTALL_PROPERTY(edge, siconos_bundle);
 }
 
 
@@ -193,7 +165,7 @@ public:
   //  typedef typename
   //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
-#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
+#if !defined(SICONOS_USE_MAP_FOR_HASH)
   typedef typename std::unordered_map<V, VDescriptor> VMap;
 #else
   typedef typename std::map<V, VDescriptor> VMap;
@@ -248,12 +220,12 @@ public:
   {
     bool ret = false;
     EDescriptor tmped;
-    std11::tie(tmped, ret) = edge(vd1, vd2);
+    std::tie(tmped, ret) = edge(vd1, vd2);
 
 #ifndef NDEBUG
     bool check_ret = false;
     AVIterator avi, aviend;
-    for (std11::tie(avi, aviend) = adjacent_vertices(vd1);
+    for (std::tie(avi, aviend) = adjacent_vertices(vd1);
          avi != aviend; ++avi)
     {
       if (*avi == vd2)
@@ -285,7 +257,7 @@ public:
     bool ifirst = false;
     bool isecond = false;
     EDescriptor first, second;
-    for (std11::tie(oei, oeiend) = out_edges(u); oei != oeiend; ++oei)
+    for (std::tie(oei, oeiend) = out_edges(u); oei != oeiend; ++oei)
     {
       if (target(*oei) == v)
       {
@@ -330,7 +302,7 @@ public:
   {
     bool found = false;
     OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = out_edges(vd1);
+    for (std::tie(oei, oeiend) = out_edges(vd1);
          oei != oeiend; ++oei)
     {
       if (target(*oei) == vd2 && bundle(*oei) == e_bundle)
@@ -346,7 +318,7 @@ public:
   {
     bool ret = false;
     VIterator vi, viend;
-    for (std11::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (std::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
@@ -478,14 +450,14 @@ public:
   inline VIterator begin() const
   {
     VIterator vi, viend;
-    std11::tie(vi, viend) = vertices();
+    std::tie(vi, viend) = vertices();
     return vi;
   }
 
   inline VIterator end() const
   {
     VIterator vi, viend;
-    std11::tie(vi, viend) = vertices();
+    std::tie(vi, viend) = vertices();
     return viend;
   }
 
@@ -571,7 +543,7 @@ public:
 
     // edges copy as in boost::subgraph
     typename G::OEIterator ogoei, ogoeiend;
-    for (std11::tie(ogoei, ogoeiend) =
+    for (std::tie(ogoei, ogoeiend) =
            og.out_edges(og.descriptor(vertex_bundle));
          ogoei != ogoeiend; ++ogoei)
     {
@@ -647,7 +619,7 @@ public:
 
     assert(!is_edge(vd1, vd2, e_bundle));
 
-    std11::tie(new_edge, inserted) = boost::add_edge(vd1, vd2, g);
+    std::tie(new_edge, inserted) = boost::add_edge(vd1, vd2, g);
 
     // During a gdb session, I saw that inserted is always going to be true ...
     // This check is therefore unnecessary.
@@ -705,7 +677,7 @@ public:
 
       if (vdx == vd2) endl = true;
 
-#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
+#if !defined(SICONOS_USE_MAP_FOR_HASH)
       std::unordered_map<E, EDescriptor> Edone;
 #else
       std::map<E, EDescriptor> Edone;
@@ -713,7 +685,7 @@ public:
 
 
       OEIterator ied, iedend;
-      for (std11::tie(ied, iedend) = out_edges(vdx);
+      for (std::tie(ied, iedend) = out_edges(vdx);
            ied != iedend; ++ied)
       {
         if (Edone.find(bundle(*ied)) == Edone.end())
@@ -807,7 +779,7 @@ public:
        multiset allows for member removal without invalidating iterators
 
         OEIterator oei,oeiend;
-        for(std11::tie(oei,oeiend)=out_edges(vd); oei!=oeiend; ++oei)
+        for(std::tie(oei,oeiend)=out_edges(vd); oei!=oeiend; ++oei)
         {
           if (pred(*oei))
           {
@@ -872,7 +844,7 @@ public:
   {
     VIterator vi, viend;
     size_t i;
-    for (std11::tie(vi, viend) = boost::vertices(g), i = 0;
+    for (std::tie(vi, viend) = boost::vertices(g), i = 0;
          vi != viend; ++vi, ++i)
     {
       index(*vi) = i;
@@ -884,7 +856,7 @@ public:
   {
     EIterator ei, eiend;
     size_t i;
-    for (std11::tie(ei, eiend) = boost::edges(g), i = 0;
+    for (std::tie(ei, eiend) = boost::edges(g), i = 0;
          ei != eiend; ++ei, ++i)
     {
       index(*ei) = i;
@@ -909,7 +881,7 @@ public:
         
     std::cout << "edges number :" << edges_number() << std::endl;
     VIterator vi, viend;
-    for (std11::tie(vi, viend) = vertices();
+    for (std::tie(vi, viend) = vertices();
          vi != viend; ++vi)
     {
       std::cout << "vertex :"
@@ -921,7 +893,7 @@ public:
                 << ", color : "
                 << color(*vi);
       OEIterator oei, oeiend, next;
-      for (std11::tie(oei, oeiend) = out_edges(*vi);
+      for (std::tie(oei, oeiend) = out_edges(*vi);
            oei != oeiend; ++oei)
       {
         std::cout << "---"
@@ -944,20 +916,20 @@ public:
   bool state_assert() const
   {
     VIterator vi, viend;
-    for (std11::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (std::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
 
       OEIterator ei, eiend;
-      for (std11::tie(ei, eiend) = out_edges(*vi);
+      for (std::tie(ei, eiend) = out_edges(*vi);
            ei != eiend; ++ei)
       {
         assert(is_vertex(bundle(target(*ei))));
         assert(source(*ei) == *vi);
       }
       AVIterator avi, aviend;
-      for (std11::tie(avi, aviend) = adjacent_vertices(*vi);
+      for (std::tie(avi, aviend) = adjacent_vertices(*vi);
            avi != aviend; ++avi)
       {
         assert(is_vertex(bundle(*avi)));
@@ -972,13 +944,13 @@ public:
   {
 
     VIterator vi, viend;
-    for (std11::tie(vi, viend) = vertices(); vi != viend; ++vi)
+    for (std::tie(vi, viend) = vertices(); vi != viend; ++vi)
     {
       assert(is_vertex(bundle(*vi)));
       assert(bundle(descriptor(bundle(*vi))) == bundle(*vi));
 
       AVIterator avi, aviend;
-      for (std11::tie(avi, aviend) = adjacent_vertices(*vi);
+      for (std::tie(avi, aviend) = adjacent_vertices(*vi);
            avi != aviend; ++avi)
       {
         assert(is_vertex(bundle(*avi)));

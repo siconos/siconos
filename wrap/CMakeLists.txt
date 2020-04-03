@@ -3,24 +3,30 @@
 # ============================================================
 if(WITH_PYTHON_WRAPPER)
   # Name of the generated Python package
-  set(SICONOS_PYTHON_PACKAGE ${PROJECT_NAME} CACHE INTERNAL "Name of the siconos python module.")
+  set(SICONOS_PYTHON_PACKAGE ${PROJECT_NAME} CACHE INTERNAL "Name of the Siconos python package.")
   
   # --------------- Python install setup ---------------
-  # Directory of all config files for python bindings.
   # Set path for siconos-python installation
   include(PythonInstallSetup)
   set_python_install_path()
   
   #  ----------- swig -----------
 
-  # -- Swig flags --
+  # -- Swig  preprocessor def. common to all swig targets --
+  # --> SWIG_DEFS
+  # get system architecture 
+  # https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
+  include(TargetArch)
+  target_architecture(SYSTEM_ARCHITECTURE)
+  if(WITH_SYSTEM_INFO) # User defined option, default = off
+    include(CMakePrintSystemInformation)
+    message(STATUS "SYSTEM ARCHITECTURE: ${SYSTEM_ARCHITECTURE}")
+  endif()
   if(SYSTEM_ARCHITECTURE)
     list(APPEND CMAKE_SWIG_FLAGS "-D__${SYSTEM_ARCHITECTURE}__")
   endif()
 
-  if(PYTHON_VERSION_MAJOR VERSION_GREATER 2)
-    list(APPEND CMAKE_SWIG_FLAGS "-py3")
-  endif()
+  list(APPEND CMAKE_SWIG_FLAGS "-py3")
 
   list(REMOVE_DUPLICATES CMAKE_SWIG_FLAGS)
   set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS}" CACHE INTERNAL "Swig flags")
@@ -30,7 +36,7 @@ if(WITH_PYTHON_WRAPPER)
   # protected methods needed to the interface to compile.
   # - with "dirprot" swig will attemp to wrap all the public and protected methods at once.
   set(SWIG_DEFS "-dirprot;-dirvtable;-Wextra")
-  
+
   if(WITH_FCLIB)
     set(SWIG_DEFS "${SWIG_DEFS};-DWITH_FCLIB")
   endif()
@@ -42,16 +48,16 @@ if(WITH_PYTHON_WRAPPER)
     endif()
   endif()
   # -- Swig files --
-  # i.e. .i files, common to all modules and submodules.
+  # Path to .i files, common to all modules and submodules.
   set(SICONOS_SWIG_SRC_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/swig
     CACHE INTERNAL "Path to swig files common to all packages.")
 
-  # -- Output dir --
+  # -- Output dir for python generated packages --
   set(SICONOS_SWIG_ROOT_DIR ${CMAKE_CURRENT_BINARY_DIR}/${SICONOS_PYTHON_PACKAGE}
     CACHE INTERNAL "Root path for swig outputs.")
 
   # -- include dir --
-  set(SICONOS_SWIG_INCLUDE_DIRS ${SICONOS_SWIG_SRC_DIRS} ${SICONOS_SWIG_ROOT_DIR} ${PYTHON_INCLUDE_DIRS}
+  set(SICONOS_SWIG_INCLUDE_DIRS ${SICONOS_SWIG_SRC_DIRS} ${SICONOS_SWIG_ROOT_DIR} ${Python3_INCLUDE_DIRS}
     CACHE INTERNAL "Directories required for swig includes.")
 
   foreach(_dir ${SICONOS_SWIG_INCLUDE_DIRS})
@@ -84,18 +90,7 @@ if(WITH_PYTHON_WRAPPER)
       set(EXPORT_LDLIBPATH "export ${ENV_LDLIBPATH_NAME}=\"${ENV_LDLIBPATH_PATH}\"")
     endif()
 
-    find_python_module(pytest REQUIRED)
-    # -- Runner for tests --
-    set(TESTS_RUNNER ${CMAKE_CURRENT_BINARY_DIR}/runtests.py CACHE INTERNAL "driver for python tests")
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/runtests.py.in)
-      message(STATUS "Generate runtests.py file ...")
-      configure_file(runtests.py.in ${TESTS_RUNNER})
-    endif()
-    if(WITH_AGGRESSIVE_PYTHON_TESTS)
-      set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")
-    else()
-      set(pytest_opt "-v" CACHE INTERNAL "extra options for py.test")
-    endif()
+    # -- test config--
     file(MAKE_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
     configure_file(tests_setup.py.in ${SICONOS_SWIG_ROOT_DIR}/tests_setup.py)
     configure_file(set_tests_env.sh.in set_tests_env.sh)
@@ -105,17 +100,10 @@ if(WITH_PYTHON_WRAPPER)
       COMMENT "set environment variables for python tests ...")
     # todo if we need to add some 'global' tests for siconos (not component dependent)
     # create a wrap/swig/tests dir and ...
-    #build_python_tests()
   endif()
 
   # ====== Generates python files required for build/install process ======
-  
-  set(SICONOS_PYTHON_MODULES)
-  foreach(comp ${COMPONENTS})
-    if(WITH_${comp}_PYTHON_WRAPPER)
-      set(SICONOS_PYTHON_MODULES "'${comp}', ${SICONOS_PYTHON_MODULES}")
-    endif()
-  endforeach()
+
   # setup.py --> CMAKE_BINARY_DIR
   if(EXISTS  ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in)
     message(STATUS "Generate setup.py file ...")
@@ -144,10 +132,10 @@ if(WITH_PYTHON_WRAPPER)
   add_custom_target(python-build
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py build
     COMMENT "Build ${SICONOS_PYTHON_PACKAGE} package")
-
-  IF(UNIX AND NOT APPLE)
-    LIST(APPEND python_install_options "--root=$(DESTDIR)/")
-  ENDIF(UNIX AND NOT APPLE)
+  
+  if(UNIX AND NOT APPLE)
+    list(APPEND python_install_options "--root=$(DESTDIR)/")
+  endif()
   add_custom_target(python-install
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install ${python_install_options}
     VERBATIM
@@ -163,10 +151,5 @@ if(WITH_PYTHON_WRAPPER)
     COMMENT "Clean sources and build.")
 
   # ====== conf/copy file for docstrings generation from doxygen ====
-  if(WITH_DOXY2SWIG)
-    configure_file(${CMAKE_SOURCE_DIR}/externals/swig/doxy2swig.py ${CMAKE_BINARY_DIR}/share/doxy2swig.py COPYONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/docs/sicodoxy2swig.py ${CMAKE_BINARY_DIR}/share/sicodoxy2swig.py COPYONLY)
-    
-  endif()
 
 endif()

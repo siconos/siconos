@@ -16,12 +16,15 @@
  * limitations under the License.
 */
 
-#ifndef NSSTOOLS_H
-#define NSSTOOLS_H
+#ifndef NUMERICSARRAYS_H
+#define NUMERICSARRAYS_H
 
-/*!\file NSSTools.h
+/*!\file NumericsArrays.h
   Header to collect basic tools for integer arrays
 */
+
+#include <stddef.h>  // for size_t
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #ifdef __cplusplus
 #undef restrict
@@ -56,6 +59,11 @@ extern "C"
                                        size_t n2, size_t *arr3);
   void NA_display(size_t * arr1,  size_t n1);
   
+/* swap two indices */
+  void uint_swap (unsigned int *a, unsigned int *b);
+  /* shuffle an unsigned array */
+  void uint_shuffle (unsigned int *a, unsigned int n);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

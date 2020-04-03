@@ -23,7 +23,8 @@
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
-#include "SiconosConst.hpp"
+#include "SiconosVisitor.hpp" // for VIRTUAL_ACCEPT_VISITORS
+#include "RuntimeException.hpp"
 #include "SimulationTypeDef.hpp"
 #include "OneStepIntegratorTypes.hpp"
 #include "SimulationGraphs.hpp"
@@ -48,7 +49,7 @@
  * </ul>
  *
  */
-class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator>
+class OneStepIntegrator :public std::enable_shared_from_this<OneStepIntegrator>
 {
 
 protected:
@@ -307,7 +308,7 @@ public:
    */
   virtual double computeResidu(){
     // default : error
-    RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + _integratorType);
+    RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + std::to_string(_integratorType));
     return 0.0;
   }
 
@@ -317,7 +318,7 @@ public:
   virtual void computeFreeState()
   {
     // default : error
-    RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + _integratorType);
+    RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + std::to_string(_integratorType));
   }
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
@@ -327,7 +328,7 @@ public:
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
   {
     // default : error
-    RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + _integratorType);
+    RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + std::to_string(_integratorType));
   }
 
   /** compute the residu of the output of the relation (y)

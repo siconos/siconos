@@ -142,9 +142,6 @@ protected:
   /** state of the system. See details on top of page. */
   VectorOfVectors _q;
 
-  /** initial coordinates of the system */
-  SP::SiconosVector _q0;
-
   /** initial velocity of the system */
   SP::SiconosVector _velocity0;
 
@@ -425,14 +422,6 @@ public:
    *  \param newPtr
    */
   void setQPtr(SP::SiconosVector newPtr);
-
-  /** return initial state of the system
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector q0() const
-  {
-    return _q0;
-  }
 
   /** set initial state (copy)
    *  \param newValue

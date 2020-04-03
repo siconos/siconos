@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,85 +31,74 @@
 #include "SiconosAlgebraTypeDef.hpp"
 #include <vector>
 
-/** Non-smooth interaction involving 1 or 2 Dynamical Systems.
- *
- * An interaction represents the "link" between a set of Dynamical
- * Systems.
- * The state variables and inputs of the DynamicalSystem (x,R)
- * are related to the interaction variables (y,lambda) thanks to the
- * interaction with the help of the relation
- * The interaction completed by a non-smooth law that describes the type
- * of law between y and lambda.
- *
- * Thus, the interaction main members are:
- *
- * - relation: a pointer to a Relation object that determines the type
- *   of relation and so the way it is computed. Warning: there is only
- *   one Relation object (ie only one type of relation for an
- *   interaction) but there can be several "relations", in the sense
- *   of constraints equations between (y,lambda) and (x,r).
- *
- * - nslaw: the nonsmooth law
- *
- * - the local variable y  (its size is interactionSize).
- *   STL vectors are used and y[i] usually represents the
- *   i-eme derivative of variable y.
- *
- * - the local variable lambda  (its size is interactionSize).
- *   STL vectors are used and lambda[i] represents various level
- *   of multiplier involved in the nonsmooth law with y[i]
- *
- *   y (resp, lambda) is a container of SiconosVector.
- *
+/** Description of a non-smooth interaction
+
+    The object Interaction is used to defined a "link" between one or two DynamicalSystem,
+    like unilateral constraints and some nonsmooth law (e.g. complementarity).
+
+    It holds two vectors of "local" variables, \f$y\f$ and \f$\lambda\f$
+    and their derivatives, which are related to the state variables and the inputs of the
+    DynamicalSystem (x,R) through constraints defined in a Relation and completed with
+    a NonSmoothLaw involving those variables.
+
+    Remarks:
+
+    - one and only one Relation (access: relation()) per Interaction
+    - one and only one NonSmoothLaw (access: nonSmoothLaw()) per Interaction
+    - dimension() is the size of the interaction and so the size of vectors y, lambda
+      and their derivatives.
+    - output: y(i), to get derivative i of y
+    - input: lambda(i), to get derivative i of lambda
+ 
  */
-class Interaction : public std11::enable_shared_from_this<Interaction >
+class Interaction : public std::enable_shared_from_this<Interaction >
 {
 private:
   /* serialization hooks */
   ACCEPT_SERIALIZATION(Interaction);
 
-  /** internal counter used to set interaction number */
-  static unsigned int __count;
-  
+  /* internal counter used to set interaction number */
+  static size_t __count;
+
   /** Interaction id */
-  unsigned int _number;
+  size_t _number;
 
   /** Minimum required 'level' for output y
    *  y will be initialized from
    *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
    */
-  unsigned int _lowerLevelForOutput;
+  unsigned int _lowerLevelForOutput = 0;
 
   /** Maximum required 'level' for output y
     *  y will be initialized from
     *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
     */
-  unsigned int _upperLevelForOutput;
+  unsigned int _upperLevelForOutput = 0;
 
   /** Minimum required 'level' for input lambda
    *  lambda will be initialized from
    *  lambda[_lowerLevelForIntput] to lambda[_upperLevelForInput]
    */
-  unsigned int _lowerLevelForInput;
+  unsigned int _lowerLevelForInput = 0;
 
   /** Maximum required 'level' for input lambda
    *  lambda will be initialized from
    *  lambda[_lowerLevelForIntput] to lambda[_upperLevelForInput]
    */
-  unsigned int _upperLevelForInput;
+  unsigned int _upperLevelForInput = 0;
 
   /** size of the interaction, ie size of y[i] and _lambda[i] */
-  unsigned int _interactionSize;
+  unsigned int _interactionSize = 0;
 
   /** sum of all DS sizes, for DS involved in the interaction */
-  unsigned int _sizeOfDS;
+  unsigned int _sizeOfDS = 0;
 
   /** Bool to check the number of DS concerned by this interaction
       (1 or 2 indeed)
       True if 2 DS.
       Note FP : usefull in NewtonEuler jacobians computation.
   */
-  bool _has2Bodies;
+  bool _has2Bodies = false;
 
   /** relation between constrained variables and states variables
    * vector of output derivatives
@@ -132,8 +121,6 @@ private:
   /** memory of previous coordinates of the system */
   VectorOfMemories _lambdaMemory;
 
-
-
   /** result of the computeInput function */
   VectorOfVectors _lambda;
 
@@ -149,7 +136,6 @@ private:
   /** the type of Relation of the interaction */
   SP::Relation _relation;
 
-  
   /** pointer links to DS variables needed for computation,
    *  mostly used in Relations (computeOutput and computeInput)
    * and OneStepIntegrator classes. */
@@ -162,17 +148,12 @@ private:
   struct _setLevels;
   friend struct Interaction::_setLevels;
 
-
-
   // === PRIVATE FUNCTIONS ===
 
-  /** copy constructor => private, no copy nor pass-by-value.
-   * \param inter to copy
-   */
-  Interaction(const Interaction& inter);
-
-  /** Initialisation common to all constructors */
-  void __init();
+  /* forbid default constructor, copy and assignment */
+  Interaction(const Interaction& inter) = delete;
+  Interaction& operator=(const Interaction&) = delete;
+  Interaction() = delete;
 
   /*! @name DSlink graph property management */
   //@{
@@ -217,18 +198,13 @@ private:
   void __initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVectors& DSlink);
   ///@}
 
-protected:
-  
-  /** Default constructor. */
-  Interaction(): _number(__count++), _interactionSize(0), _sizeOfDS(0), _has2Bodies(false), _y(2){};
-
 public:
 
-  /** constructor with NonSmoothLaw and Relation (i.e. inter size == nslaw size)
-   *  \param NSL pointer to the NonSmoothLaw, the interaction size is
-   *         infered from the size of the NonSmoothLaw
-   *  \param rel a pointer to the Relation
-   */
+  /** Interaction constructor
+      \param NSL pointer object describing the nonsmooth law;
+      the interaction size if infered from the size of this law.
+      \param rel a pointer object describing the functions used to compute the constraints 
+  */
   Interaction(SP::NonSmoothLaw NSL, SP::Relation rel);
 
   /** destructor  */
@@ -274,10 +250,8 @@ public:
   void initializeMemory(unsigned int steps);
 
   // === GETTERS/SETTERS ===
-  /** get the value of number
-   *  \return the value of number
-   */
-  inline int number() const
+  /** \return the id of the interaction */
+  inline size_t number() const
   {
     return _number;
   }

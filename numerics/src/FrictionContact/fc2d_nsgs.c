@@ -16,23 +16,24 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "SiconosBlas.h"
-#include "fc2d_Solvers.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
-
+#include <float.h>                   // for DBL_EPSILON
+#include <math.h>                    // for fabs, sqrt, INFINITY
+#include <stdio.h>                   // for printf
+#include <stdlib.h>                  // for free, calloc, malloc, exit, rand
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_2D_NSGS
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_PRINTF
+#include "fc2d_Solvers.h"            // for fc2d_nsgs, fc2d_nsgs_setDefaultS...
+#include "numerics_verbose.h"        // for verbose
+#include "SiconosBlas.h"                   // for cblas_ddot, cblas_daxpy, cblas_d...
 
-void shuffle(int size, int * randnum);
-void shuffle(int size, int * randnum) //size is the given range
+static void shuffle(int size, int * randnum) //size is the given range
 {
   int i;
   int swap, randindex;
@@ -40,7 +41,7 @@ void shuffle(int size, int * randnum) //size is the given range
   /* { */
   /*  printf("Array before shuffling is : %d\n",randnum[i]); */
   /* } */
-  for (i = 0; i < size; ++i)
+  for(i = 0; i < size; ++i)
   {
     swap = randnum[i];
     randindex = rand() % size;
@@ -55,7 +56,7 @@ void shuffle(int size, int * randnum) //size is the given range
 }
 
 
-void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
+void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;
@@ -70,17 +71,17 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
   double alpha, beta;
   double *y, res = INFINITY;
   double normr, avn, avt, det, gplus, gmoins;
-  double apn, apt, zn , zt, den1, num1;
+  double apn, apt, zn, zt, den1, num1;
   double alm1;
   double aln1;
   int pivot;
   double factor1;
   int * randomContactList;
 
-  int maxit = options->iparam[0];
-  double errmax = options->dparam[0];
-  options->iparam[1]  = 0;
-  options->dparam[1]  = 0.0;
+  int maxit = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double errmax = options->dparam[SICONOS_DPARAM_TOL];
+  options->iparam[SICONOS_IPARAM_ITER_DONE]  = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU]  = 0.0;
 
   iter         = 0;
 
@@ -88,13 +89,13 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
   randomContactList = (int*) malloc(nc  * sizeof(int));
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     randomContactList[i] = i;
   }
 
 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
 
     reaction[i]  = 0.0 ;
@@ -103,11 +104,11 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
   normr    =   1.;
 
-  while ((iter < maxit) && (normr > errmax))
+  while((iter < maxit) && (normr > errmax))
   {
     iter = iter + 1 ;
 
-    if (options->iparam[2] > 0)
+    if(options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] > 0)
     {
       shuffle(nc, randomContactList);
     }
@@ -118,7 +119,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
 
 
-    for (kk = 0; kk < nc; kk++)
+    for(kk = 0; kk < nc; kk++)
     {
 
 
@@ -129,7 +130,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
       apn = 0.;
       apt = 0.;
 
-      for (j = 0; j <= 2 * i - 1; j++)
+      for(j = 0; j <= 2 * i - 1; j++)
       {
 
         avn = avn + vec[j * n + 2 * i] * reaction[j];
@@ -137,7 +138,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
       }
 
-      for (k = 2 * i + 2; k < n; k++)
+      for(k = 2 * i + 2; k < n; k++)
       {
         apn = apn + vec[k * n + 2 * i] * reaction[k];
         apt = apt + vec[k * n + 2 * i + 1] * reaction[k];
@@ -153,7 +154,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
 
 
-      if (-zn >= 0.0)
+      if(-zn >= 0.0)
       {
 
 
@@ -172,13 +173,13 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
 
         det    = vec[2 * i + 2 * i * n] * vec[(2 * i + 1) + (2 * i + 1) * n]
-          - vec[(2 * i + 1 ) + (2 * i ) * n] * vec[(2 * i) + (2 * i + 1) * n];
+                 - vec[(2 * i + 1) + (2 * i) * n] * vec[(2 * i) + (2 * i + 1) * n];
 
-        if (fabs(det) < 100* DBL_EPSILON)
+        if(fabs(det) < 100* DBL_EPSILON)
         {
-          if (verbose > 0)
+          if(verbose > 0)
           {
-            printf("--------------- FC2D - NSGS -  Warning small denominator : %g . use of partial pivoting\n", fabs(det) );
+            printf("--------------- FC2D - NSGS -  Warning small denominator : %g . use of partial pivoting\n", fabs(det));
           }
           /* free(y); */
           /* free(randomContactList); */
@@ -187,45 +188,45 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
 
           alm1 = fabs(vec[2 * i + (2 * i) * n]);
-          aln1 = fabs(vec[(2 * i +1 ) + n * (2 * i )]);
+          aln1 = fabs(vec[(2 * i +1) + n * (2 * i)]);
           pivot = alm1 >= aln1 ? 0 : 1;
-          switch (pivot)
+          switch(pivot)
           {
           case 0:
-            if (alm1 < DBL_EPSILON)
+            if(alm1 < DBL_EPSILON)
             {
               *info = 1;
               return;
             }
-            factor1 = vec[(2 * i +1 ) + n * (2 * i )]/vec[2 * i + (2 * i) * n];
+            factor1 = vec[(2 * i +1) + n * (2 * i)]/vec[2 * i + (2 * i) * n];
             reaction[2 * i + 1]  = (zt - factor1*zn)/(vec[(2 * i + 1) + n * (2 * i + 1)] - factor1*vec[2 * i + (2 * i + 1) * n]);
-            reaction[2 * i] = (zn - vec[2 * i + (2 * i + 1) * n]*reaction[2 * i + 1] )/vec[2 * i + (2 * i) * n];
+            reaction[2 * i] = (zn - vec[2 * i + (2 * i + 1) * n]*reaction[2 * i + 1])/vec[2 * i + (2 * i) * n];
             break;
           case 1:
-            if (aln1 < DBL_EPSILON)
+            if(aln1 < DBL_EPSILON)
             {
               *info = 1;
               return;
             }
-            factor1 = vec[2 * i + (2 * i) * n]/vec[(2 * i +1 ) + n * (2 * i )];
+            factor1 = vec[2 * i + (2 * i) * n]/vec[(2 * i +1) + n * (2 * i)];
             reaction[2 * i + 1]  = (zn - factor1*zt)/(vec[2 * i + (2 * i + 1) * n] - factor1*vec[(2 * i + 1) + n * (2 * i + 1)]);
-            reaction[2 * i]= (zt - vec[(2 * i + 1) + n * (2 * i + 1)]*reaction[2 * i + 1] )/vec[(2 * i +1 ) + n * (2 * i )];
+            reaction[2 * i]= (zt - vec[(2 * i + 1) + n * (2 * i + 1)]*reaction[2 * i + 1])/vec[(2 * i +1) + n * (2 * i)];
             break;
           default:
             exit(EXIT_FAILURE);
           }
-          DEBUG_PRINTF("contact %i , reaction[2 * i] = %g, reaction[2 * i + 1] = % g \n", i,  reaction[2 * i], reaction[2 * i + 1] );
+          DEBUG_PRINTF("contact %i , reaction[2 * i] = %g, reaction[2 * i + 1] = % g \n", i,  reaction[2 * i], reaction[2 * i + 1]);
 
 
         }
         else
         {
-          reaction[2 * i]   =   (zn * vec[(2 * i + 1) + n * (2 * i + 1)] - zt * vec[2 * i + (2 * i + 1) * n]) / det;
-          reaction[2 * i + 1] = (-zn * vec[(2 * i +1 ) + n * (2 * i )]   + zt * vec[2 * i + (2 * i) * n]) / det;
-          DEBUG_PRINTF("contact %i , reaction[2 * i] = %g, reaction[2 * i + 1] = % g \n", i, reaction[2 * i], reaction[2 * i + 1] );
+          reaction[2 * i]   = (zn * vec[(2 * i + 1) + n * (2 * i + 1)] - zt * vec[2 * i + (2 * i + 1) * n]) / det;
+          reaction[2 * i + 1] = (-zn * vec[(2 * i +1) + n * (2 * i)]   + zt * vec[2 * i + (2 * i) * n]) / det;
+          DEBUG_PRINTF("contact %i , reaction[2 * i] = %g, reaction[2 * i + 1] = % g \n", i, reaction[2 * i], reaction[2 * i + 1]);
         }
 
-        if ((reaction[2 * i] >= 0.0) && ((fabs(reaction[2 * i + 1]) - mu[i] * reaction[2 * i]) <= 0.0))
+        if((reaction[2 * i] >= 0.0) && ((fabs(reaction[2 * i + 1]) - mu[i] * reaction[2 * i]) <= 0.0))
         {
           DEBUG_PRINTF("--------------- FC2D - NSGS - contact %i, Stick status \n", i);
         }
@@ -239,10 +240,10 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
           gplus  = vec[2 * i + 2 * i * n] + mu[i] * vec[(2 * i) + (2 * i + 1) * n];
 
 
-          if (fabs(gplus) < 1e-12)
+          if(fabs(gplus) < 1e-12)
           {
-            if (verbose > 0)
-              printf("--------------- FC2D - NSGS -  Warning small denominator (gplus) : %g \n", fabs(gplus) );
+            if(verbose > 0)
+              printf("--------------- FC2D - NSGS -  Warning small denominator (gplus) : %g \n", fabs(gplus));
 
             free(y);
             free(randomContactList);
@@ -261,7 +262,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
           }
 
-          if ((reaction[2 * i] >= 0.0) && (velocity[2 * i + 1] <= 0.0))
+          if((reaction[2 * i] >= 0.0) && (velocity[2 * i + 1] <= 0.0))
           {
 
             /*    printf("Slip+ status\n");*/
@@ -275,10 +276,10 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
             gmoins = vec[2 * i + 2 * i * n] - mu[i] * vec[(2 * i) + (2 * i + 1) * n];
 
 
-            if (fabs(gmoins) < 1e-12)
+            if(fabs(gmoins) < 1e-12)
             {
-              if (verbose > 0)
-                printf("--------------- FC2D - NSGS -  Warning small denominator (gmoins) : %g \n", fabs(gmoins) );
+              if(verbose > 0)
+                printf("--------------- FC2D - NSGS -  Warning small denominator (gmoins) : %g \n", fabs(gmoins));
 
               free(y);
               free(randomContactList);
@@ -332,7 +333,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
     it_end = iter;
     res    = normr;
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC2D - NSGS - Iteration %i "
              "Residual = %14.7e < %7.3e\n", iter, res, errmax);
   }
@@ -343,10 +344,10 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
 
 
-  if (normr > errmax)
+  if(normr > errmax)
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC2D - NSGS - No convergence after %i iterations"
              " residual = %14.7e < %7.3e\n", iter, res, errmax);
 
@@ -355,7 +356,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
   else
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC2D - NSGS - Convergence after %i iterations"
              " residual = %14.7e < %7.3e\n", iter, res, errmax);
 
@@ -371,26 +372,9 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
 
 }
-int fc2d_nsgs_setDefaultSolverOptions(SolverOptions *options)
+void fc2d_nsgs_set_default(SolverOptions *options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the 2D NSGS Solver\n");
-  }
-
-  /*  strcpy(options->solverName,"NLGS");*/
-  options->solverId = SICONOS_FRICTION_2D_NSGS;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
-  options ->internalSolvers = NULL;
-  return 0;
+  options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  //  useful only for the sparse nsgs case.
 }

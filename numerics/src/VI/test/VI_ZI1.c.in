@@ -16,20 +16,18 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
+#include <float.h>                  // for DECIMAL_DIG, DBL_EPSILON
+#include <math.h>                   // for copysign
+#include <stdio.h>                  // for printf, NULL
+#include <stdlib.h>                 // for free
+#include "NonSmoothDrivers.h"       // for variationalInequality_driver
+#include "NumericsFwd.h"            // for VariationalInequality, SolverOptions
+#include "NumericsMatrix.h"         // for NM_create_from_data, NM_DENSE
+#include "SiconosSets.h"            // for box_constraints, SICONOS_SET_BOX
+#include "SolverOptions.h"          // for SolverOptions, solver_options_delete
+#include "VI_cst.h"                 // for SICONOS_VI_BOX_AVI_LSA
+#include "VariationalInequality.h"  // for VariationalInequality, VI_get_env
 
-#include "debug.h"
-#include "NonSmoothDrivers.h"
-#include "VI_cst.h"
-#include "SiconosSets.h"
-
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-#include "VariationalInequality.h"
-#include "VariationalInequality_Solvers.h"
 #define N 2
 
 #ifdef __cplusplus
@@ -100,9 +98,7 @@ int main(void)
   int info = 0;
 
   /* Set solver options */
-  SolverOptions options;
-
-  solver_options_set(&options, @SOLVER_ID@);
+  SolverOptions * options = solver_options_create( @PROBLEM_COLLECTION@);
 
   /* Create a VariationalInequality */
   VariationalInequality* problem = variationalInequality_new(N);
@@ -127,13 +123,13 @@ int main(void)
   sim_data.g = 9.81;
   sim_data.kappa = .7;
 
- options.dparam[0] = N*DBL_EPSILON;
- options.iparam[SICONOS_IPARAM_PREALLOC] = 1;
-  options.iparam[0] = 250;
-
-  options.iparam[3] = 2;
-  options.iparam[4] = 10;
-
+  options->dparam[SICONOS_DPARAM_TOL] = N*DBL_EPSILON;
+  options->iparam[SICONOS_IPARAM_PREALLOC] = 1;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 250;
+  
+//  options->dparam[SICONOS_VI_DPARAM_RHO] = 2;
+//  options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 10;
+  
   problem->env = &sim_data;
   problem->nabla_F = NM_create_from_data(NM_DENSE, N, N, nablaF);
 
@@ -150,8 +146,7 @@ int main(void)
   while ((t <= T) && info == 0)
   {
     k++;
-    info = variationalInequality_driver(problem, z, F, &options);
-//    printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
+    info = variationalInequality_driver(problem, z, F, options);
     if (info > 0)
     {
       printf("VI_ZI1 info = %d\n", info);
@@ -159,12 +154,12 @@ int main(void)
       z[0] = copysign(1.0, -xk[0]);
       z[1] = copysign(1.0, -xk[1]);
 
-      info = variationalInequality_driver(problem, z, F, &options);
+      info = variationalInequality_driver(problem, z, F, options);
 
       if (info > 0)
       {
-        printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
-        printf("VI_ZI1 with solver @SOLVER_ID@ failed completly\n");
+        printf("step %d, iter = %d, error = %le\n", k, options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+        printf("VI_ZI1 with solver @PROBLEM_COLLECTION@ failed completly\n");
         printf("VI_ZI1 failure at xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
       }
 
@@ -173,8 +168,8 @@ int main(void)
     xk[1] = F[1];
     t = k*sim_data.h;
   }
-  solver_options_delete(&options);
-
+  solver_options_delete(options);
+  options = NULL;
   free(problem->nabla_F);
   problem->nabla_F = NULL;
   free(problem);

@@ -40,63 +40,65 @@
 
 namespace lapack = boost::numeric::bindings::lapack;
 
-namespace Siconos {
-  namespace eigenproblems {
+namespace Siconos
+{
+namespace eigenproblems
+{
 
-    int syev(SiconosVector& eigenval, SiconosMatrix& eigenvec, bool withVect)
-    {
-      int info = 0;
-      // Eigenvec must contains the values of the matrix from which we want
-      // to compute eigenvalues and vectors. It must be a symmetric matrix.
-      // It will be overwritten with eigenvectors.  
-      
-      // Adaptor to symmetric_mat. Warning : no copy, eigenvec will be modified
-      // by syev.
-      ublas::symmetric_adaptor<DenseMat, ublas::lower> s_a(*eigenvec.dense());
+int syev(SiconosVector& eigenval, SiconosMatrix& eigenvec, bool withVect)
+{
+  int info = 0;
+  // Eigenvec must contains the values of the matrix from which we want
+  // to compute eigenvalues and vectors. It must be a symmetric matrix.
+  // It will be overwritten with eigenvectors.
 
-      char jobz;
-      if(withVect)
-        jobz = 'V';
-      else
-        jobz = 'N';
+  // Adaptor to symmetric_mat. Warning : no copy, eigenvec will be modified
+  // by syev.
+  ublas::symmetric_adaptor<DenseMat, ublas::lower> s_a(*eigenvec.dense());
+
+  char jobz;
+  if(withVect)
+    jobz = 'V';
+  else
+    jobz = 'N';
 
 #ifdef USE_OPTIMAL_WORKSPACE
-      info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::optimal_workspace());
+  info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-      info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::minimal_workspace());
+  info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::minimal_workspace());
 #endif
-      std::cout << "Compute eigenvalues ..." << std::endl;
-      return info;
-    }
+  std::cout << "Compute eigenvalues ..." << std::endl;
+  return info;
+}
 
-    int geev(SiconosMatrix& input_mat, complex_vector& eigenval, complex_matrix& left_eigenvec, complex_matrix& right_eigenvec, bool withLeft, bool withRight)
-    {
-      int info = 0;
-      complex_matrix tmp(*input_mat.dense());
-      // tmp must contains the values of the matrix from which we want
-      // to compute eigenvalues and vectors. It must be a complex matrix.
-      // It will be overwritten with temp results.  
-      
-      char jobvl, jobvr;
-      if(withLeft)
-        jobvl = 'V';
-      else
-        jobvl = 'N';
+int geev(SiconosMatrix& input_mat, complex_vector& eigenval, complex_matrix& left_eigenvec, complex_matrix& right_eigenvec, bool withLeft, bool withRight)
+{
+  int info = 0;
+  complex_matrix tmp(*input_mat.dense());
+  // tmp must contains the values of the matrix from which we want
+  // to compute eigenvalues and vectors. It must be a complex matrix.
+  // It will be overwritten with temp results.
 
-      if(withRight)
-        jobvr = 'V';
-      else
-        jobvr = 'N';
-      
+  char jobvl, jobvr;
+  if(withLeft)
+    jobvl = 'V';
+  else
+    jobvl = 'N';
+
+  if(withRight)
+    jobvr = 'V';
+  else
+    jobvr = 'N';
+
 #ifdef USE_OPTIMAL_WORKSPACE
-      info += lapack::geev(jobvl, jobvr, tmp, eigenval, left_eigenvec, right_eigenvec, lapack::optimal_workspace());
+  info += lapack::geev(jobvl, jobvr, tmp, eigenval, left_eigenvec, right_eigenvec, lapack::optimal_workspace());
 #endif
 #ifdef USE_MINIMAL_WORKSPACE
-      info += lapack::geev(jobvl, jobvr, tmp, eigenval, left_eigenvec, right_eigenvec, lapack::minimal_workspace());
+  info += lapack::geev(jobvl, jobvr, tmp, eigenval, left_eigenvec, right_eigenvec, lapack::minimal_workspace());
 #endif
-      return info;
-    }
+  return info;
+}
 
-  } // namespace eigenproblems
+} // namespace eigenproblems
 } // namespace Siconos

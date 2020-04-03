@@ -19,21 +19,30 @@
 #ifndef MCP_CST_H
 #define MCP_CST_H
 /*!\file MCP_cst.h
-  \brief Constants to define the list of available MCP solvers. See the solver list \ref mcpSolversList
+  \brief Constants to define the list of available MCP solvers.
+  
+  \rst
+  See the detailed documentation in :ref:`mcp_solvers`
+  \endrst
 */
+
 /**\enum MCP_SOLVER
-   Each SICONOS_MCP_XXX refers to number of the solver XXX for MCP. See the solver list \ref mcpSolversList
+
+   Each SICONOS_MCP_XXX refers to number of the solver XXX for MCP.
  */
 enum MCP_SOLVER
 {
-  SICONOS_MCP_FB = 700,
-  SICONOS_MCP_NEWTON_FBLSA = 701,
-  SICONOS_MCP_NEWTON_MINFBLSA = 702
+
+  SICONOS_MCP_NEWTON_FB_FBLSA = 700,
+  SICONOS_MCP_NEWTON_MIN_FBLSA = 701,
+
+  /* old interface for MCP */
+  SICONOS_MCP_OLD_FB = 710,
 };
 
 
-extern const char* const SICONOS_MCP_FB_STR;
-extern const char* const SICONOS_MCP_NEWTON_FBLSA_STR;
-extern const char* const SICONOS_MCP_NEWTON_MINFBLSA_STR;
+extern const char* const SICONOS_MCP_OLD_FB_STR;
+extern const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR;
+extern const char* const SICONOS_MCP_NEWTON_MIN_FBLSA_STR;
 
 #endif

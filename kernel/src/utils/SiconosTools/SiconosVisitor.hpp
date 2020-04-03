@@ -128,7 +128,7 @@
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*static_cast<const BASE *>(this)); } \
 
 #define ACCEPT_BASE_SP_VISITORS(BASE)                                   \
-  virtual void acceptSPBase(SP::SiconosVisitor tourist) { tourist->visit(std11::static_pointer_cast<BASE>(shared_from_this())); }\
+  virtual void acceptSPBase(SP::SiconosVisitor tourist) { tourist->visit(std::static_pointer_cast<BASE>(shared_from_this())); }\
   virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
 
 #define ACCEPT_BASE_VISITORS(BASE)                           \
@@ -196,7 +196,7 @@ struct FindType
 /* the base visitor */
 #undef REGISTER
 #define REGISTER(X)             \
-  virtual void visit(std11::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
+  virtual void visit(std::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
   virtual void visit(X&) SICONOS_VISITOR_FAIL(X);                         \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 

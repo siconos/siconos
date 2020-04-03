@@ -22,9 +22,12 @@ Include files related to Siconos Mechanics collision interface
 #ifndef SiconosCollision_hpp
 #define SiconosCollision_hpp
 
-#include "BodyDS.hpp"
+#include "RigidBodyDS.hpp"
+#include "RigidBody2dDS.hpp"
 #include "ContactR.hpp"
-#include "SiconosCollision.hpp"
+#include "Contact2dR.hpp"
+#include "Contact2d3DR.hpp"
+#include "Contact5DR.hpp"
 #include "SiconosCollisionManager.hpp"
 #include "SiconosCollisionQueryResult.hpp"
 #include "SiconosContactor.hpp"

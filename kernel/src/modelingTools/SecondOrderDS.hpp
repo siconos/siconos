@@ -140,6 +140,9 @@ protected:
    */
   std::vector<SP::SiconosVector> _p;
 
+  /** Initial position */
+  SP::SiconosVector _q0;
+
   /** memory of previous generalized forces due to constraints */
   VectorOfMemories _pMemory;
 
@@ -303,10 +306,14 @@ public:
    */
   virtual void setQPtr(SP::SiconosVector newPtr) =0;
 
-  /** return initial state of the system
+  /** get initial state (pointer link)
    *  \return pointer on a SiconosVector
    */
-  virtual  SP::SiconosVector q0() const =0;
+  SP::SiconosVector q0() const
+  {
+    return _q0;
+  }
+
 
   /** set initial state (copy)
    *  \param newValue
@@ -321,7 +328,7 @@ public:
   /** get velocity vector (pointer link)
    *  \return pointer on a SiconosVector
    */
-  virtual inline SP::SiconosVector velocity() const =0;
+  virtual SP::SiconosVector velocity() const =0;
 
   /** set velocity vector (copy)
    *  \param newValue
@@ -467,7 +474,7 @@ public:
   */
   virtual void init_forces()=0;
 
-  ///@}
+///@}
 
   ACCEPT_STD_VISITORS();
 

@@ -34,15 +34,15 @@ integer *incy;
   --dx;
 
   /* Function Body */
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return 0;
   }
-  if (*da == 0.)
+  if(*da == 0.)
   {
     return 0;
   }
-  if (*incx == 1 && *incy == 1)
+  if(*incx == 1 && *incy == 1)
   {
     goto L20;
   }
@@ -52,16 +52,16 @@ integer *incy;
 
   ix = 1;
   iy = 1;
-  if (*incx < 0)
+  if(*incx < 0)
   {
     ix = (-(*n) + 1) * *incx + 1;
   }
-  if (*incy < 0)
+  if(*incy < 0)
   {
     iy = (-(*n) + 1) * *incy + 1;
   }
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dy[iy] += *da * dx[ix];
     ix += *incx;
@@ -77,24 +77,24 @@ integer *incy;
 
 L20:
   m = *n % 4;
-  if (m == 0)
+  if(m == 0)
   {
     goto L40;
   }
   i__1 = m;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dy[i] += *da * dx[i];
     /* L30: */
   }
-  if (*n < 4)
+  if(*n < 4)
   {
     return 0;
   }
 L40:
   mp1 = m + 1;
   i__1 = *n;
-  for (i = mp1; i <= i__1; i += 4)
+  for(i = mp1; i <= i__1; i += 4)
   {
     dy[i] += *da * dx[i];
     dy[i + 1] += *da * dx[i + 1];
@@ -129,11 +129,11 @@ integer *incy;
   --dx;
 
   /* Function Body */
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return 0;
   }
-  if (*incx == 1 && *incy == 1)
+  if(*incx == 1 && *incy == 1)
   {
     goto L20;
   }
@@ -143,16 +143,16 @@ integer *incy;
 
   ix = 1;
   iy = 1;
-  if (*incx < 0)
+  if(*incx < 0)
   {
     ix = (-(*n) + 1) * *incx + 1;
   }
-  if (*incy < 0)
+  if(*incy < 0)
   {
     iy = (-(*n) + 1) * *incy + 1;
   }
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dy[iy] = dx[ix];
     ix += *incx;
@@ -168,24 +168,24 @@ integer *incy;
 
 L20:
   m = *n % 7;
-  if (m == 0)
+  if(m == 0)
   {
     goto L40;
   }
   i__1 = m;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dy[i] = dx[i];
     /* L30: */
   }
-  if (*n < 7)
+  if(*n < 7)
   {
     return 0;
   }
 L40:
   mp1 = m + 1;
   i__1 = *n;
-  for (i = mp1; i <= i__1; i += 7)
+  for(i = mp1; i <= i__1; i += 7)
   {
     dy[i] = dx[i];
     dy[i + 1] = dx[i + 1];
@@ -228,11 +228,11 @@ integer *incy;
   /* Function Body */
   ret_val = 0.;
   dtemp = 0.;
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return ret_val;
   }
-  if (*incx == 1 && *incy == 1)
+  if(*incx == 1 && *incy == 1)
   {
     goto L20;
   }
@@ -242,16 +242,16 @@ integer *incy;
 
   ix = 1;
   iy = 1;
-  if (*incx < 0)
+  if(*incx < 0)
   {
     ix = (-(*n) + 1) * *incx + 1;
   }
-  if (*incy < 0)
+  if(*incy < 0)
   {
     iy = (-(*n) + 1) * *incy + 1;
   }
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dtemp += dx[ix] * dy[iy];
     ix += *incx;
@@ -268,24 +268,24 @@ integer *incy;
 
 L20:
   m = *n % 5;
-  if (m == 0)
+  if(m == 0)
   {
     goto L40;
   }
   i__1 = m;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dtemp += dx[i] * dy[i];
     /* L30: */
   }
-  if (*n < 5)
+  if(*n < 5)
   {
     goto L60;
   }
 L40:
   mp1 = m + 1;
   i__1 = *n;
-  for (i = mp1; i <= i__1; i += 5)
+  for(i = mp1; i <= i__1; i += 5)
   {
     dtemp = dtemp + dx[i] * dy[i] + dx[i + 1] * dy[i + 1] + dx[i + 2] *
             dy[i + 2] + dx[i + 3] * dy[i + 3] + dx[i + 4] * dy[i + 4];
@@ -505,7 +505,7 @@ ftnlen transb_len;
   /* Function Body */
   nota = lsame_(transa, "N", 1L, 1L);
   notb = lsame_(transb, "N", 1L, 1L);
-  if (nota)
+  if(nota)
   {
     nrowa = *m;
     ncola = *k;
@@ -515,7 +515,7 @@ ftnlen transb_len;
     nrowa = *k;
     ncola = *m;
   }
-  if (notb)
+  if(notb)
   {
     nrowb = *k;
   }
@@ -527,41 +527,41 @@ ftnlen transb_len;
   /*     Test the input parameters. */
 
   info = 0;
-  if (! nota && ! lsame_(transa, "C", 1L, 1L) && ! lsame_(transa, "T", 1L,
+  if(! nota && ! lsame_(transa, "C", 1L, 1L) && ! lsame_(transa, "T", 1L,
       1L))
   {
     info = 1;
   }
-  else if (! notb && ! lsame_(transb, "C", 1L, 1L) && ! lsame_(transb,
-           "T", 1L, 1L))
+  else if(! notb && ! lsame_(transb, "C", 1L, 1L) && ! lsame_(transb,
+          "T", 1L, 1L))
   {
     info = 2;
   }
-  else if (*m < 0)
+  else if(*m < 0)
   {
     info = 3;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 4;
   }
-  else if (*k < 0)
+  else if(*k < 0)
   {
     info = 5;
   }
-  else if (*lda < max(1, nrowa))
+  else if(*lda < max(1, nrowa))
   {
     info = 8;
   }
-  else if (*ldb < max(1, nrowb))
+  else if(*ldb < max(1, nrowb))
   {
     info = 10;
   }
-  else if (*ldc < max(1, *m))
+  else if(*ldc < max(1, *m))
   {
     info = 13;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DGEMM ", &info, 6L);
     return 0;
@@ -569,22 +569,22 @@ ftnlen transb_len;
 
   /*     Quick return if possible. */
 
-  if (*m == 0 || *n == 0 || (*alpha == 0. || *k == 0) && *beta == 1.)
+  if(*m == 0 || *n == 0 || (*alpha == 0. || *k == 0) && *beta == 1.)
   {
     return 0;
   }
 
   /*     And if  alpha.eq.zero. */
 
-  if (*alpha == 0.)
+  if(*alpha == 0.)
   {
-    if (*beta == 0.)
+    if(*beta == 0.)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = *m;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           c[i + j * c_dim1] = 0.;
           /* L10: */
@@ -595,10 +595,10 @@ ftnlen transb_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = *m;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           c[i + j * c_dim1] = *beta * c[i + j * c_dim1];
           /* L30: */
@@ -611,42 +611,42 @@ ftnlen transb_len;
 
   /*     Start the operations. */
 
-  if (notb)
+  if(notb)
   {
-    if (nota)
+    if(nota)
     {
 
       /*           Form  C := alpha*A*B + beta*C. */
 
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (*beta == 0.)
+        if(*beta == 0.)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = 0.;
             /* L50: */
           }
         }
-        else if (*beta != 1.)
+        else if(*beta != 1.)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = *beta * c[i + j * c_dim1];
             /* L60: */
           }
         }
         i__2 = *k;
-        for (l = 1; l <= i__2; ++l)
+        for(l = 1; l <= i__2; ++l)
         {
-          if (b[l + j * b_dim1] != 0.)
+          if(b[l + j * b_dim1] != 0.)
           {
             temp = *alpha * b[l + j * b_dim1];
             i__3 = *m;
-            for (i = 1; i <= i__3; ++i)
+            for(i = 1; i <= i__3; ++i)
             {
               c[i + j * c_dim1] += temp * a[i + l * a_dim1];
               /* L70: */
@@ -663,19 +663,19 @@ ftnlen transb_len;
       /*           Form  C := alpha*A'*B + beta*C */
 
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = *m;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           temp = 0.;
           i__3 = *k;
-          for (l = 1; l <= i__3; ++l)
+          for(l = 1; l <= i__3; ++l)
           {
             temp += a[l + i * a_dim1] * b[l + j * b_dim1];
             /* L100: */
           }
-          if (*beta == 0.)
+          if(*beta == 0.)
           {
             c[i + j * c_dim1] = *alpha * temp;
           }
@@ -692,40 +692,40 @@ ftnlen transb_len;
   }
   else
   {
-    if (nota)
+    if(nota)
     {
 
       /*           Form  C := alpha*A*B' + beta*C */
 
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (*beta == 0.)
+        if(*beta == 0.)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = 0.;
             /* L130: */
           }
         }
-        else if (*beta != 1.)
+        else if(*beta != 1.)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = *beta * c[i + j * c_dim1];
             /* L140: */
           }
         }
         i__2 = *k;
-        for (l = 1; l <= i__2; ++l)
+        for(l = 1; l <= i__2; ++l)
         {
-          if (b[j + l * b_dim1] != 0.)
+          if(b[j + l * b_dim1] != 0.)
           {
             temp = *alpha * b[j + l * b_dim1];
             i__3 = *m;
-            for (i = 1; i <= i__3; ++i)
+            for(i = 1; i <= i__3; ++i)
             {
               c[i + j * c_dim1] += temp * a[i + l * a_dim1];
               /* L150: */
@@ -742,19 +742,19 @@ ftnlen transb_len;
       /*           Form  C := alpha*A'*B' + beta*C */
 
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = *m;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           temp = 0.;
           i__3 = *k;
-          for (l = 1; l <= i__3; ++l)
+          for(l = 1; l <= i__3; ++l)
           {
             temp += a[l + i * a_dim1] * b[j + l * b_dim1];
             /* L180: */
           }
-          if (*beta == 0.)
+          if(*beta == 0.)
           {
             c[i + j * c_dim1] = *alpha * temp;
           }
@@ -916,32 +916,32 @@ ftnlen trans_len;
 
   /* Function Body */
   info = 0;
-  if (! lsame_(trans, "N", 1L, 1L) && ! lsame_(trans, "T", 1L, 1L) && !
+  if(! lsame_(trans, "N", 1L, 1L) && ! lsame_(trans, "T", 1L, 1L) && !
       lsame_(trans, "C", 1L, 1L))
   {
     info = 1;
   }
-  else if (*m < 0)
+  else if(*m < 0)
   {
     info = 2;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 3;
   }
-  else if (*lda < max(1, *m))
+  else if(*lda < max(1, *m))
   {
     info = 6;
   }
-  else if (*incx == 0)
+  else if(*incx == 0)
   {
     info = 8;
   }
-  else if (*incy == 0)
+  else if(*incy == 0)
   {
     info = 11;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DGEMV ", &info, 6L);
     return 0;
@@ -949,7 +949,7 @@ ftnlen trans_len;
 
   /*     Quick return if possible. */
 
-  if (*m == 0 || *n == 0 || *alpha == 0. && *beta == 1.)
+  if(*m == 0 || *n == 0 || *alpha == 0. && *beta == 1.)
   {
     return 0;
   }
@@ -958,7 +958,7 @@ ftnlen trans_len;
   */
   /*     up the start points in  X  and  Y. */
 
-  if (lsame_(trans, "N", 1L, 1L))
+  if(lsame_(trans, "N", 1L, 1L))
   {
     lenx = *n;
     leny = *m;
@@ -968,7 +968,7 @@ ftnlen trans_len;
     lenx = *m;
     leny = *n;
   }
-  if (*incx > 0)
+  if(*incx > 0)
   {
     kx = 1;
   }
@@ -976,7 +976,7 @@ ftnlen trans_len;
   {
     kx = 1 - (lenx - 1) * *incx;
   }
-  if (*incy > 0)
+  if(*incy > 0)
   {
     ky = 1;
   }
@@ -990,14 +990,14 @@ ftnlen trans_len;
 
   /*     First form  y := beta*y. */
 
-  if (*beta != 1.)
+  if(*beta != 1.)
   {
-    if (*incy == 1)
+    if(*incy == 1)
     {
-      if (*beta == 0.)
+      if(*beta == 0.)
       {
         i__1 = leny;
-        for (i = 1; i <= i__1; ++i)
+        for(i = 1; i <= i__1; ++i)
         {
           y[i] = 0.;
           /* L10: */
@@ -1006,7 +1006,7 @@ ftnlen trans_len;
       else
       {
         i__1 = leny;
-        for (i = 1; i <= i__1; ++i)
+        for(i = 1; i <= i__1; ++i)
         {
           y[i] = *beta * y[i];
           /* L20: */
@@ -1016,10 +1016,10 @@ ftnlen trans_len;
     else
     {
       iy = ky;
-      if (*beta == 0.)
+      if(*beta == 0.)
       {
         i__1 = leny;
-        for (i = 1; i <= i__1; ++i)
+        for(i = 1; i <= i__1; ++i)
         {
           y[iy] = 0.;
           iy += *incy;
@@ -1029,7 +1029,7 @@ ftnlen trans_len;
       else
       {
         i__1 = leny;
-        for (i = 1; i <= i__1; ++i)
+        for(i = 1; i <= i__1; ++i)
         {
           y[iy] = *beta * y[iy];
           iy += *incy;
@@ -1038,26 +1038,26 @@ ftnlen trans_len;
       }
     }
   }
-  if (*alpha == 0.)
+  if(*alpha == 0.)
   {
     return 0;
   }
-  if (lsame_(trans, "N", 1L, 1L))
+  if(lsame_(trans, "N", 1L, 1L))
   {
 
     /*        Form  y := alpha*A*x + y. */
 
     jx = kx;
-    if (*incy == 1)
+    if(*incy == 1)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (x[jx] != 0.)
+        if(x[jx] != 0.)
         {
           temp = *alpha * x[jx];
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             y[i] += temp * a[i + j * a_dim1];
             /* L50: */
@@ -1070,14 +1070,14 @@ ftnlen trans_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (x[jx] != 0.)
+        if(x[jx] != 0.)
         {
           temp = *alpha * x[jx];
           iy = ky;
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             y[iy] += temp * a[i + j * a_dim1];
             iy += *incy;
@@ -1095,14 +1095,14 @@ ftnlen trans_len;
     /*        Form  y := alpha*A'*x + y. */
 
     jy = ky;
-    if (*incx == 1)
+    if(*incx == 1)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         temp = 0.;
         i__2 = *m;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           temp += a[i + j * a_dim1] * x[i];
           /* L90: */
@@ -1115,12 +1115,12 @@ ftnlen trans_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         temp = 0.;
         ix = kx;
         i__2 = *m;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           temp += a[i + j * a_dim1] * x[ix];
           ix += *incx;
@@ -1252,27 +1252,27 @@ integer *lda;
 
   /* Function Body */
   info = 0;
-  if (*m < 0)
+  if(*m < 0)
   {
     info = 1;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 2;
   }
-  else if (*incx == 0)
+  else if(*incx == 0)
   {
     info = 5;
   }
-  else if (*incy == 0)
+  else if(*incy == 0)
   {
     info = 7;
   }
-  else if (*lda < max(1, *m))
+  else if(*lda < max(1, *m))
   {
     info = 9;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DGER  ", &info, 6L);
     return 0;
@@ -1280,7 +1280,7 @@ integer *lda;
 
   /*     Quick return if possible. */
 
-  if (*m == 0 || *n == 0 || *alpha == 0.)
+  if(*m == 0 || *n == 0 || *alpha == 0.)
   {
     return 0;
   }
@@ -1288,7 +1288,7 @@ integer *lda;
   /*     Start the operations. In this version the elements of A are */
   /*     accessed sequentially with one pass through A. */
 
-  if (*incy > 0)
+  if(*incy > 0)
   {
     jy = 1;
   }
@@ -1296,16 +1296,16 @@ integer *lda;
   {
     jy = 1 - (*n - 1) * *incy;
   }
-  if (*incx == 1)
+  if(*incx == 1)
   {
     i__1 = *n;
-    for (j = 1; j <= i__1; ++j)
+    for(j = 1; j <= i__1; ++j)
     {
-      if (y[jy] != 0.)
+      if(y[jy] != 0.)
       {
         temp = *alpha * y[jy];
         i__2 = *m;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           a[i + j * a_dim1] += x[i] * temp;
           /* L10: */
@@ -1317,7 +1317,7 @@ integer *lda;
   }
   else
   {
-    if (*incx > 0)
+    if(*incx > 0)
     {
       kx = 1;
     }
@@ -1326,14 +1326,14 @@ integer *lda;
       kx = 1 - (*m - 1) * *incx;
     }
     i__1 = *n;
-    for (j = 1; j <= i__1; ++j)
+    for(j = 1; j <= i__1; ++j)
     {
-      if (y[jy] != 0.)
+      if(y[jy] != 0.)
       {
         temp = *alpha * y[jy];
         ix = kx;
         i__2 = *m;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           a[i + j * a_dim1] += x[ix] * temp;
           ix += *incx;
@@ -1430,7 +1430,7 @@ integer *incx;
   /*     data cutlo, cuthi / 8.232d-11,  1.304d19 / */
   /*     data cutlo, cuthi / 4.441e-16,  1.304e19 / */
 
-  if (*n > 0 && *incx > 0)
+  if(*n > 0 && *incx > 0)
   {
     goto L10;
   }
@@ -1445,7 +1445,7 @@ L10:
   ix = 1;
   /*                                                 begin main loop */
 L20:
-  switch ((int)next)
+  switch((int)next)
   {
   case 0:
     goto L30;
@@ -1457,7 +1457,7 @@ L20:
     goto L110;
   }
 L30:
-  if ((d__1 = dx[i], abs(d__1)) > cutlo)
+  if((d__1 = dx[i], abs(d__1)) > cutlo)
   {
     goto L85;
   }
@@ -1468,11 +1468,11 @@ L30:
   /*                        phase 1.  sum is zero */
 
 L50:
-  if (dx[i] == zero)
+  if(dx[i] == zero)
   {
     goto L200;
   }
-  if ((d__1 = dx[i], abs(d__1)) > cutlo)
+  if((d__1 = dx[i], abs(d__1)) > cutlo)
   {
     goto L85;
   }
@@ -1497,7 +1497,7 @@ L105:
   /*                             scale to avoid destructive underflow. */
 
 L70:
-  if ((d__1 = dx[i], abs(d__1)) > cutlo)
+  if((d__1 = dx[i], abs(d__1)) > cutlo)
   {
     goto L75;
   }
@@ -1507,7 +1507,7 @@ L70:
   */
 
 L110:
-  if ((d__1 = dx[i], abs(d__1)) <= xmax)
+  if((d__1 = dx[i], abs(d__1)) <= xmax)
   {
     goto L115;
   }
@@ -1539,9 +1539,9 @@ L85:
   /*                   phase 3.  sum is mid-range.  no scaling. */
 
   i__1 = *n;
-  for (j = ix; j <= i__1; ++j)
+  for(j = ix; j <= i__1; ++j)
   {
-    if ((d__1 = dx[i], abs(d__1)) >= hitest)
+    if((d__1 = dx[i], abs(d__1)) >= hitest)
     {
       goto L100;
     }
@@ -1557,7 +1557,7 @@ L85:
 L200:
   ++ix;
   i += *incx;
-  if (ix <= *n)
+  if(ix <= *n)
   {
     goto L20;
   }
@@ -1589,12 +1589,12 @@ doublereal *da, *db, *c, *s;
 
 
   roe = *db;
-  if (abs(*da) > abs(*db))
+  if(abs(*da) > abs(*db))
   {
     roe = *da;
   }
   scale = abs(*da) + abs(*db);
-  if (scale != 0.)
+  if(scale != 0.)
   {
     goto L10;
   }
@@ -1613,11 +1613,11 @@ L10:
   *c = *da / r;
   *s = *db / r;
   z = 1.;
-  if (abs(*da) > abs(*db))
+  if(abs(*da) > abs(*db))
   {
     z = *s;
   }
-  if (abs(*db) >= abs(*da) && *c != 0.)
+  if(abs(*db) >= abs(*da) && *c != 0.)
   {
     z = 1. / *c;
   }
@@ -1653,11 +1653,11 @@ doublereal *c, *s;
   --dx;
 
   /* Function Body */
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return 0;
   }
-  if (*incx == 1 && *incy == 1)
+  if(*incx == 1 && *incy == 1)
   {
     goto L20;
   }
@@ -1667,16 +1667,16 @@ doublereal *c, *s;
 
   ix = 1;
   iy = 1;
-  if (*incx < 0)
+  if(*incx < 0)
   {
     ix = (-(*n) + 1) * *incx + 1;
   }
-  if (*incy < 0)
+  if(*incy < 0)
   {
     iy = (-(*n) + 1) * *incy + 1;
   }
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dtemp = *c * dx[ix] + *s * dy[iy];
     dy[iy] = *c * dy[iy] - *s * dx[ix];
@@ -1691,7 +1691,7 @@ doublereal *c, *s;
 
 L20:
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dtemp = *c * dx[i] + *s * dy[i];
     dy[i] = *c * dy[i] - *s * dx[i];
@@ -1723,11 +1723,11 @@ integer *incx;
   --dx;
 
   /* Function Body */
-  if (*n <= 0 || *incx <= 0)
+  if(*n <= 0 || *incx <= 0)
   {
     return 0;
   }
-  if (*incx == 1)
+  if(*incx == 1)
   {
     goto L20;
   }
@@ -1737,7 +1737,7 @@ integer *incx;
   nincx = *n * *incx;
   i__1 = nincx;
   i__2 = *incx;
-  for (i = 1; i__2 < 0 ? i >= i__1 : i <= i__1; i += i__2)
+  for(i = 1; i__2 < 0 ? i >= i__1 : i <= i__1; i += i__2)
   {
     dx[i] = *da * dx[i];
     /* L10: */
@@ -1751,24 +1751,24 @@ integer *incx;
 
 L20:
   m = *n % 5;
-  if (m == 0)
+  if(m == 0)
   {
     goto L40;
   }
   i__2 = m;
-  for (i = 1; i <= i__2; ++i)
+  for(i = 1; i <= i__2; ++i)
   {
     dx[i] = *da * dx[i];
     /* L30: */
   }
-  if (*n < 5)
+  if(*n < 5)
   {
     return 0;
   }
 L40:
   mp1 = m + 1;
   i__2 = *n;
-  for (i = mp1; i <= i__2; i += 5)
+  for(i = mp1; i <= i__2; i += 5)
   {
     dx[i] = *da * dx[i];
     dx[i + 1] = *da * dx[i + 1];
@@ -1806,11 +1806,11 @@ integer *incy;
   --dx;
 
   /* Function Body */
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return 0;
   }
-  if (*incx == 1 && *incy == 1)
+  if(*incx == 1 && *incy == 1)
   {
     goto L20;
   }
@@ -1820,16 +1820,16 @@ integer *incy;
 
   ix = 1;
   iy = 1;
-  if (*incx < 0)
+  if(*incx < 0)
   {
     ix = (-(*n) + 1) * *incx + 1;
   }
-  if (*incy < 0)
+  if(*incy < 0)
   {
     iy = (-(*n) + 1) * *incy + 1;
   }
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dtemp = dx[ix];
     dx[ix] = dy[iy];
@@ -1847,26 +1847,26 @@ integer *incy;
 
 L20:
   m = *n % 3;
-  if (m == 0)
+  if(m == 0)
   {
     goto L40;
   }
   i__1 = m;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     dtemp = dx[i];
     dx[i] = dy[i];
     dy[i] = dtemp;
     /* L30: */
   }
-  if (*n < 3)
+  if(*n < 3)
   {
     return 0;
   }
 L40:
   mp1 = m + 1;
   i__1 = *n;
-  for (i = mp1; i <= i__1; i += 3)
+  for(i = mp1; i <= i__1; i += 3)
   {
     dtemp = dx[i];
     dx[i] = dy[i];
@@ -2020,27 +2020,27 @@ ftnlen uplo_len;
 
   /* Function Body */
   info = 0;
-  if (! lsame_(uplo, "U", 1L, 1L) && ! lsame_(uplo, "L", 1L, 1L))
+  if(! lsame_(uplo, "U", 1L, 1L) && ! lsame_(uplo, "L", 1L, 1L))
   {
     info = 1;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 2;
   }
-  else if (*lda < max(1, *n))
+  else if(*lda < max(1, *n))
   {
     info = 5;
   }
-  else if (*incx == 0)
+  else if(*incx == 0)
   {
     info = 7;
   }
-  else if (*incy == 0)
+  else if(*incy == 0)
   {
     info = 10;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DSYMV ", &info, 6L);
     return 0;
@@ -2048,14 +2048,14 @@ ftnlen uplo_len;
 
   /*     Quick return if possible. */
 
-  if (*n == 0 || *alpha == 0. && *beta == 1.)
+  if(*n == 0 || *alpha == 0. && *beta == 1.)
   {
     return 0;
   }
 
   /*     Set up the start points in  X  and  Y. */
 
-  if (*incx > 0)
+  if(*incx > 0)
   {
     kx = 1;
   }
@@ -2063,7 +2063,7 @@ ftnlen uplo_len;
   {
     kx = 1 - (*n - 1) * *incx;
   }
-  if (*incy > 0)
+  if(*incy > 0)
   {
     ky = 1;
   }
@@ -2078,14 +2078,14 @@ ftnlen uplo_len;
 
   /*     First form  y := beta*y. */
 
-  if (*beta != 1.)
+  if(*beta != 1.)
   {
-    if (*incy == 1)
+    if(*incy == 1)
     {
-      if (*beta == 0.)
+      if(*beta == 0.)
       {
         i__1 = *n;
-        for (i = 1; i <= i__1; ++i)
+        for(i = 1; i <= i__1; ++i)
         {
           y[i] = 0.;
           /* L10: */
@@ -2094,7 +2094,7 @@ ftnlen uplo_len;
       else
       {
         i__1 = *n;
-        for (i = 1; i <= i__1; ++i)
+        for(i = 1; i <= i__1; ++i)
         {
           y[i] = *beta * y[i];
           /* L20: */
@@ -2104,10 +2104,10 @@ ftnlen uplo_len;
     else
     {
       iy = ky;
-      if (*beta == 0.)
+      if(*beta == 0.)
       {
         i__1 = *n;
-        for (i = 1; i <= i__1; ++i)
+        for(i = 1; i <= i__1; ++i)
         {
           y[iy] = 0.;
           iy += *incy;
@@ -2117,7 +2117,7 @@ ftnlen uplo_len;
       else
       {
         i__1 = *n;
-        for (i = 1; i <= i__1; ++i)
+        for(i = 1; i <= i__1; ++i)
         {
           y[iy] = *beta * y[iy];
           iy += *incy;
@@ -2126,24 +2126,24 @@ ftnlen uplo_len;
       }
     }
   }
-  if (*alpha == 0.)
+  if(*alpha == 0.)
   {
     return 0;
   }
-  if (lsame_(uplo, "U", 1L, 1L))
+  if(lsame_(uplo, "U", 1L, 1L))
   {
 
     /*        Form  y  when A is stored in upper triangle. */
 
-    if (*incx == 1 && *incy == 1)
+    if(*incx == 1 && *incy == 1)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         temp1 = *alpha * x[j];
         temp2 = 0.;
         i__2 = j - 1;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           y[i] += temp1 * a[i + j * a_dim1];
           temp2 += a[i + j * a_dim1] * x[i];
@@ -2158,14 +2158,14 @@ ftnlen uplo_len;
       jx = kx;
       jy = ky;
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         temp1 = *alpha * x[jx];
         temp2 = 0.;
         ix = kx;
         iy = ky;
         i__2 = j - 1;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           y[iy] += temp1 * a[i + j * a_dim1];
           temp2 += a[i + j * a_dim1] * x[ix];
@@ -2185,16 +2185,16 @@ ftnlen uplo_len;
 
     /*        Form  y  when A is stored in lower triangle. */
 
-    if (*incx == 1 && *incy == 1)
+    if(*incx == 1 && *incy == 1)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         temp1 = *alpha * x[j];
         temp2 = 0.;
         y[j] += temp1 * a[j + j * a_dim1];
         i__2 = *n;
-        for (i = j + 1; i <= i__2; ++i)
+        for(i = j + 1; i <= i__2; ++i)
         {
           y[i] += temp1 * a[i + j * a_dim1];
           temp2 += a[i + j * a_dim1] * x[i];
@@ -2209,7 +2209,7 @@ ftnlen uplo_len;
       jx = kx;
       jy = ky;
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         temp1 = *alpha * x[jx];
         temp2 = 0.;
@@ -2217,7 +2217,7 @@ ftnlen uplo_len;
         ix = jx;
         iy = jy;
         i__2 = *n;
-        for (i = j + 1; i <= i__2; ++i)
+        for(i = j + 1; i <= i__2; ++i)
         {
           ix += *incx;
           iy += *incy;
@@ -2376,27 +2376,27 @@ ftnlen uplo_len;
 
   /* Function Body */
   info = 0;
-  if (! lsame_(uplo, "U", 1L, 1L) && ! lsame_(uplo, "L", 1L, 1L))
+  if(! lsame_(uplo, "U", 1L, 1L) && ! lsame_(uplo, "L", 1L, 1L))
   {
     info = 1;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 2;
   }
-  else if (*incx == 0)
+  else if(*incx == 0)
   {
     info = 5;
   }
-  else if (*incy == 0)
+  else if(*incy == 0)
   {
     info = 7;
   }
-  else if (*lda < max(1, *n))
+  else if(*lda < max(1, *n))
   {
     info = 9;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DSYR2 ", &info, 6L);
     return 0;
@@ -2404,7 +2404,7 @@ ftnlen uplo_len;
 
   /*     Quick return if possible. */
 
-  if (*n == 0 || *alpha == 0.)
+  if(*n == 0 || *alpha == 0.)
   {
     return 0;
   }
@@ -2413,9 +2413,9 @@ ftnlen uplo_len;
   */
   /*     unity. */
 
-  if (*incx != 1 || *incy != 1)
+  if(*incx != 1 || *incy != 1)
   {
-    if (*incx > 0)
+    if(*incx > 0)
     {
       kx = 1;
     }
@@ -2423,7 +2423,7 @@ ftnlen uplo_len;
     {
       kx = 1 - (*n - 1) * *incx;
     }
-    if (*incy > 0)
+    if(*incy > 0)
     {
       ky = 1;
     }
@@ -2439,22 +2439,22 @@ ftnlen uplo_len;
   /*     accessed sequentially with one pass through the triangular part */
   /*     of A. */
 
-  if (lsame_(uplo, "U", 1L, 1L))
+  if(lsame_(uplo, "U", 1L, 1L))
   {
 
     /*        Form  A  when A is stored in the upper triangle. */
 
-    if (*incx == 1 && *incy == 1)
+    if(*incx == 1 && *incy == 1)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (x[j] != 0. || y[j] != 0.)
+        if(x[j] != 0. || y[j] != 0.)
         {
           temp1 = *alpha * y[j];
           temp2 = *alpha * x[j];
           i__2 = j;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             a[i + j * a_dim1] = a[i + j * a_dim1] + x[i] * temp1
                                 + y[i] * temp2;
@@ -2467,16 +2467,16 @@ ftnlen uplo_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (x[jx] != 0. || y[jy] != 0.)
+        if(x[jx] != 0. || y[jy] != 0.)
         {
           temp1 = *alpha * y[jy];
           temp2 = *alpha * x[jx];
           ix = kx;
           iy = ky;
           i__2 = j;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             a[i + j * a_dim1] = a[i + j * a_dim1] + x[ix] * temp1
                                 + y[iy] * temp2;
@@ -2496,17 +2496,17 @@ ftnlen uplo_len;
 
     /*        Form  A  when A is stored in the lower triangle. */
 
-    if (*incx == 1 && *incy == 1)
+    if(*incx == 1 && *incy == 1)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (x[j] != 0. || y[j] != 0.)
+        if(x[j] != 0. || y[j] != 0.)
         {
           temp1 = *alpha * y[j];
           temp2 = *alpha * x[j];
           i__2 = *n;
-          for (i = j; i <= i__2; ++i)
+          for(i = j; i <= i__2; ++i)
           {
             a[i + j * a_dim1] = a[i + j * a_dim1] + x[i] * temp1
                                 + y[i] * temp2;
@@ -2519,16 +2519,16 @@ ftnlen uplo_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (x[jx] != 0. || y[jy] != 0.)
+        if(x[jx] != 0. || y[jy] != 0.)
         {
           temp1 = *alpha * y[jy];
           temp2 = *alpha * x[jx];
           ix = jx;
           iy = jy;
           i__2 = *n;
-          for (i = j; i <= i__2; ++i)
+          for(i = j; i <= i__2; ++i)
           {
             a[i + j * a_dim1] = a[i + j * a_dim1] + x[ix] * temp1
                                 + y[iy] * temp2;
@@ -2633,7 +2633,7 @@ ftnlen trans_len;
   a -= a_offset;
 
   /* Function Body */
-  if (lsame_(trans, "N", 1L, 1L))
+  if(lsame_(trans, "N", 1L, 1L))
   {
     nrowa = *n;
   }
@@ -2644,36 +2644,36 @@ ftnlen trans_len;
   upper = lsame_(uplo, "U", 1L, 1L);
 
   info = 0;
-  if (! upper && ! lsame_(uplo, "L", 1L, 1L))
+  if(! upper && ! lsame_(uplo, "L", 1L, 1L))
   {
     info = 1;
   }
-  else if (! lsame_(trans, "N", 1L, 1L) && ! lsame_(trans, "T", 1L, 1L) &&
-           ! lsame_(trans, "C", 1L, 1L))
+  else if(! lsame_(trans, "N", 1L, 1L) && ! lsame_(trans, "T", 1L, 1L) &&
+          ! lsame_(trans, "C", 1L, 1L))
   {
     info = 2;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 3;
   }
-  else if (*k < 0)
+  else if(*k < 0)
   {
     info = 4;
   }
-  else if (*lda < max(1, nrowa))
+  else if(*lda < max(1, nrowa))
   {
     info = 7;
   }
-  else if (*ldb < max(1, nrowa))
+  else if(*ldb < max(1, nrowa))
   {
     info = 9;
   }
-  else if (*ldc < max(1, *n))
+  else if(*ldc < max(1, *n))
   {
     info = 12;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DSYR2K", &info, 6L);
     return 0;
@@ -2681,24 +2681,24 @@ ftnlen trans_len;
 
   /*     Quick return if possible. */
 
-  if (*n == 0 || (*alpha == 0. || *k == 0) && *beta == 1.)
+  if(*n == 0 || (*alpha == 0. || *k == 0) && *beta == 1.)
   {
     return 0;
   }
 
   /*     And when  alpha.eq.zero. */
 
-  if (*alpha == 0.)
+  if(*alpha == 0.)
   {
-    if (upper)
+    if(upper)
     {
-      if (*beta == 0.)
+      if(*beta == 0.)
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = j;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = 0.;
             /* L10: */
@@ -2709,10 +2709,10 @@ ftnlen trans_len;
       else
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = j;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = *beta * c[i + j * c_dim1];
             /* L30: */
@@ -2723,13 +2723,13 @@ ftnlen trans_len;
     }
     else
     {
-      if (*beta == 0.)
+      if(*beta == 0.)
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *n;
-          for (i = j; i <= i__2; ++i)
+          for(i = j; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = 0.;
             /* L50: */
@@ -2740,10 +2740,10 @@ ftnlen trans_len;
       else
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *n;
-          for (i = j; i <= i__2; ++i)
+          for(i = j; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = *beta * c[i + j * c_dim1];
             /* L70: */
@@ -2757,43 +2757,43 @@ ftnlen trans_len;
 
   /*     Start the operations. */
 
-  if (lsame_(trans, "N", 1L, 1L))
+  if(lsame_(trans, "N", 1L, 1L))
   {
 
     /*        Form  C := alpha*A*B' + alpha*B*A' + C. */
 
-    if (upper)
+    if(upper)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (*beta == 0.)
+        if(*beta == 0.)
         {
           i__2 = j;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = 0.;
             /* L90: */
           }
         }
-        else if (*beta != 1.)
+        else if(*beta != 1.)
         {
           i__2 = j;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = *beta * c[i + j * c_dim1];
             /* L100: */
           }
         }
         i__2 = *k;
-        for (l = 1; l <= i__2; ++l)
+        for(l = 1; l <= i__2; ++l)
         {
-          if (a[j + l * a_dim1] != 0. || b[j + l * b_dim1] != 0.)
+          if(a[j + l * a_dim1] != 0. || b[j + l * b_dim1] != 0.)
           {
             temp1 = *alpha * b[j + l * b_dim1];
             temp2 = *alpha * a[j + l * a_dim1];
             i__3 = j;
-            for (i = 1; i <= i__3; ++i)
+            for(i = 1; i <= i__3; ++i)
             {
               c[i + j * c_dim1] = c[i + j * c_dim1] + a[i + l *
                                   a_dim1] * temp1 + b[i + l * b_dim1] *
@@ -2809,35 +2809,35 @@ ftnlen trans_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
-        if (*beta == 0.)
+        if(*beta == 0.)
         {
           i__2 = *n;
-          for (i = j; i <= i__2; ++i)
+          for(i = j; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = 0.;
             /* L140: */
           }
         }
-        else if (*beta != 1.)
+        else if(*beta != 1.)
         {
           i__2 = *n;
-          for (i = j; i <= i__2; ++i)
+          for(i = j; i <= i__2; ++i)
           {
             c[i + j * c_dim1] = *beta * c[i + j * c_dim1];
             /* L150: */
           }
         }
         i__2 = *k;
-        for (l = 1; l <= i__2; ++l)
+        for(l = 1; l <= i__2; ++l)
         {
-          if (a[j + l * a_dim1] != 0. || b[j + l * b_dim1] != 0.)
+          if(a[j + l * a_dim1] != 0. || b[j + l * b_dim1] != 0.)
           {
             temp1 = *alpha * b[j + l * b_dim1];
             temp2 = *alpha * a[j + l * a_dim1];
             i__3 = *n;
-            for (i = j; i <= i__3; ++i)
+            for(i = j; i <= i__3; ++i)
             {
               c[i + j * c_dim1] = c[i + j * c_dim1] + a[i + l *
                                   a_dim1] * temp1 + b[i + l * b_dim1] *
@@ -2856,24 +2856,24 @@ ftnlen trans_len;
 
     /*        Form  C := alpha*A'*B + alpha*B'*A + C. */
 
-    if (upper)
+    if(upper)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = j;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           temp1 = 0.;
           temp2 = 0.;
           i__3 = *k;
-          for (l = 1; l <= i__3; ++l)
+          for(l = 1; l <= i__3; ++l)
           {
             temp1 += a[l + i * a_dim1] * b[l + j * b_dim1];
             temp2 += b[l + i * b_dim1] * a[l + j * a_dim1];
             /* L190: */
           }
-          if (*beta == 0.)
+          if(*beta == 0.)
           {
             c[i + j * c_dim1] = *alpha * temp1 + *alpha * temp2;
           }
@@ -2890,21 +2890,21 @@ ftnlen trans_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = *n;
-        for (i = j; i <= i__2; ++i)
+        for(i = j; i <= i__2; ++i)
         {
           temp1 = 0.;
           temp2 = 0.;
           i__3 = *k;
-          for (l = 1; l <= i__3; ++l)
+          for(l = 1; l <= i__3; ++l)
           {
             temp1 += a[l + i * a_dim1] * b[l + j * b_dim1];
             temp2 += b[l + i * b_dim1] * a[l + j * a_dim1];
             /* L220: */
           }
-          if (*beta == 0.)
+          if(*beta == 0.)
           {
             c[i + j * c_dim1] = *alpha * temp1 + *alpha * temp2;
           }
@@ -3120,7 +3120,7 @@ ftnlen diag_len;
 
   /* Function Body */
   lside = lsame_(side, "L", 1L, 1L);
-  if (lside)
+  if(lside)
   {
     nrowa = *m;
   }
@@ -3132,40 +3132,40 @@ ftnlen diag_len;
   upper = lsame_(uplo, "U", 1L, 1L);
 
   info = 0;
-  if (! lside && ! lsame_(side, "R", 1L, 1L))
+  if(! lside && ! lsame_(side, "R", 1L, 1L))
   {
     info = 1;
   }
-  else if (! upper && ! lsame_(uplo, "L", 1L, 1L))
+  else if(! upper && ! lsame_(uplo, "L", 1L, 1L))
   {
     info = 2;
   }
-  else if (! lsame_(transa, "N", 1L, 1L) && ! lsame_(transa, "T", 1L, 1L)
-           && ! lsame_(transa, "C", 1L, 1L))
+  else if(! lsame_(transa, "N", 1L, 1L) && ! lsame_(transa, "T", 1L, 1L)
+          && ! lsame_(transa, "C", 1L, 1L))
   {
     info = 3;
   }
-  else if (! lsame_(diag, "U", 1L, 1L) && ! lsame_(diag, "N", 1L, 1L))
+  else if(! lsame_(diag, "U", 1L, 1L) && ! lsame_(diag, "N", 1L, 1L))
   {
     info = 4;
   }
-  else if (*m < 0)
+  else if(*m < 0)
   {
     info = 5;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 6;
   }
-  else if (*lda < max(1, nrowa))
+  else if(*lda < max(1, nrowa))
   {
     info = 9;
   }
-  else if (*ldb < max(1, *m))
+  else if(*ldb < max(1, *m))
   {
     info = 11;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DTRMM ", &info, 6L);
     return 0;
@@ -3173,20 +3173,20 @@ ftnlen diag_len;
 
   /*     Quick return if possible. */
 
-  if (*n == 0)
+  if(*n == 0)
   {
     return 0;
   }
 
   /*     And when  alpha.eq.zero. */
 
-  if (*alpha == 0.)
+  if(*alpha == 0.)
   {
     i__1 = *n;
-    for (j = 1; j <= i__1; ++j)
+    for(j = 1; j <= i__1; ++j)
     {
       i__2 = *m;
-      for (i = 1; i <= i__2; ++i)
+      for(i = 1; i <= i__2; ++i)
       {
         b[i + j * b_dim1] = 0.;
         /* L10: */
@@ -3198,31 +3198,31 @@ ftnlen diag_len;
 
   /*     Start the operations. */
 
-  if (lside)
+  if(lside)
   {
-    if (lsame_(transa, "N", 1L, 1L))
+    if(lsame_(transa, "N", 1L, 1L))
     {
 
       /*           Form  B := alpha*A*B. */
 
-      if (upper)
+      if(upper)
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *m;
-          for (k = 1; k <= i__2; ++k)
+          for(k = 1; k <= i__2; ++k)
           {
-            if (b[k + j * b_dim1] != 0.)
+            if(b[k + j * b_dim1] != 0.)
             {
               temp = *alpha * b[k + j * b_dim1];
               i__3 = k - 1;
-              for (i = 1; i <= i__3; ++i)
+              for(i = 1; i <= i__3; ++i)
               {
                 b[i + j * b_dim1] += temp * a[i + k * a_dim1];
                 /* L30: */
               }
-              if (nounit)
+              if(nounit)
               {
                 temp *= a[k + k * a_dim1];
               }
@@ -3236,20 +3236,20 @@ ftnlen diag_len;
       else
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
-          for (k = *m; k >= 1; --k)
+          for(k = *m; k >= 1; --k)
           {
-            if (b[k + j * b_dim1] != 0.)
+            if(b[k + j * b_dim1] != 0.)
             {
               temp = *alpha * b[k + j * b_dim1];
               b[k + j * b_dim1] = temp;
-              if (nounit)
+              if(nounit)
               {
                 b[k + j * b_dim1] *= a[k + k * a_dim1];
               }
               i__2 = *m;
-              for (i = k + 1; i <= i__2; ++i)
+              for(i = k + 1; i <= i__2; ++i)
               {
                 b[i + j * b_dim1] += temp * a[i + k * a_dim1];
                 /* L60: */
@@ -3266,20 +3266,20 @@ ftnlen diag_len;
 
       /*           Form  B := alpha*B*A'. */
 
-      if (upper)
+      if(upper)
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
-          for (i = *m; i >= 1; --i)
+          for(i = *m; i >= 1; --i)
           {
             temp = b[i + j * b_dim1];
-            if (nounit)
+            if(nounit)
             {
               temp *= a[i + i * a_dim1];
             }
             i__2 = i - 1;
-            for (k = 1; k <= i__2; ++k)
+            for(k = 1; k <= i__2; ++k)
             {
               temp += a[k + i * a_dim1] * b[k + j * b_dim1];
               /* L90: */
@@ -3293,18 +3293,18 @@ ftnlen diag_len;
       else
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             temp = b[i + j * b_dim1];
-            if (nounit)
+            if(nounit)
             {
               temp *= a[i + i * a_dim1];
             }
             i__3 = *m;
-            for (k = i + 1; k <= i__3; ++k)
+            for(k = i + 1; k <= i__3; ++k)
             {
               temp += a[k + i * a_dim1] * b[k + j * b_dim1];
               /* L120: */
@@ -3319,34 +3319,34 @@ ftnlen diag_len;
   }
   else
   {
-    if (lsame_(transa, "N", 1L, 1L))
+    if(lsame_(transa, "N", 1L, 1L))
     {
 
       /*           Form  B := alpha*B*A. */
 
-      if (upper)
+      if(upper)
       {
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
           temp = *alpha;
-          if (nounit)
+          if(nounit)
           {
             temp *= a[j + j * a_dim1];
           }
           i__1 = *m;
-          for (i = 1; i <= i__1; ++i)
+          for(i = 1; i <= i__1; ++i)
           {
             b[i + j * b_dim1] = temp * b[i + j * b_dim1];
             /* L150: */
           }
           i__1 = j - 1;
-          for (k = 1; k <= i__1; ++k)
+          for(k = 1; k <= i__1; ++k)
           {
-            if (a[k + j * a_dim1] != 0.)
+            if(a[k + j * a_dim1] != 0.)
             {
               temp = *alpha * a[k + j * a_dim1];
               i__2 = *m;
-              for (i = 1; i <= i__2; ++i)
+              for(i = 1; i <= i__2; ++i)
               {
                 b[i + j * b_dim1] += temp * b[i + k * b_dim1];
                 /* L160: */
@@ -3360,27 +3360,27 @@ ftnlen diag_len;
       else
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           temp = *alpha;
-          if (nounit)
+          if(nounit)
           {
             temp *= a[j + j * a_dim1];
           }
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             b[i + j * b_dim1] = temp * b[i + j * b_dim1];
             /* L190: */
           }
           i__2 = *n;
-          for (k = j + 1; k <= i__2; ++k)
+          for(k = j + 1; k <= i__2; ++k)
           {
-            if (a[k + j * a_dim1] != 0.)
+            if(a[k + j * a_dim1] != 0.)
             {
               temp = *alpha * a[k + j * a_dim1];
               i__3 = *m;
-              for (i = 1; i <= i__3; ++i)
+              for(i = 1; i <= i__3; ++i)
               {
                 b[i + j * b_dim1] += temp * b[i + k * b_dim1];
                 /* L200: */
@@ -3397,19 +3397,19 @@ ftnlen diag_len;
 
       /*           Form  B := alpha*B*A'. */
 
-      if (upper)
+      if(upper)
       {
         i__1 = *n;
-        for (k = 1; k <= i__1; ++k)
+        for(k = 1; k <= i__1; ++k)
         {
           i__2 = k - 1;
-          for (j = 1; j <= i__2; ++j)
+          for(j = 1; j <= i__2; ++j)
           {
-            if (a[j + k * a_dim1] != 0.)
+            if(a[j + k * a_dim1] != 0.)
             {
               temp = *alpha * a[j + k * a_dim1];
               i__3 = *m;
-              for (i = 1; i <= i__3; ++i)
+              for(i = 1; i <= i__3; ++i)
               {
                 b[i + j * b_dim1] += temp * b[i + k * b_dim1];
                 /* L230: */
@@ -3418,14 +3418,14 @@ ftnlen diag_len;
             /* L240: */
           }
           temp = *alpha;
-          if (nounit)
+          if(nounit)
           {
             temp *= a[k + k * a_dim1];
           }
-          if (temp != 1.)
+          if(temp != 1.)
           {
             i__2 = *m;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               b[i + k * b_dim1] = temp * b[i + k * b_dim1];
               /* L250: */
@@ -3436,16 +3436,16 @@ ftnlen diag_len;
       }
       else
       {
-        for (k = *n; k >= 1; --k)
+        for(k = *n; k >= 1; --k)
         {
           i__1 = *n;
-          for (j = k + 1; j <= i__1; ++j)
+          for(j = k + 1; j <= i__1; ++j)
           {
-            if (a[j + k * a_dim1] != 0.)
+            if(a[j + k * a_dim1] != 0.)
             {
               temp = *alpha * a[j + k * a_dim1];
               i__2 = *m;
-              for (i = 1; i <= i__2; ++i)
+              for(i = 1; i <= i__2; ++i)
               {
                 b[i + j * b_dim1] += temp * b[i + k * b_dim1];
                 /* L270: */
@@ -3454,14 +3454,14 @@ ftnlen diag_len;
             /* L280: */
           }
           temp = *alpha;
-          if (nounit)
+          if(nounit)
           {
             temp *= a[k + k * a_dim1];
           }
-          if (temp != 1.)
+          if(temp != 1.)
           {
             i__1 = *m;
-            for (i = 1; i <= i__1; ++i)
+            for(i = 1; i <= i__1; ++i)
             {
               b[i + k * b_dim1] = temp * b[i + k * b_dim1];
               /* L290: */
@@ -3623,32 +3623,32 @@ ftnlen diag_len;
 
   /* Function Body */
   info = 0;
-  if (! lsame_(uplo, "U", 1L, 1L) && ! lsame_(uplo, "L", 1L, 1L))
+  if(! lsame_(uplo, "U", 1L, 1L) && ! lsame_(uplo, "L", 1L, 1L))
   {
     info = 1;
   }
-  else if (! lsame_(trans, "N", 1L, 1L) && ! lsame_(trans, "T", 1L, 1L) &&
-           ! lsame_(trans, "C", 1L, 1L))
+  else if(! lsame_(trans, "N", 1L, 1L) && ! lsame_(trans, "T", 1L, 1L) &&
+          ! lsame_(trans, "C", 1L, 1L))
   {
     info = 2;
   }
-  else if (! lsame_(diag, "U", 1L, 1L) && ! lsame_(diag, "N", 1L, 1L))
+  else if(! lsame_(diag, "U", 1L, 1L) && ! lsame_(diag, "N", 1L, 1L))
   {
     info = 3;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 4;
   }
-  else if (*lda < max(1, *n))
+  else if(*lda < max(1, *n))
   {
     info = 6;
   }
-  else if (*incx == 0)
+  else if(*incx == 0)
   {
     info = 8;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DTRMV ", &info, 6L);
     return 0;
@@ -3656,7 +3656,7 @@ ftnlen diag_len;
 
   /*     Quick return if possible. */
 
-  if (*n == 0)
+  if(*n == 0)
   {
     return 0;
   }
@@ -3666,11 +3666,11 @@ ftnlen diag_len;
   /*     Set up the start point in X if the increment is not unity. This */
   /*     will be  ( N - 1 )*INCX  too small for descending loops. */
 
-  if (*incx <= 0)
+  if(*incx <= 0)
   {
     kx = 1 - (*n - 1) * *incx;
   }
-  else if (*incx != 1)
+  else if(*incx != 1)
   {
     kx = 1;
   }
@@ -3678,28 +3678,28 @@ ftnlen diag_len;
   /*     Start the operations. In this version the elements of A are */
   /*     accessed sequentially with one pass through A. */
 
-  if (lsame_(trans, "N", 1L, 1L))
+  if(lsame_(trans, "N", 1L, 1L))
   {
 
     /*        Form  x := A*x. */
 
-    if (lsame_(uplo, "U", 1L, 1L))
+    if(lsame_(uplo, "U", 1L, 1L))
     {
-      if (*incx == 1)
+      if(*incx == 1)
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
-          if (x[j] != 0.)
+          if(x[j] != 0.)
           {
             temp = x[j];
             i__2 = j - 1;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               x[i] += temp * a[i + j * a_dim1];
               /* L10: */
             }
-            if (nounit)
+            if(nounit)
             {
               x[j] *= a[j + j * a_dim1];
             }
@@ -3711,20 +3711,20 @@ ftnlen diag_len;
       {
         jx = kx;
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
-          if (x[jx] != 0.)
+          if(x[jx] != 0.)
           {
             temp = x[jx];
             ix = kx;
             i__2 = j - 1;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               x[ix] += temp * a[i + j * a_dim1];
               ix += *incx;
               /* L30: */
             }
-            if (nounit)
+            if(nounit)
             {
               x[jx] *= a[j + j * a_dim1];
             }
@@ -3736,20 +3736,20 @@ ftnlen diag_len;
     }
     else
     {
-      if (*incx == 1)
+      if(*incx == 1)
       {
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
-          if (x[j] != 0.)
+          if(x[j] != 0.)
           {
             temp = x[j];
             i__1 = j + 1;
-            for (i = *n; i >= i__1; --i)
+            for(i = *n; i >= i__1; --i)
             {
               x[i] += temp * a[i + j * a_dim1];
               /* L50: */
             }
-            if (nounit)
+            if(nounit)
             {
               x[j] *= a[j + j * a_dim1];
             }
@@ -3761,20 +3761,20 @@ ftnlen diag_len;
       {
         kx += (*n - 1) * *incx;
         jx = kx;
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
-          if (x[jx] != 0.)
+          if(x[jx] != 0.)
           {
             temp = x[jx];
             ix = kx;
             i__1 = j + 1;
-            for (i = *n; i >= i__1; --i)
+            for(i = *n; i >= i__1; --i)
             {
               x[ix] += temp * a[i + j * a_dim1];
               ix -= *incx;
               /* L70: */
             }
-            if (nounit)
+            if(nounit)
             {
               x[jx] *= a[j + j * a_dim1];
             }
@@ -3790,18 +3790,18 @@ ftnlen diag_len;
 
     /*        Form  x := A'*x. */
 
-    if (lsame_(uplo, "U", 1L, 1L))
+    if(lsame_(uplo, "U", 1L, 1L))
     {
-      if (*incx == 1)
+      if(*incx == 1)
       {
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
           temp = x[j];
-          if (nounit)
+          if(nounit)
           {
             temp *= a[j + j * a_dim1];
           }
-          for (i = j - 1; i >= 1; --i)
+          for(i = j - 1; i >= 1; --i)
           {
             temp += a[i + j * a_dim1] * x[i];
             /* L90: */
@@ -3813,15 +3813,15 @@ ftnlen diag_len;
       else
       {
         jx = kx + (*n - 1) * *incx;
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
           temp = x[jx];
           ix = jx;
-          if (nounit)
+          if(nounit)
           {
             temp *= a[j + j * a_dim1];
           }
-          for (i = j - 1; i >= 1; --i)
+          for(i = j - 1; i >= 1; --i)
           {
             ix -= *incx;
             temp += a[i + j * a_dim1] * x[ix];
@@ -3835,18 +3835,18 @@ ftnlen diag_len;
     }
     else
     {
-      if (*incx == 1)
+      if(*incx == 1)
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           temp = x[j];
-          if (nounit)
+          if(nounit)
           {
             temp *= a[j + j * a_dim1];
           }
           i__2 = *n;
-          for (i = j + 1; i <= i__2; ++i)
+          for(i = j + 1; i <= i__2; ++i)
           {
             temp += a[i + j * a_dim1] * x[i];
             /* L130: */
@@ -3859,16 +3859,16 @@ ftnlen diag_len;
       {
         jx = kx;
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           temp = x[jx];
           ix = jx;
-          if (nounit)
+          if(nounit)
           {
             temp *= a[j + j * a_dim1];
           }
           i__2 = *n;
-          for (i = j + 1; i <= i__2; ++i)
+          for(i = j + 1; i <= i__2; ++i)
           {
             ix += *incx;
             temp += a[i + j * a_dim1] * x[ix];
@@ -4035,32 +4035,32 @@ ftnlen diag_len;
 
   /* Function Body */
   info = 0;
-  if (! lsame_(uplo, "U", 1L, 1L) && ! lsame_(uplo, "L", 1L, 1L))
+  if(! lsame_(uplo, "U", 1L, 1L) && ! lsame_(uplo, "L", 1L, 1L))
   {
     info = 1;
   }
-  else if (! lsame_(trans, "N", 1L, 1L) && ! lsame_(trans, "T", 1L, 1L) &&
-           ! lsame_(trans, "C", 1L, 1L))
+  else if(! lsame_(trans, "N", 1L, 1L) && ! lsame_(trans, "T", 1L, 1L) &&
+          ! lsame_(trans, "C", 1L, 1L))
   {
     info = 2;
   }
-  else if (! lsame_(diag, "U", 1L, 1L) && ! lsame_(diag, "N", 1L, 1L))
+  else if(! lsame_(diag, "U", 1L, 1L) && ! lsame_(diag, "N", 1L, 1L))
   {
     info = 3;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 4;
   }
-  else if (*lda < max(1, *n))
+  else if(*lda < max(1, *n))
   {
     info = 6;
   }
-  else if (*incx == 0)
+  else if(*incx == 0)
   {
     info = 8;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DTRSV ", &info, 6L);
     return 0;
@@ -4068,7 +4068,7 @@ ftnlen diag_len;
 
   /*     Quick return if possible. */
 
-  if (*n == 0)
+  if(*n == 0)
   {
     return 0;
   }
@@ -4078,11 +4078,11 @@ ftnlen diag_len;
   /*     Set up the start point in X if the increment is not unity. This */
   /*     will be  ( N - 1 )*INCX  too small for descending loops. */
 
-  if (*incx <= 0)
+  if(*incx <= 0)
   {
     kx = 1 - (*n - 1) * *incx;
   }
-  else if (*incx != 1)
+  else if(*incx != 1)
   {
     kx = 1;
   }
@@ -4090,25 +4090,25 @@ ftnlen diag_len;
   /*     Start the operations. In this version the elements of A are */
   /*     accessed sequentially with one pass through A. */
 
-  if (lsame_(trans, "N", 1L, 1L))
+  if(lsame_(trans, "N", 1L, 1L))
   {
 
     /*        Form  x := inv( A )*x. */
 
-    if (lsame_(uplo, "U", 1L, 1L))
+    if(lsame_(uplo, "U", 1L, 1L))
     {
-      if (*incx == 1)
+      if(*incx == 1)
       {
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
-          if (x[j] != 0.)
+          if(x[j] != 0.)
           {
-            if (nounit)
+            if(nounit)
             {
               x[j] /= a[j + j * a_dim1];
             }
             temp = x[j];
-            for (i = j - 1; i >= 1; --i)
+            for(i = j - 1; i >= 1; --i)
             {
               x[i] -= temp * a[i + j * a_dim1];
               /* L10: */
@@ -4120,17 +4120,17 @@ ftnlen diag_len;
       else
       {
         jx = kx + (*n - 1) * *incx;
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
-          if (x[jx] != 0.)
+          if(x[jx] != 0.)
           {
-            if (nounit)
+            if(nounit)
             {
               x[jx] /= a[j + j * a_dim1];
             }
             temp = x[jx];
             ix = jx;
-            for (i = j - 1; i >= 1; --i)
+            for(i = j - 1; i >= 1; --i)
             {
               ix -= *incx;
               x[ix] -= temp * a[i + j * a_dim1];
@@ -4144,20 +4144,20 @@ ftnlen diag_len;
     }
     else
     {
-      if (*incx == 1)
+      if(*incx == 1)
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
-          if (x[j] != 0.)
+          if(x[j] != 0.)
           {
-            if (nounit)
+            if(nounit)
             {
               x[j] /= a[j + j * a_dim1];
             }
             temp = x[j];
             i__2 = *n;
-            for (i = j + 1; i <= i__2; ++i)
+            for(i = j + 1; i <= i__2; ++i)
             {
               x[i] -= temp * a[i + j * a_dim1];
               /* L50: */
@@ -4170,18 +4170,18 @@ ftnlen diag_len;
       {
         jx = kx;
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
-          if (x[jx] != 0.)
+          if(x[jx] != 0.)
           {
-            if (nounit)
+            if(nounit)
             {
               x[jx] /= a[j + j * a_dim1];
             }
             temp = x[jx];
             ix = jx;
             i__2 = *n;
-            for (i = j + 1; i <= i__2; ++i)
+            for(i = j + 1; i <= i__2; ++i)
             {
               ix += *incx;
               x[ix] -= temp * a[i + j * a_dim1];
@@ -4199,21 +4199,21 @@ ftnlen diag_len;
 
     /*        Form  x := inv( A' )*x. */
 
-    if (lsame_(uplo, "U", 1L, 1L))
+    if(lsame_(uplo, "U", 1L, 1L))
     {
-      if (*incx == 1)
+      if(*incx == 1)
       {
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           temp = x[j];
           i__2 = j - 1;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             temp -= a[i + j * a_dim1] * x[i];
             /* L90: */
           }
-          if (nounit)
+          if(nounit)
           {
             temp /= a[j + j * a_dim1];
           }
@@ -4225,18 +4225,18 @@ ftnlen diag_len;
       {
         jx = kx;
         i__1 = *n;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           temp = x[jx];
           ix = kx;
           i__2 = j - 1;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             temp -= a[i + j * a_dim1] * x[ix];
             ix += *incx;
             /* L110: */
           }
-          if (nounit)
+          if(nounit)
           {
             temp /= a[j + j * a_dim1];
           }
@@ -4248,18 +4248,18 @@ ftnlen diag_len;
     }
     else
     {
-      if (*incx == 1)
+      if(*incx == 1)
       {
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
           temp = x[j];
           i__1 = j + 1;
-          for (i = *n; i >= i__1; --i)
+          for(i = *n; i >= i__1; --i)
           {
             temp -= a[i + j * a_dim1] * x[i];
             /* L130: */
           }
-          if (nounit)
+          if(nounit)
           {
             temp /= a[j + j * a_dim1];
           }
@@ -4271,18 +4271,18 @@ ftnlen diag_len;
       {
         kx += (*n - 1) * *incx;
         jx = kx;
-        for (j = *n; j >= 1; --j)
+        for(j = *n; j >= 1; --j)
         {
           temp = x[jx];
           ix = kx;
           i__1 = j + 1;
-          for (i = *n; i >= i__1; --i)
+          for(i = *n; i >= i__1; --i)
           {
             temp -= a[i + j * a_dim1] * x[ix];
             ix -= *incx;
             /* L150: */
           }
-          if (nounit)
+          if(nounit)
           {
             temp /= a[j + j * a_dim1];
           }
@@ -4324,16 +4324,16 @@ integer *incx;
 
   /* Function Body */
   ret_val = 0;
-  if (*n < 1 || *incx <= 0)
+  if(*n < 1 || *incx <= 0)
   {
     return ret_val;
   }
   ret_val = 1;
-  if (*n == 1)
+  if(*n == 1)
   {
     return ret_val;
   }
-  if (*incx == 1)
+  if(*incx == 1)
   {
     goto L20;
   }
@@ -4344,9 +4344,9 @@ integer *incx;
   dmax_ = abs(dx[1]);
   ix += *incx;
   i__1 = *n;
-  for (i = 2; i <= i__1; ++i)
+  for(i = 2; i <= i__1; ++i)
   {
-    if ((d__1 = dx[ix], abs(d__1)) <= dmax_)
+    if((d__1 = dx[ix], abs(d__1)) <= dmax_)
     {
       goto L5;
     }
@@ -4363,9 +4363,9 @@ L5:
 L20:
   dmax_ = abs(dx[1]);
   i__1 = *n;
-  for (i = 2; i <= i__1; ++i)
+  for(i = 2; i <= i__1; ++i)
   {
-    if ((d__1 = dx[i], abs(d__1)) <= dmax_)
+    if((d__1 = dx[i], abs(d__1)) <= dmax_)
     {
       goto L30;
     }

@@ -1,81 +1,54 @@
 include(tools4tests)
 
-set(TEST_WRAP FALSE)
-
 if(WITH_${COMPONENT}_TESTING)
+
+  # ---- Siconos Algebra tests ----
+  begin_tests(src/utils/SiconosAlgebra/test)
+
+  new_test(
+    NAME testSiconosAlgebra
+    SOURCES BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp ${SIMPLE_TEST_MAIN}
+    DEPS "numerics;CPPUNIT::CPPUNIT;externals"
+    )
+
+  # ---- Siconos Memory tests ----
+  begin_tests(src/utils/SiconosMemory/test)
+
+  new_test(
+    NAME testSiconosMemory
+    SOURCES SiconosMemoryTest.cpp ${SIMPLE_TEST_MAIN}
+    DEPS "numerics;CPPUNIT::CPPUNIT"
+    )
+
+  # ---- Siconos tools tests ----
+  begin_tests(src/utils/SiconosTools/test DEPS "CPPUNIT::CPPUNIT")
+  new_test(SOURCES SiconosGraphTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES SiconosVisitorTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES  SiconosPropertiesTest.cpp ${SIMPLE_TEST_MAIN})
+
+  # ---- Modeling tools ---
+  begin_tests(src/modelingTools/test DEPS "numerics;CPPUNIT::CPPUNIT")
+  new_test(SOURCES FirstOrderNonLinearDSTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES FirstOrderLinearDSTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES FirstOrderLinearTIRTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES FirstOrderLinearRTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES FirstOrderType1RTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES LagrangianLinearTIRTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES LagrangianScleronomousRTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES LagrangianRheonomousRTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES LagrangianCompliantRTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES LagrangianCompliantLinearTIRTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES LagrangianDSTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES LagrangianLinearTIDSTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES NewtonEulerDSTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES NonSmoothDynamicalSystemTest.cpp  ${SIMPLE_TEST_MAIN})
   
-  # We don't use COMPILE_WITH since we don't want to link cppunit with the
-  # kernel library
-  find_package(CppUnit REQUIRED)
-  set(TEST_LIBS ${TEST_LIBS} ${CPPUNIT_LIBRARIES})
-  set(TEST_INCLUDE_DIR ${TEST_INCLUDE_DIR} ${CPPUNIT_INCLUDE_DIR})
-
-  # Plugin library for tests
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/plugin/test)
-  # MODULE rather than SHARED for Macosx compatibility. 
-  add_library(TestPlugin MODULE src/plugin/test/TestPlugin.cpp)
-  set_target_properties(TestPlugin 
-    PROPERTIES PREFIX ""
-    OUTPUT_NAME TestPlugin)
-
-  # the main test driver
-  SET(TEST_MAIN src/test/TestMain.cpp)
-
-  # For Windows
-  SET(PATH_FOR_PLUGIN
-   ".\;${CMAKE_CURRENT_BINARY_DIR}/src/plugin\;${CMAKE_CURRENT_BINARY_DIR}/src/plugin/test")
-
- # Siconos Algebra
-  BEGIN_TEST(src/utils/SiconosAlgebra/test)
-
-  NEW_TEST(testSiconosAlgebra
-    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp)
-  END_TEST()
-  
-  # Siconos Memory
-  BEGIN_TEST(src/utils/SiconosMemory/test)
-  
-  NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp)
-  END_TEST()
-  
-  # modeling tools 
-  BEGIN_TEST(src/modelingTools/test)
-  
-  NEW_TEST(testModelingTools
-    FirstOrderNonLinearDSTest.cpp
-    FirstOrderLinearDSTest.cpp
-    FirstOrderLinearTIRTest.cpp
-    FirstOrderLinearRTest.cpp
-    FirstOrderType1RTest.cpp 
-    LagrangianLinearTIRTest.cpp
-    LagrangianScleronomousRTest.cpp
-    LagrangianRheonomousRTest.cpp
-    LagrangianCompliantRTest.cpp
-    LagrangianCompliantLinearTIRTest.cpp
-    LagrangianDSTest.cpp
-    LagrangianLinearTIDSTest.cpp
-    NewtonEulerDSTest.cpp
-    NonSmoothDynamicalSystemTest.cpp)
-  END_TEST()
-  #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
-  #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
-
-  
-  BEGIN_TEST(src/utils/SiconosTools/test)
-
-  NEW_TEST(testSiconosTools SiconosGraphTest.cpp SiconosVisitorTest.cpp SiconosPropertiesTest.cpp)
-
-  END_TEST()
-
-  # Simulation tests
-  BEGIN_TEST(src/simulationTools/test)
-
-  IF(HAS_FORTRAN)
-   NEW_TEST(testSimulationTools OSNSPTest.cpp EulerMoreauTest.cpp LsodarTest.cpp ZOHTest.cpp)
-   ELSE()
-    NEW_TEST(testSimulationTools OSNSPTest.cpp EulerMoreauTest.cpp)
-  ENDIF()
-  
-  END_TEST()
+  # ---- Simulation tools ---
+  begin_tests(src/simulationTools/test DEPS "numerics;CPPUNIT::CPPUNIT")
+  new_test(SOURCES OSNSPTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES testAVI.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
+  if(HAS_FORTRAN)
+    new_test(SOURCES ZOHTest.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
+  endif()
 
  endif()

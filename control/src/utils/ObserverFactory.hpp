@@ -49,7 +49,7 @@ typedef MapFactory::iterator MapFactoryIt;
  */
 template<class SubType> SP::Observer factory(SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
-  return std11::shared_ptr<SubType>(new SubType(sensor, xHat0));
+  return std::shared_ptr<SubType>(new SubType(sensor, xHat0));
 }
 
 /** Registry Class for Observers.

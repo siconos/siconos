@@ -70,7 +70,7 @@ public:
    */
   inline bool isPlugged() const
   {
-    return (fPtr != NULL);
+    return (fPtr != nullptr);
   };
 
   /** destructor

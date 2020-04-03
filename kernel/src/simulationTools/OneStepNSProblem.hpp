@@ -23,6 +23,7 @@
 #define ONESTEPNSPROBLEM_H
 
 #include "SiconosFwd.hpp"
+#include "SiconosVisitor.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SimulationGraphs.hpp"
 
@@ -75,25 +76,22 @@ protected:
   /* serialization hooks */
   ACCEPT_SERIALIZATION(OneStepNSProblem);
 
-  /** Numerics solver id */
-  int _numerics_solver_id;
-
   /** Numerics solver properties */
   SP::SolverOptions _numerics_solver_options;
 
   /** size of the nonsmooth problem */
-  unsigned int _sizeOutput;
+  unsigned int _sizeOutput = 0;
 
   /** link to the simulation that owns the nonsmooth problem */
   SP::Simulation _simulation;
 
   /** level of index sets that is considered by this osnsp */
-  unsigned int _indexSetLevel;
+  unsigned int _indexSetLevel = 0;
 
   /** level of input and output variables of the nonsmooth problems.
    *  We consider that the osnsp computes y[_inputOutputLevel] and lambda[_inputOutputLevel]
    */
-  unsigned int _inputOutputLevel;
+  unsigned int _inputOutputLevel = 0;
 
   /** maximum value for sizeOutput. Set to the number of declared
       constraints by default (topology->getNumberOfConstraints());
@@ -101,33 +99,31 @@ protected:
       call. The best choice is to set maxSize to the estimated maximum
       dimension of the problem. It must not exceed ...
   */
-  unsigned int _maxSize;
+  unsigned int _maxSize = 0;
 
   /*During Newton it, this flag allows to update the numerics matrices only once if necessary.*/
-  bool _hasBeenUpdated;
+  bool _hasBeenUpdated = false;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
-  /** default constructor
-   */
-  OneStepNSProblem();
+  /** default constructor */
+  OneStepNSProblem() = default;
 
 private:
 
-  /** copy constructor (private => no copy nor pass-by value)
-   */
-  OneStepNSProblem(const OneStepNSProblem&) {};
+  /* copy constructor, forbidden */
+  OneStepNSProblem(const OneStepNSProblem&) = delete;
 
-  /** assignment (private => forbidden) 
-   * \param osnsp
-   * \return OneStepNSProblem&  osnsp
-   */
-  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp);
+  /* assignment, forbidden */
+  OneStepNSProblem& operator=(const OneStepNSProblem&) = delete;
 
 public:
-  /**  constructor with a solver from Numerics
-   *  \param numericsSolverId id of numerics solver, see Numerics for the meaning
-   */
-  OneStepNSProblem(int numericsSolverId);
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set,
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  OneStepNSProblem(SP::SolverOptions options): _numerics_solver_options(options){};
 
   /** destructor
    */
@@ -218,6 +214,10 @@ public:
   /** Turn on/off verbose mode in numerics solver*/
   void setNumericsVerboseMode(bool vMode);
 
+  
+  /**  set the verbose level in numerics solver*/
+  void setNumericsVerboseLevel(int level);
+
   /** Check if the OSNSPb has interactions.
       \return bool = true if the  osnsp has interactions, i.e. indexSet(_indexSetLevel)->size >0 
    */
@@ -282,10 +282,18 @@ public:
    */
   virtual void postCompute() = 0;
 
-  /** change the solver type. This requires a reset of the Solveroption struct
-   * \param solverId the new solver
+  /** change the solver type and its default parameters.
+
+      - clear memory for the existing options set
+      - create and initialize a new one
+
+      \rst
+      Check the available solvers id in :ref:`problems_and_solvers`.
+      \endrst
+
+      \param solverId the new solver. 
    */
-  virtual void setSolverId(int solverId);
+  void setSolverId(int solverId);
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
       (Ex: for MoreauJeanOSI, W)

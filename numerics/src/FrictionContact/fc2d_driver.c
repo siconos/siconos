@@ -15,21 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "NumericsMatrix.h"
-#include "SparseBlockMatrix.h"
-#include "fc2d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-
+#include <assert.h>                  // for assert
+#include <stdio.h>                   // for printf, NULL, fprintf, stderr
+#include <stdlib.h>                  // for exit, malloc, EXIT_FAILURE
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_2D_NSGS, SICONO...
+#include "NonSmoothDrivers.h"        // for fc2d_driver
+#include "NumericsFwd.h"             // for FrictionContactProblem, SolverOp...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"           // for SolverOptions, solver_options_id...
+#include "SparseBlockMatrix.h"       // for SparseBlockStructuredMatrix, SBM...
+#include "fc2d_Solvers.h"            // for fc2d_cpg, fc2d_enum
+#include "numerics_verbose.h"        // for numerics_error, verbose, numeric...
 
 const char* const   SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
-const char* const   SICONOS_FRICTION_2D_PGS_STR  = "F2D_PGS";
 const char* const   SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
-const char* const   SICONOS_FRICTION_2D_LATIN_STR  = "F2D_LATIN";
 const char* const   SICONOS_FRICTION_2D_LEMKE_STR  = "F2D_LEMKE";
 const char* const   SICONOS_FRICTION_2D_ENUM_STR  = "F2D_ENUM";
 //#define DUMP_PROBLEM
@@ -42,29 +42,32 @@ static int fccounter = 0;
 #endif
 
 
-int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options)
+int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *velocity, SolverOptions* options)
 {
 
 #ifdef DUMP_PROBLEM
   char fname[256];
   sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
   printf("Dump of FrictionContactProblem%.5d.dat", fccounter);
-  
+
   FILE * foutput  =  fopen(fname, "w");
   frictionContact_printInFile(problem, foutput);
   fclose(foutput);
 #endif
 
-  if (options == NULL)
+
+
+
+  if(options == NULL)
     numerics_error("fc2d_driver", "null input for solver options");
 
   /* Checks inputs */
-  if (problem == NULL || reaction == NULL || velocity == NULL)
+  if(problem == NULL || reaction == NULL || velocity == NULL)
     numerics_error("fc2d_driver", "null input for FrictionContactProblem and/or unknowns (reaction,velocity)");
 
   assert(options->isSet);
 
-  if (verbose > 0)
+  if(verbose > 0)
     solver_options_print(options);
 
 
@@ -74,20 +77,19 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
 
   int info = -1 ;
 
-  if (problem->dimension != 2)
+  if(problem->dimension != 2)
     numerics_error("fc2d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
 
   /* Non Smooth Gauss Seidel (NSGS) */
 
-  if (problem->M->storageType == 1)
+  if(problem->M->storageType == 1)
   {
 
-    if (options->solverId == SICONOS_FRICTION_2D_NSGS)
+    if(options->solverId == SICONOS_FRICTION_2D_NSGS)
     {
-      if (verbose)
-        printf(" ======================= Call Sparse NSGS solver for Friction-Contact 2D problem ======================\n");
-      fc2d_sparse_nsgs(problem, reaction , velocity , &info , options);
+      numerics_printf(" ======================= Call Sparse NSGS solver for Friction-Contact 2D problem ======================");
+      fc2d_sparse_nsgs(problem, reaction, velocity, &info, options);
     }
     else
     {
@@ -100,26 +102,25 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
 
       problem->M->matrix0  = denseMat;
       problem->M->storageType =0;
-      info = fc2d_driver(problem, reaction , velocity, options);
+      info = fc2d_driver(problem, reaction, velocity, options);
 
       NM_clearDense(problem->M);
       problem->M->matrix1  = M;
       problem->M->storageType =1;
-        
-        
+
+
     }
 
   }
-  else if (problem->M->storageType == 0)
+  else if(problem->M->storageType == 0)
   {
 
-    switch (options->solverId)
+    switch(options->solverId)
     {
-      /****** NLGS algorithm ******/
-    case SICONOS_FRICTION_2D_PGS:
+    /****** NLGS algorithm ******/
     case SICONOS_FRICTION_2D_NSGS:
     {
-      if (verbose)
+      if(verbose)
         printf(" ========================== Call NLGS solver for Friction-Contact 2D problem ==========================\n");
       fc2d_nsgs(problem, reaction, velocity, &info, options);
       break;
@@ -127,23 +128,15 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     /****** CPG algorithm ******/
     case SICONOS_FRICTION_2D_CPG:
     {
-      if (verbose)
+      if(verbose)
         printf(" ========================== Call CPG solver for Friction-Contact 2D problem ==========================\n");
       fc2d_cpg(problem, reaction, velocity, &info, options);
-      break;
-    }
-    /****** Latin algorithm ******/
-    case SICONOS_FRICTION_2D_LATIN:
-    {
-      if (verbose)
-        printf(" ========================== Call Latin solver for Friction-Contact 2D problem ==========================\n");
-      fc2d_latin(problem, reaction, velocity, &info, options);
       break;
     }
     /****** Lexicolemke algorithm ******/
     case SICONOS_FRICTION_2D_LEMKE:
     {
-      if (verbose)
+      if(verbose)
         printf(" ========================== Call Lemke solver for Friction-Contact 2D problem ==========================\n");
       fc2d_lexicolemke(problem, reaction, velocity, &info, options);
       break;
@@ -151,7 +144,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     /****** Enum algorithm ******/
     case SICONOS_FRICTION_2D_ENUM:
     {
-      if (verbose)
+      if(verbose)
         printf(" ========================== Call Enumerative solver for Friction-Contact 2D problem ==========================\n");
       fc2d_enum(problem, reaction, velocity, &info, options);
       break;
@@ -164,7 +157,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     }
     }
 #ifdef DUMP_PROBLEM_IF_INFO
-    if (info)
+    if(info)
     {
       char fname[256];
       sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
@@ -178,8 +171,8 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   }
   else
   {
-    numerics_error("fc2d_driver", 
-                  " error: unknown storagetype named");
+    numerics_error("fc2d_driver",
+                   " error: unknown storagetype named");
     exit(EXIT_FAILURE);
   }
 

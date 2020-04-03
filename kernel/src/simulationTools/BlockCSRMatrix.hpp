@@ -22,18 +22,18 @@ Definition of a compressed row sparse block matrix of SiconosMatrix*
 #ifndef BLOCKCSRMATRIX_H
 #define BLOCKCSRMATRIX_H
 
-#include "SiconosNumerics.h"
+#include "NumericsFwd.h"  // Numerics forward declarations
 #include "SimulationTypeDef.hpp"
+#include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
+#include <boost/numeric/ublas/fwd.hpp> // Boost forward declarations 
 
 /* with signed int typedef  boost::numeric::ublas::compressed_matrix<double*> CompressedRowMat; */
 /* cf http://boost.2283326.n4.nabble.com/LU-decomposition-of-compressed-matrix-td3417929.html */
-typedef ublas::compressed_matrix <
-double*, ublas::basic_row_major<unsigned int>, 0, ublas::unbounded_array<std::size_t>
->  CompressedRowMat;
-
-
+typedef boost::numeric::ublas::compressed_matrix <
+double*, boost::numeric::ublas::basic_row_major<unsigned int>, 0, boost::numeric::ublas::unbounded_array<std::size_t> >  CompressedRowMat;
 TYPEDEF_SPTR(CompressedRowMat)
 TYPEDEF_SPTR(SparseBlockStructuredMatrix)
+
 
 /** Definition of a compressed sparse row matrix of SiconosMatrix,
  * used in OneStepNSProblem to store the M matrix.
@@ -81,7 +81,8 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix)
     0   & 0   & b33&0 \\
     b81 & 0   & 0 & b44
     \end{array}\right.
- 
+
+ \endrst
  *
  * with nc = 4, nbNonNullBlocks = 8, RowPos = [0 0 0 1 1 2 3 3],
  * RowCol = [0 1 3 0 1 2 0 3]\n and _diagsize0 = [3 6 9 12].
@@ -218,7 +219,7 @@ public:
   void fillM(InteractionsGraph& indexSet);
 
   /** fill the matrix with the H matrix 
-   * \warning only for NewtonEulerFrom3DLocalFrameR
+   * \warning only for NewtonEuler3DR
    * \param indexSet of the active constraints
    */
   void fillH(InteractionsGraph& indexSet);

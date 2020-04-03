@@ -294,7 +294,7 @@ static inline void SN_Gams_set_dirs(const SN_GAMSparams* solverParameters, const
     while (next_opt); \
   }
 
-static inline void SN_Gams_set_options(const SN_GAMSparams* GP, optHandle_t* Opts)
+static inline void SN_Gams_set_default(const SN_GAMSparams* GP, optHandle_t* Opts)
 {
   assert(GP);
   assert(Opts);

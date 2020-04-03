@@ -18,13 +18,12 @@
 #ifndef LCP_PROBLEM_C
 #define LCP_PROBLEM_C
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "NumericsMatrix.h"
 #include "LinearComplementarityProblem.h"
-#include "numerics_verbose.h"
+#include <assert.h>            // for assert
+#include <stdio.h>             // for printf, fprintf, fscanf, NULL, FILE
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
+#include "numerics_verbose.h"  // for CHECK_IO
 
 void linearComplementarity_display(LinearComplementarityProblem* problem)
 {
@@ -33,7 +32,7 @@ void linearComplementarity_display(LinearComplementarityProblem* problem)
   int i, n = problem->size;
   printf("LinearComplementarityProblem Display :\n-------------\n");
   printf("size :%d \n", problem->size);
-  if (problem->M)
+  if(problem->M)
   {
     printf("M matrix:\n");
     NM_display(problem->M);
@@ -41,10 +40,10 @@ void linearComplementarity_display(LinearComplementarityProblem* problem)
   else
     printf("No M matrix:\n");
 
-  if (problem->q)
+  if(problem->q)
   {
     printf("q vector:\n");
-    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+    for(i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
   }
   else
     printf("No q vector:\n");
@@ -53,7 +52,7 @@ void linearComplementarity_display(LinearComplementarityProblem* problem)
 
 int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file)
 {
-  if (! problem)
+  if(! problem)
   {
     fprintf(stderr, "Numerics, LinearComplementarityProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -62,7 +61,7 @@ int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FI
   int n = problem->size;
   fprintf(file, "%d\n", n);
   NM_write_in_file(problem->M, file);
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
@@ -79,16 +78,21 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
   problem->M = NM_new_from_file(file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
   return 1;
 }
-int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, char* filename)
+int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, const char* filename)
 {
   int info = 0;
   FILE * file = fopen(filename, "r");
+  if(file == NULL)
+  {
+    printf("Error! Could not open filename %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
 
   info = linearComplementarity_newFromFile(problem, file);
 
@@ -98,13 +102,13 @@ int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem,
 
 void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
 {
-  if (problem->M)
+  if(problem->M)
   {
-    NM_free(problem->M);
+    NM_clear(problem->M);
     free(problem->M);
     problem->M = NULL;
   }
-  if (problem->q)
+  if(problem->q)
   {
     free(problem->q);
     problem->q = NULL;

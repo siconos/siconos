@@ -55,23 +55,16 @@
   GlobalFrictionContactProblem()
     {
 
-      GlobalFrictionContactProblem *FC;
+      GlobalFrictionContactProblem *FC = globalFrictionContactProblem_new();
       // return pointer : free by std swig destructor
-      FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
-
-      globalFrictionContact_null(FC);
-
       return FC;
     }
 
   GlobalFrictionContactProblem(SN_OBJ_TYPE *dim)
     {
 
-      GlobalFrictionContactProblem *FC;
       // return pointer : free by std swig destructor
-      FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
-
-      globalFrictionContact_null(FC);
+      GlobalFrictionContactProblem * FC = globalFrictionContactProblem_new();
       SWIG_AsVal_int(dim, &FC->dimension);
 
       return FC;
@@ -87,8 +80,7 @@
       SN_ARRAY_TYPE* array = obj_to_sn_array(o1, &is_new_object1);
       SN_ARRAY_TYPE* vector = obj_to_sn_vector(o2, &is_new_object2);
       SN_ARRAY_TYPE* mu_vector = obj_to_sn_vector(o3, &is_new_object3);
-      GlobalFrictionContactProblem * FC = (GlobalFrictionContactProblem *) malloc(sizeof(GlobalFrictionContactProblem));
-      globalFrictionContact_null(FC);
+      GlobalFrictionContactProblem * FC = globalFrictionContactProblem_new();
 
       size_t size0 = array_size((SN_ARRAY_TYPE*)array,0);
       size_t size1 = array_size((SN_ARRAY_TYPE*)array,1);
@@ -112,7 +104,7 @@
 
   ~GlobalFrictionContactProblem()
   {
-    freeGlobalFrictionContactProblem($self);
+    globalFrictionContact_free($self);
   }
 
 };

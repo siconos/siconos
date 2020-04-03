@@ -5,9 +5,9 @@ Simulation of an electrical oscillator supplying a resistor through a half-wave 
 
 Author: Pascal Denoyelle, September 22, 2005
 
-You may refer to the source code of this example, `found here <https://github.com/siconos/siconos/blob/master/examples/Electronics/CircuitRLCD/CircuitRLCD.cpp>`_.
+You may refer to the source code of this example, `found here <https://github.com/siconos/siconos-tutorials/blob/master/examples/electronics/CircuitRLCD/CircuitRLCD.cpp>`_.
 
-There is also a PDF version of this document, `viewable online here <https://github.com/siconos/siconos/blob/master/examples/Electronics/CircuitRLCD/Template-CircuitRLCD.pdf>`_.
+There is also a PDF version of this document, `viewable online here <https://github.com/siconos/siconos-tutorials/blob/master/examples/electronics/CircuitRLCD/Template-CircuitRLCD.pdf>`_.
 
 Description of the physical problem : electrical oscillator with half-wave rectifier
 ````````````````````````````````````````````````````````````````````````````````````

@@ -9,15 +9,15 @@
 %include "MCP_Solvers.h"
 %include "MCP_cst.h"
 
-%extend MixedComplementarityProblem
+%extend MixedComplementarityProblem_old
 {
 
 
 
-  MixedComplementarityProblem()
+  MixedComplementarityProblem_old()
    {
-     MixedComplementarityProblem* MCP;
-     MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
+     MixedComplementarityProblem_old* MCP;
+     MCP =  (MixedComplementarityProblem_old *) malloc(sizeof(MixedComplementarityProblem_old));
      MCP->Fmcp=NULL;
      MCP->nablaFmcp=NULL;
      MCP->computeFmcp=NULL;
@@ -40,7 +40,7 @@
 
   void test_call_to_callback()
   {
-    printf("I am in test_call_to_callback()\n");
+    printf(" --- test_call_to_callback() starts\n");
 
     int size =   $self->sizeEqualities +  $self->sizeInequalities;
 
@@ -67,17 +67,16 @@
     free(F);
     free(nablaF);
 
+    printf(" --- test_call_to_callback() ends\n");
 
-
-    printf("I leave test_call_to_callback()\n");
   }
 
 
 
-  MixedComplementarityProblem(SN_OBJ_TYPE *sizeEq, SN_OBJ_TYPE *sizeIneq, SN_OBJ_TYPE *o1, SN_OBJ_TYPE *o2)
+  MixedComplementarityProblem_old(SN_OBJ_TYPE *sizeEq, SN_OBJ_TYPE *sizeIneq, SN_OBJ_TYPE *o1, SN_OBJ_TYPE *o2)
   {
-     MixedComplementarityProblem* MCP;
-     MCP =  (MixedComplementarityProblem *) malloc(sizeof(MixedComplementarityProblem));
+     MixedComplementarityProblem_old* MCP;
+     MCP =  (MixedComplementarityProblem_old *) malloc(sizeof(MixedComplementarityProblem_old));
 
      SWIG_AsVal_int(sizeEq, &MCP->sizeEqualities);
      SWIG_AsVal_int(sizeIneq, &MCP->sizeInequalities);
@@ -88,7 +87,7 @@
        SWIG_Error(SWIG_RuntimeError, "sizeEqualities + sizeInequalities has to be positive");
        MCP->Fmcp = NULL;
        MCP->nablaFmcp = NULL;
-       freeMixedComplementarityProblem(MCP);
+       mixedComplementarityProblem_old_free(MCP);
        return NULL;
      }
      else
@@ -109,7 +108,7 @@
        free(MCP->nablaFmcp);
        MCP->Fmcp = NULL;
        MCP->nablaFmcp = NULL;
-       freeMixedComplementarityProblem(MCP);
+       mixedComplementarityProblem_old_free(MCP);
        return NULL;
      }
 
@@ -126,19 +125,19 @@
        free(MCP->nablaFmcp);
        MCP->Fmcp = NULL;
        MCP->nablaFmcp = NULL;
-       freeMixedComplementarityProblem(MCP);
+       mixedComplementarityProblem_old_free(MCP);
        return NULL;
      }
 
      return MCP;
    }
 
-  ~MixedComplementarityProblem()
+  ~MixedComplementarityProblem_old()
   {
     free($self->Fmcp);
     free($self->nablaFmcp);
     $self->Fmcp = NULL;
     $self->nablaFmcp = NULL;
-    freeMixedComplementarityProblem($self);
+    mixedComplementarityProblem_old_free($self);
   }
 };

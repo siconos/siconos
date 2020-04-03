@@ -4,16 +4,15 @@
 #include <SiconosFwd.hpp>
 %}
 
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
-#define STD11 std
-#undef __cplusplus
-#define __cplusplus SICONOS_CXXVERSION
+#define STD std
+/* #undef __cplusplus */
+/* #define __cplusplus SICONOS_CXXVERSION */
 %include <std_shared_ptr.i>
 
 // from g++-v4/bits/shared_ptr.h
 // not sure if this is needed, but we can't use '#include <memory>'
 // since it is in a compiler path
-namespace STD11 {
+namespace STD {
   template<typename _Tp>
     class enable_shared_from_this
   {
@@ -30,29 +29,6 @@ namespace STD11 {
       shared_from_this() const;
   };
  }
-#else
-#define SWIG_SHARED_PTR_NAMESPACE std11
-%include <boost_shared_ptr.i>
-#define STD11 boost
-%import "boost/version.hpp"
-//  boost >= 1.53
-// this sucks and will likely not work in C++11, but it is difficult to
-// deal with this properly
-#if (BOOST_VERSION >= 105300)
-#define BOOST_NOEXCEPT
-#endif
-// boost >= 1.40
-#if (BOOST_VERSION >= 104000)
-%ignore std11::enable_shared_from_this::operator=;
-// boost >= 1.64
-#if (BOOST_VERSION >= 106400)
-%import "boost/smart_ptr/detail/sp_noexcept.hpp"
-#endif
-%import "boost/smart_ptr/enable_shared_from_this.hpp"
-#else
-%import "boost/enable_shared_from_this.hpp"
-#endif
-#endif
 
 // fix some problems passing ref and null shared_ptr to directors
 %define FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SP,TYPE)
@@ -121,9 +97,9 @@ FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SPC,TYPE)
   struct SharedPointerKeeper
   {
     // to keep a pointer on shared_ptr{Siconos,Simple}{Vector,Matrix}
-    std11::shared_ptr<void> ref;
+    std::shared_ptr<void> ref;
 
-    SharedPointerKeeper(std11::shared_ptr<void> v) : ref(v) 
+    SharedPointerKeeper(std::shared_ptr<void> v) : ref(v) 
     {
       DEBUG_PRINTF("SharedPointerKeeper : get %p use_count %ld\n",v.get(),v.use_count());
     };
@@ -140,7 +116,7 @@ FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SPC,TYPE)
   /* the PyCObject deleter 
      example: 
      SharedPointerKeeper* savedSharePtr = 
-       new SharedPointerKeeper(std11::static_pointer_cast<void>(mysharedptr));
+       new SharedPointerKeeper(std::static_pointer_cast<void>(mysharedptr));
      PyCObject_FromVoidPtr((void*) savedSharedPtr, &sharedPointerKeeperDelete);
   */
 

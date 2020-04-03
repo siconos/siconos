@@ -3,7 +3,7 @@
 #define MechanicsFwd_hpp
 #include <SiconosPointers.hpp>
 
-#define MECHANICS_CLASSES()\
+#define MECHANICS_CLASSES()                     \
   REGISTER(SpaceFilter)                         \
   REGISTER(SiconosBodies)                       \
   REGISTER(ExternalBody)                        \
@@ -50,9 +50,16 @@
   REGISTER(ContactShapeDistance)                \
   REGISTER(Geometer)                            \
   REGISTER(BulletR)                             \
-  REGISTER(BulletFrom1DLocalFrameR)             \
-  REGISTER(BodyDS)                              \
+  REGISTER(Bullet5DR)                           \
+  REGISTER(Bullet1DR)                           \
+  REGISTER(Bullet2dR)                           \
+  REGISTER(Bullet2d3DR)                         \
+  REGISTER(RigidBodyDS)                         \
+  REGISTER(RigidBody2dDS)                       \
   REGISTER(ContactR)                            \
+  REGISTER(Contact5DR)                          \
+  REGISTER(Contact2dR)                          \
+  REGISTER(Contact2d3DR)                        \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
   REGISTER(SiconosContactorBase)                \
@@ -60,10 +67,15 @@
   REGISTER(SiconosSphere)                       \
   REGISTER(SiconosBox)                          \
   REGISTER(SiconosCylinder)                     \
+  REGISTER(SiconosCone)                         \
+  REGISTER(SiconosCapsule)                      \
   REGISTER(SiconosConvexHull)                   \
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosMesh)                         \
   REGISTER(SiconosHeightMap)                    \
+  REGISTER(SiconosDisk)                         \
+  REGISTER(SiconosBox2d)                         \
+  REGISTER(SiconosConvexHull2d)                  \
   REGISTER(SiconosCollisionQueryResult)         \
   REGISTER(SiconosCollisionManager)             \
   REGISTER(SiconosBulletCollisionManager)
@@ -71,8 +83,8 @@
 #include <SiconosVisitables.hpp>
 
 #undef SICONOS_VISITABLES
-#define SICONOS_VISITABLES() \
-  KERNEL_CLASSES() \
+#define SICONOS_VISITABLES()                    \
+  KERNEL_CLASSES()                              \
   MECHANICS_CLASSES()
 
 #undef REGISTER

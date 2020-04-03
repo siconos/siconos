@@ -17,6 +17,8 @@
  * limitations under the License.
 */
 #include "FirstOrderLinearDSTest.hpp"
+#include "SiconosAlgebraProd.hpp"
+#include "SimpleMatrixFriends.hpp"
 
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
@@ -52,17 +54,17 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->x0() == x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->M() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->invM() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->b() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->A() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->f() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->jacobianfx() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->M() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->invM() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->b() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->A() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->f() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->jacobianfx() == nullptr, true);
   double time = 1.5;
   SiconosVector zero(3);
   ds->initRhs(time);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", *(ds->rhs()) == zero , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->jacobianRhsx() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", *(ds->rhs()) == zero, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->jacobianRhsx() == nullptr, true);
   ds->computeA(time);
   ds->computeb(time);
   ds->computeM(time);
@@ -70,7 +72,9 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0()
   ds->setComputeMFunction("TestPlugin", "computeM");
   ds->computeM(time);
   SimpleMatrix Mref(3,3);
-  Mref(0,0) = 1. * time; Mref(1,1) = 2. * time; Mref(2,2) = 3. * time;
+  Mref(0,0) = 1. * time;
+  Mref(1,1) = 2. * time;
+  Mref(2,2) = 3. * time;
   std::cout << "MLMLMQLSQML " << std::numeric_limits<double>::epsilon() << std::endl ;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->M()) == Mref, true);
   std::cout << "--> Constructor 0 test ended with success." <<std::endl;
@@ -85,8 +89,8 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->x0() == x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->M() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->invM() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->M() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->invM() == nullptr, true);
 
   SP::SiconosVector x01(new SiconosVector(3));
   (*x01)(0) = 0.;
@@ -97,26 +101,30 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   ds->computeb(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->b()) == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->A()) == 2. * *A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->f() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->f() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->jacobianfx()) == *(ds->A()), true);
   ds->setComputeMFunction("TestPlugin", "computeM");
   ds->computeM(time);
   SimpleMatrix Mref(3,3);
-  Mref(0,0) = 1. * time; Mref(1,1) = 2. * time; Mref(2,2) = 3. * time; 
+  Mref(0,0) = 1. * time;
+  Mref(1,1) = 2. * time;
+  Mref(2,2) = 3. * time;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->M()) == Mref, true);
   ds->initRhs(time);
   SimpleMatrix invM(3,3);
-  invM(0,0) = 1. / time; invM(1,1) = 1./ (2. * time); invM(2,2) = 1./(3. * time);
+  invM(0,0) = 1. / time;
+  invM(1,1) = 1./ (2. * time);
+  invM(2,2) = 1./(3. * time);
   SiconosVector tmp(3);
   tmp = (time* *x01 + 2. * prod(*A0, *x0));
   prod(invM, tmp, tmp);
   prod(invM, 2* *A0, Mref);
-  
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->rhs()) == tmp , true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->rhs()) == tmp, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->jacobianRhsx()) == Mref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->b()) == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->A()) == 2 * *A0, true);
-  
+
   std::cout << "--> Constructor 3 test ended with success." <<std::endl;
 }
 

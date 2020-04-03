@@ -49,7 +49,7 @@ DEFINE_SPTR(CircleCircleRDeclaredPool);
 DEFINE_SPTR(Hashed);
 
 class SpaceFilter : public InteractionManager,
-                    public std11::enable_shared_from_this<SpaceFilter>
+                    public std::enable_shared_from_this<SpaceFilter>
 {
 
 protected:

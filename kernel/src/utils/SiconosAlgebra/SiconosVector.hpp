@@ -29,10 +29,7 @@
 struct SiconosVectorIterator;
 struct SiconosVectorConstIterator;
 
-/** Union of DenseVect and SparseVect pointers -
-    Siconos::DENSE, num = 1,
-    SPARSE, num = 4
- */
+/** Union to gather all types of ublas vectors used in Siconos */
 union VECTOR_UBLAS_TYPE
 {
   DenseVect *Dense; // num = 1
@@ -40,23 +37,22 @@ union VECTOR_UBLAS_TYPE
 };
 
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
- *
- * Used to handle vectors of double.
- *
- * Two possible types: Siconos::DENSE (default) and SPARSE.
- *
- * You can find an overview on how to build and use vectors and matrices in siconos users' guide .
- *
- */
-class SiconosVector : public std11::enable_shared_from_this<SiconosVector>
+
+    Two possible types: Siconos::DENSE (default) and Siconos:SPARSE.
+
+    \rst
+    Reference :ref:`siconos_algebra` in Siconos users' guide.
+    \endrst
+
+*/
+class SiconosVector : public std::enable_shared_from_this<SiconosVector>
 {
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(SiconosVector);
 
-
-  bool _dense;
+  bool _dense = true;
 
   /**
    * Union of pointers to the ublas vector type (dense or sparse)
@@ -64,54 +60,53 @@ protected:
   VECTOR_UBLAS_TYPE vect;
 
 public:
-  /** Default constructor
-   */
-  SiconosVector();
 
   /***************************** CONSTRUCTORS ****************************/
 
-  /** constructor with the type and the dimension of the Boost vector
-   *  \param row the size of the vector
-   *  \param type the type of vector
-   */
+  /** Creates a zero-size vector. */
+  SiconosVector();
+
+  /** creates a vector, all components set to zero.
+      \param row the size of the vector
+      \param type the type of vector (dense or sparse)
+  */
   SiconosVector(unsigned row, Siconos::UBLAS_TYPE type = Siconos::DENSE);
 
-  /** constructor with the dimension of the Boost vector, a default value and the type.
-   *  \param row the size of the vector
-   *  \param val value for initiliazing the vector
-   *  \param type the type of vector
-   */
+  /** creates a vector and initializes its content with a single value
+      \param row size of the new vector
+      \param val value to initialize its content
+      \param type type of vector (dense or sparse)
+  */
   SiconosVector(unsigned row, double val, Siconos::UBLAS_TYPE type = Siconos::DENSE);
 
-  /** constructor with  a std::vector of the values and the type of the boost vector.
-   *  \param vec a std::vector<double>
-   *  \param type  an Siconos::UBLAS_TYPE
-   */
+  /** creates a dense vector from a copy of a stl vector.
+      \param vec vector to be copied
+      \param type of the vector (dense or sparse)
+  */
   SiconosVector(const std::vector<double>& vec, Siconos::UBLAS_TYPE type = Siconos::DENSE);
 
   /** copy constructor
-   *  \param v SiconosVector
-   */
+      \param v source vector to be copied
+  */
   SiconosVector(const SiconosVector& v);
 
-  SiconosVector(const BlockVector & vIn);
-  /** constructor with a DenseVect vector (see SiconosAlgebra.hpp for details)
-   *  \param v a DenseVect
+  /** creates a dense vector, with a copy.
+   *  \param v source vector (ublas dense)
    */
   SiconosVector(const DenseVect& v);
 
-  /** constructor with a SparseVect vector (see SiconosAlgebra.hpp for details)
-   *  \param v a SparseVect
+  /** creates a sparse vector, with a copy.
+   *  \param v source vector (ublas sparse)
    */
   SiconosVector(const SparseVect& v);
 
-  /** constructor with an input file
-   *  \param filename a std::string which contain the file path
-   *  \param is_ascii a boolean to indicate if the file is in ascii
+  /** creates a vector from data in a file
+   *  \param filename file name (possibly with path)
+   *  \param is_ascii file format (true if ascii, false if binary)
    */
   SiconosVector(const std::string& filename, bool is_ascii);
 
-  /** constructor for the concatenation of two vectors
+  /** constructor from the concatenation of two vectors
    * \param v1 the first vector
    * \param v2 the second vector
    */
@@ -121,19 +116,20 @@ public:
    */
   ~SiconosVector();
 
+  /** Copy a the content of a BlockVector into a SiconosVector
+
+      The aim of this function is to be able to handle contiguous memory
+      (which is not guaranteed in a BlockVector).
+
+      This could be have been done with a constructor but
+      doing so leads to implicit copy-construction in operators call.
+   */
+  void block2contiguous(const BlockVector & vIn);
+
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
   unsigned int size() const;
-
-  /** true if the vector is block else false.
-   * \return a bool.
-   */
-  bool isBlock() const
-  {
-    return false;
-  };
-
 
   /** Get the type number of the current vector.
    * \return an unsigned int
@@ -144,117 +140,51 @@ public:
     else return 4;
   }
 
-  /** get the ublas embedded vector if it's type is Dense
-   *  \param pos unsigned int: position of the required vector (useless for SiconosVector, default = 0)
-   *  \return a DenseVect
-   */
-  const DenseVect getDense(unsigned int pos = 0) const;
-
-  /** get the ublas embedded vector if it's type is Sparse
-   *  \param pos unsigned int: position of the required vector (useless for SiconosVector, default = 0)
-   *  \return a SparseVect
-   */
-  const SparseVect getSparse(unsigned int pos = 0) const;
-
   /** get a pointer to the ublas embedded vector if it's type is Dense
-   *  \param pos unsigned int: position of the required vector (useless for SiconosVector, default = 0)
    *  \return a DenseVect*
    */
-  inline DenseVect* dense(unsigned int pos = 0) const
+  inline DenseVect* dense() const
   {
     return vect.Dense;
   };
 
   /** get a pointer to the ublas embedded vector if it's type is Sparse
-   *  \param pos unsigned int: position of the required vector (useless for SiconosVector, default = 0)
    *  \return a SparseVect*
    */
-  SparseVect* sparse(unsigned int pos = 0) const;
+  SparseVect* sparse() const;
 
-  /** return the array of double values of the vector
-   *  \return a pointer to the array
+  /** \return the array of double values of the vector
    */
   double* getArray() const;
 
-  /** sets all the values of the vector to 0.0
-   */
+  /** sets all the values of the vector to 0.0 */
   void zero();
 
-  /** resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
-   * \param nbcol
-   * \param preserve
-   * \exception SiconosVectorException
+  /** Resize the vector. The existing elements may be preseved if specified.
+   * \param size new size of the vector
+   * \param preserve true if the content of the vector must be preserved.
    */
-  void resize(unsigned int nbcol, bool preserve= true);
+  void resize(unsigned int size, bool preserve= true);
 
-  /** compute the infinite norm of the vector
-   *  \return a double
-   */
+  /** \return the infinite norm of the vector */
   double normInf()const;
 
-  /** return the Euclidian norm of the vector
-   *  \return a double
-   */
+  /** \return the Euclidian norm of the vector */
   double norm2() const ;
 
-  /** return the sum of all elements of the vector
-   * \return a double
-   */
+  /** \return the sum of all elements of the vector */
   double vector_sum() const;
 
-  /** display data on standard output
-   */
+  /** display vector content */
   void display(void) const;
 
-  /** return the current object. This function is really useful only for block vector
-   * \return a pointer to a SiconosVector
-   * \param pos
-   */
-  inline SP::SiconosVector vector(unsigned int pos)
-  {
-    return shared_from_this();
-  };
-
-  /** return the current object. This function is really useful only for block vector
-   * \param pos
-   * \return a pointer to a SiconosVector
-   */
-  inline SPC::SiconosVector vector(unsigned int pos) const
-  {
-    return shared_from_this();
-  };
-
-  /** set SiconosVector number i (copy) with v (second arg) - Useful only for BlockVector (else equivalent to a single copy)
-   * \param num unsigned int: block number (0 for SiconosVector)
-   * \param v a SiconosVector
-   */
-  void setVector(unsigned int num, const SiconosVector& v);
-
-  /** set SiconosVector number i (pointer link) with v (second arg) - Useful only for BlockVector
-   * \param num unsigned int: block number (0 for SiconosVector)
-   * \param v a pointer to a SiconosVector
-   */
-  inline void setVectorPtr(unsigned int num, SP::SiconosVector v)
-  {
-    SiconosVectorException::selfThrow("SiconosVector::setVectorPtr(num,v), not allowed for SiconosVector.");
-  };
-
-  /** set all values of the vector component to input value.
-   * \param a double
+  /** set all values of the vector to input value.
+   * \param a input value
    */
   void fill(double a);
 
-  /** put data of the vector into a std::string
-   * \return std::string
-   */
+  /** \return the content of the vector as a string */
   std::string toString() const;
-
-  /** send data of the matrix to an ostream
-   * \param os An output stream
-   * \param sv a SiconosVector
-   * \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
 
   /** for iterator interface */
   typedef SiconosVectorIterator iterator;
@@ -262,113 +192,94 @@ public:
   /** for iterator interface */
   typedef SiconosVectorConstIterator const_iterator;
 
-  /** for iterator interface */
+  /** \return an iterator pointing to the first element in the vector. */
   iterator begin();
 
-  /** for iterator interface */
+  /** \return an iterator pointing to the first element in the vector. */
   const_iterator begin() const;
 
-  /** for iterator interface */
+  /**  \return an iterator referring to the past-the-end element in the vector container. */
   iterator end();
 
-  /** for iterator interface */
+  /**  \return an iterator referring to the past-the-end element in the vector container. */
   const_iterator end() const;
 
-  /** cast an SiconosVector to an std::vector<double> (performs copy) */
+  /** cast a SiconosVector into a std::vector<double> (performs copy) */
   operator std::vector<double>();
 
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
-  /** get the element at position i in the vector
-   *  \param i an unsigned int
-   *  \return a double
+  /** Get a component of the vector
+   *  \param i index of the required component
+   *  \return the component value
    */
   double getValue(unsigned int i) const ;
 
-  /** set the element at position i in the vector.
-   *  \param i an unsigned int
-   *  \param value
+  /** set a component of the vector
+   *  \param i index of the required component
+   *  \param value of the component
    */
   void setValue(unsigned int i, double value);
 
-  /** get the element at position i in the vector
-   *  \param i an integer
-   *  \return a double
+  /** get a component of the vector
+   *  \param i index of the required component
+   *  \return value of the component
    */
   double& operator()(unsigned int i);
 
-  /** get the element at position i in the vector
-   *  \param i an integer
-   *  \return a double
+  /** get a component of the vector
+   *  \param i index of the required component
+   *  \return value of the component
    */
-  double operator()(unsigned int i)const;
+  double operator()(unsigned int i) const;
 
-  /** get the vector at position i(ie this for Simple and block i for BlockVector)
-   *  \param i an unsigned integer
-   *  \return a SP::SiconosVector
-   */
-  inline SP::SiconosVector operator [](unsigned int i)
-  {
-    return shared_from_this();
-  };
-
-  /** get the vector at position i(ie this for Simple and block i for BlockVector)
-   *  \param i an unsigned integer
-   *  \return a SP::SiconosVector
-   */
-  inline SPC::SiconosVector operator [](unsigned int i) const
-  {
-    return shared_from_this();
-  };
-
-  /** set the elements starting from position i with input vector
-   *  \param i an unsigned int
-   *  \param v a ref to a SiconosVector
-   */
+  /** set a sub-block of the current vector
+      \param i the beginning of the destination range
+      \param v vector to be copied
+  */
   void setBlock(unsigned int i, const SiconosVector& v);
 
-  /** copy a part of the vector into another (usefull for converting a SiconosVector
-   * into a BlockVector
-   * \param vOut
-   * \param sizeB
-   * \param startIn
-   * \param startOut
-   */
+  /** copy a part of the vector into another 
+      \param vOut destination vector
+      \param sizeB number of the elements to copy
+      \param startIn the beginning of the range of elements to copy from
+      \param startOut the beginning of the destination range
+  */
   void toBlock(SiconosVector& vOut, unsigned int sizeB,
                unsigned int startIn, unsigned int startOut) const;
 
-  /** add the input vector to the elements starting from position i.
-   *  \param i an unsigned int
-   *  \param v a SiconosVector
+  /** add the input vector to a sub-block of the current vector
+      \param i the beginning of the destination range
+      \param v the source vector to be added
    */
   void addBlock(unsigned int i, const SiconosVector& v);
 
-  /** subtract the input vector to the elements starting from position i.
-   *  \param i an unsigned int i
-   *  \param v a SiconosVector
+  /** subtract the input vector to a sub-block of the current vector
+      \param i the beginning of the destination range
+      \param v the source vector to be added
    */
   void subBlock(unsigned int i, const SiconosVector& v);
 
-  /** copy the data to double* (dense only)
+  /** copy the vector into an array
    * \param data the memory where to copy the data
    * \return the number of element written (size of the vector)
    */
   unsigned copyData(double* data) const;
 
   /** operator =
-   * \param v SiconosVector, the vector to be copied
+   * \param v the vector to be copied
    * \return  SiconosVector&
    */
   SiconosVector& operator = (const SiconosVector& v);
 
   /** operator =
-   * \param b BlockVector : the vector to be copied
+   * \param b the vector to be copied
    * \return  SiconosVector&
    */
   SiconosVector& operator = (const BlockVector& b);
 
   /** operator =
-   * \param v a DenseVect : the vector to be copied
+   * \param v the vector to be copied
    * \return  SiconosVector&
    */
   SiconosVector& operator = (const DenseVect& v);
@@ -386,42 +297,45 @@ public:
   SiconosVector& operator = (const double* d);
 
   /** operator +=
-   * \param v SiconosVector : a vector to add
+   * \param v the vector to add
    * \return  SiconosVector&
    */
   SiconosVector& operator +=(const SiconosVector& v);
+
+  /** operator +=
+   * \param v the vector to add
+   * \return  SiconosVector&
+   */
   SiconosVector& operator +=(const BlockVector& v);
 
   /** operator -=
-   * \param  v SiconosVector : a vector to subtract
+   * \param  v the vector to subtract
    * \return  SiconosVector&
    */
   SiconosVector& operator -=(const SiconosVector& v);
+  /** operator -=
+   * \param  v the vector to subtract
+   * \return  SiconosVector&
+   */
   SiconosVector& operator -=(const BlockVector& v);
 
-  /** component-wise exponential of a vector
-      \param input vector such that result (this) = exp(input)
-  */
-  void exp(SiconosVector& input);
+  /** \defgroup SiconosVectorFriends
 
-  /** component-wise exponential of a vector, in-place.
-      this = exp(this)
+      List of friend functions of the SiconosVector class
+
+      @{
   */
-  void exp_in_place();
+
+  /** send data of the vector to an ostream
+   * \param os An output stream
+   * \param sv a SiconosVector
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
 
   friend SiconosVector& operator *= (SiconosVector& v, const double& s);
 
   friend SiconosVector& operator /= (SiconosVector& v, const double& s);
-
-  /** Copy a part of a vector into a sublock of another vector
-   *   \param vIn SiconosVector input vector (read only)
-   *   \param vOut SiconosVector vector to be overwritten
-   *   \param sizeB int size of the block to be copied
-   *   \param startIn int starting index of the block to be copied (in input vector)
-   *   \param startOut int starting index of the block to be overwritten (in output vector)
-   */
-  friend void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut,
-                       unsigned int sizeB, unsigned int startIn, unsigned int startOut);
 
   friend bool operator ==(const SiconosVector&, const SiconosVector&);
 
@@ -459,25 +373,17 @@ public:
 
   friend void  getMin(const SiconosVector&, double &, unsigned int &);
 
-  /*
-  friend SiconosVector abs_wise(const SiconosVector&);
-
-  friend void getMax(const SiconosVector&, double &,unsigned int &);
-
-  friend void  getMin(const SiconosVector&, double &, unsigned int &);
-  */
-
   friend struct IsDense;
 
   friend struct IsSparse;
 
   friend struct IsBlock;
 
+  /** End of Friend functions group @} */
+
   //  temporary workaround, the visitor has to be removed or rework -- xhub
   ACCEPT_NONVIRTUAL_VISITORS();
 
 };
-
-#include "SiconosVectorIterator.hpp"
 
 #endif

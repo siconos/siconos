@@ -22,9 +22,8 @@
   \brief Definition of a structure to handle with SOCLCP problems.
 */
 
-#include "NumericsMatrix.h"
-#include "SecondOrderConeLinearComplementarityProblem.h"
-#include "VariationalInequality.h"
+#include "NumericsFwd.h"  // for SecondOrderConeLinearComplementarityProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct SecondOrderConeLinearComplementarityProblem_as_VI SecondOrderConeLinearComplementarityProblem_as_VI.h
  *

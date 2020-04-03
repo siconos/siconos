@@ -108,28 +108,15 @@ class ConvexHull(object):
         if len(coordinates) < 4:
             raise RuntimeError('You must provide at least 4 coordinates!')
         self._coordinates = numpy.array(coordinates)
-        from pyhull.convex_hull import ConvexHull
-        self.hull = ConvexHull(self._coordinates)
+        from pyhull.convex_hull import ConvexHull as pyhull_ch
+        self.hull =  pyhull_ch(self._coordinates)
 
-    # def volume(self):
-    #     from pyhull.delaunay import DelaunayTri
+        
+    
+        
 
-    #     delaunay = DelaunayTri(self._coordinates,joggle=True)
-    #     volume = 0
-    #     #print(delaunay.points)
-    #     #print(delaunay.vertices)
-    #     #print(delaunay.simplices)
-    #     for vertices in delaunay.vertices:
 
-    #         coords = [self._coordinates[i] for i in vertices]
-    #         simplex = Simplex(coords)
-    #         #print(vertices)
-    #         #print(coords)
-    #         #print(simplex.volume())
-    #         volume += simplex.volume()
-
-    #     return volume
-
+        
     def centroid(self):
         cm = numpy.zeros(3)
         volume = self.volume_divergence_theorem()
@@ -143,6 +130,9 @@ class ConvexHull(object):
         #print('barycenter ---------', self.barycenter())
         return cm
 
+    __centroid = centroid
+
+    
     def barycenter(self):
         # compute barycenter
         b = numpy.zeros(3)
@@ -171,7 +161,7 @@ class ConvexHull(object):
 
         volume = 0
         # compute centroid
-        c = self.centroid()
+        c = self.__centroid()
         for vertices in self.hull.vertices:
             coords=[list(c)]
             for i in vertices:
@@ -189,7 +179,7 @@ class ConvexHull(object):
         volume = 0
         I = numpy.zeros((3,3))
         # compute centroid
-        c = self.centroid()
+        c = self.__centroid()
         for vertices in self.hull.vertices:
             coords=[list(c)]
             for i in vertices:
@@ -207,6 +197,50 @@ class ConvexHull(object):
 
         return I,volume
 
+class ConvexHull2d(ConvexHull):
+
+    def __init__(self,coordinates):
+        '''
+        Constructor
+        '''
+
+        if len(coordinates) < 3:
+            raise RuntimeError('You must provide at least 3 coordinates!')
+        
+        # construct a list of 3D coordinates for a extruded polydron
+        nb_vertices = len(coordinates)
+        coord_3d = list(coordinates)
+        coord_3d.extend(coordinates)
+        for i,v in enumerate(coord_3d):
+            if i < nb_vertices:
+                coord_3d[i]= numpy.append(v,0.0)
+            else:
+                coord_3d[i]= numpy.append(v,1.0)
+
+        super(ConvexHull2d,self).__init__(coord_3d)
+        
+    def centroid(self):
+        cm = super(ConvexHull2d,self).centroid()
+        return cm[0:2]
+
+    def barycenter(self):
+        b = super(ConvexHull2d,self).barycenter()
+        return b[0:2]
+
+    def area(self):
+
+        area  = super(ConvexHull2d,self).volume()
+        return area
+
+    def inertia(self,G):
+
+        G = list(G)
+        G.append(0.5)
+        I, area = super(ConvexHull2d,self).inertia(G)
+        return I[2,2],area
+
+
+    
 if __name__ == '__main__':
     print('####### first example #########')
     coords = []

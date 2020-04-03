@@ -1,37 +1,58 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2018 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
 #ifndef SiconosFwd_hpp
 #define SiconosFwd_hpp
 
-#include "SiconosSerialization.hpp"
-#include "SiconosPointers.hpp"
+/*! \file SiconosFwd.hpp
+  Forward declarations for numerics and kernel.
+*/
 
-/* Forward declarations */
+// #include "SiconosSerialization.hpp"
+#include "SiconosPointers.hpp"
+#include "NumericsFwd.h"
 
 // --- Numerics ---
 
-#include <MixedLinearComplementarityProblem.h>
-#include <SolverOptions.h>
-#include <NumericsMatrix.h>
+// #include <MixedLinearComplementarityProblem.h>
+// #include <SolverOptions.h>
+// #include <NumericsMatrix.h>
 
 TYPEDEF_SPTR(MixedLinearComplementarityProblem)
 TYPEDEF_SPTR(SolverOptions)
 TYPEDEF_SPTR(NumericsMatrix)
 // ----------------
 
-/* Kernel */
-
-
+// --- Kernel ---
 
 DEFINE_SPTR(BlockCSRMatrix)
 
 DEFINE_SPTR(Interaction)
 
 DEFINE_SPTR(NonSmoothDynamicalSystem)
+DEFINE_SPTR(LinearComplementaritySystemsNSDS)
 
 // --- Non-Smooth problems ---
 DEFINE_SPTR(OneStepNSProblem)
 DEFINE_SPTR(QP)
 DEFINE_SPTR(LinearOSNS)
 DEFINE_SPTR(FrictionContact)
+DEFINE_SPTR(RollingFrictionContact)
 DEFINE_SPTR(LCP)
 DEFINE_SPTR(AVI)
 DEFINE_SPTR(MLCP)
@@ -48,7 +69,6 @@ DEFINE_SPTR(OneStepIntegrator)
 DEFINE_SPTR(Relation)
 
 DEFINE_SPTR(FirstOrderR)
-
 
 DEFINE_SPTR(Simulation)
 DEFINE_SPTR(EventDriven)
@@ -92,8 +112,9 @@ DEFINE_SPTR(OSNSMatrix)
 DEFINE_SPTR(SiconosMemory)
 
 DEFINE_SPTR(NewtonEulerR)
-DEFINE_SPTR(NewtonEulerFrom1DLocalFrameR)
-DEFINE_SPTR(NewtonEulerFrom3DLocalFrameR)
+DEFINE_SPTR(NewtonEuler1DR)
+DEFINE_SPTR(NewtonEuler3DR)
+DEFINE_SPTR(NewtonEuler5DR)
 
 // OSI
 DEFINE_SPTR(EulerMoreauOSI)
@@ -110,7 +131,7 @@ DEFINE_SPTR(ZeroOrderHoldOSI)
 DEFINE_SPTR(NewMarkAlphaOSI);
 
 
-// Graph thing
+// Graph things
 DEFINE_SPTR_STRUCT(InteractionProperties)
 DEFINE_SPTR_STRUCT(GraphProperties)
 DEFINE_SPTR_STRUCT(DynamicalSystemsGraph)

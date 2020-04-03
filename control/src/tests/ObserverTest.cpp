@@ -137,7 +137,7 @@ void ObserverTest::test_Luenberger_ZOH()
   bool test = !((error=ioMatrix::compareRefFile(data, "Luenberger.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 void ObserverTest::test_Luenberger_Lsodar()
@@ -157,6 +157,6 @@ void ObserverTest::test_Luenberger_Lsodar()
   bool test = !((error=ioMatrix::compareRefFile(data, "Luenberger.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", test, true);
 
 }

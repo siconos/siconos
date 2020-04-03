@@ -39,9 +39,9 @@ SP::Actuator Registry::instantiate(unsigned int type, SP::ControlSensor sensor)
 {
   MapFactoryIt it = factory_map.find(type);
 
-  if (it == factory_map.end())
+  if(it == factory_map.end())
     RuntimeException::selfThrow("Registry::instantiate (ActuatorFactory) \
-        failed, no class numbered: " + type);
+        failed, no class numbered: " + std::to_string(type));
 
   // std::cout <<std::endl << "Factory instance for class" << name <<std::endl ; // for test purposes only
   return (it->second)(sensor) ;  // run our factory

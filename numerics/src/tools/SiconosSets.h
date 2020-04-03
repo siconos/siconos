@@ -27,7 +27,9 @@
  *
 */
 
-#include "NumericsFwd.h"
+#include "NumericsFwd.h"  // for NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 
 /** \struct generic_set SiconosSets.h
  * Generic set (can be seen as a kind of ``base class''). Mainly used to infer
@@ -85,7 +87,6 @@ enum SICONOS_SET_ID { SICONOS_SET_POSITIVE_ORTHANT, SICONOS_SET_BOX, SICONOS_SET
 
 enum SICONOS_RELATION_TYPES { SICONOS_LE, SICONOS_EQ, SICONOS_GE };
 
-#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

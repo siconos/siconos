@@ -8,21 +8,29 @@
 include(FindPythonModule)
 include(FindSphinxModule)
 
-# Devel option : activate this to generate rst from doxygen xml outputs
-# using doxyrest. 
-option(USE_DOXYREST "Build rst files from doxygen outputs (tool = doxyrest). Default = OFF" OFF)
-# Devel option : activate this to generate rst from doxygen xml outputs
-# using exhale
-option(USE_EXHALE "Build rst files from doxygen outputs (tool = exhale). Default = OFF" OFF)
-
 # Devel option : generate pure doxygen doc (no sphinx), extracting all and with graphs.
 option(USE_DEVEL_DOXYGEN "Build doxygen (html, latex ...) doc, extracting all. Devel purpose. Default = OFF" OFF)
 
+
+# -- Doc config --
+# Name and create build path for documentation
 set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/docs/build CACHE INTERNAL "Root path to generated documentation.")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
+# -- Gendoctools install --
+# gendoctools is installed in binary dir as a python package
+# used to generate docstrings, rst files and so on.
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gendoctools/__init__.py.in ${CMAKE_BINARY_DIR}/share/gendoctools/__init__.py @ONLY)
+file(GLOB files_py RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gendoctools/*.py)
+foreach(fname IN LISTS files_py)
+  configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/${fname}"
+    "${CMAKE_BINARY_DIR}/share/${fname}" COPYONLY)
+endforeach()
+if(WITH_DOXY2SWIG)
+  configure_file(${CMAKE_SOURCE_DIR}/externals/swig/doxy2swig.py ${CMAKE_BINARY_DIR}/share/gendoctools/doxy2swig.py COPYONLY)
+endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doctools.py ${CMAKE_BINARY_DIR}/share/doctools.py COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/replace_py_escape.sh ${CMAKE_BINARY_DIR}/share/replace_py_escape.sh COPYONLY)
+# configure_file(${CMAKE_CURRENT_SOURCE_DIR}/replace_py_escape.sh ${CMAKE_BINARY_DIR}/share/replace_py_escape.sh COPYONLY)
 
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
@@ -38,7 +46,6 @@ if(USE_DOXYGEN)
   if(NOT DOXYGEN_OUTPUT)
     set(DOXYGEN_OUTPUT ${DOC_ROOT_DIR}/doxygen CACHE INTERNAL "Path to doxygen outputs.")
   endif()
-
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
   
   # --- Config files and their options. --
@@ -56,47 +63,34 @@ if(USE_DOXYGEN)
     set(DOXY_WARNINGS_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/config/doxy_warnings.config.in CACHE INTERNAL "config file for doxygen warnings output.")
     # All the configure process will be done for each component
     # thanks to 'include(doxygen_warnings)'. See LibraryProjectSetup.
-  endif()
 
-  # == set configuration file for doxygen doc from sources ==
-  #  - Results in binary_dir/docs/
-  #  - input config from config/doxy.config
-  #  - only html output
-  # 'inputs' are updated by each component, during call to update_doxy_config_file macro.
-  # Doc will be built when 'make doxygen' is called.
-  if(WITH_DOCUMENTATION)
-    # config file name
-    set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config" CACHE INTERNAL "Doxygen configuration file : used to produce html (doxygen only) and xml files for sphinx (breathe/exhale).")
-    # The generation of the config and the creation of the target will be done later,
-    # after the update of inputs by each component, with macro 'finalize_doc'
-    
+    # A target to filter out doxygen warnings : remove empty files and concatenate the others.
+    # call python function from gendoctools (filter_doxygen_warnings_files).
+    add_custom_target(filter_warnings
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "from gendoctools.filters import filter_doxygen_warnings_files as f; f('${CMAKE_BINARY_DIR}/doxygen_warnings', 'SUMMARY.warnings')"
+      VERBATIM
+      COMMENT "Filter doxygen warnings (result : SUMMARY.warnings)."
+      DEPENDS ${last_component} # No warnings if siconos has not been compiled. Should we remove this dep ? 
+      )
   endif()
 endif()
 
   
-#  ====== Create a Target to generate sphinx documentation ======
-if(USE_SPHINX)
-  if(USE_DOXYREST)
-    find_package(doxyrest CONFIGS doxyrest_config.cmake REQUIRED)
-    if(doxyrest_FOUND)
-      set(HAS_DOXYREST "True" CACHE INTERNAL "True if doxyrest required and found.")
-      message(STATUS "Doxyrest found : ${DOXYREST_EXE}")
-    endif()
-  else()
-    set(HAS_DOXYREST "False" CACHE INTERNAL "True if doxyrest required and found.")
+#  ====== Create a Target to generate documentation ======
+if(WITH_DOCUMENTATION)
+
+  # --- Search dependencies required to build documentation ---
+  message("--------------------------------------------------")
+  message("------ Start global setup for documentation ------\n")
+  if(Python3_VERSION VERSION_LESS 3.6)
+    message(FATAL_ERROR "Python >= 3.6 is required to generate documentation.")
   endif()
   find_python_module(breathe REQUIRED)
-  if(USE_EXHALE)
-    find_python_module(exhale REQUIRED)
-    set(HAS_EXHALE "True" CACHE INTERNAL "True if exhale required and found.")
-  else()
-    set(HAS_EXHALE "False" CACHE INTERNAL "True if exhale required and found.")
-  endif()
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
-  #find_python_module(numpydoc REQUIRED)
-  #find_sphinx_module(sphinxcontrib doxylink REQUIRED)
   find_sphinx_module(sphinxcontrib youtube)
+
   if(NOT ${youtube_FOUND})
     # This python package can not be found using standard ways such as conda or pip,
     # so we force download and install.
@@ -106,22 +100,24 @@ if(USE_SPHINX)
     find_sphinx_module(sphinxcontrib youtube REQUIRED)
   endif()
   # Sphinx theme for documentation
-  #find_python_module(sphinx-bootstrap-theme REQUIRED)
   find_python_module(sphinx_bootstrap_theme REQUIRED)
+
+  # --- copy/conf sphinx files into build directory ---
+
+  # main page
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/index.rst" @ONLY)
 
+  # siconos biblio
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/siconos.bib"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/siconos.bib" COPYONLY)
 
-  configure_file(${CMAKE_SOURCE_DIR}/externals/swig/parse_doxygen.py ${CMAKE_BINARY_DIR}/share/parse_doxygen.py COPYONLY)
-  
   # List and copy all rst files from source dir to binary dir
   file(GLOB_RECURSE files_rst RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
     ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/*.rst)
-  foreach(filepath ${files_rst})
+  foreach(filepath IN LISTS files_rst)
     #get_filename_component(filename ${filepath} NAME)
     
     configure_file (
@@ -129,48 +125,37 @@ if(USE_SPHINX)
       "${CMAKE_CURRENT_BINARY_DIR}/sphinx/${filepath}" COPYONLY)
   endforeach()
   
-  # html menu
-  #configure_file (
-  #  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_templates/menu.html"
-  #  "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_templates/menu.html" COPYONLY)
-
   # css
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static/biblio.css"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_static/biblio.css" COPYONLY)
 
+  # !! conf.py.in must be copied later, after doxygen setup !!
+  # Done during finalize_doc call.
   
   # --- Build a target for sphinx ---
   # --> use make html or make latex ... to build documentation.
   set(SPHINX_EXECUTABLE sphinx-build)
   set(SPHINX_LOG_FILE ${CMAKE_BINARY_DIR}/docs/sphinx_warnings.log)    
-  if(HAS_EXHALE)
-    set(SPHINX_PARAMETERS
-      -b html # html output
-      -d build/doctrees # path to doctree files
-      ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
-      -t WithExhale
-      )
-    
-  else()
-    set(SPHINX_PARAMETERS
-      -w ${SPHINX_LOG_FILE}
-      -b html # html output
-      -d build/doctrees # path to doctree files
-      ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
-      -t WithoutExhale
-      )
-  endif()
+  set(SPHINX_PARAMETERS
+    -w ${SPHINX_LOG_FILE}
+    -b html # html output
+    -d build/doctrees # path to doctree files
+    ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
+    )
 
-  # -- Target to copy figures required by sphinx from source to binary dir --
+  # - Target to copy figures required by sphinx from source to binary dir -
   #  make copy-sphinx-figures
   add_custom_target(copy-sphinx-figures
     COMMAND cmake -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/figures ${CMAKE_CURRENT_BINARY_DIR}/sphinx/figures
     )
-  
-  add_custom_target(create_rst
+
+  # -- Target to generate rst files from sources (C/C++/python) --
+  #  1. creates rst files in a breathe-ready format from xml outputs of doxygen run on C/C++ headers
+  #  2. creates rst files from 'autodoc' outputs, docstrings, or others python doc. things.
+  add_custom_target(rst_api
     COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-    "import doctools; doctools.build_api_main('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
+    "from gendoctools.generate_api import build_rst_api as f; f('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
     VERBATIM
     COMMENT "Create main rst files for C/C++ and python API.")
   
@@ -178,33 +163,19 @@ if(USE_SPHINX)
   add_custom_target(html
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS} 2> errors.txt ${CMAKE_CURRENT_BINARY_DIR}/build/html
     VERBATIM
-    DEPENDS copy-sphinx-figures create_rst
+    DEPENDS copy-sphinx-figures rst_api
     )
 
+  # post command to make html : filter sphinx warnings to a log file.
   add_custom_command(TARGET html POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-      "import doctools; doctools.filter_sphinx_warnings('${SPHINX_LOG_FILE}')"
-      VERBATIM
-      COMMENT "Filtering sphinx logfile into ${SPHINX_LOG_FILE}.")
-
-  add_custom_command(TARGET html POST_BUILD
-      COMMENT "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
-
-  # Option to be tested later : generate docs for a list of tags, branches ...
-  add_custom_target(html-multiversion
-    COMMAND sphinx-versioning -g ${CMAKE_SOURCE_DIR} build docs/sphinx 
-    ${CMAKE_CURRENT_BINARY_DIR}/build/html
-    )
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+    "from gendoctools.filters import filter_sphinx_warnings as f; f('${SPHINX_LOG_FILE}')"
+    VERBATIM
+    COMMENT "Filtering sphinx logfile into ${SPHINX_LOG_FILE}.")
   
-  # -- To use doxyrest to generate rst files from doxygen (xml) outputs : make doxyrest --
-  # Note FP : test purpose only, exhale/breathe seems to be better than doxyrest.
-  if(HAS_DOXYREST)
-    add_custom_target(doxyrest
-      COMMAND ${DOXYREST_EXE} ${DOXYGEN_OUTPUT}/xml/index.xml -o ${CMAKE_CURRENT_BINARY_DIR}/sphinx/from_doxygen/index.rst -F ${DOXYREST_FRAME_DIR} -f c_index.rst.in
-      )
-    add_dependencies(html doxyrest)
-  endif()
-
+  add_custom_command(TARGET html POST_BUILD
+    COMMENT "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
+  
   # -- To build latex doc : make latex -- 
   set(SPHINX_LATEX_PARAMETERS
     -b latex # latex output
@@ -218,29 +189,8 @@ if(USE_SPHINX)
     )
 
   add_custom_target(doc DEPENDS html)
-  
-  # # -- Target to build python api documention with apidoc --
-  # # make apidoc
-  # if(WITH_PYTHON_WRAPPER)
-  #   set(SPHINX_APIDOC sphinx-apidoc)
-  #   set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
-  #   set(APIDOC_PARAMETERS -e -M -o ${GENERATED_DOC})
-  #   # -e : Put documentation for each module on its own page
-  #   # -P : Include “_private” modules. (should we??)
-  #   # -M : Put module documentation before submodule documentation.
-  #   # -a : append documented module path to sys.path
-  #   list(GET COMPONENTS -1 _last_comp)
-  #   # apidoc must be run AFTER swig process --> depends on components
-  #   add_custom_target(apidoc
-  #     COMMAND ${CMAKE_COMMAND} -E env "SPHINX_APIDOC_OPTIONS='members','undoc-members'" ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
-  #     ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
-  #     DEPENDS ${_last_comp}
-  #     )
 
-  #   # Sphinx html gen. depends on apidoc outputs.
-  #   if(WITH_DOXY2SWIG)
-  #     #add_dependencies(html apidoc)
-  #   endif()
-  # endif()
+  message("------ End global setup for documentation ------\n")
+
 
 endif()

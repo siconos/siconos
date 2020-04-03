@@ -24,10 +24,10 @@
  *
  */
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
-#include "CSparseMatrix.h" // for freeNSLSP
-
+#include <stdio.h>          // for size_t, FILE
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
+#include "NumericsFwd.h"    // for NumericsSparseMatrix, NSM_linear_solver_p...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
  * generic data struct for linear algebra operations
@@ -48,7 +48,7 @@ extern "C"
 
   /** \enum NSM_linear_solver NumericsSparseMatrix.h
    * id for linear algebra solvers */
-  typedef enum { NSM_CS_LUSOL, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT } NSM_linear_solver;
+  typedef enum { NSM_CS_LUSOL, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT, NSM_CS_CHOLSOL } NSM_linear_solver;
 
   typedef void (*freeNSLSP)(void* p);
 
@@ -62,8 +62,8 @@ extern "C"
   {
     NSM_linear_solver solver;
 
-    void* solver_data; /**< solver-specific data (or workspace) */
-    freeNSLSP solver_free_hook; /**< solver-specific hook to free solver_data  */
+    void* linear_solver_data; /**< solver-specific data (or workspace) */
+    freeNSLSP solver_free_hook; /**< solver-specific hook to free linear_solver_data  */
 
     int* iWork; /**< integer work vector array (internal) */
     int iWorkSize; /**< size of integer work vector array */
@@ -75,7 +75,7 @@ extern "C"
 
   /**\enum NumericsSparseOrigin NumericsSparseMatrix.h
    * matrix storage types */
-  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR } NumericsSparseOrigin;
+  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR, NSM_HALF_TRIPLET } NumericsSparseOrigin;
 
 
   /** \struct NumericsSparseMatrix NumericsSparseMatrix.h
@@ -84,6 +84,7 @@ extern "C"
   struct NumericsSparseMatrix
   {
     CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
+    CSparseMatrix* half_triplet;    /**< halt triplet format for symmetric matrices */
     CSparseMatrix* csc;        /**< csc matrix */
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
     CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
@@ -112,7 +113,7 @@ extern "C"
    * \param A a NumericsSparseMatrix
    * \return NULL on success
    */
-  NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
+  NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
 
 
 
@@ -120,7 +121,7 @@ extern "C"
    /** Free a workspace related to a LU factorization
    * \param p the structure to free
    */
-  void NSM_free_p(void *p);
+  void NSM_clear_p(void *p);
 
   /** Get the data part of sparse matrix
    * \param A the sparse matrix
@@ -132,9 +133,9 @@ extern "C"
   /** Get the LU factors for cs_lusol
    * \param p the structure holding the data for the solver
    */
-  static inline void* NSM_solver_data(NSM_linear_solver_params* p)
+  static inline void* NSM_linear_solver_data(NSM_linear_solver_params* p)
   {
-    return p->solver_data;
+    return p->linear_solver_data;
   }
   /** Get the workspace for the sparse solver
    * \param p the structure holding the data for the solver

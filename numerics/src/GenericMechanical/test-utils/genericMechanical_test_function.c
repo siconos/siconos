@@ -15,56 +15,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "genericMechanical_test_function.h"
-#include "GenericMechanicalProblem.h"
-#include "SolverOptions.h"
-#include "GenericMechanical_Solvers.h"
-int genericMechanical_test_function(FILE * f, SolverOptions * options)
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, calloc
+#include "GenericMechanicalProblem.h"      // for GenericMechanicalProblem
+#include "GenericMechanical_Solvers.h"     // for gmp_compute_error, gmp_driver
+#include "NumericsFwd.h"                   // for SolverOptions, GenericMech...
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
+#include "genericMechanical_test_utils.h"  // for gmp_test_function
+#include "test_utils.h"                    // for TestCase
+int gmp_test_function(TestCase* current)
 {
 
   int k, info = -1 ;
-  GenericMechanicalProblem* problem = genericMechanical_newFromFile(f);
+  GenericMechanicalProblem* problem = genericMechanical_new_from_filename(current->filename);
   double *reaction = (double*)calloc(problem->size, sizeof(double));
   double *velocity = (double*)calloc(problem->size, sizeof(double));
-  info = gmp_driver(problem,
-                                  reaction , velocity,
-                                  options);
+
+  /* printf(" iparam: \n"); */
+  /* for(size_t i=0;i<20;++i) */
+  /*   printf(" %d \t ", current->options->internalSolvers[1]->iparam[i]); */
+  /* printf(" dparam: \n"); */
+  /* for(size_t i=0;i<20;++i) */
+  /*   printf(" %g \t ", current->options->internalSolvers[1]->dparam[i]); */
+
+  info = gmp_driver(problem, reaction, velocity, current->options);
+
   double err = 0;
-  gmp_compute_error(problem, reaction , velocity, options->dparam[0], options, &err);
+  gmp_compute_error(problem, reaction, velocity, current->options->dparam[SICONOS_DPARAM_TOL], current->options, &err);
   printf("\n");
-  for (k = 0 ; k < problem->size; k++)
+  for(k = 0 ; k < problem->size; k++)
   {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
   }
   printf("\n");
 
-  if (!info)
-  {
-    if (err > options->dparam[0])
-    {
-      printf("test unsuccessful: err>tol\n");
-      printf(" ---> info=%i err=%e and tol=%e\n", info, err, options->dparam[0]);
 
-      return 1;
+  if(!info)
+  {
+    if(err > current->options->dparam[SICONOS_DPARAM_TOL])
+    {
+      printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", err, info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+      info = 1;
     }
     else
-      printf("test successful: info=%i err=%e and tol=%e\n", info, err, options->dparam[0]);
+      printf("test successful, residual = %g\t, number of iterations = %i \n", err, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
 
   }
   else
   {
-    printf("test unsuccessful.\n");
+    printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", err, info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   }
+  printf("GMP TEST: Nb GS it=%i\n",current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   free(reaction);
   free(velocity);
-
-  genericMechanicalProblem_free(problem, NUMERICS_GMP_FREE_MATRIX | NUMERICS_GMP_FREE_GMP);
-
+  genericMechanicalProblem_free(problem, NUMERICS_GMP_FREE_MATRIX);
+  free(problem);
   return info;
 
 }
-
 

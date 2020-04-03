@@ -24,13 +24,8 @@
 #include "Relation.hpp"
 #include "EventsManager.hpp"
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
 using namespace std::placeholders;
-#else
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
-#endif
 
 SP::VectorOfVectors
 OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
@@ -39,8 +34,8 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
     _dynamicalSystemsGraph->descriptor(ds);
 
   // Create new work buffers, store in the graph
-  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>();
-  SP::VectorOfMatrices wm = std11::make_shared<VectorOfMatrices>();
+  SP::VectorOfVectors wv = std::make_shared<VectorOfVectors>();
+  SP::VectorOfMatrices wm = std::make_shared<VectorOfMatrices>();
   _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
   _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
 
@@ -56,7 +51,7 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
 
 void OneStepIntegrator::initialize()
 {
-  if (_extraAdditionalTerms)
+  if(_extraAdditionalTerms)
   {
     _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0),
                                 *_simulation->nonSmoothDynamicalSystem(),
@@ -82,30 +77,30 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
   //      - simu->osi->initializeWorkVectorsForInteraction(inter)
   //      - simu->osi->update_interaction_output()
 
-  if (_steps > 1) // Multi--step methods
+  if(_steps > 1)  // Multi--step methods
   {
     // Compute the old Values of Output with stored values in Memory
-    for (unsigned int k = 0; k < _steps - 1; k++)
+    for(unsigned int k = 0; k < _steps - 1; k++)
     {
       /** ComputeOutput to fill the Memory
        * We assume the state x is stored in xMemory except for the  initial
        * condition which has not been swap yet.
        */
       //        relation()->LinkDataFromMemory(k);
-      for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-	    {
-	      inter.computeOutput(time, i);
-	      //_yMemory[i]->swap(*_y[i]);
-	    }
+      for(unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      {
+        inter.computeOutput(time, i);
+        //_yMemory[i]->swap(*_y[i]);
+      }
     }
     inter.swapInMemory();
   }
   // Compute a first value for the output
   inter.computeOutput(time,  0);
-    
+
   // prepare the gradients
   inter.relation()->computeJach(time, inter);
-  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+  for(unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
   {
     inter.computeOutput(time, i);
   }
@@ -114,42 +109,42 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
 
 void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
 {
-  
+
   bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput ))
+  if(!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput))
   {
     inter.setLowerLevelForOutput(_levelMinForOutput);
     inter.setUpperLevelForOutput(_levelMaxForOutput);
     isInitializationNeeded = true;
   }
 
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
+  if(!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput))
   {
     inter.setLowerLevelForInput(_levelMinForInput);
     inter.setUpperLevelForInput(_levelMaxForInput);
     isInitializationNeeded = true;
   }
 
-  if (isInitializationNeeded)
+  if(isInitializationNeeded)
     inter.reset();
 }
 
 void OneStepIntegrator::resetAllNonSmoothParts()
 {
- DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (!checkOSI(dsi)) continue;
+    if(!checkOSI(dsi)) continue;
     _dynamicalSystemsGraph->bundle(*dsi)->resetAllNonSmoothParts();
   }
 }
 
 void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 {
- DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
-    if (!checkOSI(dsi)) continue;
+    if(!checkOSI(dsi)) continue;
     _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(level);
   }
 }
@@ -163,9 +158,9 @@ void OneStepIntegrator::updateOutput(double time)
 void OneStepIntegrator::updateInput(double time)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  for (unsigned int level = _levelMinForInput;
-       level < _levelMaxForInput + 1;
-       level++)
+  for(unsigned int level = _levelMinForInput;
+      level < _levelMaxForInput + 1;
+      level++)
     _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
 }
 
@@ -185,14 +180,14 @@ void OneStepIntegrator::updateInput(double time, unsigned int level)
 double OneStepIntegrator::computeResiduOutput(double time, SP::InteractionsGraph indexSet)
 {
   double residu =0.0;
-  RuntimeException::selfThrow("OneStepIntegrator::computeResiduOutput not implemented for integrator of type " + _integratorType);
+  RuntimeException::selfThrow("OneStepIntegrator::computeResiduOutput not implemented for integrator of type " + std::to_string(_integratorType));
   return residu;
 }
 
 double OneStepIntegrator::computeResiduInput(double time, SP::InteractionsGraph indexSet)
 {
   double residu =0.0;
-  RuntimeException::selfThrow("OneStepIntegrator::computeResiduInput not implemented for integrator of type " + _integratorType);
+  RuntimeException::selfThrow("OneStepIntegrator::computeResiduInput not implemented for integrator of type " + std::to_string(_integratorType));
   return residu;
 }
 

@@ -29,11 +29,12 @@
  *
  */
 
-#include "SolverOptions.h"
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
-
-#include <stdbool.h>
+#include <stddef.h>       // for NULL, size_t
+#include "NumericsFwd.h"  // for SolverOptions, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#ifndef __cplusplus
+#include <stdbool.h>      // for bool
+#endif
 
 typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* F);
 typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, double* F_merit);
@@ -80,6 +81,67 @@ typedef struct {
   NumericsMatrix* H; /**< matrix */
 } newton_LSA_data;
 
+
+enum NEWTON_SOLVER
+{
+  SICONOS_NEWTON_LSA = 10000
+};
+
+extern const char* const   SICONOS_NEWTON_LSA_STR ;
+
+enum SICONOS_NEWTON_IPARAM
+{
+/** line search based algo use this */
+  SICONOS_IPARAM_LSA_NONMONOTONE_LS = 3,
+  SICONOS_IPARAM_LSA_NONMONOTONE_LS_M = 4,
+  SICONOS_IPARAM_LSA_FORCE_ARCSEARCH = 5,
+  SICONOS_IPARAM_LSA_SEARCH_CRITERION=6,
+  SICONOS_IPARAM_STOPPING_CRITERION=10
+};
+
+enum SICONOS_STOPPING_CRITERION
+{
+  SICONOS_STOPPING_CRITERION_RESIDU=0,
+  SICONOS_STOPPING_CRITERION_STATIONARITY=1,
+  SICONOS_STOPPING_CRITERION_RESIDU_AND_STATIONARITY=2,
+  SICONOS_STOPPING_CRITERION_USER_ROUTINE=3
+};
+
+
+enum SICONOS_GOLDSTEIN_IPARAM
+{
+  SICONOS_IPARAM_GOLDSTEIN_ITERMAX=7
+};
+
+enum SICONOS_NMS_IPARAM
+{
+  /** non-monotone specific part */
+  SICONOS_IPARAM_NMS_WATCHDOG_TYPE=7,
+  SICONOS_IPARAM_NMS_PROJECTED_GRADIENT_TYPE=8,
+  SICONOS_IPARAM_NMS_N_MAX=9
+};
+
+enum SICONOS_NEWTON_DPARAM{
+/** line-search */
+  SICONOS_DPARAM_LSA_ALPHA_MIN=2,
+  SICONOS_DPARAM_GOLDSTEIN_C=3,
+  SICONOS_DPARAM_GOLDSTEIN_ALPHAMAX=4
+};
+
+enum SICONOS_NMS_DPARAM
+{
+/** non-monotone specific part */
+ SICONOS_DPARAM_NMS_DELTA = 2,
+ SICONOS_DPARAM_NMS_DELTA_VAR = 3,
+ SICONOS_DPARAM_NMS_SIGMA = 4,
+ SICONOS_DPARAM_NMS_ALPHA_MIN_WATCHDOG = 5, 
+ SICONOS_DPARAM_NMS_ALPHA_MIN_PGRAD = 6,
+ SICONOS_DPARAM_NMS_MERIT_INCR=7
+};
+
+
+
+
 // status of the newton step
 #define NEWTON_STATS_NEWTON_STEP 1
 #define NEWTON_STATS_DESC_DIR 2
@@ -100,11 +162,6 @@ extern "C"
    * \param functions struct of function pointers to compute F, H and the error
    */
   void newton_LSA(unsigned n, double *z, double *w, int *info, void* data, SolverOptions* options, functions_LSA* functions);
-
-  /** Set some default values in the SolverOption when the solver is based on newton_LSA()
-   * \param options the struct to modify
-   */
-  void newton_lsa_default_SolverOption(SolverOptions* options);
 
   /** Set the functions to compute F and F_merit and all the other pointers to NULL
    * \param functions structure to fill
@@ -130,17 +187,16 @@ extern "C"
    * \param mat the */
  void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat);
 
- /** Check whether the solver uses the Newton_LSA framework or not
-  * \param solverId the solver id
-  * \return true if the solver is using newton_LSA, false otherwise
-  */
- bool newton_LSA_check_solverId(int solverId);
-
  /** clear the solver-specific data
   * \param options the SolverOption structure
   */
  void newton_LSA_free_solverOptions(SolverOptions* options);
 
+  /** @addtogroup SetSolverOptions
+      @{
+  */
+  void newton_lsa_set_default(SolverOptions* options);
+  /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

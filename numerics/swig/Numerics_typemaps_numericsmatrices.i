@@ -128,14 +128,17 @@
   if (nummat$argnum)
   {
     if (!NM_clean(nummat$argnum, alloc_ctrl_$argnum)) { return SN_SWIG_ERROR_CODE; }
-    NM_free(nummat$argnum);
+    NM_clear(nummat$argnum);
     free(nummat$argnum);
   }
 
 }
 
 %typemap(out, fragment="NumericsMatrix") (NumericsMatrix*) {
-  if (strcmp("$symname", "new_NumericsMatrix"))
+  // use tmp int to avoid "error: code will never be executed"
+  // message in C++.
+  int res = strcmp("$symname", "new_NumericsMatrix"); 
+  if (res) // convert to python or matlab object.
   {
 #ifdef SWIGPYTHON
     $result = NM_to_python($1);
@@ -144,11 +147,16 @@
 #endif
     if (!$result) SWIG_fail;
   }
-  else
+  else // create a new matrix
   {
     $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), SWIG_POINTER_NEW |  0 );
   }
 }
+%typemap(out) (RawNumericsMatrix*) {
+  $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), 0 |  0 );
+ }
+
+
 
 %typemap(freearg) (double *z)
 {
@@ -387,3 +395,5 @@
 // issue with typemap out and is useless for now
 // convert matrix to scipy.sparse.csc and do the job there
 %ignore SBM_row_to_dense;
+
+

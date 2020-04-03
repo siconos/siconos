@@ -21,7 +21,7 @@
 #include "SiconosVector.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "ControlSensor.hpp"
-
+#include "SiconosAlgebraProd.hpp"
 #include "ExplicitLinearSMC.hpp"
 
 
@@ -48,7 +48,7 @@ void ExplicitLinearSMC::initialize(const NonSmoothDynamicalSystem& nsds, const S
 
 void ExplicitLinearSMC::actuate()
 {
-  if (!_noUeq)
+  if(!_noUeq)
   {
     computeUeq();
   }
@@ -57,17 +57,17 @@ void ExplicitLinearSMC::actuate()
 
   unsigned int sDim = _u->size();
 
-  if (_D) // we are using a saturation
+  if(_D)  // we are using a saturation
   {
-    for (unsigned int i = 0; i < sDim; i++)
+    for(unsigned int i = 0; i < sDim; i++)
     {
-      if ((*_sigma)(i) > (*_D)(i, i))
+      if((*_sigma)(i) > (*_D)(i, i))
         (*_us)(i) = -_alpha;
-      else if ((*_sigma)(i) < -(*_D)(i, i))
+      else if((*_sigma)(i) < -(*_D)(i, i))
         (*_us)(i) = _alpha;
       else
       {
-        if ((*_D)(i, i) != 0)
+        if((*_D)(i, i) != 0)
           (*_us)(i) = -(*_sigma)(i) / (*_D)(i, i);
         else
           (*_us)(i) = 0;
@@ -76,11 +76,11 @@ void ExplicitLinearSMC::actuate()
   }
   else
   {
-    for (unsigned int i = 0; i < sDim; i++)
+    for(unsigned int i = 0; i < sDim; i++)
     {
-      if ((*_sigma)(i) > 0)
+      if((*_sigma)(i) > 0)
         (*_us)(i) = -_alpha;
-      else if ((*_sigma)(i) < 0)
+      else if((*_sigma)(i) < 0)
         (*_us)(i) = _alpha;
       else
         (*_us)(i) = 0;

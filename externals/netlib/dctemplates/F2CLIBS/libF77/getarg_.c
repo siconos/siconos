@@ -19,12 +19,12 @@ void getarg_(ftnint *n, register char *s, ftnlen ls)
   register char *t;
   register int i;
 
-  if (*n >= 0 && *n < xargc)
+  if(*n >= 0 && *n < xargc)
     t = xargv[*n];
   else
     t = "";
-  for (i = 0; i < ls && *t != '\0' ; ++i)
+  for(i = 0; i < ls && *t != '\0' ; ++i)
     *s++ = *t++;
-  for (; i < ls ; ++i)
+  for(; i < ls ; ++i)
     *s++ = ' ';
 }

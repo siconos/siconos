@@ -138,12 +138,12 @@ struct num_inf
     : _n(n), _sg(sg), _asg(asg) {}
   bool operator()(typename SicGraph::EDescriptor e)
   {
-     std::cout << _sg.bundle(e) << "<?" << _n << std::endl;
-    if ((_sg.bundle(e) < _n) && _asg.is_vertex(_sg.bundle(e)))
+    std::cout << _sg.bundle(e) << "<?" << _n << std::endl;
+    if((_sg.bundle(e) < _n) && _asg.is_vertex(_sg.bundle(e)))
     {
       CPPUNIT_ASSERT(_asg.bundle(_asg.descriptor(_sg.bundle(e))) == _sg.bundle(e)) ;
 
-       std::cout << "removing adjoint vertex :" << _sg.bundle(e) << " <" << _n << std::endl;
+      std::cout << "removing adjoint vertex :" << _sg.bundle(e) << " <" << _n << std::endl;
       _asg.remove_vertex(_sg.bundle(e));
 
       CPPUNIT_ASSERT(!_asg.is_vertex(_sg.bundle(e)));
@@ -177,21 +177,21 @@ void SiconosGraphTest::t5()
   vd2 = g.add_vertex("goodbye");
   vd3 = g.add_vertex("bye");
 
-   std::cout << "t5:g\n";
+  std::cout << "t5:g\n";
 
   g.display();
 
-   std::cout << "----\n";
+  std::cout << "----\n";
 
   g.add_edge(vd1, vd2, 1, ag);
   g.add_edge(vd1, vd2, 2, ag);
   g.add_edge(vd1, vd3, 3, ag);
 
-   std::cout << "t5:g+edges\n";
+  std::cout << "t5:g+edges\n";
 
   g.display();
 
-   std::cout << "----\n";
+  std::cout << "----\n";
 
   ag.display();
 
@@ -200,14 +200,14 @@ void SiconosGraphTest::t5()
 
   g.remove_out_edge_if(vd1, num_inf<G, AG>(3, g, ag));
 
-   std::cout << "t5:g+remove_edge_if\n";
+  std::cout << "t5:g+remove_edge_if\n";
   g.display();
-   std::cout << "----\n";
-   std::cout << "t5:ag+remove_edge_if\n";
+  std::cout << "----\n";
+  std::cout << "t5:ag+remove_edge_if\n";
   ag.display();
-   std::cout << "----\n";
+  std::cout << "----\n";
 
-   std::cout << g.edges_number() << std::endl;
+  std::cout << g.edges_number() << std::endl;
   CPPUNIT_ASSERT(ag.size() == g.edges_number());
 
   CPPUNIT_ASSERT(g.edges_number() == 1);
@@ -231,11 +231,11 @@ void SiconosGraphTest::t6()
 
   vd1 = g.add_vertex("hello");
 
-   std::cout << "t6:g\n";
+  std::cout << "t6:g\n";
 
   g.display();
 
-   std::cout << "---\n";
+  std::cout << "---\n";
 
   g.add_edge(vd1, vd1, 2, ag);
   g.add_edge(vd1, vd1, 3, ag);
@@ -249,22 +249,22 @@ void SiconosGraphTest::t6()
   g.add_edge(vd1, vd1, 11, ag);
 
 
-   std::cout << "t6:add_edges\n";
+  std::cout << "t6:add_edges\n";
 
   g.display();
 
-   std::cout << "---\n";
+  std::cout << "---\n";
 
   ag.display();
 
-   std::cout << "---\n";
+  std::cout << "---\n";
 
   CPPUNIT_ASSERT(ag.size() == g.edges_number());
   CPPUNIT_ASSERT(ag.size() == 10);
 //  CPPUNIT_ASSERT(ag.edges_number() == 1);
 
   AG::EIterator dsi, dsend;
-  for (std11::tie(dsi, dsend) = ag.edges(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = ag.edges(); dsi != dsend; ++dsi)
   {
     std::string& str = ag.bundle(*dsi);
     std::cout << "t6:found edge " << str << std::endl;
@@ -273,15 +273,15 @@ void SiconosGraphTest::t6()
 
   g.remove_out_edge_if(vd1, num_inf<G, AG>(10, g, ag));
 
-   std::cout << "t6:remove_out_edge_if < 10\n";
+  std::cout << "t6:remove_out_edge_if < 10\n";
 
   g.display();
 
-   std::cout << "---\n";
+  std::cout << "---\n";
 
   ag.display();
 
-   std::cout << "---\n";
+  std::cout << "---\n";
 
   CPPUNIT_ASSERT(ag.size() == g.edges_number());
 
@@ -337,7 +337,7 @@ void SiconosGraphTest::t7()
   AG::AVIterator ui, uiend;
   std::cout << "adjacent to 100:\n";
   int tot = 0, k = 1;
-  for (std11::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
+  for(std::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
   {
     std::cout << "yo " << ag.bundle(*ui) << std::endl;
     tot += k * ag.bundle(*ui);

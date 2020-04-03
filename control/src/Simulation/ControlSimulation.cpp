@@ -25,9 +25,6 @@
 #include "Actuator.hpp"
 #include "Observer.hpp"
 #include "ControlSimulation.hpp"
-#include <boost/progress.hpp>
-#include <boost/timer.hpp>
-
 #include "ControlSimulation_impl.hpp"
 
 ControlSimulation::ControlSimulation(double t0, double T, double h):
@@ -57,13 +54,13 @@ void ControlSimulation::initialize()
   res = getNumberOfStates(DSG0, IG0);
   _nDim = res.first;
   _dataLegend += res.second;
-  if (!_saveOnlyMainSimulation)
+  if(!_saveOnlyMainSimulation)
   {
     // iter over controller and observer
     const Actuators& allActuators = _CM->getActuators();
-    for (ActuatorsIterator it = allActuators.begin(); it != allActuators.end(); ++it)
+    for(ActuatorsIterator it = allActuators.begin(); it != allActuators.end(); ++it)
     {
-      if ((*it)->getInternalNSDS())
+      if((*it)->getInternalNSDS())
       {
         Topology& topo = *(*it)->getInternalNSDS()->topology();
         res = getNumberOfStates(*topo.dSG(0), *topo.indexSet0());
@@ -72,9 +69,9 @@ void ControlSimulation::initialize()
       }
     }
     const Observers& allObservers = _CM->getObservers();
-    for (ObserversIterator it = allObservers.begin(); it != allObservers.end(); ++it)
+    for(ObserversIterator it = allObservers.begin(); it != allObservers.end(); ++it)
     {
-      if ((*it)->getInternalNSDS())
+      if((*it)->getInternalNSDS())
       {
         Topology& topo = *(*it)->getInternalNSDS()->topology();
         res = getNumberOfStates(*topo.dSG(0), *topo.indexSet0());
@@ -83,7 +80,7 @@ void ControlSimulation::initialize()
       }
     }
   }
-  _dataM.reset(new SimpleMatrix(_N, _nDim + 1)); // we save the system state 
+  _dataM.reset(new SimpleMatrix(_N, _nDim + 1)); // we save the system state
 }
 
 void ControlSimulation::setTheta(unsigned int newTheta)
@@ -96,7 +93,7 @@ void ControlSimulation::addDynamicalSystem(SP::DynamicalSystem ds, const std::st
   _nsds->insertDynamicalSystem(ds);
   _processSimulation->associate(_processIntegrator, ds);
 
-  if (!name.empty())
+  if(!name.empty())
   {
     _nsds->setName(ds, name);
   }
@@ -104,8 +101,9 @@ void ControlSimulation::addDynamicalSystem(SP::DynamicalSystem ds, const std::st
 
 void ControlSimulation::addSensor(SP::Sensor sensor, const double h)
 {
-  if (h < _h) {
-     RuntimeException::selfThrow("The timestep for a sensor cannot be smaller than the one for the simulation");
+  if(h < _h)
+  {
+    RuntimeException::selfThrow("The timestep for a sensor cannot be smaller than the one for the simulation");
   }
 
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
@@ -114,8 +112,9 @@ void ControlSimulation::addSensor(SP::Sensor sensor, const double h)
 
 void ControlSimulation::addActuator(SP::Actuator actuator, const double h)
 {
-  if (h < _h) {
-     RuntimeException::selfThrow("The timestep for an actuator cannot be smaller than the one for the simulation");
+  if(h < _h)
+  {
+    RuntimeException::selfThrow("The timestep for an actuator cannot be smaller than the one for the simulation");
   }
 
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
@@ -124,8 +123,9 @@ void ControlSimulation::addActuator(SP::Actuator actuator, const double h)
 
 void ControlSimulation::addObserver(SP::Observer observer, const double h)
 {
-  if (h < _h) {
-     RuntimeException::selfThrow("The timestep for an observer cannot be smaller than the one for the simulation");
+  if(h < _h)
+  {
+    RuntimeException::selfThrow("The timestep for an observer cannot be smaller than the one for the simulation");
   }
 
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
@@ -137,22 +137,22 @@ void ControlSimulation::storeData(unsigned indx)
   unsigned startingColumn = 1;
   startingColumn = storeAllStates(indx, startingColumn, *_DSG0, *_IG0, *_dataM);
 
-  if (!_saveOnlyMainSimulation)
+  if(!_saveOnlyMainSimulation)
   {
     // iter over controller and observer
     const Actuators& allActuators = _CM->getActuators();
-    for (ActuatorsIterator it = allActuators.begin(); it != allActuators.end(); ++it)
+    for(ActuatorsIterator it = allActuators.begin(); it != allActuators.end(); ++it)
     {
-      if ((*it)->getInternalNSDS())
+      if((*it)->getInternalNSDS())
       {
         Topology& topo = *(*it)->getInternalNSDS()->topology();
         startingColumn = storeAllStates(indx, startingColumn, *topo.dSG(0), *topo.indexSet0(), *_dataM);
       }
     }
     const Observers& allObservers = _CM->getObservers();
-    for (ObserversIterator it = allObservers.begin(); it != allObservers.end(); ++it)
+    for(ObserversIterator it = allObservers.begin(); it != allObservers.end(); ++it)
     {
-      if ((*it)->getInternalNSDS())
+      if((*it)->getInternalNSDS())
       {
         Topology& topo = *(*it)->getInternalNSDS()->topology();
         startingColumn = storeAllStates(indx, startingColumn, *topo.dSG(0), *topo.indexSet0(), *_dataM);

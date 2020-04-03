@@ -128,10 +128,10 @@ PY_REGISTER_BULLET_LINEAR_MATH(btTransform);
 %include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
 
 
-%shared_ptr(std::vector< std11::shared_ptr<btCollisionObject> >);
-%template (collisionObjects) std::vector< std11::shared_ptr< btCollisionObject > >;
+%shared_ptr(std::vector< std::shared_ptr<btCollisionObject> >);
+%template (collisionObjects) std::vector< std::shared_ptr< btCollisionObject > >;
 
-//%shared_ptr(std::vector< std11::shared_ptr<btCollisionShape> >);
+//%shared_ptr(std::vector< std::shared_ptr<btCollisionShape> >);
 
 PY_REGISTER_BULLET_NARROW_PHASE_COLLISION_DETECTION(btManifoldPoint);
 PY_REGISTER_BULLET_NARROW_PHASE_COLLISION_DETECTION(btPersistentManifold);
@@ -197,17 +197,21 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape);
 typedef Interaction Interaction;
 
 %include "BulletSiconosFwd.hpp"
-PY_FULL_REGISTER(BulletR, Mechanics);
-PY_FULL_REGISTER(BulletFrom1DLocalFrameR, Mechanics);
 
-
-
+// Do not serialize (pickle) Bullet relations, because they can ony be
+// created by SiconosBulletCollisionManager when running Bullet
+// narrow-phase collision detection.
+PY_REGISTER_WITHOUT_PICKLE(BulletR, Mechanics);
+PY_REGISTER_WITHOUT_PICKLE(Bullet1DR, Mechanics);
+PY_REGISTER_WITHOUT_PICKLE(Bullet2dR, Mechanics);
+PY_REGISTER_WITHOUT_PICKLE(Bullet2d3DR, Mechanics);
+PY_REGISTER_WITHOUT_PICKLE(Bullet5DR, Mechanics);
 
 %inline
 {
   SP::BulletR cast_BulletR(SP::Relation rel)
   {
-    return std11::dynamic_pointer_cast<BulletR>(rel);
+    return std::dynamic_pointer_cast<BulletR>(rel);
   };
 
   extern bool gContactCalcArea3Points;

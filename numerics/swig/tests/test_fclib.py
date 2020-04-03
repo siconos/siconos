@@ -51,7 +51,7 @@ def solve_reduced(fcp, solver_reduced):
 def solve_global(fcp, solver):
     SO = sn.SolverOptions(solver)
     SO.dparam[0] = np.sqrt(fcp.numberOfContacts)*1e-9
-
+    SO.iparam[0] = 10000
     n, m = fcp.H.shape
     size_reaction = m
     reaction = np.zeros((size_reaction,))
@@ -63,7 +63,7 @@ def solve_global(fcp, solver):
 def test_gfc3d():
     data_files = ('LMGC_GFC3D_CubeH8.hdf5', 'LMGC_GlobalFrictionContactProblem00046.hdf5')
     mark_as_failed = False
-
+    sn.numerics_set_verbose(1)
     for d in data_files:
         full_path = data_dir + d
         if os.path.isfile(full_path):
@@ -107,3 +107,8 @@ def test_fc3d():
                     print('Solver {:} on problem {:} is ok'.format(sn.solver_options_id_to_name(s), d))
 
     assert mark_as_failed is False
+
+
+if __name__ == '__main__':
+     test_gfc3d()
+     test_fc3d()

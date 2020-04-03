@@ -21,7 +21,7 @@
 
 
 // BoundaryCondition::BoundaryCondition()
-// _velocityIndices(NULL)
+// _velocityIndices(nullptr)
 // {
 // }
 
@@ -29,7 +29,7 @@
 BoundaryCondition::BoundaryCondition(SP::UnsignedIntVector newVelocityIndices, SP::SiconosVector newVelocityValues): _velocityIndices(newVelocityIndices),  _prescribedVelocity(newVelocityValues)
 {
 
-  if (newVelocityIndices->size() != newVelocityValues->size())
+  if(newVelocityIndices->size() != newVelocityValues->size())
     RuntimeException::selfThrow("BoundaryCondition::BoundaryCondition  constructor. velocityIndices and prescribedVelocity must have the same size");
   _prescribedVelocityOld.reset(new SiconosVector(*newVelocityValues));
   _pluginPrescribedVelocity.reset(new PluggedObject());
@@ -48,6 +48,6 @@ BoundaryCondition::~BoundaryCondition()
 
 void BoundaryCondition::computePrescribedVelocity(double time)
 {
-  if (_pluginPrescribedVelocity->fPtr)
+  if(_pluginPrescribedVelocity->fPtr)
     ((FPtrPrescribedVelocity)_pluginPrescribedVelocity->fPtr)(time, _velocityIndices->size(), &(*_prescribedVelocity)(0));
 }

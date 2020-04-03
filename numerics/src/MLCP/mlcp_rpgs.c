@@ -15,23 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "SiconosBlas.h"
+
+#include <float.h>                              // for DBL_EPSILON
+#ifndef __cplusplus
+#include <stdbool.h>                       // for false
+#endif
+#include <stdio.h>                              // for printf
+#include <stdlib.h>                             // for free, malloc
+#include "MLCP_Solvers.h"                       // for mlcp_compute_error
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NumericsFwd.h"                        // for SolverOptions, MixedL...
+#include "SiconosBlas.h"                        // for cblas_ddot
+#include "SolverOptions.h"                      // for SolverOptions, SICONO...
+#include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_RHO
+
 #define EPSDIAG DBL_EPSILON
-
-int mixedLinearComplementarity_rpgs_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  pSolver->dparam[2] = 0.5; /*rho*/
-  return 0;
-}
-
 
 /*
  *
@@ -61,14 +59,14 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   incy = 1;
   /* Recup input */
 
-  itermax = options->iparam[0];
-  tol   = options->dparam[0];
-  rho   = options->dparam[2];
+  itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  tol   = options->dparam[SICONOS_DPARAM_TOL];
+  rho   = options->dparam[SICONOS_DPARAM_MLCP_RHO];
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocation */
 
@@ -79,12 +77,12 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   /* Preparation of the diagonal of the inverse matrix */
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
-    if (A[i * n + i] < -EPSDIAG)
+    if(A[i * n + i] < -EPSDIAG)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -102,12 +100,12 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
     }
   }
-  for (i = 0 ; i < m ; ++i)
+  for(i = 0 ; i < m ; ++i)
   {
-    if (B[i * m + i] < -EPSDIAG)
+    if(B[i * m + i] < -EPSDIAG)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -137,30 +135,30 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   mlcp_compute_error(problem, z, w, tol, &err);
   printf("Error = %12.8e\n", err);
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
     incy = 1;
 
 
-    for (i = 0 ; i < n ; ++i)
+    for(i = 0 ; i < n ; ++i)
     {
       uiprev = u[i];
       u[i] = 0.0;
       //zi = -( q[i] + cblas_ddot( n , &vec[i] , 1 , z , incy ))*diag[i];
       //u[i] = -( a[i]  - (rho*uiprev) +cblas_ddot( n , &A[i] , n , u , 1 )   + cblas_ddot( m , &C[i] , n , v , 1 )         )*diagA[i];
-      u[i] = -(a[i]   - (rho * uiprev) + cblas_ddot(n , &A[i] , incAx , u , incy)   + cblas_ddot(m , &C[i] , incAx , v , incy)) * diagA[i];
+      u[i] = -(a[i]   - (rho * uiprev) + cblas_ddot(n, &A[i], incAx, u, incy)   + cblas_ddot(m, &C[i], incAx, v, incy)) * diagA[i];
     }
 
-    for (i = 0 ; i < m ; ++i)
+    for(i = 0 ; i < m ; ++i)
     {
       viprev = v[i];
       v[i] = 0.0;
       //zi = -( q[i] + cblas_ddot( n , &vec[i] , 1, z , incy ))*diag[i];
       //v[i] = -( b[i] -(rho*viprev) + cblas_ddot( n , &D[i] , m , u , 1 )   + cblas_ddot( m , &B[i] , m , v , 1 )         )*diagB[i];
-      vi = -(b[i] - (rho * viprev) + cblas_ddot(n , &D[i] , incBx , u , incy)   + cblas_ddot(m , &B[i] , incBx , v , incy)) * diagB[i];
-      if (vi > 0)
+      vi = -(b[i] - (rho * viprev) + cblas_ddot(n, &D[i], incBx, u, incy)   + cblas_ddot(m, &B[i], incBx, v, incy)) * diagB[i];
+      if(vi > 0)
         v[i] = vi;
     }
 
@@ -170,32 +168,32 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
     mlcp_compute_error(problem, z, w, tol, &err);
 
 
-    if (verbose == 2)
+    if(verbose == 2)
     {
       printf(" # i%d -- %g : ", iter, err);
-      for (i = 0 ; i < n ; ++i) printf(" %g", u[i]);
-      for (i = 0 ; i < m ; ++i) printf(" %g", v[i]);
-      for (i = 0 ; i < m ; ++i) printf(" %g", w[i]);
+      for(i = 0 ; i < n ; ++i) printf(" %g", u[i]);
+      for(i = 0 ; i < m ; ++i) printf(" %g", v[i]);
+      for(i = 0 ; i < m ; ++i) printf(" %g", w[i]);
       printf("\n");
     }
 
     /* **** ********************* **** */
 
   }
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_TOL] = err;
 
-  if (err > tol)
+  if(err > tol)
   {
-    printf("Siconos/Numerics: mlcp_rpgs: No convergence of RPGS after %d iterations\n" , iter);
+    printf("Siconos/Numerics: mlcp_rpgs: No convergence of RPGS after %d iterations\n", iter);
     printf("Siconos/Numerics: mlcp_rpgs: The residue is : %g \n", err);
     *info = 1;
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
     {
-      printf("Siconos/Numerics: mlcp_rpgs: Convergence of RPGS after %d iterations\n" , iter);
+      printf("Siconos/Numerics: mlcp_rpgs: Convergence of RPGS after %d iterations\n", iter);
       printf("Siconos/Numerics: mlcp_rpgs: The residue is : %g \n", err);
     }
     *info = 0;
@@ -205,3 +203,10 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   free(diagB);
   return;
 }
+
+void mlcp_rpgs_set_default(SolverOptions* options)
+{
+  options->dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5; /*rho*/
+  options->filterOn = false;
+}
+

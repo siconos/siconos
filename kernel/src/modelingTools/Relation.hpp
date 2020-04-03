@@ -27,33 +27,28 @@
 #include "SiconosVisitor.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
 
-/** General Non Linear Relation (Virtual Base class for Relations).
- *
- *  A relation is a link between global variables of the Dynamical
- * Systems and some local ones, named y and lambda; belonging to one
- * and only one Interaction.
- *
- * The present class is an interface to all relations and provides
- * tools to define and describe them.
- *
- * Each relation must have the two following functions:
- *
- *  - computeOutput(...) to compute y using DS global variables.
- *  - computeInput(...) to compute non-smooth DS part (r or p) using
- *   lambda.
- *
- * Depending on the DS class and the link type, various relations (ie
- * derived classes) are available:
- *   - FirstOrder, for FirstOrderDS and derived classes.
- *   - Lagrangian, for LagrangianDS and derived classes.
- *
- *  The specific type (Linear, Scleronomous ...) is then given by the
- *  "subType". \n
- *
- * The relation holds also:
- *  - a VectorMap to handle links to DS variables (no copy!!!). Filled
- *    in during initialize.
- *
+/** General Non Linear Relation (Abstract Base class for Relations).
+
+    The present class is an interface to all relations and provides
+    tools to define and describe them.
+
+    A relation is a link between global variables of the Dynamical
+    Systems and some local ones, named y and lambda; belonging to one
+    and only one Interaction.
+
+    \rst
+    see :ref:`relations` for details about the different types of relations.
+    \endrst
+
+    All relations are specified by their type (First order or Lagrangian)
+    accessed by getType() and their sub-type (linear, scleronomous ...), returned by
+    getSubType().
+
+    A relation provides functions to compute:
+
+    - a function computeOutput() that updates y using dynamical systems global variables,
+    - a function computeInput() that updates non-smooth dynamical systems parts (e.g. r or p) using \f$\lambda\f$.
+
  */
 class Relation
 {
@@ -92,7 +87,7 @@ protected:
 
   /** Plug-in to compute e*/
   SP::PluggedObject _plugine;
-  /** To initialize all the plugin functions with NULL.
+  /** To initialize all the plugin functions with nullptr.
    */
   virtual void _zeroPlugin();
 
@@ -110,23 +105,14 @@ protected:
 
 private:
 
-  /** default constructor => private, no copy nor pass-by-value
-   */
-  Relation();
-
-  /** copy constructor => private, no copy nor pass-by-value.
-   */
-  Relation(const Relation&);
-
-  /* Assignment  => private, forbidden
-   */
-  Relation& operator=(const Relation&);
+  /* forbid default, copy and assignment */
+  Relation() = delete;
+  Relation(const Relation&) = delete;
+  Relation& operator=(const Relation&) = delete;
 
 public:
 
-
-  /** destructor
-   */
+  /** destructor */
   virtual ~Relation(){};
 
   /** To get the type of the Relation (FirstOrder or Lagrangian)
