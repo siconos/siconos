@@ -91,7 +91,3 @@ stages:
   stage: build
   script:
     - "sh ci_gitlab/install_siconos.sh $user_file" 
-  artifacts:
-    paths:
-      - build/Testing/Temporary/
-    expire_in: 1 week
