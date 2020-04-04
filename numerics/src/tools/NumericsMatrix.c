@@ -78,6 +78,9 @@ void NM_internalData_new(NumericsMatrix* M)
 #ifdef SICONOS_HAS_MPI
   M->internalData->mpi_comm = MPI_COMM_NULL;
 #endif
+#ifdef WITH_OPENSSL
+  M->internalData->values_sha1_count = 0;
+#endif
 }
 
 
@@ -3076,6 +3079,19 @@ int NM_LU_factorize(NumericsMatrix* Ao)
 
   if (!NM_factorized(Ao))
   {
+
+#ifdef FACTORIZATION_DEBUG
+    if (NM_internalData(Ao)->values_sha1_count > 0)
+    {
+      if(NM_check_values_sha1(Ao))
+      {
+        numerics_warning("NM_LU_factorize", "this matrix is already factorized");
+      }
+    }
+
+    NM_set_values_sha1(Ao);
+#endif
+
     assert(Ao->destructible); /* by default Ao->destructible == Ao */
 
     NumericsMatrix* A = Ao->destructible;
@@ -3216,6 +3232,12 @@ int NM_LU_factorize(NumericsMatrix* Ao)
       assert(NM_internalData(A)->isLUfactorized == false);
     }
   }
+#ifdef FACTORIZATION_DEBUG
+  else if (!NM_check_values_sha1(Ao))
+  {
+    numerics_error("NM_LU_factorize", "values have changed and matrix must be re-factorized");
+  }
+#endif
   return info;
 }
 
@@ -4566,6 +4588,7 @@ unsigned char* NM_values_sha1(NumericsMatrix* A)
 void NM_set_values_sha1(NumericsMatrix* A)
 {
   NM_compute_values_sha1(A, NM_values_sha1(A));
+  NM_internalData(A)->values_sha1_count += 1;
 }
 
 bool NM_check_values_sha1(NumericsMatrix* A)

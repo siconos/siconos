@@ -106,8 +106,11 @@ Example : if cmake is executed with WITH_MPI=ON
 // option in fc problems used to dump some info.
 #cmakedefine DUMP_PROBLEM
 
-// for md5 signatures
+// for sha1 signatures
 #cmakedefine WITH_OPENSSL
+
+// factorization debug, need WITH_OPENSSL
+#cmakedefine FACTORIZATION_DEBUG
 
 // -- Optional parts for mechanics --
 #cmakedefine SICONOS_HAS_BULLET

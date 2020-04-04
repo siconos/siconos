@@ -55,6 +55,7 @@ typedef struct
   MPI_Comm mpi_comm; /**< optional mpi communicator */
 #endif
 #ifdef WITH_OPENSSL
+  unsigned int values_sha1_count; /**< counter for sha1 */
   unsigned char values_sha1[SHA_DIGEST_LENGTH]; /**< sha1 hash of
                                                  * values. Matrices of
                                                  * differents sizes may have
