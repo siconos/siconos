@@ -106,9 +106,11 @@ protected:
 private:
 
   /* forbid default, copy and assignment */
-  Relation() = delete;
   Relation(const Relation&) = delete;
   Relation& operator=(const Relation&) = delete;
+
+protected:
+  Relation(){}; /* for serialization only */
 
 public:
 

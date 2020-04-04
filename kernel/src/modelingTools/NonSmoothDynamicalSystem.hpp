@@ -118,8 +118,11 @@ private:
   /* assignment, forbidden */
   OneStepNSProblem& operator=(const OneStepNSProblem& osnsp) = delete;
 
-  /* Forbid default constructor. No use to build a NSDS with t0=T.*/
-  NonSmoothDynamicalSystem() = delete;
+  /* Forbid default constructor except for serialization. No use to
+     build a NSDS with t0=T.*/
+protected:
+  NonSmoothDynamicalSystem(){};
+
 public:
 
   /** NSDS constructor.

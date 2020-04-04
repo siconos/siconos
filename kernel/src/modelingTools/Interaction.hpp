@@ -153,7 +153,11 @@ private:
   /* forbid default constructor, copy and assignment */
   Interaction(const Interaction& inter) = delete;
   Interaction& operator=(const Interaction&) = delete;
-  Interaction() = delete;
+
+protected:
+  Interaction() {} /* for serialization only */
+
+private:
 
   /*! @name DSlink graph property management */
   //@{
