@@ -158,7 +158,7 @@ public:
   */
   virtual void computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
 
-  /** default function to compute $ K = \nabla_{\lambda}g \f$
+  /** default function to compute \f$ K = \nabla_{\lambda}g \f$
    * \param time    current time
    * \param x       current state variables
    * \param lambda  current nonsmooth variables
