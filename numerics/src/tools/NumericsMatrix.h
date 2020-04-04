@@ -35,6 +35,10 @@
 //#define nullptr NULL
 #endif
 
+#ifdef WITH_OPENSSL
+#include <openssl/sha.h>
+#endif
+
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
  */
@@ -49,6 +53,12 @@ typedef struct
   bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
 #ifdef SICONOS_HAS_MPI
   MPI_Comm mpi_comm; /**< optional mpi communicator */
+#endif
+#ifdef WITH_OPENSSL
+  unsigned char values_sha1[SHA_DIGEST_LENGTH]; /**< sha1 hash of
+                                                 * values. Matrices of
+                                                 * differents sizes may have
+                                                 * the same hash */
 #endif
 } NumericsMatrixInternalData;
 
@@ -873,6 +883,13 @@ extern "C"
    */
   BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A);
 
+
+#ifdef WITH_OPENSSL
+  /* Compute sha1 hash of matrix values. Matrices of differents size and same
+   * values have the same hash.
+   * \param[in] A the matrix */
+  void NM_compute_values_sha1(NumericsMatrix* A);
+#endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

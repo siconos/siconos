@@ -43,7 +43,9 @@
 #include "sanitizer.h"                // for cblas_dcopy_msan
 #include "NumericsVector.h"           // for NV_max
 
-
+#ifdef WITH_OPENSSL
+#include <openssl/sha.h>
+#endif
 
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"
@@ -4534,3 +4536,21 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
   else
     return 1;
 }
+
+#ifdef WITH_OPENSSL
+void NM_compute_values_sha1(NumericsMatrix* A)
+{
+  switch(A->storageType)
+  {
+    /* ! A->matrix0 fortran layout != A->matrix2->triplet->x C layout */
+  case NM_DENSE:
+  case NM_SPARSE_BLOCK:
+  case NM_SPARSE:
+  {
+    SHA1((char*) NM_triplet(A)->x, NM_triplet(A)->nz*sizeof(double),
+         NM_internalData(A)->values_sha1);
+    break;
+  }
+  }
+}
+#endif

@@ -2219,6 +2219,53 @@ static int test_NM_LU_solve(void)
   return info;
 }
 
+#ifdef WITH_OPENSSL
+#include <openssl/sha.h>
+#include <string.h>
+int test_NM_compute_values_sha1()
+{
+  int info = 0;
+
+  NumericsMatrix* M1;
+  M1 = NM_create(NM_DENSE, 2, 2);
+
+  NM_zentry(M1, 0, 0, 2.);
+  NM_zentry(M1, 0, 1, -1.);
+  NM_zentry(M1, 1, 0, 1.);
+  NM_zentry(M1, 1, 1, 1.);
+
+  NM_compute_values_sha1(M1);
+
+
+  char sha1_str[SHA_DIGEST_LENGTH*2];
+  for(int i = 0; i < SHA_DIGEST_LENGTH; ++i)
+  {
+    sprintf(&sha1_str[i*2], "%02x",
+            (unsigned char) NM_internalData(M1)->values_sha1[i]);
+  }
+
+  /* zz.c:
+     #include <stdio.h>
+
+     int main()
+     {
+     FILE *file=fopen("t.bin","wb");
+     double buffer[4]= {2,-1,1,1};
+     fwrite(buffer,sizeof(double),4,file);
+     fclose(file);
+     }
+  */
+  /* cc zz.c -o zz && ./zz && cat t.bin | openssl sha1 */
+  char ref_str[SHA_DIGEST_LENGTH*2]
+    = "264ac112664a06a83ce53a7b35003c152e4cb8ed";
+
+  info = strncmp(sha1_str, ref_str, SHA_DIGEST_LENGTH*2);
+
+  NM_clear(M1);
+  free(M1);
+  return info;
+}
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -2263,6 +2310,10 @@ int main(int argc, char *argv[])
   info += test_NM_posv_expert();
 
   info += test_NM_LU_solve();
+
+#ifdef WITH_OPENSSL
+  info += test_NM_compute_values_sha1();
+#endif
 
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();

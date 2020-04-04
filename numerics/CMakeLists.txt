@@ -237,6 +237,11 @@ if(WITH_MUMPS)
   target_link_libraries(numerics PRIVATE MUMPS::MUMPS)
 endif()
 
+if(WITH_OPENSSL)
+  find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+  target_link_libraries(numerics PRIVATE OpenSSL::Crypto)
+endif()
+
 # -- HDF5 --
 # For logging
 if(WITH_HDF5)
