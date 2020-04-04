@@ -887,8 +887,37 @@ extern "C"
 #ifdef WITH_OPENSSL
   /* Compute sha1 hash of matrix values. Matrices of differents size and same
    * values have the same hash.
-   * \param[in] A the matrix */
-  void NM_compute_values_sha1(NumericsMatrix* A);
+   * \param[in] A the matrix
+   * \param[in,out] digest an allocated space of size SHA_DIGEST_LENGTH
+   */
+  void NM_compute_values_sha1(NumericsMatrix* A, unsigned char * digest);
+
+  /* Get stored sha1 hash of a matrix.
+   * \param[in] A the matrix
+   * \return a pointer on the current raw sha1 hash
+   */
+  unsigned char* NM_values_sha1(NumericsMatrix* A);
+
+   /* Set sha1 hash of a matrix. Matrices of differents size and same
+   * values have the same hash.
+   * \param[in] A the matrix
+   */
+  void NM_set_values_sha1(NumericsMatrix* A);
+
+  /* Check if matrix has beend modified after a previous NM_set_values_sha1.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix is the same
+   */
+  bool NM_check_values_sha1(NumericsMatrix* A);
+
+  /* Compare two matrices with sha1. NM_set_values_sha1 must be called
+   * on the two matrices before.
+   * \param[in] A a NumericsMatrix
+   * \param[in] B a NumericsMatrix
+   * \return true if the matrices have the same values
+   */
+  bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B);
+
 #endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

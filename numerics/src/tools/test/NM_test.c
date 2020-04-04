@@ -2234,14 +2234,14 @@ int test_NM_compute_values_sha1()
   NM_zentry(M1, 1, 0, 1.);
   NM_zentry(M1, 1, 1, 1.);
 
-  NM_compute_values_sha1(M1);
+  NM_set_values_sha1(M1);
 
 
   char sha1_str[SHA_DIGEST_LENGTH*2];
   for(int i = 0; i < SHA_DIGEST_LENGTH; ++i)
   {
     sprintf(&sha1_str[i*2], "%02x",
-            (unsigned char) NM_internalData(M1)->values_sha1[i]);
+            (unsigned char) NM_values_sha1(M1)[i]);
   }
 
   /* zz.c:
@@ -2263,6 +2263,32 @@ int test_NM_compute_values_sha1()
 
   NM_clear(M1);
   free(M1);
+  return info;
+}
+
+int test_NM_check_values_sha1()
+{
+  int info = 0;
+  NumericsMatrix* M1;
+  M1 = NM_create(NM_DENSE, 2, 2);
+
+  NM_zentry(M1, 0, 0, 2.);
+  NM_zentry(M1, 0, 1, -1.);
+  NM_zentry(M1, 1, 0, 1.);
+  NM_zentry(M1, 1, 1, 1.);
+
+  NM_set_values_sha1(M1);
+
+  if (!NM_check_values_sha1(M1))
+    info += 1;
+
+  NM_zentry(M1, 0, 0, 3.);
+
+  NM_clearSparse(M1);
+
+  if (NM_check_values_sha1(M1))
+    info += 1;
+
   return info;
 }
 #endif
@@ -2313,6 +2339,7 @@ int main(int argc, char *argv[])
 
 #ifdef WITH_OPENSSL
   info += test_NM_compute_values_sha1();
+  info += test_NM_check_values_sha1();
 #endif
 
 #ifdef SICONOS_HAS_MPI

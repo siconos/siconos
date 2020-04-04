@@ -4538,7 +4538,7 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
 }
 
 #ifdef WITH_OPENSSL
-void NM_compute_values_sha1(NumericsMatrix* A)
+void NM_compute_values_sha1(NumericsMatrix* A, unsigned char* digest)
 {
   switch(A->storageType)
   {
@@ -4547,10 +4547,40 @@ void NM_compute_values_sha1(NumericsMatrix* A)
   case NM_SPARSE_BLOCK:
   case NM_SPARSE:
   {
-    SHA1((char*) NM_triplet(A)->x, NM_triplet(A)->nz*sizeof(double),
-         NM_internalData(A)->values_sha1);
+    SHA1((char*) NM_triplet(A)->x, NM_triplet(A)->nz*sizeof(double), digest);
     break;
+  }
+  default:
+  {
+    numerics_error("NM_compute_values_sha1",
+                   "Unsupported matrix type %d in %s", A->storageType);
   }
   }
 }
+
+unsigned char* NM_values_sha1(NumericsMatrix* A)
+{
+  return NM_internalData(A)->values_sha1;
+}
+
+void NM_set_values_sha1(NumericsMatrix* A)
+{
+  NM_compute_values_sha1(A, NM_values_sha1(A));
+}
+
+bool NM_check_values_sha1(NumericsMatrix* A)
+{
+  char current_digest[SHA_DIGEST_LENGTH];
+  char* digest = NM_values_sha1(A);
+
+  NM_compute_values_sha1(A, current_digest);
+  return (bool) !memcmp(digest, current_digest, SHA_DIGEST_LENGTH);
+}
+
+bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B)
+{
+  return (bool) !memcmp(NM_values_sha1(A), NM_values_sha1(B),
+                        SHA_DIGEST_LENGTH);
+}
+
 #endif
