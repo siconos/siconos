@@ -252,6 +252,7 @@ install_siconos:ubuntu18.04-serialization:
   artifacts:
     paths:
       - build
+    when: on_failure
 
 # Siconos build and install, with serialization/generation ON
 # on debian unstable.
@@ -262,10 +263,11 @@ install_siconos:debian-unstable-serialization:
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
     allow_parallel_build: 0
   extends: .siconos-build
-  allow_failure: false
+  allow_failure: true
   artifacts:
     paths:
       - build
+    when: on_failure
 
 # Siconos build and install, default setup
 # on centos 7
