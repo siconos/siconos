@@ -33,12 +33,14 @@ RUN apt update  && apt install -y -qq \
         python3-h5py \
         vim
 
-# Serilaization + Generation build requires documentation packages
+# Serialization + Generation build requires documentation packages
 RUN apt install -y -qq \
         python3-breathe \
+        python3-numpydoc \
         python3-sphinxcontrib.bibtex \
-        python3-sphinx-bootstrap-theme \
         python3-sphinxcontrib.youtube \
+        python3-sphinxcontrib.websupport \
+        python3-sphinx-rtd-theme \
         python3-sphinx-bootstrap-theme
 
 RUN apt clean && apt autoremove
