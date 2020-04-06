@@ -170,6 +170,8 @@ public:
     return _dotjacqhXqdot;
   };
 
+protected:
+
   /** to compute y = h(q,z) using plug-in mechanism
    * \param q the BlockVector of coordinates
    * \param z the BlockVector of parameters
@@ -177,12 +179,22 @@ public:
    */
   virtual void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
 
+
   /** to compute the jacobian of h using plug-in mechanism.
    * Index shows which jacobian is computed
    * \param q the BlockVector of coordinates
    * \param z the BlockVector of parameters
    */
   virtual void computeJachq(SiconosVector& q, SiconosVector& z);
+
+  /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
+   * \param q the BlockVector of coordinates
+   * \param z the BlockVector of parameters
+   * \param qDot q the BlockVector of derivative of coordinates
+   */
+  virtual void computeDotJachq(SiconosVector& q, SiconosVector& z, SiconosVector& qDot);
+
+public:
 
   /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
    * \param time double, current time
@@ -208,12 +220,6 @@ public:
     ;
   }
 
-  /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
-   * \param q the BlockVector of coordinates
-   * \param z the BlockVector of parameters
-   * \param qDot q the BlockVector of derivative of coordinates
-   */
-  virtual void computeDotJachq(SiconosVector& q, SiconosVector& z, SiconosVector& qDot);
 
   /** to compute output
    * \param time the current time

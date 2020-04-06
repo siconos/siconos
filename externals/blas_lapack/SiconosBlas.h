@@ -21,15 +21,15 @@
 #define SiconosBlas_H
 #include "SiconosConfig.h"
 
-#if defined(__cplusplus) 
+#if defined(__cplusplus)
 extern "C"
 {
 #endif
 
 // tells include-what-you-use to keep this file
 // and not to suggest cblas.h or alike.
-// IWYU pragma: begin_exports 
-#if defined(HAS_MKL_CBLAS) 
+// IWYU pragma: begin_exports
+#if defined(HAS_MKL_CBLAS)
 #include <mkl_cblas.h>
 #elif defined(HAS_MATLAB_BLAS)
 #include <blas.h>
@@ -42,7 +42,7 @@ extern "C"
 #define cblas_dscal dscal
 #else
 #include <cblas.h>
-#endif 
+#endif
 // IWYU pragma: end_exports
 
 #ifdef __cplusplus
@@ -53,16 +53,16 @@ extern "C"
 
 
 static inline double* NMD_row_rmajor(double* restrict mat, unsigned ncols, unsigned rindx)
-{ 
+{
   return &mat[rindx*ncols];
 }
 
-static inline void NMD_copycol_rmajor(unsigned nrows, double* col, double* restrict mat, unsigned ncols, unsigned cindx)
+static inline void NMD_copycol_rmajor(int nrows, double* col, double* restrict mat, int ncols, unsigned cindx)
 {
   cblas_dcopy(nrows, col, 1, &mat[cindx], ncols);
 }
 
-static inline void NMD_dense_gemv(unsigned nrows, unsigned ncols, double alpha, double* restrict mat, double* restrict y, double beta, double* restrict x)
+static inline void NMD_dense_gemv(int nrows, int ncols, double alpha, double* restrict mat, double* restrict y, double beta, double* restrict x)
 {
   cblas_dgemv(CblasColMajor, CblasTrans, ncols, nrows, alpha, mat, ncols, y, 1, beta, x, 1);
 }
