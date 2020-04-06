@@ -17,6 +17,9 @@
 */
 
 #include <stdio.h>
+#include "ProgressBar.hpp"
+
+
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60
 
