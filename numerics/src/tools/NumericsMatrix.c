@@ -4597,13 +4597,28 @@ bool NM_check_values_sha1(NumericsMatrix* A)
   char* digest = NM_values_sha1(A);
 
   NM_compute_values_sha1(A, current_digest);
-  return (bool) !memcmp(digest, current_digest, SHA_DIGEST_LENGTH);
+
+  if (memcmp(digest, current_digest, SHA_DIGEST_LENGTH) == 0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B)
 {
-  return (bool) !memcmp(NM_values_sha1(A), NM_values_sha1(B),
-                        SHA_DIGEST_LENGTH);
+  if (memcmp(NM_values_sha1(A), NM_values_sha1(B),
+             SHA_DIGEST_LENGTH) == 0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 #endif
