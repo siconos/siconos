@@ -15,26 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file Utils.hpp
- *Include files related to utils directory
- */
 
-
-#include "BlockMatrix.hpp"
-#include "SimpleMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "BlockVector.hpp"
-#include "ioMatrix.hpp"
-#include "ioVector.hpp"
-
-#include "RuntimeException.hpp"
-#include "SiconosMatrixException.hpp"
-#include "SiconosVectorException.hpp"
-
-#include "SiconosMemory.hpp"
-
-#include "SSLH.hpp"
-
-#include "Tools.hpp"
-
-#include "ProgressBar.hpp"
+#ifndef ProgressBar_H
+#define ProgressBar_H
+void progressBar (double percentage);
+#endif
