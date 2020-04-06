@@ -20,7 +20,6 @@ This is the changelog for the Siconos package, www.siconos.gforge.inria.fr.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
-
 --------------------------------------------------------------------------------
   Current (in development branch siconos/master) --> 4.3.0.rc
 --------------------------------------------------------------------------------
