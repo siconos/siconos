@@ -42,7 +42,7 @@ typedef struct
 {
   size_t iWorkSize; /**< size of iWork */
   void *iWork; /**< integer workspace */
-  size_t sizeof_elt ; ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
+  size_t sizeof_elt ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
@@ -789,7 +789,8 @@ extern "C"
   static inline NumericsMatrix* NM_convert(NumericsMatrix* A)
   {
     return A;
-  };
+  }
+
   /** Compute the  maximum eigenvalue with the iterated power method
    * \param A the matrix
    * \return the maximum eigenvalue*/
@@ -808,7 +809,7 @@ extern "C"
    *  \return info
    */
   int NM_max_by_rows(NumericsMatrix *A, double * max);
-  
+
   /* Compute the maximum absolute values by columns
    *  \param A the matrix
    *  \param max the vector of max that must be preallocated
