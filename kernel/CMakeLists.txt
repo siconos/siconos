@@ -30,6 +30,7 @@ set(${COMPONENT}_DIRS
   src/utils/SiconosMemory
   src/utils/SiconosSharedLibrary
   src/utils/SiconosTools
+  src/utils/ProgressBar
   src/plugin
   src/modelingTools
   src/simulationTools
