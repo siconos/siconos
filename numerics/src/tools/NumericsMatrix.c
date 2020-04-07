@@ -1083,8 +1083,8 @@ void NM_display(const NumericsMatrix* const m)
     printf("========== internalData->iWorkSize = %lu\n", m->internalData->iWorkSize);
     printf("========== internalData->iWork = %p\n", m->internalData->iWork);
 
-    printf("========== internalData->dWorkSize = %lu\n", m->internalData->iWorkSize);
-    printf("========== internalData->dWork = %p\n", m->internalData->iWork);
+    printf("========== internalData->dWorkSize = %lu\n", m->internalData->dWorkSize);
+    printf("========== internalData->dWork = %p\n", m->internalData->dWork);
   }
   else
   {
