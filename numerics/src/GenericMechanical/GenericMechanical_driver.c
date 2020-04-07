@@ -43,9 +43,9 @@
 #include "numerics_verbose.h"              // for verbose
 #include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
 
-#define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR
 
 #ifdef DEBUG_MESSAGES

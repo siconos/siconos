@@ -31,9 +31,9 @@ using namespace RELATION;
 //#define SECONDWAY_ACTIVATION
 //#define QFREE_ACTIVATION
 
-#define DEBUG_NOCOLOR
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
