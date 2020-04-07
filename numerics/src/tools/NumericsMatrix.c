@@ -3078,7 +3078,9 @@ int NM_LU_factorize(NumericsMatrix* Ao)
     {
       if(NM_check_values_sha1(Ao))
       {
-        numerics_error("NM_LU_factorize", "this matrix is already factorized");
+        numerics_warning("NM_LU_factorize", "an attempt to  factorize this matrix has already been done");
+        info = 1;
+        return info;
       }
     }
 
