@@ -2245,9 +2245,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._interman = interaction_manager(bullet_options)
 
         joints = list(self.joints())
-        if hasattr(self._interman, 'useEqualityConstraints') \
-           and len(joints) == 0:
-            self._interman.useEqualityConstraints(False)
+        if hasattr(self._interman, 'useEqualityConstraints'):
+            if len(joints) == 0:
+                self._interman.useEqualityConstraints(False)
+            else:
+                self._interman.useEqualityConstraints(True)
 
         # (0) NonSmooth Dynamical Systems definition
         self._nsds = sk.NonSmoothDynamicalSystem(t0, T)
