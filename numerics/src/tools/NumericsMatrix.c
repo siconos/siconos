@@ -3075,7 +3075,10 @@ double* NM_dWork(NumericsMatrix* A, int size)
 
 int NM_LU_factorize(NumericsMatrix* Ao)
 {
+
   lapack_int info = 0;
+  assert(Ao->destructible); /* by default Ao->destructible == Ao */
+  NumericsMatrix* A = Ao->destructible;
 
   if (!NM_factorized(Ao))
   {
@@ -3085,16 +3088,12 @@ int NM_LU_factorize(NumericsMatrix* Ao)
     {
       if(NM_check_values_sha1(Ao))
       {
-        numerics_warning("NM_LU_factorize", "this matrix is already factorized");
+        numerics_error("NM_LU_factorize", "this matrix is already factorized");
       }
     }
 
     NM_set_values_sha1(Ao);
 #endif
-
-    assert(Ao->destructible); /* by default Ao->destructible == Ao */
-
-    NumericsMatrix* A = Ao->destructible;
 
     switch (A->storageType)
     {
@@ -3114,7 +3113,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
       DEBUG_PRINT("end of call DGETRF for NM_DENSE storage\n");
       if (info > 0)
       {
-        numerics_printf_verbose(2,"NM_LU_factorize: LU factorisation DGETRF failed. The %d-th diagonal element is 0\n", info);
+        fprintf(stderr,"NM_LU_factorize: LU factorisation DGETRF failed. The %d-th diagonal element is 0\n", info);
       }
       else if (info < 0)
       {
@@ -3232,12 +3231,9 @@ int NM_LU_factorize(NumericsMatrix* Ao)
       assert(NM_internalData(A)->isLUfactorized == false);
     }
   }
-#ifdef FACTORIZATION_DEBUG
-  else if (!NM_check_values_sha1(Ao))
-  {
-    numerics_error("NM_LU_factorize", "values have changed and matrix must be re-factorized");
-  }
-#endif
+
+  assert (NM_factorized(Ao) == NM_factorized(A));
+
   return info;
 }
 
@@ -3250,11 +3246,11 @@ int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
    * !A->internalData->isLUfactorized */
   NM_LU_factorize(Ao);
 
-  if (NM_factorized(Ao))
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
 
+  if (NM_factorized(A))
   {
-    /* get the destructible part of the matrix */
-    NumericsMatrix *A = Ao->destructible;
 
     DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
     assert(A->size0 == A->size1);
@@ -4567,6 +4563,10 @@ void NM_compute_values_sha1(NumericsMatrix* A, unsigned char* digest)
     /* ! A->matrix0 fortran layout != A->matrix2->triplet->x C layout */
   case NM_DENSE:
   case NM_SPARSE_BLOCK:
+  {
+    /* so triplet will be updated */
+    NM_clearTriplet(A);
+  }
   case NM_SPARSE:
   {
     SHA1((char*) NM_triplet(A)->x, NM_triplet(A)->nz*sizeof(double), digest);
