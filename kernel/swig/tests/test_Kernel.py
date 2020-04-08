@@ -13,9 +13,12 @@ def test_autocast():
     nsds.insertDynamicalSystem(dsB)
 
     failed=0
-    if (type(nsds.dynamicalSystem(dsA.number())) != sk.LagrangianDS):
+    
+
+    
+    if not isinstance(nsds.dynamicalSystem(dsA.number()), sk.LagrangianDS):
         failed = 1
-    if (type(nsds.dynamicalSystem(dsB.number())) != sk.FirstOrderLinearDS):
+    if not isinstance(nsds.dynamicalSystem(dsB.number()), sk.FirstOrderLinearDS):
         failed = 1
 
     return failed
@@ -96,31 +99,40 @@ def test_getMatrix():
 def test_matrix_bracket_operator():
     M = sk.SimpleMatrix(10,10)
     M.zero()
-    def fill_matrix(M):
+    M_nparray = np.zeros((10,10))
+    print(M_nparray)
+    def fill_matrix(M, M_nparray):
         for i in range(M.size(0)):
             for j in range(M.size(1)):
-                M[i,j] = i+j
-         
+                M[i,j] = float(i+j)
+                M_nparray[i,j] = float(i+j)
+                
         return
-
-    fill_matrix(M)
-    print(M, type(M))
+    fill_matrix(M,M_nparray)
+    
+    #print(M, type(M))
+    #print(M_nparray, type(M_nparray))
     for i in range(M.size(0)):
         for j in range(M.size(1)):
             if M[i,j] != i+j :
                 return False
+            
+    #assert((M == M_nparray).all())
 
+            
     M[0,1]=266.0
     if M[0,1] != 266.0:
         return (M[0,1]== 266.0)
     
     try:
+        # Slice indexing for SimpleMatrix is not yet implemented.
         M[0:1]= [0,2]
     except Exception as e:
         print(e)
-        pass
+
     try:
         M[1.0,1]= 4.0
+        # SiconosMatrix must be indexed by integer
     except Exception as e:
         print(e)
 
@@ -192,6 +204,8 @@ def test_BoundaryCondition():
 
     assert (B.velocityIndices() == [1, 2, 5]).all()
 if __name__ == "__main__":
+    
     # execute only if run as a script
+    test_autocast()
     test_matrix_bracket_operator()
 
