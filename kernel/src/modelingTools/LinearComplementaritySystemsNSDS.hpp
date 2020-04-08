@@ -52,12 +52,12 @@ private:
   /* an interaction*/
   SP::Interaction _interaction;
 
+protected:
+  /** default constructor for serialization only
+   */
+  LinearComplementaritySystemsNSDS(){};
 
 public:
-
-  /** default constructor
-   */
-  LinearComplementaritySystemsNSDS() = delete;
 
   /** constructor with t0 and T
    * \param t0 initial time

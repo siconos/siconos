@@ -130,7 +130,7 @@ def classes_from_headers(all_headers, include_paths):
             for line in out:
                 words = line.split()
                 if len(words)>=2 and (words[0]=='class' or words[0]=='struct'):
-                    classes.append(words[1])
+                    classes.append(words[1].strip(':'))
         return classes
     finally:
         shutil.rmtree(d)

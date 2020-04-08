@@ -15,26 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file Utils.hpp
- *Include files related to utils directory
- */
 
-
-#include "BlockMatrix.hpp"
-#include "SimpleMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "BlockVector.hpp"
-#include "ioMatrix.hpp"
-#include "ioVector.hpp"
-
-#include "RuntimeException.hpp"
-#include "SiconosMatrixException.hpp"
-#include "SiconosVectorException.hpp"
-
-#include "SiconosMemory.hpp"
-
-#include "SSLH.hpp"
-
-#include "Tools.hpp"
-
+#include <stdio.h>
 #include "ProgressBar.hpp"
+
+
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBWIDTH 60
+
+void progressBar (double percentage)
+{
+
+    int val = (int) (percentage * 100);
+    int lpad = (int) (percentage * PBWIDTH);
+    int rpad = PBWIDTH - lpad;
+    printf ("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+    fflush (stdout);
+}

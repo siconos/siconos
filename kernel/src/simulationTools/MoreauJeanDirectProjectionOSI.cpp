@@ -221,6 +221,8 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
   {
     gamma = _gamma;
   }
+  DEBUG_PRINTF("\nMoreauJeanDirectProjectionOSI::addInteractionInIndexSet inter->number() = %i\n", inter->number());
+  DEBUG_EXPR(inter->display(););
   DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
 
@@ -279,6 +281,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
 #ifdef DEBUG_MESSAGES
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 #endif
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet inter->number() = %i\n", inter->number());
   DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
 
   DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
