@@ -511,6 +511,40 @@ void NM_clear(NumericsMatrix* m)
   NM_internalData_free(m);
 }
 
+
+void NM_clear_other_storages(NumericsMatrix* M, int storageType)
+{
+  assert(M && "NM_clear, M == NULL");
+
+  switch(M->storageType)
+  {
+  case NM_DENSE:
+  {
+    NM_clearSparseBlock(M);
+    NM_clearSparse(M);
+    NM_internalData_free(M);
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    NM_clearDense(M);
+    NM_clearSparse(M);
+    NM_internalData_free(M);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    NM_clearDense(M);
+    NM_clearSparseBlock(M);
+    NM_internalData_free(M);
+    break;
+  }
+  default:
+    numerics_error("NM_clear_other_storages ","unknown storageType %d for matrix\n", M->storageType);
+  }
+}
+
+
 void NM_dense_display_matlab(double * m, int nRow, int nCol, int lDim)
 {
   if(m)
@@ -1511,8 +1545,10 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
 
 NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B)
 {
-  assert(A->size0 == B->size0 && "NM_add :: A->size0 != A->size0 ");
-  assert(A->size1 == B->size1 && "NM_add :: A->size1 != A->size1 ");
+
+
+  assert(A->size0 == B->size0 && "NM_add :: A->size0 != B->size0 ");
+  assert(A->size1 == B->size1 && "NM_add :: A->size1 != B->size1 ");
 
 
   /* The storageType  for C inherits from A except for NM_SPARSE_BLOCK */
@@ -1557,6 +1593,7 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
   case NM_SPARSE_BLOCK:
   case NM_SPARSE:
   {
+
     CSparseMatrix* result = cs_add(NM_csc(A), NM_csc(B), alpha, beta);
     assert(result && "NM_add :: cs_add failed");
     NSM_fix_csc(result);
@@ -1571,8 +1608,7 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
   default:
   {
     numerics_error("NM_add:","unsupported matrix storage %d", A->storageType);
-  }
-  }
+  }  }
   return C;
 
 }
@@ -2450,6 +2486,13 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
     assert(A->matrix2->csc);
     NM_clearCSCTranspose(A);
   }
+
+  assert(A->matrix2->csc);
+  assert(A->matrix2->csc->m == A->size0 && "inconsistent size of csc storage");
+  assert(A->matrix2->csc->n == A->size1 && "inconsistent size of csc storage");
+
+
+
   DEBUG_END("NM_csc(NumericsMatrix *A)\n");
   return A->matrix2->csc;
 }
@@ -3857,7 +3900,7 @@ double NM_norm_inf(NumericsMatrix* A)
 
 int NM_is_symmetric(NumericsMatrix* A)
 {
-
+  assert(A);
 
   NumericsMatrix * Atrans = NM_transpose(A);
   NumericsMatrix * AplusATrans = NM_add(1/2.0, A, -1/2.0, Atrans);
