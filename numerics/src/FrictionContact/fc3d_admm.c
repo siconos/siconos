@@ -993,7 +993,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
                int* restrict info, SolverOptions* restrict options)
 {
 
-  verbose=1;
+  /* verbose=1; */
   /* frictionContact_display(problem); */
 
   /* Number of contacts */
