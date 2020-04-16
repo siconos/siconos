@@ -120,11 +120,6 @@ if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
   target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
-# If dtrtrs is not defined in blas/lapack (which is the case in atlas) add it to the sources
-if(NOT HAS_LAPACK_dtrtrs)
-  target_sources(externals PRIVATE blas_lapack/clapack_dtrtrs.c)
-endif()
-
 # Force c++ compiler for c files (for Visual Studio I guess?)
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
@@ -152,8 +147,12 @@ target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
 target_include_directories(externals PRIVATE blas_lapack)
 
 # We don't want warnings from externals libraries.
+get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
+list(REMOVE_ITEM externals_COMPILE_FLAGS -Wall)
+set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
+target_compile_options(externals PRIVATE "-Wno-unused-parameter")
 
 # - Extras, optional -
 # --- SuiteSparse ---

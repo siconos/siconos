@@ -19,7 +19,10 @@
 #include <stdlib.h>            // for free, malloc
 #include "Friction_cst.h"      // for SICONOS_FRICTION_3D_NSN_AC
 #include "NonSmoothDrivers.h"  // for fc3d_LmgcDriver
-
+#include "SiconosConfig.h" // for SICONOS_HAS_MPI // IWYU pragma: keep
+#ifdef SICONOS_HAS_MPI
+#include "mpi.h"
+#endif
 int main(int argc, char *argv[])
 {
 

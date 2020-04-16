@@ -44,6 +44,14 @@ docker-build:debian-buster:
     IMAGE_NAME: debian-buster
   extends: .docker-build
 
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# It's based on debian unstable
+docker-build:debian-unstable:
+  variables:
+    IMAGE_NAME: debian-unstable
+  extends: .docker-build
+
     
 # This job create a docker image with all required dependencies
 # (including serialization, python wrapper, mumps parallel)
@@ -127,6 +135,29 @@ install_siconos:ubuntu18.04:
     paths:
       - build
 
+# Same as above but with many devel (warnings ...) options activated.
+install_siconos:ubuntu18.04-devmode:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+
+install_siconos:ubuntu18.04-paranoidmode:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_paranoidmode.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+  allow_failure: true
+  when: manual
+      
 # Siconos build and install, default config
 # (based on cmake/default_siconos.cmake)
 # on debian buster
@@ -140,7 +171,21 @@ install_siconos:debian-buster:
   #   paths:
   #     - build
 
-      
+# Siconos build and install, default config
+# (based on cmake/default_siconos.cmake)
+# on debian unstable. Manual only
+install_siconos:debian-unstable:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-unstable
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+  extends: .siconos-build
+  allow_failure: true
+  when: manual
+  # artifacts:
+  #   paths:
+  #     - build
+    
 # Siconos build and install, default config
 # (based on cmake/default_siconos.cmake)
 # on ubuntu 18.04.
@@ -199,11 +244,30 @@ install_siconos:ubuntu18.04-fclib:
 # on ubuntu 18.04.
 install_siconos:ubuntu18.04-serialization:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
-    cdash_submit: 0 # No submit to cdash : too unstable.
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-doc
+    cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
+    allow_parallel_build: 0
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+    when: on_failure
+
+# Siconos build and install, with serialization/generation ON
+# on debian unstable.
+install_siconos:debian-unstable-serialization:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-unstable
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
+    allow_parallel_build: 0
   extends: .siconos-build
   allow_failure: true
+  artifacts:
+    paths:
+      - build
+    when: on_failure
 
 # Siconos build and install, default setup
 # on centos 7

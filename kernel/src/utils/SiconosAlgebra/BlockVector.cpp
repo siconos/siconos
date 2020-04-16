@@ -25,26 +25,25 @@
 #include "SiconosVector.hpp"
 
 #include "SiconosAlgebra.hpp"
+#include "SiconosAlgebraTools.hpp" // for isComparableTo
 #include "Tools.hpp"
-
-
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
+
+using Siconos::Algebra::isComparableTo;
 
 // =================================================
 //                CONSTRUCTORS
 // =================================================
 BlockVector::BlockVector()
 {
-  _sizeV = 0;
   _tabIndex.reset(new Index());
 }
 
 BlockVector::BlockVector(const BlockVector &v)
 {
-  _sizeV = 0;
   unsigned int nbBlocks = v.numberOfBlocks();
   _tabIndex.reset(new Index());
   _tabIndex->reserve(nbBlocks);
@@ -52,21 +51,18 @@ BlockVector::BlockVector(const BlockVector &v)
   VectorOfVectors::const_iterator it;
   for(it = v.begin(); it != v.end(); ++it)
   {
-    _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(**it))) ;
+    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(**it))) ;
     _sizeV += (*it)->size();
     _tabIndex->push_back(_sizeV);
   }
 }
 
-
 BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
 {
-  _sizeV = 0;
-
   // Insert the two vectors in the container
   // NO COPY !!
   if(! v1  && ! v2)
-    SiconosVectorException::selfThrow("BlockVector:constructor(SiconosVector*,SiconosVector*), both vectors are NULL.");
+    SiconosVectorException::selfThrow("BlockVector:constructor(SiconosVector*,SiconosVector*), both vectors are nullptr.");
 
   _tabIndex.reset(new Index());
 
@@ -81,12 +77,12 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
 
   }
   else
-    // If first parameter is a NULL pointer, then set this(1) to a SiconosVector of the same size as v2, and equal to 0.
+    // If first parameter is a nullptr pointer, then set this(1) to a SiconosVector of the same size as v2, and equal to 0.
   {
     // This case is usefull to set xDot in LagrangianDS.
     _sizeV = v2->size();
 
-    _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(_sizeV)));
+    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(_sizeV)));
     _tabIndex->push_back(_sizeV);
 
   }
@@ -97,11 +93,11 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
     _tabIndex->push_back(_sizeV);
 
   }
-  else // If second parameter is a NULL pointer, then set this(2) to a SiconosVector of the same size as v1, and equal to 0.
+  else // If second parameter is a nullptr pointer, then set this(2) to a SiconosVector of the same size as v1, and equal to 0.
   {
     // This case is usefull to set xDot in LagrangianDS.
 
-    _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(v1->size())));
+    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(v1->size())));
     _sizeV += v1->size();
     _tabIndex->push_back(_sizeV);
   }
@@ -109,14 +105,12 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
 
 BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim)
 {
-  _sizeV = 0;
-
   _tabIndex.reset(new Index());
   _tabIndex->reserve(numberOfBlocks);
   _vect.reserve(numberOfBlocks);
   for(unsigned int i = 0; i < numberOfBlocks; ++i)
   {
-    _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(dim)));
+    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(dim)));
     _tabIndex->push_back(dim * (i + 1));
   }
   _sizeV = dim * numberOfBlocks;
@@ -124,32 +118,18 @@ BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim)
 
 BlockVector::BlockVector(unsigned int numberOfBlocks)
 {
-  _sizeV = 0;
   _tabIndex.reset(new Index());
   _tabIndex->resize(numberOfBlocks);
   _vect.resize(numberOfBlocks);
 }
 
-BlockVector::~BlockVector()
-{}
-
 // ===========================
 //      private method
 // ===========================
 
-void BlockVector::updateSizeV()
+void BlockVector::_update()
 {
   _sizeV=0;
-  VectorOfVectors::iterator it;
-  for(it = _vect.begin(); it != _vect.end(); ++it)
-  {
-    if(*it)
-      _sizeV += (*it)->size();
-  }
-}
-void BlockVector::updateTabIndex()
-{
-  unsigned int cumulated_size=0;
   _tabIndex.reset(new Index());
 
   VectorOfVectors::iterator it;
@@ -157,9 +137,9 @@ void BlockVector::updateTabIndex()
   {
     if(*it)
     {
-      cumulated_size += (*it)->size();
+      _sizeV += (*it)->size();
     }
-    _tabIndex->push_back(cumulated_size);
+    _tabIndex->push_back(_sizeV);
   }
 }
 
@@ -195,7 +175,7 @@ void BlockVector::display() const
     if(*it)
       (*it)->display();
     else
-      std::cout << "(*it)-> NULL" <<std::endl;
+      std::cout << "(*it)-> nullptr" <<std::endl;
   }
 }
 
@@ -277,16 +257,7 @@ double& BlockVector::operator()(unsigned int pos)
 
 double BlockVector::operator()(unsigned int pos) const
 {
-  unsigned int blockNum = 0;
-
-  while(pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size())
-    blockNum ++;
-  unsigned int relativePos = pos;
-
-  if(blockNum != 0)
-    relativePos -= (*_tabIndex)[blockNum - 1];
-
-  return (*_vect[blockNum])(relativePos);
+  return getValue(pos);
 }
 
 //============================================
@@ -298,29 +269,21 @@ void BlockVector::setVector(unsigned int pos, const SiconosVector& v)
 {
   assert(pos < _vect.size() && "insertion out of vector size");
   if(! _vect[pos])
-    SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] == NULL pointer.");
-
-  // if(v.size() != (_vect[pos])->size())
-  //   SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] and v have unconsistent sizes.");
-
+    SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] == nullptr pointer.");
   *_vect[pos] = v ;
 }
 
 void BlockVector::setVectorPtr(unsigned int pos, SP::SiconosVector v)
 {
   assert(pos < _vect.size() && "insertion out of vector size");
-  // if(v->size() != (_vect[pos])->size())
-  //   SiconosVectorException::selfThrow("BlockVector::setVectorPtr(pos,v), this[pos] and v have unconsistent sizes.");
   _vect[pos] = v;
-  updateSizeV();
-  updateTabIndex();
+  _update();
 }
 
 void BlockVector::setAllVect(VectorOfVectors& v)
 {
   _vect = v;
-  updateSizeV();
-  updateTabIndex();
+  _update();
 }
 
 SP::SiconosVector BlockVector::operator [](unsigned int pos)
@@ -403,11 +366,6 @@ BlockVector& BlockVector::operator -= (const BlockVector& vIn)
 
 BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
 {
-  // Add a part of vIn (starting from index) to the current vector.
-  // vIn must be a SimpleVector.
-
-  // At the end of the present function, index is equal to index + the dim. of the added sub-vector.
-
   unsigned int dim = vIn.size(); // size of the block to be added.
   if(dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
 
@@ -476,19 +434,19 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
   return *this;
 }
 
-void BlockVector::insert(const  SiconosVector& v)
-{
-  _sizeV += v.size();
+// void BlockVector::insert(const  SiconosVector& v)
+// {
+//   _sizeV += v.size();
 
-  _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(v))); // Copy
+//   _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(v))); // Copy
 
-  _tabIndex->push_back(_sizeV);
-}
+//   _tabIndex->push_back(_sizeV);
+// }
 
 void BlockVector::insertPtr(SP::SiconosVector v)
 {
   if(!v)
-    SiconosVectorException::selfThrow("BlockVector:insertPtr(v), v is a NULL vector.");
+    SiconosVectorException::selfThrow("BlockVector:insertPtr(v), v is a nullptr vector.");
 
   _sizeV += v->size();
   _vect.push_back(v);
@@ -559,19 +517,6 @@ void BlockVector::setBlock(const SiconosVector& vIn, unsigned int sizeB, unsigne
 
     vIn.toBlock(*currentBlock, subSizeB, posIn, 0);
   }
-
-}
-
-bool BlockVector::isComparableTo(const BlockVector& v1, const BlockVector& v2)
-{
-  // return:
-  //  - true if both are block but with blocks which are facing each other of the same size.
-  //  - false in other cases
-  //
-  const Index& I1 = *v1.tabIndex();
-  const Index& I2 = *v2.tabIndex();
-
-  return (I1 == I2);
 
 }
 

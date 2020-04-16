@@ -20,7 +20,7 @@
 #include <math.h>                    // for sqrt, fabs, fmax, INFINITY
 #include <stdio.h>                   // for NULL, printf
 #include <stdlib.h>                  // for calloc, free, malloc
-#include "CSparseMatrix.h"           // for CSparseMatrix_zentry, CSparseMatrix
+#include "CSparseMatrix_internal.h"           // for CSparseMatrix_zentry, CSparseMatrix
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
@@ -169,7 +169,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   double* mu = problem->mu;
   double alpha_r=0.0;
   FrictionContactProblem *  rescaled_problem =  problem;
-  if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+  if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
   {
     alpha_r = NM_norm_inf(M);
     //alpha_r=1./10.0;
@@ -492,7 +492,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     if(stopping_criterion)
     {
       /* check the full criterion */
-      if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+      if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
       {
         norm_q = cblas_dnrm2(m, problem->q, 1);
       }
@@ -508,7 +508,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
         numerics_printf_verbose(1,"---- FC3D - ADMM  - The tolerance on the  residual is not sufficient to reach accuracy (error =  %14.7e)", error);
         tolerance = tolerance * fmax(epsilon_dual/scaling_error_dual,epsilon_primal/scaling_error_primal)/error;
         numerics_printf_verbose(1,"---- FC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
-        if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+        if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
         {
           norm_q = cblas_dnrm2(m, rescaled_problem->q, 1);
         }
@@ -993,7 +993,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
                int* restrict info, SolverOptions* restrict options)
 {
 
-  verbose=1;
+  /* verbose=1; */
   /* frictionContact_display(problem); */
 
   /* Number of contacts */

@@ -27,7 +27,7 @@
 #include <stdbool.h>
 #include <float.h>
 
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "SolverOptions.h"

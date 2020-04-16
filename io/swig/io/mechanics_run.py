@@ -865,10 +865,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     float(self._nslaws_data[name].attrs['mu']),
                     self._dimension)
             elif nslawClass == sk.NewtonImpactRollingFrictionNSL:
-                nslaw = nslawClass(
-                    float(self._nslaws_data[name].attrs['e']), 0.,
-                    float(self._nslaws_data[name].attrs['mu']),
-                    float(self._nslaws_data[name].attrs['mu_r']), 5)
+                if self._dimension == 3:
+                    nslaw = nslawClass(
+                        float(self._nslaws_data[name].attrs['e']), 0.,
+                        float(self._nslaws_data[name].attrs['mu']),
+                        float(self._nslaws_data[name].attrs['mu_r']), 5)
+                elif self._dimension == 2:
+                    nslaw = nslawClass(
+                        float(self._nslaws_data[name].attrs['e']), 0.,
+                        float(self._nslaws_data[name].attrs['mu']),
+                        float(self._nslaws_data[name].attrs['mu_r']), 3)
             elif nslawClass == sk.NewtonImpactNSL:
                 nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']))
             elif nslawClass == sk.RelayNSL:
@@ -1691,7 +1697,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         time = self.current_time()
 
         positions = self._io.positions(self._nsds)
-
         if positions is not None:
             self._dynamic_data.resize(current_line + positions.shape[0], 0)
 
@@ -1704,9 +1709,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 # VA. change the position such that is corresponds to a 3D object
                 new_positions = np.zeros((positions.shape[0], 8))
 
-                new_positions[:, 0] = positions[:, 0]
-                new_positions[:, 1] = positions[:, 1]
-                new_positions[:, 2] = positions[:, 2]
+                new_positions[:, 0] = positions[:, 0] # ds number
+                new_positions[:, 1] = positions[:, 1] # x position
+                new_positions[:, 2] = positions[:, 2] # y position
 
                 new_positions[:, 4] = np.cos(positions[:, 3] / 2.0)
                 new_positions[:, 7] = np.sin(positions[:, 3] / 2.0)
@@ -1742,7 +1747,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 new_velocities[:, 2] = velocities[:, 2]
 
                 new_velocities[:, 6] = velocities[:, 3]
-                self._dynamic_data[current_line:, :] = np.concatenate(
+                self._velocities_data[current_line:, :] = np.concatenate(
                     (times, new_velocities), axis=1)
 
     def output_contact_forces(self):
@@ -1755,7 +1760,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             time = self.current_time()
             contact_points = self._io.contactPoints(self._nsds,
                                                     self._contact_index_set)
-
             if contact_points is not None:
                 current_line = self._cf_data.shape[0]
                 # Increase the number of lines in cf_data
@@ -1895,8 +1899,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         iterations = so.iparam[sn.SICONOS_IPARAM_ITER_DONE]
         precision = so.dparam[sn.SICONOS_DPARAM_RESIDU]
         msg = 'Numerics solver info at time : {0:10.6f}'.format(time)
-        msg += 'iterations = {0:8d}'.format(iterations)
-        msg += 'precision = {0:5.3e}'.format(precision)
+        msg += ' iterations = {0:8d}'.format(iterations)
+        msg += ' precision = {0:5.3e}'.format(precision)
         self.print_verbose(msg)
 
     def import_plugins(self):
@@ -2105,8 +2109,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             Note FP : already set in __enter__. Overwrite?
 
         solver_options : numerics SolverOptions, optional
-            OneStepNsProblem solver options set. If None,
-            default set will be SICONOS_FRICTION_3D_NSGS
+            OneStepNsProblem solver options set.
+            if solver_option is None, we leave Siconos/kernel choosing the default option
             (see solvers documentation for details)
 
         osnspb_max_size : int, optional
@@ -2193,10 +2197,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if gravity_scale is not None:
             self._gravity_scale = gravity_scale
 
-        # Solver options - Default : friction NSGS
-        if solver_options is None:
-            solver_options = sk.solver_options_create(
-                sn.SICONOS_FRICTION_3D_NSGS)
+
 
         # cold restart
         times = set()
@@ -2244,9 +2245,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._interman = interaction_manager(bullet_options)
 
         joints = list(self.joints())
-        if hasattr(self._interman, 'useEqualityConstraints') \
-           and len(joints) == 0:
-            self._interman.useEqualityConstraints(False)
+        if hasattr(self._interman, 'useEqualityConstraints'):
+            if len(joints) == 0:
+                self._interman.useEqualityConstraints(False)
+            else:
+                self._interman.useEqualityConstraints(True)
 
         # (0) NonSmooth Dynamical Systems definition
         self._nsds = sk.NonSmoothDynamicalSystem(t0, T)
@@ -2298,36 +2301,60 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # Creates and initialises the one-step nonsmooth problem.
         # The OSI and/or the nonsmooth law drives the choice.
-        sid = solver_options.solverId
+
+        # rationale for choosing numerics solver options
+        # if solver_option is None --> we leave Siconos/kernel choosing the default option
+        # else we use the user solver_options
+        
         if friction_contact_trace_params is None:
             # Global friction contact.
             if (osi == sk.MoreauJeanGOSI):
-                osnspb = sk.GlobalFrictionContact(3, solver_options)
-                if sid == sn.SICONOS_GLOBAL_FRICTION_3D_ADMM:
-                    osnspb.setMStorageType(sn.NM_SPARSE)
-                    # which is the default for gfc in kernel, is it?
+                if (solver_options is None):
+                    osnspb = sk.GlobalFrictionContact(3)
                 else:
-                    osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
+                    osnspb = sk.GlobalFrictionContact(3, solver_options)
+                osnspb.setMStorageType(sn.NM_SPARSE)
+                # if sid == sn.SICONOS_GLOBAL_FRICTION_3D_ADMM:
+                #     osnspb.setMStorageType(sn.NM_SPARSE)
+                #     # which is the default for gfc in kernel, is it?
+                # else:
+                #     osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
                 osnspb.setMaxSize(osnspb_max_size)
             else:
-                if (nb_of_nslaw_type > 1):
-                    osnspb = sk.GenericMechanical(
-                        sn.SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                if ('EqualityConditionNSL' in set(nslaw_type_list)):
+                    if (solver_options is None):
+                        osnspb = sk.GenericMechanical()
+                    else:
+                        osnspb = sk.GenericMechanical(solver_options)
                 else:
-                    if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):
-                        osnspb = sk.FrictionContact(self._dimension,
-                                                    solver_options)
+                    if ('NewtonImpactFrictionNSL' in set(nslaw_type_list)) or \
+                       (len(set(nslaw_type_list)) == 0):
+                        if (solver_options is None):
+                            osnspb = sk.FrictionContact(self._dimension)
+                        else:
+                            osnspb = sk.FrictionContact(self._dimension,solver_options)
                         osnspb.setMaxSize(osnspb_max_size)
                         osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
 
                     elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
-                        osnspb = sk.RollingFrictionContact(5, solver_options)
+                        if self._dimension ==3:
+                            dimension_contact=5
+                        elif self._dimension ==2:
+                            dimension_contact=3
+                        if (solver_options is None): 
+                            osnspb = sk.RollingFrictionContact(dimension_contact)
+                        else:
+                            osnspb = sk.RollingFrictionContact(dimension_contact, solver_options)
                     else:
                         msg = "Unknown nslaw type"
                         msg += str(set(nslaw_type_list))
                         raise RuntimeError(msg)
 
         else:  # With trace
+            if solver_options is None:
+                solver_options = sk.solver_options_create(
+                    sn.SICONOS_FRICTION_3D_NSGS)
+            sid = solver_options.solverId
             if(osi == sk.MoreauJeanGOSI):
                 osnspb = GFCTrace(3, sid, friction_contact_trace_params, nsds)
                 osnspb.setMStorageType(sn.NM_SPARSE)
@@ -2361,8 +2388,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:
             simulation = time_stepping(nsds, timedisc)
             simulation.insertIntegrator(self._osi)
+            simulation.insertNonSmoothProblem(osnspb)
 
-        simulation.insertNonSmoothProblem(osnspb)
         simulation.insertInteractionManager(self._interman)
 
         simulation.setNewtonOptions(Newton_options)
@@ -2505,7 +2532,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose('  velocity max :', np.max(v))
                     self.print_verbose('  velocity min :', np.min(v))
                 #     #print(simulation.output(1,0))
-
+            solver_options = osnspb.numericsSolverOptions()
             precision = solver_options.dparam[sn.SICONOS_DPARAM_RESIDU]
             if (exit_tolerance is not None):
                 if (precision > exit_tolerance):

@@ -364,7 +364,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     dimIndex[1] = 7;
     setBlock(_jachq, auxBloc, dimIndex, startIndex);
 
-    NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (ds);
+    NewtonEulerDS& d = *std::static_pointer_cast<NewtonEulerDS> (ds);
     d.computeTdot();
     SimpleMatrix& Tdot = *d.Tdot();
 
@@ -388,7 +388,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
 
   // compute the product of jachqTdot and v
   SiconosVector workVelocity;
-  workVelocity.initFromBlock(*DSlink[NewtonEulerR::velocity]);
+  workVelocity.block2contiguous(*DSlink[NewtonEulerR::velocity]);
   DEBUG_EXPR(workVelocity.display(););
   prod(*jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());

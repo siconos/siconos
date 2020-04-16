@@ -25,7 +25,7 @@
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "numerics_verbose.h"               // for numerics_error, numerics_...
-#include "rolling_fc3d_Solvers.h"           // for rolling_fc3d_nsgs, rollin...
+#include "rolling_fc_Solvers.h"           // for rolling_fc3d_nsgs, rollin...
 
 const char* const   SICONOS_ROLLING_FRICTION_3D_NSGS_STR = "RFC3D_NSGS";
 
@@ -55,8 +55,10 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
   int info = -1 ;
 
   if(problem->dimension != 5)
+  {
+    numerics_warning("rolling_fc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
     numerics_error("rolling_fc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
-
+  }
   /* Check for trivial case */
   info = rolling_fc3d_checkTrivialCase(problem, velocity, reaction, options);
   if(info == 0)
@@ -115,6 +117,6 @@ int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem, double
     reaction[i] = 0.;
   }
 
-  numerics_printf("fc3d fc3d_checkTrivialCase, take off, trivial solution reaction = 0, velocity = q.\n");
+  numerics_printf("rolling_fc3d rolling_fc3d_checkTrivialCase, take off, trivial solution reaction = 0, velocity = q.\n");
   return 0;
 }

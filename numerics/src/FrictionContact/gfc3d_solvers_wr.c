@@ -34,7 +34,9 @@
 #include "gfc3d_compute_error.h"
 #include "SolverOptions.h"                       // for SICONOS_DPARAM_TOL
 
-#define OUTPUT_DEBUG */
+/* #define OUTPUT_DEBUG *\/ */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
 #include "debug.h"                                // for DEBUG_EXPR, DEBUG_P...
 
 
@@ -268,9 +270,8 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);
 
     // compute H^T M^-1 q+ b
-    double* qtmp = (double*)malloc(n * sizeof(double));
-    for(int i = 0; i < n; i++) qtmp[i] = 0.0;
-    double alpha = 1.0, beta = 0.0;
+    double* qtmp = (double*)calloc(n,  sizeof(double));
+    double alpha = 1.0, beta = 1.0;
     double beta2 = 0.0;
     NM_gemv(alpha, M, problem->q, beta2, qtmp);
     NM_gemv(alpha, Htrans, qtmp, beta, localproblem->q);
@@ -346,7 +347,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     NM_write_in_file_python(localproblem->M, fileout);
     fclose(fileout);
 #endif
-
+    numerics_printf_verbose(1,"Compute localq = H^T M^(-1) q +b  ...");
     // compute localq = H^T M^(-1) q +b
 
     //Copy localq <- b
@@ -354,7 +355,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     localproblem->q = (double*)malloc(m * sizeof(double));
     cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);
 
-    double* qtmp = (double*)malloc(n * sizeof(double));
+    double* qtmp = (double*)calloc(n, sizeof(double));
     //cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
@@ -493,6 +494,8 @@ int freeLocalProblem(FrictionContactProblem* localproblem)
 
 void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
+
+  /* verbose=1; */
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
   NumericsMatrix *H = problem->H;
   // We compute only if the local problem has contacts

@@ -72,22 +72,22 @@ void FirstOrderLinearTIDS::display(bool brief) const
   std::cout << "===> Linear Time-invariant First Order System display, " << _number << ")." <<std::endl;
   std::cout << "- A " <<std::endl;
   if(_A) _A->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- b " <<std::endl;
   if(_b) _b->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << "- M: " <<std::endl;
   if(_M) _M->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- x " <<std::endl;
   if(_x[0]) _x[0]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- x0 " <<std::endl;
   if(_x0) _x0->display();
   std::cout << "- x[1] " <<std::endl;
   if(_x[1]) _x[1]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
 
   std::cout << "============================================" <<std::endl;

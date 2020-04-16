@@ -122,7 +122,7 @@ void Hem5OSI_solout_wrapper(integer* MODE,
 
 Hem5OSI::Hem5OSI():
   OneStepIntegrator(OSI::HEM5OSI), _idid(0)
-  , _impl(std11::make_shared<Hem5OSI_impl>(this))
+  , _impl(std::make_shared<Hem5OSI_impl>(this))
 {
   _steps=1;
   _intData.resize(9);
@@ -268,7 +268,7 @@ void Hem5OSI::fillvWork(integer* NV, doublereal* v)
 void Hem5OSI::computeRhs(double t)
 {
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -279,7 +279,7 @@ void Hem5OSI::computeRhs(double t)
 void Hem5OSI::computeJacobianRhs(double t)
 {
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -327,7 +327,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
       if(Type::value(*ds) == Type::LagrangianDS ||
           Type::value(*ds) == Type::LagrangianLinearTIDS)
       {
-        LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+        LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS>(ds);
         if(lds.mass())
         {
           lds.computeMass();
@@ -374,7 +374,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
       if(Type::value(*ds) == Type::LagrangianDS ||
           Type::value(*ds) == Type::LagrangianLinearTIDS)
       {
-        LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+        LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS>(ds);
         hem5osi->fillqWork(NQ,q);
         hem5osi->fillvWork(NV,v);
         lds.computeForces((double)*time, lds.q(), lds.velocity());
@@ -399,7 +399,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     SP::InteractionsGraph indexSet2
       = hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
     assert(indexSet2);
-    for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
       inter->computeOutput(t, 0);
@@ -413,7 +413,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2 =
       hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
-    for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
       inter->relation()->computeJach(t, *inter);
@@ -432,7 +432,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet2 =
       hem5osi->_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
-    for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
       inter->relation()->computeJach(t, *inter);
@@ -457,7 +457,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
       if(Type::value(*ds) == Type::LagrangianDS ||
           Type::value(*ds) == Type::LagrangianLinearTIDS)
       {
-        LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+        LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS>(ds);
         unsigned int dim = lds.dimension();
         for(unsigned int i =0 ; i < dim ; i++)
         {
@@ -487,12 +487,12 @@ void Hem5OSI_impl::fprob(integer* IFCN,
 }
 // void Hem5OSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 // {
-//   std11::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
+//   std::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 // }
 
 // void Hem5OSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 // {
-//   std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
+//   std::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 // }
 void Hem5OSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
@@ -518,7 +518,7 @@ void Hem5OSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
-    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+    LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS>(ds);
     lds.init_inverse_mass(); // invMass required to update post-impact velocity
 
     _qWork->insertPtr(lds.q());
@@ -636,7 +636,7 @@ void Hem5OSI::initialize()
   // SP::InteractionsGraph indexSet0
   //   = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   // assert(indexSet0);
-  // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  // for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   // {
   //   SP::Interaction inter = indexSet0->bundle(*ui);
   //   _lambdaWork->insertPtr(inter->lambda(0));
@@ -669,7 +669,7 @@ unsigned int Hem5OSI::numberOfConstraints()
   assert(indexSet2);
   SP::SiconosVector y;
   unsigned int n = 0;
-  for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet2->bundle(*ui);
     n++;
@@ -688,7 +688,7 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
-  hem5_global_object = std11::static_pointer_cast<Hem5OSI>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
+  hem5_global_object = std::static_pointer_cast<Hem5OSI>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
 
 #ifdef HAS_FORTRAN
   // function to compute the system to simulation
@@ -817,13 +817,13 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
   // Management of vectors of Size 0
   doublereal * pointerToU;
   if(_intData[2] ==0)
-    pointerToU = NULL;
+    pointerToU = nullptr;
   else
     pointerToU = &(*_utmp)(0);
 
   doublereal * pointerToXL;
   if(_intData[3] ==0)
-    pointerToXL = NULL;
+    pointerToXL = nullptr;
   else
     pointerToXL = &(*_lambdatmp)(0);
 #ifdef HAS_FORTRAN
@@ -893,7 +893,7 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
   assert(indexSet2);
   SP::SiconosVector y;
   unsigned int pos=0;
-  for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet2->bundle(*ui);
     inter->lambda(2)->setValue(0,(*_lambdatmp)(pos));
@@ -912,17 +912,17 @@ void Hem5OSI::updateState(const unsigned int level)
   DynamicalSystemsGraph::VIterator dsi, dsend;
   if(level == 1)  // ie impact case: compute velocity
   {
-    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
       if(!checkOSI(dsi)) continue;
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
+      SP::LagrangianDS lds = std::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
       lds->computePostImpactVelocity();
     }
   }
   else if(level == 2)
   {
     double time = _simulation->nextTime();
-    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
       if(!checkOSI(dsi)) continue;
       {
@@ -931,7 +931,7 @@ void Hem5OSI::updateState(const unsigned int level)
       }
     }
   }
-  else RuntimeException::selfThrow("Hem5OSI::updateState(index), index is out of range. Index = " + level);
+  else RuntimeException::selfThrow("Hem5OSI::updateState(index), index is out of range. Index = " + std::to_string(level));
 }
 
 struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
@@ -1059,12 +1059,12 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
       }
       else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        SiconosVector q,z;
-        q.initFromBlock(*DSlink[LagrangianR::q0]);
-        z.initFromBlock(*DSlink[LagrangianR::z]);
-        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
+        SiconosVector q, z;
+        q.block2contiguous(*DSlink[LagrangianR::q0]);
+        z.block2contiguous(*DSlink[LagrangianR::z]);
+        std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
         *DSlink[LagrangianR::z] = z;
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
+        subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
       }
       else
         RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
@@ -1074,13 +1074,13 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
     {
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
-        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
+        std::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
+        subprod(*ID, *(std::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
       }
     }
   }
   else
-    RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for Relation of type " + relationType);
+    RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for Relation of type " + std::to_string(relationType));
   if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
     if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)

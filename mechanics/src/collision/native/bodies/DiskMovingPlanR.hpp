@@ -39,7 +39,7 @@ typedef double(*FTime)(double);
 
 
 class DiskMovingPlanR : public LagrangianRheonomousR,
-  public std11::enable_shared_from_this<DiskMovingPlanR>
+  public std::enable_shared_from_this<DiskMovingPlanR>
 {
 private:
   /** serialization hooks

@@ -59,26 +59,26 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   // method
   if(dsType == Type::FirstOrderNonLinearDS)
   {
-    _DS_SMC.reset(new FirstOrderNonLinearDS(*(std11::static_pointer_cast<FirstOrderNonLinearDS>(DS))));
+    _DS_SMC.reset(new FirstOrderNonLinearDS(*(std::static_pointer_cast<FirstOrderNonLinearDS>(DS))));
   }
   else if(dsType == Type::FirstOrderLinearDS)
   {
-    _DS_SMC.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
-    std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setComputebFunction(NULL);
+    _DS_SMC.reset(new FirstOrderLinearDS(*(std::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    std::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setComputebFunction(nullptr);
     // We have to reset the _pluginb
     SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-    std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
+    std::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else if(dsType == Type::FirstOrderLinearTIDS)
   {
-    _DS_SMC.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
+    _DS_SMC.reset(new FirstOrderLinearTIDS(*(std::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
     // We have to reset the _pluginb
     SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-    std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
+    std::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else
   {
-    RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + dsType);
+    RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + std::to_string(dsType));
   }
   _DS_SMC->setNumber(999999);
   _DS_SMC->initMemory(1);
@@ -152,7 +152,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
       DEBUG_PRINT("A FirstOrderLinearTIR is created for the _relationSMC\n");
       _relationSMC.reset(new FirstOrderLinearTIR(_Csurface, _B));
     }
-    std11::static_pointer_cast<FirstOrderLinearTIR>(_relationSMC)->setDPtr(_D);
+    std::static_pointer_cast<FirstOrderLinearTIR>(_relationSMC)->setDPtr(_D);
   }
 
   // _nsLawSMC and the OSNSP can be defined in derived classes, like twisting
@@ -211,7 +211,7 @@ void CommonSMC::computeUeq()
   DEBUG_BEGIN("void CommonSMC::computeUeq()\n");
   assert(Type::value(*_DS_SMC) != Type::FirstOrderNonLinearDS && "CommonSMC::computeUeq the DS should be linear");
   assert(_Csurface && "CommonSMC::computeUeq the sliding variable should be linear subpsace of the state");
-  FirstOrderLinearDS& LinearDS_SMC = *std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
+  FirstOrderLinearDS& LinearDS_SMC = *std::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
   unsigned int n = LinearDS_SMC.A()->size(1);
   // equivalent part, explicit contribution
   SP::SimpleMatrix tmpM1(new SimpleMatrix(_Csurface->size(0), n));
@@ -227,7 +227,7 @@ void CommonSMC::computeUeq()
 
   // equivalent part, implicit contribution
   // XXX when to call this ?
-  ZeroOrderHoldOSI& zoh = *std11::static_pointer_cast<ZeroOrderHoldOSI>(_integratorSMC);
+  ZeroOrderHoldOSI& zoh = *std::static_pointer_cast<ZeroOrderHoldOSI>(_integratorSMC);
   zoh.updateMatrices(_DS_SMC);
 
   // tmpN = B^{*}(CB)^{-1}CA

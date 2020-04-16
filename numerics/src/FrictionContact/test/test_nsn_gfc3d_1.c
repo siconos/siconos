@@ -42,15 +42,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // default values for all parameters.
       collection[current].filename = data_collection[d];
       collection[current].options = solver_options_create(solvers[s]);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
       current++;
     }
   }
-
-  // expected to fail
-  collection[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat
-# ifndef WITH_MUMPS
-  collection[4].will_fail = 1; // NSN_AC on data/GFC3D_TwoRods1.dat, mumps only
-#endif
 
   return collection;
 }

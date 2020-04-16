@@ -30,7 +30,7 @@
 #include <SiconosContactor.hpp>
 
 class RigidBody2dDS : public LagrangianDS,
-                      public std11::enable_shared_from_this<RigidBody2dDS>
+                      public std::enable_shared_from_this<RigidBody2dDS>
 {
 protected:
   /** serialization hooks

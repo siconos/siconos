@@ -22,7 +22,7 @@ MBTB_FC3DContactRelation::MBTB_FC3DContactRelation(MBTB_Contact * pC)
 
 MBTB_FC3DContactRelation::MBTB_FC3DContactRelation()
 {
-  _pContact=NULL;
+  _pContact=nullptr;
 }
 /*This function has to compute the distance between the objects*/
 void MBTB_FC3DContactRelation::computeh(double time, BlockVector& q0, SiconosVector& y)

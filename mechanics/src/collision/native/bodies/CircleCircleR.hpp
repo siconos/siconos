@@ -29,7 +29,7 @@
 /** \class CircleCircleR
  *  \brief Two disks relation - Inherits from LagrangianScleronomousR
  */
-class CircleCircleR : public CircularR, public std11::enable_shared_from_this<CircleCircleR>
+class CircleCircleR : public CircularR, public std::enable_shared_from_this<CircleCircleR>
 {
 private:
   /** serialization hooks

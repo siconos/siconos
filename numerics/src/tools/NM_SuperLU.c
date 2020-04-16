@@ -21,7 +21,7 @@
 
 #include <slu_ddefs.h>
 #include "debug.h"
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "numerics_verbose.h"

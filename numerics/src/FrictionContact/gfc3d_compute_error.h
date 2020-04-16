@@ -44,8 +44,10 @@ extern "C"
    * \param[in,out] error value
    * \return 0 if successfull
    */
-  int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
-                          double* globalVelocity, double tolerance,  SolverOptions * options,
+  int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
+                          double *reaction , double *velocity,
+                          double* globalVelocity, double tolerance,
+                          SolverOptions * options,
                           double norm_q, double norm_b,  double * error);
   int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
                                  double* globalVelocity, double tolerance,  SolverOptions * options,

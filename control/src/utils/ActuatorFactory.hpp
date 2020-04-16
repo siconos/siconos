@@ -48,7 +48,7 @@ typedef MapFactory::iterator MapFactoryIt;
  */
 template<class SubType> SP::Actuator factory(SP::ControlSensor sensor)
 {
-  return std11::shared_ptr<SubType>(new SubType(sensor));
+  return std::shared_ptr<SubType>(new SubType(sensor));
 }
 
 /** Registry Class for Actuators.

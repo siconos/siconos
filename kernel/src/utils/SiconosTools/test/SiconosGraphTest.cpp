@@ -264,7 +264,7 @@ void SiconosGraphTest::t6()
 //  CPPUNIT_ASSERT(ag.edges_number() == 1);
 
   AG::EIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = ag.edges(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = ag.edges(); dsi != dsend; ++dsi)
   {
     std::string& str = ag.bundle(*dsi);
     std::cout << "t6:found edge " << str << std::endl;
@@ -337,7 +337,7 @@ void SiconosGraphTest::t7()
   AG::AVIterator ui, uiend;
   std::cout << "adjacent to 100:\n";
   int tot = 0, k = 1;
-  for(std11::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
+  for(std::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
   {
     std::cout << "yo " << ag.bundle(*ui) << std::endl;
     tot += k * ag.bundle(*ui);

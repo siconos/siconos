@@ -48,9 +48,8 @@ using namespace std;
 using namespace RELATION;
 
 
-unsigned int Interaction::__count = 0;
+size_t Interaction::__count = 0;
 
-// --- CONSTRUCTORS ---
 struct Interaction::_setLevels : public SiconosVisitor
 {
   /* we set the _lowerLevelForOutput, _upperLevelForOutput,
@@ -258,9 +257,7 @@ void Interaction::reset()
   // an interaction (in __init) and may be called by simulation and/or
   // OSI if levels are updated.
 
-  //  assert(_upperLevelForOutput >=0);
   assert(_upperLevelForOutput >= _lowerLevelForOutput);
-  //  assert(_upperLevelForInput >=0);
   assert(_upperLevelForInput >= _lowerLevelForInput);
 
   // --  Memory allocation for y and lambda --
@@ -302,38 +299,31 @@ void Interaction::reset()
 }
 
 
-void Interaction::__init()
+Interaction::Interaction(SP::NonSmoothLaw NSL, SP::Relation rel):
+  _number(__count++), _interactionSize(NSL->size()),
+  _y(2),  _nslaw(NSL), _relation(rel)
 {
-  // -- Delagated constructor --
+  // -- Constructor --
   // i.e. what should be done when (and only there) the interaction
   // is instanciated.
   // Other operations (like levels review and y, lambda resizing)
   // occur in reset function, potentially called during
   // simulation phase (in OSI indeed).
 
-  assert(_relation && "Interaction::__init failed, relation() == NULL");
-  assert(_nslaw && "Interaction::__inits, non smooth law == NULL");
+  assert(_relation && "Interaction::__init failed, relation() == nullptr");
+  assert(_nslaw && "Interaction::__inits, non smooth law == nullptr");
 
   // -- Set upper/lower levels, according to the nslaw --
-  std11::shared_ptr<_setLevels> setLevels;
+  std::shared_ptr<_setLevels> setLevels;
   setLevels.reset(new _setLevels(this));
   _nslaw->accept(*(setLevels.get()));
 
   // Ensure consistency between interaction and nslaw sizes
   if(_interactionSize != _nslaw->size())
-    RuntimeException::selfThrow("Interaction::__init - Nonsmooth law and relation are not consistent.");
+    RuntimeException::selfThrow("Interaction constructor - Nonsmooth law and relation are not consistent (sizes differ).");
 
   // Check levels and resize attributes (y, lambda ...) if needed.
   reset();
-
-}
-
-Interaction::Interaction(SP::NonSmoothLaw NSL,
-                         SP::Relation rel):
-  _number(__count++), _interactionSize(NSL->size()),
-  _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
-{
-  __init();
 }
 
 
@@ -356,7 +346,7 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
 
   else
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
-        a relation of type: " + relationType);
+        a relation of type: " + std::to_string(relationType));
 
   _relation->initialize(*this);
 
@@ -475,8 +465,6 @@ void Interaction::__initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSy
     //we need extra continuous memory vector
     //todo
   }
-
-
 
   __initDSDataLagrangian(ds1, DSlink);
   if(&ds1 != &ds2)
@@ -805,6 +793,7 @@ void Interaction::display(bool brief) const
 
   cout << "| "  ;
   _relation->display();
+  _nslaw->display();
   for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
   {
 
@@ -814,7 +803,7 @@ void Interaction::display(bool brief) const
       if(_y[i]->size() >= 5) std::cout <<std::endl;
       _y[i]->display();
     }
-    else std::cout << "->NULL" <<std::endl;
+    else std::cout << "->nullptr" <<std::endl;
   }
   for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
   {
@@ -824,7 +813,7 @@ void Interaction::display(bool brief) const
       if(_yOld[i]->size() >= 5) std::cout <<std::endl;
       _yOld[i]->display();
     }
-    else std::cout << "->NULL" <<std::endl;
+    else std::cout << "->nullptr" <<std::endl;
   }
   for(unsigned int i = 0; i < _upperLevelForInput + 1; i++)
   {
@@ -834,7 +823,7 @@ void Interaction::display(bool brief) const
       if(_lambda[i]->size() >= 5) std::cout <<std::endl;
       _lambda[i]->display();
     }
-    else std::cout << "->NULL" <<std::endl;
+    else std::cout << "->nullptr" <<std::endl;
   }
   if(!brief)
   {
@@ -846,7 +835,7 @@ void Interaction::display(bool brief) const
         if(_y_k[i]->size() >= 5) std::cout <<std::endl;
         _y_k[i]->display();
       }
-      else std::cout << "->NULL" <<std::endl;
+      else std::cout << "->nullptr" <<std::endl;
     }
     std::cout << "| _yMemory size: " << _yMemory.size() <<std::endl;;
     for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
@@ -890,7 +879,7 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
 
   if(relationType == FirstOrder)
   {
-    SP::SiconosMatrix CMat = std11::static_pointer_cast<FirstOrderR> (relation())->C();
+    SP::SiconosMatrix CMat = std::static_pointer_cast<FirstOrderR> (relation())->C();
     if(CMat)
       originalMatrix = CMat;
     else if(relationSubType != LinearTIR)
@@ -898,16 +887,16 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   }
   else if(relationType == Lagrangian)
   {
-    SP::LagrangianR r = std11::static_pointer_cast<LagrangianR> (relation());
+    SP::LagrangianR r = std::static_pointer_cast<LagrangianR> (relation());
     originalMatrix = r->jachq();
   }
   else if(relationType == NewtonEuler)
   {
-    SP::NewtonEulerR r = std11::static_pointer_cast<NewtonEulerR> (relation());
+    SP::NewtonEulerR r = std::static_pointer_cast<NewtonEulerR> (relation());
     originalMatrix = r->jachqT();
   }
   else
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
@@ -942,7 +931,7 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int 
     RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- relation is not from NewtonEulerR.");
 
   SP::SiconosMatrix originalMatrix;
-  SP::NewtonEulerR r = std11::static_pointer_cast<NewtonEulerR> (relation());
+  SP::NewtonEulerR r = std::static_pointer_cast<NewtonEulerR> (relation());
   //proj_with_q originalMatrix = r->jachqProj();
   originalMatrix = r->jachq();
 
@@ -969,7 +958,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
 
   if(relationType == FirstOrder)
   {
-    SP::SiconosMatrix BMat = std11::static_pointer_cast<FirstOrderR> (relation())->B();
+    SP::SiconosMatrix BMat = std::static_pointer_cast<FirstOrderR> (relation())->B();
     if(BMat)
       originalMatrix = BMat;
     else if(relationSubType != LinearTIR)
@@ -979,13 +968,13 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
   }
   else if(relationType == Lagrangian || relationType == NewtonEuler)
   {
-    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, call not permit " + relationType);
+    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, call not permit " + std::to_string(relationType));
   }
   else
-    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
 
   if(! originalMatrix)
-    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): the right interactionBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
+    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): the right interactionBlock is a nullptr pointer (miss matrix B or H or gradients ...in relation ?)");
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
@@ -1015,7 +1004,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
 
   if(relationType == FirstOrder)
   {
-    SP::SiconosMatrix DMat = std11::static_pointer_cast<FirstOrderR> (relation())->D();
+    SP::SiconosMatrix DMat = std::static_pointer_cast<FirstOrderR> (relation())->D();
     if(DMat)
       D = DMat;
     else if(relationSubType != LinearTIR)
@@ -1023,14 +1012,14 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
   }
   else if(relationType == Lagrangian)
   {
-    D = std11::static_pointer_cast<LagrangianR> (relation())->jachlambda();
+    D = std::static_pointer_cast<LagrangianR> (relation())->jachlambda();
   }
   else if(relationType == NewtonEuler)
   {
-    D = std11::static_pointer_cast<NewtonEulerR> (relation())->jachlambda();
+    D = std::static_pointer_cast<NewtonEulerR> (relation())->jachlambda();
   }
   else
-    RuntimeException::selfThrow("Interaction::getExtraInteractionBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("Interaction::getExtraInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
 
   if(!D)
   {

@@ -33,7 +33,7 @@ cd $CI_PROJECT_DIR/build
 # - SICONOS_INSTALL_DIR : where Siconos will be installed
 # - USER_FILE : user options file.
 # - OSNAME : set to IMAGE_NAME
-cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$CI_PROJECT_DIR/ci_gitlab/siconos_default.cmake -DBOOST_LIBRARYDIR=/usr/lib64/boost169 -DBOOST_INCLUDEDIR=/usr/include/boost169 -DCLAPACK_LIBRARY=/usr/lib64/libopenblas.so -DCMAKE_CXX_STANDARD=11
+cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$CI_PROJECT_DIR/ci_gitlab/siconos_confs/siconos_default.cmake -DBOOST_LIBRARYDIR=/usr/lib64/boost169 -DBOOST_INCLUDEDIR=/usr/include/boost169 -DCLAPACK_LIBRARY=/usr/lib64/libopenblas.so -DCMAKE_CXX_STANDARD=11
 make -j 4
 # Install
 #make install

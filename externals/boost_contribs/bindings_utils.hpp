@@ -97,7 +97,7 @@ namespace Siconos {
 
 // printing:
     template <typename V>
-    void print_v (V const& v, char const* ch = 0) {
+    void print_v (V const& v, char const* ch = nullptr) {
       if (ch)
         std::cout << ch << ": ";
       size_t sz
@@ -189,7 +189,7 @@ namespace Siconos {
 /** Print a boost-ublas matrix
  */
     template <typename M>
-    void print_m (M const& m, char const* ch = 0) {
+    void print_m (M const& m, char const* ch = nullptr) {
       if (ch)
         std::cout << ch << ":\n";
       size_t sz1
@@ -205,7 +205,7 @@ namespace Siconos {
     }
 
     template <typename M>
-    void print_m_data (M const& m, char const* ch = 0) {
+    void print_m_data (M const& m, char const* ch = nullptr) {
       if (ch)
         std::cout << ch << " data:\n";
       using namespace boost::numeric::bindings;

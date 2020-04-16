@@ -106,7 +106,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
 
   InteractionsGraph::VIterator uipend, uip;
-  for(std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
+  for(std::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
     /* loop over ALL vertices in indexSet0 */
   {
 
@@ -196,7 +196,7 @@ void TimeSteppingD1Minus::advanceToEvent()
   SP::InteractionsGraph indexSet0 = _nsds->
                                     topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend, vnext;
-  std11::tie(ui, uiend) = indexSet0->vertices();
+  std::tie(ui, uiend) = indexSet0->vertices();
   for(vnext = ui; ui != uiend; ui = vnext)
   {
     ++vnext;
@@ -290,7 +290,7 @@ void TimeSteppingD1Minus::updateInput(unsigned int level)
 //   //       RuntimeException::selfThrow("TimeSteppingD1Minus::updateInput - not implemented for Dynamical system type: " + dsType);
 //   //     else
 //   //     {
-//   //       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
+//   //       SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (*itDS);
 //   //       if (d->p(level)) d->p(level)->zero();
 //   //     }
 //   //   }
@@ -317,5 +317,5 @@ void TimeSteppingD1Minus::computeResidu()
 
 void TimeSteppingD1Minus::computeFreeState()
 {
-  std::for_each(_allOSI->begin(), _allOSI->end(), std11::bind(&OneStepIntegrator::computeFreeState, _1));
+  std::for_each(_allOSI->begin(), _allOSI->end(), std::bind(&OneStepIntegrator::computeFreeState, _1));
 }

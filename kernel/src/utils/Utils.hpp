@@ -36,3 +36,5 @@
 #include "SSLH.hpp"
 
 #include "Tools.hpp"
+
+#include "ProgressBar.hpp"

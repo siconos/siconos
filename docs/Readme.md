@@ -18,31 +18,17 @@ make latex
 
 # To publish web site and documentation :
 
-* A mirror of siconos project on gricad-gitlab : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos
-* CI is configured to build and publish documentation (see files .gitlab-ci.yml and CI/make_siconos_doc.sh)
+* just add [doc-build] in your commit message. This will automatically activate a job of continuous integration that will create and publish the html documentation.
 
-	* gitlab-ci.yml : two jobs (make_doc and publish)
-	* make_siconos_doc.sh : describe building process (apt + install python packages from requirements.txt + cmake and make doc)
-	 Siconos conf is described in CI/siconos_docs.cmake
+* /!\ Push to gricad-gitlab project, not to github, the mirroring process will do the job /!\
 
-* Check CI status : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror/pipelines
-* Check (public) website : https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-mirror
+* Check CI status: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/pipelines
 
+* Check (public) website : https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos
 
-## Usage:
+Note for developers:
 
-* Add remote repo:
+the whole documentation concerning the documentation process is in the developers' manual,
 
-```
-git remote add sico-doc git@gricad-gitlab.univ-grenoble-alpes.fr:nonsmooth/siconos-mirror.git
-```
-
-* To publish doc:
-
-```
-# Update your repo with github master
-git checkout master
-git pull --rebase origin master git checkout master
-# Push to gitlab (--> will automatically push to github master)
-git push sico-doc master
+https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/devel_guide/write_and_build_doc.html
 

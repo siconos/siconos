@@ -881,7 +881,7 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
 
 
 /** solve Ax = b by partial pivoting Gaussian elimination. This function is 10
- * to 20 times faster than calling LAPACK (tested with netlib and atlas).
+ * to 20 times faster than calling LAPACK (tested with netlib).
  *
  * \param a column-major matrix (not modified)
  * \param[in,out] b on input, the right-hand side; on output the solution x

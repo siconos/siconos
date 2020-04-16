@@ -51,7 +51,7 @@ extern "C"
                                           SolverOptions* internalsolver_options,
                                           double error);
 
-  
+
   /** Check for trivial solution in the friction-contact 3D problem
        \param dim of the problem
        \param q global vector (n)
@@ -172,7 +172,7 @@ extern "C"
     */
   void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem*  problem, double*  reaction, double*  velocity,
                             double*  globalVelocity, int*  info, SolverOptions* options);
-  
+
   /** solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
@@ -199,15 +199,26 @@ extern "C"
   void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
   
   void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
-  
+
 
   void gfc3d_ADMM(GlobalFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
                   int*  info, SolverOptions*  options);
 
   void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
-  
+
   void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+
+  void gfc3d_IPM(GlobalFrictionContactProblem*  problem, double*  reaction,
+                  double*  velocity, double*  globalVelocity,
+                  int*  info, SolverOptions*  options);
+
+  void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void gfc3d_ipm_set_default(SolverOptions* options);
 
   /** \addtogroup SetSolverOptions @{
    */
@@ -217,8 +228,6 @@ extern "C"
 
   /** @} */
 
-
-  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

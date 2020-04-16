@@ -41,13 +41,6 @@
 #endif
 #endif
 
-/* Siconos does not need "complex" part of CXSparse, so avoid
- * compilation C++-related problems with this flag (complex_t vs
- * std::complex). */
-#define NCOMPLEX
-
-#include "cs.h"
-
 #ifndef CS_INT
 
 /* From cs.h */
@@ -213,6 +206,17 @@ extern "C"
    * DBL_EPSILON, otherwise the return value of cs_entry.
    */
   CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
+
+  /** Add an entry to a symmetric triplet matrix only if the absolute value is
+   * greater than DBL_EPSILON.
+   * \param T the sparse matrix
+   * \param i row index
+   * \param j column index
+   * \param x the value
+   * \return integer value : 1 if the absolute value is less than
+   * DBL_EPSILON, otherwise the return value of cs_entry.
+   */
+  CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
 
   /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
    * \param T the sparse matrix to check

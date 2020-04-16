@@ -2,14 +2,11 @@
 #include "NewtonEulerDS.hpp"
 #include "RigidBody2dDS.hpp"
 #include "SiconosContactor.hpp"
-
-#include <boost/make_shared.hpp>
-
 RigidBody2dDS::RigidBody2dDS(SP::SiconosVector position,
                              SP::SiconosVector velocity,
                              SP::SiconosMatrix  mass)
   : LagrangianDS(position, velocity, mass)
-  , _contactors(std11::make_shared<SiconosContactorSet>())
+  , _contactors(std::make_shared<SiconosContactorSet>())
   , _useContactorInertia(true)
   , _allowSelfCollide(true)
 {
@@ -23,7 +20,7 @@ RigidBody2dDS::RigidBody2dDS(SP::SiconosVector position,
                              double inertia)
   : LagrangianDS(position, velocity)
   ,_scalarMass(mass)
-  , _contactors(std11::make_shared<SiconosContactorSet>())
+  , _contactors(std::make_shared<SiconosContactorSet>())
   , _useContactorInertia(true)
   , _allowSelfCollide(true)
 {

@@ -265,7 +265,7 @@ bool GlobalFrictionContact::preCompute(double time)
 
     size_t offset = 0;
     DynamicalSystemsGraph::VIterator dsi, dsend;
-    for(std11::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
     {
       SP::DynamicalSystem ds = DSG0.bundle(*dsi);
       Type::Siconos dsType = Type::value(*ds);
@@ -291,7 +291,7 @@ bool GlobalFrictionContact::preCompute(double time)
       }
       else
       {
-        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
+        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osiType));
       }
       offset += dss;
     }
@@ -314,12 +314,12 @@ bool GlobalFrictionContact::preCompute(double time)
 
     size_t pos = 0;
     InteractionsGraph::VIterator ui, uiend;
-    for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet.bundle(*ui);
 
       assert(Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
-      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu());
+      _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu());
 
       SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
       SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
@@ -334,7 +334,7 @@ bool GlobalFrictionContact::preCompute(double time)
       }
       else
       {
-        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + osi1Type);
+        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osi1Type));
       }
       SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
       pos =  indexSet.properties(*ui).absolute_position;
@@ -414,7 +414,7 @@ void GlobalFrictionContact::postCompute()
   size_t pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += 3)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += 3)
   {
     Interaction& inter = *indexSet.bundle(*ui);
     // Get Y and Lambda for the current Interaction
@@ -433,7 +433,7 @@ void GlobalFrictionContact::postCompute()
   SP::OneStepIntegrator  Osi;
   DynamicalSystemsGraph::VIterator dsi, dsend;
   pos=0;
-  for(std11::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
   {
     DynamicalSystem& ds = *DSG0.bundle(*dsi);
     Type::Siconos dsType = Type::value(ds);
@@ -479,7 +479,7 @@ void GlobalFrictionContact::display() const
   std::cout << "_numericsMatrixStorageType" << _numericsMatrixStorageType<< std::endl;
   std::cout << " - Matrix M  : " <<std::endl;
   // if (_M) _M->display();
-  // else std::cout << "-> NULL" <<std::endl;
+  // else std::cout << "-> nullptr" <<std::endl;
   NumericsMatrix* M_NM = _M->numericsMatrix().get();
   if(M_NM)
   {
@@ -487,7 +487,7 @@ void GlobalFrictionContact::display() const
   }
   std::cout << " - Matrix H : " <<std::endl;
   // if (_H) _H->display();
-  // else std::cout << "-> NULL" <<std::endl;
+  // else std::cout << "-> nullptr" <<std::endl;
   NumericsMatrix* H_NM = _H->numericsMatrix().get();
   if(H_NM)
   {
@@ -496,22 +496,22 @@ void GlobalFrictionContact::display() const
 
   std::cout << " - Vector q : " <<std::endl;
   if(_q) _q->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << " - Vector b : " <<std::endl;
   if(_b) _b->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << " - Vector z (reaction) : " <<std::endl;
   if(_z) _z->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << " - Vector w (local velocities): " <<std::endl;
   if(_w) _w->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << " - Vector globalVelocities : " <<std::endl;
   if(_globalVelocities) _globalVelocities->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << "============================================================" <<std::endl;
 }
@@ -521,9 +521,9 @@ void GlobalFrictionContact::updateMu()
   _mu->clear();
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
+    _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
   }
 }

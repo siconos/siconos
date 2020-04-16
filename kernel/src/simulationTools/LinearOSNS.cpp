@@ -164,7 +164,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     // \warning this looks like some debug code, but it gets executed even with NDEBUG.
     // may be compiler does something smarter, but still it should be rewritten. --xhub
     InteractionsGraph::OEIterator oei, oeiend;
-    for(std11::tie(oei, oeiend) = indexSet->out_edges(vd);
+    for(std::tie(oei, oeiend) = indexSet->out_edges(vd);
         oei != oeiend; ++oei)
     {
       // note : at most 4 edges
@@ -278,12 +278,12 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS
           || dsType == Type::LagrangianLinearDiagonalDS)
       {
-        SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+        SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
         if(d->boundaryConditions()) bc = d->boundaryConditions();
       }
       else if(dsType == Type::NewtonEulerDS)
       {
-        SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+        SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
         if(d->boundaryConditions()) bc = d->boundaryConditions();
       }
       if(bc)
@@ -312,7 +312,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
           if(osiType == OSI::MOREAUJEANOSI)
           {
             * currentInteractionBlock *= (static_cast<MoreauJeanOSI&>(osi)).theta() ;
-            * currentInteractionBlock +=  *std11::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
+            * currentInteractionBlock +=  *std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
           }
         }
       }
@@ -338,12 +338,12 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
           if(osiType == OSI::MOREAUJEANOSI)
           {
             * currentInteractionBlock *= (static_cast<MoreauJeanOSI&>(osi)).theta() ;
-            * currentInteractionBlock +=  *std11::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
+            * currentInteractionBlock +=  *std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
           }
         }
       }
     }
-    else RuntimeException::selfThrow("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + relationType);
+    else RuntimeException::selfThrow("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + std::to_string(relationType));
     // Set pos for next loop.
     pos = pos2;
   }
@@ -504,12 +504,12 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     Type::Siconos dsType = Type::value(*ds);
     if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearDiagonalDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
       if(d->boundaryConditions()) bc = d->boundaryConditions();
     }
     else if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
       if(d->boundaryConditions()) bc = d->boundaryConditions();
     }
     if(bc)
@@ -556,7 +556,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
     }
   }
-  else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType1);
+  else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
   DEBUG_END("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 }
 
@@ -583,7 +583,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
     // \warning this looks like some debug code, but it gets executed even with NDEBUG.
     // may be compiler does something smarter, but still it should be rewritten. --xhub
     InteractionsGraph::OEIterator oei, oeiend;
-    for(std11::tie(oei, oeiend) = indexSet->out_edges(vertex_inter);
+    for(std::tie(oei, oeiend) = indexSet->out_edges(vertex_inter);
         oei != oeiend; ++oei)
     {
       // note : at most 4 edges
@@ -666,7 +666,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 
   }
   else
-    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + osi1Type  + osi2Type);
+    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
   DEBUG_EXPR(_q->display());
   DEBUG_END("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
 }
@@ -685,7 +685,7 @@ void LinearOSNS::computeq(double time)
 
   unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
@@ -764,7 +764,7 @@ bool LinearOSNS::preCompute(double time)
     if(_keepLambdaAndYState)
     {
       InteractionsGraph::VIterator ui, uiend;
-      for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+      for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet.bundle(*ui);
         // Get the position of inter-interactionBlock in the vector w
@@ -816,7 +816,7 @@ void LinearOSNS::postCompute()
   unsigned int pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet.bundle(*ui);
     // Get the  position of inter-interactionBlock in the vector w
@@ -842,17 +842,17 @@ void LinearOSNS::display() const
   std::cout << "this : " << this <<std::endl;
   std::cout << "_M  ";
   if(_M) _M->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout <<std::endl << "q : " ;
   if(_q) _q->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << std::endl;
   std::cout << "w : ";
   if(_w) _w->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout <<std::endl << "z : " ;
   if(_z) _z->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << std::endl;
   std::cout << "The linearOSNSP works on the index set of level  " << _indexSetLevel<< std::endl;
   std::cout << "==========================" <<std::endl;

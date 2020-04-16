@@ -26,13 +26,17 @@
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-//#define MAX_PIVOT
-//#define INV_PIVOT
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+/* #define MAX_PIVOT */
+/* #define INV_PIVOT */
 #include "debug.h"                         // for DEBUG_EXPR_WE, DEBUG_PRINT
 #include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_PIVOTIN...
 #include "numerics_verbose.h"              // for verbose
+
+#ifdef DEBUG_MESSAGES
+#include "pivot-utils.h"
+#endif
 
 void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double *wlem, int *info, SolverOptions* options)
 {
@@ -132,14 +136,15 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
   for(ic = 0 ; ic < dim; ++ic) A[ic][dim + 1] = -1.0;
 
   DEBUG_PRINT("total matrix\n");
-  DEBUG_EXPR_WE(for(unsigned int i = 0; i < dim; ++i)
-{
-  for(unsigned int j = 0 ; j < dim2; ++j)
+  DEBUG_EXPR_WE(
+    for(unsigned int i = 0; i < (unsigned int)dim; ++i)
     {
-      DEBUG_PRINTF("%1.2e ", A[i][j])
-    }
-    DEBUG_PRINT("\n")
-  });
+      for(unsigned int j = 0 ; j < (unsigned int)dim2; ++j)
+      {
+        DEBUG_PRINTF("%1.2e ", A[i][j])
+          }
+      DEBUG_PRINT("\n")
+        });
   /* End of construction of A */
 
   Ifound = 0;
@@ -213,43 +218,47 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
   nobasis = basis[block];
   basis[block] = drive;
 
-  DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ")
-                for(unsigned int i = 0; i < dim; ++i)
-{
-  DEBUG_PRINTF("%i ", basis[i])
-  }
-  DEBUG_PRINT("\n"));
+  DEBUG_EXPR_WE(
+    DEBUG_PRINT("new basis: ");
+    for(unsigned int i = 0; i < (unsigned int)dim; ++i)
+    {
+      DEBUG_PRINTF("%i ", basis[i]);
+    }
+    DEBUG_PRINT("\n"));
   DEBUG_PRINT("total matrix\n");
-  DEBUG_EXPR_WE(for(unsigned int i = 0; i < dim; ++i)
-{
-  for(unsigned int j = 0 ; j < dim2; ++j)
+  
+  DEBUG_EXPR_WE(
+    for(unsigned int i = 0; i < (unsigned int)dim; ++i)
     {
-      DEBUG_PRINTF("%1.2e ", A[i][j])
-    }
-    DEBUG_PRINT("\n")
-  });
+      for(unsigned int j = 0 ; j < (unsigned int)dim2; ++j)
+      {
+        DEBUG_PRINTF("%1.2e ", A[i][j]);
+      }
+      DEBUG_PRINT("\n");
+    });
   DEBUG_PRINT("lexico_mat\n");
-  DEBUG_EXPR_WE(for(unsigned int i = 0; i < dim; ++i)
-{
-  DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.1e " ANSI_COLOR_RESET, A[i][drive]);
-    for(unsigned int j = 1 ; j <= dim; ++j)
+  DEBUG_EXPR_WE(
+    for(unsigned int i = 0; i < (unsigned int)dim; ++i)
     {
-      if(fabs(A[i][j]) > 2.2e-16)
+      DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.1e " ANSI_COLOR_RESET, A[i][drive]);
+      for(unsigned int j = 1 ; j <= (unsigned int)dim; ++j)
       {
-        DEBUG_PRINTF(ANSI_COLOR_YELLOW " % 2.f " ANSI_COLOR_RESET, A[i][j])
+        if(fabs(A[i][j]) > 2.2e-16)
+        {
+          DEBUG_PRINTF(ANSI_COLOR_YELLOW " % 2.f " ANSI_COLOR_RESET, A[i][j]);
+        }
+        else if(A[i][j] == 0.)
+        {
+          DEBUG_PRINT(ANSI_COLOR_BLUE " . " ANSI_COLOR_RESET);
+        }
+        else
+        {
+          DEBUG_PRINT(ANSI_COLOR_RED " X " ANSI_COLOR_RESET);
+        }
       }
-      else if(A[i][j] == 0.)
-      {
-        DEBUG_PRINT(ANSI_COLOR_BLUE " . " ANSI_COLOR_RESET)
-      }
-      else
-      {
-        DEBUG_PRINT(ANSI_COLOR_RED " X " ANSI_COLOR_RESET)
-      }
-    }
-    DEBUG_PRINT("\n")
-  });
-
+      DEBUG_PRINT("\n");
+    });
+  
   while(ITER < itermax && !Ifound)
   {
 
@@ -258,18 +267,22 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
     if(nobasis < dim + 1)      drive = nobasis + (dim + 1);
     else if(nobasis > dim + 1) drive = nobasis - (dim + 1);
 
-    DEBUG_EXPR_WE(DEBUG_PRINT("basis= "); for(unsigned i = 0; i < dim; ++i)
-  {
-    DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], dim), basis_to_number(basis[i], dim));
-    }
-    DEBUG_PRINT("\n"));
+    DEBUG_EXPR_WE(
+      DEBUG_PRINT("basis= ");
+      for(unsigned i = 0; i < (unsigned int)dim; ++i)
+      {
+        DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], dim), basis_to_number(basis[i], dim));;
+      }
+      DEBUG_PRINT("\n"));
 
     /* Start research of argmin lexico for minimum ratio test */
     ratio = 1e20;
     block = -1;
 
     unsigned nb_candidate = 0;
-    DEBUG_EXPR_WE(unsigned max_pivot_helped = 0;)
+#ifdef DEBUG_MESSAGES
+    unsigned max_pivot_helped = 0;
+#endif
     for(ic = 0 ; ic < dim ; ++ic)
     {
       zb = A[ic][drive];
@@ -282,7 +295,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
           ratio = z0;
           block = ic;
           nb_candidate = 0;
-          DEBUG_EXPR_WE(max_pivot_helped = 0;)
+          DEBUG_EXPR_WE(max_pivot_helped = 0;);
         }
         else
         {
@@ -308,13 +321,13 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
             {
               /*  delta_lexico > 0 (since pivot are always >0., => new lexicomin  */
               block = var;
-              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              DEBUG_EXPR_WE(max_pivot_helped = 0;);
               break;
             }
             else if(A[var][jc] > lexico_tol_elt)
               /* delta_lexico < 0 => lexicomin does not change */
             {
-              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              DEBUG_EXPR_WE(max_pivot_helped = 0;);
               break;
             }
             else /* delta_lexico not conclusive => equality */
@@ -328,13 +341,13 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
             {
               /*  delta_lexico > 0 (since pivot are always >0., => new lexicomin  */
               block = var;
-              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              DEBUG_EXPR_WE(max_pivot_helped = 0;);
               break;
             }
             else if(A[block][jc] < -lexico_tol_elt)
               /* delta_lexico < 0 => lexicomin does not change */
             {
-              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              DEBUG_EXPR_WE(max_pivot_helped = 0;);
               break;
             }
             else /* delta_lexico not conclusive => equality */
@@ -345,21 +358,22 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
           else /* really compute delta_lexico */
           {
             delta_lexico = (A[block][jc] * candidate_pivot) - (A[var][jc] * A[block][drive]);
-            DEBUG_EXPR_WE(if((delta_lexico != 0.) && (fabs(delta_lexico) < 1e-10) && (fabs(delta_lexico) > lexico_tol_diff))
-          {
-            printf("pivot_selection_lemke :: very small difference in lexicomin: %2.2e\n", delta_lexico);
-              unsigned block_number = basis_to_number(basis[block], dim);
-              unsigned var_number =  basis_to_number(basis[var], dim);
-              char* block_name = basis_to_name(basis[block], dim);
-              char* var_name = basis_to_name(basis[var], dim);
-              printf("lexicomin: A[%s%d][jc] / A[%s%d][drive] = %e / %e vs A[%s%d][jc] / A[%s%d][drive] = %e / %e\n", block_name, block_number, block_name, block_number, A[block][jc], A[block][drive], var_name, var_number, var_name, var_number, A[var][jc], A[var][drive]);
-            });
+            DEBUG_EXPR_WE(
+              if((delta_lexico != 0.) && (fabs(delta_lexico) < 1e-10) && (fabs(delta_lexico) > lexico_tol_diff))
+              {
+                printf("pivot_selection_lemke :: very small difference in lexicomin: %2.2e\n", delta_lexico);
+                unsigned block_number = basis_to_number(basis[block], dim);
+                unsigned var_number =  basis_to_number(basis[var], dim);
+                const char* block_name = basis_to_name(basis[block], dim);
+                const char* var_name = basis_to_name(basis[var], dim);
+                printf("lexicomin: A[%s%d][jc] / A[%s%d][drive] = %e / %e vs A[%s%d][jc] / A[%s%d][drive] = %e / %e\n", block_name, block_number, block_name, block_number, A[block][jc], A[block][drive], var_name, var_number, var_name, var_number, A[var][jc], A[var][drive]);
+              });
             if(delta_lexico < -lexico_tol_diff) break;
             else if(delta_lexico > lexico_tol_diff)
             {
               DEBUG_PRINTF("pivot_selection_lemke :: lexicomin change var block changes %s%d from %s%d, delta_lexico = %2.2e, new pivot = %e\n", basis_to_name(basis[var], dim), basis_to_number(basis[var], dim), basis_to_name(basis[block], dim), basis_to_number(basis[block], dim), delta_lexico, A[var][drive]);
               block = var;
-              DEBUG_EXPR_WE(max_pivot_helped = 0;)
+              DEBUG_EXPR_WE(max_pivot_helped = 0;);
               break;
             }
 #ifdef MAX_PIVOT
@@ -369,10 +383,9 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
               {
                 DEBUG_PRINTF("pivot_selection_lemke :: lexicomin small difference %2.2e, taking largest pivot %e > %e (var %s%d vs %s%d)\n", delta_lexico, candidate_pivot, A[block][drive], basis_to_name(basis[var], dim), basis_to_number(basis[var], dim), basis_to_name(basis[block], dim), basis_to_number(basis[block], dim));
                 block = var;
-                DEBUG_EXPR_WE(max_pivot_helped = 1;)
+                DEBUG_EXPR_WE(max_pivot_helped = 1;);
                 break;
               }
-
             }
 #endif
           }
@@ -381,10 +394,11 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
     }
 
 
-    DEBUG_EXPR_WE(if(max_pivot_helped)
-  {
-    DEBUG_PRINT("pivot_selection_lemke :: lexicomin MAX PIVOT HELPED!\n");
-    });
+    DEBUG_EXPR_WE(
+      if(max_pivot_helped)
+      {
+        DEBUG_PRINT("pivot_selection_lemke :: lexicomin MAX PIVOT HELPED!\n");
+      });
     if(block == -1)
     {
       Ifound = 1;
@@ -427,62 +441,62 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
     basis[block] = drive;
 
     DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ")
-                  for(unsigned int i = 0; i < dim; ++i)
-  {
-    DEBUG_PRINTF("%i ", basis[i])
-    }
-    DEBUG_PRINT("\n"));
+                  for(unsigned int i = 0; i < (unsigned int)dim; ++i)
+                  {
+                    DEBUG_PRINTF("%i ", basis[i]);
+                  }
+                  DEBUG_PRINT("\n"));
 
     DEBUG_PRINT("total matrix\n");
-    DEBUG_EXPR_WE(for(unsigned int i = 0; i < dim; ++i)
-  {
-    for(unsigned int j = 0 ; j < dim2; ++j)
-      {
-        DEBUG_PRINTF("%1.2e ", A[i][j])
-      }
-      DEBUG_PRINT("\n")
-    });
+    DEBUG_EXPR_WE(for(unsigned int i = 0; i < (unsigned int)dim; ++i)
+                  {
+                    for(unsigned int j = 0 ; j < (unsigned int)dim2; ++j)
+                    {
+                      DEBUG_PRINTF("%1.2e ", A[i][j]);
+                    }
+                    DEBUG_PRINT("\n")
+                      });
     DEBUG_PRINT("lexico_mat\n");
-    DEBUG_EXPR_WE(for(unsigned int i = 0; i < dim; ++i)
-  {
-    DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.1e " ANSI_COLOR_RESET, A[i][drive]);
-      for(unsigned int j = 1 ; j <= dim; ++j)
-      {
-        if(fabs(A[i][j]) > 2.2e-16)
-        {
-          DEBUG_PRINTF(ANSI_COLOR_YELLOW " % 2.f " ANSI_COLOR_RESET, A[i][j])
-        }
-        else if(A[i][j] == 0.)
-        {
-          DEBUG_PRINT(ANSI_COLOR_BLUE " . " ANSI_COLOR_RESET)
-        }
-        else
-        {
-          DEBUG_PRINT(ANSI_COLOR_RED " X " ANSI_COLOR_RESET)
-        }
-      }
-      DEBUG_PRINT("\n")
-    });
+    DEBUG_EXPR_WE(for(unsigned int i = 0; i < (unsigned int)dim; ++i)
+                  {
+                    DEBUG_PRINTF(ANSI_COLOR_YELLOW "% 1.1e " ANSI_COLOR_RESET, A[i][drive]);
+                    for(unsigned int j = 1 ; j <= (unsigned int)dim; ++j)
+                    {
+                      if(fabs(A[i][j]) > 2.2e-16)
+                      {
+                        DEBUG_PRINTF(ANSI_COLOR_YELLOW " % 2.f " ANSI_COLOR_RESET, A[i][j]);
+                      }
+                      else if(A[i][j] == 0.)
+                      {
+                        DEBUG_PRINT(ANSI_COLOR_BLUE " . " ANSI_COLOR_RESET);
+                      }
+                      else
+                      {
+                        DEBUG_PRINT(ANSI_COLOR_RED " X " ANSI_COLOR_RESET);
+                      }
+                    }
+                    DEBUG_PRINT("\n");
+                  });
 
 
   } /* end while*/
 
   DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ")
-                for(unsigned int i = 0; i < dim; ++i)
-{
-  DEBUG_PRINTF("%i ", basis[i])
-  }
-  DEBUG_PRINT("\n"));
+                for(unsigned int i = 0; i < (unsigned int)dim; ++i)
+                {
+                  DEBUG_PRINTF("%i ", basis[i])
+                    }
+                DEBUG_PRINT("\n"));
 
   DEBUG_PRINT("total matrix\n");
-  DEBUG_EXPR_WE(for(unsigned int i = 0; i < dim; ++i)
-{
-  for(unsigned int j = 0 ; j < dim2; ++j)
-    {
-      DEBUG_PRINTF("%1.2e ", A[i][j])
-    }
-    DEBUG_PRINT("\n")
-  });
+  DEBUG_EXPR_WE(for(unsigned int i = 0; i < (unsigned int)dim; ++i)
+                {
+                  for(unsigned int j = 0 ; j < (unsigned int)dim2; ++j)
+                  {
+                    DEBUG_PRINTF("%1.2e ", A[i][j]);
+                  }
+                  DEBUG_PRINT("\n");
+                });
 
   for(ic = 0 ; ic < dim; ++ic)
   {

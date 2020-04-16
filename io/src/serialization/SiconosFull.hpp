@@ -132,6 +132,26 @@ REGISTER_BOOST_SERIALIZATION(GlobalFrictionContact);
 
 
 template <class Archive>
+void siconos_io(Archive& ar, RollingFrictionContact &v, unsigned int version)
+{
+	SERIALIZE(v, (_contactProblemDim)(_mu)(_muR)(_numerics_solver_options), ar);
+
+  if (Archive::is_loading::value)
+  {
+    if (v._contactProblemDim == 2)
+      v._rolling_frictionContact_driver = &rolling_fc2d_driver;
+    else
+      v._rolling_frictionContact_driver = &rolling_fc3d_driver;
+  }
+
+  ar & boost::serialization::make_nvp("LinearOSNS",
+                                      boost::serialization::base_object<LinearOSNS>(v));
+
+}
+REGISTER_BOOST_SERIALIZATION(RollingFrictionContact);
+
+
+template <class Archive>
 void siconos_io(Archive& ar, __mpz_struct& v, unsigned int version)
 {
   SERIALIZE(v, (_mp_alloc)(_mp_size), ar);
@@ -415,20 +435,20 @@ BOOST_SERIALIZATION_SPLIT_FREE(NonSmoothDynamicalSystem::ChangeLogIter)
 template <class Archive>
 void siconos_io_register_Kernel(Archive& ar)
 {
-  ar.register_type(static_cast<SimpleMatrix*>(NULL));
-  ar.register_type(static_cast<SiconosVector*>(NULL));
+  ar.register_type(static_cast<SimpleMatrix*>(nullptr));
+  ar.register_type(static_cast<SiconosVector*>(nullptr));
 
   siconos_io_register_generated_Kernel(ar);
 
-  ar.register_type(static_cast<_DynamicalSystemsGraph*>(NULL));
-  ar.register_type(static_cast<_InteractionsGraph*>(NULL));
-  ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
+  ar.register_type(static_cast<_DynamicalSystemsGraph*>(nullptr));
+  ar.register_type(static_cast<_InteractionsGraph*>(nullptr));
+  ar.register_type(static_cast<std::basic_ofstream<char>*>(nullptr));
 
-  //  ar.register_type(static_cast<PluginHandle*>(NULL));
-  ar.register_type(static_cast<__mpz_struct*>(NULL));
-  ar.register_type(static_cast<FrictionContact*>(NULL));
-  ar.register_type(static_cast<GlobalFrictionContact*>(NULL));
-  ar.register_type(static_cast<LsodarOSI*>(NULL));
+  //  ar.register_type(static_cast<PluginHandle*>(nullptr));
+  ar.register_type(static_cast<__mpz_struct*>(nullptr));
+  ar.register_type(static_cast<FrictionContact*>(nullptr));
+  ar.register_type(static_cast<GlobalFrictionContact*>(nullptr));
+  ar.register_type(static_cast<LsodarOSI*>(nullptr));
 
 
 }

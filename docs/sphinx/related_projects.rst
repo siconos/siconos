@@ -46,8 +46,6 @@ Related Projects and Platforms
   
 * `Lapack <http://www.netlib.org/lapack/>`_, `scalapack <http://www.netlib.org/scalapack/>`_
   
-* `ATLAS, Automatically Tuned Linear Algebra Software <http://math-atlas.sourceforge.net/>`_
-  
 * `The GNU Scientific Library <http://sources.redhat.com/gsl/>`_  a free numerical library for C
   
 * `Numerical Recipes <http://www.nr.com/>`_

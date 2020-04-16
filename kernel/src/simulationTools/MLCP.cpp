@@ -48,12 +48,12 @@ MLCP::MLCP(SP::SolverOptions options):
   _numerics_problem->blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
   _numerics_problem->blocksRows[0] = 0;
 
-  _numerics_problem->A = 0;
-  _numerics_problem->B = 0;
-  _numerics_problem->C = 0;
-  _numerics_problem->D = 0;
-  _numerics_problem->a = 0;
-  _numerics_problem->b = 0;
+  _numerics_problem->A = nullptr;
+  _numerics_problem->B = nullptr;
+  _numerics_problem->C = nullptr;
+  _numerics_problem->D = nullptr;
+  _numerics_problem->a = nullptr;
+  _numerics_problem->b = nullptr;
   _numerics_problem->isStorageType1 = 1;
   _numerics_problem->isStorageType2 = 0;
 }
@@ -62,10 +62,10 @@ void  MLCP::reset()
 {
   if(_numerics_problem->blocksRows)
     free(_numerics_problem->blocksRows);
-  _numerics_problem->blocksRows = 0;
+  _numerics_problem->blocksRows = nullptr;
   if(_numerics_problem->blocksIsComp)
     free(_numerics_problem->blocksIsComp);
-  _numerics_problem->blocksIsComp = 0;
+  _numerics_problem->blocksIsComp = nullptr;
   mlcp_driver_reset(&*_numerics_problem, &*_numerics_solver_options);
   _numerics_solver_options.reset();
 }
@@ -80,7 +80,7 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
   //unsigned int equalitySize2 =  0;
   if(Type::value(*(inter1->nonSmoothLaw()))
       == Type::MixedComplementarityConditionNSL)
-    equalitySize1 = std11::static_pointer_cast<MixedComplementarityConditionNSL>(inter1->nonSmoothLaw())->equalitySize();
+    equalitySize1 = std::static_pointer_cast<MixedComplementarityConditionNSL>(inter1->nonSmoothLaw())->equalitySize();
   else if(Type::value(*(inter1->nonSmoothLaw()))
           == Type::EqualityConditionNSL)
     equalitySize1 = nslawSize1;

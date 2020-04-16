@@ -38,9 +38,9 @@ namespace Type
 
 #define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 
-inline std11::shared_ptr<std::string> str(const Siconos& X)
+inline std::shared_ptr<std::string> str(const Siconos& X)
 {
-  std11::shared_ptr<std::string> r;
+  std::shared_ptr<std::string> r;
 
   switch (X)
   {

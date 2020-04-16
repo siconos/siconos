@@ -22,7 +22,6 @@
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX
-#include "CxxStd.hpp"
 #include <gmp.h>
 #include <iostream>
 #include <set>
@@ -117,21 +116,21 @@ void EventsManager::preUpdate(Simulation& sim)
 double EventsManager::startingTime() const
 {
   if(_events.size() == 0)
-    RuntimeException::selfThrow("EventsManager::startingTime current event is NULL");
+    RuntimeException::selfThrow("EventsManager::startingTime current event is nullptr");
   return _events[0]->getDoubleTimeOfEvent();
 }
 
 double EventsManager::nextTime() const
 {
   if(_events.size() <= 1)
-    RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");
+    RuntimeException::selfThrow("EventsManager nextTime, next event is nullptr");
   return _events[1]->getDoubleTimeOfEvent();
 }
 
 bool EventsManager::needsIntegration() const
 {
   if(_events.size() <= 1)
-    RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");
+    RuntimeException::selfThrow("EventsManager nextTime, next event is nullptr");
   return (mpz_cmp(*_events[0]->getTimeOfEvent(), *_events[1]->getTimeOfEvent()) < 0);
 }
 
@@ -174,7 +173,7 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
     if(mpz_cmp_ui(delta_time, _GapLimit2Events) <= 0)  // the two are too close
     {
       // reschedule the TD event only if its time instant is less than T
-      if(!isnan(getTkp3()))
+      if(!std::isnan(getTkp3()))
       {
         _NSeventInsteadOfTD = true;
         static_cast<TimeDiscretisationEvent&>(ev).update(_k+3);
@@ -210,8 +209,8 @@ void EventsManager::update(Simulation& sim)
     // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectively
     // run until T
     double tkp2 = getTkp2();
-    std11::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k+2);
-    if(!isnan(tkp2))
+    std::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k+2);
+    if(!std::isnan(tkp2))
     {
       insertEv(_events[0]);
     }

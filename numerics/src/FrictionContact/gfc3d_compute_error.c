@@ -30,6 +30,11 @@
 #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dnrm2
 #include "projectionOnCone.h"
 
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                         double*  reaction, double*  velocity,
                         double*  globalVelocity,
@@ -80,13 +85,15 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   double norm_Hr = cblas_dnrm2(n,tmp,1);
   DEBUG_PRINTF("norm of H r %e\n", norm_Hr);
 
-  cblas_daxpy(n, 1, tmp, 1, tmp_1, 1);
+
+  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
+
 
   NM_gemv(-1.0, M, globalVelocity, 0.0, tmp);
   double norm_Mv = cblas_dnrm2(n,tmp,1);
   DEBUG_PRINTF("norm of M v %e\n", norm_Mv);
 
-  cblas_daxpy(n, 1, tmp, 1, tmp_1, 1);
+  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
 
   double relative_scaling = fmax(norm_q, fmax(norm_Mv,norm_Hr));
   *error = cblas_dnrm2(n,tmp_1,1);
@@ -211,13 +218,14 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   double norm_Hr = cblas_dnrm2(n,tmp,1);
   DEBUG_PRINTF("norm of H r %e\n", norm_Hr);
 
-  cblas_daxpy(n, 1, tmp, 1, tmp_1, 1);
+  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
 
   NM_gemv(-1.0, M, globalVelocity, 0.0, tmp);
   double norm_Mv = cblas_dnrm2(n,tmp,1);
   DEBUG_PRINTF("norm of M v %e\n", norm_Mv);
 
-  cblas_daxpy(n, 1, tmp, 1, tmp_1, 1);
+  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
+
 
   double relative_scaling = fmax(norm_q, fmax(norm_Mv,norm_Hr));
   *error = cblas_dnrm2(n,tmp_1,1);

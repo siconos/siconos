@@ -220,10 +220,10 @@ endif()
 
 # mumps and mpi
 if(WITH_MPI)
-  target_include_directories(numerics PRIVATE ${MPI_C_INCLUDE_DIRS})
+  target_include_directories(numerics PUBLIC ${MPI_C_INCLUDE_DIRS})
   # Note FP : PUBLIC for the moment since it's required by tests.
   # This will be improved later.
-  target_link_libraries(numerics PRIVATE ${MPI_C_LIBRARIES})
+  target_link_libraries(numerics PUBLIC ${MPI_C_LIBRARIES})
   #   target_include_directories(numerics PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
   #   target_link_libraries(numerics PRIVATE ${MPI_Fortran_LIBRARIES})
 endif()
@@ -283,6 +283,7 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   #   src/tools/internal
   src/AVI
   src/LCP
+  src/MCP
   src/MLCP
   src/Relay
   src/FrictionContact

@@ -1,5 +1,5 @@
 # default configuration for testing
-set_option(DEV_MODE ON)
+set_option(WARNINGS_LEVEL 1)
 set_option(WITH_TESTING ON)
 set_option(WITH_SYSTEM_INFO ON)
 set_option(WITH_numerics_TESTING ON)

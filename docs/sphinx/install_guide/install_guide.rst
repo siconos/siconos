@@ -204,7 +204,12 @@ Most common options
 Developers or advanced users options
 """"""""""""""""""""""""""""""""""""
   
-* DEV_MODE=ON (OFF) : activate developper mode, which means for example some more aggressive options for compilations, more outputs and so on
+
+* WARNINGS_LEVEL: to set compiler diagnostics level.
+
+  * 0: no warnings (default)
+  * 1: activate many standard warnings (Wall, Wextras ...). This should be the setup for developers.
+  * 2: strict level, turn warnings to errors and so on.
 
 * WITH_MUMPS=ON/OFF : to enable/disable mumps library (http://mumps.enseeiht.fr)
 
@@ -268,8 +273,7 @@ Here is an example, to build numerics and kernel, with documentation, no tests .
   option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 
   # --- Build/compiling options ---
-  option(DEV_MODE "Compilation flags setup for developers. Default = OFF" OFF)
-  option(DEV_MODE_STRICT "Compilation flags setup for developers (extra strict, conversion warnings). Default = OFF" OFF)
+  set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")
   option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
   option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
   option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)

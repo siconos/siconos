@@ -18,7 +18,7 @@
 */
 
 #include <stdlib.h>                // for malloc
-#include "CSparseMatrix.h"         // for cs_dl_entry, CS_INT, cs_dl_print
+#include "CSparseMatrix_internal.h"         // for cs_dl_entry, CS_INT, cs_dl_print
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
 #include "NumericsMatrix.h"        // for NM_zentry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
@@ -888,7 +888,8 @@ static int test_NM_compute_balancing_matrices(void)
 
   NM_display(A);
 
-  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-03, 10);
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 10, B);
 
   printf("D1\n:");
   NM_display(B->D1);
@@ -922,8 +923,9 @@ static int test_NM_compute_balancing_matrices_sym(void)
 
   NM_display(A);
 
-  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-03, 10);
 
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 10, B);
   printf("D1\n:");
   NM_display(B->D1);
   printf("D2\n:");
@@ -951,9 +953,8 @@ static int test_NM_compute_balancing_matrices_rectangle(void)
   }
 
   NM_display(A);
-
-  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-09, 100);
-
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 100, B);
   printf("D1\n:");
   NM_display(B->D1);
   printf("D2\n:");

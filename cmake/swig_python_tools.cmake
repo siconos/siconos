@@ -104,7 +104,28 @@ macro(add_siconos_swig_sub_module fullname)
       target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${_dir})
     endforeach()
   endif()
-  
+
+  if(WITH_SERIALIZATION)
+    target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/io/src/serialization")
+    target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} Boost::serialization)
+    if(NOT WITH_GENERATION)
+      target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/io/src/generation")
+    else()
+      add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} SerializersGeneration)
+      target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE "${CMAKE_BINARY_DIR}/io")
+    endif()
+
+    # SiconosFullGenerated.hpp includes files from all other components.
+    # (Better way than using *_DOXYGEN_INPUTS?  ${COMPONENT}_DIR is empty here!)
+    foreach(_C IN LISTS COMPONENTS)
+      string(STRIP "${${_C}_DOXYGEN_INPUTS}" _dirs)
+      string(REPLACE " " ";" _dirs "${_dirs}")
+      foreach(_D IN LISTS _dirs)
+        target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${_D})
+      endforeach()
+    endforeach()
+  endif()
+
   # WARNING ${swig_generated_file_fullname} is overriden 
   set(${_name}_generated_file_fullname ${swig_generated_file_fullname})
   set_source_files_properties( ${swig_generated_file_fullname}

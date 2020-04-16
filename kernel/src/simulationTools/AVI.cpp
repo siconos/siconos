@@ -58,14 +58,14 @@ struct AVI::_BoundsNSLEffect : public SiconosVisitor
     SiconosVector& K = nslaw.K();
     SimpleMatrix& H = nslaw.H();
     _numerics_problem->size = nslaw.size();
-    _numerics_problem->d = NULL;
+    _numerics_problem->d = nullptr;
     _numerics_problem->poly->id = SICONOS_SET_POLYHEDRON;
     _numerics_problem->poly->size_ineq = K.size();
     _numerics_problem->poly->size_eq = 0;
     _numerics_problem->poly->H = H.getArray();
     _numerics_problem->poly->K = K.getArray();
-    _numerics_problem->poly->Heq = NULL;
-    _numerics_problem->poly->Keq = NULL;
+    _numerics_problem->poly->Heq = nullptr;
+    _numerics_problem->poly->Keq = nullptr;
   }
 
   void visit(const RelayNSL& nslaw)
@@ -107,7 +107,7 @@ void AVI::initialize(SP::Simulation sim)
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
   unsigned nbInter = 0;
-  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     NormalConeNSL& nc = static_cast<NormalConeNSL&>(*indexSet.bundle(*ui)->nonSmoothLaw());
     assert(Type::value(nc) == Type::NormalConeNSL &&
@@ -115,14 +115,14 @@ void AVI::initialize(SP::Simulation sim)
     SiconosVector& K = nc.K();
     SimpleMatrix& H = nc.H();
     _numerics_problem->size = nc.size();
-    _numerics_problem->d = NULL;
+    _numerics_problem->d = nullptr;
     _numerics_problem->poly.split->id = SICONOS_SET_POLYHEDRON;
     _numerics_problem->poly.split->size_ineq = K.size();
     _numerics_problem->poly.split->size_eq = 0;
     _numerics_problem->poly.split->H = NM_create_from_data(NM_DENSE, K.size(), nc.size(), H.getArray());
     _numerics_problem->poly.split->K = K.getArray();
-    _numerics_problem->poly.split->Heq = NULL;
-    _numerics_problem->poly.split->Keq= NULL;
+    _numerics_problem->poly.split->Heq = nullptr;
+    _numerics_problem->poly.split->Keq= nullptr;
 
     // we do not support more than one interaction
     if(!(nbInter++ == 0))

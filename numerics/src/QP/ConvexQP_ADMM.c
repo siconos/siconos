@@ -526,7 +526,7 @@ void convexQP_ADMM(ConvexQP* problem,
   convexQP_compute_error(problem, z, xi, w, u, tolerance, rho, options, norm_q, norm_b, &error);
   numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t error = %14.7e", iter, rho, error);
 
-  if(error < tolerance) hasNotConverged = 0;
+  if(error  < dparam[SICONOS_DPARAM_TOL]) hasNotConverged = 0;
   else hasNotConverged = 1;
   *info = hasNotConverged;
 

@@ -116,21 +116,21 @@ void LagrangianCompliantLinearTIR::display() const
   if(_jachq)
     _jachq->display();
   else
-    std::cout << " -> NULL " <<std::endl;
+    std::cout << " -> nullptr " <<std::endl;
   std::cout << " e: " <<std::endl;
   if(_e)
     _e->display();
   else
-    std::cout << " -> NULL " <<std::endl;
+    std::cout << " -> nullptr " <<std::endl;
   std::cout << " D: " <<std::endl;
   if(_jachlambda)
     _jachlambda->display();
   else
-    std::cout << " -> NULL " <<std::endl;
+    std::cout << " -> nullptr " <<std::endl;
   std::cout << " F: " <<std::endl;
   if(_F)
     _F->display();
   else
-    std::cout << " -> NULL " <<std::endl;
+    std::cout << " -> nullptr " <<std::endl;
   std::cout << "===================================== " <<std::endl;
 }

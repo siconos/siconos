@@ -109,7 +109,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "SiconosConfig.h"
 #include "SiconosNumerics.h"
 #include "SolverOptions.h"
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -142,15 +142,15 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 
 // declare C++ shared_ptrs to C structs
 // need to do this here for other modules to reference numerics structs by shared_ptr.
-// swig requires same namespace 'std11' is used.
+// swig requires same namespace 'std' is used.
 %{
 #ifdef __cplusplus
-namespace std11 = std;
+
 #include <memory>
 #endif
 %}
 #ifdef __cplusplus
-#define SWIG_SHARED_PTR_NAMESPACE std11
+#define SWIG_SHARED_PTR_NAMESPACE std
 %include boost_shared_ptr.i
 #endif
 
@@ -282,7 +282,7 @@ namespace std11 = std;
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
-#include "CSparseMatrix.h" // must be before NumericsMatrix.h
+#include "CSparseMatrix_internal.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"
@@ -297,7 +297,7 @@ namespace std11 = std;
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
 #include "gfc3d_Solvers.h"
-#include "rolling_fc3d_Solvers.h"
+#include "rolling_fc_Solvers.h"
 #include "MCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"

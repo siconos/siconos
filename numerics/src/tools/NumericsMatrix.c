@@ -22,7 +22,7 @@
 #include <stdio.h>                    // for printf, fprintf, size_t, fscanf
 #include <stdlib.h>                   // for exit, malloc, free, EXIT_FAILURE
 #include <string.h>                   // for memcpy, memset
-#include "CSparseMatrix.h"            // for CSparseMatrix, CS_INT, cs_dl_sp...
+#include "CSparseMatrix_internal.h"            // for CSparseMatrix, CS_INT, cs_dl_sp...
 #include "NM_MPI.h"                   // for NM_MPI_copy
 #include "NM_MUMPS.h"                 // for NM_MUMPS_copy
 #include "NM_conversions.h"           // for NM_csc_to_csr, NM_csc_to_triplet
@@ -610,6 +610,12 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
       CHECK_RETURN(CSparseMatrix_zentry(M->matrix2->triplet, i, j, val));
       break;
     }
+    case NSM_HALF_TRIPLET:
+    {
+      assert(M->matrix2->half_triplet);
+      CHECK_RETURN(CSparseMatrix_symmetric_zentry(M->matrix2->triplet, i, j, val));
+      break;
+    }
     case NSM_CSC:
     {
       assert(M->matrix2->csc);
@@ -623,6 +629,7 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
 
       M->matrix2->origin= NSM_CSC;
       NM_clearTriplet(M);
+      NM_clearHalfTriplet(M);
 
       //NM_display(M);
       break;
@@ -650,7 +657,7 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
 }
 
 
-double NM_get_value(NumericsMatrix* M, int i, int j)
+double NM_get_value(const NumericsMatrix* const M, int i, int j)
 {
   assert(M);
 
@@ -695,6 +702,25 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
       return 0.0;
       break;
     }
+    case NSM_HALF_TRIPLET:
+    {
+      assert(M->matrix2->triplet);
+      assert(i <M->matrix2->triplet->m );
+      assert(j <M->matrix2->triplet->n );
+      CS_INT * Mi =   M->matrix2->triplet->i;
+      CS_INT * Mp =   M->matrix2->triplet->p;
+      double * Mx =   M->matrix2->triplet->x;
+
+      for (int idx = 0 ; idx < M->matrix2->triplet->nz  ; idx++ )
+      {
+        if ((Mi[idx] ==i && Mp[idx] == j)||(Mi[idx] ==j && Mp[idx] == i))
+        {
+          return Mx[idx];
+        }
+      }
+      return 0.0;
+      break;
+    }
     case NSM_CSC:
     {
       assert(M->matrix2->csc);
@@ -727,7 +753,7 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
 
 bool NM_equal(NumericsMatrix* A, NumericsMatrix* B)
 {
-  return NM_compare(A, B, DBL_EPSILON);
+  return NM_compare(A, B, DBL_EPSILON*2);
 };
 
 bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
@@ -783,6 +809,79 @@ void NM_vector_display(double * m, int nRow)
 
 }
 
+void NM_display_storageType(const NumericsMatrix* const m)
+{
+  if(! m)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  printf("========== Numerics Matrix\n");
+
+  printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
+
+  switch(m->storageType)
+  {
+  case NM_DENSE:
+  {
+    printf("========== storageType = NM_DENSE\n");
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    assert(m->matrix1);
+    printf("========== storageType =  NM_SPARSE_BLOCK\n");
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(m->matrix2);
+    printf("========== storageType = NM_SPARSE\n");
+    switch(m->matrix2->origin)
+    {
+    case NSM_TRIPLET:
+    {
+      printf("========== origin =  NSM_TRIPLET\n");
+      break;
+    }
+    case NSM_CSC:
+    {
+      printf("========== origin =  NSM_CSC\n");
+      break;
+    }
+    case NSM_CSR:
+    {
+      printf("========== origin =  NSM_CSR\n");
+      break;
+    }
+    default:
+    {
+      fprintf(stderr, "NM_display ::  unknown origin %d for sparse matrix\n", m->matrix2->origin);
+    }
+    }
+
+    printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
+    if(m->matrix2->triplet)
+    {
+      printf("========== a matrix in format triplet is stored\n");
+    }
+    if(m->matrix2->csc)
+    {
+      printf("========== a matrix in format csc is stored\n");
+    }
+    if(m->matrix2->trans_csc)
+    {
+      printf("========== a matrix in format trans_csc is stored\n");
+    }
+
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "display_storageType for NumericsMatrix: matrix type %d not supported!\n", m->storageType);
+  }
+  }
+}
 void NM_display(const NumericsMatrix* const m)
 {
   if(! m)
@@ -818,6 +917,11 @@ void NM_display(const NumericsMatrix* const m)
     case NSM_TRIPLET:
     {
       printf("========== origin =  NSM_TRIPLET\n");
+      break;
+    }
+    case NSM_HALF_TRIPLET:
+    {
+      printf("========== origin =  NSM_HALF_TRIPLET\n");
       break;
     }
     case NSM_CSC:
@@ -1495,6 +1599,7 @@ void  NM_scal(double alpha, NumericsMatrix* A)
     A->matrix2->origin = NSM_CSC;
     /* Invalidations */
     NM_clearTriplet(A);
+    NM_clearHalfTriplet(A);
     NM_clearCSCTranspose(A);
     NM_clearCSR(A);
     break;
@@ -1623,6 +1728,10 @@ void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* dat
           {
             M->matrix2->origin = NSM_TRIPLET;
           }
+          else if (M->matrix2->half_triplet)
+          {
+            M->matrix2->origin = NSM_HALF_TRIPLET;
+          }
           else if(M->matrix2->csc)
           {
             M->matrix2->origin = NSM_CSC;
@@ -1677,7 +1786,7 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
     Atrans->matrix2->origin = NSM_CSC;
     // \todo should be a copy */
     CSparseMatrix_copy(NM_csc_trans(A), NM_csc(Atrans));
-    DEBUG_EXPR(NM_display(Atrans););
+    //DEBUG_EXPR(NM_display(Atrans););
     break;
   }
   default:
@@ -1734,6 +1843,18 @@ void NM_clearTriplet(NumericsMatrix* A)
   }
 }
 
+void NM_clearHalfTriplet(NumericsMatrix* A)
+{
+  if (A->matrix2)
+  {
+    if (A->matrix2->half_triplet)
+    {
+      cs_spfree(A->matrix2->half_triplet);
+      A->matrix2->half_triplet = NULL;
+    }
+  }
+}
+
 void NM_clearCSC(NumericsMatrix* A)
 {
   if(A->matrix2)
@@ -1779,6 +1900,7 @@ void NM_clearSparseStorage(NumericsMatrix *A)
       A->matrix2->linearSolverParams = NSM_linearSolverParams_free(A->matrix2->linearSolverParams);
   }
   NM_clearTriplet(A);
+  NM_clearHalfTriplet(A);
   NM_clearCSC(A);
   NM_clearCSCTranspose(A);
   NM_clearCSR(A);
@@ -1980,6 +2102,18 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B_ = B->matrix2->triplet;
       break;
     }
+    case NSM_HALF_TRIPLET:
+    {
+      A_ = A->matrix2->half_triplet;
+
+      if (!B->matrix2->half_triplet)
+      {
+        B->matrix2->half_triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
+      }
+
+      B_ = B->matrix2->half_triplet;
+      break;
+    }
     case NSM_CSC:
     {
       assert(A->matrix2->csc);
@@ -2042,6 +2176,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     else
     {
       NM_clearTriplet(B);
+      NM_clearHalfTriplet(B);
       if(A->matrix2->origin == NSM_CSC)
       {
         NM_clearCSR(B);
@@ -2174,6 +2309,113 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
   assert(A->matrix2->triplet);
 
   return A->matrix2->triplet;
+}
+
+
+CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
+{
+  if (!numericsSparseMatrix(A)->half_triplet)
+  {
+    switch(A->storageType)
+    {
+    case NM_DENSE:
+    case NM_SPARSE_BLOCK:
+    {
+
+      /* Invalidation of previously constructed csc storage. */
+      /* If we want to avoid this -> rewrite cs_compress with reallocation. */
+      NM_clearCSC(A);
+      NM_clearCSR(A);
+      NM_clearCSCTranspose(A);
+
+      A->matrix2->origin = NSM_HALF_TRIPLET;
+
+      A->matrix2->half_triplet = cs_spalloc(0,0,1,1,1);
+
+      if (A->matrix1)
+      {
+
+        /* iteration on row, cr : current row */
+        for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
+        {
+          for(size_t bn = A->matrix1->index1_data[cr];
+              bn < A->matrix1->index1_data[cr + 1]; ++bn)
+          {
+            /* cc : current column */
+            size_t cc = A->matrix1->index2_data[bn];
+            unsigned int inbr = A->matrix1->blocksize0[cr];
+            unsigned int roffset = 0;
+            unsigned int coffset = 0;
+            if(cr != 0)
+            {
+              roffset = A->matrix1->blocksize0[cr - 1];
+              inbr -= roffset;
+            }
+            unsigned int inbc = A->matrix1->blocksize1[cc];
+            if(cc != 0)
+            {
+              coffset = A->matrix1->blocksize1[cc - 1];
+              inbc -= coffset;
+            }
+            for(unsigned j = 0; j < inbc; ++j)
+            {
+              for(unsigned i = 0; i < inbr; ++i)
+              {
+                CHECK_RETURN(CSparseMatrix_symmetric_zentry(A->matrix2->half_triplet, i + roffset, j + coffset,
+                                                            A->matrix1->block[bn][i + j*inbr]));
+              }
+            }
+          }
+        }
+      }
+      else if (A->matrix0)
+      {
+        fprintf(stderr, "NM_half_triplet: conversion is not implemented");
+        exit(EXIT_FAILURE);
+      }
+      break;
+    }
+    case NM_SPARSE:
+    {
+      switch (A->matrix2->origin)
+      {
+      case NSM_TRIPLET:
+      {
+        A->matrix2->half_triplet = NM_csc_to_half_triplet(NM_csc(A));
+        break;
+      }
+      case NSM_CSC:
+      {
+        assert(A->matrix2->csc);
+        A->matrix2->half_triplet = NM_csc_to_half_triplet(A->matrix2->csc);
+        break;
+      }
+      case NSM_CSR:
+      {
+        fprintf(stderr, "NM_half_triplet: conversion is not implemented");
+        exit(EXIT_FAILURE);
+        break;
+      }
+      default:
+      case NSM_UNKNOWN:
+      {
+        NSM_UNKNOWN_ERR("NM_half_triplet", (int) A->matrix2->origin);
+        exit(EXIT_FAILURE);
+      }
+      }
+      break;
+    default:
+    {
+      fprintf(stderr, "NM_half_triplet: unknown matrix type\n");
+      exit(EXIT_FAILURE);
+    }
+    }
+
+    }
+  }
+  assert (A->matrix2->half_triplet);
+
+  return A->matrix2->half_triplet;
 }
 
 CSparseMatrix* NM_csc(NumericsMatrix *A)
@@ -2319,6 +2561,140 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
   }
   }
 }
+
+/* Insert the submatrix B into the matrix A on the position defined in
+ * (start_i, start_j) position.
+ */
+void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
+               const unsigned int start_i, const unsigned int start_j)
+{
+  DEBUG_BEGIN("NM_insert\n");
+
+  DEBUG_EXPR(NM_display_storageType(A););
+  DEBUG_EXPR(NM_display_storageType(B););
+
+  /* validation */
+  assert(A->size0 >= B->size0);
+  assert(A->size1 >= B->size1);
+
+  unsigned int end_i = start_i + B->size0;
+  unsigned int end_j = start_j + B->size1;
+  assert(start_i <= end_i);
+  assert(start_j <= end_j);
+  assert((int)end_i <= A->size0);
+  assert((int)end_j <= A->size1);
+
+  /* trivial case when size(A) == size(B) */
+  if(A->size0 == B->size0 && A->size1 == B->size1)
+  {
+    NM_copy(B, A);
+    DEBUG_END("NM_insert\n");
+    return;
+  }
+  /* DEBUG_PRINTF("NM_insert -- A->storageType = %i\n", A->storageType); */
+  /* check the case when A is sparse block matrix */
+  switch(A->storageType)
+  {
+  case NM_SPARSE:
+  {
+    switch(A->matrix2->origin)
+    {
+    case NSM_TRIPLET:
+    {
+      break;
+    }
+    case NSM_CSC:
+    {
+      A->matrix2->triplet = NM_csc_to_triplet(A->matrix2->csc);
+      break;
+    }
+    case NSM_CSR:
+    {
+      A->matrix2->triplet = NM_csr_to_triplet(A->matrix2->csr);
+      break;
+    }
+    default:
+    {
+      numerics_error("NM_insert","unknown origin %d for matrix A\n", A->matrix2->origin);
+    }
+    }
+    A->matrix2->origin = NSM_TRIPLET;
+    break;
+  }
+  case NM_DENSE:
+  {
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_insert", "unknown storageType %d for numerics matrix A\n", A->storageType);
+  }
+  }
+  /* DEBUG_PRINTF("NM_insert -- B->storageType = %i\n", B->storageType); */
+
+  /* We transform B into triplet to simplify: could be optimized */
+  switch(B->storageType)
+  {
+  case NM_SPARSE:
+  {
+    switch(B->matrix2->origin)
+    {
+    case NSM_TRIPLET:
+    {
+      assert(B->matrix2->triplet);
+      break;
+    }
+    case NSM_CSC:
+    {
+      B->matrix2->triplet = NM_csc_to_triplet(B->matrix2->csc);
+      break;
+    }
+    case NSM_CSR:
+    {
+      B->matrix2->triplet = NM_csr_to_triplet(B->matrix2->csr);
+      break;
+    }
+    default:
+    {
+      numerics_error("NM_insert","unknown origin %d for matrix B\n", B->matrix2->origin);
+    }
+    }
+    B->matrix2->origin = NSM_TRIPLET;
+
+    CS_INT * Bi =   B->matrix2->triplet->i;
+    CS_INT * Bp =   B->matrix2->triplet->p;
+    double * Bx =   B->matrix2->triplet->x;
+    // loop over the values of B
+    for(int idx = 0 ; idx < B->matrix2->triplet->nz  ; idx++)
+    {
+      NM_zentry(A, Bi[idx] + start_i, Bp[idx] + start_j, Bx[idx]);
+    }
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  case NM_DENSE:
+  {
+    /* could be optimized */
+    double val;
+    for(unsigned int i = start_i; i < end_i; ++i)
+    {
+      for(unsigned int j = start_j; j < end_j; ++j)
+      {
+        val = NM_get_value(B, i - start_i, j - start_j);
+        NM_zentry(A, i, j, val);
+      }
+    }
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_insert","unknown storageType %d for numerics matrix B\n", B->storageType);
+  }
+  }
+  DEBUG_END("NM_insert\n");
+  return;
+}
+
 
 NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 {
@@ -2730,7 +3106,17 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
         NM_MUMPS(A, -1);
-        NM_MUMPS_set_verbosity(A, verbose);
+        if ((NM_MUMPS_icntl(A, 1) == -1 ||
+             NM_MUMPS_icntl(A, 2) == -1 ||
+             NM_MUMPS_icntl(A, 3) == -1 ||
+             verbose) ||
+            (NM_MUMPS_icntl(A, 1) != -1 ||
+             NM_MUMPS_icntl(A, 2) != -1 ||
+             NM_MUMPS_icntl(A, 3) != -1 ||
+             !verbose))
+        {
+          NM_MUMPS_set_verbosity(A, verbose);
+        }
         NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
@@ -2754,7 +3140,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         if(verbose > 0)
         {
-          printf("NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          fprintf(stderr,"NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
         }
       }
       if(keep != NM_KEEP_FACTORS)
@@ -3089,17 +3475,34 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
     {
       if(verbose >= 2)
       {
-        printf("NM_gesv: using MUMPS\n");
+        if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+        {
+          printf("NM_posv: using MUMPS\n" );
+        }
       }
-      if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+      /* construction of lower triangular matrix */
+      if (!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
       {
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
+        NM_MUMPS_set_sym(A, 2); /* general symmetric */
         NM_MUMPS(A, -1);
-        NM_MUMPS_set_verbosity(A, verbose);
+        if ((NM_MUMPS_icntl(A, 1) == -1 ||
+             NM_MUMPS_icntl(A, 2) == -1 ||
+             NM_MUMPS_icntl(A, 3) == -1 ||
+             verbose) ||
+            (NM_MUMPS_icntl(A, 1) != -1 ||
+             NM_MUMPS_icntl(A, 2) != -1 ||
+             NM_MUMPS_icntl(A, 3) != -1 ||
+             !verbose))
+        {
+          NM_MUMPS_set_verbosity(A, verbose);
+        }
+
         NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
+
       NM_MUMPS_set_problem(A, b);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
@@ -3120,7 +3523,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         if(verbose > 0)
         {
-          printf("NM_posv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          fprintf(stderr, "NM_posv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
         }
       }
       if(keep != NM_KEEP_FACTORS)
@@ -3325,6 +3728,12 @@ void NM_update_size(NumericsMatrix* A)
       A->size1 = (int)A->matrix2->triplet->n;
       break;
     }
+    case NSM_HALF_TRIPLET:
+    {
+      A->size0 = (int)A->matrix2->half_triplet->m;
+      A->size1 = (int)A->matrix2->half_triplet->n;
+      break;
+    }
     default:
     {
       assert(0 && "NM_update_size :: sparse matrice but neither csc nor triplet are != NULL");
@@ -3364,6 +3773,7 @@ void NM_csr_alloc(NumericsMatrix* A, CS_INT nzmax)
 void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
   numericsSparseMatrix(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
+  numericsSparseMatrix(A)->origin = NSM_TRIPLET;
 }
 
 void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id)
@@ -3648,11 +4058,8 @@ BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A)
 }
 
 
-BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax)
+int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B )
 {
-
-  BalancingMatrices * B = NM_BalancingMatrices_new(A);
-
 
   NumericsMatrix* D1_k = B->D1;
   NumericsMatrix* D2_k = B->D2;
@@ -3677,10 +4084,8 @@ BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol,
 
   double error = tol + 1.0;
   int k =0;
-  int info;
-
-  info = NM_max_abs_by_columns(A_k, D_C_x);
-  info = NM_max_abs_by_rows(A_k, D_R_x);
+  NM_max_abs_by_columns(A_k, D_C_x);
+  NM_max_abs_by_rows(A_k, D_R_x);
 
 
   while((error > tol) && (k < itermax))
@@ -3699,8 +4104,6 @@ BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol,
     {
       D_C_x[i] =1.0/sqrt(D_C_x[i]);
     }
-
-
 
     /* Update balancing matrix */
     NM_gemm(1.0, D1_k, D_R, 0.0, D1_tmp);
@@ -3724,8 +4127,8 @@ BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol,
     /* DEBUG_PRINTF("inv D_C ");NV_display(D_C_x, size); */
     /* Compute error */
 
-    info = NM_max_abs_by_rows(A_k, D_R_x);
-    info = NM_max_abs_by_columns(A_k, D_C_x);
+    NM_max_abs_by_rows(A_k, D_R_x);
+    NM_max_abs_by_columns(A_k, D_C_x);
     /* printf("D_R ");NV_display(D_R_x, size0);  */
     /* printf("D_C ");NV_display(D_C_x, size1); */
 
@@ -3745,9 +4148,6 @@ BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol,
 
     //error = fabs(1.0-NV_max(D_C_x,size)) +
     //  fabs(1.0-NV_max(D_R_x,size));
-
-
-
 
     numerics_printf_verbose(2,"NM_compute_balancing_matrices error =%e", error);
     /* printf("D_R ");NV_display(D_R_x, size); */
@@ -3772,7 +4172,10 @@ BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol,
   NM_clear(A_tmp);
   free(A_tmp);
 
-  return B;
-
-
+  if (error > tol)
+  {
+    return 0;
+  }
+  else
+    return 1;
 }

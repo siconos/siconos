@@ -82,7 +82,7 @@ void OneStepNSProblem::updateInteractionBlocks()
   {
     DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Symmetric case");
     InteractionsGraph::VIterator vi, viend;
-    for(std11::tie(vi, viend) = indexSet->vertices();
+    for(std::tie(vi, viend) = indexSet->vertices();
         vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
@@ -104,7 +104,7 @@ void OneStepNSProblem::updateInteractionBlocks()
     std::fill(initialized.begin(), initialized.end(), false);
 
     InteractionsGraph::EIterator ei, eiend;
-    for(std11::tie(ei, eiend) = indexSet->edges();
+    for(std::tie(ei, eiend) = indexSet->edges();
         ei != eiend; ++ei)
     {
       SP::Interaction inter1 = indexSet->bundle(indexSet->source(*ei));
@@ -112,7 +112,7 @@ void OneStepNSProblem::updateInteractionBlocks()
 
       /* on adjoint graph there is at most 2 edges between source and target */
       InteractionsGraph::EDescriptor ed1, ed2;
-      std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*ei), indexSet->target(*ei));
+      std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*ei), indexSet->target(*ei));
 
       assert(*ei == ed1 || *ei == ed2);
 
@@ -193,7 +193,7 @@ void OneStepNSProblem::updateInteractionBlocks()
     DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Non symmetric case\n");
 
     InteractionsGraph::VIterator vi, viend;
-    for(std11::tie(vi, viend) = indexSet->vertices();
+    for(std::tie(vi, viend) = indexSet->vertices();
         vi != viend; ++vi)
     {
       DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Computation of diaganal block\n");
@@ -213,12 +213,12 @@ void OneStepNSProblem::updateInteractionBlocks()
       InteractionsGraph::OEIterator oei, oeiend;
       /* interactionBlock must be zeroed at init */
       std::map<SP::SiconosMatrix, bool> initialized;
-      for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+      for(std::tie(oei, oeiend) = indexSet->out_edges(*vi);
           oei != oeiend; ++oei)
       {
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
-        std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
         if(indexSet->properties(ed1).upper_block)
         {
           initialized[indexSet->properties(ed1).upper_block] = false;
@@ -239,14 +239,14 @@ void OneStepNSProblem::updateInteractionBlocks()
 
       }
 
-      for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+      for(std::tie(oei, oeiend) = indexSet->out_edges(*vi);
           oei != oeiend; ++oei)
       {
         DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Computation of extra-diaganal block\n");
 
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
-        std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+        std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
 
         assert(*oei == ed1 || *oei == ed2);
 
@@ -318,7 +318,7 @@ void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
 
   std::cout <<  "OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet) " << std::endl;
   InteractionsGraph::VIterator vi, viend;
-  for(std11::tie(vi, viend) = indexSet->vertices();
+  for(std::tie(vi, viend) = indexSet->vertices();
       vi != viend; ++vi)
   {
     SP::Interaction inter = indexSet->bundle(*vi);
@@ -328,11 +328,11 @@ void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
     }
 
     InteractionsGraph::OEIterator oei, oeiend;
-    for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+    for(std::tie(oei, oeiend) = indexSet->out_edges(*vi);
         oei != oeiend; ++oei)
     {
       InteractionsGraph::EDescriptor ed1, ed2;
-      std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
+      std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
 
       if(indexSet->properties(ed1).upper_block)
       {
@@ -402,23 +402,23 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
   else if(osiType == OSI::LSODAROSI)  // Warning: LagrangianDS only at the time !!!
   {
     if(dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + dsType);
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + std::to_string(dsType));
 
     // get lu-factorized mass
-    block = (std11::static_pointer_cast<LagrangianDS>(ds))->inverseMass();
+    block = (std::static_pointer_cast<LagrangianDS>(ds))->inverseMass();
   }
   else if(osiType == OSI::NEWMARKALPHAOSI)
   {
     if(dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
     {
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + dsType);
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + std::to_string(dsType));
     }
     //
     SP::OneStepNSProblems  allOSNS  = Osi.simulation()->oneStepNSProblems();
     // If LCP at acceleration level
     if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this)
     {
-      block = (std11::static_pointer_cast<LagrangianDS>(ds))->inverseMass();
+      block = (std::static_pointer_cast<LagrangianDS>(ds))->inverseMass();
     }
     else // It LCP at position level
     {
@@ -432,11 +432,11 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
     if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       // SP::SimpleMatrix Mold;
-      // Mold.reset(new SimpleMatrix(*(std11::static_pointer_cast<LagrangianDS>(ds))->mass()));
+      // Mold.reset(new SimpleMatrix(*(std::static_pointer_cast<LagrangianDS>(ds))->mass()));
       // DEBUG_EXPR(Mold->display(););
       // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isPLUFactorized() = "<< Mold->isPLUFactorized() << std::endl;);
-      //(std11::static_pointer_cast<LagrangianDS>(ds))->computeMass();
-      SP::SiconosMatrix Mass = ((std11::static_pointer_cast<LagrangianDS>(ds))->mass()) ;
+      //(std::static_pointer_cast<LagrangianDS>(ds))->computeMass();
+      SP::SiconosMatrix Mass = ((std::static_pointer_cast<LagrangianDS>(ds))->mass()) ;
       DEBUG_EXPR(Mass->display(););
       DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mass->isPLUFactorized() = "<< Mass->isPLUFactorized() << std::endl;);
 
@@ -446,14 +446,14 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
     }
     else if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
       //   d->computeMass();
       //   d->mass()->resetLU();
       DEBUG_EXPR(d->mass()->display(););
       block.reset(new SimpleMatrix(*(d->mass())));
     }
     else
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + dsType);
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + std::to_string(dsType));
   }
   // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
   else if(osiType == OSI::ZOHOSI)
@@ -464,7 +464,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       *block = (static_cast<ZeroOrderHoldOSI&>(Osi)).Ad(ds);
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + osiType);
+    RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + std::to_string(osiType));
   return block;
 }
 

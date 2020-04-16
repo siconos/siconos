@@ -26,6 +26,10 @@
 #include "FrictionContactProblem.h" // from numerics, for GM problem struct
 #include "RelayProblem.h" // from numerics, for GM problem struct
 #include "GenericMechanical_Solvers.h"
+
+
+#include "SolverOptions.h"
+#include "numerics_verbose.h"
 using namespace RELATION;
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
@@ -48,9 +52,11 @@ GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
 GenericMechanical::GenericMechanical(SP::SolverOptions options):
   LinearOSNS(options)
 {
-  assert(options->solverId = SICONOS_GENERIC_MECHANICAL_NSGS);
+  DEBUG_BEGIN("GenericMechanical::GenericMechanical(SP::SolverOptions options)\n");
+  //assert(options->solverId == SICONOS_GENERIC_MECHANICAL_NSGS); this will be checked in the driver
   _numericsMatrixStorageType = NM_SPARSE_BLOCK;
   _pnumerics_GMP = genericMechanicalProblem_new();
+  DEBUG_END("GenericMechanical::GenericMechanical(SP::SolverOptions options)\n");
 }
 
 
@@ -100,7 +106,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       RelayProblem * pAux =
         (RelayProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_RELAY, size);
       SP::RelayNSL nsLaw =
-        std11::static_pointer_cast<RelayNSL> (inter->nonSmoothLaw());
+        std::static_pointer_cast<RelayNSL> (inter->nonSmoothLaw());
       for(int i=0; i<size; i++)
       {
         pAux->lb[i] = nsLaw->lb();
@@ -114,7 +120,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       FrictionContactProblem * pAux =
         (FrictionContactProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
       SP::NewtonImpactFrictionNSL nsLaw =
-        std11::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
+        std::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
       pAux->dimension = 3;
       pAux->numberOfContacts = 1;
       *(pAux->mu) = nsLaw->mu();
@@ -126,6 +132,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       RuntimeException::selfThrow("GenericMechanical::computeDiagonalInteractionBlock- not yet implemented for that NSLAW type");
     }
   }
+
   LinearOSNS::computeDiagonalInteractionBlock(vd);
 }
 
@@ -136,9 +143,11 @@ void GenericMechanical::computeInteractionBlock(const InteractionsGraph::EDescri
 
 int GenericMechanical::compute(double time)
 {
+  DEBUG_BEGIN("GenericMechanical::compute(double time)\n");
   int info = 0;
   // --- Prepare data for GenericMechanical computing ---
   bool cont = preCompute(time);
+
   if(!cont)
     return info;
   // MB: if _hasBeenUpdated is set true then :
@@ -166,6 +175,7 @@ int GenericMechanical::compute(double time)
   // - the unknowns (z,w)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
+
   if(_sizeOutput != 0)
   {
     // The GenericMechanical Problem in Numerics format
@@ -190,7 +200,7 @@ int GenericMechanical::compute(double time)
     DEBUG_PRINT("GenericMechanical::compute : sizeoutput is null\n");
 
   }
-
+  DEBUG_END("GenericMechanical::compute(double time)\n");
   return info;
 }
 
@@ -215,7 +225,5 @@ void  GenericMechanical::updateInteractionBlocks()
 GenericMechanical::~GenericMechanical()
 {
   genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
-  _pnumerics_GMP = 0;
+  _pnumerics_GMP = nullptr;
 }
-
-

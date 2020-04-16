@@ -28,7 +28,6 @@
 #include "FirstOrderType2R.hpp"
 #include "FirstOrderType1R.hpp"
 #include "NonSmoothLaw.hpp"
-#include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 // #define DEBUG_NOCOLOR
@@ -68,15 +67,15 @@ EulerMoreauOSI::EulerMoreauOSI(double theta, double gamma):
 const SimpleMatrix EulerMoreauOSI::getW(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "EulerMoreauOSI::getW(ds): ds == NULL.");
+         "EulerMoreauOSI::getW(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
-         "EulerMoreauOSI::getW(ds): W[ds] == NULL.");
+         "EulerMoreauOSI::getW(ds): W[ds] == nullptr.");
   return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W); // Copy !!
 }
 
 SP::SimpleMatrix EulerMoreauOSI::W(SP::DynamicalSystem ds)
 {
-  assert(ds && "EulerMoreauOSI::W(ds): ds == NULL.");
+  assert(ds && "EulerMoreauOSI::W(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
@@ -84,16 +83,16 @@ SP::SimpleMatrix EulerMoreauOSI::W(SP::DynamicalSystem ds)
 const SimpleMatrix EulerMoreauOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "EulerMoreauOSI::getWBoundaryConditions(ds): ds == NULL.");
+         "EulerMoreauOSI::getWBoundaryConditions(ds): ds == nullptr.");
   //    return *(WBoundaryConditionsMap[0]);
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions
-         && "EulerMoreauOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
+         && "EulerMoreauOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == nullptr.");
   return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions); // Copy !!
 }
 
 SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
-  assert(ds && "EulerMoreauOSI::WBoundaryConditions(ds): ds == NULL.");
+  assert(ds && "EulerMoreauOSI::WBoundaryConditions(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
@@ -103,7 +102,7 @@ void EulerMoreauOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds
   ds_work_vectors.resize(EulerMoreauOSI::WORK_LENGTH);
 
   // Check dynamical system type
-  SP::FirstOrderNonLinearDS fods = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
+  SP::FirstOrderNonLinearDS fods = std::static_pointer_cast<FirstOrderNonLinearDS> (ds);
   assert(Type::value(*ds) == Type::FirstOrderNonLinearDS ||
          Type::value(*ds) == Type::FirstOrderLinearDS ||
          Type::value(*ds) == Type::FirstOrderLinearTIDS);
@@ -274,7 +273,7 @@ void EulerMoreauOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem
   // - update its content for the current (initial) state of the dynamical system, depending on its type.
 
   if(!ds)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
@@ -293,7 +292,7 @@ void EulerMoreauOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem
   if(dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
-    SP::FirstOrderNonLinearDS d = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
+    SP::FirstOrderNonLinearDS d = std::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Memory allocation for W property of the graph
     if(d->M()) // W = M
@@ -315,7 +314,7 @@ void EulerMoreauOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem
       scal(-h * _theta, *d->jacobianfx(), *W, false);
     }
   }
-  else RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW - not yet implemented for Dynamical system type :" + dsType);
+  else RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW - not yet implemented for Dynamical system type :" + std::to_string(dsType));
 
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
@@ -329,7 +328,7 @@ void EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalS
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
 
   if(!ds)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
@@ -337,7 +336,7 @@ void EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalS
   Type::Siconos dsType = Type::value(*ds);
 
 
-  RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
+  RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions - not yet implemented for Dynamical system type :" + std::to_string(dsType));
 }
 
 
@@ -351,11 +350,11 @@ void EulerMoreauOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
   // done during initializeIterationMatrixWBoundaryConditions.
 
   assert(ds &&
-         "EulerMoreauOSI::computeWBoundaryConditions(t,ds) - ds == NULL");
+         "EulerMoreauOSI::computeWBoundaryConditions(t,ds) - ds == nullptr");
 
   Type::Siconos dsType = Type::value(*ds);
   //unsigned int dsN = ds->number();
-  RuntimeException::selfThrow("EulerMoreauOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + dsType);
+  RuntimeException::selfThrow("EulerMoreauOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + std::to_string(dsType));
 }
 
 
@@ -415,7 +414,7 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
     if(fods.A())
       scal(-h * _theta, *fods.A(), W, false);
   }
-  else RuntimeException::selfThrow("EulerMoreauOSI::computeW - not yet implemented for Dynamical system type :" + dsType);
+  else RuntimeException::selfThrow("EulerMoreauOSI::computeW - not yet implemented for Dynamical system type :" + std::to_string(dsType));
 
   //  if (_useGamma)
   {
@@ -426,7 +425,7 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
 //    InteractionsGraph::VDescriptor ivd;
     SP::SiconosMatrix K;
     SP::Interaction inter;
-    for(std11::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend; ++oei)
     {
       inter = _dynamicalSystemsGraph->bundle(*oei);
       VectorOfSMatrices& relationMat = inter->relationMatrices();
@@ -453,7 +452,7 @@ void EulerMoreauOSI::computeKhat(Interaction& inter, SiconosMatrix& m,
 
   if((relationType == FirstOrder) && (workM[EulerMoreauOSI::MAT_KHAT]))
   {
-    SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(inter.relation())->K();
+    SP::SiconosMatrix K = std::static_pointer_cast<FirstOrderR>(inter.relation())->K();
     if(!K) K = inter.relationMatrices()[FirstOrderR::mat_K];
     prod(*K, m, *workM[EulerMoreauOSI::MAT_KHAT], true);
     *workM[EulerMoreauOSI::MAT_KHAT] *= h;
@@ -493,7 +492,7 @@ double EulerMoreauOSI::computeResidu()
   double normResidu = maxResidu;
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -517,8 +516,8 @@ double EulerMoreauOSI::computeResidu()
       // Note: indices k/k+1 corresponds to value at the beginning/end of the time step.
       // Newton iterate are x and r
 
-      FirstOrderNonLinearDS& fonlds = *std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-      FirstOrderLinearDS& folds = *std11::static_pointer_cast<FirstOrderLinearDS>(ds);
+      FirstOrderNonLinearDS& fonlds = *std::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      FirstOrderLinearDS& folds = *std::static_pointer_cast<FirstOrderLinearDS>(ds);
 
       // 1 - Compute the free residu (purely on the "smooth" dynamics)
 
@@ -616,7 +615,7 @@ double EulerMoreauOSI::computeResidu()
     // 2 - First Order Linear Systems with Time Invariant coefficients
     else if(dsType == Type::FirstOrderLinearTIDS)
     {
-      FirstOrderLinearTIDS& foltids = *std11::static_pointer_cast<FirstOrderLinearTIDS>(ds);
+      FirstOrderLinearTIDS& foltids = *std::static_pointer_cast<FirstOrderLinearTIDS>(ds);
       //Don't use W because it is LU factorized
       //Residu : R_{free} = M(x^{\alpha}_{k+1} - x_{k}) -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b)
 
@@ -653,7 +652,7 @@ double EulerMoreauOSI::computeResidu()
       }
     }
     else
-      RuntimeException::selfThrow("EulerMoreauOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("EulerMoreauOSI::computeResidu - not yet implemented for Dynamical system type: " + std::to_string(dsType));
 
 
     DEBUG_PRINT("EulerMoreauOSI::computeResidu final residuFree\n");
@@ -690,7 +689,7 @@ void EulerMoreauOSI::computeFreeState()
 
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -713,7 +712,7 @@ void EulerMoreauOSI::computeFreeState()
       // to be updated at current time: W, f
       // fold is f at t_k
       // not time dependant: M
-      FirstOrderNonLinearDS& d = *std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      FirstOrderNonLinearDS& d = *std::static_pointer_cast<FirstOrderNonLinearDS>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       //    SP::SiconosVector xold = d->xMemory()->getSiconosVector(0); // xi
@@ -792,7 +791,7 @@ void EulerMoreauOSI::computeFreeState()
 
     }
     else
-      RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
   }
   DEBUG_END("EulerMoreauOSI::computeFreeState()\n");
 }
@@ -804,7 +803,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
   // we have to iterate over the edges of the DSG0 -> the following won't be necessary anymore
   // Maurice will do that with subgraph :)
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -820,7 +819,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
 
-    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       Interaction & inter = *indexSet0->bundle(*ui);
       InteractionProperties& interProp = indexSet0->properties(*ui);
@@ -938,7 +937,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   {
     DEBUG_PRINT("relationType == FirstOrder && (relationSubType == Type2R || relationSubType == NonLinearR)\n")
     SiconosVector& lambda = *inter->lambda(0);
-    FirstOrderR& rel = *std11::static_pointer_cast<FirstOrderR>(mainInteraction->relation());
+    FirstOrderR& rel = *std::static_pointer_cast<FirstOrderR>(mainInteraction->relation());
     C = rel.C();
     if(!C) C = relationMat[FirstOrderR::mat_C];
     D = rel.D();
@@ -977,7 +976,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   else if(relationType == FirstOrder && relationSubType == Type1R)
   {
     DEBUG_PRINT("relationType == FirstOrder && relationSubType == Type1R\n");
-    FirstOrderType1R& rel = *std11::static_pointer_cast<FirstOrderType1R>(mainInteraction->relation());
+    FirstOrderType1R& rel = *std::static_pointer_cast<FirstOrderType1R>(mainInteraction->relation());
     C = rel.C();
     if(!C) C = relationMat[FirstOrderR::mat_C];
     F = rel.F();
@@ -1041,14 +1040,14 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
       SP::SiconosVector e;
       if(relationSubType == LinearTIR)
       {
-        e = std11::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
-        F = std11::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
+        e = std::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
+        F = std::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
       }
       else
       {
-        e = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
+        e = std::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
         if(!e) e = relationVec[FirstOrderR::e];
-        F = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
+        F = std::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
         if(!F) F = relationMat[FirstOrderR::mat_F];
       }
 
@@ -1078,12 +1077,12 @@ void EulerMoreauOSI::integrate(double& tinit, double& tend, double& tout, int&)
 
   SP::SiconosMatrix W;
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
-    RuntimeException::selfThrow("EulerMoreauOSI::integrate - not yet implemented for Dynamical system type :" + dsType);
+    RuntimeException::selfThrow("EulerMoreauOSI::integrate - not yet implemented for Dynamical system type :" + std::to_string(dsType));
   }
 }
 
@@ -1101,7 +1100,7 @@ void EulerMoreauOSI::updateState(const unsigned int)
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
 
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -1114,7 +1113,7 @@ void EulerMoreauOSI::updateState(const unsigned int)
 
     if(dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
     {
-      FirstOrderNonLinearDS& d = *std11::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      FirstOrderNonLinearDS& d = *std::static_pointer_cast<FirstOrderNonLinearDS>(ds);
       SiconosVector& x = *ds->x();
       DEBUG_PRINT("EulerMoreauOSI::updateState Old value of x\n");
       DEBUG_EXPR(x.display());
@@ -1155,7 +1154,7 @@ void EulerMoreauOSI::updateState(const unsigned int)
       DEBUG_PRINT("EulerMoreauOSI::updateState New value of x\n");
       DEBUG_EXPR(x.display());
     }
-    else RuntimeException::selfThrow("EulerMoreauOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
+    else RuntimeException::selfThrow("EulerMoreauOSI::updateState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
   }
 }
 
@@ -1166,14 +1165,14 @@ void EulerMoreauOSI::display()
   std::cout << "====== EulerMoreauOSI OSI display ======" <<std::endl;
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     std::cout << "--------------------------------" <<std::endl;
     std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
     if(_dynamicalSystemsGraph->properties(*dsi).W) _dynamicalSystemsGraph->properties(*dsi).W->display();
-    else std::cout << "-> NULL" <<std::endl;
+    else std::cout << "-> nullptr" <<std::endl;
     std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }
   std::cout << "================================" <<std::endl;
@@ -1203,7 +1202,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
   //_simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
   InteractionsGraph::VIterator ui, uiend;
   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
     assert(inter.lowerLevelForOutput() <= level);
@@ -1370,7 +1369,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
   InteractionsGraph::VIterator ui, uiend;
 
   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = * indexSet0->bundle(*ui);
     assert(inter.lowerLevelForInput() <= level);
@@ -1459,7 +1458,7 @@ double EulerMoreauOSI::computeResiduOutput(double time, SP::InteractionsGraph in
 
   double residu =0.0;
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     VectorOfVectors& inter_work = *indexSet->properties(*ui).workVectors;
     SiconosVector&  residuY = *inter_work[EulerMoreauOSI::VEC_RESIDU_Y];
@@ -1476,7 +1475,7 @@ double EulerMoreauOSI::computeResiduInput(double time, SP::InteractionsGraph ind
 {
   double residu =0.0;
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     InteractionProperties& interProp = indexSet->properties(*ui);
     VectorOfVectors& inter_work = *interProp.workVectors;

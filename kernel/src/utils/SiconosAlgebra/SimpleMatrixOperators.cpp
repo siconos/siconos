@@ -47,7 +47,7 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
   else if(_num == SPARSE)
   {
     double *d = (*mat.Sparse).find_element(row, col);
-    if(d == NULL)
+    if(d == nullptr)
       SiconosMatrixException::selfThrow("SimpleMatrix:operator(): Index out of range");
     double & ref = *d;
     return ref;
@@ -55,7 +55,7 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
   else if(_num == SPARSE_COORDINATE)
   {
     double *d = (*mat.SparseCoordinate).find_element(row, col);
-    if(d == NULL)
+    if(d == nullptr)
       SiconosMatrixException::selfThrow("SimpleMatrix:operator(): Index out of range");
     double & ref = *d;
     return ref;
@@ -69,7 +69,7 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
   else
   {
     SiconosMatrixException::selfThrow("SimpleMatrix::op () (unsigned int row, unsigned int col): invalid type of matrix");
-    double *d = NULL;
+    double *d = nullptr;
     double & ref = *d;
     return ref;
   }

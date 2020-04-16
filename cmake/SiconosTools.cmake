@@ -2,37 +2,6 @@
 # Some convenience macros
 #
 
-# -- Basic list manipulation --
-# Get first element of list var
-MACRO(CAR var)
-  SET(${var} ${ARGV1})
-ENDMACRO(CAR)
-
-# get elements in list var minus the first one.
-MACRO(CDR var junk)
-  SET(${var} ${ARGN})
-ENDMACRO(CDR)
-
-# LIST(APPEND ...) is not correct on <COMPILER>_FLAGS 
-MACRO(APPEND_FLAGS)
-  CAR(_V ${ARGV})
-  CDR(_F ${ARGV})
-  SET(${_V} "${${_V}} ${_F}")
-ENDMACRO(APPEND_FLAGS)
-
-# The use of ADD_DEFINITION results in a warning with Fortran compiler
-MACRO(APPEND_C_FLAGS)
-  APPEND_FLAGS(CMAKE_C_FLAGS ${ARGV})
-ENDMACRO(APPEND_C_FLAGS)
-
-MACRO(APPEND_CXX_FLAGS)
-  APPEND_FLAGS(CMAKE_CXX_FLAGS ${ARGV})
-ENDMACRO(APPEND_CXX_FLAGS)
-
-MACRO(APPEND_Fortran_FLAGS)
-  APPEND_FLAGS(CMAKE_Fortran_FLAGS ${ARGV})
-ENDMACRO(APPEND_Fortran_FLAGS)
-
 # Collect source files.
 # 
 # Usage:
@@ -271,5 +240,202 @@ function(create_target)
       set_target_properties(${target_NAME} PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${target_INCLUDE_DIRS}")
     endif()
+  endif()
+endfunction()
+
+
+# Apply sanitizer options onto a given target
+#
+# Depends on user-defined variable USE_SANITIZER.
+# 
+# Might be:
+# - asan : fast memory error detector
+# - leaks : detects memory leaks
+# - msan : detects uninitialized reads.
+# - threads : detects data race
+# - cfi : control flow integrity
+# - undefined : detects the use of various features of C/C++ that are explicitly listed as resulting in undefined behaviour.
+#
+# Warning : do not combine options and notice that some of them may fail
+# on MacOs ...
+# 
+# Ref :
+# - http://www.stablecoder.ca/2018/10/30/full-cmake-helper-suite.html
+# - https://clang.llvm.org/docs/AddressSanitizer.html
+function(apply_sanitizer CURRENT_TARGET)
+
+  unset(SANITIZER_OPTIONS)
+  if(USE_SANITIZER MATCHES "asan") # Address sanitizer
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=address")
+  elseif(USE_SANITIZER MATCHES "undefined") # Address sanitizer
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=undefined")
+  elseif(USE_SANITIZER MATCHES "msan") # Memory sanitizer
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=memory")
+    list(APPEND SANITIZER_OPTIONS "-fsanitize-memory-track-origins")
+  elseif (USE_SANITIZER STREQUAL "thread") # Thread sanitizer (detect data race ...)
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=thread")
+  elseif (USE_SANITIZER STREQUAL "Leak")
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=leak") # not implemented on macos (01/2020)
+  elseif(USE_SANITIZER MATCHES "cfi") # control flow integrity
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=cfi")
+    list(APPEND SANITIZER_OPTIONS "-flto")
+    list(APPEND SANITIZER_OPTIONS "-B ${CLANG_LD_HACK}")
+  endif()
+  if(DEFINED SANITIZER_OPTIONS)
+    list(APPEND SANITIZER_OPTIONS "-fno-omit-frame-pointer")
+    message(STATUS "Activate sanitizer options (USE_SANITIZER=${USE_SANITIZER}) : ${SANITIZER_OPTIONS}")
+  endif()
+
+  if(SANITIZER_OPTIONS)
+    target_compile_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+    target_link_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+  endif()
+endfunction()
+
+
+
+# Apply compiler options onto a given target
+#
+# Depends on the diagnostics level required.
+# 
+# Usage :
+# 
+#     apply_compiler_options(numerics DIAGNOSTICS_LEVEL ${WARNINGS_LEVEL})
+#
+# * This function must be called inside create_siconos_component function.
+# * WARNINGS_LEVEL is 0 by default and set by user in siconos config file
+# (-DUSER_OPTIONS_FILE=configfile.cmake)
+# * to be more specific on a given target, use target_compile_... functions
+#   Check in externals/CMakeLists.txt for an example.
+# 
+function(apply_compiler_options COMPONENT)
+  set(oneValueArgs DIAGNOSTICS_LEVEL)
+  cmake_parse_arguments(COMP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  unset(COMP_OPTIONS)   # C and C++ options. Append options there by default.
+  
+  # -- Compiler options common to all setups --
+  
+  # Warn about types with virtual methods where code quality would be improved if the type were declared with the C++11 final specifier, or, if possible, declared in an anonymous namespace.
+  #list(APPEND COMP_OPTIONS "-Wsuggest-final-types"). GNU/CXX ONLY. ## NOTE FP : too many warnings, activate this later
+  # list(APPEND COMP_OPTIONS
+  #   $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-types>)
+  # Warn about virtual methods where code quality would be improved if the method were declared with the C++11 final specifier, or, if possible, its type were declared in an anonymous namespace or with the final specifier. GNU/CXX ONLY. ## NOTE FP : too many warnings, activate this later
+  # list(APPEND COMP_OPTIONS
+  #   $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-methods>)
+  # Warn when a literal ‘0’ is used as null pointer constant.
+  list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Wzero-as-null-pointer-constant>)
+  if(WITH_SERIALIZATION)
+    list(APPEND COMP_OPTIONS -ftemplate-depth=1024)
+  endif(WITH_SERIALIZATION)
+  # Intel specific
+  list(APPEND COMP_OPTIONS $<$<CXX_COMPILER_ID:Intel>:"-diag-disable 654">)
+  list(APPEND COMP_OPTIONS $<$<CXX_COMPILER_ID:Intel>:"-D__aligned__=ignored">)
+  # LLVM Static analyser ? Where do we ask to set this LLVM_ANALYSE ? 
+  if(LLVM_ANALYSE)
+    target_compile_options(${COMPONENT} PRIVATE "-emit-llvm")
+  endif()
+  # Clang++ specific
+  list(APPEND COMP_OPTIONS
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-string-plus-int>)
+ 
+  # -- Dev mode options --
+  if(COMP_DIAGNOSTICS_LEVEL GREATER 0)
+    # -- options working with both C and C++ --
+    # and for all compilers.
+    # ! tested only with clang and gnu
+    # - Activates  all the warnings about constructions
+    # details: https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+    list(APPEND COMP_OPTIONS -Wall)
+    # - enables some extra warning flags that are not enabled by -Wall
+    list(APPEND COMP_OPTIONS -Wextra)
+    ## TMP ?? deactivate warning for unused parameters in C/CXX
+    list(APPEND COMP_OPTIONS -Wno-unused-parameter)
+    # This option controls warnings when a function is used before being declared.
+    list(APPEND COMP_OPTIONS -Werror=implicit-function-declaration)
+    # - Warn when variables are not initialized.
+    # Warning: this may lead to many false warnings.
+    # See for instance https://gcc.gnu.org/wiki/Better_Uninitialized_Warnings
+    # --> activated by Wall
+    #  list(APPEND COMP_OPTIONS "-Wuninitialized")
+    # warn/error when a switch statement has an index of boolean type and the case values are outside the range of a boolean type
+    list(APPEND COMP_OPTIONS -Werror=switch-bool)
+    # Warn about logical not used on the left hand side operand of a comparison
+    list(APPEND COMP_OPTIONS -Werror=logical-not-parentheses)
+    # warn when the sizeof operator is applied to a parameter that is declared as an array in a function definition. This warning is enabled by default for C and C++ programs
+    list(APPEND COMP_OPTIONS -Werror=sizeof-array-argument)
+    # Warn about boolean expression compared with an integer value different from true/false
+    # GNU ONLY, C/CXX
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:GNU>>:-Werror=bool-compare>)
+    # This option is only active when -ftree-vrp is active (default for -O2 and above). It warns about subscripts to arrays that are always out of bounds.
+    list(APPEND COMP_OPTIONS -Werror=array-bounds)
+    # Warn if a comparison is always true or always false due to the limited range of the data type
+    list(APPEND COMP_OPTIONS -Werror=type-limits)
+    # warn when there is a conversion between pointers that have incompatible types.
+    list(APPEND COMP_OPTIONS -Werror=incompatible-pointer-types)
+    # Warn if a global function is defined without a previous prototype declaration.
+    list(APPEND COMP_OPTIONS -Werror=missing-prototypes)
+    # Warn whenever a function is defined with a return type that defaults to int.
+    list(APPEND COMP_OPTIONS -Werror=return-type)
+    # warns about cases where the compiler optimizes based on the assumption that signed overflow does not occur.
+    # !! this warning depends on the optimization level. Check doc.
+    list(APPEND COMP_OPTIONS -Wstrict-overflow=4)
+    # warns about code that might break the strict aliasing rules that the compiler is using for optimization.
+    list(APPEND COMP_OPTIONS -Werror=strict-aliasing)
+    # Warn about trampolines generated for pointers to nested functions.
+    # GNU ONLY, C/CXX
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:GNU>>:-Werror=trampolines>)
+    # warnings from casts to pointer type of an integer of a different size
+    list(APPEND COMP_OPTIONS -Werror=int-to-pointer-cast)
+    #  warnings from casts from a pointer to an integer type of a different size.
+    list(APPEND COMP_OPTIONS -Werror=pointer-to-int-cast)
+    # Warn if a global function is defined without a previous declaration.
+    list(APPEND COMP_OPTIONS -Werror=missing-declarations)
+    # Check calls to printf and scanf, etc., to make sure that the arguments supplied have types appropriate to the format string specified
+    list(APPEND COMP_OPTIONS -Wformat=2)
+    # warn about uses of format functions that represent possible security problems.
+    list(APPEND COMP_OPTIONS -Werror=format-security)
+    # Warn when a function declaration hides virtual functions from a base class
+    list(APPEND COMP_OPTIONS -Werror=overloaded-virtual)
+    # Warn when a class has virtual functions and an accessible non-virtual destructor itself
+    list(APPEND COMP_OPTIONS -Werror=non-virtual-dtor)
+    
+    # Clang specific, C/C++
+    # Error when option does not exist ...
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unknown-warning-option>)
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unreachable-code>)
+  endif()
+  
+  # -- Paranoid mode  options --
+  if(COMP_DIAGNOSTICS_LEVEL GREATER 1)
+    # Give an error whenever the base standard (see -Wpedantic) requires a diagnostic,
+    list(APPEND COMP_OPTIONS -pedantic-errors)
+    
+    # implicit conversions that may alter a value
+    list(APPEND COMP_OPTIONS -Werror=conversion)
+
+    # Warn if a function is declared or defined without specifying the argument types.
+    list(APPEND COMP_OPTIONS -Werror=strict-prototypes)
+  endif()
+
+  # Note FP: this part is untested and I don't know to what ends its written?
+  # msan? Keep for the record and remove it later?
+  if(USE_LIBCXX)
+     list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:"-stdlib=libc++ -I${USE_LIBCXX}/include -I${USE_LIBCXX}/include/c++/v1">)
+     set(_LIBCXX_FLAGS_TO_ADD "-L${USE_LIBCXX}/lib -lc++abi -Wl,-rpath,${USE_LIBCXX}/lib")
+     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+   endif()
+  
+  # --- Apply options to the current target ---
+  if(COMP_OPTIONS)
+    target_compile_options(${COMPONENT}
+      PRIVATE
+      $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:C>>:${COMP_OPTIONS}>)  
   endif()
 endfunction()

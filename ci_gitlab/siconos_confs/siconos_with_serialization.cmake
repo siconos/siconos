@@ -26,8 +26,8 @@ option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" ON)
 
 # --- Build/compiling options ---
-option(DEV_MODE "Compilation flags setup for developers. Default = OFF" OFF)
-option(DEV_MODE_STRICT "Compilation flags setup for developers (extra strict, conversion warnings). Default = OFF" OFF)
+set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")
+
 option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
 option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
@@ -40,14 +40,14 @@ option(WITH_GIT "Consider sources are under GIT" OFF)
 
 
 # --- Documentation setup ---
-option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF)
+option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
 option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" OFF)
-option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." OFF)
+option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." ON)
 
 
 
 # --- List of external libraries/dependencies to be searched (or not) ---
-option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
+option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" ON)
 option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)

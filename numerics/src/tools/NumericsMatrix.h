@@ -29,9 +29,10 @@
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
-
+#include "NM_MPI.h"
 #ifndef __cplusplus
 #include <stdbool.h>        // for bool
+#define nullptr NULL
 #endif
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
@@ -167,6 +168,12 @@ extern "C"
    */
   CSparseMatrix* NM_triplet(NumericsMatrix* A);
 
+   /** Creation, if needed, of half triplet storage from sparse block storage.
+   * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
+   * \return the triplet sparse Matrix created in A.
+   */
+  CSparseMatrix* NM_half_triplet(NumericsMatrix* A);
+
   /** Creation, if needed, of compress column storage of a NumericsMatrix.
    * \param[in,out] A a NumericsMatrix with sparse block storage initialized
    * \return the compressed column CSparseMatrix created in A.
@@ -216,10 +223,10 @@ extern "C"
    */
   static inline void NM_null(NumericsMatrix* A)
   {
-    A->matrix0 = NULL;
-    A->matrix1 = NULL;
-    A->matrix2 = NULL;
-    A->internalData = NULL;
+    A->matrix0 = nullptr;
+    A->matrix1 = nullptr;
+    A->matrix2 = nullptr;
+    A->internalData = nullptr;
   }
 
   /** update the size of the matrix based on the matrix data
@@ -280,7 +287,7 @@ extern "C"
    * \param j column index
    * \return  the value to be inserted.
    */
-  double NM_get_value(NumericsMatrix* M, int i, int j);
+  double NM_get_value(const NumericsMatrix* const M, int i, int j);
 
   /** compare to NumericsMatrix up to machine accuracy (DBL_EPSILON)
    * \param A the NumericsMatrix
@@ -340,6 +347,17 @@ extern "C"
    *  A copy is always performed
    */
   void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
+
+
+  /** Set the submatrix B into the matrix A on the position defined in
+   *  (start_i, start_j) position.
+   * \param[in] A a pointer to NumerixMatrix
+   * \param[in] B a pointer toNumericsMatrix
+   * \param[in] start_i a start row index
+   * \param[in] start_j a start column index
+   */
+  void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
+                 const unsigned int start_i, const unsigned int start_j);
 
   /**************************************************/
   /** Matrix - vector product           *************/
@@ -436,7 +454,6 @@ extern "C"
                 const double beta,
                 double *y);
 
-
   /**************************************************/
   /** matrix conversion display *********************/
   /**************************************************/
@@ -481,6 +498,11 @@ extern "C"
       \param M the matrix to be displayed
    */
   void NM_display(const NumericsMatrix* const M);
+
+  /** Screen display of the matrix storage
+      \param M the matrix to be displayed
+   */
+  void NM_display_storageType(const NumericsMatrix* const M);
 
 
   /** Screen display raw by raw of the matrix content
@@ -562,6 +584,11 @@ extern "C"
    * \param[in,out] A a Numericsmatrix
    */
   void NM_clearTriplet(NumericsMatrix* A);
+
+  /** Clear half triplet storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearHalfTriplet(NumericsMatrix* A);
 
   /** Clear compressed column storage, if it is existent.
    * \param[in,out] A a Numericsmatrix
@@ -647,9 +674,9 @@ extern "C"
   static inline void NM_internalData_new(NumericsMatrix* M)
   {
     M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWork = NULL;
+    M->internalData->iWork = nullptr;
     M->internalData->iWorkSize = 0;
-    M->internalData->dWork = NULL;
+    M->internalData->dWork = nullptr;
     M->internalData->dWorkSize = 0;
     M->internalData->isLUfactorized = 0;
 #ifdef SICONOS_HAS_MPI
@@ -760,28 +787,28 @@ extern "C"
 
   /* Compute the maximum values by columns
    *  \param A the matrix
-   *  \param max the vecor of max that must be preallocated
+   *  \param max the vector of max that must be preallocated
    *  \return info
    */
   int NM_max_by_columns(NumericsMatrix *A, double * max);
 
   /* Compute the maximum values by rows
    *  \param A the matrix
-   *  \param max the vecor of max that must be preallocated
+   *  \param max the vector of max that must be preallocated
    *  \return info
    */
   int NM_max_by_rows(NumericsMatrix *A, double * max);
   
   /* Compute the maximum absolute values by columns
    *  \param A the matrix
-   *  \param max the vecor of max that must be preallocated
+   *  \param max the vector of max that must be preallocated
    *  \return info
    */
   int NM_max_abs_by_columns(NumericsMatrix *A, double * max);
 
   /* Compute the maximum absolute values by rows
    *  \param A the matrix
-   *  \param max the vecor of max that must be preallocated
+   *  \param max the vector of max that must be preallocated
    *  \return info
    */
   int NM_max_abs_by_rows(NumericsMatrix *A, double * max);
@@ -790,9 +817,10 @@ extern "C"
    *  \param A the matrix
    *  \param tol tolerance on the balanced matrix
    *  \param itermax max number of iterations
-   *  \return the balancing matrices and the balanced matrix
+   *  \param alloated structure for the balancing matrices and the balanced matrix
+   * \return 0 if succeed.
    */
-  BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax);
+  int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B);
 
   /* Create a Balancing Matrices structure
    *  \param A the matrix  to be balanced

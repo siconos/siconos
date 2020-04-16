@@ -16,6 +16,8 @@
  * limitations under the License.
 */
 
+#include <chrono>
+
 #include "EventDriven.hpp"
 #include "LsodarOSI.hpp"
 #include "EventsManager.hpp"
@@ -30,8 +32,6 @@
 #include "Observer.hpp"
 #include "Actuator.hpp"
 
-#include <boost/timer/timer.hpp>
-
 
 ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   ControlSimulation(t0, T, h)
@@ -40,8 +40,8 @@ ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   _processSimulation.reset(new EventDriven(_nsds, _processTD, 0));
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
-  std11::static_pointer_cast<LsodarOSI>(_processIntegrator)->setExtraAdditionalTerms(
-    std11::shared_ptr<ControlLinearAdditionalTermsED>(new ControlLinearAdditionalTermsED()));
+  std::static_pointer_cast<LsodarOSI>(_processIntegrator)->setExtraAdditionalTerms(
+    std::shared_ptr<ControlLinearAdditionalTermsED>(new ControlLinearAdditionalTermsED()));
 
   _DSG0 = _nsds->topology()->dSG(0);
   _IG0 = _nsds->topology()->indexSet0();
@@ -54,7 +54,7 @@ void ControlLsodarSimulation::run()
 {
   EventsManager& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
-  boost::timer::cpu_timer time;
+  std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
   EventDriven& sim = static_cast<EventDriven&>(*_processSimulation);
 
   while(sim.hasNextEvent())
@@ -83,10 +83,8 @@ void ControlLsodarSimulation::run()
   storeData(k);
   ++k;
 
-  // Warning FP : with the new interface boost::timer, the
-  // result of elpased is in ns while it was in seconds
-  // in the old interface.
-  // elapsed is a tuple with wall, user and system times.
-  _elapsedTime = time.elapsed().user * 1e-9;
+  std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+  std::chrono::duration<double, std::milli> fp_s = end - start;
+  _elapsedTime = fp_s.count();
   _dataM->resize(k, _nDim + 1);
 }

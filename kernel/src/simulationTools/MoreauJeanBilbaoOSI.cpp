@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CxxStd.hpp"
 #include "SiconosAlgebraProd.hpp"
 #include "SimpleMatrixFriends.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
@@ -236,7 +235,7 @@ void MoreauJeanBilbaoOSI::computeFreeState()
 
   double time_step = _simulation->timeStep();
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     // Nothing to be done if the osi is not linked to the ds
     if(!checkOSI(dsi)) continue;
@@ -363,7 +362,7 @@ void MoreauJeanBilbaoOSI::updateState(const unsigned int)
     _simulation->setRelativeConvergenceCriterionHeld(true);
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SiconosMatrix& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).W;
@@ -401,7 +400,7 @@ void MoreauJeanBilbaoOSI::display()
   DynamicalSystemsGraph::VIterator dsi, dsend;
   if(_dynamicalSystemsGraph)
   {
-    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
       if(!checkOSI(dsi)) continue;
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -409,7 +408,7 @@ void MoreauJeanBilbaoOSI::display()
       std::cout << "--------------------------------" <<std::endl;
       std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
       if(_dynamicalSystemsGraph->properties(*dsi).W) _dynamicalSystemsGraph->properties(*dsi).W->display();
-      else std::cout << "-> NULL" <<std::endl;
+      else std::cout << "-> nullptr" <<std::endl;
     }
   }
   std::cout << "================================" <<std::endl;
@@ -435,7 +434,7 @@ bool MoreauJeanBilbaoOSI::addInteractionInIndexSet(SP::Interaction inter, unsign
 
   double gamma = 1.0 / 2.0;
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   DEBUG_EXPR(
     if(y <= 0)
     DEBUG_PRINT("MoreauJeanBilbaoOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -453,7 +452,7 @@ bool MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(SP::Interaction inter, u
   double gamma = 1.0 / 2.0;
   DEBUG_PRINTF("MoreauJeanBilbaoOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   DEBUG_EXPR(
     if(y > 0)

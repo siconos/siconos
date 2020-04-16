@@ -253,7 +253,7 @@ void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned 
   BlockVector& x = *DSlink[FirstOrderR::x];
 
   SiconosVector z_vec;
-  z_vec.initFromBlock(z); // copy !
+  z_vec.block2contiguous(z); // copy !
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
 
@@ -286,7 +286,7 @@ void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned i
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& z = *DSlink[FirstOrderR::z];
   SiconosVector z_vec;
-  z_vec.initFromBlock(z);
+  z_vec.block2contiguous(z);
   computeg(time, lambda, z_vec, *DSlink[FirstOrderR::r]);
   *DSlink[FirstOrderR::z] = z_vec;
 }
@@ -297,18 +297,18 @@ void FirstOrderLinearR::display() const
   std::cout << " ===== Linear Time Invariant relation display ===== " <<std::endl;
   std::cout << "| C " <<std::endl;
   if(_C) _C->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| D " <<std::endl;
   if(_D) _D->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| F " <<std::endl;
   if(_F) _F->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| e " <<std::endl;
   if(_e) _e->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| B " <<std::endl;
   if(_B) _B->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << " ================================================== " <<std::endl;
 }

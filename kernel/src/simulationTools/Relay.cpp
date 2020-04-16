@@ -128,7 +128,7 @@ int Relay::compute(double time)
   }
 
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet.bundle(*ui);
 

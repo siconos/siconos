@@ -169,7 +169,7 @@ public:
 
   /** get the value of W corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get W[0] in that case
+   * nullptr. get W[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
@@ -186,14 +186,14 @@ public:
 
   /** Get the value of WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get WBoundaryConditions[0] in that case
+   * nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get WBoundaryConditions[0] in that case
+   * nullptr. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);

@@ -54,12 +54,12 @@ void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForDS(double t, SP::D
   Type::Siconos dsType = Type::value(*ds);
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
-    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+    SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
     workVectors[MoreauJeanOSI::QTMP].reset(new SiconosVector(d->dimension()));
   }
   else if(dsType == Type::NewtonEulerDS)
   {
-    SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
+    SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS>(ds);
     workVectors[MoreauJeanOSI::QTMP].reset(new SiconosVector(d->getqDim()));
   }
   else
@@ -117,12 +117,12 @@ void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForInteraction(Intera
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     if(relationType == Lagrangian)
     {
-      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
+      LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
       DSlink[p0]->setVectorPtr(0,lds.p(0));
     }
     else if(relationType == NewtonEuler)
     {
-      NewtonEulerDS& neds = *std11::static_pointer_cast<NewtonEulerDS> (ds1);
+      NewtonEulerDS& neds = *std::static_pointer_cast<NewtonEulerDS> (ds1);
       DSlink[p0]->setVectorPtr(0,neds.p(0));
     }
   }
@@ -138,12 +138,12 @@ void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForInteraction(Intera
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       if(relationType == Lagrangian)
       {
-        LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
+        LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
         DSlink[p0]->setVectorPtr(1,lds.p(0));
       }
       else if(relationType == NewtonEuler)
       {
-        NewtonEulerDS& neds = *std11::static_pointer_cast<NewtonEulerDS> (ds2);
+        NewtonEulerDS& neds = *std::static_pointer_cast<NewtonEulerDS> (ds2);
         DSlink[p0]->setVectorPtr(1,neds.p(0));
       }
     }

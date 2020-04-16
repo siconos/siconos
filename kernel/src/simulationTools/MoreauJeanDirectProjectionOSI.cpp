@@ -24,9 +24,6 @@
 #include "LagrangianR.hpp"
 #include "BlockVector.hpp"
 
-#include "CxxStd.hpp"
-
-
 #include "TypeName.hpp"
 using namespace RELATION;
 //#define STANDARD_ACTIVATION
@@ -81,12 +78,12 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS(double t, SP::Dyn
   Type::Siconos dsType = Type::value(*ds);
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
-    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+    SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
     workVectors[MoreauJeanOSI::QTMP].reset(new SiconosVector(d->dimension()));
   }
   else if(dsType == Type::NewtonEulerDS)
   {
-    SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
+    SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS>(ds);
     workVectors[MoreauJeanOSI::QTMP].reset(new SiconosVector(d->getqDim()));
   }
   else
@@ -98,7 +95,7 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS(double t, SP::Dyn
     DEBUG_PRINTF("ds->initializeNonSmoothInput(%i)\n", k);
     ds->initializeNonSmoothInput(k);
     DEBUG_EXPR_WE(
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
       if(d->p(k))
       std::cout << "d->p(" << k <<" ) exists" << std::endl;
     );
@@ -153,12 +150,12 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(Interact
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     if(relationType == Lagrangian)
     {
-      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
+      LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
       DSlink[p0]->setVectorPtr(0,lds.p(0));
     }
     else if(relationType == NewtonEuler)
     {
-      NewtonEulerDS& neds = *std11::static_pointer_cast<NewtonEulerDS> (ds1);
+      NewtonEulerDS& neds = *std::static_pointer_cast<NewtonEulerDS> (ds1);
       DSlink[p0]->setVectorPtr(0,neds.p(0));
     }
   }
@@ -174,12 +171,12 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(Interact
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       if(relationType == Lagrangian)
       {
-        LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
+        LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
         DSlink[p0]->setVectorPtr(1,lds.p(0));
       }
       else if(relationType == NewtonEuler)
       {
-        NewtonEulerDS& neds = *std11::static_pointer_cast<NewtonEulerDS> (ds2);
+        NewtonEulerDS& neds = *std::static_pointer_cast<NewtonEulerDS> (ds2);
         DSlink[p0]->setVectorPtr(1,neds.p(0));
       }
     }
@@ -224,6 +221,8 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
   {
     gamma = _gamma;
   }
+  DEBUG_PRINTF("\nMoreauJeanDirectProjectionOSI::addInteractionInIndexSet inter->number() = %i\n", inter->number());
+  DEBUG_EXPR(inter->display(););
   DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
 
@@ -234,7 +233,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #ifdef DEBUG_MESSAGES
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -261,7 +260,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #ifdef DEBUG_MESSAGES
   if(y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
@@ -282,13 +281,14 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
 #ifdef DEBUG_MESSAGES
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 #endif
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet inter->number() = %i\n", inter->number());
   DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
 
   DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -309,7 +309,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold);
@@ -332,7 +332,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -353,7 +353,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y > _deactivateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold);

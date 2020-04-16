@@ -16,7 +16,7 @@ MBTB_ContactRelation::~MBTB_ContactRelation()
 
 MBTB_ContactRelation::MBTB_ContactRelation(): NewtonEuler1DR()
 {
-  _pContact=NULL;
+  _pContact=nullptr;
 }
 MBTB_ContactRelation::MBTB_ContactRelation(MBTB_Contact *pC): NewtonEuler1DR()
 {

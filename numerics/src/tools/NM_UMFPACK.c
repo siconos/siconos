@@ -18,7 +18,7 @@
 
 #include "SiconosConfig.h"  // IWYU pragma: keep
 #ifdef WITH_UMFPACK
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"

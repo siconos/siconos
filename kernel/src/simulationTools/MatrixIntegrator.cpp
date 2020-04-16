@@ -48,7 +48,7 @@ MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDyn
   unsigned int n = ds.n();
   _mat.reset(new SimpleMatrix(n, p, 0));
   _spo.reset(new SubPluggedObject(*_plugin, n, p));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginB(_spo);
+  std::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginB(_spo);
   _isConst = false;
 }
 
@@ -76,10 +76,10 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
   {
     const FirstOrderLinearDS& cfolds = static_cast<const FirstOrderLinearDS&>(ds);
     _DS.reset(new FirstOrderLinearDS(cfolds));
-    // std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->zeroPlugin();
+    // std::static_pointer_cast<FirstOrderLinearDS>(_DS)->zeroPlugin();
     if(cfolds.getPluginA()->isPlugged())
     {
-      std11::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginA(cfolds.getPluginA());
+      std::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginA(cfolds.getPluginA());
     }
     _isConst = (_TD->hConst()) && !(cfolds.getPluginA()->isPlugged()) ? true : false;
   }
@@ -87,10 +87,7 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
   _DS->setNumber(9999999);
   DEBUG_EXPR(_DS->display(););
   // integration stuff
-  _nsds.reset(new NonSmoothDynamicalSystem());
-  _nsds->sett0(nsds.t0());
-  _nsds->setT(nsds.finalT());
-
+  _nsds.reset(new NonSmoothDynamicalSystem(nsds.t0(), nsds.finalT()));
 
   _OSI.reset(new LsodarOSI());
   _nsds->insertDynamicalSystem(_DS);

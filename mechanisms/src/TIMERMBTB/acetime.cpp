@@ -25,7 +25,7 @@ aceTime::aceTime()
 void aceTime::start()
 {
 #ifdef ACE_WITH_TIMER
-  gettimeofday(&mStart,NULL);
+  gettimeofday(&mStart,nullptr);
   mCall++;
   mIsRunning=true;
 #endif
@@ -37,7 +37,7 @@ void aceTime::stop()
   if(mIsRunning)
   {
     timeval aux;
-    gettimeofday(&aux,NULL);
+    gettimeofday(&aux,nullptr);
     mCumul += (aux.tv_sec - mStart.tv_sec)*1000000 +(aux.tv_usec - mStart.tv_usec) ;
     mIsRunning = false;
   }

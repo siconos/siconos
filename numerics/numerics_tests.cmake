@@ -19,9 +19,9 @@ if(WITH_${COMPONENT}_TESTING)
 
   new_test(SOURCES test_blas_lapack.c)
 
-  if(HAS_LAPACK_dgesvd) # Some lapack versions (e.g. Atlas) miss dgesvd
-    new_test(SOURCES test_pinv.c)# DEPS "externals")
-  endif()
+  #if(HAS_LAPACK_dgesvd) # Some lapack versions miss dgesvd
+  new_test(SOURCES test_pinv.c)# DEPS "externals")
+  #endif()
   
   new_test(NAME tools_projection SOURCES test_projection.c)
 
@@ -29,6 +29,9 @@ if(WITH_${COMPONENT}_TESTING)
 
   #  tests for NumericsMatrix
   new_test(SOURCES NM_test.c DEPS "${suitesparse}")
+
+  #  tests for JordanAlgebra
+  NEW_TEST(NAME tools_test_JordanAlgebra SOURCES JordanAlgebra_test.c)
 
   # MUMPS interface tests
   if(WITH_MUMPS)
@@ -120,7 +123,7 @@ if(WITH_${COMPONENT}_TESTING)
     # -- Declare the tests --
     foreach(SOLVER IN LISTS SICONOS_NCP_SOLVERS)
       new_tests_collection(DRIVER NCP_ZI1.c.in FORMULATION NCP COLLECTION ${SOLVER})
-      if(DEV_MODE)
+      if(WARNINGS_LEVEL GREATER 0)
         new_tests_collection(DRIVER NCP_ZIT1.c.in FORMULATION NCP COLLECTION ${SOLVER} SUFFIX _UNSTABLE)
       endif()
     endforeach()
@@ -205,6 +208,9 @@ if(WITH_${COMPONENT}_TESTING)
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_nsn_gfc3d_1.c)
+  new_tests_collection(
+    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c)
 
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
@@ -238,13 +244,18 @@ if(WITH_${COMPONENT}_TESTING)
       )
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_solvers_wr_gfc3d_1.c DEPS FCLIB::fclib
+      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_solvers_wr_gfc3d_fclib.c DEPS FCLIB::fclib
       HDF5 ON
       )
     
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
 
@@ -293,7 +304,7 @@ if(WITH_${COMPONENT}_TESTING)
     list(APPEND SICONOS_VI_SOLVERS "SICONOS_VI_BOX_PATH")
   endif()
   
-  if(DEV_MODE)
+  if(WARNINGS_LEVEL GREATER 0)
     foreach(SOLVER IN LISTS SICONOS_VI_SOLVERS)
       new_tests_collection(DRIVER VI_ZI1.c.in FORMULATION vi COLLECTION ${SOLVER} SUFFIX I1 )
       new_tests_collection(DRIVER VI_ZIT1.c.in FORMULATION vi COLLECTION ${SOLVER} SUFFIX IT1 )

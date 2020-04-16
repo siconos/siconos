@@ -15,18 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file CxxStd.hpp
-  \brief Management of different c++ standards and compiler
-*/
+
+#include <stdio.h>
+#include "ProgressBar.hpp"
 
 
-// Proper definition of isnan
-#ifndef SICONOS_ISNAN
-#define SICONOS_ISNAN
-#include "SiconosConfig.h"
-#include <cmath>
-#ifndef SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
-using std::isnan;
-using std::isinf;
-#endif
-#endif
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBWIDTH 60
+
+void progressBar (double percentage)
+{
+
+    int val = (int) (percentage * 100);
+    int lpad = (int) (percentage * PBWIDTH);
+    int rpad = PBWIDTH - lpad;
+    printf ("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+    fflush (stdout);
+}

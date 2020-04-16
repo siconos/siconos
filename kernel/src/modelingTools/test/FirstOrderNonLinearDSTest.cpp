@@ -53,22 +53,22 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->getX0() == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->f() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfx() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->invM() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->f() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfx() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->invM() == nullptr, true);
   double time = 1.5;
 
   ds->computef(time, ds->x());
   ds->computeJacobianfx(time, ds->x());
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->f() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfx() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->f() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfx() == nullptr, true);
 
   SiconosVector zero(3);
   SimpleMatrix m0(3,3);
   ds->update(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->rhs()) == zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianRhsx() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->jacobianRhsx() == nullptr, true);
 
   ds->initRhs(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->rhs()) == zero, true);
@@ -112,15 +112,15 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->getX0() == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->f() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianfx() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->M() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->invM() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->f() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianfx() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->M() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->invM() == nullptr, true);
   SiconosVector zero(3);
   double time = 1.5;
   ds->update(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianRhsx() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianRhsx() == nullptr, true);
 
   ds->initRhs(time);
   SimpleMatrix m0(3,3);
@@ -145,8 +145,8 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
   ds->computeJacobianfx(time, ds->x());
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *(ds->f()) == time* *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *(ds->jacobianfx()) == *J0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->M() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->invM() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->M() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->invM() == nullptr, true);
 
   ds->initRhs(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *(ds->rhs()) == time* *x0, true);
@@ -233,8 +233,8 @@ void FirstOrderNonLinearDSTest::testInitMemory()
   std::cout << "--> Test: initMemory." <<std::endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(xnull));
   ds1->initMemory(2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->xMemory().getMemorySize() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem3 : ", ds1->rMemory().getMemorySize() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->xMemory().size() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem3 : ", ds1->rMemory().size() == 2, true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem4 : ", ds1->xMemory().nbVectorsInMemory() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem6 : ", ds1->rMemory().nbVectorsInMemory() == 0, true);

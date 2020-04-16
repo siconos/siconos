@@ -38,7 +38,7 @@ Actuator::Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix
 {
   if(B)
   {
-    _u = std11::make_shared<SiconosVector>(B->size(1), 0);
+    _u = std::make_shared<SiconosVector>(B->size(1), 0);
   }
 }
 
@@ -96,7 +96,7 @@ void Actuator::setSizeu(unsigned size)
 
 SP::NonSmoothDynamicalSystem Actuator::getInternalNSDS() const
 {
-  return std11::shared_ptr<NonSmoothDynamicalSystem>();
+  return std::shared_ptr<NonSmoothDynamicalSystem>();
 }
 
 void Actuator::display() const

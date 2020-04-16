@@ -44,6 +44,12 @@ enum SiconosBulletDimension
 
 struct SiconosBulletOptions
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletOptions);
+
+public:
   SiconosBulletOptions();
 
   int dimension;
@@ -60,6 +66,12 @@ struct SiconosBulletOptions
 
 struct SiconosBulletStatistics
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletStatistics);
+
+public:
   SiconosBulletStatistics()
     : new_interactions_created(0)
     , existing_interactions_processed(0)
@@ -73,7 +85,12 @@ struct SiconosBulletStatistics
 class SiconosBulletCollisionManager : public SiconosCollisionManager
 {
 protected:
-  SP::SiconosBulletCollisionManager_impl impl;
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletCollisionManager);
+
+protected:
+  SP::SiconosBulletCollisionManager_impl _impl;
 
   void initialize_impl();
 
@@ -108,6 +125,12 @@ protected:
   virtual SP::Bullet2dR makeBullet2dR(SP::RigidBody2dDS ds1, SP::SiconosShape shape1,
                                       SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
                                       const btManifoldPoint &);
+
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet2d3DR makeBullet2d3DR(SP::RigidBody2dDS ds1, SP::SiconosShape shape1,
+                                          SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
+                                          const btManifoldPoint &);
 
 public:
   StaticContactorSetID insertStaticContactorSet(

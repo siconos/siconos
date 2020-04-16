@@ -29,7 +29,7 @@
 /** \class DiskDiskR
  *  \brief Two disks relation - Inherits from LagrangianScleronomousR
  */
-class DiskDiskR : public CircularR, public std11::enable_shared_from_this<DiskDiskR>
+class DiskDiskR : public CircularR, public std::enable_shared_from_this<DiskDiskR>
 {
 private:
   /** serialization hooks

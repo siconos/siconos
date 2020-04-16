@@ -139,7 +139,7 @@ if print_mode:
                        split=False)
 
 for task in tasks_list:
-    root_dir=root_dir.as_posix()
+    root_dir = root_dir.as_posix()
     return_code += task.run(root_dir, dry_run=dry_run)
     print('return code {0}'.format(return_code))
 

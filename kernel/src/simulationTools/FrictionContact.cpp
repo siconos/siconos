@@ -89,9 +89,9 @@ void FrictionContact::initialize(SP::Simulation sim)
     SP::InteractionsGraph indexSet =
       simulation()->indexSet(indexSetLevel());
     InteractionsGraph::VIterator ui, uiend;
-    for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
-      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
+      _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>
                      (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
     }
   }
@@ -102,9 +102,9 @@ void FrictionContact::updateMu()
   _mu->clear();
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
+    _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
   }
 }
@@ -184,4 +184,3 @@ void FrictionContact::display() const
   std::cout << "of size " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim << " contacts)." <<std::endl;
   LinearOSNS::display();
 }
-

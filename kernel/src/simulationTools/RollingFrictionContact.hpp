@@ -73,7 +73,7 @@ protected:
   ACCEPT_SERIALIZATION(RollingFrictionContact);
 
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int _contactProblemDim = 5;
+  int _contactProblemDim;
 
   /** * friction coefficients */
   SP::MuStorage _mu;

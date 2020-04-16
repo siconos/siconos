@@ -33,7 +33,6 @@
 #include "TypeName.hpp"
 #include "Relation.hpp"
 #include "BlockVector.hpp"
-#include "CxxStd.hpp"
 #include "NewtonEulerR.hpp"
 #include "FirstOrderR.hpp"
 
@@ -55,7 +54,7 @@ using namespace RELATION;
     Note FP: (temporary) bad method to set checkSolverOutput but it
     works ... It may be better to use plug-in?
 */
-static CheckSolverFPtr checkSolverOutput = NULL;
+static CheckSolverFPtr checkSolverOutput = nullptr;
 
 TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
                            SP::TimeDiscretisation td,
@@ -74,7 +73,7 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
   if(osi) insertIntegrator(osi);
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
   if(osnspb) insertNonSmoothProblem(osnspb, SICONOS_OSNSP_TS_VELOCITY);
-  SP::EulerMoreauOSI euosi(std11::dynamic_pointer_cast<EulerMoreauOSI>(osi));
+  SP::EulerMoreauOSI euosi(std::dynamic_pointer_cast<EulerMoreauOSI>(osi));
   if(euosi)
   {
     _computeResiduY = true;
@@ -104,7 +103,7 @@ TimeStepping::~TimeStepping()
 void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
 {
   _allOSI->insert(osi);
-  SP::EulerMoreauOSI euosi(std11::dynamic_pointer_cast<EulerMoreauOSI>(osi));
+  SP::EulerMoreauOSI euosi(std::dynamic_pointer_cast<EulerMoreauOSI>(osi));
   if(euosi)
   {
     _computeResiduY = true;
@@ -118,7 +117,7 @@ void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
 //   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
 //   DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
 //   y += 0.5*h*yDot;
-//   assert(!isnan(y));
+//   assert(!std::isnan(y));
 //   if(y>0)
 //     DEBUG_PRINTF("TS::predictorDeactivate DEACTIVATE.\n");
 //   return (y>0);
@@ -131,7 +130,7 @@ void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
 //   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
 //   DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
 //   y += 0.5*h*yDot;
-//   assert(!isnan(y));
+//   assert(!std::isnan(y));
 //   if(y<=0)
 //     DEBUG_PRINTF("TS::predictorActivate ACTIVATE.\n");
 //   return (y<=0);
@@ -171,7 +170,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   // Check indexSet1
   InteractionsGraph::VIterator ui1, ui1end, v1next;
-  std11::tie(ui1, ui1end) = indexSet1->vertices();
+  std::tie(ui1, ui1end) = indexSet1->vertices();
 
   //Remove interactions from the indexSet1
   for(v1next = ui1; ui1 != ui1end; ui1 = v1next)
@@ -203,11 +202,11 @@ void TimeStepping::updateIndexSet(unsigned int i)
           indexSet1->eraseProperties(*ui1);
 
           InteractionsGraph::OEIterator oei, oeiend;
-          for(std11::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
+          for(std::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
               oei != oeiend; ++oei)
           {
             InteractionsGraph::EDescriptor ed1, ed2;
-            std11::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
+            std::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
             if(ed2 != ed1)
             {
               indexSet1->eraseProperties(ed1);
@@ -231,11 +230,11 @@ void TimeStepping::updateIndexSet(unsigned int i)
       // ui1 becomes invalid
       indexSet1->eraseProperties(*ui1);
       InteractionsGraph::OEIterator oei, oeiend;
-      for(std11::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
+      for(std::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
           oei != oeiend; ++oei)
       {
         InteractionsGraph::EDescriptor ed1, ed2;
-        std11::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
+        std::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
         if(ed2 != ed1)
         {
           indexSet1->eraseProperties(ed1);
@@ -255,7 +254,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // indexSet0\indexSet1 scan
   InteractionsGraph::VIterator ui0, ui0end;
   //Add interaction in indexSet1
-  for(std11::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
+  for(std::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
   {
     if(indexSet0->color(*ui0) == boost::black_color)
     {
@@ -368,7 +367,7 @@ void TimeStepping::nextStep()
 void TimeStepping::computeFreeState()
 {
   DEBUG_BEGIN("TimeStepping::computeFreeState()\n");
-  std::for_each(_allOSI->begin(), _allOSI->end(), std11::bind(&OneStepIntegrator::computeFreeState, _1));
+  std::for_each(_allOSI->begin(), _allOSI->end(), std::bind(&OneStepIntegrator::computeFreeState, _1));
   DEBUG_END("TimeStepping::computeFreeState()\n");
 }
 
@@ -385,7 +384,7 @@ void TimeStepping::initializeNewtonLoop()
 {
   DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
   double tkp1 = getTkp1();
-  assert(!isnan(tkp1));
+  assert(!std::isnan(tkp1));
 
   for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
   {
@@ -452,7 +451,7 @@ void TimeStepping::resetLambdas()
     // Initialize lambdas of all interactions.
     SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend, vnext;
-    std11::tie(ui, uiend) = indexSet0->vertices();
+    std::tie(ui, uiend) = indexSet0->vertices();
     for(vnext = ui; ui != uiend; ui = vnext)
     {
       ++vnext;
@@ -492,7 +491,7 @@ void TimeStepping::saveYandLambdaInOldVariables()
 
   InteractionsGraph::VIterator ui, uiend;
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     //indexSet0->bundle(*ui)->swapInMemory();
     indexSet0->bundle(*ui)->swapInOldVariables();;
@@ -649,7 +648,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     displayNewtonConvergenceAtTheEnd(info, maxStep);
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + _newtonOptions);
+    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + std::to_string(_newtonOptions));
   DEBUG_END("TimeStepping::newtonSolve(double criterion, unsigned int maxStep)\n");
 }
 
@@ -700,7 +699,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 
 //     InteractionsGraph::VIterator ui, uiend;
 //     SP::Interaction inter;
-//     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+//     for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
 //     {
 //       inter = indexSet0->bundle(*ui);
 //       VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
@@ -727,7 +726,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 
     // InteractionsGraph::VIterator ui, uiend;
     // SP::Interaction inter;
-    // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    // for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     // {
     //   inter = indexSet0->bundle(*ui);
     //   VectorOfBlockVectors& DSlink = *indexSet0->properties(*ui).DSlink;

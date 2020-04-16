@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "CxxStd.hpp"
 #include "SiconosMatrixSetBlock.hpp"
 #include "SiconosAlgebraProd.hpp"
 #include "NewtonEulerDS.hpp"
@@ -941,16 +940,16 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_fExt)
     {
       computeFExt(time);
-      assert(!isnan(_fExt->vector_sum()));
+      assert(!std::isnan(_fExt->vector_sum()));
       _wrench->setBlock(0, *_fExt);
     }
     if(_mExt)
     {
       computeMExt(time);
-      assert(!isnan(_mExt->vector_sum()));
+      assert(!std::isnan(_mExt->vector_sum()));
       if(_isMextExpressedInInertialFrame)
       {
-        SP::SiconosVector mExt(std11::make_shared<SiconosVector>(*_mExt));
+        SP::SiconosVector mExt(std::make_shared<SiconosVector>(*_mExt));
         ::changeFrameAbsToBody(q,mExt);
         _wrench->setBlock(3, *mExt);
       }
@@ -963,7 +962,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_fInt)
     {
       computeFInt(time, q, twist);
-      assert(!isnan(_fInt->vector_sum()));
+      assert(!std::isnan(_fInt->vector_sum()));
       _wrench->setValue(0, _wrench->getValue(0) - _fInt->getValue(0));
       _wrench->setValue(1, _wrench->getValue(1) - _fInt->getValue(1));
       _wrench->setValue(2, _wrench->getValue(2) - _fInt->getValue(2));
@@ -973,7 +972,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_mInt)
     {
       computeMInt(time, q, twist);
-      assert(!isnan(_mInt->vector_sum()));
+      assert(!std::isnan(_mInt->vector_sum()));
       _wrench->setValue(3, _wrench->getValue(3) - _mInt->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mInt->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mInt->getValue(2));
@@ -983,7 +982,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(!_nullifyMGyr)
     {
       computeMGyr(twist);
-      assert(!isnan(_mGyr->vector_sum()));
+      assert(!std::isnan(_mGyr->vector_sum()));
       _wrench->setValue(3, _wrench->getValue(3) - _mGyr->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mGyr->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mGyr->getValue(2));
@@ -1111,31 +1110,31 @@ void NewtonEulerDS::display(bool brief) const
   std::cout << "- _n : " << _n <<std::endl;
   std::cout << "- q " <<std::endl;
   if(_q) _q->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- q0 " <<std::endl;
   if(_q0) _q0->display();
   std::cout << "- twist " <<std::endl;
   if(_twist) _twist->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- twist0 " <<std::endl;
   if(_twist0) _twist0->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- dotq " <<std::endl;
   if(_dotq) _dotq->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- p[0] " <<std::endl;
   if(_p[0]) _p[0]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- p[1] " <<std::endl;
   if(_p[1]) _p[1]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- p[2] " <<std::endl;
   if(_p[2]) _p[2]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "mass :" <<  _scalarMass <<std::endl;
   std::cout << "Inertia :" <<std::endl;
   if(_I) _I->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "===================================== " <<std::endl;
 }
 
@@ -1302,7 +1301,7 @@ SP::SiconosVector NewtonEulerDS::linearVelocity(bool absoluteRef) const
   if(absoluteRef)
     return _twist;
 
-  SP::SiconosVector v(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector v(std::make_shared<SiconosVector>(3));
   linearVelocity(absoluteRef, *v);
   return v;
 }
@@ -1320,7 +1319,7 @@ void NewtonEulerDS::linearVelocity(bool absoluteRef, SiconosVector &v) const
 
 SP::SiconosVector NewtonEulerDS::angularVelocity(bool absoluteRef) const
 {
-  SP::SiconosVector w(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector w(std::make_shared<SiconosVector>(3));
   angularVelocity(absoluteRef, *w);
   return w;
 }

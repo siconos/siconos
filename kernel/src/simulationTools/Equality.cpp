@@ -23,9 +23,10 @@
 
 using namespace RELATION;
 
-Equality::Equality(int numericsSolverId):
-  Equality(SP::SolverOptions(solver_options_create(numericsSolverId),
-                             solver_options_delete))
+Equality::Equality(int numericsSolverId)
+//:
+// Equality(SP::SolverOptions(solver_options_create(numericsSolverId),
+//                            solver_options_delete))
 {}
 
 Equality::Equality(SP::SolverOptions options):

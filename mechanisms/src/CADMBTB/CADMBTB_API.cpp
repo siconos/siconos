@@ -501,7 +501,7 @@ void CADMBTB_buildLineArtefactLine(unsigned int id,  double* X1, double* Y1, dou
   if(sAISArtefacts[id])
   {
     pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
-    sAISArtefacts[id]=NULL;
+    sAISArtefacts[id]=nullptr;
   }
   if(!X1)
     return;
@@ -545,7 +545,7 @@ void CADMBTB_buildCylinderArtefactLine(unsigned int id,  double* X1, double* Y1,
   if(sAISArtefacts[id])
   {
     pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
-    sAISArtefacts[id]=NULL;
+    sAISArtefacts[id]=nullptr;
   }
   if(!X1)
     return;
@@ -592,7 +592,7 @@ void CADMBTB_buildOrientedLineArtefactLine(unsigned int id,  double* X1, double*
   if(sAISArtefacts[id])
   {
     pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
-    sAISArtefacts[id]=NULL;
+    sAISArtefacts[id]=nullptr;
   }
   if(!X1)
     return;
@@ -687,7 +687,7 @@ void CADMBTB_buildOrientedLineArtefactLine(unsigned int id,  double* X1, double*
 void CADMBTB_setNbOfArtefacts(unsigned int nb)
 {
   for(int ii=0; ii<NB_OBJ; ii++)
-    sAISArtefacts[ii]=NULL;
+    sAISArtefacts[ii]=nullptr;
 
   assert(nb < NB_OBJ);
   sNumberOfArtefacts = nb;

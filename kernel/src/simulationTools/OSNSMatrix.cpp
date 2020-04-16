@@ -88,7 +88,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   case NM_DENSE:
   {
     // A zero matrix M of size nXn is built.  interactionBlocksPositions
-    // remains empty (=NULL) since we have no information concerning
+    // remains empty (=nullptr) since we have no information concerning
     // the Interaction.
     _M1.reset(new SimpleMatrix(n, n));
     break;
@@ -145,7 +145,7 @@ unsigned OSNSMatrix::updateSizeAndPositions(InteractionsGraph& indexSet)
   // Interactionin indexSet
   unsigned dim = 0;
   InteractionsGraph::VIterator vd, vdend;
-  for(std11::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
+  for(std::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
   {
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
     indexSet.properties(*vd).absolute_position = dim;
@@ -170,7 +170,7 @@ unsigned OSNSMatrix::updateSizeAndPositions(DynamicalSystemsGraph & DSG)
   unsigned dim = 0;
   DynamicalSystemsGraph::VIterator dsi, dsend;
   // first loop to compute sizeM and nnz
-  for(std11::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
   {
     SP::DynamicalSystem ds = DSG.bundle(*dsi);
     DSG.properties(*dsi).absolute_position = dim;
@@ -213,13 +213,13 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
 
     // === Loop through "active" Interactions (ie vertices present in indexSets[level]) ===
     InteractionsGraph::VIterator vi, viend;
-    for(std11::tie(vi, viend) = indexSet.vertices();
+    for(std::tie(vi, viend) = indexSet.vertices();
         vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position;
 
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(pos, pos, *indexSet.properties(*vi).block);
       DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
       DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->size(0), indexSet.properties(*vi).block->size(1));
@@ -228,7 +228,7 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
     // == Loop through all edges (ds) in active index set ==
     // Computation of extra-diagonal blocks.
     InteractionsGraph::EIterator ei, eiend;
-    for(std11::tie(ei, eiend) = indexSet.edges();
+    for(std::tie(ei, eiend) = indexSet.edges();
         ei != eiend; ++ei)
     {
       // For current edge (ds) get source and target vertices (interactions)
@@ -252,11 +252,11 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
 
       assert(indexSet.properties(*ei).lower_block);
       assert(indexSet.properties(*ei).upper_block);
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *indexSet.properties(*ei).upper_block);
 
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *indexSet.properties(*ei).lower_block);
     }
@@ -295,7 +295,7 @@ void OSNSMatrix::convert()
   case NM_DENSE:
   {
     _numericsMatrix->matrix0 = _M1->getArray(); // Pointer link
-    // _numericsMatrix->matrix1 = NULL; matrix1 is not set to NULL: we
+    // _numericsMatrix->matrix1 = nullptr; matrix1 is not set to nullptr: we
     // keep previous allocation. May be usefull if we switch between
     // different storages during simu
     break;
@@ -354,7 +354,7 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
       unsigned int pos =0;
       // Loop over the DS for filling M
       DynamicalSystemsGraph::VIterator dsi, dsend;
-      for(std11::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
+      for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
       {
         SP::DynamicalSystem ds = DSG.bundle(*dsi);
         SiconosMatrix* W = DSG.properties(*dsi).W.get();
@@ -408,7 +408,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
 
       SP::SiconosMatrix leftInteractionBlock;
       InteractionsGraph::VIterator ui, uiend;
-      for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+      for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet.bundle(*ui);
 
@@ -455,14 +455,14 @@ void OSNSMatrix::display() const
   {
     std::cout << "----- OSNS Matrix using default storage type for Numerics structure (SiconosMatrix -> double*)" <<std::endl;
     if(! _M1)
-      std::cout << " matrix = NULL pointer" <<std::endl;
+      std::cout << " matrix = nullptr pointer" <<std::endl;
     else _M1->display();
   }
   else if(_storageType == NM_SPARSE_BLOCK)
   {
     std::cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics (SparseBlockStructuredMatrix)" <<std::endl;
     if(! _M2)
-      std::cout << " matrix = NULL pointer" <<std::endl;
+      std::cout << " matrix = nullptr pointer" <<std::endl;
     else _M2->display();
   }
   else if(_storageType == NM_SPARSE)

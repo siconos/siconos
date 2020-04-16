@@ -27,6 +27,8 @@
 
 #include "SiconosAlgebra.hpp"
 
+#include "SiconosAlgebraProd.hpp" // for subprod
+
 using namespace Siconos;
 
 
@@ -428,7 +430,7 @@ void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, con
   // Number of the subvector of x that handles element at position coord[5]
   unsigned int lastBlockNum = x.getNumVectorAtPos(coord[5]);
   Index subCoord = coord;
-  SPC::SiconosVector  tmp = x[firstBlockNum];
+  SPC::SiconosVector tmp = x[firstBlockNum];
   std::size_t subSize =  tmp->size(); // Size of the sub-vector
   const SP::Index xTab = x.tabIndex();
   if(firstBlockNum != 0)

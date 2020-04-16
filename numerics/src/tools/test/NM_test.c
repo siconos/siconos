@@ -28,7 +28,7 @@
 #include <stdlib.h>                      // for free, malloc, calloc
 #include <float.h>                       // for DBL_EPSILON
 #include "SiconosBlas.h"                 // for cblas_ddot, cblas_dgemv, cbl...
-#include "CSparseMatrix.h"               // for CS_INT, cs_print, cs
+#include "CSparseMatrix_internal.h"               // for CS_INT, cs_print, cs
 #include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
 #include "NumericsMatrix.h"              // for NumericsMatrix, NM_clear, NM_...
 #include "NumericsSparseMatrix.h"        // for NumericsSparseMatrix, NSM_TR...
@@ -39,6 +39,10 @@
 #include "numerics_verbose.h"            // for numerics_error
 #include "sanitizer.h"                   // for MSAN_INIT_VAR
 
+
+#ifdef WITH_MUMPS
+#include "NM_MUMPS.h"
+#endif
 
 #ifndef SIZE_MAX
 # ifdef __SIZE_MAX__
@@ -770,7 +774,104 @@ static int NM_gemm_test_all(void)
 }
 
 
+static int NM_insert_dense_test()
+{
+  int info = 0;
+  size_t Asize0 = 5, Asize1 = 6;
+  size_t Bsize0 = 3, Bsize1 = 3;
+  size_t start_i = 1, start_j = 1;
+  size_t end_i = start_i + Bsize0;
+  size_t end_j = start_j + Bsize1;
+
+  /* create and fill the dense matrix A */
+  NumericsMatrix * A_dense = NM_create(NM_DENSE, Asize0, Asize1);
+  for(size_t i = 0; i < Asize0; ++i)
+    for(size_t j = 0; j < Asize1; ++j)
+      NM_zentry(A_dense, i, j, 10.0);
+
+  /* create and fill the dense matrix B */
+  NumericsMatrix * B_dense = NM_create(NM_DENSE, Bsize0, Bsize1);
+  for(size_t i = 0; i < Bsize0; ++i)
+    for(size_t j = 0; j < Bsize1; ++j)
+      NM_zentry(B_dense, i, j, 999.0);
+
+  /* create an expected result */
+  NumericsMatrix * AB_dense = NM_create(NM_DENSE, Asize0, Asize1);
+  NM_copy(A_dense, AB_dense);
+  for(size_t i = start_i; i < end_i; ++i)
+    for(size_t j = start_j; j < end_j; ++j)
+      NM_zentry(AB_dense, i, j, 999.0);
+
+  NM_insert(A_dense, B_dense, 1, 1);
+
+  //NM_display(A_dense);
+  if(!NM_equal(A_dense, AB_dense))
+    info = 1;
+
+  NM_clear(A_dense);
+  NM_clear(B_dense);
+  NM_clear(AB_dense);
+  free(A_dense);
+  free(B_dense);
+  free(AB_dense);
+  printf("== End of test NM_insert_dense_test(result = %d)\n", info);
+  return info;
+}
+
+static int NM_insert_sparse_test()
+{
+  int info = 0;
+  size_t Asize0 = 5, Asize1 = 6;
+  size_t Bsize0 = 3, Bsize1 = 3;
+  size_t start_i = 1, start_j = 1;
+  size_t end_i = start_i + Bsize0;
+  size_t end_j = start_j + Bsize1;
+
+  /* create and fill the dense matrix A */
+  NumericsMatrix * A_sparse = NM_create(NM_SPARSE, Asize0, Asize1);
+  NM_triplet_alloc(A_sparse, 12);
+  A_sparse->matrix2->origin = NSM_TRIPLET;
+
+  for(size_t i = 0; i < Asize0; i += 2)
+    for(size_t j = 0; j < Asize1; j += 2)
+      NM_zentry(A_sparse, i, j, 10.0);
+
+  /* create and fill the dense matrix B */
+  NumericsMatrix * B_sparse = NM_create(NM_SPARSE, Bsize0, Bsize1);
+  NM_triplet_alloc(B_sparse, 4);
+  B_sparse->matrix2->origin = NSM_TRIPLET;
+
+  for(size_t i = 0; i < Bsize0; i += 2)
+    for(size_t j = 0; j < Bsize1; j += 2)
+      NM_zentry(B_sparse, i, j, 999.0);
+
+  /* create an expected result */
+  NumericsMatrix * AB_sparse = NM_create(NM_SPARSE, Asize0, Asize1);
+  NM_copy(A_sparse, AB_sparse);
+  for(size_t i = start_i; i < end_i; i += 2)
+    for(size_t j = start_j; j < end_j; j += 2)
+      NM_zentry(AB_sparse, i, j, 999.0);
+
+  NM_insert(A_sparse, B_sparse, 1, 1);
+
+  //NM_display(A_sparse);
+  if(!NM_equal(A_sparse, AB_sparse))
+    info = 1;
+
+  NM_clear(A_sparse);
+  NM_clear(B_sparse);
+  NM_clear(AB_sparse);
+  free(A_sparse);
+  free(B_sparse);
+  free(AB_sparse);
+
+  printf("== End of test NM_insert_sparse_test(result = %d)\n", info);
+  return info;
+}
+
+
 CS_INT cs_print(const cs *A, CS_INT brief);
+
 
 static int NM_gemv_test(NumericsMatrix** MM)
 {
@@ -1857,11 +1958,19 @@ static int test_NM_posv_expert_unit(NumericsMatrix * M, double * b)
   for(int j=0; j < n; j++)
     y[j] = b[j];
   NSM_linear_solver_params* p = NSM_linearSolverParams(M);
+#ifdef WITH_MUMPS
+  p->solver = NSM_MUMPS;
+  NM_MUMPS_set_verbosity(M, 1);
+#else
   p->solver = NSM_CS_CHOLSOL;
+#endif
+
+  double res;
+#ifndef WITH_MUMPS
   NM_posv_expert(M, b, NM_PRESERVE);
   NV_display(b,n);
   NM_gemv(-1.0, M, b, 1.0, y);
-  double res = cblas_dnrm2(n,y,1);
+  res = cblas_dnrm2(n,y,1);
 
   printf("residual = %e\n", res);
   if(fabs(res) >= sqrt(DBL_EPSILON))
@@ -1871,7 +1980,7 @@ static int test_NM_posv_expert_unit(NumericsMatrix * M, double * b)
   }
   else
     info=0;
-
+#endif
 
   printf("Cholesky solve keeping factors\n");
   for(int j=0; j < n; j++)
@@ -2025,23 +2134,34 @@ static int test_NM_posv_expert(void)
   return info;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+
+#ifdef SICONOS_HAS_MPI
+  MPI_Init(&argc, &argv);
+#endif
+
   int info = NM_read_write_test();
 
   info += NM_add_to_diag3_test_all();
 
-  info +=  to_dense_test();
+  info += to_dense_test();
 
-  info +=  NM_gemm_test_all();
+  info += NM_gemm_test_all();
 
-  info +=  NM_gemm_test_all2();
+  info += NM_gemm_test_all2();
 
   info += NM_row_prod_test();
 
-  info +=    NM_row_prod_no_diag_test_all();
+  info += NM_row_prod_no_diag_test_all();
 
-  info +=  NM_row_prod_no_diag_non_square_test();
+  info += NM_row_prod_no_diag_non_square_test();
+
+  info += test_NM_row_prod_non_square_test();
+
+  info += NM_insert_dense_test();
+
+  info += NM_insert_sparse_test();
 
   info +=    test_NM_row_prod_non_square_test();
 
@@ -2055,6 +2175,10 @@ int main(void)
   info += test_NM_gesv_expert();
 
   info += test_NM_posv_expert();
+
+#ifdef SICONOS_HAS_MPI
+  MPI_Finalize();
+#endif
 
   return info;
 

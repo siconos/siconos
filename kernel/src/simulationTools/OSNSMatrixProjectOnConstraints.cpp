@@ -64,7 +64,7 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
   std::cout << "indexSet :" << indexSet << std::endl;
   indexSet.display();
 #endif
-  for(std11::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
+  for(std::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
   {
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
 
@@ -122,19 +122,19 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
     // === Loop through "active" Interactions (ie present in
     // indexSets[level]) ===
     InteractionsGraph::VIterator vi, viend;
-    for(std11::tie(vi, viend) = indexSet.vertices();
+    for(std::tie(vi, viend) = indexSet.vertices();
         vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position_proj;
       assert(indexSet.blockProj[*vi]);
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(pos, pos, *(indexSet.blockProj[*vi]));
     }
 
 
     InteractionsGraph::EIterator ei, eiend;
-    for(std11::tie(ei, eiend) = indexSet.edges();
+    for(std::tie(ei, eiend) = indexSet.edges();
         ei != eiend; ++ei)
     {
       InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
@@ -157,11 +157,11 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
       printf("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
 #endif
 
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *(indexSet.upper_blockProj[*ei]));
 
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *(indexSet.lower_blockProj[*ei]));
     }
@@ -199,7 +199,7 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Intera
   {
     if(relationType == NewtonEuler)
     {
-      // SP::NewtonEuler1DR ri = std11::static_pointer_cast<NewtonEuler1DR> (inter->relation());
+      // SP::NewtonEuler1DR ri = std::static_pointer_cast<NewtonEuler1DR> (inter->relation());
       // if(ri->_isOnContact)
       //   equalitySize = 1;
       size = 1;

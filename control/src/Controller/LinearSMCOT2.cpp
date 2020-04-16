@@ -60,8 +60,8 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
   {
     FirstOrderLinearDS& fods = static_cast<FirstOrderLinearDS&>(*DS);
     SP::SiconosVector x0(new SiconosVector(*fods.x0()));
-    _DSPhi.reset(new FirstOrderLinearDS(x0));//(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
-    _DSPred.reset(new FirstOrderLinearDS(x0));//(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    _DSPhi.reset(new FirstOrderLinearDS(x0));//(std::static_pointer_cast<FirstOrderLinearDS>(DS))));
+    _DSPred.reset(new FirstOrderLinearDS(x0));//(*(std::static_pointer_cast<FirstOrderLinearDS>(DS))));
     if(fods.A())
     {
       SP::SiconosMatrix A(new SimpleMatrix(*fods.A()));
@@ -77,12 +77,12 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
   }
   else if(dsType == Type::FirstOrderLinearTIDS)
   {
-    _DSPhi.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
-    _DSPred.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
+    _DSPhi.reset(new FirstOrderLinearTIDS(*(std::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
+    _DSPred.reset(new FirstOrderLinearTIDS(*(std::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
   }
   else
   {
-    RuntimeException::selfThrow("LinearSMCOT2 is not yet implemented for system of type" + dsType);
+    RuntimeException::selfThrow("LinearSMCOT2 is not yet implemented for system of type" + std::to_string(dsType));
   }
 
   // We have to reset _pluginb

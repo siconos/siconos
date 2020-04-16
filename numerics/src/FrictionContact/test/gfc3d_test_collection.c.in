@@ -25,59 +25,81 @@
 
 #define @PROBLEM_COLLECTION@ 1
 
+#ifdef SICONOS_HAS_MPI
+#include "mpi.h"
+#endif
 
 int main (int argc, char *argv[])
 {
   const char ** _data_collection = data_collection();
   int n_data = 0;
-  
+
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
-  
+
   while (strcmp(_data_collection[n_data], "---") !=0)
     {
       n_data++;
     }
   printf("number of data = %i\n", n_data);
-  
+
   int number_of_tests;
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
 #if defined(TEST_FIRST_ORDER_COLLECTION_1)
-    collection[18].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
+  collection[2].will_fail = 1; /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[8].will_fail = 1; /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat*/
+  collection[14].will_fail = 1;/*GFC3D_VI_EG, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[20].will_fail = 1;/*GFC3D_VI_FPP, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[22].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
+  collection[53].will_fail = 1;  /* GFC3D ADMM, on ./data/GFC3D_TwoRods1.dat with scalar rescaling*/
 #endif
+
+#ifdef TEST_WR_COLLECTION_1
+  collection[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat
+  collection[9].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+  collection[14].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+#endif
+
+
+#ifdef TEST_NSN_COLLECTION_1
+  // expected to fail
+  collection[2].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_Example00_badly_scaled.dat
+  collection[5].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_TwoRods1.dat
+  collection[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat
+
+#ifndef WITH_MUMPS
+  collection[4].will_fail = 1; // NSN_AC on data/GFC3D_TwoRods1.dat, mumps only
+#endif
+#endif
+
 #if defined(TEST_FIRST_ORDER_COLLECTION_FCLIB)
-    /* collection[1].will_fail = 1;  // GFC3D_NSGS	./data/LMGC_GFC3D-i00001-1-00000.hdf5  *\/ */
-    /* collection[4].will_fail = 1; */
-    collection[6].will_fail = 1;
-    collection[8].will_fail = 1;
-    // Expected to fail
-    /* collection[9].will_fail = 1; */
-    /* collection[11].will_fail = 1; */
+  collection[0].will_fail = 1; /* (GFC3D_NSGS, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+  collection[1].will_fail = 1; /* (GFC3D_NSGS, on ./data/Spheres-i099-356-679.hdf5) */
+  collection[2].will_fail = 1; /* (GFC3D_NSGS, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+  collection[3].will_fail = 1; /* (GFC3D_NSGS, on ./data/Spheres-i099-356-679.hdf5)  */
 #endif
+
 #if defined(TEST_NSN_COLLECTION_FCLIB)
-    collection[0].will_fail = 1;
-    collection[2].will_fail = 1;
+  collection[0].will_fail = 1; /* (GFC3D_NSN_AC, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+
 #endif
 
 #if defined(TEST_WR_COLLECTION_FCLIB)
-    collection[4].will_fail = 1;
-    collection[10].will_fail = 1;
-#endif    
-  
+  collection[0].will_fail = 1;
+//    collection[10].will_fail = 1;
+#endif
+
   int out = run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
 
   free_test_collection(collection, number_of_tests);
-  
+
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
-  
+
   return out;
 }
-  
-
-  

@@ -91,7 +91,7 @@ void SimpleMatrix::PLUInverseInPlace()
   if(_num != 1)
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
-#if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
+#if defined(HAS_LAPACK_dgetri)
   int info = lapack::getri(*mat.Dense, *_ipiv);   // solve from factorization
 
   if(info != 0)
@@ -168,10 +168,6 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 {
-  if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(V) failed. Not yet implemented for V being a BlockVector.");
-
-
   DenseMat tmpB(B.size(), 1);
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info;
@@ -260,9 +256,6 @@ void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
 
 void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
 {
-  if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares(SiconosVector &B) failed. Not yet implemented for V being a BlockVector.");
-
   DenseMat tmpB(B.size(), 1);
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info = 0;
