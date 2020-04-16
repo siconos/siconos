@@ -161,6 +161,10 @@ int MLCP::compute(double time)
 
   /*If user has not allocted the working memory, do it. */
   mlcp_driver_init(&*_numerics_problem, &*_numerics_solver_options);
+  // After the first call the mlcp_direct_init must not reset the previous guess
+  // But as the problem may change the MLCP update flag is raised
+  _numerics_solver_options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED] = 1;
+
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)
