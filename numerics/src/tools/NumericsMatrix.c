@@ -516,7 +516,7 @@ void NM_clear_other_storages(NumericsMatrix* M, int storageType)
 {
   assert(M && "NM_clear, M == NULL");
 
-  switch(M->storageType)
+  switch(storageType)
   {
   case NM_DENSE:
   {
