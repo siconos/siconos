@@ -276,6 +276,9 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
     }
   }
   // invalidate other old storages.
+  _numericsMatrix.get()->storageType = _storageType ;
+  _numericsMatrix.get()->size0 = _dimRow ;
+  _numericsMatrix.get()->size1 = _dimColumn ;
   NM_clear_other_storages(_numericsMatrix.get(), _storageType);
   if(update)
     convert();

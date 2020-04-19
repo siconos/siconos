@@ -223,6 +223,9 @@ extern "C"
    */
   static inline void NM_null(NumericsMatrix* A)
   {
+    A->storageType=-1;
+    A->size0 =-1;
+    A->size1 =-1;
     A->matrix0 = nullptr;
     A->matrix1 = nullptr;
     A->matrix2 = nullptr;

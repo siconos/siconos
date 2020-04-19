@@ -515,6 +515,8 @@ void NM_clear(NumericsMatrix* m)
 void NM_clear_other_storages(NumericsMatrix* M, int storageType)
 {
   assert(M && "NM_clear, M == NULL");
+  assert(M->storageType >=0 && "M->storageType >=0");
+  assert(M->storageType <3 && "M->storageType < 3");
 
   switch(storageType)
   {
@@ -1738,11 +1740,12 @@ void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* dat
 {
 
   assert(M);
+  NM_null(M);
   M->storageType = storageType;
   M->size0 = size0;
   M->size1 = size1;
 
-  NM_null(M);
+
 
   if(data)
   {
