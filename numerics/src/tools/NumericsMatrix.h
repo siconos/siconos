@@ -223,6 +223,9 @@ extern "C"
    */
   static inline void NM_null(NumericsMatrix* A)
   {
+    A->storageType=-1;
+    A->size0 =-1;
+    A->size1 =-1;
     A->matrix0 = nullptr;
     A->matrix1 = nullptr;
     A->matrix2 = nullptr;
@@ -265,6 +268,13 @@ extern "C"
    */
   void NM_clear(NumericsMatrix* m);
 
+  /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
+      \param m the matrix to be deleted.
+      \param storageType to be kept.
+   */
+  void NM_clear_other_storages(NumericsMatrix* M, int storageType);
 
   /**************************************************/
   /** setters and getters               *************/
