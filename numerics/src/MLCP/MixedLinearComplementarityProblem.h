@@ -130,17 +130,19 @@ extern "C"
    */
   int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename);
 
-  /** \fn  void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem)
+  /** \fn  void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem)
    *  \brief function to delete a MixedLinearComplementarityProblem
    *  \param problem  pointer to a MixedLinearComplementarityProblem to delete
    */
-  void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem);
+  void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem);
 
   /** create empty MLCP
    * \return empy MLCP
    */
-  MixedLinearComplementarityProblem* newMLCP(void);
+  MixedLinearComplementarityProblem*  mixedLinearComplementarity_new(void);
 
+
+  MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedLinearComplementarityProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

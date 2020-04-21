@@ -30,16 +30,18 @@ static void affectW2V(int * W2V);
 
 void initEnum(int M)
 {
-  int cmp;
   /*  sCurrentEnum = 0;*/
+  numerics_printf_verbose(1,"----- initEnum -- problem size :%i", M);
+  numerics_printf_verbose(1,"----- initEnum -- currentEnum :%i", (int)sCurrentEnum);
 
   sCmpEnum = 0;
   sNbCase = 1;
   sMm = M;
 
-  for(cmp = 0; cmp < sMm; cmp++)
+  for(int cmp = 0; cmp < sMm; cmp++)
     sNbCase = sNbCase << 1;
   sProgress = 0;
+  numerics_printf_verbose(1,"----- initEnum -- number of cases :%i", (int)sNbCase);
 }
 
 void affectW2V(int * W2V)
@@ -50,7 +52,8 @@ void affectW2V(int * W2V)
     W2V[i] = aux & 1;
     aux = aux >> 1;
   }
-  if(verbose)
+
+  if(verbose > 1)
   {
     for(int i = 0; i < sMm; i++)
       printf("wv[%d]=%d \t", i, W2V[i]);
@@ -64,18 +67,17 @@ int nextEnum(int * W2V)
   if(sCmpEnum == sNbCase)
     return 0;
   if(sCurrentEnum >= sNbCase)
-  {
     sCurrentEnum = 0;
-  }
-  if(verbose)
-    printf("try enum :%d\n", (int)sCurrentEnum);
+
+  numerics_printf_verbose(1,"----- nextEnum -- try enum :%d", (int)sCurrentEnum);
+
   affectW2V(W2V);
   sCurrentEnum++;
   sCmpEnum++;
   if(verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
   {
     sProgress += 0.001;
-    printf(" progress %f %d \n", sProgress, (int) sCurrentEnum);
+    numerics_printf_verbose(1,"progress %f %d / %d", sProgress, (int) sCurrentEnum,  sNbCase);
   }
 
   return 1;

@@ -895,7 +895,7 @@ void test_matrix(void)
     free(sol);
     free(z);
     free(w);
-    freeMixedLinearComplementarityProblem(problem);
+    mixedLinearComplementarity_free(problem);
   }
 #ifdef BAVARD
   for(j = 0; j < 2; j++)

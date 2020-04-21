@@ -75,9 +75,14 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
      - Input matrix M of the problem is supposed to be sparse-block
        with no null row (ie no rows with all blocks equal to null)
   */
+
+
+
+
   if(problem->M->matrix1 == NULL)
   {
-    fprintf(stderr, "mlcp_NSGS_SBM error: wrong storage type for input matrix M of the LCP.\n");
+    numerics_printf_verbose(0,"mlcp_PGS_SBM, storageType =%i", problem->M->storageType);
+    fprintf(stderr, "mlcp_PGS_SBM error: wrong storage type (problem->M->matrix1 == NULL) for input matrix M of the MLCP.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -98,7 +103,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   int nbOfNonNullBlocks = blmat->nbblocks;
   if(nbOfNonNullBlocks < 1)
   {
-    fprintf(stderr, "Numerics::mlcp_NSGS_SBM error: empty M matrix (all blocks = NULL).\n");
+    fprintf(stderr, "Numerics::mlcp_PGS_SBM error: empty M matrix (all blocks = NULL).\n");
     exit(EXIT_FAILURE);
   }
 

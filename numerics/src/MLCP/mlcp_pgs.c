@@ -28,6 +28,8 @@
 #include "SiconosBlas.h"                        // for cblas_ddot, cblas_dcopy
 #include "SolverOptions.h"                      // for SolverOptions, SICONO...
 #include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_P...
+#include "NumericsMatrix.h"                     // for storageType
+#include "numerics_verbose.h"                     // for numerics_printf
 
 
 /*
@@ -36,15 +38,25 @@
  * double *w : size n+m
  */
 
-void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double *w, int *info, SolverOptions* options)
 {
 
-  if(!problem->isStorageType2)
-  {
-    printf("Siconos/Numerics: mlcp_pgs: Wrong Storage (!isStorageType2) for PGS solver\n");
-    exit(EXIT_FAILURE);
-  }
+  verbose=1;
+  MixedLinearComplementarityProblem* problem;
 
+  if(!problem_orig->isStorageType2)
+  {
+    mixedLinearComplementarity_display(problem_orig);
+    numerics_printf_verbose(0,"mlcp_pgs: Wrong Storage (!isStorageType2) for PGS solver\n");
+    MixedLinearComplementarityProblem* mlcp_abcd =  mixedLinearComplementarity_fromMtoABCD(problem_orig);
+    mixedLinearComplementarity_display(mlcp_abcd);
+    problem = mlcp_abcd;
+    //exit(EXIT_FAILURE);
+  }
+  else
+  {
+    problem =problem_orig;
+  }
 
   double* A = problem->A;
   double* B = problem->B;
@@ -98,22 +110,22 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
     if((fabs(A[i * n + i]) < DBL_EPSILON))
     {
 
-      if(verbose > 0)
-      {
-        printf(" Vanishing diagonal term \n");
-        printf(" The local problem cannot be solved \n");
-      }
+      numerics_printf_verbose(1," Vanishing diagonal term \n");
+      numerics_printf_verbose(1," The local problem cannot be solved \n");
 
       *info = 2;
       free(diagA);
       free(diagB);
       *info = 1;
+      if(!problem_orig->isStorageType2)
+      {
+        mixedLinearComplementarity_free(problem);
+      }
       return;
     }
     else
     {
       diagA[i] = 1.0 / A[i * n + i];
-
     }
   }
   for(i = 0 ; i < m ; ++i)
@@ -121,22 +133,22 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
     if((fabs(B[i * m + i]) < DBL_EPSILON))
     {
 
-      if(verbose > 0)
-      {
-        printf(" Vanishing diagonal term \n");
-        printf(" The local problem cannot be solved \n");
-      }
+      numerics_printf_verbose(1," Vanishing diagonal term \n");
+      numerics_printf_verbose(1," The local problem cannot be solved \n");
 
       *info = 2;
       free(diagA);
       free(diagB);
 
+      if(!problem_orig->isStorageType2)
+      {
+        mixedLinearComplementarity_free(problem);
+      }
       return;
     }
     else
     {
       diagB[i] = 1.0 / B[i * m + i];
-
     }
   }
   /*start iterations*/
@@ -152,7 +164,7 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
   incBy = 1;
 
 
-  mlcp_compute_error(problem, z, w, tol, &err);
+  mlcp_compute_error(problem_orig, z, w, tol, &err);
 
   while((iter < itermax) && (err > tol))
   {
@@ -210,11 +222,10 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
 
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
 
-    mlcp_compute_error(problem, z, w, tol, &err);
-
-    if(verbose == 2)
+    mlcp_compute_error(problem_orig, z, w, tol, &err);
+    numerics_printf_verbose(1,"---- MLCP - PGS  - Iteration %i residual = %14.7e, tol = %14.7e", iter, err, tol);
+    if(verbose > 1)
     {
-      printf(" # i%d -- %g : ", iter, err);
       for(i = 0 ; i < n ; ++i) printf(" %g", u[i]);
       for(i = 0 ; i < m ; ++i) printf(" %g", v[i]);
       for(i = 0 ; i < m ; ++i) printf(" %g", w[i]);
@@ -230,22 +241,25 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
 
   if(err > tol)
   {
-    printf("Siconos/Numerics: mlcp_pgs: No convergence of PGS after %d iterations\n", iter);
-    printf("Siconos/Numerics: mlcp_pgs: The residue is : %g \n", err);
+    numerics_printf_verbose(1,"---- MLCP - PGS  - No convergence of PGS after %d iterations with error = %14.7e ", iter, err);
     *info = 1;
   }
   else
   {
-    if(verbose > 0)
-    {
-      printf("Siconos/Numerics: mlcp_pgs: Convergence of PGS after %d iterations\n", iter);
-      printf("Siconos/Numerics: mlcp_pgs: The residue is : %g \n", err);
-    }
+    numerics_printf_verbose(1,"---- MLCP - PGS  - Convergence of PGS after %d iterations with error = %14.7e ", iter, err);
     *info = 0;
   }
-
+  getchar();
   free(diagA);
   free(diagB);
+
+  if(!problem_orig->isStorageType2)
+  {
+    mixedLinearComplementarity_free(problem);
+  }
+
+
+
   return;
 }
 
@@ -254,4 +268,3 @@ void mlcp_pgs_set_default(SolverOptions* options)
   options->filterOn = false;
   options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT] = 0; //implicit
 }
-

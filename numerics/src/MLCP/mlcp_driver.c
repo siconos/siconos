@@ -195,6 +195,7 @@ void mlcp_driver_reset(MixedLinearComplementarityProblem* problem, SolverOptions
 int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options)
 {
 
+  /* verbose=1; */
 
   if(options == NULL)
     numerics_error("mlcp_driver ", "null input for solver options.\n");
@@ -204,16 +205,19 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
     numerics_error("mlcp_driver", "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
+//  if(verbose)
+//    mixedLinearComplementarity_display(problem);
   if(verbose)
-    mixedLinearComplementarity_display(problem);
+    solver_options_print(options);
+
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
   int storageType = problem->M->storageType;
 
   /* Sparse Block Storage */
-  if(storageType == 1)
+  if(storageType == NM_SPARSE_BLOCK)
   {
-    numerics_error("mlcp_driver", "not yet implemented for sparse storage.");
+    numerics_error("mlcp_driver", "not yet implemented for sparse block storage (NM_SPARSE_BLOCK)");
   }
   // else
 
@@ -263,9 +267,11 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 
   /****** ENUM algorithm ******/
   case  SICONOS_MLCP_ENUM:
+  {
+    numerics_printf(" ========================== Call ENUM solver for Mixed Linear Complementarity Problem (MLCP )===========\n");
     mlcp_enum(problem, z, w, &info, options);
     break;
-
+  }
   /****** SIMPLEX algorithm ******/
   case SICONOS_MLCP_SIMPLEX:
     mlcp_simplex(problem, z, w, &info, options);

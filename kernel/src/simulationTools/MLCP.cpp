@@ -42,18 +42,13 @@ MLCP::MLCP(int numericsSolverId):
 MLCP::MLCP(SP::SolverOptions options):
   LinearOSNS(options)
 {
-  _numerics_problem.reset(new MixedLinearComplementarityProblem);
+  _numerics_problem.reset(mixedLinearComplementarity_new());
 
-  _numerics_problem->blocksRows = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
-  _numerics_problem->blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
+  _numerics_problem->blocksRows = (int*)malloc(MLCP_NB_BLOCKS_MAX * sizeof(int));
+  _numerics_problem->blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS_MAX * sizeof(int));
   _numerics_problem->blocksRows[0] = 0;
 
-  _numerics_problem->A = nullptr;
-  _numerics_problem->B = nullptr;
-  _numerics_problem->C = nullptr;
-  _numerics_problem->D = nullptr;
-  _numerics_problem->a = nullptr;
-  _numerics_problem->b = nullptr;
+  // The storage with only one matrix M is chosen
   _numerics_problem->isStorageType1 = 1;
   _numerics_problem->isStorageType2 = 0;
 }
@@ -72,6 +67,7 @@ void  MLCP::reset()
 
 void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
 {
+  DEBUG_BEGIN("MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)\n");
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   unsigned int nslawSize1 = inter1->nonSmoothLaw()->size();
   //  unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
@@ -90,11 +86,12 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
     //inter1->getExtraInteractionBlock(currentInteractionBlock);
     _m += nslawSize1 - equalitySize1;
     _n += equalitySize1;
-    if(_curBlock > MLCP_NB_BLOCKS - 2)
+    if(_curBlock > MLCP_NB_BLOCKS_MAX - 2)
       printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
     /*add an equality block.*/
     if(equalitySize1 > 0)
     {
+      DEBUG_PRINT("add an equality block.\n");
       _numerics_problem->blocksRows[_curBlock + 1] = _numerics_problem->blocksRows[_curBlock] + equalitySize1;
       _numerics_problem->blocksIsComp[_curBlock] = 0;
       _curBlock++;
@@ -102,11 +99,13 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
     /*add a complementarity block.*/
     if(nslawSize1 - equalitySize1 > 0)
     {
+      DEBUG_PRINT("add a complementarity block.\n");
       _numerics_problem->blocksRows[_curBlock + 1] = _numerics_problem->blocksRows[_curBlock] + nslawSize1 - equalitySize1;
       _numerics_problem->blocksIsComp[_curBlock] = 1;
       _curBlock++;
     }
   }
+  DEBUG_END("MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)\n");
 }
 
 void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)

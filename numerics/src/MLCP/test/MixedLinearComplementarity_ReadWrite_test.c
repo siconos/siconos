@@ -109,7 +109,7 @@ int write_newformat(char *filename)
 
   fclose(foutput);
 
-  freeMixedLinearComplementarityProblem(problem);
+  mixedLinearComplementarity_free(problem);
   free(basename);
   printf("\n End of test \n");
   return info;

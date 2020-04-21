@@ -1259,7 +1259,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         _n += equalitySize1;
         //    _m=0;
         //_n=6;
-        if(_curBlock > MLCP_NB_BLOCKS - 2)
+        if(_curBlock > MLCP_NB_BLOCKS_MAX - 2)
           printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
         /*add an equality block.*/
 

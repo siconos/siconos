@@ -84,18 +84,18 @@ static void buildQ()
 static void printCurrentSystem()
 {
   int npm = sNn + sMm;
-  printf("printCurrentSystemM:\n");
+  numerics_printf_verbose(2,"printCurrentSystemM:");
   NM_dense_display(sM, sMl, npm, 0);
-  printf("printCurrentSystemQ (ie -Q from mlcp because of linear system MZ=Q):\n");
+  numerics_printf_verbose(2,"printCurrentSystemQ (ie -Q from mlcp because of linear system MZ=Q):");
   NM_dense_display(sQ, sMl, 1, 0);
 }
 
 static void printRefSystem()
 {
   int npm = sNn + sMm;
-  printf("ref M NbLines %d n %d  m %d :\n", sMl, sNn, sMm);
+  numerics_printf_verbose(2,"ref M NbLines %d n %d  m %d :", sMl, sNn, sMm);
   NM_dense_display(sMref, sMl, npm, 0);
-  printf("ref Q (ie -Q from mlcp because of linear system MZ=Q):\n");
+  numerics_printf_verbose(2,"ref Q (ie -Q from mlcp because of linear system MZ=Q):");
   NM_dense_display(sQref, sMl, 1, 0);
 }
 
@@ -133,8 +133,7 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
   sMref = problem->M->matrix0;
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
   //  verbose=1;
-  if(verbose)
-    printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
+  numerics_printf_verbose(1,"mlcp_enum_Block BEGIN, n %d m %d tol %lf", sNn, sMm, tol);
 
   sM = workingFloat;
   /*  sQ = sM + npm*npm;*/
@@ -151,9 +150,9 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
   for(lin = 0; lin < sMl; lin++)
     sColNul[lin] = 0;
 
-  /*  printf("sColNul\n");
+  /*  numerics_printf_verbose(1,"sColNul\n");
       NM_dense_display(sColNul,npm,1);*/
-  if(verbose)
+  if(verbose >1)
     printRefSystem();
   sW2V = workingInt;
   ipiv = sW2V + sMm;
@@ -163,27 +162,32 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
   *info = 0;
   mlcp_buildIndexInBlock(problem, indexInBlock);
   initEnum(problem->m);
+
   while(nextEnum(sW2V) && itermax-- > 0)
   {
     mlcp_buildM_Block(sW2V, sM, sMref, sNn, sMm, sMl, indexInBlock);
     buildQ();
-    if(verbose)
+    if(verbose >1)
       printCurrentSystem();
     if(useDGELS)
     {
       DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sQ, sMl,&LAinfo);
-      if(verbose)
+      numerics_printf_verbose(1,"Solution of dgels");
       {
-        printf("Solution of dgels\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
     }
     else
     {
       DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
-      if(verbose)
+      numerics_printf_verbose(1,"Solution of dgesv");
+      if(LAinfo != 0)
+        numerics_printf_verbose(1,"DGESV FAILED");
+      else
+        numerics_printf_verbose(1,"DGESV SUCCEED");
+
+      if(verbose > 1)
       {
-        printf("Solution of dgesv\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
     }
@@ -193,12 +197,12 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
       {
         int cc = 0;
         int ii;
-        double rest = 0;
+        double residual = 0;
         for(ii = 0; ii < npm; ii++)
         {
           if(isnan(sQ[ii]) || isinf(sQ[ii]))
           {
-            printf("DGELS FAILED\n");
+            numerics_printf_verbose(1,"DGELS FAILED");
             cc = 1;
             break;
           }
@@ -208,22 +212,21 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
 
         if(sMl > npm)
         {
-          rest = cblas_dnrm2(sMl - npm, sQ + npm, 1);
+          residual = cblas_dnrm2(sMl - npm, sQ + npm, 1);
 
-          if(rest > tol || isnan(rest) || isinf(rest))
+          if(residual > tol || isnan(residual) || isinf(residual))
           {
-            if(verbose)
-              printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
+            numerics_printf_verbose(1,"DGELS, optimal point doesn't satisfy AX=b, residual = %e", residual);
             continue;
           }
-          if(verbose)
-            printf("DGELS, optimal point rest = %e\n", rest);
+          numerics_printf_verbose(1,"DGELS, optimal point residual = %e", residual);
         }
       }
 
-      if(verbose)
+
+      numerics_printf_verbose(1,"Solving linear system success, solution in cone?");
+      if(verbose > 1)
       {
-        printf("Solving linear system success, solution in cone?\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
 
@@ -246,30 +249,29 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
         if(err > 10 * tol)
         {
-          if(verbose)
-            printf("LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
+          numerics_printf_verbose(1,"LU no-error, but mlcp_compute_error out of tol: %e!", err);
           continue;
         }
+        numerics_printf_verbose(1,"mlcp_enum_block find a solution err = %e!", err);
         if(verbose)
         {
-          printf("mlcp_enum find a solution err = %e!\n", err);
           mlcp_DisplaySolution_Block(sU, sW1, sNn, sMm, sMl, indexInBlock);
         }
         // options->iparam[1]=sCurrentEnum-1;
+        numerics_printf_verbose(1,"mlcp_enum_block END");
+        options->dparam[SICONOS_DPARAM_RESIDU] = err;
         return;
       }
     }
     else
     {
-      if(verbose)
-      {
-        printf("LU factorization failed:\n");
-      }
+
+      numerics_printf_verbose(1,"LU factorization failed:\n");
+
     }
   }
   *info = 1;
-  if(verbose)
-    printf("mlcp_enum failed!\n");
+  numerics_printf_verbose(1,"mlcp_enum_block failed!\n");
 }
 
 
@@ -332,8 +334,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   sMref = problem->M->matrix0;
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
   //  verbose=1;
-  if(verbose)
-    printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
+  numerics_printf_verbose(1,"mlcp_enum BEGIN, n %d m %d tol %lf\n", sNn, sMm, tol);
 
   sM = workingFloat;
   /*  sQ = sM + npm*npm;*/
@@ -349,9 +350,9 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     sQref[lin] =  - problem->q[lin];
   for(lin = 0; lin < sMl; lin++)
     sColNul[lin] = 0;
-  /*  printf("sColNul\n");
+  /*  numerics_printf_verbose(1,"sColNul\n");
       NM_dense_display(sColNul,npm,1);*/
-  if(verbose)
+  if(verbose > 1)
     printRefSystem();
   sW2V = workingInt;
   ipiv = sW2V + sMm;
@@ -361,23 +362,23 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   {
     mlcp_buildM(sW2V, sM, sMref, sNn, sMm, sMl);
     buildQ();
-    if(verbose)
+    if(verbose > 1)
       printCurrentSystem();
     if(useDGELS)
     {
       DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sQ, sMl, &LAinfo);
-      if(verbose)
+      numerics_printf_verbose(1,"Solution of dgels\n");
+      if(verbose > 1)
       {
-        printf("Solution of dgels\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
     }
     else
     {
       DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
-      if(verbose)
+      numerics_printf_verbose(1,"Solution of dgesv\n");
+      if(verbose > 1 )
       {
-        printf("Solution of dgesv\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
     }
@@ -387,12 +388,12 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
       {
         int cc = 0;
         int ii;
-        double rest = 0;
+        double residual = 0;
         for(ii = 0; ii < npm; ii++)
         {
           if(isnan(sQ[ii]) || isinf(sQ[ii]))
           {
-            printf("DGELS FAILED\n");
+            numerics_printf_verbose(1,"DGELS FAILED\n");
             cc = 1;
             break;
           }
@@ -402,22 +403,20 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
         if(sMl > npm)
         {
-          rest = cblas_dnrm2(sMl - npm, sQ + npm, 1);
+          residual = cblas_dnrm2(sMl - npm, sQ + npm, 1);
 
-          if(rest > tol || isnan(rest) || isinf(rest))
+          if(residual > tol || isnan(residual) || isinf(residual))
           {
-            if(verbose)
-              printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
+            numerics_printf_verbose(1,"DGELS, optimal point doesn't satisfy AX=b, residual = %e\n", residual);
             continue;
           }
-          if(verbose)
-            printf("DGELS, optimal point rest = %e\n", rest);
+          numerics_printf_verbose(1,"DGELS, optimal point residual = %e\n", residual);
         }
       }
 
-      if(verbose)
+      numerics_printf_verbose(1,"Solving linear system success, solution in cone?\n");
+      if(verbose > 1)
       {
-        printf("Solving linear system success, solution in cone?\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
 
@@ -440,37 +439,32 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
         if(err > 10 * tol)
         {
-          if(verbose)
-            printf("LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
+          numerics_printf_verbose(1,"LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
           continue;
         }
         nbSol++;
-        if(verbose)
+        numerics_printf_verbose(1,"mlcp_enum find a solution, err=%e !\n", err);
+        if (verbose >1)
         {
-          printf("mlcp_enum find a solution, err=%e !\n", err);
           mlcp_DisplaySolution(sU, sV, sW1, sW2, sNn, sMm, sMl);
         }
+        numerics_printf_verbose(1,"mlcp_enum END");
         return;
       }
     }
     else
     {
-      if(verbose)
-      {
-        printf("LU factorization failed:\n");
-      }
+      numerics_printf_verbose(1,"LU factorization failed:\n");
     }
   }
   *info = 1;
-  if(verbose)
-    printf("mlcp_enum failed nbSol=%i!\n", nbSol);
+  numerics_printf_verbose(1,"mlcp_enum failed nbSol=%i!\n", nbSol);
 }
 
 void mlcp_enum_set_default(SolverOptions* options)
 {
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000000;
   options->dparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS] = 0;
   options->filterOn = false;
 
 }
-
-
