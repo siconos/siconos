@@ -48,7 +48,12 @@ public:
 
   double distance(double, double, double, double, double, double, double, double);
 
-  void computeh(double time, BlockVector& q0, SiconosVector& y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+  */
+  void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
   //void computeJachq(double);
 

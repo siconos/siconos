@@ -60,18 +60,18 @@ public:
 
   using LagrangianScleronomousR::computeh;
 
-  /** computeh implementation, see LagrangianScleronomousR
-      \param q
-      \param z
-      \param y
+  /** to compute the output y = h(q,z) of the Relation
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
   */
-  void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
+  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  /** computeh implementation, see LagrangianScleronomousR
-      \param q
-      \param z
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
   */
-  void computeJachq(SiconosVector& q, SiconosVector& z);
+  void computeJachq(const BlockVector& q, BlockVector& z);
 
   /** visitors hook
    */

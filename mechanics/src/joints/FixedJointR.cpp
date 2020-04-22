@@ -88,7 +88,7 @@ void FixedJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
   _G10G20d1z = quatBuff.R_component_4();
 }
 
-void FixedJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void FixedJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   double X1 = q0.getValue(0);
   double Y1 = q0.getValue(1);

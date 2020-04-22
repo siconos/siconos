@@ -16,9 +16,12 @@
  * limitations under the License.
 */
 
+
 #include "SiconosMatrix.hpp"
 #include "BlockVector.hpp"
+#include "SiconosVector.hpp"
 #include "SiconosAlgebraTools.hpp"
+#include <iostream>
 
 namespace Siconos {
   namespace Algebra {
@@ -53,6 +56,5 @@ namespace Siconos {
 
       return ((*I1R == *I2R) && (*I1C == *I2C));
     }
-
   }
 }

@@ -65,11 +65,6 @@ void FirstOrderType2R::initialize(Interaction& inter)
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  _vec_r.reset(new SiconosVector(sizeDS));
-  _vec_x.reset(new SiconosVector(sizeDS));
-  _vec_z.reset(new SiconosVector(sizeZ));
-
-
 
   if(!_C)
     relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
@@ -93,14 +88,17 @@ void FirstOrderType2R::initialize(Interaction& inter)
 
 void FirstOrderType2R::checkSize(Interaction& inter) {}
 
-void FirstOrderType2R::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
+void FirstOrderType2R::computeh(double time, const BlockVector& x, const SiconosVector& lambda, SiconosVector& y)
 {
-  ((Type2PtrH)(_pluginh->fPtr))(x.size(), x.getArray(), lambda.size(), lambda.getArray(), y.size(), y.getArray());
+  auto xp = x.prepareVectorForPlugin();
+  ((Type2PtrH)(_pluginh->fPtr))(xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), y.size(), y.getArray());
 }
 
-void FirstOrderType2R::computeg(double time, SiconosVector& lambda, SiconosVector& r)
+void FirstOrderType2R::computeg(double time, const SiconosVector& lambda, BlockVector& r)
 {
-  ((Type2PtrG)(_pluging->fPtr))(lambda.size(), lambda.getArray(), r.size(), r.getArray());
+  auto rp = r.prepareVectorForPlugin();
+  ((Type2PtrG)(_pluging->fPtr))(lambda.size(), lambda.getArray(), rp->size(), rp->getArray());
+  r = *rp;
 }
 
 void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned int level)
@@ -109,11 +107,9 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned i
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& x = *DSlink[FirstOrderR::x];
   // copy into Siconos continuous memory vector
-  SiconosVector x_vec;
-  x_vec.block2contiguous(x);
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
-  computeh(time, x_vec, lambda, y);
+  computeh(time, x, lambda, y);
   DEBUG_EXPR(y.display());
   DEBUG_END("FirstOrderType2R::computeOutput \n");
 }
@@ -123,20 +119,17 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned in
   DEBUG_BEGIN("FirstOrderType2R::computeInput \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   // copy into Siconos continuous memory vector
-  SiconosVector r_vec;
-  r_vec.block2contiguous(*DSlink[FirstOrderR::r]);
   SiconosVector& lambda = *inter.lambda(level);
-  computeg(time, lambda,  r_vec);
-  *DSlink[FirstOrderR::r] = r_vec;
+  computeg(time, lambda, *DSlink[FirstOrderR::r]);
   DEBUG_EXPR(DSlink[FirstOrderR::r]->display());
   DEBUG_END("FirstOrderType2R::computeInput \n");
 }
 
-void FirstOrderType2R::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
+void FirstOrderType2R::computeJachlambda(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& D)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJachlambda must be overload.");
 }
-void FirstOrderType2R::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
+void FirstOrderType2R::computeJachx(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& C)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
 }
@@ -149,18 +142,16 @@ void FirstOrderType2R::computeJach(double time, Interaction& inter)
 
   if(!_C)
   {
-    *_vec_x = *DSlink[FirstOrderR::x];
-    computeJachx(time, *_vec_x, *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
+    computeJachx(time, *DSlink[FirstOrderR::x], *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
   }
   if(!_D)
   {
-    *_vec_x = *DSlink[FirstOrderR::x];
-    computeJachlambda(time, *_vec_x, *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
+    computeJachlambda(time, *DSlink[FirstOrderR::x], *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
   }
   DEBUG_END("FirstOrderType2R::computeJach\n");
 }
 
-void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B)
+void FirstOrderType2R::computeJacglambda(double time, const SiconosVector& lambda, SimpleMatrix& B)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }

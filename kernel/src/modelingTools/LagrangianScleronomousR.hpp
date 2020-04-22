@@ -170,31 +170,25 @@ public:
     return _dotjacqhXqdot;
   };
 
-protected:
+  /** to compute the output y = h(q,z) of the Relation
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
+  */
+  virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  /** to compute y = h(q,z) using plug-in mechanism
-   * \param q the BlockVector of coordinates
-   * \param z the BlockVector of parameters
-   * \param y the output
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  virtual void computeJachq(const BlockVector& q, BlockVector& z);
+
+  /** to compute the time derivative of the Jacobian. Result in _dotjachq (access: dotjachq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param time derivatives of q
    */
-  virtual void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
-
-
-  /** to compute the jacobian of h using plug-in mechanism.
-   * Index shows which jacobian is computed
-   * \param q the BlockVector of coordinates
-   * \param z the BlockVector of parameters
-   */
-  virtual void computeJachq(SiconosVector& q, SiconosVector& z);
-
-  /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
-   * \param q the BlockVector of coordinates
-   * \param z the BlockVector of parameters
-   * \param qDot q the BlockVector of derivative of coordinates
-   */
-  virtual void computeDotJachq(SiconosVector& q, SiconosVector& z, SiconosVector& qDot);
-
-public:
+  virtual void computeDotJachq(const BlockVector& q, BlockVector& z, const BlockVector& qDot);
 
   /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
    * \param time double, current time
@@ -219,7 +213,6 @@ public:
   {
     ;
   }
-
 
   /** to compute output
    * \param time the current time

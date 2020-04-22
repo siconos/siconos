@@ -94,7 +94,7 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, double pos, double neg,
 }
 #endif
 
-void JointStopR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void JointStopR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   // Common cases optimisation
   bool case_onestop = y.size()==1;

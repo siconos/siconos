@@ -72,7 +72,7 @@ JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, SP::UnsignedIntVecto
   assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
-void JointFrictionR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void JointFrictionR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   // Velocity-level constraint, no position-level h
   y.zero();

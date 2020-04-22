@@ -31,7 +31,7 @@ Contact2dR::Contact2dR()
 {
 }
 
-void Contact2dR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void Contact2dR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
   DEBUG_BEGIN("Contact2dR::computeh(...)\n");
 

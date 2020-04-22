@@ -70,7 +70,12 @@ public:
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+  */
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
   virtual unsigned int numberOfDoF() { return 0; }
 

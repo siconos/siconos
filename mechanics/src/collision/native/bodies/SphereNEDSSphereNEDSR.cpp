@@ -41,7 +41,7 @@ double SphereNEDSSphereNEDSR::distance(double x1, double y1, double z1, double r
 }
 
 
-void SphereNEDSSphereNEDSR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void SphereNEDSSphereNEDSR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
 
 

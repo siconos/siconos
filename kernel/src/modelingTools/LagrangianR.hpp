@@ -151,7 +151,7 @@ public:
    * \param inter the interaction using this relation
    */
   virtual void initialize(Interaction& inter) {};
-  
+
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */

@@ -426,7 +426,7 @@ double PivotJointR::AscalA(double rot2to1x, double rot2to1y, double rot2to1z)
          + _A->getValue(2)*rot2to1z;
 }
 
-void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void PivotJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
 
   KneeJointR::computeh(time, q0,  y);
@@ -456,7 +456,7 @@ void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
-void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+void PivotJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                               unsigned int axis)
 {
   // Normally we fill y starting at axis up to the number of columns,

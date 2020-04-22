@@ -118,7 +118,7 @@ public:
    * \param z       current auxiliary variable
    * \param[out] y  output value
    */
-  virtual void computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SiconosVector& y);
 
   /** default function to compute \f$g\f$
    * \param time    current time
@@ -127,7 +127,7 @@ public:
    * \param z       current auxiliary variable
    * \param[out] r  input value
   */
-  virtual void computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& r);
+  virtual void computeg(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, BlockVector& r);
 
   /** default function to compute \f$ C = \nabla_x h \f$
    * \param time    current time
@@ -136,7 +136,7 @@ public:
    * \param z       current auxiliary variable
    * \param[out] C  jacobian matrix
    */
-  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& C);
+  virtual void computeJachx(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& C);
 
   /** default function to compute \f$ D = \nabla_{\lambda} h \f$
    * \param time    current time
@@ -145,7 +145,7 @@ public:
    * \param z       current auxiliary variables
    * \param[out] D  jacobian matrix
    */
-  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& D);
+  virtual void computeJachlambda(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& D);
 
   virtual void computeJach(double time, Interaction& inter);
 
@@ -156,7 +156,7 @@ public:
   * \param z       current auxiliary variables
   * \param[out] B  jacobian matrix
   */
-  virtual void computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
+  virtual void computeJacglambda(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& B);
 
   /** default function to compute \f$ K = \nabla_{\lambda}g \f$
    * \param time    current time
@@ -165,7 +165,7 @@ public:
    * \param z       current auxiliary variables
    * \param[out] K  jacobian matrix
    */
-  virtual void computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K);
+  virtual void computeJacgx(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& K);
 
   virtual void computeJacg(double time, Interaction& inter);
 

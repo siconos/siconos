@@ -94,6 +94,7 @@ struct IsBlock : public Question<bool>
   }
 };
 
+
 /// @endcond
 
 
@@ -230,6 +231,31 @@ SiconosVector::SiconosVector(const SiconosVector& v1, const SiconosVector& v2)
   setBlock(0, v1);
   setBlock(size1, v2);
 }
+
+// Copy a block vector into a SiconosVector
+// This is mostly used to handle contiguous memory.
+SiconosVector::SiconosVector(const BlockVector & input)
+{
+  std::cout << "BLOCK COPY !!!!" << std::endl;
+  if(input.isDense())
+  {
+    _dense = true;
+    vect.Dense = new DenseVect(input.size());
+  }
+  else
+  {
+    _dense = false;
+    vect.Sparse = new SparseVect(input.size());
+  }
+
+  unsigned int pos = 0;
+  for(auto it = input.begin(); it != input.end(); ++it)
+  {
+    setBlock(pos, **it);
+    pos += (*it)->size();
+  }
+}
+
 
 SiconosVector::~SiconosVector()
 {
@@ -454,7 +480,7 @@ void SiconosVector::setBlock(unsigned int index, const SiconosVector& vIn)
 
   assert(index < size() && "SiconosVector::setBlock : invalid ranges");
 
-  unsigned int end = vIn.size() + index;
+  auto end = vIn.size() + index;
   assert(end <= size() && "SiconosVector::setBlock : invalid ranges");
 
   assert(vIn.num() == num() && "SiconosVector::setBlock: inconsistent types.");

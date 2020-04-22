@@ -89,45 +89,46 @@ public:
    */
   virtual void checkSize(Interaction& inter);
 
-  /** default function to compute y = h(x, z, t)
-  * \param time the current time
-  * \param x the state vector
-  * \param z the external input
-  * \param y the "output" vector
+  /** to compute the output y = h(t,x,...) of the Relation
+      \param time current time value
+      \param x coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
   */
-  void computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y);
+  void computeh(double time, const BlockVector& x, BlockVector& z, SiconosVector& y);
 
-  /** default function to compute g
-  * \param time the current time
-  * \param lambda the lambda vector
-  * \param z the external input
-  * \param r the nonsmooth "input" vector
+  /** to compute the nonsmooth input r = g(t,x,...) of the Relation
+      \param time current time value
+      \param lambda interaction \f$\lambda\f$ vector
+      \param z user defined parameters (optional)
+      \param r the resulting vector
   */
-void computeg(double time, SiconosVector& lambda, SiconosVector& z, SiconosVector& r);
+void computeg(double time, const SiconosVector& lambda, BlockVector& z, BlockVector& r);
 
-  /** default function to compute \f$\nabla_x h\f$
-  *  \param time current time (not used)
-  *  \param x the state used to evaluate the jacobian
-  *  \param z the extra input used to evaluate the jacobian
-  *  \param C the matrix used to store the jacobian
+  /** to compute \f$ C = \nabla_x h \f$
+      \param time current time value
+      \param x coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param[out] C the resulting matrix
   */
-void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C);
+void computeJachx(double time, const BlockVector& x, BlockVector& z, SimpleMatrix& C);
 
   /** default function to compute \f$\nabla_z h\f$
-  *  \param time current time (not used)
-  *  \param x the state used to evaluate the jacobian
-  *  \param z the extra input used to evaluate the jacobian
-  *  \param F the matrix used to store the jacobian
+      \param time current time value
+      \param x coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param[out] F the resulting matrix
   */
-void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& F);
+void computeJachz(double time, const BlockVector& x, BlockVector& z, SimpleMatrix& F);
 
-  /** default function to compute jacobianG according to lambda
-  *  \param time current time (not used)
-  *  \param lambda the nonsmooth input used to evaluate the jacobian
-  *  \param z the extra input used to evaluate the jacobian
-  *  \param B the matrix used to store the jacobian
+  /** to compute \f$ B = \nabla_{\lambda}g \f$
+      \param time current time value
+      \param x coordinates of the dynamical systems involved in the relation
+      \param lambda interaction \f$\lambda\f$ vector
+      \param z user defined parameters (optional)
+      \param[out] B the resulting matrix
   */
-void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
+void computeJacglambda(double time, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& B);
 
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)

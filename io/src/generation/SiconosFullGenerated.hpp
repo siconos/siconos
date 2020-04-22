@@ -226,9 +226,6 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderR,(Relation),
   (_D)
   (_F)
   (_K)
-  (_vec_r)
-  (_vec_x)
-  (_vec_z))
 SICONOS_IO_REGISTER(Relation,
   (_pluginJacglambda)
   (_pluginJacgx)

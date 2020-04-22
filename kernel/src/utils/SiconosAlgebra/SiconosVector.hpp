@@ -36,6 +36,7 @@ union VECTOR_UBLAS_TYPE
   SparseVect *Sparse; // num = 4
 };
 
+
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
 
     Two possible types: Siconos::DENSE (default) and Siconos:SPARSE.
@@ -111,6 +112,12 @@ public:
    * \param v2 the second vector
    */
   SiconosVector(const SiconosVector& v1, const SiconosVector& v2);
+
+  /** constructor from a BlockVector.
+   * explicit to forbid implicit conversion/conversion constructor.
+   * \param input source vector
+   */
+  explicit SiconosVector(const BlockVector& input);//, bool = false);
 
   /** destructor
    */
@@ -379,11 +386,24 @@ public:
 
   friend struct IsBlock;
 
+  friend class TestDense;
+
   /** End of Friend functions group @} */
 
   //  temporary workaround, the visitor has to be removed or rework -- xhub
   ACCEPT_NONVIRTUAL_VISITORS();
 
 };
+
+/* functor/predicate used to test vectors type containers such as BlockVector */
+class TestDense
+{
+public:
+  bool operator()(SP::SiconosVector input) const
+  {
+    return input->_dense;
+  }
+};
+
 
 #endif

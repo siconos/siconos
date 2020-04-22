@@ -53,7 +53,7 @@ double SphereLDSPlanR::distance(double x, double y, double z, double rad)
 }
 
 
-void SphereLDSPlanR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void SphereLDSPlanR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
 
   double q_0 = q(0);
@@ -66,7 +66,7 @@ void SphereLDSPlanR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector&
 
 void normalize(SP::SiconosVector, unsigned int);
 
-void SphereLDSPlanR::computeJachq(SiconosVector& q, SiconosVector& z)
+void SphereLDSPlanR::computeJachq(const BlockVector& q, BlockVector& z)
 {
   SimpleMatrix *g = (SimpleMatrix *)_jachq.get();
 

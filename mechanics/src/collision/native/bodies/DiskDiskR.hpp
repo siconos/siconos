@@ -50,9 +50,18 @@ public:
 
   double distance(double, double, double, double, double, double);
 
-  void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
+  /** to compute the output y = h(q,z) of the Relation
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
+  */
+  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  void computeJachq(SiconosVector& q, SiconosVector& z);
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  void computeJachq(const BlockVector& q, BlockVector& z);
 
   /** visitors hook
    */

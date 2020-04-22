@@ -271,7 +271,7 @@ double NewtonEuler1DR::distance() const
   return dpc.norm2() * (inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
 }
 
-void NewtonEuler1DR::computeh(double time, BlockVector& q0,
+void NewtonEuler1DR::computeh(double time, const BlockVector& q0,
                               SiconosVector &y)
 {
   // Contact points and normal are stored as relative to q1 and q2, if

@@ -133,8 +133,6 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
   if(!interProp.workVectors)
   {
     interProp.workVectors.reset(new VectorOfVectors);
@@ -159,7 +157,6 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   unsigned int sizeY = inter.dimension();
   unsigned int sizeOfDS = inter.getSizeOfDS();
-  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
   RELATION::TYPES relationType = relation.getType();
   RELATION::SUBTYPES relationSubType = relation.getSubType();
@@ -179,14 +176,14 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
     if(relationType == FirstOrder)
     {
-      inter_work[EulerMoreauOSI::VEC_Z].reset(new SiconosVector(sizeZ));
       inter_work[EulerMoreauOSI::VEC_X].reset(new SiconosVector(sizeOfDS));
       inter_work[EulerMoreauOSI::VEC_RESIDU_Y].reset(new SiconosVector(sizeY));
       inter_work[EulerMoreauOSI::H_ALPHA].reset(new SiconosVector(sizeY));
 
       if(relationSubType == NonLinearR || relationSubType == Type2R)
       {
-        inter_work[EulerMoreauOSI::G_ALPHA].reset(new SiconosVector(sizeOfDS));
+        // inter_work[EulerMoreauOSI::G_ALPHA].reset(new SiconosVector(sizeOfDS));
+        inter_work_block[EulerMoreauOSI::G_ALPHA].reset(new BlockVector(1, sizeOfDS));
         inter_work[EulerMoreauOSI::VEC_RESIDU_R].reset(new SiconosVector(sizeOfDS));
         inter_work_mat[EulerMoreauOSI::MAT_KHAT].reset(new SimpleMatrix(sizeOfDS, sizeY));
         inter_work_mat[EulerMoreauOSI::MAT_KTILDE].reset(new SimpleMatrix(sizeOfDS, sizeY));
@@ -843,7 +840,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
           else
             prod(*relationMat[FirstOrderR::mat_B], *inter.lambda(0), *inter_work[EulerMoreauOSI::VEC_X], true);
 
-          xPartialNS = *inter_work[EulerMoreauOSI::G_ALPHA];
+          xPartialNS = *inter_work_block[EulerMoreauOSI::G_ALPHA];
           xPartialNS -= *inter_work[EulerMoreauOSI::VEC_X];
         }
       }
@@ -1274,13 +1271,9 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
         DEBUG_EXPR(y.display());
       }
 
-      SiconosVector& x = *inter_work[EulerMoreauOSI::VEC_X];
-      x = *DSlink[FirstOrderR::x];
-
-
       SiconosVector& hAlpha= *inter_work[EulerMoreauOSI::H_ALPHA];
 
-      r.computeh(time, x, *inter.lambda(level), hAlpha);
+      r.computeh(time, *DSlink[FirstOrderR::x], *inter.lambda(level), hAlpha);
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : new Halpha \n");
       DEBUG_EXPR(hAlpha.display());
     }
@@ -1339,17 +1332,11 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : new linearized y \n");
       DEBUG_EXPR(y.display());
 
-      SiconosVector& x = *inter_work[EulerMoreauOSI::VEC_X];
-      x = *DSlink[FirstOrderR::x];
-      SiconosVector& z = *inter_work[EulerMoreauOSI::VEC_Z];
-      z = *DSlink[FirstOrderR::z];
-
       SiconosVector& hAlpha =  *inter_work[EulerMoreauOSI::H_ALPHA];
-      r.computeh(time, x, *inter.lambda(level), z, hAlpha);
+      r.computeh(time, *DSlink[FirstOrderR::x], *inter.lambda(level), *DSlink[FirstOrderR::z], hAlpha);
       DEBUG_EXPR(x.display(););
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : new Halpha \n");
       DEBUG_EXPR(hAlpha.display());
-      *DSlink[FirstOrderR::z] = z;
     }
     else
       inter.computeOutput(time, level);
@@ -1391,16 +1378,17 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       lambda -= *(inter.lambdaOld(level));
 
       if(r.B())
-        prod(*r.B(), lambda, *inter_work[EulerMoreauOSI::G_ALPHA], false);
+        prod(*r.B(), lambda, *inter_work_block[EulerMoreauOSI::G_ALPHA], false);
       else
-        prod(*relationMat[FirstOrderR::mat_B], lambda, *inter_work[EulerMoreauOSI::G_ALPHA], false);
+        prod(*relationMat[FirstOrderR::mat_B], lambda, *inter_work_block[EulerMoreauOSI::G_ALPHA], false);
 
 
       *DSlink[FirstOrderR::r] += *inter_work[EulerMoreauOSI::G_ALPHA];
       DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
       //compute the new g_alpha
-      r.computeg(time, *inter.lambda(level), *inter_work[EulerMoreauOSI::G_ALPHA]);
-      DEBUG_EXPR(inter_work[EulerMoreauOSI::G_ALPHA]->display(););
+
+      r.computeg(time, *inter.lambda(level), *inter_work_block[EulerMoreauOSI::G_ALPHA]);
+      DEBUG_EXPR(inter_work_block[EulerMoreauOSI::G_ALPHA]->display(););
     }
     else if(relationSubType == NonLinearR)
     {
@@ -1413,7 +1401,9 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       SiconosVector lambda = *inter.lambda(level);
       lambda -= *(inter.lambdaOld(level));
 
-      SiconosVector& g_alpha = *inter_work[EulerMoreauOSI::G_ALPHA];
+      // Remind that g_alpha has only one block
+      SiconosVector& g_alpha = *(*inter_work_block[EulerMoreauOSI::G_ALPHA]).vector(0);
+
 
       if(r.B())
         prod(*r.B(), lambda, g_alpha, false);
@@ -1436,12 +1426,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       *DSlink[FirstOrderR::r] += g_alpha;
 
       //compute the new g_alpha
-      SiconosVector& x = *inter_work[EulerMoreauOSI::VEC_X];
-      x = *DSlink[FirstOrderR::x];
-      SiconosVector& z = *inter_work[EulerMoreauOSI::VEC_Z];
-      z = *DSlink[FirstOrderR::z];
-      r.computeg(time, x, *inter.lambda(level), z, g_alpha);
-      *DSlink[FirstOrderR::z] = z;
+      r.computeg(time, *DSlink[FirstOrderR::x], *inter.lambda(level), *DSlink[FirstOrderR::z], *inter_work_block[EulerMoreauOSI::G_ALPHA]);
 
     }
     else

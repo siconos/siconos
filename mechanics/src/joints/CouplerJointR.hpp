@@ -77,7 +77,12 @@ public:
                 SP::NewtonEulerDS refds1, unsigned int ref1_index,
                 SP::NewtonEulerDS refds2, unsigned int ref2_index);
 
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+  */
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
@@ -181,7 +186,7 @@ public:
   };
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+  virtual void computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                            unsigned int axis);
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */

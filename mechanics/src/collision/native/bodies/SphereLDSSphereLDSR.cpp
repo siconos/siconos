@@ -40,7 +40,7 @@ double SphereLDSSphereLDSR::distance(double x1, double y1, double z1, double r1,
 }
 
 
-void SphereLDSSphereLDSR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void SphereLDSSphereLDSR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
 
   y.setValue(0, distance(q(0), q(1), q(2), r1,
@@ -49,7 +49,7 @@ void SphereLDSSphereLDSR::computeh(SiconosVector& q, SiconosVector& z, SiconosVe
 
 };
 
-void SphereLDSSphereLDSR::computeJachq(SiconosVector& q, SiconosVector& z)
+void SphereLDSSphereLDSR::computeJachq(const BlockVector& q, BlockVector& z)
 {
 
   double A, B, C;
