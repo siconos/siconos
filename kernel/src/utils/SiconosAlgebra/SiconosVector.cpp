@@ -266,36 +266,6 @@ SiconosVector::~SiconosVector()
 }
 
 
-// Copy a block vector into a SiconosVector
-// in order to handle contiguous memory.
-void SiconosVector::block2contiguous(const BlockVector & vIn)
-{
-  if(_dense)
-    delete(vect.Dense);
-  else
-    delete(vect.Sparse);
-
-  if(ask<IsDense>(**(vIn.begin())))  // dense
-  {
-    _dense = true;
-    vect.Dense = new DenseVect(vIn.size());
-  }
-  else
-  {
-    _dense = false;
-    vect.Sparse = new SparseVect(vIn.size());
-  }
-
-  VectorOfVectors::const_iterator it;
-  unsigned int pos = 0;
-  for(it = vIn.begin(); it != vIn.end(); ++it)
-  {
-    setBlock(pos, **it);
-    pos += (*it)->size();
-  }
-
-}
-
 // =================================================
 //        get Ublas component (dense or sparse)
 // =================================================

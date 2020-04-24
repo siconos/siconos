@@ -556,13 +556,11 @@ SP::SiconosVector BlockVector::prepareVectorForPlugin() const
   {
     if(_tabIndex->size()> 1)
     {
-      std::cout << "case 1 " << std::endl;
       SP::SiconosVector copy(new SiconosVector(*this));
       return copy;
     }
     else
     {
-      std::cout << "case 2 " << std::endl;
       // No copy, just a ref.
       return _vect[0];
     }

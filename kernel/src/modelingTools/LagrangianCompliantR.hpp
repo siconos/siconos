@@ -104,7 +104,7 @@ public:
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector& q, SiconosVector& lambda, BlockVector& z, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& q, const SiconosVector& lambda, BlockVector& z, SiconosVector& y);
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param time current time value
@@ -112,7 +112,7 @@ public:
       \param lambda interaction \f$\lambda\f$ vector
       \param z user defined parameters (optional)
   */
-  virtual void computeJachq(double time, const BlockVector& q, SiconosVector& lambda, BlockVector& z);
+  virtual void computeJachq(double time, const BlockVector& q, const SiconosVector& lambda, BlockVector& z);
 
   /** compute the jacobian of h w.r.t. \f$\lambda\f$. Set attribute _jachlambda (access: jacqhlambda())
       \param time current time value
@@ -120,7 +120,7 @@ public:
       \param lambda interaction \f$\lambda\f$ vector
       \param z user defined parameters (optional)
   */
-  virtual void computeJachlambda(double time, const BlockVector& q0, SiconosVector& lambda, BlockVector& z);
+  virtual void computeJachlambda(double time, const BlockVector& q0, const SiconosVector& lambda, BlockVector& z);
 
   /** to compute output
   *  \param time the current time

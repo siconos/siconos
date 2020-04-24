@@ -57,38 +57,38 @@ void LagrangianCompliantR::initialize(Interaction& inter)
 void LagrangianCompliantR::checkSize(Interaction& inter)
 {
 }
-void LagrangianCompliantR::computeh(double time, const BlockVector& q0, SiconosVector& lambda, BlockVector& z, SiconosVector& y)
+void LagrangianCompliantR::computeh(double time, const BlockVector& q0, const SiconosVector& lambda, BlockVector& z, SiconosVector& y)
 {
   
   if(_pluginh->fPtr)
   {
     auto qp = q0.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
-    ((FPtr2)(_pluginh->fPtr))(qp->size(), &(*qp)(0), y.size(), &(lambda)(0), &(y)(0), zp->size(), &(*zp)(0));
+    ((FPtr2)(_pluginh->fPtr))(qp->size(), &(*qp)(0), y.size(), lambda.getArray(), &(y)(0), zp->size(), &(*zp)(0));
     z = *zp;
   }
 }
 
-void LagrangianCompliantR::computeJachq(double time, const BlockVector& q0, SiconosVector& lambda, BlockVector& z)
+void LagrangianCompliantR::computeJachq(double time, const BlockVector& q0, const SiconosVector& lambda, BlockVector& z)
 {
 
   if(_jachq && _pluginJachq->fPtr)
   {
     auto qp = q0.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
-    ((FPtr2)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), lambda.size(), &(lambda)(0), &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
+    ((FPtr2)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), lambda.size(), lambda.getArray(), &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
     z = *zp;
   }
 }
 
-void LagrangianCompliantR::computeJachlambda(double time, const BlockVector& q0, SiconosVector& lambda, BlockVector& z)
+void LagrangianCompliantR::computeJachlambda(double time, const BlockVector& q0, const SiconosVector& lambda, BlockVector& z)
 {
 
   if(_jachlambda && _pluginJachlambda->fPtr)
   {
     auto qp = q0.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
-    ((FPtr2)_pluginJachlambda->fPtr)(qp->size(), &(*qp)(0), lambda.size(), &(lambda)(0), &(*_jachlambda)(0, 0), zp->size(), &(*zp)(0));
+    ((FPtr2)_pluginJachlambda->fPtr)(qp->size(), &(*qp)(0), lambda.size(), lambda.getArray(), &(*_jachlambda)(0, 0), zp->size(), &(*zp)(0));
     z = *zp;
   }
 }

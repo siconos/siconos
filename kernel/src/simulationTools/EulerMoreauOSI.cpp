@@ -808,7 +808,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
     SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(*dsi).W;
     computeW(time, *ds, dsv, *W);
   }
-
+  
   if(!_explicitJacobiansOfRelation)
   {
     _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
@@ -1366,7 +1366,6 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
     VectorOfSMatrices& relationMat = inter.relationMatrices();
 
     InteractionProperties& interProp = indexSet0->properties(*ui);
-    VectorOfVectors& inter_work = *interProp.workVectors;
     VectorOfSMatrices& inter_work_mat = *interProp.workMatrices;
     VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
@@ -1383,7 +1382,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
         prod(*relationMat[FirstOrderR::mat_B], lambda, *inter_work_block[EulerMoreauOSI::G_ALPHA], false);
 
 
-      *DSlink[FirstOrderR::r] += *inter_work[EulerMoreauOSI::G_ALPHA];
+      *DSlink[FirstOrderR::r] += *inter_work_block[EulerMoreauOSI::G_ALPHA];
       DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
       //compute the new g_alpha
 
@@ -1464,12 +1463,13 @@ double EulerMoreauOSI::computeResiduInput(double time, SP::InteractionsGraph ind
   {
     InteractionProperties& interProp = indexSet->properties(*ui);
     VectorOfVectors& inter_work = *interProp.workVectors;
+    VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
     SP::Interaction inter = indexSet->bundle(*ui);
     VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
     SiconosVector&  residuR = *inter_work[EulerMoreauOSI::VEC_RESIDU_R];
     //Residu_r = r_alpha_k+1 - g_alpha;
     residuR = *DSlink[FirstOrderR::r];
-    residuR -= *inter_work[EulerMoreauOSI::G_ALPHA];
+    residuR -= *inter_work_block[EulerMoreauOSI::G_ALPHA];
     DEBUG_EXPR(residuR.display(););
     residu = std::max(residu,residuR.norm2());
   }

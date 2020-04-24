@@ -596,6 +596,22 @@ struct IsDense : public Question<bool>
 
 }
 
+%fragment("BlockVector", "header", fragment="NumPy_Fragments")
+{
+  // This part is required to handle BlockVector in
+  // 'plugin' functions like computeh in Relations.
+  PyObject * BlockVector_to_numpy(BlockVector const & v)
+  {
+    return SP_SiconosVector_to_numpy(v.prepareVectorForPlugin());
+  }
+
+  PyObject * SP_BlockVector_to_numpy(SP::BlockVector v)
+  {
+    return SP_SiconosVector_to_numpy(v->prepareVectorForPlugin());
+  }
+}
+
+
 %fragment("SiconosMatrix", "header", fragment="NumPy_Fragments")
 {
   PyObject* SiconosMatrix_to_numpy(SiconosMatrix& m)
@@ -952,6 +968,21 @@ struct IsDense : public Question<bool>
   //%typemap(directorin, fragment="SiconosVector") SiconosVector & ()
   $input = SiconosVector_to_numpy($1_name);
 }
+
+// director input : TYPE -> numpy
+%typemap(out, fragment="BlockVector") BlockVector & ()
+{
+  // %typemap(out, fragment="BlockVector") BlockVector& ()
+  $result = BlockVector_to_numpy(*$1);
+}
+
+// director input : TYPE -> numpy
+%typemap(directorin, fragment="BlockVector") BlockVector & ()
+{
+  //%typemap(directorin, fragment="BlockVector") BlockVector & ()
+  $input = BlockVector_to_numpy($1_name);
+}
+
 
 //%typemap(directorout, fragment="NumPy_Fragments") (SiconosMatrix&) ()
 //{

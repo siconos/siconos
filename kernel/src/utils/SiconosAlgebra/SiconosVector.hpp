@@ -123,16 +123,6 @@ public:
    */
   ~SiconosVector();
 
-  /** Copy a the content of a BlockVector into a SiconosVector
-
-      The aim of this function is to be able to handle contiguous memory
-      (which is not guaranteed in a BlockVector).
-
-      This could be have been done with a constructor but
-      doing so leads to implicit copy-construction in operators call.
-   */
-  void block2contiguous(const BlockVector & vIn);
-
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
