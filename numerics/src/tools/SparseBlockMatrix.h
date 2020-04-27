@@ -24,6 +24,7 @@
 #include "NumericsFwd.h"    // for SparseBlockStructuredMatrix, SparseBlockC...
 
 #include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsDataVersion.h" // versioning
 
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to
@@ -129,6 +130,7 @@ struct SparseBlockStructuredMatrix
   /* the indices of the diagonal blocks */
   unsigned int * diagonal_blocks;
 
+  NumericsDataVersion version; /**< version of storage */
 };
 
 struct SparseBlockCoordinateMatrix
@@ -402,7 +404,7 @@ extern "C"
   */
   unsigned int SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, unsigned int row);
 
-  int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col, double val);
+  int SBM_zentry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int col, double val);
 
   /** get the element of row i and column j of the matrix M
      \param M the SparseBlockStructuredMatrix matrix

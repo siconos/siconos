@@ -50,6 +50,12 @@
 #pragma clang diagnostic ignored "-Wfloat-conversion"
 #endif
 #endif
+
+void SBM_inc_version(SparseBlockStructuredMatrix* M)
+{
+  NDV_inc(&(M->version));
+}
+
 void SBM_null(SparseBlockStructuredMatrix* sbm)
 {
   sbm->nbblocks = 0;
@@ -63,6 +69,8 @@ void SBM_null(SparseBlockStructuredMatrix* sbm)
   sbm->index1_data = NULL;
   sbm->index2_data = NULL;
   sbm->diagonal_blocks = NULL;
+
+  NDV_reset(&(sbm->version));
 }
 
 SparseBlockStructuredMatrix* SBM_new(void)
@@ -769,6 +777,7 @@ void SBM_scal(double alpha, SparseBlockStructuredMatrix * A)
     }
   }
 
+  SBM_inc_version(A);
   DEBUG_END("SBM_scal(...)\n");
 
 }
@@ -2108,7 +2117,7 @@ unsigned int SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, unsi
   /* return pos; */
 }
 
-int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col, double val)
+int SBM_zentry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int col, double val)
 {
   DEBUG_BEGIN("SBM_zentry(...)\n");
   DEBUG_PRINTF("row= %i, col =% i, val =%e\n", row, col, val);
@@ -2177,6 +2186,7 @@ int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, uns
 
       M->block[blockNum][row_pos + col_pos * nbRows] = val;
       DEBUG_END("SBM_zentry(...)\n");
+      SBM_inc_version(M);
       return 1;
     }
   }

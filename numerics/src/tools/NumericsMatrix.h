@@ -28,6 +28,7 @@
 #include <stdlib.h>         // for malloc
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
+#include "NumericsDataVersion.h" // Versioning
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
 #ifndef __cplusplus
@@ -71,6 +72,7 @@ struct NumericsMatrix
 
   NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace among other things */
 
+  NumericsDataVersion version; /*< version of dense storage */
 };
 
 typedef struct
@@ -227,6 +229,7 @@ extern "C"
     A->matrix1 = nullptr;
     A->matrix2 = nullptr;
     A->internalData = nullptr;
+    NDV_reset(&(A->version));
   }
 
   /** update the size of the matrix based on the matrix data
@@ -827,6 +830,16 @@ extern "C"
    */
   BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A);
 
+  /* Reset the version of a NM_types storage.
+   *\param M the NumericsMatrix,
+   *\param id the NM_types storage
+   */
+  void NM_reset_version(NumericsMatrix* M, NM_types id);
+
+  /* Reset versions of all storages.
+   *\param M the NumericsMatrix
+   */
+  void NM_reset_versions(NumericsMatrix* M);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

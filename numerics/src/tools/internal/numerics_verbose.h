@@ -49,6 +49,20 @@ extern "C"
     }                                                                   \
   } while (0)
 
+/** Check return code of a first expression and execute the second */
+#define CHECK_AND_DO(EXPR, TODOIFOK)                                    \
+  do                                                                    \
+  {                                                                     \
+    if (!EXPR)                                                          \
+    {                                                                   \
+      fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d\n",  \
+               #EXPR, __FILE__, __LINE__);                              \
+    }                                                                   \
+    else                                                                \
+    {                                                                   \
+      (TODOIFOK);                                                       \
+    }                                                                   \
+  } while (0)
 
 /** check IO
  */

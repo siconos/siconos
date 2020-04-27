@@ -113,6 +113,8 @@ FrictionContactProblem* from_fclib_local(const fclib_local* fclib_problem)
   free(W.p);
   free(W.i);
 
+  NM_reset_versions(problem->M);
+
   return problem;
 
 }
@@ -360,6 +362,7 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
 
   return problem;
 
+  NM_reset_versions(problem->M);
 }
 
 
