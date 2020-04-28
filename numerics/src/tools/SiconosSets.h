@@ -97,7 +97,7 @@ extern "C"
    * \param set the set which id should be set
    * \param id the id of the set
    */
-  static inline void set_set_id(void* set, unsigned id)
+  static inline void set_set_id(void* set, int id)
   {
     ((generic_set*)set)->id = id;
   }

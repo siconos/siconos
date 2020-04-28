@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,13 +129,20 @@ public:
   */
   virtual ~Lagrangian2d1DR() {};
 
-  virtual void computeJachq(SiconosVector& q, SiconosVector& z);
-
   virtual void initialize(Interaction& inter);
 
-  /* Default implementation of computeh updates contact points and
-   * distance for q if different than qold. */
-  virtual void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
+  /** to compute the output y = h(q,z) of the Relation
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
+  */
+  virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  virtual void computeJachq(const BlockVector& q, BlockVector& z);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

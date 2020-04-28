@@ -49,7 +49,7 @@ private:
   CPPUNIT_TEST(testConstructor4);
   CPPUNIT_TEST(testConstructor5);
   CPPUNIT_TEST(testConstructor6);
-  CPPUNIT_TEST(testBlock2Contiguous);
+  CPPUNIT_TEST(testConstructor7);
   CPPUNIT_TEST(testZero);
   CPPUNIT_TEST(testNorm);
   CPPUNIT_TEST(testResize);
@@ -85,6 +85,7 @@ private:
   void testConstructor4();
   void testConstructor5();
   void testConstructor6();
+  void testConstructor7();
   void testBlock2Contiguous();
   void testZero();
   void testFill();

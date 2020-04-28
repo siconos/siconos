@@ -118,7 +118,7 @@ public:
   void computeV1V2FromAxis();
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+  virtual void computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                            unsigned int axis);
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
@@ -132,9 +132,14 @@ public:
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0 );
 
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+  */
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
-  virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
+  virtual void computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot);
 
   /* The options were    : operatorarrow */
   double H1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,

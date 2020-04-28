@@ -39,7 +39,12 @@ public:
     return _contactPoints;
   };
 
-  virtual void computeh(double time, BlockVector&, SiconosVector&);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+  */
+  virtual void computeh(double time, const BlockVector& q, SiconosVector& y);
 
   ACCEPT_STD_VISITORS();
 };

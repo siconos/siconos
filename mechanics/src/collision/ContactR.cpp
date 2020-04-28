@@ -31,7 +31,7 @@ ContactR::ContactR()
 {
 }
 
-void ContactR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void ContactR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   DEBUG_BEGIN("ContactR::computeh(...)\n");
 

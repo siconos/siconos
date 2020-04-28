@@ -179,19 +179,19 @@ void SiconosVectorTest::testConstructor6()
   std::cout << "--> Constructor 6 test ended with success." <<std::endl;
 }
 
-// creates from a BlockVector
-void SiconosVectorTest::testBlock2Contiguous()
+
+// EXPLICIT copy from a block
+void SiconosVectorTest::testConstructor7()
 {
-  std::cout << "--> Test: init SiconoVector from a BlockVector." <<std::endl;
-  int size = xB->size();
-  SP::SiconosVector v(new SiconosVector(size));
-  v->block2contiguous(*xB);
+  std::cout << "--> Test: constructor 7." <<std::endl;
+  SP::SiconosVector v(new SiconosVector(*xB));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("init from block : ", v->size() == xB->size(), true);
   for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("init from block : ", (*v)(i) == (*xB)(i), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("init from block: ", v->num() == 1, true);
-  std::cout << "--> init SiconoVector from a BlockVector test ended with success." <<std::endl;
+  std::cout << "--> Constructor 7 test ended with success." <<std::endl;
 }
+
 
 // zero
 void SiconosVectorTest::testZero()

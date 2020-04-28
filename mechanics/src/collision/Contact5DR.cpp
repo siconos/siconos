@@ -31,7 +31,7 @@ Contact5DR::Contact5DR()
 {
 }
 
-void Contact5DR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void Contact5DR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   DEBUG_BEGIN("Contact5DR::computeh(...)\n");
 

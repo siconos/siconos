@@ -83,7 +83,7 @@
 // defined in SimpleMatrix.cpp
 %ignore private_addprod;
 %ignore private_prod;
-%ignore prod;
+// %ignore prod;
 %ignore axpy_prod;
 %ignore subprod;
 %ignore axpy_prod;
@@ -307,6 +307,11 @@ KERNEL_REGISTRATION()
   };
 
   const SP::SiconosMatrix getMatrix(SP::SiconosMatrix v)
+  {
+    return v;
+  };
+
+  const SP::BlockVector getVector(SP::BlockVector v)
   {
     return v;
   };

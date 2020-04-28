@@ -203,14 +203,16 @@ void CouplerJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
   _offset = y1(0) * _ratio - y2(0);
 }
 
-void CouplerJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void CouplerJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   SiconosVector y1(y), y2(y);
 
   // Get current positions of the implicated degrees of freedom
   BlockVector q01, q02;
-  makeBlockVectors(q0.vector(0),
-                   q0.getAllVect().size()>1 ? q0.vector(1) : SP::SiconosVector(),
+  // SP::SiconosVector v0 = q0.vector(0);
+  // const_cast<BlockVector&>(q0)
+  makeBlockVectors(const_cast<BlockVector&>(q0).vector(0),
+                   q0.getAllVect().size()>1 ? const_cast<BlockVector&>(q0).vector(1) : SP::SiconosVector(),
                    q01, q02);
   _joint1->computehDoF(time, q01, y1, _dof1);
   _joint2->computehDoF(time, q02, y2, _dof2);
@@ -265,7 +267,7 @@ void CouplerJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int ax
   */
 }
 
-void CouplerJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+void CouplerJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                                 unsigned int axis)
 {
   // The DoF of the constraint is the same as the constraint itself

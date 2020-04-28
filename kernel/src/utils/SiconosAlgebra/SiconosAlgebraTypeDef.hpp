@@ -194,6 +194,7 @@ TYPEDEF_SPTR(SparseVect)
 typedef ublas::vector<std::complex<double> > complex_vector;
 TYPEDEF_SPTR(complex_vector)
 
+
 // Set this to use lapack::optimal_workspace where required in lapack routines.
 #define USE_OPTIMAL_WORKSPACE
 

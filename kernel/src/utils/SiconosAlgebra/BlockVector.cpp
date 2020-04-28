@@ -147,6 +147,11 @@ void BlockVector::_update()
 //       fill vector
 // ===========================
 
+bool BlockVector::isDense() const
+{
+  return std::find_if(_vect.begin(), _vect.end(), TestDense()) != _vect.end();
+}
+
 void BlockVector::zero()
 {
   VectorOfVectors::iterator it;
@@ -543,6 +548,27 @@ double BlockVector::normInf() const
   }
   return d;
 }
+
+
+
+SP::SiconosVector BlockVector::prepareVectorForPlugin() const
+{
+  {
+    if(_tabIndex->size()> 1)
+    {
+      SP::SiconosVector copy(new SiconosVector(*this));
+      return copy;
+    }
+    else
+    {
+      // No copy, just a ref.
+      return _vect[0];
+    }
+  }
+}
+
+
+
 
 BlockVector& BlockVector::operator =(const SiconosVector& vIn)
 {

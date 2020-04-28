@@ -38,7 +38,7 @@ void Lagrangian2d2DR::initialize(Interaction& inter)
   _jachq.reset(new SimpleMatrix(2, qSize));
 }
 
-void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
+void Lagrangian2d2DR::computeJachq(const BlockVector& q, BlockVector& z)
 {
   DEBUG_BEGIN("Lagrangian2d2DR::computeJachq(Interaction& inter, SP::BlockVector q0 \n");
 
@@ -103,7 +103,7 @@ double Lagrangian2d2DR::distance() const
 
 }
 
-void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void Lagrangian2d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
   DEBUG_BEGIN("Lagrangian2d2DR::computeh(...)\n");
   DEBUG_EXPR(q.display());

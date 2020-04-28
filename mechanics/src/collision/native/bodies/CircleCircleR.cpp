@@ -32,7 +32,7 @@ double CircleCircleR::distance(double x1, double y1, double r1, double x2, doubl
 
 }
 
-void CircleCircleR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void CircleCircleR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
 
   double q_0 = q(0);
@@ -44,7 +44,7 @@ void CircleCircleR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& 
 
 }
 
-void CircleCircleR::computeJachq(SiconosVector& q, SiconosVector& z)
+void CircleCircleR::computeJachq(const BlockVector& q, BlockVector& z)
 {
 
   SimpleMatrix *g = (SimpleMatrix *) _jachq.get();

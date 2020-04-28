@@ -26,7 +26,7 @@ Bullet1DR::Bullet1DR(SP::btManifoldPoint point) : NewtonEuler1DR(), _contactPoin
 {
 }
 
-void Bullet1DR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void Bullet1DR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   y.setValue(0, _contactPoints->getDistance());
   btVector3 posa = _contactPoints->getPositionWorldOnA();

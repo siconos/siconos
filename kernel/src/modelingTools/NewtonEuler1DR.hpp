@@ -144,9 +144,12 @@ public:
    */
   virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
 
-  /* Default implementation of computeh updates contact points and
-   * distance for q if different than qold. */
-  virtual void computeh(double time, BlockVector& q0, SiconosVector &y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+  */
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector &y);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

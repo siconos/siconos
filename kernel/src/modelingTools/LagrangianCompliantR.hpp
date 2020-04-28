@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,30 +97,30 @@ public:
   */
   virtual ~LagrangianCompliantR() {};
 
-  /** compute y = h(q,v,t) using plug-in mechanism
-  * \param time the current time
-  * \param q vector of coordinates
-  * \param lambda vector for \f[ \lambda \f]
-  * \param z parameter vector
-  * \param y vector for y
+  /** to compute the output y = h(q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param lambda interaction \f$\lambda\f$ vector
+      \param z user defined parameters (optional)
+      \param y the resulting vector
   */
-  virtual void computeh(double time, SiconosVector& q, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& q, const SiconosVector& lambda, BlockVector& z, SiconosVector& y);
 
-  /** compute the jacobian of h w.r.t. q using plug-in mechanism
-  * \param time current time
-  * \param q vector of coordinates
-  * \param lambda vector for \f[ \lambda \f]
-  * \param z parameter vector
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param lambda interaction \f$\lambda\f$ vector
+      \param z user defined parameters (optional)
   */
-  virtual void computeJachq(double time, SiconosVector& q, SiconosVector& lambda, SiconosVector& z);
+  virtual void computeJachq(double time, const BlockVector& q, const SiconosVector& lambda, BlockVector& z);
 
-  /** compute the jacobian of h w.r.t. \f$\lambda\f$ using plug-in mechanism
-  * \param time  current time
-  * \param q0 coordinates
-  * \param lambda vector for \f[ \lambda \f]
-  * \param z vector of parameters
+  /** compute the jacobian of h w.r.t. \f$\lambda\f$. Set attribute _jachlambda (access: jacqhlambda())
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param lambda interaction \f$\lambda\f$ vector
+      \param z user defined parameters (optional)
   */
-  virtual void computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
+  virtual void computeJachlambda(double time, const BlockVector& q0, const SiconosVector& lambda, BlockVector& z);
 
   /** to compute output
   *  \param time the current time

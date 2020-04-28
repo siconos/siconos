@@ -41,7 +41,7 @@ double SphereNEDSPlanR::distance(double x, double y, double z, double rad)
 }
 
 
-void SphereNEDSPlanR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void SphereNEDSPlanR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
 
   double q_0 = q0(0);

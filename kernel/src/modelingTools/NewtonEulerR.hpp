@@ -184,12 +184,12 @@ public:
    */
   virtual void checkSize(Interaction& inter);
 
-  /** to compute y = h(q,v,t) using plug-in mechanism
-  * \param time current time
-  * \param q0 the position
-  * \param y the output
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
   */
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
   /** default function to compute jacobianH
    * \param time current time
@@ -221,7 +221,7 @@ public:
      */
     assert(0) ;
   }
-  virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);
+  virtual void computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot);
 
 
   /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
