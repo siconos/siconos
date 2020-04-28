@@ -198,7 +198,7 @@ int MLCP::compute(double time)
     if(!info)
       postCompute();
     else
-      printf("MLCP solver failed\n");
+      printf("[kernel] MLCP::compute -- MLCP solver failed\n");
 
   }
   else

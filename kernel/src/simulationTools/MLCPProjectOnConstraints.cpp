@@ -52,6 +52,14 @@ void MLCPProjectOnConstraints::initOSNSMatrix()
 
 
 // Constructor from a set of data
+MLCPProjectOnConstraints::MLCPProjectOnConstraints(SP::SolverOptions options, double alphaval):
+  MLCP(options), _alpha(alphaval)
+{
+  _indexSetLevel = 2;
+  _inputOutputLevel = 0;
+}
+
+// Constructor from a set of data
 MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int numericsSolverId, double alphaval):
   MLCP(numericsSolverId), _alpha(alphaval)
 {
