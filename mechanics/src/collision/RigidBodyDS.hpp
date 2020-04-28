@@ -44,7 +44,7 @@ protected:
 
   /** If false, bodies connected to this body by a joint will not
    * collide. See also NewtonEulerJointR::_allowSelfCollide */
-  bool _allowSelfCollide true;
+  bool _allowSelfCollide = true;
 
 public:
 
