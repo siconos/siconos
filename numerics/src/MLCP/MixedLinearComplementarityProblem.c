@@ -25,6 +25,57 @@
 #include "NumericsMatrix.h"    // for NM_dense_display, NumericsMatrix, NM_c...
 #include "numerics_verbose.h"  // for CHECK_IO
 
+
+
+
+
+void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem)
+{
+  if(problem->isStorageType1)
+  {
+    NM_clear(problem->M);
+    free(problem->M);
+    free(problem->q);
+    free(problem->blocksRows);
+    free(problem->blocksIsComp);
+  }
+  if(problem->isStorageType2)
+  {
+    free(problem->A);
+    free(problem->B);
+    free(problem->C);
+    free(problem->D);
+    free(problem->a);
+    free(problem->b);
+  }
+  free(problem);
+}
+
+MixedLinearComplementarityProblem* mixedLinearComplementarity_new(void)
+{
+  MixedLinearComplementarityProblem* mlcp = (MixedLinearComplementarityProblem*) malloc(sizeof(MixedLinearComplementarityProblem));
+
+  mlcp->isStorageType1 = 0;
+  mlcp->isStorageType2 = 0;
+  mlcp->m = 0;
+  mlcp->n = 0;
+
+  mlcp->blocksRows = NULL;
+  mlcp->blocksIsComp = NULL;
+
+  mlcp->M = NULL;
+  mlcp->q = NULL;
+  mlcp->A = NULL;
+  mlcp->B = NULL;
+  mlcp->C = NULL;
+  mlcp->D = NULL;
+  mlcp->a = NULL;
+  mlcp->b = NULL;
+
+  return mlcp;
+}
+
+
 void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 {
   int n = p->n;
@@ -486,53 +537,6 @@ int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem
 }
 
 
-
-
-void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem)
-{
-  if(problem->isStorageType1)
-  {
-    NM_clear(problem->M);
-    free(problem->M);
-    free(problem->q);
-    free(problem->blocksRows);
-    free(problem->blocksIsComp);
-  }
-  if(problem->isStorageType2)
-  {
-    free(problem->A);
-    free(problem->B);
-    free(problem->C);
-    free(problem->D);
-    free(problem->a);
-    free(problem->b);
-  }
-  free(problem);
-}
-
-MixedLinearComplementarityProblem* mixedLinearComplementarity_new(void)
-{
-  MixedLinearComplementarityProblem* mlcp = (MixedLinearComplementarityProblem*) malloc(sizeof(MixedLinearComplementarityProblem));
-
-  mlcp->isStorageType1 = 0;
-  mlcp->isStorageType2 = 0;
-  mlcp->m = 0;
-  mlcp->n = 0;
-
-  mlcp->blocksRows = NULL;
-  mlcp->blocksIsComp = NULL;
-
-  mlcp->M = NULL;
-  mlcp->q = NULL;
-  mlcp->A = NULL;
-  mlcp->B = NULL;
-  mlcp->C = NULL;
-  mlcp->D = NULL;
-  mlcp->a = NULL;
-  mlcp->b = NULL;
-
-  return mlcp;
-}
 
 MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedLinearComplementarityProblem* problem)
 {

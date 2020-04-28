@@ -57,6 +57,13 @@
  * \f$ u, w_{1}\f$ are vectors of size n.
  * \f$ v, w_{2}\f$ are vectors of size m.
  *
+ * ABCD format:
+ * \left[
+ * \begin{array}{cc}
+ * A & C \\
+ * D & B \\
+ * \end{array}
+ * \right]
  */
 struct MixedLinearComplementarityProblem
 {
@@ -92,6 +99,19 @@ extern "C"
 {
 #endif
 
+  /** \fn  void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem)
+   *  \brief function to delete a MixedLinearComplementarityProblem
+   *  \param problem  pointer to a MixedLinearComplementarityProblem to delete
+   */
+  void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem);
+
+  /** create empty MLCP
+   * \return empy MLCP
+   */
+  MixedLinearComplementarityProblem*  mixedLinearComplementarity_new(void);
+
+  /** display a MLCP
+   */
   void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p);
 
   /** \fn int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem*  problem, FILE* file)
@@ -130,17 +150,9 @@ extern "C"
    */
   int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename);
 
-  /** \fn  void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem)
-   *  \brief function to delete a MixedLinearComplementarityProblem
-   *  \param problem  pointer to a MixedLinearComplementarityProblem to delete
+  /** \fn  MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedLinearComplementarityProblem* problem);
+   *  \brief function to create a MLCP with ABCD format from M formatted MLCP
    */
-  void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem);
-
-  /** create empty MLCP
-   * \return empy MLCP
-   */
-  MixedLinearComplementarityProblem*  mixedLinearComplementarity_new(void);
-
 
   MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedLinearComplementarityProblem* problem);
 

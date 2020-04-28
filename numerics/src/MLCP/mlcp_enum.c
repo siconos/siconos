@@ -162,6 +162,12 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
   *info = 0;
   mlcp_buildIndexInBlock(problem, indexInBlock);
   initEnum(problem->m);
+  unsigned long long int nbCase =  computeNbCase(problem->m);
+
+  if (itermax < (int)nbCase)
+  {
+    numerics_warning("mlcp_enum_Block", "all the cases will not be enumerated since itermax < nbCase)");
+  }
 
   while(nextEnum(sW2V) && itermax-- > 0)
   {
@@ -303,6 +309,7 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
 
 void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
+  /* verbose=1; */
   int nbSol = 0;
   if(problem->blocksRows)
   {

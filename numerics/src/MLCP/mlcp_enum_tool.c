@@ -28,6 +28,15 @@ static int sMm = 0;
 
 static void affectW2V(int * W2V);
 
+
+unsigned long long int computeNbCase(int M)
+{
+  unsigned long long int nbCase = 1;
+  for(int cmp = 0; cmp < M; cmp++)
+    nbCase = nbCase << 1;
+  return nbCase;
+}
+
 void initEnum(int M)
 {
   /*  sCurrentEnum = 0;*/
@@ -35,11 +44,10 @@ void initEnum(int M)
   numerics_printf_verbose(1,"----- initEnum -- currentEnum :%i", (int)sCurrentEnum);
 
   sCmpEnum = 0;
-  sNbCase = 1;
   sMm = M;
 
-  for(int cmp = 0; cmp < sMm; cmp++)
-    sNbCase = sNbCase << 1;
+  sNbCase  = computeNbCase(M);
+
   sProgress = 0;
   numerics_printf_verbose(1,"----- initEnum -- number of cases :%i", (int)sNbCase);
 }
