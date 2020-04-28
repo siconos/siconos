@@ -112,7 +112,7 @@ public:
   *  seems parametrize the projection algorithm
   *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
   */
-  bool _isOnContact;
+  bool _isOnContact = false;
 
   /** constructorx
   */
