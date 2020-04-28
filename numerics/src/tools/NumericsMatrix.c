@@ -53,6 +53,30 @@
 #define restrict __restrict
 #endif
 
+void NM_null(NumericsMatrix* A)
+{
+  A->storageType=-1;
+  A->size0 =-1;
+  A->size1 =-1;
+  A->matrix0 = NULL;
+  A->matrix1 = NULL;
+  A->matrix2 = NULL;
+  A->internalData = NULL;
+}
+
+void NM_internalData_new(NumericsMatrix* M)
+  {
+    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
+    M->internalData->iWork = NULL;
+    M->internalData->iWorkSize = 0;
+    M->internalData->dWork = NULL;
+    M->internalData->dWorkSize = 0;
+    M->internalData->isLUfactorized = 0;
+#ifdef SICONOS_HAS_MPI
+    M->internalData->mpi_comm = MPI_COMM_NULL;
+#endif
+  }
+
 
 void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
                     double* const x, double* y)
