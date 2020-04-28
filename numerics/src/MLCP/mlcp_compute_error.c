@@ -63,7 +63,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
     {
       numerics_error("mlcp_compute_error: ", "null input for A, B, C or D");
     }
-    if(problem->a == NULL || problem->a == NULL)
+    if(problem->a == NULL || problem->b == NULL)
     {
       numerics_error("mlcp_compute_error: ", "null input for a or b");
     }

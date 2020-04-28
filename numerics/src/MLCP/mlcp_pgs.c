@@ -41,7 +41,6 @@
 void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double *w, int *info, SolverOptions* options)
 {
 
-  verbose=1;
   MixedLinearComplementarityProblem* problem;
 
   if(!problem_orig->isStorageType2)
@@ -78,7 +77,6 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
   double tol;
   double prev;
   double *diagA, *diagB;
-  verbose = 0;
 
   incx = 1;
   incy = 1;

@@ -395,7 +395,6 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
       {
         int cc = 0;
         int ii;
-        double residual = 0;
         for(ii = 0; ii < npm; ii++)
         {
           if(isnan(sQ[ii]) || isinf(sQ[ii]))
@@ -410,7 +409,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
         if(sMl > npm)
         {
-          residual = cblas_dnrm2(sMl - npm, sQ + npm, 1);
+          double residual = cblas_dnrm2(sMl - npm, sQ + npm, 1);
 
           if(residual > tol || isnan(residual) || isinf(residual))
           {
