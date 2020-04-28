@@ -110,8 +110,6 @@ GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file)
   {
     problem = NULL;
   }
-  problem->env = NULL;
-
   return problem;
 }
 

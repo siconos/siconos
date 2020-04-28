@@ -136,7 +136,6 @@ int main(int argc, char *argv[])
     if(file == 0)
     {
       printf("Could not open file\n");
-      fclose(file);
     }
     else
     {
