@@ -218,7 +218,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
     if(info && _warnOnNonConvergence)
     {
-      std::cout << " TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
+      std::cout << "[kernel] TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
     }
     _nsds->updateInput(nextTime(),0);
 
@@ -363,9 +363,9 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   if(_nbProjectionIteration == _projectionMaxIteration && _warnOnNonConvergence)
   {
-    std::cout << "TimeSteppingDirectProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
-    printf("              max criteria equality =  %e.\n", _maxViolationEquality);
-    printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
+    std::cout << "[kernel] TimeSteppingDirectProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
+    printf("[kernel]                max criteria equality =  %e.\n", _maxViolationEquality);
+    printf("[kernel]                max criteria unilateral =  %e.\n", _maxViolationUnilateral);
   }
 
 
