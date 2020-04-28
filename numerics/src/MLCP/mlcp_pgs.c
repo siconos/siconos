@@ -71,7 +71,7 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
 
   int incx, incy, incAx, incAy, incBx, incBy;
   int i, iter;
-  int itermax, verbose;
+  int itermax;
   int pgsExplicit;
   double err, vi;
   double tol;
