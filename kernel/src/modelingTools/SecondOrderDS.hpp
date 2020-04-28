@@ -124,7 +124,7 @@ protected:
   SP::SiconosMatrix _mass;
 
   /** true if the  mass matrix is constant */
-  bool _hasConstantMass;
+  bool _hasConstantMass = false;
 
   /** inverse or factorization of the mass of the system */
   SP::SimpleMatrix _inverseMass;
