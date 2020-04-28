@@ -2018,6 +2018,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             Newton_max_iter=20,
             set_external_forces=None,
             solver_options=None,
+            solver_options_pos=None,
             osnspb_max_size=0,
             exit_tolerance=None,
             projection_itermax=20,
@@ -2109,6 +2110,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             Note FP : already set in __enter__. Overwrite?
 
         solver_options : numerics SolverOptions, optional
+            OneStepNsProblem solver options set.
+            if solver_option is None, we leave Siconos/kernel choosing the default option
+            (see solvers documentation for details)
+
+        solver_options_pos : numerics SolverOptions for the position projection, optional
             OneStepNsProblem solver options set.
             if solver_option is None, we leave Siconos/kernel choosing the default option
             (see solvers documentation for details)
@@ -2373,7 +2379,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == sk.TimeSteppingDirectProjection:
-            osnspb_pos = sk.MLCPProjectOnConstraints(sn.SICONOS_MLCP_ENUM, 1.0)
+            if solver_options_pos is None:
+                osnspb_pos = sk.MLCPProjectOnConstraints(sn.SICONOS_MLCP_ENUM, 1.0)
+            else:
+                osnspb_pos = sk.MLCPProjectOnConstraints(solver_options_pos, 1.0)
+
             osnspb_pos.setMaxSize(osnspb_max_size)
             osnspb_pos.setMStorageType(sn.NM_DENSE)
             # "not yet implemented for sparse storage"
