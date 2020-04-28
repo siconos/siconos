@@ -512,9 +512,8 @@ double EulerMoreauOSI::computeResidu()
 
       // Note: indices k/k+1 corresponds to value at the beginning/end of the time step.
       // Newton iterate are x and r
-
       FirstOrderNonLinearDS& fonlds = *std::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-      FirstOrderLinearDS& folds = *std::static_pointer_cast<FirstOrderLinearDS>(ds);
+
 
       // 1 - Compute the free residu (purely on the "smooth" dynamics)
 
@@ -534,10 +533,12 @@ double EulerMoreauOSI::computeResidu()
       double coef = -h * (1 - _theta);
       if(dsType == Type::FirstOrderLinearDS)
       {
+
         // computes f(t_k,x_k)
         // No fold in FirstOrderLinearDS.
         // residu is used as a tmp buffer to compute Ax + b
         residu.zero();
+        FirstOrderLinearDS& folds = *std::static_pointer_cast<FirstOrderLinearDS>(ds);
         if(folds.A())
         {
           folds.computeA(told);
@@ -808,7 +809,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
     SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(*dsi).W;
     computeW(time, *ds, dsv, *W);
   }
-  
+
   if(!_explicitJacobiansOfRelation)
   {
     _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
