@@ -62,6 +62,8 @@ void NM_null(NumericsMatrix* A)
   A->matrix1 = NULL;
   A->matrix2 = NULL;
   A->internalData = NULL;
+
+
 }
 
 void NM_internalData_new(NumericsMatrix* M)
@@ -71,7 +73,8 @@ void NM_internalData_new(NumericsMatrix* M)
   M->internalData->iWorkSize = 0;
   M->internalData->dWork = NULL;
   M->internalData->dWorkSize = 0;
-  M->internalData->isLUfactorized = 0;
+  M->internalData->isInversed = false ;
+  M->internalData->isLUfactorized = false ;
 #ifdef SICONOS_HAS_MPI
   M->internalData->mpi_comm = MPI_COMM_NULL;
 #endif
@@ -4011,7 +4014,10 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
   NM_gemv(1, A, q, 0.0, z);
 
   int k =0;
-  while((fabs((eig-eig_old)/eig_old) > tol) && k < itermax)
+
+  double criteria = 1.0;
+  
+  while((criteria > tol) && k < itermax)
   {
     norm = cblas_dnrm2(n, z, 1);
     cblas_dscal(m, 1.0/norm, z, 1);
@@ -4037,7 +4043,12 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
     }
     /*numerics_printf_verbose(1,"eig[%i] = %32.24e \t error = %e, costheta = %e \n",k, eig, fabs(eig-eig_old)/eig_old, costheta );*/
     k++;
+    if (fabs(eig_old) > DBL_EPSILON)
+      criteria = fabs((eig-eig_old)/eig_old);
+    else
+      criteria = fabs((eig-eig_old));
   }
+  
 
   free(q);
   free(z);

@@ -917,7 +917,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 0 ( y = alpha*A*x + beta*y, double* storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
 
   /* sparse storage test for M1 */
@@ -933,7 +933,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 0 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
   /* end of sparse storage test for M1 */
 
@@ -947,7 +947,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 1 ( y = alpha*A*x + beta*y, double* storage, non square) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
 
   /* sparse storage test for M3 */
@@ -965,7 +965,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 1 ( y = alpha*A*x + beta*y, csc storage, non square) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
   /* end of sparse storage test for M3 */
 
@@ -986,7 +986,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 2 ( y = alpha*A*x + beta*y,  SBM  storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
 
   /* sparse storage test for M2 */
@@ -1002,7 +1002,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 2 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
   /* end of sparse storage test for M2 */
 
@@ -1014,7 +1014,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 3 ( y = alpha*A*x + beta*y,  SBM storage, non square) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
 
   /* sparse storage test for M4 */
@@ -1030,9 +1030,12 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 3 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
   /* end of sparse storage test for M4 */
+
+
+free_and_return:
 
   free(x);
   free(x2);
