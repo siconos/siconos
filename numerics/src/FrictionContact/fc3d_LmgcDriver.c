@@ -108,15 +108,15 @@ int fc3d_LmgcDriver(double *reaction,
   {
     FILE * file = fopen("tutu.c", "w");
 
-    fprintf(file, "int nc = %i ;\n ", nc);
-    fprintf(file, "int nb = %i ;\n ", nb);
+    fprintf(file, "int nc = %i ;\n ", (int)nc);
+    fprintf(file, "int nb = %i ;\n ", (int)nb);
     fprintf(file, "double mu[%i] ={\n", nc);
     for(unsigned int i = 0; i < nc - 1 ; i++)
     {
       fprintf(file, "%32.24e, \t", mu[i]);
     }
     fprintf(file, "%32.24e };\n", mu[nc - 1]);
-    fprintf(file, "int row[%i] ={\n", nb);
+    fprintf(file, "int row[%i] ={\n", (int)nb);
     for(unsigned int i = 0; i < nb - 1 ; i++)
     {
       fprintf(file, "%i,\t", row[i]);
@@ -168,8 +168,8 @@ int fc3d_LmgcDriver(double *reaction,
     if(fccounter % freq_output == 0)
     {
       char fname[256];
-      sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter);
-      printf("Dump LMGC_FC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter);
+      sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, fccounter);
+      printf("Dump LMGC_FC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, fccounter);
       /* printf("ndof = %i.\n", ndof); */
 
       FILE * foutput  =  fopen(fname, "w");
