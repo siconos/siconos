@@ -615,9 +615,9 @@ static SparseBlockStructuredMatrix * SBM_calloc_for_add(SparseBlockStructuredMat
     DEBUG_PRINTF("nb_blocks_in_rowB = %zu\n",nb_blocks_in_rowB);
 
     size_t number_of_blocks_in_row = NA_merge_and_sort_sorted_arrays(
-                                &(A->index2_data[A->index1_data[currentRowNumber]]),
-                                &(B->index2_data[B->index1_data[currentRowNumber]]),nb_blocks_in_rowA,nb_blocks_in_rowB,
-                                common_block);
+                                       &(A->index2_data[A->index1_data[currentRowNumber]]),
+                                       &(B->index2_data[B->index1_data[currentRowNumber]]),nb_blocks_in_rowA,nb_blocks_in_rowB,
+                                       common_block);
 
     DEBUG_EXPR(NA_display(common_block,number_of_blocks_in_row););
 

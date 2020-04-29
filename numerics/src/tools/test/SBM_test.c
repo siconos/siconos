@@ -533,8 +533,8 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   /* C3 and CRef must have the same values.*/
   info = SBM_dense_equal(C3.matrix1, Cref->matrix0, tol);
 
-  
-  
+
+
   if(info == 0)
     printf("Step 2 ( C = alpha*A*B + beta*C, SBM storage) ok ...\n");
   else
@@ -738,7 +738,7 @@ int SBM_gemm_without_allocation_all(void)
   }
 
   printf("End of Numerics tests for SBM_gemm_without_allocation : Sucessfull ...\n");
-  
+
   /* free memory */
 
   for(i = 0 ; i < nmm; i++)

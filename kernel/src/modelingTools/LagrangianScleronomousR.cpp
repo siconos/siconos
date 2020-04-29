@@ -159,7 +159,7 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
 
       assert(_jachq);
       prod(*_jachq, *DSlink[LagrangianR::q2], y);
-      
+
       if(!_dotjachq)
       {
         unsigned int sizeY = inter.dimension();

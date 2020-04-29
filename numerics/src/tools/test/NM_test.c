@@ -753,7 +753,7 @@ static int NM_gemm_test_all(void)
 
   printf("End of ProdNumericsMatrix ...\n");
 
-  
+
 
   /* free memory */
   for(i = 0 ; i < nmm; i++)
