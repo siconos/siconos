@@ -94,8 +94,6 @@ void LagrangianScleronomousR::computeh(const BlockVector& q, BlockVector& z, Sic
     auto zp = z.prepareVectorForPlugin();
     ((FPtr3)(_pluginh->fPtr))(qp->size(), &(*qp)(0), y.size(), &(y(0)), zp->size(), &(*zp)(0));
     z = *zp;
-    DEBUG_EXPR(qcopy.display());
-    DEBUG_EXPR(zcopy.display());
     DEBUG_EXPR(y.display());
 
   }
@@ -158,18 +156,17 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
     }
     else if(derivativeNumber == 2)
     {
-      if(!_dotjachq)
-      {
-        if(_plugindotjacqh && _plugindotjacqh->fPtr)
-        {
-          unsigned int sizeY = inter.dimension();
-          unsigned int sizeDS = inter.getSizeOfDS();
-          _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
-        }
-      }
-      computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], *DSlink[LagrangianR::q1]);
+
       assert(_jachq);
       prod(*_jachq, *DSlink[LagrangianR::q2], y);
+      
+      if(!_dotjachq)
+      {
+        unsigned int sizeY = inter.dimension();
+        unsigned int sizeDS = inter.getSizeOfDS();
+        _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
+      }
+      computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], *DSlink[LagrangianR::q1]);
       prod(*_dotjachq, *DSlink[LagrangianR::q1], y, false);
     }
     else
@@ -197,10 +194,13 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsi
 
 void LagrangianScleronomousR::computeJach(double time, Interaction& inter)
 {
+  DEBUG_BEGIN("void LagrangianScleronomousR::computeJach(double time, Interaction& inter) \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  DEBUG_EXPR(inter.display(););
   computeJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
   // computeJachqDot(time, inter);
   computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], *DSlink[LagrangianR::q1]);
   // computeJachlambda(time, inter);
   // computehDot(time,inter);
+  DEBUG_END("void LagrangianScleronomousR::computeJach(double time, Interaction& inter) \n");
 }
