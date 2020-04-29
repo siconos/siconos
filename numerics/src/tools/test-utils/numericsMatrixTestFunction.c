@@ -457,6 +457,9 @@ int test_build_first_4_NM(NumericsMatrix** MM)
   double tol = 1e-12;
   info = SBM_dense_equal(M2->matrix1, M1->matrix0, tol);
 
+  if(info)
+    return info;
+  
   /*   SBM_print(SBM2); */
   /* M3 and M4 must have the same values.*/
   info = SBM_dense_equal(M4->matrix1, M3->matrix0, tol);

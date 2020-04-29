@@ -45,11 +45,10 @@ void print_int_vector(const char* desc, int n, int* a)
 void print_vector_norm(const char* desc, int m, int n, double* a, int lda)
 {
   int i, j;
-  double norm;
   printf("\n %s\n", desc);
   for(j = 0; j < n; j++)
   {
-    norm = 0.0;
+    double norm = 0.0;
     for(i = 0; i < m; i++) norm += a[i+j*lda] * a[i+j*lda];
     printf(" %6.2f", norm);
   }
@@ -65,7 +64,6 @@ void free_test_collection(TestCase* collection, int nb_tests)
   }
 
   free(collection);
-  collection = NULL;
 }
 
 void print_test_info(int test_id, TestCase* current, const char* msg)
@@ -117,10 +115,9 @@ TestCase * build_test_collection_generic(int n_data, const char ** data_collecti
   int number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc(number_of_tests * sizeof(TestCase));
 
-  int current;
   for(int s=0; s <n_solvers; ++s)
   {
-    current = s * n_data;
+    int current = s * n_data;
     for(int d=0; d <n_data; ++d)
     {
       collection[current].filename = data_collection[d];
@@ -140,7 +137,6 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
   int out = 0;
   int n_failed = 0;
   int n_succeeded = 0;
-  clock_t t1, t2;
   long clk_tck = CLOCKS_PER_SEC;
 
   // Loop through tests collection
@@ -160,10 +156,10 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
       printf("Internal solver : %s (id: %d) \n", internal_name, sid);
     }
     printf("Data file : %s \n", collection[test_num].filename);
-    t1 = clock();
+    clock_t t1 = clock();
     // Execute a single test
     int info = test_function(&collection[test_num]);
-    t2 = clock();
+    clock_t t2 = clock();
     (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
 
     // Update failed/succeeded lists

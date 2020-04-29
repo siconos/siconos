@@ -385,12 +385,11 @@ static void add_initial_value_rectangle_1(NumericsMatrix * M)
 /* hand made gemm of nxp A matrix and pxm B matrix */
 static void dense_gemm_by_hand(double alpha, double * A, double * B, int n, int m, int p, double beta, double *C)
 {
-  double sum =0.0;
   for(int i = 0; i < n; i++)
   {
     for(int j = 0; j < m; j++)
     {
-      sum = beta  * C[i + j * n] ;
+      double sum = beta  * C[i + j * n] ;
       for(int k = 0; k < p ; k++)
       {
         sum = sum + alpha *  A[i + k * n] * B[k + j * p];
@@ -529,16 +528,13 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   SBM_gemm_without_allocation(alpha,M2->matrix1,M2->matrix1,beta, C3.matrix1);
   DEBUG_EXPR(NM_display(&C3));
   DEBUG_EXPR(NM_dense_display(Cref->matrix0,M2->size0,M2->size1,M2->size0));
-  info = SBM_dense_equal(C3.matrix1, Cref->matrix0, tol);
-
-
 
   /*  Check if it is correct */
-
   /* C3 and CRef must have the same values.*/
-
   info = SBM_dense_equal(C3.matrix1, Cref->matrix0, tol);
 
+  
+  
   if(info == 0)
     printf("Step 2 ( C = alpha*A*B + beta*C, SBM storage) ok ...\n");
   else
@@ -567,6 +563,8 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   /* C4 and C2Ref must have the same values.*/
 
   info = SBM_dense_equal(C4.matrix1, C2ref->matrix0, tol);
+  if(info == 0)
+    printf("Step 3 ( C = alpha*A*B + beta*C, SBM storage, non square) ok ...\n");
 
   SBM_gemm_without_allocation(alpha,M2->matrix1,M4->matrix1,beta, C4.matrix1);
   dense_gemm_by_hand(alpha, M1->matrix0, M3->matrix0, M1->size0, M3->size1, M1->size1, beta,  C2ref->matrix0);
@@ -740,7 +738,7 @@ int SBM_gemm_without_allocation_all(void)
   }
 
   printf("End of Numerics tests for SBM_gemm_without_allocation : Sucessfull ...\n");
-  if(info != 0) return info;
+  
   /* free memory */
 
   for(i = 0 ; i < nmm; i++)
@@ -1106,11 +1104,7 @@ int SBM_to_sparse_all(void)
   int m = M->blocksize1[M->blocknumber1 - 1];
   double * denseMat = (double *)malloc(n * m * sizeof(double));
   SBM_to_dense(M, denseMat);
-  if(res)
-  {
-    printf("========= Failed SBM tests 4 for SBM  ========= \n");
-    return 1;
-  }
+
   printf("[");
   for(int i = 0; i < n * m; i++)
   {
@@ -1165,35 +1159,34 @@ static void add_initial_value_square_1a(NumericsMatrix * M)
 }
 static void add_initial_value_square_SBM_1(SparseBlockStructuredMatrix * M)
 {
-  int i=0, j=0;
-  for(i=0; i < 4 ; i++)
+  for(int i=0; i < 4 ; i++)
   {
-    for(j=0; j < 4 ; j++)
+    for(int j=0; j < 4 ; j++)
       CHECK_RETURN(SBM_zentry(M,i,j,1.0));
   }
-  for(i=0; i < 4 ; i++)
+  for(int i=0; i < 4 ; i++)
   {
-    for(j=4; j < 6 ; j++)
+    for(int j=4; j < 6 ; j++)
       CHECK_RETURN(SBM_zentry(M,i,j,2.0));
   }
-  for(i=4; i < 6 ; i++)
+  for(int i=4; i < 6 ; i++)
   {
-    for(j=4; j < 6 ; j++)
+    for(int j=4; j < 6 ; j++)
       SBM_zentry(M,i,j,3.0);
   }
-  for(i=4; i < 6 ; i++)
+  for(int i=4; i < 6 ; i++)
   {
-    for(j=6; j < 8 ; j++)
+    for(int j=6; j < 8 ; j++)
       SBM_zentry(M,i,j,4.0);
   }
-  for(i=6; i < 8 ; i++)
+  for(int i=6; i < 8 ; i++)
   {
-    for(j=0; j < 4 ; j++)
+    for(int j=0; j < 4 ; j++)
       SBM_zentry(M,i,j,5.0);
   }
-  for(i=6; i < 8 ; i++)
+  for(int i=6; i < 8 ; i++)
   {
-    for(j=6; j < 8 ; j++)
+    for(int j=6; j < 8 ; j++)
       SBM_zentry(M,i,j,6.0);
   }
 }
@@ -1247,12 +1240,11 @@ static int SBM_zentry_test2(double tol)
 int SBM_zentry_all(void)
 {
 
-  int info =0;
   double tol = 1e-14;
 
   printf("========= Starts SBM tests SBM_zentry  ========= \n");
 
-  info = SBM_zentry_test1(tol);
+  int info = SBM_zentry_test1(tol);
   if(info == 1)
   {
     printf("========= Ends SBM tests SBM_zentry  :  Unsuccessfull ========= \n");

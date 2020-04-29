@@ -65,7 +65,7 @@ static int NM_read_write_test(void)
   if(info != 0)
   {
     printf("Construction failed ...\n");
-    return info;
+    goto free;
   }
   printf("Construction ok ...\n");
 
@@ -102,10 +102,8 @@ static int NM_read_write_test(void)
     fclose(foutput2);
   }
 
-
-
   /* free memory */
-
+free:
   for(i = 0 ; i < nmm; i++)
   {
     NM_clear(NMM[i]);
@@ -355,15 +353,14 @@ static void add_initial_value_square_2(NumericsMatrix * M)
 
 static void add_initial_value_rectangle_1(NumericsMatrix * M)
 {
-  int i=0, j=0;
-  for(i=0; i < 4 ; i++)
+  for(int i=0; i < 4 ; i++)
   {
-    for(j=0; j < 4 ; j++)
+    for(int j=0; j < 4 ; j++)
       NM_zentry(M,i,j,1.0+i+j);
   }
-  for(i=6; i < 8 ; i++)
+  for(int i=6; i < 8 ; i++)
   {
-    for(j=0; j < 4 ; j++)
+    for(int j=0; j < 4 ; j++)
       NM_zentry(M,i,j,5.0+i+j);
   }
 }
@@ -371,12 +368,11 @@ static void add_initial_value_rectangle_1(NumericsMatrix * M)
 /* hand made gemm of nxp A matrix and pxm B matrix */
 static void dense_gemm_by_hand(double alpha, double * A, double * B, int n, int m, int p, double beta, double *C)
 {
-  double sum =0.0;
   for(int i = 0; i < n; i++)
   {
     for(int j = 0; j < m; j++)
     {
-      sum = beta  * C[i + j * n] ;
+      double sum = beta  * C[i + j * n] ;
       for(int k = 0; k < p ; k++)
       {
         sum = sum + alpha *  A[i + k * n] * B[k + j * p];
@@ -756,9 +752,10 @@ static int NM_gemm_test_all(void)
   }
 
   printf("End of ProdNumericsMatrix ...\n");
-  if(info != 0) return info;
-  /* free memory */
 
+  
+
+  /* free memory */
   for(i = 0 ; i < nmm; i++)
   {
     NM_clear(NMM[i]);
