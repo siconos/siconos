@@ -561,49 +561,49 @@ MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedL
   int m = problem->m;
   int n = problem->n;
   mlcp->A = (double *) calloc(n*n,sizeof(double));
-  for (int i =0; i < n; i++)
+  for(int i =0; i < n; i++)
   {
-    for (int j =0; j < n; j++)
+    for(int j =0; j < n; j++)
     {
       mlcp->A[i + j*n] = problem->M->matrix0[i + j*(m+n)];
     }
   }
 
   mlcp->B = (double *) calloc(m*m,sizeof(double));
-  for (int i =0; i < m; i++)
+  for(int i =0; i < m; i++)
   {
-    for (int j =0; j < m; j++)
+    for(int j =0; j < m; j++)
     {
       mlcp->B[i + j*m] = problem->M->matrix0[ i+n + (j+n)*(m+n)];
     }
   }
 
   mlcp->C = (double *) calloc(n*m,sizeof(double));
-  for (int i =0; i < n; i++)
+  for(int i =0; i < n; i++)
   {
-    for (int j =0; j < m; j++)
+    for(int j =0; j < m; j++)
     {
       mlcp->C[i + j*m] = problem->M->matrix0[ i + (j+n)*(m+n)];
     }
   }
 
   mlcp->D = (double *) calloc(m*n,sizeof(double));
-  for (int i =0; i < m; i++)
+  for(int i =0; i < m; i++)
   {
-    for (int j =0; j < n; j++)
+    for(int j =0; j < n; j++)
     {
       mlcp->D[i + j*n] = problem->M->matrix0[ i+n + j*(m+n)];
     }
   }
 
   mlcp->a = (double *) calloc(n,sizeof(double));
-  for (int i =0; i < n; i++)
+  for(int i =0; i < n; i++)
   {
     mlcp->a[i] = problem->q[i];
   }
 
   mlcp->b = (double *) calloc(m,sizeof(double));
-  for (int i =0; i < m; i++)
+  for(int i =0; i < m; i++)
   {
     mlcp->b[i] = problem->q[i+n];
   }

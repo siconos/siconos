@@ -209,10 +209,10 @@ void NV_dott(const double * const vec1, const double * const vec2, const unsigne
       NM_zentry(out, i, j, vec1[i] * vec2[j]);
 }
 
-int NV_isnan(const double * const vec,  const unsigned int vecSize )
+int NV_isnan(const double * const vec,  const unsigned int vecSize)
 {
   for(unsigned int i = 0; i < vecSize; ++i)
-    if (isnan(vec[i]))
+    if(isnan(vec[i]))
       return 1;
   return 0;
 }

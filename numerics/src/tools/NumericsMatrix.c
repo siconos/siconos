@@ -768,15 +768,15 @@ double NM_get_value(const NumericsMatrix* const M, int i, int j)
     case NSM_HALF_TRIPLET:
     {
       assert(M->matrix2->triplet);
-      assert(i <M->matrix2->triplet->m );
-      assert(j <M->matrix2->triplet->n );
+      assert(i <M->matrix2->triplet->m);
+      assert(j <M->matrix2->triplet->n);
       CS_INT * Mi =   M->matrix2->triplet->i;
       CS_INT * Mp =   M->matrix2->triplet->p;
       double * Mx =   M->matrix2->triplet->x;
 
-      for (int idx = 0 ; idx < M->matrix2->triplet->nz  ; idx++ )
+      for(int idx = 0 ; idx < M->matrix2->triplet->nz  ; idx++)
       {
-        if ((Mi[idx] ==i && Mp[idx] == j)||(Mi[idx] ==j && Mp[idx] == i))
+        if((Mi[idx] ==i && Mp[idx] == j)||(Mi[idx] ==j && Mp[idx] == i))
         {
           return Mx[idx];
         }
@@ -1637,7 +1637,8 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
   default:
   {
     numerics_error("NM_add:","unsupported matrix storage %d", A->storageType);
-  }  }
+  }
+  }
   return C;
 
 }
@@ -1794,7 +1795,7 @@ void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* dat
           {
             M->matrix2->origin = NSM_TRIPLET;
           }
-          else if (M->matrix2->half_triplet)
+          else if(M->matrix2->half_triplet)
           {
             M->matrix2->origin = NSM_HALF_TRIPLET;
           }
@@ -1911,9 +1912,9 @@ void NM_clearTriplet(NumericsMatrix* A)
 
 void NM_clearHalfTriplet(NumericsMatrix* A)
 {
-  if (A->matrix2)
+  if(A->matrix2)
   {
-    if (A->matrix2->half_triplet)
+    if(A->matrix2->half_triplet)
     {
       cs_spfree(A->matrix2->half_triplet);
       A->matrix2->half_triplet = NULL;
@@ -2172,7 +2173,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     {
       A_ = A->matrix2->half_triplet;
 
-      if (!B->matrix2->half_triplet)
+      if(!B->matrix2->half_triplet)
       {
         B->matrix2->half_triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
       }
@@ -2380,7 +2381,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 
 CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
 {
-  if (!numericsSparseMatrix(A)->half_triplet)
+  if(!numericsSparseMatrix(A)->half_triplet)
   {
     switch(A->storageType)
     {
@@ -2398,7 +2399,7 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
 
       A->matrix2->half_triplet = cs_spalloc(0,0,1,1,1);
 
-      if (A->matrix1)
+      if(A->matrix1)
       {
 
         /* iteration on row, cr : current row */
@@ -2428,13 +2429,13 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
               for(unsigned i = 0; i < inbr; ++i)
               {
                 CHECK_RETURN(CSparseMatrix_symmetric_zentry(A->matrix2->half_triplet, i + roffset, j + coffset,
-                                                            A->matrix1->block[bn][i + j*inbr]));
+                             A->matrix1->block[bn][i + j*inbr]));
               }
             }
           }
         }
       }
-      else if (A->matrix0)
+      else if(A->matrix0)
       {
         fprintf(stderr, "NM_half_triplet: conversion is not implemented");
         exit(EXIT_FAILURE);
@@ -2443,7 +2444,7 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
     }
     case NM_SPARSE:
     {
-      switch (A->matrix2->origin)
+      switch(A->matrix2->origin)
       {
       case NSM_TRIPLET:
       {
@@ -2470,16 +2471,16 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
       }
       }
       break;
-    default:
-    {
-      fprintf(stderr, "NM_half_triplet: unknown matrix type\n");
-      exit(EXIT_FAILURE);
-    }
+      default:
+      {
+        fprintf(stderr, "NM_half_triplet: unknown matrix type\n");
+        exit(EXIT_FAILURE);
+      }
     }
 
     }
   }
-  assert (A->matrix2->half_triplet);
+  assert(A->matrix2->half_triplet);
 
   return A->matrix2->half_triplet;
 }
@@ -3179,10 +3180,10 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
         NM_MUMPS(A, -1);
-        if ((NM_MUMPS_icntl(A, 1) == -1 ||
-             NM_MUMPS_icntl(A, 2) == -1 ||
-             NM_MUMPS_icntl(A, 3) == -1 ||
-             verbose) ||
+        if((NM_MUMPS_icntl(A, 1) == -1 ||
+            NM_MUMPS_icntl(A, 2) == -1 ||
+            NM_MUMPS_icntl(A, 3) == -1 ||
+            verbose) ||
             (NM_MUMPS_icntl(A, 1) != -1 ||
              NM_MUMPS_icntl(A, 2) != -1 ||
              NM_MUMPS_icntl(A, 3) != -1 ||
@@ -3550,20 +3551,20 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
         {
-          printf("NM_posv: using MUMPS\n" );
+          printf("NM_posv: using MUMPS\n");
         }
       }
       /* construction of lower triangular matrix */
-      if (!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+      if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
       {
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
         NM_MUMPS_set_sym(A, 2); /* general symmetric */
         NM_MUMPS(A, -1);
-        if ((NM_MUMPS_icntl(A, 1) == -1 ||
-             NM_MUMPS_icntl(A, 2) == -1 ||
-             NM_MUMPS_icntl(A, 3) == -1 ||
-             verbose) ||
+        if((NM_MUMPS_icntl(A, 1) == -1 ||
+            NM_MUMPS_icntl(A, 2) == -1 ||
+            NM_MUMPS_icntl(A, 3) == -1 ||
+            verbose) ||
             (NM_MUMPS_icntl(A, 1) != -1 ||
              NM_MUMPS_icntl(A, 2) != -1 ||
              NM_MUMPS_icntl(A, 3) != -1 ||
@@ -4016,7 +4017,7 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
   int k =0;
 
   double criteria = 1.0;
-  
+
   while((criteria > tol) && k < itermax)
   {
     norm = cblas_dnrm2(n, z, 1);
@@ -4043,12 +4044,12 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
     }
     /*numerics_printf_verbose(1,"eig[%i] = %32.24e \t error = %e, costheta = %e \n",k, eig, fabs(eig-eig_old)/eig_old, costheta );*/
     k++;
-    if (fabs(eig_old) > DBL_EPSILON)
+    if(fabs(eig_old) > DBL_EPSILON)
       criteria = fabs((eig-eig_old)/eig_old);
     else
       criteria = fabs((eig-eig_old));
   }
-  
+
 
   free(q);
   free(z);
@@ -4139,7 +4140,7 @@ BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A)
 }
 
 
-int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B )
+int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B)
 {
 
   NumericsMatrix* D1_k = B->D1;
@@ -4253,7 +4254,7 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
   NM_clear(A_tmp);
   free(A_tmp);
 
-  if (error > tol)
+  if(error > tol)
   {
     return 0;
   }

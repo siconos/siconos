@@ -59,7 +59,7 @@ void LagrangianCompliantR::checkSize(Interaction& inter)
 }
 void LagrangianCompliantR::computeh(double time, const BlockVector& q0, const SiconosVector& lambda, BlockVector& z, SiconosVector& y)
 {
-  
+
   if(_pluginh->fPtr)
   {
     auto qp = q0.prepareVectorForPlugin();

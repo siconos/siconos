@@ -374,7 +374,7 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
   {
     RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
   }
-  // invalidate other old storages.
+    // invalidate other old storages.
   NM_clear_other_storages(_numericsMatrix.get(), _storageType);
 
   }

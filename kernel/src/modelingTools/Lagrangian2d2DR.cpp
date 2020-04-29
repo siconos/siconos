@@ -135,7 +135,7 @@ void Lagrangian2d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVect
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(_Nc->display(););
-  
+
   LagrangianScleronomousR::computeh(q, z, y);
   y.setValue(0, distance());
   DEBUG_EXPR(y.display(););

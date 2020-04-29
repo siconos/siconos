@@ -137,12 +137,12 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A)
     cs_spfree(A->triplet);
     A->triplet = NULL;
   }
-  if (A->half_triplet)
+  if(A->half_triplet)
   {
     cs_spfree(A->half_triplet);
     A->half_triplet = NULL;
   }
-  if (A->csc)
+  if(A->csc)
   {
     cs_spfree(A->csc);
     A->csc = NULL;

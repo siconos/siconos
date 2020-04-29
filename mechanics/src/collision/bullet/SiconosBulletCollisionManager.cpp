@@ -302,7 +302,7 @@ public:
 };
 namespace SP
 {
-  typedef std::shared_ptr<StaticContactorSetRecord> StaticContactorSetRecord;
+typedef std::shared_ptr<StaticContactorSetRecord> StaticContactorSetRecord;
 };
 
 class CollisionUpdater;
@@ -462,7 +462,7 @@ bool SiconosBulletCollisionManager::removeStaticContactorSet(StaticContactorSetI
 {
   StaticContactorSetRecord *recptr = static_cast<StaticContactorSetRecord *>(id);
   if(_impl->_staticContactorSetRecords.find(recptr)
-     == _impl->_staticContactorSetRecords.end())
+      == _impl->_staticContactorSetRecords.end())
     return false;
 
   SP::StaticContactorSetRecord rec(_impl->_staticContactorSetRecords[recptr]);
@@ -480,7 +480,7 @@ void SiconosBulletCollisionManager::initialize_impl()
     new btDefaultCollisionConfiguration());
 
   if(_options.perturbationIterations > 0
-     || _options.minimumPointsPerturbationThreshold > 0)
+      || _options.minimumPointsPerturbationThreshold > 0)
   {
     _impl->_collisionConfiguration->setConvexConvexMultipointIterations(
       _options.perturbationIterations,
@@ -692,14 +692,14 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
 }
 
 btTransform SiconosBulletCollisionManager_impl::offsetTransform(const SiconosVector& position,
-                                                                const SiconosVector& offset)
+    const SiconosVector& offset)
 {
   /* Adjust offset position according to current rotation */
   btQuaternion rbase(position(4), position(5),
                      position(6), position(3));
   btVector3 rboffset = quatRotate(rbase, btVector3(offset(0),
-                                                   offset(1),
-                                                   offset(2)));
+                                  offset(1),
+                                  offset(2)));
 
   /* Calculate total orientation */
   btQuaternion roffset(offset(4), offset(5), offset(6), offset(3));
@@ -740,7 +740,7 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyShapeReco
     q(3) = 1;
   }
   DEBUG_PRINT("Position of the shape given to bullet:")
-    DEBUG_EXPR_WE(q.display(););
+  DEBUG_EXPR_WE(q.display(););
 
   btTransform t = offsetTransform(q, *record.contactor->offset);
   t.setOrigin(t.getOrigin() * _options.worldScale);
@@ -775,7 +775,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // initialization
   createCollisionObjectHelper<SP::SiconosSphere, SP::BTSPHERESHAPE,
                               SP::RigidBodyDS, BodySphereRecord>
-    (base, ds, sphere, btsphere, bodyShapeMap, contactor);
+                              (base, ds, sphere, btsphere, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateContactorInertia(
@@ -792,13 +792,13 @@ void SiconosBulletCollisionManager_impl::updateContactorInertia(
   localinertia[0]*=scale_factor;
   localinertia[1]*=scale_factor;
   localinertia[2]*=scale_factor;
-  assert( ! ((localinertia.x() == 0.0
-              && localinertia.y() == 0.0
-              && localinertia.z() == 0.0)
-             || isinf(localinertia.x())
-             || isinf(localinertia.y())
-             || isinf(localinertia.z()))
-          && "calculateLocalInertia() returned garbage" );
+  assert(!((localinertia.x() == 0.0
+            && localinertia.y() == 0.0
+            && localinertia.z() == 0.0)
+           || isinf(localinertia.x())
+           || isinf(localinertia.y())
+           || isinf(localinertia.z()))
+         && "calculateLocalInertia() returned garbage");
   ds->setInertia(localinertia[0],
                  localinertia[1],
                  localinertia[2]);
@@ -829,7 +829,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
     btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
 #endif
     SP::RigidBodyDS rbds=std::static_pointer_cast<RigidBodyDS>(record.ds);
-    if (record.ds && rbds->useContactorInertia())
+    if(record.ds && rbds->useContactorInertia())
     {
       updateContactorInertia(rbds, btsphere);
     }
@@ -864,12 +864,12 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 #ifdef USE_CONVEXHULL_FOR_PLANE
   btScalar h = 1000 * _options.worldScale;
   const btScalar pts[] =
-    {
-      h, h, 0,
-      h, -h, 0,
-      -h, -h, 0,
-      -h, h, 0,
-    };
+  {
+    h, h, 0,
+    h, -h, 0,
+    -h, -h, 0,
+    -h, h, 0,
+  };
   SP::btConvexHullShape btplane(
     new btConvexHullShape(pts, 4, sizeof(pts[0])*3));
 
@@ -888,7 +888,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   // initialization
   createCollisionObjectHelper<SP::SiconosPlane, SP::BTPLANESHAPE, SP::RigidBodyDS, BodyPlaneRecord>
-    (base, ds, plane, btplane, bodyShapeMap, contactor);
+  (base, ds, plane, btplane, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyPlaneRecord& record)
@@ -926,8 +926,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
 #ifdef USE_CONVEXHULL_FOR_BOX
   const btScalar pts[] =
-    {
-      -half, half, -half,
+  {
+    -half, half, -half,
       -half, -half, -half,
       -half, -half, half,
       -half, half, half,
@@ -950,7 +950,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   // initialization
   createCollisionObjectHelper<SP::SiconosBox, SP::BTBOXSHAPE, SP::RigidBodyDS, BodyBoxRecord>
-    (base, ds, box, btbox, bodyShapeMap, contactor);
+  (base, ds, box, btbox, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
@@ -1002,7 +1002,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   // initialization
   createCollisionObjectHelper<SP::SiconosCylinder, SP::BTCYLSHAPE, SP::RigidBodyDS, BodyCylinderRecord>
-    (base, ds, cylinder, btcylinder, bodyShapeMap, contactor);
+  (base, ds, cylinder, btcylinder, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
@@ -1052,7 +1052,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   // initialization
   createCollisionObjectHelper<SP::SiconosCone, SP::BTCONSHAPE, SP::RigidBodyDS, BodyConeRecord>
-    (base, ds, cone, btcone, bodyShapeMap, contactor);
+  (base, ds, cone, btcone, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyConeRecord &record)
@@ -1101,7 +1101,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   // initialization
   createCollisionObjectHelper<SP::SiconosCapsule, SP::BTCAPSHAPE, SP::RigidBodyDS, BodyCapsuleRecord>
-    (base, ds, capsule, btcapsule, bodyShapeMap, contactor);
+  (base, ds, capsule, btcapsule, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyCapsuleRecord &record)
@@ -1213,7 +1213,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   // initialization
   createCollisionObjectHelper<SP::SiconosConvexHull, SP::BTCHSHAPE, SP::RigidBodyDS,BodyCHRecord>
-    (base, ds, ch, btch, bodyShapeMap, contactor);
+  (base, ds, ch, btch, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
@@ -1235,7 +1235,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
       _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = ch->version();
@@ -1325,7 +1325,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   // initialization
   createCollisionObjectHelper<SP::SiconosMesh, SP::BTMESHSHAPE, SP::RigidBodyDS, BodyMeshRecord>
-    (base, ds, mesh, btmesh, bodyShapeMap, contactor);
+  (base, ds, mesh, btmesh, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
@@ -1351,7 +1351,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
       _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = mesh->version();
@@ -1405,7 +1405,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
                               SP::BTHEIGHTSHAPE,
                               SP::RigidBodyDS,
                               BodyHeightRecord>
-    (base, ds, heightmap, btheight, bodyShapeMap, contactor);
+                              (base, ds, heightmap, btheight, bodyShapeMap, contactor);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
@@ -1440,7 +1440,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
       _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = height->version();
@@ -1525,7 +1525,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
                               SP::btConvex2dShape,
                               SP::RigidBody2dDS,
                               BodyDiskRecord>
-    (base, ds, disk, btconvex2d1, bodyShapeMap, contactor);
+                              (base, ds, disk, btconvex2d1, bodyShapeMap, contactor);
   DEBUG_END("void SiconosBulletCollisionManager_impl::createCollisionObject(..., disk, ..) \n");
 }
 
@@ -1560,7 +1560,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyDiskRecord &record)
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
       _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = disk->version();
@@ -1594,7 +1594,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
                               SP::btConvex2dShape,
                               SP::RigidBody2dDS,
                               BodyBox2dRecord>
-    (base, ds, box2d, btconvex2d, bodyShapeMap, contactor);
+                              (base, ds, box2d, btconvex2d, bodyShapeMap, contactor);
   DEBUG_END("void SiconosBulletCollisionManager_impl::createCollisionObject(..., box2d, ..) \n");
 }
 
@@ -1636,7 +1636,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBox2dRecord &record)
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
       _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = box2d->version();
@@ -1675,10 +1675,10 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   }
   DEBUG_EXPR_WE(
     for(int r=0; r < rows; r++)
-    {
-      printf("pts[r*3+0] = %8.4e, pts[r*3+1] =%8.4e, pts[r*3+2] =%8.4e\n",pts[r*3+0], pts[r*3+1], pts[r*3+2]);
-    }
-    );
+{
+  printf("pts[r*3+0] = %8.4e, pts[r*3+1] =%8.4e, pts[r*3+2] =%8.4e\n",pts[r*3+0], pts[r*3+1], pts[r*3+2]);
+  }
+  );
 
 
   //This version is ok
@@ -1701,7 +1701,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
                               SP::btConvex2dShape,
                               SP::RigidBody2dDS,
                               BodyCH2dRecord>
-    (base, ds, ch2d, btconvex2d, bodyShapeMap, contactor);
+                              (base, ds, ch2d, btconvex2d, bodyShapeMap, contactor);
   //getchar();
   DEBUG_END("void SiconosBulletCollisionManager_impl::createCollisionObject(..., ch2d, ..) \n");
 }
@@ -1731,7 +1731,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCH2dRecord &record)
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
       _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = ch2d->version();
@@ -1862,7 +1862,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
     return;
   }
   std::shared_ptr<CreateCollisionObjectShapeVisitor>
-    ccosv(new CreateCollisionObjectShapeVisitor(*this, ds, base));
+  ccosv(new CreateCollisionObjectShapeVisitor(*this, ds, base));
 
   /* Call createCollisionObject for each shape type using the visitor
    * defined above */
@@ -1977,7 +1977,7 @@ public:
         if(manifold_index < numManifolds)
         {
           data.manifold = world->getDispatcher()->
-            getManifoldByIndexInternal(manifold_index);
+                          getManifoldByIndexInternal(manifold_index);
           data.objectA = data.manifold->getBody0();
           data.objectB = data.manifold->getBody1();
           numContacts = data.manifold->getNumContacts();
@@ -1997,8 +1997,8 @@ public:
     {
       if(it.numManifolds==0) return numManifolds!=0;
       return data.objectA != it.data.objectA
-        || data.objectB != it.data.objectB
-        || data.point != it.data.point;
+             || data.objectB != it.data.objectB
+             || data.point != it.data.point;
     };
     friend class IterateContactPoints;
   };
@@ -2043,34 +2043,34 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
 }
 
 SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::RigidBodyDS ds1,
-                                                       SP::SiconosShape shape1,
-                                                       SP::RigidBodyDS ds2,
-                                                       SP::SiconosShape shape2,
-                                                       const btManifoldPoint &p)
+    SP::SiconosShape shape1,
+    SP::RigidBodyDS ds2,
+    SP::SiconosShape shape2,
+    const btManifoldPoint &p)
 {
   return std::make_shared<BulletR>();
 }
 SP::Bullet5DR SiconosBulletCollisionManager::makeBullet5DR(SP::RigidBodyDS ds1,
-                                                           SP::SiconosShape shape1,
-                                                           SP::RigidBodyDS ds2,
-                                                           SP::SiconosShape shape2,
-                                                           const btManifoldPoint &p)
+    SP::SiconosShape shape1,
+    SP::RigidBodyDS ds2,
+    SP::SiconosShape shape2,
+    const btManifoldPoint &p)
 {
   return std::make_shared<Bullet5DR>();
 }
 SP::Bullet2dR SiconosBulletCollisionManager::makeBullet2dR(SP::RigidBody2dDS ds1,
-                                                           SP::SiconosShape shape1,
-                                                           SP::RigidBody2dDS ds2,
-                                                           SP::SiconosShape shape2,
-                                                           const btManifoldPoint &p)
+    SP::SiconosShape shape1,
+    SP::RigidBody2dDS ds2,
+    SP::SiconosShape shape2,
+    const btManifoldPoint &p)
 {
   return std::make_shared<Bullet2dR>();
 }
 SP::Bullet2d3DR SiconosBulletCollisionManager::makeBullet2d3DR(SP::RigidBody2dDS ds1,
-                                                               SP::SiconosShape shape1,
-                                                               SP::RigidBody2dDS ds2,
-                                                               SP::SiconosShape shape2,
-                                                               const btManifoldPoint &p)
+    SP::SiconosShape shape1,
+    SP::RigidBody2dDS ds2,
+    SP::SiconosShape shape2,
+    const btManifoldPoint &p)
 {
   return std::make_shared<Bullet2d3DR>();
 }
@@ -2251,10 +2251,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         /* update the relation */
         SP::BulletR rel(std::static_pointer_cast<BulletR>((*p_inter)->relation()));
         rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                  flip, _options.worldScale,
-                                                  rbdsA,
-                                                  rbdsB ? rbdsB
-                                                  : SP::NewtonEulerDS());
+            flip, _options.worldScale,
+            rbdsA,
+            rbdsB ? rbdsB
+            : SP::NewtonEulerDS());
       }
       else if(rel_bullet2dR)
       {
@@ -2265,10 +2265,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
         /* update the relation */
         rel_bullet2dR->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                            flip, _options.worldScale,
-                                                            rbdsA,
-                                                            rbdsB ? rbdsB
-                                                            : SP::RigidBody2dDS());
+            flip, _options.worldScale,
+            rbdsA,
+            rbdsB ? rbdsB
+            : SP::RigidBody2dDS());
       }
       else if(rel_bullet2d3DR)
       {
@@ -2279,10 +2279,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
         /* update the relation */
         rel_bullet2d3DR->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                              flip, _options.worldScale,
-                                                              rbdsA,
-                                                              rbdsB ? rbdsB
-                                                              : SP::RigidBody2dDS());
+            flip, _options.worldScale,
+            rbdsA,
+            rbdsB ? rbdsB
+            : SP::RigidBody2dDS());
       }
 
       else
@@ -2344,9 +2344,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           // rel->btShape[1] = pairB->btshape;
 
           rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                    flip, _options.worldScale,
-                                                    rbdsA ? rbdsA : SP::NewtonEulerDS(),
-                                                    rbdsB ? rbdsB : SP::NewtonEulerDS());
+              flip, _options.worldScale,
+              rbdsA ? rbdsA : SP::NewtonEulerDS(),
+              rbdsB ? rbdsB : SP::NewtonEulerDS());
 
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
@@ -2390,9 +2390,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           // rel->btShape[1] = pairB->btshape;
 
           rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                    flip, _options.worldScale,
-                                                    rbdsA ? rbdsA : SP::RigidBody2dDS(),
-                                                    rbdsB ? rbdsB : SP::RigidBody2dDS());
+              flip, _options.worldScale,
+              rbdsA ? rbdsA : SP::RigidBody2dDS(),
+              rbdsB ? rbdsB : SP::RigidBody2dDS());
 
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
@@ -2440,9 +2440,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           // rel->btShape[1] = pairB->btshape;
 
           rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                    flip, _options.worldScale,
-                                                    rbdsA ? rbdsA : SP::NewtonEulerDS(),
-                                                    rbdsB ? rbdsB : SP::NewtonEulerDS());
+              flip, _options.worldScale,
+              rbdsA ? rbdsA : SP::NewtonEulerDS(),
+              rbdsB ? rbdsB : SP::NewtonEulerDS());
 
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
@@ -2486,9 +2486,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           // rel->btShape[1] = pairB->btshape;
 
           rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                    flip, _options.worldScale,
-                                                    rbdsA ? rbdsA : SP::RigidBody2dDS(),
-                                                    rbdsB ? rbdsB : SP::RigidBody2dDS());
+              flip, _options.worldScale,
+              rbdsA ? rbdsA : SP::RigidBody2dDS(),
+              rbdsB ? rbdsB : SP::RigidBody2dDS());
 
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
@@ -2563,9 +2563,9 @@ bool cmpQueryResult(const SP::SiconosCollisionQueryResult &a,
 
 std::vector<SP::SiconosCollisionQueryResult>
 SiconosBulletCollisionManager::lineIntersectionQuery(const SiconosVector& start,
-                                                     const SiconosVector& end,
-                                                     bool closestOnly,
-                                                     bool sorted)
+    const SiconosVector& end,
+    bool closestOnly,
+    bool sorted)
 {
   std::vector<SP::SiconosCollisionQueryResult> result_list;
 

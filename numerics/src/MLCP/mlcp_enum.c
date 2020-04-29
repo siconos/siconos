@@ -164,7 +164,7 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
   initEnum(problem->m);
   unsigned long long int nbCase =  computeNbCase(problem->m);
 
-  if (itermax < (int)nbCase)
+  if(itermax < (int)nbCase)
   {
     numerics_warning("mlcp_enum_Block", "all the cases will not be enumerated since itermax < nbCase)");
   }
@@ -384,7 +384,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     {
       DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
       numerics_printf_verbose(1,"Solution of dgesv\n");
-      if(verbose > 1 )
+      if(verbose > 1)
       {
         NM_dense_display(sQ, sMl, 1, 0);
       }
@@ -450,7 +450,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
         }
         nbSol++;
         numerics_printf_verbose(1,"mlcp_enum find a solution, err=%e !\n", err);
-        if (verbose >1)
+        if(verbose >1)
         {
           mlcp_DisplaySolution(sU, sV, sW1, sW2, sNn, sMm, sMl);
         }

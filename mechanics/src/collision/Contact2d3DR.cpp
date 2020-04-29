@@ -50,8 +50,8 @@ void Contact2d3DR::computeh(const BlockVector& q, BlockVector& z, SiconosVector&
 }
 
 void Contact2d3DR::updateContactPoints(const SiconosVector& pos1,
-                                     const SiconosVector& pos2,
-                                     const SiconosVector& normal)
+                                       const SiconosVector& pos2,
+                                       const SiconosVector& normal)
 {
   // Copy relative positions
   *_relPc1 = pos1;

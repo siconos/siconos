@@ -720,7 +720,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                           &tolerance, norm_q, error,
                           iter);
 
-        if (!(tolerance > 0.0))
+        if(!(tolerance > 0.0))
         {
           numerics_warning("fc3d_nsgs", "tolerance has to be positive!!");
           numerics_warning("fc3d_nsgs", "we stop the iterations");

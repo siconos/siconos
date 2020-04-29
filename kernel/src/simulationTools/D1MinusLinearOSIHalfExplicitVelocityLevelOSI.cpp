@@ -514,7 +514,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         }
         else
           RuntimeException::selfThrow
-            ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
+          ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
         if(d->inverseMass())
         {

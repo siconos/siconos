@@ -331,12 +331,12 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     free(Htrans);
     Htrans =  NM_transpose(H);
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M)
+  else if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M)
   {
     numerics_printf_verbose(1,"---- GFC3D - ADMM - Rescaling of the problem by balancing M");
     rescaled_problem =  globalFrictionContact_copy(problem);
-    
-    
+
+
     B_for_M = NM_BalancingMatrices_new(problem->M);
 
     /* B_for_H =  NM_compute_balancing_matrices(problem->H, 1e-03, 100); */
@@ -904,15 +904,15 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       /* check the full criterion */
       cblas_dscal(m, rho, reaction, 1);
 
-      if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
+      if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
       {
         cblas_dscal(m, alpha_r/beta_r, reaction, 1);
         norm_q = cblas_dnrm2(n, problem->q, 1);
       }
-      else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M)
+      else if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M)
       {
         norm_q = cblas_dnrm2(n, problem->q, 1);
-        for (size_t i =0; i < n ; i++ )
+        for(size_t i =0; i < n ; i++)
         {
           v[i] = v[i]*NM_triplet(B_for_M->D2)->x[i];
         }
@@ -968,13 +968,13 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
         }
         if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
         {
-          norm_q = cblas_dnrm2(n , rescaled_problem->q , 1);
+          norm_q = cblas_dnrm2(n, rescaled_problem->q, 1);
           cblas_dscal(m, beta_r/alpha_r, reaction, 1);
         }
         else if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M)
         {
-          norm_q = cblas_dnrm2(n , rescaled_problem->q , 1);
-          for (size_t i =0; i < n ; i++ )
+          norm_q = cblas_dnrm2(n, rescaled_problem->q, 1);
+          for(size_t i =0; i < n ; i++)
           {
             v[i] = v[i]/NM_triplet(B_for_M->D2)->x[i];
           }
@@ -992,12 +992,12 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
     {
       cblas_dscal(m, alpha_r/beta_r, reaction, 1);
-      norm_q = cblas_dnrm2(n , problem->q , 1);
+      norm_q = cblas_dnrm2(n, problem->q, 1);
     }
     else if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M)
     {
-      norm_q = cblas_dnrm2(n , problem->q , 1);
-      for (size_t i =0; i < n ; i++ )
+      norm_q = cblas_dnrm2(n, problem->q, 1);
+      for(size_t i =0; i < n ; i++)
       {
         v[i] = v[i]*NM_triplet(B_for_M->D2)->x[i];
       }
@@ -1023,7 +1023,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     gfc3d_ADMM_free(problem,options);
   }
   if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR ||
-     options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M)
+      options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M)
   {
     globalFrictionContact_free(rescaled_problem);
   }

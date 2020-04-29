@@ -41,10 +41,11 @@ void NM_MUMPS_set_irn_jcn(NumericsMatrix* A)
   /* MUMPS works on triplet format. */
 
   CSparseMatrix* triplet;
-  if (NM_MUMPS_id(A)->sym)
+  if(NM_MUMPS_id(A)->sym)
   {
     triplet=NM_half_triplet(A);
-  } else
+  }
+  else
   {
     triplet=NM_triplet(A);
   }
@@ -217,10 +218,11 @@ void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)
   {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
     CSparseMatrix* triplet;
-    if (mumps_id->sym)
+    if(mumps_id->sym)
     {
       triplet=NM_half_triplet(A);
-    } else
+    }
+    else
     {
       triplet=NM_triplet(A);
     }

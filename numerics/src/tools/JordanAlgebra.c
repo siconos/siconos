@@ -86,7 +86,7 @@ NumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, c
   NumericsMatrix* out = NM_create(NM_SPARSE, vecSize, vecSize);
   NM_triplet_alloc(out, dimension * dimension * varsCount);
   //NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
-  
+
   NumericsMatrix* quad_tmp = NM_create(NM_DENSE, dimension, dimension);
 
   NumericsMatrix* R = Reflect_mat(dimension, NM_DENSE);
@@ -136,10 +136,10 @@ void NesterovToddVector(const double* const vec1, const double* const vec2,
   JA_sqrt_inv(Qx05y, vecSize, varsCount, Qx05yi);
   NM_gemv(1.0, quad_repr, Qx05yi, 0.0, _p);
   JA_sqrt_inv(_p, vecSize, varsCount, out);
-  
+
   assert(!NV_isnan(out,vecSize));
-  
-  
+
+
   free(_p);
   free(Qx05yi);
   free(Qx05y);

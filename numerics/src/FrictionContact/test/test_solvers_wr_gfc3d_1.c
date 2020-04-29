@@ -48,7 +48,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   }
 
-  
+
   return collection;
 
 }

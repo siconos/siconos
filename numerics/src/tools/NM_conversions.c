@@ -57,13 +57,13 @@ CSparseMatrix* NM_csc_to_half_triplet(CSparseMatrix* csc)
 {
   assert(csc);
   CSparseMatrix* triplet = cs_spalloc(csc->m, csc->n, csc->p[csc->n], 1, 1);
-  if (!triplet) return (cs_done (triplet, NULL, NULL, 0)) ;
+  if(!triplet) return (cs_done(triplet, NULL, NULL, 0)) ;
   CS_INT* Ap = csc->p;
   CS_INT* Ai = csc->i;
   double* val = csc->x;
-  for (CS_INT j = 0; j < csc->n; ++j)
+  for(CS_INT j = 0; j < csc->n; ++j)
   {
-    for (CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
+    for(CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
     {
       CSparseMatrix_symmetric_zentry(triplet, Ai[i], j, val[i]);
     }
