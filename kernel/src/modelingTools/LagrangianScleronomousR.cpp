@@ -159,7 +159,6 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
 
       assert(_jachq);
       prod(*_jachq, *DSlink[LagrangianR::q2], y);
-
       if(!_dotjachq)
       {
         unsigned int sizeY = inter.dimension();
@@ -199,6 +198,12 @@ void LagrangianScleronomousR::computeJach(double time, Interaction& inter)
   DEBUG_EXPR(inter.display(););
   computeJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
   // computeJachqDot(time, inter);
+  if(!_dotjachq)
+  {
+    unsigned int sizeY = inter.dimension();
+    unsigned int sizeDS = inter.getSizeOfDS();
+    _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
+  }
   computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], *DSlink[LagrangianR::q1]);
   // computeJachlambda(time, inter);
   // computehDot(time,inter);
