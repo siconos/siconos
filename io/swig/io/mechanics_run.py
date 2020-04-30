@@ -593,12 +593,12 @@ class ShapeCollection():
                             raise AssertionError("contact_index not in self.attributes(shape_name)")
                         if not ('brep' in self.attributes(shape_name)):
                             raise AssertionError("brep not in self.attributes(shape_name)")
-                        
+
 
                         #assert 'contact' in self.attributes(shape_name)
                         #assert 'contact_index' in self.attributes(shape_name)
                         #assert 'brep' in self.attributes(shape_name)
-                        
+
                         contact_index = self.attributes(shape_name)['contact_index']
 
                         if shape_class is None:
@@ -1152,10 +1152,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 #assert(joint2_ds1 == refds_name)
                 if (joint2_ds1 != refds_name):
                     raise AssertionError("joint2_ds1 != refds_name")
-                assert(joint2_ds2 == ds2_name)
+                #assert(joint2_ds2 == ds2_name)
                 if (joint2_ds2 != ds2_name):
                     raise AssertionError("joint2_ds2 != ds1_name")
- 
+
             joint = joints.CouplerJointR(joint1, int(dof1),
                                          joint2, int(dof2), ratio,
                                          refds, refidx1, refds, refidx2)
@@ -1209,7 +1209,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     raise AssertionError("references is None")
                 if (np.shape(coupled) != (1, 3)):
                     raise AssertionError("np.shape(coupled) != (1, 3)")
-                
+
                 joint = self.make_coupler_jointr(ds1_name, ds2_name,
                                                  coupled, references)
                 coupled = None  # Skip the use for "coupled" below, to
@@ -1664,7 +1664,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._scheduled_births = self._scheduled_births[ind_time:]
 
         for time_of_birth in current_times_of_births:
-            for (name, obj) in self._births[time_of_birth]:
+            for (name, _) in self._births[time_of_birth]:
                 self.import_object(name, body_class, shape_class,
                                    face_class, edge_class, birth=True)
 
@@ -1680,7 +1680,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._scheduled_deaths = self._scheduled_deaths[ind_time:]
 
         for time_of_death in current_times_of_deaths:
-            for ( _, obj, body) in self._deaths[time_of_death]:
+            for ( _, _, body) in self._deaths[time_of_death]:
                 self._interman.removeBody(body)
                 self._nsds.removeDynamicalSystem(body)
 
@@ -1992,7 +1992,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.initialize, with_timer)()
         self.log(s.resetLambdas, with_timer)()
         # Again the access to s._newtonTolerance generates a segfault due to director
-        newtonTolerance = s.newtonTolerance()
+        #newtonTolerance = s.newtonTolerance()
         newtonMaxIteration = s.newtonMaxIteration()
 
         # return _kernel.TimeStepping_newtonSolve(self, criterion, maxStep)
