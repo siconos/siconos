@@ -751,8 +751,8 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
   // else: depend on solver
   if(info != 0)
   {
-    std::cout << "TimeStepping::DefaultCheckSolverOutput:" << std::endl;
-    std::cout << "Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
+    std::cout << "[kernel] TimeStepping::DefaultCheckSolverOutput:" << std::endl;
+    std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
     //       std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
     //      std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
     //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
