@@ -489,7 +489,8 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    assert self.shape(shape_name).dtype == h5py.new_vlen(str)
+                    if self.shape(shape_name).dtype != h5py.new_vlen(str) :
+                        raise AssertionError("self.shape(shape_name).dtype != h5py.new_vlen(str)")
 
                     with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
                         step_reader = STEPControl_Reader()
@@ -586,9 +587,18 @@ class ShapeCollection():
 
                     else:
                         # a contact on a brep
-                        assert 'contact' in self.attributes(shape_name)
-                        assert 'contact_index' in self.attributes(shape_name)
-                        assert 'brep' in self.attributes(shape_name)
+                        if not ('contact' in self.attributes(shape_name)):
+                            raise AssertionError("contact not in self.attributes(shape_name)")
+                        if not ('contact_index' in self.attributes(shape_name)):
+                            raise AssertionError("contact_index not in self.attributes(shape_name)")
+                        if not ('brep' in self.attributes(shape_name)):
+                            raise AssertionError("brep not in self.attributes(shape_name)")
+                        
+
+                        #assert 'contact' in self.attributes(shape_name)
+                        #assert 'contact_index' in self.attributes(shape_name)
+                        #assert 'brep' in self.attributes(shape_name)
+                        
                         contact_index = self.attributes(shape_name)['contact_index']
 
                         if shape_class is None:
@@ -624,7 +634,9 @@ class ShapeCollection():
                     # a heightmap defined by a matrix
                     hm_data = self.shape(shape_name)
                     r = hm_data.attrs['rect']
-                    assert(len(r) == 2)
+                    if (len(r) != 2):
+                        raise AssertionError("len(r) != 2")
+                    #assert(len(r) == 2)
                     hm = SiconosHeightMap(hm_data, r[0], r[1])
                     dims = list(r) + [np.max(hm_data) - np.min(hm_data)]
                     hm.setInsideMargin(
@@ -881,7 +893,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 nslaw = nslawClass(int(self._nslaws_data[name].attrs['size']),
                                    float(self._nslaws_data[name].attrs['lb']),
                                    float(self._nslaws_data[name].attrs['ub']))
-            assert(nslaw)
+            if not nslaw:
+                raise AssertionError("no nslaw")
+            #assert(nslaw)
             self._nslaws[name] = nslaw
             gid1 = int(self._nslaws_data[name].attrs['gid1'])
             gid2 = int(self._nslaws_data[name].attrs['gid2'])
@@ -905,7 +919,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if body_class is None:
                 body_class = occ.OccBody
 
-            assert (given_inertia is not None)
+            #assert (given_inertia is not None)
+            if given_inertia is  None:
+                raise AssertionError("given_inertia is  None")
             inertia = given_inertia
             if inertia is not None:
                 if np.shape(inertia) == (3,):
@@ -1045,7 +1061,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         elif self._dimension == 2:
                             self.print_verbose('**** Warning inertia for object named {0} does not have the correct shape: {1} instead of (1, 1) or (1,) or scalar'.format(name, np.shape(inertia)))
                             self.print_verbose('**** Inertia will be computed with the shape of the first contactor')
-                            
+
                     body = body_class(translation + orientation,
                                       velocity, mass)
                     body.setUseContactorInertia(True)
@@ -1105,7 +1121,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 diff = list(dss.difference(set([ds1_name, ds2_name])))
                 # there must be exactly one reference in common that
                 # is not either of the DSs
-                assert(len(diff) == 1)
                 refds_name = diff[0]
 
         if refds_name:
@@ -1118,17 +1133,29 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             refidx1, refidx2 = 0, 0
             if joint1_ds1 == ds1_name:
                 refidx1 = 1
-                assert(joint1_ds2 == refds_name)
+                if (joint1_ds2 != refds_name):
+                    raise AssertionError("joint1_ds2 != refds_name")
+                #assert(joint1_ds2 == refds_name)
             else:
-                assert(joint1_ds1 == refds_name)
-                assert(joint1_ds2 == ds1_name)
+                if (joint1_ds1 != refds_name):
+                    raise AssertionError("joint1_ds1 != refds_name")
+                #assert(joint1_ds1 == refds_name)
+                if (joint1_ds2 != ds1_name):
+                    raise AssertionError("joint1_ds2 != ds1_name")
+                #assert(joint1_ds2 == ds1_name)
             if joint2_ds1 == ds2_name:
                 refidx2 = 1
-                assert(joint2_ds2 == refds_name)
+                if (joint2_ds2 != refds_name):
+                    raise AssertionError("joint2_ds2 != refds_name")
+                #assert(joint2_ds2 == refds_name)
             else:
-                assert(joint2_ds1 == refds_name)
+                #assert(joint2_ds1 == refds_name)
+                if (joint2_ds1 != refds_name):
+                    raise AssertionError("joint2_ds1 != refds_name")
                 assert(joint2_ds2 == ds2_name)
-
+                if (joint2_ds2 != ds2_name):
+                    raise AssertionError("joint2_ds2 != ds1_name")
+ 
             joint = joints.CouplerJointR(joint1, int(dof1),
                                          joint2, int(dof2), ratio,
                                          refds, refidx1, refds, refidx2)
@@ -1176,8 +1203,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if joint_class == joints.CouplerJointR:
                 # This case is a little different, handle it specially
-                assert(references is not None)
-                assert(np.shape(coupled) == (1, 3))
+                #assert(references is not None)
+                #assert(np.shape(coupled) == (1, 3))
+                if (references is None):
+                    raise AssertionError("references is None")
+                if (np.shape(coupled) != (1, 3)):
+                    raise AssertionError("np.shape(coupled) != (1, 3)")
+                
                 joint = self.make_coupler_jointr(ds1_name, ds2_name,
                                                  coupled, references)
                 coupled = None  # Skip the use for "coupled" below, to
@@ -1208,7 +1240,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # Add a e=0 joint by default, otherwise user can specify
             # the impact law by name or a list of names for each axis.
             if stops is not None:
-                assert np.shape(stops)[1] == 3, 'Joint stops shape must be (?, 3)'
+                if np.shape(stops)[1] != 3:
+                    raise AssertionError("np.shape(stops)[1] != 3")
+                #assert np.shape(stops)[1] == 3, 'Joint stops shape must be (?, 3)'
                 if nslaws is None:
                     nslaws = [sk.NewtonImpactNSL(0.0)] * np.shape(stops)[0]
                 elif isinstance(nslaws, bytes):
@@ -1217,12 +1251,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 elif isinstance(nslaws, str):
                     nslaws = [self._nslaws[nslaws]] * np.shape(stops)[0]
                 else:
-                    assert(np.shape(nslaws)[0] == np.shape(stops)[0])
+                    if np.shape(nslaws)[0] != np.shape(stops)[0]:
+                        raise AssertionError("np.shape(nslaws)[0] != np.shape(stops)[0]")
+                    #assert(np.shape(nslaws)[0] == np.shape(stops)[0])
                     nslaws = [self._nslaws[nsl] for nsl in nslaws]
-                for n, (nsl, (axis, pos, dir)) in enumerate(zip(nslaws, stops)):
-                    # "bool()" is needed because type of dir is
+                for n, (nsl, (axis, pos, _dir)) in enumerate(zip(nslaws, stops)):
+                    # "bool()" is needed because type of _dir is
                     # numpy.bool_, which SWIG doesn't handle well.
-                    stop = joints.JointStopR(joint, pos, bool(dir < 0),
+                    stop = joints.JointStopR(joint, pos, bool(_dir < 0),
                                              int(axis))
                     stop_inter = Interaction(nsl, stop)
                     self._nsds.\
@@ -1254,7 +1290,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if coupled is not None:
                 if len(coupled.shape) == 1:
                     coupled = np.array([coupled])
-                assert(coupled.shape[1] == 3)
+                if coupled.shape[1] != 3 :
+                    raise AssertionError("coupled.shape[1] != 3")
+                #assert(coupled.shape[1] == 3)
                 for n, (dof1, dof2, ratio) in enumerate(coupled):
                     cpl = joints.CouplerJointR(joint, int(dof1),
                                                joint, int(dof2), ratio)
@@ -1439,7 +1477,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         relative_orientation=ctr.attrs['orientation'].astype(float)))
             elif 'group' in ctr.attrs:
                 # bullet contact
-                assert not occ_type
+                if occ_type :
+                    raise AssertionError("occ type is found")
+                #assert not occ_type
                 contactors.append(
                     Contactor(
                         instance_name=ctr.attrs['instance_name'],
@@ -1499,7 +1539,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # Ensure we count up from zero for implicit DS numbering
         DynamicalSystem.resetCount(0)
 
-        for shape_name in self._ref:
+        for _ in self._ref:
             self._number_of_shapes += 1
 
         # import dynamical systems
@@ -1640,7 +1680,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._scheduled_deaths = self._scheduled_deaths[ind_time:]
 
         for time_of_death in current_times_of_deaths:
-            for (name, obj, body) in self._deaths[time_of_death]:
+            for ( _, obj, body) in self._deaths[time_of_death]:
                 self._interman.removeBody(body)
                 self._nsds.removeDynamicalSystem(body)
 
@@ -1684,7 +1724,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                      0.0,
                      0.0,
                      sin(rotation[0] / 2.0)]
-            
+
             p += 1
 
     def output_dynamic_objects(self, initial=False):
@@ -1822,7 +1862,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     new_contact_points[:, 7] = contact_points[:, 5]  # nc
                     new_contact_points[:, 8] = contact_points[:, 6]
                     #new_contact_points[:, 9]
-                    # cf 
+                    # cf
                     new_contact_points[:, 10] = contact_points[:, 7]
                     new_contact_points[:, 11] = contact_points[:, 8]
                     #new_contact_points[:, 12]
@@ -1989,7 +2029,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if (not isNewtonConverge) and (newtonNbIterations < newtonMaxIteration):
                 self.log(s.updateOutput, with_timer)()
             isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)
-            (newtonTolerance)
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceInTheLoop()
             if (not isNewtonConverge) and (not info):
@@ -2311,7 +2350,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # rationale for choosing numerics solver options
         # if solver_option is None --> we leave Siconos/kernel choosing the default option
         # else we use the user solver_options
-        
+
         if friction_contact_trace_params is None:
             # Global friction contact.
             if (osi == sk.MoreauJeanGOSI):
@@ -2347,7 +2386,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             dimension_contact=5
                         elif self._dimension ==2:
                             dimension_contact=3
-                        if (solver_options is None): 
+                        if (solver_options is None):
                             osnspb = sk.RollingFrictionContact(dimension_contact)
                         else:
                             osnspb = sk.RollingFrictionContact(dimension_contact, solver_options)
