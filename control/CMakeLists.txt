@@ -68,8 +68,6 @@ target_link_libraries(control PUBLIC numerics)
 target_link_libraries(control PUBLIC kernel)
 # Links with non-Siconos libraries
 
-target_link_libraries(control PRIVATE Boost::timer)
-
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)

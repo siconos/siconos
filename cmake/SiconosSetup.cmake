@@ -151,11 +151,6 @@ if(WITH_CXX)
   if(WITH_SERIALIZATION)
     list(APPEND boost_required_components serialization filesystem)
   endif()
-  if(HAVE_SICONOS_CONTROL)
-    # Should we always look for timer ? This a requirement for many examples
-    # but not for siconos components, except control.
-    list(APPEND boost_required_components timer)
-  endif()
   if(boost_required_components)
     set(boost_opts COMPONENTS ${boost_required_components})
   endif()
