@@ -624,6 +624,12 @@ SolverOptions * solver_options_create(int solverId)
     mlcp_direct_set_default(options);
     break;
   }
+  case SICONOS_MLCP_LCP_LEMKE:
+  {
+    options = solver_options_initialize(solverId, 10000, 1e-12, 0);
+    mlcp_direct_set_default(options);
+    break;
+  }
 
   // --- NCP Solvers ---
   // ref list : enum NCP_SOLVER in NCP_cst.h

@@ -35,16 +35,11 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   /* Relay_display(problem); */
 
   relay_to_lcp(problem, lcp_problem);
+
   /* linearComplementarity_display(lcp_problem); */
-  double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-  double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
 
-  for(i = 0; i < lcp_problem->size; i++)
-  {
-    zlcp[i] = 0.0;
-    wlcp[i] = 0.0;
-  }
-
+  double *zlcp = (double*)calloc(lcp_problem->size, sizeof(double));
+  double *wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
 
   /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
   /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */

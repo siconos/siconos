@@ -17,7 +17,8 @@ enum MLCP_SOLVER
   SICONOS_MLCP_DIRECT_PATH_ENUM = 111,
   SICONOS_MLCP_FB = 112,
   SICONOS_MLCP_DIRECT_FB = 113,
-  SICONOS_MLCP_PGS_SBM = 114
+  SICONOS_MLCP_PGS_SBM = 114,
+  SICONOS_MLCP_LCP_LEMKE = 115
 };
 
 enum SICONOS_IPARAM_MLCP
@@ -55,5 +56,6 @@ extern const char* const   SICONOS_MLCP_DIRECT_PATH_ENUM_STR;
 extern const char* const   SICONOS_MLCP_FB_STR;
 extern const char* const   SICONOS_MLCP_DIRECT_FB_STR;
 extern const char* const   SICONOS_MLCP_PGS_SBM_STR;
+extern const char* const   SICONOS_MLCP_LCP_LEMKE_STR;
 
 #endif

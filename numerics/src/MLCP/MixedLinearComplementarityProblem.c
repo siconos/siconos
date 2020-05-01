@@ -106,92 +106,92 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 
   if(p->M)
   {
-    numerics_printf_verbose(0,"M matrix:\n");
+    numerics_printf_verbose(0,"M matrix:");
     NM_display(p->M);
   }
   else
-    numerics_printf_verbose(0,"No M matrix:\n");
+    numerics_printf_verbose(0,"No M matrix:");
 
   if(p->q)
   {
-    numerics_printf_verbose(0,"q matrix:\n");
+    numerics_printf_verbose(0,"q matrix:");
     NM_dense_display(p->q, n + m, 1, 0);
   }
   else
-    numerics_printf_verbose(0,"No q matrix:\n");
+    numerics_printf_verbose(0,"No q matrix:");
 
   if(p->A)
   {
-    numerics_printf_verbose(0,"A matrix:\n");
+    numerics_printf_verbose(0,"A matrix:");
     NM_dense_display(p->A, n, n, 0);
   }
   else
   {
-    numerics_printf_verbose(0,"No A matrix:\n");
+    numerics_printf_verbose(0,"No A matrix:");
     if(p->M && !p->M->storageType)
     {
-      numerics_printf_verbose(0,"A matrix from M:\n");
+      numerics_printf_verbose(0,"A matrix from M:");
       NM_dense_display(p->M->matrix0, n, n, n + m);
     }
   }
   if(p->B)
   {
-    numerics_printf_verbose(0,"B matrix:\n");
+    numerics_printf_verbose(0,"B matrix:");
     NM_dense_display(p->B, m, m, 0);
   }
   else
   {
-    numerics_printf_verbose(0,"No B matrix:\n");
+    numerics_printf_verbose(0,"No B matrix:");
     if(p->M && !p->M->storageType)
     {
-      numerics_printf_verbose(0,"B matrix from M:\n");
+      numerics_printf_verbose(0,"B matrix from M:");
       NM_dense_display(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
     }
   }
 
   if(p->C)
   {
-    numerics_printf_verbose(0,"C matrix:\n");
+    numerics_printf_verbose(0,"C matrix:");
     NM_dense_display(p->C, n, m, 0);
   }
   else
   {
-    numerics_printf_verbose(0,"No C matrix:\n");
+    numerics_printf_verbose(0,"No C matrix:");
     if(p->M && !p->M->storageType)
     {
-      numerics_printf_verbose(0,"C matrix from M:\n");
+      numerics_printf_verbose(0,"C matrix from M:");
       NM_dense_display(p->M->matrix0 + n * (n + m), n, m, n + m);
     }
   }
 
   if(p->D)
   {
-    numerics_printf_verbose(0,"D matrix:\n");
+    numerics_printf_verbose(0,"D matrix:");
     NM_dense_display(p->D, m, n, 0);
   }
   else
   {
-    numerics_printf_verbose(0,"No D matrix:\n");
+    numerics_printf_verbose(0,"No D matrix:");
     if(p->M && !p->M->storageType)
     {
-      numerics_printf_verbose(0,"D matrix from M:\n");
+      numerics_printf_verbose(0,"D matrix from M:");
       NM_dense_display(p->M->matrix0 + n, m, n, n + m);
     }
   }
   if(p->a)
   {
-    numerics_printf_verbose(0,"a matrix:\n");
+    numerics_printf_verbose(0,"a matrix:");
     NM_dense_display(p->a, n, 1, 0);
   }
   else
-    numerics_printf_verbose(0,"No a matrix:\n");
+    numerics_printf_verbose(0,"No a matrix:");
   if(p->b)
   {
-    numerics_printf_verbose(0,"b matrix:\n");
+    numerics_printf_verbose(0,"b matrix:");
     NM_dense_display(p->b, m, 1, 0);
   }
   else
-    numerics_printf_verbose(0,"No b matrix:\n");
+    numerics_printf_verbose(0,"No b matrix:");
 
 }
 int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* problem, FILE* file)
@@ -525,7 +525,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   return 0;
 }
 
-int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename)
+int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, const char* filename)
 {
   int info = 0;
   FILE * file = fopen(filename, "r");

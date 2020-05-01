@@ -40,6 +40,10 @@
 #include "NonSmoothDrivers.h"    // for mlcp_driver
 #endif
 
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
+
 const char* const   SICONOS_NONAME_STR = "NONAME";
 const char* const   SICONOS_MLCP_PGS_STR = "MLCP_PGS";
 const char* const   SICONOS_MLCP_RPGS_STR = "MLCP_RPGS";
@@ -56,6 +60,11 @@ const char* const   SICONOS_MLCP_DIRECT_PATH_ENUM_STR = "MLCP_DIRECT_PATH_ENUM";
 const char* const   SICONOS_MLCP_FB_STR = "MLCP_FB";
 const char* const   SICONOS_MLCP_DIRECT_FB_STR = "MLCP_DIRECT_FB";
 const char* const   SICONOS_MLCP_PGS_SBM_STR = "MLCP_PGS_SBM";
+const char* const   SICONOS_MLCP_LCP_LEMKE_STR = "MLCP_LCP_LEMKE";
+
+
+
+
 
 
 /** Compute the size of internal work arrays (for SolverOptions struct) and allocate them.
@@ -114,13 +123,17 @@ static void mlcp_driver_allocate_work_arrays(MixedLinearComplementarityProblem* 
   options->iWorkSize = iwsize;
   options->dWorkSize = dwsize;
   if(options->iWorkSize)
+  {
     options->iWork = (int*)calloc(options->iWorkSize, sizeof(int));
+    DEBUG_PRINTF("options->iWork = %p\n",  options->iWork);
+  }
   if(options->dWorkSize)
     options->dWork = (double*)calloc(options->dWorkSize, sizeof(double));
 }
 
 void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
+
   // iWork, dWork arrays memory allocation
   mlcp_driver_allocate_work_arrays(problem, options);
 
@@ -185,18 +198,16 @@ void mlcp_driver_reset(MixedLinearComplementarityProblem* problem, SolverOptions
   case SICONOS_MLCP_FB :
     mlcp_FB_reset();
     break;
-
   default:
     ;/*Nothing to do*/
   }
-
 }
 
 int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options)
 {
-
+  DEBUG_BEGIN("mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options)\n");
   /* verbose=1; */
-
+  DEBUG_PRINTF("options->iWork = %p\n",  options->iWork);
   if(options == NULL)
     numerics_error("mlcp_driver ", "null input for solver options.\n");
 
@@ -268,7 +279,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
   /****** ENUM algorithm ******/
   case  SICONOS_MLCP_ENUM:
   {
-    numerics_printf(" ========================== Call ENUM solver for Mixed Linear Complementarity Problem (MLCP )===========\n");
+    numerics_printf(" ========================== Call ENUM solver for Mixed Linear Complementarity Problem (MLCP )===========");
     mlcp_enum(problem, z, w, &info, options);
     break;
   }
@@ -279,8 +290,11 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 
   /****** DIRECT ENUM algorithm ******/
   case SICONOS_MLCP_DIRECT_ENUM:
+  {
+    numerics_printf(" ========================== Call DIRECT ENUM solver for Mixed Linear Complementarity Problem (MLCP )===========");
     mlcp_direct_enum(problem, z, w, &info, options);
     break;
+  }
   case SICONOS_MLCP_PATH_ENUM:
     mlcp_path_enum(problem, z, w, &info, options);
     break;
@@ -306,6 +320,13 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
   case  SICONOS_MLCP_DIRECT_FB :
     mlcp_direct_FB(problem, z, w, &info, options);
     break;
+  case SICONOS_MLCP_LCP_LEMKE:
+  {
+    numerics_printf(" ========================== Call MLCP LCP LEMKE solver for Mixed Linear Complementarity Problem (MLCP )===========");
+    mlcp_lcp_lemke(problem, z, w, &info, options);
+    break;
+  }
+
   // need a svn add mlcp_GaussSeidel_SBM ...
   //  else if( strcmp( name , SICONOS_MLCP_MLCP_SBM ) == 0 )
   //    mlcp_GaussSeidel_SBM( problem, z , w , &info , options,1);
@@ -317,6 +338,8 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
     exit(EXIT_FAILURE);
   }
   }
+  DEBUG_PRINTF("options->iWork = %p\n",  options->iWork);
+  DEBUG_END("mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options)\n");
   return info;
 }
 
