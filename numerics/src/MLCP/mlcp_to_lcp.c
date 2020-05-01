@@ -56,10 +56,10 @@ LinearComplementarityProblem*  mlcp_to_lcp(MixedLinearComplementarityProblem* pr
   double * AinvC = (double* )calloc(n*m,sizeof(double));
   memcpy(AinvC, problem->C, n*m*sizeof(double));
   int info =  NM_gesv_expert_multiple_rhs(A, AinvC, m, NM_KEEP_FACTORS);
-
+  DEBUG_PRINTF("GESV info :  = %i \n", info);
   if (info)
   {
-    numerics_printf_verbose(0,"");
+    numerics_printf_verbose(0,"mlcp_to_lcp: NM_gesv_expert_multiple_rhs failed");
     free(AinvC);
     return NULL;
   }

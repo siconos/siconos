@@ -264,6 +264,6 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
 void mlcp_pgs_set_default(SolverOptions* options)
 {
   options->filterOn = false;
-  options->iparam[SICONOS_IPARAM_MAX_ITER]  = 20000;
+  options->iparam[SICONOS_IPARAM_MAX_ITER]  = 50000;
   options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT] = 0; //implicit
 }

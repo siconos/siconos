@@ -33,7 +33,7 @@
 #include "numerics_verbose.h"                   // for numerics_printf
 
 
-//#define DEBUG_MESSAGES
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 #ifdef DEBUG_MESSAGES
@@ -49,7 +49,6 @@ void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double *z, doubl
 
   DEBUG_EXPR(mixedLinearComplementarity_display(problem););
   LinearComplementarityProblem* lcp =  mlcp_to_lcp(problem);
-  DEBUG_EXPR(linearComplementarity_display(lcp););
 
   if(!lcp)
   {
@@ -59,6 +58,8 @@ void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double *z, doubl
     DEBUG_END("mlcp_lcp_lemke(...)\n");
     return;
   }
+  DEBUG_EXPR(linearComplementarity_display(lcp););
+
   int n = problem->n;
   int m = problem->m;
 
@@ -67,6 +68,20 @@ void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double *z, doubl
 
   options->solverId = SICONOS_LCP_LEMKE;
   lcp_lexicolemke(lcp, z_lcp, w_lcp, info, options);
+
+  DEBUG_EXPR(
+    double *  lcp_error;
+    lcp_compute_error(lcp, z_lcp, w_lcp,
+                      options->dparam[SICONOS_DPARAM_TOL], lcp_error);
+    printf("lcp_error = %12.8e\n",  *lcp_error);
+    );
+  if(*info)
+  {
+    numerics_printf_verbose(0, "mlcp_lcp_lemke: lcp_lexicolemke failed");
+    freeLinearComplementarityProblem(lcp);
+    return;
+  }
+
   DEBUG_EXPR(NV_display(z_lcp,m));
   DEBUG_EXPR(NV_display(w_lcp,m));
 

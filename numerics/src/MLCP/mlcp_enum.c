@@ -51,11 +51,11 @@ static int *sLastIWork;
 static double *sLastDWork;
 #endif
 
-static double * sQ = 0;
+static double * sp_Q = 0;
 static double * sColNul = 0;
 static double * sM = 0;
 static double * sMref = 0;
-static double * sQref = 0;
+static double * sp_Qref = 0;
 /* double working memory for dgels*/
 static double * sDgelsWork = 0;
 static int LWORK = 0;
@@ -78,16 +78,16 @@ static double* sU;
 /** Local, static functions **/
 static void buildQ()
 {
-  memcpy(sQ, sQref, sMl * sizeof(double));
+  memcpy(sp_Q, sp_Qref, sMl * sizeof(double));
 }
 
-static void printCurrentSystem()
+static void printCurrentSystem(MixedLinearComplementarityProblem* problem)
 {
-  int npm = sNn + sMm;
+  int npm = problem->n + problem->m;
   numerics_printf_verbose(2,"printCurrentSystemM:");
   NM_dense_display(sM, sMl, npm, 0);
   numerics_printf_verbose(2,"printCurrentSystemQ (ie -Q from mlcp because of linear system MZ=Q):");
-  NM_dense_display(sQ, sMl, 1, 0);
+  NM_dense_display(sp_Q, sMl, 1, 0);
 }
 
 static void printRefSystem()
@@ -96,7 +96,7 @@ static void printRefSystem()
   numerics_printf_verbose(2,"ref M NbLines %d n %d  m %d :", sMl, sNn, sMm);
   NM_dense_display(sMref, sMl, npm, 0);
   numerics_printf_verbose(2,"ref Q (ie -Q from mlcp because of linear system MZ=Q):");
-  NM_dense_display(sQref, sMl, 1, 0);
+  NM_dense_display(sp_Qref, sMl, 1, 0);
 }
 
 /* An adaptation of the enum algorithm, to manage the case of MLCP-block formalization
@@ -136,17 +136,17 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
   numerics_printf_verbose(1,"mlcp_enum_Block BEGIN, n %d m %d tol %lf", sNn, sMm, tol);
 
   sM = workingFloat;
-  /*  sQ = sM + npm*npm;*/
-  sQ = sM + (sNn + sMm) * sMl;
-  /*  sColNul = sQ + sMm +sNn;*/
-  sColNul = sQ + sMl;
-  /*  sQref = sColNul + sMm +sNn;*/
-  sQref = sColNul + sMl;
+  /*  sp_Q = sM + npm*npm;*/
+  sp_Q = sM + (sNn + sMm) * sMl;
+  /*  sColNul = sp_Q + sMm +sNn;*/
+  sColNul = sp_Q + sMl;
+  /*  sp_Qref = sColNul + sMm +sNn;*/
+  sp_Qref = sColNul + sMl;
 
-  sDgelsWork = sQref + sMl;
+  sDgelsWork = sp_Qref + sMl;
 
   for(lin = 0; lin < sMl; lin++)
-    sQref[lin] =  - problem->q[lin];
+    sp_Qref[lin] =  - problem->q[lin];
   for(lin = 0; lin < sMl; lin++)
     sColNul[lin] = 0;
 
@@ -174,18 +174,18 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
     mlcp_buildM_Block(sW2V, sM, sMref, sNn, sMm, sMl, indexInBlock);
     buildQ();
     if(verbose >1)
-      printCurrentSystem();
+      printCurrentSystem(problem);
     if(useDGELS)
     {
-      DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sQ, sMl,&LAinfo);
+      DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sp_Q, sMl,&LAinfo);
       numerics_printf_verbose(1,"Solution of dgels");
       {
-        NM_dense_display(sQ, sMl, 1, 0);
+        NM_dense_display(sp_Q, sMl, 1, 0);
       }
     }
     else
     {
-      DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
+      DGESV(npm, NRHS, sM, npm, ipiv, sp_Q, npm, &LAinfo);
       numerics_printf_verbose(1,"Solution of dgesv");
       if(LAinfo != 0)
         numerics_printf_verbose(1,"DGESV FAILED");
@@ -194,7 +194,7 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
 
       if(verbose > 1)
       {
-        NM_dense_display(sQ, sMl, 1, 0);
+        NM_dense_display(sp_Q, sMl, 1, 0);
       }
     }
     if(!LAinfo)
@@ -206,7 +206,7 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
 
         for(ii = 0; ii < npm; ii++)
         {
-          if(isnan(sQ[ii]) || isinf(sQ[ii]))
+          if(isnan(sp_Q[ii]) || isinf(sp_Q[ii]))
           {
             numerics_printf_verbose(1,"DGELS FAILED");
             cc = 1;
@@ -218,7 +218,7 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
 
         if(sMl > npm)
         {
-          double residual = cblas_dnrm2(sMl - npm, sQ + npm, 1);
+          double residual = cblas_dnrm2(sMl - npm, sp_Q + npm, 1);
 
           if(residual > tol || isnan(residual) || isinf(residual))
           {
@@ -233,13 +233,13 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
       numerics_printf_verbose(1,"Solving linear system success, solution in cone?");
       if(verbose > 1)
       {
-        NM_dense_display(sQ, sMl, 1, 0);
+        NM_dense_display(sp_Q, sMl, 1, 0);
       }
 
       check = 1;
       for(lin = 0 ; lin < sMm; lin++)
       {
-        if(sQ[indexInBlock[lin]] < - tol)
+        if(sp_Q[indexInBlock[lin]] < - tol)
         {
           check = 0;
           break;/*out of the cone!*/
@@ -250,7 +250,7 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
       else
       {
         double err;
-        mlcp_fillSolution_Block(sU, sW1, sNn, sMm, sMl, sW2V, sQ, indexInBlock);
+        mlcp_fillSolution_Block(sU, sW1, sNn, sMm, sMl, sW2V, sp_Q, indexInBlock);
         mlcp_compute_error(problem, z, w, tol, &err);
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
         if(err > 10 * tol)
@@ -344,17 +344,17 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   numerics_printf_verbose(1,"mlcp_enum BEGIN, n %d m %d tol %lf\n", sNn, sMm, tol);
 
   sM = workingFloat;
-  /*  sQ = sM + npm*npm;*/
-  sQ = sM + (sNn + sMm) * sMl;
-  /*  sColNul = sQ + sMm +sNn;*/
-  sColNul = sQ + sMl;
-  /*  sQref = sColNul + sMm +sNn;*/
-  sQref = sColNul + sMl;
+  /*  sp_Q = sM + npm*npm;*/
+  sp_Q = sM + (sNn + sMm) * sMl;
+  /*  sColNul = sp_Q + sMm +sNn;*/
+  sColNul = sp_Q + sMl;
+  /*  sp_Qref = sColNul + sMm +sNn;*/
+  sp_Qref = sColNul + sMl;
 
-  sDgelsWork = sQref + sMl;
+  sDgelsWork = sp_Qref + sMl;
 
   for(lin = 0; lin < sMl; lin++)
-    sQref[lin] =  - problem->q[lin];
+    sp_Qref[lin] =  - problem->q[lin];
   for(lin = 0; lin < sMl; lin++)
     sColNul[lin] = 0;
   /*  numerics_printf_verbose(1,"sColNul\n");
@@ -370,23 +370,23 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     mlcp_buildM(sW2V, sM, sMref, sNn, sMm, sMl);
     buildQ();
     if(verbose > 1)
-      printCurrentSystem();
+      printCurrentSystem(problem);
     if(useDGELS)
     {
-      DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sQ, sMl, &LAinfo);
+      DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sp_Q, sMl, &LAinfo);
       numerics_printf_verbose(1,"Solution of dgels\n");
       if(verbose > 1)
       {
-        NM_dense_display(sQ, sMl, 1, 0);
+        NM_dense_display(sp_Q, sMl, 1, 0);
       }
     }
     else
     {
-      DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
+      DGESV(npm, NRHS, sM, npm, ipiv, sp_Q, npm, &LAinfo);
       numerics_printf_verbose(1,"Solution of dgesv\n");
       if(verbose > 1)
       {
-        NM_dense_display(sQ, sMl, 1, 0);
+        NM_dense_display(sp_Q, sMl, 1, 0);
       }
     }
     if(!LAinfo)
@@ -397,7 +397,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
         int ii;
         for(ii = 0; ii < npm; ii++)
         {
-          if(isnan(sQ[ii]) || isinf(sQ[ii]))
+          if(isnan(sp_Q[ii]) || isinf(sp_Q[ii]))
           {
             numerics_printf_verbose(1,"DGELS FAILED\n");
             cc = 1;
@@ -409,7 +409,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
         if(sMl > npm)
         {
-          double residual = cblas_dnrm2(sMl - npm, sQ + npm, 1);
+          double residual = cblas_dnrm2(sMl - npm, sp_Q + npm, 1);
 
           if(residual > tol || isnan(residual) || isinf(residual))
           {
@@ -423,13 +423,13 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
       numerics_printf_verbose(1,"Solving linear system success, solution in cone?\n");
       if(verbose > 1)
       {
-        NM_dense_display(sQ, sMl, 1, 0);
+        NM_dense_display(sp_Q, sMl, 1, 0);
       }
 
       check = 1;
       for(lin = 0 ; lin < sMm; lin++)
       {
-        if(sQ[sNn + lin] < - tol)
+        if(sp_Q[sNn + lin] < - tol)
         {
           check = 0;
           break;/*out of the cone!*/
@@ -440,7 +440,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
       else
       {
         double err;
-        mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sMl, sW2V, sQ);
+        mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sMl, sW2V, sp_Q);
         mlcp_compute_error(problem, z, w, tol, &err);
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
         if(err > 10 * tol)

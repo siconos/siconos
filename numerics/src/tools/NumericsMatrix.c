@@ -3094,7 +3094,13 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         {
           fprintf(stderr, "NM_gesv: LU factorisation DGETRF failed. The %d-th argument has an illegal value, stopping\n", -info);
         }
-
+        else
+        {
+          if(verbose >= 2)
+          {
+            printf("NM_gesv: LU factorisation DGETRF suceeded.\n");
+          }
+        }
         if(info)
         {
           NM_internalData_free(A);
@@ -3636,6 +3642,7 @@ int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs
   for(unsigned int i = 0; i < n_rhs; ++i)
   {
     info = NM_gesv_expert(A, &b[A->size0*i],  keep);
+    if(info) break;
   }
   return info;
 }

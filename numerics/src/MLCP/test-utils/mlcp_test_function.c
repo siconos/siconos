@@ -36,6 +36,9 @@ int mlcp_test_function(TestCase * current)
   MixedLinearComplementarityProblem* problem = (MixedLinearComplementarityProblem *)malloc(sizeof(MixedLinearComplementarityProblem));
   info = mixedLinearComplementarity_newFromFilename(problem, current->filename);
 
+
+  /* mixedLinearComplementarity_display(problem); */
+
   double * z = (double *)calloc(problem->n+problem->m, sizeof(double));
   double * w = (double *)calloc(problem->n+problem->m, sizeof(double));
 
@@ -43,9 +46,26 @@ int mlcp_test_function(TestCase * current)
   info = mlcp_driver(problem, z, w, current->options);
   mlcp_driver_reset(problem, current->options);
 
-  for(i = 0 ; i < problem->n+problem->m ; i++)
+  int size_max = problem->n+problem->m;
+  bool brief= false;
+  if (size_max > 10)
+  {
+    size_max=10;
+    brief= true;
+  }
+
+
+  for(i = 0 ; i < size_max; i++)
   {
     printf("z[%i] = %12.8e\t,w[%i] = %12.8e\n", i, z[i], i, w[i]);
+  }
+  if (brief)
+  {
+    printf(".....\n");
+    printf("z[%i] = %12.8e\t,w[%i] = %12.8e\n", problem->n+problem->m-1, z[problem->n+problem->m-1], problem->n+problem->m-1, w[problem->n+problem->m-1]);
+  }
+  for(i = 0 ; i < problem->n+problem->m ; i++)
+  {
     info = info == 0 ? !(isfinite(z[i]) && isfinite(w[i])): info;
   }
 
