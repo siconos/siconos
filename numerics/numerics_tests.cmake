@@ -91,11 +91,16 @@ if(WITH_${COMPONENT}_TESTING)
 
   # ----------- MLCP solvers tests -----------
   begin_tests(src/MLCP/test)
+
   new_tests_collection(
     DRIVER mlcp_test_collection.c.in FORMULATION mlcp COLLECTION TEST_MLCP_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c)
 
-  
+   new_tests_collection(
+    DRIVER mlcp_test_collection.c.in FORMULATION mlcp COLLECTION TEST_MLCP_COLLECTION_2
+    EXTRA_SOURCES data_collection_2.c)
+
+
   if(HAVE_SYSTIMES_H AND WITH_CXX)
     new_test(NAME MLCPtest SOURCES main_mlcp.cpp)
   endif()

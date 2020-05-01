@@ -129,7 +129,7 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   incBx = m;
 
   mlcp_compute_error(problem, z, w, tol, &err);
-  printf("Error = %12.8e\n", err);
+  //printf("Error = %12.8e\n", err);
 
   while((iter < itermax) && (err > tol))
   {
@@ -176,7 +176,7 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   }
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  options->dparam[SICONOS_DPARAM_TOL] = err;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if(err > tol)
   {
@@ -188,7 +188,6 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
     numerics_printf_verbose(1,"---- MLCP - RPGS  - Convergence after %d iterations with error = %14.7e ", iter, err);
     *info = 0;
   }
-
   free(diagA);
   free(diagB);
   return;
@@ -196,6 +195,7 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
 void mlcp_rpgs_set_default(SolverOptions* options)
 {
+  options->iparam[SICONOS_IPARAM_MAX_ITER]  = 50000;
   options->dparam[SICONOS_DPARAM_MLCP_RHO] = 1.0; /*rho*/
   options->filterOn = false;
 }
