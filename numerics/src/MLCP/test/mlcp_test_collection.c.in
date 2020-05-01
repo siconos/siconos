@@ -34,7 +34,7 @@ int main(void)
     n_data++;
 
   // Set solvers list for each collection of data.
-#if defined(TEST_MLCP_COLLECTION_1)
+#if defined(TEST_MLCP_COLLECTION_1) || defined(TEST_MLCP_COLLECTION_4)
   // same solvers for data collections 1 and 2
   int solvers[] = {SICONOS_MLCP_PGS,
                    SICONOS_MLCP_RPGS,
@@ -53,8 +53,12 @@ int main(void)
                    SICONOS_MLCP_DIRECT_FB,
                    SICONOS_MLCP_LCP_LEMKE};
 
-/* #elif TEST_LCP_COLLECTION_4 */
-/*   int solvers[] = { SICONOS_MLCP_PGS_SBM}; */
+#elif TEST_MLCP_COLLECTION_3
+  int solvers[] = {SICONOS_MLCP_PGS,
+                   SICONOS_MLCP_RPGS,
+                   SICONOS_MLCP_PSOR,
+                   SICONOS_MLCP_LCP_LEMKE};
+
 #endif
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
@@ -78,11 +82,9 @@ int main(void)
   /* collection[10].will_fail = 2; */
 #elif TEST_MLCP_COLLECTION_2
 
-  int failed_test[]=  {0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                       10, 11, 12, 13, 14, 18, 19, 23, 24, 25,
-                       26, 27, 29};
+  int failed_test[]=  {0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 16, 17};
 
-  for (int t =0; t< 23; t++)
+  for (int t =0; t< 12; t++)
   {
     collection[failed_test[t]].will_fail = 1;
   }
