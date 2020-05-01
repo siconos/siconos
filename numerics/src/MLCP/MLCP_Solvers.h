@@ -237,6 +237,9 @@ extern "C"
    */
   void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double *w, int* info, SolverOptions* options);
 
+  void mlcp_lcp_lemke(MixedLinearComplementarityProblem* problem, double *z, double *w, int* info, SolverOptions* options);
+
+  void mlcp_lcp_lemke_default(SolverOptions* options);
 
   /** This function checks the validity of the vector z as a solution of the MLCP. \rst Details in :ref:`mlcp_error`\endrst
       \param[in] problem structure that represents the MLCP (n,m,M, q... or (A,B,C...))

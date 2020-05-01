@@ -40,15 +40,16 @@
 
 void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double *w, int *info, SolverOptions* options)
 {
+  /* verbose=1; */
 
   MixedLinearComplementarityProblem* problem;
 
   if(!problem_orig->isStorageType2)
   {
-    mixedLinearComplementarity_display(problem_orig);
+    //mixedLinearComplementarity_display(problem_orig);
     numerics_printf_verbose(0,"mlcp_pgs: Wrong Storage (!isStorageType2) for PGS solver\n");
     MixedLinearComplementarityProblem* mlcp_abcd =  mixedLinearComplementarity_fromMtoABCD(problem_orig);
-    mixedLinearComplementarity_display(mlcp_abcd);
+    //mixedLinearComplementarity_display(mlcp_abcd);
     problem = mlcp_abcd;
     //exit(EXIT_FAILURE);
   }
@@ -107,9 +108,8 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
   {
     if((fabs(A[i * n + i]) < DBL_EPSILON))
     {
-
-      numerics_printf_verbose(1," Vanishing diagonal term \n");
-      numerics_printf_verbose(1," The local problem cannot be solved \n");
+      numerics_printf_verbose(1," Vanishing diagonal term A[%i,%i]= %14.8e", i, i,  A[i * n + i] );
+      numerics_printf_verbose(1," The local problem cannot be solved");
 
       *info = 2;
       free(diagA);
@@ -247,7 +247,7 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
     numerics_printf_verbose(1,"---- MLCP - PGS  - Convergence of PGS after %d iterations with error = %14.7e ", iter, err);
     *info = 0;
   }
-  getchar();
+
   free(diagA);
   free(diagB);
 
@@ -256,7 +256,7 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
     mixedLinearComplementarity_free(problem);
   }
 
-
+  /* verbose=0; */
 
   return;
 }
@@ -264,5 +264,6 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
 void mlcp_pgs_set_default(SolverOptions* options)
 {
   options->filterOn = false;
+  options->iparam[SICONOS_IPARAM_MAX_ITER]  = 20000;
   options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT] = 0; //implicit
 }

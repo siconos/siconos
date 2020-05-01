@@ -148,7 +148,7 @@ extern "C"
    *  \param filename that contains the mlcp
    *  \return 0 if ok
    */
-  int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename);
+  int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, const char* filename);
 
   /** \fn  MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedLinearComplementarityProblem* problem);
    *  \brief function to create a MLCP with ABCD format from M formatted MLCP

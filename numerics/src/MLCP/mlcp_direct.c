@@ -50,6 +50,11 @@ dim(v)=nn
 #include "numerics_verbose.h"                   // for verbose
 #include "SiconosConfig.h"                      // for DIRECT_SOLVER_USE_DGETRI // IWYU pragma: keep
 
+#define DEBUG_MESSAGES
+#include "debug.h"
+
+
+
 #define DIRECT_SOLVER_USE_DGETRI
 double * sVBuf;
 
@@ -64,19 +69,19 @@ struct dataComplementarityConf
   lapack_int* IPV;
 };
 
-static double * spCurDouble = 0;
-static int * spCurInt = 0;
+static double * sp_curDouble = 0;
+static int * sp_curInt = 0;
 static double * sQ = 0;
-static int sNumberOfCC = 0;
-static int sMaxNumberOfCC = 0;
+static int s_numberOfCC = 0;
+static int s_maxNumberOfCC = 0;
 static struct dataComplementarityConf * spFirstCC = 0;
-static struct dataComplementarityConf * spCurCC = 0;
+static struct dataComplementarityConf * sp_curCC = 0;
 static double sTolneg = 0;
 static double sTolpos = 0;
-static int sN;
-static int sM;
-static int sNbLines;
-static int sNpM;
+static int s_n;
+static int s_m;
+static int s_nbLines;
+static int s_npM;
 static int* spIntBuf;
 static int sProblemChanged = 0;
 
@@ -89,70 +94,73 @@ static int solveWithCurConfig(MixedLinearComplementarityProblem* problem);
 
 double * mydMalloc(int n)
 {
-  double * aux = spCurDouble;
-  spCurDouble = spCurDouble + n;
+  double * aux = sp_curDouble;
+  sp_curDouble = sp_curDouble + n;
   return aux;
 }
 int * myiMalloc(int n)
 {
-  int * aux = spCurInt;
-  spCurInt = spCurInt + n;
+  int * aux = sp_curInt;
+  sp_curInt = sp_curInt + n;
   return aux;
 }
 // XXX this is going to fail
 static lapack_int * myiMalloc2(int n)
 {
-  lapack_int * aux = (lapack_int*)spCurInt;
-  spCurInt = (int*)&aux[n];
+  lapack_int * aux = (lapack_int*)sp_curInt;
+  sp_curInt = (int*)&aux[n];
   return aux;
 }
 
 int mlcp_direct_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  return (problem->n + problem->m) * (options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS] + 1) + options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS] * problem->m;
+  return (problem->n + problem->m) * (options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS] + 1)
+    + options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS] * problem->m;
 }
 
 int mlcp_direct_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  return  problem->n + problem->m + (options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS]) * ((problem->n + problem->m) * (problem->n + problem->m)) + (problem->n + problem->m);
+  return  problem->n + problem->m
+    + (options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS]) * ((problem->n + problem->m) * (problem->n + problem->m))
+    + (problem->n + problem->m);
 }
 
 void mlcp_direct_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  spCurDouble = options->dWork;
-  spCurInt = options->iWork;
-  sMaxNumberOfCC = options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS];
+  sp_curDouble = options->dWork;
+  sp_curInt = options->iWork;
+  s_maxNumberOfCC = options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS];
   sTolneg = options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_NEG];
   sTolpos = options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_POS];
   options->iparam[7] = 0;
   sProblemChanged = options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED];
-  sN = problem->n;
-  sM = problem->m;
-  sNbLines = problem->n + problem->m;
-  if(problem->M->size0 != sNbLines)
+  s_n = problem->n;
+  s_m = problem->m;
+  s_nbLines = problem->n + problem->m;
+  if(problem->M->size0 != s_nbLines)
   {
     printf("mlcp_direct_init : M rectangular, not yet managed\n");
     exit(1);
   }
 
   if(verbose)
-    printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
+    printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", s_n, s_m, sTolneg, sTolpos);
 
-  sNpM = sN + sM;
+  s_npM = s_n + s_m;
 
   // If the problem comes from the kernel (dynamical systems)
   // Then update is needed but no reset of the previous solutions
   // (This avoids some memory loss by the way)
   if(options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED]==0)
   {
-    spCurCC = 0;
+    sp_curCC = 0;
     spFirstCC = 0;
-    sNumberOfCC = 0;
+    s_numberOfCC = 0;
   }
 
-  sQ = mydMalloc(sNpM);
-  sVBuf = mydMalloc(sNpM);
-  spIntBuf = myiMalloc(sNpM);
+  sQ = mydMalloc(s_npM);
+  sVBuf = mydMalloc(s_npM);
+  spIntBuf = myiMalloc(s_npM);
 }
 
 void mlcp_direct_reset()
@@ -169,15 +177,15 @@ void mlcp_direct_reset()
 int internalPrecompute(MixedLinearComplementarityProblem* problem)
 {
   lapack_int INFO = 0;
-  mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM, sNbLines);
+  mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, s_n, s_m, s_nbLines);
   if(verbose)
   {
     printf("mlcp_direct, precomputed M :\n");
-    NM_dense_display(spFirstCC->M, sNpM, sNpM, 0);
+    NM_dense_display(spFirstCC->M, s_npM, s_npM, 0);
   }
   if(!(spFirstCC->Usable))
     return 0;
-  DGETRF(sNpM, sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, &INFO);
+  DGETRF(s_npM, s_npM, spFirstCC->M, s_npM, spFirstCC->IPV, &INFO);
   if(INFO)
   {
     spFirstCC->Usable = 0;
@@ -185,7 +193,7 @@ int internalPrecompute(MixedLinearComplementarityProblem* problem)
     return 0;
   }
 #ifdef DIRECT_SOLVER_USE_DGETRI
-  DGETRI(sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, &INFO);
+  DGETRI(s_npM, spFirstCC->M, s_npM, spFirstCC->IPV, &INFO);
   if(INFO)
   {
     spFirstCC->Usable = 1;
@@ -199,22 +207,21 @@ int internalPrecompute(MixedLinearComplementarityProblem* problem)
 /*memory management about floatWorkingMem and intWorkingMem*/
 int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int init)
 {
-  int i;
   if(verbose)
   {
     printf("mlcp_direct internalAddConfig\n");
     printf("---------\n");
-    for(i = 0; i < problem->m; i++)
+    for(int i = 0; i < problem->m; i++)
       printf("zw[%d]=%d\t", i, zw[i]);
     printf("\n");
   }
   if(init)
   {
-    spFirstCC->zw = myiMalloc(sM);
-    spFirstCC->IPV = myiMalloc2(sNpM);
-    spFirstCC->M = mydMalloc(sNpM * sNpM);
+    spFirstCC->zw = myiMalloc(s_m);
+    spFirstCC->IPV = myiMalloc2(s_npM);
+    spFirstCC->M = mydMalloc(s_npM * s_npM);
   }
-  for(i = 0; i < sM; i++)
+  for(int i = 0; i < s_m; i++)
   {
     spFirstCC->zw[i] = zw[i];
   }
@@ -223,14 +230,14 @@ int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int 
 /*memory management about dataComplementarityConf*/
 void mlcp_direct_addConfig(MixedLinearComplementarityProblem* problem, int * zw)
 {
-  if(sNumberOfCC < sMaxNumberOfCC)  /*Add a configuration*/
+  if(s_numberOfCC < s_maxNumberOfCC)  /*Add a configuration*/
   {
-    sNumberOfCC++;
+    s_numberOfCC++;
     if(spFirstCC == 0)  /*first add*/
     {
       spFirstCC = (struct dataComplementarityConf *) malloc(sizeof(struct dataComplementarityConf));
       spFirstCC->Usable = 1;
-      spCurCC = spFirstCC;
+      sp_curCC = spFirstCC;
       spFirstCC->prev = 0;
       spFirstCC->next = 0;
     }
@@ -264,7 +271,7 @@ void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarityProblem* probl
 {
   int i;
 
-  for(i = 0; i < sM; i++)
+  for(i = 0; i < s_m; i++)
   {
     if(wSol[i] > sTolpos)
       spIntBuf[i] = 1;
@@ -286,27 +293,27 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
   int INCY = 1;
   double * solTest = 0;
   /*  printf("cur config ");
-  for (int i=0;i<sM;i++)
-    if (spCurCC->zw[i])
+  for (int i=0;i<s_m;i++)
+    if (sp_curCC->zw[i])
       printf("1");
     else
       printf("0");
       printf("\n");*/
   if(sProblemChanged)
     internalPrecompute(problem);
-  if(!spCurCC->Usable)
+  if(!sp_curCC->Usable)
   {
     if(verbose)
       printf("solveWithCurConfig not usable\n");
     return 0;
   }
 #ifdef DIRECT_SOLVER_USE_DGETRI
-  cblas_dgemv(CblasColMajor,CblasNoTrans, sNpM, sNpM, ALPHA, spCurCC->M, sNpM, sQ, INCX, BETA, sVBuf, INCY);
+  cblas_dgemv(CblasColMajor,CblasNoTrans, s_npM, s_npM, ALPHA, sp_curCC->M, s_npM, sQ, INCX, BETA, sVBuf, INCY);
   solTest = sVBuf;
 #else
-  for(lin = 0; lin < sNpM; lin++)
+  for(lin = 0; lin < s_npM; lin++)
     sQ[lin] =  - problem->q[lin];
-  DGETRS(LA_NOTRANS, sNpM, one, spCurCC->M, sNpM, spCurCC->IPV, sQ, sNpM, &INFO);
+  DGETRS(LA_NOTRANS, s_npM, one, sp_curCC->M, s_npM, sp_curCC->IPV, sQ, s_npM, &INFO);
   solTest = sQ;
 #endif
   if(INFO)
@@ -317,12 +324,12 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
   }
   else
   {
-    for(lin = 0 ; lin < sM; lin++)
+    for(lin = 0 ; lin < s_m; lin++)
     {
-      if(solTest[sN + lin] < - sTolneg)
+      if(solTest[s_n + lin] < - sTolneg)
       {
         if(verbose)
-          printf("solveWithCurConfig Sol not in the positive cone because %lf\n", solTest[sN + lin]);
+          printf("solveWithCurConfig Sol not in the positive cone because %lf\n", solTest[s_n + lin]);
         return 0;
       }
     }
@@ -342,9 +349,9 @@ void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *
   }
   else
   {
-    spCurCC = spFirstCC;
+    sp_curCC = spFirstCC;
 #ifdef DIRECT_SOLVER_USE_DGETRI
-    for(lin = 0; lin < sNpM; lin++)
+    for(lin = 0; lin < s_npM; lin++)
       sQ[lin] =  - problem->q[lin];
 #endif
     do
@@ -353,32 +360,32 @@ void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *
       if(find)
       {
 #ifdef DIRECT_SOLVER_USE_DGETRI
-        mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, sNbLines, spCurCC->zw, sVBuf);
+        mlcp_fillSolution(z, z + s_n, w, w + s_n, s_n, s_m, s_nbLines, sp_curCC->zw, sVBuf);
 #else
-        mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, sNbLines, spCurCC->zw, sQ);
+        mlcp_fillSolution(z, z + s_n, w, w + s_n, s_n, s_m, s_nbLines, sp_curCC->zw, sQ);
 #endif
         /*Current becomes first for the next step.*/
-        if(spCurCC != spFirstCC)
+        if(sp_curCC != spFirstCC)
         {
           /*    nbConfig(spFirstCC);
-          nbConfig(spCurCC);
+          nbConfig(sp_curCC);
           printf("bidouille pour devenir 1\n");*/
-          spCurCC->prev->next = spCurCC->next;
-          if(spCurCC->next)
-            spCurCC->next->prev = spCurCC->prev;
-          spFirstCC->prev = spCurCC;
-          spCurCC->next = spFirstCC;
-          spFirstCC = spCurCC;
+          sp_curCC->prev->next = sp_curCC->next;
+          if(sp_curCC->next)
+            sp_curCC->next->prev = sp_curCC->prev;
+          spFirstCC->prev = sp_curCC;
+          sp_curCC->next = spFirstCC;
+          spFirstCC = sp_curCC;
           spFirstCC->prev = 0;
           /*    nbConfig(spFirstCC);*/
         }
       }
       else
       {
-        spCurCC = spCurCC->next;
+        sp_curCC = sp_curCC->next;
       }
     }
-    while(spCurCC && !find);
+    while(sp_curCC && !find);
 
     if(find)
     {

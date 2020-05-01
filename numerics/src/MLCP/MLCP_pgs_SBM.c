@@ -83,7 +83,8 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   {
     numerics_printf_verbose(0,"mlcp_PGS_SBM, storageType =%i", problem->M->storageType);
     fprintf(stderr, "mlcp_PGS_SBM error: wrong storage type (problem->M->matrix1 == NULL) for input matrix M of the MLCP.\n");
-    exit(EXIT_FAILURE);
+    *info=1;
+    return;
   }
 
   /*
