@@ -29,66 +29,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_ENUM_US...
 #include "numerics_verbose.h"              // for numerics_printf, verbose
-
-
-static unsigned long  int sCurrentEnum = 0;
-static unsigned long  int sCmpEnum = 0;
-static unsigned long  int sNbCase = 0;
-static double sProgress = 0;
-
-
-
-
-
-
-/*case defined with sCurrentEnum
- *if sWZ[i]==0
- *  w[i] null
- *else
- *  z[i] null
- */
-static void affectWZ(int * zw, int size)
-{
-  unsigned long  int aux = sCurrentEnum;
-  for(int i = 0; i < size; i++)
-  {
-    zw[i] = aux & 1;
-    aux = aux >> 1;
-  }
-}
-
-static void lcp_initEnum(int size)
-{
-  int cmp;
-  sCmpEnum = 0;
-  sNbCase = 1;
-  for(cmp = 0; cmp < size; cmp++)
-    sNbCase = sNbCase << 1;
-  sProgress = 0;
-}
-static int lcp_nextEnum(int * zw, int size)
-{
-  if(sCmpEnum == sNbCase)
-    return 0;
-  if(sCurrentEnum >= sNbCase)
-  {
-    sCurrentEnum = 0;
-  }
-  if(verbose)
-    numerics_printf("try enum :%d\n", (int)sCurrentEnum);
-
-  affectWZ(zw, size);
-
-  sCurrentEnum++;
-  sCmpEnum++;
-  if(verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
-  {
-    sProgress += 0.001;
-    numerics_printf("lcp_enum progress %f %d", sProgress, (int) sCurrentEnum);
-  }
-
-  return 1;
-}
+#include "enum_tool.h"
 
 
 static void lcp_buildM(int * zw,
@@ -198,7 +139,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   int useDGELS = options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS];
 
   /*OUTPUT param*/
-  sCurrentEnum = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
+ 
   tol = options->dparam[SICONOS_DPARAM_TOL];
   int multipleSolutions = options->iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS];
   int numberofSolutions = 0;
@@ -227,8 +168,9 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   int * zw_indices  =  workingInt;
   ipiv = zw_indices + size;
   *info = 0;
-  lcp_initEnum(size);
-  while(lcp_nextEnum(zw_indices, size))
+  EnumerationStruct * enum_struct = enum_init(size);
+  enum_struct->current = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
+  while(enum_next(zw_indices, size, enum_struct))
   {
     lcp_buildM(zw_indices,  M_linear_system, problem->M->matrix0, size, column_of_zero);
     memcpy(q_linear_system, q_linear_systemref, (size)*sizeof(double));
@@ -297,11 +239,11 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
         numberofSolutions++;
         if(verbose || multipleSolutions)
         {
-          numerics_printf("lcp_enum find %i solution with sCurrentEnum = %ld!", numberofSolutions, sCurrentEnum - 1);
+          numerics_printf("lcp_enum find %i solution with scurrent = %ld!", numberofSolutions, enum_struct->current - 1);
         }
         *info = 0;
         lcp_fillSolution(z, w, size, zw_indices, q_linear_system);
-        options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM ] = (int) sCurrentEnum - 1;
+        options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM ] = (int) enum_struct->current - 1;
         options->iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] = numberofSolutions;
         if(!multipleSolutions)  return;
       }
