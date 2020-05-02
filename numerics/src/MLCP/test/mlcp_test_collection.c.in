@@ -74,7 +74,10 @@ int main(void)
                        15, 16, 17, 18, 22, 23, 24, 25, 26, 27,
                        28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
                        38, 39, 40, 41, 65, 106, 107, 108, 109};
-  for (int t =0; t< 39; t++)
+
+  int n_failed_test=  (int)(sizeof(failed_test) / sizeof(failed_test[0]));
+
+  for (int t =0; t< n_failed_test; t++)
   {
     collection[failed_test[t]].will_fail = 1;
   }
@@ -83,12 +86,23 @@ int main(void)
 #elif TEST_MLCP_COLLECTION_2
 
   int failed_test[]=  {0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 16, 17};
+  int n_failed_test=  (int)(sizeof(failed_test) / sizeof(failed_test[0]));
 
-  for (int t =0; t< 12; t++)
+  for (int t =0; t< n_failed_test; t++)
   {
     collection[failed_test[t]].will_fail = 1;
   }
-#elif TEST_LCP_COLLECTION_5
+#elif TEST_MLCP_COLLECTION_3
+
+  int failed_test[]=  {0, 1, 2, 3, 4, 5, 7};
+  int n_failed_test=  (int)(sizeof(failed_test) / sizeof(failed_test[0]));
+
+  for (int t =0; t< n_failed_test; t++)
+  {
+    collection[failed_test[t]].will_fail = 1;
+  }
+
+#elif TEST_MLCP_COLLECTION_4
   collection[0].will_fail = 1;
 #endif
 
