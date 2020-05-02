@@ -19,7 +19,7 @@ void initEnum(int M);
 /** Iterate in the enumeration
  * \param[in,out] the next iterate
  */
-int nextEnum(int * W2V);
+int nextEnum(int * W2V, int size);
 
 void mlcp_enum_build_M(int * zw, double * M, double * Mref, int n, int m, int NbLines);
 void mlcp_enum_build_M_Block(int * zw, double * M, double * Mref, int n, int m, int NbLines, int *indexInBlock);

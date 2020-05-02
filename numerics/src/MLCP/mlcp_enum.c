@@ -54,21 +54,7 @@ dim(v)=nn
 #endif
 
 
-/*
- *if zw[i]==0
- *  v[i] >=0 and w_i[i]=0
- *else
- *  v[i] =0 and w_i[i] >=0
- */
-
 /** Local, static functions **/
-static void build_enum_q(MixedLinearComplementarityProblem* problem,
-                         double * q_linear_system,
-                         double * q_linear_system_ref)
-{
-  int n_row = problem->M->size0;
-  memcpy(q_linear_system, q_linear_system_ref, n_row * sizeof(double));
-}
 
 static void print_current_system(MixedLinearComplementarityProblem* problem,
                                double * M_linear_system,
@@ -147,10 +133,13 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
     numerics_warning("mlcp_enum_block", "all the cases will not be enumerated since itermax < nbCase)");
   }
 
-  while(nextEnum(zw_indices) && itermax-- > 0)
+  while(nextEnum(zw_indices, m) && itermax-- > 0)
   {
     mlcp_enum_build_M_Block(zw_indices, M_linear_system, problem->M->matrix0, n, m, n_row, indexInBlock);
-    build_enum_q(problem, q_linear_system, q_linear_system_ref);
+
+    /* copy q_ref in q */
+    memcpy(q_linear_system, q_linear_system_ref, n_row * sizeof(double));
+
     if(verbose >1)
       print_current_system(problem, M_linear_system, q_linear_system);
     if(useDGELS)
@@ -340,12 +329,16 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   ipiv = zw_indices + m;
 
   initEnum(problem->m);
-  while(nextEnum(zw_indices) && itermax-- > 0)
+  while(nextEnum(zw_indices, m) && itermax-- > 0)
   {
     mlcp_enum_build_M(zw_indices, M_linear_system, problem->M->matrix0, n, m, n_row);
-    build_enum_q(problem, q_linear_system, q_linear_system_ref);
+
+    /* copy q_ref in q */
+    memcpy(q_linear_system, q_linear_system_ref, n_row * sizeof(double));
+
     if(verbose > 1)
       print_current_system(problem, M_linear_system, q_linear_system);
+
     if(useDGELS)
     {
       DGELS(LA_NOTRANS,n_row, npm, NRHS, M_linear_system, n_row, q_linear_system, n_row, &LAinfo);
