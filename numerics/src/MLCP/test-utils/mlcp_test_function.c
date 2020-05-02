@@ -36,7 +36,12 @@ int mlcp_test_function(TestCase * current)
   MixedLinearComplementarityProblem* problem = (MixedLinearComplementarityProblem *)malloc(sizeof(MixedLinearComplementarityProblem));
   info = mixedLinearComplementarity_newFromFilename(problem, current->filename);
 
-
+  if (info)
+  {
+    printf("issue in loading the mlcp problem");
+    return info;
+  }
+  
   /* mixedLinearComplementarity_display(problem); */
 
   double * z = (double *)calloc(problem->n+problem->m, sizeof(double));

@@ -512,7 +512,6 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
     info = 1;
 
     mlcp_driver_init(problem, mlcpOptions);
-    info = mlcp_driver(problem, z, w, mlcpOptions);
     startTimer();
     info = mlcp_driver(problem, z, w, mlcpOptions);
     stopTimer();
