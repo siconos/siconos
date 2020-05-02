@@ -43,7 +43,6 @@ dim(v)=nn
 #include "SolverOptions.h"                      // for SolverOptions, SICONO...
 #include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_E...
 #include "mlcp_enum_tool.h"                     // for initEnum, nextEnum
-#include "mlcp_tool.h"                          // for mlcp_enum_display_solution
 #include "mlcp_enum.h"
 #include "numerics_verbose.h"                   // for verbose
 #include "SiconosConfig.h"                      // for MLCP_DEBUG // IWYU pragma: keep
@@ -53,6 +52,14 @@ dim(v)=nn
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"                     // for NV_display
 #endif
+
+
+/*
+ *if zw[i]==0
+ *  v[i] >=0 and w_i[i]=0
+ *else
+ *  v[i] =0 and w_i[i] >=0
+ */
 
 /** Local, static functions **/
 static void build_enum_q(MixedLinearComplementarityProblem* problem,
@@ -81,17 +88,14 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
 {
   DEBUG_BEGIN(" mlcp_enum_block(...)\n");
 
-  int * workingInt = options->iWork;
   int npm = (problem->n) + (problem->m);
+
+
   int NRHS = 1;
-  lapack_int * ipiv;
-  int * indexInBlock;
   int check;
   lapack_int LAinfo = 0;
 
   *info = 0;
-
-
 
   assert(problem->M);
   assert(problem->M->matrix0);
@@ -101,9 +105,11 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
   int n = problem->n;
   int m = problem->m;
 
-  /*OUTPUT param*/
+
   double * w_e  = w;
   double * u = z;
+
+
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   int useDGELS = options->iparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS];
@@ -123,9 +129,9 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
   for(int row = 0; row < M_size_0; row++)
     q_linear_system_ref[row] =  - problem->q[row];
 
-  int * zw_indices = workingInt;
-  ipiv = zw_indices + m;
-  indexInBlock = ipiv + m + n;
+  int * zw_indices = options->iWork;
+  lapack_int * ipiv = zw_indices + m;
+  int * indexInBlock = ipiv + m + n;
   if(m == 0)
     indexInBlock = 0;
   *info = 0;
