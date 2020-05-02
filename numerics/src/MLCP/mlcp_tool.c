@@ -22,59 +22,60 @@
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 
 /*
- *if sW2V[i]==0
- *  v[i] not null w2[i] null
+ *if zw[i]==0
+ *  v[i] >=0 and w_i[i]=0
  *else
- *  v[i] null and w2[i] not null
+ *  v[i] =0 and w_i[i] >=0
  */
-void mlcp_buildM(int * zw, double * M, double * Mref, int n, int m, int NbLines)
+
+void mlcp_enum_build_M(int * zw, double * M, double * Mref, int n, int m, int NbLines)
 {
-  int col, i;
-  double * Aux;
-  double * AuxRef;
+
   /*First, copy the n first collums.*/
   memcpy(M, Mref, n * NbLines * sizeof(double));
-  Aux = M + n * NbLines;
-  AuxRef = Mref + n * NbLines;
 
-  for(col = 0; col < m; col++)
+  double * current_col_M = M + n * NbLines;
+  double * current_col_MRef = Mref + n * NbLines;
+
+  for(int col = 0; col < m; col++)
   {
     if(zw[col] == 0)
     {
-      memcpy(Aux, AuxRef, NbLines * sizeof(double));
+      /* copy current column of MRef in M */
+      memcpy(current_col_M, current_col_MRef, NbLines * sizeof(double));
     }
     else
     {
-      for(i = 0; i < NbLines; i++) Aux[i] = 0;
-      /*memcpy(Aux,sColNul,npm*sizeof(double));*/
-      Aux[(NbLines - m) + col] = -1;
+      for(int i = 0; i < NbLines; i++) current_col_M[i] = 0;
+      /*memcpy(current_col_M, sColNul, npm*sizeof(double));*/
+      current_col_M[(NbLines - m) + col] = -1;
       /*M[(n+col)*npm+col+n]=-1;*/
     }
-    Aux = Aux + NbLines;
-    AuxRef = AuxRef + NbLines;
+    current_col_M = current_col_M + NbLines;
+    current_col_MRef = current_col_MRef + NbLines;
   }
 
 }
-void mlcp_buildM_Block(int * zw, double * M, double * Mref, int n, int m, int NbLines, int *indexInBlock)
+void mlcp_enum_build_M_Block(int * zw, double * M, double * Mref, int n, int m, int NbLines, int *indexInBlock)
 {
   int col, i;
-  double * Aux;
+  double * current_col_M;
   memcpy(M, Mref, NbLines * NbLines * sizeof(double));
-  //Aux=M+n*NbLines;
-  //AuxRef = Mref+n*NbLines;
+  //current_col_M=M+n*NbLines;
+  //current_col_MRef = Mref+n*NbLines;
 
   for(col = 0; col < m; col++)
   {
     if(zw[col])
     {
-      Aux = M + indexInBlock[col] * NbLines;
-      for(i = 0; i < NbLines; i++) Aux[i] = 0;
-      Aux[indexInBlock[col]] = -1;
+      current_col_M = M + indexInBlock[col] * NbLines;
+      for(i = 0; i < NbLines; i++) current_col_M[i] = 0;
+      current_col_M[indexInBlock[col]] = -1;
     }
   }
 }
 
-void   mlcp_fillSolution(double * z1, double * z2, double * w1, double * w2, int n, int m, int NbLines, int* zw, double * Q)
+void   mlcp_enum_fill_solution(double * z1, double * z2, double * w1, double * w2, int n, int m, int NbLines, int* zw, double * Q)
 {
   int lin;
   for(lin = 0; lin < n; lin++)
@@ -99,7 +100,7 @@ void   mlcp_fillSolution(double * z1, double * z2, double * w1, double * w2, int
   }
 }
 
-void   mlcp_fillSolution_Block(double * z, double * w, int n, int m, int NbLines, int* zw, double * Q, int *indexInBlock)
+void   mlcp_enum_fill_solution_Block(double * z, double * w, int n, int m, int NbLines, int* zw, double * Q, int *indexInBlock)
 {
   int lin;
   for(lin = 0; lin < NbLines; lin++)
@@ -119,7 +120,7 @@ void   mlcp_fillSolution_Block(double * z, double * w, int n, int m, int NbLines
   }
 }
 
-void   mlcp_DisplaySolution(double * z1, double * z2, double * w1, double * w2, int n, int m, int Nblines)
+void   mlcp_enum_display_solution(double * z1, double * z2, double * w1, double * w2, int n, int m, int Nblines)
 {
   int lin;
   printf("z1:\n");
@@ -136,7 +137,7 @@ void   mlcp_DisplaySolution(double * z1, double * z2, double * w1, double * w2, 
 
 }
 
-void   mlcp_DisplaySolution_Block(double * z, double * w, int n, int m, int Nblines, int *indexInBlock)
+void   mlcp_enum_display_solution_Block(double * z, double * w, int n, int m, int Nblines, int *indexInBlock)
 {
   int lin;
   int curCompIndex = 0;
@@ -154,7 +155,7 @@ void   mlcp_DisplaySolution_Block(double * z, double * w, int n, int m, int Nbli
 }
 
 
-void mlcp_buildIndexInBlock(MixedLinearComplementarityProblem* problem, int *indexInBlock)
+void mlcp_enum_build_indexInBlock(MixedLinearComplementarityProblem* problem, int *indexInBlock)
 {
   int numBlock = 0;
   int n = problem->n; /* Equalities */

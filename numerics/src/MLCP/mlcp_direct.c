@@ -46,7 +46,7 @@ dim(v)=nn
 #include "SiconosLapack.h"                      // for lapack_int, DGETRF
 #include "SolverOptions.h"                      // for SolverOptions
 #include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_N...
-#include "mlcp_tool.h"                          // for mlcp_buildM, mlcp_fil...
+#include "mlcp_tool.h"                          // for mlcp_enum_build_M, mlcp_fil...
 #include "numerics_verbose.h"                   // for verbose
 #include "SiconosConfig.h"                      // for DIRECT_SOLVER_USE_DGETRI // IWYU pragma: keep
 
@@ -177,7 +177,7 @@ void mlcp_direct_reset()
 int internalPrecompute(MixedLinearComplementarityProblem* problem)
 {
   lapack_int INFO = 0;
-  mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, s_n, s_m, s_nbLines);
+  mlcp_enum_build_M(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, s_n, s_m, s_nbLines);
   if(verbose)
   {
     printf("mlcp_direct, precomputed M :\n");
@@ -360,9 +360,9 @@ void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *
       if(find)
       {
 #ifdef DIRECT_SOLVER_USE_DGETRI
-        mlcp_fillSolution(z, z + s_n, w, w + s_n, s_n, s_m, s_nbLines, sp_curCC->zw, sVBuf);
+        mlcp_enum_fill_solution(z, z + s_n, w, w + s_n, s_n, s_m, s_nbLines, sp_curCC->zw, sVBuf);
 #else
-        mlcp_fillSolution(z, z + s_n, w, w + s_n, s_n, s_m, s_nbLines, sp_curCC->zw, sQ);
+        mlcp_enum_fill_solution(z, z + s_n, w, w + s_n, s_n, s_m, s_nbLines, sp_curCC->zw, sQ);
 #endif
         /*Current becomes first for the next step.*/
         if(sp_curCC != spFirstCC)
