@@ -25,10 +25,6 @@ static unsigned long long int sCurrentEnum = 0;
 static unsigned long long int sCmpEnum = 0;
 static unsigned long long int sNbCase = 0;
 static double sProgress = 0;
-static int sMm = 0;
-
-static void affectW2V(int * W2V);
-
 
 unsigned long long int computeNbCase(int M)
 {
@@ -45,7 +41,6 @@ void initEnum(int M)
   numerics_printf_verbose(1,"----- initEnum -- currentEnum :%i", (int)sCurrentEnum);
 
   sCmpEnum = 0;
-  sMm = M;
 
   sNbCase  = computeNbCase(M);
 
@@ -53,25 +48,25 @@ void initEnum(int M)
   numerics_printf_verbose(1,"----- initEnum -- number of cases :%i", (int)sNbCase);
 }
 
-void affectW2V(int * W2V)
+static void affectW2V(int * zw, int size)
 {
   unsigned long  int aux = sCurrentEnum;
-  for(int i = 0; i < sMm; i++)
+  for(int i = 0; i < size; i++)
   {
-    W2V[i] = aux & 1;
+    zw[i] = aux & 1;
     aux = aux >> 1;
   }
 
   if(verbose > 1)
   {
-    for(int i = 0; i < sMm; i++)
-      printf("wv[%d]=%d \t", i, W2V[i]);
+    for(int i = 0; i < size; i++)
+      printf("zw[%d]=%d \t", i, zw[i]);
     printf("\n");
   }
 
 }
 
-int nextEnum(int * W2V)
+int nextEnum(int * W2V, int size)
 {
   if(sCmpEnum == sNbCase)
     return 0;
@@ -80,7 +75,7 @@ int nextEnum(int * W2V)
 
   numerics_printf_verbose(1,"----- nextEnum -- try enum :%d", (int)sCurrentEnum);
 
-  affectW2V(W2V);
+  affectW2V(W2V, size);
   sCurrentEnum++;
   sCmpEnum++;
   if(verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
