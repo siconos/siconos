@@ -125,7 +125,6 @@ static void mlcp_driver_allocate_work_arrays(MixedLinearComplementarityProblem* 
   if(options->iWorkSize)
   {
     options->iWork = (int*)calloc(options->iWorkSize, sizeof(int));
-    DEBUG_PRINTF("options->iWork = %p\n",  options->iWork);
   }
   if(options->dWorkSize)
     options->dWork = (double*)calloc(options->dWorkSize, sizeof(double));
@@ -207,7 +206,6 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 {
   DEBUG_BEGIN("mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options)\n");
   /* verbose=1; */
-  DEBUG_PRINTF("options->iWork = %p\n",  options->iWork);
   if(options == NULL)
     numerics_error("mlcp_driver ", "null input for solver options.\n");
 
@@ -338,7 +336,6 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
     exit(EXIT_FAILURE);
   }
   }
-  DEBUG_PRINTF("options->iWork = %p\n",  options->iWork);
   DEBUG_END("mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options)\n");
   return info;
 }
