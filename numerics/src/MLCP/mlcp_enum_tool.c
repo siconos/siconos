@@ -18,80 +18,9 @@
 
 #include "mlcp_enum_tool.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "numerics_verbose.h"
-
-static unsigned long long int sCurrentEnum = 0;
-static unsigned long long int sCmpEnum = 0;
-static unsigned long long int sNbCase = 0;
-static double sProgress = 0;
-
-unsigned long long int computeNbCase(int M)
-{
-  unsigned long long int nbCase = 1;
-  for(int cmp = 0; cmp < M; cmp++)
-    nbCase = nbCase << 1;
-  return nbCase;
-}
-
-void initEnum(int M)
-{
-  /*  sCurrentEnum = 0;*/
-  numerics_printf_verbose(1,"----- initEnum -- problem size :%i", M);
-  numerics_printf_verbose(1,"----- initEnum -- currentEnum :%i", (int)sCurrentEnum);
-
-  sCmpEnum = 0;
-
-  sNbCase  = computeNbCase(M);
-
-  sProgress = 0;
-  numerics_printf_verbose(1,"----- initEnum -- number of cases :%i", (int)sNbCase);
-}
-
-static void affectW2V(int * zw, int size)
-{
-  unsigned long  int aux = sCurrentEnum;
-  for(int i = 0; i < size; i++)
-  {
-    zw[i] = aux & 1;
-    aux = aux >> 1;
-  }
-
-  if(verbose > 1)
-  {
-    for(int i = 0; i < size; i++)
-      printf("zw[%d]=%d \t", i, zw[i]);
-    printf("\n");
-  }
-
-}
-
-int nextEnum(int * W2V, int size)
-{
-  if(sCmpEnum == sNbCase)
-    return 0;
-  if(sCurrentEnum >= sNbCase)
-    sCurrentEnum = 0;
-
-  numerics_printf_verbose(1,"----- nextEnum -- try enum :%d", (int)sCurrentEnum);
-
-  affectW2V(W2V, size);
-  sCurrentEnum++;
-  sCmpEnum++;
-  if(verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
-  {
-    sProgress += 0.001;
-    numerics_printf_verbose(1,"progress %f %d / %d", sProgress, (int) sCurrentEnum,  sNbCase);
-  }
-
-  return 1;
-}
-/*
- *if zw[i]==0
- *  v[i] >=0 and w_i[i]=0
- *else
- *  v[i] =0 and w_i[i] >=0
- */
 
 void mlcp_enum_build_M(int * zw, double * M, double * Mref, int n, int m, int NbLines)
 {

@@ -42,7 +42,8 @@ dim(v)=nn
 #include "SiconosLapack.h"                      // for DGELS, DGESV, lapack_int
 #include "SolverOptions.h"                      // for SolverOptions, SICONO...
 #include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_E...
-#include "mlcp_enum_tool.h"                     // for initEnum, nextEnum
+#include "enum_tool.h"
+#include "mlcp_enum_tool.h"                     //
 #include "mlcp_enum.h"
 #include "numerics_verbose.h"                   // for verbose
 #include "SiconosConfig.h"                      // for MLCP_DEBUG // IWYU pragma: keep
@@ -104,7 +105,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
   int useDGELS = options->iparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS];
 
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
-  //  verbose=1;
+  //verbose=1;
   numerics_printf_verbose(1,"mlcp_enum_block BEGIN, n %d m %d tol %lf", n, m, tol);
 
   double * M_linear_system = options->dWork;
@@ -125,15 +126,17 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
     indexInBlock = 0;
   *info = 0;
   mlcp_enum_build_indexInBlock(problem, indexInBlock);
-  initEnum(problem->m);
-  unsigned long long int nbCase =  computeNbCase(problem->m);
+
+  EnumerationStruct * enum_struct = enum_init(problem->m);
+
+  unsigned long long int nbCase =  enum_compute_nb_cases(problem->m);
 
   if(itermax < (int)nbCase)
   {
     numerics_warning("mlcp_enum_block", "all the cases will not be enumerated since itermax < nbCase)");
   }
 
-  while(nextEnum(zw_indices, m) && itermax-- > 0)
+  while(enum_next(zw_indices, problem->m, enum_struct) && itermax-- > 0)
   {
     mlcp_enum_build_M_Block(zw_indices, M_linear_system, problem->M->matrix0, n, m, n_row, indexInBlock);
 
@@ -230,7 +233,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
         {
           mlcp_enum_display_solution_Block(u, w_e, n, m, n_row, indexInBlock);
         }
-        // options->iparam[1]=sCurrentEnum-1;
+        // options->iparam[1]=scurrent-1;
         numerics_printf_verbose(1,"mlcp_enum_block END");
         options->dparam[SICONOS_DPARAM_RESIDU] = err;
         return;
@@ -327,9 +330,9 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   int * zw_indices = workingInt;
   ipiv = zw_indices + m;
+  EnumerationStruct * enum_struct = enum_init(problem->m);
 
-  initEnum(problem->m);
-  while(nextEnum(zw_indices, m) && itermax-- > 0)
+  while(enum_next(zw_indices, problem->m, enum_struct) && itermax-- > 0)
   {
     mlcp_enum_build_M(zw_indices, M_linear_system, problem->M->matrix0, n, m, n_row);
 
