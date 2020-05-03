@@ -125,7 +125,7 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
   *info = nonSmoothNewtonNeigh(sN + sM, z, &F, &jacobianF, options->iparam, options->dparam);
   if(*info > 0)
   {
-    fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[SICONOS_DPARAM_RESIDU]);
+    numerics_printf_verbose(0, "mlcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[SICONOS_DPARAM_RESIDU]);
     /*ONLY FOR DEBUG
       mixedLinearComplementarity_display(problem);
     printf("with z init;\n");
@@ -143,8 +143,9 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
 
   if(err > sMaxError)
     sMaxError = err;
-  if(verbose)
-    printf("FB : MLCP Solved, error %10.10f   and max error  %10.10f \n", err, sMaxError);
-
+  numerics_printf_verbose(0, "mlcp_FB : succeed in %i iterations, error %14.8e   and max error  %14.8e \n", options->iparam[SICONOS_IPARAM_ITER_DONE], err, sMaxError);
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
+  
+  
   return;
 }
