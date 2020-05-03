@@ -43,8 +43,8 @@ unsigned int sNumberOfArtefacts=0;
 AIS_Shape * sAISArtefacts[NB_OBJ];
 double sMinLineLength = 0.00001;
 
-double * sWorkD=0;
-int * sWorkInt=0;
+double * sWorkD=nullptr;
+int * sWorkInt=nullptr;
 int sNumberOfContacts=0;
 TopoDS_Face  sFaces[2*NB_OBJ];
 TopExp_Explorer Ex[2*NB_OBJ];
@@ -62,7 +62,7 @@ void CADMBTB_init(unsigned int NumberOfObj,unsigned int NumberOfContacts)
   sNumberOfContacts=NumberOfContacts;
   for(int ii=0; ii <NB_OBJ; ii++)
   {
-    spAISToposDS[ii]=0;
+    spAISToposDS[ii]=nullptr;
     spAISTrans[ii]=2.0;
     sTopoDSType[ii]=CADMBTB_TYPE_NONE;
   }
