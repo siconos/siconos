@@ -32,11 +32,10 @@ Main changes:
 
 	* [kernel, mechanics] implement 2D rigid bodies with Bullet contact detection.
 
-
 	* [numerics, kernel, mechanics] add rolling friction in 2D and 3D
 
 	* [numerics] add gfc3d_ipm
-	First implementatin of Interior Point Method for GlobalFrictionalContact Problem
+	First implementation of Interior Point Method for GlobalFrictionalContact Problem
 
 	* [kernel] add SPARSE_COORDINATE type of matrices
 
@@ -48,7 +47,7 @@ Main changes:
 	* [kernel] add SecondOrderDS as a superclass for mechanical systems
 	LagrangianDS, NewtonEulerDS)
 
-	* [numerics] rework the test frameworl for the numerics solvers
+	* [numerics] rework the test framework for the numerics solvers
 
 
 --------------------------------------------------------------------------------
