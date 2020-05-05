@@ -29,7 +29,7 @@ public :
    * \param q0 the position
    * \param y the output
    */
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
   
   //! Doing nothing.
   virtual ~MBTB_FC3DContactRelation();
