@@ -104,9 +104,9 @@ def setup_default_classes():
         default_manager_class = m
         use_bullet = have_bullet
     elif backend == 'occ':
-
-        def default_manager_class(options):
-            occ.OccSpaceFilter()
+        default_manager_class = lambda options: occ.OccSpaceFilter()
+        #def default_manager_class(options):
+        #    occ.OccSpaceFilter()
         default_simulation_class = occ.OccTimeStepping
         default_body_class = occ.OccBody
         use_bullet = False
@@ -916,6 +916,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 'origin': translation,
                 'orientation': orientation}
         else:
+
+            if not np.isscalar(mass) or mass <= 0:
+                self.print_verbose('Warning mass must be a positive scalar')
+                raise RuntimeError('Warning mass must be a positive scalar')
+            
             if body_class is None:
                 body_class = occ.OccBody
 
@@ -1455,6 +1460,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         mass = obj.attrs.get('mass', None)
         inertia = obj.attrs.get('inertia', None)
 
+        # self.print_verbose('mass = ', mass)
+        # self.print_verbose('inertia = ', inertia)
+        
         input_ctrs = [ctr for _n_, ctr in obj.items()]
 
         contactors = []
@@ -1572,7 +1580,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 # should not be used
                 max_time = None
                 id_last = None
-
+            self.print_verbose('import dynamical systems ...')
             for (name, obj) in sorted(self._input.items(),
                                       key=lambda x: x[0]):
 
@@ -1633,15 +1641,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             # import nslaws
             # note: no time of birth for nslaws and joints
+            self.print_verbose('import nslaws ...')
             for name in self._nslaws_data:
                 self.import_nonsmooth_law(name)
 
+            self.print_verbose('import joints ...')
             for name in self.joints():
                 self.import_joint(name)
 
+            self.print_verbose('import boundary conditions ...')
             for name in self.boundary_conditions():
                 self.import_boundary_conditions(name)
 
+            self.print_verbose('import permanent interactions ...')
             for name in self.permanent_interactions():
                 self.import_permanent_interactions(name)
 
@@ -1961,7 +1973,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 file_of_str(plugin_fname, plugin_src)
 
         # build
-        subprocess.check_call(['siconos', '--build-plugins', '.'])
+        subprocess.check_call(['siconos', '--build-plugins'])
 
     def import_external_functions(self):
         topo = self._nsds.topology()
@@ -1972,6 +1984,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             plugin_name = ext_fun.attrs['plugin_name']
             plugin_function_name = ext_fun.attrs['plugin_function_name']
             body_name = ext_fun.attrs['body_name']
+
             ds = sk.cast_NewtonEulerDS(topo.getDynamicalSystem(body_name))
 
             if 'function_name' in ext_fun.attrs:

@@ -943,6 +943,15 @@ class MechanicsHdf5(object):
         defined by the Contactor objects. The Volume objects are used for
         the computation of inertia and center of mass if not provided.
 
+        The  body-fixed frame is assumed to be the global inertial
+        frame. This means that 
+        1. By default, the center of mass is located at the origin. 
+        The initial translation is applied from this point, so that x_g(0) = translation
+        2. the  orientation is identical to the inertial frame. 
+        The initial orientation is applied to the inertial frame to obtain
+        the body-fixed frame.
+
+
         Each Contactor and Volume object may have a relative
         translation and a relative orientation expressed in the bodyframe
         coordinates.
@@ -1021,18 +1030,18 @@ class MechanicsHdf5(object):
                                      shapes)
 
                     computed_mass, com, computed_inertia, computed_inertia_matrix = compute_inertia_and_center_of_mass(volumes, self)
-                    print('{0}: computed mass from Volume'.format(name))
-                    print('{0}: computed center of mass:'.format(name),
-                          com[0],
-                          com[1],
-                          com[2])
-                    print('{0}: computed mass:'.format(name),
-                          computed_mass)
-                    print('{0}: computed inertia:'.format(name),
-                          computed_inertia[0], computed_inertia[1],
-                          computed_inertia[2])
-                    print('{0}: computed inertia matrix:'.format(name),
-                          computed_inertia_matrix)
+                    self.print_verbose('{0}: computed mass from Volume'.format(name))
+                    self.print_verbose('{0}: computed center of mass:'.format(name),
+                                       com[0],
+                                       com[1],
+                                       com[2])
+                    self.print_verbose('{0}: computed mass:'.format(name),
+                                       computed_mass)
+                    self.print_verbose('{0}: computed inertia:'.format(name),
+                                       computed_inertia[0], computed_inertia[1],
+                                       computed_inertia[2])
+                    self.print_verbose('{0}: computed inertia matrix:'.format(name),
+                                       computed_inertia_matrix)
                     is_center_of_mass_computed = True
                     if mass is None:
                         mass = computed_mass
