@@ -18,11 +18,11 @@
 //! The maximal number of contacts.
 #define MBTB_MAX_CONTACTS_NUMBER 100
 //!The dynamical bodies.
-extern SP::MBTB_Body sDS[];
+extern SP::MBTB_Body  sDS[MBTB_MAX_BODIES_NUMBER];
 //!The joint relations.
-extern MBTB_JointR * sJointRelations[];
+extern MBTB_JointR * sJointRelations[MBTB_MAX_JOINTS_NUMBER];
 //!The contacts.
-extern MBTB_Contact * sContacts[];
+extern MBTB_Contact * sContacts[MBTB_MAX_CONTACTS_NUMBER];
 //!The number of bodies.
 extern unsigned int sNbOfBodies;
 //!The number of joints.
@@ -36,9 +36,9 @@ extern unsigned int sFreqGraphic;
 //!The output frequency.
 extern unsigned int sFreqOutput;
 //!The siconos joint interactions.
-extern SP::Interaction sInterJoints[];
+extern SP::Interaction  sInterJoints[MBTB_MAX_JOINTS_NUMBER];
 //!The siconos contact interactions.
-extern SP::Interaction sInterContacts[];
+extern SP::Interaction sInterContacts[MBTB_MAX_CONTACTS_NUMBER];
 //!siconos model.
 extern SP::NonSmoothDynamicalSystem myNsds;
 //!siconos model t0.
@@ -50,9 +50,9 @@ extern unsigned int sUseGravity;
 
 //!for the graph building.
 //! The dynamical systems involved in the joint 'numJ' have indices sJointIndexDS[2*numJ] and sJointIndexDS[2*numJ+1].
-extern int sJointIndexDS[];
+extern int sJointIndexDS[2*MBTB_MAX_JOINTS_NUMBER];
 //!The type of joint see JOINTS_TYPE.
-extern int sJointType[];
+extern int sJointType[MBTB_MAX_JOINTS_NUMBER];
 //!The siconos simulation.
 extern SP::TimeStepping sSimu;
 //!The draw mode of the artefacts (forces, normals). Used with bit to bit test with MBTB_CST.

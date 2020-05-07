@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ union VECTOR_UBLAS_TYPE
   DenseVect *Dense; // num = 1
   SparseVect *Sparse; // num = 4
 };
+
 
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
 
@@ -112,19 +113,15 @@ public:
    */
   SiconosVector(const SiconosVector& v1, const SiconosVector& v2);
 
+  /** constructor from a BlockVector.
+   * explicit to forbid implicit conversion/conversion constructor.
+   * \param input source vector
+   */
+  explicit SiconosVector(const BlockVector& input);//, bool = false);
+
   /** destructor
    */
   ~SiconosVector();
-
-  /** Copy a the content of a BlockVector into a SiconosVector
-
-      The aim of this function is to be able to handle contiguous memory
-      (which is not guaranteed in a BlockVector).
-
-      This could be have been done with a constructor but
-      doing so leads to implicit copy-construction in operators call.
-   */
-  void block2contiguous(const BlockVector & vIn);
 
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
@@ -379,11 +376,24 @@ public:
 
   friend struct IsBlock;
 
+  friend class TestDense;
+
   /** End of Friend functions group @} */
 
   //  temporary workaround, the visitor has to be removed or rework -- xhub
   ACCEPT_NONVIRTUAL_VISITORS();
 
 };
+
+/* functor/predicate used to test vectors type containers such as BlockVector */
+class TestDense
+{
+public:
+  bool operator()(SP::SiconosVector input) const
+  {
+    return input->_dense;
+  }
+};
+
 
 #endif

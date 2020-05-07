@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,27 +131,27 @@ public:
   */
   void setComputehDotFunction(const std::string& pluginpath, const std::string& name);
 
-  /** to compute y = h(t,q,z) using plug-in mechanism
-  * \param time current time
-  * \param q the vector of coordinates
-  * \param z the vector of parameters
-  * \param y the y vector
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
   */
-  virtual void computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  /** to compute hDot using plug-in mechanism
-   * \param time current time
-   * \param q the vector of coordinates
-   * \param z the vector of parameters
-   */
-  virtual void computehDot(double time, SiconosVector& q, SiconosVector& z);
-
-  /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
-  * \param time double, current time
-  * \param q the coordinates vector
-  * \param z the parameters vector
+  /** to compute the time-derivative of the output y = h(t,q,z), saved in attribute _hDot (access: hDot())
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
   */
-  virtual void computeJachq(double time, SiconosVector& q, SiconosVector& z);
+  virtual void computehDot(double time, const BlockVector& q, BlockVector& z);
+
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  virtual void computeJachq(double time, const BlockVector& q, BlockVector& z);
 
 
   /* compute all the H Jacobian */

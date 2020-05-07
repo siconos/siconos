@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ extern "C"
    * \param set the set which id should be set
    * \param id the id of the set
    */
-  static inline void set_set_id(void* set, unsigned id)
+  static inline void set_set_id(void* set, int id)
   {
     ((generic_set*)set)->id = id;
   }

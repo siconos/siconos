@@ -5,7 +5,7 @@ to configure, build and execute siconos examples
 Siconos is a program dedicated to modeling, simulation and control
 of non smooth dynamical systems.
 
-Copyright 2019 INRIA.
+Copyright 2020 INRIA.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -655,10 +655,10 @@ def generate_cmakelists(args):
         args.includes += args.include_directories
 
     # == runtime dependencies ==
-    # boost timer is required in many examples.
+    # boost may be used in examples.
     result += 'if(@WITH_CXX@)\n'
     result += 'set(Boost_NO_BOOST_CMAKE 1)\n'
-    result += 'find_package(Boost @boost_min_version@ COMPONENTS timer @boost_required_components@)\n'
+    result += 'find_package(Boost @boost_min_version@ COMPONENTS @boost_required_components@)\n'
     result += 'endif()\n'
     
     # Create executable target
@@ -691,9 +691,6 @@ def generate_cmakelists(args):
 
         # target setup (compile options, headers, links ...)
         result += prepare_target(args.exe_name, args)
-        result += 'if(Boost_TIMER_FOUND)\n'
-        result += '\t target_link_libraries({}'.format(args.exe_name)
-        result += ' PUBLIC Boost::timer)\n endif()\n'
 
         # == install binary ==
         result += 'install(TARGETS {}'.format(args.exe_name)

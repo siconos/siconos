@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,10 +75,16 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
      - Input matrix M of the problem is supposed to be sparse-block
        with no null row (ie no rows with all blocks equal to null)
   */
+
+
+
+
   if(problem->M->matrix1 == NULL)
   {
-    fprintf(stderr, "mlcp_NSGS_SBM error: wrong storage type for input matrix M of the LCP.\n");
-    exit(EXIT_FAILURE);
+    numerics_printf_verbose(0,"mlcp_PGS_SBM, storageType =%i", problem->M->storageType);
+    fprintf(stderr, "mlcp_PGS_SBM error: wrong storage type (problem->M->matrix1 == NULL) for input matrix M of the MLCP.\n");
+    *info=1;
+    return;
   }
 
   /*
@@ -98,7 +104,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   int nbOfNonNullBlocks = blmat->nbblocks;
   if(nbOfNonNullBlocks < 1)
   {
-    fprintf(stderr, "Numerics::mlcp_NSGS_SBM error: empty M matrix (all blocks = NULL).\n");
+    fprintf(stderr, "Numerics::mlcp_PGS_SBM error: empty M matrix (all blocks = NULL).\n");
     exit(EXIT_FAILURE);
   }
 

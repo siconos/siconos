@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ Contact2dR::Contact2dR()
 {
 }
 
-void Contact2dR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void Contact2dR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
   DEBUG_BEGIN("Contact2dR::computeh(...)\n");
 

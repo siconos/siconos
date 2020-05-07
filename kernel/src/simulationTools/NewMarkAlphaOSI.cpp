@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -342,7 +342,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       std::cout << "((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get()" << ((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() << std::endl;
       std::cout << "((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get()" << ((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() << std::endl;
       std::cout << "osnsp" << osnsp << std::endl;
-      );
+    );
     if(relationSubType == ScleronomousR)
     {
       Index coord(8);
@@ -384,7 +384,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
         }
         subprod(*C, *q_free, osnsp_rhs, coord, false);
       }
-      else if (((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
+      else if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
       {
         double h = _simulation->nextTime() - _simulation->startingTime();
         double gamma_prime = _gamma / _beta;

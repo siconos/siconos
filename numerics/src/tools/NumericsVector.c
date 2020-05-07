@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,10 +209,10 @@ void NV_dott(const double * const vec1, const double * const vec2, const unsigne
       NM_zentry(out, i, j, vec1[i] * vec2[j]);
 }
 
-int NV_isnan(const double * const vec,  const unsigned int vecSize )
+int NV_isnan(const double * const vec,  const unsigned int vecSize)
 {
   for(unsigned int i = 0; i < vecSize; ++i)
-    if (isnan(vec[i]))
+    if(isnan(vec[i]))
       return 1;
   return 0;
 }

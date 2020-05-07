@@ -42,6 +42,7 @@ namespace Siconos {
         \param v2 second matrix to compare with
     */
     bool isComparableTo(const SiconosMatrix& m1, const SiconosMatrix& m2);
+
   }
 
 }

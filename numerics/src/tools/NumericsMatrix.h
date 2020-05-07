@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@
 #include "NM_MPI.h"
 #ifndef __cplusplus
 #include <stdbool.h>        // for bool
-#define nullptr NULL
 #endif
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
@@ -43,7 +42,7 @@ typedef struct
 {
   size_t iWorkSize; /**< size of iWork */
   void *iWork; /**< integer workspace */
-  size_t sizeof_elt ; ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
+  size_t sizeof_elt ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
@@ -223,14 +222,7 @@ extern "C"
  /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
-  static inline void NM_null(NumericsMatrix* A)
-  {
-    A->matrix0 = nullptr;
-    A->matrix1 = nullptr;
-    A->matrix2 = nullptr;
-    A->internalData = nullptr;
-    NDV_reset(&(A->version));
-  }
+  void NM_null(NumericsMatrix* A);
 
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
@@ -268,6 +260,13 @@ extern "C"
    */
   void NM_clear(NumericsMatrix* m);
 
+  /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
+      \param m the matrix to be deleted.
+      \param storageType to be kept.
+   */
+  void NM_clear_other_storages(NumericsMatrix* M, int storageType);
 
   /**************************************************/
   /** setters and getters               *************/
@@ -674,18 +673,8 @@ extern "C"
   /** Allocate the internalData structure (but not its content!)
    * \param M the matrix to modify
    */
-  static inline void NM_internalData_new(NumericsMatrix* M)
-  {
-    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWork = nullptr;
-    M->internalData->iWorkSize = 0;
-    M->internalData->dWork = nullptr;
-    M->internalData->dWorkSize = 0;
-    M->internalData->isLUfactorized = 0;
-#ifdef SICONOS_HAS_MPI
-    M->internalData->mpi_comm = MPI_COMM_NULL;
-#endif
-  }
+  void NM_internalData_new(NumericsMatrix* M);
+
   /** Copy the internalData structure
    * \param M the matrix to modify
    */
@@ -782,7 +771,8 @@ extern "C"
   static inline NumericsMatrix* NM_convert(NumericsMatrix* A)
   {
     return A;
-  };
+  }
+
   /** Compute the  maximum eigenvalue with the iterated power method
    * \param A the matrix
    * \return the maximum eigenvalue*/
@@ -801,7 +791,7 @@ extern "C"
    *  \return info
    */
   int NM_max_by_rows(NumericsMatrix *A, double * max);
-  
+
   /* Compute the maximum absolute values by columns
    *  \param A the matrix
    *  \param max the vector of max that must be preallocated

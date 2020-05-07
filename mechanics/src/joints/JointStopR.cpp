@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, double pos, double neg,
 }
 #endif
 
-void JointStopR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void JointStopR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   // Common cases optimisation
   bool case_onestop = y.size()==1;

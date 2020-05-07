@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,11 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   /* Relay_display(problem); */
 
   relay_to_lcp(problem, lcp_problem);
+
   /* linearComplementarity_display(lcp_problem); */
-  double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-  double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
 
-  for(i = 0; i < lcp_problem->size; i++)
-  {
-    zlcp[i] = 0.0;
-    wlcp[i] = 0.0;
-  }
-
+  double *zlcp = (double*)calloc(lcp_problem->size, sizeof(double));
+  double *wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
 
   /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
   /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */

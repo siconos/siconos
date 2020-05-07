@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,7 +260,6 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *indexSet.properties(*ei).lower_block);
     }
-
   }
   else if(_storageType == NM_SPARSE_BLOCK)
   {
@@ -276,7 +275,11 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
       _M2->fill(indexSet);
     }
   }
-
+  // invalidate other old storages.
+  _numericsMatrix.get()->storageType = _storageType ;
+  _numericsMatrix.get()->size0 = _dimRow ;
+  _numericsMatrix.get()->size1 = _dimColumn ;
+  NM_clear_other_storages(_numericsMatrix.get(), _storageType);
   if(update)
     convert();
   DEBUG_END("void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)\n");
@@ -363,6 +366,7 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
         DEBUG_PRINTF("pos = %u \n", pos);
       }
     }
+    // invalidate other old storages.
     DEBUG_EXPR(NM_display(numericsMatrix().get()););
     break;
   }
@@ -370,6 +374,9 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
   {
     RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
   }
+    // invalidate other old storages.
+  NM_clear_other_storages(_numericsMatrix.get(), _storageType);
+
   }
 
 
@@ -436,6 +443,8 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
       }
 
     }
+    // invalidate other old storages.
+    NM_clear_other_storages(_numericsMatrix.get(), _storageType);
     break;
   }
   default:

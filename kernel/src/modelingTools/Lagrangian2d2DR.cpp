@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ void Lagrangian2d2DR::initialize(Interaction& inter)
   _jachq.reset(new SimpleMatrix(2, qSize));
 }
 
-void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
+void Lagrangian2d2DR::computeJachq(const BlockVector& q, BlockVector& z)
 {
   DEBUG_BEGIN("Lagrangian2d2DR::computeJachq(Interaction& inter, SP::BlockVector q0 \n");
 
@@ -103,7 +103,7 @@ double Lagrangian2d2DR::distance() const
 
 }
 
-void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void Lagrangian2d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
   DEBUG_BEGIN("Lagrangian2d2DR::computeh(...)\n");
   DEBUG_EXPR(q.display());
@@ -135,7 +135,7 @@ void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(_Nc->display(););
-  
+
   LagrangianScleronomousR::computeh(q, z, y);
   y.setValue(0, distance());
   DEBUG_EXPR(y.display(););

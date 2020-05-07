@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 #include "LinearOSNS.hpp"
 #include <mlcp_cst.h>
 
-#define MLCP_NB_BLOCKS 200
+#define MLCP_NB_BLOCKS_MAX 200
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
  
   \section MLCPintro Aim of the MLCP class

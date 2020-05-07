@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ Bullet1DR::Bullet1DR(SP::btManifoldPoint point) : NewtonEuler1DR(), _contactPoin
 {
 }
 
-void Bullet1DR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void Bullet1DR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   y.setValue(0, _contactPoints->getDistance());
   btVector3 posa = _contactPoints->getPositionWorldOnA();

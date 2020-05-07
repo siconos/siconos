@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
     numerics_error("mlcp_compute_error", "null input for problem and/or z and/or w");
 
   int param = 1;
-  int NbLines = problem->M->size0; /* Equalities */
   int n = problem->n; /* Equalities */
   int m = problem->m; /* Inequalities */
   int incx = 1, incy = 1;
@@ -52,37 +51,37 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
       numerics_error("mlcp_compute_error", "null input for M");
 
     /* Computes w = Mz + q */
-    cblas_dcopy(NbLines, problem->q, incx, w, incy);
+    cblas_dcopy(n+m, problem->q, incx, w, incy);
     NM_gemv(1.0, problem->M, z, 1.0, w);
 
   }
   /* Problem in the form ABCD */
   else //if (problem->isStorageType2)
   {
-
-
-
     /* Checks inputs */
     if(problem->A == NULL || problem->B == NULL || problem->C == NULL  || problem->D == NULL)
     {
       numerics_error("mlcp_compute_error: ", "null input for A, B, C or D");
     }
-
+    if(problem->a == NULL || problem->b == NULL)
+    {
+      numerics_error("mlcp_compute_error: ", "null input for a or b");
+    }
     /* Links to problem data */
-    double *a = &problem->q[0];
-    double *b = &problem->q[NbLines - m];
+    double *a = problem->a;
+    double *b = problem->b;
     double *A = problem->A;
     double *B = problem->B;
     double *C = problem->C;
     double *D = problem->D;
 
     /* Compute "equalities" part, we = Au + Cv + a - Must be equal to 0 */
-    cblas_dcopy(NbLines - m, a, incx, w, incy);     //  we = w[0..n-1] <-- a
-    cblas_dgemv(CblasColMajor,CblasNoTrans, NbLines - m, n, 1.0, A, NbLines - m, &z[0], incx, 1.0, w, incy);          // we <-- A*u + we
-    cblas_dgemv(CblasColMajor,CblasNoTrans, NbLines - m, m, 1.0, C, NbLines - m, &z[n], incx, 1.0, w, incy);          // we <-- C*v + we
+    cblas_dcopy(n, a, incx, w, incy);     //  we = w[0..n-1] <-- a
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, 1.0, A, n, &z[0], incx, 1.0, w, incy);          // we <-- A*u + we
+    cblas_dgemv(CblasColMajor,CblasNoTrans, n, m, 1.0, C, n, &z[n], incx, 1.0, w, incy);          // we <-- C*v + we
 
     /* Computes part which corresponds to complementarity */
-    double * pwi = w + NbLines - m; // No copy!!
+    double * pwi = w + n; // No copy!!
     cblas_dcopy(m, b, incx, pwi, incy);     //  wi = w[n..m] <-- b
     // following int param, we recompute the product wi = Du+BV +b and we = Au+CV +a
     // The test is then more severe if we compute w because it checks that the linear equation is satisfied
@@ -132,9 +131,9 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
   }
   else
   {
-    printf("WARNING, DEPRECATED MLCP API\n");
+    numerics_printf_verbose(0,"WARNING, DEPRECATED MLCP API\n");
     /* Error on equalities part */
-    error_e = cblas_dnrm2(NbLines - m, w, incx);;
+    error_e = cblas_dnrm2(n, w, incx);;
 
     /* Checks complementarity (only for rows number n to size) */
     error_i = 0.;
@@ -142,7 +141,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
     for(int i = 0 ; i < m ; i++)
     {
       zi = z[n + i];
-      wi = w[(NbLines - m) + i];
+      wi = w[(n) + i];
       if(zi < 0.0)
       {
         error_i += -zi;
@@ -154,8 +153,8 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
 
 
     /* Computes error */
-    norm_i += cblas_dnrm2(m, q + NbLines - m, incx);
-    norm_e += cblas_dnrm2(NbLines - m, q, incx);
+    norm_i += cblas_dnrm2(m, q + n, incx);
+    norm_e += cblas_dnrm2(n, q, incx);
   }
 
   if(error_i / norm_i >= error_e / norm_e)
@@ -170,14 +169,13 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
   if(*error > tolerance)
   {
     /*if (isVerbose > 0) printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);*/
-    if(verbose)
-      printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    numerics_printf_verbose(2,"mlcp_compute_error error = %g > tolerance = %g", *error, tolerance);
     /* displayMLCP(problem);*/
     return 1;
   }
   else
   {
-    if(verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *error);
+    numerics_printf_verbose(2,"mlcp_compute_error error = %g", *error);
     return 0;
   }
 }

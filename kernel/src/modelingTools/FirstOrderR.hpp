@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,14 +75,6 @@ protected:
   SP::SimpleMatrix _B;
   /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t X */
   SP::SimpleMatrix _K;
-
-  /** Continuous memory vector of size of x to call plugin */
-  SP::SiconosVector _vec_x;
-  /** Continuous memory vector of size of z to call plugin */
-  SP::SiconosVector _vec_z;
-  /** Continuous memory vector of size of r to call plugin */
-  SP::SiconosVector _vec_r;
-
 
 
 public:

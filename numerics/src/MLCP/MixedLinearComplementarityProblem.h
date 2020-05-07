@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,13 @@
  * \f$ u, w_{1}\f$ are vectors of size n.
  * \f$ v, w_{2}\f$ are vectors of size m.
  *
+ * ABCD format:
+ * \left[
+ * \begin{array}{cc}
+ * A & C \\
+ * D & B \\
+ * \end{array}
+ * \right]
  */
 struct MixedLinearComplementarityProblem
 {
@@ -92,6 +99,19 @@ extern "C"
 {
 #endif
 
+  /** \fn  void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem)
+   *  \brief function to delete a MixedLinearComplementarityProblem
+   *  \param problem  pointer to a MixedLinearComplementarityProblem to delete
+   */
+  void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem);
+
+  /** create empty MLCP
+   * \return empy MLCP
+   */
+  MixedLinearComplementarityProblem*  mixedLinearComplementarity_new(void);
+
+  /** display a MLCP
+   */
   void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p);
 
   /** \fn int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem*  problem, FILE* file)
@@ -128,19 +148,13 @@ extern "C"
    *  \param filename that contains the mlcp
    *  \return 0 if ok
    */
-  int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename);
+  int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, const char* filename);
 
-  /** \fn  void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem)
-   *  \brief function to delete a MixedLinearComplementarityProblem
-   *  \param problem  pointer to a MixedLinearComplementarityProblem to delete
+  /** \fn  MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedLinearComplementarityProblem* problem);
+   *  \brief function to create a MLCP with ABCD format from M formatted MLCP
    */
-  void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem);
 
-  /** create empty MLCP
-   * \return empy MLCP
-   */
-  MixedLinearComplementarityProblem* newMLCP(void);
-
+  MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedLinearComplementarityProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

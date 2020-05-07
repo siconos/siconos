@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ double DiskMovingPlanR::distance(double x, double y, double rad)
 }
 
 /* Called compute h, but only the gap function is needed! */
-void DiskMovingPlanR::computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void DiskMovingPlanR::computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
   init(time);
 
@@ -71,7 +71,7 @@ void DiskMovingPlanR::computeh(double time, SiconosVector& q, SiconosVector& z, 
 
 }
 
-void DiskMovingPlanR::computeJachq(double time, SiconosVector& q, SiconosVector& z)
+void DiskMovingPlanR::computeJachq(double time, const BlockVector& q, BlockVector& z)
 {
   init(time);
 
@@ -91,7 +91,7 @@ void DiskMovingPlanR::computeJachq(double time, SiconosVector& q, SiconosVector&
   (*g)(1, 2) = -_r;
 }
 
-void DiskMovingPlanR::computehDot(double time, SiconosVector& q, SiconosVector& z)
+void DiskMovingPlanR::computehDot(double time, const BlockVector& q, BlockVector& z)
 {
   init(time);
 

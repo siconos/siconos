@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,29 +72,38 @@ void LagrangianRheonomousR::_zeroPlugin()
   _pluginhDot.reset(new PluggedObject());
 }
 
-void LagrangianRheonomousR::computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void LagrangianRheonomousR::computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
   DEBUG_PRINT(" LagrangianRheonomousR::computeh(double time,Interaction& inter, SP::BlockVector q, SP::BlockVector z)");
   // arg= time. Unused in this function but required for interface.
   if(_pluginh->fPtr)
   {
-    ((FPtr4)(_pluginh->fPtr))(q.size(), &(q)(0), time, y.size(),  &(y)(0), z.size(), &(z)(0));
+    auto qp = q.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((FPtr4)(_pluginh->fPtr))(qp->size(), &(*qp)(0), time, y.size(),  &(y)(0), zp->size(), &(*zp)(0));
+    z = *zp;
   }
 }
 
-void LagrangianRheonomousR::computehDot(double time, SiconosVector& q, SiconosVector& z)
+void LagrangianRheonomousR::computehDot(double time, const BlockVector& q, BlockVector& z)
 {
   if(_hDot && _pluginhDot->fPtr)
   {
-    ((FPtr4)(_pluginhDot->fPtr))(q.size(), &(q)(0), time, _hDot->size(),  &(*_hDot)(0), z.size(), &(z)(0));
+    auto qp = q.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((FPtr4)(_pluginhDot->fPtr))(qp->size(), &(*qp)(0), time, _hDot->size(),  &(*_hDot)(0), zp->size(), &(*zp)(0));
+    z = *zp;
   }
 }
 
-void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, SiconosVector& z)
+void LagrangianRheonomousR::computeJachq(double time,  const BlockVector& q, BlockVector& z)
 {
   if(_jachq && _pluginJachq->fPtr)
   {
-    ((FPtr4)(_pluginJachq->fPtr))(q.size(), &(q)(0), time, _jachq->size(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
+    auto qp = q.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((FPtr4)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), time, _jachq->size(0), &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
+    z = *zp;
   }
 }
 
@@ -102,15 +111,12 @@ void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, Siconos
 void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q, z;
-  q.block2contiguous(*DSlink[LagrangianR::q0]);
-  z.block2contiguous(*DSlink[LagrangianR::z]);
   SiconosVector& y = *inter.y(derivativeNumber);
   if(derivativeNumber == 0)
-    computeh(time, q, z, y);
+    computeh(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], y);
   else
   {
-    computeJachq(time, q, z);
+    computeJachq(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
     if(derivativeNumber == 1)
     {
       if(!_hDot)
@@ -119,7 +125,7 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
         _hDot.reset(new SiconosVector(sizeY));
       }
       // Computation of the partial derivative w.r.t time of h(q,t)
-      computehDot(time, q, z);
+      computehDot(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
       assert(_jachq);
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
       prod(*_jachq, *DSlink[LagrangianR::q1], y);
@@ -138,32 +144,24 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
     else
       RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) index >2  not yet implemented.");
   }
-  *DSlink[LagrangianR::z] = z;
 }
 
 void LagrangianRheonomousR::computeInput(double time, Interaction& inter,  unsigned int level)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q, z;
-  q.block2contiguous(*DSlink[LagrangianR::q0]);
-  z.block2contiguous(*DSlink[LagrangianR::z]);
-  computeJachq(time, q, z);
+  computeJachq(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
-  *DSlink[LagrangianR::z] = z;
 }
 
 void LagrangianRheonomousR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q, z;
-  q.block2contiguous(*DSlink[LagrangianR::q0]);
-  z.block2contiguous(*DSlink[LagrangianR::z]);
-  computeJachq(time, q, z);
+  computeJachq(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
   // computeJachqDot(time, inter);
   //    computeDotJachq(time, q, z);
   // computeJachlambda(time, inter);
-  computehDot(time, q, z);
+  computehDot(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
 }

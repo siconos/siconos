@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,14 @@ void MLCPProjectOnConstraints::initOSNSMatrix()
   _useMassNormalization = false;
 }
 
+
+// Constructor from a set of data
+MLCPProjectOnConstraints::MLCPProjectOnConstraints(SP::SolverOptions options, double alphaval):
+  MLCP(options), _alpha(alphaval)
+{
+  _indexSetLevel = 2;
+  _inputOutputLevel = 0;
+}
 
 // Constructor from a set of data
 MLCPProjectOnConstraints::MLCPProjectOnConstraints(const int numericsSolverId, double alphaval):
@@ -1259,7 +1267,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         _n += equalitySize1;
         //    _m=0;
         //_n=6;
-        if(_curBlock > MLCP_NB_BLOCKS - 2)
+        if(_curBlock > MLCP_NB_BLOCKS_MAX - 2)
           printf("MLCP.cpp : number of block to small, memory crach below!!!\n");
         /*add an equality block.*/
 

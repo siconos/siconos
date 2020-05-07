@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public:
    * \param inter the interaction using this relation
    */
   virtual void initialize(Interaction& inter) {};
-  
+
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */

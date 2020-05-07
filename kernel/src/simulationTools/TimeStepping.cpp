@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -751,8 +751,8 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
   // else: depend on solver
   if(info != 0)
   {
-    std::cout << "TimeStepping::DefaultCheckSolverOutput:" << std::endl;
-    std::cout << "Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
+    std::cout << "[kernel] TimeStepping::DefaultCheckSolverOutput:" << std::endl;
+    std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
     //       std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
     //      std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
     //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");

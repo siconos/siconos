@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ Contact2d3DR::Contact2d3DR()
 {
 }
 
-void Contact2d3DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void Contact2d3DR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
   DEBUG_BEGIN("Contact2d3DR::computeh(...)\n");
 
@@ -50,8 +50,8 @@ void Contact2d3DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y
 }
 
 void Contact2d3DR::updateContactPoints(const SiconosVector& pos1,
-                                     const SiconosVector& pos2,
-                                     const SiconosVector& normal)
+                                       const SiconosVector& pos2,
+                                       const SiconosVector& normal)
 {
   // Copy relative positions
   *_relPc1 = pos1;

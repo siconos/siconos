@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ void PrismaticJointR::computeJachq(double time, Interaction& inter,  SP::BlockVe
   DEBUG_END("PrismaticJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
 }
 
-void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void PrismaticJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   DEBUG_PRINT("PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y) \n");
   SP::SiconosVector q1 = (q0.getAllVect())[0];
@@ -565,7 +565,7 @@ void PrismaticJointR::Jd1(double X1, double Y1, double Z1, double q10, double q1
 
 
 
-void PrismaticJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
+void PrismaticJointR::computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot)
 {
   std::cout << "Warning:  PrismaticJointR::computeDotJachq(...) not yet implemented" << std::endl;
 }
@@ -581,7 +581,7 @@ void PrismaticJointR::DotJd2(double Xdot1, double Ydot1, double Zdot1, double qd
 }
 
 /** Compute the vector of linear and angular positions of the degrees of freedom */
-void PrismaticJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+void PrismaticJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                                   unsigned int axis)
 {
   // Normally we fill y starting at axis up to the number of columns,

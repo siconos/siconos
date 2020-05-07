@@ -475,7 +475,7 @@ CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, doub
 {
   if(fabs(x) >= DBL_EPSILON)
   {
-    if (j<=i)
+    if(j<=i)
     {
       return cs_entry(T, i, j, x);
     }

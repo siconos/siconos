@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,12 @@ using namespace RELATION;
 
 //  constructor
 LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(double t0, double T, SP::SiconosVector x0,
-                                                                   SP::SimpleMatrix A,  SP::SimpleMatrix B,
-                                                                   SP::SimpleMatrix C,  SP::SimpleMatrix D,
-                                                                   SP::SiconosVector a,  SP::SiconosVector b): NonSmoothDynamicalSystem(t0,T)
+    SP::SimpleMatrix A,  SP::SimpleMatrix B,
+    SP::SimpleMatrix C,  SP::SimpleMatrix D,
+    SP::SiconosVector a,  SP::SiconosVector b): NonSmoothDynamicalSystem(t0,T)
 {
   _ds.reset(new FirstOrderLinearTIDS(x0, A));
-  if (a)
+  if(a)
   {
     _ds-> setbPtr(a);
   }
@@ -48,11 +48,11 @@ LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(double t0, do
   _relation.reset(new FirstOrderLinearTIR(C, B));
 
   // todo: check sizes
-  if (D)
+  if(D)
   {
     _relation->setDPtr(D);
   }
-  if (b)
+  if(b)
   {
     _relation->setePtr(b);
   }

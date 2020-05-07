@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,12 +212,12 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A)
     cs_spfree(A->triplet);
     A->triplet = NULL;
   }
-  if (A->half_triplet)
+  if(A->half_triplet)
   {
     cs_spfree(A->half_triplet);
     A->half_triplet = NULL;
   }
-  if (A->csc)
+  if(A->csc)
   {
     cs_spfree(A->csc);
     A->csc = NULL;

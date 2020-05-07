@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,11 @@ dim(v)=nn
 #include "SolverOptions.h"                      // for SolverOptions
 #include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_S...
 #include "mlcp_direct.h"                        // for mlcp_direct_addConfig...
+#include "numerics_verbose.h"                   // for numerics_error, verbose
+
+
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
 
 static int sN;
 static int sM;
@@ -68,10 +73,12 @@ void mlcp_direct_enum_reset()
 
 void mlcp_direct_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
+  DEBUG_BEGIN("mlcp_direct_enum(...)\n");
+  DEBUG_PRINTF("options->iWork = %p\n",  options->iWork);
   if(!siWorkEnum)
   {
     *info = 1;
-    printf("MLCP_DIRECT_ENUM error, call a non initialised method!!!!!!!!!!!!!!!!!!!!!\n");
+    numerics_printf_verbose(0,"MLCP_DIRECT_ENUM error, call a non initialised method!!!!!!!!!!!!!!!!!!!!!\n");
     return;
   }
   /*First, try direct solver*/
@@ -80,15 +87,20 @@ void mlcp_direct_enum(MixedLinearComplementarityProblem* problem, double *z, dou
   mlcp_direct(problem, z, w, info, options);
   if(*info)
   {
+    DEBUG_PRINT("Solver direct failed, so run the enum solver\n");
     options->dWork = sdWorkEnum;
     options->iWork = siWorkEnum;
-    /*solver direct failed, so run the enum solver.*/
     mlcp_enum(problem, z, w, info, options);
     if(!(*info))
     {
       mlcp_direct_addConfigFromWSolution(problem, w + sN);
     }
+    /* Come back to previous memory adress to ensure correct freeing */
+    options->dWork = sdWorkDirect;
+    options->iWork = siWorkDirect;
   }
+  DEBUG_PRINTF("options->iWork = %p\n",  options->iWork);
+  DEBUG_END("mlcp_direct_enum(...)\n");
 }
 
 void mlcp_direct_enum_set_default(SolverOptions* options)

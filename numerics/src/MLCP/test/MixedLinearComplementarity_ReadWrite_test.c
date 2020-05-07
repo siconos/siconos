@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ int write_newformat(char *filename)
 
   fclose(foutput);
 
-  freeMixedLinearComplementarityProblem(problem);
+  mixedLinearComplementarity_free(problem);
   free(basename);
   printf("\n End of test \n");
   return info;
@@ -136,7 +136,6 @@ int main(int argc, char *argv[])
     if(file == 0)
     {
       printf("Could not open file\n");
-      fclose(file);
     }
     else
     {

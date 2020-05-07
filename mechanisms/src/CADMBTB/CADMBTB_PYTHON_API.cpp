@@ -2,8 +2,8 @@
 #include "CADMBTB_PYTHON_API.hpp"
 #include <assert.h>
 
-AIS_InteractiveContext * pAIS_InteractiveContext=0;
-V3d_View * pV3d_View=0;
+AIS_InteractiveContext * pAIS_InteractiveContext=nullptr;
+V3d_View * pV3d_View=nullptr;
 int sCmpDump=0;
 unsigned int sCmpDumpMan=0;
 void CADMBTB_setGraphicContext(AIS_InteractiveContext & aisContext)
@@ -17,8 +17,8 @@ void CADMBTB_setGraphicView(V3d_View & aView)
 }
 void CADMBTB_disableGraphic()
 {
-  pAIS_InteractiveContext =0;
-  pV3d_View=0;
+  pAIS_InteractiveContext =nullptr;
+  pV3d_View=nullptr;
 }
 
 void CADMBTB_setContactDParam(unsigned int IdParam,unsigned int idContact,unsigned int idShape,double  v)

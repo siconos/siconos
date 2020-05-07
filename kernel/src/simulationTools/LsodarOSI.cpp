@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -732,12 +732,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
       }
       else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        SiconosVector q, z;
-        q.block2contiguous(*DSlink[LagrangianR::q0]);
-        z.block2contiguous(*DSlink[LagrangianR::z]);
-
-        std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
-        *DSlink[LagrangianR::z] = z;
+        std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
         subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
       }
       else

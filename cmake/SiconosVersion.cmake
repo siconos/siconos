@@ -1,6 +1,6 @@
 # --- set siconos current version ---
 set(MAJOR_VERSION 4)
-set(MINOR_VERSION 2)
+set(MINOR_VERSION 4)
 set(PATCH_VERSION 0)
 set(SICONOS_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 

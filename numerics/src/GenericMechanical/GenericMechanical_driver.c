@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -366,7 +366,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
         DEBUG_EXPR_WE(NV_display(curProblem->q,3);
 
 
-          for(int i =0 ; i < 3; i++) numerics_printf("curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,curProblem->q[i],i,fcProblem->q[i]););
+                      for(int i =0 ; i < 3; i++) numerics_printf("curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,curProblem->q[i],i,fcProblem->q[i]););
 
         NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, fcProblem->q, NULL, 0);
 
@@ -483,7 +483,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
     {
       if(curProblem->error && verbose)
         numerics_printf("genericMechanical_GS Numerics : Local solver FAILED row %d of type %s\n",
-               currentRowNumber, ns_problem_id_to_name(curProblem->type));
+                        currentRowNumber, ns_problem_id_to_name(curProblem->type));
       curProblem = curProblem->nextProblem;
       currentRowNumber++;
     }

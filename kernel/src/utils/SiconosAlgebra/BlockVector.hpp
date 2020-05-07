@@ -25,6 +25,8 @@
 
 #include "SiconosAlgebraTypeDef.hpp"
 
+class SiconosVector;
+
 /** "Block" vector : container (list) of SiconosVector
  *
  * A block vector is a stl vector that handles pointers to SiconosVector.
@@ -134,7 +136,8 @@ public:
     return _tabIndex->size();
   };
 
-
+  /** \return true if all SiconosVector in the container are dense **/
+  bool isDense() const;
 
   /** sets all the values of the vector to 0.0 */
   void zero();
@@ -306,6 +309,13 @@ public:
 
   /** \return the infinite norm of the vector */
   double normInf() const;
+
+  /** Tranform a BlockVector into a SiconosVector.
+      Required for plugins, that need contiguous memory for their parameters.
+      \return a vector (the result depends on the number of blocks in input.
+      1 block : link to first component of the container, more : copy of all components into a SiconosVector)
+  */
+  SP::SiconosVector prepareVectorForPlugin() const;
 
   /** \defgroup BlockVectorFriends
 

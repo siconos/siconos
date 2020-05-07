@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -456,6 +456,9 @@ int test_build_first_4_NM(NumericsMatrix** MM)
   /* M1 and M2 must have the same values.*/
   double tol = 1e-12;
   info = SBM_dense_equal(M2->matrix1, M1->matrix0, tol);
+
+  if(info)
+    return info;
 
   /*   SBM_print(SBM2); */
   /* M3 and M4 must have the same values.*/

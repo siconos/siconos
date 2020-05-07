@@ -22,15 +22,15 @@ extern "C"
       returns an array of char
   */
   const char ** data_collection(void);
-  
+
   void print_matrix( const char* desc, int m, int n, double* a, int lda );
-  
+
   void print_int_vector( const char* desc, int n, int* a );
-  
+
   void print_vector_norm( const char* desc, int m, int n, double* a, int lda );
-  
+
   void print_test_info(int test_id, TestCase* current, const char* msg);
-  
+
   void free_test_collection(TestCase* collection, int nb_tests);
 
   void print_tests_collection_report(TestCase * collection, int, int * failed_tests, int, int * succeeded_test);
@@ -39,7 +39,7 @@ extern "C"
 
   int run_test_collection(TestCase * collection, int number_of_tests, int (*test_function)(TestCase*));
 
-  
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
