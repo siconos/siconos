@@ -795,9 +795,9 @@ void SiconosBulletCollisionManager_impl::updateContactorInertia(
   assert(!((localinertia.x() == 0.0
             && localinertia.y() == 0.0
             && localinertia.z() == 0.0)
-           || isinf(localinertia.x())
-           || isinf(localinertia.y())
-           || isinf(localinertia.z()))
+           || std::isinf(localinertia.x())
+           || std::isinf(localinertia.y())
+           || std::isinf(localinertia.z()))
          && "calculateLocalInertia() returned garbage");
   ds->setInertia(localinertia[0],
                  localinertia[1],
