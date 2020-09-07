@@ -148,7 +148,7 @@ target_include_directories(externals PRIVATE blas_lapack)
 #target_include_directories(externals PRIVATE ${BLAS_INCLUDE_DIR})
 
 get_target_property(CHECK BLAS::BLAS INTERFACE_INCLUDE_DIRECTORIES)
-message("JZIEIEZIUZEIZEU ${CHECK}")
+
 
 # We don't want warnings from externals libraries.
 get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
