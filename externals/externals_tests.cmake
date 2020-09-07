@@ -8,6 +8,8 @@ if(WITH_${COMPONENT}_TESTING)
     foreach(odetest IN LISTS odepacktests)
       new_test(SOURCES ${odetest}-test.f)
       target_compile_options(${odetest}-test PRIVATE "-w")
+      target_compile_options(${odetest}-test PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
+
     endforeach()
     if(WITH_CXX)
       new_test(NAME odepacktest10 SOURCES test-funcC-inC.cpp funC.cpp

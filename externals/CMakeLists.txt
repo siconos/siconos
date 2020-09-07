@@ -145,6 +145,10 @@ endif()
 # Link only at build time.
 target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
 target_include_directories(externals PRIVATE blas_lapack)
+#target_include_directories(externals PRIVATE ${BLAS_INCLUDE_DIR})
+
+get_target_property(CHECK BLAS::BLAS INTERFACE_INCLUDE_DIRECTORIES)
+message("JZIEIEZIUZEIZEU ${CHECK}")
 
 # We don't want warnings from externals libraries.
 get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
@@ -153,6 +157,9 @@ set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
 target_compile_options(externals PRIVATE "-Wno-unused-parameter")
+# An awful command asking to add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
+# See https://scivision.co/gfortran-type-mismatch-error/
+target_compile_options(externals PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
 
 # - Extras, optional -
 # --- SuiteSparse ---
