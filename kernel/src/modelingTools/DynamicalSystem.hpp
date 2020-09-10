@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,8 +113,8 @@ protected:
   /** Arbitrary algebraic values vector, z, discrete state of the
       system. */
   SP::SiconosVector _z;
-  
-  /** the  previous state vectors stored in memory 
+
+  /** the  previous state vectors stored in memory
    */
   SiconosMemory _xMemory;
 

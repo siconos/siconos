@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -761,15 +761,14 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
   /** Free memory*/
 
-  if(verbose > 0)
-  {
+
     if(dparam[SICONOS_DPARAM_RESIDU] > tolerance)
-      printf("Non Smooth Newton warning: no convergence after %i iterations\n", niter);
+      numerics_printf_verbose(1,"Non Smooth Newton warning: no convergence after %i iterations\n", niter);
 
     else
-      printf("Non Smooth Newton: convergence after %i iterations\n", niter);
-    printf(" The residue is : %e \n", dparam[SICONOS_DPARAM_RESIDU]);
-  }
+      numerics_printf_verbose(1,"Non Smooth Newton: convergence after %i iterations\n", niter);
+    numerics_printf_verbose(1," The residue is : %e \n", dparam[SICONOS_DPARAM_RESIDU]);
+
 
   /*  free(oldz);*/
 

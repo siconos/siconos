@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,8 @@ void NonSmoothDynamicalSystemTest::tearDown()
 // insertDynamicalSystem
 void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
 {
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
+  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(1., 10.));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" test ndsn build: ", nsds->currentTime() == 1., true);
 
   SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
                                           std::make_shared<SiconosVector>(3)));
@@ -76,7 +77,7 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
 // insertInteraction
 void NonSmoothDynamicalSystemTest::testinsertInteraction()
 {
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
+  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(0., 10.));
 
   SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
                                           std::make_shared<SiconosVector>(3)));
@@ -101,7 +102,7 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction()
 
 void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
 {
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
+  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(0., 10.));
 
   SP::DynamicalSystem ds1(new LagrangianDS(std::make_shared<SiconosVector>(3),
                           std::make_shared<SiconosVector>(3)));
@@ -155,7 +156,7 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
 
 void NonSmoothDynamicalSystemTest::testremoveInteraction()
 {
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
+  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(0., 10.));
 
   SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
                                           std::make_shared<SiconosVector>(3)));

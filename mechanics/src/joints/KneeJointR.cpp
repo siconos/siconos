@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -527,7 +527,7 @@ void KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
   _dotjachq->setValue(2,13, 2.0*t21);
 
 }
-void KneeJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
+void KneeJointR::computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot)
 {
   DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) starts \n");
   if(workQdot.numberOfBlocks()>1)
@@ -664,7 +664,7 @@ double KneeJointR::Hz(double X1, double Y1, double Z1, double q10, double q11, d
   }
 }
 
-void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void KneeJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   DEBUG_BEGIN("KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
   DEBUG_EXPR(q0.display());

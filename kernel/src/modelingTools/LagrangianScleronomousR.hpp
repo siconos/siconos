@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,17 @@
 #include "LagrangianR.hpp"
 #include "SimpleMatrixFriends.hpp"
 /** \brief   Scleronomic Lagrangian (Non Linear) Relations
- 
+
   Scleronomic Relation (constraint) :
 
- \rst 
+ \rst
   .. math::
-      
+
       y = h(q,z) \\
 
   \endrst
- 
- \rst 
+
+ \rst
   .. math::
 
       \\dot y = \nabla^\top_q h(q,z) \\dot q
@@ -42,42 +42,42 @@
 
   or more generally
 
- \rst 
+ \rst
  .. math::
      \\dot y = H(q,z) \\dot q
   \endrst
- 
+
   and by duality
- 
- \rst 
+
+ \rst
  .. math::
 
      p = \nabla_q h(q,z)\lambda
- 
+
  \endrst
 
   or more generally
 
-  \rst 
+  \rst
 
   .. math::
       p = H^\top(q,z)\lambda
   \endrst
- 
+
   with
- 
-  \rst 
+
+  \rst
   .. math::
-  
+
       H^\top(q,z) = \nabla_q h(q,z)
   \endrst
- 
+
   is the pure Lagrangian setting.
- 
+
    y (or its discrete approximation) is stored in y[0]
   \f$ \dot y \f$ (or its discrete approximation) is  stored in y[1]
    higher level y[i] can be used for storing higher levels of derivatives.
- 
+
   Jacobians and h are connected to plug-in functions.\n
   The plugin function to compute h(q,z) needs the following parameters:\n
   --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction\n
@@ -95,7 +95,7 @@
   --> sizeZ : size of vector z \n
   -->[in,out] z: pointer to z vector(s) from DS.\n
   Its signature must be "void plugin(unsigned int, double*, unsigned int, double*, unsigned int, double*)"\n
- 
+
  */
 class LagrangianScleronomousR : public LagrangianR
 {
@@ -170,19 +170,25 @@ public:
     return _dotjacqhXqdot;
   };
 
-  /** to compute y = h(q,z) using plug-in mechanism
-   * \param q the BlockVector of coordinates
-   * \param z the BlockVector of parameters
-   * \param y the output
-   */
-  virtual void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
+  /** to compute the output y = h(q,z) of the Relation
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
+  */
+  virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  /** to compute the jacobian of h using plug-in mechanism.
-   * Index shows which jacobian is computed
-   * \param q the BlockVector of coordinates
-   * \param z the BlockVector of parameters
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  virtual void computeJachq(const BlockVector& q, BlockVector& z);
+
+  /** to compute the time derivative of the Jacobian. Result in _dotjachq (access: dotjachq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param time derivatives of q
    */
-  virtual void computeJachq(SiconosVector& q, SiconosVector& z);
+  virtual void computeDotJachq(const BlockVector& q, BlockVector& z, const BlockVector& qDot);
 
   /** to compute the product of  the time--derivative of Jacobian with the velocity qdot
    * \param time double, current time
@@ -207,13 +213,6 @@ public:
   {
     ;
   }
-
-  /** to compute the time derivative of the Jacobian with respect to time using plug-in mechanism
-   * \param q the BlockVector of coordinates
-   * \param z the BlockVector of parameters
-   * \param qDot q the BlockVector of derivative of coordinates
-   */
-  virtual void computeDotJachq(SiconosVector& q, SiconosVector& z, SiconosVector& qDot);
 
   /** to compute output
    * \param time the current time

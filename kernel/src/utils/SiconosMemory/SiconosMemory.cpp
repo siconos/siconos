@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,9 @@
 
 #include <iostream>
 
-
-// --- CONSTRUCTORS ---
-
-
-// from data: _size
-SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorSize)
-  : MemoryContainer(),
-    _nbVectorsInMemory(0),
-    _indx(size-1)
+// From the size of the container (number of saved vectors) and
+// the size of the vectors.
+SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorSize): MemoryContainer(), _indx(size-1)
 {
   for(unsigned int i = 0; i < size; i++)
   {
@@ -37,105 +31,36 @@ SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorS
   }
 }
 
-// copy of a std::vector of siconos vectors
-SiconosMemory::SiconosMemory(const MemoryContainer& V)
-  : MemoryContainer(),
-    _nbVectorsInMemory(V.size()),
-    _indx(V.size()-1)
-{
-  for(unsigned int i = 0; i < V.size(); i++)
-  {
-    push_back(V[i]);
-  }
-}
-
-// copy of a std::vector of siconos vectors  + _size
-SiconosMemory::SiconosMemory(const unsigned int newMemorySize,
-                             const MemoryContainer& V)
-  : MemoryContainer(),
-    _nbVectorsInMemory(V.size()),
-    _indx(newMemorySize-1)
-{
-  if(newMemorySize < V.size())
-    SiconosMemoryException::selfThrow(
-      "SiconosMemory(int _size, vector<SP::SiconosVector> V) : V.size > _size");
-  else
-  {
-    unsigned int i;
-    for(i = 0; i < V.size(); i++)
-    {
-      push_back(V[i]);
-    }
-    for(; i < newMemorySize; i++)
-    {
-      push_back(SiconosVector(V[0].size()));
-    }
-  }
-}
-
 //Copy constructor
 SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
   : MemoryContainer(),
     _nbVectorsInMemory(Mem.nbVectorsInMemory()),
-    _indx(Mem.getMemorySize()-1)
+    _indx(Mem.size()-1)
 {
-  for(unsigned int i = 0; i < Mem.getMemorySize(); i++)
+  for(unsigned int i = 0; i < Mem.size(); i++)
   {
     push_back(Mem[i]);
   }
 }
 
-// Destructor
-SiconosMemory::~SiconosMemory()
-{
-}
-
-// Assignment
 void SiconosMemory::operator=(const SiconosMemory& V)
 {
   if(size() != V.size())
   {
-    this->resize(V.size());
+    this->resize(V.size()); // => copy construction of old content
   }
+
   for(unsigned int i = 0; i < V.size(); i++)
   {
     (*this)[i].resize(V[i].size(), true);
-    (*this)[i] = V[i];
+    (*this)[i] = V[i]; // copy
   }
   _indx = V._indx;
   _nbVectorsInMemory = V._nbVectorsInMemory;
 }
 
-// Assignment from container
-void SiconosMemory::operator=(const MemoryContainer& V)
-{
-  _nbVectorsInMemory = V.size();
-  if(V.size() > size())
-    this->resize(V.size());
-  _indx = size()-1;
-  for(unsigned int i = 0; i < V.size(); i++)
-  {
-    (*this)[i].resize(V[i].size(), true);
-    (*this)[i] = V[i];
-  }
-}
 
-// Copy from container
-void SiconosMemory::setVectorMemory(const MemoryContainer& V,
-                                    MemoryContainer::size_type _size)
-{
-  _nbVectorsInMemory = std::min(V.size(), _size);
-  if(_size > size())
-    resize(_size);
-  _indx = size()-1;
-  for(unsigned int i = 0; i < _nbVectorsInMemory; i++)
-  {
-    (*this)[i].resize(V[i].size(), true);
-    (*this)[i] = V[i];
-  }
-}
-
-// Set the size of an existing SiconosMemory
+// (Re)set the size of an existing SiconosMemory
 void SiconosMemory::setMemorySize(const unsigned int steps,
                                   const unsigned int vectorSize)
 {

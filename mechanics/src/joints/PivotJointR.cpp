@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -426,7 +426,7 @@ double PivotJointR::AscalA(double rot2to1x, double rot2to1y, double rot2to1z)
          + _A->getValue(2)*rot2to1z;
 }
 
-void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void PivotJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
 
   KneeJointR::computeh(time, q0,  y);
@@ -456,7 +456,7 @@ void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
-void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+void PivotJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                               unsigned int axis)
 {
   // Normally we fill y starting at axis up to the number of columns,

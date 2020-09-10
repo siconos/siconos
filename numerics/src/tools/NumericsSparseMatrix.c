@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 #endif
 #include <stdio.h>             // for NULL, size_t, printf, fprintf, fscanf
 #include <stdlib.h>            // for free, exit, malloc, realloc, EXIT_FAILURE
-#include "CSparseMatrix.h"     // for CSparseMatrix, CS_INT, cs_dl_spfree
+#include "CSparseMatrix_internal.h"     // for CSparseMatrix, CS_INT, cs_dl_spfree
 #include "NumericsMatrix.h"    // for NumericsMatrix, NM_csc, numericsSparse...
 #include "SiconosConfig.h"     // for HAVE_SORT
 /* #define DEBUG_NOCOLOR */
@@ -137,12 +137,12 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A)
     cs_spfree(A->triplet);
     A->triplet = NULL;
   }
-  if (A->half_triplet)
+  if(A->half_triplet)
   {
     cs_spfree(A->half_triplet);
     A->half_triplet = NULL;
   }
-  if (A->csc)
+  if(A->csc)
   {
     cs_spfree(A->csc);
     A->csc = NULL;

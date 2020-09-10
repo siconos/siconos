@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,16 @@
 #include "SiconosBlas.h"                        // for cblas_ddot
 #include "SolverOptions.h"                      // for SolverOptions, SICONO...
 #include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_RHO
+#include "numerics_verbose.h"                     // for numerics_printf
 
 #define EPSDIAG DBL_EPSILON
 
 /*
- *
  * double *z : size n+m
  * double *w : size n+m
  */
+
+
 void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   double* A = problem->A;
@@ -82,11 +84,8 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
     if(A[i * n + i] < -EPSDIAG)
     {
 
-      if(verbose > 0)
-      {
-        printf(" Negative diagonal term \n");
-        printf(" The local problem cannot be solved \n");
-      }
+      numerics_printf_verbose(1," Vanishing diagonal term A[%i,%i]= %14.8e", i, i,  A[i * n + i] );
+      numerics_printf_verbose(1," The local problem cannot be solved");
 
       *info = 2;
       free(diagA);
@@ -105,11 +104,8 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
     if(B[i * m + i] < -EPSDIAG)
     {
 
-      if(verbose > 0)
-      {
-        printf(" Negative diagonal term \n");
-        printf(" The local problem cannot be solved \n");
-      }
+      numerics_printf_verbose(1," Vanishing diagonal term \n");
+      numerics_printf_verbose(1," The local problem cannot be solved \n");
 
       *info = 2;
       free(diagA);
@@ -133,7 +129,7 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   incBx = m;
 
   mlcp_compute_error(problem, z, w, tol, &err);
-  printf("Error = %12.8e\n", err);
+  //printf("Error = %12.8e\n", err);
 
   while((iter < itermax) && (err > tol))
   {
@@ -166,11 +162,10 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
     mlcp_compute_error(problem, z, w, tol, &err);
-
+    numerics_printf_verbose(1,"---- MLCP - RPGS  - Iteration %i rho = %8.4e, residual = %14.7e, tol = %14.7e", rho, iter, err, tol);
 
     if(verbose == 2)
     {
-      printf(" # i%d -- %g : ", iter, err);
       for(i = 0 ; i < n ; ++i) printf(" %g", u[i]);
       for(i = 0 ; i < m ; ++i) printf(" %g", v[i]);
       for(i = 0 ; i < m ; ++i) printf(" %g", w[i]);
@@ -181,24 +176,18 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   }
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  options->dparam[SICONOS_DPARAM_TOL] = err;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if(err > tol)
   {
-    printf("Siconos/Numerics: mlcp_rpgs: No convergence of RPGS after %d iterations\n", iter);
-    printf("Siconos/Numerics: mlcp_rpgs: The residue is : %g \n", err);
+    numerics_printf_verbose(1,"---- MLCP - RPGS  - No convergence after %d iterations with error = %14.7e ", iter, err);
     *info = 1;
   }
   else
   {
-    if(verbose > 0)
-    {
-      printf("Siconos/Numerics: mlcp_rpgs: Convergence of RPGS after %d iterations\n", iter);
-      printf("Siconos/Numerics: mlcp_rpgs: The residue is : %g \n", err);
-    }
+    numerics_printf_verbose(1,"---- MLCP - RPGS  - Convergence after %d iterations with error = %14.7e ", iter, err);
     *info = 0;
   }
-
   free(diagA);
   free(diagB);
   return;
@@ -206,7 +195,8 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
 void mlcp_rpgs_set_default(SolverOptions* options)
 {
-  options->dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5; /*rho*/
+  options->iparam[SICONOS_IPARAM_MAX_ITER]  = 50000;
+  options->dparam[SICONOS_DPARAM_MLCP_RHO] = 1.0; /*rho*/
   options->filterOn = false;
 }
 

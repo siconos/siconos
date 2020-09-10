@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
 
 
 
-void NewtonEulerR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void NewtonEulerR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   prod(*_jachq, q0, y, true);
   if(_e)
@@ -303,11 +303,15 @@ void NewtonEulerR::computeJach(double time, Interaction& inter)
   DEBUG_END("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
 }
 
-void NewtonEulerR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
+void NewtonEulerR::computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot)
 {
   if(_dotjachq && _plugindotjacqh->fPtr)
   {
-    ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
+    auto zp = workZ.prepareVectorForPlugin();
+    auto qp = workQ.prepareVectorForPlugin();
+    auto qdotp = workQdot.prepareVectorForPlugin();
+    ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), qp->getArray(), workQdot.size(), qdotp->getArray(), &(*_dotjachq)(0, 0), zp->size(), &(*zp)(0));
+    workZ = *zp;
   }
 }
 
@@ -325,18 +329,18 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
   }
   // Compute the product of the time derivative of the Jacobian with dotq
-  BlockVector workQdot = *DSlink[NewtonEulerR::dotq]; // we assume that dotq is up to date !
-  BlockVector workQ = *DSlink[NewtonEulerR::q0]; // we assume that dotq is up to date !
-  BlockVector workZ = *DSlink[NewtonEulerR::z]; // we assume that dotq is up to date !
-  DEBUG_EXPR(workQdot.display(););
-
-  computeDotJachq(time, workQ, workZ, workQdot);
+  // we assume that dotq is up to date !
+  DEBUG_EXPR(DSlink[NewtonEulerR::dotq]->display(););
+  computeDotJachq(time,
+                  *DSlink[NewtonEulerR::q0],
+                  *DSlink[NewtonEulerR::z],
+                  *DSlink[NewtonEulerR::dotq]);
 
   _secondOrderTimeDerivativeTerms.reset(new SiconosVector(_dotjachq->size(0)));
 
   DEBUG_EXPR(_dotjachq->display(););
 
-  prod(*_dotjachq, workQdot, *_secondOrderTimeDerivativeTerms, true);
+  prod(*_dotjachq, *DSlink[NewtonEulerR::dotq], *_secondOrderTimeDerivativeTerms, true);
 
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
 
@@ -387,12 +391,9 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   }
 
   // compute the product of jachqTdot and v
-  SiconosVector workVelocity;
-  workVelocity.initFromBlock(*DSlink[NewtonEulerR::velocity]);
+  SiconosVector workVelocity(*DSlink[NewtonEulerR::velocity]);
   DEBUG_EXPR(workVelocity.display(););
   prod(*jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
   DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
-
-  *DSlink[NewtonEulerR::z] = workZ;
 }

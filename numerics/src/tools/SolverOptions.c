@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -619,6 +619,12 @@ SolverOptions * solver_options_create(int solverId)
     break;
   }
   case SICONOS_MLCP_DIRECT_FB:
+  {
+    options = solver_options_initialize(solverId, 10000, 1e-12, 0);
+    mlcp_direct_set_default(options);
+    break;
+  }
+  case SICONOS_MLCP_LCP_LEMKE:
   {
     options = solver_options_initialize(solverId, 10000, 1e-12, 0);
     mlcp_direct_set_default(options);

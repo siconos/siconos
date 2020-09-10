@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 #include <math.h>                    // for sqrt, fabs, fmax, INFINITY
 #include <stdio.h>                   // for NULL, printf
 #include <stdlib.h>                  // for calloc, free, malloc
-#include "CSparseMatrix.h"           // for CSparseMatrix_zentry, CSparseMatrix
+#include "CSparseMatrix_internal.h"           // for CSparseMatrix_zentry, CSparseMatrix
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
@@ -995,7 +995,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
                int* restrict info, SolverOptions* restrict options)
 {
 
-  verbose=1;
+  /* verbose=1; */
   /* frictionContact_display(problem); */
 
   /* Number of contacts */

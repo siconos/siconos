@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
   if(rank == 0)
 #endif
   {
-    assert (rank == 0);
+    assert(rank == 0);
     NM_MUMPS_set_verbosity(M, 1);
 
     /*
@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
     NM_MUMPS(M, 6);
     NM_MUMPS(M, -2);
     NM_MUMPS(M, 0);
+
 
     for (unsigned int i=0; i<4; ++i)
     {
@@ -101,7 +102,7 @@ int main(int argc, char *argv[])
   if(rank == 0)
 #endif
   {
-    assert (rank == 0);
+    assert(rank == 0);
     NM_MUMPS_set_verbosity(M, 1);
 
     /*
@@ -115,10 +116,10 @@ int main(int argc, char *argv[])
     NM_zentry(M, 0, 0, 1.);
     NM_zentry(M, 1, 1, 1.);
     NM_zentry(M, 2, 1, 0.5);
-/*    NM_zentry(M, 1, 2, 0.5);*/
+    /*    NM_zentry(M, 1, 2, 0.5);*/
     NM_zentry(M, 2, 2, 1.);
 
-/*    NM_display(M);*/
+    /*    NM_display(M);*/
 
     /* solution: [1, 2/3, 2/3] */
     b[0] = 1.;
@@ -134,6 +135,7 @@ int main(int argc, char *argv[])
     NM_MUMPS(M, 6);
     NM_MUMPS(M, -2);
     NM_MUMPS(M, 0);
+
 
     for (unsigned int i=0; i<6; ++i)
     {
@@ -151,8 +153,8 @@ int main(int argc, char *argv[])
   }
 
 
-   NM_clear(M);
-   free(M);
+  NM_clear(M);
+  free(M);
 
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();

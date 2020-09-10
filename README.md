@@ -17,6 +17,11 @@ optimal control with state constraints), Optimization (Complementarity systems a
 Fluid Mechanics, Computer Graphics, ...
 
 Read more about Siconos at the [Siconos homepage](http://siconos.gforge.inria.fr)
+
+
+
+
+
 # Main components
 
 Each component can be used either from a low-level language like C/C++ or from Python.

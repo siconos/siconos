@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,15 +108,6 @@ void sub(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
    \return a boolean
  */
 bool operator == (const SiconosMatrix& A, const SiconosMatrix& B);
-
-/** Compares two (block) matrices: true if they have the same number of blocks and if
-    blocks which are facing each other have the same size;
-    always true if one of the two is a SimpleMatrix.
-    \param m1 a SiconosMatrix
-    \param m2 a SiconosMatrix
-*/
-bool isComparableTo(const SiconosMatrix& m1, const SiconosMatrix& m2);
-  
 
 /**: A!=B when (A-B).normInf()>tolerance
  * \param A a SiconosMatrix

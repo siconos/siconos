@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,29 +25,80 @@
 #include "NumericsMatrix.h"    // for NM_dense_display, NumericsMatrix, NM_c...
 #include "numerics_verbose.h"  // for CHECK_IO
 
+
+
+
+
+void mixedLinearComplementarity_free(MixedLinearComplementarityProblem* problem)
+{
+  if(problem->isStorageType1)
+  {
+    NM_clear(problem->M);
+    free(problem->M);
+    free(problem->q);
+    free(problem->blocksRows);
+    free(problem->blocksIsComp);
+  }
+  if(problem->isStorageType2)
+  {
+    free(problem->A);
+    free(problem->B);
+    free(problem->C);
+    free(problem->D);
+    free(problem->a);
+    free(problem->b);
+  }
+  free(problem);
+}
+
+MixedLinearComplementarityProblem* mixedLinearComplementarity_new(void)
+{
+  MixedLinearComplementarityProblem* mlcp = (MixedLinearComplementarityProblem*) malloc(sizeof(MixedLinearComplementarityProblem));
+
+  mlcp->isStorageType1 = 0;
+  mlcp->isStorageType2 = 0;
+  mlcp->m = 0;
+  mlcp->n = 0;
+
+  mlcp->blocksRows = NULL;
+  mlcp->blocksIsComp = NULL;
+
+  mlcp->M = NULL;
+  mlcp->q = NULL;
+  mlcp->A = NULL;
+  mlcp->B = NULL;
+  mlcp->C = NULL;
+  mlcp->D = NULL;
+  mlcp->a = NULL;
+  mlcp->b = NULL;
+
+  return mlcp;
+}
+
+
 void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 {
   int n = p->n;
   int m = p->m;
-  printf("MLCP DISPLAY:\n-------------\n");
-  printf("n :%d m: %d\n", p->n, p->m);
+  numerics_printf("MLCP DISPLAY:\n-------------\n");
+  numerics_printf_verbose(0,"n :%d m: %d\n", p->n, p->m);
 
 
-  printf(p->isStorageType1 ? "using (M)\n" : "not using (M)\n");
-  printf(p->isStorageType2 ? "using (ABCD)\n" : "not using (ABCD)\n");
+  numerics_printf_verbose(0,p->isStorageType1 ? "using (M)\n" : "not using (M)\n");
+  numerics_printf_verbose(0,p->isStorageType2 ? "using (ABCD)\n" : "not using (ABCD)\n");
   if(p->blocksRows)
   {
-    printf("blocks are:\n");
+    numerics_printf_verbose(0,"blocks are:\n");
     int NumBlock = 0;
     while(p->blocksRows[NumBlock] < n + m)
     {
       if(p->blocksIsComp[NumBlock])
       {
-        printf("->block of complementarity condition (type %d), from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksRows[NumBlock], p->blocksRows[NumBlock + 1] - 1);
+        numerics_printf_verbose(0,"->block of complementarity condition (type %d), from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksRows[NumBlock], p->blocksRows[NumBlock + 1] - 1);
       }
       else
       {
-        printf("->block of equality type (type %d), from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksRows[NumBlock], p->blocksRows[NumBlock + 1] - 1);
+        numerics_printf_verbose(0,"->block of equality type (type %d), from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksRows[NumBlock], p->blocksRows[NumBlock + 1] - 1);
       }
       NumBlock++;
     }
@@ -55,92 +106,92 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 
   if(p->M)
   {
-    printf("M matrix:\n");
+    numerics_printf_verbose(0,"M matrix:");
     NM_display(p->M);
   }
   else
-    printf("No M matrix:\n");
+    numerics_printf_verbose(0,"No M matrix:");
 
   if(p->q)
   {
-    printf("q matrix:\n");
+    numerics_printf_verbose(0,"q matrix:");
     NM_dense_display(p->q, n + m, 1, 0);
   }
   else
-    printf("No q matrix:\n");
+    numerics_printf_verbose(0,"No q matrix:");
 
   if(p->A)
   {
-    printf("A matrix:\n");
+    numerics_printf_verbose(0,"A matrix:");
     NM_dense_display(p->A, n, n, 0);
   }
   else
   {
-    printf("No A matrix:\n");
+    numerics_printf_verbose(0,"No A matrix:");
     if(p->M && !p->M->storageType)
     {
-      printf("A matrix from M:\n");
+      numerics_printf_verbose(0,"A matrix from M:");
       NM_dense_display(p->M->matrix0, n, n, n + m);
     }
   }
   if(p->B)
   {
-    printf("B matrix:\n");
+    numerics_printf_verbose(0,"B matrix:");
     NM_dense_display(p->B, m, m, 0);
   }
   else
   {
-    printf("No B matrix:\n");
+    numerics_printf_verbose(0,"No B matrix:");
     if(p->M && !p->M->storageType)
     {
-      printf("B matrix from M:\n");
+      numerics_printf_verbose(0,"B matrix from M:");
       NM_dense_display(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
     }
   }
 
   if(p->C)
   {
-    printf("C matrix:\n");
+    numerics_printf_verbose(0,"C matrix:");
     NM_dense_display(p->C, n, m, 0);
   }
   else
   {
-    printf("No C matrix:\n");
+    numerics_printf_verbose(0,"No C matrix:");
     if(p->M && !p->M->storageType)
     {
-      printf("C matrix from M:\n");
+      numerics_printf_verbose(0,"C matrix from M:");
       NM_dense_display(p->M->matrix0 + n * (n + m), n, m, n + m);
     }
   }
 
   if(p->D)
   {
-    printf("D matrix:\n");
+    numerics_printf_verbose(0,"D matrix:");
     NM_dense_display(p->D, m, n, 0);
   }
   else
   {
-    printf("No D matrix:\n");
+    numerics_printf_verbose(0,"No D matrix:");
     if(p->M && !p->M->storageType)
     {
-      printf("D matrix from M:\n");
+      numerics_printf_verbose(0,"D matrix from M:");
       NM_dense_display(p->M->matrix0 + n, m, n, n + m);
     }
   }
   if(p->a)
   {
-    printf("a matrix:\n");
+    numerics_printf_verbose(0,"a matrix:");
     NM_dense_display(p->a, n, 1, 0);
   }
   else
-    printf("No a matrix:\n");
+    numerics_printf_verbose(0,"No a matrix:");
   if(p->b)
   {
-    printf("b matrix:\n");
+    numerics_printf_verbose(0,"b matrix:");
     NM_dense_display(p->b, m, 1, 0);
   }
   else
-    printf("No b matrix:\n");
+    numerics_printf_verbose(0,"No b matrix:");
 
 }
 int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* problem, FILE* file)
@@ -474,7 +525,7 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
   return 0;
 }
 
-int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, char* filename)
+int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem* problem, const char* filename)
 {
   int info = 0;
   FILE * file = fopen(filename, "r");
@@ -487,50 +538,81 @@ int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem
 
 
 
-
-void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem)
+MixedLinearComplementarityProblem* mixedLinearComplementarity_fromMtoABCD(MixedLinearComplementarityProblem* problem)
 {
-  if(problem->isStorageType1)
-  {
-    NM_clear(problem->M);
-    free(problem->M);
-    free(problem->q);
-    free(problem->blocksRows);
-    free(problem->blocksIsComp);
-  }
-  if(problem->isStorageType2)
-  {
-    free(problem->A);
-    free(problem->B);
-    free(problem->C);
-    free(problem->D);
-    free(problem->a);
-    free(problem->b);
-  }
-  free(problem);
-}
 
-MixedLinearComplementarityProblem* newMLCP(void)
-{
-  MixedLinearComplementarityProblem* mlcp = (MixedLinearComplementarityProblem*) malloc(sizeof(MixedLinearComplementarityProblem));
+
+  MixedLinearComplementarityProblem* mlcp = mixedLinearComplementarity_new();
+
+
+  if(!problem->isStorageType1)
+  {
+    numerics_printf_verbose(0,"mixedLinearComplementarity_new: Wrong Storage (!isStorageType1)\n");
+    exit(EXIT_FAILURE);
+  }
 
   mlcp->isStorageType1 = 0;
-  mlcp->isStorageType2 = 0;
-  mlcp->m = 0;
-  mlcp->n = 0;
+  mlcp->isStorageType2 = 1;
 
-  mlcp->blocksRows = NULL;
-  mlcp->blocksIsComp = NULL;
+  mlcp->n = problem->n; /* Equalities */
+  mlcp->m = problem->m; /* Inequalities */
 
-  mlcp->M = NULL;
-  mlcp->q = NULL;
-  mlcp->A = NULL;
-  mlcp->B = NULL;
-  mlcp->C = NULL;
-  mlcp->D = NULL;
-  mlcp->a = NULL;
-  mlcp->b = NULL;
+
+  int m = problem->m;
+  int n = problem->n;
+  mlcp->A = (double *) calloc(n*n,sizeof(double));
+  for(int i =0; i < n; i++)
+  {
+    for(int j =0; j < n; j++)
+    {
+      mlcp->A[i + j*n] = problem->M->matrix0[i + j*(m+n)];
+    }
+  }
+
+  mlcp->B = (double *) calloc(m*m,sizeof(double));
+  for(int i =0; i < m; i++)
+  {
+    for(int j =0; j < m; j++)
+    {
+      mlcp->B[i + j*m] = problem->M->matrix0[ i+n + (j+n)*(m+n)];
+    }
+  }
+
+  mlcp->C = (double *) calloc(n*m,sizeof(double));
+  for(int i =0; i < n; i++)
+  {
+    for(int j =0; j < m; j++)
+    {
+      mlcp->C[i + j*m] = problem->M->matrix0[ i + (j+n)*(m+n)];
+    }
+  }
+
+  mlcp->D = (double *) calloc(m*n,sizeof(double));
+  for(int i =0; i < m; i++)
+  {
+    for(int j =0; j < n; j++)
+    {
+      mlcp->D[i + j*n] = problem->M->matrix0[ i+n + j*(m+n)];
+    }
+  }
+
+  mlcp->a = (double *) calloc(n,sizeof(double));
+  for(int i =0; i < n; i++)
+  {
+    mlcp->a[i] = problem->q[i];
+  }
+
+  mlcp->b = (double *) calloc(m,sizeof(double));
+  for(int i =0; i < m; i++)
+  {
+    mlcp->b[i] = problem->q[i+n];
+  }
 
   return mlcp;
 }
+
+
+
+
+
 #endif

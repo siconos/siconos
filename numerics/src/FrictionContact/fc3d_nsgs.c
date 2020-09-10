@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -720,7 +720,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                           &tolerance, norm_q, error,
                           iter);
 
-        if (!(tolerance > 0.0))
+        if(!(tolerance > 0.0))
         {
           numerics_warning("fc3d_nsgs", "tolerance has to be positive!!");
           numerics_warning("fc3d_nsgs", "we stop the iterations");

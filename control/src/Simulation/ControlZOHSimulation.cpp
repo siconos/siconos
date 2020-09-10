@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include <boost/timer/timer.hpp>
+#include <chrono>
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 #include "EventsManager.hpp"
@@ -58,7 +58,7 @@ void ControlZOHSimulation::run()
   DEBUG_BEGIN("void ControlZOHSimulation::run()\n");
   EventsManager& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
-  boost::timer::cpu_timer time;
+  std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
   TimeStepping& sim = static_cast<TimeStepping&>(*_processSimulation);
 
@@ -85,11 +85,10 @@ void ControlZOHSimulation::run()
   storeData(k);
   ++k;
 
-  // Warning FP : with the new interface boost::timer, the
-  // result of elpased is in ns while it was in seconds
-  // in the old interface.
-  // elapsed is a tuple with wall, user and system times.
-  _elapsedTime = time.elapsed().user * 1e-9;
+  std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+  std::chrono::duration<double, std::milli> fp_s = end - start;
+  _elapsedTime = fp_s.count();
+
   _dataM->resize(k, _nDim + 1);
   DEBUG_END("void ControlZOHSimulation::run()\n");
 }

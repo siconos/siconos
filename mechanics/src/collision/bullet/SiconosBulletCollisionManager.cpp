@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosBulletCollisionManager.cpp
   \brief Definition of a Bullet-based interaction handler for contact
@@ -25,6 +25,7 @@
 // needed is a way to project the point detected on the external shell
 // back to the shape surface.  This could be for example the closest
 // point on the convex hell.  (For convex shapes.)
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include <debug.h>
@@ -67,7 +68,6 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <map>
 #include <limits>
 #include <boost/format.hpp>
-#include <CxxStd.hpp>
 
 #include <Relation.hpp>
 #include <Simulation.hpp>
@@ -258,18 +258,18 @@ public:
 //   BULLETSHAPE btshape;
 // };
 
-#define SHAPE_RECORD(X, BODYDS, SICONOSSHAPE,BULLETSHAPE)               \
-  class X : public BodyShapeRecord,                                     \
-            public std::enable_shared_from_this<X> {                  \
-  public:                                                               \
-    X(SP::SiconosVector base, BODYDS ds,                                \
-      SICONOSSHAPE sh, BULLETSHAPE btsh,                                \
-      SP::btCollisionObject btobj, SP::SiconosContactor con)            \
-      : BodyShapeRecord(base, ds, sh, btobj, con),                      \
-      shape(sh), btshape(btsh) {}                                       \
-    SICONOSSHAPE shape;                                                 \
-    BULLETSHAPE btshape;                                                \
-    ACCEPT_VISITORS();                                                  \
+#define SHAPE_RECORD(X, BODYDS, SICONOSSHAPE,BULLETSHAPE)     \
+  class X : public BodyShapeRecord,                           \
+            public std::enable_shared_from_this<X> {          \
+  public:                                                     \
+    X(SP::SiconosVector base, BODYDS ds,                      \
+      SICONOSSHAPE sh, BULLETSHAPE btsh,                      \
+      SP::btCollisionObject btobj, SP::SiconosContactor con)  \
+      : BodyShapeRecord(base, ds, sh, btobj, con),            \
+      shape(sh), btshape(btsh) {}                             \
+    SICONOSSHAPE shape;                                       \
+    BULLETSHAPE btshape;                                      \
+    ACCEPT_VISITORS();                                        \
   };
 
 // Body-Shape record types
@@ -453,19 +453,19 @@ SiconosBulletCollisionManager::insertStaticContactorSet(
   }
 
   rec->base = position;
-  impl->createCollisionObjectsForBodyContactorSet(SP::SecondOrderDS(), rec->base, cs);
-  impl->_staticContactorSetRecords[&*rec] = rec;
+  _impl->createCollisionObjectsForBodyContactorSet(SP::SecondOrderDS(), rec->base, cs);
+  _impl->_staticContactorSetRecords[&*rec] = rec;
   return static_cast<SiconosBulletCollisionManager::StaticContactorSetID>(&*rec);
 }
 
 bool SiconosBulletCollisionManager::removeStaticContactorSet(StaticContactorSetID id)
 {
   StaticContactorSetRecord *recptr = static_cast<StaticContactorSetRecord *>(id);
-  if(impl->_staticContactorSetRecords.find(recptr)
-      == impl->_staticContactorSetRecords.end())
+  if(_impl->_staticContactorSetRecords.find(recptr)
+      == _impl->_staticContactorSetRecords.end())
     return false;
 
-  SP::StaticContactorSetRecord rec(impl->_staticContactorSetRecords[recptr]);
+  SP::StaticContactorSetRecord rec(_impl->_staticContactorSetRecords[recptr]);
   // TODO
   assert(0 && "removeStaticContactorSet not implemented.");
   return false;
@@ -473,36 +473,36 @@ bool SiconosBulletCollisionManager::removeStaticContactorSet(StaticContactorSetI
 
 void SiconosBulletCollisionManager::initialize_impl()
 {
-  impl.reset(new SiconosBulletCollisionManager_impl(_options));
+  _impl.reset(new SiconosBulletCollisionManager_impl(_options));
 
   //collision configuration contains default setup for memory, collision setup
-  impl->_collisionConfiguration.reset(
+  _impl->_collisionConfiguration.reset(
     new btDefaultCollisionConfiguration());
 
   if(_options.perturbationIterations > 0
       || _options.minimumPointsPerturbationThreshold > 0)
   {
-    impl->_collisionConfiguration->setConvexConvexMultipointIterations(
+    _impl->_collisionConfiguration->setConvexConvexMultipointIterations(
       _options.perturbationIterations,
       _options.minimumPointsPerturbationThreshold);
-    impl->_collisionConfiguration->setPlaneConvexMultipointIterations(
+    _impl->_collisionConfiguration->setPlaneConvexMultipointIterations(
       _options.perturbationIterations,
       _options.minimumPointsPerturbationThreshold);
   }
 
   //use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-  impl->_dispatcher.reset(
-    new btCollisionDispatcher(&*impl->_collisionConfiguration));
+  _impl->_dispatcher.reset(
+    new btCollisionDispatcher(&*_impl->_collisionConfiguration));
 
 
   if(_options.useAxisSweep3)
-    impl->_broadphase.reset(new btAxisSweep3(btVector3(), btVector3()));
+    _impl->_broadphase.reset(new btAxisSweep3(btVector3(), btVector3()));
   else
-    impl->_broadphase.reset(new btDbvtBroadphase());
+    _impl->_broadphase.reset(new btDbvtBroadphase());
 
-  impl->_collisionWorld.reset(
-    new btCollisionWorld(&*impl->_dispatcher, &*impl->_broadphase,
-                         &*impl->_collisionConfiguration));
+  _impl->_collisionWorld.reset(
+    new btCollisionWorld(&*_impl->_dispatcher, &*_impl->_broadphase,
+                         &*_impl->_collisionConfiguration));
 
 
   DEBUG_PRINTF("_options.dimension = %i", _options.dimension);
@@ -516,31 +516,31 @@ void SiconosBulletCollisionManager::initialize_impl()
     btConvex2dConvex2dAlgorithm::CreateFunc* m_convexAlgo2d = new btConvex2dConvex2dAlgorithm::CreateFunc(m_simplexSolver,m_pdSolver);
     btBox2dBox2dCollisionAlgorithm::CreateFunc* m_box2dbox2dAlgo = new btBox2dBox2dCollisionAlgorithm::CreateFunc();
 
-    impl->_dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,CONVEX_2D_SHAPE_PROXYTYPE,m_convexAlgo2d);
-    impl->_dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,CONVEX_2D_SHAPE_PROXYTYPE,m_convexAlgo2d);
-    impl->_dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,BOX_2D_SHAPE_PROXYTYPE,m_convexAlgo2d);
-    impl->_dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,BOX_2D_SHAPE_PROXYTYPE,m_box2dbox2dAlgo);
+    _impl->_dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,CONVEX_2D_SHAPE_PROXYTYPE,m_convexAlgo2d);
+    _impl->_dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,CONVEX_2D_SHAPE_PROXYTYPE,m_convexAlgo2d);
+    _impl->_dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,BOX_2D_SHAPE_PROXYTYPE,m_convexAlgo2d);
+    _impl->_dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,BOX_2D_SHAPE_PROXYTYPE,m_box2dbox2dAlgo);
   }
   else
-    btGImpactCollisionAlgorithm::registerAlgorithm(&*impl->_dispatcher);
+    btGImpactCollisionAlgorithm::registerAlgorithm(&*_impl->_dispatcher);
 
 
 
 
 
 
-  impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
-  impl->_collisionWorld->getDispatchInfo().m_enableSatConvex = _options.enableSatConvex;
+  _impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
+  _impl->_collisionWorld->getDispatchInfo().m_enableSatConvex = _options.enableSatConvex;
 }
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager()
-  : SiconosCollisionManager()
+  : SiconosCollisionManager(),_with_equality_constraints(false)
 {
   initialize_impl();
 }
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager(const SiconosBulletOptions &options)
-  : _options(options)
+  : _with_equality_constraints(false),_options(options)
 {
   initialize_impl();
 }
@@ -551,7 +551,7 @@ SiconosBulletCollisionManager::~SiconosBulletCollisionManager()
   // contact points when world is destroyed
 
   // must be the first de-allocated, otherwise segfault
-  impl->_collisionWorld.reset();
+  _impl->_collisionWorld.reset();
 }
 
 class UpdateShapeVisitor : public SiconosVisitor
@@ -792,13 +792,13 @@ void SiconosBulletCollisionManager_impl::updateContactorInertia(
   localinertia[0]*=scale_factor;
   localinertia[1]*=scale_factor;
   localinertia[2]*=scale_factor;
-  assert( ! ((localinertia.x() == 0.0
-              && localinertia.y() == 0.0
-              && localinertia.z() == 0.0)
-             || isinf(localinertia.x())
-             || isinf(localinertia.y())
-             || isinf(localinertia.z()))
-          && "calculateLocalInertia() returned garbage" );
+  assert(!((localinertia.x() == 0.0
+            && localinertia.y() == 0.0
+            && localinertia.z() == 0.0)
+           || std::isinf(localinertia.x())
+           || std::isinf(localinertia.y())
+           || std::isinf(localinertia.z()))
+         && "calculateLocalInertia() returned garbage");
   ds->setInertia(localinertia[0],
                  localinertia[1],
                  localinertia[2]);
@@ -829,7 +829,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
     btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
 #endif
     SP::RigidBodyDS rbds=std::static_pointer_cast<RigidBodyDS>(record.ds);
-    if (record.ds && rbds->useContactorInertia())
+    if(record.ds && rbds->useContactorInertia())
     {
       updateContactorInertia(rbds, btsphere);
     }
@@ -1882,31 +1882,31 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
 
 void SiconosBulletCollisionManager::removeBody(const SP::RigidBodyDS& body)
 {
-  BodyShapeMap::iterator it(impl->bodyShapeMap.find(&*body));
-  if(it == impl->bodyShapeMap.end())
+  BodyShapeMap::iterator it(_impl->bodyShapeMap.find(&*body));
+  if(it == _impl->bodyShapeMap.end())
     return;
 
   std::vector<std::shared_ptr<BodyShapeRecord> >::iterator it2;
   for(it2 = it->second.begin(); it2 != it->second.end(); it2++)
   {
-    impl->_collisionWorld->removeCollisionObject(&* (*it2)->btobject);
+    _impl->_collisionWorld->removeCollisionObject(&* (*it2)->btobject);
   }
 
-  impl->bodyShapeMap.erase(it);
+  _impl->bodyShapeMap.erase(it);
 }
 void SiconosBulletCollisionManager::removeBody(const SP::RigidBody2dDS& body)
 {
-  BodyShapeMap::iterator it(impl->bodyShapeMap.find(&*body));
-  if(it == impl->bodyShapeMap.end())
+  BodyShapeMap::iterator it(_impl->bodyShapeMap.find(&*body));
+  if(it == _impl->bodyShapeMap.end())
     return;
 
   std::vector<std::shared_ptr<BodyShapeRecord> >::iterator it2;
   for(it2 = it->second.begin(); it2 != it->second.end(); it2++)
   {
-    impl->_collisionWorld->removeCollisionObject(&* (*it2)->btobject);
+    _impl->_collisionWorld->removeCollisionObject(&* (*it2)->btobject);
   }
 
-  impl->bodyShapeMap.erase(it);
+  _impl->bodyShapeMap.erase(it);
 }
 /** This class allows to iterate over all the contact points in a
  *  btCollisionWorld, returning a tuple containing the two btCollisionObjects
@@ -2112,24 +2112,24 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 {
   DEBUG_BEGIN("SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)\n");
   // -2. update collision objects from all RigidBodyDS dynamical systems
-  SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*impl));
+  SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*_impl));
   simulation->nonSmoothDynamicalSystem()->visitDynamicalSystems(updateVisitor);
 
   // Clear cache automatically before collision detection if requested
   if(_options.clearOverlappingPairCache)
     clearOverlappingPairCache();
 
-  if(! impl->_queuedCollisionObjects.empty())
+  if(! _impl->_queuedCollisionObjects.empty())
   {
 
     std::vector<SP::btCollisionObject>::iterator it;
-    for(it = impl->_queuedCollisionObjects.begin();
-        it != impl->_queuedCollisionObjects.end();
+    for(it = _impl->_queuedCollisionObjects.begin();
+        it != _impl->_queuedCollisionObjects.end();
         ++ it)
     {
-      impl->_collisionWorld->addCollisionObject(&**it);
+      _impl->_collisionWorld->addCollisionObject(&**it);
     }
-    impl->_queuedCollisionObjects.clear();
+    _impl->_queuedCollisionObjects.clear();
   }
 
   // -1. reset statistical counters
@@ -2143,13 +2143,13 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   gContactBreakingThreshold = _options.contactBreakingThreshold;
 
   // 1. perform bullet collision detection
-  impl->_collisionWorld->performDiscreteCollisionDetection();
+  _impl->_collisionWorld->performDiscreteCollisionDetection();
 
   // 2. deleted contact points have been removed from the graph during the
   //    bullet collision detection callbacks
 
   // 3. for each contact point, if there is no interaction, create one
-  IterateContactPoints t(impl->_collisionWorld);
+  IterateContactPoints t(_impl->_collisionWorld);
   IterateContactPoints::iterator it, itend=t.end();
   DEBUG_PRINT("SiconosBulletCollisionManager :: iterating contact points:\n");
   //getchar();
@@ -2172,7 +2172,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       pairB = reinterpret_cast<const BodyShapeRecord*>(it->objectA->getUserPointer());
       flip = true;
     }
-    DEBUG_PRINTF("flip = %i \n", flip);
+    DEBUG_PRINTF("SiconosBulletCollisionManager :: flip = %i \n", flip);
     // If both collision objects belong to the same body (or no body),
     // no interaction is created.
     if(pairA->ds == pairB->ds)
@@ -2182,6 +2182,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     // relation (e.g. EqualityCondition == they have a joint between
     // them), then don't create contact constraints, because it leads
     // to an ill-conditioned problem.
+
+    DEBUG_PRINTF("SiconosBulletCollisionManager :: _with_equality_constraints  -- %i\n", _with_equality_constraints);
+
+
     if(_with_equality_constraints && pairA->ds && pairB->ds)
     {
       InteractionsGraph::VIterator ui, uiend;
@@ -2197,10 +2201,11 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         if(ds1 && ds2 && (((&*ds1==&*pairA->ds) && (&*ds2==&*pairB->ds))
                           || ((&*ds1==&*pairB->ds) && (&*ds2==&*pairA->ds))))
         {
-          // Only match on non-BulletR interactions, i.e. non-contact relations
           SP::BulletR br(std::dynamic_pointer_cast<BulletR>(inter->relation()));
+          DEBUG_EXPR(std::cout << "br" << br << std::endl;);
           if(!br)
           {
+            DEBUG_PRINT("Only match on non-BulletR interactions, i.e. non-contact relations\n");
             SP::NewtonEulerJointR jr(
               std::dynamic_pointer_cast<NewtonEulerJointR>(inter->relation()));
 
@@ -2274,10 +2279,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
         /* update the relation */
         rel_bullet2d3DR->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                              flip, _options.worldScale,
-                                                              rbdsA,
-                                                              rbdsB ? rbdsB
-                                                              : SP::RigidBody2dDS());
+            flip, _options.worldScale,
+            rbdsA,
+            rbdsB ? rbdsB
+            : SP::RigidBody2dDS());
       }
 
       else
@@ -2302,8 +2307,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       SP::NewtonImpactFrictionNSL nslaw_NewtonImpactFrictionNSL(std::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw));
       SP::NewtonImpactRollingFrictionNSL nslaw_NewtonImpactRollingFrictionNSL(std::dynamic_pointer_cast<NewtonImpactRollingFrictionNSL>(nslaw));
 
-      DEBUG_EXPR(std::cout << nslaw_NewtonImpactFrictionNSL << std::endl;);
-      DEBUG_EXPR(std::cout << nslaw_NewtonImpactRollingFrictionNSL << std::endl;);
+      // DEBUG_EXPR(std::cout << nslaw_NewtonImpactFrictionNSL << std::endl;);
+      // DEBUG_EXPR(std::cout << nslaw_NewtonImpactRollingFrictionNSL << std::endl;);
 
       DEBUG_PRINTF("SiconosBulletCollisionManager ::  nslaw->size() = %i\n", nslaw->size());
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
@@ -2459,8 +2464,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           SP::RigidBody2dDS rbdsB =  std::static_pointer_cast<RigidBody2dDS>(pairB->ds);
 
           SP::Bullet2d3DR rel(makeBullet2d3DR(rbdsA, pairA->sshape,
-                                            rbdsB, pairB->sshape,
-                                            *it->point));
+                                              rbdsB, pairB->sshape,
+                                              *it->point));
 
           if(!rel) continue;
 
@@ -2528,13 +2533,13 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
 void SiconosBulletCollisionManager::clearOverlappingPairCache()
 {
-  if(!impl->_collisionWorld) return;
+  if(!_impl->_collisionWorld) return;
 
   BodyShapeMap::iterator it;
   btOverlappingPairCache *pairCache =
-    impl->_collisionWorld->getBroadphase()->getOverlappingPairCache();
+    _impl->_collisionWorld->getBroadphase()->getOverlappingPairCache();
 
-  for(it = impl->bodyShapeMap.begin(); it != impl->bodyShapeMap.end(); it++)
+  for(it = _impl->bodyShapeMap.begin(); it != _impl->bodyShapeMap.end(); it++)
   {
     std::vector< std::shared_ptr<BodyShapeRecord> >::iterator rec;
     for(rec = it->second.begin(); rec != it->second.end(); rec++)
@@ -2542,7 +2547,7 @@ void SiconosBulletCollisionManager::clearOverlappingPairCache()
       if((*rec)->btobject)
       {
         pairCache-> cleanProxyFromPairs((*rec)->btobject->getBroadphaseHandle(),
-                                        &*impl->_dispatcher);
+                                        &*_impl->_dispatcher);
       }
     }
   }
@@ -2571,7 +2576,7 @@ SiconosBulletCollisionManager::lineIntersectionQuery(const SiconosVector& start,
   if(closestOnly)
   {
     btCollisionWorld::ClosestRayResultCallback rayResult(btstart, btend);
-    impl->_collisionWorld->rayTest(btstart, btend, rayResult);
+    _impl->_collisionWorld->rayTest(btstart, btend, rayResult);
 
     if(rayResult.hasHit())
     {
@@ -2605,7 +2610,7 @@ SiconosBulletCollisionManager::lineIntersectionQuery(const SiconosVector& start,
   else
   {
     btCollisionWorld::AllHitsRayResultCallback rayResult(btstart, btend);
-    impl->_collisionWorld->rayTest(btstart, btend, rayResult);
+    _impl->_collisionWorld->rayTest(btstart, btend, rayResult);
 
     if(rayResult.hasHit())
     {

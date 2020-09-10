@@ -474,7 +474,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       SiconosVector& data = inspector.answer;
       data_size = data.size();
 
-      if (data_size ==0)
+      if(data_size ==0)
       {
         // Nothing is done since the relation does not appear as a relation
         // related to a contact points (perhaps a joint)

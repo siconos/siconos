@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,10 +192,6 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 {
-  if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(V) failed. Not yet implemented for V being a BlockVector.");
-
-
   DenseMat tmpB(B.size(), 1);
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info;
@@ -285,9 +281,6 @@ void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
 
 void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
 {
-  if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares(SiconosVector &B) failed. Not yet implemented for V being a BlockVector.");
-
   DenseMat tmpB(B.size(), 1);
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info = 0;

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 #include <stdlib.h>                      // for free, malloc, calloc
 #include <float.h>                       // for DBL_EPSILON
 #include "SiconosBlas.h"                 // for cblas_ddot, cblas_dgemv, cbl...
-#include "CSparseMatrix.h"               // for CS_INT, cs_print, cs
+#include "CSparseMatrix_internal.h"               // for CS_INT, cs_print, cs
 #include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
 #include "NumericsMatrix.h"              // for NumericsMatrix, NM_clear, NM_...
 #include "NumericsSparseMatrix.h"        // for NumericsSparseMatrix, NSM_TR...
@@ -65,7 +65,7 @@ static int NM_read_write_test(void)
   if(info != 0)
   {
     printf("Construction failed ...\n");
-    return info;
+    goto free;
   }
   printf("Construction ok ...\n");
 
@@ -102,10 +102,8 @@ static int NM_read_write_test(void)
     fclose(foutput2);
   }
 
-
-
   /* free memory */
-
+free:
   for(i = 0 ; i < nmm; i++)
   {
     NM_clear(NMM[i]);
@@ -355,15 +353,14 @@ static void add_initial_value_square_2(NumericsMatrix * M)
 
 static void add_initial_value_rectangle_1(NumericsMatrix * M)
 {
-  int i=0, j=0;
-  for(i=0; i < 4 ; i++)
+  for(int i=0; i < 4 ; i++)
   {
-    for(j=0; j < 4 ; j++)
+    for(int j=0; j < 4 ; j++)
       NM_zentry(M,i,j,1.0+i+j);
   }
-  for(i=6; i < 8 ; i++)
+  for(int i=6; i < 8 ; i++)
   {
-    for(j=0; j < 4 ; j++)
+    for(int j=0; j < 4 ; j++)
       NM_zentry(M,i,j,5.0+i+j);
   }
 }
@@ -371,12 +368,11 @@ static void add_initial_value_rectangle_1(NumericsMatrix * M)
 /* hand made gemm of nxp A matrix and pxm B matrix */
 static void dense_gemm_by_hand(double alpha, double * A, double * B, int n, int m, int p, double beta, double *C)
 {
-  double sum =0.0;
   for(int i = 0; i < n; i++)
   {
     for(int j = 0; j < m; j++)
     {
-      sum = beta  * C[i + j * n] ;
+      double sum = beta  * C[i + j * n] ;
       for(int k = 0; k < p ; k++)
       {
         sum = sum + alpha *  A[i + k * n] * B[k + j * p];
@@ -756,9 +752,10 @@ static int NM_gemm_test_all(void)
   }
 
   printf("End of ProdNumericsMatrix ...\n");
-  if(info != 0) return info;
-  /* free memory */
 
+
+
+  /* free memory */
   for(i = 0 ; i < nmm; i++)
   {
     NM_clear(NMM[i]);
@@ -917,7 +914,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 0 ( y = alpha*A*x + beta*y, double* storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
 
   /* sparse storage test for M1 */
@@ -933,7 +930,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 0 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
   /* end of sparse storage test for M1 */
 
@@ -947,7 +944,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 1 ( y = alpha*A*x + beta*y, double* storage, non square) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
 
   /* sparse storage test for M3 */
@@ -965,7 +962,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 1 ( y = alpha*A*x + beta*y, csc storage, non square) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
   /* end of sparse storage test for M3 */
 
@@ -986,7 +983,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 2 ( y = alpha*A*x + beta*y,  SBM  storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
 
   /* sparse storage test for M2 */
@@ -1002,7 +999,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 2 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
   /* end of sparse storage test for M2 */
 
@@ -1014,7 +1011,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 3 ( y = alpha*A*x + beta*y,  SBM storage, non square) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
 
   /* sparse storage test for M4 */
@@ -1030,9 +1027,12 @@ static int NM_gemv_test(NumericsMatrix** MM)
   {
     printf("Step 3 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
     info=1;
-    return info;
+    goto free_and_return;
   }
   /* end of sparse storage test for M4 */
+
+
+free_and_return:
 
   free(x);
   free(x2);

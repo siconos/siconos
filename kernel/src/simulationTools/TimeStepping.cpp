@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@
 #include "TypeName.hpp"
 #include "Relation.hpp"
 #include "BlockVector.hpp"
-#include "CxxStd.hpp"
 #include "NewtonEulerR.hpp"
 #include "FirstOrderR.hpp"
 
@@ -118,7 +117,7 @@ void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
 //   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
 //   DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
 //   y += 0.5*h*yDot;
-//   assert(!isnan(y));
+//   assert(!std::isnan(y));
 //   if(y>0)
 //     DEBUG_PRINTF("TS::predictorDeactivate DEACTIVATE.\n");
 //   return (y>0);
@@ -131,7 +130,7 @@ void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
 //   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
 //   DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
 //   y += 0.5*h*yDot;
-//   assert(!isnan(y));
+//   assert(!std::isnan(y));
 //   if(y<=0)
 //     DEBUG_PRINTF("TS::predictorActivate ACTIVATE.\n");
 //   return (y<=0);
@@ -385,7 +384,7 @@ void TimeStepping::initializeNewtonLoop()
 {
   DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
   double tkp1 = getTkp1();
-  assert(!isnan(tkp1));
+  assert(!std::isnan(tkp1));
 
   for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
   {
@@ -752,8 +751,8 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
   // else: depend on solver
   if(info != 0)
   {
-    std::cout << "TimeStepping::DefaultCheckSolverOutput:" << std::endl;
-    std::cout << "Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
+    std::cout << "[kernel] TimeStepping::DefaultCheckSolverOutput:" << std::endl;
+    std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
     //       std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
     //      std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
     //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");

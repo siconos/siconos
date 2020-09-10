@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
-#include "CxxStd.hpp"
 #include "TypeName.hpp"
 
 #include "OneStepNSProblem.hpp"
@@ -70,7 +69,7 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   _levelMaxForInput =1;
   _steps=1;
   _theta = theta;
-  if(!isnan(gamma))
+  if(!std::isnan(gamma))
   {
     _gamma = gamma;
     _useGamma = true;
@@ -1427,12 +1426,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       {
         if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
         {
-          SiconosVector q,z;
-          q.initFromBlock(*DSlink[LagrangianR::q0]);
-          z.initFromBlock(*DSlink[LagrangianR::z]);
-
-          std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->computehDot(simulation()->getTkp1(), q, z);
-          *DSlink[LagrangianR::z] = z;
+          std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->computehDot(simulation()->getTkp1(), *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
           subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
         }
         else
@@ -1448,15 +1442,12 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
           osnsp_rhs *= h * _theta ;
 
           /* we have to check that the value are at the beginnning of the time step */
-          SiconosVector q,v;
-          q.initFromBlock(*DSlink[LagrangianR::q0]);
-          v.initFromBlock(*DSlink[LagrangianR::q1]);
           // + C q_k
-          subprod(C, q, osnsp_rhs, coord, false);
+          subprod(C, *DSlink[LagrangianR::q0], osnsp_rhs, coord, false);
           // + h(1-_theta)v_k
 
-          v *= (1-_theta)* h ;
-          subprod(C, v, osnsp_rhs, coord, false);
+          *DSlink[LagrangianR::q1] *= (1-_theta)* h ;
+          subprod(C, *DSlink[LagrangianR::q1], osnsp_rhs, coord, false);
 
 
           if(std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter.relation())->e())
@@ -1846,7 +1837,7 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   }
   DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   DEBUG_EXPR(
     if(y <= 0)
     DEBUG_PRINT("MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");

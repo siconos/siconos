@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,6 @@ private:
   */
   ACCEPT_SERIALIZATION(Topology);
 
-
-  // --- MEMBERS ---
   /** dynamical systems graphs */
   std::vector<SP::DynamicalSystemsGraph> _DSG;
 
@@ -69,14 +67,14 @@ private:
   std::vector<SP::InteractionsGraph> _IG;
 
   /** check if topology is static or  not */
-  bool _hasChanged;
+  bool _hasChanged = true;
 
   /** Total number of (scalar) constraints in the problem, ie sum of
       all nslaw sizes of Interactions of IndexSet0.*/
-  unsigned int _numberOfConstraints;
+  unsigned int _numberOfConstraints = 0;
 
   /** symmetry in the blocks computation */
-  bool _symmetric;
+  bool _symmetric = false;
 
   /** initializations ( time invariance) from non
       smooth laws kind */
@@ -106,17 +104,19 @@ private:
    */
   void __removeDynamicalSystemFromIndexSet(SP::DynamicalSystem ds);
 
+  /* forbid copy and assignment */
+  Topology(const Topology&) = delete;
+  Topology& operator=(const Topology&) = delete;
+  
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
-  /** default constructor
-  */
+  /** default constructor */
   Topology();
 
   /** destructor */
   ~Topology();
-
 
   // === GETTERS/SETTERS ===
 

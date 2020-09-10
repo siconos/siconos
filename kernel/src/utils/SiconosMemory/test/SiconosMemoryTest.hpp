@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ private:
   CPPUNIT_TEST_SUITE(SiconosMemoryTest);
 
   CPPUNIT_TEST(testBuildMemory1);
-  CPPUNIT_TEST(testBuildMemory2);
-  CPPUNIT_TEST(testBuildMemory3);
+  // CPPUNIT_TEST(testBuildMemory2);
+  // CPPUNIT_TEST(testBuildMemory3);
   CPPUNIT_TEST(testSetVectorMemory);
   CPPUNIT_TEST(testGetSiconosVector);
   CPPUNIT_TEST(testSwap);
@@ -44,8 +44,8 @@ private:
   CPPUNIT_TEST_SUITE_END();
 
   void testBuildMemory1();
-  void testBuildMemory2();
-  void testBuildMemory3();
+  // void testBuildMemory2();
+  // void testBuildMemory3();
   void testSetVectorMemory();
   void testGetSiconosVector();
   void testSwap();

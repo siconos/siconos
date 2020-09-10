@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ double SphereLDSSphereLDSR::distance(double x1, double y1, double z1, double r1,
 }
 
 
-void SphereLDSSphereLDSR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void SphereLDSSphereLDSR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
 
   y.setValue(0, distance(q(0), q(1), q(2), r1,
@@ -49,7 +49,7 @@ void SphereLDSSphereLDSR::computeh(SiconosVector& q, SiconosVector& z, SiconosVe
 
 };
 
-void SphereLDSSphereLDSR::computeJachq(SiconosVector& q, SiconosVector& z)
+void SphereLDSSphereLDSR::computeJachq(const BlockVector& q, BlockVector& z)
 {
 
   double A, B, C;

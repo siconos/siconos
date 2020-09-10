@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@
 #include "FirstOrderType2R.hpp"
 #include "MatrixIntegrator.hpp"
 #include "ExtraAdditionalTerms.hpp"
-#include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
@@ -599,7 +598,7 @@ bool ZeroOrderHoldOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
   double gamma = .5;
   DEBUG_PRINTF("ZeroOrderHoldOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y <= 0)
   {
     DEBUG_PRINT("ZeroOrderHoldOSI::addInteractionInIndexSet ACTIVATE.\n");

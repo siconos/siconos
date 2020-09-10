@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,6 @@
 #include "NewtonEulerR.hpp"
 #include "LagrangianR.hpp"
 #include "BlockVector.hpp"
-
-#include "CxxStd.hpp"
-
 
 #include "TypeName.hpp"
 using namespace RELATION;
@@ -224,6 +221,8 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
   {
     gamma = _gamma;
   }
+  DEBUG_PRINTF("\nMoreauJeanDirectProjectionOSI::addInteractionInIndexSet inter->number() = %i\n", inter->number());
+  DEBUG_EXPR(inter->display(););
   DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
 
@@ -234,7 +233,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #ifdef DEBUG_MESSAGES
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -261,7 +260,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #ifdef DEBUG_MESSAGES
   if(y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
@@ -282,13 +281,14 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
 #ifdef DEBUG_MESSAGES
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 #endif
+  DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet inter->number() = %i\n", inter->number());
   DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
 
   DEBUG_PRINTF("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -309,7 +309,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold);
@@ -332,7 +332,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -353,7 +353,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y > _deactivateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold);

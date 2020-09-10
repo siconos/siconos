@@ -30,6 +30,7 @@ set(${COMPONENT}_DIRS
   src/utils/SiconosMemory
   src/utils/SiconosSharedLibrary
   src/utils/SiconosTools
+  src/utils/ProgressBar
   src/plugin
   src/modelingTools
   src/simulationTools
@@ -114,7 +115,7 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   )
 
 # List header files (in dir above) that must not be installed 
-set(${COMPONENT}_HDRS_EXCLUDE src/utils/SiconosTools/CxxStd.hpp)
+#set(${COMPONENT}_HDRS_EXCLUDE)
 
 siconos_component_install_setup(${COMPONENT})
 

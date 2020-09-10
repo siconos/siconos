@@ -18,7 +18,7 @@
  */
 #define _POSIX_C_SOURCE 200112L
 
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include <assert.h>            // for assert
 #include <cs.h>                // for CS_INT, CS_ID, cs_dl_spalloc, cs_dl_free
 #include <float.h>             // for DBL_EPSILON
@@ -475,7 +475,7 @@ CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, doub
 {
   if(fabs(x) >= DBL_EPSILON)
   {
-    if (j<=i)
+    if(j<=i)
     {
       return cs_entry(T, i, j, x);
     }

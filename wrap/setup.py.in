@@ -25,10 +25,11 @@ To get a full list of avaiable commands, read the output of:
     python setup.py --help-commands
 
 """
-from numpy.distutils.core import setup, Extension, Command
+from numpy.distutils.core import setup, Extension
 from numpy.distutils.command.build_py import build_py
 from distutils.command.install_lib import install_lib
 from distutils import dir_util
+from distutils.core import Command
 from distutils.file_util import copy_file
 from numpy.distutils.misc_util import Configuration
 import numpy as np

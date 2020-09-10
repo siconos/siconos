@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,7 +258,7 @@ void CylindricalJointR::computeJachq(double time, Interaction& inter,  SP::Block
     Jd1(X1, Y1, Z1, q10, q11, q12, q13);
 }
 
-void CylindricalJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void CylindricalJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   SP::SiconosVector q1 = (q0.getAllVect())[0];
   double X1 = q1->getValue(0);
@@ -608,7 +608,7 @@ void CylindricalJointR::Jd1(double X1, double Y1, double Z1, double q10, double 
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
-void CylindricalJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+void CylindricalJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                                     unsigned int axis)
 {
   if(axis > 1)

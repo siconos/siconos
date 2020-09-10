@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,6 @@ GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file)
   {
     problem = NULL;
   }
-  problem->env = NULL;
-
   return problem;
 }
 
@@ -293,7 +291,7 @@ void globalFrictionContact_rescaling(
   cblas_dscal(m,beta,problem->b,1);
 
 }
-void globalFrictionContact_balancing_M_H (
+void globalFrictionContact_balancing_M_H(
   GlobalFrictionContactProblem* problem,
   BalancingMatrices * B_for_M,
   BalancingMatrices * B_for_H)
@@ -329,7 +327,7 @@ void globalFrictionContact_balancing_M_H (
   /* scaling of q */
   /* cblas_dscal(n,alpha*gamma,problem->q,1); */
   double * q_tmp = (double *) malloc(n*sizeof(double));
-  NM_gemv(1.0, B_for_M->D2, problem->q, 0.0, q_tmp );
+  NM_gemv(1.0, B_for_M->D2, problem->q, 0.0, q_tmp);
   NM_gemv(1.0, B_for_M->D1, q_tmp, 0.0, problem->q);
 
   /* scaling of b */
@@ -356,7 +354,7 @@ void globalFrictionContact_balancing_M(
   assert(B_for_M);
 
   NM_compute_balancing_matrices(problem->M, 1e-03, 100, B_for_M);
-  
+
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
   int m = 3 * nc;
@@ -379,7 +377,7 @@ void globalFrictionContact_balancing_M(
   /* scaling of q */
   /* cblas_dscal(n,alpha*gamma,problem->q,1); */
   double * q_tmp = (double *) malloc(n*sizeof(double));
-  NM_gemv(1.0, B_for_M->D2, problem->q, 0.0, q_tmp );
+  NM_gemv(1.0, B_for_M->D2, problem->q, 0.0, q_tmp);
   cblas_dcopy(n, q_tmp, 1, problem->q, 1);
 
   /* scaling of b */

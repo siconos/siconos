@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ protected:
 
   /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
    * false by default */
-  bool _hasConstantFExt;
+  bool _hasConstantFExt = false;
 
   /** non-linear inertia term of the system */
   SP::SiconosVector _fGyr;

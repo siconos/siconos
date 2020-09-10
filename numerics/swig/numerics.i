@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2018 INRIA.
+// Copyright 2020 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "SiconosConfig.h"
 #include "SiconosNumerics.h"
 #include "SolverOptions.h"
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -282,7 +282,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
-#include "CSparseMatrix.h" // must be before NumericsMatrix.h
+#include "CSparseMatrix_internal.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"

@@ -25,7 +25,7 @@ MBTB_FC3DContactRelation::MBTB_FC3DContactRelation()
   _pContact=nullptr;
 }
 /*This function has to compute the distance between the objects*/
-void MBTB_FC3DContactRelation::computeh(double time, BlockVector& q0, SiconosVector& y)
+void MBTB_FC3DContactRelation::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
 //  DSIterator itDS=_pContact->interaction()->dynamicalSystemsBegin();
 //  SP::DynamicalSystem aux = *itDS;

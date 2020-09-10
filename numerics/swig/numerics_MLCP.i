@@ -31,7 +31,7 @@
 {
   MixedLinearComplementarityProblem()
    {
-     MixedLinearComplementarityProblem* MLCP = newMLCP();
+     MixedLinearComplementarityProblem* MLCP =  mixedLinearComplementarity_new();
      return MLCP;
    }
 
@@ -41,7 +41,7 @@
       int is_new_object2=0;
       SN_ARRAY_TYPE* vector = obj_to_sn_vector(o2, &is_new_object2);
 
-      MixedLinearComplementarityProblem *MLCP = newMLCP();
+      MixedLinearComplementarityProblem *MLCP = mixedLinearComplementarity_new();
       // return pointer : free by std swig destructor
 
       %NM_convert_from_target(o1, (&MLCP->M), return NULL);
@@ -49,7 +49,7 @@
       if (MLCP->M->size0 != MLCP->M->size1)
       {
         SWIG_Error(SWIG_ValueError, "A non square matrix has been given");
-        freeMixedLinearComplementarityProblem(MLCP);
+        mixedLinearComplementarity_free(MLCP);
         return NULL;
       }
 
@@ -97,7 +97,7 @@
 
   ~MixedLinearComplementarityProblem()
   {
-    freeMixedLinearComplementarityProblem($self);
+    mixedLinearComplementarity_free($self);
   }
 
   // MixedLinearComplementarityProblem * newFromFilename(SN_OBJ_TYPE * o1)

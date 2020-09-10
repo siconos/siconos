@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ protected:
 
   /** If false, bodies connected to this body by a joint will not
    * collide. See also NewtonEulerJointR::_allowSelfCollide */
-  bool _allowSelfCollide;
+  bool _allowSelfCollide = true;
 
 public:
 

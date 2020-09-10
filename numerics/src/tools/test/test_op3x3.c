@@ -351,7 +351,7 @@ int main()
   unsigned int k2;
   k2 = k;
   printf("DGESV/solv3x3 (rand):%g\n", ELAPSED(t9) / ELAPSED(t8));
-  printf("Number of pb DGESV and solv3x3 (rand):%d,%d\n", k1, k2);
+  printf("Number of pb DGESV and solv3x3 (rand):%d,%d\n", (int)k1, (int)k2);
   assert(ELAPSED(t9) < ELAPSED(t8));
 #endif
 

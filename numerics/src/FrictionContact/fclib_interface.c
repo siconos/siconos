@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include <fclib.h>                         // for fclib_matrix, fclib_global
 #include <stdio.h>                         // for NULL, fprintf, stderr
 #include <stdlib.h>                        // for malloc, free, exit, EXIT_F...
-#include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT, cs_...
+#include "CSparseMatrix_internal.h"                 // for CSparseMatrix, CS_INT, cs_...
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...

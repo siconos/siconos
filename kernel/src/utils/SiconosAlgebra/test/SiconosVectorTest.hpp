@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,19 +46,15 @@ private:
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
   CPPUNIT_TEST(testConstructor3);
-  CPPUNIT_TEST(testConstructor3Bis);
   CPPUNIT_TEST(testConstructor4);
   CPPUNIT_TEST(testConstructor5);
   CPPUNIT_TEST(testConstructor6);
   CPPUNIT_TEST(testConstructor7);
   CPPUNIT_TEST(testZero);
-  CPPUNIT_TEST(testFill);
   CPPUNIT_TEST(testNorm);
   CPPUNIT_TEST(testResize);
+  CPPUNIT_TEST(testSetBlockFriend);
   CPPUNIT_TEST(testSetBlock);
-  //  CPPUNIT_TEST(testSetBlock2);
-  CPPUNIT_TEST(testSetBlock3);
-  CPPUNIT_TEST(testSetBlock4);
   CPPUNIT_TEST(testAssignment);
   CPPUNIT_TEST(testOperators1);
   CPPUNIT_TEST(testOperators2);
@@ -86,19 +82,17 @@ private:
   void testConstructor1();
   void testConstructor2();
   void testConstructor3();
-  void testConstructor3Bis();
   void testConstructor4();
   void testConstructor5();
   void testConstructor6();
   void testConstructor7();
+  void testBlock2Contiguous();
   void testZero();
   void testFill();
   void testNorm();
   void testResize();
   void testSetBlock();
-  void testSetBlock2();
-  void testSetBlock3();
-  void testSetBlock4();
+  void testSetBlockFriend();
   void testAssignment();
   void testOperators1();
   void testOperators2();

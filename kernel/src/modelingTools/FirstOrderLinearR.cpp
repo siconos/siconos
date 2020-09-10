@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,53 +159,62 @@ void FirstOrderLinearR::checkSize(Interaction& inter)
       assert(_e->size() == sizeY && "FirstOrderLinearR::initialize , inconsistent size between C and e.");
   }
 }
-void FirstOrderLinearR::computeC(double time, SiconosVector& z, SimpleMatrix& C)
+void FirstOrderLinearR::computeC(double time, BlockVector& z, SimpleMatrix& C)
 {
   if(_pluginJachx->fPtr)
   {
-    ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.size(0), C.size(1), &(C)(0, 0), z.size(), &(z)(0));
+    auto zp = z.prepareVectorForPlugin();
+    ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.size(0), C.size(1), &(C)(0, 0), zp->size(), &(*zp)(0));
+    z = *zp;
   }
 }
 
-void FirstOrderLinearR::computeD(double time, SiconosVector& z, SimpleMatrix& D)
+void FirstOrderLinearR::computeD(double time, BlockVector& z, SimpleMatrix& D)
 {
   if(_pluginJachlambda->fPtr)
   {
-    ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, D.size(0), D.size(1), &(D)(0, 0), z.size(), &(z)(0));
+    auto zp = z.prepareVectorForPlugin();
+    ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, D.size(0), D.size(1), &(D)(0, 0), zp->size(), &(*zp)(0));
+    z = *zp;
   }
 }
 
-void FirstOrderLinearR::computeF(double time, SiconosVector& z, SimpleMatrix& F)
+void FirstOrderLinearR::computeF(double time, BlockVector& z, SimpleMatrix& F)
 {
   if(_pluginf->fPtr)
   {
-    ((FOMatPtr1)(_pluginf->fPtr))(time, F.size(0), F.size(1), &(F)(0, 0), z.size(), &(z)(0));
+    auto zp = z.prepareVectorForPlugin();
+    ((FOMatPtr1)(_pluginf->fPtr))(time, F.size(0), F.size(1), &(F)(0, 0), zp->size(), &(*zp)(0));
+    z = *zp;
   }
 }
 
-void FirstOrderLinearR::computee(double time, SiconosVector& z, SiconosVector& e)
+void FirstOrderLinearR::computee(double time, BlockVector& z, SiconosVector& e)
 {
 
   if(_plugine->fPtr)
   {
-    ((FOVecPtr) _plugine->fPtr)(time, e.size(), &(e)(0), z.size(), &(z)(0));
+    auto zp = z.prepareVectorForPlugin();
+    ((FOVecPtr) _plugine->fPtr)(time, e.size(), &(e)(0), zp->size(), &(*zp)(0));
+    z = *zp;
   }
 }
 
-void FirstOrderLinearR::computeB(double time, SiconosVector& z, SimpleMatrix& B)
+void FirstOrderLinearR::computeB(double time, BlockVector& z, SimpleMatrix& B)
 {
   if(_pluginJacglambda->fPtr)
   {
-    ((FOMatPtr1) _pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), z.size(), &(z)(0));
+    auto zp = z.prepareVectorForPlugin();
+    ((FOMatPtr1) _pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), zp->size(), &(*zp)(0));
+    z = *zp;
   }
 }
 
-void FirstOrderLinearR::computeh(double time, BlockVector& x, SiconosVector& lambda,
-                                 SiconosVector& z, SiconosVector& y)
+void FirstOrderLinearR::computeh(double time, const BlockVector& x, const SiconosVector& lambda,
+                                 BlockVector& z, SiconosVector& y)
 {
 
   y.zero();
-
   if(_pluginJachx->fPtr)
   {
     if(!_C)
@@ -252,19 +261,15 @@ void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned 
   BlockVector& z = *DSlink[FirstOrderR::z];
   BlockVector& x = *DSlink[FirstOrderR::x];
 
-  SiconosVector z_vec;
-  z_vec.initFromBlock(z); // copy !
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
 
-  computeh(time, x, lambda, z_vec, y);
-
-  *DSlink[FirstOrderR::z] = z_vec;
+  computeh(time, x, lambda, z, y);
 
   DEBUG_END("FirstOrderLinearR::computeOutput \n");
 }
 
-void FirstOrderLinearR::computeg(double time, SiconosVector& lambda, SiconosVector& z, BlockVector& r)
+void FirstOrderLinearR::computeg(double time, const SiconosVector& lambda, BlockVector& z, BlockVector& r)
 {
   if(_pluginJacglambda->fPtr)
   {
@@ -285,10 +290,7 @@ void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned i
   SiconosVector& lambda = *inter.lambda(level);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& z = *DSlink[FirstOrderR::z];
-  SiconosVector z_vec;
-  z_vec.initFromBlock(z);
-  computeg(time, lambda, z_vec, *DSlink[FirstOrderR::r]);
-  *DSlink[FirstOrderR::z] = z_vec;
+  computeg(time, lambda, z, *DSlink[FirstOrderR::r]);
 }
 
 

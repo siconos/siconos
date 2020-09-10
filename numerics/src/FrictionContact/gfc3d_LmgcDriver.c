@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #include <stdio.h>                         // for printf, fclose, fopen, snp...
 #include <stdlib.h>                        // for malloc, free, abs
 #include <string.h>                        // for strncpy, NULL, memcpy
-#include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT
+#include "CSparseMatrix_internal.h"                 // for CSparseMatrix, CS_INT
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver, gfc3d_LmgcDr...
 #include "NumericsFwd.h"                   // for NumericsMatrix, GlobalFric...
@@ -252,18 +252,18 @@ int gfc3d_LmgcDriver(double *reaction,
     if(gfccounter % freq_output == 0)
     {
       char fname[256];
-      snprintf(fname, sizeof(fname), "./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);
-      printf("Dump ./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);
+      snprintf(fname, sizeof(fname), "./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, gfccounter);
+      printf("Dump ./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, gfccounter);
       /* printf("ndof = %i.\n", ndof); */
 
       FILE * foutput  =  fopen(fname, "w");
       int n = 100;
-      char * title = (char *)malloc(n * sizeof(char *));
+      char * title = (char *)malloc(n * sizeof(char));
       strncpy(title, "LMGC dump in hdf5", n);
-      char * description = (char *)malloc(n * sizeof(char *));
+      char * description = (char *)malloc(n * sizeof(char));
 
       snprintf(description, n, "Rewriting in hdf5 through siconos of %s in FCLIB format", fname);
-      char * mathInfo = (char *)malloc(n * sizeof(char *));
+      char * mathInfo = (char *)malloc(n * sizeof(char));
       strncpy(mathInfo, "unknown", n);
 
       globalFrictionContact_fclib_write(problem,

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,43 +88,43 @@ public:
    */
   virtual void checkSize(Interaction& inter);
 
-  /** default function to compute y = h(x, lambda, t)
-  * \param time the current time
-  * \param x the state vector
-  * \param lambda XXX
-  * \param y the "output" vector
+  /** to compute the output y = h(t,x,...) of the Relation
+      \param time current time value
+      \param x coordinates of the dynamical systems involved in the relation
+      \param lambda interaction \f$\lambda\f$ vector
+      \param y the resulting vector
   */
-  virtual void computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& x, const SiconosVector& lambda, SiconosVector& y);
 
-  /** default function to compute g
-  * \param time the current time
-  * \param lambda XXX
-  * \param r the nonsmooth "input" vector
+  /** to compute the nonsmooth input r = g(t,x,...) of the Relation
+      \param time current time value
+      \param lambda interaction \f$\lambda\f$ vector
+      \param r the resulting vector
   */
-  virtual void computeg(double time, SiconosVector& lambda, SiconosVector& r);
+  virtual void computeg(double time, const SiconosVector& lambda, BlockVector& r);
 
-  /** default function to compute \f$\nabla_x h\f$
-  *  \param time current time (not used)
-  *  \param x the state used to evaluate the jacobian
-  *  \param lambda
-  *  \param C the matrix used to store the jacobian
+  /** to compute \f$ C = \nabla_x h \f$
+      \param time current time value
+      \param x coordinates of the dynamical systems involved in the relation
+      \param lambda interaction \f$\lambda\f$ vector
+      \param[out] C the resulting matrix
   */
-  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
+  virtual void computeJachx(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& C);
 
-  /** default function to compute jacobianG according to lambda
-  *  \param time current time (not used)
-  *  \param lambda the nonsmooth input used to evaluate the jacobian
-  *  \param B the matrix used to store the jacobian
+  /** to compute \f$ B = \nabla_{\lambda}g \f$
+      \param time current time value
+      \param lambda interaction \f$\lambda\f$ vector
+      \param[out] B the resulting matrix
   */
-  virtual void computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B);
+  virtual void computeJacglambda(double time, const SiconosVector& lambda, SimpleMatrix& B);
 
-  /** default function to compute jacobianh according to lambda
-  *  \param time current time (not used)
-  *  \param x the state used to evaluate the jacobian
-  *  \param lambda the nonsmooth input used to evaluate the jacobian
-  *  \param D the matrix used to store the jacobian
+  /** to compute \f$ D = \nabla_{\lambda}h \f$
+      \param time current time value
+      \param x coordinates of the dynamical systems involved in the relation
+      \param lambda interaction \f$\lambda\f$ vector
+      \param[out] D the resulting matrix
   */
-  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
+  virtual void computeJachlambda(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& D);
 
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)

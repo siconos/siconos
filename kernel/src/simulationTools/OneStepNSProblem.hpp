@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,15 +110,15 @@ protected:
 
 private:
 
-  /** copy constructor, forbidden */
+  /* copy constructor, forbidden */
   OneStepNSProblem(const OneStepNSProblem&) = delete;
 
-  /** assignment, forbidden */
-  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp) = delete;
+  /* assignment, forbidden */
+  OneStepNSProblem& operator=(const OneStepNSProblem&) = delete;
 
 public:
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -271,7 +271,7 @@ double NewtonEuler1DR::distance() const
   return dpc.norm2() * (inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
 }
 
-void NewtonEuler1DR::computeh(double time, BlockVector& q0,
+void NewtonEuler1DR::computeh(double time, const BlockVector& q0,
                               SiconosVector &y)
 {
   // Contact points and normal are stored as relative to q1 and q2, if

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include <assert.h>         // for assert
 #include <stdio.h>          // for fprintf, stderr
 #include <stdlib.h>         // for exit, EXIT_FAILURE
-#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT, CSparseMatrix_zentry
+#include "CSparseMatrix_internal.h"  // for CSparseMatrix, CS_INT, CSparseMatrix_zentry
 #include "SiconosConfig.h"  // for WITH_MKL_SPBLAS  // IWYU pragma: keep
 
 #ifdef WITH_MKL_SPBLAS
@@ -57,13 +57,13 @@ CSparseMatrix* NM_csc_to_half_triplet(CSparseMatrix* csc)
 {
   assert(csc);
   CSparseMatrix* triplet = cs_spalloc(csc->m, csc->n, csc->p[csc->n], 1, 1);
-  if (!triplet) return (cs_done (triplet, NULL, NULL, 0)) ;
+  if(!triplet) return (cs_done(triplet, NULL, NULL, 0)) ;
   CS_INT* Ap = csc->p;
   CS_INT* Ai = csc->i;
   double* val = csc->x;
-  for (CS_INT j = 0; j < csc->n; ++j)
+  for(CS_INT j = 0; j < csc->n; ++j)
   {
-    for (CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
+    for(CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
     {
       CSparseMatrix_symmetric_zentry(triplet, Ai[i], j, val[i]);
     }

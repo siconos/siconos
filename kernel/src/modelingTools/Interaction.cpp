@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,8 @@ using namespace std;
 using namespace RELATION;
 
 
-unsigned int Interaction::__count = 0;
+size_t Interaction::__count = 0;
 
-// --- CONSTRUCTORS ---
 struct Interaction::_setLevels : public SiconosVisitor
 {
   /* we set the _lowerLevelForOutput, _upperLevelForOutput,
@@ -258,9 +257,7 @@ void Interaction::reset()
   // an interaction (in __init) and may be called by simulation and/or
   // OSI if levels are updated.
 
-  //  assert(_upperLevelForOutput >=0);
   assert(_upperLevelForOutput >= _lowerLevelForOutput);
-  //  assert(_upperLevelForInput >=0);
   assert(_upperLevelForInput >= _lowerLevelForInput);
 
   // --  Memory allocation for y and lambda --
@@ -302,9 +299,11 @@ void Interaction::reset()
 }
 
 
-void Interaction::__init()
+Interaction::Interaction(SP::NonSmoothLaw NSL, SP::Relation rel):
+  _number(__count++), _interactionSize(NSL->size()),
+  _y(2),  _nslaw(NSL), _relation(rel)
 {
-  // -- Delagated constructor --
+  // -- Constructor --
   // i.e. what should be done when (and only there) the interaction
   // is instanciated.
   // Other operations (like levels review and y, lambda resizing)
@@ -321,19 +320,10 @@ void Interaction::__init()
 
   // Ensure consistency between interaction and nslaw sizes
   if(_interactionSize != _nslaw->size())
-    RuntimeException::selfThrow("Interaction::__init - Nonsmooth law and relation are not consistent.");
+    RuntimeException::selfThrow("Interaction constructor - Nonsmooth law and relation are not consistent (sizes differ).");
 
   // Check levels and resize attributes (y, lambda ...) if needed.
   reset();
-
-}
-
-Interaction::Interaction(SP::NonSmoothLaw NSL,
-                         SP::Relation rel):
-  _number(__count++), _interactionSize(NSL->size()),
-  _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
-{
-  __init();
 }
 
 
@@ -475,8 +465,6 @@ void Interaction::__initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSy
     //we need extra continuous memory vector
     //todo
   }
-
-
 
   __initDSDataLagrangian(ds1, DSlink);
   if(&ds1 != &ds2)
@@ -805,6 +793,7 @@ void Interaction::display(bool brief) const
 
   cout << "| "  ;
   _relation->display();
+  _nslaw->display();
   for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
   {
 

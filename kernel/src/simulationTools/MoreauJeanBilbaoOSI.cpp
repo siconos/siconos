@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CxxStd.hpp"
 #include "SiconosAlgebraProd.hpp"
 #include "SimpleMatrixFriends.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
@@ -435,7 +434,7 @@ bool MoreauJeanBilbaoOSI::addInteractionInIndexSet(SP::Interaction inter, unsign
 
   double gamma = 1.0 / 2.0;
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   DEBUG_EXPR(
     if(y <= 0)
     DEBUG_PRINT("MoreauJeanBilbaoOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -453,7 +452,7 @@ bool MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(SP::Interaction inter, u
   double gamma = 1.0 / 2.0;
   DEBUG_PRINTF("MoreauJeanBilbaoOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   DEBUG_EXPR(
     if(y > 0)

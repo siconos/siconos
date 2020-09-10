@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-#include "CxxStd.hpp"
 #include "TypeName.hpp"
 
 #include "OneStepNSProblem.hpp"
@@ -63,7 +62,7 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
   _levelMaxForInput =1;
   _steps=1;
   _theta = theta;
-  if(!isnan(gamma))
+  if(!std::isnan(gamma))
   {
     _gamma = gamma;
     _useGamma = true;
@@ -1065,7 +1064,7 @@ bool MoreauJeanGOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned in
   y += gamma * h * yDot;
 
   DEBUG_PRINTF("y = %e\n", y);
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   DEBUG_EXPR_WE(
     if(y <= 0)
 {
@@ -1093,7 +1092,7 @@ bool MoreauJeanGOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsign
   }
   DEBUG_PRINTF("MoreauJeanGOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   DEBUG_EXPR(
     if(y > 0)

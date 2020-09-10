@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #include "NM_MUMPS.h"
 #ifdef WITH_MUMPS
 #include <string.h> // for memcpy
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -41,10 +41,11 @@ void NM_MUMPS_set_irn_jcn(NumericsMatrix* A)
   /* MUMPS works on triplet format. */
 
   CSparseMatrix* triplet;
-  if (NM_MUMPS_id(A)->sym)
+  if(NM_MUMPS_id(A)->sym)
   {
     triplet=NM_half_triplet(A);
-  } else
+  }
+  else
   {
     triplet=NM_triplet(A);
   }
@@ -217,10 +218,11 @@ void NM_MUMPS_set_problem(NumericsMatrix* A, unsigned int nrhs, double *b)
   {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
     CSparseMatrix* triplet;
-    if (mumps_id->sym)
+    if(mumps_id->sym)
     {
       triplet=NM_half_triplet(A);
-    } else
+    }
+    else
     {
       triplet=NM_triplet(A);
     }

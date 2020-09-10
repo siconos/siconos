@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2019 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 */
 
 #include <stdlib.h>                // for malloc
-#include "CSparseMatrix.h"         // for cs_dl_entry, CS_INT, cs_dl_print
+#include "CSparseMatrix_internal.h"         // for cs_dl_entry, CS_INT, cs_dl_print
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
 #include "NumericsMatrix.h"        // for NM_zentry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
