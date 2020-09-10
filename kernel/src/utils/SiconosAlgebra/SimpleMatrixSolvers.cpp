@@ -453,26 +453,27 @@ void SimpleMatrix::PLUSolve(SiconosVector &B)
 
   // and then solve
   int info =1;
-  if(B.num() == 0)
+  if(B.num() == DENSE)
   {
     NumericsMatrix * NM = _numericsMatrix.get();
     double * b = B.getArray();
     DEBUG_EXPR(NV_display(b, B.size()););
     DEBUG_EXPR(B.display(););
-    info = NM_LU_solve(NM, b, B.size());
+    info = NM_LU_solve(NM, b, 1);
     DEBUG_EXPR(NV_display(b, B.size()););
     DEBUG_EXPR(B.display(););
   }
-  else if(B.num() == 1)
+  else if(B.num() == SPARSE)
   {
     // First way. We copy to dense since our sparse solver is not able to take into account sparse r.h.s
     SP::SiconosVector Bdense (new SiconosVector(size(0)));
     * Bdense= B ;
     double * b = &(*Bdense->getArray());
     NumericsMatrix * NM = _numericsMatrix.get();
-    info = NM_LU_solve(NM, b, B.size());
+    info = NM_LU_solve(NM, b, 1);
+    DEBUG_EXPR(NV_display(b, B.size()););
     B = *Bdense ;
-
+    DEBUG_EXPR(B.display(););
     // Second way use inplace_solve of ublas
     // For that, we need to fill our factorization given by NM_LU_factorize into a ublas sparse matrix
     //inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());

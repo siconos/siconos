@@ -58,6 +58,8 @@ void SimpleMatrixTest::setUp()
   v5[1] = 9;
   v5[2] = 10;
 
+
+
   vect1.reset(new SiconosVector(v3));
   vect2.reset(new SiconosVector(v4)); // vect2 != vect1, but vect2 == SimM second column
   vect3.reset(new SiconosVector(v5)); // vect3 != vect1, but vect3 == SimM second row
@@ -99,7 +101,7 @@ void SimpleMatrixTest::setUp()
     for(unsigned j = 0; j < SP->size2()-1; ++ j)
       if(i != j)
         (*SP2)(i, j) = 3 * i + j;
-  
+
   SP3.reset(new SparseMat(3, 3));
   (*SP3)(0,0) = 1.0;
   (*SP3)(0,2) = 2.0;
@@ -107,7 +109,7 @@ void SimpleMatrixTest::setUp()
   (*SP3)(2,0) = 4.0;
   (*SP3)(2,1) = 5.0;
   (*SP3)(2,2) = 5.0;
-  
+
   SP4.reset(new SparseMat(3, 3));
   (*SP4)(0,0) = 1.0;
   (*SP4)(0,2) = 4.0;
@@ -3485,7 +3487,7 @@ void SimpleMatrixTest::testPLUFactorizationInPlace()
   DEBUG_EXPR(Sparse2->display(););
   Sparse2->PLUFactorizationInPlace();
   DEBUG_EXPR(Sparse2->display(););
-  
+
   std::cout << "-->  test PLUFactorizationInPlace ended with success." <<std::endl;
 }
 
@@ -3499,7 +3501,7 @@ void SimpleMatrixTest::testPLUFactorize()
   Dense->display();
   //CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorize: ",  < tol, true);
 
-  
+
   SP::SimpleMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
   Sparse->eye();
   Sparse->display();
@@ -3521,8 +3523,8 @@ void SimpleMatrixTest::testPLUFactorize()
   // Triangle->PLUFactorize();
   // Triangle->display();
 
-  
-  
+
+
   /* A last column full of zero caused memory corruption in cs_lusol
      since ublas does not fill the last entry correctly*/
   // Sparse.reset(new SimpleMatrix(*SP2));
@@ -3532,18 +3534,18 @@ void SimpleMatrixTest::testPLUFactorize()
   // Sparse->display();
 
 
-  
 
 
 
-  
+
+
   std::cout << "-->  test PLUFactorize ended with success." <<std::endl;
 }
 void SimpleMatrixTest::testPLUSolve()
 {
   std::cout << "\n\n--> Test: PLUSolve." <<std::endl;
 
-  // Test dense matrix 
+  // Test dense matrix
   SP::SiconosMatrix Dense(new SimpleMatrix(*D));
   SP::SiconosVector b (new SiconosVector(Dense->size(0)));
   for( int i =0; i <Dense->size(0); i++)
@@ -3558,7 +3560,24 @@ void SimpleMatrixTest::testPLUSolve()
   b->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*D_backup,*b) - *backup).norm2()  < tol, true);
 
-  // Test sparse matrix identity 
+  // // Test dense matrix and sparse rhs
+  // Dense.reset(new SimpleMatrix(*D));
+  // SP::SiconosVector b_sparse (new SiconosVector(Dense->size(0), SPARSE));
+  // for( int i =0; i <Dense->size(0); i++)
+  // {
+  //   (*b_sparse)(i)=1.0;
+  // }
+  // backup.reset(new SiconosVector(*b_sparse));
+  // Dense->PLUSolve(*b_sparse);
+  // b_sparse->display();
+
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*D_backup,*b_sparse) - *backup).norm2()  < tol, true);
+
+
+
+
+
+  // Test sparse matrix identity
   SP::SimpleMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
   b.reset(new SiconosVector(Sparse->size(0)));
   for( int i =0; i <Sparse->size(0); i++)
@@ -3595,7 +3614,7 @@ void SimpleMatrixTest::testPLUSolve()
   Sparse->PLUSolve(*b);
   b->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
-  
+
 
   // test sparse matrix 3x3 SP4
   Sparse.reset(new SimpleMatrix(*SP4));
@@ -3633,7 +3652,7 @@ void SimpleMatrixTest::testPLUSolve()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*Sparse_rhs) - *Id ).normInf()  < tol, true);
 
 
-  
+
 
   std::cout << "-->  test PLUSolve ended with success." <<std::endl;
 }

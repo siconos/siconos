@@ -168,7 +168,7 @@ private:
   SPC::SiconosMatrix A, B, Ab, Bb;
   SP::SimpleMatrix SimM;
   std::string fic1, fic2;
-  SP::SiconosVector vect1, vect2, vect3;
+  SP::SiconosVector vect1, vect2, vect3, vect_sparse_1;
   SP::DenseMat  D;
   SP::TriangMat T, T2;
   SP::SymMat S, S2;
