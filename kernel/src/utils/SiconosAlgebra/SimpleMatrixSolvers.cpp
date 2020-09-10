@@ -46,7 +46,7 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include "SiconosAlgebra.hpp"
 
 #include "NumericsMatrix.h"
-                          #include "NumericsSparseMatrix.h"
+#include "NumericsSparseMatrix.h"
 #include "CSparseMatrix.h"
 
 //#define DEBUG_MESSAGES
@@ -54,6 +54,7 @@ namespace lapack = boost::numeric::bindings::lapack;
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
+#include <cs.h>
 #endif
 
 using namespace Siconos;
@@ -329,7 +330,7 @@ void SimpleMatrix::PLUFactorize()
   }
   if(_num == DENSE)
   {
-    _numericsMatrix.reset(NM_new(),NM_clear);
+    _numericsMatrix.reset(NM_new(),NM_clear_not_dense); // When we reset, we do not free the matrix0 that is linked to the array of the boost container
     NumericsMatrix * NM = _numericsMatrix.get();
     double * data = (double*)(getArray());
     DEBUG_EXPR(NV_display(data,size(0)*size(1)););
@@ -353,7 +354,7 @@ void SimpleMatrix::PLUFactorize()
   }
   else
   {
-    // We build a sparse matrix and we call numerics for the LU factorization of a sparse matrix.
+    // For all the other cases, we build a sparse matrix and we call numerics for the LU factorization of a sparse matrix.
     _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_clear);
     NumericsMatrix * NM = _numericsMatrix.get();
     _numericsMatrix->matrix2->origin = NSM_CSC;
@@ -443,9 +444,7 @@ void SimpleMatrix::PLUSolve(SiconosMatrix &B)
 void SimpleMatrix::PLUSolve(SiconosVector &B)
 {
   DEBUG_BEGIN("SimpleMatrix::PLUSolve(SiconosVector &B)\n");
-  if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix PLUSolve(V) failed. Not yet implemented for V being a BlockVector.");
-
+  
   if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
   {
     PLUFactorize();

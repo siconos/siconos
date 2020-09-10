@@ -3513,6 +3513,16 @@ void SimpleMatrixTest::testPLUFactorize()
   Sparse->display();
 
 
+  // Other types than SPARSE are not working since fillCSC is not implemented.
+  // std::cout << "--> Test: PLUFactorize -- Triangle" <<std::endl;
+  // SP::SimpleMatrix Triangle(new SimpleMatrix(*T2));
+  // Triangle->display();
+  // Triangle->displayExpert();
+  // Triangle->PLUFactorize();
+  // Triangle->display();
+
+  
+  
   /* A last column full of zero caused memory corruption in cs_lusol
      since ublas does not fill the last entry correctly*/
   // Sparse.reset(new SimpleMatrix(*SP2));
@@ -3521,6 +3531,12 @@ void SimpleMatrixTest::testPLUFactorize()
   // Sparse->PLUFactorizationInPlace();
   // Sparse->display();
 
+
+  
+
+
+
+  
   std::cout << "-->  test PLUFactorize ended with success." <<std::endl;
 }
 void SimpleMatrixTest::testPLUSolve()
