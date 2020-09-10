@@ -555,6 +555,17 @@ void NM_clear(NumericsMatrix* m)
   }
 }
 
+void NM_clear_not_dense(NumericsMatrix* m)
+{
+  assert(m && "NM_clear, m == NULL");
+
+  //NM_clearDense(m);
+  NM_clearSparseBlock(m);
+  NM_clearSparse(m);
+
+  NM_internalData_free(m);
+}
+
 
 void NM_clear_other_storages(NumericsMatrix* M, int storageType)
 {

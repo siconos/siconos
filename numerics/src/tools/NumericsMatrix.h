@@ -298,6 +298,14 @@ extern "C"
    */
   void NM_clear(NumericsMatrix* m);
 
+  /** Free memory for a NumericsMatrix except the dense matrix that is assumed not to be owned.
+      Warning: call this function only if you are sure that
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
+      \param m the matrix to be deleted.
+   */
+  void NM_clear_not_dense(NumericsMatrix* m);
+
   /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.
