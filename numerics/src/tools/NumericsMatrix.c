@@ -80,8 +80,6 @@ void NM_internalData_new(NumericsMatrix* M)
   M->internalData->dWorkSize = 0;
   M->internalData->isInversed = false ;
   M->internalData->isLUfactorized = false ;
-  M->internalData->isInversed = false ;
-  M->internalData->isLUfactorized = false ;
 #ifdef SICONOS_HAS_MPI
   M->internalData->mpi_comm = MPI_COMM_NULL;
 #endif
