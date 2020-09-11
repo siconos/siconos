@@ -37,7 +37,7 @@
 #include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+//#define DEBUG_MESSAGES
 #include "debug.h"                    // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
 #include "numerics_verbose.h"         // for numerics_error, numerics_printf...
 #include "sanitizer.h"                // for cblas_dcopy_msan
@@ -80,6 +80,7 @@ void NM_internalData_new(NumericsMatrix* M)
   M->internalData->dWorkSize = 0;
   M->internalData->isInversed = false ;
   M->internalData->isLUfactorized = false ;
+  M->internalData->isCholeskyfactorized = false ;
 #ifdef SICONOS_HAS_MPI
   M->internalData->mpi_comm = MPI_COMM_NULL;
 #endif
@@ -531,6 +532,7 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B->internalData->dWorkSize=0;
     }
     B->internalData->isLUfactorized = A->internalData->isLUfactorized;
+    B->internalData->isCholeskyfactorized = A->internalData->isCholeskyfactorized;
     B->internalData->isInversed = A->internalData->isInversed;
   }
 
@@ -1903,7 +1905,7 @@ RawNumericsMatrix* NM_preserve(NumericsMatrix* A)
 {
   if (NM_destructible(A))
   {
-    if (NM_factorized(A))
+    if (NM_LU_factorized(A) || NM_Cholesky_factorized(A))
     {
       numerics_warning("NM_preserve", "preservation is done on a factorized matrix!");
     }
@@ -1927,9 +1929,13 @@ RawNumericsMatrix* NM_unpreserve(NumericsMatrix* A)
   return A;
 }
 
-bool NM_factorized(NumericsMatrix* A)
+bool NM_LU_factorized(NumericsMatrix* A)
 {
   return NM_internalData(A->destructible)->isLUfactorized;
+}
+bool NM_Cholesky_factorized(NumericsMatrix* A)
+{
+  return NM_internalData(A->destructible)->isCholeskyfactorized;
 }
 
 void NM_set_factorized(NumericsMatrix* A, bool flag)
@@ -2213,96 +2219,17 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   }
   case NM_SPARSE:
   {
-    CSparseMatrix* A_;
-    CSparseMatrix* B_;
 
-    if(!B->matrix2)
-    {
-      B->matrix2 = NSM_new();
-    }
+    NumericsSparseMatrix * A_ = A->matrix2;
+    NumericsSparseMatrix * B_ = numericsSparseMatrix(B);
 
-    B->matrix2->origin = A->matrix2->origin;
-
-    switch(A->matrix2->origin)
-    {
-    case NSM_TRIPLET:
-    {
-      A_ = A->matrix2->triplet;
-
-      if(!B->matrix2->triplet)
-      {
-        B->matrix2->triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
-      }
-
-      B_ = B->matrix2->triplet;
-      break;
-    }
-    case NSM_HALF_TRIPLET:
-    {
-      A_ = A->matrix2->half_triplet;
-
-      if(!B->matrix2->half_triplet)
-      {
-        B->matrix2->half_triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
-      }
-
-      B_ = B->matrix2->half_triplet;
-      break;
-    }
-    case NSM_CSC:
-    {
-      assert(A->matrix2->csc);
-
-      A_ = A->matrix2->csc;
-
-      if(!B->matrix2->csc)
-      {
-        B->matrix2->csc = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 0);
-      }
-
-      B_ = B->matrix2->csc;
-      break;
-    }
-    case NSM_CSR:
-    {
-      assert(A->matrix2->csr);
-
-      A_ = A->matrix2->csr;
-
-      if(!B->matrix2->csr)
-      {
-        NM_csr_alloc(B, A_->nzmax);
-      }
-
-      B_ = B->matrix2->csr;
-      break;
-    }
-    default:
-    {
-      fprintf(stderr, "NM_copy :: error unknown origin %d for sparse matrix\n", A->matrix2->origin);
-      exit(EXIT_FAILURE);
-    }
-    }
-    CSparseMatrix_copy(A_, B_);
-
+    NSM_copy(A_,B_);
 
     /* invalidations */
     NM_clearDense(B);
     NM_clearSparseBlock(B);
 
-    /* We remove diag_indx from B and  we copy it from A if it exists */
-    if(numericsSparseMatrix(B)->diag_indx)
-    {
-      free(numericsSparseMatrix(B)->diag_indx);
-      numericsSparseMatrix(B)->diag_indx=NULL;
-    }
-    if(A->matrix2->diag_indx)
-    {
-      numericsSparseMatrix(B)->diag_indx = (CS_INT*) malloc(A->size0 * sizeof(CS_INT));
-      memcpy(numericsSparseMatrix(B)->diag_indx, A->matrix2->diag_indx, A->size0 * sizeof(CS_INT));
-    }
-
-    if(B_->nz >= 0)
+    if(NSM_get_origin(B_)->nz >= 0)
     {
       NM_clearCSC(B);
       NM_clearCSCTranspose(B);
@@ -2321,10 +2248,10 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
         NM_clearCSC(B);
       }
     }
-
     break;
   }
   }
+  
   NM_internalData_copy(A, B);
   NM_MPI_copy(A, B);
   NM_MUMPS_copy(A, B);
@@ -3143,7 +3070,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
   NumericsMatrix* A = Ao->destructible;
 
-  if (!NM_factorized(Ao))
+  if (!NM_LU_factorized(Ao))
   {
 
 #ifdef FACTORIZATION_DEBUG
@@ -3295,7 +3222,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
     }
   }
 
-  assert (NM_factorized(Ao) == NM_factorized(A));
+  assert (NM_LU_factorized(Ao) == NM_LU_factorized(A));
 
   return info;
 }
@@ -3312,7 +3239,7 @@ int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
   /* get the destructible part of the matrix */
   NumericsMatrix *A = Ao->destructible;
 
-  if (NM_factorized(A))
+  if (NM_LU_factorized(A))
   {
 
     DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
@@ -3333,6 +3260,7 @@ int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 
       numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
       lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+      
       DGETRS(LA_NOTRANS, A->size0, nrhs, A->matrix0, A->size0, ipiv, b, A->size0, &info);
 
       DEBUG_PRINT("End of call DGETRS for NM_DENSE storage\n");
@@ -3830,7 +3758,10 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       }
       DEBUG_PRINT("Start to call DPOTRS for NM_DENSE storage\n");
       numerics_printf_verbose(2,"NM_posv_expert, we solve with given factors");
+      DEBUG_EXPR(NV_display(b,A->size0));
       DPOTRS(LA_UP, A->size0, 1, A->matrix0, A->size0, b, A->size0, &info);
+      DEBUG_EXPR(NV_display(b,A->size0));
+      DEBUG_EXPR(NM_display(A));
       DEBUG_PRINT("End of call DPOTRS for NM_DENSE storage\n");
       if(info < 0)
       {
@@ -3854,6 +3785,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       }
       DPOSV(LA_UP, A->size0, 1, mat, A->size0, b,
             A->size0, &info);
+
       if(info > 0)
       {
         if(verbose >= 2)
@@ -4206,13 +4138,7 @@ void NM_csc_empty_alloc(NumericsMatrix* A, CS_INT nzmax)
 }
 
 
-void NM_csr_alloc(NumericsMatrix* A, CS_INT nzmax)
-{
-  numericsSparseMatrix(A)->csr = cs_spalloc(A->size1, A->size0, nzmax, 1, 0);
-  numericsSparseMatrix(A)->csr->nz = -2;
-  numericsSparseMatrix(A)->csr->m =  A->size0;
-  numericsSparseMatrix(A)->csr->n = A->size1;
-}
+
 
 void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
@@ -4699,4 +4625,290 @@ bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B)
   }
 }
 
+
 #endif
+
+
+int NM_Cholesky_factorize(NumericsMatrix* Ao)
+{
+  DEBUG_BEGIN("int NM_Cholesky_factorize(NumericsMatrix* Ao) \n");
+  lapack_int info = 0;
+  assert(Ao->destructible); /* by default Ao->destructible == Ao */
+  NumericsMatrix* A = Ao->destructible;
+
+  if (!NM_Cholesky_factorized(Ao))
+  {
+
+#ifdef FACTORIZATION_DEBUG
+    if (NM_internalData(Ao)->values_sha1_count > 0)
+    {
+      if(NM_check_values_sha1(Ao))
+      {
+        numerics_error("NM_Cholesky_factorize", "this matrix is already factorized");
+      }
+    }
+
+    NM_set_values_sha1(Ao);
+#endif
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2,"NM_Cholesky_factorize, using LAPACK (POSV)" );
+
+      DEBUG_PRINTF("iwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
+
+      numerics_printf_verbose(2,"NM_Cholesky_factorize, we compute factors and keep it in place" );
+      DEBUG_PRINT("Start to call DPOTRF for NM_DENSE storage\n");
+      DPOTRF(LA_UP, A->size1, A->matrix0, A->size0, &info);
+      DEBUG_PRINT("end of call DPOTRF for NM_DENSE storage\n");
+
+      if (info > 0)
+      {
+        fprintf(stderr,"NM_Cholesky_factorize: Cholesky factorisation DPOTRF failed. The %d-th diagonal element is 0\n", info);
+      }
+      else if (info < 0)
+      {
+        fprintf(stderr, "NM_Cholesky_factorize: Cholesky factorisation DPOTRF failed. The %d-th argument has an illegal value, stopping\n", -info);
+      }
+      if (info)
+      {
+        NM_internalData_free(A);
+        assert(!NM_internalData(A)->isCholeskyfactorized);
+      }
+    }
+    break;
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      assert(!NM_internalData(A)->isCholeskyfactorized);
+      switch (p->solver)
+      {
+      case NSM_CS_CHOLSOL:
+        numerics_printf_verbose(2, "NM_Cholesky_factorize, using CSparse (chol_factorization)");
+
+        if (!(p->dWork && p->linear_solver_data))
+        {
+          assert(!NSM_workspace(p));
+          assert(!NSM_linear_solver_data(p));
+          assert(!p->solver_free_hook);
+
+          p->solver_free_hook = &NSM_clear_p;
+          p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          p->dWorkSize = A->size1;
+        };
+
+        CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+
+        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it");
+        info = !CSparsematrix_chol_factorization(1, NM_csc(A),  cs_chol_A);
+        
+        if (info)
+        {
+          numerics_printf_verbose(2, "NM_Cholesky_factorize: cparse factorization failed.");
+        }
+        assert(!p->linear_solver_data);
+        p->linear_solver_data = cs_chol_A;
+        break;
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_Cholesky_factorize: using MUMPS\n");
+        }
+        if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+        {
+          /* the mumps instance is initialized (call with job=-1) */
+          NM_MUMPS_set_control_params(A);
+          NM_MUMPS_set_sym(A, 1); /*  symmetric positive definite */
+          NM_MUMPS(A, -1);
+          if ((NM_MUMPS_icntl(A, 1) == -1 ||
+               NM_MUMPS_icntl(A, 2) == -1 ||
+               NM_MUMPS_icntl(A, 3) == -1 ||
+               verbose) ||
+              (NM_MUMPS_icntl(A, 1) != -1 ||
+               NM_MUMPS_icntl(A, 2) != -1 ||
+               NM_MUMPS_icntl(A, 3) != -1 ||
+               !verbose))
+          {
+            NM_MUMPS_set_verbosity(A, verbose);
+          }
+          /* NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection */
+          /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
+        }
+
+        NM_MUMPS_set_problem(A, 0, NULL);
+
+        NM_MUMPS(A, 4); /* analyzis,factorization */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_Cholesky_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+
+        /* we should not do that here */
+        if(!p->solver_free_hook)
+        {
+          p->solver_free_hook = &NM_MUMPS_free;
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        numerics_printf_verbose(0,"NM_Cholesky_factorize, Unknown solver in NM_SPARSE case." );
+        info = 1;
+      }
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_Cholesky_factors: unknown storageType");
+    }
+
+    if (!info)
+    {
+      NM_internalData(A)->isCholeskyfactorized = true;
+    }
+    else
+    {
+      assert(NM_internalData(A)->isCholeskyfactorized == false);
+    }
+  }
+
+  assert (NM_Cholesky_factorized(Ao) == NM_Cholesky_factorized(A));
+  DEBUG_END("int NM_Cholesky_factorize(NumericsMatrix* Ao) \n");
+  return info;
+}
+
+
+int NM_Cholesky_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
+{
+
+  lapack_int info = 1;
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_Cholesky_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_Cholesky_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_Cholesky_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
+    assert(A->size0 == A->size1);
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2, "NM_Cholesky_solve, using LAPACK (DPOTRS)" );
+
+      /* dpotrf is called in NM_Cholesky_factorize */
+      DEBUG_PRINT("Start to call DPOTRS for NM_DENSE storage\n");
+
+      numerics_printf_verbose(2,"NM_Cholesky_solve, we solve with given factors" );
+      DEBUG_PRINT("Start to call DPOTRS for NM_DENSE storage\n");
+      DEBUG_EXPR(NV_display(b,A->size0));
+      DPOTRS(LA_UP, A->size0, nrhs, A->matrix0, A->size0, b, A->size0, &info);
+      DEBUG_EXPR(NV_display(b,A->size0));
+      DEBUG_PRINT("End of call DPOTRS for NM_DENSE storage\n");
+ 
+      if (info < 0)
+      {
+        numerics_printf_verbose(2,"NM_Cholesky_solve: dense Cholesky solve DPOTRS failed. The %d-th argument has an illegal value\n", -info);
+      }
+      break;
+    }
+
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      switch (p->solver)
+      {
+      case NSM_CS_CHOLSOL:
+      {
+        numerics_printf_verbose(2,"NM_Cholesky_solve, using CSparse" );
+
+        numerics_printf_verbose(2,"NM_Cholesky_solve, we solve with given factors" );
+        for(unsigned int j=0; j < nrhs ; j++ )
+        {
+          info = !CSparseMatrix_chol_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
+        }
+        break;
+      }
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_Cholesky_solve: using MUMPS\n");
+        }
+
+        assert (NM_MUMPS_id(A)->job); /* this means that least a
+                                       * factorization has already been
+                                       * done */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        NM_MUMPS_set_problem(A, nrhs, b);
+
+        NM_MUMPS(A, 3); /* solve */
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_Cholesky_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        fprintf(stderr, "NM_Cholesky_solve: unknown sparse linearsolver %d\n", p->solver);
+        exit(EXIT_FAILURE);
+      }
+      break;
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_Cholesky_solve unknown storageType");
+    }
+
+
+    /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+       CHECK_RETURN is ok for cs, but not for MUMPS and others */
+    /* some time we cannot find a solution to a linear system, and its fine, for
+     * instance with the minFBLSA. Therefore, we should not check here for
+     * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+    DEBUG_END("NM_Cholesky_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  }
+
+  return info;
+}
+
+
+

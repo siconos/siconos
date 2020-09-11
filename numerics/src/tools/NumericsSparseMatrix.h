@@ -83,16 +83,16 @@ extern "C"
    * triplet (aka coordinate, COO), CSC (via CSparse) and CSR if MKL is used */
   struct NumericsSparseMatrix
   {
-    CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
-    CSparseMatrix* half_triplet;    /**< halt triplet format for symmetric matrices */
-    CSparseMatrix* csc;        /**< csc matrix */
-    CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
-    CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
-    CS_INT*           diag_indx;  /**< indices for the diagonal terms.
-                                    Very useful for the proximal perturbation */
-    unsigned       origin;     /**< original format of the matrix */
+    CSparseMatrix* triplet;         /**< triplet format, aka coordinate */
+    CSparseMatrix* half_triplet;    /**< half triplet format for symmetric matrices */
+    CSparseMatrix* csc;             /**< csc matrix */
+    CSparseMatrix* trans_csc;       /**< transpose of a csc matrix (used by CSparse) */
+    CSparseMatrix* csr;             /**< csr matrix, only supported with mkl */
+    CS_INT*        diag_indx;       /**< indices for the diagonal terms.
+                                         Very useful for the proximal perturbation */
+    unsigned       origin;          /**< original format of the matrix */
     NSM_linear_solver_params* linearSolverParams;
-                               /**< solver-specific parameters */
+                                    /**< solver-specific parameters */
 
   };
 
@@ -115,8 +115,11 @@ extern "C"
    */
   NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
 
-
-
+  /** Copy a NumericsSparseMatrix.
+   * \param A a NumericsSparseMatrix
+   * \param B a NumericsSparseMatrix
+   */
+  void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B);
 
    /** Free a workspace related to a LU factorization
    * \param p the structure to free

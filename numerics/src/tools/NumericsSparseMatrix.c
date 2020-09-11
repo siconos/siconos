@@ -166,6 +166,116 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A)
 }
 
 
+
+
+void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
+{
+
+  assert(A);
+  assert(B);
+  
+  B->origin = A->origin;
+
+  CSparseMatrix* A_;
+  CSparseMatrix* B_;
+
+  switch(A->origin)
+  {
+  case NSM_TRIPLET:
+  {
+    A_ = A->triplet;
+
+    if(!B->triplet)
+    {
+      B->triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
+    }
+
+    B_ = B->triplet;
+    break;
+  }
+  case NSM_HALF_TRIPLET:
+  {
+    A_ = A->half_triplet;
+
+    if(!B->half_triplet)
+    {
+      B->half_triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
+    }
+
+    B_ = B->half_triplet;
+    break;
+  }
+  case NSM_CSC:
+  {
+    assert(A->csc);
+
+    A_ = A->csc;
+
+    if(!B->csc)
+    {
+      B->csc = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 0);
+    }
+
+    B_ = B->csc;
+    break;
+  }
+  case NSM_CSR:
+  {
+    assert(A->csr);
+
+    A_ = A->csr;
+
+    if(!B->csr)
+    {
+      B->csr = cs_spalloc(A_->m, A_->n, A_->nzmax, 1, 0);
+      B->csr->nz = -2;
+      B->csr->m = A_->m;
+      B->csr->n = A_->n;
+    }
+
+    B_ = B->csr;
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "NSM_copy :: error unknown origin %d for sparse matrix\n", A->origin);
+    exit(EXIT_FAILURE);
+  }
+  }
+  CSparseMatrix_copy(A_, B_);
+
+  /* diag_indx   */
+  /* We remove diag_indx from B and  we copy it from A if it exists */
+  if(B->diag_indx)
+  {
+    free(B->diag_indx);
+    B->diag_indx=NULL;
+  }
+  if(A->diag_indx)
+  {
+    B->diag_indx = (CS_INT*) malloc(A_->m * sizeof(CS_INT));
+    memcpy(B->diag_indx, A->diag_indx, A_->m * sizeof(CS_INT));
+  }
+
+
+  /*  NSM_linear_solver_params */
+  if(B->linearSolverParams)
+  {
+    NSM_linearSolverParams_free(B->linearSolverParams);
+    B->linearSolverParams=NULL;
+  }
+  /* We copy only the id of the solver to keep track of if NM_preserve is used before
+   * factorization. The remaining part is not copied since we have blind pointer.
+   */
+  if(A->linearSolverParams)
+  {
+    B->linearSolverParams = NSM_linearSolverParams_new();
+    B->linearSolverParams->solver =A->linearSolverParams->solver;
+  }
+  
+}
+
+
 NSM_linear_solver_params* NSM_linearSolverParams_new(void)
 {
   NSM_linear_solver_params* p = (NSM_linear_solver_params*)
@@ -182,7 +292,7 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
 #elif defined(WITH_MKL_PARDISO)
   p->solver = NSM_MKL_PARDISO;
 #else
-  p->solver = NSM_CS_LUSOL;
+  p->solver = NSM_CS_LUSOL;  // default solver
 #endif
 
   p->linear_solver_data = NULL;
@@ -197,6 +307,8 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
 
   return p;
 }
+
+
 
 NSM_linear_solver_params* NSM_linearSolverParams(NumericsMatrix* A)
 {

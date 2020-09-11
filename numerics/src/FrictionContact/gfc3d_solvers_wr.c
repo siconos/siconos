@@ -403,7 +403,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
 
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
 
-    assert(NM_factorized(problem->M));
+    assert(NM_LU_factorized(problem->M));
 #ifdef USE_LAPACK_DGETRS
     lapack_int infoDGETRS = 0;
     lapack_int* ipiv = (lapack_int*)NM_iWork(problem->M, problem->M->size0, sizeof(lapack_int));

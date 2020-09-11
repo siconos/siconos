@@ -45,6 +45,7 @@ typedef struct
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
+  bool isCholeskyfactorized; /**<  true if the matrix has already been Cholesky factorized */
   bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
 #ifdef SICONOS_HAS_MPI
   MPI_Comm mpi_comm; /**< optional mpi communicator */
@@ -253,7 +254,8 @@ extern "C"
    * \param[in] A the NumericsMatrix
    * \return true if the matrix has been factorized.
    */
-  bool NM_factorized(NumericsMatrix* A);
+  bool NM_LU_factorized(NumericsMatrix* A);
+  bool NM_Cholesky_factorized(NumericsMatrix* A);
 
   /** Set the factorization flag.
    * \param[in] A the NumericsMatrix,
@@ -284,12 +286,6 @@ extern "C"
    * \param nzmax maximum number of non-zero elements
    */
   void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax);
-
-  /** Allocate a csr matrix in A
-   * \param A the matrix
-   * \param nzmax number of non-zero elements
-   */
-  void NM_csr_alloc(NumericsMatrix* A, CS_INT nzmax);
 
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
@@ -677,7 +673,7 @@ extern "C"
    */
 
   /* LU factorization of the matrix. If the matrix has already been
-   * factorized (i.e if NM_factorized(A) return true), nothing is
+   * factorized (i.e if NM_LU_factorized(A) return true), nothing is
    * done. To force a new factorization one has to set factorization
    * flag to false : NM_set_factorized(A, false) before the call to
    * NM_LU_factorize.
@@ -690,6 +686,7 @@ extern "C"
    * \param[in] A the NumericsMatrix
    * \return an int, 0 means the matrix has been factorized. */
   int NM_LU_factorize(NumericsMatrix* A);
+  int NM_Cholesky_factorize(NumericsMatrix* A);
 
   /* Solve linear system with multiple right hand size. A call to
    * NM_LU_factorize is done at the beginning.
@@ -703,7 +700,8 @@ extern "C"
    * \param[in] nrhs the number of right hand side.
    * \return 0 if the solve succeeded.
    */
-  int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
+  int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs); 
+  int NM_Cholesky_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
 
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);

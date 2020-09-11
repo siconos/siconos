@@ -36,8 +36,6 @@ extern "C"
   void NM_internalData_free(NumericsMatrix* m);
 
 
-
-
 #ifdef WITH_UMFPACK
 #include <umfpack.h>
 
