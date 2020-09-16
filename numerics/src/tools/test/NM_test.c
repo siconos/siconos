@@ -1962,7 +1962,7 @@ static int test_NM_posv_expert_unit(NumericsMatrix * M, double * b)
   p->solver = NSM_MUMPS;
   NM_MUMPS_set_verbosity(M, 1);
 #else
-  p->solver = NSM_CS_CHOLSOL;
+  p->solver = NSM_CSPARSE;
 #endif
 
   double res;
@@ -2238,7 +2238,7 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix * M, double * b)
   p->solver = NSM_MUMPS;
   NM_MUMPS_set_verbosity(M, 1);
 #else
-  p->solver = NSM_CS_CHOLSOL;
+  p->solver = NSM_CSPARSE;
 #endif
 
   double res;

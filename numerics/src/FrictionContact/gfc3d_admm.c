@@ -671,7 +671,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 #ifdef WITH_MUMPS
       p->solver = NSM_MUMPS;
 #else
-      p->solver = NSM_CS_CHOLSOL;
+      p->solver = NSM_CSPARSE;
 #endif
       NM_posv_expert(W,v,NM_KEEP_FACTORS);
     }

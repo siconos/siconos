@@ -624,7 +624,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     {
     case SICONOS_FRICTION_3D_NSN_USE_CSLUSOL:
     {
-      NSM_linearSolverParams(AWpB)->solver = NSM_CS_LUSOL;
+      NSM_linearSolverParams(AWpB)->solver = NSM_CSPARSE;
       break;
     }
     case SICONOS_FRICTION_3D_NSN_USE_MUMPS:

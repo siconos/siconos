@@ -292,7 +292,7 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
 #elif defined(WITH_MKL_PARDISO)
   p->solver = NSM_MKL_PARDISO;
 #else
-  p->solver = NSM_CS_LUSOL;  // default solver
+  p->solver = NSM_CSPARSE;  // default solver
 #endif
 
   p->linear_solver_data = NULL;

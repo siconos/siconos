@@ -3123,7 +3123,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
       assert(!NM_internalData(A)->isLUfactorized);
       switch (p->solver)
       {
-      case NSM_CS_LUSOL:
+      case NSM_CSPARSE:
         numerics_printf_verbose(2, "NM_LU_factorize, using CSparse");
 
         if (!(p->dWork && p->linear_solver_data))
@@ -3278,7 +3278,7 @@ int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
       NSM_linear_solver_params* p = NSM_linearSolverParams(A);
       switch (p->solver)
       {
-      case NSM_CS_LUSOL:
+      case NSM_CSPARSE:
       {
         numerics_printf_verbose(2,"NM_LU_solve, using CSparse" );
 
@@ -3436,7 +3436,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
     NSM_linear_solver_params* p = NSM_linearSolverParams(A);
     switch(p->solver)
     {
-    case NSM_CS_LUSOL:
+    case NSM_CSPARSE:
       numerics_printf_verbose(2,"NM_gesv, using CSparse");
 
       if(keep == NM_KEEP_FACTORS)
@@ -3807,7 +3807,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
     NSM_linear_solver_params* p = NSM_linearSolverParams(A);
     switch(p->solver)
     {
-    case NSM_CS_CHOLSOL:
+    case NSM_CSPARSE:
       numerics_printf_verbose(2,"NM_posv, using CSparse cholsol");
 
       if(keep == NM_KEEP_FACTORS)
@@ -4688,7 +4688,7 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
       assert(!NM_internalData(A)->isCholeskyfactorized);
       switch (p->solver)
       {
-      case NSM_CS_CHOLSOL:
+      case NSM_CSPARSE:
         numerics_printf_verbose(2, "NM_Cholesky_factorize, using CSparse (chol_factorization)");
 
         if (!(p->dWork && p->linear_solver_data))
@@ -4843,7 +4843,7 @@ int NM_Cholesky_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
       NSM_linear_solver_params* p = NSM_linearSolverParams(A);
       switch (p->solver)
       {
-      case NSM_CS_CHOLSOL:
+      case NSM_CSPARSE:
       {
         numerics_printf_verbose(2,"NM_Cholesky_solve, using CSparse" );
 
