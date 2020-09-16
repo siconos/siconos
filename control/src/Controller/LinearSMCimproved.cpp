@@ -103,7 +103,7 @@ void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleM
       // Compute the control to counteract the perturbation
       up = predictedPertC;
       up *= -1;
-      CBstar.PLUSolve(up);
+      CBstar.Solve(up);
 
       // project onto feasible set
       double norm = up.norm2();
@@ -141,7 +141,7 @@ void LinearSMCimproved::actuate()
   // compute C(I-e^{Ah})x_k
   prod(*tmpM1, *xTk, *_ueq);
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
-  CBstar->PLUSolve(*_ueq);
+  CBstar->Solve(*_ueq);
 
   *(_DS_SMC->x()) = *xTk;
   prod(*_B, *_ueq, *(std::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->b()));

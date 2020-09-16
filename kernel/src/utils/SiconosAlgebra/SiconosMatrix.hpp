@@ -76,6 +76,16 @@ protected:
    */
   unsigned int _num;
 
+  /** bool _isSymmetric;
+   *  Boolean = true if the Matrix is symmetric
+   */
+  bool _isSymmetric;
+
+  /** bool _isPositiveDefinite;
+   *  Boolean = true if the Matrix is positive definite
+   */
+  bool _isPositiveDefinite;
+
   /** default constructor */
   SiconosMatrix() {};
 
@@ -126,10 +136,38 @@ public:
     return false;
   };
 
+  /** true if the matrix is symmetric (the flag is just returned)
+   *  \return true if the matrix is symmetric
+   */
+  inline bool isSymmetric() const
+  {
+    return _isSymmetric;
+  }
+  
+  /** set the flag _isSymmetric */
+  inline void setIsSymmetric(bool b)
+  {
+    _isSymmetric= b;
+  }
+
+  /** true if the matrix is definite positive (the flag is just returned)
+   *  \return true if the matrix is
+   */
+  inline bool isPositiveDefinite() const
+  {
+    return _isPositiveDefinite;
+  }
+
+  /** set the flag _isPositiveDefinite */
+  inline void setIsPositiveDefinite(bool b)
+  {
+    _isPositiveDefinite= b ;
+  }
+
   /** determines if the matrix is symmetric up to a given tolerance
    *  \return true if the matrix is inversed
    */
-  virtual bool isSymmetric(double tol) const =0;
+  virtual bool checkSymmetry(double tol) const =0;
 
   /** determines if the matrix has been PLU factorized
    *  \return true if the matrix is factorized
@@ -138,6 +176,7 @@ public:
   {
     return false;
   };
+
   /** determines if the matrix has been PLU factorized in place
    *  \return true if the matrix is factorized
    */
@@ -146,6 +185,13 @@ public:
     return false;
   };
 
+  /** determines if the matrix has been Cholesky factorized
+   *  \return true if the matrix is factorized
+   */
+  inline virtual bool isCholeskyFactorized() const
+  {
+    return false;
+  };
 
   /** determines if the matrix has been QR factorized
    *  \return true if the matrix is factorized
@@ -160,6 +206,15 @@ public:
     SP::VInt dummy;
     return dummy;
   }
+
+  /** determines if the matrix has been factorized
+   *  \return true if the matrix is factorized
+   */
+  inline virtual bool isFactorized() const
+  {
+    return (isPLUFactorizedInPlace() || isPLUFactorizedInPlace() || isCholeskyFactorized() || isQRFactorized());
+  };
+
 
   /** get the number of rows or columns of the matrix
    *  \param index 0 for rows, 1 for columns
@@ -481,11 +536,10 @@ public:
    */
   virtual void PLUFactorizationInPlace() = 0;
 
-  /** computes a LU factorization of a general M-by-N matrix
-   * with partial pivoting and row interchanges.
+  /** computes a factorization of a general M-by-N matrix
    * The implementation is based on an internal NumericsMatrix
    */
-  virtual void PLUFactorize() = 0;
+  virtual void Factorize() = 0;
 
   /**  compute inverse of this thanks to LU factorization with partial pivoting.
    * This method inverts U and then computes inv(A) by solving the system
@@ -508,7 +562,7 @@ public:
    * by PLUFactorize.
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
-  virtual void  PLUSolve(SiconosMatrix &B) = 0;
+  virtual void  Solve(SiconosMatrix &B) = 0;
 
   /** solves a system of linear equations A * X = B  (A=this)
    * for a general N-by-N matrix A using the LU factorization computed
@@ -523,7 +577,7 @@ public:
    * by PLUFactorize.
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
-  virtual void   PLUSolve(SiconosVector &B) = 0;
+  virtual void   Solve(SiconosVector &B) = 0;
 
   /** set to false all LU indicators. Useful in case of
       assignment for example.

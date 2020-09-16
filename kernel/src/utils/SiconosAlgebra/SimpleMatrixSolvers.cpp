@@ -320,173 +320,241 @@ void polePlacement(const SiconosMatrix& A, const SiconosVector& B, SiconosVector
 */
 
 
-void SimpleMatrix::PLUFactorize()
+void SimpleMatrix::Factorize()
 {
-  DEBUG_BEGIN("void SimpleMatrix::PLUFactorize()\n");
-  if(_isPLUFactorized)
+  DEBUG_BEGIN("void SimpleMatrix::Factorize()\n");
+  if(isFactorized())
   {
-    std::cout << "SimpleMatrix::PLUFactorize warning: this matrix is already PLUFactorized. " << std::endl;
+    std::cout << "SimpleMatrix::PLUFactorize warning: this matrix is already Factorized. " << std::endl;
     return;
   }
+
+
+  /* set the numericsMatrix */
+  NumericsMatrix * NM;
   if(_num == DENSE)
   {
-    _numericsMatrix.reset(NM_new(),NM_clear_not_dense); // When we reset, we do not free the matrix0 that is linked to the array of the boost container
-    NumericsMatrix * NM = _numericsMatrix.get();
+    _numericsMatrix.reset(NM_new(),NM_clear_not_dense); // When we reset, we do not free the matrix0
+                                                        //that is linked to the array of the boost container
+    NM = _numericsMatrix.get();
     double * data = (double*)(getArray());
     DEBUG_EXPR(NV_display(data,size(0)*size(1)););
     NM_fill(NM, NM_DENSE, size(0), size(1), data ); // Pointer link
-    DEBUG_EXPR(NM_display(NM));
+  }
+  else
+  {
+    // For all the other cases, we build a sparse matrix and we call numerics for the factorization of a sparse matrix.
+    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_clear);
+    NM = _numericsMatrix.get();
+    _numericsMatrix->matrix2->origin = NSM_CSC;
+    NM_csc_alloc(NM, nnz());
+    fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
+    DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
+  }
 
-    int info  = NM_LU_factorize(NM);
-    DEBUG_EXPR(NM_display(NM));
+  /* Factorization calling the right method in Numerics */
+  int info =1;
+  if (isSymmetric())
+  {
+    if (isPositiveDefinite()) // Cholesky Factorization
+    {
+      //std::cout << "Cholesky Factorize"<< std::endl;
+      info  = NM_Cholesky_factorize(NM);
+
+      if(info != 0)
+      {
+        _isCholeskyFactorized = false;
+        SiconosMatrixException::selfThrow("SimpleMatrix::Factorize failed (Cholesky)");
+      }
+      else
+      {
+        _isCholeskyFactorized = true;
+      }
+    }
+    else  //  LDLT Factorization
+    {
+      SiconosMatrixException::selfThrow("SimpleMatrix::Factorize failed: LDL^T not yet implemented.");
+    }
+  }
+  else //  LU Factorization  by default
+  {
+    info  = NM_LU_factorize(NM);
 
     if(info != 0)
     {
       _isPLUFactorized = false;
-      _isPLUFactorizedInPlace = true;
+      if(_num == DENSE)
+        _isPLUFactorizedInPlace = true;
       SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
     }
     else
     {
       _isPLUFactorized = true;
-      _isPLUFactorizedInPlace = true;
+       if(_num == DENSE)
+         _isPLUFactorizedInPlace = true;
     }
   }
-  else
-  {
-    // For all the other cases, we build a sparse matrix and we call numerics for the LU factorization of a sparse matrix.
-    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_clear);
-    NumericsMatrix * NM = _numericsMatrix.get();
-    _numericsMatrix->matrix2->origin = NSM_CSC;
-    NM_csc_alloc(NM, nnz());
-
-    fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
-
-    DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
-
-    NM_LU_factorize(NM);
-
-    NSM_linear_solver_params* p = NSM_linearSolverParams(NM);
-    CSparseMatrix_factors* cs_lu_A =  (CSparseMatrix_factors*)p->linear_solver_data;
-
-    int info = 1;
-    if (cs_lu_A)
-    {
-      info = 0;
-
-      DEBUG_EXPR(CSparseMatrix * L = cs_lu_A->N->L; cs_print(L,0););
-      DEBUG_EXPR(CSparseMatrix * U = cs_lu_A->N->U; cs_print(U,0););
-      DEBUG_EXPR(
-        CS_INT * pinv = cs_lu_A->N->pinv;
-        for (int i =0; i < size(0) ; i++)
-          printf("pinv[%i] = %i\n", i, pinv[i])
-        );
-    }
-
-    if(info != 0)
-    {
-      _isPLUFactorized = false;
-      _isPLUFactorizedInPlace = false;
-      std::cout << "Problem in LU Factorization" << std::endl;
-      SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorize failed. ");
-    }
-    else
-    {
-      _isPLUFactorized = true;
-      _isPLUFactorizedInPlace = false;
-    }
-  }
-  DEBUG_END("void SimpleMatrix::PLUFactorize()\n");
+  DEBUG_END("void SimpleMatrix::Factorize()\n");
 }
-void SimpleMatrix::PLUSolve(SiconosMatrix &B)
+void SimpleMatrix::Solve(SiconosMatrix &B)
 {
   if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix PLUSolve(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
-  int info = 0;
-  if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
+    SiconosMatrixException::selfThrow("SimpleMatrix Solve(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
+
+  int info = 1;
+  if(!isFactorized())
   {
-    PLUFactorize();
+    Factorize();
   }
   // and then solve
+
+  NumericsMatrix * NM;
+  double * b;
+  SP::SimpleMatrix Bdense;
+
   if(B.num() == DENSE)
   {
-    NumericsMatrix * NM = _numericsMatrix.get();
-    double * b = B.getArray();
-    info = NM_LU_solve(NM, b, B.size(1));
+    NM = _numericsMatrix.get();
+    b = B.getArray();
   }
   else if(B.num() == SPARSE)
   {
     // First way.
     // We copy to dense since our sparse solver is not able to take
     // into account for sparse r.h.s, yet.
-    SP::SimpleMatrix Bdense (new SimpleMatrix(size(0),size(1)));
+    Bdense.reset (new SimpleMatrix(size(0),size(1)));
     * Bdense= B ;                                                // copy to dense
-    double * b = &(*Bdense->getArray());
-    NumericsMatrix * NM = _numericsMatrix.get();
-    info = NM_LU_solve(NM, b, B.size(1));       // we solve with dense R.H.S.
-    DEBUG_EXPR(NV_display(b,size(0)*size(1)););
-    DEBUG_EXPR(Bdense->display(););
-    B = *Bdense ;                                                // we copy back to sparse.
-
+    b = &(*Bdense->getArray());
+    NM = _numericsMatrix.get();
+ 
     // Second way
-    // use inplace_solve of ublas (see above with PLUSolveInPlace)
+    // use inplace_solve of ublas (see above with SolveInPlace)
     // For that, we need to fill our factorization given by NM_LU_factorize
     // into a ublas sparse matrix
     // inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
     // inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
   }
   else
-    SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense and sparse matrices in RHS.");
-
-  if(info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::PLUSolve failed.");
-}
-void SimpleMatrix::PLUSolve(SiconosVector &B)
-{
-  DEBUG_BEGIN("SimpleMatrix::PLUSolve(SiconosVector &B)\n");
+    SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
   
-  if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
+  if (isSymmetric())
   {
-    PLUFactorize();
+    if (isPositiveDefinite()) // Cholesky Solving
+    {
+      //std::cout << "Cholesky Solve"<< std::endl;
+      info  = NM_Cholesky_solve(NM, b, B.size(1));
+
+      if(info != 0)
+      {
+        SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed (Cholesky)");
+      }
+    }
+    else  //  LDLT Factorization
+    {
+      SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed: LDL^T not yet implemented.");
+    }
+  }
+  else //  LU Factorization  by default
+  {
+    info  = NM_LU_solve(NM, b, B.size(1));
+
+    if(info != 0)
+    {
+      SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
+    }
+  }
+
+  if(B.num() == SPARSE)
+  {
+    B = *Bdense ; // we copy back to sparse.
+    //std::cout << "B" << std::endl;
+    //B.display();
   }
 
 
+  if(info != 0)
+    SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed.");
+}
+
+void SimpleMatrix::Solve(SiconosVector &B)
+{
+  DEBUG_BEGIN("SimpleMatrix::PLUSolve(SiconosVector &B)\n");
+
+  if(!isFactorized())
+  {
+    Factorize();
+  }
+
   // and then solve
   int info =1;
+  NumericsMatrix * NM;
+  double * b;
+  SP::SiconosVector Bdense;
+
+
   if(B.num() == DENSE)
   {
-    NumericsMatrix * NM = _numericsMatrix.get();
-    double * b = B.getArray();
-    DEBUG_EXPR(NV_display(b, B.size()););
-    DEBUG_EXPR(B.display(););
-    info = NM_LU_solve(NM, b, 1);
-    DEBUG_EXPR(NV_display(b, B.size()););
-    DEBUG_EXPR(B.display(););
+    NM = _numericsMatrix.get();
+    b = B.getArray();
   }
   else if(B.num() == SPARSE)
   {
     // First way. We copy to dense since our sparse solver is not able to take into account sparse r.h.s
-    SP::SiconosVector Bdense (new SiconosVector(size(0)));
+    Bdense.reset (new SiconosVector(size(0)));
     * Bdense= B ;
-    double * b = &(*Bdense->getArray());
-    NumericsMatrix * NM = _numericsMatrix.get();
-    info = NM_LU_solve(NM, b, 1);
-    DEBUG_EXPR(NV_display(b, B.size()););
-    B = *Bdense ;
-    DEBUG_EXPR(B.display(););
+    b = &(*Bdense->getArray());
+    NM = _numericsMatrix.get();
+
     // Second way use inplace_solve of ublas
     // For that, we need to fill our factorization given by NM_LU_factorize into a ublas sparse matrix
     //inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
     //inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
   }
   else
-    SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense and sparse matrices in RHS.");
+    SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
 
+
+  if (isSymmetric())
+  {
+    if (isPositiveDefinite()) // Cholesky Factorization
+    {
+      //std::cout << "Cholesky Solve"<< std::endl;
+      info  = NM_Cholesky_solve(NM, b, 1);
+
+      if(info != 0)
+      {
+        SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed (Cholesky)");
+      }
+    }
+    else  //  LDLT Factorization
+    {
+      SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed: LDL^T not yet implemented.");
+    }
+  }
+  else //  LU Factorization  by default
+  {
+    info  = NM_LU_solve(NM, b, 1);
+
+    if(info != 0)
+    {
+      SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed (LU)");
+    }
+  }
+
+  if(B.num() == SPARSE)
+  {
+    B = *Bdense ;                                                // we copy back to sparse.
+  }
+
+  
+
+
+  
   if(info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::PLUSolve failed.");
+    SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed.");
   // else
   // {
   //   noalias(*(B.dense())) = ublas::column(tmpB, 0);
   // }
-  DEBUG_END("SimpleMatrix::PLUSolve(SiconosVector &B)\n");
+  DEBUG_END("SimpleMatrix::Solve(SiconosVector &B)\n");
 }

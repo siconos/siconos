@@ -100,7 +100,7 @@ public:
   ~BlockMatrix(void);
 
 
-  inline bool isSymmetric(double tol) const
+  inline bool checkSymmetry(double tol) const
   {
     return false;
   };
@@ -445,7 +445,7 @@ public:
    */
   void PLUFactorizationInPlace();
   
-  void PLUFactorize();
+  void Factorize();
 
  
   /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
@@ -458,7 +458,7 @@ public:
    *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosMatrix &B);
-  void PLUSolve(SiconosMatrix &B);
+  void Solve(SiconosMatrix &B);
   
   
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
@@ -466,7 +466,7 @@ public:
    *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosVector &B);
-  void PLUSolve(SiconosVector &B);
+  void Solve(SiconosVector &B);
   
   /** visitors hook
    */

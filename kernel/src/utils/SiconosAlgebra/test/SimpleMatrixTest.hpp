@@ -96,8 +96,8 @@ private:
   //CPPUNIT_TEST(testGemv);
   //CPPUNIT_TEST(testGemm);
   CPPUNIT_TEST(testPLUFactorizationInPlace);
-  CPPUNIT_TEST(testPLUFactorize);
-  CPPUNIT_TEST(testPLUSolve);
+  CPPUNIT_TEST(testFactorize);
+  CPPUNIT_TEST(testSolve);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
@@ -159,8 +159,8 @@ private:
   //void testGemm();
   //void testGemv();
   void testPLUFactorizationInPlace();
-  void testPLUFactorize();
-  void testPLUSolve();
+  void testFactorize();
+  void testSolve();
   void End();
 
   unsigned int size, size2;

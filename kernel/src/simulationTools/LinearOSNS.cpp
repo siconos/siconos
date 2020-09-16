@@ -253,7 +253,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-        centralInteractionBlock->PLUSolve(*rightInteractionBlock);
+        centralInteractionBlock->Solve(*rightInteractionBlock);
         VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
         static_cast<EulerMoreauOSI&>(osi).computeKhat(*inter, *rightInteractionBlock,
             workMInter, h);
@@ -324,15 +324,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
         work->trans();
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-        DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isPLUFactorized() = "<< centralInteractionBlock->isPLUFactorized() << std::endl;);
-        centralInteractionBlock->PLUSolve(*work);
+        DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isFactorized() = "<< centralInteractionBlock->isFactorized() << std::endl;);
+        centralInteractionBlock->Solve(*work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
         DEBUG_EXPR(work->display(););
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
         //*currentInteractionBlock *=h;
         DEBUG_EXPR(currentInteractionBlock->display(););
-        //assert(currentInteractionBlock->isSymmetric(1e-10));
+        //assert(currentInteractionBlock->checkSymmetry(1e-10));
         if(relationSubType == CompliantLinearTIR)
         {
           if(osiType == OSI::MOREAUJEANOSI)
@@ -465,7 +465,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
     SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-    centralInteractionBlock->PLUSolve(*rightInteractionBlock);
+    centralInteractionBlock->Solve(*rightInteractionBlock);
 
     //      integration of r with theta method removed
     //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
@@ -551,7 +551,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       // size checking inside the getBlock function, a
       // getRight call will fail.
       SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-      centralInteractionBlock->PLUSolve(*rightInteractionBlock);
+      centralInteractionBlock->Solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
     }

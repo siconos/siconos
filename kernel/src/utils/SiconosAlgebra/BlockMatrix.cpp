@@ -1147,9 +1147,9 @@ void BlockMatrix::PLUFactorizationInPlace()
 {
   SiconosMatrixException::selfThrow(" BlockMatrix::PLUFactorizationInPlace: not yet implemented for Block Matrices.");
 }
-void BlockMatrix::PLUFactorize()
+void BlockMatrix::Factorize()
 {
-  SiconosMatrixException::selfThrow(" BlockMatrix::PLUFactorize: not yet implemented for Block Matrices.");
+  SiconosMatrixException::selfThrow(" BlockMatrix::Factorize: not yet implemented for Block Matrices.");
 }
 
 void BlockMatrix::PLUInverseInPlace()
@@ -1161,18 +1161,18 @@ void BlockMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 {
   SiconosMatrixException::selfThrow(" BlockMatrix::PLUForwardBackwardInPlace: not yet implemented for Block Matrices.");
 }
-void BlockMatrix::PLUSolve(SiconosMatrix &B)
+void BlockMatrix::Solve(SiconosMatrix &B)
 {
-  SiconosMatrixException::selfThrow(" BlockMatrix::PLUSolve: not yet implemented for Block Matrices.");
+  SiconosMatrixException::selfThrow(" BlockMatrix::Solve: not yet implemented for Block Matrices.");
 }
 
 void BlockMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 {
   SiconosMatrixException::selfThrow(" BlockMatrix::PLUForwardBackwardInPlace: not yet implemented for Block Matrices.");
 }
-void BlockMatrix::PLUSolve(SiconosVector &B)
+void BlockMatrix::Solve(SiconosVector &B)
 {
-  SiconosMatrixException::selfThrow(" BlockMatrix::PLUSolve: not yet implemented for Block Matrices.");
+  SiconosMatrixException::selfThrow(" BlockMatrix::Solve: not yet implemented for Block Matrices.");
 }
 
 SP::SiconosMatrix BlockMatrix::block(unsigned int row, unsigned int col)

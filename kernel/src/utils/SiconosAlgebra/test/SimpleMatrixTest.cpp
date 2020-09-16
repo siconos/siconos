@@ -3491,36 +3491,37 @@ void SimpleMatrixTest::testPLUFactorizationInPlace()
   std::cout << "-->  test PLUFactorizationInPlace ended with success." <<std::endl;
 }
 
-void SimpleMatrixTest::testPLUFactorize()
+void SimpleMatrixTest::testFactorize()
 {
-  std::cout << "--> Test: PLUFactorize." <<std::endl;
+  std::cout << "--> Test: Factorize (LU)." <<std::endl;
 
   SP::SiconosMatrix Dense(new SimpleMatrix(*D));
   Dense->display();
-  Dense->PLUFactorize();
+  Dense->Factorize();
   Dense->display();
-  //CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorize: ",  < tol, true);
+  //CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
 
 
   SP::SimpleMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
   Sparse->eye();
   Sparse->display();
-  Sparse->PLUFactorize();
+  Sparse->Factorize();
 
 
   Sparse.reset(new SimpleMatrix(*SP3));
   Sparse->display();
   Sparse->displayExpert();
-  Sparse->PLUFactorize();
+  Sparse->Factorize();
   Sparse->display();
 
+ 
 
   // Other types than SPARSE are not working since fillCSC is not implemented.
-  // std::cout << "--> Test: PLUFactorize -- Triangle" <<std::endl;
+  // std::cout << "--> Test: Factorize -- Triangle" <<std::endl;
   // SP::SimpleMatrix Triangle(new SimpleMatrix(*T2));
   // Triangle->display();
   // Triangle->displayExpert();
-  // Triangle->PLUFactorize();
+  // Triangle->Factorize();
   // Triangle->display();
 
 
@@ -3533,17 +3534,27 @@ void SimpleMatrixTest::testPLUFactorize()
   // Sparse->PLUFactorizationInPlace();
   // Sparse->display();
 
+  std::cout << "--> Test: Factorize (Cholesky)." <<std::endl;
 
+  Dense.reset(new SimpleMatrix(*D));
+  /* conpute DD^T */
+  SP::SiconosMatrix DenseT(new SimpleMatrix(*Dense));
+  DenseT->trans();
+  SP::SiconosMatrix DDT(new SimpleMatrix(Dense->size(0), Dense->size(1)));
+  prod(*Dense, *DenseT, *DDT);
+  DDT->display();
+  DDT->setIsSymmetric(true);
+  DDT->setIsPositiveDefinite(true);
+  DDT->Factorize();
+  
+  DDT->display();
+  //CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
 
-
-
-
-
-  std::cout << "-->  test PLUFactorize ended with success." <<std::endl;
+  std::cout << "-->  test Factorize ended with success." <<std::endl;
 }
-void SimpleMatrixTest::testPLUSolve()
+void SimpleMatrixTest::testSolve()
 {
-  std::cout << "\n\n--> Test: PLUSolve." <<std::endl;
+  std::cout << "\n\n--> Test: Solve. Dense. LU." <<std::endl;
 
   // Test dense matrix
   SP::SiconosMatrix Dense(new SimpleMatrix(*D));
@@ -3555,10 +3566,10 @@ void SimpleMatrixTest::testPLUSolve()
   SP::SiconosVector backup (new SiconosVector(*b));
   SP::SiconosMatrix D_backup (new SimpleMatrix(*Dense));
   Dense->display();
-  Dense->PLUSolve(*b);
+  Dense->Solve(*b);
   Dense->display();
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*D_backup,*b) - *backup).norm2()  < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*D_backup,*b) - *backup).norm2()  < tol, true);
 
   // // Test dense matrix and sparse rhs
   // Dense.reset(new SimpleMatrix(*D));
@@ -3568,29 +3579,47 @@ void SimpleMatrixTest::testPLUSolve()
   //   (*b_sparse)(i)=1.0;
   // }
   // backup.reset(new SiconosVector(*b_sparse));
-  // Dense->PLUSolve(*b_sparse);
+  // Dense->Solve(*b_sparse);
   // b_sparse->display();
 
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*D_backup,*b_sparse) - *backup).norm2()  < tol, true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*D_backup,*b_sparse) - *backup).norm2()  < tol, true);
 
 
+  std::cout << "\n\n--> Test: Solve. Dense. Cholesky." <<std::endl;
+  Dense.reset(new SimpleMatrix(*D));
+  b.reset(new SiconosVector(Dense->size(0)));
+  for( int i =0; i <Dense->size(0); i++)
+  {
+    (*b)(i)=1.0;
+  }
+  SP::SiconosMatrix DenseT(new SimpleMatrix(*Dense));
+  DenseT->trans();
+  SP::SiconosMatrix DDT(new SimpleMatrix(Dense->size(0), Dense->size(1)));
+  prod(*Dense, *DenseT, *DDT);
+  SP::SiconosMatrix DDT_backup (new SimpleMatrix(*DDT));
+  DDT->setIsSymmetric(true);
+  DDT->setIsPositiveDefinite(true);
+  DDT->Solve(*b);
+  b->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*DDT_backup,*b) - *backup).norm2()  < tol, true);
 
 
+  std::cout << "\n\n--> Test: Solve. Sparse. LU." <<std::endl;
 
   // Test sparse matrix identity
   SP::SimpleMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
+  SP::SimpleMatrix Sparse_backup(new SimpleMatrix(4,4,SPARSE));
   b.reset(new SiconosVector(Sparse->size(0)));
   for( int i =0; i <Sparse->size(0); i++)
   {
     (*b)(i)=1.0;
   }
   backup.reset (new SiconosVector(*b));
-
+  Sparse_backup->eye();
   Sparse->eye();
-  Sparse->display();
-  Sparse->PLUSolve(*b);
+  Sparse->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse_backup,*b) - *backup).norm2()  < tol, true);
 
   // test sparse matrix 3x3
   Sparse.reset(new SimpleMatrix(*SP3));
@@ -3600,9 +3629,9 @@ void SimpleMatrixTest::testPLUSolve()
     (*b)(i)=1.0;
   }
   backup.reset (new SiconosVector(*b));
-  Sparse->PLUSolve(*b);
+  Sparse->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
 
   // Solve again with another r.h.s.
   b.reset(new SiconosVector(Sparse->size(0)));
@@ -3611,12 +3640,12 @@ void SimpleMatrixTest::testPLUSolve()
     (*b)(i)=2.0;
   }
   backup.reset (new SiconosVector(*b));
-  Sparse->PLUSolve(*b);
+  Sparse->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
 
 
-  // test sparse matrix 3x3 SP4
+  // test sparse matrix 4x4 SP4
   Sparse.reset(new SimpleMatrix(*SP4));
   b.reset(new SiconosVector(Sparse->size(0)));
   for( int i =0; i <Sparse->size(0); i++)
@@ -3624,24 +3653,24 @@ void SimpleMatrixTest::testPLUSolve()
     (*b)(i)=1.0;
   }
   backup.reset (new SiconosVector(*b));
-  Sparse->PLUSolve(*b);
+  Sparse->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
 
   // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
   Sparse.reset(new SimpleMatrix(*SP3));
   SP::SimpleMatrix Sparse_rhs (new SimpleMatrix(*SP3));
-  Sparse->PLUSolve(*Sparse_rhs);
+  Sparse->Solve(*Sparse_rhs);
   Sparse_rhs->display();
   std::cout << "A A^{-1}" << std::endl;
   (prod(*Sparse,*Sparse_rhs)).display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*Sparse_rhs) - *Sparse ).normInf()  < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse,*Sparse_rhs) - *Sparse ).normInf()  < tol, true);
 
   // test sparse matrix 3x3 sparse RhS. inverse
   Sparse.reset(new SimpleMatrix(*SP3));
   Sparse_rhs.reset(new SimpleMatrix(3,3));
   Sparse_rhs->eye();
-  Sparse->PLUSolve(*Sparse_rhs);
+  Sparse->Solve(*Sparse_rhs);
   SP::SiconosMatrix Id (new SimpleMatrix(3,3));
   Id->eye();
 
@@ -3649,12 +3678,112 @@ void SimpleMatrixTest::testPLUSolve()
   std::cout << "A A^{-1}" << std::endl;
 
   (prod(*Sparse,*Sparse_rhs)).display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*Sparse_rhs) - *Id ).normInf()  < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse,*Sparse_rhs) - *Id ).normInf()  < tol, true);
+
+  std::cout << "\n\n--> Test: Solve. Sparse. Cholesky." <<std::endl;
+
+  // Test sparse matrix identity
+  Sparse.reset(new SimpleMatrix(4,4,SPARSE));
+  Sparse_backup.reset(new SimpleMatrix(4,4,SPARSE));
+  b.reset(new SiconosVector(Sparse->size(0)));
+  for( int i =0; i <Sparse->size(0); i++)
+  {
+    (*b)(i)=1.0;
+  }
+  backup.reset (new SiconosVector(*b));
+  Sparse_backup->eye();
+  Sparse->eye();
+  Sparse->setIsSymmetric(true);
+  Sparse->setIsPositiveDefinite(true);
+  Sparse->Solve(*b);
+  b->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse_backup,*b) - *backup).norm2()  < tol, true);
+
+  // test sparse matrix 3x3
+  Sparse.reset(new SimpleMatrix(*SP3));
+  b.reset(new SiconosVector(Sparse->size(0)));
+  for( int i =0; i <Sparse->size(0); i++)
+  {
+    (*b)(i)=1.0;
+  }
+  backup.reset (new SiconosVector(*b));
+  SP::SimpleMatrix SparseT (new SimpleMatrix(*SP3));
+  SparseT->trans();
+  SP::SimpleMatrix SST (new SimpleMatrix(Sparse->size(0), Sparse->size(1), SPARSE));
+  prod(*Sparse, *SparseT, *SST);
+  SST->setIsSymmetric(true);
+  SST->setIsPositiveDefinite(true);
+  SST->Solve(*b);
+  b->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST,*b) - *backup).norm2()  < tol, true);
+
+  // Solve again with another r.h.s.
+  b.reset(new SiconosVector(Sparse->size(0)));
+  for( int i =0; i <Sparse->size(0); i++)
+  {
+    (*b)(i)=2.0;
+  }
+  backup.reset (new SiconosVector(*b));
+  SST->Solve(*b);
+  b->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST,*b) - *backup).norm2()  < tol, true);
+
+  // test sparse matrix 4x4 SP4
+  Sparse.reset(new SimpleMatrix(*SP4));
+  b.reset(new SiconosVector(Sparse->size(0)));
+  for( int i =0; i <Sparse->size(0); i++)
+  {
+    (*b)(i)=1.0;
+  }
+  backup.reset (new SiconosVector(*b));
+  SparseT.reset(new SimpleMatrix(*SP4));
+  SparseT->trans();
+  SST.reset (new SimpleMatrix(Sparse->size(0), Sparse->size(1), SPARSE));
+  prod(*Sparse, *SparseT, *SST);
+  SST->setIsSymmetric(true);
+  SST->setIsPositiveDefinite(true);
+  SST->Solve(*b);
+  b->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST,*b) - *backup).norm2()  < tol, true);
+
+  // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
+  Sparse.reset(new SimpleMatrix(*SP3));
+  SparseT.reset(new SimpleMatrix(*SP3));
+  SparseT->trans();
+  SST.reset (new SimpleMatrix(Sparse->size(0), Sparse->size(1), SPARSE));
+  prod(*Sparse, *SparseT, *SST);
+  Sparse_rhs.reset (new SimpleMatrix(*SST));
+  std::cout << "SST" << std::endl;
+  SST->display();
+  SST->setIsSymmetric(true);
+  SST->setIsPositiveDefinite(true);
+  SST->Solve(*Sparse_rhs);
+  Sparse_rhs->display();
+  // std::cout << "A A^{-1}" << std::endl;
+  // (prod(*SST,*Sparse_rhs)).display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST,*Sparse_rhs) - *SST ).normInf()  < tol, true);
+
+  // test sparse matrix 3x3 sparse RhS. inverse
+  SST.reset (new SimpleMatrix(Sparse->size(0), Sparse->size(1), SPARSE));
+  prod(*Sparse, *SparseT, *SST);
+  Sparse_rhs.reset(new SimpleMatrix(3,3, SPARSE));
+  Sparse_rhs->eye();
+  std::cout << "SST" << std::endl;
+  SST->display();
+  SST->setIsSymmetric(true);
+  SST->setIsPositiveDefinite(true);
+  SST->Solve(*Sparse_rhs);
+  Sparse_rhs->display();
+
+  Sparse_rhs->display();
+  std::cout << "A A^{-1}" << std::endl;
+
+  (prod(*SST,*Sparse_rhs)).display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST,*Sparse_rhs) - *Id ).normInf()  < tol, true);
 
 
 
-
-  std::cout << "-->  test PLUSolve ended with success." <<std::endl;
+  std::cout << "-->  test Solve ended with success." <<std::endl;
 }
 
 

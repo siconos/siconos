@@ -282,7 +282,7 @@ void NewMarkAlphaOSI::computeFreeState()
     {
       SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS>(ds);
       qfree = residuFree;
-      W->PLUSolve(qfree); //_qfree = (W^-1)*R_free
+      W->Solve(qfree); //_qfree = (W^-1)*R_free
       qfree *= -1.0; //_qfree = -(W^-1)*R_free
       //
       DEBUG_EXPR(qfree.display(););
@@ -680,7 +680,7 @@ void NewMarkAlphaOSI::correction()
       SP::SiconosVector _p = d->p(2); // resultant force p_{n+1,k+1} of DS at (k+1)th iteration
       // Compute delta_q = W_{n+1,k}^{-1}(p_{n+1,k+1} - r_{n+1,k})
       delta_q.reset(new SiconosVector(*_p - residuFree)); // copy (p_{n+1,k+1} - r_{n+1,k}) to delta_q
-      W->PLUSolve(*delta_q);
+      W->Solve(*delta_q);
       // Correction q_{n+1,k+1}, dotq_{n+1,k+1}, ddotq_{n+1,k+1}
       *(d->q()) += *delta_q; // q_{n+1,k+1} = q_{n+1,k} + delta_q
       *(d->velocity()) += (gamma_prime / h) * (*delta_q); // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q

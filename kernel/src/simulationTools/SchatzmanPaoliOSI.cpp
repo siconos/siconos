@@ -561,7 +561,7 @@ void SchatzmanPaoliOSI::computeFreeState()
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       qfree = residuFree;
 
-      W->PLUSolve(qfree);
+      W->Solve(qfree);
       qfree *= -1.0;
       qfree += qold;
 
@@ -783,7 +783,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int)
       if(d.p(_levelMaxForInput))
       {
         q = *d.p(_levelMaxForInput); // q = p
-        W->PLUSolve(q);
+        W->Solve(q);
       }
       else
         q.zero();
@@ -851,7 +851,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int)
       //       /*d->p has been fill by the Relation->computeInput, it contains
       //            B \lambda _{k+1}*/
       //       *v = *d->p(level); // v = p
-      //       d->luW()->PLUSolve(*v);
+      //       d->luW()->Solve(*v);
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       std::cout<<"SchatzmanPaoliOSI::updatestate hWB lambda"<<endl;

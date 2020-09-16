@@ -404,7 +404,7 @@ SimpleMatrix::~SimpleMatrix()
     delete(mat.Identity);
 }
 
-bool SimpleMatrix::isSymmetric(double tol) const
+bool SimpleMatrix::checkSymmetry(double tol) const
 {
   SP::SimpleMatrix  m_trans(new SimpleMatrix(*this));
   m_trans->trans();

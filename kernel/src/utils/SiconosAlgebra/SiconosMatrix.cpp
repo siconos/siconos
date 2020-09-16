@@ -37,7 +37,7 @@
 #include "SimpleMatrixFriends.hpp" // for isComparableTo
 
 // Constructor with the type-number
-SiconosMatrix::SiconosMatrix(unsigned int type): _num(type)
+SiconosMatrix::SiconosMatrix(unsigned int type): _num(type), _isSymmetric(false), _isPositiveDefinite(false)
 {}
 
 const SP::Index SiconosMatrix::tabRow() const
@@ -322,7 +322,7 @@ std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm)
 
 void SiconosMatrix::private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init) const
 {
-  assert(!(isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(isFactorized()) && "A is Factorized in prod !!");
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 
@@ -337,7 +337,7 @@ void SiconosMatrix::private_prod(unsigned int startRow, const SiconosVector& x, 
  */
 void SiconosMatrix::private_addprod(unsigned startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& y) const
 {
-  assert(!(isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(isFactorized()) && "A is Factorized in prod !!");
   assert(!isBlock() && "private_addprod(start,x,y) error: not yet implemented for block matrix.");
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
