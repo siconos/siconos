@@ -57,7 +57,7 @@
  * \f$ u, w_{1}\f$ are vectors of size n.
  * \f$ v, w_{2}\f$ are vectors of size m.
  *
- * ABCD format:
+ * ABCD format (see  "R. W. {Cottle} and J. {Pang} and R. E. {Stone}", "The Linear Complementarity Problem, Academic Press, Inc., 1992, Section 1.5 )
  * \left[
  * \begin{array}{cc}
  * A & C \\

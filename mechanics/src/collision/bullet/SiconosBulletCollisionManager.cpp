@@ -792,13 +792,13 @@ void SiconosBulletCollisionManager_impl::updateContactorInertia(
   localinertia[0]*=scale_factor;
   localinertia[1]*=scale_factor;
   localinertia[2]*=scale_factor;
-  assert( ! ((localinertia.x() == 0.0
-              && localinertia.y() == 0.0
-              && localinertia.z() == 0.0)
-             || std::isinf(localinertia.x())
-             || std::isinf(localinertia.y())
-             || std::isinf(localinertia.z()))
-          && "calculateLocalInertia() returned garbage" );
+  assert(!((localinertia.x() == 0.0
+            && localinertia.y() == 0.0
+            && localinertia.z() == 0.0)
+           || std::isinf(localinertia.x())
+           || std::isinf(localinertia.y())
+           || std::isinf(localinertia.z()))
+         && "calculateLocalInertia() returned garbage");
   ds->setInertia(localinertia[0],
                  localinertia[1],
                  localinertia[2]);

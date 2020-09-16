@@ -50,6 +50,9 @@ siconos_debian_latest = siconos_default.copy()(
 siconos_ubuntu_18_04 = siconos_default.copy()(
     distrib='ubuntu:18.04')
 
+siconos_ubuntu_20_04 = siconos_default.copy()(
+    distrib='ubuntu:20.04')
+
 siconos_fedora_latest = siconos_default.copy()(
     distrib='fedora:latest')
 
