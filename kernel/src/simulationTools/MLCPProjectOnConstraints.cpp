@@ -644,8 +644,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       SP::LagrangianDS lds = (std::static_pointer_cast<LagrangianDS>(ds));
       unsigned int sizeDS = lds->dimension();
-      leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
-      inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
+      leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, sizeY, sizeDS);
 
       if(lds->boundaryConditions())  // V.A. Should we do that ?
       {
@@ -927,8 +926,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
               relationType2 == Lagrangian)
       {
         unsigned int sizeDS =  ds->dimension();
-        leftInteractionBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
-        inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
+        leftInteractionBlock = inter1->getLeftInteractionBlockForDS(pos1, sizeY1, sizeDS );
 
         Type::Siconos dsType = Type::value(*ds);
         if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
@@ -954,8 +952,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         leftInteractionBlock->display();
 #endif
         // inter1 != inter2
-        rightInteractionBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
-        inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
+        rightInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, sizeY2, sizeDS);
 #ifdef MLCPPROJ_DEBUG
         std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : rightInteractionBlock" << std::endl;
         rightInteractionBlock->display();

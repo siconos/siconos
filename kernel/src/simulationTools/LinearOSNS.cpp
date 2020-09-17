@@ -223,16 +223,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
-    leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
-    inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
+    leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, nslawSize, sizeDS);
     DEBUG_EXPR(leftInteractionBlock->display(););
     // Computing depends on relation type -> move this in Interaction method?
     if(relationType == FirstOrder)
     {
 
-      rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize));
+      
 
-      inter->getRightInteractionBlockForDS(pos, rightInteractionBlock);
+      rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
       if(osiType == OSI::EULERMOREAUOSI)
       {
@@ -452,16 +451,12 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
   // get _interactionBlocks corresponding to the current DS
   // These _interactionBlocks depends on the relation type.
-  leftInteractionBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-  inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
+  leftInteractionBlock = inter1->getLeftInteractionBlockForDS(pos1, nslawSize1, sizeDS);
 
   // Computing depends on relation type -> move this in Interaction method?
   if(relationType1 == FirstOrder && relationType2 == FirstOrder)
   {
-
-    rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
-
-    inter2->getRightInteractionBlockForDS(pos2, rightInteractionBlock);
+    rightInteractionBlock = inter2->getRightInteractionBlockForDS(pos2, sizeDS, nslawSize2);
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
     SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
@@ -535,7 +530,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       // remind that W contains the inverse of the iteration matrix
       axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *rightInteractionBlock, true);
       // Then save block corresponding to the 'right' interaction into leftInteractionBlock
-      inter2->getLeftInteractionBlockForDS(pos2, leftInteractionBlock);
+      leftInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize1, sizeDS);
       leftInteractionBlock->trans();
       // and compute LW-1R == rightInteractionBlock * leftInteractionBlock into currentInteractionBlock
       prod(*rightInteractionBlock, *leftInteractionBlock, *currentInteractionBlock, false);
@@ -543,8 +538,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     else
     {
       // inter1 != inter2
-      rightInteractionBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-      inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
+      rightInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize2, sizeDS);
       rightInteractionBlock->trans();
       // Warning: we use getLeft for Right interactionBlock
       // because right = transpose(left) and because of
