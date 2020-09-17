@@ -74,7 +74,7 @@ protected:
   /** A number to specify the type of the matrix: (block or ublas-type)
    * 0-> BlockMatrix, 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat, 6->zeroMat, 7->IdentityMat
    */
-  unsigned int _num;
+  Siconos::UBLAS_TYPE _num;
 
   /** bool _isSymmetric;
    *  Boolean = true if the Matrix is symmetric
@@ -92,7 +92,7 @@ protected:
   /** basic constructor
    *   \param type unsigned int type-number of the vector
    */
-  SiconosMatrix(unsigned int type);
+  SiconosMatrix(Siconos::UBLAS_TYPE type);
 
   /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
    *  If x is a block vector, it call the present function for all blocks.
@@ -225,7 +225,7 @@ public:
   /** get the attribute num of current matrix
    * \return an unsigned int.
    */
-  inline unsigned int num() const
+  inline Siconos::UBLAS_TYPE num() const
   {
     return _num;
   };

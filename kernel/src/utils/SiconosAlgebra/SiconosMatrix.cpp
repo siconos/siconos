@@ -37,7 +37,7 @@
 #include "SimpleMatrixFriends.hpp" // for isComparableTo
 
 // Constructor with the type-number
-SiconosMatrix::SiconosMatrix(unsigned int type): _num(type), _isSymmetric(false), _isPositiveDefinite(false)
+SiconosMatrix::SiconosMatrix(Siconos::UBLAS_TYPE type): _num(type), _isSymmetric(false), _isPositiveDefinite(false)
 {}
 
 const SP::Index SiconosMatrix::tabRow() const
