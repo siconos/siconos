@@ -169,36 +169,52 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 // }
 
 // Copy constructors
-SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.num()), _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SimpleMatrix &m):
+  SiconosMatrix(m.num()),
+  _isPLUFactorized(false),
+  _isPLUFactorizedInPlace(false),
+  _isQRFactorized(false),
+  _isPLUInversed(false)
 {
+
+  _isSymmetric = m.isSymmetric();
+  _isPositiveDefinite = m.isPositiveDefinite();
+  
+
+  _isPLUFactorized= m.isPLUFactorized();
+  _isPLUFactorizedInPlace= m.isPLUFactorizedInPlace();
+  _isPLUInversed= m.isPLUInversed();
+  
+
+  
   if(_num == Siconos::DENSE)
   {
-    mat.Dense = new DenseMat(smat.size(0), smat.size(1));
-    noalias(*mat.Dense) = (*smat.dense());
+    mat.Dense = new DenseMat(m.size(0), m.size(1));
+    noalias(*mat.Dense) = (*m.dense());
   }
-  //   mat.Dense = new DenseMat(*smat.dense());
+  //   mat.Dense = new DenseMat(*m.dense());
 
   else if(_num == Siconos::TRIANGULAR)
-    mat.Triang = new TriangMat(*smat.triang());
+    mat.Triang = new TriangMat(*m.triang());
 
   else if(_num == Siconos::SYMMETRIC)
 
-    mat.Sym = new SymMat(*smat.sym());
+    mat.Sym = new SymMat(*m.sym());
 
   else if(_num == Siconos::SPARSE)
-    mat.Sparse = new SparseMat(*smat.sparse());
+    mat.Sparse = new SparseMat(*m.sparse());
 
   else if(_num == Siconos::SPARSE_COORDINATE)
-    mat.SparseCoordinate = new SparseCoordinateMat(*smat.sparseCoordinate());
+    mat.SparseCoordinate = new SparseCoordinateMat(*m.sparseCoordinate());
 
   else if(_num == Siconos::BANDED)
-    mat.Banded = new BandedMat(*smat.banded());
+    mat.Banded = new BandedMat(*m.banded());
 
   else if(_num == Siconos::ZERO)
-    mat.Zero = new ZeroMat(smat.size(0), smat.size(1));
+    mat.Zero = new ZeroMat(m.size(0), m.size(1));
 
   else// if(_num == Siconos::IDENTITY)
-    mat.Identity = new IdentityMat(smat.size(0), smat.size(1));
+    mat.Identity = new IdentityMat(m.size(0), m.size(1));
 }
 
 /** copy constructor of a block given by the coord = [r0A r1A c0A c1A]
@@ -261,15 +277,21 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix& A, const Index& coord):
 
 
 
-SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.num()), _isPLUFactorized(), _isPLUFactorizedInPlace(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SiconosMatrix &m):
+  SiconosMatrix(m.num()),
+  _isPLUFactorized(), _isPLUFactorizedInPlace(false),
+  _isQRFactorized(false), _isPLUInversed(false)
 {
   // _num is set in SiconosMatrix constructor with m.num() ... must be changed if m is Block
   unsigned int numM = m.num();
 
+  _isSymmetric = m.isSymmetric();
+  _isPositiveDefinite = m.isPositiveDefinite();
 
   _isPLUFactorized= m.isPLUFactorized();
   _isPLUFactorizedInPlace= m.isPLUFactorizedInPlace();
   _isPLUInversed= m.isPLUInversed();
+
 
   if(m.ipiv())
     _ipiv.reset(new VInt(*(m.ipiv())));

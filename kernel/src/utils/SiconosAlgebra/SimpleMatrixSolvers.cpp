@@ -426,7 +426,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
     * Bdense= B ;                                                // copy to dense
     b = &(*Bdense->getArray());
     NM = _numericsMatrix.get();
- 
+
     // Second way
     // use inplace_solve of ublas (see above with SolveInPlace)
     // For that, we need to fill our factorization given by NM_LU_factorize
@@ -436,7 +436,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   }
   else
     SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
-  
+
   if (isSymmetric())
   {
     if (isPositiveDefinite()) // Cholesky Solving
@@ -467,8 +467,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   if(B.num() == SPARSE)
   {
     B = *Bdense ; // we copy back to sparse.
-    //std::cout << "B" << std::endl;
-    //B.display();
+    //B.displayExpert();
   }
 
 
@@ -546,10 +545,10 @@ void SimpleMatrix::Solve(SiconosVector &B)
     B = *Bdense ;                                                // we copy back to sparse.
   }
 
-  
 
 
-  
+
+
   if(info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed.");
   // else

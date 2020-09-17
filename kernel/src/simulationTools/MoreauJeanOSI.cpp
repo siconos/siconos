@@ -368,6 +368,14 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW - not yet implemented for Dynamical system of type : " + Type::name(*ds));
 
+
+  if (isWSymmetricDefinitePositive())
+  {
+    SiconosMatrix& W = *_dynamicalSystemsGraph->properties(dsv).W;
+    W.setIsSymmetric(true);
+    W.setIsPositiveDefinite(true);
+  }
+  
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
   DEBUG_END("MoreauJeanOSI::initializeIterationMatrixW\n");
