@@ -209,12 +209,12 @@ static double getNewtonStepLength(const double * const x, const double * const d
 
     if(ai < 0 || (bi < 0 && ai < (bi * bi) / ci))
       alpha = ((-bi - sqrt(di)) / ai);
-    else if((fabs(ai) < 1e-12) && (bi < 0))
+    else if((fabs(ai) < DBL_EPSILON) && (bi < 0))
       alpha = (-ci / (2 * bi));
     else
       alpha = DBL_MAX;
 
-    if(fabs(alpha) < 1e-12)
+    if(fabs(alpha) < DBL_EPSILON)
       alpha = 0.0;
 
     alpha_list[i] = alpha;
