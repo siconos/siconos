@@ -37,7 +37,9 @@
 /* #define DEBUG_STDOUT */
 #include "debug.h"
 
+#include "hdf5_logger.h"
 
+#include <string.h>
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";
 
 
@@ -698,9 +700,31 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double norm_q = cblas_dnrm2(m, problem->q, 1);
   double norm_b = cblas_dnrm2(nd, problem->b, 1);
 
+  const char* filename = "logger_ipm";
+  char  hdf5_filename[50];
 
+  unsigned log_hdf5 = SN_logh5_loglevel(SN_LOGLEVEL_NO);
+
+  SN_logh5* logger_s = NULL;
+  if(log_hdf5)
+  {
+    /* Logger starting  */
+    if(filename)
+    {
+      strncpy(hdf5_filename, filename, sizeof(hdf5_filename));
+    }
+    else
+    {
+      strncpy(hdf5_filename, "logger", sizeof(hdf5_filename));
+    }
+    strncat(hdf5_filename, ".hdf5", sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
+    logger_s = SN_logh5_init(hdf5_filename, max_iter);
+
+  }
   while(iteration < max_iter)
   {
+    if(log_hdf5) SN_logh5_new_iter(iteration, logger_s);
+    if(log_hdf5) SN_logh5_scalar_uinteger(iteration, "iteration", logger_s->group);
     if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
     {
       NesterovToddVector(velocity, reaction, nd, n, p);
@@ -716,13 +740,14 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     complem = complemResidualNorm(velocity, reaction, nd, n);
 
     setErrorArray(error, pinfeas, dinfeas, complem, barr_param);
-
+    if(log_hdf5) SN_logh5_scalar_double(*error, "error", logger_s->group);
     numerics_printf_verbose(-1, "---- GFC3D - IPM - | %3i | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
                             iteration, barr_param, pinfeas, dinfeas, complem, alpha_primal, alpha_dual, sigma);
 
     // check exit condition
     if(NV_max(error, 4) < tol)
     {
+      if(log_hdf5) SN_logh5_end_iter(logger_s);
       hasNotConverged = 0;
       break;
     }
@@ -795,6 +820,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     /* Newton system solving */
     NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
+    if(log_hdf5) SN_logh5_NM(J, "J", logger_s);
 
     d_globalVelocity = rhs;
     d_velocity = rhs + m;
@@ -911,6 +937,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
                     tol, options,
                     norm_q, norm_b,  &err);
     numerics_printf_verbose(-1,"---- GFC3D - IPM  - Iteration %i, full error = %14.7e", iteration, err);
+
+    if(log_hdf5) SN_logh5_end_iter(logger_s);
     // check exit condition
     if(err < tol)
     {
@@ -955,6 +983,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   free(H);
 
   *info = hasNotConverged;
+  if(log_hdf5) SN_logh5_end(logger_s);
 }
 
 void gfc3d_ipm_set_default(SolverOptions* options)
@@ -974,7 +1003,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-05;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
-  options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.8;
+  options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;
 
 }
