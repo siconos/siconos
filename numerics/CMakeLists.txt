@@ -241,9 +241,9 @@ endif()
 # For logging
 if(WITH_HDF5)
   find_package(HDF5 REQUIRED COMPONENTS C HL)
-  target_include_directories(${PROJECT_NAME} PRIVATE ${HDF5_C_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${HDF5_C_LIBRARIES})
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${HDF5_HL_LIBRARIES})
+  target_include_directories(numerics PRIVATE ${HDF5_C_INCLUDE_DIRS})
+  target_link_libraries(numerics PRIVATE ${HDF5_C_LIBRARIES})
+  target_link_libraries(numerics PRIVATE ${HDF5_HL_LIBRARIES})
 endif()
 
 # -- OpenMP --

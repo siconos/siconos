@@ -21,8 +21,17 @@
 #include <stdio.h>  // for fprintf, stderr
 #include "SiconosConfig.h" // for WITH_HDF5  // IWYU pragma: keep
 
-
 #ifdef WITH_HDF5
+
+#include "assert.h"
+#include <stdlib.h>
+#include <math.h>
+#include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
+//#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
+
+
 
 bool SN_logh5_check_gzip(void)
 {
