@@ -86,12 +86,14 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
 
 # ---- Final setup for the library ----
 
-# Windows stuff
-include(WindowsNumericsSetup)
 
 # -- create/setup component target --
 include(ComponentSetup)
+
 create_siconos_component(${COMPONENT})
+
+# Windows stuff
+include(WindowsNumericsSetup)
 
 # --- Extra setup for the component ---
 if(MLCPSIMPLEX_FOUND OR BUILD_AS_CPP) 
