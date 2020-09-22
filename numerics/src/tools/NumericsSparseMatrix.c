@@ -238,7 +238,7 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
   }
   default:
   {
-    fprintf(stderr, "NSM_copy :: error unknown origin %d for sparse matrix\n", A->origin);
+    fprintf(stderr, "NSM_copy :: error unknown origin %u for sparse matrix\n", A->origin);
     exit(EXIT_FAILURE);
   }
   }
