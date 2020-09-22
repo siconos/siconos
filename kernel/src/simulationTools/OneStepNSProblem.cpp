@@ -448,7 +448,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
     {
       SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
       //   d->computeMass();
-      //   d->mass()->resetLU();
+      //   d->mass()->resetFactorizationFlags();
       DEBUG_EXPR(d->mass()->display(););
       block.reset(new SimpleMatrix(*(d->mass())));
     }

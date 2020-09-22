@@ -107,7 +107,7 @@ void SimpleMatrix::setValue(unsigned int row, unsigned int col, double value)
     (*mat.Banded)(row, col) = value;
   else if(_num == Siconos::ZERO || _num == Siconos::IDENTITY)
     SiconosMatrixException::selfThrow("SimpleMatrix:setValue: forbidden for Identity or Zero type matrices.");
-  resetLU();
+  resetFactorizationFlags();
 
 }
 
@@ -178,7 +178,7 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
       noalias(ublas::subrange(*mat.Banded, row_min, row_max, col_min, col_max)) = *(m.banded());
     else // if(_num == Siconos::ZERO) or _num == Siconos::IDENTITY nothing to do
     {}
-    resetLU();
+    resetFactorizationFlags();
   }
 }
 
@@ -265,7 +265,7 @@ void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
       SiconosMatrixException::selfThrow("setRow(row,v): inconsistent types between current matrix and v.");
   }
 
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
@@ -353,7 +353,7 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
       SiconosMatrixException::selfThrow("setCol(col,v): inconsistent types between current matrix and v.");
   }
 
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector vOut) const
@@ -455,7 +455,7 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
 #endif
     else
       SiconosMatrixException::selfThrow("setSubRow(row,v): inconsistent types between current matrix and v.");
-    resetLU();
+    resetFactorizationFlags();
   }
 
 }
@@ -559,7 +559,7 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
 #endif
     else
       SiconosMatrixException::selfThrow("setSubCol(row,v): inconsistent types between current matrix and v.");
-    resetLU();
+    resetFactorizationFlags();
   }
 }
 

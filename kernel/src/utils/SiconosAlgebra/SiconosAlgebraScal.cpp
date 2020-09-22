@@ -35,7 +35,7 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
   // To compute B = a * A (init = true) or B += a*A (init = false).
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
   if(!B.isBlock())
-    B.resetLU();
+    B.resetFactorizationFlags();
 
   if(&A == &B)
   {

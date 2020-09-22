@@ -37,7 +37,7 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-//#define DEBUG_NOCOLOR
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 //#define DEBUG_BEGIN_END_ONLY

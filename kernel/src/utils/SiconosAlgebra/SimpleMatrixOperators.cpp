@@ -264,7 +264,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
       SiconosMatrixException::selfThrow("SimpleMatrix::op= (const SimpleMatrix): invalid type of matrix");
       break;
     }
-    resetLU();
+    resetFactorizationFlags();
   }
   return *this;
 }
@@ -402,7 +402,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
     SiconosMatrixException::selfThrow("SimpleMatrix::op= (const SimpleMatrix): invalid type of matrix");
     break;
   }
-  resetLU();
+  resetFactorizationFlags();
   return *this;
 }
 
@@ -416,7 +416,7 @@ SimpleMatrix& SimpleMatrix::operator = (const DenseMat& m)
 
   noalias(*(mat.Dense)) = m;
 
-  resetLU();
+  resetFactorizationFlags();
   return *this;
 }
 
@@ -456,7 +456,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
     default:
       SiconosMatrixException::selfThrow("SimpleMatrix op+= invalid type of matrix");
     }
-    resetLU();
+    resetFactorizationFlags();
     return *this;
   }
 
@@ -609,7 +609,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
       SiconosMatrixException::selfThrow("SimpleMatrix::op+= : invalid type of matrix");
       break;
     }
-    resetLU();
+    resetFactorizationFlags();
   }
   return *this;
 }
@@ -646,7 +646,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
     default:
       SiconosMatrixException::selfThrow("SimpleMatrix op-= invalid type of matrix");
     }
-    resetLU();
+    resetFactorizationFlags();
     return *this;
   }
   if(size(0) != m.size(0) || size(1) != m.size(1))
@@ -797,7 +797,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
       SiconosMatrixException::selfThrow("SimpleMatrix::op-= : invalid type of matrix");
       break;
     }
-    resetLU();
+    resetFactorizationFlags();
   }
   return *this;
 

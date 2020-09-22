@@ -251,11 +251,26 @@ void SimpleMatrix::resetLU()
   _isPLUInversed = false;
 }
 
+void SimpleMatrix::resetCholesky()
+{
+  _isCholeskyFactorized = false;
+  _isCholeskyFactorizedInPlace = false;
+}
+
 void SimpleMatrix::resetQR()
 {
   _isQRFactorized = false;
 
 }
+
+void SimpleMatrix::resetFactorizationFlags()
+{
+  resetLU();
+  resetCholesky();
+  resetQR();
+}
+
+
 // const SimpleMatrix operator * (const SimpleMatrix & A, const SimpleMatrix& B )
 // {
 //   return (DenseMat)prod(*A.dense() , *B.dense());

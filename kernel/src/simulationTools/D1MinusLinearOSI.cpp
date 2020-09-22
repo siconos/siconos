@@ -382,7 +382,7 @@ void D1MinusLinearOSI::computeFreeState()
       vfree =  residuFree;
       DEBUG_EXPR(residuFree.display());
       // d->computeMass();
-      // M->resetLU();
+      // M->resetFactorizationFlags();
       // M->Solve(vfree);
       // DEBUG_EXPR(M->display());
 

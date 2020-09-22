@@ -680,7 +680,7 @@ void SimpleMatrix::zero()
 
   else if(_num == Siconos::IDENTITY)
     SiconosMatrixException::selfThrow("SimpleMatrix::zero(): you can not set to zero a matrix of type Identity!.");
-  resetLU();
+  resetFactorizationFlags();
   // if _num == Siconos::ZERO: nothing
 }
 
@@ -690,7 +690,7 @@ void SimpleMatrix::randomize()
     Siconos::algebra::fill(*mat.Dense);
   else
     SiconosMatrixException::selfThrow("SimpleMatrix::randomize(): only implemented for dense matrices.");
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::randomize_sym()
@@ -699,7 +699,7 @@ void SimpleMatrix::randomize_sym()
     Siconos::algebra::fill_sym(*mat.Dense);
   else
     SiconosMatrixException::selfThrow("SimpleMatrix::randomize_sym(): only implemented for dense matrices.");
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::eye()
@@ -723,7 +723,7 @@ void SimpleMatrix::eye()
 
   else if(_num == Siconos::ZERO)
     SiconosMatrixException::selfThrow("SimpleMatrix::eye(): you can not set to identity a matrix of type Zero!.");
-  resetLU();
+  resetFactorizationFlags();
 }
 
 
@@ -815,7 +815,7 @@ void SimpleMatrix::resize(unsigned int row, unsigned int col, unsigned int lower
   {
     (*mat.Identity).resize(row, col, preserve);
   }
-  resetLU();
+  resetFactorizationFlags();
 }
 
 

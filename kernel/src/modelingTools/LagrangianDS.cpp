@@ -337,7 +337,7 @@ void LagrangianDS::computeMass(SP::SiconosVector position)
   if(_mass && !_hasConstantMass && _pluginMass->fPtr)
   {
     ((FPtr7)_pluginMass->fPtr)(_ndof, &(*position)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
-    _mass->resetLU();
+    _mass->resetFactorizationFlags();
   }
 }
 

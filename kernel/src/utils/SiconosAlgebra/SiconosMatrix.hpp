@@ -143,7 +143,7 @@ public:
   {
     return _isSymmetric;
   }
-  
+
   /** set the flag _isSymmetric */
   inline void setIsSymmetric(bool b)
   {
@@ -587,6 +587,13 @@ public:
     SiconosMatrixException::selfThrow(" SiconosMatrix::resetLU not yet implemented for BlockMatrix.");
   };
 
+  /** set to false all factorization indicators. Useful in case of
+      assignment for example.
+  */
+  virtual void resetFactorizationFlags()
+  {
+    SiconosMatrixException::selfThrow(" SiconosMatrix::resetFactorizationFlags not yet implemented for BlockMatrix.");
+  };
 
   /** return the number of non-zero in the matrix
    * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)

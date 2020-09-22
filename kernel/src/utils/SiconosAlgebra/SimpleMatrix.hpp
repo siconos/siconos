@@ -739,10 +739,23 @@ public:
 
   void resetLU();
 
+  /** set to false all Cholesky indicators. Useful in case of
+      assignment for example.
+  */
+
+  void resetCholesky();
+
   /** set to false all QR indicators. Useful in case of
       assignment for example.
   */
   void resetQR();
+
+  /** set to false all factorization indicators. Useful in case of
+      assignment for example.
+  */
+  void resetFactorizationFlags();
+
+
 
   /** Visitors hook
    */

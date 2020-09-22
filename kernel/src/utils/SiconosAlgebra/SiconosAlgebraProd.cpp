@@ -530,7 +530,7 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
   assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorizedInPlace in prod !!");
   if(!C.isBlock())
-    C.resetLU();
+    C.resetFactorizationFlags();
 
   if((A.size(1) != B.size(0)))
     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
@@ -917,7 +917,7 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       }
     }
     if(!C.isBlock())
-      C.resetLU();
+      C.resetFactorizationFlags();
   }
 }
 

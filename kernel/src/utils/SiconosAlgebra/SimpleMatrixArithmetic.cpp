@@ -106,7 +106,7 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             else //if(numA==5)
               noalias(*C.dense()) = *A.banded() + *B.banded();
           }
-          C.resetLU();
+          C.resetFactorizationFlags();
         }
         else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
         {
@@ -242,7 +242,7 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             }
           else
             SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
-          C.resetLU();
+          C.resetFactorizationFlags();
         }
         else // A and/or B is Block
         {
@@ -340,7 +340,7 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
           C = A;
           C -= B;
         }
-        C.resetLU();
+        C.resetFactorizationFlags();
       }
     }
   }
@@ -389,7 +389,7 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             else //if(numA==5)
               noalias(*C.dense()) = *A.banded() - *B.banded();
           }
-          C.resetLU();
+          C.resetFactorizationFlags();
         }
         else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
         {
@@ -546,7 +546,7 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             }
           else
             SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
-          C.resetLU();
+          C.resetFactorizationFlags();
         }
         else // A and/or B is Block
         {
