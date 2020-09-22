@@ -61,7 +61,8 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   OneStepIntegrator(OSI::MOREAUJEANOSI),
   _constraintActivationThreshold(0.0),
   _useGammaForRelation(false),
-  _explicitNewtonEulerDSOperators(false)
+  _explicitNewtonEulerDSOperators(false),
+  _isWSymmetricDefinitePositive(false)
 {
   _levelMinForOutput= 0;
   _levelMaxForOutput =1;
