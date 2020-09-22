@@ -2264,7 +2264,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   else
   {
     /* A is preserved, so B must be preserved */
-    assert(!NM_destructible(B));
+    /* assert(!NM_destructible(B));  VA. 22-09-2020 I do not understand B must be destructible. It the case by default if B is created with NM_new */
     NM_preserve(B);
   }
 }
