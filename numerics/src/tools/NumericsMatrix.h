@@ -34,6 +34,10 @@
 #include <stdbool.h>        // for bool
 #endif
 
+#ifdef WITH_OPENSSL
+#include <openssl/sha.h>
+#endif
+
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
  */
