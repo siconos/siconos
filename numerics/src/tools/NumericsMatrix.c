@@ -3098,7 +3098,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
       lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
       DEBUG_PRINTF("iwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
 
-      numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it in place" );
+      numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep them in place" );
       DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
       //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
       DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
@@ -3140,12 +3140,12 @@ int NM_LU_factorize(NumericsMatrix* Ao)
         };
 
         CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
-        numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it" );
+        numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep them" );
         DEBUG_EXPR(cs_print(NM_csc(A),0));
         info = !CSparseMatrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A);
         if (info)
         {
-          numerics_printf_verbose(2, "NM_LU_factorize: cparse factorization failed.");
+          numerics_printf_verbose(2, "NM_LU_factorize: csparse factorization failed.");
         }
         assert(!p->linear_solver_data);
         p->linear_solver_data = cs_lu_A;
@@ -3371,7 +3371,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
       if(!NM_internalData(A)->isLUfactorized)
       {
-        numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it");
+        numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep them");
         DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
         //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
         DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
@@ -3453,7 +3453,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
           CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
-          numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it");
+          numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep them");
           CHECK_RETURN(CSparseMatrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->linear_solver_data = cs_lu_A;
         }
@@ -3733,7 +3733,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
       if(!NM_internalData(A)->isLUfactorized)
       {
-        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it");
+        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep them");
         DEBUG_PRINT("Start to call DPOTRF for NM_DENSE storage\n");
         //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
         DPOTRF(LA_UP, A->size1, A->matrix0, A->size0, &info);
@@ -3826,7 +3826,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
           CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
 
-          numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it");
+          numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep them");
           CHECK_RETURN(CSparseMatrix_chol_factorization(1, NM_csc(A),  cs_chol_A));
 
           p->linear_solver_data = cs_chol_A;
@@ -4663,7 +4663,7 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
 
       DEBUG_PRINTF("iwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
 
-      numerics_printf_verbose(2,"NM_Cholesky_factorize, we compute factors and keep it in place" );
+      numerics_printf_verbose(2,"NM_Cholesky_factorize, we compute factors and keep them in place" );
       DEBUG_PRINT("Start to call DPOTRF for NM_DENSE storage\n");
       DPOTRF(LA_UP, A->size1, A->matrix0, A->size0, &info);
       DEBUG_PRINT("end of call DPOTRF for NM_DENSE storage\n");
@@ -4706,12 +4706,12 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
 
         CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
 
-        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it");
+        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep them");
         info = !CSparseMatrix_chol_factorization(1, NM_csc(A),  cs_chol_A);
-        
+
         if (info)
         {
-          numerics_printf_verbose(2, "NM_Cholesky_factorize: cparse factorization failed.");
+          numerics_printf_verbose(2, "NM_Cholesky_factorize: csparse factorization failed.");
         }
         assert(!p->linear_solver_data);
         p->linear_solver_data = cs_chol_A;
