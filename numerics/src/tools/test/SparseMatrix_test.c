@@ -234,7 +234,7 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
 
   CSparseMatrix_factors* cs_lu_M = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
 
-  int info = 1-CSparsematrix_lu_factorization(1, M, 1e-14, cs_lu_M);
+  int info = 1-CSparseMatrix_lu_factorization(1, M, 1e-14, cs_lu_M);
 
   if (info)
   {
@@ -271,12 +271,13 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
 }
 
 
+
 static int test_CSparseMatrix_spsolve(void)
 {
   CSparseMatrix *m_triplet = cs_spalloc(3,3,3,1,1); /* coo format */
-  CS_INT info1 = 1-cs_entry(m_triplet, 0, 0, 1.0);
-  CS_INT info2 = 1-cs_entry(m_triplet, 1, 1, 2.0);
-  CS_INT info3 = 1-cs_entry(m_triplet, 2, 2, 4.0);
+  cs_entry(m_triplet, 0, 0, 1.0);
+  cs_entry(m_triplet, 1, 1, 2.0);
+  cs_entry(m_triplet, 2, 2, 4.0);
 //  CS_INT info4 = 1-cs_print(m_triplet, 0);
   CSparseMatrix *M = cs_compress(m_triplet);
 
