@@ -710,6 +710,574 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   return info;
 }
 
+
+
+
+static int gemm_square_triplet()
+{
+
+
+  int size0 =3;
+  int size1 =3;
+
+  // product of triplet matrices into triplet matrix
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(A, 0, 0, 1);
+  NM_zentry(A, 0, 1, 2);
+  NM_zentry(A, 0, 2, 3);
+  NM_zentry(A, 1, 1, 2);
+  NM_zentry(A, 1, 2, 3);
+  NM_display(A);
+
+
+  NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(B,0);
+  B->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(B, 0, 0, 1);
+  NM_zentry(B, 1, 1, 2);
+  NM_zentry(B, 2, 2, 3);
+  NM_display(B);
+
+  NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+
+  double alpha = 1.0;
+  double beta =0.0;
+  NM_gemm(alpha, A,B, beta, C);
+  NM_display(C);
+
+  NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(Cref,0);
+  Cref->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(Cref, 0, 0, 1);
+  NM_zentry(Cref, 0, 1, 4);
+  NM_zentry(Cref, 0, 2, 9);
+  NM_zentry(Cref, 1, 1, 4);
+  NM_zentry(Cref, 1, 2, 9);
+  NM_display(Cref);
+
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(C,%i,%i) =%e \n", i,j,NM_get_value(C,i,j) ); */
+  /*   } */
+  /* } */
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
+  /*   } */
+  /* } */
+
+
+  printf("NM_equal(C,Cref) =%i \n", NM_equal(C,Cref));
+  return (int)!NM_equal(C,Cref);
+
+
+}
+
+static int gemm_square_csc()
+{
+
+
+  int size0 =3;
+  int size1 =3;
+
+  // product of csc matrices into csc matrix
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_csc_empty_alloc(A,0);
+  A->matrix2->origin= NSM_CSC;
+  NM_zentry(A, 0, 0, 1);
+  NM_zentry(A, 0, 1, 2);
+  NM_zentry(A, 0, 2, 3);
+  NM_zentry(A, 1, 1, 2);
+  NM_zentry(A, 1, 2, 3);
+  /* NM_display(A); */
+
+
+  NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
+  NM_csc_empty_alloc(B,0);
+  B->matrix2->origin= NSM_CSC;
+  NM_zentry(B, 0, 0, 1);
+  NM_zentry(B, 1, 1, 2);
+  NM_zentry(B, 2, 2, 3);
+  /* NM_display(B); */
+
+  NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
+  int nzmax = 10;
+  NM_csc_empty_alloc(C,nzmax);
+  C->matrix2->origin= NSM_CSC;
+
+  NM_display(C);
+  double alpha = 1.0;
+  double beta = 0.0;
+  NM_gemm(alpha, A,B, beta, C);
+  NM_display(C);
+
+  NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
+  NM_csc_empty_alloc(Cref,0);
+  Cref->matrix2->origin= NSM_CSC;
+  NM_zentry(Cref, 0, 0, 1);
+  NM_zentry(Cref, 0, 1, 4);
+  NM_zentry(Cref, 0, 2, 9);
+  NM_zentry(Cref, 1, 1, 4);
+  NM_zentry(Cref, 1, 2, 9);
+  NM_display(Cref);
+
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(C,%i,%i) =%e \n", i,j,NM_get_value(C,i,j) ); */
+  /*   } */
+  /* } */
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
+  /*   } */
+  /* } */
+  return (int)!NM_equal(C,Cref);;
+
+}
+static int gemm_square_triplet_into_csc()
+{
+  int size0 =3;
+  int size1 =3;
+
+  // product of triplet matrices into triplet matrix
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(A, 0, 0, 1);
+  NM_zentry(A, 0, 1, 2);
+  NM_zentry(A, 0, 2, 3);
+  NM_zentry(A, 1, 1, 2);
+  NM_zentry(A, 1, 2, 3);
+  NM_display(A);
+
+
+
+
+  NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(B,0);
+  B->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(B, 0, 0, 1);
+  NM_zentry(B, 1, 1, 2);
+  NM_zentry(B, 2, 2, 3);
+  NM_display(B);
+
+  NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
+  int nzmax = 10;
+  NM_csc_empty_alloc(C,nzmax);
+  C->matrix2->origin= NSM_CSC;
+
+  double alpha = 1.0;
+  double beta =0.0;
+  NM_gemm(alpha, A,B, beta, C);
+  NM_display(C);
+  NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
+  NM_csc_empty_alloc(Cref,0);
+  Cref->matrix2->origin= NSM_CSC;
+  NM_zentry(Cref, 0, 0, 1);
+  NM_zentry(Cref, 0, 1, 4);
+  NM_zentry(Cref, 0, 2, 9);
+  NM_zentry(Cref, 1, 1, 4);
+  NM_zentry(Cref, 1, 2, 9);
+  NM_display(Cref);
+
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(C,%i,%i) =%e \n", i,j,NM_get_value(C,i,j) ); */
+  /*   } */
+  /* } */
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
+  /*   } */
+  /* } */
+  return (int)!NM_equal(C,Cref);;
+}
+
+static int gemm_rectangle_triplet()
+{
+
+
+  int size0 =3;
+  int size1 =9;
+
+  // product of triplet matrices into triplet matrix
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(A, 0, 0, 1);
+  NM_zentry(A, 0, 1, 2);
+  NM_zentry(A, 0, 2, 3);
+  NM_zentry(A, 1, 1, 2);
+  NM_zentry(A, 1, 2, 3);
+  NM_zentry(A, 2, 6, 2);
+  NM_zentry(A, 2, 5, 22);
+  NM_display(A);
+
+
+
+
+  NumericsMatrix * B  = NM_create(NM_SPARSE, size1, size0);
+  NM_triplet_alloc(B,0);
+  B->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(B, 0, 0, 1);
+  NM_zentry(B, 1, 1, 2);
+  NM_zentry(B, 2, 2, 3);
+  NM_zentry(B, 3, 0, 1);
+  NM_zentry(B, 4, 1, 2);
+  NM_zentry(B, 5, 2, 3);
+  NM_display(B);
+
+  NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size0);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+
+  double alpha = 1.0;
+  double beta =0.0;
+  NM_gemm(alpha, A,B, beta, C);
+  NM_display(C);
+
+  NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size0);
+  NM_triplet_alloc(Cref,0);
+  Cref->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(Cref, 0, 0, 1);
+  NM_zentry(Cref, 0, 1, 4);
+  NM_zentry(Cref, 0, 2, 9);
+  NM_zentry(Cref, 1, 1, 4);
+  NM_zentry(Cref, 1, 2, 9);
+  NM_zentry(Cref, 2, 2, 66);
+  NM_display(Cref);
+
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(C,%i,%i) =%e \n", i,j,NM_get_value(C,i,j) ); */
+  /*   } */
+  /* } */
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
+  /*   } */
+  /* } */
+
+
+  printf("NM_equal(C,Cref) =%i \n", NM_equal(C,Cref));
+  return (int)!NM_equal(C,Cref);
+
+
+}
+
+static int gemm_square_triplet_1()
+{
+
+
+  int size0 =3;
+  int size1 =3;
+
+  // product of triplet matrices into triplet matrix
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(A, 0, 0, 1);
+  NM_zentry(A, 0, 1, 2);
+  NM_zentry(A, 0, 2, 3);
+  NM_zentry(A, 1, 1, 2);
+  NM_zentry(A, 1, 2, 3);
+  NM_display(A);
+
+
+  NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(B,0);
+  B->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(B, 0, 0, 1);
+  NM_zentry(B, 1, 1, 2);
+  NM_zentry(B, 2, 2, 3);
+  NM_display(B);
+
+  NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+
+  double alpha = 1.0;
+  double beta =0.0;
+  NM_gemm(alpha, A,B, beta, C);
+  NM_display(C);
+
+  NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(Cref,0);
+  Cref->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(Cref, 0, 0, 1);
+  NM_zentry(Cref, 0, 1, 4);
+  NM_zentry(Cref, 0, 2, 9);
+  NM_zentry(Cref, 1, 1, 4);
+  NM_zentry(Cref, 1, 2, 9);
+  NM_display(Cref);
+
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(C,%i,%i) =%e \n", i,j,NM_get_value(C,i,j) ); */
+  /*   } */
+  /* } */
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
+  /*   } */
+  /* } */
+
+
+  printf("NM_equal(C,Cref) =%i \n", NM_equal(C,Cref));
+  return (int)!NM_equal(C,Cref);
+
+
+}
+
+static int gemm_square_csc_1()
+{
+
+
+  int size0 =3;
+  int size1 =3;
+
+  // product of csc matrices into csc matrix
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_csc_empty_alloc(A,0);
+  A->matrix2->origin= NSM_CSC;
+  NM_zentry(A, 0, 0, 1);
+  NM_zentry(A, 0, 1, 2);
+  NM_zentry(A, 0, 2, 3);
+  NM_zentry(A, 1, 1, 2);
+  NM_zentry(A, 1, 2, 3);
+  /* NM_display(A); */
+
+
+  NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
+  NM_csc_empty_alloc(B,0);
+  B->matrix2->origin= NSM_CSC;
+  NM_zentry(B, 0, 0, 1);
+  NM_zentry(B, 1, 1, 2);
+  NM_zentry(B, 2, 2, 3);
+  /* NM_display(B); */
+
+  NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
+  int nzmax = 10;
+  NM_csc_empty_alloc(C,nzmax);
+  C->matrix2->origin= NSM_CSC;
+
+  NM_display(C);
+  double alpha = 1.0;
+  double beta = 0.0;
+  NM_gemm(alpha, A,B, beta, C);
+  NM_display(C);
+
+  NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
+  NM_csc_empty_alloc(Cref,0);
+  Cref->matrix2->origin= NSM_CSC;
+  NM_zentry(Cref, 0, 0, 1);
+  NM_zentry(Cref, 0, 1, 4);
+  NM_zentry(Cref, 0, 2, 9);
+  NM_zentry(Cref, 1, 1, 4);
+  NM_zentry(Cref, 1, 2, 9);
+  NM_display(Cref);
+
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(C,%i,%i) =%e \n", i,j,NM_get_value(C,i,j) ); */
+  /*   } */
+  /* } */
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
+  /*   } */
+  /* } */
+  return (int)!NM_equal(C,Cref);;
+
+}
+static int gemm_square_triplet_into_csc_1()
+{
+  int size0 =3;
+  int size1 =3;
+
+  // product of triplet matrices into triplet matrix
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(A, 0, 0, 1);
+  NM_zentry(A, 0, 1, 2);
+  NM_zentry(A, 0, 2, 3);
+  NM_zentry(A, 1, 1, 2);
+  NM_zentry(A, 1, 2, 3);
+  NM_display(A);
+
+
+
+
+  NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(B,0);
+  B->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(B, 0, 0, 1);
+  NM_zentry(B, 1, 1, 2);
+  NM_zentry(B, 2, 2, 3);
+  NM_display(B);
+
+  NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size1);
+  int nzmax = 10;
+  NM_csc_empty_alloc(C,nzmax);
+  C->matrix2->origin= NSM_CSC;
+
+  double alpha = 1.0;
+  double beta =0.0;
+  NM_gemm(alpha, A,B, beta, C);
+  NM_display(C);
+  NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
+  NM_csc_empty_alloc(Cref,0);
+  Cref->matrix2->origin= NSM_CSC;
+  NM_zentry(Cref, 0, 0, 1);
+  NM_zentry(Cref, 0, 1, 4);
+  NM_zentry(Cref, 0, 2, 9);
+  NM_zentry(Cref, 1, 1, 4);
+  NM_zentry(Cref, 1, 2, 9);
+  NM_display(Cref);
+
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(C,%i,%i) =%e \n", i,j,NM_get_value(C,i,j) ); */
+  /*   } */
+  /* } */
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
+  /*   } */
+  /* } */
+  return (int)!NM_equal(C,Cref);;
+}
+
+static int gemm_rectangle_triplet_1()
+{
+
+
+  int size0 =3;
+  int size1 =9;
+
+  // product of triplet matrices into triplet matrix
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(A, 0, 0, 1);
+  NM_zentry(A, 0, 1, 2);
+  NM_zentry(A, 0, 2, 3);
+  NM_zentry(A, 1, 1, 2);
+  NM_zentry(A, 1, 2, 3);
+  NM_zentry(A, 2, 6, 2);
+  NM_zentry(A, 2, 5, 22);
+  NM_display(A);
+
+
+
+
+  NumericsMatrix * B  = NM_create(NM_SPARSE, size1, size0);
+  NM_triplet_alloc(B,0);
+  B->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(B, 0, 0, 1);
+  NM_zentry(B, 1, 1, 2);
+  NM_zentry(B, 2, 2, 3);
+  NM_zentry(B, 3, 0, 1);
+  NM_zentry(B, 4, 1, 2);
+  NM_zentry(B, 5, 2, 3);
+  NM_display(B);
+
+  NumericsMatrix * C  = NM_create(NM_SPARSE, size0, size0);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+
+  double alpha = 1.0;
+  double beta =0.0;
+  NM_gemm(alpha, A,B, beta, C);
+  NM_display(C);
+
+  NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size0);
+  NM_triplet_alloc(Cref,0);
+  Cref->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(Cref, 0, 0, 1);
+  NM_zentry(Cref, 0, 1, 4);
+  NM_zentry(Cref, 0, 2, 9);
+  NM_zentry(Cref, 1, 1, 4);
+  NM_zentry(Cref, 1, 2, 9);
+  NM_zentry(Cref, 2, 2, 66);
+  NM_display(Cref);
+
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(C,%i,%i) =%e \n", i,j,NM_get_value(C,i,j) ); */
+  /*   } */
+  /* } */
+  /* for(int i=0; i < C->size0; i++) */
+  /* { */
+  /*   for(int j=0; j < C->size1; j++) */
+  /*   { */
+  /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
+  /*   } */
+  /* } */
+
+
+  printf("NM_equal(C,Cref) =%i \n", NM_equal(C,Cref));
+  return (int)!NM_equal(C,Cref);
+
+
+}
+
+
+
+
+
+static int gemm_test_sparse(void)
+{
+
+  int info = gemm_square_triplet();
+  info += gemm_square_csc();
+  info +=  gemm_square_triplet_into_csc();
+  info +=  gemm_rectangle_triplet();
+  info += gemm_square_triplet_1();
+  info += gemm_square_csc_1();
+  info +=  gemm_square_triplet_into_csc_1();
+  info +=  gemm_rectangle_triplet_1();
+
+  return info;
+}
+
+
+
 static int NM_gemm_test_all(void)
 {
 
@@ -750,6 +1318,14 @@ static int NM_gemm_test_all(void)
     printf("End of ProdNumericsMatrix : unsucessfull\n");
     return info;
   }
+
+  info = gemm_test_sparse();
+  if(info != 0)
+  {
+    printf("End of ProdNumericsMatrix : unsucessfull\n");
+    return info;
+  }
+
 
   printf("End of ProdNumericsMatrix ...\n");
 
@@ -1784,6 +2360,46 @@ static int test_NM_scal(void)
   printf("========= End Numerics tests for NumericsMatrix NM_scal========= \n");
   return info;
 }
+
+
+static int NM_inv_test_sparse(void)
+{
+  int size0 =10;
+  int size1 =10;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =i; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  //NM_zentry(A, size0-1, size0-1, 10);
+
+  NM_display(A);
+  FILE * fileout = fopen("dataA.py", "w");
+  NM_write_in_file_python(A, fileout);
+  fclose(fileout);
+
+  NumericsMatrix * Ainv  = NM_inv(A);
+
+
+  NumericsMatrix* AAinv = NM_multiply(A,Ainv);
+  //NM_display(AAinv);
+
+  NumericsMatrix * Id  = NM_eye(size0);
+
+  //NM_display(Id);
+
+
+  return  !NM_equal(AAinv, Id);
+}
+
+
+
 static int test_NM_inv(void)
 {
 
@@ -1855,9 +2471,13 @@ static int test_NM_inv(void)
   NM_clear(IC);
   NM_clear(C);
 
+  info = NM_inv_test_sparse();
+  if(info ) return info;
+
   printf("========= End Numerics tests for NumericsMatrix NM_inv ========= \n");
   return info;
 }
+
 
 
 static int test_NM_gesv_expert_unit(NumericsMatrix * M1, double * b)
@@ -2488,6 +3108,133 @@ int test_NM_check_values_sha1()
 }
 #endif
 
+
+static int test_NM_compute_balancing_matrices(void)
+{
+  int size0 =50;
+  int size1 =50;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =i; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  NM_display(A);
+
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 10, B);
+
+  printf("D1\n:");
+  NM_display(B->D1);
+  printf("D2\n:");
+  NM_display(B->D2);
+  printf("A\n:");
+  NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
+static int test_NM_compute_balancing_matrices_sym(void)
+{
+  int size0 =10;
+  int size1 =10;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for(int i =0; i < size0; i++)
+  {
+    NM_zentry(A, i, i, i+i+1);
+    for(int j =i; j < size1; j++)
+    {
+      if(i != j)
+      {
+        NM_zentry(A, i, j, i+j+1);
+        NM_zentry(A, j, i, i+j+1);
+      }
+    }
+  }
+
+  NM_display(A);
+
+
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 10, B);
+  printf("D1\n:");
+  NM_display(B->D1);
+  printf("D2\n:");
+  NM_display(B->D2);
+  printf("A\n:");
+  NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
+static int test_NM_compute_balancing_matrices_rectangle(void)
+{
+  int size0 =3;
+  int size1 =1;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =0; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  NM_display(A);
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 100, B);
+  printf("D1\n:");
+  NM_display(B->D1);
+  printf("D2\n:");
+  NM_display(B->D2);
+  printf("A\n:");
+  NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
+
+static int test_NM_max_by_columns_and_rows(void)
+{
+  int size0 =5;
+  int size1 =5;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =i; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  NM_display(A);
+
+  double * max = (double *) malloc(size0*sizeof(double));
+
+  int info = NM_max_by_columns(A, max);
+  printf("Max by columns:\n");
+  NV_display(max,size0);
+  printf("Max by rows:\n");
+  info += NM_max_by_rows(A, max);
+  NV_display(max,size0);
+
+  return  info;
+}
+
+
+
 int main(int argc, char *argv[])
 {
 
@@ -2538,6 +3285,11 @@ int main(int argc, char *argv[])
   info += test_NM_compute_values_sha1();
   info += test_NM_check_values_sha1();
 #endif
+
+  info += test_NM_compute_balancing_matrices();
+  info += test_NM_compute_balancing_matrices_sym();
+  info += test_NM_compute_balancing_matrices_rectangle();
+  info += test_NM_max_by_columns_and_rows();
 
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();

@@ -156,6 +156,7 @@ extern "C"
    * \param[in,out] b on input RHS of the linear system; on output the solution
    * \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b);
+  CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A, CSparseMatrix* X, CSparseMatrix* B);
 
   /** reuse a Cholesky factorization (stored in the cs_chols_A) to solve a linear system Ax = b
    * \param cs_chol_A contains the Cholesky factors of A, permutation information

@@ -36,8 +36,13 @@
 #endif
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+//#define DEBUG_MESSAGES
 #include "debug.h" // for DEBUG_PRINTF
+
+
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
 
 /* y = alpha*A*x+beta*y */
 int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
@@ -261,6 +266,94 @@ CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b)
   return (ok);
 }
 
+/* Solve Ax = B with the factorization of A stored in the cs_lu_A
+ * B is a sparse matrix (CSparseMatrix_factors)
+ * This is extracted from cs_lusol, you need to synchronize any changes! */
+CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, CSparseMatrix* B)
+{
+  assert(cs_lu_A);
+  DEBUG_BEGIN("CSparseMatrix_spsolve(...)\n");
+
+  if(!CS_CSC(X)) return 1 ;                  /* check inputs */
+  if(!CS_CSC(B)) return 1 ;                  /* check inputs */
+
+
+  CS_INT ok;
+  CS_INT n = cs_lu_A->n;
+  csn* N = cs_lu_A->N;
+  if(!N)
+    return 1;
+
+  CS_ENTRY *x ;
+  CS_INT *xi, *q, top, k, col, i, p, j;
+  x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
+  xi = cs_malloc(2*n, sizeof(CS_INT)) ;              /* get CS_INT workspace */
+
+  CS_INT i_x=0;
+  X->p[0]=0;
+  /* 1- First step X = L\B */
+  /************************/
+  for(k = 0 ; k < n ; k++)
+  {
+    //q = S->q ;
+    //col = q ? (q [k]) : k ;
+    col = k ;
+    top = cs_spsolve(N->L, B, col, xi, x, N->pinv, 1) ;   /* x = L\B(:,col) */
+    if ( X->p[k]+ n-top > X->nzmax && !cs_sprealloc(X, 2*(X->nzmax)+ n-top) ) /* realloc X if need */
+    {
+      return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
+    }
+
+    for(p = top ; p < n ; p++)
+    {
+      i = xi [p] ;/* x(i) is nonzero */
+
+      X->i[i_x]=i;          /* store the result in X */
+      X->x[i_x++] = x[i];
+    }
+    X->p[k+1] = X->p[k] + n-top;
+  }
+  DEBUG_EXPR(cs_print(X,0););
+
+
+  /* 2- Second step B = U\X */
+  /************************/
+  DEBUG_PRINT("2- Second step B = U\\X\n");
+
+  CS_INT i_b=0;
+  B->p[0]=0;
+
+  for(k = 0 ; k < n ; k++)
+  {
+    //col = q ? (q [k]) : k ;
+    col = k ;
+    top = cs_spsolve(N->U, X, col, xi, x, N->pinv, 0) ;   /* x = U\X_csc(:,col) */
+    if ( B->p[k]+ n-top > B->nzmax && !cs_sprealloc(B, 2*(B->nzmax)+ n-top) )
+    {
+      return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
+    }
+    for(p = top ; p < n ; p++)
+    {
+      i = xi [p] ;/* x(i) is nonzero */
+      B->i[i_b]=i;  /* store the result in B */
+      B->x[i_b++] = x[i];
+    }
+    B->p[k+1] = B->p[k] + n-top;
+  }
+  DEBUG_EXPR(cs_print(B,0));
+
+  ok =1;
+
+  free(x);
+  free(xi);
+  DEBUG_END("CSparseMatrix_spsolve(...)\n");
+  return (ok);
+}
+
+
+
+
+
 CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b)
 {
   assert(cs_chol_A);
@@ -317,7 +410,7 @@ CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
     DEBUG_PRINTF("%d: %s\n", k, token);
     if(strncmp(token, "triplet:",8) == 0)
     {
-      DEBUG_PRINTF(" triplet matrix\n");
+      DEBUG_PRINT(" triplet matrix\n");
       is_triplet =1;
     }
     if(k==1+is_triplet)
@@ -393,7 +486,7 @@ CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
         {
           if(1 == sscanf(token, "%lld", &val1))
           {
-            DEBUG_PRINTF(" j- col = %i\n", j-val1);
+            DEBUG_PRINTF(" j- col = %lli\n", j-val1);
           }
           assert(j-val1 == 0);
         }
