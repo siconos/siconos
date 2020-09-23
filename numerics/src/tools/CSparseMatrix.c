@@ -207,7 +207,7 @@ CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A)
   return NULL;
 }
 
-int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSparseMatrix_factors * cs_lu_A)
+int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol, CSparseMatrix_factors * cs_lu_A)
 {
   assert(A);
   cs_lu_A->n = A->n;
@@ -217,7 +217,7 @@ int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSpars
 
   return (S && cs_lu_A->N);
 }
-int CSparsematrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A)
+int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A)
 {
   assert(A);
   cs_chol_A->n = A->n;

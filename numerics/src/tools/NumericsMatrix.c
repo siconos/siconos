@@ -3142,7 +3142,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
         CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
         numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it" );
         DEBUG_EXPR(cs_print(NM_csc(A),0));
-        info = !CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A);
+        info = !CSparseMatrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A);
         if (info)
         {
           numerics_printf_verbose(2, "NM_LU_factorize: cparse factorization failed.");
@@ -3454,7 +3454,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->dWorkSize = A->size1;
           CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
           numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it");
-          CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
+          CHECK_RETURN(CSparseMatrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->linear_solver_data = cs_lu_A;
         }
 
@@ -3827,7 +3827,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
           CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
 
           numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it");
-          CHECK_RETURN(CSparsematrix_chol_factorization(1, NM_csc(A),  cs_chol_A));
+          CHECK_RETURN(CSparseMatrix_chol_factorization(1, NM_csc(A),  cs_chol_A));
 
           p->linear_solver_data = cs_chol_A;
         }
@@ -4707,7 +4707,7 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
         CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
 
         numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it");
-        info = !CSparsematrix_chol_factorization(1, NM_csc(A),  cs_chol_A);
+        info = !CSparseMatrix_chol_factorization(1, NM_csc(A),  cs_chol_A);
         
         if (info)
         {

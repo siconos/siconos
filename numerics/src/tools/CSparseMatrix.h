@@ -140,7 +140,7 @@ extern "C"
    * \param cs_lu_A the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
-  int CSparsematrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_factors * cs_lu_A);
+  int CSparseMatrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_factors * cs_lu_A);
 
  /** compute a Cholesky factorization of A and store it in a workspace
    * \param order control if ordering is used
@@ -148,7 +148,7 @@ extern "C"
    * \param cs_chol_A the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
-  int CSparsematrix_chol_factorization(CS_INT order, const CSparseMatrix *A,  CSparseMatrix_factors * cs_chol_A);
+  int CSparseMatrix_chol_factorization(CS_INT order, const CSparseMatrix *A,  CSparseMatrix_factors * cs_chol_A);
 
   /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
    * \param cs_lu_A contains the LU factors of A, permutation information
