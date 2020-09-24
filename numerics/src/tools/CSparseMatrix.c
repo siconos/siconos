@@ -36,13 +36,47 @@
 #endif
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
-//#define DEBUG_MESSAGES
+/* #define DEBUG_MESSAGES */
 #include "debug.h" // for DEBUG_PRINTF
 
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
+
+double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j)
+{
+  CS_INT * Ai =   A->i;
+  CS_INT * Ap =   A->p;
+  double * Ax =   A->x;
+
+  for(CS_INT row = Ap[j]; row < Ap[j+1] ; row++)
+  {
+    if(i == Ai[row])
+      return  Ax[row];
+  }
+  return 0.0;
+}
+
+void CSparseMatrix_write_in_file_python(const CSparseMatrix* const m, FILE* file)
+{
+
+  fprintf(file, "m = %ld; \n", m->m);
+  fprintf(file, "n = %ld; \n", m->n);
+  fprintf(file, "data= [");
+  for(int i = 0; i < m->m; i++)
+  {
+    fprintf(file, "[");
+    for(int j = 0; j < m->n; j++)
+    {
+      fprintf(file, "%32.24e,\t ", CSparseMatrix_get_value((CSparseMatrix*) m,i,j));
+    }
+    fprintf(file, "],\n");
+  }
+  fprintf(file, "]");
+}
+
+
 
 /* y = alpha*A*x+beta*y */
 int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
@@ -277,74 +311,93 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
   if(!CS_CSC(X)) return 1 ;                  /* check inputs */
   if(!CS_CSC(B)) return 1 ;                  /* check inputs */
 
-
   CS_INT ok;
   CS_INT n = cs_lu_A->n;
   csn* N = cs_lu_A->N;
-  if(!N)
-    return 1;
+  if(!N) return 1;
+  css* S = cs_lu_A->S;
+  if(!S) return 1;
 
-  CS_ENTRY *x ;
-  CS_INT *xi, *q, top, k, col, i, p, j;
+  CS_ENTRY *x, *b, *Xx, *Bx ;
+  CS_INT *xi, *pinv, *q, top, k, col, i, p, j,  *Bp, *Bi, *Xp, *Xi;
+
   x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
-  xi = cs_malloc(2*n, sizeof(CS_INT)) ;              /* get CS_INT workspace */
+  b = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
+  xi = cs_malloc(2*n, sizeof(CS_INT)) ;             /* get CS_INT workspace */
 
-  CS_INT i_x=0;
-  X->p[0]=0;
-  /* 1- First step X = L\B */
-  /************************/
+  CS_INT xnz=0;
+  Xp= X->p;
+  Xi= X->i;
+  Xx= X->x;
+  Xp[0]=0;
+  pinv = N->pinv;
+  /* --- 1. First step X = L\B ---------------------------------------------- */
   for(k = 0 ; k < n ; k++)
   {
-    //q = S->q ;
-    //col = q ? (q [k]) : k ;
-    col = k ;
-    top = cs_spsolve(N->L, B, col, xi, x, N->pinv, 1) ;   /* x = L\B(:,col) */
-    if ( X->p[k]+ n-top > X->nzmax && !cs_sprealloc(X, 2*(X->nzmax)+ n-top) ) /* realloc X if need */
+    /* permutation of the rows  of B(:,k) */
+    for(p = B->p [k] ; p < B->p [k+1] ; p++) x [B->i[p]] = B->x [p] ; /* scatter B  */
+    for(p = B->p [k] ; p < B->p [k+1] ; p++)
+    {
+      CS_INT i_old= B->i[p];
+      B->i[p] = pinv[p]; /* permute row indices with N->pinv */
+      B->x[p] = x[i_old];
+    }
+    /* call spsolve */
+    top = cs_spsolve(N->L, B, k, xi, x, NULL, 1) ;    /* x = L\B(:,col) */
+    /* store the result in X */
+    if(Xp[k]+ n-top > X->nzmax && !cs_sprealloc(X, 2*(X->nzmax)+ n-top))    /* realloc X if need */
     {
       return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
     }
-
+    Xp= X->p;
+    Xi= X->i;
+    Xx= X->x;
     for(p = top ; p < n ; p++)
     {
       i = xi [p] ;/* x(i) is nonzero */
-
-      X->i[i_x]=i;          /* store the result in X */
-      X->x[i_x++] = x[i];
+      Xi[xnz]=i;          /* store the result in X */
+      Xx[xnz++] = x[i];
     }
-    X->p[k+1] = X->p[k] + n-top;
+    Xp[k+1] =Xp[k] + n-top;
   }
   DEBUG_EXPR(cs_print(X,0););
 
-
-  /* 2- Second step B = U\X */
-  /************************/
+  /* --- 2. First step B = U\B ---------------------------------------------- */
   DEBUG_PRINT("2- Second step B = U\\X\n");
-
-  CS_INT i_b=0;
-  B->p[0]=0;
-
+  CS_INT bnz=0;
+  Bp= B->p;
+  Bi= B->i;
+  Bx= B->x;
+  Bp[0]=0;
+  q = S->q;
   for(k = 0 ; k < n ; k++)
   {
-    //col = q ? (q [k]) : k ;
-    col = k ;
-    top = cs_spsolve(N->U, X, col, xi, x, N->pinv, 0) ;   /* x = U\X_csc(:,col) */
-    if ( B->p[k]+ n-top > B->nzmax && !cs_sprealloc(B, 2*(B->nzmax)+ n-top) )
+    top = cs_spsolve(N->U, X, k, xi, x, NULL, 0) ;   /* x = U\X(:,col) */
+
+    /* store the result in B */
+    if(Bp[k]+ n-top > B->nzmax && !cs_sprealloc(B, 2*(B->nzmax)+ n-top))
     {
       return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
     }
+    Bp= B->p;
+    Bi= B->i;
+    Bx= B->x;
+    /* permutation with S->q */
+    for(p = top ; p < n ; p++) b [q ? q [p] : p] = x [p] ;  /* b(q) = x */
     for(p = top ; p < n ; p++)
     {
-      i = xi [p] ;/* x(i) is nonzero */
-      B->i[i_b]=i;  /* store the result in B */
-      B->x[i_b++] = x[i];
+      i = xi[p] ;           /* x(i) is nonzero */
+      i = q[i];              /* permute the indices with S->q */
+      Bi[bnz] = i;
+      Bx[bnz++] = b[i];
     }
-    B->p[k+1] = B->p[k] + n-top;
+    Bp[k+1] = Bp[k] + n-top;
   }
   DEBUG_EXPR(cs_print(B,0));
 
   ok =1;
-
   free(x);
+  free(b);
   free(xi);
   DEBUG_END("CSparseMatrix_spsolve(...)\n");
   return (ok);
@@ -372,6 +425,116 @@ CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, dou
   }
   return (ok);
 }
+
+
+
+/* Solve Ax = B with the factorization of A stored in the cs_chol_A
+ * B is a sparse matrix (CSparseMatrix_factors)
+ * This is extracted from cs_lusol, you need to synchronize any changes! */
+CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatrix* X, CSparseMatrix* B)
+{
+  DEBUG_BEGIN("CSparseMatrix_chol_spsolve(...)\n");
+
+  if(!CS_CSC(X)) return 1 ;                  /* check inputs */
+  if(!CS_CSC(B)) return 1 ;                  /* check inputs */
+
+  CS_INT ok;
+  CS_INT n = cs_chol_A->n;
+  csn* N = cs_chol_A->N;
+  if(!N) return 1;
+  css* S = cs_chol_A->S;
+  if(!S) return 1;
+
+  CS_ENTRY *x, *b, *Xx, *Bx ;
+  CS_INT *xi, *pinv, top, k, col, i, p, j,  *Bp, *Bi, *Xp, *Xi;
+
+  x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
+  b = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
+  xi = cs_malloc(2*n, sizeof(CS_INT)) ;             /* get CS_INT workspace */
+
+  CS_INT xnz=0;
+  Xp= X->p;
+  Xi= X->i;
+  Xx= X->x;
+  Xp[0]=0;
+  pinv = S->pinv;
+
+  /* for (i =0; i <n; i++) printf("pinv[%li] = %li\t", i, pinv[i]); */
+  /* printf("\n"); */
+  
+  /* --- 1. First step X = L\B ---------------------------------------------- */
+  for(k = 0 ; k < n ; k++)
+  {
+    /* permutation of the rows  of B(:,k) */
+    for(p = B->p [k] ; p < B->p [k+1] ; p++) x [B->i[p]] = B->x [p] ; /* scatter B  */
+    for(p = B->p [k] ; p < B->p [k+1] ; p++)
+    {
+      CS_INT i_old= B->i[p];
+      B->i[p] = pinv[p]; /* permute row indices with N->pinv */
+      B->x[p] = x[i_old];
+    }
+    /* call spsolve */
+    top = cs_spsolve(N->L, B, k, xi, x, NULL, 1) ;    /* x = L\B(:,col) */
+    /* store the result in X */
+    if(Xp[k]+ n-top > X->nzmax && !cs_sprealloc(X, 2*(X->nzmax)+ n-top))    /* realloc X if need */
+    {
+      return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
+    }
+    Xp= X->p;
+    Xi= X->i;
+    Xx= X->x;
+    for(p = top ; p < n ; p++)
+    {
+      i = xi [p] ;/* x(i) is nonzero */
+      Xi[xnz]=i;          /* store the result in X */
+      Xx[xnz++] = x[i];
+    }
+    Xp[k+1] =Xp[k] + n-top;
+  }
+  DEBUG_EXPR(cs_print(X,0););
+
+  /* --- 2. First step B = L'\B ---------------------------------------------- */
+  DEBUG_PRINT("2- Second step B = L'\\X\n");
+
+  CSparseMatrix* LT = cs_transpose(N->L,1);
+  CS_INT bnz=0;
+  Bp= B->p;
+  Bi= B->i;
+  Bx= B->x;
+  Bp[0]=0;
+  for(k = 0 ; k < n ; k++)
+  {
+    top = cs_spsolve(LT, X, k, xi, x, NULL, 0) ;   /* x = U\X(:,col) */
+
+    /* store the result in B */
+    if(Bp[k]+ n-top > B->nzmax && !cs_sprealloc(B, 2*(B->nzmax)+ n-top))
+    {
+      return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
+    }
+    Bp= B->p;
+    Bi= B->i;
+    Bx= B->x;
+    /* permutation with S->pinv */
+    cs_pvec(pinv, x, b, n) ;     /* b = P'*x */
+    //for(p = top ; p < n ; p++) b [q ? q [p] : p] = x [p] ;  /* b(q) = x */
+    for(p = top ; p < n ; p++)
+    {
+      i = xi[p] ;               /* x(i) is nonzero */
+      i = pinv[i];              /* permute the indices with S->pinv */ // to be checked carefully
+      Bi[bnz] = i;
+      Bx[bnz++] = b[i];
+    }
+    Bp[k+1] = Bp[k] + n-top;
+  }
+  DEBUG_EXPR(cs_print(B,0));
+  ok =1;
+  free(x);
+  free(b);
+  free(xi);
+  DEBUG_END("CSparseMatrix_chol_spsolve(...)\n");
+  return (ok);
+}
+
 
 CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
 {

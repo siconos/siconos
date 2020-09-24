@@ -30,7 +30,6 @@
 int add_square_triplet(void);
 int add_square_csc(void);
 int add_square_triplet_into_csc(void);
-
 int add_rectangle_triplet(void);
 
 int add_square_triplet()
@@ -246,7 +245,7 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
   /* printf(" U:\n"); */
   /* cs_print(cs_lu_M->N->U, 0); */
 
-  info = !CSparseMatrix_spsolve(cs_lu_M, X, B);
+  info = 1-CSparseMatrix_spsolve(cs_lu_M, X, B);
   if (info)
   {
     printf("problem in spsolve\n");
@@ -261,7 +260,9 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
   CSparseMatrix* check = cs_add(I, Id, 1.0, -1.0);
   //cs_print(check, 0);
 
-  if (cs_norm(check) > 1-14)
+  double error = cs_norm(check);
+  printf("error =%e\n", error);
+  if (error > 1e-14)
   {
     return 1;
 
@@ -269,7 +270,6 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
 
   return  info;
 }
-
 
 
 static int test_CSparseMatrix_spsolve(void)
@@ -313,6 +313,100 @@ static int test_CSparseMatrix_spsolve(void)
 
   return  info;
 }
+static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M )
+{
+  //cs_print(M, 0);
+
+  CSparseMatrix *b_triplet = cs_spalloc(M->m, M->n,M->n, 1, 1); /* coo format */
+  for (int i; i < M->n; i++)
+    cs_entry(b_triplet, i, i, 1.0);
+
+  CSparseMatrix *B = cs_compress(b_triplet);
+
+  CSparseMatrix *X = cs_spalloc(M->m, M->n, M->nzmax, 1,0); /* csc format */
+
+  CSparseMatrix_factors* cs_chol_M = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+
+  int info = 1-CSparseMatrix_chol_factorization(1, M, cs_chol_M);
+
+  if (info)
+  {
+    printf("problem in Cholesky factor\n");
+    return info;
+  }
+  printf(" L:\n");
+  cs_print(cs_chol_M->N->L, 0);
+
+  info = 1-CSparseMatrix_chol_spsolve(cs_chol_M, X, B);
+  if (info)
+  {
+    printf("problem in chol_spsolve\n");
+    return info;
+  }
+  CSparseMatrix* I = cs_multiply(M, B);
+  //printf(" M * M^-1:\n");
+  //cs_print(I, 0);
+
+  CSparseMatrix *Id = cs_compress(b_triplet);
+
+  CSparseMatrix* check = cs_add(I, Id, 1.0, -1.0);
+  //cs_print(check, 0);
+
+  double error = cs_norm(check);
+  printf("error =%e\n", error);
+  if (error > 1e-14)
+  {
+    return 1;
+
+  }
+  printf("info =%i\n", info);
+  return  info;
+}
+
+
+static int test_CSparseMatrix_chol_spsolve(void)
+{
+  CSparseMatrix *m_triplet = cs_spalloc(3,3,3,1,1); /* coo format */
+  cs_entry(m_triplet, 0, 0, 1.0);
+  cs_entry(m_triplet, 1, 1, 2.0);
+  cs_entry(m_triplet, 2, 2, 4.0);
+//  CS_INT info4 = 1-cs_print(m_triplet, 0);
+  CSparseMatrix *M = cs_compress(m_triplet);
+
+  int info =  test_CSparseMatrix_chol_spsolve_unit(M);
+  if (info) return 1;
+
+  cs_entry(m_triplet, 0, 1, 3.0);
+  cs_entry(m_triplet, 0, 2, 6.0);
+  cs_entry(m_triplet, 1, 2, 5.0);
+  cs_entry(m_triplet, 1, 0, 3.0);
+  cs_entry(m_triplet, 2, 0, 6.0);
+  cs_entry(m_triplet, 2, 1, 5.0);
+  CSparseMatrix *M2 = cs_compress(m_triplet);
+  CSparseMatrix *M2T = cs_transpose(M2,1);
+  CSparseMatrix *M2M2T = cs_multiply(M2,M2T);
+  info =  test_CSparseMatrix_chol_spsolve_unit(M2M2T);
+  if (info) return 1;
+
+  int size0 =10;
+  int size1 =10;
+  CSparseMatrix *a_triplet = cs_spalloc(size0,size1,size0,1,1); /* coo format */
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =i; j < size1; j++)
+    {
+      cs_entry(a_triplet, i, j, i+j+1);
+    }
+  }
+  CSparseMatrix *A = cs_compress(a_triplet);
+  CSparseMatrix *AT = cs_transpose(A,1);
+  CSparseMatrix *AAT = cs_multiply(A,AT);
+
+  info =  test_CSparseMatrix_chol_spsolve_unit(AAT);
+
+  return  info;
+}
+
 
 
 
@@ -326,10 +420,8 @@ int main()
   int info = add_test();
 
   info += test_CSparseMatrix_alloc();
-
-
-
   info += test_CSparseMatrix_spsolve();
+  info += test_CSparseMatrix_chol_spsolve();
 
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();

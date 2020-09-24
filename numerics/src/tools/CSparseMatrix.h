@@ -156,6 +156,13 @@ extern "C"
    * \param[in,out] b on input RHS of the linear system; on output the solution
    * \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b);
+
+  /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = B
+   * with a sparse r.h.s
+   * \param cs_lu_A contains the LU factors of A, permutation information
+   * \param X a csc sparse matrix workspace
+   * \param[in,out] B on input sparse RHS of the linear system; on output the solution
+   * \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A, CSparseMatrix* X, CSparseMatrix* B);
 
   /** reuse a Cholesky factorization (stored in the cs_chols_A) to solve a linear system Ax = b
@@ -164,6 +171,14 @@ extern "C"
    * \param[in,out] b on input RHS of the linear system; on output the solution
    * \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b);
+
+  /** reuse a Cholesky factorization (stored in the cs_chols_A) to solve a linear system Ax = B
+   * with a sparse r.h.s
+   * \param cs_chol_A contains the Cholesky factors of A, permutation information
+   * \param X a csc sparse matrix workspace
+   * \param[in,out] b on input sparse RHS of the linear system; on output the solution
+   * \return 0 if failed, 1 otherwise*/
+  CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A, CSparseMatrix* X, CSparseMatrix* B);
 
   /** Free a workspace related to a LU factorization
    * \param cs_lu_A the structure to free
@@ -253,7 +268,10 @@ extern "C"
    */
   int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A);
 
+  double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j);
 
+  void CSparseMatrix_write_in_file_python(const CSparseMatrix* const m, FILE* file);
+  
   int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double * max);
 
   int CSparseMatrix_max_abs_by_columns(const CSparseMatrix *A, double * max);
