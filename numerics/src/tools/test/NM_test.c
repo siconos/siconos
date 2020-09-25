@@ -2752,7 +2752,13 @@ static int test_NM_posv_expert(void)
   free(NMM);
   printf("========= End Numerics tests for NumericsMatrix ========= \n");
   return info;
+
 }
+
+
+
+
+
 static int test_NM_LU_solve_unit(NumericsMatrix * M1, double * b)
 {
   int n = M1->size0;
@@ -2797,13 +2803,14 @@ static int test_NM_LU_solve(void)
   double * b = NULL;
 
   int n =0;
-  
+
   M1 = NMM[0];
   n = M1->size0;
   b = (double*)malloc(n* sizeof(double));
   for(int j=0; j < n; j++)
     b[j] =1.0;
   info = test_NM_LU_solve_unit(M1, b);
+  free(b);
   if(info != 0) return info;
 
   M1=NMM[1];
@@ -2812,6 +2819,7 @@ static int test_NM_LU_solve(void)
   for(int j=0; j < n; j++)
     b[j] =1.0;
   info = test_NM_LU_solve_unit(M1, b);
+  free(b);
   if(info != 0) return info;
 
   M1 = test_matrix_5();
@@ -2820,11 +2828,121 @@ static int test_NM_LU_solve(void)
   for(int j=0; j < n; j++)
     b[j] =1.0;
   info = test_NM_LU_solve_unit(M1, b);
+  free(b);
   if(info != 0) return info;
 
-  free(b);
 
-  printf("End of NM_gesv...\n");
+  if(info != 0) return info;
+
+  /* free memory */
+
+  for(i = 0 ; i < nmm; i++)
+  {
+    NM_clear(NMM[i]);
+    free(NMM[i]);
+  }
+  free(NMM);
+  printf("========= End Numerics tests for NumericsMatrix  (test_NM_LU_solve) ========= \n");
+  return info;
+}
+static int test_NM_LU_solve_matrix_rhs_unit(NumericsMatrix * M1, NumericsMatrix * B )
+{
+  int n = M1->size0;
+  int info =-1;
+
+  NumericsMatrix * B_backup = NM_new();
+  NM_copy(B, B_backup);
+
+  /* We can also write:
+     NM_preserve(M1);
+     NM_LU_solve(M1, b, 1); */
+
+  NM_LU_solve_matrix_rhs(NM_preserve(M1), B);
+  NM_display(B);
+  NumericsMatrix * MB = NM_new();
+  NM_copy(B, MB); /* in order to get to same allocation */
+  NM_gemm(1.0, M1, B, 0.0, MB );
+
+  NumericsMatrix* RES = NM_add(1.0, MB, -1.0, B_backup);
+  double res = NM_norm_1(RES);
+
+  NM_clear(B_backup);
+  NM_clear(MB);
+  NM_clear(RES);
+  free(B_backup);
+  free(MB);
+  free(RES);
+
+  printf("test_NM_LU_solve_matrix_rhs_unit :residual = %e\n", res);
+  if(fabs(res) >= sqrt(DBL_EPSILON))
+    info = 1;
+  else
+    info=0;
+  return info;
+}
+static int test_NM_LU_solve_matrix_rhs(void)
+{
+
+  printf("========= Starts Numerics tests for NumericsMatrix (test_NM_LU_solve) ========= \n");
+  /* numerics_set_verbose(2); */
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
+  int info = test_build_first_4_NM(NMM);
+
+  if(info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
+  printf("Construction ok ...\n");
+
+
+  /* DENSE matrix, DENSE RHS */
+
+  NumericsMatrix * M1 = NULL;
+  NumericsMatrix * B ;
+
+
+  int n =0;
+
+  M1 = NMM[0];
+  n = M1->size0;
+  B = NM_create(NM_DENSE, n, n);
+  for(int j=0; j < n; j++)
+    B->matrix0[j+j*n] = 1.0;
+  info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
+  NM_clear(B);
+  if(info != 0) return info;
+
+
+  /* SBM RHS */
+  /* M1=NMM[1]; */
+  /* n = M1->size0; */
+  /* B = NM_create(NM_SPARSE_BLOCK, n, n); */
+  /* for(int 2j=0; j < n; j++) */
+  /*   B->matrix0[j+j*n] = 1.0; */
+  /* info = test_NM_LU_solve_matrix_rhs_unit(M1, B); */
+  /* NM_clear(B); */
+
+
+  /* SPARSE matrix, DENSE RHS */
+  M1 = test_matrix_5();
+  n = M1->size0;
+  B = NM_create(NM_DENSE, n, n);
+  for(int j=0; j < n; j++)
+    B->matrix0[j+j*n] = 1.0;
+  info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
+  NM_clear(B);
+
+  /* SPARSE matrix, SPARSE RHS */
+  M1 = test_matrix_5();
+  FILE* foutput = fopen("M1.py", "w");
+  NM_write_in_file_python(M1, foutput);
+  fclose(foutput);
+  n = M1->size0;
+  B = NM_eye(n);
+  info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
+  NM_clear(B);
   if(info != 0) return info;
 
   /* free memory */
@@ -2849,7 +2967,7 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix * M, double * b)
 
 
   printf("Cholesky solve preserving matrix\n");
-  
+
   double * y = (double*)malloc(n* sizeof(double));
   for(int j=0; j < n; j++)
     y[j] = b[j];
@@ -2919,7 +3037,7 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix * M, double * b)
   }
   else
     info=0;
-  
+
   free(y);
   free(y_save);
 
@@ -3034,6 +3152,143 @@ static int test_NM_Cholesky_solve(void)
   printf("========= End Numerics tests for NumericsMatrix (test_NM_Cholesky_solve) ========= \n");
   return info;
 }
+
+static int test_NM_Cholesky_solve_matrix_rhs_unit(NumericsMatrix * M1, NumericsMatrix * B )
+{
+  int n = M1->size0;
+  int info =-1;
+
+  NumericsMatrix * B_backup = NM_new();
+  NM_copy(B, B_backup);
+
+  /* We can also write:
+     NM_preserve(M1);
+     NM_LU_solve(M1, b, 1); */
+
+  NM_Cholesky_solve_matrix_rhs(NM_preserve(M1), B);
+  //NM_display(B);
+  NumericsMatrix * MB = NM_new();
+  NM_copy(B, MB); /* in order to get to same allocation */
+  NM_gemm(1.0, M1, B, 0.0, MB );
+
+  NumericsMatrix* RES = NM_add(1.0, MB, -1.0, B_backup);
+  double res = NM_norm_1(RES);
+
+  NM_clear(B_backup);
+  NM_clear(MB);
+  NM_clear(RES);
+  free(B_backup);
+  free(MB);
+  free(RES);
+
+  printf("test_NM_Cholesky_solve_matrix_rhs_unit : residual = %e\n", res);
+  if(fabs(res) >= sqrt(DBL_EPSILON))
+    info = 1;
+  else
+    info=0;
+  return info;
+}
+static int test_NM_Cholesky_solve_matrix_rhs(void)
+{
+
+  printf("========= Starts Numerics tests for NumericsMatrix (test_NM_Cholesky_solve_matrix_rhs) ========= \n");
+  /* numerics_set_verbose(2); */
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
+  int info = test_build_first_4_NM(NMM);
+
+  if(info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
+  printf("Construction ok ...\n");
+
+
+  /* DENSE matrix, DENSE RHS */
+
+  NumericsMatrix * M1 = NULL;
+  NumericsMatrix * B ;
+
+
+  int n =0;
+
+  M1 = NMM[0];
+  n = M1->size0;
+
+  NumericsMatrix * M1T = NM_transpose(M1);
+  NumericsMatrix * C = NM_create(NM_DENSE,M1->size0,M1->size1);
+  NM_gemm(1.0, M1, M1T, 0.0, C);
+
+  B = NM_create(NM_DENSE, n, n);
+  for(int j=0; j < n; j++)
+    B->matrix0[j+j*n] = 1.0;
+  info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
+  NM_clear(B);
+  NM_clear(C);
+  NM_clear(M1T);
+  if(info != 0) return info;
+
+
+  /* SBM RHS */
+  /* M1=NMM[1]; */
+  /* n = M1->size0; */
+  /* B = NM_create(NM_SPARSE_BLOCK, n, n); */
+  /* for(int 2j=0; j < n; j++) */
+  /*   B->matrix0[j+j*n] = 1.0; */
+  /* info = test_NM_Cholesky_solve_matrix_rhs_unit(M1, B); */
+  /* NM_clear(B); */
+
+
+  /* SPARSE matrix, DENSE RHS */
+  M1 = test_matrix_5();
+  n = M1->size0;
+  M1T = NM_transpose(M1);
+  C = NM_create(NM_SPARSE,M1->size0,M1->size1);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+  NM_gemm(1.0, M1, M1T, 0.0, C);
+  B = NM_create(NM_DENSE, n, n);
+  for(int j=0; j < n; j++)
+    B->matrix0[j+j*n] = 1.0;
+  info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
+  NM_clear(B);
+  NM_clear(C);
+  NM_clear(M1T);
+
+  /* SPARSE matrix, SPARSE RHS */
+  M1 = test_matrix_5();
+  M1T = NM_transpose(M1);
+  C = NM_create(NM_SPARSE,M1->size0,M1->size1);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+  NM_gemm(1.0, M1, M1T, 0.0, C);
+
+  n = M1->size0;
+  B = NM_eye(n);
+  info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
+
+  NM_clear(B);
+  NM_clear(C);
+  NM_clear(M1T);
+  if(info != 0) return info;
+
+  /* free memory */
+
+  for(i = 0 ; i < nmm; i++)
+  {
+    NM_clear(NMM[i]);
+    free(NMM[i]);
+  }
+  free(NMM);
+  printf("========= End Numerics tests for NumericsMatrix  (test_NM_Cholesky_solve_matrix_rhs) ========= \n");
+  return info;
+}
+
+
+
+
+
 #ifdef WITH_OPENSSL
 #include <openssl/sha.h>
 #include <string.h>
@@ -3271,14 +3526,19 @@ int main(int argc, char *argv[])
 
   info +=    test_NM_scal();
 
+  info += test_NM_compute_balancing_matrices();
+  info += test_NM_compute_balancing_matrices_sym();
+  info += test_NM_compute_balancing_matrices_rectangle();
+  info += test_NM_max_by_columns_and_rows();
+
+
   info +=    test_NM_inv();
-
   info += test_NM_gesv_expert();
-
   info += test_NM_posv_expert();
 
   info += test_NM_LU_solve();
-
+  info += test_NM_LU_solve_matrix_rhs();
+  info += test_NM_Cholesky_solve_matrix_rhs();
   info += test_NM_Cholesky_solve();
 
 #ifdef WITH_OPENSSL
@@ -3286,15 +3546,11 @@ int main(int argc, char *argv[])
   info += test_NM_check_values_sha1();
 #endif
 
-  info += test_NM_compute_balancing_matrices();
-  info += test_NM_compute_balancing_matrices_sym();
-  info += test_NM_compute_balancing_matrices_rectangle();
-  info += test_NM_max_by_columns_and_rows();
 
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
-
+  printf("info = %i\n", info);
   return info;
 
 }
