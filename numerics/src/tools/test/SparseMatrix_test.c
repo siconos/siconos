@@ -274,6 +274,7 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
 
 static int test_CSparseMatrix_spsolve(void)
 {
+  printf("start - test_CSparseMatrix_spsolve\n");
   CSparseMatrix *m_triplet = cs_spalloc(3,3,3,1,1); /* coo format */
   cs_entry(m_triplet, 0, 0, 1.0);
   cs_entry(m_triplet, 1, 1, 2.0);
@@ -310,7 +311,7 @@ static int test_CSparseMatrix_spsolve(void)
   }
   CSparseMatrix *A = cs_compress(a_triplet);
   info +=  test_CSparseMatrix_spsolve_unit(A);
-
+  printf("end - test_CSparseMatrix_spsolve\n");
   return  info;
 }
 static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M )
@@ -334,8 +335,8 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M )
     printf("problem in Cholesky factor\n");
     return info;
   }
-  printf(" L:\n");
-  cs_print(cs_chol_M->N->L, 0);
+  /* printf(" L:\n"); */
+  /* cs_print(cs_chol_M->N->L, 0); */
 
   info = 1-CSparseMatrix_chol_spsolve(cs_chol_M, X, B);
   if (info)
@@ -359,13 +360,14 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M )
     return 1;
 
   }
-  printf("info =%i\n", info);
+  //printf("info =%i\n", info);
   return  info;
 }
 
 
 static int test_CSparseMatrix_chol_spsolve(void)
 {
+  printf("start - test_CSparseMatrix_chol_spsolve \n");
   CSparseMatrix *m_triplet = cs_spalloc(3,3,3,1,1); /* coo format */
   cs_entry(m_triplet, 0, 0, 1.0);
   cs_entry(m_triplet, 1, 1, 2.0);
@@ -403,7 +405,7 @@ static int test_CSparseMatrix_chol_spsolve(void)
   CSparseMatrix *AAT = cs_multiply(A,AT);
 
   info =  test_CSparseMatrix_chol_spsolve_unit(AAT);
-
+  printf("end - test_CSparseMatrix_chol_spsolve \n");
   return  info;
 }
 

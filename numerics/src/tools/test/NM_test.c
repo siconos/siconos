@@ -3273,6 +3273,23 @@ static int test_NM_Cholesky_solve_matrix_rhs(void)
   NM_clear(M1T);
   if(info != 0) return info;
 
+  /* SPARSE matrix, SPARSE RHS */
+  M1 = test_matrix_5();
+  M1T = NM_transpose(M1);
+  C = NM_create(NM_SPARSE,M1->size0,M1->size1);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+  NM_gemm(1.0, M1, M1T, 0.0, C);
+
+  n = M1->size0;
+  B = NM_eye(n);
+  info = test_NM_Cholesky_solve_matrix_rhs_unit(C, B);
+
+  NM_clear(B);
+  NM_clear(C);
+  NM_clear(M1T);
+  if(info != 0) return info;
+  
   /* free memory */
 
   for(i = 0 ; i < nmm; i++)

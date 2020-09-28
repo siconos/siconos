@@ -374,11 +374,6 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
   {
     top = cs_spsolve(N->U, X, k, xi, x, NULL, 0) ;   /* x = U\X(:,col) */
 
-    for(p = top ; p < n ; p++)
-    {
-      i = xi[p] ;
-      printf("x[%i]=%e\t", i, x[i]);
-    }
     /* store the result in B */
     if(Bp[k]+ n-top > B->nzmax && !cs_sprealloc(B, 2*(B->nzmax)+ n-top))
     {
