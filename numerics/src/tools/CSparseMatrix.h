@@ -204,6 +204,9 @@ extern "C"
 
   CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B);
 
+  int CSparseMatrix_print(const CSparseMatrix *A, int brief);
+
+
   /** print a matrix to a text file
    * \param A matrix to print
    * \param brief if positive, print only a portion of the matrix

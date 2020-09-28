@@ -339,7 +339,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
     for(p = B->p [k] ; p < B->p [k+1] ; p++)
     {
       CS_INT i_old= B->i[p];
-      B->i[p] = pinv[p]; /* permute row indices with N->pinv */
+      B->i[p] = pinv[i_old]; /* permute row indices with N->pinv */
       B->x[p] = x[i_old];
     }
     /* call spsolve */
@@ -374,6 +374,11 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
   {
     top = cs_spsolve(N->U, X, k, xi, x, NULL, 0) ;   /* x = U\X(:,col) */
 
+    for(p = top ; p < n ; p++)
+    {
+      i = xi[p] ;
+      printf("x[%i]=%e\t", i, x[i]);
+    }
     /* store the result in B */
     if(Bp[k]+ n-top > B->nzmax && !cs_sprealloc(B, 2*(B->nzmax)+ n-top))
     {
@@ -382,19 +387,15 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
     Bp= B->p;
     Bi= B->i;
     Bx= B->x;
-    /* permutation with S->q */
-    for(p = top ; p < n ; p++) b [q ? q [p] : p] = x [p] ;  /* b(q) = x */
     for(p = top ; p < n ; p++)
     {
       i = xi[p] ;           /* x(i) is nonzero */
-      i = q[i];              /* permute the indices with S->q */
-      Bi[bnz] = i;
-      Bx[bnz++] = b[i];
+      Bi[bnz] = q[i];       /* permute the indices with S->q */
+      Bx[bnz++] = x[i];
     }
     Bp[k+1] = Bp[k] + n-top;
   }
   DEBUG_EXPR(cs_print(B,0));
-
   ok =1;
   free(x);
   free(b);
@@ -461,7 +462,7 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatr
 
   /* for (i =0; i <n; i++) printf("pinv[%li] = %li\t", i, pinv[i]); */
   /* printf("\n"); */
-  
+
   /* --- 1. First step X = L\B ---------------------------------------------- */
   for(k = 0 ; k < n ; k++)
   {
@@ -470,7 +471,7 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatr
     for(p = B->p [k] ; p < B->p [k+1] ; p++)
     {
       CS_INT i_old= B->i[p];
-      B->i[p] = pinv[p]; /* permute row indices with N->pinv */
+      B->i[p] = pinv[i_old]; /* permute row indices with N->pinv */
       B->x[p] = x[i_old];
     }
     /* call spsolve */
@@ -739,7 +740,11 @@ CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, doub
   return 1;
 }
 
-
+int CSparseMatrix_print(const CSparseMatrix *A, int brief)
+{
+  cs_print(A, brief);
+  return 0;
+}
 int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE* file)
 {
   CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai ;
