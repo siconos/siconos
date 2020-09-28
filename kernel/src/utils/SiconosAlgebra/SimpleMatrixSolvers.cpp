@@ -344,29 +344,11 @@ void SimpleMatrix::Factorize()
     return;
   }
 
-
   /* set the numericsMatrix */
-  NumericsMatrix * NM;
-  if(_num == DENSE)
-  {
-    _numericsMatrix.reset(NM_new(),NM_clear_not_dense); // When we reset, we do not free the matrix0
-                                                        //that is linked to the array of the boost container
-    NM = _numericsMatrix.get();
-    double * data = (double*)(getArray());
-    DEBUG_EXPR(NV_display(data,size(0)*size(1)););
-    NM_fill(NM, NM_DENSE, size(0), size(1), data ); // Pointer link
-  }
-  else
-  {
-    // For all the other cases, we build a sparse matrix and we call numerics for the factorization of a sparse matrix.
-    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_clear);
-    NM = _numericsMatrix.get();
-    _numericsMatrix->matrix2->origin = NSM_CSC;
-    NM_csc_alloc(NM, nnz());
-    fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
-    DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
-  }
 
+  updateNumericsMatrix();
+  NumericsMatrix * NM = numericsMatrix();
+  
   /* Factorization calling the right method in Numerics */
   int info =1;
   if (isSymmetric())
@@ -423,41 +405,48 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   }
   // and then solve
 
-  NumericsMatrix * NM;
-  double * b;
-  SP::SimpleMatrix Bdense;
+  NumericsMatrix * NM = _numericsMatrix.get();
 
-  if(B.num() == DENSE)
-  {
-    NM = _numericsMatrix.get();
-    b = B.getArray();
-  }
-  else if(B.num() == SPARSE)
-  {
-    // First way.
-    // We copy to dense since our sparse solver is not able to take
-    // into account for sparse r.h.s, yet.
-    Bdense.reset (new SimpleMatrix(size(0),size(1)));
-    * Bdense= B ;                                                // copy to dense
-    b = &(*Bdense->getArray());
-    NM = _numericsMatrix.get();
+  
+  // double * b;
+  // SP::SimpleMatrix Bdense;
 
-    // Second way
-    // use inplace_solve of ublas (see above with SolveInPlace)
-    // For that, we need to fill our factorization given by NM_LU_factorize
-    // into a ublas sparse matrix
-    // inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
-    // inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
-  }
-  else
-    SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
+  // if(B.num() == DENSE)
+  // {
+  //   b = B.getArray();
+  // }
+  // else if(B.num() == SPARSE)
+  // {
+  //   // First way.
+  //   // We copy to dense since our sparse solver is not able to take
+  //   // into account for sparse r.h.s, yet.
+  //   Bdense.reset (new SimpleMatrix(size(0),size(1)));
+  //   * Bdense= B ;                                                // copy to dense
+  //   b = &(*Bdense->getArray());
+
+  //   // Second way
+  //   // use inplace_solve of ublas (see above with SolveInPlace)
+  //   // For that, we need to fill our factorization given by NM_LU_factorize
+  //   // into a ublas sparse matrix
+  //   // inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
+  //   // inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
+
+  // }
+  // else
+  //   SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
+
+  B.updateNumericsMatrix();
+  NumericsMatrix * NM_B = B.numericsMatrix();
+
+
+  NM_display(NM_B);
 
   if (isSymmetric())
   {
     if (isPositiveDefinite()) // Cholesky Solving
     {
       //std::cout << "Cholesky Solve"<< std::endl;
-      info  = NM_Cholesky_solve(NM, b, B.size(1));
+      info  = NM_Cholesky_solve_matrix_rhs(NM, NM_B);
 
       if(info != 0)
       {
@@ -471,7 +460,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   }
   else //  LU Factorization  by default
   {
-    info  = NM_LU_solve(NM, b, B.size(1));
+    info  = NM_LU_solve_matrix_rhs(NM, NM_B);
 
     if(info != 0)
     {
@@ -481,7 +470,11 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
 
   if(B.num() == SPARSE)
   {
-    B = *Bdense ; // we copy back to sparse.
+    /* we need to fill back again */
+    B.fromCSC(NM_csc(NM_B));
+    
+
+    //B = *Bdense ; // we copy back to sparse.
     //B.displayExpert();
   }
 

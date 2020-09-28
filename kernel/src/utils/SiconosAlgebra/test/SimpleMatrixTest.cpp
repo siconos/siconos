@@ -24,6 +24,8 @@
 #include "SimpleMatrixFriends.hpp"
 #include "SiconosMatrixSetBlock.hpp"
 #include "SiconosVectorFriends.hpp"
+#include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
@@ -3467,6 +3469,32 @@ void SimpleMatrixTest::testProd6() // y += trans(A)*x
 //   std::cout << "-->  test gemm ended with success." <<std::endl;
 // }
 
+
+void SimpleMatrixTest::testFromAndFillCSC()
+{
+  std::cout << "Start SimpleMatrixTest::testFromAndFillCSC() "<< std::endl;
+  SP::SiconosMatrix Sparse4(new SimpleMatrix(*SP4));
+  Sparse4->updateNumericsMatrix();
+  NumericsMatrix *NM = Sparse4->numericsMatrix();
+  NM_display(NM);
+//  NumericsMatrix *NM_1 = NM_create(4,4, NM_SPARSE);
+
+  
+  SP::SiconosMatrix Sparse1(new SimpleMatrix(4,4,SPARSE));
+  Sparse1->fromCSC(NM_csc(NM));
+  Sparse1->displayExpert();
+
+  NumericsMatrix *NM_1 = NM_create(NM_SPARSE, 4,4);
+  NM_1->matrix2->origin = NSM_CSC;
+  NM_csc_alloc(NM_1, Sparse4->nnz());
+  Sparse4->fillCSC(NM_csc(NM_1));
+  NM_display(NM_1);
+  
+
+  
+  std::cout << "End SimpleMatrixTest::testFromAndFillCSC() "<< std::endl;
+
+}
 void SimpleMatrixTest::testPLUFactorizationInPlace()
 {
   std::cout << "--> Test: PLUFactorizationInPlace." <<std::endl;
@@ -3554,7 +3582,7 @@ void SimpleMatrixTest::testFactorize()
 }
 void SimpleMatrixTest::testSolve()
 {
-  std::cout << "\n\n--> Test: Solve. Dense. LU." <<std::endl;
+  std::cout << "\n--> Test: Solve. Dense. LU." <<std::endl;
 
   // Test dense matrix
   SP::SiconosMatrix Dense(new SimpleMatrix(*D));
@@ -3657,13 +3685,20 @@ void SimpleMatrixTest::testSolve()
   b->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
 
+
+  std::cout << "\n\n--> Test: Solve. Sparse. LU.  Sparse rhs" <<std::endl;
+
+  
   // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
   Sparse.reset(new SimpleMatrix(*SP3));
   SP::SimpleMatrix Sparse_rhs (new SimpleMatrix(*SP3));
   Sparse->Solve(*Sparse_rhs);
-  Sparse_rhs->display();
-  std::cout << "A A^{-1}" << std::endl;
-  (prod(*Sparse,*Sparse_rhs)).display();
+  // std::cout << "Sparse_rhs :" << std::endl;
+  // Sparse_rhs->display();
+  // std::cout << "Sparse :" << std::endl;
+  // Sparse->display();
+  // std::cout << "A A^{-1}" << std::endl;
+  // (prod(*Sparse,*Sparse_rhs)).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse,*Sparse_rhs) - *Sparse ).normInf()  < tol, true);
 
   // test sparse matrix 3x3 sparse RhS. inverse
@@ -3674,12 +3709,14 @@ void SimpleMatrixTest::testSolve()
   SP::SiconosMatrix Id (new SimpleMatrix(3,3));
   Id->eye();
 
-  Sparse_rhs->display();
-  std::cout << "A A^{-1}" << std::endl;
+  // Sparse_rhs->display();
+  // std::cout << "A A^{-1}" << std::endl;
 
-  (prod(*Sparse,*Sparse_rhs)).display();
+  // (prod(*Sparse,*Sparse_rhs)).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse,*Sparse_rhs) - *Id ).normInf()  < tol, true);
 
+
+  
   std::cout << "\n\n--> Test: Solve. Sparse. Cholesky." <<std::endl;
 
   // Test sparse matrix identity
@@ -3746,6 +3783,9 @@ void SimpleMatrixTest::testSolve()
   b->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST,*b) - *backup).norm2()  < tol, true);
 
+
+  std::cout << "\n\n--> Test: Solve. Sparse. Cholesky.  Sparse rhs" <<std::endl;
+  
   // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
   Sparse.reset(new SimpleMatrix(*SP3));
   SparseT.reset(new SimpleMatrix(*SP3));
@@ -3753,12 +3793,12 @@ void SimpleMatrixTest::testSolve()
   SST.reset (new SimpleMatrix(Sparse->size(0), Sparse->size(1), SPARSE));
   prod(*Sparse, *SparseT, *SST);
   Sparse_rhs.reset (new SimpleMatrix(*SST));
-  std::cout << "SST" << std::endl;
-  SST->display();
+  // std::cout << "SST" << std::endl;
+  // SST->display();
   SST->setIsSymmetric(true);
   SST->setIsPositiveDefinite(true);
   SST->Solve(*Sparse_rhs);
-  Sparse_rhs->display();
+  // Sparse_rhs->display();
   // std::cout << "A A^{-1}" << std::endl;
   // (prod(*SST,*Sparse_rhs)).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST,*Sparse_rhs) - *SST ).normInf()  < tol, true);
@@ -3768,17 +3808,17 @@ void SimpleMatrixTest::testSolve()
   prod(*Sparse, *SparseT, *SST);
   Sparse_rhs.reset(new SimpleMatrix(3,3, SPARSE));
   Sparse_rhs->eye();
-  std::cout << "SST" << std::endl;
-  SST->display();
+  // std::cout << "SST" << std::endl;
+  // SST->display();
   SST->setIsSymmetric(true);
   SST->setIsPositiveDefinite(true);
   SST->Solve(*Sparse_rhs);
-  Sparse_rhs->display();
+  // Sparse_rhs->display();
 
-  Sparse_rhs->display();
-  std::cout << "A A^{-1}" << std::endl;
+  // Sparse_rhs->display();
+  // std::cout << "A A^{-1}" << std::endl;
 
-  (prod(*SST,*Sparse_rhs)).display();
+  // (prod(*SST,*Sparse_rhs)).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST,*Sparse_rhs) - *Id ).normInf()  < tol, true);
 
 

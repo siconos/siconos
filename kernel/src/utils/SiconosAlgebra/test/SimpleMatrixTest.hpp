@@ -95,6 +95,7 @@ private:
   CPPUNIT_TEST(testProd6);
   //CPPUNIT_TEST(testGemv);
   //CPPUNIT_TEST(testGemm);
+  CPPUNIT_TEST(testFromAndFillCSC);
   CPPUNIT_TEST(testPLUFactorizationInPlace);
   CPPUNIT_TEST(testFactorize);
   CPPUNIT_TEST(testSolve);
@@ -158,6 +159,7 @@ private:
   void testProd6();
   //void testGemm();
   //void testGemv();
+  void testFromAndFillCSC();
   void testPLUFactorizationInPlace();
   void testFactorize();
   void testSolve();

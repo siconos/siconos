@@ -525,6 +525,15 @@ public:
    */
   virtual SiconosMatrix& operator -=(const SiconosMatrix& m) = 0;
 
+
+  virtual void updateNumericsMatrix() =0;
+
+  virtual NumericsMatrix * numericsMatrix() const
+  {
+    return nullptr;
+  };
+
+  
   /** computes a LU factorization of a general M-by-N matrix
    * with partial pivoting and row interchanges.
    * The result is returned in this (InPlace).
@@ -618,6 +627,8 @@ public:
    */
   bool fillCSC(CSparseMatrix* csc, double tol = 1e-14);
 
+  bool fromCSC(CSparseMatrix* csc);
+  
   /** return the number of non-zero in the matrix
    *  \param csc the compressed column sparse matrix
    *  \param row_off

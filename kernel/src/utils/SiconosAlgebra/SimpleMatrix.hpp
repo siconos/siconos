@@ -29,6 +29,12 @@
 #include "SiconosFwd.hpp"             // for SiconosVector, SiconosMatrix
 #include "SiconosMatrix.hpp"          // for SiconosMatrix, VInt, MATRIX_UBL...
 #include "SiconosVector.hpp"          // for SiconosVector
+
+
+
+
+
+
 class BlockVector;
 
 /**  Matrix (embedded various types of Boost matrices of double)
@@ -283,6 +289,13 @@ public:
   ~SimpleMatrix();
   //************************** GETTERS/SETTERS  **************************
 
+  void updateNumericsMatrix();
+
+  NumericsMatrix * numericsMatrix() const
+  {
+    return _numericsMatrix.get();
+  };
+  
   /** determines if the matrix has been inversed
    *  \return true if the matrix is inversed
    */

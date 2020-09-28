@@ -33,6 +33,22 @@
 #include "Tools.hpp"                                            // for toString
 #include "bindings_utils.hpp"                                   // for fill
 #include "NumericsMatrix.h"
+
+#include "NumericsSparseMatrix.h"
+#include "CSparseMatrix.h"
+
+//#define DEBUG_MESSAGES
+#include "debug.h"
+
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#include <cs.h>
+#endif
+
+
+
+
+
 using namespace Siconos;
 namespace siconosBindings = boost::numeric::bindings::blas;
 using std::cout;
@@ -484,6 +500,34 @@ SimpleMatrix::~SimpleMatrix()
   else if(_num == Siconos::IDENTITY)
     delete(mat.Identity);
 }
+
+
+void SimpleMatrix::updateNumericsMatrix()
+{
+  /* set the numericsMatrix */
+  NumericsMatrix * NM;
+  if(_num == DENSE)
+  {
+    _numericsMatrix.reset(NM_new(),NM_clear_not_dense); // When we reset, we do not free the matrix0
+                                                        //that is linked to the array of the boost container
+    NM = _numericsMatrix.get();
+    double * data = (double*)(getArray());
+    DEBUG_EXPR(NV_display(data,size(0)*size(1)););
+    NM_fill(NM, NM_DENSE, size(0), size(1), data ); // Pointer link
+  }
+  else
+  {
+    // For all the other cases, we build a sparse matrix and we call numerics for the factorization of a sparse matrix.
+    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_clear);
+    NM = _numericsMatrix.get();
+    _numericsMatrix->matrix2->origin = NSM_CSC;
+    NM_csc_alloc(NM, nnz());
+    fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
+    DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
+  }
+}
+
+
 
 bool SimpleMatrix::checkSymmetry(double tol) const
 {

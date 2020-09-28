@@ -32,9 +32,11 @@
 #include <vector>                                     // for vector, operator==
 #include "SiconosAlgebra.hpp"
 #include "BlockMatrix.hpp"                            // for BlockMatrix
-#include "CSparseMatrix_internal.h"                   // for CSparseMatrix
 #include "SiconosVector.hpp"                          // for SiconosVector
-#include "SimpleMatrixFriends.hpp" // for isComparableTo
+#include "SimpleMatrixFriends.hpp"                    // for isComparableTo
+
+#include "CSparseMatrix_internal.h"                   // for CSparseMatrix
+#include "NumericsSparseMatrix.h"                     // for NSM_fix_csc
 
 // Constructor with the type-number
 SiconosMatrix::SiconosMatrix(Siconos::UBLAS_TYPE type): _num(type), _isSymmetric(false), _isPositiveDefinite(false)
@@ -284,6 +286,92 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol)
 
   return true;
 }
+
+bool SiconosMatrix::fromCSC(CSparseMatrix* csc)
+{
+  assert(csc);
+
+  NSM_fix_csc(csc);
+  double* Mx = csc->x; // data
+  CS_INT* Mi = csc->i; // row indx
+  CS_INT* Mp = csc->p; // column pointers
+  CS_INT n = csc->n;
+  CS_INT m = csc->m;
+
+  size_t nnz = csc->p[n];
+
+  if(_num == Siconos::SPARSE)
+  {
+    sparse()->clear();
+    CS_INT pval=0;
+    // push_back in order should be in constant time
+    // http://www.guwi17.de/ublas/matrix_sparse_usage.html
+    for (CS_INT col =0; col < n; col++)
+    {
+      for (CS_INT p = Mp[col]; p < Mp[col+1];  p++)
+      {
+        sparse()->push_back(Mi[pval], col, Mx[pval]);
+        pval++;
+      }
+    }
+
+    // not able to work directly on the contents of the sparse matrix.
+    // sparse()->resize(m, nnz, false);
+    // //sparse()->set_filled(nnz, n+1);
+    // std::cout << sparse()->size1() << std::endl;
+    // std::cout << sparse()->size2() << std::endl;
+
+    // Index& ptr = sparse()->index1_data();
+    // Index& indx = sparse()->index2_data();
+    // ublas::unbounded_array<double>& vals = sparse()->value_data();
+
+    // // ptr.resize(n+1);
+    // // indx.resize(nnz);
+    // // vals.resize(nnz);
+
+    // std::cout << sparse()->filled1() << std::endl;
+    // std::cout << sparse()->filled2() << std::endl;
+
+    // // CS_INT pval=0;
+
+    // // for(size_t i = 0; i < nnz; ++i)
+    // // {
+    // //   vals[i] = Mx[pval];
+    // //   indx[i] = Mi[pval++];
+    // // }
+    // for(size_t i = 0; i < nnz; ++i)
+    // {
+    //   printf("vals[%i] = %e\t", i, vals[i]);
+    //   printf("indx[%i] = %i\t", i, indx[i]);
+    // }
+
+    // // for(size_t j = 0 ; j < n+1; ++j)
+    // // {
+    // //   ptr[j] = Mp[j]  ;
+    // // }
+    // for(size_t j = 0 ; j < n+1; ++j) printf("ptr[%i] = %i\t", j, ptr[j]);
+  }
+  else if(_num == Siconos::DENSE)
+  {
+    CS_INT pval=0;
+    // push_back in order should be in constant time
+    // http://www.guwi17.de/ublas/matrix_sparse_usage.html
+    for (CS_INT col =0; col < n; col++)
+    {
+      for (CS_INT p = Mp[col]; p < Mp[col+1];  p++)
+      {
+        setValue(Mi[pval], col, Mx[pval]);
+        pval++;
+      }
+    }
+  }
+  else
+  {
+    SiconosMatrixException::selfThrow("SiconosMatrix::fromCSC not implemented for the given matrix type");
+  }
+  return true;
+}
+
 
 bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t col_off, double tol)
 {

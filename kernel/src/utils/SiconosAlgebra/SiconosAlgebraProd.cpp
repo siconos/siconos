@@ -75,7 +75,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
   if(A.size(0) != y.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-  unsigned int numA = A.num();
+  Siconos::UBLAS_TYPE numA = A.num();
   unsigned int numX = x.num();
   unsigned int numY = y.num();
 
@@ -265,7 +265,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
   if(A.size(1) != y.size())
     SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and y.");
 
-  unsigned int numA = A.num();
+  Siconos::UBLAS_TYPE numA = A.num();
   unsigned int numX = x.num();
   unsigned int numY = y.num();
 
@@ -475,7 +475,7 @@ SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
   if(A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(matrix,vector) error: inconsistent sizes.");
 
-  unsigned int numA = A.num();
+  Siconos::UBLAS_TYPE numA = A.num();
   unsigned int numX = x.num();
 
   if(numA == 0)  // if A is block ...
@@ -520,9 +520,21 @@ SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
 
 const SimpleMatrix  prod(const SiconosMatrix& A, const SiconosMatrix& B)
 {
-  SimpleMatrix  C(A.size(0),B.size(1));
-  prod(A, B, C);
-  return C;
+  Siconos::UBLAS_TYPE numA = A.num();
+  Siconos::UBLAS_TYPE numB = B.num();
+
+  if (numA == numB)
+  {
+    SimpleMatrix  C(A.size(0),B.size(1), numA);
+    prod(A, B, C);
+    return C;
+  }
+  else
+  {
+    SimpleMatrix  C(A.size(0),B.size(1));
+    prod(A, B, C);
+    return C;
+  }
 }
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
@@ -538,9 +550,9 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
   if(A.size(0) != C.size(0) || B.size(1) != C.size(1))
     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
 
-  unsigned int numA = A.num();
-  unsigned int numB = B.num();
-  unsigned int numC = C.num();
+  Siconos::UBLAS_TYPE numA = A.num();
+  Siconos::UBLAS_TYPE numB = B.num();
+  Siconos::UBLAS_TYPE numC = C.num();
 
   // == TODO: implement block product ==
   if(numA == 0 || numB == 0)
@@ -933,7 +945,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
   if(A.size(0) != y.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-  unsigned int numA = A.num();
+  Siconos::UBLAS_TYPE numA = A.num();
   unsigned int numX = x.num();
   unsigned int numY = y.num();
 
@@ -1119,7 +1131,7 @@ void taxpy(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, un
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
   // Then computation of y = subA*x + y.
-  unsigned int numA = A->num();
+  Siconos::UBLAS_TYPE numA = A->num();
   unsigned int numY = y->num();
   unsigned int numX = x->num();
   unsigned int sizeX = x->size();

@@ -440,6 +440,13 @@ public:
    */
   BlockMatrix& operator -=(const SiconosMatrix& m);
 
+
+  void updateNumericsMatrix()
+  {
+    SiconosMatrixException::selfThrow("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
+  };
+
+  
   /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
