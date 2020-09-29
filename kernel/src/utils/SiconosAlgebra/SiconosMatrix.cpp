@@ -291,7 +291,8 @@ bool SiconosMatrix::fromCSC(CSparseMatrix* csc)
 {
   assert(csc);
 
-  NSM_fix_csc(csc);
+  NSM_sort_csc(csc);
+
   double* Mx = csc->x; // data
   CS_INT* Mi = csc->i; // row indx
   CS_INT* Mp = csc->p; // column pointers
