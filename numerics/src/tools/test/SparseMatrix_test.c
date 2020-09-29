@@ -261,7 +261,7 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
   //cs_print(check, 0);
 
   double error = cs_norm(check);
-  printf("error =%e\n", error);
+  printf("residual =%e\n", error);
   if (error > 1e-14)
   {
     return 1;
@@ -354,7 +354,7 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M )
   //cs_print(check, 0);
 
   double error = cs_norm(check);
-  printf("error =%e\n", error);
+  printf("residual =%e\n", error);
   if (error > 1e-14)
   {
     return 1;
