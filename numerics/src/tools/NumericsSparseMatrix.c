@@ -464,6 +464,26 @@ void NSM_fix_csc(CSparseMatrix* A)
     s = NULL;
   }
 }
+
+void NSM_sort_csc(CSparseMatrix* A)
+{
+
+  CSparseMatrix * AT = cs_transpose(A,1);
+  CSparseMatrix * ATT = cs_transpose(AT,1);
+  cs_spfree(AT);
+  
+  free(A->i);
+  free(A->x);
+  A->i = ATT->i;
+  A->x = ATT->x;
+
+  ATT->i=NULL;
+  ATT->x=NULL;
+
+  cs_spfree(ATT);
+}
+
+
 int NSM_to_dense(const NumericsSparseMatrix* const A, double * B)
 {
 

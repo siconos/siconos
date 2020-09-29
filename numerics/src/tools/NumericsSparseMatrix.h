@@ -197,6 +197,8 @@ extern "C"
    * \param A the matrix to check, modified if necessary to have ordered indices
    */
   void NSM_fix_csc(CSparseMatrix* A);
+  
+  void NSM_sort_csc(CSparseMatrix* A);
 
   /** return the origin of a sparse part of a matrix
    * \param M the matrix
