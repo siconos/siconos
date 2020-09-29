@@ -196,7 +196,7 @@ extern "C"
   int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A, const double *x,
                            const double beta, double *y);
 
-    /** Allocate a CSparse matrix for future copy (as in NSM_copy)
+  /** Allocate a CSparse matrix for future copy (as in NSM_copy)
    * \param m the matrix used as model
    * \return an newly allocated matrix
    */
@@ -204,8 +204,11 @@ extern "C"
 
   CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B);
 
+  /** print a matrix to std output
+   * \param A matrix to print
+   * \param brief if positive, print only a portion of the matrix 
+   */
   int CSparseMatrix_print(const CSparseMatrix *A, int brief);
-
 
   /** print a matrix to a text file
    * \param A matrix to print
@@ -249,7 +252,6 @@ extern "C"
    * */
   int CSparseMatrix_check_csc(CSparseMatrix *T);
 
-
   /** Free space allocated for a SparseMatrix. note : cs_spfree also
    *  free the cs_struct this fails when the struct is allocated on
    *  the stack.
@@ -271,11 +273,31 @@ extern "C"
    */
   int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A);
 
+
+  /** Return the element A(i,j)
+   * \param A the sparse matrix
+   * \param i the row index
+   * \param j the column index
+   */
   double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j);
 
+  /** print a matrix to a text file in pyhton format
+   * \param m matrix to print
+   * \param file file descriptor*/
   void CSparseMatrix_write_in_file_python(const CSparseMatrix* const m, FILE* file);
-  
+
+  /** Compute the max by columns of a sparse matrix
+   * \param A the sparse matrix
+   * \param max, the vector of maximum by columns
+   * \param j the column index
+   */
   int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double * max);
+
+  /** Compute the max in absolute value  by columns of a sparse matrix
+   * \param A the sparse matrix
+   * \param max, the vector of maximum by columns
+   * \param j the column index
+   */
 
   int CSparseMatrix_max_abs_by_columns(const CSparseMatrix *A, double * max);
 

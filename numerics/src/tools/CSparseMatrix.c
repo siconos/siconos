@@ -332,7 +332,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
   Xp[0]=0;
   pinv = N->pinv;
   /* --- 1. First step X = L\B ---------------------------------------------- */
-  for(k = 0 ; k < n ; k++)
+  for(k = 0 ; k < B->n ; k++)
   {
     /* permutation of the rows  of B(:,k) */
     for(p = B->p [k] ; p < B->p [k+1] ; p++) x [B->i[p]] = B->x [p] ; /* scatter B  */
@@ -370,7 +370,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
   Bx= B->x;
   Bp[0]=0;
   q = S->q;
-  for(k = 0 ; k < n ; k++)
+  for(k = 0 ; k < X->n ; k++)
   {
     top = cs_spsolve(N->U, X, k, xi, x, NULL, 0) ;   /* x = U\X(:,col) */
 
@@ -459,7 +459,7 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatr
   /* printf("\n"); */
 
   /* --- 1. First step X = L\B ---------------------------------------------- */
-  for(k = 0 ; k < n ; k++)
+  for(k = 0 ; k < B->n ; k++)
   {
     /* permutation of the rows  of B(:,k) */
     for(p = B->p [k] ; p < B->p [k+1] ; p++) x [B->i[p]] = B->x [p] ; /* scatter B  */
@@ -498,7 +498,7 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatr
   Bi= B->i;
   Bx= B->x;
   Bp[0]=0;
-  for(k = 0 ; k < n ; k++)
+  for(k = 0 ; k < X->n ; k++)
   {
     top = cs_spsolve(LT, X, k, xi, x, NULL, 0) ;   /* x = U\X(:,col) */
 
