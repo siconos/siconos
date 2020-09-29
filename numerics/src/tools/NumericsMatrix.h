@@ -254,11 +254,16 @@ extern "C"
    */
   RawNumericsMatrix* NM_unpreserve(NumericsMatrix* A);
 
-  /** Check for a previous factorization.
+  /** Check for a previous LU factorization.
    * \param[in] A the NumericsMatrix
-   * \return true if the matrix has been factorized.
+   * \return true if the matrix has been LU factorized.
    */
   bool NM_LU_factorized(NumericsMatrix* A);
+
+  /** Check for a previous Cholesky factorization.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix has been Cholesky factorized.
+   */
   bool NM_Cholesky_factorized(NumericsMatrix* A);
 
   /** Set the factorization flag.
@@ -266,7 +271,6 @@ extern "C"
    * \param[in] flag a boolean.
    */
   void NM_set_factorized(NumericsMatrix* A, bool flag);
-
 
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
@@ -349,8 +353,6 @@ extern "C"
    * \param tol the tolerance
    */
   bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol);
-
-
 
   /** return the number of non-zero element. For a dense matrix, it is the
    * product of the dimensions (e.g. an upper bound). For a sparse matrix, it is the true number
@@ -457,8 +459,6 @@ extern "C"
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
 
-
-
   void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
   /** Matrix vector multiplication : y = alpha A x + beta y
@@ -488,8 +488,6 @@ extern "C"
    * \param[in,out] C a NumericsMatrix
    */
   RawNumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
-
-
 
   /** Transposed matrix multiplication : y += alpha transpose(A) x + y
    * \param[in] alpha scalar
@@ -737,7 +735,6 @@ extern "C"
     return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
   }
 
-
   /** Set the linear solver
    * \param A the matrix
    * \param solver_id the solver
@@ -759,7 +756,6 @@ extern "C"
    * \param M the matrix to modify
    */
   void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B );
-
 
   /** Integer work vector initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
