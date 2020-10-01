@@ -158,7 +158,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     M = NM_create(NM_SPARSE,  problem->M->size0,  problem->M->size1);
-    NM_copy_to_sparse(problem->M, M);
+    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
     NSM_diag_indices(M);
   }
   else
@@ -599,7 +599,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   NM_clearSparseBlock(A);
   for(int i=0; i<m; i++)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(A_triplet, i+m, i, 1.0));
+    CHECK_RETURN(CSparseMatrix_entry(A_triplet, i+m, i, 1.0));
   }
   A->size0 = 2*A->size0;
 

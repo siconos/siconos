@@ -43,6 +43,7 @@
 #include "op3x3.h"                                    // for extract3x3, add3x3
 #include "sanitizer.h"                                // for cblas_dcopy_msan
 #include "SiconosBlas.h"                                    // for cblas_dcopy
+#include "float.h"                                    // for DBL_EPSILON
 
 static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block_row_size, size_t block_col_size)
 {
@@ -59,7 +60,7 @@ static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block
       {
         for(size_t row_indx = i; row_indx < block_row_size+i; ++row_indx, ++Alocal)
         {
-          CHECK_RETURN(CSparseMatrix_zentry(Btriplet, row_indx, col_indx, *Alocal));
+          CHECK_RETURN(CSparseMatrix_zentry(Btriplet, row_indx, col_indx, *Alocal, DBL_EPSILON));
         }
 //        Alocal = ;
       }

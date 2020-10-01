@@ -159,7 +159,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
     for(size_t k =0; k< n; k++)
     {
-      NM_zentry(problem->A, k, k, 1);
+      NM_entry(problem->A, k, k, 1);
     }
     DEBUG_EXPR(NM_display(problem->A));
 

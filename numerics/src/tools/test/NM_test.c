@@ -169,7 +169,7 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha)
   /* C = C + alpha +I NM_SPARSE storage, square matrix  */
   /***********************************************************/
   NumericsMatrix * C2= NM_create(NM_SPARSE, n, m);
-  NM_copy_to_sparse(M,C2);
+  NM_copy_to_sparse(M,C2, 1e-16);
   NM_add_to_diag3(C2, alpha);
 
   info = NM_dense_equal(C2, Cref->matrix0, 1e-14);
@@ -295,32 +295,32 @@ static void add_initial_value_square_1(NumericsMatrix * M)
   for(i=0; i < 4 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,1.0+i+j);
+      NM_entry(M,i,j,1.0+i+j);
   }
   for(i=0; i < 4 ; i++)
   {
     for(j=4; j < 6 ; j++)
-      NM_zentry(M,i,j,2.0+i+j);
+      NM_entry(M,i,j,2.0+i+j);
   }
   for(i=4; i < 6 ; i++)
   {
     for(j=4; j < 6 ; j++)
-      NM_zentry(M,i,j,3.0+i+j);
+      NM_entry(M,i,j,3.0+i+j);
   }
   for(i=4; i < 6 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,4.0+i+j);
+      NM_entry(M,i,j,4.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,5.0+i+j);
+      NM_entry(M,i,j,5.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,6.0+i+j);
+      NM_entry(M,i,j,6.0+i+j);
   }
 }
 
@@ -330,22 +330,22 @@ static void add_initial_value_square_2(NumericsMatrix * M)
   for(i=0; i < 4 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,1.0+i+j);
+      NM_entry(M,i,j,1.0+i+j);
   }
   for(i=4; i < 6 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,4.0+i+j);
+      NM_entry(M,i,j,4.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,5.0+i+j);
+      NM_entry(M,i,j,5.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,6.0+i+j);
+      NM_entry(M,i,j,6.0+i+j);
   }
 }
 
@@ -356,12 +356,12 @@ static void add_initial_value_rectangle_1(NumericsMatrix * M)
   for(int i=0; i < 4 ; i++)
   {
     for(int j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,1.0+i+j);
+      NM_entry(M,i,j,1.0+i+j);
   }
   for(int i=6; i < 8 ; i++)
   {
     for(int j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,5.0+i+j);
+      NM_entry(M,i,j,5.0+i+j);
   }
 }
 
@@ -784,20 +784,20 @@ static int NM_insert_dense_test()
   NumericsMatrix * A_dense = NM_create(NM_DENSE, Asize0, Asize1);
   for(size_t i = 0; i < Asize0; ++i)
     for(size_t j = 0; j < Asize1; ++j)
-      NM_zentry(A_dense, i, j, 10.0);
+      NM_entry(A_dense, i, j, 10.0);
 
   /* create and fill the dense matrix B */
   NumericsMatrix * B_dense = NM_create(NM_DENSE, Bsize0, Bsize1);
   for(size_t i = 0; i < Bsize0; ++i)
     for(size_t j = 0; j < Bsize1; ++j)
-      NM_zentry(B_dense, i, j, 999.0);
+      NM_entry(B_dense, i, j, 999.0);
 
   /* create an expected result */
   NumericsMatrix * AB_dense = NM_create(NM_DENSE, Asize0, Asize1);
   NM_copy(A_dense, AB_dense);
   for(size_t i = start_i; i < end_i; ++i)
     for(size_t j = start_j; j < end_j; ++j)
-      NM_zentry(AB_dense, i, j, 999.0);
+      NM_entry(AB_dense, i, j, 999.0);
 
   NM_insert(A_dense, B_dense, 1, 1);
 
@@ -831,7 +831,7 @@ static int NM_insert_sparse_test()
 
   for(size_t i = 0; i < Asize0; i += 2)
     for(size_t j = 0; j < Asize1; j += 2)
-      NM_zentry(A_sparse, i, j, 10.0);
+      NM_entry(A_sparse, i, j, 10.0);
 
   /* create and fill the dense matrix B */
   NumericsMatrix * B_sparse = NM_create(NM_SPARSE, Bsize0, Bsize1);
@@ -840,14 +840,14 @@ static int NM_insert_sparse_test()
 
   for(size_t i = 0; i < Bsize0; i += 2)
     for(size_t j = 0; j < Bsize1; j += 2)
-      NM_zentry(B_sparse, i, j, 999.0);
+      NM_entry(B_sparse, i, j, 999.0);
 
   /* create an expected result */
   NumericsMatrix * AB_sparse = NM_create(NM_SPARSE, Asize0, Asize1);
   NM_copy(A_sparse, AB_sparse);
   for(size_t i = start_i; i < end_i; i += 2)
     for(size_t j = start_j; j < end_j; j += 2)
-      NM_zentry(AB_sparse, i, j, 999.0);
+      NM_entry(AB_sparse, i, j, 999.0);
 
   NM_insert(A_sparse, B_sparse, 1, 1);
 
@@ -2070,10 +2070,10 @@ static int test_NM_posv_expert(void)
   NumericsMatrix * Z = NM_create(NM_SPARSE,2,2);
   NM_triplet_alloc(Z,0);
   Z->matrix2->origin= NSM_TRIPLET;
-  NM_zentry(Z,0,0,2.0);
-  NM_zentry(Z,1,1,2.0);
-  NM_zentry(Z,0,1,1.0);
-  NM_zentry(Z,1,0,1.0);
+  NM_entry(Z,0,0,2.0);
+  NM_entry(Z,1,1,2.0);
+  NM_entry(Z,0,1,1.0);
+  NM_entry(Z,1,0,1.0);
   info = test_NM_posv_expert_unit(Z, b);
   if(info != 0) return info;
   NM_clear(Z);

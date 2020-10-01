@@ -53,10 +53,10 @@ int main(int argc, char *argv[])
     */
     /* solution x: 2/3, y: 1/3 */
 
-    NM_zentry(M, 0, 0, 2.);
-    NM_zentry(M, 0, 1, -1.);
-    NM_zentry(M, 1, 0, 1.);
-    NM_zentry(M, 1, 1, 1.);
+    NM_entry(M, 0, 0, 2.);
+    NM_entry(M, 0, 1, -1.);
+    NM_entry(M, 1, 0, 1.);
+    NM_entry(M, 1, 1, 1.);
 
     for(unsigned int i=0; i<2; ++i)
     {
@@ -109,11 +109,11 @@ int main(int argc, char *argv[])
     */
     /* solution: [1, 2/3, 2/3] */
 
-    NM_zentry(M, 0, 0, 1.);
-    NM_zentry(M, 1, 1, 1.);
-    NM_zentry(M, 2, 1, 0.5);
-    /*    NM_zentry(M, 1, 2, 0.5);*/
-    NM_zentry(M, 2, 2, 1.);
+    NM_entry(M, 0, 0, 1.);
+    NM_entry(M, 1, 1, 1.);
+    NM_entry(M, 2, 1, 0.5);
+    /*    NM_entry(M, 1, 2, 0.5);*/
+    NM_entry(M, 2, 2, 1.);
 
     /*    NM_display(M);*/
 

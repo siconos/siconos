@@ -119,7 +119,7 @@ CS_INT initACPsiJacobian(
   for(int e = 0; e < M->nz; ++e)
   {
     /* DEBUG_PRINTF("e=%d, M->i[e]=%td, M->p[e]=%td, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]); */
-    CHECK_RETURN(CSparseMatrix_zentry(J, M->i[e], M->p[e], - M->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, M->i[e], M->p[e], - M->x[e]));
   }
 
   /* H */
@@ -128,19 +128,19 @@ CS_INT initACPsiJacobian(
   {
     /* DEBUG_PRINTF("e=%d, H->i[e]=%td, H->p[e] + M->n + A->n=%td, H->x[e]=%g\n", */
     /*              e, H->i[e], H->p[e] + M->n + A->n , H->x[e]); */
-    CHECK_RETURN(CSparseMatrix_zentry(J, H->i[e], H->p[e] + M->n + A->n, rescaling*H->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, H->i[e], H->p[e] + M->n + A->n, rescaling*H->x[e]));
   }
 
   /* Ht */
   for(int e = 0; e < H->nz; ++e)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(J, H->p[e] + M->m, H->i[e], H->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, H->p[e] + M->m, H->i[e], H->x[e]));
   }
 
   /* -I */
   for(int e = 0; e < A->m; ++e)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(J, e + M->m, e + M->n, -1.));
+    CHECK_RETURN(CSparseMatrix_entry(J, e + M->m, e + M->n, -1.));
   }
 
   /* keep A start indice for update */
@@ -149,13 +149,13 @@ CS_INT initACPsiJacobian(
   /* A */
   for(int e = 0; e < A->nz; ++e)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
   }
 
   /* B */
   for(int e = 0; e < B->nz; ++e)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n,  rescaling*B->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n,  rescaling*B->x[e]));
   }
 
   return Astart;

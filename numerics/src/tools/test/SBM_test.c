@@ -313,32 +313,32 @@ static void add_initial_value_square_1(NumericsMatrix * M)
   for(i=0; i < 4 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,1.0+i+j);
+      NM_entry(M,i,j,1.0+i+j);
   }
   for(i=0; i < 4 ; i++)
   {
     for(j=4; j < 6 ; j++)
-      NM_zentry(M,i,j,2.0+i+j);
+      NM_entry(M,i,j,2.0+i+j);
   }
   for(i=4; i < 6 ; i++)
   {
     for(j=4; j < 6 ; j++)
-      NM_zentry(M,i,j,3.0+i+j);
+      NM_entry(M,i,j,3.0+i+j);
   }
   for(i=4; i < 6 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,4.0+i+j);
+      NM_entry(M,i,j,4.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,5.0+i+j);
+      NM_entry(M,i,j,5.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,6.0+i+j);
+      NM_entry(M,i,j,6.0+i+j);
   }
 
 }
@@ -348,22 +348,22 @@ static void add_initial_value_square_2(NumericsMatrix * M)
   for(i=0; i < 4 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,1.0+i+j);
+      NM_entry(M,i,j,1.0+i+j);
   }
   for(i=4; i < 6 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,4.0+i+j);
+      NM_entry(M,i,j,4.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,5.0+i+j);
+      NM_entry(M,i,j,5.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,6.0+i+j);
+      NM_entry(M,i,j,6.0+i+j);
   }
 }
 
@@ -373,12 +373,12 @@ static void add_initial_value_rectangle_1(NumericsMatrix * M)
   for(i=0; i < 4 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,1.0+i+j);
+      NM_entry(M,i,j,1.0+i+j);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,5.0+i+j);
+      NM_entry(M,i,j,5.0+i+j);
   }
 }
 
@@ -1129,32 +1129,32 @@ static void add_initial_value_square_1a(NumericsMatrix * M)
   for(i=0; i < 4 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,1.0);
+      NM_entry(M,i,j,1.0);
   }
   for(i=0; i < 4 ; i++)
   {
     for(j=4; j < 6 ; j++)
-      NM_zentry(M,i,j,2.0);
+      NM_entry(M,i,j,2.0);
   }
   for(i=4; i < 6 ; i++)
   {
     for(j=4; j < 6 ; j++)
-      NM_zentry(M,i,j,3.0);
+      NM_entry(M,i,j,3.0);
   }
   for(i=4; i < 6 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,4.0);
+      NM_entry(M,i,j,4.0);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=0; j < 4 ; j++)
-      NM_zentry(M,i,j,5.0);
+      NM_entry(M,i,j,5.0);
   }
   for(i=6; i < 8 ; i++)
   {
     for(j=6; j < 8 ; j++)
-      NM_zentry(M,i,j,6.0);
+      NM_entry(M,i,j,6.0);
   }
 }
 static void add_initial_value_square_SBM_1(SparseBlockStructuredMatrix * M)
@@ -1162,37 +1162,37 @@ static void add_initial_value_square_SBM_1(SparseBlockStructuredMatrix * M)
   for(int i=0; i < 4 ; i++)
   {
     for(int j=0; j < 4 ; j++)
-      CHECK_RETURN(SBM_zentry(M,i,j,1.0));
+      CHECK_RETURN(SBM_entry(M,i,j,1.0));
   }
   for(int i=0; i < 4 ; i++)
   {
     for(int j=4; j < 6 ; j++)
-      CHECK_RETURN(SBM_zentry(M,i,j,2.0));
+      CHECK_RETURN(SBM_entry(M,i,j,2.0));
   }
   for(int i=4; i < 6 ; i++)
   {
     for(int j=4; j < 6 ; j++)
-      SBM_zentry(M,i,j,3.0);
+      SBM_entry(M,i,j,3.0);
   }
   for(int i=4; i < 6 ; i++)
   {
     for(int j=6; j < 8 ; j++)
-      SBM_zentry(M,i,j,4.0);
+      SBM_entry(M,i,j,4.0);
   }
   for(int i=6; i < 8 ; i++)
   {
     for(int j=0; j < 4 ; j++)
-      SBM_zentry(M,i,j,5.0);
+      SBM_entry(M,i,j,5.0);
   }
   for(int i=6; i < 8 ; i++)
   {
     for(int j=6; j < 8 ; j++)
-      SBM_zentry(M,i,j,6.0);
+      SBM_entry(M,i,j,6.0);
   }
 }
 
 
-static int SBM_zentry_test1(double tol)
+static int SBM_entry_test1(double tol)
 {
 
   int info=0;
@@ -1216,20 +1216,20 @@ static int SBM_zentry_test1(double tol)
   return info;
 }
 
-static int SBM_zentry_test2(double tol)
+static int SBM_entry_test2(double tol)
 {
 
   int info=0;
 
   NumericsMatrix * M2 = test_matrix_2();
 
-  /* CHECK_RETURN(SBM_zentry(M2->matrix1,0,8,1.0)); */
-  /* CHECK_RETURN(SBM_zentry(M2->matrix1,8,0,1.0)); */
-  /* CHECK_RETURN(SBM_zentry(M2->matrix1,0,7,1.0)); */
+  /* CHECK_RETURN(SBM_entry(M2->matrix1,0,8,1.0)); */
+  /* CHECK_RETURN(SBM_entry(M2->matrix1,8,0,1.0)); */
+  /* CHECK_RETURN(SBM_entry(M2->matrix1,0,7,1.0)); */
 
-  info = SBM_zentry(M2->matrix1,0,8,1.0);
-  info = SBM_zentry(M2->matrix1,8,0,1.0);
-  info = SBM_zentry(M2->matrix1,0,7,1.0);
+  info = SBM_entry(M2->matrix1,0,8,1.0);
+  info = SBM_entry(M2->matrix1,8,0,1.0);
+  info = SBM_entry(M2->matrix1,0,7,1.0);
 
   NM_clear(M2);
 
@@ -1237,26 +1237,26 @@ static int SBM_zentry_test2(double tol)
 }
 
 
-int SBM_zentry_all(void)
+int SBM_entry_all(void)
 {
 
   double tol = 1e-14;
 
-  printf("========= Starts SBM tests SBM_zentry  ========= \n");
+  printf("========= Starts SBM tests SBM_entry  ========= \n");
 
-  int info = SBM_zentry_test1(tol);
+  int info = SBM_entry_test1(tol);
   if(info == 1)
   {
-    printf("========= Ends SBM tests SBM_zentry  :  Unsuccessfull ========= \n");
+    printf("========= Ends SBM tests SBM_entry  :  Unsuccessfull ========= \n");
     return info;
   }
-  info = SBM_zentry_test2(tol);
+  info = SBM_entry_test2(tol);
   if(info == 1)
   {
-    printf("========= Ends SBM tests SBM_zentry  :  Unsuccessfull ========= \n");
+    printf("========= Ends SBM tests SBM_entry  :  Unsuccessfull ========= \n");
     return info;
   }
-  printf("========= Ends SBM tests SBM_zentry  :  successfull ========= \n");
+  printf("========= Ends SBM tests SBM_entry  :  successfull ========= \n");
 
   return info;
 
@@ -1268,7 +1268,7 @@ int main()
 
   int info =  SBM_add_test_all();
 
-  info += SBM_zentry_all();
+  info += SBM_entry_all();
 
   info += SBM_to_dense_all();
 
