@@ -229,6 +229,10 @@ static inline void gfc3d_ADMM_compute_full_H(int nc, double * u,
     }
     else
     {
+      /* This really set entry to 0: note that with old NM_zentry
+       there were a bug here as 0.0 was not added. NM_entry may be
+       improved to remove entry from sparse matrices, but would it be
+       more efficient? */
       NM_entry(H_correction,pos,pos+1, 0.0);
       NM_entry(H_correction,pos,pos+2, 0.0);
     }
