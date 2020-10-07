@@ -439,7 +439,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   NumericsMatrix * NM_B = B.numericsMatrix();
 
 
-  NM_display(NM_B);
+  //NM_display(NM_B);
 
   if (isSymmetric())
   {
