@@ -410,7 +410,7 @@ void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(SecondOrderDS&
     SP::BoundaryCondition bc = d.boundaryConditions();
 
     unsigned int numberBoundaryConditions = bc->velocityIndices()->size();
-    _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions.reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
+    _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions.reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions, d.mass()->num()));
     _computeWBoundaryConditions(ds,*_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions,
                                 *_dynamicalSystemsGraph->properties(dsv).W);
   }
@@ -436,7 +436,7 @@ void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
   if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS ||  dsType == Type::NewtonEulerDS || dsType == Type::LagrangianLinearDiagonalDS)
   {
 
-    SP::SiconosVector columntmp(new SiconosVector(ds.dimension()));
+    SP::SiconosVector columntmp(new SiconosVector(ds.dimension(), WBoundaryConditions.num()));
 
     int columnindex = 0;
 
