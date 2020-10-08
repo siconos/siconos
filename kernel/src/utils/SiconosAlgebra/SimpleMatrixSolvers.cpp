@@ -348,7 +348,7 @@ void SimpleMatrix::Factorize()
 
   updateNumericsMatrix();
   NumericsMatrix * NM = numericsMatrix();
-  
+
   /* Factorization calling the right method in Numerics */
   int info =1;
   if (isSymmetric())
@@ -393,6 +393,9 @@ void SimpleMatrix::Factorize()
   }
   DEBUG_END("void SimpleMatrix::Factorize()\n");
 }
+
+//#define SPARSE_RHS_COPY_TO_DENSE 1
+
 void SimpleMatrix::Solve(SiconosMatrix &B)
 {
   if(B.isBlock())
@@ -404,50 +407,56 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
     Factorize();
   }
   // and then solve
-
   NumericsMatrix * NM = _numericsMatrix.get();
 
-  
-  // double * b;
-  // SP::SimpleMatrix Bdense;
 
-  // if(B.num() == DENSE)
-  // {
-  //   b = B.getArray();
-  // }
-  // else if(B.num() == SPARSE)
-  // {
-  //   // First way.
-  //   // We copy to dense since our sparse solver is not able to take
-  //   // into account for sparse r.h.s, yet.
-  //   Bdense.reset (new SimpleMatrix(size(0),size(1)));
-  //   * Bdense= B ;                                                // copy to dense
-  //   b = &(*Bdense->getArray());
+#ifdef SPARSE_RHS_COPY_TO_DENSE
 
-  //   // Second way
-  //   // use inplace_solve of ublas (see above with SolveInPlace)
-  //   // For that, we need to fill our factorization given by NM_LU_factorize
-  //   // into a ublas sparse matrix
-  //   // inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
-  //   // inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
+  double * b;
+  SP::SimpleMatrix Bdense;
 
-  // }
-  // else
-  //   SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
+  if(B.num() == DENSE)
+  {
+    b = B.getArray();
+  }
+  else if(B.num() == SPARSE)
+  {
+    // First way.
+    // We copy to dense since our sparse solver is not able to take
+    // into account for sparse r.h.s, yet.
+    Bdense.reset (new SimpleMatrix(size(0),size(1)));
+    * Bdense= B ;                                                // copy to dense
+    b = &(*Bdense->getArray());
 
+    // Second way
+    // use inplace_solve of ublas (see above with SolveInPlace)
+    // For that, we need to fill our factorization given by NM_LU_factorize
+    // into a ublas sparse matrix
+    // inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
+    // inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
+
+  }
+  else
+    SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
+
+#else
   B.updateNumericsMatrix();
   NumericsMatrix * NM_B = B.numericsMatrix();
-
-
   //NM_display(NM_B);
+#endif
+
+
 
   if (isSymmetric())
   {
     if (isPositiveDefinite()) // Cholesky Solving
     {
       //std::cout << "Cholesky Solve"<< std::endl;
+#ifdef SPARSE_RHS_COPY_TO_DENSE
+      info  = NM_Cholesky_solve(NM, b, B.size(1));
+#else
       info  = NM_Cholesky_solve_matrix_rhs(NM, NM_B);
-
+#endif
       if(info != 0)
       {
         SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed (Cholesky)");
@@ -460,8 +469,11 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   }
   else //  LU Factorization  by default
   {
+#ifdef SPARSE_RHS_COPY_TO_DENSE
+    info  = NM_LU_solve(NM, b, B.size(1));
+#else
     info  = NM_LU_solve_matrix_rhs(NM, NM_B);
-
+#endif
     if(info != 0)
     {
       SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
@@ -470,12 +482,13 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
 
   if(B.num() == SPARSE)
   {
-    /* we need to fill back again */
-    B.fromCSC(NM_csc(NM_B));
-    
-
-    //B = *Bdense ; // we copy back to sparse.
+#ifdef SPARSE_RHS_COPY_TO_DENSE
+    B = *Bdense ; // we copy back to sparse.
     //B.displayExpert();
+#else
+    /* we need to fill back again */
+    //B.fromCSC(NM_csc(NM_B));
+#endif
   }
 
 
