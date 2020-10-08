@@ -224,17 +224,21 @@ static inline void gfc3d_ADMM_compute_full_H(int nc, double * u,
 
     if(normUT > DBL_EPSILON)
     {
-      NM_zentry(H_correction,pos,pos+1, mu[contact]* u[pos+1]/normUT);
-      NM_zentry(H_correction,pos,pos+2, mu[contact]* u[pos+2]/normUT);
+      NM_entry(H_correction,pos,pos+1, mu[contact]* u[pos+1]/normUT);
+      NM_entry(H_correction,pos,pos+2, mu[contact]* u[pos+2]/normUT);
     }
     else
     {
-      NM_zentry(H_correction,pos,pos+1, 0.0);
-      NM_zentry(H_correction,pos,pos+2, 0.0);
+      /* This really set entry to 0: note that with old NM_zentry
+       there were a bug here as 0.0 was not added. NM_entry may be
+       improved to remove entry from sparse matrices, but would it be
+       more efficient? */
+      NM_entry(H_correction,pos,pos+1, 0.0);
+      NM_entry(H_correction,pos,pos+2, 0.0);
     }
-    NM_zentry(H_correction,pos,pos, 1.0);
-    NM_zentry(H_correction,pos+1,pos+1, 1.0);
-    NM_zentry(H_correction,pos+2,pos+2, 1.0);
+    NM_entry(H_correction,pos,pos, 1.0);
+    NM_entry(H_correction,pos+1,pos+1, 1.0);
+    NM_entry(H_correction,pos+2,pos+2, 1.0);
 
   }
   DEBUG_EXPR(NM_display(H_correction););
@@ -273,7 +277,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     M = NM_create(NM_SPARSE,  problem->M->size0,  problem->M->size1);
-    NM_copy_to_sparse(problem->M, M);
+    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
   }
   else
   {
@@ -284,7 +288,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     H = NM_create(NM_SPARSE,  problem->H->size0,  problem->H->size1);
-    NM_copy_to_sparse(problem->H, H);
+    NM_copy_to_sparse(problem->H, H, DBL_EPSILON);
   }
   else
   {
@@ -536,9 +540,9 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     for(size_t contact = 0 ; contact < nc ; ++contact)
     {
       int pos = contact*3;
-      NM_zentry(P,pos,pos, cone_scaling/problem->mu[contact]);
-      NM_zentry(P,pos+1,pos+1, 1.0);
-      NM_zentry(P,pos+2,pos+2, 1.0);
+      NM_entry(P,pos,pos, cone_scaling/problem->mu[contact]);
+      NM_entry(P,pos+1,pos+1, 1.0);
+      NM_entry(P,pos+2,pos+2, 1.0);
       b[pos]=cone_scaling/problem->mu[contact]*b[pos];
       mu[contact]=cone_scaling;
     }

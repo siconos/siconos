@@ -51,10 +51,13 @@ int main(int argc, char *argv[])
       2*x - y = 1
       x   + y = 1
     */
-    NM_zentry(M, 0, 0, 2.);
-    NM_zentry(M, 0, 1, -1.);
-    NM_zentry(M, 1, 0, 1.);
-    NM_zentry(M, 1, 1, 1.);
+    /* solution x: 2/3, y: 1/3 */
+
+    NM_entry(M, 0, 0, 2.);
+    NM_entry(M, 0, 1, -1.);
+    NM_entry(M, 1, 0, 1.);
+    NM_entry(M, 1, 1, 1.);
+
 
     /* solution x: 2/3, y: 1/3 */
     b[0] = 1.;
@@ -113,11 +116,11 @@ int main(int argc, char *argv[])
       b=[1, 1, 1]
     */
 
-    NM_zentry(M, 0, 0, 1.);
-    NM_zentry(M, 1, 1, 1.);
-    NM_zentry(M, 2, 1, 0.5);
-    /*    NM_zentry(M, 1, 2, 0.5);*/
-    NM_zentry(M, 2, 2, 1.);
+    NM_entry(M, 0, 0, 1.);
+    NM_entry(M, 1, 1, 1.);
+    NM_entry(M, 2, 1, 0.5);
+    /*    NM_entry(M, 1, 2, 0.5);*/
+    NM_entry(M, 2, 2, 1.);
 
     /*    NM_display(M);*/
 

@@ -19,6 +19,7 @@
 #include "SiconosMatrix.hpp"
 #include <assert.h>                                   // for assert
 #include <math.h>                                     // for fabs
+#include <float.h>                                     // for DBL_EPSILON
 #include <algorithm>                                  // for max, min, lower...
 #include <boost/numeric/ublas/detail/config.hpp>      // for noalias, noalia...
 #include <boost/numeric/ublas/detail/iterator.hpp>    // for bidirectional_i...
@@ -389,7 +390,7 @@ bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t c
       {
         // col-major
 
-        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow]);
+        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow], DBL_EPSILON);
       }
     }
   }

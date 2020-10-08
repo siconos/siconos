@@ -710,9 +710,9 @@ CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
 
 
 /* add an entry to triplet matrix only if value is not (nearly) null */
-CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
+CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold)
 {
-  if(fabs(x) >= DBL_EPSILON)
+  if(fabs(x) >= threshold)
   {
     return cs_entry(T, i, j, x);
   }
@@ -723,9 +723,9 @@ CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
 }
 
 /* add an entry to a symmetric triplet matrix only if value is not (nearly) null */
-CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
+CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold)
 {
-  if(fabs(x) >= DBL_EPSILON)
+  if(fabs(x) >= threshold)
   {
     if(j<=i)
     {
@@ -735,11 +735,30 @@ CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, doub
   return 1;
 }
 
+
 int CSparseMatrix_print(const CSparseMatrix *A, int brief)
 {
   cs_print(A, brief);
   return 0;
 }
+
+/* add an entry to triplet matrix */
+CS_INT CSparseMatrix_entry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
+{
+    return cs_entry(T, i, j, x);
+}
+
+/* add an entry to a symmetric triplet matrix */
+CS_INT CSparseMatrix_symmetric_entry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
+{
+  if(j<=i)
+  {
+    return cs_entry(T, i, j, x);
+  }
+  return 1;
+}
+
+
 int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE* file)
 {
   CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai ;

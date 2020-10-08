@@ -86,12 +86,14 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
 
 # ---- Final setup for the library ----
 
-# Windows stuff
-include(WindowsNumericsSetup)
 
 # -- create/setup component target --
 include(ComponentSetup)
+
 create_siconos_component(${COMPONENT})
+
+# Windows stuff
+include(WindowsNumericsSetup)
 
 # --- Extra setup for the component ---
 if(MLCPSIMPLEX_FOUND OR BUILD_AS_CPP) 
@@ -246,9 +248,9 @@ endif()
 # For logging
 if(WITH_HDF5)
   find_package(HDF5 REQUIRED COMPONENTS C HL)
-  target_include_directories(${PROJECT_NAME} PRIVATE ${HDF5_C_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${HDF5_C_LIBRARIES})
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${HDF5_HL_LIBRARIES})
+  target_include_directories(numerics PRIVATE ${HDF5_C_INCLUDE_DIRS})
+  target_link_libraries(numerics PRIVATE ${HDF5_C_LIBRARIES})
+  target_link_libraries(numerics PRIVATE ${HDF5_HL_LIBRARIES})
 endif()
 
 # -- OpenMP --

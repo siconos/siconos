@@ -41,7 +41,7 @@ static int test_0(void)
 
   for(int k =0; k< cqp.size; k++)
   {
-    NM_zentry(M, k, k, 1);
+    NM_entry(M, k, k, 1);
   }
   /* NM_display(M); */
 
@@ -109,7 +109,7 @@ static int test_1(void)
 
   for(int k =0; k< cqp.size; k++)
   {
-    NM_zentry(M, k, k, 1);
+    NM_entry(M, k, k, 1);
   }
   /* NM_display(M); */
 
@@ -189,7 +189,7 @@ static int test_2(void)
 
   for(int k =0; k< cqp.size; k++)
   {
-    NM_zentry(M, k, k, 1);
+    NM_entry(M, k, k, 1);
   }
   /* NM_display(M); */
 
@@ -280,7 +280,7 @@ static int test_3(void)
 
   for(int k =0; k< cqp.size; k++)
   {
-    NM_zentry(M, k, k, 1);
+    NM_entry(M, k, k, 1);
   }
   /* DEBUG_EXPR(NM_display(M)); */
 
@@ -299,7 +299,7 @@ static int test_3(void)
 
   for(int k =0; k< cqp.m; k++)
   {
-    NM_zentry(A, k, k, 1);
+    NM_entry(A, k, k, 1);
   }
   /* DEBUG_EXPR(NM_display(A)); */
 
@@ -397,7 +397,7 @@ static int test_4(void)
 
   for(int k =0; k< cqp.size; k++)
   {
-    NM_zentry(M, k, k, 1);
+    NM_entry(M, k, k, 1);
   }
   /* DEBUG_EXPR(NM_display(M)); */
 
@@ -416,7 +416,7 @@ static int test_4(void)
 
   for(int k =0; k< cqp.m; k++)
   {
-    NM_zentry(A, k, k, 1);
+    NM_entry(A, k, k, 1);
   }
   /* DEBUG_EXPR(NM_display(A)); */
 
@@ -512,7 +512,7 @@ static int test_5(void)
 
   for(int k =0; k< cqp.size; k++)
   {
-    NM_zentry(M, k, k, 1);
+    NM_entry(M, k, k, 1);
   }
   /* DEBUG_EXPR(NM_display(M)); */
 
@@ -531,7 +531,7 @@ static int test_5(void)
 
   for(int k =0; k< cqp.m; k++)
   {
-    NM_zentry(A, k, k, 1);
+    NM_entry(A, k, k, 1);
   }
   /* DEBUG_EXPR(NM_display(A)); */
 

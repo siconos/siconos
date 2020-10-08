@@ -159,8 +159,10 @@ extern "C"
    *  be set to NM_SPARSE.
    * \param[in] A a NumericsMatrix
    * \param[in,out] B a NumericsMatrix
+   * \param threshold if the original matrix is dense, a threshold can be applied
+   * on the absolute value of the entries
    */
-  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
+  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold);
 
   /** create a NumericsMatrix similar to the another one. The structure is the same
    * \param mat the model matrix
@@ -324,14 +326,26 @@ extern "C"
 
   /** insert an non zero entry into a NumericsMatrix.
    * for storageType = NM_SPARSE, a conversion to triplet is done for performing the entry in the
-   * matrix. This method is expensice in terms of memory management. For a lot of entries, use
+   * matrix. This method is expensive in terms of memory management. For a lot of entries, use
+   * preferably a triplet matrix.
+   * \param M the NumericsMatrix
+   * \param i row index
+   * \param j column index
+   * \param val the value to be inserted.
+   * \param threshold a threshold to filter the small value in magnitude (useful for dense to sparse conversion) 
+   */
+  void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold);
+
+  /** insert an entry into a NumericsMatrix.
+   * for storageType = NM_SPARSE, a conversion to triplet is done for performing the entry in the
+   * matrix. This method is expensive in terms of memory management. For a lot of entries, use
    * preferably a triplet matrix.
    * \param M the NumericsMatrix
    * \param i row index
    * \param j column index
    * \param val the value to be inserted.
    */
-  void NM_zentry(NumericsMatrix* M, int i, int j, double val);
+  void NM_entry(NumericsMatrix* M, int i, int j, double val);
 
   /** get the value of a NumericsMatrix.
    * \param M the NumericsMatrix
@@ -509,7 +523,7 @@ extern "C"
   /** matrix and vector display *********************/
   /**************************************************/
 
-  void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
+  void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold);
 
   /** Copy a NumericsMatrix into another with dense storage.
       \param A source matrix (any kind of storage)

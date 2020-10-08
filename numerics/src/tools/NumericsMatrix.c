@@ -675,19 +675,28 @@ void NM_dense_display(double * m, int nRow, int nCol, int lDim)
 
 }
 
-void NM_zentry(NumericsMatrix* M, int i, int j, double val)
+void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold)
 {
+  int insertion=0;
   switch(M->storageType)
   {
   case NM_DENSE:
   {
     // column major
-    M->matrix0[i+j*M->size0] = val;
+    if (fabs(val) >= threshold)
+    {
+      M->matrix0[i+j*M->size0] = val;
+      insertion=1;
+    }
     break;
   }
   case NM_SPARSE_BLOCK:
   {
-    CHECK_RETURN(SBM_zentry(M->matrix1, i, j, val));
+    if (fabs(val) >= threshold)
+    {
+      CHECK_RETURN(SBM_entry(M->matrix1, i, j, val));
+      insertion=1;
+    }
     break;
   }
   case NM_SPARSE:
@@ -698,31 +707,25 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     case NSM_TRIPLET:
     {
       assert(M->matrix2->triplet);
-      CHECK_RETURN(CSparseMatrix_zentry(M->matrix2->triplet, i, j, val));
+      insertion = 1 - CSparseMatrix_zentry(M->matrix2->triplet, i, j, val, threshold);
       break;
     }
     case NSM_HALF_TRIPLET:
     {
       assert(M->matrix2->half_triplet);
-      CHECK_RETURN(CSparseMatrix_symmetric_zentry(M->matrix2->triplet, i, j, val));
+      insertion = 1 - CSparseMatrix_symmetric_zentry(M->matrix2->triplet, i, j, val, threshold);
       break;
     }
     case NSM_CSC:
     {
       assert(M->matrix2->csc);
-      CHECK_RETURN(CSparseMatrix_zentry(NM_triplet(M), i, j, val));
+      insertion = 1 -CSparseMatrix_zentry(NM_triplet(M), i, j, val, threshold);
       M->matrix2->origin= NSM_TRIPLET;
       NM_clearCSC(M);
-      //NM_display(M);
-      //NM_csc_alloc(M,M->matrix2->triplet->nz);
-      //M->matrix2->origin= NSM_CSC;
       NM_csc(M);
-
       M->matrix2->origin= NSM_CSC;
       NM_clearTriplet(M);
       NM_clearHalfTriplet(M);
-
-      //NM_display(M);
       break;
     }
     default:
@@ -736,6 +739,74 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
   default:
     numerics_error("NM_zentry  ","unknown storageType %d for matrix\n", M->storageType);
   }
+  if(insertion)
+  {
+    if(i>M->size0-1)
+    {
+      M->size0 = i+1;
+    }
+    if(j>M->size1-1)
+    {
+      M->size1 = j+1;
+    }
+  }
+}
+
+void NM_entry(NumericsMatrix* M, int i, int j, double val)
+{
+  switch(M->storageType)
+  {
+  case NM_DENSE:
+  {
+    // column major
+    M->matrix0[i+j*M->size0] = val;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    CHECK_RETURN(SBM_entry(M->matrix1, i, j, val));
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(M->matrix2);
+    switch(M->matrix2->origin)
+    {
+    case NSM_TRIPLET:
+    {
+      assert(M->matrix2->triplet);
+      CHECK_RETURN(CSparseMatrix_entry(M->matrix2->triplet, i, j, val));
+      break;
+    }
+    case NSM_HALF_TRIPLET:
+    {
+      assert(M->matrix2->half_triplet);
+      CHECK_RETURN(CSparseMatrix_symmetric_entry(M->matrix2->triplet, i, j, val));
+      break;
+    }
+    case NSM_CSC:
+    {
+      assert(M->matrix2->csc);
+      CHECK_RETURN(CSparseMatrix_entry(NM_triplet(M), i, j, val));
+      M->matrix2->origin= NSM_TRIPLET;
+      NM_clearCSC(M);
+      NM_csc(M);
+      M->matrix2->origin= NSM_CSC;
+      NM_clearTriplet(M);
+      NM_clearHalfTriplet(M);
+      break;
+    }
+    default:
+    {
+      numerics_error("NM_entry","unknown origin %d for sparse matrix\n", M->matrix2->origin);
+      break;
+    }
+    }
+    break;
+  }
+  default:
+    numerics_error("NM_entry  ","unknown storageType %d for matrix\n", M->storageType);
+  }
 
   if(i>M->size0-1)
   {
@@ -746,6 +817,7 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     M->size1 = j+1;
   }
 }
+
 
 
 double NM_get_value(const NumericsMatrix* const M, int i, int j)
@@ -2049,7 +2121,7 @@ void NM_clearSparseStorage(NumericsMatrix *A)
 }
 
 
-void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
+void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold)
 {
   assert(A->matrix0);
   assert(B->matrix2->triplet);
@@ -2057,7 +2129,7 @@ void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
   {
     for(int j = 0; j < A->size1; ++j)
     {
-      CHECK_RETURN(CSparseMatrix_zentry(B->matrix2->triplet, i, j, A->matrix0[i + A->size0*j]));
+      CHECK_RETURN(CSparseMatrix_zentry(B->matrix2->triplet, i, j, A->matrix0[i + A->size0*j], threshold));
     }
   }
 }
@@ -2116,7 +2188,7 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
 }
 
 
-void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
+void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold)
 {
   DEBUG_BEGIN("NM_copy_to_sparse(...)\n")
   assert(A);
@@ -2136,7 +2208,7 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
   {
     B->matrix2->triplet = cs_spalloc(0,0,1,1,1);
     B->matrix2->origin = NSM_TRIPLET;
-    NM_dense_to_sparse(A, B);
+    NM_dense_to_sparse(A, B, threshold );
     break;
   }
   case NM_SPARSE_BLOCK:
@@ -2328,7 +2400,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
             {
               for(unsigned i = 0; i < inbr; ++i)
               {
-                CHECK_RETURN(CSparseMatrix_zentry(A->matrix2->triplet, i + roffset, j + coffset,
+                CHECK_RETURN(CSparseMatrix_entry(A->matrix2->triplet, i + roffset, j + coffset,
                                                   A->matrix1->block[bn][i + j*inbr]));
               }
             }
@@ -2337,7 +2409,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
       }
       else if(A->matrix0)
       {
-        NM_dense_to_sparse(A, A);
+        NM_dense_to_sparse(A, A, DBL_EPSILON);
       }
       else if(A->size0 > 0 || A->size1 > 0)
       {
@@ -2434,7 +2506,7 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
             {
               for(unsigned i = 0; i < inbr; ++i)
               {
-                CHECK_RETURN(CSparseMatrix_symmetric_zentry(A->matrix2->half_triplet, i + roffset, j + coffset,
+                CHECK_RETURN(CSparseMatrix_symmetric_entry(A->matrix2->half_triplet, i + roffset, j + coffset,
                              A->matrix1->block[bn][i + j*inbr]));
               }
             }
@@ -2747,7 +2819,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
     // loop over the values of B
     for(int idx = 0 ; idx < B->matrix2->triplet->nz  ; idx++)
     {
-      NM_zentry(A, Bi[idx] + start_i, Bp[idx] + start_j, Bx[idx]);
+      NM_entry(A, Bi[idx] + start_i, Bp[idx] + start_j, Bx[idx]);
     }
     break;
   }
@@ -2761,7 +2833,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
       for(unsigned int j = start_j; j < end_j; ++j)
       {
         val = NM_get_value(B, i - start_i, j - start_j);
-        NM_zentry(A, i, j, val);
+        NM_entry(A, i, j, val);
       }
     }
     break;
@@ -4137,7 +4209,7 @@ NumericsMatrix* NM_inv(NumericsMatrix* A)
       }
       for(int i = 0; i < A->size0; ++i)
       {
-        CHECK_RETURN(CSparseMatrix_zentry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
+        CHECK_RETURN(CSparseMatrix_entry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
       }
     }
     break;

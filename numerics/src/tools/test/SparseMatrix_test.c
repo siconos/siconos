@@ -20,7 +20,7 @@
 #include <stdlib.h>                // for malloc
 #include "CSparseMatrix_internal.h"         // for cs_dl_entry, CS_INT, cs_dl_print
 #include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
-#include "NumericsMatrix.h"        // for NM_zentry, NM_display, NM_create
+#include "NumericsMatrix.h"        // for NM_entry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
 #include "NumericsVector.h"        // for NV_display
 
@@ -43,20 +43,20 @@ int add_square_triplet()
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(A,0);
   A->matrix2->origin= NSM_TRIPLET;
-  NM_zentry(A, 0, 0, 1);
-  NM_zentry(A, 0, 1, 2);
-  NM_zentry(A, 0, 2, 3);
-  NM_zentry(A, 1, 1, 2);
-  NM_zentry(A, 1, 2, 3);
+  NM_entry(A, 0, 0, 1);
+  NM_entry(A, 0, 1, 2);
+  NM_entry(A, 0, 2, 3);
+  NM_entry(A, 1, 1, 2);
+  NM_entry(A, 1, 2, 3);
   NM_display(A);
 
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(B,0);
   B->matrix2->origin= NSM_TRIPLET;
-  NM_zentry(B, 0, 0, 1);
-  NM_zentry(B, 1, 1, 2);
-  NM_zentry(B, 2, 2, 3);
+  NM_entry(B, 0, 0, 1);
+  NM_entry(B, 1, 1, 2);
+  NM_entry(B, 2, 2, 3);
   NM_display(B);
 
   double alpha = 2.0;
@@ -67,12 +67,12 @@ int add_square_triplet()
   NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(Cref,0);
   Cref->matrix2->origin= NSM_TRIPLET;
-  NM_zentry(Cref, 0, 0, 4);
-  NM_zentry(Cref, 0, 1, 4);
-  NM_zentry(Cref, 0, 2, 6);
-  NM_zentry(Cref, 1, 1, 8);
-  NM_zentry(Cref, 1, 2, 6);
-  NM_zentry(Cref, 2, 2, 6);
+  NM_entry(Cref, 0, 0, 4);
+  NM_entry(Cref, 0, 1, 4);
+  NM_entry(Cref, 0, 2, 6);
+  NM_entry(Cref, 1, 1, 8);
+  NM_entry(Cref, 1, 2, 6);
+  NM_entry(Cref, 2, 2, 6);
   NM_display(Cref);
 
   printf("add_square_triplet: NM_equal(C,Cref) =%i \n", NM_equal(C,Cref));
@@ -92,20 +92,20 @@ int add_square_csc()
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(A,0);
   A->matrix2->origin= NSM_CSC;
-  NM_zentry(A, 0, 0, 1);
-  NM_zentry(A, 0, 1, 2);
-  NM_zentry(A, 0, 2, 3);
-  NM_zentry(A, 1, 1, 2);
-  NM_zentry(A, 1, 2, 3);
+  NM_entry(A, 0, 0, 1);
+  NM_entry(A, 0, 1, 2);
+  NM_entry(A, 0, 2, 3);
+  NM_entry(A, 1, 1, 2);
+  NM_entry(A, 1, 2, 3);
   /* NM_display(A); */
 
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(B,0);
   B->matrix2->origin= NSM_CSC;
-  NM_zentry(B, 0, 0, 1);
-  NM_zentry(B, 1, 1, 2);
-  NM_zentry(B, 2, 2, 3);
+  NM_entry(B, 0, 0, 1);
+  NM_entry(B, 1, 1, 2);
+  NM_entry(B, 2, 2, 3);
   /* NM_display(B); */
 
   double alpha = 2.0;
@@ -116,12 +116,12 @@ int add_square_csc()
   NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
   NM_csc_empty_alloc(Cref,0);
   Cref->matrix2->origin= NSM_CSC;
-  NM_zentry(Cref, 0, 0, 4);
-  NM_zentry(Cref, 0, 1, 4);
-  NM_zentry(Cref, 0, 2, 6);
-  NM_zentry(Cref, 1, 1, 8);
-  NM_zentry(Cref, 1, 2, 6);
-  NM_zentry(Cref, 2, 2, 6);
+  NM_entry(Cref, 0, 0, 4);
+  NM_entry(Cref, 0, 1, 4);
+  NM_entry(Cref, 0, 2, 6);
+  NM_entry(Cref, 1, 1, 8);
+  NM_entry(Cref, 1, 2, 6);
+  NM_entry(Cref, 2, 2, 6);
   NM_display(Cref);
   printf("add_square_csc: NM_equal(C,Cref) =%i \n", NM_equal(C,Cref));
   return (int)!NM_equal(C,Cref);;
@@ -139,25 +139,25 @@ int add_rectangle_triplet()
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(A,0);
   A->matrix2->origin= NSM_TRIPLET;
-  NM_zentry(A, 0, 0, 1);
-  NM_zentry(A, 0, 1, 2);
-  NM_zentry(A, 0, 2, 3);
-  NM_zentry(A, 1, 1, 2);
-  NM_zentry(A, 1, 2, 3);
-  NM_zentry(A, 2, 6, 2);
-  NM_zentry(A, 2, 5, 22);
+  NM_entry(A, 0, 0, 1);
+  NM_entry(A, 0, 1, 2);
+  NM_entry(A, 0, 2, 3);
+  NM_entry(A, 1, 1, 2);
+  NM_entry(A, 1, 2, 3);
+  NM_entry(A, 2, 6, 2);
+  NM_entry(A, 2, 5, 22);
   NM_display(A);
 
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(B,0);
   B->matrix2->origin= NSM_TRIPLET;
-  NM_zentry(B, 0, 0, 1);
-  NM_zentry(B, 1, 1, 2);
-  NM_zentry(B, 2, 2, 3);
-  NM_zentry(B, 0, 3, 1);
-  NM_zentry(B, 1, 4, 2);
-  NM_zentry(B, 2, 5, 3);
+  NM_entry(B, 0, 0, 1);
+  NM_entry(B, 1, 1, 2);
+  NM_entry(B, 2, 2, 3);
+  NM_entry(B, 0, 3, 1);
+  NM_entry(B, 1, 4, 2);
+  NM_entry(B, 2, 5, 3);
   NM_display(B);
 
   double alpha = 1.0;
@@ -168,20 +168,20 @@ int add_rectangle_triplet()
   NumericsMatrix * Cref  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(Cref,0);
   Cref->matrix2->origin= NSM_TRIPLET;
-  NM_zentry(Cref, 0, 0, 3);
-  NM_zentry(Cref, 0, 1, 2);
-  NM_zentry(Cref, 0, 2, 3);
-  NM_zentry(Cref, 0, 3, 2);
+  NM_entry(Cref, 0, 0, 3);
+  NM_entry(Cref, 0, 1, 2);
+  NM_entry(Cref, 0, 2, 3);
+  NM_entry(Cref, 0, 3, 2);
 
-  NM_zentry(Cref, 1, 1, 6);
-  NM_zentry(Cref, 1, 2, 3);
-  NM_zentry(Cref, 1, 4, 4);
+  NM_entry(Cref, 1, 1, 6);
+  NM_entry(Cref, 1, 2, 3);
+  NM_entry(Cref, 1, 4, 4);
 
-  NM_zentry(Cref, 2, 2, 6);
+  NM_entry(Cref, 2, 2, 6);
 
 
-  NM_zentry(Cref, 2, 5, 28);
-  NM_zentry(Cref, 2, 6, 2);
+  NM_entry(Cref, 2, 5, 28);
+  NM_entry(Cref, 2, 6, 2);
   NM_display(Cref);
 
   printf("add_rectangle_triplet : NM_equal(C,Cref) =%i \n", NM_equal(C,Cref));
@@ -199,7 +199,6 @@ static int add_test(void)
 
   return info;
 }
-
 
 
 /* create an empty triplet matrix, insert 2 elements, print and free */
@@ -235,6 +234,7 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
 
   int info = 1-CSparseMatrix_lu_factorization(1, M, 1e-14, cs_lu_M);
 
+
   if (info)
   {
     printf("problem in Lu factor\n");
@@ -244,6 +244,7 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
   /* cs_print(cs_lu_M->N->L, 0); */
   /* printf(" U:\n"); */
   /* cs_print(cs_lu_M->N->U, 0); */
+
 
   info = 1-CSparseMatrix_spsolve(cs_lu_M, X, B);
   if (info)
@@ -318,9 +319,11 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M )
 {
   //cs_print(M, 0);
 
+
   CSparseMatrix *b_triplet = cs_spalloc(M->m, M->n,M->n, 1, 1); /* coo format */
   for (int i; i < M->n; i++)
     cs_entry(b_triplet, i, i, 1.0);
+
 
   CSparseMatrix *B = cs_compress(b_triplet);
 
@@ -408,10 +411,6 @@ static int test_CSparseMatrix_chol_spsolve(void)
   printf("end - test_CSparseMatrix_chol_spsolve \n");
   return  info;
 }
-
-
-
-
 
 
 int main()
