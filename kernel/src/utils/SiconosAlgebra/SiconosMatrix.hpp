@@ -212,7 +212,7 @@ public:
    */
   inline virtual bool isFactorized() const
   {
-    return (isPLUFactorizedInPlace() || isPLUFactorizedInPlace() || isCholeskyFactorized() || isQRFactorized());
+    return (isPLUFactorized() || isPLUFactorizedInPlace() || isCholeskyFactorized() || isQRFactorized());
   };
 
 
