@@ -37,7 +37,7 @@
 #include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
-//#define DEBUG_MESSAGES
+/* #define DEBUG_MESSAGE */
 #include "debug.h"                    // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
 #include "numerics_verbose.h"         // for numerics_error, numerics_printf...
 #include "sanitizer.h"                // for cblas_dcopy_msan
@@ -3136,14 +3136,14 @@ double* NM_dWork(NumericsMatrix* A, int size)
 
 int NM_LU_factorize(NumericsMatrix* Ao)
 {
-
+  DEBUG_BEGIN(" NM_LU_factorize(NumericsMatrix* Ao)\n");
   lapack_int info = 0;
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
   NumericsMatrix* A = Ao->destructible;
 
   if (!NM_LU_factorized(Ao))
   {
-
+    DEBUG_PRINT("NM_LU_factorize. The Factorization is performed\n");
 #ifdef FACTORIZATION_DEBUG
     if (NM_internalData(Ao)->values_sha1_count > 0)
     {
@@ -3209,7 +3209,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
 
         CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
         numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep them" );
-        DEBUG_EXPR(cs_print(NM_csc(A),0));
+        //DEBUG_EXPR(cs_print(NM_csc(A),0));
         info = !CSparseMatrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A);
         if (info)
         {
@@ -3293,7 +3293,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
   }
 
   assert (NM_LU_factorized(Ao) == NM_LU_factorized(A));
-
+  DEBUG_END(" NM_LU_factorize(NumericsMatrix* Ao)\n");
   return info;
 }
 
