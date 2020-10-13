@@ -50,6 +50,7 @@ typedef struct
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
   bool isCholeskyfactorized; /**<  true if the matrix has already been Cholesky factorized */
+  bool isLDLTfactorized; /**<  true if the matrix has already been LDLT factorized */
   bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
 #ifdef SICONOS_HAS_MPI
   MPI_Comm mpi_comm; /**< optional mpi communicator */
@@ -267,6 +268,12 @@ extern "C"
    * \return true if the matrix has been Cholesky factorized.
    */
   bool NM_Cholesky_factorized(NumericsMatrix* A);
+
+  /** Check for a previous LDLT factorization.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix has been Cholesky factorized.
+   */
+  bool NM_LDLT_factorized(NumericsMatrix* A);
 
   /** Set the factorization flag.
    * \param[in] A the NumericsMatrix,
@@ -703,6 +710,7 @@ extern "C"
    * \return an int, 0 means the matrix has been factorized. */
   int NM_LU_factorize(NumericsMatrix* A);
   int NM_Cholesky_factorize(NumericsMatrix* A);
+  int NM_LDLT_factorize(NumericsMatrix* A);
 
   /* Solve linear system with multiple right hand size. A call to
    * NM_LU_factorize is done at the beginning.
@@ -720,7 +728,9 @@ extern "C"
   int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
   int NM_Cholesky_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
   int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
+  int NM_LDLT_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
 
+  
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
