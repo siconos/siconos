@@ -92,6 +92,7 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine WITH_SUPERLU_MT
 #cmakedefine WITH_SUPERLU_dist
 
+#cmakedefine WITH_MA57
 // - internal timer -
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H
