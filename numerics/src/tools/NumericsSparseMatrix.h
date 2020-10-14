@@ -48,7 +48,7 @@ extern "C"
 
   /** \enum NSM_linear_solver NumericsSparseMatrix.h
    * id for linear algebra solvers */
-  typedef enum { NSM_CSPARSE, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT } NSM_linear_solver;
+  typedef enum { NSM_CSPARSE, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT, NSM_HSL } NSM_linear_solver;
 
   typedef void (*freeNSLSP)(void* p);
 

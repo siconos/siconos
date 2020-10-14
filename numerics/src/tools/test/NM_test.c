@@ -3317,11 +3317,13 @@ static int test_NM_LDLT_solve_unit(NumericsMatrix * M, double * b)
   for(int j=0; j < n; j++)
     y[j] = b[j];
   NSM_linear_solver_params* p = NSM_linearSolverParams(M);
-#ifdef WITH_MUMPS
+#if defined(WITH_MUMPS)
   p->solver = NSM_MUMPS;
   NM_MUMPS_set_verbosity(M, 1);
+#elif defined(WITH_MA57)
+  p->solver = NSM_HSL;
 #else
-  p->solver = NSM_CSPARSE;
+ p->solver = NSM_CSPARSE;
 #endif
 
   double res;
@@ -3413,35 +3415,36 @@ static int test_NM_LDLT_solve(void)
   int n =10;
   b = (double*)malloc(n* sizeof(double)); 
 
-  /* printf("test 1 ...\n"); */
-  /* NumericsMatrix *Id = NM_eye(10); */
-  /* //NM_scal(Id, 5.0); */
-  /* n = Id->size0;  */
-  /* for(int j=0; j < n; j++) */
-  /* { */
-  /*   b[j] =2.0*j; */
-  /*   //NM_set_value(Id, j,j, 2.0*j); */
-  /* } */
-  /* info = test_NM_LDLT_solve_unit(Id, b); */
-  /* if(info != 0) return info; */
-  /* NM_clear(Id); */
-  /* free(Id); */
-  /* printf("test 1 ...ok \n"); */
-
-  /* printf("test 2 ...\n"); */
-  /* NumericsMatrix * Z = NM_create(NM_SPARSE,2,2); */
-  /* NM_triplet_alloc(Z,0); */
-  /* Z->matrix2->origin= NSM_TRIPLET; */
-  /* NM_entry(Z,0,0,2.0); */
-  /* NM_entry(Z,1,1,2.0); */
-  /* NM_entry(Z,0,1,1.0); */
-  /* NM_entry(Z,1,0,1.0); */
-  /* info = test_NM_LDLT_solve_unit(Z, b); */
-  /* if(info != 0) return info; */
-  /* NM_clear(Z); */
-  /* free(Z); */
-  /* printf("test 2 ... ok\n"); */
-
+#if defined(WITH_MUMPS) || defined(WITH_MA57) 
+  printf("test 1 ...\n");
+  NumericsMatrix *Id = NM_eye(10);
+  //NM_scal(Id, 5.0);
+  n = Id->size0;
+  for(int j=0; j < n; j++)
+  {
+    b[j] =2.0*j;
+    //NM_set_value(Id, j,j, 2.0*j);
+  }
+  info = test_NM_LDLT_solve_unit(Id, b);
+  if(info != 0) return info;
+  NM_clear(Id);
+  free(Id);
+  printf("test 1 ...ok \n");
+  
+  printf("test 2 ...\n");
+  NumericsMatrix * Z = NM_create(NM_SPARSE,2,2);
+  NM_triplet_alloc(Z,0);
+  Z->matrix2->origin= NSM_TRIPLET;
+  NM_entry(Z,0,0,2.0);
+  NM_entry(Z,1,1,2.0);
+  NM_entry(Z,0,1,1.0);
+  NM_entry(Z,1,0,1.0);
+  info = test_NM_LDLT_solve_unit(Z, b);
+  if(info != 0) return info;
+  NM_clear(Z);
+  free(Z);
+  printf("test 2 ... ok\n");
+#endif
   printf("test 3 ...\n");
   M1 = NMM[0];
   NumericsMatrix * M1T = NM_transpose(M1);
@@ -3468,21 +3471,21 @@ static int test_NM_LDLT_solve(void)
   /*   b[j] =1.0; */
   /* info = test_LDLT_solve_unit_unit(C, b); */
   /* if (info != 0) return info; */
-
-  /* printf("test 5 ...\n"); */
-  /* M1 = test_matrix_5(); */
-  /* M1T = NM_transpose(M1); */
-  /* C = NM_create(NM_SPARSE,M1->size0,M1->size1); */
-  /* NM_triplet_alloc(C,0); */
-  /* C->matrix2->origin= NSM_TRIPLET; */
-  /* NM_gemm(1.0, M1, M1T, 0.0, C); */
-  /* n = M1->size0; */
-  /* for(int j=0; j < n; j++) */
-  /*   b[j] =1.0; */
-  /* info = test_NM_LDLT_solve_unit(C, b); */
-  /* if(info != 0) return info; */
-  /* printf("test 5 ... ok\n"); */
-
+#if defined(WITH_MUMPS) || defined(WITH_MA57) 
+  printf("test 5 ...\n");
+  M1 = test_matrix_5();
+  M1T = NM_transpose(M1);
+  C = NM_create(NM_SPARSE,M1->size0,M1->size1);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+  NM_gemm(1.0, M1, M1T, 0.0, C);
+  n = M1->size0;
+  for(int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_LDLT_solve_unit(C, b);
+  if(info != 0) return info;
+  printf("test 5 ... ok\n");
+#endif
   free(b);
 
   printf("End of NM_LDLT...\n");
@@ -3752,8 +3755,8 @@ int main(int argc, char *argv[])
   info += test_NM_LU_solve_matrix_rhs();
   info += test_NM_Cholesky_solve_matrix_rhs();
   info += test_NM_Cholesky_solve();
-  
   info += test_NM_LDLT_solve();
+  
 #ifdef WITH_OPENSSL
   info += test_NM_compute_values_sha1();
   info += test_NM_check_values_sha1();

@@ -291,6 +291,8 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
   p->solver = NSM_SUPERLU_MT;
 #elif defined(WITH_MKL_PARDISO)
   p->solver = NSM_MKL_PARDISO;
+//#elif defined(WITH_MA57)
+//  p->solver = NSM_HSL;
 #else
   p->solver = NSM_CSPARSE;  // default solver
 #endif

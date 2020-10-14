@@ -52,6 +52,11 @@
 #include "NM_MKL_spblas.h"
 #endif
 
+#ifdef WITH_MA57
+#include "lbl.h"
+#include "NM_MA57.h"
+#endif
+
 #ifdef __cplusplus
 #undef restrict
 #include <sys/cdefs.h>                // for __restrict
@@ -5286,10 +5291,63 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
     case NM_SPARSE:
     {
       NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-      assert(!NM_internalData(A)->isCholeskyfactorized);
+      assert(!NM_internalData(A)->isLDLTfactorized);
       switch (p->solver)
       {
       case NSM_CSPARSE:
+      {
+        info=1;
+        fprintf(stderr, "NM_LDLT_factorize: NSM_CSPARSE is not available for LDLT %d\n", info);
+        break;
+      }
+#ifdef WITH_MA57
+      case NSM_HSL:
+      {
+        int  n = A->size0;
+        CSparseMatrix * A_halftriplet= NM_half_triplet(A);
+        CS_INT nz = A_halftriplet->nz;
+
+        FILE * logfile = fopen("lbl.log", "w");
+        int lblsolver = 1;  // MA27=0, MA57=1.
+
+        // ... Initialize LBL data structure.
+        LBL_Data * lbl = LBL_Initialize(nz, n, logfile, lblsolver);
+
+        for(int i = 0; i < nz; i++)
+        {
+          lbl->irn[i]=A_halftriplet->i[i]+1;
+          lbl->jcn[i]=A_halftriplet->p[i]+1;
+        }
+
+        p->linear_solver_data = lbl;
+
+        if(!p->solver_free_hook)
+        {
+          p->solver_free_hook = &NM_MA57_free;
+        }
+
+        // Optionally, we may set some specific parameters (MA57 only).
+        //LBL_set_int_parm(lbl, LBL_I_SCALING, 0);        // No scaling.
+        //LBL_set_int_parm(lbl, LBL_I_PIV_NUMERICAL, 1);  // Do pivoting.
+        //LBL_set_real_parm(lbl, LBL_D_PIV_THRESH, 0.5);  // Pivot threshold.
+
+        // Analyze.
+        info  = LBL_Analyze(lbl, 0);  // iflag=0: automatic pivot choice.
+        if(info) {
+            fprintf(stderr, "NM_LDLT_factorize: LBL_Analyze Error return from Analyze: %d\n", info);
+        }
+
+        // Factorize.
+        info = LBL_Factorize(lbl, A_halftriplet->x);
+        if(info) {
+          fprintf(stderr, "NM_LDLT_factorize: LBL_Factorize. Error return from Factorize: %d\n", info);
+        }
+        // Close logging stream.
+        fclose(logfile);
+
+      break;
+      }
+#endif
 #ifdef WITH_MUMPS
       case NSM_MUMPS:
       {
@@ -5423,15 +5481,26 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
       {
       case NSM_CSPARSE:
       {
-        numerics_printf_verbose(2,"NM_LDLT_solve, using CSparse" );
-
-        numerics_printf_verbose(2,"NM_LDLT_solve, we solve with given factors" );
-        for(unsigned int j=0; j < nrhs ; j++ )
+        info=1;
+        fprintf(stderr, "NM_LDLT_solve: NSM_CSPARSE is not available for LDLT %d\n", info);
+        break;
+      }
+#ifdef WITH_MA57
+      case NSM_HSL:
+      {
+        LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
+        // Solve.
+        for (int irhs=0; irhs <nrhs ; irhs++)
         {
-          info = !CSparseMatrix_chol_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
+          info = LBL_Solve(lbl, &b[irhs*A->size1]); // MA57 is able to accept multiple rhs but the C wrapper lbl not.
+          if(info)
+          {
+            fprintf(stderr, "NM_LDLT_solve. LBL_Solve error return from Solve: %d\n", info);
+          }
         }
         break;
       }
+#endif
 #ifdef WITH_MUMPS
       case NSM_MUMPS:
       {
