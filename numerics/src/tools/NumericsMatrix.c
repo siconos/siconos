@@ -4910,7 +4910,6 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
 
         CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
 
-        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep them");
         info = !CSparseMatrix_chol_factorization(1, NM_csc(A),  cs_chol_A);
 
         if (info)
@@ -5295,9 +5294,29 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
       switch (p->solver)
       {
       case NSM_CSPARSE:
-      {
-        info=1;
-        fprintf(stderr, "NM_LDLT_factorize: NSM_CSPARSE is not available for LDLT %d\n", info);
+      {        numerics_printf_verbose(2, "NM_LDLT_factorize, using SuiteSparse (LDL )");
+
+        if (!(p->dWork && p->linear_solver_data))
+        {
+          assert(!NSM_workspace(p));
+          assert(!NSM_linear_solver_data(p));
+          assert(!p->solver_free_hook);
+
+          p->solver_free_hook = &NSM_clear_p;
+          p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          p->dWorkSize = A->size1;
+        };
+
+        CSparseMatrix_factors* cs_ldlt_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+
+        info = !CSparseMatrix_ldlt_factorization(1, NM_csc(A),  cs_ldlt_A);
+
+        if (info)
+        {
+          numerics_printf_verbose(2, "NM_LDLT_factorize: LDL (SuiteSparse) factorization failed.");
+        }
+        assert(!p->linear_solver_data);
+        p->linear_solver_data = cs_ldlt_A;
         break;
       }
 #ifdef WITH_MA57
@@ -5481,8 +5500,13 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
       {
       case NSM_CSPARSE:
       {
-        info=1;
-        fprintf(stderr, "NM_LDLT_solve: NSM_CSPARSE is not available for LDLT %d\n", info);
+        numerics_printf_verbose(2,"NM_LDLT_solve, using SuiteSparse" );
+
+        numerics_printf_verbose(2,"NM_LDLT_solve, we solve with given factors" );
+        for(unsigned int j=0; j < nrhs ; j++ )
+        {
+          info = !CSparseMatrix_ldlt_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
+        }
         break;
       }
 #ifdef WITH_MA57
