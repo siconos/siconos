@@ -61,11 +61,13 @@ using namespace Siconos;
 //======================
 // Note FP: this function is never used. We keep it for the record. Remove it later ?
 
+
 // const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
 // {
 //   // To compute C = A * B
 //   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
 //   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+
 
 //   if((A.size(1) != B.size(0)))
 //     SiconosMatrixException::selfThrow("Matrix function C=prod(A,B): inconsistent sizes");
@@ -212,7 +214,6 @@ dim : dim[0] number of raw, dim[1] number of col
 // }
 
 
-
 void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
 
@@ -232,10 +233,10 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   if(&A == &C || &B == &C)
     SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): C must be different from A and B.");
 
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorized in place in prod !!");
+  assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorized in place in prod !!");
   if(!C.isBlock())
-    C.resetLU();
+    C.resetFactorizationFlags();
   unsigned int numA = A.num();
   unsigned int numB = B.num();
   unsigned int numC = C.num();
@@ -365,9 +366,10 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
       SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
     }
     if(!C.isBlock())
-      C.resetLU();
+      C.resetFactorizationFlags();
   }
 }
+
 
 // Note FP: this function is never used. We keep it for the record. Remove it later ?
 // void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
@@ -380,6 +382,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 //   if(numA != Siconos::DENSE || numB != Siconos::DENSE || numC != Siconos::DENSE)
 //     SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
 
+
 //   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
 //   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
@@ -387,8 +390,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 //   siconosBindings::blas::gemm(a, siconosBindings::trans(*A.dense()), siconosBindings::trans(*B.dense()), b, *C.dense());
 
 
-
-//   C.resetLU();
+//   C.resetFactorizationFlags();
 // }
 
 // Note FP: this function is never used. We keep it for the record. Remove it later ?
@@ -399,7 +401,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 //   unsigned int numC = C.num();
 //   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
 //   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-//   C.resetLU();
+//   C.resetFactorizationFlags();
 
 //   // At the time, only dense output allowed
 //   DenseMat * tmpC = nullptr;
@@ -419,8 +421,6 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 //   }
 //   else
 //     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for these kinds of matrices.");
-//   C.resetLU();
+//   C.resetFactorizationFlags();
 // }
-
-
 

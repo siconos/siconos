@@ -871,7 +871,7 @@ void Interaction::computeInput(double time,  unsigned int level)
 
 
 
-void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
+SP::SiconosMatrix Interaction::getLeftInteractionBlockForDS(unsigned int pos, unsigned size, unsigned int  sizeDS) const
 {
   SP::SiconosMatrix originalMatrix;
   RELATION::TYPES relationType = relation()->getType();
@@ -897,6 +897,8 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   }
   else
     RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
+//  Siconos::UBLAS_TYPE type = originalMatrix->num();
+  SP::SiconosMatrix  InteractionBlock(new SimpleMatrix(size, sizeDS, originalMatrix->num() ));
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
@@ -911,6 +913,7 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   subPos[2] = 0;
   subPos[3] = 0;
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
+  return InteractionBlock;
 }
 
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
@@ -950,7 +953,7 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int 
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
+SP::SiconosMatrix Interaction::getRightInteractionBlockForDS(unsigned int pos, unsigned int sizeDS, unsigned int size ) const
 {
   SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
   RELATION::TYPES relationType = relation()->getType();
@@ -973,6 +976,8 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
   else
     RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
 
+  SP::SiconosMatrix  InteractionBlock(new SimpleMatrix(sizeDS, size, originalMatrix->num() ));
+
   if(! originalMatrix)
     RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): the right interactionBlock is a nullptr pointer (miss matrix B or H or gradients ...in relation ?)");
 
@@ -989,6 +994,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
   subPos[2] = 0;
   subPos[3] = 0;
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
+  return InteractionBlock;
 }
 
 void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const
@@ -1029,4 +1035,3 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
 
   *InteractionBlock = *D;
 }
-

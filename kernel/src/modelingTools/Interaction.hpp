@@ -683,10 +683,12 @@ public:
 
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to one ds.
-   *  \param pos int, relative position of the beginning of the required block in relation matrix.
-   *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   * \param pos int, relative position of the beginning of the required block in relation matrix.
+   * \param size int, size(0) of the block
+   * \param sizeDS int, size(1) of the block
+   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const;
+  SP::SiconosMatrix getLeftInteractionBlockForDS(unsigned int pos, unsigned int size,  unsigned int sizeDS) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation projecting on the constraints.
    *         We get only the part corresponding to ds.
@@ -697,10 +699,12 @@ public:
 
   /** gets the matrix used in interactionBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
-   *  \param pos int, relative position of the beginning of the required block in relation matrix.
-   *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   * \param pos int, relative position of the beginning of the required block in relation matrix.
+   * \param sizeDS int, size(0) of the block
+   * \param size int, size(1) of the block
+   * \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
    */
-  void getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const;
+  SP::SiconosMatrix  getRightInteractionBlockForDS(unsigned int pos, unsigned int sizeDS, unsigned size) const;
 
   /** gets extra interactionBlock corresponding to the present Interaction (see the
    *  top of this files for extra interactionBlock meaning)

@@ -21,7 +21,7 @@
 #include <assert.h>         // for assert
 #include <stdio.h>          // for fprintf, stderr
 #include <stdlib.h>         // for exit, EXIT_FAILURE
-#include "CSparseMatrix_internal.h"  // for CSparseMatrix, CS_INT, CSparseMatrix_zentry
+#include "CSparseMatrix_internal.h"  // for CSparseMatrix, CS_INT
 #include "SiconosConfig.h"  // for WITH_MKL_SPBLAS  // IWYU pragma: keep
 
 #ifdef WITH_MKL_SPBLAS
@@ -47,7 +47,7 @@ CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc)
   {
     for(CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
     {
-      CSparseMatrix_zentry(triplet, Ai[i], j, val[i]);
+      CSparseMatrix_entry(triplet, Ai[i], j, val[i]);
     }
   }
   return triplet;
@@ -65,7 +65,7 @@ CSparseMatrix* NM_csc_to_half_triplet(CSparseMatrix* csc)
   {
     for(CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
     {
-      CSparseMatrix_symmetric_zentry(triplet, Ai[i], j, val[i]);
+      CSparseMatrix_symmetric_entry(triplet, Ai[i], j, val[i]);
     }
   }
   return triplet;

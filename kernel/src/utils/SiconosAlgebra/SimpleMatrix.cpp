@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "SimpleMatrix.hpp"
 
 #include <assert.h>                                             // for assert
@@ -32,6 +32,22 @@
 #include "ioMatrix.hpp"                                         // for read
 #include "Tools.hpp"                                            // for toString
 #include "bindings_utils.hpp"                                   // for fill
+#include "NumericsMatrix.h"
+
+#include "NumericsSparseMatrix.h"
+#include "CSparseMatrix.h"
+
+//#define DEBUG_MESSAGES
+#include "debug.h"
+
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#include <cs.h>
+#endif
+
+
+
+
 
 using namespace Siconos;
 namespace siconosBindings = boost::numeric::bindings::blas;
@@ -45,12 +61,26 @@ using std::endl;
 
 
 // Default (protected, used only for derived classes)
-SimpleMatrix::SimpleMatrix(int i): SiconosMatrix(1), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(int i):
+  SiconosMatrix(Siconos::DENSE),
+  _isPLUFactorized(false),
+  _isPLUFactorizedInPlace(false),
+  _isQRFactorized(false),
+  _isPLUInversed(false),
+  _isCholeskyFactorized(false),
+  _isCholeskyFactorizedInPlace(false)
 {
   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
 }
 
-SimpleMatrix::SimpleMatrix(): SiconosMatrix(1), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix():
+  SiconosMatrix(Siconos::DENSE),
+  _isPLUFactorized(false),
+  _isPLUFactorizedInPlace(false),
+  _isQRFactorized(false),
+  _isPLUInversed(false),
+  _isCholeskyFactorized(false),
+  _isCholeskyFactorizedInPlace(false)
 {
   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
 }
@@ -61,7 +91,13 @@ SimpleMatrix::SimpleMatrix(unsigned int row,
                            UBLAS_TYPE typ,
                            unsigned int upper,
                            unsigned int lower):
-  SiconosMatrix(1), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+  SiconosMatrix(Siconos::DENSE),
+  _isPLUFactorized(false),
+  _isPLUFactorizedInPlace(false),
+  _isQRFactorized(false),
+  _isPLUInversed(false),
+  _isCholeskyFactorized(false),
+  _isCholeskyFactorizedInPlace(false)
 {
   if(typ == DENSE)
   {
@@ -112,7 +148,13 @@ SimpleMatrix::SimpleMatrix(unsigned int row,
 
 // parameters: dimensions, input value and type
 SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue, UBLAS_TYPE typ, unsigned int upper, unsigned int lower):
-  SiconosMatrix(1), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+  SiconosMatrix(typ),
+  _isPLUFactorized(false),
+  _isPLUFactorizedInPlace(false),
+  _isQRFactorized(false),
+  _isPLUInversed(false),
+  _isCholeskyFactorized(false),
+  _isCholeskyFactorizedInPlace(false)
 {
   // This constructor has sense only for dense matrices ...
   if(typ == DENSE)
@@ -126,7 +168,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 
 // // parameters: a vector (stl) of double and the type.
 // SimpleMatrix::SimpleMatrix(const std::vector<double>& v, unsigned int row, unsigned int col, UBLAS_TYPE typ, unsigned int lower, unsigned int upper):
-//   SiconosMatrix(1, row, col), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+//   SiconosMatrix(1, row, col), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 // {
 //   if( (  (v.size() != row*col) && (typ != SYMMETRIC && typ != BANDED) )
 //       || (v.size() != row*row && typ == SYMMETRIC)
@@ -167,36 +209,54 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 // }
 
 // Copy constructors
-SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.num()), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SimpleMatrix &m):
+  SiconosMatrix(m.num()),
+  _isPLUFactorized(false),
+  _isPLUFactorizedInPlace(false),
+  _isQRFactorized(false),
+  _isPLUInversed(false),
+  _isCholeskyFactorized(false),
+  _isCholeskyFactorizedInPlace(false)
 {
+
+  _isSymmetric = m.isSymmetric();
+  _isPositiveDefinite = m.isPositiveDefinite();
+  
+
+  _isPLUFactorized= m.isPLUFactorized();
+  _isPLUFactorizedInPlace= m.isPLUFactorizedInPlace();
+  _isPLUInversed= m.isPLUInversed();
+  
+
+  
   if(_num == Siconos::DENSE)
   {
-    mat.Dense = new DenseMat(smat.size(0), smat.size(1));
-    noalias(*mat.Dense) = (*smat.dense());
+    mat.Dense = new DenseMat(m.size(0), m.size(1));
+    noalias(*mat.Dense) = (*m.dense());
   }
-  //   mat.Dense = new DenseMat(*smat.dense());
+  //   mat.Dense = new DenseMat(*m.dense());
 
   else if(_num == Siconos::TRIANGULAR)
-    mat.Triang = new TriangMat(*smat.triang());
+    mat.Triang = new TriangMat(*m.triang());
 
   else if(_num == Siconos::SYMMETRIC)
 
-    mat.Sym = new SymMat(*smat.sym());
+    mat.Sym = new SymMat(*m.sym());
 
   else if(_num == Siconos::SPARSE)
-    mat.Sparse = new SparseMat(*smat.sparse());
+    mat.Sparse = new SparseMat(*m.sparse());
 
   else if(_num == Siconos::SPARSE_COORDINATE)
-    mat.SparseCoordinate = new SparseCoordinateMat(*smat.sparseCoordinate());
+    mat.SparseCoordinate = new SparseCoordinateMat(*m.sparseCoordinate());
 
   else if(_num == Siconos::BANDED)
-    mat.Banded = new BandedMat(*smat.banded());
+    mat.Banded = new BandedMat(*m.banded());
 
   else if(_num == Siconos::ZERO)
-    mat.Zero = new ZeroMat(smat.size(0), smat.size(1));
+    mat.Zero = new ZeroMat(m.size(0), m.size(1));
 
   else// if(_num == Siconos::IDENTITY)
-    mat.Identity = new IdentityMat(smat.size(0), smat.size(1));
+    mat.Identity = new IdentityMat(m.size(0), m.size(1));
 }
 
 /** copy constructor of a block given by the coord = [r0A r1A c0A c1A]
@@ -205,8 +265,11 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.num()),
 SimpleMatrix::SimpleMatrix(const SimpleMatrix& A, const Index& coord):
   SiconosMatrix(A.num()),
   _isPLUFactorized(false),
+  _isPLUFactorizedInPlace(false),
   _isQRFactorized(false),
-  _isPLUInversed(false)
+  _isPLUInversed(false),
+  _isCholeskyFactorized(false),
+  _isCholeskyFactorizedInPlace(false)
 {
   if(coord[0]>=coord[1])
     SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). Empty row range coord[0]>= coord[1]");
@@ -258,14 +321,25 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix& A, const Index& coord):
 
 
 
-SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.num()), _isPLUFactorized(), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SiconosMatrix &m):
+  SiconosMatrix(m.num()),
+  _isPLUFactorized(),
+  _isPLUFactorizedInPlace(false),
+  _isQRFactorized(false),
+  _isPLUInversed(false),
+  _isCholeskyFactorized(false),
+  _isCholeskyFactorizedInPlace(false)
 {
   // _num is set in SiconosMatrix constructor with m.num() ... must be changed if m is Block
   unsigned int numM = m.num();
 
+  _isSymmetric = m.isSymmetric();
+  _isPositiveDefinite = m.isPositiveDefinite();
 
   _isPLUFactorized= m.isPLUFactorized();
+  _isPLUFactorizedInPlace= m.isPLUFactorizedInPlace();
   _isPLUInversed= m.isPLUInversed();
+
 
   if(m.ipiv())
     _ipiv.reset(new VInt(*(m.ipiv())));
@@ -320,47 +394,74 @@ SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.num()), _isP
     mat.Identity = new IdentityMat(m.size(0), m.size(1));
 }
 
-SimpleMatrix::SimpleMatrix(const DenseMat& m): SiconosMatrix(1), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const DenseMat& m):
+  SiconosMatrix(Siconos::DENSE),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.Dense = new DenseMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const TriangMat& m): SiconosMatrix(2), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const TriangMat& m):
+  SiconosMatrix(Siconos::TRIANGULAR),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.Triang = new TriangMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const SymMat& m): SiconosMatrix(3), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SymMat& m):
+  SiconosMatrix(Siconos::SYMMETRIC),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.Sym = new SymMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const SparseMat& m): SiconosMatrix(4), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SparseMat& m):
+  SiconosMatrix(Siconos::SPARSE),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.Sparse = new SparseMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const SparseCoordinateMat& m): SiconosMatrix(SPARSE_COORDINATE), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SparseCoordinateMat& m):
+  SiconosMatrix(SPARSE_COORDINATE),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.SparseCoordinate = new SparseCoordinateMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const BandedMat& m): SiconosMatrix(5), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const BandedMat& m):
+  SiconosMatrix(Siconos::BANDED),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.Banded = new BandedMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const ZeroMat& m): SiconosMatrix(6), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const ZeroMat& m):
+  SiconosMatrix(Siconos::ZERO),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.Zero = new ZeroMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const IdentityMat& m): SiconosMatrix(7), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const IdentityMat& m):
+  SiconosMatrix(Siconos::IDENTITY),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.Identity = new IdentityMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii): SiconosMatrix(1), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii):
+  SiconosMatrix(Siconos::DENSE),
+  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
+  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
 {
   mat.Dense = new DenseMat();
   if(ascii)
@@ -376,7 +477,16 @@ SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii): SiconosMatrix(1
 SimpleMatrix::~SimpleMatrix()
 {
   if(_num == Siconos::DENSE)
+  {
     delete(mat.Dense);
+    if (_numericsMatrix)
+    {
+      // _numericsMatrix->matrix0 points to the array contained in the ublas matrix
+      // To avoid double free on this pointer, we set it to NULL before deletion
+      if (_numericsMatrix->matrix0)
+        _numericsMatrix->matrix0 =nullptr;
+    }
+  }
   else if(_num == Siconos::TRIANGULAR)
     delete(mat.Triang);
   else if(_num == Siconos::SYMMETRIC)
@@ -391,7 +501,35 @@ SimpleMatrix::~SimpleMatrix()
     delete(mat.Identity);
 }
 
-bool SimpleMatrix::isSymmetric(double tol) const
+
+void SimpleMatrix::updateNumericsMatrix()
+{
+  /* set the numericsMatrix */
+  NumericsMatrix * NM;
+  if(_num == DENSE)
+  {
+    _numericsMatrix.reset(NM_new(),NM_clear_not_dense); // When we reset, we do not free the matrix0
+                                                        //that is linked to the array of the boost container
+    NM = _numericsMatrix.get();
+    double * data = (double*)(getArray());
+    DEBUG_EXPR(NV_display(data,size(0)*size(1)););
+    NM_fill(NM, NM_DENSE, size(0), size(1), data ); // Pointer link
+  }
+  else
+  {
+    // For all the other cases, we build a sparse matrix and we call numerics for the factorization of a sparse matrix.
+    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_clear);
+    NM = _numericsMatrix.get();
+    _numericsMatrix->matrix2->origin = NSM_CSC;
+    NM_csc_alloc(NM, nnz());
+    fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
+    DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
+  }
+}
+
+
+
+bool SimpleMatrix::checkSymmetry(double tol) const
 {
   SP::SimpleMatrix  m_trans(new SimpleMatrix(*this));
   m_trans->trans();
@@ -586,7 +724,7 @@ void SimpleMatrix::zero()
 
   else if(_num == Siconos::IDENTITY)
     SiconosMatrixException::selfThrow("SimpleMatrix::zero(): you can not set to zero a matrix of type Identity!.");
-  resetLU();
+  resetFactorizationFlags();
   // if _num == Siconos::ZERO: nothing
 }
 
@@ -596,7 +734,7 @@ void SimpleMatrix::randomize()
     Siconos::algebra::fill(*mat.Dense);
   else
     SiconosMatrixException::selfThrow("SimpleMatrix::randomize(): only implemented for dense matrices.");
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::randomize_sym()
@@ -605,7 +743,7 @@ void SimpleMatrix::randomize_sym()
     Siconos::algebra::fill_sym(*mat.Dense);
   else
     SiconosMatrixException::selfThrow("SimpleMatrix::randomize_sym(): only implemented for dense matrices.");
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::eye()
@@ -629,7 +767,7 @@ void SimpleMatrix::eye()
 
   else if(_num == Siconos::ZERO)
     SiconosMatrixException::selfThrow("SimpleMatrix::eye(): you can not set to identity a matrix of type Zero!.");
-  resetLU();
+  resetFactorizationFlags();
 }
 
 
@@ -721,7 +859,7 @@ void SimpleMatrix::resize(unsigned int row, unsigned int col, unsigned int lower
   {
     (*mat.Identity).resize(row, col, preserve);
   }
-  resetLU();
+  resetFactorizationFlags();
 }
 
 
@@ -901,14 +1039,9 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
   }
 }
 
-
-
 // void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init)
 // {
-
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-
-
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 //   if(init)
 //     y.zero();
 //   unsigned int startRow = 0;
@@ -928,10 +1061,8 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_addprod(const SiconosMatrix& A, unsigned int startRow, unsigned int startCol, const BlockVector& x, SiconosVector& y)
 // {
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 //   assert(!A.isBlock() && "private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
-
 //   VectorOfVectors::const_iterator it;
 //   unsigned int startColBis = startCol;
 //   for(it = x.begin(); it != x.end(); ++it)
@@ -945,10 +1076,8 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 // // x block, y siconos
 // void private_prod(const SiconosMatrix& A, unsigned int startRow, const BlockVector& x, SiconosVector& y, bool init)
 // {
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 //   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
-
 //   if(init)  // y = subA * x , else y += subA * x
 //     y.zero();
 //   private_addprod(A, startRow, 0, x, y);
@@ -957,7 +1086,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 // // x and y blocks
 // void private_prod(SPC::SiconosMatrix A, const unsigned int startRow, SPC::BlockVector x, SP::BlockVector y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int row = startRow;
 //   VectorOfVectors::const_iterator it;
@@ -968,11 +1097,10 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 //   }
 // }
 
-
 // // x and y blocks
 // void private_prod(SPC::SiconosMatrix A, const unsigned int startRow, SPC::SiconosVector x, SP::BlockVector y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int row = startRow;
 //   VectorOfVectors::const_iterator it;
@@ -985,8 +1113,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_addprod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SP::SiconosVector y)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
-
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 //   VectorOfVectors::const_iterator it;
 //   unsigned int startColBis = startCol;
 //   for(it = x->begin(); it != x->end(); ++it)
@@ -999,7 +1126,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_prod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::BlockVector  y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int col = startCol;
 //   VectorOfVectors::const_iterator it;
@@ -1012,7 +1139,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_prod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::SiconosVector  y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of trans(A), between el. of A of index (col) startCol and startCol + sizeY
 //   if(init)  // y = subA * x , else y += subA * x
@@ -1023,7 +1150,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_prod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::BlockVector  y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int col = startCol;
 //   VectorOfVectors::const_iterator it;
@@ -1036,7 +1163,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_addprod(double a, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SPC::SiconosVector x, SP::SiconosVector y)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   if(A->isBlock())
 //     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
@@ -1080,7 +1207,8 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::SiconosVector x, SP::SiconosVector  y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
+
 
 //   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 

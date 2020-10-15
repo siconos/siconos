@@ -116,12 +116,6 @@ bool operator == (const SiconosMatrix& A, const SiconosMatrix& B);
  */
 bool operator != (const SiconosMatrix& A, const SiconosMatrix& B);
 
-// /** product of two matrices, C = A*B
-//   \param A a SiconosMatrix
-//   \param B a SiconosMatrix
-//   \return C a SimpleMatrix
-//   */
-// const SimpleMatrix prod(const SiconosMatrix& A, const SiconosMatrix& B);
 
 
 // /** prod(A, x, y, init) computes y = A*x or y += A*x if init = false

@@ -324,7 +324,7 @@ void setBlock(SPC::SiconosMatrix  MIn, SP::SiconosMatrix MOut, const Index& dim,
         currentPos[3] = start[3];
 
       }
-      MOut->resetLU();
+      MOut->resetFactorizationFlags();
 
     }
     else // neither MIn nor MOut is a BlockMatrix.
@@ -390,7 +390,7 @@ void setBlock(SPC::SiconosMatrix  MIn, SP::SiconosMatrix MOut, const Index& dim,
         SiconosMatrixException::selfThrow("matrix, setBlock(MIn, MOut, ...), unconsistent types between MIn and MOut.");
         break;
       }
-      MOut->resetLU();
+      MOut->resetFactorizationFlags();
     }
   }
 }

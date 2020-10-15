@@ -644,8 +644,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       SP::LagrangianDS lds = (std::static_pointer_cast<LagrangianDS>(ds));
       unsigned int sizeDS = lds->dimension();
-      leftInteractionBlock.reset(new SimpleMatrix(sizeY, sizeDS));
-      inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
+      leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, sizeY, sizeDS);
 
       if(lds->boundaryConditions())  // V.A. Should we do that ?
       {
@@ -674,7 +673,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       if(_useMassNormalization)
       {
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi1, ds);
-        centralInteractionBlock->PLUForwardBackwardInPlace(*work);
+        centralInteractionBlock->Solve(*work);
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       }
@@ -709,7 +708,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       work->trans();
       std::cout << "LinearOSNS::computeInteractionBlock workT2" <<std::endl;
       workT2->display();
-      workT2->PLUForwardBackwardInPlace(*work);
+      workT2->Solve(*work);
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
 #else
       if(0)  //(std::static_pointer_cast<NewtonEulerR> inter->relation())->_isConstact){
@@ -732,7 +731,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 //        work->trans();
 //        //cout<<"LinearOSNS::computeInteractionBlock workT2"<<endl;
 //        //workT2->display();
-//        workT2->PLUForwardBackwardInPlace(*work);
+//        workT2->Solve(*work);
 //        prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
       }
       else
@@ -908,7 +907,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       rightInteractionBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
       inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
       rightInteractionBlock->trans();
-      workT2->PLUForwardBackwardInPlace(*rightInteractionBlock);
+      workT2->Solve(*rightInteractionBlock);
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
 
 #else
@@ -927,8 +926,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
               relationType2 == Lagrangian)
       {
         unsigned int sizeDS =  ds->dimension();
-        leftInteractionBlock.reset(new SimpleMatrix(sizeY1, sizeDS));
-        inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
+        leftInteractionBlock = inter1->getLeftInteractionBlockForDS(pos1, sizeY1, sizeDS );
 
         Type::Siconos dsType = Type::value(*ds);
         if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
@@ -954,8 +952,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         leftInteractionBlock->display();
 #endif
         // inter1 != inter2
-        rightInteractionBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
-        inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
+        rightInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, sizeY2, sizeDS);
 #ifdef MLCPPROJ_DEBUG
         std::cout << "MLCPProjectOnConstraints::computeInteractionBlock : rightInteractionBlock" << std::endl;
         rightInteractionBlock->display();
@@ -973,7 +970,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
         if(_useMassNormalization)
         {
-          centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+          centralInteractionBlock->Solve(*rightInteractionBlock);
           //*currentInteractionBlock +=  *leftInteractionBlock ** work;
           prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
         }

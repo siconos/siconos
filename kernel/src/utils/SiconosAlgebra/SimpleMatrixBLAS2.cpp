@@ -38,14 +38,10 @@ namespace siconosBindings = boost::numeric::bindings;
 
 using namespace Siconos;
 
-
-
-
-
 // void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init)
 // {
 //   // To compute y = A * x ( init = true) or y += A * x (init = false) using ublas::axpy_prod
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   if(A.size(1) != x.size())
 //     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
@@ -158,7 +154,7 @@ using namespace Siconos;
 // {
 //   if(A.isBlock())
 //     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int numA = A.num();
 //   unsigned int numX = x.num();
@@ -173,7 +169,7 @@ using namespace Siconos;
 // {
 //   if(A.isBlock())
 //     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int numA = A.num();
 //   unsigned int numX = x.num();

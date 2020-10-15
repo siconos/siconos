@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <float.h>
 
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
@@ -438,9 +439,9 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   data->P_mu->mat->matrix2->origin = NSM_TRIPLET;
   for(unsigned int i = 0; i < nd; ++i)
     if(i % d == 0)
-      NM_zentry(data->P_mu->mat, i, i, 1. / problem->mu[(int)(i/d)]);
+      NM_entry(data->P_mu->mat, i, i, 1. / problem->mu[(int)(i/d)]);
     else
-      NM_zentry(data->P_mu->mat, i, i, 1.);
+      NM_entry(data->P_mu->mat, i, i, 1.);
 
   /* ------ initialize the inverse P_mu_inv of the change of variable matrix P_mu ------- */
   data->P_mu->inv_mat = NM_create(NM_SPARSE, nd, nd);
@@ -448,9 +449,9 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   data->P_mu->inv_mat->matrix2->origin = NSM_TRIPLET;
   for(unsigned int i = 0; i < nd; ++i)
     if(i % d == 0)
-      NM_zentry(data->P_mu->inv_mat, i, i, problem->mu[(int)(i/d)]);
+      NM_entry(data->P_mu->inv_mat, i, i, problem->mu[(int)(i/d)]);
     else
-      NM_zentry(data->P_mu->inv_mat, i, i, 1.);
+      NM_entry(data->P_mu->inv_mat, i, i, 1.);
 
   /* ------ initial parameters initialization ---------- */
   data->internal_params = (IPM_internal_params*)malloc(sizeof(IPM_internal_params));
@@ -551,7 +552,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     M = NM_create(NM_SPARSE,  problem->M->size0,  problem->M->size1);
-    NM_copy_to_sparse(problem->M, M);
+    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
   }
   else
   {
@@ -563,7 +564,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     H_tilde = NM_create(NM_SPARSE,  problem->H->size1,  problem->H->size0);
-    NM_copy_to_sparse(NM_transpose(problem->H), H_tilde);
+    NM_copy_to_sparse(NM_transpose(problem->H), H_tilde, DBL_EPSILON);
   }
   else
   {
@@ -819,7 +820,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
     /* Newton system solving */
-    NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
+    // NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
+    NM_LU_solve(J, rhs, 1);
     if(log_hdf5) SN_logh5_NM(J, "J", logger_s);
 
     d_globalVelocity = rhs;
@@ -882,7 +884,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
     /* Newton system solving */
-    NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
+    // NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
+    NM_LU_solve(J, rhs, 1);
 
     NM_clear(J);
     free(J);

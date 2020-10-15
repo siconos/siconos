@@ -201,7 +201,7 @@ void LsodarOSI::computeRhs(double t)
       // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
       free = *lds->forces();
       if(lds->inverseMass())
-        lds->inverseMass()->PLUForwardBackwardInPlace(free);
+        lds->inverseMass()->Solve(free);
       DEBUG_EXPR(free.display(););
     }
     if(_extraAdditionalTerms)

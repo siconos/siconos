@@ -43,6 +43,7 @@
 #include "op3x3.h"                                    // for extract3x3, add3x3
 #include "sanitizer.h"                                // for cblas_dcopy_msan
 #include "SiconosBlas.h"                                    // for cblas_dcopy
+#include "float.h"                                    // for DBL_EPSILON
 
 static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block_row_size, size_t block_col_size)
 {
@@ -59,7 +60,7 @@ static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block
       {
         for(size_t row_indx = i; row_indx < block_row_size+i; ++row_indx, ++Alocal)
         {
-          CHECK_RETURN(CSparseMatrix_zentry(Btriplet, row_indx, col_indx, *Alocal));
+          CHECK_RETURN(CSparseMatrix_zentry(Btriplet, row_indx, col_indx, *Alocal, DBL_EPSILON));
         }
 //        Alocal = ;
       }
@@ -624,7 +625,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     {
     case SICONOS_FRICTION_3D_NSN_USE_CSLUSOL:
     {
-      NSM_linearSolverParams(AWpB)->solver = NSM_CS_LUSOL;
+      NSM_linearSolverParams(AWpB)->solver = NSM_CSPARSE;
       break;
     }
     case SICONOS_FRICTION_3D_NSN_USE_MUMPS:
@@ -698,7 +699,11 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
     /* Solve: AWpB X = -F */
 //    NM_copy(AWpB, AWpB_backup);
-    int lsi = NM_gesv(AWpB, tmp1, true);
+    // int lsi = NM_gesv(AWpB, tmp1, true);
+    NM_unpreserve(AWpB);
+    NM_preserve(AWpB);
+    NM_set_factorized(AWpB, false);
+    int lsi = NM_LU_solve(AWpB, tmp1, 1);
 
     /* NM_copy needed here */
 //    NM_copy(AWpB_backup, AWpB);

@@ -119,7 +119,7 @@ CS_INT initACPsiJacobian(
   for(int e = 0; e < M->nz; ++e)
   {
     /* DEBUG_PRINTF("e=%d, M->i[e]=%td, M->p[e]=%td, M->x[e]=%g\n", e, M->i[e], M->p[e], M->x[e]); */
-    CHECK_RETURN(CSparseMatrix_zentry(J, M->i[e], M->p[e], - M->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, M->i[e], M->p[e], - M->x[e]));
   }
 
   /* H */
@@ -128,19 +128,19 @@ CS_INT initACPsiJacobian(
   {
     /* DEBUG_PRINTF("e=%d, H->i[e]=%td, H->p[e] + M->n + A->n=%td, H->x[e]=%g\n", */
     /*              e, H->i[e], H->p[e] + M->n + A->n , H->x[e]); */
-    CHECK_RETURN(CSparseMatrix_zentry(J, H->i[e], H->p[e] + M->n + A->n, rescaling*H->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, H->i[e], H->p[e] + M->n + A->n, rescaling*H->x[e]));
   }
 
   /* Ht */
   for(int e = 0; e < H->nz; ++e)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(J, H->p[e] + M->m, H->i[e], H->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, H->p[e] + M->m, H->i[e], H->x[e]));
   }
 
   /* -I */
   for(int e = 0; e < A->m; ++e)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(J, e + M->m, e + M->n, -1.));
+    CHECK_RETURN(CSparseMatrix_entry(J, e + M->m, e + M->n, -1.));
   }
 
   /* keep A start indice for update */
@@ -149,13 +149,13 @@ CS_INT initACPsiJacobian(
   /* A */
   for(int e = 0; e < A->nz; ++e)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, A->i[e] + M->m + H->n, A->p[e] + M->n, A->x[e]));
   }
 
   /* B */
   for(int e = 0; e < B->nz; ++e)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n,  rescaling*B->x[e]));
+    CHECK_RETURN(CSparseMatrix_entry(J, B->i[e] + M->m + H->n, B->p[e] + M->n + A->n,  rescaling*B->x[e]));
   }
 
   return Astart;
@@ -548,6 +548,9 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                  NM_triplet(problem->M)->nzmax + 2*NM_triplet(problem->H)->nzmax +
                  2*A_.n + A_.nzmax + B_.nzmax, 1, 1);
 
+  /* needed to build the NumericsMatrix for J */
+  NumericsSparseMatrix *NSM_J = NSM_new();
+  NSM_J->triplet = J;
 
   DEBUG_PRINTF("NM_triplet(problem->M)->n= %li\t,NM_triplet(problem->M)->nzmax = %li\n",NM_triplet(problem->M)->n,NM_triplet(problem->M)->nzmax);
   DEBUG_PRINTF("NM_triplet(problem->M)->n + A_.m + B_.m = %li\n",NM_triplet(problem->M)->n + A_.m + B_.m);
@@ -589,15 +592,9 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   // direction
   for(unsigned int i = 0; i < problem_size; ++i) rhs[i] = 0.;
 
-
-
-  // quick hack to make things work
-  // need to use the functions from NumericsMatrix --xhub
-
-
-  NumericsSparseMatrix* SM = NSM_new();
-  SM->triplet = J;
-  NumericsMatrix *AA = NM_create_from_data(NM_SPARSE, (int)J->m, (int)J->n, SM);
+  /* NM_J wraps NSM_J, which wraps J */
+  NumericsMatrix *NM_J = NM_new();
+  NM_fill(NM_J, NM_SPARSE, J->n, J->m, NSM_J);
 
   info[0] = 1;
 
@@ -680,12 +677,12 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     CSparseMatrix* Jcsc = cs_compress(J);
 
     /* Solve: J X = -psi */
+    DEBUG_PRINTF("norm of AA = %e\n", NM_norm_1(NM_J));
 
-
-
-    DEBUG_PRINTF("norm of AA = %e\n", NM_norm_1(AA));
-    /* Solve: AWpB X = -F */
-    int info_solver = NM_gesv(AA, rhs, true);
+    /* Solve: AWpB X = -F. We want to preserve NM_J, but as data has
+       been updated we unset the previous backup before */
+    //int info_solver = NM_gesv(AA, rhs, true);
+    int info_solver = NM_LU_solve(NM_preserve(NM_unpreserve(NM_J)), rhs, 1);
 
     DEBUG_PRINTF("norm of rhs (direction) = %e\n", cblas_dnrm2(problem_size,rhs,1));
     if(info_solver > 0)
@@ -694,14 +691,14 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
       break;
       // Unreachable code => comment.
       /* info[0] = 2; */
-      /* CHECK_RETURN(!CSparseMatrix_check_triplet(NM_triplet(AA))); */
+      /* CHECK_RETURN(!CSparseMatrix_check_triplet(NM_triplet(NM_J))); */
     }
 
     /* Check the quality of the solution */
     if(verbose > 0)
     {
       cblas_dcopy_msan(problem_size, psi, 1, tmp3, 1);
-      NM_gemv(1., AA, rhs, 1., tmp3);
+      NM_gemv(1., NM_J, rhs, 1., tmp3);
       linear_solver_residual = cblas_dnrm2(problem_size, tmp3, 1);
       numerics_printf_verbose(1, "---- GFC3D - NSN_AC iteration %d, linear_solver_residual = %g ", iter, linear_solver_residual);
       /* for the component wise scaled residual: cf mumps &
@@ -826,8 +823,8 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   }
 #endif
 
-  NM_clear(AA);
-  free(AA);
+  NM_clear(NM_J);
+  free(NM_J);
 }
 
 void gfc3d_nsn_ac_set_default(SolverOptions* options)

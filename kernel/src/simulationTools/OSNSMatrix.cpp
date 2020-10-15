@@ -432,8 +432,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
           endl = (ds == ds2);
           size_t sizeDS = ds->dimension();
           // this whole part is a hack. Just should just get the rightblock
-          leftInteractionBlock.reset(new SimpleMatrix(3, sizeDS));
-          inter.getLeftInteractionBlockForDS(posBlock, leftInteractionBlock);
+          leftInteractionBlock = inter.getLeftInteractionBlockForDS(posBlock, 3, sizeDS);
           leftInteractionBlock->trans();
           pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
           DEBUG_PRINTF("pos = %u", pos);

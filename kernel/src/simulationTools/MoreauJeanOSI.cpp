@@ -37,7 +37,7 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-//#define DEBUG_NOCOLOR
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 //#define DEBUG_BEGIN_END_ONLY
@@ -61,7 +61,8 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   OneStepIntegrator(OSI::MOREAUJEANOSI),
   _constraintActivationThreshold(0.0),
   _useGammaForRelation(false),
-  _explicitNewtonEulerDSOperators(false)
+  _explicitNewtonEulerDSOperators(false),
+  _isWSymmetricDefinitePositive(false)
 {
   _levelMinForOutput= 0;
   _levelMaxForOutput =1;
@@ -368,6 +369,14 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW - not yet implemented for Dynamical system of type : " + Type::name(*ds));
 
+
+  if (isWSymmetricDefinitePositive())
+  {
+    SiconosMatrix& W = *_dynamicalSystemsGraph->properties(dsv).W;
+    W.setIsSymmetric(true);
+    W.setIsPositiveDefinite(true);
+  }
+  
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
   DEBUG_END("MoreauJeanOSI::initializeIterationMatrixW\n");
@@ -401,7 +410,7 @@ void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(SecondOrderDS&
     SP::BoundaryCondition bc = d.boundaryConditions();
 
     unsigned int numberBoundaryConditions = bc->velocityIndices()->size();
-    _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions.reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
+    _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions.reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions, d.mass()->num()));
     _computeWBoundaryConditions(ds,*_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions,
                                 *_dynamicalSystemsGraph->properties(dsv).W);
   }
@@ -427,7 +436,7 @@ void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
   if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS ||  dsType == Type::NewtonEulerDS || dsType == Type::LagrangianLinearDiagonalDS)
   {
 
-    SP::SiconosVector columntmp(new SiconosVector(ds.dimension()));
+    SP::SiconosVector columntmp(new SiconosVector(ds.dimension(), WBoundaryConditions.num()));
 
     int columnindex = 0;
 
@@ -439,7 +448,7 @@ void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
         itindex != bc->velocityIndices()->end();
         ++itindex)
     {
-      if(!iteration_matrix.isSymmetric(1e-10))
+      if(!iteration_matrix.checkSymmetry(1e-10))
       {
         // iteration_matrix.display();
         std::cout <<"Warning, we apply boundary conditions assuming W symmetric" << std::endl;
@@ -529,7 +538,7 @@ void MoreauJeanOSI::computeW(double t, SecondOrderDS& ds, SiconosMatrix& W)
       //*W -= h*h*_theta*_theta**K;
     }
     DEBUG_EXPR(W.display(););
-    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "W.isPLUFactorized() = "<< W.isPLUFactorized() << std::endl;);
+    DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "W.isFactorized() = "<< W.isFactorized() << std::endl;);
 
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(ds));
@@ -1063,7 +1072,7 @@ void MoreauJeanOSI::computeFreeState()
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
-      W.PLUForwardBackwardInPlace(vfree);
+      W.Solve(vfree);
       // -> compute real vfree
       vfree *= -1.0;
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
@@ -1107,7 +1116,7 @@ void MoreauJeanOSI::computeFreeState()
 
     //   vfree = residuFree;
     //   DEBUG_EXPR(vfree.display());
-    //   W.PLUForwardBackwardInPlace(vfree);
+    //   W.Solve(vfree);
     //   vfree *= -1.0;
     //   vfree += vold;
 
@@ -1183,7 +1192,7 @@ void MoreauJeanOSI::computeFreeState()
     //   //    vfree->display();
     //   DEBUG_EXPR(residuFree.display(););
 
-    //   W.PLUForwardBackwardInPlace(vfree);
+    //   W.Solve(vfree);
     //   //    std::cout<<"MoreauJeanOSI::computeFreeState -WRfree"<<endl;
     //   //    vfree->display();
     //   //    scal(h,*vfree,*vfree);
@@ -1550,7 +1559,7 @@ void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& no
         scal(coeff, *Fext, v, false); // v += h*theta * fext(ti+1)
       }
       // -> Solve WX = v and set v = X
-      W->PLUForwardBackwardInPlace(v);
+      W->Solve(v);
       v += vold;
     }
     else RuntimeException::selfThrow("MoreauJeanOSI::integrate - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
@@ -1685,7 +1694,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
         }
         else
         {
-          W.PLUForwardBackwardInPlace(v);
+          W.Solve(v);
           v +=  vfree;
         }
       }
@@ -1772,7 +1781,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
               ++itindex)
             v.setValue(*itindex, 0.0);
 
-        _dynamicalSystemsGraph->properties(*dsi).W->PLUForwardBackwardInPlace(v);
+        _dynamicalSystemsGraph->properties(*dsi).W->Solve(v);
 
         DEBUG_EXPR(d.p(_levelMaxForInput)->display());
         DEBUG_PRINT("MoreauJeanOSI::updatestate W CT lambda\n");

@@ -57,6 +57,21 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/optim_misc/ql0001/ql0001.f")
   set(HAVE_QL0001 TRUE CACHE INTERNAL "True if ql0001 is available in externals.")
 endif()
 
+# --- MA57  ---
+#SET(WITH_MA57 1)
+# - Extra setup for the component -
+if(WITH_MA57) 
+  list(APPEND ${COMPONENT}_DIRS
+    lbl
+    lbl/src
+    lbl/include
+    lbl/ext
+    lbl/metis4)
+  # find_package(Metis) Metis 5  is not compatible with MA57. We include metis4
+  list(APPEND ${COMPONENT}_EXCLUDE_SRCS "lbl/src/ma57dummy_lib.c")
+
+endif()
+
 # -- Documentation --
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
@@ -80,7 +95,10 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
    SOL/lumod-c # For lumod_dense.h in numerics
    hairer # For kernel
    )
-
+if (WITH_MA57)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES lbl/include/)
+endif()
+ 
 if(WITH_CXX)
   list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
     numeric_bindings boost_contribs) # SiconosAlgebra needs this
@@ -120,6 +138,10 @@ if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
   target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
+# if(METIS_FOUND)
+#   target_link_libraries(externals PUBLIC Metis::Metis)
+# endif()
+
 # Force c++ compiler for c files (for Visual Studio I guess?)
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
@@ -133,7 +155,7 @@ if(BUILD_AS_CPP)
     set_property(TARGET externals PROPERTY CXX_STANDARD 11)
   endif()
 else()
-  # set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
+  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
   if(${CMAKE_VERSION} VERSION_GREATER "3.8.0")
     target_compile_features(externals PUBLIC c_std_11)
   else()

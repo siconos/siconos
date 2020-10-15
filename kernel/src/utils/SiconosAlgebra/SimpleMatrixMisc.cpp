@@ -128,7 +128,7 @@ void SimpleMatrix::trans()
   default:
     RuntimeException::selfThrow("SimpleMatrix::trans: Matrix type not supported");
   }
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::trans(const SiconosMatrix &m)
@@ -194,7 +194,7 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
     default:
       SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed.");
     }
-    resetLU();
+    resetFactorizationFlags();
   }
 }
 

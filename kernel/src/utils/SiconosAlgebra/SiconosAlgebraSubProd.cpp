@@ -423,7 +423,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
 
 void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, const Index& coord, bool init)
 {
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isFactorized()) && "A is Factorized in prod !!");
 
   // Number of the subvector of x that handles element at position coord[4]
   std::size_t firstBlockNum = x.getNumVectorAtPos(coord[4]);

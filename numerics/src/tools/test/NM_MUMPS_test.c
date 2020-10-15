@@ -13,7 +13,7 @@
 int main(int argc, char *argv[])
 {
   int rval = 0;
-  double b[SIZE];
+  double b[SIZE*2];
 
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
@@ -53,28 +53,36 @@ int main(int argc, char *argv[])
     */
     /* solution x: 2/3, y: 1/3 */
 
-    NM_zentry(M, 0, 0, 2.);
-    NM_zentry(M, 0, 1, -1.);
-    NM_zentry(M, 1, 0, 1.);
-    NM_zentry(M, 1, 1, 1.);
+    NM_entry(M, 0, 0, 2.);
+    NM_entry(M, 0, 1, -1.);
+    NM_entry(M, 1, 0, 1.);
+    NM_entry(M, 1, 1, 1.);
 
-    for(unsigned int i=0; i<2; ++i)
-    {
-      b[i] = 1.;
-    }
 
-    NM_MUMPS_set_problem(M, b);
+    /* solution x: 2/3, y: 1/3 */
+    b[0] = 1.;
+    b[1] = 1.;
+
+    /* solution x: 1/3, y: -1/3 */
+    b[2] = 1.;
+    b[3] = 0.;
+
+    NM_MUMPS_set_problem(M, 2, b);
     NM_MUMPS(M, 6);
     NM_MUMPS(M, -2);
     NM_MUMPS(M, 0);
 
-    for(unsigned int i=0; i<2; ++i)
+
+    for (unsigned int i=0; i<4; ++i)
     {
       printf("solution b[%u] = %g\n", i, b[i]);
     }
 
     rval += (fabs(b[0] - 2./3.) > 1e-7);
     rval = rval << (fabs(b[1] - 1./3.) > 1e-7);
+
+    rval = rval << (fabs(b[2] - 1./3.) > 1e-7);
+    rval = rval << (fabs(b[3] + 1./3.) > 1e-7);
 
   }
 
@@ -107,27 +115,32 @@ int main(int argc, char *argv[])
 
       b=[1, 1, 1]
     */
-    /* solution: [1, 2/3, 2/3] */
 
-    NM_zentry(M, 0, 0, 1.);
-    NM_zentry(M, 1, 1, 1.);
-    NM_zentry(M, 2, 1, 0.5);
-    /*    NM_zentry(M, 1, 2, 0.5);*/
-    NM_zentry(M, 2, 2, 1.);
+    NM_entry(M, 0, 0, 1.);
+    NM_entry(M, 1, 1, 1.);
+    NM_entry(M, 2, 1, 0.5);
+    /*    NM_entry(M, 1, 2, 0.5);*/
+    NM_entry(M, 2, 2, 1.);
 
     /*    NM_display(M);*/
 
-    for(unsigned int i=0; i<3; ++i)
-    {
-      b[i] = 1.;
-    }
+    /* solution: [1, 2/3, 2/3] */
+    b[0] = 1.;
+    b[1] = 1.;
+    b[2] = 1.;
 
-    NM_MUMPS_set_problem(M, b);
+    /* solution: [1, -2/3, 5/3] */
+    b[3] = 1.;
+    b[4] = 0.;
+    b[5] = 1.;
+
+    NM_MUMPS_set_problem(M, 2, b);
     NM_MUMPS(M, 6);
     NM_MUMPS(M, -2);
     NM_MUMPS(M, 0);
 
-    for(unsigned int i=0; i<3; ++i)
+
+    for (unsigned int i=0; i<6; ++i)
     {
       printf("solution b[%u] = %g\n", i, b[i]);
     }
@@ -135,6 +148,11 @@ int main(int argc, char *argv[])
     rval = rval << (fabs(b[0] - 1.) > 1e-7);
     rval = rval << (fabs(b[1] - 2./3.) > 1e-7);
     rval = rval << (fabs(b[2] - 2./3.) > 1e-7);
+
+    rval = rval << (fabs(b[3] - 1) > 1e-7);
+    rval = rval << (fabs(b[3] + 2./3.) > 1e-7);
+    rval = rval << (fabs(b[3] - 5./3.) > 1e-7);
+
   }
 
 

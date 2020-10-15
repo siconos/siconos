@@ -1,3 +1,4 @@
+
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -36,15 +37,24 @@
 #include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+/* #define DEBUG_MESSAGE */
 #include "debug.h"                    // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
 #include "numerics_verbose.h"         // for numerics_error, numerics_printf...
 #include "sanitizer.h"                // for cblas_dcopy_msan
-#include "NumericsVector.h"
+#include "NumericsVector.h"           // for NV_max
+
+#ifdef WITH_OPENSSL
+#include <openssl/sha.h>
+#endif
 
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"
 #include "NM_MKL_spblas.h"
+#endif
+
+#ifdef WITH_MA57
+#include "lbl.h"
+#include "NM_MA57.h"
 #endif
 
 #ifdef __cplusplus
@@ -55,6 +65,7 @@
 
 void NM_null(NumericsMatrix* A)
 {
+
   A->storageType=-1;
   A->size0 =-1;
   A->size1 =-1;
@@ -62,8 +73,7 @@ void NM_null(NumericsMatrix* A)
   A->matrix1 = NULL;
   A->matrix2 = NULL;
   A->internalData = NULL;
-
-
+  A->destructible = A; /* by default, the destructible matrix is itself */
 }
 
 void NM_internalData_new(NumericsMatrix* M)
@@ -75,8 +85,13 @@ void NM_internalData_new(NumericsMatrix* M)
   M->internalData->dWorkSize = 0;
   M->internalData->isInversed = false ;
   M->internalData->isLUfactorized = false ;
+  M->internalData->isCholeskyfactorized = false ;
+  M->internalData->isLDLTfactorized = false ;
 #ifdef SICONOS_HAS_MPI
   M->internalData->mpi_comm = MPI_COMM_NULL;
+#endif
+#ifdef WITH_OPENSSL
+  M->internalData->values_sha1_count = 0;
 #endif
 }
 
@@ -523,6 +538,8 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B->internalData->dWorkSize=0;
     }
     B->internalData->isLUfactorized = A->internalData->isLUfactorized;
+    B->internalData->isCholeskyfactorized = A->internalData->isCholeskyfactorized;
+    B->internalData->isLDLTfactorized = A->internalData->isLDLTfactorized;
     B->internalData->isInversed = A->internalData->isInversed;
   }
 
@@ -532,6 +549,24 @@ void NM_clear(NumericsMatrix* m)
   assert(m && "NM_clear, m == NULL");
 
   NM_clearDense(m);
+  NM_clearSparseBlock(m);
+  NM_clearSparse(m);
+
+  NM_internalData_free(m);
+
+  /* restore the destructible pointer */
+  if (!NM_destructible(m))
+  {
+    NM_clear(m->destructible);
+    m->destructible = m;
+  }
+}
+
+void NM_clear_not_dense(NumericsMatrix* m)
+{
+  assert(m && "NM_clear, m == NULL");
+
+  //NM_clearDense(m);
   NM_clearSparseBlock(m);
   NM_clearSparse(m);
 
@@ -647,19 +682,28 @@ void NM_dense_display(double * m, int nRow, int nCol, int lDim)
 
 }
 
-void NM_zentry(NumericsMatrix* M, int i, int j, double val)
+void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold)
 {
+  int insertion=0;
   switch(M->storageType)
   {
   case NM_DENSE:
   {
     // column major
-    M->matrix0[i+j*M->size0] = val;
+    if (fabs(val) >= threshold)
+    {
+      M->matrix0[i+j*M->size0] = val;
+      insertion=1;
+    }
     break;
   }
   case NM_SPARSE_BLOCK:
   {
-    CHECK_RETURN(SBM_zentry(M->matrix1, i, j, val));
+    if (fabs(val) >= threshold)
+    {
+      CHECK_RETURN(SBM_entry(M->matrix1, i, j, val));
+      insertion=1;
+    }
     break;
   }
   case NM_SPARSE:
@@ -670,31 +714,25 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     case NSM_TRIPLET:
     {
       assert(M->matrix2->triplet);
-      CHECK_RETURN(CSparseMatrix_zentry(M->matrix2->triplet, i, j, val));
+      insertion = 1 - CSparseMatrix_zentry(M->matrix2->triplet, i, j, val, threshold);
       break;
     }
     case NSM_HALF_TRIPLET:
     {
       assert(M->matrix2->half_triplet);
-      CHECK_RETURN(CSparseMatrix_symmetric_zentry(M->matrix2->triplet, i, j, val));
+      insertion = 1 - CSparseMatrix_symmetric_zentry(M->matrix2->triplet, i, j, val, threshold);
       break;
     }
     case NSM_CSC:
     {
       assert(M->matrix2->csc);
-      CHECK_RETURN(CSparseMatrix_zentry(NM_triplet(M), i, j, val));
+      insertion = 1 -CSparseMatrix_zentry(NM_triplet(M), i, j, val, threshold);
       M->matrix2->origin= NSM_TRIPLET;
       NM_clearCSC(M);
-      //NM_display(M);
-      //NM_csc_alloc(M,M->matrix2->triplet->nz);
-      //M->matrix2->origin= NSM_CSC;
       NM_csc(M);
-
       M->matrix2->origin= NSM_CSC;
       NM_clearTriplet(M);
       NM_clearHalfTriplet(M);
-
-      //NM_display(M);
       break;
     }
     default:
@@ -708,6 +746,74 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
   default:
     numerics_error("NM_zentry  ","unknown storageType %d for matrix\n", M->storageType);
   }
+  if(insertion)
+  {
+    if(i>M->size0-1)
+    {
+      M->size0 = i+1;
+    }
+    if(j>M->size1-1)
+    {
+      M->size1 = j+1;
+    }
+  }
+}
+
+void NM_entry(NumericsMatrix* M, int i, int j, double val)
+{
+  switch(M->storageType)
+  {
+  case NM_DENSE:
+  {
+    // column major
+    M->matrix0[i+j*M->size0] = val;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    CHECK_RETURN(SBM_entry(M->matrix1, i, j, val));
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(M->matrix2);
+    switch(M->matrix2->origin)
+    {
+    case NSM_TRIPLET:
+    {
+      assert(M->matrix2->triplet);
+      CHECK_RETURN(CSparseMatrix_entry(M->matrix2->triplet, i, j, val));
+      break;
+    }
+    case NSM_HALF_TRIPLET:
+    {
+      assert(M->matrix2->half_triplet);
+      CHECK_RETURN(CSparseMatrix_symmetric_entry(M->matrix2->triplet, i, j, val));
+      break;
+    }
+    case NSM_CSC:
+    {
+      assert(M->matrix2->csc);
+      CHECK_RETURN(CSparseMatrix_entry(NM_triplet(M), i, j, val));
+      M->matrix2->origin= NSM_TRIPLET;
+      NM_clearCSC(M);
+      NM_csc(M);
+      M->matrix2->origin= NSM_CSC;
+      NM_clearTriplet(M);
+      NM_clearHalfTriplet(M);
+      break;
+    }
+    default:
+    {
+      numerics_error("NM_entry","unknown origin %d for sparse matrix\n", M->matrix2->origin);
+      break;
+    }
+    }
+    break;
+  }
+  default:
+    numerics_error("NM_entry  ","unknown storageType %d for matrix\n", M->storageType);
+  }
 
   if(i>M->size0-1)
   {
@@ -718,6 +824,7 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     M->size1 = j+1;
   }
 }
+
 
 
 double NM_get_value(const NumericsMatrix* const M, int i, int j)
@@ -1055,8 +1162,8 @@ void NM_display(const NumericsMatrix* const m)
     printf("========== internalData->iWorkSize = %lu\n", m->internalData->iWorkSize);
     printf("========== internalData->iWork = %p\n", m->internalData->iWork);
 
-    printf("========== internalData->dWorkSize = %lu\n", m->internalData->iWorkSize);
-    printf("========== internalData->dWork = %p\n", m->internalData->iWork);
+    printf("========== internalData->dWorkSize = %lu\n", (unsigned long) m->internalData->dWorkSize);
+    printf("========== internalData->dWork = %p\n", m->internalData->dWork);
   }
   else
   {
@@ -1868,6 +1975,56 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
   return Atrans;
 }
 
+bool NM_destructible(const NumericsMatrix* A)
+{
+  return A->destructible == A;
+}
+
+RawNumericsMatrix* NM_preserve(NumericsMatrix* A)
+{
+  if (NM_destructible(A))
+  {
+    if (NM_LU_factorized(A) || NM_Cholesky_factorized(A) ||  NM_LDLT_factorized(A) )
+    {
+      numerics_warning("NM_preserve", "preservation is done on a factorized matrix!");
+    }
+    NumericsMatrix* B = NM_new();
+    NM_copy(A, B);
+
+    A->destructible = B;
+    assert(A->destructible->destructible == A->destructible);
+  };
+  return A;
+}
+
+RawNumericsMatrix* NM_unpreserve(NumericsMatrix* A)
+{
+  if (A->destructible != A)
+  {
+    NM_clear(A->destructible);
+    free(A->destructible);
+    A->destructible = A;
+  }
+  return A;
+}
+
+bool NM_LU_factorized(NumericsMatrix* A)
+{
+  return NM_internalData(A->destructible)->isLUfactorized;
+}
+bool NM_Cholesky_factorized(NumericsMatrix* A)
+{
+  return NM_internalData(A->destructible)->isCholeskyfactorized;
+}
+bool NM_LDLT_factorized(NumericsMatrix* A)
+{
+  return NM_internalData(A->destructible)->isLDLTfactorized;
+}
+
+void NM_set_factorized(NumericsMatrix* A, bool flag)
+{
+  NM_internalData(A->destructible)->isLUfactorized = flag;
+}
 
 void NM_clearDense(NumericsMatrix* A)
 {
@@ -1975,7 +2132,7 @@ void NM_clearSparseStorage(NumericsMatrix *A)
 }
 
 
-void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
+void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold)
 {
   assert(A->matrix0);
   assert(B->matrix2->triplet);
@@ -1983,7 +2140,7 @@ void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
   {
     for(int j = 0; j < A->size1; ++j)
     {
-      CHECK_RETURN(CSparseMatrix_zentry(B->matrix2->triplet, i, j, A->matrix0[i + A->size0*j]));
+      CHECK_RETURN(CSparseMatrix_zentry(B->matrix2->triplet, i, j, A->matrix0[i + A->size0*j], threshold));
     }
   }
 }
@@ -2042,7 +2199,7 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
 }
 
 
-void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
+void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold)
 {
   DEBUG_BEGIN("NM_copy_to_sparse(...)\n")
   assert(A);
@@ -2062,7 +2219,7 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
   {
     B->matrix2->triplet = cs_spalloc(0,0,1,1,1);
     B->matrix2->origin = NSM_TRIPLET;
-    NM_dense_to_sparse(A, B);
+    NM_dense_to_sparse(A, B, threshold );
     break;
   }
   case NM_SPARSE_BLOCK:
@@ -2145,96 +2302,17 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   }
   case NM_SPARSE:
   {
-    CSparseMatrix* A_;
-    CSparseMatrix* B_;
 
-    if(!B->matrix2)
-    {
-      B->matrix2 = NSM_new();
-    }
+    NumericsSparseMatrix * A_ = A->matrix2;
+    NumericsSparseMatrix * B_ = numericsSparseMatrix(B);
 
-    B->matrix2->origin = A->matrix2->origin;
-
-    switch(A->matrix2->origin)
-    {
-    case NSM_TRIPLET:
-    {
-      A_ = A->matrix2->triplet;
-
-      if(!B->matrix2->triplet)
-      {
-        B->matrix2->triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
-      }
-
-      B_ = B->matrix2->triplet;
-      break;
-    }
-    case NSM_HALF_TRIPLET:
-    {
-      A_ = A->matrix2->half_triplet;
-
-      if(!B->matrix2->half_triplet)
-      {
-        B->matrix2->half_triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
-      }
-
-      B_ = B->matrix2->half_triplet;
-      break;
-    }
-    case NSM_CSC:
-    {
-      assert(A->matrix2->csc);
-
-      A_ = A->matrix2->csc;
-
-      if(!B->matrix2->csc)
-      {
-        B->matrix2->csc = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 0);
-      }
-
-      B_ = B->matrix2->csc;
-      break;
-    }
-    case NSM_CSR:
-    {
-      assert(A->matrix2->csr);
-
-      A_ = A->matrix2->csr;
-
-      if(!B->matrix2->csr)
-      {
-        NM_csr_alloc(B, A_->nzmax);
-      }
-
-      B_ = B->matrix2->csr;
-      break;
-    }
-    default:
-    {
-      fprintf(stderr, "NM_copy :: error unknown origin %d for sparse matrix\n", A->matrix2->origin);
-      exit(EXIT_FAILURE);
-    }
-    }
-    CSparseMatrix_copy(A_, B_);
-
+    NSM_copy(A_,B_);
 
     /* invalidations */
     NM_clearDense(B);
     NM_clearSparseBlock(B);
 
-    /* We remove diag_indx from B and  we copy it from A if it exists */
-    if(numericsSparseMatrix(B)->diag_indx)
-    {
-      free(numericsSparseMatrix(B)->diag_indx);
-      numericsSparseMatrix(B)->diag_indx=NULL;
-    }
-    if(A->matrix2->diag_indx)
-    {
-      numericsSparseMatrix(B)->diag_indx = (CS_INT*) malloc(A->size0 * sizeof(CS_INT));
-      memcpy(numericsSparseMatrix(B)->diag_indx, A->matrix2->diag_indx, A->size0 * sizeof(CS_INT));
-    }
-
-    if(B_->nz >= 0)
+    if(NSM_get_origin(B_)->nz >= 0)
     {
       NM_clearCSC(B);
       NM_clearCSCTranspose(B);
@@ -2253,13 +2331,24 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
         NM_clearCSC(B);
       }
     }
-
     break;
   }
   }
   NM_internalData_copy(A, B);
   NM_MPI_copy(A, B);
   NM_MUMPS_copy(A, B);
+
+  if (NM_destructible(A))
+  {
+    /* A is destructible, so B must be destructible */
+    B->destructible = B;
+  }
+  else
+  {
+    /* A is preserved, so B must be preserved */
+    /* assert(!NM_destructible(B));  VA. 22-09-2020 I do not understand B must be destructible. It the case by default if B is created with NM_new */
+    NM_preserve(B);
+  }
 }
 
 NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)
@@ -2322,7 +2411,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
             {
               for(unsigned i = 0; i < inbr; ++i)
               {
-                CHECK_RETURN(CSparseMatrix_zentry(A->matrix2->triplet, i + roffset, j + coffset,
+                CHECK_RETURN(CSparseMatrix_entry(A->matrix2->triplet, i + roffset, j + coffset,
                                                   A->matrix1->block[bn][i + j*inbr]));
               }
             }
@@ -2331,7 +2420,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
       }
       else if(A->matrix0)
       {
-        NM_dense_to_sparse(A, A);
+        NM_dense_to_sparse(A, A, DBL_EPSILON);
       }
       else if(A->size0 > 0 || A->size1 > 0)
       {
@@ -2428,7 +2517,7 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
             {
               for(unsigned i = 0; i < inbr; ++i)
               {
-                CHECK_RETURN(CSparseMatrix_symmetric_zentry(A->matrix2->half_triplet, i + roffset, j + coffset,
+                CHECK_RETURN(CSparseMatrix_symmetric_entry(A->matrix2->half_triplet, i + roffset, j + coffset,
                              A->matrix1->block[bn][i + j*inbr]));
               }
             }
@@ -2741,7 +2830,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
     // loop over the values of B
     for(int idx = 0 ; idx < B->matrix2->triplet->nz  ; idx++)
     {
-      NM_zentry(A, Bi[idx] + start_i, Bp[idx] + start_j, Bx[idx]);
+      NM_entry(A, Bi[idx] + start_i, Bp[idx] + start_j, Bx[idx]);
     }
     break;
   }
@@ -2755,7 +2844,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
       for(unsigned int j = start_j; j < end_j; ++j)
       {
         val = NM_get_value(B, i - start_i, j - start_j);
-        NM_zentry(A, i, j, val);
+        NM_entry(A, i, j, val);
       }
     }
     break;
@@ -2779,6 +2868,7 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 
   /* should we copy the whole internal data ? */
   /*NM_internalData_copy(A, C);*/
+  NM_copy(A,C);
   NM_MPI_copy(A, C);
   NM_MUMPS_copy(A, C);
 
@@ -3055,6 +3145,413 @@ double* NM_dWork(NumericsMatrix* A, int size)
   return A->internalData->dWork;
 }
 
+int NM_LU_factorize(NumericsMatrix* Ao)
+{
+  DEBUG_BEGIN(" NM_LU_factorize(NumericsMatrix* Ao)\n");
+  lapack_int info = 0;
+  assert(Ao->destructible); /* by default Ao->destructible == Ao */
+  NumericsMatrix* A = Ao->destructible;
+
+  if (!NM_LU_factorized(Ao))
+  {
+    DEBUG_PRINT("NM_LU_factorize. The Factorization is performed\n");
+#ifdef FACTORIZATION_DEBUG
+    if (NM_internalData(Ao)->values_sha1_count > 0)
+    {
+      if(NM_check_values_sha1(Ao))
+      {
+        numerics_warning("NM_LU_factorize", "an attempt to  factorize this matrix has already been done");
+        info = 1;
+        return info;
+      }
+    }
+
+    NM_set_values_sha1(Ao);
+#endif
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2,"NM_LU_factorize, using LAPACK (DGETRF)" );
+
+      lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+      DEBUG_PRINTF("iwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
+
+      numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep them in place" );
+      DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
+      //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
+      DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
+      DEBUG_PRINT("end of call DGETRF for NM_DENSE storage\n");
+      if (info > 0)
+      {
+        fprintf(stderr,"NM_LU_factorize: LU factorisation DGETRF failed. The %d-th diagonal element is 0\n", info);
+      }
+      else if (info < 0)
+      {
+        fprintf(stderr, "NM_LU_factorize: LU factorisation DGETRF failed. The %d-th argument has an illegal value, stopping\n", -info);
+      }
+      if (info)
+      {
+        NM_internalData_free(A);
+        assert(!NM_internalData(A)->isLUfactorized);
+      }
+    }
+    break;
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      assert(!NM_internalData(A)->isLUfactorized);
+      switch (p->solver)
+      {
+      case NSM_CSPARSE:
+        numerics_printf_verbose(2, "NM_LU_factorize, using CSparse");
+
+        if (!p->linear_solver_data)
+        {
+          assert(!NSM_linear_solver_data(p));
+          assert(!p->solver_free_hook);
+
+          p->solver_free_hook = &NSM_clear_p;
+        };
+
+        CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+        numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep them" );
+        //DEBUG_EXPR(cs_print(NM_csc(A),0));
+        info = !CSparseMatrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A);
+        if (info)
+        {
+          numerics_printf_verbose(2, "NM_LU_factorize: csparse factorization failed.");
+        }
+        assert(!p->linear_solver_data);
+        p->linear_solver_data = cs_lu_A;
+        break;
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_LU_factorize: using MUMPS\n");
+        }
+        if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+        {
+          /* the mumps instance is initialized (call with job=-1) */
+          NM_MUMPS_set_control_params(A);
+          NM_MUMPS(A, -1);
+          if ((NM_MUMPS_icntl(A, 1) == -1 ||
+               NM_MUMPS_icntl(A, 2) == -1 ||
+               NM_MUMPS_icntl(A, 3) == -1 ||
+               verbose) ||
+              (NM_MUMPS_icntl(A, 1) != -1 ||
+               NM_MUMPS_icntl(A, 2) != -1 ||
+               NM_MUMPS_icntl(A, 3) != -1 ||
+               !verbose))
+          {
+            NM_MUMPS_set_verbosity(A, verbose);
+          }
+          NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
+          NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
+        }
+
+        NM_MUMPS_set_problem(A, 0, NULL);
+
+        NM_MUMPS(A, 4); /* analyzis,factorization */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_LU_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+
+        /* we should not do that here */
+        if(!p->solver_free_hook)
+        {
+          p->solver_free_hook = &NM_MUMPS_free;
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        numerics_printf_verbose(0,"NM_LU_factorize, Unknown solver in NM_SPARSE case." );
+        info = 1;
+      }
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_LU_factors: unknown storageType");
+    }
+
+    if (!info)
+    {
+      NM_internalData(A)->isLUfactorized = true;
+    }
+    else
+    {
+      assert(NM_internalData(A)->isLUfactorized == false);
+    }
+  }
+
+  assert (NM_LU_factorized(Ao) == NM_LU_factorized(A));
+  DEBUG_END(" NM_LU_factorize(NumericsMatrix* Ao)\n");
+  return info;
+}
+
+int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
+{
+
+  lapack_int info = 1;
+
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_LU_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_LU_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
+    assert(A->size0 == A->size1);
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2, "NM_LU_solve, using LAPACK" );
+
+      numerics_printf_verbose(2, "NM_LU_solve, factorization in-place" );
+
+      /* dgetrf is called in NM_LU_factorize */
+      DEBUG_PRINT("Start to call DGETRS for NM_DENSE storage\n");
+
+      numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
+      lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+
+      DGETRS(LA_NOTRANS, A->size0, nrhs, A->matrix0, A->size0, ipiv, b, A->size0, &info);
+
+      DEBUG_PRINT("End of call DGETRS for NM_DENSE storage\n");
+
+      if (info < 0)
+      {
+        numerics_printf_verbose(2,"NM_LU_solve: dense LU solve DGETRS failed. The %d-th argument has an illegal value\n", -info);
+      }
+      break;
+    }
+
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      switch (p->solver)
+      {
+      case NSM_CSPARSE:
+      {
+
+        if (!p->dWork)
+        {
+          assert(!NSM_workspace(p));
+          p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          p->dWorkSize = A->size1;
+        };
+
+
+        numerics_printf_verbose(2,"NM_LU_solve, using CSparse" );
+        numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
+        for(unsigned int j=0; j < nrhs ; j++ )
+        {
+          info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
+        }
+        break;
+      }
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_LU_solve: using MUMPS\n");
+        }
+
+        assert (NM_MUMPS_id(A)->job); /* this means that least a
+                                       * factorization has already been
+                                       * done */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        NM_MUMPS_set_problem(A, nrhs, b);
+
+        NM_MUMPS(A, 3); /* solve */
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_LU_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
+        exit(EXIT_FAILURE);
+      }
+      break;
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_LU_solve unknown storageType");
+    }
+
+
+    /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+       CHECK_RETURN is ok for cs, but not for MUMPS and others */
+    /* some time we cannot find a solution to a linear system, and its fine, for
+     * instance with the minFBLSA. Therefore, we should not check here for
+     * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+    DEBUG_END("NM_LU_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  }
+
+  return info;
+}
+int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
+{
+
+  lapack_int info = 1;
+
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_LU_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_LU_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
+    assert(A->size0 == A->size1);
+
+    if (B->storageType == NM_DENSE)
+    {
+      assert(B->matrix0);
+      info = NM_LU_solve(A, B->matrix0, B->size1);
+    }
+    else if ((B->storageType == NM_SPARSE) || (B->storageType == NM_SPARSE_BLOCK))
+    {
+      switch (A->storageType)
+      {
+      case NM_DENSE:
+      {
+        numerics_error("NM_LU_solve_matrix_rhs", "Solving Linear system with a dense matrix and a sparse matrix rhs is not implemented since it requires to copy the rhs into dense matrix." );
+        break;
+      }
+
+      case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+      case NM_SPARSE:
+      {
+        NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+        switch (p->solver)
+        {
+        case NSM_CSPARSE:
+        {
+          numerics_printf_verbose(2,"NM_LU_solve_matrix_rhs, using CSparse" );
+          numerics_printf_verbose(2,"NM_LU_solve_matrix_rhs, we solve with given factors" );
+
+          if (!p->dWork)
+          {
+            assert(!NSM_workspace(p));
+            p->dWork = (double*) malloc(A->size1 * sizeof(double));
+            p->dWorkSize = A->size1;
+          };
+
+
+          CSparseMatrix *X = cs_spalloc(NM_csc(B)->m, NM_csc(B)->n, NM_csc(B)->nzmax, 1,0); /* csc format */
+
+          info = !CSparseMatrix_spsolve((CSparseMatrix_factors *)NSM_linear_solver_data(p), X, NM_csc(B));
+          //Invalidation
+          B->matrix2->origin = NSM_CSC;
+          NM_clearCSR(B);
+          NM_clearCSCTranspose(B);
+          NM_clearTriplet(B);
+          NM_clearHalfTriplet(B);
+
+          break;
+        }
+#ifdef WITH_MUMPS
+        case NSM_MUMPS:
+        {
+          numerics_printf_verbose(2,"NM_LU_solve: using MUMPS\n");
+          numerics_error("NM_LU_solve_matrix_rhs"," not yet implemented\n")
+
+          assert (NM_MUMPS_id(A)->job); /* this means that least a
+                                         * factorization has already been
+                                         * done */
+
+          DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+          NM_MUMPS_set_problem(A, nrhs, b);
+
+          NM_MUMPS(A, 3); /* solve */
+          info = mumps_id->info[0];
+
+          /* MUMPS can return info codes with negative value */
+          if(info)
+          {
+            if(verbose > 0)
+            {
+              fprintf(stderr,"NM_LU_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+            }
+          }
+          break;
+        }
+#endif /* WITH_MUMPS */
+        default:
+        {
+          fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
+          exit(EXIT_FAILURE);
+        }
+        break;
+        }
+        break;
+      }
+      default:
+        assert (0 && "NM_LU_solve unknown storageType");
+      }
+
+
+      /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+         CHECK_RETURN is ok for cs, but not for MUMPS and others */
+      /* some time we cannot find a solution to a linear system, and its fine, for
+       * instance with the minFBLSA. Therefore, we should not check here for
+       * problems, but the calling function has to check the return code.*/
+
+    }
+  }
+  DEBUG_END("NM_LU_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  return info;
+}
+
+
 int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 {
 
@@ -3078,7 +3575,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
       if(!NM_internalData(A)->isLUfactorized)
       {
-        numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it");
+        numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep them");
         DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
         //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
         DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
@@ -3145,7 +3642,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
     NSM_linear_solver_params* p = NSM_linearSolverParams(A);
     switch(p->solver)
     {
-    case NSM_CS_LUSOL:
+    case NSM_CSPARSE:
       numerics_printf_verbose(2,"NM_gesv, using CSparse");
 
       if(keep == NM_KEEP_FACTORS)
@@ -3160,8 +3657,8 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
           CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
-          numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it");
-          CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
+          numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep them");
+          CHECK_RETURN(CSparseMatrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->linear_solver_data = cs_lu_A;
         }
 
@@ -3200,7 +3697,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
-      NM_MUMPS_set_problem(A, b);
+      NM_MUMPS_set_problem(A, 1, b);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
@@ -3440,7 +3937,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
       if(!NM_internalData(A)->isLUfactorized)
       {
-        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it");
+        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep them");
         DEBUG_PRINT("Start to call DPOTRF for NM_DENSE storage\n");
         //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
         DPOTRF(LA_UP, A->size1, A->matrix0, A->size0, &info);
@@ -3467,7 +3964,10 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       }
       DEBUG_PRINT("Start to call DPOTRS for NM_DENSE storage\n");
       numerics_printf_verbose(2,"NM_posv_expert, we solve with given factors");
+      DEBUG_EXPR(NV_display(b,A->size0));
       DPOTRS(LA_UP, A->size0, 1, A->matrix0, A->size0, b, A->size0, &info);
+      DEBUG_EXPR(NV_display(b,A->size0));
+      DEBUG_EXPR(NM_display(A));
       DEBUG_PRINT("End of call DPOTRS for NM_DENSE storage\n");
       if(info < 0)
       {
@@ -3491,6 +3991,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       }
       DPOSV(LA_UP, A->size0, 1, mat, A->size0, b,
             A->size0, &info);
+
       if(info > 0)
       {
         if(verbose >= 2)
@@ -3512,7 +4013,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
     NSM_linear_solver_params* p = NSM_linearSolverParams(A);
     switch(p->solver)
     {
-    case NSM_CS_CHOLSOL:
+    case NSM_CSPARSE:
       numerics_printf_verbose(2,"NM_posv, using CSparse cholsol");
 
       if(keep == NM_KEEP_FACTORS)
@@ -3529,8 +4030,8 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
           CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
 
-          numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it");
-          CHECK_RETURN(CSparsematrix_chol_factorization(1, NM_csc(A),  cs_chol_A));
+          numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep them");
+          CHECK_RETURN(CSparseMatrix_chol_factorization(1, NM_csc(A),  cs_chol_A));
 
           p->linear_solver_data = cs_chol_A;
         }
@@ -3583,7 +4084,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
 
-      NM_MUMPS_set_problem(A, b);
+      NM_MUMPS_set_problem(A, 1, b);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
@@ -3719,7 +4220,7 @@ NumericsMatrix* NM_inv(NumericsMatrix* A)
       }
       for(int i = 0; i < A->size0; ++i)
       {
-        CHECK_RETURN(CSparseMatrix_zentry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
+        CHECK_RETURN(CSparseMatrix_entry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
       }
     }
     break;
@@ -3843,13 +4344,7 @@ void NM_csc_empty_alloc(NumericsMatrix* A, CS_INT nzmax)
 }
 
 
-void NM_csr_alloc(NumericsMatrix* A, CS_INT nzmax)
-{
-  numericsSparseMatrix(A)->csr = cs_spalloc(A->size1, A->size0, nzmax, 1, 0);
-  numericsSparseMatrix(A)->csr->nz = -2;
-  numericsSparseMatrix(A)->csr->m =  A->size0;
-  numericsSparseMatrix(A)->csr->n = A->size1;
-}
+
 
 void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
@@ -3943,6 +4438,7 @@ int NM_is_symmetric(NumericsMatrix* A)
   NumericsMatrix * Atrans = NM_transpose(A);
   NumericsMatrix * AplusATrans = NM_add(1/2.0, A, -1/2.0, Atrans);
   double norm_inf = NM_norm_inf(AplusATrans);
+
   NM_clear(Atrans);
   free(Atrans);
   NM_clear(AplusATrans);
@@ -4267,4 +4763,796 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
   }
   else
     return 1;
+}
+
+#ifdef WITH_OPENSSL
+void NM_compute_values_sha1(NumericsMatrix* A, unsigned char* digest)
+{
+  switch(A->storageType)
+  {
+    /* ! A->matrix0 fortran layout != A->matrix2->triplet->x C layout */
+  case NM_DENSE:
+  case NM_SPARSE_BLOCK:
+  {
+    /* so triplet will be updated */
+    NM_clearTriplet(A);
+  }
+  case NM_SPARSE:
+  {
+    SHA1((char*) NM_triplet(A)->x, NM_triplet(A)->nz*sizeof(double), digest);
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_compute_values_sha1",
+                   "Unsupported matrix type %d in %s", A->storageType);
+  }
+  }
+}
+
+unsigned char* NM_values_sha1(NumericsMatrix* A)
+{
+  return NM_internalData(A)->values_sha1;
+}
+
+void NM_set_values_sha1(NumericsMatrix* A)
+{
+  NM_compute_values_sha1(A, NM_values_sha1(A));
+  NM_internalData(A)->values_sha1_count += 1;
+}
+
+bool NM_check_values_sha1(NumericsMatrix* A)
+{
+  char current_digest[SHA_DIGEST_LENGTH];
+  char* digest = NM_values_sha1(A);
+
+  NM_compute_values_sha1(A, current_digest);
+
+  if (memcmp(digest, current_digest, SHA_DIGEST_LENGTH) == 0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B)
+{
+  if (memcmp(NM_values_sha1(A), NM_values_sha1(B),
+             SHA_DIGEST_LENGTH) == 0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+
+#endif
+
+
+int NM_Cholesky_factorize(NumericsMatrix* Ao)
+{
+  DEBUG_BEGIN("int NM_Cholesky_factorize(NumericsMatrix* Ao) \n");
+  lapack_int info = 0;
+  assert(Ao->destructible); /* by default Ao->destructible == Ao */
+  NumericsMatrix* A = Ao->destructible;
+
+  if (!NM_Cholesky_factorized(Ao))
+  {
+
+#ifdef FACTORIZATION_DEBUG
+    if (NM_internalData(Ao)->values_sha1_count > 0)
+    {
+      if(NM_check_values_sha1(Ao))
+      {
+        numerics_error("NM_Cholesky_factorize", "this matrix is already factorized");
+      }
+    }
+
+    NM_set_values_sha1(Ao);
+#endif
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2,"NM_Cholesky_factorize, using LAPACK (POTRF)" );
+
+      DEBUG_PRINTF("iwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
+
+      numerics_printf_verbose(2,"NM_Cholesky_factorize, we compute factors and keep them in place" );
+      DEBUG_PRINT("Start to call DPOTRF for NM_DENSE storage\n");
+      DPOTRF(LA_UP, A->size1, A->matrix0, A->size0, &info);
+      DEBUG_PRINT("end of call DPOTRF for NM_DENSE storage\n");
+
+      if (info > 0)
+      {
+        fprintf(stderr,"NM_Cholesky_factorize: Cholesky factorisation DPOTRF failed. The %d-th diagonal element is 0\n", info);
+      }
+      else if (info < 0)
+      {
+        fprintf(stderr, "NM_Cholesky_factorize: Cholesky factorisation DPOTRF failed. The %d-th argument has an illegal value, stopping\n", -info);
+      }
+      if (info)
+      {
+        NM_internalData_free(A);
+        assert(!NM_internalData(A)->isCholeskyfactorized);
+      }
+    }
+    break;
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      assert(!NM_internalData(A)->isCholeskyfactorized);
+      switch (p->solver)
+      {
+      case NSM_CSPARSE:
+        numerics_printf_verbose(2, "NM_Cholesky_factorize, using CSparse (chol_factorization)");
+
+        if (!(p->dWork && p->linear_solver_data))
+        {
+          assert(!NSM_workspace(p));
+          assert(!NSM_linear_solver_data(p));
+          assert(!p->solver_free_hook);
+
+          p->solver_free_hook = &NSM_clear_p;
+          p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          p->dWorkSize = A->size1;
+        };
+
+        CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+
+        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep them");
+        info = !CSparseMatrix_chol_factorization(1, NM_csc(A),  cs_chol_A);
+
+        if (info)
+        {
+          numerics_printf_verbose(2, "NM_Cholesky_factorize: csparse factorization failed.");
+        }
+        assert(!p->linear_solver_data);
+        p->linear_solver_data = cs_chol_A;
+        break;
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_Cholesky_factorize: using MUMPS\n");
+        }
+        if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+        {
+          /* the mumps instance is initialized (call with job=-1) */
+          NM_MUMPS_set_control_params(A);
+          NM_MUMPS_set_sym(A, 1); /*  symmetric positive definite */
+          NM_MUMPS(A, -1);
+          if ((NM_MUMPS_icntl(A, 1) == -1 ||
+               NM_MUMPS_icntl(A, 2) == -1 ||
+               NM_MUMPS_icntl(A, 3) == -1 ||
+               verbose) ||
+              (NM_MUMPS_icntl(A, 1) != -1 ||
+               NM_MUMPS_icntl(A, 2) != -1 ||
+               NM_MUMPS_icntl(A, 3) != -1 ||
+               !verbose))
+          {
+            NM_MUMPS_set_verbosity(A, verbose);
+          }
+          /* NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection */
+          /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
+        }
+
+        NM_MUMPS_set_problem(A, 0, NULL);
+
+        NM_MUMPS(A, 4); /* analyzis,factorization */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_Cholesky_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+
+        /* we should not do that here */
+        if(!p->solver_free_hook)
+        {
+          p->solver_free_hook = &NM_MUMPS_free;
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        numerics_printf_verbose(0,"NM_Cholesky_factorize, Unknown solver in NM_SPARSE case." );
+        info = 1;
+      }
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_Cholesky_factors: unknown storageType");
+    }
+
+    if (!info)
+    {
+      NM_internalData(A)->isCholeskyfactorized = true;
+    }
+    else
+    {
+      assert(NM_internalData(A)->isCholeskyfactorized == false);
+    }
+  }
+
+  assert (NM_Cholesky_factorized(Ao) == NM_Cholesky_factorized(A));
+  DEBUG_END("int NM_Cholesky_factorize(NumericsMatrix* Ao) \n");
+  return info;
+}
+
+
+int NM_Cholesky_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
+{
+
+  lapack_int info = 1;
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_Cholesky_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_Cholesky_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_Cholesky_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
+    assert(A->size0 == A->size1);
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2, "NM_Cholesky_solve, using LAPACK (DPOTRS)" );
+
+      /* dpotrf is called in NM_Cholesky_factorize */
+      DEBUG_PRINT("Start to call DPOTRS for NM_DENSE storage\n");
+
+      numerics_printf_verbose(2,"NM_Cholesky_solve, we solve with given factors" );
+      DEBUG_PRINT("Start to call DPOTRS for NM_DENSE storage\n");
+      DEBUG_EXPR(NV_display(b,A->size0));
+      DPOTRS(LA_UP, A->size0, nrhs, A->matrix0, A->size0, b, A->size0, &info);
+      DEBUG_EXPR(NV_display(b,A->size0));
+      DEBUG_PRINT("End of call DPOTRS for NM_DENSE storage\n");
+
+      if (info < 0)
+      {
+        numerics_printf_verbose(2,"NM_Cholesky_solve: dense Cholesky solve DPOTRS failed. The %d-th argument has an illegal value\n", -info);
+      }
+      break;
+    }
+
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      switch (p->solver)
+      {
+      case NSM_CSPARSE:
+      {
+        numerics_printf_verbose(2,"NM_Cholesky_solve, using CSparse" );
+
+        numerics_printf_verbose(2,"NM_Cholesky_solve, we solve with given factors" );
+        for(unsigned int j=0; j < nrhs ; j++ )
+        {
+          info = !CSparseMatrix_chol_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
+        }
+        break;
+      }
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_Cholesky_solve: using MUMPS\n");
+        }
+
+        assert (NM_MUMPS_id(A)->job); /* this means that least a
+                                       * factorization has already been
+                                       * done */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        NM_MUMPS_set_problem(A, nrhs, b);
+
+        NM_MUMPS(A, 3); /* solve */
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_Cholesky_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        fprintf(stderr, "NM_Cholesky_solve: unknown sparse linearsolver %d\n", p->solver);
+        exit(EXIT_FAILURE);
+      }
+      break;
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_Cholesky_solve unknown storageType");
+    }
+
+
+    /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+       CHECK_RETURN is ok for cs, but not for MUMPS and others */
+    /* some time we cannot find a solution to a linear system, and its fine, for
+     * instance with the minFBLSA. Therefore, we should not check here for
+     * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+    DEBUG_END("NM_Cholesky_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  }
+
+  return info;
+}
+
+int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
+{
+
+  lapack_int info = 1;
+
+  /* factorization is done on destructible part only if
+   * !A->internalData->isCHOLESKYfactorized */
+  NM_Cholesky_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_Cholesky_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)\n");
+    assert(A->size0 == A->size1);
+
+    if (B->storageType == NM_DENSE)
+    {
+      assert(B->matrix0);
+      info = NM_Cholesky_solve(A, B->matrix0, B->size1);
+    }
+    else if ((B->storageType == NM_SPARSE) || (B->storageType == NM_SPARSE_BLOCK))
+    {
+      switch (A->storageType)
+      {
+      case NM_DENSE:
+      {
+        numerics_error("NM_Cholesky_solve_matrix_rhs", "Solving Linear system with a dense matrix and a sparse matrix rhs is not implemented since it requires to copy the rhs into dense matrix." );
+        break;
+      }
+
+      case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+      case NM_SPARSE:
+      {
+        NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+        switch (p->solver)
+        {
+        case NSM_CSPARSE:
+        {
+          numerics_printf_verbose(2,"NM_Cholesky_solve_matrix_rhs, using CSparse" );
+          numerics_printf_verbose(2,"NM_Cholesky_solve_matrix_rhs, we solve with given factors" );
+
+          if (!p->dWork)
+          {
+            assert(!NSM_workspace(p));
+            p->dWork = (double*) malloc(A->size1 * sizeof(double));
+            p->dWorkSize = A->size1;
+          };
+
+
+          CSparseMatrix *X = cs_spalloc(NM_csc(B)->m, NM_csc(B)->n, NM_csc(B)->nzmax, 1,0); /* csc format */
+
+          info = !CSparseMatrix_chol_spsolve((CSparseMatrix_factors *)NSM_linear_solver_data(p), X, NM_csc(B));
+          //Invalidation
+          B->matrix2->origin = NSM_CSC;
+          NM_clearCSR(B);
+          NM_clearCSCTranspose(B);
+          NM_clearTriplet(B);
+          NM_clearHalfTriplet(B);
+
+          break;
+        }
+#ifdef WITH_MUMPS
+        case NSM_MUMPS:
+        {
+          numerics_printf_verbose(2,"NM_Cholesky_solve: using MUMPS\n");
+          numerics_error("NM_Cholesky_solve_matrix_rhs"," not yet implemented\n")
+
+          assert (NM_MUMPS_id(A)->job); /* this means that least a
+                                         * factorization has already been
+                                         * done */
+
+          DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+          NM_MUMPS_set_problem(A, nrhs, b);
+
+          NM_MUMPS(A, 3); /* solve */
+          info = mumps_id->info[0];
+
+          /* MUMPS can return info codes with negative value */
+          if(info)
+          {
+            if(verbose > 0)
+            {
+              fprintf(stderr,"NM_Cholesky_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+            }
+          }
+          break;
+        }
+#endif /* WITH_MUMPS */
+        default:
+        {
+          fprintf(stderr, "NM_Cholesky_solve: unknown sparse linearsolver %d\n", p->solver);
+          exit(EXIT_FAILURE);
+        }
+        break;
+        }
+        break;
+      }
+      default:
+        assert (0 && "NM_Cholesky_solve_matrix_rhs unknown storageType");
+      }
+
+
+      /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+         CHECK_RETURN is ok for cs, but not for MUMPS and others */
+      /* some time we cannot find a solution to a linear system, and its fine, for
+       * instance with the minFBLSA. Therefore, we should not check here for
+       * problems, but the calling function has to check the return code.*/
+
+    }
+  }
+  DEBUG_END("NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)\n");
+  return info;
+}
+
+
+int NM_LDLT_factorize(NumericsMatrix* Ao)
+{
+  DEBUG_BEGIN("int NM_LDLT_factorize(NumericsMatrix* Ao) \n");
+  lapack_int info = 0;
+  assert(Ao->destructible); /* by default Ao->destructible == Ao */
+  NumericsMatrix* A = Ao->destructible;
+
+  if (!NM_LDLT_factorized(Ao))
+  {
+
+#ifdef FACTORIZATION_DEBUG
+    if (NM_internalData(Ao)->values_sha1_count > 0)
+    {
+      if(NM_check_values_sha1(Ao))
+      {
+        numerics_error("NM_LDLT_factorize", "this matrix is already factorized");
+      }
+    }
+
+    NM_set_values_sha1(Ao);
+#endif
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2,"NM_LDLT_factorize, using LAPACK (SYTRF)" );
+      lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+      DEBUG_PRINTF("iwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
+
+      numerics_printf_verbose(2,"NM_LDLT_factorize, we compute factors and keep them in place" );
+      DEBUG_PRINT("Start to call DSYTRF for NM_DENSE storage\n");
+      DSYTRF(LA_UP, A->size1, A->matrix0, A->size0, ipiv, &info);
+      DEBUG_PRINT("end of call DSYTRF for NM_DENSE storage\n");
+
+      if (info > 0)
+      {
+        fprintf(stderr,"NM_LDLT_factorize: LDLT factorisation DSYTRF failed. The %d-th diagonal element is 0\n", info);
+      }
+      else if (info < 0)
+      {
+        fprintf(stderr, "NM_LDLT_factorize: LDLT factorisation DSYTRF failed. The %d-th argument has an illegal value, stopping\n", -info);
+      }
+      if (info)
+      {
+        NM_internalData_free(A);
+        assert(!NM_internalData(A)->isLDLTfactorized);
+      }
+    }
+    break;
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      assert(!NM_internalData(A)->isLDLTfactorized);
+      switch (p->solver)
+      {
+      case NSM_CSPARSE:
+      {
+        info=1;
+        fprintf(stderr, "NM_LDLT_factorize: NSM_CSPARSE is not available for LDLT %d\n", info);
+        break;
+      }
+#ifdef WITH_MA57
+      case NSM_HSL:
+      {
+        int  n = A->size0;
+        CSparseMatrix * A_halftriplet= NM_half_triplet(A);
+        CS_INT nz = A_halftriplet->nz;
+
+        FILE * logfile = fopen("lbl.log", "w");
+        int lblsolver = 1;  // MA27=0, MA57=1.
+
+        // ... Initialize LBL data structure.
+        LBL_Data * lbl = LBL_Initialize(nz, n, logfile, lblsolver);
+
+        for(int i = 0; i < nz; i++)
+        {
+          lbl->irn[i]=A_halftriplet->i[i]+1;
+          lbl->jcn[i]=A_halftriplet->p[i]+1;
+        }
+
+        p->linear_solver_data = lbl;
+
+        if(!p->solver_free_hook)
+        {
+          p->solver_free_hook = &NM_MA57_free;
+        }
+
+        // Optionally, we may set some specific parameters (MA57 only).
+        //LBL_set_int_parm(lbl, LBL_I_SCALING, 0);        // No scaling.
+        //LBL_set_int_parm(lbl, LBL_I_PIV_NUMERICAL, 1);  // Do pivoting.
+        //LBL_set_real_parm(lbl, LBL_D_PIV_THRESH, 0.5);  // Pivot threshold.
+
+        // Analyze.
+        info  = LBL_Analyze(lbl, 0);  // iflag=0: automatic pivot choice.
+        if(info) {
+            fprintf(stderr, "NM_LDLT_factorize: LBL_Analyze Error return from Analyze: %d\n", info);
+        }
+
+        // Factorize.
+        info = LBL_Factorize(lbl, A_halftriplet->x);
+        if(info) {
+          fprintf(stderr, "NM_LDLT_factorize: LBL_Factorize. Error return from Factorize: %d\n", info);
+        }
+        // Close logging stream.
+        fclose(logfile);
+
+      break;
+      }
+#endif
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_LDLT_factorize: using MUMPS\n");
+        }
+        if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+        {
+          /* the mumps instance is initialized (call with job=-1) */
+          NM_MUMPS_set_control_params(A);
+          NM_MUMPS_set_sym(A, 2); /*  general symmetric (LDLT)  */
+          NM_MUMPS(A, -1);
+          if ((NM_MUMPS_icntl(A, 1) == -1 ||
+               NM_MUMPS_icntl(A, 2) == -1 ||
+               NM_MUMPS_icntl(A, 3) == -1 ||
+               verbose) ||
+              (NM_MUMPS_icntl(A, 1) != -1 ||
+               NM_MUMPS_icntl(A, 2) != -1 ||
+               NM_MUMPS_icntl(A, 3) != -1 ||
+               !verbose))
+          {
+            NM_MUMPS_set_verbosity(A, verbose);
+          }
+          /* NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection */
+          /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
+        }
+
+        NM_MUMPS_set_problem(A, 0, NULL);
+
+        NM_MUMPS(A, 4); /* analyzis,factorization */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_LDLT_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+
+        /* we should not do that here */
+        if(!p->solver_free_hook)
+        {
+          p->solver_free_hook = &NM_MUMPS_free;
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        numerics_printf_verbose(0,"NM_LDLT_factorize, Unknown solver in NM_SPARSE case." );
+        info = 1;
+      }
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_LDLT_factors: unknown storageType");
+    }
+
+    if (!info)
+    {
+      NM_internalData(A)->isLDLTfactorized = true;
+    }
+    else
+    {
+      assert(NM_internalData(A)->isLDLTfactorized == false);
+    }
+  }
+
+  assert (NM_LDLT_factorized(Ao) == NM_LDLT_factorized(A));
+  DEBUG_END("int NM_LDLT_factorize(NumericsMatrix* Ao) \n");
+  return info;
+}
+
+
+int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
+{
+
+  lapack_int info = 1;
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_LDLT_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_LDLT_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_LDLT_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
+    assert(A->size0 == A->size1);
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2, "NM_LDLT_solve, using LAPACK (DSYTRS)" );
+
+      /* dpotrf is called in NM_LDLT_factorize */
+      DEBUG_PRINT("Start to call DSYTRS for NM_DENSE storage\n");
+
+      numerics_printf_verbose(2,"NM_LDLT_solve, we solve with given factors" );
+      lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+
+      DEBUG_PRINT("Start to call DSYTRS for NM_DENSE storage\n");
+      DEBUG_EXPR(NV_display(b,A->size0));
+      DSYTRS(LA_UP, A->size0, nrhs, A->matrix0, A->size0,  ipiv, b, A->size0, &info);
+      DEBUG_EXPR(NV_display(b,A->size0));
+      DEBUG_PRINT("End of call DSYTRS for NM_DENSE storage\n");
+
+      if (info < 0)
+      {
+        numerics_printf_verbose(2,"NM_LDLT_solve: dense LDLT solve DPOTRS failed. The %d-th argument has an illegal value\n", -info);
+      }
+      break;
+    }
+
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      switch (p->solver)
+      {
+      case NSM_CSPARSE:
+      {
+        info=1;
+        fprintf(stderr, "NM_LDLT_solve: NSM_CSPARSE is not available for LDLT %d\n", info);
+        break;
+      }
+#ifdef WITH_MA57
+      case NSM_HSL:
+      {
+        LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
+        // Solve.
+        for (int irhs=0; irhs <nrhs ; irhs++)
+        {
+          info = LBL_Solve(lbl, &b[irhs*A->size1]); // MA57 is able to accept multiple rhs but the C wrapper lbl not.
+          if(info)
+          {
+            fprintf(stderr, "NM_LDLT_solve. LBL_Solve error return from Solve: %d\n", info);
+          }
+        }
+        break;
+      }
+#endif
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_LDLT_solve: using MUMPS\n");
+        }
+
+        assert (NM_MUMPS_id(A)->job); /* this means that least a
+                                       * factorization has already been
+                                       * done */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        NM_MUMPS_set_problem(A, nrhs, b);
+
+        NM_MUMPS(A, 3); /* solve */
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_LDLT_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        fprintf(stderr, "NM_LDLT_solve: unknown sparse linearsolver %d\n", p->solver);
+        exit(EXIT_FAILURE);
+      }
+      break;
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_LDLT_solve unknown storageType");
+    }
+
+
+    /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+       CHECK_RETURN is ok for cs, but not for MUMPS and others */
+    /* some time we cannot find a solution to a linear system, and its fine, for
+     * instance with the minFBLSA. Therefore, we should not check here for
+     * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+    DEBUG_END("NM_LDLT_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  }
+
+  return info;
 }

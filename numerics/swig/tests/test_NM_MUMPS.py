@@ -33,13 +33,13 @@ def test_nm_mumps():
     #     2*x - y = 1
     #     x   + y = 1
     # solution x: 2/3, y: 1/3 */
-    numerics.NM_zentry(M, 0, 0, 2.)
-    numerics.NM_zentry(M, 0, 1, -1.)
-    numerics.NM_zentry(M, 1, 0, 1.)
-    numerics.NM_zentry(M, 1, 1, 1.)
+    numerics.NM_entry(M, 0, 0, 2.)
+    numerics.NM_entry(M, 0, 1, -1.)
+    numerics.NM_entry(M, 1, 0, 1.)
+    numerics.NM_entry(M, 1, 1, 1.)
 
     b = numpy.array([1.0, 1.0])
-    numerics.NM_MUMPS_set_problem(M, b)
+    numerics.NM_MUMPS_set_problem(M, 1, b)
 
     # analysis, factorization, solve.
     numerics.NM_MUMPS(M, 6)

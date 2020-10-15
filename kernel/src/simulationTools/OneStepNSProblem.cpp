@@ -434,11 +434,11 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       // SP::SimpleMatrix Mold;
       // Mold.reset(new SimpleMatrix(*(std::static_pointer_cast<LagrangianDS>(ds))->mass()));
       // DEBUG_EXPR(Mold->display(););
-      // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isPLUFactorized() = "<< Mold->isPLUFactorized() << std::endl;);
+      // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isFactorized() = "<< Mold->isFactorized() << std::endl;);
       //(std::static_pointer_cast<LagrangianDS>(ds))->computeMass();
       SP::SiconosMatrix Mass = ((std::static_pointer_cast<LagrangianDS>(ds))->mass()) ;
       DEBUG_EXPR(Mass->display(););
-      DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mass->isPLUFactorized() = "<< Mass->isPLUFactorized() << std::endl;);
+      DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mass->isFactorized() = "<< Mass->isFactorized() << std::endl;);
 
       //DEBUG_EXPR(std::cout << (*Mass-*Mold).normInf() << std::endl;);
       /*Copy of the current mass matrix. */
@@ -448,7 +448,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
     {
       SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
       //   d->computeMass();
-      //   d->mass()->resetLU();
+      //   d->mass()->resetFactorizationFlags();
       DEBUG_EXPR(d->mass()->display(););
       block.reset(new SimpleMatrix(*(d->mass())));
     }

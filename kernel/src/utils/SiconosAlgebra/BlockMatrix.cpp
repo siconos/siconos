@@ -38,7 +38,7 @@ using Siconos::Algebra::isComparableTo;
 //                CONSTRUCTORS
 // =================================================
 
-BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), _dimCol(0)
+BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(Siconos::BLOCK), _dimRow(0), _dimCol(0)
 {
   _tabRow.reset(new Index());
   _tabCol.reset(new Index());
@@ -95,7 +95,7 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
   }
 }
 
-BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _dimCol(0)
+BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(Siconos::BLOCK), _dimRow(0), _dimCol(0)
 {
   unsigned int nbRows = m.numberOfBlocks(0);
   unsigned int nbCols = m.numberOfBlocks(1);
@@ -138,7 +138,7 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _d
 }
 
 BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int row, unsigned int col):
-  SiconosMatrix(0), _dimRow(0), _dimCol(0)
+  SiconosMatrix(Siconos::BLOCK), _dimRow(0), _dimCol(0)
 {
   if(m.size() != (row * col))
     SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<SiconosMatrix*>, number of blocks inconsistent with provided dimensions.");
@@ -180,7 +180,7 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
 }
 
 BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMatrix C, SP::SiconosMatrix D):
-  SiconosMatrix(0), _dimRow(0), _dimCol(0)
+  SiconosMatrix(Siconos::BLOCK), _dimRow(0), _dimCol(0)
 {
   if(A->size(0) != B->size(0) || C->size(0) != D->size(0) ||  A->size(1) != C->size(1) ||  B->size(1) != D->size(1))
     SiconosMatrixException::selfThrow("BlockMatrix constructor(A,B,C,D), inconsistent sizes between A, B, C or D SiconosMatrices.");
@@ -1147,6 +1147,10 @@ void BlockMatrix::PLUFactorizationInPlace()
 {
   SiconosMatrixException::selfThrow(" BlockMatrix::PLUFactorizationInPlace: not yet implemented for Block Matrices.");
 }
+void BlockMatrix::Factorize()
+{
+  SiconosMatrixException::selfThrow(" BlockMatrix::Factorize: not yet implemented for Block Matrices.");
+}
 
 void BlockMatrix::PLUInverseInPlace()
 {
@@ -1157,10 +1161,18 @@ void BlockMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 {
   SiconosMatrixException::selfThrow(" BlockMatrix::PLUForwardBackwardInPlace: not yet implemented for Block Matrices.");
 }
+void BlockMatrix::Solve(SiconosMatrix &B)
+{
+  SiconosMatrixException::selfThrow(" BlockMatrix::Solve: not yet implemented for Block Matrices.");
+}
 
 void BlockMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 {
   SiconosMatrixException::selfThrow(" BlockMatrix::PLUForwardBackwardInPlace: not yet implemented for Block Matrices.");
+}
+void BlockMatrix::Solve(SiconosVector &B)
+{
+  SiconosMatrixException::selfThrow(" BlockMatrix::Solve: not yet implemented for Block Matrices.");
 }
 
 SP::SiconosMatrix BlockMatrix::block(unsigned int row, unsigned int col)

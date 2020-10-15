@@ -558,10 +558,12 @@ SiconosVector& SiconosVector::operator = (const SiconosVector& vIn)
       }
       break;
     case 4:
-      if(vInNum == 4)
+      if (vInNum == 1)
+        noalias(*vect.Sparse) = *vIn.dense();
+      else if(vInNum == 4)
         noalias(*vect.Sparse) = *vIn.sparse();
       else
-        SiconosVectorException::selfThrow("SiconosVector::operator = : can not set sparse = dense.");
+        SiconosVectorException::selfThrow("SiconosVector::operator = : invalid type given");
       break;
     default:
       SiconosVectorException::selfThrow("SiconosVector::operator = : invalid type given");
