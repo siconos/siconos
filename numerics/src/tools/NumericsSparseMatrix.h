@@ -61,6 +61,7 @@ extern "C"
   struct NSM_linear_solver_params
   {
     NSM_linear_solver solver;
+    NSM_linear_solver LDLT_solver;
 
     void* linear_solver_data; /**< solver-specific data (or workspace) */
     freeNSLSP solver_free_hook; /**< solver-specific hook to free linear_solver_data  */
@@ -197,7 +198,7 @@ extern "C"
    * \param A the matrix to check, modified if necessary to have ordered indices
    */
   void NSM_fix_csc(CSparseMatrix* A);
-  
+
   void NSM_sort_csc(CSparseMatrix* A);
 
   /** return the origin of a sparse part of a matrix

@@ -5291,7 +5291,7 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
     {
       NSM_linear_solver_params* p = NSM_linearSolverParams(A);
       assert(!NM_internalData(A)->isLDLTfactorized);
-      switch (p->solver)
+      switch (p->LDLT_solver)
       {
       case NSM_CSPARSE:
       {        numerics_printf_verbose(2, "NM_LDLT_factorize, using SuiteSparse (LDL )");
@@ -5496,7 +5496,7 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
     case NM_SPARSE:
     {
       NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-      switch (p->solver)
+      switch (p->LDLT_solver)
       {
       case NSM_CSPARSE:
       {
@@ -5557,7 +5557,7 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 #endif /* WITH_MUMPS */
       default:
       {
-        fprintf(stderr, "NM_LDLT_solve: unknown sparse linearsolver %d\n", p->solver);
+        fprintf(stderr, "NM_LDLT_solve: unknown sparse linearsolver %d\n", p->LDLT_solver);
         exit(EXIT_FAILURE);
       }
       break;
