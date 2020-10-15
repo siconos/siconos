@@ -128,7 +128,7 @@ extern "C"
   /** \struct CSparseMatrix_factors
    * Information used and produced by CSparse for an LU factorization*/
   typedef struct {
-    CS_INT n;       /**< size of linear system */
+    CS_INT n;    /**< size of linear system */
     css* S;      /**< symbolic analysis */
     csn* N;      /**< numerics factorization */
   } CSparseMatrix_factors;
@@ -142,13 +142,21 @@ extern "C"
    */
   int CSparseMatrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_factors * cs_lu_A);
 
- /** compute a Cholesky factorization of A and store it in a workspace
+  /** compute a Cholesky factorization of A and store it in a workspace
    * \param order control if ordering is used
    * \param A the sparse matrix
    * \param cs_chol_A the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
   int CSparseMatrix_chol_factorization(CS_INT order, const CSparseMatrix *A,  CSparseMatrix_factors * cs_chol_A);
+
+  /** compute a LDLT factorization of A and store it in a workspace
+   * \param order control if ordering is used
+   * \param A the sparse matrix
+   * \param cs_ldlt_A the parameter structure that eventually holds the factors
+   * \return 1 if the factorization was successful, 1 otherwise
+   */
+  int CSparseMatrix_ldlt_factorization(CS_INT order, const CSparseMatrix *A,  CSparseMatrix_factors * cs_ldlt_A);
 
   /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
    * \param cs_lu_A contains the LU factors of A, permutation information
@@ -165,14 +173,14 @@ extern "C"
    * \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A, CSparseMatrix* X, CSparseMatrix* B);
 
-  /** reuse a Cholesky factorization (stored in the cs_chols_A) to solve a linear system Ax = b
+  /** reuse a Cholesky factorization (stored in the cs_chol_A) to solve a linear system Ax = b
    * \param cs_chol_A contains the Cholesky factors of A, permutation information
    * \param x workspace
    * \param[in,out] b on input RHS of the linear system; on output the solution
    * \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b);
 
-  /** reuse a Cholesky factorization (stored in the cs_chols_A) to solve a linear system Ax = B
+  /** reuse a Cholesky factorization (stored in the cs_chol_A) to solve a linear system Ax = B
    * with a sparse r.h.s
    * \param cs_chol_A contains the Cholesky factors of A, permutation information
    * \param X a csc sparse matrix workspace
@@ -180,6 +188,12 @@ extern "C"
    * \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A, CSparseMatrix* X, CSparseMatrix* B);
 
+  /** reuse a LDLT factorization (stored in the cs_ldlt_A) to solve a linear system Ax = b
+   * \param cs_ldlt_A contains the LDLT factors of A, permutation information
+   * \param x workspace
+   * \param[in,out] b on input RHS of the linear system; on output the solution
+   * \return 0 if failed, 1 otherwise*/
+  CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors* cs_ldlt_A, double* x, double *b);
   /** Free a workspace related to a LU factorization
    * \param cs_lu_A the structure to free
    */
