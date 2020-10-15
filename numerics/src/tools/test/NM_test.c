@@ -2882,6 +2882,7 @@ static int test_NM_LU_solve_matrix_rhs_unit(NumericsMatrix * M1, NumericsMatrix 
 }
 static int test_NM_LU_solve_matrix_rhs(void)
 {
+  numerics_set_verbose(3);
 
   printf("========= Starts Numerics tests for NumericsMatrix (test_NM_LU_solve) ========= \n");
   /* numerics_set_verbose(2); */
