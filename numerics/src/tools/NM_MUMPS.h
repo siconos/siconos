@@ -100,20 +100,27 @@ extern "C"
    */
   double NM_MUMPS_cntl(NumericsMatrix* A, unsigned int index);
 
-  /** Set linear problem.
+  /** Set matrix before factorization.
    * \param A, the matrix holding the MUMPS config,
    * \param nrhs, the number of right hand side.
    * \param b, a pointer on double values of the right hand side.
    */
-  void NM_MUMPS_set_problem(NumericsMatrix* A, unsigned int nrhs, double *b);
+  void NM_MUMPS_set_matrix(NumericsMatrix* A);
 
-  /** Set linear problem with sparse right hand side.
+  /** Set dense right hand side.
+   * \param A, the matrix holding the MUMPS config,
+   * \param nrhs, the number of right hand side.
+   * \param b, a pointer on double values of the right hand side.
+   */
+  void NM_MUMPS_set_dense_rhs(NumericsMatrix* A, unsigned int nrhs, double *b);
+
+  /** Set sparse right hand side.
    * \param A, the matrix holding the MUMPS config,
    * \param B, the matrix holding the right hand side.
    * B is converted to csc if not already stored in this
-   * representation. The solution is returned in B in the DENSE format.
+   * representation.
    */
-  void NM_MUMPS_set_sparse_rhs_problem(NumericsMatrix* A, NumericsMatrix* B);
+  void NM_MUMPS_set_sparse_rhs(NumericsMatrix* A, NumericsMatrix* B);
 
   /** Set MUMPS verbosity.
    * \param A, the matrix holding the MUMPS config,

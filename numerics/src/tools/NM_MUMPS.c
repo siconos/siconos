@@ -229,14 +229,14 @@ void NM_MUMPS_set_default_params(NumericsMatrix* A)
   mumps_id->ICNTL(7) = 3; // scotch
 }
 
-void NM_MUMPS_set_problem(NumericsMatrix* A, unsigned int nrhs, double *b)
+void NM_MUMPS_set_matrix(NumericsMatrix* A)
 {
   /* numerics matrices are not distributed */
   if(NM_MPI_rank(A) == 0)
   {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
     CSparseMatrix* triplet;
-    if(mumps_id->sym)
+    if(mumps_id->sym) /* symmetry */
     {
       triplet=NM_half_triplet(A);
     }
@@ -245,50 +245,44 @@ void NM_MUMPS_set_problem(NumericsMatrix* A, unsigned int nrhs, double *b)
       triplet=NM_triplet(A);
     }
     mumps_id->n = (MUMPS_INT) triplet->n;
+    mumps_id->nz = (MUMPS_INT) triplet->nz;
+
     NM_MUMPS_set_irn_jcn(A);
-
-    MUMPS_INT nz;
-    nz = (MUMPS_INT) triplet->nz;
-
-    mumps_id->nrhs = nrhs;
-    mumps_id->lrhs = A->size0; /* note: maybe this can also become a
-                                * parameter */
-    mumps_id->nz = nz;
     mumps_id->a = triplet->x;
+
+    mumps_id->lrhs = A->size0;
+  }
+}
+
+void NM_MUMPS_set_dense_rhs(NumericsMatrix* A, unsigned int nrhs, double *b)
+{
+  /* numerics matrices are not distributed */
+  if(NM_MPI_rank(A) == 0)
+  {
+    DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+    mumps_id->nrhs = nrhs;
+
     mumps_id->rhs = b;
   }
 }
 
-void NM_MUMPS_set_sparse_rhs_problem(NumericsMatrix* A, NumericsMatrix* B)
+void NM_MUMPS_set_sparse_rhs(NumericsMatrix* A, NumericsMatrix* B)
 {
   /* numerics matrices are not distributed */
   if(NM_MPI_rank(A) == 0)
   {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
-    CSparseMatrix* triplet;
-    if(mumps_id->sym)
-    {
-      triplet=NM_half_triplet(A);
-    }
-    else
-    {
-      triplet=NM_triplet(A);
-    }
-    mumps_id->n = (MUMPS_INT) triplet->n;
-    NM_MUMPS_set_irn_jcn(A);
-
-    MUMPS_INT nz;
-    nz = (MUMPS_INT) triplet->nz;
 
     CSparseMatrix* csc;
     csc = NM_csc(B);
 
-    mumps_id->ICNTL(20) = 1; /* decision of exploting sparsity is done
+    mumps_id->ICNTL(20) = 1; /* decision of exploiting sparsity is done
                               * by mumps */
     mumps_id->ICNTL(21) = 0; /* centralized solution */
 
-    mumps_id->nz_rhs = csc->nzmax;  /* maximum number of entries */
-    mumps_id->nrhs = csc->n;        /* number of columns */
+    mumps_id->nz_rhs = (MUMPS_INT) csc->nzmax;  /* maximum number of entries */
+
+    mumps_id->nrhs = (MUMPS_INT) B->size1;
 
     mumps_id->irhs_ptr = (MUMPS_INT *) malloc((mumps_id->nrhs+1)*
                                               sizeof(MUMPS_INT));
