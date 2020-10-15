@@ -137,7 +137,7 @@ void NesterovToddVector(const double* const vec1, const double* const vec2,
   NM_gemv(1.0, quad_repr, Qx05yi, 0.0, _p);
   JA_sqrt_inv(_p, vecSize, varsCount, out);
 
-  assert(!NV_isnan(out,vecSize));
+  //assert(!NV_isnan(out,vecSize));
 
 
   free(_p);
@@ -191,7 +191,7 @@ void JA_eigenvals(const double * const vec, const unsigned int vecSize, const si
   for(size_t i = 0; i < 2*varsCount; i += 2)
   {
     pos = (i / 2.) * dimension;
-    assert(!isnan(vec[pos]));
+    //assert(!isnan(vec[pos]));
     out[i] = vec[pos] + NV_norm_2(vec + pos + 1, dimension - 1);
   }
 
@@ -207,7 +207,7 @@ void JA_eigenvals(const double * const vec, const unsigned int vecSize, const si
 
 void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const size_t varsCount, double ** out)
 {
-  const double EPS = 1e-12;
+  //const double EPS = 1e-12;
   unsigned int dimension = (int)(vecSize / varsCount);
   register unsigned int pos;
   double xi_bar_norm;
@@ -217,7 +217,8 @@ void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const si
     pos = (i / 2.) * dimension;
     xi_bar_norm = NV_norm_2(vec + pos + 1, dimension - 1);
     out[i][0] = 0.5;
-    NV_const_add(vec + pos + 1, dimension - 1, 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
+    //NV_const_add(vec + pos + 1, dimension - 1, 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
+    NV_const_add(vec + pos + 1, dimension - 1, 1. / (2 * xi_bar_norm), 0, out[i] + 1);
   }
 
   for(size_t i = 1; i < 2*varsCount; i += 2)
@@ -225,7 +226,8 @@ void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const si
     pos = ((i - 1) / 2.) * dimension;
     xi_bar_norm = NV_norm_2(vec + pos + 1, dimension - 1);
     out[i][0] = 0.5;
-    NV_const_add(vec + pos + 1, dimension - 1, - 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
+    //NV_const_add(vec + pos + 1, dimension - 1, - 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
+    NV_const_add(vec + pos + 1, dimension - 1, - 1. / (2 * xi_bar_norm), 0, out[i] + 1);
   }
 }
 
@@ -285,8 +287,8 @@ void JA_sqrt_inv(const double * const vec, const unsigned int vecSize, const siz
   for(size_t i = 0; i < 2 * varsCount; i += 2)
   {
     //printf("eigenvals[i] = %e \t, eigenvals[i+1] = %e\n ", eigenvals[i], eigenvals[i + 1]);
-    assert(eigenvals[i]>0);
-    assert(eigenvals[i+1]>0);
+    //assert(eigenvals[i]>0);
+    //assert(eigenvals[i+1]>0);
     sqrt_eigenval1 = 1. / sqrt(eigenvals[i]);
     sqrt_eigenval2 = 1. / sqrt(eigenvals[i + 1]);
     pos = (i / 2) * dimension;
