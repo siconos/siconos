@@ -67,10 +67,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(solvers[s]);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 500;
     current++;
   }
   //#ifdef WITH_UMFPACK
+  collection[5].will_fail = 2; //(FC3D_NSN_AC, on ./data/KaplasTower-i1061-4.hdf5.dat)  is unstable
   collection[6].will_fail = 1; //(FC3D_NSN_AC_TEST, on ./data/KaplasTower-i1061-4.hdf5.dat)  is expected to fail.
   //#endif
   *number_of_tests = current;
