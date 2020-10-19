@@ -59,28 +59,8 @@ using std::endl;
 //                CONSTRUCTORS
 // =================================================
 
-
-// Default (protected, used only for derived classes)
-SimpleMatrix::SimpleMatrix(int i):
-  SiconosMatrix(Siconos::DENSE),
-  _isPLUFactorized(false),
-  _isPLUFactorizedInPlace(false),
-  _isQRFactorized(false),
-  _isPLUInversed(false),
-  _isCholeskyFactorized(false),
-  _isCholeskyFactorizedInPlace(false)
-{
-  mat.Dense = new DenseMat(ublas::zero_matrix<double>());
-}
-
 SimpleMatrix::SimpleMatrix():
-  SiconosMatrix(Siconos::DENSE),
-  _isPLUFactorized(false),
-  _isPLUFactorizedInPlace(false),
-  _isQRFactorized(false),
-  _isPLUInversed(false),
-  _isCholeskyFactorized(false),
-  _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::DENSE)
 {
   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
 }
@@ -91,13 +71,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row,
                            UBLAS_TYPE typ,
                            unsigned int upper,
                            unsigned int lower):
-  SiconosMatrix(Siconos::DENSE),
-  _isPLUFactorized(false),
-  _isPLUFactorizedInPlace(false),
-  _isQRFactorized(false),
-  _isPLUInversed(false),
-  _isCholeskyFactorized(false),
-  _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::DENSE)
 {
   if(typ == DENSE)
   {
@@ -148,13 +122,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row,
 
 // parameters: dimensions, input value and type
 SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue, UBLAS_TYPE typ, unsigned int upper, unsigned int lower):
-  SiconosMatrix(typ),
-  _isPLUFactorized(false),
-  _isPLUFactorizedInPlace(false),
-  _isQRFactorized(false),
-  _isPLUInversed(false),
-  _isCholeskyFactorized(false),
-  _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(typ)
 {
   // This constructor has sense only for dense matrices ...
   if(typ == DENSE)
@@ -210,25 +178,16 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 
 // Copy constructors
 SimpleMatrix::SimpleMatrix(const SimpleMatrix &m):
-  SiconosMatrix(m.num()),
-  _isPLUFactorized(false),
-  _isPLUFactorizedInPlace(false),
-  _isQRFactorized(false),
-  _isPLUInversed(false),
-  _isCholeskyFactorized(false),
-  _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(m.num())
 {
 
   _isSymmetric = m.isSymmetric();
   _isPositiveDefinite = m.isPositiveDefinite();
-  
 
   _isPLUFactorized= m.isPLUFactorized();
   _isPLUFactorizedInPlace= m.isPLUFactorizedInPlace();
   _isPLUInversed= m.isPLUInversed();
-  
 
-  
   if(_num == Siconos::DENSE)
   {
     mat.Dense = new DenseMat(m.size(0), m.size(1));
@@ -263,13 +222,7 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix &m):
  *  \param A the matrix for extracting the block
  */
 SimpleMatrix::SimpleMatrix(const SimpleMatrix& A, const Index& coord):
-  SiconosMatrix(A.num()),
-  _isPLUFactorized(false),
-  _isPLUFactorizedInPlace(false),
-  _isQRFactorized(false),
-  _isPLUInversed(false),
-  _isCholeskyFactorized(false),
-  _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(A.num())
 {
   if(coord[0]>=coord[1])
     SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). Empty row range coord[0]>= coord[1]");
@@ -322,16 +275,10 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix& A, const Index& coord):
 
 
 SimpleMatrix::SimpleMatrix(const SiconosMatrix &m):
-  SiconosMatrix(m.num()),
-  _isPLUFactorized(),
-  _isPLUFactorizedInPlace(false),
-  _isQRFactorized(false),
-  _isPLUInversed(false),
-  _isCholeskyFactorized(false),
-  _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(m.num())
 {
   // _num is set in SiconosMatrix constructor with m.num() ... must be changed if m is Block
-  unsigned int numM = m.num();
+  Siconos::UBLAS_TYPE numM = m.num();
 
   _isSymmetric = m.isSymmetric();
   _isPositiveDefinite = m.isPositiveDefinite();
@@ -395,73 +342,55 @@ SimpleMatrix::SimpleMatrix(const SiconosMatrix &m):
 }
 
 SimpleMatrix::SimpleMatrix(const DenseMat& m):
-  SiconosMatrix(Siconos::DENSE),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::DENSE)
 {
   mat.Dense = new DenseMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const TriangMat& m):
-  SiconosMatrix(Siconos::TRIANGULAR),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::TRIANGULAR)
 {
   mat.Triang = new TriangMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const SymMat& m):
-  SiconosMatrix(Siconos::SYMMETRIC),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::SYMMETRIC)
 {
   mat.Sym = new SymMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const SparseMat& m):
-  SiconosMatrix(Siconos::SPARSE),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::SPARSE)
 {
   mat.Sparse = new SparseMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const SparseCoordinateMat& m):
-  SiconosMatrix(SPARSE_COORDINATE),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(SPARSE_COORDINATE)
 {
   mat.SparseCoordinate = new SparseCoordinateMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const BandedMat& m):
-  SiconosMatrix(Siconos::BANDED),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::BANDED)
 {
   mat.Banded = new BandedMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const ZeroMat& m):
-  SiconosMatrix(Siconos::ZERO),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::ZERO)
 {
   mat.Zero = new ZeroMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const IdentityMat& m):
-  SiconosMatrix(Siconos::IDENTITY),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::IDENTITY)
 {
   mat.Identity = new IdentityMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii):
-  SiconosMatrix(Siconos::DENSE),
-  _isPLUFactorized(false), _isPLUFactorizedInPlace(false), _isQRFactorized(false),
-  _isPLUInversed(false), _isCholeskyFactorized(false), _isCholeskyFactorizedInPlace(false)
+  SiconosMatrix(Siconos::DENSE)
 {
   mat.Dense = new DenseMat();
   if(ascii)

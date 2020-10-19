@@ -24,12 +24,7 @@
 
 #include "SiconosException.hpp"
 
-/** Exception caused by a SiconosMatrix
- *
- * SiconosMatrixException must be throws when an error is find in a SiconosMatrix
- * This exception can be caught by "catch(SiconosMatrixException)" or "catch(SiconosException)"
- *
- */
+/** SiconosMatrixException must be thrown for errors related to Siconos Matrice */
 class SiconosMatrixException : public SiconosException
 {
 public:
@@ -49,13 +44,13 @@ public:
 
   /** static function which throw a SiconosMatrixException
    */
-  static void selfThrow() NO_RETURN ;
+  [[ noreturn ]] static void selfThrow();
 
   /** static function which throw a SiconosMatrixException with a report
    * \param report exception description
    * \exception SiconosMatrixException
    */
-  static void selfThrow(const std::string& report) NO_RETURN;
+  [[ noreturn ]] static void selfThrow(const std::string& report);
 };
 
 #endif //__SiconosMatrixException__

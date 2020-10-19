@@ -24,11 +24,7 @@
 
 #include "SiconosException.hpp"
 
-/** Exceptions for SiconosMemory
- *
- *  Matrices can be either block or Simple.
- *  See Derived classes for details.
- */
+/** Exceptions for SiconosMemory */
 class SiconosMemoryException : public SiconosException
 {
 public:
@@ -49,9 +45,9 @@ public:
    */
   ~SiconosMemoryException();
 
-  static void selfThrow() NO_RETURN;
+  [[ noreturn ]] static void selfThrow();
 
-  static void selfThrow(const std::string& report) NO_RETURN;
+  [[ noreturn ]] static void selfThrow(const std::string& report);
 
 };
 

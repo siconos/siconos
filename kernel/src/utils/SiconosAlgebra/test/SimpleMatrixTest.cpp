@@ -650,11 +650,11 @@ void SimpleMatrixTest::testAssignment0()
 
   // // Sparse coordinate => Sparse
   ref.reset(new SimpleMatrix(*SP_coor));
-  ref->display();
+  //ref->display();
   tRef.reset(new SimpleMatrix(*SP));
   tRef->zero();
   *tRef = *ref;
-  tRef->displayExpert();
+  //tRef->displayExpert();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
 
 
@@ -1490,9 +1490,9 @@ void SimpleMatrixTest::testOperators6Ter()
   res.reset(new SimpleMatrix(4, 4, Siconos::SPARSE_COORDINATE));
   *res = *tmp + *tmp2;
 
-  res->displayExpert();
-  tmp->displayExpert();
-  tmp2->displayExpert();
+  // res->displayExpert();
+  // tmp->displayExpert();
+  // tmp2->displayExpert();
 
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
@@ -3479,7 +3479,6 @@ void SimpleMatrixTest::testFromAndFillCSC()
   NM_display(NM);
 //  NumericsMatrix *NM_1 = NM_create(4,4, NM_SPARSE);
 
-  
   SP::SiconosMatrix Sparse1(new SimpleMatrix(4,4,SPARSE));
   Sparse1->fromCSC(NM_csc(NM));
   Sparse1->displayExpert();
@@ -3489,9 +3488,7 @@ void SimpleMatrixTest::testFromAndFillCSC()
   NM_csc_alloc(NM_1, Sparse4->nnz());
   Sparse4->fillCSC(NM_csc(NM_1));
   NM_display(NM_1);
-  
 
-  
   std::cout << "End SimpleMatrixTest::testFromAndFillCSC() "<< std::endl;
 
 }

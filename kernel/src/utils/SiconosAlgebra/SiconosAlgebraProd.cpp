@@ -25,6 +25,7 @@
 #include "SimpleMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
+#include "myexception.hpp"
 
 void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init)
 {
@@ -478,8 +479,9 @@ SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
   Siconos::UBLAS_TYPE numA = A.num();
   unsigned int numX = x.num();
 
-  if(numA == 0)  // if A is block ...
-    SiconosMatrixException::selfThrow("prod(matrix,vector) error: not yet implemented for block matrix.");
+  if(numA == Siconos::BLOCK)  // if A is block ...
+    THROW_EXCEPTION("Not implemented for block matrices.");
+  //SiconosMatrixException::selfThrow("prod(matrix,vector) error: not yet implemented for block matrix.");
 
   if(numA == Siconos::ZERO)  // A = 0
     return (DenseVect)(ublas::zero_vector<double>(x.size()));

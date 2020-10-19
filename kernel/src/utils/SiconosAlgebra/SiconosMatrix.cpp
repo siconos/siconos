@@ -64,7 +64,7 @@ const SP::Index SiconosMatrix::tabCol() const
 //=====================
 SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 {
-  if(m._num == 0)  // BlockMatrix
+  if(m._num == Siconos::BLOCK)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
@@ -96,7 +96,7 @@ SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 
 SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 {
-  if(m._num == 0)  // BlockMatrix
+  if(m._num == Siconos::BLOCK)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
@@ -298,9 +298,9 @@ bool SiconosMatrix::fromCSC(CSparseMatrix* csc)
   CS_INT* Mi = csc->i; // row indx
   CS_INT* Mp = csc->p; // column pointers
   CS_INT n = csc->n;
-  CS_INT m = csc->m;
+  // CS_INT m = csc->m;
 
-  size_t nnz = csc->p[n];
+  // size_t nnz = csc->p[n];
 
   if(_num == Siconos::SPARSE)
   {

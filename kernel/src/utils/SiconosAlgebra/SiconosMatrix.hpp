@@ -124,7 +124,7 @@ public:
    * \return a bool.*/
   inline bool isBlock(void) const
   {
-    if (_num == 0) return true ;
+    if (_num == Siconos::BLOCK) return true ;
     else return false;
   }
 

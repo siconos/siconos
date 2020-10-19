@@ -25,6 +25,7 @@
 #include "BlockMatrix.hpp"
 
 #include "SiconosAlgebra.hpp"
+#include "myexception.hpp"
 
 using namespace Siconos;
 
@@ -140,9 +141,9 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
   if(col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col,m): m.col + col is out of range.");
 
-  unsigned int numM = m.num();
+  Siconos::UBLAS_TYPE numM = m.num();
 
-  if(numM == 0)  // if m is a block matrix ...
+  if(numM == Siconos::BLOCK)  // if m is a block matrix ...
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     BlocksMat::const_iterator1 it;
@@ -164,7 +165,8 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
   else // if m is a SimpleMatrix
   {
     if(numM != _num)
-      SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(i,j,m), inconsistent types.");
+      THROW_EXCEPTION("Inconsistent matrix types.");
+    //SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(i,j,m), inconsistent types.");
 
     if(_num == Siconos::DENSE)
       noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) = *(m.dense());

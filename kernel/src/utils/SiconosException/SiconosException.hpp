@@ -30,28 +30,25 @@
 #else
 #define NO_RETURN
 #endif
+/** Generic Siconos Exception
 
-/** General Siconos Exception
- *
- * SiconosException should not be throws directly; prefer to use an inherit class
- * This exception can be caught by "catch(SiconosException)"
- *
- */
+    When it makes sense, inherited class exceptions (e.g. SiconosMatrixException) should be prefered to SiconosException.
+*/
 class SiconosException
 {
 public:
   /** constructor
    */
-  SiconosException();
+  SiconosException() = default;
 
-  /** constructor with a report
+  /** constructor from description
    * \param report exception description
    */
-  SiconosException(const std::string& report);
+  SiconosException(const std::string& report): _reportMsg(report){};
 
   /** destructor
-  */
-  virtual ~SiconosException();
+   */
+  virtual ~SiconosException() = default;
 
   /** return the report of the exception
    * \return std::string report : exception description
@@ -62,12 +59,11 @@ public:
   } ;
 
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(SiconosException);
 
-  /** report message which describe the exception */
-  std::string _reportMsg;
+  /** report message used to describe the exception */
+  std::string _reportMsg = "Siconos Exception";
 };
 
 #endif //__SiconosException__

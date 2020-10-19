@@ -69,9 +69,6 @@ double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
   else
   {
     SiconosMatrixException::selfThrow("SimpleMatrix::op () (unsigned int row, unsigned int col): invalid type of matrix");
-    double *d = nullptr;
-    double & ref = *d;
-    return ref;
   }
 }
 

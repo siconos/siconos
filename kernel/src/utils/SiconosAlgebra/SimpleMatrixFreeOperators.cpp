@@ -36,7 +36,7 @@ const SimpleMatrix operator * (const SiconosMatrix & A, double a)
 {
   // To compute B = a * A
 
-  unsigned int numA = A.num();
+  Siconos::UBLAS_TYPE numA = A.num();
 
   if(numA == ZERO)  // if A = 0
   {
@@ -48,7 +48,7 @@ const SimpleMatrix operator * (const SiconosMatrix & A, double a)
   {
     return (DenseMat)(a**A.identity());
   }
-  else if(numA == 0)  // A block
+  else if(numA == Siconos::BLOCK)  // A block
   {
     SimpleMatrix tmp(A); // ... copy ...
     tmp *= a;
@@ -67,7 +67,6 @@ const SimpleMatrix operator * (const SiconosMatrix & A, double a)
   else
   {
     SiconosMatrixException::selfThrow("SimpleMatrix::op* (const SimpleMatrix): invalid type of matrix");
-    return 0;
   }
 }
 
@@ -75,7 +74,7 @@ SimpleMatrix operator * (double a, const SiconosMatrix & A)
 {
   // To compute B = a * A
 
-  unsigned int numA = A.num();
+  Siconos::UBLAS_TYPE numA = A.num();
 
   if(numA == ZERO)  // if A = 0
   {
@@ -108,7 +107,6 @@ SimpleMatrix operator * (double a, const SiconosMatrix & A)
   else
   {
     SiconosMatrixException::selfThrow("SimpleMatrix::op* (const SimpleMatrix): invalid type of matrix");
-    return 0;
   }
 }
 
@@ -119,7 +117,7 @@ const SimpleMatrix operator / (const SiconosMatrix & A, double a)
   if(a == 0.0)
     SiconosMatrixException::selfThrow(" Matrix, operator / , division by zero.");
 
-  unsigned int numA = A.num();
+  Siconos::UBLAS_TYPE numA = A.num();
 
   if(numA == ZERO)  // if A = 0
   {
@@ -150,7 +148,6 @@ const SimpleMatrix operator / (const SiconosMatrix & A, double a)
   else
   {
     SiconosMatrixException::selfThrow("SimpleMatrix::op / (const SimpleMatrix): invalid type of matrix");
-    return 0;
   }
 }
 
@@ -183,8 +180,8 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
   if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
     SiconosMatrixException::selfThrow("Matrix operator + : inconsistent sizes");
 
-  unsigned int numA = A.num();
-  unsigned int numB = B.num();
+  Siconos::UBLAS_TYPE numA = A.num();
+  Siconos::UBLAS_TYPE numB = B.num();
 
   // == A or B equal to null ==
   if(numA == ZERO)  // A = 0
@@ -350,7 +347,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
     return tmp;
   }
   SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
-  return 0;
+
 }
 
 const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
@@ -360,8 +357,8 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
   if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
     SiconosMatrixException::selfThrow("Matrix operator -  : inconsistent sizes");
 
-  unsigned int numA = A.num();
-  unsigned int numB = B.num();
+  Siconos::UBLAS_TYPE numA = A.num();
+  Siconos::UBLAS_TYPE numB = B.num();
 
 
   // == B equal to null ==
@@ -401,7 +398,6 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
     else
     {
       SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-      return 0;
     }
   }
   else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
@@ -423,7 +419,6 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else
       {
         SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-        return 0;
       }
     }
     else if(numA == TRIANGULAR)
@@ -443,7 +438,6 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else
       {
         SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-        return 0;
       }
     }
     else if(numA == SYMMETRIC)
@@ -463,7 +457,6 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else
       {
         SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-        return 0;
       }
     }
     else if(numA == SPARSE)
@@ -483,7 +476,6 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else
       {
         SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-        return 0;
       }
     }
 
@@ -504,7 +496,6 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else
       {
         SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-        return 0;
       }
     }
 
@@ -525,7 +516,6 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else
       {
         SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-        return 0;
       }
     }
     else if(numA == IDENTITY)
@@ -545,13 +535,11 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else
       {
         SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-        return 0;
       }
     }
     else
     {
       SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
-      return 0;
     }
   }
   else // A and/or B are/is Block
