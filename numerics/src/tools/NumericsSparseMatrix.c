@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
+#include "CSparseMatrix_internal.h"     // for CSparseMatrix, CS_INT, cs_dl_spfree
 #include "NumericsSparseMatrix.h"
 #include <assert.h>            // for assert
 #ifndef __cplusplus
@@ -23,7 +23,7 @@
 #endif
 #include <stdio.h>             // for NULL, size_t, printf, fprintf, fscanf
 #include <stdlib.h>            // for free, exit, malloc, realloc, EXIT_FAILURE
-#include "CSparseMatrix_internal.h"     // for CSparseMatrix, CS_INT, cs_dl_spfree
+
 #include "NumericsMatrix.h"    // for NumericsMatrix, NM_csc, numericsSparse...
 #include "SiconosConfig.h"     // for HAVE_SORT
 /* #define DEBUG_NOCOLOR */

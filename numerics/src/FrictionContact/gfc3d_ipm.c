@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 
-
+#include "CSparseMatrix_internal.h"
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
 #include "SiconosLapack.h"
+
 #include "SparseBlockMatrix.h"
 #include <stdio.h>
 #include <assert.h>
@@ -30,7 +31,7 @@
 #include "NumericsVector.h"
 #include "float.h"
 #include "JordanAlgebra.h"
-#include "CSparseMatrix_internal.h"
+
 #include "NumericsSparseMatrix.h"
 
 
