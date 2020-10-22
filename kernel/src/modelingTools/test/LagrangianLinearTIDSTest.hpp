@@ -20,7 +20,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianLinearTIDS.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 class LagrangianLinearTIDSTest : public CppUnit::TestFixture
 {

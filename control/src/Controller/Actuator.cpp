@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "Actuator.hpp"
 #include "ActuatorEvent.hpp"
 #include "ControlSensor.hpp"
@@ -55,7 +55,7 @@ void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation
 {
   if(!_sensor)
   {
-    RuntimeException::selfThrow("Actuator::initialize - No Sensor given to the Actuator");
+    THROW_EXCEPTION("Actuator::initialize - No Sensor given to the Actuator");
   }
 
   // Init the control variable and add the necessary properties
@@ -74,12 +74,12 @@ void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation
     }
     if(!_u)
     {
-      RuntimeException::selfThrow("Actuator::initialize - u should have already been initialized");
+      THROW_EXCEPTION("Actuator::initialize - u should have already been initialized");
     }
   }
   else
   {
-    RuntimeException::selfThrow("Actuator::initialize - neither the matrix B or the plugin g are not initialized");
+    THROW_EXCEPTION("Actuator::initialize - neither the matrix B or the plugin g are not initialized");
   }
 
   DSG0.u[dsgVD] = _u;

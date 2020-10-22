@@ -73,7 +73,7 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
   Type::Siconos dsType = Type::value(*ds);
 
   if((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
-    RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
+    THROW_EXCEPTION("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
   unsigned int indxIter = 0;
   DynamicalSystemsGraph::AVIterator avi, aviend;
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
@@ -84,7 +84,7 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
       DSG0.Ad.at(dsgVD)->integrate();
   }
   else
-    RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
+    THROW_EXCEPTION("ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
 
   if((static_cast<const FirstOrderLinearDS&>(*ds)).b())
   {
@@ -111,7 +111,7 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
       Interaction& inter = *DSG0.bundle(ed1);
       Relation& rel = *inter.relation();
       if(rel.getType() != RELATION::FirstOrder)
-        RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the Integrator can only deal with FirstOrder Relation");
+        THROW_EXCEPTION("ZeroOrderHoldOSI::initialize - the Integrator can only deal with FirstOrder Relation");
       FirstOrderR& relR = static_cast<FirstOrderR&>(rel);
 
       if(indxIter == 0)
@@ -130,7 +130,7 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
       }
       else
       {
-        //        RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - DS linked with more that one iteraction");
+        //        THROW_EXCEPTION("ZeroOrderHoldOSI::initialize - DS linked with more that one iteraction");
         DEBUG_PRINTF("number of iteraction attached to the process : %d\n", indxIter);
       }
     }
@@ -181,7 +181,7 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   /* allocate and set work vectors for the osi */
   if(!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
+    THROW_EXCEPTION("ZeroOrderHoldOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
   unsigned int xfree = ZeroOrderHoldOSI::xfree;
@@ -254,7 +254,7 @@ double ZeroOrderHoldOSI::computeResidu()
       // No residu with ZOH ...
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHoldOSI::computeResidu - not yet implemented for Dynamical system type: " + std::to_string(dsType));
+      THROW_EXCEPTION("ZeroOrderHoldOSI::computeResidu - not yet implemented for Dynamical system type: " + std::to_string(dsType));
   }
   DEBUG_END("double ZeroOrderHoldOSI::computeResidu()\n");
   return maxResidu;
@@ -315,7 +315,7 @@ void ZeroOrderHoldOSI::computeFreeState()
       DEBUG_EXPR(xfree.display(););
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
+      THROW_EXCEPTION("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
 
   }
   DEBUG_END("void ZeroOrderHoldOSI::computeFreeState()\n");
@@ -458,7 +458,7 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
 
       if(_useGammaForRelation)
       {
-        RuntimeException::selfThrow("ZeroOrderHoldOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+        THROW_EXCEPTION("ZeroOrderHoldOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
       }
 
       SiconosVector& hAlpha= *inter_work[ZeroOrderHoldOSI::H_ALPHA];
@@ -527,7 +527,7 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
 void ZeroOrderHoldOSI::integrate(double& tinit, double& tend, double& tout, int&)
 {
   // This function should not be used
-  RuntimeException::selfThrow("ZeroOrderHoldOSI::integrate - should not be used");
+  THROW_EXCEPTION("ZeroOrderHoldOSI::integrate - should not be used");
 }
 
 void ZeroOrderHoldOSI::updateState(const unsigned int level)
@@ -583,7 +583,7 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
       DEBUG_EXPR(ds->display(););
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHoldOSI::updateState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
+      THROW_EXCEPTION("ZeroOrderHoldOSI::updateState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
   }
   DEBUG_END("ZeroOrderHoldOSI::updateState(const unsigned int level)\n");
 }

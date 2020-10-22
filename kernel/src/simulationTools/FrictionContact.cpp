@@ -51,7 +51,7 @@ FrictionContact::FrictionContact(int dimPb, SP::SolverOptions options):
     _frictionContact_driver = &fc3d_driver;
   }
   else
-    RuntimeException::selfThrow("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
+    THROW_EXCEPTION("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
 
   _mu.reset(new MuStorage());
 }

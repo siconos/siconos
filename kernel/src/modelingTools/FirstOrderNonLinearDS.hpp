@@ -313,7 +313,6 @@ public:
   /** to set a specified function to compute M
    *  \param pluginPath the complete path to the plugin
    *  \param functionName function name to use in this library
-   *  \exception SiconosSharedLibraryException
    */
   void setComputeMFunction(const std::string& pluginPath, const std::string& functionName);
 
@@ -325,7 +324,6 @@ public:
   /** to set a specified function to compute f(x,t)
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the function name to use in this library
-   *  \exception SiconosSharedLibraryException
    */
   void setComputeFFunction(const std::string& pluginPath, const std::string& functionName);
 
@@ -337,7 +335,6 @@ public:
   /** to set a specified function to compute jacobianfx
    *  \param pluginPath the complete path to the plugin
    *  \param functionName function name to use in this library
-   *  \exception SiconosSharedLibraryException
    */
   void setComputeJacobianfxFunction(const std::string&  pluginPath, const std::string&  functionName);
 

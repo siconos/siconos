@@ -30,7 +30,7 @@ BoundaryCondition::BoundaryCondition(SP::UnsignedIntVector newVelocityIndices, S
 {
 
   if(newVelocityIndices->size() != newVelocityValues->size())
-    RuntimeException::selfThrow("BoundaryCondition::BoundaryCondition  constructor. velocityIndices and prescribedVelocity must have the same size");
+    THROW_EXCEPTION("BoundaryCondition::BoundaryCondition  constructor. velocityIndices and prescribedVelocity must have the same size");
   _prescribedVelocityOld.reset(new SiconosVector(*newVelocityValues));
   _pluginPrescribedVelocity.reset(new PluggedObject());
 }

@@ -314,7 +314,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 //   // A the time, a time stepping simulation can only have one non
 //   // smooth problem.
 //   if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY])
-//      RuntimeException::selfThrow
+//      THROW_EXCEPTION
 //        ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
 
 //   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
@@ -336,7 +336,7 @@ void TimeStepping::initOSNS()
     // built.
   {
     //if (_allNSProblems->size()>1)
-    //  RuntimeException::selfThrow("TimeStepping::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
+    //  THROW_EXCEPTION("TimeStepping::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
 
     // At the time, we consider that for all systems, levelMin is
     // equal to the minimum value of the relative degree - 1 except
@@ -352,7 +352,7 @@ void TimeStepping::initOSNS()
       if(*itOsns)
         (*itOsns)->initialize(shared_from_this());
       else
-        RuntimeException::selfThrow("TimeStepping::initOSNS failed. A OneStepNSProblem has not been set. ");
+        THROW_EXCEPTION("TimeStepping::initOSNS failed. A OneStepNSProblem has not been set. ");
     }
   }
 }
@@ -648,7 +648,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     displayNewtonConvergenceAtTheEnd(info, maxStep);
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + std::to_string(_newtonOptions));
+    THROW_EXCEPTION("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + std::to_string(_newtonOptions));
   DEBUG_END("TimeStepping::newtonSolve(double criterion, unsigned int maxStep)\n");
 }
 
@@ -755,26 +755,26 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
     std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
     //       std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
     //      std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
-    //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
+    //     THROW_EXCEPTION(" Non smooth problem, solver convergence failed ");
     /*      if(info == 1)
             std::cout <<" reach max iterations number with solver " << solverName <<std::endl;
             else if (info == 2)
             {
             if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
-            RuntimeException::selfThrow(" negative diagonal term with solver "+solverName);
+            THROW_EXCEPTION(" negative diagonal term with solver "+solverName);
             else if (solverName == "QP" || solverName == "NSQP" )
-            RuntimeException::selfThrow(" can not satisfy convergence criteria for solver "+solverName);
+            THROW_EXCEPTION(" can not satisfy convergence criteria for solver "+solverName);
             else if (solverName == "Latin")
-            RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
+            THROW_EXCEPTION(" Choleski factorisation failed with solver Latin");
             }
             else if (info == 3 && solverName == "CPG")
             std::cout << "pWp null in solver CPG" <<std::endl;
             else if (info == 3 && solverName == "Latin")
-            RuntimeException::selfThrow("Null diagonal term with solver Latin");
+            THROW_EXCEPTION("Null diagonal term with solver Latin");
             else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
-            RuntimeException::selfThrow("Length of working array insufficient in solver "+solverName);
+            THROW_EXCEPTION("Length of working array insufficient in solver "+solverName);
             else
-            RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
+            THROW_EXCEPTION("Unknown error type in solver "+ solverName);
     */
   }
 }

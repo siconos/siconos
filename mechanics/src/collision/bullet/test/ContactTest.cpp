@@ -372,9 +372,9 @@ void ContactTest::t1()
     fprintf(stderr, "Final position: %g  (std=%g)\n\n",
             r.final_position, r.final_position_std);
   }
-  catch(SiconosException e)
+  catch(...)
   {
-    std::cout << "SiconosException: " << e.report() << std::endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -431,9 +431,9 @@ void ContactTest::t2()
            results[1][1].final_position_std,
            results[1][2].final_position_std);
   }
-  catch(SiconosException e)
+  catch(...)
   {
-    std::cout << "SiconosException: " << e.report() << std::endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -483,9 +483,9 @@ void ContactTest::t3()
               results[i].final_position_std);
     }
   }
-  catch(SiconosException e)
+  catch(...)
   {
-    std::cout << "SiconosException: " << e.report() << std::endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -519,9 +519,9 @@ void ContactTest::t4()
     results = bounceTest("ch", "plane", params);
     success = true;
   }
-  catch(SiconosException e)
+  catch(...)
   {
-    std::cout << "SiconosException: " << e.report() << std::endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(1);
   }
 }

@@ -108,7 +108,7 @@ void LinearOSNS::initOSNSMatrix()
     }
     {
       default:
-        RuntimeException::selfThrow("LinearOSNS::initOSNSMatrix unknown _storageType");
+        THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
       }
     }
   }
@@ -342,7 +342,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         }
       }
     }
-    else RuntimeException::selfThrow("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + std::to_string(relationType));
+    else THROW_EXCEPTION("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + std::to_string(relationType));
     // Set pos for next loop.
     pos = pos2;
   }
@@ -550,7 +550,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
     }
   }
-  else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
+  else THROW_EXCEPTION("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
   DEBUG_END("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 }
 
@@ -660,7 +660,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 
   }
   else
-    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
+    THROW_EXCEPTION("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
   DEBUG_EXPR(_q->display());
   DEBUG_END("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
 }

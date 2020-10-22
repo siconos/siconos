@@ -25,6 +25,7 @@ set(PACKAGE_NAME siconos)
 
 # set path to siconos installation
 set_and_check(siconos_ROOT "@CMAKE_INSTALL_PREFIX@")
+set_and_check(siconos_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos")
 
 # set list of targets build by siconos project
 set(installed_targets "@installed_targets@")
@@ -66,6 +67,9 @@ if(@WITH_FCLIB@)
   find_dependency(FCLIB 3.0.0 CONFIG REQUIRED)
 endif()
 
+if(${mechanisms_installed})
+  set_and_check(siconos_mechanisms_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos_mechanisms")
+endif()
 
 # --- Final check to set (or not) siconos_FOUND, siconos_numerics_FOUND and so on
 check_required_components(siconos)

@@ -236,7 +236,6 @@ public:
   /** set a specified function to compute the matrix A => same action as setComputeJacobianfxFunction
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
    */
   void setComputeAFunction(const std::string& pluginPath, const std::string& functionName);
 
@@ -248,7 +247,6 @@ public:
   /** set a specified function to compute the vector b
    *  \param pluginPath the complete path to the plugin file
    *  \param functionName the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
    */
   void setComputebFunction(const std::string& pluginPath, const std::string& functionName);
 

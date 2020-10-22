@@ -17,7 +17,7 @@
 */
 #include "Event.hpp"
 #include "TimeDiscretisation.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include <cmath>
 #include <iostream>
 

@@ -203,15 +203,15 @@ void MoreauJeanGOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds
   // - update its content for the current (initial) state of the dynamical system, depending on its type.
 
   if(!ds)
-    RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixW(t, ds, dsv) - ds == nullptr or dsv == nullptr");
+    THROW_EXCEPTION("MoreauJeanGOSI::initializeIterationMatrixW(t, ds, dsv) - ds == nullptr or dsv == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
+    THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
 
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
 
   if(_dynamicalSystemsGraph->properties(dsv).W)
-    RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
+    THROW_EXCEPTION("MoreauJeanGOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
 
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
@@ -267,7 +267,7 @@ void MoreauJeanGOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds
       initializeIterationMatrixWBoundaryConditions(d);
 
   }
-  else RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixW - not yet implemented for Dynamical system of type : " + Type::name(*ds));
+  else THROW_EXCEPTION("MoreauJeanGOSI::initializeIterationMatrixW - not yet implemented for Dynamical system of type : " + Type::name(*ds));
 
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
@@ -285,10 +285,10 @@ void MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalS
 
   DEBUG_PRINT("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds) starts\n");
   if(!ds)
-    RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == nullptr");
+    THROW_EXCEPTION("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
+    THROW_EXCEPTION("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
   unsigned int dsN = ds->number();
@@ -296,7 +296,7 @@ void MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalS
   if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::NewtonEulerDS)
   {
     if(_WBoundaryConditionsMap.find(dsN) != _WBoundaryConditionsMap.end())
-      RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
+      THROW_EXCEPTION("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
     // Memory allocation for WBoundaryConditions
     unsigned int sizeWBoundaryConditions = ds->dimension(); // n for first order systems, ndof for lagrangian.
@@ -317,7 +317,7 @@ void MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalS
     computeWBoundaryConditions(ds);
   }
   else
-    RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
+    THROW_EXCEPTION("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
   DEBUG_PRINT("MoreauJeanGOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds) ends \n");
 }
 
@@ -385,7 +385,7 @@ void MoreauJeanGOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
     DEBUG_EXPR(W->display());
   }
   else
-    RuntimeException::selfThrow("MoreauJeanGOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type : " +  Type::name(*ds));
+    THROW_EXCEPTION("MoreauJeanGOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type : " +  Type::name(*ds));
 }
 
 
@@ -457,7 +457,7 @@ void MoreauJeanGOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W
       //*W -= h*h*_theta*_theta**K;
     }
   }
-  else RuntimeException::selfThrow("MoreauJeanGOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(*ds));
+  else THROW_EXCEPTION("MoreauJeanGOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(*ds));
   DEBUG_PRINT("MoreauJeanGOSI::computeW ends\n");
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
@@ -606,7 +606,7 @@ double MoreauJeanGOSI::computeResidu()
 
       if(d->boundaryConditions())
       {
-        RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
+        THROW_EXCEPTION("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
 
@@ -678,7 +678,7 @@ double MoreauJeanGOSI::computeResidu()
 
       if(d->boundaryConditions())
       {
-        RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
+        THROW_EXCEPTION("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
       // residu = -1.0*free_rhs;
@@ -760,7 +760,7 @@ double MoreauJeanGOSI::computeResidu()
 
       if(d->boundaryConditions())
       {
-        RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
+        THROW_EXCEPTION("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
       residu =  -1.0* free_rhs;
@@ -774,7 +774,7 @@ double MoreauJeanGOSI::computeResidu()
 
       if(d->boundaryConditions())
       {
-        RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
+        THROW_EXCEPTION("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
       DEBUG_PRINT("MoreauJeanGOSI::computeResidu :\n");
@@ -786,7 +786,7 @@ double MoreauJeanGOSI::computeResidu()
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
     }
     else
-      RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - not yet implemented for Dynamical system of type: " + Type::name(*ds));
+      THROW_EXCEPTION("MoreauJeanGOSI::computeResidu - not yet implemented for Dynamical system of type: " + Type::name(*ds));
 
     if(normResidu > maxResidu) maxResidu = normResidu;
 
@@ -1040,7 +1040,7 @@ void MoreauJeanGOSI::updateState(const unsigned int)
       DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int ), dsType == Type::NewtonEulerDS \n");
       updatePosition(ds);
     }
-    else RuntimeException::selfThrow("MoreauJeanGOSI::updateState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
+    else THROW_EXCEPTION("MoreauJeanGOSI::updateState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
   }
 }

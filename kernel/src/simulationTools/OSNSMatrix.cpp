@@ -316,7 +316,7 @@ void OSNSMatrix::convert()
   }
   default:
   {
-    RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
   DEBUG_END("OSNSMatrix::convert()\n");
@@ -372,11 +372,10 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
   }
   default:
   {
-    RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
-  }
     // invalidate other old storages.
-  NM_clear_other_storages(_numericsMatrix.get(), _storageType);
-
+    NM_clear_other_storages(_numericsMatrix.get(), _storageType);
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
+  }
   }
 
 
@@ -448,7 +447,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
   }
   default:
   {
-    RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
   DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");

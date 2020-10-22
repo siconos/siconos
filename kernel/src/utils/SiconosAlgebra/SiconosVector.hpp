@@ -24,7 +24,7 @@
 
 #include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosVectorFriends.hpp"
-#include "SiconosVectorException.hpp"
+#include "SiconosSerialization.hpp" // For ACCEPT_SERIALIZATION
 
 struct SiconosVectorIterator;
 struct SiconosVectorConstIterator;
@@ -131,10 +131,10 @@ public:
   /** Get the type number of the current vector.
    * \return an unsigned int
    */
-  unsigned int num() const
+  Siconos::UBLAS_TYPE num() const
   {
-    if (_dense) return 1;
-    else return 4;
+    if (_dense) return Siconos::DENSE;
+    else return Siconos::SPARSE;
   }
 
   /** get a pointer to the ublas embedded vector if it's type is Dense

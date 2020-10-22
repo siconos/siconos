@@ -63,7 +63,7 @@ public:
     fPtr = (void *)&SubPluggedObject::computeAndExtract;
     _parentfPtr = PO.fPtr;
 #else
-    RuntimeException::selfThrow("SubPluggedObject must be compiled with GCC !");
+    THROW_EXCEPTION("SubPluggedObject must be compiled with GCC !");
 #endif
   };
 

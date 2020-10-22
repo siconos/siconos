@@ -26,7 +26,6 @@ set(${COMPONENT}_DIRS
   src/.
   src/utils
   src/utils/SiconosAlgebra
-  src/utils/SiconosException
   src/utils/SiconosMemory
   src/utils/SiconosSharedLibrary
   src/utils/SiconosTools

@@ -175,17 +175,22 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None,
     if not debug:
         os.remove(tfilename)
 
+time_measure = time.perf_counter
+if (sys.version_info.major+0.1*sys.version_info.minor < 3.3):
+    time_measure= time.clock
+
+
 
 class Timer():
 
     def __init__(self):
-        self._t0 = time.clock()
+        self._t0 = time_measure()
 
     def elapsed(self):
-        return time.clock() - self._t0
+        return time_measure() - self._t0
 
     def update(self):
-        self._t0 = time.clock()
+        self._t0 = time_measure()
 
 
 def warn(msg):

@@ -64,7 +64,7 @@ void ControlLinearAdditionalTermsED::addSmoothTerms(DynamicalSystemsGraph& DSG0,
     }
     else
     {
-      RuntimeException::selfThrow("ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
+      THROW_EXCEPTION("ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
     }
   }
   // check whether the DynamicalSystem is an Observer
@@ -88,6 +88,6 @@ void ControlLinearAdditionalTermsED::addJacobianRhsContribution(DynamicalSystems
   }
   else
   {
-    RuntimeException::selfThrow("ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
+    THROW_EXCEPTION("ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
   }
 }

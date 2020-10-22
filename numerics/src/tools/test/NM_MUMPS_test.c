@@ -67,7 +67,8 @@ int main(int argc, char *argv[])
     b[2] = 1.;
     b[3] = 0.;
 
-    NM_MUMPS_set_problem(M, 2, b);
+    NM_MUMPS_set_matrix(M);
+    NM_MUMPS_set_dense_rhs(M, 2, b);
     NM_MUMPS(M, 6);
     NM_MUMPS(M, -2);
     NM_MUMPS(M, 0);
@@ -134,7 +135,8 @@ int main(int argc, char *argv[])
     b[4] = 0.;
     b[5] = 1.;
 
-    NM_MUMPS_set_problem(M, 2, b);
+    NM_MUMPS_set_matrix(M);
+    NM_MUMPS_set_dense_rhs(M, 2, b);
     NM_MUMPS(M, 6);
     NM_MUMPS(M, -2);
     NM_MUMPS(M, 0);
