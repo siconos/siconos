@@ -29,6 +29,7 @@
 #include <exception>
 #include <boost/throw_exception.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <cstring>
 #include <iostream>
 #include <errno.h>
 
