@@ -51,7 +51,7 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSyst
   // Check consistency between OSI type and DS type
   Type::Siconos dsType = Type::value(*ds);
   if(dsType != Type::LagrangianLinearDiagonalDS)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeWorkVectorsForDS - not yet implemented for Dynamical system of type : " + Type::name(*ds));
+    THROW_EXCEPTION("MoreauJeanBilbaoOSI::initializeWorkVectorsForDS - not yet implemented for Dynamical system of type : " + Type::name(*ds));
 
   // Prepare work buffers
   work_ds.resize(MoreauJeanBilbaoOSI::WORK_LENGTH);
@@ -100,7 +100,7 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
   inter_work[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   if(relationType != Lagrangian || relationSubType != LinearTIR)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
+    THROW_EXCEPTION("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
 
   // // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -159,12 +159,12 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
 
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   if(_dynamicalSystemsGraph->properties(dsv).W)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::_initialize_iteration_matrix(ds) - W has already been initialized by another osi");
+    THROW_EXCEPTION("MoreauJeanBilbaoOSI::_initialize_iteration_matrix(ds) - W has already been initialized by another osi");
 
   VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   Type::Siconos dsType = Type::value(*ds);
   if(dsType != Type::LagrangianLinearDiagonalDS)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initialize_iteration_matrix - not yet implemented for Dynamical system of type : " + Type::name(*ds));
+    THROW_EXCEPTION("MoreauJeanBilbaoOSI::initialize_iteration_matrix - not yet implemented for Dynamical system of type : " + Type::name(*ds));
   LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&>(*ds);
   unsigned int ndof = lldds.dimension();
   // Allocate work buffers for:
@@ -302,7 +302,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
   // RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
   // check relation type: done in initializeWorkVectorsForInteraction.
   // if(relationType != Lagrangian || relationSubType != LinearR)
-  //   RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
+  //   THROW_EXCEPTION("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
 
   unsigned int sizeY = inter.nonSmoothLaw()->size();
   unsigned int relativePosition = 0;
@@ -334,7 +334,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
 
 void MoreauJeanBilbaoOSI::integrate(double& tinit, double& tend, double& tout, int& notUsed)
 {
-  RuntimeException::selfThrow("MoreauJeanBilbaoOSI::integrate - Not yet implemented for MoreauJeanBilbaoOSI.");
+  THROW_EXCEPTION("MoreauJeanBilbaoOSI::integrate - Not yet implemented for MoreauJeanBilbaoOSI.");
 }
 
 void MoreauJeanBilbaoOSI::updatePosition(DynamicalSystem& ds)

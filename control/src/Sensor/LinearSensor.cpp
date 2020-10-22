@@ -42,7 +42,7 @@ void LinearSensor::initialize(const NonSmoothDynamicalSystem& nsds)
   // consistency checks
   if(!_matC)
   {
-    RuntimeException::selfThrow("LinearSensor::initialize - no C matrix was given");
+    THROW_EXCEPTION("LinearSensor::initialize - no C matrix was given");
   }
 
   unsigned int colC = _matC->size(1);
@@ -52,14 +52,14 @@ void LinearSensor::initialize(const NonSmoothDynamicalSystem& nsds)
   //  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
   if(colC != _DS->n())
   {
-    RuntimeException::selfThrow(" LinearSensor::initialize - The number of column of the C matrix must be equal to the length of x");
+    THROW_EXCEPTION(" LinearSensor::initialize - The number of column of the C matrix must be equal to the length of x");
   }
   if(_matD)
   {
     unsigned int rowD = _matD->size(0);
     if(rowC != rowD)
     {
-      RuntimeException::selfThrow("C and D must have the same number of rows");
+      THROW_EXCEPTION("C and D must have the same number of rows");
     }
   }
 

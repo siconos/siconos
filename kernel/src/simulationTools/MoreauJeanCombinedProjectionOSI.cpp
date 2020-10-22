@@ -64,7 +64,7 @@ void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForDS(double t, SP::D
   }
   else
   {
-    RuntimeException::selfThrow("MoreauJeanCombinedProjectionOSI::initialize() - DS not of the right type");
+    THROW_EXCEPTION("MoreauJeanCombinedProjectionOSI::initialize() - DS not of the right type");
   }
   for(unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
   {

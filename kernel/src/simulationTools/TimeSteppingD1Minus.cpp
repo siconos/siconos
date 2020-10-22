@@ -55,7 +55,7 @@ void TimeSteppingD1Minus::initOSNS()
   if(!_allNSProblems->empty())
   {
     if(_allNSProblems->size() != 2)
-      RuntimeException::selfThrow("TimeSteppingD1Minus::initOSNS, TimeSteppingD1Minus simulation must have two OneStepNonsmoothProblems.");
+      THROW_EXCEPTION("TimeSteppingD1Minus::initOSNS, TimeSteppingD1Minus simulation must have two OneStepNonsmoothProblems.");
 
     //update all index sets
     updateIndexSets();
@@ -287,7 +287,7 @@ void TimeSteppingD1Minus::updateInput(unsigned int level)
 //   //   {
 //   //     Type::Siconos dsType = Type::value(**itDS);
 //   //     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-//   //       RuntimeException::selfThrow("TimeSteppingD1Minus::updateInput - not implemented for Dynamical system type: " + dsType);
+//   //       THROW_EXCEPTION("TimeSteppingD1Minus::updateInput - not implemented for Dynamical system type: " + dsType);
 //   //     else
 //   //     {
 //   //       SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (*itDS);

@@ -27,7 +27,7 @@
 #include "SiconosFwd.hpp"
 
 #include "SSLH.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"

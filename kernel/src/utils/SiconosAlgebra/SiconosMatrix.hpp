@@ -27,10 +27,8 @@
 #include <stddef.h>                    // for size_t
 #include <iosfwd>                      // for ostream
 #include "CSparseMatrix.h"             // for CSparseMatrix
-#include "RuntimeException.hpp"        // for RuntimeException
 #include "SiconosAlgebraTypeDef.hpp"   // for DenseMat, BandedMat, IdentityMat
 #include "SiconosFwd.hpp"              // for SiconosMatrix
-#include "SiconosMatrixException.hpp"  // for SiconosMatrixException
 #include "SiconosSerialization.hpp"    // for ACCEPT_SERIALIZATION
 #include "SiconosVisitor.hpp"          // for VIRTUAL_ACCEPT_VISITORS
 class BlockVector;
@@ -452,8 +450,7 @@ public:
    */
   virtual SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
   {
-    RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
-    return SP::SiconosMatrix();
+    THROW_EXCEPTION("must be implemented");
   };
 
 
@@ -464,8 +461,7 @@ public:
    */
   virtual SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
   {
-    RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
-    return SPC::SiconosMatrix();
+    THROW_EXCEPTION("must be implemented");
   };
 
   /** get row index of current matrix and save it into vOut
@@ -593,7 +589,7 @@ public:
   */
   virtual void resetLU()
   {
-    SiconosMatrixException::selfThrow(" SiconosMatrix::resetLU not yet implemented for BlockMatrix.");
+    THROW_EXCEPTION(" SiconosMatrix::resetLU not yet implemented for BlockMatrix.");
   };
 
   /** set to false all factorization indicators. Useful in case of
@@ -601,7 +597,7 @@ public:
   */
   virtual void resetFactorizationFlags()
   {
-    SiconosMatrixException::selfThrow(" SiconosMatrix::resetFactorizationFlags not yet implemented for BlockMatrix.");
+    THROW_EXCEPTION(" SiconosMatrix::resetFactorizationFlags not yet implemented for BlockMatrix.");
   };
 
   /** return the number of non-zero in the matrix

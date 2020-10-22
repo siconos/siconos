@@ -25,7 +25,7 @@
 #include "SimpleMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
-#include "myexception.hpp"
+#include "SiconosException.hpp"
 
 void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init)
 {
@@ -71,17 +71,17 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(1) != x.size())
-    SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
+    THROW_EXCEPTION("inconsistent sizes between A and x.")
 
   if(A.size(0) != y.size())
-    SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
+    THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   Siconos::UBLAS_TYPE numA = A.num();
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
+  Siconos::UBLAS_TYPE numX = x.num();
+  Siconos::UBLAS_TYPE numY = y.num();
 
-  if(numA == 0)  // If A is Block
-    SiconosMatrixException::selfThrow("prod(A,x,y) error: not yet implemented for block matrices.");
+  if(numA == Siconos::BLOCK)
+    THROW_EXCEPTION("not yet implemented for block matrices.");
 
   if(numA == Siconos::ZERO)
   {
@@ -112,7 +112,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         if(numX == Siconos::DENSE)
         {
           if(numY != Siconos::DENSE)
-            SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+            THROW_EXCEPTION("y (output) must be a dense vector.");
 
           assert(y.dense() != x.dense());
 
@@ -130,7 +130,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         else //if(numX == Siconos::SPARSE)
         {
           if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
-            SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+            THROW_EXCEPTION(" y (output) must be a dense vector or A a sparse matrix.");
 
           if(numA == Siconos::DENSE)
             noalias(*y.dense()) = ublas::prod(*A.dense(), *x.sparse());
@@ -186,7 +186,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         if(numX == Siconos::DENSE)
         {
           if(numY != Siconos::DENSE)
-            SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+            THROW_EXCEPTION("y (output) must be a dense vector.");
 
           if(numA == Siconos::DENSE)
             noalias(*y.dense()) += ublas::prod(*A.dense(), *x.dense());
@@ -202,7 +202,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         else //if(numX == Siconos::SPARSE)
         {
           if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
-            SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+            THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
 
           if(numA == Siconos::DENSE)
             noalias(*y.dense()) += ublas::prod(*A.dense(), *x.sparse());
@@ -261,17 +261,17 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(0) != x.size())
-    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and x.");
+    THROW_EXCEPTION("inconsistent sizes between A and x.");
 
   if(A.size(1) != y.size())
-    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and y.");
+    THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   Siconos::UBLAS_TYPE numA = A.num();
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
+  Siconos::UBLAS_TYPE numX = x.num();
+  Siconos::UBLAS_TYPE numY = y.num();
 
-  if(numA == 0)  // If A is Block
-    SiconosMatrixException::selfThrow("prod(x,A,y) error: not yet implemented for block matrices.");
+  if(numA == Siconos::BLOCK)
+    THROW_EXCEPTION("not yet implemented for block matrices.");
 
   if(numA == Siconos::ZERO)  // A = 0
   {
@@ -302,7 +302,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
           if(numX == Siconos::DENSE)
           {
             if(numY != Siconos::DENSE)
-              SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+              THROW_EXCEPTION("y (output) must be a dense vector.");
 
             if(numA == Siconos::DENSE)
               noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.dense());
@@ -318,8 +318,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
           else //if(numX == Siconos::SPARSE)
           {
             if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
-              SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
-
+              THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
             if(numA == Siconos::DENSE)
               noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.sparse());
             else if(numA == Siconos::TRIANGULAR)
@@ -375,7 +374,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
           if(numX == Siconos::DENSE)
           {
             if(numY != Siconos::DENSE)
-              SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+              THROW_EXCEPTION("y (output) must be a dense vector.");
 
             if(numA == Siconos::DENSE)
               noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.dense());
@@ -391,7 +390,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
           else //if(numX == Siconos::SPARSE)
           {
             if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
-              SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+              THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
 
             if(numA == Siconos::DENSE)
               noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.sparse());
@@ -449,10 +448,10 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool i
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(0) != x.size())
-    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and x.");
+    THROW_EXCEPTION("inconsistent sizes between A and x.");
 
   if(A.size(1) != y.size())
-    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and y.");
+    THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   unsigned int pos = 0;
   VectorOfVectors::const_iterator it;
@@ -474,14 +473,13 @@ SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(1) != x.size())
-    SiconosMatrixException::selfThrow("prod(matrix,vector) error: inconsistent sizes.");
+    THROW_EXCEPTION("inconsistent sizes between A and x.");
 
   Siconos::UBLAS_TYPE numA = A.num();
-  unsigned int numX = x.num();
+  Siconos::UBLAS_TYPE numX = x.num();
 
   if(numA == Siconos::BLOCK)  // if A is block ...
     THROW_EXCEPTION("Not implemented for block matrices.");
-  //SiconosMatrixException::selfThrow("prod(matrix,vector) error: not yet implemented for block matrix.");
 
   if(numA == Siconos::ZERO)  // A = 0
     return (DenseVect)(ublas::zero_vector<double>(x.size()));
@@ -547,22 +545,22 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
     C.resetFactorizationFlags();
 
   if((A.size(1) != B.size(0)))
-    SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
+    THROW_EXCEPTION("inconsistent sizes between A and B");
 
   if(A.size(0) != C.size(0) || B.size(1) != C.size(1))
-    SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
+    THROW_EXCEPTION("inconsistent sizes between A and C or B and C.");
 
   Siconos::UBLAS_TYPE numA = A.num();
   Siconos::UBLAS_TYPE numB = B.num();
   Siconos::UBLAS_TYPE numC = C.num();
 
   // == TODO: implement block product ==
-  if(numA == 0 || numB == 0)
-    SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): not yet implemented for BlockMatrix objects.");
+  if(numA == Siconos::BLOCK || numB == Siconos::BLOCK)
+    THROW_EXCEPTION("not yet implemented for block matrices");
 
   // === if C is zero or identity => read-only ===
   if(numC == Siconos::ZERO || numC == Siconos::IDENTITY)
-    SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
+    THROW_EXCEPTION("wrong type for resulting matrix C (read-only: zero or identity).");
 
 
   if(numA == Siconos::IDENTITY)  // A = identity ...
@@ -593,7 +591,7 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       C.zero();
     //else nothing
   }
-  else if(numC == 0)  // if C is Block - Temp. solution
+  else if(numC == Siconos::BLOCK)  // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     prod(A, B, tmp, init);
@@ -624,21 +622,21 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
           break;
         case Siconos::TRIANGULAR:
           if(numB != Siconos::TRIANGULAR)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.triang() = prod(*A.triang(), *B.triang());
           break;
         case Siconos::SYMMETRIC:
           if(numB != Siconos::SYMMETRIC)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.sym() = prod(*A.sym(), *B.sym());
           break;
         case Siconos::SPARSE:
           if(numB != Siconos::SPARSE)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.sparse() = prod(*A.sparse(), *B.sparse());
           break;
         default:
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          THROW_EXCEPTION("not implemented for A type.");
         }
       }
       else if(&C == &B)
@@ -659,21 +657,21 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
           break;
         case Siconos::TRIANGULAR:
           if(numA != Siconos::TRIANGULAR)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.triang() = prod(*A.triang(), *B.triang());
           break;
         case Siconos::SYMMETRIC:
           if(numA != Siconos::SYMMETRIC)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.sym() = prod(*A.sym(), *B.sym());
           break;
         case Siconos::SPARSE:
           if(numA != Siconos::SPARSE)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.sparse() = prod(*A.sparse(), *B.sparse());
           break;
         default:
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          THROW_EXCEPTION("not implemented for B type.");
         }
       }
       else // if no alias between C and A or B.
@@ -749,21 +747,21 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
           break;
         case Siconos::TRIANGULAR:
           if(numA != Siconos::TRIANGULAR || numB != Siconos::TRIANGULAR)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.triang()) = prod(*A.triang(), *B.triang());
           break;
         case Siconos::SYMMETRIC:
           if(numA != Siconos::SYMMETRIC || numB != Siconos::SYMMETRIC)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.sym()) = prod(*A.sym(), *B.sym());
           break;
         case Siconos::SPARSE:
           if(numA != Siconos::SPARSE || numB != Siconos::SPARSE)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.sparse()) = prod(*A.sparse(), *B.sparse());
           break;
         default:
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          THROW_EXCEPTION("not implemented for C type.");
         }
       }
     }
@@ -787,21 +785,21 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
           break;
         case Siconos::TRIANGULAR:
           if(numB != Siconos::TRIANGULAR)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.triang() += prod(*A.triang(), *B.triang());
           break;
         case Siconos::SYMMETRIC:
           if(numB != Siconos::SYMMETRIC)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.sym() += prod(*A.sym(), *B.sym());
           break;
         case Siconos::SPARSE:
           if(numB != Siconos::SPARSE)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.sparse() += prod(*A.sparse(), *B.sparse());
           break;
         default:
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          THROW_EXCEPTION("not implemented for A type.");
         }
       }
       else if(&C == &B)
@@ -822,21 +820,21 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
           break;
         case Siconos::TRIANGULAR:
           if(numA != Siconos::TRIANGULAR)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.triang() += prod(*A.triang(), *B.triang());
           break;
         case Siconos::SYMMETRIC:
           if(numA != Siconos::SYMMETRIC)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.sym() += prod(*A.sym(), *B.sym());
           break;
         case Siconos::SPARSE:
           if(numA != Siconos::SPARSE)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.sparse() += prod(*A.sparse(), *B.sparse());
           break;
         default:
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("not yet implemented for A type.");
         }
       }
       else // if no alias between C and A or B.
@@ -912,21 +910,21 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
           break;
         case Siconos::TRIANGULAR:
           if(numA != Siconos::TRIANGULAR || numB != Siconos::TRIANGULAR)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.triang()) += prod(*A.triang(), *B.triang());
           break;
         case Siconos::SYMMETRIC:
           if(numA != Siconos::SYMMETRIC || numB != Siconos::SYMMETRIC)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.sym()) += prod(*A.sym(), *B.sym());
           break;
         case Siconos::SPARSE:
           if(numA != Siconos::SPARSE || numB != Siconos::SPARSE)
-            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.sparse()) += prod(*A.sparse(), *B.sparse());
           break;
         default:
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+            THROW_EXCEPTION("not implemented for C type).");
         }
       }
     }
@@ -942,17 +940,17 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(1) != x.size())
-    SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
+    THROW_EXCEPTION("inconsistent sizes between A and x.");
 
   if(A.size(0) != y.size())
-    SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
+    THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   Siconos::UBLAS_TYPE numA = A.num();
-  unsigned int numX = x.num();
-  unsigned int numY = y.num();
+  Siconos::UBLAS_TYPE numX = x.num();
+  Siconos::UBLAS_TYPE numY = y.num();
 
-  if(numA == 0)  // If A is Block
-    SiconosMatrixException::selfThrow("prod(A,x,y) error: not yet implemented for block matrices.");
+  if(numA == Siconos::BLOCK)  // If A is Block
+    THROW_EXCEPTION("not yet implemented for block matrices.");
 
   if(numA == Siconos::ZERO)  // A = 0
   {
@@ -979,7 +977,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
             if(numX == Siconos::DENSE)
             {
               if(numY != Siconos::DENSE)
-                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+                THROW_EXCEPTION("y (output) must be a dense vector.");
 
               if(numA == Siconos::DENSE)
                 noalias(*y.dense()) = a * ublas::prod(*A.dense(), *x.dense());
@@ -995,7 +993,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
             else //if(numX == Siconos::SPARSE)
             {
               if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
-                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+               THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
 
               if(numA == Siconos::DENSE)
                 noalias(*y.dense()) = a * ublas::prod(*A.dense(), *x.sparse());
@@ -1051,7 +1049,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
             if(numX == Siconos::DENSE)
             {
               if(numY != Siconos::DENSE)
-                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+               THROW_EXCEPTION("y (output) must be a dense vector.");
 
               if(numA == Siconos::DENSE)
                 noalias(*y.dense()) += a * ublas::prod(*A.dense(), *x.dense());
@@ -1067,7 +1065,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
             else //if(numX == Siconos::SPARSE)
             {
               if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
-                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+                THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
 
               if(numA == Siconos::DENSE)
                 noalias(*y.dense()) += a * ublas::prod(*A.dense(), *x.sparse());
@@ -1129,18 +1127,18 @@ void taxpy(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, un
     y->zero();
 
   if(A->isBlock())
-    SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for block matrix.");
+    THROW_EXCEPTION("not yet implemented for block matrix.");
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
   // Then computation of y = subA*x + y.
   Siconos::UBLAS_TYPE numA = A->num();
-  unsigned int numY = y->num();
-  unsigned int numX = x->num();
+  Siconos::UBLAS_TYPE numY = y->num();
+  Siconos::UBLAS_TYPE numX = x->num();
   unsigned int sizeX = x->size();
   unsigned int sizeY = y->size();
 
   if(numX != numY)
-    SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for x and y of different types.");
+    THROW_EXCEPTION("not yet implemented for x and y of different types.");
 
   if(numY == Siconos::DENSE && numX == Siconos::DENSE)
   {
@@ -1163,7 +1161,7 @@ void taxpy(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, un
     if(numA == Siconos::SPARSE)
       *y->sparse() += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
     else
-      SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for x, y  sparse and A not sparse.");
+      THROW_EXCEPTION("not yet implemented for x, y  sparse and A not sparse.");
   }
 }
 

@@ -161,7 +161,7 @@ void BlockCSRMatrix::fillM(InteractionsGraph& indexSet)
   {
     if(Type::value(*indexSet.bundle(*ei)) != Type::NewtonEulerDS)
     {
-      RuntimeException::selfThrow("BlockCSRMatrix::fillM only for Newton EulerDS");
+      THROW_EXCEPTION("BlockCSRMatrix::fillM only for Newton EulerDS");
     }
 
     _nr = 0;
@@ -207,7 +207,7 @@ void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
       {
         if(Type::value(*indexSet.bundle(*ei)) != Type::NewtonEulerDS)
         {
-          RuntimeException::selfThrow("BlockCSRMatrix::fillH only for Newton EulerDS");
+          THROW_EXCEPTION("BlockCSRMatrix::fillH only for Newton EulerDS");
         }
         involvedDS[indexSet.bundle(*ei)] = index;
       }

@@ -22,6 +22,7 @@
 
 #include "SiconosAlgebra.hpp"
 #include "SimpleMatrixFriends.hpp" // for operators
+#include "SiconosException.hpp"
 using namespace Siconos;
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -66,7 +67,7 @@ const SimpleMatrix operator * (const SiconosMatrix & A, double a)
     return (BandedMat)(a ** A.banded());
   else
   {
-    SiconosMatrixException::selfThrow("SimpleMatrix::op* (const SimpleMatrix): invalid type of matrix");
+    THROW_EXCEPTION("invalid type of matrix");
   }
 }
 
@@ -106,7 +107,7 @@ SimpleMatrix operator * (double a, const SiconosMatrix & A)
     return (BandedMat)(a ** A.banded());
   else
   {
-    SiconosMatrixException::selfThrow("SimpleMatrix::op* (const SimpleMatrix): invalid type of matrix");
+    THROW_EXCEPTION("invalid type of matrix");
   }
 }
 
@@ -115,7 +116,7 @@ const SimpleMatrix operator / (const SiconosMatrix & A, double a)
   // To compute B = A/a
 
   if(a == 0.0)
-    SiconosMatrixException::selfThrow(" Matrix, operator / , division by zero.");
+     THROW_EXCEPTION("division by zero.");
 
   Siconos::UBLAS_TYPE numA = A.num();
 
@@ -147,7 +148,7 @@ const SimpleMatrix operator / (const SiconosMatrix & A, double a)
     return (BandedMat)(*A.banded() / a);
   else
   {
-    SiconosMatrixException::selfThrow("SimpleMatrix::op / (const SimpleMatrix): invalid type of matrix");
+     THROW_EXCEPTION("invalid type of matrix");
   }
 }
 
@@ -178,7 +179,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
   // To compute C = A + B
 
   if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
-    SiconosMatrixException::selfThrow("Matrix operator + : inconsistent sizes");
+     THROW_EXCEPTION("inconsistent sizes");
 
   Siconos::UBLAS_TYPE numA = A.num();
   Siconos::UBLAS_TYPE numB = B.num();
@@ -225,7 +226,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
       return tmp;
     }
     else
-      SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
+       THROW_EXCEPTION("invalid type of matrix");
   }
   else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
   {
@@ -244,7 +245,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else if(numB == IDENTITY)
         return (DenseMat)(*A.dense() + *B.identity());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
     }
     else if(numA == TRIANGULAR)
     {
@@ -261,7 +262,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else if(numB == IDENTITY)
         return (DenseMat)(*A.triang() + *B.identity());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
     }
     else if(numA == SYMMETRIC)
     {
@@ -278,7 +279,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else if(numB == IDENTITY)
         return (DenseMat)(*A.sym() + *B.identity());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
     }
     else if(numA == SPARSE)
     {
@@ -293,7 +294,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
       else if(numB ==IDENTITY)
         return (DenseMat)(*A.sparse() + *B.identity());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
     }
 
     else if(numA == BANDED)
@@ -312,7 +313,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.banded() + *B.identity());
       else
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
       }
     }
 
@@ -332,7 +333,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.identity() + *B.banded());
     }
     else
-      SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
+       THROW_EXCEPTION("invalid type of matrix");
   }
   else if(numB != 0)  // B Simple, whatever is A
   {
@@ -346,7 +347,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
     tmp += B;
     return tmp;
   }
-  SiconosMatrixException::selfThrow("SimpleMatrix::op + (const SimpleMatrix): invalid type of matrix");
+   THROW_EXCEPTION("invalid type of matrix");
 
 }
 
@@ -355,7 +356,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
   // To compute C = A - B
 
   if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
-    SiconosMatrixException::selfThrow("Matrix operator -  : inconsistent sizes");
+     THROW_EXCEPTION("inconsistent sizes");
 
   Siconos::UBLAS_TYPE numA = A.num();
   Siconos::UBLAS_TYPE numB = B.num();
@@ -397,7 +398,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
     }
     else
     {
-      SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+       THROW_EXCEPTION("invalid type of matrix");
     }
   }
   else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
@@ -418,7 +419,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.dense() - *B.identity());
       else
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
       }
     }
     else if(numA == TRIANGULAR)
@@ -437,7 +438,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.triang() - *B.identity());
       else
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
       }
     }
     else if(numA == SYMMETRIC)
@@ -456,7 +457,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.sym() - *B.identity());
       else
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
       }
     }
     else if(numA == SPARSE)
@@ -475,7 +476,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.sparse() - *B.identity());
       else
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
       }
     }
 
@@ -495,7 +496,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.banded() - *B.identity());
       else
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
       }
     }
 
@@ -515,7 +516,7 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.zero_mat() - *B.identity());
       else
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
       }
     }
     else if(numA == IDENTITY)
@@ -534,12 +535,12 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
         return (DenseMat)(*A.identity() - *B.banded());
       else
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+         THROW_EXCEPTION("invalid type of matrix");
       }
     }
     else
     {
-      SiconosMatrixException::selfThrow("SimpleMatrix::op - (const SimpleMatrix): invalid type of matrix");
+       THROW_EXCEPTION("invalid type of matrix");
     }
   }
   else // A and/or B are/is Block

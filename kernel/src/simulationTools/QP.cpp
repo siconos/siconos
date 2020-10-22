@@ -20,11 +20,11 @@
 
 int QP::compute(double)
 {
-  RuntimeException::selfThrow("QP::compute not yet implemented");
+  THROW_EXCEPTION("QP::compute not yet implemented");
   return 1;
 }
 
 void QP::display() const
 {
-  RuntimeException::selfThrow("QP::compute not yet implemented");
+  THROW_EXCEPTION("QP::compute not yet implemented");
 }

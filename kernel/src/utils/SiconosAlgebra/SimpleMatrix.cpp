@@ -28,7 +28,7 @@
 #include "SiconosAlgebra.hpp"    // for symmetric, triangular ...
 #include "BlockMatrix.hpp"                                      // for Block...
 #include "BlockMatrixIterators.hpp"                             // for Const...
-#include "SiconosMatrixException.hpp"                           // for Sicon...
+#include "SiconosException.hpp"                           // for Sicon...
 #include "ioMatrix.hpp"                                         // for read
 #include "Tools.hpp"                                            // for toString
 #include "bindings_utils.hpp"                                   // for fill
@@ -116,8 +116,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row,
     mat.Identity = new IdentityMat(row, col);
     _num = IDENTITY;
   }
-  else
-    SiconosMatrixException::selfThrow("SiconosMatrix::constructor(UBLAS_TYPE type, unsigned int row, unsigned int col): invalid type.");
+  else THROW_EXCEPTION("invalid type.");
 }
 
 // parameters: dimensions, input value and type
@@ -131,7 +130,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
     // _num = Siconos::DENSE; default value
   }
   else
-    SiconosMatrixException::selfThrow("SiconosMatrix::constructor(UBLAS_TYPE type, unsigned int row, unsigned int col, double fillInValue): invalid type.");
+     THROW_EXCEPTION("invalid type.");
 }
 
 // // parameters: a vector (stl) of double and the type.
@@ -141,7 +140,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 //   if( (  (v.size() != row*col) && (typ != SYMMETRIC && typ != BANDED) )
 //       || (v.size() != row*row && typ == SYMMETRIC)
 //       || (typ == BANDED && ( (v.size()) != (unsigned int)(std::max)(row, col)*(lower+1+upper) ) ))
-//     SiconosMatrixException::selfThrow("constructor(UBLAS_TYPE, const std::vector<double>, int, int) : invalid vector size");
+//      THROW_EXCEPTION("invalid vector size");
 
 //   if(typ == DENSE)
 //     {
@@ -160,7 +159,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 //     }
 //   else if(typ == SPARSE)
 //     {
-//       SiconosMatrixException::selfThrow("SimpleMatrix::constructor(UBLAS_TYPE, const std::vector<double>, int row, int col, int lower, int upper) : warning -- use constructor(const SparseMat &m) or constructor(UBLAS_TYPE, int row, int col) with UBLAS_TYPE = SPARSE");
+//        THROW_EXCEPTION("warning -- use constructor(const SparseMat &m) or constructor(UBLAS_TYPE, int row, int col) with UBLAS_TYPE = SPARSE");
 
 //     }
 //   else if(typ == BANDED)
@@ -169,7 +168,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 //       _num = Siconos::BANDED;
 //     }
 //   else
-//     SiconosMatrixException::selfThrow("constructor(UBLAS_TYPE, const std::vector<double>, int, int) : invalid type of matrix given");
+//      THROW_EXCEPTION("invalid type of matrix given");
 
 //   std::copy(v.begin(), v.end(), (vect.Dense)->begin());
 
@@ -225,13 +224,13 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix& A, const Index& coord):
   SiconosMatrix(A.num())
 {
   if(coord[0]>=coord[1])
-    SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). Empty row range coord[0]>= coord[1]");
+     THROW_EXCEPTION("Empty row range coord[0]>= coord[1]");
   if(coord[2]>=coord[3])
-    SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). Empty column range coord[2]>= coord[3]");
+     THROW_EXCEPTION("Empty column range coord[2]>= coord[3]");
   if(coord[1] > A.size(0))
-    SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). row index too large.");
+     THROW_EXCEPTION("row index too large.");
   if(coord[3] > A.size(1))
-    SiconosMatrixException::selfThrow("SimpleMatrix::SimpleMatrix(const SimpleMatrix& A , const Index& coord ). column index too large.");
+     THROW_EXCEPTION("column index too large.");
 
   if(_num == Siconos::DENSE)
   {
@@ -477,7 +476,7 @@ bool SimpleMatrix::checkSymmetry(double tol) const
 const DenseMat SimpleMatrix::getDense(unsigned int, unsigned int) const
 {
   if(_num != Siconos::DENSE)
-    SiconosMatrixException::selfThrow("SimpleMatrix::getDense(): the current matrix is not a Dense matrix");
+     THROW_EXCEPTION(" the current matrix is not a Dense matrix");
 
   return *mat.Dense;
 }
@@ -485,7 +484,7 @@ const DenseMat SimpleMatrix::getDense(unsigned int, unsigned int) const
 const TriangMat SimpleMatrix::getTriang(unsigned int, unsigned int) const
 {
   if(_num != Siconos::TRIANGULAR)
-    SiconosMatrixException::selfThrow("TriangMat SimpleMatrix::getTriang(): the current matrix is not a Triangular matrix");
+     THROW_EXCEPTION("the current matrix is not a Triangular matrix");
 
   return *mat.Triang;
 }
@@ -493,7 +492,7 @@ const TriangMat SimpleMatrix::getTriang(unsigned int, unsigned int) const
 const SymMat SimpleMatrix::getSym(unsigned int, unsigned int) const
 {
   if(_num != Siconos::SYMMETRIC)
-    SiconosMatrixException::selfThrow("SymMat SimpleMatrix::getSym(): the current matrix is not a Symmetric matrix");
+     THROW_EXCEPTION("he current matrix is not a Symmetric matrix");
 
   return *mat.Sym;
 }
@@ -501,7 +500,7 @@ const SymMat SimpleMatrix::getSym(unsigned int, unsigned int) const
 const SparseMat SimpleMatrix::getSparse(unsigned int, unsigned int) const
 {
   if(_num != Siconos::SPARSE)
-    SiconosMatrixException::selfThrow("SparseMat SimpleMatrix::getSparse(): the current matrix is not a Sparse matrix");
+     THROW_EXCEPTION("the current matrix is not a Sparse matrix");
 
   return *mat.Sparse;
 }
@@ -509,14 +508,14 @@ const SparseMat SimpleMatrix::getSparse(unsigned int, unsigned int) const
 const SparseCoordinateMat SimpleMatrix::getSparseCoordinate(unsigned int, unsigned int) const
 {
   if(_num != Siconos::SPARSE_COORDINATE)
-    SiconosMatrixException::selfThrow("SparseCoordinateMat SimpleMatrix::getSparseCoordinate(): the current matrix is not a Sparse Coordinate matrix");
+     THROW_EXCEPTION("the current matrix is not a Sparse Coordinate matrix");
 
   return *mat.SparseCoordinate;
 }
 const BandedMat SimpleMatrix::getBanded(unsigned int, unsigned int) const
 {
   if(_num != Siconos::BANDED)
-    SiconosMatrixException::selfThrow("BandedMat SimpleMatrix::getBanded(): the current matrix is not a Banded matrix");
+     THROW_EXCEPTION("the current matrix is not a Banded matrix");
 
   return *mat.Banded;
 }
@@ -524,7 +523,7 @@ const BandedMat SimpleMatrix::getBanded(unsigned int, unsigned int) const
 const ZeroMat SimpleMatrix::getZero(unsigned int, unsigned int) const
 {
   if(_num != Siconos::ZERO)
-    SiconosMatrixException::selfThrow("ZeroMat SimpleMatrix::getZero(): the current matrix is not a Zero matrix");
+     THROW_EXCEPTION("the current matrix is not a Zero matrix");
 
   return *mat.Zero;
 }
@@ -532,7 +531,7 @@ const ZeroMat SimpleMatrix::getZero(unsigned int, unsigned int) const
 const IdentityMat SimpleMatrix::getIdentity(unsigned int, unsigned int) const
 {
   if(_num != Siconos::IDENTITY)
-    SiconosMatrixException::selfThrow("IdentityMat SimpleMatrix::getIdentity(): the current matrix is not a Identity matrix");
+     THROW_EXCEPTION("the current matrix is not a Identity matrix");
 
   return *mat.Identity;
 }
@@ -540,7 +539,7 @@ const IdentityMat SimpleMatrix::getIdentity(unsigned int, unsigned int) const
 DenseMat* SimpleMatrix::dense(unsigned int, unsigned int) const
 {
   if(_num != Siconos::DENSE)
-    SiconosMatrixException::selfThrow("DenseMat* SimpleMatrix::dense(): the current matrix is not a Dense matrix");
+     THROW_EXCEPTION("the current matrix is not a Dense matrix");
 
   return mat.Dense;
 }
@@ -548,7 +547,7 @@ DenseMat* SimpleMatrix::dense(unsigned int, unsigned int) const
 TriangMat* SimpleMatrix::triang(unsigned int, unsigned int) const
 {
   if(_num != Siconos::TRIANGULAR)
-    SiconosMatrixException::selfThrow("TriangMat* SimpleMatrix::triang(): the current matrix is not a Triangular matrix");
+     THROW_EXCEPTION("the current matrix is not a Triangular matrix");
 
   return mat.Triang;
 }
@@ -556,7 +555,7 @@ TriangMat* SimpleMatrix::triang(unsigned int, unsigned int) const
 SymMat* SimpleMatrix::sym(unsigned int, unsigned int) const
 {
   if(_num != Siconos::SYMMETRIC)
-    SiconosMatrixException::selfThrow("SymMat* SimpleMatrix::sym(): the current matrix is not a Symmetric matrix");
+     THROW_EXCEPTION("the current matrix is not a Symmetric matrix");
 
   return mat.Sym;
 }
@@ -564,7 +563,7 @@ SymMat* SimpleMatrix::sym(unsigned int, unsigned int) const
 SparseMat* SimpleMatrix::sparse(unsigned int, unsigned int) const
 {
   if(_num != Siconos::SPARSE)
-    SiconosMatrixException::selfThrow("SparseMat* SimpleMatrix::sparse(): the current matrix is not a Sparse matrix");
+     THROW_EXCEPTION("the current matrix is not a Sparse matrix");
 
   return mat.Sparse;
 }
@@ -572,7 +571,7 @@ SparseMat* SimpleMatrix::sparse(unsigned int, unsigned int) const
 SparseCoordinateMat* SimpleMatrix::sparseCoordinate(unsigned int, unsigned int) const
 {
   if(_num != Siconos::SPARSE_COORDINATE)
-    SiconosMatrixException::selfThrow("SparseMat* SimpleMatrix::sparse(): the current matrix is not a Sparse matrix");
+     THROW_EXCEPTION("the current matrix is not a Sparse matrix");
 
   return mat.SparseCoordinate;
 }
@@ -580,7 +579,7 @@ SparseCoordinateMat* SimpleMatrix::sparseCoordinate(unsigned int, unsigned int) 
 BandedMat* SimpleMatrix::banded(unsigned int, unsigned int) const
 {
   if(_num != Siconos::BANDED)
-    SiconosMatrixException::selfThrow("BandedMat* SimpleMatrix::banded(): the current matrix is not a Banded matrix");
+     THROW_EXCEPTION("the current matrix is not a Banded matrix");
 
   return mat.Banded;
 }
@@ -588,7 +587,7 @@ BandedMat* SimpleMatrix::banded(unsigned int, unsigned int) const
 ZeroMat* SimpleMatrix::zero_mat(unsigned int, unsigned int) const
 {
   if(_num != Siconos::ZERO)
-    SiconosMatrixException::selfThrow("ZeroMat* SimpleMatrix::zero_mat(): the current matrix is not a Zero matrix");
+     THROW_EXCEPTION("the current matrix is not a Zero matrix");
 
   return mat.Zero;
 }
@@ -596,7 +595,7 @@ ZeroMat* SimpleMatrix::zero_mat(unsigned int, unsigned int) const
 IdentityMat* SimpleMatrix::identity(unsigned int, unsigned int) const
 {
   if(_num != Siconos::IDENTITY)
-    SiconosMatrixException::selfThrow("IdentityMat* SimpleMatrix::identity(): the current matrix is not a Identity matrix");
+     THROW_EXCEPTION("the current matrix is not a Identity matrix");
 
   return mat.Identity;
 }
@@ -604,7 +603,7 @@ IdentityMat* SimpleMatrix::identity(unsigned int, unsigned int) const
 double* SimpleMatrix::getArray(unsigned int, unsigned int) const
 {
   if(_num == Siconos::SPARSE)
-    SiconosMatrixException::selfThrow("SimpleMatrix::getArray(): not yet implemented for sparse matrix.");
+     THROW_EXCEPTION("not yet implemented for sparse matrix.");
 
   if(_num == Siconos::DENSE)
     return (((*mat.Dense).data()).data());
@@ -652,7 +651,7 @@ void SimpleMatrix::zero()
     *mat.Banded = ublas::zero_matrix<double>(size1, size2);
 
   else if(_num == Siconos::IDENTITY)
-    SiconosMatrixException::selfThrow("SimpleMatrix::zero(): you can not set to zero a matrix of type Identity!.");
+     THROW_EXCEPTION("you can not set to zero a matrix of type Identity!.");
   resetFactorizationFlags();
   // if _num == Siconos::ZERO: nothing
 }
@@ -662,7 +661,7 @@ void SimpleMatrix::randomize()
   if(_num == Siconos::DENSE)
     Siconos::algebra::fill(*mat.Dense);
   else
-    SiconosMatrixException::selfThrow("SimpleMatrix::randomize(): only implemented for dense matrices.");
+     THROW_EXCEPTION("only implemented for dense matrices.");
   resetFactorizationFlags();
 }
 
@@ -671,7 +670,7 @@ void SimpleMatrix::randomize_sym()
   if(_num == Siconos::DENSE)
     Siconos::algebra::fill_sym(*mat.Dense);
   else
-    SiconosMatrixException::selfThrow("SimpleMatrix::randomize_sym(): only implemented for dense matrices.");
+     THROW_EXCEPTION("only implemented for dense matrices.");
   resetFactorizationFlags();
 }
 
@@ -695,7 +694,7 @@ void SimpleMatrix::eye()
     *mat.Banded = ublas::identity_matrix<double>(size1, size2);
 
   else if(_num == Siconos::ZERO)
-    SiconosMatrixException::selfThrow("SimpleMatrix::eye(): you can not set to identity a matrix of type Zero!.");
+     THROW_EXCEPTION("you can not set to identity a matrix of type Zero!.");
   resetFactorizationFlags();
 }
 
@@ -963,7 +962,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
   }
   default:
   {
-    SiconosMatrixException::selfThrow("SimpleMatrix::assign(const SimpleMatrix& A) : do not know how to assign for the given storage type ");
+     THROW_EXCEPTION("do not know how to assign for the given storage type ");
   }
   }
 }
@@ -1095,18 +1094,18 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 //   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   if(A->isBlock())
-//     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
+//      THROW_EXCEPTION("not yet implemented for block matrix.");
 
 //   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
 //   // Then computation of y = subA*x + y.
-//   unsigned int numA = A->num();
-//   unsigned int numY = y->num();
-//   unsigned int numX = x->num();
+//   Siconos::UBLAS_TYPE numA = A->num();
+//   Siconos::UBLAS_TYPE numY = y->num();
+//   Siconos::UBLAS_TYPE numX = x->num();
 //   unsigned int sizeX = x->size();
 //   unsigned int sizeY = y->size();
 
 //   if(numX != numY)
-//     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+//      THROW_EXCEPTION("not yet implemented for x and y of different types.");
 
 //   if(numY == 1 && numX == 1)
 //   {
@@ -1129,7 +1128,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 //     if(numA == 4)
 //       *y->sparse() += a * prod(ublas::subrange(*A->sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
 //     else
-//       SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
+//        THROW_EXCEPTION("not yet implemented for x, y  sparse and A not sparse.");
 //   }
 
 // }

@@ -41,7 +41,7 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
 {
   if(!_Csurface)
   {
-    RuntimeException::selfThrow("CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing the Actuator");
+    THROW_EXCEPTION("CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing the Actuator");
   }
   else
   {
@@ -82,7 +82,7 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
   }
   else
   {
-    RuntimeException::selfThrow("LinearSMCOT2 is not yet implemented for system of type" + std::to_string(dsType));
+    THROW_EXCEPTION("LinearSMCOT2 is not yet implemented for system of type" + std::to_string(dsType));
   }
 
   // We have to reset _pluginb

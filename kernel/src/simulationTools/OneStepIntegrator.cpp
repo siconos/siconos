@@ -180,14 +180,14 @@ void OneStepIntegrator::updateInput(double time, unsigned int level)
 double OneStepIntegrator::computeResiduOutput(double time, SP::InteractionsGraph indexSet)
 {
   double residu =0.0;
-  RuntimeException::selfThrow("OneStepIntegrator::computeResiduOutput not implemented for integrator of type " + std::to_string(_integratorType));
+  THROW_EXCEPTION("OneStepIntegrator::computeResiduOutput not implemented for integrator of type " + std::to_string(_integratorType));
   return residu;
 }
 
 double OneStepIntegrator::computeResiduInput(double time, SP::InteractionsGraph indexSet)
 {
   double residu =0.0;
-  RuntimeException::selfThrow("OneStepIntegrator::computeResiduInput not implemented for integrator of type " + std::to_string(_integratorType));
+  THROW_EXCEPTION("OneStepIntegrator::computeResiduInput not implemented for integrator of type " + std::to_string(_integratorType));
   return residu;
 }
 

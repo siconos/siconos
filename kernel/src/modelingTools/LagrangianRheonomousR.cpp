@@ -142,7 +142,7 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
       // (especially, partial derivatives with respect to time).
     }
     else
-      RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) index >2  not yet implemented.");
+      THROW_EXCEPTION("LagrangianRheonomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) index >2  not yet implemented.");
   }
 }
 

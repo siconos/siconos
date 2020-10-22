@@ -52,7 +52,7 @@ Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation
   _staticLevels(false),_isInitialized(false)
 {
   if(!td)
-    RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == nullptr.");
+    THROW_EXCEPTION("Simulation constructor - timeDiscretisation == nullptr.");
   _useRelativeConvergenceCriterion = false;
   _relativeConvergenceCriterionHeld = false;
   _relativeConvergenceTol = 10e-3;
@@ -81,7 +81,7 @@ Simulation::Simulation(SP::TimeDiscretisation td):
 
 {
   if(!td)
-    RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == nullptr.");
+    THROW_EXCEPTION("Simulation constructor - timeDiscretisation == nullptr.");
   _allOSI.reset(new OSISet());
   _allNSProblems.reset(new OneStepNSProblems());
   _eventsManager.reset(new EventsManager(td)); //
@@ -168,7 +168,7 @@ SP::InteractionsGraph Simulation::indexSet(unsigned int i)
 SP::OneStepNSProblem Simulation::oneStepNSProblem(int Id)
 {
   if(!(*_allNSProblems)[Id])
-    RuntimeException::selfThrow("Simulation - oneStepNSProblem(Id) - The One Step NS Problem is not in the simulation.");
+    THROW_EXCEPTION("Simulation - oneStepNSProblem(Id) - The One Step NS Problem is not in the simulation.");
 
   return (*_allNSProblems)[Id];
 }
@@ -199,7 +199,7 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
   if(_allNSProblems->size() > (unsigned int)Id)
   {
     if((*_allNSProblems)[Id])
-      RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
+      THROW_EXCEPTION("Simulation - insertNonSmoothProblem(osns), trying to insert a OSNSP already existing. ");
     (*_allNSProblems)[Id] = osns;
   }
   else
@@ -269,7 +269,7 @@ void Simulation::initializeNSDSChangelog()
       if(!DSG->properties(DSG->descriptor(ds)).osi)
       {
         if(_allOSI->size() == 0)
-          RuntimeException::selfThrow
+          THROW_EXCEPTION
           ("Simulation::initialize - there is no osi in this Simulation !!");
         DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
         SP::OneStepIntegrator osi_default = *_allOSI->begin();
@@ -472,7 +472,7 @@ int Simulation::computeOneStepNSProblem(int Id)
   DEBUG_PRINTF("with Id = %i\n", Id);
 
   if(!(*_allNSProblems)[Id])
-    RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == nullptr, Id: " + std::to_string(Id));
+    THROW_EXCEPTION("Simulation - computeOneStepNSProblem, OneStepNSProblem == nullptr, Id: " + std::to_string(Id));
 
   // Before compute, inform all OSNSs if topology has changed
   if(_nsds->topology()->hasChanged())

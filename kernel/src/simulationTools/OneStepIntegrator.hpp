@@ -24,7 +24,7 @@
 #define ONESTEPINTEGRATOR_H
 
 #include "SiconosVisitor.hpp" // for VIRTUAL_ACCEPT_VISITORS
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "SimulationTypeDef.hpp"
 #include "OneStepIntegratorTypes.hpp"
 #include "SimulationGraphs.hpp"
@@ -308,7 +308,7 @@ public:
    */
   virtual double computeResidu(){
     // default : error
-    RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + std::to_string(_integratorType));
+    THROW_EXCEPTION("OneStepIntegrator::computeResidu not implemented for integrator of type " + std::to_string(_integratorType));
     return 0.0;
   }
 
@@ -318,7 +318,7 @@ public:
   virtual void computeFreeState()
   {
     // default : error
-    RuntimeException::selfThrow("OneStepIntegrator::computeFreeState not implemented for integrator of type " + std::to_string(_integratorType));
+    THROW_EXCEPTION("OneStepIntegrator::computeFreeState not implemented for integrator of type " + std::to_string(_integratorType));
   }
 
   /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
@@ -328,7 +328,7 @@ public:
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
   {
     // default : error
-    RuntimeException::selfThrow("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + std::to_string(_integratorType));
+    THROW_EXCEPTION("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + std::to_string(_integratorType));
   }
 
   /** compute the residu of the output of the relation (y)
@@ -413,7 +413,7 @@ public:
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
   {
-    RuntimeException::selfThrow("OneStepIntegrator::addInteractionInIndexSet - Should be called at this level");
+    THROW_EXCEPTION("OneStepIntegrator::addInteractionInIndexSet - Should be called at this level");
     return 0;
   }
   ;
@@ -426,7 +426,7 @@ public:
    */
   virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
   {
-    RuntimeException::selfThrow("OneStepIntegrator::removeInteractionFromIndexSet - Should not be called at this level");
+    THROW_EXCEPTION("OneStepIntegrator::removeInteractionFromIndexSet - Should not be called at this level");
     return 0;
   };
 

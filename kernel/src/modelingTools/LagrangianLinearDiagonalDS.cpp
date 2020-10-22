@@ -55,7 +55,7 @@ LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP:
 
 void LagrangianLinearDiagonalDS::initRhs(double time)
 {
-  RuntimeException::selfThrow("LagrangianLinearDiagonalDS::initRhs - not yet implemented for LagrangianLinearDiagonalDS.");
+  THROW_EXCEPTION("LagrangianLinearDiagonalDS::initRhs - not yet implemented for LagrangianLinearDiagonalDS.");
 
 }
 

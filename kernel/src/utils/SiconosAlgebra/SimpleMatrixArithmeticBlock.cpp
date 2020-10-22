@@ -29,31 +29,31 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
   // add m to current matrix elements, starting from row row_min and column col_min, to the values of the matrix m.
   // m may be a BlockMatrix.
 
-  if(_num == 6 || _num == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(pos,..., m) forbidden for zero or identity matrix.");
+  if(_num == Siconos::ZERO || _num == Siconos::IDENTITY)
+    THROW_EXCEPTION("SimpleMatrix::addBlock(pos,..., m) forbidden for zero or identity matrix.");
 
   if(&m == this)
-    SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(pos,..., m): m = this.");
+    THROW_EXCEPTION("SimpleMatrix::addBlock(pos,..., m): m = this.");
 
   if(row_min >= size(0))
-    SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col): row is out of range");
+    THROW_EXCEPTION("SimpleMatrix::addBlock(row,col): row is out of range");
 
   if(col_min >= size(1))
-    SiconosMatrixException::selfThrow("SimpleMatrix::addBloc(row,col)k: col is out of range");
+    THROW_EXCEPTION("SimpleMatrix::addBloc(row,col)k: col is out of range");
 
   unsigned int row_max, col_max;
   row_max = m.size(0) + row_min;
   col_max = m.size(1) + col_min;
 
   if(row_max > size(0))
-    SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col,m): m.row + row is out of range.");
+    THROW_EXCEPTION("SimpleMatrix::addBlock(row,col,m): m.row + row is out of range.");
 
   if(col_max > size(1))
-    SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col,m): m.col + col is out of range.");
+    THROW_EXCEPTION("SimpleMatrix::addBlock(row,col,m): m.col + col is out of range.");
 
-  unsigned int numM = m.num();
+  Siconos::UBLAS_TYPE numM = m.num();
 
-  if(numM == 0)  // if m is a block matrix ...
+  if(numM == Siconos::BLOCK)  // if m is a block matrix ...
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     BlocksMat::const_iterator1 it;
@@ -72,41 +72,41 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
       posCol = 0;
     }
   }
-  else if(numM == 6)  // if m = 0
+  else if(numM == Siconos::ZERO)  // if m = 0
   {
     // nothing to do !
   }
   else // if m is a SimpleMatrix
   {
-    if(_num == 1)
+    if(_num == Siconos::DENSE)
     {
       switch(numM)
       {
-      case 1:
+      case Siconos::DENSE:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.dense());
         break;
-      case 2:
+      case Siconos::TRIANGULAR:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.triang());
         break;
-      case 3:
+      case Siconos::SYMMETRIC:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.sym());
         break;
-      case 4:
+      case Siconos::SPARSE:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.sparse());
         break;
-      case 5:
+      case Siconos::BANDED:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.banded());
         break;
-      case 7:
+      case Siconos::IDENTITY:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.identity());
         break;
       default:
-        SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(...,m): wrong matrix type for m.");
+        THROW_EXCEPTION("SimpleMatrix::addBlock(...,m): wrong matrix type for m.");
         break;
       }
     }
     else
-      SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(...): implemented only for dense matrices.");
+      THROW_EXCEPTION("SimpleMatrix::addBlock(...): implemented only for dense matrices.");
     resetFactorizationFlags();
   }
 }
@@ -116,29 +116,29 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
   // sub m to current matrix elements, starting from row row_min and column col_min, to the values of the matrix m.
   // m may be a BlockMatrix.
 
-  if(_num == 6 || _num == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(pos,..., m) forbidden for zero or identity matrix.");
+  if(_num == Siconos::ZERO || _num == Siconos::IDENTITY)
+    THROW_EXCEPTION("SimpleMatrix::subBlock(pos,..., m) forbidden for zero or identity matrix.");
 
   if(&m == this)
-    SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(pos,..., m): m = this.");
+    THROW_EXCEPTION("SimpleMatrix::subBlock(pos,..., m): m = this.");
 
   if(row_min >= size(0))
-    SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col): row is out of range");
+    THROW_EXCEPTION("SimpleMatrix::subBlock(row,col): row is out of range");
 
   if(col_min >= size(1))
-    SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col): col is out of range");
+    THROW_EXCEPTION("SimpleMatrix::subBlock(row,col): col is out of range");
 
   unsigned int row_max, col_max;
   row_max = m.size(0) + row_min;
   col_max = m.size(1) + col_min;
 
   if(row_max > size(0))
-    SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col,m): m.row + row is out of range.");
+    THROW_EXCEPTION("SimpleMatrix::subBlock(row,col,m): m.row + row is out of range.");
 
   if(col_max > size(1))
-    SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col,m): m.col + col is out of range.");
+    THROW_EXCEPTION("SimpleMatrix::subBlock(row,col,m): m.col + col is out of range.");
 
-  unsigned int numM = m.num();
+  Siconos::UBLAS_TYPE numM = m.num();
 
   if(numM == 0)  // if m is a block matrix ...
   {
@@ -159,41 +159,41 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
       posCol = 0;
     }
   }
-  else if(numM == 6)  // if m = 0
+  else if(numM == Siconos::ZERO)  // if m = 0
   {
     // nothing to do !
   }
   else // if m is a SimpleMatrix
   {
-    if(_num == 1)
+    if(_num == Siconos::DENSE)
     {
       switch(numM)
       {
-      case 1:
+      case Siconos::DENSE:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.dense());
         break;
-      case 2:
+      case Siconos::TRIANGULAR:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.triang());
         break;
-      case 3:
+      case Siconos::SYMMETRIC:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.sym());
         break;
-      case 4:
+      case Siconos::SPARSE:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.sparse());
         break;
-      case 5:
+      case Siconos::BANDED:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.banded());
         break;
-      case 7:
+      case Siconos::IDENTITY:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.identity());
         break;
       default:
-        SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(...,m): wrong matrix type for m.");
+        THROW_EXCEPTION("SimpleMatrix::subBlock(...,m): wrong matrix type for m.");
         break;
       }
     }
     else
-      SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(...): implemented only for dense matrices.");
+      THROW_EXCEPTION("SimpleMatrix::subBlock(...): implemented only for dense matrices.");
     resetFactorizationFlags();
   }
 }

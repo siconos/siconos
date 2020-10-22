@@ -161,10 +161,10 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, unsigned int d
     }
     else if(derivativeNumber == 2)
     {
-      RuntimeException::selfThrow("Warning: we attempt to call NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) for derivativeNumber=2");
+      THROW_EXCEPTION("Warning: we attempt to call NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) for derivativeNumber=2");
     }
     else
-      RuntimeException::selfThrow("NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) derivativeNumber out of range or not yet implemented.");
+      THROW_EXCEPTION("NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) derivativeNumber out of range or not yet implemented.");
   }
   DEBUG_END("NewtonEulerR::computeOutput(...)\n");
 }
@@ -235,7 +235,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
     prod(lambda, *_jachq, *DSlink[NewtonEulerR::p0 + level], false);
   }
   else
-    RuntimeException::selfThrow("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)  not yet implemented for level > 1");
+    THROW_EXCEPTION("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)  not yet implemented for level > 1");
   DEBUG_END("NewtonEulerR::computeInput(...)\n");
 }
 /*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEuler3DR and NewtonEuler1DR)*/

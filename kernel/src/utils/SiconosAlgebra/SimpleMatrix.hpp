@@ -526,7 +526,6 @@ public:
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
-   *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
   double& operator()(unsigned int i, unsigned int j);
@@ -534,7 +533,6 @@ public:
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
-   *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
   double operator()(unsigned int i, unsigned int j) const;
