@@ -803,6 +803,13 @@ extern "C"
    */
   void NM_add_to_diag3(NumericsMatrix* M, double alpha);
 
+  /** Add a constant term to the diagonal elements, when the block of the SBM
+   * are 5x5
+   * \param M the matrix
+   * \param alpha the term to add
+   */
+  void NM_add_to_diag5(NumericsMatrix* M, double alpha);
+
   /** Add two matrices with coefficients C = alpha*A + beta*B
    * \param alpha the first coefficient
    * \param A the first  matrix

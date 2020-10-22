@@ -111,12 +111,16 @@ enum FRICTION_SOLVER
   SICONOS_ROLLING_FRICTION_3D_NSGS = 3000,
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone= 3001,
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 3002,
-
+  SICONOS_ROLLING_FRICTION_3D_ADMM = 3003,
+  
   /** Non-smooth Gauss Seidel, local formulation */
   SICONOS_ROLLING_FRICTION_2D_NSGS = 4000,
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone= 4001,
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 4002
 
+ 
+ 
+  
 };
 
 
@@ -186,10 +190,12 @@ extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 extern const char* const   SICONOS_ROLLING_FRICTION_3D_NSGS_STR ;
 extern const char* const   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
 extern const char* const   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
+extern const char* const   SICONOS_ROLLING_FRICTION_3D_ADMM_STR ;
 
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_NSGS_STR ;
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone_STR;
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
+
 
 enum SICONOS_FRICTION_3D_IPARAM
 {

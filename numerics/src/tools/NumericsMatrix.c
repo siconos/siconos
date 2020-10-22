@@ -1678,6 +1678,48 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
     exit(EXIT_FAILURE);
   }
 }
+void NM_add_to_diag5(NumericsMatrix* M, double alpha)
+{
+  size_t n = M->size0;
+  switch(M->storageType)
+  {
+  case NM_DENSE:
+  {
+    for(size_t indx = 0; indx < n*n; indx += n+1) M->matrix0[indx] += alpha;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    for(size_t ic = 0; ic < n/5; ++ic)
+    {
+      int diagPos = SBM_diagonal_block_index(M->matrix1, ic);
+      M->matrix1->block[diagPos][0] += alpha;
+      M->matrix1->block[diagPos][6] += alpha;
+      M->matrix1->block[diagPos][12] += alpha;
+      M->matrix1->block[diagPos][18] += alpha;
+      M->matrix1->block[diagPos][24] += alpha;
+    }
+    break;
+  }
+  case NM_SPARSE:
+  {
+    CS_INT* diag_indices = NSM_diag_indices(M);
+
+    DEBUG_EXPR(
+      printf("diag_indices:\n");
+      for(size_t i = 0; i < n; ++i) printf("diag_indices[%zu] = %li\t ", i, diag_indices[i]);
+    );
+
+    double* Mx = NSM_data(M->matrix2);
+    for(size_t i = 0; i < n; ++i) Mx[diag_indices[i]] += alpha;
+
+    break;
+  }
+  default:
+    printf("NM_add_to_diag5 :: unsupported matrix storage %d", M->storageType);
+    exit(EXIT_FAILURE);
+  }
+}
 
 NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B)
 {
