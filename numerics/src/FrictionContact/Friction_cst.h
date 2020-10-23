@@ -462,9 +462,22 @@ enum SICONOS_FRICTION_3D_ADMM_ACCELERATION_ENUM
 
 enum SICONOS_FRICTION_3D_ADMM_SYMMETRY_ENUM
 {
+  /* default choice. We check symmetry of the problem (Matrix M)
+   * if the problem is not symmetric, we called an asymmetric
+   * version of the algo is possible */
   SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY= 0,
+  /* The symmetric version of the algorithm is used even if
+   *  the system is not symmetric */
   SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY= 1,
-  SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY= 2
+  /* The asymmetric version of the algorithm is used even if
+   *  the system is symmetric */
+  SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY= 2,
+  /* The symmetric version of the algorithm is used and the matrix 
+   *is systematically symmetrized*/
+  SICONOS_FRICTION_3D_ADMM_SYMMETRIZE= 3,
+  /* The symmetric version of the algorithm is used and we assume 
+   *  that the data are symmetric */
+  SICONOS_FRICTION_3D_ADMM_ASSUME_SYMMETRY= 4
 };
 
 enum SICONOS_FRICTION_3D_ADMM_STORAGE_ENUM
