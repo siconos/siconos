@@ -94,7 +94,6 @@ int rolling_fc3d_compute_error(
 
   cblas_dcopy(n, problem->q, incx, velocity, incy);     // velocity <-q
   // Compute the current velocity
-  //NM_prod_mv_3x3(n, n, problem->M, reaction, velocity);
   NM_gemv(1.0, problem->M, reaction,
           1.0,
           velocity);
@@ -113,11 +112,15 @@ int rolling_fc3d_compute_error(
   *error = sqrt(*error);
   DEBUG_PRINTF("absolute error = %12.8e\n", *error);
   /* Compute relative error with respect to norm */
-  DEBUG_PRINTF("norm = %12.8e\n", norm);
+  DEBUG_PRINTF("norm = %12.8e\n", norm); 
+
+  norm=fmax(norm, cblas_dnrm2(n, reaction, 1));
+  norm=fmax(norm, cblas_dnrm2(n, velocity, 1));
   if(fabs(norm) > DBL_EPSILON)
     *error /= norm;
   /* *error = *error / (norm + 1.0); old version */
   DEBUG_PRINTF("relative error = %12.8e\n", *error);
+  
   DEBUG_END("rolling_fc3d_compute_error(...)\n");
   if(*error > tolerance)
     return 1;
