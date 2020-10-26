@@ -24,7 +24,7 @@
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_solvers = 3;
+  int n_solvers = 4;
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
@@ -56,6 +56,18 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_ADMM);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
     
+    current++;
+  }
+  for(int d =0; d <n_data; d++)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10;
     current++;
   }
 
