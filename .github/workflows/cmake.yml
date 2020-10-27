@@ -23,6 +23,32 @@ jobs:
         sudo apt-get install -f -y git-core wget libboost-all-dev libgmp-dev swig  libcppunit-dev libcppunit-doc 
         sudo apt-get install -f -y libopenblas-dev libsuitesparse-dev
         sudo apt-get install -f -y python3 python3-pip
+        sudo apt install -y -qq \
+        cmake \
+        git-core \
+        make \
+        libboost-dev \
+        libboost-serialization-dev \
+        libboost-filesystem-dev \
+        libboost-timer-dev \
+        libboost-chrono-dev \
+        libgmp-dev \
+        gcc \
+        gfortran \
+        libgfortran3 \
+        g++ \
+        libopenblas-dev \
+        liblapacke-dev \
+        lp-solve \
+        liblpsolve55-dev \
+        python3 \
+        python3-packaging \
+        libpython3-dev \
+        libcppunit-dev \
+        libbullet-dev \
+        libfreetype6-dev \
+        freeglut3-dev \
+        vim
         pip3 install numpy scipy packaging
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
