@@ -159,6 +159,10 @@ if(WITH_${COMPONENT}_TESTING)
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_2
     EXTRA_SOURCES data_collection_2.c test_nsgs_1.c)
   new_tests_collection(
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_FREEZE_2
+    EXTRA_SOURCES data_collection_2.c test_nsgs_freeze_1.c)
+
+  new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_3
     EXTRA_SOURCES data_collection_3.c test_nsgs_3.c)
   new_tests_collection(
