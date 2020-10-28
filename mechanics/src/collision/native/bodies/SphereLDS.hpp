@@ -71,7 +71,7 @@ public:
   void computeMass();
   void computeMass(SP::SiconosVector)
   {
-    RuntimeException::selfThrow("SphereLDS::computeMass(vector) - not implemented");
+    THROW_EXCEPTION("SphereLDS::computeMass(vector) - not implemented");
   }
 
   void computeFGyr(SP::SiconosVector, SP::SiconosVector);

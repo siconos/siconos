@@ -29,7 +29,7 @@ install:
     #  - pip install lxml numpy scipy pytest
   - set PATH=%PATH%;C:\MinGW\msys\1.0\bin
   - cd C:\projects\siconos
-  - bash Build\Windows\deal-with-symlink-zip.sh ; echo symlink replacement 
+  #- bash Build\Windows\deal-with-symlink-zip.sh ; echo symlink replacement 
   - echo %PATH%
   - cd C:\
   - ps: |

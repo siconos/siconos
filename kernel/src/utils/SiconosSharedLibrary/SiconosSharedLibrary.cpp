@@ -16,8 +16,7 @@
  * limitations under the License.
 */
 #include "SiconosSharedLibrary.hpp"
-#include "SiconosSharedLibraryException.hpp"
-
+#include "SiconosException.hpp"
 #ifndef _WIN32
 #include <dlfcn.h>                      // for dlerror, dlclose, dlopen, etc
 #endif
@@ -44,7 +43,7 @@ PluginHandle loadPlugin(const std::string& pluginPath)
     DWORD err = GetLastError();
     std::cout << "SiconosSharedLibrary::loadPlugin Error returned : " << err << std::endl;
     std::cout << "Arguments: pluginPath = " << pluginPath << std::endl;
-    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or find " + pluginPath);
+    THROW_EXCEPTION("can not open or find plugin");
   }
 #endif
 #ifdef _SYS_UNX
@@ -63,7 +62,7 @@ PluginHandle loadPlugin(const std::string& pluginPath)
   if(!HandleRes)
   {
     std::cout << "dlerror() :" << dlerror() <<std::endl;
-    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or find " + pluginPath);
+    THROW_EXCEPTION("can not open or find plugin");
   }
 #endif
   openedPlugins.insert(std::make_pair(pluginPath, HandleRes));
@@ -80,7 +79,7 @@ void * getProcAddress(PluginHandle plugin, const std::string& procedure)
     DWORD err = GetLastError();
     std::cout << "SiconosSharedLibrary::getProcAddress Error returned : " << err << std::endl;
     std::cout << "Arguments: procedure = " << procedure << std::endl;
-    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::getProcAddress, can not find procedure " + procedure);
+    THROW_EXCEPTION("can not find procedure");
   }
 #endif
 #ifdef _SYS_UNX
@@ -89,7 +88,7 @@ void * getProcAddress(PluginHandle plugin, const std::string& procedure)
   {
     std::cout << "SiconosSharedLibrary::getProcAddress Error returned : " << dlerror() << std::endl;
     std::cout << "Arguments: procedure = " << procedure << std::endl;
-    throw SiconosSharedLibraryException("SiconosSharedLibrary::getProcAddress, can not find procedure " + procedure);
+    THROW_EXCEPTION("can not find procedure procedure");
   }
 #endif
   return ptr;
@@ -103,7 +102,7 @@ void closePlugin(const std::string& pluginFile)
     std::cout << "SiconosSharedLibrary::closePlugin - could not find an opened plugin named " << pluginFile << std::endl;
     std::cout << "Plugins in openedPlugins:" << std::endl;
     for(iter it2 = openedPlugins.begin(); it2 != openedPlugins.end(); ++it2) std::cout <<  it2->first << std::endl;
-    SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::closePlugin - could not find an opened plugin named " + pluginFile);
+    THROW_EXCEPTION("could not find an opened plugin with this name");
   }
   PluginHandle plugin = it->second;
   assert(plugin);

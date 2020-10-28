@@ -44,7 +44,7 @@ HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
       newVelocityIndices->size() != b->size()     ||
       newVelocityIndices->size() != omega->size() ||
       newVelocityIndices->size() != phi->size())
-    RuntimeException::selfThrow("HarmonicBC::HarmonicBC indices and vectors of data \
+    THROW_EXCEPTION("HarmonicBC::HarmonicBC indices and vectors of data \
            (a,b,omega,phi) must be of the same size ");
 
 

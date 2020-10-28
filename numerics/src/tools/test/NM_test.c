@@ -2882,6 +2882,7 @@ static int test_NM_LU_solve_matrix_rhs_unit(NumericsMatrix * M1, NumericsMatrix 
 }
 static int test_NM_LU_solve_matrix_rhs(void)
 {
+  numerics_set_verbose(3);
 
   printf("========= Starts Numerics tests for NumericsMatrix (test_NM_LU_solve) ========= \n");
   /* numerics_set_verbose(2); */
@@ -2933,6 +2934,7 @@ static int test_NM_LU_solve_matrix_rhs(void)
     B->matrix0[j+j*n] = 1.0;
   info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
   NM_clear(B);
+  if(info != 0) return info;
 
   /* SPARSE matrix, SPARSE RHS */
   M1 = test_matrix_5();

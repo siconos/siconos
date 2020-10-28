@@ -175,6 +175,7 @@ get_target_property(CHECK BLAS::BLAS INTERFACE_INCLUDE_DIRECTORIES)
 # We don't want warnings from externals libraries.
 get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
 list(REMOVE_ITEM externals_COMPILE_FLAGS -Wall)
+list(REMOVE_ITEM externals_COMPILE_FLAGS -Wunused-variable)
 set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")

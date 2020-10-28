@@ -3256,7 +3256,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
           NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
         }
 
-        NM_MUMPS_set_problem(A, 0, NULL);
+        NM_MUMPS_set_matrix(A);
 
         NM_MUMPS(A, 4); /* analyzis,factorization */
 
@@ -3392,7 +3392,7 @@ int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 
         DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
-        NM_MUMPS_set_problem(A, nrhs, b);
+        NM_MUMPS_set_dense_rhs(A, nrhs, b);
 
         NM_MUMPS(A, 3); /* solve */
         info = mumps_id->info[0];
@@ -3501,15 +3501,14 @@ int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
         case NSM_MUMPS:
         {
           numerics_printf_verbose(2,"NM_LU_solve: using MUMPS\n");
-          numerics_error("NM_LU_solve_matrix_rhs"," not yet implemented\n")
 
-          assert (NM_MUMPS_id(A)->job); /* this means that least a
+          assert (NM_MUMPS_id(A)->job); /* this means that at least a
                                          * factorization has already been
                                          * done */
 
           DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
-          NM_MUMPS_set_problem(A, nrhs, b);
+          NM_MUMPS_set_sparse_rhs(A, B);
 
           NM_MUMPS(A, 3); /* solve */
           info = mumps_id->info[0];
@@ -3522,6 +3521,16 @@ int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
               fprintf(stderr,"NM_LU_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
             }
           }
+
+          /* solution is returned in the DENSE format in the B matrix */
+          NM_clear(B);
+          B->storageType = NM_DENSE;
+          B->size0 = A->size0;
+          B->size1 = mumps_id->nrhs;
+          B->matrix0 = (double *) malloc(
+            A->size0*mumps_id->nrhs*sizeof(double));
+          memcpy(B->matrix0, mumps_id->rhs,
+                 A->size0*mumps_id->nrhs*sizeof(double));
           break;
         }
 #endif /* WITH_MUMPS */
@@ -3697,7 +3706,8 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
-      NM_MUMPS_set_problem(A, 1, b);
+      NM_MUMPS_set_matrix(A);
+      NM_MUMPS_set_dense_rhs(A, 1, b);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
@@ -4084,7 +4094,8 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
 
-      NM_MUMPS_set_problem(A, 1, b);
+      NM_MUMPS_set_matrix(A);
+      NM_MUMPS_set_dense_rhs(A, 1, b);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
@@ -4948,7 +4959,7 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
           /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
         }
 
-        NM_MUMPS_set_problem(A, 0, NULL);
+        NM_MUMPS_set_matrix(A);
 
         NM_MUMPS(A, 4); /* analyzis,factorization */
 
@@ -5074,7 +5085,7 @@ int NM_Cholesky_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 
         DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
-        NM_MUMPS_set_problem(A, nrhs, b);
+        NM_MUMPS_set_dense_rhs(A, nrhs, b);
 
         NM_MUMPS(A, 3); /* solve */
         info = mumps_id->info[0];
@@ -5184,15 +5195,14 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
         case NSM_MUMPS:
         {
           numerics_printf_verbose(2,"NM_Cholesky_solve: using MUMPS\n");
-          numerics_error("NM_Cholesky_solve_matrix_rhs"," not yet implemented\n")
 
-          assert (NM_MUMPS_id(A)->job); /* this means that least a
+          assert (NM_MUMPS_id(A)->job); /* this means that at least a
                                          * factorization has already been
                                          * done */
 
           DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
-          NM_MUMPS_set_problem(A, nrhs, b);
+          NM_MUMPS_set_sparse_rhs(A, B);
 
           NM_MUMPS(A, 3); /* solve */
           info = mumps_id->info[0];
@@ -5205,6 +5215,16 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
               fprintf(stderr,"NM_Cholesky_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
             }
           }
+
+          /* solution is returned in the DENSE format in the B matrix */
+          NM_clear(B);
+          B->storageType = NM_DENSE;
+          B->size0 = A->size0;
+          B->size1 = mumps_id->nrhs;
+          B->matrix0 = (double *) malloc(
+            A->size0*mumps_id->nrhs*sizeof(double));
+          memcpy(B->matrix0, mumps_id->rhs,
+                 A->size0*mumps_id->nrhs*sizeof(double));
           break;
         }
 #endif /* WITH_MUMPS */
@@ -5376,7 +5396,7 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
           /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
         }
 
-        NM_MUMPS_set_problem(A, 0, NULL);
+        NM_MUMPS_set_matrix(A);
 
         NM_MUMPS(A, 4); /* analyzis,factorization */
 
@@ -5515,7 +5535,7 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 
         DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
-        NM_MUMPS_set_problem(A, nrhs, b);
+        NM_MUMPS_set_dense_rhs(A, nrhs, b);
 
         NM_MUMPS(A, 3); /* solve */
         info = mumps_id->info[0];

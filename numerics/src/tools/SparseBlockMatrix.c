@@ -1401,9 +1401,6 @@ void SBM_row_prod(unsigned int sizeX, unsigned int sizeY, unsigned int currentRo
   /* Column (block) position of the current block*/
   size_t colNumber = 0;
 
-  /* Position of the sub-block of x multiplied by the sub-block of A */
-  unsigned int posInX = 0;
-
   /* Check if currentRowNumber fits with A dimensions */
   assert(currentRowNumber <= A->blocknumber0);
 

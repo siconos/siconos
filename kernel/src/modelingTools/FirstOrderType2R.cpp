@@ -127,11 +127,11 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned in
 
 void FirstOrderType2R::computeJachlambda(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& D)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJachlambda must be overload.");
+  THROW_EXCEPTION("FirstOrderType2R::computeJachlambda must be overload.");
 }
 void FirstOrderType2R::computeJachx(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& C)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
+  THROW_EXCEPTION("FirstOrderType2R::computeJachx must be overload.");
 }
 
 void FirstOrderType2R::computeJach(double time, Interaction& inter)
@@ -153,7 +153,7 @@ void FirstOrderType2R::computeJach(double time, Interaction& inter)
 
 void FirstOrderType2R::computeJacglambda(double time, const SiconosVector& lambda, SimpleMatrix& B)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
+  THROW_EXCEPTION("FirstOrderType2R::computeJacglambda must be overload.");
 }
 
 void FirstOrderType2R::computeJacg(double time, Interaction& inter)

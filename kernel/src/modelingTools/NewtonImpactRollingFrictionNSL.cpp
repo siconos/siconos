@@ -39,7 +39,7 @@ bool NewtonImpactRollingFrictionNSL::isVerified() const
 {
   bool res = false;
   // to do
-  RuntimeException::selfThrow("NewtonImpactRollingFrictionNSL:: isVerified, not yet implemented!");
+  THROW_EXCEPTION("NewtonImpactRollingFrictionNSL:: isVerified, not yet implemented!");
   return res;
 }
 

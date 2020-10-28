@@ -89,12 +89,11 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
   assert(problem->q);
 
   int n_row = problem->M->size0;
-  int n_col = problem->M->size1;
 
   int n = problem->n;
   int m = problem->m;
 
-  assert(n_col == n+m);
+  assert(problem->M->size1 == n+m);
 
   double * w_e  = w;
   double * u = z;
@@ -114,7 +113,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
   /*  q_linear_system_ref = q_linear_system  + m + n;*/
   double * q_linear_system_ref = q_linear_system  + n_row;
 
-  double * work_DGELS = q_linear_system_ref + n_row;
+  // double * work_DGELS = q_linear_system_ref + n_row;
 
   for(int row = 0; row < n_row; row++)
     q_linear_system_ref[row] =  - problem->q[row];
@@ -323,7 +322,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   /*  q_linear_system_ref = q_linear_system + m + n;*/
   double * q_linear_system_ref = q_linear_system + n_row;
 
-  double * work_DGELS = q_linear_system_ref + n_row;
+  // double * work_DGELS = q_linear_system_ref + n_row;
 
   for(int row = 0; row < n_row; row++)
     q_linear_system_ref[row] =  - problem->q[row];

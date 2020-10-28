@@ -46,7 +46,6 @@ namespace SiconosSharedLibrary
 {
   /** loads a plugin
    * \param pluginPath full path to plugin
-   * \exception SiconosSharedLibraryException if plugin fail to open
    * \return PluginHandle the object to handle the plugin
    */
   PluginHandle loadPlugin(const std::string& pluginPath);
@@ -54,14 +53,12 @@ namespace SiconosSharedLibrary
   /** Gets procedure address
    * \param plugin the plugin handle
    * \param procedure the procedure name
-   * \exception SiconosSharedLibraryException if procedure not found
    * \return pointer on procedure
    */
   void * getProcAddress(PluginHandle plugin, const std::string& procedure);
   
   /**  Closes plugin
    * \param pluginFile the name of the plugin to close
-   * \exception SiconosSharedLibraryException if the given plugin is not opened
    */
   void closePlugin(const std::string& pluginFile);
 }

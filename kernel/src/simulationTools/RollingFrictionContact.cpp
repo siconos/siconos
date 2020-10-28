@@ -52,7 +52,7 @@ RollingFrictionContact::RollingFrictionContact(int dimPb, SP::SolverOptions opti
     _rolling_frictionContact_driver = &rolling_fc2d_driver;
   }
   else
-    RuntimeException::selfThrow("Wrong dimension value (only 5 (3D) or 3 (2D) are allowed for RollingFrictionContact constructor.");
+    THROW_EXCEPTION("Wrong dimension value (only 5 (3D) or 3 (2D) are allowed for RollingFrictionContact constructor.");
 
   _mu.reset(new MuStorage());
   _muR.reset(new MuStorage());

@@ -254,15 +254,15 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
   // - allocate memory for the matrix W
   // - update its content for the current (initial) state of the dynamical system, depending on its type.
   if(!ds)
-    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
+    THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
+    THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
 
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
 
   if(_dynamicalSystemsGraph->properties(dsv).W)
-    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
+    THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
 
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
@@ -367,7 +367,7 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
       _initializeIterationMatrixWBoundaryConditions(*ds,dsv);
 
   }
-  else RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW - not yet implemented for Dynamical system of type : " + Type::name(*ds));
+  else THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixW - not yet implemented for Dynamical system of type : " + Type::name(*ds));
 
 
   if (isWSymmetricDefinitePositive())
@@ -392,10 +392,10 @@ void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(SecondOrderDS&
   DEBUG_BEGIN("MoreauJeanOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds)\n");
 
   if(!(checkOSI(dsv)))
-    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
+    THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
 
   if(_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions)
-    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
+    THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - WBoundaryConditions(ds) is already in the map and has been initialized.");
 
 
   Type::Siconos dsType = Type::value(ds);
@@ -415,7 +415,7 @@ void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(SecondOrderDS&
                                 *_dynamicalSystemsGraph->properties(dsv).W);
   }
   else
-    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixWBoundaryConditions - not yet implemented for Dynamical system of type :" +  Type::name(ds));
+    THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixWBoundaryConditions - not yet implemented for Dynamical system of type :" +  Type::name(ds));
   DEBUG_END("MoreauJeanOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds) \n");
 }
 
@@ -469,7 +469,7 @@ void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
     DEBUG_EXPR(WBoundaryConditions.display(););
   }
   else
-    RuntimeException::selfThrow("MoreauJeanOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type : " +  Type::name(ds));
+    THROW_EXCEPTION("MoreauJeanOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type : " +  Type::name(ds));
   DEBUG_END("MoreauJeanOSI::_computeWBoundaryConditions\n");
 }
 
@@ -541,7 +541,7 @@ void MoreauJeanOSI::computeW(double t, SecondOrderDS& ds, SiconosMatrix& W)
     DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "W.isFactorized() = "<< W.isFactorized() << std::endl;);
 
   }
-  else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(ds));
+  else THROW_EXCEPTION("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(ds));
 
 
   DEBUG_END("MoreauJeanOSI::computeW\n");
@@ -972,7 +972,7 @@ double MoreauJeanOSI::computeResidu()
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
     }
     else
-      RuntimeException::selfThrow("MoreauJeanOSI::computeResidu - not yet implemented for Dynamical system of type: " + Type::name(ds));
+      THROW_EXCEPTION("MoreauJeanOSI::computeResidu - not yet implemented for Dynamical system of type: " + Type::name(ds));
 
     if(normResidu > maxResidu) maxResidu = normResidu;
 
@@ -1203,7 +1203,7 @@ void MoreauJeanOSI::computeFreeState()
     //   DEBUG_EXPR(vfree.display(););
     // }
     // else
-    //   RuntimeException::selfThrow("MoreauJeanOSI::computeFreeState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
+    //   THROW_EXCEPTION("MoreauJeanOSI::computeFreeState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
   }
   DEBUG_END("MoreauJeanOSI::computeFreeState()\n");
@@ -1406,7 +1406,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       // current Interaction.
       if(_useGammaForRelation)
       {
-        RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput Configuration not possible");
+        THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput Configuration not possible");
 //        subprod(C, *deltax, osnsp_rhs, coord, true);
       }
       else
@@ -1439,7 +1439,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
           subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
         }
         else
-          RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
+          THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
       }
       if(relationSubType == CompliantLinearTIR)
       {
@@ -1466,7 +1466,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
           }
         }
         else
-          RuntimeException::selfThrow("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
+          THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
       }
       DEBUG_EXPR(osnsp_rhs.display(););
 
@@ -1562,7 +1562,7 @@ void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& no
       W->Solve(v);
       v += vold;
     }
-    else RuntimeException::selfThrow("MoreauJeanOSI::integrate - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
+    else THROW_EXCEPTION("MoreauJeanOSI::integrate - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
   }
 }
 
@@ -1823,7 +1823,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
       updatePosition(ds);
 
     }
-    else RuntimeException::selfThrow("MoreauJeanOSI::updateState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
+    else THROW_EXCEPTION("MoreauJeanOSI::updateState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
   }
   DEBUG_END("MoreauJeanOSI::updateState(const unsigned int)\n");

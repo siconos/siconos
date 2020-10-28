@@ -39,7 +39,8 @@ def test_nm_mumps():
     numerics.NM_entry(M, 1, 1, 1.)
 
     b = numpy.array([1.0, 1.0])
-    numerics.NM_MUMPS_set_problem(M, 1, b)
+    numerics.NM_MUMPS_set_matrix(M)
+    numerics.NM_MUMPS_set_dense_rhs(M, 1, b)
 
     # analysis, factorization, solve.
     numerics.NM_MUMPS(M, 6)

@@ -319,7 +319,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
   if(!S) return 1;
 
   CS_ENTRY *x, *b, *Xx, *Bx ;
-  CS_INT *xi, *pinv, *q, top, k, col, i, p, j,  *Bp, *Bi, *Xp, *Xi;
+  CS_INT *xi, *pinv, *q, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
 
   x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
   b = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
@@ -442,7 +442,7 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatr
   if(!S) return 1;
 
   CS_ENTRY *x, *b, *Xx, *Bx ;
-  CS_INT *xi, *pinv, top, k, col, i, p, j,  *Bp, *Bi, *Xp, *Xi;
+  CS_INT *xi, *pinv, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
 
   x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
   b = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */

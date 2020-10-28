@@ -3,7 +3,7 @@
 #include "OccContactShape.hpp"
 #include "ContactShapeDistance.hpp"
 #include "WhichGeometer.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include <limits>
 #include <iostream>
 #include <boost/typeof/typeof.hpp>
@@ -31,7 +31,7 @@ OccR::OccR(const ContactPoint& contact1,
     this->_geometer = ask<WhichGeometer<CadmbtbDistanceType> >(contact1.contactShape());
     break;
   default:
-    RuntimeException::selfThrow("OccR: Unknown distance calculator");
+    THROW_EXCEPTION("OccR: Unknown distance calculator");
   }
   this->_contact2.contactShape().accept(*this->_geometer);
     

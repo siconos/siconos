@@ -20,7 +20,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "FirstOrderLinearDS.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 class FirstOrderLinearDSTest : public CppUnit::TestFixture
 {

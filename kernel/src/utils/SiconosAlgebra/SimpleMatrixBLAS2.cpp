@@ -44,17 +44,17 @@ using namespace Siconos;
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   if(A.size(1) != x.size())
-//     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
+//     THROW_EXCEPTION("prod(A,x,y) error: inconsistent sizes between A and x.");
 
 //   if(A.size(0) != y.size())
-//     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
+//     THROW_EXCEPTION("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-//   unsigned int numA = A.num();
-//   unsigned int numX = x.num();
-//   unsigned int numY = y.num();
+//   Siconos::UBLAS_TYPE numA = A.num();
+//   Siconos::UBLAS_TYPE numX = x.num();
+//   Siconos::UBLAS_TYPE numY = y.num();
 
 //   if(numA == 0)  // If A is Block
-//     SiconosMatrixException::selfThrow("axpy_prod(A,x,y) error: not yet implemented for block matrices.");
+//     THROW_EXCEPTION("axpy_prod(A,x,y) error: not yet implemented for block matrices.");
 
 //   if(numA == ZERO)  // A = 0
 //   {
@@ -81,7 +81,7 @@ using namespace Siconos;
 //           if(numX == DENSE)
 //           {
 //             if(numY != DENSE)
-//               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+//               THROW_EXCEPTION("prod(A,x,y) error: y (output) must be a dense vector.");
 
 //             if(numA == DENSE)
 //               ublas::axpy_prod(*A.dense(), *x.dense(), *y.dense(), init);
@@ -97,7 +97,7 @@ using namespace Siconos;
 //           else //if(numX == SPARSE)
 //           {
 //             if(numY != DENSE && numA != SPARSE)
-//               SiconosMatrixException::selfThrow("axpy_prod(A,x,y) error: y (output) must be a dense vector.");
+//               THROW_EXCEPTION("axpy_prod(A,x,y) error: y (output) must be a dense vector.");
 
 //             if(numA == DENSE)
 //               ublas::axpy_prod(*A.dense(), *x.sparse(), *y.dense(), init);
@@ -153,14 +153,14 @@ using namespace Siconos;
 // void gemvtranspose(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
 // {
 //   if(A.isBlock())
-//     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
+//     THROW_EXCEPTION("gemv(...) not yet implemented for block vectors or matrices.");
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
-//   unsigned int numA = A.num();
-//   unsigned int numX = x.num();
-//   unsigned int numY = y.num();
+//   Siconos::UBLAS_TYPE numA = A.num();
+//   Siconos::UBLAS_TYPE numX = x.num();
+//   Siconos::UBLAS_TYPE numY = y.num();
 //   if(numA != DENSE || numX != DENSE || numY != DENSE)
-//     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
+//     THROW_EXCEPTION("gemv(...) failed: reserved to dense matrices or vectors.");
 
 //   siconosBindings::blas::gemv(a, siconosBindings::trans(*A.dense()), *x.dense(), b, *y.dense());
 // }
@@ -168,14 +168,14 @@ using namespace Siconos;
 // void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
 // {
 //   if(A.isBlock())
-//     SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
+//     THROW_EXCEPTION("gemv(...) not yet implemented for block vectors or matrices.");
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
-//   unsigned int numA = A.num();
-//   unsigned int numX = x.num();
-//   unsigned int numY = y.num();
+//   Siconos::UBLAS_TYPE numA = A.num();
+//   Siconos::UBLAS_TYPE numX = x.num();
+//   Siconos::UBLAS_TYPE numY = y.num();
 //   if(numA != DENSE || numX != DENSE || numY != DENSE)
-//     SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
+//     THROW_EXCEPTION("gemv(...) failed: reserved to dense matrices or vectors.");
 
 //   siconosBindings::blas::gemv(a, *A.dense(), *x.dense(), b, *y.dense());
 // }

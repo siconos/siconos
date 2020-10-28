@@ -74,35 +74,23 @@ private:
    */
   SP::VInt _ipiv;
 
-  /** bool _isPLUFactorized;
-   *  Boolean = true if the Matrix is PLU Factorized.
-   */
-  bool _isPLUFactorized;
+  /** True if the Matrix is PLU Factorized. */
+  bool _isPLUFactorized = false;
 
-  /** bool _isPLUFactorizedInPlace;
-   *  Boolean = true if the Matrix is PLU Factorized in place.
-   */
-  bool _isPLUFactorizedInPlace;
+  /** True if the Matrix is PLU Factorized in place.*/
+  bool _isPLUFactorizedInPlace = false;
 
-  /** bool _isCholeskyFactorized;
-   *  Boolean = true if the Matrix is Cholesky Factorized.
-   */
-  bool _isCholeskyFactorized;
+  /** True if the Matrix is Cholesky Factorized. */
+  bool _isCholeskyFactorized = false;
 
-  /** bool _isCholeskyFactorizedInPlace;
-   *  Boolean = true if the Matrix is Cholesky Factorized in place.
-   */
-  bool _isCholeskyFactorizedInPlace;
+  /** True if the Matrix is Cholesky Factorized in place. */
+  bool _isCholeskyFactorizedInPlace = false;
 
-  /** bool _isQRFactorized;
-   *  Boolean = true if the Matrix has been QR Factorized in place.
-   */
-  bool _isQRFactorized;
+  /** True if the Matrix has been QR Factorized in place. */
+  bool _isQRFactorized = false;
 
-  /** bool _isPLUInversed;
-   *  Boolean = true if the Matrix has been Inversed in Place
-   */
-  bool _isPLUInversed;
+  /** True if the Matrix has been Inversed in Place. */
+  bool _isPLUInversed = false;
 
   /** Numerics Matrix structure
    * This matrix is used to perform  computation using Numerics,
@@ -196,10 +184,8 @@ private:
   // friend void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
 
 public:
-  /** Default constructor
-   */
+  /** Default constructor */
   SimpleMatrix();
-  SimpleMatrix(int i);
 
   /** constructor with the type and the dimension of the Boost matrix
    *  \param row number of rows.
@@ -295,7 +281,7 @@ public:
   {
     return _numericsMatrix.get();
   };
-  
+
   /** determines if the matrix has been inversed
    *  \return true if the matrix is inversed
    */
@@ -540,7 +526,6 @@ public:
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
-   *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
   double& operator()(unsigned int i, unsigned int j);
@@ -548,7 +533,6 @@ public:
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
-   *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
   double operator()(unsigned int i, unsigned int j) const;

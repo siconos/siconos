@@ -28,7 +28,7 @@
 OSNSMultipleImpact::OSNSMultipleImpact(std::string newTypeLaw, double newDelP): LinearOSNS(), _typeCompLaw(newTypeLaw),  _deltaP(newDelP)
 {
   if((_typeCompLaw != "MonoStiffness") && (_typeCompLaw != "BiStiffness"))
-    RuntimeException::selfThrow("OSNSMultipleImpact::_typeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
+    THROW_EXCEPTION("OSNSMultipleImpact::_typeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
 }
 
 void OSNSMultipleImpact::setTolImpact(double newTolZero)
@@ -86,7 +86,7 @@ void OSNSMultipleImpact::set_typeCompLaw(std::string newTypeLaw)
 {
   _typeCompLaw = newTypeLaw;
   if((_typeCompLaw != "MonoStiffness") && (_typeCompLaw != "BiStiffness"))
-    RuntimeException::selfThrow("OSNSMultipleImpact::_typeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
+    THROW_EXCEPTION("OSNSMultipleImpact::_typeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
 };
 
 void OSNSMultipleImpact::SetSizeDataSave(unsigned int var)
@@ -296,7 +296,7 @@ void OSNSMultipleImpact::PreComputeImpact()
 {
   //1. Get the number of contacts and bodies involved in the impact
   if(indexSetLevel() != 1)
-    RuntimeException::selfThrow("OSNSMultipleImpact::PreComputeImpact==> the levelMin must be equal to 1 in the multiple impact model !!");
+    THROW_EXCEPTION("OSNSMultipleImpact::PreComputeImpact==> the levelMin must be equal to 1 in the multiple impact model !!");
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel()); // get indexSet[1]
   _nContact = indexSet.size();
   //2. Compute matrix _M
@@ -311,7 +311,7 @@ void OSNSMultipleImpact::PreComputeImpact()
     _sizeOutput = _M->size();
   }
   if(_nContact != _sizeOutput)
-    RuntimeException::selfThrow("OSNSMultipleImpact::ComputeWMinvWtrans: number of contacts different from the size of output--> this case is not yet implemented!");
+    THROW_EXCEPTION("OSNSMultipleImpact::ComputeWMinvWtrans: number of contacts different from the size of output--> this case is not yet implemented!");
   //3. Checks size of vectors
   if(_velocityContact->size() != _sizeOutput)
   {
@@ -460,7 +460,7 @@ void OSNSMultipleImpact::PrimConVelocity()
   _energyPrimaryContact = (*_energyContact)(_primaryContactId);
   if(!isVelNegative(_relativeVelocityPrimaryContact))
   {
-    RuntimeException::selfThrow("OSNSMultipleImpact::PrimConVelocity, the velocity at the primary contact must be negative !!");
+    THROW_EXCEPTION("OSNSMultipleImpact::PrimConVelocity, the velocity at the primary contact must be negative !!");
   }
   /*
     std::cout << "Primary contact according to relative velocity: " << _primaryContactId <<std::endl;
@@ -475,7 +475,7 @@ void OSNSMultipleImpact::PrimConEnergy()
   _relativeVelocityPrimaryContact = (*_velocityContact)(_primaryContactId);
   if(_energyPrimaryContact < 0.0)
   {
-    RuntimeException::selfThrow("OSNSMultipleImpact::PrimConEnergy the potential energy at the primary contact must be positive !!");
+    THROW_EXCEPTION("OSNSMultipleImpact::PrimConEnergy the potential energy at the primary contact must be positive !!");
   }
   /*
     std::cout << "Primary contact according to potenial energy: " << _primaryContactId <<std::endl;
@@ -594,7 +594,7 @@ void OSNSMultipleImpact::Compute_distributionVector()
         ratio_stiff = (std::pow(_stiff, (1.0 / (1.0 + _mu)))) / (std::pow(stiff_prima, (1.0 / (1.0 + mu_prima))));
         if(!isVelNegative(_vel))
         {
-          RuntimeException::selfThrow("OSNSMultipleImpact::Compute_distributionVector, the relative velocity when particle starts to impact must be negative!!");
+          THROW_EXCEPTION("OSNSMultipleImpact::Compute_distributionVector, the relative velocity when particle starts to impact must be negative!!");
         }
 
         ratio_vel = (std::pow(std::fabs(_vel), (_mu / (_mu + 1.0)))) / (std::pow(std::fabs(_relativeVelocityPrimaryContact), (mu_prima / (1.0 + mu_prima))));
@@ -605,7 +605,7 @@ void OSNSMultipleImpact::Compute_distributionVector()
         (*_distributionVector)(i) = 0.0;
       }
       if((*_distributionVector)(i) < 0.0)
-        RuntimeException::selfThrow("OSNSMultipleImpact::Compute_distributionVector the component of _distributionVector must be positive !!");
+        THROW_EXCEPTION("OSNSMultipleImpact::Compute_distributionVector the component of _distributionVector must be positive !!");
     };
   }
   //Case 2: case of primary contact selected according to the potential energy
@@ -622,7 +622,7 @@ void OSNSMultipleImpact::Compute_distributionVector()
       {
         if(!isVelNegative((*_velocityContact)(i)))
         {
-          RuntimeException::selfThrow("OSNSMultipleImpact::Compute_distributionVector, the pre-impact velocity must be negative!!");
+          THROW_EXCEPTION("OSNSMultipleImpact::Compute_distributionVector, the pre-impact velocity must be negative!!");
         }
         else
         {
@@ -649,7 +649,7 @@ void OSNSMultipleImpact::Compute_distributionVector()
         (*_distributionVector)(i) = 0.0;
       };
       if((*_distributionVector)(i) < 0.0)
-        RuntimeException::selfThrow("OSNSMultipleImpact::Compute_distributionVector the component of _distributionVector must be positive !!");
+        THROW_EXCEPTION("OSNSMultipleImpact::Compute_distributionVector the component of _distributionVector must be positive !!");
     };
   };
 }
@@ -681,7 +681,7 @@ void OSNSMultipleImpact::ComputeImpulseContact()
     }
     if((*_forceContact)(i) < 0.0)
     {
-      RuntimeException::selfThrow("OSNSMultipleImpact::ComputeImpulseContact, the contact force must be positive or equal to zero!!!");
+      THROW_EXCEPTION("OSNSMultipleImpact::ComputeImpulseContact, the contact force must be positive or equal to zero!!!");
     }
   };
 }
@@ -730,7 +730,7 @@ void OSNSMultipleImpact::Compute_energyContact()
       //
       if((*_energyContact)(i) <  0.0)
       {
-        RuntimeException::selfThrow("OSNSMultipleImpact::Compute_energyContact, the potential energy during compression phase must be positive!!!");
+        THROW_EXCEPTION("OSNSMultipleImpact::Compute_energyContact, the potential energy during compression phase must be positive!!!");
       };
     };
   }
@@ -799,7 +799,7 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
 {
   // Save the total impulse at the primary contacts (time-like independent variable) and the time evolution during impact
   if(_ithPoint >= _DataMatrix->size(0))
-    RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of points saved exceeds the size of matrix allocated!!!");
+    THROW_EXCEPTION("In OSNSMultipleImpact::ComputeImpact, number of points saved exceeds the size of matrix allocated!!!");
   //(*_DataMatrix)(_ithPoint,0) = _timeVariable;
   (*_DataMatrix)(_ithPoint, 0) = _impulseVariable;
   // Save the data related to UnitaryRelations
@@ -921,7 +921,7 @@ void OSNSMultipleImpact::ComputeImpact()
     //
     if(number_step > _nStepMax)
     {
-      RuntimeException::selfThrow("In OSNSMultipleImpact::ComputeImpact, number of integration steps performed exceeds the maximal number of steps allowed!!!");
+      THROW_EXCEPTION("In OSNSMultipleImpact::ComputeImpact, number of integration steps performed exceeds the maximal number of steps allowed!!!");
       //cout << "Causion: so long computation, the computation is stopped even when the impact is not yet terminated!!! " <<std::endl;
       break;
     }

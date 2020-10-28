@@ -37,7 +37,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   DEBUG_BEGIN("CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulation & s)\n");
   if(!_Csurface && _pluginhName.empty())
   {
-    RuntimeException::selfThrow("CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing the Actuator");
+    THROW_EXCEPTION("CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing the Actuator");
   }
   else
   {
@@ -78,7 +78,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   }
   else
   {
-    RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + std::to_string(dsType));
+    THROW_EXCEPTION("LinearSMC is not yet implemented for system of type" + std::to_string(dsType));
   }
   _DS_SMC->setNumber(999999);
   _DS_SMC->initMemory(1);
@@ -99,7 +99,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   if(!_plugingName.empty())
   {
     if(_pluginhName.empty())
-      RuntimeException::selfThrow("LinearSMC::initialize - the Controller has a function g set but _pluginhName is not set\n You must supply a function to compute y=h(x,...)");
+      THROW_EXCEPTION("LinearSMC::initialize - the Controller has a function g set but _pluginhName is not set\n You must supply a function to compute y=h(x,...)");
     if(!_pluginJacgxName.empty())  // Is the relation the most generic NL one ?
     {
       DEBUG_PRINT("A FirstOrderNonLinearR is created for the _relationSMC\n");
@@ -257,7 +257,7 @@ void CommonSMC::setSaturationMatrix(SP::SimpleMatrix newSat)
   // check dimensions ...
   if(newSat->size(1) != _B->size(1))
   {
-    RuntimeException::selfThrow("CommonSMC::setSaturationMatrixPtr - inconstency between the dimension of the state space and D");
+    THROW_EXCEPTION("CommonSMC::setSaturationMatrixPtr - inconstency between the dimension of the state space and D");
   }
   else
   {

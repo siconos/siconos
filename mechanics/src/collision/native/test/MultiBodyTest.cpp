@@ -310,14 +310,9 @@ void Disks::init(std::string disks_input)
 
   }
 
-  catch(SiconosException e)
-  {
-    std::cout << e.report() << std::endl;
-    exit(1);
-  }
   catch(...)
   {
-    std::cout << "Exception caught in Disks::init()" << std::endl;
+    Siconos::exception::process();
     exit(1);
   }
 }

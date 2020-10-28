@@ -26,6 +26,7 @@
 #include "RelationNamespace.hpp"
 #include "SiconosVisitor.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosSerialization.hpp" // For ACCEPT_SERIALIZATION
 
 /** General Non Linear Relation (Abstract Base class for Relations).
 

@@ -86,7 +86,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
 
@@ -112,7 +112,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
 
@@ -129,7 +129,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
 
@@ -146,7 +146,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
 
@@ -172,7 +172,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
     ;
   }
@@ -190,7 +190,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
   }
 
@@ -208,7 +208,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
   }
   void visit(const NewtonImpactRollingFrictionNSL& nslaw)
@@ -225,7 +225,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
   }
   void visit(const MultipleImpactNSL& nslaw)
@@ -242,7 +242,7 @@ struct Interaction::_setLevels : public SiconosVisitor
     }
     else
     {
-      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
   }
 };
@@ -320,7 +320,7 @@ Interaction::Interaction(SP::NonSmoothLaw NSL, SP::Relation rel):
 
   // Ensure consistency between interaction and nslaw sizes
   if(_interactionSize != _nslaw->size())
-    RuntimeException::selfThrow("Interaction constructor - Nonsmooth law and relation are not consistent (sizes differ).");
+    THROW_EXCEPTION("Interaction constructor - Nonsmooth law and relation are not consistent (sizes differ).");
 
   // Check levels and resize attributes (y, lambda ...) if needed.
   reset();
@@ -345,7 +345,7 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
     __initDataNewtonEuler(DSlink, ds1, ds2);
 
   else
-    RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
+    THROW_EXCEPTION("Interaction::initData unknown initialization procedure for \
         a relation of type: " + std::to_string(relationType));
 
   _relation->initialize(*this);
@@ -617,7 +617,7 @@ void Interaction::setYOldPtr(const VectorOfVectors& newVector)
 void Interaction::setYOld(const unsigned int  index, const SiconosVector& newYOld)
 {
   if(_yOld.size() <= index)
-    RuntimeException::selfThrow("Interaction::setYOld, index out of range ");
+    THROW_EXCEPTION("Interaction::setYOld, index out of range ");
 
   // set _yOld[index]
   if(! _yOld[index])
@@ -723,7 +723,7 @@ void Interaction::setLambdaOld(const unsigned int  index, const SiconosVector& n
   else
   {
     if(_lambdaOld[index]->size() != newLambdaOld.size())
-      RuntimeException::selfThrow("Interaction::setLambdaOld(index,newLambdaOld), inconsistent sizes between lambdaOld(index) and newLambdaOld ");
+      THROW_EXCEPTION("Interaction::setLambdaOld(index,newLambdaOld), inconsistent sizes between lambdaOld(index) and newLambdaOld ");
     *(_lambdaOld[index]) = newLambdaOld;
   }
 }
@@ -731,9 +731,9 @@ void Interaction::setLambdaOld(const unsigned int  index, const SiconosVector& n
 void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector newLambdaOld)
 {
   if(_lambdaOld.size() > index)
-    RuntimeException::selfThrow("Interaction::setLambdaOldPtr, index out of range ");
+    THROW_EXCEPTION("Interaction::setLambdaOldPtr, index out of range ");
   if(newLambdaOld->size() != _interactionSize)
-    RuntimeException::selfThrow("Interaction::setLambdaOldPtr, interactionSize differs from newLambdaOld vector size ");
+    THROW_EXCEPTION("Interaction::setLambdaOldPtr, interactionSize differs from newLambdaOld vector size ");
 
   _lambdaOld[index] = newLambdaOld;
 }
@@ -896,7 +896,7 @@ SP::SiconosMatrix Interaction::getLeftInteractionBlockForDS(unsigned int pos, un
     originalMatrix = r->jachqT();
   }
   else
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
+    THROW_EXCEPTION("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
 //  Siconos::UBLAS_TYPE type = originalMatrix->num();
   SP::SiconosMatrix  InteractionBlock(new SimpleMatrix(size, sizeDS, originalMatrix->num() ));
 
@@ -927,11 +927,11 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int 
 
   //Type::Siconos dsType = Type::value(*ds);
   //if (dsType != Type::NewtonEulerDS)
-  //  RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- ds is not from NewtonEulerDS.");
+  //  THROW_EXCEPTION("Interaction::getLeftInteractionBlockForDSForProject- ds is not from NewtonEulerDS.");
 
   RELATION::TYPES relationType = relation()->getType();
   if(relationType != NewtonEuler)
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDSForProject- relation is not from NewtonEulerR.");
+    THROW_EXCEPTION("Interaction::getLeftInteractionBlockForDSForProject- relation is not from NewtonEulerR.");
 
   SP::SiconosMatrix originalMatrix;
   SP::NewtonEulerR r = std::static_pointer_cast<NewtonEulerR> (relation());
@@ -967,19 +967,19 @@ SP::SiconosMatrix Interaction::getRightInteractionBlockForDS(unsigned int pos, u
     else if(relationSubType != LinearTIR)
       originalMatrix = _relationMatrices[FirstOrderR::mat_B];
     else
-      RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, FirstOrderLinearTIR relation but no B matrix found!");
+      THROW_EXCEPTION("Interaction::getRightInteractionBlockForDS, FirstOrderLinearTIR relation but no B matrix found!");
   }
   else if(relationType == Lagrangian || relationType == NewtonEuler)
   {
-    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, call not permit " + std::to_string(relationType));
+    THROW_EXCEPTION("Interaction::getRightInteractionBlockForDS, call not permit " + std::to_string(relationType));
   }
   else
-    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
+    THROW_EXCEPTION("Interaction::getRightInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
 
   SP::SiconosMatrix  InteractionBlock(new SimpleMatrix(sizeDS, size, originalMatrix->num() ));
 
   if(! originalMatrix)
-    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): the right interactionBlock is a nullptr pointer (miss matrix B or H or gradients ...in relation ?)");
+    THROW_EXCEPTION("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): the right interactionBlock is a nullptr pointer (miss matrix B or H or gradients ...in relation ?)");
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
@@ -1025,7 +1025,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
     D = std::static_pointer_cast<NewtonEulerR> (relation())->jachlambda();
   }
   else
-    RuntimeException::selfThrow("Interaction::getExtraInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
+    THROW_EXCEPTION("Interaction::getExtraInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
 
   if(!D)
   {

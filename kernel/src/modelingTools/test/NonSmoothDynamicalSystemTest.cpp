@@ -49,7 +49,7 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
     SP::DynamicalSystem dsnull;
     nsds->insertDynamicalSystem(dsnull);
   }
-  catch(const RuntimeException& e)
+  catch(const Siconos::exception& e)
   {
     /*  Pass */
     std::cout << "testinsertDynamicalSystemNull: success!" << std::endl;

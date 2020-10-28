@@ -36,7 +36,7 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
   DEBUG_BEGIN(" SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
   if(!_C)
   {
-    RuntimeException::selfThrow("SlidingReducedOrderObserver::initialize - you have to set C before initializing the Observer");
+    THROW_EXCEPTION("SlidingReducedOrderObserver::initialize - you have to set C before initializing the Observer");
   }
   else
   {
@@ -68,7 +68,7 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
       _DS.reset(new FirstOrderLinearTIDS(static_cast<FirstOrderLinearTIDS&>(observedDS)));
     }
     else
-      RuntimeException::selfThrow("SlidingReducedOrderObserver is not yet implemented for system of type" + std::to_string(dsType));
+      THROW_EXCEPTION("SlidingReducedOrderObserver is not yet implemented for system of type" + std::to_string(dsType));
 
     // is it controlled ?
     originaldsgVD = originalDSG0.descriptor(_sensor->getDS());

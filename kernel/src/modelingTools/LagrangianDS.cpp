@@ -115,13 +115,13 @@ void LagrangianDS::resetToInitialState()
     *(_q[0]) = *_q0;
   }
   else
-    RuntimeException::selfThrow("LagrangianDS::resetToInitialState - initial position _q0 is null");
+    THROW_EXCEPTION("LagrangianDS::resetToInitialState - initial position _q0 is null");
   if(_velocity0)
   {
     *(_q[1]) = *_velocity0;
   }
   else
-    RuntimeException::selfThrow("LagrangianDS::resetToInitialState - initial velocity _velocity0 is null");
+    THROW_EXCEPTION("LagrangianDS::resetToInitialState - initial velocity _velocity0 is null");
 }
 
 void LagrangianDS::init_generalized_coordinates(unsigned int level)
@@ -252,7 +252,7 @@ void LagrangianDS::initRhs(double time)
 void LagrangianDS::setQ(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQ: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setQ: inconsistent input vector size ");
 
   if(! _q[0])
     _q[0].reset(new SiconosVector(newValue));
@@ -263,7 +263,7 @@ void LagrangianDS::setQ(const SiconosVector& newValue)
 void LagrangianDS::setQPtr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQPtr: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setQPtr: inconsistent input vector size ");
   _q[0] = newPtr;
 
 }
@@ -271,7 +271,7 @@ void LagrangianDS::setQPtr(SP::SiconosVector newPtr)
 void LagrangianDS::setQ0(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQ0: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setQ0: inconsistent input vector size ");
 
   if(! _q0)
     _q0.reset(new SiconosVector(newValue));
@@ -282,14 +282,14 @@ void LagrangianDS::setQ0(const SiconosVector& newValue)
 void LagrangianDS::setQ0Ptr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQ0Ptr: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setQ0Ptr: inconsistent input vector size ");
   _q0 = newPtr;
 }
 
 void LagrangianDS::setVelocity0(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocity0: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setVelocity0: inconsistent input vector size ");
 
   if(! _velocity0)
     _velocity0.reset(new SiconosVector(newValue));
@@ -300,7 +300,7 @@ void LagrangianDS::setVelocity0(const SiconosVector& newValue)
 void LagrangianDS::setVelocity(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocity: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setVelocity: inconsistent input vector size ");
 
   if(! _q[1])
     _q[1].reset(new SiconosVector(newValue));
@@ -311,7 +311,7 @@ void LagrangianDS::setVelocity(const SiconosVector& newValue)
 void LagrangianDS::setVelocityPtr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocityPtr: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setVelocityPtr: inconsistent input vector size ");
   _q[1] = newPtr;
 }
 
@@ -319,7 +319,7 @@ void LagrangianDS::setVelocityPtr(SP::SiconosVector newPtr)
 void LagrangianDS::setVelocity0Ptr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocity0Ptr: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setVelocity0Ptr: inconsistent input vector size ");
   _velocity0 = newPtr;
 }
 
@@ -577,7 +577,7 @@ void LagrangianDS::computeJacobianvForces(double time)
   //else nothing.
 }
 // void LagrangianDS::computeJacobianZFL( double time){
-//    RuntimeException::selfThrow("LagrangianDS::computeJacobianZFL - not implemented");
+//    THROW_EXCEPTION("LagrangianDS::computeJacobianZFL - not implemented");
 // }
 
 void LagrangianDS::display(bool brief) const
