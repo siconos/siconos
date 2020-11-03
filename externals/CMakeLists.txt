@@ -111,7 +111,7 @@ endif()
 if(NOT WITH_SYSTEM_SUITESPARSE)
   # else suite sparse is an external dependency of numerics and handled in numerics
   # CMakeLists.txt.
-  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse/CXSparse)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse SuiteSparse/CXSparse SuiteSparse/LDL  )
 endif()
 # TEST TEST TEST
 

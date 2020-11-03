@@ -28,6 +28,7 @@ target_link_libraries(yourlib PRIVATE SuiteSparse::<name>)
 
 with name among :
 - CXSparse
+- LDL
 - UMFPACK
 and that's it for the moment ...
 
@@ -37,7 +38,10 @@ if it's not in a "classic" place or if you want a specific version
 header for CXSparse : cs.h
 libs for CXSparse : <prefix>LIBS.<suffix>, with LIBS=cxsparse, colamd
 
-header fo umfpack : umfpack.h
+header for umfpack : ldl.h
+libs for umfpack : <prefix>ldl.<suffix>
+
+header for umfpack : umfpack.h
 libs for umfpack : <prefix>umfpack.<suffix>
 #]=======================================================================]
 
@@ -56,6 +60,9 @@ set(_CXSparse_lib cxsparse)
 # At least on some systems we need to link to libcolamd which is
 # another output from suitesparse.
 set(_Cxsparse_extralibs colamnd)
+
+set(_LDL_header ldl.h)
+set(_LDL_lib ldl)
 
 set(_UMFPACK_header umfpack.h)
 set(_UMFPACK_lib umfpack)

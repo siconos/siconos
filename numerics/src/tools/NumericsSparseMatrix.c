@@ -173,7 +173,7 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
 
   assert(A);
   assert(B);
-  
+
   B->origin = A->origin;
 
   CSparseMatrix* A_;
@@ -271,8 +271,9 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
   {
     B->linearSolverParams = NSM_linearSolverParams_new();
     B->linearSolverParams->solver =A->linearSolverParams->solver;
+    B->linearSolverParams->LDLT_solver =A->linearSolverParams->LDLT_solver;
   }
-  
+
 }
 
 
@@ -291,10 +292,13 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
   p->solver = NSM_SUPERLU_MT;
 #elif defined(WITH_MKL_PARDISO)
   p->solver = NSM_MKL_PARDISO;
-//#elif defined(WITH_MA57)
-//  p->solver = NSM_HSL;
 #else
   p->solver = NSM_CSPARSE;  // default solver
+#endif
+
+  p->LDLT_solver = p->solver;
+#if defined(WITH_MA57)
+  p->LDLT_solver = NSM_HSL;
 #endif
 
   p->linear_solver_data = NULL;
@@ -473,7 +477,7 @@ void NSM_sort_csc(CSparseMatrix* A)
   CSparseMatrix * AT = cs_transpose(A,1);
   CSparseMatrix * ATT = cs_transpose(AT,1);
   cs_spfree(AT);
-  
+
   free(A->i);
   free(A->x);
   A->i = ATT->i;
