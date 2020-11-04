@@ -83,6 +83,7 @@ class VViewOptions(object):
         self.gen_para_script = False
         self.with_edges = False
         self.with_random_color = True
+        self.with_charts= 0
     ## Print usage information
     def usage(self, long=False):
         print(__doc__); print()
@@ -97,6 +98,7 @@ class VViewOptions(object):
             [--normalcone-ratio = <float value>]
             [--advance=<'fps' or float value>] [--fps=float value]
             [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--clipping=near,far] [--ortho=scale]
+            [--with-charts=<int value>]
             [--visible=all,avatars,contactors] [--with-edges]
             """)
         else:
@@ -148,6 +150,8 @@ class VViewOptions(object):
      --ortho=scale
        start in ortho mode with given parallel scale
        (default=perspective)
+      --with-charts=value
+       display convergence charts
      --visible=all
        all: view all contactors and avatars
        avatars: view only avatar if an avatar is defined (for each
@@ -171,7 +175,7 @@ class VViewOptions(object):
                                             'occlusion-ratio=',
                                             'cf-scale=', 'normalcone-ratio=',
                                             'advance=', 'fps=',
-                                            'camera=', 'lookat=', 'up=', 'clipping=', 'ortho=', 'visible=', 'with-edges', 'with-fixed-color'])
+                                            'camera=', 'lookat=', 'up=', 'clipping=', 'ortho=', 'visible=', 'with-edges', 'with-fixed-color', 'with-charts='])
             self.configure(opts, args)
         except getopt.GetoptError as err:
             sys.stderr.write('{0}\n'.format(str(err)))
@@ -244,6 +248,9 @@ class VViewOptions(object):
 
             elif o == '--ortho':
                 self.initial_camera[3] = float(a)
+                
+            elif o == '--with-charts=':
+                self.with_charts = int(a)
 
             elif o == '--visible':
                 self.visible_mode = a
@@ -275,6 +282,8 @@ class VExportOptions(VViewOptions):
         self.stride = 1
         self.nprocs = 1
         self.gen_para_script = False
+ 
+        
     def usage(self, long=False):
         print(__doc__); print()
         print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
@@ -525,9 +534,9 @@ class InputObserver():
 
         self._current_id.SetNumberOfValues(1)
         self._current_id.SetValue(0, self.vview.io_reader._index)
-
-        self.vview.iter_plot.SetSelection(self._current_id)
-        self.vview.prec_plot.SetSelection(self._current_id)
+        if self.vview.opts.with_charts:
+            self.vview.iter_plot.SetSelection(self._current_id)
+            self.vview.prec_plot.SetSelection(self._current_id)
 
         self.vview.renderer_window.Render()
 
@@ -2676,7 +2685,8 @@ class VView(object):
 
         self.setup_vtk_renderer()
         self.setup_sliders(self.io_reader._times)
-        self.setup_charts()
+        if self.opts.with_charts:
+            self.setup_charts()
         self.setup_axes()
 
         self.gui_initialized = True
