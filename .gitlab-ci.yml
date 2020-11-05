@@ -294,9 +294,10 @@ siconos:doc:
   artifacts:
     paths:
       - build/docs/build/html
-  only:
-    variables: # Run this job only when commit message starts with [doc-build]
-      - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
+  when: manual
+  #only:
+  #  variables: # Run this job only when commit message starts with [doc-build]
+  #    - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
 
 pages:
 
@@ -309,7 +310,7 @@ pages:
   stage: doc-deploy 
   dependencies:
   - siconos:doc
-  only:
-    variables: # Run this job only when commit message starts with [doc-build]
-      - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
+  #only:
+  #  variables: # Run this job only when commit message starts with [doc-build]
+  #    - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
 
