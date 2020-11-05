@@ -270,15 +270,15 @@ void EulerMoreauOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem
   // - update its content for the current (initial) state of the dynamical system, depending on its type.
 
   if(!ds)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
+    THROW_EXCEPTION("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
+    THROW_EXCEPTION("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
 
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
 
   if(_dynamicalSystemsGraph->properties(dsv).W)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
+    THROW_EXCEPTION("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
 
   unsigned int sizeW = ds->dimension(); // n for first order systems, ndof for lagrangian.
   // Memory allocation for W
@@ -311,7 +311,7 @@ void EulerMoreauOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem
       scal(-h * _theta, *d->jacobianfx(), *W, false);
     }
   }
-  else RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW - not yet implemented for Dynamical system type :" + std::to_string(dsType));
+  else THROW_EXCEPTION("EulerMoreauOSI::initializeIterationMatrixW - not yet implemented for Dynamical system type :" + std::to_string(dsType));
 
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
@@ -325,15 +325,15 @@ void EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalS
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
 
   if(!ds)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == nullptr");
+    THROW_EXCEPTION("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
+    THROW_EXCEPTION("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
 
   Type::Siconos dsType = Type::value(*ds);
 
 
-  RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions - not yet implemented for Dynamical system type :" + std::to_string(dsType));
+  THROW_EXCEPTION("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions - not yet implemented for Dynamical system type :" + std::to_string(dsType));
 }
 
 
@@ -351,7 +351,7 @@ void EulerMoreauOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 
   Type::Siconos dsType = Type::value(*ds);
   //unsigned int dsN = ds->number();
-  RuntimeException::selfThrow("EulerMoreauOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + std::to_string(dsType));
+  THROW_EXCEPTION("EulerMoreauOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type :" + std::to_string(dsType));
 }
 
 
@@ -411,7 +411,7 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
     if(fods.A())
       scal(-h * _theta, *fods.A(), W, false);
   }
-  else RuntimeException::selfThrow("EulerMoreauOSI::computeW - not yet implemented for Dynamical system type :" + std::to_string(dsType));
+  else THROW_EXCEPTION("EulerMoreauOSI::computeW - not yet implemented for Dynamical system type :" + std::to_string(dsType));
 
   //  if (_useGamma)
   {
@@ -650,7 +650,7 @@ double EulerMoreauOSI::computeResidu()
       }
     }
     else
-      RuntimeException::selfThrow("EulerMoreauOSI::computeResidu - not yet implemented for Dynamical system type: " + std::to_string(dsType));
+      THROW_EXCEPTION("EulerMoreauOSI::computeResidu - not yet implemented for Dynamical system type: " + std::to_string(dsType));
 
 
     DEBUG_PRINT("EulerMoreauOSI::computeResidu final residuFree\n");
@@ -733,7 +733,7 @@ void EulerMoreauOSI::computeFreeState()
 
       // At this point xfree = (ResiduFree - h(1-gamma)*rold)
       // -> Solve WX = xfree and set xfree = X
-      W.PLUForwardBackwardInPlace(xfree);
+      W.Solve(xfree);
 
       // at this point, xfree = W^{-1} (ResiduFree - h(1-gamma)*rold)
       // -> compute real xfree = x - W^{-1} (ResiduFree - h(1-gamma)*rold)
@@ -752,7 +752,7 @@ void EulerMoreauOSI::computeFreeState()
 
       // -> Solve WX = g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
       // and set xPartialNS = X
-      W.PLUForwardBackwardInPlace(xPartialNS);
+      W.Solve(xPartialNS);
       scal(h, xPartialNS, xPartialNS);
 
       // compute real xPartialNS = xfree + ...
@@ -772,7 +772,7 @@ void EulerMoreauOSI::computeFreeState()
       if(_useGammaForRelation)
       {
         if(!(dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS))
-          RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState - _useGammaForRelation == true is only implemented for FirstOrderLinearDS or FirstOrderLinearTIDS");
+          THROW_EXCEPTION("EulerMoreauOSI::computeFreeState - _useGammaForRelation == true is only implemented for FirstOrderLinearDS or FirstOrderLinearTIDS");
 
         deltaxForRelation = xfree;
 
@@ -789,7 +789,7 @@ void EulerMoreauOSI::computeFreeState()
 
     }
     else
-      RuntimeException::selfThrow("EulerMoreauOSI::computeFreeState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
+      THROW_EXCEPTION("EulerMoreauOSI::computeFreeState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
   }
   DEBUG_END("EulerMoreauOSI::computeFreeState()\n");
 }
@@ -964,7 +964,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
     if(_useGammaForRelation)
     {
-      RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
+      THROW_EXCEPTION("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
     }
     SiconosVector& hAlpha= *inter_work[EulerMoreauOSI::H_ALPHA];
     DEBUG_EXPR(hAlpha.display());
@@ -999,7 +999,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
     if(_useGammaForRelation)
     {
-      RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
+      THROW_EXCEPTION("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
     }
     if(inter_work[EulerMoreauOSI::H_ALPHA])
     {
@@ -1080,7 +1080,7 @@ void EulerMoreauOSI::integrate(double& tinit, double& tend, double& tout, int&)
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
-    RuntimeException::selfThrow("EulerMoreauOSI::integrate - not yet implemented for Dynamical system type :" + std::to_string(dsType));
+    THROW_EXCEPTION("EulerMoreauOSI::integrate - not yet implemented for Dynamical system type :" + std::to_string(dsType));
   }
 }
 
@@ -1137,7 +1137,7 @@ void EulerMoreauOSI::updateState(const unsigned int)
         scal(h, *d.r(), x); // x = h*r
       }
 
-      W.PLUForwardBackwardInPlace(x); // x = h* W^{-1} *r
+      W.Solve(x); // x = h* W^{-1} *r
 
       x += *ds_work_vectors[EulerMoreauOSI::FREE]; // x+=xfree
 
@@ -1152,7 +1152,7 @@ void EulerMoreauOSI::updateState(const unsigned int)
       DEBUG_PRINT("EulerMoreauOSI::updateState New value of x\n");
       DEBUG_EXPR(x.display());
     }
-    else RuntimeException::selfThrow("EulerMoreauOSI::updateState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
+    else THROW_EXCEPTION("EulerMoreauOSI::updateState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
   }
 }
 

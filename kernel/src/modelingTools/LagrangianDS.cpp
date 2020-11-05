@@ -115,13 +115,13 @@ void LagrangianDS::resetToInitialState()
     *(_q[0]) = *_q0;
   }
   else
-    RuntimeException::selfThrow("LagrangianDS::resetToInitialState - initial position _q0 is null");
+    THROW_EXCEPTION("LagrangianDS::resetToInitialState - initial position _q0 is null");
   if(_velocity0)
   {
     *(_q[1]) = *_velocity0;
   }
   else
-    RuntimeException::selfThrow("LagrangianDS::resetToInitialState - initial velocity _velocity0 is null");
+    THROW_EXCEPTION("LagrangianDS::resetToInitialState - initial velocity _velocity0 is null");
 }
 
 void LagrangianDS::init_generalized_coordinates(unsigned int level)
@@ -213,7 +213,7 @@ void LagrangianDS::initRhs(double time)
     computeJacobianqForces(time);
 
     _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqForces));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10]);
     flag1 = true;
   }
 
@@ -222,7 +222,7 @@ void LagrangianDS::initRhs(double time)
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianqDotForces(time);
     _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotForces));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11]);
     flag2 = true;
   }
 
@@ -252,7 +252,7 @@ void LagrangianDS::initRhs(double time)
 void LagrangianDS::setQ(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQ: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setQ: inconsistent input vector size ");
 
   if(! _q[0])
     _q[0].reset(new SiconosVector(newValue));
@@ -263,7 +263,7 @@ void LagrangianDS::setQ(const SiconosVector& newValue)
 void LagrangianDS::setQPtr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQPtr: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setQPtr: inconsistent input vector size ");
   _q[0] = newPtr;
 
 }
@@ -271,7 +271,7 @@ void LagrangianDS::setQPtr(SP::SiconosVector newPtr)
 void LagrangianDS::setQ0(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQ0: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setQ0: inconsistent input vector size ");
 
   if(! _q0)
     _q0.reset(new SiconosVector(newValue));
@@ -282,14 +282,14 @@ void LagrangianDS::setQ0(const SiconosVector& newValue)
 void LagrangianDS::setQ0Ptr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQ0Ptr: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setQ0Ptr: inconsistent input vector size ");
   _q0 = newPtr;
 }
 
 void LagrangianDS::setVelocity0(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocity0: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setVelocity0: inconsistent input vector size ");
 
   if(! _velocity0)
     _velocity0.reset(new SiconosVector(newValue));
@@ -300,7 +300,7 @@ void LagrangianDS::setVelocity0(const SiconosVector& newValue)
 void LagrangianDS::setVelocity(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocity: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setVelocity: inconsistent input vector size ");
 
   if(! _q[1])
     _q[1].reset(new SiconosVector(newValue));
@@ -311,7 +311,7 @@ void LagrangianDS::setVelocity(const SiconosVector& newValue)
 void LagrangianDS::setVelocityPtr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocityPtr: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setVelocityPtr: inconsistent input vector size ");
   _q[1] = newPtr;
 }
 
@@ -319,7 +319,7 @@ void LagrangianDS::setVelocityPtr(SP::SiconosVector newPtr)
 void LagrangianDS::setVelocity0Ptr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocity0Ptr: inconsistent input vector size ");
+    THROW_EXCEPTION("LagrangianDS - setVelocity0Ptr: inconsistent input vector size ");
   _velocity0 = newPtr;
 }
 
@@ -337,7 +337,7 @@ void LagrangianDS::computeMass(SP::SiconosVector position)
   if(_mass && !_hasConstantMass && _pluginMass->fPtr)
   {
     ((FPtr7)_pluginMass->fPtr)(_ndof, &(*position)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
-    _mass->resetLU();
+    _mass->resetFactorizationFlags();
   }
 }
 
@@ -461,7 +461,7 @@ void LagrangianDS::computeRhs(double time)
 
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
   if(_inverseMass)
-    _inverseMass->PLUForwardBackwardInPlace(*_q[2]);
+    _inverseMass->Solve(*_q[2]);
 
   _x[1]->setBlock(0, *_q[1]);
   _x[1]->setBlock(_ndof, *_q[2]);
@@ -489,7 +489,7 @@ void LagrangianDS::computeJacobianRhsx(double time)
     SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianqForces;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc10);
+    _inverseMass->Solve(*bloc10);
   }
 
   if(_jacobianqDotForces)
@@ -497,7 +497,7 @@ void LagrangianDS::computeJacobianRhsx(double time)
     SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
     computeJacobianqDotForces(time);
     *bloc11 = *_jacobianqDotForces;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc11);
+    _inverseMass->Solve(*bloc11);
   }
 }
 
@@ -577,7 +577,7 @@ void LagrangianDS::computeJacobianvForces(double time)
   //else nothing.
 }
 // void LagrangianDS::computeJacobianZFL( double time){
-//    RuntimeException::selfThrow("LagrangianDS::computeJacobianZFL - not implemented");
+//    THROW_EXCEPTION("LagrangianDS::computeJacobianZFL - not implemented");
 // }
 
 void LagrangianDS::display(bool brief) const
@@ -702,7 +702,7 @@ void LagrangianDS::computePostImpactVelocity()
   DEBUG_BEGIN("LagrangianDS::computePostImpactV()\n");
   SiconosVector tmp(*_p[1]);
   if(_inverseMass)
-    _inverseMass->PLUForwardBackwardInPlace(tmp);
+    _inverseMass->Solve(tmp);
   *_q[1] += tmp;  // v+ = v- + p
   DEBUG_BEGIN("LagrangianDS::computePostImpactV() END \n");
 }

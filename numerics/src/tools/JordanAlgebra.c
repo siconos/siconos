@@ -51,13 +51,13 @@ NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, 
   for(size_t i = 0; i < varsCount; ++i)
   {
     pos = i * dimension;
-    NM_zentry(Arw_mat, pos, pos, vec[pos]);
+    NM_entry(Arw_mat, pos, pos, vec[pos]);
 
     for(size_t j = 1; j < dimension; ++j)
     {
-      NM_zentry(Arw_mat, pos, pos + j, vec[pos + j]);
-      NM_zentry(Arw_mat, pos + j, pos, vec[pos + j]);
-      NM_zentry(Arw_mat, pos + j, pos + j, vec[pos]);
+      NM_entry(Arw_mat, pos, pos + j, vec[pos + j]);
+      NM_entry(Arw_mat, pos + j, pos, vec[pos + j]);
+      NM_entry(Arw_mat, pos + j, pos + j, vec[pos]);
     }
   }
   return Arw_mat;
@@ -74,9 +74,9 @@ NumericsMatrix* Reflect_mat(const unsigned int size, NM_types type)
     NM_fill(Refl_mat, NM_SPARSE, size, size, Refl_mat->matrix2);
   }
 
-  NM_zentry(Refl_mat, 0, 0, 1.0);
+  NM_entry(Refl_mat, 0, 0, 1.0);
   for(unsigned int i = 1; i < size; ++i)
-    NM_zentry(Refl_mat, i, i, -1.0);
+    NM_entry(Refl_mat, i, i, -1.0);
   return Refl_mat;
 }
 
@@ -102,7 +102,7 @@ NumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, c
     {
       for(unsigned int k = 0; k < dimension; ++k)
         quad_tmp->matrix0[j+k*quad_tmp->size0] *= 2.0;
-      NM_zentry(quad_tmp, j, j, NM_get_value(quad_tmp, j, j) - dets[(int)(i / dimension)] * NM_get_value(R, j, j));
+      NM_entry(quad_tmp, j, j, NM_get_value(quad_tmp, j, j) - dets[(int)(i / dimension)] * NM_get_value(R, j, j));
     }
     NM_insert(out, quad_tmp, i, i);
   }

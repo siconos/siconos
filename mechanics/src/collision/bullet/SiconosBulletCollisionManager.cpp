@@ -425,7 +425,7 @@ protected:
 
   SiconosBulletOptions &_options;
 
-  std::vector<SP::btCollisionObject> _queuedCollisionObjects;
+  std::vector<std::pair<SP::btCollisionObject,int>> _queuedCollisionObjects;
 
 public:
   SiconosBulletCollisionManager_impl(SiconosBulletOptions &op) : _options(op) {}
@@ -471,6 +471,30 @@ bool SiconosBulletCollisionManager::removeStaticContactorSet(StaticContactorSetI
   return false;
 }
 
+/* We derive a specific callback for filtering the broadphase of Bullet
+ * based on collision group */
+struct SiconosBulletFilterCallback : public btOverlapFilterCallback
+{
+  InteractionManager * _interactionManager;
+
+// return true when pairs need collision
+  virtual bool needBroadphaseCollision(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1) const
+  {
+    DEBUG_BEGIN("SiconosBulletFilterCallback :: needBroadphaseCollision\n");
+
+    /* standard filter in Bullet */
+    // bool collides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
+    // collides = collides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask);
+
+    //add some additional logic here that modified 'collides'
+    SP::NonSmoothLaw nslaw = _interactionManager->nonSmoothLaw(proxy0->m_collisionFilterGroup,proxy1->m_collisionFilterGroup);
+    bool collides = (bool)nslaw;
+
+    DEBUG_END("SiconosBulletFilterCallback :: needBroadphaseCollision\n");
+    return collides;
+  }
+};
+
 void SiconosBulletCollisionManager::initialize_impl()
 {
   _impl.reset(new SiconosBulletCollisionManager_impl(_options));
@@ -505,6 +529,10 @@ void SiconosBulletCollisionManager::initialize_impl()
                          &*_impl->_collisionConfiguration));
 
 
+  btOverlapFilterCallback * filterCallback = new SiconosBulletFilterCallback();
+  reinterpret_cast<SiconosBulletFilterCallback*>(filterCallback)->_interactionManager = this;
+  _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(filterCallback);
+
   DEBUG_PRINTF("_options.dimension = %i", _options.dimension);
 
   //2D specific
@@ -538,6 +566,8 @@ SiconosBulletCollisionManager::SiconosBulletCollisionManager()
 {
   initialize_impl();
 }
+
+
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager(const SiconosBulletOptions &options)
   : _with_equality_constraints(false),_options(options)
@@ -656,13 +686,18 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
     btobject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
 
   // put it in the world
+  int collisionFilterGroup = contactor->collision_group;
+  int collisionFilterMask  = 1;
+
 #ifdef QUEUE_STATIC_CONTACTORS
   if(!ds)
-    _queuedCollisionObjects.push_back(btobject);
+  {
+    _queuedCollisionObjects.push_back(std::make_pair(btobject,collisionFilterGroup));
+  }
   else
-    _collisionWorld->addCollisionObject(&*btobject);
+    _collisionWorld->addCollisionObject(&*btobject,collisionFilterGroup,collisionFilterMask);
 #else
-  _collisionWorld->addCollisionObject(&*btobject);
+  _collisionWorld->addCollisionObject(&*btobject,collisionFilterGroup,collisionFilterMask);
 #endif
 
   // create a record to keep track of things
@@ -1153,10 +1188,10 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   SP::SiconosContactor contactor)
 {
   if(!ch->vertices())
-    throw SiconosException("No vertices matrix specified for convex hull.");
+    THROW_EXCEPTION("No vertices matrix specified for convex hull.");
 
   if(ch->vertices()->size(1) != 3)
-    throw SiconosException("Convex hull vertices matrix must have 3 columns.");
+    THROW_EXCEPTION("Convex hull vertices matrix must have 3 columns.");
 
   // Copy and scale the points
   int rows = ch->vertices()->size(0);
@@ -1296,16 +1331,16 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   SP::SiconosContactor contactor)
 {
   if(!mesh->indexes())
-    throw SiconosException("No indexes matrix specified for mesh.");
+    THROW_EXCEPTION("No indexes matrix specified for mesh.");
 
   if((mesh->indexes()->size() % 3) != 0)
-    throw SiconosException("Mesh indexes size must be divisible by 3.");
+    THROW_EXCEPTION("Mesh indexes size must be divisible by 3.");
 
   if(!mesh->vertices())
-    throw SiconosException("No vertices matrix specified for mesh.");
+    THROW_EXCEPTION("No vertices matrix specified for mesh.");
 
   if(mesh->vertices()->size(0) != 3)
-    throw SiconosException("Convex hull vertices matrix must have 3 columns.");
+    THROW_EXCEPTION("Convex hull vertices matrix must have 3 columns.");
 
   // Create Bullet triangle list, either by copying on non-copying method
   // TODO: worldScale on vertices
@@ -1367,12 +1402,12 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   SP::SiconosContactor contactor)
 {
   if(!heightmap->height_data())
-    throw SiconosException("No height matrix specified for heightmap.");
+    THROW_EXCEPTION("No height matrix specified for heightmap.");
 
   SP::SiconosMatrix data = heightmap->height_data();
 
   if(!data || data->size(0) < 2 || data->size(1) < 2)
-    throw SiconosException("Height matrix does not have sufficient dimensions "
+    THROW_EXCEPTION("Height matrix does not have sufficient dimensions "
                            "to represent a plane.");
 
   // Create heightfield data for Bullet.  Make a copy in case data
@@ -1658,10 +1693,10 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // set radius to 1.0 and use scaling instead of setting radius
   // directly, makes it easier to change during update
   if(!ch2d->vertices())
-    throw SiconosException("No vertices matrix specified for convex hull.");
+    THROW_EXCEPTION("No vertices matrix specified for convex hull.");
 
   if(ch2d->vertices()->size(1) != 2)
-    throw SiconosException("2d Convex hull vertices matrix must have 2 columns.");
+    THROW_EXCEPTION("2d Convex hull vertices matrix must have 2 columns.");
 
   // Copy and scale the points
   int rows = ch2d->vertices()->size(0);
@@ -1702,7 +1737,6 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
                               SP::RigidBody2dDS,
                               BodyCH2dRecord>
                               (base, ds, ch2d, btconvex2d, bodyShapeMap, contactor);
-  //getchar();
   DEBUG_END("void SiconosBulletCollisionManager_impl::createCollisionObject(..., ch2d, ..) \n");
 }
 
@@ -2121,13 +2155,17 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
   if(! _impl->_queuedCollisionObjects.empty())
   {
+    int collisionFilterMask  = 1;
 
-    std::vector<SP::btCollisionObject>::iterator it;
+    std::vector<std::pair<SP::btCollisionObject,int>>::iterator it;
     for(it = _impl->_queuedCollisionObjects.begin();
         it != _impl->_queuedCollisionObjects.end();
         ++ it)
     {
-      _impl->_collisionWorld->addCollisionObject(&**it);
+      std::pair<SP::btCollisionObject,int> p = *it;
+      int collisionFilterGroup  = p.second;
+      SP::btCollisionObject collisionObject = p.first;
+      _impl->_collisionWorld->addCollisionObject(&*collisionObject,collisionFilterGroup,collisionFilterMask);
     }
     _impl->_queuedCollisionObjects.clear();
   }
@@ -2151,6 +2189,12 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   // 3. for each contact point, if there is no interaction, create one
   IterateContactPoints t(_impl->_collisionWorld);
   IterateContactPoints::iterator it, itend=t.end();
+
+  DEBUG_EXPR(
+    int num_contact_points =0;
+    for(it=t.begin(); it!=itend; ++it)  num_contact_points++;
+    std::cout << "Number of contacts points detected by bullet: " << num_contact_points << std::endl; );
+
   DEBUG_PRINT("SiconosBulletCollisionManager :: iterating contact points:\n");
   //getchar();
   for(it=t.begin(); it!=itend; ++it)
@@ -2287,7 +2331,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       else
       {
-        throw SiconosException("Unknown relation type");
+        THROW_EXCEPTION("Unknown relation type");
       }
 
 
@@ -2310,7 +2354,6 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       // DEBUG_EXPR(std::cout << nslaw_NewtonImpactFrictionNSL << std::endl;);
       // DEBUG_EXPR(std::cout << nslaw_NewtonImpactRollingFrictionNSL << std::endl;);
 
-      DEBUG_PRINTF("SiconosBulletCollisionManager ::  nslaw->size() = %i\n", nslaw->size());
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
       if(nslaw && nslaw_NewtonImpactFrictionNSL)

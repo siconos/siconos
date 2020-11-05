@@ -100,7 +100,7 @@ public:
   ~BlockMatrix(void);
 
 
-  inline bool isSymmetric(double tol) const
+  inline bool checkSymmetry(double tol) const
   {
     return false;
   };
@@ -290,7 +290,6 @@ public:
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 
    *  \param j an unsigned int 
-   *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
   double& operator()(unsigned int i, unsigned int j);
@@ -298,7 +297,6 @@ public:
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 
    *  \param j an unsigned int
-   *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
   double operator()(unsigned int i, unsigned int j) const;
@@ -440,11 +438,21 @@ public:
    */
   BlockMatrix& operator -=(const SiconosMatrix& m);
 
+
+  void updateNumericsMatrix()
+  {
+    THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
+  };
+
+  
   /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
   void PLUFactorizationInPlace();
+  
+  void Factorize();
 
+ 
   /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
    */
@@ -455,13 +463,16 @@ public:
    *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosMatrix &B);
-
+  void Solve(SiconosMatrix &B);
+  
+  
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
    *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosVector &B);
-
+  void Solve(SiconosVector &B);
+  
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();

@@ -30,13 +30,9 @@ void SiconosBodies::compute()
     _sim->processEvents();
   }
 
-  catch(SiconosException e)
-  {
-    std::cout << e.report() << std::endl;
-  }
   catch(...)
   {
-    std::cout << "Exception caught in SiconosBodies::compute()" << std::endl;
+    Siconos::exception::process();
   }
 }
 

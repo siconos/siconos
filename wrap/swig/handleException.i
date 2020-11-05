@@ -22,9 +22,9 @@
     {
       PyErr_SetString(PyExc_IndexError, e.what());
     }
-    catch (const SiconosException& e)
+    catch (const Siconos::exception& e)
     {
-      PyErr_SetString(PyExc_Exception, e.report().c_str());
+      PyErr_SetString(PyExc_Exception, e.what());
     }
     catch (const Swig::DirectorException& e)
     {

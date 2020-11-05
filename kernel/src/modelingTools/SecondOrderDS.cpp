@@ -26,7 +26,7 @@
 
 void SecondOrderDS::setBoundaryConditions(SP::BoundaryCondition newbd)
 {
-  if(!_boundaryConditions)
+  if(_boundaryConditions)
   {
     std::cout << "Warning : SecondOrderDS::setBoundaryConditions. old boundary conditions were pre-existing" <<std::endl;
   }

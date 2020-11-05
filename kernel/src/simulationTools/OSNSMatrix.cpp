@@ -316,7 +316,7 @@ void OSNSMatrix::convert()
   }
   default:
   {
-    RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
   DEBUG_END("OSNSMatrix::convert()\n");
@@ -372,11 +372,10 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
   }
   default:
   {
-    RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
-  }
     // invalidate other old storages.
-  NM_clear_other_storages(_numericsMatrix.get(), _storageType);
-
+    NM_clear_other_storages(_numericsMatrix.get(), _storageType);
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
+  }
   }
 
 
@@ -432,8 +431,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
           endl = (ds == ds2);
           size_t sizeDS = ds->dimension();
           // this whole part is a hack. Just should just get the rightblock
-          leftInteractionBlock.reset(new SimpleMatrix(3, sizeDS));
-          inter.getLeftInteractionBlockForDS(posBlock, leftInteractionBlock);
+          leftInteractionBlock = inter.getLeftInteractionBlockForDS(posBlock, 3, sizeDS);
           leftInteractionBlock->trans();
           pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
           DEBUG_PRINTF("pos = %u", pos);
@@ -449,7 +447,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
   }
   default:
   {
-    RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
   DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");

@@ -81,6 +81,13 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
     rolling_fc3d_nsgs(problem, reaction, velocity, &info, options);
     break;
   }
+   /* ADMM */
+  case SICONOS_ROLLING_FRICTION_3D_ADMM:
+  {
+    numerics_printf(" ========================== Call ADMM solver for Rolling Friction-Contact 3D problem ==========================\n");
+    rolling_fc3d_admm(problem, reaction, velocity, &info, options);
+    break;
+  }
   default:
   {
     fprintf(stderr, "Numerics, rolling_fc3d_driver failed. Unknown solver.\n");

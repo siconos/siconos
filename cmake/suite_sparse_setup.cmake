@@ -36,7 +36,7 @@ endif()
 list(REMOVE_DUPLICATES _flags)
 
 # Set list of CXSparse files.
-file(GLOB_RECURSE CXSPARSE_FILES ${CMAKE_CURRENT_SOURCE_DIR}  cxsparse_*.c)
+file(GLOB_RECURSE CXSPARSE_FILES ${CMAKE_CURRENT_SOURCE_DIR}  cxsparse_*.c ldl_*.c)
 
 # Add cxsparse sources to external build.
 foreach(csfile IN LISTS CXSPARSE_FILES)

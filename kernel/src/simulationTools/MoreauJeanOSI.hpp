@@ -129,7 +129,7 @@ protected:
    */
   bool _useGamma;
 
-  /** Constraint activation threshold 
+  /** Constraint activation threshold
    *
    */
   double _constraintActivationThreshold;
@@ -141,6 +141,10 @@ protected:
   /** a boolean to force the evaluation of T in an explicit way
    */
   bool _explicitNewtonEulerDSOperators;
+
+  /** a boolean to know if the matrix W is symmetric definite positive
+   */
+  bool _isWSymmetricDefinitePositive;
 
   /** nslaw effects
    */
@@ -180,6 +184,15 @@ public:
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
+  inline bool isWSymmetricDefinitePositive() const
+  {
+    return _isWSymmetricDefinitePositive;
+  };
+
+  inline void setIsWSymmetricDefinitePositive(bool b) 
+  {
+    _isWSymmetricDefinitePositive = b ;
+  };
 
   // -- WBoundaryConditions --
 
@@ -274,7 +287,7 @@ public:
   {
     _constraintActivationThreshold = v;
   }
-  
+
   /** get the constraint activation threshold */
   inline double constraintActivationThreshold ()
   {

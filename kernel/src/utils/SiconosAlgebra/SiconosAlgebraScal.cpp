@@ -27,6 +27,7 @@
 #include "BlockMatrix.hpp"
 #include "BlockMatrixIterators.hpp"
 #include "SiconosAlgebraTools.hpp" // for isComparableTo
+#include "SiconosException.hpp"
 
 using Siconos::Algebra::isComparableTo;
 
@@ -35,7 +36,7 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
   // To compute B = a * A (init = true) or B += a*A (init = false).
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
   if(!B.isBlock())
-    B.resetLU();
+    B.resetFactorizationFlags();
 
   if(&A == &B)
   {
@@ -44,11 +45,11 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
   }
   else
   {
-    unsigned int numA = A.num();
-    unsigned int numB = B.num();
+    Siconos::UBLAS_TYPE numA = A.num();
+    Siconos::UBLAS_TYPE numB = B.num();
 
     if(numB == Siconos::ZERO || numB == Siconos::IDENTITY)  // B = 0 or identity.
-      SiconosMatrixException::selfThrow("scal(a,A,B) : forbidden for B being a zero or identity matrix.");
+      THROW_EXCEPTION("forbidden for B being a zero or identity matrix.");
 
     if(numA == Siconos::ZERO)
     {
@@ -75,7 +76,7 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
         switch(numA)
         {
 
-        case 0: // A and B are block
+        case Siconos::BLOCK: // A and B are block
           if(isComparableTo(A, B))
           {
             const BlockMatrix& Aref = static_cast<const BlockMatrix&>(A);
@@ -141,11 +142,13 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
           else
             noalias(*B.banded()) += a ** A.banded();
           break;
+        default:
+          THROW_EXCEPTION("Not implemented for A/B type.");
         }
       }
       else // if A and B are of different types.
       {
-        if(numA == 0 || numB == 0)  // if A or B is block
+        if(numA == Siconos::BLOCK || numB == Siconos::BLOCK)  // if A or B is block
         {
           if(init)
           {
@@ -162,11 +165,11 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
         else
         {
           if(numB != Siconos::DENSE)
-            SiconosMatrixException::selfThrow("scal(a,A,B) failed. A and B types do not fit together.");
+            THROW_EXCEPTION("Inconsistent types between A and B (must be dense?)");
 
           if(init)
           {
-            switch(numB)
+            switch(numA)
             {
             case Siconos::DENSE:
               noalias(*B.dense()) = a ** A.dense();
@@ -183,12 +186,14 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
             case Siconos::BANDED:
               noalias(*B.dense()) = a ** A.banded();
               break;
+            default:
+              THROW_EXCEPTION("Not implemented for A type.");
             }
           }
           else
 
           {
-            switch(numB)
+            switch(numA)
             {
             case Siconos::DENSE:
               noalias(*B.dense()) += a ** A.dense();
@@ -205,6 +210,8 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
             case Siconos::BANDED:
               noalias(*B.dense()) += a ** A.banded();
               break;
+            default:
+              THROW_EXCEPTION("Not implemented for A type.");
             }
           }
         }

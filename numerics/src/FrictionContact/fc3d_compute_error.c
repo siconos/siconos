@@ -95,9 +95,11 @@ int fc3d_compute_error(
   DEBUG_PRINTF("absolute error in complementarity = %12.8e\n", *error);
 
   /* Compute relative error */
-  /* double relative_scaling = fmax(norm, fmax(norm_r,norm_w)); */
+  double norm_r =cblas_dnrm2(n, z, 1);
+  double norm_u =cblas_dnrm2(n, w, 1);
+  double relative_scaling = fmax(norm, fmax(norm_r,norm_u)); 
   /* double relative_scaling = fmax(norm_r,norm_w); */
-  double relative_scaling = norm;
+  /* double relative_scaling = norm; */
 
   if(fabs(relative_scaling) > DBL_EPSILON)
     *error /= relative_scaling;

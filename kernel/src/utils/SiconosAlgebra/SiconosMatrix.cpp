@@ -19,6 +19,7 @@
 #include "SiconosMatrix.hpp"
 #include <assert.h>                                   // for assert
 #include <math.h>                                     // for fabs
+#include <float.h>                                     // for DBL_EPSILON
 #include <algorithm>                                  // for max, min, lower...
 #include <boost/numeric/ublas/detail/config.hpp>      // for noalias, noalia...
 #include <boost/numeric/ublas/detail/iterator.hpp>    // for bidirectional_i...
@@ -32,26 +33,25 @@
 #include <vector>                                     // for vector, operator==
 #include "SiconosAlgebra.hpp"
 #include "BlockMatrix.hpp"                            // for BlockMatrix
-#include "CSparseMatrix_internal.h"                   // for CSparseMatrix
 #include "SiconosVector.hpp"                          // for SiconosVector
-#include "SimpleMatrixFriends.hpp" // for isComparableTo
+#include "SimpleMatrixFriends.hpp"                    // for isComparableTo
+
+#include "CSparseMatrix_internal.h"                   // for CSparseMatrix
+#include "NumericsSparseMatrix.h"                     // for NSM_fix_csc
+#include "SiconosException.hpp"
 
 // Constructor with the type-number
-SiconosMatrix::SiconosMatrix(unsigned int type): _num(type)
+SiconosMatrix::SiconosMatrix(Siconos::UBLAS_TYPE type): _num(type), _isSymmetric(false), _isPositiveDefinite(false)
 {}
 
 const SP::Index SiconosMatrix::tabRow() const
 {
-  SiconosMatrixException::selfThrow("SiconosMatrix::tabRow() : not implemented for this type of matrix (Simple?) reserved to BlockMatrix.");
-  // fake to avoid error on warning.
-  return SP::Index();
+  THROW_EXCEPTION("not implemented for this type of matrix (Simple?) reserved to BlockMatrix.");
 }
 
 const SP::Index SiconosMatrix::tabCol() const
 {
-  SiconosMatrixException::selfThrow("SiconosMatrix::tabCol() : not implemented for this type of matrix (Simple?) reserved to BlockMatrix.");
-  // fake to avoid error on warning.
-  return SP::Index();
+  THROW_EXCEPTION("not implemented for this type of matrix (Simple?) reserved to BlockMatrix.");
 }
 
 
@@ -61,7 +61,7 @@ const SP::Index SiconosMatrix::tabCol() const
 //=====================
 SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 {
-  if(m._num == 0)  // BlockMatrix
+  if(m._num == Siconos::BLOCK)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
@@ -86,14 +86,14 @@ SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
     *m.banded() *= s;
   else if(m._num == Siconos::ZERO) {}  // nothing!
   else //if(_num == 7)
-    SiconosMatrixException::selfThrow(" SP::SiconosMatrix = (double) : invalid type of matrix");
+    THROW_EXCEPTION("invalid type of matrix");
 
   return m;
 }
 
 SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 {
-  if(m._num == 0)  // BlockMatrix
+  if(m._num == Siconos::BLOCK)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
@@ -118,7 +118,7 @@ SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
     *m.banded() /= s;
   else if(m._num == Siconos::ZERO) {}  // nothing!
   else //if(_num == 7)
-    SiconosMatrixException::selfThrow(" SiconosMatrix *= (double) : invalid type of matrix");
+    THROW_EXCEPTION("invalid type of matrix");
 
   return m;
 }
@@ -142,9 +142,7 @@ size_t SiconosMatrix::nnz(double tol)
     nnz = sparse()->nnz();
   }
   else
-  {
-    SiconosMatrixException::selfThrow("SiconosMatrix::nnz not implemented for the given matrix type");
-  }
+    THROW_EXCEPTION("not implemented for the given matrix type");
 
   return nnz;
 
@@ -213,11 +211,164 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
   }
   else
   {
-    SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
+    THROW_EXCEPTION("not implemented for the given matrix type");
   }
 
   return true;
 }
+
+bool SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol)
+{
+  assert(csc);
+  double* Mx = csc->x; // data
+  CS_INT* Mi = csc->i; // row indx
+  CS_INT* Mp = csc->p; // column pointers
+
+  size_t nrow = size(0);
+  size_t ncol = size(1);
+
+  CS_INT pval = 0;
+
+  if(_num == Siconos::DENSE)  //dense
+  {
+    double* arr = getArray();
+    for(size_t j = 0, joff = 0; j < ncol; ++j)
+    {
+      for(size_t i = 0; i < nrow; ++i)
+      {
+        // col-major
+        double elt_val = arr[i + j*nrow];
+        // std::cout << " a(i=" << i << ",j=" << j << ") = "<< elt_val << std::endl;
+        if(fabs(elt_val) > tol)
+        {
+          Mx[pval] = elt_val;
+          Mi[pval] = i;
+          // std::cout << "Mx[" <<pval <<"] = " << Mx[pval]<<   std::endl;
+          // std::cout << "Mp[" <<pval <<"] = " << Mi[pval]<<   std::endl;
+          ++pval;
+        }
+      }
+      // std::cout << "joff" << joff << std::endl;
+      Mp[++joff] = pval;
+
+    }
+  }
+  else if(_num == Siconos::SPARSE)
+  {
+    const Index& ptr = sparse()->index1_data();
+    const Index& indx = sparse()->index2_data();
+    const ublas::unbounded_array<double>& vals = sparse()->value_data();
+
+    size_t nnz =  sparse()->nnz();
+
+    assert(ptr.size() == ncol + 1);
+    assert(indx.size() >= nnz);
+    assert(vals.size() >= nnz);
+
+    for(size_t i = 0; i < nnz; ++i)
+    {
+      Mx[pval] = vals[i];
+      Mi[pval++] = indx[i];
+    }
+    for(size_t j = 0; j < ncol+1; ++j)
+    {
+      Mp[j] = ptr[j];
+    }
+  }
+  else
+  {
+    THROW_EXCEPTION("not implemented for the given matrix type");
+  }
+
+  return true;
+}
+
+bool SiconosMatrix::fromCSC(CSparseMatrix* csc)
+{
+  assert(csc);
+
+  NSM_sort_csc(csc);
+
+  double* Mx = csc->x; // data
+  CS_INT* Mi = csc->i; // row indx
+  CS_INT* Mp = csc->p; // column pointers
+  CS_INT n = csc->n;
+  // CS_INT m = csc->m;
+
+  // size_t nnz = csc->p[n];
+
+  if(_num == Siconos::SPARSE)
+  {
+    sparse()->clear();
+    CS_INT pval=0;
+    // push_back in order should be in constant time
+    // http://www.guwi17.de/ublas/matrix_sparse_usage.html
+    for (CS_INT col =0; col < n; col++)
+    {
+      for (CS_INT p = Mp[col]; p < Mp[col+1];  p++)
+      {
+        sparse()->push_back(Mi[pval], col, Mx[pval]);
+        pval++;
+      }
+    }
+
+    // not able to work directly on the contents of the sparse matrix.
+    // sparse()->resize(m, nnz, false);
+    // //sparse()->set_filled(nnz, n+1);
+    // std::cout << sparse()->size1() << std::endl;
+    // std::cout << sparse()->size2() << std::endl;
+
+    // Index& ptr = sparse()->index1_data();
+    // Index& indx = sparse()->index2_data();
+    // ublas::unbounded_array<double>& vals = sparse()->value_data();
+
+    // // ptr.resize(n+1);
+    // // indx.resize(nnz);
+    // // vals.resize(nnz);
+
+    // std::cout << sparse()->filled1() << std::endl;
+    // std::cout << sparse()->filled2() << std::endl;
+
+    // // CS_INT pval=0;
+
+    // // for(size_t i = 0; i < nnz; ++i)
+    // // {
+    // //   vals[i] = Mx[pval];
+    // //   indx[i] = Mi[pval++];
+    // // }
+    // for(size_t i = 0; i < nnz; ++i)
+    // {
+    //   printf("vals[%i] = %e\t", i, vals[i]);
+    //   printf("indx[%i] = %i\t", i, indx[i]);
+    // }
+
+    // // for(size_t j = 0 ; j < n+1; ++j)
+    // // {
+    // //   ptr[j] = Mp[j]  ;
+    // // }
+    // for(size_t j = 0 ; j < n+1; ++j) printf("ptr[%i] = %i\t", j, ptr[j]);
+  }
+  else if(_num == Siconos::DENSE)
+  {
+    CS_INT pval=0;
+    // push_back in order should be in constant time
+    // http://www.guwi17.de/ublas/matrix_sparse_usage.html
+    for (CS_INT col =0; col < n; col++)
+    {
+      for (CS_INT p = Mp[col]; p < Mp[col+1];  p++)
+      {
+        setValue(Mi[pval], col, Mx[pval]);
+        pval++;
+      }
+    }
+  }
+  else
+  {
+    THROW_EXCEPTION("not implemented for the given matrix type");
+  }
+  return true;
+}
+
 
 bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t col_off, double tol)
 {
@@ -234,13 +385,13 @@ bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t c
       {
         // col-major
 
-        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow]);
+        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow], DBL_EPSILON);
       }
     }
   }
   else
   {
-    SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
+    THROW_EXCEPTION("not implemented for the given matrix type");
   }
 
   return true;
@@ -256,7 +407,7 @@ std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm)
 
 void SiconosMatrix::private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init) const
 {
-  assert(!(isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(isFactorized()) && "A is Factorized in prod !!");
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 
@@ -271,14 +422,14 @@ void SiconosMatrix::private_prod(unsigned int startRow, const SiconosVector& x, 
  */
 void SiconosMatrix::private_addprod(unsigned startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& y) const
 {
-  assert(!(isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(isFactorized()) && "A is Factorized in prod !!");
   assert(!isBlock() && "private_addprod(start,x,y) error: not yet implemented for block matrix.");
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
   // Then computation of y = subA*x + y.
-  unsigned int numA = num();
-  unsigned int numY = y.num();
-  unsigned int numX = x.num();
+  Siconos::UBLAS_TYPE numA = num();
+  Siconos::UBLAS_TYPE numY = y.num();
+  Siconos::UBLAS_TYPE numX = x.num();
   unsigned int sizeX = x.size();
   unsigned int sizeY = y.size();
 
@@ -305,7 +456,6 @@ void SiconosMatrix::private_addprod(unsigned startRow, unsigned int startCol, co
     if(numA == Siconos::SPARSE)
       *y.sparse() += prod(ublas::subrange(*sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.sparse());
     else
-      SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
+      THROW_EXCEPTION("not yet implemented for x, y  sparse and A not sparse.");
   }
 }
-

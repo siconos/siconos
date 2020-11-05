@@ -23,7 +23,7 @@
 
 int SBM_add_test_all(void);
 
-int SBM_zentry_all(void);
+int SBM_entry_all(void);
 
 int SBM_to_dense_all(void);
 

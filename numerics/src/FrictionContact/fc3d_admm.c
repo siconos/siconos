@@ -53,6 +53,8 @@ typedef struct
 }
 Fc3d_ADMM_data;
 
+/** pointer to function used to call local solver */
+typedef int (*LinearSolverPtr)(NumericsMatrix *M, double *b, unsigned int nrhs);
 
 
 
@@ -136,7 +138,8 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
                                 double* restrict velocity,
                                 int* restrict info, SolverOptions* restrict options,
                                 double rho,  int is_rho_variable,
-                                double norm_q)
+                                double norm_q,
+                                LinearSolverPtr linear_solver)
 {
 
   /* verbose=2;  */
@@ -158,7 +161,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   {
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     M = NM_create(NM_SPARSE,  problem->M->size0,  problem->M->size1);
-    NM_copy_to_sparse(problem->M, M);
+    NM_copy_to_sparse(problem->M, M, DBL_EPSILON);
     NSM_diag_indices(M);
   }
   else
@@ -292,8 +295,9 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     DEBUG_PRINT("rhs:");
     DEBUG_EXPR(NV_display(reaction,m));
 
-    /* Linear system solver */
-    NM_gesv_expert(W,reaction, NM_KEEP_FACTORS);
+    /* Linear system solver, W destroyed */
+    // NM_gesv_expert(W,reaction, NM_KEEP_FACTORS);
+    (*linear_solver)(W, reaction, 1);
     DEBUG_PRINT("reaction:");
     DEBUG_EXPR(NV_display(reaction,m));
 
@@ -599,7 +603,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   NM_clearSparseBlock(A);
   for(int i=0; i<m; i++)
   {
-    CHECK_RETURN(CSparseMatrix_zentry(A_triplet, i+m, i, 1.0));
+    CHECK_RETURN(CSparseMatrix_entry(A_triplet, i+m, i, 1.0));
   }
   A->size0 = 2*A->size0;
 
@@ -709,8 +713,9 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     DEBUG_PRINT("rhs:");
     DEBUG_EXPR(NV_display(reaction,m));
 
-    /* Linear system solver */
-    NM_gesv_expert(W,reaction, NM_KEEP_FACTORS);
+    /* Linear system solver, W destroyed */
+    // NM_gesv_expert(W,reaction, NM_KEEP_FACTORS);
+    NM_Cholesky_solve(W, reaction, 1);
     DEBUG_PRINT("reaction:");
     DEBUG_EXPR(NV_display(reaction,m));
 
@@ -1045,7 +1050,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
         numerics_printf_verbose(1,"fc3d_admm ---- FC3D - ADMM - M is not symmetric (%e) but fc3d_admm_symmetric  \nis called",d);
       }
     }
-    fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q);
+    fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q,  &NM_LU_solve);
   }
   else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY)
   {
@@ -1061,10 +1066,27 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     }
     else
     {
-      fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q);
+      fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q,  &NM_Cholesky_solve);
     }
 
   }
+  else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_SYMMETRIZE)
+  {
+    NumericsMatrix *MT = NM_transpose(M);
+    NumericsMatrix *Msym = NM_add(1/2., M, 1/2., MT );
+    //NM_display(Msym);
+    //getchar();
+    problem->M = Msym;
+    NM_clear(MT);
+    fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q, &NM_Cholesky_solve);
+    problem->M =M;
+    NM_clear(Msym);
+  }
+  else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_ASSUME_SYMMETRY)
+  {
+    fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q,  &NM_Cholesky_solve);
+  }
+
   else
     numerics_error("fc3d_admm", "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented", options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
 

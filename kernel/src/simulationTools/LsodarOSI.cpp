@@ -201,7 +201,7 @@ void LsodarOSI::computeRhs(double t)
       // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
       free = *lds->forces();
       if(lds->inverseMass())
-        lds->inverseMass()->PLUForwardBackwardInPlace(free);
+        lds->inverseMass()->Solve(free);
       DEBUG_EXPR(free.display(););
     }
     if(_extraAdditionalTerms)
@@ -343,10 +343,10 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    THROW_EXCEPTION("LsodarOSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
+    THROW_EXCEPTION("LsodarOSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -357,7 +357,7 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   if(!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
+    THROW_EXCEPTION("LsodarOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
 
@@ -536,7 +536,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
                  (_intData[1]),
                  jroot.get());
 #else
-  RuntimeException::selfThrow("LsodarOSI, Fortran Language is not enabled in siconos kernel. Compile with fortran if you need Lsodar");
+  THROW_EXCEPTION("LsodarOSI, Fortran Language is not enabled in siconos kernel. Compile with fortran if you need Lsodar");
 #endif
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
@@ -551,7 +551,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
     std::cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or wrong choice of JT or tolerances)." <<std::endl;
     std::cout << " -6 means error weight became zero during problem. (Solution component i vanished, and ATOL or ATOL(i) = 0.)" <<std::endl;
     std::cout << " -7 means work space insufficient to finish (see messages)." <<std::endl;
-    RuntimeException::selfThrow("LsodarOSI, integration failed");
+    THROW_EXCEPTION("LsodarOSI, integration failed");
   }
 
   *_xWork = *_xtmp;
@@ -599,7 +599,7 @@ void LsodarOSI::updateState(const unsigned int level)
       }
     }
   }
-  else RuntimeException::selfThrow("LsodarOSI::updateState(index), index is out of range. Index = " + std::to_string(level));
+  else THROW_EXCEPTION("LsodarOSI::updateState(index), index is out of range. Index = " + std::to_string(level));
 }
 
 struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
@@ -696,7 +696,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
 
   }
   else
-    RuntimeException::selfThrow(" computeqBlock for Event Event-driven is wrong ");
+    THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 
   if(relationType == Lagrangian)
   {
@@ -728,7 +728,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
     {
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
-        RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
+        THROW_EXCEPTION("LsodarOSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
       }
       else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
@@ -736,7 +736,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
         subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
       }
       else
-        RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
+        THROW_EXCEPTION("LsodarOSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
     }
     // For the relation of type LagrangianScleronomousR
     if(relationSubType == ScleronomousR)
@@ -749,7 +749,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
     }
   }
   else
-    RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for Relation of type " + std::to_string(relationType));
+    THROW_EXCEPTION("LsodarOSI::computeFreeOutput not yet implemented for Relation of type " + std::to_string(relationType));
   if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
     if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)

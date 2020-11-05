@@ -404,7 +404,15 @@ extern "C"
   */
   unsigned int SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, unsigned int row);
 
-  int SBM_zentry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int col, double val);
+  /** insert an entry into a SparseBlockStructuredMatrix.
+   *  This method is expensive in terms of memory management. For a lot of entries, use
+   * an alternative
+   * \param M the SparseBlockStructuredMatrix
+   * \param i row index
+   * \param j column index
+   * \param val the value to be inserted.
+   */
+  int SBM_entry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int col, double val);
 
   /** get the element of row i and column j of the matrix M
      \param M the SparseBlockStructuredMatrix matrix

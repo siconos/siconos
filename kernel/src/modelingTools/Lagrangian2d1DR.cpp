@@ -37,7 +37,7 @@ void Lagrangian2d1DR::initialize(Interaction& inter)
 
   if((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6))
   {
-    RuntimeException::selfThrow("Lagrangian2d1DR::initialize(Interaction& inter). The size of ds must of size 3");
+    THROW_EXCEPTION("Lagrangian2d1DR::initialize(Interaction& inter). The size of ds must of size 3");
   }
   unsigned int qSize = 3 * (inter.getSizeOfDS() / 3);
   _jachq.reset(new SimpleMatrix(1, qSize));

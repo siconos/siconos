@@ -25,7 +25,7 @@
 
 #include <string>
 #include <set>
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "SiconosPointers.hpp"
 
 #include "SiconosFwd.hpp"

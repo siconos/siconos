@@ -66,6 +66,10 @@
 #define WRAP_DPOTRS(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
   F(A1,A2,A3,A4,A5,A6,A7,INFO)
 
+// --- DSYTRS ---
+#define WRAP_DSYTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO) \
+  F(A1,A2,A3,A4,A5,A6,A7,A8,INFO)
+
 
 // --- DGESV ---
 #define WRAP_DGESV(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
@@ -97,13 +101,27 @@
   F(A1,A2,A3,A4,C_WORK,&lwork,INFO);                                    \
   free(C_WORK);                                                         \
 
-// --- DPOTRF ---
-#define WRAP_DPOTRF(F,A1,A2,A3,A4,INFO)                                 \
-  F(A1,A2,A3,A4,INFO);                                                  \
 
 // --- DGETRF ---
 #define WRAP_DGETRF(F,A1,A2,A3,A4,A5,INFO)      \
   F(A1,A2,A3,A4,A5,INFO)
+
+
+// --- DPOTRF ---
+#define WRAP_DPOTRF(F,A1,A2,A3,A4,INFO)                                 \
+  F(A1,A2,A3,A4,INFO);                                                  \
+
+// --- DSYTRF ---
+#define WRAP_DSYTRF(F,A1,A2,A3,A4,A5,INFO)                              \
+  lapack_int lwork = -1;                                                \
+  double* C_WORK;                                                       \
+  C_WORK = (double*)malloc(sizeof *C_WORK);                             \
+  assert(C_WORK);                                                       \
+  F(A1,A2,A3,A4,A5,C_WORK,&lwork,INFO);                                 \
+  lwork = (lapack_int) (C_WORK[0]);                                     \
+  C_WORK = (double*)realloc(C_WORK, lwork * sizeof *C_WORK);            \
+  F(A1,A2,A3,A4,A5,C_WORK,&lwork,INFO);                                 \
+  free(C_WORK);                                                         \
 
 // --- DTRTRS ---
 #define WRAP_DTRTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO) \

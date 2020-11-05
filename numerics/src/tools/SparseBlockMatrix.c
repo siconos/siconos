@@ -1410,9 +1410,6 @@ void SBM_row_prod(unsigned int sizeX, unsigned int sizeY, unsigned int currentRo
   /* Column (block) position of the current block*/
   size_t colNumber = 0;
 
-  /* Position of the sub-block of x multiplied by the sub-block of A */
-  unsigned int posInX = 0;
-
   /* Check if currentRowNumber fits with A dimensions */
   assert(currentRowNumber <= A->blocknumber0);
 
@@ -2089,9 +2086,9 @@ unsigned int SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, unsi
   /* return pos; */
 }
 
-int SBM_zentry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int col, double val)
+int SBM_entry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int col, double val)
 {
-  DEBUG_BEGIN("SBM_zentry(...)\n");
+  DEBUG_BEGIN("SBM_entry(...)\n");
   DEBUG_PRINTF("row= %i, col =% i, val =%e\n", (int)row, (int)col, val);
 
 
@@ -2102,8 +2099,8 @@ int SBM_zentry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int co
     rowNumber++;
     if(rowNumber >= M->blocknumber0)
     {
-      numerics_warning("SBM_zentry", "The row number exceeds the size of the matrix");
-      DEBUG_END("SBM_zentry(...)\n");
+      numerics_warning("SBM_entry", "The row number exceeds the size of the matrix");
+      DEBUG_END("SBM_entry(...)\n");
       return 0;
     }
   }
@@ -2117,8 +2114,8 @@ int SBM_zentry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int co
     colNumber++;
     if(colNumber >= M->blocknumber1)
     {
-      numerics_warning("SBM_zentry", "The col number exceeds the size of the matrix");
-      DEBUG_END("SBM_zentry(...)\n");
+      numerics_warning("SBM_entry", "The col number exceeds the size of the matrix");
+      DEBUG_END("SBM_entry(...)\n");
       return 0;
     }
   }
@@ -2155,13 +2152,13 @@ int SBM_zentry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int co
       DEBUG_PRINTF("row_pos = %zu, col_pos = %zu \n", row_pos, col_pos);
 
       M->block[blockNum][row_pos + col_pos * nbRows] = val;
-      DEBUG_END("SBM_zentry(...)\n");
+      DEBUG_END("SBM_entry(...)\n");
       SBM_inc_version(M);
       return 1;
     }
   }
-  numerics_warning("SBM_zentry", "no existing block for inserting entry\n");
-  DEBUG_END("SBM_zentry(...)\n");
+  numerics_warning("SBM_entry", "no existing block for inserting entry\n");
+  DEBUG_END("SBM_entry(...)\n");
   return 0;
 }
 

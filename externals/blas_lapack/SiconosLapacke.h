@@ -71,6 +71,10 @@
 #define WRAP_DPOTRS(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
 
+// --- DSYTRS ---
+#define WRAP_DSYTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO) \
+  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8)
+
 
 // --- DGESV ---
 #define WRAP_DGESV(F,A1,A2,A3,A4,A5,A6,A7,INFO)   \
@@ -93,14 +97,18 @@
 #define WRAP_DGETRI(F,A1,A2,A3,A4,INFO)         \
   INFO = F(CblasColMajor,A1,A2,A3,A4)
 
-// --- DPOTRF ---
-#define WRAP_DPOTRF(F,A1,A2,A3,A4,INFO)  \
-  INFO = F(CblasColMajor,A1,A2,A3,A4)
 
 // --- DGETRF ---
 #define WRAP_DGETRF(F,A1,A2,A3,A4,A5,INFO)  \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5)
 
+// --- DPOTRF ---
+#define WRAP_DPOTRF(F,A1,A2,A3,A4,INFO)  \
+  INFO = F(CblasColMajor,A1,A2,A3,A4)
+
+// --- DSYTRF ---
+#define WRAP_DSYTRF(F,A1,A2,A3,A4,A5,INFO)      \
+  INFO = F(CblasColMajor,A1,A2,A3,A4,A5)
 
 // --- DTRTRS ---
 #if defined(HAS_LAPACK_dtrtrs)

@@ -108,10 +108,11 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     lapack_int infoDGETRS;
     DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF);
     assert(!infoDGETRF);
-    NM_internalData(M)->isLUfactorized = true;
+    NM_set_factorized(M, true);
     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
 #else
-    NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS);
+    // NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS);
+    NM_LU_solve(M, Htmp, m);
 #endif
 
     /* assert(!infoDGETRS); */
@@ -148,7 +149,8 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 #ifdef USE_LAPACK_DGETRS
     DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, qtmp, n, &infoDGETRS);
 #else
-    NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
+    // NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
+    NM_LU_solve(M, qtmp, 1);
 #endif
 
     cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0, n, qtmp, 1, 1.0, localproblem->q, 1);
@@ -401,14 +403,15 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
 
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
 
-    assert(NM_internalData(problem->M)->isLUfactorized);
+    assert(NM_LU_factorized(problem->M));
 #ifdef USE_LAPACK_DGETRS
     lapack_int infoDGETRS = 0;
     lapack_int* ipiv = (lapack_int*)NM_iWork(problem->M, problem->M->size0, sizeof(lapack_int));
     DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, ipiv, globalVelocity, n, &infoDGETRS);
     assert(!infoDGETRS);
 #else
-    NM_gesv_expert(problem->M,globalVelocity,NM_KEEP_FACTORS);
+    // NM_gesv_expert(problem->M,globalVelocity,NM_KEEP_FACTORS);
+    NM_LU_solve(problem->M, globalVelocity, 1);
 #endif
 
   }
@@ -455,7 +458,8 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
       DEBUG_EXPR(NM_vector_display(reaction, m));
     }
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
-    info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE);
+    // info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE);
+    info = NM_LU_solve(NM_preserve(problem->M), globalVelocity, 1);
     DEBUG_EXPR(NM_vector_display(globalVelocity, n));
   }
   else

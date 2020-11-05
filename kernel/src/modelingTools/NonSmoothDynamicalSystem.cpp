@@ -114,7 +114,7 @@ void  NonSmoothDynamicalSystem::insertDynamicalSystem(SP::DynamicalSystem ds)
   // some checks here ...
   if(!ds)
   {
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem::insertDynamicalSystem :: DS is nul");
+    THROW_EXCEPTION("NonSmoothDynamicalSystem::insertDynamicalSystem :: DS is nul");
   }
 
   // Do not insert the same ds several times : results in errors in initialisation process.

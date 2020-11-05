@@ -140,6 +140,15 @@ extern "C"
     *INFO = C_INFO;
   }
 
+/* DSYTRF - LDLT factorization */
+  static inline void DSYTRF(char UPLO, lapack_int N, double* A, lapack_int LDA, lapack_int* IPIV, lapack_int* INFO)
+  {
+    lapack_int C_N = N;
+    lapack_int C_LDA = LDA;
+    lapack_int C_INFO = 0;
+    WRAP_DSYTRF(LAPACK_NAME(dsytrf), CHAR(UPLO),  INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO));
+    *INFO = C_INFO;
+  }
 
   
 /*
@@ -211,9 +220,9 @@ extern "C"
     *INFO = C_INFO;
   }
 /* DPOTRS solves a system of linear equations
- *     A * X = B  or  A' * X = B
- *  with a general N-by-N matrix A using the LU factorization computed
- *  by DGETRF.
+ *     A * X = B  
+ *  with a symmetrix definite positive N-by-N matrix A using the Cholesky factorization computed
+ *  by DPOTRF.
  */
   static inline void DPOTRS(char UPLO, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)
   {
@@ -223,6 +232,21 @@ extern "C"
     lapack_int C_LDB = LDB;
     lapack_int C_INFO = 0;
     WRAP_DPOTRS(LAPACK_NAME(dpotrs), CHAR(UPLO), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA),  B, INTEGER(C_LDB), INTEGER(C_INFO));
+    *INFO = C_INFO;
+  }
+  /* DSYTRS solves a system of linear equations
+   *     A * X = B  
+   *  with a general symmetric N-by-N matrix A using the LDLT factorization computed
+   *  by DSYTRF.
+ */
+  static inline void DSYTRS(char UPLO, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, lapack_int* IPIV,double* B, lapack_int LDB, lapack_int* INFO)
+  {
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
+    WRAP_DSYTRS(LAPACK_NAME(dsytrs), CHAR(UPLO), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA),  INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
   /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,

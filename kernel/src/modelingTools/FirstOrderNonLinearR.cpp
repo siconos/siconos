@@ -62,7 +62,7 @@ void FirstOrderNonLinearR::computeh(double time, const BlockVector& x, const Sic
   }
   else
   {
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeh - no plugin detected, you should provide one or derive this class and implement this function");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeh - no plugin detected, you should provide one or derive this class and implement this function");
   }
 }
 
@@ -79,7 +79,7 @@ void FirstOrderNonLinearR::computeg(double time, const BlockVector& x, const Sic
   }
   else
   {
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeg - no plugin detected, you should provide one or derive this class and implement this function");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeg - no plugin detected, you should provide one or derive this class and implement this function");
   }
 }
 
@@ -93,7 +93,7 @@ void FirstOrderNonLinearR::computeJachx(double time, const BlockVector& x, const
     z = *zp;
   }
   else
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachx, you need to derive this function in order to use it");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeJachx, you need to derive this function in order to use it");
 }
 
 void FirstOrderNonLinearR::computeJachlambda(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& D)
@@ -106,7 +106,7 @@ void FirstOrderNonLinearR::computeJachlambda(double time, const BlockVector& x, 
     z = *zp;
   }
   else
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachlambda, you need to either provide a matrix D or derive this function in order to use it");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeJachlambda, you need to either provide a matrix D or derive this function in order to use it");
 }
 
 void FirstOrderNonLinearR::computeJacglambda(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& B)
@@ -119,7 +119,7 @@ void FirstOrderNonLinearR::computeJacglambda(double time, const BlockVector& x, 
     z = *zp;
   }
   else
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacglambda, you need to either provide a matrix B or derive this function in order to use it");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeJacglambda, you need to either provide a matrix B or derive this function in order to use it");
 }
 
 void FirstOrderNonLinearR::computeJacgx(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& K)
@@ -132,7 +132,7 @@ void FirstOrderNonLinearR::computeJacgx(double time, const BlockVector& x, const
     z = *zp;
   }
   else
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacgx, you need to either provide a matrix K or derive this function in order to use it");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeJacgx, you need to either provide a matrix K or derive this function in order to use it");
 }
 
 

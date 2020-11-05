@@ -111,12 +111,16 @@ enum FRICTION_SOLVER
   SICONOS_ROLLING_FRICTION_3D_NSGS = 3000,
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone= 3001,
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 3002,
-
+  SICONOS_ROLLING_FRICTION_3D_ADMM = 3003,
+  
   /** Non-smooth Gauss Seidel, local formulation */
   SICONOS_ROLLING_FRICTION_2D_NSGS = 4000,
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone= 4001,
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 4002
 
+ 
+ 
+  
 };
 
 
@@ -186,10 +190,12 @@ extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 extern const char* const   SICONOS_ROLLING_FRICTION_3D_NSGS_STR ;
 extern const char* const   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
 extern const char* const   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
+extern const char* const   SICONOS_ROLLING_FRICTION_3D_ADMM_STR ;
 
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_NSGS_STR ;
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone_STR;
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
+
 
 enum SICONOS_FRICTION_3D_IPARAM
 {
@@ -245,6 +251,8 @@ enum SICONOS_FRICTION_3D_NSGS_IPARAM
   /** index in iparam to store the shuffle seed */
   SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED=6,
   /** index in iparam to store the  */
+  SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT =19,
+  /** index in iparam to store the  */
   SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION =14,
 };
 enum SICONOS_FRICTION_3D_NSGS_DPARAM
@@ -286,6 +294,7 @@ enum SICONOS_FRICTION_3D_NSGS_SHUFFLE_ENUM
   SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE=1,
   SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP=2
 };
+
 enum SICONOS_FRICTION_3D_NSGS_RELAXATION_ENUM
 {
   SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE,
@@ -456,9 +465,22 @@ enum SICONOS_FRICTION_3D_ADMM_ACCELERATION_ENUM
 
 enum SICONOS_FRICTION_3D_ADMM_SYMMETRY_ENUM
 {
+  /* default choice. We check symmetry of the problem (Matrix M)
+   * if the problem is not symmetric, we called an asymmetric
+   * version of the algo is possible */
   SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY= 0,
+  /* The symmetric version of the algorithm is used even if
+   *  the system is not symmetric */
   SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY= 1,
-  SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY= 2
+  /* The asymmetric version of the algorithm is used even if
+   *  the system is symmetric */
+  SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY= 2,
+  /* The symmetric version of the algorithm is used and the matrix 
+   *is systematically symmetrized*/
+  SICONOS_FRICTION_3D_ADMM_SYMMETRIZE= 3,
+  /* The symmetric version of the algorithm is used and we assume 
+   *  that the data are symmetric */
+  SICONOS_FRICTION_3D_ADMM_ASSUME_SYMMETRY= 4
 };
 
 enum SICONOS_FRICTION_3D_ADMM_STORAGE_ENUM

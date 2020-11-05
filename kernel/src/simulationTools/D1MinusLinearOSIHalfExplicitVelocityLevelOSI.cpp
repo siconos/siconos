@@ -104,7 +104,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       if(d->inverseMass())
       {
         d->update_inverse_mass();
-        d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+        d->inverseMass()->Solve(vFree);
       }
 
       work_tdg =  workVectors[D1MinusLinearOSI::FREE_TDG];
@@ -145,7 +145,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       if(d->inverseMass())
       {
         d->update_inverse_mass();
-        d->inverseMass()->PLUForwardBackwardInPlace(vFree); // contains left (right limit) acceleration without contact force
+        d->inverseMass()->Solve(vFree); // contains left (right limit) acceleration without contact force
       }
 
       work_tdg =  workVectors[D1MinusLinearOSI::FREE_TDG];;
@@ -165,7 +165,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
     }
     else
     {
-      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
+      THROW_EXCEPTION("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
     }
   }
 
@@ -250,7 +250,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       p2 /= h;
       if(d->inverseMass())
       {
-        d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+        d->inverseMass()->Solve(dummy);
         DEBUG_EXPR(d->inverseMass()->display(););
       }
       DEBUG_EXPR(vFree.display());
@@ -302,7 +302,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       if(d->inverseMass())
       {
         d->update_inverse_mass();
-        d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+        d->inverseMass()->Solve(dummy);
       }
 
       DEBUG_EXPR(vFree.display());
@@ -344,7 +344,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
     }
     else
-      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
+      THROW_EXCEPTION("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
 
     /** At this step, we obtain
@@ -437,7 +437,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
+          d->inverseMass()->Solve(*work_tdg);
           // contains right (left limit) acceleration without contact force
         }
 
@@ -467,7 +467,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
+          d->inverseMass()->Solve(*work_tdg);
           // contains right (left limit) acceleration without contact force
         }
 
@@ -475,7 +475,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(residuFree.display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
+        THROW_EXCEPTION("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
     }
   }
   else
@@ -513,13 +513,13 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
         }
         else
-          RuntimeException::selfThrow
+          THROW_EXCEPTION
           ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+          d->inverseMass()->Solve(vFree);
         }
         /* vFree contains right (left limit) acceleration without contact force */
         SiconosVector& residuFree = *workVectors[D1MinusLinearOSI::RESIDU_FREE];
@@ -554,7 +554,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(vFree);
+          d->inverseMass()->Solve(vFree);
         }
         /* work_tdg contains right (left limit) acceleration without contact force */
         SiconosVector& residuFree = *workVectors[D1MinusLinearOSI::RESIDU_FREE];
@@ -568,7 +568,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(vFree.display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
+        THROW_EXCEPTION("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
     }
 
@@ -627,7 +627,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           if(d->inverseMass())
           {
             d->update_inverse_mass();
-            d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+            d->inverseMass()->Solve(dummy);
           }
           residuFree -=  dummy;
 
@@ -650,7 +650,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
           if(d->inverseMass())
           {
             d->update_inverse_mass();
-            d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+            d->inverseMass()->Solve(dummy);
           }
           residuFree -=  dummy;
 
@@ -658,7 +658,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(residuFree.display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
+        THROW_EXCEPTION("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
       /**
        * \f[
@@ -733,7 +733,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
       DEBUG_PRINT("Xfree = DSlink[NewtonEulerR::velocity];\n");
     }
     else
-      RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
+      THROW_EXCEPTION("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
     DEBUG_PRINT("Xfree contains the current velocity of the aggregated ds];\n");
     DEBUG_EXPR(Xfree->display());
 
@@ -750,7 +750,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
       Xfree = workBlockV[D1MinusLinearOSI::xfree];
     }
     else
-      RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
+      THROW_EXCEPTION("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
     assert(Xfree);
     DEBUG_PRINT("Xfree = DSlink[Lagrangian/NewtonEulerR::xfree];\n");
     DEBUG_PRINT("Xfree contains the free velocity of the aggregated ds];\n");
@@ -758,7 +758,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
 
   }
   else
-    RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
+    THROW_EXCEPTION("D1MinusLinearOSI::computeFreeOutput - OSNSP neither on velocity nor on acceleration level.");
 
   // calculate data of interaction
   SP::Interaction mainInteraction = inter;
@@ -784,7 +784,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     /*  explicit time dependence -> partial time derivative has to be added */
     if(relationSubType == RheonomousR)
     {
-      RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput is not implemented  at velocity level for LagrangianRheonomousR.");
+      THROW_EXCEPTION("D1MinusLinearOSI::computeFreeOutput is not implemented  at velocity level for LagrangianRheonomousR.");
     }
 
     /* add the contribution due to the coefficient of restitution*/
@@ -834,7 +834,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
 
 
   else
-    RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " +  std::to_string(relationType));
+    THROW_EXCEPTION("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " +  std::to_string(relationType));
 
   DEBUG_EXPR(osnsp_rhs.display(););
 
@@ -879,7 +879,7 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Int
     return (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS);
   }
   else
-    RuntimeException::selfThrow("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel, IndexSet[i > 2] does not exist.");
+    THROW_EXCEPTION("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel, IndexSet[i > 2] does not exist.");
   return false;
 }
 

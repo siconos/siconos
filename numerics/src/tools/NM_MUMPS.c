@@ -32,6 +32,18 @@
 void NM_MUMPS_free(void* p)
 {
   NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
+  DMUMPS_STRUC_C* mumps_id;
+  mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
+  if (mumps_id->rhs && (mumps_id->ICNTL(20) > 0))
+  {
+    /* a rhs has been allocated for sparse rhs calls */
+    free(mumps_id->irhs_ptr);
+    free(mumps_id->irhs_sparse);
+    free(mumps_id->rhs);
+    mumps_id->irhs_ptr = NULL;
+    mumps_id->irhs_sparse = NULL;
+    mumps_id->rhs = NULL;
+  }
   free(params->linear_solver_data);
   params->linear_solver_data = NULL;
 }
@@ -82,6 +94,12 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     params->linear_solver_data = calloc(1, sizeof(DMUMPS_STRUC_C));
     mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
     mumps_id->job = 0;
+
+    /* may be allocated in the sparse rhs case */
+    mumps_id->irhs_ptr = NULL;
+    mumps_id->irhs_sparse = NULL;
+    mumps_id->rhs = NULL;
+
   }
   mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
   return mumps_id;
@@ -211,14 +229,14 @@ void NM_MUMPS_set_default_params(NumericsMatrix* A)
   mumps_id->ICNTL(7) = 3; // scotch
 }
 
-void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)
+void NM_MUMPS_set_matrix(NumericsMatrix* A)
 {
   /* numerics matrices are not distributed */
   if(NM_MPI_rank(A) == 0)
   {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
     CSparseMatrix* triplet;
-    if(mumps_id->sym)
+    if(mumps_id->sym) /* symmetry */
     {
       triplet=NM_half_triplet(A);
     }
@@ -227,13 +245,61 @@ void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)
       triplet=NM_triplet(A);
     }
     mumps_id->n = (MUMPS_INT) triplet->n;
-    NM_MUMPS_set_irn_jcn(A);
+    mumps_id->nz = (MUMPS_INT) triplet->nz;
 
-    MUMPS_INT nz;
-    nz = (MUMPS_INT) triplet->nz;
-    mumps_id->nz = nz;
+    NM_MUMPS_set_irn_jcn(A);
     mumps_id->a = triplet->x;
+
+    mumps_id->lrhs = A->size0;
+  }
+}
+
+void NM_MUMPS_set_dense_rhs(NumericsMatrix* A, unsigned int nrhs, double *b)
+{
+  /* numerics matrices are not distributed */
+  if(NM_MPI_rank(A) == 0)
+  {
+    DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+    mumps_id->nrhs = nrhs;
+
     mumps_id->rhs = b;
+  }
+}
+
+void NM_MUMPS_set_sparse_rhs(NumericsMatrix* A, NumericsMatrix* B)
+{
+  /* numerics matrices are not distributed */
+  if(NM_MPI_rank(A) == 0)
+  {
+    DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+    CSparseMatrix* csc;
+    csc = NM_csc(B);
+
+    mumps_id->ICNTL(20) = 1; /* decision of exploiting sparsity is done
+                              * by mumps */
+    mumps_id->ICNTL(21) = 0; /* centralized solution */
+
+    mumps_id->nz_rhs = (MUMPS_INT) csc->nzmax;  /* maximum number of entries */
+
+    mumps_id->nrhs = (MUMPS_INT) B->size1;
+
+    mumps_id->irhs_ptr = (MUMPS_INT *) malloc((mumps_id->nrhs+1)*
+                                              sizeof(MUMPS_INT));
+    for(size_t k=0; k < (size_t)mumps_id->nrhs+1; ++k)
+    {
+      mumps_id->irhs_ptr[k] = (MUMPS_INT) (csc->p[k]+1);    /* pointers to the columns */
+    }
+    mumps_id->irhs_sparse  = (MUMPS_INT *) malloc(mumps_id->nz_rhs
+                                                  *sizeof(MUMPS_INT));
+    for(size_t k=0; k < (size_t)mumps_id->nz_rhs; ++k)
+    {
+      mumps_id->irhs_sparse[k] = (MUMPS_INT) (csc->i[k]+1); /* row indices */
+    }
+
+    mumps_id->rhs_sparse = csc->x;  /* numerical values */
+
+    mumps_id->rhs = (double *) malloc((A->size0*csc->n) * sizeof(double));
   }
 }
 

@@ -35,7 +35,7 @@ void FirstOrderLinearTIDS::initRhs(double time)
     {
       _jacxRhs.reset(new SimpleMatrix(*_A)); // Copy A into _jacxRhs
       // Solve M_jacxRhs = A
-      _invM->PLUForwardBackwardInPlace(*_jacxRhs);
+      _invM->Solve(*_jacxRhs);
     }
     // else no allocation, jacobian is equal to 0.
   }
@@ -58,7 +58,7 @@ void FirstOrderLinearTIDS::computeRhs(double time)
     // allocate invM at the first call of the present function
     if(! _invM)
       _invM.reset(new SimpleMatrix(*_M));
-    _invM->PLUForwardBackwardInPlace(*_x[1]);
+    _invM->Solve(*_x[1]);
   }
 }
 
