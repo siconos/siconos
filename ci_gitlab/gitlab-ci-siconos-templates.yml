@@ -39,9 +39,7 @@ stages:
   - docker-build-layer2
   - docker-build-layer3
   - docker-build-layer-doc
-  # --- Doc stages ---
-  # Build documentation
-  - doc-build
+  
   # Deploy documentation
   # --- Build stage ---
   # jobs run on images generated in previous stage, available in siconos registry:
@@ -51,6 +49,9 @@ stages:
   # - submit to cdash
   #
   # Templates for these jobs : .siconos-build (see below).
+  # --- Doc stages ---
+  # Build documentation
+  # - doc-build : same level as other builds, since it's manual.
   - doc-deploy
   - build
 

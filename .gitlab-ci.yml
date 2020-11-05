@@ -288,7 +288,7 @@ siconos:doc:
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_docs.cmake
     LANG: C.UTF-8
   extends: .siconos-build
-  stage: doc-build
+  #stage: doc-build
   script:
     - "sh ci_gitlab/make_siconos_doc.sh"
   artifacts:
