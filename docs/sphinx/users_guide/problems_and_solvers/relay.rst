@@ -3,7 +3,7 @@
    
 .. contents::
 
-.. _lcp_problem:
+.. _relay_problem:
 
 Relay or box-constrained AVI problems
 *************************************
@@ -65,7 +65,7 @@ PATH (:enumerator:`SICONOS_RELAY_PATH`)
 
 The relay problem is reformulated as a LCP and solved with the PATH solver
 
-*Works only if Siconos has been built with path support (if PathFerris or PathVI has been found, see :ref:`siconos_install_guide`)**
+*Works only if Siconos has been built with path support (if PathFerris or PathVI has been found, see* :ref:`siconos_install_guide` *)*
 
 driver: :func:`relay_path()`
 
