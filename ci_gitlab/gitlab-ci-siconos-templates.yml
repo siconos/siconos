@@ -40,20 +40,19 @@ stages:
   - docker-build-layer3
   - docker-build-layer-doc
   
-  # Deploy documentation
   # --- Build stage ---
   # jobs run on images generated in previous stage, available in siconos registry:
   # https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/container_registry
   # - configure, build Siconos
   # - run tests
   # - submit to cdash
-  #
+  - build
+  - test
   # Templates for these jobs : .siconos-build (see below).
   # --- Doc stages ---
   # Build documentation
-  # - doc-build : same level as other builds, since it's manual.
+  - doc-build
   - doc-deploy
-  - build
 
 
 # --- Templates definitions ---
