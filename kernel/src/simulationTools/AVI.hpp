@@ -40,7 +40,7 @@ TYPEDEF_SPTR(AffineVariationalInequalities)
 
  .. math::
 
-   \text{find z}\in P\text{such that for all x}\in P\quad \langle x-z, Mz+q\rangle \geq 0.
+   \text{find }z \in P\text{ such that}\quad \langle Mz+q, x - z\rangle \geq 0 \qquad \forall x \in P
 
  \endrst
  \todo : add "recover" function to start from old values of z and w.
