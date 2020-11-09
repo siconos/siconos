@@ -316,3 +316,16 @@ void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
     dsg.bundle(*dsi)->acceptSP(visitor);
   }
 }
+std::vector<SP::DynamicalSystem> NonSmoothDynamicalSystem::dynamicalSystemsVector() const
+{
+    std::vector<SP::DynamicalSystem> dynamicalSystemsVector;
+    DynamicalSystemsGraph &dsg = *dynamicalSystems();
+    DynamicalSystemsGraph::VIterator dsi, dsiend;
+    std::tie(dsi, dsiend) = dsg.vertices();
+    for(; dsi != dsiend; ++dsi)
+    {
+      dynamicalSystemsVector.push_back(dsg.bundle(*dsi));
+    }
+
+    return dynamicalSystemsVector;
+  }
