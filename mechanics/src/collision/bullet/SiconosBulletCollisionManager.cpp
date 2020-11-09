@@ -1914,8 +1914,9 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
   DEBUG_END("SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorSet(...)\n");
 }
 
-void SiconosBulletCollisionManager::removeBody(const SP::RigidBodyDS& body)
+void SiconosBulletCollisionManager::removeBody(const SP::SecondOrderDS& body)
 {
+
   BodyShapeMap::iterator it(_impl->bodyShapeMap.find(&*body));
   if(it == _impl->bodyShapeMap.end())
     return;
@@ -1928,20 +1929,7 @@ void SiconosBulletCollisionManager::removeBody(const SP::RigidBodyDS& body)
 
   _impl->bodyShapeMap.erase(it);
 }
-void SiconosBulletCollisionManager::removeBody(const SP::RigidBody2dDS& body)
-{
-  BodyShapeMap::iterator it(_impl->bodyShapeMap.find(&*body));
-  if(it == _impl->bodyShapeMap.end())
-    return;
 
-  std::vector<std::shared_ptr<BodyShapeRecord> >::iterator it2;
-  for(it2 = it->second.begin(); it2 != it->second.end(); it2++)
-  {
-    _impl->_collisionWorld->removeCollisionObject(&* (*it2)->btobject);
-  }
-
-  _impl->bodyShapeMap.erase(it);
-}
 /** This class allows to iterate over all the contact points in a
  *  btCollisionWorld, returning a tuple containing the two btCollisionObjects
  *  and the btManifoldPoint.  To be called after
