@@ -764,14 +764,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     """
 
-    def __init__(self, io_filename=None, mode='w',
+    def __init__(self, io_filename=None, io_filename_backup=None, mode='w',
                  interaction_manager=None, nsds=None, simulation=None,
                  osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None,
                  collision_margin=None,
                  use_compression=False, output_domains=False, verbose=True):
 
-        super(MechanicsHdf5Runner, self).__init__(io_filename, mode, None,
+        super(MechanicsHdf5Runner, self).__init__(io_filename, mode,
+                                                  io_filename_backup,
                                                   use_compression,
                                                   output_domains, verbose)
         self._interman = interaction_manager
@@ -2546,8 +2547,17 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if self._output_backup:
                 if (k % self._output_backup_frequency == 0) or (k == 1):
-                    shutil.copyfile(self._io_filename,
-                                    self._io_filename_backup)
+
+                    # close io file, hdf5 memory is cleaned
+                    self._out.close()
+                    try:
+                        shutil.copyfile(self._io_filename,
+                                        self._io_filename_backup)
+                    except shutil.Error as e:
+                        warn(str(e))
+                    # open the file again
+                    finally:
+                        self.__enter__()
 
             self.log(simulation.clearNSDSChangeLog, with_timer)()
 
