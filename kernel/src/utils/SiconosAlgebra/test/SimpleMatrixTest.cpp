@@ -3488,7 +3488,7 @@ void SimpleMatrixTest::testFromAndFillCSC()
   NM_csc_alloc(NM_1, Sparse4->nnz());
   Sparse4->fillCSC(NM_csc(NM_1));
   //NM_display(NM_1);  --> Note FP : fails when exiting the function ... To be investigating ...
-
+  NM_1 = NM_free(NM_1);
   std::cout << "End SimpleMatrixTest::testFromAndFillCSC() "<< std::endl;
 
 }
