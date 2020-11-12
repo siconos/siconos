@@ -26,8 +26,9 @@ const char ** data_collection()
 
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
-  data_collection_1[n_data++] = "./data/Box_Stacks-i0122-82-5.hdf5";
-  data_collection_1[n_data++] = "./data/Spheres-i099-356-679.hdf5";
+  /* data_collection_1[n_data++] = "./data/Box_Stacks-i0122-82-5.hdf5"; */
+  /* data_collection_1[n_data++] = "./data/Spheres-i099-356-679.hdf5"; */
+  data_collection_1[n_data++] = "/scratch/Vincent/fclib-library/Global/siconos/Capsules/Capsules-i000375-39-9142.hdf5";
   data_collection_1[n_data++] = "---";
   return data_collection_1;
 }

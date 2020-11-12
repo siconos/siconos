@@ -1080,7 +1080,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
                double* restrict velocity, double* restrict globalVelocity,
                int* restrict info, SolverOptions* restrict options)
 {
-  // the size of the problem detection
+  verbose=3;
+// the size of the problem detection
   unsigned int m = problem->M->size0;
   unsigned int nd = problem->H->size1;
   unsigned int d = problem->dimension;
