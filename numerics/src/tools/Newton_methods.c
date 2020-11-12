@@ -24,7 +24,7 @@
 #include <stdlib.h>            // for free, calloc, malloc, getenv, atoi
 #include "ArmijoSearch.h"      // for linesearch_Armijo2, armijo_extra_params
 #include "GoldsteinSearch.h"   // for goldstein_extra_params, search_Goldste...
-#include "NumericsMatrix.h"    // for NM_gesv, NM_tgemv, NM_duplicate, NM_clear
+#include "NumericsMatrix.h"    // for NM_LU_solve, NM_tgemv, NM_duplicate, NM_clear
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "debug.h"             // for DEBUG_PRINT
@@ -273,7 +273,9 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       // Find direction by solving H * d = -F_desc
       cblas_dcopy(n, F_merit, incx, workV1, incy);
       cblas_dscal(n, -1.0, workV1, incx);
-      info_dir_search = NM_gesv(H, workV1, params->keep_H);
+      // info_dir_search = NM_gesv(H, workV1, params->keep_H);
+      NM_set_factorized(H, false);
+      info_dir_search = NM_LU_solve(params->keep_H ? NM_preserve(H) : H, workV1, 1);
     }
     /**************************************************************************
      * END COMPUTATION DESCENT DIRECTION
@@ -322,7 +324,9 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         numerics_printf("functions->compute_RHS_desc : no  descent direction found! searching for merit descent direction");
         cblas_dcopy(n, F_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
-        info_dir_search = NM_gesv(H, workV1, params->keep_H);
+        // info_dir_search = NM_gesv(H, workV1, params->keep_H);
+        NM_set_factorized(H, false);
+        info_dir_search = NM_LU_solve(params->keep_H ? NM_preserve(H) : H, workV1, 1);
 
         if(log_hdf5)
         {

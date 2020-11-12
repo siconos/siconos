@@ -17,7 +17,7 @@
 */
 
 #include "EventFactory.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include <iostream>
 
 
@@ -41,7 +41,7 @@ SP::Event Registry::instantiate(double time, int type)
   MapFactoryIt it = factory_map.find(type) ;
 
   if(it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (EventFactory) failed, no class with id: " + std::to_string(type));
+    THROW_EXCEPTION("Registry::instantiate (EventFactory) failed, no class with id: " + std::to_string(type));
 
   return (it->second)(time, type) ; // run our factory
 }

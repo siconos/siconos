@@ -169,7 +169,7 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
       prod(*_dotjachq, *DSlink[LagrangianR::q1], y, false);
     }
     else
-      RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber), index out of range");
+      THROW_EXCEPTION("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber), index out of range");
   }
 }
 

@@ -108,7 +108,7 @@ void LinearOSNS::initOSNSMatrix()
     }
     {
       default:
-        RuntimeException::selfThrow("LinearOSNS::initOSNSMatrix unknown _storageType");
+        THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
       }
     }
   }
@@ -223,16 +223,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
-    leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
-    inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
+    leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, nslawSize, sizeDS);
     DEBUG_EXPR(leftInteractionBlock->display(););
     // Computing depends on relation type -> move this in Interaction method?
     if(relationType == FirstOrder)
     {
 
-      rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize));
+      
 
-      inter->getRightInteractionBlockForDS(pos, rightInteractionBlock);
+      rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
       if(osiType == OSI::EULERMOREAUOSI)
       {
@@ -253,7 +252,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-        centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+        centralInteractionBlock->Solve(*rightInteractionBlock);
         VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
         static_cast<EulerMoreauOSI&>(osi).computeKhat(*inter, *rightInteractionBlock,
             workMInter, h);
@@ -324,15 +323,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
         work->trans();
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-        DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isPLUFactorized() = "<< centralInteractionBlock->isPLUFactorized() << std::endl;);
-        centralInteractionBlock->PLUForwardBackwardInPlace(*work);
+        DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isFactorized() = "<< centralInteractionBlock->isFactorized() << std::endl;);
+        centralInteractionBlock->Solve(*work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
         DEBUG_EXPR(work->display(););
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
         //*currentInteractionBlock *=h;
         DEBUG_EXPR(currentInteractionBlock->display(););
-        //assert(currentInteractionBlock->isSymmetric(1e-10));
+        //assert(currentInteractionBlock->checkSymmetry(1e-10));
         if(relationSubType == CompliantLinearTIR)
         {
           if(osiType == OSI::MOREAUJEANOSI)
@@ -343,7 +342,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         }
       }
     }
-    else RuntimeException::selfThrow("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + std::to_string(relationType));
+    else THROW_EXCEPTION("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + std::to_string(relationType));
     // Set pos for next loop.
     pos = pos2;
   }
@@ -452,20 +451,16 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
   // get _interactionBlocks corresponding to the current DS
   // These _interactionBlocks depends on the relation type.
-  leftInteractionBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-  inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
+  leftInteractionBlock = inter1->getLeftInteractionBlockForDS(pos1, nslawSize1, sizeDS);
 
   // Computing depends on relation type -> move this in Interaction method?
   if(relationType1 == FirstOrder && relationType2 == FirstOrder)
   {
-
-    rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
-
-    inter2->getRightInteractionBlockForDS(pos2, rightInteractionBlock);
+    rightInteractionBlock = inter2->getRightInteractionBlockForDS(pos2, sizeDS, nslawSize2);
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
     SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-    centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+    centralInteractionBlock->Solve(*rightInteractionBlock);
 
     //      integration of r with theta method removed
     //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
@@ -535,7 +530,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       // remind that W contains the inverse of the iteration matrix
       axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *rightInteractionBlock, true);
       // Then save block corresponding to the 'right' interaction into leftInteractionBlock
-      inter2->getLeftInteractionBlockForDS(pos2, leftInteractionBlock);
+      leftInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize1, sizeDS);
       leftInteractionBlock->trans();
       // and compute LW-1R == rightInteractionBlock * leftInteractionBlock into currentInteractionBlock
       prod(*rightInteractionBlock, *leftInteractionBlock, *currentInteractionBlock, false);
@@ -543,20 +538,19 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     else
     {
       // inter1 != inter2
-      rightInteractionBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-      inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
+      rightInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize2, sizeDS);
       rightInteractionBlock->trans();
       // Warning: we use getLeft for Right interactionBlock
       // because right = transpose(left) and because of
       // size checking inside the getBlock function, a
       // getRight call will fail.
       SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-      centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+      centralInteractionBlock->Solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
     }
   }
-  else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
+  else THROW_EXCEPTION("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
   DEBUG_END("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 }
 
@@ -666,7 +660,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 
   }
   else
-    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
+    THROW_EXCEPTION("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
   DEBUG_EXPR(_q->display());
   DEBUG_END("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
 }

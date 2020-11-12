@@ -3,7 +3,7 @@
 #
 
 # Collect source files.
-# 
+#
 # Usage:
 #
 # get_sources(<COMPONENT> DIRS <dirs list> EXCLUDE <files list>)
@@ -14,9 +14,9 @@
 #
 # Remarks:
 # - dir1, dir2 ... are relative to CMAKE_CURRENT_SOURCE_DIR
-# 
+#
 function(get_sources COMPONENT)
-  
+
   set(multiValueArgs DIRS EXCLUDE)
   cmake_parse_arguments(source "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
@@ -53,19 +53,21 @@ function(get_sources COMPONENT)
 
   # Check if some sources are to be excluded from build
   foreach(_FILE IN LISTS source_EXCLUDE)
-    if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
-      file(GLOB _GFILE CONFIGURE_DEPENDS ${_FILE})
-    else()
-      file(GLOB _GFILE ${_FILE})
-    endif()
-    
-    if(_GFILE)
-      list(REMOVE_ITEM SOURCES_FILES ${_GFILE})
-    else()
-      message(WARNING "file to be excluded NOT FOUND : ${_FILE}")
-    endif()
+    # if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+    #   file(GLOB _GFILE CONFIGURE_DEPENDS ${_FILE})
+    # else()
+    #   file(GLOB _GFILE ${_FILE})
+    # endif()
+    # MESSAGE("_GFILE::" ${_GFILE})
+    # MESSAGE("SOURCES_FILES::" ${SOURCES_FILES})
+    # if(_GFILE)
+    #   list(REMOVE_ITEM SOURCES_FILES ${_GFILE})
+    # else()
+    #   message(WARNING "file to be excluded NOT FOUND : ${_FILE}")
+    #endif()
+    list(REMOVE_ITEM SOURCES_FILES ${_FILE})
   endforeach()
-  
+
   set(${COMPONENT}_SRCS ${SOURCES_FILES} PARENT_SCOPE)
 endfunction()
 
@@ -101,7 +103,7 @@ MACRO(ASSERT VAR)
   IF (NOT DEFINED ${VAR})
     MESSAGE( FATAL_ERROR "ASSERTION ERROR : ${VAR} UNSET" )
   ENDIF()
-ENDMACRO()    
+ENDMACRO()
 
 
 # -------------------------------
@@ -115,7 +117,7 @@ ENDMACRO()
 # while
 # cmake -DWITH_kernel_DOCUMENTATION=ON
 # will set WITH_DOCUMENTATION=ON and WITH_other_components=OFF
-# 
+#
 # This will work (I hope ...) in standard cases but will probably
 # failed after several cmake . with schizophrenic options
 # like
@@ -156,12 +158,12 @@ endfunction()
 
 
 # Try to provide some hints for a find_package call.
-# 
+#
 # Usage:
 #
 # set_find_package_hints(NAME <name> MODULE <mod>)
 #
-# 
+#
 # Result : set (parent scope) _<NAME>_SEARCH_OPTS and _<NAME>_INC_SEARCH_OPTS
 # that can be used in find_path (INC_SEARCH) and find_library calls.
 #
@@ -169,7 +171,7 @@ endfunction()
 # or using pkg-config information, if available.
 #
 # See examples of use in FindCPPUNIT.cmake or FindSuperLU.cmake.
-# 
+#
 function(set_find_package_hints)
   set(oneValueArgs NAME MODULE)
 
@@ -192,7 +194,7 @@ function(set_find_package_hints)
       HINTS ${PKGC_${pkg_NAME}_LIBRARY_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
       PARENT_SCOPE)
   endif()
-  
+
 endfunction()
 
 # ------------------------------------
@@ -215,19 +217,19 @@ endmacro()
 #
 # This is useful for packages with
 # an 'old-way' find_package cmake routine.
-# 
+#
 # Usage:
-# 
+#
 # find_package(<name>)
 # create_target(NAME <name> LIBRARIES <list of libs>  INCLUDE_DIR <list of includes>)
 # target_link_libraries(some_other_target PRIVATE name)
-# 
+#
 # Result : create a target <name>.
 # some_other_target will be linked with <list of libs> and use <list of includes>
 # to search for headers.
 #
 # See example in mechanics/CMakeLists.txt, for Bullet setup.
-# 
+#
 function(create_target)
   set(oneValueArgs NAME)
   set(multiValueArgs LIBRARIES INCLUDE_DIRS)
@@ -247,7 +249,7 @@ endfunction()
 # Apply sanitizer options onto a given target
 #
 # Depends on user-defined variable USE_SANITIZER.
-# 
+#
 # Might be:
 # - asan : fast memory error detector
 # - leaks : detects memory leaks
@@ -258,7 +260,7 @@ endfunction()
 #
 # Warning : do not combine options and notice that some of them may fail
 # on MacOs ...
-# 
+#
 # Ref :
 # - http://www.stablecoder.ca/2018/10/30/full-cmake-helper-suite.html
 # - https://clang.llvm.org/docs/AddressSanitizer.html
@@ -297,9 +299,9 @@ endfunction()
 # Apply compiler options onto a given target
 #
 # Depends on the diagnostics level required.
-# 
+#
 # Usage :
-# 
+#
 #     apply_compiler_options(numerics DIAGNOSTICS_LEVEL ${WARNINGS_LEVEL})
 #
 # * This function must be called inside create_siconos_component function.
@@ -307,15 +309,15 @@ endfunction()
 # (-DUSER_OPTIONS_FILE=configfile.cmake)
 # * to be more specific on a given target, use target_compile_... functions
 #   Check in externals/CMakeLists.txt for an example.
-# 
+#
 function(apply_compiler_options COMPONENT)
   set(oneValueArgs DIAGNOSTICS_LEVEL)
   cmake_parse_arguments(COMP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   unset(COMP_OPTIONS)   # C and C++ options. Append options there by default.
-  
+
   # -- Compiler options common to all setups --
-  
+
   # Warn about types with virtual methods where code quality would be improved if the type were declared with the C++11 final specifier, or, if possible, declared in an anonymous namespace.
   #list(APPEND COMP_OPTIONS "-Wsuggest-final-types"). GNU/CXX ONLY. ## NOTE FP : too many warnings, activate this later
   # list(APPEND COMP_OPTIONS
@@ -331,14 +333,14 @@ function(apply_compiler_options COMPONENT)
   # Intel specific
   list(APPEND COMP_OPTIONS $<$<CXX_COMPILER_ID:Intel>:"-diag-disable 654">)
   list(APPEND COMP_OPTIONS $<$<CXX_COMPILER_ID:Intel>:"-D__aligned__=ignored">)
-  # LLVM Static analyser ? Where do we ask to set this LLVM_ANALYSE ? 
+  # LLVM Static analyser ? Where do we ask to set this LLVM_ANALYSE ?
   if(LLVM_ANALYSE)
     target_compile_options(${COMPONENT} PRIVATE "-emit-llvm")
   endif()
   # Clang++ specific
   list(APPEND COMP_OPTIONS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-string-plus-int>)
- 
+
   # -- Dev mode options --
   if(COMP_DIAGNOSTICS_LEVEL GREATER 0)
     # -- options working with both C and C++ --
@@ -401,7 +403,7 @@ function(apply_compiler_options COMPONENT)
     list(APPEND COMP_OPTIONS -Werror=overloaded-virtual)
     # Warn when a class has virtual functions and an accessible non-virtual destructor itself
     list(APPEND COMP_OPTIONS -Werror=non-virtual-dtor)
-    
+
     # Clang specific, C/C++
     # Error when option does not exist ...
     list(APPEND COMP_OPTIONS
@@ -409,12 +411,12 @@ function(apply_compiler_options COMPONENT)
     list(APPEND COMP_OPTIONS
       $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unreachable-code>)
   endif()
-  
+
   # -- Paranoid mode  options --
   if(COMP_DIAGNOSTICS_LEVEL GREATER 1)
     # Give an error whenever the base standard (see -Wpedantic) requires a diagnostic,
     list(APPEND COMP_OPTIONS -pedantic-errors)
-    
+
     # implicit conversions that may alter a value
     list(APPEND COMP_OPTIONS -Werror=conversion)
 
@@ -431,11 +433,11 @@ function(apply_compiler_options COMPONENT)
      set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
    endif()
-  
+
   # --- Apply options to the current target ---
   if(COMP_OPTIONS)
     target_compile_options(${COMPONENT}
       PRIVATE
-      $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:C>>:${COMP_OPTIONS}>)  
+      $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:C>>:${COMP_OPTIONS}>)
   endif()
 endfunction()

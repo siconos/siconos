@@ -17,11 +17,10 @@
 */
 #include "ioVector.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorException.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/vector_sparse.hpp>
 #include<fstream>
-
+#include "SiconosException.hpp"
 #include "SiconosAlgebra.hpp"
 
 namespace ioVector
@@ -38,10 +37,10 @@ bool read(const std::string& fileName,
   std::ifstream infile(fileName.c_str(), mode);
   infile.flags(flags);
   if(!infile.good())
-    SiconosVectorException::selfThrow("ioVector::read error : Fail to open \"" + fileName + "\"");
+    THROW_EXCEPTION("");
   if(infile.peek() == std::ifstream::traits_type::eof())
   {
-    SiconosVectorException::selfThrow("ioVector::read : the given file is empty!");
+    THROW_EXCEPTION("");
   }
 
   infile.precision(prec);
@@ -86,7 +85,7 @@ bool write(const std::string& fileName,
   outfile.flags(flags);
 
   if(!outfile.good())
-    SiconosVectorException::selfThrow("ioVector:: write error : Fail to open \"" + fileName + "\"");
+    THROW_EXCEPTION("");
   outfile.precision(prec);
   if(mode == BINARY_OUT)
   {
@@ -104,12 +103,12 @@ bool write(const std::string& fileName,
     if(outputType != "noDim")
       outfile << m.size() << std::endl;
 
-    if(m.num() == 1)
+    if(m.num() == Siconos::DENSE)
     {
       DenseVect*  p = m.dense();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
     }
-    else if(m.num() == 4)
+    else if(m.num() == Siconos::SPARSE)
     {
       SparseVect* p = m.sparse();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));

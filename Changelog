@@ -27,6 +27,11 @@ of the file were added first, and each subsequent addition is placed on a line
 --------------------------------------------------------------------------------
 Main changes:
 	[...]
+	* [numerics] add sparse linear solver with a sparse rhs based on csparse
+	* [numerics] new implementation of NM_LU_solve and NM_Cholesky_solve
+	* [kernel] new implementation of linear solvers in SimpleMatrix
+	The class SimpleMatrix owns a internal NumericsMatrix thats is used for
+	linear system solving, based on Siconos/Numerics
 	
 
 --------------------------------------------------------------------------------

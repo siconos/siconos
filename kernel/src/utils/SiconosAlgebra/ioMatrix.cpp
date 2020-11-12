@@ -22,7 +22,7 @@
 #include <limits>
 #include "ioMatrix.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixException.hpp"
+#include "SiconosException.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
 #include <boost/numeric/ublas/io.hpp>
@@ -40,18 +40,18 @@ bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m
   else if(mode == "binary")
     infile.open(fileName.c_str(), std::ifstream::binary);
   else
-    SiconosMatrixException::selfThrow("ioMatrix::read Incorrect mode for reading");
+    THROW_EXCEPTION("incorrect mode for reading");
 
   if(!infile.good())
-    SiconosMatrixException::selfThrow("ioMatrix::read error : Fail to open \"" + fileName + "\"");
+    THROW_EXCEPTION("");
 
   if(infile.peek() == std::ifstream::traits_type::eof())
   {
-    SiconosMatrixException::selfThrow("ioMatrix::read : the given file is empty!");
+    THROW_EXCEPTION("the given file is empty!");
   }
 
   if(m.isBlock())
-    SiconosMatrixException::selfThrow("ioMatrix::read not yet implemented for block matrix.");
+    THROW_EXCEPTION("not yet implemented for block matrix.");
 
   infile.precision(15);
   infile.setf(std::ios::scientific);
@@ -102,13 +102,13 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
   else if(mode == "binary")
     outfile.open(fileName.c_str(), std::ofstream::binary);
   else
-    SiconosMatrixException::selfThrow("ioMatrix::write Incorrect mode for writing");
+    THROW_EXCEPTION("Incorrect mode for writing");
 
   if(!outfile.good())
-    SiconosMatrixException::selfThrow("ioMatrix:: write error : Fail to open \"" + fileName + "\"");
+    THROW_EXCEPTION("");
 
   if(m.isBlock())
-    SiconosMatrixException::selfThrow("ioMatrix:: write error : not yet implemented for BlockMatrix");
+    THROW_EXCEPTION("not yet implemented for BlockMatrix");
 
   outfile.precision(15);
   outfile.setf(std::ios::scientific);
@@ -117,7 +117,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
   if(outputType != "noDim")
     outfile << m.size(0) << " " << m.size(1) << std::endl;
 
-  if(m.num() == 1)
+  if(m.num() == Siconos::DENSE)
   {
     // DenseMat * p = m.dense();
     DenseMat::iterator1 row;
@@ -136,7 +136,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
 
     }
   }
-  else if(m.num() == 2)
+  else if(m.num() == Siconos::TRIANGULAR)
   {
     TriangMat * p = m.triang();
     TriangMat::iterator1 row;
@@ -146,7 +146,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
       outfile << std::endl;
     }
   }
-  else if(m.num() == 3)
+  else if(m.num() == Siconos::SYMMETRIC)
   {
     SymMat * p = m.sym();
     SymMat::iterator1 row;
@@ -156,7 +156,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
       outfile << std::endl;
     }
   }
-  else if(m.num() == 4)
+  else if(m.num() == Siconos::SPARSE)
   {
     SparseMat * p = m.sparse();
     SparseMat::iterator1 row;
@@ -195,11 +195,12 @@ double compareRefFile(const SimpleMatrix& data, std::string filename, double eps
   {
     compare = ioMatrix::read(filename, mode, **ref);
   }
-  catch(SiconosMatrixException &e)
+  catch(...)
   {
     if(verbose)
       std::cout << "Warning: reference file " << filename
                 << " not found, no comparison performed." << std::endl;
+      Siconos::exception::process();
   }
   if(!compare)
     return -1.0;

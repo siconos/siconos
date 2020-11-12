@@ -57,6 +57,21 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/optim_misc/ql0001/ql0001.f")
   set(HAVE_QL0001 TRUE CACHE INTERNAL "True if ql0001 is available in externals.")
 endif()
 
+# --- MA57  ---
+#SET(WITH_MA57 1)
+# - Extra setup for the component -
+if(WITH_MA57) 
+  list(APPEND ${COMPONENT}_DIRS
+    lbl
+    lbl/src
+    lbl/include
+    lbl/ext
+    lbl/metis4)
+  # find_package(Metis) Metis 5  is not compatible with MA57. We include metis4
+  list(APPEND ${COMPONENT}_EXCLUDE_SRCS "lbl/src/ma57dummy_lib.c")
+
+endif()
+
 # -- Documentation --
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
@@ -80,7 +95,10 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
    SOL/lumod-c # For lumod_dense.h in numerics
    hairer # For kernel
    )
-
+if (WITH_MA57)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES lbl/include/)
+endif()
+ 
 if(WITH_CXX)
   list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
     numeric_bindings boost_contribs) # SiconosAlgebra needs this
@@ -93,7 +111,7 @@ endif()
 if(NOT WITH_SYSTEM_SUITESPARSE)
   # else suite sparse is an external dependency of numerics and handled in numerics
   # CMakeLists.txt.
-  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse/CXSparse)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse SuiteSparse/CXSparse SuiteSparse/LDL  )
 endif()
 # TEST TEST TEST
 
@@ -120,6 +138,10 @@ if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
   target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
+# if(METIS_FOUND)
+#   target_link_libraries(externals PUBLIC Metis::Metis)
+# endif()
+
 # Force c++ compiler for c files (for Visual Studio I guess?)
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
@@ -133,7 +155,7 @@ if(BUILD_AS_CPP)
     set_property(TARGET externals PROPERTY CXX_STANDARD 11)
   endif()
 else()
-  # set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
+  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
   if(${CMAKE_VERSION} VERSION_GREATER "3.8.0")
     target_compile_features(externals PUBLIC c_std_11)
   else()
@@ -145,14 +167,22 @@ endif()
 # Link only at build time.
 target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
 target_include_directories(externals PRIVATE blas_lapack)
+#target_include_directories(externals PRIVATE ${BLAS_INCLUDE_DIR})
+
+get_target_property(CHECK BLAS::BLAS INTERFACE_INCLUDE_DIRECTORIES)
+
 
 # We don't want warnings from externals libraries.
 get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
 list(REMOVE_ITEM externals_COMPILE_FLAGS -Wall)
+list(REMOVE_ITEM externals_COMPILE_FLAGS -Wunused-variable)
 set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
 target_compile_options(externals PRIVATE "-Wno-unused-parameter")
+# An awful command asking to add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
+# See https://scivision.co/gfortran-type-mismatch-error/
+target_compile_options(externals PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
 
 # - Extras, optional -
 # --- SuiteSparse ---

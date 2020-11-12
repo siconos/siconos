@@ -34,9 +34,9 @@ void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd)
   // Note FP : Maybe it works for others but it has not been
   // tested here --> to be done
   // Do not work with sparse.
-  A.resetLU();
-  Exp.resetLU();
-  assert(Exp.num() == 1 || A.num() == 1);
+  A.resetFactorizationFlags();
+  Exp.resetFactorizationFlags();
+  assert(Exp.num() == Siconos::DENSE || A.num() == Siconos::DENSE);
   if(computeAndAdd)
     *Exp.dense() += expm_pad(*A.dense());
   else

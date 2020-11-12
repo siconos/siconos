@@ -61,9 +61,9 @@ void FirstOrderLinearTIR::initialize(Interaction& inter)
   FirstOrderR::initialize(inter); // ?
 
   if(!_C)
-    RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() C is null and is a required input.");
+    THROW_EXCEPTION("FirstOrderLinearTIR::initialize() C is null and is a required input.");
   if(!_B)
-    RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() B is null and is a required input.");
+    THROW_EXCEPTION("FirstOrderLinearTIR::initialize() B is null and is a required input.");
 
   checkSize(inter);
 }

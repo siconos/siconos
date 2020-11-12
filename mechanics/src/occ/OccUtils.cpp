@@ -75,7 +75,7 @@ void occ_distanceFaceFace(const OccContactFace& csh1,
     }
   }
   else
-    RuntimeException::selfThrow("occ distance: BRepExtrema_DistShapeShape failed");
+    THROW_EXCEPTION("occ distance: BRepExtrema_DistShapeShape failed");
 }
 void occ_distanceFaceEdge(const OccContactFace& csh1,
                           const OccContactEdge& csh2,
@@ -128,5 +128,5 @@ void occ_distanceFaceEdge(const OccContactFace& csh1,
     // what to do now if MinDist is not changed ?
   }
   else
-    RuntimeException::selfThrow("occ distance: BRepExtrema_DistShapeShape failed");
+    THROW_EXCEPTION("occ distance: BRepExtrema_DistShapeShape failed");
 }

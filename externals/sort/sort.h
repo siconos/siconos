@@ -840,6 +840,7 @@ static void TIM_SORT_RESIZE(TEMP_STORAGE_T *store, const size_t new_size) {
   if (store->alloc < new_size) {
     SORT_TYPE *tempstore = (SORT_TYPE *)realloc(store->storage, new_size * sizeof(SORT_TYPE));
 
+
     if (tempstore == 0) {
       fprintf(stderr, "Error allocating temporary storage for tim sort: need %lu bytes",
               (unsigned long)(sizeof(SORT_TYPE) * new_size));
@@ -999,6 +1000,7 @@ static __inline int PUSH_NEXT(SORT_TYPE *dst,
       (*stack_curr)--;
     }
 
+
     if (store->storage != 0) {
       free(store->storage);
       store->storage = 0;
@@ -1032,7 +1034,9 @@ void TIM_SORT(SORT_TYPE *dst, const size_t size) {
   /* temporary storage for merges */
   store = &_store;
   store->alloc = 0;
+
   store->storage = 0;
+
 
   if (!PUSH_NEXT(dst, size, store, minrun, run_stack, &stack_curr, &curr)) {
     return;
@@ -1447,11 +1451,13 @@ static void SQRT_SORT(SORT_TYPE *arr, size_t Len) {
   int NK = (Len - 1) / L + 2;
   ExtBuf = (SORT_TYPE*)malloc(L * sizeof(SORT_TYPE));
 
+
   if (ExtBuf == 0) {
     return;  /* fail */
   }
 
   Tags = (int*)malloc(NK * sizeof(int));
+
 
   if (Tags == 0) {
     return;
@@ -2171,6 +2177,7 @@ static void GRAIL_COMMON_SORT(SORT_TYPE *arr, int Len, SORT_TYPE *extbuf, int LE
 
 static void GRAIL_SORT(SORT_TYPE *arr, size_t Len) {
   GRAIL_COMMON_SORT(arr, Len, 0, 0);
+
 }
 
 static void GRAIL_SORT_FIXED_BUFFER(SORT_TYPE *arr, size_t Len) {
@@ -2187,6 +2194,7 @@ static void GRAIL_SORT_DYN_BUFFER(SORT_TYPE *arr, size_t Len) {
   }
 
   ExtBuf = (SORT_TYPE*)malloc(L * sizeof(SORT_TYPE));
+
 
   if (ExtBuf == 0) {
     GRAIL_SORT_FIXED_BUFFER(arr, Len);

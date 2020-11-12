@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 #include "TimeDiscretisation.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "Tools.hpp"
 
 #include <cmath>
@@ -128,7 +128,7 @@ void TimeDiscretisation::setT0(double val)
   if(_h == 0.0)
     mpf_set_d(_t0gmp, val);
   if(!_tkV.empty())
-    RuntimeException::selfThrow("TimeDiscretisation::setT0 must be called only when the TimeDiscretisation is with a constant h");
+    THROW_EXCEPTION("TimeDiscretisation::setT0 must be called only when the TimeDiscretisation is with a constant h");
 }
 
 double TimeDiscretisation::currentTimeStep(const unsigned int k)

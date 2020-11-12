@@ -28,7 +28,8 @@
 #include <string.h>            // for strtok_r, memcpy, strncmp
 #include "SiconosCompat.h"     // for SN_PTRDIFF_T_F
 #include "numerics_verbose.h"  // for CHECK_IO
-
+#define LDL_LONG
+#include "ldl.h"
 #if defined(__cplusplus)
 #undef restrict
 #include <sys/cdefs.h> // for __restrict
@@ -38,6 +39,45 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h" // for DEBUG_PRINTF
+
+
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
+
+double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j)
+{
+  CS_INT * Ai =   A->i;
+  CS_INT * Ap =   A->p;
+  double * Ax =   A->x;
+
+  for(CS_INT row = Ap[j]; row < Ap[j+1] ; row++)
+  {
+    if(i == Ai[row])
+      return  Ax[row];
+  }
+  return 0.0;
+}
+
+void CSparseMatrix_write_in_file_python(const CSparseMatrix* const m, FILE* file)
+{
+
+  fprintf(file, "m = %ld; \n", m->m);
+  fprintf(file, "n = %ld; \n", m->n);
+  fprintf(file, "data= [");
+  for(int i = 0; i < m->m; i++)
+  {
+    fprintf(file, "[");
+    for(int j = 0; j < m->n; j++)
+    {
+      fprintf(file, "%32.24e,\t ", CSparseMatrix_get_value((CSparseMatrix*) m,i,j));
+    }
+    fprintf(file, "],\n");
+  }
+  fprintf(file, "]");
+}
+
+
 
 /* y = alpha*A*x+beta*y */
 int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
@@ -202,7 +242,7 @@ CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A)
   return NULL;
 }
 
-int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSparseMatrix_factors * cs_lu_A)
+int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol, CSparseMatrix_factors * cs_lu_A)
 {
   assert(A);
   cs_lu_A->n = A->n;
@@ -212,7 +252,7 @@ int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSpars
 
   return (S && cs_lu_A->N);
 }
-int CSparsematrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A)
+int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A)
 {
   assert(A);
   cs_chol_A->n = A->n;
@@ -221,6 +261,77 @@ int CSparsematrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_f
   cs_chol_A->N = cs_chol(A, S);
 
   return (S && cs_chol_A->N);
+}
+int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_ldlt_A)
+{
+  assert(A);
+
+  CS_INT *Ap, *Ai, *Lp, *Li;
+  CS_INT *Parent;
+  CS_ENTRY *Ax, *Lx;
+  css *S;
+  csn *N;
+  CS_INT n, lnz, d;
+  DEBUG_EXPR(cs_print(A,1););
+  Ap=A->p;
+  Ai=A->i;
+  Ax=A->x;
+
+  cs_ldlt_A->n = n =  A->n;
+
+  /* could be good to good cs_spalloc */
+
+  cs_ldlt_A->N = N        =  cs_calloc (1, sizeof (csn)) ;       /* allocate result N */
+  cs_ldlt_A->N->L         = cs_calloc (1, sizeof (cs)) ;         /* allocate the cs struct */
+  cs_ldlt_A->N->L->m =n;
+  cs_ldlt_A->N->L->n =n;
+  cs_ldlt_A->N->L->nz =-1;
+  cs_ldlt_A->N->L->p = Lp = cs_malloc (n+1, sizeof (CS_INT)) ;
+
+
+  cs_ldlt_A->S = S = cs_calloc (1, sizeof (css)) ;              /* allocate result S */
+  cs_ldlt_A->S->parent = Parent = cs_malloc (n+1, sizeof (CS_INT)) ;
+
+  CS_INT* Lnz = cs_malloc (n, sizeof (CS_INT)) ;
+  CS_INT* Flag =  cs_malloc (n, sizeof (CS_INT)) ;
+
+  /* ordering with amd */
+  CS_INT * Perm, *PermInv;
+  cs_ldlt_A->N->pinv = Perm  = cs_amd (order, A) ;  /* We used pinv to store Perm !! */
+  PermInv = cs_malloc (n, sizeof (CS_INT)) ;
+
+
+  DEBUG_EXPR(for (int k =0; k< n+1; k++){printf("%li\t", Perm[k]);}printf("\n"););
+
+  /* symbolic factorization to get Lp, Parent, Lnz, and Pinv */
+  LDL_symbolic (n, Ap, Ai, Lp, Parent, Lnz, Flag, Perm, PermInv) ;
+  DEBUG_EXPR(for (int k =0; k< n+1; k++){printf("%li\t", Lp[k]);}printf("\n"););
+  DEBUG_EXPR(for (int k =0; k< n; k++){printf("%li\t", Flag[k]);}printf("\n"););
+
+  /* factorization */
+  lnz = Lp [n] ;
+  DEBUG_PRINTF("Lp[n] = %ld\n", Lp[n]);
+  cs_ldlt_A->N->L->i = Li = cs_malloc (lnz, sizeof (CS_INT)) ;
+  cs_ldlt_A->N->L->x = Lx = cs_malloc (lnz, sizeof (CS_ENTRY)) ;
+
+  CS_INT *Pattern =  cs_malloc (n, sizeof (CS_INT)) ;
+  CS_ENTRY* D;
+  cs_ldlt_A->N->B = D= cs_malloc (n, sizeof (CS_ENTRY)) ; /* We use cs_ldlt_A->N->B  for storing D !! */
+  CS_ENTRY* Y = cs_malloc (n, sizeof (CS_ENTRY)) ;
+  d = LDL_numeric (n, Ap, Ai, Ax, Lp, Parent, Lnz, Li, Lx, D,
+                   Y, Flag, Pattern, Perm, PermInv) ;
+
+  DEBUG_EXPR(cs_print(cs_ldlt_A->N->L,1););
+  DEBUG_EXPR(NV_display(D,n));
+
+
+  cs_free(Lnz);
+  cs_free(Flag);
+  cs_free(PermInv);
+  cs_free(Pattern);
+  cs_free(Y);
+
+  return (S && cs_ldlt_A->N);
 }
 
 void CSparseMatrix_free_lu_factors(CSparseMatrix_factors* cs_lu_A)
@@ -261,6 +372,109 @@ CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b)
   return (ok);
 }
 
+/* Solve Ax = B with the factorization of A stored in the cs_lu_A
+ * B is a sparse matrix (CSparseMatrix_factors)
+ * This is extracted from cs_lusol, you need to synchronize any changes! */
+CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, CSparseMatrix* B)
+{
+  assert(cs_lu_A);
+  DEBUG_BEGIN("CSparseMatrix_spsolve(...)\n");
+
+  if(!CS_CSC(X)) return 1 ;                  /* check inputs */
+  if(!CS_CSC(B)) return 1 ;                  /* check inputs */
+
+  CS_INT ok;
+  CS_INT n = cs_lu_A->n;
+  csn* N = cs_lu_A->N;
+  if(!N) return 1;
+  css* S = cs_lu_A->S;
+  if(!S) return 1;
+
+  CS_ENTRY *x, *b, *Xx, *Bx ;
+  CS_INT *xi, *pinv, *q, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
+
+  x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
+  b = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
+  xi = cs_malloc(2*n, sizeof(CS_INT)) ;             /* get CS_INT workspace */
+
+  CS_INT xnz=0;
+  Xp= X->p;
+  Xi= X->i;
+  Xx= X->x;
+  Xp[0]=0;
+  pinv = N->pinv;
+  /* --- 1. First step X = L\B ---------------------------------------------- */
+  for(k = 0 ; k < B->n ; k++)
+  {
+    /* permutation of the rows  of B(:,k) */
+    for(p = B->p [k] ; p < B->p [k+1] ; p++) x [B->i[p]] = B->x [p] ; /* scatter B  */
+    for(p = B->p [k] ; p < B->p [k+1] ; p++)
+    {
+      CS_INT i_old= B->i[p];
+      B->i[p] = pinv[i_old]; /* permute row indices with N->pinv */
+      B->x[p] = x[i_old];
+    }
+    /* call spsolve */
+    top = cs_spsolve(N->L, B, k, xi, x, NULL, 1) ;    /* x = L\B(:,col) */
+    /* store the result in X */
+    if(Xp[k]+ n-top > X->nzmax && !cs_sprealloc(X, 2*(X->nzmax)+ n-top))    /* realloc X if need */
+    {
+      return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
+    }
+    Xp= X->p;
+    Xi= X->i;
+    Xx= X->x;
+    for(p = top ; p < n ; p++)
+    {
+      i = xi [p] ;/* x(i) is nonzero */
+      Xi[xnz]=i;          /* store the result in X */
+      Xx[xnz++] = x[i];
+    }
+    Xp[k+1] =Xp[k] + n-top;
+  }
+  DEBUG_EXPR(cs_print(X,0););
+
+  /* --- 2. First step B = U\B ---------------------------------------------- */
+  DEBUG_PRINT("2- Second step B = U\\X\n");
+  CS_INT bnz=0;
+  Bp= B->p;
+  Bi= B->i;
+  Bx= B->x;
+  Bp[0]=0;
+  q = S->q;
+  for(k = 0 ; k < X->n ; k++)
+  {
+    top = cs_spsolve(N->U, X, k, xi, x, NULL, 0) ;   /* x = U\X(:,col) */
+
+    /* store the result in B */
+    if(Bp[k]+ n-top > B->nzmax && !cs_sprealloc(B, 2*(B->nzmax)+ n-top))
+    {
+      return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
+    }
+    Bp= B->p;
+    Bi= B->i;
+    Bx= B->x;
+    for(p = top ; p < n ; p++)
+    {
+      i = xi[p] ;           /* x(i) is nonzero */
+      Bi[bnz] = q[i];       /* permute the indices with S->q */
+      Bx[bnz++] = x[i];
+    }
+    Bp[k+1] = Bp[k] + n-top;
+  }
+  DEBUG_EXPR(cs_print(B,0));
+  ok =1;
+  free(x);
+  free(b);
+  free(xi);
+  DEBUG_END("CSparseMatrix_spsolve(...)\n");
+  return (ok);
+}
+
+
+
+
+
 CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b)
 {
   assert(cs_chol_A);
@@ -276,6 +490,168 @@ CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, dou
     cs_lsolve(N->L, x) ;            /* x = L\x */
     cs_ltsolve(N->L, x) ;           /* x = L'\x */
     cs_pvec(S->pinv, x, b, n) ;     /* b = P'*x */
+  }
+  return (ok);
+}
+
+
+
+/* Solve Ax = B with the factorization of A stored in the cs_chol_A
+ * B is a sparse matrix (CSparseMatrix_factors)
+ * This is extracted from cs_lusol, you need to synchronize any changes! */
+CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatrix* X, CSparseMatrix* B)
+{
+  DEBUG_BEGIN("CSparseMatrix_chol_spsolve(...)\n");
+
+  if(!CS_CSC(X)) return 1 ;                  /* check inputs */
+  if(!CS_CSC(B)) return 1 ;                  /* check inputs */
+
+  CS_INT ok;
+  CS_INT n = cs_chol_A->n;
+  csn* N = cs_chol_A->N;
+  if(!N) return 1;
+  css* S = cs_chol_A->S;
+  if(!S) return 1;
+
+  CS_ENTRY *x, *b, *Xx, *Bx ;
+  CS_INT *xi, *pinv, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
+
+  x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
+  b = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
+  xi = cs_malloc(2*n, sizeof(CS_INT)) ;             /* get CS_INT workspace */
+
+  CS_INT xnz=0;
+  Xp= X->p;
+  Xi= X->i;
+  Xx= X->x;
+  Xp[0]=0;
+  pinv = S->pinv;
+
+  /* for (i =0; i <n; i++) printf("pinv[%li] = %li\t", i, pinv[i]); */
+  /* printf("\n"); */
+
+  /* --- 1. First step X = L\B ---------------------------------------------- */
+  for(k = 0 ; k < B->n ; k++)
+  {
+    /* permutation of the rows  of B(:,k) */
+    for(p = B->p [k] ; p < B->p [k+1] ; p++) x [B->i[p]] = B->x [p] ; /* scatter B  */
+    for(p = B->p [k] ; p < B->p [k+1] ; p++)
+    {
+      CS_INT i_old= B->i[p];
+      B->i[p] = pinv[i_old]; /* permute row indices with N->pinv */
+      B->x[p] = x[i_old];
+    }
+    /* call spsolve */
+    top = cs_spsolve(N->L, B, k, xi, x, NULL, 1) ;    /* x = L\B(:,col) */
+    /* store the result in X */
+    if(Xp[k]+ n-top > X->nzmax && !cs_sprealloc(X, 2*(X->nzmax)+ n-top))    /* realloc X if need */
+    {
+      return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
+    }
+    Xp= X->p;
+    Xi= X->i;
+    Xx= X->x;
+    for(p = top ; p < n ; p++)
+    {
+      i = xi [p] ;/* x(i) is nonzero */
+      Xi[xnz]=i;          /* store the result in X */
+      Xx[xnz++] = x[i];
+    }
+    Xp[k+1] =Xp[k] + n-top;
+  }
+  DEBUG_EXPR(cs_print(X,0););
+
+  /* --- 2. First step B = L'\B ---------------------------------------------- */
+  DEBUG_PRINT("2- Second step B = L'\\X\n");
+
+  CSparseMatrix* LT = cs_transpose(N->L,1);
+  CS_INT bnz=0;
+  Bp= B->p;
+  Bi= B->i;
+  Bx= B->x;
+  Bp[0]=0;
+  for(k = 0 ; k < X->n ; k++)
+  {
+    top = cs_spsolve(LT, X, k, xi, x, NULL, 0) ;   /* x = U\X(:,col) */
+
+    /* store the result in B */
+    if(Bp[k]+ n-top > B->nzmax && !cs_sprealloc(B, 2*(B->nzmax)+ n-top))
+    {
+      return 1;  /* (cs_done(X, w, x, 0)) ;   */            /* out of memory */
+    }
+    Bp= B->p;
+    Bi= B->i;
+    Bx= B->x;
+    /* permutation with S->pinv */
+    cs_pvec(pinv, x, b, n) ;     /* b = P'*x */
+    //for(p = top ; p < n ; p++) b [q ? q [p] : p] = x [p] ;  /* b(q) = x */
+    for(p = top ; p < n ; p++)
+    {
+      i = xi[p] ;               /* x(i) is nonzero */
+      i = pinv[i];              /* permute the indices with S->pinv */ // to be checked carefully
+      Bi[bnz] = i;
+      Bx[bnz++] = b[i];
+    }
+    Bp[k+1] = Bp[k] + n-top;
+  }
+  DEBUG_EXPR(cs_print(B,0));
+  ok =1;
+  free(x);
+  free(b);
+  free(xi);
+  DEBUG_END("CSparseMatrix_chol_spsolve(...)\n");
+  return (ok);
+}
+
+
+CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors* cs_ldlt_A, double* x, double *b)
+{
+  assert(cs_ldlt_A);
+
+  CS_INT ok;
+
+  CS_INT n = cs_ldlt_A->n;
+  css* S = cs_ldlt_A->S;
+  csn* N = cs_ldlt_A->N;
+  ok = (S && N && x) ;
+
+
+  cs* L;
+  CS_INT  *Lp, *Li;
+  CS_ENTRY *Lx;
+
+  if(ok)
+  {
+    CS_INT * P = cs_ldlt_A->N->pinv; /* We used pinv to store Perm !! */
+    CS_ENTRY* D = cs_ldlt_A->N->B;   /* We use cs_ldlt_A->N->B  for storing D !! */
+
+    L = cs_ldlt_A->N->L;
+    Lp=L->p;
+    Li=L->i;
+    Lx=L->x;
+
+    /* solve Ax=b */
+		if (P)
+		{
+      /* the factorization is LDL' = PAP' */
+      LDL_perm (n, x, b, P) ;			/* y = Pb */
+      LDL_lsolve (n, x, Lp, Li, Lx) ;		/* y = L\y */
+      LDL_dsolve (n, x, D) ;			/* y = D\y */
+      LDL_ltsolve (n, x, Lp, Li, Lx) ;		/* y = L'\y */
+      LDL_permt (n, b, x, P) ;			/* x = P'y */
+		}
+		else
+		{
+      /* the factorization is LDL' = A */
+      DEBUG_EXPR(NV_display(b,n));
+      DEBUG_EXPR(NV_display(D,n));
+      LDL_lsolve (n, b, Lp, Li, Lx) ;		/* x = L\x */
+      LDL_dsolve (n, b, D) ;			/* x = D\x */
+      LDL_ltsolve (n, b, Lp, Li, Lx) ;		/* x = L'\x */
+      DEBUG_EXPR(NV_display(b,n));
+		}
+
+
   }
   return (ok);
 }
@@ -317,7 +693,7 @@ CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
     DEBUG_PRINTF("%d: %s\n", k, token);
     if(strncmp(token, "triplet:",8) == 0)
     {
-      DEBUG_PRINTF(" triplet matrix\n");
+      DEBUG_PRINT(" triplet matrix\n");
       is_triplet =1;
     }
     if(k==1+is_triplet)
@@ -393,7 +769,7 @@ CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
         {
           if(1 == sscanf(token, "%lld", &val1))
           {
-            DEBUG_PRINTF(" j- col = %i\n", j-val1);
+            DEBUG_PRINTF(" j- col = %lli\n", j-val1);
           }
           assert(j-val1 == 0);
         }
@@ -458,9 +834,9 @@ CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
 
 
 /* add an entry to triplet matrix only if value is not (nearly) null */
-CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
+CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold)
 {
-  if(fabs(x) >= DBL_EPSILON)
+  if(fabs(x) >= threshold)
   {
     return cs_entry(T, i, j, x);
   }
@@ -471,14 +847,37 @@ CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
 }
 
 /* add an entry to a symmetric triplet matrix only if value is not (nearly) null */
-CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
+CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold)
 {
-  if(fabs(x) >= DBL_EPSILON)
+  if(fabs(x) >= threshold)
   {
     if(j<=i)
     {
       return cs_entry(T, i, j, x);
     }
+  }
+  return 1;
+}
+
+
+int CSparseMatrix_print(const CSparseMatrix *A, int brief)
+{
+  cs_print(A, brief);
+  return 0;
+}
+
+/* add an entry to triplet matrix */
+CS_INT CSparseMatrix_entry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
+{
+    return cs_entry(T, i, j, x);
+}
+
+/* add an entry to a symmetric triplet matrix */
+CS_INT CSparseMatrix_symmetric_entry(CSparseMatrix *T, CS_INT i, CS_INT j, double x)
+{
+  if(j<=i)
+  {
+    return cs_entry(T, i, j, x);
   }
   return 1;
 }

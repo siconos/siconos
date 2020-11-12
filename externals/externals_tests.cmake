@@ -8,6 +8,8 @@ if(WITH_${COMPONENT}_TESTING)
     foreach(odetest IN LISTS odepacktests)
       new_test(SOURCES ${odetest}-test.f)
       target_compile_options(${odetest}-test PRIVATE "-w")
+      target_compile_options(${odetest}-test PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
+
     endforeach()
     if(WITH_CXX)
       new_test(NAME odepacktest10 SOURCES test-funcC-inC.cpp funC.cpp
@@ -30,6 +32,12 @@ if(WITH_${COMPONENT}_TESTING)
     target_compile_options(dr_rodas PRIVATE "-w")
     new_test(SOURCES dr_seulex.f)
     target_compile_options(dr_seulex PRIVATE "-w")
+    IF(WITH_MA57)
+      begin_tests(lbl/example)
+      new_test(NAME test_ma57 SOURCES example.c)
+      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/lbl/example/mat.txt ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_DIR}/lbl/example/mat.txt COPYONLY)
+    ENDIF()
   endif()
+  
 
 endif()

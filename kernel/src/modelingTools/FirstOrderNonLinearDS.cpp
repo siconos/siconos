@@ -260,7 +260,7 @@ void FirstOrderNonLinearDS::computeRhs(double time)
     else if(_pluginM->fPtr) // if M is plugged, invM must be updated
       *_invM = *_M;
 
-    _invM->PLUForwardBackwardInPlace(*_x[1]);
+    _invM->Solve(*_x[1]);
   }
 }
 
@@ -285,7 +285,7 @@ void FirstOrderNonLinearDS::computeJacobianRhsx(double time)
       _invM.reset(new SimpleMatrix(*_M));
     else if(_pluginM->fPtr) // if M is plugged, invM must be updated
       *_invM = *_M;
-    _invM->PLUForwardBackwardInPlace(*_jacxRhs);
+    _invM->Solve(*_jacxRhs);
   }
   // else jacobianRhsx = jacobianfx, pointers equality set in initRhs
 

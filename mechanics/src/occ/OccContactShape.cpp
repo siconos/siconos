@@ -1,7 +1,5 @@
 #include "OccContactShape.hpp"
-
-#include <RuntimeException.hpp>
-
+#include "SiconosException.hpp"
 #include <TopoDS.hxx>
 #include <BRepTools.hxx>
 #include <BRep_Builder.hxx>
@@ -43,7 +41,7 @@ OccContactShape::ContactTypeValue OccContactShape::contactType() const
 
 void OccContactShape::computeUVBounds()
 {
-  RuntimeException::selfThrow(
+  THROW_EXCEPTION(
     "OccContactShape::computeUVBounds() : cannot compute UV bounds for this contact shape"
   );
 }
@@ -85,7 +83,7 @@ SPC::TopoDS_Face OccContactShape::face(unsigned int index) const
   }
   else
   {
-    RuntimeException::selfThrow("OccContactShape::face failed");
+    THROW_EXCEPTION("OccContactShape::face failed");
   }
 
   return return_value;
@@ -105,7 +103,7 @@ SPC::TopoDS_Edge OccContactShape::edge(unsigned int index) const
   }
   else
   {
-    RuntimeException::selfThrow("OccContactShape::edge failed");
+    THROW_EXCEPTION("OccContactShape::edge failed");
   }
 
   return return_value;

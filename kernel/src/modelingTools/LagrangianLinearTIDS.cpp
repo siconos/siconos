@@ -57,7 +57,7 @@ void LagrangianLinearTIDS::initRhs(double time)
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
     if(!_rhsMatrices[jacobianXBloc10])
       _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(-1 * *_K));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10]);
   }
   else
     _rhsMatrices[jacobianXBloc10] = _rhsMatrices[zeroMatrix] ;
@@ -67,7 +67,7 @@ void LagrangianLinearTIDS::initRhs(double time)
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
     if(!_rhsMatrices[jacobianXBloc11])
       _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(-1 * *_C));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11]);
   }
   else
     _rhsMatrices[jacobianXBloc11] = _rhsMatrices[zeroMatrix] ;
@@ -81,7 +81,7 @@ void LagrangianLinearTIDS::initRhs(double time)
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
 {
   if(newValue.size(0) != _ndof || newValue.size(1) != _ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
+    THROW_EXCEPTION("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
 
   if(!_K)
     _K.reset(new SimpleMatrix(newValue));
@@ -92,14 +92,14 @@ void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
 void LagrangianLinearTIDS::setKPtr(SP::SiconosMatrix newPtr)
 {
   if(newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
+    THROW_EXCEPTION("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
   _K = newPtr;
 }
 
 void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
 {
   if(newValue.size(0) != _ndof || newValue.size(1) != _ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
+    THROW_EXCEPTION("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
 
   if(!_C)
     _C.reset(new SimpleMatrix(newValue));
@@ -110,7 +110,7 @@ void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
 void LagrangianLinearTIDS::setCPtr(SP::SiconosMatrix newPtr)
 {
   if(newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
+    THROW_EXCEPTION("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
 
   _C = newPtr;
 }

@@ -30,6 +30,7 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
+#include "SiconosException.hpp"
 
 
 using Siconos::Algebra::isComparableTo;
@@ -62,7 +63,7 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
   // Insert the two vectors in the container
   // NO COPY !!
   if(! v1  && ! v2)
-    SiconosVectorException::selfThrow("BlockVector:constructor(SiconosVector*,SiconosVector*), both vectors are nullptr.");
+    THROW_EXCEPTION("both vectors are nullptr.");
 
   _tabIndex.reset(new Index());
 
@@ -274,7 +275,7 @@ void BlockVector::setVector(unsigned int pos, const SiconosVector& v)
 {
   assert(pos < _vect.size() && "insertion out of vector size");
   if(! _vect[pos])
-    SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] == nullptr pointer.");
+    THROW_EXCEPTION("this[pos] == nullptr pointer.");
   *_vect[pos] = v ;
 }
 
@@ -372,18 +373,20 @@ BlockVector& BlockVector::operator -= (const BlockVector& vIn)
 BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
 {
   unsigned int dim = vIn.size(); // size of the block to be added.
-  if(dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
+  if(dim > _sizeV) THROW_EXCEPTION("invalid ranges");
 
   VectorOfVectors::const_iterator it;
-  unsigned int numVIn = vIn.num();
-  unsigned int currentSize, currentNum;
+  Siconos::UBLAS_TYPE numVIn = vIn.num();
+  unsigned int currentSize;
+  Siconos::UBLAS_TYPE currentNum;
   unsigned int index = 0;
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
     currentSize = (*it)->size();
     currentNum = (*it)->num();
-    if(numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
-    if(numVIn == 1)
+    if(numVIn != currentNum)
+      THROW_EXCEPTION("inconsistent types.");
+    if(numVIn == Siconos::DENSE)
       noalias(*(*it)->dense()) -=  ublas::subrange(*vIn.dense(), index, index + currentSize) ;
     else
       noalias(*(*it)->sparse()) -=  ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
@@ -418,19 +421,19 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
   // At the end of the present function, index is equal to index + the dim. of the added sub-vector.
 
   unsigned int dim = vIn.size(); // size of the block to be added.
-  if(dim > _sizeV) SiconosVectorException::selfThrow("BlockVector::addSimple : invalid ranges");
+  if(dim > _sizeV) THROW_EXCEPTION("invalid ranges");
 
   VectorOfVectors::const_iterator it;
-  unsigned int numVIn = vIn.num();
-  unsigned int currentSize, currentNum;
+  Siconos::UBLAS_TYPE numVIn = vIn.num(), currentNum;
+  unsigned int currentSize;
   unsigned int index = 0;
 
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
     currentSize = (*it)->size();
     currentNum = (*it)->num();
-    if(numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
-    if(numVIn == 1)
+    if(numVIn != currentNum) THROW_EXCEPTION("inconsistent types.");
+    if(numVIn == Siconos::DENSE)
       noalias(*(*it)->dense()) += ublas::subrange(*vIn.dense(), index, index + currentSize) ;
     else
       noalias(*(*it)->sparse()) += ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
@@ -451,7 +454,7 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
 void BlockVector::insertPtr(SP::SiconosVector v)
 {
   if(!v)
-    SiconosVectorException::selfThrow("BlockVector:insertPtr(v), v is a nullptr vector.");
+    THROW_EXCEPTION("v is a nullptr vector.");
 
   _sizeV += v->size();
   _vect.push_back(v);

@@ -41,7 +41,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 {
   _zeroPlugin();
   if((newA->size(0) != _n) || (newA->size(1) != _n))
-    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
+    THROW_EXCEPTION("FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
   _A = newA;
 }
 
@@ -58,10 +58,10 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
   _zeroPlugin();
 
   if((newA->size(0) != _n) || (newA->size(1) != _n))
-    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
+    THROW_EXCEPTION("FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
 
   if(newB->size() != _n)
-    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
+    THROW_EXCEPTION("FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
 
   _A = newA;
   _b = newB;
@@ -190,7 +190,7 @@ void FirstOrderLinearDS::computeRhs(double time)
     if(! _invM)
       _invM.reset(new SimpleMatrix(*_M));
 
-    _invM->PLUForwardBackwardInPlace(*_x[1]);
+    _invM->Solve(*_x[1]);
   }
 }
 
@@ -208,7 +208,7 @@ void FirstOrderLinearDS::computeJacobianRhsx(double time)
       else if(_pluginM->fPtr) // if M is plugged, invM must be updated
         *_invM = *_M;
       // solve MjacobianRhsx = A
-      _invM->PLUForwardBackwardInPlace(*_jacxRhs);
+      _invM->Solve(*_jacxRhs);
     }
   }
   // else 0

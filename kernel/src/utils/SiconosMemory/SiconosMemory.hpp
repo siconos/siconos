@@ -25,10 +25,10 @@
 #ifndef SICONOSMEMORY_H
 #define SICONOSMEMORY_H
 
-#include "SiconosMemoryException.hpp"
 #include "SiconosPointers.hpp"
 #include <deque>
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosSerialization.hpp" // For ACCEPT_SERIALIZATION
 
 /** Container used to save vectors in SiconosMemory */
 typedef std::vector<SiconosVector> MemoryContainer;

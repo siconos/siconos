@@ -84,13 +84,13 @@ void NewMarkAlphaOSI::initializeIterationMatrixW(SP::DynamicalSystem ds)
 {
 
   if(!ds)
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
+    THROW_EXCEPTION("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
+    THROW_EXCEPTION("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
 
   if(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W)
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
+    THROW_EXCEPTION("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
 
   _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W.reset(
     new SimpleMatrix(ds->dimension(), ds->dimension())); // allocate memory
@@ -104,7 +104,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds, SiconosMatrix& W)
   double gamma_prime = _gamma / _beta;
   double h = _simulation->nextTime() - _simulation->startingTime(); // step size
   if(h < 100 * MACHINE_PREC)
-    RuntimeException::selfThrow("In NewMarkAlphaOSI::initializeIterationMatrixW(t,ds), time integration is too small");
+    THROW_EXCEPTION("In NewMarkAlphaOSI::initializeIterationMatrixW(t,ds), time integration is too small");
   // make sure that W is initialized before computing
   Type::Siconos dsType = Type::value(*ds);
   SP::SiconosMatrix M;
@@ -150,7 +150,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds, SiconosMatrix& W)
   }
   else
   {
-    RuntimeException::selfThrow("In NewMarkAlphaOSI::initializeIterationMatrixW(t,ds), this type of Dynamical System is not yet implemented");
+    THROW_EXCEPTION("In NewMarkAlphaOSI::initializeIterationMatrixW(t,ds), this type of Dynamical System is not yet implemented");
   }
 }
 
@@ -245,7 +245,7 @@ double NewMarkAlphaOSI::computeResidu()
     }
     else
     {
-      RuntimeException::selfThrow("In NewMarkAlphaOSI::computeResidu(t,ds), this type of Dynamical System is not yet implemented");
+      THROW_EXCEPTION("In NewMarkAlphaOSI::computeResidu(t,ds), this type of Dynamical System is not yet implemented");
     }
   }
   DEBUG_END("NewMarkAlphaOSI::computeResidu() \n");
@@ -282,14 +282,14 @@ void NewMarkAlphaOSI::computeFreeState()
     {
       SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS>(ds);
       qfree = residuFree;
-      W->PLUForwardBackwardInPlace(qfree); //_qfree = (W^-1)*R_free
+      W->Solve(qfree); //_qfree = (W^-1)*R_free
       qfree *= -1.0; //_qfree = -(W^-1)*R_free
       //
       DEBUG_EXPR(qfree.display(););
     }
     else
     {
-      RuntimeException::selfThrow("In NewMarkAlphaOSI::computeResidu(t,ds), this type of Dynamical System is not yet implemented");
+      THROW_EXCEPTION("In NewMarkAlphaOSI::computeResidu(t,ds), this type of Dynamical System is not yet implemented");
     }
   }
   DEBUG_END("NewMarkAlphaOSI::computeFreeState()\n");
@@ -336,7 +336,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   {
     if(relationSubType == RheonomousR)
     {
-      RuntimeException::selfThrow("NewMarkAlphaOSI::computeFreeOutput  not yet implemented with LagrangianRheonomousR");
+      THROW_EXCEPTION("NewMarkAlphaOSI::computeFreeOutput  not yet implemented with LagrangianRheonomousR");
     }
     DEBUG_EXPR(
       std::cout << "((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get()" << ((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() << std::endl;
@@ -395,7 +395,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       else
       {
         osnsp->display();
-        RuntimeException::selfThrow("NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not exist");
+        THROW_EXCEPTION("NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not exist");
       }
     } //endif(relationSubType == ScleronomousR)
 
@@ -403,7 +403,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   }
   else
   {
-    RuntimeException::selfThrow("In NewMarkAlphaOSI::computeFreeOutput, this type of relation is not yet implemented");
+    THROW_EXCEPTION("In NewMarkAlphaOSI::computeFreeOutput, this type of relation is not yet implemented");
   }
   DEBUG_END("NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
 }
@@ -459,7 +459,7 @@ void NewMarkAlphaOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem d
   }
   else
   {
-    RuntimeException::selfThrow("In NewMarkAlphaOSI::initialize: this type of DS is not yet implemented");
+    THROW_EXCEPTION("In NewMarkAlphaOSI::initialize: this type of DS is not yet implemented");
   }
 
   DEBUG_END("NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n")
@@ -521,10 +521,10 @@ void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    THROW_EXCEPTION("NewMarkAlphaOSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
+    THROW_EXCEPTION("NewMarkAlphaOSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -534,7 +534,7 @@ void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   /* allocate and set work vectors for the osi */
   if(!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
+    THROW_EXCEPTION("NewMarkAlphaOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if(relationType == Lagrangian)
@@ -599,7 +599,7 @@ void NewMarkAlphaOSI::prediction()
   // Step size
   double h = _simulation->nextTime() - _simulation->startingTime();
   if(h < 100 * MACHINE_PREC)
-    RuntimeException::selfThrow("In NewMarkAlphaOSI::prediction, time integration is too small");
+    THROW_EXCEPTION("In NewMarkAlphaOSI::prediction, time integration is too small");
   // Loop over all DS
   Type::Siconos dsType ;    // Type of the current DS.
   SP::SiconosVector _q, _dotq, _ddotq;
@@ -644,7 +644,7 @@ void NewMarkAlphaOSI::prediction()
     }
     else
     {
-      RuntimeException::selfThrow("In NewMarkAlphaOSI::prediction: this type of DS is not yet implemented");
+      THROW_EXCEPTION("In NewMarkAlphaOSI::prediction: this type of DS is not yet implemented");
     }
   }
   DEBUG_END("NewMarkAlphaOSI::prediction()\n");
@@ -680,7 +680,7 @@ void NewMarkAlphaOSI::correction()
       SP::SiconosVector _p = d->p(2); // resultant force p_{n+1,k+1} of DS at (k+1)th iteration
       // Compute delta_q = W_{n+1,k}^{-1}(p_{n+1,k+1} - r_{n+1,k})
       delta_q.reset(new SiconosVector(*_p - residuFree)); // copy (p_{n+1,k+1} - r_{n+1,k}) to delta_q
-      W->PLUForwardBackwardInPlace(*delta_q);
+      W->Solve(*delta_q);
       // Correction q_{n+1,k+1}, dotq_{n+1,k+1}, ddotq_{n+1,k+1}
       *(d->q()) += *delta_q; // q_{n+1,k+1} = q_{n+1,k} + delta_q
       *(d->velocity()) += (gamma_prime / h) * (*delta_q); // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
@@ -698,7 +698,7 @@ void NewMarkAlphaOSI::correction()
     }
     else
     {
-      RuntimeException::selfThrow("In NewMarkAlphaOSI::updateState: this type of DS is not yet implemented");
+      THROW_EXCEPTION("In NewMarkAlphaOSI::updateState: this type of DS is not yet implemented");
     }
   }
 
@@ -707,7 +707,7 @@ void NewMarkAlphaOSI::correction()
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::integrate(double& t_ini, double& t_end, double& t_out, int& flag)
 {
-  RuntimeException::selfThrow("In NewMarkAlphaOSI::integrate, this method does nothing in the NewMarkAlpha OneStepIntegrator!!!");
+  THROW_EXCEPTION("In NewMarkAlphaOSI::integrate, this method does nothing in the NewMarkAlpha OneStepIntegrator!!!");
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -736,7 +736,7 @@ void NewMarkAlphaOSI::updateState(const unsigned int level)
       ds->update(time);
     }
   }
-  else RuntimeException::selfThrow("In NewMarkAlphaOSI::updateState, index is out of range. Index = " + std::to_string(level));
+  else THROW_EXCEPTION("In NewMarkAlphaOSI::updateState, index is out of range. Index = " + std::to_string(level));
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -765,7 +765,7 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
     //d->workMatrix(NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS); // matrix of coefficients [a0 a1 a2 a3 a4 a5]
     if(_CoeffsDense->size(1) != 6)
     {
-      RuntimeException::selfThrow("In NewMarkAlphaOSI::computeCoefsDenseOutput: the number of polynomial coeffcients considered here must equal to 6 (dense output polynomial of order 5)");
+      THROW_EXCEPTION("In NewMarkAlphaOSI::computeCoefsDenseOutput: the number of polynomial coeffcients considered here must equal to 6 (dense output polynomial of order 5)");
     }
     //a0 = q_n
     (*_vec) = q_n;
@@ -819,7 +819,7 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
   }
   else
   {
-    RuntimeException::selfThrow("In NewMarkAlphaOSI::computeCoefsDenseOutput: this type of DS has not been implemented yet");
+    THROW_EXCEPTION("In NewMarkAlphaOSI::computeCoefsDenseOutput: this type of DS has not been implemented yet");
   }
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -890,7 +890,7 @@ void NewMarkAlphaOSI::DenseOutputallDSs(double t)
     }
     else
     {
-      RuntimeException::selfThrow("In NewMarkAlphaOSI::DenseOutputallDSs: this type of DS has not been implemented yet");
+      THROW_EXCEPTION("In NewMarkAlphaOSI::DenseOutputallDSs: this type of DS has not been implemented yet");
     }
 
   }

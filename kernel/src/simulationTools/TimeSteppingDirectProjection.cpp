@@ -49,7 +49,7 @@ TimeSteppingDirectProjection::TimeSteppingDirectProjection(
   OSI::TYPES typeOSI;
   typeOSI = (osi)->getType();
   if(typeOSI != OSI::MOREAUDIRECTPROJECTIONOSI)
-    RuntimeException::selfThrow("TimeSteppingDirectProjection::TimeSteppingDirectProjection.  wrong type of OneStepIntegrator");
+    THROW_EXCEPTION("TimeSteppingDirectProjection::TimeSteppingDirectProjection.  wrong type of OneStepIntegrator");
 
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
@@ -135,7 +135,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
     SP::DynamicalSystem ds = dsGraph->bundle(*vi);
     Type::Siconos dsType = Type::value(*ds);
     if(dsType != Type::NewtonEulerDS)
-      RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
+      THROW_EXCEPTION("TS:: - ds is not from NewtonEulerDS.");
     SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
     *(neds->deltaq()) = *(neds->q());
   }
@@ -189,7 +189,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
     }
     else
-      RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+      THROW_EXCEPTION("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
   }
 
   while(runningProjection && _nbProjectionIteration < _projectionMaxIteration)
@@ -283,7 +283,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
         }
       }
       else
-        RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+        THROW_EXCEPTION("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
     }
 
@@ -352,7 +352,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
     {
     }
     else
-      RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+      THROW_EXCEPTION("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
   }
 
 
@@ -380,7 +380,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //     SP::DynamicalSystem ds = dsGraph->bundle(*vi);
   //     Type::Siconos dsType = Type::value(*ds);
   //     if(dsType !=Type::NewtonEulerDS)
-  //       RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
+  //       THROW_EXCEPTION("TS:: - ds is not from NewtonEulerDS.");
   //     // SP::SiconosVector dotq = neds->dotq();
   //     // SP::SiconosVector q = neds->q();
   //     // SP::SiconosVector qold = neds->qMemory()->getSiconosVector(0);
@@ -627,5 +627,5 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbIterations<<"maxStep="<<maxStep<<endl;
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + std::to_string(_newtonOptions));
+    THROW_EXCEPTION("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + std::to_string(_newtonOptions));
 }

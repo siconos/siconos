@@ -86,12 +86,14 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
 
 # ---- Final setup for the library ----
 
-# Windows stuff
-include(WindowsNumericsSetup)
 
 # -- create/setup component target --
 include(ComponentSetup)
+
 create_siconos_component(${COMPONENT})
+
+# Windows stuff
+include(WindowsNumericsSetup)
 
 # --- Extra setup for the component ---
 if(MLCPSIMPLEX_FOUND OR BUILD_AS_CPP) 
@@ -180,6 +182,11 @@ if(WITH_SYSTEM_SUITESPARSE)
   # SuiteSparse headers are required by kernel
   target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
   target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXSparse_INCLUDE_DIR}>)
+
+  find_package(SuiteSparse COMPONENTS LDL REQUIRED)
+  target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::LDL>)
+  target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
+
 endif()
 
 # - MLCP Simplex -
@@ -237,13 +244,18 @@ if(WITH_MUMPS)
   target_link_libraries(numerics PRIVATE MUMPS::MUMPS)
 endif()
 
+if(WITH_OPENSSL)
+  find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+  target_link_libraries(numerics PRIVATE OpenSSL::Crypto)
+endif()
+
 # -- HDF5 --
 # For logging
 if(WITH_HDF5)
   find_package(HDF5 REQUIRED COMPONENTS C HL)
-  target_include_directories(${PROJECT_NAME} PRIVATE ${HDF5_C_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${HDF5_C_LIBRARIES})
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${HDF5_HL_LIBRARIES})
+  target_include_directories(numerics PRIVATE ${HDF5_C_INCLUDE_DIRS})
+  target_link_libraries(numerics PRIVATE ${HDF5_C_LIBRARIES})
+  target_link_libraries(numerics PRIVATE ${HDF5_HL_LIBRARIES})
 endif()
 
 # -- OpenMP --

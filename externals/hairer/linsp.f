@@ -324,7 +324,7 @@ c transfer common block information.
 c
 c reorder off-diagonal blocks according to pivot permutation.
   200 I1 = IDISP(1) - 1
-      IF (I1.NE.0) CALL MC22AD(N, ICN, A, I1, IKEEP(1,5), IKEEP(1,2),
+      IF (I1.NE.0) CALL MC22ADO(N, ICN, A, I1, IKEEP(1,5), IKEEP(1,2),
      * IKEEP(1,3), IW, IRN)
       I1 = IDISP(1)
       IEND = LICN - I1 + 1
@@ -2578,9 +2578,10 @@ c permutation iperm.
   170 CONTINUE
       RETURN
       END
+     
 c######date   01 jan 1984     copyright ukaea, harwell.
 c######alias mc22ad
-      SUBROUTINE MC22AD(N,ICN,A,NZ,LENROW,IP,IQ,IW,IW1)
+      SUBROUTINE MC22ADO(N,ICN,A,NZ,LENROW,IP,IQ,IW,IW1)
       DOUBLE PRECISION A(NZ),AVAL
       INTEGER IW(N,2)
       INTEGER   ICN(NZ),LENROW(N),IP(N),IQ(N),IW1(NZ)
@@ -2653,6 +2654,7 @@ c ***   end of main loop   ***
 c
  1000 RETURN
       END
+      
 c######date   01 jan 1984     copyright ukaea, harwell.
 c######alias mc23ad
 c###### calls   mc13    mc21

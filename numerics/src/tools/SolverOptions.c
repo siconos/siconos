@@ -697,6 +697,12 @@ SolverOptions * solver_options_create(int solverId)
     rfc3d_nsgs_set_default(options);
     break;
   }
+  case SICONOS_ROLLING_FRICTION_3D_ADMM:
+  {
+    options = solver_options_initialize(solverId, 1000, 1e-4, 0);
+    rolling_fc3d_admm_set_default(options);
+    break;
+  }
   case SICONOS_ROLLING_FRICTION_2D_NSGS:
   {
     options = solver_options_initialize(solverId, 1000, 1e-4, 1);

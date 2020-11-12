@@ -129,7 +129,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
     }
     else
     {
-      RuntimeException::selfThrow("GenericMechanical::computeDiagonalInteractionBlock- not yet implemented for that NSLAW type");
+      THROW_EXCEPTION("GenericMechanical::computeDiagonalInteractionBlock- not yet implemented for that NSLAW type");
     }
   }
 

@@ -381,9 +381,9 @@ void Contact2dTest::t1()
     fprintf(stderr, "Final position: %g  (std=%g)\n\n",
             r.final_position, r.final_position_std);
   }
-  catch(SiconosException e)
+  catch(...)
   {
-    std::cout << "SiconosException: " << e.report() << std::endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -412,9 +412,9 @@ void Contact2dTest::t2()
     fprintf(stderr, "Final position: %g  (std=%g)\n\n",
             r.final_position, r.final_position_std);
   }
-  catch(SiconosException e)
+  catch(...)
   {
-    std::cout << "SiconosException: " << e.report() << std::endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -443,9 +443,9 @@ void Contact2dTest::t3()
     fprintf(stderr, "Final position: %g  (std=%g)\n\n",
             r.final_position, r.final_position_std);
   }
-  catch(SiconosException e)
+  catch(...)
   {
-    std::cout << "SiconosException: " << e.report() << std::endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 

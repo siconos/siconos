@@ -110,4 +110,10 @@ subA is a sub-matrix of A.
 */
 void taxpy(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SP::SiconosVector y, bool init = true);
 
+/** product of two matrices, C = A*B
+  \param A a SiconosMatrix
+  \param B a SiconosMatrix
+  \return C a SimpleMatrix
+  */
+const SimpleMatrix prod(const SiconosMatrix& A, const SiconosMatrix& B);
 #endif

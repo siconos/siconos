@@ -402,7 +402,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
   else if(osiType == OSI::LSODAROSI)  // Warning: LagrangianDS only at the time !!!
   {
     if(dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + std::to_string(dsType));
+      THROW_EXCEPTION("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + std::to_string(dsType));
 
     // get lu-factorized mass
     block = (std::static_pointer_cast<LagrangianDS>(ds))->inverseMass();
@@ -411,7 +411,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
   {
     if(dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
     {
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + std::to_string(dsType));
+      THROW_EXCEPTION("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + std::to_string(dsType));
     }
     //
     SP::OneStepNSProblems  allOSNS  = Osi.simulation()->oneStepNSProblems();
@@ -434,11 +434,11 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       // SP::SimpleMatrix Mold;
       // Mold.reset(new SimpleMatrix(*(std::static_pointer_cast<LagrangianDS>(ds))->mass()));
       // DEBUG_EXPR(Mold->display(););
-      // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isPLUFactorized() = "<< Mold->isPLUFactorized() << std::endl;);
+      // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isFactorized() = "<< Mold->isFactorized() << std::endl;);
       //(std::static_pointer_cast<LagrangianDS>(ds))->computeMass();
       SP::SiconosMatrix Mass = ((std::static_pointer_cast<LagrangianDS>(ds))->mass()) ;
       DEBUG_EXPR(Mass->display(););
-      DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mass->isPLUFactorized() = "<< Mass->isPLUFactorized() << std::endl;);
+      DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mass->isFactorized() = "<< Mass->isFactorized() << std::endl;);
 
       //DEBUG_EXPR(std::cout << (*Mass-*Mold).normInf() << std::endl;);
       /*Copy of the current mass matrix. */
@@ -448,12 +448,12 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
     {
       SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
       //   d->computeMass();
-      //   d->mass()->resetLU();
+      //   d->mass()->resetFactorizationFlags();
       DEBUG_EXPR(d->mass()->display(););
       block.reset(new SimpleMatrix(*(d->mass())));
     }
     else
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + std::to_string(dsType));
+      THROW_EXCEPTION("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + std::to_string(dsType));
   }
   // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
   else if(osiType == OSI::ZOHOSI)
@@ -464,7 +464,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       *block = (static_cast<ZeroOrderHoldOSI&>(Osi)).Ad(ds);
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + std::to_string(osiType));
+    THROW_EXCEPTION("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + std::to_string(osiType));
   return block;
 }
 

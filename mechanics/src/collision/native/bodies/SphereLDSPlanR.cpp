@@ -33,7 +33,7 @@ SphereLDSPlanR::SphereLDSPlanR(double r, double A, double B, double C, double D)
   nN = sqrt(A * A + B * B + C * C);
 
   if(orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3))
-    RuntimeException::selfThrow("SphereLDSPlanR::SphereLDSPlanR. Problem in calling orthoBaseFromVector");
+    THROW_EXCEPTION("SphereLDSPlanR::SphereLDSPlanR. Problem in calling orthoBaseFromVector");
   // r*u & r *v
 
   ru1 = r * u1;

@@ -388,19 +388,11 @@ void KernelTest::t6()
 
   }
 
-  catch(SiconosException e)
-  {
-    cout << e.report() << endl;
-    CPPUNIT_ASSERT(false);
-  }
   catch(...)
   {
-    cout << "Exception caught in KernelTest.cpp" << endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(false);
-
   }
-
-
 }
 
 #ifdef HAVE_SICONOS_MECHANICS
@@ -513,14 +505,9 @@ void KernelTest::t9()
 
     CPPUNIT_ASSERT(nsds1->finalT() == nsds2->finalT());
   }
-  catch(SiconosException e)
-  {
-    cout << e.report() << endl;
-    CPPUNIT_ASSERT(false);
-  }
   catch(...)
   {
-    cout << "Exception caught in KernelTest.cpp" << endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(false);
   }
 }

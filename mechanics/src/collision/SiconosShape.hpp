@@ -327,7 +327,7 @@ public:
     : SiconosShape(), _vertices(vertices)
   {
     if (_vertices && _vertices->size(1) != 3)
-      throw SiconosException("Convex hull vertices matrix must have 3 columns.");
+      THROW_EXCEPTION("Convex hull vertices matrix must have 3 columns.");
   }
 
   virtual ~SiconosConvexHull() {}
@@ -367,9 +367,9 @@ public:
     : SiconosShape(), _indexes(indexes), _vertices(vertices)
   {
     if (!_indexes || (_indexes->size() % 3) != 0)
-      throw SiconosException("Mesh indexes size must be divisible by 3.");
+      THROW_EXCEPTION("Mesh indexes size must be divisible by 3.");
     if (!_vertices || _vertices->size(0) != 3)
-      throw SiconosException("Mesh vertices matrix must have 3 columns.");
+      THROW_EXCEPTION("Mesh vertices matrix must have 3 columns.");
   }
 
   SP::VUInt indexes() { return _indexes; }
@@ -511,7 +511,7 @@ public:
     : SiconosShape(), _vertices(vertices)
   {
     if (_vertices && _vertices->size(1) != 2)
-      throw SiconosException("Convex hull vertices matrix must have 2 columns in 2d.");
+      THROW_EXCEPTION("Convex hull vertices matrix must have 2 columns in 2d.");
   }
 
   virtual ~SiconosConvexHull2d() {}

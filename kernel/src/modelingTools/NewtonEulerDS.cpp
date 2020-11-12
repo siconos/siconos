@@ -327,7 +327,7 @@ void NewtonEulerDS::initRhs(double time)
     computeJacobianqForces(time);
 
     _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianWrenchq));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10]);
     flag1 = true;
   }
 
@@ -336,7 +336,7 @@ void NewtonEulerDS::initRhs(double time)
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianvForces(time);
     _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianWrenchTwist));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11]);
     flag2 = true;
   }
 
@@ -365,7 +365,7 @@ void NewtonEulerDS::initRhs(double time)
 void NewtonEulerDS::setQ(const SiconosVector& newValue)
 {
   if(newValue.size() != _qDim)
-    RuntimeException::selfThrow("NewtonEulerDS - setQ: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setQ: inconsistent input vector size ");
 
   if(! _q)
     _q.reset(new SiconosVector(newValue));
@@ -376,13 +376,13 @@ void NewtonEulerDS::setQ(const SiconosVector& newValue)
 void NewtonEulerDS::setQPtr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _qDim)
-    RuntimeException::selfThrow("NewtonEulerDS - setQPtr: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setQPtr: inconsistent input vector size ");
   _q = newPtr;
 }
 void NewtonEulerDS::setQ0(const SiconosVector& newValue)
 {
   if(newValue.size() != _qDim)
-    RuntimeException::selfThrow("NewtonEulerDS - setQ0: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setQ0: inconsistent input vector size ");
 
   if(! _q0)
     _q0.reset(new SiconosVector(newValue));
@@ -393,13 +393,13 @@ void NewtonEulerDS::setQ0(const SiconosVector& newValue)
 void NewtonEulerDS::setQ0Ptr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _qDim)
-    RuntimeException::selfThrow("NewtonEulerDS - setQ0Ptr: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setQ0Ptr: inconsistent input vector size ");
   _q0 = newPtr;
 }
 void NewtonEulerDS::setVelocity(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("NewtonEulerDS - setVelocity: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setVelocity: inconsistent input vector size ");
 
   if(! _twist)
     _twist0.reset(new SiconosVector(newValue));
@@ -410,14 +410,14 @@ void NewtonEulerDS::setVelocity(const SiconosVector& newValue)
 void NewtonEulerDS::setVelocityPtr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("NewtonEulerDS - setVelocityPtr: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setVelocityPtr: inconsistent input vector size ");
   _twist = newPtr;
 }
 
 void NewtonEulerDS::setVelocity0(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("NewtonEulerDS - setVelocity0: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setVelocity0: inconsistent input vector size ");
 
   if(! _twist0)
     _twist0.reset(new SiconosVector(newValue));
@@ -428,7 +428,7 @@ void NewtonEulerDS::setVelocity0(const SiconosVector& newValue)
 void NewtonEulerDS::setVelocity0Ptr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("NewtonEulerDS - setVelocity0Ptr: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setVelocity0Ptr: inconsistent input vector size ");
   _twist0 = newPtr;
 }
 
@@ -442,7 +442,7 @@ void NewtonEulerDS::resetToInitialState()
     *_q = *_q0;
   }
   else
-    RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial position _q0 is null");
+    THROW_EXCEPTION("NewtonEulerDS::resetToInitialState - initial position _q0 is null");
 
 
   if(_twist0)
@@ -450,7 +450,7 @@ void NewtonEulerDS::resetToInitialState()
     *_twist = *_twist0;
   }
   else
-    RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
+    THROW_EXCEPTION("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
 }
 
 void NewtonEulerDS::init_inverse_mass()
@@ -850,7 +850,7 @@ void NewtonEulerDS::computeRhs(double time)
   DEBUG_EXPR(_wrench->display(););
 
   if(_inverseMass)
-    _inverseMass->PLUForwardBackwardInPlace(*_acceleration);
+    _inverseMass->Solve(*_acceleration);
 
 
   // Compute _dotq
@@ -869,14 +869,14 @@ void NewtonEulerDS::computeJacobianRhsx(double time)
     SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianWrenchq;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc10);
+    _inverseMass->Solve(*bloc10);
   }
   if(_jacobianWrenchTwist)
   {
     SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
     computeJacobianvForces(time);
     *bloc11 = *_jacobianWrenchTwist;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc11);
+    _inverseMass->Solve(*bloc11);
   }
 
 }
@@ -993,7 +993,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
   }
   else
   {
-    RuntimeException::selfThrow("NewtonEulerDS::computeForces _wrench is null");
+    THROW_EXCEPTION("NewtonEulerDS::computeForces _wrench is null");
   }
   // else nothing.
 }
@@ -1022,7 +1022,7 @@ void NewtonEulerDS::computeJacobianqForces(double time)
   }
   else
   {
-    RuntimeException::selfThrow("NewtonEulerDS::computeJacobianqForces _jacobianWrenchq is null");
+    THROW_EXCEPTION("NewtonEulerDS::computeJacobianqForces _jacobianWrenchq is null");
   }
   //else nothing.
   DEBUG_END("NewtonEulerDS::computeJacobianqForces(double time) \n");

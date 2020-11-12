@@ -138,8 +138,7 @@ public:
 
   bool removeStaticContactorSet(StaticContactorSetID id);
 
-  void removeBody(const SP::RigidBodyDS& body);
-  void removeBody(const SP::RigidBody2dDS& body);
+  void removeBody(const SP::SecondOrderDS& body);
 
   void updateInteractions(SP::Simulation simulation);
 

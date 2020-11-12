@@ -78,18 +78,18 @@ SP::Simulation load(const std::string& filename)
 }
 #else
 #include "SiconosRestart.hpp"
-#include <RuntimeException.hpp>
+#include <SiconosException.hpp>
 namespace Siconos
 {
 
 void save(SP::Simulation s, const std::string& filename)
 {
-  RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
+  THROW_EXCEPTION("Siconos/IO must be compiled with serialization support for this service.");
 }
 
 SP::Simulation load(const std::string& filename)
 {
-  RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
+  THROW_EXCEPTION("Siconos/IO must be compiled with serialization support for this service.");
   /* Dummy return to make every compiler happy  */
   return std::shared_ptr<Simulation>();
 }

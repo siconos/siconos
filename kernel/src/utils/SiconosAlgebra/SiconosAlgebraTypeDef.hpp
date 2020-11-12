@@ -62,22 +62,23 @@ namespace Siconos
       vector we want to construct.
   */
   enum UBLAS_TYPE {
+    BLOCK =0,
     /** id for dense matrix or vector */
     DENSE = 1, 
     /** id for triangular matrix */
-    TRIANGULAR,
+    TRIANGULAR=2,
     /** id for symmetric matrix */
-    SYMMETRIC,
+    SYMMETRIC=3,
     /** id for sparse matrix or vector */
-    SPARSE,
+    SPARSE=4,
     /** id for banded matrix */
-    BANDED,
+    BANDED=5,
     /** id for zero matrix */
-    ZERO,
+    ZERO=6,
     /** id for identity matrix */
-    IDENTITY,
+    IDENTITY=7,
     /** id for sparse matrix or vector */
-    SPARSE_COORDINATE};
+    SPARSE_COORDINATE=8};
 }
 // Notes:
 // Vector definition in boost: vector<T,A> see http://www.boost.org/libs/numeric/ublas/doc/vector.htm

@@ -35,7 +35,7 @@ void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const 
   DEBUG_BEGIN("void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
   if(!_C)
   {
-    RuntimeException::selfThrow("LuenbergerObserver::initialize - you have to set C before initializing the Observer");
+    THROW_EXCEPTION("LuenbergerObserver::initialize - you have to set C before initializing the Observer");
   }
   else
   {
@@ -65,7 +65,7 @@ void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const 
       _DS.reset(new FirstOrderLinearTIDS(static_cast<FirstOrderLinearTIDS&>(observedDS)));
     }
     else
-      RuntimeException::selfThrow("LuenbergerObserver is not yet implemented for system of type" + std::to_string(dsType));
+      THROW_EXCEPTION("LuenbergerObserver is not yet implemented for system of type" + std::to_string(dsType));
 
     // is it controlled ?
     originaldsgVD = originalDSG0.descriptor(_sensor->getDS());

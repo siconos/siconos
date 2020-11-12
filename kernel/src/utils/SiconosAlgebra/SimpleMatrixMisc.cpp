@@ -27,6 +27,7 @@
 #include "BlockMatrix.hpp"
 
 #include "SiconosAlgebra.hpp"
+#include "SiconosException.hpp"
 
 using namespace Siconos;
 
@@ -53,7 +54,7 @@ double SimpleMatrix::normInf() const
   else if(_num == IDENTITY)
     return 1;
 
-  RuntimeException::selfThrow("SimpleMatrix::normInf: Matrix type not supported");
+  THROW_EXCEPTION("Matrix type not supported");
   return std::numeric_limits<double>::infinity();
 }
 
@@ -62,7 +63,7 @@ void SimpleMatrix::normInfByColumn(SP::SiconosVector vIn) const
   if(_num == DENSE)
   {
     if(vIn->size() != size(1))
-      RuntimeException::selfThrow("SimpleMatrix::normInfByColumn: the given vector does not have the right length");
+      THROW_EXCEPTION("the given vector does not have the right length");
     DenseVect tmpV = DenseVect(size(0));
     for(unsigned int i = 0; i < size(1); i++)
     {
@@ -71,7 +72,7 @@ void SimpleMatrix::normInfByColumn(SP::SiconosVector vIn) const
     }
   }
   else
-    RuntimeException::selfThrow("SimpleMatrix::normInfByColumn: not implemented for data other than DenseMat");
+    THROW_EXCEPTION("not implemented for data other than DenseMat");
 }
 //=======================
 //       determinant
@@ -95,7 +96,7 @@ double SimpleMatrix::det() const
     return 0;
   else  if(_num == IDENTITY)
     return 1;
-  RuntimeException::selfThrow("SimpleMatrix::det: Matrix type not supported");
+  THROW_EXCEPTION("Matrix type not supported");
   return std::numeric_limits<double>::infinity();
 }
 
@@ -108,7 +109,7 @@ void SimpleMatrix::trans()
     *mat.Dense = ublas::trans(*mat.Dense);
     break;
   case TRIANGULAR:
-    SiconosMatrixException::selfThrow("SimpleMatrix::trans() failed, the matrix is triangular matrix and can not be transposed in place.");
+    THROW_EXCEPTION("failed, the matrix is triangular matrix and can not be transposed in place.");
     break;
   case SYMMETRIC:
     break;
@@ -121,37 +122,37 @@ void SimpleMatrix::trans()
   case BANDED:
     *mat.Banded = ublas::trans(*mat.Banded);
     break;
-  case 6:
+  case Siconos::ZERO:
     break;
-  case 7:
+  case Siconos::IDENTITY:
     break;
   default:
-    RuntimeException::selfThrow("SimpleMatrix::trans: Matrix type not supported");
+    THROW_EXCEPTION("Matrix type not supported");
   }
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::trans(const SiconosMatrix &m)
 {
   if(m.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, not yet implemented for m being a BlockMatrix.");
+    THROW_EXCEPTION("not yet implemented for m being a BlockMatrix.");
 
 
   if(&m == this)
-    trans();//SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, m = this, use this->trans().");
+    trans();
   else
   {
-    unsigned int numM = m.num();
+    Siconos::UBLAS_TYPE numM = m.num();
     switch(numM)
     {
     case DENSE:
       if(_num != DENSE)
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a dense matrix into another type.");
+        THROW_EXCEPTION("try to transpose a dense matrix into another type.");
       noalias(*mat.Dense) = ublas::trans(*m.dense());
       break;
     case TRIANGULAR:
       if(_num != DENSE)
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a triangular matrix into a non-dense one.");
+        THROW_EXCEPTION("try to transpose a triangular matrix into a non-dense one.");
       noalias(*mat.Dense) = ublas::trans(*m.triang());
       break;
     case SYMMETRIC:
@@ -165,7 +166,7 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
       else if(_num == SPARSE_COORDINATE)
         noalias(*mat.SparseCoordinate) = ublas::trans(*m.sparse());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a sparse matrix into a forbidden type (not dense nor sparse).");
+        THROW_EXCEPTION("try to transpose a sparse matrix into a forbidden type (not dense nor sparse).");
       break;
     case SPARSE_COORDINATE:
       if(_num == DENSE)
@@ -175,7 +176,7 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
       else if(_num == SPARSE_COORDINATE)
         noalias(*mat.SparseCoordinate) = ublas::trans(*m.sparseCoordinate());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a sparse coordinate matrix into a forbidden type (not dense nor sparse coordinate).");
+        THROW_EXCEPTION("try to transpose a sparse coordinate matrix into a forbidden type (not dense nor sparse coordinate).");
       break;
     case BANDED:
       if(_num == DENSE)
@@ -183,7 +184,7 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
       else if(_num == BANDED)
         noalias(*mat.Banded) = ublas::trans(*m.banded());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a banded matrix into a forbidden type (not dense nor banded).");
+        THROW_EXCEPTION("try to transpose a banded matrix into a forbidden type (not dense nor banded).");
       break;
     case ZERO:
       *this = m;
@@ -192,9 +193,9 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
       *this = m;
       break;
     default:
-      SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed.");
+      THROW_EXCEPTION("");
     }
-    resetLU();
+    resetFactorizationFlags();
   }
 }
 

@@ -468,7 +468,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
 
       /* one may an empty matrix, for example:
          numerics.NumericsMatrix(scipy.sparse.eye(0))
-         then add entries with NM_zentry.
+         then add entries with NM_entry.
       */
       if (csm->nz >= 0)
       {

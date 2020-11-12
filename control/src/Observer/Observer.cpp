@@ -50,7 +50,7 @@ void Observer::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation
   // XXX What if there is more than one sensor ...
   if(!_sensor)
   {
-    RuntimeException::selfThrow("Observer::initialize - the no ControlSensor was given");
+    THROW_EXCEPTION("Observer::initialize - the no ControlSensor was given");
   }
 }
 

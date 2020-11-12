@@ -93,8 +93,12 @@ private:
   CPPUNIT_TEST(testProd4);
   CPPUNIT_TEST(testProd5);
   CPPUNIT_TEST(testProd6);
-  // CPPUNIT_TEST(testGemv);
-  // CPPUNIT_TEST(testGemm);
+  //CPPUNIT_TEST(testGemv);
+  //CPPUNIT_TEST(testGemm);
+  CPPUNIT_TEST(testFromAndFillCSC);
+  CPPUNIT_TEST(testPLUFactorizationInPlace);
+  CPPUNIT_TEST(testFactorize);
+  CPPUNIT_TEST(testSolve);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
@@ -153,8 +157,12 @@ private:
   void testProd4();
   void testProd5();
   void testProd6();
-  // void testGemm();
-  // void testGemv();
+  //void testGemm();
+  //void testGemv();
+  void testFromAndFillCSC();
+  void testPLUFactorizationInPlace();
+  void testFactorize();
+  void testSolve();
   void End();
 
   unsigned int size, size2;
@@ -162,12 +170,12 @@ private:
   SPC::SiconosMatrix A, B, Ab, Bb;
   SP::SimpleMatrix SimM;
   std::string fic1, fic2;
-  SP::SiconosVector vect1, vect2, vect3;
+  SP::SiconosVector vect1, vect2, vect3, vect_sparse_1;
   SP::DenseMat  D;
   SP::TriangMat T, T2;
   SP::SymMat S, S2;
   SP::BandedMat Band, Band2;
-  SP::SparseMat SP, SP2;
+  SP::SparseMat SP, SP2, SP3, SP4;
   SP::SparseCoordinateMat SP_coor;
   SP::ZeroMat  Z, Z2;
   SP::IdentityMat I, I2;

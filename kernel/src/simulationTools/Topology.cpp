@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 #include "Topology.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Interaction.hpp"
@@ -300,7 +300,7 @@ SP::InteractionsGraph Topology::indexSet(unsigned int num) const
 {
   if(num >= _IG.size())
   {
-    RuntimeException::selfThrow("Topology::indexSet: indexSet does not exist");
+    THROW_EXCEPTION("Topology::indexSet: indexSet does not exist");
   }
   assert(num < _IG.size()) ;
   return _IG[num];
@@ -406,7 +406,7 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber) co
       return ds;
   }
 
-  RuntimeException::selfThrow("Topology::getDynamicalSystem(n) ds not found.");
+  THROW_EXCEPTION("Topology::getDynamicalSystem(n) ds not found.");
 
   return ds;
 }
@@ -435,7 +435,7 @@ SP::DynamicalSystem Topology::getDynamicalSystem(std::string name) const
       return _DSG[0]->bundle(*vi);
   }
 
-  RuntimeException::selfThrow("Topology::getDynamicalSystem() ds not found.");
+  THROW_EXCEPTION("Topology::getDynamicalSystem() ds not found.");
 
   return SP::DynamicalSystem();
 }
@@ -445,7 +445,7 @@ unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
 {
   if(inumber >= _IG.size())
   {
-    RuntimeException::selfThrow("Topology::numberOfInvolvedDS :: index number must be smaller than the number of indexSets");
+    THROW_EXCEPTION("Topology::numberOfInvolvedDS :: index number must be smaller than the number of indexSets");
   }
 
   /* on an adjoint graph a dynamical system may be on several edges */

@@ -67,6 +67,7 @@ void AVITest::testAVI()
   (*B)(1, 1) = G*beta;
   C->eye();
   SP::FirstOrderLinearTIR rel(new FirstOrderLinearTIR(C, B));
+  // H-K representation: the feasible set is given by all the element λ such that Hλ ≥ K
   SP::SimpleMatrix H(new SimpleMatrix(4, 2));
   (*H)(0, 0) = 1.0;
   (*H)(1, 0) = -_h/2.0;

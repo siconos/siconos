@@ -17,7 +17,7 @@
 */
 
 #include "RelationFactory.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 namespace RelationFactory
 {
@@ -38,7 +38,7 @@ SP::Relation Registry::instantiate(int name)
   MapFactoryIt it = factory_map.find(name) ;
 
   if(it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (RelationFactory) failed, no class named: " + std::to_string(name));
+    THROW_EXCEPTION("Registry::instantiate (RelationFactory) failed, no class named: " + std::to_string(name));
 
   return (it->second)(name) ;  // run our factory
 }

@@ -24,7 +24,7 @@
 #define BLOCKVECTOR_H
 
 #include "SiconosAlgebraTypeDef.hpp"
-
+#include "SiconosSerialization.hpp"
 class SiconosVector;
 
 /** "Block" vector : container (list) of SiconosVector
