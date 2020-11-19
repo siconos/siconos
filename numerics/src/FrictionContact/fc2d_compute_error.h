@@ -31,7 +31,8 @@
 extern "C"
 {
 #endif
-
+  
+  void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, double mu, double* restrict error, double * worktmp);
   /** Error computation for friction-contact 3D problem
       \param problem the structure which defines the friction-contact problem
       \param z vector

@@ -907,7 +907,7 @@ SolverOptions * solver_options_create(int solverId)
   // --- GMP Solver ---
   case SICONOS_GENERIC_MECHANICAL_NSGS:
   {
-    options = solver_options_initialize(solverId, 10000, 1e-4, 3);
+    options = solver_options_initialize(solverId, 10000, 1e-4, 4);
     gmp_set_default(options);
     break;
   }

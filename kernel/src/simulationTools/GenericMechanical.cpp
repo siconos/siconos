@@ -122,15 +122,31 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
     else if(Type::value(*(inter->nonSmoothLaw()))
             == Type::NewtonImpactFrictionNSL)
     {
-      FrictionContactProblem * pAux =
-        (FrictionContactProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
-      SP::NewtonImpactFrictionNSL nsLaw =
-        std::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
-      pAux->dimension = 3;
-      pAux->numberOfContacts = 1;
-      *(pAux->mu) = nsLaw->mu();
+      if (size ==3)
+      {
+        FrictionContactProblem * pAux =
+          (FrictionContactProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
+        SP::NewtonImpactFrictionNSL nsLaw =
+          std::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
+        pAux->dimension = 3;
+        pAux->numberOfContacts = 1;
+        *(pAux->mu) = nsLaw->mu();
 
-      DEBUG_PRINT(" Type::NewtonImpactFrictionNSL\n");
+        DEBUG_PRINT(" Type::NewtonImpactFrictionNSL\n");
+      }
+      else if (size ==2)
+      {
+        FrictionContactProblem * pAux =
+          (FrictionContactProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC2D, size);
+        SP::NewtonImpactFrictionNSL nsLaw =
+          std::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
+        pAux->dimension = 2;
+        pAux->numberOfContacts = 1;
+        *(pAux->mu) = nsLaw->mu();
+        
+        DEBUG_PRINT(" Type::NewtonImpactFrictionNSL\n");
+      }
+        
     }
     else
     {
