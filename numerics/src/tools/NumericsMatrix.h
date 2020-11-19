@@ -126,6 +126,7 @@ extern "C"
    */
   RawNumericsMatrix* NM_new(void);
   RawNumericsMatrix* NM_eye(int size);
+  RawNumericsMatrix* NM_scalar(int size, double s);
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows

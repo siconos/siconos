@@ -192,7 +192,7 @@ double NV_norm_2(const double * const vec, const unsigned int vecSize)
   /* free(vec2); */
   /* return sqrt(sum); */
   double norm = cblas_dnrm2(vecSize, vec, 1);
-  assert(!isnan(norm));
+  //  assert(!isnan(norm));
   return norm;
 }
 

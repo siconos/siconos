@@ -586,6 +586,26 @@ NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
   return out;
 }
 
+NumericsSparseMatrix * NSM_triplet_scalar(unsigned int size, double s)
+{
+  int _origin = NSM_TRIPLET;
+  NumericsSparseMatrix * out = NSM_new();
+  out->origin = _origin;
+
+  CSparseMatrix * C = cs_spalloc(size, size, size, 1, 1);
+
+  for(unsigned int k=0 ; k < size; k++)
+  {
+    C->nz++;
+    C->i[k] =k;
+    C->p[k] =k;
+    C->x[k] =s;
+  }
+  assert(out->origin ==NSM_TRIPLET);
+  out->triplet = C;
+  out->origin = NSM_TRIPLET;
+  return out;
+}
 
 static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
 {

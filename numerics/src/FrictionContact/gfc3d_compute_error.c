@@ -226,7 +226,6 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
 
   cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
 
-
   double relative_scaling = fmax(norm_q, fmax(norm_Mv,norm_Hr));
   *error = cblas_dnrm2(n,tmp_1,1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
@@ -268,8 +267,8 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
     error_complementarity = error_complementarity/relative_scaling;
   DEBUG_PRINTF("relative error in complementarity= %e\n", error_complementarity);
 
-
   *error += error_complementarity;
+
   DEBUG_PRINTF("relative error = %e\n", *error);
   numerics_printf_verbose(1,"---- GFC3D - Compute Error Convex case");
   if(*error > tolerance)

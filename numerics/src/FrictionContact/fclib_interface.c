@@ -316,10 +316,10 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
     problem->M->matrix2->origin = NSM_TRIPLET;
     M->nz = (CS_INT) fclib_problem->M->nz;
     M->p = (CS_INT*) malloc(sizeof(CS_INT)*M->nzmax);
-    int_to_csi(fclib_problem->M->p, M->p, (unsigned) M->nzmax);
+    int_to_csi(fclib_problem->M->p, M->p, (unsigned) M->nz);
   }
   M->i = (CS_INT*) malloc(sizeof(CS_INT)*M->nzmax);
-  int_to_csi(fclib_problem->M->i, M->i, (unsigned) M->nzmax);
+  int_to_csi(fclib_problem->M->i, M->i, (unsigned) M->nz);
 
 
   problem->H = NM_create(NM_SPARSE, fclib_problem->H->m, fclib_problem->H->n);

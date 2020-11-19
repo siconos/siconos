@@ -63,7 +63,7 @@ extern "C"
                  const double * const y, const unsigned int ySize,
                  unsigned int i);
 
-  /** Put all elements of vector to the suqre (element by element)
+  /** Put all elements of vector to the square (element by element)
       \param vec is the vector
       \param vecSize the size of the vector vec
       \param out is the result power2 vector

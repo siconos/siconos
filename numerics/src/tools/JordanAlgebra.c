@@ -175,7 +175,7 @@ void JA_prod(const double * const vec1, const double * const vec2, const unsigne
   {
     pos = i * dimension;
     out[pos] = cblas_ddot(dimension, vec1 + pos, 1, vec2 + pos, 1);
-    for(unsigned int j = 1; j < dimension; ++j)
+    for(unsigned int j = 1; j < dimension; j++)
       out[pos + j] = vec1[pos] * vec2[pos + j] + vec2[pos] * vec1[pos + j];
   }
 }
