@@ -96,6 +96,8 @@ public:
    */
   int compute(double time);
 
+
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
   /* visitors hook */
   ACCEPT_STD_VISITORS();
 

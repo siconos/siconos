@@ -101,6 +101,9 @@ protected:
   */
   unsigned int _maxSize = 0;
 
+  /* set of nslaw types */
+  std::set<float> _nslawtype;
+
   /*During Newton it, this flag allows to update the numerics matrices only once if necessary.*/
   bool _hasBeenUpdated = false;
 

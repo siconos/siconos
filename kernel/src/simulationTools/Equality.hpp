@@ -83,6 +83,7 @@ public:
   /** Build or reinit M and the NumericsProblem*/
   virtual void updateM();
 
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
 
   /** print the data to the screen
    */
