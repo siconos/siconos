@@ -999,11 +999,11 @@ bool MultipleImpact::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
   float type_number= (float) (Type::value(nslaw) + 0.1 * nslaw.size());
   _nslawtype.insert(type_number);
 
-  if (Type::value(nslaw) != Type::NewtonImpactFrictionNSL)
+  if (Type::value(nslaw) != Type::MultipleImpactNSL )
   {
     THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
-                      The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
-                      Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D) \n");
+                      The chosen nonsmooth law is not compatible with  MultipleImpact one step nonsmooth problem. \n\
+                      Compatible NonSmoothLaw are: MultipleImpactNSL (2D or 3D) \n");
     return false;
   }
   if (_nslawtype.size() > 1)

@@ -50,8 +50,8 @@
    - Relay
    - Equality
    - GenericMechanical
-   - OSNSMultipleImpact
-   - GlobalFrictionContact (unstable)
+   - MultipleImpact
+   - GlobalFrictionContact
 
    The usual way to build and initialize a one-step nonsmooth problem is :
    - call constructor with the id of the required Numerics solver.

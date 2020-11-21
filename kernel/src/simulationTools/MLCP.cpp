@@ -113,7 +113,8 @@ bool MLCP::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
   float type_number= (float) (Type::value(nslaw));
   _nslawtype.insert(type_number);
 
-  if (not (Type::value(nslaw) == Type::ComplementarityConditionNSL ||
+  if (not (Type::value(nslaw) == Type::MixedComplementarityConditionNSL ||
+           Type::value(nslaw) == Type::ComplementarityConditionNSL ||
            Type::value(nslaw) == Type::NewtonImpactNSL ||
            Type::value(nslaw) == Type::EqualityConditionNSL)
     )
