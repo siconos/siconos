@@ -192,6 +192,7 @@ public:
   /** print the data to the screen */
   void display() const;
 
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
 
 

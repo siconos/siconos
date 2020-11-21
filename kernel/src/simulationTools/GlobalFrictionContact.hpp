@@ -239,6 +239,7 @@ public:
   virtual void postCompute();
 
 
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
 
   void updateMu();

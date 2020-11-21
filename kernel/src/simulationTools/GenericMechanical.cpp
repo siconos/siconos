@@ -70,6 +70,11 @@ void GenericMechanical::initialize(SP::Simulation sim)
   // General initialize for OneStepNSProblem
   LinearOSNS::initialize(sim);
 }
+bool GenericMechanical::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  // do nothoing since it is check in GenericMechanical::computeDiagonalInteractionBlock
+  return true;
+}
 
 void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
 {
