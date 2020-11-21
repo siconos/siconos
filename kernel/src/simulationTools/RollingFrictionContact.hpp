@@ -36,13 +36,13 @@ TYPEDEF_SPTR(RollingFrictionContactProblem)
 
 
   \rst
-  
+
   .. math::
 
      velocity =  q + M reaction \\
      \\
      velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
-  
+
   \endrst
 
   and a Coulomb friction law.
@@ -77,7 +77,7 @@ protected:
 
   /** * friction coefficients */
   SP::MuStorage _mu;
-  
+
  /** * friction coefficients */
   SP::MuStorage _muR;
 
@@ -97,10 +97,10 @@ public:
       \endrst
   */
   RollingFrictionContact(int dimPb=5, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
-  
+
   /**  constructor from a pre-defined solver options set.
-       \param dim, pb dimension, 5 only. 
-       \param options, the options set, 
+       \param dim, pb dimension, 5 only.
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst
@@ -191,6 +191,9 @@ public:
 
   /** print the data to the screen */
   void display() const;
+
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+
 
   /** visitors hook
    */

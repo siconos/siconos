@@ -201,6 +201,30 @@ GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProble
 }
 
 
+bool GlobalFrictionContact::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+
+  float type_number= (float) (Type::value(nslaw) + 0.1 * nslaw.size());
+  _nslawtype.insert(type_number);
+
+  if (Type::value(nslaw) != Type::NewtonImpactFrictionNSL)
+  {
+    THROW_EXCEPTION("\nGlobalFrictionContact::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
+                      Compatible NonSmoothLaw is NewtonImpactFrictionNSL (3D) \n");
+    return false;
+  }
+  if (_nslawtype.size() > 1)
+  {
+    THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
+                     Compatible NonSmoothLaw is : NewtonImpactFrictionNSL (3D), but you cannot mix them \n");
+    return false;
+  }
+
+  return true;
+}
+
+
 
 bool GlobalFrictionContact::preCompute(double time)
 {

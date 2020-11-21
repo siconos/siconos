@@ -161,6 +161,7 @@ public:
   */
   virtual void display() const;
 
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();

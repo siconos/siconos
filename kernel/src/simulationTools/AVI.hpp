@@ -65,7 +65,7 @@ public:
   AVI(int numericsSolverId = SICONOS_AVI_CAOFERRIS);
 
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst
@@ -83,6 +83,8 @@ public:
    *  \return information about the solver convergence.
    */
   int compute(double time);
+
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
 
   /** print the data to the screen
    */

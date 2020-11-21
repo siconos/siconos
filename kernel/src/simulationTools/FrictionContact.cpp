@@ -157,14 +157,13 @@ bool FrictionContact::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
   {
     THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
-                      Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 2D) \n");
+                      Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D) \n");
     return false;
   }
   if (_nslawtype.size() > 1)
   {
     THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
-                     The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
-                     Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 2D), but you cannot mix them \n");
+                     Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D), but you cannot mix them \n");
     return false;
   }
 

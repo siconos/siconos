@@ -266,7 +266,7 @@ public:
     _keepLambdaAndYState = val ;
   }
 
-  virtual bool checkCompatibleNSLaw(NonSmoothLaw& nslaw) {return true;};
+  virtual bool checkCompatibleNSLaw(NonSmoothLaw& nslaw) =0;
   
   /* visitors hook */
   ACCEPT_STD_VISITORS();

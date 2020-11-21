@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file OSNSMultipleImpact.hpp
+/*! \file MultipleImpact.hpp
  * \brief Linear Complementarity Problem formulation and solving
  */
 
@@ -32,14 +32,14 @@
 
 /** Formalization and Resolution of a Multiple Impact Non-Smooth problem.
 
-\todo write a short introduction about OSNSMultipleImpact ...
+\todo write a short introduction about MultipleImpact ...
  */
-class OSNSMultipleImpact : public LinearOSNS
+class MultipleImpact : public LinearOSNS
 {
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(OSNSMultipleImpact);
+  ACCEPT_SERIALIZATION(MultipleImpact);
 
   //! Time-like variable (Impulse)
   double _impulseVariable = 0.;
@@ -129,16 +129,16 @@ public:
 
   /** default constructor
    */
-  OSNSMultipleImpact():LinearOSNS(){};
+  MultipleImpact():LinearOSNS(){};
 
   /** Constructor from data (step size is required here)
    *  \param type  the type of the compliance law
    *  \param step step size estimated
    */
-  OSNSMultipleImpact(std::string type, double step = 1.0e-5);
+  MultipleImpact(std::string type, double step = 1.0e-5);
 
   //!Destructor
-  ~OSNSMultipleImpact(){};
+  ~MultipleImpact(){};
   
   /* To get the type of the compliance law at contact
    * \return std::string
@@ -330,6 +330,8 @@ public:
    */
   void initialize(SP::Simulation sim);
 
+
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
   /** print the data to the screen */
   void display() const;
 
