@@ -1080,7 +1080,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
                double* restrict velocity, double* restrict globalVelocity,
                int* restrict info, SolverOptions* restrict options)
 {
-  verbose=3;
+//  verbose=3;
 // the size of the problem detection
   unsigned int m = problem->M->size0;
   unsigned int nd = problem->H->size1;
@@ -1592,7 +1592,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 	  }
 	else
 	  {
-	    NSM_linearSolverParams(J)->solver = NSM_HSL;
+	    //NSM_linearSolverParams(J)->solver = NSM_HSL;
 	    NM_LDLT_solve(J, rhs, 1);
 	  }
 	
@@ -1723,6 +1723,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(nd, data->tmp_point->t_reaction, 1, reaction, 1);
 
   options->dparam[SICONOS_DPARAM_RESIDU] = NV_max(error, 4);
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
   if(internal_allocation)
