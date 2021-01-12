@@ -1458,7 +1458,7 @@ class VView(object):
 
         if shape_type in ['vtp', 'stl']:
             with io_tmpfile() as tmpf:
-                tmpf[0].write(str(self.io.shapes()[shape_name][:][0]))
+                tmpf[0].write((self.io.shapes()[shape_name][:][0]).decode('utf-8'))
                 tmpf[0].flush()
                 reader = self.vtk_reader[shape_type]()
                 reader.SetFileName(tmpf[1])
