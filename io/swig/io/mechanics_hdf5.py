@@ -937,6 +937,7 @@ class MechanicsHdf5(object):
                    use_volume_centroid_as_initial_translation=False,
                    mass=None, center_of_mass=[0, 0, 0], inertia=None,
                    time_of_birth=-1, time_of_death=-1,
+                   fext=None,
                    allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
@@ -1077,6 +1078,10 @@ class MechanicsHdf5(object):
 
             if inertia is not None:
                 obj.attrs['inertia'] = inertia
+
+            if fext is not None:
+                obj.attrs['fext'] = fext
+
             if allow_self_collide is not None:
                 obj.attrs['allow_self_collide'] = allow_self_collide
 

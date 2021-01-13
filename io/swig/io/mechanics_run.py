@@ -1080,6 +1080,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                       velocity, mass)
                     body.setUseContactorInertia(True)
 
+
+                fext = self._input[name].get('allow_self_collide',
+                                             None)
+                if fext is not None:
+                    body.setFextPtr(fext)
+
+                    
                 self_collide = self._input[name].get('allow_self_collide',
                                                      None)
                 if self_collide is not None:

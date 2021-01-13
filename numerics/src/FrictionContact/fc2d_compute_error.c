@@ -24,8 +24,8 @@
 #include "numerics_verbose.h"        // for numerics_error, verbose
 #include "SiconosBlas.h"                   // for cblas_dcopy
 
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
 #include "debug.h"
 
 
