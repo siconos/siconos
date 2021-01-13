@@ -1145,7 +1145,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 refds_name = diff[0]
 
         if refds_name:
-            refds = topo.getDynamicalSystem(str(refds_name))
+            refds = sk.cast_NewtonEulerDS(topo.getDynamicalSystem(str(refds_name)))
 
             # Determine reference indexes:
             # Assert if neither ds in reference joints is the
