@@ -26,14 +26,18 @@
 #include "DynamicalSystem.hpp"
 
 
-/**  General First Order Non Linear Dynamical Systems - \f$ M(t) \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0 \f$
+/**  General First Order Non Linear Dynamical Systems
      
      This class defines and computes a generic n-dimensional
      dynamical system of the form :
      
-     \f$
-     M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
-     \f$
+     \rst
+
+     .. math::
+
+        M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
+
+     \endrst
 
      where
 
@@ -49,9 +53,14 @@
  
   By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
   and the initial conditions are given by
-   \f$
-   x(t_0)=x_0
-  \f$
+   \rst
+
+   .. math::
+
+      x(t_0)=x_0
+
+  \endrst
+
   To define a Boundary Value Problem, a pointer on a BoundaryCondition must be set.
    
   The right-hand side and its jacobian (from base classe) are defined as
