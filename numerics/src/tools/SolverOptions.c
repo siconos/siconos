@@ -238,7 +238,8 @@ void solver_options_delete(SolverOptions* op)
 
     op->isSet = false;
   }
-  free(op);
+//  double free or corruption
+//  free(op);
 }
 
 SolverOptions * solver_options_copy(SolverOptions* source)
