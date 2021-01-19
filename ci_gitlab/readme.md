@@ -38,4 +38,13 @@ To download and run an image, try for example:
 
 docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/ubuntu18.04 /bin/bash
 
+## Predefined environment variables
+
+### gitlab-ci
+
+https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+
+### Travis
+
+https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
 

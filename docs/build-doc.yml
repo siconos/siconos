@@ -6,25 +6,18 @@
 include: ci_gitlab/gitlab-ci-siconos-templates.yml
 
 # --- Build doc/web site and publish it ---
-# Image : ubuntu 18.04
-siconos:doc:
+doc:build:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-doc
-    cdash_submit: 1    
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-doc
+    cdash_submit: 0
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_docs.cmake
     LANG: C.UTF-8
-  extends: .siconos-build
-  stage: doc-build
+  extends: .siconos-full
   script:
     - "sh ci_gitlab/make_siconos_doc.sh"
   artifacts:
     paths:
       - build/docs/build/html
-  #when: manual
-  #only:
-  #  variables: # Run this job only when commit message starts with [doc-build]
-  #    - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
-
 pages:
 
   image: python:alpine
@@ -34,11 +27,5 @@ pages:
     paths:
     - public
   stage: doc-deploy 
-  dependencies:
-  - siconos:doc
-  #only:
-  #  variables: # Run this job only when commit message starts with [doc-build]
-  #    - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
-
-
+  needs: ["doc:build"]
 

@@ -54,7 +54,7 @@ extensions = [
     'sphinxcontrib.bibtex',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.githubpages',
-    'sphinxcontrib.youtube',
+    #'sphinxcontrib.youtube',
 ]
 
 with_python_wrapper = '@WITH_PYTHON_WRAPPER@' == 'ON'

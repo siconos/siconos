@@ -89,19 +89,6 @@ if(WITH_DOCUMENTATION)
   find_python_module(breathe REQUIRED)
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
-  find_sphinx_module(sphinxcontrib youtube)
-
-  if(NOT ${youtube_FOUND})
-    # This python package can not be found using standard ways such as conda or pip,
-    # so we force download and install.
-    message("Can not found sphinxcontrib-youtube. Trying to download and install it via pip ...")
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -m pip install git+https://github.com/sphinx-contrib/youtube.git)
-    find_sphinx_module(sphinxcontrib youtube)
-    if(NOT ${youtube_FOUND})
-      message(FATAL_ERROR "the following command failed:\n ${PYTHON_EXECUTABLE} -m pip install git+https://github.com/sphinx-contrib/youtube.git")
-    endif()
-  endif()
   # Sphinx theme for documentation
   find_python_module(sphinx_bootstrap_theme REQUIRED)
 

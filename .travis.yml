@@ -41,9 +41,9 @@ sudo: required
 # is the name and the second the version.
 
 env:
-  - TASK=default:distrib=ubuntu,20.04
+  #- TASK=default:distrib=ubuntu,20.04
   - TASK=default:distrib=ubuntu,18.04
-  - TASK=default:distrib=debian,latest
+  #- TASK=default:distrib=debian,latest
   - TASK=default:distrib=fedora,30
   - TASK=default:pkgs+=lpsolve,
   - TASK=default:ci_config=with_mumps_par:pkgs+=mumps-par,
@@ -66,9 +66,11 @@ before_script:
   - cd build
 
 script:
+  - ln -s ../ci_gitlab/ctest_driver_install_siconos.cmake ../ci_travis/
+  - env
   - if test "$TRAVIS" = true; then
-      ../ci_travis/driver.py --run --root-dir=.. --task="$TASK";
+       ../ci_travis/driver.py --run --root-dir=.. --task="$TASK";
     else
-      ../ci_travis/driver.py --run --root-dir=..;
+       ../ci_travis/driver.py --run --root-dir=..;
     fi
 

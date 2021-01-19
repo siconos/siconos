@@ -22,6 +22,9 @@ variables:
   # configurations may require non-parallel builds (cf. swig +
   # serialization requires too much memory)
   allow_parallel_build: 1
+  GIT_DEPTH: 1
+  #GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
+
 
 
 stages:
@@ -46,48 +49,118 @@ stages:
   # - configure, build Siconos
   # - run tests
   # - submit to cdash
+  - configure
   - build
   - test
+  - install
   # Templates for these jobs : .siconos-build (see below).
   # --- Doc stages ---
   # Build documentation
   - doc-build
   - doc-deploy
 
-
 # --- Templates definitions ---
+# Each template can be used in CI jobs, with the keyword 'extends'.
   
-# -- Template for docker-build jobs --
-# - should build and push a docker image to siconos project registry
+# -- Template used to describe docker-build jobs --
+# - build and push a docker image into siconos project registry
 #   image name : $CI_REGISTRY_IMAGE/$IMAGE_NAME
-# - should be allowed to failed (in order to avoid blocking of last stage jobs)
-# - should run only when commit message contains [docker build]
+# - should be allowed to failed (in order to avoid blocking of the jobs in the next stages)
+# - should run only when commit message starts with [docker build]
 # - use Dockerfile from ci_gitlab/dockerfiles/<IMAGE_NAME>
-# - will be tagged <IMAGE_NAME>:<docker_tag>. The default tag is latest.
-# Warning : this kind of job can only run on 'privileged' runners.
+# - will be tagged <IMAGE_NAME>:<docker_tag>. The default tag is 'latest'.
+# Based on Kaniko stuff. For details, see https://docs.gitlab.com/ee/ci/docker/using_kaniko.html.
 .docker-build:
-  image: docker:stable
-  services:
-    - docker:18-dind
-  tags:
-    - priv
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  variables:
+    GIT_STRATEGY: clone
   stage: docker-build
   script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA $docker_path/$IMAGE_NAME > /dev/null
-    - docker tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE/$IMAGE_NAME:$docker_tag
-    - docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:$docker_tag
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $docker_path/$IMAGE_NAME/Dockerfile --destination $CI_REGISTRY_IMAGE/sources/$IMAGE_NAME:latest
   only:
     variables: # Run this job only when commit message starts with [docker-build]
       - $CI_COMMIT_MESSAGE =~ /^\[docker-build\].*/i      
-  allow_failure: true
 
-# -- Template for siconos build-test-install jobs --
-# - Pull an image (possibly from siconos registry)
+
+# -- Template used for siconos configure-build-test-install jobs  --
+# .siconos-ctest must be overloaded by a specific template like
+# .siconos-configure, .siconos-build ...
+# 1. Pulls an image (possibly from siconos registry)
 #   named  IMAGE_NAME
-# - Run for all branches and for all push
-.siconos-build:
+# 2. executes ctest script. The specific case (configure, build ...) is determined
+
+.siconos-ctest:
   image: $IMAGE_NAME
-  stage: build
   script:
-    - "sh ci_gitlab/install_siconos.sh $user_file" 
+    - "sh ci_gitlab/ctest_siconos.sh $ctest_mode $user_file" 
+  
+# - Template to complete .siconos-ctest
+# Configure (cmake) step.
+# Keeps build directory for next stages (build/install/test)
+.siconos-configure:
+  extends: .siconos-ctest
+  variables:
+    #GIT_STRATEGY: clone
+    ctest_mode: Configure
+  stage: configure
+  artifacts:
+    paths:
+      - build
+    expire_in: 2 days  
+
+# - Template to complete .siconos-ctest
+# build (make) step.
+# Gets artifacts from .siconos-configure and keep build dir. as artifact for next stages.
+.siconos-build:
+  extends: .siconos-ctest
+  variables:
+    ctest_mode: Build
+    #GIT_STRATEGY: none
+  stage: build
+  artifacts:
+    paths:
+      - build
+    expire_in: 2 days  
+
+# - Template to complete .siconos-ctest
+# test step.
+# Gets artifacts from .siconos-build
+.siconos-test:
+  extends: .siconos-ctest
+  variables:
+    ctest_mode: Test
+    #GIT_STRATEGY: none
+  stage: test
+
+# -- Template to execute a the full pipeline (configure/build/test)
+# Keeps build directory for next stage (install) as artifact.
+.siconos-full:
+  extends: .siconos-ctest
+  variables:
+    ctest_mode: all
+    #GIT_STRATEGY: clone
+  stage: configure
+  artifacts:
+    paths:
+      - build
+    expire_in: 2 days  
+
+
+# Installs siconos and generates a docker image with a full/uptodate install of siconos
+# Uses output (build from artifacts) from a previous job (e.g. debian:build or similar).
+# The docker image is saved in the project registries.
+.siconos-install:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  variables:
+    #GIT_STRATEGY: none
+    #REG_NAME: $CI_REGISTRY_IMAGE
+  stage: install
+  script:
+    - cat $CI_PROJECT_DIR/ci_gitlab/dockerfiles/install_template| sed -e "s|IMAGENAME|$IMAGE_NAME|g" >> build/Dockerfile
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/build/Dockerfile --destination $CI_REGISTRY_IMAGE/$siconos_docker_name:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY_IMAGE/$siconos_docker_name:latest
