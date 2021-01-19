@@ -44,6 +44,9 @@
 
 #include "SimulationGraphs.hpp"
 
+// Test : the following line is allowed only from C++17.
+#include <variant>
+
 using namespace std;
 using namespace RELATION;
 
