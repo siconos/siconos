@@ -1,6 +1,4 @@
 #!bin/bash
-#
-# Check if CI_PROJECT_DIR is set AND not empty
 
 # -- Fclib download --
 cd $HOME
@@ -15,3 +13,4 @@ cd $HOME/build
 cmake $HOME/fclib -DFCLIB_HEADER_ONLY=OFF
 make
 make install
+rm -rf $HOME/fclib $HOME/build

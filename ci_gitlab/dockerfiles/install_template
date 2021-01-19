@@ -1,0 +1,8 @@
+FROM IMAGENAME
+WORKDIR /home
+RUN cd /builds/nonsmooth/siconos/build; make install #; cp -R /builds/nonsmooth/siconos/install-siconos /root/install-siconos
+ENV SICONOS_INSTALL_DIR=/home/install-siconos PATH=/home/install-siconos/bin/:$PATH
+# ENV PYTHONPATH=`siconos --pythonpath`
+# RUN apt autoclean -y && apt autoremove -y
+
+

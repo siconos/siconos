@@ -171,8 +171,7 @@ def env(definitions=None, output_mode=None):
 
         items += definitions
 
-        sys.stdout.write('{0}\n'.format(' \\\n  '.join(items)))
-
+        sys.stdout.write('{0}\n'.format(' \\\n  '.join(items)))    
 
 def install(installer=None, command=None, pkg=None, pkgs=None,
             run_command=None,
