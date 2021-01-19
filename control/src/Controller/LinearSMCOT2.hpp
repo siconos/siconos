@@ -18,7 +18,7 @@
 
 /*! \file LinearSMCOT2.hpp
   \brief General interface to define a sliding mode controller with
-  disturbance compensation. Reference: Su, W.C.; Drakunov, S.; Özgüner, Ü.
+  disturbance compensation. Reference: Su, W.C.; Drakunov, S.; Ozguner, U.
   An O(T2) boundary layer in sliding mode for sampled-data systems
   */
 

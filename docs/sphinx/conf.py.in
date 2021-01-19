@@ -132,6 +132,11 @@ breathe_default_members = ('members', 'public-members')
 # https://github.com/CityOfZion/neon-js/issues/111)
 # scv_root_ref = 'feature_branch'
 
+
+
+# Bibtex config.
+# https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html
+bibtex_bibfiles = ['siconos.bib']
 # Tell sphinx what the primary language being documented is.
 primary_domain = 'cpp'
 
@@ -470,7 +475,7 @@ def source_read(app, docname, source):
 
 def setup(app):
     app.connect('source-read', source_read)
-    app.add_stylesheet("biblio.css")
+    app.add_css_file("biblio.css")
 
 #if with_python_wrapper:
 #    autodoc_member_order = 'bysource'

@@ -190,7 +190,8 @@ if(${CTEST_MODE} STREQUAL "Test" OR ${CTEST_MODE} STREQUAL "all")
     RETURN_VALUE _RESULT
     # QUIET
     )
-  
+  post_ctest(PHASE Test)
+
   if(WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
     #find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
     # set(CTEST_COVERAGE_COMMAND gcov)
@@ -204,7 +205,7 @@ if(${CTEST_MODE} STREQUAL "Test" OR ${CTEST_MODE} STREQUAL "all")
   if(WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
     ctest_memcheck()
   endif()
-
+  
   if(CDASH_SUBMIT)
     ctest_submit(
       RETURN_VALUE RETURN_STATUS

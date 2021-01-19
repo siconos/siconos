@@ -4,4 +4,5 @@ RUN apt update  && apt upgrade -y && apt install -y -qq \
 WORKDIR /home
 COPY ci_gitlab/dockerfiles/requirements4doc.txt /home
 RUN pip3 install -U -r /home/requirements4doc.txt
-ENV LANG C.UTF-8 # Required, else doxy2swig fails!
+ENV LANG C.UTF-8
+# Required, else doxy2swig fails!
