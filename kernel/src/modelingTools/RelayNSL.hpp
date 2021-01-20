@@ -59,7 +59,7 @@
  
  .. math::
      :nowrap:
-     
+
      \mbox{sgn} (y) =
      \left\{ \begin{array}{lcl}
      1 &\quad& y >0 \\
