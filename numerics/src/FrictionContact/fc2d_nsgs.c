@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include <float.h>                   // for DBL_EPSILON
 #include <math.h>                    // for fabs, sqrt, INFINITY
@@ -54,10 +54,26 @@ static void shuffle(int size, int * randnum) //size is the given range
   /*  printf("Array after shuffling is : %d\n",randnum[i]); */
   /* } */
 }
-
+static
+unsigned int* allocfreezingContacts(FrictionContactProblem *problem,
+                                    SolverOptions *options)
+{
+  unsigned int *fcontacts = 0;
+  unsigned int nc = problem->numberOfContacts;
+  if(options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0)
+  {
+    fcontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
+    for(unsigned int i = 0; i < nc ; ++i)
+    {
+      fcontacts[i] = 0;
+    }
+  }
+  return fcontacts;
+}
 
 void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
+
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;
   double *q = problem->q;
@@ -77,12 +93,14 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
   int pivot;
   double factor1;
   int * randomContactList;
-
+  unsigned int *freeze_contacts = NULL;
+  freeze_contacts = allocfreezingContacts(problem, options);
   int maxit = options->iparam[SICONOS_IPARAM_MAX_ITER];
-  double errmax = options->dparam[SICONOS_DPARAM_TOL];
+  double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   options->iparam[SICONOS_IPARAM_ITER_DONE]  = 0;
   options->dparam[SICONOS_DPARAM_RESIDU]  = 0.0;
 
+  int * iparam = options->iparam;
   iter         = 0;
 
   y       = (double*) malloc(n  * sizeof(double));
@@ -104,7 +122,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
   normr    =   1.;
 
-  while((iter < maxit) && (normr > errmax))
+  while((iter < maxit) && (normr > tolerance))
   {
     iter = iter + 1 ;
 
@@ -113,8 +131,9 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
       shuffle(nc, randomContactList);
     }
 
-
-
+    double light_error_sum = 0.0;
+    double light_error_2 = 0.0;
+    double norm_r=  cblas_dnrm2(nc*2, reaction, 1);
     /*         Loop over contacts                */
 
 
@@ -124,7 +143,15 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
       i = randomContactList[kk];
-
+      if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
+      {
+        if (freeze_contacts[i] >0)
+        {
+          /* we skip freeze contacts */
+          freeze_contacts[i] -=  1;
+          continue;
+        }
+      }
       avn = 0.;
       avt = 0.;
       apn = 0.;
@@ -150,8 +177,9 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
 
-
-
+      double oldreaction[2];
+      oldreaction[0]=reaction[2 * i];
+      oldreaction[1]=reaction[2 * i+1];
 
 
       if(-zn >= 0.0)
@@ -173,7 +201,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
         det    = vec[2 * i + 2 * i * n] * vec[(2 * i + 1) + (2 * i + 1) * n]
-                 - vec[(2 * i + 1) + (2 * i) * n] * vec[(2 * i) + (2 * i + 1) * n];
+          - vec[(2 * i + 1) + (2 * i) * n] * vec[(2 * i) + (2 * i + 1) * n];
 
         if(fabs(det) < 100* DBL_EPSILON)
         {
@@ -301,8 +329,25 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
             /* printf("Slip- status\n");*/
           }
         }
+        light_error_2= (oldreaction[0] - reaction[2*i])*(oldreaction[0] - reaction[2*i])
+          + (oldreaction[1] - reaction[2*i+1])*(oldreaction[1] - reaction[2*i+1]);
+        light_error_sum += light_error_2;
+        double squared_norm=          reaction[2*i]*reaction[2*i]+ reaction[2*i+1]* reaction[2*i+1];
+        if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
+        {
+          if ((light_error_2*squared_norm <= tolerance*tolerance/(nc*nc*10)
+               || squared_norm <=  (norm_r* norm_r/(nc*nc*1000)))
+              && iter >=10)
+          {
+            /* we  freeze the contact for n iterations*/
+            //printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e\n", light_error_2*squared_norm(localreaction), tolerance*tolerance/(nc*nc*10));
+            //printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc))/1000. ==> %e <= %e\n",  squared_norm(localreaction) ,  (*norm_r* *norm_r/(nc*nc))/1000.);
+            //printf("Contact % i is freezed for %i steps\n", contact,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
+            numerics_printf_verbose(2,"Contact % i is freezed for %i steps", i,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
+            freeze_contacts[i] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] ;
+          }
+        }
       }
-
     }
 
 
@@ -335,7 +380,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
     res    = normr;
     if(verbose > 0)
       printf("--------------- FC2D - NSGS - Iteration %i "
-             "Residual = %14.7e < %7.3e\n", iter, res, errmax);
+             "Residual = %14.7e < %7.3e\n", iter, res, tolerance);
   }
 
 
@@ -344,12 +389,12 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
 
-  if(normr > errmax)
+  if(normr > tolerance)
   {
 
     if(verbose > 0)
       printf("--------------- FC2D - NSGS - No convergence after %i iterations"
-             " residual = %14.7e < %7.3e\n", iter, res, errmax);
+             " residual = %14.7e < %7.3e\n", iter, res, tolerance);
 
     *info = 1;
   }
@@ -358,7 +403,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *reaction, double *veloci
 
     if(verbose > 0)
       printf("--------------- FC2D - NSGS - Convergence after %i iterations"
-             " residual = %14.7e < %7.3e\n", iter, res, errmax);
+             " residual = %14.7e < %7.3e\n", iter, res, tolerance);
 
     *info = 0;
   }
@@ -376,5 +421,6 @@ void fc2d_nsgs_set_default(SolverOptions *options)
 {
   options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] = 0;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] =0;
   //  useful only for the sparse nsgs case.
 }
