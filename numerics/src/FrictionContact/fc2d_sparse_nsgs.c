@@ -36,20 +36,38 @@
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
+
 static
-void accumulateLightErrorSum(double *light_error_sum, double localreaction[3],
-                             double *oldreaction)
+double light_error_squared( double localreaction[2],
+                            double *oldreaction)
 {
-  *light_error_sum += ((oldreaction[0] - localreaction[0])*(oldreaction[0] - localreaction[0]) +
-                       (oldreaction[1] - localreaction[1])*(oldreaction[1] - localreaction[1])) ;
+  return (pow(oldreaction[0] - localreaction[0], 2) +
+          pow(oldreaction[1] - localreaction[1], 2)  );
 }
+
 static
-double calculateLightError(double light_error_sum, unsigned int nc, double *reaction)
+double squared_norm(double localreaction[2])
+{
+  return (pow(localreaction[0], 2) +
+          pow(localreaction[1], 2) );
+}
+
+
+
+/* static */
+/* void accumulateLightErrorSum(double *light_error_sum, double localreaction[3], */
+/*                              double *oldreaction) */
+/* { */
+/*   *light_error_sum += ((oldreaction[0] - localreaction[0])*(oldreaction[0] - localreaction[0]) + */
+/*                        (oldreaction[1] - localreaction[1])*(oldreaction[1] - localreaction[1])) ; */
+/* } */
+static
+double calculateLightError(double light_error_sum, unsigned int nc, double *reaction, double * norm_r)
 {
   double error = sqrt(light_error_sum);
-  double norm_r = cblas_dnrm2(nc*2, reaction, 1);
-  if(fabs(norm_r) > DBL_EPSILON)
-    error /= norm_r;
+  *norm_r = cblas_dnrm2(nc*2, reaction, 1);
+  if(fabs(*norm_r) > DBL_EPSILON)
+    error /= *norm_r;
   return error;
 }
 static
@@ -208,7 +226,22 @@ int fc2dLocalSolve(double *W, double *q, double mu, double *P, double *U)
 
   return(0);
 }
-
+static
+unsigned int* allocfreezingContacts(FrictionContactProblem *problem,
+                                    SolverOptions *options)
+{
+  unsigned int *fcontacts = 0;
+  unsigned int nc = problem->numberOfContacts;
+  if(options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0)
+  {
+    fcontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
+    for(unsigned int i = 0; i < nc ; ++i)
+    {
+      fcontacts[i] = 0;
+    }
+  }
+  return fcontacts;
+}
 
 void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
                       int *info, SolverOptions* options)
@@ -258,6 +291,9 @@ void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
   local_problem->M->matrix2 = NULL;
   local_problem->M->internalData = NULL;
 
+  unsigned int *freeze_contacts = NULL;
+ 
+  
   /* Memory allocation for q. Size of q = blsizemax, size of the
      largest square-block in blmat */
 
@@ -281,76 +317,178 @@ void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
 
   int pos = 0;
 
+  double  norm_r[1];
+  *norm_r=  cblas_dnrm2(nc*2, z, 1);
+  
   /* Output from local solver */
   int infoLocal = -1;
-
-  while((iter < itermax) && hasNotConverged)
+  if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
   {
-    ++iter;
-
-    double light_error_sum = 0.0;
-    /* Loop over the rows of blocks in blmat */
-    for(pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
+    freeze_contacts = allocfreezingContacts(problem, options);
+      
+    while((iter < itermax) && hasNotConverged)
     {
-      /* Local problem formalization */
-      lcp_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+      ++iter;
 
+      double light_error_sum = 0.0;
+      double light_error_2 = 0.0;
+      //double norm_r=  cblas_dnrm2(nc*2, z, 1);
 
-      localreaction[0] = z[pos];
-      localreaction[1] = z[pos+1];
-
-
-      /* Solve local problem */
-      infoLocal = fc2dLocalSolve(local_problem->M->matrix0,
-                                 local_problem->q,
-                                 problem->mu[rowNumber],
-                                 localreaction, &w[pos]);
-
-
-      if(infoLocal)
+      /* Loop over the rows of blocks in blmat */
+      for(pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
       {
-        free(local_problem->q);
-        free(local_problem->M);
-        free(local_problem);
-        /* Number of GS iterations */
-        options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-        fprintf(stderr, "fc2d_nsgs error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
 
-        *info = infoLocal;
-        return;
+        if (freeze_contacts[pos/2] >0)
+        {
+          /* we skip freeze contacts */
+          freeze_contacts[pos] -=  1;
+          continue;
+        }
+        
+        /* Local problem formalization */
+        lcp_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+
+
+        localreaction[0] = z[pos];
+        localreaction[1] = z[pos+1];
+
+
+        /* Solve local problem */
+        infoLocal = fc2dLocalSolve(local_problem->M->matrix0,
+                                   local_problem->q,
+                                   problem->mu[rowNumber],
+                                   localreaction, &w[pos]);
+
+
+        if(infoLocal)
+        {
+          free(local_problem->q);
+          free(local_problem->M);
+          free(local_problem);
+          /* Number of GS iterations */
+          options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+          fprintf(stderr, "fc2d_nsgs error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
+
+          *info = infoLocal;
+          return;
+        }
+
+        z[pos]   = localreaction[0];
+        z[pos+1] = localreaction[1];
+        
+        light_error_2= light_error_squared(localreaction, &z[pos]);
+        light_error_sum += light_error_2;
+        if ((light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10)
+             || squared_norm(localreaction) <=  (* norm_r* *norm_r/(nc*nc*1000)))
+            && iter >=10)
+        {
+          /* we  freeze the contact for n iterations*/
+          //printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e\n", light_error_2*squared_norm(localreaction), tolerance*tolerance/(nc*nc*10));
+          //printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc))/1000. ==> %e <= %e\n",  squared_norm(localreaction) ,  (*norm_r* *norm_r/(nc*nc))/1000.);
+          //printf("Contact % i is freezed for %i steps\n", contact,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
+          freeze_contacts[pos/2] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] ;
+        }
+
+
+        
+
       }
-      if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
-          iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
-        )
-        accumulateLightErrorSum(&light_error_sum, localreaction, &z[pos]);
+      
+      
+      /* error evaluation */
+      if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
+      {
+        error = calculateLightError(light_error_sum, nc, z, norm_r);
+        hasNotConverged = determine_convergence(error, tolerance, iter, options);
+      }
+      else if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+      {
+        error = calculateLightError(light_error_sum, nc, z, norm_r);
+        hasNotConverged = determine_convergence_with_full_final(problem,  options,
+                                                                z, w,
+                                                                &tolerance, norm_q, error,
+                                                                iter);
 
-      z[pos]   = localreaction[0];
-      z[pos+1] = localreaction[1];
+      }
 
+      /* if (erriter >= erritermax) */
+      /* { */
+      /*   erriter = 0; */
+      /*   fc2d_compute_error(problem, z, w, tolerance, &error); */
+      /*   hasNotConverged = error > tolerance  ; */
+      /* } */
     }
-    /* error evaluation */
-    if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
-    {
-      error = calculateLightError(light_error_sum, nc, z);
-      hasNotConverged = determine_convergence(error, tolerance, iter, options);
-    }
-    else if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
-    {
-      error = calculateLightError(light_error_sum, nc, z);
-      hasNotConverged = determine_convergence_with_full_final(problem,  options,
-                        z, w,
-                        &tolerance, norm_q, error,
-                        iter);
-
-    }
-
-    /* if (erriter >= erritermax) */
-    /* { */
-    /*   erriter = 0; */
-    /*   fc2d_compute_error(problem, z, w, tolerance, &error); */
-    /*   hasNotConverged = error > tolerance  ; */
-    /* } */
   }
+  else
+  {
+    while((iter < itermax) && hasNotConverged)
+    {
+      ++iter;
+
+      double light_error_sum = 0.0;
+      /* Loop over the rows of blocks in blmat */
+      for(pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
+      {
+        /* Local problem formalization */
+        lcp_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+
+
+        localreaction[0] = z[pos];
+        localreaction[1] = z[pos+1];
+
+
+        /* Solve local problem */
+        infoLocal = fc2dLocalSolve(local_problem->M->matrix0,
+                                   local_problem->q,
+                                   problem->mu[rowNumber],
+                                   localreaction, &w[pos]);
+        if(infoLocal)
+        {
+          free(local_problem->q);
+          free(local_problem->M);
+          free(local_problem);
+          /* Number of GS iterations */
+          options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+          fprintf(stderr, "fc2d_nsgs error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
+
+          *info = infoLocal;
+          return;
+        }
+
+        light_error_sum += light_error_squared(localreaction, &z[pos]);
+ 
+        z[pos]   = localreaction[0];
+        z[pos+1] = localreaction[1];
+
+      }
+      /* error evaluation */
+      if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION]
+         == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
+      {
+        error = calculateLightError(light_error_sum, nc, z, norm_r);
+        hasNotConverged = determine_convergence(error, tolerance, iter, options);
+      }
+      else if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
+              SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+      {
+        error = calculateLightError(light_error_sum, nc, z, norm_r);
+        hasNotConverged = determine_convergence_with_full_final(problem,  options,
+                                                                z, w,
+                                                                &tolerance, norm_q, error,
+                                                                iter);
+
+      }
+
+      /* if (erriter >= erritermax) */
+      /* { */
+      /*   erriter = 0; */
+      /*   fc2d_compute_error(problem, z, w, tolerance, &error); */
+      /*   hasNotConverged = error > tolerance  ; */
+      /* } */
+    }
+  }
+
+  
   /* Full criterium */
   if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
   {

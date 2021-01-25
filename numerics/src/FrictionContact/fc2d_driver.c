@@ -55,7 +55,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
   fclose(foutput);
 #endif
 
-
+  verbose=3;
 
 
   if(options == NULL)

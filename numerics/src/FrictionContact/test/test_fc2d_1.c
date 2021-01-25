@@ -35,17 +35,17 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   int current = 0;
   // tol and maxiter used in tests are the same for all solvers.
 
-  for(int s=0; s<n_solvers; ++s)
-  {
-    for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(solvers[s]);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-      current++;
-    }
-  }
+  /* for(int s=0; s<n_solvers; ++s) */
+  /* { */
+  /*   for(int d =0; d <n_data; d++) */
+  /*   { */
+  /*     collection[current].filename = data_collection[d]; */
+  /*     collection[current].options = solver_options_create(solvers[s]); */
+  /*     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5; */
+  /*     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000; */
+  /*     current++; */
+  /*   } */
+  /* } */
 
   for(int d =0; d <n_data; d++)
   {
