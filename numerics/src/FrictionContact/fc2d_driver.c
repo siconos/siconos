@@ -54,10 +54,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
   frictionContact_printInFile(problem, foutput);
   fclose(foutput);
 #endif
-
-
-
-
+  
   if(options == NULL)
     numerics_error("fc2d_driver", "null input for solver options");
 
@@ -89,7 +86,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
     if(options->solverId == SICONOS_FRICTION_2D_NSGS)
     {
       numerics_printf(" ======================= Call Sparse NSGS solver for Friction-Contact 2D problem ======================");
-      fc2d_sparse_nsgs(problem, reaction, velocity, &info, options);
+      fc2d_nsgs_sbm(problem, reaction, velocity, &info, options);
     }
     else
     {
@@ -122,7 +119,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
     {
       if(verbose)
         printf(" ========================== Call NLGS solver for Friction-Contact 2D problem ==========================\n");
-      fc2d_nsgs(problem, reaction, velocity, &info, options);
+      fc2d_nsgs_dense(problem, reaction, velocity, &info, options);
       break;
     }
     /****** CPG algorithm ******/

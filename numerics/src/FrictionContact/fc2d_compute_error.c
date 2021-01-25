@@ -33,11 +33,7 @@
 
 void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, double mu, double* restrict error, double * worktmp)
 {
-
-  //double normUT;
-  //double worktmp[3];
   /* Compute the modified local velocity */
-  /* worktmp[0] = r[0] - u[0] - mu *  hypot(u[1], u[2]); */
   worktmp[0] = r[0] -  u[0] - mu  * fabs(u[1]);
   worktmp[1] = r[1] -  u[1] ;
   /* projection */
@@ -49,10 +45,10 @@ void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, 
   }
   else if(normT > mu*worktmp[0])
   {
-    /* solve([sqrt((r1-mu*ra)^2+(r0-ra)^2)=abs(mu*r0-r1)/sqrt(mu*mu+1)],[ra]) */
     worktmp[0] = (mu * normT + worktmp[0]) / (mu * mu + 1.0);
     worktmp[1] = mu * worktmp[0] * SGN(worktmp[1]);
   }
+  
   worktmp[0] = r[0] -  worktmp[0];
   worktmp[1] = r[1] -  worktmp[1];
   *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1];
@@ -60,7 +56,7 @@ void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, 
 
 
 
-int fc2d_compute_error(
+static int fc2d_compute_error_old(
   FrictionContactProblem* problem,
   double *z,
   double *w,
@@ -102,7 +98,54 @@ int fc2d_compute_error(
   DEBUG_END("fc2d_compute_error(...)\n");
   if(*error > tolerance)
   {
-    if(verbose > 1) printf(" Numerics - fc2d_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    numerics_printf_verbose(1, "-- FC2D - warning. fc2d_compute_error = %g > %g (= tolerance)", *error, tolerance);
+    return 1;
+  }
+  else
+    return 0;
+}
+
+int fc2d_compute_error(
+  FrictionContactProblem* problem,
+  double *z,
+  double *w,
+  double tolerance,
+  double norm,
+  double * error)
+{
+  DEBUG_BEGIN("fc2d_compute_error(...)\n");
+  /* Checks inputs */
+  assert(z);
+  assert(w);
+  assert(problem);
+  assert(error);
+
+  int nc = problem->numberOfContacts;
+  int n = nc * 2;
+
+  double *mu = problem->mu;
+  double tmp[2];
+
+  cblas_dcopy(n, problem->q, 1, w, 1); // w <-q
+  NM_gemv(1.0, problem->M, z, 1.0, w); // w = W z +q is assumed to be compute at machine accuracy.
+
+  *error = 0.;
+  for(int ic = 0, iN = 0 ; ic < nc ; ++ic, ++iN, ++iN)
+    fc2d_unitary_compute_and_add_error( &z[iN], &w[iN], mu[ic], error, tmp);
+  DEBUG_PRINTF("error=%e\n", *error );
+
+  *error = sqrt(*error);
+
+  double norm_r = cblas_dnrm2(n, z, 1);
+  double norm_w = cblas_dnrm2(n, w, 1);
+  double relative_scaling = fmax(norm_r, fmax(norm_w,norm));
+  if(fabs(relative_scaling) > DBL_EPSILON)
+    *error /= relative_scaling;
+
+  DEBUG_END("fc2d_compute_error(...)\n");
+  if(*error > tolerance)
+  {
+    numerics_printf_verbose(1, "-- FC2D - warning. fc2d_compute_error = %g > %g (= tolerance)", *error, tolerance);
     return 1;
   }
   else
