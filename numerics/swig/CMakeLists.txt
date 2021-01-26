@@ -37,7 +37,7 @@ endif()
 if(NOT NO_RUNTIME_BUILD_DEP)
   # -- Scipy --
   # It is required for sparse matrices in numerics
-  find_python_module(scipy  VERSION 0.15) # for sparse
+  find_python_module(scipy  REQUIRED)# for sparse
 
   # -- mpi4py -- 
   if(WITH_MPI)

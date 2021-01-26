@@ -678,7 +678,7 @@ class MechanicsHdf5(object):
 
         if name not in self._plugins:
             plugin_src = self._plugins.create_dataset(name, (1,),
-                                                      dtype=h5py.new_vlen(str))
+                                                      dtype=h5py.vlen_dtype(str))
             plugin_src[:] = str_of_file(filename)
             plugin_src.attrs['filename'] = filename
 
@@ -712,7 +712,7 @@ class MechanicsHdf5(object):
         if name not in self._ref:
 
             shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.new_vlen(str))
+                                             dtype=h5py.vlen_dtype(str))
             shape[:] = shape_data
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'vtp'
@@ -793,7 +793,7 @@ class MechanicsHdf5(object):
         """
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.new_vlen(str))
+                                             dtype=h5py.vlen_dtype(str))
             if type(shape_data) == str:
                 # raw str
                 shape[:] = shape_data
@@ -831,7 +831,7 @@ class MechanicsHdf5(object):
                 shape_data = str_of_file(tmpf[1])
 
                 shape = self._ref.create_dataset(name, (1,),
-                                                 dtype=h5py.new_vlen(str))
+                                                 dtype=h5py.vlen_dtype(str))
                 shape[:] = shape_data
                 shape.attrs['id'] = self._number_of_shapes
                 shape.attrs['type'] = 'step'
@@ -843,7 +843,7 @@ class MechanicsHdf5(object):
         """
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.new_vlen(str))
+                                             dtype=h5py.vlen_dtype(str))
             shape[:] = str_of_file(filename)
             shape.attrs['id'] = self._number_of_shapes
             try:
@@ -862,7 +862,7 @@ class MechanicsHdf5(object):
         """
         if name not in self.permanent_interactions():
             pinter = self.permanent_interactions().create_dataset(
-                name, (1,), dtype=h5py.new_vlen(str))
+                name, (1,), dtype=h5py.vlen_dtype(str))
             pinter.attrs['id'] = self._number_of_permanent_interactions
             pinter.attrs['type'] = 'permanent_interaction'
             pinter.attrs['body1_name'] = body1_name
@@ -937,6 +937,7 @@ class MechanicsHdf5(object):
                    use_volume_centroid_as_initial_translation=False,
                    mass=None, center_of_mass=[0, 0, 0], inertia=None,
                    time_of_birth=-1, time_of_death=-1,
+                   fext=None,
                    allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
@@ -1077,6 +1078,10 @@ class MechanicsHdf5(object):
 
             if inertia is not None:
                 obj.attrs['inertia'] = inertia
+
+            if fext is not None:
+                obj.attrs['fext'] = fext
+
             if allow_self_collide is not None:
                 obj.attrs['allow_self_collide'] = allow_self_collide
 

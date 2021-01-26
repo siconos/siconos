@@ -844,8 +844,8 @@ class IOReader(VTKPythonAlgorithmBase):
 
         id_t = max(0, numpy.searchsorted(self._times, t, side='right') - 1)
         if id_t < len(self._indices)-1:
-            self._id_t_m = range(self._indices[id_t],
-                                 self._indices[id_t+1])
+            self._id_t_m = list(range(self._indices[id_t],
+                                      self._indices[id_t+1]))
         else:
             self._id_t_m = [self._indices[id_t]]
 
@@ -880,8 +880,8 @@ class IOReader(VTKPythonAlgorithmBase):
                 if (id_t_cf > 0 and abs(t-self._cf_times[id_t_cf-1])
                     <= ctimestep):
                     if id_t_cf < ncfindices-1:
-                        self._id_t_m_cf = range(self._cf_indices[id_t_cf-1],
-                                                self._cf_indices[id_t_cf])
+                        self._id_t_m_cf = list(range(self._cf_indices[id_t_cf-1],
+                                                     self._cf_indices[id_t_cf]))
                         self.cf_data = self._icf_data[self._id_t_m_cf, :]
 
                     else:
@@ -1458,7 +1458,7 @@ class VView(object):
 
         if shape_type in ['vtp', 'stl']:
             with io_tmpfile() as tmpf:
-                tmpf[0].write(str(self.io.shapes()[shape_name][:][0]))
+                tmpf[0].write((self.io.shapes()[shape_name][:][0]).decode('utf-8'))
                 tmpf[0].flush()
                 reader = self.vtk_reader[shape_type]()
                 reader.SetFileName(tmpf[1])

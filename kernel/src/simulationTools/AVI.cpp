@@ -130,6 +130,20 @@ void AVI::initialize(SP::Simulation sim)
   }
 
 }
+bool AVI::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  float type_number= (float) (Type::value(nslaw));
+  _nslawtype.insert(type_number);
+
+  if (not (Type::value(nslaw) == Type::NormalConeNSL))
+  {
+    THROW_EXCEPTION("\nAVI::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with AVVI one step nonsmooth problem. \n \
+                      Compatible NonSmoothLaw are: NormalConeNSL\n");
+    return false;
+  }
+  return true;
+}
 
 
 int AVI::compute(double time)

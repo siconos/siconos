@@ -62,6 +62,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int
       free(((RelayProblem *)(pElem->problem))->M);
       break;
     }
+    case SICONOS_NUMERICS_PROBLEM_FC2D:
     case SICONOS_NUMERICS_PROBLEM_FC3D:
     {
       free(((FrictionContactProblem*)(pElem->problem))->M);
@@ -166,6 +167,21 @@ void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
     newProblem->q = pFC3D->q;
     break;
   }
+  case(SICONOS_NUMERICS_PROBLEM_FC2D):
+  {
+    newProblem->problem = (void *) malloc(sizeof(FrictionContactProblem));
+    FrictionContactProblem* pFC2D = (FrictionContactProblem*) newProblem->problem;
+    pFC2D->mu = (double*) malloc(sizeof(double));
+    pFC2D->M = NM_new();
+    pFC2D->M->storageType = 0; /*Local prb is dense*/
+    pFC2D->M->size0 = size;
+    pFC2D->M->size1 = size;
+    pFC2D->numberOfContacts = 1;
+    pFC2D->q = (double*) malloc(size * sizeof(double));
+    pFC2D->dimension = 3;
+    newProblem->q = pFC2D->q;
+    break;
+  }
   default:
     printf("GenericMechanicalProblem.h gmp_add : problemType unknown: %d . \n", problemType);
     exit(EXIT_FAILURE);
@@ -205,7 +221,7 @@ void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  pGMP, FILE*
   for(int ii = 0; ii < pGMP->size; ii++)
     fprintf(file, "%e\n", pGMP->q[ii]);
   fprintf(file, "\n");
-  /*Print lthe type and options (mu)*/
+  /*Print the type and options (mu)*/
   while(curProblem)
   {
     fprintf(file, "%d\n", curProblem->type);

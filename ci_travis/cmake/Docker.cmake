@@ -136,6 +136,9 @@ macro(add_docker_targets)
   message(STATUS "Docker make test flags : ${DOCKER_MAKE_TEST_FLAGS}")
   message(STATUS "Docker hostname : ${DOCKER_HOSTNAME}")
 
+  execute_process(COMMAND cat Docker/Context/${DOCKER_REPOSITORY}/${DOCKER_IMAGE_AS_DIR}
+    OUTPUT_VARIABLE dockfile)
+  message("dockerfile ? ${dockfile}")
 
   # ================== Create targets ==================
   set(ENV{CI_PROJECT_DIR} ${CMAKE_SOURCE_DIR}/..)
@@ -193,10 +196,10 @@ macro(add_docker_targets)
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-cmd
     COMMENT "Docker cmd : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --env SOURCE_DIR=${DOCKER_PROJECT_SOURCE_DIR} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} )
+    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --env SOURCE_DIR=${DOCKER_PROJECT_SOURCE_DIR} -e TRAVIS -e TRAVIS_BRANCH -e TRAVIS_COMMIT -e TRAVIS_JOB_WEB_URL -e TRAVIS_CPU_ARCH --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} )
 
   set(DOCKER_COMMAND_FULL
-    ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR})
+    ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} -e TRAVIS -e TRAVIS_BRANCH -e TRAVIS_COMMIT -e TRAVIS_JOB_WEB_URL -e TRAVIS_CPU_ARCH --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR})
 
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-cmake
@@ -239,18 +242,15 @@ macro(add_docker_targets)
     COMMENT "Docker make clean : ${DOCKER_IMAGE}"
     COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_CLEAN_FLAGS} clean)
 
-  include(${DOCKER_PROJECT_SOURCE_DIR}/cmake/SiconosVersion.cmake)
-  set(CTEST_BUILD_NAME "Siconos (${SICONOS_VERSION}-devel, branch/commit=$ENV{TRAVIS_BRANCH}/$ENV{TRAVIS_COMMIT})")
-
   # --- ctest targets ---
   set(CTEST_COMMAND ctest
     -DCTEST_SOURCE_DIRECTORY=${DOCKER_PROJECT_SOURCE_DIR} # default = env(CI_PROJECT_DIR)
     -DCTEST_BINARY_DIRECTORY=${DOCKER_WORKDIR}            # default = .
     -DCTEST_BUILD_CONFIGURATION=${BUILD_CONFIGURATION}    # default = release
     -S ${DOCKER_CTEST_DRIVER}                             # ctest driver file
-    -DCTEST_SITE=${DOCKER_HOSTNAME}                       # site name for cdash
+    -DCTEST_MODE=all
     -Dmodel=${DOCKER_CTEST_MODE}                          # ctest model (Exp, Continuous ...)
-    -DCTEST_BUILD_NAME="${CTEST_BUILD_NAME}"
+    -V
     )
 
   # Run ctest, no submission

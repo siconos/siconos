@@ -45,7 +45,7 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
   double *wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
 
   // Call the lcp_solver
-
+  int solver_id_save= options->solverId;
   options->solverId = SICONOS_LCP_LEMKE;
   *info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
   if(options->filterOn > 0)
@@ -106,7 +106,7 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
     *info = 0;
   }
 
-
+  options->solverId = solver_id_save;
   free(zlcp);
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);

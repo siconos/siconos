@@ -696,9 +696,20 @@ void NM_clear(NumericsMatrix* m)
     NM_clear(m->destructible);
     m->destructible = m;
   }
+
 }
 
-void NM_clear_not_dense(NumericsMatrix* m)
+NumericsMatrix*  NM_free(NumericsMatrix* m)
+{
+  assert(m && "NM_free, m == NULL");
+
+  NM_clear(m);
+  free(m);
+  return NULL;
+
+}
+
+void  NM_clear_not_dense(NumericsMatrix* m)
 {
   assert(m && "NM_clear, m == NULL");
 
@@ -707,7 +718,26 @@ void NM_clear_not_dense(NumericsMatrix* m)
   NM_clearSparse(m);
 
   NM_internalData_free(m);
+  /* restore the destructible pointer */
+  if (!NM_destructible(m))
+  {
+    NM_clear(m->destructible);
+    m->destructible = m;
+  }
 }
+
+NumericsMatrix*  NM_free_not_dense(NumericsMatrix* m)
+{
+  assert(m && "NM_free_bot_dense, m == NULL");
+  NM_clear_not_dense(m);
+  free(m);
+  return NULL;
+}
+
+
+
+
+
 
 
 void NM_clear_other_storages(NumericsMatrix* M, int storageType)

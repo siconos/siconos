@@ -89,16 +89,6 @@ if(WITH_DOCUMENTATION)
   find_python_module(breathe REQUIRED)
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
-  find_sphinx_module(sphinxcontrib youtube)
-
-  if(NOT ${youtube_FOUND})
-    # This python package can not be found using standard ways such as conda or pip,
-    # so we force download and install.
-    message("Can not found sphinxcontrib-youtube. It will be downloaded and installed ...")
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} -m pip install git+https://github.com/sphinx-contrib/youtube.git)
-    find_sphinx_module(sphinxcontrib youtube REQUIRED)
-  endif()
   # Sphinx theme for documentation
   find_python_module(sphinx_bootstrap_theme REQUIRED)
 
@@ -138,6 +128,7 @@ if(WITH_DOCUMENTATION)
   set(SPHINX_EXECUTABLE sphinx-build)
   set(SPHINX_LOG_FILE ${CMAKE_BINARY_DIR}/docs/sphinx_warnings.log)    
   set(SPHINX_PARAMETERS
+    -N # no color, it is terrible in log files --xhub
     -w ${SPHINX_LOG_FILE}
     -b html # html output
     -d build/doctrees # path to doctree files

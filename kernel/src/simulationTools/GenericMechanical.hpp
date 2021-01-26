@@ -103,6 +103,10 @@ public:
    */
   void updateInteractionBlocks();
 
+  /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+
+  
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();
