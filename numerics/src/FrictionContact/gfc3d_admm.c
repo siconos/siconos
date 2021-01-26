@@ -33,6 +33,8 @@
 #include "projectionOnCone.h"              // for projectionOnDualCone
 #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
 #include "NumericsSparseMatrix.h"                // for NSM_TRIPLET ...
+#include "gfc3d_balancing.h"
+
 const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR = "GFC3D ADMM";
 
 typedef struct
@@ -325,8 +327,23 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     return;
 
   double norm_q = cblas_dnrm2(n, q, 1);
-
+  problem->norm_q=norm_q;
+  
   double norm_b = cblas_dnrm2(m, b, 1);
+  problem->norm_b=norm_b;
+
+  GlobalFrictionContactProblem* original_problem=NULL;
+  if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
+  {
+    GlobalFrictionContactProblem_balancing_data  *data = (GlobalFrictionContactProblem_balancing_data * ) problem->env;
+    original_problem = data->original_problem;
+      
+      
+    assert(original_problem);
+    original_problem->norm_b = cblas_dnrm2(m, original_problem->b, 1);
+    original_problem->norm_q = cblas_dnrm2(n, original_problem->q, 1);
+  }
+  
 
   if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] ==
       SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_YES)
@@ -842,8 +859,33 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
           reaction[pos] = reaction[pos] * cone_scaling / problem->mu[contact];
         }
       }
-      (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
-                      norm_q, norm_b,  &error);
+
+      /* double error_original=0.0; */
+      if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
+      {
+        /* (*computeError)(problem,  reaction, velocity, v,  tolerance, options, */
+        /*                 norm_q, norm_b,  &error); */
+        /* printf("############ error  = %g\n", error); */
+        
+        gfc3d_balance_back_to_original_variables(problem,
+                                                 options,
+                                                 reaction, velocity, v);
+        (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
+                        original_problem->norm_b, original_problem->norm_b,  &error);
+        /* error_original = error; */
+        /* printf("############ error original = %g\n", error_original); */
+      }
+      else
+      {
+        (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
+                        norm_q, norm_b,  &error);
+        printf("############ error  = %g\n", error);
+      }
+      
+      
+
+
+      
       numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
 
 
@@ -864,6 +906,14 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
         {
           numerics_printf_verbose(1,"---- GFC3D - ADMM  - We keep the tolerance on the residual to %14.7e", tolerance);
         }
+
+        if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
+        {
+          gfc3d_balance_go_to_balanced_variables(problem,
+                                                 options,
+                                                 reaction, velocity, v);
+        }
+        
         if(rescaling_cone)
         {
           for(size_t contact = 0 ; contact < nc ; ++contact)
@@ -892,9 +942,19 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   if(iter==itermax)
   {
     cblas_dscal(m, rho, reaction, 1);
-
-    (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
-                    norm_q, norm_b, &error);
+    if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
+    {
+      gfc3d_balance_back_to_original_variables(problem,
+                                               options,
+                                               reaction, velocity, v);
+      (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
+                      original_problem->norm_b, original_problem->norm_b,  &error);
+    }
+    else
+    {
+      (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
+                      norm_q, norm_b,  &error);
+    }
     if(error < dparam[SICONOS_DPARAM_TOL])
     {
       *info = 0;

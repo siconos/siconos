@@ -420,3 +420,21 @@ int globalFrictionContact_computeGlobalVelocity(
 
   return info;
 }
+GlobalFrictionContactProblem_balancing_data  * globalFrictionContactProblem_balancing_data_new()
+{
+  GlobalFrictionContactProblem_balancing_data  * data = malloc(sizeof(GlobalFrictionContactProblem_balancing_data));
+  data->B_for_M =NULL;
+  data->B_for_H =NULL;
+  return data;
+}
+
+GlobalFrictionContactProblem_balancing_data  * globalFrictionContactProblem_balancing_data_free
+(GlobalFrictionContactProblem_balancing_data * data)
+{
+  if (data->B_for_M)
+    data->B_for_M = NM_BalancingMatrices_free(data->B_for_M);
+  if (data->B_for_H)
+    data->B_for_H = NM_BalancingMatrices_free(data->B_for_H);
+  free(data);
+  return NULL;
+}

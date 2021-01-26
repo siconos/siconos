@@ -4725,6 +4725,17 @@ BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A)
   return B;
 }
 
+BalancingMatrices * NM_BalancingMatrices_free(BalancingMatrices * B)
+{
+  if (B->D1)
+    NM_free(B->D1);
+  if (B->D2)
+    NM_free(B->D2);
+  if (B->A)
+    NM_free(B->A);
+  free(B); 
+  return NULL;
+}
 
 int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B)
 {

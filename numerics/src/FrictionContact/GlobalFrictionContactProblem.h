@@ -53,8 +53,12 @@ struct GlobalFrictionContactProblem
   NumericsMatrix* H;
   /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
+  /** norm-2 of q */
+  double norm_q;
   /** \f${b} \in {{\mathrm{I\!R}}}^{m} \f$ */
   double* b;
+  /** norm-2 of b */
+  double norm_b;
   /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
   double* mu;
@@ -142,7 +146,9 @@ extern "C"
     double * reaction,
     double * globalVelocity);
 
-
+  GlobalFrictionContactProblem_balancing_data  * globalFrictionContactProblem_balancing_data_free
+  ( GlobalFrictionContactProblem_balancing_data * data);
+  GlobalFrictionContactProblem_balancing_data  * globalFrictionContactProblem_balancing_data_new();
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

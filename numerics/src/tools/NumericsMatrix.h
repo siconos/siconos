@@ -930,6 +930,10 @@ extern "C"
    */
   BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A);
 
+  /* free a Balancing Matrices structure
+   */
+  BalancingMatrices * NM_BalancingMatrices_free(BalancingMatrices* A);
+
 
 #ifdef WITH_OPENSSL
   /* Compute sha1 hash of matrix values. Matrices of differents size and same
