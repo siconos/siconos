@@ -280,7 +280,7 @@ void globalFrictionContact_rescaling(
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
   int m = 3 * nc;
-
+                                           
   /* scaling of M */
   NM_scal(alpha*gamma*gamma, problem->M);
   /* scaling of H */
