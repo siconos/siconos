@@ -2257,10 +2257,22 @@ bool NM_LDLT_factorized(NumericsMatrix* A)
   return NM_internalData(A->destructible)->isLDLTfactorized;
 }
 
-void NM_set_factorized(NumericsMatrix* A, bool flag)
+void NM_set_LU_factorized(NumericsMatrix* A, bool flag)
 {
   NM_internalData(A->destructible)->isLUfactorized = flag;
 }
+
+void NM_set_Cholesky_factorized(NumericsMatrix* A, bool flag)
+{
+  NM_internalData(A->destructible)->isCholeskyfactorized = flag;
+}
+
+void NM_set_LDLT_factorized(NumericsMatrix* A, bool flag)
+{
+  NM_internalData(A->destructible)->isLDLTfactorized = flag;
+}
+
+
 
 void NM_clearDense(NumericsMatrix* A)
 {
@@ -5165,6 +5177,12 @@ void NM_set_values_sha1(NumericsMatrix* A)
   NM_compute_values_sha1(A, NM_values_sha1(A));
   NM_internalData(A)->values_sha1_count += 1;
 }
+
+void NM_clear_values_sha1(NumericsMatrix* A)
+{
+  NM_internalData(A)->values_sha1_count = 0;
+}
+
 
 bool NM_check_values_sha1(NumericsMatrix* A)
 {

@@ -282,7 +282,9 @@ extern "C"
    * \param[in] A the NumericsMatrix,
    * \param[in] flag a boolean.
    */
-  void NM_set_factorized(NumericsMatrix* A, bool flag);
+  void NM_set_LU_factorized(NumericsMatrix* A, bool flag);
+  void NM_set_Cholesky_factorized(NumericsMatrix* A, bool flag);
+  void NM_set_LDLT_factorized(NumericsMatrix* A, bool flag);
 
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
@@ -704,7 +706,7 @@ extern "C"
   /* LU factorization of the matrix. If the matrix has already been
    * factorized (i.e if NM_LU_factorized(A) return true), nothing is
    * done. To force a new factorization one has to set factorization
-   * flag to false : NM_set_factorized(A, false) before the call to
+   * flag to false : NM_set_LU_factorized(A, false) before the call to
    * NM_LU_factorize.
    * If the matrix is preserved, that means that a call to
    * NM_preserve(A) has been done before the call to NM_LU_factorize,
@@ -963,6 +965,11 @@ extern "C"
    * \param[in] A the matrix
    */
   void NM_set_values_sha1(NumericsMatrix* A);
+
+  /* Clear sha1 hash of a matrix.
+   * \param[in] A the matrix
+   */
+  void NM_clear_values_sha1(NumericsMatrix* A);
 
   /* Check if matrix has beend modified after a previous NM_set_values_sha1.
    * \param[in] A the NumericsMatrix
