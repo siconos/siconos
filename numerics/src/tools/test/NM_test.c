@@ -3001,6 +3001,9 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix * M, double * b)
 
   printf("Cholesky solve without preserving matrix\n");
   NM_unpreserve(M);
+#ifdef WITH_OPENSSL
+  NM_clear_values_sha1(M);
+#endif
   for(int j=0; j < n; j++)
   {
     b[j] = y_save[j];
@@ -3348,6 +3351,9 @@ static int test_NM_LDLT_solve_unit(NumericsMatrix * M, double * b)
 
   printf("LDLT solve without preserving matrix\n");
   NM_unpreserve(M);
+#ifdef WITH_OPENSSL
+  NM_clear_values_sha1(M);
+#endif
   for(int j=0; j < n; j++)
   {
     b[j] = y_save[j];

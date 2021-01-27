@@ -238,7 +238,8 @@ void solver_options_delete(SolverOptions* op)
 
     op->isSet = false;
   }
-  free(op);
+//  double free or corruption
+//  free(op);
 }
 
 SolverOptions * solver_options_copy(SolverOptions* source)
@@ -961,5 +962,19 @@ SolverOptions * solver_options_get_internal_solver(SolverOptions * options, size
   }
   else
     return options->internalSolvers[n];
+}
+
+void solver_options_set_internal_solver(SolverOptions * options,
+                                                   size_t n,
+                                                   SolverOptions* NSO)
+{
+  if(n+1 > options->numberOfInternalSolvers)
+  {
+    printf("solver_options_set_internal_solver : the index must be between 0 and  options->numberOfInternalSolvers -1 ");
+  }
+  else
+  {
+    options->internalSolvers[n] = NSO;
+  }
 }
 
