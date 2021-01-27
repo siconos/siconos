@@ -274,7 +274,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       cblas_dcopy(n, F_merit, incx, workV1, incy);
       cblas_dscal(n, -1.0, workV1, incx);
       // info_dir_search = NM_gesv(H, workV1, params->keep_H);
-      NM_set_factorized(H, false);
+      NM_set_LU_factorized(H, false);
       info_dir_search = NM_LU_solve(params->keep_H ? NM_preserve(H) : H, workV1, 1);
     }
     /**************************************************************************
@@ -325,7 +325,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         cblas_dcopy(n, F_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
         // info_dir_search = NM_gesv(H, workV1, params->keep_H);
-        NM_set_factorized(H, false);
+        NM_set_LU_factorized(H, false);
         info_dir_search = NM_LU_solve(params->keep_H ? NM_preserve(H) : H, workV1, 1);
 
         if(log_hdf5)

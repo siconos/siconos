@@ -28,6 +28,7 @@
 #include <stdlib.h>         // for malloc
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
+#include "NumericsDataVersion.h" // Versioning
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
 #ifndef __cplusplus
@@ -82,6 +83,8 @@ struct NumericsMatrix
   NumericsSparseMatrix* matrix2; /**< csc, csr or triplet storage */
 
   NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace among other things */
+
+  NumericsDataVersion version; /*< version of dense storage */
 
   NumericsMatrix* destructible; /**< pointer on the destructible
                                  * matrix, by default points toward
@@ -279,7 +282,9 @@ extern "C"
    * \param[in] A the NumericsMatrix,
    * \param[in] flag a boolean.
    */
-  void NM_set_factorized(NumericsMatrix* A, bool flag);
+  void NM_set_LU_factorized(NumericsMatrix* A, bool flag);
+  void NM_set_Cholesky_factorized(NumericsMatrix* A, bool flag);
+  void NM_set_LDLT_factorized(NumericsMatrix* A, bool flag);
 
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
@@ -701,7 +706,7 @@ extern "C"
   /* LU factorization of the matrix. If the matrix has already been
    * factorized (i.e if NM_LU_factorized(A) return true), nothing is
    * done. To force a new factorization one has to set factorization
-   * flag to false : NM_set_factorized(A, false) before the call to
+   * flag to false : NM_set_LU_factorized(A, false) before the call to
    * NM_LU_factorize.
    * If the matrix is preserved, that means that a call to
    * NM_preserve(A) has been done before the call to NM_LU_factorize,
@@ -930,9 +935,21 @@ extern "C"
    */
   BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A);
 
+
   /* free a Balancing Matrices structure
    */
   BalancingMatrices * NM_BalancingMatrices_free(BalancingMatrices* A);
+
+  /* Reset the version of a NM_types storage.
+   *\param M the NumericsMatrix,
+   *\param id the NM_types storage
+   */
+  void NM_reset_version(NumericsMatrix* M, NM_types id);
+
+  /* Reset versions of all storages.
+   *\param M the NumericsMatrix
+   */
+  void NM_reset_versions(NumericsMatrix* M);
 
 
 #ifdef WITH_OPENSSL
@@ -954,6 +971,11 @@ extern "C"
    * \param[in] A the matrix
    */
   void NM_set_values_sha1(NumericsMatrix* A);
+
+  /* Clear sha1 hash of a matrix.
+   * \param[in] A the matrix
+   */
+  void NM_clear_values_sha1(NumericsMatrix* A);
 
   /* Check if matrix has beend modified after a previous NM_set_values_sha1.
    * \param[in] A the NumericsMatrix
