@@ -1,5 +1,5 @@
 # Siconos
-|[![Build Status](https://travis-ci.org/siconos/siconos.svg?branch=master)](https://travis-ci.org/siconos/siconos)|
+|![Github Actions](https://github.com/siconos/siconos/workflows/CMake/badge.svg)|[![Build Status](https://travis-ci.org/siconos/siconos.svg?branch=master)](https://travis-ci.org/siconos/siconos)|
 |[![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/master/COPYING)|
  
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
