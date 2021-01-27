@@ -66,15 +66,7 @@ struct GlobalFrictionContactProblem
   void* env;
 };
 
-struct GlobalFrictionContactProblem_balancing_data
-{
-  BalancingMatrices * B_for_M;
-  BalancingMatrices * B_for_H;
-  GlobalFrictionContactProblem * original_problem;
-  double alpha;
-  double beta;
-  double gamma;
-};
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -146,9 +138,7 @@ extern "C"
     double * reaction,
     double * globalVelocity);
 
-  GlobalFrictionContactProblem_balancing_data  * globalFrictionContactProblem_balancing_data_free
-  ( GlobalFrictionContactProblem_balancing_data * data);
-  GlobalFrictionContactProblem_balancing_data  * globalFrictionContactProblem_balancing_data_new();
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -254,11 +254,19 @@ static inline void gfc3d_ADMM_compute_full_H(int nc, double * u,
   /* getchar();  */
 }
 
-void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
+void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double* restrict reaction,
                 double* restrict velocity, double* restrict globalVelocity,
                 int* restrict info, SolverOptions* restrict options)
 {
   /* verbose=1; */
+
+
+  /************ Balancing */
+  GlobalFrictionContactProblem* problem = gfc3d_balancing_problem(problem_original,options);
+  gfc3d_balancing_go_to_balanced_variables(problem, options,
+                                           reaction, velocity, globalVelocity);
+  
+  
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -867,7 +875,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
         /*                 norm_q, norm_b,  &error); */
         /* printf("############ error  = %g\n", error); */
         
-        gfc3d_balance_back_to_original_variables(problem,
+        gfc3d_balancing_back_to_original_variables(problem,
                                                  options,
                                                  reaction, velocity, v);
         (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
@@ -909,7 +917,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
         if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
         {
-          gfc3d_balance_go_to_balanced_variables(problem,
+          gfc3d_balancing_go_to_balanced_variables(problem,
                                                  options,
                                                  reaction, velocity, v);
         }
@@ -944,9 +952,9 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     cblas_dscal(m, rho, reaction, 1);
     if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
     {
-      gfc3d_balance_back_to_original_variables(problem,
-                                               options,
-                                               reaction, velocity, v);
+      gfc3d_balancing_back_to_original_variables(problem,
+                                                 options,
+                                                 reaction, velocity, v);
       (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
                       original_problem->norm_b, original_problem->norm_b,  &error);
     }
@@ -966,6 +974,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
   /***** Free memory *****/
+  problem = gfc3d_balancing_free(problem, options);
   NM_clear(W);
   NM_clear(Htrans);
   if(internal_allocation)

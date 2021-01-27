@@ -30,7 +30,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
-  *number_of_tests = n_data * n_solvers;
+  *number_of_tests = n_data * (n_solvers+1);
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
@@ -45,6 +45,17 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
       current++;
     }
+  }
+ 
+  for(int d =0; d <n_data; d++)
+  {
+    // default values for all parameters.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSN_AC);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] =  SICONOS_FRICTION_3D_RESCALING_BALANCING_M;
+    current++;
   }
 
   return collection;

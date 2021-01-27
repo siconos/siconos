@@ -19,7 +19,15 @@
 #define GLOBALFRICTIONCONTACT3DBALANCING_H
 
 
-
+struct GlobalFrictionContactProblem_balancing_data
+{
+  BalancingMatrices * B_for_M;
+  BalancingMatrices * B_for_H;
+  GlobalFrictionContactProblem * original_problem;
+  double alpha;
+  double beta;
+  double gamma;
+};
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -30,15 +38,20 @@ extern "C"
   GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProblem* problem,
                                                        SolverOptions* options);
 
-  void gfc3d_balance_go_to_balanced_variables(GlobalFrictionContactProblem* balanced_problem,
+  void gfc3d_balancing_go_to_balanced_variables(GlobalFrictionContactProblem* balanced_problem,
                                   SolverOptions* options,
                                   double *r, double *u, double* v);
   
-  void gfc3d_balance_back_to_original_variables(GlobalFrictionContactProblem* balanced_problem,
+  void gfc3d_balancing_back_to_original_variables(GlobalFrictionContactProblem* balanced_problem,
                                SolverOptions* options,
                                double *r, double *u, double *v);
-
   
+  GlobalFrictionContactProblem*  gfc3d_balancing_free(GlobalFrictionContactProblem* balanced_problem,
+                            SolverOptions* options);
+
+  GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_free(GlobalFrictionContactProblem_balancing_data * data);
+  
+  GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_new();
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -23,8 +23,7 @@
 #include "numerics_verbose.h"              // for numerics_printf_verbose
 #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
 #include "CSparseMatrix_internal.h"                // for NSM_TRIPLET ...
-
-
+#include "gfc3d_balancing.h"
 #include "debug.h"                         // for DEBUG_EXPR
 #ifdef  DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -41,7 +40,7 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
   if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
   {
     rescaled_problem =  globalFrictionContact_copy(problem);
-    data = globalFrictionContactProblem_balancing_data_new();
+    data = gfc3d_balancing_data_new();
     rescaled_problem->env = (void*) data;
     data->original_problem = problem;
   }
@@ -108,7 +107,7 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
 }
 
 
-void gfc3d_balance_go_to_balanced_variables(GlobalFrictionContactProblem* balanced_problem,
+void gfc3d_balancing_go_to_balanced_variables(GlobalFrictionContactProblem* balanced_problem,
                                 SolverOptions* options,
                                 double *r, double *u, double* v)
 {  
@@ -143,7 +142,7 @@ void gfc3d_balance_go_to_balanced_variables(GlobalFrictionContactProblem* balanc
   //else continue;
   
 }
-void gfc3d_balance_back_to_original_variables(GlobalFrictionContactProblem* balanced_problem,
+void gfc3d_balancing_back_to_original_variables(GlobalFrictionContactProblem* balanced_problem,
                                     SolverOptions* options,
                                     double *r, double *u, double *v)
 {
@@ -176,5 +175,41 @@ void gfc3d_balance_back_to_original_variables(GlobalFrictionContactProblem* bala
       numerics_printf_verbose(1,"---- GFC3D - ADMM - rescaling type is not implemented");
       
   }
+  
   //else continue;
+}
+
+
+GlobalFrictionContactProblem* gfc3d_balancing_free(GlobalFrictionContactProblem* balanced_problem,
+                                                   SolverOptions* options)
+{
+  assert(balanced_problem);
+  GlobalFrictionContactProblem_balancing_data  *balancing_data = (GlobalFrictionContactProblem_balancing_data * ) balanced_problem->env;
+  if (balancing_data)
+  {
+    balanced_problem->env = gfc3d_balancing_data_free(balancing_data);
+    globalFrictionContact_free(balanced_problem);
+    return NULL;
+  }
+  else
+    return balanced_problem;
+}
+
+GlobalFrictionContactProblem_balancing_data   * gfc3d_balancing_data_new()
+{
+  GlobalFrictionContactProblem_balancing_data  * data = malloc(sizeof(GlobalFrictionContactProblem_balancing_data));
+  data->B_for_M =NULL;
+  data->B_for_H =NULL;
+  return data;
+}
+
+GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_free
+(GlobalFrictionContactProblem_balancing_data * data)
+{
+  if (data->B_for_M)
+    data->B_for_M = NM_BalancingMatrices_free(data->B_for_M);
+  if (data->B_for_H)
+    data->B_for_H = NM_BalancingMatrices_free(data->B_for_H);
+  free(data);
+  return NULL;
 }
