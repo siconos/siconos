@@ -188,7 +188,8 @@ static inline long int array_size(mxArray* m, int indx)
     array_len[0] = *p_problem_size1 * *p_problem_size1;
   }
 
-  if (CHECK_ARRAY_VECTOR(array)  || (array_numdims == 2 && CHECK_ARRAY_MATRIX(array)) || !CHECK_ARRAY_SIZE(array_len[0], array, 0) || !(array_numdims(array) > 1 && CHECK_ARRAY_SIZE(array_len[1], array, 1))) SWIG_fail;
+/* MB: commenting this line allows for the call of fc3d_AlartCurnierFunction and similar functions */
+  // if (CHECK_ARRAY_VECTOR(array)  || (array_numdims == 2 && CHECK_ARRAY_MATRIX(array)) || !CHECK_ARRAY_SIZE(array_len[0], array, 0) || !(array_numdims(array) > 1 && CHECK_ARRAY_SIZE(array_len[1], array, 1))) SWIG_fail;
 
   $1 = (double *) array_data(array);
 
@@ -249,7 +250,7 @@ static inline long int array_size(mxArray* m, int indx)
     array_len[1] = 1;
   }
 
-  if (CHECK_ARRAY_VECTOR(array) || !CHECK_ARRAY_SIZE(array_len[0], array, 0) || !(array_numdims(array) > 1 && CHECK_ARRAY_SIZE(array_len[1], array, 1))) SWIG_fail;
+//  if (CHECK_ARRAY_VECTOR(array) || !CHECK_ARRAY_SIZE(array_len[0], array, 0) || !(array_numdims(array) > 1 && CHECK_ARRAY_SIZE(array_len[1], array, 1))) SWIG_fail;
 
   $1 = (double *) array_data(array);
 
