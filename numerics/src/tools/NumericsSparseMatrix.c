@@ -68,6 +68,77 @@ static int sort_indices_struct_cmp(const void *a, const void *b)
 #pragma GCC diagnostic pop
 #endif
 
+version_t NSM_version(const NumericsSparseMatrix* M, NSM_t type)
+{
+  return NDV_value(&(M->versions[type]));
+}
+
+void NSM_set_version(NumericsSparseMatrix* M, NSM_t type,
+                     version_t value)
+{
+  NDV_set_value(&(M->versions[type]), value);
+}
+
+
+void NSM_inc_version(NumericsSparseMatrix* M, NSM_t type)
+{
+  version_t new_version = NSM_max_version(M) + 1;
+  NSM_set_version(M, type, new_version);
+}
+
+/* internal compare function */
+static inline NM_types nsm_max(const NumericsSparseMatrix* M,
+                               NSM_t type1,
+                               NSM_t type2)
+{
+  return NSM_version(M, type1) > NSM_version(M, type2) ?
+    type1 : type2;
+}
+
+NSM_t NSM_latest_id(const NumericsSparseMatrix* M)
+{
+  assert(M);
+
+  return (nsm_max(M, nsm_max(M, nsm_max(M, NSM_TRIPLET,
+                                        NSM_HALF_TRIPLET),
+                             NSM_CSC),
+                  NSM_CSR));
+}
+
+version_t NSM_max_version(const NumericsSparseMatrix* M)
+{
+  return NSM_version(M, NSM_latest_id(M));
+}
+
+
+CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M)
+{
+  assert(M);
+
+  switch (NSM_latest_id(M))
+  {
+  case NSM_TRIPLET: return M->triplet;
+  case NSM_HALF_TRIPLET: return M->half_triplet;
+  case NSM_CSR: return M->csr;
+  case NSM_CSC: return M->csc;
+  default: numerics_error("NSM_latest", "unknown matrix type");
+  }
+}
+
+void NSM_reset_version(NumericsSparseMatrix*M, NSM_t id)
+{
+  NDV_reset(&(M->versions[id]));
+}
+
+void NSM_reset_versions(NumericsSparseMatrix* M)
+{
+  NSM_reset_version(M, NSM_TRIPLET);
+  NSM_reset_version(M, NSM_HALF_TRIPLET);
+  NSM_reset_version(M, NSM_CSC);
+  NSM_reset_version(M, NSM_CSR);
+}
+
+
 void NSM_null(NumericsSparseMatrix* A)
 {
   A->linearSolverParams = NULL;
@@ -78,10 +149,14 @@ void NSM_null(NumericsSparseMatrix* A)
   A->csr = NULL;
   A->diag_indx = NULL;
   A->origin = NSM_UNKNOWN;
+
+  NSM_reset_versions(A);
 }
 
 double* NSM_data(NumericsSparseMatrix* A)
 {
+  assert (NSM_latest_id(A) == A->origin);
+
   switch(A->origin)
   {
   case NSM_CSC:
@@ -162,6 +237,9 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A)
     free(A->diag_indx);
     A->diag_indx = NULL;
   }
+
+  NSM_reset_versions(A);
+
   return NULL;
 }
 
@@ -191,6 +269,8 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
     }
 
     B_ = B->triplet;
+    NSM_set_version(B, NSM_TRIPLET,
+                    NSM_version(A, NSM_TRIPLET));
     break;
   }
   case NSM_HALF_TRIPLET:
@@ -203,6 +283,10 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
     }
 
     B_ = B->half_triplet;
+    NSM_set_version(B,
+                    NSM_HALF_TRIPLET,
+                    NSM_version(A,
+                                NSM_HALF_TRIPLET));
     break;
   }
   case NSM_CSC:
@@ -217,6 +301,8 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
     }
 
     B_ = B->csc;
+    NSM_set_version(B, NSM_CSC, NSM_version(A,
+                                            NSM_CSC));
     break;
   }
   case NSM_CSR:
@@ -234,6 +320,8 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
     }
 
     B_ = B->csr;
+    NSM_set_version(B, NSM_CSR, NSM_version(A,
+                                            NSM_CSR));
     break;
   }
   default:
@@ -505,8 +593,10 @@ unsigned NSM_origin(const NumericsSparseMatrix* M)
 {
   assert(M);
   if(!M) return -1;
+  assert (NSM_version(M, NSM_latest_id(M)) == NSM_version(M, M->origin));
   return M->origin;
 }
+
 
 CSparseMatrix* NSM_get_origin(const NumericsSparseMatrix* M)
 {
@@ -552,6 +642,7 @@ NumericsSparseMatrix * NSM_new_from_file(FILE* file)
     assert(out->origin ==NSM_TRIPLET);
     out->triplet = C;
     out->origin = NSM_TRIPLET;
+    NSM_inc_version(out, NSM_TRIPLET);
   }
   else
   {
@@ -559,11 +650,18 @@ NumericsSparseMatrix * NSM_new_from_file(FILE* file)
     {
       out->csc = C;
       out->origin = NSM_CSC;
+      NSM_inc_version(out, NSM_CSC);
     }
     else if(out->origin == NSM_CSR)
     {
       out->csr = C;
       out->origin = NSM_CSR;
+      NSM_inc_version(out, NSM_CSR);
+    }
+    else if(out->origin == NSM_HALF_TRIPLET)
+    {
+      out->half_triplet = C;
+      NSM_inc_version(out, NSM_HALF_TRIPLET);
     }
   }
   return out;
@@ -587,6 +685,7 @@ NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
   assert(out->origin ==NSM_TRIPLET);
   out->triplet = C;
   out->origin = NSM_TRIPLET;
+  NSM_inc_version(out, NSM_TRIPLET);
   return out;
 }
 
