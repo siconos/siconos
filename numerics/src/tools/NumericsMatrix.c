@@ -188,7 +188,7 @@ void NM_set_version(NumericsMatrix* M, NM_types id, version_t value)
 }
 
 /* internal compare function */
-ulong nm_max(const NumericsMatrix* M,
+unsigned long nm_max(const NumericsMatrix* M,
              NM_types type1,
              NM_types type2)
 {
@@ -2430,7 +2430,7 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
   B->size1 = A->size1;
   B->storageType=NM_DENSE;
 
-  ulong src_version;
+  unsigned long src_version;
   switch(A->storageType)
   {
   case NM_DENSE:
