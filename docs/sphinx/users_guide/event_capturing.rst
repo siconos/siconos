@@ -53,12 +53,14 @@ The left-hand term is :math:`M(x(t_{i+1})-x(t_i)) \approx M(x_{i+1} - x_i)` .
 Right-hand terms are approximated with a :math:`\theta`-method:
 
 .. math::
+
    \int_{t_i}^{t_{i+1}} f(t,x,z)dt &\approx h \theta f(t_{i+1},x_{i+1},z) + h (1-\theta) f(t_i,x_i,z) \\
    &\approx h \theta f_{i+1} + h (1-\theta) f_i
 
 and the third integral is approximated with:
 
 .. math::
+
    \int_{t_i}^{t_{i+1}}r\,dt \approx h r(t_{i+1}) \approx hr_{i+1}
 
 Then, we get the following "residu"
@@ -73,11 +75,13 @@ Then, we get the following "residu"
 A Newton method is used to solve :math:`\mathcal R(x_{k+1}) = 0`. The gradient of the residu according to :math:`x` is:
 
 .. math::
+
    \nabla_{x}\mathcal R(x) = M - h \theta\cdot\nabla_{x}f(t,x)
 
 And we get (index k corresponds to the Newton iteration number):
 
 .. math::
+
    W_{i+1}^k\cdot (x_{i+1}^{k+1} - x_{i+1}^k) = - \mathcal R(x_{i+1}^k)
 
 with
@@ -140,6 +144,7 @@ Using the results of the previous section, the discretisation is straightforward
 with a W that does not depend on time:
 
 .. math::
+
    W =  (M - h\theta A)
 
 Time discretization of the relations
@@ -173,6 +178,7 @@ These constraints are linearized around state :math:`(X_{i+1}^{k+1},\lambda_{i+1
 Where :math:`S_{i+1}^k` stands for :math:`(X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k})` and
 
 .. math::
+
    H_0(X,t,\lambda)=\nabla_X h(X,t,\lambda)&, \ \  H_1(X,t,\lambda)=\nabla_{\lambda} h(X,t,\lambda) \\
    &\\
    G_0(X,t,\lambda)=\nabla_X g(X,t,\lambda)&, \ \  G_1(X,t,\lambda)=\nabla_{\lambda} g(X,t,\lambda) \\
@@ -180,11 +186,13 @@ Where :math:`S_{i+1}^k` stands for :math:`(X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k}
 In the case where :
 
 .. math::
+
    x_{i+1}^{k+1} = x^{free,k}_{i+1} + (w_{i+1}^k)^{-1}r_{i+1}^{k+1}
 
 We can write
 
 .. math::
+
    X_{i+1}^{k+1} = X^{free,k}_{i+1} + (W_{i+1}^k)^{-1}R_{i+1}^{k+1}
 
 where :math:`(W_{i+1}^k)^{-1}`, is a diagonal block matrix holding the :math:`(w_{i+1}^k)^{-1}`,
@@ -216,7 +224,7 @@ First Order Linear Relations
 The Time discretization of the relations is fully implicit and may be written as :
 
 .. math::
-   
+
    y_{i+1} &= C(t_{i+1})X_{i+1} + D(t_{i+1})\lambda_{i+1} + e(t_{i+1}) + F(t_{i+1})Z \\	
    \\
    R_{i+1} &= B(t_{i+1})\lambda_{i+1}
@@ -227,14 +235,16 @@ Discretisation of the non-smooth law
 Complementarity Condition
 """""""""""""""""""""""""
 
-The complementarity condition writes:
+The complementarity condition reads:
 
 .. math::
+
    0 \leq y \, &\perp \, \lambda \geq 0 
 
 and the discretisation is straightforward:
 
 .. math::
+
    0 \leq y_{i+1} \, &\perp \, \lambda_{i+1} \geq 0 
 
 Lagrangian systems
@@ -258,6 +268,7 @@ We provide in the following sections a time discretization method of the Lagrang
 with 
 
 .. math::
+
    q(t) = q_0 + \int_{t_0}^t v^+(t)dt
 
 *Remark*: recall that :math:`v^+(t)` means :math:`v(t^+)` ie right limit of :math:`v` in t.
@@ -265,6 +276,7 @@ with
 Left hand side is discretised by assuming that:
 
 .. math::
+
    \int_{t_i}^{t_{i+1}} M(q(t),z)dv \approx M(q*,z)(v_{i+1}-v_{i}) 
 
 As for first order non-linear systems, we use a :math:`\theta`-method to integrate the other terms, and obtain:
@@ -301,6 +313,7 @@ That requires to compute the gradient of the residu;
 assuming that the mass matrix evolves slowly with the configuration in a single time step, we get:
 
 .. math::
+
    \nabla_{v_{i+1}}\left[M(q*,z)(v_{i+1}-v_{i})\right] \approx M(q^{*},z)
 
 and denoting:
@@ -314,16 +327,19 @@ and denoting:
 we get (index k corresponds to the Newton iteration number):
 
 .. math::
+
    W(t_{i+1}^k,v_{i+1}^k,q_{i+1}^k)\cdot (v_{i+1}^{k+1}-v_{i+1}^k) = - \mathcal R(v_{i+1}^k)
 
 with
 
 .. math::
+
    W(t,v,q) = M(q*,z) + h\theta C_t(t,v,q) + h^2\theta^2 K_t(t,v,q)
 
 As an approximation for :math:`q^*`, we choose:
 
 .. math::
+
    q^* &\approx (1-\gamma) q_i  + \gamma q_{i+1}^k \\
    &\approx q_i + h\gamma\left[ (1-\theta) v_i + \theta v_{i+1}^k\right]
 
@@ -331,6 +347,7 @@ with :math:`\gamma \in \left[0,1\right]`.
 Moreover, if :math:`M` is evaluated at the first step of the Newton iteration, with :math:`v_{i+1}^0 = v_i`, we get:
 
 .. math::
+
    M(q^*) \approx M(q_i + h\gamma v_i)
 
 Finally, if :math:`W` is invertible, the solution at iteration k+1 is given by, 
@@ -359,6 +376,7 @@ Using the displacement integration through the velocity,
 
 
 .. math::
+
    q_{i+1} = q_{i} +  h\left[\theta v_{i+1}+(1-\theta) v_{i}  \right]\\
 
 we get:
@@ -397,6 +415,7 @@ Lagrangian Scleronomous Relations
 with
 
 .. math::
+
    G_0(Q) &= \nabla_Qh(Q) \\
 
 From now on, to lighten the notations, the parameter :math:`Z` will omitted.
@@ -404,6 +423,7 @@ From now on, to lighten the notations, the parameter :math:`Z` will omitted.
 Considering the Newton process introduced above for Lagrangian non linear systems, the constraints write:
 
 .. math::
+
    \dot y_{i+1}^{k+1} = G_0(Q_{i+1}^{k+1}))V_{i+1}^{k+1} \\
    P_{i+1}^{k+1} = G_0^t(Q_{i+1}^{k+1}))\lambda_{i+1}^{k+1}
 
@@ -433,6 +453,7 @@ It leads to:
 As for the evaluation of the mass, the prediction of the position, :math:`Q^*` can be evaluated at the first iteration of the Newton process,
 
 .. math::
+
    Q^*(V_{i+1}^0) =  Q_i + h\gamma V_i
 
 Lagrangian Rheonomous Relations
@@ -450,7 +471,7 @@ Lagrangian Rheonomous Relations
 As for scleronomous relations, we get:
 
 .. math::
-   
+
    \dot y_{i+1}^{k+1} &= G_0(Q^*(V_{i+1}^k),t_{i+1})V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, t_{i+1})) \\
    \\
    P_{i+1}^{k+1} &= G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1} 
@@ -510,6 +531,7 @@ In the Moreau's time--stepping, we use a reformulation of the unilateral constra
 which leads to the following discretisation :
 
 .. math::
+
    If \ y^{p} \leq 0, \ then \ 0 \leq \dot y_{i+1} \perp  \lambda_{i+1}  \geq 0
 
 where :math:`y^{p}` is a prediction of the position at time :math:`t_{i+1}`, for instance, :math:`y^{p} = y_{i} + \frac{h}{2}  \dot y_i`.
@@ -517,6 +539,7 @@ where :math:`y^{p}` is a prediction of the position at time :math:`t_{i+1}`, for
 To introduce a Newton impact law, consider an equivalent velocity defined by
 
 .. math::
+
    \dot y^{e}_{i+1} = \dot y_{i+1} + e \dot y_{i}
 
 and apply the constraints directly on this velocity :

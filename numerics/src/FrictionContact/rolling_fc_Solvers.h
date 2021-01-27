@@ -100,15 +100,15 @@ extern "C"
 
   void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-  void  rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve,
-                                                  RollingUpdatePtr* update,
-                                                  RollingFreeSolverNSGSPtr* freeSolver,
-                                                  RollingComputeErrorPtr* computeError,
-                                                  RollingFrictionContactProblem* problem,
-                                                  RollingFrictionContactProblem* localproblem,
-                                                  SolverOptions * options);
+  void rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve,
+                                                 RollingUpdatePtr* update,
+                                                 RollingFreeSolverNSGSPtr* freeSolver,
+                                                 RollingComputeErrorPtr* computeError,
+                                                 RollingFrictionContactProblem* problem,
+                                                 RollingFrictionContactProblem* localproblem,
+                                                 SolverOptions * options);
 
-  /** Check for trivial solution in the friction-contact 3D problem
+  /** Check for trivial solution in the rolling friction-contact 3D problem
       \param problem FrictionContactProblem*  the problem
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
@@ -131,6 +131,13 @@ extern "C"
   void rfc3d_poc_set_default(SolverOptions* options);
 
 
+  void rolling_fc3d_admm(RollingFrictionContactProblem*  problem, double*  reaction,
+                         double*  velocity,
+                         int*  info, SolverOptions*  options);
+
+  void rolling_fc3d_admm_init(RollingFrictionContactProblem* problem, SolverOptions* options);
+  void rolling_fc3d_admm_free(RollingFrictionContactProblem* problem, SolverOptions* options);
+  void rolling_fc3d_admm_set_default(SolverOptions* options);
 
   /** Non-Smooth Gauss Seidel solver for Rolling friction-contact 2D problem
       \param problem the friction-contact 3D problem to solve

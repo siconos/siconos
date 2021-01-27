@@ -53,8 +53,8 @@ void fc3d_unitary_compute_and_add_error(double* restrict r, double* restrict u, 
   worktmp[1] = r[1] -  worktmp[1];
   worktmp[2] = r[2] -  worktmp[2];
   *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
-
 }
+
 int fc3d_compute_error(
   FrictionContactProblem* problem,
   double *z, double *w, double tolerance,

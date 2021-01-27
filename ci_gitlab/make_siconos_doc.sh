@@ -22,5 +22,5 @@
 
 mkdir $CI_PROJECT_DIR/build
 cd $CI_PROJECT_DIR/build
-cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$user_file
+cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$user_file -DWITH_GIT=ON
 make doc -j 4

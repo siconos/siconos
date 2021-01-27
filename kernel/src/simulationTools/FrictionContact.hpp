@@ -36,13 +36,13 @@ TYPEDEF_SPTR(FrictionContactProblem)
 
 
   \rst
-  
+
   .. math::
 
      velocity =  q + M reaction \\
      \\
      velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
-  
+
   \endrst
 
   and a Coulomb friction law.
@@ -97,7 +97,7 @@ public:
   FrictionContact(int dimPb=3, int numericsSolverId = SICONOS_FRICTION_3D_NSGS);
 
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst
@@ -188,6 +188,10 @@ public:
 
   /** print the data to the screen */
   void display() const;
+
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+
 
   /** visitors hook
    */

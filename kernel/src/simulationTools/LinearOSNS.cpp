@@ -182,10 +182,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   pos2 = indexSet->properties(vd).target_pos;
 
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
 
+  // --- Check compatible nslaws ---- 
+  checkCompatibleNSLaw(*nslaw);
+  
+  
   // --- Check block size ---
-  assert(indexSet->properties(vd).block->size(0) == inter->nonSmoothLaw()->size());
-  assert(indexSet->properties(vd).block->size(1) == inter->nonSmoothLaw()->size());
+  assert(indexSet->properties(vd).block->size(0) == nslaw->size());
+  assert(indexSet->properties(vd).block->size(1) == nslaw->size());
 
   // --- Compute diagonal block ---
   // Block to be set in OSNS Matrix, corresponding to
@@ -208,7 +213,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
   inter->getExtraInteractionBlock(currentInteractionBlock);
 
-  unsigned int nslawSize = inter->nonSmoothLaw()->size();
+  unsigned int nslawSize = nslaw->size();
   // loop over the DS connected to the interaction.
   bool endl = false;
   unsigned int pos = pos1;

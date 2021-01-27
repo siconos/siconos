@@ -1,0 +1,31 @@
+# CI config (jobs) used to build documentation for siconos.
+# This file is included in main .gitlab-ci.yml only if the job build-doc is 
+# executed (see trigger keyword).
+
+# Templates for ci jobs
+include: ci_gitlab/gitlab-ci-siconos-templates.yml
+
+# --- Build doc/web site and publish it ---
+doc:build:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-doc
+    cdash_submit: 0
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_docs.cmake
+    LANG: C.UTF-8
+  extends: .siconos-full
+  script:
+    - "sh ci_gitlab/make_siconos_doc.sh"
+  artifacts:
+    paths:
+      - build/docs/build/html
+pages:
+
+  image: python:alpine
+  script:
+  - mv build/docs/build/html public
+  artifacts:
+    paths:
+    - public
+  stage: doc-deploy 
+  needs: ["doc:build"]
+

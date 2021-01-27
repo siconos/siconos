@@ -560,9 +560,20 @@ void NM_clear(NumericsMatrix* m)
     NM_clear(m->destructible);
     m->destructible = m;
   }
+
 }
 
-void NM_clear_not_dense(NumericsMatrix* m)
+NumericsMatrix*  NM_free(NumericsMatrix* m)
+{
+  assert(m && "NM_free, m == NULL");
+
+  NM_clear(m);
+  free(m);
+  return NULL;
+
+}
+
+void  NM_clear_not_dense(NumericsMatrix* m)
 {
   assert(m && "NM_clear, m == NULL");
 
@@ -571,7 +582,26 @@ void NM_clear_not_dense(NumericsMatrix* m)
   NM_clearSparse(m);
 
   NM_internalData_free(m);
+  /* restore the destructible pointer */
+  if (!NM_destructible(m))
+  {
+    NM_clear(m->destructible);
+    m->destructible = m;
+  }
 }
+
+NumericsMatrix*  NM_free_not_dense(NumericsMatrix* m)
+{
+  assert(m && "NM_free_bot_dense, m == NULL");
+  NM_clear_not_dense(m);
+  free(m);
+  return NULL;
+}
+
+
+
+
+
 
 
 void NM_clear_other_storages(NumericsMatrix* M, int storageType)
@@ -1675,6 +1705,48 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
   }
   default:
     printf("NM_add_to_diag3 :: unsupported matrix storage %d", M->storageType);
+    exit(EXIT_FAILURE);
+  }
+}
+void NM_add_to_diag5(NumericsMatrix* M, double alpha)
+{
+  size_t n = M->size0;
+  switch(M->storageType)
+  {
+  case NM_DENSE:
+  {
+    for(size_t indx = 0; indx < n*n; indx += n+1) M->matrix0[indx] += alpha;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    for(size_t ic = 0; ic < n/5; ++ic)
+    {
+      int diagPos = SBM_diagonal_block_index(M->matrix1, ic);
+      M->matrix1->block[diagPos][0] += alpha;
+      M->matrix1->block[diagPos][6] += alpha;
+      M->matrix1->block[diagPos][12] += alpha;
+      M->matrix1->block[diagPos][18] += alpha;
+      M->matrix1->block[diagPos][24] += alpha;
+    }
+    break;
+  }
+  case NM_SPARSE:
+  {
+    CS_INT* diag_indices = NSM_diag_indices(M);
+
+    DEBUG_EXPR(
+      printf("diag_indices:\n");
+      for(size_t i = 0; i < n; ++i) printf("diag_indices[%zu] = %li\t ", i, diag_indices[i]);
+    );
+
+    double* Mx = NSM_data(M->matrix2);
+    for(size_t i = 0; i < n; ++i) Mx[diag_indices[i]] += alpha;
+
+    break;
+  }
+  default:
+    printf("NM_add_to_diag5 :: unsupported matrix storage %d", M->storageType);
     exit(EXIT_FAILURE);
   }
 }
@@ -4921,7 +4993,6 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
 
         CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
 
-        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep them");
         info = !CSparseMatrix_chol_factorization(1, NM_csc(A),  cs_chol_A);
 
         if (info)
@@ -5312,12 +5383,32 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
     {
       NSM_linear_solver_params* p = NSM_linearSolverParams(A);
       assert(!NM_internalData(A)->isLDLTfactorized);
-      switch (p->solver)
+      switch (p->LDLT_solver)
       {
       case NSM_CSPARSE:
-      {
-        info=1;
-        fprintf(stderr, "NM_LDLT_factorize: NSM_CSPARSE is not available for LDLT %d\n", info);
+      {        numerics_printf_verbose(2, "NM_LDLT_factorize, using SuiteSparse (LDL )");
+
+        if (!(p->dWork && p->linear_solver_data))
+        {
+          assert(!NSM_workspace(p));
+          assert(!NSM_linear_solver_data(p));
+          assert(!p->solver_free_hook);
+
+          p->solver_free_hook = &NSM_clear_p;
+          p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          p->dWorkSize = A->size1;
+        };
+
+        CSparseMatrix_factors* cs_ldlt_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+
+        info = !CSparseMatrix_ldlt_factorization(1, NM_csc(A),  cs_ldlt_A);
+
+        if (info)
+        {
+          numerics_printf_verbose(2, "NM_LDLT_factorize: LDL (SuiteSparse) factorization failed.");
+        }
+        assert(!p->linear_solver_data);
+        p->linear_solver_data = cs_ldlt_A;
         break;
       }
 #ifdef WITH_MA57
@@ -5497,12 +5588,17 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
     case NM_SPARSE:
     {
       NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-      switch (p->solver)
+      switch (p->LDLT_solver)
       {
       case NSM_CSPARSE:
       {
-        info=1;
-        fprintf(stderr, "NM_LDLT_solve: NSM_CSPARSE is not available for LDLT %d\n", info);
+        numerics_printf_verbose(2,"NM_LDLT_solve, using SuiteSparse" );
+
+        numerics_printf_verbose(2,"NM_LDLT_solve, we solve with given factors" );
+        for(unsigned int j=0; j < nrhs ; j++ )
+        {
+          info = !CSparseMatrix_ldlt_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
+        }
         break;
       }
 #ifdef WITH_MA57
@@ -5553,7 +5649,7 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 #endif /* WITH_MUMPS */
       default:
       {
-        fprintf(stderr, "NM_LDLT_solve: unknown sparse linearsolver %d\n", p->solver);
+        fprintf(stderr, "NM_LDLT_solve: unknown sparse linearsolver %d\n", p->LDLT_solver);
         exit(EXIT_FAILURE);
       }
       break;

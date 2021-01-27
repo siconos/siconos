@@ -46,6 +46,8 @@ mkdir -p $CI_PROJECT_DIR/build/pyocc
 # Maybe we should clone specific tags for oce and pythonocc?
 cd $CI_PROJECT_DIR
 git clone https://github.com/tpaviot/pythonocc-core.git  > /dev/null
+cd pythonocc-core
+git checkout 0.18.2
 cd $CI_PROJECT_DIR/build/pyocc
 # Requires (in calling script):
 # installpath=`python3 -c "import site;print(site.USER_SITE)"`# Unfortunately, this cannot work, artifacts must be
@@ -60,3 +62,5 @@ cd $CI_PROJECT_DIR
 # test ...
 export PYTHONPATH=$pyocc_installpath
 python3 -c 'import OCC; print(OCC.__file__)'
+rm -rf $CI_PROJECT_DIR/build/
+rm -rf $CI_PROJECT_DIR/pythonocc-core

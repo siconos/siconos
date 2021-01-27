@@ -465,6 +465,113 @@ static int test_CSparseMatrix_chol_spsolve(void)
   printf("end - test_CSparseMatrix_chol_spsolve \n");
   return  info;
 }
+static int test_CSparseMatrix_ldlt_solve_unit(CSparseMatrix *M )
+{
+  //cs_print(M, 0);
+
+  double * b = (double * )calloc(M->n, sizeof(double));
+  for (int k = 0 ; k < M->n; k++)
+  {
+    b[k] = 3*k+3;
+  }
+  double * b_backup = (double * )calloc(M->n, sizeof(double));
+  for (int k = 0 ; k < M->n; k++)
+  {
+    b_backup[k] = b[k];
+  }
+  double * x = (double * )calloc(M->n, sizeof(double));
+
+  CSparseMatrix_factors* cs_ldlt_M = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+
+  int info = 1-CSparseMatrix_ldlt_factorization(1, M, cs_ldlt_M);
+
+  if (info)
+  {
+    printf("problem in LDLT factor\n");
+    return info;
+  }
+  /* printf(" L:\n"); */
+  /* cs_print(cs_ldlt_M->N->L, 0); */
+
+  info = 1-CSparseMatrix_ldlt_solve(cs_ldlt_M, x, b);
+  if (info)
+  {
+    printf("problem in ldlt_spsolve\n");
+    return info;
+  }
+
+
+  /* compute residual */
+  CSparseMatrix_aaxpby(1.0, M, b, -1.0, b_backup);
+  
+  double error =0.0;
+  for (int k =0; k < M->n ; k++)
+  {
+    error += b_backup[k]*b_backup[k];
+  }
+  error = sqrt(error);
+  
+  free(b);
+  free(x);
+  free(b_backup);
+
+  printf("residual =%e\n", error);
+  if (error > 1e-12)
+  {
+    return 1;
+
+  }
+  printf("info =%i\n", info);
+  return  info;
+}
+
+
+static int test_CSparseMatrix_ldlt_solve(void)
+{
+  printf("\nstart - test_CSparseMatrix_ldlt_solve \n");
+  CSparseMatrix *m_triplet = cs_spalloc(3,3,3,1,1); /* coo format */
+  cs_entry(m_triplet, 0, 0, 1.0);
+  cs_entry(m_triplet, 1, 1, 2.0);
+  cs_entry(m_triplet, 2, 2, 4.0);
+//  CS_INT info4 = 1-cs_print(m_triplet, 0);
+  CSparseMatrix *M = cs_compress(m_triplet);
+  printf("test 1 ....");
+  int info =  test_CSparseMatrix_ldlt_solve_unit(M);
+  if (info) return 1;
+  printf("ok\n");
+
+  cs_entry(m_triplet, 0, 1, 3.0);
+  cs_entry(m_triplet, 0, 2, 6.0);
+  cs_entry(m_triplet, 1, 2, 5.0);
+  cs_entry(m_triplet, 1, 0, 3.0);
+  cs_entry(m_triplet, 2, 0, 6.0);
+  cs_entry(m_triplet, 2, 1, 5.0);
+  CSparseMatrix *M2 = cs_compress(m_triplet);
+  CSparseMatrix *M2T = cs_transpose(M2,1);
+  CSparseMatrix *M2M2T = cs_multiply(M2,M2T);
+  printf("test 2 ....");
+  info =  test_CSparseMatrix_ldlt_solve_unit(M2M2T);
+  if (info) return 1;
+  printf("ok\n");
+  int size0 =10;
+  int size1 =10;
+  CSparseMatrix *a_triplet = cs_spalloc(size0,size1,size0,1,1); /* coo format */
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =i; j < size1; j++)
+    {
+      cs_entry(a_triplet, i, j, i+j+1);
+    }
+  }
+  CSparseMatrix *A = cs_compress(a_triplet);
+  CSparseMatrix *AT = cs_transpose(A,1);
+  CSparseMatrix *AAT = cs_multiply(A,AT);
+  printf("test 3 ....");
+  info =  test_CSparseMatrix_ldlt_solve_unit(AAT);
+  printf("ok\n");
+  printf("end - test_CSparseMatrix_ldlt_solve \n");
+  return  info;
+}
 
 
 int main()
@@ -478,11 +585,11 @@ int main()
   info += test_CSparseMatrix_spsolve();
   printf("info : %i\n", info);
   info += test_CSparseMatrix_chol_spsolve();
+  info += test_CSparseMatrix_ldlt_solve();
   printf("info : %i\n", info);
-  
+
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
-
   return info;
 }

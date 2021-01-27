@@ -18,7 +18,7 @@
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
 #include "SolverOptions.h"
-
+#include "ComplementarityConditionNSL.hpp"
 // --- numerics headers ---
 #include "NonSmoothDrivers.h"
 #include "LCP_Solvers.h"
@@ -38,6 +38,24 @@ LCP::LCP(int numericsSolverId):
 LCP::LCP(SP::SolverOptions options):
   LinearOSNS(options), _numerics_problem(new LinearComplementarityProblem)
 {}
+
+bool LCP::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  float type_number= (float) (Type::value(nslaw));
+  _nslawtype.insert(type_number);
+
+  if (not (Type::value(nslaw) == Type::ComplementarityConditionNSL ||
+           Type::value(nslaw) == Type::NewtonImpactNSL||
+           Type::value(nslaw) == Type::MultipleImpactNSL))
+  {
+    THROW_EXCEPTION("\nLCP::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with LCP one step nonsmooth problem. \n \
+                      Compatible NonSmoothLaw are: ComplementarityConditionNSL, MultipleImpactNSL or NewtonImpactNSL\n");
+    return false;
+  }
+
+  return true;
+}
 
 
 int LCP::numericsCompute()

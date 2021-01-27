@@ -60,7 +60,7 @@ DEFINE_SPTR(MLCPProjectOnConstraints)
 DEFINE_SPTR(Relay)
 DEFINE_SPTR(Equality)
 DEFINE_SPTR(GenericMechanical)
-DEFINE_SPTR(OSNSMultipleImpact)
+DEFINE_SPTR(MultipleImpact)
 // ----------------------------
 
 

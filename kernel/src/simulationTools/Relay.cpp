@@ -101,6 +101,22 @@ void Relay::initialize(SP::Simulation sim)
       _ub->resize(maxSize());
   }
 }
+bool Relay::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  float type_number= (float) (Type::value(nslaw));
+  _nslawtype.insert(type_number);
+
+  if (not (Type::value(nslaw) == Type::ComplementarityConditionNSL ||
+           Type::value(nslaw) == Type::RelayNSL))
+  {
+    THROW_EXCEPTION("\nRelay::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with Relay one step nonsmooth problem. \n \
+                      Compatible NonSmoothLaw are: ComplementarityConditionNSL or RelayNSL\n");
+    return false;
+  }
+
+  return true;
+}
 
 
 int Relay::compute(double time)

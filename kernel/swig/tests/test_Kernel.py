@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+
 import siconos.kernel as sk
 import siconos.numerics as sn
 
@@ -11,8 +12,19 @@ def test_autocast():
     nsds.insertDynamicalSystem(dsA)
     nsds.insertDynamicalSystem(dsB)
 
-    assert(type(nsds.dynamicalSystem(dsA.number())) == sk.LagrangianDS)
-    assert(type(nsds.dynamicalSystem(dsB.number())) == sk.FirstOrderLinearDS)
+    failed=0
+    
+
+    
+    if not isinstance(nsds.dynamicalSystem(dsA.number()), sk.LagrangianDS):
+        failed = 1
+    if not isinstance(nsds.dynamicalSystem(dsB.number()), sk.FirstOrderLinearDS):
+        failed = 1
+
+    return failed
+        
+    #assert(type(nsds.dynamicalSystem(dsA.number())) == sk.LagrangianDS)
+    #assert(type(nsds.dynamicalSystem(dsB.number())) == sk.FirstOrderLinearDS)
 
 
 def test_getVector():
@@ -35,6 +47,7 @@ def test_getVector():
 def test_castVector():
     i = [1.0, 4.0, 3.0]
     v = sk.SiconosVector([1, 2, 3])
+
     assert str(v) == '[3](1,2,3)'
     repr(v)
     assert v[0] == 1.0
@@ -61,11 +74,13 @@ def test_castVector():
 
 
 def test_getMatrix():
+
     assert (sk.getMatrix([[1, 2, 3]]) == np.array([[1, 2, 3]])).all()
 
     m = sk.SimpleMatrix(1, 3)
 
     m.setValue(0, 0, 1)
+
 
     m.setValue(0, 1, 2)
 
@@ -79,9 +94,57 @@ def test_getMatrix():
     m2 = sk.SimpleMatrix(np.array([[1, 2, 3], [4, 5, 6]]))
     assert (sk.getMatrix(m1) == sk.getMatrix(sk.SimpleMatrix(m2))).all()
 
+    
+    
+def test_matrix_bracket_operator():
+    M = sk.SimpleMatrix(10,10)
+    M.zero()
+    M_nparray = np.zeros((10,10))
+    print(M_nparray)
+    def fill_matrix(M, M_nparray):
+        for i in range(M.size(0)):
+            for j in range(M.size(1)):
+                M[i,j] = float(i+j)
+                M_nparray[i,j] = float(i+j)
+                
+        return
+    fill_matrix(M,M_nparray)
+    
+    #print(M, type(M))
+    #print(M_nparray, type(M_nparray))
+    for i in range(M.size(0)):
+        for j in range(M.size(1)):
+            if M[i,j] != i+j :
+                return False
+            
+    #assert((M == M_nparray).all())
 
+            
+    M[0,1]=266.0
+    if M[0,1] != 266.0:
+        return (M[0,1]== 266.0)
+    
+    try:
+        # Slice indexing for SimpleMatrix is not yet implemented.
+        M[0:1]= [0,2]
+    except Exception as e:
+        print(e)
+
+    try:
+        M[1.0,1]= 4.0
+        # SiconosMatrix must be indexed by integer
+    except Exception as e:
+        print(e)
+
+        
+
+
+
+    
 def test_LagrangianDS_setMassPtr():
+
     class LDS(sk.LagrangianDS):
+
         pass
 
     lds = LDS()
@@ -113,6 +176,7 @@ def test_LagrangianScleronomousR_setJachqPtr():
 
 
 def test_SolverOption():
+
     lcp = sk.LCP()
 
     # Check default solver
@@ -129,6 +193,7 @@ def test_SolverOption():
 
 
 def test_BoundaryCondition():
+
     B = sk.BoundaryCondition([1, 2, 3])
 
     print(B)
@@ -138,3 +203,9 @@ def test_BoundaryCondition():
     B.velocityIndices()[2] = 5
 
     assert (B.velocityIndices() == [1, 2, 5]).all()
+if __name__ == "__main__":
+    
+    # execute only if run as a script
+    test_autocast()
+    test_matrix_bracket_operator()
+

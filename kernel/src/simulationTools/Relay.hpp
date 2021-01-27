@@ -29,9 +29,9 @@
 TYPEDEF_SPTR(RelayProblem)
 
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)
- 
+
   \section Relayintro Aim of the Relay class
- 
+
   This class is devoted to the formalization and the resolution of the
   Relay NonSmooth problems.
   \f[
@@ -43,7 +43,7 @@ TYPEDEF_SPTR(RelayProblem)
   where
      - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
      - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
-      
+
   \todo : add "recover" function to start from old values of z and w.
   \todo : review this introduction ...
 */
@@ -81,7 +81,7 @@ public:
   Relay(int numericsSolverId = SICONOS_RELAY_AVI_CAOFERRIS);
 
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst
@@ -150,6 +150,10 @@ public:
    *  \return information about the solver convergence.
    */
   int compute(double time);
+
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+
 
   /** print the data to the screen
    */

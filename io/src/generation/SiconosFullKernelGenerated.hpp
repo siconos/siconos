@@ -404,7 +404,7 @@ SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
   (_newtonResiduYMax)
   (_newtonTolerance)
   (_numberOfOneStepNSproblems))
-SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact,(LinearOSNS),
+SICONOS_IO_REGISTER_WITH_BASES(MultipleImpact,(LinearOSNS),
   (_DataMatrix)
   (_IsImpactEnd)
   (_Kcontact)

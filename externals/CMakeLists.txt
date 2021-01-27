@@ -111,7 +111,7 @@ endif()
 if(NOT WITH_SYSTEM_SUITESPARSE)
   # else suite sparse is an external dependency of numerics and handled in numerics
   # CMakeLists.txt.
-  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse/CXSparse)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse SuiteSparse/CXSparse SuiteSparse/LDL  )
 endif()
 # TEST TEST TEST
 
@@ -150,9 +150,9 @@ if(BUILD_AS_CPP)
   # set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
   # We require C++ 11. PUBLIC to propagate to numerics.
   if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
-    target_compile_features(externals PUBLIC cxx_std_11)
+    target_compile_features(externals PUBLIC cxx_std_17)
   else()
-    set_property(TARGET externals PROPERTY CXX_STANDARD 11)
+    set_property(TARGET externals PROPERTY CXX_STANDARD 17)
   endif()
 else()
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)

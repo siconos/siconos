@@ -50,8 +50,8 @@
    - Relay
    - Equality
    - GenericMechanical
-   - OSNSMultipleImpact
-   - GlobalFrictionContact (unstable)
+   - MultipleImpact
+   - GlobalFrictionContact
 
    The usual way to build and initialize a one-step nonsmooth problem is :
    - call constructor with the id of the required Numerics solver.
@@ -100,6 +100,9 @@ protected:
       dimension of the problem. It must not exceed ...
   */
   unsigned int _maxSize = 0;
+
+  /* set of nslaw types */
+  std::set<float> _nslawtype;
 
   /*During Newton it, this flag allows to update the numerics matrices only once if necessary.*/
   bool _hasBeenUpdated = false;

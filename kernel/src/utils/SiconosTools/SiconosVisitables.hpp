@@ -43,7 +43,7 @@
   REGISTER(LCP)                                        \
   REGISTER(MLCP)                                       \
   REGISTER(MLCPProjectOnConstraints)                   \
-  REGISTER(OSNSMultipleImpact)                         \
+  REGISTER(MultipleImpact)                             \
   REGISTER(FrictionContact)                            \
   REGISTER(GlobalFrictionContact)                      \
   REGISTER(SiconosVector)                              \

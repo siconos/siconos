@@ -304,12 +304,15 @@ extern "C"
    */
   void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax);
 
+
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.
       \param m the matrix to be deleted.
    */
+
   void NM_clear(NumericsMatrix* m);
+  NumericsMatrix *  NM_free(NumericsMatrix* m);
 
   /** Free memory for a NumericsMatrix except the dense matrix that is assumed not to be owned.
       Warning: call this function only if you are sure that
@@ -318,7 +321,7 @@ extern "C"
       \param m the matrix to be deleted.
    */
   void NM_clear_not_dense(NumericsMatrix* m);
-
+  NumericsMatrix *  NM_free_not_dense(NumericsMatrix* m);
   /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.
@@ -802,6 +805,13 @@ extern "C"
    * \param alpha the term to add
    */
   void NM_add_to_diag3(NumericsMatrix* M, double alpha);
+
+  /** Add a constant term to the diagonal elements, when the block of the SBM
+   * are 5x5
+   * \param M the matrix
+   * \param alpha the term to add
+   */
+  void NM_add_to_diag5(NumericsMatrix* M, double alpha);
 
   /** Add two matrices with coefficients C = alpha*A + beta*B
    * \param alpha the first coefficient

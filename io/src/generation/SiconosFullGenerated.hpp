@@ -427,7 +427,7 @@ SICONOS_IO_REGISTER_WITH_BASES(EventDriven,(Simulation),
   (_newtonResiduYMax)
   (_newtonTolerance)
   (_numberOfOneStepNSproblems))
-SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact,(LinearOSNS),
+SICONOS_IO_REGISTER_WITH_BASES(MultipleImpact,(LinearOSNS),
   (_DataMatrix)
   (_IsImpactEnd)
   (_Kcontact)
@@ -1129,7 +1129,7 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<TimeDiscretisationEvent*>(nullptr));
   ar.register_type(static_cast<TimeSteppingCombinedProjection*>(nullptr));
   ar.register_type(static_cast<EventDriven*>(nullptr));
-  ar.register_type(static_cast<OSNSMultipleImpact*>(nullptr));
+  ar.register_type(static_cast<MultipleImpact*>(nullptr));
   ar.register_type(static_cast<NonSmoothEvent*>(nullptr));
   ar.register_type(static_cast<QP*>(nullptr));
   ar.register_type(static_cast<TimeSteppingD1Minus*>(nullptr));

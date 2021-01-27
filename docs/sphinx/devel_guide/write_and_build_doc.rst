@@ -476,7 +476,7 @@ Dependencies
 ------------
 
 * `Doxygen`_
-* `Sphinx`_, sphinxcontrib.bibtex, sphinxcontrib-youtube, sphinxcontrib-napoleon
+* `Sphinx`_, sphinxcontrib.bibtex, sphinxcontrib-napoleon
 * sphinx-bootstrap-theme
 * `Breathe`_
 
@@ -485,7 +485,6 @@ See docs/requirements.txt for a list of required python packages, and try for ex
 .. code-block:: bash
 
    pip install -r ./docs/requirements.txt
-   pip install git+https://github.com/sphinx-contrib/youtube.git
 
 See also the file CI/make_siconos_doc.sh that may be helpful to install siconos docs, since it is used by continuous integration on gitlab to provide all dependencies required to build doc on ubuntu. 
 

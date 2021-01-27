@@ -419,6 +419,8 @@ SimpleMatrix::~SimpleMatrix()
     delete(mat.Triang);
   else if(_num == Siconos::SYMMETRIC)
     delete(mat.Sym);
+  else if(_num == Siconos::SPARSE_COORDINATE)
+    delete(mat.SparseCoordinate);
   else if(_num == Siconos::SPARSE)
     delete(mat.Sparse);
   else if(_num == Siconos::BANDED)
@@ -436,7 +438,7 @@ void SimpleMatrix::updateNumericsMatrix()
   NumericsMatrix * NM;
   if(_num == DENSE)
   {
-    _numericsMatrix.reset(NM_new(),NM_clear_not_dense); // When we reset, we do not free the matrix0
+    _numericsMatrix.reset(NM_new(),NM_free_not_dense); // When we reset, we do not free the matrix0
                                                         //that is linked to the array of the boost container
     NM = _numericsMatrix.get();
     double * data = (double*)(getArray());
@@ -446,7 +448,7 @@ void SimpleMatrix::updateNumericsMatrix()
   else
   {
     // For all the other cases, we build a sparse matrix and we call numerics for the factorization of a sparse matrix.
-    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_clear);
+    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_free);
     NM = _numericsMatrix.get();
     _numericsMatrix->matrix2->origin = NSM_CSC;
     NM_csc_alloc(NM, nnz());

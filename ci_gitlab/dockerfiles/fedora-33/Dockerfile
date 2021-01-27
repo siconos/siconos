@@ -1,4 +1,4 @@
-FROM fedora:31
+FROM fedora:33
 RUN dnf --setopt=deltarpm=false install -y \
 	make \
         cmake \
@@ -23,4 +23,4 @@ RUN dnf --setopt=deltarpm=false install -y \
         lapack-devel \
         suitesparse-devel \
         swig \
-        git-core
+        git-core && dnf clean all

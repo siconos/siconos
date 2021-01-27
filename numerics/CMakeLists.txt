@@ -182,6 +182,11 @@ if(WITH_SYSTEM_SUITESPARSE)
   # SuiteSparse headers are required by kernel
   target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
   target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXSparse_INCLUDE_DIR}>)
+
+  find_package(SuiteSparse COMPONENTS LDL REQUIRED)
+  target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::LDL>)
+  target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
+
 endif()
 
 # - MLCP Simplex -

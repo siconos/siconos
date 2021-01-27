@@ -38,9 +38,9 @@ TYPEDEF_SPTR(GlobalFrictionContactProblem)
  *
 
  \rst
- 
+
  .. math::
-  
+
    M velocity =  q + H reaction \\
    globalVelocities = H^T velocity + tildeGlobalVelocities
 
@@ -78,7 +78,7 @@ class GlobalFrictionContact : public LinearOSNS
 private:
   /** default constructor */
   GlobalFrictionContact() = default;
-  
+
 protected:
   /** serialization hooks
   */
@@ -119,7 +119,7 @@ public:
   GlobalFrictionContact(int dimPb, int numericsSolverId = SICONOS_GLOBAL_FRICTION_3D_NSGS);
 
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst
@@ -239,9 +239,11 @@ public:
   virtual void postCompute();
 
 
-  
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+
   void updateMu();
-  
+
   /** print the data to the screen */
   void display() const;
 };

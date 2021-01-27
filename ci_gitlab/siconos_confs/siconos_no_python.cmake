@@ -15,7 +15,7 @@
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 
 # --- List of siconos components to build and install ---
-# The complete list is : externals numerics kernel control mechanics mechanisms io
+# The complete list is : externals numerics
 # mechanisms is "off" by default.
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.
@@ -36,8 +36,6 @@ option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=O
 option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)
 option(WITH_TESTING "Enable 'make test' target" ON)
-option(WITH_GIT "Consider sources are under GIT" OFF)
-
 
 # --- Documentation setup ---
 option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF)
