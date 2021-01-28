@@ -167,9 +167,9 @@ int frictionContact_test_function(TestCase* current)
   }
 
   if(!info)
-    printf("test successful, residual = %g\t, number of iterations = %i \n", current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+    printf("test success, residual = %9.2e, info = %d, nb iter = %i\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   else
-    printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+    printf("test failure, residual = %9.2e, info = %d, nb iter = %i\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
 
   free(reaction);
   free(velocity);

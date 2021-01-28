@@ -951,6 +951,11 @@ bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
                      i,j, NM_get_value(A, i, j),
                      i,j, NM_get_value(B, i, j),
                      fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+
+        printf("A(%i,%i) = %e\t, B(%i,%i) = %e\t,  error = %e\n",
+                     i,j, NM_get_value(A, i, j),
+                     i,j, NM_get_value(B, i, j),
+                     fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
         return false;
       }
     }

@@ -511,7 +511,13 @@ enum SICONOS_FRICTION_3D_IPM_IPARAM_ENUM
   /** index in iparam to store the sparse storage parameter */
   SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE= 12,
   /** index in iparam to get problem info */
-  SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO= 13
+  SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO= 13,
+  /** index in iparam to print iterates (including problem data) into a Matlab file */
+  SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE= 14,
+  /** index in iparam to use reduce the linear system */
+  SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM= 15,
+  /** index in iparam to finish the solution without scaling */
+  SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING= 16
 
 };
 

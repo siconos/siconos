@@ -28,7 +28,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "frictionContact_test_utils.h"    // for globalFrictionContact_test...
 #include "test_utils.h"                    // for TestCase
-
+#include <time.h>
 #include "SiconosConfig.h"                 // for HAVE_GAMS_C_API // IWYU pragma: keep
 
 int globalFrictionContact_test_function(TestCase* current)
@@ -51,13 +51,17 @@ int globalFrictionContact_test_function(TestCase* current)
   double *velocity = calloc(dim * NC, sizeof(double));
   double *globalvelocity = calloc(n, sizeof(double));
 
+  long clk_tck = CLOCKS_PER_SEC;
+
+
   // --- Extra setup for options when the solver belongs to GAMS family ---
 #ifdef HAVE_GAMS_C_API
   // Do we really need this?
   frictionContact_test_gams_opts(current->options);
 #endif
 
-
+  clock_t t1 = clock();
+  
   if(dim == 2)
   {
     info = 1;
@@ -67,8 +71,11 @@ int globalFrictionContact_test_function(TestCase* current)
     info = gfc3d_driver(problem,
                         reaction, velocity, globalvelocity,
                         current->options);
+    //    printf("info = %i\n", info);
   }
 
+  clock_t t2 = clock();
+  
   int print_size = 10;
 
   if(dim * NC >= print_size)
@@ -109,9 +116,12 @@ int globalFrictionContact_test_function(TestCase* current)
   }
 
   if(!info)
-    printf("test successful, residual = %e\t, number of iterations = %i \n", current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+    printf("test: success\n");
   else
-    printf("test unsuccessful, residual = %e, info = %d, nb iter = %d\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+    printf("test: failure\n");
+    
+  printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
+  printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
 
   free(reaction);
   free(velocity);
@@ -121,3 +131,4 @@ int globalFrictionContact_test_function(TestCase* current)
   return info;
 
 }
+
