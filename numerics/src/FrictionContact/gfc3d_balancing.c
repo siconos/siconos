@@ -81,7 +81,7 @@ void gfc3d_balancing_MHHT(
     NM_triplet(B_for_H->D2)->x[i+2] = NM_triplet(B_for_H->D2)->x[i];
     NM_triplet(B_for_H->D1)->x[i+1] = NM_triplet(B_for_H->D2)->x[i];
     NM_triplet(B_for_H->D1)->x[i+2] = NM_triplet(B_for_H->D2)->x[i];
-  }  
+  }
   NumericsMatrix* H_tmp = NM_create(NM_SPARSE, n, m);
   NM_triplet_alloc(H_tmp, n);
   NM_gemm(1.0,problem->H,B_for_H->D2,0.0, H_tmp); // H * D2H
@@ -215,6 +215,7 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
   {
     numerics_printf_verbose(1,"---- GFC3D - BALANCING - Rescaling of the problem by balancing M");
     data->B_for_M  = NM_BalancingMatrices_new(problem->M);
+    //NM_compute_balancing_matrices(problem->M, 1e-2, 5, data->B_for_M);
     gfc3d_balancing_M(rescaled_problem, data->B_for_M);
   }
   /* else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_H) */
@@ -236,8 +237,9 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
     NumericsMatrix *HT =  NM_transpose(H);
     NM_insert(MHHT, HT, n, 0);
 
-    NM_display(MHHT);
+    //NM_display(MHHT);
     BalancingMatrices * B_for_MHHT = NM_BalancingMatrices_new(MHHT);
+    //NM_compute_balancing_matrices(MHHT, 1e-2, 5, B_for_MHHT);
 
     /* to simplify the use of the balancing matrices, we split it */
     data->B_for_M = NM_BalancingMatrices_new(problem->M); // lazy mode
@@ -247,11 +249,12 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
     {
        NM_triplet(data->B_for_M->D2)->x[i] = NM_triplet(B_for_MHHT->D2)->x[i];
        NM_triplet(data->B_for_M->D1)->x[i] = NM_triplet(B_for_MHHT->D1)->x[i];
+       NM_triplet(data->B_for_H->D1)->x[i] = NM_triplet(B_for_MHHT->D1)->x[i+n];
     }
-    for(size_t i =n; i < n+m ; i++)
+    for(size_t i =0; i < m ; i++)
     {
-       NM_triplet(data->B_for_H->D2)->x[i-n] = NM_triplet(B_for_MHHT->D2)->x[i];
-       NM_triplet(data->B_for_H->D1)->x[i-n] = NM_triplet(B_for_MHHT->D1)->x[i];
+       NM_triplet(data->B_for_H->D2)->x[i] = NM_triplet(B_for_MHHT->D2)->x[i+m];
+
     }
     gfc3d_balancing_MHHT(rescaled_problem, data->B_for_M, data->B_for_H);
   }

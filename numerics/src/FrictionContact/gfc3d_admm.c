@@ -868,20 +868,20 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
         }
       }
 
-      /* double error_original=0.0; */
+      double error_original=0.0;
       if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
       {
-        /* (*computeError)(problem,  reaction, velocity, v,  tolerance, options, */
-        /*                 norm_q, norm_b,  &error); */
-        /* printf("############ error  = %g\n", error); */
+        (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
+                        norm_q, norm_b,  &error);
+        printf("############ error  = %g\n", error);
         
         gfc3d_balancing_back_to_original_variables(problem,
                                                  options,
                                                  reaction, velocity, v);
         (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
                         original_problem->norm_b, original_problem->norm_b,  &error);
-        /* error_original = error; */
-        /* printf("############ error original = %g\n", error_original); */
+        error_original = error;
+        printf("############ error original = %g\n", error_original);
       }
       else
       {
