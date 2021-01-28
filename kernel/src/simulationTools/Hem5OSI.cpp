@@ -213,7 +213,7 @@ void Hem5OSI::updateIntData()
   }
   if(MODE >3)
   {
-    RuntimeException::selfThrow("Hem5OSI::updateIntData(), MODE >3 Sparse case not implemented ...");
+    THROW_EXCEPTION("Hem5OSI::updateIntData(), MODE >3 Sparse case not implemented ...");
   }
 
   // 5 - LWK length of real array rwork
@@ -356,7 +356,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
       }
       else
       {
-        RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Lagrangian DS is allowed");
+        THROW_EXCEPTION("Hem5OSI::fprob(), Only integration of Lagrangian DS is allowed");
       }
       DEBUG_EXPR(
         for(int kk =0 ; kk < (int)(*NV)* (int)(*NV); kk ++)
@@ -381,11 +381,11 @@ void Hem5OSI_impl::fprob(integer* IFCN,
       }
       else if(Type::value(*ds) == Type::NewtonEulerDS)
       {
-        RuntimeException::selfThrow("Hem5OSI::fprob(), Integration of Newton Euler DS not yet implemented.");
+        THROW_EXCEPTION("Hem5OSI::fprob(), Integration of Newton Euler DS not yet implemented.");
       }
       else
       {
-        RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Lagrangian DS is allowed");
+        THROW_EXCEPTION("Hem5OSI::fprob(), Only integration of Lagrangian DS is allowed");
       }
     }
     for(unsigned int ii =0 ; ii < (unsigned int)(*NV); ii ++)
@@ -423,7 +423,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
 
   if((ifcn == 5) || (ifcn == 7))   // compute GPP ( Hessian of the constraints)
   {
-    //RuntimeException::selfThrow("Hem5OSI::fprob(), G_qq is not available");
+    //THROW_EXCEPTION("Hem5OSI::fprob(), G_qq is not available");
     std::cout << "Hem5OSI::fprob(), G_qq is not available " << std::endl;
   }
 
@@ -467,11 +467,11 @@ void Hem5OSI_impl::fprob(integer* IFCN,
       }
       else if(Type::value(*ds) == Type::NewtonEulerDS)
       {
-        RuntimeException::selfThrow("Hem5OSI::fprob(), Integration of Newton Euler DS not yet implemented.");
+        THROW_EXCEPTION("Hem5OSI::fprob(), Integration of Newton Euler DS not yet implemented.");
       }
       else
       {
-        RuntimeException::selfThrow("Hem5OSI::fprob(), Only integration of Mechanical DS is allowed");
+        THROW_EXCEPTION("Hem5OSI::fprob(), Only integration of Mechanical DS is allowed");
       }
 
     }
@@ -531,7 +531,7 @@ void Hem5OSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
   }
   else
   {
-    RuntimeException::selfThrow("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
+    THROW_EXCEPTION("Hem5OSI::initialize(), Only integration of Lagrangian DS is allowed");
   }
 
   ds->swapInMemory();
@@ -582,10 +582,10 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-    RuntimeException::selfThrow("HEM5OSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    THROW_EXCEPTION("HEM5OSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("HEM5OSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
+    THROW_EXCEPTION("HEM5OSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -595,7 +595,7 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
   /* allocate and set work vectors for the osi */
   if(!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("Hem5OSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
+    THROW_EXCEPTION("Hem5OSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
@@ -853,7 +853,7 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
               &_idid);
 
 #else
-  RuntimeException::selfThrow("Hem5, Fortran Language is not enabled in siconos kernel. Compile with fortran if you need Hem5");
+  THROW_EXCEPTION("Hem5, Fortran Language is not enabled in siconos kernel. Compile with fortran if you need Hem5");
 #endif
   // === Post ===
   if(_idid < 0)  // if istate < 0 => HEM2 failed
@@ -864,7 +864,7 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
     std::cout << " -3 means step size becomes too small." <<std::endl;
     std::cout << " -4 means matrix is singular" <<std::endl;
     std::cout << " -5 means initial projection: no convergence" <<std::endl;
-    RuntimeException::selfThrow("Hem5OSI::integrate(), integration failed");
+    THROW_EXCEPTION("Hem5OSI::integrate(), integration failed");
   }
 
   DEBUG_EXPR_WE(std::cout << "HEM5 Statitics : " <<std::endl;
@@ -931,7 +931,7 @@ void Hem5OSI::updateState(const unsigned int level)
       }
     }
   }
-  else RuntimeException::selfThrow("Hem5OSI::updateState(index), index is out of range. Index = " + std::to_string(level));
+  else THROW_EXCEPTION("Hem5OSI::updateState(index), index is out of range. Index = " + std::to_string(level));
 }
 
 struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
@@ -1023,7 +1023,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
 
   }
   else
-    RuntimeException::selfThrow(" computeqBlock for Event Event-driven is wrong ");
+    THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 
   if(relationType == Lagrangian)
   {
@@ -1055,7 +1055,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
     {
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
-        RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
+        THROW_EXCEPTION("Hem5OSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
       }
       else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
@@ -1063,7 +1063,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
         subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
       }
       else
-        RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
+        THROW_EXCEPTION("Hem5OSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
     }
     // For the relation of type LagrangianScleronomousR
     if(relationSubType == ScleronomousR)
@@ -1076,7 +1076,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
     }
   }
   else
-    RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for Relation of type " + std::to_string(relationType));
+    THROW_EXCEPTION("Hem5OSI::computeFreeOutput not yet implemented for Relation of type " + std::to_string(relationType));
   if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
     if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)

@@ -1,3 +1,3 @@
 name = "gendoctools"
 
-with_doxy2swig = '@WITH_DOXY2SWIG@' is 'ON'
+with_doxy2swig = '@WITH_DOXY2SWIG@' == 'ON'

@@ -39,6 +39,7 @@
 #include "SiconosBlas.h"                   // for cblas_dnrm2, cblas_dgemv
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
+#include "fc2d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
 #include "numerics_verbose.h"              // for verbose
 #include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
@@ -174,6 +175,20 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double *reaction, double *
         *err = localError ;
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
       numerics_printf("GenericMechanical_driver, localerror of lcp: %e\n", localError);
+#endif
+      break;
+    }
+    case SICONOS_NUMERICS_PROBLEM_FC2D:
+    {
+      FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
+      localError = 0.;
+      double worktmp[2];
+      fc2d_unitary_compute_and_add_error(reaction + posInX, velocity + posInX, fcProblem->mu[0], &localError, worktmp);
+      localError = sqrt(localError) / (1 + cblas_dnrm2(curSize, curProblem->q, 1));
+      if(localError > *err)
+        *err = localError ;
+#ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
+      numerics_printf("GenericMechanical_driver FC2D, Local Velocity v_n=%e v_t1=%e v_t2=%e localerror=%e\n", *(velocity + posInX), *(velocity + posInX + 1),  localError);
 #endif
       break;
     }
@@ -364,17 +379,50 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
         fcProblem->M->matrix0 = diagBlock;
         memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
 
-        DEBUG_EXPR_WE(NV_display(curProblem->q,3);
-
-
-                      for(int i =0 ; i < 3; i++) numerics_printf("curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,curProblem->q[i],i,fcProblem->q[i]););
+        DEBUG_EXPR_WE(
+          NV_display(curProblem->q,3);
+          for(int i =0 ; i < 3; i++)
+            numerics_printf("curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,curProblem->q[i],i,fcProblem->q[i]);
+          );
 
         NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, fcProblem->q, NULL, 0);
 
-        DEBUG_EXPR_WE(for(int i =0 ; i < 3; i++)  numerics_printf("reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,reaction[i],i,fcProblem->q[i]););
+        DEBUG_EXPR_WE(
+          for(int i =0 ; i < 3; i++)
+            numerics_printf("reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",
+                            i,reaction[i],i,fcProblem->q[i]);
+          );
 
         /* We call the generic driver (rather than the specific) since we may choose between various local solvers */
         resLocalSolver = fc3d_driver(fcProblem, sol, w, options->internalSolvers[1]);
+        //resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
+        break;
+      }
+      case SICONOS_NUMERICS_PROBLEM_FC2D:
+      {
+        numerics_printf_verbose(1, "solve SICONOS_NUMERICS_PROBLEM_FC2D");
+        FrictionContactProblem * fcProblem = (FrictionContactProblem *)curProblem->problem;
+        assert(fcProblem);
+        assert(fcProblem->M);
+        assert(fcProblem->q);
+        fcProblem->M->matrix0 = diagBlock;
+        memcpy(curProblem->q, &(pGMP->q[posInX]), curSize * sizeof(double));
+
+        DEBUG_EXPR_WE(
+          NV_display(curProblem->q,2);
+          for(int i =0 ; i < 2; i++)
+            numerics_printf("curProblem->q[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,curProblem->q[i],i,fcProblem->q[i]);
+          );
+
+        NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, fcProblem->q, NULL, 0);
+
+        DEBUG_EXPR_WE(
+          for(int i =0 ; i < 2; i++)
+            numerics_printf("reaction[%i]= %12.8e,\t fcProblem->q[%i]= %12.8e,\n",i,reaction[i],i,fcProblem->q[i]);
+          );
+
+        /* We call the generic driver (rather than the specific) since we may choose between various local solvers */
+        resLocalSolver = fc2d_driver(fcProblem, sol, w, options->internalSolvers[3]);
         //resLocalSolver=fc3d_unitary_enumerative_solve(fcProblem,sol,&options->internalSolvers[1]);
         break;
       }
@@ -423,9 +471,6 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
         *pCoefLS = 1.0;
         memcpy(velocity, pBuffVelocity, pGMP->size * sizeof(double));
       }
-
-
-
     }
     else
     {
@@ -574,6 +619,7 @@ void gmp_set_default(SolverOptions* options)
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_LEMKE);
   options->internalSolvers[1] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
   options->internalSolvers[2] = solver_options_create(SICONOS_RELAY_LEMKE);
+  options->internalSolvers[3] = solver_options_create(SICONOS_FRICTION_2D_NSGS);
 
   /* switch (id) */
   /*   { */

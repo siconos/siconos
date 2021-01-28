@@ -126,9 +126,23 @@ void AVI::initialize(SP::Simulation sim)
 
     // we do not support more than one interaction
     if(!(nbInter++ == 0))
-      RuntimeException::selfThrow("AVI::initialize :: more than one Interactions for this OneStepNSProblem is not support ATM!");
+      THROW_EXCEPTION("AVI::initialize :: more than one Interactions for this OneStepNSProblem is not support ATM!");
   }
 
+}
+bool AVI::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  float type_number= (float) (Type::value(nslaw));
+  _nslawtype.insert(type_number);
+
+  if (not (Type::value(nslaw) == Type::NormalConeNSL))
+  {
+    THROW_EXCEPTION("\nAVI::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with AVVI one step nonsmooth problem. \n \
+                      Compatible NonSmoothLaw are: NormalConeNSL\n");
+    return false;
+  }
+  return true;
 }
 
 
@@ -142,7 +156,7 @@ int AVI::compute(double time)
 
   if(_numerics_problem->size != _sizeOutput)
   {
-    RuntimeException::selfThrow("AVI::compute - size mismatch between AVI size and and the current size");
+    THROW_EXCEPTION("AVI::compute - size mismatch between AVI size and and the current size");
   }
 
   // --- Call Numerics driver ---

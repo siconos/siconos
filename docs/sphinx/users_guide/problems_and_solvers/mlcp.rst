@@ -3,7 +3,7 @@
    
 .. contents::
 
-.. _lcp_problem:
+.. _mlcp_problem:
 
 Mixed Linear Complementarity Problems (MLCP)
 ********************************************

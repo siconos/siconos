@@ -355,7 +355,7 @@ public:
    */
   void setRhs(const SiconosVector& newValue)
   {
-    RuntimeException::selfThrow("LagrangianDS - setRhs call is forbidden for 2nd order systems.");
+    THROW_EXCEPTION("LagrangianDS - setRhs call is forbidden for 2nd order systems.");
   }
 
   /** set right-hand side, \f$ \dot x \f$ (pointer link)
@@ -363,7 +363,7 @@ public:
    */
   void setRhsPtr(SP::SiconosVector newPtr)
   {
-    RuntimeException::selfThrow("LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
+    THROW_EXCEPTION("LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
   }
 
   /** function to compute \f$F(v,q,t,z)\f$ for the current state

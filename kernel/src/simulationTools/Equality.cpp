@@ -18,6 +18,7 @@
 #include "Equality.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
+#include "EqualityConditionNSL.hpp"
 #include "SolverOptions.h"
 #include <NumericsMatrix.h>
 
@@ -33,6 +34,21 @@ Equality::Equality(SP::SolverOptions options):
   LinearOSNS(options)
 {}
 
+bool Equality::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  float type_number= (float) (Type::value(nslaw));
+  _nslawtype.insert(type_number);
+
+  if (not (Type::value(nslaw) == Type::EqualityConditionNSL))
+  {
+    THROW_EXCEPTION("\nEquality::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with Equality one step nonsmooth problem. \n \
+                      Compatible NonSmoothLaw are: EqualityConditionNSL\n");
+    return false;
+  }
+
+  return true;
+}
 int Equality::compute(double time)
 {
   int info = 0;

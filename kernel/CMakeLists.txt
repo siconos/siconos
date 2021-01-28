@@ -26,7 +26,6 @@ set(${COMPONENT}_DIRS
   src/.
   src/utils
   src/utils/SiconosAlgebra
-  src/utils/SiconosException
   src/utils/SiconosMemory
   src/utils/SiconosSharedLibrary
   src/utils/SiconosTools
@@ -67,9 +66,9 @@ create_siconos_component(${COMPONENT})
 
 # We require C++ 11. PUBLIC to propagate to other components.
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
-  target_compile_features(kernel PUBLIC cxx_std_11)
+  target_compile_features(kernel PUBLIC cxx_std_17)
 else()
-  set_property(TARGET kernel PROPERTY CXX_STANDARD 11)
+  set_property(TARGET kernel PROPERTY CXX_STANDARD 17)
 endif()
 
 # --- Extra setup for the component ---

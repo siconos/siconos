@@ -20,7 +20,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianDS.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 class LagrangianDSTest : public CppUnit::TestFixture
 {

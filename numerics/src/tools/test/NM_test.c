@@ -2882,6 +2882,7 @@ static int test_NM_LU_solve_matrix_rhs_unit(NumericsMatrix * M1, NumericsMatrix 
 }
 static int test_NM_LU_solve_matrix_rhs(void)
 {
+  numerics_set_verbose(3);
 
   printf("========= Starts Numerics tests for NumericsMatrix (test_NM_LU_solve) ========= \n");
   /* numerics_set_verbose(2); */
@@ -2933,6 +2934,7 @@ static int test_NM_LU_solve_matrix_rhs(void)
     B->matrix0[j+j*n] = 1.0;
   info = test_NM_LU_solve_matrix_rhs_unit(M1, B);
   NM_clear(B);
+  if(info != 0) return info;
 
   /* SPARSE matrix, SPARSE RHS */
   M1 = test_matrix_5();
@@ -2999,6 +3001,9 @@ static int test_NM_Cholesky_solve_unit(NumericsMatrix * M, double * b)
 
   printf("Cholesky solve without preserving matrix\n");
   NM_unpreserve(M);
+#ifdef WITH_OPENSSL
+  NM_clear_values_sha1(M);
+#endif
   for(int j=0; j < n; j++)
   {
     b[j] = y_save[j];
@@ -3346,6 +3351,9 @@ static int test_NM_LDLT_solve_unit(NumericsMatrix * M, double * b)
 
   printf("LDLT solve without preserving matrix\n");
   NM_unpreserve(M);
+#ifdef WITH_OPENSSL
+  NM_clear_values_sha1(M);
+#endif
   for(int j=0; j < n; j++)
   {
     b[j] = y_save[j];
@@ -3415,7 +3423,7 @@ static int test_NM_LDLT_solve(void)
   int n =10;
   b = (double*)malloc(n* sizeof(double)); 
 
-#if defined(WITH_MUMPS) || defined(WITH_MA57) 
+
   printf("test 1 ...\n");
   NumericsMatrix *Id = NM_eye(10);
   //NM_scal(Id, 5.0);
@@ -3444,7 +3452,7 @@ static int test_NM_LDLT_solve(void)
   NM_clear(Z);
   free(Z);
   printf("test 2 ... ok\n");
-#endif
+
   printf("test 3 ...\n");
   M1 = NMM[0];
   NumericsMatrix * M1T = NM_transpose(M1);
@@ -3471,7 +3479,7 @@ static int test_NM_LDLT_solve(void)
   /*   b[j] =1.0; */
   /* info = test_LDLT_solve_unit_unit(C, b); */
   /* if (info != 0) return info; */
-#if defined(WITH_MUMPS) || defined(WITH_MA57) 
+
   printf("test 5 ...\n");
   M1 = test_matrix_5();
   M1T = NM_transpose(M1);
@@ -3485,7 +3493,7 @@ static int test_NM_LDLT_solve(void)
   info = test_NM_LDLT_solve_unit(C, b);
   if(info != 0) return info;
   printf("test 5 ... ok\n");
-#endif
+
   free(b);
 
   printf("End of NM_LDLT...\n");

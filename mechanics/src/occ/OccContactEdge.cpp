@@ -2,7 +2,7 @@
 #include "ContactShapeDistance.hpp"
 #include "cadmbtb.hpp"
 
-#include <RuntimeException.hpp>
+#include <SiconosException.hpp>
 
 #include <TopoDS.hxx>
 #include <TopExp_Explorer.hxx>

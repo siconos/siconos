@@ -59,7 +59,7 @@ TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(
   _indexSetLevelForProjection = level;
   if(_indexSetLevelForProjection != 2)
   {
-    RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection level not equal to 2 is not yet implemented.  ");
+    THROW_EXCEPTION("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection level not equal to 2 is not yet implemented.  ");
 
   }
   _constraintTol = 1e-08;
@@ -305,7 +305,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     if(_nbIndexSetsIteration > _kIndexSetMax)
     {
-      RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection _nbIndexSetsIteration >  _kIndexSetMax ");
+      THROW_EXCEPTION("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection _nbIndexSetsIteration >  _kIndexSetMax ");
     }
 
 
@@ -424,7 +424,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         *workVectors[MoreauJeanOSI::QTMP] = * d->q();
       }
       else
-        RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+        THROW_EXCEPTION("TimeSteppingCombinedProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
     }
 
 
@@ -518,7 +518,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 #endif
         }
         else
-          RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+          THROW_EXCEPTION("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
       }
 
@@ -595,7 +595,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       {
       }
       else
-        RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+        THROW_EXCEPTION("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
     }
 
 

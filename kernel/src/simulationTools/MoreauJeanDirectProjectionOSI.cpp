@@ -88,7 +88,7 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS(double t, SP::Dyn
   }
   else
   {
-    RuntimeException::selfThrow("MoreauJeanDirectProjectionOSI::initialize() - DS not of the right type");
+    THROW_EXCEPTION("MoreauJeanDirectProjectionOSI::initialize() - DS not of the right type");
   }
   for(unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
   {

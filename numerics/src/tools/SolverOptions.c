@@ -238,7 +238,8 @@ void solver_options_delete(SolverOptions* op)
 
     op->isSet = false;
   }
-  free(op);
+//  double free or corruption
+//  free(op);
 }
 
 SolverOptions * solver_options_copy(SolverOptions* source)
@@ -697,6 +698,12 @@ SolverOptions * solver_options_create(int solverId)
     rfc3d_nsgs_set_default(options);
     break;
   }
+  case SICONOS_ROLLING_FRICTION_3D_ADMM:
+  {
+    options = solver_options_initialize(solverId, 1000, 1e-4, 0);
+    rolling_fc3d_admm_set_default(options);
+    break;
+  }
   case SICONOS_ROLLING_FRICTION_2D_NSGS:
   {
     options = solver_options_initialize(solverId, 1000, 1e-4, 1);
@@ -901,7 +908,7 @@ SolverOptions * solver_options_create(int solverId)
   // --- GMP Solver ---
   case SICONOS_GENERIC_MECHANICAL_NSGS:
   {
-    options = solver_options_initialize(solverId, 10000, 1e-4, 3);
+    options = solver_options_initialize(solverId, 10000, 1e-4, 4);
     gmp_set_default(options);
     break;
   }
@@ -955,5 +962,19 @@ SolverOptions * solver_options_get_internal_solver(SolverOptions * options, size
   }
   else
     return options->internalSolvers[n];
+}
+
+void solver_options_set_internal_solver(SolverOptions * options,
+                                                   size_t n,
+                                                   SolverOptions* NSO)
+{
+  if(n+1 > options->numberOfInternalSolvers)
+  {
+    printf("solver_options_set_internal_solver : the index must be between 0 and  options->numberOfInternalSolvers -1 ");
+  }
+  else
+  {
+    options->internalSolvers[n] = NSO;
+  }
 }
 

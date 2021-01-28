@@ -28,7 +28,8 @@
 #include <string.h>            // for strtok_r, memcpy, strncmp
 #include "SiconosCompat.h"     // for SN_PTRDIFF_T_F
 #include "numerics_verbose.h"  // for CHECK_IO
-
+#define LDL_LONG
+#include "ldl.h"
 #if defined(__cplusplus)
 #undef restrict
 #include <sys/cdefs.h> // for __restrict
@@ -261,6 +262,77 @@ int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_f
 
   return (S && cs_chol_A->N);
 }
+int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_ldlt_A)
+{
+  assert(A);
+
+  CS_INT *Ap, *Ai, *Lp, *Li;
+  CS_INT *Parent;
+  CS_ENTRY *Ax, *Lx;
+  css *S;
+  csn *N;
+  CS_INT n, lnz, d;
+  DEBUG_EXPR(cs_print(A,1););
+  Ap=A->p;
+  Ai=A->i;
+  Ax=A->x;
+
+  cs_ldlt_A->n = n =  A->n;
+
+  /* could be good to good cs_spalloc */
+
+  cs_ldlt_A->N = N        =  cs_calloc (1, sizeof (csn)) ;       /* allocate result N */
+  cs_ldlt_A->N->L         = cs_calloc (1, sizeof (cs)) ;         /* allocate the cs struct */
+  cs_ldlt_A->N->L->m =n;
+  cs_ldlt_A->N->L->n =n;
+  cs_ldlt_A->N->L->nz =-1;
+  cs_ldlt_A->N->L->p = Lp = cs_malloc (n+1, sizeof (CS_INT)) ;
+
+
+  cs_ldlt_A->S = S = cs_calloc (1, sizeof (css)) ;              /* allocate result S */
+  cs_ldlt_A->S->parent = Parent = cs_malloc (n+1, sizeof (CS_INT)) ;
+
+  CS_INT* Lnz = cs_malloc (n, sizeof (CS_INT)) ;
+  CS_INT* Flag =  cs_malloc (n, sizeof (CS_INT)) ;
+
+  /* ordering with amd */
+  CS_INT * Perm, *PermInv;
+  cs_ldlt_A->N->pinv = Perm  = cs_amd (order, A) ;  /* We used pinv to store Perm !! */
+  PermInv = cs_malloc (n, sizeof (CS_INT)) ;
+
+
+  DEBUG_EXPR(for (int k =0; k< n+1; k++){printf("%li\t", Perm[k]);}printf("\n"););
+
+  /* symbolic factorization to get Lp, Parent, Lnz, and Pinv */
+  LDL_symbolic (n, Ap, Ai, Lp, Parent, Lnz, Flag, Perm, PermInv) ;
+  DEBUG_EXPR(for (int k =0; k< n+1; k++){printf("%li\t", Lp[k]);}printf("\n"););
+  DEBUG_EXPR(for (int k =0; k< n; k++){printf("%li\t", Flag[k]);}printf("\n"););
+
+  /* factorization */
+  lnz = Lp [n] ;
+  DEBUG_PRINTF("Lp[n] = %ld\n", Lp[n]);
+  cs_ldlt_A->N->L->i = Li = cs_malloc (lnz, sizeof (CS_INT)) ;
+  cs_ldlt_A->N->L->x = Lx = cs_malloc (lnz, sizeof (CS_ENTRY)) ;
+
+  CS_INT *Pattern =  cs_malloc (n, sizeof (CS_INT)) ;
+  CS_ENTRY* D;
+  cs_ldlt_A->N->B = D= cs_malloc (n, sizeof (CS_ENTRY)) ; /* We use cs_ldlt_A->N->B  for storing D !! */
+  CS_ENTRY* Y = cs_malloc (n, sizeof (CS_ENTRY)) ;
+  d = LDL_numeric (n, Ap, Ai, Ax, Lp, Parent, Lnz, Li, Lx, D,
+                   Y, Flag, Pattern, Perm, PermInv) ;
+
+  DEBUG_EXPR(cs_print(cs_ldlt_A->N->L,1););
+  DEBUG_EXPR(NV_display(D,n));
+
+
+  cs_free(Lnz);
+  cs_free(Flag);
+  cs_free(PermInv);
+  cs_free(Pattern);
+  cs_free(Y);
+
+  return (S && cs_ldlt_A->N);
+}
 
 void CSparseMatrix_free_lu_factors(CSparseMatrix_factors* cs_lu_A)
 {
@@ -319,7 +391,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
   if(!S) return 1;
 
   CS_ENTRY *x, *b, *Xx, *Bx ;
-  CS_INT *xi, *pinv, *q, top, k, col, i, p, j,  *Bp, *Bi, *Xp, *Xi;
+  CS_INT *xi, *pinv, *q, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
 
   x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
   b = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
@@ -442,7 +514,7 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatr
   if(!S) return 1;
 
   CS_ENTRY *x, *b, *Xx, *Bx ;
-  CS_INT *xi, *pinv, top, k, col, i, p, j,  *Bp, *Bi, *Xp, *Xi;
+  CS_INT *xi, *pinv, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
 
   x = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
   b = cs_malloc(n, sizeof(CS_ENTRY)) ;              /* get CS_ENTRY workspace */
@@ -531,6 +603,58 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A,  CSparseMatr
   return (ok);
 }
 
+
+CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors* cs_ldlt_A, double* x, double *b)
+{
+  assert(cs_ldlt_A);
+
+  CS_INT ok;
+
+  CS_INT n = cs_ldlt_A->n;
+  css* S = cs_ldlt_A->S;
+  csn* N = cs_ldlt_A->N;
+  ok = (S && N && x) ;
+
+
+  cs* L;
+  CS_INT  *Lp, *Li;
+  CS_ENTRY *Lx;
+
+  if(ok)
+  {
+    CS_INT * P = cs_ldlt_A->N->pinv; /* We used pinv to store Perm !! */
+    CS_ENTRY* D = cs_ldlt_A->N->B;   /* We use cs_ldlt_A->N->B  for storing D !! */
+
+    L = cs_ldlt_A->N->L;
+    Lp=L->p;
+    Li=L->i;
+    Lx=L->x;
+
+    /* solve Ax=b */
+		if (P)
+		{
+      /* the factorization is LDL' = PAP' */
+      LDL_perm (n, x, b, P) ;			/* y = Pb */
+      LDL_lsolve (n, x, Lp, Li, Lx) ;		/* y = L\y */
+      LDL_dsolve (n, x, D) ;			/* y = D\y */
+      LDL_ltsolve (n, x, Lp, Li, Lx) ;		/* y = L'\y */
+      LDL_permt (n, b, x, P) ;			/* x = P'y */
+		}
+		else
+		{
+      /* the factorization is LDL' = A */
+      DEBUG_EXPR(NV_display(b,n));
+      DEBUG_EXPR(NV_display(D,n));
+      LDL_lsolve (n, b, Lp, Li, Lx) ;		/* x = L\x */
+      LDL_dsolve (n, b, D) ;			/* x = D\x */
+      LDL_ltsolve (n, b, Lp, Li, Lx) ;		/* x = L'\x */
+      DEBUG_EXPR(NV_display(b,n));
+		}
+
+
+  }
+  return (ok);
+}
 
 CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
 {

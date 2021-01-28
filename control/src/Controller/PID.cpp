@@ -84,7 +84,7 @@ void PID::setK(SP::SiconosVector K)
   // check dimensions ...
   if(K->size() != 3)
   {
-    RuntimeException::selfThrow("PID::setK - the size of K should be 3");
+    THROW_EXCEPTION("PID::setK - the size of K should be 3");
   }
   else
   {

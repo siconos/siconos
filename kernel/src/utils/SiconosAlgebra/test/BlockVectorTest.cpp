@@ -74,7 +74,7 @@ void BlockVectorTest::testConstructor1()
   //
   //  SP::SiconosVector  z = v->vector(0);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->size() == 3, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->num() == 1, true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->num() == Siconos::DENSE, true);
   //  std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
 
@@ -105,10 +105,10 @@ void BlockVectorTest::testConstructor2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*tab)[1] == 8, true);
   SP::SiconosVector  ww = v->vector(0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->size() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->num() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->num() == Siconos::DENSE, true);
   ww = v->vector(1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->num() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->num() == Siconos::DENSE, true);
 
   SP::BlockVector  x2(new BlockVector());
   x2->insertPtr(w);
@@ -127,10 +127,10 @@ void BlockVectorTest::testConstructor2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*tab2)[1] == 8, true);
   SP::SiconosVector  ww2 = v2->vector(0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->num() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->num() == Siconos::DENSE, true);
   ww2 = v2->vector(1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->num() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->num() == Siconos::DENSE, true);
   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }
 

@@ -58,7 +58,6 @@ SiconosVector operator * (const SiconosVector&, double);
  *  \param a SiconosVector
  *  \param a double
  *  \return a SiconosVector
- *  \exception SiconosVectorException, if the double d = 0
  */
 SiconosVector operator / (const SiconosVector&, double);
 

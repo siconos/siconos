@@ -108,6 +108,28 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
   DEBUG_END("MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)\n");
 }
 
+bool MLCP::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  float type_number= (float) (Type::value(nslaw));
+  _nslawtype.insert(type_number);
+
+  if (not (Type::value(nslaw) == Type::MixedComplementarityConditionNSL ||
+           Type::value(nslaw) == Type::ComplementarityConditionNSL ||
+           Type::value(nslaw) == Type::NewtonImpactNSL ||
+           Type::value(nslaw) == Type::EqualityConditionNSL)
+    )
+  {
+    THROW_EXCEPTION("\nMLCP::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with LCP one step nonsmooth problem. \n \
+                      Compatible NonSmoothLaw are: ComplementarityConditionNSL, EqualityConditionNSL or NewtonImpactNSL\n");
+    return false;
+  }
+
+  return true;
+}
+
+
+
 void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 {
   DEBUG_BEGIN("MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n")

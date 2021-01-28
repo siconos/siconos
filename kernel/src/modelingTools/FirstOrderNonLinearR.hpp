@@ -51,8 +51,8 @@
  * .. math::
  *
  *   C &=& \nabla_x h\\
- *   B &=& \nabla_{lambda} g\\
- *   D &=& \nabla_{lambda} h\\
+ *   B &=& \nabla_{\lambda} g\\
+ *   D &=& \nabla_{\lambda} h\\
  *   K &=& \nabla_x g.
  * \endrststar
  *

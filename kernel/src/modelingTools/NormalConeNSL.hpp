@@ -31,11 +31,11 @@
   
   .. math::
   
-      y \in \mathcal{N}_{-P}(-\lambda),
+      0 \in y + \mathcal{N}_{P}(\lambda),
       
   \endrst
 
-  where \f$P\f$ is the polytopic set. This is a generalization of the RelayNSL law,
+  where \f$P\f$ is a polyhedral set. This is a generalization of the RelayNSL law,
   where the set \f$P\f$ is a scaled box. Note that there exists an inverse of the
   previous relation in the form
 
@@ -43,12 +43,15 @@
 
   .. math::
 
-      -\lambda \in \partial \sigma_{-P} (y),
+      \lambda \in \partial \sigma_{P} (-y),
    
   \endrst
 
-  with \f$\sigma_{-P}\f$ the support function of \f$-P\f$ and \f$\partial \sigma_{-P}\f$
+  with \f$\sigma_{P}\f$ the support function of \f$P\f$ and \f$\partial \sigma_{P}\f$
   the subdifferential of this support function.
+
+  Note that the polyhedral set \f$P\f$ is described as \f$\{\lambda\mid H \lambda \geq K\}\f$,
+  where \f$H\f$ is a matrix and \f$K\f$ a vector.
  
 */
 class NormalConeNSL : public NonSmoothLaw
@@ -71,7 +74,7 @@ private:
 
 public:
 
-  /** constructor with the value of the NormalConeNSL attributes
+  /** Constructor with the polyhedral representation of P as Hx >= K
   *  \param size size of the NonSmoothLaw
   *  \param H matrix in the (H-K)-representation of the polytope P
   *  \param K vector in the (H-K)-representation of the polytope P

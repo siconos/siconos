@@ -111,7 +111,7 @@ endif()
 if(NOT WITH_SYSTEM_SUITESPARSE)
   # else suite sparse is an external dependency of numerics and handled in numerics
   # CMakeLists.txt.
-  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse/CXSparse)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse SuiteSparse/CXSparse SuiteSparse/LDL  )
 endif()
 # TEST TEST TEST
 
@@ -150,9 +150,9 @@ if(BUILD_AS_CPP)
   # set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
   # We require C++ 11. PUBLIC to propagate to numerics.
   if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
-    target_compile_features(externals PUBLIC cxx_std_11)
+    target_compile_features(externals PUBLIC cxx_std_17)
   else()
-    set_property(TARGET externals PROPERTY CXX_STANDARD 11)
+    set_property(TARGET externals PROPERTY CXX_STANDARD 17)
   endif()
 else()
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
@@ -175,6 +175,7 @@ get_target_property(CHECK BLAS::BLAS INTERFACE_INCLUDE_DIRECTORIES)
 # We don't want warnings from externals libraries.
 get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
 list(REMOVE_ITEM externals_COMPILE_FLAGS -Wall)
+list(REMOVE_ITEM externals_COMPILE_FLAGS -Wunused-variable)
 set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")

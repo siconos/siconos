@@ -52,7 +52,7 @@ RollingFrictionContact::RollingFrictionContact(int dimPb, SP::SolverOptions opti
     _rolling_frictionContact_driver = &rolling_fc2d_driver;
   }
   else
-    RuntimeException::selfThrow("Wrong dimension value (only 5 (3D) or 3 (2D) are allowed for RollingFrictionContact constructor.");
+    THROW_EXCEPTION("Wrong dimension value (only 5 (3D) or 3 (2D) are allowed for RollingFrictionContact constructor.");
 
   _mu.reset(new MuStorage());
   _muR.reset(new MuStorage());
@@ -153,6 +153,30 @@ int RollingFrictionContact::solve(SP::RollingFrictionContactProblem problem)
          &*_z->getArray(),
          &*_w->getArray(),
          &*_numerics_solver_options);
+}
+
+
+bool RollingFrictionContact::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+
+  float type_number= (float) (Type::value(nslaw) + 0.1 * nslaw.size());
+  _nslawtype.insert(type_number);
+
+  if (Type::value(nslaw) != Type::NewtonImpactRollingFrictionNSL)
+  {
+    THROW_EXCEPTION("\nRollingFrictionContact::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
+                      Compatible NonSmoothLaw are: NewtonImpactRollingFrictionNSL (2D or 3D) \n");
+    return false;
+  }
+  if (_nslawtype.size() > 1)
+  {
+    THROW_EXCEPTION("\nRollingFrictionContact::checkCompatibleNSLaw -  \n\
+                     Compatible NonSmoothLaw are: NewtonImpactRollingFrictionNSL (2D or 3D), but you cannot mix them \n");
+    return false;
+  }
+
+  return true;
 }
 
 

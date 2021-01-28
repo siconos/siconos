@@ -130,7 +130,7 @@ void EventDriven::updateIndexSet(unsigned int i)
       {
         inter->display();
         cout << "y = " << y << " < -_TOL_ED =  "   << -_TOL_ED  <<endl;
-        RuntimeException::selfThrow("EventDriven::updateIndexSet, output of level 0 must be positive!!! ");
+        THROW_EXCEPTION("EventDriven::updateIndexSet, output of level 0 must be positive!!! ");
       }
       // 1 - If the Interaction is not yet in the set
       if(!indexSet1->is_vertex(inter))  // Interaction is not yet in the indexSet[i]
@@ -183,7 +183,7 @@ void EventDriven::updateIndexSet(unsigned int i)
     }
     else
     {
-      RuntimeException::selfThrow("EventDriven::updateIndexSet, IndexSet[i > 2] doesn't exist");
+      THROW_EXCEPTION("EventDriven::updateIndexSet, IndexSet[i > 2] doesn't exist");
     }
   }
 
@@ -224,9 +224,15 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     if(fabs(F) < _TOL_ED)
       indexSet2->remove_vertex(inter);
     else if((gamma < -_TOL_ED) || (F < -_TOL_ED))
-      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interaction of indexSet[2] must be nonnegative.");
+    {
+      THROW_EXCEPTION("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interaction of indexSet[2] must be nonnegative.");
+    }
     else if(((fabs(gamma) > _TOL_ED) && (fabs(F) > _TOL_ED)))
-      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), something is wrong for the LCP resolution.");
+    {
+      THROW_EXCEPTION("EventDriven::updateIndexSetsWithDoubleCondition(), something is wrong for the LCP resolution.");
+    }
+    else
+    {};
     DEBUG_PRINTF("End update with double condition %f\n", _TOL_ED);
   }
 }
@@ -255,7 +261,7 @@ void EventDriven::initOSNS()
     else if(osiType == OSI::NEWMARKALPHAOSI)  // EventDriven associated with NewMarkAlpha
     {
       if(_allNSProblems->size() != 3)
-        RuntimeException::selfThrow
+        THROW_EXCEPTION
         (" EventDriven::initialize, \n an EventDriven simulation associated with NewMarkAlphaOSI must have three non smooth problems.\n Here, there are "
          + std::to_string(_allNSProblems->size()));
       // Initialize OSNSP at position level
@@ -265,17 +271,17 @@ void EventDriven::initOSNS()
     }
     else
     {
-      RuntimeException::selfThrow(" EventDriven::initialize, OSI not yet implemented.");
+      THROW_EXCEPTION(" EventDriven::initialize, OSI not yet implemented.");
     }
 
     if(!((*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT])) /* ie if the impact problem does not
                                                         *  exist */
-      RuntimeException::selfThrow
+      THROW_EXCEPTION
       ("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
 
     if(!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC])) /* ie if the acceleration-level problem
                                                             * does not exist */
-      RuntimeException::selfThrow
+      THROW_EXCEPTION
       ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
     // Initialize OSNSP for impact problem and at the acceleration level
@@ -316,7 +322,7 @@ void EventDriven::initOSIRhs()
   {
     //Check whether OSIs used are of the same type
     if((*itosi)->getType() != osiType)
-      RuntimeException::selfThrow("OSIs used must be of the same type");
+      THROW_EXCEPTION("OSIs used must be of the same type");
 
     // perform the initialization
     DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -476,7 +482,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
     }
     else
     {
-      RuntimeException::selfThrow("EventDriven::computeJacobianfx, type of DynamicalSystem not yet supported.");
+      THROW_EXCEPTION("EventDriven::computeJacobianfx, type of DynamicalSystem not yet supported.");
     }
   }
 }
@@ -792,7 +798,7 @@ void EventDriven::advanceToEvent()
   }
   else
   {
-    RuntimeException::selfThrow("In EventDriven::advanceToEvent, this type of OneStepIntegrator does not exist for Event-Driven scheme!!!");
+    THROW_EXCEPTION("In EventDriven::advanceToEvent, this type of OneStepIntegrator does not exist for Event-Driven scheme!!!");
   }
   DEBUG_END("EventDriven::advanceToEvent()\n");
 }
@@ -837,7 +843,7 @@ double EventDriven::computeResiduConstraints()
     }
     else
     {
-      RuntimeException::selfThrow("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
+      THROW_EXCEPTION("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
     }
   }
 
@@ -867,7 +873,7 @@ void EventDriven::prepareNewtonIteration()
     osiType = (*itosi)->getType();
     if(osiType != OSI::NEWMARKALPHAOSI)
     {
-      RuntimeException::selfThrow("In EventDriven::prepareNewtonIteration, the current OSI is not NewMarkAlpha scheme!!!");
+      THROW_EXCEPTION("In EventDriven::prepareNewtonIteration, the current OSI is not NewMarkAlpha scheme!!!");
     }
     // Compute iteration matrix W
     (*itosi)->prepareNewtonIteration(nextTime()); // preparation for each OSI
@@ -910,7 +916,7 @@ void EventDriven::predictionNewtonIteration()
     }
     else
     {
-      RuntimeException::selfThrow("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
+      THROW_EXCEPTION("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
     }
   }
   // Prediction of the output and lambda for all Interactions before Newton iteration
@@ -940,7 +946,7 @@ void EventDriven::correctionNewtonIteration()
     }
     else
     {
-      RuntimeException::selfThrow("In EventDriven::correctionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
+      THROW_EXCEPTION("In EventDriven::correctionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
     }
   }
 }
@@ -1011,7 +1017,7 @@ double EventDriven::detectEvents(bool updateIstate)
     double nsLawSize = inter->nonSmoothLaw()->size();
     if(nsLawSize != 1)
     {
-      RuntimeException::selfThrow("In EventDriven::detectEvents, the interaction size > 1 has not been implemented yet!!!");
+      THROW_EXCEPTION("In EventDriven::detectEvents, the interaction size > 1 has not been implemented yet!!!");
     }
     y = inter->y(0);   // output y at this Interaction
     ydot = inter->y(1); // output of level 1 at this Interaction
@@ -1106,7 +1112,7 @@ void EventDriven::LocalizeFirstEvent()
     }
     else
     {
-      RuntimeException::selfThrow("In EventDriven::LocalizeFirstEvent, the current OSI must be NewMarkAlpha scheme!!!");
+      THROW_EXCEPTION("In EventDriven::LocalizeFirstEvent, the current OSI must be NewMarkAlpha scheme!!!");
     }
   }
   //
@@ -1162,7 +1168,7 @@ void EventDriven::LocalizeFirstEvent()
     //
     if(_numIter > _localizeEventMaxIter)
     {
-      RuntimeException::selfThrow("In EventDriven::LocalizeFirstEvent, the numbner of iterations performed is too large!!!");
+      THROW_EXCEPTION("In EventDriven::LocalizeFirstEvent, the numbner of iterations performed is too large!!!");
     }
   }
 }

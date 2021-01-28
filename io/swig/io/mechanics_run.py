@@ -175,17 +175,22 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None,
     if not debug:
         os.remove(tfilename)
 
+time_measure = time.perf_counter
+if (sys.version_info.major+0.1*sys.version_info.minor < 3.3):
+    time_measure= time.clock
+
+
 
 class Timer():
 
     def __init__(self):
-        self._t0 = time.clock()
+        self._t0 = time_measure()
 
     def elapsed(self):
-        return time.clock() - self._t0
+        return time_measure() - self._t0
 
     def update(self):
-        self._t0 = time.clock()
+        self._t0 = time_measure()
 
 
 def warn(msg):
@@ -458,10 +463,13 @@ class ShapeCollection():
                 # assume a vtp file (xml) stored in a string buffer
 
                 if self.attributes(shape_name)['type'] == 'vtp':
-                    if self.shape(shape_name).dtype == h5py.new_vlen(str):
+#                    if self.shape(shape_name).dtype == h5py.string_dtype():
+                    if self.shape(shape_name).dtype == h5py.vlen_dtype(str):
                         with tmpfile() as tmpf:
                             data = self.shape(shape_name)[:][0]
-                            tmpf[0].write(data)
+                            
+                            tmpf[0].write(data.decode("utf-8"))
+                            #tmpf[0].write(data)
                             tmpf[0].flush()
                             scale = self.attributes(shape_name).get(
                                 'scale', None)
@@ -489,10 +497,10 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    if self.shape(shape_name).dtype != h5py.new_vlen(str) :
-                        raise AssertionError("self.shape(shape_name).dtype != h5py.new_vlen(str)")
+                    if self.shape(shape_name).dtype != h5py.vlen_dtype(str) :
+                        raise AssertionError("self.shape(shape_name).dtype != h5py.vlen_dtype(str)")
 
-                    with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
+                    with tmpfile(contents=self.shape(shape_name)[:][0].decode('utf-8')) as tmpf:
                         step_reader = STEPControl_Reader()
 
                         status = step_reader.ReadFile(tmpf[1])
@@ -527,10 +535,10 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    if not (self.shape(shape_name).dtype == h5py.new_vlen(str)):
+                    if not (self.shape(shape_name).dtype == h5py.vlen_dtype(str)):
                         raise AssertionError("ShapeCollection.get()")
 
-                    #assert(self.shape(shape_name).dtype == h5py.new_vlen(str))
+                    #assert(self.shape(shape_name).dtype == h5py.vlen_dtype(str))
 
                     with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
                         iges_reader = IGESControl_Reader()
@@ -759,14 +767,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     """
 
-    def __init__(self, io_filename=None, mode='w',
+    def __init__(self, io_filename=None, io_filename_backup=None, mode='w',
                  interaction_manager=None, nsds=None, simulation=None,
                  osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None,
                  collision_margin=None,
                  use_compression=False, output_domains=False, verbose=True):
 
-        super(MechanicsHdf5Runner, self).__init__(io_filename, mode, None,
+        super(MechanicsHdf5Runner, self).__init__(io_filename, mode,
+                                                  io_filename_backup,
                                                   use_compression,
                                                   output_domains, verbose)
         self._interman = interaction_manager
@@ -1071,6 +1080,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                       velocity, mass)
                     body.setUseContactorInertia(True)
 
+
+                fext = self._input[name].get('allow_self_collide',
+                                             None)
+                if fext is not None:
+                    body.setFextPtr(fext)
+
+                    
                 self_collide = self._input[name].get('allow_self_collide',
                                                      None)
                 if self_collide is not None:
@@ -1129,7 +1145,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 refds_name = diff[0]
 
         if refds_name:
-            refds = topo.getDynamicalSystem(str(refds_name))
+            refds = sk.cast_NewtonEulerDS(topo.getDynamicalSystem(str(refds_name)))
 
             # Determine reference indexes:
             # Assert if neither ds in reference joints is the
@@ -2541,8 +2557,17 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if self._output_backup:
                 if (k % self._output_backup_frequency == 0) or (k == 1):
-                    shutil.copyfile(self._io_filename,
-                                    self._io_filename_backup)
+
+                    # close io file, hdf5 memory is cleaned
+                    self._out.close()
+                    try:
+                        shutil.copyfile(self._io_filename,
+                                        self._io_filename_backup)
+                    except shutil.Error as e:
+                        warn(str(e))
+                    # open the file again
+                    finally:
+                        self.__enter__()
 
             self.log(simulation.clearNSDSChangeLog, with_timer)()
 

@@ -27,9 +27,7 @@
 #include "ioMatrix.hpp"
 #include "ioVector.hpp"
 
-#include "RuntimeException.hpp"
-#include "SiconosMatrixException.hpp"
-#include "SiconosVectorException.hpp"
+#include "SiconosException.hpp"
 
 #include "SiconosMemory.hpp"
 

@@ -53,8 +53,7 @@
 */
 
 #include "SiconosPointers.hpp"
-#include "RuntimeException.hpp"
-
+#include "SiconosException.hpp"
 /* all Siconos classes that may be visited are defined there */
 #include "SiconosVisitables.hpp"
 
@@ -62,7 +61,7 @@
 #define SICONOS_VISITOR_QUOTE(M) #M
 
 #define SICONOS_VISITOR_FAIL(X)                                         \
-  { RuntimeException::selfThrow                                         \
+  { THROW_EXCEPTION                                         \
       ( SICONOS_VISITOR_QUOTE(you must define a visit function for X in a derived class of SiconosVisitor)); }
 
 
@@ -71,21 +70,21 @@
   template<typename Archive> friend class SiconosSerializer;            \
   virtual void acceptSP(SP::SiconosVisitor)                             \
   {                                                                     \
-    RuntimeException::selfThrow                                         \
+    THROW_EXCEPTION                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); \
   };                                                                    \
   virtual void accept(SiconosVisitor&) const                            \
   {                                                                     \
-    RuntimeException::selfThrow                                         \
+    THROW_EXCEPTION                                         \
       ( "accept: no visitor defined");                                  \
   };                                                                    \
   virtual void acceptSerializer(SiconosVisitor&)                        \
   {                                                                     \
-    RuntimeException::selfThrow                                         \
+    THROW_EXCEPTION                                         \
       ( "acceptSerializer: no serializer defined");                     \
   };                                                                    \
   virtual inline Type::Siconos acceptType(FindType& ft) const           \
-  { RuntimeException::selfThrow                                         \
+  { THROW_EXCEPTION                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor)); \
     return Type::void_type;                                             \
   }                                                                     \

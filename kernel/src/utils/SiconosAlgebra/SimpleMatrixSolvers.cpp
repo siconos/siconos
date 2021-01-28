@@ -66,7 +66,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
     std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: this matrix is already PLUFactorized. " << std::endl;
     return;
   }
-  if (_num == 1)
+  if (_num == Siconos::DENSE)
   {
     if (!_ipiv)
       _ipiv.reset(new VInt(size(0)));
@@ -77,7 +77,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
     {
       _isPLUFactorized = false;
       _isPLUFactorizedInPlace = true;
-      SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorizationInPlace failed: the matrix is singular.");
+      THROW_EXCEPTION("SimpleMatrix::PLUFactorizationInPlace failed: the matrix is singular.");
     }
     else
     {
@@ -95,7 +95,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
       _isPLUFactorized = false;
       _isPLUFactorizedInPlace = false;
       std::cout << "Problem in Cholesky Decomposition for the row number" << info   << std::endl;
-      SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorizationInPlace failed. ");
+      THROW_EXCEPTION("SimpleMatrix::PLUFactorizationInPlace failed. ");
     }
     else
     {
@@ -112,28 +112,28 @@ void SimpleMatrix::PLUInverseInPlace()
 {
   if(!_isPLUFactorized)
     PLUFactorizationInPlace();
-  if(_num != 1)
-    SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
+  if(_num != Siconos::DENSE)
+    THROW_EXCEPTION(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
 #if defined(HAS_LAPACK_dgetri)
   int info = lapack::getri(*mat.Dense, *_ipiv);   // solve from factorization
 
   if(info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::PLUInverseInPlace failed, the matrix is singular.");
+    THROW_EXCEPTION("SimpleMatrix::PLUInverseInPlace failed, the matrix is singular.");
 
   _isPLUInversed = true;
 #else
-  SiconosMatrixException::selfThrow("SimpleMatrix::PLUInverseInPlace not implemented with lapack.");
+  THROW_EXCEPTION("SimpleMatrix::PLUInverseInPlace not implemented with lapack.");
 #endif
 }
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 {
   if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
+    THROW_EXCEPTION("SimpleMatrix PLUForwardBackwardInPlace(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
   int info = 0;
 
-  if(_num == 1)
+  if(_num == Siconos::DENSE)
   {
     if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
     {
@@ -159,7 +159,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       if(B.num() == DENSE)
         info = lapack::getrs(*mat.Dense, *_ipiv, *(B.dense()));
       else
-        SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices in RHS.");
+        THROW_EXCEPTION(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices in RHS.");
 
   }
   else
@@ -169,26 +169,26 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       PLUFactorizationInPlace();
     }
     // and then solve
-    if(B.num() == 1)
+    if(B.num() == Siconos::DENSE)
     {
       inplace_solve(*sparse(), *(B.dense()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.dense()), ublas::upper_tag());
     }
-    else if(B.num() == 4)
+    else if(B.num() == Siconos::SPARSE)
     {
       inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
     }
     else
-      SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense ans sparse matrices in RHS.");
+      THROW_EXCEPTION(" SimpleMatrix::PLUInverseInPlace: only implemented for dense ans sparse matrices in RHS.");
     info = 0 ;
   }
-  //  SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
+  //  THROW_EXCEPTION(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
 
 
   if(info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::PLUForwardBackwardInPlace failed.");
+    THROW_EXCEPTION("SimpleMatrix::PLUForwardBackwardInPlace failed.");
 }
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
@@ -197,7 +197,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info;
 
-  if(_num == 1)
+  if(_num == Siconos::DENSE)
   {
     if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
     {
@@ -236,11 +236,10 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
     info = 0;
   }
   if(info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::PLUForwardBackwardInPlace failed.");
-  else
-  {
-    noalias(*(B.dense())) = ublas::column(tmpB, 0);
-  }
+    THROW_EXCEPTION("SimpleMatrix::PLUForwardBackwardInPlace failed.");
+
+  noalias(*(B.dense())) = ublas::column(tmpB, 0);
+
 }
 
 void SimpleMatrix::resetLU()
@@ -280,7 +279,7 @@ void SimpleMatrix::resetFactorizationFlags()
 void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
 {
   if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares(Siconos Matrix &B) failed. Not yet implemented for M being a BlockMatrix.");
+    THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares(Siconos Matrix &B) failed. Not yet implemented for M being a BlockMatrix.");
   int info = 0;
 #ifdef USE_OPTIMAL_WORKSPACE
   info += lapack::gels(*mat.Dense, *(B.dense()), lapack::optimal_workspace());
@@ -289,7 +288,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
   info += lapack::gels(*mat.Dense, *(B.dense()), lapack::minimal_workspace());
 #endif
   if(info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares failed.");
+    THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares failed.");
 }
 
 
@@ -310,7 +309,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
   if(info != 0)
   {
     std::cout << "info = " << info << std::endl;
-    SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares failed.");
+    THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares failed.");
   }
   else
   {
@@ -361,7 +360,7 @@ void SimpleMatrix::Factorize()
       if(info != 0)
       {
         _isCholeskyFactorized = false;
-        SiconosMatrixException::selfThrow("SimpleMatrix::Factorize failed (Cholesky)");
+        THROW_EXCEPTION("SimpleMatrix::Factorize failed (Cholesky)");
       }
       else
       {
@@ -370,7 +369,7 @@ void SimpleMatrix::Factorize()
     }
     else  //  LDLT Factorization
     {
-      SiconosMatrixException::selfThrow("SimpleMatrix::Factorize failed: LDL^T not yet implemented.");
+      THROW_EXCEPTION("SimpleMatrix::Factorize failed: LDL^T not yet implemented.");
     }
   }
   else //  LU Factorization  by default
@@ -382,7 +381,7 @@ void SimpleMatrix::Factorize()
       _isPLUFactorized = false;
       if(_num == DENSE)
         _isPLUFactorizedInPlace = true;
-      SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
+      THROW_EXCEPTION("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
     }
     else
     {
@@ -399,7 +398,7 @@ void SimpleMatrix::Factorize()
 void SimpleMatrix::Solve(SiconosMatrix &B)
 {
   if(B.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix Solve(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
+    THROW_EXCEPTION("SimpleMatrix Solve(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
 
   int info = 1;
   if(!isFactorized())
@@ -437,7 +436,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
 
   }
   else
-    SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
+    THROW_EXCEPTION(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
 
 #else
   B.updateNumericsMatrix();
@@ -459,12 +458,12 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
 #endif
       if(info != 0)
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed (Cholesky)");
+        THROW_EXCEPTION("SimpleMatrix::Solve failed (Cholesky)");
       }
     }
     else  //  LDLT Factorization
     {
-      SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed: LDL^T not yet implemented.");
+      THROW_EXCEPTION("SimpleMatrix::Solve failed: LDL^T not yet implemented.");
     }
   }
   else //  LU Factorization  by default
@@ -476,7 +475,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
 #endif
     if(info != 0)
     {
-      SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
+      THROW_EXCEPTION("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
     }
   }
 
@@ -493,7 +492,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
 
 
   if(info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed.");
+    THROW_EXCEPTION("SimpleMatrix::Solve failed.");
 }
 
 void SimpleMatrix::Solve(SiconosVector &B)
@@ -531,7 +530,7 @@ void SimpleMatrix::Solve(SiconosVector &B)
     //inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
   }
   else
-    SiconosMatrixException::selfThrow(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
+    THROW_EXCEPTION(" SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
 
 
   if (isSymmetric())
@@ -543,12 +542,12 @@ void SimpleMatrix::Solve(SiconosVector &B)
 
       if(info != 0)
       {
-        SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed (Cholesky)");
+        THROW_EXCEPTION("SimpleMatrix::Solve failed (Cholesky)");
       }
     }
     else  //  LDLT Factorization
     {
-      SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed: LDL^T not yet implemented.");
+      THROW_EXCEPTION("SimpleMatrix::Solve failed: LDL^T not yet implemented.");
     }
   }
   else //  LU Factorization  by default
@@ -557,7 +556,7 @@ void SimpleMatrix::Solve(SiconosVector &B)
 
     if(info != 0)
     {
-      SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed (LU)");
+      THROW_EXCEPTION("SimpleMatrix::Solve failed (LU)");
     }
   }
 
@@ -571,7 +570,7 @@ void SimpleMatrix::Solve(SiconosVector &B)
 
 
   if(info != 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix::Solve failed.");
+    THROW_EXCEPTION("SimpleMatrix::Solve failed.");
   // else
   // {
   //   noalias(*(B.dense())) = ublas::column(tmpB, 0);

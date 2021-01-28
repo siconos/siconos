@@ -326,6 +326,14 @@ public:
     return _topology->dSG(0);
   }
 
+  /** get all the dynamical systems declared in the NonSmoothDynamicalSystem.
+   * into a std::vector<SP::DynamicalSystems>
+   * Useful for iterates on DynamicalSystems in Python for instance
+   * \return std::vector<SP::DynamicalSystems>
+   */
+  std::vector<SP::DynamicalSystem> dynamicalSystemsVector() const;
+
+
   /** add a dynamical system into the DS graph (as a vertex)
    * \param ds a pointer to the system to add
    */

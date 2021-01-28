@@ -8,14 +8,10 @@
 
 set(CTEST_PROJECT_NAME "Siconos")
 set(CTEST_NIGHTLY_START_TIME "20:00:00 CET")
-
-# https is needed on cdash server side
-set(CTEST_DROP_METHOD "https")
-set(CTEST_DROP_SITE "my.cdash.org/")
-# set(CTEST_DROP_SITE "cdash-tripop.inrialpes.fr")
-set(CTEST_DROP_LOCATION "/submit.php?project=Siconos-Dashboard")
-#set(CTEST_DROP_LOCATION "/submit.php?project=Siconos+Sandbox")
+set(CTEST_DROP_METHOD "http")
+# -- Drop site = on Nova VM --
+set(CTEST_DROP_SITE "siconos-web.univ-grenoble-alpes.fr:8080")
+set(CTEST_DROP_LOCATION "/submit.php?project=siconos-dashboard")
+#set(CTEST_DROP_SITE "my.cdash.org")
+#set(CTEST_DROP_LOCATION "/submit.php?project=sicosandbox")
 set(CTEST_DROP_SITE_CDASH TRUE)
-if(BUILD_NAME)
-  set(CTEST_BUILD_NAME Siconos-${BUILD_NAME})
-endif()

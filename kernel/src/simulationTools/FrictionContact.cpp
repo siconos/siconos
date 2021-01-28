@@ -51,7 +51,7 @@ FrictionContact::FrictionContact(int dimPb, SP::SolverOptions options):
     _frictionContact_driver = &fc3d_driver;
   }
   else
-    RuntimeException::selfThrow("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
+    THROW_EXCEPTION("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
 
   _mu.reset(new MuStorage());
 }
@@ -144,6 +144,31 @@ int FrictionContact::solve(SP::FrictionContactProblem problem)
                                     &*_numerics_solver_options);
 }
 
+
+
+
+bool FrictionContact::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+
+  float type_number= (float) (Type::value(nslaw) + 0.1 * nslaw.size());
+  _nslawtype.insert(type_number);
+
+  if (Type::value(nslaw) != Type::NewtonImpactFrictionNSL)
+  {
+    THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
+                      Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D) \n");
+    return false;
+  }
+  if (_nslawtype.size() > 1)
+  {
+    THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
+                     Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D), but you cannot mix them \n");
+    return false;
+  }
+
+  return true;
+}
 
 int FrictionContact::compute(double time)
 {

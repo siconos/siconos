@@ -124,7 +124,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocks()
 
   if(indexSet->properties().symmetric)
   {
-    RuntimeException::selfThrow
+    THROW_EXCEPTION
     (" MLCPProjectOnConstraints::updateInteractionBlocks() - not yet implemented for symmetric case");
   }
   else // not symmetric => follow out_edges for each vertices
@@ -390,7 +390,7 @@ void MLCPProjectOnConstraints::updateInteractionBlocksOLD()
 
   if(indexSet->properties().symmetric)
   {
-    RuntimeException::selfThrow
+    THROW_EXCEPTION
     ("MLCPProjectOnConstraints::updateInteractionBlocks() - symmetric case for the indexSet is not yet implemented");
   }
   else // not symmetric => follow out_edges for each vertices
@@ -637,7 +637,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
     {
       if(inter->relation()->getType() != Lagrangian)
       {
-        RuntimeException::selfThrow(
+        THROW_EXCEPTION(
           "MLCPProjectOnConstraints::computeDiagonalInteractionBlock - relation is not of type Lagrangian with a LagrangianDS.");
       }
 
@@ -690,7 +690,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       if(inter->relation()->getType() != NewtonEuler)
       {
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeDiagonalInteractionBlock - relation is not from NewtonEulerR.");
+        THROW_EXCEPTION("MLCPProjectOnConstraints::computeDiagonalInteractionBlock - relation is not from NewtonEulerR.");
       }
       SP::NewtonEulerDS neds = (std::static_pointer_cast<NewtonEulerDS>(ds));
 #ifdef MLCPPROJ_WITH_CT
@@ -759,7 +759,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
     }
     else
-      RuntimeException::selfThrow("MLCPProjectOnConstraints::computeDiagonalInteractionBlock - ds is not from NewtonEulerDS neither a LagrangianDS.");
+      THROW_EXCEPTION("MLCPProjectOnConstraints::computeDiagonalInteractionBlock - ds is not from NewtonEulerDS neither a LagrangianDS.");
 
 
 
@@ -985,7 +985,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       }
 
       else
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
+        THROW_EXCEPTION("MLCPProjectOnConstraints::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
 
     }
 
@@ -1080,7 +1080,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
         }
         else
         {
-          RuntimeException::selfThrow("MLCPProjectOnConstraints::computeInteractionBlock - relation type is not from Lagrangian type neither NewtonEuler.");
+          THROW_EXCEPTION("MLCPProjectOnConstraints::computeInteractionBlock - relation type is not from Lagrangian type neither NewtonEuler.");
         }
 
       }
@@ -1176,7 +1176,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       //   if((dsType !=Type::LagrangianDS) and
       //      (dsType !=Type::LagrangianLinearTIDS) )
       //   {
-      //     RuntimeException::selfThrow("MLCPProjectOnConstraint::postCompute- ds is not of Lagrangian DS type.");
+      //     THROW_EXCEPTION("MLCPProjectOnConstraint::postCompute- ds is not of Lagrangian DS type.");
       //   }
 
       //   SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (*itDS);
@@ -1190,7 +1190,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
       // if ((*lr->q() - *tmp).normInf() > 1e-12)
       // {
-      //   RuntimeException::selfThrow("youyou");
+      //   THROW_EXCEPTION("youyou");
       // }
 
 #ifdef MLCPPROJ_DEBUG
@@ -1205,7 +1205,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
 
 
-      //RuntimeException::selfThrow("MLCPProjectOnConstraints::postComputeLagrangianR() - not yet implemented");
+      //THROW_EXCEPTION("MLCPProjectOnConstraints::postComputeLagrangianR() - not yet implemented");
     }
 
     void MLCPProjectOnConstraints::postComputeNewtonEulerR(SP::Interaction inter, unsigned int pos)

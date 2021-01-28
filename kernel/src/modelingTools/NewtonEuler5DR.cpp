@@ -79,7 +79,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   // 1 - Construction of the local contact frame from the normal vector
 
   if(orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
-    RuntimeException::selfThrow("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
+    THROW_EXCEPTION("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
 
   // 2 - Construction of the rotation matrix from the absolute frame to the local contact frame
   pt = t;
@@ -206,7 +206,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Si
   double t[6];
   double * pt = t;
   if(orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
-    RuntimeException::selfThrow("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
+    THROW_EXCEPTION("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
   pt = t;
 
   _rotationAbsoluteToContactFrame->setValue(0, 0, Nx);

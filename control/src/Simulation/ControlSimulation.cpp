@@ -103,7 +103,7 @@ void ControlSimulation::addSensor(SP::Sensor sensor, const double h)
 {
   if(h < _h)
   {
-    RuntimeException::selfThrow("The timestep for a sensor cannot be smaller than the one for the simulation");
+    THROW_EXCEPTION("The timestep for a sensor cannot be smaller than the one for the simulation");
   }
 
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
@@ -114,7 +114,7 @@ void ControlSimulation::addActuator(SP::Actuator actuator, const double h)
 {
   if(h < _h)
   {
-    RuntimeException::selfThrow("The timestep for an actuator cannot be smaller than the one for the simulation");
+    THROW_EXCEPTION("The timestep for an actuator cannot be smaller than the one for the simulation");
   }
 
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
@@ -125,7 +125,7 @@ void ControlSimulation::addObserver(SP::Observer observer, const double h)
 {
   if(h < _h)
   {
-    RuntimeException::selfThrow("The timestep for an observer cannot be smaller than the one for the simulation");
+    THROW_EXCEPTION("The timestep for an observer cannot be smaller than the one for the simulation");
   }
 
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));

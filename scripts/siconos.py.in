@@ -57,6 +57,12 @@ def main():
         print_siconos_info()
         sys.exit()
 
+    # -- Display siconos install info --
+    # Command : siconos --pythonpath
+    if args.pythonpath:
+        print(siconos_pythonpath)
+        sys.exit()
+
     args.rundir = Path.cwd()
 
     if not args.driver:
@@ -351,6 +357,10 @@ def parse_command_line():
     # Print details about siconos install
     parser.add_argument('--info', action='store_true',
                         help='Print details regarding Siconos installation.')
+
+    # Print details about siconos install
+    parser.add_argument('--pythonpath', action='store_true',
+                        help='Print details regarding the location of Siconos python modules.')
 
     # -- Directories (source, build, working) management --
     build_mode = parser.add_mutually_exclusive_group()

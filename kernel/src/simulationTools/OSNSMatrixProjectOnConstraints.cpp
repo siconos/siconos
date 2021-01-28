@@ -216,7 +216,7 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Intera
     }
     else
     {
-      RuntimeException::selfThrow("MLCPProjectOnConstraints::computeSizeForProjection. relation is not of the right type. neither Lagrangian nor NewtonEuler ");
+      THROW_EXCEPTION("MLCPProjectOnConstraints::computeSizeForProjection. relation is not of the right type. neither Lagrangian nor NewtonEuler ");
     }
   }
 #ifdef OSNSMPROJ_DEBUG

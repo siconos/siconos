@@ -70,14 +70,14 @@ using namespace Siconos;
 
 
 //   if((A.size(1) != B.size(0)))
-//     SiconosMatrixException::selfThrow("Matrix function C=prod(A,B): inconsistent sizes");
+//     THROW_EXCEPTION("Matrix function C=prod(A,B): inconsistent sizes");
 
-//   unsigned int numA = A.num();
-//   unsigned int numB = B.num();
+//   Siconos::UBLAS_TYPE numA = A.num();
+//   Siconos::UBLAS_TYPE numB = B.num();
 
 //   // == TODO: implement block product ==
 //   if(numA == 0 || numB == 0)
-//     SiconosMatrixException::selfThrow("Matrix product ( C=prod(A,B) ): not yet implemented for BlockMatrix objects.");
+//     THROW_EXCEPTION("Matrix product ( C=prod(A,B) ): not yet implemented for BlockMatrix objects.");
 
 //   if(numA == Siconos::IDENTITY || numB == Siconos::ZERO)  // A = identity or B = 0
 //     return SimpleMatrix(B);
@@ -195,18 +195,18 @@ dim : dim[0] number of raw, dim[1] number of col
 // void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, int indexACol, bool init){
 //   // To compute C[indexAcol::] = A * B
 
-//   unsigned int numA = A.num();
-//   unsigned int numB = B.num();
-//   unsigned int numC = C.num();
+//   Siconos::UBLAS_TYPE numA = A.num();
+//   Siconos::UBLAS_TYPE numB = B.num();
+//   Siconos::UBLAS_TYPE numC = C.num();
 //   if (numA == 0 || numB == 0 || numC == 0)
-//     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C,index): inconsistent sizes");
+//     THROW_EXCEPTION("Matrix function prod(A,B,C,index): inconsistent sizes");
 //   // === if C is zero or identity => read-only ===
 //   if (numC == Siconos::Zero || numC == Siconos::IDENTITY)
-//     SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C,index) ): wrong type for resulting matrix C (read-only: zero or identity).");
+//     THROW_EXCEPTION("Matrix product ( prod(A,B,C,index) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
 
 //   if (numA == Siconos::IDENTITY || numC == Siconos::Zero) // A = identity or 0
-//     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C,index): numA == Siconos::IDENTITY || numC == Siconos::Zero not yet implemented");
+//     THROW_EXCEPTION("Matrix function prod(A,B,C,index): numA == Siconos::IDENTITY || numC == Siconos::Zero not yet implemented");
 
 //   int rawB = B.size(0);
 //   int colB = B.size(1);
@@ -225,28 +225,28 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   //
 
   if((A.size(1) != B.size(0)))
-    SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): inconsistent sizes");
+    THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): inconsistent sizes");
 
   if(A.size(0) != C.size(0) || B.size(1) != C.size(1))
-    SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): inconsistent sizes");
+    THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): inconsistent sizes");
 
   if(&A == &C || &B == &C)
-    SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): C must be different from A and B.");
+    THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): C must be different from A and B.");
 
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorized in place in prod !!");
   assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorized in place in prod !!");
   if(!C.isBlock())
     C.resetFactorizationFlags();
-  unsigned int numA = A.num();
-  unsigned int numB = B.num();
-  unsigned int numC = C.num();
+  Siconos::UBLAS_TYPE numA = A.num();
+  Siconos::UBLAS_TYPE numB = B.num();
+  Siconos::UBLAS_TYPE numC = C.num();
   // == TODO: implement block product ==
-  if(numA == 0 || numB == 0)
-    SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): not yet implemented for BlockMatrix objects.");
+  if(numA == Siconos::BLOCK || numB == Siconos::BLOCK)
+    THROW_EXCEPTION("Matrix product ( prod(A,B,C) ): not yet implemented for BlockMatrix objects.");
 
   // === if C is zero or identity => read-only ===
   if(numC == Siconos::ZERO || numC == Siconos::IDENTITY)
-    SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
+    THROW_EXCEPTION("Matrix product ( prod(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
 
   if(numA == Siconos::IDENTITY)  // A = identity ...
@@ -270,7 +270,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   {
     if(init) C.zero();  // else nothing
   }
-  else if(numC == 0)  // if C is Block - Temp. solution
+  else if(numC == Siconos::BLOCK)  // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     axpy_prod(A, B, tmp, init);
@@ -349,21 +349,21 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
       break;
     case Siconos::TRIANGULAR:
       // if(numA!= Siconos::TRIANGULAR || numB != Siconos::TRIANGULAR)
-      SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+      THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       //ublas::axpy_prod(*A.triang(), *B.triang(),*C.triang(), init);
       break;
     case Siconos::SYMMETRIC:
       //        if(numA!= Siconos::SYMMETRIC || numB != Siconos::SYMMETRIC)
-      SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+      THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       //ublas::axpy_prod(*A.sym(), *B.sym(),*C.sym(),init);
       break;
     case Siconos::SPARSE:
       if(numA != Siconos::SPARSE || numB != Siconos::SPARSE)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       ublas::sparse_prod(*A.sparse(), *B.sparse(), *C.sparse(), init);
       break;
     default:
-      SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+      THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
     }
     if(!C.isBlock())
       C.resetFactorizationFlags();
@@ -375,12 +375,12 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 // void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 // {
 //   if(A.isBlock() || B.isBlock() || C.isBlock())
-//     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
-//   unsigned int numA = A.num();
-//   unsigned int numB = B.num();
-//   unsigned int numC = C.num();
+//     THROW_EXCEPTION("gemm(...) not yet implemented for block matrices.");
+//   Siconos::UBLAS_TYPE numA = A.num();
+//   Siconos::UBLAS_TYPE numB = B.num();
+//   Siconos::UBLAS_TYPE numC = C.num();
 //   if(numA != Siconos::DENSE || numB != Siconos::DENSE || numC != Siconos::DENSE)
-//     SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
+//     THROW_EXCEPTION("gemm(...) failed: reserved to dense matrices.");
 
 
 //   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
@@ -396,9 +396,9 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 // Note FP: this function is never used. We keep it for the record. Remove it later ?
 // void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 // {
-//   unsigned int numA = A.num();
-//   unsigned int numB = B.num();
-//   unsigned int numC = C.num();
+//   Siconos::UBLAS_TYPE numA = A.num();
+//   Siconos::UBLAS_TYPE numB = B.num();
+//   Siconos::UBLAS_TYPE numC = C.num();
 //   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
 //   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 //   C.resetFactorizationFlags();
@@ -406,7 +406,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 //   // At the time, only dense output allowed
 //   DenseMat * tmpC = nullptr;
 //   if(numA == 0 || numB == 0 || numC == 0)
-//     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
+//     THROW_EXCEPTION("gemm(...) not yet implemented for block matrices.");
 
 //   if(numA == Siconos::DENSE && numB == Siconos::DENSE && numC == Siconos::DENSE)
 //     siconosBindings::blas::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
@@ -420,7 +420,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 //     delete tmpC;
 //   }
 //   else
-//     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for these kinds of matrices.");
+//     THROW_EXCEPTION("gemm(...) not yet implemented for these kinds of matrices.");
 //   C.resetFactorizationFlags();
 // }
 

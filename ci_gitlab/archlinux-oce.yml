@@ -1,0 +1,37 @@
+# Specific jobs used to build a siconos-ready docker image, including oce, on archlinux.
+# These jobs are triggered on demand (manual button on gitlab interface).
+# Used for tests with altair.
+
+include: 
+  - ci_gitlab/gitlab-ci-siconos-templates.yml
+
+archlinux-oce:configure:
+   variables:
+     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
+     cdash_submit: 1
+     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+   extends: .siconos-configure
+   when: manual
+
+archlinux-oce:build:
+    variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+    extends: .siconos-build
+    needs: ["archlinux-oce:configure"]
+
+archlinux-oce:test:
+    variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+    needs: ["archlinux-oce:build"]
+    extends: .siconos-test
+
+archlinux-oce:install:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
+    siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-archlinux-oce
+  extends: .siconos-install
+  needs: ["archlinux-oce:build"]

@@ -159,6 +159,10 @@ if(WITH_${COMPONENT}_TESTING)
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_2
     EXTRA_SOURCES data_collection_2.c test_nsgs_1.c)
   new_tests_collection(
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_FREEZE_2
+    EXTRA_SOURCES data_collection_2.c test_nsgs_freeze_1.c)
+
+  new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_3
     EXTRA_SOURCES data_collection_3.c test_nsgs_3.c)
   new_tests_collection(
@@ -231,7 +235,15 @@ if(WITH_${COMPONENT}_TESTING)
 
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
+
+  # ---------------------------------------------------
+  # --- Rolling friction contact problem formulation ---
+  # ---------------------------------------------------
   
+  new_tests_collection(
+    DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION
+    EXTRA_SOURCES data_collection_rfc3d.c test_first_order_rfc3d_1.c )
+      
   if(WITH_FCLIB)
 
     new_test(NAME FCLIB_test1 SOURCES fc3d_writefclib_local_test.c DEPS FCLIB::fclib)
@@ -281,7 +293,7 @@ if(WITH_${COMPONENT}_TESTING)
     # ---------------------------------------------------
     
     new_tests_collection(
-      DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_NSGS_COLLECTION_FCLIB
+      DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_rfc3d_fclib.c test_first_order_rfc3d_1.c DEPS FCLIB::fclib)
     
   endif()

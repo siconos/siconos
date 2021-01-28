@@ -30,6 +30,7 @@
 #include "SiconosFwd.hpp"
 
 #include "SiconosVisitor.hpp"
+#include "SiconosSerialization.hpp" // For ACCEPT_SERIALIZATION
 
 /** Non Smooth Laws (NSL) Base Class
  *

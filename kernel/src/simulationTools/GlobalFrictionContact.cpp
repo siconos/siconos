@@ -52,7 +52,7 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions option
 {
   // Only fc3d for the moment.
   if(_contactProblemDim != 3)
-    RuntimeException::selfThrow("GlobalFrictionContact No solver for 2 dimensional problems");
+    THROW_EXCEPTION("GlobalFrictionContact No solver for 2 dimensional problems");
 
   //Reset default storage type for numerics matrices.
   _numericsMatrixStorageType = NM_SPARSE;
@@ -111,7 +111,7 @@ void GlobalFrictionContact::initOSNSMatrix()
     }
     {
       default:
-        RuntimeException::selfThrow("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
+        THROW_EXCEPTION("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
       }
     }
   }
@@ -139,7 +139,7 @@ void GlobalFrictionContact::initOSNSMatrix()
     }
     {
       default:
-        RuntimeException::selfThrow("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
+        THROW_EXCEPTION("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
       }
     }
   }
@@ -198,6 +198,30 @@ GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProble
   numerics_problem->mu = _mu->data();
   numerics_problem->dimension = 3;
   return numerics_problem;
+}
+
+
+bool GlobalFrictionContact::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+
+  float type_number= (float) (Type::value(nslaw) + 0.1 * nslaw.size());
+  _nslawtype.insert(type_number);
+
+  if (Type::value(nslaw) != Type::NewtonImpactFrictionNSL)
+  {
+    THROW_EXCEPTION("\nGlobalFrictionContact::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
+                      Compatible NonSmoothLaw is NewtonImpactFrictionNSL (3D) \n");
+    return false;
+  }
+  if (_nslawtype.size() > 1)
+  {
+    THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
+                     Compatible NonSmoothLaw is : NewtonImpactFrictionNSL (3D), but you cannot mix them \n");
+    return false;
+  }
+
+  return true;
 }
 
 
@@ -291,7 +315,7 @@ bool GlobalFrictionContact::preCompute(double time)
       }
       else
       {
-        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osiType));
+        THROW_EXCEPTION("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osiType));
       }
       offset += dss;
     }
@@ -334,7 +358,7 @@ bool GlobalFrictionContact::preCompute(double time)
       }
       else
       {
-        RuntimeException::selfThrow("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osi1Type));
+        THROW_EXCEPTION("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osi1Type));
       }
       SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
       pos =  indexSet.properties(*ui).absolute_position;
@@ -462,7 +486,7 @@ void GlobalFrictionContact::postCompute()
       setBlock(*_globalVelocities, twist, sizeDS, pos, 0);
       DEBUG_EXPR(twist->display(););
     }
-    else RuntimeException::selfThrow("GlobalFrictionContact::postCompute() - not yet implemented for Dynamical system of type: " +  Type::name(ds));
+    else THROW_EXCEPTION("GlobalFrictionContact::postCompute() - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
   }
 

@@ -23,7 +23,7 @@
 #ifndef Sensor_H
 #define Sensor_H
 
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "SiconosPointers.hpp"
 
 #include "SiconosFwd.hpp"

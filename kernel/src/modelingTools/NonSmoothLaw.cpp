@@ -17,7 +17,7 @@
 */
 
 #include "NonSmoothLaw.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 
 // Constructors
@@ -32,7 +32,7 @@ NonSmoothLaw::~NonSmoothLaw()
 
 bool NonSmoothLaw::isVerified() const
 {
-  RuntimeException::selfThrow("NonSmoothLaw::isVerified, not yet implemented!");
+  THROW_EXCEPTION("NonSmoothLaw::isVerified, not yet implemented!");
   return false;
 }
 

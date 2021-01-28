@@ -117,7 +117,7 @@ void LagrangianCompliantR::computeOutput(double time, Interaction& inter, unsign
     else if(derivativeNumber == 2)
       prod(*_jachq, *DSlink[LagrangianR::q2], y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
     else
-      RuntimeException::selfThrow("LagrangianCompliantR::computeOutput, index out of range or not yet implemented.");
+      THROW_EXCEPTION("LagrangianCompliantR::computeOutput, index out of range or not yet implemented.");
   }
 }
 

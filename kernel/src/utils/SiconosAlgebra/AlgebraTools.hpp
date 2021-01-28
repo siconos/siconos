@@ -19,7 +19,8 @@
 #define ALGEBRATOOLS_HPP
 
 /*! \file AlgebraTools.hpp
-  Utilities to perform operations on matrices (exponantial ...)
+  Utilities to perform operations on matrices
+ (exponential ...)
 */
 
 #include "SiconosFwd.hpp"
@@ -36,7 +37,7 @@ namespace Siconos {
     \param computeAndAdd : if true, result = result + exp(A)
 **/
       void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd = false);
-    
+
     } // namespace tools
   } // namespace algebra
 } // namespace Siconos
