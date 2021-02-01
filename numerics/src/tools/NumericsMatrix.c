@@ -3744,6 +3744,12 @@ int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
         {
           info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
         }
+        if (info < 0)
+        {
+          numerics_printf_verbose(2,"NM_LU_solve: Csparse solver failed with info = %i \n", info);
+        }
+        else
+          numerics_printf_verbose(2,"NM_LU_solve: Csparse  with info = %i \n", info);
         break;
       }
 #ifdef WITH_MUMPS

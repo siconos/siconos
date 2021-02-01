@@ -26,20 +26,20 @@
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
 
-  int n_solvers = 6;
+  int n_solvers = 5;
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
-  for(int d =0; d <n_data; d++)
-  {
-    // GFC3D, NSGS_WR.
-    collection[current].filename = data_collection[d];
-    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    current++;
-  }
+  /* for(int d =0; d <n_data; d++) */
+  /* { */
+  /*   // GFC3D, NSGS_WR. */
+  /*   collection[current].filename = data_collection[d]; */
+  /*   collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS_WR); */
+  /*   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5; */
+  /*   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000; */
+  /*   current++; */
+  /* } */
 
   for(int d =0; d <n_data; d++)
   {

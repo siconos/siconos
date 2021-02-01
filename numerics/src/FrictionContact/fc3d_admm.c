@@ -1039,25 +1039,11 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     numerics_error("fc3d_admm", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] (rho) must be nonzero");
 
 
-
-  if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY)
+  if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY)
   {
-    if(verbose >= 1)
-    {
-      if(!(NM_is_symmetric(M)))
-      {
-        double d= NM_symmetry_discrepancy(M);
-        numerics_printf_verbose(1,"fc3d_admm ---- FC3D - ADMM - M is not symmetric (%e) but fc3d_admm_symmetric  \nis called",d);
-      }
-    }
-    fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q,  &NM_LU_solve);
-  }
-  else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY)
-  {
-    fc3d_admm_asymmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q);
-  }
-  else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY)
-  {
+    /* default choice. We check symmetry of the problem (Matrix M)
+     * if the problem is not symmetric, we called an asymmetric
+     * version of the algo is possible */
     if(!(NM_is_symmetric(M)))
     {
       /* double d= NM_symmetry_discrepancy(M); */
@@ -1068,10 +1054,31 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     {
       fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q,  &NM_Cholesky_solve);
     }
-
+  }
+  else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY)
+  {
+    /* The symmetric version of the algorithm is used even if
+     *  the system is not symmetric using the LU solver */
+    if(verbose >= 1)
+    {
+      if(!(NM_is_symmetric(M)))
+      {
+        double d= NM_symmetry_discrepancy(M);
+        numerics_printf_verbose(1,"fc3d_admm ---- FC3D - ADMM - M is not symmetric (%e) but fc3d_admm_symmetric  \nis called with LU solver",d);
+      }
+    }
+    fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q,  &NM_LU_solve);
+  }
+  else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY)
+  {
+    /* The asymmetric version of the algorithm is used even if
+     *  the system is symmetric */
+    fc3d_admm_asymmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q);
   }
   else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_SYMMETRIZE)
   {
+    /* The symmetric version of the algorithm is used and the matrix
+     *is systematically symmetrized*/
     NumericsMatrix *MT = NM_transpose(M);
     NumericsMatrix *Msym = NM_add(1/2., M, 1/2., MT );
     //NM_display(Msym);
@@ -1084,9 +1091,10 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   }
   else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_ASSUME_SYMMETRY)
   {
+    /* The symmetric version of the algorithm is used and we assume
+     *  that the data are symmetric */
     fc3d_admm_symmetric(problem, reaction, velocity, info, options, rho,  is_rho_variable, norm_q,  &NM_Cholesky_solve);
   }
-
   else
     numerics_error("fc3d_admm", "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented", options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
 

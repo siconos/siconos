@@ -470,7 +470,7 @@ enum SICONOS_FRICTION_3D_ADMM_SYMMETRY_ENUM
    * version of the algo is possible */
   SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY= 0,
   /* The symmetric version of the algorithm is used even if
-   *  the system is not symmetric */
+   *  the system is not symmetric using the LU solver */
   SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY= 1,
   /* The asymmetric version of the algorithm is used even if
    *  the system is symmetric */
