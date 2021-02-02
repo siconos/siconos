@@ -52,7 +52,7 @@
 #endif
 #endif
 
-void SBM_inc_version(SparseBlockStructuredMatrix* M)
+static void SBM_inc_version(SparseBlockStructuredMatrix* M)
 {
   NDV_inc(&(M->version));
 }

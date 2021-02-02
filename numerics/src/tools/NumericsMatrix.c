@@ -97,7 +97,7 @@ void NM_internalData_new(NumericsMatrix* M)
 }
 
 
-version_t NM_version(const NumericsMatrix* M, NM_types id)
+static version_t NM_version(const NumericsMatrix* M, NM_types id)
 {
   switch (id)
   {
@@ -127,7 +127,9 @@ version_t NM_version(const NumericsMatrix* M, NM_types id)
       return 0;
     }
   }
-  default: numerics_error("NM_version", "unknown id");
+  default: 
+    numerics_error("NM_version", "unknown id");
+    return 0;
   }
   assert (false);
 }
@@ -165,7 +167,7 @@ void NM_reset_versions(NumericsMatrix* M)
   NM_reset_version(M, NM_SPARSE);
 }
 
-void NM_set_version(NumericsMatrix* M, NM_types id, version_t value)
+static void NM_set_version(NumericsMatrix* M, NM_types id, version_t value)
 {
   switch (id)
   {
@@ -188,7 +190,7 @@ void NM_set_version(NumericsMatrix* M, NM_types id, version_t value)
 }
 
 /* internal compare function */
-unsigned long nm_max(const NumericsMatrix* M,
+static unsigned long nm_max(const NumericsMatrix* M,
              NM_types type1,
              NM_types type2)
 {
@@ -196,18 +198,18 @@ unsigned long nm_max(const NumericsMatrix* M,
     type1 : type2;
 }
 
-NM_types NM_latest_id(const NumericsMatrix* M)
+static NM_types NM_latest_id(const NumericsMatrix* M)
 {
   return nm_max(M, nm_max(M, NM_DENSE, NM_SPARSE_BLOCK), NM_SPARSE);
 }
 
 
-version_t NM_max_version(const NumericsMatrix* M)
+static version_t NM_max_version(const NumericsMatrix* M)
 {
   return NM_version(M, NM_latest_id(M));
 }
 
-void NM_inc_version(NumericsMatrix* M, NM_types id)
+static void NM_inc_version(NumericsMatrix* M, NM_types id)
 {
   unsigned int new_version = NM_max_version(M) + 1;
 
