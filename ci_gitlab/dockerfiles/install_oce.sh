@@ -34,11 +34,28 @@ else
 fi
 # Check if CI_PROJECT_DIR is set AND not empty
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos-tutorials' repository (absolute) path."}
-# Create directory to install libs.
-mkdir -p $CI_PROJECT_DIR/install/
 
-# Build dir
+# Creates directories to build and install libs.
+mkdir -p $CI_PROJECT_DIR/install/
 mkdir -p $CI_PROJECT_DIR/build/pyocc
+
+# --- OCE (optional, might be installed using package manager) ---
+if [ -n "$1" ]; then
+    if [[ "$1" == "clone_oce" ]]; then
+        cd $CI_PROJECT_DIR/
+        git clone https://github.com/tpaviot/oce.git > /dev/null
+        mkdir $CI_PROJECT_DIR/build/oce-last
+        cd $CI_PROJECT_DIR/build/oce-last
+        # Warning : install in 'user' path, that will be transfered between jobs (artifacts)
+        cmake $CI_PROJECT_DIR/oce -DCMAKE_INSTALL_PREFIX=$CI_PROJECT_DIR/install/oce  -Wno-deprecated -Wno-dev -DCMAKE_BUILD_TYPE=Release
+        make -j $nbprocs > /dev/null
+        echo "----> install oce ..."
+        make install > /dev/null
+        # Save path to OCEConfig.cmake, required to configure pythonocc
+        export OCE_INSTALL=`grep OCEConfig.cmake install_manifest.txt| sed 's/OCEConfig.cmake//g'`
+        rm -rf $CI_PROJECT_DIR/oce
+    fi
+fi
 
 # -- Python occ --
 # Clone last pythonocc version.
