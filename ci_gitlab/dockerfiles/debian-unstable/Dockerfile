@@ -1,5 +1,5 @@
 FROM debian:unstable
-RUN apt update  && apt upgrade -y && apt install -y -qq \
+RUN apt update  && apt install -y -qq \
         cmake \
         git-core \
         make \
@@ -43,4 +43,4 @@ RUN apt install -y -qq \
         python3-sphinx-rtd-theme \
         python3-sphinx-bootstrap-theme
 
-RUN apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
+RUN apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
