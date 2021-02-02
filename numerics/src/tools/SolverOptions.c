@@ -964,9 +964,7 @@ SolverOptions * solver_options_get_internal_solver(SolverOptions * options, size
     return options->internalSolvers[n];
 }
 
-void solver_options_set_internal_solver(SolverOptions * options,
-                                                   size_t n,
-                                                   SolverOptions* NSO)
+void solver_options_set_internal_solver(SolverOptions * options, size_t n, SolverOptions* NSO)
 {
   if(n+1 > options->numberOfInternalSolvers)
   {

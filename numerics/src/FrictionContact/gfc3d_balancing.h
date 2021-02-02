@@ -18,7 +18,6 @@
 #ifndef GLOBALFRICTIONCONTACT3DBALANCING_H
 #define GLOBALFRICTIONCONTACT3DBALANCING_H
 
-
 struct GlobalFrictionContactProblem_balancing_data
 {
   BalancingMatrices * B_for_M;
@@ -51,7 +50,7 @@ extern "C"
 
   GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_free(GlobalFrictionContactProblem_balancing_data * data);
   
-  GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_new();
+  GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_new(void);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
