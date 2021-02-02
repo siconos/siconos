@@ -181,7 +181,7 @@ PY_FULL_REGISTER(OccSpaceFilter, Mechanics);
   /* fix: use generated dynamic casting instead! */
   SP::OccBody cast_OccBody(SP::DynamicalSystem ds)
   {
-    return std11::dynamic_pointer_cast<OccBody>(ds);
+    return std::dynamic_pointer_cast<OccBody>(ds);
   };
 
   SP::SiconosVector facePoint(const TopoDS_Face &face,

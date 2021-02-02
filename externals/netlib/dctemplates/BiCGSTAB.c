@@ -166,19 +166,19 @@ int (*matvec)(), (*psolve)();
 
   /*     Test the input parameters. */
 
-  if (*n < 0)
+  if(*n < 0)
   {
     *info = -1;
   }
-  else if (*ldw < max(1, *n))
+  else if(*ldw < max(1, *n))
   {
     *info = -2;
   }
-  else if (*iter <= 0)
+  else if(*iter <= 0)
   {
     *info = -3;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     return 0;
   }
@@ -205,10 +205,10 @@ int (*matvec)(), (*psolve)();
   /*     Set initial residual. */
 
   dcopy_(n, &b[1], &c__1, &work[r * work_dim1 + 1], &c__1);
-  if (dnrm2_(n, &x[1], &c__1) != 0.)
+  if(dnrm2_(n, &x[1], &c__1) != 0.)
   {
     (*matvec)(&c_b5, &x[1], &c_b6, &work[r * work_dim1 + 1]);
-    if (dnrm2_(n, &work[r * work_dim1 + 1], &c__1) <= tol)
+    if(dnrm2_(n, &work[r * work_dim1 + 1], &c__1) <= tol)
     {
       goto L30;
     }
@@ -217,7 +217,7 @@ int (*matvec)(), (*psolve)();
          c__1);
 
   bnrm2 = dnrm2_(n, &b[1], &c__1);
-  if (bnrm2 == 0.)
+  if(bnrm2 == 0.)
   {
     bnrm2 = 1.;
   }
@@ -232,14 +232,14 @@ L10:
 
   rho = ddot_(n, &work[rtld * work_dim1 + 1], &c__1, &work[r * work_dim1 +
               1], &c__1);
-  if (abs(rho) < rhotol)
+  if(abs(rho) < rhotol)
   {
     goto L25;
   }
 
   /*        Compute vector P. */
 
-  if (*iter > 1)
+  if(*iter > 1)
   {
     beta = rho / rho1 * (alpha / omega);
     d__1 = -omega;
@@ -270,7 +270,7 @@ L10:
          , &c__1);
   dcopy_(n, &work[r * work_dim1 + 1], &c__1, &work[s * work_dim1 + 1], &
          c__1);
-  if (dnrm2_(n, &work[s * work_dim1 + 1], &c__1) <= tol)
+  if(dnrm2_(n, &work[s * work_dim1 + 1], &c__1) <= tol)
   {
     daxpy_(n, &alpha, &work[phat * work_dim1 + 1], &c__1, &x[1], &c__1);
     *resid = dnrm2_(n, &work[s * work_dim1 + 1], &c__1) / bnrm2;
@@ -299,17 +299,17 @@ L10:
     daxpy_(n, &d__1, &work[t * work_dim1 + 1], &c__1, &work[r * work_dim1
            + 1], &c__1);
     *resid = dnrm2_(n, &work[r * work_dim1 + 1], &c__1) / bnrm2;
-    if (*resid <= tol)
+    if(*resid <= tol)
     {
       goto L30;
     }
-    if (*iter == maxit)
+    if(*iter == maxit)
     {
       goto L20;
     }
   }
 
-  if (abs(omega) < omegatol)
+  if(abs(omega) < omegatol)
   {
     goto L25;
   }
@@ -330,11 +330,11 @@ L25:
 
   /*     Set breakdown flag. */
 
-  if (abs(rho) < rhotol)
+  if(abs(rho) < rhotol)
   {
     *info = -10;
   }
-  else if (abs(omega) < omegatol)
+  else if(abs(omega) < omegatol)
   {
     *info = -11;
   }

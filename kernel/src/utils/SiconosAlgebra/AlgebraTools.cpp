@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,27 @@
 #include <boost/numeric/ublas/io.hpp>
 #include "expm.hpp"
 
-namespace Siconos {
-  namespace algebra {
-    namespace tools {
+namespace Siconos
+{
+namespace algebra
+{
+namespace tools
+{
 
-      void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd)
-      {
-        // Implemented only for dense matrices.
-        // Note FP : Maybe it works for others but it has not been
-        // tested here --> to be done
-        // Do not work with sparse.
-        A.resetLU();
-        Exp.resetLU();
-        assert(Exp.num() == 1 || A.num() == 1);
-        if(computeAndAdd)
-          *Exp.dense() += expm_pad(*A.dense());
-        else
-          *Exp.dense() = expm_pad(*A.dense());
-      }
-    } // namespace tools
-  } // namespace algebra
+void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd)
+{
+  // Implemented only for dense matrices.
+  // Note FP : Maybe it works for others but it has not been
+  // tested here --> to be done
+  // Do not work with sparse.
+  A.resetFactorizationFlags();
+  Exp.resetFactorizationFlags();
+  assert(Exp.num() == Siconos::DENSE || A.num() == Siconos::DENSE);
+  if(computeAndAdd)
+    *Exp.dense() += expm_pad(*A.dense());
+  else
+    *Exp.dense() = expm_pad(*A.dense());
+}
+} // namespace tools
+} // namespace algebra
 } // namespace Siconos

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 */
 
 #include "PrismaticJointR.hpp"
+#include "SiconosVectorFriends.hpp"
 #include <NewtonEulerDS.hpp>
 //#include <Interaction.hpp>
 #include <RotationQuaternion.hpp>
@@ -63,7 +64,7 @@
 
 PrismaticJointR::PrismaticJointR()
   : NewtonEulerJointR()
-  , _axis0(std11::make_shared<SiconosVector>(3))
+  , _axis0(std::make_shared<SiconosVector>(3))
 {
   _axes.resize(1);
 }
@@ -71,12 +72,12 @@ PrismaticJointR::PrismaticJointR()
 PrismaticJointR::PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
                                  SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
-  , _axis0(std11::make_shared<SiconosVector>(3))
+  , _axis0(std::make_shared<SiconosVector>(3))
 {
   _axes.resize(1);
   setAbsolute(absoluteRef);
   setAxis(0, axis);
-  if (d1)
+  if(d1)
     setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
@@ -95,12 +96,12 @@ void PrismaticJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q
 {
   *_axis0 = *_axes[0];
 
-  if (_absoluteRef)
+  if(_absoluteRef)
   {
     // Adjust axis to be in q1 frame
     boost::math::quaternion<double> quat1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
     boost::math::quaternion<double> quatA(0, _axis0->getValue(0),
-                                       _axis0->getValue(1), _axis0->getValue(2));
+                                          _axis0->getValue(1), _axis0->getValue(2));
     boost::math::quaternion<double> tmp = (1.0/quat1) * quatA * quat1;
     _axis0->setValue(0, tmp.R_component_2());
     _axis0->setValue(1, tmp.R_component_3());
@@ -205,7 +206,7 @@ void PrismaticJointR::computeJachq(double time, Interaction& inter,  SP::BlockVe
   DEBUG_END("PrismaticJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
 }
 
-void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void PrismaticJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   DEBUG_PRINT("PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y) \n");
   SP::SiconosVector q1 = (q0.getAllVect())[0];
@@ -224,7 +225,7 @@ void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0.getAllVect())[1];
     X2 = q2->getValue(0);
@@ -269,36 +270,36 @@ void PrismaticJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 double PrismaticJointR::H1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
   return -_G10G20d1x*_V1x - _G10G20d1y*_V1y - _G10G20d1z*_V1z
-    + _V1x*(q10*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
-            - q11*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
-            - q12*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-            + q13*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2)))
-    + _V1y*(q10*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
-            + q11*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-            - q12*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
-            - q13*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2)))
-    + _V1z*(q10*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-            - q11*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
-            + q12*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
-            - q13*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2)));
+         + _V1x*(q10*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
+                 - q11*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
+                 - q12*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 + q13*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2)))
+         + _V1y*(q10*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
+                 + q11*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 - q12*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
+                 - q13*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2)))
+         + _V1z*(q10*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 - q11*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
+                 + q12*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
+                 - q13*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2)));
 }
 
 /* The options were    : operatorarrow */
 double PrismaticJointR::H2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
   return -_G10G20d1x*_V2x - _G10G20d1y*_V2y - _G10G20d1z*_V2z
-    + _V2x*(q10*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
-            - q11*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
-            - q12*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-            + q13*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2)))
-    + _V2y*(q10*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
-            + q11*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-            - q12*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
-            - q13*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2)))
-    + _V2z*(q10*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-            - q11*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
-            + q12*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
-            - q13*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2)));
+         + _V2x*(q10*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
+                 - q11*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
+                 - q12*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 + q13*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2)))
+         + _V2y*(q10*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
+                 + q11*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 - q12*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
+                 - q13*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2)))
+         + _V2z*(q10*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+                 - q11*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
+                 + q12*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
+                 - q13*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2)));
 }
 
 /* sympy expression:
@@ -314,27 +315,27 @@ double PrismaticJointR::H2(double X1, double Y1, double Z1, double q10, double q
 double PrismaticJointR::H3(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
   return q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-    + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-    + q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-    - q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21);
+         + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+         + q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+         - q13*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21);
 }
 
 /* The options were    : operatorarrow */
 double PrismaticJointR::H4(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
   return q10*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-    - q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-    + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-    + q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22);
+         - q11*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
+         + q12*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+         + q13*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22);
 }
 
 /* The options were    : operatorarrow */
 double PrismaticJointR::H5(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
 {
   return q10*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
-    + q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-    - q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-    + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23);
+         + q11*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+         - q12*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+         + q13*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23);
 }
 
 void PrismaticJointR::Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13, double X2, double Y2, double Z2, double q20, double q21, double q22, double q23)
@@ -564,7 +565,7 @@ void PrismaticJointR::Jd1(double X1, double Y1, double Z1, double q10, double q1
 
 
 
-void PrismaticJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
+void PrismaticJointR::computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot)
 {
   std::cout << "Warning:  PrismaticJointR::computeDotJachq(...) not yet implemented" << std::endl;
 }
@@ -580,13 +581,13 @@ void PrismaticJointR::DotJd2(double Xdot1, double Ydot1, double Zdot1, double qd
 }
 
 /** Compute the vector of linear and angular positions of the degrees of freedom */
-void PrismaticJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+void PrismaticJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                                   unsigned int axis)
 {
   // Normally we fill y starting at axis up to the number of columns,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
-  if (axis != 0)
+  if(axis != 0)
     return;
 
   SP::SiconosVector q1 = (q0.getAllVect())[0];
@@ -601,7 +602,7 @@ void PrismaticJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y
   double Y2 = 0;
   double Z2 = 0;
 
-  if (q0.numberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0.getAllVect())[1];
     X2 = q2->getValue(0);
@@ -613,20 +614,20 @@ void PrismaticJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y
              - _G10G20d1y*_axis0->getValue(1)
              - _G10G20d1z*_axis0->getValue(2)
              + _axis0->getValue(0)
-               *(q10*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
-                 - q11*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
-                 - q12*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-                 + q13*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2)))
+             *(q10*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
+               - q11*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
+               - q12*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+               + q13*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2)))
              + _axis0->getValue(1)
-               *(q10*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
-                 + q11*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-                 - q12*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
-                 - q13*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2)))
+             *(q10*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
+               + q11*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+               - q12*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))
+               - q13*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2)))
              + _axis0->getValue(2)
-               *(q10*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
-                 - q11*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
-                 + q12*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
-                 - q13*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))));
+             *(q10*(q10*(-Z1 + Z2) - q11*(-Y1 + Y2) + q12*(-X1 + X2))
+               - q11*(q10*(-Y1 + Y2) + q11*(-Z1 + Z2) - q13*(-X1 + X2))
+               + q12*(q10*(-X1 + X2) - q12*(-Z1 + Z2) + q13*(-Y1 + Y2))
+               - q13*(-q11*(-X1 + X2) - q12*(-Y1 + Y2) - q13*(-Z1 + Z2))));
 }
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
@@ -637,7 +638,7 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
-  if (axis != 0)
+  if(axis != 0)
     return;
 
   SP::SiconosVector q1 = (q0->getAllVect())[0];
@@ -652,7 +653,7 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
   double Y2 = 0;
   double Z2 = 0;
 
-  if (q0->numberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
     X2 = q2->getValue(0);
@@ -661,7 +662,7 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
   }
 
   jachq.setValue(0, 0, _axis0->getValue(0)*(-pow(q10,2) - pow(q11,2)
-                                            + pow(q12,2) + pow(q13,2))
+                 + pow(q12,2) + pow(q13,2))
                  + _axis0->getValue(1)*(2*q10*q13 - 2*q11*q12)
                  + _axis0->getValue(2)*(-2*q10*q12 - 2*q11*q13));
   jachq.setValue(0, 1, _axis0->getValue(0)*(-2*q10*q13 - 2*q11*q12)
@@ -673,14 +674,14 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
                  + _axis0->getValue(2)*(-pow(q10,2) + pow(q11,2)
                                         + pow(q12,2) - pow(q13,2)));
   jachq.setValue(0, 3, _axis0->getValue(0)*(2*q10*(-X1 + X2)
-                                            - 2*q12*(-Z1 + Z2) + 2*q13*(-Y1 + Y2))
+                 - 2*q12*(-Z1 + Z2) + 2*q13*(-Y1 + Y2))
                  + _axis0->getValue(1)*(2*q10*(-Y1 + Y2) + 2*q11*(-Z1 + Z2)
                                         - 2*q13*(-X1 + X2))
                  + _axis0->getValue(2)*(2*q10*(-Z1 + Z2) - 2*q11*(-Y1 + Y2)
                                         + 2*q12*(-X1 + X2)));
   jachq.setValue(0, 4, _axis0->getValue(0)*(q11*(-X1 + X2) - q11*(X1 - X2)
-                                            + q12*(-Y1 + Y2) - q12*(Y1 - Y2)
-                                            + 2*q13*(-Z1 + Z2))
+                 + q12*(-Y1 + Y2) - q12*(Y1 - Y2)
+                 + 2*q13*(-Z1 + Z2))
                  + _axis0->getValue(1)*(2*q10*(-Z1 + Z2) - q11*(-Y1 + Y2)
                                         + q11*(Y1 - Y2) + q12*(-X1 + X2)
                                         - q12*(X1 - X2))
@@ -688,8 +689,8 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
                                         - 2*q11*(-Z1 + Z2) + q13*(-X1 + X2)
                                         - q13*(X1 - X2)));
   jachq.setValue(0, 5, _axis0->getValue(0)*(-q10*(-Z1 + Z2) + q10*(Z1 - Z2)
-                                            + q11*(-Y1 + Y2) - q11*(Y1 - Y2)
-                                            - 2*q12*(-X1 + X2))
+                 + q11*(-Y1 + Y2) - q11*(Y1 - Y2)
+                 - 2*q12*(-X1 + X2))
                  + _axis0->getValue(1)*(2*q11*(-X1 + X2) + q12*(-Y1 + Y2)
                                         - q12*(Y1 - Y2) + q13*(-Z1 + Z2)
                                         - q13*(Z1 - Z2))
@@ -697,8 +698,8 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
                                         + q12*(Z1 - Z2) + q13*(-Y1 + Y2)
                                         - q13*(Y1 - Y2)));
   jachq.setValue(0, 6, _axis0->getValue(0)*(2*q10*(-Y1 + Y2) + q11*(-Z1 + Z2)
-                                            - q11*(Z1 - Z2) - q13*(-X1 + X2)
-                                            + q13*(X1 - X2))
+                 - q11*(Z1 - Z2) - q13*(-X1 + X2)
+                 + q13*(X1 - X2))
                  + _axis0->getValue(1)*(-q10*(-X1 + X2) + q10*(X1 - X2)
                                         + q12*(-Z1 + Z2) - q12*(Z1 - Z2)
                                         - 2*q13*(-Y1 + Y2))
@@ -706,10 +707,10 @@ void PrismaticJointR::computeJachqDoF(double time, Interaction& inter,
                                         + 2*q12*(-Y1 + Y2) + q13*(-Z1 + Z2)
                                         - q13*(Z1 - Z2)));
 
-  if (q0->numberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     jachq.setValue(0, 7, _axis0->getValue(0)*(pow(q10,2) + pow(q11,2)
-                                              - pow(q12,2) - pow(q13,2))
+                   - pow(q12,2) - pow(q13,2))
                    + _axis0->getValue(1)*(-2*q10*q13 + 2*q11*q12)
                    + _axis0->getValue(2)*(2*q10*q12 + 2*q11*q13));
     jachq.setValue(0, 8, _axis0->getValue(0)*(2*q10*q13 + 2*q11*q12)
@@ -731,11 +732,11 @@ void PrismaticJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int 
                                  bool absoluteRef)
 {
   assert(axis == 0);
-  if (axis != 0) return;
+  if(axis != 0) return;
 
   // We assume that a is normalized.
   ans = *_axis0;
 
-  if (absoluteRef)
+  if(absoluteRef)
     changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
 }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ TYPEDEF_SPTR(AffineVariationalInequalities)
 
  .. math::
 
-   \text{find z}\in P\text{such that for all x}\in P\quad \langle x-z, Mz+q\rangle \geq 0.
+   \text{find }z \in P\text{ such that}\quad \langle Mz+q, x - z\rangle \geq 0 \qquad \forall x \in P
 
  \endrst
  \todo : add "recover" function to start from old values of z and w.
@@ -59,23 +59,33 @@ protected:
 
 public:
 
-  /** constructor from data
-   *  \param numericsSolverId id of numerics solver
+  /** constructor from numerics solver id
+   *  \param numericsSolverId id of numerics solver, default =  SICONOS_AVI_CAOFERRIS
    */
   AVI(int numericsSolverId = SICONOS_AVI_CAOFERRIS);
+
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set,
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  AVI(SP::SolverOptions options);
 
   /** destructor
    */
   virtual ~AVI();
 
   void initialize(SP::Simulation sim);
-  virtual void setSolverId(int solverId);
 
   /** Compute the unknown z and update the Interaction (y and lambda)
    *  \param time current time
    *  \return information about the solver convergence.
    */
   int compute(double time);
+
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
 
   /** print the data to the screen
    */

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class FMatrix  : public ublas::matrix < FTime, ublas::column_major,
   ACCEPT_SERIALIZATION(FMatrix);
 };
 
-class Hashed : public std11::enable_shared_from_this<Hashed>
+class Hashed : public std::enable_shared_from_this<Hashed>
 {
 protected:
   /** serialization hooks
@@ -72,7 +72,7 @@ class space_hash : public boost::unordered_multiset < SP::Hashed,
 /* relations pool */
 typedef std::pair<double, double> CircleCircleRDeclared;
 typedef std::pair<double, double> DiskDiskRDeclared;
-typedef std11::array<double, 6> DiskPlanRDeclared;
+typedef std::array<double, 6> DiskPlanRDeclared;
 
 
 class CircleCircleRDeclaredPool : public std::map<CircleCircleRDeclared, SP::CircularR>

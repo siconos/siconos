@@ -91,12 +91,12 @@ ftnlen flag_len;
   --b;
 
   /* Function Body */
-  if (lsame_(method, "JACOBI", 1L, 6L))
+  if(lsame_(method, "JACOBI", 1L, 6L))
   {
     jacsplit_(&matdim_1.n, system_1.a, &matdim_1.lda, &work[work_offset],
               ldw, flag_, 1L);
   }
-  else if (lsame_(method, "SOR", 1L, 3L))
+  else if(lsame_(method, "SOR", 1L, 3L))
   {
     sorsplit_(omega, &matdim_1.n, system_1.a, &matdim_1.lda, &b[1], &work[
                 work_offset], ldw, flag_, 1L);
@@ -151,15 +151,15 @@ ftnlen flag_len;
   a -= a_offset;
 
   /* Function Body */
-  if (lsame_(flag_, "SPLIT", 1L, 5L))
+  if(lsame_(flag_, "SPLIT", 1L, 5L))
   {
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       work[i + work_dim1] = 1. / a[i + i * a_dim1];
       a[i + i * a_dim1] = 0.;
       i__2 = *n;
-      for (j = 1; j <= i__2; ++j)
+      for(j = 1; j <= i__2; ++j)
       {
         a[i + j * a_dim1] = -a[i + j * a_dim1];
         /* L10: */
@@ -167,13 +167,13 @@ ftnlen flag_len;
       /* L20: */
     }
   }
-  else if (lsame_(flag_, "RECONSTRUCT", 1L, 11L))
+  else if(lsame_(flag_, "RECONSTRUCT", 1L, 11L))
   {
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       i__2 = *n;
-      for (j = 1; j <= i__2; ++j)
+      for(j = 1; j <= i__2; ++j)
       {
         a[i + j * a_dim1] = -a[i + j * a_dim1];
         /* L30: */
@@ -235,17 +235,17 @@ ftnlen flag_len;
   a -= a_offset;
 
   /* Function Body */
-  if (lsame_(flag_, "SPLIT", 3L, 5L))
+  if(lsame_(flag_, "SPLIT", 3L, 5L))
   {
 
     /*        Set M. */
 
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       work[i + i * work_dim1] = a[i + i * a_dim1];
       i__2 = i - 1;
-      for (j = 1; j <= i__2; ++j)
+      for(j = 1; j <= i__2; ++j)
       {
         work[i + j * work_dim1] = *omega * a[i + j * a_dim1];
         /* L10: */
@@ -262,10 +262,10 @@ ftnlen flag_len;
     /*        This causes the requirement that WORK be N x (2N+3). */
 
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       i__2 = *n;
-      for (j = 1; j <= i__2; ++j)
+      for(j = 1; j <= i__2; ++j)
       {
         work[i + (j + *n + 3) * work_dim1] = a[i + j * a_dim1];
         /* L30: */
@@ -274,12 +274,12 @@ ftnlen flag_len;
     }
 
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       b[i] = *omega * b[i];
       a[i + i * a_dim1] = (1. - *omega) * a[i + i * a_dim1];
       i__2 = *n;
-      for (j = i + 1; j <= i__2; ++j)
+      for(j = i + 1; j <= i__2; ++j)
       {
         a[i + j * a_dim1] = -(*omega) * a[i + j * a_dim1];
         /* L50: */
@@ -288,10 +288,10 @@ ftnlen flag_len;
     }
 
     i__1 = *n;
-    for (i = 2; i <= i__1; ++i)
+    for(i = 2; i <= i__1; ++i)
     {
       i__2 = i - 1;
-      for (j = 1; j <= i__2; ++j)
+      for(j = 1; j <= i__2; ++j)
       {
         a[i + j * a_dim1] = 0.;
         /* L70: */
@@ -300,14 +300,14 @@ ftnlen flag_len;
     }
 
   }
-  else if (lsame_(flag_, "RECONSTRUCT", 3L, 11L))
+  else if(lsame_(flag_, "RECONSTRUCT", 3L, 11L))
   {
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       b[i] /= *omega;
       i__2 = *n;
-      for (j = 1; j <= i__2; ++j)
+      for(j = 1; j <= i__2; ++j)
       {
         a[i + j * a_dim1] = work[i + (j + *n + 3) * work_dim1];
         /* L90: */
@@ -420,10 +420,10 @@ doublereal *eigmax, *eigmin;
 
   /* Function Body */
   matcopy_(&matdim_1.n, system_1.a, &matdim_1.lda, &work[work_offset], ldw);
-  if (lsamen_(&c__3, forms_1.curpform, "JACBI", 5L, 5L))
+  if(lsamen_(&c__3, forms_1.curpform, "JACBI", 5L, 5L))
   {
     i__1 = matdim_1.n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       work[i + i * work_dim1] /= system_1.m[i - 1];
       /* L30: */
@@ -435,9 +435,9 @@ doublereal *eigmax, *eigmin;
   i__1 = matdim_1.n * 3 - 1;
   dsyev_("NO_VEC", "UPPER", &matdim_1.n, &work[work_offset], ldw, &work[(
            matdim_1.n + 1) * work_dim1 + 1], &work[(matdim_1.n + 2) *
-               work_dim1 + 1], &i__1, &info, 6L, 5L);
+                                work_dim1 + 1], &i__1, &info, 6L, 5L);
 
-  if (info != 0)
+  if(info != 0)
   {
     s_wsle(&io___10);
     e_wsle();
@@ -463,7 +463,7 @@ A|", 48L);
 
   /*     Eigenvalues should be positive. */
 
-  if (*eigmin < 0.)
+  if(*eigmin < 0.)
   {
     s_wsle(&io___14);
     do_lio(&c__9, &c__1, "CHEBYSHEV WARNING: COMPUTED MIN EIGENVALUE <= \
@@ -471,7 +471,7 @@ A|", 48L);
     e_wsle();
     *eigmin = dlamch_("EPS", 3L);
   }
-  if (*eigmax < *eigmin)
+  if(*eigmax < *eigmin)
   {
     s_wsle(&io___15);
     do_lio(&c__9, &c__1, "CHEBYSHEV WARNING: MAX EIGENVALUE < MIN: SET T\
@@ -512,10 +512,10 @@ integer *ldb;
 
   /* Function Body */
   i__1 = *n;
-  for (j = 1; j <= i__1; ++j)
+  for(j = 1; j <= i__1; ++j)
   {
     i__2 = *n;
-    for (i = 1; i <= i__2; ++i)
+    for(i = 1; i <= i__2; ++i)
     {
       b[i + j * b_dim1] = a[i + j * a_dim1];
       /* L10: */

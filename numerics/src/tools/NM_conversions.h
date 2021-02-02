@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@
 /*!\file NM_conversions.h
   \brief Conversion related functions for the various matrix storages in Numerics
 */
-
-#include "CSparseMatrix.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "CSparseMatrix.h"  // for CSparseMatrix
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -35,6 +35,12 @@ extern "C"
    * \return the matrix in triplet format
    */
   CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc);
+
+  /** Convert from csc to half triplet for symmetric matrices
+   * \param csc the matrix to convert
+   * \return the matrix in triplet format
+   */
+  CSparseMatrix* NM_csc_to_half_triplet(CSparseMatrix* csc);
 
   /** Convert from triplet (aka coo) to csr
    * \param triplet the matrix to convert

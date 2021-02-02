@@ -7,6 +7,7 @@
 #endif
 #endif
 
+%include "CSparseMatrix_internal.h"
 %include "CSparseMatrix.h"
 %include "SparseBlockMatrix.h"
 %include "NumericsMatrix.h"
@@ -144,7 +145,7 @@
 
   ~NumericsMatrix()
   {
-    NM_free($self);
+    NM_clear($self);
     free($self);
   }
 
@@ -154,7 +155,7 @@
 {
  ~SparseBlockStructuredMatrix()
  {
-   SBM_free($self);
+   SBM_clear($self);
    free($self);
  }
 }

@@ -44,62 +44,66 @@ endmacro()
 # from xml outputs (doxygen).
 # 
 # ---------------------------------------------
-macro(doxy2rst_sphinx COMP)
+function(doxy2rst_sphinx COMPONENT)
 
+  set(multiValueArgs HEADERS)
+  cmake_parse_arguments(component "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  
+  
   # --- Target : create rst files from xml outputs (doxygen) ---
-    # run : make doxy2rst
-    # depends : xml4rst
-    #
-    # Call python script to create rst files that can be parsed by sphinx/breathe
-    # to create documentation.
-
-    # output path, required to generate conf.py (breathe part)
-    # This is the place where xml files created by doxygen
-    # will be generated, for a later use by sphinx.
-    set(DOXYGEN_4_RST ${DOXYGEN_OUTPUT}/xml4rst CACHE INTERNAL "doxy (xml) output path")
-
-    # Doxygen conf for xml outputs for breathe. It might be different
-    # from the one used for xml outputs for swig.
-    set(DOXY_QUIET "YES")
-    set(DOXY_WARNINGS "NO")
-    set(GENERATE_HTML NO)
-    set(GENERATE_XML YES)
-    set(EXTRACT_ALL NO)
-    set(EXTRACT_PRIVATE NO)
-    set(XML_OUTPUT xml4rst/${COMP})
-    file(MAKE_DIRECTORY ${DOXYGEN_4_RST}/${COMP})
-    # Set config file name
-    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy-xml.config")
-
-    # Get list of inputs
-    set(DOXYGEN_INPUTS ${${COMP}_DOXYGEN_INPUTS})
+  # run : make doxy2rst
+  # depends : xml4rst
+  #
+  # Call python script to create rst files that can be parsed by sphinx/breathe
+  # to create documentation.
+  
+  # output path, required to generate conf.py (breathe part)
+  # This is the place where xml files created by doxygen
+  # will be generated, for a later use by sphinx.
+  set(DOXYGEN_4_RST ${DOXYGEN_OUTPUT}/xml4rst CACHE INTERNAL "doxy (xml) output path")
+  
+  # Doxygen conf for xml outputs for breathe. It might be different
+  # from the one used for xml outputs for swig.
+  set(DOXY_QUIET "YES")
+  set(DOXY_WARNINGS "NO")
+  set(GENERATE_HTML NO)
+  set(GENERATE_XML YES)
+  set(EXTRACT_ALL NO)
+  set(EXTRACT_PRIVATE NO)
+  set(XML_OUTPUT xml4rst/${COMPONENT})
+  file(MAKE_DIRECTORY ${DOXYGEN_4_RST}/${COMPONENT})
+  # Set config file name
+  set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMPONENT}doxy-xml.config")
+  
+  # Get list of inputs
+  set(DOXYGEN_INPUTS ${${COMPONENT}_DOXYGEN_INPUTS})
     
-    configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxyxml2sphinx.config.in ${DOXY_CONFIG_XML} @ONLY)
+  configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxyxml2sphinx.config.in ${DOXY_CONFIG_XML} @ONLY)
 
-    # Create a new target used to create doxygen outputs (xml).
-    # Required for documentation and/or for serialization.
-    add_custom_target(${COMP}-doxy2xml
-      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML}
-      OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy4rst.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy4rst.log
-      COMMENT "Generate xml/doxygen files for ${COMP} (conf: ${DOXY_CONFIG_XML}).") 
+  # Create a new target used to create doxygen outputs (xml).
+  # Required for documentation and/or for serialization.
+  add_custom_target(${COMPONENT}-doxy2xml
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML}
+    OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMPONENT}doxy4rst.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMPONENT}doxy4rst.log
+    COMMENT "Generate xml/doxygen files for ${COMPONENT} (conf: ${DOXY_CONFIG_XML}).") 
 
-    if(WITH_${COMPONENT}_DOCUMENTATION)
-      # Path where rst files will be generated.
-      set(SPHINX_DIR "${CMAKE_BINARY_DIR}/docs/sphinx")
-      
-      # Create a new target used to create sphinx inputs (rst) from doxygen outputs (xml).
-      # It calls a python function defined in gendoctools (create_breathe_files)
-      add_custom_target(${COMP}-xml2rst
-        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-        "from gendoctools.cpp2rst import create_breathe_files as f; f('${${COMP}_HDRS}', '${CMAKE_SOURCE_DIR}', '${COMP}', '${SPHINX_DIR}','${DOXY_CONFIG_XML}')"
+  if(WITH_${COMPONENT}_DOCUMENTATION)
+    # Path where rst files will be generated.
+    set(SPHINX_DIR "${CMAKE_BINARY_DIR}/docs/sphinx")
+    
+    # Create a new target used to create sphinx inputs (rst) from doxygen outputs (xml).
+    # It calls a python function defined in gendoctools (create_breathe_files)
+    add_custom_target(${COMPONENT}-xml2rst
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "from gendoctools.cpp2rst import create_breathe_files as f; f('${component_HEADERS}', '${CMAKE_SOURCE_DIR}', '${COMPONENT}', '${SPHINX_DIR}','${DOXY_CONFIG_XML}')"
         VERBATIM
-        DEPENDS ${COMP}-doxy2xml
+        DEPENDS ${COMPONENT}-doxy2xml
         )
       
-      add_custom_command(TARGET  ${COMP}-xml2rst POST_BUILD
-        COMMENT "${COMP} : rst (c++ API) files have been generated in ${SPHINX_DIR}/reference/cpp.")
+      add_custom_command(TARGET  ${COMPONENT}-xml2rst POST_BUILD
+        COMMENT "${COMPONENT} : rst (c++ API) files have been generated in ${SPHINX_DIR}/reference/cpp.")
     endif()
-endmacro()
+endfunction()
 
 # --------------------------------------
 # Call this macro when configuration

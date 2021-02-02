@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,110 +15,128 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_NSGS
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
-
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  int n_solvers = 10;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
+  int current = 0;
+  for(int d =0; d <n_data; d++)
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
-
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS);
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS);
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "internal_iparam";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "internal_dparam";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_VI_EG);
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
-    n++;
+    // GFC3D, NSGS, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS);
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
   }
 
-    for ( int d =0; d <n_data_1; d++)
+  for(int d =0; d <n_data; d++)
   {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_VI_FPP);
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
-    n++;
+    // GFC3D, NSGS, default values.
+    // projection on cone for the internal solver, with default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS);
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+    current++;
   }
 
-    for ( int d =0; d <n_data_1; d++)
+  for(int d =0; d <n_data; d++)
   {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ACLMFP);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
+    // GFC3D, VI_EG, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_VI_EG);
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 40000;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-1;
+    current++;
   }
-    for ( int d =0; d <n_data_1; d++)
+
+  for(int d =0; d <n_data; d++)
   {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
+    // GFC3D, VI_FPP, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_VI_FPP);
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 40000;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-1;
+    current++;
   }
-    
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D, ACLMFP, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ACLMFP);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+  }
+
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D, ADMM
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+    current++;
+  }
+
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D, ADMM
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
+    current++;
+  }
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D, ADMM
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
+    current++;
+  }
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D, ADMM
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] =  SICONOS_FRICTION_3D_RESCALING_SCALAR;
+    current++;
+  }
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D, ADMM
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] =  SICONOS_FRICTION_3D_RESCALING_BALANCING_M;
+    current++;
+  }
+
+  return collection;
+
 
 }

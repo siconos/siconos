@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@
 #ifndef SiconosSerialization_hpp
 #define SiconosSerialization_hpp
 
-/** install serialization hooks. Must be used inside a protected zone
-    of class definition
-    \parameter a class name
- */
+// tells include-what-you-use to keep this file
+// and not to suggest boost or alike.
+// IWYU pragma: begin_exports 
+
 namespace boost
 {
 namespace serialization
@@ -35,10 +35,16 @@ class access;
 }
 }
 
+/** install serialization hooks. Must be used inside a protected zone
+    of class definition
+    \parameter a class name
+*/
 #define ACCEPT_SERIALIZATION(CLASS)                             \
   typedef void serializable;                                    \
   template<typename Archive>                                    \
   friend void siconos_io(Archive&, CLASS&, const unsigned int); \
   friend class boost::serialization::access
+
+// IWYU pragma: end_exports
 
 #endif

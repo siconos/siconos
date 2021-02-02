@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
  * limitations under the License.
 */
 
+#include <stdio.h>                          // for printf
+#include "NumericsFwd.h"                    // for SolverOptions, Variationa...
+#include "VariationalInequality_Solvers.h"  // for vi_box_path
+#include "SiconosConfig.h" // for HAVE_PATHFERRIS // IWYU pragma: keep
 
-#include <stdio.h>
-#include "VariationalInequality.h"
-#include "SolverOptions.h"
 
-#include "VariationalInequality_Solvers.h"
 
 #ifdef HAVE_PATHFERRIS
+#include "VariationalInequality.h"
+#include "SolverOptions.h"
 
 #include <limits.h>
 #include <assert.h>
@@ -71,7 +73,8 @@ static CB_FUNC(void) vi_box_PATH_bounds(void* restrict id, int n, double* restri
 {
   SN_generic_path_env* env = (SN_generic_path_env*) id;
 
-  for (unsigned i = 0; i < (unsigned)n; ++i) {
+  for(unsigned i = 0; i < (unsigned)n; ++i)
+  {
     z[i] = env->z[i];
     lb[i] = env->lb[i];
     ub[i] = env->ub[i];
@@ -87,17 +90,18 @@ static CB_FUNC(int) vi_box_PATH_function_eval(void* id, int n, double*z, double 
   return 0;
 }
 
-static CB_FUNC(int) vi_box_PATH_jacobian_eval(void *id, int n, double *z, int wantf, 
-                                        double *f, int *nnz,
-                                        int *col_start, int *col_len, 
-                                        int *row, double *data)
+static CB_FUNC(int) vi_box_PATH_jacobian_eval(void *id, int n, double *z, int wantf,
+    double *f, int *nnz,
+    int *col_start, int *col_len,
+    int *row, double *data)
 {
   int err = 0;
   SN_generic_path_env* env = (SN_generic_path_env*) id;
   VariationalInequality* vi_box = (VariationalInequality*)env->problem;
 
-  if (wantf) {
-    //err += 
+  if(wantf)
+  {
+    //err +=
     vi_box->F(vi_box, n, z, f);
   }
 
@@ -114,7 +118,7 @@ static CB_FUNC(int) vi_box_PATH_jacobian_eval(void *id, int n, double *z, int wa
 
 
 
-void vi_box_path(VariationalInequality* problem, double *z, double* F, int *info , SolverOptions* options)
+void vi_box_path(VariationalInequality* problem, double *z, double* F, int *info, SolverOptions* options)
 {
   assert(problem);
   unsigned n = problem->size;
@@ -125,7 +129,8 @@ void vi_box_path(VariationalInequality* problem, double *z, double* F, int *info
 
   box_constraints* box_set = (box_constraints*) problem->set;
 
-  SN_generic_path_env PATH_env = {
+  SN_generic_path_env PATH_env =
+  {
     n,
     nnz,
     z,
@@ -136,7 +141,8 @@ void vi_box_path(VariationalInequality* problem, double *z, double* F, int *info
   };
 
 
-  MCP_Interface mcp_interface = {
+  MCP_Interface mcp_interface =
+  {
     &PATH_env,
     &PATH_problem_size, &vi_box_PATH_bounds,
     &vi_box_PATH_function_eval, &vi_box_PATH_jacobian_eval,
@@ -153,7 +159,7 @@ void vi_box_path(VariationalInequality* problem, double *z, double* F, int *info
 
 #else
 
-void vi_box_path(VariationalInequality* problem, double *z, double* F, int *info , SolverOptions* options)
+void vi_box_path(VariationalInequality* problem, double *z, double* F, int *info, SolverOptions* options)
 {
   printf("vi_box_path :: Path was not configured at compile time!\n");
 }

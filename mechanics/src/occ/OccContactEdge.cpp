@@ -2,7 +2,7 @@
 #include "ContactShapeDistance.hpp"
 #include "cadmbtb.hpp"
 
-#include <RuntimeException.hpp>
+#include <SiconosException.hpp>
 
 #include <TopoDS.hxx>
 #include <TopExp_Explorer.hxx>
@@ -30,8 +30,8 @@ void OccContactEdge::computeUVBounds()
 {
   TopExp_Explorer exp;
   exp.Init(this->data(),TopAbs_EDGE);
-  for (unsigned int i=0; i<_index; ++i, exp.Next());
-  if (exp.More())
+  for(unsigned int i=0; i<_index; ++i, exp.Next());
+  if(exp.More())
   {
     const TopoDS_Edge& edge = TopoDS::Edge(exp.Current());
     BRepAdaptor_Curve SC(edge);

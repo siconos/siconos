@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,22 @@
 /*!\file NumericsMatrix.h
   \brief Structure definition and functions related to matrix storage in Numerics
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <stdbool.h>
-#include <stdio.h>
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include "CSparseMatrix.h" // for CS_INT
+#include <assert.h>         // for assert
+#include <stdio.h>          // for size_t, FILE, NULL
+#include <stdlib.h>         // for malloc
+#include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
+#include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
+#include "NumericsDataVersion.h" // Versioning
+#include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
+#ifndef __cplusplus
+#include <stdbool.h>        // for bool
+#endif
+
+#ifdef WITH_OPENSSL
+#include <openssl/sha.h>
+#endif
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -39,13 +46,22 @@ typedef struct
 {
   size_t iWorkSize; /**< size of iWork */
   void *iWork; /**< integer workspace */
-  size_t sizeof_elt ; ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
+  size_t sizeof_elt ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
+  bool isCholeskyfactorized; /**<  true if the matrix has already been Cholesky factorized */
+  bool isLDLTfactorized; /**<  true if the matrix has already been LDLT factorized */
   bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
 #ifdef SICONOS_HAS_MPI
   MPI_Comm mpi_comm; /**< optional mpi communicator */
+#endif
+#ifdef WITH_OPENSSL
+  unsigned int values_sha1_count; /**< counter for sha1 */
+  unsigned char values_sha1[SHA_DIGEST_LENGTH]; /**< sha1 hash of
+                                                 * values. Matrices of
+                                                 * differents sizes may have
+                                                 * the same hash */
 #endif
 } NumericsMatrixInternalData;
 
@@ -68,7 +84,21 @@ struct NumericsMatrix
 
   NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace among other things */
 
+  NumericsDataVersion version; /*< version of dense storage */
+
+  NumericsMatrix* destructible; /**< pointer on the destructible
+                                 * matrix, by default points toward
+                                 * the matrix itself */
 };
+
+typedef struct
+{
+  int size0;
+  int size1;
+  NumericsMatrix* D1;
+  NumericsMatrix* D2;
+  NumericsMatrix* A;
+} BalancingMatrices;
 
 /*! RawNumericsMatrix is used without conversion in python */
 typedef NumericsMatrix RawNumericsMatrix;
@@ -80,7 +110,6 @@ typedef enum NumericsMatrix_types {
   NM_SPARSE,          /**< compressed column format */
 } NM_types;
 
-/*! option for gesv factorization */
 typedef enum {
   NM_NONE,          /**< keep nothing */
   NM_KEEP_FACTORS,  /**< keep all the factorization data (useful to reuse the factorization) */
@@ -117,7 +146,7 @@ extern "C"
    * \return a pointer to a NumericsMatrix
    */
   RawNumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
-  RawNumericsMatrix* NM_create_from_filename(char *filename);
+  RawNumericsMatrix* NM_create_from_filename(const char *filename);
   RawNumericsMatrix* NM_create_from_file(FILE *file);
 
 
@@ -134,8 +163,10 @@ extern "C"
    *  be set to NM_SPARSE.
    * \param[in] A a NumericsMatrix
    * \param[in,out] B a NumericsMatrix
+   * \param threshold if the original matrix is dense, a threshold can be applied
+   * on the absolute value of the entries
    */
-  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
+  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold);
 
   /** create a NumericsMatrix similar to the another one. The structure is the same
    * \param mat the model matrix
@@ -155,6 +186,12 @@ extern "C"
    * \return the triplet sparse Matrix created in A.
    */
   CSparseMatrix* NM_triplet(NumericsMatrix* A);
+
+   /** Creation, if needed, of half triplet storage from sparse block storage.
+   * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
+   * \return the triplet sparse Matrix created in A.
+   */
+  CSparseMatrix* NM_half_triplet(NumericsMatrix* A);
 
   /** Creation, if needed, of compress column storage of a NumericsMatrix.
    * \param[in,out] A a NumericsMatrix with sparse block storage initialized
@@ -203,13 +240,51 @@ extern "C"
  /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
-  static inline void NM_null(NumericsMatrix* A)
-  {
-    A->matrix0 = NULL;
-    A->matrix1 = NULL;
-    A->matrix2 = NULL;
-    A->internalData = NULL;
-  }
+  void NM_null(NumericsMatrix* A);
+
+  /** Check if a matrix is destructible.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix is destructible */
+  bool NM_destructible(const NumericsMatrix* A);
+
+  /** Preservation of a matrix before in-place transformations such as
+   * factorizations.
+   * \param[in] A the NumericsMatrix
+   * \return a pointer on the preserved Matrix;
+   */
+  RawNumericsMatrix* NM_preserve(NumericsMatrix* A);
+
+  /** Set the matrix as destructible, clear the preserved data.
+   * \param[in] A the NumericsMatrix
+   * \return a pointer on the Matrix;
+   */
+  RawNumericsMatrix* NM_unpreserve(NumericsMatrix* A);
+
+  /** Check for a previous LU factorization.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix has been LU factorized.
+   */
+  bool NM_LU_factorized(NumericsMatrix* A);
+
+  /** Check for a previous Cholesky factorization.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix has been Cholesky factorized.
+   */
+  bool NM_Cholesky_factorized(NumericsMatrix* A);
+
+  /** Check for a previous LDLT factorization.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix has been Cholesky factorized.
+   */
+  bool NM_LDLT_factorized(NumericsMatrix* A);
+
+  /** Set the factorization flag.
+   * \param[in] A the NumericsMatrix,
+   * \param[in] flag a boolean.
+   */
+  void NM_set_LU_factorized(NumericsMatrix* A, bool flag);
+  void NM_set_Cholesky_factorized(NumericsMatrix* A, bool flag);
+  void NM_set_LDLT_factorized(NumericsMatrix* A, bool flag);
 
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
@@ -234,19 +309,31 @@ extern "C"
    */
   void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax);
 
-  /** Allocate a csr matrix in A
-   * \param A the matrix
-   * \param nzmax number of non-zero elements
-   */
-  void NM_csr_alloc(NumericsMatrix* A, CS_INT nzmax);
 
   /** Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.
       \param m the matrix to be deleted.
    */
-  void NM_free(NumericsMatrix* m);
 
+  void NM_clear(NumericsMatrix* m);
+  NumericsMatrix *  NM_free(NumericsMatrix* m);
+
+  /** Free memory for a NumericsMatrix except the dense matrix that is assumed not to be owned.
+      Warning: call this function only if you are sure that
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
+      \param m the matrix to be deleted.
+   */
+  void NM_clear_not_dense(NumericsMatrix* m);
+  NumericsMatrix *  NM_free_not_dense(NumericsMatrix* m);
+  /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
+      \param m the matrix to be deleted.
+      \param storageType to be kept.
+   */
+  void NM_clear_other_storages(NumericsMatrix* M, int storageType);
 
   /**************************************************/
   /** setters and getters               *************/
@@ -254,14 +341,26 @@ extern "C"
 
   /** insert an non zero entry into a NumericsMatrix.
    * for storageType = NM_SPARSE, a conversion to triplet is done for performing the entry in the
-   * matrix. This method is expensice in terms of memory management. For a lot of entries, use
+   * matrix. This method is expensive in terms of memory management. For a lot of entries, use
+   * preferably a triplet matrix.
+   * \param M the NumericsMatrix
+   * \param i row index
+   * \param j column index
+   * \param val the value to be inserted.
+   * \param threshold a threshold to filter the small value in magnitude (useful for dense to sparse conversion) 
+   */
+  void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold);
+
+  /** insert an entry into a NumericsMatrix.
+   * for storageType = NM_SPARSE, a conversion to triplet is done for performing the entry in the
+   * matrix. This method is expensive in terms of memory management. For a lot of entries, use
    * preferably a triplet matrix.
    * \param M the NumericsMatrix
    * \param i row index
    * \param j column index
    * \param val the value to be inserted.
    */
-  void NM_zentry(NumericsMatrix* M, int i, int j, double val);
+  void NM_entry(NumericsMatrix* M, int i, int j, double val);
 
   /** get the value of a NumericsMatrix.
    * \param M the NumericsMatrix
@@ -269,7 +368,7 @@ extern "C"
    * \param j column index
    * \return  the value to be inserted.
    */
-  double NM_get_value(NumericsMatrix* M, int i, int j);
+  double NM_get_value(const NumericsMatrix* const M, int i, int j);
 
   /** compare to NumericsMatrix up to machine accuracy (DBL_EPSILON)
    * \param A the NumericsMatrix
@@ -283,8 +382,6 @@ extern "C"
    * \param tol the tolerance
    */
   bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol);
-
-
 
   /** return the number of non-zero element. For a dense matrix, it is the
    * product of the dimensions (e.g. an upper bound). For a sparse matrix, it is the true number
@@ -312,7 +409,7 @@ extern "C"
    */
 
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 5x5 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
@@ -320,7 +417,7 @@ extern "C"
    *   In case of SBM case **Bout contains the resulting block (from the SBM).
    */
   void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
@@ -329,6 +426,17 @@ extern "C"
    *  A copy is always performed
    */
   void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
+
+
+  /** Set the submatrix B into the matrix A on the position defined in
+   *  (start_i, start_j) position.
+   * \param[in] A a pointer to NumerixMatrix
+   * \param[in] B a pointer toNumericsMatrix
+   * \param[in] start_i a start row index
+   * \param[in] start_j a start column index
+   */
+  void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
+                 const unsigned int start_i, const unsigned int start_j);
 
   /**************************************************/
   /** Matrix - vector product           *************/
@@ -378,10 +486,8 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
-  
 
 
-  
   void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
   /** Matrix vector multiplication : y = alpha A x + beta y
@@ -412,8 +518,6 @@ extern "C"
    */
   RawNumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
 
-
-
   /** Transposed matrix multiplication : y += alpha transpose(A) x + y
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix
@@ -425,7 +529,6 @@ extern "C"
                 const double beta,
                 double *y);
 
-
   /**************************************************/
   /** matrix conversion display *********************/
   /**************************************************/
@@ -435,12 +538,13 @@ extern "C"
   /** matrix and vector display *********************/
   /**************************************************/
 
-  void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
+  void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold);
 
+  /** Copy a NumericsMatrix into another with dense storage.
+      \param A source matrix (any kind of storage)
+      \param B targeted matrix, must be dense with the same dimension as A
+  */
   int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
-
-
-
 
   /** Screen display of the matrix content stored as a double * array in Fortran style
       \param m the matrix to be displayed
@@ -469,6 +573,11 @@ extern "C"
       \param M the matrix to be displayed
    */
   void NM_display(const NumericsMatrix* const M);
+
+  /** Screen display of the matrix storage
+      \param M the matrix to be displayed
+   */
+  void NM_display_storageType(const NumericsMatrix* const M);
 
 
   /** Screen display raw by raw of the matrix content
@@ -510,7 +619,7 @@ extern "C"
      \return 0 if the matrix
   */
   RawNumericsMatrix*  NM_new_from_file(FILE *file);
-  RawNumericsMatrix*  NM_new_from_filename(char * filename);
+  RawNumericsMatrix*  NM_new_from_filename(const char * filename);
 
   /**  NM_write_in_file_scilab of the matrix content
    \param M the matrix to be printed
@@ -551,6 +660,11 @@ extern "C"
    */
   void NM_clearTriplet(NumericsMatrix* A);
 
+  /** Clear half triplet storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearHalfTriplet(NumericsMatrix* A);
+
   /** Clear compressed column storage, if it is existent.
    * \param[in,out] A a Numericsmatrix
    */
@@ -574,7 +688,7 @@ extern "C"
 
 
 
-  /** Direct computation of the solution of a real system of linear
+  /** XXXXXX: to be rewritten Direct computation of the solution of a real system of linear
    * equations: A x = b. The factorized matrix A is kept for future solve.
    * If A is already factorized, the solve the linear system from it
    * \warning this is not enable for all the solvers, your mileage may vary
@@ -588,15 +702,53 @@ extern "C"
    * \return 0 if successful, else the error is specific to the backend solver
    * used
    */
+
+  /* LU factorization of the matrix. If the matrix has already been
+   * factorized (i.e if NM_LU_factorized(A) return true), nothing is
+   * done. To force a new factorization one has to set factorization
+   * flag to false : NM_set_LU_factorized(A, false) before the call to
+   * NM_LU_factorize.
+   * If the matrix is preserved, that means that a call to
+   * NM_preserve(A) has been done before the call to NM_LU_factorize,
+   * it is not destroyed, but the factorized part remains accessible for
+   * subsequent calls to NM_LU_solve.
+   * If the matrix is not preserved, then it is replaced by the
+   * factorized part.
+   * \param[in] A the NumericsMatrix
+   * \return an int, 0 means the matrix has been factorized. */
+  int NM_LU_factorize(NumericsMatrix* A);
+  int NM_Cholesky_factorize(NumericsMatrix* A);
+  int NM_LDLT_factorize(NumericsMatrix* A);
+
+  /* Solve linear system with multiple right hand size. A call to
+   * NM_LU_factorize is done at the beginning.
+
+   * \param[in] A the NumericsMatrix. A is not destroyed if it has
+   * been preserved by a call to NM_preserve(A).
+
+   * \param[in,out] b the right hand size which is a pointer on a
+   * matrix of double. It is replaced by the solutions
+
+   * \param[in] nrhs the number of right hand side.
+   * \return 0 if the solve succeeded.
+   */
+  int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
+  int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
+  int NM_Cholesky_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
+  int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
+  int NM_LDLT_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
+
+  
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
+  int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
   /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    * \param[in,out] A a NumericsMatrix.
-   * \param[out] Ainv the matrix inverse.
+   * \return the matrix inverse.
    */
-  int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv);
+  NumericsMatrix* NM_inv(NumericsMatrix* A);
 
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
 
@@ -615,7 +767,6 @@ extern "C"
     return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
   }
 
-
   /** Set the linear solver
    * \param A the matrix
    * \param solver_id the solver
@@ -631,23 +782,12 @@ extern "C"
   /** Allocate the internalData structure (but not its content!)
    * \param M the matrix to modify
    */
-  static inline void NM_internalData_new(NumericsMatrix* M)
-  {
-    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWork = NULL;
-    M->internalData->iWorkSize = 0;
-    M->internalData->dWork = NULL;
-    M->internalData->dWorkSize = 0;
-    M->internalData->isLUfactorized = 0;
-#ifdef SICONOS_HAS_MPI
-    M->internalData->mpi_comm = MPI_COMM_NULL;
-#endif
-  }
+  void NM_internalData_new(NumericsMatrix* M);
+
   /** Copy the internalData structure
    * \param M the matrix to modify
    */
   void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B );
-
 
   /** Integer work vector initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
@@ -671,6 +811,13 @@ extern "C"
    */
   void NM_add_to_diag3(NumericsMatrix* M, double alpha);
 
+  /** Add a constant term to the diagonal elements, when the block of the SBM
+   * are 5x5
+   * \param M the matrix
+   * \param alpha the term to add
+   */
+  void NM_add_to_diag5(NumericsMatrix* M, double alpha);
+
   /** Add two matrices with coefficients C = alpha*A + beta*B
    * \param alpha the first coefficient
    * \param A the first  matrix
@@ -680,11 +827,17 @@ extern "C"
    */
   RawNumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
 
+  /** Multiply a matrix with a double alpha*A --> A
+   * \param alpha the  coefficient
+   * \param A the   matrix
+   */
+  void  NM_scal(double alpha, NumericsMatrix* A);
+
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type
    * \param M the matrix to check
    */
-  static inline void NM_assert(const int type, NumericsMatrix* M)
+    static inline void NM_assert(const int type, NumericsMatrix* M)
   {
 #ifndef NDEBUG
     assert(M && "NM_assert :: the matrix is NULL");
@@ -733,7 +886,112 @@ extern "C"
   static inline NumericsMatrix* NM_convert(NumericsMatrix* A)
   {
     return A;
-  };
+  }
+
+  /** Compute the  maximum eigenvalue with the iterated power method
+   * \param A the matrix
+   * \return the maximum eigenvalue*/
+  double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax);
+
+  /* Compute the maximum values by columns
+   *  \param A the matrix
+   *  \param max the vector of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_by_columns(NumericsMatrix *A, double * max);
+
+  /* Compute the maximum values by rows
+   *  \param A the matrix
+   *  \param max the vector of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_by_rows(NumericsMatrix *A, double * max);
+
+  /* Compute the maximum absolute values by columns
+   *  \param A the matrix
+   *  \param max the vector of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_abs_by_columns(NumericsMatrix *A, double * max);
+
+  /* Compute the maximum absolute values by rows
+   *  \param A the matrix
+   *  \param max the vector of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_abs_by_rows(NumericsMatrix *A, double * max);
+
+  /* Compute the balancing matrices for a given matrix by iteration
+   *  \param A the matrix
+   *  \param tol tolerance on the balanced matrix
+   *  \param itermax max number of iterations
+   *  \param alloated structure for the balancing matrices and the balanced matrix
+   * \return 0 if succeed.
+   */
+  int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B);
+
+  /* Create a Balancing Matrices structure
+   *  \param A the matrix  to be balanced
+   */
+  BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A);
+
+
+  /* free a Balancing Matrices structure
+   */
+  BalancingMatrices * NM_BalancingMatrices_free(BalancingMatrices* A);
+
+  /* Reset the version of a NM_types storage.
+   *\param M the NumericsMatrix,
+   *\param id the NM_types storage
+   */
+  void NM_reset_version(NumericsMatrix* M, NM_types id);
+
+  /* Reset versions of all storages.
+   *\param M the NumericsMatrix
+   */
+  void NM_reset_versions(NumericsMatrix* M);
+
+
+#ifdef WITH_OPENSSL
+  /* Compute sha1 hash of matrix values. Matrices of differents size and same
+   * values have the same hash.
+   * \param[in] A the matrix
+   * \param[in,out] digest an allocated space of size SHA_DIGEST_LENGTH
+   */
+  void NM_compute_values_sha1(NumericsMatrix* A, unsigned char * digest);
+
+  /* Get stored sha1 hash of a matrix.
+   * \param[in] A the matrix
+   * \return a pointer on the current raw sha1 hash
+   */
+  unsigned char* NM_values_sha1(NumericsMatrix* A);
+
+   /* Set sha1 hash of a matrix. Matrices of differents size and same
+   * values have the same hash.
+   * \param[in] A the matrix
+   */
+  void NM_set_values_sha1(NumericsMatrix* A);
+
+  /* Clear sha1 hash of a matrix.
+   * \param[in] A the matrix
+   */
+  void NM_clear_values_sha1(NumericsMatrix* A);
+
+  /* Check if matrix has beend modified after a previous NM_set_values_sha1.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix is the same
+   */
+  bool NM_check_values_sha1(NumericsMatrix* A);
+
+  /* Compare two matrices with sha1. NM_set_values_sha1 must be called
+   * on the two matrices before.
+   * \param[in] A a NumericsMatrix
+   * \param[in] B a NumericsMatrix
+   * \return true if the matrices have the same values
+   */
+  bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B);
+
+#endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

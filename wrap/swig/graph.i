@@ -156,40 +156,40 @@ struct DynamicalSystemsGraph{};
 
 TYPEDEF_SPTR(_DynamicalSystemsGraph);
 %feature("director") _DynamicalSystemsGraph;
-%shared_ptr( SiconosGraph<std11::shared_ptr<DynamicalSystem>,
-                          std11::shared_ptr<Interaction>,
+%shared_ptr( SiconosGraph<std::shared_ptr<DynamicalSystem>,
+                          std::shared_ptr<Interaction>,
                           DynamicalSystemProperties, InteractionProperties,
                           GraphProperties >);
 
 TYPEDEF_SPTR(_InteractionsGraph);
 %feature("director") _InteractionsGraph;
-%shared_ptr( SiconosGraph<std11::shared_ptr<Interaction>,
-                          std11::shared_ptr<DynamicalSystem>,
+%shared_ptr( SiconosGraph<std::shared_ptr<Interaction>,
+                          std::shared_ptr<DynamicalSystem>,
                           InteractionProperties, DynamicalSystemProperties,
                           GraphProperties >);
 
 // must be specified after %shared_ptr, if ever needed
 %template(_DynamicalSystemsGraph) SiconosGraph<
-  std11::shared_ptr<DynamicalSystem>,
-  std11::shared_ptr<Interaction>,
+  std::shared_ptr<DynamicalSystem>,
+  std::shared_ptr<Interaction>,
   DynamicalSystemProperties, InteractionProperties,
   GraphProperties >;
 
-%template(SP_DynamicalSystemsGraph) std11::shared_ptr<
-  SiconosGraph<std11::shared_ptr<DynamicalSystem>,
-               std11::shared_ptr<Interaction>,
+%template(SP_DynamicalSystemsGraph) std::shared_ptr<
+  SiconosGraph<std::shared_ptr<DynamicalSystem>,
+               std::shared_ptr<Interaction>,
                DynamicalSystemProperties, InteractionProperties,
                GraphProperties > >;
 
 %template(_InteractionsGraph) SiconosGraph<
-  std11::shared_ptr<Interaction>,
-  std11::shared_ptr<DynamicalSystem>,
+  std::shared_ptr<Interaction>,
+  std::shared_ptr<DynamicalSystem>,
   InteractionProperties, DynamicalSystemProperties,
   GraphProperties >;
 
-%template(SP_InteractionsGraph) std11::shared_ptr<
-  SiconosGraph<std11::shared_ptr<Interaction>,
-               std11::shared_ptr<DynamicalSystem>,
+%template(SP_InteractionsGraph) std::shared_ptr<
+  SiconosGraph<std::shared_ptr<Interaction>,
+               std::shared_ptr<DynamicalSystem>,
                InteractionProperties, DynamicalSystemProperties,
                GraphProperties > >;
 
@@ -214,14 +214,14 @@ TYPEDEF_SPTR(_InteractionsGraph);
 
 // /* this 2 should be sufficients */
 // %template (dsg_edescr) std::vector<
-//   SiconosGraph<std11::shared_ptr<DynamicalSystem>,
-//                std11::shared_ptr<Interaction>,
+//   SiconosGraph<std::shared_ptr<DynamicalSystem>,
+//                std::shared_ptr<Interaction>,
 //                DynamicalSystemProperties, InteractionProperties,
 //                GraphProperties >::EDescriptor >;
 
 // %template (ig_vdescr) std::vector<
-//   SiconosGraph<std11::shared_ptr<Interaction>,
-//                std11::shared_ptr<DynamicalSystem>,
+//   SiconosGraph<std::shared_ptr<Interaction>,
+//                std::shared_ptr<DynamicalSystem>,
 //                InteractionProperties, DynamicalSystemProperties,
 //                GraphProperties >::VDescriptor >;
 

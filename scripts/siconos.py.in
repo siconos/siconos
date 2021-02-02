@@ -1,446 +1,826 @@
-#!/usr/bin/env @PYTHON_EXE_NAME@
+#!/usr/bin/env @Python3_EXECUTABLE@
+"""Classes and functions used at runtime
+to configure, build and execute siconos examples
 
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
-#
-# Copyright 2018 INRIA.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+Siconos is a program dedicated to modeling, simulation and control
+of non smooth dynamical systems.
 
-from __future__ import print_function
+Copyright 2020 INRIA.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+import argparse
 import os
-import sys
-import shutil
-import platform
-import subprocess
-import getopt
 import tempfile
-import shlex
-import posixpath
-import glob
-
-# Path to siconos installation
-siconos_prefix = os.getenv('SICONOSPATH', default='@CMAKE_INSTALL_PREFIX@')
-
-lib_dir = '@CMAKE_INSTALL_LIBDIR@'
-
-msvc = '@MSVC@' != ''
-exec_ = True
-comp = True
-myname = sys.argv[0]
-call_pwd = os.getcwd()
-verbose = False
+import subprocess
+import datetime
+import sys
+import platform
+import logging
+from pathlib import Path
+from packaging import version
+import shutil
 
 
-class WorkDir(object):
-    ''' a context manager for a workdir that may be temporary '''
-    def __init__(self, directory, tmp=False):
-        self.directory = directory
-        self.tmp = tmp
-        self.enter_wdir = os.getcwd()
+def main():
+    """process :
+       - parse command line
+       - process options
+       - generate CMakeLists.txt for the current driver (if any)
+       - configure, build and execute.
 
-    def __enter__(self):
+    """
+    # -- Parse command line --
+    parser = parse_command_line()
+    args = parser.parse_args()
 
-        if self.tmp:
-            self.directory = tempfile.mkdtemp()
+    # -- Clean current dir (.siconos) --
+    # Command : siconos --clean
+    if args.clean:
+        siconos_clean(args.build_dir, args.quiet)
+        sys.exit()
 
+    # -- Display siconos install info --
+    # Command : siconos --info
+    if args.info:
+        print_siconos_info()
+        sys.exit()
+
+    # -- Display siconos install info --
+    # Command : siconos --pythonpath
+    if args.pythonpath:
+        print(siconos_pythonpath)
+        sys.exit()
+
+    args.rundir = Path.cwd()
+
+    if not args.driver:
+        # No driver : check if we need to build plugins
+        # else exit.
+        if args.build_plugins:
+            args.is_python = False
+            create_build_dir(args)
+            args.driver_dir = Path.cwd()
+            args.exe_name = 'plugin_only'
+            build = generate_cmakelists(args)
+            # generate_cmakelists returns true if the driver
+            # is C++ or if plugins must be built.
+            if build:
+                build_project(args)
         else:
-            if not os.path.exists(self.directory):
-                os.makedirs(self.directory)
+            parser.print_usage()
+        sys.exit()
 
+    # -- Create binary dir --
+    create_build_dir(args)
+
+    # -- Print cartdrige --
+    # (--quiet to turn this off)
+    if not args.quiet:
+        cartridge()
+
+    # -- Run : build (if required) and execute siconos on driver file --
+    # command : siconos <file>.[py,cpp]
+
+    # Check if the driver file exists
+    main_source = Path(args.driver).expanduser().resolve()
+    assert main_source.exists(), 'Driver file does not exists.'
+    args.main_source = main_source
+
+    # Check driver file type
+    args.is_python = main_source.suffix == '.py'
+
+    # Do we need to build plugins ?
+    if args.is_python and not args.build_plugins:
+        # By default, plugins are ignored when
+        # driver is in python.
+        # This must be asked explicitely with --build-plugins
+        args.build_plugins = False
+        args.no_build = True
+
+    if not args.is_python and not args.no_plugins:
+        # By default, plugins are always built when
+        # driver is in C++.
+        # This must be turned off explicitely with --no-plugins
+        args.build_plugins = True
+
+    args.driver_dir = main_source.parent
+    assert args.driver_dir.is_dir()
+    if not args.is_python:
+        args.exe_name = main_source.stem  # filename without extension
+        args.exe_full_name = Path(args.rundir, args.exe_name)
+    else:
+        args.exe_name = main_source.name  # python filename
+        args.exe_full_name = main_source
+
+    # Set log file
+    # no need to log if build dir is automatically removed
+
+    logfile = Path(args.build_dir, '{}.log'.format(args.exe_name)).as_posix()
+    logging.basicConfig(filename=logfile, level=logging.DEBUG)
+    msg = 'Try to execute siconos on driver file : {}.'.format(args.driver)
+    logging.info(msg)
+    msg = 'Source (driver) directory is ({})'.format(args.driver_dir)
+    logging.info(msg)
+    msg = 'Build directory is ({})'.format(args.build_dir)
+    logging.info(msg)
+    msg = 'Run directory is ({})'.format(args.rundir)
+    logging.info(msg)
+
+    # If build is required :
+    # - generate CMakeListst.txt in build_dir
+    # - build project (cmake, make, make install)
+    # Rq : default is yes,
+    # call siconos --no-build to avoid build step.
+    if not args.no_build:
+        build = generate_cmakelists(args)
+        # generate_cmakelists returns true if the driver
+        # is C++ or if plugins must be built.
+        if build:
+            build_project(args)
+    # If execution is required :
+    # Rq : default is yes,
+    # call siconos --no-exec for no execution.
+    if not args.no_exec:
+        cmd = []
+        # Check user-defined prefixes (.e.g valgrind)
+        if args.exec_prefix:
+            cmd += args.exec_prefix
+
+        env = os.environ
+        # If the driver file is python, set python exe
+        if args.is_python:
+            cmd += ['@Python3_EXECUTABLE@']
+            # for python modules
+            if('PYTHONPATH') in env:
+                env['PYTHONPATH'] += ':' + \
+                    siconos_pythonpath.resolve().as_posix()
+            else:
+                env['PYTHONPATH'] = siconos_pythonpath.resolve().as_posix()
+
+        cmd += [Path(args.exe_full_name).as_posix()]
+
+        # Execute ...
+        format_msg('run ' + ' '.join(cmd), args.quiet)
+
+        # for plugins
+        env['LD_LIBRARY_PATH'] = args.rundir.as_posix()
+        run_command(cmd, args.quiet, env)
+
+    # Clean build directory, if required
+    if args.remove_build:
+        # Be sure to close log files to avoid race condition
+        logging.shutdown()
+        siconos_clean(args.build_dir, args.quiet)
+
+
+# ------------ Siconos config ------------
+# Read info from siconos setup and install files.
+
+# Path to siconos install #
+# (this file is supposed to be in <siconos_root_dir>/bin)
+siconos_root_dir = Path(__file__).resolve().parent.parent
+
+# Path to cmake setup for siconos (e.g. Find...cmake files)
+siconos_package_dir = Path(siconos_root_dir, '@ConfigPackageLocation@')
+
+# Path to siconos python package
+siconos_pythonpath = Path('@SICONOS_PYTHON_INSTALL_DIR@')
+
+# Check platform
+is_windows = 'Windows' in platform.uname()
+is_darwin = 'Darwin' in platform.uname()
+
+# List of installed components
+components = '@COMPONENTS@'.split(';')
+
+# Check if Microsoft Virtual C++ has been used
+msvc = '@MSVC@' != ''
+
+# Current version of cmake
+cmake_version = version.parse("@CMAKE_VERSION@")
+
+# Compiler id. One of
+# https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html#variable:CMAKE_<LANG>_COMPILER_ID
+compiler_id = "@CMAKE_CXX_COMPILER_ID@"
+if not compiler_id:
+    compiler_id = "@CMAKE_C_COMPILER_ID@"
+
+siconos_command_description = '''
+===============================================================\n
+
+The siconos command :
+
+ * either compiles, links and runs a program (C++), \n
+ * or executes a python script.
+
+In both cases, it sets the environment so that Siconos API
+is available/callable in your driver file.
+
+
+Usage :
+
+>> siconos driver_name [options]\n
+
+  driver_name : .cpp or .py file name (with absolute or relative path).\n
+
+or
+
+>> siconos --build-plugins
+
+Options are detailed below.
+
+Actions :
+
+For cpp driver :
+
+ - build libraries from all plugins sources (see plugins-dirs option)
+ - use driver.cpp and extra sources (see src-dirs option) to build
+   an executable, linked with plugins
+ - run executable
+
+
+For python driver :
+
+ - execute python on your driver.
+
+ To build plugins when using a python driver, use:
+
+ siconos <file>.py --build-plugins
+
+For --build-plugins options :
+
+  build all plugins from 'plugin'-like sources available
+  in the current directory.
+
+
+
+
+===============================================================
+'''
+
+
+def create_build_dir(args):
+    """Create binary dir :
+     where current example will be built,
+    the place to save binaries, libraries and so on.
+
+    Either :
+    * use a tmp directory (automatically removed at the end of the build)
+    * or use .siconos as default value
+    * or use command line build-dir value
+
+    Parameters
+    ----------
+    args : argsparse.Namespace
+         arguments parsed from command line.
+
+    """
+    if args.tmp_dir:
+        args.tmpdir = tempfile.TemporaryDirectory()
+        args.build_dir = Path(args.tmpdir.name).resolve()
+    # or a default value
+    elif not args.build_dir:
+        args.build_dir = Path('.siconos')
+        args.build_dir.mkdir(parents=False, exist_ok=True)
+    # or the value provided at command line (--build-dir)
+    else:
+        args.build_dir = Path(args.build_dir).expanduser()
+        args.build_dir.mkdir(parents=False, exist_ok=True)
+    args.build_dir = args.build_dir.resolve().as_posix()
+
+def siconos_clean(build_dir=None, quiet=True):
+    """clean  binary dir
+    Parameters
+    ---------
+    build_dir : Path()
+        the directory to be removed.
+    quiet : boolean, verbosity level
+    """
+    if build_dir:
+        build_dir = Path(build_dir).expanduser().resolve()
+    else:
+        # By default we remove any existing .siconos path
+        build_dir = Path('.siconos')
+    if build_dir.exists():
+        format_msg('Clean build directory ({})'.format(build_dir), quiet)
         try:
-            os.chdir(self.directory)
-        except OSError as e:
-            sys.stderr.write('{0} : {1}\n'.format(myname, str(e)))
-            exit(2)
-
-        return self.directory
-
-    def __exit__(self, xtype, value, traceback):
-
-        os.chdir(self.enter_wdir)
-
-        if os.listdir(self.directory) == []:
-
-            os.rmdir(self.directory)
-
-        if self.tmp:
-            shutil.rmtree(self.directory)
+            shutil.rmtree(build_dir.as_posix())
+        except OSError:
+            raise
 
 
-def silent_try(command, *_args):
-    try:
-        command(*_args)
-    except Exception as e:
-        sys.stderr.write('{0} : {1}'.format(myname, e))
+def parse_command_line():
+    """Use argparse (python3) to read command line options.
+    """
+    # Build parser
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=siconos_command_description)
+
+    # -- General options --
+
+    # Main source file.
+    msg = 'driver file name (.cpp or .py) to build and run a simulation. '
+    parser.add_argument('driver', help=msg, nargs='?')
+
+    # verbosity
+    verbose_mode = parser.add_mutually_exclusive_group()
+    verbose_mode.add_argument('-v', '--verbose',
+                              help='increase verbosity for cmake/make runs.',
+                              action="store_true")
+    verbose_mode.add_argument('-q', '--quiet', action='store_true',
+                              help='Silent mode, no screen outputs')
+
+    # Print version
+    parser.add_argument('--version', action='version',
+                        version='@SICONOS_VERSION@',
+                        help='Print Siconos version.')
+
+    # Clean binary dir (if it exists).
+    msg = 'Clean binary directory (if it exists).\n'
+    msg += 'Default is .siconos, use --build-dir to overwrite.'
+    parser.add_argument('-C', '--clean', action='store_true',
+                        help=msg)
+
+    # Print details about siconos install
+    parser.add_argument('--info', action='store_true',
+                        help='Print details regarding Siconos installation.')
+
+    # Print details about siconos install
+    parser.add_argument('--pythonpath', action='store_true',
+                        help='Print details regarding the location of Siconos python modules.')
+
+    # -- Directories (source, build, working) management --
+    build_mode = parser.add_mutually_exclusive_group()
+    build_mode.add_argument(
+        '--no-build',
+        help='Only execution (if possible), no build',
+        action="store_true")
+
+    msg = 'Change build directory (default : <current_path>/.siconos).'
+    build_mode.add_argument('--build-dir', help=msg, type=Path)
+
+    msg = 'If set, do not remove build directory when build phase is finished.'
+    parser.add_argument('--remove-build', '-R', action="store_true",
+                        help=msg)
+
+    msg = 'Use temporary (automatically removed after build)'
+    msg += 'directory to build the example.'
+    build_mode.add_argument('--tmp-dir', help=msg, action="store_true")
+
+    parser.add_argument('--no-exec', help='Build only, no execution',
+                        action="store_true")
+    msg = 'Prepend EXEC_PREFIX to execution command line '
+    msg += '(e.g. valgrind, time, gdb ...). '
+    msg += 'Try for example "siconos -P lldb toto.cpp" to run debugger.'
+    parser.add_argument('-P', '--exec-prefix', help=msg, action='append')
+
+    # -- Build options (compile, link ...) for main and plugins) --
+    compile_group = parser.add_argument_group(
+        'Build options (compiling and linking)')
+    compile_group.add_argument('-D', '--compiler-definitions',
+                               help='Add preprocessor definition',
+                               action='append')
+    compile_group.add_argument('-g', '--debug', help='Activate debug mode',
+                               action="store_true")
+    compile_group.add_argument('--compiler-options',
+                               help='Add compiler options',
+                               action='append')
+    compile_group.add_argument('--compiler-features',
+                               help='Add compiler features',
+                               action='append')
+    compile_group.add_argument('-I', '--include-directories',
+                               help='Add include directories to build',
+                               action='append')
+    compile_group.add_argument('-L', '--link-directories',
+                               help='Add link directories to build',
+                               action='append', default=[])
+    compile_group.add_argument('-l', '--link-libraries',
+                               help='Add link dependencies to build',
+                               action='append', default=[])
+    msg = 'Add source dirs for plugins. By default, plugins dir in driver '
+    msg += 'directory is always taken into account.'
+    plugins_group = compile_group.add_mutually_exclusive_group()
+    plugins_group.add_argument('--plugins-dirs', help=msg, action='append')
+    msg = 'Do not compile any plugins. Useful only for C/C++ input '
+    msg += '(no plugins by default for python inputs).'
+    plugins_group.add_argument('--no-plugins', help=msg, action="store_true")
+    msg = 'Build all plugins. Useful only for Python input '
+    msg += '(plugins are built by default for C++ inputs).'
+    plugins_group.add_argument('--build-plugins', help=msg,
+                               action="store_true")
+    msg = 'Add source dirs for driver. By default, src '
+    msg += 'in driver directory is always taken into account.'
+    compile_group.add_argument('--src-dirs', help=msg, action='append')
+    compile_group.add_argument('-j', '--jobs', help="build in a parallel way",
+                               type=int)
+
+    msg = 'Set the generator for cmake (default : make). '
+    msg += 'This is mainly useful for Windows users.'
+    parser.add_argument('--generator', help=msg)
+
+    return parser
 
 
 def cartridge():
-    sys.stdout.write("""
-|=============================================================================|
-|          Siconos-Kernel version {0}.{1}.{2}      Copyright 2018 INRIA       |
-|                                                                             |
-|                    Free software under Apache License.                      |
-|=============================================================================|
-""".format(@MAJOR_VERSION@, @MINOR_VERSION@, '@PATCH_VERSION@'.ljust(3)))
+    """Print siconos cartridge
+    """
+    now = datetime.datetime.now()
+    cart = '|===========================================================|\n'
+    buff = '| Siconos software, version @SICONOS_VERSION@'
+    buff += ' - Copyright {} INRIA'.format(now.year)
+    cart += buff.ljust(60)
+    cart += '|\n'
+    cart += '|'.ljust(60) + '|\n'
+    cart += '| Free software under Apache 2.0 License.'.ljust(60) + '|\n'
+    cart += '|===========================================================|\n'
+    sys.stdout.write(cart)
 
 
-def usage():
-    sys.stdout.write("""
-The siconos command compiles, links and runs a Siconos program.
+def collect_sources(src_dir, suffixes=None):
+    """Get a list of c/c++ source files from a list of directories
 
-Usage: {0} [options] [YourExample.{{cpp,py}}|location/YourExample.{{cpp,py}}] [Arguments]
+    Parameters
+    ----------
+    src_dir : string or Path
+        directory to be scanned
+    suffixes : list of strings, optional
+        file extensions to be matched.
+        default = cxx, cpp and c
 
-
- --> If your main file needs other source files (*.c, *.cpp, *.f), put them in
-     ./src or use option src_dir (see below)
-
- --> To create a library (to get a plugin for instance), create
-    a ./plugins (--> will build plugins.so) directory or some
-    directories xxxPluginxxx (---> will build xxxPluginxxx.so) or
-    use -plugin_dir option below. In all case, all files in 'plugin dir'
-    will be used to compute 'pluginname.so'.
-
-Options are:
-
- -a : to find and compile all sources files in YourExample.cpp
-      directory.
-
- --build-dir <dir> : build is done in <dir>. Under /tmp, a temp
-                     directory is created
-
- --clean-build : clean build directory.
-
- -c | --clean : to clean the current directory (deletes binary files,
-               etc.).
-
- -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.
-
- -g : to compile with debug information.
-
- -h | --help : to print this help.
-
- -j<n>   : parallel compilation with n jobs
-
- -I<dir> : add directory <dir> to the list of paths to include headers.
-
- -L<dir> : add directory <dir> to the list from with the linker search
-           for libraries.
-
- -l<lib> : link with library <lib>.
-
- --noexec : compile only.
-
- --nocomp : execute only.
-
- -O<n> : set compiler optimization.
-
- --opt <opt> : add option <opt> to compiler.
-
- --ldopt <opt> : add option <opt> to linker.
-
- -P prefix_command : to add a prefix command (time, valgrind, gdb,
-                     etc.).
-
- --plugin-dir <plugin_directory> (default = plugins): create a library
- named plugin_directory.so built with all files in plugin_directory.
-
- --src-dir <source_directory> (default = src): all sources files under
-    <source_directory> (Warning: absolute path!!)  to the executable.
-
- -v : to print 'make' commands as they are executed.
-
- --generator <Generator Name>: set the generator for cmake (the default is
-     plateform dependent, but usually "Unix Makefiles" under *nix and MacOs).
-     This is mainly useful for Windows users.
-
- """.format(myname))
+    Returns the list of files.
+    """
+    if suffixes is None:
+        suffixes = ['cxx', 'cpp', 'c']
+    srcfiles = []
+    dd = Path(src_dir).expanduser().resolve()
+    assert dd.exists()
+    for ext in suffixes:
+        srcfiles += [r for r in dd.glob('*.' + ext)]
+    srcfiles = [str(r.resolve()) for r in srcfiles]
+    return srcfiles
 
 
-if __name__ == '__main__':
+def update_compiler(options_type, options_list, target):
+    """Add extra parameters to compile line.
 
-    try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'acghO:I:j:l:L:D:P:v',
-                                       ['build-dir=', 'clean-build', 'clean',
-                                        'help', 'noexec', 'nocomp', 'silent',
-                                        'src-dir=',
-                                        'opt=', 'ldopt=',
-                                        'plugin-dir=', 'generator='])
-    except getopt.GetoptError as err:
-        sys.stderr.write('{0} : {1}\n'.format(myname, str(err)))
-        usage()
-        sys.exit(2)
+    Parameters
+    ----------
+    options_type : string
+         'options' for compiler options,
+         'definitions' for preprocessor definition,
+         'features' for language features.
+    options_list : list of strings
+         the options to be set
+    target : string
+         name of the target to which options will be applied.
 
-    definitions = []
-    # User defined libraries
-    linker_libraries = []
-    linker_directories = []
-    linker_options = []
-    exec_prefix = []
-    compiler_options = []
-    # Path to user-defined plugin sources. Default = plugins.
-    plugin_directories = []
-    # Some user-defined extra directories for input sources
-    extra_sources_directories = []
-    if len(args) > 0:
-        path_to_src = os.path.dirname(os.path.join(call_pwd, args[0]))
-        # default plugin dirs = *Plugin*, plugins
-        plugin_dirs = glob.glob(os.path.join(path_to_src, '*Plugin*'))
-        for dd in plugin_dirs:
-            if os.path.isdir(dd):
-                plugin_directories.append(dd)
-        pg_dir = os.path.join(path_to_src, 'plugins')
-        if os.path.isdir(pg_dir):
-            plugin_directories.append(pg_dir)
+    Returns : a string which contains the cmake
+    command to apply the options.
+    """
+    result = ''
+    allowed_types = ['options', 'definitions', 'features']
+    assert options_type in allowed_types, \
+        'Wrong option type "{}" for compiler.'.format(options_type)
+    for opt in options_list:
+        result += 'target_compile_{}'.format(options_type)
+        result += '({} PRIVATE {})\n'.format(target, opt)
+    return result
 
-        # default extra src dir ...
-        extra_src_dir = os.path.join(path_to_src, 'src')
-        if os.path.isdir(extra_src_dir):
-            extra_sources_directories.append(extra_src_dir)
-    tmp_build = False
-    build_directory = '.siconos'
-    clean_build = False
-    all_srcs = False
-    main_source = None
-    make_targets = ['install']
-    make_args = []
-    source_is_python = False
-    extra_cmake_args = []
-    cmake_generator = None
-    silent = False
 
-    for o, a in opts:
+def prepare_target(target, extra_args):
+    """Write setup (from extra_args defined with command line)
+    to be applied to a given target in a string to be appended
+    to a CMakeLists.txt.
+    This sets compile options, headers, links ...
 
-        if o == '-a':
-            all_srcs = True
+    Parameters
+    ----------
+    target : string
+         name of the target to which setup will be applied.
+    extra_args : argsparse.Namespace
+         arguments parsed from command line.
 
-        if o == '--build-dir':
-            if os.path.commonprefix([a, '/tmp']) == '/tmp':
-                tmp_build = True
-            build_directory = a
+    Returns a string which contains cmake command
+    to setup the target.
+    """
+    result = ''
+    for inc in extra_args.includes:
+        result += 'target_include_directories({}'.format(target)
+        result += ' PUBLIC {})\n'.format(inc)
 
-        if o == '--clean-build':
-            tmp_build = True
+    # preprocessor definitions
+    if extra_args.compiler_definitions:
+        result += update_compiler('definitions',
+                                  extra_args.compiler_definitions, target)
+    # compiler options
+    if extra_args.compiler_options:
+        result += update_compiler('options', extra_args.compiler_options,
+                                  target)
 
-        if o == '-c' or o == '--clean':
-            make_targets = ['clean']
-            if len(args) == 0:
-                args = ['.']  # as : siconos -c .
-            clean_build = True
-            exec_ = False
+    # compiler features
+    if extra_args.compiler_features:
+        result += update_compiler('features',
+                                  extra_args.compiler_features, target)
 
-        if o == '-D':
-            definitions.append(a)
+    # -- link with siconos components --
+    for comp in components:
+        result += 'target_link_libraries({}'.format(target)
+        result += ' PRIVATE Siconos::{})\n'.format(comp)
+    # User-defined path to search for libraries
+    for libdir in extra_args.link_directories:
+        result += '\t target_link_directories({}'.format(target)
+        result += ' PUBLIC {})\n'.format(libdir)
 
-        if o == '--g':
-            definitions.append('CMAKE_BUILD_TYPE=Debug')
+    # User defined libraries to be linked with
+    for lib in extra_args.link_libraries:
+        result += '\t target_link_libraries({}'.format(target)
+        result += ' PUBLIC {})\n'.format(lib)
+    return result
 
-        if o == '-h' or o == '--help':
-            usage()
-            sys.exit(0)
 
-        if o == '--noexec':
-            exec_ = False
+def write_plugin(plugin, extra_args):
+    """Configure plugin
 
-        if o == '--silent':
-            silent = True
+    Parameters
+    ----------
+    plugin : Path or string.
+         directory which contains source files for the
+         plugin
+    extra_args : argsparse.Namespace
+         arguments parsed from command line.
 
-        if o == '--nocomp':
-            comp = False
+    Returns a string, cmake commands to create the plugin.
+    """
+    result = ''
+    dd = Path(plugin).expanduser().resolve()
+    assert dd.exists()
+    srcfiles = collect_sources(dd)
+    if srcfiles:
+        result += '\n# === Create plugin {} === \n'.format(plugin.name)
+        result += 'add_library({} MODULE {})\n'.format(plugin.name,
+                                                       srcfiles[0])
+        for sourcefile in srcfiles:
+            result += 'target_sources({} PRIVATE {})\n'.format(plugin.name,
+                                                               sourcefile)
+        extra_args.includes.append(dd)
+        result += prepare_target(plugin.name, extra_args)
+        result += 'set_target_properties({}'.format(plugin.name)
+        result += ' PROPERTIES PREFIX "")\n'
+        #f 'Clang' in compiler_id and cmake_version > version.parse("3.13"):
+        #    result += 'target_link_options({}'.format(plugin.name)
+        #    result += ' PRIVATE "-undefined dynamic_lookup")\n'
+        #elif 'Clang' in compiler_id:
+        #    result += 'set_target_properties({} '.format(plugin.name)
+        #    result += 'PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")\n'
+        result += 'install(TARGETS {}'.format(plugin.name)
+        result += ' DESTINATION {})\n'.format(extra_args.rundir)
 
-        if o == '-I':
-            compiler_options.append('-I{0}'.format(a))
+    return result
 
-        if o == '-j':
-            make_args.append('-j{0}'.format(a))
 
-        if o == '-l':
-            linker_libraries.append(a)
+def generate_cmakelists(args):
+    """Generate a CMakeLists.txt in args.build_dir dir.
 
-        if o == '-L':
-            linker_directories.append(a)
+    args : argsparse.Namespace
+         arguments parsed from command line.
 
-        if o == '-P':
-            exec_prefix += shlex.split(a)
+    Returns a boolean, True if cmake
+    call is required for the current example
+    (i.e. if sources are C++ or if plugins must be built)
+    """
 
-        if o == '-O':
-            compiler_options.append('-O{0}'.format(a))
+    # Return value : true if cmake/make is required
+    # i.e. if driver is cpp and/or if some plugins
+    # have been found.
+    build_required = not args.no_build
+    if not build_required:
+        # exit if no build has been set from command line.
+        return False
 
-        if o == '--opt':
-            compiler_options.append(a)
+    # -- Check if some plugins must be built --
+    # Only if --no-plugins=False (default).
+    # Any  *Plugin* or *plugin* directory is taken into account
+    # in addition to plugins_dirs command line arg.
+    plugins_dirs = []
+    if args.build_plugins:
+        # Automatically add *plugins* dir
+        for d in args.driver_dir.glob('*[Pp]lugin*'):
+            if d.is_dir():
+                plugins_dirs.append(d)
+        # Add command line options for plugins
+        if args.plugins_dirs:
+            plugins_dirs.append(Path(args.plugins_dirs).expanduser())
 
-        if o == '--ldopt':
-            linker_options.append(a)
+    # Build either if some plugins must be compiled
+    # or if the sources are c++.
+    if not plugins_dirs and args.is_python:
+        build_required = False
 
-        if o == '--plugin-dir':
-            plugin_directories.append(os.path.join(path_to_src, a))
+    if not build_required:
+        # exit if no build has been set from command line.
+        return False
+    result = 'project({} CXX C)\n'.format(args.exe_name)
+    # cmake minimum version
+    result += 'cmake_minimum_required(VERSION 3.7)\n'
+    if cmake_version >= version.parse("3.12"):
+        result += 'cmake_policy(SET CMP0074 NEW)\n'
 
-        if o == '--src-dir':
-            extra_sources_directories.append(os.path.join(path_to_src, a))
+    if args.debug:
+        build_type = 'Debug'
+    else:
+        build_type = 'Release'
+    result += 'set(CMAKE_BUILD_TYPE {})\n'.format(build_type)
 
-        if o == '--generator':
-            cmake_generator = a
+    # Rpath stuff
+    result += 'set(CMAKE_SKIP_BUILD_RPATH  FALSE)\n'
+    result += 'set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)\n'
+    result += 'set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)\n'
 
-        if o == '-v':
-            make_args.append('VERBOSE=1')
-            verbose = True
-    if not silent:
-        cartridge()
+    # find siconos package and components
+    result += 'set(@PROJECT_NAME@_DIR {}'.format(siconos_root_dir)
+    result += '/@ConfigPackageLocation@)\n'.format(siconos_root_dir)
+    result += 'find_package(@PROJECT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@'
+    result += '.@PATCH_VERSION@ CONFIG REQUIRED)\n'
+    result += 'set(CMAKE_MODULE_PATH ${siconos_ROOT}/'
+    result += '@ConfigPackageLocation@)\n'
 
-    if len(args) == 0:
-        sys.stderr.write('{0} : need a file\n'.format(myname))
-        usage()
-        sys.exit(1)
+    # -- Extra headers --
+    # It's allowed to put some headers in the driver dir.
+    # These headers might be useful for extra sources and/or plugins.
+    args.includes = [args.driver_dir]
+    if args.include_directories:
+        args.includes += args.include_directories
 
-    if not os.path.exists(args[0]):
-        sys.stderr.write('{0} : cannot open {1}\n'.format(myname, args[0]))
-        usage()
-        sys.exit(1)
+    # == runtime dependencies ==
+    # boost may be used in examples.
+    result += 'if(@WITH_CXX@)\n'
+    result += 'set(Boost_NO_BOOST_CMAKE 1)\n'
+    result += 'find_package(Boost @boost_min_version@ COMPONENTS @boost_required_components@)\n'
+    result += 'endif()\n'
+    
+    # Create executable target
+    if not args.is_python and args.driver:
+        # -- Main target --
+        result += 'add_executable({}'.format(args.exe_name)
+        result += ' {})\n'.format(str(args.main_source))
 
-    siconos_build_dir = os.getenv('SICONOS_BUILD_DIR', default=build_directory)
+        # -- Extra sources --
+        if Path(args.driver_dir, 'src').exists():
+            srcdirs = [Path(args.driver_dir, 'src')]
+        else:
+            srcdirs = []
+        if args.src_dirs:
+            srcdirs += args.src_dirs
+        for srcdir in srcdirs:
+            srcfiles = collect_sources(srcdir)
+            args.includes.append(srcdir)
+            for sourcefile in srcfiles:
+                result += 'target_sources({}'.format(args.exe_name)
+                result += ' PRIVATE {})\n'.format(sourcefile)
 
-    if msvc and 'Windows' in platform.uname():
-        cmake_cmd = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cmake-vc.bat')
+        # -- user-defined cmake setup commands --
+        # check for a .cmake file with the same name
+        # as driver file
+        opt_file = args.main_source.with_suffix('.cmake')
+        if opt_file.exists():
+            result += 'message(STATUS "Including {}")\n'.format(opt_file)
+            result += 'include({})\n'.format(opt_file)
+
+        # target setup (compile options, headers, links ...)
+        result += prepare_target(args.exe_name, args)
+
+        # == install binary ==
+        result += 'install(TARGETS {}'.format(args.exe_name)
+        result += ' DESTINATION {})\n'.format(args.rundir)
+
+    # -- Plugins --
+    # Build plugins
+    for plugin in plugins_dirs:
+        plugin = Path(plugin)
+        result += write_plugin(plugin, args)
+
+    format_msg('Generate CMakeLists.txt file in {}'.format(args.build_dir),
+               args.quiet)
+    filename = Path(args.build_dir, 'CMakeLists.txt').as_posix()
+    with open(filename, 'w') as f:
+        f.write(result)
+
+    return build_required
+
+
+def build_project(args, configure=True, build=True):
+    """Configure (cmake) and build (make/make install) the project
+    from a previously generated CMakeLists.txt
+
+    Parameters
+    ----------
+    args : argsparse.Namespace
+         arguments parsed from command line.
+    configure : boolean, optional
+         True to run cmake to conf. the project, default=True.
+    build : boolean, optional
+         True to run make to build the (already configured) project,
+         default=True.
+
+    """
+    if msvc and is_windows:
+        cmake_cmd = str(Path(siconos_package_dir, 'cmake-vc.bat'))
     else:
         cmake_cmd = 'cmake'
 
-    with WorkDir(directory=siconos_build_dir, tmp=tmp_build) as work_dir:
-
-        assert(len(args) > 0)
-        # File type (i.e. extension)
-        source_type = os.path.splitext(args[0])[1]
-        # file == python file --> exe_name = full path to source file
-        main_source = os.path.join(call_pwd, args[0])
-        assert os.path.exists(main_source)
-        if source_type == '.py':
-            exe_full_path = main_source
-            exe_dir = call_pwd
-            source_is_python = True
+    cmake_source_dir = args.build_dir
+    #env = []
+    if configure:
+        format_msg('Configure project (cmake)', args.quiet)
+        if cmake_version >= version.parse("3.13"):
+            cmake_configure_command = [cmake_cmd, '-S', cmake_source_dir,
+                                       '-B', args.build_dir]
         else:
-            # create an exe in binary dir, from source file
-            exe_name = os.path.splitext(os.path.basename(args[0]))[0]
-            exe_full_path = os.path.join(call_pwd, exe_name)
-        env = os.environ
-        # LD_LIBRARY_PATH required to find local plugins.
-        # No need to set DYLD for macos, since plugins are .so files.
-        env['LD_LIBRARY_PATH'] = '{0};{1}'.format(os.getenv('LD_LIBRARY_PATH'), os.getcwd())
-        env['Path'] = '{0};{1}'.format(os.getenv('Path'),
-                                       os.path.join(siconos_prefix, 'bin'))
-        if 'install' in make_targets:
+            cmake_configure_command = [cmake_cmd,
+                                       '-E', 'chdir', args.build_dir,
+                                       cmake_cmd, cmake_source_dir]
 
-            if all_srcs:
-                extra_sources_directories.append(os.path.dirname(main_source))
+        if args.generator and is_windows:
+            cmake_configure_command += ['-G', args.generator]
+        run_command(cmake_configure_command, args.quiet)
 
-            full_definitions = []
-            kwd_definitions = []
-            for d in definitions:
-                if '=' not in d:
-                    full_definitions.append('{0}=1'.format(d))
-                    kwd_definitions.append(d)
-                else:
-                    full_definitions.append(d)
-                    kwd_definitions.append(d.split('=')[0])
+    if build:
+        format_msg('Build project (make)', args.quiet)
+        cmake_build_command = [cmake_cmd, '--build', args.build_dir,
+                               '--target', 'install', '--']
+        if args.jobs:
+            cmake_build_command += ['-j', args.jobs]
+        if args.verbose:
+            cmake_build_command += ['VERBOSE=1']
+        run_command(cmake_build_command, args.quiet)
 
-            extra_defs = ['-D{0}'.format(d) for d in full_definitions]
-            all_extra_defs = kwd_definitions
 
-            if cmake_generator is not None and 'Windows' in platform.uname():
-                extra_cmake_args.append('-G' + cmake_generator)
+def run_command(command, quiet, env=None):
+    """wrap subprocess run to deal with
+    different versions of python.
 
-            # No compilation required if only python files ...
-            if source_is_python and len(plugin_directories) == 0:
-                comp = False
+    Parameters
+    ----------
+    command : list of strings
+        command and its paremeters, e.g:
+        ['cmake', '.siconos']
+    quiet : boolean
+        verbosity level
+    env : list
+        environment variables
+        (usually an extent of os.environ)
+    """
+    extra_args = {}
+    if sys.version_info.minor > 6:
+        # capture_output is a py3.7 feature
+        extra_args['capture_output'] = quiet
+    else:
+        if quiet:
+            extra_args['stdout'] = subprocess.PIPE,
+            extra_args['stderr'] = subprocess.PIPE
 
-            if comp:
-                # for macos : the linker doesn't allow undefined
-                # symbol by default -- xhub
-                if 'Darwin' in platform.uname():
-                    linker_options.append('-undefined dynamic_lookup')
-                # Compiling on Windows is not an easy thing --xhub
-                try:
-                    cmake_boolean = {True: '1', False: '0'}
-                    configure_command = [
-                        cmake_cmd, posixpath.join(siconos_prefix,
-                                                  '@ConfigPackageLocation@'),
-                        '-DCALL_PWD={0}'.format(call_pwd),
-                        '-DMAIN_SOURCE={0}'.format(main_source),
-                        '-DBUILD_MAIN={0}'.format(cmake_boolean[
-                            not source_is_python]),
-                        '-DPLUGIN_DIRECTORIES={0}'.format(
-                            ';'.join(plugin_directories)),
-                        '-DSOURCES_DIRECTORIES={0}'.format(
-                            ';'.join(extra_sources_directories)),
-                        '-DCOMPILER_OPTIONS={0}'.format(
-                            ';'.join(compiler_options)),
-                        '-DCOMMAND_LINE_LINKER_OPTIONS={0}'.format(
-                            ';'.join(linker_options)),
-                        '-DLINKER_DIRECTORIES={0}'.format(
-                            ';'.join(linker_directories)),
-                        '-DLINKER_LIBRARIES={0}'.format(
-                            ';'.join(linker_libraries)),
-                        '-DALL_EXTRA_DEFINITIONS={0}'.format(
-                            ';'.join(all_extra_defs))] +\
-                        extra_defs + extra_cmake_args
-                    if verbose:
-                        print("\n"," ".join(configure_command))
-                    subprocess.check_call(configure_command,
-                                          stderr=subprocess.STDOUT, env=env)
-                except Exception as exception:
-                    sys.stderr.write(
-                        '{0}: {1} build configuration failed, {2}\n'.format(
-                            myname, exe_full_path, exception))
-                    sys.exit(1)
+    if env is not None:
+        # send environment variables
+        extra_args['env'] = env
 
-        if comp:
-            try:
-                assert(len(make_targets) > 0)
-                build_command = [cmake_cmd, '--build', '.',
-                                 '--target', make_targets[0], '--'] + make_args
-                if verbose:
-                        print("\n"," ".join(build_command))
-                subprocess.check_call(build_command)
-            except Exception as exception:
-                sys.stderr.write('{0}: {1} build failed, {2}'.format(
-                    myname, exe_full_path, exception))
-                sys.exit(1)
+    subprocess.run(command, check=True, **extra_args)
 
-    # execution
-    if exec_:
-        os.chdir(call_pwd)
-        if source_is_python:
-            exec_prefix.append('@PYTHON_EXE_NAME@')
-            if 'Windows' in platform.uname():
-                var_separator = ';'
-            else:
-                var_separator = ':'
-            siconos_pythonpath = "@SICONOS_PYTHON_INSTALL_DIR@"
-            env['PYTHONPATH'] = '{0}{1}{2}'.format(
-                siconos_pythonpath,
-                var_separator, os.getenv('PYTHONPATH'))
 
-        try:
-            exec_command = exec_prefix + [exe_full_path] +  args[1:]
-            if verbose:
-                print("\n"," ".join(exec_command))
-                #print("en=",env)
-            subprocess.check_call(exec_prefix +
-                                  [exe_full_path] +
-                                  args[1:],
-                                  env=env)
-        except Exception as exception:
-            sys.stderr.write('{0}: {1} failed, {2}\n'.format(myname,
-                                                             exe_full_path,
-                                                             exception))
-            sys.exit(1)
+def format_msg(msg, quiet):
+    """Print msg if quiet is True, in a predefined format.
+    """
+    if not quiet:
+        msg = ' ' + msg + ' '
+        print('\n[' + msg.center(66, '-') + ']\n')
+
+
+def print_siconos_info():
+    """Display siconos setup information
+    (e.g. installed path, dependencies, runner and so on)
+    """
+    cartridge()
+    root = siconos_root_dir
+    py_root = siconos_pythonpath
+    print('- Siconos root (install dir) is : {}.\n'.format(root))
+    print('- Siconos runner is : {}.\n'.format(__file__))
+    print('- Siconos includes : {}/include/siconos .\n'.format(root))
+    print('- Siconos python packages are located in :{}.\n'.format(py_root))
+    print('- Siconos cmake files are in {}.\n'.format(siconos_package_dir))
+
+
+if __name__ == "__main__":
+
+    main()

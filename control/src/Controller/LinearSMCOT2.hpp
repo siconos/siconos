@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 /*! \file LinearSMCOT2.hpp
   \brief General interface to define a sliding mode controller with
-  disturbance compensation. Reference: Su, W.C.; Drakunov, S.; Özgüner, Ü.
+  disturbance compensation. Reference: Su, W.C.; Drakunov, S.; Ozguner, U.
   An O(T2) boundary layer in sliding mode for sampled-data systems
   */
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
  * limitations under the License.
 */
 
-
 #include "fc3d_GlockerFischerBurmeister_functions.h"
-#include "NonSmoothNewton.h"
-#include "fc3d_Solvers.h"
-#include "FischerBurmeister.h"
+#include <stddef.h>             // for NULL
+#include "FischerBurmeister.h"  // for jacobianPhi_FB, phi_FB
+#include "fc3d_2NCP_Glocker.h"  // for computeFGlocker, computeJacobianFGlocker
+
 /* size of a block */
 /* static int Fsize; */
 

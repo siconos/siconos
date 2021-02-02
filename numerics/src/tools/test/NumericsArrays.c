@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,8 @@
 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "NumericsArrays.h"
-#include <math.h>
-
+#include <stdio.h>           // for printf, size_t
+#include "NumericsArrays.h"  // for NA_display, NA_merge_and_sort_sorted_arrays
 
 static int NumericsArrays_merge_test0()
 {
@@ -36,7 +32,7 @@ static int NumericsArrays_merge_test0()
   int n2 =3;
   size_t arr2[]=  {0, 1, 2};
   int n3 =6;
-  size_t  arr3[]=  {99, 99 ,99, 99, 99, 99};
+  size_t  arr3[]=  {99, 99,99, 99, 99, 99};
 
   NA_merge_sorted_arrays(arr1, arr2, n1, n2, arr3);
   NA_display(arr3, n3);
@@ -46,10 +42,10 @@ static int NumericsArrays_merge_test0()
 
   NA_sort_bubble(arr3, n_rm);
   NA_display(arr3, n_rm);
-  
+
   int n = NA_merge_and_sort_sorted_arrays(arr1, arr2, n1, n2, arr3);
   NA_display(arr3, n);
-  
+
   return info;
 }
 
@@ -63,7 +59,7 @@ static int NumericsArrays_merge_test1()
   int n2 =3;
   size_t arr2[]=  {1, 1, 1};
   int n3 =6;
-  size_t  arr3[]=  {99, 99 ,99, 99, 99, 99};
+  size_t  arr3[]=  {99, 99,99, 99, 99, 99};
 
   NA_merge_sorted_arrays(arr1, arr2, n1, n2, arr3);
   NA_display(arr3, n3);
@@ -73,10 +69,10 @@ static int NumericsArrays_merge_test1()
 
   NA_sort_bubble(arr3, n_rm);
   NA_display(arr3, n_rm);
-  
+
   int n = NA_merge_and_sort_sorted_arrays(arr1, arr2, n1, n2, arr3);
   NA_display(arr3, n);
-  
+
   return info;
 }
 
@@ -89,7 +85,7 @@ int main(void)
   int info = NumericsArrays_merge_test0();
   info = NumericsArrays_merge_test1();
 
-  
+
 
   printf("========= End Numerics tests for NumericsArrays ========= \n");
   return info;

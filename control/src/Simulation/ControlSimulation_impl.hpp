@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(DynamicalSystem
   DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   unsigned nb = 0;
   unsigned counter = 0;
-  for (std11::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
+  for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
   {
     SiconosVector& x = *DSG0.bundle(*dsvi)->x();
     nb += x.size();
@@ -72,7 +72,7 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(DynamicalSystem
 
   InteractionsGraph::VIterator ivi, ivdend;
   counter = 0;
-  for (std11::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi)
+  for (std::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi)
   {
     std::string nameInter;
     if (IG0.name.hasKey(*ivi))
@@ -114,7 +114,7 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn, Dynam
 {
   DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   unsigned column = startColumn;
-  for (std11::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
+  for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
   {
     unsigned i = column;
     SiconosVector& x = *DSG0.bundle(*dsvi)->x();
@@ -147,7 +147,7 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn, Dynam
   }
 
   InteractionsGraph::VIterator ivi, ivdend;
-  for (std11::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi)
+  for (std::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi)
   {
     unsigned i = column;
     SiconosVector& y = *IG0.bundle(*ivi)->y(0);

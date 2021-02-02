@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,6 @@ extern "C"
 {
 #endif
 
-  /** set the default solver parameters and perform memory allocation for Relay
-      \param[in] problem the RelayProblem structure which handles the problem (M,q)
-      \param options the pointer to options to set
-      \param solverId the identifier of the solver
-  */
-  int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId);
-
-
   /** relay_pgs is a projected Gauss-Seidel solver for relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
@@ -58,11 +50,6 @@ extern "C"
   */
   void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for PGS
-      \param options SolverOptions * the pointer to options to set
-  */
-  int relay_pgs_setDefaultSolverOptions(SolverOptions* options);
-
   /** relay_lexicolemke is a Lemke solver for  relay problems.
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
@@ -73,11 +60,6 @@ extern "C"
      1 = no convergence,
     */
   void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for Lemke
-      \param options the pointer to options to set
-  */
-  int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options);
 
   /** relay_enum is enum solver for  relay problems.
      * \param[in] problem structure that represents the Relay (M, q...)
@@ -91,12 +73,6 @@ extern "C"
     */
   void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for ENUM
-   * \param[in] problem structure that represents the Relay (M, q...)
-   * \param options SolverOptions * the pointer to options to set
-  */
-  int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options);
-
   /** relay_path is a resolution of the Relay with its inherent MCP formulation and using path.
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
@@ -109,11 +85,6 @@ extern "C"
    */
   void relay_path(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for PATH
-      \param options the pointer to options to set
-  */
-  int relay_path_setDefaultSolverOptions(SolverOptions* options);
-
   /** Solve a Relay problem using the AVI framework and the solver by Cao
    * and Ferris.
    * \param[in] problem structure that represents the Relay (M, q, ...)
@@ -125,12 +96,6 @@ extern "C"
    *  1 = no convergence,
    */
   void relay_avi_caoferris(RelayProblem* problem, double* restrict z, double* restrict w, int *info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for
-   * AVI_CAOFERRIS
-   * \param options struct used to define the solver(s) and its (their) parameters
-   */
-  int relay_avi_caoferris_setDefaultSolverOptions(SolverOptions* options);
 
   /** Solve a Relay problem using the AVI framework and the solver by Cao and Ferris.
    * \warning This is only a test version. It does not take into account the
@@ -145,11 +110,6 @@ extern "C"
    *  1 = no convergence,
    */
   void relay_avi_caoferris_test(RelayProblem* problem, double* restrict z, double* restrict w, int *info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for AVI_CAOFERRIS
-   * \param options struct used to define the solver(s) and its (their) parameters
-   */
-  int relay_avi_caoferris_test_setDefaultSolverOptions(SolverOptions* options);
 
   /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)

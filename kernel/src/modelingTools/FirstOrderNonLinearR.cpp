@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,6 @@ void FirstOrderNonLinearR::initialize(Interaction& inter)
 
   unsigned int sizeY = inter.dimension();
   unsigned int sizeDS = inter.getSizeOfDS();
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
-
-  _vec_r.reset(new SiconosVector(sizeDS));
-  _vec_x.reset(new SiconosVector(sizeDS));
-  _vec_z.reset(new SiconosVector(sizeZ));
-
-
-
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
   relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
@@ -60,68 +51,88 @@ void FirstOrderNonLinearR::initialize(Interaction& inter)
 void FirstOrderNonLinearR::checkSize(Interaction& inter)
 {}
 
-void FirstOrderNonLinearR::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
+void FirstOrderNonLinearR::computeh(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SiconosVector& y)
 {
-  if (_pluginh)
+  if(_pluginh)
   {
-    ((FONLR_h)_pluginh->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), y.getArray(), z.size(), z.getArray());
+    auto xp = x.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((FONLR_h)_pluginh->fPtr)(time, xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), y.getArray(), zp->size(), zp->getArray());
+    z = *zp;
   }
   else
   {
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeh - no plugin detected, you should provide one or derive this class and implement this function");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeh - no plugin detected, you should provide one or derive this class and implement this function");
   }
 }
 
-void FirstOrderNonLinearR::computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& r)
+void FirstOrderNonLinearR::computeg(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, BlockVector& r)
 {
-  if (_pluging)
+  if(_pluging)
   {
-    ((FONLR_g)_pluging->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), r.getArray(), z.size(), z.getArray());
+    auto xp = x.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    auto rp = r.prepareVectorForPlugin();
+    ((FONLR_g)_pluging->fPtr)(time, xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), rp->getArray(), zp->size(), zp->getArray());
+    z = *zp;
+    r = *rp;
   }
   else
   {
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeg - no plugin detected, you should provide one or derive this class and implement this function");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeg - no plugin detected, you should provide one or derive this class and implement this function");
   }
 }
 
-void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& C)
+void FirstOrderNonLinearR::computeJachx(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& C)
 {
-  if (_pluginJachx)
+  if(_pluginJachx)
   {
-    ((FONLR_C)_pluginJachx->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), C.getArray(), z.size(), z.getArray());
+    auto xp = x.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((FONLR_C)_pluginJachx->fPtr)(time, xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), C.getArray(), zp->size(), zp->getArray());
+    z = *zp;
   }
   else
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachx, you need to derive this function in order to use it");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeJachx, you need to derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& D)
+void FirstOrderNonLinearR::computeJachlambda(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& D)
 {
-  if (_pluginJachlambda)
+  if(_pluginJachlambda)
   {
-    ((FONLR_D)_pluginJachlambda->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), D.getArray(), z.size(), z.getArray());
+    auto xp = x.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((FONLR_D)_pluginJachlambda->fPtr)(time, xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), D.getArray(), zp->size(), zp->getArray());
+    z = *zp;
   }
   else
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeJachlambda, you need to either provide a matrix D or derive this function in order to use it");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeJachlambda, you need to either provide a matrix D or derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
+void FirstOrderNonLinearR::computeJacglambda(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& B)
 {
-  if (_pluginJacglambda)
+  if(_pluginJacglambda)
   {
-    ((FONLR_B)_pluginJacglambda->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), B.getArray(), z.size(), z.getArray());
+    auto xp = x.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((FONLR_B)_pluginJacglambda->fPtr)(time, xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), B.getArray(), zp->size(), zp->getArray());
+    z = *zp;
   }
   else
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacglambda, you need to either provide a matrix B or derive this function in order to use it");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeJacglambda, you need to either provide a matrix B or derive this function in order to use it");
 }
 
-void FirstOrderNonLinearR::computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K)
+void FirstOrderNonLinearR::computeJacgx(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& K)
 {
-  if (_pluginJacgx)
+  if(_pluginJacgx)
   {
-    ((FONLR_K)_pluginJacgx->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), K.getArray(), z.size(), z.getArray());
+    auto xp = x.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((FONLR_K)_pluginJacgx->fPtr)(time, xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), K.getArray(), zp->size(), zp->getArray());
+    z = *zp;
   }
   else
-    RuntimeException::selfThrow("FirstOrderNonLinearR::computeJacgx, you need to either provide a matrix K or derive this function in order to use it");
+    THROW_EXCEPTION("FirstOrderNonLinearR::computeJacgx, you need to either provide a matrix K or derive this function in order to use it");
 }
 
 
@@ -129,14 +140,9 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, unsign
 {
   DEBUG_PRINT("FirstOrderNonLinearR::computeOutput \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  BlockVector& x = *DSlink[FirstOrderR::x];
-  BlockVector& z = *DSlink[FirstOrderR::z];
-  // copy into Siconos continuous memory vector
-  *_vec_x = x ;
-  *_vec_z = z ;
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
-  computeh(time, *_vec_x, lambda, *_vec_z, y);
+  computeh(time, *DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], y);
   DEBUG_END("FirstOrderNonLinearR::computeOutput \n");
 }
 
@@ -144,14 +150,8 @@ void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, unsigne
 {
   DEBUG_PRINT("FirstOrderNonLinearR::computeInput \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  BlockVector& x = *DSlink[FirstOrderR::x];
-  BlockVector& z = *DSlink[FirstOrderR::z];
-  // copy into Siconos continuous memory vector
-  *_vec_x = x ;
-  *_vec_z = z ;
   SiconosVector& lambda = *inter.lambda(level);
-  computeg(time, *_vec_x, lambda, *_vec_z, *_vec_r);
-  *DSlink[FirstOrderR::r] = *_vec_r;
+  computeg(time, *DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], *DSlink[FirstOrderR::r]);
   DEBUG_END("FirstOrderNonLinearR::computeinput \n");
 }
 
@@ -160,20 +160,17 @@ void FirstOrderNonLinearR::computeJach(double time, Interaction& inter)
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  *_vec_x = *DSlink[FirstOrderR::x];
-  *_vec_z = *DSlink[FirstOrderR::z];
   SiconosVector& lambda = *inter.lambda(0);
 
-  if (!_C)
+  if(!_C)
   {
-    computeJachx(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_C]);
+    computeJachx(time, *DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], *relationMat[FirstOrderR::mat_C]);
   }
 
-  if (!_D)
+  if(!_D)
   {
-    computeJachlambda(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_D]);
+    computeJachlambda(time, *DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], *relationMat[FirstOrderR::mat_D]);
   }
-  *DSlink[FirstOrderR::z] = *_vec_z;
 }
 
 void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter)
@@ -181,16 +178,13 @@ void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter)
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  *_vec_x = *DSlink[FirstOrderR::x];
-  *_vec_z = *DSlink[FirstOrderR::z];
   SiconosVector& lambda = *inter.lambda(0);
-  if (!_B)
+  if(!_B)
   {
-    computeJacglambda(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_B]);
+    computeJacglambda(time, *DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], *relationMat[FirstOrderR::mat_B]);
   }
-  if (!_K)
+  if(!_K)
   {
-    computeJacgx(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_K]);
+    computeJacgx(time, *DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], *relationMat[FirstOrderR::mat_K]);
   }
-  *DSlink[FirstOrderR::z] = *_vec_z;
 }

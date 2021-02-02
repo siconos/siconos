@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ void EulerMoreauTest::setUp()
 
 void EulerMoreauTest::init(bool initDS)
 {
-  if (initDS) {
+  if(initDS)
+  {
     _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   }
 
@@ -77,7 +78,8 @@ void EulerMoreauTest::testCstGradTIDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->computeOneStep();
     _sim->nextStep();
   }
@@ -101,7 +103,8 @@ void EulerMoreauTest::testCstGradDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->computeOneStep();
     _sim->nextStep();
   }
@@ -129,7 +132,8 @@ void EulerMoreauTest::testCstGradNLDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->computeOneStep();
     _sim->nextStep();
   }

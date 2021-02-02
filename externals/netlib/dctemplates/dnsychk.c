@@ -210,7 +210,7 @@ MED\002)";
 
   /*     Check for quick return. */
 
-  if (nsys < 0)
+  if(nsys < 0)
   {
     s_wsle(&io___4);
     do_lio(&c__9, &c__1, "ERROR IN NONSYMMETRIC TESTER: NUMBER OF SYSTEM\
@@ -220,15 +220,15 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
   }
 
   flag_ = FALSE_;
-  for (i = 4; i <= 8; ++i)
+  for(i = 4; i <= 8; ++i)
   {
-    if (ltest[i])
+    if(ltest[i])
     {
       flag_ = TRUE_;
     }
     /* L5: */
   }
-  if (! flag_)
+  if(! flag_)
   {
     return 0;
   }
@@ -242,7 +242,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
 L10:
 
   i__1 = nsys;
-  for (matform = 1; matform <= i__1; ++matform)
+  for(matform = 1; matform <= i__1; ++matform)
   {
 
     s_rsle(&io___13);
@@ -272,7 +272,7 @@ L10:
      */
     /*           delx ( d u ) + dely (e u) + delz( f u ) + g u */
 
-    if (lsamen_(&c__4, aform, "PDE1", 4L, 4L))
+    if(lsamen_(&c__4, aform, "PDE1", 4L, 4L))
     {
 
       /*           u_xx + u_yy + au_x + (a_x/2)u for a = 20exp[3.5(x^2 +
@@ -287,7 +287,7 @@ L10:
       /*        nonsymmetric linear systems". */
 
     }
-    else if (lsamen_(&c__4, aform, "PDE2", 4L, 4L))
+    else if(lsamen_(&c__4, aform, "PDE2", 4L, 4L))
     {
 
       /*           u_xx + u_yy + u_zz + 1000u_x */
@@ -296,7 +296,7 @@ L10:
                onefun_, onefun_, onefun_, thousfun_, zerofun_, zerofun_,
                zerofun_);
     }
-    else if (lsamen_(&c__4, aform, "PDE3", 4L, 4L))
+    else if(lsamen_(&c__4, aform, "PDE3", 4L, 4L))
     {
 
       /*           u_xx + u_yy + u_zz - 10^5x^2(u_x + u_y + u_z ) */
@@ -305,7 +305,7 @@ L10:
                onefun_, onefun_, onefun_, ten5x2fun_, ten5x2fun_,
                ten5x2fun_, zerofun_);
     }
-    else if (lsamen_(&c__4, aform, "PDE4", 4L, 4L))
+    else if(lsamen_(&c__4, aform, "PDE4", 4L, 4L))
     {
 
       /*           u_xx + u_yy + u_zz + 1000exp(xyz)( u_x + u_y - u_z )
@@ -328,7 +328,7 @@ L10:
 
     comp2dense_(&work[ival], &work[ipointr], &work[iindx], &matdim_1.n,
                 system_1.a, &matdim_1.lda, "ROW", info, 3L);
-    if (info[0] != 0)
+    if(info[0] != 0)
     {
       s_wsfe(&io___25);
       do_fio(&c__1, (char *)&matdim_1.n, (ftnlen)sizeof(integer));
@@ -350,7 +350,7 @@ L10:
     vecgen_(initialguess, &matdim_1.n, system_1.a, &matdim_1.lda, &x0[1],
             &info[2], 4L);
 
-    if (info[1] != 0)
+    if(info[1] != 0)
     {
       s_wsfe(&io___27);
       do_fio(&c__1, (char *)&matform, (ftnlen)sizeof(integer));
@@ -360,7 +360,7 @@ L10:
       e_wsfe();
       goto L10;
     }
-    else if (info[2] != 0)
+    else if(info[2] != 0)
     {
       s_wsfe(&io___29);
       do_fio(&c__1, (char *)&matform, (ftnlen)sizeof(integer));
@@ -380,12 +380,12 @@ L10:
     /*        preconditioning, then diagonal preconditioning. */
 
     i__2 = npforms;
-    for (i = 1; i <= i__2; ++i)
+    for(i = 1; i <= i__2; ++i)
     {
 
       /*           Initializations. */
 
-      for (j = 3; j <= 9; ++j)
+      for(j = 3; j <= 9; ++j)
       {
         info[j - 1] = 0;
         iter[j - 1] = maxit;
@@ -396,7 +396,7 @@ L10:
 
       precon_(&matdim_1.n, system_1.a, &matdim_1.lda, pform + i * 5,
               system_1.m, info, 5L);
-      if (info[0] != 0)
+      if(info[0] != 0)
       {
         s_wsfe(&io___36);
         do_fio(&c__1, pform + i * 5, 5L);
@@ -408,35 +408,35 @@ L10:
       }
       s_copy(forms_1.curpform, pform + i * 5, 5L, 5L);
 
-      if (tstbicg)
+      if(tstbicg)
       {
         bicg_(&matdim_1.n, &b[1], &x[(x_dim1 << 2) + 1], &work[1],
               ldw, &iter[3], &resid[3], matvec, matvectrans, psolve,
               psolvetrans, &info[3]);
       }
 
-      if (tstcgs)
+      if(tstcgs)
       {
         cgs_(&matdim_1.n, &b[1], &x[x_dim1 * 5 + 1], &work[1], ldw, &
              iter[4], &resid[4], matvec, psolve, &info[4]);
       }
 
-      if (tstbicgs)
+      if(tstbicgs)
       {
         bicgstab_(&matdim_1.n, &b[1], &x[x_dim1 * 6 + 1], &work[1],
                   ldw, &iter[5], &resid[5], matvec, psolve, &info[5]);
       }
 
-      if (tstgmres)
+      if(tstgmres)
       {
         restrt = matdim_1.n / 2;
-        if (restrt == 0)
+        if(restrt == 0)
         {
           restrt = matdim_1.n;
         }
         needws = matdim_1.n * (restrt + 4) + (restrt + 1) * (restrt +
                  2);
-        if (needws > *maxws)
+        if(needws > *maxws)
         {
           info[6] = 100;
           s_wsle(&io___40);
@@ -466,7 +466,7 @@ EST MATRIX", 44L);
         }
       }
 
-      if (tstqmr)
+      if(tstqmr)
       {
         qmr_(&matdim_1.n, &b[1], &x[(x_dim1 << 3) + 1], &work[1], ldw,
              &iter[7], &resid[7], matvec, matvectrans, psolveq,
@@ -475,9 +475,9 @@ EST MATRIX", 44L);
 
       /*           Check for convergence. */
 
-      for (j = 4; j <= 8; ++j)
+      for(j = 4; j <= 8; ++j)
       {
-        if (info[j - 1] != 0)
+        if(info[j - 1] != 0)
         {
           ++(*numsusp);
         }

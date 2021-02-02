@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
  * limitations under the License.
 */
 
-#include "VariationalInequality_Solvers.h"
-#include "VariationalInequality_computeError.h"
-#include "Qi_merit.h"
-#include "SiconosSets.h"
-#include "Newton_methods.h"
-#include "VI_Newton.h"
+#include "Newton_methods.h"                      // for functions_LSA, init_...
+#include "NumericsFwd.h"                         // for VariationalInequality
+#include "Qi_merit.h"                            // for Jac_F_Qi, phi_Qi
+#include "SiconosSets.h"                         // for box_constraints
+#include "SolverOptions.h"                       // for SolverOptions
+#include "VI_Newton.h"                           // for VI_compute_F, VI_com...
+#include "VariationalInequality.h"               // for VariationalInequality
+#include "VariationalInequality_Solvers.h"       // for variationalInequalit...
+#include "VariationalInequality_computeError.h"  // for variationalInequalit...
 
 void VI_compute_F(void* data_opaque, double* x, double* F)
 {
@@ -58,8 +61,18 @@ void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, doub
   functions_QiLSA.compute_H = &VI_compute_H_box_Qi;
   functions_QiLSA.compute_error = &VI_compute_error_box;
   functions_QiLSA.get_set_from_problem_data = &vi_get_set;
-  options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
+
 
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);
+}
+
+
+void variationalInequality_BOX_QI_set_default(SolverOptions* options)
+{
+  options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
+  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
+  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
+  options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
+  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
 }

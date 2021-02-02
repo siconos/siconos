@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 
 /* same things in BulletDS_impl.hpp */
 /* long unsigned int with bullet stuff ? */
-typedef std11::array<double, 7> OffSet;
+typedef std::array<double, 7> OffSet;
 
 struct ContactShapes : public std::vector<boost::tuple<SP::OccContactShape, OffSet, int > >
 {

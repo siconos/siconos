@@ -15,7 +15,8 @@ $TEMPLATE[test_case.cpp]
 #include <cstdlib>
 #include <boost/numeric/bindings/$library/$levelname/$groupname.hpp>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
 
 
@@ -26,7 +27,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
 
 $TEMPLATE[end]

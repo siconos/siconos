@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,14 @@
 #ifndef RELAY_PROBLEM_H
 #define RELAY_PROBLEM_H
 
-
-#include <assert.h>
-#include <stdio.h>
-
 /*!\file RelayProblem.h
   \brief Structure used to define a Relay (dual or primal) Problem
 
 */
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include <stdio.h>        // for FILE
+#include "NumericsFwd.h"  // for RelayProblem, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct RelayProblem RelayProblem.h
  * \brief Struct defining a Relay problem
@@ -47,15 +44,38 @@ extern "C"
 {
 #endif
 
-  /** Relay_display displays on screen a Relay_problem
-  * \param[in] p Relay_problem to be displayed
-  */
+  /** displays the problem onto the screen 
+   * \param[in] p Relay problem to be displayed
+   */
   void Relay_display(RelayProblem* p);
-
+  
+  /** Saves relay struct into a file.
+      \param[in] problem structure
+      \param[in] file, file descriptor
+      \return file status (1 if everything has worked properly)
+   */
   int relay_printInFile(RelayProblem*  problem, FILE* file);
 
-  int relay_newFromFile(RelayProblem* problem, FILE* file);
+  /* create a new Relay Problem (ptr) and set structure member to null.
+   * \return a pointer to a relay 
+   */
+  RelayProblem* relayProblem_new(void);
+  
+  /** read a RelayProblem from a file descriptor
+   * \param file descriptor
+   * \return problem the problem to read
+   */
+  RelayProblem*  relay_newFromFile(FILE* file);
 
+  /** read a RelayProblem from a file (.dat or hdf5 if fclib is on) from its filename
+   * \param filename the name of the input file
+   * \return problem the problem to read
+   */
+  RelayProblem* relay_new_from_filename(const char * filename);
+
+  /** Release memory for the problem structure
+      \param[inout] problem, Relay problem structure to be freed.
+  */
   void freeRelay_problem(RelayProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

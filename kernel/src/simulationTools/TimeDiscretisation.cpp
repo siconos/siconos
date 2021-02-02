@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 #include "TimeDiscretisation.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "Tools.hpp"
 
 #include <cmath>
@@ -26,8 +26,8 @@
 TimeDiscretisation::TimeDiscretisation(): _h(0.), _t0(std::numeric_limits<double>::quiet_NaN())
 {
   mpf_init(_hgmp);
-  mpf_init(_tkp1); 
-  mpf_init(_tk); 
+  mpf_init(_tkp1);
+  mpf_init(_tk);
   mpf_init(_t0gmp);
 }
 
@@ -37,8 +37,8 @@ TimeDiscretisation::TimeDiscretisation(const TkVector& tk):
   _h(0.0)
 {
   mpf_init(_hgmp);
-  mpf_init(_tkp1); 
-  mpf_init(_tk); 
+  mpf_init(_tkp1);
+  mpf_init(_tk);
   mpf_init(_t0gmp);
 
   _tkV = tk;
@@ -50,8 +50,8 @@ TimeDiscretisation::TimeDiscretisation(double t0, double h):
   _h(h), _t0(t0)
 {
   mpf_init(_hgmp);
-  mpf_init(_tkp1); 
-  mpf_init(_tk); 
+  mpf_init(_tkp1);
+  mpf_init(_tk);
   mpf_init(_t0gmp);
 
 }
@@ -70,8 +70,8 @@ TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T)
   _t0(t0)
 {
   mpf_init(_hgmp);
-  mpf_init(_tkp1); 
-  mpf_init(_tk); 
+  mpf_init(_tkp1);
+  mpf_init(_tk);
   mpf_init(_t0gmp);
 
   _h = (T - t0) / nSteps;
@@ -85,12 +85,12 @@ TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
   mpf_init(_tk);
   mpf_init(_t0gmp);
 
-  if (td.hGmp())
+  if(td.hGmp())
   {
     mpf_init_set(_hgmp, *td.currentTimeStep());
     _h = 0.;
   }
-  else if (td.hConst())
+  else if(td.hConst())
   {
     _h = td._h;
   }
@@ -106,7 +106,7 @@ TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
 // --- Destructor ---
 TimeDiscretisation::~TimeDiscretisation()
 {
-  if (!_tkV.empty())
+  if(!_tkV.empty())
     _tkV.clear();
 
   mpf_clear(_hgmp);
@@ -125,17 +125,17 @@ void TimeDiscretisation::setTkVector(const TkVector& newTk)
 void TimeDiscretisation::setT0(double val)
 {
   _t0 = val;
-  if (_h == 0.0)
+  if(_h == 0.0)
     mpf_set_d(_t0gmp, val);
-  if (!_tkV.empty())
-    RuntimeException::selfThrow("TimeDiscretisation::setT0 must be called only when the TimeDiscretisation is with a constant h");
+  if(!_tkV.empty())
+    THROW_EXCEPTION("TimeDiscretisation::setT0 must be called only when the TimeDiscretisation is with a constant h");
 }
 
 double TimeDiscretisation::currentTimeStep(const unsigned int k)
 {
   if(_tkV.empty())
   {
-    if (_h > 0.)
+    if(_h > 0.)
       return _h;
     else
     {
@@ -154,7 +154,7 @@ double TimeDiscretisation::getTk(const unsigned int indx)
 {
   if(_tkV.empty())
   {
-    if (_h > 0.)
+    if(_h > 0.)
       return _t0 + _h*indx;
     else
     {

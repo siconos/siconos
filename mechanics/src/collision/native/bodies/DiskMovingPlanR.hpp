@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ typedef double(*FTime)(double);
 
 
 class DiskMovingPlanR : public LagrangianRheonomousR,
-  public std11::enable_shared_from_this<DiskMovingPlanR>
+  public std::enable_shared_from_this<DiskMovingPlanR>
 {
 private:
   /** serialization hooks
@@ -66,12 +66,28 @@ public:
   void init(double);
 
   using LagrangianRheonomousR::computeh;
-  void computeh(double time, SiconosVector& q, SiconosVector& z, SiconosVector& y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
+  */
+  void computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  void computeJachq(double time, SiconosVector& q, SiconosVector& z);
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  void computeJachq(double time, const BlockVector& q, BlockVector& z);
 
   using LagrangianRheonomousR::computehDot;
-  void computehDot(double time, SiconosVector& q, SiconosVector& z);
+  /** to compute the time-derivative of the output y = h(t,q,z), saved in attribute _hDot (access: hDot())
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  void computehDot(double time, const BlockVector& q, BlockVector& z);
 
   double distance(double, double, double);
 

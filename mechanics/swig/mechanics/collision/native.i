@@ -6,8 +6,8 @@
 %fragment("NumPy_Fragments");
 
 // suppress warning
-%ignore  STD11::enable_shared_from_this< Hashed >;
-%template (sharedHashed) STD11::enable_shared_from_this< Hashed >;
+%ignore  std::enable_shared_from_this< Hashed >;
+%template (sharedHashed) std::enable_shared_from_this< Hashed >;
 
 PY_FULL_REGISTER(SpaceFilter, Mechanics);
 PY_FULL_REGISTER(SiconosBodies, Mechanics);

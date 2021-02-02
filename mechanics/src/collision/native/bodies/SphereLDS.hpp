@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 #include "MechanicsFwd.hpp"
 #include "LagrangianDS.hpp"
 
-class SphereLDS : public LagrangianDS, public std11::enable_shared_from_this<SphereLDS>
+class SphereLDS : public LagrangianDS, public std::enable_shared_from_this<SphereLDS>
 {
 protected:
   /** serialization hooks
@@ -71,7 +71,7 @@ public:
   void computeMass();
   void computeMass(SP::SiconosVector)
   {
-    RuntimeException::selfThrow("SphereLDS::computeMass(vector) - not implemented");
+    THROW_EXCEPTION("SphereLDS::computeMass(vector) - not implemented");
   }
 
   void computeFGyr(SP::SiconosVector, SP::SiconosVector);

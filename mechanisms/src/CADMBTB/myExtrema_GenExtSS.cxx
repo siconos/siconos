@@ -326,6 +326,6 @@ Extrema_POnSurf myExtrema_GenExtSS::PointOnS2(const Standard_Integer N) const
 
 Adaptor3d_SurfacePtr myExtrema_GenExtSS::Bidon() const 
 {
-  return (Adaptor3d_SurfacePtr)0L;
+  return (Adaptor3d_SurfacePtr)nullptr;
 }
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,7 +236,6 @@ public:
   /** set a specified function to compute the matrix A => same action as setComputeJacobianfxFunction
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
    */
   void setComputeAFunction(const std::string& pluginPath, const std::string& functionName);
 
@@ -248,7 +247,6 @@ public:
   /** set a specified function to compute the vector b
    *  \param pluginPath the complete path to the plugin file
    *  \param functionName the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
    */
   void setComputebFunction(const std::string& pluginPath, const std::string& functionName);
 

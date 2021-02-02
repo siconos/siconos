@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ private:
   ACCEPT_SERIALIZATION(PID);
 
   /** error vector */
-  std11::shared_ptr<boost::circular_buffer<double> > _err;
+  std::shared_ptr<boost::circular_buffer<double> > _err;
 
   /** reference we are tracking */
   double _ref;
@@ -54,7 +54,7 @@ public:
    * \param sensor the ControlSensor feeding the Actuator
    * \param B the B matrix
    */
-  PID(SP::ControlSensor sensor, SP::SimpleMatrix B = std11::shared_ptr<SimpleMatrix>());
+  PID(SP::ControlSensor sensor, SP::SimpleMatrix B = std::shared_ptr<SimpleMatrix>());
 
   /** destructor
    */

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 #include "LinearOSNS.hpp"
+#include "NumericsMatrix.h"
+#include "SiconosAlgebraProd.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "MoreauJeanOSI.hpp"
@@ -49,50 +51,41 @@ using namespace RELATION;
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-LinearOSNS::LinearOSNS(): OneStepNSProblem(), _numericsMatrixStorageType(NM_DENSE), _keepLambdaAndYState(true)
-{
-}
-
-// Constructor from a set of data
-LinearOSNS::LinearOSNS(const int numericsSolverId):
-  OneStepNSProblem(numericsSolverId), _numericsMatrixStorageType(0), _keepLambdaAndYState(true)
-{}
-
 void LinearOSNS::initVectorsMemory()
 {
   // Memory allocation for _w, M, z and q.
   // If one of them has already been allocated, nothing is done.
   // We suppose that user has chosen a correct size.
-  if (! _w)
+  if(! _w)
     _w.reset(new SiconosVector(maxSize()));
   else
   {
-    if (_w->size() != maxSize())
+    if(_w->size() != maxSize())
       _w->resize(maxSize());
   }
 
-  if (! _z)
+  if(! _z)
     _z.reset(new SiconosVector(maxSize()));
   else
   {
-    if (_z->size() != maxSize())
+    if(_z->size() != maxSize())
       _z->resize(maxSize());
   }
 
-  if (! _q)
+  if(! _q)
     _q.reset(new SiconosVector(maxSize()));
   else
   {
-    if (_q->size() != maxSize())
+    if(_q->size() != maxSize())
       _q->resize(maxSize());
   }
 }
 void LinearOSNS::initOSNSMatrix()
 {
   // Default size for M = maxSize()
-  if (! _M)
+  if(! _M)
   {
-    switch (_numericsMatrixStorageType)
+    switch(_numericsMatrixStorageType)
     {
     case NM_DENSE:
     case NM_SPARSE:
@@ -103,7 +96,7 @@ void LinearOSNS::initOSNSMatrix()
     case NM_SPARSE_BLOCK:
     {
       // = number of Interactionin the largest considered indexSet
-      if (indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
+      if(indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
       {
         _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _numericsMatrixStorageType));
       }
@@ -114,9 +107,9 @@ void LinearOSNS::initOSNSMatrix()
       break;
     }
     {
-    default:
-      RuntimeException::selfThrow("LinearOSNS::initOSNSMatrix unknown _storageType");
-    }
+      default:
+        THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
     }
   }
 }
@@ -157,7 +150,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   SP::DynamicalSystem ds2;
   unsigned int pos1, pos2;
   // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
-  if (indexSet->properties(vd).source != indexSet->properties(vd).target)
+  if(indexSet->properties(vd).source != indexSet->properties(vd).target)
   {
     DEBUG_PRINT("a two DS Interaction\n");
     ds1 = indexSet->properties(vd).source;
@@ -171,12 +164,12 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     // \warning this looks like some debug code, but it gets executed even with NDEBUG.
     // may be compiler does something smarter, but still it should be rewritten. --xhub
     InteractionsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = indexSet->out_edges(vd);
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = indexSet->out_edges(vd);
+        oei != oeiend; ++oei)
     {
       // note : at most 4 edges
       ds2 = indexSet->bundle(*oei);
-      if (ds2 != ds1)
+      if(ds2 != ds1)
       {
         assert(false);
         break;
@@ -189,10 +182,15 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   pos2 = indexSet->properties(vd).target_pos;
 
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
 
+  // --- Check compatible nslaws ---- 
+  checkCompatibleNSLaw(*nslaw);
+  
+  
   // --- Check block size ---
-  assert(indexSet->properties(vd).block->size(0) == inter->nonSmoothLaw()->size());
-  assert(indexSet->properties(vd).block->size(1) == inter->nonSmoothLaw()->size());
+  assert(indexSet->properties(vd).block->size(0) == nslaw->size());
+  assert(indexSet->properties(vd).block->size(1) == nslaw->size());
 
   // --- Compute diagonal block ---
   // Block to be set in OSNS Matrix, corresponding to
@@ -215,11 +213,11 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
   inter->getExtraInteractionBlock(currentInteractionBlock);
 
-  unsigned int nslawSize = inter->nonSmoothLaw()->size();
+  unsigned int nslawSize = nslaw->size();
   // loop over the DS connected to the interaction.
   bool endl = false;
   unsigned int pos = pos1;
-  for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
+  for(SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
   {
     assert(ds == ds1 || ds == ds2);
     endl = (ds == ds2);
@@ -230,27 +228,26 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
-    leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
-    inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
+    leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, nslawSize, sizeDS);
     DEBUG_EXPR(leftInteractionBlock->display(););
     // Computing depends on relation type -> move this in Interaction method?
-    if (relationType == FirstOrder)
+    if(relationType == FirstOrder)
     {
 
-      rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize));
+      
 
-      inter->getRightInteractionBlockForDS(pos, rightInteractionBlock);
+      rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
-      if (osiType == OSI::EULERMOREAUOSI)
+      if(osiType == OSI::EULERMOREAUOSI)
       {
-        if ((static_cast<EulerMoreauOSI&> (osi)).useGamma() || (static_cast<EulerMoreauOSI&> (osi)).useGammaForRelation())
+        if((static_cast<EulerMoreauOSI&>(osi)).useGamma() || (static_cast<EulerMoreauOSI&>(osi)).useGammaForRelation())
         {
-          *rightInteractionBlock *= (static_cast<EulerMoreauOSI&> (osi)).gamma();
+          *rightInteractionBlock *= (static_cast<EulerMoreauOSI&>(osi)).gamma();
         }
       }
 
       // for ZOH, we have a different formula ...
-      if ((osiType == OSI::ZOHOSI) && indexSet->properties(vd).forControl)
+      if((osiType == OSI::ZOHOSI) && indexSet->properties(vd).forControl)
       {
         *rightInteractionBlock = static_cast<ZeroOrderHoldOSI&>(osi).Bd(ds);
         prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
@@ -260,10 +257,10 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-        centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+        centralInteractionBlock->Solve(*rightInteractionBlock);
         VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
         static_cast<EulerMoreauOSI&>(osi).computeKhat(*inter, *rightInteractionBlock,
-                                                      workMInter, h);
+            workMInter, h);
 
 
 
@@ -276,28 +273,28 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
       }
 
     }
-    else if (relationType == Lagrangian ||
-             relationType == NewtonEuler)
+    else if(relationType == Lagrangian ||
+            relationType == NewtonEuler)
     {
 
       SP::BoundaryCondition bc;
       Type::Siconos dsType = Type::value(*ds);
-      if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS
+      if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS
           || dsType == Type::LagrangianLinearDiagonalDS)
       {
-        SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-        if (d->boundaryConditions()) bc = d->boundaryConditions();
+        SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+        if(d->boundaryConditions()) bc = d->boundaryConditions();
       }
-      else if (dsType == Type::NewtonEulerDS)
+      else if(dsType == Type::NewtonEulerDS)
       {
-        SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-        if (d->boundaryConditions()) bc = d->boundaryConditions();
+        SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
+        if(d->boundaryConditions()) bc = d->boundaryConditions();
       }
-      if (bc)
+      if(bc)
       {
-        for (std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
-             itindex != bc->velocityIndices()->end();
-             ++itindex)
+        for(std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
+            itindex != bc->velocityIndices()->end();
+            ++itindex)
         {
           // (nslawSize,sizeDS));
           SP::SiconosVector coltmp(new SiconosVector(nslawSize));
@@ -314,12 +311,12 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *work, true);
         leftInteractionBlock->trans();
         prod(*work,* leftInteractionBlock, *currentInteractionBlock, false);
-        if (relationSubType == CompliantLinearTIR)
+        if(relationSubType == CompliantLinearTIR)
         {
-          if (osiType == OSI::MOREAUJEANOSI)
+          if(osiType == OSI::MOREAUJEANOSI)
           {
-            * currentInteractionBlock *= (static_cast<MoreauJeanOSI&> (osi)).theta() ;
-            * currentInteractionBlock +=  *std11::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
+            * currentInteractionBlock *= (static_cast<MoreauJeanOSI&>(osi)).theta() ;
+            * currentInteractionBlock +=  *std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
           }
         }
       }
@@ -331,26 +328,26 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
         work->trans();
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-        DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isPLUFactorized() = "<< centralInteractionBlock->isPLUFactorized() << std::endl;);
-        centralInteractionBlock->PLUForwardBackwardInPlace(*work);
+        DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isFactorized() = "<< centralInteractionBlock->isFactorized() << std::endl;);
+        centralInteractionBlock->Solve(*work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
         DEBUG_EXPR(work->display(););
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
         //*currentInteractionBlock *=h;
         DEBUG_EXPR(currentInteractionBlock->display(););
-        //assert(currentInteractionBlock->isSymmetric(1e-10));
-        if (relationSubType == CompliantLinearTIR)
+        //assert(currentInteractionBlock->checkSymmetry(1e-10));
+        if(relationSubType == CompliantLinearTIR)
         {
-          if (osiType == OSI::MOREAUJEANOSI)
+          if(osiType == OSI::MOREAUJEANOSI)
           {
-            * currentInteractionBlock *= (static_cast<MoreauJeanOSI&> (osi)).theta() ;
-            * currentInteractionBlock +=  *std11::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
+            * currentInteractionBlock *= (static_cast<MoreauJeanOSI&>(osi)).theta() ;
+            * currentInteractionBlock +=  *std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
           }
         }
       }
     }
-    else RuntimeException::selfThrow("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + relationType);
+    else THROW_EXCEPTION("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + std::to_string(relationType));
     // Set pos for next loop.
     pos = pos2;
   }
@@ -392,7 +389,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   // source of inter1 :
   vertex_inter = indexSet->source(ed);
   SP::DynamicalSystem tmpds = indexSet->properties(vertex_inter).source;
-  if (tmpds == ds)
+  if(tmpds == ds)
     pos1 =  indexSet->properties(vertex_inter).source_pos;
   else
   {
@@ -402,7 +399,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   // now, inter2
   vertex_inter = indexSet->target(ed);
   tmpds = indexSet->properties(vertex_inter).source;
-  if (tmpds == ds)
+  if(tmpds == ds)
     pos2 =  indexSet->properties(vertex_inter).source_pos;
   else
   {
@@ -419,7 +416,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
   assert(index1 != index2);
 
-  if (index2 > index1) // upper block
+  if(index2 > index1)  // upper block
   {
     assert(indexSet->properties(ed).upper_block->size(0) == nslawSize1);
     assert(indexSet->properties(ed).upper_block->size(1) == nslawSize2);
@@ -459,20 +456,16 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
   // get _interactionBlocks corresponding to the current DS
   // These _interactionBlocks depends on the relation type.
-  leftInteractionBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-  inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
+  leftInteractionBlock = inter1->getLeftInteractionBlockForDS(pos1, nslawSize1, sizeDS);
 
   // Computing depends on relation type -> move this in Interaction method?
-  if (relationType1 == FirstOrder && relationType2 == FirstOrder)
+  if(relationType1 == FirstOrder && relationType2 == FirstOrder)
   {
-
-    rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
-
-    inter2->getRightInteractionBlockForDS(pos2, rightInteractionBlock);
+    rightInteractionBlock = inter2->getRightInteractionBlockForDS(pos2, sizeDS, nslawSize2);
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
     SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-    centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+    centralInteractionBlock->Solve(*rightInteractionBlock);
 
     //      integration of r with theta method removed
     //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
@@ -484,10 +477,10 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
 
   }
-  else if (relationType1 == Lagrangian ||
-           relationType2 == Lagrangian ||
-           relationType1 == NewtonEuler ||
-           relationType2 == NewtonEuler)
+  else if(relationType1 == Lagrangian ||
+          relationType2 == Lagrangian ||
+          relationType1 == NewtonEuler ||
+          relationType2 == NewtonEuler)
   {
 
     //Type::Siconos dsType = Type::value(*ds);
@@ -509,21 +502,21 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
     SP::BoundaryCondition bc;
     Type::Siconos dsType = Type::value(*ds);
-    if (dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearDiagonalDS)
+    if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearDiagonalDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      if (d->boundaryConditions()) bc = d->boundaryConditions();
+      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+      if(d->boundaryConditions()) bc = d->boundaryConditions();
     }
-    else if (dsType == Type::NewtonEulerDS)
+    else if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      if (d->boundaryConditions()) bc = d->boundaryConditions();
+      SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
+      if(d->boundaryConditions()) bc = d->boundaryConditions();
     }
-    if (bc)
+    if(bc)
     {
-      for (std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
-           itindex != bc->velocityIndices()->end();
-           ++itindex)
+      for(std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
+          itindex != bc->velocityIndices()->end();
+          ++itindex)
       {
         // (nslawSize,sizeDS));
         SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
@@ -542,7 +535,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       // remind that W contains the inverse of the iteration matrix
       axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *rightInteractionBlock, true);
       // Then save block corresponding to the 'right' interaction into leftInteractionBlock
-      inter2->getLeftInteractionBlockForDS(pos2, leftInteractionBlock);
+      leftInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize1, sizeDS);
       leftInteractionBlock->trans();
       // and compute LW-1R == rightInteractionBlock * leftInteractionBlock into currentInteractionBlock
       prod(*rightInteractionBlock, *leftInteractionBlock, *currentInteractionBlock, false);
@@ -550,20 +543,19 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     else
     {
       // inter1 != inter2
-      rightInteractionBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-      inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
+      rightInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize2, sizeDS);
       rightInteractionBlock->trans();
       // Warning: we use getLeft for Right interactionBlock
       // because right = transpose(left) and because of
       // size checking inside the getBlock function, a
       // getRight call will fail.
       SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-      centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+      centralInteractionBlock->Solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
     }
   }
-  else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType1);
+  else THROW_EXCEPTION("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
   DEBUG_END("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 }
 
@@ -576,7 +568,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   SP::DynamicalSystem ds1;
   SP::DynamicalSystem ds2;
   // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
-  if (indexSet->properties(vertex_inter).source != indexSet->properties(vertex_inter).target)
+  if(indexSet->properties(vertex_inter).source != indexSet->properties(vertex_inter).target)
   {
     DEBUG_PRINT("a two DS Interaction\n");
     ds1 = indexSet->properties(vertex_inter).source;
@@ -590,12 +582,12 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
     // \warning this looks like some debug code, but it gets executed even with NDEBUG.
     // may be compiler does something smarter, but still it should be rewritten. --xhub
     InteractionsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = indexSet->out_edges(vertex_inter);
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = indexSet->out_edges(vertex_inter);
+        oei != oeiend; ++oei)
     {
       // note : at most 4 edges
       ds2 = indexSet->bundle(*oei);
-      if (ds2 != ds1)
+      if(ds2 != ds1)
       {
         assert(false);
         break;
@@ -617,63 +609,63 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   // We assume that the osi of ds1 (osi1) is integrating the interaction
-  if ((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
+  if((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[EulerMoreauOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
   else if(osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI)
   {
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-  else if ((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||
-           (osi1Type == OSI::MOREAUDIRECTPROJECTIONOSI && osi2Type == OSI::MOREAUDIRECTPROJECTIONOSI))
+  else if((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI)||
+          (osi1Type == OSI::MOREAUDIRECTPROJECTIONOSI && osi2Type == OSI::MOREAUDIRECTPROJECTIONOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-  else if ((osi1Type == OSI::MOREAUJEANBILBAOOSI && osi2Type == OSI::MOREAUJEANBILBAOOSI ))
+  else if((osi1Type == OSI::MOREAUJEANBILBAOOSI && osi2Type == OSI::MOREAUJEANBILBAOOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-  else if ((osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI  ) )
+  else if((osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[LsodarOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-  else if ((osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI  ))
+  else if((osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-  else if ((osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI ) )
+  else if((osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-  else if ((osi1Type == OSI::D1MINUSLINEAROSI && osi2Type == OSI::D1MINUSLINEAROSI  ))
+  else if((osi1Type == OSI::D1MINUSLINEAROSI && osi2Type == OSI::D1MINUSLINEAROSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
 
-  else if (osi1Type == OSI::MOREAUJEANGOSI && osi2Type == OSI::MOREAUJEANGOSI)
+  else if(osi1Type == OSI::MOREAUJEANGOSI && osi2Type == OSI::MOREAUJEANGOSI)
   {
 
   }
   else
-    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + osi1Type  + osi2Type);
+    THROW_EXCEPTION("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
   DEBUG_EXPR(_q->display());
   DEBUG_END("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
 }
@@ -681,7 +673,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 void LinearOSNS::computeq(double time)
 {
   DEBUG_BEGIN("void LinearOSNS::computeq(double time)\n");
-  if (_q->size() != _sizeOutput)
+  if(_q->size() != _sizeOutput)
     _q->resize(_sizeOutput);
   _q->zero();
 
@@ -692,7 +684,7 @@ void LinearOSNS::computeq(double time)
 
   unsigned int pos = 0;
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
@@ -725,7 +717,7 @@ bool LinearOSNS::preCompute(double time)
   //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do
-  if (indexSetLevel() == LEVELMAX)
+  if(indexSetLevel() == LEVELMAX)
   {
     DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
     return false;
@@ -733,13 +725,13 @@ bool LinearOSNS::preCompute(double time)
 
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
-  if (indexSet.size() == 0)
+  if(indexSet.size() == 0)
   {
     DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
     return false;
   }
 
-  if (!_hasBeenUpdated || !isLinear)
+  if(!_hasBeenUpdated || !isLinear)
   {
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
@@ -753,13 +745,13 @@ bool LinearOSNS::preCompute(double time)
 
     // Checks z and _w sizes and reset if necessary
 
-    if (_z->size() != _sizeOutput)
+    if(_z->size() != _sizeOutput)
     {
       _z->resize(_sizeOutput, false);
       _z->zero();
     }
 
-    if (_w->size() != _sizeOutput)
+    if(_w->size() != _sizeOutput)
     {
       _w->resize(_sizeOutput);
       _w->zero();
@@ -768,10 +760,10 @@ bool LinearOSNS::preCompute(double time)
     // Reset _w and _z with previous values of y and lambda
     // (i.e. val saved in yOutputOld and lambdaOld of the interaction).
     // Note : sizeOuput can be unchanged, but positions may have changed. (??)
-    if (_keepLambdaAndYState)
+    if(_keepLambdaAndYState)
     {
       InteractionsGraph::VIterator ui, uiend;
-      for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+      for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet.bundle(*ui);
         // Get the position of inter-interactionBlock in the vector w
@@ -780,7 +772,7 @@ bool LinearOSNS::preCompute(double time)
         SiconosVector& yOutputOld = *inter.yOld(inputOutputLevel());
         SiconosVector& lambdaOld = *inter.lambdaOld(inputOutputLevel());
 
-        if (_sizeOutput >= yOutputOld.size() + pos)
+        if(_sizeOutput >= yOutputOld.size() + pos)
         {
           setBlock(yOutputOld, _w, yOutputOld.size(), 0, pos);
           setBlock(lambdaOld, _z, lambdaOld.size(), 0, pos);
@@ -823,7 +815,7 @@ void LinearOSNS::postCompute()
   unsigned int pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet.bundle(*ui);
     // Get the  position of inter-interactionBlock in the vector w
@@ -848,18 +840,18 @@ void LinearOSNS::display() const
   std::cout << "==========================" <<std::endl;
   std::cout << "this : " << this <<std::endl;
   std::cout << "_M  ";
-  if (_M) _M->display();
-  else std::cout << "-> NULL" <<std::endl;
+  if(_M) _M->display();
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout <<std::endl << "q : " ;
-  if (_q) _q->display();
-  else std::cout << "-> NULL" <<std::endl;
+  if(_q) _q->display();
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << std::endl;
   std::cout << "w : ";
-  if (_w) _w->display();
-  else std::cout << "-> NULL" <<std::endl;
+  if(_w) _w->display();
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout <<std::endl << "z : " ;
-  if (_z) _z->display();
-  else std::cout << "-> NULL" <<std::endl;
+  if(_z) _z->display();
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << std::endl;
   std::cout << "The linearOSNSP works on the index set of level  " << _indexSetLevel<< std::endl;
   std::cout << "==========================" <<std::endl;

@@ -1,6 +1,7 @@
 #ifndef SOCLCP_CST_H
 #define SOCLCP_CST_H
 /** \file SOCLCP_cst.h */
+
 /** \enum SOCLCP_SOLVER encode the list of solvers as integers to avoid mispelling
  * with const char* const  variables
  */
@@ -22,7 +23,7 @@ enum SOCLCP_SOLVER
   /** SOCLCP for one cone (used mainly inside NSGS solvers) */
   SICONOS_SOCLCP_ProjectionOnCone = 1150,
   SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration = 1151,
-  SICONOS_SOCLCP_projectionOnConeWithRegularization = 1152
+  SICONOS_SOCLCP_ProjectionOnConeWithRegularization = 1152
   /* SICONOS_SOCLCP_AlartCurnierNewton = 550, */
   /* SICONOS_SOCLCP_NCPGlockerFBNewton = 551, */
   /* SICONOS_SOCLCP_NCPGlockerFBPATH = 556, */
@@ -47,13 +48,21 @@ enum SOCLCP_SOLVER
 };
 
 
+enum SICONOS_DPARAM_SOCLCP
+{
+ SICONOS_DPARAM_SOCLCP_PROJECTION_RHO = 3,
+ /** index to save relaxation parameter value */
+ SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION = 8,
+};
 
-/* extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ; */
-/* extern const char* const   SICONOS_FRICTION_2D_PGS_STR ; */
-/* extern const char* const   SICONOS_FRICTION_2D_CPG_STR ; */
-/* extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ; */
-/* extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ; */
-/* extern const char* const   SICONOS_FRICTION_2D_ENUM_STR ; */
+
+enum SICONOS_IPARAM_SOCLCP
+{
+ SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION = 8,
+ SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX = 4,
+};
+
+
 
 extern const char* const   SICONOS_SOCLCP_NSGS_STR ;
 extern const char* const   SICONOS_SOCLCP_NSGSV_STR ;
@@ -74,7 +83,7 @@ extern const char* const   SICONOS_SOCLCP_NCPGlockerFBNewton_STR;
 extern const char* const   SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR;
 extern const char* const   SICONOS_SOCLCP_ProjectionOnCone_STR;
 extern const char* const   SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR;
-extern const char* const   SICONOS_SOCLCP_projectionOnConeWithRegularization_STR;
+extern const char* const   SICONOS_SOCLCP_ProjectionOnConeWithRegularization_STR;
 extern const char* const   SICONOS_SOCLCP_NCPGlockerFBPATH_STR;
 extern const char* const   SICONOS_SOCLCP_projectionOnCylinder_STR;
 extern const char* const   SICONOS_SOCLCP_ProjectionOnCone_velocity_STR;

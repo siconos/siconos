@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include <assert.h>
+#include "NumericsMatrix.h"
 #include "OSNSMatrix.hpp"
 #include "NonSmoothLaw.hpp"
 #include "Tools.hpp"
@@ -48,24 +49,25 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   // * Dense matrix (_storageType = NM_DENSE), n represents the real dimension of
   // the matrix
   // * Sparse matrix (_storageType == 1) n represents the number of blocks in a row or column.
-  
+
   DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
   switch(_storageType)
-    {
-    case NM_DENSE:
-      {
-	// A zero matrix M of size nXn is built.
-	_M1.reset(new SimpleMatrix(n, n));
-	break;
-      }
-    case NM_SPARSE_BLOCK:
-      {
-	DEBUG_PRINTF(" _M2 is reset with a matrix of size = %i\n", n);
-	_M2.reset(new BlockCSRMatrix(n));
-	break;
-      }
-    default: {} // do nothing here
-    }
+  {
+  case NM_DENSE:
+  {
+    // A zero matrix M of size nXn is built.
+    _M1.reset(new SimpleMatrix(n, n));
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    DEBUG_PRINTF(" _M2 is reset with a matrix of size = %i\n", n);
+    _M2.reset(new BlockCSRMatrix(n));
+    break;
+  }
+  default:
+  {} // do nothing here
+  }
 
   _numericsMatrix.reset(new NumericsMatrix);
   NM_null(_numericsMatrix.get());
@@ -86,7 +88,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   case NM_DENSE:
   {
     // A zero matrix M of size nXn is built.  interactionBlocksPositions
-    // remains empty (=NULL) since we have no information concerning
+    // remains empty (=nullptr) since we have no information concerning
     // the Interaction.
     _M1.reset(new SimpleMatrix(n, n));
     break;
@@ -96,7 +98,8 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
     _M2.reset(new BlockCSRMatrix(n));
     break;
   }
-  default: {} // do nothing here
+  default:
+  {} // do nothing here
   }
 
   _numericsMatrix.reset(new NumericsMatrix);
@@ -142,12 +145,12 @@ unsigned OSNSMatrix::updateSizeAndPositions(InteractionsGraph& indexSet)
   // Interactionin indexSet
   unsigned dim = 0;
   InteractionsGraph::VIterator vd, vdend;
-  for (std11::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
+  for(std::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
   {
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
     indexSet.properties(*vd).absolute_position = dim;
     dim += (indexSet.bundle(*vd)->nonSmoothLaw()->size());
-    DEBUG_PRINTF("Position = %i for interaction %i\n",dim, indexSet.bundle(*vd)->number()  );
+    DEBUG_PRINTF("Position = %i for interaction %i\n",dim, indexSet.bundle(*vd)->number());
     assert(indexSet.properties(*vd).absolute_position < dim);
   }
 
@@ -167,7 +170,7 @@ unsigned OSNSMatrix::updateSizeAndPositions(DynamicalSystemsGraph & DSG)
   unsigned dim = 0;
   DynamicalSystemsGraph::VIterator dsi, dsend;
   // first loop to compute sizeM and nnz
-  for(std11::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
   {
     SP::DynamicalSystem ds = DSG.bundle(*dsi);
     DSG.properties(*dsi).absolute_position = dim;
@@ -182,41 +185,41 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
 
-  if (update) // If index set vertices list has changed
+  if(update)  // If index set vertices list has changed
   {
     // Computes _dimRow and interactionBlocksPositions according to indexSet
     _dimColumn = updateSizeAndPositions(indexSet);
     _dimRow = _dimColumn;
   }
 
-  if (_storageType == NM_DENSE)
+  if(_storageType == NM_DENSE)
   {
 
     // === Memory allocation, if required ===
     // Mem. is allocate only if !M or if its size has changed.
-    if (update)
+    if(update)
     {
-      if (! _M1)
+      if(! _M1)
         _M1.reset(new SimpleMatrix(_dimRow, _dimColumn));
       else
       {
-        if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
+        if(_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
           _M1->resize(_dimRow, _dimColumn);
         _M1->zero();
       }
     }
 
     unsigned int pos = 0, col = 0; // index position used for
-    
+
     // === Loop through "active" Interactions (ie vertices present in indexSets[level]) ===
     InteractionsGraph::VIterator vi, viend;
-    for (std11::tie(vi, viend) = indexSet.vertices();
-         vi != viend; ++vi)
+    for(std::tie(vi, viend) = indexSet.vertices();
+        vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position;
 
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(pos, pos, *indexSet.properties(*vi).block);
       DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
       DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->size(0), indexSet.properties(*vi).block->size(1));
@@ -225,8 +228,8 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
     // == Loop through all edges (ds) in active index set ==
     // Computation of extra-diagonal blocks.
     InteractionsGraph::EIterator ei, eiend;
-    for (std11::tie(ei, eiend) = indexSet.edges();
-         ei != eiend; ++ei)
+    for(std::tie(ei, eiend) = indexSet.edges();
+        ei != eiend; ++ei)
     {
       // For current edge (ds) get source and target vertices (interactions)
       InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
@@ -249,19 +252,18 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
 
       assert(indexSet.properties(*ei).lower_block);
       assert(indexSet.properties(*ei).upper_block);
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *indexSet.properties(*ei).upper_block);
 
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *indexSet.properties(*ei).lower_block);
     }
-
   }
-  else if (_storageType == NM_SPARSE_BLOCK)
+  else if(_storageType == NM_SPARSE_BLOCK)
   {
-    if (! _M2)
+    if(! _M2)
     {
       DEBUG_PRINT("Reset _M2 shared pointer using new BlockCSRMatrix(indexSet) \n ");
       _M2.reset(new BlockCSRMatrix(indexSet));
@@ -273,8 +275,12 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
       _M2->fill(indexSet);
     }
   }
-
-  if (update)
+  // invalidate other old storages.
+  _numericsMatrix.get()->storageType = _storageType ;
+  _numericsMatrix.get()->size0 = _dimRow ;
+  _numericsMatrix.get()->size1 = _dimColumn ;
+  NM_clear_other_storages(_numericsMatrix.get(), _storageType);
+  if(update)
     convert();
   DEBUG_END("void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)\n");
 }
@@ -287,12 +293,12 @@ void OSNSMatrix::convert()
   _numericsMatrix->storageType = _storageType;
   _numericsMatrix->size0 = _dimRow;
   _numericsMatrix->size1 = _dimColumn;
-  switch (_storageType)
+  switch(_storageType)
   {
   case NM_DENSE:
   {
     _numericsMatrix->matrix0 = _M1->getArray(); // Pointer link
-    // _numericsMatrix->matrix1 = NULL; matrix1 is not set to NULL: we
+    // _numericsMatrix->matrix1 = nullptr; matrix1 is not set to nullptr: we
     // keep previous allocation. May be usefull if we switch between
     // different storages during simu
     break;
@@ -310,7 +316,7 @@ void OSNSMatrix::convert()
   }
   default:
   {
-     RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
   DEBUG_END("OSNSMatrix::convert()\n");
@@ -322,17 +328,17 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillM(SP::DynamicalSystemsGraph DSG, bool update)\n");
 
-  if (update)
-    {
-      _dimColumn = updateSizeAndPositions(DSG);
-      _dimRow = _dimColumn;
-    }
+  if(update)
+  {
+    _dimColumn = updateSizeAndPositions(DSG);
+    _dimRow = _dimColumn;
+  }
 
-  switch (_storageType)
+  switch(_storageType)
   {
   case NM_SPARSE:
   {
-    if (update)
+    if(update)
     {
       size_t sizeM = _dimRow;
       DEBUG_PRINTF("sizeM = %lu \n", sizeM);
@@ -351,7 +357,7 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
       unsigned int pos =0;
       // Loop over the DS for filling M
       DynamicalSystemsGraph::VIterator dsi, dsend;
-      for(std11::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
+      for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
       {
         SP::DynamicalSystem ds = DSG.bundle(*dsi);
         SiconosMatrix* W = DSG.properties(*dsi).W.get();
@@ -360,12 +366,15 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
         DEBUG_PRINTF("pos = %u \n", pos);
       }
     }
-    DEBUG_EXPR(NM_display(numericsMatrix().get() ););
+    // invalidate other old storages.
+    DEBUG_EXPR(NM_display(numericsMatrix().get()););
     break;
   }
   default:
   {
-     RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
+    // invalidate other old storages.
+    NM_clear_other_storages(_numericsMatrix.get(), _storageType);
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
 
@@ -377,18 +386,18 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
 void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
-  if (update)
-    {
+  if(update)
+  {
 
-      _dimColumn = updateSizeAndPositions(indexSet);
-      _dimRow = updateSizeAndPositions(DSG);
-    }
+    _dimColumn = updateSizeAndPositions(indexSet);
+    _dimRow = updateSizeAndPositions(DSG);
+  }
 
-  switch (_storageType)
+  switch(_storageType)
   {
   case NM_SPARSE:
   {
-    if (update)
+    if(update)
     {
       // We choose a triplet matrix format for inserting values.
       // This simplifies the memory manipulation.
@@ -405,7 +414,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
 
       SP::SiconosMatrix leftInteractionBlock;
       InteractionsGraph::VIterator ui, uiend;
-      for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+      for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet.bundle(*ui);
 
@@ -417,13 +426,12 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
         size_t pos2 = indexSet.properties(*ui).target_pos;
 
         pos =  indexSet.properties(*ui).absolute_position;
-        for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2, posBlock = pos2)
+        for(SP::DynamicalSystem ds = ds1; !endl; ds = ds2, posBlock = pos2)
         {
           endl = (ds == ds2);
           size_t sizeDS = ds->dimension();
           // this whole part is a hack. Just should just get the rightblock
-          leftInteractionBlock.reset(new SimpleMatrix(3, sizeDS));
-          inter.getLeftInteractionBlockForDS(posBlock, leftInteractionBlock);
+          leftInteractionBlock = inter.getLeftInteractionBlockForDS(posBlock, 3, sizeDS);
           leftInteractionBlock->trans();
           pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
           DEBUG_PRINTF("pos = %u", pos);
@@ -433,11 +441,13 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
       }
 
     }
+    // invalidate other old storages.
+    NM_clear_other_storages(_numericsMatrix.get(), _storageType);
     break;
   }
   default:
   {
-     RuntimeException::selfThrow("OSNSMatrix::convert unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
   DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
@@ -448,21 +458,21 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
 // Display data
 void OSNSMatrix::display() const
 {
-  if (_storageType == NM_DENSE)
+  if(_storageType == NM_DENSE)
   {
     std::cout << "----- OSNS Matrix using default storage type for Numerics structure (SiconosMatrix -> double*)" <<std::endl;
-    if (! _M1)
-      std::cout << " matrix = NULL pointer" <<std::endl;
+    if(! _M1)
+      std::cout << " matrix = nullptr pointer" <<std::endl;
     else _M1->display();
   }
-  else if (_storageType == NM_SPARSE_BLOCK)
+  else if(_storageType == NM_SPARSE_BLOCK)
   {
     std::cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics (SparseBlockStructuredMatrix)" <<std::endl;
-    if (! _M2)
-      std::cout << " matrix = NULL pointer" <<std::endl;
+    if(! _M2)
+      std::cout << " matrix = nullptr pointer" <<std::endl;
     else _M2->display();
   }
-  else if (_storageType == NM_SPARSE)
+  else if(_storageType == NM_SPARSE)
   {
     std::cout << "----- OSNS Matrix using sparse storage, nothing to show" << std::endl;
   }

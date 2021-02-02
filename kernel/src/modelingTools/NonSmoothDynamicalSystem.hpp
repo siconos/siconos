@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,15 @@
 
 /** the NonSmoothDynamicalSystem consists in Dynamical Systems and Interactions
     structured into a graph defined in a Topology.
-    In the DynamicalSystem graph, DynamicalSystem objects are nodes and Interaction objects 
+    In the DynamicalSystem graph, DynamicalSystem objects are nodes and Interaction objects
     are edges.
 
     To add a DynamicalSystem, use insertDynamicalSystem method.
     To add a new Interaction, use link method.
-    
+
     A dual graph is also contructed, where Interactions are vertices and DynamicalSystems
     are edges.
-    
+
 */
 class NonSmoothDynamicalSystem
 {
@@ -49,7 +49,7 @@ public:
   {
   private:
     ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
-    Change(){};
+    Change() = default;
   public:
     ChangeType typeOfChange;
     SP::DynamicalSystem ds;
@@ -79,25 +79,28 @@ private:
   */
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
 
+  /** initial time of the simulation */
+  double _t0 = 0.;
+
   /** current time of the simulation
       Warning FP : it corresponds to the time
       at the end of the integration step.
       It means that _t corresponds to tkp1 of the
       simulation or nextTime().
    */
-  double _t;
-
-  /** initial time of the simulation */
-  double _t0;
+  double _t = _t0;
 
   /** final time of the simulation */
-  double _T;
+  double _T = 0.;
 
   /** information concerning the Model */
-  std::string _title, _author, _description, _date;
+  std::string _title = "none",
+    _author = "none",
+    _description = "none",
+    _date="unknown";
 
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
-  bool _BVP;
+  bool _BVP = false;
 
   /** log list of the modifications of the nsds */
   std::list<Change> _changeLog;
@@ -105,19 +108,24 @@ private:
   /** the topology of the system */
   SP::Topology _topology;
 
-  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds);
-
   /** False is one of the interaction is non-linear.
    */
-  bool _mIsLinear;
+  bool _mIsLinear = true;
+
+  /* copy constructor, forbidden */
+  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds) = delete;
+
+  /* assignment, forbidden */
+  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp) = delete;
+
+  /* Forbid default constructor except for serialization. No use to
+     build a NSDS with t0=T.*/
+protected:
+  NonSmoothDynamicalSystem(){};
 
 public:
 
-  /** default constructor
-   */
-  NonSmoothDynamicalSystem();
-
-  /** constructor with t0 and T
+  /** NSDS constructor.
    * \param t0 initial time
    * \param T final time
    */
@@ -318,6 +326,14 @@ public:
     return _topology->dSG(0);
   }
 
+  /** get all the dynamical systems declared in the NonSmoothDynamicalSystem.
+   * into a std::vector<SP::DynamicalSystems>
+   * Useful for iterates on DynamicalSystems in Python for instance
+   * \return std::vector<SP::DynamicalSystems>
+   */
+  std::vector<SP::DynamicalSystem> dynamicalSystemsVector() const;
+
+
   /** add a dynamical system into the DS graph (as a vertex)
    * \param ds a pointer to the system to add
    */
@@ -330,6 +346,10 @@ public:
   inline SP::DynamicalSystem dynamicalSystem(int nb) const
   {
     return _topology->getDynamicalSystem(nb);
+  }
+  inline void displayDynamicalSystems() const
+  {
+    _topology->displayDynamicalSystems();
   }
 
   /** remove a dynamical system

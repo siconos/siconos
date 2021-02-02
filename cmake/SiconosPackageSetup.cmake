@@ -9,6 +9,9 @@ set(cmake_macros
   SiconosTools.cmake
   FindPythonModule.cmake
   valgrind.supp
+  FindBLASDEV.cmake
+  FindLAPACKDEV.cmake
+  BlasLapackUtils.cmake
   )
 
 foreach(file IN LISTS cmake_macros)
@@ -57,8 +60,6 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(siconos-config.cmake.in ${CMAKE_BINARY_DIR}/siconos-config.cmake
   INSTALL_DESTINATION ${ConfigPackageLocation})
 
-install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
-
 # Generate siconos-config-version.cmake file.
 write_basic_package_version_file(
   "${CMAKE_BINARY_DIR}/siconos-config-version.cmake"
@@ -79,3 +80,17 @@ install(EXPORT siconosTargets
 install(
   FILES ${CMAKE_BINARY_DIR}/siconos-config.cmake ${CMAKE_BINARY_DIR}/siconos-config-version.cmake
   DESTINATION ${ConfigPackageLocation})
+
+if(WITH_GIT)
+  # Save and install a file which contain git references for the current source directory
+  # (branch and short commit number), mostly used by continuous integration and cdash 
+  # to tag cdash builds.
+  # git reference name (branch, tag ...) 
+  execute_process(COMMAND
+    git rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE COMMIT_REF_NAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  file(WRITE ${CMAKE_BINARY_DIR}/siconos-commit.txt "${COMMIT_REF_NAME}-${SOURCE_ABBREV_GIT_SHA1}")
+  install(FILES ${CMAKE_BINARY_DIR}/siconos-commit.txt DESTINATION share)
+endif()

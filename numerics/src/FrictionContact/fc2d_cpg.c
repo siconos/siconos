@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <assert.h>                  // for assert
+#include <math.h>                    // for sqrt
+#include <stdio.h>                   // for printf
+#include <stdlib.h>                  // for free, malloc
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SiconosBlas.h"             // for cblas_dcopy, cblas_ddot, cblas_d...
+#include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_RE...
+#include "fc2d_Solvers.h"            // for fc2d_projf, fc2d_projc, fc2d_cpg
+#include "numerics_verbose.h"        // for verbose
 
-#include "fc2d_Solvers.h"
-#include "NumericsMatrix.h"
-#include <assert.h>
-#include <math.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
-void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
+void fc2d_cpg(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
   assert(nc>0);
@@ -43,10 +48,10 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
   double    *fric1, *v, *w, *Ap, *xi, *z;
 
 
-  int maxit = options->iparam[0];
-  double tol = options->dparam[0];
-  options->iparam[1]  = 0;
-  options->dparam[1]  = 0.0;
+  int maxit = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
+  options->iparam[SICONOS_IPARAM_ITER_DONE]  = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU]  = 0.0;
 
 
   r       = (double*) malloc(n * sizeof(double));
@@ -66,7 +71,7 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
 
-  for (i = 0; i < n ; i++)
+  for(i = 0; i < n ; i++)
   {
     reaction[i]     = 0.0;
     xi[i]    = 0.0;
@@ -78,7 +83,7 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
     z[i]     = 0.0;
     fric1[i] = 1.0;
 
-    if (i < nc)
+    if(i < nc)
     {
       fric[i]  = mu[i] * fric1[i];
       stat[i]    = 0;
@@ -104,20 +109,20 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
   /*             Check for initial status             */
 
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     mu[i] = fric[i];
-    if (reaction[2 * i] <= eps)
+    if(reaction[2 * i] <= eps)
     {
       /*       No contact            */
       stat[i] = 0;
     }
-    else if (reaction[2 * i + 1] <=  -mu[i]*reaction[2 * i])
+    else if(reaction[2 * i + 1] <=  -mu[i]*reaction[2 * i])
     {
       /*     Slide backward         */
       stat[i] = 1;
     }
-    else if (reaction[2 * i + 1] >=  mu[i]*reaction[2 * i])
+    else if(reaction[2 * i + 1] >=  mu[i]*reaction[2 * i])
     {
       /*   Slide forward          */
       stat[i] = 3;
@@ -135,18 +140,18 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
 
-  while ((iter < maxit) && (normr > tol))
+  while((iter < maxit) && (normr > tol))
   {
 
 
 
-    for (i = 0 ; i < nc ; i++)
+    for(i = 0 ; i < nc ; i++)
       statusi[i] = stat[i];
 
 
     cblas_dcopy(n, r, incx, v, incy);
 
-    if (iter == 0)
+    if(iter == 0)
     {
       cblas_dcopy(n, r, incx, w, incy);
 
@@ -168,9 +173,9 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
     pAp    = ddot_( (integer *)&n, p, &incx, Ap, &incy );*/
 
-    if (pAp == 0)
+    if(pAp == 0)
     {
-      if (verbose > 0)
+      if(verbose > 0)
         printf("\n Operation non conform alpha at the iteration %d \n", iter);
 
       free(r);
@@ -248,8 +253,8 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
     res     = normr;
 
 
-    options->iparam[1] = it_end;
-    options->dparam[1] = res;
+    options->iparam[SICONOS_IPARAM_ITER_DONE] = it_end;
+    options->dparam[SICONOS_DPARAM_RESIDU] = res;
 
 
     iter = iter + 1;
@@ -259,10 +264,10 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
 
-  if (normr < tol)
+  if(normr < tol)
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("convergence after %d iterations with a residual %g\n", iter - 1, normr);
 
     *info = 0;
@@ -271,7 +276,7 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("no convergence after %d iterations with a residual %g\n", iter - 1, normr);
 
     *info = 1;
@@ -279,7 +284,7 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
   alpha = -1.;
-  cblas_dscal(n , alpha , r , incx);
+  cblas_dscal(n, alpha, r, incx);
 
   cblas_dcopy(n, r, incx, velocity, incy);
 
@@ -300,28 +305,5 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
 
-}
-int fc2d_cpg_setDefaultSolverOptions(SolverOptions *options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the CPG Solver\n");
-  }
-
-  /*  strcpy(options->solverName,"CPG");*/
-  options->solverId =  SICONOS_FRICTION_2D_CPG;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
-  options ->internalSolvers = NULL;
-  return 0;
 }
 

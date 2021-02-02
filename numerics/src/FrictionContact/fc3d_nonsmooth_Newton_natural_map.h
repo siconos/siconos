@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@
 
 
  */
-#include "SiconosConfig.h"
-#include "FrictionContactProblem.h"
+#include "NumericsFwd.h"  // for SolverOptions, FrictionContactProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -92,17 +92,6 @@ extern "C"
     double *output_blocklist3,
     double *output_blocklist3x3_1,
     double *output_blocklist3x3_2);
-
-  /* Set the default solver options for the NSN_NM Solver
-   * Some default values:
-   * options.iparam[0] = 200 is the maximum number of iterations.
-   * options.iparam[3] = 100000 is the nzmax parameter for sparse matrices.
-   * options.dparam[0] = 1e-3 precision.
-   * \param options  the solver options
-   */
-  int fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(
-    SolverOptions* options);
-
 
   int fc3d_nonsmooth_Newton_NaturalMap_compute_error(
     FrictionContactProblem* problem,

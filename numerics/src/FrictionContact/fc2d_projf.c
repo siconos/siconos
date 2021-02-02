@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,7 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#include "fc2d_Solvers.h"
+#include "fc2d_Solvers.h"  // for fc2d_projf
 
 void fc2d_projf(int etat[], int *nn, double y[], double fric[], double projf1[])
 {
@@ -37,12 +32,12 @@ void fc2d_projf(int etat[], int *nn, double y[], double fric[], double projf1[])
   nc = n / 2;
   bb = 0.0;
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
 
-    if (etat[i] == 0)                      /*  No contact status       */
+    if(etat[i] == 0)                       /*  No contact status       */
     {
-      if (y[2 * i] <=  0.0)
+      if(y[2 * i] <=  0.0)
       {
 
         projf1[2 * i]   = 0.0;
@@ -54,11 +49,11 @@ void fc2d_projf(int etat[], int *nn, double y[], double fric[], double projf1[])
         projf1[2 * i + 1] = y[2 * i + 1];
       }
     }
-    else if (etat[i] == 3)                  /*   Etat de contact glissant+ */
+    else if(etat[i] == 3)                   /*   Etat de contact glissant+ */
     {
       projf1[2 * i] = y[2 * i];
 
-      if (y[2 * i + 1] > bb)
+      if(y[2 * i + 1] > bb)
       {
         mina = bb;
       }
@@ -69,11 +64,11 @@ void fc2d_projf(int etat[], int *nn, double y[], double fric[], double projf1[])
 
       projf1[2 * i + 1] = mina;
     }
-    else if (etat[i] == 1)                  /*   Etat de contact glissant-  */
+    else if(etat[i] == 1)                   /*   Etat de contact glissant-  */
     {
       projf1[2 * i] = y[2 * i];
 
-      if (y[2 * i + 1] < bb)
+      if(y[2 * i + 1] < bb)
       {
         maxa = bb;
       }

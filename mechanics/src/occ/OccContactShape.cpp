@@ -1,7 +1,5 @@
 #include "OccContactShape.hpp"
-
-#include <RuntimeException.hpp>
-
+#include "SiconosException.hpp"
 #include <TopoDS.hxx>
 #include <BRepTools.hxx>
 #include <BRep_Builder.hxx>
@@ -24,10 +22,16 @@ OccContactShape::OccContactShape() : _shape(new TopoDS_Shape())
 
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
 {
-  switch (this->_shape->ShapeType())
+  switch(this->_shape->ShapeType())
   {
-  case TopAbs_EDGE: { return OccContactShape::Edge; }
-  case TopAbs_FACE: { return OccContactShape::Face; }
+  case TopAbs_EDGE:
+  {
+    return OccContactShape::Edge;
+  }
+  case TopAbs_FACE:
+  {
+    return OccContactShape::Face;
+  }
   default:
     return OccContactShape::Unknown;
   };
@@ -37,9 +41,9 @@ OccContactShape::ContactTypeValue OccContactShape::contactType() const
 
 void OccContactShape::computeUVBounds()
 {
-  RuntimeException::selfThrow(
+  THROW_EXCEPTION(
     "OccContactShape::computeUVBounds() : cannot compute UV bounds for this contact shape"
-    );
+  );
 }
 
 std::string OccContactShape::exportBRepToString() const
@@ -71,15 +75,15 @@ SPC::TopoDS_Face OccContactShape::face(unsigned int index) const
 
   TopExp_Explorer exp;
   exp.Init(this->data(), TopAbs_FACE);
-  for (unsigned int i=0; i<index; ++i, exp.Next());
-  if (exp.More())
+  for(unsigned int i=0; i<index; ++i, exp.Next());
+  if(exp.More())
   {
     // taking a ref fail!
     *return_value = TopoDS::Face(exp.Current());
   }
   else
   {
-    RuntimeException::selfThrow("OccContactShape::face failed");
+    THROW_EXCEPTION("OccContactShape::face failed");
   }
 
   return return_value;
@@ -91,15 +95,15 @@ SPC::TopoDS_Edge OccContactShape::edge(unsigned int index) const
 
   TopExp_Explorer exp;
   exp.Init(this->data(), TopAbs_EDGE);
-  for (unsigned int i=0; i<index; ++i, exp.Next());
-  if (exp.More())
+  for(unsigned int i=0; i<index; ++i, exp.Next());
+  if(exp.More())
   {
     // taking a ref fail!
     *return_value = TopoDS::Edge(exp.Current());
   }
   else
   {
-    RuntimeException::selfThrow("OccContactShape::edge failed");
+    THROW_EXCEPTION("OccContactShape::edge failed");
   }
 
   return return_value;

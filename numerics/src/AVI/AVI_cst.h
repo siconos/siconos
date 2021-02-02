@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@
   \brief Constants to define the list of available AVI solvers. See the solver list \ref aviSolversList
 */
 /**\enum AVI_SOLVER
-   Each SICONOS_AVI_XXX refers to number of the solver XXX for an AVI. See the solver list \ref aviSolversList
- */
+   List of available ids for AVI solvers.
+*/
 enum AVI_SOLVER
 {
   SICONOS_AVI_CAOFERRIS = 800,

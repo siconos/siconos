@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@
 /*!\file MixedComplementarityProblem.h
 */
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for MixedComplementarityProblem, NumericsMatrix
 
 /** type for user defined function used to compute Fmcp and its jacobian.
     TODO : set properly the list of arguments for this function, when

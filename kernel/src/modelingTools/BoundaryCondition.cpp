@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
 
 // BoundaryCondition::BoundaryCondition()
-// _velocityIndices(NULL)
+// _velocityIndices(nullptr)
 // {
 // }
 
@@ -29,8 +29,8 @@
 BoundaryCondition::BoundaryCondition(SP::UnsignedIntVector newVelocityIndices, SP::SiconosVector newVelocityValues): _velocityIndices(newVelocityIndices),  _prescribedVelocity(newVelocityValues)
 {
 
-  if (newVelocityIndices->size() != newVelocityValues->size())
-    RuntimeException::selfThrow("BoundaryCondition::BoundaryCondition  constructor. velocityIndices and prescribedVelocity must have the same size");
+  if(newVelocityIndices->size() != newVelocityValues->size())
+    THROW_EXCEPTION("BoundaryCondition::BoundaryCondition  constructor. velocityIndices and prescribedVelocity must have the same size");
   _prescribedVelocityOld.reset(new SiconosVector(*newVelocityValues));
   _pluginPrescribedVelocity.reset(new PluggedObject());
 }
@@ -48,6 +48,6 @@ BoundaryCondition::~BoundaryCondition()
 
 void BoundaryCondition::computePrescribedVelocity(double time)
 {
-  if (_pluginPrescribedVelocity->fPtr)
+  if(_pluginPrescribedVelocity->fPtr)
     ((FPtrPrescribedVelocity)_pluginPrescribedVelocity->fPtr)(time, _velocityIndices->size(), &(*_prescribedVelocity)(0));
 }

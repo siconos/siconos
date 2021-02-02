@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include "MechanicsFwd.hpp"
 #include "LagrangianScleronomousR.hpp"
 
-class SphereLDSSphereLDSR : public LagrangianScleronomousR, public std11::enable_shared_from_this<SphereLDSSphereLDSR>
+class SphereLDSSphereLDSR : public LagrangianScleronomousR, public std::enable_shared_from_this<SphereLDSSphereLDSR>
 {
 private:
   /** serialization hooks
@@ -49,9 +49,18 @@ public:
   double distance(double, double, double, double, double, double, double, double);
 
   using LagrangianScleronomousR::computeh;
-  void computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+      \param y the resulting vector
+  */
+  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  void computeJachq(SiconosVector& q, SiconosVector& z);
+  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+      \param q coordinates of the dynamical systems involved in the relation
+      \param z user defined parameters (optional)
+  */
+  void computeJachq(const BlockVector& q, BlockVector& z);
 
   /** visitors hook
    */

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ public:
                                 SP::SiconosVector q2=SP::SiconosVector()) = 0;
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+  virtual void computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                            unsigned int axis=0) {}
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@
   Two different storages are available for M: dense and sparse block.
 
  */
-#include "SiconosConfig.h"
-#include "FrictionContactProblem.h"
+#include "NumericsFwd.h"  // for SolverOptions, FrictionContactProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -93,11 +93,7 @@ extern "C"
 
   
 
-  int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(SolverOptions* options);
-
-
   /** The Alart & Curnier function for several contacts.
-      On each contact, the specified Alart Curnier function in iparam[9] is called.
       \param problemSize the number of contacts.
       \param computeACFun3x3 the block 3x3 Alart & Curnier function.
       \param reaction3D the reactions at each contact (size: 3 x problemSize)

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ void FixedJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
   _G10G20d1z = quatBuff.R_component_4();
 }
 
-void FixedJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void FixedJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   double X1 = q0.getValue(0);
   double Y1 = q0.getValue(1);
@@ -106,7 +106,7 @@ void FixedJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     X2 = q0.getValue(7);
     Y2 = q0.getValue(8);

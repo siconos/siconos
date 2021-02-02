@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
 #include "FrictionContactProblem_as_VI.h"
-#include "FrictionContactProblem.h"
-#include "VariationalInequality.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "projectionOnDisk.h"
-#include "numerics_verbose.h"
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
+#include <math.h>                    // for sqrt
+#include "FrictionContactProblem.h"  // for FrictionContactProblem, Splitted...
+#include "NumericsMatrix.h"          // for NM_gemv
+#include "SolverOptions.h"           // for SolverOptions
+#include "VariationalInequality.h"   // for VariationalInequality
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "projectionOnCylinder.h"    // for projectionOnCylinder
+#include "projectionOnDisk.h"        // for projectionOnDisk
+#include "SiconosBlas.h"                   // for cblas_dcopy
+
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_PRINT
 
 
 
@@ -47,16 +45,16 @@ void Function_VI_FC3D(void * self, int n_notused, double *x, double *F)
   int nLocal =  fc3d->dimension;
   int n = fc3d->numberOfContacts *  fc3d->dimension;
 
-  cblas_dcopy(n , fc3d->q , 1 , F, 1);
+  cblas_dcopy(n, fc3d->q, 1, F, 1);
   NM_gemv(1.0, fc3d->M, x, 1.0, F);
 
   int contact =0;
 
-  for (contact = 0 ; contact <  fc3d->numberOfContacts ; ++contact)
+  for(contact = 0 ; contact <  fc3d->numberOfContacts ; ++contact)
   {
     double  normUT = sqrt(F[contact * nLocal + 1] * F[contact * nLocal + 1]
-                            + F[contact * nLocal + 2] * F[contact * nLocal + 2]);
-    F[contact * nLocal] +=  (fc3d->mu[contact] * normUT);
+                          + F[contact * nLocal + 2] * F[contact * nLocal + 2]);
+    F[contact * nLocal] += (fc3d->mu[contact] * normUT);
   }
 
 }
@@ -74,8 +72,8 @@ void Projection_VI_FC3D(void *viIn, double *x, double *PX)
   int contact =0;
   int nLocal =  fc3d->dimension;
   int n = fc3d->numberOfContacts* nLocal;
-  cblas_dcopy(n , x , 1 , PX, 1);
-  for (contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
+  cblas_dcopy(n, x, 1, PX, 1);
+  for(contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
   {
     projectionOnCone(&PX[ contact * nLocal ], fc3d->mu[contact]);
   }
@@ -91,7 +89,7 @@ void Function_VI_FC3D_Cylinder(void * self, int n_notused, double *x, double *F)
 
   int n = fc3d->numberOfContacts *  fc3d->dimension;
 
-  cblas_dcopy(n , fc3d->q , 1 , F, 1);
+  cblas_dcopy(n, fc3d->q, 1, F, 1);
   NM_gemv(1.0, fc3d->M, x, 1.0, F);
 }
 
@@ -108,8 +106,8 @@ void Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX)
   int contact =0;
   int nLocal =  fc3d->dimension;
   int n = fc3d->numberOfContacts* nLocal;
-  cblas_dcopy(n , x , 1 , PX, 1);
-  for (contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
+  cblas_dcopy(n, x, 1, PX, 1);
+  for(contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
   {
     projectionOnCylinder(&PX[ contact * nLocal ], options->dWork[contact]);
   }
@@ -128,7 +126,7 @@ void Function_VI_FC3D_Disk(void * self, int n_notused, double *x, double *F)
 
   int n = 2 * fc3d->numberOfContacts ;
 
-  cblas_dcopy(n , splitted_problem->q_t , 1 , F, 1);
+  cblas_dcopy(n, splitted_problem->q_t, 1, F, 1);
   NM_gemv(1.0, splitted_problem->M_tt, x, 1.0, F);
 }
 
@@ -145,9 +143,9 @@ void Projection_VI_FC3D_Disk(void *viIn, double *x, double *PX)
   int nLocal  =  2;
   int n = fc3d->numberOfContacts* nLocal;
 
-  cblas_dcopy(n , x , 1 , PX, 1);
+  cblas_dcopy(n, x, 1, PX, 1);
 
-  for (int contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
+  for(int contact = 0 ; contact < fc3d->numberOfContacts  ; ++contact)
   {
     projectionOnDisk(&PX[ contact * nLocal ], options->dWork[contact]);
   }

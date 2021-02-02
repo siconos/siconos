@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,15 @@
 
 typedef void (*SolverGlobalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverGlobalPtr)(int, double*);
-typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double *, double, SolverOptions*, double, double*);
+
 typedef void (*FreeSolverGlobalPtr)(GlobalFrictionContactProblem*);
 
-
+/** pointer to function used to update velocity and compute error */
+typedef void (* ComputeErrorGlobalPtr)(GlobalFrictionContactProblem* ,
+                                      double * , double *,
+                                      double* , double ,
+                                      SolverOptions * ,
+                                      double, double,  double * );
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -41,18 +46,12 @@ extern "C"
 {
 #endif
 
-  /** set the default solver parameters and perform memory allocation for gfc3d
-      \param options the pointer to the array of options to set
-      \param solverId int identifier of the solver
-  */
-  int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
-
   void gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
                                           SolverOptions* options,
                                           SolverOptions* internalsolver_options,
                                           double error);
 
-  
+
   /** Check for trivial solution in the friction-contact 3D problem
        \param dim of the problem
        \param q global vector (n)
@@ -79,13 +78,7 @@ extern "C"
   */
   void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
-  int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options);
-  
   void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
-
-  int gfc3d_admm_wr_setDefaultSolverOptions(SolverOptions* options);
-
-  int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options);
 
   void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
 
@@ -104,8 +97,6 @@ extern "C"
   */
   void gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
-  int gfc3d_proximal_wr_setDefaultSolverOptions(SolverOptions* options);
-
   /** Fixed Point iteration on De Saxe formulation solver with reformulation for friction-contact 3D problem
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
@@ -119,8 +110,6 @@ extern "C"
      dparam[1] : (out) error
   */
   void gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
-
-  int gfc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** Fied Point iteration on Tresca Friction Cylinder with reformulation for friction-contact 3D problem
      \param problem the friction-contact 3D problem to solve
@@ -136,8 +125,6 @@ extern "C"
   */
   void gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
-  int gfc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
-
   /**  Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
         \param problem the friction-contact 3D problem to solve
         \param velocity global vector (n), in-out parameter
@@ -151,8 +138,6 @@ extern "C"
         dparam[1] : (out) error
     */
   void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
-
-  int gfc3d_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options);
 
   /** Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
         \param problem the friction-contact 3D problem to solve
@@ -187,8 +172,6 @@ extern "C"
     */
   void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem*  problem, double*  reaction, double*  velocity,
                             double*  globalVelocity, int*  info, SolverOptions* options);
-  
-  int gfc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
       \param problem the friction-contact 3D problem to solve
@@ -215,12 +198,7 @@ extern "C"
 
   void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
   
-  int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
   void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
-  
-  int gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
-
-  
 
 
   void gfc3d_ADMM(GlobalFrictionContactProblem*  problem, double*  reaction,
@@ -228,11 +206,28 @@ extern "C"
                   int*  info, SolverOptions*  options);
 
   void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
-  
+
   void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
 
-  int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options);
-  
+
+  void gfc3d_IPM(GlobalFrictionContactProblem*  problem, double*  reaction,
+                  double*  velocity, double*  globalVelocity,
+                  int*  info, SolverOptions*  options);
+
+  void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void gfc3d_ipm_set_default(SolverOptions* options);
+
+  /** \addtogroup SetSolverOptions @{
+   */
+  void gfc3d_nsn_ac_set_default(SolverOptions* options);
+  void gfc3d_aclmfp_set_default(SolverOptions* options);
+  void gfc3d_admm_set_default(SolverOptions* options);
+
+  /** @} */
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

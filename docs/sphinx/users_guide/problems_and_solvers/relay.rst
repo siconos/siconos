@@ -1,111 +1,105 @@
-.. index:: single: Relay or box-constrained AVI problems
-.. _doxid-_relay_problem:
+.. index::
+   single: Relay or box-constrained AVI problems
+   
+.. contents::
+
+.. _relay_problem:
 
 Relay or box-constrained AVI problems
-=====================================
+*************************************
 
-.. _doxid-_relay_problem_1relayIntro:
-.. rubric:: The problem:
+Problem statement
+=================
 
 Find :math:`(z,w)` such that:
 
 .. math::
 
-    \begin{equation*} \left\lbrace \begin{array}{l} w = M z + q\\ -w \in \mathcal{N}_{K}(z)\\ \end{array}, \right. \end{equation*}
+    \begin{equation*}
+    \left\lbrace \begin{array}{l}
+    w = M z + q\\
+    -w \in \mathcal{N}_{K}(z)\\
+    \end{array}, \right.
+    \end{equation*}
 
-where M is an ( :math:` n \times n ` )-matrix, q, z and w are n-dimensional vectors, K is the box defined by :math:`K=\{x\in\mathbb{R}^n \mid lb_i \leq x_i \leq ub_i, i = 1, ..., n \}` and :math:`\mathcal{N}_K(z)` is the normal cone to :math:`K` at :math:`z` .
+where M is an ( :math:`n \times n` )-matrix, q, z and w are n-dimensional vectors, K is the box defined by :math:`K=\{x\in\mathbb{R}^n\mid lb_i\leq x_i\leq ub_i,i=1,...,n\}` and :math:`\mathcal{N}_K(z)` is the normal cone to :math:`K` at :math:`z` .
 
-The solvers and their parameters are described in :class:`Relay Problems Solvers` .
+Implementation in numerics
+==========================
 
-.. _doxid-_relay_problem_1relaySolversList:
-.. rubric:: Available solvers:
+Structure to define the problem: :class:`RelayProblem`.
 
-The "direct" solvers are
+The generic driver for all Relay problems is :func:`relay_driver()`.
 
-* :func:`relay_avi_caoferris()` based on an algorithm by Cao and Ferris for AVI with a polytopic set :math:`K` .
+Solvers list  :enum:`RELAY_SOLVER`
 
-* :func:`relay_path()` using the PATH solver
+.. _relay_solvers:
 
-Using an LCP reformulation (splitting z in positive and negative part), we have the following available solvers:
+Relay available solvers
+=======================
 
-* :func:`relay_enum()` which solves the LCP using the enumerative method
+Direct solvers
+--------------
 
-* :func:`relay_lexicolemke()` which solves the LCP using Lemke's algorithm
+Enumerative solver (:enumerator:`SICONOS_RELAY_ENUM`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-(see the functions/solvers list in ``Relay_Solvers.h`` )
+The relay problem is reformulated as a LCP and solved with enum method, see :ref:`lcp_solvers`.
 
-.. index:: single: Relay Problems Solvers
-.. _doxid-_relay_solvers:
+driver: :func:`relay_enum()`
 
-.. rubric:: Relay Problems Solvers:
+parameters: same as :enumerator:`SICONOS_LCP_ENUM`.
 
-This page gives an overview of the available solvers for relay problems and their required parameters.
+Lemke solver (:enumerator:`SICONOS_RELAY_LEMKE`)
+""""""""""""""""""""""""""""""""""""""""""""""""
 
-This page gives an overview of the available solvers for relay problems and their required parameters.
+The relay problem is reformulated as a LCP and solved with Lemke's method, see :ref:`lcp_solvers`.
 
-For each solver, the input argument are:
+driver: :func:`relay_lexicolemke()`
 
-* a :class:`RelayProblem`
+parameters: same as :enumerator:`SICONOS_LCP_ENUM`.
 
-* the unknowns (z,w)
 
-* info, the termination value (0: convergence, >0 problem which depends on the solver)
-
-* a SolverOptions structure, which handles iparam and dparam
-
-.. _doxid-_relay_solvers_1relayENUM:
-.. rubric:: Enumerative solver:
-
-The relay problem is reformulated as a LCP and solved with the enumerative solver
-
-function: :func:`relay_enum()`
-
-parameters:
-
-* dparam[0] (in): tolerance
-
-* iparam[0] (in) : search for multiple solutions if 1
-
-* iparam[1] (out) : key of the solution
-
-* iparam[3] (in) : starting key values (seed)
-
-* iparam[4] (in) : use DGELS (1) or DGESV (0).
-
-.. _doxid-_relay_solvers_1relayPATH:
-.. rubric:: PATH solver:
+PATH (:enumerator:`SICONOS_RELAY_PATH`)
+"""""""""""""""""""""""""""""""""""""""
 
 The relay problem is reformulated as a LCP and solved with the PATH solver
 
-function: :func:`relay_path()`
+*Works only if Siconos has been built with path support (if PathFerris or PathVI has been found, see* :ref:`siconos_install_guide` *)*
+
+driver: :func:`relay_path()`
+
+parameters : none.
+
+AVI reformulation
+-----------------
+
+AVI, Cao/Ferris solver (:enumerator:`SICONOS_RELAY_AVI_CAOFERRIS`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Based on an algorithm by Cao and Ferris for AVI with a polytopic set :math:`K` .
+
+driver:  :func:`relay_avi_caoferris()`
+
+parameters: same as :enumerator:`SICONOS_AVI_CAOFERRIS`, see :ref:`avi_solvers`.
 
 
+There also exists a test version :enumerator:`SICONOS_RELAY_AVI_CAOFERRIS_TEST` with 
 
-* dparam[0] (in): tolerance
+driver:  :func:`relay_avi_caoferris_test()`
 
-.. _doxid-_relay_solvers_1relayLEMKE:
-.. rubric:: Lemke solver:
+parameters: same as :enumerator:`SICONOS_AVI_CAOFERRIS`, see :ref:`avi_solvers`.
 
-The relay problem is reformulated as a LCP and solved with Lemke's method
 
-function: :func:`relay_lexicolemke()`
+Iterative solvers
+-----------------
+
+Projected Gauss-Seidel (:enumerator:`SICONOS_RELAY_PGS`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+driver: :func:`relay_pgs()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-
-* iparam[1] (out): number of iterations processed
-
-.. _doxid-_relay_solvers_1relayAVI_CaoFerris:
-.. rubric:: CaoFerris solver:
-
-The relay problem is reformulated as an AVI and solved with the solver proposed by Cao and Ferris
-
-function: :func:`relay_avi_caoferris()`
-
-parameters:
-
-* iparam[0] (in): maximum number of iterations allowed
-
-* iparam[1] (out): number of iterations processed
-
+* iparam[SICONOS_IPARAM_MAX_ITER] = 1000
+* dparam[SICONOS_DPARAM_TOL] = 1e-6

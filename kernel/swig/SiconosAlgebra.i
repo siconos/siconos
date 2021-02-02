@@ -41,9 +41,195 @@
 
 %extend SiconosMatrix{
   std::string __str__() { return $self->toString(); }
+    PyObject *__getitem__(PyObject *args) {
+    /* printf("__getitem__ PyObject\n"); */
+    if (PyTuple_Check(args))
+    {
+      /* printf("__getitem__ PyObject - PyTuple\n"); */
+      Py_ssize_t argc;
+      Py_ssize_t ii;
+      PyObject *argv[3] = {0};
+      argc = args ? PyObject_Length(args) : 0;
+      for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+        argv[ii] = PyTuple_GET_ITEM(args,ii);
+      }
+      unsigned int i,j;
+      if (!PyInt_Check(argv[0]))
+      {
+        SWIG_Error(SWIG_TypeError, "SiconosMatrix must be indexed by integer");
+        return NULL;
+      }
+      else
+        i = PyLong_AsLong(argv[0]);
+      
+      /* printf("i = %i\n ", i); */
+      if (!PyInt_Check(argv[1]))
+      {
+        SWIG_Error(SWIG_TypeError, "SiconosMatrix must be indexed by integer");
+        return NULL;
+      }
+      else
+        j = PyLong_AsLong(argv[1]);
+      /* printf("first j = %i\n ", j); */
+      if (i < $self->size(0) && j < $self->size(1) )
+        return PyFloat_FromDouble($self->getValue(i,j));
+      else {
+        PyErr_SetNone(PyExc_IndexError);
+        return NULL;
+      }
+    }
+    if (PySlice_Check(args))
+    {
+      SWIG_Error(SWIG_TypeError, "Slice indexing for SimpleMatrix is not implemented expected.");
+      return NULL;
+    }
+
+    return NULL;
+  }
+  
+  PyObject *__setitem__(PyObject *args, double value) {
+    /* printf("__setitem__"); */
+    if (PyTuple_Check(args))
+    {
+      /* printf("__getitem__ PyObject - PyTuple\n"); */
+      Py_ssize_t argc;
+      Py_ssize_t ii;
+      PyObject *argv[3] = {0};
+      argc = args ? PyObject_Length(args) : 0;
+      for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+        argv[ii] = PyTuple_GET_ITEM(args,ii);
+      }
+      unsigned int i,j;
+      if (!PyInt_Check(argv[0]))
+      {
+        SWIG_Error(SWIG_TypeError, "SiconosMatrix must be indexed by integer");
+        return NULL;
+      }
+      else
+        i = PyLong_AsLong(argv[0]);
+      /* printf("i = %i\n ", i); */
+      if (!PyInt_Check(argv[1]))
+      {
+        SWIG_Error(SWIG_TypeError, "SiconosMatrix must be indexed by integer");
+        return NULL;
+      }
+      else
+        j = PyLong_AsLong(argv[1]);
+      /* printf("first j = %i\n ", j); */
+      if (i < $self->size(0) && j < $self->size(1) )
+      {
+        $self->setValue(i, j, value);
+        return Py_None;
+        }
+      else {
+        PyErr_SetNone(PyExc_IndexError);
+        return NULL;
+      }
+    }
+    if (PySlice_Check(args))
+    {
+      /* printf("__getitem__ PyObject - PySlice\n"); */
+      SWIG_Error(SWIG_TypeError, "Slice indexing for SimpleMatrix is not yet implemented.");
+      return NULL;
+    }
+    return NULL;
+  }
 }
 %extend SimpleMatrix{
   std::string __str__() { return $self->toString(); }
+  PyObject *__getitem__(PyObject *args) {
+    /* printf("__getitem__ PyObject\n"); */
+    if (PyTuple_Check(args))
+    {
+      /* printf("__getitem__ PyObject - PyTuple\n"); */
+      Py_ssize_t argc;
+      Py_ssize_t ii;
+      PyObject *argv[3] = {0};
+      argc = args ? PyObject_Length(args) : 0;
+      for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+        argv[ii] = PyTuple_GET_ITEM(args,ii);
+      }
+      unsigned int i,j;
+      if (!PyInt_Check(argv[0]))
+      {
+        SWIG_Error(SWIG_TypeError, "SiconosMatrix must be indexed by integer");
+        return NULL;
+      }
+      else
+        i = PyLong_AsLong(argv[0]);
+      
+      /* printf("i = %i\n ", i); */
+      if (!PyInt_Check(argv[1]))
+      {
+        SWIG_Error(SWIG_TypeError, "SiconosMatrix must be indexed by integer");
+        return NULL;
+      }
+      else
+        j = PyLong_AsLong(argv[1]);
+      /* printf("first j = %i\n ", j); */
+      if (i < $self->size(0) && j < $self->size(1) )
+        return PyFloat_FromDouble($self->getValue(i,j));
+      else {
+        PyErr_SetNone(PyExc_IndexError);
+        return NULL;
+      }
+    }
+    if (PySlice_Check(args))
+    {
+      SWIG_Error(SWIG_TypeError, "Slice indexing for SimpleMatrix is not implemented expected.");
+      return NULL;
+    }
+
+    return NULL;
+  }
+  
+  PyObject *__setitem__(PyObject *args, double value) {
+    /* printf("__setitem__"); */
+    if (PyTuple_Check(args))
+    {
+      /* printf("__getitem__ PyObject - PyTuple\n"); */
+      Py_ssize_t argc;
+      Py_ssize_t ii;
+      PyObject *argv[3] = {0};
+      argc = args ? PyObject_Length(args) : 0;
+      for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+        argv[ii] = PyTuple_GET_ITEM(args,ii);
+      }
+      unsigned int i,j;
+      if (!PyInt_Check(argv[0]))
+      {
+        SWIG_Error(SWIG_TypeError, "SiconosMatrix must be indexed by integer");
+        return NULL;
+      }
+      else
+        i = PyLong_AsLong(argv[0]);
+      /* printf("i = %i\n ", i); */
+      if (!PyInt_Check(argv[1]))
+      {
+        SWIG_Error(SWIG_TypeError, "SiconosMatrix must be indexed by integer");
+        return NULL;
+      }
+      else
+        j = PyLong_AsLong(argv[1]);
+      /* printf("first j = %i\n ", j); */
+      if (i < $self->size(0) && j < $self->size(1) )
+      {
+        $self->setValue(i, j, value);
+        return Py_None;
+        }
+      else {
+        PyErr_SetNone(PyExc_IndexError);
+        return NULL;
+      }
+    }
+    if (PySlice_Check(args))
+    {
+      /* printf("__getitem__ PyObject - PySlice\n"); */
+      SWIG_Error(SWIG_TypeError, "Slice indexing for SimpleMatrix is not yet implemented.");
+      return NULL;
+    }
+    return NULL;
+  }
 }
 %extend SiconosVector{
   std::string __str__() { return $self->toString(); }
@@ -52,7 +238,7 @@
       return PyFloat_FromDouble($self->getValue(i));
     else {
       PyErr_SetNone(PyExc_IndexError);
-      return NULL;
+      return nullptr;
     }
   }
   PyObject *__setitem__(size_t i, double value) {
@@ -61,7 +247,7 @@
       return Py_None;
     } else {
       PyErr_SetNone(PyExc_IndexError);
-      return NULL;
+      return nullptr;
     }
   }
   double __len__() { return $self->size(); }
@@ -88,7 +274,7 @@
     if (*$self != (*$self).v->end())
       return PyFloat_FromDouble(*(*$self)++);
     PyErr_SetNone(PyExc_StopIteration);
-    return NULL;
+    return nullptr;
   }
 %insert("python") %{
     __next__ = next

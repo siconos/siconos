@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ protected:
   SP::SiconosMatrix _mass;
 
   /** true if the  mass matrix is constant */
-  bool _hasConstantMass;
+  bool _hasConstantMass = false;
 
   /** inverse or factorization of the mass of the system */
   SP::SimpleMatrix _inverseMass;
@@ -243,7 +243,7 @@ public:
    */
   virtual void setRhs(const SiconosVector& newValue)
   {
-    RuntimeException::selfThrow("SecondOrderDS - setRhs call is forbidden for 2nd order systems.");
+    THROW_EXCEPTION("SecondOrderDS - setRhs call is forbidden for 2nd order systems.");
   }
 
   /** set right-hand side, \f$ \dot x \f$ (pointer link)
@@ -251,7 +251,7 @@ public:
    */
   virtual void setRhsPtr(SP::SiconosVector newPtr)
   {
-    RuntimeException::selfThrow("SecondOrderDS - setRhsPtr call is forbidden for 2nd order systems.");
+    THROW_EXCEPTION("SecondOrderDS - setRhsPtr call is forbidden for 2nd order systems.");
   }
 
   /** function to compute \f$F(v,q,t,z)\f$ for the current state
@@ -328,7 +328,7 @@ public:
   /** get velocity vector (pointer link)
    *  \return pointer on a SiconosVector
    */
-  virtual inline SP::SiconosVector velocity() const =0;
+  virtual SP::SiconosVector velocity() const =0;
 
   /** set velocity vector (copy)
    *  \param newValue

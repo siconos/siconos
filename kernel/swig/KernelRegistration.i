@@ -15,6 +15,7 @@
   PY_REGISTER(NormalConeNSL, Kernel);                                           \
   PY_REGISTER(DynamicalSystem, Kernel);                                         \
   PY_REGISTER(NonSmoothDynamicalSystem, Kernel);                                \
+  PY_REGISTER(LinearComplementaritySystemsNSDS, Kernel);                \
   PY_REGISTER(Topology, Kernel);                                                \
   PY_REGISTER(SecondOrderDS, Kernel);                                   \
   PY_REGISTER(LagrangianDS, Kernel);                                            \

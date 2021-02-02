@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,16 @@
 Ferris solves the subsequent AVI.
 */
 
-#include "AVI_Solvers.h"
-#include "Relay_Solvers.h"
-#include "avi_caoferris.h"
-#include "relay_cst.h"
-#include "AffineVariationalInequalities.h"
-#include "SiconosSets.h"
-#include "NumericsMatrix.h"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
-#include <stdlib.h>
+#include <assert.h>                         // for assert
+#include <stdlib.h>                         // for calloc, malloc, rand, NULL
+#include "AVI_Solvers.h"                    // for avi_caoferris
+#include "AffineVariationalInequalities.h"  // for AffineVariationalInequali...
+#include "NumericsFwd.h"                    // for RelayProblem, AffineVaria...
+#include "NumericsMatrix.h"                 // for NM_create_from_data, NM_D...
+#include "RelayProblem.h"                   // for RelayProblem
+#include "Relay_Solvers.h"                  // for relay_avi_caoferris_test
+#include "SiconosSets.h"                    // for polyhedron, free_polyhedron
+#include "debug.h"                          // for DEBUG_EXPR_WE, DEBUG_PRINT
 
 void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -61,9 +60,9 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
   DEBUG_PRINT_VEC(problem->ub, n);
 
   int starting_constraint = rand() % s;
-  for (unsigned i = 0, j = starting_constraint; i < s; ++i, j = (j+1) % s)
+  for(unsigned i = 0, j = starting_constraint; i < s; ++i, j = (j+1) % s)
   {
-    if (j >= n)
+    if(j >= n)
     {
       H[i + s*(j-n)] = 1.0;
       poly.K[i] = problem->lb[j-n];
@@ -75,26 +74,26 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
     }
   }
   DEBUG_PRINT("H matrix\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < s; ++i)
-      { for(unsigned j = 0 ; j < n; ++j)
-      { DEBUG_PRINTF("% 2.2e ", H[i + j*s]) }
-      DEBUG_PRINT("\n")});
+  DEBUG_EXPR_WE(for(unsigned i = 0; i < s; ++i)
+{
+  for(unsigned j = 0 ; j < n; ++j)
+    {
+      DEBUG_PRINTF("% 2.2e ", H[i + j*s])
+    }
+    DEBUG_PRINT("\n")
+  });
 
   DEBUG_PRINT("K vector\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < s; ++i)
-      { DEBUG_PRINTF("% 2.2e ", poly.K[i])
-      DEBUG_PRINT("\n")});
+  DEBUG_EXPR_WE(for(unsigned i = 0; i < s; ++i)
+{
+  DEBUG_PRINTF("% 2.2e ", poly.K[i])
+    DEBUG_PRINT("\n")
+  });
 
- /* Call directly the 3rd stage 
-   * Here w is used as u and z as s in the AVI */
+  /* Call directly the 3rd stage
+    * Here w is used as u and z as s in the AVI */
   *info = avi_caoferris(&avi_pb, z, w, options);
 
   free_polyhedron(&poly);
-}
-
-int relay_avi_caoferris_test_setDefaultSolverOptions(SolverOptions* options)
-{
-  solver_options_set(options, SICONOS_RELAY_AVI_CAOFERRIS_TEST);
-  return 0;
 }
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,13 @@
 
 
 /** ! \file SiconosAlgebra.hpp
-    \brief Header file for Siconos Algebra objects
-
-    This file provides typedef for matrix and vector objects, const values and so on ...
+    \brief boost ublas includes related to matrices.
+    
 */
 
 #ifndef SiconosAlgebra
 #define SiconosAlgebra
 
-//#include "SiconosConfig.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/triangular.hpp>

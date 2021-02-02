@@ -18,9 +18,9 @@ void pow_zi(doublecomplex *p, doublecomplex *a, integer *b)   /* p = a**b  */
   p->r = 1;
   p->i = 0;
 
-  if (n == 0)
+  if(n == 0)
     return;
-  if (n < 0)
+  if(n < 0)
   {
     n = -n;
     z_div(&x, &one, a);
@@ -31,15 +31,15 @@ void pow_zi(doublecomplex *p, doublecomplex *a, integer *b)   /* p = a**b  */
     x.i = a->i;
   }
 
-  for (; ;)
+  for(; ;)
   {
-    if (n & 01)
+    if(n & 01)
     {
       t = p->r * x.r - p->i * x.i;
       p->i = p->r * x.i + p->i * x.r;
       p->r = t;
     }
-    if (n >>= 1)
+    if(n >>= 1)
     {
       t = x.r * x.r - x.i * x.i;
       x.i = 2 * x.r * x.i;

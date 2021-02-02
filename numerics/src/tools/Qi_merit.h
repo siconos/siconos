@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@
 #ifndef QI_MERIT_H
 #define QI_MERIT_H
 
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
+
 
 #ifdef __cplusplus
+#include <sys/cdefs.h>      // for __restrict
 #define restrict __restrict
 #endif
 

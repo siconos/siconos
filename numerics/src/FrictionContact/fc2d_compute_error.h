@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,15 @@
 
 */
 
-#include "SiconosConfig.h"
-#include "FrictionContactProblem.h"
+#include "NumericsFwd.h"  // for FrictionContactProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-
+  
+  void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, double mu, double* restrict error, double * worktmp);
   /** Error computation for friction-contact 3D problem
       \param problem the structure which defines the friction-contact problem
       \param z vector
@@ -40,7 +41,7 @@ extern "C"
       \param[in,out] error value
       \return 0 if ok
    */
-  int fc2d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error);
+  int fc2d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double norm, double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

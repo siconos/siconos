@@ -1,18 +1,29 @@
-sudo: required
+# --- Travis config ---
 
-service: docker
+# - runner os. Default on Travis is ubuntu16.04 - 
+dist: bionic # 18.04
 
-# 
-# for CI driver
-#
+# - services to start on the runner -
+services:
+  - docker
+
+# - Default language -
 language: python
-python: 3.6
+python: 3.7
+sudo: required
 
 # TASK line is of the form <config>:<parameters>
 # where <config> is a known config in tasks.py
 #
-# Each parameter is of the form of <kwd>=<value> or <kwd>+=<values> or <kwd>-=<values>
-# where:
+# A job will be created by Travis for each task in the list below.
+# 
+# TASK line must be of the form <config>:<parameters>
+# where :
+# - <config> is a known config in tasks.py
+# - <parameters> is a list (comma separated) of parameters, each of them being of
+# the form <kwd>=<value> or <kwd>+=<values> or <kwd>-=<values>.
+# 
+# With:
 #   - <kwd> is a named keyword accepted by ci_task.copy function
 #   - <value> can be:
 #       - a string
@@ -22,7 +33,7 @@ python: 3.6
 #   - <kwd>-= is the same as remove_<kwd>=
 #
 # If kwd is present several times, associated values must be lists. In
-# this case a dictionay is incrementally built with the first element of the list as
+# this case a dictionary is incrementally built with the first element of the list as
 # the key, and the remaining as the associated internal value. This
 # concerns the targets keyword.
 #
@@ -30,24 +41,16 @@ python: 3.6
 # is the name and the second the version.
 
 env:
+  #- TASK=default:distrib=ubuntu,20.04
   - TASK=default:distrib=ubuntu,18.04
-  - TASK=default:distrib=debian,latest
-  - TASK=default:distrib=debian,stretch
-  - TASK=default:distrib=fedora,latest:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
-  - TASK=default:distrib=fedora,28:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
-  # - TASK=default:distrib=opensuse/leap,15.0:ci_config=with_cxx11,with_isnan_workaround:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
+  #- TASK=default:distrib=debian,latest
+  - TASK=default:distrib=fedora,30
   - TASK=default:pkgs+=lpsolve,
-  - TASK=default:pkgs-=atlas-lapack:pkgs+=openblas-lapacke,
   - TASK=default:ci_config=with_mumps_par:pkgs+=mumps-par,
   - TASK=default:ci_config=with_umfpack:pkgs+=umfpack,
 
 # not finalized yet
-#  - TASK=default:distrib=opensuse,42.3:ci_config=with_cxx11,with_isnan_workaround,with_mumps_seq:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,mumps-seq
 #  - TASK=default:ci_config=nix:distrib=nixos/nix,latest:targets=.,docker-build,docker-cmd:pkgs=cmake,make,siconos-nix-default,
-# tasks too long for travis:
-# siconos package
-#  - TASK=empty:docker=true:ci_config=examples_all:distrib=fedora,latest:pkgs=siconos,siconos-source:srcs=examples,:targets=examples,docker-build,docker-ctest
-#  - TASK=empty:docker=true:ci_config=examples_all:distrib=ubuntu,16.04:pkgs=siconos,siconos-source:srcs=examples,:targets=examples,docker-build,docker-ctest
 
 before_script:
   - case $TASK in
@@ -63,9 +66,11 @@ before_script:
   - cd build
 
 script:
+  - ln -s ../ci_gitlab/ctest_driver_install_siconos.cmake ../ci_travis/
+  - env
   - if test "$TRAVIS" = true; then
-      ../CI/driver.py --run --root-dir=.. --task="$TASK" --packages-db=../CI/config/siconos.yml;
+       ../ci_travis/driver.py --run --root-dir=.. --task="$TASK";
     else
-      ../CI/driver.py --run --root-dir=.. --packages-db=../CI/config/siconos.yml;
+       ../ci_travis/driver.py --run --root-dir=..;
     fi
 

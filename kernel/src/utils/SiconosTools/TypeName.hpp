@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ namespace Type
 
 #define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
 
-inline std11::shared_ptr<std::string> str(const Siconos& X)
+inline std::shared_ptr<std::string> str(const Siconos& X)
 {
-  std11::shared_ptr<std::string> r;
+  std::shared_ptr<std::string> r;
 
   switch (X)
   {

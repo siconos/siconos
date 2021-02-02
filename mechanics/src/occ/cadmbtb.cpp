@@ -1,4 +1,4 @@
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "SiconosConfig.h"
 #include "cadmbtb.hpp"
 
@@ -41,7 +41,7 @@ gp_Pnt cadmbtb_FacePoint(const TopoDS_Face &face,Standard_Real u, Standard_Real 
 }
 
 gp_Pnt cadmbtb_EdgePoint(const TopoDS_Edge &edge,Standard_Real u)
-  {
+{
   // get bounds of face
   //Standard_Real umin, umax, vmin, vmax;
   //BRepTools::UVBounds(face, umin, umax, vmin, vmax);          // create surface
@@ -72,11 +72,11 @@ gp_Dir cadmbtb_FaceNormal(const TopoDS_Face &face,Standard_Real u, Standard_Real
   GeomLProp_SLProps props(surf, u, v, 1, 0.01);
 
   // get surface normal
-   gp_Dir norm=props.Normal();
+  gp_Dir norm=props.Normal();
 
   // check orientation
   //  if(face.Orientation()==TopAbs_REVERSED) norm.Reverse();
-   return norm;
+  return norm;
 
 }
 #ifdef HAS_FORTRAN
@@ -209,7 +209,7 @@ void cadmbtb_distanceFaceFace(const OccContactFace& csh1,
 #ifdef HAS_FORTRAN
   n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 #else
-  RuntimeException::selfThrow("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
+  THROW_EXCEPTION("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
 #endif
   while(mode > 7)
   {
@@ -217,7 +217,7 @@ void cadmbtb_distanceFaceFace(const OccContactFace& csh1,
 #ifdef HAS_FORTRAN
     n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 #else
-  RuntimeException::selfThrow("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
+    THROW_EXCEPTION("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
 #endif
   }
 
@@ -303,7 +303,7 @@ void cadmbtb_distanceFaceEdge(
 #ifdef HAS_FORTRAN
   n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 #else
-  RuntimeException::selfThrow("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
+  THROW_EXCEPTION("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
 #endif
   while(mode > 7)
   {
@@ -311,7 +311,7 @@ void cadmbtb_distanceFaceEdge(
 #ifdef HAS_FORTRAN
     n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 #else
-  RuntimeException::selfThrow("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
+    THROW_EXCEPTION("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
 #endif
   }
 

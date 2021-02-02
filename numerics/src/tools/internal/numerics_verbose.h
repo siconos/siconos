@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,20 @@ extern "C"
     }                                                                   \
   } while (0)
 
+/** Check return code of a first expression and execute the second */
+#define CHECK_AND_DO(EXPR, TODOIFOK)                                    \
+  do                                                                    \
+  {                                                                     \
+    if (!EXPR)                                                          \
+    {                                                                   \
+      fprintf (stderr, "Siconos Numerics: Warning %s failed, %s:%d\n",  \
+               #EXPR, __FILE__, __LINE__);                              \
+    }                                                                   \
+    else                                                                \
+    {                                                                   \
+      (TODOIFOK);                                                       \
+    }                                                                   \
+  } while (0)
 
 /** check IO
  */
@@ -118,7 +132,7 @@ extern "C"
    * \param fn_name name of the function where warning occurs
    * \param msg formatted output message
    */
-  void numerics_warning(const char * fn_name, char* msg, ...);
+  void numerics_warning(const char * fn_name, const char* msg, ...);
 
   /** log message (if verbosity is on)
    *

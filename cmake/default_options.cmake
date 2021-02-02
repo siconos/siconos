@@ -22,24 +22,22 @@
 set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
+
+# -- Serialization --
+# Warning : this is highly unstable. Developers only !
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 
 # --- Build/compiling options ---
-option(DEV_MODE "Compilation flags setup for developers. Default = OFF" OFF)
-option(DEV_MODE_STRICT "Compilation flags setup for developers (extra strict, conversion warnings). Default = OFF" OFF)
+set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")
 option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
 option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
 option(NO_RUNTIME_BUILD_DEP "Do not check for runtime dependencies. Useful only for packaging. Default = OFF" OFF)
-option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
-option(WITH_UNSTABLE "Enable this to include all 'unstable' sources. Default=OFF" OFF)
 option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=OFF" OFF)
 option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)
 option(WITH_TESTING "Enable 'make test' target" OFF)
-option(WITH_GIT "Consider sources are under GIT" OFF)
-
 
 # --- Documentation setup ---
 option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF)
@@ -55,6 +53,7 @@ option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)
 option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version. Default = OFF" OFF)
+option(WITH_MA57 "Compilation with the MA57 solver (License HSL). Default = OFF" OFF)
 option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" OFF)
 option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
 option(WITH_RENDERER "Install OCC renderer. Default = OFF" OFF)

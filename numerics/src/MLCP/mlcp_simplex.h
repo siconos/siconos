@@ -6,6 +6,7 @@
  */
 
 
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
 void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 void mlcp_simplex_reset(void);
 

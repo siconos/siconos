@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
-#include "MixedComplementarityProblem.h"
-#include "SolverOptions.h"
-#include "NonSmoothNewton.h"
-#include "FischerBurmeister.h"
-#include "MCP_Solvers.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                        // for fprintf, NULL, stderr
+#include <stdlib.h>                       // for malloc, calloc
+#include "FischerBurmeister.h"            // for jacobianPhi_Mixed_FB, phi_M...
+#include "MCP_Solvers.h"                  // for mcp_old_compute_error, mcp_...
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
+#include "NonSmoothNewton.h"              // for nonSmoothNewton, nonSmoothN...
+#include "NumericsFwd.h"                  // for MixedComplementarityProblem...
+#include "SolverOptions.h"                // for SolverOptions, solver_optio...
+#include "numerics_verbose.h"             // for numerics_printf
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -92,27 +90,24 @@ void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double 
   // Set links to Fisher functions and its jacobian
   NewtonFunctionPtr phi = &FischerFunc_MCP ;
   NewtonFunctionPtr nablaPhi = &nablaFischerFunc_MCP ;
-  
-  options->internalSolvers->dparam[0] = options->dparam[0];
-  options->internalSolvers->iparam[0] = options->iparam[0];
 
   // Call semi-smooth Newton solver
-  *info = nonSmoothNewton(fullSize, z, &phi, &nablaPhi, options->internalSolvers);
+  *info = nonSmoothNewton(fullSize, z, &phi, &nablaPhi, options);
 
-  // Compute w 
+  // Compute w
   problem->computeFmcp(fullSize, z, w);
   // todo : compute error function
 
   // Check output
-  if (*info > 0)
+  if(*info > 0)
     fprintf(stderr, "Numerics, mcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[SICONOS_DPARAM_RESIDU]);
-  
+
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   double  error =0.0;
-  
-  mcp_old_compute_error(problem, z , w, &error);
 
-  if (error > tolerance)
+  mcp_old_compute_error(problem, z, w, &error);
+
+  if(error > tolerance)
   {
     numerics_printf("mcp_old_FischerBurmeister : error = %e > tolerance = %e.", error, tolerance);
     *info = 1;
@@ -122,47 +117,9 @@ void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double 
     numerics_printf("mcp_old_FischerBurmeister : error = %e < tolerance = %e.", error, tolerance);
     *info = 0;
   }
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = options->internalSolvers->iparam[SICONOS_IPARAM_ITER_DONE];
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
-  
   return;
-}
-
-int mcp_old_FB_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* options)
-{
-  
-  options->isSet = 0;
-  options->iSize = 10;
-  options->iparam = 0;
-  options->dSize = 10;
-  options->dparam = 0;
-  options->filterOn = 0;
-  options->dWork = 0;
-  options->iWork = 0;
-  options->iparam = (int*)calloc(10, sizeof(int));
-  options->dparam = (double*)calloc(10, sizeof(double));
-  options->numberOfInternalSolvers = 1;
-  solver_options_nullify(options);
-
-  /*default tolerance of it*/
-  options->dparam[0] = 10e-7;
-  /*default number of it*/
-  options->iparam[0] = 10;
-
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-  nonSmoothNewton_setDefaultSolverOptions(options->internalSolvers);
-
-    
-  /* int sizeOfIwork = mcp_old_driver_get_iwork(problem, options); */
-  /* if(sizeOfIwork) */
-  /*   options->iWork = (int*)malloc(sizeOfIwork*sizeof(int)); */
-  /* int sizeOfDwork = mcp_old_driver_get_dwork(problem, options); */
-  /* if(sizeOfDwork) */
-  /*   options->dWork = (double*)malloc(sizeOfDwork*sizeof(double)); */
-
-  return 0;
 }
 
 

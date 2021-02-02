@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ struct Question : public SiconosVisitor
   typedef AnswerType type;
   type answer;
 
-  Question() : answer(std11::array<typename std11::remove_reference<AnswerType>::type, 1>()[0])
+  Question() : answer(std::array<typename std::remove_reference<AnswerType>::type, 1>()[0])
   {};
   Question(AnswerType ref) : answer(ref) {};
 

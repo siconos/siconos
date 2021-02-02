@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public:
   *  seems parametrize the projection algorithm
   *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
   */
-  bool _isOnContact;
+  bool _isOnContact = false;
 
   /** constructorx
   */
@@ -125,7 +125,7 @@ public:
     _relPc1(new SiconosVector(3)), _relPc2(new SiconosVector(3)),
     _Nc(new SiconosVector(3)), _relNc(new SiconosVector(3))
   {
-    /*_ds1=NULL;_ds2=NULL;*/
+    /*_ds1=nullptr;_ds2=nullptr;*/
   }
 
   /** destructor
@@ -144,9 +144,12 @@ public:
    */
   virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
 
-  /* Default implementation of computeh updates contact points and
-   * distance for q if different than qold. */
-  virtual void computeh(double time, BlockVector& q0, SiconosVector &y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+  */
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector &y);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

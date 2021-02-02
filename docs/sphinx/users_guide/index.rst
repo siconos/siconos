@@ -12,4 +12,3 @@ Users guide
    simulation
    problems_and_solvers/index
    control
-   simulation_strategies

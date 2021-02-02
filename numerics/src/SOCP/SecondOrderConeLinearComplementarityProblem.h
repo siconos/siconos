@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@
 #ifndef SOCLCP_H
 #define SOCLCP_H
 
-#include "NumericsMatrix.h"
-#include "NumericsFwd.h"
+#include <stdio.h>          // for FILE
+#include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct  SecondOrderConeLinearComplementarityProblem
  *  The structure that defines a Second Order Cone Linear Complementarity Problem.

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@
 #ifndef PATHVI_HELPERS_H
 #define PATHVI_HELPERS_H
 
-#include "SiconosConfig.h"
+#include <stddef.h>  // for size_t
 
-#include <stddef.h>
+#include "SiconosConfig.h"  // for HAVE_PATHVI, BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct SN_generic_pathvi_env PATHVI_helpers.h
  * Generic structure for the PATHVI solver*/

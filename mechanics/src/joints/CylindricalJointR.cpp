@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 */
 
 #include "CylindricalJointR.hpp"
+#include "SiconosVectorFriends.hpp"
 //
 #include <NewtonEulerDS.hpp>
 // #include <Interaction.hpp>
@@ -68,16 +69,18 @@
 
 class quatPos : public ::boost::math::quaternion<double>
 {
-public: quatPos(const SiconosVector& v)
-  : ::boost::math::quaternion<double>
-  (0,v.getValue(0),v.getValue(1),v.getValue(2)) {}
+public:
+  quatPos(const SiconosVector& v)
+    : ::boost::math::quaternion<double>
+      (0,v.getValue(0),v.getValue(1),v.getValue(2)) {}
 };
 
 class quatOrientation : public ::boost::math::quaternion<double>
 {
-public: quatOrientation(const SiconosVector& v)
-  : ::boost::math::quaternion<double>
-  (v.getValue(3),v.getValue(4),v.getValue(5),v.getValue(6)) {}
+public:
+  quatOrientation(const SiconosVector& v)
+    : ::boost::math::quaternion<double>
+      (v.getValue(3),v.getValue(4),v.getValue(5),v.getValue(6)) {}
 };
 
 // Wrap value in interval [-pi,pi]
@@ -88,8 +91,8 @@ static double piwrap(double x)
 
 CylindricalJointR::CylindricalJointR()
   : NewtonEulerJointR()
-  , _axis0(std11::make_shared<SiconosVector>(3))
-  , _G1P0(std11::make_shared<SiconosVector>(3))
+  , _axis0(std::make_shared<SiconosVector>(3))
+  , _G1P0(std::make_shared<SiconosVector>(3))
 {
   _points.resize(1);
   _axes.resize(1);
@@ -99,20 +102,20 @@ CylindricalJointR::CylindricalJointR(SP::SiconosVector P, SP::SiconosVector A,
                                      bool absoluteRef,
                                      SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
-  , _axis0(std11::make_shared<SiconosVector>(3))
-  , _G1P0(std11::make_shared<SiconosVector>(3))
+  , _axis0(std::make_shared<SiconosVector>(3))
+  , _G1P0(std::make_shared<SiconosVector>(3))
 {
   _points.resize(1);
   _axes.resize(1);
   setAbsolute(absoluteRef);
   setPoint(0, P);
   setAxis(0, A);
-  if (d1)
+  if(d1)
     setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
 void CylindricalJointR::setBasePositions(SP::SiconosVector q1,
-                                         SP::SiconosVector q2)
+    SP::SiconosVector q2)
 {
   // in the two-DS case, _P is unused.
   _G1P0->zero();
@@ -120,7 +123,8 @@ void CylindricalJointR::setBasePositions(SP::SiconosVector q1,
   _axis0->zero();
   *_axis0 = *_axes[0];
 
-  if (_absoluteRef) {
+  if(_absoluteRef)
+  {
     _G1P0->setValue(0, _G1P0->getValue(0) - q1->getValue(0));
     _G1P0->setValue(1, _G1P0->getValue(1) - q1->getValue(1));
     _G1P0->setValue(2, _G1P0->getValue(2) - q1->getValue(2));
@@ -167,7 +171,7 @@ void CylindricalJointR::setBasePositions(SP::SiconosVector q1,
   quatPos quatG2P0_abs(G2P0_abs);
   tmp = 1.0/quat2 * quatG2P0_abs * quat2;
 
-  _G2P0 = std11::make_shared<SiconosVector>(3);
+  _G2P0 = std::make_shared<SiconosVector>(3);
   _G2P0->setValue(0, tmp.R_component_2());
   _G2P0->setValue(1, tmp.R_component_3());
   _G2P0->setValue(2, tmp.R_component_4());
@@ -177,14 +181,15 @@ void CylindricalJointR::setBasePositions(SP::SiconosVector q1,
   _twistCount = 0;
   _initialAngle = 0.0;
   SiconosVector tmpy(1);
-  if (q2)
+  if(q2)
   {
     BlockVector q0(q1, q2);
     this->computehDoF(0, q0, tmpy, 1);
   }
   else
   {
-    BlockVector q0(1); q0.setVectorPtr(0, q1);
+    BlockVector q0(1);
+    q0.setVectorPtr(0, q1);
     this->computehDoF(0, q0, tmpy, 1);
   }
   _initialAngle = tmpy(0);
@@ -253,7 +258,7 @@ void CylindricalJointR::computeJachq(double time, Interaction& inter,  SP::Block
     Jd1(X1, Y1, Z1, q10, q11, q12, q13);
 }
 
-void CylindricalJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void CylindricalJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   SP::SiconosVector q1 = (q0.getAllVect())[0];
   double X1 = q1->getValue(0);
@@ -271,7 +276,7 @@ void CylindricalJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0.getAllVect())[1];
     X2 = q2->getValue(0);
@@ -603,10 +608,10 @@ void CylindricalJointR::Jd1(double X1, double Y1, double Z1, double q10, double 
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
-void CylindricalJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+void CylindricalJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                                     unsigned int axis)
 {
-  if (axis > 1)
+  if(axis > 1)
     return;
 
   SP::SiconosVector q1 = (q0.getAllVect())[0];
@@ -625,7 +630,7 @@ void CylindricalJointR::computehDoF(double time, BlockVector& q0, SiconosVector&
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0.getAllVect())[1];
     X2 = q2->getValue(0);
@@ -679,30 +684,30 @@ void CylindricalJointR::computehDoF(double time, BlockVector& q0, SiconosVector&
 
   /* Linear axis */
   unsigned int i = 0;
-  if (axis+i == 0 && y.size() > i)
+  if(axis+i == 0 && y.size() > i)
   {
     /* axis 0 = Linear position */
     y.setValue(i, -x13*(X1 - X2 + q10*x10 + q11*x5 + q12*x12 - q13*x11
                         - q20*x7 - q21*x6 - q22*x9 + q23*x8)
-                  - x14*(Z1 - Z2 + q10*x12 + q11*x11 - q12*x10 + q13*x5
-                         - q20*x9 - q21*x8 + q22*x7 - q23*x6)
-                  - x15*(Y1 - Y2 + q10*x11 - q11*x12 + q12*x5 + q13*x10
-                         - q20*x8 + q21*x9 - q22*x6 - q23*x7)
-                  + x4*(q10*x5 - q11*x10 - q12*x11 - q13*x12 - q20*x6
-                        + q21*x7 + q22*x8 + q23*x9));
+               - x14*(Z1 - Z2 + q10*x12 + q11*x11 - q12*x10 + q13*x5
+                      - q20*x9 - q21*x8 + q22*x7 - q23*x6)
+               - x15*(Y1 - Y2 + q10*x11 - q11*x12 + q12*x5 + q13*x10
+                      - q20*x8 + q21*x9 - q22*x6 - q23*x7)
+               + x4*(q10*x5 - q11*x10 - q12*x11 - q13*x12 - q20*x6
+                     + q21*x7 + q22*x8 + q23*x9));
 
     i ++;
   }
 
   /* Rotational axis */
-  if (axis+i == 1 && y.size() > i)
+  if(axis+i == 1 && y.size() > i)
   {
     /* The dot product with the rotational free axis taking into
      * account original angular difference. */
     double Adot2to1 = -x13*(q10*x16 + q11*x17 + q12*x18 - q13*x19)
-                     - x14*(q10*x18 + q11*x19 - q12*x16 + q13*x17)
-                     - x15*(q10*x19 - q11*x18 + q12*x17 + q13*x16)
-                     + x4*(x20 - x21 - x22 - x23);
+                      - x14*(q10*x18 + q11*x19 - q12*x16 + q13*x17)
+                      - x15*(q10*x19 - q11*x18 + q12*x17 + q13*x16)
+                      + x4*(x20 - x21 - x22 - x23);
 
     // We only need the w part of the quaternion for atan2
     // (see rot2to1() in PivotJointR.cpp, and sympy expression above.)
@@ -715,9 +720,9 @@ void CylindricalJointR::computehDoF(double time, BlockVector& q0, SiconosVector&
 
     // Count the number of twists around the angle, and report the
     // unwrapped angle.  Needed to implement joint stops near pi.
-    if (wrappedAngle < -M_PI*3/4 && _previousAngle >= 0)
+    if(wrappedAngle < -M_PI*3/4 && _previousAngle >= 0)
       _twistCount ++;
-    else if (wrappedAngle > M_PI*3/4 && _previousAngle <= 0)
+    else if(wrappedAngle > M_PI*3/4 && _previousAngle <= 0)
       _twistCount --;
     _previousAngle = wrappedAngle;
     double unwrappedAngle = wrappedAngle + 2*M_PI*_twistCount;
@@ -733,7 +738,7 @@ void CylindricalJointR::computeJachqDoF(double time, Interaction& inter,
                                         SP::BlockVector q0, SimpleMatrix& jachq,
                                         unsigned int axis)
 {
-  if (axis > 1)
+  if(axis > 1)
     return;
 
   SP::SiconosVector q1 = (q0->getAllVect())[0];
@@ -752,7 +757,7 @@ void CylindricalJointR::computeJachqDoF(double time, Interaction& inter,
   double q22 = 0;
   double q23 = 0;
 
-  if (q0->numberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
     X2 = q2->getValue(0);
@@ -866,7 +871,7 @@ void CylindricalJointR::computeJachqDoF(double time, Interaction& inter,
 
   /* Linear axis */
   unsigned int i = 0;
-  if (axis+i == 0 && jachq.size(0) > i)
+  if(axis+i == 0 && jachq.size(0) > i)
   {
     /* axis 0 = Linear position */
     jachq.setValue(i, 0, -x1 + x3 - x5 - x7);
@@ -877,7 +882,7 @@ void CylindricalJointR::computeJachqDoF(double time, Interaction& inter,
     jachq.setValue(i, 5, -2*x0*x29 + 2*x16*x19 - 2*x17*x18 - 2*x21*x22 - 2*x27*x6 + 2*x28*x4);
     jachq.setValue(i, 6, -2*x0*x28 - 2*x16*x21 + 2*x17*x20 - 2*x19*x22 + 2*x2*x27 - 2*x29*x4);
 
-    if (q0->numberOfBlocks()>=2)
+    if(q0->numberOfBlocks()>=2)
     {
       jachq.setValue(i, 7, x17);
       jachq.setValue(i, 8, x21);
@@ -892,7 +897,7 @@ void CylindricalJointR::computeJachqDoF(double time, Interaction& inter,
   }
 
   /* Rotational axis */
-  if (axis+i == 1 && jachq.size(0) > i)
+  if(axis+i == 1 && jachq.size(0) > i)
   {
 
     jachq.setValue(i, 0, 0);
@@ -903,7 +908,7 @@ void CylindricalJointR::computeJachqDoF(double time, Interaction& inter,
     jachq.setValue(i, 5, x77*(x47*x76 + x78*(x17*x53 - x19*x49 + x21*x51 + x47*x66 - x55*x74 + x60*x73 - x65*x79)));
     jachq.setValue(i, 6, x77*(x53*x76 + x78*(-x17*x47 + x19*x51 + x21*x49 + x53*x66 + x55*x75 - x60*x79 - x65*x73)));
 
-    if (q0->numberOfBlocks()>=2)
+    if(q0->numberOfBlocks()>=2)
     {
       /*
        * sympy expression:
@@ -932,11 +937,11 @@ void CylindricalJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0,
 {
   // Return the same axis for linear and rotational DoFs
   assert(axis == 0 || axis == 1);
-  if (axis != 0 && axis != 1) return;
+  if(axis != 0 && axis != 1) return;
 
   // We assume that _axis0 is normalized.
   ans = *_axis0;
 
-  if (absoluteRef)
+  if(absoluteRef)
     changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
 }

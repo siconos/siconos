@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ CouplerJointR::CouplerJointR(SP::NewtonEulerJointR joint1, unsigned int dof1,
   , _ratio(ratio)
   , _offset(0.0)
 {
-  assert( _dof1 < _joint1->numberOfDoF() );
-  assert( _dof2 < _joint2->numberOfDoF() );
+  assert(_dof1 < _joint1->numberOfDoF());
+  assert(_dof2 < _joint2->numberOfDoF());
 }
 
 /* A constructor taking a DS exists just because it's hard to pass
@@ -80,8 +80,8 @@ CouplerJointR::CouplerJointR(SP::NewtonEulerJointR joint1, unsigned int dof1,
   , _ratio(ratio)
   , _offset(0.0)
 {
-  assert( _dof1 < _joint1->numberOfDoF() );
-  assert( _dof2 < _joint2->numberOfDoF() );
+  assert(_dof1 < _joint1->numberOfDoF());
+  assert(_dof2 < _joint2->numberOfDoF());
 }
 
 void CouplerJointR::setReferences(SP::NewtonEulerJointR joint1, unsigned int dof1,
@@ -138,28 +138,30 @@ void CouplerJointR::makeBlockVectors(SP::SiconosVector q1, SP::SiconosVector q2,
    * calculated automatically.  Here we do not have that luxury since
    * we only have SP::SiconosVectors. */
   VectorOfVectors vects1(2), vects2(2);
-  if (!_ref1 && !_ref2 && q2)
+  if(!_ref1 && !_ref2 && q2)
   {
     vects1[0] = q1;
     vects1[1] = q2;
     vects2 = vects1;
   }
-  else if (!q2)
+  else if(!q2)
   {
-    if (_ref1) {
+    if(_ref1)
+    {
       vects1[_ref1_index] = _ref1;
       vects1[1-_ref1_index] = q1;
       vects2 = vects1;
     }
-    else {
+    else
+    {
       vects1.resize(1);
       vects1[0] = q1;
       vects2 = vects1;
     }
   }
-  else if (q2)
+  else if(q2)
   {
-    if (_ref1)
+    if(_ref1)
     {
       vects1[_ref1_index] = _ref1;
       vects1[1-_ref1_index] = q1;
@@ -170,7 +172,7 @@ void CouplerJointR::makeBlockVectors(SP::SiconosVector q1, SP::SiconosVector q2,
       vects1[1] = q2;
     }
 
-    if (_ref2)
+    if(_ref2)
     {
       vects2[_ref2_index] = _ref2;
       vects2[1-_ref2_index] = q2;
@@ -201,14 +203,16 @@ void CouplerJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
   _offset = y1(0) * _ratio - y2(0);
 }
 
-void CouplerJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void CouplerJointR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
   SiconosVector y1(y), y2(y);
 
   // Get current positions of the implicated degrees of freedom
   BlockVector q01, q02;
-  makeBlockVectors(q0.vector(0),
-                   q0.getAllVect().size()>1 ? q0.vector(1) : SP::SiconosVector(),
+  // SP::SiconosVector v0 = q0.vector(0);
+  // const_cast<BlockVector&>(q0)
+  makeBlockVectors(const_cast<BlockVector&>(q0).vector(0),
+                   q0.getAllVect().size()>1 ? const_cast<BlockVector&>(q0).vector(1) : SP::SiconosVector(),
                    q01, q02);
   _joint1->computehDoF(time, q01, y1, _dof1);
   _joint2->computehDoF(time, q02, y2, _dof2);
@@ -219,13 +223,13 @@ void CouplerJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
 void CouplerJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
 {
-  SP::SimpleMatrix jachq1 = std11::make_shared<SimpleMatrix>(1, q0->size());
-  SP::SimpleMatrix jachq2 = std11::make_shared<SimpleMatrix>(1, q0->size());
+  SP::SimpleMatrix jachq1 = std::make_shared<SimpleMatrix>(1, q0->size());
+  SP::SimpleMatrix jachq2 = std::make_shared<SimpleMatrix>(1, q0->size());
 
   // Get jacobians for the implicated degrees of freedom
   // Compute the jacobian for the required range of axes
-  SP::BlockVector q01 = std11::make_shared<BlockVector>();
-  SP::BlockVector q02 = std11::make_shared<BlockVector>();
+  SP::BlockVector q01 = std::make_shared<BlockVector>();
+  SP::BlockVector q02 = std::make_shared<BlockVector>();
   makeBlockVectors(q0->vector(0),
                    q0->getAllVect().size()>1 ? q0->vector(1) : SP::SiconosVector(),
                    *q01, *q02);
@@ -233,8 +237,8 @@ void CouplerJointR::computeJachq(double time, Interaction& inter, SP::BlockVecto
   _joint2->computeJachqDoF(time, inter, q02, *jachq2, _dof2);
 
   // Constraint is the linear relation between them
-  for (unsigned int i=0; i<1; i++)
-    for (unsigned int j=0; j<_jachq->size(1); j++)
+  for(unsigned int i=0; i<1; i++)
+    for(unsigned int j=0; j<_jachq->size(1); j++)
       _jachq->setValue(i,j, jachq2->getValue(i,j) - jachq1->getValue(i,j)*_ratio);
 }
 
@@ -263,7 +267,7 @@ void CouplerJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int ax
   */
 }
 
-void CouplerJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
+void CouplerJointR::computehDoF(double time, const BlockVector& q0, SiconosVector& y,
                                 unsigned int axis)
 {
   // The DoF of the constraint is the same as the constraint itself
@@ -280,13 +284,13 @@ void CouplerJointR::computeJachqDoF(double time, Interaction& inter,
   // don't store result in member object.)
   assert(axis==0);
 
-  SP::SimpleMatrix jachq1 = std11::make_shared<SimpleMatrix>(1, q0->size());
-  SP::SimpleMatrix jachq2 = std11::make_shared<SimpleMatrix>(1, q0->size());
+  SP::SimpleMatrix jachq1 = std::make_shared<SimpleMatrix>(1, q0->size());
+  SP::SimpleMatrix jachq2 = std::make_shared<SimpleMatrix>(1, q0->size());
 
   // Get jacobians for the implicated degrees of freedom
   // Compute the jacobian for the required range of axes
-  SP::BlockVector q01 = std11::make_shared<BlockVector>();
-  SP::BlockVector q02 = std11::make_shared<BlockVector>();
+  SP::BlockVector q01 = std::make_shared<BlockVector>();
+  SP::BlockVector q02 = std::make_shared<BlockVector>();
   makeBlockVectors(q0->vector(0),
                    q0->getAllVect().size()>1 ? q0->vector(1) : SP::SiconosVector(),
                    *q01, *q02);
@@ -294,7 +298,7 @@ void CouplerJointR::computeJachqDoF(double time, Interaction& inter,
   _joint2->computeJachqDoF(time, inter, q02, *jachq2, _dof2);
 
   // Constraint is the linear relation between them
-  for (unsigned int i=0; i<1; i++)
-    for (unsigned int j=0; j<_jachq->size(1); j++)
+  for(unsigned int i=0; i<1; i++)
+    for(unsigned int j=0; j<_jachq->size(1); j++)
       jachq.setValue(i,j, jachq2->getValue(i,j) - jachq1->getValue(i,j)*_ratio);
 }

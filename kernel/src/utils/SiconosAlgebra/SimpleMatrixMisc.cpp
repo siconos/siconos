@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include "BlockMatrix.hpp"
 
 #include "SiconosAlgebra.hpp"
+#include "SiconosException.hpp"
 
 using namespace Siconos;
 
@@ -36,37 +37,42 @@ using namespace Siconos;
 
 double SimpleMatrix::normInf() const
 {
-  if (_num == 1)
+  if(_num == DENSE)
     return norm_inf(*mat.Dense);
-  else if (_num == 2)
+  else if(_num == TRIANGULAR)
     return norm_inf(*mat.Triang);
-  else if (_num == 3)
+  else if(_num == SYMMETRIC)
     return norm_inf(*mat.Sym);
-  else if (_num == 4)
+  else if(_num == SPARSE)
     return norm_inf(*mat.Sparse);
-  else if (_num == 5)
+  else if(_num == SPARSE_COORDINATE)
+    return norm_inf(*mat.SparseCoordinate);
+  else if(_num == BANDED)
     return norm_inf(*mat.Banded);
-  else if (_num == 6)
+  else if(_num == ZERO)
     return 0;
-  else // if(_num==7)
+  else if(_num == IDENTITY)
     return 1;
+
+  THROW_EXCEPTION("Matrix type not supported");
+  return std::numeric_limits<double>::infinity();
 }
 
 void SimpleMatrix::normInfByColumn(SP::SiconosVector vIn) const
 {
-  if (_num == 1)
+  if(_num == DENSE)
   {
-    if (vIn->size() != size(1))
-      RuntimeException::selfThrow("SimpleMatrix::normInfByColumn: the given vector does not have the right length");
+    if(vIn->size() != size(1))
+      THROW_EXCEPTION("the given vector does not have the right length");
     DenseVect tmpV = DenseVect(size(0));
-    for (unsigned int i = 0; i < size(1); i++)
+    for(unsigned int i = 0; i < size(1); i++)
     {
-       ublas::noalias(tmpV) = ublas::column(*mat.Dense, i);
-       (*vIn)(i) = norm_inf(tmpV);
+      ublas::noalias(tmpV) = ublas::column(*mat.Dense, i);
+      (*vIn)(i) = norm_inf(tmpV);
     }
   }
   else
-    RuntimeException::selfThrow("SimpleMatrix::normInfByColumn: not implemented for data other than DenseMat");
+    THROW_EXCEPTION("not implemented for data other than DenseMat");
 }
 //=======================
 //       determinant
@@ -74,101 +80,122 @@ void SimpleMatrix::normInfByColumn(SP::SiconosVector vIn) const
 
 double SimpleMatrix::det() const
 {
-  if (_num == 1)
+  if(_num == DENSE)
     return determinant(*mat.Dense);
-  else if (_num == 2)
+  else if(_num == TRIANGULAR)
     return determinant(*mat.Triang);
-  else if (_num == 3)
+  else if(_num == SYMMETRIC)
     return determinant(*mat.Sym);
-  else if (_num == 4)
+  else if(_num == SPARSE)
     return determinant(*mat.Sparse);
-  else if (_num == 5)
+  else if(_num == SPARSE_COORDINATE)
+    return determinant(*mat.Sparse);
+  else if(_num == BANDED)
     return determinant(*mat.Banded);
-  else if (_num == 6)
+  else if(_num == ZERO)
     return 0;
-  else // if(_num==7)
+  else  if(_num == IDENTITY)
     return 1;
+  THROW_EXCEPTION("Matrix type not supported");
+  return std::numeric_limits<double>::infinity();
 }
 
 
 void SimpleMatrix::trans()
 {
-  switch (_num)
+  switch(_num)
   {
-  case 1:
+  case DENSE:
     *mat.Dense = ublas::trans(*mat.Dense);
     break;
-  case 2:
-    SiconosMatrixException::selfThrow("SimpleMatrix::trans() failed, the matrix is triangular matrix and can not be transposed in place.");
+  case TRIANGULAR:
+    THROW_EXCEPTION("failed, the matrix is triangular matrix and can not be transposed in place.");
     break;
-  case 3:
+  case SYMMETRIC:
     break;
-  case 4:
+  case SPARSE:
     *mat.Sparse = ublas::trans(*mat.Sparse);
     break;
-  case 5:
+  case SPARSE_COORDINATE:
+    *mat.Sparse = ublas::trans(*mat.Sparse);
+    break;
+  case BANDED:
     *mat.Banded = ublas::trans(*mat.Banded);
     break;
-  case 6:
+  case Siconos::ZERO:
     break;
-  case 7:
+  case Siconos::IDENTITY:
     break;
+  default:
+    THROW_EXCEPTION("Matrix type not supported");
   }
-  resetLU();
+  resetFactorizationFlags();
 }
 
 void SimpleMatrix::trans(const SiconosMatrix &m)
 {
-  if (m.isBlock())
-    SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, not yet implemented for m being a BlockMatrix.");
+  if(m.isBlock())
+    THROW_EXCEPTION("not yet implemented for m being a BlockMatrix.");
 
 
-  if (&m == this)
-    trans();//SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, m = this, use this->trans().");
+  if(&m == this)
+    trans();
   else
   {
-    unsigned int numM = m.num();
-    switch (numM)
+    Siconos::UBLAS_TYPE numM = m.num();
+    switch(numM)
     {
-    case 1:
-      if (_num != 1)
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a dense matrix into another type.");
+    case DENSE:
+      if(_num != DENSE)
+        THROW_EXCEPTION("try to transpose a dense matrix into another type.");
       noalias(*mat.Dense) = ublas::trans(*m.dense());
       break;
-    case 2:
-      if (_num != 1)
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a triangular matrix into a non-dense one.");
+    case TRIANGULAR:
+      if(_num != DENSE)
+        THROW_EXCEPTION("try to transpose a triangular matrix into a non-dense one.");
       noalias(*mat.Dense) = ublas::trans(*m.triang());
       break;
-    case 3:
+    case SYMMETRIC:
       *this = m;
       break;
-    case 4:
-      if (_num == 1)
+    case SPARSE:
+      if(_num == DENSE)
         noalias(*mat.Dense) = ublas::trans(*m.sparse());
-      else if (_num == 4)
+      else if(_num == SPARSE)
         noalias(*mat.Sparse) = ublas::trans(*m.sparse());
+      else if(_num == SPARSE_COORDINATE)
+        noalias(*mat.SparseCoordinate) = ublas::trans(*m.sparse());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a sparse matrix into a forbidden type (not dense nor sparse).");
+        THROW_EXCEPTION("try to transpose a sparse matrix into a forbidden type (not dense nor sparse).");
       break;
-    case 5:
-      if (_num == 1)
+    case SPARSE_COORDINATE:
+      if(_num == DENSE)
+        noalias(*mat.Dense) = ublas::trans(*m.sparseCoordinate());
+      else if(_num == SPARSE)
+        noalias(*mat.Sparse) = ublas::trans(*m.sparseCoordinate());
+      else if(_num == SPARSE_COORDINATE)
+        noalias(*mat.SparseCoordinate) = ublas::trans(*m.sparseCoordinate());
+      else
+        THROW_EXCEPTION("try to transpose a sparse coordinate matrix into a forbidden type (not dense nor sparse coordinate).");
+      break;
+    case BANDED:
+      if(_num == DENSE)
         noalias(*mat.Dense) = ublas::trans(*m.banded());
-      else if (_num == 5)
+      else if(_num == BANDED)
         noalias(*mat.Banded) = ublas::trans(*m.banded());
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a banded matrix into a forbidden type (not dense nor banded).");
+        THROW_EXCEPTION("try to transpose a banded matrix into a forbidden type (not dense nor banded).");
       break;
-    case 6:
+    case ZERO:
       *this = m;
       break;
-    case 7:
+    case IDENTITY:
       *this = m;
+      break;
+    default:
+      THROW_EXCEPTION("");
     }
-    // unsigned int tmp = _dimRow;
-    // _dimRow = _dimCol;
-    // _dimCol = tmp;
-    resetLU();
+    resetFactorizationFlags();
   }
 }
 
@@ -177,69 +204,6 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
 
 
 
-
-const SimpleMatrix matrix_pow(const SimpleMatrix& m, unsigned int power)
-{
-  if (m.isBlock())
-    SiconosMatrixException::selfThrow("Matrix, pow function: not yet implemented for BlockMatrix.");
-  if ( m.size(0) != m.size(1))
-    SiconosMatrixException::selfThrow("matrix_pow(SimpleMatrix), matrix is not square.");
-
-  if (power > 0)
-  {
-    unsigned int num = m.num();
-    if (num == 1)
-    {
-      DenseMat p = *m.dense();
-      for (unsigned int i = 1; i < power; i++)
-        p = prod(p, *m.dense());
-      return p;
-    }
-    else if (num == 2)
-    {
-      TriangMat t = *m.triang();
-      for (unsigned int i = 1; i < power; i++)
-        t = prod(t, *m.triang());
-      return t;
-    }
-    else if (num == 3)
-    {
-      SymMat s = *m.sym();
-      for (unsigned int i = 1; i < power; i++)
-        s = prod(s, *m.sym());
-      return s;
-    }
-    else if (num == 4)
-    {
-      SparseMat sp = *m.sparse();
-      for (unsigned int i = 1; i < power; i++)
-        sp = prod(sp, *m.sparse());
-      return sp;
-    }
-    else if (num == 5)
-    {
-      DenseMat b = *m.banded();
-      for (unsigned int i = 1; i < power; i++)
-        b = prod(b, *m.banded());
-      return b;
-    }
-    else if (num == 6)
-    {
-      ZeroMat z(m.size(0), m.size(1));
-      return z;
-    }
-    else // if (num==7)
-    {
-      IdentityMat I(m.size(0), m.size(1));;
-      return I;
-    }
-  }
-  else// if(power == 0)
-  {
-    IdentityMat I = ublas::identity_matrix<double>(m.size(0), m.size(1));
-    return I;
-  }
-}
 
 
 
@@ -278,7 +242,7 @@ bool InvertMatrix(const ublas::matrix<T, U, V>& input, ublas::matrix<T, U, V>& i
 
 // perform LU-factorization
   int res = lu_factorize(A,pm);
-  if (res != 0) return false;
+  if(res != 0) return false;
 
 // create identity matrix of "inverse"
   inverse.assign(ublas::identity_matrix<T>(A.size1()));
@@ -291,25 +255,9 @@ bool InvertMatrix(const ublas::matrix<T, U, V>& input, ublas::matrix<T, U, V>& i
 
 #endif //INVERT_MATRIX_HPP
 
-void invertMatrix(const SimpleMatrix& input, SimpleMatrix& output)
-{
-  InvertMatrix(*input.dense(), *output.dense());
-}
-
-
-/* XXX Find out if we can use an elementwise ublas operation */
-SP::SiconosVector compareMatrices(const SimpleMatrix& data, const SimpleMatrix& ref)
-{
-  SimpleMatrix diff(data.size(0), data.size(1));
-  SP::SiconosVector res(new SiconosVector(data.size(1)));
-  diff = data - ref;
-  for (unsigned int i = 0; i < data.size(0); ++i)
-  {
-    for (unsigned int j = 0; j < data.size(1); ++j)
-      diff(i, j) /= 1 + fabs(ref(i, j));
-  }
-  diff.normInfByColumn(res);
-  return res;
-
-}
+// Note FP: never used. Comment before removal ?
+// void invertMatrix(const SimpleMatrix& input, SimpleMatrix& output)
+// {
+//   InvertMatrix(*input.dense(), *output.dense());
+// }
 

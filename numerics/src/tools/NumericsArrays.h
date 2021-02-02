@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
  * limitations under the License.
 */
 
-#ifndef NSSTOOLS_H
-#define NSSTOOLS_H
+#ifndef NUMERICSARRAYS_H
+#define NUMERICSARRAYS_H
 
-/*!\file NSSTools.h
+/*!\file NumericsArrays.h
   Header to collect basic tools for integer arrays
 */
+
+#include <stddef.h>  // for size_t
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #ifdef __cplusplus
 #undef restrict
@@ -60,8 +63,7 @@ extern "C"
   void uint_swap (unsigned int *a, unsigned int *b);
   /* shuffle an unsigned array */
   void uint_shuffle (unsigned int *a, unsigned int n);
-  
-  
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

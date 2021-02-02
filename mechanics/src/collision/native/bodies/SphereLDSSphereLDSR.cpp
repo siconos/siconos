@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ double SphereLDSSphereLDSR::distance(double x1, double y1, double z1, double r1,
 }
 
 
-void SphereLDSSphereLDSR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void SphereLDSSphereLDSR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 {
 
   y.setValue(0, distance(q(0), q(1), q(2), r1,
@@ -49,7 +49,7 @@ void SphereLDSSphereLDSR::computeh(SiconosVector& q, SiconosVector& z, SiconosVe
 
 };
 
-void SphereLDSSphereLDSR::computeJachq(SiconosVector& q, SiconosVector& z)
+void SphereLDSSphereLDSR::computeJachq(const BlockVector& q, BlockVector& z)
 {
 
   double A, B, C;
@@ -83,8 +83,8 @@ void SphereLDSSphereLDSR::computeJachq(SiconosVector& q, SiconosVector& z)
   n2 = B;
   n3 = C;
 
-  if (orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3))
-        RuntimeException::selfThrow("SphereLDSSphereLDSR::computeJachq. Problem in calling orthoBaseFromVector");
+  if(orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3))
+    THROW_EXCEPTION("SphereLDSSphereLDSR::computeJachq. Problem in calling orthoBaseFromVector");
 
   double x0 = 2 * n1 * r1 * u2;
   double x1 = 2 * n2 * r1 * u1;

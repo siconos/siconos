@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 */
 
 #include "Qi_merit.h"
-#include <math.h>
-#include <assert.h>
-#include <float.h>
+#include <assert.h>          // for assert
+#include <float.h>           // for DBL_EPSILON
+#include <math.h>            // for sqrt, fabs
+#include "NumericsMatrix.h"  // for NM_assert, NM_DENSE, NumericsMatrix
 
 void phi_Qi(int n, double* restrict x, double* restrict F, double* restrict Fbox, double* restrict lb, double* restrict ub)
 {
@@ -32,16 +33,16 @@ void phi_Qi(int n, double* restrict x, double* restrict F, double* restrict Fbox
   double val2;
   double Fi2;
 
-  for (int i = 0; i < n; ++i)
+  for(int i = 0; i < n; ++i)
   {
-    if (F[i] >= 0.0)
+    if(F[i] >= 0.0)
     {
       val = x[i] - lb[i];
-      if (x[i] >= lb[i])
+      if(x[i] >= lb[i])
       {
         Fi2 = F[i]*F[i];
         val -= sqrt(val*val + Fi2);
-        if (x[i] <= ub[i])
+        if(x[i] <= ub[i])
         {
           val += F[i]; // done
         }
@@ -55,11 +56,11 @@ void phi_Qi(int n, double* restrict x, double* restrict F, double* restrict Fbox
     else
     {
       val = x[i] - ub[i];
-      if (x[i] <= ub[i])
+      if(x[i] <= ub[i])
       {
         Fi2 = F[i]*F[i];
         val += sqrt(val*val + Fi2);
-        if (x[i] >= lb[i])
+        if(x[i] >= lb[i])
         {
           val += F[i]; // done
         }
@@ -98,13 +99,14 @@ void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict wo
 
   // constructing the set beta
   // Introduce a tolerance ? -- xhub
-  for (int i = 0; i < n; ++i)
+  for(int i = 0; i < n; ++i)
   {
     diff_l = x[i] - lb[i];
     diff_u = x[i] - ub[i];
-    if ((fabs(F[i]) < DBL_EPSILON) && ((fabs(diff_l) < DBL_EPSILON) || (fabs(diff_u) < DBL_EPSILON)))
-    { // a = 0.0, b = 1.0 ; other choices are possible
-      for (int j = 0; j < n; ++j)
+    if((fabs(F[i]) < DBL_EPSILON) && ((fabs(diff_l) < DBL_EPSILON) || (fabs(diff_u) < DBL_EPSILON)))
+    {
+      // a = 0.0, b = 1.0 ; other choices are possible
+      for(int j = 0; j < n; ++j)
       {
         H_dense[j * n + i] = bb*nabla_F_dense[j * n + i];
       }
@@ -112,15 +114,15 @@ void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict wo
     }
     else // now the rest.... Easy things first
     {
-      if (((diff_l <= 0.0) && (F[i] >= 0.0)) || ((diff_u >= 0.0) && (F[i] <= 0.0)))
+      if(((diff_l <= 0.0) && (F[i] >= 0.0)) || ((diff_u >= 0.0) && (F[i] <= 0.0)))
       {
         a = 1.0;
         b = 0.0;
       }
       // x in the box
-      else if ((diff_l >= 0.0) && (diff_u <= 0.0))
+      else if((diff_l >= 0.0) && (diff_u <= 0.0))
       {
-        if (F[i] >= 0.0)
+        if(F[i] >= 0.0)
         {
           normi = sqrt(diff_l*diff_l + F[i]*F[i]);
           a = 1.0 - diff_l/normi;
@@ -143,7 +145,7 @@ void Jac_F_Qi(int n, double* restrict x, double* restrict F, double* restrict wo
       }
 
       // now fill H
-      for (int j = 0; j < n; ++j)
+      for(int j = 0; j < n; ++j)
       {
         H_dense[j * n + i] = b*nabla_F_dense[j * n + i];
       }

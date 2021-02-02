@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@
  *
 */
 
-#include "NumericsFwd.h"
+#include "NumericsFwd.h"  // for NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 
 /** \struct generic_set SiconosSets.h
  * Generic set (can be seen as a kind of ``base class''). Mainly used to infer
@@ -85,7 +87,6 @@ enum SICONOS_SET_ID { SICONOS_SET_POSITIVE_ORTHANT, SICONOS_SET_BOX, SICONOS_SET
 
 enum SICONOS_RELATION_TYPES { SICONOS_LE, SICONOS_EQ, SICONOS_GE };
 
-#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -96,7 +97,7 @@ extern "C"
    * \param set the set which id should be set
    * \param id the id of the set
    */
-  static inline void set_set_id(void* set, unsigned id)
+  static inline void set_set_id(void* set, int id)
   {
     ((generic_set*)set)->id = id;
   }

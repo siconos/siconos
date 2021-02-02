@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,33 +22,33 @@
 #include <assert.h>
 PluggedObject::PluggedObject(): _pluginName("unplugged")
 {
-  fPtr = NULL;
+  fPtr = nullptr;
 }
 
 PluggedObject::PluggedObject(const std::string& name): _pluginName(name)
 {
-  fPtr = NULL;
+  fPtr = nullptr;
   setComputeFunction();
 }
 
 PluggedObject::PluggedObject(const PluggedObject & PO):  _pluginName(PO.pluginName())
 {
   // we don't copy the fPtr since we need to increment the number of times we opened the plugin file in the openedPlugins multimap
-  fPtr = NULL;
-  if ((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
+  fPtr = nullptr;
+  if((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
     setComputeFunction();
 }
 
 PluggedObject::~PluggedObject()
 {
-  if ((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
+  if((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
     SSLH::closePlugin(_pluginName);
 }
 
 void PluggedObject::setComputeFunction(const std::string& pluginPath, const std::string& functionName)
 {
   std::string ext = SSLH::getSharedLibraryExtension();
-  if (ext.compare(pluginPath.substr(pluginPath.size() - ext.size())) == 0)
+  if(ext.compare(pluginPath.substr(pluginPath.size() - ext.size())) == 0)
   {
     SSLH::setFunction(&fPtr, pluginPath, functionName);
     _pluginName = pluginPath.substr(0, pluginPath.find_last_of(".")) + ":" + functionName;

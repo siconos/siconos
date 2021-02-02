@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,32 +18,28 @@
 
 
 #include "lumod_wrapper.h"
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <assert.h>
-
-#include "SiconosBlas.h"
-#include "SiconosLapack.h"
-#include "lumod_dense.h"
-
-
+#include <assert.h>              // for assert
+#include <fenv.h>                // for feclearexcept, fetestexcept, FE_ALL_...
+#include <stdio.h>               // for printf
+#include <stdlib.h>              // for free, malloc, NULL, calloc
+#include <string.h>              // for memset
+#include "NumericsMatrix.h"      // for NumericsMatrix
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
-
+#include "debug.h"               // for DEBUG_PRINT_MAT_STR, DEBUG_PRINT_VEC...
+#include "lumod_dense.h"         // for LUmod_dense, Lprod_dense, Usolve_dense
+#include "SiconosBlas.h"         // for cblas_dcopy, cblas_dgemv, CblasColMajor
+#include "SiconosLapack.h"       // for lapack_int, DGETRF, DGETRS
 
 #define TOL_BLU 1e-30
 #define BASIS_OFFSET 1
 #define DEEP_DEBUG_Ck
-#include <fenv.h>
-#include "pivot-utils.h"
 
 /* TODO :
  *  - Yk should be row-major (be careful with gemv and lda)
  *  - in solve, we should try to better handle the resolution with C
  *  - the solution to Hx = col should be saved only when col correspond to a
- *  driving variable not in the factorized basis*/ 
+ *  driving variable not in the factorized basis*/
 
 #ifdef DEBUG_MESSAGES
 inline static void lumod_full_check(SN_lumod_dense_data* lumod_data)
@@ -56,7 +52,7 @@ inline static void lumod_full_check(SN_lumod_dense_data* lumod_data)
 
   double* Ctmp = (double*)calloc(k*k, sizeof(double));
   cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, k, k, n, 1.0, lumod_data->Uk, n, lumod_data->Yk, n, 0., Ctmp, k);
-  for (unsigned i = 0; i < k; ++i)
+  for(unsigned i = 0; i < k; ++i)
   {
     memset(lumod_data->y, 0, k*sizeof(double));
     lumod_data->y[i] = 1.;
@@ -67,12 +63,18 @@ inline static void lumod_full_check(SN_lumod_dense_data* lumod_data)
     cblas_dgemv(CblasColMajor, CblasNoTrans, k, k, 1.0, Ctmp, k, lumod_data->z, 1, 0., lumod_data->y, 1);
 #define TOL_CHECK 1e-10
     unsigned failcount = 0;
-    for (unsigned j = 0; j < k; ++j)
+    for(unsigned j = 0; j < k; ++j)
     {
-      if ((j == i) && (fabs(lumod_data->y[j] - 1.) > TOL_CHECK)) { ++failcount; }
-      else if ((j != i) && (fabs(lumod_data->y[j]) > TOL_CHECK)) { ++failcount; }
+      if((j == i) && (fabs(lumod_data->y[j] - 1.) > TOL_CHECK))
+      {
+        ++failcount;
+      }
+      else if((j != i) && (fabs(lumod_data->y[j]) > TOL_CHECK))
+      {
+        ++failcount;
+      }
     }
-    if (failcount > 0)
+    if(failcount > 0)
     {
       DEBUG_PRINT_MAT_STR("Ck", Ctmp, k, k);
       DEBUG_PRINT_VEC_STR("ep", lumod_data->y, k);
@@ -184,20 +186,20 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
   /* Save H col_tilde = col for a possible BLU
    * Note that in practice, we need this only when the driving variable is not
    * in the basis used for factorisation*/
-  if (col_tilde)
+  if(col_tilde)
   {
     cblas_dcopy(n, x, 1, col_tilde, 1);
   }
 
-  if (k > 0)
+  if(k > 0)
   {
 
     feclearexcept(FE_ALL_EXCEPT);
 
     DEBUG_EXPR_WE(double* Ctmp = (double*)calloc(k*k, sizeof(double));
-        cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, k, k, n, 1.0, lumod_data->Uk, n, lumod_data->Yk, n, 0., Ctmp, k);
-        DEBUG_PRINT_MAT_STR("Ck", Ctmp, k, k);
-        free(Ctmp););
+                  cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, k, k, n, 1.0, lumod_data->Uk, n, lumod_data->Yk, n, 0., Ctmp, k);
+                  DEBUG_PRINT_MAT_STR("Ck", Ctmp, k, k);
+                  free(Ctmp););
     /* Step 2. */
     /* Step 2.a Compute Uk^T x1  */
     /** this is just a permutation, could replace accordingly*/
@@ -205,7 +207,7 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
     DEBUG_PRINT_VEC_STR("Uk^T x1", lumod_data->y, k);
 
     /* XXX: hack */
-    if (cblas_ddot(k, lumod_data->y, 1, lumod_data->y, 1) < k*TOL_BLU)
+    if(cblas_ddot(k, lumod_data->y, 1, lumod_data->y, 1) < k*TOL_BLU)
     {
       goto exit_SN_lumod_dense_solve;
     }
@@ -217,13 +219,12 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
     Usolve_dense(1, maxmod, k, lumod_data->U_C-1, lumod_data->z-1);
     DEBUG_PRINT_VEC_STR("x2 sol to C x = Uk^T x1", lumod_data->z, k);
 
-    if (fetestexcept(FE_ALL_EXCEPT & ~FE_INEXACT & ~FE_UNDERFLOW))
+    if(fetestexcept(FE_ALL_EXCEPT & ~FE_INEXACT & ~FE_UNDERFLOW))
     {
       printf("solution of the small system is spurious!\n");
       return SN_LUMOD_NEED_REFACTORIZATION;
     }
     /* Step 3. Compute x3 = x1 - Yk x2 */
-    /* Row-major looks broken on ATLAS ... */
     cblas_dgemv(CblasColMajor, CblasNoTrans, n, k, -1., lumod_data->Yk, n, lumod_data->z, 1, 1., x, 1);
     DEBUG_PRINT_VEC_STR("x3 = x1 - Yk x2", x, n);
 
@@ -251,19 +252,19 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
   memset(lumod_data->row_col_indx, 0, (2*n+1)*sizeof(int));
   DEBUG_PRINT("Variables in factorized basis\n")
 
-  for (unsigned i = 0, j = 0; i < n; ++i, j += n)
+  for(unsigned i = 0, j = 0; i < n; ++i, j += n)
   {
     unsigned var = basis[i] - BASIS_OFFSET;
     DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], n), basis_to_number(basis[i], n))
     factorized_basis[var] = i + BASIS_OFFSET;
-    if (var > n) /* z var */
+    if(var > n)  /* z var */
     {
       unsigned z_indx = var - n - 1;
-      assert(var >=  n + 1 );
+      assert(var >=  n + 1);
       assert(var - n - 1 < n);
       cblas_dcopy(n, &Mlcp[z_indx*n], 1, &H[j], 1);
     }
-    else if (var < n)
+    else if(var < n)
     {
       unsigned w_indx = var;
       memset(&H[j], 0, n*sizeof(double));
@@ -281,14 +282,14 @@ int SN_lumod_factorize(SN_lumod_dense_data* restrict lumod_data, unsigned* restr
   /*  Compute LU factorisation of basis */
   lapack_int infoDGETRF = 0;
   DGETRF(n, n, H, n, lumod_data->ipiv_LU_H, &infoDGETRF);
-  if (infoDGETRF > 0)
+  if(infoDGETRF > 0)
   {
     printf("crash_pivot_basis :: the crash basis is singular, cannot inverse the matrix.\n\
         The (first) diagonal element of U to be 0.0 is %d\n\
         A remedy remains to be implemented! Do not hesitate to report to the developers!\n", infoDGETRF);
     return infoDGETRF;
   }
-  else if (infoDGETRF < 0)
+  else if(infoDGETRF < 0)
   {
     printf("SN_lumod_factorize :: wrong call to DGETRF: %d parameter has an illegal value", infoDGETRF);
     return infoDGETRF;
@@ -316,7 +317,7 @@ void SN_lumod_add_row_col(SN_lumod_dense_data* restrict lumod_data, unsigned lea
   /*  We first update Ck: we have to prepare
    *  y = ((Yk)_{leaving} col_{leaving})
    *  z = Uk^T col*/
-  if (k > 0)
+  if(k > 0)
   {
     DEBUG_PRINT_MAT_STR("Uk before expansion", lumod_data->Uk, n, (k+1));
     DEBUG_PRINT_MAT_STR("Yk before expansion", lumod_data->Yk, n, (k+1));
@@ -345,7 +346,7 @@ void SN_lumod_add_row_col(SN_lumod_dense_data* restrict lumod_data, unsigned lea
   DEBUG_EXPR_WE(lumod_full_check(lumod_data););
 
   /* costly check */
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < k*n; i += n) assert(cblas_ddot(n, &lumod_data->Uk[i], 1, &lumod_data->Uk[i], 1) == 1));
+  DEBUG_EXPR_WE(for(unsigned i = 0; i < k*n; i += n) assert(cblas_ddot(n, &lumod_data->Uk[i], 1, &lumod_data->Uk[i], 1) == 1));
 }
 
 void SN_lumod_replace_col(SN_lumod_dense_data* restrict lumod_data,  unsigned index_col, double* restrict col)
@@ -420,7 +421,7 @@ void SN_lumod_delete_row_col(SN_lumod_dense_data* restrict lumod_data, unsigned 
   DEBUG_PRINTF("Deleting row %d and col %d\n", index_row, index_col);
 
   DEBUG_PRINT_MAT_STR("Uk before deletion", lumod_data->Uk, n, k);
-  if ((index_row + 1) != k)
+  if((index_row + 1) != k)
   {
     assert(index_row < k);
     cblas_dcopy(n, &lumod_data->Uk[(k-1)*n], 1, &lumod_data->Uk[(index_row)*n], 1);
@@ -430,16 +431,16 @@ void SN_lumod_delete_row_col(SN_lumod_dense_data* restrict lumod_data, unsigned 
 
   DEBUG_PRINT_MAT_STR("Yk before deletion", lumod_data->Yk, n, k);
   /* Row major logic */
-/*  if (index_col + 1 != k)
-  {
-    assert(index_col < k);
-    unsigned len = k - 1;
-    for (unsigned i = 0, indx_dest = index_col, indx_src = index_col+1; i < n; ++i, indx_dest += len, indx_src += k)
+  /*  if (index_col + 1 != k)
     {
-      memmove(&lumod_data->Yk[indx_dest], &lumod_data->Yk[indx_src], len);
-    }
-  }*/
-  if ((index_col + 1) != k)
+      assert(index_col < k);
+      unsigned len = k - 1;
+      for (unsigned i = 0, indx_dest = index_col, indx_src = index_col+1; i < n; ++i, indx_dest += len, indx_src += k)
+      {
+        memmove(&lumod_data->Yk[indx_dest], &lumod_data->Yk[indx_src], len);
+      }
+    }*/
+  if((index_col + 1) != k)
   {
     assert(index_col < k);
     cblas_dcopy(n, &lumod_data->Yk[(k-1)*n], 1, &lumod_data->Yk[index_col*n], 1);
@@ -450,5 +451,5 @@ void SN_lumod_delete_row_col(SN_lumod_dense_data* restrict lumod_data, unsigned 
   LUmod_dense(4, maxmod, k, index_row+1, index_col+1, lumod_data->L_C-1, lumod_data->U_C-1, lumod_data->y-1, lumod_data->z-1, lumod_data->w-1);
   DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS_STR("L_C after suppr", lumod_data->L_C, k-1, maxmod, k-1);
   --(lumod_data->k);
-  DEBUG_EXPR_WE(if (k > 0) lumod_full_check(lumod_data););
+  DEBUG_EXPR_WE(if(k > 0) lumod_full_check(lumod_data););
 }

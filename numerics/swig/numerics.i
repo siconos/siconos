@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2018 INRIA.
+// Copyright 2020 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,15 +37,15 @@ static char* format_exception_msg(const char* first_line)
   strncpy(error_msg, first_line, strlen(first_line)+1);
   strncat(error_msg, "\n", 2);
   const char* sn_msg = sn_fatal_error_msg();
-  strncat(error_msg, sn_msg, strlen(sn_msg) - 1);
+  strncat(error_msg, sn_msg, sizeof(error_msg) - strlen(error_msg) - 1);
   return error_msg;
 }
 
 static char* format_msg_concat(const char* msg1, const char* msg2)
 {
-  strncpy(error_msg, msg1, strlen(msg1)+1);
-  strncat(error_msg, "\n", 2);
-  strncat(error_msg, msg2, strlen(msg2));
+  strncpy(error_msg, msg1, sizeof(error_msg));
+  strncat(error_msg, "\n", sizeof(error_msg)-strlen(error_msg)-1);
+  strncat(error_msg, msg2, sizeof(error_msg)-strlen(error_msg)-1);
   return error_msg;
 }
 
@@ -94,6 +94,8 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 
 %include <typemaps/swigmacros.swg>
 
+// we should be using descriptor or such here, however this doesn't directly work
+// maybe the caller should put the type as arg too
 %define %SN_INPUT_CHECK_RETURN(var, output, type_)
 { void* _ptr = NULL; if (!SWIG_IsOK(SWIG_ConvertPtr(var, &_ptr, SWIGTYPE_p_##type_, 0 |  0 ))) {
     char errmsg[1024];
@@ -140,15 +142,15 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 
 // declare C++ shared_ptrs to C structs
 // need to do this here for other modules to reference numerics structs by shared_ptr.
-// swig requires same namespace 'std11' is used.
+// swig requires same namespace 'std' is used.
 %{
 #ifdef __cplusplus
-namespace std11 = std;
+
 #include <memory>
 #endif
 %}
 #ifdef __cplusplus
-#define SWIG_SHARED_PTR_NAMESPACE std11
+#define SWIG_SHARED_PTR_NAMESPACE std
 %include boost_shared_ptr.i
 #endif
 
@@ -295,7 +297,7 @@ namespace std11 = std;
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
 #include "gfc3d_Solvers.h"
-#include "rolling_fc3d_Solvers.h"
+#include "rolling_fc_Solvers.h"
 #include "MCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"

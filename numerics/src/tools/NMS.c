@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-
 #include "NMS.h"
-
-#include <float.h>
-#include <assert.h>
-
-#include "SiconosBlas.h"
-#include "Newton_methods.h"
-#include "SiconosSets.h"
-
+#include <assert.h>          // for assert
+#include <stdio.h>           // for printf
+#include <stdlib.h>          // for free, malloc, exit, EXIT_FAILURE, NULL
+#include "ArmijoSearch.h"    // for search_Armijo_standalone
+#include "Newton_methods.h"  // for functions_LSA, SICONOS_IPARAM_LSA_NONMON...
+#include "NumericsMatrix.h"  // for NM_create, NM_clear, NumericsMatrix
+#include "SiconosSets.h"     // for free_siconos_set, project_on_set
+#include "SiconosBlas.h"    // for cblas_dcopy, cblas_daxpy, cblas_ddot
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h" // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
 
 #ifdef __cplusplus
 #undef restrict
+#include <sys/cdefs.h>       // for __restrict
 #define restrict __restrict
 #endif
 
@@ -53,17 +52,17 @@ int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restri
   double alpha_projected_gradient, alpha_watchdog;
 
   /* first see whether the path search was successful */
-  if (force_watchdog_step) goto watchdog_step;
+  if(force_watchdog_step) goto watchdog_step;
 
   /* see if we can do a d_step */
-  if (data_NMS->n < data_NMS->n_max)
+  if(data_NMS->n < data_NMS->n_max)
   {
     /* compute the norm of the increment */
     cblas_dcopy(n, z_N, 1, workV1, 1);
     cblas_daxpy(n, -1.0, z, 1, workV1, 1);
     double dist = cblas_dnrm2(n, workV1, 1);
 
-    if (force_d_step_merit_check || (dist <= data_NMS->delta*(1.0 + check_ratio))) /* try a d_step */
+    if(force_d_step_merit_check || (dist <= data_NMS->delta*(1.0 + check_ratio)))  /* try a d_step */
     {
       /* see if the nonmonotone criterion is fulfilled */
       /* F should be up-to-date, H and F_merit have to be recomputed */
@@ -77,7 +76,7 @@ int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restri
       theta_iter = .5 * cblas_ddot(n, F_merit, 1, F_merit, 1);
 
       /* check if the merit value does not increase too much */
-      if (force_d_step_merit_check || theta_iter < data_NMS->merit_incr*data_NMS->ref_merit*(1.0 + check_ratio))
+      if(force_d_step_merit_check || theta_iter < data_NMS->merit_incr*data_NMS->ref_merit*(1.0 + check_ratio))
       {
         DEBUG_PRINTF("NMS d_step accepted theta_iter = %2.2e < tol = %2.2e\n", theta_iter, data_NMS->merit_incr*data_NMS->ref_merit);
         /* we accept the step */
@@ -86,7 +85,7 @@ int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restri
         double dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
 
         int criterion = check_nmd_criterion(theta_iter, data_NMS->ref_merit, data_NMS->sigma, dotprod);
-        if (criterion == 0)
+        if(criterion == 0)
         {
           goto update_checkpoint;
         }
@@ -123,7 +122,7 @@ m_step:
     double dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
 
     int criterion = check_nmd_criterion(theta_iter, data_NMS->ref_merit, data_NMS->sigma, dotprod);
-    if (criterion == 0)
+    if(criterion == 0)
     {
       DEBUG_PRINT("NMS m_step succeeded !\n");
       goto update_checkpoint;
@@ -141,57 +140,57 @@ watchdog_step:
 
   switch(data_NMS->watchdog_search_type)
   {
-    case LINESEARCH:
-      /* compute the gradient JacThetaF_merit at the checkpoint z_c(0)*/
-      functions->compute_F(data, NMS_checkpoint_0(data_NMS, n), F);
-      functions->compute_H(data, NMS_checkpoint_0(data_NMS, n), F, workV1, workV2, Htmp);
-      functions->compute_F_merit(data, NMS_checkpoint_0(data_NMS, n), F, F_merit);
-      cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, H, n, F_merit, 1, 0.0, JacThetaF_merit, 1);
-      /* compute d = z_c(T_k) - z_c(0) */
-      cblas_dcopy(n, NMS_checkpoint_T(data_NMS, n), 1, workV1, 1);
-      cblas_daxpy(n, -1.0, NMS_checkpoint_0(data_NMS, n), 1, workV1, 1);
+  case LINESEARCH:
+    /* compute the gradient JacThetaF_merit at the checkpoint z_c(0)*/
+    functions->compute_F(data, NMS_checkpoint_0(data_NMS, n), F);
+    functions->compute_H(data, NMS_checkpoint_0(data_NMS, n), F, workV1, workV2, Htmp);
+    functions->compute_F_merit(data, NMS_checkpoint_0(data_NMS, n), F, F_merit);
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, H, n, F_merit, 1, 0.0, JacThetaF_merit, 1);
+    /* compute d = z_c(T_k) - z_c(0) */
+    cblas_dcopy(n, NMS_checkpoint_T(data_NMS, n), 1, workV1, 1);
+    cblas_daxpy(n, -1.0, NMS_checkpoint_0(data_NMS, n), 1, workV1, 1);
 
-      dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
-      ref_merit = data_NMS->ref_merit;
-      if (dotprod < 0.0) /* check condition on <JacThetaF_merit, z_c(0) - z_c(T_k)>*/
-      {
+    dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
+    ref_merit = data_NMS->ref_merit;
+    if(dotprod < 0.0)  /* check condition on <JacThetaF_merit, z_c(0) - z_c(T_k)>*/
+    {
 //        preRHS = -data_NMS->sigma*dotprod; /* we expect a plus in the LS function */
-        preRHS = -dotprod; /* we expect a plus in the LS function */
-      }
-      else
-      {
+      preRHS = -dotprod; /* we expect a plus in the LS function */
+    }
+    else
+    {
 //        preRHS = -data_NMS->sigma*ref_merit;
-        preRHS = -ref_merit;
-      }
+      preRHS = -ref_merit;
+    }
 
-      data_NMS->ls_data->z = NMS_checkpoint_0(data_NMS, n);
-      data_NMS->ls_data->alpha0 = .95;
-      data_NMS->ls_data->searchtype = LINESEARCH;
-      alpha_watchdog = search_Armijo_standalone(n, &ref_merit, preRHS, data_NMS->ls_data);
-      if (alpha_watchdog > data_NMS->alpha_min_watchdog)
-      {
-        /* successful line search */
-        /* XXX this is not needed. we could get it from ls_data->zc */
-        cblas_dcopy(n, NMS_checkpoint_0(data_NMS, n), 1, z_N, 1);
-        cblas_daxpy(n, alpha_watchdog, workV1, 1, z_N, 1); //  z_N + tau*d --> z_N
-        theta_iter = ref_merit; /* on output ref_merit contains the current value of theta*/
-        DEBUG_PRINTF("NMS :: successful watchdog_step: alpha = %2.2e; theta_iter = %2.2e\n", alpha_watchdog, theta_iter);
-        goto update_checkpoint;
-      }
-      /* else, we have to do a projected gradient step */
-        DEBUG_PRINTF("NMS :: unsuccessful watchdog_step: alpha = %2.2e\n", alpha_watchdog);
-      break;
-    case ARCSEARCH:
-      printf("watchdog_step: arc search not implemented yet !\n");
-      exit(EXIT_FAILURE);
-      //break;
-    case BACKWARD_PATHSEARCH:
-      printf("watchdog_step: path search not implemented yet !\n");
-      exit(EXIT_FAILURE);
-      //break;
-    default:
-      printf("watchdog_step: unknown search type : %d\n", data_NMS->watchdog_search_type);
-      exit(EXIT_FAILURE);
+    data_NMS->ls_data->z = NMS_checkpoint_0(data_NMS, n);
+    data_NMS->ls_data->alpha0 = .95;
+    data_NMS->ls_data->searchtype = LINESEARCH;
+    alpha_watchdog = search_Armijo_standalone(n, &ref_merit, preRHS, data_NMS->ls_data);
+    if(alpha_watchdog > data_NMS->alpha_min_watchdog)
+    {
+      /* successful line search */
+      /* XXX this is not needed. we could get it from ls_data->zc */
+      cblas_dcopy(n, NMS_checkpoint_0(data_NMS, n), 1, z_N, 1);
+      cblas_daxpy(n, alpha_watchdog, workV1, 1, z_N, 1); //  z_N + tau*d --> z_N
+      theta_iter = ref_merit; /* on output ref_merit contains the current value of theta*/
+      DEBUG_PRINTF("NMS :: successful watchdog_step: alpha = %2.2e; theta_iter = %2.2e\n", alpha_watchdog, theta_iter);
+      goto update_checkpoint;
+    }
+    /* else, we have to do a projected gradient step */
+    DEBUG_PRINTF("NMS :: unsuccessful watchdog_step: alpha = %2.2e\n", alpha_watchdog);
+    break;
+  case ARCSEARCH:
+    printf("watchdog_step: arc search not implemented yet !\n");
+    exit(EXIT_FAILURE);
+  //break;
+  case BACKWARD_PATHSEARCH:
+    printf("watchdog_step: path search not implemented yet !\n");
+    exit(EXIT_FAILURE);
+  //break;
+  default:
+    printf("watchdog_step: unknown search type : %d\n", data_NMS->watchdog_search_type);
+    exit(EXIT_FAILURE);
   }
 
   /* compute the gradient JacThetaF_merit at the bestpoint z_b(0)*/
@@ -202,84 +201,84 @@ watchdog_step:
 
   switch(data_NMS->projected_gradient_search_type)
   {
-    case LINESEARCH:
-      /* workV1 is the same vector as the desc_dir used in the search */
-      /* compute d = z_b(0) - JacThetaF_merit and project it onto the set*/
-      cblas_dcopy(n, NMS_bestpoint(data_NMS, n), 1, workV1, 1);
-      cblas_daxpy(n, -1.0, JacThetaF_merit, 1, workV1, 1);
+  case LINESEARCH:
+    /* workV1 is the same vector as the desc_dir used in the search */
+    /* compute d = z_b(0) - JacThetaF_merit and project it onto the set*/
+    cblas_dcopy(n, NMS_bestpoint(data_NMS, n), 1, workV1, 1);
+    cblas_daxpy(n, -1.0, JacThetaF_merit, 1, workV1, 1);
 
-      /* compute d_B = proj_B(d) */
-      project_on_set(n, workV1, data_NMS->set);
-      /* compute d_B - z_b(0) */
-      cblas_daxpy(n, -1.0, NMS_bestpoint(data_NMS, n), 1, workV1, 1);
-      /* compute <JacThetaF_merit, d_B - z_b(0)> */
-      dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
+    /* compute d_B = proj_B(d) */
+    project_on_set(n, workV1, data_NMS->set);
+    /* compute d_B - z_b(0) */
+    cblas_daxpy(n, -1.0, NMS_bestpoint(data_NMS, n), 1, workV1, 1);
+    /* compute <JacThetaF_merit, d_B - z_b(0)> */
+    dotprod = cblas_ddot(n, JacThetaF_merit, 1, workV1, 1);
 
-      /* check is reversed because we compute the <JacThetaF_merit, d_B - z_b(0)> */
-      if (dotprod > 0.0) /* check condition on <JacThetaF_merit, z_b(0) - z_b(T_k)>*/
-      {
+    /* check is reversed because we compute the <JacThetaF_merit, d_B - z_b(0)> */
+    if(dotprod > 0.0)  /* check condition on <JacThetaF_merit, z_b(0) - z_b(T_k)>*/
+    {
 //        preRHS = data_NMS->sigma*dotprod; /* we expect a plus in the LS function */
-        preRHS = dotprod; /* we expect a plus in the LS function */
-      }
-      else
-      {
+      preRHS = dotprod; /* we expect a plus in the LS function */
+    }
+    else
+    {
 //        preRHS = -data_NMS->sigma*data_NMS->merit_bestpoint; /* we expect a plus in the LS function */
-        preRHS = -data_NMS->merit_bestpoint; /* we expect a plus in the LS function */
-      }
+      preRHS = -data_NMS->merit_bestpoint; /* we expect a plus in the LS function */
+    }
 
-      data_NMS->ls_data->z = NMS_bestpoint(data_NMS, n);
-      data_NMS->ls_data->alpha0 = 1.0;
-      data_NMS->ls_data->searchtype = LINESEARCH;
-      alpha_projected_gradient = search_Armijo_standalone(n, &data_NMS->merit_bestpoint, preRHS, data_NMS->ls_data);
-      if (alpha_projected_gradient > data_NMS->alpha_min_pgrad)
-      {
-        /* successful line search */
-        theta_iter = data_NMS->merit_bestpoint; /* on output ref_merit contains the current value of theta*/
-        DEBUG_PRINTF("NMS :: projected_gradient_step succeed: alpha = %2.2e; theta_iter = %2.2e\n", alpha_projected_gradient, theta_iter);
-        /** \todo check sign here */
-        cblas_dcopy(n, NMS_bestpoint(data_NMS, n), 1, z_N, 1);
-        cblas_daxpy(n, alpha_projected_gradient, workV1, 1, z_N, 1); //  z_N + tau*d --> z_N
-        goto update_checkpoint;
-      }
-      else
-      {
-        DEBUG_PRINTF("NMS :: projected_gradient_step unsuccessful: alpha = %2.2e\n", alpha_projected_gradient);
-        printf("NMS: projected gradient unsuccessful ! Don't know what to do ... \n");
-        return 1;
-      }
-    case ARCSEARCH:
-      /* workV1 is the same vector as the desc_dir used in the search */
-      /* desc_dir = -JacThetaF_merit */
-      cblas_dcopy(n, JacThetaF_merit, 1, workV1, 1);
-      cblas_dscal(n, -1.0, workV1, 1);
-      /* preRHS is not useful here */
-      data_NMS->ls_data->z = NMS_bestpoint(data_NMS, n);
-      data_NMS->ls_data->alpha0 = 1.0;
-      data_NMS->ls_data->searchtype = ARCSEARCH;
-      alpha_projected_gradient = search_Armijo_standalone(n, &data_NMS->merit_bestpoint, preRHS, data_NMS->ls_data);
-      if (alpha_projected_gradient > data_NMS->alpha_min_pgrad)
-      {
-        /* successful line search */
-        theta_iter = data_NMS->merit_bestpoint; /* on output ref_merit contains the current value of theta*/
-        DEBUG_PRINTF("NMS :: projected_gradient_step succeed: alpha = %2.2e; theta_iter = %2.2e\n", alpha_projected_gradient, theta_iter);
-        /** \todo check sign here */
-        cblas_dcopy(n, NMS_bestpoint(data_NMS, n), 1, z_N, 1);
-        cblas_daxpy(n, alpha_projected_gradient, workV1, 1, z_N, 1); //  z_N + tau*d --> z_N
-        goto update_checkpoint;
-      }
-      else
-      {
-        DEBUG_PRINTF("NMS :: projected_gradient_step unsuccessful: alpha = %2.2e\n", alpha_projected_gradient);
-        printf("NMS: projected gradient unsuccessful ! Don't know what to do ... \n");
-        return 1;
-      }
-    default:
-      printf("projected gradient: unknown search type : %d\n", data_NMS->projected_gradient_search_type);
-      exit(EXIT_FAILURE);
+    data_NMS->ls_data->z = NMS_bestpoint(data_NMS, n);
+    data_NMS->ls_data->alpha0 = 1.0;
+    data_NMS->ls_data->searchtype = LINESEARCH;
+    alpha_projected_gradient = search_Armijo_standalone(n, &data_NMS->merit_bestpoint, preRHS, data_NMS->ls_data);
+    if(alpha_projected_gradient > data_NMS->alpha_min_pgrad)
+    {
+      /* successful line search */
+      theta_iter = data_NMS->merit_bestpoint; /* on output ref_merit contains the current value of theta*/
+      DEBUG_PRINTF("NMS :: projected_gradient_step succeed: alpha = %2.2e; theta_iter = %2.2e\n", alpha_projected_gradient, theta_iter);
+      /** \todo check sign here */
+      cblas_dcopy(n, NMS_bestpoint(data_NMS, n), 1, z_N, 1);
+      cblas_daxpy(n, alpha_projected_gradient, workV1, 1, z_N, 1); //  z_N + tau*d --> z_N
+      goto update_checkpoint;
+    }
+    else
+    {
+      DEBUG_PRINTF("NMS :: projected_gradient_step unsuccessful: alpha = %2.2e\n", alpha_projected_gradient);
+      printf("NMS: projected gradient unsuccessful ! Don't know what to do ... \n");
+      return 1;
+    }
+  case ARCSEARCH:
+    /* workV1 is the same vector as the desc_dir used in the search */
+    /* desc_dir = -JacThetaF_merit */
+    cblas_dcopy(n, JacThetaF_merit, 1, workV1, 1);
+    cblas_dscal(n, -1.0, workV1, 1);
+    /* preRHS is not useful here */
+    data_NMS->ls_data->z = NMS_bestpoint(data_NMS, n);
+    data_NMS->ls_data->alpha0 = 1.0;
+    data_NMS->ls_data->searchtype = ARCSEARCH;
+    alpha_projected_gradient = search_Armijo_standalone(n, &data_NMS->merit_bestpoint, preRHS, data_NMS->ls_data);
+    if(alpha_projected_gradient > data_NMS->alpha_min_pgrad)
+    {
+      /* successful line search */
+      theta_iter = data_NMS->merit_bestpoint; /* on output ref_merit contains the current value of theta*/
+      DEBUG_PRINTF("NMS :: projected_gradient_step succeed: alpha = %2.2e; theta_iter = %2.2e\n", alpha_projected_gradient, theta_iter);
+      /** \todo check sign here */
+      cblas_dcopy(n, NMS_bestpoint(data_NMS, n), 1, z_N, 1);
+      cblas_daxpy(n, alpha_projected_gradient, workV1, 1, z_N, 1); //  z_N + tau*d --> z_N
+      goto update_checkpoint;
+    }
+    else
+    {
+      DEBUG_PRINTF("NMS :: projected_gradient_step unsuccessful: alpha = %2.2e\n", alpha_projected_gradient);
+      printf("NMS: projected gradient unsuccessful ! Don't know what to do ... \n");
+      return 1;
+    }
+  default:
+    printf("projected gradient: unknown search type : %d\n", data_NMS->projected_gradient_search_type);
+    exit(EXIT_FAILURE);
   }
 
 
-/* This code is executed if there a m_step or a watchdog_step have been done*/
+  /* This code is executed if there a m_step or a watchdog_step have been done*/
 update_checkpoint:
   /* save the new checkpoint */
   DEBUG_PRINTF("NMS :: updating checkpoint : theta_iter = %e; ref_merit = %e\n", theta_iter, data_NMS->ref_merit);
@@ -297,7 +296,7 @@ update_checkpoint:
 
   /* save current checkpoint as bestpoint if there is a decrease in the merit
    * value */
-  if (theta_iter <= data_NMS->merit_bestpoint)
+  if(theta_iter <= data_NMS->merit_bestpoint)
   {
     /* save z_c(0) as bestpoint */
     /** \todo check if z_c(T) is really not needed */
@@ -310,8 +309,10 @@ update_checkpoint:
 
 accept_z_N:
   DEBUG_PRINT("z_N z_0\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < n; ++i)
-      { DEBUG_PRINTF("%e %e\n", z_N[i], z[i]) });
+  DEBUG_EXPR_WE(for(unsigned i = 0; i < n; ++i)
+{
+  DEBUG_PRINTF("%e %e\n", z_N[i], z[i])
+  });
 
   cblas_dcopy(n, z_N, 1, z, 1);
 
@@ -339,16 +340,16 @@ NMS_data* create_NMS_data(unsigned size, int matrix_type, int* restrict iparam, 
   data->set = NULL;
   data->path_data = NULL;
 
-  switch (iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS])
+  switch(iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS])
   {
-    case NM_LS_MAX:
-    case NM_LS_MEAN:
-      data->ref_merit_data = malloc(sizeof(nm_ref_struct));
-      fill_nm_data((nm_ref_struct*)data->ref_merit_data, iparam);
-      break;
-    default:
-      printf("create_NMS_data :: unknown search type %d\n", iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS]);
-      exit(EXIT_FAILURE);
+  case NM_LS_MAX:
+  case NM_LS_MEAN:
+    data->ref_merit_data = malloc(sizeof(nm_ref_struct));
+    fill_nm_data((nm_ref_struct*)data->ref_merit_data, iparam);
+    break;
+  default:
+    printf("create_NMS_data :: unknown search type %d\n", iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS]);
+    exit(EXIT_FAILURE);
   }
 
   /* set some parameters for the NMS; default values should be set */
@@ -373,7 +374,7 @@ NMS_data* create_NMS_data(unsigned size, int matrix_type, int* restrict iparam, 
 void free_NMS_data(NMS_data* data)
 {
   assert(data);
-  if (data->ref_merit_data)
+  if(data->ref_merit_data)
   {
     /* XXX fix this */
     /** \todo sort the nm data thing */
@@ -384,14 +385,14 @@ void free_NMS_data(NMS_data* data)
   free(data->checkpoint);
   free(data->bestpoint);
   free(data->workspace);
-  NM_free(data->H);
+  NM_clear(data->H);
   free(data->H);
   free_siconos_set(data->set);
   free(data->set);
   free_ls_data(data->ls_data);
   free(data->ls_data);
 
-  if (data->path_data)
+  if(data->path_data)
     free(data->path_data);
 
   free(data);

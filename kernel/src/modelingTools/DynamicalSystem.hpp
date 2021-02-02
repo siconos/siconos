@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 #include "SiconosFwd.hpp"
 
 #include "SSLH.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
@@ -42,13 +42,10 @@
 
 This class is used to describe dynamical systems of the form :
 
-   
 \f$ g(\dot x, x, t, z) = 0\f$
 
-\endverbatim
-
 where
-    
+
 - \f$ x \in R^{n} \f$ is the state.
 - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
   variables, some sort of discret state.  For example, z may be used
@@ -57,7 +54,7 @@ where
 - \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
 
 By default, the DynamicalSystem is considered to be an Initial Value
-Problem (IVP) and the initial conditions are given by 
+Problem (IVP) and the initial conditions are given by
 
 \f$x(t_0)=x_0\f$
 
@@ -115,8 +112,8 @@ protected:
   /** Arbitrary algebraic values vector, z, discrete state of the
       system. */
   SP::SiconosVector _z;
-  
-  /** the  previous state vectors stored in memory 
+
+  /** the  previous state vectors stored in memory
    */
   SiconosMemory _xMemory;
 

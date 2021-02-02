@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@
 #define LinearOSNS_H
 
 #include "OneStepNSProblem.hpp"
+#include "SiconosVector.hpp"
+#include "NumericsMatrix.h" // For NM_DENSE
 
 /** stl vector of double */
 typedef std::vector<double> MuStorage;
@@ -61,12 +63,12 @@ protected:
 
   /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage
       (embedded into OSNSMatrix) */
-  int _numericsMatrixStorageType;
+  int _numericsMatrixStorageType = NM_DENSE;
 
   /** a boolean to decide if _w and _z vectors are initialized with
       previous values of Y and Lambda when a change occurs in problem
       size */
-  bool _keepLambdaAndYState;
+  bool _keepLambdaAndYState = true;
 
   /** nslaw effects : visitors experimentation
    */
@@ -79,14 +81,17 @@ protected:
 
   /** default constructor (private)
    */
-  LinearOSNS() ;
+  LinearOSNS() = default ;
 
 public:
 
-  /** constructor from data
-      \param numericsSolverId the numerics_solver identifier
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
   */
-  LinearOSNS(const int numericsSolverId);
+  LinearOSNS(SP::SolverOptions options): OneStepNSProblem(options){};
 
   /** destructor
    */
@@ -261,6 +266,8 @@ public:
     _keepLambdaAndYState = val ;
   }
 
+  virtual bool checkCompatibleNSLaw(NonSmoothLaw& nslaw) =0;
+  
   /* visitors hook */
   ACCEPT_STD_VISITORS();
 

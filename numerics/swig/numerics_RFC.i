@@ -1,5 +1,5 @@
 %{
-#include "rolling_fc3d_Solvers.h"
+#include "rolling_fc_Solvers.h"
 #include "Friction_cst.h"
 #include "RollingFrictionContactProblem.h"
 #include "rolling_fc3d_compute_error.h"
@@ -18,7 +18,7 @@
 #endif
 
 %include "fclib_interface.h"
-%include "rolling_fc3d_Solvers.h"
+%include "rolling_fc_Solvers.h"
 %include "Friction_cst.h"
 %include "rolling_fc3d_compute_error.h"
 

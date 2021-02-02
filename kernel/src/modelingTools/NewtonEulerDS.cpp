@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "CxxStd.hpp"
-
+#include "SiconosMatrixSetBlock.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "NewtonEulerDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
@@ -25,14 +25,16 @@
 #include "RotationQuaternion.hpp"
 #include <iostream>
 
-
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 
 
 
 static
 void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, double q3,
-                                               SP::SimpleMatrix jacobian, SP::SiconosVector v)
+    SP::SimpleMatrix jacobian, SP::SiconosVector v)
 {
 
   /* This routine compute the jacobian with respect to p of R^T(p)v */
@@ -158,7 +160,7 @@ void NewtonEulerDS::init_forces()
   // Needed only for integrators with first-order formulation.
 
   if(!_wrench)
-      _wrench.reset(new SiconosVector(_ndof));
+    _wrench.reset(new SiconosVector(_ndof));
   if(!_mGyr)
     _mGyr.reset(new SiconosVector(3,0.0));
 
@@ -292,7 +294,7 @@ void NewtonEulerDS::initRhs(double time)
 
   _x[0].reset(new SiconosVector(*_q, *_twist));
 
-  if (!_acceleration)
+  if(!_acceleration)
     _acceleration.reset(new SiconosVector(6));
 
   // Compute _dotq
@@ -327,7 +329,7 @@ void NewtonEulerDS::initRhs(double time)
     computeJacobianqForces(time);
 
     _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianWrenchq));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10]);
     flag1 = true;
   }
 
@@ -336,7 +338,7 @@ void NewtonEulerDS::initRhs(double time)
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianvForces(time);
     _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianWrenchTwist));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11]);
     flag2 = true;
   }
 
@@ -365,7 +367,7 @@ void NewtonEulerDS::initRhs(double time)
 void NewtonEulerDS::setQ(const SiconosVector& newValue)
 {
   if(newValue.size() != _qDim)
-    RuntimeException::selfThrow("NewtonEulerDS - setQ: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setQ: inconsistent input vector size ");
 
   if(! _q)
     _q.reset(new SiconosVector(newValue));
@@ -376,13 +378,13 @@ void NewtonEulerDS::setQ(const SiconosVector& newValue)
 void NewtonEulerDS::setQPtr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _qDim)
-    RuntimeException::selfThrow("NewtonEulerDS - setQPtr: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setQPtr: inconsistent input vector size ");
   _q = newPtr;
 }
 void NewtonEulerDS::setQ0(const SiconosVector& newValue)
 {
   if(newValue.size() != _qDim)
-    RuntimeException::selfThrow("NewtonEulerDS - setQ0: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setQ0: inconsistent input vector size ");
 
   if(! _q0)
     _q0.reset(new SiconosVector(newValue));
@@ -393,13 +395,13 @@ void NewtonEulerDS::setQ0(const SiconosVector& newValue)
 void NewtonEulerDS::setQ0Ptr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _qDim)
-    RuntimeException::selfThrow("NewtonEulerDS - setQ0Ptr: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setQ0Ptr: inconsistent input vector size ");
   _q0 = newPtr;
 }
 void NewtonEulerDS::setVelocity(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("NewtonEulerDS - setVelocity: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setVelocity: inconsistent input vector size ");
 
   if(! _twist)
     _twist0.reset(new SiconosVector(newValue));
@@ -410,14 +412,14 @@ void NewtonEulerDS::setVelocity(const SiconosVector& newValue)
 void NewtonEulerDS::setVelocityPtr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("NewtonEulerDS - setVelocityPtr: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setVelocityPtr: inconsistent input vector size ");
   _twist = newPtr;
 }
 
 void NewtonEulerDS::setVelocity0(const SiconosVector& newValue)
 {
   if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("NewtonEulerDS - setVelocity0: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setVelocity0: inconsistent input vector size ");
 
   if(! _twist0)
     _twist0.reset(new SiconosVector(newValue));
@@ -428,7 +430,7 @@ void NewtonEulerDS::setVelocity0(const SiconosVector& newValue)
 void NewtonEulerDS::setVelocity0Ptr(SP::SiconosVector newPtr)
 {
   if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("NewtonEulerDS - setVelocity0Ptr: inconsistent input vector size ");
+    THROW_EXCEPTION("NewtonEulerDS - setVelocity0Ptr: inconsistent input vector size ");
   _twist0 = newPtr;
 }
 
@@ -442,7 +444,7 @@ void NewtonEulerDS::resetToInitialState()
     *_q = *_q0;
   }
   else
-    RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial position _q0 is null");
+    THROW_EXCEPTION("NewtonEulerDS::resetToInitialState - initial position _q0 is null");
 
 
   if(_twist0)
@@ -450,25 +452,25 @@ void NewtonEulerDS::resetToInitialState()
     *_twist = *_twist0;
   }
   else
-    RuntimeException::selfThrow("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
+    THROW_EXCEPTION("NewtonEulerDS::resetToInitialState - initial twist _twist0 is null");
 }
 
 void NewtonEulerDS::init_inverse_mass()
 {
   if(_mass && !_inverseMass)
-    {
-      updateMassMatrix();
-      _inverseMass.reset(new SimpleMatrix(*_mass));
-    }
+  {
+    updateMassMatrix();
+    _inverseMass.reset(new SimpleMatrix(*_mass));
+  }
 }
 
 void NewtonEulerDS::update_inverse_mass()
 {
   if(_mass && _inverseMass)
-    {
-      updateMassMatrix();
-      *_inverseMass = *_mass;
-    }
+  {
+    updateMassMatrix();
+    *_inverseMass = *_mass;
+  }
 }
 
 void NewtonEulerDS::computeFExt(double time)
@@ -634,9 +636,9 @@ void NewtonEulerDS::computeFInt(double time, SP::SiconosVector q, SP::SiconosVec
 
 void NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)
 {
-   DEBUG_BEGIN("NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)\n");
-   computeMInt(time, q, v, _mInt);
-   DEBUG_END("NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)\n");
+  DEBUG_BEGIN("NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)\n");
+  computeMInt(time, q, v, _mInt);
+  DEBUG_END("NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v)\n");
 }
 
 void NewtonEulerDS::computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v, SP::SiconosVector mInt)
@@ -850,10 +852,10 @@ void NewtonEulerDS::computeRhs(double time)
   DEBUG_EXPR(_wrench->display(););
 
   if(_inverseMass)
-    _inverseMass->PLUForwardBackwardInPlace(*_acceleration);
+    _inverseMass->Solve(*_acceleration);
 
 
-   // Compute _dotq
+  // Compute _dotq
   computeT();
   prod(*_T, *_twist, *_dotq, true);
 
@@ -869,14 +871,14 @@ void NewtonEulerDS::computeJacobianRhsx(double time)
     SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianWrenchq;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc10);
+    _inverseMass->Solve(*bloc10);
   }
   if(_jacobianWrenchTwist)
   {
     SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
     computeJacobianvForces(time);
     *bloc11 = *_jacobianWrenchTwist;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc11);
+    _inverseMass->Solve(*bloc11);
   }
 
 }
@@ -892,7 +894,7 @@ void NewtonEulerDS::computeForces(double time)
  * computeMGyr(twist, _mGyr)
  */
 static
-void computeMGyr_internal(SP::SiconosMatrix I ,SP::SiconosVector twist, SP::SiconosVector mGyr)
+void computeMGyr_internal(SP::SiconosMatrix I,SP::SiconosVector twist, SP::SiconosVector mGyr)
 {
   if(I)
   {
@@ -912,7 +914,7 @@ void NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)
   // computation of \Omega times I \Omega (MGyr is in the l.h.s of the equation of motion)
   DEBUG_BEGIN("NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)\n");
 
-   ::computeMGyr_internal(_I, twist, mGyr);
+  ::computeMGyr_internal(_I, twist, mGyr);
 
   DEBUG_END("NewtonEulerDS::computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr)\n");
 
@@ -921,7 +923,7 @@ void NewtonEulerDS::computeMGyr(SP::SiconosVector twist)
 {
   /*computation of \Omega times I \Omega*/
   //DEBUG_BEGIN("NewtonEulerDS::computeMGyr(SP::SiconosVector twist)\n");
-  ::computeMGyr_internal(_I , twist, _mGyr);
+  ::computeMGyr_internal(_I, twist, _mGyr);
   //DEBUG_END("NewtonEulerDS::computeMGyr(SP::SiconosVector twist)\n");
 
 }
@@ -940,15 +942,16 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_fExt)
     {
       computeFExt(time);
-      assert(!isnan(_fExt->vector_sum()));
+      assert(!std::isnan(_fExt->vector_sum()));
       _wrench->setBlock(0, *_fExt);
     }
     if(_mExt)
     {
       computeMExt(time);
-      assert(!isnan(_mExt->vector_sum()));
-      if(_isMextExpressedInInertialFrame) {
-        SP::SiconosVector mExt(std11::make_shared<SiconosVector>(*_mExt));
+      assert(!std::isnan(_mExt->vector_sum()));
+      if(_isMextExpressedInInertialFrame)
+      {
+        SP::SiconosVector mExt(std::make_shared<SiconosVector>(*_mExt));
         ::changeFrameAbsToBody(q,mExt);
         _wrench->setBlock(3, *mExt);
       }
@@ -961,7 +964,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(_fInt)
     {
       computeFInt(time, q, twist);
-      assert(!isnan(_fInt->vector_sum()));
+      assert(!std::isnan(_fInt->vector_sum()));
       _wrench->setValue(0, _wrench->getValue(0) - _fInt->getValue(0));
       _wrench->setValue(1, _wrench->getValue(1) - _fInt->getValue(1));
       _wrench->setValue(2, _wrench->getValue(2) - _fInt->getValue(2));
@@ -970,8 +973,8 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
 
     if(_mInt)
     {
-      computeMInt(time, q , twist);
-      assert(!isnan(_mInt->vector_sum()));
+      computeMInt(time, q, twist);
+      assert(!std::isnan(_mInt->vector_sum()));
       _wrench->setValue(3, _wrench->getValue(3) - _mInt->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mInt->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mInt->getValue(2));
@@ -981,7 +984,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
     if(!_nullifyMGyr)
     {
       computeMGyr(twist);
-      assert(!isnan(_mGyr->vector_sum()));
+      assert(!std::isnan(_mGyr->vector_sum()));
       _wrench->setValue(3, _wrench->getValue(3) - _mGyr->getValue(0));
       _wrench->setValue(4, _wrench->getValue(4) - _mGyr->getValue(1));
       _wrench->setValue(5, _wrench->getValue(5) - _mGyr->getValue(2));
@@ -992,7 +995,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
   }
   else
   {
-    RuntimeException::selfThrow("NewtonEulerDS::computeForces _wrench is null");
+    THROW_EXCEPTION("NewtonEulerDS::computeForces _wrench is null");
   }
   // else nothing.
 }
@@ -1021,7 +1024,7 @@ void NewtonEulerDS::computeJacobianqForces(double time)
   }
   else
   {
-    RuntimeException::selfThrow("NewtonEulerDS::computeJacobianqForces _jacobianWrenchq is null");
+    THROW_EXCEPTION("NewtonEulerDS::computeJacobianqForces _jacobianWrenchq is null");
   }
   //else nothing.
   DEBUG_END("NewtonEulerDS::computeJacobianqForces(double time) \n");
@@ -1109,31 +1112,31 @@ void NewtonEulerDS::display(bool brief) const
   std::cout << "- _n : " << _n <<std::endl;
   std::cout << "- q " <<std::endl;
   if(_q) _q->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- q0 " <<std::endl;
   if(_q0) _q0->display();
   std::cout << "- twist " <<std::endl;
   if(_twist) _twist->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- twist0 " <<std::endl;
   if(_twist0) _twist0->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- dotq " <<std::endl;
   if(_dotq) _dotq->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- p[0] " <<std::endl;
   if(_p[0]) _p[0]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- p[1] " <<std::endl;
   if(_p[1]) _p[1]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- p[2] " <<std::endl;
   if(_p[2]) _p[2]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "mass :" <<  _scalarMass <<std::endl;
   std::cout << "Inertia :" <<std::endl;
   if(_I) _I->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "===================================== " <<std::endl;
 }
 
@@ -1297,10 +1300,10 @@ SP::SiconosVector NewtonEulerDS::linearVelocity(bool absoluteRef) const
 {
   // Short-cut: return the _twist 6-vector without modification, first
   // 3 components are the expected linear velocity.
-  if (absoluteRef)
+  if(absoluteRef)
     return _twist;
 
-  SP::SiconosVector v(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector v(std::make_shared<SiconosVector>(3));
   linearVelocity(absoluteRef, *v);
   return v;
 }
@@ -1312,13 +1315,13 @@ void NewtonEulerDS::linearVelocity(bool absoluteRef, SiconosVector &v) const
   v(2) = (*_twist)(2);
 
   /* See _twist: linear velocity is in absolute frame */
-  if (!absoluteRef)
+  if(!absoluteRef)
     changeFrameAbsToBody(*_q, v);
 }
 
 SP::SiconosVector NewtonEulerDS::angularVelocity(bool absoluteRef) const
 {
-  SP::SiconosVector w(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector w(std::make_shared<SiconosVector>(3));
   angularVelocity(absoluteRef, *w);
   return w;
 }
@@ -1330,7 +1333,7 @@ void NewtonEulerDS::angularVelocity(bool absoluteRef, SiconosVector &w) const
   w(2) = (*_twist)(5);
 
   /* See _twist: angular velocity is in relative frame */
-  if (absoluteRef)
+  if(absoluteRef)
     changeFrameBodyToAbs(*_q, w);
 }
 
@@ -1342,21 +1345,25 @@ void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFra
 {
   assert(!!fExt && fExt->size() == 3);
   assert(!!force && force->size() == 3);
-  if (pos)
+  if(pos)
     assert(!!mExt && mExt->size() == 3);
 
   SiconosVector abs_frc(*force), local_frc(*force);
 
-  if (forceAbsRef) {
-    if (pos)
+  if(forceAbsRef)
+  {
+    if(pos)
       changeFrameAbsToBody(*q, local_frc);
-  } else
+  }
+  else
     changeFrameBodyToAbs(*q, abs_frc);
 
-  if (pos) {
+  if(pos)
+  {
     assert(!!mExt && mExt->size() >= 3);
     SiconosVector moment(3);
-    if (posAbsRef) {
+    if(posAbsRef)
+    {
       SiconosVector local_pos(*pos);
       local_pos(0) -= (*q)(0);
       local_pos(1) -= (*q)(1);
@@ -1364,20 +1371,21 @@ void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFra
       changeFrameAbsToBody(*q, local_pos);
       cross_product(local_pos, local_frc, moment);
     }
-    else {
+    else
+    {
       cross_product(*pos, local_frc, moment);
     }
 
-    if (isMextExpressedInInertialFrame)
+    if(isMextExpressedInInertialFrame)
       changeFrameBodyToAbs(*q, moment);
 
-    if (accumulate)
+    if(accumulate)
       *mExt = *mExt + moment;
     else
       *mExt = moment;
   }
 
-  if (accumulate)
+  if(accumulate)
     *fExt += *fExt + abs_frc;
   else
     *fExt = abs_frc;
@@ -1388,7 +1396,7 @@ void NewtonEulerDS::addExtForceAtPos(SP::SiconosVector force, bool forceAbsRef,
 {
   assert(!!_fExt && _fExt->size() == 3);
   assert(!!force && force->size() == 3);
-  if (pos)
+  if(pos)
     assert(!!_mExt && _mExt->size() == 3);
 
   computeExtForceAtPos(_q, _isMextExpressedInInertialFrame,

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 
 #include "ActuatorFactory.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 
 
@@ -39,9 +39,9 @@ SP::Actuator Registry::instantiate(unsigned int type, SP::ControlSensor sensor)
 {
   MapFactoryIt it = factory_map.find(type);
 
-  if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (ActuatorFactory) \
-        failed, no class numbered: " + type);
+  if(it == factory_map.end())
+    THROW_EXCEPTION("Registry::instantiate (ActuatorFactory) \
+        failed, no class numbered: " + std::to_string(type));
 
   // std::cout <<std::endl << "Factory instance for class" << name <<std::endl ; // for test purposes only
   return (it->second)(sensor) ;  // run our factory

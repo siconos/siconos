@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ Note that not all files from the current location are listed below, since some o
 
 #include "Equality.hpp"
 #include "LCP.hpp"
-#include "OSNSMultipleImpact.hpp"
+#include "MultipleImpact.hpp"
 #include "MLCP.hpp"
 #include "MLCPProjectOnConstraints.hpp"
 #include "AVI.hpp"

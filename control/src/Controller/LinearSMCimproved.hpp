@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 
 #include <boost/circular_buffer_fwd.hpp>
 
-typedef std11::shared_ptr<boost::circular_buffer<SP::SiconosVector> > BufferOfVectors;
+typedef std::shared_ptr<boost::circular_buffer<SP::SiconosVector> > BufferOfVectors;
 
 class LinearSMCimproved : public LinearSMC
 {
@@ -77,7 +77,7 @@ public:
    * \param B the B matrix in the FirstOrderLinearR
    * \param D the D matrix in the FirstOrderLinearR
    */
-  LinearSMCimproved(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std11::shared_ptr<SimpleMatrix>());
+  LinearSMCimproved(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std::shared_ptr<SimpleMatrix>());
 
   /** destructor
    */

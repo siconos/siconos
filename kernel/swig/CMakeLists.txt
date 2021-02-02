@@ -18,22 +18,52 @@ set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS
 # List of modules to be built in the python bindings
 set(${COMPONENT}_PYTHON_MODULES "./${COMPONENT}")
 
-set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
-
 set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
+# TMP fix 
+if(${CMAKE_VERSION} VERSION_LESS "3.13")
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/numerics/src/tools")
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIR}")
+
+  # Kernel dirs are required as include for swig in next components.
+  foreach(_dir IN LISTS ${COMPONENT}_DIRS)
+    list(APPEND CMAKE_SWIG_FLAGS "-I${CMAKE_SOURCE_DIR}/${COMPONENT}/${_dir}")
+  endforeach()
+  list(REMOVE_DUPLICATES CMAKE_SWIG_FLAGS)
+  set(CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} CACHE INTERNAL "")
+endif()
+
 
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
-if(NOT WITH_XML)
-  list(APPEND ${COMPONENT}_python_excluded_tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
+
+target_link_libraries(_kernel numerics)
+
+## FP : when serialization is ON, we need includes from io in kernel ...
+# This has to be reviewed.
+if(WITH_SERIALIZATION)
+  target_include_directories(_kernel PRIVATE ${CMAKE_SOURCE_DIR}/io/src/serialization)
+  if(WITH_GENERATION)
+    target_include_directories(_kernel PRIVATE ${CMAKE_BINARY_DIR}/io/)
+  else()
+    target_include_directories(_kernel PRIVATE ${CMAKE_SOURCE_DIR}/io/src/generation)
+  endif()
+  # for f2c.h in SiconosFull.h ...
+  target_include_directories(_kernel PRIVATE ${CMAKE_SOURCE_DIR}/externals/tools/)
 endif()
 
-if(NOT HAS_FORTRAN)
-  list(APPEND ${COMPONENT}_python_excluded_tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
+# --- Tests ---
+if(WITH_${COMPONENT}_TESTING)
+  if(NOT WITH_XML)
+    list(APPEND python_excluded_tests tests/test_xml.py)
+  endif()
+  
+  if(NOT HAS_FORTRAN)
+    list(APPEND python_excluded_tests tests/test_matrix_exp.py)
+  endif()
+  
+  find_python_module(lxml REQUIRED)
+  build_python_tests(
+    EXCLUDE ${python_excluded_tests})
 endif()
-
-build_python_tests()
 
 configure_file(fromXml.py.in ${SICONOS_SWIG_ROOT_DIR}/fromXml.py @ONLY)

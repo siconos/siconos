@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,12 @@
  * limitations under the License.
 */
 
-
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "NCP_Solvers.h"
-#include "SiconosLapack.h"
-#include "Newton_methods.h"
-#include "FischerBurmeister.h"
-#include "min_merit.h"
-#include "ncp_newton_FBLSA.h"
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
+#include "NCP_Solvers.h"                      // for ncp_newton_minFBLSA
+#include "Newton_methods.h"                   // for functions_LSA, init_lsa...
+#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
+#include "NumericsFwd.h"                      // for NonlinearComplementarit...
+#include "min_merit.h"                        // for F_min, Jac_F_min
+#include "ncp_newton_FBLSA.h"                 // for FB_compute_F_ncp, FB_co...
 
 static void ncp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {
@@ -48,7 +39,7 @@ static void min_compute_H_ncp(void* data_opaque, double* z, double* F, double* w
   Jac_F_min(0, data->n, z, F, data->nabla_F, H);
 }
 
-void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info , SolverOptions* options)
+void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info, SolverOptions* options)
 {
   functions_LSA functions_minFBLSA_ncp;
   init_lsa_functions(&functions_minFBLSA_ncp, &FB_compute_F_ncp, &ncp_FB);

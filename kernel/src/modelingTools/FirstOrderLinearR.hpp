@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,54 +142,54 @@ public:
    * \param z the auxiliary input vector
    * \param C the C matrix
   */
-  void computeC(double time, SiconosVector& z, SimpleMatrix& C);
+  void computeC(double time, BlockVector& z, SimpleMatrix& C);
 
   /** Function to compute the matrix D
    * \param time the current time
    * \param z the auxiliary input vector
    * \param D the D matrix
   */
-  void computeD(double time, SiconosVector& z, SimpleMatrix& D);
+  void computeD(double time, BlockVector& z, SimpleMatrix& D);
 
   /** Function to compute the matrix F
    * \param time the current time
    * \param z the auxiliary input vector
    * \param F the F matrix
   */
-  void computeF(double time, SiconosVector& z, SimpleMatrix& F);
+  void computeF(double time, BlockVector& z, SimpleMatrix& F);
 
   /** Function to compute the vector e
    * \param time the current time
    * \param z the auxiliary input vector
    * \param e the e vector
   */
-  void computee(double time, SiconosVector& z, SiconosVector& e);
+  void computee(double time, BlockVector& z, SiconosVector& e);
 
   /** Function to compute the matrix B
    * \param time the current time
    * \param z the auxiliary input vector
    * \param B the B matrix
   */
-  void computeB(double time, SiconosVector& z, SimpleMatrix& B);
+  void computeB(double time, BlockVector& z, SimpleMatrix& B);
 
-  /** default function to compute h
-  *  \param time current time
-  *  \param x XXX
-  *  \param lambda
-  *  \param z XXX
-  *  \param y value of h
+  /** to compute the output y = h(t,x,...) of the Relation
+      \param time current time value
+      \param x coordinates of the dynamical systems involved in the relation
+      \param lambda interaction \f$\lambda\f$ vector
+      \param z user defined parameters (optional)
+      \param y the resulting vector
   */
   void computeh(double time, 
-                BlockVector& x, SiconosVector& lambda,
-                SiconosVector& z, SiconosVector& y);
+                const BlockVector& x, const SiconosVector& lambda,
+                BlockVector& z, SiconosVector& y);
 
-  /** default function to compute g
-  *  \param time current time
-  *  \param lambda XXX
-  *  \param z XXX
-  *  \param r non-smooth input
+  /** to compute the nonsmooth input r = g(t,x,...) of the Relation
+      \param time current time value
+      \param lambda interaction \f$\lambda\f$ vector
+      \param z user defined parameters (optional)
+      \param r the resulting vector
   */
-  void computeg(double time, SiconosVector& lambda, SiconosVector& z, BlockVector& r);
+  void computeg(double time, const SiconosVector& lambda, BlockVector& z, BlockVector& r);
 
   /** default function to compute y
   *  \param time current time

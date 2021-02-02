@@ -42,40 +42,40 @@ void occ_distanceFaceFace(const OccContactFace& csh1,
   measure.LoadS2(face2);
   measure.Perform();
 
-  if (measure.IsDone())
+  if(measure.IsDone())
   {
     /* we look for the first solution on a face */
     int nb_solutions = measure.NbSolution();
-    for (Standard_Integer i=1; i<= nb_solutions; ++i)
+    for(Standard_Integer i=1; i<= nb_solutions; ++i)
     {
-      if (measure.SupportTypeShape2(i) == BRepExtrema_IsInFace)
+      if(measure.SupportTypeShape2(i) == BRepExtrema_IsInFace)
       {
-         const gp_Pnt& p1 = measure.PointOnShape1(i);
-         const gp_Pnt& p2 = measure.PointOnShape2(i);
+        const gp_Pnt& p1 = measure.PointOnShape1(i);
+        const gp_Pnt& p2 = measure.PointOnShape2(i);
 
-         Standard_Real u, v;
+        Standard_Real u, v;
 
-         measure.ParOnFaceS2(i, u, v);
-         gp_Dir normal = cadmbtb_FaceNormal(face2, u, v);
-         normal.Coord(nX,nY,nZ);
-         X1 = p1.X();
-         X2 = p2.X();
-         Y1 = p1.Y();
-         Y2 = p2.Y();
-         Z1 = p1.Z();
-         Z2 = p2.Z();
-         if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)<0)
-         {
-           normal.Reverse();
-         }
-         normal.Coord(nX,nY,nZ);
-         MinDist = measure.Value();
-         break;
+        measure.ParOnFaceS2(i, u, v);
+        gp_Dir normal = cadmbtb_FaceNormal(face2, u, v);
+        normal.Coord(nX,nY,nZ);
+        X1 = p1.X();
+        X2 = p2.X();
+        Y1 = p1.Y();
+        Y2 = p2.Y();
+        Z1 = p1.Z();
+        Z2 = p2.Z();
+        if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)<0)
+        {
+          normal.Reverse();
+        }
+        normal.Coord(nX,nY,nZ);
+        MinDist = measure.Value();
+        break;
       }
     }
   }
   else
-    RuntimeException::selfThrow("occ distance: BRepExtrema_DistShapeShape failed");
+    THROW_EXCEPTION("occ distance: BRepExtrema_DistShapeShape failed");
 }
 void occ_distanceFaceEdge(const OccContactFace& csh1,
                           const OccContactEdge& csh2,
@@ -96,13 +96,13 @@ void occ_distanceFaceEdge(const OccContactFace& csh1,
   measure.LoadS2(edge2);
   measure.Perform();
 
-  if (measure.IsDone())
+  if(measure.IsDone())
   {
     int nb_solutions = measure.NbSolution();
-    for (Standard_Integer i=1; i<= nb_solutions; ++i)
+    for(Standard_Integer i=1; i<= nb_solutions; ++i)
     {
       /* we look for the first solution on a face */
-      if (measure.SupportTypeShape1(i) == BRepExtrema_IsInFace)
+      if(measure.SupportTypeShape1(i) == BRepExtrema_IsInFace)
       {
         const gp_Pnt& p1 = measure.PointOnShape1(i);
         const gp_Pnt& p2 = measure.PointOnShape2(i);
@@ -128,5 +128,5 @@ void occ_distanceFaceEdge(const OccContactFace& csh1,
     // what to do now if MinDist is not changed ?
   }
   else
-    RuntimeException::selfThrow("occ distance: BRepExtrema_DistShapeShape failed");
+    THROW_EXCEPTION("occ distance: BRepExtrema_DistShapeShape failed");
 }

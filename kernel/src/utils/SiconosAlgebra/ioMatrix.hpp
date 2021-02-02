@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
            otherwise -1.
  */
 double compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
-                      Index index=Index(), SP::SimpleMatrix* ref=0,
+                      Index index=Index(), SP::SimpleMatrix* ref=nullptr,
                       std::string mode="ascii", bool verbose=true);
 }
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,6 @@ extern "C"
   /** Free the internalData of a NumericsMatrix
    * \param m the matrix */
   void NM_internalData_free(NumericsMatrix* m);
-
-
 
 
 #ifdef WITH_UMFPACK

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 //#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+#include "RotationQuaternion.hpp"
+
 #include <debug.h>
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
@@ -298,8 +300,8 @@ double sin_x(double x)
 void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q)
 {
   double angle = sqrt(rotationVector->getValue(0)*rotationVector->getValue(0)+
-               rotationVector->getValue(1)*rotationVector->getValue(1)+
-               rotationVector->getValue(2)*rotationVector->getValue(2));
+                      rotationVector->getValue(1)*rotationVector->getValue(1)+
+                      rotationVector->getValue(2)*rotationVector->getValue(2));
 
   double f = 0.5 * sin_x(angle *0.5);
 

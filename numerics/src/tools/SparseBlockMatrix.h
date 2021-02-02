@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@
 #ifndef SparseBlockMatrix_H
 #define SparseBlockMatrix_H
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include <stdio.h>
+#include <stdio.h>          // for size_t, FILE
+#include "CSparseMatrix.h"  // for CSparseMatrix
+#include "NumericsFwd.h"    // for SparseBlockStructuredMatrix, SparseBlockC...
 
-#include "CSparseMatrix.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsDataVersion.h" // versioning
 
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to
@@ -66,7 +67,7 @@
     index2_data[blockNumber] -> columnNumber.
 
 
-    Related functions: SBM_gemv(), SBM_row_prod(), SBM_free(),
+    Related functions: SBM_gemv(), SBM_row_prod(), SBM_clear(),
     SBM_print, SBM_diagonal_block_index()
  * If we consider the matrix M and the right-hand-side q defined as
  *
@@ -129,6 +130,7 @@ struct SparseBlockStructuredMatrix
   /* the indices of the diagonal blocks */
   unsigned int * diagonal_blocks;
 
+  NumericsDataVersion version; /**< version of storage */
 };
 
 struct SparseBlockCoordinateMatrix
@@ -284,6 +286,13 @@ extern "C"
                                   SparseBlockStructuredMatrix * C,
                                   double gamma);
 
+  
+  /** Multiply a matrix with a double alpha*A --> A
+   * \param alpha the  coefficient
+   * \param A the   matrix
+   */
+  void SBM_scal(double alpha, SparseBlockStructuredMatrix * A);
+  
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX dim of the vector x
@@ -327,7 +336,7 @@ extern "C"
   /** Destructor for SparseBlockStructuredMatrix objects
       \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.
    */
-  void SBM_free(SparseBlockStructuredMatrix * blmat);
+  void SBM_clear(SparseBlockStructuredMatrix * blmat);
 
   /** To free a SBM matrix (for example allocated by NM_new_from_file).
    * \param[in] A the SparseBlockStructuredMatrix that mus be de-allocated.
@@ -380,7 +389,7 @@ extern "C"
   /** Destructor for SparseBlockStructuredMatrixPred objects
    *   \param blmatpred SparseBlockStructuredMatrix, the matrix to be destroyed.
    */
-  void SBM_free_pred(SparseBlockStructuredMatrixPred *blmatpred);
+  void SBM_clear_pred(SparseBlockStructuredMatrixPred *blmatpred);
 
   /** Compute the indices of blocks of the diagonal block
       \param M the SparseBlockStructuredMatrix matrix
@@ -395,7 +404,15 @@ extern "C"
   */
   unsigned int SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, unsigned int row);
 
-  int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col, double val);
+  /** insert an entry into a SparseBlockStructuredMatrix.
+   *  This method is expensive in terms of memory management. For a lot of entries, use
+   * an alternative
+   * \param M the SparseBlockStructuredMatrix
+   * \param i row index
+   * \param j column index
+   * \param val the value to be inserted.
+   */
+  int SBM_entry(SparseBlockStructuredMatrix* M, unsigned int row, unsigned int col, double val);
 
   /** get the element of row i and column j of the matrix M
      \param M the SparseBlockStructuredMatrix matrix

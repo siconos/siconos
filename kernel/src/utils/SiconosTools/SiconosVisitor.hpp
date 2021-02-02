@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,7 @@
 */
 
 #include "SiconosPointers.hpp"
-#include "RuntimeException.hpp"
-
+#include "SiconosException.hpp"
 /* all Siconos classes that may be visited are defined there */
 #include "SiconosVisitables.hpp"
 
@@ -62,7 +61,7 @@
 #define SICONOS_VISITOR_QUOTE(M) #M
 
 #define SICONOS_VISITOR_FAIL(X)                                         \
-  { RuntimeException::selfThrow                                         \
+  { THROW_EXCEPTION                                         \
       ( SICONOS_VISITOR_QUOTE(you must define a visit function for X in a derived class of SiconosVisitor)); }
 
 
@@ -71,21 +70,21 @@
   template<typename Archive> friend class SiconosSerializer;            \
   virtual void acceptSP(SP::SiconosVisitor)                             \
   {                                                                     \
-    RuntimeException::selfThrow                                         \
+    THROW_EXCEPTION                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); \
   };                                                                    \
   virtual void accept(SiconosVisitor&) const                            \
   {                                                                     \
-    RuntimeException::selfThrow                                         \
+    THROW_EXCEPTION                                         \
       ( "accept: no visitor defined");                                  \
   };                                                                    \
   virtual void acceptSerializer(SiconosVisitor&)                        \
   {                                                                     \
-    RuntimeException::selfThrow                                         \
+    THROW_EXCEPTION                                         \
       ( "acceptSerializer: no serializer defined");                     \
   };                                                                    \
   virtual inline Type::Siconos acceptType(FindType& ft) const           \
-  { RuntimeException::selfThrow                                         \
+  { THROW_EXCEPTION                                         \
       ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a type visitor)); \
     return Type::void_type;                                             \
   }                                                                     \
@@ -128,7 +127,7 @@
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*static_cast<const BASE *>(this)); } \
 
 #define ACCEPT_BASE_SP_VISITORS(BASE)                                   \
-  virtual void acceptSPBase(SP::SiconosVisitor tourist) { tourist->visit(std11::static_pointer_cast<BASE>(shared_from_this())); }\
+  virtual void acceptSPBase(SP::SiconosVisitor tourist) { tourist->visit(std::static_pointer_cast<BASE>(shared_from_this())); }\
   virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
 
 #define ACCEPT_BASE_VISITORS(BASE)                           \
@@ -196,7 +195,7 @@ struct FindType
 /* the base visitor */
 #undef REGISTER
 #define REGISTER(X)             \
-  virtual void visit(std11::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
+  virtual void visit(std::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
   virtual void visit(X&) SICONOS_VISITOR_FAIL(X);                         \
   virtual void visit(const X&) SICONOS_VISITOR_FAIL(X);
 

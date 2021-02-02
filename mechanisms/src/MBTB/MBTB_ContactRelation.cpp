@@ -16,7 +16,7 @@ MBTB_ContactRelation::~MBTB_ContactRelation()
 
 MBTB_ContactRelation::MBTB_ContactRelation(): NewtonEuler1DR()
 {
-  _pContact=NULL;
+  _pContact=nullptr;
 }
 MBTB_ContactRelation::MBTB_ContactRelation(MBTB_Contact *pC): NewtonEuler1DR()
 {
@@ -34,7 +34,7 @@ void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector&
   if(sPrintDist)
   {
     printf("MBTB_ContactRelation::computeh Start display for contact name %s\n",_pContact->_ContactName);
-  } 
+  }
 
 
 
@@ -42,7 +42,7 @@ void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector&
   //if (_pContact->_curTimeh + 1e-9 < time){
   ACE_times[ACE_TIMER_DIST].start();
   double X1,X2,Y1,Y2,Z1,Z2,nx,ny,nz;
-  CADMBTB_getMinDistance(_pContact->_id,_pContact->_indexCAD1,_pContact->_indexCAD2 ,
+  CADMBTB_getMinDistance(_pContact->_id,_pContact->_indexCAD1,_pContact->_indexCAD2,
                          X1,Y1,Z1,
                          X2,Y2,Z2,
                          nx,ny,nz,_pContact->_normalFromFace1,
@@ -52,7 +52,7 @@ void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector&
     printf("    Minimal distance computed from CAD and n2qn1 : %lf \n",_pContact->_dist);
     printf("    Proximal point 1 computed from CAD :  X1=%lf, Y1=%lf, Z1=%lf \n",X1,Y1,Z1);
     printf("    Proximal point 2 computed from CAD :  X2=%lf, Y2=%lf, Z2=%lf \n",X2,Y2,Z2);
-    if (_pContact->_normalFromFace1)
+    if(_pContact->_normalFromFace1)
       printf("    Normal vector computed from CAD taken from  Object 1 :  nx=%lf, ny=%lf, nz=%lf \n",nx,ny,nz);
     else
       printf("    Normal vector computed from CAD taken from  Object 2 :  nx=%lf, ny=%lf, nz=%lf \n",nx,ny,nz);
@@ -62,7 +62,7 @@ void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector&
   // nx=-nx;
   // ny=-ny;
   // nz=-nz;
-  
+
 
 
   if(_pContact->_OffsetP1)
@@ -72,11 +72,11 @@ void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector&
     _Pc1->setValue(2,Z1+_pContact->_Offset*nz);
     _Pc2->setValue(0,X2);
     _Pc2->setValue(1,Y2);
-    _Pc2->setValue(2,Z2); 
+    _Pc2->setValue(2,Z2);
     if(sPrintDist)
     {
       printf("    OffSet is added from contact point PC1 : newPC1 =  PC1 + Offset.n ");
-      printf("    OffSet %lf\n ",_pContact->_Offset );
+      printf("    OffSet %lf\n ",_pContact->_Offset);
     }
   }
   else
@@ -86,11 +86,11 @@ void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector&
     _Pc1->setValue(2,Z1);
     _Pc2->setValue(0,X2-_pContact->_Offset*nx);
     _Pc2->setValue(1,Y2-_pContact->_Offset*ny);
-    _Pc2->setValue(2,Z2-_pContact->_Offset*nz); 
+    _Pc2->setValue(2,Z2-_pContact->_Offset*nz);
     if(sPrintDist)
     {
       printf("    OffSet is substracted from contact point PC2 : newPC1 =  PC2 - Offset.n ");
-      printf("    OffSet %lf\n",_pContact->_Offset );
+      printf("    OffSet %lf\n",_pContact->_Offset);
     }
   }
   /** Because in CAD model, the normal is going outside of the body .*/
@@ -98,7 +98,7 @@ void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector&
   // _Nc->setValue(0,-nx);
   // _Nc->setValue(1,-ny);
   // _Nc->setValue(2,-nz);
-  
+
 
   DEBUG_EXPR(display(););
   DEBUG_EXPR(_Nc->display(););
@@ -137,7 +137,7 @@ void MBTB_ContactRelation::computeh(double time, BlockVector& q0, SiconosVector&
   if(sPrintDist)
   {
     printf("MBTB_ContactRelation::computeh End display for contact name %s\n",_pContact->_ContactName);
-  } 
+  }
 
 }
 

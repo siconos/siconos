@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CxxStd.hpp"
-
+#include "SiconosAlgebraProd.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
 #include "BlockVector.hpp"
@@ -46,12 +46,12 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSyst
   // Get work buffers from the graph and initialize ds state and memory
   VectorOfVectors& work_ds = *_initializeDSWorkVectors(ds);
 
- 
+
   DEBUG_PRINT("initializeWorkVectorsForDS() \n");
   // Check consistency between OSI type and DS type
   Type::Siconos dsType = Type::value(*ds);
   if(dsType != Type::LagrangianLinearDiagonalDS)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initializeWorkVectorsForDS - not yet implemented for Dynamical system of type : " + Type::name(*ds));
+    THROW_EXCEPTION("MoreauJeanBilbaoOSI::initializeWorkVectorsForDS - not yet implemented for Dynamical system of type : " + Type::name(*ds));
 
   // Prepare work buffers
   work_ds.resize(MoreauJeanBilbaoOSI::WORK_LENGTH);
@@ -63,14 +63,14 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSyst
 
   // Initialize the iteration matrix and other parameters of the osi (all ds-dependent)
   _initialize_iteration_matrix(ds);
-  LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&> (*ds);
+  LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&>(*ds);
   // Update dynamical system components (for memory swap).
   lldds.computeForces(t, lldds.q(), lldds.velocity());
   lldds.swapInMemory();
 }
 
 void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
-				  DynamicalSystemsGraph & DSG)
+    DynamicalSystemsGraph & DSG)
 {
   // Get the dynamical systems linked by inter
   SP::DynamicalSystem ds1= interProp.source;
@@ -78,13 +78,13 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
   assert(ds1);
   assert(ds2);
 
-  if (!interProp.workVectors)
+  if(!interProp.workVectors)
   {
     interProp.workVectors.reset(new VectorOfVectors);
     interProp.workVectors->resize(MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
   }
 
-  if (!interProp.workBlockVectors)
+  if(!interProp.workBlockVectors)
   {
     interProp.workBlockVectors.reset(new VectorOfBlockVectors);
     interProp.workBlockVectors->resize(MoreauJeanBilbaoOSI::BLOCK_WORK_LENGTH);
@@ -96,11 +96,11 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
-  
+
   inter_work[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   if(relationType != Lagrangian || relationSubType != LinearTIR)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
+    THROW_EXCEPTION("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
 
   // // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -112,7 +112,7 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
   if(checkOSI(DSG.descriptor(ds1)))
   {
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    if (!inter_work_block[MoreauJeanBilbaoOSI::xfree])
+    if(!inter_work_block[MoreauJeanBilbaoOSI::xfree])
     {
       inter_work_block[MoreauJeanBilbaoOSI::xfree].reset(new BlockVector());
       inter_work_block[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds1[MoreauJeanBilbaoOSI::VFREE]);
@@ -122,12 +122,12 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
       inter_work_block[MoreauJeanBilbaoOSI::xfree]->setVectorPtr(0,workVds1[MoreauJeanBilbaoOSI::VFREE]);
     }
   }
-  if (ds1 != ds2)
+  if(ds1 != ds2)
   {
     if(checkOSI(DSG.descriptor(ds2)))
     {
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (!inter_work_block[MoreauJeanBilbaoOSI::xfree])
+      if(!inter_work_block[MoreauJeanBilbaoOSI::xfree])
       {
         inter_work_block[MoreauJeanBilbaoOSI::xfree].reset(new BlockVector());
         //dummy insertion to reserve first vector for ds1
@@ -159,13 +159,13 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
 
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   if(_dynamicalSystemsGraph->properties(dsv).W)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::_initialize_iteration_matrix(ds) - W has already been initialized by another osi");
+    THROW_EXCEPTION("MoreauJeanBilbaoOSI::_initialize_iteration_matrix(ds) - W has already been initialized by another osi");
 
   VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   Type::Siconos dsType = Type::value(*ds);
   if(dsType != Type::LagrangianLinearDiagonalDS)
-    RuntimeException::selfThrow("MoreauJeanBilbaoOSI::initialize_iteration_matrix - not yet implemented for Dynamical system of type : " + Type::name(*ds));
-  LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&> (*ds);
+    THROW_EXCEPTION("MoreauJeanBilbaoOSI::initialize_iteration_matrix - not yet implemented for Dynamical system of type : " + Type::name(*ds));
+  LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&>(*ds);
   unsigned int ndof = lldds.dimension();
   // Allocate work buffers for:
   // - Iteration matrix
@@ -186,7 +186,7 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
   double one = 1.;
   double two = 2.;
   double omega2k, sigmak, massk;
-  for(unsigned int k=0;k<ndof;++k)
+  for(unsigned int k=0; k<ndof; ++k)
   {
     massk = 1.;
     sigmak = 0.;
@@ -235,13 +235,13 @@ void MoreauJeanBilbaoOSI::computeFreeState()
 
   double time_step = _simulation->timeStep();
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     // Nothing to be done if the osi is not linked to the ds
     if(!checkOSI(dsi)) continue;
     //
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&> (*ds);
+    LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&>(*ds);
     VectorOfVectors& work_ds = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     // Get velocity computed at the beginning of the time step.
@@ -257,7 +257,7 @@ void MoreauJeanBilbaoOSI::computeFreeState()
     SiconosVector& vfree = *work_ds[MoreauJeanBilbaoOSI::VFREE];
     // Compute vfree
     unsigned int dimension = lldds.dimension();
-    for(unsigned int k=0; k<dimension;++k)
+    for(unsigned int k=0; k<dimension; ++k)
       vfree(k) = v_i(k) - inv_iteration_matrix(k, k) * (time_step * stiffness(k) * q_i(k) + two_dt_sigma_star(k) * v_i(k));
   }
 
@@ -302,7 +302,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
   // RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
   // check relation type: done in initializeWorkVectorsForInteraction.
   // if(relationType != Lagrangian || relationSubType != LinearR)
-  //   RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
+  //   THROW_EXCEPTION("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
 
   unsigned int sizeY = inter.nonSmoothLaw()->size();
   unsigned int relativePosition = 0;
@@ -334,7 +334,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
 
 void MoreauJeanBilbaoOSI::integrate(double& tinit, double& tend, double& tout, int& notUsed)
 {
-  RuntimeException::selfThrow("MoreauJeanBilbaoOSI::integrate - Not yet implemented for MoreauJeanBilbaoOSI.");
+  THROW_EXCEPTION("MoreauJeanBilbaoOSI::integrate - Not yet implemented for MoreauJeanBilbaoOSI.");
 }
 
 void MoreauJeanBilbaoOSI::updatePosition(DynamicalSystem& ds)
@@ -343,7 +343,7 @@ void MoreauJeanBilbaoOSI::updatePosition(DynamicalSystem& ds)
   // q(i+1) = q(i) + dt v(i+1)
   double time_step = _simulation->timeStep();
   // get dynamical system
-  LagrangianLinearDiagonalDS& d = static_cast<LagrangianLinearDiagonalDS&> (ds);
+  LagrangianLinearDiagonalDS& d = static_cast<LagrangianLinearDiagonalDS&>(ds);
   // Compute q
   SiconosVector& v = *d.velocity();
   SiconosVector& q = *d.q();
@@ -355,19 +355,19 @@ void MoreauJeanBilbaoOSI::updatePosition(DynamicalSystem& ds)
 }
 
 
-void MoreauJeanBilbaoOSI::updateState(const unsigned int )
+void MoreauJeanBilbaoOSI::updateState(const unsigned int)
 {
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if(useRCC)
     _simulation->setRelativeConvergenceCriterionHeld(true);
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SiconosMatrix& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).W;
     // get dynamical system and work vector
-    LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&> (*_dynamicalSystemsGraph->bundle(*dsi));
+    LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&>(*_dynamicalSystemsGraph->bundle(*dsi));
     VectorOfVectors& work_ds = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     SiconosVector& vfree = *work_ds[MoreauJeanBilbaoOSI::VFREE];
 
@@ -377,12 +377,12 @@ void MoreauJeanBilbaoOSI::updateState(const unsigned int )
       v = *lldds.p(_levelMaxForInput); // v = p
       if(lldds.boundaryConditions())
         for(std::vector<unsigned int>::iterator
-              itindex = lldds.boundaryConditions()->velocityIndices()->begin() ;
+            itindex = lldds.boundaryConditions()->velocityIndices()->begin() ;
             itindex != lldds.boundaryConditions()->velocityIndices()->end();
             ++itindex)
           v.setValue(*itindex, 0.0);
       unsigned int ndof = lldds.dimension();
-      for(unsigned int k=0;k<ndof;++k)
+      for(unsigned int k=0; k<ndof; ++k)
         v(k) = vfree(k) + v(k) * inv_iteration_matrix(k, k);
     }
     else
@@ -400,7 +400,7 @@ void MoreauJeanBilbaoOSI::display()
   DynamicalSystemsGraph::VIterator dsi, dsend;
   if(_dynamicalSystemsGraph)
   {
-    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
       if(!checkOSI(dsi)) continue;
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -408,7 +408,7 @@ void MoreauJeanBilbaoOSI::display()
       std::cout << "--------------------------------" <<std::endl;
       std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
       if(_dynamicalSystemsGraph->properties(*dsi).W) _dynamicalSystemsGraph->properties(*dsi).W->display();
-      else std::cout << "-> NULL" <<std::endl;
+      else std::cout << "-> nullptr" <<std::endl;
     }
   }
   std::cout << "================================" <<std::endl;
@@ -434,11 +434,11 @@ bool MoreauJeanBilbaoOSI::addInteractionInIndexSet(SP::Interaction inter, unsign
 
   double gamma = 1.0 / 2.0;
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   DEBUG_EXPR(
     if(y <= 0)
-      DEBUG_PRINT("MoreauJeanBilbaoOSI::addInteractionInIndexSet ACTIVATE.\n");
-    );
+    DEBUG_PRINT("MoreauJeanBilbaoOSI::addInteractionInIndexSet ACTIVATE.\n");
+  );
   return (y <= 0.0);
 }
 
@@ -452,12 +452,12 @@ bool MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(SP::Interaction inter, u
   double gamma = 1.0 / 2.0;
   DEBUG_PRINTF("MoreauJeanBilbaoOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   DEBUG_EXPR(
     if(y > 0)
-      DEBUG_PRINT("MoreauJeanOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
-    );
+    DEBUG_PRINT("MoreauJeanOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
+  );
   return (y > 0.0);
 }
 

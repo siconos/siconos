@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,20 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "NonSmoothDrivers.h"
-#include "fc2d_Solvers.h"
-#include "fc2d_compute_error.h"
-#include "LCP_Solvers.h"
-#include <assert.h>
-#include "numerics_verbose.h"
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for calloc, free, malloc
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_enu...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NonSmoothDrivers.h"              // for linearComplementarity_driver
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "SiconosBlas.h"                   // for cblas_dnrm2
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "fc2d_Solvers.h"                  // for fc2d_tolcp, fc2d_enum
+#include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
+#include "numerics_verbose.h"              // for verbose
+#include "Friction_cst.h"                  // for SICONOS_FRICTION_2D_ENUM
 
 void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
@@ -40,34 +43,23 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
 
-  double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-  double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-
-  for (i = 0; i < lcp_problem->size; i++)
-  {
-    zlcp[i] = 0.0;
-    wlcp[i] = 0.0;
-  }
-
-
-  /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
-  /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */
+  double *zlcp = (double*)calloc(lcp_problem->size, sizeof(double));
+  double *wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
 
   // Call the lcp_solver
-
-  SolverOptions * lcp_options = options->internalSolvers;
-
-  lcp_enum_init(lcp_problem, lcp_options, 1);
+  options->solverId = SICONOS_LCP_ENUM;
+  lcp_enum_init(lcp_problem, options, 1);
   //}
-  * info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, lcp_options);
-  if (options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, lcp_options->dparam[0], &(lcp_options->dparam[1]));
-  lcp_enum_reset(lcp_problem, lcp_options, 1);
+  * info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
+  if(options->filterOn > 0)
+    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
+  lcp_enum_reset(lcp_problem, options, 1);
 
   /*       printf("\n"); */
   int nc = problem->numberOfContacts;
+  double norm_q = cblas_dnrm2(nc*2, problem->q, 1);
   // Conversion of result
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
 
     /* printf("Contact number = %i\n",i); */
@@ -93,23 +85,23 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
   /*        printf("\n"); */
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = lcp_options->iparam[SICONOS_IPARAM_ITER_DONE];
-  options->iparam[SICONOS_DPARAM_RESIDU] = lcp_options->iparam[SICONOS_DPARAM_RESIDU];
+  // back to fc2d for the solver name
+  options->solverId = SICONOS_FRICTION_2D_ENUM;
 
-  if (options->dparam[SICONOS_DPARAM_RESIDU] > options->iparam[SICONOS_DPARAM_TOL])
+  if(options->dparam[SICONOS_DPARAM_RESIDU] > options->iparam[SICONOS_DPARAM_TOL])
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC2D - ENUM - No convergence after %i iterations"
              " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE],
              options->dparam[SICONOS_DPARAM_RESIDU],
-             options->dparam[SICONOS_DPARAM_TOL] );
+             options->dparam[SICONOS_DPARAM_TOL]);
 
   }
   else
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC2D - ENUM - Convergence after %i iterations"
              " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE],
              options->dparam[SICONOS_DPARAM_RESIDU], options->dparam[SICONOS_DPARAM_TOL]);
@@ -117,36 +109,11 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
     *info = 0;
   }
   double error;
-  *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], &error);
+  *info = fc2d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], norm_q, &error);
   free(zlcp);
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
 }
 
-
-int fc2d_enum_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Enumerative Solver for fc2d\n");
-  }
-  /*  strcpy(options->solverName,"Lemke");*/
-  options->solverId = SICONOS_FRICTION_2D_ENUM;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->dparam[0] = 1e-6;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  LinearComplementarityProblem* problem = NULL;
-  linearComplementarity_enum_setDefaultSolverOptions(problem, options->internalSolvers);
-
-  return 0;
-}
 
 

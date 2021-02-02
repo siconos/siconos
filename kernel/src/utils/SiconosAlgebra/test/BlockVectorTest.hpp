@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ private:
   CPPUNIT_TEST(testOperators2);
   CPPUNIT_TEST(testOperators3);
   CPPUNIT_TEST(testOperators4);
+  CPPUNIT_TEST(testSetBlock);
   CPPUNIT_TEST(testInsert);
   CPPUNIT_TEST(End);
 
@@ -73,6 +74,7 @@ private:
   void testOperators2();
   void testOperators3();
   void testOperators4();
+  void testSetBlock();
   void testInsert();
   void End();
   // Members

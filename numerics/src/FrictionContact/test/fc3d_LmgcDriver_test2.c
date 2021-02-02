@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
-#include "Friction_cst.h"
-#include "numerics_verbose.h"
+#include <stdlib.h>            // for free, malloc
+#include "Friction_cst.h"      // for SICONOS_FRICTION_3D_NSGS
+#include "NonSmoothDrivers.h"  // for fc3d_LmgcDriver
 
 int main(void)
 {
@@ -67,7 +64,7 @@ int main(void)
 
   double *reaction = (double*)malloc(3 * nc * sizeof(double));
   double *velocity = (double*)malloc(3 * nc * sizeof(double));
-  for (int i = 0; i < 3 * nc; i++)
+  for(int i = 0; i < 3 * nc; i++)
   {
     reaction[i] = 0.0;
     velocity[i] = 0.0;
@@ -78,18 +75,18 @@ int main(void)
   int itermax = 100;
 
   info = fc3d_LmgcDriver(reaction,
-                                      velocity,
-                                      q,
-                                      mu,
-                                      W,
-                                      row,
-                                      column,
-                                      nc,
-                                      nb,
-                                      solver_id,
-                                      tolerance,
-                                      itermax,
-                                      0, 0, 0, 0);
+                         velocity,
+                         q,
+                         mu,
+                         W,
+                         row,
+                         column,
+                         nc,
+                         nb,
+                         solver_id,
+                         tolerance,
+                         itermax,
+                         0, 0, 0, 0);
 
   free(reaction);
   free(velocity);

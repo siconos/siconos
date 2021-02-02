@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,73 +18,41 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "SiconosLapack.h"
 #include "lcp_enum.h"
-#include "numerics_verbose.h"
-
-static unsigned long  int sCurrentEnum = 0;
-static unsigned long  int sCmpEnum = 0;
-static unsigned long  int sNbCase = 0;
-static double sProgress = 0;
-static int* sWZ = 0;
-static double * sM = 0;
-static double * sMref = 0;
-static double * sQ = 0;
-static double * sQref = 0;
-static double * sColNul = 0;
-static int sSize = 0;
-static int LWORK = 0;
+#include <math.h>                          // for isinf, isnan
+#include <stdlib.h>                        // for malloc, free
+#include <string.h>                        // for NULL, memcpy
+#include "LCP_Solvers.h"                   // for lcp_enum, lcp_enum_init
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NM_dense_display, Numerics...
+#include "SiconosLapack.h"                 // for DGELS, DGESV, lapack_int, LA_NOTRANS
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_ENUM_US...
+#include "numerics_verbose.h"              // for numerics_printf, verbose
+#include "enum_tool.h"
 
 
-static void affectWZ();
-static void lcp_buildM(int * zw, double * M, double * Mref, int size);
-static void lcp_fillSolution(double*  z, double * w, int size, int* zw, double * Q);
-static void lcp_initEnum();
-static int lcp_nextEnum();
-static void lcp_buildQ();
-
-/*case defined with sCurrentEnum
- *if sWZ[i]==0
- *  w[i] null
- *else
- *  z[i] null
- */
-void affectWZ()
-{
-  unsigned long  int aux = sCurrentEnum;
-  for (int i = 0; i < sSize; i++)
-  {
-    sWZ[i] = aux & 1;
-    aux = aux >> 1;
-  }
-}
-void lcp_buildM(int * zw, double * M, double * Mref, int size)
+static void lcp_buildM(int * zw,
+                       double * M,
+                       double * Mref,
+                       int size,
+                       double * column_of_zero)
 {
   int col;
   double * Aux;
   double * AuxRef;
   Aux = M;
   AuxRef = Mref;
-  for (col = 0; col < size; col++)
+  for(col = 0; col < size; col++)
   {
-    if (zw[col] == 0)
+    if(zw[col] == 0)
     {
       memcpy(Aux, AuxRef, size * sizeof(double));
     }
     else
     {
       /*for(i=0;i<size;i++) Aux[i]=0;*/
-      memcpy(Aux, sColNul, sSize * sizeof(double));
+      memcpy(Aux, column_of_zero, size * sizeof(double));
       Aux[col] = -1;
       /*M[(n+col)*npm+col+n]=-1;*/
     }
@@ -92,13 +60,13 @@ void lcp_buildM(int * zw, double * M, double * Mref, int size)
     AuxRef = AuxRef + size;
   }
 }
-void   lcp_fillSolution(double*  z, double * w, int size, int* zw, double * Q)
+static void   lcp_fillSolution(double*  z, double * w, int size, int* zw, double * Q)
 {
   int lin;
 
-  for (lin = 0; lin < size; lin++)
+  for(lin = 0; lin < size; lin++)
   {
-    if (zw[lin] == 0)
+    if(zw[lin] == 0)
     {
       w[lin] = 0;
       z[lin] = Q[lin];
@@ -110,41 +78,7 @@ void   lcp_fillSolution(double*  z, double * w, int size, int* zw, double * Q)
     }
   }
 }
-void lcp_initEnum()
-{
-  int cmp;
-  sCmpEnum = 0;
-  sNbCase = 1;
-  for (cmp = 0; cmp < sSize; cmp++)
-    sNbCase = sNbCase << 1;
-  sProgress = 0;
-}
-int lcp_nextEnum()
-{
-  if (sCmpEnum == sNbCase)
-    return 0;
-  if (sCurrentEnum >= sNbCase)
-  {
-    sCurrentEnum = 0;
-  }
-  if (verbose)
-    numerics_printf("try enum :%d\n", (int)sCurrentEnum);
-  affectWZ();
-  sCurrentEnum++;
-  sCmpEnum++;
-  if (verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
-  {
-    sProgress += 0.001;
-    numerics_printf("lcp_enum progress %f %d", sProgress, (int) sCurrentEnum);
-  }
 
-  return 1;
-}
-
-void lcp_buildQ()
-{
-  memcpy(sQ, sQref, (sSize)*sizeof(double));
-}
 int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   return 2 * (problem->size);
@@ -152,7 +86,8 @@ int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* op
 int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   int aux = 3 * (problem->size) + (problem->size) * (problem->size);
-  if (options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS])
+  int LWORK;
+  if(options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS])
   {
     LWORK = -1;
     //int info = 0;
@@ -165,7 +100,7 @@ int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* op
 }
 void lcp_enum_init(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
-  if (withMemAlloc)
+  if(withMemAlloc)
   {
     options->dWork = (double *) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
     options->iWork = (int *) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
@@ -173,187 +108,158 @@ void lcp_enum_init(LinearComplementarityProblem* problem, SolverOptions* options
 }
 void lcp_enum_reset(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
-  if (withMemAlloc)
+  if(withMemAlloc)
   {
-    free(options->dWork);
-    free(options->iWork);
+    if(options->dWork)
+      free(options->dWork);
+    if(options->iWork)
+      free(options->iWork);
   }
   options->dWork = NULL;
-  solver_options_nullify(options);
+  options->iWork = NULL;
 }
 
 
-void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   *info = 1;
   double tol ;
-  if (options->dWork == NULL)
+  if(options->dWork == NULL)
   {
     lcp_enum_init(problem, options, 1);
   }
   double * workingFloat = options->dWork;
   int * workingInt = options->iWork;
-  int lin;
-  sSize = (problem->size);
+
+  int size = problem->size;
   int NRHS = 1;
   lapack_int * ipiv;
   int check;
   lapack_int LAinfo = 0;
   int useDGELS = options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS];
-  
+
   /*OUTPUT param*/
-  sCurrentEnum = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
+
   tol = options->dparam[SICONOS_DPARAM_TOL];
   int multipleSolutions = options->iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS];
   int numberofSolutions = 0;
 
 
-
-
-  sMref = problem->M->matrix0;
-  if (!sMref)
+  if(! problem->M->matrix0)
   {
     numerics_printf("lcp_enum failed, problem->M->matrix0 is null");
 
   }
 
-  if (verbose)
-    numerics_printf("lcp_enum begin, size %d tol %e", sSize, tol);
+  if(verbose)
+    numerics_printf("lcp_enum begin, size %d tol %e", size, tol);
 
-  sM = workingFloat;
-  sQ = sM + sSize * sSize;
-  sColNul = sQ + sSize;
-  sQref = sColNul + sSize;
-  for (lin = 0; lin < sSize; lin++)
+  double * M_linear_system = workingFloat;
+  double * q_linear_system =  M_linear_system + size * size;
+  double * column_of_zero = q_linear_system + size;
+  double * q_linear_systemref = column_of_zero + size;
+
+  for(int row = 0; row < size; row++)
   {
-    sQref[lin] =  - problem->q[lin];
-    sColNul[lin] = 0;
+    q_linear_systemref[row] =  - problem->q[row];
+    column_of_zero[row] = 0;
   }
-  sWZ = workingInt;
-  ipiv = sWZ + sSize;
+  //sWZ = workingInt;
+  int * zw_indices  =  workingInt;
+  ipiv = zw_indices + size;
   *info = 0;
-  lcp_initEnum();
-  while (lcp_nextEnum())
+  EnumerationStruct * enum_struct = enum_init(size);
+  enum_struct->current = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
+  while(enum_next(zw_indices, size, enum_struct))
   {
-    lcp_buildM(sWZ, sM, sMref, sSize);
-    lcp_buildQ();
+    lcp_buildM(zw_indices,  M_linear_system, problem->M->matrix0, size, column_of_zero);
+    memcpy(q_linear_system, q_linear_systemref, (size)*sizeof(double));
     /*     if (verbose) */
     /*       printCurrentSystem(); */
-    if (useDGELS)
+    if(useDGELS)
     {
       /* if (verbose) */
       /*   { */
       /*     numerics_printf("call dgels on ||AX-B||\n"); */
       /*     numerics_printf("A\n"); */
-      /*     NM_dense_display(sM,sSize,sSize,0); */
+      /*     NM_dense_display( M_linear_system,sSize,sSize,0); */
       /*     numerics_printf("B\n"); */
-      /*     NM_dense_display(sQ,sSize,1,0); */
+      /*     NM_dense_display(q_linear_system,sSize,1,0); */
       /*   } */
 
-      DGELS(LA_NOTRANS,sSize, sSize, NRHS, sM, sSize, sQ, sSize,&LAinfo);
-      if (verbose)
+      DGELS(LA_NOTRANS, size, size, NRHS,  M_linear_system, size, q_linear_system, size, &LAinfo);
+      if(verbose)
       {
         numerics_printf("Solution of dgels (info=%i)", LAinfo);
-        NM_dense_display(sQ, sSize, 1, 0);
+        NM_dense_display(q_linear_system, size, 1, 0);
       }
     }
     else
     {
-      DGESV(sSize, NRHS, sM, sSize, ipiv, sQ, sSize, &LAinfo);
+      DGESV(size, NRHS,  M_linear_system, size, ipiv, q_linear_system, size, &LAinfo);
     }
-    if (!LAinfo)
+    if(!LAinfo)
     {
-      if (useDGELS)
+      if(useDGELS)
       {
         int cc = 0;
         int ii;
         numerics_printf("DGELS LAInfo=%i", LAinfo);
-        for (ii = 0; ii < sSize; ii++)
+        for(ii = 0; ii < size; ii++)
         {
-          if (isnan(sQ[ii]) || isinf(sQ[ii]))
+          if(isnan(q_linear_system[ii]) || isinf(q_linear_system[ii]))
           {
             numerics_printf("DGELS FAILED");
             cc = 1;
             break;
           }
         }
-        if (cc)
+        if(cc)
           continue;
       }
 
-      if (verbose)
+      if(verbose)
       {
         numerics_printf("lcp_enum LU factorization succeeded:");
       }
 
       check = 1;
-      for (lin = 0 ; lin < sSize; lin++)
+      for(int row  = 0 ; row < size; row++)
       {
-        if (sQ[lin] < - tol)
+        if(q_linear_system[row] < - tol)
         {
           check = 0;
           break;/*out of the cone!*/
         }
       }
-      if (!check)
+      if(!check)
         continue;
       else
       {
         numberofSolutions++;
-        if (verbose || multipleSolutions)
+        if(verbose || multipleSolutions)
         {
-          numerics_printf("lcp_enum find %i solution with sCurrentEnum = %ld!", numberofSolutions, sCurrentEnum - 1);
+          numerics_printf("lcp_enum find %i solution with scurrent = %ld!", numberofSolutions, enum_struct->current - 1);
         }
         *info = 0;
-        lcp_fillSolution(z, w, sSize, sWZ, sQ);
-        options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM ] = (int) sCurrentEnum - 1;
+        lcp_fillSolution(z, w, size, zw_indices, q_linear_system);
+        options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM ] = (int) enum_struct->current - 1;
         options->iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] = numberofSolutions;
-        if (!multipleSolutions)  return;
+        if(!multipleSolutions)  return;
       }
     }
   }
   *info = 1;
-  if (verbose)
+  if(verbose)
     numerics_printf("lcp_enum has not found a solution!\n");
 }
 
-int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options)
+void lcp_enum_set_default(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    numerics_printf("Set the Default SolverOptions for the ENUM Solver\n");
-  }
+  options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS] = 0;
+  options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED] = 0;
+  options->iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS] = 0;
+  // SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM (out)
+  // SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS (out)
 
-
-  solver_options_nullify(options);
-  options->solverId = SICONOS_LCP_ENUM;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for (i = 0; i < options->iSize; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  if (problem)
-  {
-    options->dWork = (double*) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
-    options->iWork = (int*) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
-  }
-  else
-  {
-    options->dWork = NULL;
-    options->iWork = NULL;
-  }
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-
-
-
-  return 0;
 }

@@ -19,3 +19,12 @@ are not permissive as defined by https://opensource.org/osd-annotated
 These directories may be removed and Siconos can still compile and
 function.  Currently the LCP_QP solver will give runtime errors if
 `optim_misc/ql0001/ql0001.f` is removed.
+
+Directory lbl contains the C wrapper C wrapper around MA27 and MA57
+written by D. Orban. LBL is a unified C interface to the multifrontal
+symmetric indefinite linear system solvers MA27 and MA57 from the Harwell
+Subroutine Library (HSL). The HSL library is not permissive. To use it,
+you must ask the library to HSL and put is in lbl/ext. For some compatiblity
+reason, we also inlude metis 4.
+The source are taken form github https://github.com/dpo/lbl
+commit 80d468c1584e475287bcd3a2762a4ee3db5d2c15

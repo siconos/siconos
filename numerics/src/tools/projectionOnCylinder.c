@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ void projectionOnCylinder(double* r, double  R)
 
   double normTsquare = r[1] * r[1] + r[2] * r[2];
 
-  if (r[0] >= 0)
+  if(r[0] >= 0)
   {
-    if (normTsquare <= R * R)
+    if(normTsquare <= R * R)
     {
       return ;
     }
@@ -40,7 +40,7 @@ void projectionOnCylinder(double* r, double  R)
   else
   {
     r[0] = 0.0;
-    if (0 < normTsquare)
+    if(0 < normTsquare)
     {
 
       normTsquare = sqrt(normTsquare);

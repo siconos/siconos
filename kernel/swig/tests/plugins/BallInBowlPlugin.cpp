@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifdef _WIN32 
-#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
-#else 
-#define SICONOS_EXPORT extern "C" 
-#endif  
+#ifdef _WIN32
+#define SICONOS_EXPORT extern "C" __declspec(dllexport)
+#else
+#define SICONOS_EXPORT extern "C"
+#endif
 #include <stdio.h>
 #include <math.h>
 
@@ -36,7 +36,7 @@ extern "C" double FextFunction(double time)
 
 SICONOS_EXPORT void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 
   fExt[0] = -m * g + FextFunction(time);
@@ -44,14 +44,14 @@ SICONOS_EXPORT void ballFExt(double time, unsigned int sizeOfq, double *fExt, un
 
 SICONOS_EXPORT void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq ; i++)
+  for(unsigned int i = 0; i < sizeOfq ; i++)
     fExt[i] = 0.0;
 }
 
 SICONOS_EXPORT void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   double R0 = 0.0;
-  if (R * R - q[1]*q[1] < 0)
+  if(R * R - q[1]*q[1] < 0)
     printf("problem\n");
   y[0] = q[0] + sqrt(fabs(R * R - q[1] * q[1])) - R0;
 }

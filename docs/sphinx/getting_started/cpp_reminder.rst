@@ -259,7 +259,7 @@ Remark: get/setValue functions are equivalent to "()" operator but mainly useful
    scal(1.0/a,A,B);
    // matrices product
    C = A*B;
-   prod(A,B,C); // Based on atlas gemm for Dense matrices and ublas::prod for others. 
+   prod(A,B,C); 
                 // C and A or B can be the same matrices (ie have common memory), 
 	        // but that will slow down the operation.
    gemm(A,B,C); // Only for denses matrices.

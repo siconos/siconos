@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ void ControlSensor::initialize(const  NonSmoothDynamicalSystem& nsds)
 //  {
 //    if (_timeDiscretisation->getTDCase() != 2)
 //    {
-//       RuntimeException::selfThrow("ControlSensor::initialize the timediscretization should be of type 2");
+//       THROW_EXCEPTION("ControlSensor::initialize the timediscretization should be of type 2");
 //    }
 //    else
 //    {
@@ -48,7 +48,7 @@ void ControlSensor::initialize(const  NonSmoothDynamicalSystem& nsds)
 //    }
 //  }
 //  else if (_delay < 0)
-//    RuntimeException::selfThrow("ControlSensor::initialize the delay value should be >= 0");
+//    THROW_EXCEPTION("ControlSensor::initialize the delay value should be >= 0");
 }
 
 unsigned int ControlSensor::getYDim() const

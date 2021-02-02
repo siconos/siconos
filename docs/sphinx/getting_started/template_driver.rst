@@ -9,14 +9,11 @@ C++ template for siconos driver
 .. code::
 
    // Header file
-   #include "SiconosKernel.h"
+   #include <SiconosKernel.h>
    using namespace std;
    // main program
    int main(int argc, char* argv[])
    {
-   // == Start timer ==
-   boost::timer time;
-   time.restart();
    // Exception handling
    try
    {
@@ -41,11 +38,10 @@ C++ template for siconos driver
   }
   
   // == Catch exceptions ==
-  catch(SiconosException e)
-    {cout << e.report() << endl;}
   catch(...)
-    {cout << "Exception caught in mySample.cpp" << endl;}
-  
+    {
+      Siconos::exception::process();
+    }
   // == get elapsed time ==
   cout << "Computation Time " << time.elapsed()  << endl;  
   }

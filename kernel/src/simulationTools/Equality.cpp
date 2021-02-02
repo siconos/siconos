@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,43 @@
 #include "Equality.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
+#include "EqualityConditionNSL.hpp"
+#include "SolverOptions.h"
 #include <NumericsMatrix.h>
 
 using namespace RELATION;
 
+Equality::Equality(int numericsSolverId)
+//:
+// Equality(SP::SolverOptions(solver_options_create(numericsSolverId),
+//                            solver_options_delete))
+{}
+
+Equality::Equality(SP::SolverOptions options):
+  LinearOSNS(options)
+{}
+
+bool Equality::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  float type_number= (float) (Type::value(nslaw));
+  _nslawtype.insert(type_number);
+
+  if (not (Type::value(nslaw) == Type::EqualityConditionNSL))
+  {
+    THROW_EXCEPTION("\nEquality::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with Equality one step nonsmooth problem. \n \
+                      Compatible NonSmoothLaw are: EqualityConditionNSL\n");
+    return false;
+  }
+
+  return true;
+}
 int Equality::compute(double time)
 {
   int info = 0;
   // --- Prepare data for EQUALITY computing ---
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
     return info;
 
 
@@ -38,15 +65,18 @@ int Equality::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if (_sizeOutput != 0)
+  if(_sizeOutput != 0)
   {
     double* q_ = q()->getArray();
     double* z_ =  _z->getArray();
-    for (size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
-    info = NM_gesv(&*_M->numericsMatrix(), z_, true);
+    for(size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
+    //info = NM_gesv(&*_M->numericsMatrix(), z_, true);
+    //info = NM_LU_solve(NM_preserve(&*_M->numericsMatrix()), z_, 1);
+    info = NM_LU_solve(&*_M->numericsMatrix(), z_, 1);
+
+
     // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();
-
   }
 
   return info;
@@ -66,7 +96,7 @@ void Equality::updateM()
   // Get index set from Simulation
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
-  if (!_M)
+  if(!_M)
   {
     // Creates and fills M using Interactionof indexSet
     _M.reset(new OSNSMatrix(indexSet, _numericsMatrixStorageType));

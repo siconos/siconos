@@ -15,7 +15,7 @@
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 
 # --- List of siconos components to build and install ---
-# The complete list is : externals numerics kernel control mechanics mechanisms io
+# The complete list is : externals numerics
 # mechanisms is "off" by default.
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.
@@ -26,20 +26,16 @@ option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 
 # --- Build/compiling options ---
-option(DEV_MODE "Compilation flags setup for developers. Default = OFF" OFF)
-option(DEV_MODE_STRICT "Compilation flags setup for developers (extra strict, conversion warnings). Default = OFF" OFF)
+set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")
+
 option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
 option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
 option(NO_RUNTIME_BUILD_DEP "Do not check for runtime dependencies. Useful only for packaging. Default = OFF" OFF)
-option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
-option(WITH_UNSTABLE "Enable this to include all 'unstable' sources. Default=OFF" OFF)
 option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=OFF" OFF)
 option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)
 option(WITH_TESTING "Enable 'make test' target" ON)
-option(WITH_GIT "Consider sources are under GIT" OFF)
-
 
 # --- Documentation setup ---
 option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF)

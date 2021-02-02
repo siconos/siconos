@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@
 /*!\file ConvexQP_computeError.h
   \brief functions related to error computation for friction-contact 
 */
+
+#include "NumericsFwd.h"  // for ConvexQP, SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #ifdef __cplusplus
 #undef restrict
@@ -63,12 +66,13 @@ extern "C"
       \return 0 if ok
    */
   int convexQP_compute_error(ConvexQP* problem,
-                                 double *z , double *xi,
-                                 double* w, double * u,
-                                 double tolerance,
-                                 double scaling,
-                                 SolverOptions * options, double norm,
-                                 double * error);
+                             double *z , double *xi,
+                             double* w, double * u,
+                             double tolerance,
+                             double scaling,
+                             SolverOptions * options,
+                             double norm_q, double norm_b,
+                             double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

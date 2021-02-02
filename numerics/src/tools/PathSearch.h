@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@
 #ifndef PATHSEARCH_H
 #define PATHSEARCH_H
 
-#include "NMS.h"
-#include "Newton_methods.h"
+#include "NMS.h"             // for NMS_data
+#include "Newton_methods.h"  // for functions_LSA
+#include "NumericsFwd.h"     // for SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** struct ncp_pathsearch_data NCP_PathSearch.h
  * solver specific data
@@ -34,8 +36,6 @@ typedef struct
   functions_LSA* lsa_functions; /**< functions for the search */
 } pathsearch_data;
 
-#include "SiconosConfig.h"
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -45,13 +45,7 @@ extern "C"
    * algorithm is used
    * \param options the structure to be modified
    */
-  void pathsearch_default_SolverOption(SolverOptions* options);
-
-  /** free solverData specific for the path search
-   * \param solverData the struct to free
-   */
-  void free_solverData_PathSearch(void* solverData);
-
+  void pathsearch_set_default(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

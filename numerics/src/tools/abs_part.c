@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "NSSTools.h"
+
+#include "NSSTools.h"  // for abs_part
 
 void abs_part(double x[], double sol[], int n)
 
@@ -31,11 +28,11 @@ void abs_part(double x[], double sol[], int n)
   eps = 1.e-12;
 
 
-  for (i = 0 ; i < n ; i++)
+  for(i = 0 ; i < n ; i++)
   {
 
 
-    if (x[i] >= eps)
+    if(x[i] >= eps)
     {
       sol[i] = x[i];
     }

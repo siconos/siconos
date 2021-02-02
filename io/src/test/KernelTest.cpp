@@ -14,7 +14,7 @@
 #include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
 
 #define DEBUG_MESSAGES 1
-#include "../SiconosFull.hpp"
+#include "SiconosFull.hpp"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -44,14 +44,14 @@ void KernelTest::t0()
   std::ofstream ofs("Kernelt0.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SiconosVector*>(NULL));
+    oa.register_type(static_cast<SiconosVector*>(nullptr));
     oa << NVP(q);
   }
 
   std::ifstream ifs("Kernelt0.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SiconosVector*>(NULL));
+    ia.register_type(static_cast<SiconosVector*>(nullptr));
     ia >> NVP(q0);
   }
 
@@ -71,14 +71,14 @@ void KernelTest::t1()
   std::ofstream ofs("Kernelt1.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SimpleMatrix*>(NULL));
+    oa.register_type(static_cast<SimpleMatrix*>(nullptr));
     oa << NVP(m1);
   }
 
   std::ifstream ifs("Kernelt1.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SimpleMatrix*>(NULL));
+    ia.register_type(static_cast<SimpleMatrix*>(nullptr));
     ia >> NVP(m2);
   }
 
@@ -104,39 +104,39 @@ void KernelTest::t2()
   std::ofstream ofs("Kernelt2.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SimpleMatrix*>(NULL));
-    oa.register_type(static_cast<SiconosVector*>(NULL));
-    oa.register_type(static_cast<LagrangianDS*>(NULL));
+    oa.register_type(static_cast<SimpleMatrix*>(nullptr));
+    oa.register_type(static_cast<SiconosVector*>(nullptr));
+    oa.register_type(static_cast<LagrangianDS*>(nullptr));
     oa << NVP(ds1);
   }
 
   std::ifstream ifs("Kernelt2.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SimpleMatrix*>(NULL));
-    ia.register_type(static_cast<SiconosVector*>(NULL));
-    ia.register_type(static_cast<LagrangianDS*>(NULL));
+    ia.register_type(static_cast<SimpleMatrix*>(nullptr));
+    ia.register_type(static_cast<SiconosVector*>(nullptr));
+    ia.register_type(static_cast<LagrangianDS*>(nullptr));
     ia >> NVP(ds2);
   }
 
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->mass())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->mass()));
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->q())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->q()));
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->velocity())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->velocity()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->mass())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->mass()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->q())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->q()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->velocity())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->velocity()));
 
 }
 
 
 void KernelTest::t3()
 {
-  SP::SolverOptions so(new SolverOptions);
+  SP::SolverOptions so(solver_options_create(SICONOS_FRICTION_3D_NSN_AC),
+                       solver_options_delete);
   SP::SolverOptions sor(new SolverOptions);
-  solver_options_fill(so.get(), SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);
   so->numberOfInternalSolvers = 1;
-  so->internalSolvers = (SolverOptions *) malloc(sizeof(SolverOptions) * so->numberOfInternalSolvers);
-  solver_options_fill(so->internalSolvers, SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);
+  so->internalSolvers = (SolverOptions**) calloc(1, sizeof(SolverOptions*));
+  so->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
 
   std::ofstream ofs("SolverOptions.xml");
   {
@@ -151,10 +151,6 @@ void KernelTest::t3()
   }
 
   CPPUNIT_ASSERT((so->iSize == sor->iSize));
-
-  solver_options_delete(so.get());
-  solver_options_delete(sor.get());
-
 }
 
 // void KernelTest::t4()
@@ -177,9 +173,9 @@ void KernelTest::t3()
 //   std::ofstream ofs("t4.xml");
 //   {
 //     boost::archive::xml_oarchive oa(ofs);
-//     oa.register_type(static_cast<SimpleMatrix*>(NULL));
-//     oa.register_type(static_cast<SiconosVector*>(NULL));
-//     oa.register_type(static_cast<LagrangianDS*>(NULL));
+//     oa.register_type(static_cast<SimpleMatrix*>(nullptr));
+//     oa.register_type(static_cast<SiconosVector*>(nullptr));
+//     oa.register_type(static_cast<LagrangianDS*>(nullptr));
 //     oa << NVP(dsset);
 //   }
 
@@ -188,9 +184,9 @@ void KernelTest::t3()
 //   std::ifstream ifs("t4.xml");
 //   {
 //     boost::archive::xml_iarchive ia(ifs);
-//     ia.register_type(static_cast<SimpleMatrix*>(NULL));
-//     ia.register_type(static_cast<SiconosVector*>(NULL));
-//     ia.register_type(static_cast<LagrangianDS*>(NULL));
+//     ia.register_type(static_cast<SimpleMatrix*>(nullptr));
+//     ia.register_type(static_cast<SiconosVector*>(nullptr));
+//     ia.register_type(static_cast<LagrangianDS*>(nullptr));
 //     ia >> NVP(dssetfromfile);
 //   }
 
@@ -323,14 +319,14 @@ void KernelTest::t6()
     SP::DynamicalSystemsGraph dsg =
       bouncingBall->topology()->dSG(0);
 
-    SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
-      (dsg->bundle(*(dsg->begin())));
+    SP::LagrangianDS ball = std::static_pointer_cast<LagrangianDS>
+                            (dsg->bundle(*(dsg->begin())));
 
-    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(sim);
+    SP::TimeStepping s = std::static_pointer_cast<TimeStepping>(sim);
     SP::Interaction inter;
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = bouncingBall->topology()->indexSet(0);
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       inter = indexSet0->bundle(*ui);
 
 
@@ -355,12 +351,7 @@ void KernelTest::t6()
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 1;
-    boost::progress_display show_progress(N);
-
-    boost::timer time;
-    time.restart();
-
-    while (s->hasNextEvent())
+    while(s->hasNextEvent())
     {
       s->computeOneStep();
 
@@ -371,11 +362,9 @@ void KernelTest::t6()
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
       s->nextStep();
-      ++show_progress;
       k++;
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
-    cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
@@ -386,32 +375,24 @@ void KernelTest::t6()
     dataPlotRef.zero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    if((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
       std::cout <<
-        "Warning. The results is rather different from the reference file :"
+                "Warning. The results is rather different from the reference file :"
                 <<
-        (dataPlot - dataPlotRef).normInf()
+                (dataPlot - dataPlotRef).normInf()
                 <<
-        std::endl;
+                std::endl;
       CPPUNIT_ASSERT(false);
     }
 
   }
 
-  catch (SiconosException e)
+  catch(...)
   {
-    cout << e.report() << endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(false);
   }
-  catch (...)
-  {
-    cout << "Exception caught in KernelTest.cpp" << endl;
-    CPPUNIT_ASSERT(false);
-
-  }
-
-
 }
 
 #ifdef HAVE_SICONOS_MECHANICS
@@ -444,8 +425,8 @@ void KernelTest::t7()
     ia >> NVP(ds2);
   }
 
-  CPPUNIT_ASSERT(std11::static_pointer_cast<Disk>(ds1)->getRadius() ==
-                 std11::static_pointer_cast<Disk>(ds2)->getRadius());
+  CPPUNIT_ASSERT(std::static_pointer_cast<Disk>(ds1)->getRadius() ==
+                 std::static_pointer_cast<Disk>(ds2)->getRadius());
 }
 
 void KernelTest::t8()
@@ -524,14 +505,9 @@ void KernelTest::t9()
 
     CPPUNIT_ASSERT(nsds1->finalT() == nsds2->finalT());
   }
-  catch (SiconosException e)
+  catch(...)
   {
-    cout << e.report() << endl;
-    CPPUNIT_ASSERT(false);
-  }
-  catch (...)
-  {
-    cout << "Exception caught in KernelTest.cpp" << endl;
+    Siconos::exception::process();
     CPPUNIT_ASSERT(false);
   }
 }

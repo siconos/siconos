@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@
 
  */
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions
+
+
 /* Pointer to function that corresponds to the function \f$ \phi \f$ */
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
-
-#include "SiconosConfig.h"
-#include "SolverOptions.h"
 
 enum NONSMOOTH_NEWTON_SOLVER
 {
@@ -91,8 +92,11 @@ extern "C"
   int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
                             NewtonFunctionPtr* jacobianPhi,
                             SolverOptions * options);
-  
-  void nonSmoothNewton_setDefaultSolverOptions(SolverOptions* options);
+  /** @addtogroup SetSolverOptions
+      @{
+  */
+  void nonSmoothNewton_set_default(SolverOptions* options); 
+  /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

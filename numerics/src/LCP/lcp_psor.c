@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs, fmax
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_psor
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_RHO
+#include "numerics_verbose.h"              // for verbose
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
 
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
 
 /*\warning omega is not explicitely used. must be completed    */
-void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -48,7 +48,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
   double *ww, *diag;
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
-  double omega = options->dparam[SICONOS_LCP_IPARAM_RHO]; // Not yet used
+  double omega = options->dparam[SICONOS_LCP_DPARAM_RHO]; // Not yet used
   printf("Warning : omega %f is not used !!!!!\n", omega);
 
   incxn = n;
@@ -65,16 +65,16 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   /* Check for non trivial case */
 
-  qs = cblas_dnrm2(n , q , incx);
+  qs = cblas_dnrm2(n, q, incx);
 
-  if (verbose > 0) printf("\n ||q||= %g \n", qs);
+  if(verbose > 0) printf("\n ||q||= %g \n", qs);
 
   // Note FP : den never used ...
   //if (qs > DBL_EPSILON) den = 1.0 / qs;
   //else
-  if (qs <= DBL_EPSILON)
+  if(qs <= DBL_EPSILON)
   {
-    for (i = 0 ; i < n ; ++i)
+    for(i = 0 ; i < n ; ++i)
     {
       w[i] = 0.;
       z[i] = 0.;
@@ -87,12 +87,12 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
     return;
   }
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
     ww[i] = 0.;
   }
 
-  cblas_dcopy(n , q , incx , w , incy);
+  cblas_dcopy(n, q, incx, w, incy);
   /* Intialization of w and z */
   /*if(initmethod == 0) {*/
   /* dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy );*/
@@ -102,12 +102,12 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   /* Preparation of the diagonal of the inverse matrix */
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
-    if (fabs(M[i * n + i]) < DBL_EPSILON)
+    if(fabs(M[i * n + i]) < DBL_EPSILON)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Warning negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -129,17 +129,17 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   qs   = -1.0;
 
-  cblas_dcopy(n , q , incx , w , incy);
+  cblas_dcopy(n, q, incx, w, incy);
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
 
-    cblas_dcopy(n , w , incx , ww , incy);   /* w --> ww */
-    cblas_dcopy(n , q , incx , w , incy);    /* q --> w */
+    cblas_dcopy(n, w, incx, ww, incy);       /* w --> ww */
+    cblas_dcopy(n, q, incx, w, incy);        /* q --> w */
 
-    for (i = 0 ; i < n ; ++i)
+    for(i = 0 ; i < n ; ++i)
     {
 
       z[i] = 0.0;
@@ -149,7 +149,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
       /*       if( zi < 0 ) z[i] = 0.0;  */
       /*       else z[i] = zi; */
 
-      z[i] = fmax(0.0, -(q[i] + cblas_ddot(n , &M[i] , incxn , z , incy)) * diag[i]);
+      z[i] = fmax(0.0, -(q[i] + cblas_ddot(n, &M[i], incxn, z, incy)) * diag[i]);
 
     }
 
@@ -162,17 +162,17 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
-  if (err > tol)
+  if(err > tol)
   {
-    printf("Siconos/Numerics: lcp_psor: No convergence of PSOR after %d iterations\n" , iter);
+    printf("Siconos/Numerics: lcp_psor: No convergence of PSOR after %d iterations\n", iter);
     printf("Siconos/Numerics: lcp_psor: The residue is : %g \n", err);
     *info = 1;
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
     {
-      printf("Siconos/Numerics: lcp_psor: Convergence of PSOR after %d iterations\n" , iter);
+      printf("Siconos/Numerics: lcp_psor: Convergence of PSOR after %d iterations\n", iter);
       printf("Siconos/Numerics: lcp_psor: The residue is : %g \n", err);
     }
     *info = 0;
@@ -184,35 +184,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   return;
 }
-int linearComplementarity_psor_setDefaultSolverOptions(SolverOptions* options)
+void lcp_psor_set_default(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PSOR Solver\n");
-  }
-
-
-  /*  strcpy(options->solverName,"PSOR");*/
-  options->solverId = SICONOS_LCP_PSOR;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->dparam[SICONOS_LCP_IPARAM_RHO] = 0.1;
-
-
-  return 0;
+  options->dparam[SICONOS_LCP_DPARAM_RHO] = 0.1;
 }

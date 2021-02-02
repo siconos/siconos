@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,15 @@ void LagrangianR::display() const
 {
   Relation::display();
   std::cout << " _jachq :" << std::endl;
-  if (_jachq)
+  if(_jachq)
     _jachq->display();
   std::cout << " _jachqDot :" << std::endl;
-  if (_jachqDot)
+  if(_jachqDot)
     _jachqDot->display();
   std::cout << " _jachlambda :" << std::endl;
-  if (_jachlambda)
+  if(_jachlambda)
     _jachlambda->display();
   else
-    std::cout << " NULL :" << std::endl;
+    std::cout << " nullptr :" << std::endl;
 
 }

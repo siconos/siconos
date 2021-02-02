@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@
 #include "NewtonEulerJointR.hpp"
 
 void NewtonEulerJointR::projectVectorDoF(const SiconosVector& v,
-                                         const BlockVector& q0,
-                                         SiconosVector& ans, int axis,
-                                         bool absoluteRef)
+    const BlockVector& q0,
+    SiconosVector& ans, int axis,
+    bool absoluteRef)
 {
   SiconosVector ax(3);
   normalDoF(ax, q0, axis, absoluteRef);
@@ -38,11 +38,11 @@ void NewtonEulerJointR::projectVectorDoF(const SiconosVector& v,
 }
 
 SP::SiconosVector NewtonEulerJointR::projectVectorDoF(const SiconosVector& v,
-                                                      const BlockVector& q0,
-                                                      int axis,
-                                                      bool absoluteRef)
+    const BlockVector& q0,
+    int axis,
+    bool absoluteRef)
 {
-  SP::SiconosVector ans(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector ans(std::make_shared<SiconosVector>(3));
   projectVectorDoF(v, q0, *ans, axis, absoluteRef);
   return ans;
 }
@@ -55,9 +55,9 @@ void NewtonEulerJointR::normalDoF(SiconosVector& ans,
 }
 
 SP::SiconosVector NewtonEulerJointR::normalDoF(const BlockVector& q0, int axis,
-                                               bool absoluteRef)
+    bool absoluteRef)
 {
-  SP::SiconosVector ans(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector ans(std::make_shared<SiconosVector>(3));
   _normalDoF(*ans, q0, axis, absoluteRef);
   return ans;
 }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 #include "LinearOSNS.hpp"
 #include <mlcp_cst.h>
 
-#define MLCP_NB_BLOCKS 200
+#define MLCP_NB_BLOCKS_MAX 200
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
  
   \section MLCPintro Aim of the MLCP class
@@ -67,24 +67,32 @@ protected:
 
 
   /** n is the number of equality */
-  int _n;
+  int _n = 0;
 
   /** m is the size of the complementarity conditions */
-  int _m;
+  int _m = 0;
 
-  int _curBlock;
+  int _curBlock = 0;
 
   /** The MLCP instance */
-  MixedLinearComplementarityProblem _numerics_problem;
+  SP::MixedLinearComplementarityProblem _numerics_problem;
 
 public:
 
   /** constructor from data
-  *  \param numericsSolverId id of Numerics solver
-  *  (optional, SICONOS_MLCP_ENUM the enumerative solver)
+      \param numericsSolverId id of Numerics solver
+      (optional, default = SICONOS_MLCP_ENUM the enumerative solver)
   */
   MLCP(int numericsSolverId = SICONOS_MLCP_ENUM);
 
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  MLCP(SP::SolverOptions options);
+  
   /** destructor
   */
   virtual ~MLCP() {reset();};
@@ -114,7 +122,7 @@ public:
   */
   inline SP::MixedLinearComplementarityProblem getNumericsMLCP()
   {
-    return createSPtrMixedLinearComplementarityProblem(_numerics_problem);
+    return _numerics_problem;
   }
 
   /** Reninitialize numerics driver.
@@ -153,6 +161,8 @@ public:
   */
   virtual void display() const;
 
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();

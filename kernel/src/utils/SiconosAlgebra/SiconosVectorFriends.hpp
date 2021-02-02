@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@
  *  of vOut (from index startOut)
  * \param vIn block to copy
  * \param vOut vector to change (destination)
- * \param sizeB size of the block to copy
- * \param startIn starting position for the block (vIn)
- * \param startOut starting position for the destination (vOut)
+ * \param sizeB number of the elements to copy
+ * \param startIn the beginning of the range of elements to copy from
+ * \param startOut the beginning of the destination range
  */
 void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut);
 
@@ -58,7 +58,6 @@ SiconosVector operator * (const SiconosVector&, double);
  *  \param a SiconosVector
  *  \param a double
  *  \return a SiconosVector
- *  \exception SiconosVectorException, if the double d = 0
  */
 SiconosVector operator / (const SiconosVector&, double);
 

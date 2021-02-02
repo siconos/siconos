@@ -46,7 +46,7 @@ void MBTB_JointR::computeEquivalentForces()
   ML_G.setValue(2,Blambda->getValue(5));
   SP::SiconosVector spML_G_abs(new SiconosVector(3));
   *spML_G_abs = ML_G;
-  changeFrameBodyToAbs(_ds1->q(),spML_G_abs );
+  changeFrameBodyToAbs(_ds1->q(),spML_G_abs);
   ML_G_abs = * spML_G_abs;
 #ifdef MBTB_JOINTR_DEBUG
   printf("MBTB_JointR::computeEquivalentForces Blambda\n");
@@ -99,8 +99,11 @@ void MBTB_JointR::computeEquivalentForces()
          e0_x*ML_A_abs.getValue(0)+e0_y*ML_A_abs.getValue(1)+e0_z*ML_A_abs.getValue(2));
 #endif
   double  e1_x,e1_y,e1_z,e2_x,e2_y,e2_z;
-  orthoBaseFromVector(&e0_x,&e0_y,&e0_z,&e1_x,&e1_y,&e1_z,&e2_x,&e2_y,&e2_z);
-
+  int info = orthoBaseFromVector(&e0_x,&e0_y,&e0_z,&e1_x,&e1_y,&e1_z,&e2_x,&e2_y,&e2_z);
+  if(info)
+  {
+    std::cout << "something wrong happened in  orthoBaseFromVector"<<std::endl;
+  }
   /*
    * ML_A_abs = M_FA_A + M_FB_A = F2/\BA
    * the system is :
@@ -158,7 +161,7 @@ void MBTB_JointR::computeEquivalentForces()
   try
   {
     _M->PLUFactorizationInPlace();
-    _M->PLUForwardBackwardInPlace(*_F);
+    _M->PLUSolve(*_F);
 #ifdef MBTB_JOINTR_DEBUG
     printf("MBTB_JointR::computeEquivalentForces Forces equivalent:");
     _F->display();

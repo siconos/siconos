@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ void ObserverTest::test_Luenberger_ZOH()
   bool test = !((error=ioMatrix::compareRefFile(data, "Luenberger.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 void ObserverTest::test_Luenberger_Lsodar()
@@ -157,6 +157,6 @@ void ObserverTest::test_Luenberger_Lsodar()
   bool test = !((error=ioMatrix::compareRefFile(data, "Luenberger.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", test, true);
 
 }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ NonSmoothEvent::~NonSmoothEvent()
 
 void NonSmoothEvent::process(Simulation& simulation)
 {
-  if (Type::value(simulation) != Type::EventDriven)
-    RuntimeException::selfThrow("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
+  if(Type::value(simulation) != Type::EventDriven)
+    THROW_EXCEPTION("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
 
-  if (!(simulation.oneStepNSProblems()->empty()))
+  if(!(simulation.oneStepNSProblems()->empty()))
   {
     EventDriven& eventDriven = static_cast<EventDriven&>(simulation);
 
@@ -56,13 +56,13 @@ void NonSmoothEvent::process(Simulation& simulation)
     SP::InteractionsGraph indexSet2 = simulation.indexSet(2);
     bool found = true;
     InteractionsGraph::VIterator ui, uiend;
-    for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
     {
       found = indexSet2->is_vertex(indexSet1->bundle(*ui));
-      if (!found) break;
+      if(!found) break;
     }
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
-    if (!found)
+    if(!found)
     {
       // For Event-Driven algo., memories vectors are of size 2
       // (ie 2 interactionBlocks).  First interactionBlock (pos 0, last
@@ -81,7 +81,7 @@ void NonSmoothEvent::process(Simulation& simulation)
     }
 
     //---> solve acceleration LCP if IndexSet[2] is not empty
-    if (indexSet2->size() > 0)
+    if(indexSet2->size() > 0)
     {
       // solve LCP-acceleration
       eventDriven.computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_ACC); // solveLCPAcceleration();

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@
  *
  */
 
-#include "Newton_methods.h"
-#include "line_search.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stddef.h>       // for size_t
+#include "line_search.h"  // for line_search_generic, search_data, ARCSEARCH
 
 /** \struct goldstein_extra_params GoldsteinSearch.h
  * Struct to hold together the extra parameters needed by the Goldstein line search

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public:
 
   /** Default Constructor
    */
-  SubPluggedObject(): PluggedObject(), _parentfPtr(NULL), _indx(0), _p(0)  { };
+  SubPluggedObject(): PluggedObject(), _parentfPtr(nullptr), _indx(0), _p(0)  { };
 
   /** Constructor with the plugin name
    * \param PO a PluggedObject
@@ -63,7 +63,7 @@ public:
     fPtr = (void *)&SubPluggedObject::computeAndExtract;
     _parentfPtr = PO.fPtr;
 #else
-    RuntimeException::selfThrow("SubPluggedObject must be compiled with GCC !");
+    THROW_EXCEPTION("SubPluggedObject must be compiled with GCC !");
 #endif
   };
 

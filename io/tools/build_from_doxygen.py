@@ -47,16 +47,19 @@ def get_classes_conditional(doxy_xml_files, cond):
                     })
     return found
 
-def classes_from_build_path(build_path):
+def classes_from_build_path(build_path, targets):
     """Get classes and members from all Doxygen XML files found on the
        provided build path."""
-    doxy_xml_path = os.path.join(build_path,'Docs/build/html/doxygen/xml')
+    doxy_xml_path = os.path.join(build_path,'docs/build/doxygen/xml4rst')
     if not os.path.exists(doxy_xml_path):
         print('%s: Error, path "%s" does not exist.'%(sys.argv[0], doxy_xml_path))
         sys.exit(1)
-    doxy_xml_files = (
-        glob(os.path.join(doxy_xml_path, 'class*.xml'))
-        + glob(os.path.join(doxy_xml_path, 'struct*.xml')))
+
+    doxy_xml_files = []
+    for component in targets:
+        doxypath = os.path.join(doxy_xml_path, component)
+        doxy_xml_files += glob(os.path.join(doxypath, 'class*.xml'))
+        doxy_xml_files += glob(os.path.join(doxypath, 'struct*.xml'))
 
     # We want only classes that contain calls to the
     # ACCEPT_SERIALIZATION macro.
@@ -127,7 +130,7 @@ def classes_from_headers(all_headers, include_paths):
             for line in out:
                 words = line.split()
                 if len(words)>=2 and (words[0]=='class' or words[0]=='struct'):
-                    classes.append(words[1])
+                    classes.append(words[1].strip(':'))
         return classes
     finally:
         shutil.rmtree(d)
@@ -143,7 +146,7 @@ if __name__=='__main__':
 
     all_headers = get_headers(targets)
 
-    doxygen_classes = classes_from_build_path(build_path)
+    doxygen_classes = classes_from_build_path(build_path, targets)
 
     header_classes = classes_from_headers(all_headers, include_paths)
 

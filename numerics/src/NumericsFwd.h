@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,5 @@ TYPEDEF_STRUCT(VariationalInequality)
 TYPEDEF_STRUCT(AffineVariationalInequalities)
 TYPEDEF_STRUCT(ConvexQP)
 TYPEDEF_STRUCT(ConvexQP_as_VI)
-
-
-
+TYPEDEF_STRUCT(GlobalFrictionContactProblem_balancing_data)
 #endif

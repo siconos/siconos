@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ extern "C"
 {
 #endif
 
-  /**
-   * This function compute the complementarity error of the NCP: \f$ 0 \leq z \perp F(z) \geq 0\f$.
+  /** This function compute the complementarity error of the NCP: \f$ 0 \leq z \perp F(z) \geq 0\f$.
    * \param n size of the vectors
    * \param[in] z solution
    * \param[in] F value of the function at the solution

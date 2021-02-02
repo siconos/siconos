@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@
 
 #ifndef MCP_PROBLEM_C
 #define MCP_PROBLEM_C
-
-
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
 #include "MixedComplementarityProblem.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>           // for NULL
+#include <stdlib.h>          // for free, malloc
+#include "NumericsMatrix.h"  // for NM_clear
 
 void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem)
 {
@@ -35,9 +32,9 @@ void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* probl
 
 void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp)
 {
-  if (mcp->nabla_Fmcp)
+  if(mcp->nabla_Fmcp)
   {
-    NM_free(mcp->nabla_Fmcp);
+    NM_clear(mcp->nabla_Fmcp);
     free(mcp->nabla_Fmcp);
     mcp->nabla_Fmcp = NULL;
   }

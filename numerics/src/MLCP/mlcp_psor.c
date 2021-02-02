@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <float.h>                              // for DBL_EPSILON
+#include <math.h>                               // for fabs
+#ifndef __cplusplus
+#include <stdbool.h>                       // for false
+#endif
+#include <stdio.h>                              // for printf
+#include <stdlib.h>                             // for free, malloc, exit
+#include "MLCP_Solvers.h"                       // for mlcp_compute_error
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NumericsFwd.h"                        // for SolverOptions, MixedL...
+#include "SiconosBlas.h"                        // for cblas_ddot
+#include "SolverOptions.h"                      // for SolverOptions, SICONO...
+#include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_O...
+#include "numerics_verbose.h"                     // for numerics_printf
 
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <float.h>
-#include "SiconosBlas.h"
-#include <math.h>
 /*
  *
  * double *z : size n+m
  * double *w : size n+m
  */
 
-/*\warning omega is not explicitely used. must be completed    */
-int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  return 0;
-}
 void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
 
-  if (!problem->isStorageType2)
+  if(!problem->isStorageType2)
   {
     printf("Siconos/Numerics: mlcp_psor: Wrong Storage (!isStorageType2) for PSOR solver\n");
     exit(EXIT_FAILURE);
@@ -68,15 +68,15 @@ void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w,
   incy = 1;
   /* Recup input */
 
-  itermax = options->iparam[0];
-  tol   = options->dparam[0];
-  omega = options->dparam[2];
-  printf("omega %f\n is not used !!!!!", omega);
+  itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  tol   = options->dparam[SICONOS_DPARAM_TOL];
+  omega = options->dparam[SICONOS_DPARAM_MLCP_OMEGA];
+  numerics_printf_verbose(0,"omega %f\n is not used !!!!!", omega);
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocation */
 
@@ -88,16 +88,13 @@ void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   /* Preparation of the diagonal of the inverse matrix */
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
-    if ((fabs(A[i * n + i]) < DBL_EPSILON))
+    if((fabs(A[i * n + i]) < DBL_EPSILON))
     {
 
-      if (verbose > 0)
-      {
-        printf(" Vanishing diagonal term \n");
-        printf(" The local problem cannot be solved \n");
-      }
+      numerics_printf_verbose(1," Vanishing diagonal term A[%i,%i]= %14.8e", i, i,  A[i * n + i] );
+      numerics_printf_verbose(1," The local problem cannot be solved");
 
       *info = 2;
       free(diagA);
@@ -111,16 +108,13 @@ void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
     }
   }
-  for (i = 0 ; i < m ; ++i)
+  for(i = 0 ; i < m ; ++i)
   {
-    if ((fabs(B[i * m + i]) < DBL_EPSILON))
+    if((fabs(B[i * m + i]) < DBL_EPSILON))
     {
 
-      if (verbose > 0)
-      {
-        printf(" Vanishing diagonal term \n");
-        printf(" The local problem cannot be solved \n");
-      }
+      numerics_printf_verbose(1," Vanishing diagonal term \n");
+      numerics_printf_verbose(1," The local problem cannot be solved \n");
 
       *info = 2;
       free(diagA);
@@ -145,7 +139,7 @@ void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   mlcp_compute_error(problem, z, w, tol, &err);
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
@@ -153,36 +147,36 @@ void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w,
     incy = 1;
 
 
-    for (i = 0 ; i < n ; ++i)
+    for(i = 0 ; i < n ; ++i)
     {
       u[i] = 0.0;
       //uiprev = u[i];
       //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-      u[i] =  - (a[i] + cblas_ddot(n , &A[i] , incAx , u , incy)   + cblas_ddot(m , &C[i] , incAx , v , incy)) * diagA[i];
+      u[i] =  - (a[i] + cblas_ddot(n, &A[i], incAx, u, incy)   + cblas_ddot(m, &C[i], incAx, v, incy)) * diagA[i];
     }
 
-    for (i = 0 ; i < m ; ++i)
+    for(i = 0 ; i < m ; ++i)
     {
       //prevvi = v[i];
       v[i] = 0.0;
       //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-      vi = -(b[i] + cblas_ddot(n , &D[i] , incBx , u , incy)   + cblas_ddot(m , &B[i] , incBx , v , incy)) * diagB[i];
+      vi = -(b[i] + cblas_ddot(n, &D[i], incBx, u, incy)   + cblas_ddot(m, &B[i], incBx, v, incy)) * diagB[i];
 
-      if (vi < 0) v[i] = 0.0;
+      if(vi < 0) v[i] = 0.0;
       else v[i] = vi;
     }
 
 
 
+
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
     mlcp_compute_error(problem, z, w, tol, &err);
-
-    if (verbose == 2)
+    numerics_printf_verbose(1,"---- MLCP - PSOR  - Iteration %i omega = %8.4e, residual = %14.7e, tol = %14.7e", omega, iter, err, tol);
+    if(verbose == 2)
     {
-      printf(" # i%d -- %g : ", iter, err);
-      for (i = 0 ; i < n ; ++i) printf(" %g", u[i]);
-      for (i = 0 ; i < m ; ++i) printf(" %g", v[i]);
-      for (i = 0 ; i < m ; ++i) printf(" %g", w[i]);
+      for(i = 0 ; i < n ; ++i) printf(" %g", u[i]);
+      for(i = 0 ; i < m ; ++i) printf(" %g", v[i]);
+      for(i = 0 ; i < m ; ++i) printf(" %g", w[i]);
       printf("\n");
     }
 
@@ -190,22 +184,17 @@ void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
-  if (err > tol)
+  if(err > tol)
   {
-    printf("Siconos/Numerics: mlcp_psor: No convergence of PGS after %d iterations\n" , iter);
-    printf("Siconos/Numerics: mlcp_psor: The residue is : %g \n", err);
+    numerics_printf_verbose(1,"---- MLCP - PSOR  - No convergence after %d iterations with error = %14.7e ", iter, err);
     *info = 1;
   }
   else
   {
-    if (verbose > 0)
-    {
-      printf("Siconos/Numerics: mlcp_psor: Convergence of PGS after %d iterations\n" , iter);
-      printf("Siconos/Numerics: mlcp_psor: The residue is : %g \n", err);
-    }
+    numerics_printf_verbose(1,"---- MLCP - PSOR  - Convergence after %d iterations with error = %14.7e ", iter, err);
     *info = 0;
   }
 
@@ -213,3 +202,13 @@ void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w,
   free(diagB);
   return;
 }
+
+/*\warning omega is not explicitely used. must be completed    */
+void mlcp_psor_set_default(SolverOptions* options)
+{
+  options->iparam[SICONOS_IPARAM_MAX_ITER]  = 50000;
+  options->dparam[SICONOS_DPARAM_MLCP_OMEGA] = 1.2;
+  options->filterOn = false;
+
+}
+

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
 #ifndef NM_MUMPS_h
 #define NM_MUMPS_h
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
+#include "NumericsFwd.h"  // for NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP, WITH_MUMPS // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -100,11 +100,27 @@ extern "C"
    */
   double NM_MUMPS_cntl(NumericsMatrix* A, unsigned int index);
 
-  /** Set linear problem
+  /** Set matrix before factorization.
    * \param A, the matrix holding the MUMPS config,
-   * \param b, a pointer on double values.
+   * \param nrhs, the number of right hand side.
+   * \param b, a pointer on double values of the right hand side.
    */
-  void NM_MUMPS_set_problem(NumericsMatrix* A, double *b);
+  void NM_MUMPS_set_matrix(NumericsMatrix* A);
+
+  /** Set dense right hand side.
+   * \param A, the matrix holding the MUMPS config,
+   * \param nrhs, the number of right hand side.
+   * \param b, a pointer on double values of the right hand side.
+   */
+  void NM_MUMPS_set_dense_rhs(NumericsMatrix* A, unsigned int nrhs, double *b);
+
+  /** Set sparse right hand side.
+   * \param A, the matrix holding the MUMPS config,
+   * \param B, the matrix holding the right hand side.
+   * B is converted to csc if not already stored in this
+   * representation.
+   */
+  void NM_MUMPS_set_sparse_rhs(NumericsMatrix* A, NumericsMatrix* B);
 
   /** Set MUMPS verbosity.
    * \param A, the matrix holding the MUMPS config,

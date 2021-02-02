@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@
 
 #include "NumericsFwd.h"
 #include <stdio.h>
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 /* void * solverFC3D; */
 /* void * solverEquality; */
 /* void * solverLCP; */
@@ -52,6 +54,22 @@ struct listNumericsProblem
   struct listNumericsProblem * prevProblem;
 };
 
+
+/** \enum ids for the possible/allowed numerics problem formulations
+ */
+enum SICONOS_NUMERICS_PROBLEM_TYPE
+{
+  SICONOS_NUMERICS_PROBLEM_LCP = 0,
+  SICONOS_NUMERICS_PROBLEM_MLCP = 1,
+  SICONOS_NUMERICS_PROBLEM_EQUALITY = 2,
+  SICONOS_NUMERICS_PROBLEM_FC2D = 3,
+  SICONOS_NUMERICS_PROBLEM_FC3D = 4,
+  SICONOS_NUMERICS_PROBLEM_NCP = 5,
+  SICONOS_NUMERICS_PROBLEM_MCP = 6,
+  SICONOS_NUMERICS_PROBLEM_VI = 7,
+  SICONOS_NUMERICS_PROBLEM_AVI = 8,
+  SICONOS_NUMERICS_PROBLEM_RELAY = 9,
+};
 
 /** \struct GenericMechanicalProblem GenericMechanicalProblem.h
  * \param numberOfBlockLine The number of  line of blocks.
@@ -110,12 +128,18 @@ extern "C"
    */
   void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  problem, FILE* file);
 
-  /*To build a GenericMechanicalProblem from a file.
-   * \parm[in] file, a file containing the GenericMechanicalProblem.
-   * \return the GenericMechanicalProblem.
+  /** read a GenericMechanicalProblem from a file descriptor
+   * \param file descriptor
+   * \return problem the problem to read
    */
-  GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file);
+  GenericMechanicalProblem*  genericMechanical_newFromFile(FILE* file);
 
+  /** read a GenericMechanicalProblem from a file (.dat or hdf5 if fclib is on) from its filename
+   * \param filename the name of the input file
+   * \return problem the problem to read
+   */
+  GenericMechanicalProblem* genericMechanical_new_from_filename(const char * filename);
+  
   /* A recursive displaying method.
    *  \param[in], pGMP the displayed problem.
    */
@@ -130,6 +154,14 @@ extern "C"
    * \ return the localProblem (either lcp, linearSystem of fc3d
    */
   void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size);
+  
+  /** returns nonsmooth problem formulation name, from its id number.
+   \param id problem id (must be one of the allowed values in SICONOS_NUMERICS_PROBLEM_TYPE enum).
+   \return const char
+  */
+  const char * ns_problem_id_to_name(enum SICONOS_NUMERICS_PROBLEM_TYPE id);
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

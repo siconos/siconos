@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,20 +62,23 @@ namespace Siconos
       vector we want to construct.
   */
   enum UBLAS_TYPE {
+    BLOCK =0,
     /** id for dense matrix or vector */
     DENSE = 1, 
     /** id for triangular matrix */
-    TRIANGULAR,
+    TRIANGULAR=2,
     /** id for symmetric matrix */
-    SYMMETRIC,
+    SYMMETRIC=3,
     /** id for sparse matrix or vector */
-    SPARSE,
+    SPARSE=4,
     /** id for banded matrix */
-    BANDED,
+    BANDED=5,
     /** id for zero matrix */
-    ZERO,
+    ZERO=6,
     /** id for identity matrix */
-    IDENTITY};
+    IDENTITY=7,
+    /** id for sparse matrix or vector */
+    SPARSE_COORDINATE=8};
 }
 // Notes:
 // Vector definition in boost: vector<T,A> see http://www.boost.org/libs/numeric/ublas/doc/vector.htm
@@ -145,10 +148,15 @@ TYPEDEF_SPTR(SymMat)
 typedef ublas::banded_matrix<double, ublas::column_major > BandedMat;
 TYPEDEF_SPTR(BandedMat)
 
-/** SparseMat is a typedef of boost::ublas::numeric::mapped_matrix<double>
+/** SparseMat is a typedef of boost::ublas::numeric::compressed_matrix<double>
  */
 typedef ublas::compressed_matrix<double, ublas::column_major, 0, Index > SparseMat;
 TYPEDEF_SPTR(SparseMat)
+
+/** SparseMat is a typedef of boost::ublas::numeric::mapped_matrix<double>
+ */
+typedef ublas::coordinate_matrix<double, ublas::column_major, 0, Index > SparseCoordinateMat;
+TYPEDEF_SPTR(SparseCoordinateMat)
 
 /** ZeroMat is a typedef of boost::ublas::numeric::zero_matrix, ie null matrix.
  */
@@ -186,6 +194,7 @@ TYPEDEF_SPTR(SparseVect)
  */
 typedef ublas::vector<std::complex<double> > complex_vector;
 TYPEDEF_SPTR(complex_vector)
+
 
 // Set this to use lapack::optimal_workspace where required in lapack routines.
 #define USE_OPTIMAL_WORKSPACE

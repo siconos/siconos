@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,18 @@
  * limitations under the License.
 */
 
-#include "numerics_verbose.h"
-#include "op3x3.h"
-#include "SparseBlockMatrix.h"
-#include "fc3d_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "fc3d_compute_error.h"
-#include "FischerBurmeisterGenerated.h"
-#include "fc3d_nonsmooth_Newton_solvers.h"
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "Friction_cst.h"
-#include "SiconosLapack.h"
+#include <assert.h>                         // for assert
+#include <math.h>                           // for sqrt
+#include <stdio.h>                          // for printf, NULL
+#include <stdlib.h>                         // for calloc, free, malloc
+#include "FischerBurmeisterGenerated.h"     // for fc3d_FischerBurmeisterFun...
+#include "FrictionContactProblem.h"         // for FrictionContactProblem
+#include "Friction_cst.h"                   // for SICONOS_FRICTION_3D_NSN_FB
+#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
+#include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
+#include "numerics_verbose.h"               // for verbose
+#include "fc3d_Solvers.h"
 
 void fc3d_FischerBurmeisterFunction(
   unsigned int problemSize,
@@ -52,7 +49,7 @@ void fc3d_FischerBurmeisterFunction(
   assert(problemSize % 3 == 0);
 
   unsigned int i;
-  for (i = 0; i < problemSize; i += 3)
+  for(i = 0; i < problemSize; i += 3)
   {
 
     computeACFun3x3(reaction, velocity, *mu, rho, result, A, B);
@@ -62,13 +59,13 @@ void fc3d_FischerBurmeisterFunction(
     mu++;
     rho += 3;
 
-    if (result)
+    if(result)
       result += 3;
 
-    if (A)
+    if(A)
       A += 9;
 
-    if (B)
+    if(B)
       B += 9;
 
   }
@@ -77,9 +74,9 @@ void fc3d_FischerBurmeisterFunction(
 
 
 int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
-    FrictionContactProblem* problem,
-    double *z , double *w, double tolerance,
-    SolverOptions * options, double * error)
+  FrictionContactProblem* problem,
+  double *z, double *w, double tolerance,
+  SolverOptions * options, double * error)
 {
 
   double *A = NULL;
@@ -92,9 +89,9 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
 
   FischerBurmeisterFun3x3Ptr computeACFun3x3;
 
-  switch (options->iparam[10])
+  switch(options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
 
     computeACFun3x3 = &fc3d_FischerBurmeisterFunctionGenerated;
@@ -121,9 +118,9 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
   free(F);
   free(rho);
 
-  if (*error > tolerance)
+  if(*error > tolerance)
   {
-    if (verbose > 1)
+    if(verbose > 1)
       printf(" Numerics - fc3d_compute_error: error = %g > tolerance = %g.\n",
              *error, tolerance);
     return 1;
@@ -134,46 +131,26 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
   }
 }
 
-int fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(
-  SolverOptions* options)
+void fc3d_nsn_fb_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the default solver options for the NSN_FB Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_NSN_FB;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 14;
-  options->dSize = 14;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 200;
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
-  options->iparam[7] = 1;      /* erritermax */
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1;      /* default rho */
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
-  options->iparam[8] = -1;     /* mpi com fortran */
-  options->iparam[10] = 0;
-  options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
-  options->iparam[12] = 100;   /* max iter line search */
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1;      /* default rho */
+
+  options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;     /* mpi com fortran */
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
+
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100;   /* max iter line search */
 
 #ifdef WITH_MUMPS
-  options->iparam[13] = 1;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] = SICONOS_FRICTION_3D_NSN_USE_MUMPS;
 #else
-  options->iparam[13] = 0;     /* Linear solver used at each Newton iteration. 0: cs_lusol, 1 mumps */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] = SICONOS_FRICTION_3D_NSN_USE_CSLUSOL;
 #endif
-
-  options->internalSolvers = NULL;
-
-  return 0;
 }
 
 
@@ -204,14 +181,14 @@ void nonsmoothEqnFischerBurmeisterFun(void* arg,
   FischerBurmeisterParams* acparams_p = (FischerBurmeisterParams *) arg;
 
   fc3d_FischerBurmeisterFunction(problemSize,
-                                         acparams_p->computeACFun3x3,
-                                         reaction,
-                                         velocity,
-                                         mu,
-                                         rho,
-                                         result,
-                                         A,
-                                         B);
+                                 acparams_p->computeACFun3x3,
+                                 reaction,
+                                 velocity,
+                                 mu,
+                                 rho,
+                                 result,
+                                 A,
+                                 B);
 }
 
 
@@ -243,9 +220,9 @@ void fc3d_nonsmooth_Newton_FischerBurmeister(
 
   FischerBurmeisterParams acparams;
 
-  switch (options->iparam[10])
+  switch(options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
     acparams.computeACFun3x3 = &fc3d_FischerBurmeisterFunctionGenerated;
     break;
@@ -259,6 +236,6 @@ void fc3d_nonsmooth_Newton_FischerBurmeister(
   equation.function = &nonsmoothEqnFischerBurmeisterFun;
 
   fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
-                                   options);
+                                      options);
 
 }

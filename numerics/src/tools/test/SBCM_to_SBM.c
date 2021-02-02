@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,8 @@
 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "NumericsMatrix.h"
-#include <math.h>
-#include "numericsMatrixTestFunction.h"
-#include "CSparseMatrix.h"
-#include "SparseBlockMatrix.h"
+#include "NumericsFwd.h"        // for SparseBlockCoordinateMatrix, SparseBl...
+#include "SparseBlockMatrix.h"  // for SparseBlockCoordinateMatrix, SBM_get_...
 
 #define nnz 10
 
@@ -55,7 +49,7 @@ int main(void)
   mc.column = Aj;
 
   mc.block = block;
- 
+
   SparseBlockStructuredMatrix* m = SBCM_to_SBM(&mc);
 
   SBM_print(m);

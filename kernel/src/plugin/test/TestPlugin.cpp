@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,21 +28,21 @@
 extern "C" DLLEXPORT void computef(double time, unsigned int sizeOfX, double* x, double* f, unsigned int sizeZ, double* z);
 extern "C" DLLEXPORT void computef(double time, unsigned int sizeOfX, double* x, double* f, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfX; i++)
+  for(unsigned int i = 0; i < sizeOfX; i++)
     f[i] = time * x[i];
 }
 
 extern "C" DLLEXPORT void computeJacobianfx(double time, unsigned int sizeOfX, double* x, double* jacob, unsigned int sizeZ, double* z);
 extern "C" DLLEXPORT void computeJacobianfx(double time, unsigned int sizeOfX, double* x, double* jacob, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfX * sizeOfX; i++)
+  for(unsigned int i = 0; i < sizeOfX * sizeOfX; i++)
     jacob[i] = i + 1;
 }
 
 extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x, double* M, unsigned int sizeZ, double* z);
 extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x, double* M, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfX * sizeOfX; ++i)
+  for(unsigned int i = 0; i < sizeOfX * sizeOfX; ++i)
     M[i] = 0;
   M[0] = 1 * time;
   M[4] = 2 * time;
@@ -55,7 +55,7 @@ extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x,
 extern "C" DLLEXPORT void computeMass(unsigned int sizeOfq, double *q, double *mass, unsigned int sizeZ, double* z);
 extern "C" DLLEXPORT void computeMass(unsigned int sizeOfq, double *q, double *mass, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
+  for(unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     mass[i] = 0;
   mass[0] = 1;
   mass[4] = 2;
@@ -65,49 +65,49 @@ extern "C" DLLEXPORT void computeMass(unsigned int sizeOfq, double *q, double *m
 extern "C" DLLEXPORT void computeFInt(double time, unsigned int sizeOfq, double *q, double *velocity, double *fInt, unsigned int sizeZ, double * z);
 extern "C" DLLEXPORT void computeFInt(double time, unsigned int sizeOfq, double *q, double *velocity, double *fInt, unsigned int sizeZ, double * z)
 {
-  for (unsigned int i = 0; i < sizeOfq; ++i)
+  for(unsigned int i = 0; i < sizeOfq; ++i)
     fInt[i] = i * q[i];
 }
 
 extern "C" DLLEXPORT void computeFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeOfZ, double *z);
 extern "C" DLLEXPORT void computeFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeOfZ, double *z)
 {
-  for (unsigned int i = 0; i < sizeOfq; ++i)
+  for(unsigned int i = 0; i < sizeOfq; ++i)
     fExt[i] = i * time;
 }
 
 extern "C" DLLEXPORT void computeFGyr(unsigned int sizeOfq, double *q, double *velocity, double *FGyr, unsigned int sizeOfZ, double *z);
 extern "C" DLLEXPORT void computeFGyr(unsigned int sizeOfq, double *q, double *velocity, double *FGyr, unsigned int sizeOfZ, double *z)
 {
-  for (unsigned int i = 0; i < sizeOfq; ++i)
+  for(unsigned int i = 0; i < sizeOfq; ++i)
     FGyr[i] = i * q[i];
 }
 
 extern "C" DLLEXPORT void computeJacobianFIntq(double time, unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z);
 extern "C" DLLEXPORT void computeJacobianFIntq(double time, unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
+  for(unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
 extern "C" DLLEXPORT void computeJacobianFintVelocity(double time, unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z);
 extern "C" DLLEXPORT void computeJacobianFintVelocity(double time, unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
+  for(unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
 extern "C" DLLEXPORT void computeJacobianFGyrq(unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z);
 extern "C" DLLEXPORT void computeJacobianFGyrq(unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
+  for(unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
 extern "C" DLLEXPORT void computeJacobianFGyrVelocity(unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z);
 extern "C" DLLEXPORT void computeJacobianFGyrVelocity(unsigned int sizeOfq, double *q, double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
+  for(unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
@@ -117,16 +117,16 @@ extern "C" DLLEXPORT void computeJacobianFGyrVelocity(unsigned int sizeOfq, doub
 extern "C" DLLEXPORT void computeb(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double *z);
 extern "C" DLLEXPORT void computeb(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double *z)
 {
-  for (unsigned int i = 0; i < sizeOfB; i++)
+  for(unsigned int i = 0; i < sizeOfB; i++)
     b[i] = time * i ;
 
 }
 extern "C" DLLEXPORT void computeA(double time, unsigned int rowA, unsigned int colA, double* A, unsigned int sizeOfZ, double *z);
 extern "C" DLLEXPORT void computeA(double time, unsigned int rowA, unsigned int colA, double* A, unsigned int sizeOfZ, double *z)
 {
-  for (unsigned int j = 0; j < rowA; j++)
+  for(unsigned int j = 0; j < rowA; j++)
   {
-    for (unsigned int i = 0; i < rowA; i++)
+    for(unsigned int i = 0; i < rowA; i++)
       A[i + j * rowA] = 4 * (i + 1);
   }
 }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,6 @@
 #define EulerMoreauOSI_H
 
 #include "OneStepIntegrator.hpp"
-
-
-const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
 
 /** One Step time Integrator for First Order Dynamical Systems.
  *
@@ -160,10 +157,10 @@ public:
   enum EulerMoreauOSI_ds_workVector_id{RESIDU, RESIDU_FREE, FREE, X_PARTIAL_NS_FOR_RELATION,
 				       DELTA_X_FOR_RELATION,LOCAL_BUFFER, WORK_LENGTH};
 
-  enum EulerMoreauOSI_interaction_workVector_id{OSNSP_RHS, VEC_X, VEC_Z, H_ALPHA, VEC_RESIDU_Y,
-						G_ALPHA, VEC_RESIDU_R, WORK_INTERACTION_LENGTH};
+  enum EulerMoreauOSI_interaction_workVector_id{OSNSP_RHS, VEC_X, H_ALPHA, VEC_RESIDU_Y,
+						VEC_RESIDU_R, WORK_INTERACTION_LENGTH};
 
-  enum EulerMoreauOSI_interaction_workBlockVector_id{XFREE, X_PARTIAL_NS, DELTA_X, BLOCK_WORK_LENGTH};
+  enum EulerMoreauOSI_interaction_workBlockVector_id{XFREE, X_PARTIAL_NS, DELTA_X, G_ALPHA, BLOCK_WORK_LENGTH};
 
   enum EulerMoreauOSI_interaction_workMat_id{MAT_KHAT, MAT_KTILDE, MAT_WORK_LENGTH};
 
@@ -186,7 +183,7 @@ public:
 
   /** get the value of W corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get W[0] in that case
+   * nullptr. get W[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
@@ -201,14 +198,14 @@ public:
 
   /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get WBoundaryConditions[0] in that case
+   * nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get WBoundaryConditions[0] in that case
+   * nullptr. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@
 
 
 // Default (private)
-NormalConeNSL::NormalConeNSL(): NonSmoothLaw(), _H(std11::shared_ptr<SimpleMatrix>()), _K(std11::shared_ptr<SiconosVector>())
+NormalConeNSL::NormalConeNSL(): NonSmoothLaw(), _H(std::shared_ptr<SimpleMatrix>()), _K(std::shared_ptr<SiconosVector>())
 {}
 
 NormalConeNSL::NormalConeNSL(unsigned size, SP::SimpleMatrix H, SP::SiconosVector K):
   NonSmoothLaw(size), _H(H), _K(K)
 {
-assert(H->size(1) == size &&
-      "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are not equal, check your code !");
+  assert(H->size(1) == size &&
+         "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are not equal, check your code !");
 }
 
 NormalConeNSL::~NormalConeNSL()

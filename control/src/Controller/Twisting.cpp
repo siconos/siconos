@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ Twisting::Twisting(SP::ControlSensor sensor, double gain, double beta, double hC
   CommonSMC(TWISTING, sensor)
 {
   _u.reset(new SiconosVector(2));
-  if (beta <= 0.0 || beta >= 1.0)
+  if(beta <= 0.0 || beta >= 1.0)
   {
     std::cout << "Twisting constructor: beta is not in (0, 1)" << std::endl;
   }
@@ -77,9 +77,9 @@ void Twisting::setNSdata(double hControl)
 void Twisting::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
   // basic check
-  if (!_nsLawSMC || !_OSNSPB_SMC)
+  if(!_nsLawSMC || !_OSNSPB_SMC)
   {
-    RuntimeException::selfThrow("Twisting::initialize - nslaw or osnsp not set. If you used the constructor with only the ControlSensor as argument, you need to manually call setNSdata");
+    THROW_EXCEPTION("Twisting::initialize - nslaw or osnsp not set. If you used the constructor with only the ControlSensor as argument, you need to manually call setNSdata");
   }
 
   CommonSMC::initialize(nsds, s);

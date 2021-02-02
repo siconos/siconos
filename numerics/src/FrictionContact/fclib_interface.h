@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,21 @@
 #ifndef FCLIB_INTERFACE_H
 #define FCLIB_INTERFACE_H
 
-#include "SiconosConfig.h"
+#include "SiconosConfig.h"  // for BUILD_AS_CPP, WITH_FCLIB
 
 #if defined(WITH_FCLIB)
-#include <fclib.h>
-#endif
+#include "NumericsFwd.h"    // for FrictionContactProblem, GlobalFrictionCon...
+
+typedef struct fclib_local fclib_local;
+typedef struct fclib_global fclib_global;
+typedef struct fclib_solution fclib_solution;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-#if defined(WITH_FCLIB)
-  #include "FrictionContactProblem.h"
-  FrictionContactProblem* from_fclib_local(const struct fclib_local *fclib_problem);
+  FrictionContactProblem* from_fclib_local(const fclib_local *fclib_problem);
 
 
   FrictionContactProblem* frictionContact_fclib_read(const char *path);
@@ -49,7 +50,7 @@ extern "C"
   int frictionContact_fclib_write_guess( double * reaction, double * velocity,
                                          const char *path);
 
-  GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global *fclib_problem);
+  GlobalFrictionContactProblem* from_fclib_global(const fclib_global *fclib_problem);
 
 
   GlobalFrictionContactProblem* globalFrictionContact_fclib_read(const char *path);
@@ -60,10 +61,10 @@ extern "C"
                                         char * mathInfo,
                                         const char *path);
 
-#endif
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
+#endif
+
 
 #endif

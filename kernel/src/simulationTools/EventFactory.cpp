@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 
 #include "EventFactory.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include <iostream>
 
 
@@ -40,8 +40,8 @@ SP::Event Registry::instantiate(double time, int type)
 {
   MapFactoryIt it = factory_map.find(type) ;
 
-  if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (EventFactory) failed, no class with id: " + type);
+  if(it == factory_map.end())
+    THROW_EXCEPTION("Registry::instantiate (EventFactory) failed, no class with id: " + std::to_string(type));
 
   return (it->second)(time, type) ; // run our factory
 }

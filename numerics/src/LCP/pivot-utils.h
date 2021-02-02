@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,17 @@
 #ifndef PIVOT_UTILS_H
 #define PIVOT_UTILS_H
 
-#include "SiconosConfig.h"
-#include "lumod_wrapper.h"
+#include "NumericsFwd.h"    // for NumericsMatrix
+#include "lumod_wrapper.h"  // for SN_lumod_dense_data
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #ifdef __cplusplus
 #undef restrict
+#include <sys/cdefs.h>      // for __restrict
 #define restrict __restrict
 #endif
 
 #define PIVOT_PATHSEARCH_SUCCESS -2
-#define BASIS_OFFSET 1
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -170,7 +171,7 @@ void do_pivot_lumod(SN_lumod_dense_data* lumod_data, NumericsMatrix* M, double* 
   void init_M_least_index(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q);
   int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, double* restrict M, double* restrict q, int* restrict basis, double* restrict cov_vec);
 
-  char* basis_to_name(unsigned nb, unsigned n);
+  const char* basis_to_name(unsigned nb, unsigned n);
   unsigned basis_to_number(unsigned nb, unsigned n);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

@@ -1,5 +1,5 @@
 #include "CADMBTB_internalTools.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include "SiconosConfig.h"
 #include "TopExp_Explorer.hxx"
 #include "TopoDS_Iterator.hxx"
@@ -67,7 +67,7 @@ gp_Pnt _CADMBTB_FacePoint(const TopoDS_Face &face,Standard_Real u, Standard_Real
 }
 
 gp_Pnt _CADMBTB_EdgePoint(const TopoDS_Edge &edge,Standard_Real u)
-  {
+{
   // get bounds of face
   //Standard_Real umin, umax, vmin, vmax;
   //BRepTools::UVBounds(face, umin, umax, vmin, vmax);          // create surface
@@ -75,7 +75,7 @@ gp_Pnt _CADMBTB_EdgePoint(const TopoDS_Edge &edge,Standard_Real u)
   //if (v < vmin) v = vmin;
   //if (u > umax) u = umax;
   //if (v > vmax) v = vmax;
-   
+
   BRepAdaptor_Curve SC(edge);
   //  gp_Vec VecU,VecV;
   gp_Pnt aPaux;
@@ -88,21 +88,21 @@ gp_Dir _CADMBTB_FaceNormal(const TopoDS_Face &face,Standard_Real u, Standard_Rea
 {
   // get bounds of face
   //  Standard_Real umin, umax, vmin, vmax;
-  //  BRepTools::UVBounds(face, umin, umax, vmin, vmax);         
+  //  BRepTools::UVBounds(face, umin, umax, vmin, vmax);
 
   // create surface
-  Handle(Geom_Surface) surf=BRep_Tool::Surface(face);          
-  
+  Handle(Geom_Surface) surf=BRep_Tool::Surface(face);
+
   // get surface properties
-  GeomLProp_SLProps props(surf, u, v, 1, 0.01);      
-  
+  GeomLProp_SLProps props(surf, u, v, 1, 0.01);
+
   // get surface normal
-   gp_Dir norm=props.Normal();                        
-  
+  gp_Dir norm=props.Normal();
+
   // check orientation
   //  if(face.Orientation()==TopAbs_REVERSED) norm.Reverse();
-   return norm;
-   
+  return norm;
+
 }
 #ifdef HAS_FORTRAN
 extern "C"
@@ -172,10 +172,10 @@ void _myf_FaceEdge(double *x, double * fx, double * gx,const TopoDS_Face& face1,
 }
 
 void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(unsigned int idContact, unsigned int idFace1, unsigned int idFace2,
-                                                 Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                                                 Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                                                 Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ, 
-                                                 unsigned int normalFromFace1, Standard_Real& MinDist)
+    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
+    Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
+    Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
+    unsigned int normalFromFace1, Standard_Real& MinDist)
 {
   unsigned int idFace11=sNumberOfObj+(2*idContact-2*sNumberOfContacts);
   unsigned int idFace21=sNumberOfObj+(2*idContact+1-2*sNumberOfContacts);
@@ -307,7 +307,7 @@ void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(unsigned int idContact, unsigne
 #ifdef HAS_FORTRAN
       n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 #else
-      RuntimeException::selfThrow("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
+      THROW_EXCEPTION("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
 #endif
       //      ACE_times[ACE_TIMER_CAD_12].stop();
       while(mode > 7)
@@ -317,7 +317,7 @@ void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(unsigned int idContact, unsigne
 #ifdef HAS_FORTRAN
         n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 #else
-        RuntimeException::selfThrow("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
+        THROW_EXCEPTION("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
 #endif
         //	ACE_times[ACE_TIMER_CAD_12].stop();
       }
@@ -337,94 +337,100 @@ void _CADMBTB_getMinDistanceFaceFace_using_n2qn1(unsigned int idContact, unsigne
           gp_Dir normal = _CADMBTB_FaceNormal(face1,x[0],x[1]);
           normal.Coord(nX,nY,nZ);
           //check orientation of normal from face 1
-	     gp_Pnt aPaux1 = _CADMBTB_FacePoint(face1,x[0],x[1]);
-          aPaux1.Coord(X1, Y1, Z1);
-	    gp_Pnt aPaux2 = _CADMBTB_FacePoint(face2,x[2],x[3]);
-          aPaux2.Coord(X2, Y2, Z2);
-	    if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)>0)
-	   normal.Reverse();
-	    normal.Coord(nX,nY,nZ);
-	 
-       	}
-	else
-        {
-	gp_Dir normal = _CADMBTB_FaceNormal(face2,x[2],x[3]);
-	normal.Coord(nX,nY,nZ); 
-	/**check orientation of normal from face 2**/
-	 gp_Pnt aPaux1 = _CADMBTB_FacePoint(face1,x[0],x[1]);
+          gp_Pnt aPaux1 = _CADMBTB_FacePoint(face1,x[0],x[1]);
           aPaux1.Coord(X1, Y1, Z1);
           gp_Pnt aPaux2 = _CADMBTB_FacePoint(face2,x[2],x[3]);
           aPaux2.Coord(X2, Y2, Z2);
-	   if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)<0)
-	      { normal.Reverse();
-	      normal.Coord(nX,nY,nZ);}
-     
-	    
-	  /*   gp_Vec norm(normal);
-           gp_Lin norm1(aPaux2,norm);
-    
-          BRepBuilderAPI_MakeEdge MakeEdge(norm1);
-          TopoDS_Edge aVert1= BRepBuilderAPI_MakeEdge (norm1); 
-	
-           sAISArtefacts[idFace21] = new AIS_Shape(aVert1);
-          pAIS_InteractiveContext->Display(sAISArtefacts[idFace21],false);*/ 
-	  nX=-nX; 
-	  nY=-nY;
-	  nZ=-nZ;
+          if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)>0)
+            normal.Reverse();
+          normal.Coord(nX,nY,nZ);
 
-         
-
-	}
-        if (sCADPrintDist)
+        }
+        else
         {
-	  
-          
-	  /*  gp_Pnt aPaux1=_CADMBTB_FacePoint(face1,x[0],x[1]);
+          gp_Dir normal = _CADMBTB_FaceNormal(face2,x[2],x[3]);
+          normal.Coord(nX,nY,nZ);
+          /**check orientation of normal from face 2**/
+          gp_Pnt aPaux1 = _CADMBTB_FacePoint(face1,x[0],x[1]);
           aPaux1.Coord(X1, Y1, Z1);
           gp_Pnt aPaux2 = _CADMBTB_FacePoint(face2,x[2],x[3]);
           aPaux2.Coord(X2, Y2, Z2);
-          BRepClass_FaceClassifier classify1(face1, aPaux1, Precision::Confusion());
-          TopAbs_State st1 = classify1.State();
-          BRepClass_FaceClassifier classify2(face2, aPaux2, Precision::Confusion());
-          TopAbs_State st2 = classify2.State();*/
+          if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)<0)
+          {
+            normal.Reverse();
+            normal.Coord(nX,nY,nZ);
+          }
+
+
+          /*   gp_Vec norm(normal);
+                 gp_Lin norm1(aPaux2,norm);
+
+                BRepBuilderAPI_MakeEdge MakeEdge(norm1);
+                TopoDS_Edge aVert1= BRepBuilderAPI_MakeEdge (norm1);
+
+                 sAISArtefacts[idFace21] = new AIS_Shape(aVert1);
+                pAIS_InteractiveContext->Display(sAISArtefacts[idFace21],false);*/
+          nX=-nX;
+          nY=-nY;
+          nZ=-nZ;
+
+
+
+        }
+        if(sCADPrintDist)
+        {
+
+
+          /*  gp_Pnt aPaux1=_CADMBTB_FacePoint(face1,x[0],x[1]);
+                aPaux1.Coord(X1, Y1, Z1);
+                gp_Pnt aPaux2 = _CADMBTB_FacePoint(face2,x[2],x[3]);
+                aPaux2.Coord(X2, Y2, Z2);
+                BRepClass_FaceClassifier classify1(face1, aPaux1, Precision::Confusion());
+                TopAbs_State st1 = classify1.State();
+                BRepClass_FaceClassifier classify2(face2, aPaux2, Precision::Confusion());
+                TopAbs_State st2 = classify2.State();*/
           printf("   _CADMBTB_getMinDistanceFaceFace_using_n2qn1:  Minimal distance computed from CAD and n2qn1 : %lf \n",MinDist);
-          if (normalFromFace1)
-	    { printf("    Normal vector computed from CAD taken from  Object 1 :  nx=%lf, ny=%lf, nz=%lf \n",nX,nY,nZ);
+          if(normalFromFace1)
+          {
+            printf("    Normal vector computed from CAD taken from  Object 1 :  nx=%lf, ny=%lf, nz=%lf \n",nX,nY,nZ);
             printf("    First contact point taken from  Object 1 :  x1=%lf, y1=%lf, z1=%lf \n",X1,Y1,Z1);
-	    printf("    Second contact point taken from  Object 2 :  x2=%lf, y2=%lf, z2=%lf \n",X2,Y2,Z2);}
-         else
-           { printf("    Normal vector computed from CAD taken from  Object 2 :  nx=%lf, ny=%lf, nz=%lf \n",nX,nY,nZ);
-             printf("    First contact point taken from  Object 1 :  x1=%lf, y1=%lf, z1=%lf \n",X1,Y1,Z1);
-	     printf("    Second contact point taken from  Object 2 :  x2=%lf, y2=%lf, z2=%lf \n",X2,Y2,Z2);}
-        
-	  // check status of point of face1
-	  /* if (st1 == TopAbs_ON) {
-	    printf("point1 sur la surface\n");
-	   }else if(st1 == TopAbs_IN){
-	     printf("ponit1 est interieur\n");
-	   }else if(st1 == TopAbs_OUT){
-	     printf("point1 est exterieur\n");
-	    }else {
-	     printf("unknown 4\n");
-	   } 
-	 //check status of point of face2
-	   if (st2 == TopAbs_ON) {
-	     printf("point2 sur la surface\n");
-	    }else if(st2 == TopAbs_IN){
-	     printf("ponit2 est interieur\n");
-	   }else if(st2 == TopAbs_OUT){
-	    printf("point2 est exterieur\n");
-	   }else {
-	    printf("unknown 4\n");
-	   }*/
+            printf("    Second contact point taken from  Object 2 :  x2=%lf, y2=%lf, z2=%lf \n",X2,Y2,Z2);
+          }
+          else
+          {
+            printf("    Normal vector computed from CAD taken from  Object 2 :  nx=%lf, ny=%lf, nz=%lf \n",nX,nY,nZ);
+            printf("    First contact point taken from  Object 1 :  x1=%lf, y1=%lf, z1=%lf \n",X1,Y1,Z1);
+            printf("    Second contact point taken from  Object 2 :  x2=%lf, y2=%lf, z2=%lf \n",X2,Y2,Z2);
+          }
+
+          // check status of point of face1
+          /* if (st1 == TopAbs_ON) {
+            printf("point1 sur la surface\n");
+           }else if(st1 == TopAbs_IN){
+             printf("ponit1 est interieur\n");
+           }else if(st1 == TopAbs_OUT){
+             printf("point1 est exterieur\n");
+            }else {
+             printf("unknown 4\n");
+           }
+          //check status of point of face2
+           if (st2 == TopAbs_ON) {
+             printf("point2 sur la surface\n");
+            }else if(st2 == TopAbs_IN){
+             printf("ponit2 est interieur\n");
+           }else if(st2 == TopAbs_OUT){
+            printf("point2 est exterieur\n");
+           }else {
+            printf("unknown 4\n");
+           }*/
         }
         gp_Pnt aPaux1 = _CADMBTB_FacePoint(face1,x[0],x[1]);
         aPaux1.Coord(X1, Y1, Z1);
-	gp_Pnt aPaux2 = _CADMBTB_FacePoint(face2,x[2],x[3]);
-        aPaux2.Coord(X2, Y2, Z2);       
-	/*	printf("    second display \n");
-	printf("    First contact point taken from  Object 1 :  x1=%lf, y1=%lf, z1=%lf \n",X1,Y1,Z1);
-	printf("    Second contact point taken from  Object 2 :  x2=%lf, y2=%lf, z2=%lf \n",X2,Y2,Z2);*/
+        gp_Pnt aPaux2 = _CADMBTB_FacePoint(face2,x[2],x[3]);
+        aPaux2.Coord(X2, Y2, Z2);
+        /*	printf("    second display \n");
+        printf("    First contact point taken from  Object 1 :  x1=%lf, y1=%lf, z1=%lf \n",X1,Y1,Z1);
+        printf("    Second contact point taken from  Object 2 :  x2=%lf, y2=%lf, z2=%lf \n",X2,Y2,Z2);*/
         // cand_x[0]=x[0];
         // cand_x[1]=x[1];
         // cand_x[2]=x[2];
@@ -567,7 +573,7 @@ void _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
     n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
     //    ACE_times[ACE_TIMER_CAD_12].stop();
 #else
-        RuntimeException::selfThrow("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
+    THROW_EXCEPTION("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
 #endif
     while(mode > 7)
     {
@@ -576,7 +582,7 @@ void _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
 #ifdef HAS_FORTRAN
       n2qn1_(&n, x, &f, g, dxim, &df1, &epsabs, &imp, &io,&mode, &iter, &nsim, binf, bsup, iz, rz, &reverse);
 #else
-        RuntimeException::selfThrow("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
+      THROW_EXCEPTION("_CADMBTB_getMinDistanceFaceFace_using_n2qn1, Fortran Language is not enabled in siconos mechanisms. Compile with fortran if you need n2qn1");
 #endif
       //      ACE_times[ACE_TIMER_CAD_12].stop();
     }
@@ -600,17 +606,19 @@ void _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
       aPaux = _CADMBTB_EdgePoint(edge2,x[2]);
       aPaux.Coord(X2, Y2, Z2);
       /** check orientation of normal*/
-       if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)>0) 
-	{normal.Reverse();
-	normal.Coord(nX,nY,nZ);}
-      
+      if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)>0)
+      {
+        normal.Reverse();
+        normal.Coord(nX,nY,nZ);
+      }
+
     }
 
     Ex1.Next();
     firstFace1=0;
   }
   if(reverted)
-  {    
+  {
     Standard_Real Raux;
     Raux=X1;
     X1=X2;
@@ -628,17 +636,17 @@ void _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(
     nZ=-nZ;
     //}
   }
-  if (sCADPrintDist)
+  if(sCADPrintDist)
   {
-     printf(" min value at u=%e,v=%e \n",x[0],x[1]);
+    printf(" min value at u=%e,v=%e \n",x[0],x[1]);
     printf("   _CADMBTB_getMinDistanceFaceEdge_using_n2qn1:  Minimal distance computed from CAD and n2qn1 : %lf \n",MinDist);
-    if (reverted)
+    if(reverted)
       printf("    Normal vector computed from CAD (reverted) :  nx=%lf, ny=%lf, nz=%lf \n",nX,nY,nZ);
     else
       printf("    Normal vector computed from CAD (not reverted) :  nx=%lf, ny=%lf, nz=%lf \n",nX,nY,nZ);
     printf("    First contact point  :  X1=%lf, Y1=%lf, Z1=%lf \n",X1,Y1,Z1);
     printf("    Second contact point  :  X2=%lf, Y2=%lf, Z2=%lf \n",X2,Y2,Z2);
-    
+
   }
   //  ACE_times[ACE_TIMER_CAD_14].stop();
   //  ACE_times[ACE_TIMER_CAD_1].stop();
@@ -708,8 +716,8 @@ void _CADMBTB_getMinDistanceFaceFace(unsigned int idFace1, unsigned int idFace2,
     dst.ParameterOnFace2(aN,u,v);
     aPaux = _CADMBTB_FacePoint(aFace2,u,v);
     aPaux.Coord(X2, Y2, Z2);
-  
-      
+
+
 #ifdef CADMBTB_PRINT_DIST
     printf("_CADMBTB_getMinDistanceFaceFace nx %e, ny %e, nz %e .\n",nX,nY,nZ);
 #endif

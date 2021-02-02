@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,18 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "fc2d_Solvers.h"
-#include "LCP_Solvers.h"
-#include <assert.h>
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>                         // for NULL
+#include <stdlib.h>                        // for malloc
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
+#include "fc2d_Solvers.h"                  // for fc2d_tolcp
+#include "numerics_verbose.h"              // for numerics_error
 
 int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * lcp_problem)
 {
-  if (problem->dimension != 2)
+  if(problem->dimension != 2)
   {
     numerics_error("fc2d_tolcp", "Dimension of the problem : problem-> dimension is not compatible or is not set");
     return 1;
@@ -48,9 +46,9 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * l
   lcp_problem->q = (double*)malloc(lcp_problem->size * sizeof(double));
   int n = 2 * nc;
   int i, j;
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
-    for (j = 0; j < nc; j++)
+    for(j = 0; j < nc; j++)
     {
       /* first Column */
       lcp_problem->M->matrix0[3 * i + 3 * j * lcp_problem->size] =
@@ -59,7 +57,7 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * l
       lcp_problem->M->matrix0[3 * i + 1 + 3 * j * lcp_problem->size] =
         problem->M->matrix0[(2 * i + 1) + 2 * j * n] - problem->mu[i] * problem->M->matrix0[(2 * i + 1) + (2 * j + 1) * n] ; // compute W_TN-mu W_TT
 
-      if (i == j)
+      if(i == j)
       {
         lcp_problem->M->matrix0[3 * i + 2 + 3 * j * lcp_problem->size] = 2.0 * problem->mu[i];
       }
@@ -75,7 +73,7 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * l
       lcp_problem->M->matrix0[3 * i + 1 + (3 * j + 1)*lcp_problem->size] =
         problem->M->matrix0[(2 * i + 1) + (2 * j + 1) * n] ; // set WTT
 
-      if (i == j)
+      if(i == j)
       {
         lcp_problem->M->matrix0[3 * i + 2 + (3 * j + 1)*lcp_problem->size] =  -1.0;
       }
@@ -88,7 +86,7 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * l
       lcp_problem->M->matrix0[3 * i + (3 * j + 2)*lcp_problem->size] =  0.0;
 
 
-      if (i == j)
+      if(i == j)
       {
         lcp_problem->M->matrix0[3 * i + 1 + (3 * j + 2)*lcp_problem->size] =  1.0;
       }
@@ -103,7 +101,7 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * l
   }
 
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     lcp_problem->q[3 * i  ] = problem->q[2 * i];
     lcp_problem->q[3 * i + 1] = problem->q[2 * i + 1];

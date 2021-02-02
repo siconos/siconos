@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,23 @@
  * limitations under the License.
 */
 
-
-#include "SOCLCP_Solvers.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "soclcp_compute_error.h"
 #include "soclcp_projection.h"
-#include "SparseBlockMatrix.h"
-#include "SiconosBlas.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-#include "numerics_verbose.h"
+#include <math.h>                                         // for sqrt, pow
+#include <stdio.h>                                        // for printf, NULL
+#include <stdlib.h> // for malloc, free, calloc
+#include "NumericsMatrix.h"                               // for NumericsMatrix
+#include "SOCLCP_Solvers.h"                               // for soclcp_nsgs...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "NSSTools.h"                                  // for max
+#include "SolverOptions.h"                                // for SolverOptions
+#include "numerics_verbose.h"                             // for verbose
+#include "projectionOnCone.h"                             // for projectionO...
+#include "projectionOnCylinder.h"                         // for projectionO...
+#include "sanitizer.h"                                    // for cblas_dcopy...
+#include "soclcp_compute_error.h"                         // for soclcp_unit...
+#include "SiconosBlas.h"                                  // for cblas_dgemv
 
-#include "sanitizer.h"
 #define VERBOSE_DEBUG
 
 void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * problem,
@@ -39,7 +41,7 @@ void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * 
 {
   int nc = problem->nc;
   unsigned int dim_max=0;
-  for (int i =0; i <nc; i++)
+  for(int i =0; i <nc; i++)
   {
     dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
   }
@@ -50,7 +52,7 @@ void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * 
 int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* localproblem, double* reaction, SolverOptions * options)
 {
   /*  /\* Build local problem for the current cone *\/ */
-  /*   soclcp_projection_update(cone, reaction); */ 
+  /*   soclcp_projection_update(cone, reaction); */
   double * MLocal = localproblem->M->matrix0;
   double * qLocal = localproblem->q;
   double mu_i = localproblem->tau[0];
@@ -63,11 +65,11 @@ int soclcp_projectionOnCone_solve(SecondOrderConeLinearComplementarityProblem* l
   int incx = 1, incy = 1;
   double * worktmp = options->dWork;
 
-  cblas_dcopy(nLocal , qLocal, incx , worktmp , incy);
+  cblas_dcopy(nLocal, qLocal, incx, worktmp, incy);
 
   cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, reaction, incx, 1.0, worktmp, incy);
 
-  for (int i =0; i < nLocal ; i++)
+  for(int i =0; i < nLocal ; i++)
   {
     reaction[i] -= an * worktmp[i];
   }
@@ -109,7 +111,7 @@ void soclcp_projection_update_with_regularization(int cone, SecondOrderConeLinea
      excluding the block corresponding to the current cone. ****/
   soclcp_nsgs_computeqLocal(problem, localproblem, reaction, cone, options);
 
-  double rho = options->dparam[3];
+  double rho = options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO];
   for(int i = 0 ; i < 3 ; i++) localproblem->M->matrix0[i + 3 * i] += rho ;
 
   double *qLocal = localproblem->q;
@@ -127,12 +129,12 @@ void soclcp_projection_update_with_regularization(int cone, SecondOrderConeLinea
 }
 
 void soclcp_projectionOnConeWithLocalIteration_initialize(SecondOrderConeLinearComplementarityProblem * problem,
-                                                          SecondOrderConeLinearComplementarityProblem * localproblem,
-                                                          SolverOptions* localsolver_options)
+    SecondOrderConeLinearComplementarityProblem * localproblem,
+    SolverOptions* localsolver_options)
 {
   int nc = problem->nc;
   unsigned int dim_max=0;
-  for (int i =0; i <nc; i++)
+  for(int i =0; i <nc; i++)
   {
     dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
   }
@@ -144,7 +146,7 @@ void soclcp_projectionOnConeWithLocalIteration_initialize(SecondOrderConeLinearC
   {
     localsolver_options->dWork[i]=1.0;
   }
-    
+
 }
 
 void soclcp_projectionOnConeWithLocalIteration_free(SecondOrderConeLinearComplementarityProblem * problem, SecondOrderConeLinearComplementarityProblem * localproblem, SolverOptions* localsolver_options)
@@ -183,9 +185,9 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
-  double rho=   options->dWork[options->iparam[4]+options->iWork[0]] , rho_k;
+  double rho=   options->dWork[options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX]+options->iWork[0]], rho_k;
   /* printf ("saved rho = %14.7e\n",rho );  */
-  /* printf ("options->iparam[4] = %i\n",options->iparam[4] );  */
+  /* printf ("options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] = %i\n",options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] );  */
 
   int incx = 1, incy = 1;
 
@@ -196,7 +198,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
   int localiter = 0;
-  double localtolerance = dparam[0];
+  double localtolerance = dparam[SICONOS_DPARAM_TOL];
 
 
   /* Variable for Line_search */
@@ -211,7 +213,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
 
 
   /*     printf ("localtolerance = %14.7e\n",localtolerance ); */
-  while((localerror > localtolerance) && (localiter < iparam[0]))
+  while((localerror > localtolerance) && (localiter < iparam[SICONOS_IPARAM_MAX_ITER]))
   {
     localiter ++;
 
@@ -223,10 +225,10 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
     localerror_k = localerror;
 
     /* store r at the beginning of the iteration */
-    cblas_dcopy_msan(nLocal , r , 1 , r_k, 1);
+    cblas_dcopy_msan(nLocal, r, 1, r_k, 1);
 
     /* velocity_k <- q  */
-    cblas_dcopy_msan(nLocal , qLocal , 1 , v_k, 1);
+    cblas_dcopy_msan(nLocal, qLocal, 1, v_k, 1);
 
     /* velocity_k <- q + M * reaction  */
     cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, r, incx, 1.0, v_k, incy);
@@ -246,7 +248,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
       projectionOnSecondOrderCone(&r[0], mu_i, nLocal);
 
       /* v <- q  */
-      cblas_dcopy_msan(nLocal , qLocal , 1 , v, 1);
+      cblas_dcopy_msan(nLocal, qLocal, 1, v, 1);
 
       /* v <- q + M * r  */
       cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, r, incx, 1.0, v, incy);
@@ -277,7 +279,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
 
     /* compute local error */
     localerror =0.0;
-    soclcp_unitary_compute_and_add_error(r , v, nLocal, mu_i, &localerror, r_k);
+    soclcp_unitary_compute_and_add_error(r, v, nLocal, mu_i, &localerror, r_k);
 
     /* printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);  */
 
@@ -294,7 +296,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
       printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
     }
 
-    options->dWork[options->iparam[4]+options->iWork[0]] =rho;
+    options->dWork[options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX]+options->iWork[0]] =rho;
 
   }
 
@@ -328,11 +330,11 @@ int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProble
   int incx = 1, incy = 1;
   double * worktmp = (double*)malloc(nLocal*sizeof(double));
 
-  cblas_dcopy(nLocal , qLocal, incx , worktmp , incy);
+  cblas_dcopy(nLocal, qLocal, incx, worktmp, incy);
 
   cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, nLocal, reaction, incx, 1.0, worktmp, incy);
 
-  for (int i =0; i < nLocal ; i++)
+  for(int i =0; i < nLocal ; i++)
   {
     reaction[i] -= an * worktmp[i];
   }
@@ -344,33 +346,7 @@ int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProble
 
 }
 
-
-
-
-int soclcp_projection_setDefaultSolverOptions(SolverOptions* options)
+void soclcp_projection_set_default(SolverOptions* options)
 {
-  int i;
-  if(verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the local SOCLCP Solver\n");
-  }
-
-  solver_options_nullify(options);
-  options->solverId = SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for(i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-16;
-  return 0;
+  options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ protected:
    */
   bool _useGamma;
 
-  /** Constraint activation threshold 
+  /** Constraint activation threshold
    *
    */
   double _constraintActivationThreshold;
@@ -141,6 +141,10 @@ protected:
   /** a boolean to force the evaluation of T in an explicit way
    */
   bool _explicitNewtonEulerDSOperators;
+
+  /** a boolean to know if the matrix W is symmetric definite positive
+   */
+  bool _isWSymmetricDefinitePositive;
 
   /** nslaw effects
    */
@@ -169,7 +173,7 @@ public:
 
   /** get the value of W corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get W[0] in that case
+   * nullptr. get W[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
@@ -180,20 +184,29 @@ public:
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
+  inline bool isWSymmetricDefinitePositive() const
+  {
+    return _isWSymmetricDefinitePositive;
+  };
+
+  inline void setIsWSymmetricDefinitePositive(bool b) 
+  {
+    _isWSymmetricDefinitePositive = b ;
+  };
 
   // -- WBoundaryConditions --
 
 
   /** Get the value of WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get WBoundaryConditions[0] in that case
+   * nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get WBoundaryConditions[0] in that case
+   * nullptr. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);
@@ -274,7 +287,7 @@ public:
   {
     _constraintActivationThreshold = v;
   }
-  
+
   /** get the constraint activation threshold */
   inline double constraintActivationThreshold ()
   {

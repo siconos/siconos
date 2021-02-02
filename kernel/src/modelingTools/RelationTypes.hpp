@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,4 +38,7 @@ Include files related to the different types of relations
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianCompliantR.hpp"
 #include "LagrangianCompliantLinearTIR.hpp"
+#include "Lagrangian2d1DR.hpp"
+#include "Lagrangian2d2DR.hpp"
+#include "Lagrangian2d3DR.hpp"
 #endif

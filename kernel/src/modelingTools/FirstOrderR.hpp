@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@
  * This is an abstract class for all relation operating on first order systems.
  * It should not be used. Rather, the following classes should be used:
  *
- * - FirstOrderNonlinearR: for fully nonlinear relations: $\f y = h(t, X, \lambda, Z)\f$, $\f$ R = g(t, X, \lambda, Z)\f$.
- * - FirstOrderType2R: specialization with $\f y = h(t, X, \lambda, Z)\f$, $\f$ R = g(t, \lambda, Z)\f$.
- * - FirstOrderType1R: further specialization with $\f y = h(t, X, Z)\f$, $\f$ R = g(t, \lambda, Z)\f$.
- * - FirstOrderLinearR: linear case: $\f y = C(t)x + D(t)\lambda + F(t) z + e$, $\f$ R = B(t)\lambda\f$.
- * - FirstOrderLinearR: time-invariant linear case: $\f y = Cx + D\lambda + F z + e$, $\f$ R = B\lambda\f$.
+ * - FirstOrderNonlinearR: for fully nonlinear relations: \f$ y = h(t, X, \lambda, Z)\f$, \f$ R = g(t, X, \lambda, Z)\f$.
+ * - FirstOrderType2R: specialization with \f$ y = h(t, X, \lambda, Z)\f$, \f$ R = g(t, \lambda, Z)\f$.
+ * - FirstOrderType1R: further specialization with \f$ y = h(t, X, Z)\f$, \f$ R = g(t, \lambda, Z)\f$.
+ * - FirstOrderLinearR: linear case: \f$ y = C(t)x + D(t)\lambda + F(t) z + e\f$, \f$ R = B(t)\lambda\f$.
+ * - FirstOrderLinearR: time-invariant linear case: \f$ y = Cx + D\lambda + F z + e\f$, \f$ R = B\lambda\f$.
  *
  * If the relation involves only one DynamicalSystem, then \f$R = r\f$, \f$X = x\f$, and \f$Z = z\f$.
  * With two, then \f$R = [r_1, r_2] \f$, \f$X = [x_1 x_2] \f$, and \f$Z = [z_1 z_2]\f$.
@@ -75,14 +75,6 @@ protected:
   SP::SimpleMatrix _B;
   /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t X */
   SP::SimpleMatrix _K;
-
-  /** Continuous memory vector of size of x to call plugin */
-  SP::SiconosVector _vec_x;
-  /** Continuous memory vector of size of z to call plugin */
-  SP::SiconosVector _vec_z;
-  /** Continuous memory vector of size of r to call plugin */
-  SP::SiconosVector _vec_r;
-
 
 
 public:

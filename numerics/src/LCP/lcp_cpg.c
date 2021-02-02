@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "SiconosBlas.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "numerics_verbose.h"
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_cpg
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "numerics_verbose.h"              // for verbose
 
 void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -44,13 +42,13 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
 
 
-  double err, a1, b1 , qs;
+  double err, a1, b1, qs;
 
   double alpha, beta, rp, pMp;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
   int *status;
-  double *zz , *pp , *rr, *ww, *Mp;
+  double *zz, *pp, *rr, *ww, *Mp;
 
   *info = 1;
   incx  = 1;
@@ -60,7 +58,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
-  qs = cblas_dnrm2(n , q , incx);
+  qs = cblas_dnrm2(n, q, incx);
 
   /*printf( " Norm: %g \n", qs );*/
 
@@ -77,7 +75,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
   incx = 1;
 
-  for (i = 0; i < n; ++i)
+  for(i = 0; i < n; ++i)
   {
 
     status[i] = 0;
@@ -112,7 +110,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   iter = 0;
   err  = 1.0 ;
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
@@ -131,10 +129,10 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     pMp = cblas_ddot(n, pp, incx, w, incy);
 
-    if (fabs(pMp) < DBL_EPSILON)
+    if(fabs(pMp) < DBL_EPSILON)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Operation not conform at the iteration %d \n", iter);
         printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
@@ -168,9 +166,9 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /* Iterate projection*/
 
-    for (i = 0; i < n; ++i)
+    for(i = 0; i < n; ++i)
     {
-      if (z[i] > 0.0)
+      if(z[i] > 0.0)
       {
         status[i] = 1;
       }
@@ -183,8 +181,8 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /* rr = -Wz + q */
 
-    cblas_dcopy(n, rr, incx, w , incy);
-    cblas_dcopy(n, q , incx, rr, incy);
+    cblas_dcopy(n, rr, incx, w, incy);
+    cblas_dcopy(n, q, incx, rr, incy);
 
     a1 = -1.;
     b1 = -1.;
@@ -196,17 +194,17 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
      * pp --> zz
      */
 
-    for (i = 0; i < n; ++i)
+    for(i = 0; i < n; ++i)
     {
 
-      if (status[i])
+      if(status[i])
       {
         ww[i] = rr[i];
         zz[i] = pp[i];
       }
       else
       {
-        if (rr[i] < 0)
+        if(rr[i] < 0)
         {
           ww[i] = 0.0;
           zz[i] = 0.0;
@@ -214,7 +212,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
         else
         {
           ww[i] = rr[i];
-          if (pp[i] < 0) zz[i] = 0.0;
+          if(pp[i] < 0) zz[i] = 0.0;
           else zz[i] = pp[i];
         }
       }
@@ -222,7 +220,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /*  beta = -w.Mp / pMp  */
 
-    rp = cblas_ddot(n , ww, incx, w, incy);
+    rp = cblas_ddot(n, ww, incx, w, incy);
 
     beta = -rp / pMp;
 
@@ -249,21 +247,21 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
 
   *info = 1;
-  if (verbose > 0)
+  if(verbose > 0)
   {
-    if (err > tol)
+    if(err > tol)
     {
-      printf(" No convergence of CPG after %d iterations\n" , iter);
+      printf(" No convergence of CPG after %d iterations\n", iter);
       printf(" The residue is : %g \n", err);
     }
     else
     {
-      printf(" Convergence of CPG after %d iterations\n" , iter);
+      printf(" Convergence of CPG after %d iterations\n", iter);
       printf(" The residue is : %g \n", err);
       *info = 0;
     }
   }
-  else if (err <= tol) *info = 0;
+  else if(err <= tol) *info = 0;
 
   free(Mp);
   free(status);
@@ -273,34 +271,4 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   free(pp);
   free(zz);
 
-}
-int linearComplementarity_cpg_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the CPG Solver\n");
-  }
-  options->solverId = SICONOS_LCP_CPG;
-
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
-
-  return 0;
 }

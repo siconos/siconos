@@ -1,54 +1,71 @@
-# -----------------------------------------
-# Search for path library (headers are in externals)
-# --> libpath
+#  Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 #
-# User hint : PathFerris_DIR --> try cmake -DPathFerris_DIR=path-to-path-install
+# Copyright 2020 INRIA.
 #
-# By default we are using path 4.7
-# -----------------------------------------
-include(LibFindMacros)
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# --
+#[=======================================================================[.rst:
+FindPathFerris
+-----------
 
-IF(NOT PathFerris_VERSION)
-  SET(PathFerris_VERSION "47")
-ENDIF(NOT PathFerris_VERSION)
+Find Path library
 
-IF(NOT PathFerris_DIR AND GAMSCAPI_FOUND)
-  SET(PathFerris_DIR ${GAMS_DIR})
-ENDIF(NOT PathFerris_DIR AND GAMSCAPI_FOUND)
+Usage :
+ 
+find_package(PathFerris REQUIRED)
+target_link_libraries(yourlib PRIVATE PathFerris::PathFerris)
 
-# ----------------------------------------
-# Library == libpath${PathFerris_VERSION}
-# First, search in (optionnaly) user-defined PathFerris_DIR
-# Try:
-# - PathFerris_DIR
-# - PathFerris_DIR/lib
-# - PathFerris_DIR/lib/CMAKE_LIBRARY_ARCHITECTURE (for example on Debian like system : lib/x86_64-linux-gnu
-if(PathFerris_DIR)
-find_library(PathFerris_LIBRARY path${PathFerris_VERSION}
-  PATHS ${PathFerris_DIR}
-  PATH_SUFFIXES lib lib/${CMAKE_LIBRARY_ARCHITECTURE} 
-  )
-else(PathFerris_DIR)
-  find_library(PathFerris_LIBRARY path${PathFerris_VERSION} PATHS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
-endif(PathFerris_DIR)
-# If not found, try standard path.
+Set PathFerris_ROOT=<where pathferris is installed>
+if it's not in a "classic" place or if you want a specific version
 
-# Set PathFerris_LIBRARY_DIRS and PathFerris_LIBRARIES for libfindprocess
-# see Using LibFindMacros : https://cmake.org/Wiki/CMake:How_To_Find_Libraries
-IF (PathFerris_LIBRARY)
-  GET_FILENAME_COMPONENT(PathFerris_LIBRARIES ${PathFerris_LIBRARY} REALPATH)
-  SET(HAVE_PATHFERRIS TRUE)
+Lib : <prefix>path<PathFerris_VERSION>.<suffix>
+
+#]=======================================================================]
+
+include(FindPackageHandleStandardArgs)
+
+if(NOT PathFerris_ROOT)
+  set(PathFerris_ROOT $ENV{PathFerris_ROOT})
 endif()
-IF (NOT PathFerris_FIND_QUIETLY)
-  IF(${PathFerris_LIBRARY} MATCHES ".*-NOTFOUND")
-     MESSAGE(STATUS "Could not find library named path${PathFerris_VERSION} for PathFerris support")
-     MESSAGE(STATUS "Try setting either PathFerris_DIR or (DY)LD_LIBRARY_PATH to the directory where the library is")
-  ELSE()
-    MESSAGE(STATUS "Found PathFerris: ${PathFerris_LIBRARY}")
-    MESSAGE(STATUS "PathFerris_LIBRARIES: ${PathFerris_LIBRARIES}")
-  ENDIF()
-ENDIF (NOT PathFerris_FIND_QUIETLY)
 
-# Final check :
-set(PathFerris_PROCESS_LIBS PathFerris_LIBRARIES)
-libfind_process(PathFerris)
+if(NOT PathFerris_VERSION)
+  set(PathFerris_VERSION 47)
+endif()
+
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME PathFerris MODULE path${PathFerris_VERSION})
+
+if(NOT PathFerris_LIBRARIES)
+  find_library(PathFerris_LIBRARIES NAMES path${PathFerris_VERSION}
+    ${_PathFerris_SEARCH_OPTS}
+    #HINTS ENV LD_LIBRARY_PATH)
+    PATH_SUFFIXES lib lib64
+    )
+ endif()
+
+# -- Library setup --
+find_package_handle_standard_args(PathFerris
+  REQUIRED_VARS PathFerris_LIBRARIES)
+
+if(PathFerris_FOUND)
+  
+  if(NOT TARGET PathFerris::PathFerris)
+    add_library(PathFerris::PathFerris IMPORTED INTERFACE)
+    set_property(TARGET PathFerris::PathFerris PROPERTY INTERFACE_LINK_LIBRARIES ${PathFerris_LIBRARIES})
+    if(PathFerris_INCLUDE_DIR)  # FP: should we set this with externals/PATH_SDK ??
+      set_target_properties(PathFerris::PathFerris PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${PathFerris_INCLUDE_DIR}")
+    endif()
+  endif()
+endif()

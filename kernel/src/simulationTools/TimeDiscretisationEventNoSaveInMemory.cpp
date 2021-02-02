@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ void TimeDiscretisationEventNoSaveInMemory::process(Simulation& simulation)
 void TimeDiscretisationEventNoSaveInMemory::update(unsigned int k)
 {
   assert(k > _k && "TimeDiscretisationEvent::update - next step has to be greater than the current one");
-  if (_td) // if no TimeDiscretisation, then do nothing
+  if(_td)  // if no TimeDiscretisation, then do nothing
   {
-    if (_td->hGmp())
+    if(_td->hGmp())
       incrementTime(k-_k);
     else
       setTime(_td->getTk(k));

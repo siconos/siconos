@@ -7,6 +7,8 @@
 #include "MBTB_TimeSteppingCombinedProj.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "RotationQuaternion.hpp"
+#include "SolverOptions.h"   // for SolverOptions struct
+#include "SiconosAlgebraProd.hpp" // for prod
 void _MBTB_updateContactFromDS()
 {
   for(unsigned int numC=0; numC<sNbOfContacts; numC++)
@@ -36,7 +38,7 @@ void _MBTB_updateContactFromDS()
 
 void _MBTB_updateContactFromDS(int numDS)
 {
-  for( int numC=0; numC < (int)sNbOfContacts; numC++)
+  for(int numC=0; numC < (int)sNbOfContacts; numC++)
   {
     if((int)(sContacts[numC]->_indexBody1) == numDS)
     {
@@ -58,7 +60,7 @@ void _MBTB_DRAW_STEP()
   {
     for(unsigned int nC=0; nC<3*sNbOfContacts; nC++)
     {
-       CADMBTB_buildLineArtefactLine(nC,0,0,0,0,0,0);
+      CADMBTB_buildLineArtefactLine(nC,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr);
     }
 
   }
@@ -223,22 +225,22 @@ void _MBTB_STEP()
 
   Type::Siconos  simuType;
   simuType = Type::value(*sSimu);
-  if (simuType == Type::TimeStepping)
+  if(simuType == Type::TimeStepping)
   {
-    
+
   }
-  else if (simuType == Type::TimeSteppingDirectProjection)
+  else if(simuType == Type::TimeSteppingDirectProjection)
   {
   }
-  else if (simuType == Type::TimeSteppingCombinedProjection)
+  else if(simuType == Type::TimeSteppingCombinedProjection)
   {
-    std::cout<< "     Number of projection iterations = " <<  (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbProjectionIteration() <<std::endl;
-    std::cout<< "     Number of cumulated Newton iterations = " <<  (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->cumulatedNewtonNbIterations() <<std::endl;
-    std::cout<< "     Number of set  iterations = " <<  (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbIndexSetsIteration() <<std::endl;
-    std::cout<< "     Max violation unilateral = " <<  (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationUnilateral()  <<std::endl;
-    std::cout<< "     Max violation equality = " <<  (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationEquality() <<std::endl;
+    std::cout<< "     Number of projection iterations = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbProjectionIteration() <<std::endl;
+    std::cout<< "     Number of cumulated Newton iterations = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->cumulatedNewtonNbIterations() <<std::endl;
+    std::cout<< "     Number of set  iterations = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbIndexSetsIteration() <<std::endl;
+    std::cout<< "     Max violation unilateral = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationUnilateral()  <<std::endl;
+    std::cout<< "     Max violation equality = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationEquality() <<std::endl;
   }
-  
+
   //sSimu->oneStepNSProblem(0)->display();
   ACE_times[ACE_TIMER_SICONOS].stop();
 
@@ -258,7 +260,7 @@ void _MBTB_displayStep()
   //printf("%d\t",sTimerCmp);
 
   // Bodies display output
-  if (sDisplayStepBodies)
+  if(sDisplayStepBodies)
   {
     printf("STEP Number = %d\t",sTimerCmp);
     for(unsigned int numDS =0; numDS<sNbOfBodies; numDS++)
@@ -295,7 +297,7 @@ void _MBTB_displayStep()
 
 
   // Joints display output
-  if (sDisplayStepJoints)
+  if(sDisplayStepJoints)
   {
     printf("STEP Number = %d\t",sTimerCmp);
     for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
@@ -303,7 +305,8 @@ void _MBTB_displayStep()
       printf("Joint number %i\n", numJ);
       printf("interactionjointR->display  %i\n", numJ);
       sJointRelations[numJ]->_interaction->display();
-      printf("\n");printf("Forces in Joint  %i\n", numJ);
+      printf("\n");
+      printf("Forces in Joint  %i\n", numJ);
       for(int ii=0; ii<3; ii++)
       {
         printf("%e",sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
@@ -344,12 +347,12 @@ void _MBTB_displayStep()
       {
         printf("N/A\t");
       }
-     printf("\n");
+      printf("\n");
 
     }
   }
   // Contacts display output
-  if (sDisplayStepContacts)
+  if(sDisplayStepContacts)
   {
     printf("STEP Number = %d\t",sTimerCmp);
     for(unsigned int numC=0; numC<sNbOfContacts; numC++)
@@ -404,7 +407,7 @@ void _MBTB_displayStep()
              sContacts[numC]->relation()->pc1()->getValue(1),
              sContacts[numC]->relation()->pc1()->getValue(2));
       printf("\n");
-      if (sContacts[numC]->relation()->pc2())
+      if(sContacts[numC]->relation()->pc2())
       {
         printf("Coordinates of second contact point for contact %i",numC);
         printf("%e\t%e\t%e\t",
@@ -415,10 +418,10 @@ void _MBTB_displayStep()
       }
       printf("Gap  for contact %i\t =\t ",numC);
       printf("%e\n",
-	     sContacts[numC]->interaction()->y(0)->getValue(0));
-       printf("vitess  for contact %i\t =\t ",numC);
+             sContacts[numC]->interaction()->y(0)->getValue(0));
+      printf("vitess  for contact %i\t =\t ",numC);
       printf("%e\n",
-	     sContacts[numC]->interaction()->y(1)->getValue(0));
+             sContacts[numC]->interaction()->y(1)->getValue(0));
 
     }
   }
@@ -548,37 +551,37 @@ void _MBTB_printStep(FILE *fp)
   for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();
-    if (sizeY==1)
+    if(sizeY==1)
     {
       fprintf(fp,"%e\t0.\t0.\t",
               sContacts[numC]->interaction()->y(0)->getValue(0));
     }
     else
     {
-    fprintf(fp,"%e\t%e\t%e\t",
-            sContacts[numC]->interaction()->y(0)->getValue(0),
-            sContacts[numC]->interaction()->y(0)->getValue(1),
-            sContacts[numC]->interaction()->y(0)->getValue(2));
+      fprintf(fp,"%e\t%e\t%e\t",
+              sContacts[numC]->interaction()->y(0)->getValue(0),
+              sContacts[numC]->interaction()->y(0)->getValue(1),
+              sContacts[numC]->interaction()->y(0)->getValue(2));
     }
   }
   for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     unsigned int sizeY = sContacts[numC]->interaction()->y(0)->size();
-    if (sizeY==1)
+    if(sizeY==1)
     {
       fprintf(fp,"%e\t0.\t0.\t",
-            sContacts[numC]->interaction()->y(1)->getValue(0));
+              sContacts[numC]->interaction()->y(1)->getValue(0));
     }
     else
     {
       fprintf(fp,"%e\t%e\t%e\t",
-            sContacts[numC]->interaction()->y(1)->getValue(0),
-            sContacts[numC]->interaction()->y(1)->getValue(1),
-            sContacts[numC]->interaction()->y(1)->getValue(2));
+              sContacts[numC]->interaction()->y(1)->getValue(0),
+              sContacts[numC]->interaction()->y(1)->getValue(1),
+              sContacts[numC]->interaction()->y(1)->getValue(2));
     }
   }
 
- fprintf(fp,"\n");
+  fprintf(fp,"\n");
 }
 void _MBTB_printHeader(FILE *fp)
 {
@@ -643,7 +646,7 @@ void _MBTB_printHeader(FILE *fp)
     }
     cmp+=3;
   }
- for(unsigned int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     for(unsigned int icmp=cmp; icmp<=cmp+2; ++icmp)
     {
@@ -652,7 +655,7 @@ void _MBTB_printHeader(FILE *fp)
     cmp+=3;
   }
 
- for(unsigned int numC=0; numC<sNbOfContacts; numC++)
+  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
   {
     for(unsigned int icmp=cmp; icmp<=cmp+2; ++icmp)
     {

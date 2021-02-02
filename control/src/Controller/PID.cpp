@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ void PID::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 
   // initialize _err
   _err.reset(new boost::circular_buffer<double> (3));
-  for (unsigned int i = 0; i < 3; ++i)
+  for(unsigned int i = 0; i < 3; ++i)
     (*_err).push_front(0.0);
 }
 
@@ -82,9 +82,9 @@ void PID::actuate()
 void PID::setK(SP::SiconosVector K)
 {
   // check dimensions ...
-  if (K->size() != 3)
+  if(K->size() != 3)
   {
-    RuntimeException::selfThrow("PID::setK - the size of K should be 3");
+    THROW_EXCEPTION("PID::setK - the size of K should be 3");
   }
   else
   {

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,42 +65,40 @@ void FirstOrderType2R::initialize(Interaction& inter)
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  _vec_r.reset(new SiconosVector(sizeDS));
-  _vec_x.reset(new SiconosVector(sizeDS));
-  _vec_z.reset(new SiconosVector(sizeZ));
 
-
-
-  if (!_C)
+  if(!_C)
     relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
-  if (!_D)
+  if(!_D)
     relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-  if (!_F)
+  if(!_F)
     relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
-  if (!_B)
+  if(!_B)
     relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
-  if (!_K)
+  if(!_K)
     relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
 
 //  if (!_jacgx)
 //  {
 //    relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
-    // TODO add this back to workV of the DS -> needed for X partial NS
+  // TODO add this back to workV of the DS -> needed for X partial NS
 //  }
 }
 
 
 
-void FirstOrderType2R::checkSize(Interaction& inter){}
+void FirstOrderType2R::checkSize(Interaction& inter) {}
 
-void FirstOrderType2R::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
+void FirstOrderType2R::computeh(double time, const BlockVector& x, const SiconosVector& lambda, SiconosVector& y)
 {
-  ((Type2PtrH)(_pluginh->fPtr))(x.size(), x.getArray(), lambda.size(), lambda.getArray(), y.size(), y.getArray());
+  auto xp = x.prepareVectorForPlugin();
+  ((Type2PtrH)(_pluginh->fPtr))(xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), y.size(), y.getArray());
 }
 
-void FirstOrderType2R::computeg(double time, SiconosVector& lambda, SiconosVector& r)
+void FirstOrderType2R::computeg(double time, const SiconosVector& lambda, BlockVector& r)
 {
-  ((Type2PtrG)(_pluging->fPtr))(lambda.size(), lambda.getArray(), r.size(), r.getArray());
+  auto rp = r.prepareVectorForPlugin();
+  ((Type2PtrG)(_pluging->fPtr))(lambda.size(), lambda.getArray(), rp->size(), rp->getArray());
+  r = *rp;
 }
 
 void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned int level)
@@ -108,13 +106,10 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned i
   DEBUG_BEGIN("FirstOrderType2R::computeOutput \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& x = *DSlink[FirstOrderR::x];
-  BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
-  SP::SiconosVector x_vec(new SiconosVector(x));
-  SP::SiconosVector z_vec(new SiconosVector(z));
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
-  computeh(time, *x_vec, lambda, y);
+  computeh(time, x, lambda, y);
   DEBUG_EXPR(y.display());
   DEBUG_END("FirstOrderType2R::computeOutput \n");
 }
@@ -124,21 +119,19 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned in
   DEBUG_BEGIN("FirstOrderType2R::computeInput \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   // copy into Siconos continuous memory vector
-  SP::SiconosVector r_vec(new SiconosVector(*DSlink[FirstOrderR::r]));
   SiconosVector& lambda = *inter.lambda(level);
-  computeg(time, lambda,  *r_vec);
-  *DSlink[FirstOrderR::r] = *r_vec;
+  computeg(time, lambda, *DSlink[FirstOrderR::r]);
   DEBUG_EXPR(DSlink[FirstOrderR::r]->display());
   DEBUG_END("FirstOrderType2R::computeInput \n");
 }
 
-void FirstOrderType2R::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
+void FirstOrderType2R::computeJachlambda(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& D)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJachlambda must be overload.");
+  THROW_EXCEPTION("FirstOrderType2R::computeJachlambda must be overload.");
 }
-void FirstOrderType2R::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C)
+void FirstOrderType2R::computeJachx(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& C)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
+  THROW_EXCEPTION("FirstOrderType2R::computeJachx must be overload.");
 }
 
 void FirstOrderType2R::computeJach(double time, Interaction& inter)
@@ -147,28 +140,26 @@ void FirstOrderType2R::computeJach(double time, Interaction& inter)
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  if (!_C)
+  if(!_C)
   {
-    *_vec_x = *DSlink[FirstOrderR::x];
-    computeJachx(time, *_vec_x, *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
+    computeJachx(time, *DSlink[FirstOrderR::x], *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
   }
-  if (!_D)
+  if(!_D)
   {
-    *_vec_x = *DSlink[FirstOrderR::x];
-    computeJachlambda(time, *_vec_x, *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
+    computeJachlambda(time, *DSlink[FirstOrderR::x], *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
   }
   DEBUG_END("FirstOrderType2R::computeJach\n");
 }
 
-void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B)
+void FirstOrderType2R::computeJacglambda(double time, const SiconosVector& lambda, SimpleMatrix& B)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
+  THROW_EXCEPTION("FirstOrderType2R::computeJacglambda must be overload.");
 }
 
 void FirstOrderType2R::computeJacg(double time, Interaction& inter)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeJacg\n");
-  if (!_B)
+  if(!_B)
   {
     VectorOfSMatrices& relationMat = inter.relationMatrices();
     computeJacglambda(time, *inter.lambda(0), *relationMat[FirstOrderR::mat_B]);

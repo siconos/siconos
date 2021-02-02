@@ -77,11 +77,11 @@ doublereal *x, *b;
   --x;
 
   /* Function Body */
-  if (lsame_(forms_1.curpform, "IDENT", 5L, 5L))
+  if(lsame_(forms_1.curpform, "IDENT", 5L, 5L))
   {
     psolvenone_(&x[1], &b[1]);
   }
-  else if (lsame_(forms_1.curpform, "JACBI", 5L, 5L))
+  else if(lsame_(forms_1.curpform, "JACBI", 5L, 5L))
   {
     psolvejac_(&x[1], &b[1]);
   }
@@ -124,11 +124,11 @@ doublereal *x, *b;
   --x;
 
   /* Function Body */
-  if (lsame_(forms_1.curpform, "IDENT", 5L, 5L))
+  if(lsame_(forms_1.curpform, "IDENT", 5L, 5L))
   {
     psolvenonetrans_(&x[1], &b[1]);
   }
-  else if (lsame_(forms_1.curpform, "JACBI", 5L, 5L))
+  else if(lsame_(forms_1.curpform, "JACBI", 5L, 5L))
   {
     psolvejactrans_(&x[1], &b[1]);
   }
@@ -264,7 +264,7 @@ doublereal *x, *b;
 
   /* Function Body */
   i__1 = matdim_1.n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     x[i] = b[i] / system_1.m[i - 1];
     /* L10: */
@@ -345,13 +345,13 @@ ftnlen which_len;
   --x;
 
   /* Function Body */
-  if (lsame_(forms_1.curpform, "IDENT", 5L, 5L))
+  if(lsame_(forms_1.curpform, "IDENT", 5L, 5L))
   {
     psolvenone_(&x[1], &b[1]);
   }
-  else if (lsame_(forms_1.curpform, "JACBI", 5L, 5L))
+  else if(lsame_(forms_1.curpform, "JACBI", 5L, 5L))
   {
-    if (lsame_(which, "LEFT", 4L, 4L))
+    if(lsame_(which, "LEFT", 4L, 4L))
     {
       psolvejac_(&x[1], &b[1]);
     }
@@ -400,13 +400,13 @@ ftnlen which_len;
   --x;
 
   /* Executable Statements */
-  if (lsame_(forms_1.curpform, "IDENT", 5L, 5L))
+  if(lsame_(forms_1.curpform, "IDENT", 5L, 5L))
   {
     psolvenone_(&x[1], &b[1]);
   }
-  else if (lsame_(forms_1.curpform, "JACBI", 5L, 5L))
+  else if(lsame_(forms_1.curpform, "JACBI", 5L, 5L))
   {
-    if (lsame_(which, "LEFT", 4L, 4L))
+    if(lsame_(which, "LEFT", 4L, 4L))
     {
       psolvejac_(&x[1], &b[1]);
     }

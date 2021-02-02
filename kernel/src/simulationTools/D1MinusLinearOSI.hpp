@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,7 +284,7 @@ public:
    */
   virtual void integrate(double& ti, double& tf, double& t , int& flag)
   {
-    RuntimeException::selfThrow("D1MinusLinearOSI::integrate - not implemented!");
+    THROW_EXCEPTION("D1MinusLinearOSI::integrate - not implemented!");
   }
 
   /** updates the state of the Dynamical Systems
@@ -345,7 +345,7 @@ public:
   /** displays the data of the D1MinusLinearOSI's integrator */
   virtual void display()
   {
-    RuntimeException::selfThrow("D1MinusLinearOSI::display - not implemented!");
+    THROW_EXCEPTION("D1MinusLinearOSI::display - not implemented!");
   }
 
   /** preparations for Newton iteration
@@ -353,7 +353,7 @@ public:
    */
   virtual void prepareNewtonIteration(double time)
   {
-    RuntimeException::selfThrow("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
+    THROW_EXCEPTION("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
   }
 
   /** visitors hook */

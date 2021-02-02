@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
   double *b = problem->lb;
   //\todo Rewrite completely the algorithm with a projection.
   int ib;
-  for (ib = 0; ib < n; ib++) b[ib] = -b[ib];
+  for(ib = 0; ib < n; ib++) b[ib] = -b[ib];
 
   double k_latin = options->dparam[2];
   int itermax = options->iparam[0];
@@ -74,13 +74,13 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
   /*             Initialisation                   */
 
 
-  for (i = 0; i < n * n; i++)
+  for(i = 0; i < n * n; i++)
   {
     k[i]    =  0.0;
     DPO[i]  =  0.0;
     kinv[i] =  0.0;
 
-    if (i < n)
+    if(i < n)
     {
       wc[i]       = 0.0;
       zc[i]       = 0.0;
@@ -96,14 +96,14 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
   }
 
 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
     k[i + n * i] = k_latin * vec[i * n + i];
 
-    if (fabs(k[i + n * i]) < DBL_EPSILON)
+    if(fabs(k[i + n * i]) < DBL_EPSILON)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
         printf("\n Warning nul diagonal term in k matrix \n");
 
       free(k);
@@ -129,9 +129,9 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
 
 
 
-  for (j = 0; j < n; j++)
+  for(j = 0; j < n; j++)
   {
-    for (i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
 
     {
       DPO[i + n * j] =  vec[j * n + i] + k[i + n * j];
@@ -144,12 +144,12 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
 
 
 
-  DPOTRF(LA_UP, n, DPO , n, &info2);
+  DPOTRF(LA_UP, n, DPO, n, &info2);
 
-  if (info2 != 0)
+  if(info2 != 0)
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("\n Matter with Cholesky factorization \n");
 
     free(k);
@@ -183,7 +183,7 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
   err1   = 1.;
 
 
-  while ((iter1 < itermax) && (err1 > errmax))
+  while((iter1 < itermax) && (err1 > errmax))
   {
 
     /*   Linear stage (zc,wc) -> (z,w)       */
@@ -223,9 +223,9 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
     beta = 1.;
     cblas_dgemv(CblasColMajor,CblasTrans, n, n, alpha, k, n, z, incx, beta, zt, incy);
 
-    for (i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
     {
-      if (a[i] < zt[i])
+      if(a[i] < zt[i])
       {
         mina = a[i];
       }
@@ -233,7 +233,7 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
       {
         mina = zt[i];
       }
-      if (mina > -b[i])
+      if(mina > -b[i])
       {
         wc[i] = mina;
       }
@@ -313,16 +313,16 @@ void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOpti
   }
 
 
-  if (err1 > errmax)
+  if(err1 > errmax)
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
 
     *info = 1;
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
     *info = 0;
   }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,15 @@ using namespace RELATION;
 
 
 Relay::Relay(int numericsSolverId):
-  LinearOSNS(numericsSolverId)
-{
-  _numerics_problem.reset(new RelayProblem);
+  Relay(SP::SolverOptions(solver_options_create(numericsSolverId),
+                          solver_options_delete))
+{}
 
-  relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, numericsSolverId);
+Relay::Relay(SP::SolverOptions options):
+  LinearOSNS(options), _numerics_problem(new RelayProblem)
+{}
 
 
-}
 /* nslaw dispatch on bounds */
 
 struct Relay::_BoundsNSLEffect : public SiconosVisitor
@@ -59,7 +60,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
   void visit(const RelayNSL& nslaw)
   {
 
-    for (unsigned i = 0; i <  _inter->nonSmoothLaw()->size(); ++i)
+    for(unsigned i = 0; i <  _inter->nonSmoothLaw()->size(); ++i)
     {
       (*(_parent->lb()))(_pos + i) = nslaw.lb();
       (*(_parent->ub()))(_pos + i) = nslaw.ub();
@@ -68,7 +69,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
 
   void visit(const ComplementarityConditionNSL& nslaw)
   {
-    for (unsigned i = 0; i <  _inter->nonSmoothLaw()->size(); ++i)
+    for(unsigned i = 0; i <  _inter->nonSmoothLaw()->size(); ++i)
     {
       (*(_parent->lb()))(_pos + i) = 0.0;
       (*(_parent->ub()))(_pos + i) = std::numeric_limits<double>::infinity();
@@ -85,20 +86,36 @@ void Relay::initialize(SP::Simulation sim)
 
 
   // initialize memory for _lb and _ub
-  if (! _lb)
+  if(! _lb)
     _lb.reset(new SiconosVector(maxSize()));
   else
   {
-    if (_lb->size() != maxSize())
+    if(_lb->size() != maxSize())
       _lb->resize(maxSize());
   }
-  if (! _ub)
+  if(! _ub)
     _ub.reset(new SiconosVector(maxSize()));
   else
   {
-    if (_ub->size() != maxSize())
+    if(_ub->size() != maxSize())
       _ub->resize(maxSize());
   }
+}
+bool Relay::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+{
+  float type_number= (float) (Type::value(nslaw));
+  _nslawtype.insert(type_number);
+
+  if (not (Type::value(nslaw) == Type::ComplementarityConditionNSL ||
+           Type::value(nslaw) == Type::RelayNSL))
+  {
+    THROW_EXCEPTION("\nRelay::checkCompatibleNSLaw -  \n\
+                      The chosen nonsmooth law is not compatible with Relay one step nonsmooth problem. \n \
+                      Compatible NonSmoothLaw are: ComplementarityConditionNSL or RelayNSL\n");
+    return false;
+  }
+
+  return true;
 }
 
 
@@ -107,7 +124,7 @@ int Relay::compute(double time)
   int info = 0;
   // --- Prepare data for Relay computing ---
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
     return info;
 
   // fill _lb and _ub wiht the value of the NonSmooth Law
@@ -115,19 +132,19 @@ int Relay::compute(double time)
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
   //cout << " _sizeOutput =" <<_sizeOutput <<std::endl;
-  if (_lb->size() != _sizeOutput)
+  if(_lb->size() != _sizeOutput)
   {
     _lb->resize(_sizeOutput, false);
     _lb->zero();
   }
-  if (_ub->size() != _sizeOutput)
+  if(_ub->size() != _sizeOutput)
   {
     _ub->resize(_sizeOutput, false);
     _ub->zero();
   }
 
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet.bundle(*ui);
 
@@ -145,7 +162,7 @@ int Relay::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if (_sizeOutput != 0)
+  if(_sizeOutput != 0)
   {
     // The Relay in Numerics format
     RelayProblem numerics_problem;
@@ -160,10 +177,10 @@ int Relay::compute(double time)
 
     //      Relay_display(&numerics_problem);
 
-    info = relay_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
+    info = relay_driver(&numerics_problem, _z->getArray(), _w->getArray(),
                         &*_numerics_solver_options);
 
-    if (info != 0)
+    if(info != 0)
     {
       std::cout << "Warning : Problem in Relay resolution" <<std::endl;
     }
@@ -175,13 +192,6 @@ int Relay::compute(double time)
   return info;
 }
 
-void Relay::setSolverId(int solverId)
-{
-  // clear previous Solveroptions
-  solver_options_delete(_numerics_solver_options.get());
-  relay_setDefaultSolverOptions(NULL, _numerics_solver_options.get(), solverId);
-}
-
 void Relay::display() const
 {
   std::cout << "======= Relay of size " << _sizeOutput << " with: " <<std::endl;
@@ -190,11 +200,6 @@ void Relay::display() const
   _lb->display();
   std::cout<< "upper bound : (_ub)"<<std::endl;
   _ub->display();
-  
-}
 
-Relay::~Relay()
-{
-  solver_options_delete(&*_numerics_solver_options);
 }
 

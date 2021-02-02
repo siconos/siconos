@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,12 @@
  *
  */
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
-#include "CSparseMatrix.h" // for freeNSLSP
-#include "NM_MPI.h"
+#include <stdio.h>          // for size_t, FILE
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
+#include "NumericsFwd.h"    // for NumericsSparseMatrix, NSM_linear_solver_p...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
+#include "NumericsDataVersion.h"
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
  * generic data struct for linear algebra operations
@@ -48,7 +50,7 @@ extern "C"
 
   /** \enum NSM_linear_solver NumericsSparseMatrix.h
    * id for linear algebra solvers */
-  typedef enum { NSM_CS_LUSOL, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT } NSM_linear_solver;
+  typedef enum { NSM_CSPARSE, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT, NSM_HSL } NSM_linear_solver;
 
   typedef void (*freeNSLSP)(void* p);
 
@@ -61,6 +63,7 @@ extern "C"
   struct NSM_linear_solver_params
   {
     NSM_linear_solver solver;
+    NSM_linear_solver LDLT_solver;
 
     void* linear_solver_data; /**< solver-specific data (or workspace) */
     freeNSLSP solver_free_hook; /**< solver-specific hook to free linear_solver_data  */
@@ -75,24 +78,27 @@ extern "C"
 
   /**\enum NumericsSparseOrigin NumericsSparseMatrix.h
    * matrix storage types */
-  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR } NumericsSparseOrigin;
+  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR, NSM_HALF_TRIPLET } NumericsSparseOrigin;
 
+  typedef NumericsSparseOrigin NSM_t;
 
   /** \struct NumericsSparseMatrix NumericsSparseMatrix.h
    * Sparse matrix representation in Numerics. The supported format are:
    * triplet (aka coordinate, COO), CSC (via CSparse) and CSR if MKL is used */
   struct NumericsSparseMatrix
   {
-    CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
-    CSparseMatrix* csc;        /**< csc matrix */
-    CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
-    CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
-    CS_INT*           diag_indx;  /**< indices for the diagonal terms.
-                                    Very useful for the proximal perturbation */
-    unsigned       origin;     /**< original format of the matrix */
+    CSparseMatrix* triplet;         /**< triplet format, aka coordinate */
+    CSparseMatrix* half_triplet;    /**< half triplet format for symmetric matrices */
+    CSparseMatrix* csc;             /**< csc matrix */
+    CSparseMatrix* trans_csc;       /**< transpose of a csc matrix (used by CSparse) */
+    CSparseMatrix* csr;             /**< csr matrix, only supported with mkl */
+    CS_INT*        diag_indx;       /**< indices for the diagonal terms.
+                                         Very useful for the proximal perturbation */
+    NSM_t       origin;          /**< original format of the matrix */
     NSM_linear_solver_params* linearSolverParams;
-                               /**< solver-specific parameters */
+                                    /**< solver-specific parameters */
 
+    NumericsDataVersion versions[5];
   };
 
 
@@ -112,15 +118,18 @@ extern "C"
    * \param A a NumericsSparseMatrix
    * \return NULL on success
    */
-  NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
+  NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
 
-
-
+  /** Copy a NumericsSparseMatrix.
+   * \param A a NumericsSparseMatrix
+   * \param B a NumericsSparseMatrix
+   */
+  void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B);
 
    /** Free a workspace related to a LU factorization
    * \param p the structure to free
    */
-  void NSM_free_p(void *p);
+  void NSM_clear_p(void *p);
 
   /** Get the data part of sparse matrix
    * \param A the sparse matrix
@@ -194,6 +203,8 @@ extern "C"
    */
   void NSM_fix_csc(CSparseMatrix* A);
 
+  void NSM_sort_csc(CSparseMatrix* A);
+
   /** return the origin of a sparse part of a matrix
    * \param M the matrix
    * \return -1 if the matrix has no sparse representation, the origin
@@ -213,10 +224,55 @@ extern "C"
    */
   NumericsSparseMatrix* NSM_new_from_file(FILE *file);
 
-
-
   int NSM_to_dense(const NumericsSparseMatrix * const A, double * B);
 
+  /** Get current version of a type of csparse matrix.
+   * \param M the NumericsSparseMatrix,
+   * \param type the type of sparse storage from NumericsSparseOrigin
+   * \return a comparable version. */
+  version_t NSM_version(const NumericsSparseMatrix* M, NSM_t type);
+
+  /** Get the maximum of versions of csparse matrices.
+   * \param M the NumericsSparseMatrix,
+   * \return a comparable version. */
+  version_t NSM_max_version(const NumericsSparseMatrix* M);
+
+  /** Set the version of a NumericsSparseMatrix.
+   * \param M the NumericsSparseMatrix,
+   * \param type the NumericsSparseOrigin of storage,
+   * \param value the new version.
+   */
+  void NSM_set_version(NumericsSparseMatrix* M, NSM_t type,
+                       version_t value);
+
+  /* Reset all versions of a NumericsSparseMatrix.
+   * \param M the NumericsSparseMatrix.
+   */
+  void NSM_reset_versions(NumericsSparseMatrix *M);
+
+  /* Reset version of a sparse storage.
+   * \param M the NumericsSparseMatrix,
+   * \param type the NumericsSparseOrigin of storage.
+   */
+  void NSM_reset_version(NumericsSparseMatrix*M, NSM_t type);
+
+  /** Increment the version of a NumericsSparseMatrix.
+   * \param M the NumericsSparseMatrix,
+   * \param type the NumericsSparseOrigin of storage
+   */
+  void NSM_inc_version(NumericsSparseMatrix* M, NSM_t type);
+
+  /** Get the NumericsSparseOrigin with the latest version.
+   * \param M the NumericsSparseMatrix
+   * \return the NumericsSparseOrigin.
+   */
+  NSM_t NSM_latest_id(const NumericsSparseMatrix* M);
+
+  /** Get most recent CSparseMatrix.
+   * \param M the NumericsSparseMatrix
+   * \return a pointer on a CSparseMatrix.
+   */
+  CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

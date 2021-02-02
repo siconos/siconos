@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public:
    *  \param q0 : the state vector.
    *  \param y : output vector.
    */
-  void computeh(double time, BlockVector& q0, SiconosVector& y);
+  void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
   /** Set offset1, offset from first contact.
    * \param val : the new value.

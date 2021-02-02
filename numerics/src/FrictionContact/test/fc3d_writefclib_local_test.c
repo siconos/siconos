@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "NonSmoothDrivers.h"
-#include "fclib_interface.h"
+
+#include <stdio.h>                   // for printf, fopen, fclose, FILE, size_t
+#include <stdlib.h>                  // for malloc, free, abs
+#include <string.h>                  // for strlen, strncpy, strcmp, strncat
+#include "FrictionContactProblem.h"  // for frictionContactProblem_free, Fri...
+#include "NumericsFwd.h"             // for FrictionContactProblem
+#include "fclib_interface.h"         // for frictionContact_fclib_read, fric...
 
 static int write_test_fclib(char * filename)
 {
@@ -32,7 +34,7 @@ static int write_test_fclib(char * filename)
   strncpy(extension, &filename[sizeoffilename - sizeof(extension) + 1], sizeof(extension));
   char * basename;
 
-  if (strcmp(extension, ".dat") == 0)
+  if(strcmp(extension, ".dat") == 0)
   {
     basename = (char *)malloc((sizeoffilename + 2) * sizeof(char *));
     strcpy(basename, filename);
@@ -51,13 +53,7 @@ static int write_test_fclib(char * filename)
   fclose(foutput);
 
 
-  FILE * f  =  fopen(filename, "r");
-
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-
-  info = frictionContact_newFromFile(problem, f);
-  fclose(f);
-
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
   int n = 100;
   char * title = (char *)malloc(n * sizeof(char *));
   strncpy(title, "Confeti-ex03-Fc3D-SBM", n);
@@ -125,17 +121,17 @@ int main(int argc, char *argv[])
 {
   int info=-1;
   printf("argc %i\n", argc);
-  if (argc == 1)
+  if(argc == 1)
   {
     info = write_test_fclib("./data/Confeti-ex03-Fc3D-SBM.dat");
   }
-  else if (argc == 2)
+  else if(argc == 2)
   {
     // We assume argv[1] is a filename to open
     FILE *file = fopen(argv[1], "r");
 
     /* fopen returns 0, the NULL pointer, on failure */
-    if (file == 0)
+    if(file == 0)
     {
       printf("Could not open file\n");
     }

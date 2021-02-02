@@ -27,7 +27,8 @@ It consists in
 
   Source files and sphinx configuration file are all in docs/sphinx directory.
 
-* **Siconos APIs** (Python and C++) documentation, automatically generated from inline comments in source files ( *.h/ *.hpp).
+* **Siconos APIs** (Python and C++) documentation, automatically generated from inline comments in source files ( .h and .hpp).
+  
   Rules and best practices to write comments leading to a proper html documentation are detailed in :ref:`documenting_source_code`.
 
 
@@ -475,7 +476,7 @@ Dependencies
 ------------
 
 * `Doxygen`_
-* `Sphinx`_, sphinxcontrib.bibtex, sphinxcontrib-youtube, sphinxcontrib-napoleon
+* `Sphinx`_, sphinxcontrib.bibtex, sphinxcontrib-napoleon
 * sphinx-bootstrap-theme
 * `Breathe`_
 
@@ -484,7 +485,6 @@ See docs/requirements.txt for a list of required python packages, and try for ex
 .. code-block:: bash
 
    pip install -r ./docs/requirements.txt
-   pip install git+https://github.com/sphinx-contrib/youtube.git
 
 See also the file CI/make_siconos_doc.sh that may be helpful to install siconos docs, since it is used by continuous integration on gitlab to provide all dependencies required to build doc on ubuntu. 
 

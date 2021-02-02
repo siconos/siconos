@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@
 Ferris solves the subsequent AVI.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "LCP_Solvers.h"
-#include "avi_caoferris.h"
-#include "LinearComplementarityProblem.h"
-#include <assert.h>
+#include <assert.h>                        // for assert
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_avi_caoferris
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "avi_caoferris.h"                 // for avi_caoferris_stage3
 
 void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -34,11 +34,11 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double 
   assert(n > 0);
 
   double* d_vec = (double *)malloc(n*sizeof(double));
-  for (unsigned i = 0; i < n; ++i) d_vec[i] = -1.0;
+  for(unsigned i = 0; i < n; ++i) d_vec[i] = -1.0;
 
   /* Set of active constraint is trivial */
   unsigned* A = (unsigned*)malloc(n*sizeof(unsigned));
-  for (unsigned i = 0; i < n; ++i) A[i] = i + 1;
+  for(unsigned i = 0; i < n; ++i) A[i] = i + 1;
 
   /* Call directly the 3rd stage */
   *info = avi_caoferris_stage3(problem, w, z, d_vec, n, A, options);

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,12 @@
  */
 #define LEVELMAX 999
 
-#ifndef NULL
-const int NULL = 0;
-#endif
+/** double precision machine */
+#define MACHINE_PREC std::numeric_limits<double>::epsilon()
+
+// #ifndef nullptr
+// const int nullptr = 0;
+// #endif
 
 #endif
 

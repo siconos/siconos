@@ -17,9 +17,8 @@ Create a task
 -------------
 
 1. Create a file my_task_name.cmake in CI/config dir. This file will be used to set siconos configuration options and components to be built.
-   For example, if you need to compile siconos externals and numerics components, without python wrappers in DEV_MODE, task_name.cmake should contain::
+   For example, if you need to compile siconos externals and numerics components, without python wrappers, task_name.cmake should contain::
 
-    set_option(DEV_MODE ON)
     set_option(WITH_PYTHON_WRAPPER OFF)
     set_components(externals;numerics)
 
@@ -32,7 +31,7 @@ Create a task
      my_new_task = CiTask(
      ci_config='task_name',
      distrib='ubuntu:16.10',
-     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack', 'python-minimal'],
+     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'python-minimal'],
      srcs=['.'],
      targets={'.': ['docker-build', 'docker-ctest']})
 

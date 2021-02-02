@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@
 
 // --- Constructor for the complete system
 LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector velocity0,
-                                                       SP::SiconosVector stiffness, SP::SiconosVector damping,
-                                                       SP::SiconosVector mass):
+    SP::SiconosVector stiffness, SP::SiconosVector damping,
+    SP::SiconosVector mass):
   LagrangianDS(q0, velocity0)
 {
   _mass.reset(new SimpleMatrix(dimension(), dimension(), Siconos::BANDED, 0, 0));
-  for(unsigned int i = 0;i<dimension(); ++i)
+  for(unsigned int i = 0; i<dimension(); ++i)
     (*_mass)(i, i) = (*mass)(i);
   _stiffness = stiffness;
   _damping = damping;
@@ -38,7 +38,7 @@ LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP:
 
 // --- Constructor for the complete system with identity mass matrix
 LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector velocity0,
-                                                       SP::SiconosVector stiffness, SP::SiconosVector damping):
+    SP::SiconosVector stiffness, SP::SiconosVector damping):
   LagrangianDS(q0, velocity0)
 {
   _stiffness = stiffness;
@@ -47,7 +47,7 @@ LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP:
 
 // --- Constructor for the undamped system with identity mass matrix
 LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector velocity0,
-                                                       SP::SiconosVector stiffness):
+    SP::SiconosVector stiffness):
   LagrangianDS(q0, velocity0)
 {
   _stiffness = stiffness;
@@ -55,7 +55,7 @@ LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP:
 
 void LagrangianLinearDiagonalDS::initRhs(double time)
 {
-  RuntimeException::selfThrow("LagrangianLinearDiagonalDS::initRhs - not yet implemented for LagrangianLinearDiagonalDS.");
+  THROW_EXCEPTION("LagrangianLinearDiagonalDS::initRhs - not yet implemented for LagrangianLinearDiagonalDS.");
 
 }
 
@@ -63,24 +63,24 @@ void LagrangianLinearDiagonalDS::computeForces(double time, SP::SiconosVector q2
 {
   DEBUG_PRINT("LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2) \n");
 
-  if (!_forces)
+  if(!_forces)
   {
     _forces.reset(new SiconosVector(_ndof));
   }
   else
     _forces->zero();
 
-  if (_fExt)
+  if(_fExt)
   {
     computeFExt(time);
     *_forces += *_fExt;
   }
 
-  if (_stiffness)
-    for(unsigned int i=0;i<_ndof;++i)
+  if(_stiffness)
+    for(unsigned int i=0; i<_ndof; ++i)
       (*_forces)(i) -= (*_stiffness)(i) * (*q2)(i);
-  if (_damping)
-    for(unsigned int i=0;i<_ndof;++i)
+  if(_damping)
+    for(unsigned int i=0; i<_ndof; ++i)
       (*_forces)(i) -= (*_damping)(i) * (*v2)(i);
 
   // if (_stiffness)
@@ -115,14 +115,14 @@ void LagrangianLinearDiagonalDS::display(bool brief) const
   LagrangianDS::display();
   std::cout << "===== Lagrangian Linear Diagonal System display ===== " <<std::endl;
   std::cout << "- Mass Matrix M : " <<std::endl;
-  if (_mass) _mass->display();
-  else std::cout << "-> NULL" <<std::endl;
+  if(_mass) _mass->display();
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- Stiffness Matrix K : " <<std::endl;
-  if (_stiffness) _stiffness->display();
-  else std::cout << "-> NULL" <<std::endl;
+  if(_stiffness) _stiffness->display();
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- Viscosity Matrix C : " <<std::endl;
-  if (_damping) _damping->display();
-  else std::cout << "-> NULL" <<std::endl;
+  if(_damping) _damping->display();
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "=========================================================== " <<std::endl;
 }
 

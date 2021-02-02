@@ -17,10 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-
-#include <stdlib.h>
-#include <math.h>
-
 #ifdef _MSC_VER
 
 // before MSVC 2013
@@ -48,8 +44,12 @@ extern "C" int __fpclassify(double x)
 }/* This is really bad --xhub */
 
 #ifdef __cplusplus
-namespace std {
-  int isfinite(double x) { return _finite(x); }
+namespace std
+{
+int isfinite(double x)
+{
+  return _finite(x);
+}
 }
 
 #endif
@@ -62,12 +62,12 @@ extern "C" double __cdecl __powidf2(double a, int b)
 {
   const int recip = b < 0;
   double r = 1;
-  while (1)
+  while(1)
   {
-    if (b & 1)
+    if(b & 1)
       r *= a;
     b /= 2;
-    if (b == 0)
+    if(b == 0)
       break;
     a *= a;
   }

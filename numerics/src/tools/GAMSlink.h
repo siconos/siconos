@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -294,7 +294,7 @@ static inline void SN_Gams_set_dirs(const SN_GAMSparams* solverParameters, const
     while (next_opt); \
   }
 
-static inline void SN_Gams_set_options(const SN_GAMSparams* GP, optHandle_t* Opts)
+static inline void SN_Gams_set_default(const SN_GAMSparams* GP, optHandle_t* Opts)
 {
   assert(GP);
   assert(Opts);

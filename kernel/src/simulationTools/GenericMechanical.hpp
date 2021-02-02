@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@
 #include "LinearOSNS.hpp"
 #include "SiconosNumerics.h"
 #include "Friction_cst.h" // from numerics, for solver id
-/** Pointer to function of the type used for drivers for GenericMechanical problems in Numerics */
 
 TYPEDEF_SPTR(GenericMechanicalProblem)
 
@@ -45,19 +44,26 @@ TYPEDEF_SPTR(GenericMechanicalProblem)
 class GenericMechanical : public LinearOSNS
 {
 protected:
-  /** serialization hooks
-  */
+  /** serialization hooks */
   ACCEPT_SERIALIZATION(GenericMechanical);
-
 
   GenericMechanicalProblem * _pnumerics_GMP;
 
 public:
-
-  /** Basic constructor, from numerics solver id.
-   *  \param FC3D_Solver_Id int type of FC3D solver
+  
+  /** constructor from solver id
+      \param numericsSolverId id of the internal friction solver of the generic problem
+      default = SICONOS_FRICTION_3D_ONECONTACT_NSN
    */
-  GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+  GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_ONECONTACT_NSN);
+
+  /** constructor from a pre-defined solver options set.
+      \param options, the options set, 
+      \rst
+      see :ref:`problems_and_solvers` for details.
+      \endrst
+  */
+  GenericMechanical(SP::SolverOptions options);
 
   /** destructor
    */
@@ -97,6 +103,10 @@ public:
    */
   void updateInteractionBlocks();
 
+  /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+
+  
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@
 #ifndef gfc3d_nonsmooth_Newton_AlartCurnier_h
 #define gfc3d_nonsmooth_Newton_AlartCurnier_h
 
-#include "SolverOptions.h"
-#include "GlobalFrictionContactProblem.h"
+#include "NumericsFwd.h"  // for SolverOptions
 
 int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   SolverOptions* options);

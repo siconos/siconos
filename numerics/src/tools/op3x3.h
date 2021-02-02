@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@
 
 #ifdef __cplusplus
 #undef restrict
+#include <sys/cdefs.h>  // for __restrict
 #define restrict __restrict
 #endif
 
@@ -880,7 +881,7 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
 
 
 /** solve Ax = b by partial pivoting Gaussian elimination. This function is 10
- * to 20 times faster than calling LAPACK (tested with netlib and atlas).
+ * to 20 times faster than calling LAPACK (tested with netlib).
  *
  * \param a column-major matrix (not modified)
  * \param[in,out] b on input, the right-hand side; on output the solution x

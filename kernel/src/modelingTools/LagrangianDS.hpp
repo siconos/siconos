@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ protected:
 
   /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
    * false by default */
-  bool _hasConstantFExt;
+  bool _hasConstantFExt = false;
 
   /** non-linear inertia term of the system */
   SP::SiconosVector _fGyr;
@@ -355,7 +355,7 @@ public:
    */
   void setRhs(const SiconosVector& newValue)
   {
-    RuntimeException::selfThrow("LagrangianDS - setRhs call is forbidden for 2nd order systems.");
+    THROW_EXCEPTION("LagrangianDS - setRhs call is forbidden for 2nd order systems.");
   }
 
   /** set right-hand side, \f$ \dot x \f$ (pointer link)
@@ -363,7 +363,7 @@ public:
    */
   void setRhsPtr(SP::SiconosVector newPtr)
   {
-    RuntimeException::selfThrow("LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
+    THROW_EXCEPTION("LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
   }
 
   /** function to compute \f$F(v,q,t,z)\f$ for the current state

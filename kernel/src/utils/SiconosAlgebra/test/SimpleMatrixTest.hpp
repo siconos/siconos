@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ private:
   CPPUNIT_TEST(testConstructor10);
   CPPUNIT_TEST(testConstructor11);
   CPPUNIT_TEST(testConstructor12);
+  CPPUNIT_TEST(testConstructor13);
+  CPPUNIT_TEST(testConstructor14);
   CPPUNIT_TEST(testGetSetRowCol);
   CPPUNIT_TEST(testZero);
   CPPUNIT_TEST(testEye);
@@ -65,12 +67,13 @@ private:
   CPPUNIT_TEST(testOperators2);
   CPPUNIT_TEST(testOperators3);
   CPPUNIT_TEST(testOperators4);
+  CPPUNIT_TEST(testOperators4bis);
   CPPUNIT_TEST(testOperators5);
   CPPUNIT_TEST(testOperators6);
   CPPUNIT_TEST(testOperators6Bis);
   CPPUNIT_TEST(testOperators6Ter);
   CPPUNIT_TEST(testOperators7);
-  CPPUNIT_TEST(testOperators8);
+  //  CPPUNIT_TEST(testOperators8);
   CPPUNIT_TEST(testOperators8Bis);
   CPPUNIT_TEST(testOperators8Ter);
   CPPUNIT_TEST(testOperators8_4);
@@ -83,15 +86,19 @@ private:
   CPPUNIT_TEST(testOperators11);
   CPPUNIT_TEST(testOperators12);
   CPPUNIT_TEST(testOperators13);
-  CPPUNIT_TEST(testPow);
+  //CPPUNIT_TEST(testPow);
   CPPUNIT_TEST(testProd);
   CPPUNIT_TEST(testProdBis);
   CPPUNIT_TEST(testProdTer);
   CPPUNIT_TEST(testProd4);
   CPPUNIT_TEST(testProd5);
   CPPUNIT_TEST(testProd6);
-  CPPUNIT_TEST(testGemv);
-  CPPUNIT_TEST(testGemm);
+  //CPPUNIT_TEST(testGemv);
+  //CPPUNIT_TEST(testGemm);
+  CPPUNIT_TEST(testFromAndFillCSC);
+  CPPUNIT_TEST(testPLUFactorizationInPlace);
+  CPPUNIT_TEST(testFactorize);
+  CPPUNIT_TEST(testSolve);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
@@ -108,6 +115,8 @@ private:
   void testConstructor10();
   void testConstructor11();
   void testConstructor12();
+  void testConstructor13();
+  void testConstructor14();
   void testGetSetRowCol();
   void testZero();
   void testEye();
@@ -123,12 +132,13 @@ private:
   void testOperators2();
   void testOperators3();
   void testOperators4();
+  void testOperators4bis();
   void testOperators5();
   void testOperators6();
   void testOperators6Bis();
   void testOperators6Ter();
   void testOperators7();
-  void testOperators8();
+  // void testOperators8();
   void testOperators8Bis();
   void testOperators8Ter();
   void testOperators8_4();
@@ -141,15 +151,18 @@ private:
   void testOperators11();
   void testOperators12();
   void testOperators13();
-  void testPow();
   void testProd();
   void testProdBis();
   void testProdTer();
   void testProd4();
   void testProd5();
   void testProd6();
-  void testGemm();
-  void testGemv();
+  //void testGemm();
+  //void testGemv();
+  void testFromAndFillCSC();
+  void testPLUFactorizationInPlace();
+  void testFactorize();
+  void testSolve();
   void End();
 
   unsigned int size, size2;
@@ -157,12 +170,13 @@ private:
   SPC::SiconosMatrix A, B, Ab, Bb;
   SP::SimpleMatrix SimM;
   std::string fic1, fic2;
-  SP::SiconosVector vect1, vect2, vect3;
+  SP::SiconosVector vect1, vect2, vect3, vect_sparse_1;
   SP::DenseMat  D;
   SP::TriangMat T, T2;
   SP::SymMat S, S2;
   SP::BandedMat Band, Band2;
-  SP::SparseMat SP;
+  SP::SparseMat SP, SP2, SP3, SP4;
+  SP::SparseCoordinateMat SP_coor;
   SP::ZeroMat  Z, Z2;
   SP::IdentityMat I, I2;
   double tol;

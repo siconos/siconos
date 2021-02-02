@@ -1,5 +1,4 @@
 FROM opensuse/leap:15.0
-
 RUN zypper install -n -y \
     cmake \
     which \
@@ -9,6 +8,7 @@ RUN zypper install -n -y \
     libboost_headers1_66_0-devel \
     gmp-devel \
     libboost_serialization1_66_0-devel \
+    libboost_timer1_66_0-devel \
     openblas-devel \
     lapacke-devel \
     liblpsolve55-0 \
@@ -19,11 +19,11 @@ RUN zypper install -n -y \
     libbullet-devel \
     hdf5-devel \
     doxygen \
-    valgrind
-RUN zypper clean --all
+    suitesparse-devel \
+    valgrind && zypper clean --all
 WORKDIR /home
 RUN pip3 install --upgrade pip
-COPY requirements.txt /home
+COPY ci_gitlab/dockerfiles/requirements.txt /home
 RUN pip3 install -U -r /home/requirements.txt > /dev/null
 
 

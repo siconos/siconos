@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,98 +16,53 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_PROX
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_prox = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_prox[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  *number_of_tests = 3; //n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  int n =0;
-  int e=0;
-  
-  int d=0;/* "./data/FC3D_Example1_SBM.dat"; */
-  e=0;
-  test_prox[n][e++] = data_collection[d];
-  test_prox[n][e++] = "0";
-  test_prox[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_prox[n][e++], "%d", SICONOS_FRICTION_3D_PROX);
-  test_prox[n][e++] = "1e-08";
-  test_prox[n][e++] = "100";
-  test_prox[n][e++] = "---";
-  n++;
+  int current = 0;
+  int d;
+  // ========== FC3D_Example1_SBM.dat ========
+  d = 0;
+  // Prox, default
 
-  d=9;
-  e=0;
-  test_prox[n][e++] = data_collection[d];
-  test_prox[n][e++] = "0";
-  test_prox[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_prox[n][e++], "%d", SICONOS_FRICTION_3D_PROX);
-  test_prox[n][e++] = "1e-08";
-  test_prox[n][e++] = "1000000";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "dparam";
-  test_prox[n][e++] = "3";
-  test_prox[n][e++] = "1e4";
-  test_prox[n][e++] = "iparam";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "---";
-  n++;
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_PROX);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+  current++;
 
-  e=0;
-  test_prox[n][e++] = data_collection[d];
-  test_prox[n][e++] = "0";
-  test_prox[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_prox[n][e++], "%d", SICONOS_FRICTION_3D_PROX);
-  test_prox[n][e++] = "1e-08";
-  test_prox[n][e++] = "1000000";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "dparam";
-  test_prox[n][e++] = "3";
-  test_prox[n][e++] = "1e4";
-  test_prox[n][e++] = "iparam";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "---";
-  n++;
-  
-  d=6;
-  e=0;
-  test_prox[n][e++] = data_collection[d];
-  test_prox[n][e++] = "0";
-  test_prox[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_prox[n][e++], "%d", SICONOS_FRICTION_3D_PROX);
-  test_prox[n][e++] = "1e-08";
-  test_prox[n][e++] = "1000000";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "dparam";
-  test_prox[n][e++] = "3";
-  test_prox[n][e++] = "1e4";
-  test_prox[n][e++] = "iparam";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "---";
-  n++;
+  // ========== BoxesStack1-i100000-32.hdf5.dat ========
+  d = 6;
+  // Prox, set alpha, many iter.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_PROX);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] = 1e4;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000000;
+  current++;
 
- 
+  // ========== OneObject-i100000-499.hdf5.dat ========
+  d = 9;
+  // Prox, set alpha, many iter.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_PROX);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_ALPHA] = 1e4;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000000;
+  current++;
 
-  test_prox[n][0] ="---";
-  return test_prox;
+
+  *number_of_tests = current;
+  return collection;
 
 }

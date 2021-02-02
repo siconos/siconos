@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX
-#include "CxxStd.hpp"
 #include <gmp.h>
 #include <iostream>
 #include <set>
@@ -78,11 +77,11 @@ Event& EventsManager::insertEvent(const int type, SP::TimeDiscretisation td)
 
 void EventsManager::noSaveInMemory(const Simulation& sim)
 {
-  for (EventsContainer::iterator it = _events.begin();
-       it != _events.end(); ++it)
+  for(EventsContainer::iterator it = _events.begin();
+      it != _events.end(); ++it)
   {
     Event& ev = **it;
-    if (ev.getType() == TD_EVENT)
+    if(ev.getType() == TD_EVENT)
     {
       (*it).reset(new TimeDiscretisationEventNoSaveInMemory(ev.getDoubleTimeOfEvent(), 0));
       (*it)->setTimeDiscretisation(ev.getTimeDiscretisation());
@@ -96,13 +95,13 @@ void EventsManager::preUpdate(Simulation& sim)
   DEBUG_EXPR(display(););
   const mpz_t *t1 = _events[0]->getTimeOfEvent();
   _events[0]->process(sim);
-  for (unsigned int i = 1; i < _events.size() ; i++)
+  for(unsigned int i = 1; i < _events.size() ; i++)
   {
     const  mpz_t *t2 =  _events[i]->getTimeOfEvent();
     int res = mpz_cmp(*t1, *t2);
-    if (res == 0)
+    if(res == 0)
     {
-      if (_events[i]->getType() == NS_EVENT)
+      if(_events[i]->getType() == NS_EVENT)
       {
         _events[i]->process(sim);
         _events.erase(_events.begin()+i);
@@ -116,22 +115,22 @@ void EventsManager::preUpdate(Simulation& sim)
 
 double EventsManager::startingTime() const
 {
-  if (_events.size() == 0)
-    RuntimeException::selfThrow("EventsManager::startingTime current event is NULL");
+  if(_events.size() == 0)
+    THROW_EXCEPTION("EventsManager::startingTime current event is nullptr");
   return _events[0]->getDoubleTimeOfEvent();
 }
 
 double EventsManager::nextTime() const
 {
-  if (_events.size() <= 1)
-    RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");
+  if(_events.size() <= 1)
+    THROW_EXCEPTION("EventsManager nextTime, next event is nullptr");
   return _events[1]->getDoubleTimeOfEvent();
 }
 
 bool EventsManager::needsIntegration() const
 {
-  if (_events.size() <= 1)
-    RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");
+  if(_events.size() <= 1)
+    THROW_EXCEPTION("EventsManager nextTime, next event is nullptr");
   return (mpz_cmp(*_events[0]->getTimeOfEvent(), *_events[1]->getTimeOfEvent()) < 0);
 }
 
@@ -139,7 +138,7 @@ bool EventsManager::needsIntegration() const
 // Useful during simulation when a new event is detected.
 void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool yes_update)
 {
-  if (!_eNonSmooth)
+  if(!_eNonSmooth)
   {
     EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
     _eNonSmooth = regEvent.instantiate(time, NS_EVENT);
@@ -161,20 +160,20 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
   // looking for a TD event close to the NS one.
   mpz_t delta_time = {};
   mpz_init(delta_time); // initialize delta_time
-  for (unsigned int j = 1; j < _events.size(); j++)
+  for(unsigned int j = 1; j < _events.size(); j++)
   {
-    if (j == pos)
+    if(j == pos)
       continue;
     Event& ev = *_events[j];
-    if (ev.getType() != TD_EVENT) // current event is not of type TD
+    if(ev.getType() != TD_EVENT)  // current event is not of type TD
       continue;
     mpz_sub(delta_time, *ev.getTimeOfEvent(), *t1); // gap between the NS and TD events
-    if (mpz_cmp_ui(delta_time, 0) < 0) // ok
+    if(mpz_cmp_ui(delta_time, 0) < 0)  // ok
       continue;
-    if (mpz_cmp_ui(delta_time, _GapLimit2Events) <= 0) // the two are too close
+    if(mpz_cmp_ui(delta_time, _GapLimit2Events) <= 0)  // the two are too close
     {
       // reschedule the TD event only if its time instant is less than T
-      if (!isnan(getTkp3()))
+      if(!std::isnan(getTkp3()))
       {
         _NSeventInsteadOfTD = true;
         static_cast<TimeDiscretisationEvent&>(ev).update(_k+3);
@@ -202,7 +201,7 @@ void EventsManager::update(Simulation& sim)
   // delete last event, since we have processed one
   int event0Type = _events[0]->getType();
   // reschedule an TD event if needed
-  if (event0Type == TD_EVENT)
+  if(event0Type == TD_EVENT)
   {
     // this checks whether the next time instant is less than T or not
     // it is isn't then tkp1 is a NaN, in which case we don't reschedule the event
@@ -210,23 +209,23 @@ void EventsManager::update(Simulation& sim)
     // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectively
     // run until T
     double tkp2 = getTkp2();
-    std11::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k+2);
-    if (!isnan(tkp2))
+    std::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k+2);
+    if(!std::isnan(tkp2))
     {
       insertEv(_events[0]);
     }
   }
   // reschedule if needed
-  else if (_events[0]->reschedule())
+  else if(_events[0]->reschedule())
   {
     _events[0]->update();
-    if (_events[0]->getDoubleTimeOfEvent() < _T + 100.0*std::numeric_limits<double>::epsilon())
+    if(_events[0]->getDoubleTimeOfEvent() < _T + 100.0*std::numeric_limits<double>::epsilon())
       insertEv(_events[0]);
   }
   // An NS_EVENT was schedule close to a TD_EVENT
   // the latter was removed, but we still need to increase
   // the current index
-  else if (event0Type == NS_EVENT && _NSeventInsteadOfTD)
+  else if(event0Type == NS_EVENT && _NSeventInsteadOfTD)
   {
     _NSeventInsteadOfTD = false;
     _k++;
@@ -236,7 +235,7 @@ void EventsManager::update(Simulation& sim)
   _events.erase(_events.begin());
 
   // Now we may update _k if we have processed a TD_EVENT
-  if (_events[0]->getType() == TD_EVENT)
+  if(_events[0]->getType() == TD_EVENT)
     _k++;
 }
 
@@ -251,13 +250,13 @@ unsigned int EventsManager::insertEv(SP::Event e)
   mpz_t abs_delta_time;
   mpz_init(abs_delta_time); // initialize delta_time
   // Find a place for the event in the vector
-  for (EventsContainer::iterator it = _events.begin();
+  for(EventsContainer::iterator it = _events.begin();
       it != _events.end(); ++it)
   {
     Event& ev = **it;
     mpz_sub(delta_time, *ev.getTimeOfEvent(), *t1); // delta = t_existing_event - t_event_to _insert
     int res = mpz_cmp_ui(delta_time, _GapLimit2Events);
-    if (res > 0) // insert
+    if(res > 0)  // insert
     {
       _events.insert(it, e);
       inserted = true;
@@ -266,12 +265,12 @@ unsigned int EventsManager::insertEv(SP::Event e)
     else
     {
       mpz_abs(abs_delta_time, delta_time);
-      if (mpz_cmp_ui(abs_delta_time, _GapLimit2Events) <= 0) // the two are too close
+      if(mpz_cmp_ui(abs_delta_time, _GapLimit2Events) <= 0)  // the two are too close
       {
         // reschedule the TD event only if its time instant is less than T
         mpz_set(*t1, *ev.getTimeOfEvent());
         res = eType - ev.getType();
-        if (res < 0)
+        if(res < 0)
         {
           _events.insert(it, e);
           inserted = true;
@@ -282,7 +281,7 @@ unsigned int EventsManager::insertEv(SP::Event e)
     pos++;
   }
 
-  if (!inserted)
+  if(!inserted)
     _events.push_back(e);
 
   mpz_clear(delta_time);
@@ -294,7 +293,7 @@ void EventsManager::display() const
 {
   std::cout << "=== EventsManager data display ===" <<std::endl;
   std::cout << " - The number of unprocessed events (including current one) is: " << _events.size() <<std::endl;
-  for (EventsContainer::const_iterator it = _events.begin(); it != _events.end(); ++it)
+  for(EventsContainer::const_iterator it = _events.begin(); it != _events.end(); ++it)
     (*it)->display();
   std::cout << "===== End of EventsManager display =====" <<std::endl;
 }

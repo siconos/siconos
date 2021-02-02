@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ RelayNSL::RelayNSL(unsigned int size, double lb, double ub):
   NonSmoothLaw(size), _lb(lb), _ub(ub)
 {
   if(ub < lb)
-    RuntimeException::selfThrow("RelayNSL::RelayNSL(unsigned int size, double lb, double ub). Upper bound ub must be greater than lower bound lb");
+    THROW_EXCEPTION("RelayNSL::RelayNSL(unsigned int size, double lb, double ub). Upper bound ub must be greater than lower bound lb");
 }
 
 RelayNSL::~RelayNSL()

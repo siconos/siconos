@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 #include "Event.hpp"
 #include "TimeDiscretisation.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include <cmath>
 #include <iostream>
 
@@ -42,10 +42,10 @@ Event::~Event()
 
 void Event::update(unsigned int k)
 {
-  if (_td) // if no TimeDiscretisation then do nothing
+  if(_td)  // if no TimeDiscretisation then do nothing
   {
     _k++;
-    if (_td->hGmp())
+    if(_td->hGmp())
       incrementTime();
     else
       setTime(_td->getTk(_k));
@@ -54,7 +54,7 @@ void Event::update(unsigned int k)
 void Event::setTimeDiscretisation(SP::TimeDiscretisation td)
 {
   _td = td;
-  if (_td->hGmp())
+  if(_td->hGmp())
   {
     mpf_t tmp;
     mpf_init_set_d(tmp, _tick);
@@ -66,7 +66,7 @@ void Event::setTimeDiscretisation(SP::TimeDiscretisation td)
 
 void Event::setTick(double newTick)
 {
-  if (_eventCreated)
+  if(_eventCreated)
   {
     std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
   }

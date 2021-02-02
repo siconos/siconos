@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@
 #include "SiconosGraph.hpp"
 #include "SiconosProperties.hpp"
 #include "SiconosPointers.hpp"
+#include "SiconosFwd.hpp" // for SP::DynamicalSystem, ...
+#include "SiconosAlgebraTypeDef.hpp" // for VectorOfVectors, ...
 #include "SimulationTypeDef.hpp"
 
 /** the graph structure :
@@ -115,8 +117,8 @@ struct GraphProperties
 
 
 class _DynamicalSystemsGraph :
-  public SiconosGraph < std11::shared_ptr<DynamicalSystem>,
-                        std11::shared_ptr<Interaction>,
+  public SiconosGraph < std::shared_ptr<DynamicalSystem>,
+                        std::shared_ptr<Interaction>,
                         DynamicalSystemProperties, InteractionProperties,
                         GraphProperties >
 {
@@ -125,8 +127,8 @@ class _DynamicalSystemsGraph :
 
 
 class _InteractionsGraph :
-  public SiconosGraph < std11::shared_ptr<Interaction>,
-                        std11::shared_ptr<DynamicalSystem>,
+  public SiconosGraph < std::shared_ptr<Interaction>,
+                        std::shared_ptr<DynamicalSystem>,
                         InteractionProperties, DynamicalSystemProperties,
                         GraphProperties >
 {

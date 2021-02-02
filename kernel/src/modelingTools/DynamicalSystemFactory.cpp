@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 
 #include "DynamicalSystemFactory.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 namespace DynamicalSystemFactory
 {
@@ -37,8 +37,8 @@ SP::DynamicalSystem Registry::instantiate(int name, const SiconosVector& x0)
 {
   MapFactoryIt it = factory_map.find(name) ;
 
-  if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (DynamicalSystemFactory) failed, no class named: " + name);
+  if(it == factory_map.end())
+    THROW_EXCEPTION("Registry::instantiate (DynamicalSystemFactory) failed, no class named: " + std::to_string(name));
 
   return (it->second)(name, x0) ; // run our factory
 }

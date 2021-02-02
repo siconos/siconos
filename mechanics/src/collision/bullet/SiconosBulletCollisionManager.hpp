@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,24 @@
 
 DEFINE_SPTR(SiconosBulletCollisionManager_impl);
 
+
+enum SiconosBulletDimension
+{
+  SICONOS_BULLET_3D=0,
+  SICONOS_BULLET_2D=1
+};
+
 struct SiconosBulletOptions
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletOptions);
+
+public:
   SiconosBulletOptions();
 
+  int dimension;
   double contactBreakingThreshold;
   double contactProcessingThreshold;
   double worldScale;
@@ -52,6 +66,12 @@ struct SiconosBulletOptions
 
 struct SiconosBulletStatistics
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletStatistics);
+
+public:
   SiconosBulletStatistics()
     : new_interactions_created(0)
     , existing_interactions_processed(0)
@@ -65,7 +85,12 @@ struct SiconosBulletStatistics
 class SiconosBulletCollisionManager : public SiconosCollisionManager
 {
 protected:
-  SP::SiconosBulletCollisionManager_impl impl;
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletCollisionManager);
+
+protected:
+  SP::SiconosBulletCollisionManager_impl _impl;
 
   void initialize_impl();
 
@@ -92,8 +117,20 @@ protected:
   /** Provided so that creation of collision points can be overridden.
    * See modify_normals.py in examples/Mechanics/Hacks */
   virtual SP::Bullet5DR makeBullet5DR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
-                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
-                                  const btManifoldPoint &);
+                                      SP::RigidBodyDS ds2, SP::SiconosShape shape2,
+                                      const btManifoldPoint &);
+
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet2dR makeBullet2dR(SP::RigidBody2dDS ds1, SP::SiconosShape shape1,
+                                      SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
+                                      const btManifoldPoint &);
+
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet2d3DR makeBullet2d3DR(SP::RigidBody2dDS ds1, SP::SiconosShape shape1,
+                                          SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
+                                          const btManifoldPoint &);
 
 public:
   StaticContactorSetID insertStaticContactorSet(
@@ -101,7 +138,7 @@ public:
 
   bool removeStaticContactorSet(StaticContactorSetID id);
 
-  void removeBody(const SP::RigidBodyDS& body);
+  void removeBody(const SP::SecondOrderDS& body);
 
   void updateInteractions(SP::Simulation simulation);
 

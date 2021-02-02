@@ -62,9 +62,8 @@ Then, the simulation loop will be::
 .. toctree::
    :maxdepth: 4
 	      
-   event_capturing
-   event_driven
    time_discretisation
    time_integrators
+   event_capturing
+   event_driven
    osns_problems
-   numerics_solvers

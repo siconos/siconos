@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ void TwistingTest::initTwisting()
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
   _sensor.reset(new LinearSensor(_DS, _C));
   _itw.reset(new Twisting(_sensor, 300., _beta, _h));
-  SP::SimpleMatrix eye(new SimpleMatrix(2 , 2));
+  SP::SimpleMatrix eye(new SimpleMatrix(2, 2));
   eye->eye();
   _itw->setCsurface(eye);
 
@@ -75,7 +75,7 @@ void TwistingTest::initRegularTwisting()
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
   _sensor.reset(new LinearSensor(_DS, _C));
   _reg_itw.reset(new RegularTwisting(_sensor, 300., _beta));
-  SP::SimpleMatrix eye(new SimpleMatrix(2 , 2));
+  SP::SimpleMatrix eye(new SimpleMatrix(2, 2));
   eye->eye();
   _reg_itw->setCsurface(eye);
 
@@ -87,7 +87,7 @@ void TwistingTest::initExplicitTwisting()
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
   _sensor.reset(new LinearSensor(_DS, _C));
   _expl_tw.reset(new ExplicitTwisting(_sensor, 300., _beta));
-  SP::SimpleMatrix eye(new SimpleMatrix(2 , 2));
+  SP::SimpleMatrix eye(new SimpleMatrix(2, 2));
   eye->eye();
   _expl_tw->setCsurface(eye);
 
@@ -112,7 +112,7 @@ void TwistingTest::test_ExplicitTwisting_ZOH()
   bool test = !((error=ioMatrix::compareRefFile(data, "etw_ZOH.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 void TwistingTest::test_ExplicitTwisting_Lsodar()
@@ -131,7 +131,7 @@ void TwistingTest::test_ExplicitTwisting_Lsodar()
   bool test = !((error=ioMatrix::compareRefFile(data, "etw_lsodar.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 #ifdef HAS_EXTREME_POINT_ALGO

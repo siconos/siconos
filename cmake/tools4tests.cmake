@@ -28,6 +28,7 @@ function(begin_tests SOURCE_DIR)
   
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
     set(EMULATOR "wine")
+    set(DRIVE_LETTER "Z:")
   else()
     set(EMULATOR "")
   endif()
@@ -53,7 +54,7 @@ function(begin_tests SOURCE_DIR)
   endforeach()
 
   # If a directory *-utils is found, its content is used
-  # to create a <COMPONENT>-test library.
+  # to create/expand the <COMPONENT>-test library.
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
     file(GLOB_RECURSE TEST_UTILS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils/*.[ch])
     if(NOT TARGET ${COMPONENT}-test) 
@@ -75,9 +76,12 @@ function(begin_tests SOURCE_DIR)
 
     # Link with extra deps, if any
     foreach(libtarget IN LISTS TEST_DEPS)
-      target_link_libraries(${COMPONENT}-test PRIVATE ${libtarget})
+      target_link_libraries(${COMPONENT}-test PUBLIC ${libtarget})
     endforeach()
-
+  else()
+    # If there is no ${COMPONENT}-test but some extra DEPS.
+    unset(GLOBAL_TEST_DEPS)
+    set(GLOBAL_TEST_DEPS ${TEST_DEPS} PARENT_SCOPE)
   endif()
   
 endfunction()
@@ -88,7 +92,7 @@ macro(test_windows_setup test_name test_sources)
   # fortran -> gfortran; {c,cpp} -> link.exe
   if(BUILD_AS_CPP)
     set(EXE_FORTRAN FALSE) # Windows only
-    foreach(_file IN LISTS ${test_sources)
+    foreach(_file IN LISTS ${test_sources})
       if(${_file} MATCHES "[.]c$")
         set_source_files_properties(${_file} PROPERTIES LANGUAGE CXX)
       endif()
@@ -115,8 +119,6 @@ macro(test_windows_setup test_name test_sources)
 
 endmacro()
 
-
-
 # ========================================
 # Add a test into the ctest suite.
 #
@@ -135,8 +137,8 @@ endmacro()
 # - link (PRIVATE) executable with <COMPONENT>-test (if it exists)
 # - add a test (ctest) named <name>. If NAME is not set, use name of first source file (without ext).
 # ========================================
-function(new_test_1)
-  set(oneValueArgs NAME)
+function(new_test)
+  set(oneValueArgs NAME HDF5)
   set(multiValueArgs SOURCES DATA DEPS)
   cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
@@ -151,7 +153,7 @@ function(new_test_1)
   file(APPEND ${TESTS_LOGFILE} "Add test ${CURRENT_TEST_DIR}/${TEST_NAME} \n")
 
   # -- Check if data files are required --
-  # If so, copy the corresponding file into the working directory
+  # If so, copy the corresponding files into the working directory
   if(TEST_DATA)
     foreach(_datafile IN LISTS TEST_DATA)
       file(APPEND ${TESTS_LOGFILE} "Copy data file : ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${_datafile} \n")
@@ -181,10 +183,15 @@ function(new_test_1)
   else()
     add_executable(${TEST_NAME} ${TEST_SOURCES_ABSPATH})
   endif()
-  set_target_properties(${TEST_NAME} PROPERTIES COMPILE_DEFINITIONS "EMULATOR=\"${EMULATOR}\";WRAPPER=\"\"")
+  target_compile_definitions(${TEST_NAME} PRIVATE "EMULATOR=\"${EMULATOR}\";WRAPPER=\"\"")
+  if(TEST_HDF5)
+    target_compile_definitions(${TEST_NAME} PRIVATE "TEST_HDF5")
+  endif()
+  
+  
   # Set path where exe should be generated
   set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)
-
+  
   test_windows_setup(${TEST_NAME} ${TEST_SOURCES})
 
   # -- link with current component and its dependencies --
@@ -194,9 +201,30 @@ function(new_test_1)
     target_include_directories(${TEST_NAME} PRIVATE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
   endforeach()
+  if(WITH_SERIALIZATION)
+    if(WITH_GENERATION)
+      target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_BINARY_DIR}/io)
+    endif()
+    # SiconosFullGenerated.hpp includes files from all other components.
+    # (Better way than using *_DOXYGEN_INPUTS?  ${COMPONENT}_DIR is empty here!)
+    foreach(_C IN LISTS COMPONENTS)
+      string(STRIP "${${_C}_DOXYGEN_INPUTS}" _dirs)
+      string(REPLACE " " ";" _dirs "${_dirs}")
+      foreach(_D IN LISTS _dirs)
+        target_include_directories(${TEST_NAME} PRIVATE ${_D})
+      endforeach()
+    endforeach()
+  endif()
 
   # Link with extra deps (set for each test in new_test call)
   foreach(libtarget IN LISTS TEST_DEPS)
+    target_link_libraries(${TEST_NAME} PRIVATE ${libtarget})
+  endforeach()
+  # ... or with GLOBAL_TEST_DEPS variable. GLOBAL_TEST_DEPS is
+  # set during call to begin_test and useful only
+  # when some dependencies are required by all tests
+  # and if there is no <component>-test lib.
+  foreach(libtarget IN LISTS GLOBAL_TEST_DEPS) 
     target_link_libraries(${TEST_NAME} PRIVATE ${libtarget})
   endforeach()
 
@@ -208,6 +236,12 @@ function(new_test_1)
   if(WITH_CXX)
     set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   endif()
+
+  if(WITH_MPI)
+    target_include_directories(${TEST_NAME} PUBLIC ${MPI_CXX_INCLUDE_DIRS})
+    target_link_libraries(${TEST_NAME} PUBLIC ${MPI_CXX_LIBRARIES})
+  endif()
+
   
   if (LDLIBPATH)
     set_target_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
@@ -254,632 +288,88 @@ function(set_siconos_test_properties)
   
 endfunction()
 
-
-
-
-
-
-
-
-
-MACRO(BEGIN_TEST _D)
-  SET(_CURRENT_TEST_DIRECTORY ${_D})
-  FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_D})
-
-  # find and copy data files : *.mat, *.dat and *.xml, and etc.
-  FILE(GLOB_RECURSE _DATA_FILES 
-    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
-    *.mat
-    *.dat
-    *.hdf5
-    *.npz
-    *.xml
-    *.DAT
-    *.INI)
-  FOREACH(_F ${_DATA_FILES})
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F}
-      ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
-  ENDFOREACH(_F ${_DATA_FILES})
-
-  IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
-    FILE(GLOB_RECURSE TEST_UTILS_SOURCES_TMP ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils/*.c)
-    set(TEST_UTILS_SOURCES ${TEST_UTILS_SOURCES} ${TEST_UTILS_SOURCES_TMP})
-    SET(${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
-  ELSE()
-    SET(${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES)
-  ENDIF()
-
-  # configure test CMakeLists.txt (needed for a chdir before running test)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/CMakeListsForTests.cmake 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/CMakeLists.txt @ONLY)
-
-  SET(_EXE_LIST_${_CURRENT_TEST_DIRECTORY})
-ENDMACRO(BEGIN_TEST _D)
-
-# Tests
-MACRO(BEGIN_TEST2 _D)
-  SET(_CURRENT_TEST_DIRECTORY ${_D})
-  FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D})
-
-  # find and copy data files : *.mat, *.dat and *.xml, and etc.
-  FILE(GLOB_RECURSE _DATA_FILES 
-    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
-    *.mat 
-    *.dat
-    *.hdf5
-    *.npz
-    *.xml
-    *.DAT
-    *.INI
-    data_collection*.c
-    test_*.c)
-
-  IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
-    FILE(GLOB_RECURSE TEST_UTILS_SOURCES_TMP ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils/*.[ch])
-    set(TEST_UTILS_SOURCES ${TEST_UTILS_SOURCES} ${TEST_UTILS_SOURCES_TMP})
-    SET(${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
-  ELSE()
-    SET(${_CURRENT_TEST_DIRECTORY}_INCLUDE_DIRECTORIES)
-  ENDIF()
-
-  FOREACH(_F ${_DATA_FILES})
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
-  ENDFOREACH(_F ${_DATA_FILES})
-
-  # configure test CMakeLists.txt (needed for a chdir before running test)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/CMakeListsForTestsv2.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/CMakeLists.txt @ONLY)
-
-  SET(_EXE_LIST_${_CURRENT_TEST_DIRECTORY})
-
-ENDMACRO(BEGIN_TEST2 _D _L)
-
-# Declaration of a siconos test
-MACRO(NEW_TEST)
-  CAR(_EXE ${ARGV})
-  CDR(_SOURCES ${ARGV})
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${_EXE})
-  SET(${_EXE}_FSOURCES)
-  FOREACH(_F ${_SOURCES})
-    LIST(APPEND ${_EXE}_FSOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${_CURRENT_TEST_DIRECTORY}/${_F})
-  ENDFOREACH(_F ${_SOURCES})
- 
-  IF(TEST_MAIN)
-    LIST(APPEND ${_EXE}_FSOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_MAIN})
-  ENDIF(TEST_MAIN)
-
-ENDMACRO(NEW_TEST)
-
-# ====- Generate test file for 3D Fricton Contact Problem =====
-# Source file used to generate tests is fctest.c.in
-# Output file name (in build dir) is test_fc3d_SOLVERNAME_INTERNAL_SOLVERNAME_PARAM_VALUES ... .c
+# ================================================
+# Build a test for a set of data and/or solvers.
 #
-# Usage:
+# It usually needs :
+# - a driver (.c.in file)
+# - a formulation name (eg fc2d, LCP ...)
+# - a 'collection' name, something to identify the set of data files
+# - a list of sources files (in addition to the .c generated from the driver)
 #
-# NEW_FC_TEST(arg[0], arg[1] ...)
-# required args:
-#  0 : input data file name
-#  1 : solver name/id
-# optional args: 
-#  2 : tolerance
-#  3 : max iterations number
-#  4 : internal solver name/id
-#  5 : internal solver tolerance
-#  6 : internal solver, max iterations number
-#  others:
-#  IPARAM idx value ...
-# to set iparam[idx] = value
-# and/or :
-#  DPARAM idx value ...
-#  INTERNAL_IPARAM idx value ...
-#  INTERNAL_DPARAM idx value ...
-MACRO(NEW_FC_TEST)
+# Usage :
+#
+# Process :
+# - generate <COLLECTION><SUFFIX>.c file from <DRIVER>
+#   variables required (@XX@ in .c.in) : PROBLEM_FORMULATION, the formulation and PROBLEM_COLLECTION, the collection.
+# - create the test named <NAME>_<COLLECTION><SUFFIX> from sources and data set.
+function(new_tests_collection)
+  set(oneValueArgs DRIVER NAME COLLECTION SUFFIX FORMULATION HDF5)
+  set(multiValueArgs EXTRA_SOURCES)
+  cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-  # check input file name
-  assert(SOURCE_FILE_NAME)
-  # check prefix for test (fc3d, gfc3d ...)
-  assert(TEST_NAME_PREFIX)
-  
-  SET(TEST_DATA ${ARGV0})
-
-  SET(TEST_SOLVER ${ARGV1})
-
-  SET(TEST_TOLERANCE ${ARGV2})
-  IF(NOT DEFINED TEST_TOLERANCE)
-    SET(TEST_TOLERANCE 0)
-  ENDIF(NOT DEFINED TEST_TOLERANCE)
-  
-  SET(TEST_MAXITER ${ARGV3})
-  IF(NOT DEFINED TEST_MAXITER)
-    SET(TEST_MAXITER 0)
-  ENDIF(NOT DEFINED TEST_MAXITER)
-  
-  SET(TEST_INTERNAL_SOLVER ${ARGV4})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER)
-    SET(TEST_INTERNAL_SOLVER 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER)
-  
-  SET(TEST_INTERNAL_SOLVER_TOLERANCE ${ARGV5})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER_TOLERANCE)
-    SET(TEST_INTERNAL_SOLVER_TOLERANCE 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER_TOLERANCE)
-  
-  SET(TEST_INTERNAL_SOLVER_MAXITER ${ARGV6})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER_MAXITER)
-    SET(TEST_INTERNAL_SOLVER_MAXITER 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER_MAXITER)
-
-
-  #MESSAGE("ARGC = " ${ARGC} )
-  
-  SET(IPARAM_IDX_SIZE 0)
-  SET(DPARAM_IDX_SIZE 0)
-  
-  UNSET(IPARAM_IDX)
-  UNSET(IPARAM_IDX_STR)
-  UNSET(IPARAM_IDX_STR_UNDER)
-
-  UNSET(DPARAM_IDX)
-  UNSET(DPARAM_IDX_STR)
-  UNSET(DPARAM_IDX_STR_UNDER)
-
-  UNSET(IPARAM_VAL)
-  UNSET(IPARAM_VAL_STR)
-  UNSET(IPARAM_VAL_STR_UNDER)
-
-  UNSET(DPARAM_VAL)
-  UNSET(DPARAM_VAL_STR)
-  UNSET(DPARAM_VAL_STR_UNDER)
-
-  SET(INTERNAL_IPARAM_IDX_SIZE 0)
-  SET(INTERNAL_DPARAM_IDX_SIZE 0)
-  
-  UNSET(INTERNAL_IPARAM_IDX)
-  UNSET(INTERNAL_IPARAM_IDX_STR)
-  UNSET(INTERNAL_IPARAM_IDX_STR_UNDER)
-
-  UNSET(INTERNAL_DPARAM_IDX)
-  UNSET(INTERNAL_DPARAM_IDX_STR)
-  UNSET(INTERNAL_DPARAM_IDX_STR_UNDER)
-
-  UNSET(INTERNAL_IPARAM_VAL)
-  UNSET(INTERNAL_IPARAM_VAL_STR)
-  UNSET(INTERNAL_IPARAM_VAL_STR_UNDER)
-
-  UNSET(INTERNAL_DPARAM_VAL)
-  UNSET(INTERNAL_DPARAM_VAL_STR)
-  UNSET(INTERNAL_DPARAM_VAL_STR_UNDER)
-  unset(TEST_NAME_SUFFIX)
-  IF(${ARGC} GREATER 7)
-    #MESSAGE("ARGN : " "${ARGN}")
-    SET(ARGN_COPY ${ARGN})
-    list(REMOVE_AT ARGN_COPY 0 1 2 3 4 5 6)
-    #MESSAGE("ARGN_COPY : " "${ARGN_COPY}")
-
-
-    LIST(LENGTH ARGN_COPY LISTCOUNT)
-    WHILE(LISTCOUNT GREATER 0)
-      LIST(GET ARGN_COPY 0 PARAM_TYPE)
-      LIST(REMOVE_AT ARGN_COPY 0)
-      #MESSAGE("PARAM TYPE : " ${PARAM_TYPE})
-
-      if(NOT ${PARAM_TYPE} STREQUAL "WILL_FAIL")
-	LIST(GET ARGN_COPY 0 PARAM_INDEX)
-	LIST(REMOVE_AT ARGN_COPY 0)
-	#MESSAGE("PARAM INDEX : " ${PARAM_INDEX})
-	
-	LIST(GET ARGN_COPY 0 PARAM_VAL)
-	LIST(REMOVE_AT ARGN_COPY 0)
-	#MESSAGE("PARAM VAL : " ${PARAM_VAL})
-      endif()
-
-      IF ("${PARAM_TYPE}" STREQUAL "IPARAM")
-	MATH(EXPR IPARAM_IDX_SIZE "${IPARAM_IDX_SIZE}+1")
-	LIST(APPEND IPARAM_IDX  ${PARAM_INDEX})
-	LIST(APPEND IPARAM_VAL  ${PARAM_VAL})
-
-      ELSEIF("${PARAM_TYPE}" STREQUAL "DPARAM")
-	MATH(EXPR DPARAM_IDX_SIZE "${DPARAM_IDX_SIZE}+1")
-	LIST(APPEND DPARAM_IDX  ${PARAM_INDEX})	
- 	LIST(APPEND DPARAM_VAL  ${PARAM_VAL})
-      ELSEIF (${PARAM_TYPE} STREQUAL "INTERNAL_IPARAM")
-	MATH(EXPR INTERNAL_IPARAM_IDX_SIZE "${INTERNAL_IPARAM_IDX_SIZE}+1")
-	LIST(APPEND INTERNAL_IPARAM_IDX  ${PARAM_INDEX})	
- 	LIST(APPEND INTERNAL_IPARAM_VAL  ${PARAM_VAL})
-      ELSEIF (${PARAM_TYPE} STREQUAL "INTERNAL_DPARAM")
-	MATH(EXPR INTERNAL_DPARAM_IDX_SIZE "${INTERNAL_DPARAM_IDX_SIZE}+1")
-	LIST(APPEND INTERNAL_DPARAM_IDX  ${PARAM_INDEX})	
- 	LIST(APPEND INTERNAL_DPARAM_VAL  ${PARAM_VAL})
-      ELSEIF (${PARAM_TYPE} STREQUAL "WILL_FAIL")
-	set(TEST_NAME_SUFFIX "_EXPECTED_TO_FAIL")
-      ELSE()
-	MESSAGE(SEND_ERROR "Problem in parameters in NEW_FC_TEST")
-      ENDIF()
-
-      #MESSAGE("IPARAM_IDX : " "${IPARAM_IDX}")
-      #MESSAGE("IPARAM_VAL : " "${IPARAM_VAL}")
-
-      
-      LIST(LENGTH ARGN_COPY LISTCOUNT)
-      #MESSAGE("LISTCOUNT : " ${LISTCOUNT} )
-    ENDWHILE(LISTCOUNT GREATER 0)
-
-    STRING(REPLACE ";" ","  IPARAM_IDX_STR "${IPARAM_IDX}")
-    STRING(REPLACE ";" ","  IPARAM_VAL_STR "${IPARAM_VAL}")
-    STRING(REPLACE ";" "_"  IPARAM_VAL_STR_UNDER "${IPARAM_VAL}")
-    #MESSAGE( "IPARAM_VAL_STR_UNDER :"  "${IPARAM_VAL_STR_UNDER}")
-
-    STRING(REPLACE ";" ","  DPARAM_IDX_STR "${DPARAM_IDX}")
-    STRING(REPLACE ";" ","  DPARAM_VAL_STR "${DPARAM_VAL}")
-    STRING(REPLACE ";" "_"  DPARAM_VAL_STR_UNDER "${DPARAM_VAL}")
-
-    STRING(REPLACE ";" ","  INTERNAL_IPARAM_IDX_STR "${INTERNAL_IPARAM_IDX}")
-    STRING(REPLACE ";" ","  INTERNAL_IPARAM_VAL_STR "${INTERNAL_IPARAM_VAL}")
-    STRING(REPLACE ";" "_"  INTERNAL_IPARAM_VAL_STR_UNDER "${INTERNAL_IPARAM_VAL}")
-    #MESSAGE( "IPARAM_VAL_STR_UNDER :"  "${IPARAM_VAL_STR_UNDER}")
-
-    STRING(REPLACE ";" ","  INTERNAL_DPARAM_IDX_STR "${INTERNAL_DPARAM_IDX}")
-    STRING(REPLACE ";" ","  INTERNAL_DPARAM_VAL_STR "${INTERNAL_DPARAM_VAL}")
-    STRING(REPLACE ";" "_"  INTERNAL_DPARAM_VAL_STR_UNDER "${INTERNAL_DPARAM_VAL}")
-
-
-  ENDIF(${ARGC} GREATER 7)
-
-  STRING(FIND ${TEST_SOLVER}  "SICONOS_FRICTION_3D" Foo)
-  IF (Foo GREATER -1)
-    STRING(REGEX REPLACE "SICONOS_FRICTION_3D" "" TEST_SOLVER_NAME ${TEST_SOLVER})
-    STRING(REGEX REPLACE "SICONOS_FRICTION_3D" "" TEST_INTERNAL_SOLVER_NAME1 ${TEST_INTERNAL_SOLVER})
-  ENDIF()
-  STRING(FIND ${TEST_SOLVER}  "SICONOS_GLOBAL_FRICTION_3D" Foo)
-  IF (Foo GREATER -1)
-    STRING(REGEX REPLACE "SICONOS_GLOBAL_FRICTION_3D" "" TEST_SOLVER_NAME ${TEST_SOLVER})
-    STRING(REGEX REPLACE "SICONOS_GLOBAL_FRICTION_3D" "" TEST_INTERNAL_SOLVER_NAME1 ${TEST_INTERNAL_SOLVER})
-  ENDIF()
-  STRING(FIND ${TEST_SOLVER}  "SICONOS_FRICTION_2D" Foo)
-  IF (Foo GREATER -1)
-    STRING(REGEX REPLACE "SICONOS_FRICTION_2D" "" TEST_SOLVER_NAME ${TEST_SOLVER})
-    STRING(REGEX REPLACE "SICONOS_FRICTION_2D" "" TEST_INTERNAL_SOLVER_NAME1 ${TEST_INTERNAL_SOLVER})
-  ENDIF()
-
-  IF (TEST_INTERNAL_SOLVER_NAME1 STREQUAL "0")
-    SET(TEST_INTERNAL_SOLVER_NAME "")
-  ELSE()
-    SET(TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER_NAME1})
-  ENDIF()
-
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-
-  SET(TEST_NAME "${TEST_NAME_PREFIX}_${TEST_SOLVER_NAME}${TEST_INTERNAL_SOLVER_NAME}_Tol_${TEST_TOLERANCE}_Max_${TEST_MAXITER}_inTol_${TEST_INTERNAL_SOLVER_TOLERANCE}_inMax_${TEST_INTERNAL_SOLVER_MAXITER}")
-
-
-  IF(${IPARAM_IDX_SIZE} GREATER 0)
-    STRING(CONCAT TEST_NAME ${TEST_NAME} "_IPARAM_${IPARAM_VAL_STR_UNDER}")
-  ENDIF()
-  IF(${INTERNAL_IPARAM_IDX_SIZE} GREATER 0)
-    STRING(CONCAT TEST_NAME ${TEST_NAME} "_INTERNAL_IPARAM_${INTERNAL_IPARAM_VAL_STR_UNDER}")
-  ENDIF()
-  IF(${DPARAM_IDX_SIZE} GREATER 0)
-    STRING(CONCAT TEST_NAME ${TEST_NAME} "_DPARAM_${DPARAM_VAL_STR_UNDER}")
-  ENDIF()
-  IF(${INTERNAL_DPARAM_IDX_SIZE} GREATER 0)
-    STRING(CONCAT TEST_NAME ${TEST_NAME} "_INTERNAL_DPARAM_${INTERNAL_DPARAM_VAL_STR_UNDER}")
-  ENDIF()
- 
-
-  STRING(CONCAT TEST_NAME ${TEST_NAME} "_${TEST_DATA_NAME}")
-  if(TEST_NAME_SUFFIX)
-    string(CONCAT TEST_NAME ${TEST_NAME} "_${TEST_NAME_SUFFIX}")
-    set(${TEST_NAME}_PROPERTIES WILL_FAIL TRUE)
-    #MESSAGE( "test name   --> " ${TEST_NAME})
+  # set(TEST_SOLVER SICONOS_${PROBLEM_NAME}_${PROBLEM_SOLVER}) # Required for configure below!
+  # This value is replaced in solver call in .c file.
+  # Generate source file
+  set(generated_driver_name ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}.c)
+  if(BUILD_AS_CPP)
+    set(generated_driver_name ${generated_driver_name}xx)
   endif()
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${PROBLEM_DRIVER}
+    ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name})
 
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/FrictionContact/test/${SOURCE_FILE_NAME} 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+  set(TEST_NAME_PREFIX ${PROBLEM_FORMULATION})
+  set(TEST_COLLECTION ${PROBLEM_COLLECTION})
+  new_test(
+    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name} ${PROBLEM_EXTRA_SOURCES}
+    NAME ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}
+    HDF5 ${PROBLEM_HDF5}
+    )
+ 
+endfunction()
 
-  SET(${TEST_NAME}_FSOURCES)
+# Specialisation of tests_collection to lcp formulation.
+function(new_lcp_tests_collection)
+  set(options)
+  set(oneValueArgs COLLECTION SUFFIX)
+  set(multiValueArgs EXTRA_SOURCES)
+  cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_FC_TEST)
-
-macro(NEW_FC_3D_TEST)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME fc_test.c.in )
-  set(TEST_NAME_PREFIX fc3d)
-  NEW_FC_TEST(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-MACRO(NEW_FC_TEST_1)
-
-  # check input file name
-  assert(SOURCE_FILE_NAME)
-  # check prefix for test (fc3d, gfc3d ...)
-  assert(TEST_NAME_PREFIX)
+  new_tests_collection(
+    DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION ${PROBLEM_COLLECTION}
+    EXTRA_SOURCES ${PROBLEM_EXTRA_SOURCES})
   
-  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} "_" ${TEST_COLLECTION})
-
-  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/FrictionContact/test/${SOURCE_FILE_NAME} 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  SET(${TEST_NAME}_FSOURCES)
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_FC_TEST_1)
-
-
-macro(NEW_FC_3D_TEST_COLLECTION)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME fc_test_collection.c.in )
-  set(TEST_NAME_PREFIX fc3d)
-  set(TEST_COLLECTION ${ARGV0})
-  NEW_FC_TEST_1(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-
-
-macro(NEW_FC_3D_TEST_HDF5)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME fc_test_hdf5.c.in )
-  set(TEST_NAME_PREFIX fc3d)
-  NEW_FC_TEST(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-
-macro(NEW_FC_2D_TEST_COLLECTION)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME fc_test_collection.c.in )
-  set(TEST_NAME_PREFIX fc2d)
-  set(TEST_COLLECTION ${ARGV0})
-  NEW_FC_TEST_1(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-macro(NEW_GFC_3D_TEST)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME gfc3d_test.c.in )
-  set(TEST_NAME_PREFIX gfc3d)
-  NEW_FC_TEST(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-macro(NEW_GFC_3D_TEST_COLLECTION)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME gfc3d_test_collection.c.in )
-  set(TEST_NAME_PREFIX gfc3d)
-  set(TEST_COLLECTION ${ARGV0})
-  NEW_FC_TEST_1(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-macro(NEW_RFC_3D_TEST_COLLECTION)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME rfc3d_test_collection.c.in )
-  set(TEST_NAME_PREFIX rolling_fc3d)
-  set(TEST_COLLECTION ${ARGV0})
-  NEW_FC_TEST_1(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-MACRO(NEW_LCP_TEST_1)
-
-  # check input file name
-  assert(SOURCE_FILE_NAME)
-  assert(TEST_NAME_PREFIX)
-  
-  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} "_" ${TEST_COLLECTION})
-
-  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/LCP/test/${SOURCE_FILE_NAME} 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  SET(${TEST_NAME}_FSOURCES)
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_LCP_TEST_1)
-
-MACRO(NEW_LCP_TEST_COLLECTION)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME lcp_test_collection.c.in )
-  set(TEST_NAME_PREFIX lcp)
-  set(TEST_COLLECTION ${ARGV0})
-  NEW_LCP_TEST_1(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-
-MACRO(NEW_RELAY_TEST_1)
-
-  # check input file name
-  assert(SOURCE_FILE_NAME)
-  assert(TEST_NAME_PREFIX)
-  
-  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} "_" ${TEST_COLLECTION})
-
-  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/Relay/test/${SOURCE_FILE_NAME} 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  SET(${TEST_NAME}_FSOURCES)
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_RELAY_TEST_1)
-
-MACRO(NEW_RELAY_TEST_COLLECTION)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME relay_test_collection.c.in )
-  set(TEST_NAME_PREFIX relay)
-  set(TEST_COLLECTION ${ARGV0})
-  NEW_RELAY_TEST_1(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-MACRO(NEW_NCP_TEST)
-  SET(FILE_TO_CONF ${ARGV0})
-  SET(TEST_SOLVER ${ARGV1})
-  STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  SET(TEST_EXE ${TEST_SOLVER_NAME}-${FILE_TO_CONF})
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}-${FILE_TO_CONF}")
-
-  SET(${TEST_EXE}_FSOURCES)
-
-  SET(SOLVER_ID ${TEST_SOLVER})
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_CURRENT_TEST_DIRECTORY}/${FILE_TO_CONF}.c.in
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_EXE}.c)
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_EXE})
-  LIST(APPEND ${TEST_EXE}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_EXE}.c)
-  SET(${TEST_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY} )
-  SET(${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY})
-ENDMACRO(NEW_NCP_TEST)
-
-MACRO(NEW_GMP_TEST_1)
-
-  # check input file name
-  assert(SOURCE_FILE_NAME)
-  assert(TEST_NAME_PREFIX)
-  
-  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} "_" ${TEST_COLLECTION})
-
-  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/GenericMechanical/test/${SOURCE_FILE_NAME} 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  SET(${TEST_NAME}_FSOURCES)
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_GMP_TEST_1)
-
-macro(NEW_GMP_TEST_COLLECTION)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME gmp_test_collection.c.in )
-  set(TEST_NAME_PREFIX gmp)
-  set(TEST_COLLECTION ${ARGV0})
-  NEW_GMP_TEST_1(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-
-
-# add subdirs (i.e. CMakeLists.txt generated for tests) to the build
-MACRO(END_TEST)
-  ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY} ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY})
-ENDMACRO(END_TEST)
-
+endfunction()
 
 # Build plugins required for python tests
-macro(build_plugin plug)
-  get_filename_component(plug_name ${plug} NAME_WE)
-  add_library(${plug_name} MODULE ${plug})
-  target_include_directories(${plug_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/)
+function(build_plugin)
+  set(oneValueArgs FILE)
+  set(multiValueArgs DEPS)
+  cmake_parse_arguments(plug "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  get_filename_component(plug_name ${plug_FILE} NAME_WE)
+
+  add_library(${plug_name} MODULE ${plug_FILE})
+  target_include_directories(${plug_name} PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/>)
+
+  # link with extra deps.
+  foreach(dep IN LISTS plug_DEPS)
+    target_link_libraries(${plug_name} PRIVATE ${dep})
+  endforeach()
 
   set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_target_properties(${plug_name} PROPERTIES PREFIX "")
-  add_dependencies(${COMPONENT} ${plug_name})
   if(NOT WITH_CXX)
-    set_source_files_properties(${plug} PROPERTIES LANGUAGE C)
+    set_source_files_properties(${plug_FILE} PROPERTIES LANGUAGE C)
   endif(NOT WITH_CXX)
   if(WITH_MPI)
     # Note FP : temporary fix, to deal with PRIVATE deps of some components.
     # This will be reviewed later.
     target_include_directories(${plug_name} PRIVATE ${MPI_C_INCLUDE_DIRS})
   endif()
-endmacro()
-
-# ----------------------------------------
-# Prepare python tests for the current
-# component
-# Usage:
-#   build_python_tests(path_to_tests)
-#
-# path_to_tests is relative to the current source dir.
-# Most of the time, path_to_tests = 'tests'.
-# For instance, in mechanics, tests are called in CMakeLists.txt
-# in swig, current source dir is thus source_dir/mechanics/swig
-# and source_dir/mechanics/swig/tests contains all the python files for tests.
-#
-# This routine copy the directory of tests to binary dir to allow 'py.test' run in the build.
-# 
-# binary dir will then look like :
-# wrap/siconos
-# wrap/siconos/mechanics
-# wrap/siconos/mechanics/tests
-#
-# and running py.tests in wrap dir will end up with a run of
-# all mechanics tests.
-macro(build_python_tests)
-  if(WITH_${COMPONENT}_TESTING)
-    # copy data files
-    #file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${_D}/data ${SICONOS_SWIG_ROOT_DIR}/${_D}/data)
-    
-    # build plugins, if any
-    # Note : all built libraries are saved in SICONOS_SWIG_ROOT_DIR/plugins
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins)
-      file(GLOB plugfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/*.cpp)
-      foreach(plug ${plugfiles})
-	build_plugin(${plug})
-      endforeach()
-    endif()
-    
-    # copy test dir to binary dir (inside siconos package)
-    # ---> allows py.test run in binary dir
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/data)
-      file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/data
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
-      foreach(datafile ${data4tests})
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/data/${datafile}
-	  ${SICONOS_SWIG_ROOT_DIR}/tests/data/${datafile} COPYONLY)
-      endforeach()
-    endif()
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD)
-      file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/*)
-      foreach(datafile ${data4tests})
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/${datafile}
-	  ${SICONOS_SWIG_ROOT_DIR}/tests/CAD/${datafile} COPYONLY)
-      endforeach()
-    endif()
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-      file(GLOB testfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
-      foreach(excluded_test ${${COMPONENT}_python_excluded_tests})
-	list(REMOVE_ITEM testfiles ${excluded_test})
-      endforeach()
-      foreach(file ${testfiles})
-	get_filename_component(testname ${file} NAME_WE)
-	get_filename_component(exename ${file} NAME)
-	# Each file is copy to siconos/tests.
-	# Maybe we can create a 'tests' dir for each subpackage?
-	# --> Easier to deal with plugins and data if only one package
-	configure_file(${file} ${SICONOS_SWIG_ROOT_DIR}/tests COPYONLY)
-	set(name "python_${testname}")
-	set(exename ${SICONOS_SWIG_ROOT_DIR}/tests/${exename})
-	set_ldlibpath()
-	add_python_test(${name}, ${exename})
-      endforeach()
-    endif()
-  endif()
-endmacro()
+endfunction()
 
 macro(set_ldlibpath)
   # In certain cases, ex. no rpath, or running tests with plugins,
@@ -887,7 +377,7 @@ macro(set_ldlibpath)
   # LD_LIBRARY_PATH variable.
   SET(LDLIBPATH)
   if (CMAKE_SKIP_RPATH)
-    FOREACH(_C ${COMPONENTS})
+    foreach(_C IN LISTS COMPONENTS)
       LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
     ENDFOREACH()
   else()
@@ -916,13 +406,121 @@ macro(set_ldlibpath)
   endif()
 endmacro()
 
-# Declaration of a siconos test based on python bindings
-macro(add_python_test test_name test_file)
-  add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
+# ----------------------------------------
+# Declaration of a siconos test run with python.
+#
+# Usage :
+#
+#  add_pythons_test(<name> <file>)
+#
+# Result :
+#
+#  Add a test :
+#  - named <name>
+#  - that will be run using python
+#  - with PYTHONPATH set to ${CMAKE_BINARY_DIR}/wrap
+# 
+function(add_python_test test_name test_file)
+  # add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
+  add_test(${test_name} ${PYTHON_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${test_file})
   set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
   set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/wrap")
   if(LDLIBPATH)
     set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
   endif()
-endmacro()
+endfunction()
+
+
+# ----------------------------------------
+# Prepare python tests for the current
+# component
+# Usage:
+#   build_python_tests(path_to_tests)
+#
+# path_to_tests is relative to the current source dir.
+# Most of the time, path_to_tests = 'tests'.
+# For instance, in mechanics, tests are called in CMakeLists.txt
+# in swig, current source dir is thus source_dir/mechanics/swig
+# and source_dir/mechanics/swig/tests contains all the python files for tests.
+#
+# This routine copy the directory of tests to binary dir to allow 'py.test' run in the build.
+# 
+# binary dir will then look like :
+# wrap/siconos
+# wrap/siconos/mechanics
+# wrap/siconos/mechanics/tests
+#
+# and running py.tests in wrap dir will end up with a run of
+# all mechanics tests.
+#
+# Usage :
+# build_python_tests(DEPS <list of targets> EXCLUDE <list of python files>)
+#
+#  * DEPS : list of targets that must be linked with c/c++ plugins used by python tests
+#  * EXCLUDE : list of python files (path relative to current source dir) that
+#    must not be run as tests.
+# 
+# both DEPS and EXCLUDE are optional.
+#
+function(build_python_tests)
+  set(multiValueArgs DEPS EXCLUDE)
+  cmake_parse_arguments(test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  
+  # build plugins, if any
+  # Note : all built libraries are saved in SICONOS_SWIG_ROOT_DIR/plugins
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins)
+    file(GLOB plugfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/*.cpp)
+    foreach(plug ${plugfiles})
+      build_plugin(FILE ${plug} DEPS ${test_DEPS})
+    endforeach()
+  endif()
+    
+  # copy test dir to binary dir (inside siconos package)
+  # ---> allows py.test run in binary dir
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/data)
+    file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/data
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
+    foreach(datafile ${data4tests})
+      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/data/${datafile}
+	${SICONOS_SWIG_ROOT_DIR}/tests/data/${datafile} COPYONLY)
+    endforeach()
+  endif()
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD)
+    file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/*)
+    foreach(datafile ${data4tests})
+      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/${datafile}
+	${SICONOS_SWIG_ROOT_DIR}/tests/CAD/${datafile} COPYONLY)
+    endforeach()
+  endif()
+
+  if(CROSSCOMPILING_LINUX_TO_WINDOWS)
+    set(EMULATOR "wine")
+    set(DRIVE_LETTER "Z:")
+  else()
+    set(EMULATOR "")
+  endif()
+
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    file(GLOB testfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
+    foreach(excluded_test ${test_EXCLUDE})
+      list(REMOVE_ITEM testfiles ${CMAKE_CURRENT_SOURCE_DIR}/${excluded_test})
+    endforeach()
+    foreach(file ${testfiles})
+      get_filename_component(testname ${file} NAME_WE)
+      get_filename_component(exename ${file} NAME)
+      # Each file is copied into siconos/tests.
+      configure_file(${file} ${SICONOS_SWIG_ROOT_DIR}/tests COPYONLY)
+      set(name "python_${testname}")
+      set(exename ${SICONOS_SWIG_ROOT_DIR}/tests/${exename})
+      set_ldlibpath()
+      add_python_test(${name} ${exename})
+    endforeach()
+  endif()
+endfunction()
+
+if(WITH_TESTING)
+  set_ldlibpath()
+endif()

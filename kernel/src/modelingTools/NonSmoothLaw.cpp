@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 
 #include "NonSmoothLaw.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 
 
 // Constructors
@@ -32,7 +32,7 @@ NonSmoothLaw::~NonSmoothLaw()
 
 bool NonSmoothLaw::isVerified() const
 {
-  RuntimeException::selfThrow("NonSmoothLaw::isVerified, not yet implemented!");
+  THROW_EXCEPTION("NonSmoothLaw::isVerified, not yet implemented!");
   return false;
 }
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,6 +147,11 @@ public:
    * \param nb number of non smooth problem
    */
   TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb =0);
+
+  /** insert an Integrator into the simulation list of integrators
+   *  \param osi the OneStepIntegrator to add
+   */
+  virtual void insertIntegrator(SP::OneStepIntegrator osi);
 
   /** Destructor.
   */
@@ -329,8 +334,9 @@ public:
   /** get the maximum number of Newton iteration
    *  \return maximum number of Newton solver iterations
    */
-  double newtonMaxIteration()
+  unsigned int newtonMaxIteration()
   {
+
     return _newtonMaxIteration;
   };
 

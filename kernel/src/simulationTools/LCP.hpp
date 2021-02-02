@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,20 +67,28 @@ protected:
 
 public:
 
-  /** Constructor with Numerics solver id (default = Lemke)
-      \param numericsSolverId id of numerics solver
-  */
+  /** constructor from numerics solver id
+   *  \param numericsSolverId id of numerics solver, default =  SICONOS_LCP_LEMKE
+   */
   LCP(int numericsSolverId = SICONOS_LCP_LEMKE);
 
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set,
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  LCP(SP::SolverOptions options);
+
   /** destructor */
-  ~LCP();
+  ~LCP(){};
 
   /** Call numerics solver.
       \return int information about the solver convergence
       (output from numerics driver, linearComplementarity_driver, check numerics doc. for details).
    */
   int numericsCompute();
-  
+
   /** Compute the unknowns z and w and update the corresponding Interactions (y and lambda )
       \param time : current time
       \return int, information about the solver convergence
@@ -88,6 +96,9 @@ public:
    */
   int compute(double time);
 
+
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
   /* visitors hook */
   ACCEPT_STD_VISITORS();
 

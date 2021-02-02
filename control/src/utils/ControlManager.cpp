@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@
 
 ControlManager::ControlManager(SP::Simulation sim): _sim(sim)
 {
-  if (!_sim)
-    RuntimeException::selfThrow("ControlManager::constructor failed. The given Simulation is a NULL pointer.");
+  if(!_sim)
+    THROW_EXCEPTION("ControlManager::constructor failed. The given Simulation is a NULL pointer.");
 }
 
 ControlManager::~ControlManager()
@@ -53,23 +53,23 @@ void ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)
   DEBUG_BEGIN("ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)\n")
   // Initialize all the Sensors and insert their events into the
   // EventsManager of the Simulation.
-  for (SensorsIterator itS = _allSensors.begin();
-       itS != _allSensors.end(); ++itS)
+  for(SensorsIterator itS = _allSensors.begin();
+      itS != _allSensors.end(); ++itS)
   {
     (*itS)->initialize(nsds);
   }
   // Initialize all the Actuators and insert their events into the
   // EventsManager of the Simulation.
-  for (ActuatorsIterator itA = _allActuators.begin();
-       itA != _allActuators.end(); ++itA)
+  for(ActuatorsIterator itA = _allActuators.begin();
+      itA != _allActuators.end(); ++itA)
   {
     (*itA)->initialize(nsds,*_sim);
   }
 
   // Initialize all the Observer and insert their events into the
   // EventsManager of the Simulation.
-  for (ObserversIterator itO = _allObservers.begin();
-       itO != _allObservers.end(); ++itO)
+  for(ObserversIterator itO = _allObservers.begin();
+      itO != _allObservers.end(); ++itO)
   {
     (*itO)->initialize(nsds,*_sim);
   }
@@ -78,9 +78,9 @@ void ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)
   //OSISet& allOSI = *m.simulation()->oneStepIntegrators();
   OSISet& allOSI = *_sim->oneStepIntegrators();
   DynamicalSystemsGraph& DSG0 = *nsds.topology()->dSG(0);
-  for (OSIIterator itosi = allOSI.begin(); itosi != allOSI.end(); ++itosi)
+  for(OSIIterator itosi = allOSI.begin(); itosi != allOSI.end(); ++itosi)
   {
-    if ((*itosi)->extraAdditionalTerms())
+    if((*itosi)->extraAdditionalTerms())
     {
       // would be nice to check is those are for Control
       (*itosi)->extraAdditionalTerms()->init(DSG0, nsds, _sim->eventsManager()->timeDiscretisation());
@@ -108,18 +108,18 @@ SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t
 
 SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor)
 {
-  if (!sensor)
-    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
+  if(!sensor)
+    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
   SP::Actuator act = (* (_allActuators.insert(regActuator.instantiate(type, sensor))).first);
-  linkActuatorSimulation(act, td); 
+  linkActuatorSimulation(act, td);
   return act;
 }
 
 SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const NonSmoothDynamicalSystem& nsds)
 {
-  if (!sensor)
-    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
+  if(!sensor)
+    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
   SP::Actuator act = *(_allActuators.insert(regActuator.instantiate(type, sensor))).first;
   linkActuatorSimulation(act, td);
@@ -129,8 +129,8 @@ SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisati
 
 SP::Observer ControlManager::addObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
-  if (!sensor)
-    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
+  if(!sensor)
+    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
   ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
   SP::Observer obs = (* (_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first);
   linkObserverSimulation(obs, td);
@@ -148,16 +148,16 @@ SP::Observer ControlManager::addAndRecordObserver(int type, SP::TimeDiscretisati
 
 void ControlManager::addSensorPtr(SP::Sensor s, SP::TimeDiscretisation td)
 {
-  if (!s)
-    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
+  if(!s)
+    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
   _allSensors.insert(s);
   linkSensorSimulation(s, td);
 }
 
-void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds )
+void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
 {
-  if (!s)
-    RuntimeException::selfThrow("ControlManager::addActuator - sensor is not valid !");
+  if(!s)
+    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
   _allSensors.insert(s);
   linkSensorSimulation(s, td);
   s->initialize(nsds);
@@ -165,16 +165,16 @@ void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation 
 
 void ControlManager::addActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td)
 {
-  if (!act)
-    RuntimeException::selfThrow("ControlManager::addActuator - actuator is not valid !");
+  if(!act)
+    THROW_EXCEPTION("ControlManager::addActuator - actuator is not valid !");
   _allActuators.insert(act);
   linkActuatorSimulation(act, td);
 }
 
-void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds )
+void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
 {
-  if (!act)
-    RuntimeException::selfThrow("ControlManager::addActuator - actuator is not valid !");
+  if(!act)
+    THROW_EXCEPTION("ControlManager::addActuator - actuator is not valid !");
   _allActuators.insert(act);
   linkActuatorSimulation(act, td);
   act->initialize(nsds,*_sim);
@@ -182,16 +182,16 @@ void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretis
 
 void ControlManager::addObserverPtr(SP::Observer obs, SP::TimeDiscretisation td)
 {
-  if (!obs)
-    RuntimeException::selfThrow("ControlManager::addActuator - observer is not valid !");
+  if(!obs)
+    THROW_EXCEPTION("ControlManager::addActuator - observer is not valid !");
   _allObservers.insert(obs);
   linkObserverSimulation(obs, td);
 }
 
 void ControlManager::addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
 {
-  if (!obs)
-    RuntimeException::selfThrow("ControlManager::addActuator - observer is not valid !");
+  if(!obs)
+    THROW_EXCEPTION("ControlManager::addActuator - observer is not valid !");
   _allObservers.insert(obs);
   linkObserverSimulation(obs, td);
   obs->initialize(nsds,*_sim);
@@ -223,13 +223,13 @@ void ControlManager::display() const
   std::cout << "=========> ControlManager " ;
   std::cout << "It handles the following objects: " <<std::endl;
   SensorsIterator itS;
-  for (itS = _allSensors.begin(); itS != _allSensors.end(); ++itS)
+  for(itS = _allSensors.begin(); itS != _allSensors.end(); ++itS)
     (*itS)->display();
   ActuatorsIterator itA;
-  for (itA = _allActuators.begin(); itA != _allActuators.end(); ++itA)
+  for(itA = _allActuators.begin(); itA != _allActuators.end(); ++itA)
     (*itA)->display();
   ObserversIterator itO;
-  for (itO = _allObservers.begin(); itO != _allObservers.end(); ++itO)
+  for(itO = _allObservers.begin(); itO != _allObservers.end(); ++itO)
     (*itO)->display();
   std::cout << "==========" << std::endl;
   std::cout << std::endl;

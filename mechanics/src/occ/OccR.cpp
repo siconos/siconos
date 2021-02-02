@@ -3,12 +3,12 @@
 #include "OccContactShape.hpp"
 #include "ContactShapeDistance.hpp"
 #include "WhichGeometer.hpp"
-#include "RuntimeException.hpp"
+#include "SiconosException.hpp"
 #include <limits>
 #include <iostream>
 #include <boost/typeof/typeof.hpp>
 
-#undef DEBUG_MESSAGES
+// #define  DEBUG_MESSAGES
 #include "debug.h"
 
 OccR::OccR(const ContactPoint& contact1,
@@ -21,7 +21,8 @@ OccR::OccR(const ContactPoint& contact1,
   _offset1(0.),
   _offset2(0.)
 {
-  switch (Type::value(distance_calculator))
+  DEBUG_BEGIN("OccR::OccR(const ContactPoint& contact1, const ContactPoint& contact2,                         const DistanceCalculatorType& distance_calculator)\n");
+  switch(Type::value(distance_calculator))
   {
   case Type::OccDistanceType:
     this->_geometer = ask<WhichGeometer<OccDistanceType> >(contact1.contactShape());
@@ -30,16 +31,21 @@ OccR::OccR(const ContactPoint& contact1,
     this->_geometer = ask<WhichGeometer<CadmbtbDistanceType> >(contact1.contactShape());
     break;
   default:
-    RuntimeException::selfThrow("OccR: Unknown distance calculator");
+    THROW_EXCEPTION("OccR: Unknown distance calculator");
   }
   this->_contact2.contactShape().accept(*this->_geometer);
+    
+  DEBUG_END("OccR::OccR(const ContactPoint& contact1, const ContactPoint& contact2,                         const DistanceCalculatorType& distance_calculator)\n");
 }
 
 
-void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void OccR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 {
+  DEBUG_BEGIN("OccR::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
   this->_contact2.contactShape().accept(*this->_geometer);
 
+  
+  
   ContactShapeDistance& dist = this->_geometer->answer;
 
   DEBUG_PRINTF("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", dist.value,
@@ -61,5 +67,9 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
   dist.value -= (_offset1+_offset2);
 
   y.setValue(0, dist.value);
+
+  DEBUG_EXPR(y.display(););
+  DEBUG_EXPR(_Nc->display(););
+  DEBUG_END("OccR::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
 
 }

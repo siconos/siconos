@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ template<class Seq> void purge(Seq& c)
   for (i = c.begin(); i != c.end(); ++i)
   {
     delete *i;
-    *i = NULL;
+    *i = nullptr;
   }
 }
 
@@ -69,7 +69,7 @@ template<class InpIt> void purge(InpIt begin, InpIt end)
   while (begin != end)
   {
     delete *begin;
-    *begin = NULL;
+    *begin = nullptr;
     ++begin;
   }
 }
@@ -86,7 +86,7 @@ template<class Seq> void purge(Seq& c, const std::vector<bool>& isAllocatedIn)
   for (i = c.begin(); i != c.end(); ++i)
   {
     if (*it ++) delete *i;
-    *i = NULL;
+    *i = nullptr;
   }
 }
 
@@ -100,7 +100,7 @@ template<class InpIt> void purge(InpIt begin, InpIt end, const std::vector<bool>
   while (begin != end)
   {
     if (*it ++) delete *begin;
-    *begin = NULL;
+    *begin = nullptr;
     ++begin;
   }
 }
@@ -120,9 +120,9 @@ template <class T, class SPT, class U> void setObject(SPT& obj, const U& val)
 #include "SiconosPointers.hpp"
 /** Graph -> Set conversion */
 template <class S, class G>
-std11::shared_ptr<S> setOfGraph(std11::shared_ptr<G> g)
+std::shared_ptr<S> setOfGraph(std::shared_ptr<G> g)
 {
-  std11::shared_ptr<S> r;
+  std::shared_ptr<S> r;
   r.reset(new S());
   for (typename G::VIterator vi = g->begin(); vi != g->end(); ++vi)
   {
@@ -151,7 +151,7 @@ std11::shared_ptr<S> setOfGraph(std11::shared_ptr<G> g)
 template<typename Iter>
 void print(Iter first, Iter last, const char* nm = "", const char * sep = "\n", std::ostream& os =  std::cout)
 {
-  if (nm != NULL && *nm != '\0')
+  if (nm != nullptr && *nm != '\0')
     os << nm << ": " << sep;
   typedef typename std::iterator_traits<Iter>::value_type T;
   std::copy(first, last, std::ostream_iterator<T>(os, sep));

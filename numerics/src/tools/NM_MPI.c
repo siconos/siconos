@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ MPI_Comm NM_MPI_comm(NumericsMatrix* A)
 {
   assert(A);
 
-  if (NM_internalData(A)->mpi_comm == MPI_COMM_NULL)
+  if(NM_internalData(A)->mpi_comm == MPI_COMM_NULL)
   {
-    if (verbose)
+    if(verbose)
     {
       fprintf(stderr, "siconos/numerics: warning, MPI communicator has not been initialized,\n");
       fprintf(stderr, "siconos/numerics: MPI_COMM_WORLD will be used.\n");
@@ -62,7 +62,7 @@ void NM_MPI_copy(const NumericsMatrix* A, NumericsMatrix* B)
   assert(A);
   assert(B);
 #ifdef SICONOS_HAS_MPI
-  if (A->internalData && A->internalData->mpi_comm)
+  if(A->internalData && A->internalData->mpi_comm)
   {
     NM_MPI_set_comm(B, A->internalData->mpi_comm);
   }

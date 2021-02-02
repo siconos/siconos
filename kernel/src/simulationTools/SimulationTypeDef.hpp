@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,11 @@
 #define SimulationTypedef_H
 
 #include <vector>
-#include <map>
 #include <set>
-#include "SiconosVector.hpp"
-#include "SiconosPointers.hpp"
-
-/** double precision machine */
-#define MACHINE_PREC std::numeric_limits<double>::epsilon()
+#include "SiconosPointers.hpp" // for TYPEDEF_SPTR
+#include "SiconosFwd.hpp" // for SP::OneStepIntegrator, ...
 
 // ================== Objects to handle DS ==================
-
-/** Map of SP::SimpleMatrix; used only in MoreauJeanGOSI. key = the number(id) of the related DS*/
-typedef std::map<unsigned int, SP::SimpleMatrix> MapOfDSMatrices;
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;

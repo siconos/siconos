@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ enum RELAY_SOLVER
   SICONOS_RELAY_ENUM = 301,
   SICONOS_RELAY_PATH = 302,
   SICONOS_RELAY_LEMKE = 303,
-  SICONOS_RELAY_LATIN = 304,
-  SICONOS_RELAY_NLGS = 305,
   SICONOS_RELAY_AVI_CAOFERRIS = 306,
   SICONOS_RELAY_AVI_CAOFERRIS_TEST = 307
 };
@@ -40,9 +38,7 @@ enum RELAY_SOLVER
 extern const char* const   SICONOS_RELAY_PGS_STR;
 extern const char* const   SICONOS_RELAY_PATH_STR;
 extern const char* const   SICONOS_RELAY_ENUM_STR;
-extern const char* const   SICONOS_RELAY_NLGS_STR;
 extern const char* const   SICONOS_RELAY_LEMKE_STR;
-extern const char* const   SICONOS_RELAY_LATIN_STR;
 extern const char* const   SICONOS_RELAY_AVI_CAOFERRIS_STR;
 extern const char* const   SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR;
 #endif

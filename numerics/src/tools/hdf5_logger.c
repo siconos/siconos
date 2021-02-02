@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,22 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <math.h>
 
-#include "CSparseMatrix_internal.h"
 #include "hdf5_logger.h"
-#include "NumericsSparseMatrix.h"
+#include <stdio.h>  // for fprintf, stderr
+#include "SiconosConfig.h" // for WITH_HDF5  // IWYU pragma: keep
 
 #ifdef WITH_HDF5
+
+#include "assert.h"
+#include <stdlib.h>
+#include <math.h>
+#include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
+//#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
+
+
 
 bool SN_logh5_check_gzip(void)
 {
@@ -31,15 +39,17 @@ bool SN_logh5_check_gzip(void)
   unsigned filter_info;
 
   htri_t avail = H5Zfilter_avail(H5Z_FILTER_DEFLATE);
-  if (!avail) {
-    printf ("gzip filter not available.\n");
+  if(!avail)
+  {
+    printf("gzip filter not available.\n");
     return false;
   }
 
   herr_t status = H5Zget_filter_info(H5Z_FILTER_DEFLATE, &filter_info);
-  if ( !(filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED) ||
-      !(filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED) ) {
-    printf ("gzip filter not available for encoding and decoding.\n");
+  if(!(filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED) ||
+      !(filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED))
+  {
+    printf("gzip filter not available for encoding and decoding.\n");
     return false;
   }
 
@@ -55,7 +65,7 @@ SN_logh5* SN_logh5_init(const char* filename, const unsigned iter_max)
   assert(iter_max > 0);
 
   SN_logh5* logger = (SN_logh5*) malloc(sizeof(SN_logh5));
-  if (!logger)
+  if(!logger)
   {
     fprintf(stderr, "SN_logh5_init :: could not allocate a logger struct!\n");
     exit(EXIT_FAILURE);
@@ -78,7 +88,7 @@ bool SN_logh5_end(SN_logh5* logger)
   assert(logger);
   herr_t status = 0;
 
-  if (logger->group)
+  if(logger->group)
   {
     fprintf(stderr, "SN_logh5_end :: group pointer was not 0! Most likely the last opened group was not properly closed\n");
     SN_logh5_end_iter(logger);
@@ -99,15 +109,15 @@ bool SN_logh5_new_iter(unsigned iter, SN_logh5* logger)
   assert(logger);
   herr_t status = 0;
 
-  if (logger->group)
+  if(logger->group)
   {
     fprintf(stderr, "SN_logh5_new_iter :: group pointer was not 0! Most likely the last opened group was not properly closed\n");
-    status = H5Gclose (logger->group);
+    status = H5Gclose(logger->group);
   }
 
   snprintf(logger->itername, logger->itername_len, "i-%d", iter);
 
-  logger->group = H5Gcreate (logger->file, logger->itername, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  logger->group = H5Gcreate(logger->file, logger->itername, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
   return !status ? true : false;
 }
@@ -117,13 +127,13 @@ bool SN_logh5_end_iter(SN_logh5* logger)
   assert(logger);
   assert(logger->group);
 
-  if (!logger->group)
+  if(!logger->group)
   {
     fprintf(stderr, "SN_logh5_end_iter :: group pointer is NULL !!\n");
     return false;
   }
 
-  herr_t status = H5Gclose (logger->group);
+  herr_t status = H5Gclose(logger->group);
   logger->group = 0;
 
   return status;
@@ -132,9 +142,9 @@ bool SN_logh5_end_iter(SN_logh5* logger)
 static bool SN_logh5_write_dset(hid_t loc_id, const char* name, hid_t type, hid_t space, void* val)
 {
   herr_t status;
-  hid_t dset = H5Dcreate (loc_id, name, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  status = H5Dwrite (dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, val);
-  status = H5Dclose (dset);
+  hid_t dset = H5Dcreate(loc_id, name, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  status = H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, val);
+  status = H5Dclose(dset);
 
   return !status ? true : false;
 }
@@ -142,9 +152,9 @@ static bool SN_logh5_write_dset(hid_t loc_id, const char* name, hid_t type, hid_
 static bool SN_logh5_write_attr(hid_t loc_id, const char* name, hid_t type, hid_t space, void* val)
 {
   herr_t status;
-  hid_t dset = H5Acreate (loc_id, name, type, space, H5P_DEFAULT, H5P_DEFAULT);
-  status = H5Awrite (dset, type, val);
-  status = H5Aclose (dset);
+  hid_t dset = H5Acreate(loc_id, name, type, space, H5P_DEFAULT, H5P_DEFAULT);
+  status = H5Awrite(dset, type, val);
+  status = H5Aclose(dset);
 
   return !status ? true : false;
 }
@@ -171,21 +181,21 @@ bool SN_logh5_scalar_integer(ptrdiff_t val, const char* name, hid_t loc_id)
   hid_t type;
   herr_t status;
 
-  switch (sizeof(ptrdiff_t))
+  switch(sizeof(ptrdiff_t))
   {
-    case sizeof(int32_t):
-    {
-      type = H5T_NATIVE_INT_LEAST32;
-      break;
-    }
-    case sizeof(int64_t):
-    {
-      type = H5T_NATIVE_INT_LEAST64;
-      break;
-    }
-    default:
-      fprintf(stderr, "logh5 :: unsupported integer length %lu\n", sizeof(ptrdiff_t));
-      return false;
+  case sizeof(int32_t):
+  {
+    type = H5T_NATIVE_INT_LEAST32;
+    break;
+  }
+  case sizeof(int64_t):
+  {
+    type = H5T_NATIVE_INT_LEAST64;
+    break;
+  }
+  default:
+    fprintf(stderr, "logh5 :: unsupported integer length %lu\n", sizeof(ptrdiff_t));
+    return false;
   }
 
   hid_t space = H5Screate(H5S_SCALAR);
@@ -203,21 +213,21 @@ bool SN_logh5_scalar_uinteger(size_t val, const char* name, hid_t loc_id)
   hid_t type;
   herr_t status;
 
-  switch (sizeof(size_t))
+  switch(sizeof(size_t))
   {
-    case sizeof(int32_t):
-    {
-      type = H5T_NATIVE_UINT_LEAST32;
+  case sizeof(int32_t):
+  {
+    type = H5T_NATIVE_UINT_LEAST32;
     break;
-    }
-    case sizeof(int64_t):
-    {
-      type = H5T_NATIVE_UINT_LEAST64;
-      break;
-    }
-    default:
-      fprintf(stderr, "logh5 :: unsupported unsigned integer length %lu\n", sizeof(size_t));
-      return false;
+  }
+  case sizeof(int64_t):
+  {
+    type = H5T_NATIVE_UINT_LEAST64;
+    break;
+  }
+  default:
+    fprintf(stderr, "logh5 :: unsupported unsigned integer length %lu\n", sizeof(size_t));
+    return false;
   }
 
   hid_t space = H5Screate(H5S_SCALAR);
@@ -235,21 +245,21 @@ bool SN_logh5_attr_uinteger(size_t val, const char* name, hid_t loc_id)
   hid_t type;
   herr_t status;
 
-  switch (sizeof(size_t))
+  switch(sizeof(size_t))
   {
-    case sizeof(int32_t):
-    {
-      type = H5T_NATIVE_UINT_LEAST32;
+  case sizeof(int32_t):
+  {
+    type = H5T_NATIVE_UINT_LEAST32;
     break;
-    }
-    case sizeof(int64_t):
-    {
-      type = H5T_NATIVE_UINT_LEAST64;
-      break;
-    }
-    default:
-      fprintf(stderr, "logh5 :: unsupported unsigned integer length %lu\n", sizeof(size_t));
-      return false;
+  }
+  case sizeof(int64_t):
+  {
+    type = H5T_NATIVE_UINT_LEAST64;
+    break;
+  }
+  default:
+    fprintf(stderr, "logh5 :: unsupported unsigned integer length %lu\n", sizeof(size_t));
+    return false;
   }
 
   hid_t space = H5Screate(H5S_SCALAR);
@@ -284,7 +294,7 @@ bool SN_logh5_csparse(CSparseMatrix* cs, const char* name, hid_t loc_id)
 
   bool result = false;
 
-  if (name)
+  if(name)
   {
     /* Create subgroup here */
     mat_group = H5Gcreate(loc_id, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -300,16 +310,16 @@ bool SN_logh5_csparse(CSparseMatrix* cs, const char* name, hid_t loc_id)
   result = SN_logh5_scalar_integer(cs->n, "n", mat_group);
   result = SN_logh5_scalar_integer(cs->nz, "nz", mat_group);
 
-  if (sizeof(CS_INT) == sizeof(int64_t))
+  if(sizeof(CS_INT) == sizeof(int64_t))
   {
     result = SN_logh5_vec_int64(cs->n+1, (int64_t*)cs->p, "p", mat_group);
     result = SN_logh5_vec_int64(cs->p[cs->n], (int64_t*)cs->i, "i", mat_group);
   }
-/*   else if (sizeof(CS_INT) == sizeof(int32_t))
-  {
-    result = SN_logh5_vec_int32(cs->n+1, cs->p, "p", mat_group);
-    result = SN_logh5_vec_int32(cs->nzmax, cs->i, "i", mat_group);
-  }*/
+  /*   else if (sizeof(CS_INT) == sizeof(int32_t))
+    {
+      result = SN_logh5_vec_int32(cs->n+1, cs->p, "p", mat_group);
+      result = SN_logh5_vec_int32(cs->nzmax, cs->i, "i", mat_group);
+    }*/
   else
   {
     fprintf(stderr, "SN_logh5_NM :: unknown pointer size %lu\n", sizeof(CS_INT));
@@ -317,9 +327,9 @@ bool SN_logh5_csparse(CSparseMatrix* cs, const char* name, hid_t loc_id)
   }
   result = SN_logh5_vec_double(cs->p[cs->n], cs->x, "x", mat_group);
 
-  if (name)
+  if(name)
   {
-    H5Gclose (mat_group);
+    H5Gclose(mat_group);
   }
   return result;
 }
@@ -336,7 +346,7 @@ bool SN_logh5_NM(NumericsMatrix* mat, const char* name, SN_logh5* logger)
 
   /* Create subgroup based on the name of the matrix*/
   hid_t mat_group;
-  if (logger->group)
+  if(logger->group)
   {
     mat_group = H5Gcreate(logger->group, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   }
@@ -350,36 +360,36 @@ bool SN_logh5_NM(NumericsMatrix* mat, const char* name, SN_logh5* logger)
   SN_logh5_attr_uinteger(mat->size0, "size0", mat_group);
   SN_logh5_attr_uinteger(mat->size1, "size1", mat_group);
 
-  switch (storageType)
+  switch(storageType)
   {
-    case NM_DENSE:
+  case NM_DENSE:
+  {
+    result = SN_logh5_mat_dense(mat->size0, mat->size1, mat->matrix0, "values", mat_group);
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    if(!(mat->matrix2 &&  mat->matrix2->csc))
     {
-      result = SN_logh5_mat_dense(mat->size0, mat->size1, mat->matrix0, "values", mat_group);
+      fprintf(stderr, "SN_logh5_NM :: sparse block matrix are currently not supported\n");
       break;
-    }
-    case NM_SPARSE_BLOCK:
-    {
-      if (!(mat->matrix2 &&  mat->matrix2->csc))
-      {
-        fprintf(stderr, "SN_logh5_NM :: sparse block matrix are currently not supported\n");
-        break;
-      }
-    }
-    case NM_SPARSE:
-    {
-      CSparseMatrix* cs = mat->matrix2->csc;
-      assert(cs && "SN_logh5_NM only csc matrix are supported");
-      SN_logh5_csparse(cs, NULL, mat_group);
-      break;
-    }
-    default:
-    {
-      fprintf(stderr, "SN_logh5_NM :: unknown matrix type %d\n", mat->storageType);
-      return false;
     }
   }
+  case NM_SPARSE:
+  {
+    CSparseMatrix* cs = mat->matrix2->csc;
+    assert(cs && "SN_logh5_NM only csc matrix are supported");
+    SN_logh5_csparse(cs, NULL, mat_group);
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "SN_logh5_NM :: unknown matrix type %d\n", mat->storageType);
+    return false;
+  }
+  }
 
-  status = H5Gclose (mat_group);
+  status = H5Gclose(mat_group);
   return true;
 }
 

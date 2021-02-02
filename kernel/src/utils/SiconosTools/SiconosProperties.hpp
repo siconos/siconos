@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,6 @@
 
 #include <SiconosConfig.h>
 #include <memory>
-namespace std11 = std;
-
 #include <map>
 
 
@@ -65,7 +63,7 @@ template <typename T>
 struct IsSharedPtr : boost::mpl::false_ {};
 
 template <typename T>
-struct IsSharedPtr<std11::shared_ptr<T> > : boost::mpl::true_ {};
+struct IsSharedPtr<std::shared_ptr<T> > : boost::mpl::true_ {};
 
 template <typename T>
 struct IsPointer : boost::mpl::or_<boost::is_pointer<T>, IsSharedPtr<T> > {};
@@ -78,7 +76,7 @@ struct RemovePointer
 };
 
 template <typename T>
-struct RemovePointer<std11::shared_ptr<T> >
+struct RemovePointer<std::shared_ptr<T> >
 {
   typedef T type;
 };
@@ -247,7 +245,7 @@ public:
   G& _g;
 
   // serialization issue with key_type as simple pointer (void *)
-  std11::shared_ptr< std::map<key_type, T> > _store;
+  std::shared_ptr< std::map<key_type, T> > _store;
 
   int _stamp;
 
@@ -354,10 +352,10 @@ public:
     \param G the graph type
  */
 template<typename T, typename G>
-class VertexSPProperties : public VertexProperties<std11::shared_ptr<T>, G>
+class VertexSPProperties : public VertexProperties<std::shared_ptr<T>, G>
 {
 public:
-  VertexSPProperties(G& g) : VertexProperties<std11::shared_ptr<T>, G>(g)
+  VertexSPProperties(G& g) : VertexProperties<std::shared_ptr<T>, G>(g)
   {};
 
 

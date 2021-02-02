@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,15 @@
 #ifndef __SiconosMatrix__
 #define __SiconosMatrix__
 
-#include "SiconosAlgebraTypeDef.hpp"
-#include "SiconosMatrixException.hpp"
+#include <stddef.h>                    // for size_t
+#include <iosfwd>                      // for ostream
+#include "CSparseMatrix.h"             // for CSparseMatrix
+#include "SiconosAlgebraTypeDef.hpp"   // for DenseMat, BandedMat, IdentityMat
+#include "SiconosFwd.hpp"              // for SiconosMatrix
+#include "SiconosSerialization.hpp"    // for ACCEPT_SERIALIZATION
+#include "SiconosVisitor.hpp"          // for VIRTUAL_ACCEPT_VISITORS
+class BlockVector;
+
 
 /** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat, SymMat, Zero and Identity mat pointers.
  */
@@ -38,6 +45,7 @@ union MATRIX_UBLAS_TYPE
   BandedMat *Banded;  // num = 5
   ZeroMat *Zero;      // num = 6
   IdentityMat *Identity; // num = 7
+  SparseCoordinateMat *SparseCoordinate; // num = 8
 };
 /** A STL vector of int */
 typedef std::vector<int> VInt;
@@ -54,19 +62,27 @@ TYPEDEF_SPTR(VInt)
  * You can find an overview on how to build and use vectors and matrices in siconos users guide .
  *
  */
-class SiconosMatrix //: public std11::enable_shared_from_this<SiconosMatrix>
+class SiconosMatrix //: public std::enable_shared_from_this<SiconosMatrix>
 {
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(SiconosMatrix);
 
-
-
   /** A number to specify the type of the matrix: (block or ublas-type)
    * 0-> BlockMatrix, 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat, 6->zeroMat, 7->IdentityMat
    */
-  unsigned int _num;
+  Siconos::UBLAS_TYPE _num;
+
+  /** bool _isSymmetric;
+   *  Boolean = true if the Matrix is symmetric
+   */
+  bool _isSymmetric;
+
+  /** bool _isPositiveDefinite;
+   *  Boolean = true if the Matrix is positive definite
+   */
+  bool _isPositiveDefinite;
 
   /** default constructor */
   SiconosMatrix() {};
@@ -74,9 +90,28 @@ protected:
   /** basic constructor
    *   \param type unsigned int type-number of the vector
    */
-  SiconosMatrix(unsigned int type);
+  SiconosMatrix(Siconos::UBLAS_TYPE type);
 
-  //SiconosMatrix(unsigned int, unsigned int, unsigned int);
+  /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
+   *  If x is a block vector, it call the present function for all blocks.
+   * \param A a pointer to SiconosMatrix
+   * \param startRow an int, sub-block position
+   * \param x a pointer to a SiconosVector
+   * \param y a pointer to a SiconosVector
+   * \param init a bool
+   */
+  void private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init) const;
+
+
+  /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+   * If x is a block vector, it call the present function for all blocks.
+   * \param A a pointer to SiconosMatrix
+   * \param startRow an int, sub-block position
+   * \param startCol an int, sub-block position
+   * \param x a pointer to a SiconosVector
+   * \param res a DenseVect
+   */
+  void private_addprod(unsigned int startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& res) const;
 
 public:
 
@@ -87,7 +122,7 @@ public:
    * \return a bool.*/
   inline bool isBlock(void) const
   {
-    if (_num == 0) return true ;
+    if (_num == Siconos::BLOCK) return true ;
     else return false;
   }
 
@@ -99,12 +134,40 @@ public:
     return false;
   };
 
+  /** true if the matrix is symmetric (the flag is just returned)
+   *  \return true if the matrix is symmetric
+   */
+  inline bool isSymmetric() const
+  {
+    return _isSymmetric;
+  }
+
+  /** set the flag _isSymmetric */
+  inline void setIsSymmetric(bool b)
+  {
+    _isSymmetric= b;
+  }
+
+  /** true if the matrix is definite positive (the flag is just returned)
+   *  \return true if the matrix is
+   */
+  inline bool isPositiveDefinite() const
+  {
+    return _isPositiveDefinite;
+  }
+
+  /** set the flag _isPositiveDefinite */
+  inline void setIsPositiveDefinite(bool b)
+  {
+    _isPositiveDefinite= b ;
+  }
+
   /** determines if the matrix is symmetric up to a given tolerance
    *  \return true if the matrix is inversed
    */
-  virtual bool isSymmetric(double tol) const =0;
+  virtual bool checkSymmetry(double tol) const =0;
 
-  /** determines if the matrix has been PLU factorized in place
+  /** determines if the matrix has been PLU factorized
    *  \return true if the matrix is factorized
    */
   inline virtual bool isPLUFactorized() const
@@ -112,6 +175,21 @@ public:
     return false;
   };
 
+  /** determines if the matrix has been PLU factorized in place
+   *  \return true if the matrix is factorized
+   */
+  inline virtual bool isPLUFactorizedInPlace() const
+  {
+    return false;
+  };
+
+  /** determines if the matrix has been Cholesky factorized
+   *  \return true if the matrix is factorized
+   */
+  inline virtual bool isCholeskyFactorized() const
+  {
+    return false;
+  };
 
   /** determines if the matrix has been QR factorized
    *  \return true if the matrix is factorized
@@ -127,6 +205,15 @@ public:
     return dummy;
   }
 
+  /** determines if the matrix has been factorized
+   *  \return true if the matrix is factorized
+   */
+  inline virtual bool isFactorized() const
+  {
+    return (isPLUFactorized() || isPLUFactorizedInPlace() || isCholeskyFactorized() || isQRFactorized());
+  };
+
+
   /** get the number of rows or columns of the matrix
    *  \param index 0 for rows, 1 for columns
    *  \return an int
@@ -136,7 +223,7 @@ public:
   /** get the attribute num of current matrix
    * \return an unsigned int.
    */
-  inline unsigned int num() const
+  inline Siconos::UBLAS_TYPE num() const
   {
     return _num;
   };
@@ -195,6 +282,13 @@ public:
    */
   virtual const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const = 0;
 
+  /** get SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat
+   */
+  virtual const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0) const = 0;
+
   /** get ZeroMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -244,6 +338,13 @@ public:
    */
   virtual SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const = 0;
 
+  /** get a pointer on SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat*
+   */
+  virtual SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0) const = 0;
+
   /** get a pointer on ZeroMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -258,7 +359,7 @@ public:
    */
   virtual IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const = 0;
 
-  /** return the address of the array of double values of the matrix 
+  /** return the address of the array of double values of the matrix
    *   ( for block(i,j) if this is a block matrix)
    *  \param row position for the required block
    *  \param col position for the required block
@@ -275,7 +376,7 @@ public:
   virtual void randomize() = 0;
 
   /** Initialize a symmetric matrix with random values
-   */ 
+   */
   virtual void randomize_sym()= 0;
 
   /** set an identity matrix
@@ -301,17 +402,14 @@ public:
    */
   virtual void display() const = 0;
 
+  /** display data on standard output
+   */
+  virtual void displayExpert(bool brief = true ) const = 0;
+
   /** put data of the matrix into a std::string
    * \return std::string
    */
   virtual std::string toString() const = 0;
-
-  /** send data of the matrix to an ostream
-   * \param os An output stream
-   * \param sm a SiconosMatrix
-   * \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
 
   // Note: in the following functions, row and col are general;
   // that means that for a SimpleMatrix m, m(i,j) is index (i,j) element but
@@ -352,10 +450,9 @@ public:
    */
   virtual SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
   {
-    RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
-    return SP::SiconosMatrix();
+    THROW_EXCEPTION("must be implemented");
   };
-  
+
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param row unsigned int row
@@ -364,8 +461,7 @@ public:
    */
   virtual SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
   {
-    RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
-    return SPC::SiconosMatrix();
+    THROW_EXCEPTION("must be implemented");
   };
 
   /** get row index of current matrix and save it into vOut
@@ -425,6 +521,145 @@ public:
    */
   virtual SiconosMatrix& operator -=(const SiconosMatrix& m) = 0;
 
+
+  virtual void updateNumericsMatrix() =0;
+
+  virtual NumericsMatrix * numericsMatrix() const
+  {
+    return nullptr;
+  };
+
+  
+  /** computes a LU factorization of a general M-by-N matrix
+   * with partial pivoting and row interchanges.
+   * The result is returned in this (InPlace).
+   * Based on Blas dgetrf function for dense matrix and
+   * ublas cholesky decomposition for sparse matrix
+   * (work only for a symmetric matrix and very slow because it uses
+   * matric accessor)
+   * use preferably PLUFactorize()
+   */
+  virtual void PLUFactorizationInPlace() = 0;
+
+  /** computes a factorization of a general M-by-N matrix
+   * The implementation is based on an internal NumericsMatrix
+   */
+  virtual void Factorize() = 0;
+
+  /**  compute inverse of this thanks to LU factorization with partial pivoting.
+   * This method inverts U and then computes inv(A) by solving the system
+   * inv(A)*L = inv(U) for inv(A).
+   * The result is returned in this (InPlace).
+   * Based on Blas dgetri function for dense function
+   */
+  virtual void  PLUInverseInPlace() = 0;
+
+  /** solves a system of linear equations A * X = B  (A=this)
+   * for a general N-by-N matrix A using the LU factorization computed
+   * by PLUFactorizationInPlace.
+   * Based on Blas dgetrs function for dense matrix.
+   * \param[in,out] B on input the RHS matrix b; on output the result x
+   */
+  virtual void  PLUForwardBackwardInPlace(SiconosMatrix &B) = 0;
+
+  /** solves a system of linear equations A * X = B  (A=this)
+   * for a general N-by-N matrix A using the LU factorization computed
+   * by PLUFactorize.
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
+   */
+  virtual void  Solve(SiconosMatrix &B) = 0;
+
+  /** solves a system of linear equations A * X = B  (A=this)
+   * for a general N-by-N matrix A using the LU factorization computed
+   * by PLUFactorizationInPlace.
+   * Based on Blas dgetrs function for dense matrix.
+   * \param[in,out] B on input the RHS matrix b; on output the result x
+   */
+  virtual void   PLUForwardBackwardInPlace(SiconosVector &B) = 0;
+
+   /** solves a system of linear equations A * X = B  (A=this)
+   * for a general N-by-N matrix A using the LU factorization computed
+   * by PLUFactorize.
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
+   */
+  virtual void   Solve(SiconosVector &B) = 0;
+
+  /** set to false all LU indicators. Useful in case of
+      assignment for example.
+  */
+  virtual void resetLU()
+  {
+    THROW_EXCEPTION(" SiconosMatrix::resetLU not yet implemented for BlockMatrix.");
+  };
+
+  /** set to false all factorization indicators. Useful in case of
+      assignment for example.
+  */
+  virtual void resetFactorizationFlags()
+  {
+    THROW_EXCEPTION(" SiconosMatrix::resetFactorizationFlags not yet implemented for BlockMatrix.");
+  };
+
+  /** return the number of non-zero in the matrix
+   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   * \return the number of non-zeros
+   */
+  virtual size_t nnz(double tol = 1e-14);
+
+  /** Fill CSparseMatrix compresses column sparse matrix
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance under which a number is considered as equal to zero
+   *  \return true if function worked.
+   *  \warning not clear that it works for an empty csr matrix with row_off =0  and col_off =0
+   */
+  bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
+
+  /** Fill CSparseMatrix compresses column sparse matrix
+   *  \param csc the compressed column sparse matrix
+   *  \param tol the tolerance under which a number is considered as equal to zero
+   *  \return true if function worked.
+   */
+  bool fillCSC(CSparseMatrix* csc, double tol = 1e-14);
+
+  bool fromCSC(CSparseMatrix* csc);
+  
+  /** return the number of non-zero in the matrix
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   *  \return the number of non-zeros
+   */
+  bool fillTriplet(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
+
+  /** Visitors hook
+   */
+  VIRTUAL_ACCEPT_VISITORS(SiconosMatrix);
+
+  /** \defgroup SiconosMatrixFriends
+
+      List of friend functions of the SimpleMatrix class
+
+      Declared in SimpleMatrixFriends.hpp.
+      Implemented in SimpleMatrixFriends.cpp.
+
+      @{
+  */
+
+  // grant access to private_prod
+  friend void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init);
+  // grant access to private_addprod
+  friend void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init);
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sm a SiconosMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
+
   /** multiply the current matrix with a scalar
    *  \param m the matrix to operate on
    *  \param s the scalar
@@ -439,71 +674,7 @@ public:
    */
   friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
 
-  /** computes a LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
-   *  The result is returned in this (InPlace). Based on Blas dgetrf function.
-   */
-  virtual void PLUFactorizationInPlace() = 0;
-
-  /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
-   *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
-   */
-  virtual void  PLUInverseInPlace() = 0;
-
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
-   *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
-   *  \param[in,out] B on input the RHS matrix b; on output the result x
-   */
-  virtual void  PLUForwardBackwardInPlace(SiconosMatrix &B) = 0;
-
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
-   *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
-   *  \param[in,out] B on input the RHS matrix b; on output the result x
-   */
-  virtual void   PLUForwardBackwardInPlace(SiconosVector &B) = 0;
-
-  /** set to false all LU indicators. Useful in case of
-      assignment for example.
-  */
-  virtual void resetLU()
-  {
-    SiconosMatrixException::selfThrow(" SiconosMatrix::resetLU not yet implemented for BlockMatrix.");
-  };
-
-  /** Compares two (block) matrices: true if they have the same number of blocks and if
-      blocks which are facing each other have the same size;
-      always true if one of the two is a SimpleMatrix.
-      \param m1 a SiconosMatrix
-      \param m2 a SiconosMatrix
-  */
-  friend bool isComparableTo(const SiconosMatrix& m1, const SiconosMatrix& m2);
-
-  /** return the number of non-zero in the matrix
-   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   * \return the number of non-zeros
-   */
-  virtual size_t nnz(double tol = 1e-14);
-
-  /** Fill sparse matrix
-   *  \param csc the compressed column sparse matrix
-   *  \param row_off
-   *  \param col_off
-   *  \param tol the tolerance under which a number is considered as equal to zero 
-   *  \return true if function worked.
-   */
-  bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
-
-  /** return the number of non-zero in the matrix
-   *  \param csc the compressed column sparse matrix
-   *  \param row_off
-   *  \param col_off
-   *  \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   *  \return the number of non-zeros
-   */
-  bool fillTriplet(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
-
-  /** Visitors hook
-   */
-  VIRTUAL_ACCEPT_VISITORS(SiconosMatrix);
+  /** End of Friend functions group @} */
 
 };
 

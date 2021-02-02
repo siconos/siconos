@@ -28,7 +28,7 @@ extern "C" void CNAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, dou
 
   //        printf("Call of the function 'f1' of the file funC.\n");
 
-  if (sizeOfX[0] == 2)
+  if(sizeOfX[0] == 2)
   {
     xdot[0] = x[1];
     xdot[1] = 3.0 * (1.0 - x[0] * x[0]) * x[1] - x[0];
@@ -49,7 +49,7 @@ extern "C" void CNAME(jac1)(integer *sizeOfX, doublereal *time, doublereal *x, i
 
   //      printf("Call of the function 'jac1' of the  the file funC.c .\n");
 
-  if (*sizeOfX == 2)
+  if(*sizeOfX == 2)
   {
     jacob[0] = 0.0;
     jacob[1] = -6.0 * x[0] * x[1] - 1.0;

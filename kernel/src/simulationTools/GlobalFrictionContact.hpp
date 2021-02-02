@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ TYPEDEF_SPTR(GlobalFrictionContactProblem)
  *
 
  \rst
- 
+
  .. math::
-  
+
    M velocity =  q + H reaction \\
    globalVelocities = H^T velocity + tildeGlobalVelocities
 
@@ -77,19 +77,18 @@ class GlobalFrictionContact : public LinearOSNS
 {
 private:
   /** default constructor */
-  GlobalFrictionContact() {};
-  
+  GlobalFrictionContact() = default;
+
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(GlobalFrictionContact);
 
-
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int _contactProblemDim;
+  int _contactProblemDim = 3;
 
   /** size of the local problem to solve */
-  size_t _sizeGlobalOutput;
+  size_t _sizeGlobalOutput = 0;
 
   /** contains the vector globalVelocities of a GlobalFrictionContact system */
   SP::SiconosVector _globalVelocities;
@@ -109,15 +108,27 @@ protected:
   GlobalFrictionContactProblem _numerics_problem;
 public:
 
-  /** constructor from data
-   *  \param dimPb dimension (2D or 3D) of the friction-contact problem
-   *  \param numericsSolverId solver to be used (see the documentation of siconos/numerics)
-   */
+  /** constructor (solver id and dimension)
+      \param dimPb dimension (2D or 3D) of the friction-contact problem
+      \param numericsSolverId id of the solver to be used, optional,
+      default : SICONOS_GLOBAL_FRICTION_3D_NSGS
+      \rst
+      see :ref:`problems_and_solvers` for details.
+      \endrst
+  */
   GlobalFrictionContact(int dimPb, int numericsSolverId = SICONOS_GLOBAL_FRICTION_3D_NSGS);
+
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set,
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  GlobalFrictionContact(int dimPb, SP::SolverOptions options);
 
   /** destructor
    */
-  virtual ~GlobalFrictionContact();
+  virtual ~GlobalFrictionContact(){};
 
   // GETTERS/SETTERS
 
@@ -228,9 +239,11 @@ public:
   virtual void postCompute();
 
 
-  
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+
   void updateMu();
-  
+
   /** print the data to the screen */
   void display() const;
 };

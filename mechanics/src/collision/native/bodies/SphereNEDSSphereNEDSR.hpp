@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include "MechanicsFwd.hpp"
 #include "NewtonEuler3DR.hpp"
 class SphereNEDSSphereNEDSR : public NewtonEuler3DR,
-  public std11::enable_shared_from_this<SphereNEDSSphereNEDSR>
+  public std::enable_shared_from_this<SphereNEDSSphereNEDSR>
 {
 private:
   /** serialization hooks
@@ -48,7 +48,12 @@ public:
 
   double distance(double, double, double, double, double, double, double, double);
 
-  void computeh(double time, BlockVector& q0, SiconosVector& y);
+  /** to compute the output y = h(t,q,z) of the Relation
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+  */
+  void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
   //void computeJachq(double);
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,18 @@ private:
 
 public:
 
-  /** constructor
-   *  \param numericsSolverId int id of numerics solver
+  /** constructor from data
+   *  \param numericsSolverId id of numerics solver, default = 0
    */
-  Equality(int numericsSolverId = 0): LinearOSNS(numericsSolverId) {};
+  Equality(int numericsSolverId = 0);
+
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  Equality(SP::SolverOptions options);
   
   /** destructor
    */
@@ -75,6 +83,8 @@ public:
   /** Build or reinit M and the NumericsProblem*/
   virtual void updateM();
 
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
 
   /** print the data to the screen
    */

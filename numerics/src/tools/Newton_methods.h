@@ -1,7 +1,7 @@
  /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,12 @@
  *
  */
 
-#include "SolverOptions.h"
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
-
-#include <stdbool.h>
+#include <stddef.h>       // for NULL, size_t
+#include "NumericsFwd.h"  // for SolverOptions, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#ifndef __cplusplus
+#include <stdbool.h>      // for bool
+#endif
 
 typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* F);
 typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, double* F_merit);
@@ -162,11 +163,6 @@ extern "C"
    */
   void newton_LSA(unsigned n, double *z, double *w, int *info, void* data, SolverOptions* options, functions_LSA* functions);
 
-  /** Set some default values in the SolverOption when the solver is based on newton_LSA()
-   * \param options the struct to modify
-   */
-  void newton_lsa_setDefaultSolverOptions(SolverOptions* options);
-
   /** Set the functions to compute F and F_merit and all the other pointers to NULL
    * \param functions structure to fill
    * \param compute_F function to compute F
@@ -191,17 +187,16 @@ extern "C"
    * \param mat the */
  void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat);
 
- /** Check whether the solver uses the Newton_LSA framework or not
-  * \param solverId the solver id
-  * \return true if the solver is using newton_LSA, false otherwise
-  */
- bool newton_LSA_check_solverId(int solverId);
-
  /** clear the solver-specific data
   * \param options the SolverOption structure
   */
  void newton_LSA_free_solverOptions(SolverOptions* options);
 
+  /** @addtogroup SetSolverOptions
+      @{
+  */
+  void newton_lsa_set_default(SolverOptions* options);
+  /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

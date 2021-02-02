@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ TYPEDEF_SPTR(RollingFrictionContactProblem)
 
 
   \rst
-  
+
   .. math::
 
      velocity =  q + M reaction \\
      \\
      velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
-  
+
   \endrst
 
   and a Coulomb friction law.
@@ -72,13 +72,12 @@ protected:
   */
   ACCEPT_SERIALIZATION(RollingFrictionContact);
 
-
   /** Type (dimension) of the contact problem (2D or 3D) */
   int _contactProblemDim;
 
   /** * friction coefficients */
   SP::MuStorage _mu;
-  
+
  /** * friction coefficients */
   SP::MuStorage _muR;
 
@@ -89,15 +88,28 @@ protected:
 
 public:
 
-  /**
-     \param dimPb dimension (2D or 3D) of the RollingFrictionContact problem (default = 3D)
-     \param numericsSolverId Numerics solver to use (default = NSGS)
+  /** constructor (solver id and dimension)
+      \param dimPb dimension, default = 5
+      \param numericsSolverId id of the solver to be used, optional,
+      default : SICONOS_ROLLING_FRICTION_3D_NSGS
+      \rst
+      see :ref:`problems_and_solvers` for details.
+      \endrst
   */
-  RollingFrictionContact(int dimPb = 5, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
+  RollingFrictionContact(int dimPb=5, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
+
+  /**  constructor from a pre-defined solver options set.
+       \param dim, pb dimension, 5 only.
+       \param options, the options set,
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  RollingFrictionContact(int dimPb, SP::SolverOptions options);
 
   /** destructor
    */
-  virtual ~RollingFrictionContact();
+  virtual ~RollingFrictionContact(){};
 
   // GETTERS/SETTERS
 
@@ -179,6 +191,10 @@ public:
 
   /** print the data to the screen */
   void display() const;
+
+   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+
 
   /** visitors hook
    */

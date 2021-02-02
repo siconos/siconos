@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,13 @@
  * limitations under the License.
 */
 
-
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "SiconosLapack.h"
-#include "Newton_methods.h"
-#include "FischerBurmeister.h"
-#include "min_merit.h"
-#include "lcp_newton_FB.h"
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
+#include <assert.h>                        // for assert
+#include "LCP_Solvers.h"                   // for lcp_newton_minFB
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "Newton_methods.h"                // for functions_LSA, init_lsa_fu...
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "lcp_newton_FB.h"                 // for FB_compute_F_lcp, FB_compu...
+#include "min_merit.h"                     // for F_min, Jac_F_min
 
 static void lcp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {
@@ -51,7 +38,7 @@ static void min_compute_H_lcp(void* data_opaque, double* z, double* F, double* w
   Jac_F_min(0, n, z, F, data->M, H);
 }
 
-void lcp_newton_minFB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_newton_minFB(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   functions_LSA functions_minFBLSA_lcp;
   init_lsa_functions(&functions_minFBLSA_lcp, &FB_compute_F_lcp, &lcp_FB);

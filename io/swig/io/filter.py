@@ -153,7 +153,7 @@ class CopyVisitor(object):
                 elif len(time_idx)==1:
                     ds[0,:] = obj[time_idx[0],:]
                 else:
-                    ds[range(len(time_idx)),:] = obj[time_idx,:]
+                    ds[:len(time_idx),:] = obj[time_idx,:]
             else:
                 ds[:] = obj
 

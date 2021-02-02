@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,13 +57,13 @@ void FirstOrderType1R::initialize(Interaction& inter)
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
   VectorOfSMatrices& relationMat = inter.relationMatrices();
-  if (!_C)
+  if(!_C)
     relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
-  if (!_D)
+  if(!_D)
     relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-  if (!_F)
+  if(!_F)
     relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
-  if (!_B)
+  if(!_B)
     relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
 }
 
@@ -72,35 +72,33 @@ void FirstOrderType1R::checkSize(Interaction& inter)
 {
 
 }
-void FirstOrderType1R::computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y)
+void FirstOrderType1R::computeh(double time, const BlockVector& x, BlockVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
-  
-  ((Type1Ptr)(_pluginh->fPtr))(x.size(), &(x)(0), y.size(), &(y)(0), z.size(), &(z)(0));
+  auto xp = x.prepareVectorForPlugin();
+  auto zp = z.prepareVectorForPlugin();
+  ((Type1Ptr)(_pluginh->fPtr))(xp->size(), &(*xp)(0), y.size(), &(y)(0), zp->size(), &(*zp)(0));
+  z = *zp;
 
 }
 
-void FirstOrderType1R::computeg(double time, SiconosVector& lambda, SiconosVector& z, SiconosVector& r)
+void FirstOrderType1R::computeg(double time, const SiconosVector& lambda, BlockVector& z, BlockVector& r)
 {
   assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
-  ((Type1Ptr)(_pluging->fPtr))(lambda.size(), &(lambda)(0), r.size(), &(r)(0), z.size(), &(z)(0));
-
+  auto zp = z.prepareVectorForPlugin();
+  auto rp = r.prepareVectorForPlugin();
+  ((Type1Ptr)(_pluging->fPtr))(lambda.size(), lambda.getArray(), rp->size(), &(*rp)(0), zp->size(), &(*zp)(0));
+  z = *zp;
+  r = *rp;
 }
 void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   SiconosVector& y = *inter.y(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  BlockVector& x = *DSlink[FirstOrderR::x];
-  BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
-  SP::SiconosVector x_vec(new SiconosVector(x));
-  SP::SiconosVector z_vec(new SiconosVector(z));
-  
-  computeh(time, *x_vec, *z_vec, y);
-
-  *DSlink[FirstOrderR::z] = *z_vec;
+  computeh(time, *DSlink[FirstOrderR::x], *DSlink[FirstOrderR::z], y);
 }
 
 void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned int level)
@@ -114,36 +112,42 @@ void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned in
   BlockVector& r = *DSlink[FirstOrderR::r];
   BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
-  SP::SiconosVector r_vec(new SiconosVector(r));
-  SP::SiconosVector z_vec(new SiconosVector(z));
-
-  computeg(time, lambda, *z_vec, *r_vec);
-
-  *DSlink[FirstOrderR::r] = *r_vec;
-  *DSlink[FirstOrderR::z] = *z_vec;
+  computeg(time, lambda, z, r);
 }
 
-void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C)
+void FirstOrderType1R::computeJachx(double time, const BlockVector& x, BlockVector& z, SimpleMatrix& C)
 {
   //
   assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
   if(_C && _pluginJachx)
-    ((Type1Ptr)(_pluginJachx->fPtr))(x.size(), &(x)(0), C.size(0), C.getArray(), z.size(), &(z)(0));
-
+  {
+    auto xp = x.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((Type1Ptr)(_pluginJachx->fPtr))(xp->size(), &(*xp)(0), C.size(0), C.getArray(), zp->size(), &(*zp)(0));
+    z = *zp;
+  }
 }
 
-void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& F)
+void FirstOrderType1R::computeJachz(double time, const BlockVector& x, BlockVector& z, SimpleMatrix& F)
 {
-  if (_F && _pluginJachz && _pluginJachz->fPtr)
-    ((Type1Ptr)(_pluginJachz->fPtr))(x.size(), &(x)(0), F.size(0), F.getArray(), z.size(), &(z)(0));
-
+  if(_F && _pluginJachz && _pluginJachz->fPtr)
+  {
+    auto xp = x.prepareVectorForPlugin();
+    auto zp = z.prepareVectorForPlugin();
+    ((Type1Ptr)(_pluginJachz->fPtr))(xp->size(), &(*xp)(0), F.size(0), F.getArray(), zp->size(), &(*zp)(0));
+    z = *zp;
+  }
 }
 
-void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
+void FirstOrderType1R::computeJacglambda(double time, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& B)
 {
   assert(_pluginJacglambda && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
   if(_B && _pluginJacglambda)
-    ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), &(lambda)(0), B.size(0), B.getArray(), z.size(), &(z)(0));
+  {
+    auto zp = z.prepareVectorForPlugin();
+    ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), lambda.getArray(), B.size(0), B.getArray(), zp->size(), &(*zp)(0));
+    z = *zp;
+  }
 }
 
 void FirstOrderType1R::computeJach(double time, Interaction& inter)
@@ -151,28 +155,28 @@ void FirstOrderType1R::computeJach(double time, Interaction& inter)
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  *_vec_x = *DSlink[FirstOrderR::x];
-  *_vec_z = *DSlink[FirstOrderR::z];
-  if (!_C)
+  if(!_C)
   {
-    computeJachx(time, *_vec_x, *_vec_z, *relationMat[FirstOrderR::mat_C]);
+    computeJachx(time,
+                 *DSlink[FirstOrderR::x],
+                 *DSlink[FirstOrderR::z],
+                 *relationMat[FirstOrderR::mat_C]);
   }
-  if (!_F)
+  if(!_F)
   {
-    computeJachz(time, *_vec_x, *_vec_z, *relationMat[FirstOrderR::mat_F]);
+    computeJachz(time,
+                 *DSlink[FirstOrderR::x],
+                 *DSlink[FirstOrderR::z],
+                 *relationMat[FirstOrderR::mat_F]);
   }
-  *DSlink[FirstOrderR::z] = *_vec_z;
 }
 
 void FirstOrderType1R::computeJacg(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
-
-  *_vec_z = *DSlink[FirstOrderR::z];
-  if (!_B)
+  if(!_B)
   {
-    computeJacglambda(time, *inter.lambda(0), *_vec_z, *relationMat[FirstOrderR::mat_B]);
+    computeJacglambda(time, *inter.lambda(0), *DSlink[FirstOrderR::z], *relationMat[FirstOrderR::mat_B]);
   }
-  *DSlink[FirstOrderR::z] = *_vec_z;
 }

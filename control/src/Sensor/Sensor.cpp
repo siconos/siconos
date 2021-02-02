@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ Sensor::~Sensor()
 void Sensor::display() const
 {
   std::cout << "=====> Sensor of type " << _type << ", named " << _id ;
-  if (_DS)
+  if(_DS)
     std::cout << " and linked to the DynamicalSystem number " << _DS->number() << "." <<std::endl;
   else
     std::cout << " and not linked to a DynamicalSystem." <<std::endl;

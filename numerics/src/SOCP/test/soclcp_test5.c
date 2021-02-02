@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,8 @@ int main(void)
   info = soclcp_test_function(finput, options);
 
   solver_options_delete(options);
-  free(options);
+  options = NULL;
+
   fclose(finput);
   printf("\nEnd of test on ./data/Capsules-i122-1617.dat \n");
   return info;
