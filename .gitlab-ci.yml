@@ -207,13 +207,22 @@ ubuntu20:install:
 debian-buster:install:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
-  needs: ["jupyterlab:full"]
+    siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-debian-buster
+  extends:
+    - .siconos-install
+    - .full-ci-rules
+  needs: ["debian-buster:build"]
+
 
 jupyterlab:install:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
-  extends: .siconos-jupyterlab-install
+    siconos_docker_name: siconoslab
+  extends:
+    - .siconos-jupyterlab-install
+    - .full-ci-rules
   needs: ["jupyterlab:full"]
+
 
 # --- Creates a new pipeline to build documentation
 # Trigger : manual.
