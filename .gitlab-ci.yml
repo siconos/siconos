@@ -186,14 +186,34 @@ fedora-33:test:
     - .siconos-test
     - .full-ci-rules
 
-jupyterlab:full:
+jupyterlab:configure:
+  variables:
+     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
+     cdash_submit: 1
+     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
+  extends:
+    - .siconos-configure
+    - .full-ci-rules
+
+jupyterlab:build:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
+  extends:
+    - .siconos-build
+    - .full-ci-rules
+  needs: ["jupyterlab:configure"]
+
+jupyterlab:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
       cdash_submit: 1
       user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
+    needs: ["jupyterlab:build"]
     extends:
-      - .siconos-full
-      - .full-ci-rules
+    - .siconos-test
+    - .full-ci-rules
 
 # Generate sico install
 
@@ -221,7 +241,7 @@ jupyterlab:install:
   extends:
     - .siconos-jupyterlab-install
     - .full-ci-rules
-  needs: ["jupyterlab:full"]
+  needs: ["jupyterlab:build"]
 
 
 # --- Creates a new pipeline to build documentation

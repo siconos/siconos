@@ -17,6 +17,8 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
         libopenblas-dev \
         liblapacke-dev \
         libcppunit-dev \
+        lp-solve \
+        liblpsolve55-dev \
         vim  \
         swig \
         doxygen \
@@ -26,10 +28,14 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 	valgrind \
         python3-lxml \
         python3-h5py \
+        python3-packaging \
         libopenmpi-dev \
         libparmetis-dev \
         libptscotch-dev \
         openssh-client \
+        libbullet-dev \
+        libfreetype6-dev \
+        freeglut3-dev \
         libmumps-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
 RUN python3 -m pip install mpi4py
 
