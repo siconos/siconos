@@ -5,7 +5,7 @@ import locale
 
 encoding = locale.getdefaultlocale()[1]
 
-output = subprocess.Popen(["python", "setup.py", "--dry-run", "install"],
+output = subprocess.Popen(["@Python3_EXECUTABLE@", "setup.py", "--dry-run", "install"],
                           stdout=subprocess.PIPE).communicate()[0]
 
 if encoding:

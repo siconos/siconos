@@ -12,7 +12,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
         libgmp-dev \
         gcc \
         gfortran \
-        libgfortran-10-dev \
+        libgfortran-8-dev \
         g++ \
         libopenblas-dev \
         liblapacke-dev \
