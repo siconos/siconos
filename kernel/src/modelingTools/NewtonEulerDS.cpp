@@ -30,6 +30,8 @@
 #include "debug.h"
 
 
+
+
 static
 void computeJacobianConvectedVectorInBodyFrame(double q0, double q1, double q2, double q3,
     SP::SimpleMatrix jacobian, SP::SiconosVector v)
