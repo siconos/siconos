@@ -20,14 +20,13 @@
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.
 set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
-#set(COMPONENTS externals numerics CACHE INTERNAL "List of siconos components to build and install")
 
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 
 # --- Build/compiling options ---
-set(WARNINGS_LEVEL 1 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")
+set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")
 option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
 option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
@@ -45,7 +44,7 @@ option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = 
 
 
 # --- List of external libraries/dependencies to be searched (or not) ---
-option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
+option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" ON)
 option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
@@ -64,13 +63,7 @@ option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
 # - user --> behave as 'python setup.py install --user'
 # - standard --> install in python site-package (ie behave as python setup.py install)
 # - prefix --> install in python CMAKE_INSTALL_PREFIX (ie behave as python setup.py install --prefix=CMAKE_INSTALL_PREFIX)
-if(UNIX)
-  # on unix, there is no reason to use the standard option. By default, CMAKE_INSTALL_PREFIX is set to /usr/local and therefore,
-  # the python packages should be installed in /usr/local/...
-  set(siconos_python_install "prefix" CACHE STRING "Install mode for siconos python package")
-else()
-  set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
-endif()
+set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
 
 # If OFF, headers from libraries in externals will not be installed.
 option(INSTALL_EXTERNAL_HEADERS

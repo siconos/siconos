@@ -44,6 +44,16 @@ ubuntu20.4-doc:docker-build:
   stage: docker-build-layer3
   needs: ["ubuntu20.4:docker-build"]
 
+# A specific image, that will be used to install siconos,
+# get examples and provide some notebooks to
+# run siconos software.
+jupyter-notebook:docker-build:
+  variables:
+    IMAGE_NAME: jupyterlab
+  extends: .docker-build
+  stage: docker-build
+
+
 # Manual jobs, used to create docker images.
 docker-manual-img:
   extends: .docker-rules
@@ -176,6 +186,14 @@ fedora-33:test:
     - .siconos-test
     - .full-ci-rules
 
+jupyterlab:full:
+    variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
+    extends:
+      - .siconos-full
+      - .full-ci-rules
 
 # Generate sico install
 
@@ -189,12 +207,13 @@ ubuntu20:install:
 debian-buster:install:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
-    siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-debian-buster
-  extends:
-    - .siconos-install
-    - .full-ci-rules
-  needs: ["debian-buster:build"]
+  needs: ["jupyterlab:full"]
 
+jupyterlab:install:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
+  extends: .siconos-jupyterlab-install
+  needs: ["jupyterlab:full"]
 
 # --- Creates a new pipeline to build documentation
 # Trigger : manual.
