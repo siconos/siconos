@@ -33,7 +33,7 @@
 #include "numerics_verbose.h"                         // for numerics_error
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                                    // for DEBUG_PRINTF
+#include "siconos_debug.h"                                    // for DEBUG_PRINTF
 
 void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {

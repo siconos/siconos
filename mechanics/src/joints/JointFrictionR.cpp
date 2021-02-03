@@ -29,7 +29,7 @@
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 /** Initialize a joint friction for a common case: a single axis with a
  * single friction, either positive or negative. For use with

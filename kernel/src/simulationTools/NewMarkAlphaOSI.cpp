@@ -31,7 +31,7 @@ using namespace RELATION;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_alpha_m, double new_alpha_f, bool flag = false):
   OneStepIntegrator(OSI::NEWMARKALPHAOSI)
 {

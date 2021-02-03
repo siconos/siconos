@@ -21,7 +21,7 @@
 // #define DEBUG_MESSAGES
 #include "RotationQuaternion.hpp"
 
-#include <debug.h>
+#include "siconos_debug.h"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include <boost/math/quaternion.hpp>

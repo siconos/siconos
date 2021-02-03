@@ -9,7 +9,7 @@
 #include <boost/typeof/typeof.hpp>
 
 // #define  DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 OccR::OccR(const ContactPoint& contact1,
            const ContactPoint& contact2,

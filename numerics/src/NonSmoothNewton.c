@@ -28,7 +28,7 @@
 #include "SiconosLapack.h"     // for lapack_int, DGESV
 
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 void linesearch_Armijo(int n, double *z, double* dir, double psi_k,

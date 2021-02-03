@@ -24,7 +24,7 @@
 #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
 #include "CSparseMatrix_internal.h"                // for NSM_TRIPLET ...
 #include "gfc3d_balancing.h"
-#include "debug.h"                         // for DEBUG_EXPR
+#include "siconos_debug.h"                         // for DEBUG_EXPR
 #ifdef  DEBUG_MESSAGES
 #include "NumericsVector.h"
 #include "NumericsMatrix.h"

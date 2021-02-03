@@ -29,7 +29,7 @@
 #include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
 #include "NumericsMatrix.h"              // for NumericsMatrix, NM_clear, NM_...
 #include "SparseBlockMatrix.h"           // for SBM_clear, SBM_new_from_file
-#include "debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
 #include "numericsMatrixTestFunction.h"  // for SBM_dense_equal, test_matrix_2
 #include "numerics_verbose.h"            // for CHECK_RETURN
 #include "sanitizer.h"                   // for MSAN_INIT_VAR

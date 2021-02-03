@@ -23,7 +23,7 @@
 #include "SiconosBlas.h"                          // for cblas_dcopy
 #include "NumericsMatrix.h"                 // for NM_gemv
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
-#include "debug.h"                          // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"                          // for DEBUG_EXPR, DEBUG_PRINTF
 #include "projectionOnRollingCone.h"        // for projectionOnRollingCone
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"

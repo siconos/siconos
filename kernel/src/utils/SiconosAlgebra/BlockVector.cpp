@@ -29,7 +29,7 @@
 #include "Tools.hpp"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 #include "SiconosException.hpp"
 
 

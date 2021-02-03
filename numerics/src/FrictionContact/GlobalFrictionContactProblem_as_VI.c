@@ -25,7 +25,7 @@
 #include "SiconosBlas.h"                         // for cblas_dcopy
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                         // for DEBUG_EXPR, DEBUG_BEGIN
+#include "siconos_debug.h"                         // for DEBUG_EXPR, DEBUG_BEGIN
 
 void Function_VI_GFC3D(void * self, int n_notused, double *x, double *F)
 {

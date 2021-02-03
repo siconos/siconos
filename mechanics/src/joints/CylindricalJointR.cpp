@@ -32,7 +32,7 @@
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 /*
  * This file contains some code generated using sympy.  The following

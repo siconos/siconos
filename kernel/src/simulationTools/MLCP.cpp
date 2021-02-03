@@ -31,7 +31,7 @@ using namespace RELATION;
 // #define DEBUG_NCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 // Constructor from a set of data, use delegated constructor
 MLCP::MLCP(int numericsSolverId):

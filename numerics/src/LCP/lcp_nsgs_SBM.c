@@ -26,7 +26,7 @@
 #include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
-#include "debug.h"                         // for DEBUG_BEGIN, DEBUG_END
+#include "siconos_debug.h"                         // for DEBUG_BEGIN, DEBUG_END
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_NSGS_LO...
 #include "numerics_verbose.h"              // for numerics_error, verbose
 #include "sanitizer.h"                     // for cblas_dcopy_msan

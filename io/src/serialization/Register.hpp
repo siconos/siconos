@@ -45,7 +45,7 @@
 
 #include <boost/typeof/typeof.hpp>
 
-#include <debug.h>
+#include "siconos_debug.h"
 
 // This should be cleaner --xhub
 #if (BOOST_VERSION >= 106100)

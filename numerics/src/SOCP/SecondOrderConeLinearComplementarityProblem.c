@@ -22,7 +22,7 @@
 #include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"             // for DEBUG_PRINT
+#include "siconos_debug.h"             // for DEBUG_PRINT
 #include "numerics_verbose.h"  // for CHECK_IO
 
 void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearComplementarityProblem* problem)

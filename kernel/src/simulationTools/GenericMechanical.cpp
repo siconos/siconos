@@ -37,7 +37,7 @@ using namespace RELATION;
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
 #include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
-#include <debug.h>
+#include "siconos_debug.h"
 
 
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):

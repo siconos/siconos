@@ -51,7 +51,7 @@ dim(v)=nn
 #include "SiconosConfig.h"                      // for DIRECT_SOLVER_USE_DGETRI // IWYU pragma: keep
 
 #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 

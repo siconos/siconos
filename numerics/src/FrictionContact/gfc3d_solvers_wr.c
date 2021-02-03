@@ -37,7 +37,7 @@
 /* #define OUTPUT_DEBUG *\/ */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"                                // for DEBUG_EXPR, DEBUG_P...
+#include "siconos_debug.h"                                // for DEBUG_EXPR, DEBUG_P...
 
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"

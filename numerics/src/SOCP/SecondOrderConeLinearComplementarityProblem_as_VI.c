@@ -21,7 +21,7 @@
 #include "VariationalInequality.h"                        // for Variational...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                                        // for DEBUG_PRINT
+#include "siconos_debug.h"                                        // for DEBUG_PRINT
 #include "projectionOnCone.h"                             // for projectionO...
 #include "SiconosBlas.h"                                        // for cblas_dcopy
 

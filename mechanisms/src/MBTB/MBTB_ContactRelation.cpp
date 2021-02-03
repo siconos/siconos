@@ -5,7 +5,7 @@
 #include "ace.h"
 
 #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 MBTB_ContactRelation::~MBTB_ContactRelation()
 {

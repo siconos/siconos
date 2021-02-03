@@ -22,7 +22,7 @@
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_STDOUT
-#include "debug.h"
+#include "siconos_debug.h"
 
 FixedBC::FixedBC(SP::UnsignedIntVector newVelocityIndices) :
   BoundaryCondition(newVelocityIndices)

@@ -23,7 +23,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 void Lagrangian2d2DR::initialize(Interaction& inter)
 {

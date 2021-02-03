@@ -28,7 +28,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"             // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"             // for DEBUG_EXPR, DEBUG_PRINTF
 #include "numerics_verbose.h"  // for verbose
 #include "SiconosBlas.h"             // for cblas_dcopy, cblas_daxpy, cblas_dnrm2
 

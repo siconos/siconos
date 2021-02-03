@@ -22,7 +22,7 @@
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                         // for DEBUG_PRINT
+#include "siconos_debug.h"                         // for DEBUG_PRINT
 
 void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX)
 {

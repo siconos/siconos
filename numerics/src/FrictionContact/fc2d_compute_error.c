@@ -26,7 +26,7 @@
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)

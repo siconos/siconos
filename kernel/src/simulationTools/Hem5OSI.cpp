@@ -36,7 +36,7 @@ using namespace RELATION;
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 // initial step size guess (typical value 1e-3)
 #define INITIAL_GUESS_TS 1.e-3

@@ -38,7 +38,7 @@
 #include "CSparseMatrix.h"
 
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"

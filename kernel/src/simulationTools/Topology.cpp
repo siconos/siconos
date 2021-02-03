@@ -35,7 +35,7 @@
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES 1
-#include <debug.h>
+#include "siconos_debug.h"
 
 #define MAX_RELATIVE_DEGREE 999
 

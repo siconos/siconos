@@ -31,7 +31,7 @@
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-//#include "debug.h"
+//#include "siconos_debug.h"
 
 #ifdef HAS_ONE_LP_SOLVER
 #pragma GCC diagnostic push

@@ -22,7 +22,7 @@
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 
-#include "debug.h"
+#include "siconos_debug.h"
 
 typedef void (*FONLR_h)(double time, unsigned x_size, double *x, unsigned size_lambda, double* lambda, double *, unsigned z_size, double *z);
 typedef FONLR_h FONLR_g;
