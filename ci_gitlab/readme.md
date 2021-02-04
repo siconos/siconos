@@ -30,9 +30,7 @@ Job type are:
 | push to any other branch |   :x:       | :white_check_mark: all [A]<br>:white_check_mark: [B] on ubuntu20.04<br>:white_check_mark: [C] on ubuntu20.04 | :white_check_mark: all [A] (debian, ubuntu ...)<br>:white_check_mark: [C] on ubuntu20.04 | :white_check_mark: [B] on ubuntu20.04<br>:white_check_mark: [C] on ubuntu20.04|
 
 
-Moreover, some jobs are optional and must be started directly by clicking on the little gear next to the job name on gitlab CI interface (e.g. siconos with oce, documentation ...). 
-
-They look like ![manual_ci.png](./manual_ci.png)
+* Some jobs are optional and must be started directly by clicking on the little gear next to the job name on gitlab CI interface (e.g. siconos with oce, documentation ...). They look like ![manual_ci.jpg](./manual_ci.jpg)
 
 To check the complete pipeline, see https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/pipelines.
 
