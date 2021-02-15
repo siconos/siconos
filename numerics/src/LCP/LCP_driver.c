@@ -26,7 +26,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                         // for DEBUG_END, DEBUG_BEGIN
+#include "siconos_debug.h"                         // for DEBUG_END, DEBUG_BEGIN
 #include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_PIVOTIN...
 #include "numerics_verbose.h"              // for numerics_error, verbose
 

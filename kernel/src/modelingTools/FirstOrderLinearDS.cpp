@@ -19,7 +19,7 @@
 #include "SiconosAlgebraProd.hpp" // For prod matrix-vectors
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
-#include "debug.h"
+#include "siconos_debug.h"
 #include <iostream>
 
 typedef void (*computeAfct)(double, unsigned int, unsigned int, double*, unsigned int, double*);

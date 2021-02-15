@@ -25,7 +25,7 @@
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "NumericsMatrix.h"                // for NM_gemv, NumericsMatrix
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "debug.h"                         // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"                         // for DEBUG_EXPR, DEBUG_PRINTF
 #include "float.h"                         // for DBL_EPSILON
 #include "gfc3d_Solvers.h"                 // for gfc3d_checkTrivialCaseGlobal
 #include "gfc3d_compute_error.h"           // for gfc3d_compute_error

@@ -47,7 +47,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR
+#include "siconos_debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"

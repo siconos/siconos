@@ -31,7 +31,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 // Default constructor: empty matrix, default storage
 // No allocation for _M1 or _M2

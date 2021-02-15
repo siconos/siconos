@@ -78,7 +78,7 @@ static inline void _sn_check_shape(PyObject** mat, CSparseMatrix *M) {};
 #endif
 
 #include "SiconosConfig.h"
-#include "debug.h"
+#include "siconos_debug.h"
 // Work-around for "disappearing" SICONOS_INT64 problem in use of
 // %#ifdef below
 #ifdef SICONOS_INT64

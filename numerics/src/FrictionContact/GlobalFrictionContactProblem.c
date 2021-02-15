@@ -24,7 +24,7 @@
 #include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO
 #include "io_tools.h"
-#include "debug.h"
+#include "siconos_debug.h"
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"
 #endif

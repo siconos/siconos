@@ -29,7 +29,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"             // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
+#include "siconos_debug.h"             // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
 #include "numerics_verbose.h"  // for numerics_error_nonfatal, CHECK_IO
 #include "string.h"            // for memcpy, memset
 

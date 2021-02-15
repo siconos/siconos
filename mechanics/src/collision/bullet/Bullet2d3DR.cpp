@@ -19,7 +19,7 @@
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include <debug.h>
+#include "siconos_debug.h"
 
 #include "Bullet2d3DR.hpp"
 #include <RigidBody2dDS.hpp>

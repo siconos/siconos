@@ -32,7 +32,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor, B), _ref(0), _curDeltaT(0)

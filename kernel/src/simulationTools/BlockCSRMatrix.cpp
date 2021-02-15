@@ -31,7 +31,7 @@
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
-#include "debug.h"
+#include "siconos_debug.h"
 
 // Default constructor: empty matrix
 BlockCSRMatrix::BlockCSRMatrix():

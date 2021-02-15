@@ -28,7 +28,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"                         // for DEBUG_PRINT, DEBUG_EXPR_WE
+#include "siconos_debug.h"                         // for DEBUG_PRINT, DEBUG_EXPR_WE
 #include "lcp_cst.h"                       // for SICONOS_LCP_PIVOT_PATHSEARCH
 #include "lcp_pivot.h"                     // for LCP_PATHSEARCH_LEAVING_T
 #include "SiconosBlas.h"              // for cblas_dcopy, cblas_daxpy

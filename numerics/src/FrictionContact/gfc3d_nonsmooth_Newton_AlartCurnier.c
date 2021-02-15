@@ -22,7 +22,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
 #include <assert.h>                              // for assert
-#include <debug.h>                               // for DEBUG_PRINTF, DEBUG_...
+#include "siconos_debug.h"                               // for DEBUG_PRINTF, DEBUG_...
 #include <float.h>                               // for DBL_EPSILON
 #include <math.h>                                // for fabs, INFINITY
 #ifndef __cplusplus

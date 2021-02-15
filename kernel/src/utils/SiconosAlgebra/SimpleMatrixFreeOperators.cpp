@@ -25,7 +25,7 @@
 #include "SiconosException.hpp"
 using namespace Siconos;
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 SP::SimpleMatrix operator * (const SP::SimpleMatrix A, const SP::SimpleMatrix B)
 {

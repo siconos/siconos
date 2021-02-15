@@ -34,7 +34,7 @@
 #include "NumericsSparseMatrix.h"        // for NumericsSparseMatrix, NSM_TR...
 #include "NumericsVector.h"              // for NV_equal
 #include "SparseBlockMatrix.h"           // for SBM_zero_matrix_for_multiply
-#include "debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
 #include "numericsMatrixTestFunction.h"  // for test_build_first_4_NM, NM_de...
 #include "numerics_verbose.h"            // for numerics_error
 #include "sanitizer.h"                   // for MSAN_INIT_VAR

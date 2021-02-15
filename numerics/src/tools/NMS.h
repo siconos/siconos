@@ -33,7 +33,7 @@
 #include "line_search.h"     // for search_data
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 /** \struct path_record NMS.h

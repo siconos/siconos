@@ -21,7 +21,7 @@
 
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
-#include "debug.h"
+#include "siconos_debug.h"
 #include "numerics_verbose.h"
 
 #include <slu_mt_ddefs.h>

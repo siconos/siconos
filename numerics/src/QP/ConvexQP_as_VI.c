@@ -22,7 +22,7 @@
 #include "VariationalInequality.h"  // for VariationalInequality
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                  // for DEBUG_PRINT
+#include "siconos_debug.h"                  // for DEBUG_PRINT
 #include "SiconosBlas.h"                  // for cblas_dcopy
 
 

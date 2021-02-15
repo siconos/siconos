@@ -39,7 +39,7 @@
 #include "SiconosBlas.h"                                     // for cblas_dnrm2
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                                     // for DEBUG_EXPR
+#include "siconos_debug.h"                                     // for DEBUG_EXPR
 
 
 //#define FCLIB_OUTPUT

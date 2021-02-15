@@ -43,7 +43,7 @@
 // #define DEBUG_MESSAGES
 //#define DEBUG_BEGIN_END_ONLY
 //#define DEBUG_WHERE_MESSAGES
-#include <debug.h>
+#include "siconos_debug.h"
 
 
 using namespace RELATION;

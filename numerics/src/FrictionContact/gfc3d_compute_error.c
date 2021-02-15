@@ -23,7 +23,6 @@
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NM_gemv, NM_tgemv, Numeric...
 #include "SolverOptions.h"                 // for SolverOptions
-#include "debug.h"                         // for DEBUG_EXPR, DEBUG_PRINTF
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "numerics_verbose.h"              // for numerics_error, numerics_w...
 #include "sanitizer.h"                     // for cblas_dcopy_msan
@@ -33,7 +32,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "siconos_debug.h"
 
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                         double*  reaction, double*  velocity,

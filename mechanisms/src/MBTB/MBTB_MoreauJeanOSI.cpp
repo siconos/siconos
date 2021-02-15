@@ -2,7 +2,7 @@
 #define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
-#include <debug.h>
+#include "siconos_debug.h"
 
 //#define STANDARD_ACTIVATION
 #define FIRSTWAY_ACTIVATION

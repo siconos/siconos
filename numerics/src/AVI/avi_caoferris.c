@@ -30,7 +30,7 @@
 #include "SolverOptions.h"                  // for SolverOptions
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"                          // for DEBUG_PRINT, DEBUG_EXPR_WE
+#include "siconos_debug.h"                          // for DEBUG_PRINT, DEBUG_EXPR_WE
 #include "numerics_verbose.h"               // for numerics_error_nonfatal
 #include "pivot-utils.h"                    // for pivot_init_lemke, pivot_s...
 #include "sanitizer.h"                      // for cblas_dcopy_msan

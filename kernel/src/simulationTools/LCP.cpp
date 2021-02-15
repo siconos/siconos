@@ -27,7 +27,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #define DEBUG_NOCOLOR
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 LCP::LCP(int numericsSolverId):

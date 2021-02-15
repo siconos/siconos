@@ -25,7 +25,7 @@
 #include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_gemv
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "debug.h"                         // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"                         // for DEBUG_EXPR, DEBUG_PRINTF
 #include "gfc3d_Solvers.h"                 // for ComputeErrorGlobalPtr, gfc...
 #include "gfc3d_compute_error.h"           // for gfc3d_compute_error
 #include "numerics_verbose.h"              // for numerics_printf_verbose

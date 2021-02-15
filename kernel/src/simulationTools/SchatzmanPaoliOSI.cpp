@@ -36,7 +36,7 @@ using namespace RELATION;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 // --- constructor from a set of data ---
 SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta):

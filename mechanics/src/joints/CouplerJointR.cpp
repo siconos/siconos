@@ -29,7 +29,7 @@
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 CouplerJointR::CouplerJointR() : NewtonEulerJointR() {}
 

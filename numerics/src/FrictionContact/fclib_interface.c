@@ -33,7 +33,7 @@
 #include "NumericsSparseMatrix.h"          // for NumericsSparseMatrix, NSM_CSC
 #include "SiconosConfig.h"                 // for WITH_FCLIB
 #include "SparseBlockMatrix.h"             // for SBM_from_csparse, SBM_to_s...
-#include "debug.h"                         // for DEBUG_PRINT, DEBUG_PRINTF
+#include "siconos_debug.h"                         // for DEBUG_PRINT, DEBUG_PRINTF
 #include "timers_interf.h"                 // for MAYBE_UNUSED
 
 // avoid a conflict with old csparse.h in case fclib includes it

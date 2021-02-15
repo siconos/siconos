@@ -27,7 +27,7 @@
 #include "NumericsMatrix.h"    // for NM_LU_solve, NM_tgemv, NM_duplicate, NM_clear
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
-#include "debug.h"             // for DEBUG_PRINT
+#include "siconos_debug.h"             // for DEBUG_PRINT
 #include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
 #include "line_search.h"       // for search_data, fill_nm_data, free_ls_data
 #include "numerics_verbose.h"  // for numerics_printf_verbose, numerics_printf

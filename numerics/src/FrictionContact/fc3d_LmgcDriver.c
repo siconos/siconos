@@ -26,7 +26,7 @@
 #include "SiconosConfig.h"           // for WITH_FCLIB // IWYU pragma: keep
 #include "SolverOptions.h"           // for SolverOptions, SICONOS_IPARAM_IT...
 #include "SparseBlockMatrix.h"       // for SBCM_free_3x3, SBCM_new_3x3, SBC...
-#include "debug.h"                   // for DEBUG_EXPR
+#include "siconos_debug.h"                   // for DEBUG_EXPR
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H

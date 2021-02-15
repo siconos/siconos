@@ -49,7 +49,7 @@ dim(v)=nn
 #include "SiconosConfig.h"                      // for MLCP_DEBUG // IWYU pragma: keep
 
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "siconos_debug.h"
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"                     // for NV_display
 #endif

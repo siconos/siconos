@@ -25,7 +25,7 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                                        // for DEBUG_PRINTF
+#include "siconos_debug.h"                                        // for DEBUG_PRINTF
 #include "numerics_verbose.h"                             // for numerics_error
 #include "projectionOnCone.h"                             // for projectionO...
 #include "NSSTools.h"  // for max

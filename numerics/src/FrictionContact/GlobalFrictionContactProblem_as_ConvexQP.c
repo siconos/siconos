@@ -24,7 +24,7 @@
 #include "SiconosBlas.h"                         // for cblas_dcopy
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 void Projection_ConvexQP_GFC3D_DualCone(void *cqpIn, double *x, double *PX)

@@ -22,7 +22,7 @@
 
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
-#include "debug.h"
+#include "siconos_debug.h"
 
 HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
                        double a, double b,
