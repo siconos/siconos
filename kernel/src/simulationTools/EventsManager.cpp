@@ -32,7 +32,7 @@ unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 EventsManager::EventsManager(SP::TimeDiscretisation td): _k(0), _td(td),
   _T(std::numeric_limits<double>::infinity()), _NSeventInsteadOfTD(false)

@@ -34,7 +34,7 @@
 #include "SiconosBlas.h"                         // for cblas_dnrm2
 
 //#define DEBUG_MESSAGES
-#include "debug.h"                         // for cblas_dnrm2
+#include "siconos_debug.h"                         // for cblas_dnrm2
 
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)

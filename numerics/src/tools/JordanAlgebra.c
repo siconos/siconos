@@ -22,7 +22,7 @@
 #include "NumericsVector.h"
 
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)

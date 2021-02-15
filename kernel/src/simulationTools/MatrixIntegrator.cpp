@@ -32,7 +32,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 
-#include <debug.h>
+#include "siconos_debug.h"
 
 MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const  TimeDiscretisation & td, SP::SiconosMatrix E): _E(E)
 {

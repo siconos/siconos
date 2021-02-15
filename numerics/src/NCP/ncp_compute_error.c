@@ -17,7 +17,7 @@
 */
 #include "LCP_Solvers.h"  // for lcp_compute_error_only
 #include "NCP_Solvers.h"  // for ncp_compute_error
-#include "debug.h"        // for DEBUG_END, DEBUG_BEGIN, DEBUG_PRINTF
+#include "siconos_debug.h"        // for DEBUG_END, DEBUG_BEGIN, DEBUG_PRINTF
 
 
 int ncp_compute_error(int n, double* z, double * F, double tol, double* err)

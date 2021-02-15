@@ -12,7 +12,7 @@
 #include <limits>
 
 //#define DEBUG_MESSAGES 1
-#include <debug.h>
+#include "siconos_debug.h"
 
 #include <boost/math/quaternion.hpp>
 

@@ -27,7 +27,7 @@
 #include "NM_MPI.h"
 
 /*#define DEBUG_MESSAGES*/
-#include "debug.h"
+#include "siconos_debug.h"
 
 void NM_MUMPS_free(void* p)
 {

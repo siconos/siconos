@@ -30,7 +30,7 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_NO_MATRIX
-#include "debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR_WE
+#include "siconos_debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR_WE
 #include "lcp_cst.h"                       // for SICONOS_LCP_PIVOT_PATHSEARCH
 #include "numerics_verbose.h"              // for verbose
 #include "pivot-utils.h"                   // for do_pivot_driftless, do_pivot

@@ -1,5 +1,5 @@
 FROM debian:buster
-RUN apt update  && apt upgrade -y && apt install -y -qq \
+RUN apt update  && apt install -y -qq \
         cmake \
         git-core \
         make \
@@ -31,4 +31,4 @@ RUN apt update  && apt upgrade -y && apt install -y -qq \
         valgrind \
         python3-lxml \
         python3-h5py \
-        vim && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
+        vim && apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*

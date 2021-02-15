@@ -39,7 +39,7 @@ dim(v)=nn
 
 
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "siconos_debug.h"
 
 static int sN;
 static int sM;

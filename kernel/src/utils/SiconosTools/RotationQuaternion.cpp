@@ -21,7 +21,7 @@
 // #define DEBUG_MESSAGES
 #include "RotationQuaternion.hpp"
 
-#include <debug.h>
+#include "siconos_debug.h"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include <boost/math/quaternion.hpp>
@@ -325,3 +325,63 @@ void normalizeq(SP::SiconosVector q)
   q->setValue(5, q->getValue(5) * normq);
   q->setValue(6, q->getValue(6) * normq);
 }
+
+
+void quaternionFromTwistVector(SiconosVector& twist, SiconosVector& q)
+ {
+   assert(twist.size() == 6);
+   assert(q.size() == 7);
+   double angle = sqrt(twist.getValue(3)*twist.getValue(3)+
+                twist.getValue(4)*twist.getValue(4)+
+                twist.getValue(5)*twist.getValue(5));
+
+    double f = 0.5 * sin_x(angle *0.5);
+
+    q.setValue(3,cos(angle/2.0));
+   q.setValue(4,twist.getValue(3)* f);
+   q.setValue(5,twist.getValue(4)* f);
+   q.setValue(6,twist.getValue(5)* f);
+ }
+void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b, SiconosVector& ab)
+{
+
+  assert(a.size() == 7);
+  assert(b.size() == 7);
+  assert(ab.size()== 7);
+
+  // For the translational component, the composition law is the addition
+  ab.setValue(0,a.getValue(0)+b.getValue(0));
+  ab.setValue(1,a.getValue(1)+b.getValue(1));
+  ab.setValue(2,a.getValue(2)+b.getValue(2));
+
+  // For the quaternion that encodes rotation, the composition law is the quaternion product.
+  ::boost::math::quaternion<double>    quat_a(a.getValue(3), a.getValue(4), a.getValue(5), a.getValue(6));
+  ::boost::math::quaternion<double>    quat_b(b.getValue(3), b.getValue(4), b.getValue(5), b.getValue(6));
+  ::boost::math::quaternion<double>    quat_ab = quat_a * quat_b;
+  ab.setValue(3,quat_ab.R_component_1());
+  ab.setValue(4,quat_ab.R_component_2());
+  ab.setValue(5,quat_ab.R_component_3());
+  ab.setValue(6,quat_ab.R_component_4());
+}
+
+void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b)
+{
+
+  assert(a.size() == 7);
+  assert(b.size() == 7);
+
+  // For the translational component, the composition law is the addition
+  b.setValue(0,a.getValue(0)+b.getValue(0));
+  b.setValue(1,a.getValue(1)+b.getValue(1));
+  b.setValue(2,a.getValue(2)+b.getValue(2));
+
+  // For the quaternion that encodes rotation, the composition law is the quaternion product.
+  ::boost::math::quaternion<double>    quat_a(a.getValue(3), a.getValue(4), a.getValue(5), a.getValue(6));
+  ::boost::math::quaternion<double>    quat_b(b.getValue(3), b.getValue(4), b.getValue(5), b.getValue(6));
+  ::boost::math::quaternion<double>    quat_ab = quat_a * quat_b;
+  b.setValue(3,quat_ab.R_component_1());
+  b.setValue(4,quat_ab.R_component_2());
+  b.setValue(5,quat_ab.R_component_3());
+  b.setValue(6,quat_ab.R_component_4());
+}
+

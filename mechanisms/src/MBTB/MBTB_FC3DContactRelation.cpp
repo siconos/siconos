@@ -6,7 +6,7 @@
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_STDOUT
-#include "debug.h"
+#include "siconos_debug.h"
 
 #define OUTPUT_H_IN_FILE
 

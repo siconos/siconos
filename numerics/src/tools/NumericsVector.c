@@ -22,7 +22,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"   // for DEBUG_PRINTF
+#include "siconos_debug.h"   // for DEBUG_PRINTF
 #include "SiconosBlas.h"
 #include "NumericsMatrix.h"
 #include "float.h"

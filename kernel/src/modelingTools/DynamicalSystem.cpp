@@ -20,7 +20,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
-#include "debug.h"
+#include "siconos_debug.h"
 
 #include <iostream>
 

@@ -21,6 +21,7 @@
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
+#include "RotationQuaternion.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
 
@@ -42,7 +43,7 @@
 // #define DEBUG_MESSAGES
 //#define DEBUG_BEGIN_END_ONLY
 //#define DEBUG_WHERE_MESSAGES
-#include <debug.h>
+#include "siconos_debug.h"
 
 
 using namespace RELATION;
@@ -376,7 +377,7 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
     W.setIsSymmetric(true);
     W.setIsPositiveDefinite(true);
   }
-  
+
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
   DEBUG_END("MoreauJeanOSI::initializeIterationMatrixW\n");
@@ -669,6 +670,7 @@ double MoreauJeanOSI::computeResidu()
       const SiconosVector &v = *d.velocity(); // v = v_k,i+1
       //residuFree.zero();
       DEBUG_EXPR(residuFree.display());
+
       DEBUG_EXPR(vold.display());
       DEBUG_EXPR(v.display());
 
@@ -688,6 +690,9 @@ double MoreauJeanOSI::computeResidu()
         scal(coef, fold, residuFree, false);
 
         // Expensive computes forces(ti,vi,qi)
+        // SiconosVector &qold = *d.qMemory()->getSiconosVector(0);
+        // SiconosVector &vold = *d.velocityMemory()->getSiconosVector(0);
+
         // d.computeForces(told, qold, vold);
         // double coef = -h * (1 - _theta);
         // // residuFree += coef * fL_i
@@ -1595,44 +1600,62 @@ void MoreauJeanOSI::updatePosition(DynamicalSystem& ds)
   }
   else if(dsType == Type::NewtonEulerDS)
   {
+
+    // Old Version with projection
+    //  NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
+    // SiconosVector &v = *d.twist();
+    // DEBUG_EXPR(d.display());
+    // //compute q
+    // //first step consists in computing  \dot q.
+    // //second step consists in updating q.
+    // //
+    // SiconosMatrix& T = *d.T();
+    // SiconosVector& dotq = *d.dotq();
+    // DEBUG_EXPR(v.display());
+    // prod(T, v, dotq, true);
+    // DEBUG_EXPR(dotq.display());
+    // SiconosVector& q = *d.q();
+    // //  -> get previous time step state
+    // SiconosVector& dotqold = *d.dotqMemory()->getSiconosVector(0);
+    // DEBUG_EXPR(dotqold.display());
+    // // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
+    // double coeff = h * _theta;
+    // scal(coeff, dotq, q) ; // q = h*theta*v
+    // coeff = h * (1 - _theta);
+    // scal(coeff, dotqold, q, false); // q += h(1-theta)*vold
+    // SiconosVector& qold = *d.qMemory()->getSiconosVector(0);
+    // DEBUG_EXPR(qold.display());
+    // q += qold;   // q += qold
+    // DEBUG_PRINT("new q before normalizing\n");
+    // DEBUG_EXPR(q.display());
+    // //q[3:6] must be normalized
+    // d.normalizeq();
+    // DEBUG_PRINT("new q after normalizing\n");
+    // DEBUG_EXPR(q.display());
+
+    
     // get dynamical system
-    NewtonEulerDS& d = static_cast<NewtonEulerDS&>(ds);
-    const SiconosVector &v = *d.twist();
-    //DEBUG_EXPR(d.display());
-
-    //compute q
-    //first step consists in computing  \dot q.
-    //second step consists in updating q.
-    //
-    SiconosMatrix& T = *d.T();
-    SiconosVector& dotq = *d.dotq();
-    DEBUG_EXPR(v.display());
-    prod(T, v, dotq, true);
-    DEBUG_EXPR(dotq.display());
-
-    SiconosVector& q = *d.q();
-    //  -> get previous time step state
-    const SiconosVector& dotqold = d.dotqMemory().getSiconosVector(0);
-    DEBUG_EXPR(dotqold.display());
-
-
-    // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
-    double coeff = h * _theta;
-    scal(coeff, dotq, q) ; // q = h*theta*v
-
-    coeff = h * (1 - _theta);
-    scal(coeff, dotqold, q, false); // q += h(1-theta)*vold
+    NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
 
     const SiconosVector& qold = d.qMemory().getSiconosVector(0);
-    DEBUG_EXPR(qold.display());
-    q += qold;   // q += qold
+    const SiconosVector& vold = d.twistMemory().getSiconosVector(0);
+    SiconosVector& q = *d.q();
+    SiconosVector& v = *d.twist();
 
-    DEBUG_PRINT("new q before normalizing\n");
+    SP::SiconosVector velocityIncrement(new SiconosVector(v.size()));
+    double coeff = h * _theta;
+    scal(coeff, v, *velocityIncrement) ; //  velocityIncrement= h*theta*v
+    coeff = h * (1 - _theta);
+    scal(coeff, vold, *velocityIncrement, false); // velocityIncrement += h(1-theta)*vold
+    DEBUG_EXPR(velocityIncrement->display());
+
+    q.setValue(0,velocityIncrement->getValue(0));
+    q.setValue(1,velocityIncrement->getValue(1));
+    q.setValue(2,velocityIncrement->getValue(2));
+    quaternionFromTwistVector(*velocityIncrement, q);
+
     DEBUG_EXPR(q.display());
-
-    //q[3:6] must be normalized
-    d.normalizeq();
-    DEBUG_PRINT("new q after normalizing\n");
+    compositionLawLieGroup(qold, q);
     DEBUG_EXPR(q.display());
 
   }

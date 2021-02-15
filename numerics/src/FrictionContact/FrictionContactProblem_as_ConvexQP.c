@@ -23,7 +23,7 @@
 #include "SolverOptions.h"           // for SolverOptions
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                   // for DEBUG_PRINT
+#include "siconos_debug.h"                   // for DEBUG_PRINT
 #include "projectionOnCylinder.h"    // for projectionOnCylinder
 #include "projectionOnDisk.h"        // for projectionOnDisk
 #include "SiconosBlas.h"                   // for cblas_dcopy

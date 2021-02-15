@@ -38,7 +38,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 // Constructor from solver id - Uses delegated constructor
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolverId):

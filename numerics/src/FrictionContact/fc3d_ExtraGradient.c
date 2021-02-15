@@ -25,7 +25,7 @@
 #include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                   // for DEBUG_PRINTF, DEBUG_EXPR_WE
+#include "siconos_debug.h"                   // for DEBUG_PRINTF, DEBUG_EXPR_WE
 #include "fc3d_Solvers.h"            // for fc3d_ExtraGradient, fc3d_ExtraGr...
 #include "fc3d_compute_error.h"      // for fc3d_compute_error
 #include "numerics_verbose.h"        // for verbose

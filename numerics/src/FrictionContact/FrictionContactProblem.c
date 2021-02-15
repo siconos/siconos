@@ -27,7 +27,7 @@
 #include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"              // for DEBUG_PRINT, DEBUG_PRINTF
+#include "siconos_debug.h"              // for DEBUG_PRINT, DEBUG_PRINTF
 #include "numerics_verbose.h"   // for CHECK_IO, numerics_error, numerics_pr...
 #include "io_tools.h"
 #if defined(WITH_FCLIB)

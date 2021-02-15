@@ -1,0 +1,52 @@
+# Tests
+
+include:
+   - ci_gitlab/gitlab-ci-siconos-templates.yml
+
+debian-stretch:docker-build:
+  variables:
+    IMAGE_NAME: debian-stretch
+  extends: .docker-manual
+
+ubuntu18.04:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu18.04
+  extends: .docker-manual
+
+ubuntu18.04-doc:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu18.04-doc
+  extends: .docker-manual
+  stage: docker-build-layer2
+  needs: ["ubuntu18.04:docker-build"]
+
+ubuntu18.04-oce:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu18.04-oce
+  extends: .docker-manual
+  stage: docker-build-layer2
+  needs: ["ubuntu18.04:docker-build"]
+
+ubuntu20.4-oce:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu20.04-oce
+  extends: .docker-manual
+  stage: docker-build-layer3
+  # #needs: ["ubuntu20.4:docker-build"]
+
+archlinux-oce:docker-build:
+  variables:
+    IMAGE_NAME: archlinux-oce
+  extends: .docker-manual
+
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# It's based on ubuntu 18.04.
+# ubuntu18.04-oce:docker-build:
+#   variables:
+#     IMAGE_NAME: ubuntu18.04-oce
+#   extends: .docker-build
+#   stage: docker-build-layer2
+#   needs: ["ubuntu18.04:docker-build"]
+
+  

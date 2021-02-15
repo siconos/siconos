@@ -22,7 +22,7 @@
 #include "ArmijoSearch.h"
 #include <assert.h>            // for assert
 #include "SiconosSets.h"       // for project_on_set
-#include "debug.h"             // for DEBUG_EXPR_WE, DEBUG_PRINT, DEBUG_PRINTF
+#include "siconos_debug.h"             // for DEBUG_EXPR_WE, DEBUG_PRINT, DEBUG_PRINTF
 #include "numerics_verbose.h"  // for numerics_printf_verbose
 #include "SiconosBlas.h"       // for cblas_daxpy, cblas_dcopy, cblas_ddot
 

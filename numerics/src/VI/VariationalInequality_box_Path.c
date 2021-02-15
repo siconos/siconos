@@ -54,7 +54,7 @@ extern "C"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 #if defined(__cplusplus)
 #undef restrict

@@ -25,7 +25,7 @@
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"             // for DEBUG_PRINT, DEBUG_PRINTF
+#include "siconos_debug.h"             // for DEBUG_PRINT, DEBUG_PRINTF
 
 void rollingFrictionContact_display(RollingFrictionContactProblem* problem)
 {

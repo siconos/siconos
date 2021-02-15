@@ -42,7 +42,7 @@ namespace siconosBindings = boost::numeric::bindings::blas;
 #include <algorithm>    // std::transform
 #include "SiconosException.hpp"
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 // Do not document
 /// @cond

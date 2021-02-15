@@ -26,7 +26,7 @@
 #include "SiconosSets.h"            // for box_constraints
 #include "SolverOptions.h"          // for SolverOptions
 #include "VariationalInequality.h"  // for VariationalInequality
-#include "debug.h"                  // for DEBUG_PRINTF
+#include "siconos_debug.h"                  // for DEBUG_PRINTF
 #include "numerics_verbose.h"       // for verbose
 
 int variationalInequality_computeError(

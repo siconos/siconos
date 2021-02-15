@@ -40,7 +40,7 @@ using namespace RELATION;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 int LsodarOSI::count_NST = 0;
 int LsodarOSI::count_NFE = 0;

@@ -24,7 +24,7 @@
 #include "TypeName.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include <debug.h>
+#include "siconos_debug.h"
 #include "LagrangianR.hpp"
 #include "NewtonImpactNSL.hpp"
 

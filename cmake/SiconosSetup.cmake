@@ -216,7 +216,7 @@ if(WITH_TESTING)
   # File used to print tests setup messages.
   set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
 
-  set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
+  set(tests_timeout 200 CACHE INTERNAL "Limit time for tests (in seconds)")
   if(HAVE_SICONOS_KERNEL)
     find_package(CPPUNIT REQUIRED)
     # File used as main driver for cppunit tests

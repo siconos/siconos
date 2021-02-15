@@ -41,7 +41,7 @@
 #endif
 
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 const char* const   SICONOS_NONAME_STR = "NONAME";

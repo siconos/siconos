@@ -30,7 +30,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 
-#include "debug.h"
+#include "siconos_debug.h"
 
 void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0,
                                      const NonSmoothDynamicalSystem & nsds,

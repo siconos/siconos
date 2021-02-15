@@ -31,7 +31,7 @@
 /* #define DEBUG_NOCOLOR 1 */
 /* #define DEBUG_STDOUT 1 */
 /* #define DEBUG_MESSAGES 1 */
-#include "debug.h"             // for DEBUG_PRINTF, DEBUG_END, DEBUG_BEGIN
+#include "siconos_debug.h"             // for DEBUG_PRINTF, DEBUG_END, DEBUG_BEGIN
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_war...
 #include "op3x3.h"             // for mvp3x3, mvp_alpha3x3
 #include "NSSTools.h"     // for min, max
@@ -52,7 +52,7 @@
 #endif
 #endif
 
-void SBM_inc_version(SparseBlockStructuredMatrix* M)
+static void SBM_inc_version(SparseBlockStructuredMatrix* M)
 {
   NDV_inc(&(M->version));
 }

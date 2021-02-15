@@ -28,7 +28,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                   // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
+#include "siconos_debug.h"                   // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
 #include "numerics_verbose.h"        // for numerics_error
 #include "projectionOnCone.h"        // for projectionOnCone
 #include "projectionOnCylinder.h"    // for projectionOnCylinder

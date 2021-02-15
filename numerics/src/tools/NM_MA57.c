@@ -24,7 +24,7 @@
 
 
 /*#define DEBUG_MESSAGES*/
-#include "debug.h"
+#include "siconos_debug.h"
 
 void NM_MA57_free(void* p)
 {

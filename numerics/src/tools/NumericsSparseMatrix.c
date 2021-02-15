@@ -29,7 +29,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"             // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
+#include "siconos_debug.h"             // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
 #include "numerics_verbose.h"  // for numerics_error_nonfatal, CHECK_IO
 #include "string.h"            // for memcpy, memset
 
@@ -121,8 +121,10 @@ CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M)
   case NSM_HALF_TRIPLET: return M->half_triplet;
   case NSM_CSR: return M->csr;
   case NSM_CSC: return M->csc;
-  default: numerics_error("NSM_latest", "unknown matrix type");
+  default:
+    numerics_error("NSM_latest", "unknown matrix type");
   }
+  return 0;
 }
 
 void NSM_reset_version(NumericsSparseMatrix*M, NSM_t id)

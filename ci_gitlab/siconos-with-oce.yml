@@ -5,6 +5,45 @@
 include: 
   - ci_gitlab/gitlab-ci-siconos-templates.yml
 
+ubuntu20.04-oce:configure:
+   variables:
+     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
+     cdash_submit: 1
+     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+   extends:
+     - .siconos-configure
+   when: manual
+
+ubuntu20.04-oce:build:
+    variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+    extends:
+      - .siconos-build
+    when: manual
+    needs: ["ubuntu20.04-oce:configure"]
+
+ubuntu20.04-oce:test:
+    variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+    needs: ["ubuntu20.04-oce:build"]
+    extends:
+      - .siconos-test
+    when: manual
+
+ubuntu20-oce:install:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
+    siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-ubuntu-fossa
+  extends: .siconos-install
+  needs: ["ubuntu20.04-oce:build"]
+  when: manual
+  
+
+
 archlinux-oce:configure:
    variables:
      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce

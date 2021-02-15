@@ -20,7 +20,7 @@
 #ifdef WITH_SUPERLU
 
 #include <slu_ddefs.h>
-#include "debug.h"
+#include "siconos_debug.h"
 #include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"

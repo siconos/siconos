@@ -21,7 +21,7 @@
 
 #include <iostream>
 //#define DEBUG_MESSAGES 1
-#include <debug.h>
+#include "siconos_debug.h"
 
 gp_Pnt cadmbtb_FacePoint(const TopoDS_Face &face,Standard_Real u, Standard_Real v)
 {

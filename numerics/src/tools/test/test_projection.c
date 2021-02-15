@@ -1,7 +1,7 @@
 #include <assert.h>                   // for assert
 #include <projectionOnRollingCone.h>  // for display_status_rolling_cone
 #include <stdio.h>                    // for printf
-#include "debug.h"                    // for DEBUG_EXPR
+#include "siconos_debug.h"                    // for DEBUG_EXPR
 #include "math.h"                     // for sqrt
 
 #ifdef DEBUG_MESSAGES

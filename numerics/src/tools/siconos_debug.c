@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "debug.h"
+#include "siconos_debug.h"
 
 /* add a global counter for the incrementation in debug output */
 

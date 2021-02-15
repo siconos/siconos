@@ -26,7 +26,7 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_clear
 #include "NumericsSparseMatrix.h"          // for NSM_new, NumericsSparseMatrix
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-#include "debug.h"                         // for DEBUG_PRINTF
+#include "siconos_debug.h"                         // for DEBUG_PRINTF
 #include "numerics_verbose.h"              // for verbose
 
 #include "SiconosConfig.h" // for WITH_FCLIB  // IWYU pragma: keep

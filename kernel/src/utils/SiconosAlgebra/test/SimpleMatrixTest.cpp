@@ -37,7 +37,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SimpleMatrixTest);
 using namespace Siconos;
 
 #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 // Note FP: tests are (rather) complete for Dense objects but many are missing for other cases (Triang, Symm etc ...).

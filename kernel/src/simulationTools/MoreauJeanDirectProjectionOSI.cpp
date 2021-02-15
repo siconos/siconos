@@ -35,7 +35,7 @@ using namespace RELATION;
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 //#define DEBUG_WHERE_MESSAGES
-#include <debug.h>
+#include "siconos_debug.h"
 
 #define SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD 1.e-7
 #define SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD 0.0

@@ -3,7 +3,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Simulation.hpp"
 
-#include "debug.h"
+#include "siconos_debug.h"
 
 #include <algorithm>
 

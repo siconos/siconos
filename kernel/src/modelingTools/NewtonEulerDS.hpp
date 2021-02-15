@@ -31,6 +31,8 @@ typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int 
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);
 
 void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
+#include "RotationQuaternion.hpp"
+
 
 /** Compute the force and moment vectors applied to a body with state
  * q from a force vector at a given position. */
