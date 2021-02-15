@@ -37,7 +37,7 @@
 #include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGE */
+/* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"                    // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
 #include "numerics_verbose.h"         // for numerics_error, numerics_printf...
 #include "sanitizer.h"                // for cblas_dcopy_msan
@@ -56,6 +56,7 @@
 #include "lbl.h"
 #include "NM_MA57.h"
 #endif
+
 
 #ifdef __cplusplus
 #undef restrict
@@ -1343,9 +1344,12 @@ void NM_display(const NumericsMatrix* const m)
   {
     printf("========== internalData = NULL\n");
   }
-
-
+  if (NM_destructible(m))
+    printf("========== is destructible \n");
+  else
+    printf("========== is not destructible \n");
 }
+
 void NM_display_row_by_row(const NumericsMatrix* const m)
 {
   if(! m)
@@ -2642,6 +2646,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   if (NM_destructible(A))
   {
     /* A is destructible, so B must be destructible */
+    NM_unpreserve(B);
     B->destructible = B;
   }
   else
@@ -2651,6 +2656,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     NM_preserve(B);
   }
 
+  assert(NM_destructible(B) == NM_destructible(A));
   assert(NM_max_version(B) == NM_max_version(A));
 
 }

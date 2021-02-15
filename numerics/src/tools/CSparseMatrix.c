@@ -255,6 +255,9 @@ int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol, CSpars
 int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A)
 {
   assert(A);
+  FILE * foutput = fopen("cs.py", "w");
+  CSparseMatrix_print_in_file(A, 0, foutput);
+  fclose(foutput);
   cs_chol_A->n = A->n;
   css* S = cs_schol(order, A);
   cs_chol_A->S = S;
@@ -478,7 +481,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
 CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b)
 {
   assert(cs_chol_A);
-
+  
   CS_INT ok;
   CS_INT n = cs_chol_A->n;
   css* S = cs_chol_A->S;
