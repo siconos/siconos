@@ -265,8 +265,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   GlobalFrictionContactProblem* problem = gfc3d_balancing_problem(problem_original,options);
   gfc3d_balancing_go_to_balanced_variables(problem, options,
                                            reaction, velocity, globalVelocity);
-  
-  
+
+
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -315,7 +315,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
                                       * Htrans*globalVelocity */
 
   NumericsMatrix *Htrans =  NM_transpose(H);
-  
+
   /* Compute M + rho H H^T (storage in W)*/
   NumericsMatrix *W = NM_create(NM_SPARSE,n,n);
   NM_triplet_alloc(W, n);
@@ -336,7 +336,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
 
   double norm_q = cblas_dnrm2(n, q, 1);
   problem->norm_q=norm_q;
-  
+
   double norm_b = cblas_dnrm2(m, b, 1);
   problem->norm_b=norm_b;
 
@@ -345,13 +345,13 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   {
     GlobalFrictionContactProblem_balancing_data  *data = (GlobalFrictionContactProblem_balancing_data * ) problem->env;
     original_problem = data->original_problem;
-      
-      
+
+
     assert(original_problem);
     original_problem->norm_b = cblas_dnrm2(m, original_problem->b, 1);
     original_problem->norm_q = cblas_dnrm2(n, original_problem->q, 1);
   }
-  
+
 
   if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] ==
       SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_YES)
@@ -873,27 +873,27 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
       {
         (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
                         norm_q, norm_b,  &error);
-        printf("############ error  = %g\n", error);
-        
+        /* printf("############ error  = %g\n", error); */
+
         gfc3d_balancing_back_to_original_variables(problem,
-                                                 options,
-                                                 reaction, velocity, v);
+                                                   options,
+                                                   reaction, velocity, v);
         (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
-                        original_problem->norm_b, original_problem->norm_b,  &error);
+                        original_problem->norm_q, original_problem->norm_b,  &error);
         error_original = error;
-        printf("############ error original = %g\n", error_original);
+        /* printf("############ error original = %g\n", error_original); */
       }
       else
       {
         (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
                         norm_q, norm_b,  &error);
-        printf("############ error  = %g\n", error);
+        /* printf("############ error  = %g\n", error); */
       }
-      
-      
 
 
-      
+
+
+
       numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
 
 
@@ -915,13 +915,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
           numerics_printf_verbose(1,"---- GFC3D - ADMM  - We keep the tolerance on the residual to %14.7e", tolerance);
         }
 
-        if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
-        {
-          gfc3d_balancing_go_to_balanced_variables(problem,
-                                                 options,
-                                                 reaction, velocity, v);
-        }
-        
+
         if(rescaling_cone)
         {
           for(size_t contact = 0 ; contact < nc ; ++contact)
@@ -940,6 +934,14 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
             reaction[pos] = reaction[pos]/ problem->mu[contact];
           }
         }
+        if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
+        {
+          gfc3d_balancing_go_to_balanced_variables(problem,
+                                                   options,
+                                                   reaction, velocity, v);
+        }
+
+        
       }
       //getchar();
     }
@@ -956,7 +958,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
                                                  options,
                                                  reaction, velocity, v);
       (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
-                      original_problem->norm_b, original_problem->norm_b,  &error);
+                      original_problem->norm_q, original_problem->norm_b,  &error);
     }
     else
     {
