@@ -61,7 +61,7 @@ class FrictionContactTraceParams():
 
 class FrictionContactTrace(FrictionContact):
 
-    def __init__(self, dim, solver, params=None, nsds=None):
+    def __init__(self, dim, solver_options, params=None, nsds=None):
         if params == None:
             self._params = FrictionContactTraceParams()
         else:
@@ -80,7 +80,7 @@ class FrictionContactTrace(FrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds=nsds
-        super(FrictionContactTrace, self).__init__(dim, solver)
+        super(FrictionContactTrace, self).__init__(dim, solver_options)
 
     def maxiter_condition(self, SO):
         return SO.iparam[N.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -194,7 +194,7 @@ class GlobalFrictionContactTraceParams():
 
 class GlobalFrictionContactTrace(GlobalFrictionContact):
 
-    def __init__(self, dim, solver, params=None, nsds=None):
+    def __init__(self, dim, solver_options, params=None, nsds=None):
         if params == None:
             self._params = GlobalFrictionContactTraceParams()
         else:
@@ -213,7 +213,7 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds=nsds
-        super(GlobalFrictionContactTrace, self).__init__(dim, solver)
+        super(GlobalFrictionContactTrace, self).__init__(dim, solver_options)
 
     def maxiter_condition(self, SO):
         return SO.iparam[N.SICONOS_IPARAM_ITER_DONE] >= self._maxiter

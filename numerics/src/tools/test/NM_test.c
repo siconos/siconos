@@ -3294,7 +3294,7 @@ static int test_NM_Cholesky_solve_matrix_rhs(void)
   NM_clear(C);
   NM_clear(M1T);
   if(info != 0) return info;
-  
+
   /* free memory */
 
   for(i = 0 ; i < nmm; i++)
@@ -3306,7 +3306,47 @@ static int test_NM_Cholesky_solve_matrix_rhs(void)
   printf("========= End Numerics tests for NumericsMatrix  (test_NM_Cholesky_solve_matrix_rhs) ========= \n");
   return info;
 }
+static int test_NM_Cholesky_solve_vs_posv_expert(void)
+{
+  printf("========= start Numerics tests for NumericsMatrix  (test_NM_Cholesky_solve_vs_posv_expert) ========= \n");
+  int info=1;
+  FILE* finput = fopen("./data/W_102x102.dat", "r");
+  NumericsMatrix *  W = NM_new_from_file(finput);
+  NM_preserve(W);
+  NM_is_symmetric(W);
+  //NM_display(W);
+  fclose(finput);
 
+  int n = W->size0;
+  double * x = (double*)malloc(n* sizeof(double));
+  for(int j=0; j < n; j++)
+    x[j] = 1.0;
+
+  NumericsMatrix * W_copy = NM_create(NM_SPARSE,W->size0, W->size1);
+  NM_copy(W, W_copy);
+  double * x_copy = (double*)malloc(n* sizeof(double));
+  for(int j=0; j < n; j++)
+    x_copy[j] = x[j];
+
+  NM_Cholesky_solve(W_copy, x_copy, 1);
+
+  NM_posv_expert(W, x, NM_KEEP_FACTORS);
+
+  for(int j=0; j < n; j++)
+    x_copy[j] = x_copy[j]-x[j];
+
+  double diff = cblas_dnrm2(n,x_copy,1);
+
+  printf("diff = %e\n", diff);
+
+  if(fabs(diff) >= sqrt(DBL_EPSILON))
+    info = 1;
+  else
+    info=0;
+  printf("========= end Numerics tests for NumericsMatrix  (test_NM_Cholesky_solve_vs_posv_expert) ========= \n");
+  return info;
+
+}
 static int test_NM_LDLT_solve_unit(NumericsMatrix * M, double * b)
 {
   int n = M->size0;
@@ -3421,7 +3461,7 @@ static int test_NM_LDLT_solve(void)
   double * b = NULL;
 
   int n =10;
-  b = (double*)malloc(n* sizeof(double)); 
+  b = (double*)malloc(n* sizeof(double));
 
 
   printf("test 1 ...\n");
@@ -3438,7 +3478,7 @@ static int test_NM_LDLT_solve(void)
   NM_clear(Id);
   free(Id);
   printf("test 1 ...ok \n");
-  
+
   printf("test 2 ...\n");
   NumericsMatrix * Z = NM_create(NM_SPARSE,2,2);
   NM_triplet_alloc(Z,0);
@@ -3763,8 +3803,9 @@ int main(int argc, char *argv[])
   info += test_NM_LU_solve_matrix_rhs();
   info += test_NM_Cholesky_solve_matrix_rhs();
   info += test_NM_Cholesky_solve();
+  info += test_NM_Cholesky_solve_vs_posv_expert();
   info += test_NM_LDLT_solve();
-  
+
 #ifdef WITH_OPENSSL
   info += test_NM_compute_values_sha1();
   info += test_NM_check_values_sha1();

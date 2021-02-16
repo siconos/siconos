@@ -2430,13 +2430,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     sn.SICONOS_FRICTION_3D_NSGS)
             sid = solver_options.solverId
             if(osi == sk.MoreauJeanGOSI):
-                osnspb = GFCTrace(3, sid, friction_contact_trace_params, nsds)
+                osnspb = GFCTrace(3, solver_options, friction_contact_trace_params, nsds)
                 osnspb.setMStorageType(sn.NM_SPARSE)
                 osnspb.setMaxSize(osnspb_max_size)
             else:
-                osnspb = FCTrace(3, sid, friction_contact_trace_params, nsds)
+                osnspb = FCTrace(3, solver_options, friction_contact_trace_params, nsds)
                 osnspb.setMaxSize(osnspb_max_size)
                 osnspb.setMStorageType(sn.NM_DENSE)
+
 
         osnspb.setNumericsVerboseMode(numerics_verbose)
         if numerics_verbose:
