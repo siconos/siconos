@@ -352,8 +352,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   NumericsMatrix* M_original=problem->M;
   NumericsMatrix* H_original=problem->H;
 
-
-
   /**************************************************************************/
   /* Change storage                        **********************************/
   /**************************************************************************/

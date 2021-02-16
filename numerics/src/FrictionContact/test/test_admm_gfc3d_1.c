@@ -26,7 +26,7 @@
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
 
-  int n_solvers = 5;
+  int n_solvers = 6;
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
