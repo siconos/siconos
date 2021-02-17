@@ -325,7 +325,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   size_t n = problem_original->M->size0;
   size_t m = 3 * nc;
 
-/**************************************************************************/
+  /**************************************************************************/
   /* Balancing                        ***************************************/
   /**************************************************************************/
 
@@ -337,7 +337,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   {
     GlobalFrictionContactProblem_balancing_data  *data = (GlobalFrictionContactProblem_balancing_data * ) problem->env;
     original_problem = data->original_problem;
-
     assert(original_problem);
     original_problem->norm_b = cblas_dnrm2(m, original_problem->b, 1);
     original_problem->norm_q = cblas_dnrm2(n, original_problem->q, 1);
@@ -352,8 +351,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
 
   NumericsMatrix* M_original=problem->M;
   NumericsMatrix* H_original=problem->H;
-
-
 
   /**************************************************************************/
   /* Change storage                        **********************************/
@@ -945,19 +942,19 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
         }
       }
 
-      /* double error_original=0.0; */
+      double error_original=0.0;
       if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
       {
-        /* (*computeError)(problem,  reaction, velocity, v,  tolerance, options, */
-        /*                 norm_q, norm_b,  &error); */
+        (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
+                        norm_q, norm_b,  &error);
         /* printf("############ error  = %g\n", error); */
 
         gfc3d_balancing_back_to_original_variables(problem,
-                                                 options,
-                                                 reaction, velocity, v);
+                                                   options,
+                                                   reaction, velocity, v);
         (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
-                        original_problem->norm_b, original_problem->norm_b,  &error);
-        /* error_original = error; */
+                        original_problem->norm_q, original_problem->norm_b,  &error);
+        error_original = error;
         /* printf("############ error original = %g\n", error_original); */
       }
       else
@@ -992,13 +989,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
           numerics_printf_verbose(1,"---- GFC3D - ADMM  - We keep the tolerance on the residual to %14.7e", tolerance);
         }
 
-        if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
-        {
-          gfc3d_balancing_go_to_balanced_variables(problem,
-                                                 options,
-                                                 reaction, velocity, v);
-        }
-
         if(rescaling_cone)
         {
           for(size_t contact = 0 ; contact < nc ; ++contact)
@@ -1017,6 +1007,14 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
             reaction[pos] = reaction[pos]/ problem->mu[contact];
           }
         }
+        if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
+        {
+          gfc3d_balancing_go_to_balanced_variables(problem,
+                                                   options,
+                                                   reaction, velocity, v);
+        }
+
+        
       }
       //getchar();
     }
@@ -1033,7 +1031,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
                                                  options,
                                                  reaction, velocity, v);
       (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
-                      original_problem->norm_b, original_problem->norm_b,  &error);
+                      original_problem->norm_q, original_problem->norm_b,  &error);
     }
     else
     {

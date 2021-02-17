@@ -33,24 +33,42 @@ struct GlobalFrictionContactProblem_balancing_data
 extern "C"
 {
 #endif
+  void gfc3d_rescaling(
+    GlobalFrictionContactProblem* problem,
+    double alpha,  double beta, double gamma);
 
-  GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProblem* problem,
-                                                       SolverOptions* options);
+  void gfc3d_balancing_M(
+    GlobalFrictionContactProblem* problem,
+    BalancingMatrices * B_for_M);
+  
+  void gfc3d_balancing_MHHT(
+    GlobalFrictionContactProblem* problem,
+    BalancingMatrices * B_for_M,
+    BalancingMatrices * B_for_H);
 
-  void gfc3d_balancing_go_to_balanced_variables(GlobalFrictionContactProblem* balanced_problem,
-                                  SolverOptions* options,
-                                  double *r, double *u, double* v);
-  
-  void gfc3d_balancing_back_to_original_variables(GlobalFrictionContactProblem* balanced_problem,
-                               SolverOptions* options,
-                               double *r, double *u, double *v);
-  
-  GlobalFrictionContactProblem*  gfc3d_balancing_free(GlobalFrictionContactProblem* balanced_problem,
-                            SolverOptions* options);
+  GlobalFrictionContactProblem*  gfc3d_balancing_problem(
+    GlobalFrictionContactProblem* problem,
+    SolverOptions* options);
 
-  GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_free(GlobalFrictionContactProblem_balancing_data * data);
-  
+  void gfc3d_balancing_go_to_balanced_variables(
+    GlobalFrictionContactProblem* balanced_problem,
+    SolverOptions* options,
+    double *r, double *u, double* v);
+
+  void gfc3d_balancing_back_to_original_variables(
+    GlobalFrictionContactProblem* balanced_problem,
+    SolverOptions* options,
+    double *r, double *u, double *v);
+
+  GlobalFrictionContactProblem*  gfc3d_balancing_free(
+    GlobalFrictionContactProblem* balanced_problem,
+    SolverOptions* options);
+
+  GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_free(
+    GlobalFrictionContactProblem_balancing_data * data);
+
   GlobalFrictionContactProblem_balancing_data  * gfc3d_balancing_data_new(void);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
