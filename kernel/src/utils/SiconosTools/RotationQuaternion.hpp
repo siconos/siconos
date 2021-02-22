@@ -51,10 +51,18 @@ void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosV
 
 void quaternionFromTwistVector(SiconosVector& twist, SiconosVector& q);
 
+/* For a given quaternion q, compute the norm
+ */
+double quaternionNorm(const SiconosVector &q);
+
 
 /* For a given quaternion q, compute the unit quaternion by normalization
  */
 void normalizeq(SP::SiconosVector q);
+
+/* For a given quaternion q, compute the unit quaternion by normalization
+ */
+void normalizeq(SiconosVector &q);
 
 /* For a given quaternion q, compute the associated rotation matrix
  * w.r.t the quaternion that parametrize the rotation in q,

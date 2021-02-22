@@ -312,6 +312,17 @@ void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosV
 }
 
 
+double quaternionNorm(const SiconosVector &q)
+{
+  double normq = sqrt(q.getValue(3) * q.getValue(3) +
+                      q.getValue(4) * q.getValue(4) +
+                      q.getValue(5) * q.getValue(5) +
+                      q.getValue(6) * q.getValue(6));
+  return normq;
+}
+
+
+
 void normalizeq(SP::SiconosVector q)
 {
   double normq = sqrt(q->getValue(3) * q->getValue(3) +
@@ -326,21 +337,35 @@ void normalizeq(SP::SiconosVector q)
   q->setValue(6, q->getValue(6) * normq);
 }
 
+void  normalizeq(SiconosVector &q)
+{
+  double normq = sqrt(q.getValue(3) * q.getValue(3) +
+                      q.getValue(4) * q.getValue(4) +
+                      q.getValue(5) * q.getValue(5) +
+                      q.getValue(6) * q.getValue(6));
+  assert(normq > 0);
+  normq = 1.0 / normq;
+  q.setValue(3, q.getValue(3) * normq);
+  q.setValue(4, q.getValue(4) * normq);
+  q.setValue(5, q.getValue(5) * normq);
+  q.setValue(6, q.getValue(6) * normq);
+}
 
 void quaternionFromTwistVector(SiconosVector& twist, SiconosVector& q)
  {
    assert(twist.size() == 6);
    assert(q.size() == 7);
    double angle = sqrt(twist.getValue(3)*twist.getValue(3)+
-                twist.getValue(4)*twist.getValue(4)+
-                twist.getValue(5)*twist.getValue(5));
+                       twist.getValue(4)*twist.getValue(4)+
+                       twist.getValue(5)*twist.getValue(5));
 
-    double f = 0.5 * sin_x(angle *0.5);
+   double f = 0.5 * sin_x(angle *0.5);
 
-    q.setValue(3,cos(angle/2.0));
+   q.setValue(3,cos(angle/2.0));
    q.setValue(4,twist.getValue(3)* f);
    q.setValue(5,twist.getValue(4)* f);
    q.setValue(6,twist.getValue(5)* f);
+
  }
 void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b, SiconosVector& ab)
 {
@@ -383,5 +408,5 @@ void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b)
   b.setValue(4,quat_ab.R_component_2());
   b.setValue(5,quat_ab.R_component_3());
   b.setValue(6,quat_ab.R_component_4());
+  //normalizeq(b);
 }
-
