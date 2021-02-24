@@ -10,7 +10,7 @@ siconos_files = [item for item in siconos_files if not 'update_license' in item.
 
 search = ['Copyright 2016 INRIA', 'Copyright 2018 INRIA', 'Copyright 2019 INRIA']
 
-replace = ['Copyright 2020 INRIA'] * 3
+replace = ['Copyright 2021 INRIA'] * 3
 
 if (len(search) != len(replace)) :
     sys.exit("Error: search does not match with replace")

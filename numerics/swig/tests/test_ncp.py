@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2005, 2018 by INRIA
+# Copyright 2021 INRIA
 
 import numpy as np
 
