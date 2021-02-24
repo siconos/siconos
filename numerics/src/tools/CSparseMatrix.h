@@ -1,4 +1,4 @@
-/* Siconos, Copyright INRIA 2005-2016.
+/* Copyright 2021 INRIA.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify

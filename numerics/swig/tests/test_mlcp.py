@@ -1,4 +1,4 @@
-# Copyright (C) 2005, 2018 by INRIA
+# Copyright 2021 INRIA
 #!/usr/bin/env python
 
 import numpy as np

@@ -45,4 +45,4 @@ fi
 # --- Run ctest for Siconos ---
 cd $CI_PROJECT_DIR/build
 
-ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_install_siconos.cmake -Dmodel=$ctest_build_model -DUSER_FILE=$user_file -DALLOW_PARALLEL_BUILD=$allow_parallel_build -DCDASH_SUBMIT=$cdash_submit -VV -DCTEST_MODE=${ctest_mode}
+ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_install_siconos.cmake -Dmodel=$ctest_build_model -DUSER_FILE=$user_file -DALLOW_PARALLEL_BUILD=$allow_parallel_build -DCDASH_SUBMIT=$cdash_submit -V -DCTEST_MODE=${ctest_mode}
