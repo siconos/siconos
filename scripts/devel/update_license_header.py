@@ -1,50 +1,31 @@
+
 import os
-import sys
-from pathlib import Path
+import fileinput
+rootpath = './sico-2021'
+flist = []
+for root, directories, files in os.walk(rootpath):
+    for name in files:
+        flist.append(os.path.join(root, name))
 
-root_dir_instance = Path('.')
-siconos_files = [item.absolute() for item in root_dir_instance.glob("**/*") if not item.is_dir()]
-siconos_files = [item for item in siconos_files if not '.git' in item.as_posix()]
-siconos_files = [item for item in siconos_files if not 'update_license' in item.as_posix()]
-#siconos_files = [os.path.join(item.parent.name, item.name) for item in root_dir_instance.glob("**/*") if not item.is_dir()]
+    exclude = ['.png', '.eps', '.hdf5', '.h5','.jpg', '.gz','.pdf', '.npz']
+for ext in exclude:
+    flist[:] = [d for d in flist if not d.endswith(ext) and '.git' not in d]
 
-search = ['Copyright 2016 INRIA', 'Copyright 2018 INRIA', 'Copyright 2019 INRIA']
+# for f in flist:
+#     with open(f) as ff:
+#         try:
+#             ff.readline()
+#         except:
+#             print(f)
 
-replace = ['Copyright 2021 INRIA'] * 3
 
-if (len(search) != len(replace)) :
-    sys.exit("Error: search does not match with replace")
+instring ='Copyright 2020 INRIA'
+#instring ='Copyright (C) 2005, 2018 by INRIA'
+#instring ='Siconos-Numerics, Copyright INRIA 2005-2015'
+#instring = 'Siconos, Copyright INRIA 2005-2016'
 
-modified = []
-count = 0
-# Loop through files and replace "search" with "replace"
-for filename in siconos_files:
-    #filename = Path(filename).resolve()
-    #print(filename)
-    # Read in the file
+outstring='Copyright 2021 INRIA'
 
-    try:
-        with open(filename, 'r') as file :
-            filedata = file.read()
-
-        fdata2 = filedata # copy
-        for i in range(len(search)):
-            #if filedata.find(search[i]) > -1:
-            fdata2 = fdata2.replace(search[i], replace[i])
-
-            #modified.append(filename)
-               
-            # Write the file out again
-        #if filename in modified:
-        # print(filename)
-        if fdata2 == filedata:
-            #with open(filename, 'w') as file:
-            print("oualou", filename)
-                #file.write(fdata2)
-        else:
-            with open(filename, 'w') as file:
-                file.write(fdata2)
-            #pass#print("ok")
-    except UnicodeDecodeError:
-        pass
- 
+with fileinput.input(files=flist, inplace=True) as f:
+    for line in f:
+        print(line.replace(instring, outstring), end='')
