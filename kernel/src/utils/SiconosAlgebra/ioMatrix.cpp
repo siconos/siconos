@@ -200,7 +200,7 @@ double compareRefFile(const SimpleMatrix& data, std::string filename, double eps
     if(verbose)
       std::cout << "Warning: reference file " << filename
                 << " not found, no comparison performed." << std::endl;
-      Siconos::exception::process();
+    Siconos::exception::process();
   }
   if(!compare)
     return -1.0;

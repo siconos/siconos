@@ -33,6 +33,12 @@
 %ignore SiconosVector::begin() const;
 %ignore SiconosVector::end() const;
 
+// Ambiguity resolution
+
+%rename("solve_matrix") *::Solve(SiconosMatrix &);
+%rename("solve_vector") *::Solve(SiconosVector &);
+
+
 %include SiconosMatrix.hpp
 %include SimpleMatrix.hpp
 %include SiconosVector.hpp
@@ -280,3 +286,4 @@
     __next__ = next
 %}
 }
+

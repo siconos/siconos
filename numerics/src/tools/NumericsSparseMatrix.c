@@ -87,7 +87,7 @@ void NSM_inc_version(NumericsSparseMatrix* M, NSM_t type)
 }
 
 /* internal compare function */
-static inline NM_types nsm_max(const NumericsSparseMatrix* M,
+static inline NSM_t nsm_max(const NumericsSparseMatrix* M,
                                NSM_t type1,
                                NSM_t type2)
 {

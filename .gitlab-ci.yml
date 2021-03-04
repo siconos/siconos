@@ -157,6 +157,32 @@ ubuntu20.04:test:
     extends:
       - .siconos-test
  
+ubuntu20.04-debug:configure:
+   variables:
+     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+     cdash_submit: 1
+     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
+   extends:
+    - .siconos-configure
+
+ubuntu20.04-debug:build:
+  variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
+  extends:
+    - .siconos-build
+  needs: ["ubuntu20.04-debug:configure"]
+
+ubuntu20.04-debug:test:
+    variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
+    needs: ["ubuntu20.04-debug:build"]
+    extends:
+      - .siconos-test
+
 fedora-33:configure:
   variables:
      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-33

@@ -292,15 +292,15 @@ void BlockVector::setAllVect(VectorOfVectors& v)
   _update();
 }
 
-SP::SiconosVector BlockVector::operator [](unsigned int pos)
-{
-  return  _vect[pos];
-}
+// SP::SiconosVector BlockVector::operator [](unsigned int pos)
+// {
+//   return  _vect[pos];
+// }
 
-SPC::SiconosVector BlockVector::operator [](unsigned int pos) const
-{
-  return  _vect[pos];
-}
+// SPC::SiconosVector BlockVector::operator [](unsigned int pos) const
+// {
+//   return  _vect[pos];
+// }
 
 unsigned int BlockVector::getNumVectorAtPos(unsigned int pos) const
 {
@@ -360,7 +360,7 @@ BlockVector& BlockVector::operator -= (const BlockVector& vIn)
     VectorOfVectors::iterator it1;
 
     for(it1 = _vect.begin(); it1 != _vect.end(); ++it1)
-      **it1 -= *(vIn[i++]);
+      **it1 -= *(vIn.vector(i++));
   }
   else // use of a temporary SimpleVector... bad way, to be improved. But this case happens rarely ...
   {
@@ -403,7 +403,7 @@ BlockVector& BlockVector::operator += (const BlockVector& vIn)
     VectorOfVectors::iterator it1;
 
     for(it1 = _vect.begin(); it1 != _vect.end(); ++it1)
-      **it1 += *(vIn[i++]);
+      **it1 += *(vIn.vector(i++));
   }
   else // use of a temporary SimpleVector... bad way, to be improved. But this case happens rarely ...
   {

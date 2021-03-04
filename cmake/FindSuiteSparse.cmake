@@ -86,14 +86,24 @@ foreach(_component IN LISTS SuiteSparse_FIND_COMPONENTS)
     list(APPEND SuiteSparse_${_component}_LIBRARIES ${SuiteSparse_${_component}_${_lib}})
   endforeach()
 
-  find_package_handle_standard_args(SuiteSparse_${_component} REQUIRED_VARS
-    SuiteSparse_${_component}_INCLUDE_DIR
-    SuiteSparse_${_component}_LIBRARIES)
+  if(SuiteSparse_${_component}_INCLUDE_DIR AND SuiteSparse_${_component}_LIBRARIES)
+    set(SuiteSparse_${_component}_FOUND ON)
+  endif()
 
+  # trick required for cmake < 3.18
+  list(APPEND REQUIRED_VARIABLES SuiteSparse_${_component}_LIBRARIES SuiteSparse_${_component}_INCLUDE_DIR)
+    
 endforeach()
 
+set(REQUIRED_VARS_ARG)
+if(${CMAKE_VERSION} VERSION_LESS "3.18")
+  set(REQUIRED_VARS_ARG REQUIRED_VARS ${REQUIRED_VARIABLES})
+endif()   
 
-set(SuiteSparse_FOUND TRUE CACHE INTERNAL "")
+
+find_package_handle_standard_args(SuiteSparse HANDLE_COMPONENTS "${REQUIRED_VARS_ARG}")
+
+# set(SuiteSparse_FOUND TRUE CACHE INTERNAL "")
 foreach(_component IN LISTS SuiteSparse_FIND_COMPONENTS)
   
   if(SuiteSparse_${_component}_FOUND)

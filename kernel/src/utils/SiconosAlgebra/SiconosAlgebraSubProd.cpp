@@ -430,7 +430,7 @@ void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, con
   // Number of the subvector of x that handles element at position coord[5]
   unsigned int lastBlockNum = x.getNumVectorAtPos(coord[5]);
   Index subCoord = coord;
-  SPC::SiconosVector tmp = x[firstBlockNum];
+  SPC::SiconosVector tmp = x.vector(firstBlockNum);
   std::size_t subSize =  tmp->size(); // Size of the sub-vector
   const SP::Index xTab = x.tabIndex();
   if(firstBlockNum != 0)
@@ -456,7 +456,7 @@ void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, con
         THROW_EXCEPTION("not yet implemented for x block of blocks ...");
       if(xPos >= firstBlockNum && xPos <= lastBlockNum)
       {
-        tmp = x[xPos];
+        tmp = x.vector(xPos);
         if(firstLoop)
         {
           subprod(A, *tmp, y, subCoord, init);

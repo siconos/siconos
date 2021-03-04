@@ -171,7 +171,7 @@ static void rolling_fc3d_admm_symmetric(RollingFrictionContactProblem* restrict 
   double* q = problem->q;
   double* mu = problem->mu;
   double* mu_r = problem->mu_r;
-  double alpha_r=0.0;
+  // double alpha_r=0.0;
   RollingFrictionContactProblem *  rescaled_problem =  problem;
   if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
   {

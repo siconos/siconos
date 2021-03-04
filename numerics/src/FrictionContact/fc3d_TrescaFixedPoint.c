@@ -58,7 +58,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  internalSolverPtr internalsolver;
+  internalSolverPtr internalsolver=0;
   // dwork will be used to save friction threshold
   options->dWork = (double *) malloc(nc * sizeof(double));
   options->dWorkSize = nc;

@@ -276,7 +276,6 @@ static void gfc3d_print_problem_info(GlobalFrictionContactProblem* restrict prob
   size_t m = 3 * nc;
   double* q = problem->q;
   double* b = problem->b;
-  double* mu = problem->mu;
   double norm_q = cblas_dnrm2(n, q, 1);
   double norm_b = cblas_dnrm2(m, b, 1);
 
@@ -942,7 +941,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
         }
       }
 
-      double error_original=0.0;
+      //double error_original=0.0;
       if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
       {
         (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
@@ -954,7 +953,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
                                                    reaction, velocity, v);
         (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
                         original_problem->norm_q, original_problem->norm_b,  &error);
-        error_original = error;
+        //error_original = error;
         /* printf("############ error original = %g\n", error_original); */
       }
       else

@@ -274,7 +274,7 @@ int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,  CSparseMatrix_f
   CS_ENTRY *Ax, *Lx;
   css *S;
   csn *N;
-  CS_INT n, lnz, d;
+  CS_INT n, lnz;
   DEBUG_EXPR(cs_print(A,1););
   Ap=A->p;
   Ai=A->i;
@@ -321,8 +321,8 @@ int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,  CSparseMatrix_f
   CS_ENTRY* D;
   cs_ldlt_A->N->B = D= cs_malloc (n, sizeof (CS_ENTRY)) ; /* We use cs_ldlt_A->N->B  for storing D !! */
   CS_ENTRY* Y = cs_malloc (n, sizeof (CS_ENTRY)) ;
-  d = LDL_numeric (n, Ap, Ai, Ax, Lp, Parent, Lnz, Li, Lx, D,
-                   Y, Flag, Pattern, Perm, PermInv) ;
+  LDL_numeric (n, Ap, Ai, Ax, Lp, Parent, Lnz, Li, Lx, D,
+               Y, Flag, Pattern, Perm, PermInv) ;
 
   DEBUG_EXPR(cs_print(cs_ldlt_A->N->L,1););
   DEBUG_EXPR(NV_display(D,n));
@@ -661,7 +661,7 @@ CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors* cs_ldlt_A, double* x, dou
 
 CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
 {
-  CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai ;
+  CS_INT m=0, n=0, nzmax=0, nz, p, j, *Ap, *Ai ;
   long long foo;
   double *Ax ;
   int info = 0;

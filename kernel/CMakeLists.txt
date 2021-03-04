@@ -72,6 +72,11 @@ else()
 endif()
 
 # --- Extra setup for the component ---
+# remove boring warnings from boost bindings includes
+set_source_files_properties(
+  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/EigenProblems.cpp
+  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixSolvers.cpp
+  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable")
 
 # Links with other Siconos components
 target_link_libraries(kernel PRIVATE externals numerics)

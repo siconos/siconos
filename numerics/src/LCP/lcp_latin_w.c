@@ -107,7 +107,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
   /* Initialization */
 
-  for(i = 0; i < n2; i++)
+  for(int i = 0; i < n2; i++)
   {
 
 

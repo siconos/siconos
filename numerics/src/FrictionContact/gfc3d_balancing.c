@@ -76,7 +76,7 @@ void gfc3d_balancing_MHHT(
   /* scaling of H */
   /* Warning the matrix H must be scaled such
    * that the cone constraint is respected */
-  for (size_t contact =0, i=0; contact < nc; contact++, i++, i++, i++)
+  for (int contact =0, i=0; contact < nc; contact++, i++, i++, i++)
   {
     /* A choice among other */
     NM_triplet(B_for_H->D2)->x[i+1] = NM_triplet(B_for_H->D2)->x[i];
@@ -177,9 +177,9 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
   size_t nc = problem->numberOfContacts;
   size_t n = problem->M->size0;
   size_t m = 3 * nc;
-  double* q = problem->q;
-  double* b = problem->b;
-  double* mu = problem->mu;
+  // double* q = problem->q;
+  // double* b = problem->b;
+  // double* mu = problem->mu;
 
   NumericsMatrix *M = problem->M;
   NumericsMatrix *H = problem->H;
@@ -188,8 +188,8 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
   data->original_problem = problem;
 
   double alpha_r=0.0, beta_r=0.0;
-  BalancingMatrices * B_for_M = NULL;
-  BalancingMatrices * B_for_H = NULL;
+  // BalancingMatrices * B_for_M = NULL;
+  // BalancingMatrices * B_for_H = NULL;
 
   /* NumericsMatrix *Htrans =  NM_transpose(H); */
   /* /\* Compute M + rho H H^T (storage in W)*\/ */

@@ -326,9 +326,6 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
   local_problem->q = (double*)malloc(blsizemax * sizeof(double));
   double localreaction[2];
 
-  /* Current row (of blocks) number */
-  unsigned int rowNumber;
-
   /*****  Gauss-Seidel iterations *****/
   int iter = 0; /* Current iteration number */
   double error = INFINITY; /* Current error */
@@ -346,7 +343,8 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
       double light_error_sum = 0.0;
       double light_error_2 = 0.0;
       /* Loop over the rows of blocks in blmat */
-      for(int pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
+      /* rowNumber: current row (of blocks) number */
+      for(unsigned int pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
       {
         int contact = pos/2;
         if (freeze_contacts[contact] >0)
@@ -444,7 +442,7 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
       ++iter;
       double light_error_sum = 0.0;
       /* Loop over the rows of blocks in blmat */
-      for(int pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
+      for(unsigned int pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
       {
         /* store  old reaction */
         localreaction[0] = z[pos];

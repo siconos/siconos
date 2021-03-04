@@ -197,17 +197,17 @@ public:
     return _vect[pos];
   };
 
-  /** get a block (SiconosVector) of the vector
-   * \param pos index of the required block
-   * \return the expected block
-   */
-  SP::SiconosVector operator [](unsigned int pos) ;
+  // /** get a block (SiconosVector) of the vector
+  //  * \param pos index of the required block
+  //  * \return the expected block
+  //  */
+  // SP::SiconosVector operator [](unsigned int pos) ;
 
-  /** get a block (SiconosVector) of the vector
-   * \param pos index of the required block
-   * \return the expected block
-   */
-  SPC::SiconosVector operator [](unsigned int pos) const;
+  // /** get a block (SiconosVector) of the vector
+  //  * \param pos index of the required block
+  //  * \return the expected block
+  //  */
+  // SPC::SiconosVector operator [](unsigned int pos) const;
 
   /** set a block with a given vector (copy!)
    * \param pos index of the block to set

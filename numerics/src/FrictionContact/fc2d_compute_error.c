@@ -56,54 +56,54 @@ void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, 
 
 
 
-static int fc2d_compute_error_old(
-  FrictionContactProblem* problem,
-  double *z,
-  double *w,
-  double tolerance,
-  double norm,
-  double * error)
-{
-  DEBUG_BEGIN("fc2d_compute_error(...)\n");
-  /* Checks inputs */
-  if(! problem || ! z || ! w)
-    numerics_error("fc2d_compute_error", "null input for problem and/or z and/or w");
+/* static int fc2d_compute_error_old( */
+/*   FrictionContactProblem* problem, */
+/*   double *z, */
+/*   double *w, */
+/*   double tolerance, */
+/*   double norm, */
+/*   double * error) */
+/* { */
+/*   DEBUG_BEGIN("fc2d_compute_error(...)\n"); */
+/*   /\* Checks inputs *\/ */
+/*   if(! problem || ! z || ! w) */
+/*     numerics_error("fc2d_compute_error", "null input for problem and/or z and/or w"); */
 
-  int nc = problem->numberOfContacts;
+/*   int nc = problem->numberOfContacts; */
 
-  int n = nc * 2;
+/*   int n = nc * 2; */
 
-  int ic, iN;
+/*   int ic, iN; */
 
-  double *mu = problem->mu;
+/*   double *mu = problem->mu; */
 
-  double tmp[2];
+/*   double tmp[2]; */
 
-  cblas_dcopy(n, problem->q, 1, w, 1); // w <-q
-  NM_gemv(1.0, problem->M, z, 1.0, w);
+/*   cblas_dcopy(n, problem->q, 1, w, 1); // w <-q */
+/*   NM_gemv(1.0, problem->M, z, 1.0, w); */
 
-  *error = 0.;
+/*   *error = 0.; */
 
-  for(ic = 0, iN = 0 ; ic < nc ; ++ic, ++iN, ++iN)
-  {
-    fc2d_unitary_compute_and_add_error( &z[iN], &w[iN], mu[ic], error, tmp);
-  }
+/*   for(ic = 0, iN = 0 ; ic < nc ; ++ic, ++iN, ++iN) */
+/*   { */
+/*     fc2d_unitary_compute_and_add_error( &z[iN], &w[iN], mu[ic], error, tmp); */
+/*   } */
 
-  DEBUG_PRINTF("error=%e\n", *error );
+/*   DEBUG_PRINTF("error=%e\n", *error ); */
 
-  *error = sqrt(*error);
-  if(fabs(norm) > DBL_EPSILON)
-    *error /= norm;
+/*   *error = sqrt(*error); */
+/*   if(fabs(norm) > DBL_EPSILON) */
+/*     *error /= norm; */
 
-  DEBUG_END("fc2d_compute_error(...)\n");
-  if(*error > tolerance)
-  {
-    numerics_printf_verbose(1, "-- FC2D - warning. fc2d_compute_error = %g > %g (= tolerance)", *error, tolerance);
-    return 1;
-  }
-  else
-    return 0;
-}
+/*   DEBUG_END("fc2d_compute_error(...)\n"); */
+/*   if(*error > tolerance) */
+/*   { */
+/*     numerics_printf_verbose(1, "-- FC2D - warning. fc2d_compute_error = %g > %g (= tolerance)", *error, tolerance); */
+/*     return 1; */
+/*   } */
+/*   else */
+/*     return 0; */
+/* } */
 
 int fc2d_compute_error(
   FrictionContactProblem* problem,
