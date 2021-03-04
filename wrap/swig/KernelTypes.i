@@ -600,10 +600,15 @@ struct IsDense : public Question<bool>
 {
   // This part is required to handle BlockVector in
   // 'plugin' functions like computeh in Relations.
-  PyObject * BlockVector_to_numpy(BlockVector const & v)
+  PyObject * BlockVector_to_numpy(BlockVector & v)
   {
     return SP_SiconosVector_to_numpy(v.prepareVectorForPlugin());
   }
+  PyObject * const_BlockVector_to_numpy(const BlockVector & v)
+  {
+    return SP_SiconosVector_to_numpy(v.prepareVectorForPlugin());
+  }
+
 
   PyObject * SP_BlockVector_to_numpy(SP::BlockVector v)
   {
@@ -976,6 +981,14 @@ struct IsDense : public Question<bool>
   $result = BlockVector_to_numpy(*$1);
 }
 
+%typemap(out, fragment="BlockVector") const BlockVector & ()
+{
+  // %typemap(out, fragment="BlockVector") BlockVector& ()
+  $result = const_BlockVector_to_numpy(*$1);
+}
+
+
+
 // director input : TYPE -> numpy
 %typemap(directorin, fragment="BlockVector") BlockVector & ()
 {
@@ -983,6 +996,11 @@ struct IsDense : public Question<bool>
   $input = BlockVector_to_numpy($1_name);
 }
 
+%typemap(directorin, fragment="BlockVector") const BlockVector & ()
+{
+  //%typemap(directorin, fragment="BlockVector") BlockVector & ()
+  $input = const_BlockVector_to_numpy($1_name);
+}
 
 //%typemap(directorout, fragment="NumPy_Fragments") (SiconosMatrix&) ()
 //{

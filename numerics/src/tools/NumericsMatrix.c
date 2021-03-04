@@ -185,6 +185,7 @@ static void NM_set_version(NumericsMatrix* M, NM_types id, version_t value)
   case NM_SPARSE:
   {
     numerics_error("NM_set_version", "cannot set version of sparse matrix, use NSM_set_version");
+    break;
   }
   default: numerics_error("NM_set_version", "unknown id");
   }
@@ -226,6 +227,7 @@ static void NM_inc_version(NumericsMatrix* M, NM_types id)
   {
     numerics_error("NM_inc_version",
                    "cannot increment version of sparse matrix, use NSM_inc_version instead");
+    break;
   }
   default: numerics_error("NM_inc_version", "unknown storage");
   }
@@ -2930,6 +2932,7 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
     case NSM_HALF_TRIPLET:
     {
       numerics_error("NM_csc", "cannot get csc from half triplet");
+      break;
     }
     default:
     {
@@ -3002,6 +3005,7 @@ CSparseMatrix* NM_csr(NumericsMatrix *A)
     case NSM_HALF_TRIPLET:
     {
       numerics_error("NM_csr", "cannot get csr from half triplet");
+      break;
     }
     default:
     {

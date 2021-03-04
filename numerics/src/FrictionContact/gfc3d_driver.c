@@ -214,11 +214,10 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
                                         globalVelocity, &info, options);
 
     /* check if the drift is large */
-    int info_check_drift = gfc3d_balancing_check_drift(balanced_problem,problem,
-                                                       reaction, velocity, globalVelocity,
-                                                       options);
+    // int info_check_drift =
+    gfc3d_balancing_check_drift(balanced_problem,problem, reaction, velocity, globalVelocity,
+                                options);
 
-    
     problem = gfc3d_balancing_free(problem, options);
 
     break;

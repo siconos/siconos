@@ -203,7 +203,7 @@ void convexQP_ADMM(ConvexQP* problem,
   double * tmp =  options->dWork;
 
   /* Compute M + rho A^T A (storage in M)*/
-  NumericsMatrix *Atrans;
+  NumericsMatrix *Atrans=0;
   if(!A)
   {
     if(M->storageType != A->storageType)
@@ -564,7 +564,8 @@ void convexQP_ADMM(ConvexQP* problem,
   }
   else
   {
-    NM_clear(Atrans);
+    if(Atrans)
+      NM_clear(Atrans);
   }
 
 

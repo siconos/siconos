@@ -105,31 +105,31 @@ void rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve, RollingU
   }
 }
 
-
-static
-unsigned int* allocShuffledContacts(RollingFrictionContactProblem *problem,
-                                    SolverOptions *options)
-{
-  unsigned int *scontacts = 0;
-  unsigned int nc = problem->numberOfContacts;
-  if(options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE||
-      options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
-  {
-    if(options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED] >0)
-    {
-      srand((unsigned int)options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED]);
-    }
-    else
-      srand(1);
-    scontacts = (unsigned int *) malloc(nc * sizeof(unsigned int));
-    for(unsigned int i = 0; i < nc ; ++i)
-    {
-      scontacts[i] = i;
-    }
-    uint_shuffle(scontacts, nc);
-  }
-  return scontacts;
-}
+// Never used ...
+/* static */
+/* unsigned int* allocShuffledContacts(RollingFrictionContactProblem *problem, */
+/*                                     SolverOptions *options) */
+/* { */
+/*   unsigned int *scontacts = 0; */
+/*   unsigned int nc = problem->numberOfContacts; */
+/*   if(options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE|| */
+/*       options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) */
+/*   { */
+/*     if(options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED] >0) */
+/*     { */
+/*       srand((unsigned int)options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED]); */
+/*     } */
+/*     else */
+/*       srand(1); */
+/*     scontacts = (unsigned int *) malloc(nc * sizeof(unsigned int)); */
+/*     for(unsigned int i = 0; i < nc ; ++i) */
+/*     { */
+/*       scontacts[i] = i; */
+/*     } */
+/*     uint_shuffle(scontacts, nc); */
+/*   } */
+/*   return scontacts; */
+/* } */
 
 static
 unsigned int* allocfreezingContacts(RollingFrictionContactProblem *problem,
