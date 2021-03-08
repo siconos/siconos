@@ -119,7 +119,7 @@ public:
   /** gives the numbers of SiconosVectors currently stored in the memory
    * \return int >= 0
    */
-  inline unsigned int nbVectorsInMemory() const
+  inline MemoryContainer::size_type nbVectorsInMemory() const
   {
     return _nbVectorsInMemory;
   };

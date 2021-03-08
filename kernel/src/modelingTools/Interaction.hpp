@@ -661,9 +661,9 @@ public:
   /** reset the global Interaction counter (for ids)
    *  \return the previous value of count
    */
-  static inline int resetCount(int new_count=0)
+  static inline size_t resetCount(size_t new_count=0)
   {
-    int old_count = __count;
+    size_t old_count = __count;
     __count = new_count;
     return old_count;
   };

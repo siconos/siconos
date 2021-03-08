@@ -143,7 +143,7 @@ public:
   /** get dimension of the problem
    *  \return an unsigned ing
    */
-  inline unsigned int getGlobalSizeOutput() const
+  inline size_t getGlobalSizeOutput() const
   {
     return _sizeGlobalOutput;
   }

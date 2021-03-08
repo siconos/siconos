@@ -270,7 +270,7 @@ public:
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *  \return an unsigned int
    */
-  inline unsigned int numberOfOSI() const
+  inline size_t numberOfOSI() const
   {
     return _allOSI->size();
   }
@@ -301,7 +301,7 @@ public:
   /** get the number of OSNSP in the Simulation (ie the size of allNSProblems)
    *  \return an unsigned int
    */
-  inline unsigned int numberOfOSNSProblems() const
+  inline size_t numberOfOSNSProblems() const
   {
     return _allNSProblems->size();
   }

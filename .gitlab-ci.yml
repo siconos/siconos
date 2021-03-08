@@ -64,14 +64,6 @@ docker-manual-img:
 
 
 # -------------- Configure, build and test Siconos --------------
-ubuntu18.04:full:
-      variables:
-        IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu18.04
-        cdash_submit: 1
-        user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-      extends:
-        - .siconos-full
-        - .full-ci-rules
      
 debian-buster:configure:
   variables:
@@ -290,3 +282,10 @@ siconos-oce:
     include:
       - ci_gitlab/siconos-with-oce.yml
   when: manual
+
+ubuntu18.04:full:
+      variables:
+        IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu18.04
+        cdash_submit: 1
+        user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+      when: manual

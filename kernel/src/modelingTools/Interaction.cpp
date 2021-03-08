@@ -551,12 +551,12 @@ void Interaction::__initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVect
 void Interaction::setY(const VectorOfVectors& newVector)
 {
 
-  unsigned int size = newVector.size();
+  auto size = newVector.size();
 
   _y.clear();
   _y.resize(size);
 
-  for(unsigned int i = 0; i < size; i++)
+  for(VectorOfVectors::size_type i = 0; i < size; i++)
     _y[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
 }
 
@@ -599,11 +599,11 @@ void Interaction::setYPtr(const unsigned int  index, SP::SiconosVector newY)
 
 void Interaction::setYOld(const VectorOfVectors& newVector)
 {
-  unsigned int size = newVector.size();
+  auto size = newVector.size();
   _yOld.clear();
   _yOld.resize(size);
 
-  for(unsigned int i = 0; i < size; i++)
+  for(VectorOfVectors::size_type i = 0; i < size; i++)
     _yOld[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
 }
 
@@ -648,11 +648,11 @@ void Interaction::setYOldPtr(const unsigned int  index, SP::SiconosVector newYOl
 
 void Interaction::setLambda(const VectorOfVectors& newVector)
 {
-  unsigned int size = newVector.size();
+  auto size = newVector.size();
   _lambda.clear();
   _lambda.resize(size);
 
-  for(unsigned int i = 0; i < size; i++)
+  for(VectorOfVectors::size_type i = 0; i < size; i++)
     _lambda[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
 }
 
@@ -694,13 +694,13 @@ void Interaction::setLambdaPtr(const unsigned int  index, SP::SiconosVector newL
 
 void Interaction::setLambdaOld(const VectorOfVectors& newVector)
 {
-  unsigned int size = newVector.size();
+  auto size = newVector.size();
 
   // clear lambdaOld
   _lambdaOld.clear();
   _lambdaOld.resize(size);
 
-  for(unsigned int i = 0; i < size; i++)
+  for(VectorOfVectors::size_type i = 0; i < size; i++)
     _lambdaOld[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
 }
 

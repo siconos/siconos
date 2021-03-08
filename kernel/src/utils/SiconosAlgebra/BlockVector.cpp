@@ -45,7 +45,7 @@ BlockVector::BlockVector()
 
 BlockVector::BlockVector(const BlockVector &v)
 {
-  unsigned int nbBlocks = v.numberOfBlocks();
+  Index::size_type nbBlocks = v.numberOfBlocks();
   _tabIndex.reset(new Index());
   _tabIndex->reserve(nbBlocks);
   _vect.reserve(nbBlocks);
@@ -498,7 +498,7 @@ void BlockVector::setBlock(const SiconosVector& vIn, unsigned int sizeB, unsigne
     SP::SiconosVector currentBlock = _vect[blockOutStart];
 
     // Size of the subBlock of vOut to be set.
-    unsigned int subSizeB = currentBlock->size() - posOut;
+    size_t subSizeB = currentBlock->size() - posOut;
     unsigned int posIn = startIn;
 
     // Set first sub-block (currentBlock) values, between index posOut and posOut+subSizeB,

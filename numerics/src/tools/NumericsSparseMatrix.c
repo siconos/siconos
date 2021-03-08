@@ -807,7 +807,7 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
     }
 
     /* Could optimize further and copy everything using memcpy */
-    for(CS_INT j = 1; j < (size_t)M->size0; ++j)
+    for(CS_INT j = 1; j < M->size0; ++j)
     {
       CS_INT rem = 0;
       for(CS_INT p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
