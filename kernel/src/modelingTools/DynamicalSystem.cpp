@@ -25,7 +25,7 @@
 #include <iostream>
 
 
-unsigned int DynamicalSystem::__count = 0;
+size_t DynamicalSystem::__count = 0;
 
 void DynamicalSystem::_init()
 {

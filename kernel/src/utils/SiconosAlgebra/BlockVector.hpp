@@ -131,7 +131,7 @@ public:
   }
 
   /** \return the number of SiconosVectors in the container */
-  inline unsigned int numberOfBlocks() const
+  inline Index::size_type numberOfBlocks() const
   {
     return _tabIndex->size();
   };

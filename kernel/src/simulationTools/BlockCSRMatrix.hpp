@@ -190,7 +190,7 @@ public:
    * \param i block position
    * \return unsigned int
   */
-  unsigned int getSizeOfDiagonalBlock(int i) const
+  IndexInt::value_type getSizeOfDiagonalBlock(int i) const
   {
     if (i == 0) return _diagsize0->at(0);
     else return (_diagsize0->at(i) - _diagsize0->at(i - 1));

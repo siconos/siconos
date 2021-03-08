@@ -146,7 +146,7 @@ public:
   /** get the type of the Actuator (ie class name)
    *  \return an integer
    */
-  inline int getType() const
+  inline unsigned int getType() const
   {
     return _type;
   };

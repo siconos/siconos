@@ -157,7 +157,7 @@ public:
   /** get the type of the Sensor
    *  \return an int
    */
-  inline int getType() const
+  inline unsigned int getType() const
   {
     return _type;
   };

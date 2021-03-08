@@ -61,7 +61,7 @@ protected:
   /** vector q of a LinearOSNS system */
   SP::SiconosVector _q;
 
-  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage
+  /** Storage type for M - NM_DENSE: SiconosMatrix (dense), NM_SPARSE_BLOCK: Sparse Storage
       (embedded into OSNSMatrix) */
   NM_types _numericsMatrixStorageType = NM_DENSE;
 

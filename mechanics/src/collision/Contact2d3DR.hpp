@@ -32,6 +32,8 @@ private:
 
 public:
   Contact2d3DR();
+  virtual ~Contact2d3DR() = default;
+
 
   /* For users that may require extra information about contacts. */
   SP::SiconosVector base[2];

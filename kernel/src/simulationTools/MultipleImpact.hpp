@@ -120,9 +120,9 @@ private:
   //! Tolerance to define a negligeable value for a potential energy grandeur
   double _Tol_Ener = DEFAULT_TOL_ENER;
   //! Epsilon to define a zero value for relative velocity in termination condition
-  double _ZeroVel_EndIm = DEFAULT_TOL_VEL;;
+  double _ZeroVel_EndIm = DEFAULT_TOL_VEL;
   //! Epsilon to define a zero value for potential energy in termination condition
-  double _ZeroEner_EndIm = DEFAULT_TOL_ENER;;
+  double _ZeroEner_EndIm = DEFAULT_TOL_ENER;
   //! we start to save data from _stepMinSave to _stepMaxSave
   unsigned int _stepMinSave = 1, _stepMaxSave = _nStepMax;
 public:
