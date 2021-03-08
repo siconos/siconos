@@ -110,9 +110,9 @@ public:
   /** Constructor with dimRow and DimColumn of the matrix
    * \param n row size of the rectangle matrix
    * \param m column size of the rectangle matrix
-   * \param stor storage type (0:dense, 1:sparse interactionBlock)
+   * \param stor storage type (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, int stor);
+  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor);
 
   /** compute the size of the vector to project for a given Interaction.
    * \param inter the corresponding interaction

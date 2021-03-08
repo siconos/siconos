@@ -52,7 +52,7 @@
   __CLPK_doublereal* work = (__CLPK_doublereal*)malloc(sizeof(*work));  \
   F(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,work,&lwork,INFO);               \
   lwork = (__CLPK_integer)work[0];                                      \
-  work = (__CLPK_doublereal*)realloc(work,lwork*sizeof(*work));                    \
+  work = (__CLPK_doublereal*)realloc(work,(size_t)lwork*sizeof(*work)); \
   F(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,work,&lwork,INFO);               \
   free(work);                                                           \
 
@@ -82,7 +82,7 @@
   __CLPK_doublereal* work = (__CLPK_doublereal*)malloc(sizeof(*work));  \
   F(A1,A2,A3,A4,A5,A6,A7,A8,work,&lwork,INFO);                          \
   lwork = (__CLPK_integer)work[0];                                      \
-  work = (__CLPK_doublereal*)realloc(work,lwork*sizeof(*work));         \
+  work = (__CLPK_doublereal*)realloc(work,(size_t)lwork*sizeof(*work)); \
   F(A1,A2,A3,A4,A5,A6,A7,A8,work,&lwork,INFO);                          \
   free(work);                                                           \
 
@@ -94,7 +94,7 @@
   assert(C_WORK);                                                       \
   F(A1,A2,A3,A4,C_WORK,&lwork,INFO);                                    \
   lwork = (__CLPK_integer) (C_WORK[0]);                                 \
-  C_WORK = (__CLPK_doublereal*)realloc(C_WORK, lwork * sizeof *C_WORK); \
+  C_WORK = (__CLPK_doublereal*)realloc(C_WORK, (size_t)lwork * sizeof *C_WORK); \
   F(A1,A2,A3,A4,C_WORK,&lwork,INFO);                                    \
   free(C_WORK);                                                         \
 
@@ -114,7 +114,7 @@
   assert(C_WORK);                                                       \
   F(A1,A2,A3,A4,A5,C_WORK,&lwork,INFO);                                 \
   lwork = (lapack_int) (C_WORK[0]);                                     \
-  C_WORK = (double*)realloc(C_WORK, lwork * sizeof *C_WORK);            \
+  C_WORK = (double*)realloc(C_WORK, (size_t)lwork * sizeof *C_WORK);    \
   F(A1,A2,A3,A4,A5,C_WORK,&lwork,INFO);                                 \
   free(C_WORK);
 

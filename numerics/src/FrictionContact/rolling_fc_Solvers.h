@@ -42,7 +42,7 @@ typedef void (*RollingPostSolverPtr)(int, double*);
 typedef void (*RollingComputeErrorPtr)(RollingFrictionContactProblem*, double*, double*, double, SolverOptions*, double,  double*);
 
 /** pointer to function used to free memory for objects used in solvers */
-typedef void (*RollingFreeSolverPtr)();
+typedef void (*RollingFreeSolverPtr)(void);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
 typedef void (*RollingFreeSolverNSGSPtr)(RollingFrictionContactProblem*, RollingFrictionContactProblem*, SolverOptions*  );

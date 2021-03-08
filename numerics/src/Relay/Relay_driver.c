@@ -55,10 +55,10 @@ int relay_driver(RelayProblem* problem, double *z, double *w,
 
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
-  int storageType = problem->M->storageType;
+  NM_types storageType = problem->M->storageType;
 
   /* Sparse Block Storage */
-  if(storageType == 1)
+  if(storageType == NM_SPARSE_BLOCK)
   {
     numerics_error("Relay_driver", "not yet implemented for sparse storage.");
   }

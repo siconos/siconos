@@ -343,8 +343,8 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
   }
   if(A->diag_indx)
   {
-    B->diag_indx = (CS_INT*) malloc(A_->m * sizeof(CS_INT));
-    memcpy(B->diag_indx, A->diag_indx, A_->m * sizeof(CS_INT));
+    B->diag_indx = (CS_INT*) malloc((size_t)A_->m * sizeof(CS_INT));
+    memcpy(B->diag_indx, A->diag_indx, (size_t)A_->m * sizeof(CS_INT));
   }
 
 
@@ -632,7 +632,7 @@ void NSM_write_in_file(const NumericsSparseMatrix* m, FILE* file)
 NumericsSparseMatrix * NSM_new_from_file(FILE* file)
 {
   int info;
-  int _origin =0;
+  NSM_t _origin =0;
   CHECK_IO(fscanf(file, "%d", &_origin), &info);
   NumericsSparseMatrix * out = NSM_new();
   out->origin = _origin;
@@ -671,7 +671,7 @@ NumericsSparseMatrix * NSM_new_from_file(FILE* file)
 
 NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
 {
-  int _origin = NSM_TRIPLET;
+  NSM_t _origin = NSM_TRIPLET;
   NumericsSparseMatrix * out = NSM_new();
   out->origin = _origin;
 
@@ -698,7 +698,7 @@ static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
   assert(A);
   if(A->diag_indx) return A->diag_indx;
 
-  CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
+  CS_INT* indices = (CS_INT*) malloc((size_t)M->size0 * sizeof(CS_INT));
   A->diag_indx = indices;
   /* XXX hack --xhub  */
   if(A->origin == NSM_TRIPLET)
@@ -766,7 +766,7 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
    * on the existence  of the diagonal elements. This makes sure that the matrix is replaced
    * by one that has all diagonal elements. The copy of the matrix could be optimized. */
 
-  indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
+  indices = (CS_INT*) malloc((size_t)M->size0 * sizeof(CS_INT));
   A->diag_indx = indices;
   /* XXX hack --xhub  */
   if(A->origin == NSM_TRIPLET)
@@ -792,34 +792,34 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
     Np[0] = 0;
     if(Ai[0] == 0)
     {
-      memcpy(Ni, Ai, end*sizeof(CS_INT));
+      memcpy(Ni, Ai, (size_t)end*sizeof(CS_INT));
       Np[1] = Ap[1];
-      memcpy(Nx, Ax, end*sizeof(double));
+      memcpy(Nx, Ax, (size_t)end*sizeof(double));
     }
     else
     {
       Ni[0] = 0;
       Np[1] = Ap[1] + 1;
       Nx[0] = 0.;
-      memcpy(&Ni[1], Ai, end*sizeof(CS_INT));
-      memcpy(&Nx[1], Ax, end*sizeof(double));
+      memcpy(&Ni[1], Ai, (size_t)end*sizeof(CS_INT));
+      memcpy(&Nx[1], Ax, (size_t)end*sizeof(double));
       ++inc;
     }
 
     /* Could optimize further and copy everything using memcpy */
-    for(size_t j = 1; j < (size_t)M->size0; ++j)
+    for(CS_INT j = 1; j < (size_t)M->size0; ++j)
     {
       CS_INT rem = 0;
       for(CS_INT p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
       {
-        if(Ai[p] < (CS_INT) j)
+        if(Ai[p] <  j)
         {
           Ni[p+inc] = Ai[p];
           Nx[p+inc] = Ax[p];
         }
         else
         {
-          if(Ai[p] > (CS_INT) j)
+          if(Ai[p] >  j)
           {
             Ni[p+inc] = j;
             Nx[p+inc] = 0.;
@@ -834,8 +834,8 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
           Np[j] = Ap[j] + inc;
         }
         end = Ap[j+1] - rem;
-        memcpy(&Ni[rem+inc], &Ai[rem], end*sizeof(CS_INT));
-        memcpy(&Nx[rem+inc], &Ax[rem], end*sizeof(double));
+        memcpy(&Ni[rem+inc], &Ai[rem], (size_t)end*sizeof(CS_INT));
+        memcpy(&Nx[rem+inc], &Ax[rem], (size_t)end*sizeof(double));
         assert(inc <= M->size0);
       }
     }

@@ -1022,28 +1022,28 @@ void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B)
 
   if(B->nzmax < A->nzmax)
   {
-    B->x = (double *) realloc(B->x, A->nzmax * sizeof(double));
-    B->i = (CS_INT *) realloc(B->i, A->nzmax * sizeof(CS_INT));
+    B->x = (double *) realloc(B->x, (size_t)A->nzmax * sizeof(double));
+    B->i = (CS_INT *) realloc(B->i, (size_t)A->nzmax * sizeof(CS_INT));
   }
   else if(!(B->x))
   {
-    B->x = (double *) malloc(A->nzmax * sizeof(double));
+    B->x = (double *) malloc((size_t)A->nzmax * sizeof(double));
   }
 
   if(A->nz >= 0)
   {
     /* triplet */
-    B->p = (CS_INT *) realloc(B->p, A->nzmax * sizeof(CS_INT));
+    B->p = (CS_INT *) realloc(B->p, (size_t)A->nzmax * sizeof(CS_INT));
   }
   else if((A->nz == -1) && (B->n < A->n))
   {
     /* csc */
-    B->p = (CS_INT *) realloc(B->p, (A->n + 1) * sizeof(CS_INT));
+    B->p = (CS_INT *) realloc(B->p, ((size_t)A->n + 1) * sizeof(CS_INT));
   }
   else if((A->nz == -2) && (B->m < A->m))
   {
     /* csr */
-    B->p = (CS_INT *) realloc(B->p, (A->m + 1) * sizeof(CS_INT));
+    B->p = (CS_INT *) realloc(B->p, ((size_t)A->m + 1) * sizeof(CS_INT));
   }
 
 
@@ -1052,23 +1052,25 @@ void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B)
   B->m = A->m;
   B->n = A->n;
 
-  memcpy(B->x, A->x, A->nzmax * sizeof(double));
-  memcpy(B->i, A->i, A->nzmax * sizeof(CS_INT));
+  memcpy(B->x, A->x, (size_t)A->nzmax * sizeof(double));
+  memcpy(B->i, A->i, (size_t)A->nzmax * sizeof(CS_INT));
 
-  size_t size_cpy = -1;
+  size_t size_cpy=0;
   if(A->nz >= 0)
   {
-    size_cpy = A->nzmax;
+    size_cpy = (size_t)A->nzmax;
   }
   else if(A->nz == -1)
   {
-    size_cpy = A->n + 1;
+    size_cpy = (size_t)A->n + 1;
   }
   else if(A->nz == -2)
   {
-    size_cpy = A->m + 1;
+    size_cpy = (size_t)A->m + 1;
   }
-
+  else
+    numerics_error("CSparseMatrix_copy", "Wrong nz value in CSparseMatrix.");
+ 
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
 }
 

@@ -67,7 +67,7 @@
 void NM_null(NumericsMatrix* A)
 {
 
-  A->storageType=-1;
+  A->storageType= NM_UNKNOWN;
   A->size0 =-1;
   A->size1 =-1;
   A->matrix0 = NULL;
@@ -192,7 +192,7 @@ static void NM_set_version(NumericsMatrix* M, NM_types id, version_t value)
 }
 
 /* internal compare function */
-static unsigned long nm_max(const NumericsMatrix* M,
+static NM_types nm_max(const NumericsMatrix* M,
              NM_types type1,
              NM_types type2)
 {
@@ -213,7 +213,7 @@ static version_t NM_max_version(const NumericsMatrix* M)
 
 static void NM_inc_version(NumericsMatrix* M, NM_types id)
 {
-  unsigned int new_version = NM_max_version(M) + 1;
+  version_t new_version = NM_max_version(M) + 1;
 
   switch(id)
   {
@@ -246,7 +246,7 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
   double alpha=1;
   double beta=1;
 
-  int storage = A->storageType;
+  NM_types storage = A->storageType;
 
   /* double* storage */
 
@@ -281,10 +281,10 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatri
   assert(A->size0 >= sizeY);
   assert(A->size1 == sizeX);
 
-  int storage = A->storageType;
+  NM_types storage = A->storageType;
 
   /* double* storage */
-  if(storage == 0)
+  if(storage == NM_DENSE)
   {
     int incx = A->size0, incy = 1;
     double* mat = A->matrix0;
@@ -301,7 +301,7 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatri
 
   }
   /* SparseBlock storage */
-  else if(storage == 1)
+  else if(storage == NM_SPARSE_BLOCK)
     SBM_row_prod(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
   else
   {
@@ -625,7 +625,7 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     if(A->internalData->iWork)
     {
 
-      int size = A->internalData->iWorkSize / sizeof_elt;
+      size_t size = A->internalData->iWorkSize / sizeof_elt;
 
 
       if(! B->internalData->iWork)
@@ -745,11 +745,9 @@ NumericsMatrix*  NM_free_not_dense(NumericsMatrix* m)
 
 
 
-void NM_clear_other_storages(NumericsMatrix* M, int storageType)
+void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType)
 {
   assert(M && "NM_clear, M == NULL");
-  assert(M->storageType >=0 && "M->storageType >=0");
-  assert(M->storageType <3 && "M->storageType < 3");
 
   switch(storageType)
   {
@@ -1075,7 +1073,7 @@ double NM_get_value(const NumericsMatrix* const M, int i, int j)
       CS_INT * Mp =   M->matrix2->csc->p;
       double * Mx =   M->matrix2->csc->x;
 
-      for(int row = Mp[j]; row < Mp[j+1] ; row++)
+      for(CS_INT row = Mp[j]; row < Mp[j+1] ; row++)
       {
         if(i == Mi[row])
           return  Mx[row];
@@ -1101,7 +1099,7 @@ double NM_get_value(const NumericsMatrix* const M, int i, int j)
 bool NM_equal(NumericsMatrix* A, NumericsMatrix* B)
 {
   return NM_compare(A, B, DBL_EPSILON*2);
-};
+}
 
 bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
 {
@@ -1134,7 +1132,7 @@ bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
   }
   DEBUG_END("NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)\n");
   return true;
-};
+}
 
 
 void NM_vector_display(double * m, int nRow)
@@ -1309,7 +1307,7 @@ void NM_display(const NumericsMatrix* const m)
     /* } */
     if(m->matrix2->diag_indx)
     {
-      printf("========== m->matrix2->diag_indx = %p\n", m->matrix2->diag_indx);
+      printf("========== m->matrix2->diag_indx = %ld\n", m->matrix2->diag_indx);
       for(int  i = 0; i < m->size0; ++i) printf("diag_indices[%i] = %li\t ", i, m->matrix2->diag_indx[i]);
     }
     else
@@ -1359,7 +1357,7 @@ void NM_display_row_by_row(const NumericsMatrix* const m)
     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  int storageType = m->storageType;
+  NM_types storageType = m->storageType;
   if(storageType == NM_DENSE)
   {
     printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
@@ -1504,7 +1502,7 @@ void NM_read_in_file(NumericsMatrix* const m, FILE *file)
   CHECK_IO(fscanf(file, "%d", &(m->storageType)));
   CHECK_IO(fscanf(file, "%d", &(m->size0)));
   CHECK_IO(fscanf(file, "%d", &(m->size1)));
-  int storageType = m->storageType;
+  NM_types storageType = m->storageType;
 
   if(storageType == NM_DENSE)
   {
@@ -1537,7 +1535,7 @@ NumericsMatrix* NM_new_from_file(FILE *file)
 {
   NumericsMatrix* m = NM_new();
 
-  int storageType;
+  NM_types storageType;
   size_t size0;
   size_t size1;
   int info = 0;
@@ -1622,7 +1620,7 @@ void NM_read_in_file_scilab(NumericsMatrix* const M, FILE *file)
 
 void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row, int size, double ** Block)
 {
-  int storageType = M->storageType;
+  NM_types storageType = M->storageType;
   switch(storageType)
   {
   case NM_DENSE:
@@ -1632,7 +1630,7 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
     /* The part of MM which corresponds to the current block is copied into MLocal */
     for(size_t i = 0; i < (size_t) size; ++i)
     {
-      memcpy(Bmat, Mptr, size*sizeof(double));
+      memcpy(Bmat, Mptr, (size_t)size*sizeof(double));
       Mptr += M->size0;
       Bmat += size;
     }
@@ -1658,7 +1656,7 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
 }
 void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block)
 {
-  int storageType = M->storageType;
+  NM_types storageType = M->storageType;
   switch(storageType)
   {
   case NM_DENSE:
@@ -1701,7 +1699,7 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block
 
 void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double ** Block)
 {
-  int storageType = M->storageType;
+  NM_types storageType = M->storageType;
   switch(storageType)
   {
   case NM_DENSE:
@@ -1766,7 +1764,7 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double ** Block
 
 void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block)
 {
-  int storageType = M->storageType;
+  NM_types storageType = M->storageType;
   switch(storageType)
   {
   case NM_DENSE:
@@ -1851,7 +1849,10 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
       for(size_t i = 0; i < n; ++i) printf("diag_indices[%zu] = %li\t ", i, diag_indices[i]);
     );
 
-    assert (NM_version(M, M->matrix2->origin) ==
+
+    /* assert (NM_version(M, M->matrix2->origin) == */
+    /*         NSM_version(M->matrix2, NSM_latest_id(M->matrix2))); */
+    assert (NSM_version(M->matrix2, M->matrix2->origin) ==
             NSM_version(M->matrix2, NSM_latest_id(M->matrix2)));
 
     double* Mx = NSM_data(M->matrix2);
@@ -2045,7 +2046,7 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat)
   switch(mat->storageType)
   {
   case NM_DENSE:
-    data = malloc(size0*size1*sizeof(double));
+    data = malloc((size_t)size0*size1*sizeof(double));
     break;
   case NM_SPARSE_BLOCK:
     data = SBM_new();
@@ -2066,7 +2067,7 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat)
 NumericsMatrix* NM_new(void)
 {
   NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
-  M->storageType = -1;
+  M->storageType = NM_UNKNOWN;
   M->size0 = 0;
   M->size1 = 0;
   NM_null(M);
@@ -2081,7 +2082,7 @@ NumericsMatrix* NM_eye(int size)
   M->matrix2 = NSM_triplet_eye(size);
   return M;
 }
-NumericsMatrix* NM_create(int storageType, int size0, int size1)
+NumericsMatrix* NM_create(NM_types storageType, int size0, int size1)
 {
   NumericsMatrix* M = NM_new();
 
@@ -2109,7 +2110,7 @@ NumericsMatrix* NM_create(int storageType, int size0, int size1)
 }
 
 
-void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* data)
+void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void* data)
 {
 
   assert(M);
@@ -2640,6 +2641,9 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     }
     break;
   }
+  default:
+    numerics_error("NM_copy","The type of the source matrix is unknown.");
+    
   }
   NM_internalData_copy(A, B);
   NM_MPI_copy(A, B);
@@ -3240,7 +3244,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
 NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 {
   DEBUG_BEGIN("NM_multiply(...) \n")
-  size_t storageType;
+  NM_types storageType;
 
   NumericsMatrix * C = NM_new();
 
@@ -3345,7 +3349,7 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
              const double beta, NumericsMatrix* C)
 {
-  size_t storageType;
+  NM_types storageType;
 
   /* At the time of writing, we are able to transform anything into NM_SPARSE,
    * hence we use this format whenever possible */
@@ -4747,9 +4751,9 @@ void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax)
   numericsSparseMatrix(A)->origin = NSM_TRIPLET;
 }
 
-void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id)
+void NM_setSparseSolver(NumericsMatrix* A, NSM_linear_solver solver_id)
 {
-  NSM_linearSolverParams(A)->solver = (NSM_linear_solver)solver_id;
+  NSM_linearSolverParams(A)->solver = solver_id;
 }
 
 

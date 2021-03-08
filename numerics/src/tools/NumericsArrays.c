@@ -160,7 +160,7 @@ void NA_merge_sorted_arrays(size_t * arr1, size_t * arr2, size_t n1,
 
 static void NA_swap(size_t *xp, size_t *yp)
 {
-  int temp = *xp;
+  size_t temp = *xp;
   *xp = *yp;
   *yp = temp;
 }
@@ -179,7 +179,7 @@ size_t  NA_merge_and_sort_sorted_arrays(size_t * arr1, size_t * arr2, size_t n1,
                                         size_t n2, size_t *arr3)
 {
   NA_merge_sorted_arrays(arr1, arr2,  n1, n2, arr3);
-  int n3 = NA_rm_duplicate(arr3, n1+n2);
+  size_t n3 = NA_rm_duplicate(arr3, n1+n2);
   NA_sort_bubble(arr3, n3);
 
   return n3;
@@ -208,7 +208,7 @@ void uint_shuffle(unsigned int *a, unsigned int n)
 
   for(unsigned int i = 0; i < n - 1; i++)
   {
-    uint_swap(&a[i], &a[i + rand()%(n - i)]);
+    uint_swap(&a[i], &a[i + (unsigned int)rand()%(n - i)]);
   }
 }
 

@@ -17,12 +17,12 @@
 */
 
 #include "SiconosConfig.h"    // for HAVE_PATHFERRIS  // IWYU pragma: keep
+#include "SolverOptions_helpers.h" // for SN_set..., SN_get...
 #ifdef HAVE_PATHFERRIS
 
 #include <limits.h>
 #include <stdio.h>
 #include <assert.h>
-#include "SolverOptions_helpers.h" // for SN_set..., SN_get...
 
 #if defined(__cplusplus)
 extern "C"

@@ -281,7 +281,7 @@ void Disks::init(std::string disks_input)
 
 
     osnspb_->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
-    osnspb_->setMStorageType(1);            // Sparse storage
+    osnspb_->setMStorageType(NM_SPARSE_BLOCK);            // Sparse storage
     osnspb_->setNumericsVerboseMode(0);
 
     osnspb_->setKeepLambdaAndYState(true);  // inject previous solution

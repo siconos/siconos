@@ -17,13 +17,13 @@
 */
 
 #include "SiconosConfig.h"  // IWYU pragma: keep
+#include "siconos_debug.h"
+#include "numerics_verbose.h"
 #ifdef WITH_UMFPACK
 #include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
-#include "siconos_debug.h"
-#include "numerics_verbose.h"
 
 NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 {

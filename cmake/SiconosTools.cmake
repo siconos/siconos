@@ -403,7 +403,6 @@ function(apply_compiler_options COMPONENT)
     list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Werror=overloaded-virtual>)
     # Warn when a class has virtual functions and an accessible non-virtual destructor itself
     list(APPEND COMP_OPTIONS  $<$<COMPILE_LANGUAGE:CXX>:-Werror=non-virtual-dtor>)
-
     # Clang specific, C/C++
     # Error when option does not exist ...
     list(APPEND COMP_OPTIONS
@@ -412,10 +411,22 @@ function(apply_compiler_options COMPONENT)
       $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unreachable-code>)
   endif()
 
-  # -- Paranoid mode  options --
-  if(COMP_DIAGNOSTICS_LEVEL GREATER 1)
-    # Give an error whenever the base standard (see -Wpedantic) requires a diagnostic,
-    list(APPEND COMP_OPTIONS -pedantic-errors)
+  # More diagnostics ...
+  if(COMP_DIAGNOSTICS_LEVEL EQUAL 2)
+    # implicit conversions that may alter a value
+    list(APPEND COMP_OPTIONS -Wconversion)
+
+    # Gives a warning whenever the base standard (see -Wpedantic) requires a diagnostic,
+    list(APPEND COMP_OPTIONS -pedantic)
+
+    # Warn if a function is declared or defined without specifying the argument types.
+    list(APPEND COMP_OPTIONS -Wstrict-prototypes)
+
+  elseif(COMP_DIAGNOSTICS_LEVEL EQUAL 3)
+    # -- Paranoid mode  options --
+    # Warnings = errors
+     # Gives a warning whenever the base standard (see -Wpedantic) requires a diagnostic,
+    list(APPEND COMP_OPTIONS -Werror=pedantic)
 
     # implicit conversions that may alter a value
     list(APPEND COMP_OPTIONS -Werror=conversion)
@@ -424,7 +435,7 @@ function(apply_compiler_options COMPONENT)
     list(APPEND COMP_OPTIONS -Werror=strict-prototypes)
   endif()
 
-  # Note FP: this part is untested and I don't know to what ends its written?
+  # Note FP: this part is untested and I don't know to what ends it's written?
   # msan? Keep for the record and remove it later?
   if(USE_LIBCXX)
      list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:"-stdlib=libc++ -I${USE_LIBCXX}/include -I${USE_LIBCXX}/include/c++/v1">)

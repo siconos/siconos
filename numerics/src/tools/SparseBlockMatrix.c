@@ -406,7 +406,7 @@ void SBM_gemv_3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStruc
     if(currentRowNumber != 0)
       nbRows -= A->blocksize0[currentRowNumber - 1];
 
-    assert((nbRows <= sizeY));
+    assert((nbRows <= (int)sizeY));
     for(size_t blockNum = A->index1_data[currentRowNumber];
         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
     {
@@ -421,7 +421,7 @@ void SBM_gemv_3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStruc
       if(colNumber != 0)
         nbColumns -= A->blocksize1[colNumber - 1];
 
-      assert((nbColumns <= sizeX));
+      assert((nbColumns <= (int)sizeX));
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       unsigned int posInX = 0;
@@ -829,7 +829,7 @@ static void SBM_index_by_column_compute(const SparseBlockStructuredMatrix* const
   SBM_index_by_column_M->filled4 =  M->nbblocks;
   SBM_index_by_column_M->index4_data = (size_t *)malloc(SBM_index_by_column_M->filled4 * sizeof(size_t));;
 
-  size_t blockNumM = -1;
+  size_t blockNumM = 0;
   SBM_index_by_column_M->index3_data[0] = 0;
   SBM_index_by_column_M->blockMap  = (size_t *)malloc(SBM_index_by_column_M->filled4 * sizeof(size_t));
   unsigned int currentRowNumberofM;
@@ -848,11 +848,11 @@ static void SBM_index_by_column_compute(const SparseBlockStructuredMatrix* const
         colNumberofM = M->index2_data[blockNum];
         if(colNumberofM == currentColNumberofM)
         {
-          blockNumM++;
           assert(blockNumM < M->nbblocks);
           SBM_index_by_column_M->index3_data[currentColNumberofM + 1]++;
           SBM_index_by_column_M->index4_data[blockNumM] = currentRowNumberofM;
           SBM_index_by_column_M->blockMap[blockNumM] = blockNum;
+          blockNumM++;
         }
       }
     }
@@ -909,8 +909,8 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
 
   size_t colNumberAA;
   size_t rowNumberBB;
-  C->nbblocks = -1;
-  C->filled2 = -1;
+  C->nbblocks = 0;
+  C->filled2 = 0;
   /*     \warning The implementation is chosen to optimize cpu effort rather than memory. Otherwise a two loops are needed */
   int nbblocksmax = A->blocknumber0 * B->blocknumber1;
 
@@ -942,10 +942,7 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
           if(rowNumberBB == colNumberAA)
           {
             BlockCexists = 1;
-            C->nbblocks++;
-            /*           printf("C block number %i exists for %i %i ",C->nbblocks, currentRowNumberofA, currentColNumberofB ); */
-
-            C->filled2++;
+             /*           printf("C block number %i exists for %i %i ",C->nbblocks, currentRowNumberofA, currentColNumberofB ); */
 
             unsigned int Cblocksize1 = B->blocksize1[currentColNumberofB];
             if(currentColNumberofB != 0)
@@ -956,7 +953,10 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
 
             C->index1_data[currentRowNumberofA + 1]++ ;
             Cindex2_datatmp[C->nbblocks] = currentColNumberofB ;
-            break;
+            C->nbblocks++;
+            C->filled2++;
+
+           break;
 
           };
         }
@@ -965,8 +965,6 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
 
     }
   }
-  C->nbblocks++;
-  C->filled2++;
   assert(C->nbblocks ==  C->filled2);
   C->block = (double**)malloc(C->nbblocks * sizeof(double*));
   C->index2_data = (size_t*)malloc(C->nbblocks * sizeof(size_t));

@@ -31,7 +31,7 @@ using namespace Siconos;
 //#define OSNSMPROJ_DEBUG
 
 
-OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, int stor):
+OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor):
   OSNSMatrix(n, m, stor)
 {
 }

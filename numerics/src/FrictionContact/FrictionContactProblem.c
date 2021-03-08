@@ -251,7 +251,7 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
 
   /* Splitting matrix M */
 
-  int storageType = problem->M->storageType;
+  NM_types storageType = problem->M->storageType;
   NumericsMatrix * M =  problem->M;
 
   splitted_problem->M_nn =  NM_create(problem->M->storageType, nc, nc);
