@@ -53,7 +53,7 @@
     \param *blocksize0 the list of sums of the number of rows of the
     first column of blocks of M: blocksize0[i] = blocksize0[i-1] +
     ni, ni being the number of rows of the block at row i
-    *blocksize1 the list of sums of the number of columns of the
+    \param *blocksize1 the list of sums of the number of columns of the
     first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,
     ni being the number of columns of the block at column i
     \param filled1 index of the last non empty line + 1
@@ -121,7 +121,7 @@ struct SparseBlockStructuredMatrix
 
   /* the index of the last non empty line + 1 */
   size_t filled1;
-  /* the size of index2_data that corresponds of the number of non null blocks*/
+  /* the size of index2_data that corresponds to the number of non null blocks*/
   size_t filled2;
 
   size_t *index1_data;

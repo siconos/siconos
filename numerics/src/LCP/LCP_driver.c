@@ -359,10 +359,10 @@ int linearComplementarity_driver(LinearComplementarityProblem* problem, double *
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
 
-  int storageType = problem->M->storageType;
+  NM_types storageType = problem->M->storageType;
   DEBUG_PRINTF("storageType = %i\n", storageType);
   /* Sparse Block Storage */
-  if(storageType == 1)
+  if(storageType == NM_SPARSE_BLOCK)
   {
     info = lcp_driver_SparseBlockMatrix(problem, z, w, options);
   }

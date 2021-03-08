@@ -112,7 +112,7 @@ static SolverOptions* solver_options_initialize(int solver_id, int iter_max, dou
 static void recursive_solver_options_print(SolverOptions* options, int level)
 {
   char* marge;
-  marge = (char*) malloc((level + 1) * sizeof(char));
+  marge = (char*) malloc((size_t)(level + 1) * sizeof(char));
   for(int i = 0; i < level; i++)
     marge[i] = ' ';
   marge[level] = '\0';
@@ -141,7 +141,7 @@ static void recursive_solver_options_print(SolverOptions* options, int level)
       numerics_printf("%snon zero double parameters in options->dparam:", marge);
       for(int i = 0; i < options->dSize; ++i)
       {
-        if(options->dparam[i]) numerics_printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le", marge, i, options->dparam[i]);
+        if(options->dparam[i]>0.) numerics_printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le", marge, i, options->dparam[i]);
       }
     }
   }

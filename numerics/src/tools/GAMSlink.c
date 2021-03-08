@@ -14,8 +14,8 @@ static inline char* strdup(const char* src)
   return dest;
 }
 #endif
-
-
+#include "SiconosConfig.h" // for HAVE_GAMS_C_API
+#include <math.h>
 #ifdef HAVE_GAMS_C_API
 #include <stdio.h>
 #include <string.h>
@@ -31,7 +31,7 @@ static inline char* strdup(const char* src)
 
 #include "GAMSlink.h"
 
-#include <math.h>
+
 
 #include "sanitizer.h"
 
@@ -550,3 +550,4 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
 }
 */
 #endif
+

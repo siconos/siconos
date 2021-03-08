@@ -17,12 +17,12 @@
 */
 
 #include "SiconosConfig.h"  // IWYU pragma: keep
+#include "siconos_debug.h"
+#include "numerics_verbose.h"
 #ifdef WITH_SUPERLU_MT
 
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
-#include "siconos_debug.h"
-#include "numerics_verbose.h"
 
 #include <slu_mt_ddefs.h>
 

@@ -80,8 +80,8 @@ void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int
   if(level & NUMERICS_GMP_FREE_MATRIX)
   {
     assert(pGMP->M);
-    int storageType = pGMP->M->storageType;
-    if(storageType == 0)
+    NM_types storageType = pGMP->M->storageType;
+    if(storageType == NM_DENSE)
       free(pGMP->M->matrix0);
     else
       SBMfree(pGMP->M->matrix1, NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM);

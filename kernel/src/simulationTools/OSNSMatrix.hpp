@@ -25,6 +25,7 @@
 #include "SiconosFwd.hpp"
 #include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
 #include "SimulationTypeDef.hpp"
+#include "NumericsMatrix.h" // for NM_types
 
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
@@ -78,17 +79,17 @@
  *
  * Note: at the time the available storage types are:
  *
- *  - full matrix in a SiconosMatrix (_storageType = 0). In this case,
+ *  - full matrix in a SiconosMatrix (_storageType = NM_DENSE). In this case,
  *  for each call to fill(), the SiconosMatrix M is resized
  *  according  to the sizes of the Interaction present in indexSet and then
  *  all the required interactionBlocks mij are COPIED into M.
  *
- *  - Sparse Block Storage (_storageType = 1): corresponds to
+ *  - Sparse Block Storage (_storageType = NM_SPARSE_BLOCK): corresponds to
  *  SparseBlockStructuredMatrix structure of Numerics. Only non-null
  *  interactionBlocks are saved in the matrix M and there is no copy of
  *  sub-interactionBlocks, only links thanks to pointers.
  *
- *  - Sparse matrix (_storageType = 2): at the time of writting, only csc (compressed-sparse column).
+ *  - Sparse matrix (_storageType = NM_SPARSE): at the time of writting, only csc (compressed-sparse column).
  *    Could also be triplet (coo or coordinate) or csr (compressed-sparse row).
  */
 class OSNSMatrix
@@ -105,16 +106,16 @@ protected:
   unsigned int _dimColumn;
 
   /** Storage type used for the present matrix */
-  int _storageType;
+  NM_types _storageType;
 
   /** Numerics structure to be filled  */
   SP::NumericsMatrix _numericsMatrix;
 
-  /** Matrix used for default storage type (_storageType = 0) */
+  /** Matrix used for default storage type (_storageType = NM_DENSE) */
   SP::SiconosMatrix _M1;
 
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
-      (_storageType = 1) */
+      (_storageType = NM_SPARSE_BLOCK) */
   SP::BlockCSRMatrix _M2;
 
   /** For each Interaction in the graph, compute its absolute position
@@ -148,24 +149,24 @@ public:
 
   /** Constructor with _dimRow. of the matrix
    *   \param n size of the square matrix
-   *   \param stor storage type (0:dense, 1:sparse interactionBlock)
+   *   \param stor storage type (NM_DENSE or NM_SPARSE_BLOCK)
    */
-  OSNSMatrix(unsigned int n, int stor);
+  OSNSMatrix(unsigned int n, NM_types stor);
 
   /** Constructor with _dimRow and DimColumn of the matrix
    * \param n row sizes of the rectangle matrix
    * \param m column size of the rectangle matrix
-   * \param stor storage type (0:dense, 1:sparse interactionBlock)
+   * \param stor storage type (NM_DENSE or NM_SPARSE_BLOCK)
    */
-  OSNSMatrix(unsigned int n, unsigned int m, int stor);
+  OSNSMatrix(unsigned int n, unsigned int m, NM_types stor);
 
   /** Constructor from index set and map
    * \param indexSet InteractionsGraph* the index set of the active constraints
    * \param stor storage type
    */
-  OSNSMatrix(InteractionsGraph& indexSet, int stor);
+  OSNSMatrix(InteractionsGraph& indexSet, NM_types stor);
 
-  /** Constructor with copy of a SiconosMatrix => _storageType = 0
+  /** Constructor with copy of a SiconosMatrix => _storageType = NM_DENSE
    * \param MSource matrix to be copied
    */
   OSNSMatrix(const SiconosMatrix& MSource);
@@ -193,7 +194,7 @@ public:
   /** get the type of storage for current matrix
    * \return unsigned int
    */
-  inline int storagetype() const
+  inline NM_types storagetype() const
   {
     return _storageType;
   };
@@ -201,7 +202,7 @@ public:
   /** set which type of storage will be used for current matrix
    * \param i the type of storage
    */
-  inline void setStorageType(int i)
+  inline void setStorageType(NM_types i)
   {
     _storageType = i;
   };

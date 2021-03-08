@@ -51,7 +51,7 @@ typedef void (*PostSolver_soclcp_Ptr)(int, double*);
 typedef void (*ComputeError_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem*, double*, double*, double, SolverOptions*,  double*);
 
 /** pointer to function used to free memory for objects used in solvers */
-typedef void (*FreeSolver_soclcp_Ptr)();
+typedef void (*FreeSolver_soclcp_Ptr)(void);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
 typedef void (*FreeSolverNSGS_soclcp_Ptr)(SecondOrderConeLinearComplementarityProblem*, SecondOrderConeLinearComplementarityProblem*, SolverOptions*);

@@ -444,12 +444,12 @@ void MultipleImpact::initialize(SP::Simulation sim)
 
   if(! _M)
   {
-    if(_numericsMatrixStorageType == 0)
-      _M.reset(new OSNSMatrix(maxSize(), 0));
+    if(_numericsMatrixStorageType == NM_DENSE)
+      _M.reset(new OSNSMatrix(maxSize(), NM_DENSE));
 
     else // if(_numericsMatrixStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
-      _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), 1));
+      _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), NM_SPARSE_BLOCK));
   }
 
 };

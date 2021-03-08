@@ -29,6 +29,7 @@
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
 #include "NumericsDataVersion.h" // Versioning
+#include "NumericsSparseMatrix.h" // for NSM_linear_solver typedef
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
 #ifndef __cplusplus
@@ -65,6 +66,14 @@ typedef struct
 #endif
 } NumericsMatrixInternalData;
 
+/*! Available types of storage for NumericsMatrix */
+typedef enum NumericsMatrix_types {
+  NM_DENSE,        /**< dense format */
+  NM_SPARSE_BLOCK, /**< sparse block format */
+  NM_SPARSE,          /**< compressed column format */
+  NM_UNKNOWN, /** unset. Used in NM_null */
+} NM_types;
+
 /** \struct NumericsMatrix NumericsMatrix.h
     Interface to different type of matrices in numerics component.
 
@@ -72,7 +81,7 @@ typedef struct
 */
 struct NumericsMatrix
 {
-  int storageType; /**< the type of storage:
+  NM_types storageType; /**< the type of storage:
                       0: dense (double*),
                       1: SparseBlockStructuredMatrix,
                       2: classical sparse (csc, csr or triplet) via CSparse (from T. Davis)*/
@@ -103,12 +112,6 @@ typedef struct
 /*! RawNumericsMatrix is used without conversion in python */
 typedef NumericsMatrix RawNumericsMatrix;
 
-/*! Available types of storage for NumericsMatrix */
-typedef enum NumericsMatrix_types {
-  NM_DENSE,        /**< dense format */
-  NM_SPARSE_BLOCK, /**< sparse block format */
-  NM_SPARSE,          /**< compressed column format */
-} NM_types;
 
 typedef enum {
   NM_NONE,          /**< keep nothing */
@@ -129,13 +132,14 @@ extern "C"
    */
   RawNumericsMatrix* NM_new(void);
   RawNumericsMatrix* NM_eye(int size);
+  
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
    * \param size1 number of columns
    * \return a pointer to a NumericsMatrix
    */
-  RawNumericsMatrix* NM_create(int storageType, int size0, int size1);
+  RawNumericsMatrix* NM_create(NM_types storageType, int size0, int size1);
 
   /** create a NumericsMatrix and possibly set the data
    * \param storageType the type of storage
@@ -221,7 +225,7 @@ extern "C"
    * \param data pointer to the matrix data. If NULL, all matrixX fields are
    * set to NULL
    */
-  void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* data);
+  void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void* data);
 
   /** new NumericsMatrix with sparse storage from minimal set of data
    * \param[in] size0 number of rows
@@ -333,7 +337,7 @@ extern "C"
       \param m the matrix to be deleted.
       \param storageType to be kept.
    */
-  void NM_clear_other_storages(NumericsMatrix* M, int storageType);
+  void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType);
 
   /**************************************************/
   /** setters and getters               *************/
@@ -769,9 +773,9 @@ extern "C"
 
   /** Set the linear solver
    * \param A the matrix
-   * \param solver_id the solver
+   * \param solver_id id of the solver
    */
-  void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id);
+  void NM_setSparseSolver(NumericsMatrix* A, NSM_linear_solver solver_id);
 
   /** Get Matrix internal data with initialization if needed.
    * \param[in,out] A a NumericsMatrix.
@@ -837,7 +841,7 @@ extern "C"
    * \param type expected type
    * \param M the matrix to check
    */
-    static inline void NM_assert(const int type, NumericsMatrix* M)
+    static inline void NM_assert(NM_types type, NumericsMatrix* M)
   {
 #ifndef NDEBUG
     assert(M && "NM_assert :: the matrix is NULL");

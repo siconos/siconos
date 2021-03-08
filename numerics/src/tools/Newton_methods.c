@@ -57,7 +57,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
          "functions_LSA lacks a way to compute JacTheta_merit");
 
 
-  unsigned int iter;
+  int iter;
   /* if (verbose) */
   /*   solver_options_print(options); */
   int incx, incy;
@@ -68,7 +68,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   double *workV1, *workV2;
   double *JacThetaF_merit, *F_merit;
-  unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
   incx = 1;
@@ -115,10 +115,11 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   assert(params);
   assert(H);
 
+  // Is this really still in use ???
   char* solver_opt = getenv("SICONOS_SPARSE_SOLVER");
   if(solver_opt)
   {
-    NM_setSparseSolver(H, atoi(solver_opt));
+    NM_setSparseSolver(H, (NSM_linear_solver)atoi(solver_opt));
   }
 
   search_data ls_data;
@@ -202,7 +203,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   functions->compute_F_merit(data, z, F, F_merit);
 
   // Merit Evaluation
-  norm_F_merit = cblas_dnrm2(n, F_merit, incx);
+  norm_F_merit = cblas_dnrm2((int)n, F_merit, incx);
   theta = 0.5 * norm_F_merit * norm_F_merit;
 
   functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
@@ -271,8 +272,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       }
 
       // Find direction by solving H * d = -F_desc
-      cblas_dcopy(n, F_merit, incx, workV1, incy);
-      cblas_dscal(n, -1.0, workV1, incx);
+      cblas_dcopy((int)n, F_merit, incx, workV1, incy);
+      cblas_dscal((int)n, -1.0, workV1, incx);
       // info_dir_search = NM_gesv(H, workV1, params->keep_H);
       NM_set_LU_factorized(H, false);
       info_dir_search = NM_LU_solve(params->keep_H ? NM_preserve(H) : H, workV1, 1);
@@ -322,8 +323,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       if(functions->compute_RHS_desc)  // we are safe here
       {
         numerics_printf("functions->compute_RHS_desc : no  descent direction found! searching for merit descent direction");
-        cblas_dcopy(n, F_merit, incx, workV1, incy);
-        cblas_dscal(n, -1.0, workV1, incx);
+        cblas_dcopy((int)n, F_merit, incx, workV1, incy);
+        cblas_dscal((int)n, -1.0, workV1, incx);
         // info_dir_search = NM_gesv(H, workV1, params->keep_H);
         NM_set_LU_factorized(H, false);
         info_dir_search = NM_LU_solve(params->keep_H ? NM_preserve(H) : H, workV1, 1);
@@ -350,22 +351,22 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     {
       numerics_printf_verbose(2,"direction search suceeded");
       // workV1 contains the direction d
-      cblas_dcopy(n, z, incx, workV2, incy);
-      cblas_daxpy(n, 1.0, workV1, incx, workV2, incy);     //  z + d --> z
+      cblas_dcopy((int)n, z, incx, workV2, incy);
+      cblas_daxpy((int)n, 1.0, workV1, incx, workV2, incy);     //  z + d --> z
 
       // compute new F_merit value and also the new merit
       functions->compute_F(data, workV2, F);
       functions->compute_F_merit(data, workV2, F, F_merit);
 
 
-      theta_iter = cblas_dnrm2(n, F_merit, incx);
+      theta_iter = cblas_dnrm2((int)n, F_merit, incx);
       theta_iter = 0.5 * theta_iter * theta_iter;
     }
     else /* direction search failed, backup to gradient step*/
     {
       numerics_printf("direction search failed, backup to gradient step");
-      cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
-      cblas_dscal(n, -1.0, workV1, incx);
+      cblas_dcopy((int)n, JacThetaF_merit, incx, workV1, incy);
+      cblas_dscal((int)n, -1.0, workV1, incx);
       theta_iter = INFINITY;
     }
 
@@ -383,10 +384,10 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       // Computations for the line search
       // preRHS = <JacThetaF_merit, d>
       // TODO: find a better name for this variable
-      preRHS = cblas_ddot(n, JacThetaF_merit, incx, workV1, incy);
+      preRHS = cblas_ddot((int)n, JacThetaF_merit, incx, workV1, incy);
 
       // TODO we should not compute this if min descent search has failed
-      threshold = -params->rho*pow(cblas_dnrm2(n, workV1, incx), params->p);
+      threshold = -params->rho*pow(cblas_dnrm2((int)n, workV1, incx), params->p);
       //threshold = -rho*cblas_dnrm2(n, workV1, incx)*cblas_dnrm2(n, JacThetaF_merit, incx);
 
       if(log_hdf5)
@@ -399,9 +400,9 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       {
         numerics_printf_verbose(2,"newton_LSA :: direction not acceptable %g > %g\n", preRHS, threshold);
 
-        cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
-        cblas_dscal(n, -1.0, workV1, incx);
-        preRHS = cblas_ddot(n, JacThetaF_merit, incx, workV1, incy);
+        cblas_dcopy((int)n, JacThetaF_merit, incx, workV1, incy);
+        cblas_dscal((int)n, -1.0, workV1, incx);
+        preRHS = cblas_ddot((int)n, JacThetaF_merit, incx, workV1, incy);
       }
 
       if(log_hdf5)
@@ -410,13 +411,13 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       }
 
       // Line search
-      tau = (*linesearch_algo)(n, theta, preRHS, &ls_data);
+      tau = (*linesearch_algo)((int)n, theta, preRHS, &ls_data);
     }
 
     if(isfinite(tau))
-      cblas_daxpy(n, tau, workV1, incx, z, incy);         //  z + tau*d --> z
+      cblas_daxpy((int)n, tau, workV1, incx, z, incy);         //  z + tau*d --> z
     else
-      cblas_daxpy(n, 1., workV1, incx, z, incy);           // hack (restart)
+      cblas_daxpy((int)n, 1., workV1, incx, z, incy);           // hack (restart)
 
     // Construction of the RHS for the next iterate
     /* VA : What happens if we use  functions->compute_RHS_desc(data, z, F, F_merit); above */
@@ -425,10 +426,10 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
 
     // Merit Evaluation
-    norm_F_merit = cblas_dnrm2(n, F_merit, incx);
+    norm_F_merit = cblas_dnrm2((int)n, F_merit, incx);
     theta = 0.5 * norm_F_merit * norm_F_merit;
 
-    norm_JacThetaF_merit = cblas_dnrm2(n, JacThetaF_merit, 1);
+    norm_JacThetaF_merit = cblas_dnrm2((int)n, JacThetaF_merit, 1);
     // Error Evaluation
 
     if(options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_RESIDU)
@@ -471,7 +472,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       stats_iteration.merit_value = theta;
       stats_iteration.alpha = tau;
       stats_iteration.status = 0;
-      options->callback->collectStatsIteration(options->callback->env, n, z, F, err, &stats_iteration);
+      options->callback->collectStatsIteration(options->callback->env, (int)n, z, F, err, &stats_iteration);
     }
     numerics_printf_verbose(1,"--- newton_LSA :: iter = %i,  norm merit function = %e, norm grad. merit function = %e, err = %e > tol = %e",iter, norm_F_merit, norm_JacThetaF_merit, err, tol);
   }

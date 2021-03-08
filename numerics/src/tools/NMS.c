@@ -37,7 +37,7 @@
 int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restrict z, double* restrict z_N, int force_watchdog_step, int force_d_step_merit_check, double check_ratio)
 {
   double theta_iter;
-  int n = data_NMS->size;
+  int n = (int)data_NMS->size;
 
   /* H could be sparse ... */
   NumericsMatrix* Htmp = data_NMS->H;

@@ -221,7 +221,7 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
-  int storageType = problem->M->storageType;
+  NM_types storageType = problem->M->storageType;
 
   /* Sparse Block Storage */
   if(storageType == NM_SPARSE_BLOCK)

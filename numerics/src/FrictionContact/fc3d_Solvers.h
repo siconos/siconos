@@ -50,7 +50,7 @@ typedef void (*PostSolverPtr)(int, double*);
 typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double, SolverOptions*, double,  double*);
 
 /** pointer to function used to free memory for objects used in solvers */
-typedef void (*FreeSolverPtr)();
+typedef void (*FreeSolverPtr)(void);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
 typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem*, FrictionContactProblem*, SolverOptions*  );

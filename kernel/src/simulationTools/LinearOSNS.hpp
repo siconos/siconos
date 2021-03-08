@@ -63,7 +63,7 @@ protected:
 
   /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage
       (embedded into OSNSMatrix) */
-  int _numericsMatrixStorageType = NM_DENSE;
+  NM_types _numericsMatrixStorageType = NM_DENSE;
 
   /** a boolean to decide if _w and _z vectors are initialized with
       previous values of Y and Lambda when a change occurs in problem
@@ -188,9 +188,9 @@ public:
   }
 
   /** get the type of storage used for M
-      \return int (0: dense, 1:sparse)
+      \return NM_types (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  inline int getMStorageType() const
+  inline NM_types getMStorageType() const
   {
     return _numericsMatrixStorageType;
   };
@@ -198,9 +198,9 @@ public:
   /** set which type of storage will be used for M
    * \warning this function does not allocate any memory for M,
    * it just sets an indicator for future use
-   * \param i (0:dense, 1:sparse)
+   * \param i (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  inline void setMStorageType(int i)
+  inline void setMStorageType(NM_types i)
   {
     _numericsMatrixStorageType = i;
   };

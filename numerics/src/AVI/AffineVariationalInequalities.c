@@ -31,7 +31,8 @@ void AVI_display(AffineVariationalInequalities* avi)
 {
 
   assert(avi);
-  int i, n = avi->size;
+  int i;
+  size_t n = avi->size;
   printf("AffineVariationalInequalities Display :\n-------------\n");
   printf("size :%zu \n", avi->size);
   if(avi->M)
@@ -72,8 +73,8 @@ int AVI_printInFile(AffineVariationalInequalities*  avi, FILE* file)
     exit(EXIT_FAILURE);
   }
   int i;
-  int n = avi->size;
-  fprintf(file, "%d\n", n);
+  size_t n = avi->size;
+  fprintf(file, "%zu\n", n);
   NM_write_in_file(avi->M, file);
   for(i = 0; i < avi->M->size1; i++)
   {
@@ -84,10 +85,10 @@ int AVI_printInFile(AffineVariationalInequalities*  avi, FILE* file)
 
 int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file)
 {
-  int n = 0;
+  size_t n = 0;
   int i;
 
-  CHECK_IO(fscanf(file, "%d\n", &n));
+  CHECK_IO(fscanf(file, "%zu\n", &n));
   avi->size = n;
   avi->M = NM_new_from_file(file);
 

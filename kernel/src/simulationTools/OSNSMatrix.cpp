@@ -42,7 +42,7 @@ OSNSMatrix::OSNSMatrix():
 }
 
 // Constructor with dimensions (one input: square matrix only)
-OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
+OSNSMatrix::OSNSMatrix(unsigned int n, NM_types stor):
   _dimRow(n),  _dimColumn(n), _storageType(stor)
 {
   // Note:
@@ -50,7 +50,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   // the matrix
   // * Sparse matrix (_storageType == 1) n represents the number of blocks in a row or column.
 
-  DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
+  DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(unsigned int n, NM_types stor) \n");
   switch(_storageType)
   {
   case NM_DENSE:
@@ -71,10 +71,10 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
 
   _numericsMatrix.reset(new NumericsMatrix);
   NM_null(_numericsMatrix.get());
-  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
+  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, NM_types stor) \n");
 }
 
-OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
+OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor):
   _dimRow(n),  _dimColumn(m), _storageType(stor)
 {
   // Note:
@@ -82,7 +82,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   // for _storageType = NM_DENSE (dense) n represents the real dimension of
   // the matrix and for sparse storage (_storageType == 1) the number
   // of interactionBlocks in a row or column.
-  DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor)\n");
+  DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor)\n");
   switch(_storageType)
   {
   case NM_DENSE:
@@ -104,12 +104,12 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
 
   _numericsMatrix.reset(new NumericsMatrix);
   NM_null(_numericsMatrix.get());
-  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor)\n");
+  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor)\n");
 
 }
 
 // Build from index set (i.e. get size from number of interactions in the set)
-OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, int stor):
+OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor):
   _dimRow(0), _dimColumn(0), _storageType(stor)
 {
   _numericsMatrix.reset(new NumericsMatrix);

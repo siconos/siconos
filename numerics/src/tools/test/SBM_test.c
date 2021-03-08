@@ -477,7 +477,7 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   NumericsMatrix C2;
   NM_null(&C2);
 
-  C2.storageType = 0;
+  C2.storageType = NM_DENSE;
   C2.size0 = M1->size0;
   C2.size1 = M3->size1;
   C2.matrix0 = (double *)calloc(C2.size0 * C2.size1, sizeof(double));
