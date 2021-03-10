@@ -235,7 +235,7 @@ workflow:
   script:
     - cat $CI_PROJECT_DIR/ci_gitlab/dockerfiles/install_template| sed -e "s|IMAGENAME|$IMAGE_NAME|g" >> build/Dockerfile
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/build/Dockerfile --destination $CI_REGISTRY_IMAGE/$siconos_docker_name:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:latest --cleanup
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/build/Dockerfile --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:latest --cleanup
 
 # Installs siconos and generates a docker image with a full/uptodate install of siconos
 # Uses output (build from artifacts) from a previous job (e.g. debian:build or similar).
@@ -253,4 +253,4 @@ workflow:
   script:
     - cat $CI_PROJECT_DIR/ci_gitlab/dockerfiles/siconoslab/Dockerfile| sed -e "s|IMAGENAME|$IMAGE_NAME|g" >> build/Dockerfile
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/build/Dockerfile --destination $CI_REGISTRY_IMAGE/$siconos_docker_name:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:latest --cleanup
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/build/Dockerfile --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:latest --cleanup
