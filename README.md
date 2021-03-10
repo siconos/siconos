@@ -18,9 +18,57 @@ Fluid Mechanics, Computer Graphics, ...
 
 Read more about Siconos at the [Siconos homepage](http://siconos.gforge.inria.fr)
 
+## Installation
+
+### From source
+
+Assuming you have cloned the project into <siconos-sources>, to build and install the libraries and the python interface ::
+
+* Create a user options file. Some templates are provided in <siconos-sources>/ci_gitlab/siconos_confs.
+* Run
+```
+mkdir build ;cd build
+cmake -DUSER_OPTIONS_FILE=<your options file> <path-to-siconos-sources> 
+make -j 4 # or the number of cores available on your computer.
+make test # optional
+make install
+```
+
+More details in [Siconos download and install guide](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/index.html).
+
+## Docker images
+
+#### Docker images with siconos ready to use:
+
+* latest version (development)
+
+```
+docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest
+```
+
+* A specific (release) version X.Y:
+
+```
+docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-release-X.Y:latest
+```
+
+#### Jupyter Lab environment with siconos ready to use and a set of end-user examples:
+
+* latest version (development)
+
+```
+docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master
+```
 
 
+* A specific (release) version X.Y:
 
+```
+docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-release-X.Y
+```
+
+
+Then, access in your browser at http://localhost:8888
 
 # Main components
 
