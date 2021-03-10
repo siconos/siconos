@@ -211,7 +211,6 @@ jupyterlab:configure:
      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
   extends:
     - .siconos-configure
-    - .full-ci-rules
 
 jupyterlab:build:
   variables:
@@ -220,7 +219,6 @@ jupyterlab:build:
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
   extends:
     - .siconos-build
-    - .full-ci-rules
   needs: ["jupyterlab:configure"]
 
 jupyterlab:test:
@@ -231,7 +229,6 @@ jupyterlab:test:
     needs: ["jupyterlab:build"]
     extends:
     - .siconos-test
-    - .full-ci-rules
 
 # Generate sico install
 
