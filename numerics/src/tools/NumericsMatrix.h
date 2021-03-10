@@ -1117,6 +1117,11 @@ extern "C"
    */
   void NM_reset_versions(NumericsMatrix* M);
 
+  /* Sync storageType from version.
+   * \param M the NumericsMatrix
+   */
+  void NM_version_sync(NumericsMatrix* M);
+
 
 #ifdef WITH_OPENSSL
   /** Compute sha1 hash of matrix values. Matrices of differents size and same
