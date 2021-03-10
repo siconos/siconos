@@ -274,6 +274,11 @@ extern "C"
    */
   CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M);
 
+  /** Sync matrix origin and version
+   * \param M the NumericsSparseMatrix
+   */
+  void NSM_version_sync(NumericsSparseMatrix* M);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
