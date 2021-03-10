@@ -23,8 +23,13 @@ of the file were added first, and each subsequent addition is placed on a line
 
 
 --------------------------------------------------------------------------------
-  Current (in development branch siconos/master) --> 4.4.0.rc
+  Current (in development branch siconos/master) --> 4.5.0.rc
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+  v 4.4.0
+--------------------------------------------------------------------------------
+
 Main changes:
 	[...]
 	* [numerics] add sparse linear solver with a sparse rhs based on csparse
@@ -32,6 +37,11 @@ Main changes:
 	* [kernel] new implementation of linear solvers in SimpleMatrix
 	The class SimpleMatrix owns a internal NumericsMatrix thats is used for
 	linear system solving, based on Siconos/Numerics
+	* [numerics] add balancing matrice framework
+	* [numerics] add freezing contacts in Gauss seidel solvers
+	* [externals] add LDL support
+	* [mechanics] modify broadphase for Bullet
+	* [numerics] render the truncation in NM_entry
 	
 
 --------------------------------------------------------------------------------
