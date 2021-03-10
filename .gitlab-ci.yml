@@ -255,7 +255,7 @@ debian-buster:install:
 jupyterlab:install:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
-    siconos_docker_name: siconoslab
+    siconos_docker_name: siconoslab-$CI_COMMIT_REF_NAME
   extends:
     - .siconos-jupyterlab-install
     - .full-ci-rules

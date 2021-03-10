@@ -42,7 +42,8 @@ Main changes:
 	* [externals] add LDL support
 	* [mechanics] modify broadphase for Bullet
 	* [numerics] render the truncation in NM_entry
-	
+	* [numerics] add matrix versioning
+	* [misc] automates the generation of docker end-user images 'siconos-ready'
 
 --------------------------------------------------------------------------------
   v4.3.x
