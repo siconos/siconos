@@ -229,7 +229,7 @@ jupyterlab:test:
     needs: ["jupyterlab:build"]
     extends:
     - .siconos-test
- 
+
 # Generate sico install
 
 ubuntu20:install:
