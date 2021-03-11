@@ -287,8 +287,8 @@ void NM_version_sync(NumericsMatrix* M)
       }
     }
     }
-  }
 #endif
+  }
 }
 
 
