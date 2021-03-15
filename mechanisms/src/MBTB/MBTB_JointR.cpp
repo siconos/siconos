@@ -160,8 +160,7 @@ void MBTB_JointR::computeEquivalentForces()
   /*Solve the system.*/
   try
   {
-    _M->PLUFactorizationInPlace();
-    _M->PLUSolve(*_F);
+    _M->Solve(*_F);
 #ifdef MBTB_JOINTR_DEBUG
     printf("MBTB_JointR::computeEquivalentForces Forces equivalent:");
     _F->display();
