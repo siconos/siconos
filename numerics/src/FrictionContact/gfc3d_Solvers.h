@@ -63,7 +63,7 @@ extern "C"
    */
   int gfc3d_checkTrivialCaseGlobal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
 
-  /** Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
+/** Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters

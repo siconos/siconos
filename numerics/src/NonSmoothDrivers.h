@@ -133,6 +133,17 @@ extern "C"
                                      double *velocity, double* globalVelocity,
                                      SolverOptions* options);
 
+  /** General interface to solvers for global rolling friction-contact 3D problem
+   *  \param[in] problem the structure which handles the Friction-Contact problem
+   *  \param[in,out] reaction global vector (n)
+   *  \param[in,out] velocity global vector (n)
+   *  \param[in,out] options structure used to define the solver(s) and their parameters
+   *  \return result (0 if successful otherwise 1).
+   */
+  int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem,
+                            double *reaction, double *velocity, double* globalVelocity,
+                            SolverOptions* options);
+
   /** General interface to solvers for friction-contact 3D problem
    *  \param[in] problem the structure which handles the Friction-Contact problem
    *  \param[in,out] x global vector (n)

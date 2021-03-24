@@ -112,15 +112,15 @@ enum FRICTION_SOLVER
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone= 3001,
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 3002,
   SICONOS_ROLLING_FRICTION_3D_ADMM = 3003,
-  
+
   /** Non-smooth Gauss Seidel, local formulation */
   SICONOS_ROLLING_FRICTION_2D_NSGS = 4000,
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone= 4001,
-  SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 4002
+  SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 4002,
 
- 
- 
-  
+  /** Non-smooth Gauss Seidel, global formulation */
+  SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR = 5000
+
 };
 
 
@@ -196,6 +196,7 @@ extern const char* const   SICONOS_ROLLING_FRICTION_2D_NSGS_STR ;
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone_STR;
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
 
+extern const char* const   SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR ;
 
 enum SICONOS_FRICTION_3D_IPARAM
 {
@@ -319,7 +320,7 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM
   SICONOS_FRICTION_3D_NSN_LINESEARCH = 11,
   /** index in iparam to store the maximum number of iterations */
   SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER = 12,
-  /** index in iparam to set the linear solver used at each Newton iteration 
+  /** index in iparam to set the linear solver used at each Newton iteration
    cs_lusol or mumps */
   SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER = 13,
   /** index in iparam to store the strategy for the hybrid solver */
@@ -476,10 +477,10 @@ enum SICONOS_FRICTION_3D_ADMM_SYMMETRY_ENUM
   /* The asymmetric version of the algorithm is used even if
    *  the system is symmetric */
   SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY= 2,
-  /* The symmetric version of the algorithm is used and the matrix 
+  /* The symmetric version of the algorithm is used and the matrix
    *is systematically symmetrized*/
   SICONOS_FRICTION_3D_ADMM_SYMMETRIZE= 3,
-  /* The symmetric version of the algorithm is used and we assume 
+  /* The symmetric version of the algorithm is used and we assume
    *  that the data are symmetric */
   SICONOS_FRICTION_3D_ADMM_ASSUME_SYMMETRY= 4
 };
