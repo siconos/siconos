@@ -37,10 +37,63 @@
 #endif
 
 const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR = "GFC3D_NSGS_WR";
+#ifdef WITH_FCLIB
+#include "string.h"                  // for strcpy, strcat
+#include "fclib_interface.h"         // for frictionContact_fclib_write, fri...
+#endif
+
+//#define FCLIB_OUTPUT
+
+#ifdef  FCLIB_OUTPUT
+#ifdef WITH_FCLIB
+#include "string.h"                  // for strcpy, strcat
+#include "fclib_interface.h"         // for frictionContact_fclib_write, fri...
+#endif
+static int fccounter = -1;
+#endif
 
 int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem, double *reaction, double *velocity,
                   double* globalVelocity,  SolverOptions* options)
 {
+#ifdef FCLIB_OUTPUT
+#ifdef WITH_FCLIB
+  fccounter ++;
+  int freq_output=1;
+  int nc = problem->numberOfContacts;
+  if(nc >0)
+  {
+    if(fccounter % freq_output == 0)
+    {
+      char fname[256];
+      sprintf(fname, "GRFC3D-%.5d-%.5d.hdf5",  (int)nc, fccounter);
+      printf("Dump GRFC3D-%.5d-%.5d.hdf5.\n",  (int)nc, fccounter);
+      /* printf("ndof = %i.\n", ndof); */
+      /* FILE * foutput  =  fopen(fname, "w"); */
+      int n = 100;
+      char * title = (char *)malloc(n * sizeof(char));
+      strcpy(title, "GRFC3 dump in hdf5");
+      char * description = (char *)malloc(n * sizeof(char));
+      strcpy(description, "Rewriting in hdf5 through siconos of  ");
+      strcat(description, fname);
+      strcat(description, " in FCLIB format");
+      char * mathInfo = (char *)malloc(n * sizeof(char));
+      strcpy(mathInfo,  "unknown");
+      globalRollingFrictionContact_fclib_write(problem,
+                                               title,
+                                               description,
+                                               mathInfo,
+                                               fname);
+    }
+    /* fclose(foutput); */
+  }
+#else
+  printf("Fclib is not available ...\n");
+#endif
+#endif
+
+
+
+
   assert(options->isSet);
   DEBUG_EXPR(NV_display(globalVelocity,problem_ori->M->size0););
   if(verbose > 0)

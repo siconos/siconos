@@ -29,6 +29,7 @@
 #include "CSparseMatrix_internal.h"                 // for CSparseMatrix, CS_INT, cs_...
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "GlobalRollingFrictionContactProblem.h"  // for GlobalRollingFrictionContactProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
 #include "NumericsSparseMatrix.h"          // for NumericsSparseMatrix, NSM_CSC
 #include "SiconosConfig.h"                 // for WITH_FCLIB
@@ -387,13 +388,6 @@ int globalFrictionContact_fclib_write(
   char * title,
   char * description,
   char * mathInfo,
-  const char *path);
-
-int globalFrictionContact_fclib_write(
-  GlobalFrictionContactProblem* problem,
-  char * title,
-  char * description,
-  char * mathInfo,
   const char *path)
 {
   int rinfo = 0;
@@ -484,6 +478,118 @@ int globalFrictionContact_fclib_write(
   DEBUG_PRINT("write in fclib of fclib_problem\n");
 
   rinfo = fclib_write_global(fclib_problem, path);
+  DEBUG_PRINT("end of write in fclib of fclib_problem\n");
+
+  free(fclib_problem->M->p);
+  free(fclib_problem->M->i);
+  free(fclib_problem->H->p);
+  free(fclib_problem->H->i);
+  free(fclib_problem->H);
+  free(fclib_problem->M);
+  free(fclib_problem->info);
+  free(fclib_problem);
+
+  return rinfo;
+
+}
+
+
+int globalRollingFrictionContact_fclib_write(
+  GlobalRollingFrictionContactProblem* problem,
+  char * title,
+  char * description,
+  char * mathInfo,
+  const char *path)
+{
+  int rinfo = 0;
+
+  DEBUG_PRINTF("construction of fclib_problem in %s with title = %s and description = %s\n", path, title, description);
+  if(problem->numberOfContacts == 0)
+  {
+    DEBUG_PRINT("zero contacts");
+    return rinfo;
+
+  }
+  /* globalFrictionContact_display(problem); */
+  /* FILE * file  =  fopen("toto.dat", "w"); */
+  /* globalFrictionContact_printInFile(problem, file); */
+
+  fclib_global_rolling *fclib_problem;
+  fclib_problem = (fclib_global_rolling*)malloc(sizeof(fclib_global_rolling));
+
+  fclib_problem->info = (struct fclib_info*)malloc(sizeof(struct fclib_info)) ;
+
+  fclib_problem->info->title = title;
+  fclib_problem->info->description = description;
+  fclib_problem->info->math_info = mathInfo;
+
+
+
+  fclib_problem->spacedim = problem->dimension;
+  fclib_problem->mu = problem->mu;
+  fclib_problem->mu_r = problem->mu_r;
+  fclib_problem->w =  problem->b;
+  fclib_problem->f =  problem->q;
+
+  /* only sparse storage */
+  assert(problem->M->matrix2);
+  assert(problem->H->matrix2);
+
+
+  /* only coordinates (triplet) */
+  if(problem->M->matrix2->triplet)
+  {
+    fclib_problem->M = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
+    fclib_problem->M->n = (int) problem->M->matrix2->triplet->n;
+    fclib_problem->M->m = (int) problem->M->matrix2->triplet->m;
+    fclib_problem->M->nzmax= (int) problem->M->matrix2->triplet->nzmax;
+
+    fclib_problem->M->p= (int*) malloc(sizeof(int)*(problem->M->matrix2->triplet->nzmax));
+    csi_to_int(problem->M->matrix2->triplet->p, fclib_problem->M->p,
+               (unsigned) problem->M->matrix2->triplet->nzmax);
+    fclib_problem->M->i= (int*) malloc(sizeof(int)*(problem->M->matrix2->triplet->nzmax));
+    csi_to_int(problem->M->matrix2->triplet->i, fclib_problem->M->i,
+               (unsigned) problem->M->matrix2->triplet->nzmax);
+    fclib_problem->M->x= problem->M->matrix2->triplet->x;
+    fclib_problem->M->nz= (int) problem->M->matrix2->triplet->nz;
+    fclib_problem->M->info=NULL;
+  }
+  else
+  {
+    fprintf(stderr, "globalRollingFrictionContact_fclib_write only implemented for triplet storage.\n");
+    exit(EXIT_FAILURE); ;
+  }
+
+  if(problem->H->matrix2->triplet)
+  {
+    fclib_problem->H = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
+    fclib_problem->H->n = (int) problem->H->matrix2->triplet->n;
+    fclib_problem->H->m = (int) problem->H->matrix2->triplet->m;
+    fclib_problem->H->nzmax= (int) problem->H->matrix2->triplet->nzmax;
+    fclib_problem->H->p= (int*) malloc(sizeof(int)*problem->H->matrix2->triplet->nzmax);
+    csi_to_int(problem->H->matrix2->triplet->p, fclib_problem->H->p,
+               (unsigned) problem->H->matrix2->triplet->nzmax);
+    fclib_problem->H->i= (int*) malloc(sizeof(int)*problem->H->matrix2->triplet->nzmax);
+    csi_to_int(problem->H->matrix2->triplet->i, fclib_problem->H->i,
+               (unsigned) problem->H->matrix2->triplet->nzmax);
+    fclib_problem->H->x= problem->H->matrix2->triplet->x;
+    fclib_problem->H->nz= (int) problem->H->matrix2->triplet->nz;
+    fclib_problem->H->info=NULL;
+  }
+  else
+  {
+    fprintf(stderr, "globalRollingFrictionContact_fclib_write only implemented for triplet storage.\n");
+    exit(EXIT_FAILURE); ;
+  }
+
+  fclib_problem->G = NULL;
+  fclib_problem->b = NULL;
+
+
+
+  DEBUG_PRINT("write in fclib of fclib_problem\n");
+
+  rinfo = fclib_write_global_rolling(fclib_problem, path);
   DEBUG_PRINT("end of write in fclib of fclib_problem\n");
 
   free(fclib_problem->M->p);
