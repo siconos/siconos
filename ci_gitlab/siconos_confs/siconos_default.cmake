@@ -44,7 +44,7 @@ option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = 
 
 
 # --- List of external libraries/dependencies to be searched (or not) ---
-option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
+option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" ON)
 option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
