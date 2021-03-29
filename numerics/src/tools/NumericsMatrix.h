@@ -53,7 +53,7 @@ typedef struct
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
   bool isCholeskyfactorized; /**<  true if the matrix has already been Cholesky factorized */
   bool isLDLTfactorized; /**<  true if the matrix has already been LDLT factorized */
-  bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
+  bool isInversed; /**<  true if the matrix contains its inverse (in place inversion) */
 #ifdef SICONOS_HAS_MPI
   MPI_Comm mpi_comm; /**< optional mpi communicator */
 #endif
@@ -351,7 +351,7 @@ extern "C"
    * \param i row index
    * \param j column index
    * \param val the value to be inserted.
-   * \param threshold a threshold to filter the small value in magnitude (useful for dense to sparse conversion) 
+   * \param threshold a threshold to filter the small value in magnitude (useful for dense to sparse conversion)
    */
   void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold);
 
@@ -742,17 +742,19 @@ extern "C"
   int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
   int NM_LDLT_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
 
-  
+
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
+
+
   /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    * \param[in,out] A a NumericsMatrix.
    * \return the matrix inverse.
    */
-  NumericsMatrix* NM_inv(NumericsMatrix* A);
+  NumericsMatrix* NM_LU_inv(NumericsMatrix* A);
 
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
 
@@ -770,6 +772,12 @@ extern "C"
   {
     return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
   }
+
+  /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
+   * \param[in,out] A a NumericsMatrix.
+   * \return the matrix inverse.
+   */
+  NumericsMatrix* NM_gesv_inv(NumericsMatrix* A);
 
   /** Set the linear solver
    * \param A the matrix

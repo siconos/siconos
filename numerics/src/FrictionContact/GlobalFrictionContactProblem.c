@@ -23,6 +23,7 @@
 #include <string.h>            // for memcpy
 #include "SiconosBlas.h"         // for cblas_dscal, cblas_dcopy
 #include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
+#include "NumericsSparseMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
 #include "SparseBlockMatrix.h"                   // for SBM_gemv, SBM_free
 #include "sanitizer.h"                           // for cblas_dcopy_msan
 #include "numerics_verbose.h"  // for CHECK_IO
@@ -291,7 +292,7 @@ int globalFrictionContact_computeGlobalVelocity(
   /* globalVelocity <- problem->q */
   cblas_dcopy(n,  problem->q, 1, globalVelocity, 1);
 
-  // We compute only if the problem has contacts
+  // We add the reaction part only if the problem has contacts
   if(m>0)
   {
     /* globalVelocity <-  H*reaction + globalVelocity*/
@@ -300,8 +301,8 @@ int globalFrictionContact_computeGlobalVelocity(
   }
 
   /* Compute globalVelocity <- M^(-1) globalVelocity*/
-  // info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE)
-  info = NM_LU_solve(NM_preserve(problem->M), globalVelocity, 1);
+  //info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE);
+  info = NM_LU_solve(problem->M, globalVelocity, 1);
   DEBUG_EXPR(NM_vector_display(globalVelocity, n));
 
   return info;
@@ -321,7 +322,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
   
   localproblem->numberOfContacts = problem->numberOfContacts;
   localproblem->dimension =  problem->dimension;
-  localproblem->mu = (double*)malloc(problem->numberOfContacts * sizeof(double));
+  localproblem->mu = (double*)calloc(problem->numberOfContacts,sizeof(double));
   cblas_dcopy_msan(problem->numberOfContacts, problem->mu, 1, localproblem->mu, 1);
 
   /* assert(M); */
@@ -362,7 +363,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
 
     int nm = n * m;
 
-    double *Htmp = (double*)malloc(nm * sizeof(double));
+    double *Htmp = (double*)calloc(nm, sizeof(double));
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
     cblas_dcopy_msan(nm,  H->matrix0, 1, Htmp, 1);
@@ -405,10 +406,10 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     // compute localq = H^T M^(-1) q +b
 
     //Copy localq <- b
-    localproblem->q = (double*)malloc(m * sizeof(double));
+    localproblem->q = (double*)calloc(m, sizeof(double));
     cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);
 
-    double* qtmp = (double*)malloc(n * sizeof(double));
+    double* qtmp = (double*)calloc(n , sizeof(double));
     cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
@@ -436,8 +437,6 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
 
     // compute W = H^T M^-1 H
     // compute MinvH   <- M^-1 H
-
-
     /* int infoMInv = 0; */
     /* infoMInv = NM_inverse_diagonal_block_matrix_in_place(M); */
     assert(!NM_inverse_diagonal_block_matrix_in_place(M));
@@ -477,7 +476,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     WnumInverse->matrix1 = NULL;
     WnumInverse->matrix2 = NULL;
     WnumInverse->internalData = NULL;
-    WnumInverse->matrix0 = (double*)malloc(m * m * sizeof(double));
+    WnumInverse->matrix0 = (double*)calloc(m * m , sizeof(double));
     double * WInverse = WnumInverse->matrix0;
     SBM_to_dense(W, WnumInverse->matrix0);
 
@@ -485,12 +484,12 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     NM_write_in_file_scilab(WnumInverse, file1);
     fclose(file1);
 
-    double * WInversetmp = (double*)malloc(m * m * sizeof(double));
+    double * WInversetmp = (double*)calloc(m * m,  sizeof(double));
     memcpy(WInversetmp, WInverse, m * m * sizeof(double));
     double  condW;
     condW = cond(WInverse, m, m);
 
-    lapack_int* ipiv = (lapack_int *)malloc(m * sizeof(lapack_int));
+    lapack_int* ipiv = (lapack_int *)calloc(m , sizeof(lapack_int));
     int infoDGETRF = 0;
     DGETRF(m, m, WInverse, m, ipiv, &infoDGETRF);
     assert(!infoDGETRF);
@@ -530,7 +529,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     free(WnumInverse);
 #endif
 
-    localproblem->q = (double*)malloc(m * sizeof(double));
+    localproblem->q = (double*)calloc(m, sizeof(double));
 
     //Copy localq<- b
     cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);
@@ -539,7 +538,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     double* qtmp = (double*)calloc(n,  sizeof(double));
     double alpha = 1.0, beta = 1.0;
     double beta2 = 0.0;
-    NM_gemv(alpha, M, problem->q, beta2, qtmp);
+    NM_gemv(alpha, M, problem->q, beta2, qtmp); /* Warning M contains Minv */
     NM_gemv(alpha, Htrans, qtmp, beta, localproblem->q);
 
 
@@ -573,7 +572,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     // Product M^-1 H
     DEBUG_EXPR(NM_display(H););
     numerics_printf_verbose(1,"inversion of the matrix M ...");
-    NumericsMatrix * Minv  = NM_inv(M);
+    NumericsMatrix * Minv  = NM_LU_inv(M);
     DEBUG_EXPR(NM_display(Minv););
 
 
@@ -614,24 +613,24 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     NM_write_in_file_python(localproblem->M, fileout);
     fclose(fileout);
 #endif
+
+    /* compute localq <- H^T M^(-1) q + b */
     numerics_printf_verbose(1,"Compute localq = H^T M^(-1) q +b  ...");
-    // compute localq = H^T M^(-1) q +b
-
-    //Copy localq <- b
-    //DEBUG_PRINT("Compute locaproblem q\n");
-    localproblem->q = (double*)malloc(m * sizeof(double));
-    cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);
-
     double* qtmp = (double*)calloc(n, sizeof(double));
-    //cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
-
-    // compute H^T M^(-1) q + b
-    NM_gemv(1.0, Minv, problem->q, 0.0, qtmp);
+    NM_gemv(1.0, Minv, problem->q, 0.0, qtmp);   /* qtmp <- M^(-1) q  */
     DEBUG_EXPR(NV_display(qtmp,n););
     DEBUG_EXPR(NV_display(problem->q,n););
+    localproblem->q = (double*)calloc(m, sizeof(double));
+    cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);     /*Copy localq <- b */
+    NM_gemv(1.0, Htrans, qtmp, 1.0, localproblem->q); /* localq <- H^T qtmp + localq   */
 
-    NM_gemv(1.0, Htrans, qtmp, 1.0, localproblem->q);
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataqloc.py", "w");
+    NV_write_in_file_python(localproblem->q, H->size1, fileout);
+    fclose(fileout);
+#endif
 
+    
     DEBUG_EXPR(frictionContact_display(localproblem););
     //getchar();
   }

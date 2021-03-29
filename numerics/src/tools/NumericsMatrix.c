@@ -1348,6 +1348,18 @@ void NM_display(const NumericsMatrix* const m)
     printf("========== is destructible \n");
   else
     printf("========== is not destructible \n");
+  if (NM_LU_factorized(m))
+    printf("========== is LU factorized \n");
+  else
+    printf("========== is not LU factorized \n");
+  if (NM_Cholesky_factorized(m))
+    printf("========== is Cholesky factorized \n");
+  else
+    printf("========== is not Cholesky factorized \n");
+  if (NM_LDLT_factorized(m))
+    printf("========== is LDLT factorized \n");
+  else
+    printf("========== is not LDLT factorized \n");
 }
 
 void NM_display_row_by_row(const NumericsMatrix* const m)
@@ -3948,6 +3960,93 @@ int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
   return info;
 }
 
+NumericsMatrix* NM_LU_inv(NumericsMatrix* A)
+{
+
+  DEBUG_BEGIN("NM_LU_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
+  assert(A->size0 == A->size1);
+  double * b = (double *) malloc(A->size0*sizeof(double));
+  for(int i = 0; i < A->size0; ++i)
+  {
+    b[i]=0.0;
+  }
+
+
+  NumericsMatrix* Atmp = NM_new();
+  NM_copy(A,Atmp);
+
+  NumericsMatrix * Ainv  = NM_new();
+  Ainv->size0 =  A->size0;
+  Ainv->size1 =  A->size1;
+
+  int info =-1;
+
+  switch(A->storageType)
+  {
+  case NM_DENSE:
+  {
+    Ainv->storageType = NM_DENSE;
+    Ainv->matrix0 = (double *)malloc(A->size0*A->size1*sizeof(double));
+    for(int col_rhs =0; col_rhs < A->size1; col_rhs++)
+    {
+      for(int i = 0; i < A->size0; ++i)
+      {
+        b[i]=0.0;
+      }
+      b[col_rhs] = 1.0;
+      DEBUG_EXPR(NV_display(b,A->size1););
+      info = NM_LU_solve(Atmp, b, 1);
+      DEBUG_EXPR(NV_display(b,A->size1););
+      if(info)
+      {
+        numerics_warning("NM_LU_inv", "problem in NM_LU_solve");
+      }
+      for(int i = 0; i < A->size0; ++i)
+      {
+        Ainv->matrix0[i+col_rhs*A->size0]  = b[i];
+      }
+    }
+    break;
+  }
+  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+  case NM_SPARSE:
+  {
+
+    Ainv->storageType = NM_SPARSE;
+    NM_triplet_alloc(Ainv,  A->size0);
+    Ainv->matrix2->origin = NSM_TRIPLET;
+
+    for(int col_rhs =0; col_rhs < A->size1; col_rhs++)
+    {
+      for(int i = 0; i < A->size0; ++i)
+      {
+        b[i]=0.0;
+      }
+      b[col_rhs] = 1.0;
+      DEBUG_EXPR(NV_display(b,A->size1););
+      info = NM_LU_solve(Atmp, b, 1);
+      if(info)
+      {
+        numerics_warning("NM_LU_inv", "problem in NM_LU_solve");
+      }
+      for(int i = 0; i < A->size0; ++i)
+      {
+        CHECK_RETURN(CSparseMatrix_entry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
+      }
+    }
+    break;
+  }
+  default:
+    assert(0 && "NM_LU_inv :  unknown storageType");
+  }
+
+  NM_clear(Atmp);
+  free(Atmp);
+  free(b);
+  DEBUG_END("NM_LU_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
+  return Ainv;
+
+}
 
 int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 {
@@ -4546,7 +4645,7 @@ int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs
   }
   return info;
 }
-NumericsMatrix* NM_inv(NumericsMatrix* A)
+NumericsMatrix* NM_gesv_inv(NumericsMatrix* A)
 {
 
   DEBUG_BEGIN("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
