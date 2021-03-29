@@ -48,7 +48,9 @@
 #include <RotationQuaternion.hpp>
 #include <SiconosVectorIterator.hpp>
 #include <vector>
+#include <cstddef>
 %}
+
 
 // ignores
 %ignore nullDeleter;
@@ -135,10 +137,10 @@ namespace boost
 };
 
 // a std::size_t definition (otherwise swig complains about it)
-namespace std
-{
-  typedef size_t size_t;
-}
+//namespace std
+//{
+//  typedef size_t size_t;
+//}
 
 
 

@@ -947,7 +947,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 list(translation) + list(orientation), velocity, mass, inertia)
 
             if number is not None:
-                body.setNumber(number)
+                body.setNumber(int(number))
 
         ref_shape = {ctor.instance_name: occ.OccContactShape(
             self._shape.get(ctor.shape_name,
@@ -1103,7 +1103,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if body:
                 # set id number
                 if number is not None:
-                    body.setNumber(number)
+                    body.setNumber(int(number))
 
                 # set external forces
                 self._set_external_forces(body)

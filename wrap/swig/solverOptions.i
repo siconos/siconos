@@ -30,7 +30,7 @@
 #include "Newton_methods.h"
 %}
 
-typedef size_t size_t;
+//typedef size_t size_t;
 
 #ifdef SWIGPYTHON
 #define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
