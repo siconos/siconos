@@ -2384,7 +2384,7 @@ static int NM_inv_test_sparse(void)
   NM_write_in_file_python(A, fileout);
   fclose(fileout);
 
-  NumericsMatrix * Ainv  = NM_inv(A);
+  NumericsMatrix * Ainv  = NM_LU_inv(A);
 
 
   NumericsMatrix* AAinv = NM_multiply(A,Ainv);
@@ -2418,7 +2418,7 @@ static int test_NM_inv(void)
 
   NumericsMatrix * Id = NM_eye(50);
   NM_csc(Id);
-  NumericsMatrix * Iinv = NM_inv(Id);
+  NumericsMatrix * Iinv = NM_LU_inv(Id);
   NM_csc(Iinv);
   NumericsMatrix* IIinv = NM_multiply(Id,Iinv);
   info = !NM_equal(IIinv, Id);
@@ -2427,7 +2427,7 @@ static int test_NM_inv(void)
   printf("end if test I  ...\n");
 
   NumericsMatrix * A = NMM[0];
-  NumericsMatrix * Ainv = NM_inv(A);
+  NumericsMatrix * Ainv = NM_LU_inv(A);
   NumericsMatrix* AAinv = NM_multiply(A,Ainv);
   NumericsMatrix * IA = NM_eye(A->size0);
   info = !NM_compare(AAinv, IA, 1e-14);
@@ -2435,7 +2435,7 @@ static int test_NM_inv(void)
   printf("end if test A dense  ...\n");
 
   NumericsMatrix * B = NMM[1];
-  NumericsMatrix * Binv = NM_inv(B);
+  NumericsMatrix * Binv = NM_LU_inv(B);
   NumericsMatrix* BBinv = NM_multiply(B,Binv);
   NumericsMatrix * IB = NM_eye(B->size0);
   info = !NM_compare(BBinv, IB, 1e-14);
@@ -2443,7 +2443,7 @@ static int test_NM_inv(void)
   printf("end if test B  SBM ...\n");
 
   NumericsMatrix * C = test_matrix_5();
-  NumericsMatrix * Cinv = NM_inv(C);
+  NumericsMatrix * Cinv = NM_LU_inv(C);
   NumericsMatrix* CCinv = NM_multiply(C,Cinv);
   NumericsMatrix * IC = NM_eye(C->size0);
   info = !NM_compare(CCinv, IC, 1e-14);
