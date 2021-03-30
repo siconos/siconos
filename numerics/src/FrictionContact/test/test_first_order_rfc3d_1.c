@@ -64,9 +64,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
-    //collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 2;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10;
     current++;
   }
 
