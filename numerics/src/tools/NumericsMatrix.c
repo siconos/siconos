@@ -1756,13 +1756,14 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double ** Block
   }
   case NM_SPARSE_BLOCK:
   {
+    assert(0); /* this has to be checked carefully */
     int diagPos = SBM_diagonal_block_index(M->matrix1, block_row_nb);
     (*Block) = M->matrix1->block[diagPos];
     break;
   }
   case NM_SPARSE:
   {
-    size_t start_row = (size_t)block_row_nb + block_row_nb + block_row_nb;
+    size_t start_row = (size_t)5*block_row_nb;
     NSM_extract_block(M, *Block, start_row, start_row, 5, 5);
     break;
   }
