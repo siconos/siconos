@@ -48,10 +48,10 @@ extern "C"
   void grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
 
-  /** \addtogroup SetSolverOptions @{
-   */
-  void grfc3d_nsgs_sr_set_default(SolverOptions* options);
-  /** @} */
+  /* /\** \addtogroup SetSolverOptions @{ */
+  /*  *\/ */
+  /* void grfc3d_nsgs_sr_set_default(SolverOptions* options); */
+  /* /\** @} *\/ */
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
