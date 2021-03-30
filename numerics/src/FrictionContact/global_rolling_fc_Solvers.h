@@ -48,6 +48,9 @@ extern "C"
   void grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
 
+  int grfc3d_checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options);
+
+  
   /* /\** \addtogroup SetSolverOptions @{ */
   /*  *\/ */
   /* void grfc3d_nsgs_sr_set_default(SolverOptions* options); */
