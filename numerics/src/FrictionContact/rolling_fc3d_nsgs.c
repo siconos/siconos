@@ -312,12 +312,12 @@ int determine_convergence(double error, double tolerance, int iter,
   {
     hasNotConverged = 0;
     numerics_printf("--------------- RFC3D - NSGS - Iteration %i "
-                    "Residual = %14.7e < %7.3e\n", iter, error, tolerance);
+                    "Residual = %14.7e < %7.3e", iter, error, tolerance);
   }
   else
   {
     numerics_printf("--------------- RFC3D - NSGS - Iteration %i "
-                    "Residual = %14.7e > %7.3e\n", iter, error, tolerance);
+                    "Residual = %14.7e > %7.3e", iter, error, tolerance);
   }
   return hasNotConverged;
 }
