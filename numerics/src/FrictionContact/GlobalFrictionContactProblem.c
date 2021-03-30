@@ -319,7 +319,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
   int m = H->size1;
 
   FrictionContactProblem* localproblem = frictionContactProblem_new();
-  
+
   localproblem->numberOfContacts = problem->numberOfContacts;
   localproblem->dimension =  problem->dimension;
   localproblem->mu = (double*)calloc(problem->numberOfContacts,sizeof(double));
@@ -608,6 +608,8 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     localproblem->M = NM_multiply(Htrans,MinvH);
     DEBUG_EXPR(NM_display(localproblem->M););
 
+    NSM_fix_csc(NM_csc(localproblem->M));
+
 #ifdef OUTPUT_DEBUG
     fileout = fopen("dataW.py", "w");
     NM_write_in_file_python(localproblem->M, fileout);
@@ -630,7 +632,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     fclose(fileout);
 #endif
 
-    
+
     DEBUG_EXPR(frictionContact_display(localproblem););
     //getchar();
   }
