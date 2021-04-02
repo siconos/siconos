@@ -28,11 +28,13 @@
 #include "sanitizer.h"                           // for cblas_dcopy_msan
 #include "numerics_verbose.h"  // for CHECK_IO
 #include "io_tools.h"
+
 #include "siconos_debug.h"
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"
 #endif
-#define OUTPUT_DEBUG 1
+
+//#define OUTPUT_DEBUG 1
 #ifdef OUTPUT_DEBUG
 #include "NumericsVector.h"
 #endif

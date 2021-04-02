@@ -18,22 +18,14 @@
 #include <assert.h>                              // for assert
 #include <stdio.h>                               // for printf, fclose, fopen
 #include <stdlib.h>                              // for malloc, free, exit
-#include "FrictionContactProblem.h"              // for FrictionContactProblem
 #include "GlobalRollingFrictionContactProblem.h" // for GlobalRollingFrictionContac...
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "RollingFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "NumericsFwd.h"                         // for NumericsMatrix, Fric...
-
 #include "NumericsMatrix.h"                      // for NumericsMatrix, NM_gemv
-//#include "NumericsSparseMatrix.h"                // for NumericsSparseMatrix
-//#include "NumericsVector.h"                      // for NV_write_in_file_python
 #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_d...
-//#include "SparseBlockMatrix.h"                   // for SBM_gemv, SBM_free
 #include "rolling_fc_Solvers.h"                        // for fc3d_DeSaxceFixedPoint
-
-//#include "gfc3d_Solvers.h"                       // for gfc3d_DeSaxceFixedPo...
 #include "numerics_verbose.h"                    // for verbose, numerics_pr...
-//#include "sanitizer.h"                           // for cblas_dcopy_msan
 //#include "gfc3d_compute_error.h"
 #include "SolverOptions.h"                       // for SICONOS_DPARAM_TOL
 
@@ -60,7 +52,7 @@ void  grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem,
     numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
     RollingFrictionContactProblem* localproblem = globalRollingFrictionContact_reformulation_RollingFrictionContact(problem);
     DEBUG_EXPR(rollingFrictionContact_display(localproblem););
-    
+
     if(verbose)
     {
       printf("Call to the fc3d solver ...\n");
@@ -78,7 +70,7 @@ void  grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem,
     double norm_b = cblas_dnrm2(m, problem->b, 1);
     double error;
     //gfc3d_compute_error(problem,  reaction, velocity, globalVelocity,  options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
-    
+
     rollingFrictionContactProblem_free(localproblem);
   }
   else
@@ -88,4 +80,3 @@ void  grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem,
   }
   DEBUG_END("grfc3d_nsgs_wr\n");
 }
-
