@@ -157,10 +157,10 @@ class VViewOptions(object):
        avatars: view only avatar if an avatar is defined (for each
        object) contactors: ignore avatars, view only contactors where
        avatars are contactors with collision_group=-1
-     --with_edges 
+     --with_edges
        add edges in the rendering (experimental for primitives)
      --with_fixed_color
-       use fixed color defined in the config file    
+       use fixed color defined in the config file
     """)
 
     def parse(self):
@@ -248,16 +248,16 @@ class VViewOptions(object):
 
             elif o == '--ortho':
                 self.initial_camera[3] = float(a)
-                
+
             elif o == '--with-charts=':
                 self.with_charts = int(a)
 
             elif o == '--visible':
                 self.visible_mode = a
-                
+
             elif o == '--with-edges':
                 self.with_edges = True
-                
+
             elif o == '--with-fixed-color':
                 self.with_random_color = False
 
@@ -282,8 +282,8 @@ class VExportOptions(VViewOptions):
         self.stride = 1
         self.nprocs = 1
         self.gen_para_script = False
- 
-        
+
+
     def usage(self, long=False):
         print(__doc__); print()
         print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
@@ -347,7 +347,7 @@ class VExportOptions(VViewOptions):
         else:
             self.usage()
             exit(1)
-            
+
 class VRawDataExportOptions(VViewOptions):
     def __init__(self, io_filename = None):
         super(self.__class__, self).__init__()
@@ -359,8 +359,8 @@ class VRawDataExportOptions(VViewOptions):
         self.start_step = 0
         self.end_step = None
         self.stride = 1
-        
-        self.io_filename = io_filename 
+
+        self.io_filename = io_filename
     def usage(self, long=False):
         print(__doc__); print()
         print('Usage:  {0} [--help]  <HDF5>'
@@ -380,7 +380,7 @@ class VRawDataExportOptions(VViewOptions):
             --no-export-velocity do not export position
             --export-cf          do export of contact friction data
             --export-velocity-in-absolute-frame          do export of contact friction data
-                                 
+
             """)
 
     def parse(self):
@@ -389,7 +389,7 @@ class VRawDataExportOptions(VViewOptions):
             opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                            ['help', 'version', 'ascii',
                                             'start-step=', 'end-step=',
-                                            'stride=', 
+                                            'stride=',
                                             'no-export-position',
                                             'no-export-velocity',
                                             'export-cf',
@@ -426,7 +426,7 @@ class VRawDataExportOptions(VViewOptions):
 
         if self.io_filename is  None:
             if len(args) > 0 :
-                self.io_filename = args[0]       
+                self.io_filename = args[0]
             else:
                 self.usage()
                 exit(1)
@@ -1596,7 +1596,7 @@ class VView(object):
                     convex.GetPointIds().SetId(id_, id_)
                     points.InsertNextPoint(vertice[0], vertice[1], 0.05)
                     convex.GetPointIds().SetId(id_+number_of_vertices, id_+number_of_vertices)
-                    
+
             source = ConvexSource(convex, points)
             self.readers[shape_name] = source
 
@@ -1667,7 +1667,7 @@ class VView(object):
                 source = vtk.vtkMultiBlockDataGroupFilter()
                 add_compatiblity_methods(source)
                 source.AddInputData(data)
-                
+
             elif primitive == 'Disk':
                 source = vtk.vtkCylinderSource()
                 source.SetResolution(200)
@@ -1680,7 +1680,7 @@ class VView(object):
                 source.SetYLength(attrs[1])
                 source.SetZLength(0.1)
 
-                
+
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
             if not self.opts.imr:
@@ -1694,7 +1694,7 @@ class VView(object):
                     mapper_edge.SetInputConnection(source.GetOutputPort())
                 self.mappers_edges[shape_name] = (y for y in [mapper_edge])
 
-                
+
 
     def init_shapes(self):
         for shape_name in self.io.shapes():
@@ -1748,14 +1748,14 @@ class VView(object):
                     self.config.get('dynamic_opacity', 0.7))
                 actor.GetProperty().SetColor(
                     self.config.get('dynamic_bodies_color', [0.3,0.3,0.3]))
-                
+
                 if self.opts.with_edges:
                     self.dynamic_actors[instid].append((actor_edge, contact_shape_indx,
                                                     collision_group))
                     actor_edge.GetProperty().SetOpacity(
                         self.config.get('dynamic_opacity', 1.0))
                     actor_edge.GetProperty().SetRepresentationToWireframe()
-                
+
             else:
                 # objects that are not supposed to move
                 self.static_actors[instid].append((actor, contact_shape_indx,
@@ -1765,7 +1765,7 @@ class VView(object):
                     self.config.get('static_opacity', 1.0))
                 actor.GetProperty().SetColor(
                         self.config.get('static_bodies_color', [0.5,0.5,0.5]))
-                
+
             if self.opts.with_random_color :
                 actor.GetProperty().SetColor(random_color())
                 if self.opts.with_edges:
@@ -2193,6 +2193,8 @@ class VView(object):
         self.renderer.AddLight(hlight)
         self.renderer.SetBackground(*self.config.get('background_color', [.0,.0,.0]))
 
+        self.renderer_window.SetSize(*self.config['window_size'])
+        self.renderer_window.SetWindowName('vview: ' + self.opts.io_filename)
     def setup_charts(self):
         # Warning! numpy support offer a view on numpy array
         # the numpy array must not be garbage collected!
@@ -2246,9 +2248,6 @@ class VView(object):
         tview_prec.GetInteractor().AddObserver('RightButtonReleaseEvent',
                                                self.input_observer.prec_plot_observer)
 
-        # screen_size = self.renderer_window.GetScreenSize()
-        self.renderer_window.SetSize(*self.config['window_size'])
-        self.renderer_window.SetWindowName('vview: ' + self.opts.io_filename)
         tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
         tview_prec.GetRenderer().GetRenderWindow().SetSize(600, 200)
 
@@ -2444,7 +2443,7 @@ class VView(object):
                 big_data_writer.Write()
 
             big_data_writer.Write()
-            
+
     def export_raw_data(self):
 
         times = self.io_reader._times[
@@ -2468,7 +2467,7 @@ class VView(object):
         position_output = {}
         velocity_output = {}
         velocity_absolute_output = {}
-                
+
         for time in times:
             k = k + self.opts.stride
             if (k % packet == 0):
@@ -2477,13 +2476,13 @@ class VView(object):
 
             pos_data = self.io_reader.pos_data
             velo_data = self.io_reader.velo_data
-            
+
             ndyna=pos_data.shape[0]
-            
+
 
             for i in range(ndyna):
                 bdy_id = int(pos_data[i,1])
-                
+
                 ######## position output ########
                 if self.opts._export_position :
                     nvalue=pos_data.shape[1]
@@ -2501,7 +2500,7 @@ class VView(object):
                         position_output_body[-1].extend(pos_data[i,2:nvalue])
                     position_output_body[-1].append(bdy_id)
 
-                
+
                 ######## velocity output ########
                 if self.opts._export_velocity :
                     nvalue=velo_data.shape[1]
@@ -2513,7 +2512,7 @@ class VView(object):
                     velocity_output_body[-1].append(time)
                     velocity_output_body[-1].extend(velo_data[i,2:nvalue])
                     velocity_output_body[-1].append(bdy_id)
-                    
+
                 ######## velocity in absolute frame output ########
                 if self.opts._export_velocity_in_absolute_frame :
                     nvalue=velo_data.shape[1]
@@ -2536,7 +2535,7 @@ class VView(object):
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
             bdy_id)
             numpy.savetxt(filename_output, output)
-            
+
         for bdy_id in velocity_output.keys():
             output = numpy.array(velocity_output[bdy_id])
             filename_output = '{0}-velocity-body_{1}.dat'.format(
@@ -2550,14 +2549,14 @@ class VView(object):
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
             bdy_id)
             numpy.savetxt(filename_output, output)
-            
+
         cf_output = {}
         for time in times:
             #print('time', time)
             k = k + self.opts.stride
             if (k % packet == 0):
                 sys.stdout.write('.')
-                
+
             self.io_reader.SetTime(time)
 
             cf_data = self.io_reader.cf_data
@@ -2579,18 +2578,18 @@ class VView(object):
                     cf_output_contact[-1].append(time)
                     cf_output_contact[-1].extend(cf_data[i,2:nvalue])
                     cf_output_contact[-1].append(contact_id)
-  
+
         for contact_id in cf_output.keys():
             output = numpy.array(cf_output[contact_id])
             filename_output = '{0}-cf-contact_{1}.dat'.format(
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
             contact_id)
             numpy.savetxt(filename_output, output)
-    
-            
+
+
         sys.stdout.write('\n')
-            
-            
+
+
     def initialize_vtk(self):
 
         if not self.opts.gen_para_script:
