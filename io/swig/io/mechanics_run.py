@@ -467,7 +467,7 @@ class ShapeCollection():
                     if self.shape(shape_name).dtype == h5py.vlen_dtype(str):
                         with tmpfile() as tmpf:
                             data = self.shape(shape_name)[:][0]
-                            
+
                             tmpf[0].write(data.decode("utf-8"))
                             #tmpf[0].write(data)
                             tmpf[0].flush()
@@ -916,6 +916,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                           body_class, shape_class, face_class, edge_class,
                           birth=False, number=None):
 
+
         if mass is None:
             # a static object
             body = None
@@ -924,12 +925,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 'number': number,
                 'origin': translation,
                 'orientation': orientation}
+            flag='static'
         else:
 
             if not np.isscalar(mass) or mass <= 0:
                 self.print_verbose('Warning mass must be a positive scalar')
                 raise RuntimeError('Warning mass must be a positive scalar')
-            
+
             if body_class is None:
                 body_class = occ.OccBody
 
@@ -948,7 +950,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if number is not None:
                 body.setNumber(int(number))
-
+            flag='dynamic'
+        
         ref_shape = {ctor.instance_name: occ.OccContactShape(
             self._shape.get(ctor.shape_name,
                             shape_class, face_class,
@@ -1009,7 +1012,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if birth and self._verbose:
                 self.print_verbose('birth of body named {0}, translation {1}, orientation {2}'.format(name, translation, orientation))
 
-        return body
+        return body, flag
 
     def import_bullet_object(self, name, translation, orientation,
                              velocity, contactors, mass, inertia,
@@ -1024,17 +1027,20 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self._interman is not None and 'input' in self._data:
             body = None
+            # ---------------
+            # a static object
+            # ---------------
             if mass is None:
-                # a static object
+
                 cset = SiconosContactorSet()
                 csetpos = (translation + orientation)
                 for c in contactors:
                     shp = self._shape.get(c.shape_name)
                     pos = list(c.translation) + list(c.orientation)
                     cset.append(SiconosContactor(shp, pos, c.group))
-                    self.print_verbose('Adding shape %s to static contactor'%c.shape_name, pos)
+                    self.print_verbose('              Adding shape %s to static contactor'%c.shape_name, 'at relative position', pos)
 
-                self._interman.insertStaticContactorSet(cset, csetpos)
+                staticContactorSetID = self._interman.insertStaticContactorSet(cset, csetpos)
 
                 self._static[name] = {
                     'number': number,
@@ -1042,8 +1048,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     'orientation': orientation,
                     'shape': shp,
                 }
-
-            else: #  dynamic object
+                # In the case of a static object, we return the staticContactorSetID and a flag
+                # this will be used to remove the contactor if we have a time of death
+                return staticContactorSetID, 'static'
+            
+            # ---------------
+            # a dynamic object
+            # ---------------
+            else: 
 
                 if not np.isscalar(mass) or mass <= 0:
                     self.print_verbose('Warning mass must be a positive scalar')
@@ -1086,7 +1098,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if fext is not None:
                     body.setFextPtr(fext)
 
-                    
+
                 self_collide = self._input[name].get('allow_self_collide',
                                                      None)
                 if self_collide is not None:
@@ -1097,6 +1109,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     shp = self._shape.get(c.shape_name)
                     pos = list(c.translation) + list(c.orientation)
                     cset.append(SiconosContactor(shp, pos, c.group))
+                    self.print_verbose('              Adding shape %s to dynamic contactor'%c.shape_name, 'at relative position', pos)
 
                 body.setContactors(cset)
 
@@ -1113,7 +1126,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._nsds.insertDynamicalSystem(body)
                 self._nsds.setName(body, str(name))
 
-        return body
+            return body, 'dynamic'
 
     def make_coupler_jointr(self, ds1_name, ds2_name, coupled, references):
         topo = self._nsds.topology()
@@ -1459,9 +1472,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         possibly overriding initial position and velocity.
         """
         obj = self._input[name]
-        self.print_verbose('Import  dynamic or static object number ',
-                           obj.attrs['id'], 'from initial state')
-        self.print_verbose('                object name   ', name)
+        self.print_verbose ('Import object name:', name)
+        self.print_verbose ('              number (id): {0} '.format(obj.attrs['id']))
 
         if translation is None:
             translation = obj.attrs['translation']
@@ -1476,9 +1488,17 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         mass = obj.attrs.get('mass', None)
         inertia = obj.attrs.get('inertia', None)
 
+        if mass is None:
+            self.print_verbose ('              static object')
+            self.print_verbose ('              position', list(translation) + list(orientation))
+        else:
+            self.print_verbose ('              dynamic object')
+            self.print_verbose ('              position', list(translation) + list(orientation))
+            self.print_verbose ('              velocity', velocity)
+        
         # self.print_verbose('mass = ', mass)
         # self.print_verbose('inertia = ', inertia)
-        
+
         input_ctrs = [ctr for _n_, ctr in obj.items()]
 
         contactors = []
@@ -1524,7 +1544,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if occ_type:
             # Occ object
-            body = self.import_occ_object(
+            body, flag = self.import_occ_object(
                 name, floatv(translation), floatv(orientation),
                 floatv(velocity), contactors, mass,
                 inertia, body_class, shape_class, face_class,
@@ -1532,7 +1552,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 number=self.instances()[name].attrs['id'])
         else:
             # Bullet object
-            body = self.import_bullet_object(
+            body, flag = self.import_bullet_object(
                 name, floatv(translation), floatv(orientation),
                 floatv(velocity), contactors, mass,
                 inertia, body_class, shape_class, birth=birth,
@@ -1540,12 +1560,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # schedule its death immediately
         time_of_death = obj.attrs.get('time_of_death', None)
-        if None not in (time_of_death, body):
+        if time_of_death is not None :
             bisect.insort_left(self._scheduled_deaths, time_of_death)
             if time_of_death in self._deaths:
-                self._deaths[time_of_death].append((name, obj, body))
+                self._deaths[time_of_death].append((name, obj, body, flag))
             else:
-                self._deaths[time_of_death] = [(name, obj, body)]
+                self._deaths[time_of_death] = [(name, obj, body, flag)]
 
     def import_scene(self, time, body_class, shape_class, face_class,
                      edge_class):
@@ -1617,15 +1637,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     # this is for now
                     #
                     # cold restart if output previously done
+                    
                     if mass is not None and dpos_data is not None and\
                        len(dpos_data) > 0:
-
-                        self.print_verbose('Import  dynamic object name ',
-                                           name,
-                                           'from current state')
-                        self.print_verbose('imported object has id: {0}'.
-                                           format(obj.attrs['id']))
-
+                        
                         xpos = xdpos_data[obj.attrs['id']]
                         translation = (xpos[2], xpos[3], xpos[4])
                         orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
@@ -1634,18 +1649,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         velocity = (xvel[2], xvel[3], xvel[4],
                                     xvel[5], xvel[6], xvel[7])
 
-                        self.print_verbose('position:', list(translation) +
-                                           list(orientation))
-                        self.print_verbose('velocity:', velocity)
-
                     else:
                         # start from initial conditions
-                        self.print_verbose ('Import  dynamic or static object number ', obj.attrs['id'], 'from initial state')
-                        self.print_verbose ('                object name   ', name)
+
                         translation = obj.attrs['translation']
                         orientation = obj.attrs['orientation']
                         velocity = obj.attrs['velocity']
-
+                        
                     self.import_object(name=name, body_class=body_class,
                                        shape_class=shape_class,
                                        face_class=face_class,
@@ -1693,8 +1703,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         for time_of_birth in current_times_of_births:
             for (name, _) in self._births[time_of_birth]:
+
                 self.import_object(name, body_class, shape_class,
                                    face_class, edge_class, birth=True)
+
 
     def execute_deaths(self):
         """
@@ -1705,13 +1717,22 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         ind_time = bisect.bisect_right(self._scheduled_deaths, time)
 
         current_times_of_deaths = set(self._scheduled_deaths[:ind_time])
+
         self._scheduled_deaths = self._scheduled_deaths[ind_time:]
 
         for time_of_death in current_times_of_deaths:
-            for ( _, _, body) in self._deaths[time_of_death]:
-                self._interman.removeBody(body)
-                self._nsds.removeDynamicalSystem(body)
-
+            print(self._deaths[time_of_death])
+            for ( _, _, body, flag) in self._deaths[time_of_death]:
+                if flag == 'static':
+                    self._interman.removeStaticContactorSet(body)
+                elif  flag == 'dynamic':
+                    self._interman.removeBody(body)
+                    self._nsds.removeDynamicalSystem(body)
+                else:
+                    msg = 'execute_deaths : unknown object type'
+                    msg += 'It should static or dynamic'
+                    raise RuntimeError(msg)
+                
     def output_static_objects(self):
         """
         Outputs translations and orientations of static objects
@@ -1721,10 +1742,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._static_data.resize(len(self._static), 0)
 
         for static in self._static.values():
-
-            self.print_verbose('output static object', static['number'])
-
-            self.print_verbose(static.keys())
             translation = static['origin']
             rotation = static['orientation']
 
@@ -1754,6 +1771,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                      sin(rotation[0] / 2.0)]
 
             p += 1
+
 
     def output_dynamic_objects(self, initial=False):
         """
@@ -2305,11 +2323,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
         # SiconosBulletOptions if one is provided.
+        if (multipoints_iterations is not None ) and (bullet_options is not None):
+            msg = '[io.mechanics] run(): one cannot give multipoints_iterations and bullet_options simultaneously. \n'
+            msg += '                             multipoints_iterations will be marked as obsolete. use preferably bullet_options\n'
+            msg += '                             with  bullet_options.perturbationIterations and bullet_options.minimumPointsPerturbationThreshold.'
+            raise RuntimeError(msg)
+        
         if multipoints_iterations and bullet_options is None:
             bullet_options = SiconosBulletOptions()
             bullet_options.perturbationIterations = 3 * multipoints_iterations
             bullet_options.minimumPointsPerturbationThreshold = \
                 3 * multipoints_iterations
+            
 
         if (self._dimension == 2):
             if bullet_options is None:
@@ -2478,7 +2503,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             simulation.setDisplayNewtonConvergence(True)
 
         self._simulation = simulation
-        # input()
 
         if len(self._plugins) > 0:
             self.print_verbose('import plugins ...')
@@ -2503,7 +2527,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # for i in range(nds):
         #     ds = nsds.dynamicalSystem(i)
         #     ds.display()
-        # raw_input()
+
         self.print_verbose('start simulation ...')
         self._initializing = False
         while simulation.hasNextEvent():
@@ -2542,6 +2566,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if cond or k == 1:
                 if verbose:
                     self.print_verbose('output in hdf5 file at step ', k)
+
+                self.log(self.output_static_objects, with_timer)()
 
                 self.log(self.output_dynamic_objects, with_timer)()
 
@@ -2610,7 +2636,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     lam = simulation.lambda_(1, 0)
                     self.print_verbose('  lambda max :', np.max(lam))
                     #print(' lambda : ',lam)
-                    #raw_input()
 
                 if len(simulation.y(1, 0)) > 0:
                     v = simulation.y(1, 0)
