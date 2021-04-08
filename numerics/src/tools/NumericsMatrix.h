@@ -268,19 +268,19 @@ extern "C"
    * \param[in] A the NumericsMatrix
    * \return true if the matrix has been LU factorized.
    */
-  bool NM_LU_factorized(NumericsMatrix* A);
+  bool NM_LU_factorized(const NumericsMatrix* const A);
 
   /** Check for a previous Cholesky factorization.
    * \param[in] A the NumericsMatrix
    * \return true if the matrix has been Cholesky factorized.
    */
-  bool NM_Cholesky_factorized(NumericsMatrix* A);
+  bool NM_Cholesky_factorized(const NumericsMatrix* const A);
 
   /** Check for a previous LDLT factorization.
    * \param[in] A the NumericsMatrix
    * \return true if the matrix has been Cholesky factorized.
    */
-  bool NM_LDLT_factorized(NumericsMatrix* A);
+  bool NM_LDLT_factorized(const NumericsMatrix* const A);
 
   /** Set the factorization flag.
    * \param[in] A the NumericsMatrix,

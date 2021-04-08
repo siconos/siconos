@@ -1307,7 +1307,7 @@ void NM_display(const NumericsMatrix* const m)
     /* } */
     if(m->matrix2->diag_indx)
     {
-      printf("========== m->matrix2->diag_indx = %ld\n", m->matrix2->diag_indx);
+      printf("========== m->matrix2->diag_indx = %p\n", m->matrix2->diag_indx);
       for(int  i = 0; i < m->size0; ++i) printf("diag_indices[%i] = %li\t ", i, m->matrix2->diag_indx[i]);
     }
     else
@@ -2266,15 +2266,15 @@ RawNumericsMatrix* NM_unpreserve(NumericsMatrix* A)
   return A;
 }
 
-bool NM_LU_factorized(NumericsMatrix* A)
+bool NM_LU_factorized(const NumericsMatrix* const A)
 {
   return NM_internalData(A->destructible)->isLUfactorized;
 }
-bool NM_Cholesky_factorized(NumericsMatrix* A)
+bool NM_Cholesky_factorized(const NumericsMatrix* const A)
 {
   return NM_internalData(A->destructible)->isCholeskyfactorized;
 }
-bool NM_LDLT_factorized(NumericsMatrix* A)
+bool NM_LDLT_factorized(const NumericsMatrix* const A)
 {
   return NM_internalData(A->destructible)->isLDLTfactorized;
 }
