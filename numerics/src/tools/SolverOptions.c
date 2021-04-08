@@ -889,6 +889,12 @@ SolverOptions * solver_options_create(int solverId)
     rfc2d_poc_withLocalIteration_set_default(options);
     break;
   }
+  case SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR:
+  {
+    options = solver_options_initialize(solverId, 1000, 1e-12, 1);
+    rfc3d_nsgs_set_default(options);
+    break;
+  }
 
 
   case SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint:

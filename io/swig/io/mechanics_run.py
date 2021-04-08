@@ -36,6 +36,7 @@ from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
 from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace as GFCTrace
 from siconos.io.FrictionContactTrace import FrictionContactTrace as FCTrace
+from siconos.io.FrictionContactTrace import GlobalRollingFrictionContactTrace as GRFCTrace
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 
@@ -2367,10 +2368,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # Check nslaw/OSI compatibility
         if (osi == sk.MoreauJeanGOSI):
-            checknsl = 'NewtonImpactFrictionNSL' not in set(nslaw_type_list)
-            if (nb_of_nslaw_type > 1) or checknsl:
-                msg = 'MoreauJeanGOSI can only deal'
-                msg += 'with NewtonImpactFrictionNSL.'
+            checknsl = 'NewtonImpactFrictionNSL' in set(nslaw_type_list) or 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list)
+            if  not checknsl:
+                msg = 'MoreauJeanGOSI can only deal '
+                msg += 'with NewtonImpactFrictionNSL or NewtonImpactRollingFrictionNSL.'
+                raise RuntimeError(msg)
+            if (nb_of_nslaw_type > 1):
+                msg = 'MoreauJeanGOSI cannot only deal with multiple inpact laws at the same time '
                 raise RuntimeError(msg)
 
         # Creates and initialises the one-step nonsmooth problem.
@@ -2383,10 +2387,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if friction_contact_trace_params is None:
             # Global friction contact.
             if (osi == sk.MoreauJeanGOSI):
-                if (solver_options is None):
-                    osnspb = sk.GlobalFrictionContact(3)
-                else:
-                    osnspb = sk.GlobalFrictionContact(3, solver_options)
+                if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):           
+                    if (solver_options is None):
+                        osnspb = sk.GlobalFrictionContact(3)
+                    else:
+                        osnspb = sk.GlobalFrictionContact(3, solver_options)
+                elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
+                    if (solver_options is None):
+                        osnspb = sk.GlobalRollingFrictionContact(5)
+                    else:
+                        osnspb = sk.GlobalRollingFrictionContact(5, solver_options)
                 osnspb.setMStorageType(sn.NM_SPARSE)
                 # if sid == sn.SICONOS_GLOBAL_FRICTION_3D_ADMM:
                 #     osnspb.setMStorageType(sn.NM_SPARSE)
@@ -2430,9 +2440,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     sn.SICONOS_FRICTION_3D_NSGS)
             sid = solver_options.solverId
             if(osi == sk.MoreauJeanGOSI):
-                osnspb = GFCTrace(3, solver_options, friction_contact_trace_params, nsds)
-                osnspb.setMStorageType(sn.NM_SPARSE)
-                osnspb.setMaxSize(osnspb_max_size)
+                if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):
+                    osnspb = GFCTrace(3, solver_options, friction_contact_trace_params, nsds)
+                    osnspb.setMStorageType(sn.NM_SPARSE)
+                    osnspb.setMaxSize(osnspb_max_size)
+                elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
+                    osnspb = GRFCTrace(5, solver_options, friction_contact_trace_params, nsds)
+                    osnspb.setMStorageType(sn.NM_SPARSE)
+                    osnspb.setMaxSize(osnspb_max_size)
+                else:
+                    msg = "Unknown nslaw type"
+                    msg += str(set(nslaw_type_list))
+                    raise RuntimeError(msg) 
             else:
                 osnspb = FCTrace(3, solver_options, friction_contact_trace_params, nsds)
                 osnspb.setMaxSize(osnspb_max_size)

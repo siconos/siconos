@@ -889,6 +889,8 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
         for(CS_INT p = Mp[j]; p < Mp[j+1]; ++p)
         {
           CS_INT row_nb = Mi[p];
+          /* Warning : the following strategy work only if the csc storage is
+             correclty ordered. Use NSM_fix_csc to be sure*/
           if(row_nb >= (CS_INT) pos_row)
           {
             if(row_nb >= (CS_INT)(pos_row + block_row_size))

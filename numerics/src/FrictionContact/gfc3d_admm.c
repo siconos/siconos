@@ -150,7 +150,7 @@ static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int * 
            SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_EIGENVALUES)
   {
     double lambda_max =  NM_iterated_power_method(M, 1e-08, 100);
-    double lambda_min =  1.0/NM_iterated_power_method(NM_inv(M), 1e-08, 100);
+    double lambda_min =  1.0/NM_iterated_power_method(NM_LU_inv(M), 1e-08, 100);
 
     numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of M = %g ",lambda_max);
     numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of M = %g ",lambda_min);
@@ -286,7 +286,7 @@ static void gfc3d_print_problem_info(GlobalFrictionContactProblem* restrict prob
     numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(M), norm_q);
     numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(M));
     double eig_max = NM_iterated_power_method(M, 1e-08, 100);
-    double eig_min =  1./NM_iterated_power_method(NM_inv(M), 1e-08, 100);
+    double eig_min =  1./NM_iterated_power_method(NM_LU_inv(M), 1e-08, 100);
     numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of M = %g ", eig_max);
     numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of M = %g ", eig_min);
     numerics_printf_verbose(1,"---- GFC3D - ADMM - conditioning of M = %g ", eig_max/eig_min);

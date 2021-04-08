@@ -131,8 +131,8 @@ extern "C"
     double * reaction,
     double * globalVelocity);
 
-
-
+  /** Refomulation into local problem */
+  FrictionContactProblem *  globalFrictionContact_reformulation_FrictionContact(GlobalFrictionContactProblem* problem);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

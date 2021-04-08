@@ -55,8 +55,7 @@ void rolling_fc3d_local_problem_fill_M(RollingFrictionContactProblem * problem, 
 RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(RollingFrictionContactProblem* problem)
 {
   /* Connect local solver and local problem*/
-  RollingFrictionContactProblem* localproblem =
-    (RollingFrictionContactProblem*)malloc(sizeof(RollingFrictionContactProblem));
+  RollingFrictionContactProblem* localproblem = rollingFrictionContactProblem_new();
   localproblem->numberOfContacts = 1;
   localproblem->dimension = 5;
   localproblem->q = (double*)malloc(5 * sizeof(double));

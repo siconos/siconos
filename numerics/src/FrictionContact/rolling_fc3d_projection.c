@@ -97,9 +97,11 @@ int rolling_fc3d_projectionOnCone_solve(
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
   //double an = 1./(MLocal[0]+mu_i);
-  //double an = 1. / (MLocal[0]);
-
-  double an=1.0;
+  double an = 1. / (MLocal[0]);
+  for (unsigned int i =1; i <5; i++)
+  {
+    an = fmin(an,1. / (MLocal[i+i*5]));
+  }
 
   /* int incx = 1, incy = 1; */
   double velocity[5];

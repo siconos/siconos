@@ -38,7 +38,7 @@
 OSNSMatrix::OSNSMatrix():
   _dimRow(0),  _dimColumn(0), _storageType(NM_DENSE)
 {
-  _numericsMatrix.reset(new NumericsMatrix);
+  //_numericsMatrix.reset(new NumericsMatrix);
 }
 
 // Constructor with dimensions (one input: square matrix only)
@@ -69,9 +69,8 @@ OSNSMatrix::OSNSMatrix(unsigned int n, NM_types stor):
   {} // do nothing here
   }
 
-  _numericsMatrix.reset(new NumericsMatrix);
-  NM_null(_numericsMatrix.get());
-  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, NM_types stor) \n");
+  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
+
 }
 
 OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor):
@@ -102,9 +101,8 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor):
   {} // do nothing here
   }
 
-  _numericsMatrix.reset(new NumericsMatrix);
-  NM_null(_numericsMatrix.get());
-  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor)\n");
+
+  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor)\n");
 
 }
 
@@ -112,8 +110,8 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor):
 OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor):
   _dimRow(0), _dimColumn(0), _storageType(stor)
 {
-  _numericsMatrix.reset(new NumericsMatrix);
-  NM_null(_numericsMatrix.get());
+//  _numericsMatrix.reset(new NumericsMatrix);
+//  NM_null(_numericsMatrix.get());
   fillW(indexSet);
 }
 
@@ -122,8 +120,8 @@ OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor):
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
   _dimRow(MSource.size(0)), _dimColumn(MSource.size(1)), _storageType(NM_DENSE)
 {
-  _numericsMatrix.reset(new NumericsMatrix);
-  NM_null(_numericsMatrix.get());
+//  _numericsMatrix.reset(new NumericsMatrix);
+//  NM_null(_numericsMatrix.get());
   _M1.reset(new SimpleMatrix(MSource));
 }
 
@@ -275,11 +273,6 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
       _M2->fill(indexSet);
     }
   }
-  // invalidate other old storages.
-  _numericsMatrix.get()->storageType = _storageType ;
-  _numericsMatrix.get()->size0 = _dimRow ;
-  _numericsMatrix.get()->size1 = _dimColumn ;
-  NM_clear_other_storages(_numericsMatrix.get(), _storageType);
   if(update)
     convert();
   DEBUG_END("void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)\n");
@@ -290,13 +283,16 @@ void OSNSMatrix::convert()
 {
   DEBUG_BEGIN("OSNSMatrix::convert()\n");
   DEBUG_PRINTF("_storageType = %i\n", _storageType);
-  _numericsMatrix->storageType = _storageType;
-  _numericsMatrix->size0 = _dimRow;
-  _numericsMatrix->size1 = _dimColumn;
+
+  
   switch(_storageType)
   {
   case NM_DENSE:
   {
+    _numericsMatrix.reset(NM_new(),NM_free_not_dense);
+    _numericsMatrix.get()->storageType = _storageType ;
+    _numericsMatrix.get()->size0 = _dimRow ;
+    _numericsMatrix.get()->size1 = _dimColumn ;
     _numericsMatrix->matrix0 = _M1->getArray(); // Pointer link
     // _numericsMatrix->matrix1 = nullptr; matrix1 is not set to nullptr: we
     // keep previous allocation. May be usefull if we switch between
@@ -306,6 +302,10 @@ void OSNSMatrix::convert()
   case NM_SPARSE_BLOCK:
   {
     _M2->convert();
+    _numericsMatrix.reset(NM_new(),NM_free);
+    _numericsMatrix.get()->storageType = _storageType ;
+    _numericsMatrix.get()->size0 = _dimRow ;
+    _numericsMatrix.get()->size1 = _dimColumn ;
     _numericsMatrix->matrix1 = &*_M2->getNumericsMatSparse();
     break;
   }
@@ -345,13 +345,10 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
 
       // We choose a triplet matrix format for inserting values.
       // This simplifies the memory manipulation.
+      _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM),NM_free);
+
       NumericsMatrix& M_NM = *numericsMatrix();
-      NM_clearSparse(&M_NM);
-      M_NM.storageType = NM_SPARSE;
-      M_NM.size0 = sizeM;
-      M_NM.size1 = sizeM;
       NM_triplet_alloc(&M_NM, sizeM); // At least one element per row
-      M_NM.matrix2->origin = NSM_TRIPLET;
       CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
 
       unsigned int pos =0;
@@ -366,15 +363,11 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
         DEBUG_PRINTF("pos = %u \n", pos);
       }
     }
-    // invalidate other old storages.
-    DEBUG_EXPR(NM_display(numericsMatrix().get()););
     break;
   }
   default:
   {
-    // invalidate other old storages.
-    NM_clear_other_storages(_numericsMatrix.get(), _storageType);
-    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::fillM unknown _storageType");
   }
   }
 
@@ -401,23 +394,18 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
     {
       // We choose a triplet matrix format for inserting values.
       // This simplifies the memory manipulation.
+      _numericsMatrix.reset(NM_create(NM_SPARSE, _dimRow, _dimColumn),NM_free);
       NumericsMatrix& H_NM = *numericsMatrix();
-      NM_clearSparse(&H_NM);
-      H_NM.storageType = NM_SPARSE;
-      H_NM.size0 = _dimRow;
-      H_NM.size1 = _dimColumn;
       NM_triplet_alloc(&H_NM, _dimColumn);// At least one element per column
-      H_NM.matrix2->origin = NSM_TRIPLET;
       CSparseMatrix* Htriplet= NM_triplet(&H_NM);
+
+
       unsigned int pos = 0, pos_ds=0;
-
-
       SP::SiconosMatrix leftInteractionBlock;
       InteractionsGraph::VIterator ui, uiend;
       for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet.bundle(*ui);
-
         SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
         SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
 
@@ -430,8 +418,9 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
         {
           endl = (ds == ds2);
           size_t sizeDS = ds->dimension();
+          size_t sizeY = inter.dimension();
           // this whole part is a hack. Just should just get the rightblock
-          leftInteractionBlock = inter.getLeftInteractionBlockForDS(posBlock, 3, sizeDS);
+          leftInteractionBlock = inter.getLeftInteractionBlockForDS(posBlock, sizeY, sizeDS);
           leftInteractionBlock->trans();
           pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
           DEBUG_PRINTF("pos = %u", pos);
@@ -441,13 +430,11 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
       }
 
     }
-    // invalidate other old storages.
-    NM_clear_other_storages(_numericsMatrix.get(), _storageType);
     break;
   }
   default:
   {
-    THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::fillH unknown _storageType");
   }
   }
   DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");

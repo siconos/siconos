@@ -312,12 +312,12 @@ int determine_convergence(double error, double tolerance, int iter,
   {
     hasNotConverged = 0;
     numerics_printf("--------------- RFC3D - NSGS - Iteration %i "
-                    "Residual = %14.7e < %7.3e\n", iter, error, tolerance);
+                    "Residual = %14.7e < %7.3e", iter, error, tolerance);
   }
   else
   {
     numerics_printf("--------------- RFC3D - NSGS - Iteration %i "
-                    "Residual = %14.7e > %7.3e\n", iter, error, tolerance);
+                    "Residual = %14.7e > %7.3e", iter, error, tolerance);
   }
   return hasNotConverged;
 }
@@ -411,7 +411,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
   double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*5, problem->q, 1);
   double omega = dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE];
- 
+
   double  norm_r[] = {1e24};
   RollingSolverPtr local_solver = NULL;
   RollingUpdatePtr update_localproblem = NULL;
@@ -523,6 +523,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
    * common cases to avoid checking booleans on every iteration. **/
   else
   {
+
     while((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
@@ -530,6 +531,16 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
       double light_error_2 = 0.0;
 
       rolling_fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
+      int number_of_freezed_contact=0;
+      if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
+      {
+        for(unsigned int i = 0 ; i < nc ; ++i)
+        {
+        if (freeze_contacts[i] >0)
+          number_of_freezed_contact++;
+        }
+      }
+      numerics_printf_verbose(2,"Number of freezed contacts  = %i",  number_of_freezed_contact);
 
       for(unsigned int i = 0 ; i < nc ; ++i)
       {
@@ -543,13 +554,13 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
         else
           contact = i;
 
-
         if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
         {
           if (freeze_contacts[contact] >0)
           {
             /* we skip freeze contacts */
             freeze_contacts[contact] -=  1;
+            //printf("Contact % i is freezed for %i remaining steps\n", contact, freeze_contacts[contact]);
             continue;
           }
         }
@@ -578,14 +589,23 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
                || squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc*1000)))
               && iter >=10)
           {
+            //printf("Number of freezed contacts  = %i\n",  number_of_freezed_contact);
             /* we  freeze the contact for n iterations*/
-            //printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e\n", light_error_2*squared_norm(localreaction), tolerance*tolerance/(nc*nc*10));
-            //printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc))/1000. ==> %e <= %e\n",  squared_norm(localreaction) ,  (*norm_r* *norm_r/(nc*nc))/1000.);
-            //printf("Contact % i is freezed for %i steps\n", contact,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
-            freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] ;
+            /* printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e\n", light_error_2*squared_norm(localreaction), tolerance*tolerance/(nc*nc*10)); */
+            /* printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc))/1000. ==> %e <= %e\n",  squared_norm(localreaction) ,  (*norm_r* *norm_r/(nc*nc))/1000.); */
+            // printf("Contact % i is freezed for %i steps\n", contact,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
+            if (number_of_freezed_contact < nc-1)
+            {
+              number_of_freezed_contact++;
+              freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] ;
+            }
+            else
+            {
+              numerics_printf_verbose(2,"Number of freezed contacts too large w.r.t number of contact. we defreeze all contacts\n");
+              for(unsigned int c = 0 ; c < nc ; ++c)  freeze_contacts[c] =0;
+            }
           }
         }
-
         if(iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
           acceptLocalReactionFiltered(localproblem, localsolver_options,
                                       contact, iter, reaction, localreaction);

@@ -50,9 +50,9 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolver
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions options):
   LinearOSNS(options), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
 {
-  // Only fc3d for the moment.
-  if(_contactProblemDim != 3)
-    THROW_EXCEPTION("GlobalFrictionContact No solver for 2 dimensional problems");
+  // // Only fc3d for the moment.
+  // if(_contactProblemDim != 3)
+  //   THROW_EXCEPTION("GlobalFrictionContact No solver for 2 dimensional problems");
 
   //Reset default storage type for numerics matrices.
   _numericsMatrixStorageType = NM_SPARSE;
@@ -362,7 +362,8 @@ bool GlobalFrictionContact::preCompute(double time)
       }
       SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
       pos =  indexSet.properties(*ui).absolute_position;
-      setBlock(osnsp_rhs, _b, 3, 0, pos);
+      size_t sizeY = inter->dimension();
+      setBlock(osnsp_rhs, _b, sizeY, 0, pos);
     }
     DEBUG_EXPR(_b->display(););
     // Checks z and w sizes and reset if necessary

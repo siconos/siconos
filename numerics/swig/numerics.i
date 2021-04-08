@@ -298,6 +298,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "fc3d_Solvers.h"
 #include "gfc3d_Solvers.h"
 #include "rolling_fc_Solvers.h"
+#include "global_rolling_fc_Solvers.h"
 #include "MCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"
@@ -473,6 +474,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 %include GAMSlink.h
 %include numerics_GFC.i
 %include numerics_RFC.i
+%include numerics_GRFC.i
 
 %define STR_FIELD_COPY(field,strobj)
 {

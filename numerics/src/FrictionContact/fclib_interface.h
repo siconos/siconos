@@ -30,6 +30,7 @@
 
 typedef struct fclib_local fclib_local;
 typedef struct fclib_global fclib_global;
+typedef struct fclib_global_rolling fclib_global_rolling;
 typedef struct fclib_solution fclib_solution;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -61,6 +62,11 @@ extern "C"
                                         char * mathInfo,
                                         const char *path);
 
+  int globalRollingFrictionContact_fclib_write(GlobalRollingFrictionContactProblem* problem,
+                                               char * title,
+                                               char * description,
+                                               char * mathInfo,
+                                               const char *path);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -45,6 +45,7 @@ Note that not all files from the current location are listed below, since some o
 #include "FrictionContact.hpp"
 #include "RollingFrictionContact.hpp"
 #include "GlobalFrictionContact.hpp"
+#include "GlobalRollingFrictionContact.hpp"
 
 #include "LsodarOSI.hpp"
 #include "Hem5OSI.hpp"
