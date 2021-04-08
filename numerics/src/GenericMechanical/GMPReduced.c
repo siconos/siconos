@@ -416,6 +416,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
   //  printDenseMatrice("newQ",file,Qreduced,nbRow,1);
 #endif
   NumericsMatrix numM;
+  NM_null(&numM);
   numM.storageType = 0;
   numM.matrix0 = reducedProb;
   numM.matrix1 = 0;
@@ -565,6 +566,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction, d
     curProblem = curProblem->nextProblem;
   }
   NumericsMatrix numM;
+  NM_null(&numM);
   numM.storageType = 0;
   numM.matrix0 = reducedProb;
   numM.matrix1 = 0;
