@@ -460,14 +460,47 @@ SiconosBulletCollisionManager::insertStaticContactorSet(
 
 bool SiconosBulletCollisionManager::removeStaticContactorSet(StaticContactorSetID id)
 {
+  DEBUG_BEGIN("bool SiconosBulletCollisionManager::removeStaticContactorSet(StaticContactorSetID id)");
   StaticContactorSetRecord *recptr = static_cast<StaticContactorSetRecord *>(id);
   if(_impl->_staticContactorSetRecords.find(recptr)
-      == _impl->_staticContactorSetRecords.end())
+     == _impl->_staticContactorSetRecords.end())
     return false;
 
   SP::StaticContactorSetRecord rec(_impl->_staticContactorSetRecords[recptr]);
+  // get contactorSet in the contactor set record
+  SP::SiconosContactorSet cs  = rec->contactorSet;
+
+  // Loop over contactors in the contactor set
+  std::vector< SP::SiconosContactor >::const_iterator it;
+  for(it=cs->begin(); it!=cs->end(); it++)
+  {
+    // get the SiconosContactor
+    SP::SiconosContactor sc = (*it);
+
+    // find record associated with static objects in BodyShapeMap related to the
+    // specific ds marked as nullptr
+    BodyShapeMap::iterator itbs(_impl->bodyShapeMap.find(nullptr));
+    for (itbs = _impl->bodyShapeMap.begin(); itbs != _impl->bodyShapeMap.end(); itbs++ )
+    {
+      // Loop over the Body Shape Record and find if a contactor corresponds to the contactor sc
+      std::vector<std::shared_ptr<BodyShapeRecord> >::iterator it2;
+      for(it2 = itbs->second.begin(); it2 != itbs->second.end(); it2++)
+      {
+        if ((*it2)->contactor == sc)
+        {
+          DEBUG_PRINT("Remove Collision Object");
+          _impl->_collisionWorld->removeCollisionObject(&*((*it2)->btobject));
+        }
+      }
+    }
+  }
+
+  // remove from the map of ContactorSetRecords
+  _impl->_staticContactorSetRecords.erase(&*rec);
+
+  DEBUG_END("bool SiconosBulletCollisionManager::removeStaticContactorSet(StaticContactorSetID id)");
   // TODO
-  assert(0 && "removeStaticContactorSet not implemented.");
+  //assert(0 && "removeStaticContactorSet not implemented.");
   return false;
 }
 
@@ -1887,7 +1920,10 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
     con = rb2dds->contactors();
     base = rb2dds->q();
   }
-
+  // if ((!rbds) and (!rb2dds))
+  // {
+  //   std::cout << "createCollisionObjectsForBodyContactorSet for static objects" << std::endl;
+  // }
 
   if(!con)
   {

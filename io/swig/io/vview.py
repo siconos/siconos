@@ -525,7 +525,8 @@ class InputObserver():
                 self.vview.contact_pos_norm[mu].Update()
 
         self.vview.set_dynamic_actors_visibility(self.vview.io_reader._time)
-
+        self.vview.set_static_actors_visibility(self.vview.io_reader._time)
+        
         pos_data = self.vview.io_reader.pos_data
 
         self.vview.set_position(pos_data)
@@ -1857,7 +1858,6 @@ class VView(object):
             self.times_of_birth[instid] = instance.attrs['time_of_birth']
         if 'time_of_death' in instance.attrs:
             self.times_of_death[instid] = instance.attrs['time_of_death']
-
         if 'mass' in instance.attrs:
             # a dynamic instance
             self.mass[instid] = instance.attrs['id']
@@ -1898,6 +1898,8 @@ class VView(object):
     def set_position_i(self, instance, q0, q1, q2, q3, q4, q5, q6):
         # all objects are set to a nan position at startup,
         # so they are invisibles
+
+        
         if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
             or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
             print('Bad position for object number', int(instance),' :',  q0, q1, q2, q3, q4, q5, q6)
@@ -1940,6 +1942,7 @@ class VView(object):
         # here the numpy vectorization is used with a column vector and a
         # scalar for the time arg
         self.set_visibility_v = numpy.vectorize(self.set_dynamic_instance_visibility)
+        self.set_visibility_static_v = numpy.vectorize(self.set_static_instance_visibility)
 
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in cc:
@@ -1987,9 +1990,36 @@ class VView(object):
         else:
             for actor, index, group in self.dynamic_actors[instance]:
                 actor.VisibilityOff()
+                
+    # set visibility for all actors associated to a static instance
+    def set_static_instance_visibility(self, instance, time):
+        tob = self.times_of_birth.get(instance, -1)
+        tod = self.times_of_death.get(instance, infinity)
+        has_avatar = False
+        if self.opts.visible_mode=='avatars' or self.opts.visible_mode=='contactors':
+            for actor, index, group in self.static_actors[instance]:
+                if group==-1:
+                    has_avatar = True
+                    break
+        if (tob <= time and tod >= time):
+            for actor, index, group in self.static_actors[instance]:
+                if not has_avatar or visible_mode=='all':
+                    actor.VisibilityOn()
+                elif visible_mode=='avatars' and group==-1 and has_avatar:
+                    actor.VisibilityOn()
+                elif visible_mode=='contactors' and group!=-1 and has_avatar:
+                    actor.VisibilityOn()
+                else:
+                    actor.VisibilityOff()
+        else:
+            for actor, index, group in self.static_actors[instance]:
+                actor.VisibilityOff()
 
     def set_dynamic_actors_visibility(self, time):
         self.set_visibility_v(list(self.dynamic_actors.keys()), time)
+        
+    def set_static_actors_visibility(self, time):
+        self.set_visibility_static_v(list(self.static_actors.keys()), time)
 
     # callback maker for scale manipulation
     def make_scale_observer(self, glyphs):
@@ -2116,13 +2146,15 @@ class VView(object):
 
         if numpy.shape(self.io_reader._spos_data)[0] > 0:
             self.set_position(self.io_reader._spos_data)
+        #    print('self.io_reader._spos_data', self.io_reader._spos_data)
             # static objects are always visible
-            for instance, actors in self.static_actors.items():
-                for actor,_,_ in actors:
-                     actor.VisibilityOn()
+            #for instance, actors in self.static_actors.items():
+            #    for actor,_,_ in actors:
+            #         actor.VisibilityOn()
 
         self.set_position(*self.pos_t0)
-
+            
+        self.set_static_actors_visibility(self.time0)
         self.set_dynamic_actors_visibility(self.time0)
 
     def setup_vtk_renderer(self):
