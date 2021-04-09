@@ -132,7 +132,7 @@ extern "C"
    */
   RawNumericsMatrix* NM_new(void);
   RawNumericsMatrix* NM_eye(int size);
-  
+
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
@@ -321,16 +321,25 @@ extern "C"
    */
 
   void NM_clear(NumericsMatrix* m);
+
   NumericsMatrix *  NM_free(NumericsMatrix* m);
 
   /** Free memory for a NumericsMatrix except the dense matrix that is assumed not to be owned.
-      Warning: call this function only if you are sure that
-      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
-      Note that this function does not free m.
-      \param m the matrix to be deleted.
+      \param m the matrix to be cleared.
    */
   void NM_clear_not_dense(NumericsMatrix* m);
   NumericsMatrix *  NM_free_not_dense(NumericsMatrix* m);
+  /** Free memory for a NumericsMatrix except the SBM matrix that is assumed not to be owned.
+      Note that this function does not free m.
+      \param m the matrix to be cleared.
+   */
+  void NM_clear_not_SBM(NumericsMatrix* m);
+  NumericsMatrix * NM_free_not_SBM(NumericsMatrix* m);
+  
+
+
+
+ 
   /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.

@@ -128,7 +128,7 @@ static version_t NM_version(const NumericsMatrix* M, NM_types id)
       return 0;
     }
   }
-  default: 
+  default:
     numerics_error("NM_version", "unknown id");
     return 0;
   }
@@ -716,7 +716,7 @@ NumericsMatrix*  NM_free(NumericsMatrix* m)
 
 void  NM_clear_not_dense(NumericsMatrix* m)
 {
-  assert(m && "NM_clear, m == NULL");
+  assert(m && "NM_clear_not_dense, m == NULL");
 
   //NM_clearDense(m);
   NM_clearSparseBlock(m);
@@ -730,7 +730,6 @@ void  NM_clear_not_dense(NumericsMatrix* m)
     m->destructible = m;
   }
 }
-
 NumericsMatrix*  NM_free_not_dense(NumericsMatrix* m)
 {
   assert(m && "NM_free_bot_dense, m == NULL");
@@ -738,6 +737,32 @@ NumericsMatrix*  NM_free_not_dense(NumericsMatrix* m)
   free(m);
   return NULL;
 }
+
+void  NM_clear_not_SBM(NumericsMatrix* m)
+{
+  assert(m && "NM_clear_not_SBM, m == NULL");
+
+  NM_clearDense(m);
+/*  NM_clearSparseBlock(m); */
+  NM_clearSparse(m);
+  NM_internalData_free(m);
+  /* restore the destructible pointer */
+  if (!NM_destructible(m))
+  {
+    NM_clear(m->destructible);
+    m->destructible = m;
+  }
+}
+
+NumericsMatrix*  NM_free_not_SBM(NumericsMatrix* m)
+{
+  assert(m && "NM_free_not_SBM, m == NULL");
+  NM_clear_not_SBM(m);
+  free(m);
+  return NULL;
+}
+
+
 
 
 
@@ -2656,7 +2681,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   }
   default:
     numerics_error("NM_copy","The type of the source matrix is unknown.");
-    
+
   }
   NM_internalData_copy(A, B);
   NM_MPI_copy(A, B);
@@ -5149,7 +5174,7 @@ BalancingMatrices * NM_BalancingMatrices_free(BalancingMatrices * B)
     NM_free(B->D2);
   if (B->A)
     NM_free(B->A);
-  free(B); 
+  free(B);
   return NULL;
 }
 
