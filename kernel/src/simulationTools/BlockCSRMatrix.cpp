@@ -29,8 +29,8 @@
 #include "SparseBlockMatrix.h" // From numerics, for SparseBlockStructuredMatrix
 #include "Tools.hpp"
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
 
 // Default constructor: empty matrix
@@ -272,6 +272,7 @@ void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
 // convert _blockCSR to numerics structure
 void BlockCSRMatrix::convert()
 {
+  DEBUG_BEGIN("void BlockCSRMatrix::convert()\n");
   _sparseBlockStructuredMatrix->blocknumber0 = _nr;
   _sparseBlockStructuredMatrix->blocknumber1 = _nr;  // nc not always set
   _sparseBlockStructuredMatrix->nbblocks = (*_blockCSR).nnz();
@@ -301,6 +302,7 @@ void BlockCSRMatrix::convert()
   //    block[i] = *i2;
   //  }
   //     }
+  DEBUG_END("void BlockCSRMatrix::convert()\n");
 }
 
 // Display data

@@ -28,9 +28,9 @@
 
 
 #include "NumericsSparseMatrix.h"
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_NOCOLOR
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 // Default constructor: empty matrix, default storage
@@ -102,7 +102,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor):
   }
 
 
-  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor)\n");
+  DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor)\n");
 
 }
 
@@ -110,9 +110,11 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, NM_types stor):
 OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor):
   _dimRow(0), _dimColumn(0), _storageType(stor)
 {
+  DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor)\n");
 //  _numericsMatrix.reset(new NumericsMatrix);
 //  NM_null(_numericsMatrix.get());
   fillW(indexSet);
+  DEBUG_END("OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor)\n");
 }
 
 
@@ -148,7 +150,7 @@ unsigned OSNSMatrix::updateSizeAndPositions(InteractionsGraph& indexSet)
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
     indexSet.properties(*vd).absolute_position = dim;
     dim += (indexSet.bundle(*vd)->nonSmoothLaw()->size());
-    DEBUG_PRINTF("Position = %i for interaction %i\n",dim, indexSet.bundle(*vd)->number());
+    DEBUG_PRINTF("Position = %i for interaction %zu\n",dim, indexSet.bundle(*vd)->number());
     assert(indexSet.properties(*vd).absolute_position < dim);
   }
 
@@ -182,7 +184,7 @@ unsigned OSNSMatrix::updateSizeAndPositions(DynamicalSystemsGraph & DSG)
 void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
-
+  DEBUG_PRINTF(" update = %i\n", update);
   if(update)  // If index set vertices list has changed
   {
     // Computes _dimRow and interactionBlocksPositions according to indexSet
@@ -271,6 +273,7 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
     {
       DEBUG_PRINT("fill existing _M2\n");
       _M2->fill(indexSet);
+      DEBUG_EXPR(_M2->display(););
     }
   }
   if(update)
@@ -284,7 +287,7 @@ void OSNSMatrix::convert()
   DEBUG_BEGIN("OSNSMatrix::convert()\n");
   DEBUG_PRINTF("_storageType = %i\n", _storageType);
 
-  
+
   switch(_storageType)
   {
   case NM_DENSE:
@@ -302,7 +305,7 @@ void OSNSMatrix::convert()
   case NM_SPARSE_BLOCK:
   {
     _M2->convert();
-    _numericsMatrix.reset(NM_new(),NM_free);
+    _numericsMatrix.reset(NM_new(), NM_free_not_SBM);
     _numericsMatrix.get()->storageType = _storageType ;
     _numericsMatrix.get()->size0 = _dimRow ;
     _numericsMatrix.get()->size1 = _dimColumn ;
