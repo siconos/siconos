@@ -716,6 +716,7 @@ NumericsMatrix*  NM_free(NumericsMatrix* m)
 
 void  NM_clear_not_dense(NumericsMatrix* m)
 {
+  DEBUG_BEGIN("NM_clear_not_dense(NumericsMatrix* m)\n");
   assert(m && "NM_clear_not_dense, m == NULL");
 
   //NM_clearDense(m);
@@ -729,10 +730,11 @@ void  NM_clear_not_dense(NumericsMatrix* m)
     NM_clear(m->destructible);
     m->destructible = m;
   }
+  DEBUG_END("NM_clear_not_dense(NumericsMatrix* m)\n");
 }
 NumericsMatrix*  NM_free_not_dense(NumericsMatrix* m)
 {
-  assert(m && "NM_free_bot_dense, m == NULL");
+  assert(m && "NM_free_not_dense, m == NULL");
   NM_clear_not_dense(m);
   free(m);
   return NULL;
@@ -2104,12 +2106,13 @@ NumericsMatrix* NM_duplicate(NumericsMatrix* mat)
 
 NumericsMatrix* NM_new(void)
 {
+  DEBUG_BEGIN("NumericsMatrix* NM_new(void)\n");
   NumericsMatrix* M = (NumericsMatrix*) malloc(sizeof(NumericsMatrix));
   M->storageType = NM_UNKNOWN;
   M->size0 = 0;
   M->size1 = 0;
   NM_null(M);
-
+  DEBUG_END("NumericsMatrix* NM_new(void)\n");
   return M;
 }
 
