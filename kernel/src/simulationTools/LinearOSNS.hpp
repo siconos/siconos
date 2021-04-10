@@ -239,7 +239,7 @@ public:
 
   /** build problem coefficients (if required)
       \param time the current time
-      \return true if succeeded
+      \return true if the indexSet is not empty
    */
   virtual bool preCompute(double time);
 
