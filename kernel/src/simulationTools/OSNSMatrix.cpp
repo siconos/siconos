@@ -320,7 +320,6 @@ void OSNSMatrix::convert()
     THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
-  display();
   DEBUG_END("OSNSMatrix::convert()\n");
 }
 
