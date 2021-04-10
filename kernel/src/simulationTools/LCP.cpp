@@ -58,7 +58,7 @@ bool LCP::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
 }
 
 
-int LCP::numericsCompute()
+int LCP::solve()
 {
   // Note FP : wrap call to numerics solver inside this function
   // for python API (e.g. to allow profiling without C struct handling)
@@ -69,12 +69,13 @@ int LCP::numericsCompute()
   _numerics_problem->size = _sizeOutput;
   int info  = 0;
   //const char * name = &*_numerics_solver_options->solverName;
+
   if(_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
   {
     lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
-
-
   }
+  
+  // Call LCP Driver
   info = linearComplementarity_driver(&*_numerics_problem, _z->getArray(), _w->getArray(),
                                       &*_numerics_solver_options);
 
@@ -93,8 +94,8 @@ int LCP::compute(double time)
 
   // --- Prepare data for LCP computing ---
   // And check if there is something to be done
-  bool cont = preCompute(time);
-  if(!cont)
+  bool not_empty = preCompute(time);
+  if(!not_empty)
   {
     DEBUG_PRINT("Nothing to compute\n");
     DEBUG_END("LCP::compute(double time)\n");
@@ -113,7 +114,7 @@ int LCP::compute(double time)
   if(_sizeOutput != 0)
   {
 
-    info = numericsCompute();
+    info = solve();
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
 

@@ -87,7 +87,7 @@ public:
       \return int information about the solver convergence
       (output from numerics driver, linearComplementarity_driver, check numerics doc. for details).
    */
-  int numericsCompute();
+  int solve();
 
   /** Compute the unknowns z and w and update the corresponding Interactions (y and lambda )
       \param time : current time
