@@ -543,13 +543,13 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
   if(!_isNewtonConverge)
   {
     if(_warnOnNonConvergence)
-      std::cout << "[kernel] TimeStepping::newtonSolve -- Newton process stopped:"
-                << "max. number of steps ("
+
+      std::cout << "[kernel][warning] TimeStepping::newtonSolve reached max. number of iterations: "
                 << maxStep
-                <<") reached at accuracy = "
+                <<" with accuracy: "
                 << _newtonResiduDSMax
-                <<"."
                 << std::endl ;
+    
     if(info && _warnOnNonConvergence)
       std::cout << "[kernel] TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
   }
