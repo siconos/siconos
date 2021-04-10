@@ -473,9 +473,11 @@ class ShapeCollection():
                     if self.shape(shape_name).dtype == h5py_vlen_dtype(str):
                         with tmpfile() as tmpf:
                             data = self.shape(shape_name)[:][0]
-
-                            tmpf[0].write(data.decode("utf-8"))
-                            #tmpf[0].write(data)
+                            ## fix compatibility with h5py version: to be removed in the future
+                            if (h5py.version.version_tuple.major >=3 ):
+                                tmpf[0].write(data.decode("utf-8"))
+                            else:
+                                tmpf[0].write(data)
                             tmpf[0].flush()
                             scale = self.attributes(shape_name).get(
                                 'scale', None)
