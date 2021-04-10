@@ -11,6 +11,12 @@ from scipy import constants
 
 import numpy as np
 import h5py
+## fix compatibility with h5py version
+if (h5py.version.version_tuple.major >=3 ):
+    h5py_vlen_dtype = h5py.vlen_dtype
+else:
+    h5py_vlen_dtype = h5py.new_vlen
+
 import bisect
 import time
 import numbers
@@ -464,8 +470,7 @@ class ShapeCollection():
                 # assume a vtp file (xml) stored in a string buffer
 
                 if self.attributes(shape_name)['type'] == 'vtp':
-#                    if self.shape(shape_name).dtype == h5py.string_dtype():
-                    if self.shape(shape_name).dtype == h5py.vlen_dtype(str):
+                    if self.shape(shape_name).dtype == h5py_vlen_dtype(str):
                         with tmpfile() as tmpf:
                             data = self.shape(shape_name)[:][0]
 
@@ -498,10 +503,16 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    if self.shape(shape_name).dtype != h5py.vlen_dtype(str) :
-                        raise AssertionError("self.shape(shape_name).dtype != h5py.vlen_dtype(str)")
+                    if self.shape(shape_name).dtype != h5py_vlen_dtype(str) :
+                        raise AssertionError("self.shape(shape_name).dtype != h5py_vlen_dtype(str)")
 
-                    with tmpfile(contents=self.shape(shape_name)[:][0].decode('utf-8')) as tmpf:
+                    ## fix compatibility with h5py version: to be removed in the future
+                    if (h5py.version.version_tuple.major >=3 ):
+                        tmp_contents =self.shape(shape_name)[:][0].decode('utf-8')
+                    else :
+                        tmp_contents =self.shape(shape_name)[:][0]
+                    
+                    with tmpfile(contents=tmp_contents) as tmpf:
                         step_reader = STEPControl_Reader()
 
                         status = step_reader.ReadFile(tmpf[1])
@@ -536,10 +547,10 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    if not (self.shape(shape_name).dtype == h5py.vlen_dtype(str)):
+                    if not (self.shape(shape_name).dtype == h5py_vlen_dtype(str)):
                         raise AssertionError("ShapeCollection.get()")
 
-                    #assert(self.shape(shape_name).dtype == h5py.vlen_dtype(str))
+                    #assert(self.shape(shape_name).dtype == h5py_vlen_dtype(str))
 
                     with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
                         iges_reader = IGESControl_Reader()
@@ -2519,7 +2530,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
         if verbose:
-            simulation.setDisplayNewtonConvergence(True)
+            simulation.setDisplayNewtonConvergence(display_Newton_convergence)
 
         self._simulation = simulation
 

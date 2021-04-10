@@ -4,6 +4,12 @@ import sys
 from math import cos, sin, asin, atan2
 import numpy as np
 import h5py
+## fix compatibility with h5py version
+if (h5py.version.version_tuple.major >=3 ):
+    h5py_vlen_dtype = h5py.vlen_dtype
+else:
+    h5py_vlen_dtype = h5py.new_vlen
+
 import pickle
 import tempfile
 from contextlib import contextmanager
@@ -678,7 +684,7 @@ class MechanicsHdf5(object):
 
         if name not in self._plugins:
             plugin_src = self._plugins.create_dataset(name, (1,),
-                                                      dtype=h5py.vlen_dtype(str))
+                                                      dtype=h5py_vlen_dtype(str))
             plugin_src[:] = str_of_file(filename)
             plugin_src.attrs['filename'] = filename
 
@@ -712,7 +718,7 @@ class MechanicsHdf5(object):
         if name not in self._ref:
 
             shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.vlen_dtype(str))
+                                             dtype=h5py_vlen_dtype(str))
             shape[:] = shape_data
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'vtp'
@@ -793,7 +799,7 @@ class MechanicsHdf5(object):
         """
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.vlen_dtype(str))
+                                             dtype=h5py_vlen_dtype(str))
             if type(shape_data) == str:
                 # raw str
                 shape[:] = shape_data
@@ -831,7 +837,7 @@ class MechanicsHdf5(object):
                 shape_data = str_of_file(tmpf[1])
 
                 shape = self._ref.create_dataset(name, (1,),
-                                                 dtype=h5py.vlen_dtype(str))
+                                                 dtype=h5py_vlen_dtype(str))
                 shape[:] = shape_data
                 shape.attrs['id'] = self._number_of_shapes
                 shape.attrs['type'] = 'step'
@@ -843,7 +849,7 @@ class MechanicsHdf5(object):
         """
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1,),
-                                             dtype=h5py.vlen_dtype(str))
+                                             dtype=h5py_vlen_dtype(str))
             shape[:] = str_of_file(filename)
             shape.attrs['id'] = self._number_of_shapes
             try:
@@ -862,7 +868,7 @@ class MechanicsHdf5(object):
         """
         if name not in self.permanent_interactions():
             pinter = self.permanent_interactions().create_dataset(
-                name, (1,), dtype=h5py.vlen_dtype(str))
+                name, (1,), dtype=h5py_vlen_dtype(str))
             pinter.attrs['id'] = self._number_of_permanent_interactions
             pinter.attrs['type'] = 'permanent_interaction'
             pinter.attrs['body1_name'] = body1_name
