@@ -25,12 +25,11 @@
 #include "SimpleMatrix.hpp"
 #include "Interaction.hpp"
 #include "DynamicalSystem.hpp"
-
-
 #include "NumericsSparseMatrix.h"
-//#define DEBUG_NOCOLOR
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 // Default constructor: empty matrix, default storage
@@ -278,7 +277,7 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
   }
   if(update)
     convert();
-  DEBUG_END("void OSNSMatrix::fill(SP::InteractionsGraph indexSet, bool update)\n");
+  DEBUG_END("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
 }
 
 // convert current matrix to NumericsMatrix structure
@@ -296,10 +295,9 @@ void OSNSMatrix::convert()
     _numericsMatrix.get()->storageType = _storageType ;
     _numericsMatrix.get()->size0 = _dimRow ;
     _numericsMatrix.get()->size1 = _dimColumn ;
-    _numericsMatrix->matrix0 = _M1->getArray(); // Pointer link
-    // _numericsMatrix->matrix1 = nullptr; matrix1 is not set to nullptr: we
-    // keep previous allocation. May be usefull if we switch between
-    // different storages during simu
+    _numericsMatrix->matrix0 = _M1->getArray(); // Pointer link, be careful when freed.
+    DEBUG_EXPR(NM_display(_numericsMatrix.get()););
+    DEBUG_EXPR(_M1->display(););
     break;
   }
   case NM_SPARSE_BLOCK:
@@ -309,7 +307,7 @@ void OSNSMatrix::convert()
     _numericsMatrix.get()->storageType = _storageType ;
     _numericsMatrix.get()->size0 = _dimRow ;
     _numericsMatrix.get()->size1 = _dimColumn ;
-    _numericsMatrix->matrix1 = &*_M2->getNumericsMatSparse();
+    _numericsMatrix->matrix1 = &*_M2->getNumericsMatSparse(); // Pointer link, be careful when freed.
     break;
   }
   case NM_SPARSE:
@@ -322,6 +320,7 @@ void OSNSMatrix::convert()
     THROW_EXCEPTION("OSNSMatrix::convert unknown _storageType");
   }
   }
+  display();
   DEBUG_END("OSNSMatrix::convert()\n");
 }
 
@@ -444,13 +443,12 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
 }
 
 
-
 // Display data
 void OSNSMatrix::display() const
 {
   if(_storageType == NM_DENSE)
   {
-    std::cout << "----- OSNS Matrix using default storage type for Numerics structure (SiconosMatrix -> double*)" <<std::endl;
+    std::cout << "----- OSNS Matrix ( "<< this <<") using default storage type for Numerics structure (SiconosMatrix -> double*)" <<std::endl;
     if(! _M1)
       std::cout << " matrix = nullptr pointer" <<std::endl;
     else _M1->display();
