@@ -15,6 +15,8 @@ import vtk
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
+import h5py
+
 # Exports from this module
 __all__ = ['VView', 'VViewOptions', 'VExportOptions', 'VViewConfig']
 
@@ -1459,7 +1461,11 @@ class VView(object):
 
         if shape_type in ['vtp', 'stl']:
             with io_tmpfile() as tmpf:
-                tmpf[0].write((self.io.shapes()[shape_name][:][0]).decode('utf-8'))
+                ## fix compatibility with h5py version: to be removed in the future
+                if (h5py.version.version_tuple.major >=3 ):
+                    tmpf[0].write((self.io.shapes()[shape_name][:][0]).decode('utf-8'))
+                else:
+                    tmpf[0].write(str(self.io.shapes()[shape_name][:][0]))
                 tmpf[0].flush()
                 reader = self.vtk_reader[shape_type]()
                 reader.SetFileName(tmpf[1])
