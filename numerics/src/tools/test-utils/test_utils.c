@@ -107,6 +107,8 @@ void print_tests_collection_report(TestCase * collection, int n_failed, int * fa
   {
     if(collection[succeeded_tests[t]].will_fail == 1)
       print_test_info(succeeded_tests[t], &collection[succeeded_tests[t]], " was expected to fail but has succeeded");
+    else if(collection[failed_tests[t]].will_fail == 2)  // Or is unstable.
+      print_test_info(failed_tests[t], &collection[failed_tests[t]], " is unstable and has suceeded");
   }
 }
 

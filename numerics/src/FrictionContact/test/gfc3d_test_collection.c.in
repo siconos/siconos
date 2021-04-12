@@ -50,18 +50,21 @@ int main (int argc, char *argv[])
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
 #if defined(TEST_FIRST_ORDER_COLLECTION_1)
-  collection[2].will_fail = 1; /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat */
-  collection[8].will_fail = 1; /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat*/
-  collection[14].will_fail = 1;/*GFC3D_VI_EG, on ./data/GFC3D_Example00_badly_scaled.dat */
-  collection[20].will_fail = 1;/*GFC3D_VI_FPP, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[2].will_fail = 1;   /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[8].will_fail = 1;   /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat*/
+  collection[14].will_fail = 1;  /* GFC3D_VI_EG, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[20].will_fail = 1;  /* GFC3D_VI_FPP, on ./data/GFC3D_Example00_badly_scaled.dat */
   collection[22].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
   collection[53].will_fail = 1;  /* GFC3D ADMM, on ./data/GFC3D_TwoRods1.dat with scalar rescaling*/
 #endif
 
 #ifdef TEST_WR_COLLECTION_1
-  collection[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat
-  collection[9].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
-  collection[14].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+  collection[7].will_fail = 1;  // GFC3D_PROX_WR	./data/GFC3D_Example1.dat
+  collection[9].will_fail = 1;  // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+  collection[14].will_fail = 1; // GFC3D_DSFP_WR, on ./data/GFC3D_Example00_badly_scaled.dat
+  collection[11].will_fail = 2; // GFC3D_PROX_WR, on ./data/GFC3D_TwoRods1.dat
+  collection[15].will_fail = 2; // GFC3D_DSFP_WR, on ./data/GFC3D_Example1.dat
+  collection[16].will_fail = 2; // GFC3D_DSFP_WR, on ./data/GFC3D_OneContact.dat
 #endif
 
 
