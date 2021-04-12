@@ -90,12 +90,12 @@ void gfc3d_balancing_MHHT(
   //NM_copy(M_tmp, problem->M);
 
   /* scaling of q */
-  double * q_tmp = (double *) malloc(n*sizeof(double));
+  double * q_tmp = (double *) calloc(n,sizeof(double));
   NM_gemv(1.0, B_for_M->D2, problem->q, 0.0, q_tmp);
   cblas_dcopy(n, q_tmp, 1, problem->q, 1);
 
   /* scaling of b */
-  double * b_tmp = (double *) malloc(m*sizeof(double));
+  double * b_tmp = (double *) calloc(m,sizeof(double));
   NM_gemv(1.0, B_for_H->D2, problem->b, 0.0, b_tmp);
   cblas_dcopy(m, b_tmp, 1, problem->b, 1);
 
@@ -139,7 +139,7 @@ void gfc3d_balancing_M(
 
   /* scaling of q */
   /* cblas_dscal(n,alpha*gamma,problem->q,1); */
-  double * q_tmp = (double *) malloc(n*sizeof(double));
+  double * q_tmp = (double *) calloc(n,sizeof(double));
   NM_gemv(1.0, B_for_M->D2, problem->q, 0.0, q_tmp);
   cblas_dcopy(n, q_tmp, 1, problem->q, 1);
 
