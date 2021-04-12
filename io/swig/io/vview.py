@@ -86,6 +86,7 @@ class VViewOptions(object):
         self.with_edges = False
         self.with_random_color = True
         self.with_charts= 0
+        self.depth=0.1
     ## Print usage information
     def usage(self, long=False):
         print(__doc__); print()
@@ -163,6 +164,8 @@ class VViewOptions(object):
        add edges in the rendering (experimental for primitives)
      --with_fixed_color
        use fixed color defined in the config file
+     --2d-depth
+       fix depth for 2D objects     
     """)
 
     def parse(self):
@@ -177,7 +180,8 @@ class VViewOptions(object):
                                             'occlusion-ratio=',
                                             'cf-scale=', 'normalcone-ratio=',
                                             'advance=', 'fps=',
-                                            'camera=', 'lookat=', 'up=', 'clipping=', 'ortho=', 'visible=', 'with-edges', 'with-fixed-color', 'with-charts='])
+                                            'camera=', 'lookat=', 'up=', 'clipping=', 'ortho=', 'visible=',
+                                            'with-edges', 'with-fixed-color', 'with-charts=', '2d-depth='])
             self.configure(opts, args)
         except getopt.GetoptError as err:
             sys.stderr.write('{0}\n'.format(str(err)))
@@ -186,7 +190,6 @@ class VViewOptions(object):
 
     def configure(self, opts, args):
         for o, a in opts:
-
             if o == '--help':
                 self.usage(long=True)
                 exit(0)
@@ -253,6 +256,9 @@ class VViewOptions(object):
 
             elif o == '--with-charts=':
                 self.with_charts = int(a)
+                
+            elif o == '--2d-depth':
+                self.depth = float(a)
 
             elif o == '--visible':
                 self.visible_mode = a
@@ -262,6 +268,7 @@ class VViewOptions(object):
 
             elif o == '--with-fixed-color':
                 self.with_random_color = False
+                
 
         if self.frames_per_second == 0:
             self.frames_per_second = 25
@@ -285,7 +292,6 @@ class VExportOptions(VViewOptions):
         self.nprocs = 1
         self.gen_para_script = False
 
-
     def usage(self, long=False):
         print(__doc__); print()
         print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
@@ -303,7 +309,7 @@ class VExportOptions(VViewOptions):
             --stride=n           integer, set export time step/simulation time step
                                  (default: 1)
             --ascii              export file in ascii format
-            ---gen-para-script=n generation of a gnu parallel command for n processus
+            --gen-para-script=n generation of a gnu parallel command for n processus
             """)
 
     def parse(self):
@@ -313,7 +319,8 @@ class VExportOptions(VViewOptions):
                                            ['help', 'version', 'ascii',
                                             'start-step=', 'end-step=',
                                             'stride=', 'global-filter',
-                                            'gen-para-script='])
+                                            'gen-para-script=',
+                                            '2d-depth='])
             self.configure(opts, args)
         except getopt.GetoptError as err:
                 sys.stderr.write('{0}\n'.format(str(err)))
@@ -342,6 +349,8 @@ class VExportOptions(VViewOptions):
                 self.nprocs = int(a)
             if o in ('--ascii'):
                 self.ascii_mode = True
+            if o in ('--2d-depth'):
+                self.depth = float(a)
 
         if len(args) > 0:
             self.io_filename = args[0]
@@ -1599,9 +1608,9 @@ class VView(object):
                 number_of_vertices = data.shape[0]
                 convex.GetPointIds().SetNumberOfIds(data.shape[0]*2)
                 for id_, vertice in enumerate(data):
-                    points.InsertNextPoint(vertice[0], vertice[1], -0.05)
+                    points.InsertNextPoint(vertice[0], vertice[1], - self.opts.depth/2.0)
                     convex.GetPointIds().SetId(id_, id_)
-                    points.InsertNextPoint(vertice[0], vertice[1], 0.05)
+                    points.InsertNextPoint(vertice[0], vertice[1], -self.opts.depth/2.0)
                     convex.GetPointIds().SetId(id_+number_of_vertices, id_+number_of_vertices)
 
             source = ConvexSource(convex, points)
@@ -1677,16 +1686,15 @@ class VView(object):
 
             elif primitive == 'Disk':
                 source = vtk.vtkCylinderSource()
-                source.SetResolution(200)
+                source.SetResolution(100)
                 source.SetRadius(attrs[0])
-                source.SetHeight(0.1)
+                source.SetHeight(self.opts.depth)
 
             elif primitive == 'Box2d':
                 source = vtk.vtkCubeSource()
                 source.SetXLength(attrs[0])
                 source.SetYLength(attrs[1])
-                source.SetZLength(0.1)
-
+                source.SetZLength(self.opts.depth)
 
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
