@@ -57,9 +57,10 @@ void print_vector_norm(const char* desc, int m, int n, double* a, int lda)
 
 void free_test_collection(TestCase* collection, int nb_tests)
 {
-  for(int i=0; i<nb_tests; ++i)
+  for(int i=0; i < nb_tests; ++i)
   {
     solver_options_delete(collection[i].options);
+    free(collection[i].options);
     collection[i].options = NULL;
   }
 
@@ -174,7 +175,6 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
     }
     else
       succeeded_tests[n_succeeded++]  = test_num;
-
     printf("\n################# end of  test # %i #######################\n", test_num);
   }
 
