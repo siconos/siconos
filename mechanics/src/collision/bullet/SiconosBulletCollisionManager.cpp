@@ -220,6 +220,7 @@ SiconosBulletOptions::SiconosBulletOptions()
   , minimumPointsPerturbationThreshold(3)
   , enableSatConvex(false)
   , enablePolyhedralContactClipping(false)
+  , Depth2D(0.04)
 {
 }
 
@@ -1573,7 +1574,8 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   //This version is ok
   double SCALING =1.0;
-  btConvexShape* childShape2 = new btCylinderShapeZ(btVector3(btScalar(SCALING*1),btScalar(SCALING*1),btScalar(0.04)));
+  
+  btConvexShape* childShape2 = new btCylinderShapeZ(btVector3(btScalar(SCALING*1),btScalar(SCALING*1),btScalar(_options.Depth2D)));
   //btConvexShape* colShape3= new btConvex2dShape(childShape2);
   SP::btConvex2dShape btconvex2d1(new btConvex2dShape(childShape2));
 
@@ -1653,7 +1655,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   //This version is ok
   double SCALING =1.0;
-  btConvexShape* childShape0 = new btBoxShape(btVector3(btScalar(SCALING*1),btScalar(SCALING*1),btScalar(0.04)));
+  btConvexShape* childShape0 = new btBoxShape(btVector3(btScalar(SCALING*1),btScalar(SCALING*1),btScalar(_options.Depth2D)));
   //btConvexShape* colShape= new btConvex2dShape(childShape0);
   SP::btConvex2dShape btconvex2d(new btConvex2dShape(childShape0));
 
@@ -1739,7 +1741,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   {
     pts[r*3+0] = (*ch2d->vertices())(r, 0) * _options.worldScale;
     pts[r*3+1] = (*ch2d->vertices())(r, 1) * _options.worldScale;
-    pts[r*3+2] = 0.0 * _options.worldScale;
+    pts[r*3+2] = _options.Depth2D * _options.worldScale;
   }
   DEBUG_EXPR_WE(
     for(int r=0; r < rows; r++)

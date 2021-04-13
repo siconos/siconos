@@ -62,6 +62,7 @@ public:
   unsigned int minimumPointsPerturbationThreshold;
   bool enableSatConvex;
   bool enablePolyhedralContactClipping;
+  double Depth2D;
 };
 
 struct SiconosBulletStatistics
