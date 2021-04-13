@@ -74,15 +74,19 @@ void Lagrangian2d2DR::computeJachq(const BlockVector& q, BlockVector& z)
     DEBUG_PRINT("take into account second ds\n");
     double G2x = q.getValue(3);
     double G2y = q.getValue(4);
+    lever_arm_x = G2x-Px ;
+    lever_arm_y = G2y-Py ;
+
+    DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
 
     _jachq->setValue(0,3,-Nx);
     _jachq->setValue(0,4,-Ny);
-    _jachq->setValue(0,5,- ((G2y-Py)*Nx - (G2x-Px)*Ny));
+    _jachq->setValue(0,5,-(lever_arm_y * Nx - lever_arm_x*Ny));
 
     _jachq->setValue(1,3,-Tx);
     _jachq->setValue(1,4,-Ty);
-    _jachq->setValue(1,5,-((G2y-Py)*Tx - (G2x-Px)*Ty));
+    _jachq->setValue(1,5,-(lever_arm_y * Tx - lever_arm_x*Ty));
 
 
   }
