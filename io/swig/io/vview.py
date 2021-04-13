@@ -1854,8 +1854,9 @@ class VView(object):
         self.cell_connectors[instid] = CellConnector(
             instid,
             data_names=['instance', 'translation',
-                        'velocity', 'kinetic_energy'],
-            data_sizes=[1, 3, 6, 1])
+                        'velocity(linear)','velocity(angular)',
+                        'kinetic_energy'],
+            data_sizes=[1, 3, 3, 3, 1])
         self.cell_connectors[instid].SetInputConnection(
             transformer.GetOutputPort())
 
@@ -1874,7 +1875,7 @@ class VView(object):
             self.times_of_death[instid] = instance.attrs['time_of_death']
         if 'mass' in instance.attrs:
             # a dynamic instance
-            self.mass[instid] = instance.attrs['id']
+            self.mass[instid] = instance.attrs['mass']
             if 'inertia' in instance.attrs:
                 inertia = instance.attrs['inertia']
                 if self.io.dimension() ==3 :
@@ -1960,12 +1961,24 @@ class VView(object):
 
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in cc:
-                cc[instance]._datas[2][:] = [v0, v1, v2, v3, v4, v5]
-                cc[instance]._datas[3][:] = \
-                    0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
-                         numpy.dot([v3, v4, v5],
-                                   numpy.dot(self.inertia[instance],
-                                             [v3, v4, v5])))
+                cc[instance]._datas[2][:] = [v0, v1, v2]
+                cc[instance]._datas[3][:] = [v3, v4, v5]
+                if self.io.dimension() == 3 :
+                    cc[instance]._datas[4][:] = \
+                        0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
+                             numpy.dot([v3, v4, v5],
+                                       numpy.dot(self.inertia[instance],
+                                                 [v3, v4, v5])))
+                elif self.io.dimension() == 2 :
+                    kinetic_energy= 0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
+                                         self.inertia[instance]*(v5*v5))
+                    #print('velo', instance, v0, v1, v2, v3, v4, v5)
+                    #print('mass', self.mass[instance])
+                    #print('inertia', self.inertia[instance])
+                    #print('kinetic_energy', kinetic_energy)
+                    cc[instance]._datas[4][:] = kinetic_energy
+                        
+                    
 
         self.set_velocity_v = numpy.vectorize(set_velocity)
 

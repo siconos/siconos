@@ -1842,11 +1842,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                  # VA. change the position such that is corresponds to a 3D object
                 new_velocities = np.zeros((velocities.shape[0], 7))
 
-                new_velocities[:, 0] = velocities[:, 0]
-                new_velocities[:, 1] = velocities[:, 1]
-                new_velocities[:, 2] = velocities[:, 2]
+                new_velocities[:, 0] = velocities[:, 0] # ds number
+                new_velocities[:, 1] = velocities[:, 1] # x velocity
+                new_velocities[:, 2] = velocities[:, 2] # y velocity
 
-                new_velocities[:, 6] = velocities[:, 3]
+                new_velocities[:, 6] = velocities[:, 3] # theta velocity
                 self._velocities_data[current_line:, :] = np.concatenate(
                     (times, new_velocities), axis=1)
 
