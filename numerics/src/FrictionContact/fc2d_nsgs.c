@@ -33,12 +33,42 @@
 #include "numerics_verbose.h"              // for numerics_printf, verbose
 #include "SiconosBlas.h"                         // for cblas_dnrm2
 
-//#define DEBUG_MESSAGES
-#include "siconos_debug.h"                         // for cblas_dnrm2
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES 1 */
+#include "siconos_debug.h"                         // for DEBUG_BEGIN, DEBUG_END
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
 
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
+static void fc2d_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat,
+                                            LinearComplementarityProblem* local_problem,
+                                            double* q, double* z)
+{
+
+  assert(blmat->blocksize0[rowNumber] > 0);
+
+  /* Position in vector blmat->block of the required diagonal block */
+  int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
+  /* Gets diagonal block = MLocal  */
+  local_problem->M->matrix0 = blmat->block[diagPos];
+  local_problem->M->size0 = 2;
+  local_problem->M->size1 = 2;
+
+  int pos = 0;
+  local_problem->size =2;
+  pos =  rowNumber*2;
+
+  local_problem->q[0]= q[pos];
+  local_problem->q[1]= q[pos+1];
+  DEBUG_EXPR(NV_display(local_problem->q,2););
+  SBM_row_prod_no_diag_2x2(blmat->blocksize0[blmat->blocknumber0 - 1], 2,
+                           rowNumber, blmat, z, local_problem->q);
+  DEBUG_EXPR(NM_display(local_problem->M););
+  DEBUG_EXPR(NV_display(local_problem->q,2););
+}
 static void shuffle(int size, int * randnum) //size is the given range
 {
   int i;
@@ -189,10 +219,7 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
   return has_not_converged;
 }
 
-
-static int fc2dLocalSolve(double *W, double *q, double mu, double *P, double *U);
-
-int fc2dLocalSolve(double *W, double *q, double mu, double *P, double *U)
+static inline int fc2dLocalSolve(double *W, double *q, double mu, double *P, double *U)
 {
   double D, muPn;
 
@@ -306,13 +333,8 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
 
   LinearComplementarityProblem * local_problem = (LinearComplementarityProblem *)
     malloc(sizeof(*local_problem));
-  local_problem->M = (NumericsMatrix *)malloc(sizeof(*local_problem->M));
-  local_problem->M->storageType = 0; // dense storage
-  local_problem->M->matrix0 = NULL;
-  local_problem->M->matrix1 = NULL;
-  local_problem->M->matrix2 = NULL;
-  local_problem->M->internalData = NULL;
-
+  
+  local_problem->M = NM_create(NM_DENSE,2,2);
   /* Memory allocation for q. Size of q = blsizemax, size of the
      largest square-block in blmat */
 
@@ -363,9 +385,9 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
 
         /* Solve local problem */
         int local_solver_info = fc2dLocalSolve(local_problem->M->matrix0,
-                                   local_problem->q,
-                                   problem->mu[rowNumber],
-                                   localreaction, &w[pos]);
+                                               local_problem->q,
+                                               problem->mu[rowNumber],
+                                               localreaction, &w[pos]);
 
 
         /* verbose if problem */
