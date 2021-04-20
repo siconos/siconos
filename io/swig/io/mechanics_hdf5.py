@@ -494,6 +494,7 @@ class MechanicsHdf5(object):
         self._cf_data = None
         self._domain_data = None
         self._solv_data = None
+        self._run_options = None
         self._log_data = None
         self._input = None
         self._nslaws_data = None
@@ -574,6 +575,9 @@ class MechanicsHdf5(object):
                                      use_compression=self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression=self._use_compression)
+        self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
+                                      use_compression=self._use_compression)
+        
         try:
             self._log_data = group(self._data, 'log')
         except Exception as e:
