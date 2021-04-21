@@ -1892,7 +1892,6 @@ class VView(object):
                 self.static_actors[instid].append((actor, contact_shape_indx,
                                                    collision_group))
                 actor.GetProperty().SetOpacity(
-
                     self.config.get('static_opacity', 1.0))
                 actor.GetProperty().SetColor(
                         self.config.get('static_bodies_color', [0.5,0.5,0.5]))
@@ -2550,9 +2549,12 @@ class VView(object):
             # just the generation of a parallel command
             options_str = ''
             if self.opts.ascii_mode:
-                options_str += '--ascii'
+                options_str += '--ascii '
             if self.opts.global_filter:
-                options_str += '--global-filter'
+                options_str += '--global-filter '
+            if self.opts.depth_2d != 0.1:
+                options_str += ' --depth-2d='+str(self.opts.depth_2d)
+                
             ntimes_proc = int(ntime / self.opts.nprocs)
             s = ''
             for i in range(self.opts.nprocs):
@@ -2574,21 +2576,24 @@ class VView(object):
 
             packet = int(ntime/100)+1
 
-            # independant of time
-            spos_data = self.io_reader._spos_data
-            if spos_data.size > 0:
-                self.set_position_v(spos_data[:, 1], spos_data[:, 2],
-                                    spos_data[:, 3],
-                                    spos_data[:, 4], spos_data[:, 5],
-                                    spos_data[:, 6],
-                                    spos_data[:, 7], spos_data[:, 8])
-
+ 
             for time in times:
                 k = k + self.opts.stride
                 if (k % packet == 0):
                     sys.stdout.write('.')
+
                 self.io_reader.SetTime(time)
 
+                spos_data = self.io_reader._spos_data
+
+                if spos_data.size > 0:
+                    self.set_position_v(spos_data[:, 1], spos_data[:, 2],
+                                        spos_data[:, 3],
+                                        spos_data[:, 4], spos_data[:, 5],
+                                        spos_data[:, 6],
+                                        spos_data[:, 7], spos_data[:, 8])
+
+                
                 pos_data = self.io_reader.pos_data
                 velo_data = self.io_reader.velo_data
 

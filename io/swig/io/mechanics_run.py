@@ -877,6 +877,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._scheduled_births = []
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
+        self._ds_positions=None
 
     def __enter__(self):
         super(MechanicsHdf5Runner, self).__enter__()
@@ -1810,12 +1811,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         time = self.current_time()
         p = 0
-        self._static_data.resize(len(self._static), 0)
+        
+        # append new static position
+        current_line = self._static_data.shape[0]
+        self._static_data.resize(current_line+len(self._static), 0)
+        
 
+        p=current_line
         for static in self._static.values():
             translation = static['origin']
             rotation = static['orientation']
-
             if self._dimension == 3:
                 self._static_data[p, :] = \
                     [time,
@@ -1827,7 +1832,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                      rotation[1],
                      rotation[2],
                      rotation[3]]
-
             elif self._dimension == 2:
                 # VA. change the position such that is corresponds to a 3D object
                 self._static_data[p, :] = \
@@ -1843,6 +1847,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             p += 1
 
+        print('current_line , self._static_data', current_line, self._static_data)
+        #input()
+
+
 
     def output_dynamic_objects(self, initial=False):
         """
@@ -1854,6 +1862,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         time = self.current_time()
 
         positions = self._io.positions(self._nsds)
+        self._ds_positions = positions
         if positions is not None:
             self._dynamic_data.resize(current_line + positions.shape[0], 0)
 
@@ -2064,19 +2073,24 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             for i in range(so.dSize):
                 if so.dparam[i] <= 1e24:
                     d['solver_options']['dparam['+ str(i)+']'] = float(so.dparam[i])
-            # d['solver_options']['numberOfInternalSolvers']=so.numberOfInternalSolvers
+            # d['solver_options']['numberOfInternalSolvers']=so.numberOfInternalSolvers        # fix it
 
-        # fix it
+
         bo = d['bullet_options']
-        l = ['clearOverlappingPairCache', 'contactBreakingThreshold', 'contactProcessingThreshold', 'dimension', 'enablePolyhedralContactClipping', 'enableSatConvex', 'minimumPointsPerturbationThreshold', 'perturbationIterations', 'useAxisSweep3', 'worldScale']
-        l = ['contactProcessingThreshold', 'dimension', 'enablePolyhedralContactClipping', 'enableSatConvex', 'minimumPointsPerturbationThreshold', 'perturbationIterations', 'useAxisSweep3', 'worldScale']
-        d['bullet_options'] = {}
-        for e in l:
-            print('getattr(bo, e)', getattr(bo, e))
-            d['bullet_options'][e] = getattr(bo, e)
+        if bo:
+            l = ['clearOverlappingPairCache', 'contactBreakingThreshold', 'contactProcessingThreshold', 'dimension', 'enablePolyhedralContactClipping', 'enableSatConvex', 'minimumPointsPerturbationThreshold', 'perturbationIterations', 'useAxisSweep3', 'worldScale']        # fix it
+            l = ['contactProcessingThreshold', 'dimension', 'enablePolyhedralContactClipping', 'enableSatConvex', 'minimumPointsPerturbationThreshold', 'perturbationIterations', 'useAxisSweep3', 'worldScale']
+            d['bullet_options'] = {}
+            for e in l:
+                print('getattr(bo, e)', getattr(bo, e))
+                d['bullet_options'][e] = getattr(bo, e)
 
-        d['osi'] = None
-        d['start_run_iteration_hook']=None
+        
+                
+        d['friction_contact_trace_params']='not serialized'         # fix it
+        d['osi'] = 'not serialized'        # fix it
+        d['start_run_iteration_hook']='not serialized'        # fix it
+        d['end_run_iteration_hook']='not serialized'        # fix it
         
         dict_json=json.dumps(d)
         self._run_options_data.attrs['options'] = dict_json
