@@ -1847,7 +1847,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             p += 1
 
-        print('current_line , self._static_data', current_line, self._static_data)
+        #print('current_line , self._static_data', current_line, self._static_data)
         #input()
 
 
