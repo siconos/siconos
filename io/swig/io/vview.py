@@ -969,7 +969,8 @@ class IOReader(VTKPythonAlgorithmBase):
         self._index = id_t
         self.pos_data = self._idpos_data[self._id_t_m, :]
         self.velo_data = self._ivelo_data[self._id_t_m, :]
-
+        self.pos_static_data = self._ispos_data[self._id_t_m, :]
+       
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName('pos_data')
 
@@ -2584,8 +2585,8 @@ class VView(object):
 
                 self.io_reader.SetTime(time)
 
-                spos_data = self.io_reader._spos_data
-
+                spos_data = self.io_reader.pos_static_data
+                #print('spos_data at time 1' , time, spos_data)
                 if spos_data.size > 0:
                     self.set_position_v(spos_data[:, 1], spos_data[:, 2],
                                         spos_data[:, 3],
