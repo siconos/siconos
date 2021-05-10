@@ -390,7 +390,7 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
         localreaction[1] = z[pos+1];
 
         /* Local problem formalization */
-        lcp_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+        fc2d_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
 
         /* Solve local problem */
         int local_solver_info = fc2dLocalSolve(local_problem->M->matrix0,
@@ -488,7 +488,7 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
         localreaction[1] = z[pos+1];
 
         /* Local problem formalization */
-        lcp_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+        fc2d_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
 
         /* Solve local problem */
         int local_solver_info = fc2dLocalSolve(local_problem->M->matrix0,
