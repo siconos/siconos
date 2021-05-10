@@ -179,7 +179,7 @@ public:
 
   /** Reset all lambdas of all interactions */
   void resetLambdas();
-  
+
   /** step from current event to next event of EventsManager
   */
   void advanceToEvent();
@@ -212,7 +212,7 @@ public:
    */
   void initializeNewtonLoop();
 
-
+  void computeInitialNewtonState();
   void prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion
@@ -245,7 +245,7 @@ public:
   {
     return _isNewtonConverge;
   };
-  
+
   bool displayNewtonConvergence()
   {
     return _displayNewtonConvergence;
@@ -254,7 +254,7 @@ public:
   {
     _displayNewtonConvergence = newval;
   };
-  
+
   void setWarnOnNonConvergence(bool newval)
   {
     _warnOnNonConvergence = newval;
@@ -264,9 +264,9 @@ public:
     return _warnOnNonConvergence;
   };
   void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
-  
+
   void displayNewtonConvergenceInTheLoop();
-  
+
   void setResetAllLambda(bool newval)
   {
     _resetAllLambda = newval;

@@ -380,53 +380,6 @@ void TimeStepping::computeOneStep()
 }
 
 
-void TimeStepping::initializeNewtonLoop()
-{
-  DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
-  double tkp1 = getTkp1();
-  assert(!std::isnan(tkp1));
-
-  for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
-  {
-    (*it)->computeInitialNewtonState();
-    (*it)->computeResidu();
-  }
-
-  // Predictive contact -- update initial contacts after updating DS positions
-  updateWorldFromDS();
-  updateInteractions();
-
-  // Changes in updateInteractions may require initialization
-  initializeNSDSChangelog();
-
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-  if(indexSet0->size()>0)
-  {
-    for(OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-    {
-      (*itOSI)->updateOutput(nextTime());
-      (*itOSI)->updateInput(nextTime());
-    }
-  }
-
-  SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
-  for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-  {
-    dsGraph->bundle(*vi)->updatePlugins(tkp1);
-  }
-
-  for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
-    (*it)->computeResidu();
-
-  if(_computeResiduY)
-  {
-    for(OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-    {
-      (*itOSI)->computeResiduOutput(tkp1, indexSet0);
-    }
-  }
-  DEBUG_END("TimeStepping::initializeNewtonLoop()\n");
-}
 
 void TimeStepping::run()
 {
@@ -554,6 +507,91 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
       std::cout << "[kernel] TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
   }
 }
+
+void TimeStepping::computeInitialNewtonState()
+{
+  DEBUG_BEGIN("TimeStepping::computeInitialNewtonState()\n");
+  for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
+    {
+      (*it)->computeInitialNewtonState();
+    }
+  DEBUG_END("SimulationTimeStepping::computeInitialNewtonState()\n");
+}
+
+void TimeStepping::initializeNewtonLoop()
+{
+  DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
+  double tkp1 = getTkp1();
+  assert(!std::isnan(tkp1));
+
+  if(_newtonOptions == SICONOS_TS_NONLINEAR)
+  {
+    //  Compute the initial state for the Newton loop
+    computeInitialNewtonState();
+    computeResidu();
+
+    
+    // for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
+    // {
+    //   (*it)->computeInitialNewtonState();
+    //   (*it)->computeResidu();
+    // }
+
+    // Predictive contact -- update initial contacts after updating DS positions
+    // for the Newton loop
+    // allow the InteractionManager to add/remove any interactions it wants
+    updateWorldFromDS();
+    updateInteractions();
+
+    // Changes in updateInteractions may require initialization
+    initializeNSDSChangelog();
+  }
+  // else  if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT) || isLinear)
+  // {
+  //   // Nothing to do in the linear case since everything has been already done in Simulation::initialize
+  // }
+
+  updateInput();
+  updateOutput();
+
+  
+  
+  // SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
+  // if(indexSet0->size()>0)
+  // {
+  //   for(OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+  //   {
+  //     (*itOSI)->updateOutput(nextTime());
+  //     (*itOSI)->updateInput(nextTime());
+  //   }
+  // }
+
+
+  updateDSPlugins(tkp1);
+  
+  // SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
+  // for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
+  // {
+  //   dsGraph->bundle(*vi)->updatePlugins(tkp1);
+  // }
+
+  computeResidu();
+  // for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
+  //   (*it)->computeResidu();
+
+  if(_computeResiduY)
+  {
+    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
+    for(OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+    {
+      (*itOSI)->computeResiduOutput(tkp1, indexSet0);
+    }
+  }
+  DEBUG_END("TimeStepping::initializeNewtonLoop()\n");
+}
+
+
+
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
 
@@ -582,7 +620,9 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     else
       checkSolverOutput(info, this);
 
-    update();
+    updateInput();
+    updateState();
+    updateOutput();
 
     hasNSProblems = (!_allNSProblems->empty()) ? true : false;
     if(hasNSProblems)

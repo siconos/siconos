@@ -203,7 +203,15 @@ void NonSmoothDynamicalSystem::pushInteractionsInMemory()
     }
   }
 }
-
+void NonSmoothDynamicalSystem::updateDSPlugins(double time)
+{
+  //could be better to call bind method
+  DynamicalSystemsGraph::VIterator vi;
+  for(vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
+  {
+    dynamicalSystems()->bundle(*vi)->updatePlugins(time);
+  }
+}
 void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
 {
 

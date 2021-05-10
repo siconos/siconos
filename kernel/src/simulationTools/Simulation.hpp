@@ -31,10 +31,10 @@
 
 /** Description of the simulation process (integrators, time
     discretisation and so on).
-    
+
     !!! This is an abstract class !!!
-    
-    The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.  
+
+    The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.
 */
 
 class Simulation : public std::enable_shared_from_this<Simulation>
@@ -126,26 +126,6 @@ protected:
   /** map of not-yet-initialized DS variables for each OSI */
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
 
-  /** Call the interaction manager one if is registered, otherwise do nothing. */
-  void updateInteractions();
-
-  /*TS set the ds->q memory, the world (CAD model for example) must be updated.
-    Overload this method to update user model.*/
-  virtual void updateWorldFromDS()
-  {
-    ;
-  };
-
-  /** initialize OSI-DS links in the NSDS graph. */
-  void initializeOSIAssociations();
-
-  /** initialize objects (DSs and Interations) found in the NSDS
-   * Changelog and update the changelog iterator.
-   */
-  void initializeNSDSChangelog();
-
-  /** initialize index sets for OSIs */
-  void initializeIndexSets();
 
 private:
 
@@ -391,16 +371,26 @@ public:
   virtual void initializeInteraction(double time, SP::Interaction inter);
 
   /** Set an object to automatically manage interactions during the simulation
-   * \param manager 
+   * \param manager
    */
   void insertInteractionManager(SP::InteractionManager manager)
     { _interman = manager; }
-  
+
+
+  /** Compute the residu of all OSI
+   */
+  void computeResidu();
+
   /** computes a one step NS problem
    *  \param nb the id of the OneStepNSProblem to be computed
    *  \return information about the solver convergence.
    */
   int computeOneStepNSProblem(int nb);
+
+  /** update the plugins of the DS
+   *  \param time to be used for plugins
+   */
+  virtual void updateDSPlugins(double time);
 
   /** update input
    *  \param level lambda order used to compute input
@@ -548,6 +538,31 @@ public:
    * \param inter the SP::Interaction to remove
    */
   void unlink(SP::Interaction inter);
+  /** Call the interaction manager one if is registered, otherwise do nothing. */
+  void updateInteractions();
+
+  /*TS set the ds->q memory, the world (CAD model for example) must be updated.
+    Overload this method to update user model.*/
+  virtual void updateWorldFromDS()
+  {
+    ;
+  };
+
+  /** initialize OSI-DS links in the NSDS graph. */
+  void initializeOSIAssociations();
+
+  /** initialize objects (DSs and Interations) found in the NSDS
+   * Changelog and update the changelog iterator.
+   */
+  void initializeNSDSChangelog();
+
+  /** initialize index sets for OSIs */
+  void initializeIndexSets();
+
+  /** Complete initialisation of the Simulation (OneStepIntegrators,
+      OneStepNSProblem, TImediscretisation).
+  */
+  virtual void firstInitialize();
 
   /** visitors hook
    */
