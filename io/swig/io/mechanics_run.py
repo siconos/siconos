@@ -853,6 +853,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._nsds = nsds
         self._simulation = simulation
         self._osi = osi
+        self._osnspb = None
         self._static = {}
         self._shape = None
         self._occ_contactors = dict()
@@ -2209,10 +2210,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.log(s.computeFreeState, with_timer)()
             if s.numberOfOSNSProblems() > 0:
                 if explode_computeOneStep:
-                    # experimental
-                    osnsp = s.oneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY)
-                    #info = self.log(osnsp.compute, with_timer)(s.nextTime())
-                    fc = cast_FrictionContact(osnsp)
+                    fc = self._osnspb
                     #self.log(fc.updateInteractionBlocks, with_timer)()
                     self.log(fc.preCompute, with_timer)(s.nextTime())
                     self.log(fc.updateMu, with_timer)()
@@ -2237,11 +2235,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.log(s.computeFreeState, with_timer)()
                 if s.numberOfOSNSProblems() > 0:
                     if explode_computeOneStep:
-                        # experimental
-                        osnsp = s.oneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY)
-                        #info = self.log(osnsp.compute, with_timer)(s.nextTime())
-                        fc = cast_FrictionContact(osnsp)
-                        #self.log(fc.updateInteractionBlocks, with_timer)()
+                        fc = self._osnspb
                         self.log(fc.preCompute, with_timer)(s.nextTime())
                         self.log(fc.updateMu, with_timer)()
                         info = self.log(fc.solve, with_timer)()
@@ -2745,6 +2739,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
 
+
+        self._osnspb = osnspb
+
+        
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == sk.TimeSteppingDirectProjection:
             if solver_options_pos is None:
