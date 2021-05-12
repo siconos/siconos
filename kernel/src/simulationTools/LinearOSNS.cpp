@@ -83,35 +83,105 @@ void LinearOSNS::initVectorsMemory()
 void LinearOSNS::initOSNSMatrix()
 {
   // Default size for M = maxSize()
-  if(! _M)
+  if (_assemblyType == BLOCK_ASSEMBLY or  _assemblyType == GLOBAL_REDUCED_ASSEMBLY)
   {
-    switch(_numericsMatrixStorageType)
+    if(! _M)
     {
-    case NM_DENSE:
-    case NM_SPARSE:
-    {
-      _M.reset(new OSNSMatrix(maxSize(), _numericsMatrixStorageType));
-      break;
-    }
-    case NM_SPARSE_BLOCK:
-    {
-      // = number of Interactionin the largest considered indexSet
-      if(indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
+      switch(_numericsMatrixStorageType)
       {
-        _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _numericsMatrixStorageType));
-      }
-      else
+      case NM_DENSE:
+      case NM_SPARSE:
       {
-        _M.reset(new OSNSMatrix(1, _numericsMatrixStorageType));
+        _M.reset(new OSNSMatrix(maxSize(), _numericsMatrixStorageType));
+        break;
       }
-      break;
-    }
-    {
-      default:
-        THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      case NM_SPARSE_BLOCK:
+      {
+        // = number of Interactionin the largest considered indexSet
+        if(indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
+        {
+          _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _numericsMatrixStorageType));
+        }
+        else
+        {
+          _M.reset(new OSNSMatrix(1, _numericsMatrixStorageType));
+        }
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
       }
     }
   }
+  if (_assemblyType == GLOBAL_ASSEMBLY or  _assemblyType == GLOBAL_REDUCED_ASSEMBLY)
+  {
+    // Default size for M = _maxSize
+    if(!_W)
+    {
+      // if (_numericsMatrixStorageType == NM_DENSE)
+      //   _W.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+      // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
+      //   _W.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
+
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _W.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _W.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _W.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+
+    if(!_H)
+    {
+
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _H.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+
+  }
+
+  
+
+  
+  
 }
 void LinearOSNS::initialize(SP::Simulation sim)
 {
@@ -694,7 +764,18 @@ void LinearOSNS::computeq(double time)
   DEBUG_END("void LinearOSNS::computeq(double time)\n");
 }
 
+void LinearOSNS::computeM()
+{
 
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+  
+  // Computes new _interactionBlocks if required
+  updateInteractionBlocks();
+
+  //    _M->fill(indexSet);
+  _M->fillM(indexSet, !_hasBeenUpdated);
+  DEBUG_EXPR(_M->display(););
+}
 
 bool LinearOSNS::preCompute(double time)
 {
@@ -733,12 +814,7 @@ bool LinearOSNS::preCompute(double time)
 
   if(!_hasBeenUpdated || !isLinear)
   {
-    // Computes new _interactionBlocks if required
-    updateInteractionBlocks();
-
-    //    _M->fill(indexSet);
-    _M->fillW(indexSet, !_hasBeenUpdated);
-    DEBUG_EXPR(_M->display(););
+    computeM();
 
     //      updateOSNSMatrix();
     _sizeOutput = _M->size();

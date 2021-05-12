@@ -30,6 +30,14 @@
 typedef std::vector<double> MuStorage;
 TYPEDEF_SPTR(MuStorage)
 
+typedef enum
+{
+  BLOCK_ASSEMBLY,
+  GLOBAL_ASSEMBLY,
+  GLOBAL_REDUCED_ASSEMBLY
+
+} LINEAROSNS_ASSEMBLY_TYPE;
+
 /** Base (abstract) class for linear non-smooth problems
 
     Base class for linear non-smooth problems, usually in the form:
@@ -61,6 +69,16 @@ protected:
   /** vector q of a LinearOSNS system */
   SP::SiconosVector _q;
 
+  /** matrix W of a LinearOSNS system */
+  SP::OSNSMatrix _W;
+
+  /** matrix H of a LinearOSNS system */
+  SP::OSNSMatrix _H;
+
+  /** Assembly strategy */
+  LINEAROSNS_ASSEMBLY_TYPE _assemblyType;
+
+
   /** Storage type for M - NM_DENSE: SiconosMatrix (dense), NM_SPARSE_BLOCK: Sparse Storage
       (embedded into OSNSMatrix) */
   NM_types _numericsMatrixStorageType = NM_DENSE;
@@ -86,12 +104,12 @@ protected:
 public:
 
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst
   */
-  LinearOSNS(SP::SolverOptions options): OneStepNSProblem(options){};
+  LinearOSNS(SP::SolverOptions options, LINEAROSNS_ASSEMBLY_TYPE assemblyType = BLOCK_ASSEMBLY): OneStepNSProblem(options){_assemblyType = assemblyType;};
 
   /** destructor
    */
@@ -163,6 +181,23 @@ public:
     _M = newM;
   }
 
+
+  // --- H ---
+
+  /** get H
+   *  \return pointer on a OSNSMatrix
+   */
+  inline SP::OSNSMatrix H() const
+  {
+    return _H;
+  }
+
+  /** set the value of H
+   *  \param H the new matrix
+   */
+  void setH(SP::OSNSMatrix H) { _H = H;}
+
+
   /** get the value of q, the constant vector in the LinearOSNS
       \return SiconosVector
    */
@@ -210,7 +245,7 @@ public:
 
   /** initialize the _M matrix */
   virtual void initOSNSMatrix();
- 
+
   /** To initialize the LinearOSNS problem(computes topology ...)
       \param sim the simulation owning this OSNSPB
   */
@@ -225,6 +260,11 @@ public:
    * \param vd a vertex descriptor
    */
   virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
+
+  /** compute matrix M
+   */
+  virtual void computeM();
+
 
   /** To compute a part of the "q" vector of the OSNS
       \param vertex, vertex (interaction) which corresponds to the considered block
@@ -267,7 +307,7 @@ public:
   }
 
   virtual bool checkCompatibleNSLaw(NonSmoothLaw& nslaw) =0;
-  
+
   /* visitors hook */
   ACCEPT_STD_VISITORS();
 

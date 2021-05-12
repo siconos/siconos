@@ -75,7 +75,7 @@ void GlobalRollingFrictionContact::initialize(SP::Simulation sim)
 SP::GlobalRollingFrictionContactProblem GlobalRollingFrictionContact::globalRollingFrictionContactProblem()
 {
   SP::GlobalRollingFrictionContactProblem numerics_problem(globalRollingFrictionContactProblem_new());
-  numerics_problem->M = &*_M->numericsMatrix();
+  numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
   numerics_problem->b = _b->getArray();
@@ -89,7 +89,7 @@ SP::GlobalRollingFrictionContactProblem GlobalRollingFrictionContact::globalRoll
 GlobalRollingFrictionContactProblem *GlobalRollingFrictionContact::globalRollingFrictionContactProblemPtr()
 {
   GlobalRollingFrictionContactProblem *numerics_problem = &_numerics_problem;
-  numerics_problem->M = &*_M->numericsMatrix();
+  numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
   numerics_problem->b = _b->getArray();
@@ -177,9 +177,9 @@ bool GlobalRollingFrictionContact::preCompute(double time)
     size_t sizeM = 0;
 
 
-    // fill _M
-    _M->fillM(DSG0);
-    sizeM = _M->size();
+    // fill _W
+    _W->fillW(DSG0);
+    sizeM = _W->size();
     _sizeGlobalOutput = sizeM;
     DEBUG_PRINTF("sizeM = %lu \n", sizeM);
 

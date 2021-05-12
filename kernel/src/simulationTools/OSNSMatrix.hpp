@@ -227,13 +227,13 @@ public:
    * \param indexSet the index set of the active constraints
    * \param update if true update the size of the Matrix (default true)
    */
-  virtual void fillW(InteractionsGraph&indexSet, bool update = true);
+  virtual void fillM(InteractionsGraph&indexSet, bool update = true);
 
   /** fill the current class using an index set
    * \param DSG the index set of the dynamicalSystems
    * \param update if true update the size of the Matrix (default true)
    */
-  virtual void fillM(DynamicalSystemsGraph& DSG, bool update = true);
+  virtual void fillW(DynamicalSystemsGraph& DSG, bool update = true);
 
   /** fill the current class using an index set
    * \param DSG the index set of the dynamicalSystems

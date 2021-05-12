@@ -112,7 +112,7 @@ OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor):
   DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor)\n");
 //  _numericsMatrix.reset(new NumericsMatrix);
 //  NM_null(_numericsMatrix.get());
-  fillW(indexSet);
+  fillM(indexSet);
   DEBUG_END("OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor)\n");
 }
 
@@ -180,9 +180,9 @@ unsigned OSNSMatrix::updateSizeAndPositions(DynamicalSystemsGraph & DSG)
 }
 
 // Fill the matrix W
-void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
+void OSNSMatrix::fillM(InteractionsGraph& indexSet, bool update)
 {
-  DEBUG_BEGIN("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
+  DEBUG_BEGIN("void OSNSMatrix::fillM(SP::InteractionsGraph indexSet, bool update)\n");
   DEBUG_PRINTF(" update = %i\n", update);
   if(update)  // If index set vertices list has changed
   {
@@ -277,7 +277,7 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
   }
   if(update)
     convert();
-  DEBUG_END("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
+  DEBUG_END("void OSNSMatrix::fillM(SP::InteractionsGraph indexSet, bool update)\n");
 }
 
 // convert current matrix to NumericsMatrix structure
@@ -325,9 +325,9 @@ void OSNSMatrix::convert()
 
 // Fill the matrix M
 // Used only in GlobalFrictionContact
-void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
+void OSNSMatrix::fillW(DynamicalSystemsGraph & DSG, bool update)
 {
-  DEBUG_BEGIN("void OSNSMatrix::fillM(SP::DynamicalSystemsGraph DSG, bool update)\n");
+  DEBUG_BEGIN("void OSNSMatrix::fillW(SP::DynamicalSystemsGraph DSG, bool update)\n");
 
   if(update)
   {
@@ -368,12 +368,12 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
   }
   default:
   {
-    THROW_EXCEPTION("OSNSMatrix::fillM unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::fillW unknown _storageType");
   }
   }
 
 
-  DEBUG_END("void OSNSMatrix::fillM(SP::DynamicalSystemsGraph DSG, bool update)\n");
+  DEBUG_END("void OSNSMatrix::fillW(SP::DynamicalSystemsGraph DSG, bool update)\n");
 }
 
 // Fill the matrix H

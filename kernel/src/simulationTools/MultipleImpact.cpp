@@ -307,7 +307,7 @@ void MultipleImpact::PreComputeImpact()
     // Computes new _unitaryBlocks if required
     updateInteractionBlocks();
     // Updates matrix M
-    _M->fillW(indexSet, !_hasBeenUpdated);
+    _M->fillM(indexSet, !_hasBeenUpdated);
     _sizeOutput = _M->size();
   }
   if(_nContact != _sizeOutput)

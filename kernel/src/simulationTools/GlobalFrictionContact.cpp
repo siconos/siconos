@@ -48,7 +48,7 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolver
 
 // Constructor based on a pre-defined solver options set.
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions options):
-  LinearOSNS(options), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
+  LinearOSNS(options,GLOBAL_ASSEMBLY), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
 {
   // // Only fc3d for the moment.
   // if(_contactProblemDim != 3)
@@ -79,71 +79,6 @@ void GlobalFrictionContact::initVectorsMemory()
     if(_b->size() != _maxSize)
       _b->resize(_maxSize);
   }
-}
-
-
-void GlobalFrictionContact::initOSNSMatrix()
-{
-  // Default size for M = _maxSize
-  if(!_M)
-  {
-    // if (_numericsMatrixStorageType == NM_DENSE)
-    //   _M.reset(new OSNSMatrix(_maxSize, NM_DENSE));
-    // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
-    //   _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
-
-    switch(_numericsMatrixStorageType)
-    {
-    case NM_DENSE:
-    {
-      _M.reset(new OSNSMatrix(_maxSize, NM_DENSE));
-      break;
-    }
-    case NM_SPARSE:
-    {
-      _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE));
-      break;
-    }
-    case NM_SPARSE_BLOCK:
-    {
-      _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE_BLOCK));
-      break;
-    }
-    {
-      default:
-        THROW_EXCEPTION("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
-      }
-    }
-  }
-
-
-  if(!_H)
-  {
-
-    switch(_numericsMatrixStorageType)
-    {
-    case NM_DENSE:
-    {
-      _H.reset(new OSNSMatrix(_maxSize, NM_DENSE));
-      break;
-    }
-    case NM_SPARSE:
-    {
-      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE));
-      break;
-    }
-    case NM_SPARSE_BLOCK:
-    {
-      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK));
-      break;
-    }
-    {
-      default:
-        THROW_EXCEPTION("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
-      }
-    }
-  }
-
 }
 
 void GlobalFrictionContact::initialize(SP::Simulation sim)
@@ -177,7 +112,7 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
 SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactProblem()
 {
   SP::GlobalFrictionContactProblem numerics_problem(globalFrictionContactProblem_new());
-  numerics_problem->M = &*_M->numericsMatrix();
+  numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
   numerics_problem->b = _b->getArray();
@@ -190,7 +125,7 @@ SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactPro
 GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProblemPtr()
 {
   GlobalFrictionContactProblem *numerics_problem = &_numerics_problem;
-  numerics_problem->M = &*_M->numericsMatrix();
+  numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
   numerics_problem->b = _b->getArray();
@@ -276,9 +211,9 @@ bool GlobalFrictionContact::preCompute(double time)
     size_t sizeM = 0;
 
 
-    // fill _M
-    _M->fillM(DSG0);
-    sizeM = _M->size();
+    // fill _W
+    _W->fillW(DSG0);
+    sizeM = _W->size();
     _sizeGlobalOutput = sizeM;
     DEBUG_PRINTF("sizeM = %lu \n", sizeM);
 
@@ -503,12 +438,12 @@ void GlobalFrictionContact::display() const
   std::cout << "and  size (_sizeGlobalOutput) " << _sizeGlobalOutput  <<std::endl;
   std::cout << "_numericsMatrixStorageType" << _numericsMatrixStorageType<< std::endl;
   std::cout << " - Matrix M  : " <<std::endl;
-  // if (_M) _M->display();
+  // if (_W) _W->display();
   // else std::cout << "-> nullptr" <<std::endl;
-  NumericsMatrix* M_NM = _M->numericsMatrix().get();
-  if(M_NM)
+  NumericsMatrix* W_NM = _W->numericsMatrix().get();
+  if(W_NM)
   {
-    NM_display(M_NM);
+    NM_display(W_NM);
   }
   std::cout << " - Matrix H : " <<std::endl;
   // if (_H) _H->display();
