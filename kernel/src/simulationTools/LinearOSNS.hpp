@@ -239,6 +239,13 @@ public:
   {
     _numericsMatrixStorageType = i;
   };
+  
+  /** set which type of assembly will be used for M
+   */
+  inline void setAssemblyType(LINEAROSNS_ASSEMBLY_TYPE assemblyType)
+  {
+    _assemblyType = assemblyType;
+  };
 
   /** Memory allocation or resizing for z,w,q */
   void initVectorsMemory();

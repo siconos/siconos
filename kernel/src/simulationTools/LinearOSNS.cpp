@@ -178,10 +178,10 @@ void LinearOSNS::initOSNSMatrix()
 
   }
 
-  
 
-  
-  
+
+
+
 }
 void LinearOSNS::initialize(SP::Simulation sim)
 {
@@ -254,10 +254,10 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
 
-  // --- Check compatible nslaws ---- 
+  // --- Check compatible nslaws ----
   checkCompatibleNSLaw(*nslaw);
-  
-  
+
+
   // --- Check block size ---
   assert(indexSet->properties(vd).block->size(0) == nslaw->size());
   assert(indexSet->properties(vd).block->size(1) == nslaw->size());
@@ -304,7 +304,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     if(relationType == FirstOrder)
     {
 
-      
+
 
       rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
@@ -767,14 +767,55 @@ void LinearOSNS::computeq(double time)
 void LinearOSNS::computeM()
 {
 
-  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
-  
-  // Computes new _interactionBlocks if required
-  updateInteractionBlocks();
+  if (_assemblyType == BLOCK_ASSEMBLY)
+  {
 
-  //    _M->fill(indexSet);
-  _M->fillM(indexSet, !_hasBeenUpdated);
+    InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+
+    // Computes new _interactionBlocks if required
+    updateInteractionBlocks();
+
+    //    _M->fill(indexSet);
+    _M->fillM(indexSet, !_hasBeenUpdated);
+
+  }
+  else if (_assemblyType ==GLOBAL_REDUCED_ASSEMBLY)
+  {
+    InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+    DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+
+
+    // fill _Winverse
+    _W->fillWinverse(DSG0);
+    // fill H
+    _H->fillH(DSG0, indexSet);
+    // Compute M = H Winverse * H
+
+    NumericsMatrix *   Winverse_NM = _W->numericsMatrix().get();
+    NumericsMatrix *   H_NM = _H->numericsMatrix().get();
+
+    NumericsMatrix *   NM1 = NM_multiply(Winverse_NM, H_NM);
+    NumericsMatrix *   Htrans_NM = NM_transpose(H_NM);
+
+    NumericsMatrix *   M_NM = NM_multiply(Htrans_NM, NM1);
+
+
+
+    SP::NumericsMatrix M (M_NM);
+    _M->setNumericsMatrix(M);
+    _M->setSize(M_NM->size0);
+
+  }
+  else
+    THROW_EXCEPTION("LinearOSNS::computeM unknown _assemblyTYPE");
+  
   DEBUG_EXPR(_M->display(););
+  // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
+  // if (M_NM )
+  //   NM_display(M_NM);
+
+  // getchar();
+
 }
 
 bool LinearOSNS::preCompute(double time)

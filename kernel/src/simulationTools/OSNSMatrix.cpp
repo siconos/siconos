@@ -26,6 +26,7 @@
 #include "Interaction.hpp"
 #include "DynamicalSystem.hpp"
 #include "NumericsSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -323,7 +324,7 @@ void OSNSMatrix::convert()
   DEBUG_END("OSNSMatrix::convert()\n");
 }
 
-// Fill the matrix M
+// Fill the matrix W
 // Used only in GlobalFrictionContact
 void OSNSMatrix::fillW(DynamicalSystemsGraph & DSG, bool update)
 {
@@ -376,6 +377,68 @@ void OSNSMatrix::fillW(DynamicalSystemsGraph & DSG, bool update)
   DEBUG_END("void OSNSMatrix::fillW(SP::DynamicalSystemsGraph DSG, bool update)\n");
 }
 
+
+// Fill the matrix Winverse
+// Used only in GlobalFrictionContact
+void OSNSMatrix::fillWinverse(DynamicalSystemsGraph & DSG, bool update)
+{
+  DEBUG_BEGIN("void OSNSMatrix::fillWinverse(SP::DynamicalSystemsGraph DSG, bool update)\n");
+
+  if(update)
+  {
+    _dimColumn = updateSizeAndPositions(DSG);
+    _dimRow = _dimColumn;
+  }
+
+  switch(_storageType)
+  {
+  case NM_SPARSE:
+  {
+    if(update)
+    {
+      size_t sizeM = _dimRow;
+      DEBUG_PRINTF("sizeM = %lu \n", sizeM);
+
+      // We choose a triplet matrix format for inserting values.
+      // This simplifies the memory manipulation.
+      _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM),NM_free);
+
+      NumericsMatrix& M_NM = *numericsMatrix();
+      NM_triplet_alloc(&M_NM, sizeM); // At least one element per row
+      CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
+
+      unsigned int pos =0;
+      // Loop over the DS for filling M
+      DynamicalSystemsGraph::VIterator dsi, dsend;
+      for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
+      {
+        SP::DynamicalSystem ds = DSG.bundle(*dsi);
+        SiconosMatrix* W = DSG.properties(*dsi).W.get();
+        pos = DSG.properties(*dsi).absolute_position;
+        W->fillTriplet(Mtriplet, pos, pos);
+        DEBUG_PRINTF("pos = %u \n", pos);
+      }
+
+      // Ugly inversion
+      for (unsigned int k =0 ; k < M_NM.size0; k++)
+      {
+        Mtriplet->x[k] = 1.0/Mtriplet->x[k];
+      }
+      //NM_display(numericsMatrix().get());
+
+
+    }
+    break;
+  }
+  default:
+  {
+    THROW_EXCEPTION("OSNSMatrix::fillWinverse unknown _storageType");
+  }
+  }
+
+
+  DEBUG_END("void OSNSMatrix::fillW(SP::DynamicalSystemsGraph DSG, bool update)\n");
+}
 // Fill the matrix H
 void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet, bool update)
 {
