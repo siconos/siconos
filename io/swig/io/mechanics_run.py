@@ -2208,14 +2208,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if s.newtonOptions() == sk.SICONOS_TS_LINEAR or s.newtonOptions() == sk.SICONOS_TS_LINEAR_IMPLICIT:
             self.log(s.prepareNewtonIteration, with_timer)()
             self.log(s.computeFreeState, with_timer)()
+            info=0
             if s.numberOfOSNSProblems() > 0:
                 if explode_computeOneStep:
                     fc = self._osnspb
                     #self.log(fc.updateInteractionBlocks, with_timer)()
                     self.log(fc.preCompute, with_timer)(s.nextTime())
                     self.log(fc.updateMu, with_timer)()
-                    info = self.log(fc.solve, with_timer)()
-                    self.log(fc.postCompute, with_timer)()
+                    if fc.getSizeOutput() != 0 :
+                        info = self.log(fc.solve, with_timer)()
+                        self.log(fc.postCompute, with_timer)()
                 else:
                     info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
@@ -2238,8 +2240,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         fc = self._osnspb
                         self.log(fc.preCompute, with_timer)(s.nextTime())
                         self.log(fc.updateMu, with_timer)()
-                        info = self.log(fc.solve, with_timer)()
-                        self.log(fc.postCompute, with_timer)()
+                        if fc.getSizeOutput() != 0 :
+                            info = self.log(fc.solve, with_timer)()
+                            self.log(fc.postCompute, with_timer)()
                     else:
                         info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
@@ -2693,6 +2696,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             osnspb = sk.FrictionContact(self._dimension,solver_options)
                         osnspb.setMaxSize(osnspb_max_size)
                         osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
+                        osnspb.setMStorageType(sn.NM_SPARSE)
+                        osnspb.setAssemblyType(sk.GLOBAL_REDUCED_ASSEMBLY)
 
                     elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
                         if self._dimension ==3:
