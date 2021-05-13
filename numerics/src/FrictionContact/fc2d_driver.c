@@ -80,13 +80,13 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
 
   /* Non Smooth Gauss Seidel (NSGS) */
 
-  if(problem->M->storageType == 1)
+  if(problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE )
   {
 
     if(options->solverId == SICONOS_FRICTION_2D_NSGS)
     {
       numerics_printf(" ======================= Call Sparse NSGS solver for Friction-Contact 2D problem ======================");
-      fc2d_nsgs_sbm(problem, reaction, velocity, &info, options);
+      fc2d_nsgs(problem, reaction, velocity, &info, options);
     }
     else
     {
@@ -109,7 +109,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
     }
 
   }
-  else if(problem->M->storageType == 0)
+  else if(problem->M->storageType == NM_DENSE)
   {
 
     switch(options->solverId)

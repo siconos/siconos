@@ -43,29 +43,22 @@
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-static void fc2d_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat,
-                                            LinearComplementarityProblem* local_problem,
-                                            double* q, double* z)
+static void fc2d_nsgs_buildLocalProblem(int contact,
+                                        FrictionContactProblem* problem,
+                                        LinearComplementarityProblem* local_problem,
+                                        double* reaction)
 {
 
-  assert(blmat->blocksize0[rowNumber] > 0);
+  NM_extract_diag_block2(problem->M, contact, &local_problem->M->matrix0);
 
-  /* Position in vector blmat->block of the required diagonal block */
-  int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
-  /* Gets diagonal block = MLocal  */
-  local_problem->M->matrix0 = blmat->block[diagPos];
-  local_problem->M->size0 = 2;
+  local_problem->M->size0 = 2; // Necessary ?
   local_problem->M->size1 = 2;
 
-  int pos = 0;
-  local_problem->size =2;
-  pos =  rowNumber*2;
+  local_problem->q[0]= problem->q[contact*2];
+  local_problem->q[1]= problem->q[contact*2+1];
+  NM_row_prod_no_diag2(2 * problem->numberOfContacts, contact, 2*contact,
+                       problem->M, reaction, local_problem->q, false);
 
-  local_problem->q[0]= q[pos];
-  local_problem->q[1]= q[pos+1];
-  DEBUG_EXPR(NV_display(local_problem->q,2););
-  SBM_row_prod_no_diag_2x2(blmat->blocksize0[blmat->blocknumber0 - 1], 2,
-                           rowNumber, blmat, z, local_problem->q);
   DEBUG_EXPR(NM_display(local_problem->M););
   DEBUG_EXPR(NV_display(local_problem->q,2););
 }
@@ -292,60 +285,36 @@ unsigned int* allocfreezingContacts(FrictionContactProblem *problem,
   return fcontacts;
 }
 
-void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
-                   int *info, SolverOptions* options)
+void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
+               int *info, SolverOptions* options)
 {
   /* Notes:
      - we suppose that the trivial solution case has been checked before,
      and that all inputs differs from NULL since this function is
      supposed to be called from lcp_driver_global().
-
-     - Input matrix M of the problem is supposed to be sparse-block
-     with no null row (ie no rows with all blocks equal to null)
-  */
-
-  assert(problem->M->matrix1);
-
-  /*
-    The options for the global "block" solver are defined in
-    options[0].
   */
 
   /* Global Solver parameters*/
   int * iparam = options->iparam;
   double * dparam = options->dparam;
 
-
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   /* Matrix M/vector q of the LCP */
-  SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
   double * q = problem->q;
 
   int nc = problem->numberOfContacts;
   double norm_q = cblas_dnrm2(nc*2, problem->q, 1);
   double norm_r[] = {1e24};
 
-  assert(blmat->nbblocks >= 1);
-
   /* Local problem initialization */
-
   LinearComplementarityProblem * local_problem = (LinearComplementarityProblem *)
     malloc(sizeof(*local_problem));
   
   local_problem->M = NM_create(NM_DENSE,2,2);
-  /* Memory allocation for q. Size of q = blsizemax, size of the
-     largest square-block in blmat */
+  local_problem->q = (double*)malloc(2 * sizeof(double));
 
-  int blsizemax = blmat->blocksize0[0];
-  for(unsigned int i = 1 ; i < blmat->blocknumber0 ; i++)
-  {
-    int k = blmat->blocksize0[i] - blmat->blocksize0[i - 1];
-    if(k > blsizemax) blsizemax = k;
-  }
-
-  local_problem->q = (double*)malloc(blsizemax * sizeof(double));
   double localreaction[2];
 
   /*****  Gauss-Seidel iterations *****/
@@ -353,7 +322,6 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
   double error = INFINITY; /* Current error */
   int has_not_converged = 1;
 
-  /* Output from local solver */
   if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
   {
     unsigned int *freeze_contacts = NULL;
@@ -365,7 +333,7 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
       double light_error_sum = 0.0;
       double light_error_2 = 0.0;
       /* Loop over the rows of blocks in blmat */
-      /* rowNumber: current row (of blocks) number */
+      /* contact: current row (of blocks) number */
       int number_of_freezed_contact=0;
       if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
       {
@@ -375,9 +343,8 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
             number_of_freezed_contact++;
         }
       }
-      for(unsigned int pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
+      for(unsigned int pos = 0, contact = 0; contact < nc; ++contact, ++pos, ++pos)
       {
-        int contact = pos/2;
         if (freeze_contacts[contact] >0)
         {
           /* we skip freeze contacts */
@@ -390,12 +357,12 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
         localreaction[1] = z[pos+1];
 
         /* Local problem formalization */
-        fc2d_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+        fc2d_nsgs_buildLocalProblem(contact, problem, local_problem, z);
 
         /* Solve local problem */
         int local_solver_info = fc2dLocalSolve(local_problem->M->matrix0,
                                                local_problem->q,
-                                               problem->mu[rowNumber],
+                                               problem->mu[contact],
                                                localreaction, &w[pos]);
 
 
@@ -408,11 +375,11 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
           fprintf(stderr,
                   "fc2d_nsgs error: local LCP solver failed at global iteration %d.\n", iter);
           fprintf(stderr,
-                  "                for block-row number %d. Output info equal to %d.\n", rowNumber, local_solver_info);
-                  *info = local_solver_info;
+                  "                for block-row number %d. Output info equal to %d.\n", contact, local_solver_info);
+          *info = local_solver_info;
           goto free_and_return;
         }
-       /* if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT || */
+        /* if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT || */
         /*    iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL */
         /*   ) */
         /*   accumulateLightErrorSum(&light_error_sum, localreaction, &z[pos]); */
@@ -425,23 +392,23 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
             && iter >=10)
         {
           /* we  freeze the contact for n iterations*/
-           if (number_of_freezed_contact < nc-1)
-            {
-              number_of_freezed_contact++;
-              freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
-            }
-           else
-            {
-              numerics_printf_verbose(2,"Number of freezed contacts too large w.r.t number of contact. we defreeze all contacts\n");
-              for(unsigned int c = 0 ; c < nc ; ++c)  freeze_contacts[c] =0;
-            }
-           DEBUG_EXPR
-             (printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e\n",
-                     light_error_2*squared_norm(localreaction), tolerance*tolerance/(nc*nc*10));
-              printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc))/1000. ==> %e <= %e\n",
-                     squared_norm(localreaction) ,  (*norm_r* *norm_r/(nc*nc))/1000.);
-              printf("Contact % i is freezed for %i steps\n", contact,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
-               );
+          if (number_of_freezed_contact < nc-1)
+          {
+            number_of_freezed_contact++;
+            freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
+          }
+          else
+          {
+            numerics_printf_verbose(2,"Number of freezed contacts too large w.r.t number of contact. we defreeze all contacts\n");
+            for(unsigned int c = 0 ; c < nc ; ++c)  freeze_contacts[c] =0;
+          }
+          DEBUG_EXPR
+            (printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e\n",
+                    light_error_2*squared_norm(localreaction), tolerance*tolerance/(nc*nc*10));
+             printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc))/1000. ==> %e <= %e\n",
+                    squared_norm(localreaction) ,  (*norm_r* *norm_r/(nc*nc))/1000.);
+             printf("Contact % i is freezed for %i steps\n", contact,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
+              );
         }
         /* reaction update */
         z[pos]   = localreaction[0];
@@ -468,8 +435,8 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
       {
         error = calculateLightError(light_error_sum, nc, z, norm_r);
         has_not_converged = determine_convergence_with_full_final(problem,  options,
-                                                                z, w,
-                                                                &tolerance, norm_q, error, iter);
+                                                                  z, w,
+                                                                  &tolerance, norm_q, error, iter);
       }
     } //end while loop
     free(freeze_contacts);
@@ -481,20 +448,20 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
       ++iter;
       double light_error_sum = 0.0;
       /* Loop over the rows of blocks in blmat */
-      for(unsigned int pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
+      for(unsigned int pos = 0, contact = 0; contact < nc; ++contact, ++pos, ++pos)
       {
         /* store  old reaction */
         localreaction[0] = z[pos];
         localreaction[1] = z[pos+1];
 
         /* Local problem formalization */
-        fc2d_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+        fc2d_nsgs_buildLocalProblem(contact, problem, local_problem, z);
 
         /* Solve local problem */
         int local_solver_info = fc2dLocalSolve(local_problem->M->matrix0,
-                                   local_problem->q,
-                                   problem->mu[rowNumber],
-                                   localreaction, &w[pos]);
+                                               local_problem->q,
+                                               problem->mu[contact],
+                                               localreaction, &w[pos]);
 
 
         /* verbose if problem */
@@ -506,8 +473,8 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
           fprintf(stderr,
                   "fc2d_nsgs error: local LCP solver failed at global iteration %d.\n", iter);
           fprintf(stderr,
-                  "                for block-row number %d. Output info equal to %d.\n", rowNumber, local_solver_info);
-                  *info = local_solver_info;
+                  "                for block-row number %d. Output info equal to %d.\n", contact, local_solver_info);
+          *info = local_solver_info;
           goto free_and_return;
         }
         if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT ||
@@ -530,8 +497,8 @@ void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w,
       {
         error = calculateLightError(light_error_sum, nc, z, norm_r);
         has_not_converged = determine_convergence_with_full_final(problem,  options,
-                                                                z, w,
-                                                                &tolerance, norm_q, error,iter);
+                                                                  z, w,
+                                                                  &tolerance, norm_q, error,iter);
       }
     } //end while loop
   }
@@ -685,7 +652,7 @@ void fc2d_nsgs_dense(FrictionContactProblem* problem, double *reaction, double *
 
 
         det    = vec[2 * i + 2 * i * n] * vec[(2 * i + 1) + (2 * i + 1) * n]
-                 - vec[(2 * i + 1) + (2 * i) * n] * vec[(2 * i) + (2 * i + 1) * n];
+          - vec[(2 * i + 1) + (2 * i) * n] * vec[(2 * i) + (2 * i + 1) * n];
 
         if(fabs(det) < 100* DBL_EPSILON)
         {
