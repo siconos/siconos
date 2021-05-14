@@ -311,6 +311,8 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
   /* Local problem initialization */
   LinearComplementarityProblem * local_problem = (LinearComplementarityProblem *)
     malloc(sizeof(*local_problem));
+
+  
   
   local_problem->M = NM_create(NM_DENSE,2,2);
   local_problem->q = (double*)malloc(2 * sizeof(double));

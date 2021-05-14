@@ -766,7 +766,6 @@ void LinearOSNS::computeq(double time)
 
 void LinearOSNS::computeM()
 {
-
   if (_assemblyType == BLOCK_ASSEMBLY)
   {
 
@@ -789,26 +788,14 @@ void LinearOSNS::computeM()
     _W->fillWinverse(DSG0);
     // fill H
     _H->fillH(DSG0, indexSet);
-    // Compute M = H Winverse * H
 
-    NumericsMatrix *   Winverse_NM = _W->numericsMatrix().get();
-    NumericsMatrix *   H_NM = _H->numericsMatrix().get();
-
-    NumericsMatrix *   NM1 = NM_multiply(Winverse_NM, H_NM);
-    NumericsMatrix *   Htrans_NM = NM_transpose(H_NM);
-
-    NumericsMatrix *   M_NM = NM_multiply(Htrans_NM, NM1);
-
-
-
-    SP::NumericsMatrix M (M_NM);
-    _M->setNumericsMatrix(M);
-    _M->setSize(M_NM->size0);
+    // ComputeM
+    _M->computeM(_W->numericsMatrix(), _H->numericsMatrix());
 
   }
   else
     THROW_EXCEPTION("LinearOSNS::computeM unknown _assemblyTYPE");
-  
+
   DEBUG_EXPR(_M->display(););
   // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
   // if (M_NM )

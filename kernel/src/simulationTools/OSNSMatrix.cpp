@@ -504,6 +504,22 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
   DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
 }
 
+void OSNSMatrix::computeM(SP::NumericsMatrix Winverse, SP::NumericsMatrix H)
+{
+   // Compute M = H^T * Winverse * H
+
+    NumericsMatrix *   NM1 = NM_multiply(Winverse.get(), H.get());
+    NumericsMatrix *   Htrans_NM = NM_transpose(H.get());
+    
+    _numericsMatrix.reset(NM_multiply(Htrans_NM, NM1), NM_free);
+    _dimRow = _numericsMatrix->size0;
+    _dimColumn = _numericsMatrix->size1;
+
+    NM_free(NM1);
+    NM_free(Htrans_NM);
+}
+
+
 
 // Display data
 void OSNSMatrix::display() const

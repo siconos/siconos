@@ -223,14 +223,6 @@ public:
     return _numericsMatrix;
   };
 
-  /** get the numerics-readable structure
-   * \return SP::NumericsMatrix
-   */
-  inline  void setNumericsMatrix(SP::NumericsMatrix NM)
-  {
-    _numericsMatrix = NM;
-  };
-
   /** get the matrix used for default storage
    * \return SP::NumericsMatrix
    */
@@ -244,6 +236,13 @@ public:
    * \param update if true update the size of the Matrix (default true)
    */
   virtual void fillM(InteractionsGraph&indexSet, bool update = true);
+
+
+  /** Compute the M matrix given the inverse of W and H
+   * \param Winverse the NumericsMatrix that contains the inverse of W
+   * \param Winverse the NumericsMatrix that contains H
+   */
+  void computeM(SP::NumericsMatrix Winverse, SP::NumericsMatrix H);
 
   /** fill the current class using an index set with the W matrix of DS
    * \param DSG the index set of the dynamicalSystems
