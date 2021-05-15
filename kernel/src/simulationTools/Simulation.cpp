@@ -198,7 +198,7 @@ void Simulation::updateDSPlugins(double time)
 {
   _nsds->updateDSPlugins(time);
 }
-  
+
 void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 {
   if(_allNSProblems->size() > (unsigned int)Id)
@@ -406,7 +406,17 @@ void Simulation::initialize()
   // 4 - initialize new ds and interactions
   initializeNSDSChangelog();
 
-  // 5 - First initialization of the simulation
+  // 5 - updateOutput
+  updateOutput();
+
+  // 6 - Initialize OneStepNSProblem(s)
+  DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
+  // Initialize OneStepNSProblem(s). Depends on the type of simulation.
+  // Warning FP : must be done in any case, even if the interactions set
+  // is empty.
+  initOSNS();
+
+  // 7 - First initialization of the simulation
   firstInitialize();
 
   DEBUG_END("Simulation::initialize()\n");
@@ -573,14 +583,14 @@ void Simulation::processEvents()
   DEBUG_BEGIN("void Simulation::processEvents()\n");
   _eventsManager->processEvents(*this);
 
-  if(_eventsManager->hasNextEvent())
-  {
-    // For TimeStepping Scheme, need to update IndexSets, but not for EventDriven scheme
-    if(Type::value(*this) != Type::EventDriven)
-    {
-      updateIndexSets();
-    }
-  }
+  // if(_eventsManager->hasNextEvent())
+  // {
+  //   // For TimeStepping Scheme, need to update IndexSets, but not for EventDriven scheme
+  //   if(Type::value(*this) != Type::EventDriven)
+  //   {
+  //     updateIndexSets();
+  //   }
+  // }
   DEBUG_END("void Simulation::processEvents()\n");
 }
 

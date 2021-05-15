@@ -69,7 +69,6 @@ protected:
    */
   unsigned int _newtonOptions;
 
-
   /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
 
@@ -109,6 +108,12 @@ protected:
   /** boolean variable to resetAllLamda at each step (default true)
    */
   bool _resetAllLambda;
+
+  /** boolean variable to skip  updateOutput at the end of the step (default false)
+   */
+  bool _skip_last_updateOutput;
+
+
 
   /** Default Constructor
    */
@@ -272,6 +277,10 @@ public:
     _resetAllLambda = newval;
   };
 
+  void setSkipLastUpdateOutput(bool newval)
+  {
+    _skip_last_updateOutput = newval;
+  };
 
   /** To specify if the output interaction residu must be computed.
    *  \param v set to true when the output interaction residu must be computed

@@ -95,15 +95,15 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
     }
     inter.swapInMemory();
   }
-  // Compute a first value for the output
-  inter.computeOutput(time,  0);
+  // // Compute a first value for the output
+  // inter.computeOutput(time,  0);
 
-  // prepare the gradients
-  inter.relation()->computeJach(time, inter);
-  for(unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-  {
-    inter.computeOutput(time, i);
-  }
+  // // prepare the gradients
+  // inter.relation()->computeJach(time, inter);
+  // for(unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+  // {
+  //   inter.computeOutput(time, i);
+  // }
   inter.swapInMemory();
 }
 
