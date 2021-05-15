@@ -281,6 +281,10 @@ public:
   {
     _skip_last_updateOutput = newval;
   };
+  bool skipLastUpdateOutput()
+  {
+    return _skip_last_updateOutput;
+  };
 
   /** To specify if the output interaction residu must be computed.
    *  \param v set to true when the output interaction residu must be computed

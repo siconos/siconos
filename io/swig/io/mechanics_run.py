@@ -2229,7 +2229,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
                 self.log(s.updateInput, with_timer)()
                 self.log(s.updateState, with_timer)()
-                if not s._skip_last_updateOutput:
+                if not s.skipLastUpdateOutput():
                     self.log(s.updateOutput, with_timer)()
 
                 if s.numberOfOSNSProblems() > 0:
