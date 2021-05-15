@@ -776,6 +776,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['display_Newton_convergence']=False
         d['start_run_iteration_hook']=None
         d['end_run_iteration_hook']=None
+        d['skip_last_update_output']=False
 
         super(self.__class__, self).__init__(d)
 
@@ -2170,6 +2171,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.updateWorldFromDS, with_timer)()
         self.log(s.updateInteractions, with_timer)()
         self.log(s.initializeNSDSChangelog, with_timer)()
+        self.log(s.updateOutput, with_timer)()
+        self.log(s.initOSNS, with_timer)()
 
         self.log(s.firstInitialize, with_timer)()
 
@@ -2195,8 +2198,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.log(s.updateWorldFromDS, with_timer)()
             self.log(s.updateInteractions, with_timer)()
             self.log(s.initializeNSDSChangelog, with_timer)()
-            self.log(s.updateInput, with_timer)()
             self.log(s.updateOutput, with_timer)()
+            self.log(s.initOSNS, with_timer)()
+            self.log(s.updateInput, with_timer)()
+
         self.log(s.updateDSPlugins, with_timer)(s.nextTime())
         self.log(s.computeResidu, with_timer)()
 
@@ -2206,7 +2211,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
         if s.newtonOptions() == sk.SICONOS_TS_LINEAR or s.newtonOptions() == sk.SICONOS_TS_LINEAR_IMPLICIT:
-            self.log(s.prepareNewtonIteration, with_timer)()
+            if s.newtonOptions() == sk.SICONOS_TS_LINEAR_IMPLICIT:
+                self.log(s.prepareNewtonIteration, with_timer)()
             self.log(s.computeFreeState, with_timer)()
             info=0
             if s.numberOfOSNSProblems() > 0:
@@ -2223,7 +2229,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
                 self.log(s.updateInput, with_timer)()
                 self.log(s.updateState, with_timer)()
-                self.log(s.updateOutput, with_timer)()
+                if not s._skip_last_updateOutput:
+                    self.log(s.updateOutput, with_timer)()
 
                 if s.numberOfOSNSProblems() > 0:
                     self.log(s.saveYandLambdaInOldVariables, with_timer)()
@@ -2301,7 +2308,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             explode_computeOneStep=False,
             display_Newton_convergence=False,
             start_run_iteration_hook=None,
-            end_run_iteration_hook=None
+            end_run_iteration_hook=None,
+            skip_last_update_output=False
             ):
         """Run a simulation from a set of parameters described in a hdf5 file.
 
@@ -2489,7 +2497,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         run_options['display_Newton_convergence']=display_Newton_convergence
         run_options['start_run_iteration_hook']=start_run_iteration_hook
         run_options['end_run_iteration_hook']=end_run_iteration_hook
-
+        run_options['skip_last_update_output']=skip_last_update_output
 
         self.run_with_options(run_options)
 
@@ -2747,7 +2755,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         self._osnspb = osnspb
 
-        
+
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == sk.TimeSteppingDirectProjection:
             if solver_options_pos is None:
@@ -2776,6 +2784,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         simulation.setNewtonOptions(run_options['Newton_options'])
         simulation.setNewtonMaxIteration(run_options['Newton_max_iter'])
         simulation.setNewtonTolerance(run_options['Newton_tolerance'])
+
+        
+        simulation.setSkipLastUpdateOutput(run_options.get('skip_last_update_output'))
 
         verbose=run_options.get('verbose')
         if verbose:
@@ -2807,7 +2818,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
-
 
 
         self.output_run_options()
@@ -2901,12 +2911,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose('number of contacts',
                                        number_of_contacts,
                                        '(detected)',
-                                       osnspb.getSizeOutput() // 3,
+                                       osnspb.getSizeOutput() // self._dimension ,
                                        '(active at velocity level. approx)')
                     self.print_solver_infos()
 
             else:
-                number_of_contacts = osnspb.getSizeOutput() // 3
+                number_of_contacts = osnspb.getSizeOutput() // self._dimension
                 if verbose and number_of_contacts > 0:
                     msg = 'number of active contacts at the velocity level (approx)'
                     self.print_verbose(msg, number_of_contacts)
