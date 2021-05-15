@@ -2195,8 +2195,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.log(s.updateWorldFromDS, with_timer)()
             self.log(s.updateInteractions, with_timer)()
             self.log(s.initializeNSDSChangelog, with_timer)()
-        self.log(s.updateInput, with_timer)()
-        self.log(s.updateOutput, with_timer)()
+            self.log(s.updateInput, with_timer)()
+            self.log(s.updateOutput, with_timer)()
         self.log(s.updateDSPlugins, with_timer)(s.nextTime())
         self.log(s.computeResidu, with_timer)()
 
