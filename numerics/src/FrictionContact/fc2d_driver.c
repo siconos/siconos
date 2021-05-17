@@ -47,8 +47,9 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
 
 #ifdef DUMP_PROBLEM
   char fname[256];
-  sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
-  printf("Dump of FrictionContactProblem%.5d.dat", fccounter);
+  int ncc = problem->numberOfContacts;
+  sprintf(fname, "fc2d_granularflowonwall_%.5d_%.5d.dat", ncc, fccounter++);
+  printf("Dump %s file\n", fname);
 
   FILE * foutput  =  fopen(fname, "w");
   frictionContact_printInFile(problem, foutput);
@@ -91,21 +92,15 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
     else
     {
 
-      SparseBlockStructuredMatrix * M =  problem->M->matrix1;
-      int n = M->blocksize0[M->blocknumber0 - 1];
-      int m = M->blocksize1[M->blocknumber1 - 1];
-      double * denseMat = (double*)malloc(n*m*sizeof(double));
-      SBM_to_dense(M, denseMat);
+      NumericsMatrix* M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
+      NM_to_dense(problem->M, M_dense);
+      NumericsMatrix* M_original = problem->M;
+      problem->M = M_dense;
 
-      problem->M->matrix0  = denseMat;
-      problem->M->storageType =0;
       info = fc2d_driver(problem, reaction, velocity, options);
 
-      NM_clearDense(problem->M);
-      problem->M->matrix1  = M;
-      problem->M->storageType =1;
-
-
+      NM_free(M_dense);
+      problem->M = M_original;
     }
 
   }

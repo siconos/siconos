@@ -25,7 +25,7 @@
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int solvers[] = {SICONOS_FRICTION_2D_NSGS};
+  int solvers[] = {SICONOS_FRICTION_2D_LEMKE, SICONOS_FRICTION_2D_CPG};
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
@@ -45,15 +45,6 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
       current++;
     }
-  }
-  for(int d =0; d <n_data; d++)
-  {
-    collection[current].filename = data_collection[d];
-    collection[current].options = solver_options_create(SICONOS_FRICTION_2D_NSGS);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 20;
-    current++;
   }
 
   *number_of_tests = current;

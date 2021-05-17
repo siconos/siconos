@@ -305,7 +305,14 @@ if(WITH_${COMPONENT}_TESTING)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_1
     EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_1.c)
+
+  
+  new_tests_collection(
+    DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_2
+    EXTRA_SOURCES data_collection_fc2d_2.c test_fc2d_2.c)
   # test fc2d dense, for enum solvers. Files from data_collection_fc2d_1.c lead to timeout.
+  
+  
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_ENUM
     EXTRA_SOURCES data_collection_fc2d_enum.c test_fc2d_enum.c)
