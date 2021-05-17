@@ -777,6 +777,8 @@ class MechanicsHdf5Runner_run_options(dict):
         d['start_run_iteration_hook']=None
         d['end_run_iteration_hook']=None
         d['skip_last_update_output']=False
+        d['osns_assembly_type']= None
+                
 
         super(self.__class__, self).__init__(d)
 
@@ -2668,6 +2670,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # else we use the user solver_options
         solver_options= run_options.get('solver_options')
         osnspb_max_size = run_options.get('osnspb_max_size')
+        osnspb_assembly_type =  run_options.get('osns_assembly_type')
         friction_contact_trace_params = run_options.get('friction_contact_trace_params')
         if friction_contact_trace_params is None:
             # Global friction contact.
@@ -2704,8 +2707,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             osnspb = sk.FrictionContact(self._dimension,solver_options)
                         osnspb.setMaxSize(osnspb_max_size)
                         osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
-                        osnspb.setMStorageType(sn.NM_SPARSE)
-                        osnspb.setAssemblyType(sk.GLOBAL_REDUCED_ASSEMBLY)
+
+                        if osnspb_assembly_type :
+                            osnspb.setMStorageType(sn.NM_SPARSE)
+                            osnspb.setAssemblyType(osnspb_assembly_type)
 
                     elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
                         if self._dimension ==3:

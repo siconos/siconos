@@ -108,6 +108,9 @@ protected:
   /** Storage type used for the present matrix */
   NM_types _storageType;
 
+  /** _triplet_nzmax for memory allocation of NM_SPARSE */
+  size_t _triplet_nzmax;
+
   /** Numerics structure to be filled  */
   SP::NumericsMatrix _numericsMatrix;
 
@@ -263,6 +266,13 @@ public:
    * \param update if true update the size of the Matrix (default true)
    */
   virtual void fillH(DynamicalSystemsGraph& DSG, InteractionsGraph& indexSet,  bool update = true);
+  
+  /** fill the current class using an index set
+   * \param DSG the index set of the dynamicalSystems
+   * \param indexSet the index set of the Interactions
+   * \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillHtrans(DynamicalSystemsGraph& DSG, InteractionsGraph& indexSet,  bool update = true);
 
   /** fill the numerics structure _numericsMatSparse using MBlockCSR */
   void convert();

@@ -66,7 +66,9 @@ OSNSMatrix::OSNSMatrix(unsigned int n, NM_types stor):
     break;
   }
   default:
-  {} // do nothing here
+  {
+    _triplet_nzmax = _dimRow ; /* at least a non zero element per row */
+  } // do nothing here
   }
 
   DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
@@ -350,7 +352,7 @@ void OSNSMatrix::fillW(DynamicalSystemsGraph & DSG, bool update)
       _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM),NM_free);
 
       NumericsMatrix& M_NM = *numericsMatrix();
-      NM_triplet_alloc(&M_NM, sizeM); // At least one element per row
+      NM_triplet_alloc(&M_NM, _triplet_nzmax); 
       CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
 
       unsigned int pos =0;
@@ -364,6 +366,7 @@ void OSNSMatrix::fillW(DynamicalSystemsGraph & DSG, bool update)
         W->fillTriplet(Mtriplet, pos, pos);
         DEBUG_PRINTF("pos = %u \n", pos);
       }
+      _triplet_nzmax =  NM_nnz(&M_NM);
     }
     break;
   }
@@ -404,7 +407,7 @@ void OSNSMatrix::fillWinverse(DynamicalSystemsGraph & DSG, bool update)
       _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM),NM_free);
 
       NumericsMatrix& M_NM = *numericsMatrix();
-      NM_triplet_alloc(&M_NM, sizeM); // At least one element per row
+      NM_triplet_alloc(&M_NM, _triplet_nzmax); 
       CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
 
       unsigned int pos =0;
@@ -425,7 +428,7 @@ void OSNSMatrix::fillWinverse(DynamicalSystemsGraph & DSG, bool update)
         Mtriplet->x[k] = 1.0/Mtriplet->x[k];
       }
       //NM_display(numericsMatrix().get());
-
+      _triplet_nzmax =  NM_nnz(&M_NM);
 
     }
     break;
@@ -460,7 +463,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
       // This simplifies the memory manipulation.
       _numericsMatrix.reset(NM_create(NM_SPARSE, _dimRow, _dimColumn),NM_free);
       NumericsMatrix& H_NM = *numericsMatrix();
-      NM_triplet_alloc(&H_NM, _dimColumn);// At least one element per column
+      NM_triplet_alloc(&H_NM, _triplet_nzmax); 
       CSparseMatrix* Htriplet= NM_triplet(&H_NM);
 
 
@@ -492,7 +495,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
           leftInteractionBlock->fillTriplet(Htriplet, pos_ds, pos);
         }
       }
-
+      _triplet_nzmax =  NM_nnz(&H_NM);
     }
     break;
   }
@@ -503,20 +506,94 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
   }
   DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
 }
+// Fill the matrix H
+void OSNSMatrix::fillHtrans(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet, bool update)
+{
+  DEBUG_BEGIN("void OSNSMatrix::fillHtrans(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
+  if(update)
+  {
 
-void OSNSMatrix::computeM(SP::NumericsMatrix Winverse, SP::NumericsMatrix H)
+    _dimRow = updateSizeAndPositions(indexSet);
+    _dimColumn = updateSizeAndPositions(DSG);
+  }
+
+  switch(_storageType)
+  {
+  case NM_SPARSE:
+  {
+    if(update)
+    {
+      // We choose a triplet matrix format for inserting values.
+      // This simplifies the memory manipulation.
+      _numericsMatrix.reset(NM_create(NM_SPARSE, _dimRow, _dimColumn),NM_free);
+      NumericsMatrix& H_NM = *numericsMatrix();
+      NM_triplet_alloc(&H_NM, _triplet_nzmax); 
+      CSparseMatrix* Htriplet= NM_triplet(&H_NM);
+
+
+      unsigned int pos = 0, pos_ds=0;
+      SP::SiconosMatrix leftInteractionBlock;
+      InteractionsGraph::VIterator ui, uiend;
+      for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+      {
+        Interaction& inter = *indexSet.bundle(*ui);
+        SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
+        SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
+
+        bool endl = false;
+        size_t posBlock = indexSet.properties(*ui).source_pos;
+        size_t pos2 = indexSet.properties(*ui).target_pos;
+
+        pos =  indexSet.properties(*ui).absolute_position;
+        for(SP::DynamicalSystem ds = ds1; !endl; ds = ds2, posBlock = pos2)
+        {
+          endl = (ds == ds2);
+          size_t sizeDS = ds->dimension();
+          size_t sizeY = inter.dimension();
+          // this whole part is a hack. Just should just get the rightblock
+          leftInteractionBlock = inter.getLeftInteractionBlockForDS(posBlock, sizeY, sizeDS);
+          pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
+          DEBUG_PRINTF("pos = %u", pos);
+          DEBUG_PRINTF("pos_ds = %u", pos_ds);
+          leftInteractionBlock->fillTriplet(Htriplet, pos, pos_ds);
+        }
+      }
+      _triplet_nzmax =  NM_nnz(&H_NM);
+    }
+    break;
+  }
+  default:
+  {
+    THROW_EXCEPTION("OSNSMatrix::fillHtrans unknown _storageType");
+  }
+  }
+  DEBUG_END("void OSNSMatrix::fillHtrans(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
+}
+
+void OSNSMatrix::computeM(SP::NumericsMatrix Winverse, SP::NumericsMatrix Htrans)
 {
    // Compute M = H^T * Winverse * H
+  NumericsMatrix *   H_NM = NM_transpose(Htrans.get());
 
-    NumericsMatrix *   NM1 = NM_multiply(Winverse.get(), H.get());
-    NumericsMatrix *   Htrans_NM = NM_transpose(H.get());
     
-    _numericsMatrix.reset(NM_multiply(Htrans_NM, NM1), NM_free);
+  NumericsMatrix *   NM1 = NM_multiply(Winverse.get(), H_NM);
+
+    
+  _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1), NM_free);
+
+
+    // NumericsMatrix *   NM1 = NM_multiply(Winverse.get(), H.get());
+    // NumericsMatrix *   Htrans_NM = NM_transpose(H.get());
+    
+    // _numericsMatrix.reset(NM_multiply(Htrans_NM, NM1), NM_free);
+
+
+    
     _dimRow = _numericsMatrix->size0;
     _dimColumn = _numericsMatrix->size1;
 
     NM_free(NM1);
-    NM_free(Htrans_NM);
+    NM_free(H_NM);
 }
 
 

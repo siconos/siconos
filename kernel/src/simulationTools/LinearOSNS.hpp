@@ -32,9 +32,9 @@ TYPEDEF_SPTR(MuStorage)
 
 typedef enum
 {
-  BLOCK_ASSEMBLY,
-  GLOBAL_ASSEMBLY,
-  GLOBAL_REDUCED_ASSEMBLY
+  REDUCED_BLOCK,
+  GLOBAL,
+  REDUCED_DIRECT
 
 } LINEAROSNS_ASSEMBLY_TYPE;
 
@@ -109,7 +109,7 @@ public:
        see :ref:`problems_and_solvers` for details.
        \endrst
   */
-  LinearOSNS(SP::SolverOptions options, LINEAROSNS_ASSEMBLY_TYPE assemblyType = BLOCK_ASSEMBLY): OneStepNSProblem(options){_assemblyType = assemblyType;};
+  LinearOSNS(SP::SolverOptions options, LINEAROSNS_ASSEMBLY_TYPE assemblyType = REDUCED_BLOCK): OneStepNSProblem(options){_assemblyType = assemblyType;};
 
   /** destructor
    */

@@ -48,7 +48,7 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolver
 
 // Constructor based on a pre-defined solver options set.
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions options):
-  LinearOSNS(options,GLOBAL_ASSEMBLY), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
+  LinearOSNS(options,GLOBAL), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
 {
   // // Only fc3d for the moment.
   // if(_contactProblemDim != 3)

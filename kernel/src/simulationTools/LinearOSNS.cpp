@@ -9,7 +9,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, softwareﬁ
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -83,7 +83,7 @@ void LinearOSNS::initVectorsMemory()
 void LinearOSNS::initOSNSMatrix()
 {
   // Default size for M = maxSize()
-  if (_assemblyType == BLOCK_ASSEMBLY or  _assemblyType == GLOBAL_REDUCED_ASSEMBLY)
+  if (_assemblyType == REDUCED_BLOCK or  _assemblyType == REDUCED_DIRECT)
   {
     if(! _M)
     {
@@ -92,7 +92,7 @@ void LinearOSNS::initOSNSMatrix()
       case NM_DENSE:
       case NM_SPARSE:
       {
-        _M.reset(new OSNSMatrix(maxSize(), _numericsMatrixStorageType));
+        _M.reset(new OSNSMatrix(0, _numericsMatrixStorageType));
         break;
       }
       case NM_SPARSE_BLOCK:
@@ -115,7 +115,7 @@ void LinearOSNS::initOSNSMatrix()
       }
     }
   }
-  if (_assemblyType == GLOBAL_ASSEMBLY or  _assemblyType == GLOBAL_REDUCED_ASSEMBLY)
+  if (_assemblyType == GLOBAL or  _assemblyType == REDUCED_DIRECT)
   {
     // Default size for M = _maxSize
     if(!_W)
@@ -134,7 +134,7 @@ void LinearOSNS::initOSNSMatrix()
       }
       case NM_SPARSE:
       {
-        _W.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE));
+        _W.reset(new OSNSMatrix(0, NM_SPARSE));
         break;
       }
       case NM_SPARSE_BLOCK:
@@ -161,7 +161,7 @@ void LinearOSNS::initOSNSMatrix()
       }
       case NM_SPARSE:
       {
-        _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE));
+        _H.reset(new OSNSMatrix(0, simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE));
         break;
       }
       case NM_SPARSE_BLOCK:
@@ -766,7 +766,7 @@ void LinearOSNS::computeq(double time)
 
 void LinearOSNS::computeM()
 {
-  if (_assemblyType == BLOCK_ASSEMBLY)
+  if (_assemblyType == REDUCED_BLOCK)
   {
 
     InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
@@ -778,7 +778,7 @@ void LinearOSNS::computeM()
     _M->fillM(indexSet, !_hasBeenUpdated);
 
   }
-  else if (_assemblyType ==GLOBAL_REDUCED_ASSEMBLY)
+  else if (_assemblyType ==REDUCED_DIRECT)
   {
     InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
     DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -787,7 +787,7 @@ void LinearOSNS::computeM()
     // fill _Winverse
     _W->fillWinverse(DSG0);
     // fill H
-    _H->fillH(DSG0, indexSet);
+    _H->fillHtrans(DSG0, indexSet);
 
     // ComputeM
     _M->computeM(_W->numericsMatrix(), _H->numericsMatrix());
