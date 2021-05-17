@@ -2269,6 +2269,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration)
 
     def run(self,
+            run_options=None,
             with_timer=False,
             time_stepping=None,
             interaction_manager=None,
@@ -2454,70 +2455,64 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             Default = False.
         """
 
+        if run_options is None:
+            self.print_verbose('\nyou should consider to use a run_options dictionnary')
+            self.print_verbose('we create a run_options for you and fill it with given options')
+            self.print_verbose('some new options may not be available without run_options')
+                
+            run_options=MechanicsHdf5Runner_run_options()
+            run_options['with_timer']=with_timer
+            run_options['time_stepping']=time_stepping
+            run_options['interaction_manager']=interaction_manager
+            run_options['bullet_options']=bullet_options
+            run_options['body_class']=body_class
+            run_options['shape_class']=shape_class
+            run_options['face_class']=face_class
+            run_options['edge_class']=edge_class
+            run_options['controller']=controller
+            run_options['gravity_scale']=gravity_scale
+            run_options['t0']=t0
+            run_options['T']=T
+            run_options['h']=h
+            run_options['multipoints_iterations']=multipoints_iterations
+            run_options['theta']=theta
+            run_options['Newton_options']=Newton_options
+            run_options['Newton_max_iter']=Newton_max_iter
+            run_options['interaction_manager']= None
+            run_options['set_external_forces']=set_external_forces
+            run_options['solver_options']=solver_options
+            run_options['solver_options_pos']=solver_options_pos
+            run_options['osnspb_max_size']=osnspb_max_size
+            run_options['exit_tolerance']=exit_tolerance
+            run_options['projection_itermax']=projection_itermax
+            run_options['projection_tolerance']=projection_tolerance
+            run_options['projection_tolerance_unilateral']=projection_tolerance_unilateral
+            run_options['numerics_verbose']=numerics_verbose
+            run_options['numerics_verbose_level']=numerics_verbose_level
+            run_options['violation_verbose']=violation_verbose
+            run_options['verbose']=verbose
+            run_options['verbose_progress']=verbose_progress
+            run_options['output_frequency']=output_frequency
+            run_options['output_backup']=output_backup
+            run_options['output_backup_frequency']=output_backup_frequency
+            run_options['friction_contact_trace_params']=friction_contact_trace_params
+            run_options['contact_index_set']=contact_index_set
+            run_options['osi']=osi
+            run_options['constraint_activation_threshold']=constraint_activation_threshold
+            run_options['explode_Newton_solve']=explode_Newton_solve
+            run_options['explode_computeOneStep']=False,
+            run_options['display_Newton_convergence']=display_Newton_convergence
+            run_options['start_run_iteration_hook']=start_run_iteration_hook
+            run_options['end_run_iteration_hook']=end_run_iteration_hook
+            run_options['skip_last_update_output']=skip_last_update_output
 
-        run_options=MechanicsHdf5Runner_run_options()
-        run_options['with_timer']=with_timer
-        run_options['time_stepping']=time_stepping
-        run_options['interaction_manager']=interaction_manager
-        run_options['bullet_options']=bullet_options
-        run_options['body_class']=body_class
-        run_options['shape_class']=shape_class
-        run_options['face_class']=face_class
-        run_options['edge_class']=edge_class
-        run_options['controller']=controller
-        run_options['gravity_scale']=gravity_scale
-        run_options['t0']=t0
-        run_options['T']=T
-        run_options['h']=h
-        run_options['multipoints_iterations']=multipoints_iterations
-        run_options['theta']=theta
-        run_options['Newton_options']=Newton_options
-        run_options['Newton_max_iter']=Newton_max_iter
-        run_options['interaction_manager']= None
-        run_options['set_external_forces']=set_external_forces
-        run_options['solver_options']=solver_options
-        run_options['solver_options_pos']=solver_options_pos
-        run_options['osnspb_max_size']=osnspb_max_size
-        run_options['exit_tolerance']=exit_tolerance
-        run_options['projection_itermax']=projection_itermax
-        run_options['projection_tolerance']=projection_tolerance
-        run_options['projection_tolerance_unilateral']=projection_tolerance_unilateral
-        run_options['numerics_verbose']=numerics_verbose
-        run_options['numerics_verbose_level']=numerics_verbose_level
-        run_options['violation_verbose']=violation_verbose
-        run_options['verbose']=verbose
-        run_options['verbose_progress']=verbose_progress
-        run_options['output_frequency']=output_frequency
-        run_options['output_backup']=output_backup
-        run_options['output_backup_frequency']=output_backup_frequency
-        run_options['friction_contact_trace_params']=friction_contact_trace_params
-        run_options['contact_index_set']=contact_index_set
-        run_options['osi']=osi
-        run_options['constraint_activation_threshold']=constraint_activation_threshold
-        run_options['explode_Newton_solve']=explode_Newton_solve
-        run_options['explode_computeOneStep']=False,
-        run_options['display_Newton_convergence']=display_Newton_convergence
-        run_options['start_run_iteration_hook']=start_run_iteration_hook
-        run_options['end_run_iteration_hook']=end_run_iteration_hook
-        run_options['skip_last_update_output']=skip_last_update_output
-
-        self.run_with_options(run_options)
-
-
-    def run_with_options(self,run_options=None):
-
+        
         self._run_options=run_options
 
+        self.print_verbose('run with run_options ...')
 
-
-        self.print_verbose('run_with_options ...')
-
-        if run_options== None:
-            run_options=MechanicsHdf5Runner_run_options()
         if run_options['verbose']:
             run_options.display()
-
-        run_options.display()
 
         self.print_verbose('setup model simulation ...')
         if run_options['set_external_forces'] is not None:
