@@ -356,7 +356,8 @@ public:
    *  \param W the result in W
    */
   void computeW(double time , SecondOrderDS& ds, SiconosMatrix& W);
-
+  
+  SP::SimpleMatrix Winverse(SP::SecondOrderDS ds);
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions

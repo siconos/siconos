@@ -27,7 +27,9 @@
 #include "DynamicalSystem.hpp"
 #include "NumericsSparseMatrix.h"
 #include "CSparseMatrix_internal.h"
-
+#include "OneStepIntegrator.hpp"
+#include "MoreauJeanOSI.hpp"
+#include "SecondOrderDS.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -352,7 +354,7 @@ void OSNSMatrix::fillW(DynamicalSystemsGraph & DSG, bool update)
       _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM),NM_free);
 
       NumericsMatrix& M_NM = *numericsMatrix();
-      NM_triplet_alloc(&M_NM, _triplet_nzmax); 
+      NM_triplet_alloc(&M_NM, _triplet_nzmax);
       CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
 
       unsigned int pos =0;
@@ -407,7 +409,7 @@ void OSNSMatrix::fillWinverse(DynamicalSystemsGraph & DSG, bool update)
       _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM),NM_free);
 
       NumericsMatrix& M_NM = *numericsMatrix();
-      NM_triplet_alloc(&M_NM, _triplet_nzmax); 
+      NM_triplet_alloc(&M_NM, _triplet_nzmax);
       CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
 
       unsigned int pos =0;
@@ -415,21 +417,44 @@ void OSNSMatrix::fillWinverse(DynamicalSystemsGraph & DSG, bool update)
       DynamicalSystemsGraph::VIterator dsi, dsend;
       for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
       {
-        SP::DynamicalSystem ds = DSG.bundle(*dsi);
-        SiconosMatrix* W = DSG.properties(*dsi).W.get();
+        OneStepIntegrator& osi = *DSG.properties(*dsi).osi;
+        SP::SimpleMatrix Winverse;
+        OSI::TYPES osiType = osi.getType();
+        if(osiType == OSI::MOREAUJEANOSI)
+        {
+          SP::SecondOrderDS sods =  std::static_pointer_cast<SecondOrderDS> (DSG.bundle(*dsi));
+          Winverse = (static_cast<MoreauJeanOSI&>(osi)).Winverse(sods);
+        }
+        else
+          THROW_EXCEPTION("OSNSMatrix::fillWinverse not yet implemented for OSI of type " + std::to_string(osiType));
+        // Winverse->display();
+        // getchar();
+        // SimpleMatrix* W = DSG.properties(*dsi).W.get();
+        // SP::SimpleMatrix Winverse = DSG.properties(*dsi).Winverse;
+        // if (!Winverse)
+        // {
+        //   unsigned int sizeW = ds->dimension();
+        //   DSG.properties(*dsi).Winverse.reset(new SimpleMatrix(sizeW, sizeW));
+        //   Winverse = DSG.properties(*dsi).Winverse;
+        //   Winverse->eye();
+        //   W->Solve(*Winverse);
+        //   //W->display();
+        //   //Winverse->display();
+        // }
         pos = DSG.properties(*dsi).absolute_position;
-        W->fillTriplet(Mtriplet, pos, pos);
+        Winverse->fillTriplet(Mtriplet, pos, pos);
         DEBUG_PRINTF("pos = %u \n", pos);
+        //W->display();
       }
 
-      // Ugly inversion
-      for (unsigned int k =0 ; k < M_NM.size0; k++)
-      {
-        Mtriplet->x[k] = 1.0/Mtriplet->x[k];
-      }
+      // // Ugly inversion
+      // for (unsigned int k =0 ; k < M_NM.size0; k++)
+      // {
+      //   Mtriplet->x[k] = 1.0/Mtriplet->x[k];
+      // }
       //NM_display(numericsMatrix().get());
       _triplet_nzmax =  NM_nnz(&M_NM);
-
+      //getchar();
     }
     break;
   }
@@ -463,7 +488,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
       // This simplifies the memory manipulation.
       _numericsMatrix.reset(NM_create(NM_SPARSE, _dimRow, _dimColumn),NM_free);
       NumericsMatrix& H_NM = *numericsMatrix();
-      NM_triplet_alloc(&H_NM, _triplet_nzmax); 
+      NM_triplet_alloc(&H_NM, _triplet_nzmax);
       CSparseMatrix* Htriplet= NM_triplet(&H_NM);
 
 
@@ -527,7 +552,7 @@ void OSNSMatrix::fillHtrans(DynamicalSystemsGraph & DSG, InteractionsGraph& inde
       // This simplifies the memory manipulation.
       _numericsMatrix.reset(NM_create(NM_SPARSE, _dimRow, _dimColumn),NM_free);
       NumericsMatrix& H_NM = *numericsMatrix();
-      NM_triplet_alloc(&H_NM, _triplet_nzmax); 
+      NM_triplet_alloc(&H_NM, _triplet_nzmax);
       CSparseMatrix* Htriplet= NM_triplet(&H_NM);
 
 
@@ -575,20 +600,20 @@ void OSNSMatrix::computeM(SP::NumericsMatrix Winverse, SP::NumericsMatrix Htrans
    // Compute M = H^T * Winverse * H
   NumericsMatrix *   H_NM = NM_transpose(Htrans.get());
 
-    
+
   NumericsMatrix *   NM1 = NM_multiply(Winverse.get(), H_NM);
 
-    
+
   _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1), NM_free);
 
 
     // NumericsMatrix *   NM1 = NM_multiply(Winverse.get(), H.get());
     // NumericsMatrix *   Htrans_NM = NM_transpose(H.get());
-    
+
     // _numericsMatrix.reset(NM_multiply(Htrans_NM, NM1), NM_free);
 
 
-    
+
     _dimRow = _numericsMatrix->size0;
     _dimColumn = _numericsMatrix->size1;
 

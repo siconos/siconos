@@ -36,6 +36,7 @@
 #include "TypeName.hpp"
 
 #include "OneStepNSProblem.hpp"
+
 #include "BlockVector.hpp"
 
 // #define DEBUG_NOCOLOR
@@ -119,8 +120,6 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanOSI::initializeWorkVectorsForDS(Model&, double t, SP::DynamicalSystem ds)\n");
-  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
-  ds_work_vectors.resize(MoreauJeanOSI::WORK_LENGTH);
 
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
@@ -132,6 +131,11 @@ void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
   // Compute W (iteration matrix)
   SP::SecondOrderDS sods = std::static_pointer_cast<SecondOrderDS> (ds);
   initializeIterationMatrixW(t, sods);
+
+  // Initialize work vectors
+  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
+  ds_work_vectors.resize(MoreauJeanOSI::WORK_LENGTH);
+
   ds_work_vectors[MoreauJeanOSI::RESIDU_FREE].reset(new SiconosVector(sods->dimension()));
   ds_work_vectors[MoreauJeanOSI::VFREE].reset(new SiconosVector(sods->dimension()));
 
@@ -549,6 +553,30 @@ void MoreauJeanOSI::computeW(double t, SecondOrderDS& ds, SiconosMatrix& W)
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
 }
+
+SP::SimpleMatrix MoreauJeanOSI::Winverse(SP::SecondOrderDS ds)
+{
+
+  /* We compute and return the current inverse the W matrix */
+
+  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
+
+  SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(dsv).W;
+  SP::SimpleMatrix Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
+  if (!Winverse)
+  {
+    unsigned int sizeW = ds->dimension();
+    _dynamicalSystemsGraph->properties(dsv).Winverse.reset(new SimpleMatrix(sizeW, sizeW));
+    Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
+  }
+  Winverse->eye();
+  W->Solve(*Winverse);
+  
+  return Winverse;
+  
+  
+}
+
 
 void MoreauJeanOSI::computeInitialNewtonState()
 {
