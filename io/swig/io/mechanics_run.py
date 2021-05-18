@@ -2593,7 +2593,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             bullet_options.dimension = SICONOS_BULLET_2D
 
         self._interman = interaction_manager(bullet_options)
-
+       
+        
         joints = list(self.joints())
         if hasattr(self._interman, 'useEqualityConstraints'):
             if len(joints) == 0:
@@ -2908,12 +2909,21 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 number_of_contacts = self._interman.statistics().new_interactions_created
                 number_of_contacts += self._interman.statistics().existing_interactions_processed
                 if verbose and number_of_contacts > 0:
+                    bullet_statistics = self._interman.statistics()
+                    self.print_verbose('bullet_statistics:',
+                                       'new_interactions_created :', bullet_statistics.new_interactions_created,
+                                       'existing_interactions_processed :', bullet_statistics.existing_interactions_processed,
+                                       'interaction_warnings :', bullet_statistics.interaction_warnings)
                     self.print_verbose('number of contacts',
                                        number_of_contacts,
                                        '(detected)',
                                        osnspb.getSizeOutput() // self._dimension ,
                                        '(active at velocity level. approx)')
                     self.print_solver_infos()
+
+        
+                 
+                    
 
             else:
                 number_of_contacts = osnspb.getSizeOutput() // self._dimension
@@ -2946,9 +2956,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose('  velocity max :', np.max(v))
                     self.print_verbose('  velocity min :', np.min(v))
                 #     #print(simulation.output(1,0))
-            solver_options = osnspb.numericsSolverOptions()
-            precision = solver_options.dparam[sn.SICONOS_DPARAM_RESIDU]
+
             if (run_options.get('exit_tolerance') is not None):
+                solver_options = osnspb.numericsSolverOptions()
+                precision = solver_options.dparam[sn.SICONOS_DPARAM_RESIDU]
                 if (precision > exit_tolerance):
                     print('precision is larger exit_tolerance')
                     return False
