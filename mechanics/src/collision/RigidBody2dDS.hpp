@@ -25,11 +25,11 @@
 #define RigidBody2dDS_h
 
 #include <MechanicsFwd.hpp>
-#include <LagrangianDS.hpp>
+#include <LagrangianLinearTIDS.hpp>
 #include <SiconosVisitor.hpp>
 #include <SiconosContactor.hpp>
 
-class RigidBody2dDS : public LagrangianDS,
+class RigidBody2dDS : public LagrangianLinearTIDS,
                       public std::enable_shared_from_this<RigidBody2dDS>
 {
 protected:
@@ -37,7 +37,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(RigidBody2dDS);
 
-  RigidBody2dDS() : LagrangianDS() {};
+  RigidBody2dDS() : LagrangianLinearTIDS() {};
 
   /** a scalar mass in the case of RigidBody2dDS */
   double _scalarMass;
@@ -92,7 +92,8 @@ public:
 
   /** visitors hook
    */
-  ACCEPT_BASE_VISITORS(LagrangianDS);
+  ACCEPT_BASE_VISITORS(LagrangianLinearTIDS);
+  
 };
 
 #endif /* RigidBody2dDS_h */
