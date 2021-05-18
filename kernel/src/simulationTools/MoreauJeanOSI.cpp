@@ -568,13 +568,24 @@ SP::SimpleMatrix MoreauJeanOSI::Winverse(SP::SecondOrderDS ds)
     unsigned int sizeW = ds->dimension();
     _dynamicalSystemsGraph->properties(dsv).Winverse.reset(new SimpleMatrix(sizeW, sizeW));
     Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
+    Winverse->eye();
+    W->Solve(*Winverse);
   }
-  Winverse->eye();
-  W->Solve(*Winverse);
-  
+  else
+  {
+    Type::Siconos dsType = Type::value(*ds);
+    if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianLinearDiagonalDS)
+    {
+      // Nothing: W does not depend on time.
+    }
+    else
+    {
+      Winverse->eye();
+      W->Solve(*Winverse);
+    }
+  }
+
   return Winverse;
-  
-  
 }
 
 
@@ -1661,7 +1672,7 @@ void MoreauJeanOSI::updatePosition(DynamicalSystem& ds)
     // DEBUG_PRINT("new q after normalizing\n");
     // DEBUG_EXPR(q.display());
 
-    
+
     // get dynamical system
     NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
 
