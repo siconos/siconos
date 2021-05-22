@@ -51,21 +51,22 @@ void Lagrangian2d2DR::computeJachq(const BlockVector& q, BlockVector& z)
 
 
   /* construct tangent vector */
-  double Tx = Ny;
-  double Ty = - Nx;
+  double Tx = -Ny;
+  double Ty =  Nx;
 
 
-  double lever_arm_x = G1x-Px ;
-  double lever_arm_y = G1y-Py ;
+  double lever_arm_x = Px-G1x;
+  double lever_arm_y = Py-G1y;
+  DEBUG_PRINTF("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
   DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
   _jachq->setValue(0,0,Nx);
   _jachq->setValue(0,1,Ny);
-  _jachq->setValue(0,2,lever_arm_y*Nx - lever_arm_x*Ny);
+  _jachq->setValue(0,2,lever_arm_x*Ny - lever_arm_y*Nx );
 
   _jachq->setValue(1,0,Tx);
   _jachq->setValue(1,1,Ty);
-  _jachq->setValue(1,2,lever_arm_y*Tx - lever_arm_x*Ty);
+  _jachq->setValue(1,2,lever_arm_x*Ty - lever_arm_y*Tx );
 
 
 
@@ -74,19 +75,19 @@ void Lagrangian2d2DR::computeJachq(const BlockVector& q, BlockVector& z)
     DEBUG_PRINT("take into account second ds\n");
     double G2x = q.getValue(3);
     double G2y = q.getValue(4);
-    lever_arm_x = G2x-Px ;
-    lever_arm_y = G2y-Py ;
+    lever_arm_x = Px-G2x;
+    lever_arm_y = Py-G2y;
 
     DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
 
     _jachq->setValue(0,3,-Nx);
     _jachq->setValue(0,4,-Ny);
-    _jachq->setValue(0,5,-(lever_arm_y * Nx - lever_arm_x*Ny));
+    _jachq->setValue(0,5,lever_arm_y * Nx - lever_arm_x*Ny);
 
     _jachq->setValue(1,3,-Tx);
     _jachq->setValue(1,4,-Ty);
-    _jachq->setValue(1,5,-(lever_arm_y * Tx - lever_arm_x*Ty));
+    _jachq->setValue(1,5,lever_arm_y * Tx - lever_arm_x*Ty);
 
 
   }
