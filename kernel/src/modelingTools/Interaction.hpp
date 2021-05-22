@@ -680,7 +680,12 @@ public:
    *  \param level order of _lambda used to compute input.
    */
   void computeInput(double time, unsigned int level = 0);
-
+  
+  /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B)..
+   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   */
+  SP::SiconosMatrix getLeftInteractionBlock() const;
+  
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to one ds.
    * \param pos int, relative position of the beginning of the required block in relation matrix.

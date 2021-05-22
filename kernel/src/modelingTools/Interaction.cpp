@@ -872,17 +872,42 @@ void Interaction::computeInput(double time,  unsigned int level)
 }
 
 
+SP::SiconosMatrix Interaction::getLeftInteractionBlock() const
+{
+  RELATION::TYPES relationType = relation()->getType();
 
+  if(relationType == Lagrangian)
+  {
+    SP::LagrangianR r = std::static_pointer_cast<LagrangianR> (relation());
+    return r->jachq();
+  }
+  else if(relationType == NewtonEuler)
+  {
+    SP::NewtonEulerR r = std::static_pointer_cast<NewtonEulerR> (relation());
+    return r->jachqT();
+  }
+  else if(relationType == FirstOrder)
+  {
+    SP::SiconosMatrix CMat = std::static_pointer_cast<FirstOrderR> (relation())->C();
+    RELATION::SUBTYPES relationSubType = relation()->getSubType();
+    if(CMat)
+      return CMat;
+    else if(relationSubType != LinearTIR)
+      return _relationMatrices[FirstOrderR::mat_C];
+  }
+  THROW_EXCEPTION("Interaction::getLeftInteractionBlock, not yet implemented for relations of type " + std::to_string(relationType));
+
+  return SP::SiconosMatrix();
+}
 
 SP::SiconosMatrix Interaction::getLeftInteractionBlockForDS(unsigned int pos, unsigned size, unsigned int  sizeDS) const
 {
   SP::SiconosMatrix originalMatrix;
   RELATION::TYPES relationType = relation()->getType();
-  RELATION::SUBTYPES relationSubType = relation()->getSubType();
-
   if(relationType == FirstOrder)
   {
     SP::SiconosMatrix CMat = std::static_pointer_cast<FirstOrderR> (relation())->C();
+    RELATION::SUBTYPES relationSubType = relation()->getSubType();
     if(CMat)
       originalMatrix = CMat;
     else if(relationSubType != LinearTIR)
@@ -900,7 +925,7 @@ SP::SiconosMatrix Interaction::getLeftInteractionBlockForDS(unsigned int pos, un
   }
   else
     THROW_EXCEPTION("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + std::to_string(relationType));
-//  Siconos::UBLAS_TYPE type = originalMatrix->num();
+
   SP::SiconosMatrix  InteractionBlock(new SimpleMatrix(size, sizeDS, originalMatrix->num() ));
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
