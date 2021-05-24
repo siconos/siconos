@@ -50,8 +50,8 @@ protected:
 
   /* Contact Points in coordinates relative to attached DS->q.  Set
    * these if _Pc1/_Pc2 are not calculated within the Newton loop. */
-  SP::SiconosVector _relPc1;
-  SP::SiconosVector _relPc2;
+  // SP::SiconosVector _relPc1;
+  // SP::SiconosVector _relPc2;
 
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
@@ -59,25 +59,7 @@ protected:
   SP::SiconosVector _Nc;
 
   /* _Nc must be calculated relative to q2 */
-  SP::SiconosVector _relNc;
-
-  /* Rotation matrix converting the absolute coordinate to the contact frame coordinate.
-   * This matrix contains the unit vector(s)of the contact frame in row.
-   */
-  SP::SimpleMatrix _RotationAbsToContactFrame;
-
-  /* Matrix converting */
-  SP::SimpleMatrix _rotationMatrixAbsToBody;
-
-  /* Cross product matrices that correspond the lever arm from
-   * contact point to center of mass*/
-  SP::SimpleMatrix _NPG1;
-  SP::SimpleMatrix _NPG2;
-
-
-  /*buffer matrices*/
-  SP::SimpleMatrix _AUX1;
-  SP::SimpleMatrix _AUX2;
+  // SP::SiconosVector _relNc;
 
   /** Set the coordinates of first contact point.  Must only be done
   * in a computeh() override.
@@ -119,8 +101,7 @@ public:
   Lagrangian2d2DR():
     LagrangianScleronomousR(),
     _Pc1(new SiconosVector(2)), _Pc2(new SiconosVector(2)),
-    _relPc1(new SiconosVector(2)), _relPc2(new SiconosVector(2)),
-    _Nc(new SiconosVector(2)), _relNc(new SiconosVector(2))
+    _Nc(new SiconosVector(2))
   {
     /*_ds1=nullptr;_ds2=nullptr;*/
   }
@@ -166,45 +147,45 @@ public:
     return _Nc;
   }
 
-  inline SP::SiconosVector relPc1() const
-  {
-    return _relPc1;
-  }
-  inline SP::SiconosVector relPc2() const
-  {
-    return _relPc2;
-  }
-  inline SP::SiconosVector relNc() const
-  {
-    return _relNc;
-  }
+  // inline SP::SiconosVector relPc1() const
+  // {
+  //   return _relPc1;
+  // }
+  // inline SP::SiconosVector relPc2() const
+  // {
+  //   return _relPc2;
+  // }
+  // inline SP::SiconosVector relNc() const
+  // {
+  //   return _relNc;
+  // }
 
-  /** Set the coordinates of first contact point in ds1 frame.
-   * It will be used to compute _Pc1 during computeh().
-  * \param npc new coordinates
-  */
-  void setRelPc1(SP::SiconosVector npc)
-  {
-    _relPc1 = npc;
-  };
+  // /** Set the coordinates of first contact point in ds1 frame.
+  //  * It will be used to compute _Pc1 during computeh().
+  // * \param npc new coordinates
+  // */
+  // void setRelPc1(SP::SiconosVector npc)
+  // {
+  //   _relPc1 = npc;
+  // };
 
-  /** Set the coordinates of second contact point in ds2 frame
-   * It will be used to compute _Pc2 during computeh().
-  * \param npc new coordinates
-  */
-  void setRelPc2(SP::SiconosVector npc)
-  {
-    _relPc2 = npc;
-  };
+  // /** Set the coordinates of second contact point in ds2 frame
+  //  * It will be used to compute _Pc2 during computeh().
+  // * \param npc new coordinates
+  // */
+  // void setRelPc2(SP::SiconosVector npc)
+  // {
+  //   _relPc2 = npc;
+  // };
 
-  /** Set the coordinates of inside normal vector at the contact point in ds2 frame.
-   * It will be used to compute _Nc during computeh().
-  * \param nnc new coordinates
-  */
-  void setRelNc(SP::SiconosVector nnc)
-  {
-    _relNc = nnc;
-  };
+  // /** Set the coordinates of inside normal vector at the contact point in ds2 frame.
+  //  * It will be used to compute _Nc during computeh().
+  // * \param nnc new coordinates
+  // */
+  // void setRelNc(SP::SiconosVector nnc)
+  // {
+  //   _relNc = nnc;
+  // };
   void display() const;
 
   // visitors hook

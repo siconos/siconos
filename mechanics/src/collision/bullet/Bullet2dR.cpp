@@ -17,8 +17,8 @@
 */
 
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 #include "Bullet2dR.hpp"
@@ -172,8 +172,8 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   //   va : position of the contact point in the body-fixed of A
   //   vb : position of the contact point in the body-fixed of B
   // */
-  
-  SiconosVector va(2), vb(2);
+
+  // SiconosVector va(2), vb(2);
   // if(flip)
   // {
   //   /* Rotate the relative position of the contact point */
@@ -200,11 +200,11 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   // }
 
 
-  DEBUG_PRINTF("point.m_normalWorldOnB.x() = %8.5e\t", point.m_normalWorldOnB.x());
-  DEBUG_PRINTF("point.m_normalWorldOnB.y() = %8.5e\t", point.m_normalWorldOnB.y());
-  DEBUG_PRINTF("point.m_normalWorldOnB.z() = %8.5e\n", point.m_normalWorldOnB.z());
+  // DEBUG_PRINTF("point.m_normalWorldOnB.x() = %8.5e\t", point.m_normalWorldOnB.x());
+  // DEBUG_PRINTF("point.m_normalWorldOnB.y() = %8.5e\t", point.m_normalWorldOnB.y());
+  // DEBUG_PRINTF("point.m_normalWorldOnB.z() = %8.5e\n", point.m_normalWorldOnB.z());
 
-  SiconosVector vn(3);
+  // SiconosVector vn(3);
   // // Get new normal
   // if(ds2)
   // {
@@ -226,34 +226,35 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   // DEBUG_EXPR(va.display(););
   // DEBUG_EXPR(vb.display(););
   // DEBUG_EXPR(vn.display(););
-  //Contact2dR::updateContactPoints(va, vb, vn*(flip?-1:1));
-  
+  // Contact2dR::updateContactPoints(va, vb, vn*(flip?-1:1));
+
+  //SiconosVector va(2), vb(2), vn(2);
 
   const btVector3& pt_A= point.getPositionWorldOnA();
   const btVector3& pt_B= point.getPositionWorldOnB();
-  
+
   if(flip)
   {
-    va(0) = pt_B.x();
-    va(1) = pt_B.y();
-    vb(0) = pt_A.x();
-    vb(1) = pt_A.y();
+    (*_Pc1)(0) = pt_B.x()/scaling;
+    (*_Pc1)(1) = pt_B.y()/scaling;
+    (*_Pc2)(0) = pt_A.x()/scaling;
+    (*_Pc2)(1) = pt_A.y()/scaling;
   }
   else
   {
-    va(0) = pt_A.x();
-    va(1) = pt_A.y();
-    vb(0) = pt_B.x();
-    vb(1) = pt_B.y();
+    (*_Pc1)(0) = pt_A.x()/scaling;
+    (*_Pc1)(1) = pt_A.y()/scaling;
+    (*_Pc2)(0) = pt_B.x()/scaling;
+    (*_Pc2)(1) = pt_B.y()/scaling;
   }
-  
+
   const btVector3& normal = point.m_normalWorldOnB;
-  vn(0) =  normal.x();
-  vn(1) =  normal.y();
- 
+  (*_Nc)(0) =  normal.x();
+  (*_Nc)(1) =  normal.y();
 
-  Contact2dR::updateContactPointsInAbsoluteFrame(va, vb, vn*(flip?-1:1));
 
-  
+//  Contact2dR::updateContactPointsInAbsoluteFrame(va, vb, vn*(flip?-1:1));
+
+
   DEBUG_END("Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
 }

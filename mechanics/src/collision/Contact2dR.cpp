@@ -31,38 +31,38 @@ Contact2dR::Contact2dR()
 {
 }
 
-void Contact2dR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
-{
-  DEBUG_BEGIN("Contact2dR::computeh(...)\n");
+// void Contact2dR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
+// {
+//   DEBUG_BEGIN("Contact2dR::computeh(...)\n");
 
-  // Update contact points and distance if necessary
-  Lagrangian2d2DR::computeh(q, z, y);
+//   // Update contact points and distance if necessary
+//   Lagrangian2d2DR::computeh(q, z, y);
 
-  y.setValue(0, distance());
+//   y.setValue(0, distance());
 
 
-  DEBUG_PRINTF("distance : %g \n", distance());
-  DEBUG_PRINTF("position on A : %g,%g\n", (*pc1())(0), (*pc1())(1));
-  DEBUG_PRINTF("position on B : %g,%g\n", (*pc2())(0), (*pc2())(1));
-  DEBUG_PRINTF("normal on B   : %g,%g\n", (*nc())(0), (*nc())(1));
+//   DEBUG_PRINTF("distance : %g \n", distance());
+//   DEBUG_PRINTF("position on A : %g,%g\n", (*pc1())(0), (*pc1())(1));
+//   DEBUG_PRINTF("position on B : %g,%g\n", (*pc2())(0), (*pc2())(1));
+//   DEBUG_PRINTF("normal on B   : %g,%g\n", (*nc())(0), (*nc())(1));
 
-  DEBUG_END("Contact2dR::computeh(...)\n");
-}
+//   DEBUG_END("Contact2dR::computeh(...)\n");
+// }
 
-void Contact2dR::updateContactPoints(const SiconosVector& pos1,
-                                     const SiconosVector& pos2,
-                                     const SiconosVector& normal)
-{
-  // Copy relative positions
-  *_relPc1 = pos1;
-  *_relPc2 = pos2;
+// void Contact2dR::updateContactPoints(const SiconosVector& pos1,
+//                                      const SiconosVector& pos2,
+//                                      const SiconosVector& normal)
+// {
+//   // Copy relative positions
+//   *_relPc1 = pos1;
+//   *_relPc2 = pos2;
 
-  // Update normal
-  *_relNc = normal;
+//   // Update normal
+//   *_relNc = normal;
 
-  assert(!((*_relNc)(0)==0 && (*_relNc)(1)==0)
-         && "nc = 0, problems..\n");
-}
+//   assert(!((*_relNc)(0)==0 && (*_relNc)(1)==0)
+//          && "nc = 0, problems..\n");
+// }
 void Contact2dR::updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
                                                     const SiconosVector& pos2,
                                                     const SiconosVector& normal)

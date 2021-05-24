@@ -21,8 +21,8 @@
 
 
 // #define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 void Lagrangian2d2DR::initialize(Interaction& inter)
@@ -155,13 +155,13 @@ void Lagrangian2d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVect
   //   DEBUG_PRINTF("angle (ds2) = %e\n", angle);
   //   //(*_Pc2)(0) = q(3) + cos_angle * (*_relPc2)(0)- sin_angle * (*_relPc2)(1);
   //   //(*_Pc2)(1) = q(4) + sin_angle * (*_relPc2)(0)+ cos_angle * (*_relPc2)(1);
-  //   //(*_Nc)(0) =  cos_angle * (*_relNc)(0)- sin_angle * (*_relNc)(1);
-  //   //(*_Nc)(1) =  sin_angle * (*_relNc)(0)+ cos_angle * (*_relNc)(1);
+  //   (*_Nc)(0) =  cos_angle * (*_relNc)(0)- sin_angle * (*_relNc)(1);
+  //   (*_Nc)(1) =  sin_angle * (*_relNc)(0)+ cos_angle * (*_relNc)(1);
   // }
   // else
   // {
   //   //*_Pc2 = *_relPc2;
-  //   //*_Nc = *_relNc;
+  //   *_Nc = *_relNc;
   // }
   // DEBUG_EXPR(_Pc1->display(););
   // DEBUG_EXPR(_Pc2->display(););
@@ -205,28 +205,28 @@ void Lagrangian2d2DR::display() const
   else
     std::cout << " nullptr :" << std::endl;
 
-  std::cout << " _relPc1 :" << std::endl;
-  if(_relPc1)
-    _relPc1->display();
-  else
-    std::cout << " nullptr :" << std::endl;
+  // std::cout << " _relPc1 :" << std::endl;
+  // if(_relPc1)
+  //   _relPc1->display();
+  // else
+  //   std::cout << " nullptr :" << std::endl;
 
-  std::cout << " _relPc2 :" << std::endl;
-  if(_relPc2)
-    _relPc2->display();
-  else
-    std::cout << " nullptr :" << std::endl;
+  // std::cout << " _relPc2 :" << std::endl;
+  // if(_relPc2)
+  //   _relPc2->display();
+  // else
+  //   std::cout << " nullptr :" << std::endl;
 
   std::cout << " _Nc :" << std::endl;
   if(_Nc)
     _Nc->display();
   else
     std::cout << " nullptr :" << std::endl;
-  std::cout << " _relNc :" << std::endl;
-  if(_relNc)
-    _relNc->display();
-  else
-    std::cout << " nullptr :" << std::endl;
+  // std::cout << " _relNc :" << std::endl;
+  // if(_relNc)
+  //   _relNc->display();
+  // else
+  //   std::cout << " nullptr :" << std::endl;
 
 }
 
