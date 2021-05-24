@@ -127,7 +127,11 @@ DEFINE_SPTR(UpdateShapeVisitor)
 
 #include <LinearMath/btQuaternion.h>
 #include <LinearMath/btVector3.h>
-
+//#define BULLET_TIMER
+#ifdef BULLET_TIMER
+#define BT_ENABLE_PROFILE 1
+#include <LinearMath/btQuickprof.h>
+#endif
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #elif !(__INTEL_COMPILER || __APPLE__ )
@@ -2096,7 +2100,7 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
   // else if (rel_bullet2d3DR)
   //   rel_bullet2d3DR->preDelete();
   // std::static_pointer_cast<BulletR>((*p_inter)->relation())->preDelete();
-
+  //_stats.interaction_destroyed++;
   gSimulation->unlink(*p_inter);
   delete p_inter;
   return false;
@@ -2168,13 +2172,29 @@ public:
 
 };
 
+
+
+
 void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)
 {
   DEBUG_BEGIN("SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)\n");
+#ifdef BULLET_TIMER
+  CProfileManager::Start_Profile("bullet_profile.txt");
+  CProfileManager::Reset();
+#endif
   // -2. update collision objects from all RigidBodyDS dynamical systems
+#ifdef BULLET_TIMER
+  std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+  start = std::chrono::system_clock::now();
+#endif
+
   SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*_impl));
   simulation->nonSmoothDynamicalSystem()->visitDynamicalSystems(updateVisitor);
-
+#ifdef BULLET_TIMER
+  end = std::chrono::system_clock::now();
+  int elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end-start).count();
+  std::cout << "-2 : visit " << elapsed << " ms" << std::endl;
+#endif 
   // Clear cache automatically before collision detection if requested
   if(_options.clearOverlappingPairCache)
     clearOverlappingPairCache();
@@ -2199,6 +2219,13 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   // -1. reset statistical counters
   resetStatistics();
 
+#ifdef BULLET_TIMER
+  end_old=end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+    (end-end_old).count();
+  std::cout << "-1 : addCollisionObject " << elapsed << " ms" << std::endl;
+#endif
   // 0. set up bullet callbacks
   gSimulation = &*simulation;
   gContactDestroyedCallback = this->bulletContactClear;
@@ -2208,14 +2235,19 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
   // 1. perform bullet collision detection
   _impl->_collisionWorld->performDiscreteCollisionDetection();
+#ifdef BULLET_TIMER  
+  end_old =end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+    (end-end_old).count();
+  std::cout << "1 : collisionDectection" << elapsed << " ms" << std::endl;
+#endif
 
-  // 2. deleted contact points have been removed from the graph during the
-  //    bullet collision detection callbacks
 
-  // 3. for each contact point, if there is no interaction, create one
-  IterateContactPoints t(_impl->_collisionWorld);
-  IterateContactPoints::iterator it, itend=t.end();
-
+#ifdef BULLET_TIMER
+  CProfileManager::dumpAll();
+  CProfileManager::Stop_Profile();
+#endif
   DEBUG_EXPR(
     int num_contact_points =0;
     for(it=t.begin(); it!=itend; ++it)  num_contact_points++;
@@ -2223,6 +2255,13 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
   DEBUG_PRINT("SiconosBulletCollisionManager :: iterating contact points:\n");
   //getchar();
+  // 2. deleted contact points have been removed from the graph during the
+  //    bullet collision detection callbacks
+
+  // 3. for each contact point, if there is no interaction, create one
+  IterateContactPoints t(_impl->_collisionWorld);
+  IterateContactPoints::iterator it, itend=t.end();
+
   for(it=t.begin(); it!=itend; ++it)
   {
     DEBUG_PRINTF("SiconosBulletCollisionManager ::   -- %p, %p, %p\n", it->objectA, it->objectB, it->point);
@@ -2597,6 +2636,13 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     }
     //getchar();
   }
+#ifdef BULLET_TIMER  
+  end_old =end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+    (end-end_old).count();
+  std::cout << "2 : creation of interaction " << elapsed << " ms" << std::endl;
+#endif
   DEBUG_END("SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)\n");
 }
 

@@ -783,14 +783,28 @@ void LinearOSNS::computeM()
     InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
     DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
-
+    // std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+    // start = std::chrono::system_clock::now();
     // fill _Winverse
     _W->fillWinverse(DSG0);
-    // fill H
+    // end = std::chrono::system_clock::now();
+    // int elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end-start).count();
+    // std::cout << "LinearOSNS: fill W inverse " << elapsed << " ms" << std::endl;
+   // fill H
     _H->fillHtrans(DSG0, indexSet);
-
+    // end_old=end;
+    // end = std::chrono::system_clock::now();
+    // elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+    //   (end-end_old).count();
+    // std::cout << "LinearOSNS: FillH " << elapsed << " ms" << std::endl;
+ 
     // ComputeM
     _M->computeM(_W->numericsMatrix(), _H->numericsMatrix());
+    // end_old=end;
+    // end = std::chrono::system_clock::now();
+    // elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+    //   (end-end_old).count();
+    // std::cout << "LinearOSNS: computeM " << elapsed << " ms" << std::endl;
 
   }
   else
