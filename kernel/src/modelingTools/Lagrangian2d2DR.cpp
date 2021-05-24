@@ -134,38 +134,38 @@ void Lagrangian2d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVect
   DEBUG_EXPR(_Nc->display(););
 
 
-  SP::SiconosVector _Pc1_tmp(new SiconosVector(*_Pc1));
-  SP::SiconosVector _Pc2_tmp(new SiconosVector(*_Pc2));
-  SP::SiconosVector _Nc_tmp(new SiconosVector(*_Nc));
+  // SP::SiconosVector _Pc1_tmp(new SiconosVector(*_Pc1));
+  // SP::SiconosVector _Pc2_tmp(new SiconosVector(*_Pc2));
+  // SP::SiconosVector _Nc_tmp(new SiconosVector(*_Nc));
 
   
-  double angle= q(2);
-  double cos_angle = cos(angle);
-  double sin_angle = sin(angle);
-  DEBUG_PRINTF("angle (ds1)= %e\n", angle);
-  (*_Pc1)(0) = q(0) + cos_angle * (*_relPc1)(0)- sin_angle * (*_relPc1)(1);
-  (*_Pc1)(1) = q(1) + sin_angle * (*_relPc1)(0)+ cos_angle * (*_relPc1)(1);
-  if(q.size() == 6)
-  {
-    // To be checked
-    DEBUG_PRINT("take into account second ds\n");
-    angle = q(5);
-    cos_angle = cos(angle);
-    sin_angle = sin(angle);
-    DEBUG_PRINTF("angle (ds2) = %e\n", angle);
-    (*_Pc2)(0) = q(3) + cos_angle * (*_relPc2)(0)- sin_angle * (*_relPc2)(1);
-    (*_Pc2)(1) = q(4) + sin_angle * (*_relPc2)(0)+ cos_angle * (*_relPc2)(1);
-    (*_Nc)(0) =  cos_angle * (*_relNc)(0)- sin_angle * (*_relNc)(1);
-    (*_Nc)(1) =  sin_angle * (*_relNc)(0)+ cos_angle * (*_relNc)(1);
-  }
-  else
-  {
-    *_Pc2 = *_relPc2;
-    *_Nc = *_relNc;
-  }
-  DEBUG_EXPR(_Pc1->display(););
-  DEBUG_EXPR(_Pc2->display(););
-  DEBUG_EXPR(_Nc->display(););
+  // double angle= q(2);
+  // double cos_angle = cos(angle);
+  // double sin_angle = sin(angle);
+  // DEBUG_PRINTF("angle (ds1)= %e\n", angle);
+  // //(*_Pc1)(0) = q(0) + cos_angle * (*_relPc1)(0)- sin_angle * (*_relPc1)(1);
+  // //(*_Pc1)(1) = q(1) + sin_angle * (*_relPc1)(0)+ cos_angle * (*_relPc1)(1);
+  // if(q.size() == 6)
+  // {
+  //   // To be checked
+  //   DEBUG_PRINT("take into account second ds\n");
+  //   angle = q(5);
+  //   cos_angle = cos(angle);
+  //   sin_angle = sin(angle);
+  //   DEBUG_PRINTF("angle (ds2) = %e\n", angle);
+  //   //(*_Pc2)(0) = q(3) + cos_angle * (*_relPc2)(0)- sin_angle * (*_relPc2)(1);
+  //   //(*_Pc2)(1) = q(4) + sin_angle * (*_relPc2)(0)+ cos_angle * (*_relPc2)(1);
+  //   //(*_Nc)(0) =  cos_angle * (*_relNc)(0)- sin_angle * (*_relNc)(1);
+  //   //(*_Nc)(1) =  sin_angle * (*_relNc)(0)+ cos_angle * (*_relNc)(1);
+  // }
+  // else
+  // {
+  //   //*_Pc2 = *_relPc2;
+  //   //*_Nc = *_relNc;
+  // }
+  // DEBUG_EXPR(_Pc1->display(););
+  // DEBUG_EXPR(_Pc2->display(););
+  // DEBUG_EXPR(_Nc->display(););
 
   // if ((*_Pc1-*_Pc1_tmp).norm2() >= 1e-12)
   // {
