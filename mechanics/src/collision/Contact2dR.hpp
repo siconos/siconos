@@ -58,7 +58,9 @@ public:
   virtual void updateContactPoints(const SiconosVector& pos1,
                                    const SiconosVector& pos2,
                                    const SiconosVector& normal);
-
+  virtual void updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
+                                   const SiconosVector& pos2,
+                                   const SiconosVector& normal);
   virtual void preDelete() {}
 
   ACCEPT_STD_VISITORS();

@@ -17,8 +17,8 @@
 */
 
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 #include "Bullet2dR.hpp"
@@ -121,16 +121,14 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   DEBUG_PRINTF("point.getPositionWorldOnB().y() = %8.5e\t", point.getPositionWorldOnB().y());
   DEBUG_PRINTF("point.getPositionWorldOnB().z() = %8.5e\n", point.getPositionWorldOnB().z());
 
-  DEBUG_PRINTF("point.m_normalWorldOnB.x() = %8.5e\t", point.m_normalWorldOnB.x());
-  DEBUG_PRINTF("point.m_normalWorldOnB.y() = %8.5e\t", point.m_normalWorldOnB.y());
-  DEBUG_PRINTF("point.m_normalWorldOnB.z() = %8.5e\n", point.m_normalWorldOnB.z());
 
 
   ::boost::math::quaternion<double> rq1, rq2, posa;
   ::boost::math::quaternion<double> pq1, pq2, posb;
 
 
-  /* Compute quaternion representation of the position of ds1 and the rotation */
+  /* Compute quaternion representation of the position of ds1
+     to perform the rotation  and the orientiation */
   DEBUG_EXPR(ds1->q()->display(););
   copyQuatPos2d(*ds1->q(), pq1);
 
@@ -170,11 +168,15 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   DEBUG_EXPR(display_quat(posa););
   DEBUG_EXPR(display_quat(posb););
 
-
+  /* Compute position of the contacts points in the body fixed frame
+    va : position of the contact point in the body-fixed of A
+    vb : position of the contact point in the body-fixed of B
+  */
+  
   SiconosVector va(2), vb(2);
   if(flip)
   {
-    /* Rotate the relatice position of the contact point */
+    /* Rotate the relative position of the contact point */
     copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
 
     if(ds2)
@@ -198,6 +200,9 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   }
 
 
+  DEBUG_PRINTF("point.m_normalWorldOnB.x() = %8.5e\t", point.m_normalWorldOnB.x());
+  DEBUG_PRINTF("point.m_normalWorldOnB.y() = %8.5e\t", point.m_normalWorldOnB.y());
+  DEBUG_PRINTF("point.m_normalWorldOnB.z() = %8.5e\n", point.m_normalWorldOnB.z());
 
   SiconosVector vn(3);
   // Get new normal
@@ -222,5 +227,36 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   DEBUG_EXPR(vb.display(););
   DEBUG_EXPR(vn.display(););
   Contact2dR::updateContactPoints(va, vb, vn*(flip?-1:1));
+  
+
+  // const btVector3& pt_A= point.getPositionWorldOnA();
+  // const btVector3& pt_B= point.getPositionWorldOnB();
+  
+  // if(flip)
+  // {
+  //   va(0) = pt_B.x();
+  //   va(1) = pt_B.y();
+  //   vb(0) = pt_A.x();
+  //   vb(1) = pt_A.y();
+  // }
+  // else
+  // {
+  //   va(0) = pt_A.x();
+  //   va(1) = pt_A.y();
+  //   vb(0) = pt_B.x();
+  //   vb(1) = pt_B.y();
+  // }
+ 
+
+
+  
+  // const btVector3& normal = point.m_normalWorldOnB;
+  // vn(0) =  normal.x();
+  // vn(1) =  normal.y();
+ 
+
+  //Contact2dR::updateContactPointsInAbsoluteFrame(va, vb, vn*(flip?-1:1));
+
+  
   DEBUG_END("Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
 }

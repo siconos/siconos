@@ -145,6 +145,11 @@ public:
   */
   virtual void computeJachq(const BlockVector& q, BlockVector& z);
 
+  // virtual void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber);
+
+
+
+  
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 

@@ -21,8 +21,8 @@
 
 
 // #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 void Lagrangian2d2DR::initialize(Interaction& inter)
@@ -60,15 +60,22 @@ void Lagrangian2d2DR::computeJachq(const BlockVector& q, BlockVector& z)
   DEBUG_PRINTF("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
   DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
-  _jachq->setValue(0,0,Nx);
-  _jachq->setValue(0,1,Ny);
-  _jachq->setValue(0,2,lever_arm_x*Ny - lever_arm_y*Nx );
+  // _jachq->setValue(0,0,Nx);
+  // _jachq->setValue(0,1,Ny);
+  // _jachq->setValue(0,2,lever_arm_x*Ny - lever_arm_y*Nx );
 
-  _jachq->setValue(1,0,Tx);
-  _jachq->setValue(1,1,Ty);
-  _jachq->setValue(1,2,lever_arm_x*Ty - lever_arm_y*Tx );
+  // _jachq->setValue(1,0,Tx);
+  // _jachq->setValue(1,1,Ty);
+  // _jachq->setValue(1,2,lever_arm_x*Ty - lever_arm_y*Tx );
 
+  double * array = &*_jachq->getArray();
+  array[0] = Nx;
+  array[2] = Ny;
+  array[4] = lever_arm_x*Ny - lever_arm_y*Nx;
 
+  array[1] = Tx;
+  array[3] = Ty;
+  array[5] = lever_arm_x*Ty - lever_arm_y*Tx;
 
   if(q.size() ==6)
   {
@@ -81,14 +88,20 @@ void Lagrangian2d2DR::computeJachq(const BlockVector& q, BlockVector& z)
     DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
 
-    _jachq->setValue(0,3,-Nx);
-    _jachq->setValue(0,4,-Ny);
-    _jachq->setValue(0,5,lever_arm_y * Nx - lever_arm_x*Ny);
+    // _jachq->setValue(0,3,-Nx);
+    // _jachq->setValue(0,4,-Ny);
+    // _jachq->setValue(0,5,lever_arm_y * Nx - lever_arm_x*Ny);
 
-    _jachq->setValue(1,3,-Tx);
-    _jachq->setValue(1,4,-Ty);
-    _jachq->setValue(1,5,lever_arm_y * Tx - lever_arm_x*Ty);
+    // _jachq->setValue(1,3,-Tx);
+    // _jachq->setValue(1,4,-Ty);
+    // _jachq->setValue(1,5,lever_arm_y * Tx - lever_arm_x*Ty);
+    array[6] = -Nx;
+    array[8] = -Ny;
+    array[10] = lever_arm_y * Nx - lever_arm_x*Ny;
 
+    array[7] = -Tx;
+    array[9] = -Ty;
+    array[11]= lever_arm_y*Tx - lever_arm_x*Ty;
 
   }
   DEBUG_EXPR(_jachq->display(););
@@ -112,25 +125,38 @@ void Lagrangian2d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVect
 {
   DEBUG_BEGIN("Lagrangian2d2DR::computeh(...)\n");
   DEBUG_EXPR(q.display());
-  // Contact points and normal are stored as relative to q1 and q2, if
-  // no q2 then pc2 and normal are absolute.
+  // // Contact points and normal are stored as relative to q1 and q2, if
+  // // no q2 then pc2 and normal are absolute.
 
-  // Update pc1 based on q and relPc1
+  // // Update pc1 based on q and relPc1
+  DEBUG_EXPR(_Pc1->display(););
+  DEBUG_EXPR(_Pc2->display(););
+  DEBUG_EXPR(_Nc->display(););
 
+
+  SP::SiconosVector _Pc1_tmp(new SiconosVector(*_Pc1));
+  SP::SiconosVector _Pc2_tmp(new SiconosVector(*_Pc2));
+  SP::SiconosVector _Nc_tmp(new SiconosVector(*_Nc));
+
+  
   double angle= q(2);
+  double cos_angle = cos(angle);
+  double sin_angle = sin(angle);
   DEBUG_PRINTF("angle (ds1)= %e\n", angle);
-  (*_Pc1)(0) = q(0) + cos(angle) * (*_relPc1)(0)- sin(angle) * (*_relPc1)(1);
-  (*_Pc1)(1) = q(1) + sin(angle) * (*_relPc1)(0)+ cos(angle) * (*_relPc1)(1);
+  (*_Pc1)(0) = q(0) + cos_angle * (*_relPc1)(0)- sin_angle * (*_relPc1)(1);
+  (*_Pc1)(1) = q(1) + sin_angle * (*_relPc1)(0)+ cos_angle * (*_relPc1)(1);
   if(q.size() == 6)
   {
     // To be checked
     DEBUG_PRINT("take into account second ds\n");
     angle = q(5);
+    cos_angle = cos(angle);
+    sin_angle = sin(angle);
     DEBUG_PRINTF("angle (ds2) = %e\n", angle);
-    (*_Pc2)(0) = q(3) + cos(angle) * (*_relPc2)(0)- sin(angle) * (*_relPc2)(1);
-    (*_Pc2)(1) = q(4) + sin(angle) * (*_relPc2)(0)+ cos(angle) * (*_relPc2)(1);
-    (*_Nc)(0) =  cos(angle) * (*_relNc)(0)- sin(angle) * (*_relNc)(1);
-    (*_Nc)(1) =  sin(angle) * (*_relNc)(0)+ cos(angle) * (*_relNc)(1);
+    (*_Pc2)(0) = q(3) + cos_angle * (*_relPc2)(0)- sin_angle * (*_relPc2)(1);
+    (*_Pc2)(1) = q(4) + sin_angle * (*_relPc2)(0)+ cos_angle * (*_relPc2)(1);
+    (*_Nc)(0) =  cos_angle * (*_relNc)(0)- sin_angle * (*_relNc)(1);
+    (*_Nc)(1) =  sin_angle * (*_relNc)(0)+ cos_angle * (*_relNc)(1);
   }
   else
   {
@@ -141,11 +167,27 @@ void Lagrangian2d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVect
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(_Nc->display(););
 
+  // if ((*_Pc1-*_Pc1_tmp).norm2() >= 1e-12)
+  // {
+  //   getchar();
+  // }
+  // if ((*_Pc2-*_Pc2_tmp).norm2() >= 1e-12)
+  // {
+  //   getchar();
+  // }
+  // if ((*_Nc-*_Nc_tmp).norm2() >= 1e-12)
+  // {
+  //   getchar();
+  // }
+
+
+  
   LagrangianScleronomousR::computeh(q, z, y);
   y.setValue(0, distance());
   DEBUG_EXPR(y.display(););
   DEBUG_EXPR(display(););
-  DEBUG_END("Lagrangian2d2DR::computeh(...)\n")
+  DEBUG_END("Lagrangian2d2DR::computeh(...)\n");
+  //getchar();
 }
 void Lagrangian2d2DR::display() const
 {
@@ -187,3 +229,99 @@ void Lagrangian2d2DR::display() const
     std::cout << " nullptr :" << std::endl;
 
 }
+
+
+
+// void Lagrangian2d2DR::computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber)
+// {
+
+//   DEBUG_PRINTF("Lagrangian2d2DR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
+//   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+//   SiconosVector& y = *inter.y(derivativeNumber);
+//   if(derivativeNumber == 0)
+//   {
+//     computeh(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], y);
+//   }
+//   else
+//   {
+//     computeJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
+//     if(derivativeNumber == 1)
+//     {
+//       assert(_jachq);
+
+//       // direct prod to save time
+//       //prod(*_jachq, *DSlink[LagrangianR::q1], y);
+
+//       double * A = &*_jachq->getArray();
+//       SP::BlockVector v = DSlink[LagrangianR::q1];
+//       double *  v_ds_1 = v->vector(0)->getArray();
+      
+//       y(0)= A[0]* v_ds_1[0] + A[2]* v_ds_1[1]  + A[4]* v_ds_1[2];
+//       y(1)= A[1]* v_ds_1[0] + A[3]* v_ds_1[1]  + A[5]* v_ds_1[2];
+
+//       if (v ->numberOfBlocks() >1 )
+//       {
+//         double *  v_ds_2 = v->vector(1)->getArray();
+//         y(0) += A[6]* v_ds_2[0] + A[8]* v_ds_2[1]  + A[10]* v_ds_2[2];
+//         y(1) += A[7]* v_ds_2[0] + A[9]* v_ds_2[1]  + A[11]* v_ds_2[2];
+
+//       }
+
+        
+//     // }
+//     //   else
+//     //   {
+//     //     y(0)= A[0]* (*v)(0) + A[2]* (*v)(1) + A[4]* (*v)(2)
+//     //         + A[6]* (*v)(3) + A[8]* (*v)(4) + A[10]* (*v)(5);
+//     //     y(1)= A[1]* (*v)(0) + A[3]* (*v)(1) + A[5]* (*v)(2)
+//     //         + A[7]* (*v)(3) + A[9]* (*v)(4) + A[11]* (*v)(5);
+ 
+//     //   }
+//       // for (unsigned int i =0; i < 2; i++)
+//       // {
+//       //   y(i)= A[i]* (*v)(0);
+//       //   for (unsigned int j =1; j<v->size(); j++)
+//       //   {
+//       //     y(i) += A[i+j*2] * (*v)(j);
+//       //   }
+//       // }
+//     }
+//     else
+//       THROW_EXCEPTION("Lagrangian2d2DR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber), index out of range");
+//   }
+// }
+
+
+
+
+
+// void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsigned int level)
+// {
+//   DEBUG_BEGIN("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
+
+//   DEBUG_PRINTF("level = %i\n", level);
+//   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+//   computeJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
+//   // get lambda of the concerned interaction
+//   SiconosVector& lambda = *inter.lambda(level);
+//   DEBUG_EXPR(lambda.display(););
+//   DEBUG_EXPR(_jachq->display(););
+//   // data[name] += trans(G) * lambda
+//   //prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+
+//   double * A = &*_jachq->getArray();
+//   SP::BlockVector v = DSlink[LagrangianR::q1];
+//   int v_size= v->size();
+//   for (unsigned int i =0; i < 2; i++)
+//   {
+//     y(i)= A[i]* (*v)(0);
+//     for (unsigned int j =1; j<v->size(); j++)
+//     {
+//       y(i) += A[i+j*2] * (*v)(j);
+//     }
+//   }
+
+  
+//   DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
+//   DEBUG_END("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
+// }

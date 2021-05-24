@@ -63,3 +63,17 @@ void Contact2dR::updateContactPoints(const SiconosVector& pos1,
   assert(!((*_relNc)(0)==0 && (*_relNc)(1)==0)
          && "nc = 0, problems..\n");
 }
+void Contact2dR::updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
+                                                    const SiconosVector& pos2,
+                                                    const SiconosVector& normal)
+{
+  // Copy relative positions
+  *_Pc1 = pos1;
+  *_Pc2 = pos2;
+
+  // Update normal
+  *_Nc = normal;
+
+  assert(!((*_Nc)(0)==0 && (*_Nc)(1)==0)
+         && "nc = 0, problems..\n");
+}
