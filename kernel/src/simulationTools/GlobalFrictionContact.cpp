@@ -313,7 +313,6 @@ bool GlobalFrictionContact::preCompute(double time)
       _w->resize(_sizeOutput);
       _w->zero();
     }
-
     if(_globalVelocities->size() != _sizeGlobalOutput)
     {
       _globalVelocities->resize(_sizeGlobalOutput);
@@ -334,9 +333,12 @@ int GlobalFrictionContact::compute(double time)
     return info;
   updateMu();
   // --- Call Numerics solver ---
-  info= solve();
-  DEBUG_EXPR(display(););
-  postCompute();
+  if(_sizeGlobalOutput != 0)
+  {
+    info= solve();
+    DEBUG_EXPR(display(););
+    postCompute();
+  }
   return info;
 }
 
