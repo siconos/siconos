@@ -11,6 +11,11 @@ RigidBody2dDS::RigidBody2dDS(SP::SiconosVector position,
   , _allowSelfCollide(true)
 {
   // Check size of positions, velocities and mass matrix
+  if((position->size() !=3) or (velocity->size() !=3))
+  {
+    THROW_EXCEPTION("RigidBody2dDS::RigidBody2dDS(...). The size of position and velocity must of size 3");
+  }
+
   _scalarMass = mass->getValue(0,0);
 }
 
@@ -29,6 +34,12 @@ RigidBody2dDS::RigidBody2dDS(SP::SiconosVector position,
   _mass->setValue(2,2,inertia);
 
   // Check size of positions, velocities and mass matrix
+    if((position->size() !=3) or (velocity->size() !=3))
+  {
+    THROW_EXCEPTION("RigidBody2dDS::RigidBody2dDS(...). The size of position and velocity must of size 3");
+  }
+
+
 }
 
 RigidBody2dDS::~RigidBody2dDS()
