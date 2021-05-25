@@ -151,6 +151,10 @@ protected:
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
 
+
+  /** A set of work indices for the selected coordinates when
+      we subprod in computeFreeOuput*/
+  std::vector<std::size_t> _selected_coordinates;
 public:
 
   enum MoreauJeanOSI_ds_workVector_id{RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH};
@@ -189,7 +193,7 @@ public:
     return _isWSymmetricDefinitePositive;
   };
 
-  inline void setIsWSymmetricDefinitePositive(bool b) 
+  inline void setIsWSymmetricDefinitePositive(bool b)
   {
     _isWSymmetricDefinitePositive = b ;
   };
@@ -356,7 +360,7 @@ public:
    *  \param W the result in W
    */
   void computeW(double time , SecondOrderDS& ds, SiconosMatrix& W);
-  
+
   SP::SimpleMatrix Winverse(SP::SecondOrderDS ds);
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem

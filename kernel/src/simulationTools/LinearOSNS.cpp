@@ -764,6 +764,8 @@ void LinearOSNS::computeq(double time)
   DEBUG_END("void LinearOSNS::computeq(double time)\n");
 }
 
+
+
 void LinearOSNS::computeM()
 {
   if (_assemblyType == REDUCED_BLOCK)
@@ -782,30 +784,35 @@ void LinearOSNS::computeM()
   {
     InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
     DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
-    // std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
-    // start = std::chrono::system_clock::now();
+#ifdef WITH_TIMER
+    std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+    start = std::chrono::system_clock::now();
+#endif
     // fill _Winverse
     _W->fillWinverse(DSG0);
-    // end = std::chrono::system_clock::now();
-    // int elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end-start).count();
-    // std::cout << "LinearOSNS: fill W inverse " << elapsed << " ms" << std::endl;
-   // fill H
+#ifdef WITH_TIMER
+    end = std::chrono::system_clock::now();
+    int elapsed = std::chrono::duration_cast<std::chrono::microseconds> (end-start).count();
+    std::cout << "\nLinearOSNS: fill W inverse " << elapsed << " ms" << std::endl;
+#endif
+    // fill H
     _H->fillHtrans(DSG0, indexSet);
-    // end_old=end;
-    // end = std::chrono::system_clock::now();
-    // elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
-    //   (end-end_old).count();
-    // std::cout << "LinearOSNS: FillH " << elapsed << " ms" << std::endl;
- 
+#ifdef WITH_TIMER
+    end_old=end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+      (end-end_old).count();
+    std::cout << "LinearOSNS: FillH " << elapsed << " ms" << std::endl;
+#endif
     // ComputeM
     _M->computeM(_W->numericsMatrix(), _H->numericsMatrix());
-    // end_old=end;
-    // end = std::chrono::system_clock::now();
-    // elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
-    //   (end-end_old).count();
-    // std::cout << "LinearOSNS: computeM " << elapsed << " ms" << std::endl;
-
+#ifdef WITH_TIMER
+    end_old=end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+      (end-end_old).count();
+    std::cout << "LinearOSNS: _computeM " << elapsed << " ms" << std::endl;
+#endif
   }
   else
     THROW_EXCEPTION("LinearOSNS::computeM unknown _assemblyTYPE");
@@ -836,7 +843,7 @@ bool LinearOSNS::preCompute(double time)
   // Get topology
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
-
+  int elapsed =0;
   //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do
@@ -853,11 +860,19 @@ bool LinearOSNS::preCompute(double time)
     DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
     return false;
   }
-
+#ifdef WITH_TIMER
+  std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+  start = std::chrono::system_clock::now();
+#endif
   if(!_hasBeenUpdated || !isLinear)
   {
+ 
     computeM();
-
+#ifdef WITH_TIMER
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds> (end-start).count();
+    std::cout << "\nLinearOSNS: ComputeM " << elapsed << " ms" << std::endl;
+#endif
     //      updateOSNSMatrix();
     _sizeOutput = _M->size();
 
@@ -905,9 +920,22 @@ bool LinearOSNS::preCompute(double time)
   }
   // else
   // nothing to do (IsLinear and not changed)
-
+#ifdef WITH_TIMER
+  end_old=end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+    (end-end_old).count();
+  std::cout << "LinearOSNS: init w and z " << elapsed << " ms" << std::endl;
+#endif
   // Computes q of LinearOSNS
   computeq(time);
+#ifdef WITH_TIMER
+  end_old=end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+    (end-end_old).count();
+  std::cout << "LinearOSNS: compute q " << elapsed << " ms" << std::endl;
+#endif
   DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
   return true;
 
