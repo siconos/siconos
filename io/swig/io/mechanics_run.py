@@ -6,7 +6,7 @@ from __future__ import print_function
 import os
 import sys
 
-from math import cos, sin, asin, atan2
+from math import cos, sin, asin, atan2, acos
 from scipy import constants
 
 import numpy as np
@@ -878,7 +878,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._deaths = dict()
         self._initializing = True
         self._contact_index_set = 1
-        self._scheduled_births = []
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
         self._ds_positions=None
@@ -1151,7 +1150,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             inertia_ok = True
 
                 if inertia_ok:
-                    # create the dynamics object with mass and inertia
+                    # create the dynamics object with mass and inertia  
                     body = body_class(translation + orientation,
                                       velocity, mass, inertia)
                     body.setUseContactorInertia(False)
@@ -1636,6 +1635,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # schedule its death immediately
         time_of_death = obj.attrs.get('time_of_death', None)
+
         if time_of_death is not None :
             bisect.insort_left(self._scheduled_deaths, time_of_death)
             if time_of_death in self._deaths:
@@ -1698,6 +1698,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 mass = obj.attrs.get('mass', None)
                 time_of_birth = obj.attrs.get('time_of_birth', -1)
+                time_of_death = obj.attrs.get('time_of_death', float('inf'))
 
                 if time_of_birth >= time:
                     #
@@ -1708,6 +1709,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         self._births[time_of_birth].append((name, obj))
                     else:
                         self._births[time_of_birth] = [(name, obj)]
+                elif time_of_death <= time:
+                    # object already dead do not import
+                    self.print_verbose('object', name, 'already dead do not import')
+                    #input()
+                    #pass
                 else:
                     #
                     # this is for now
@@ -1716,18 +1722,20 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                     if mass is not None and dpos_data is not None and\
                        len(dpos_data) > 0:
-
                         xpos = xdpos_data[obj.attrs['id']]
                         translation = (xpos[2], xpos[3], xpos[4])
                         orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
-
                         xvel = xvelocities[obj.attrs['id']]
                         velocity = (xvel[2], xvel[3], xvel[4],
                                     xvel[5], xvel[6], xvel[7])
-
+                        if self._dimension ==2:
+                            angle=2.0*acos(translation[2])
+                            orientation= (angle,)
+                            translation = (translation[0],translation[1])
+                            velocity =  (velocity[0],velocity[1],velocity[5])
+     
                     else:
                         # start from initial conditions
-
                         translation = obj.attrs['translation']
                         orientation = obj.attrs['orientation']
                         velocity = obj.attrs['velocity']
@@ -1791,11 +1799,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         time = self.current_time()
 
         ind_time = bisect.bisect_right(self._scheduled_deaths, time)
-
+        #print('ind_time', ind_time)
+        #print('self._scheduled_deaths', self._scheduled_deaths )
+        #print('self._deaths', self._deaths )
+         
         current_times_of_deaths = set(self._scheduled_deaths[:ind_time])
-
+        #print('current_times_of_deaths', current_times_of_deaths )
         self._scheduled_deaths = self._scheduled_deaths[ind_time:]
-
+        #print(self._scheduled_deaths)
         for time_of_death in current_times_of_deaths:
             #print(self._deaths[time_of_death])
             for ( _, _, body, flag) in self._deaths[time_of_death]:
@@ -1808,6 +1819,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     msg = 'execute_deaths : unknown object type'
                     msg += 'It should static or dynamic'
                     raise RuntimeError(msg)
+        #input()
 
     def output_static_objects(self):
         """
@@ -2059,7 +2071,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                  'useAxisSweep3', 'worldScale']
             d['bullet_options'] = {}
             for e in l:
-                print('getattr(bo, e)', getattr(bo, e))
+#                print('getattr(bo, e)', getattr(bo, e))
                 d['bullet_options'][e] = getattr(bo, e)
 
 
@@ -2485,6 +2497,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.print_verbose('setup model simulation ...')
         if run_options['set_external_forces'] is not None:
             self._set_external_forces = run_options['set_external_forces']
+            
         interaction_manager=run_options['interaction_manager']
         if  interaction_manager is None:
             interaction_manager = default_manager_class
@@ -2534,8 +2547,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.print_verbose(msg)
             return
 
-        # get dimension
-        self._dimension = self._out.attrs.get('dimension', 3)
 
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
@@ -2548,17 +2559,17 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             msg += '                             with  bullet_options.perturbationIterations and bullet_options.minimumPointsPerturbationThreshold.'
             raise RuntimeError(msg)
 
-        if multipoints_iterations and bullet_options is None:
+        if  bullet_options is None:
             bullet_options = SiconosBulletOptions()
-            bullet_options.perturbationIterations = 3 * multipoints_iterations
-            bullet_options.minimumPointsPerturbationThreshold = \
-                3 * multipoints_iterations
+            if multipoints_iterations :
+                bullet_options.perturbationIterations = 3 * multipoints_iterations
+                bullet_options.minimumPointsPerturbationThreshold = \
+                    3 * multipoints_iterations
 
-
-        if (self._dimension == 2):
-            if bullet_options is None:
-                bullet_options = SiconosBulletOptions()
-            bullet_options.dimension = SICONOS_BULLET_2D
+        if bullet_options.dimension == SICONOS_BULLET_2D:
+            self._dimension = 2
+        else:
+            self._dimension = 3
 
         self._interman = interaction_manager(bullet_options)
        
