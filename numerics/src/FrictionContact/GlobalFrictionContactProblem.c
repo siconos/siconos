@@ -47,6 +47,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void)
   problem->q = NULL;
   problem->b = NULL;
   problem->mu = NULL;
+  problem->M_inverse = NULL;
   problem->env = NULL;
   problem->numberOfContacts = 0;
   problem->dimension = 0;
@@ -200,6 +201,13 @@ void globalFrictionContact_free(GlobalFrictionContactProblem* problem)
     free(problem->b);
   }
   problem->b = NULL;
+  
+  if(problem->M_inverse)
+  {
+    NM_clear(problem->M_inverse);
+    free(problem->M_inverse);
+  }
+  problem->M_inverse = NULL;
 
   if(problem->env) assert(0 && "globalFrictionContact_free :: problem->env != NULL, don't know what to do");
 
@@ -253,6 +261,13 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
   }
   else
     printf("No mu vector:\n");
+  if(problem->M_inverse)
+  {
+    printf("M inverse matrix:\n");
+    NM_display(problem->M_inverse);
+  }
+  else
+    printf("No M inverse matrix:\n");
 
 }
 
@@ -304,7 +319,18 @@ int globalFrictionContact_computeGlobalVelocity(
 
   /* Compute globalVelocity <- M^(-1) globalVelocity*/
   //info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE);
-  info = NM_LU_solve(problem->M, globalVelocity, 1);
+  if (problem->M_inverse)
+  {
+    double alpha = 1.0;
+    double beta2 = 0.0;
+    double* vtmp = (double*)calloc(n , sizeof(double));
+    cblas_dcopy_msan(n,  globalVelocity, 1, vtmp, 1);
+    NM_gemv(alpha, problem->M_inverse, vtmp, beta2, globalVelocity);
+  }
+  else
+  {
+    info = NM_LU_solve(problem->M, globalVelocity, 1);
+  }
   DEBUG_EXPR(NM_vector_display(globalVelocity, n));
 
   return info;
@@ -568,28 +594,27 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     fclose(fileout);
 #endif
 
-
-
-
     // Product M^-1 H
     DEBUG_EXPR(NM_display(H););
-    numerics_printf_verbose(1,"inversion of the matrix M ...");
-    NumericsMatrix * Minv  = NM_LU_inv(M);
-    DEBUG_EXPR(NM_display(Minv););
+    NumericsMatrix * Minv;
+    if (problem->M_inverse)
+    {
+      numerics_printf_verbose(1,"use the given inverse of the matrix M ...");
+      Minv = problem->M_inverse;
+    }
+    else
+    {
+      numerics_printf_verbose(1,"inversion of the matrix M ...");
+      Minv  = NM_LU_inv(M);
+    }
+      DEBUG_EXPR(NM_display(Minv););
 
-
-    /* NumericsMatrix* MinvH = NM_create(NM_SPARSE,n,m); */
-    /* NM_triplet_alloc(MinvH, n); */
-    /* MinvH->matrix2->origin = NSM_TRIPLET; */
-    /* DEBUG_EXPR(NM_display(MinvH);); */
-    /* NM_gemm(1.0, Minv, H, 0.0, MinvH); */
     numerics_printf_verbose(1,"multiplication  H^T M^{-1} H ...");
     NumericsMatrix* MinvH = NM_multiply(Minv,H);
     DEBUG_EXPR(NM_display(MinvH););
 
     // Product H^T M^-1 H
     NM_csc_trans(H);
-
 
     NumericsMatrix* Htrans = NM_new();
     Htrans->storageType = NM_SPARSE;
@@ -599,13 +624,6 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     Htrans->matrix2->origin = NSM_CSC;
     Htrans->matrix2->csc = NM_csc_trans(H);
     DEBUG_EXPR(NM_display(Htrans););
-
-    /* localproblem->M = NM_create(NM_SPARSE, m, m); */
-    /* NumericsMatrix *W = localproblem->M; */
-    /* int nzmax= m*m; */
-    /* NM_csc_empty_alloc(W, nzmax); */
-    /* W->matrix2->origin = NSM_CSC; */
-    /* NM_gemm(1.0, Htrans, MinvH, 0.0, W); */
 
     localproblem->M = NM_multiply(Htrans,MinvH);
     DEBUG_EXPR(NM_display(localproblem->M););

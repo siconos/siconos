@@ -62,6 +62,11 @@ struct GlobalFrictionContactProblem
   /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
   double* mu;
+  
+  /** \f${M^{-1} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+      a matrix with \f$ n\f$ stored in NumericsMatrix structure */
+  NumericsMatrix* M_inverse;
+
   /** opaque environment, solver specific */
   void* env;
 };

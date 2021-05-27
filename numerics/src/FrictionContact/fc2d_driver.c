@@ -28,10 +28,10 @@
 #include "fc2d_Solvers.h"            // for fc2d_cpg, fc2d_enum
 #include "numerics_verbose.h"        // for numerics_error, verbose, numeric...
 
-const char* const   SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
-const char* const   SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
-const char* const   SICONOS_FRICTION_2D_LEMKE_STR  = "F2D_LEMKE";
-const char* const   SICONOS_FRICTION_2D_ENUM_STR  = "F2D_ENUM";
+const char* const   SICONOS_FRICTION_2D_NSGS_STR  = "FC2D_NSGS";
+const char* const   SICONOS_FRICTION_2D_CPG_STR  = "FC2D_CPG";
+const char* const   SICONOS_FRICTION_2D_LEMKE_STR  = "FC2D_LEMKE";
+const char* const   SICONOS_FRICTION_2D_ENUM_STR  = "FC2D_ENUM";
 //#define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
