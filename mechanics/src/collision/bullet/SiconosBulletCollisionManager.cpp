@@ -1307,8 +1307,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCHRecord &record)
     if(record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      // _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+      // cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = ch->version();
@@ -1423,8 +1423,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
     if(record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      // _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+      // cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = mesh->version();
@@ -1512,8 +1512,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
     if(record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      // _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+      // cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = height->version();
@@ -1803,8 +1803,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCH2dRecord &record)
     if(record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+      // _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+      // cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = ch2d->version();
