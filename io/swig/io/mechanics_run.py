@@ -2201,9 +2201,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if explode_computeOneStep:
                     fc = self._osnspb
                     #self.log(fc.updateInteractionBlocks, with_timer)()
-                    self.log(fc.preCompute, with_timer)(s.nextTime())
+                    self.log(fc.preCompute, with_timer, before=False)(s.nextTime())
                     self.log(fc.updateMu, with_timer)()
-                    if fc.getSizeOutput() != 0 :
+                    if self._run_options.get('osi') == sk.MoreauJeanOSI :
+                        if fc.getSizeOutput() != 0  :
+                            info = self.log(fc.solve, with_timer)()
+                            self.log(fc.postCompute, with_timer)()
+                    else:
                         info = self.log(fc.solve, with_timer)()
                         self.log(fc.postCompute, with_timer)()
                 else:
@@ -2598,9 +2602,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # (1) OneStepIntegrators
         osi = run_options.get('osi')
         self._osi = osi(run_options.get('theta'))
-        if (osi == sk.MoreauJeanOSI):
-            self._osi.setConstraintActivationThreshold(
-                run_options['constraint_activation_threshold'])
+        self._osi.setConstraintActivationThreshold(
+            run_options['constraint_activation_threshold'])
         # (2) Time discretisation --
         timedisc = sk.TimeDiscretisation(t0, h)
 
@@ -2652,14 +2655,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if (osi == sk.MoreauJeanGOSI):
                 if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):
                     if (solver_options is None):
-                        osnspb = sk.GlobalFrictionContact(3)
+                        osnspb = sk.GlobalFrictionContact(self._dimension)
                     else:
-                        osnspb = sk.GlobalFrictionContact(3, solver_options)
+                        osnspb = sk.GlobalFrictionContact(self._dimension, solver_options)
                 elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
+                    if self._dimension ==3:
+                        dimension_contact=5
+                    elif self._dimension ==2:
+                        dimension_contact=3
                     if (solver_options is None):
-                        osnspb = sk.GlobalRollingFrictionContact(5)
+                        osnspb = sk.GlobalRollingFrictionContact(dimension_contact)
                     else:
-                        osnspb = sk.GlobalRollingFrictionContact(5, solver_options)
+                        osnspb = sk.GlobalRollingFrictionContact(dimension_contact, solver_options)
                 osnspb.setMStorageType(sn.NM_SPARSE)
                 # if sid == sn.SICONOS_GLOBAL_FRICTION_3D_ADMM:
                 #     osnspb.setMStorageType(sn.NM_SPARSE)
@@ -2683,9 +2690,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         osnspb.setMaxSize(osnspb_max_size)
                         osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
 
-                        if osnspb_assembly_type :
-                            osnspb.setMStorageType(sn.NM_SPARSE)
-                            osnspb.setAssemblyType(osnspb_assembly_type)
 
                     elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
                         if self._dimension ==3:
@@ -2700,6 +2704,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         msg = "Unknown nslaw type"
                         msg += str(set(nslaw_type_list))
                         raise RuntimeError(msg)
+                    
+            if osnspb_assembly_type :
+                osnspb.setMStorageType(sn.NM_SPARSE)
+                osnspb.setAssemblyType(osnspb_assembly_type)
 
         else:  # With trace
             if solver_options is None:
