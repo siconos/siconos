@@ -34,8 +34,8 @@ typedef enum
 {
   REDUCED_BLOCK,
   GLOBAL,
-  REDUCED_DIRECT
-
+  REDUCED_DIRECT,
+  GLOBAL_REDUCED
 } LINEAROSNS_ASSEMBLY_TYPE;
 
 /** Base (abstract) class for linear non-smooth problems
@@ -71,6 +71,9 @@ protected:
 
   /** matrix W of a LinearOSNS system */
   SP::OSNSMatrix _W;
+
+  /** matrix W of a LinearOSNS system */
+  SP::OSNSMatrix _W_inverse;
 
   /** matrix H of a LinearOSNS system */
   SP::OSNSMatrix _H;

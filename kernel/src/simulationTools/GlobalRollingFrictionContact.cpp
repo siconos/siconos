@@ -256,7 +256,7 @@ bool GlobalRollingFrictionContact::preCompute(double time)
       OSI::TYPES osi2Type = Osi2.getType();
       if(osi1Type == OSI::MOREAUJEANGOSI  && osi2Type == OSI::MOREAUJEANGOSI)
       {
-        static_cast<MoreauJeanGOSI&>(Osi1).NSLcontrib(inter, *this);
+        static_cast<MoreauJeanGOSI&>(Osi1).NonSmoothLawContributionToOutput(inter, *this);
       }
       else
       {

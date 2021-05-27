@@ -558,7 +558,7 @@ void MoreauJeanOSI::computeW(double t, SecondOrderDS& ds, SiconosMatrix& W)
   // Function PLUForwardBackward will do that if required.
 }
 
-SP::SimpleMatrix MoreauJeanOSI::Winverse(SP::SecondOrderDS ds)
+SP::SimpleMatrix MoreauJeanOSI::Winverse(SP::SecondOrderDS ds, bool keepW)
 {
 
   /* We compute and return the current inverse the W matrix */
@@ -573,7 +573,16 @@ SP::SimpleMatrix MoreauJeanOSI::Winverse(SP::SecondOrderDS ds)
     _dynamicalSystemsGraph->properties(dsv).Winverse.reset(new SimpleMatrix(sizeW, sizeW));
     Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
     Winverse->eye();
-    W->Solve(*Winverse);
+    if (keepW)
+    {
+      //std::cout << "MoreauJeanOSI keepW" << std::endl;
+      SP::SiconosMatrix Wtmp(new SimpleMatrix(*W));
+      Wtmp->Solve(*Winverse);
+    }
+    else
+    {
+      W->Solve(*Winverse);
+    }
   }
   else
   {
@@ -585,7 +594,15 @@ SP::SimpleMatrix MoreauJeanOSI::Winverse(SP::SecondOrderDS ds)
     else
     {
       Winverse->eye();
-      W->Solve(*Winverse);
+      if (keepW)
+      {
+        SP::SiconosMatrix Wtmp(new SimpleMatrix(*W));
+        Wtmp->Solve(*Winverse);
+      }
+      else
+      {
+        W->Solve(*Winverse);
+      }
     }
   }
 
@@ -1299,87 +1316,87 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
 }
 
 
-struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
+// struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
+// {
+//   using SiconosVisitor::visit;
+
+//   OneStepNSProblem& _osnsp;
+//   Interaction& _inter;
+//   InteractionProperties& _interProp;
+
+//   _NSLEffectOnFreeOutput(OneStepNSProblem& p, Interaction& inter, InteractionProperties& interProp) :
+//     _osnsp(p), _inter(inter), _interProp(interProp) {};
+
+void  MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nslaw)
 {
-  using SiconosVisitor::visit;
+  double e;
+  e = nslaw.e();
+  Index subCoord(4);
+  subCoord[0] = 0;
+  subCoord[1] = _inter.nonSmoothLaw()->size();
+  subCoord[2] = 0;
+  subCoord[3] = subCoord[1];
+  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
+  subscal(e, *_inter.y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord, false);
+}
 
-  OneStepNSProblem * _osnsp;
-  Interaction& _inter;
-  InteractionProperties& _interProp;
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const RelayNSL& nslaw)
+{
+  // since velocity lower-/upper-bounds are fully specified in NSL,
+  // nothing to do here
+}
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, Interaction& inter, InteractionProperties& interProp) :
-    _osnsp(p), _inter(inter), _interProp(interProp) {};
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactFrictionNSL& nslaw)
+{
+  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
-  void visit(const NewtonImpactNSL& nslaw)
+  // The normal part is multiplied depends on en
+  if(nslaw.en() > 0.0)
   {
-    double e;
-    e = nslaw.e();
-    Index subCoord(4);
-    subCoord[0] = 0;
-    subCoord[1] = _inter.nonSmoothLaw()->size();
-    subCoord[2] = 0;
-    subCoord[3] = subCoord[1];
-    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
-    subscal(e, *_inter.y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
+    osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
   }
-
-  void visit(const RelayNSL& nslaw)
+  // The tangential part is multiplied depends on et
+  if(nslaw.et() > 0.0)
   {
-    // since velocity lower-/upper-bounds are fully specified in NSL,
-    // nothing to do here
-  }
-
-  void visit(const NewtonImpactFrictionNSL& nslaw)
-  {
-    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
-
-    // The normal part is multiplied depends on en
-    if(nslaw.en() > 0.0)
+    osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(1);
+    if(_inter.nonSmoothLaw()->size()>=2)
     {
-      osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
-    }
-    // The tangential part is multiplied depends on et
-    if(nslaw.et() > 0.0)
-    {
-      osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(1);
-      if(_inter.nonSmoothLaw()->size()>=2)
-      {
-        osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(2);
-      }
+      osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(2);
     }
   }
-  void visit(const NewtonImpactRollingFrictionNSL& nslaw)
-  {
-    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
+}
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactRollingFrictionNSL& nslaw)
+{
+  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
-    // The normal part is multiplied depends on en
-    if(nslaw.en() > 0.0)
+  // The normal part is multiplied depends on en
+  if(nslaw.en() > 0.0)
+  {
+    osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
+  }
+  // The tangential part is multiplied depends on et
+  if(nslaw.et() > 0.0)
+  {
+    osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(1);
+    if(_inter.nonSmoothLaw()->size()>=2)
     {
-      osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
-    }
-    // The tangential part is multiplied depends on et
-    if(nslaw.et() > 0.0)
-    {
-      osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(1);
-      if(_inter.nonSmoothLaw()->size()>=2)
-      {
-        osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(2);
-      }
+      osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(2);
     }
   }
-  void visit(const EqualityConditionNSL& nslaw)
-  {
-    ;
-  }
-  void visit(const MixedComplementarityConditionNSL& nslaw)
-  {
-    ;
-  }
-  void visit(const ComplementarityConditionNSL& nslaw)
-  {
-    ;
-  }
-};
+}
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const EqualityConditionNSL& nslaw)
+{
+  ;
+}
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const MixedComplementarityConditionNSL& nslaw)
+{
+  ;
+}
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const ComplementarityConditionNSL& nslaw)
+{
+  ;
+}
+// };
 
 
 void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
@@ -1478,7 +1495,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   // 3 - add part due to NonSmoothLaw
   if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
   {
-    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter,
+    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(*osnsp, inter,
         indexSet.properties(vertex_inter));
     inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }

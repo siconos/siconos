@@ -21,7 +21,7 @@
 #ifndef MoreauJeanGOSI_H
 #define MoreauJeanGOSI_H
 
-#include "OneStepIntegrator.hpp"
+#include "MoreauJeanOSI.hpp"
 #include "OneStepNSProblem.hpp"
 
 #include <limits>
@@ -110,7 +110,7 @@
  * See User's guide for details.
  *
  */
-class MoreauJeanGOSI : public OneStepIntegrator
+class MoreauJeanGOSI : public MoreauJeanOSI
 {
 protected:
   /** serialization hooks
@@ -141,10 +141,6 @@ protected:
    */
   bool _explicitNewtonEulerDSOperators;
 
-  /** nslaw effects
-   */
-  struct _NSLEffectOnFreeOutput;
-  friend struct _NSLEffectOnFreeOutput;
 
 public:
   
@@ -158,7 +154,7 @@ public:
    *  \param theta value for all linked DS (default = 0.5).
    *  \param gamma value for all linked DS (default = NaN and gamma is not used).
    */
-  MoreauJeanGOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN());
+  MoreauJeanGOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN()): MoreauJeanOSI(theta,gamma){};
 
   /** destructor
    */
@@ -167,9 +163,6 @@ public:
   // --- GETTERS/SETTERS ---
   
   // --- OTHER FUNCTIONS ---
-
-  virtual void initialize_nonsmooth_problems();
-
   
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
@@ -188,41 +181,6 @@ public:
 		     InteractionProperties& interProp,
 		     DynamicalSystemsGraph & DSG);
 
-  /** get the number of index sets required for the simulation
-   * \return unsigned int
-   */
-  unsigned int numberOfIndexSets() const {return 2;};
-
-  
-  /** initialize iteration matrix W MoreauJeanGOSI matrix at time t
-   *  \param time
-   *  \param ds a pointer to DynamicalSystem
-   */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
-
-  /** compute W MoreauJeanGOSI matrix at time t
-   *  \param time (double)
-   *  \param ds a pointer to DynamicalSystem
-   *  \param W the matrix to compute
-   */
-  void computeW(double time, SP::DynamicalSystem ds,  SiconosMatrix& W);
-
-  /** compute WBoundaryConditionsMap[ds] MoreauJeanGOSI matrix at time t
-   *  \param ds a pointer to DynamicalSystem
-   */
-  void computeWBoundaryConditions(SP::DynamicalSystem ds);
-
-  /** initialize iteration matrix WBoundaryConditionsMap[ds] MoreauJeanGOSI
-   *  \param ds a pointer to DynamicalSystem
-   */
-  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds);
-
-
-  /** compute the initial state of the Newton loop.
-   */
-  void computeInitialNewtonState();
-
-
   /** return the maximum of all norms for the "MoreauJeanGOSI-discretized" residus of DS
       \return a double
    */
@@ -232,29 +190,6 @@ public:
    *  without taking into account the nonsmooth input (_r or _p)
    */
   virtual void computeFreeState();
-
-  /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
-   * \param inter the Interaction to test
-   * \param i level of the IndexSet
-   * \return Boolean
-   */
-  virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
-
-  /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
-   * \param inter the Interaction to test
-   * \param i level of the IndexSet
-   * \return Boolean
-   */
-  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
-
-
-  /** method to prepare the fist Newton iteration
-   *   \param time
-   */
-  void prepareNewtonIteration(double time);
-
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param tinit the initial time
@@ -274,11 +209,11 @@ public:
    */
   virtual void updateState(const unsigned int level);
 
-  /** Compute the nonsmooth law contribution
+  /** Compute the nonsmooth law contribution to the output
    * \param inter the interaction (for y_k)
    * \param osnsp the non-smooth integrator
    */
-  void NSLcontrib(SP::Interaction inter, OneStepNSProblem& osnsp);
+  void NonSmoothLawContributionToOutput(SP::Interaction inter, OneStepNSProblem& osnsp);
 
   /** Displays the data of the MoreauJeanGOSI's integrator
    */

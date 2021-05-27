@@ -29,6 +29,7 @@
 #include "CSparseMatrix_internal.h"
 #include "OneStepIntegrator.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "MoreauJeanGOSI.hpp"
 #include "SecondOrderDS.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -417,30 +418,23 @@ void OSNSMatrix::fillWinverse(DynamicalSystemsGraph & DSG, bool update)
       DynamicalSystemsGraph::VIterator dsi, dsend;
       for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
       {
-        OneStepIntegrator& osi = *DSG.properties(*dsi).osi;
         SP::SimpleMatrix Winverse;
-        OSI::TYPES osiType = osi.getType();
-        if(osiType == OSI::MOREAUJEANOSI)
+
+        OneStepIntegrator& osi = *DSG.properties(*dsi).osi;
+        SP::DynamicalSystem ds =  DSG.bundle(*dsi);
+        SP::SecondOrderDS sods =  std::static_pointer_cast<SecondOrderDS> (ds);
+
+        if (typeid(osi) == typeid(MoreauJeanGOSI))
         {
-          SP::SecondOrderDS sods =  std::static_pointer_cast<SecondOrderDS> (DSG.bundle(*dsi));
-          Winverse = (static_cast<MoreauJeanOSI&>(osi)).Winverse(sods);
+          Winverse =  static_cast<MoreauJeanGOSI&>(osi).Winverse(sods, true);
+        }
+        else if (typeid(osi) == typeid(MoreauJeanOSI))
+        {
+          Winverse =  static_cast<MoreauJeanOSI&>(osi).Winverse(sods);
         }
         else
-          THROW_EXCEPTION("OSNSMatrix::fillWinverse not yet implemented for OSI of type " + std::to_string(osiType));
-        // Winverse->display();
-        // getchar();
-        // SimpleMatrix* W = DSG.properties(*dsi).W.get();
-        // SP::SimpleMatrix Winverse = DSG.properties(*dsi).Winverse;
-        // if (!Winverse)
-        // {
-        //   unsigned int sizeW = ds->dimension();
-        //   DSG.properties(*dsi).Winverse.reset(new SimpleMatrix(sizeW, sizeW));
-        //   Winverse = DSG.properties(*dsi).Winverse;
-        //   Winverse->eye();
-        //   W->Solve(*Winverse);
-        //   //W->display();
-        //   //Winverse->display();
-        // }
+          THROW_EXCEPTION("OSNSMatrix::fillWinverse not yet implemented for this type of OSI  ");
+
         pos = DSG.properties(*dsi).absolute_position;
         Winverse->fillTriplet(Mtriplet, pos, pos);
         DEBUG_PRINTF("pos = %u \n", pos);
@@ -467,73 +461,25 @@ void OSNSMatrix::fillWinverse(DynamicalSystemsGraph & DSG, bool update)
 
   DEBUG_END("void OSNSMatrix::fillW(SP::DynamicalSystemsGraph DSG, bool update)\n");
 }
+
+
+#include <float.h>
 // Fill the matrix H
 void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
-  if(update)
-  {
 
-    _dimColumn = updateSizeAndPositions(indexSet);
-    _dimRow = updateSizeAndPositions(DSG);
-  }
+  fillHtrans(DSG, indexSet, update);
+  
+  SP::NumericsMatrix Htrans = _numericsMatrix;
+  _numericsMatrix.reset(NM_transpose(Htrans.get()), NM_free);
+  _dimColumn = updateSizeAndPositions(indexSet);
+  _dimRow = updateSizeAndPositions(DSG);
 
-  switch(_storageType)
-  {
-  case NM_SPARSE:
-  {
-    if(update)
-    {
-      // We choose a triplet matrix format for inserting values.
-      // This simplifies the memory manipulation.
-      _numericsMatrix.reset(NM_create(NM_SPARSE, _dimRow, _dimColumn),NM_free);
-      NumericsMatrix& H_NM = *numericsMatrix();
-      NM_triplet_alloc(&H_NM, _triplet_nzmax);
-      CSparseMatrix* Htriplet= NM_triplet(&H_NM);
-
-
-      unsigned int pos = 0, pos_ds=0;
-      SP::SiconosMatrix leftInteractionBlock;
-      InteractionsGraph::VIterator ui, uiend;
-      for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
-      {
-        Interaction& inter = *indexSet.bundle(*ui);
-        SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
-        SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
-
-        bool endl = false;
-        size_t posBlock = indexSet.properties(*ui).source_pos;
-        size_t pos2 = indexSet.properties(*ui).target_pos;
-
-        pos =  indexSet.properties(*ui).absolute_position;
-        for(SP::DynamicalSystem ds = ds1; !endl; ds = ds2, posBlock = pos2)
-        {
-          endl = (ds == ds2);
-          size_t sizeDS = ds->dimension();
-          size_t sizeY = inter.dimension();
-          // this whole part is a hack. Just should just get the rightblock
-          leftInteractionBlock = inter.getLeftInteractionBlockForDS(posBlock, sizeY, sizeDS);
-          leftInteractionBlock->trans();
-          pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
-          DEBUG_PRINTF("pos = %u", pos);
-          DEBUG_PRINTF("pos_ds = %u", pos_ds);
-          leftInteractionBlock->fillTriplet(Htriplet, pos_ds, pos);
-        }
-      }
-      _triplet_nzmax =  NM_nnz(&H_NM);
-    }
-    break;
-  }
-  default:
-  {
-    THROW_EXCEPTION("OSNSMatrix::fillH unknown _storageType");
-  }
-  }
   DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
 }
-
-#include <float.h>
-// Fill the matrix H
+    
+// Fill the matrix Htrans
 void OSNSMatrix::fillHtrans(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillHtrans(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");

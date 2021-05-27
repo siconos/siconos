@@ -23,6 +23,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Relation.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "MoreauJeanOSI.hpp" // Numerics Header
 #include "MoreauJeanGOSI.hpp" // Numerics Header
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
@@ -35,7 +36,7 @@
 #include "NonSmoothDrivers.h"
 #include "gfc3d_Solvers.h"
 #include "NumericsSparseMatrix.h"
-// #define DEBUG_NOCOLOR
+//#define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -50,9 +51,16 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolver
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions options):
   LinearOSNS(options,GLOBAL), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
 {
-  // // Only fc3d for the moment.
-  // if(_contactProblemDim != 3)
-  //   THROW_EXCEPTION("GlobalFrictionContact No solver for 2 dimensional problems");
+  if(dimPb == 2)
+  {
+    _gfc_driver = &gfc2d_driver;
+  }
+  else if(dimPb == 3)
+  {
+    _gfc_driver = &gfc3d_driver;
+  }
+  else
+    THROW_EXCEPTION("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
 
   //Reset default storage type for numerics matrices.
   _numericsMatrixStorageType = NM_SPARSE;
@@ -118,7 +126,11 @@ SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactPro
   numerics_problem->b = _b->getArray();
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->mu = _mu->data();
-  numerics_problem->dimension = 3;
+  numerics_problem->dimension = _contactProblemDim;
+  if (_assemblyType == GLOBAL_REDUCED)
+  {
+    numerics_problem->M_inverse = &*_W_inverse->numericsMatrix();
+  }
   return numerics_problem;
 }
 
@@ -131,7 +143,11 @@ GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProble
   numerics_problem->b = _b->getArray();
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->mu = _mu->data();
-  numerics_problem->dimension = 3;
+  numerics_problem->dimension = _contactProblemDim;
+  if (_assemblyType == GLOBAL_REDUCED)
+  {
+    numerics_problem->M_inverse = &*_W_inverse->numericsMatrix();
+  }
   return numerics_problem;
 }
 
@@ -146,19 +162,20 @@ bool GlobalFrictionContact::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
   {
     THROW_EXCEPTION("\nGlobalFrictionContact::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
-                      Compatible NonSmoothLaw is NewtonImpactFrictionNSL (3D) \n");
+                      Compatible NonSmoothLaw is NewtonImpactFrictionNSL (2D or 3D) \n");
     return false;
   }
   if (_nslawtype.size() > 1)
   {
     THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
-                     Compatible NonSmoothLaw is : NewtonImpactFrictionNSL (3D), but you cannot mix them \n");
+                     Compatible NonSmoothLaw is : NewtonImpactFrictionNSL (2D or 3D), but you cannot mix them \n");
     return false;
   }
 
   return true;
 }
 
+//#define WITH_TIMER
 
 
 bool GlobalFrictionContact::preCompute(double time)
@@ -210,14 +227,35 @@ bool GlobalFrictionContact::preCompute(double time)
 
     size_t sizeM = 0;
 
-
+#ifdef WITH_TIMER
+    std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+    start = std::chrono::system_clock::now();
+#endif
     // fill _W
     _W->fillW(DSG0);
     sizeM = _W->size();
     _sizeGlobalOutput = sizeM;
     DEBUG_PRINTF("sizeM = %lu \n", sizeM);
+#ifdef WITH_TIMER
+    end = std::chrono::system_clock::now();
+    int elapsed = std::chrono::duration_cast<std::chrono::microseconds> (end-start).count();
+    std::cout << "\nGlobalFrictionContact: fill W  " << elapsed << " ms" << std::endl;
+#endif    
 
-
+    
+    if (_assemblyType == GLOBAL_REDUCED)
+    {
+      // fill _W_inverse
+      _W_inverse->fillWinverse(DSG0);
+    }
+#ifdef WITH_TIMER
+    end_old=end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+      (end-end_old).count();
+    std::cout << "GlobalFrictionContact: fillW inverse " << elapsed << " ms" << std::endl;
+#endif
+ 
     // fill _q
     if(_q->size() != _sizeGlobalOutput)
       _q->resize(_sizeGlobalOutput);
@@ -229,20 +267,14 @@ bool GlobalFrictionContact::preCompute(double time)
       SP::DynamicalSystem ds = DSG0.bundle(*dsi);
       Type::Siconos dsType = Type::value(*ds);
       size_t dss = ds->dimension();
-      DEBUG_PRINTF("offset = %lu \n", offset);
 
-      OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
-      OSI::TYPES osiType = Osi.getType();
-      if(osiType == OSI::MOREAUJEANGOSI)
+      //OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
+      //OSI::TYPES osiType = Osi.getType();
+      SP::MoreauJeanGOSI mjgosi =  std::dynamic_pointer_cast<MoreauJeanGOSI>(DSG0.properties(DSG0.descriptor(ds)).osi);
+      if(mjgosi)
       {
         VectorOfVectors& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
-
-        if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-        {
-          SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
-          setBlock(vfree, _q, dss, 0, offset);
-        }
-        else  if(dsType == Type::NewtonEulerDS)
+        if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
         {
           SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
           setBlock(vfree, _q, dss, 0, offset);
@@ -250,12 +282,19 @@ bool GlobalFrictionContact::preCompute(double time)
       }
       else
       {
-        THROW_EXCEPTION("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osiType));
+        THROW_EXCEPTION("GlobalFrictionContact::computeq. Not yet implemented for the given Integrator type : ");
       }
       offset += dss;
     }
     DEBUG_EXPR(_q->display(););
-
+#ifdef WITH_TIMER
+    end_old=end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+      (end-end_old).count();
+    std::cout << "GlobalFrictionContact: fill q " << elapsed << " ms" << std::endl;
+#endif
+ 
     /************************************/
 
 
@@ -265,7 +304,13 @@ bool GlobalFrictionContact::preCompute(double time)
 
     _sizeOutput =_H->sizeColumn();
     DEBUG_PRINTF("_sizeOutput = %i\n ", _sizeOutput);
-
+#ifdef WITH_TIMER
+    end_old=end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+      (end-end_old).count();
+    std::cout << "GlobalFrictionContact: fill H " << elapsed << " ms" << std::endl;
+#endif
 
     //fill _b
     if(_b->size() != _sizeOutput)
@@ -282,18 +327,18 @@ bool GlobalFrictionContact::preCompute(double time)
 
       SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
       SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
-      OneStepIntegrator& Osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
-      OneStepIntegrator& Osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
+      OneStepIntegrator& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+      OneStepIntegrator& osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
 
-      OSI::TYPES osi1Type = Osi1.getType();
-      OSI::TYPES osi2Type = Osi2.getType();
-      if(osi1Type == OSI::MOREAUJEANGOSI  && osi2Type == OSI::MOREAUJEANGOSI)
+      if (typeid(osi1) == typeid(MoreauJeanGOSI) and typeid(osi2) == typeid(MoreauJeanGOSI))
       {
-        static_cast<MoreauJeanGOSI&>(Osi1).NSLcontrib(inter, *this);
+        //std::cout << "MoreauJeanGOSI case" << std::endl;
+        SP::MoreauJeanGOSI mjgosi1 =  std::dynamic_pointer_cast<MoreauJeanGOSI>(DSG0.properties(DSG0.descriptor(ds1)).osi);
+        mjgosi1->NonSmoothLawContributionToOutput(inter, *this);
       }
       else
       {
-        THROW_EXCEPTION("GlobalFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osi1Type));
+        THROW_EXCEPTION("GlobalFrictionContact::computeq. Not yet implemented for the given Integrator type ");
       }
       SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
       pos =  indexSet.properties(*ui).absolute_position;
@@ -301,6 +346,14 @@ bool GlobalFrictionContact::preCompute(double time)
       setBlock(osnsp_rhs, _b, sizeY, 0, pos);
     }
     DEBUG_EXPR(_b->display(););
+#ifdef WITH_TIMER
+    end_old=end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+      (end-end_old).count();
+    std::cout << "GlobalFrictionContact: fill b " << elapsed << " ms" << std::endl;
+#endif
+    
     // Checks z and w sizes and reset if necessary
     if(_z->size() != _sizeOutput)
     {
@@ -318,7 +371,14 @@ bool GlobalFrictionContact::preCompute(double time)
       _globalVelocities->resize(_sizeGlobalOutput);
       _globalVelocities->zero();
     }
-
+  // nothing to do (IsLinear and not changed)
+#ifdef WITH_TIMER
+  end_old=end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+    (end-end_old).count();
+  std::cout << "GlobalFrictionContact: init w and z and V " << elapsed << " ms" << std::endl;
+#endif
   }
   DEBUG_END("GlobalFrictionContact::preCompute(double time)\n");
   return true;
@@ -332,8 +392,9 @@ int GlobalFrictionContact::compute(double time)
   if(!cont)
     return info;
   updateMu();
+  
   // --- Call Numerics solver ---
-  if(_sizeGlobalOutput != 0)
+  //if(_sizeGlobalOutput != 0)
   {
     info= solve();
     DEBUG_EXPR(display(););
@@ -376,7 +437,7 @@ void GlobalFrictionContact::postCompute()
   size_t pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += 3)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += _contactProblemDim)
   {
     Interaction& inter = *indexSet.bundle(*ui);
     // Get Y and Lambda for the current Interaction
@@ -392,7 +453,7 @@ void GlobalFrictionContact::postCompute()
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   unsigned int sizeDS;
-  SP::OneStepIntegrator  Osi;
+  SP::OneStepIntegrator  Osi; 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   pos=0;
   for(std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
