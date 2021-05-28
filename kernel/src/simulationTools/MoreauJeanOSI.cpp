@@ -1711,11 +1711,13 @@ void MoreauJeanOSI::updateState(const unsigned int)
                " MoreauJeanOSI::updateState() *d.p(_levelMaxForInput) == nullptr.");
         v = *d.p(_levelMaxForInput); // v = p
         if(d.boundaryConditions())
+        {
           for(std::vector<unsigned int>::iterator
               itindex = d.boundaryConditions()->velocityIndices()->begin() ;
               itindex != d.boundaryConditions()->velocityIndices()->end();
               ++itindex)
             v.setValue(*itindex, 0.0);
+        }
         if(dsType == Type::LagrangianLinearDiagonalDS)
         {
           for(unsigned int i=0; i<d.dimension(); ++i)

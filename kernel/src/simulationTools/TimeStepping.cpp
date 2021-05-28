@@ -68,7 +68,8 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
     _resetAllLambda(true),
-    _skip_last_updateOutput(false)
+    _skip_last_updateOutput(false),
+    _skip_last_updateInput(false)
 {
 
   if(osi) insertIntegrator(osi);
@@ -92,7 +93,8 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisa
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
     _resetAllLambda(true),
-    _skip_last_updateOutput(false)
+    _skip_last_updateOutput(false),
+    _skip_last_updateInput(false)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -509,7 +511,7 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
                 <<" with accuracy: "
                 << _newtonResiduDSMax
                 << std::endl ;
-    
+
     if(info && _warnOnNonConvergence)
       std::cout << "[kernel] TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
   }
@@ -537,7 +539,7 @@ void TimeStepping::initializeNewtonLoop()
     computeInitialNewtonState();
     computeResidu(); // we compute two times the residu ?
 
-    
+
     // for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     // {
     //   (*it)->computeInitialNewtonState();
@@ -554,23 +556,23 @@ void TimeStepping::initializeNewtonLoop()
     initializeNSDSChangelog();
 
     updateOutput();
-    
+
     DEBUG_PRINT("(re)Initialize OneStepNSProblem(s)\n");
     // Initialize OneStepNSProblem(s). Depends on the type of simulation.
     // Warning FP : must be done in any case, even if the interactions set
     // is empty.
     initOSNS();
 
-    
+
     updateInput(); //??
-    
+
   }
   // else  if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT) || isLinear)
   // {
   //   // Nothing to do in the linear case since everything has been already done in Simulation::initialize
   // }
 
-  
+
   // SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   // if(indexSet0->size()>0)
   // {
@@ -583,7 +585,7 @@ void TimeStepping::initializeNewtonLoop()
 
 
   updateDSPlugins(tkp1);
-  
+
   // SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
   // for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   // {
@@ -624,7 +626,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     _newtonNbIterations++;
     if (_newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
        prepareNewtonIteration();
-       
+
     computeFreeState();
 
     bool hasNSProblems = (!_allNSProblems->empty()) ? true : false;
@@ -637,6 +639,9 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       DefaultCheckSolverOutput(info);
     else
       checkSolverOutput(info, this);
+
+    if (!_skip_last_updateInput)
+      updateOutput();
 
     updateInput();
     updateState();

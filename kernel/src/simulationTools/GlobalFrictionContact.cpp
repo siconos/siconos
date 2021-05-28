@@ -323,7 +323,7 @@ bool GlobalFrictionContact::preCompute(double time)
       SP::Interaction inter = indexSet.bundle(*ui);
 
       assert(Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
-      _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu());
+      _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu()); //curious !!
 
       SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
       SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;

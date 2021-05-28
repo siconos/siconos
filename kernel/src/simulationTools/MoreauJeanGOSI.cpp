@@ -268,7 +268,7 @@ double MoreauJeanGOSI::computeResidu()
 
       residu =  -1.0* free_rhs;
       prod(1.0, W, *v, residu, false);
-     
+
       DEBUG_EXPR(residu.display());
 
       if(d->p(1))
@@ -588,11 +588,10 @@ void MoreauJeanGOSI::updateState(const unsigned int)
     VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     // Get the DS type
-
     Type::Siconos dsType = Type::value(ds);
 
     // 3 - Lagrangian Systems
-    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    if(dsType == Type::LagrangianDS)
     {
       LagrangianDS& d = static_cast<LagrangianDS&>(ds);
       bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
@@ -614,6 +613,29 @@ void MoreauJeanGOSI::updateState(const unsigned int)
         if(aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);
       }
+    }
+    else if (dsType == Type::LagrangianLinearTIDS)
+    {
+      //LagrangianDS& d = static_cast<LagrangianDS&>(ds);
+      // bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
+
+      // SiconosVector &q = *d.q();
+      // SiconosVector& local_buffer = *ds_work_vectors[MoreauJeanGOSI::LOCAL_BUFFER];
+
+      // // Save value of q in stateTmp for future convergence computation
+      // if(baux)
+      //   local_buffer = q;
+
+      updatePosition(ds);
+
+      // if(baux)
+      // {
+      //   double ds_norm_ref = 1. + ds.x0()->norm2(); // Should we save this in the graph?
+      //   local_buffer -= q;
+      //   double aux = (local_buffer.norm2()) / ds_norm_ref;
+      //   if(aux > RelativeTol)
+      //     _simulation->setRelativeConvergenceCriterionHeld(false);
+      // }
     }
     else if(dsType == Type::NewtonEulerDS)
     {

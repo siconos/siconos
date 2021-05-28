@@ -113,6 +113,11 @@ protected:
    */
   bool _skip_last_updateOutput;
 
+  /** boolean variable to skip  updateInput at the end of the step (default false)
+   * useful for Global integrators that do not need to compute input in the linear case
+   */
+  bool _skip_last_updateInput;
+
 
 
   /** Default Constructor
@@ -284,6 +289,14 @@ public:
   bool skipLastUpdateOutput()
   {
     return _skip_last_updateOutput;
+  };
+  void setSkipLastUpdateInput(bool newval)
+  {
+    _skip_last_updateInput = newval;
+  };
+  bool skipLastUpdateInput()
+  {
+    return _skip_last_updateInput;
   };
 
   /** To specify if the output interaction residu must be computed.
