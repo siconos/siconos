@@ -326,6 +326,7 @@ int globalFrictionContact_computeGlobalVelocity(
     double* vtmp = (double*)calloc(n , sizeof(double));
     cblas_dcopy_msan(n,  globalVelocity, 1, vtmp, 1);
     NM_gemv(alpha, problem->M_inverse, vtmp, beta2, globalVelocity);
+    free(vtmp);
   }
   else
   {
