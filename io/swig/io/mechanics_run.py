@@ -2041,6 +2041,25 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
 
+
+    def output_results(self,with_timer=False):
+                            
+        self.log(self.output_static_objects, with_timer)()
+
+        self.log(self.output_dynamic_objects, with_timer)()
+
+        self.log(self.output_velocities, with_timer)()
+
+        self.log(self.output_contact_forces, with_timer)()
+
+        if self._should_output_domains:
+            self.log(self.output_domains, with_timer)()
+
+        self.log(self.output_solver_infos, with_timer)()
+
+        self.log(self._out.flush)()
+
+
     def output_run_options(self):
         """
         Outputs run_options
@@ -2149,8 +2168,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.initializeOSIAssociations, with_timer)()
         self.log(s.initializeIndexSets, with_timer)()
 
-
-
         self.log(s.updateWorldFromDS, with_timer)()
         self.log(s.updateInteractions, with_timer)()
         self.log(s.initializeNSDSChangelog, with_timer)()
@@ -2159,9 +2176,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         self.log(s.firstInitialize, with_timer)()
 
-
-
-        self.log(s.resetLambdas, with_timer)()
+        #self.log(s.resetLambdas, with_timer)()
         # Again the access to s._newtonTolerance generates a segfault due to director
         #newtonTolerance = s.newtonTolerance()
         newtonMaxIteration = s.newtonMaxIteration()
@@ -2859,20 +2874,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if verbose:
                     self.print_verbose('output in hdf5 file at step ', k)
 
-                self.log(self.output_static_objects, with_timer)()
-
-                self.log(self.output_dynamic_objects, with_timer)()
-
-                self.log(self.output_velocities, with_timer)()
-
-                self.log(self.output_contact_forces, with_timer)()
-
-                if self._should_output_domains:
-                    self.log(self.output_domains, with_timer)()
-
-                self.log(self.output_solver_infos, with_timer)()
-
-                self.log(self._out.flush)()
+                self.log(self.output_results, with_timer)()
 
             if self._output_backup:
                 if (k % self._output_backup_frequency == 0) or (k == 1):
