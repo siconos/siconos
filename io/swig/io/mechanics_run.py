@@ -777,6 +777,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['start_run_iteration_hook']=None
         d['end_run_iteration_hook']=None
         d['skip_last_update_output']=False
+        d['skip_last_update_input']=False
         d['osns_assembly_type']= None
                 
 
@@ -2213,11 +2214,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 else:
                     info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
-                self.log(s.updateInput, with_timer)()
+                if not s.skipLastUpdateInput():
+                    self.log(s.updateInput, with_timer)()
                 self.log(s.updateState, with_timer)()
                 if not s.skipLastUpdateOutput():
                     self.log(s.updateOutput, with_timer)()
-
+  
                 if s.numberOfOSNSProblems() > 0:
                     self.log(s.saveYandLambdaInOldVariables, with_timer)()
 
@@ -2775,6 +2777,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         
         simulation.setSkipLastUpdateOutput(run_options.get('skip_last_update_output'))
+        simulation.setSkipLastUpdateInput(run_options.get('skip_last_update_input'))
 
         verbose=run_options.get('verbose')
         if verbose:
