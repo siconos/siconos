@@ -269,9 +269,7 @@ int frictionContact_fclib_write_guess(double * reaction, double * velocity,
 
 GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_problem)
 {
-  GlobalFrictionContactProblem* problem;
-
-  problem = (GlobalFrictionContactProblem*)malloc(sizeof(GlobalFrictionContactProblem));
+  GlobalFrictionContactProblem* problem = globalFrictionContactProblem_new();
 
   problem->dimension = fclib_problem->spacedim;
   problem->mu = fclib_problem->mu;
