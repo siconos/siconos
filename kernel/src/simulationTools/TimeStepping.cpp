@@ -69,7 +69,8 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
     _warnOnNonConvergence(true),
     _resetAllLambda(true),
     _skip_last_updateOutput(false),
-    _skip_last_updateInput(false)
+    _skip_last_updateInput(false),
+    _skip_resetLambdas(false)
 {
 
   if(osi) insertIntegrator(osi);
@@ -94,7 +95,8 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisa
     _warnOnNonConvergence(true),
     _resetAllLambda(true),
     _skip_last_updateOutput(false),
-    _skip_last_updateInput(false)
+    _skip_last_updateInput(false),
+    _skip_resetLambdas(false)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -426,7 +428,8 @@ void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
   initialize();
-  resetLambdas();
+  if (!_skip_resetLambdas)
+    resetLambdas();
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 }
 

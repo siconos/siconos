@@ -118,6 +118,10 @@ protected:
    */
   bool _skip_last_updateInput;
 
+  /** boolean variable to skip  resetLambdas (default false)
+   */
+  bool _skip_resetLambdas;
+
 
 
   /** Default Constructor
@@ -297,6 +301,14 @@ public:
   bool skipLastUpdateInput()
   {
     return _skip_last_updateInput;
+  };
+  void setSkipResetLambdas(bool newval)
+  {
+    _skip_resetLambdas = newval;
+  };
+  bool skipResetLambdas()
+  {
+    return _skip_resetLambdas;
   };
 
   /** To specify if the output interaction residu must be computed.

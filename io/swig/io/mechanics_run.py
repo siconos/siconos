@@ -778,6 +778,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['end_run_iteration_hook']=None
         d['skip_last_update_output']=False
         d['skip_last_update_input']=False
+        d['skip_reset_lambdas']=False
         d['osns_assembly_type']= None
                 
 
@@ -2175,8 +2176,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.initOSNS, with_timer)()
 
         self.log(s.firstInitialize, with_timer)()
-
-        #self.log(s.resetLambdas, with_timer)()
+        if not s.skipResetLambdas():
+            self.log(s.resetLambdas, with_timer)()
         # Again the access to s._newtonTolerance generates a segfault due to director
         #newtonTolerance = s.newtonTolerance()
         newtonMaxIteration = s.newtonMaxIteration()
@@ -2506,6 +2507,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['start_run_iteration_hook']=start_run_iteration_hook
             run_options['end_run_iteration_hook']=end_run_iteration_hook
             run_options['skip_last_update_output']=skip_last_update_output
+            run_options['skip_last_update_input']=skip_last_update_input
 
         
         self._run_options=run_options
@@ -2793,6 +2795,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         
         simulation.setSkipLastUpdateOutput(run_options.get('skip_last_update_output'))
         simulation.setSkipLastUpdateInput(run_options.get('skip_last_update_input'))
+        simulation.setSkipResetLambdas(run_options.get('skip_reset_lambdas'))
 
         verbose=run_options.get('verbose')
         if verbose:
