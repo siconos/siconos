@@ -231,7 +231,12 @@ if(WITH_${COMPONENT}_TESTING)
     EXTRA_SOURCES data_collection_gfc3d_1.c test_nsn_gfc3d_1.c)
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_1
-    EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c)
+    EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c )
+
+  
+  new_tests_collection(
+    DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc2d_1.c test_first_order_gfc2d_1.c )
 
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)

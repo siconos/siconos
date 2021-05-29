@@ -278,8 +278,7 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactPr
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
   int m = 3 * nc;
-
-  GlobalFrictionContactProblem* new = (GlobalFrictionContactProblem*) malloc(sizeof(GlobalFrictionContactProblem));
+  GlobalFrictionContactProblem* new = globalFrictionContactProblem_new();
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
   new->M = NM_new();
@@ -292,6 +291,10 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactPr
   memcpy(new->b, problem->b, m*sizeof(double));
   new->mu = (double*)malloc(nc*sizeof(double));
   memcpy(new->mu, problem->mu, nc*sizeof(double));
+  if (problem->M_inverse)
+  {
+    NM_copy(problem->M_inverse, new->M_inverse);
+  }
   new->env = NULL;
   return new;
 }
@@ -353,28 +356,6 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
   localproblem->dimension =  problem->dimension;
   localproblem->mu = (double*)calloc(problem->numberOfContacts,sizeof(double));
   cblas_dcopy_msan(problem->numberOfContacts, problem->mu, 1, localproblem->mu, 1);
-
-  /* assert(M); */
-  /* assert(H); */
-  /* NM_display(M); */
-  /* NM_display(H); */
-  /* NumericsMatrix *MMtmp = NM_new(); */
-  /* NumericsMatrix *HHtmp = NM_new(); */
-
-  /* NM_copy(M,MMtmp); */
-  /* NM_copy(H,HHtmp); */
-
-  /* NM_clearSparse(M); */
-  /* NM_clearSparse(H); */
-
-  /* M = NM_create(NM_DENSE, n, n); */
-  /* H = NM_create(NM_DENSE, n, m); */
-
-  /* NM_to_dense(MMtmp,M); */
-  /* NM_to_dense(HHtmp,H); */
-
-  /* NM_display(M); */
-  /* NM_display(H); */
 
   if(H->storageType != M->storageType)
   {

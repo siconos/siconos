@@ -77,12 +77,31 @@
 
 /* } */
 
+//#define DUMP_PROBLEM
+#ifdef DUMP_PROBLEM
+static int fccounter = 0;
+#endif
+//#define DUMP_PROBLEM_IF_INFO
+#ifdef DUMP_PROBLEM_IF_INFO
+static int fccounter = 0;
+#endif
 
 int gfc2d_driver(GlobalFrictionContactProblem* problem, double *reaction, double *velocity,
                  double* globalVelocity,  SolverOptions* options)
 {
   assert(options->isSet);
   DEBUG_EXPR(NV_display(globalVelocity,problem_ori->M->size0););
+
+#ifdef DUMP_PROBLEM
+  char fname[256];
+  int ncc = problem->numberOfContacts;
+  sprintf(fname, "gfc2d_granularflowonwall_%.5d_%.5d.dat", ncc, fccounter++);
+  printf("Dump %s file\n", fname);
+
+  FILE * foutput  =  fopen(fname, "w");
+  globalFrictionContact_printInFile(problem, foutput);
+  fclose(foutput);
+#endif
 
   /* verbose=1; */
 

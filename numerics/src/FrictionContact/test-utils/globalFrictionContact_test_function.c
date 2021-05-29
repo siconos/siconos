@@ -60,7 +60,10 @@ int globalFrictionContact_test_function(TestCase* current)
 
   if(dim == 2)
   {
-    info = 1;
+
+    info = gfc2d_driver(problem,
+                        reaction, velocity, globalvelocity,
+                        current->options);
   }
   else if(dim == 3)
   {
