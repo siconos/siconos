@@ -360,7 +360,7 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
-    subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
+    subscal(e, _inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -369,7 +369,7 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     e = nslaw.en();
     // Only the normal part is multiplied by e
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
-    osnsp_rhs(0) +=  e * (*_inter->y_k(_osnsp->inputOutputLevel()))(0);
+    osnsp_rhs(0) +=  e * _inter->y_k(_osnsp->inputOutputLevel())(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)

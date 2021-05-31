@@ -1277,7 +1277,7 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
-    subscal(e, *_inter.y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
+    subscal(e, _inter.y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
   }
 
   void visit(const RelayNSL& nslaw)
@@ -1293,15 +1293,15 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     // The normal part is multiplied depends on en
     if(nslaw.en() > 0.0)
     {
-      osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
+      osnsp_rhs(0) +=  nslaw.en() * _inter.y_k(_osnsp->inputOutputLevel())(0);
     }
     // The tangential part is multiplied depends on et
     if(nslaw.et() > 0.0)
     {
-      osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(1);
+      osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp->inputOutputLevel())(1);
       if(_inter.nonSmoothLaw()->size()>=2)
       {
-        osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(2);
+        osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp->inputOutputLevel())(2);
       }
     }
   }
@@ -1312,15 +1312,15 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     // The normal part is multiplied depends on en
     if(nslaw.en() > 0.0)
     {
-      osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
+      osnsp_rhs(0) +=  nslaw.en() * _inter.y_k(_osnsp->inputOutputLevel())(0);
     }
     // The tangential part is multiplied depends on et
     if(nslaw.et() > 0.0)
     {
-      osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(1);
+      osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp->inputOutputLevel())(1);
       if(_inter.nonSmoothLaw()->size()>=2)
       {
-        osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(2);
+        osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp->inputOutputLevel())(2);
       }
     }
   }

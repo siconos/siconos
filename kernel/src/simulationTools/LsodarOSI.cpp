@@ -622,7 +622,7 @@ struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[LsodarOSI::OSNSP_RHS];
-    subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false); // q = q + e * q
+    subscal(e, _inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false); // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)

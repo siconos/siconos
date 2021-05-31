@@ -871,7 +871,7 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Int
     /*  Contacts which have been closing in the last time step */
     DEBUG_PRINT(" level == 2\n");
     double y = (*(inter->y(0)))(0); // current position
-    double y_k = (*(inter->y_k(0)))(0); // old position
+    double y_k = (inter->y_k(0))(0); // old position
     DEBUG_PRINTF("y= %18.14e\n", y);
     DEBUG_PRINTF("y_k= %18.14e\n", y_k);
     /* if Interaction has not been active in the previous calculation

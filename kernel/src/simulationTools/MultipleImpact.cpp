@@ -404,17 +404,17 @@ void MultipleImpact::InitializeInput()
   {
     SP::Interaction inter = indexSet.bundle(*ui);
     //SP::SiconosVector Vc0 = inter->y(1); // Relative velocity at beginning of impact
-    SP::SiconosVector Vc0 = inter->y_k(1); // Relative velocity at beginning of impact
+    const SiconosVector & Vc0 = inter->y_k(1); // Relative velocity at beginning of impact
 
     unsigned int pos_inter = indexSet.properties(*ui).absolute_position;
 
-    setBlock(*Vc0, _velocityContact, Vc0->size(), 0, pos_inter);
-    SP::SiconosVector ener0(new SiconosVector(Vc0->size()));
+    setBlock(Vc0, _velocityContact, Vc0.size(), 0, pos_inter);
+    SP::SiconosVector ener0(new SiconosVector(Vc0.size()));
     ener0->zero(); // We suppose that the initial potential energy before impact is equal to zero at any contact
     // at the beginning of impact
     setBlock(*ener0, _energyContact, ener0->size(), 0, pos_inter);
     //SP::SiconosVector impulse0= (inter)->lambda(1))->vector(inter->number());
-    SP::SiconosVector impulse0(new SiconosVector(Vc0->size()));
+    SP::SiconosVector impulse0(new SiconosVector(Vc0.size()));
     impulse0->zero(); // We suppose that the impulse before impact is equal to zero at any contact
     // at the beginning of impact
     setBlock(*impulse0, _tolImpulseContact, impulse0->size(), 0, pos_inter);

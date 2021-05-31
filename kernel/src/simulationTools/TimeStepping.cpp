@@ -534,7 +534,7 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
                 <<" with accuracy: "
                 << _newtonResiduDSMax
                 << std::endl ;
-    
+
     if(info && _warnOnNonConvergence)
       std::cout << "[kernel] TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
   }
@@ -570,7 +570,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     update();
 
     hasNSProblems = (!_allNSProblems->empty()) ? true : false;
-    
+
   }
 
   else if(_newtonOptions == SICONOS_TS_NONLINEAR)
@@ -613,14 +613,14 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       updateState();
 
       _isNewtonConverge = newtonCheckConvergence(criterion);
-           
+
       if(!_isNewtonConverge && _newtonNbIterations < maxStep)
       {
         updateOutput();
       }
 
- 
-      
+
+
       displayNewtonConvergenceInTheLoop();
     } // End of the Newton Loop
 

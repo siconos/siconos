@@ -268,9 +268,6 @@ void Interaction::reset()
   _y.resize(_upperLevelForOutput + 1) ;
   _lambda.resize(_upperLevelForInput + 1);
 
-  // -- Memory allocation for buffers (OSI related ! Must be moved to the graph)
-  _y_k.resize(_upperLevelForOutput + 1);
-
   // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per relation)
   unsigned int nslawSize = _nslaw->size();
 
@@ -279,10 +276,7 @@ void Interaction::reset()
       i++)
   {
     _y[i].reset(new SiconosVector(nslawSize));
-    _y_k[i].reset(new SiconosVector(nslawSize));
-
     _y[i]->zero();
-    _y_k[i]->zero();
   }
 
 
@@ -664,7 +658,6 @@ void Interaction::swapInMemory()
   DEBUG_EXPR(display(false));
   for(unsigned int  i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
-    *(_y_k[i]) = *(_y[i]) ;
     _yMemory[i].swap(*_y[i]);
     DEBUG_PRINTF("swap level i = %i",i);
     DEBUG_EXPR(_yMemory[i].display(););
@@ -714,16 +707,6 @@ void Interaction::display(bool brief) const
   }
   if(!brief)
   {
-    for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
-    {
-      std::cout << "| y_k[" << i  << "] : ";
-      if(_y_k[i])
-      {
-        if(_y_k[i]->size() >= 5) std::cout <<std::endl;
-        _y_k[i]->display();
-      }
-      else std::cout << "->nullptr" <<std::endl;
-    }
     std::cout << "| _yMemory size: " << _yMemory.size() <<std::endl;;
     for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {

@@ -49,7 +49,7 @@
       and their derivatives.
     - output: y(i), to get derivative i of y
     - input: lambda(i), to get derivative i of lambda
- 
+
  */
 class Interaction : public std::enable_shared_from_this<Interaction >
 {
@@ -106,17 +106,14 @@ private:
    */
   VectorOfVectors _y;
 
-  /** value of the previous time-step */
-  VectorOfVectors _y_k;
-
   /** memory of previous coordinates of the system */
   VectorOfMemories _yMemory;
 
-  /** memory of previous coordinates of the system */
-  VectorOfMemories _lambdaMemory;
-
   /** result of the computeInput function */
   VectorOfVectors _lambda;
+
+  /** memory of previous coordinates of the system */
+  VectorOfMemories _lambdaMemory;
 
 
   /** the Non-smooth Law of the interaction*/
@@ -196,7 +193,7 @@ public:
   /** Interaction constructor
       \param NSL pointer object describing the nonsmooth law;
       the interaction size if infered from the size of this law.
-      \param rel a pointer object describing the functions used to compute the constraints 
+      \param rel a pointer object describing the functions used to compute the constraints
   */
   Interaction(SP::NonSmoothLaw NSL, SP::Relation rel);
 
@@ -207,7 +204,7 @@ public:
       Must be called when levels have been modified.
   */
   void reset();
-  
+
   /** set the links to the DynamicalSystem(s) and allocate the required workspaces
    *  \param interProp the InteractionProperties of this Interaction
       \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
@@ -227,7 +224,7 @@ public:
   void initializeLinkToDsVariables(DynamicalSystem& ds1,
                                    DynamicalSystem& ds2);
   ///@}
-  
+
   /** set all lambda to zero */
   void resetAllLambda() ;
 
@@ -319,7 +316,7 @@ public:
   {
     return _interactionSize;
   }
-  
+
   /** Get the sum of DS sizes, for DS involved in interaction.
    *  \return an unsigned int
    */
@@ -396,16 +393,8 @@ public:
    */
   void setYPtr(const unsigned int i, SP::SiconosVector v);
 
-  // -- y_k --
 
-  inline SP::SiconosVector y_k(const unsigned int i) const
-  {
-    assert(_y_k[i]);
-    return _y_k[i];
-  }
-
-
-  /** get all the values of the state vector y stored in memory
+  /** get all the values of the output y stored in memory
    * \param level
    * \return a memory
    */
@@ -413,15 +402,15 @@ public:
   {
     return _yMemory[level];
   }
-
-  /** get all the values of the multiplier lambda stored in memory
+  /** get the last value of the  output y stored in memory
    * \param level
-   * \return a memory
+   * \return a SiconosVector reference
    */
-  inline SiconosMemory& lambdaMemory(unsigned int level)
+  inline const SiconosVector& y_k(const unsigned int i) const
   {
-    return _lambdaMemory[level];
+    return _yMemory[i].getSiconosVector(0);
   }
+
 
   // -- _lambda --
 
@@ -453,6 +442,24 @@ public:
     return _lambda[i];
   }
 
+  /** get all the values of the multiplier lambda stored in memory
+   * \param level
+   * \return a memory
+   */
+  inline SiconosMemory& lambdaMemory(unsigned int level)
+  {
+    return _lambdaMemory[level];
+  }
+
+   /** get the last value of the multiplier lambda stored in memory
+   * \param level
+   * \return a SiconosVector reference
+   */
+  inline const SiconosVector& lambda_k(const unsigned int i) const
+  {
+    return _lambdaMemory[i].getSiconosVector(0);
+  }
+
   /** set the input vector _lambda to newVector
    *  \param v VectorOfVectors
    */
@@ -465,7 +472,7 @@ public:
 
   /** set _lambda[i] to newValue
    * \param i derivative number i of output
-   *  \param newValue a SiconosVector 
+   *  \param newValue a SiconosVector
    */
   void setLambda(const unsigned int i, const SiconosVector& newValue);
 
@@ -507,7 +514,7 @@ public:
   {
     return _relationMatrices;
   };
-  
+
   // --- OTHER FUNCTIONS ---
 
   /** set interaction 'ds-dimension', i.e. sum of all sizes of the dynamical systems linked
@@ -519,7 +526,7 @@ public:
     _sizeOfDS = s1;
   }
 
-  /** Must be call to fill _y_k. (after convergence of the Newton iterations)
+  /** Must be call to fill the memory. (after convergence of the Newton iterations)
    */
   void swapInMemory();
 
@@ -536,7 +543,7 @@ public:
     __count = new_count;
     return old_count;
   };
-  
+
   /** Computes output y; depends on the relation type.
    *  \param time current time
    *  \param derivativeNumber number of the derivative to compute,

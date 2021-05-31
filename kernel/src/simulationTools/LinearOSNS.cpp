@@ -184,10 +184,10 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
 
-  // --- Check compatible nslaws ---- 
+  // --- Check compatible nslaws ----
   checkCompatibleNSLaw(*nslaw);
-  
-  
+
+
   // --- Check block size ---
   assert(indexSet->properties(vd).block->size(0) == nslaw->size());
   assert(indexSet->properties(vd).block->size(1) == nslaw->size());
@@ -234,7 +234,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     if(relationType == FirstOrder)
     {
 
-      
+
 
       rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
@@ -758,6 +758,8 @@ bool LinearOSNS::preCompute(double time)
     }
 
     // Reset _w and _z with previous values of y and lambda
+    // VA 31/05/2021. Values was before the one of the NEwton Loop
+    // shpudl be better but needs memory comsumption
     // (i.e. val saved in yOutputOld and lambdaOld of the interaction).
     // Note : sizeOuput can be unchanged, but positions may have changed. (??)
     if(_keepLambdaAndYState)
@@ -769,8 +771,8 @@ bool LinearOSNS::preCompute(double time)
         // Get the position of inter-interactionBlock in the vector w
         // or z
         unsigned int pos = indexSet.properties(*ui).absolute_position;
-        SiconosVector& yOutput_k = *inter.y_k(inputOutputLevel());
-        const SiconosVector& lambda_k = inter.lambdaMemory(inputOutputLevel()).getSiconosVector(0);
+        const SiconosVector& yOutput_k = inter.y_k(inputOutputLevel());
+        const SiconosVector& lambda_k = inter.lambda_k(inputOutputLevel());
 
         if(_sizeOutput >= yOutput_k.size() + pos)
         {
