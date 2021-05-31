@@ -404,7 +404,7 @@ void MultipleImpact::InitializeInput()
   {
     SP::Interaction inter = indexSet.bundle(*ui);
     //SP::SiconosVector Vc0 = inter->y(1); // Relative velocity at beginning of impact
-    SP::SiconosVector Vc0 = inter->yOld(1); // Relative velocity at beginning of impact
+    SP::SiconosVector Vc0 = inter->y_k(1); // Relative velocity at beginning of impact
 
     unsigned int pos_inter = indexSet.properties(*ui).absolute_position;
 

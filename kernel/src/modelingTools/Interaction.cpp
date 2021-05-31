@@ -269,9 +269,7 @@ void Interaction::reset()
   _lambda.resize(_upperLevelForInput + 1);
 
   // -- Memory allocation for buffers (OSI related ! Must be moved to the graph)
-  _yOld.resize(_upperLevelForOutput + 1);
   _y_k.resize(_upperLevelForOutput + 1);
-  _lambdaOld.resize(_upperLevelForInput + 1);
 
   // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per relation)
   unsigned int nslawSize = _nslaw->size();
@@ -281,11 +279,9 @@ void Interaction::reset()
       i++)
   {
     _y[i].reset(new SiconosVector(nslawSize));
-    _yOld[i].reset(new SiconosVector(nslawSize));
     _y_k[i].reset(new SiconosVector(nslawSize));
 
     _y[i]->zero();
-    _yOld[i]->zero();
     _y_k[i]->zero();
   }
 
@@ -296,8 +292,6 @@ void Interaction::reset()
   {
     DEBUG_PRINTF("Interaction::reset(). _lambda[%i].reset()\n",i)
     _lambda[i].reset(new SiconosVector(nslawSize));
-    _lambdaOld[i].reset(new SiconosVector(nslawSize));
-    _lambdaOld[i]->zero();
   }
 }
 
@@ -457,17 +451,17 @@ void Interaction::__initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSy
   DSlink.resize(LagrangianR::DSlinkSize);
   DSlink[LagrangianR::q0].reset(new BlockVector()); // displacement
   DSlink[LagrangianR::q1].reset(new BlockVector()); // velocity
-  DSlink[LagrangianR::q2].reset(new BlockVector()); // acceleration
-  DSlink[LagrangianR::p0].reset(new BlockVector());
-  DSlink[LagrangianR::p1].reset(new BlockVector());
-  DSlink[LagrangianR::p2].reset(new BlockVector());
-  DSlink[LagrangianR::z].reset(new BlockVector());
-  RELATION::SUBTYPES relationSubType = _relation->getSubType();
-  if(relationSubType != LinearTIR)
-  {
-    //we need extra continuous memory vector
-    //todo
-  }
+  // DSlink[LagrangianR::q2].reset(new BlockVector()); // acceleration
+  // DSlink[LagrangianR::p0].reset(new BlockVector());
+  // DSlink[LagrangianR::p1].reset(new BlockVector());
+  // DSlink[LagrangianR::p2].reset(new BlockVector());
+  // DSlink[LagrangianR::z].reset(new BlockVector());
+  // RELATION::SUBTYPES relationSubType = _relation->getSubType();
+  // if(relationSubType != LinearTIR)
+  // {
+  //   //we need extra continuous memory vector
+  //   //todo
+  // }
 
   __initDSDataLagrangian(ds1, DSlink);
   if(&ds1 != &ds2)
@@ -487,17 +481,34 @@ void Interaction::__initDSDataLagrangian(DynamicalSystem& ds, VectorOfBlockVecto
 
   // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
-
   DSlink[LagrangianR::q1]->insertPtr(lds.velocity());
-  if(lds.acceleration())
-    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
-  DSlink[LagrangianR::z]->insertPtr(lds.z());
 
+
+  if(lds.acceleration())
+  {
+    if (!DSlink[LagrangianR::q2])
+      DSlink[LagrangianR::q2].reset(new BlockVector()); // acceleration}
+
+    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
+  }
+
+  if (lds.z())
+  {
+    if (!DSlink[LagrangianR::z])
+      DSlink[LagrangianR::z].reset(new BlockVector());
+    DSlink[LagrangianR::z]->insertPtr(lds.z());
+  }
   for(unsigned int k = 0; k < 3; k++)
   {
-    if(lds.p(k) && DSlink[LagrangianR::p0 + k])
+    if(lds.p(k))
+    {
+      if(!DSlink[LagrangianR::p0 + k])
+        DSlink[LagrangianR::p0+k].reset(new BlockVector());
       DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
+    }
   }
+
+
 }
 
 void Interaction::__initDataNewtonEuler(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2)
@@ -597,55 +608,6 @@ void Interaction::setYPtr(const unsigned int  index, SP::SiconosVector newY)
   _y[index] = newY;
 }
 
-void Interaction::setYOld(const VectorOfVectors& newVector)
-{
-  auto size = newVector.size();
-  _yOld.clear();
-  _yOld.resize(size);
-
-  for(VectorOfVectors::size_type i = 0; i < size; i++)
-    _yOld[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
-}
-
-void Interaction::setYOldPtr(const VectorOfVectors& newVector)
-{
-  // clear _yOld
-
-  _yOld.clear();
-
-  // copy
-  _yOld = newVector; // smart ptr
-}
-
-void Interaction::setYOld(const unsigned int  index, const SiconosVector& newYOld)
-{
-  if(_yOld.size() <= index)
-    THROW_EXCEPTION("Interaction::setYOld, index out of range ");
-
-  // set _yOld[index]
-  if(! _yOld[index])
-  {
-    _yOld[index].reset(new SiconosVector(newYOld));
-  }
-  else
-  {
-    assert(_yOld[index]->size() == newYOld.size() &&
-           "Interaction::setYOld(index,newYOld), inconsistent sizes between yOld(index) and newYOld");
-    *(_yOld[index]) = newYOld;
-  }
-}
-
-void Interaction::setYOldPtr(const unsigned int  index, SP::SiconosVector newYOld)
-{
-  assert(_yOld.size() > index &&
-         "Interaction::setYOldPtr, index out of range");
-
-  assert(newYOld->size() == _interactionSize &&
-         "Interaction::setYOldPtr, interactionSize differs from newYOld vector size");
-
-  _yOld[index] = newYOld;
-}
-
 void Interaction::setLambda(const VectorOfVectors& newVector)
 {
   auto size = newVector.size();
@@ -692,76 +654,8 @@ void Interaction::setLambdaPtr(const unsigned int  index, SP::SiconosVector newL
   _lambda[index] = newLambda;
 }
 
-void Interaction::setLambdaOld(const VectorOfVectors& newVector)
-{
-  auto size = newVector.size();
-
-  // clear lambdaOld
-  _lambdaOld.clear();
-  _lambdaOld.resize(size);
-
-  for(VectorOfVectors::size_type i = 0; i < size; i++)
-    _lambdaOld[i].reset(new SiconosVector(*(newVector[i]))); // -> copy !
-}
-
-void Interaction::setLambdaOldPtr(const VectorOfVectors& newVector)
-{
-  // clear lambdaOld
-  _lambdaOld.clear();
-
-  // copy
-  _lambdaOld = newVector; // smart ptrs
-}
-
-void Interaction::setLambdaOld(const unsigned int  index, const SiconosVector& newLambdaOld)
-{
-  assert(_lambdaOld.size() > index &&
-         "Interaction::setLambdaOld, index out of range ");
-
-  // set lambdaOld[index]
-  if(! _lambdaOld[index])
-  {
-    _lambdaOld[index].reset(new SiconosVector(newLambdaOld));
-  }
-  else
-  {
-    if(_lambdaOld[index]->size() != newLambdaOld.size())
-      THROW_EXCEPTION("Interaction::setLambdaOld(index,newLambdaOld), inconsistent sizes between lambdaOld(index) and newLambdaOld ");
-    *(_lambdaOld[index]) = newLambdaOld;
-  }
-}
-
-void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector newLambdaOld)
-{
-  if(_lambdaOld.size() > index)
-    THROW_EXCEPTION("Interaction::setLambdaOldPtr, index out of range ");
-  if(newLambdaOld->size() != _interactionSize)
-    THROW_EXCEPTION("Interaction::setLambdaOldPtr, interactionSize differs from newLambdaOld vector size ");
-
-  _lambdaOld[index] = newLambdaOld;
-}
-
 
 // --- OTHER FUNCTIONS ---
-
-void Interaction::swapInOldVariables()
-{
-  // i corresponds to the derivative number and j the relation number.
-  for(unsigned int i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
-  {
-    assert(_y[i]);
-    assert(_yOld[i]);
-
-    *(_yOld[i]) = *(_y[i]) ;
-  }
-
-  for(unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
-  {
-    assert(_lambdaOld[i]);
-    assert(_lambda[i]);
-    *(_lambdaOld[i]) = *(_lambda[i]);
-  }
-}
 
 void Interaction::swapInMemory()
 {
@@ -805,16 +699,6 @@ void Interaction::display(bool brief) const
     {
       if(_y[i]->size() >= 5) std::cout <<std::endl;
       _y[i]->display();
-    }
-    else std::cout << "->nullptr" <<std::endl;
-  }
-  for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
-  {
-    std::cout << "| yOld[" << i  << "] : ";
-    if(_yOld[i])
-    {
-      if(_yOld[i]->size() >= 5) std::cout <<std::endl;
-      _yOld[i]->display();
     }
     else std::cout << "->nullptr" <<std::endl;
   }

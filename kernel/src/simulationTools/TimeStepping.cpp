@@ -483,21 +483,6 @@ void   TimeStepping::prepareNewtonIteration()
   DEBUG_END("TimeStepping::prepareNewtonIteration()\n");
 }
 
-void TimeStepping::saveYandLambdaInOldVariables()
-{
-  // Temp FP : saveInOldVar was called for each osns and each osns call
-  // swapInOldVar for all interactions in the nsds.
-  // ==> let's do it only once, by the simu.
-
-  InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    //indexSet0->bundle(*ui)->swapInMemory();
-    indexSet0->bundle(*ui)->swapInOldVariables();;
-  }
-}
-
 void TimeStepping::displayNewtonConvergenceInTheLoop()
 {
   if(_displayNewtonConvergence)
@@ -585,8 +570,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     update();
 
     hasNSProblems = (!_allNSProblems->empty()) ? true : false;
-    if(hasNSProblems)
-      saveYandLambdaInOldVariables();
+    
   }
 
   else if(_newtonOptions == SICONOS_TS_NONLINEAR)
@@ -628,18 +612,15 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       updateInput();
       updateState();
 
+      _isNewtonConverge = newtonCheckConvergence(criterion);
+           
       if(!_isNewtonConverge && _newtonNbIterations < maxStep)
       {
         updateOutput();
       }
 
-      _isNewtonConverge = newtonCheckConvergence(criterion);
-
-      if(!_isNewtonConverge && !info)
-      {
-        if(hasNSProblems)
-          saveYandLambdaInOldVariables();
-      }
+ 
+      
       displayNewtonConvergenceInTheLoop();
     } // End of the Newton Loop
 

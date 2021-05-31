@@ -106,12 +106,6 @@ private:
    */
   VectorOfVectors _y;
 
-  /** previous value of Newton iteration for y
-   * \warning : VA 24/05/2013 this has to be put into the workspace vector
-   *   or we have to use the _yMemory storage
-   */
-  VectorOfVectors _yOld;
-
   /** value of the previous time-step */
   VectorOfVectors _y_k;
 
@@ -124,11 +118,6 @@ private:
   /** result of the computeInput function */
   VectorOfVectors _lambda;
 
-  /** previous step values for _lambda
-   * \warning : VA 24/05/2013 this has to be put into the workspace vector
-   *   or we have to use the _yMemory storage
-   */
-  VectorOfVectors _lambdaOld;
 
   /** the Non-smooth Law of the interaction*/
   SP::NonSmoothLaw _nslaw;
@@ -364,17 +353,6 @@ public:
     return *(_y[i]);
   }
 
-  /** get y[i], derivative number i of output
-   * \param i derivative number i of output
-   * \return BlockVector
-   */
-  inline const SiconosVector getCopyOfyOld(const unsigned int i) const
-  {
-    assert(_yOld[i]);
-    return *(_yOld[i]);
-  }
-
-
   /** get vector of output derivatives
    *  \return a VectorOfVectors
    */
@@ -418,67 +396,13 @@ public:
    */
   void setYPtr(const unsigned int i, SP::SiconosVector v);
 
-  // -- yOld --
+  // -- y_k --
 
-  /** get vector of output derivatives
-  *  \return a VectorOfVectors
-  */
-  inline const VectorOfVectors getYOld() const
-  {
-    return _yOld;
-  }
-
-  /** get yOld[i], derivative number i of output
-   * \param i derivative number i of output
-   * \return BlockVector
-   */
-  inline const SiconosVector getYOld(const unsigned int i) const
-  {
-    assert(_yOld[i]);
-    return *(_yOld[i]);
-  }
-
-  /** get yOld[i], derivative number i of output
-   * \param i derivative number i of output
-   * \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector yOld(const unsigned int i) const
-  {
-    assert(_yOld[i]);
-    return _yOld[i];
-  }
-  /* get y_k[i]
-   * \param i derivative number i of output
-   * \return pointer on a SiconosVector
-   */
   inline SP::SiconosVector y_k(const unsigned int i) const
   {
     assert(_y_k[i]);
     return _y_k[i];
   }
-
-  /** set the output vector yOld to newVector
-   * \param  v VectorOfVectors
-   */
-  void setYOld(const VectorOfVectors& v);
-
-  /** set vector yOld to newVector with direct pointer equality for
-   *  the yOld[i]
-   * \param  v VectorOfVectors
-   */
-  void setYOldPtr(const VectorOfVectors& v);
-
-  /** set yOld[i] to newValue
-   * \param i derivative number i of output
-   * \param v a SiconosVector and an unsigned int
-   */
-  void setYOld(const unsigned int i, const SiconosVector& v);
-
-  /** set yOld[i] to pointer newPtr
-   * \param i derivative number i of output
-   * \param v a SP::SiconosVector  and an unsigned int
-   */
-  void setYOldPtr(const unsigned int i, SP::SiconosVector v);
 
 
   /** get all the values of the state vector y stored in memory
@@ -551,57 +475,6 @@ public:
    */
   void setLambdaPtr(const unsigned int i, SP::SiconosVector newPtr);
 
-  // -- _lambdaOld --
-
-  /** get vector of input derivatives
-  *  \return a VectorOfVectors
-  */
-  inline const VectorOfVectors getLambdaOld() const
-  {
-    return _lambdaOld;
-  }
-
-  /** get _lambdaOld[i], derivative number i of input
-   * \param i derivative number i of output
-   *  \return SiconosVector
-   */
-  inline const SiconosVector getLambdaOld(const unsigned int i) const
-  {
-    assert(_lambdaOld[i]);
-    return *(_lambdaOld[i]);
-  }
-
-  /** get _lambdaOld[i], derivative number i of input
-   * \param i derivative number i of output
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector lambdaOld(const unsigned int i) const
-  {
-    assert(_lambdaOld[i]);
-    return _lambdaOld[i];
-  }
-
-  /** set the input vector _lambdaOld to newVector
-   * \param v VectorOfVectors
-   */
-  void setLambdaOld(const VectorOfVectors& v);
-
-  /** set vector _lambdaOld to newVector with direct pointer equality for the _lambdaOld
-  *  \param v VectorOfVectors
-  */
-  void setLambdaOldPtr(const VectorOfVectors& v);
-
-  /** set _lambdaOld[i] to newValue
-   * \param i derivative number i of output
-   * \param v a SiconosVector
-   */
-  void setLambdaOld(const unsigned int i, const SiconosVector& v );
-
-  /** set _lambdaOld[i] to pointer newPtr
-   * \param i derivative number i of output
-   * \param newPtr a SP::SiconosVector
-   */
-  void setLambdaOldPtr(const unsigned int i, SP::SiconosVector newPtr);
 
   /** get the Relation of this Interaction
    *  \return a pointer on this Relation
@@ -645,10 +518,6 @@ public:
   {
     _sizeOfDS = s1;
   }
-
-  /**   put values of y into yOld, the same for _lambda
-  */
-  void swapInOldVariables();
 
   /** Must be call to fill _y_k. (after convergence of the Newton iterations)
    */
