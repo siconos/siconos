@@ -611,14 +611,19 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       updateInput();
       updateState();
-
-      _isNewtonConverge = newtonCheckConvergence(criterion);
-
+      
+      // -- VA 01/07/2021
+      // The fact that we compute _isNewtonConverge after is a bit curious,
+      // it seems related to the fact that we do not compute at the beginning
+      // of the step for a old interaction
+      // if we compute the boolean before "if", the updateOutput is not done !!
+      // --
       if(!_isNewtonConverge && _newtonNbIterations < maxStep)
       {
         updateOutput();
       }
-
+      _isNewtonConverge = newtonCheckConvergence(criterion);
+      
 
 
       displayNewtonConvergenceInTheLoop();
