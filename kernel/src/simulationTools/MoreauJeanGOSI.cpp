@@ -470,6 +470,7 @@ void MoreauJeanGOSI::computeFreeState()
   DEBUG_END("MoreauJeanGOSI::computeFreeState()\n");
 }
 
+
 void MoreauJeanGOSI::NonSmoothLawContributionToOutput(SP::Interaction inter, OneStepNSProblem& osnsp)
 {
   if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)

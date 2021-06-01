@@ -448,21 +448,6 @@ void   TimeStepping::prepareNewtonIteration()
   DEBUG_END("TimeStepping::prepareNewtonIteration()\n");
 }
 
-void TimeStepping::saveYandLambdaInOldVariables()
-{
-  // Temp FP : saveInOldVar was called for each osns and each osns call
-  // swapInOldVar for all interactions in the nsds.
-  // ==> let's do it only once, by the simu.
-
-  InteractionsGraph::VIterator ui, uiend;
-  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    //indexSet0->bundle(*ui)->swapInMemory();
-    indexSet0->bundle(*ui)->swapInOldVariables();;
-  }
-}
-
 void TimeStepping::displayNewtonConvergenceInTheLoop()
 {
   if(_displayNewtonConvergence)
@@ -650,9 +635,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     updateState();
     if (!_skip_last_updateOutput)
       updateOutput();
+    hasNSProblems = (!_allNSProblems->empty()) ? true : false;
 
-    if(hasNSProblems)
-      saveYandLambdaInOldVariables();
   }
 
   else if(_newtonOptions == SICONOS_TS_NONLINEAR)
@@ -694,18 +678,18 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       updateInput();
       updateState();
 
+      // -- VA 01/07/2021
+      // The fact that we compute _isNewtonConverge after is a bit curious,
+      // it seems related to the fact that we do not compute at the beginning
+      // of the step for a old interaction
+      // if we compute the boolean before "if", the updateOutput is not done !!
+      // --
       if(!_isNewtonConverge && _newtonNbIterations < maxStep)
       {
         updateOutput();
       }
-
       _isNewtonConverge = newtonCheckConvergence(criterion);
 
-      if(!_isNewtonConverge && !info)
-      {
-        if(hasNSProblems)
-          saveYandLambdaInOldVariables();
-      }
       displayNewtonConvergenceInTheLoop();
     } // End of the Newton Loop
 

@@ -2235,9 +2235,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.log(s.updateState, with_timer)()
                 if not s.skipLastUpdateOutput():
                     self.log(s.updateOutput, with_timer)()
-  
-                if s.numberOfOSNSProblems() > 0:
-                    self.log(s.saveYandLambdaInOldVariables, with_timer)()
 
         else:
             while (not isNewtonConverge) and newtonNbIterations < newtonMaxIteration:
@@ -2264,9 +2261,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)
                 if s.displayNewtonConvergence():
                     s.displayNewtonConvergenceInTheLoop()
-                if (not isNewtonConverge) and (not info):
-                    if s.numberOfOSNSProblems() > 0:
-                        self.log(s.saveYandLambdaInOldVariables, with_timer)()
+                    
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration)
 

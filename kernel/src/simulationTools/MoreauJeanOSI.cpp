@@ -1327,6 +1327,7 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
 //   _NSLEffectOnFreeOutput(OneStepNSProblem& p, Interaction& inter, InteractionProperties& interProp) :
 //     _osnsp(p), _inter(inter), _interProp(interProp) {};
 
+
 void  MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nslaw)
 {
   double e;
@@ -1337,7 +1338,7 @@ void  MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nslaw)
   subCoord[2] = 0;
   subCoord[3] = subCoord[1];
   SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
-  subscal(e, *_inter.y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord, false);
+  subscal(e, _inter.y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord, false);
 }
 
 void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const RelayNSL& nslaw)
@@ -1350,19 +1351,19 @@ void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactFrictionNSL&
 {
   SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
+
   // The normal part is multiplied depends on en
   if(nslaw.en() > 0.0)
   {
-    osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
+    osnsp_rhs(0) +=  nslaw.en() * _inter.y_k(_osnsp.inputOutputLevel())(0);
   }
   // The tangential part is multiplied depends on et
   if(nslaw.et() > 0.0)
   {
-    osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(1);
+    osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
     if(_inter.nonSmoothLaw()->size()>=2)
     {
-      osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(2);
-    }
+      osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);    }
   }
 }
 void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactRollingFrictionNSL& nslaw)
@@ -1372,15 +1373,15 @@ void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactRollingFrict
   // The normal part is multiplied depends on en
   if(nslaw.en() > 0.0)
   {
-    osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
+    osnsp_rhs(0) +=  nslaw.en() * _inter.y_k(_osnsp.inputOutputLevel())(0);
   }
   // The tangential part is multiplied depends on et
   if(nslaw.et() > 0.0)
   {
-    osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(1);
+    osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
     if(_inter.nonSmoothLaw()->size()>=2)
     {
-      osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(2);
+      osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);
     }
   }
 }
@@ -1443,12 +1444,12 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
     _selected_coordinates[5] = sizeY;
     _selected_coordinates[6] = 0;
     _selected_coordinates[7] = sizeY;
-    
+
     VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
     // For the relation of type LagrangianRheonomousR
     if(relationSubType == RheonomousR)
     {
-     
+
 
       if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
