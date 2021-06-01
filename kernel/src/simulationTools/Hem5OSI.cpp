@@ -599,10 +599,15 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
   }
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
   if(relationType == Lagrangian)
   {
     inter_work_block[Hem5OSI::xfree].reset(new BlockVector());
     inter_work_block[Hem5OSI::xfree]->insertPtr(workVds1[Hem5OSI::FREE]);
+    LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
+    DSlink[LagrangianR::q2].reset(new BlockVector());
+    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
   }
   // else if (relationType == NewtonEuler)
   // {
@@ -615,7 +620,10 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if(relationType == Lagrangian)
     {
+      
       inter_work_block[Hem5OSI::xfree]->insertPtr(workVds2[Hem5OSI::FREE]);
+      LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
+      DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
