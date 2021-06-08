@@ -52,7 +52,9 @@ stages:
   # To run all tests
   - test      
   # To install software, generate a "siconos-ready" docker image and asave it in the registry.
-  - install   
+  - install 
+  # To build and run all examples
+  - examples
   # Templates for these jobs : .siconos-build (see below).
   # --- Doc stages ---
   # Build documentation (run doxygen, sphinx, ...)
@@ -89,7 +91,16 @@ workflow:
     - if: $CI_COMMIT_MESSAGE =~ /^\[docker-build\]/
       when: manual
     - when: never
-  
+
+# A rule to automatically start CI in child project siconos-tutorials.
+# Rule: commit message must contain [with examples]
+.examples-rules:
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
+      when: always
+    - when: never
+
+
 
 # -- Template used to describe docker-build jobs --
 #

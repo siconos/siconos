@@ -257,6 +257,22 @@ jupyterlab:install:
     - .siconos-jupyterlab-install
   needs: ["jupyterlab:build"]
 
+# Start CI in siconos-tutorials, when required
+# How? Use [with examples] in your commit message.
+# Based on the specific docker image build and saved during ubuntu20:install step.
+bridge:examples:
+  variables:
+    SICONOS_DOCKER_NAME: siconos-$CI_COMMIT_REF_NAME
+    TRIGGERED: 1
+  stage: examples
+  trigger: 
+    project: nonsmooth/siconos-tutorials
+    strategy: depend
+  needs: ["ubuntu20:install"]
+  extends:
+    - .examples-rules
+    
+
 
 # --- Creates a new pipeline to build documentation
 # Trigger : manual.
