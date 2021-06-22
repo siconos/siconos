@@ -24,7 +24,7 @@
 // Note, in general the "outside margin" is not implemented.  What is
 // needed is a way to project the point detected on the external shell
 // back to the shape surface.  This could be for example the closest
-// point on the convex hell.  (For convex shapes.)
+// point on the convex hull.  (For convex shapes.)
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -1578,7 +1578,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   //This version is ok
   double SCALING =1.0;
-  
+
   btConvexShape* childShape2 = new btCylinderShapeZ(btVector3(btScalar(SCALING*1),btScalar(SCALING*1),btScalar(_options.Depth2D)));
   //btConvexShape* colShape3= new btConvex2dShape(childShape2);
   SP::btConvex2dShape btconvex2d1(new btConvex2dShape(childShape2));
@@ -1737,38 +1737,98 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   if(ch2d->vertices()->size(1) != 2)
     THROW_EXCEPTION("2d Convex hull vertices matrix must have 2 columns.");
 
+  // First way. We avoid to double the point
+  // This works well if the  _options.worldScale is near to 1.
+  // for a unknown reason
+  // int rows = ch2d->vertices()->size(0);
+  // std::vector<btScalar> pts;
+  // pts.resize(rows*3);
+  // for(int r=0; r < rows; r++)
+  // {
+  //   pts[r*3+0] = (*ch2d->vertices())(r, 0) * _options.worldScale;
+  //   pts[r*3+1] = (*ch2d->vertices())(r, 1) * _options.worldScale;
+  //   pts[r*3+2] = _options.Depth2D * _options.worldScale;
+  // }
+
+  // Second way. We double the points
+  // it seems to be more robust for the contact detection
+  // it avoids to find contact on the edge of the convex hull "plate"
   // Copy and scale the points
-  int rows = ch2d->vertices()->size(0);
+  int rows2d = ch2d->vertices()->size(0);
+  int rows = rows2d *2;
+
   std::vector<btScalar> pts;
   pts.resize(rows*3);
-  for(int r=0; r < rows; r++)
+  for(int r=0; r < rows2d; r++)
   {
     pts[r*3+0] = (*ch2d->vertices())(r, 0) * _options.worldScale;
     pts[r*3+1] = (*ch2d->vertices())(r, 1) * _options.worldScale;
-    pts[r*3+2] = _options.Depth2D * _options.worldScale;
+    pts[r*3+2] = _options.Depth2D * _options.worldScale/2.0;
   }
+  for(int r=rows2d; r < rows; r++)
+  {
+    pts[r*3+0] = (*ch2d->vertices())(r-rows2d, 0) * _options.worldScale;
+    pts[r*3+1] = (*ch2d->vertices())(r-rows2d, 1) * _options.worldScale;
+    pts[r*3+2] =  - _options.Depth2D * _options.worldScale/2.0;
+  }
+
   DEBUG_EXPR_WE(
     for(int r=0; r < rows; r++)
-{
-  printf("pts[r*3+0] = %8.4e, pts[r*3+1] =%8.4e, pts[r*3+2] =%8.4e\n",pts[r*3+0], pts[r*3+1], pts[r*3+2]);
+      printf("pts[r*3+0] = %8.4e, pts[r*3+1] =%8.4e, pts[r*3+2] =%8.4e\n",pts[r*3+0], pts[r*3+1], pts[r*3+2]);
+    );
+
+
+  // This version is ok
+  // btConvexHullShape* childShape1 = new btConvexHullShape(&pts[0],rows, sizeof(btScalar)*3);
+
+  btConvexHullShape * btch;
+  btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible loss of memory since we cannot SP here
+
+// Warning inside margin is not taken into account as in 3D
+  if(ch2d->insideMargin() == 0)
+  {
+    // Create a convex hull directly with no further processing.
+    // TODO: In case of worldScale=1, maybe we could avoid the copy to pts.
+    btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible loss of memory since we cannot SP here
   }
-  );
+  else
+  {
+    // Internal margin implemented by shrinking the hull
+    // TODO: Do we need the shrink clamp? (last parameter)
+    btConvexHullComputer shrinkCH;
+    btScalar shrunkBy = shrinkCH.compute(&pts[0], sizeof(btScalar)*3, rows,
+                                         ch2d->insideMargin() * _options.worldScale,
+                                         0);
+    if(shrunkBy < 0)
+    {
+      // TODO: Warning
+      // "insideMargin is too large, convex hull would be too small.";
+      btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible loss of memory since we cannot SP here
+      ch2d->setInsideMargin(0);
+    }
+    else
+    {
+      btch = new btConvexHullShape;
+      for(int i=0; i < shrinkCH.vertices.size(); i++)
+      {
+        const btVector3 &v(shrinkCH.vertices[i]);
+#if defined(BT_BULLET_VERSION) && (BT_BULLET_VERSION <= 281)
+        btch->addPoint(v);
+#else
+        btch->addPoint(v, false);
+#endif
+      }
+      ch2d->setInsideMargin(shrunkBy / _options.worldScale);
+    }
+  }
 
-
-  //This version is ok
-  btConvexHullShape* childShape1 = new btConvexHullShape(&pts[0],rows, sizeof(btScalar)*3);
-  SP::btConvex2dShape btconvex2d(new btConvex2dShape(childShape1));
-
-
+  // Add external margin and recalc bounding box
   DEBUG_PRINTF("ch2d->insideMargin() = %8.4e\t, ch2d->outsideMargin() = %8.4e\n", ch2d->insideMargin(), ch2d->outsideMargin());
+  btch->setMargin((ch2d->insideMargin() + ch2d->outsideMargin()) * _options.worldScale);
+  btch->recalcLocalAabb();
 
-
+  SP::btConvex2dShape btconvex2d(new btConvex2dShape(btch));
   btconvex2d->setMargin((ch2d->insideMargin() + ch2d->outsideMargin()) * _options.worldScale);
-  childShape1->recalcLocalAabb();
-
-  // Warning inside margin is not taken into account as in 3D
-
-
 
   // initialization
   createCollisionObjectHelper<SP::SiconosConvexHull2d,
@@ -2194,7 +2254,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   end = std::chrono::system_clock::now();
   int elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end-start).count();
   std::cout << "-2 : visit " << elapsed << " ms" << std::endl;
-#endif 
+#endif
   // Clear cache automatically before collision detection if requested
   if(_options.clearOverlappingPairCache)
     clearOverlappingPairCache();
@@ -2235,7 +2295,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
   // 1. perform bullet collision detection
   _impl->_collisionWorld->performDiscreteCollisionDetection();
-#ifdef BULLET_TIMER  
+#ifdef BULLET_TIMER
   end_old =end;
   end = std::chrono::system_clock::now();
   elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
@@ -2636,7 +2696,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     }
     //getchar();
   }
-#ifdef BULLET_TIMER  
+#ifdef BULLET_TIMER
   end_old =end;
   end = std::chrono::system_clock::now();
   elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
