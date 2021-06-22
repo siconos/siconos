@@ -2502,7 +2502,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['start_run_iteration_hook']=start_run_iteration_hook
             run_options['end_run_iteration_hook']=end_run_iteration_hook
             run_options['skip_last_update_output']=skip_last_update_output
-            run_options['skip_last_update_input']=skip_last_update_input
+            
 
         
         self._run_options=run_options
@@ -2870,7 +2870,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             cond = self._output_frequency and (k % self._output_frequency == 0)
             if cond or k == 1:
                 if verbose:
-                    self.print_verbose('output in hdf5 file at step ', k)
+                    self.print_verbose('output in hdf5 file at step ', k, ' time =', self.current_time())
 
                 self.log(self.output_results, with_timer)()
 
