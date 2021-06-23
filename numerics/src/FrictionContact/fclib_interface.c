@@ -361,9 +361,10 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
   H->i = (CS_INT*) malloc(sizeof(CS_INT)*H->nzmax);
   int_to_csi(fclib_problem->H->i, H->i, (unsigned) H->nz);
 
+ 
+  NM_reset_versions(problem->M);
   return problem;
 
-  NM_reset_versions(problem->M);
 }
 
 

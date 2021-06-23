@@ -91,3 +91,31 @@ https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 
 https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
 
+# Running locally ...
+
+To (re)-build a docker image locally, try
+
+```
+source docker-local.sh <image-name>
+```
+
+Replace <image-name> by any name matching a directory in ci_gitlab/dockerfiles, depending on the image you need 
+(e.g. ubuntu20.04).
+
+This will:
+
+- create a temporary Dockerfile in ./tmp, from the template in ci_gitlab/dockerfiles/<image-name>
+- build a docker image using this dockerfile
+
+Then, you can build a container from this image and mount the current siconos repository inside this container:
+
+```
+docker run -v $PWD:/home/siconos -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/sources/ubuntu20-04
+```
+
+Or upload it to siconos registries on gricad-gitlab:
+
+```
+docker push gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/sources/ubuntu20-04
+```
+
