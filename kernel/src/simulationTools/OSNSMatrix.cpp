@@ -470,7 +470,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
   DEBUG_BEGIN("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
 
   fillHtrans(DSG, indexSet, update);
-  
+
   SP::NumericsMatrix Htrans = _numericsMatrix;
   _numericsMatrix.reset(NM_transpose(Htrans.get()), NM_free);
   _dimColumn = updateSizeAndPositions(indexSet);
@@ -478,7 +478,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
 
   DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
 }
-    
+
 // Fill the matrix Htrans
 void OSNSMatrix::fillHtrans(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet, bool update)
 {
@@ -515,6 +515,7 @@ void OSNSMatrix::fillHtrans(DynamicalSystemsGraph & DSG, InteractionsGraph& inde
         leftInteractionBlock = inter.getLeftInteractionBlock();
 
         double * array = &*leftInteractionBlock->getArray();
+        //double * array_with_bc= nullptr;
 
         SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
         SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
@@ -529,6 +530,42 @@ void OSNSMatrix::fillHtrans(DynamicalSystemsGraph & DSG, InteractionsGraph& inde
         {
           endl = (ds == ds2);
           size_t sizeDS = ds->dimension();
+
+          SecondOrderDS* sods = dynamic_cast<SecondOrderDS*> (ds.get());
+
+          if (sods)
+          {
+            SP::BoundaryCondition bc;
+            if(sods->boundaryConditions())
+            {
+              // bc = sods->boundaryConditions();
+              // NM_dense_display(array,sizeY,sizeDS,sizeY);
+              // array_with_bc = (double *) calloc(sizeY*sizeDS,sizeof(double));
+              // memcpy(array_with_bc, array ,sizeY*sizeDS,sizeof(double));
+              // NM_dense_display(array_with_bc,sizeY,sizeDS,sizeY);
+              // for(std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
+              //     itindex != bc->velocityIndices()->end();
+              //     ++itindex)
+              // {
+
+
+              //   for (unsigned int row; row < sizeY; row++  )
+              //   {
+              //     array_with_bc[row + (sizeY) * (posBlock + *itindex)] = 0.0
+              //   }
+              //     // (nslawSize,sizeDS));
+              //   //SP::SiconosVector coltmp(new SiconosVector(nslawSize));
+              //   //coltmp->zero();
+              //   std::cout <<  "bc indx "<< *itindex << std::endl;
+              // }
+
+
+              // //getchar();
+              THROW_EXCEPTION("OSNSMatrix::fillHtrans boundary conditions not yet implemented.");
+            }
+          }
+
+
           abs_pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
           CSparseMatrix_block_dense_zentry(Htriplet,  pos, abs_pos_ds, array+posBlock*sizeY, sizeY, sizeDS, DBL_EPSILON);
         }
