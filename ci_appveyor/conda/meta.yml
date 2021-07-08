@@ -1,0 +1,42 @@
+# change the version number in case of a release build
+package:
+  name: siconos
+  version: 3.4.0
+
+source:
+  path: ../..
+
+
+build:
+  rpaths:
+    - lib/
+  script_env:
+    - CC
+    - CXX
+
+  number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
+  binary_relocation: true
+  features:
+  #  - vc9               [win and py27]
+  #  - vc14              [win and py35]
+    - vc14              [win and py36]
+
+requirements:
+  build:
+    - python
+    - cmake >=3.9.3
+    - swig >=3.0.12
+
+  run:
+    - python
+
+test:
+  requires:
+    - wxpython          [py36]
+    - pyside            [py36]
+
+about:
+  home: https://github.com/siconos/siconos
+  license: Apache 2.0
+  license_family: Apache
+  summary: Simulation of nonsmooth dynamical system
