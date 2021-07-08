@@ -1659,7 +1659,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   //This version is ok
   double SCALING =1.0;
-  btConvexShape* childShape0 = new btBoxShape(btVector3(btScalar(SCALING*1),btScalar(SCALING*1),btScalar(_options.Depth2D)));
+  btConvexShape* childShape0 = new btBoxShape(btVector3(btScalar(SCALING*1),btScalar(SCALING*1),btScalar(SCALING*1)));
   //btConvexShape* colShape= new btConvex2dShape(childShape0);
   SP::btConvex2dShape btconvex2d(new btConvex2dShape(childShape0));
 
@@ -1698,7 +1698,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBox2dRecord &record)
     DEBUG_PRINTF("height=%f \n", height);
 
     DEBUG_PRINTF("_options.worldScale=%f \n", _options.worldScale);
-    btconvex2d->setLocalScaling(btVector3(width/2.0, height/2.0, (width+height)/50.0));
+    btconvex2d->setLocalScaling(btVector3(width/2.0, height/2.0, _options.Depth2D * _options.worldScale/2.0));
     btconvex2d->setMargin((box2d->insideMargin() + box2d->outsideMargin()) * _options.worldScale);
 
 
