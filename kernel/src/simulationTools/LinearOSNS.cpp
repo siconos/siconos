@@ -498,20 +498,10 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     else if(relationType == Lagrangian ||
             relationType == NewtonEuler)
     {
-
+      // Applying boundary conditions
       SP::BoundaryCondition bc;
-      Type::Siconos dsType = Type::value(*ds);
-      if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS
-          || dsType == Type::LagrangianLinearDiagonalDS)
-      {
-        SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
-        if(d->boundaryConditions()) bc = d->boundaryConditions();
-      }
-      else if(dsType == Type::NewtonEulerDS)
-      {
-        SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
-        if(d->boundaryConditions()) bc = d->boundaryConditions();
-      }
+      SP::SecondOrderDS d = std::static_pointer_cast<SecondOrderDS> (ds);
+      if(d->boundaryConditions()) bc = d->boundaryConditions();
       if(bc)
       {
         for(std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
@@ -524,6 +514,8 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
           leftInteractionBlock->setCol(*itindex, *coltmp);
         }
       }
+
+      Type::Siconos dsType = Type::value(*ds);
       if(osiType == OSI::MOREAUJEANBILBAOOSI || dsType == Type::LagrangianLinearDiagonalDS)
       {
         SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
@@ -704,36 +696,10 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
           relationType1 == NewtonEuler ||
           relationType2 == NewtonEuler)
   {
-
-    //Type::Siconos dsType = Type::value(*ds);
-
-
-    // if (d->boundaryConditions())
-    // {
-    //   for (std::vector<unsigned int>::iterator itindex =
-    //          d->boundaryConditions()->velocityIndices()->begin() ;
-    //        itindex != d->boundaryConditions()->velocityIndices()->end();
-    //        ++itindex)
-    //   {
-    //     // (nslawSize1,sizeDS));
-    //     SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
-    //     coltmp->zero();
-    //     leftInteractionBlock->setCol(*itindex, *coltmp);
-    //   }
-    // }
-
+    // Applying boundary conditions
     SP::BoundaryCondition bc;
-    Type::Siconos dsType = Type::value(*ds);
-    if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearDiagonalDS)
-    {
-      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
-      if(d->boundaryConditions()) bc = d->boundaryConditions();
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-      SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
-      if(d->boundaryConditions()) bc = d->boundaryConditions();
-    }
+    SP::SecondOrderDS d = std::static_pointer_cast<SecondOrderDS> (ds);
+    if(d->boundaryConditions()) bc = d->boundaryConditions();
     if(bc)
     {
       for(std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
@@ -744,8 +710,10 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
         SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
         coltmp->zero();
         leftInteractionBlock->setCol(*itindex, *coltmp);
-      }
+        }
     }
+
+    Type::Siconos dsType = Type::value(*ds);
 
     if(osiType == OSI::MOREAUJEANBILBAOOSI || dsType == Type::LagrangianLinearDiagonalDS)
     {
