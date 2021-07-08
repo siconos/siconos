@@ -36,7 +36,7 @@
 #include "NonSmoothDrivers.h"
 #include "gfc3d_Solvers.h"
 #include "NumericsSparseMatrix.h"
-//#define DEBUG_NOCOLOR
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"

@@ -36,7 +36,7 @@
 
 
 // #define DEBUG_STDOUT
-// //#define DEBUG_NOCOLOR
+// #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
@@ -466,7 +466,7 @@ double MoreauJeanGOSI::computeResidu()
 
 void MoreauJeanGOSI::computeFreeState()
 {
-  DEBUG_BEGIN("\nMoreauJeanGOSI::computeFreeState()\n");
+  DEBUG_BEGIN("MoreauJeanGOSI::computeFreeState()\n");
   DEBUG_END("MoreauJeanGOSI::computeFreeState()\n");
 }
 
@@ -478,6 +478,8 @@ void MoreauJeanGOSI::NonSmoothLawContributionToOutput(SP::Interaction inter, One
     InteractionsGraph& indexSet = *osnsp.simulation()->indexSet(osnsp.indexSetLevel());
     InteractionsGraph::VDescriptor ivd = indexSet.descriptor(inter);
     struct _NSLEffectOnFreeOutput nslEffectOnFreeOutput =  _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd));
+    SiconosVector & osnsp_rhs = *(*indexSet.properties(ivd).workVectors)[MoreauJeanOSI::OSNSP_RHS];
+    osnsp_rhs.zero();
     inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
 }
@@ -488,7 +490,7 @@ void MoreauJeanGOSI::integrate(double& tinit, double& tend, double& tout, int& n
 
 void MoreauJeanGOSI::updatePosition(DynamicalSystem& ds)
 {
-  DEBUG_END("MoreauJeanGOSI::updatePosition(const unsigned int )\n");
+  DEBUG_BEGIN("MoreauJeanGOSI::updatePosition(const unsigned int )\n");
   double h = _simulation->timeStep();
 
   Type::Siconos dsType = Type::value(ds);
@@ -574,7 +576,7 @@ void MoreauJeanGOSI::updatePosition(DynamicalSystem& ds)
 void MoreauJeanGOSI::updateState(const unsigned int)
 {
 
-  DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int )\n");
+  DEBUG_BEGIN("MoreauJeanGOSI::updateState(const unsigned int )\n");
 
   double RelativeTol = _simulation->relativeConvergenceTol();
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
@@ -646,6 +648,7 @@ void MoreauJeanGOSI::updateState(const unsigned int)
     else THROW_EXCEPTION("MoreauJeanGOSI::updateState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
   }
+  DEBUG_END("MoreauJeanGOSI::updateState(const unsigned int )\n");
 }
 
 
