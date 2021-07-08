@@ -422,6 +422,15 @@ extern "C"
    */
 
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
+  
+  /** get a 2x2 diagonal block of a NumericsMatrix. No allocation is done.
+   * \param[in] M a NumericsMatrix
+   * \param[in] block_row_nb the number of the block row
+   * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
+   *   In case of SBM case **Bout contains the resulting block (from the SBM).
+   */
+
+  void NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double **Block);
 
   /** get a 5x5 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
@@ -499,6 +508,17 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
+  
+  /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (2 rows and sizeX columns)
+      \param[in] sizeX dim of the vector x
+      \param[in] block_start block number (only used for SBM)
+      \param[in] row_start position of the first row of A (unused if A is SBM)
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in,out] y the resulting vector
+      \param[in] init if True y = Ax, else y += Ax
+  */
+  void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
 
   void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);

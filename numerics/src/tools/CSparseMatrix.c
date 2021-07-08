@@ -848,6 +848,19 @@ CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, doub
     return 1;
   }
 }
+/* add a block (col-major dense) to triplet matrix only if value is not (nearly) null */
+CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T,  CS_INT row_off, CS_INT col_off, double * x, CS_INT row_size, CS_INT col_size, double threshold)
+{
+  for(size_t j = 0; j < col_size; ++j)
+  {
+    for(size_t i = 0; i < row_size; ++i)
+    {
+      // col-major
+      
+      CSparseMatrix_zentry(T, i + row_off, j + col_off, x[i + j*row_size], DBL_EPSILON);
+    }
+  }
+}
 
 /* add an entry to a symmetric triplet matrix only if value is not (nearly) null */
 CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold)

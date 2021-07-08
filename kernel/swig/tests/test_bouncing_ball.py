@@ -28,7 +28,7 @@ def test_bouncing_ball1():
     v = np.zeros_like(x)
     # mass matrix
     mass = np.eye(3, dtype=np.float64)
-    mass[2, 2] = 3. / 5 * r * r
+    mass[2, 2] = 2. / 5 * r * r
 
     # the dynamical system
     ball = sk.LagrangianLinearTIDS(x, v, mass)
@@ -140,7 +140,7 @@ def test_bouncing_ball1():
     #
 
     ref = sk.getMatrix(sk.SimpleMatrix(
-        os.path.join(working_dir, "data/result.ref")))
+        os.path.join(working_dir, "data/BouncingBallTS.ref")))
     assert (np.linalg.norm(data - ref) < 1e-12)
 
 

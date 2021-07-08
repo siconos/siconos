@@ -507,6 +507,94 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
   }
   }
 }
+void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init)
+{
+  assert(A);
+  assert(x);
+  assert(y);
+  assert((size_t)A->size0 >= 2);
+  assert((size_t)A->size1 == sizeX);
+
+  switch(A->storageType)
+  {
+  case NM_DENSE:
+  {
+    if(init)
+    {
+      y[0] = 0.;
+      y[1] = 0.;
+    }
+    double* M = A->matrix0;
+    assert(M);
+    int incx = sizeX, incy = 1;
+    size_t in = row_start, it = row_start + 1;
+    double rin = x[in] ;
+    double rit = x[it] ;
+    x[in] = 0.;
+    x[it] = 0.;
+    y[0] += cblas_ddot(sizeX, &M[in], incx, x, incy);
+    y[1] += cblas_ddot(sizeX, &M[it], incx, x, incy);
+    x[in] = rin;
+    x[it] = rit;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    /* qLocal += rowMB * x
+     * with rowMB the row of blocks of MGlobal which corresponds
+     * to the current contact
+     */
+    SBM_row_prod_no_diag_2x2(sizeX, 2, block_start, A->matrix1, x, y);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    if(init)
+    {
+      y[0] = 0.;
+      y[1] = 0.;
+    }
+
+    size_t in = row_start, it = row_start + 1;
+    double rin = x[in] ;
+    double rit = x[it] ;
+    x[in] = 0.;
+    x[it] = 0.;
+
+    CSparseMatrix* M;
+    if(A->matrix2->origin == NSM_CSR)
+    {
+      M = NM_csr(A);
+    }
+    else
+    {
+      M = NM_csc_trans(A);
+    }
+
+    CS_INT* Mp = M->p;
+    CS_INT* Mi = M->i;
+    double* Mx = M->x;
+
+    for(size_t i = 0, j = row_start; i < 2; ++i, ++j)
+    {
+      for(CS_INT p = Mp[j]; p < Mp[j+1]; ++p)
+      {
+        y[i] += Mx[p] * x[Mi[p]];
+      }
+    }
+
+    x[in] = rin;
+    x[it] = rit;
+
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "NM_row_prod_no_diag2 :: unknown matrix storage %d", A->storageType);
+    exit(EXIT_FAILURE);
+  }
+  }
+}
 
 void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init)
 {
@@ -1735,6 +1823,46 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block
   }
   }
 }
+void NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double ** Block)
+{
+  NM_types storageType = M->storageType;
+  switch(storageType)
+  {
+  case NM_DENSE:
+  {
+    double* Mptr = M->matrix0 + (M->size0 + 1)*(block_row_nb + block_row_nb);
+    double* Bmat = *Block;
+    /* The part of MM which corresponds to the current block is copied into MLocal */
+    Bmat[0] = Mptr[0];
+    Bmat[1] = Mptr[1];
+    Mptr += M->size0;
+    Bmat[2] = Mptr[0];
+    Bmat[3] = Mptr[1];
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    int diagPos = SBM_diagonal_block_index(M->matrix1, block_row_nb);
+    (*Block) = M->matrix1->block[diagPos];
+    break;
+  }
+  case NM_SPARSE:
+  {
+    size_t start_row = (size_t)block_row_nb + block_row_nb;
+    NSM_extract_block(M, *Block, start_row, start_row, 2, 2);
+    break;
+  }
+  default:
+  {
+    printf("NM_extract_diag_block :: unknown matrix storage");
+    exit(EXIT_FAILURE);
+  }
+  }
+}
+
+
+
+
 
 void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double ** Block)
 {

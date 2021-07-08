@@ -220,7 +220,7 @@ extern "C"
 
   /** print a matrix to std output
    * \param A matrix to print
-   * \param brief if positive, print only a portion of the matrix 
+   * \param brief if positive, print only a portion of the matrix
    */
   int CSparseMatrix_print(const CSparseMatrix *A, int brief);
 
@@ -242,6 +242,9 @@ extern "C"
    * DBL_EPSILON, otherwise the return value of cs_entry.
    */
   CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold);
+
+  /* add a block (col-major dense) to triplet matrix only if value is not (nearly) null */
+  CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T,  CS_INT row_off, CS_INT col_off, double * x, CS_INT row_size, CS_INT col_size, double threshold);
 
   /** Add an entry to a symmetric triplet matrix only if the absolute value is
    * greater than threshold

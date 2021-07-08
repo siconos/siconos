@@ -109,7 +109,7 @@ class FrictionContactTrace(FrictionContact):
         if self.getSizeOutput() != 0:
 
             #            M = BlockCSRMatrix()
-            #M.fillM(model.nonSmoothDynamicalSystem().topology().indexSet(1))
+            #M.fillW(model.nonSmoothDynamicalSystem().topology().indexSet(1))
             #M.convert()
 
             #            H = BlockCSRMatrix()

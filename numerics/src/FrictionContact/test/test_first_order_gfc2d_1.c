@@ -15,48 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <stdlib.h>                      // for malloc
-#include "Friction_cst.h"                // for SICONOS_FRICTION_2D_CPG, SIC...
+#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_NSGS
 #include "NumericsFwd.h"                 // for SolverOptions
-#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "SolverOptions.h"               // for solver_options_create, solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int solvers[] = {SICONOS_FRICTION_2D_NSGS};
-
-  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
-
-  *number_of_tests = n_data * (n_solvers+1);
+  int n_solvers = 1;
+  *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
-  // tol and maxiter used in tests are the same for all solvers.
-
-  for(int s=0; s<n_solvers; ++s)
-  {
-    for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(solvers[s]);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-      current++;
-    }
-  }
   for(int d =0; d <n_data; d++)
   {
+    // GFC3D, NSGS, default values.
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_FRICTION_2D_NSGS);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    collection[current].options->iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 20;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     current++;
   }
-
-  *number_of_tests = current;
-
   return collection;
 }

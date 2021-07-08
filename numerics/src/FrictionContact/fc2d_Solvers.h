@@ -57,7 +57,7 @@ extern "C"
        \param[in,out] info termination value
        \param[in,out] options structure
   */
-  void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   
   /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.

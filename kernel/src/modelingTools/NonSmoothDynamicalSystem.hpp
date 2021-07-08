@@ -499,6 +499,11 @@ public:
   */
   void pushInteractionsInMemory();
 
+  /** update the plugins of the DS
+   *  \param time to be used for plugins
+   */
+  void updateDSPlugins(double time);
+
   /** compute r thanks to lambda[level] for all Interactions
     * \param time
     * \param level lambda level

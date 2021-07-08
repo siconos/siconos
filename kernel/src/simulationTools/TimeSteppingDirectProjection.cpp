@@ -571,8 +571,6 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     update();
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
-    if(!_allNSProblems->empty() &&   indexSet->size()>0)
-      saveYandLambdaInOldVariables();
   }
 
   else if(_newtonOptions == SICONOS_TS_NONLINEAR)
@@ -608,8 +606,6 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       if(!isNewtonConverge && !info)
       {
         updateOutput();
-        if(!_allNSProblems->empty() &&  indexSet->size()>0)
-          saveYandLambdaInOldVariables();
       }
     }
     if(!isNewtonConverge)

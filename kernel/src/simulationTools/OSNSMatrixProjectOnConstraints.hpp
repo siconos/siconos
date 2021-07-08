@@ -130,7 +130,7 @@ public:
       \param indexSet the index set of the active constraints
       \param update if true update the size and position
   */
-  void fillW(InteractionsGraph& indexSet, bool update = true);
+  void fillM(InteractionsGraph& indexSet, bool update = true);
 
 };
 

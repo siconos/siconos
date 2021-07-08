@@ -151,7 +151,7 @@ void BlockCSRMatrix::fill(InteractionsGraph& indexSet)
   DEBUG_EXPR(display(););
 }
 
-void BlockCSRMatrix::fillM(InteractionsGraph& indexSet)
+void BlockCSRMatrix::fillW(InteractionsGraph& indexSet)
 {
   /* on adjoint graph a dynamical system may be on several edges */
   std::map<SP::DynamicalSystem, bool> involvedDS;
@@ -161,7 +161,7 @@ void BlockCSRMatrix::fillM(InteractionsGraph& indexSet)
   {
     if(Type::value(*indexSet.bundle(*ei)) != Type::NewtonEulerDS)
     {
-      THROW_EXCEPTION("BlockCSRMatrix::fillM only for Newton EulerDS");
+      THROW_EXCEPTION("BlockCSRMatrix::fillW only for Newton EulerDS");
     }
 
     _nr = 0;

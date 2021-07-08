@@ -104,7 +104,7 @@ void Equality::updateM()
   else
   {
     _M->setStorageType(_numericsMatrixStorageType);
-    _M->fillW(indexSet);
+    _M->fillM(indexSet);
 
   }
   _sizeOutput = _M->size();

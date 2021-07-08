@@ -216,7 +216,7 @@ public:
    * \warning only for NewtonEulerDS
    * \param indexSet of the active constraints
    */
-  void fillM(InteractionsGraph& indexSet);
+  void fillW(InteractionsGraph& indexSet);
 
   /** fill the matrix with the H matrix 
    * \warning only for NewtonEuler3DR

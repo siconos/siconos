@@ -96,9 +96,6 @@ protected:
   /** contains the impact contributions */
   SP::SiconosVector _b;
 
-  /** contains the matrix H of a GlobalFrictionContact system */
-  SP::OSNSMatrix _H;
-
   /** friction coefficients */
   SP::MuStorage _mu;
 
@@ -164,20 +161,7 @@ public:
     _globalVelocities = newPtr;
   }
 
-  // --- H ---
 
-  /** get H
-   *  \return pointer on a OSNSMatrix
-   */
-  inline SP::OSNSMatrix H() const
-  {
-    return _H;
-  }
-
-  /** set the value of H
-   *  \param H the new matrix
-   */
-  void setH(SP::OSNSMatrix H) { _H = H;}
 
   /** get a pointer to mu, the list of the friction coefficients
    *  \return pointer on a std::vector<double>
@@ -196,8 +180,7 @@ public:
   }
 
   // --- Others functions ---
-  /** initialize the _M and _H matrix */
-  virtual void initOSNSMatrix();
+
 
   /** Memory allocation or resizing for z,w,q,b, globalVelocities */
   void initVectorsMemory();

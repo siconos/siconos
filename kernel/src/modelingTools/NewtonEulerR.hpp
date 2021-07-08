@@ -154,6 +154,10 @@ public:
   {
     _jachqT = newJachqT;
   }
+  inline SP::SimpleMatrix H() const
+  {
+    return _jachqT;
+  }
 
   /** set Jach[index] to pointer newPtr (pointer link)
   *  \param newPtr the new matrix

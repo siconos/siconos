@@ -146,6 +146,11 @@ public:
   {
     return _jachq;
   }
+  
+  inline SP::SimpleMatrix H() const
+  {
+    return _jachq;
+  }
 
   /** initialize components specific to derived classes.
    * \param inter the interaction using this relation

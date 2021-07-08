@@ -60,12 +60,12 @@
  * We denote interactionBlocks[interi][interj] = mij \n Then, a call to
  * fill(indexSet, interactionBlock) results in a matrix which looks like:
  *
- * 
+ *
  \rst
 
  .. math::
    :nowrap:
-   
+
      M=\left\lbrace\begin{array}{cccc}
      m22 & m23 & m28 &  0 \\
      m32 & m33 & 0   &  0 \\
@@ -107,6 +107,9 @@ protected:
 
   /** Storage type used for the present matrix */
   NM_types _storageType;
+
+  /** _triplet_nzmax for memory allocation of NM_SPARSE */
+  size_t _triplet_nzmax;
 
   /** Numerics structure to be filled  */
   SP::NumericsMatrix _numericsMatrix;
@@ -186,6 +189,14 @@ public:
   /** get dimension of the square matrix
    * \return unsigned int
    */
+  inline void setSize(unsigned int size)
+  {
+    _dimRow =size;
+  };
+
+  /** get dimension of the square matrix
+   * \return unsigned int
+   */
   inline unsigned int sizeColumn() const
   {
     return _dimColumn;
@@ -227,13 +238,27 @@ public:
    * \param indexSet the index set of the active constraints
    * \param update if true update the size of the Matrix (default true)
    */
-  virtual void fillW(InteractionsGraph&indexSet, bool update = true);
+  virtual void fillM(InteractionsGraph&indexSet, bool update = true);
 
-  /** fill the current class using an index set
+
+  /** Compute the M matrix given the inverse of W and H
+   * \param Winverse the NumericsMatrix that contains the inverse of W
+   * \param Winverse the NumericsMatrix that contains H
+   */
+  void computeM(SP::NumericsMatrix Winverse, SP::NumericsMatrix H);
+
+  /** fill the current class using an index set with the W matrix of DS
    * \param DSG the index set of the dynamicalSystems
    * \param update if true update the size of the Matrix (default true)
    */
-  virtual void fillM(DynamicalSystemsGraph& DSG, bool update = true);
+
+  virtual void fillW(DynamicalSystemsGraph& DSG, bool update = true);
+
+  /** fill the current class using an index set with the inverse of W matrix of DS
+   * \param DSG the index set of the dynamicalSystems
+   * \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillWinverse(DynamicalSystemsGraph& DSG, bool update = true);
 
   /** fill the current class using an index set
    * \param DSG the index set of the dynamicalSystems
@@ -241,6 +266,13 @@ public:
    * \param update if true update the size of the Matrix (default true)
    */
   virtual void fillH(DynamicalSystemsGraph& DSG, InteractionsGraph& indexSet,  bool update = true);
+  
+  /** fill the current class using an index set
+   * \param DSG the index set of the dynamicalSystems
+   * \param indexSet the index set of the Interactions
+   * \param update if true update the size of the Matrix (default true)
+   */
+  virtual void fillHtrans(DynamicalSystemsGraph& DSG, InteractionsGraph& indexSet,  bool update = true);
 
   /** fill the numerics structure _numericsMatSparse using MBlockCSR */
   void convert();

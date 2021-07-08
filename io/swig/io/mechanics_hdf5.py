@@ -494,6 +494,7 @@ class MechanicsHdf5(object):
         self._cf_data = None
         self._domain_data = None
         self._solv_data = None
+        self._run_options = None
         self._log_data = None
         self._input = None
         self._nslaws_data = None
@@ -563,17 +564,21 @@ class MechanicsHdf5(object):
         self._cf_data = data(self._data, 'cf', 26,
                              use_compression=self._use_compression)
         if self._mode == 'w':
-            self._cf_data.attrs['info'] = 'time,  mu,  contact point A ,'
-            self._cf_data.attrs['info'] += 'contact point B,  contact normal, '
-            self._cf_data.attrs['info'] += 'relative gap  relative velocity,'
-            self._cf_data.attrs['info'] += 'reaction impulse,  interaction id,'
-            self._cf_data.attrs['info'] += 'ds 1 number,  ds 2 number '
+            self._cf_data.attrs['info'] = 'time [0],  mu [1],  contact point A [2:4] ,'
+            self._cf_data.attrs['info'] += 'contact point B [5:7],  contact normal [8:10], '
+            self._cf_data.attrs['info'] += 'reaction impulse (global frame) [11:13],'
+            self._cf_data.attrs['info'] += 'relative gap [14:16], reaction velocity [17:19],'
+            self._cf_data.attrs['info'] += 'reaction impulse (local frame) [20:22],  interaction id [23],'
+            self._cf_data.attrs['info'] += 'ds 1 number [24],  ds 2 number [25]'
 
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
                                      use_compression=self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression=self._use_compression)
+        self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
+                                      use_compression=self._use_compression)
+        
         try:
             self._log_data = group(self._data, 'log')
         except Exception as e:

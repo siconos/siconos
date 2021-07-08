@@ -301,6 +301,8 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+    DSlink[LagrangianR::q2].reset(new BlockVector());
+    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
   }
   else if(relationType == NewtonEuler)
   {
@@ -313,6 +315,7 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     {
       LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+      DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     else if(relationType == NewtonEuler)
     {

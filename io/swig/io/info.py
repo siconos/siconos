@@ -92,6 +92,19 @@ def list_contactors(io):
             obj.attrs['type'],
             obj.attrs['primitive'] if 'primitive' in obj.attrs else ''))
 
+
+def compute_violation(io):
+    cf_data = io.contact_forces_data()
+    gap =  cf_data[:,14]
+    negative_gap = C = np.where(gap < 0, gap, 0.)
+    
+    print ('            {0:>10} {1:>10} {2:>10}'.format('Min','Avg','std'))
+        
+    print ('Violation:  {0: >10.2e} {1: >10.2e} {2: >10.2e}'
+           .format( negative_gap.min(),negative_gap.mean(),
+                    negative_gap.std()))
+
+        
 if __name__=='__main__':
     try:
         with MechanicsHdf5(mode='r', io_filename=args.file[0]) as io:
@@ -101,6 +114,7 @@ if __name__=='__main__':
                 print ('')
                 print ('Filename: "{0}"'.format(args.file[0]))
                 summarize(io)
+                compute_violation(io)
                 if args.list_objects:
                     list_objects(io)
                 if args.list_contactors:

@@ -134,6 +134,14 @@ public:
     return _C;
   }
 
+  /** get H
+  *  \return C matrix
+  */
+  inline SP::SimpleMatrix H() const
+  {
+    return _C;
+  }
+
   /** get D
   *  \return D matrix
   */
