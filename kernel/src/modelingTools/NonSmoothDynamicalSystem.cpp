@@ -198,7 +198,6 @@ void NonSmoothDynamicalSystem::pushInteractionsInMemory()
     SP::InteractionsGraph indexSet0 = _topology->indexSet0();
     for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      indexSet0->bundle(*ui)->swapInOldVariables();
       indexSet0->bundle(*ui)->swapInMemory();
     }
   }

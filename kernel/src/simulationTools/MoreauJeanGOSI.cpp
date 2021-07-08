@@ -865,45 +865,45 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanGOSI::OSNSP_RHS];
-    subscal(e, *_inter.y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord, true);
+    subscal(e, _inter.y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord, true);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
   {
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanGOSI::OSNSP_RHS];
-    DEBUG_PRINTF("y_k = %e\n", (*_inter.y_k(_osnsp.inputOutputLevel()))(0));
+    DEBUG_PRINTF("y_k = %e\n", _inter.y_k(_osnsp.inputOutputLevel())(0));
     DEBUG_PRINTF("level = %i\n", _osnsp.inputOutputLevel());
     if(nslaw.en() > 0.0)
     {
-      osnsp_rhs(0) =  nslaw.en()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
+      osnsp_rhs(0) =  nslaw.en()  * _inter.y_k(_osnsp.inputOutputLevel())(0);
     }
     // The tangential part is multiplied depends on et
     if(nslaw.et() > 0.0)
     {
-      osnsp_rhs(1) =  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(1);
+      osnsp_rhs(1) =  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
       if(_inter.nonSmoothLaw()->size()>=2)
       {
-        osnsp_rhs(2) =  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(2);
+        osnsp_rhs(2) =  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);
       }
     }
   }
   void visit(const NewtonImpactRollingFrictionNSL& nslaw)
   {
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanGOSI::OSNSP_RHS];
-    DEBUG_PRINTF("y_k = %e\n", (*_inter.y_k(_osnsp.inputOutputLevel()))(0));
+    DEBUG_PRINTF("y_k = %e\n", _inter.y_k(_osnsp.inputOutputLevel())(0));
     DEBUG_PRINTF("level = %i\n", _osnsp.inputOutputLevel());
 
     if(nslaw.en() > 0.0)
     {
-      osnsp_rhs(0) =  nslaw.en()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
+      osnsp_rhs(0) =  nslaw.en()  * _inter.y_k(_osnsp.inputOutputLevel())(0);
     }
     // The tangential part is multiplied depends on et
     if(nslaw.et() > 0.0)
     {
-      osnsp_rhs(1) =  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(1);
+      osnsp_rhs(1) =  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
       if(_inter.nonSmoothLaw()->size()>=2)
       {
-        osnsp_rhs(2) =  nslaw.et()  * (*_inter.y_k(_osnsp.inputOutputLevel()))(2);
+        osnsp_rhs(2) =  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);
       }
     }
   }
