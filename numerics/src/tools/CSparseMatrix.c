@@ -860,6 +860,7 @@ CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T,  CS_INT row_off, CS_IN
       CSparseMatrix_zentry(T, i + row_off, j + col_off, x[i + j*row_size], DBL_EPSILON);
     }
   }
+  return 1;
 }
 
 /* add an entry to a symmetric triplet matrix only if value is not (nearly) null */
