@@ -411,10 +411,15 @@ void Simulation::initialize()
 
   // 6 - Initialize OneStepNSProblem(s)
   DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
-  // Initialize OneStepNSProblem(s). Depends on the type of simulation.
-  // Warning FP : must be done in any case, even if the interactions set
+
+  //Initialize OneStepNSProblem(s). Depends on the type of simulation.
+  //Warning FP : must be done in any case, even if the interactions set
   // is empty.
-  initOSNS();
+  if(Type::value(*this) != Type::EventDriven)
+  {
+    initOSNS();
+  }
+
 
   // 7 - First initialization of the simulation
   firstInitialize();
