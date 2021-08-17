@@ -146,7 +146,8 @@ void NM_reset_version(NumericsMatrix* M, NM_types id)
   }
   case NM_SPARSE_BLOCK:
   {
-    NDV_reset(&(M->matrix1->version));
+  if (M->matrix1)
+      NDV_reset(&(M->matrix1->version));
     break;
   }
   case NM_SPARSE:
