@@ -5,6 +5,7 @@ RUN  apt update && apt install -y -qq \
         cmake \
         make \
         gfortran \
+        g++ \
         libgfortran-10-dev \
         libboost-dev \
         libboost-filesystem-dev \
