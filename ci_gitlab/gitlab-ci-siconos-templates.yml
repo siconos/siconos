@@ -201,6 +201,7 @@ workflow:
 .siconos-test:
   extends: .siconos-ctest
   variables:
+    OPENBLAS_NUM_THREADS: 1
     ctest_mode: Test
     #GIT_STRATEGY: none
   stage: test
