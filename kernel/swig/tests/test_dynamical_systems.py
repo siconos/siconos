@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+import numpy as np
 from siconos.tests_setup import working_dir
 import os
 import siconos.kernel as sk
-import numpy as np
 
 ndof = 3
 nn = 2 * ndof
