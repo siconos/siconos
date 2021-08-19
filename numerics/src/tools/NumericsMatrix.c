@@ -1882,7 +1882,7 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
   }
   case NM_SPARSE:
   {
-    /* NSM_diag_indices modify M->matrix2->origin */
+    /* NSM_diag_indices modifies M->matrix2->origin */
     CS_INT* diag_indices = NSM_diag_indices(M);
 
     DEBUG_EXPR(

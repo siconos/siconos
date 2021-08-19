@@ -157,7 +157,9 @@ void NSM_null(NumericsSparseMatrix* A)
 
 double* NSM_data(NumericsSparseMatrix* A)
 {
-  assert (NSM_latest_id(A) == A->origin);
+  // assert (NSM_latest_id(A) == A->origin);
+  assert (NSM_version(A, A->origin) ==
+            NSM_version(A, NSM_latest_id(A)));
 
   switch(A->origin)
   {
