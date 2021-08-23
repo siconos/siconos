@@ -177,6 +177,8 @@ get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
 list(REMOVE_ITEM externals_COMPILE_FLAGS -Wall)
 list(REMOVE_ITEM externals_COMPILE_FLAGS -Wunused-variable)
 set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
+# This is ugly, but helps with old lumod code (12.08.2021) --xhub
+target_compile_definitions(externals PRIVATE CLOCKTIME)
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
 target_compile_options(externals PRIVATE "-Wno-unused-parameter")
