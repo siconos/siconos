@@ -17,9 +17,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
 import siconos.kernel as SK
 import siconos.numerics as SN
-import numpy as np
 from scipy.linalg import expm
 from siconos.functions import compute_dt_matrices
 

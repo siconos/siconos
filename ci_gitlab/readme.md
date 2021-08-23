@@ -29,6 +29,9 @@ Job type are:
 | push to master           |   :x:       | :white_check_mark: all [A]<br>:white_check_mark: all [B] (debian, ubuntu ...)<br>:white_check_mark: [C] on ubuntu20.04 |useless| :white_check_mark: all [A] <br>:white_check_mark: [C] on ubuntu20.04 |
 | push to any other branch |   :x:       | :white_check_mark: all [A]<br>:white_check_mark: [B] on ubuntu20.04<br>:white_check_mark: [C] on ubuntu20.04 | :white_check_mark: all [A] (debian, ubuntu ...)<br>:white_check_mark: [C] on ubuntu20.04 | :white_check_mark: [B] on ubuntu20.04<br>:white_check_mark: [C] on ubuntu20.04|
 
+* "bridge examples" job: when the commit message contains "[with examples], the push will triggered the CI process in siconos-tutorials project and 
+run all examples with the version of Siconos (MR or branch or master) corresponding to the current push. It will be executed on the docker image
+built and saved during the current CI pipeline (named siconos-<branch-name> and saved in siconos-tutorials registries).
 
 * Some jobs are optional and must be started directly by clicking on the little gear next to the job name on gitlab CI interface (e.g. siconos with oce, documentation ...). They look like ![manual_ci.jpg](./manual_ci.jpg)
 
@@ -87,4 +90,32 @@ https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 ### Travis
 
 https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+
+# Running locally ...
+
+To (re)-build a docker image locally, try
+
+```
+source docker-local.sh <image-name>
+```
+
+Replace <image-name> by any name matching a directory in ci_gitlab/dockerfiles, depending on the image you need 
+(e.g. ubuntu20.04).
+
+This will:
+
+- create a temporary Dockerfile in ./tmp, from the template in ci_gitlab/dockerfiles/<image-name>
+- build a docker image using this dockerfile
+
+Then, you can build a container from this image and mount the current siconos repository inside this container:
+
+```
+docker run -v $PWD:/home/siconos -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/sources/ubuntu20-04
+```
+
+Or upload it to siconos registries on gricad-gitlab:
+
+```
+docker push gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/sources/ubuntu20-04
+```
 
