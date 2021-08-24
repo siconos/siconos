@@ -48,15 +48,17 @@ class Hem5OSI_impl
 public:
   Hem5OSI_impl(Hem5OSI* h) : hem5osi(h) {}
   Hem5OSI *hem5osi;
+#ifdef HAS_FORTRAN
   fprobfunction fprob;
   soloutfunction solout;
+#endif
 };
 
 // ===== Out of class objects and functions =====
 
 // global object and wrapping functions -> required for function plug-in and call in fortran routine.
 SP::Hem5OSI hem5_global_object;
-
+#ifdef HAS_FORTRAN
 // This first function must have the same signature as argument FPROB  in HEM5
 extern "C" fprobfunction Hem5OSI_fprob_wrapper;
 
@@ -117,7 +119,7 @@ void Hem5OSI_solout_wrapper(integer* MODE,
          q, v,  u,
          DOWK, IDOWK);
 }
-
+#endif
 // ===== Main class implementation ====
 
 Hem5OSI::Hem5OSI():
@@ -286,7 +288,7 @@ void Hem5OSI::computeJacobianRhs(double t)
     ds->computeJacobianRhsx(t);
   }
 }
-
+#ifdef HAS_FORTRAN
 void Hem5OSI_impl::fprob(integer* IFCN,
                          integer* NQ,
                          integer* NV,
@@ -485,6 +487,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
 
   DEBUG_PRINTF("END : Hem5OSI::fprob(integer* IFCN,...) with IFCN = %i \n \n", (int)*IFCN);
 }
+#endif
 // void Hem5OSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 // {
 //   std::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
@@ -644,7 +647,7 @@ void Hem5OSI::initialize()
 
 
 }
-
+#ifdef HAS_FORTRAN
 void Hem5OSI_impl::solout(integer* MODE,
                           integer* NSTEP,
                           integer* NQ,
@@ -659,7 +662,7 @@ void Hem5OSI_impl::solout(integer* MODE,
 
 {
 }
-
+#endif
 unsigned int Hem5OSI::numberOfConstraints()
 {
   DEBUG_PRINT("Hem5OSI::updateConstraints() \n");

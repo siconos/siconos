@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#ifdef HAS_FORTRAN
 #include "SiconosFortran.h"
 
 typedef void fprobfunction (integer* IFCN,
@@ -64,4 +65,6 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

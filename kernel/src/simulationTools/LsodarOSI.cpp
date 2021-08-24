@@ -497,11 +497,11 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 
   // function to compute the Jacobian/x of the rhs.
   jacopointer pointerToJacobianF = LsodarOSI_jacobianf_wrapper; // function to compute the Jacobian/x of the rhs.
-#endif
+
   // function to compute the constraints
   gpointer pointerToG;
   pointerToG = LsodarOSI_g_wrapper; // function to compute the constraints
-
+#endif
 
   // === LSODAR CALL ===
   DEBUG_EXPR(_xWork->display(););
