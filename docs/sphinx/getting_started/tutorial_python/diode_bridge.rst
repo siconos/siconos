@@ -7,6 +7,7 @@ Tutorial: A 4-diodes bridge wave rectifier
 
 .. highlight:: python
 
+.. note:: the uptodate version of this tutorial is available as a Python notebook in `siconos tutorials repository <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/-/blob/master/siconos-notebooks/st01_diode_bridge.ipynb>`_.
 
 Preamble
 --------
@@ -385,7 +386,6 @@ This corresponds to :class:`EulerMoreauOSI` integrators, which inherits from :cl
 
   theta = 0.5
   osi = sk.EulerMoreauOSI(theta)
-  osi.insertDynamicalSystem(ds)
 
 Notice that each dynamical system of the model must be associated to one and only one one-step integrator.
 
@@ -442,7 +442,7 @@ time step, which might not be enough ...
 
 For the present case, :math:`x, y \ and \ \lambda` at each time step are needed for postprocessing. Here is an example on how to get and save them in a numpy array::
 
-  N = (T - t0) / time_step
+  N = int((T - t0) / simu.timeStep()) + 1
   data_plot = np.zeros((N, 8))
   y = interaction.y(0)
   lamb = interaction.lambda_(0)
@@ -451,10 +451,10 @@ For the present case, :math:`x, y \ and \ \lambda` at each time step are needed 
   data_plot[k, 1] = x[0] #  inductor voltage
   data_plot[k, 2] = x[1] # inductor current
   data_plot[k, 3] = y[0] # diode R1 current
-  data_plot[k, 4] = - lambda_[0] # diode R1 voltage
-  data_plot[k, 5] = - lambda_[1] # diode F2 voltage 
-  data_plot[k, 6] = lambda_[2] # diode F1 current
-  data_plot[k, 7] = y[0] + lambda_[2] # resistor current
+  data_plot[k, 4] = - lamb[0] # diode R1 voltage
+  data_plot[k, 5] = - lamb[1] # diode F2 voltage 
+  data_plot[k, 6] = lamb[2] # diode F1 current
+  data_plot[k, 7] = y[0] + lamb[2] # resistor current
   while simu.hasNextEvent():
       k += 1
       simu.computeOneStep()
@@ -462,10 +462,10 @@ For the present case, :math:`x, y \ and \ \lambda` at each time step are needed 
       data_plot[k, 1] = x[0]
       data_plot[k, 2] = x[1]
       data_plot[k, 3] = y[0]
-      data_plot[k, 4] = - lambda_[0]
-      data_plot[k, 5] = - lambda_[1]
-      data_plot[k, 6] = lambda_[2]
-      data_plot[k, 7] = y[0] + lambda_[2]
+      data_plot[k, 4] = - lamb[0]
+      data_plot[k, 5] = - lamb[1]
+      data_plot[k, 6] = lamb[2]
+      data_plot[k, 7] = y[0] + lamb[2]
       simu.nextStep()
 
 
