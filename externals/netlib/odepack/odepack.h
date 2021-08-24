@@ -18,6 +18,9 @@
 #ifndef ODEPACK_H
 #define ODEPACK_H
 
+
+#include "SiconosConfig.h"
+#ifdef HAS_FORTRAN
 #include "SiconosFortran.h"
 
 typedef void (*fpointer)(integer *, doublereal *, doublereal *, doublereal *);
@@ -38,3 +41,4 @@ extern "C" {
 
 #endif
 
+#endif

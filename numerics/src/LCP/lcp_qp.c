@@ -25,6 +25,9 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "sanitizer.h"                     // for MSAN_INIT_VAR
 
+#ifndef HAS_FORTRAN
+#include "numerics_verbose.h"
+#endif
 void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* size of the LCP */

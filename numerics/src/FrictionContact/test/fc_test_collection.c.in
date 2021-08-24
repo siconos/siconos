@@ -33,19 +33,19 @@ int main (int argc, char *argv[])
 {
   const char ** _data_collection = data_collection();
   int n_data = 0;
-  
+
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
-  
+
   while (strcmp(_data_collection[n_data], "---") !=0)
     {
       n_data++;
     }
   printf("number of data = %i\n", n_data);
-  
+
   int number_of_tests;
-  
+
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
 #if defined(TEST_ADMM_COLLECTION_FCLIB)
@@ -61,11 +61,10 @@ int main (int argc, char *argv[])
   int out = run_test_collection(collection, number_of_tests, frictionContact_test_function);
 
   free_test_collection(collection, number_of_tests);
-  
+
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
-  
+
   return out;
 }
-  

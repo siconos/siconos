@@ -184,7 +184,9 @@ target_compile_options(externals PRIVATE "-Wno-unused-variable")
 target_compile_options(externals PRIVATE "-Wno-unused-parameter")
 # An awful command asking to add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
 # See https://scivision.co/gfortran-type-mismatch-error/
-target_compile_options(externals PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
+if(WITH_FORTRAN)
+  target_compile_options(externals PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
+endif()
 # - Extras, optional -
 # --- SuiteSparse ---
 # It is allowed to switch between system or local suitesparse,
