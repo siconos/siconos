@@ -163,9 +163,11 @@ else()
   endif()
 endif()
 
-# externals lib needs blas while tests need Blas AND lapack.
+# externals lib needs blas and lapack while tests need Blas AND lapack.
 # Link only at build time.
 target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
+# HEM5 calls DGETRF and DGETRS from LAPACK
+target_link_libraries(externals PRIVATE $<BUILD_INTERFACE:LAPACK::LAPACK>)
 target_include_directories(externals PRIVATE blas_lapack)
 #target_include_directories(externals PRIVATE ${BLAS_INCLUDE_DIR})
 
