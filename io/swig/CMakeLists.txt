@@ -62,9 +62,15 @@ if(HAVE_SICONOS_MECHANICS)
       list(REMOVE_ITEM _OTHER_COMPONENTS ${COMPONENT})
 
       # swig modules must be built before vview and vexport can generate manpages
+      # this hack is not working with Ninja since target like ${_SWIG_MODULE_NAME}_swig_compilation
+      # exists only for MakeFiles.
       foreach(_SWIG_MODULE ${${COMPONENT}_PYTHON_MODULES})
         get_filename_component(_SWIG_MODULE_NAME ${_SWIG_MODULE} NAME)
-        list(APPEND _OTHER_COMPONENTS ${_SWIG_MODULE_NAME}_swig_compilation _${_SWIG_MODULE_NAME})
+	if (${CMAKE_GENERATOR} MATCHES Ninja)
+          list(APPEND _OTHER_COMPONENTS  _${_SWIG_MODULE_NAME})
+	else()
+	  list(APPEND _OTHER_COMPONENTS ${_SWIG_MODULE_NAME}_swig_compilation _${_SWIG_MODULE_NAME})
+	endif()
       endforeach()
 
       set(MANPAGES_FOR_TOOLS)
