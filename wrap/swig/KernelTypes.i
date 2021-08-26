@@ -411,7 +411,8 @@ struct IsDense : public Question<bool>
 {
   PyObject * SiconosVector_to_numpy(SiconosVector const & v)
   {
-    npy_intp this_vector_dim[1] = { v.size() };
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0] = v.size();
 
     PyObject * larray;
     PYARRAY_FROM_SHARED_SICONOS_DATA_REF(NPY_DOUBLE, 1, this_vector_dim, v, larray);
@@ -421,7 +422,9 @@ struct IsDense : public Question<bool>
 
   PyObject * SP_SiconosVector_to_numpy(SP::SiconosVector v)
   {
-    npy_intp this_vector_dim[1] = { v->size() };
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0] = v->size();
+
     PyObject* lresult;
     PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE, 1, this_vector_dim, v, lresult);
     return lresult;
