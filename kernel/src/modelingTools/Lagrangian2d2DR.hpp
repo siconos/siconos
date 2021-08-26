@@ -48,19 +48,12 @@ protected:
   SP::SiconosVector _Pc1;
   SP::SiconosVector _Pc2;
 
-  /* Contact Points in coordinates relative to attached DS->q.  Set
-   * these if _Pc1/_Pc2 are not calculated within the Newton loop. */
-  // SP::SiconosVector _relPc1;
-  // SP::SiconosVector _relPc2;
-
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
    */
   SP::SiconosVector _Nc;
 
-  /* _Nc must be calculated relative to q2 */
-  // SP::SiconosVector _relNc;
-
+  
   /** Set the coordinates of first contact point.  Must only be done
   * in a computeh() override.
   * \param npc new coordinates
@@ -129,8 +122,6 @@ public:
   // virtual void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber);
 
 
-
-  
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
@@ -146,46 +137,6 @@ public:
   {
     return _Nc;
   }
-
-  // inline SP::SiconosVector relPc1() const
-  // {
-  //   return _relPc1;
-  // }
-  // inline SP::SiconosVector relPc2() const
-  // {
-  //   return _relPc2;
-  // }
-  // inline SP::SiconosVector relNc() const
-  // {
-  //   return _relNc;
-  // }
-
-  // /** Set the coordinates of first contact point in ds1 frame.
-  //  * It will be used to compute _Pc1 during computeh().
-  // * \param npc new coordinates
-  // */
-  // void setRelPc1(SP::SiconosVector npc)
-  // {
-  //   _relPc1 = npc;
-  // };
-
-  // /** Set the coordinates of second contact point in ds2 frame
-  //  * It will be used to compute _Pc2 during computeh().
-  // * \param npc new coordinates
-  // */
-  // void setRelPc2(SP::SiconosVector npc)
-  // {
-  //   _relPc2 = npc;
-  // };
-
-  // /** Set the coordinates of inside normal vector at the contact point in ds2 frame.
-  //  * It will be used to compute _Nc during computeh().
-  // * \param nnc new coordinates
-  // */
-  // void setRelNc(SP::SiconosVector nnc)
-  // {
-  //   _relNc = nnc;
-  // };
   void display() const;
 
   // visitors hook

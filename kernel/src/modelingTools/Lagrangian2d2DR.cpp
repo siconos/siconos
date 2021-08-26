@@ -54,20 +54,13 @@ void Lagrangian2d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVect
 {
   DEBUG_BEGIN("Lagrangian2d2DR::computeh(...)\n");
   DEBUG_EXPR(q.display());
-  // // Contact points and normal are stored as relative to q1 and q2, if
-  // // no q2 then pc2 and normal are absolute.
 
-  // // Update pc1 based on q and relPc1
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(_Nc->display(););
 
-
-
   LagrangianScleronomousR::computeh(q, z, y);
   y.setValue(0, distance());
-
-
 
   DEBUG_EXPR(y.display(););
   DEBUG_EXPR(display(););
