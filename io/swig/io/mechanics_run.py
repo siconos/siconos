@@ -2095,12 +2095,25 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 #                print('getattr(bo, e)', getattr(bo, e))
                 d['bullet_options'][e] = getattr(bo, e)
 
+        # to fix the serialization of run_options, we should use pickle
+        # which is able to serialize python object.
 
-
-        d['friction_contact_trace_params']='not serialized'         # fix it
+        d['friction_contact_trace_params']='not serialized'   # fix it
         d['osi'] = 'not serialized'        # fix it
         d['start_run_iteration_hook']='not serialized'        # fix it
-        d['end_run_iteration_hook']='not serialized'        # fix it
+        d['end_run_iteration_hook']='not serialized'          # fix it
+        if d['set_external_forces'] is not None:
+            try :
+                d['set_external_forces']= d['set_external_forces'].__name__ + '(name serialized)'
+            except :
+                d['set_external_forces']= 'not serialized'
+                
+        if d['controller'] is not None:
+            try :
+                d['controller']= d['controller'].__name__ + '(name serialized)'
+            except :
+                d['controller']= 'not serialized'
+
 
         dict_json=json.dumps(d)
         self._run_options_data.attrs['options'] = dict_json
