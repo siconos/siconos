@@ -1879,9 +1879,9 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
   y += gamma * h * yDot;
   assert(!std::isnan(y));
-  DEBUG_EXPR(
+  DEBUG_EXPR_WE(
     if(y <= _constraintActivationThreshold)
-    DEBUG_PRINT("MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");
+      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y << "<= " <<  _constraintActivationThreshold <<  std::endl;;
   );
   return (y <= _constraintActivationThreshold);
 }
