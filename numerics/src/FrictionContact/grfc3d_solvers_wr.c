@@ -45,7 +45,7 @@ void  grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem,
   DEBUG_BEGIN("grfc3d_nsgs_wr\n");
   NumericsMatrix *H = problem->H;
   // We compute only if the local problem has contacts
-  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/5);
   if(H->size1 > 0)
   {
     // Reformulation
@@ -55,7 +55,7 @@ void  grfc3d_nsgs_wr(GlobalRollingFrictionContactProblem* problem,
 
     if(verbose)
     {
-      printf("Call to the fc3d solver ...\n");
+      printf("Call to the rfc3d solver ...\n");
     }
     // call nsgs solver for the local problem
     rolling_fc3d_nsgs(localproblem, reaction, velocity, info, options);
