@@ -59,8 +59,6 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions option
   {
     _gfc_driver = &gfc3d_driver;
   }
-  else
-    THROW_EXCEPTION("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
 
   //Reset default storage type for numerics matrices.
   _numericsMatrixStorageType = NM_SPARSE;
@@ -496,7 +494,7 @@ void GlobalFrictionContact::postCompute()
 void GlobalFrictionContact::display() const
 {
 
-  std::cout << "===== " << _contactProblemDim << "D Primal Friction Contact Problem " <<std::endl;
+  std::cout << "===== " << _contactProblemDim << "D Global Friction Contact Problem " <<std::endl;
   std::cout << "size (_sizeOutput) " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim << " contacts)."<<std::endl;
   std::cout << "and  size (_sizeGlobalOutput) " << _sizeGlobalOutput  <<std::endl;
   std::cout << "_numericsMatrixStorageType" << _numericsMatrixStorageType<< std::endl;
