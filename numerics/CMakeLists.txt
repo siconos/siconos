@@ -154,7 +154,7 @@ if(WITH_FCLIB)
     message(STATUS "FCLIB can not be found locally. Try to download and install it from github repository.")
   
     FetchContent_Declare(fclib
-       GIT_REPOSITORY    git@github.com:fperignon/fclib.git#git@github.com:FrictionalContactLibrary/fclib.git
+       GIT_REPOSITORY    git@github.com:FrictionalContactLibrary/fclib.git
        GIT_TAG           origin/master
       #     #CMAKE_ARGS FCLIB_HEADER_ONLY=OFF
       #     LOG_CONFIGURE TRUE
