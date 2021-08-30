@@ -146,10 +146,37 @@ endif()
 
 # - Fclib - 
 if(WITH_FCLIB)
-  find_package(FCLIB 3.0.0 CONFIG REQUIRED)
-  if(FCLIB_NOT_FOUND)
-    message(FATAL_ERROR "Can not find fclib package. Try to set FCLIB_ROOT.")
+  find_package(FCLIB 3.0.0 CONFIG)
+  if(NOT ${FCLIB_FOUND})
+    # if(FCLIB_NOT_FOUND)
+    include(FetchContent)
+    #message(FATAL_ERROR "Can not find fclib package. Try to set FCLIB_ROOT.")
+    message(STATUS "FCLIB can not be found locally. Try to download and install it from github repository.")
+  
+    FetchContent_Declare(fclib
+       GIT_REPOSITORY    git@github.com:fperignon/fclib.git#git@github.com:FrictionalContactLibrary/fclib.git
+       GIT_TAG           origin/master
+      #     #CMAKE_ARGS FCLIB_HEADER_ONLY=OFF
+      #     LOG_CONFIGURE TRUE
+      #     LOG_BUILD TRUE
+      #     LOG_INSTALL TRUE
+    )
+    FetchContent_GetProperties(fclib)
+    if(NOT fclib_POPULATED)
+      # Fetch the content using previously declared details
+      FetchContent_Populate(fclib)
+      # Bring the populated content into the build
+      add_subdirectory(${fclib_SOURCE_DIR} ${fclib_BINARY_DIR})
+    endif()
+    #FetchContent_MakeAvailable(fclib)
+    set(FCLIB_DIR ${fclib_BINARY_DIR})
+    find_package(FCLIB 3.0.0 CONFIG REQUIRED)
+    get_property(targets DIRECTORY  PROPERTY IMPORTED_TARGETS)
+    message("TARGS ${targets}")
+
   endif()
+
+
   target_link_libraries(numerics PUBLIC FCLIB::fclib)
 endif()
 
