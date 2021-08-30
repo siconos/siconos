@@ -53,7 +53,7 @@ using namespace RELATION;
 ZeroOrderHoldOSI::ZeroOrderHoldOSI():
   OneStepIntegrator(OSI::ZOHOSI), _useGammaForRelation(false)
 {
-  _steps = 0;
+  _steps = 1;
   _levelMinForOutput= 0;
   _levelMaxForOutput =0;
   _levelMinForInput =0;

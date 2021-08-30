@@ -115,7 +115,7 @@ void LinearOSNS::initOSNSMatrix()
       }
     }
   }
-  
+
   if (_assemblyType == GLOBAL)
   {
     // Default size for M = _maxSize
@@ -795,9 +795,9 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   OSI::TYPES osi1Type = osi1.getType();
   OSI::TYPES osi2Type = osi2.getType();
 
-  
- 
-  
+
+
+
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
@@ -984,7 +984,7 @@ bool LinearOSNS::preCompute(double time)
 #endif
   if(!_hasBeenUpdated || !isLinear)
   {
- 
+
     computeM();
 #ifdef WITH_TIMER
     end = std::chrono::system_clock::now();
@@ -1009,9 +1009,10 @@ bool LinearOSNS::preCompute(double time)
     }
 
     // Reset _w and _z with previous values of y and lambda
-    // VA 31/05/2021. Values was before the one of the NEwton Loop
-    // shpudl be better but needs memory comsumption
-    // (i.e. val saved in yOutputOld and lambdaOld of the interaction).
+    // VA 31/05/2021. Values was before the one of the Newton Loop
+    // (i.e. values saved in yOutputOld and lambdaOld of the interaction)
+    // should be better but needs memory comsumption
+
     // Note : sizeOuput can be unchanged, but positions may have changed. (??)
     if(_keepLambdaAndYState)
     {
@@ -1022,6 +1023,8 @@ bool LinearOSNS::preCompute(double time)
         // Get the position of inter-interactionBlock in the vector w
         // or z
         unsigned int pos = indexSet.properties(*ui).absolute_position;
+        // VA 30/08/2021  : Warning. the values of y_k and lambda_k that are stored in Memory
+        // may be undefined at the first time step.
         const SiconosVector& yOutput_k = inter.y_k(inputOutputLevel());
         const SiconosVector& lambda_k = inter.lambda_k(inputOutputLevel());
 
