@@ -2100,6 +2100,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         d['friction_contact_trace_params']='not serialized'   # fix it
         d['osi'] = 'not serialized'        # fix it
+        d['time_stepping'] = 'not serialized'        # fix it
+        
         d['start_run_iteration_hook']='not serialized'        # fix it
         d['end_run_iteration_hook']='not serialized'          # fix it
         if d['set_external_forces'] is not None:
@@ -2113,7 +2115,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 d['controller']= d['controller'].__name__ + '(name serialized)'
             except :
                 d['controller']= 'not serialized'
-
 
         dict_json=json.dumps(d)
         self._run_options_data.attrs['options'] = dict_json
