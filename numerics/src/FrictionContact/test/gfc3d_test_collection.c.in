@@ -88,6 +88,7 @@ int main (int argc, char *argv[])
 
 #if defined(TEST_NSN_COLLECTION_FCLIB)
   collection[0].will_fail = 1; /* (GFC3D_NSN_AC, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+  collection[4].will_fail = 1; /* (GFC3D_NSN_AC, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
 
 #endif
 
