@@ -154,11 +154,13 @@ if(WITH_FCLIB)
     message(STATUS "FCLIB can not be found locally. Try to download and install it from github repository.")
   
     FetchContent_Declare(fclib
+    #GIT_REPOSITORY    https://github.com/fperignon/fclib.git
+   
        GIT_REPOSITORY    https://github.com/FrictionalContactLibrary/fclib.git
        GIT_TAG           origin/master
       #     #CMAKE_ARGS FCLIB_HEADER_ONLY=OFF
-      #     LOG_CONFIGURE TRUE
-      #     LOG_BUILD TRUE
+      LOG_CONFIGURE TRUE
+      LOG_BUILD TRUE
       #     LOG_INSTALL TRUE
     )
     FetchContent_GetProperties(fclib)
@@ -167,17 +169,16 @@ if(WITH_FCLIB)
       FetchContent_Populate(fclib)
       # Bring the populated content into the build
       add_subdirectory(${fclib_SOURCE_DIR} ${fclib_BINARY_DIR})
-    endif()
-    #FetchContent_MakeAvailable(fclib)
-    set(FCLIB_DIR ${fclib_BINARY_DIR})
-    find_package(FCLIB 3.0.0 CONFIG REQUIRED)
-    get_property(targets DIRECTORY  PROPERTY IMPORTED_TARGETS)
-    message("TARGS ${targets}")
+      add_library(FCLIB::fclib ALIAS fclib)
 
+    endif()
+
+    #FetchContent_MakeAvailable(fclib)
+ 
   endif()
 
-
   target_link_libraries(numerics PUBLIC FCLIB::fclib)
+ 
 endif()
 
 # - SuiteSparse -
