@@ -59,15 +59,18 @@ def test_lagrangian_and_osis():
     nslaw = sk.NewtonImpactNSL(cor)
     hmat = np.zeros((1, ndof), dtype=np.float64)
     hmat[0, 0] = 1.
-    relation = sk.LagrangianLinearTIR(hmat)
+    b = np.zeros((1), dtype=np.float64)
+    b [0] = 2e-2
+    relation = sk.LagrangianLinearTIR(hmat,b)
 
     interactions = []
     for k in range(nb_ds):
         interactions.append(sk.Interaction(nslaw, relation))
 
     # --- NSDS ---
+    time_step = 1e-2
     tinit = 0.
-    tend = 3.
+    tend = 3 #1.5+10*time_step 
     nsds = sk.NonSmoothDynamicalSystem(tinit, tend)
 
     # - insert ds into the model and link them with their interaction -
@@ -84,7 +87,7 @@ def test_lagrangian_and_osis():
     standard = sk.MoreauJeanOSI(theta)
     bilbao = sk.MoreauJeanBilbaoOSI()
     #-- (2) Time discretisation --
-    time_step = 1e-4
+    
     td = sk.TimeDiscretisation(tinit, time_step)
     # -- (3) one step non smooth problem
     lcp = sk.LCP()
@@ -129,6 +132,40 @@ def test_lagrangian_and_osis():
     # -- check results
     ref_pos = data[:, 1]
     ref_vel = data[:, 2]
+
+    with_plot = False
+
+    if with_plot:
+        import matplotlib.pyplot as plt
+        plt.title('position')
+        plt.plot(ref_pos)
+        for k in range(1, nb_ds):
+            plt.plot(data[:, k * 2 + 1])
+
+        plt.figure()
+        plt.title('velocity')
+        plt.plot(ref_vel)
+        for k in range(1, nb_ds):
+            plt.plot(data[:, k * 2 + 2])
+
+
+    def test_allclose(a,b, atol, rtol):
+        print(np.absolute(a - b))
+        return np.absolute(a - b) <= (atol + rtol * np.absolute(b))
+    
+    #plt.plot(ref_vel)
     for k in range(1, nb_ds):
+        #print('k = ', k)
+        #print(test_allclose(ref_pos, data[:, k * 2 + 1], atol=time_step, rtol=1e-05))
+        
         assert np.allclose(ref_pos, data[:, k * 2 + 1], atol=time_step)
         assert np.allclose(ref_vel, data[:, k * 2 + 2], atol=time_step)
+     
+        
+    #plt.show()
+
+
+
+
+if __name__ == "__main__":    
+    test_lagrangian_and_osis()
