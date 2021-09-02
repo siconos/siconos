@@ -170,7 +170,7 @@ if(WITH_FCLIB)
       # Bring the populated content into the build
       add_subdirectory(${fclib_SOURCE_DIR} ${fclib_BINARY_DIR})
       add_library(FCLIB::fclib ALIAS fclib)
-
+      set(FCLIB_ROOT "${CMAKE_INSTALL_PREFIX}" CACHE PATH "fclib install path")
     endif()
 
     #FetchContent_MakeAvailable(fclib)
@@ -289,14 +289,8 @@ endif()
 # -- OpenMP --
 if(WITH_OPENMP)
   find_package(OpenMP REQUIRED)
-  # Notice : cmake  >= 3.9.6 is advised for a proper handling of openmp
-  if(${CMAKE_VERSION} VERSION_GREATER "3.9.6")
-    target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_C)
-    target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
-  else()
-    message("Openmp flags : ${OpenMP_C_FLAGS}")
-    target_compile_options(numerics PRIVATE  ${OpenMP_C_FLAGS})
-  endif()
+  target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_C)
+  target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 # --- python bindings ---

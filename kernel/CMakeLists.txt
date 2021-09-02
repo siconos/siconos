@@ -64,12 +64,8 @@ include(WindowsKernelSetup)
 include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
-# We require C++ 11. PUBLIC to propagate to other components.
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
-  target_compile_features(kernel PUBLIC cxx_std_17)
-else()
-  set_property(TARGET kernel PROPERTY CXX_STANDARD 17)
-endif()
+# We require C++ 17. PUBLIC to propagate to other components.
+target_compile_features(kernel PUBLIC cxx_std_17)
 
 # --- Extra setup for the component ---
 # remove boring warnings from boost bindings includes
