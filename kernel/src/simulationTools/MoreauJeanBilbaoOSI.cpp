@@ -24,11 +24,18 @@
 #include "TypeName.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "siconos_debug.h"
 #include "LagrangianR.hpp"
 #include "NewtonImpactNSL.hpp"
 
 using namespace RELATION;
+
+
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
+#include "siconos_debug.h"
+
+
 
 // --- constructor from a set of data ---
 MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI():
@@ -230,6 +237,7 @@ double MoreauJeanBilbaoOSI::computeResidu()
 
 void MoreauJeanBilbaoOSI::computeFreeState()
 {
+  DEBUG_BEGIN("MoreauJeanBilbaoOSI::computeFreeState()")
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
@@ -247,10 +255,13 @@ void MoreauJeanBilbaoOSI::computeFreeState()
     // Get velocity computed at the beginning of the time step.
     const SiconosVector& v_i = lldds.velocityMemory().getSiconosVector(0);
     const SiconosVector& q_i = lldds.qMemory().getSiconosVector(0);
+    DEBUG_EXPR(q_i.display(););
+    DEBUG_EXPR(v_i.display(););
     const SiconosVector& stiffness = *lldds.stiffness();
     // Get iteration matrix
     const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
     SimpleMatrix& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
+    DEBUG_EXPR(inv_iteration_matrix.display(););
     // Get 2.*dt*sigma^*
     SiconosVector& two_dt_sigma_star = *work_ds[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR];
     // buffer for vfree
@@ -259,7 +270,9 @@ void MoreauJeanBilbaoOSI::computeFreeState()
     unsigned int dimension = lldds.dimension();
     for(unsigned int k=0; k<dimension; ++k)
       vfree(k) = v_i(k) - inv_iteration_matrix(k, k) * (time_step * stiffness(k) * q_i(k) + two_dt_sigma_star(k) * v_i(k));
+    DEBUG_EXPR(vfree.display(););
   }
+  DEBUG_END("MoreauJeanBilbaoOSI::computeFreeState()")
 
 }
 
@@ -352,11 +365,13 @@ void MoreauJeanBilbaoOSI::updatePosition(DynamicalSystem& ds)
   // update positions
   scal(time_step, v, q, true) ;
   q += qold;
+  DEBUG_EXPR(q.display(););
 }
 
 
 void MoreauJeanBilbaoOSI::updateState(const unsigned int)
 {
+  DEBUG_BEGIN("MoreauJeanBilbaoOSI::updateState(const unsigned int)");
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if(useRCC)
     _simulation->setRelativeConvergenceCriterionHeld(true);
@@ -387,9 +402,11 @@ void MoreauJeanBilbaoOSI::updateState(const unsigned int)
     }
     else
       v =  vfree;
+    DEBUG_EXPR(v.display(););
     // Update positions with the last computed velocities.
     updatePosition(lldds);
   }
+  DEBUG_END("MoreauJeanBilbaoOSI::updateState(const unsigned int)");
 }
 
 void MoreauJeanBilbaoOSI::display()
@@ -432,34 +449,27 @@ bool MoreauJeanBilbaoOSI::addInteractionInIndexSet(SP::Interaction inter, unsign
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 
+  bool _useGamma= false;
+  double _gamma = 1.0/2.0;
+  double _constraintActivationThreshold = 0.0;
+
   double gamma = 1.0 / 2.0;
+  if(_useGamma)
+  {
+    gamma = _gamma;
+  }
+  DEBUG_PRINTF("MoreauJeanBilbaoOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.,  _constraintActivationThreshold =%e\n", i,  y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
   y += gamma * h * yDot;
   assert(!std::isnan(y));
-  DEBUG_EXPR(
-    if(y <= 0)
-    DEBUG_PRINT("MoreauJeanBilbaoOSI::addInteractionInIndexSet ACTIVATE.\n");
+  DEBUG_EXPR_WE(
+    if(y <= _constraintActivationThreshold)
+      std::cout << "MoreauJeanBilbaoOSI::addInteractionInIndexSet ACTIVATE." << y << "<= " <<  _constraintActivationThreshold <<  std::endl;;
   );
-  return (y <= 0.0);
+  return (y <= _constraintActivationThreshold);
 }
 
 
 bool MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
 {
-  assert(i == 1);
-  double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
-  double gamma = 1.0 / 2.0;
-  DEBUG_PRINTF("MoreauJeanBilbaoOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
-  y += gamma * h * yDot;
-  assert(!std::isnan(y));
-
-  DEBUG_EXPR(
-    if(y > 0)
-    DEBUG_PRINT("MoreauJeanOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
-  );
-  return (y > 0.0);
+  return !(addInteractionInIndexSet(inter, i));
 }
-
-
-
