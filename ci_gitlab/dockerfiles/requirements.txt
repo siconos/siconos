@@ -4,3 +4,4 @@ pyhull
 pytest
 h5py
 lxml
+matplotlib
