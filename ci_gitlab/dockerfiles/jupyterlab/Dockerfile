@@ -27,4 +27,4 @@ RUN  apt update && apt install -y -qq \
         libbullet-dev \
         libfreetype6-dev \
         freeglut3-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
-RUN pip3 install pytest lxml
+RUN pip3 install pytest lxml pyhull

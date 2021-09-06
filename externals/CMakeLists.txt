@@ -149,23 +149,19 @@ if(BUILD_AS_CPP)
     COMPILE_FLAGS -fpermissive) # to allow some nonconforming code to compile
   # set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
   # We require C++ 11. PUBLIC to propagate to numerics.
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
-    target_compile_features(externals PUBLIC cxx_std_17)
-  else()
-    set_property(TARGET externals PROPERTY CXX_STANDARD 17)
-  endif()
+
+  target_compile_features(externals PUBLIC cxx_std_17)
+  
 else()
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
-  if(${CMAKE_VERSION} VERSION_GREATER "3.8.0")
-    target_compile_features(externals PUBLIC c_std_11)
-  else()
-    set_property(TARGET externals PROPERTY C_STANDARD 11)
-  endif()
+  target_compile_features(externals PUBLIC c_std_11)
 endif()
 
-# externals lib needs blas while tests need Blas AND lapack.
+# externals lib needs blas and lapack while tests need Blas AND lapack.
 # Link only at build time.
 target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
+# HEM5 calls DGETRF and DGETRS from LAPACK
+target_link_libraries(externals PRIVATE $<BUILD_INTERFACE:LAPACK::LAPACK>)
 target_include_directories(externals PRIVATE blas_lapack)
 #target_include_directories(externals PRIVATE ${BLAS_INCLUDE_DIR})
 

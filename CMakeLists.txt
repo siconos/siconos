@@ -23,7 +23,7 @@
 
 # Set minimum version for cmake
 # We advise 3.14 at least, but 3.10 is authorized since it's the default version on some OS still in use.
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
   cmake_policy(SET CMP0074 NEW)
 endif()

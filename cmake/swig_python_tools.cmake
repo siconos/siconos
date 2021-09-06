@@ -79,13 +79,9 @@ macro(add_siconos_swig_sub_module fullname)
   endif()
 
   # --- build swig module ---
-  if(CMAKE_VERSION VERSION_LESS 3.8.0)
-    swig_add_module(${_name} python ${swig_file})
-  else()
-    set(ADDITIONAL_SWIG_DEFINES ${ADDITIONAL_SWIG_DEFINES} -DBOOST_NOEXCEPT)
-    swig_add_library(${_name} LANGUAGE python SOURCES ${swig_file})
-  endif()
-
+  set(ADDITIONAL_SWIG_DEFINES ${ADDITIONAL_SWIG_DEFINES} -DBOOST_NOEXCEPT)
+  swig_add_library(${_name} LANGUAGE python SOURCES ${swig_file})
+  
   # Link with current component
   target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
   # Python and numpy
