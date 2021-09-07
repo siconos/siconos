@@ -36,12 +36,13 @@ Whatever your system is, you will need first to :
 The quick way
 -------------
 
-If you do not want to bother with all installations details and only need a 'standard' siconos install, just do : (first ensure you follow the steps described above : download, check dependencies ...)
+If you do not want to bother with all installations details and only need a 'standard' siconos install, just do (first ensure you follow the steps described above : download, check dependencies ...)::
 
-   cd path_to_build
-   cmake path_to_sources
-   make -j N
-   make install
+  cd path_to_build 
+  cmake path_to_sources
+  make -j N
+  make install
+
 
 N being the number of processes available on your system to run the compilation. Note that you'll probably need to run the install
 command as root.
@@ -124,19 +125,21 @@ The list of components to be installed can be set using :ref:`siconos_install_wi
 Running siconos tests
 ---------------------
 
-You must enable tests with option WITH_TESTING=ON for cmake. To activate tests only for some chosen component, use::
-
-  cmake -DWITH_<COMPONENT_NAME>_TESTING=ON
+To enable tests, use the option WITH_TESTING=ON when running cmake.
 
 Then to run all tests::
 
-  make -j N test
+  make -j  test
 
 To run only a set of tests, for example number 10 to 14::
 
   ctest -VV -I 10,14
 
 '-V' or '-VV' is used to enable verbose and extra verbose mode. For other options, try 'man ctest' or check ctest documentation, https://cmake.org/documentation/.
+
+To get a list of all available tests::
+
+  ctest -N
 
 To run python tests only::
 
@@ -201,6 +204,12 @@ Most common options
 
 * WITH_TESTING : to enable/disable tests
 
+
+.. warning::
+  Sometimes you may try to modify some options without success.
+  This because, when activated during the first run of cmake, some options are persistent. The only way to modify them is to remove the content of
+  the build directory.
+
 Developers or advanced users options
 """"""""""""""""""""""""""""""""""""
   
@@ -213,11 +222,12 @@ Developers or advanced users options
 
 * WITH_MUMPS=ON/OFF : to enable/disable mumps library (http://mumps.enseeiht.fr)
 
-* WITH_FCLIB=ON/OFF : to enable/disable fclib interface
+* WITH_FCLIB=ON/OFF : to enable/disable fclib interface (https://github.com/FrictionalContactLibrary/fclib). 
+  This option is ON by default and if not found it will be downloaded and installed automatically as part of Siconos.
 
 * WITH_DOXYGEN_WARNINGS=ON/OFF : verbose mode to explore doxygen warnings generated for siconos
 
-* WITH_SERIALIZATION :
+* WITH_SERIALIZATION:
 
 * WITH_GENERATION:
 
@@ -243,6 +253,13 @@ For example, to build siconos with documentation for all components, no python b
 But when you need a lot of options, this may get a bit tedious, with very long command line. To avoid this, you can use :ref:`siconos_install_with_user_options`.
 
 .. _siconos_install_with_user_options:
+
+.. note::
+  for most of the required or optional dependencies, you can add some hints regarding their installation path to
+  help cmake find them by using the option 'XXX_ROOT=<install_path>', XXX being the name of the package to be searched.
+  For example::
+
+    cmake -DFCLIB_ROOT=... 
 
 User-defined option file
 ------------------------

@@ -141,7 +141,7 @@ swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
 # right now the only tests we have require serialization
 if(WITH_SERIALIZATION)
-  if(WITH_${COMPONENT}_TESTING)
+  if(WITH_TESTING)
     build_python_tests(
       # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
       )

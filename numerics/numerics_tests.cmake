@@ -1,6 +1,6 @@
 include(tools4tests)
 
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
 
   # If WITH_SYSTEM_SUITESPARSE, suite sparse is an imported target
   # that must sometimes be taken into account by tests.

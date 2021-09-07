@@ -38,7 +38,7 @@ install(PROGRAMS ${CMAKE_BINARY_DIR}/scripts/siconos_mechanisms.py DESTINATION b
 
 
 # --- Tests ---
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
   # -- prepare siconos_mechanisms tests --
   set(CURRENT_PYTHON_PATH ${CMAKE_BINARY_DIR}/wrap)
   set(EXAMPLE_PATH ${SICONOS_SWIG_ROOT_DIR}/tests/) # @EXAMPLE_PATH@ is required in siconos_mechanisms script
