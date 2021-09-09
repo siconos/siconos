@@ -137,8 +137,8 @@ class VViewOptions(object):
        do not use vtk depth peeling
      --maximum-number-of-peels= value
        maximum number of peels when depth peeling is on
-     --occlusion-ration= value
-       occlusion-ration when depth peeling is on
+     --occlusion-ratio= value
+       occlusion-ratio when depth peeling is on
      --normalcone-ratio = value  (default : 1.0 )
        introduce a ratio between the representation of the contact
        forces arrows the normal cone and the contact points. useful
@@ -158,19 +158,19 @@ class VViewOptions(object):
      --ortho=scale
        start in ortho mode with given parallel scale
        (default=perspective)
-      --with-charts=value
+     --with-charts=value
        display convergence charts
      --visible=all
        all: view all contactors and avatars
        avatars: view only avatar if an avatar is defined (for each
        object) contactors: ignore avatars, view only contactors where
        avatars are contactors with collision_group=-1
-     --with_edges
+     --with-edges
        add edges in the rendering (experimental for primitives)
-     --with_fixed_color
+     --with-fixed-color
        use fixed color defined in the config file
-     --depth-2d
-       fix depth for 2D objects
+     --depth-2d=<value>
+       specify a depth for 2D objects
      --verbose=<int verbose_level>
     """)
 
@@ -1886,15 +1886,17 @@ class VView(object):
             actor = vtk.vtkActor()
             if self.opts.with_edges:
                 actor_edge = vtk.vtkActor()
+
             if instance.attrs.get('mass', 0) > 0:
                 # objects that may move
                 self.dynamic_actors[instid].append((actor, contact_shape_indx,
                                                     collision_group))
                 actor.GetProperty().SetOpacity(
                     self.config.get('dynamic_opacity', 0.7))
-                actor.GetProperty().SetColor(
-                    self.config.get('dynamic_bodies_color', [0.3,0.3,0.3]))
 
+                actor.GetProperty().SetColor(
+                    instance.attrs.get('color',
+                                       self.config.get('dynamic_bodies_color', [0.3,0.3,0.3])))
                 if self.opts.with_edges:
                     self.dynamic_actors[instid].append((actor_edge, contact_shape_indx,
                                                     collision_group))
@@ -1909,7 +1911,8 @@ class VView(object):
                 actor.GetProperty().SetOpacity(
                     self.config.get('static_opacity', 1.0))
                 actor.GetProperty().SetColor(
-                        self.config.get('static_bodies_color', [0.5,0.5,0.5]))
+                    instance.attrs.get('color',
+                                       self.config.get('static_bodies_color', [0.5,0.5,0.5])))
 
             if self.opts.with_random_color :
                 actor.GetProperty().SetColor(random_color())
