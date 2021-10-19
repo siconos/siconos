@@ -22,6 +22,7 @@
 #include "MechanicsFwd.hpp"
 #include "SiconosVector.hpp"
 #include "NewtonEuler3DR.hpp"
+#include "StaticBody.hpp"
 
 class ContactR : public NewtonEuler3DR
 {
@@ -38,6 +39,7 @@ public:
   SP::SiconosShape shape[2];
   SP::SiconosContactor contactor[2];
   SP::RigidBodyDS ds[2];
+  SP::StaticBody staticBody[1];
 
   /** to compute the output y = h(t,q,z) of the Relation
       \param time current time value
@@ -56,6 +58,9 @@ public:
                                    const SiconosVector& normal);
 
   virtual void preDelete() {}
+
+  virtual void display() const ;
+
 
   ACCEPT_STD_VISITORS();
 };

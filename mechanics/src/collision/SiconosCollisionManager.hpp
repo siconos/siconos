@@ -51,6 +51,15 @@ public:
    *  in failure. */
   virtual void removeBody(const SP::SecondOrderDS& body) {}
 
+  /** Add a static body in the collision detector.
+   */
+  virtual SP::StaticBody addStaticBody(
+    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector(), int number=0) {return SP::StaticBody();};
+
+  /** Remove a body from the collision detector.
+   */
+  virtual void removeStaticBody(const SP::StaticBody& body) {};
+
   /** Perform an intersection test on all shapes in the contactors and
    * return a vector of all results, ordered by distance from start.
    \param start The starting point of the line segment in inertial
@@ -128,16 +137,6 @@ public:
                    bool sorted=true)
     { return std::vector<SP::SiconosCollisionQueryResult>(); }
 
-public:
-  /** Insert a static contactor set */
-  virtual StaticContactorSetID insertStaticContactorSet(
-    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector())
-    { return (StaticContactorSetID)nullptr; }
-
-  /** Remove a static contactor set.
-   * \param id An identifier returned by insertStaticContactorSet. */
-  virtual bool removeStaticContactorSet(StaticContactorSetID id)
-    { return !id; };
 };
 
 #endif /* SiconosCollisionManager.hpp */

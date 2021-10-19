@@ -168,3 +168,14 @@ void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& m
 
   ContactR::updateContactPoints(va, vb, vn*(flip?-1:1));
 }
+void BulletR::display() const
+{
+  std::cout << "BulletR display()" << std::endl;
+  ContactR::display();
+
+
+  std::cout << "&btObject[0]" << &btObject[0] << std::endl;
+  std::cout << "&btObject[1]" << &btObject[1] << std::endl;
+  std::cout << "&btShape[0]" << &btShape[0] << std::endl;
+  std::cout << "&btShape[1]" << &btShape[1] << std::endl;
+}

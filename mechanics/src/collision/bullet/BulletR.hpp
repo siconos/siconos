@@ -45,6 +45,8 @@ public:
                                             SP::NewtonEulerDS ds1,
                                             SP::NewtonEulerDS ds2);
 
+  void display() const;
+
   ACCEPT_STD_VISITORS();
 };
 

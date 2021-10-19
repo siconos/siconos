@@ -206,7 +206,7 @@ public:
   {
     _relNc = nnc;
   };
-
+  virtual void display() const {}
   // visitors hook
   ACCEPT_STD_VISITORS();
 

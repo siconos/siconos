@@ -1117,17 +1117,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     cset.append(SiconosContactor(shp, pos, c.group))
                     self.print_verbose('              Adding shape %s to static contactor'%c.shape_name, 'at relative position', pos)
 
-                staticContactorSetID = self._interman.insertStaticContactorSet(cset, csetpos)
-
+                staticBody = self._interman.addStaticBody(cset, csetpos, number)
                 self._static[name] = {
                     'number': number,
                     'origin': translation,
                     'orientation': orientation,
                     'shape': shp,
                 }
-                # In the case of a static object, we return the staticContactorSetID and a flag
+                # In the case of a static object, we return the staticBody and a flag
                 # this will be used to remove the contactor if we have a time of death
-                return staticContactorSetID, 'static'
+                return staticBody, 'static'
 
             # ---------------
             # a dynamic object
@@ -1813,7 +1812,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             #print(self._deaths[time_of_death])
             for ( _, _, body, flag) in self._deaths[time_of_death]:
                 if flag == 'static':
-                    self._interman.removeStaticContactorSet(body)
+                    self._interman.removeStaticBody(body)
                 elif  flag == 'dynamic':
                     self._interman.removeBody(body)
                     self._nsds.removeDynamicalSystem(body)
