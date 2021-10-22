@@ -272,6 +272,116 @@ void ContactPointVisitor::operator()(const NewtonEuler5DR& rel)
   answer.setValue(21,inter->lambda(1)->getValue(2));
   answer.setValue(22, id);
 }
+
+template<>
+void ContactPointVisitor::operator()(const DiskDiskR& rel)
+{
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
+  auto& q = *DSlink[LagrangianR::q0];
+
+  double x1 = q(0); double y1 = q(1); const double r1 = rel.getRadius1();
+  double x2 = q(3); double y2 = q(4); const double r2 = rel.getRadius2();
+  double d = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+
+  double ncx = d > 0 ? (x2-x1)/d : 0;
+  double ncy = d > 0 ? (y2-y1)/d : 0;
+
+  double cpax = x1 + ncx * r1;
+  double cpay = y1 + ncy * r1;
+
+  double cpbx = x2 - ncx * r2;
+  double cpby = y2 - ncy * r2;
+
+  double id = inter->number();
+  double mu = ask<ForMu>(*inter->nonSmoothLaw());
+  const SimpleMatrix& jachq = *rel.jachq();
+  SiconosVector cf(jachq.size(1));
+  prod(*inter->lambda(1), jachq, cf, true);
+
+  answer.resize(16);
+
+  answer.setValue(0, mu);
+  answer.setValue(1, cpax);
+  answer.setValue(2, cpay);
+
+  answer.setValue(3, cpbx);
+  answer.setValue(4, cpby);
+
+  answer.setValue(5, ncx);
+  answer.setValue(6, ncy);
+
+  answer.setValue(7, cf(0));
+  answer.setValue(8, cf(1));
+
+  answer.setValue(9, inter->y(0)->getValue(0));
+  answer.setValue(10, inter->y(0)->getValue(1));
+
+  answer.setValue(11, inter->y(1)->getValue(0));
+  answer.setValue(12, inter->y(1)->getValue(1));
+
+  answer.setValue(13, inter->lambda(1)->getValue(0));
+  answer.setValue(14, inter->lambda(1)->getValue(1));
+
+  answer.setValue(15, id);
+
+}
+
+template<>
+void ContactPointVisitor::operator()(const DiskPlanR& rel)
+{
+  auto& DSlink = inter->linkToDSVariables();
+  const auto& q0 = *DSlink[LagrangianR::q0];
+
+  auto x1 = q0(0); auto y1 = q0(1); auto r1 = rel.getRadius();
+  auto A = rel.getA(); auto B = rel.getB(); auto C = rel.getC();
+
+
+  double x2 = - (A*C - B*B * x1 + A*B * y1) / (A*A + B*B);
+  double y2 = - (B*C - A*A * y1 + A*B * x1) / (A*A + B*B);
+
+  double d = (*(inter->y()[1]))(0) + r1;
+
+  double ncx = d > 0 ? (x2-x1)/d : 0;
+  double ncy = d > 0 ? (y2-y1)/d : 0;
+
+  double cpax = x1 + ncx * r1;
+  double cpay = y1 + ncy * r1;
+
+  double id = inter->number();
+  double mu = ask<ForMu>(*inter->nonSmoothLaw());
+  const SimpleMatrix& jachq = *rel.jachq();
+  SiconosVector cf(jachq.size(1));
+  prod(*inter->lambda(1), jachq, cf, true);
+
+  answer.resize(16);
+
+  answer.setValue(0, mu);
+  answer.setValue(1, cpax);
+  answer.setValue(2, cpay);
+
+  answer.setValue(3, x2);
+  answer.setValue(4, y2);
+
+  answer.setValue(5, ncx);
+  answer.setValue(6, ncy);
+
+  answer.setValue(7, cf(0));
+  answer.setValue(8, cf(1));
+
+  answer.setValue(9, inter->y(0)->getValue(0));
+  answer.setValue(10, inter->y(0)->getValue(1));
+
+  answer.setValue(11, inter->y(1)->getValue(0));
+  answer.setValue(12, inter->y(1)->getValue(1));
+
+  answer.setValue(13, inter->lambda(1)->getValue(0));
+  answer.setValue(14, inter->lambda(1)->getValue(1));
+
+  answer.setValue(15, id);
+
+}
+
+
 template<>
 void ContactPointVisitor::operator()(const Lagrangian2d2DR& rel)
 {
@@ -329,7 +439,6 @@ void ContactPointVisitor::operator()(const Lagrangian2d3DR& rel)
   const SimpleMatrix& jachq = *rel.jachq();
   SiconosVector cf(jachq.size(1));
   prod(*inter->lambda(1), jachq, cf, true);
-
 
   answer.resize(16);
 
@@ -462,11 +571,13 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
 
       /* create a visitor for specified classes */
       typedef Visitor < Classes <
-      NewtonEuler1DR,
-      NewtonEuler3DR,
-      NewtonEuler5DR,
-      Lagrangian2d2DR,
-      Lagrangian2d3DR>,
+        NewtonEuler1DR,
+        NewtonEuler3DR,
+        NewtonEuler5DR,
+        Lagrangian2d2DR,
+        Lagrangian2d3DR,
+        DiskDiskR,
+        DiskPlanR>,
       ContactPointVisitor>::Make ContactPointInspector;
       ContactPointInspector inspector;
       inspector.inter = graph.bundle(*vi);
