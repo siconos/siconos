@@ -916,7 +916,7 @@ class MechanicsHdf5(object):
         Add a primitive shape.
         """
         # infer the dimension of the problem
-        if primitive == 'Disk' or primitive == 'Box2d':
+        if primitive == 'Disk' or primitive == 'Box2d' or primitive == 'Line':
             self._dimension = 2
         else:
             if self._dimension == 2:
@@ -925,6 +925,7 @@ class MechanicsHdf5(object):
         self._out.attrs['dimension'] = self._dimension
 
         if name not in self._ref:
+
             shape = self._ref.create_dataset(name, (1, len(params)))
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'primitive'

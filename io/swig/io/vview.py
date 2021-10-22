@@ -1810,6 +1810,30 @@ class VView(object):
                 source.SetYLength(attrs[1])
                 source.SetZLength(self.opts.depth_2d)
 
+            elif primitive == 'Line':
+                source = vtk.vtkLineSource()
+                (a, b, c) = attrs
+                if a==0:
+                    assert (b != 0)
+                    x1 = 0
+                    y1 = -c/b
+                    x2 = 1
+                    y2 = y1
+                elif b==0:
+                    assert (a != 0)
+                    x1 = -c/a
+                    y1 = 0
+                    x2 = x1
+                    y2 = 1
+                else:
+                    x1 = 0
+                    y1 = -c/b
+                    x2 = -c/a
+                    y2 = 0
+
+                source.SetPoint1(x1, y1, 0)
+                source.SetPoint2(x2, y2, 0)
+
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
             if not self.opts.imr:
