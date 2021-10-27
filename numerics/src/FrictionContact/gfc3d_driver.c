@@ -61,10 +61,10 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
 {
   if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
   {
-    size_t nc = problem->numberOfContacts;   
+    size_t nc = problem->numberOfContacts;
     size_t n = problem->M->size0;
     size_t m = 3 * nc;
-    
+
     double norm_b = cblas_dnrm2(m, balanced_problem->b, 1);
     double norm_q = cblas_dnrm2(n, balanced_problem->q, 1);
     double error_balancing = 1e24;
@@ -72,7 +72,7 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
     gfc3d_compute_error(balanced_problem,  reaction, velocity, globalVelocity,
                         tolerance, options,
                         norm_q, norm_b,  &error_balancing);
-    
+
     /* Come back to original variables */
     gfc3d_balancing_back_to_original_variables(balanced_problem, options,
                                                reaction, velocity, globalVelocity);
@@ -83,12 +83,12 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
     gfc3d_compute_error(problem,  reaction, velocity, globalVelocity,
                         tolerance, options,
                         norm_q, norm_b,  &error);
-    
+
     numerics_printf_verbose(0,"error with balancing = %8.4e", error_balancing);
     numerics_printf_verbose(0,"error with original = %8.4e", error);
   }
   //else continue
-    
+
   return 0;
 
 }
@@ -104,9 +104,9 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
   /* Solver name */
   /*  const char* const  name = options->solverName;*/
-  
 
-  
+
+
   int info = -1 ;
 
   if(problem->dimension != 3)
@@ -218,7 +218,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
                                                        reaction, velocity, globalVelocity,
                                                        options);
 
-    
+
     problem = gfc3d_balancing_free(problem, options);
 
     break;

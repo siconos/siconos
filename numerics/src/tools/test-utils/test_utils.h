@@ -39,6 +39,8 @@ extern "C"
 
   int run_test_collection(TestCase * collection, int number_of_tests, int (*test_function)(TestCase*));
 
+  /* void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem * problem, FILE * file)   */
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

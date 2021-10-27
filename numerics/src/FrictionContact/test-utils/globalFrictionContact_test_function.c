@@ -30,6 +30,11 @@
 #include "test_utils.h"                    // for TestCase
 #include <time.h>
 #include "SiconosConfig.h"                 // for HAVE_GAMS_C_API // IWYU pragma: keep
+#include <string.h>
+
+void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem * problem, FILE * file);
+
+void print_solution_in_Matlab_file(double * v, double * u, double * r, int d, int n, int m, FILE * file);
 
 int globalFrictionContact_test_function(TestCase* current)
 {
@@ -38,6 +43,28 @@ int globalFrictionContact_test_function(TestCase* current)
   GlobalFrictionContactProblem* problem = globalFrictionContact_new_from_filename(current->filename);
   /* globalFrictionContact_display(problem); */
 
+  /* /\* print problem data in Matlab file *\/ */
+  /* char *fname; */
+  /* FILE * mfile; */
+  /* char filename[60] = "mdata/"; */
+  /* char fsolname[60] = "mdata/"; */
+  /* char probname[50] = "\0"; */
+  /* fname = strrchr(current->filename, '/'); */
+  /* fname++; */
+  /* for(int i = 0; *fname != '.'; i++) */
+  /* { */
+  /*   probname[i] = (*fname == '-' ? '_' : *fname);  */
+  /*   fname++; */
+  /* } */
+  /* size_t long_probname = strlen(probname); */
+  /* strcat(filename, probname); */
+  /* strcat(filename, ".m");  */
+  /* mfile = fopen(filename, "w"); */
+  /* print_problem_data_in_Matlab_file(problem, mfile); */
+  /* fclose(mfile); */
+
+  /* strcat(fsolname, probname); */
+  /* strcat(fsolname, "_sol.m"); */
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = globalFrictionContact_printInFile(problem, foutput);
@@ -75,6 +102,11 @@ int globalFrictionContact_test_function(TestCase* current)
   }
 
   clock_t t2 = clock();
+
+  /* print final solution in Matlab file */
+  /* mfile = fopen(fsolname, "w"); */
+  /* print_solution_in_Matlab_file(globalvelocity, velocity, reaction, dim, NC, n, mfile); */
+  /* fclose(mfile); */
   
   int print_size = 10;
 
@@ -130,5 +162,73 @@ int globalFrictionContact_test_function(TestCase* current)
   globalFrictionContact_free(problem);
   return info;
 
+}
+
+void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem * problem, FILE * file)
+{
+  int d = problem->dimension;
+  int n = problem->numberOfContacts;
+  int m = problem->M->size0;
+  
+  fprintf(file,"d = %3i;\n", d);
+  fprintf(file,"n = %6i;\n", n);
+  fprintf(file,"m = %6i;\n", m);
+
+  fprintf(file,"M = [\n");
+  CSparseMatrix_print_in_Matlab_file(NM_triplet(problem->M), 0, file);
+  fprintf(file,"    ];\n");
+  fprintf(file,"M = sparse(int32(M(:,1)), int32(M(:,2)), M(:,3));\n");
+
+  fprintf(file,"H = [\n");
+  CSparseMatrix_print_in_Matlab_file(NM_triplet(problem->H), 0, file);
+  fprintf(file,"    ];\n");
+  fprintf(file,"H = sparse(int32(H(:,1)), int32(H(:,2)), H(:,3));\n");
+
+  fprintf(file,"q = [");
+  for(int i = 0; i < m; i++)
+  {
+    fprintf(file,"%22.14e; ",problem->q[i]);
+  }
+  fprintf(file,"];\n");
+
+  fprintf(file,"b = [");
+  for(int i = 0; i < n*d; i++)
+  {
+    fprintf(file,"%22.14e; ",problem->b[i]);
+  }
+  fprintf(file,"];\n");
+
+  fprintf(file,"mu = [");
+  for(int i = 0; i < n; i++)
+  {
+    fprintf(file,"%22.14e; ",problem->mu[i]);
+  }
+  fprintf(file,"];\n");
+
+  return;
+}
+
+
+void print_solution_in_Matlab_file(double * v, double * u, double * r, int d, int n, int m, FILE * file)
+{
+  fprintf(file, "globalVelocity=[\n");
+  for(int i = 0; i < m; i++)
+  {
+    fprintf(file, "%22.14e\n", v[i]);
+  }
+  fprintf(file, "               ];\n");
+  fprintf(file, "velocity=[\n");
+  for(int i = 0; i < n*d; i++)
+  {
+    fprintf(file, "%22.14e\n", u[i]);
+  }
+  fprintf(file, "         ];\n");
+  fprintf(file, "reaction=[\n");
+  for(int i = 0; i < n*d; i++)
+  {
+    fprintf(file, "%22.14e\n", r[i]);
+  }
+  fprintf(file, "         ];\n");
+  return;
 }
 

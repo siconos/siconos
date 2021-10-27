@@ -937,6 +937,59 @@ int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE* file)
   return (1) ;
 }
 
+int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief, FILE* file)
+{
+  CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai ;
+  double *Ax ;
+  if(!A)
+  {
+    fprintf(file,"(null)\n") ;
+    return (0) ;
+  }
+  m = A->m ;
+  n = A->n ;
+  Ap = A->p ;
+  Ai = A->i ;
+  Ax = A->x ;
+  nzmax = A->nzmax ;
+  nz = A->nz ;
+  /* fprintf(file,"CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER, */
+  /*         CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ; */
+  if(nz < 0)
+  {
+    fprintf(file,"%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n",
+            (long long int)m, (long long int)n, (long long int)nzmax,
+            (long long int)Ap [n],  cs_norm(A)) ;
+    for(j = 0 ; j < n ; j++)
+    {
+      fprintf(file,"    col %lld : locations %lld to %lld\n", (long long int)j, (long long int)Ap [j], (long long int)Ap [j+1]-1);
+      for(p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        fprintf(file,"      %lld : %g\n", (long long int)Ai [p], Ax ? Ax [p] : 1) ;
+        if(brief && p > 20)
+        {
+          fprintf(file,"  ...\n") ;
+          return (1) ;
+        }
+      }
+    }
+  }
+  else
+  {
+    for(p = 0 ; p < nz ; p++)
+    {
+      fprintf(file,"    %lld %lld %g\n", (long long int)Ai [p] + 1, (long long int)Ap [p] + 1, Ax ? Ax [p] : 1) ;
+      if(brief && p > 20)
+      {
+        fprintf(file,"  ...\n") ;
+        return (1) ;
+      }
+    }
+    fprintf(file,"    %lld %lld %g\n", (long long int)m, (long long int)n, 0.0);
+  }
+  return (1) ;
+}
+
 CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B)
 {
 

@@ -230,6 +230,8 @@ extern "C"
    * \param file file descriptor*/
   int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE* file);
 
+  int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief, FILE* file);
+
   CSparseMatrix * CSparseMatrix_new_from_file(FILE* file);
 
   /** Add an entry to a triplet matrix only if the absolute value is

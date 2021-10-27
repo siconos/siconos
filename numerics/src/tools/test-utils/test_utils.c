@@ -137,7 +137,7 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
   int out = 0;
   int n_failed = 0;
   int n_succeeded = 0;
-  long clk_tck = CLOCKS_PER_SEC;
+  long clk_tck = CLOCKS_PER_SEC;  
 
   // Loop through tests collection
   for(int test_num=0; test_num<number_of_tests; ++test_num)
@@ -161,7 +161,7 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
     int info = test_function(&collection[test_num]);
     clock_t t2 = clock();
     (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
-
+    
     // Update failed/succeeded lists
     if(info)  // info != 0 --> test is unsuccesful
     {
@@ -182,3 +182,4 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
   // tests status.
   return out;
 }
+
