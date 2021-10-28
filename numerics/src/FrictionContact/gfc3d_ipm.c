@@ -1230,9 +1230,11 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   data->P_mu->mat->matrix2->origin = NSM_TRIPLET;
   for(unsigned int i = 0; i < nd; ++i)
     if(i % d == 0)
-      NM_entry(data->P_mu->mat, i, i, 1. / problem->mu[(int)(i/d)]);
-    else
+      /* NM_entry(data->P_mu->mat, i, i, 1. / problem->mu[(int)(i/d)]); */
       NM_entry(data->P_mu->mat, i, i, 1.);
+    else
+      /* NM_entry(data->P_mu->mat, i, i, 1.); */
+      NM_entry(data->P_mu->mat, i, i, problem->mu[(int)(i/d)]);
 
   /* ------ initialize the inverse P_mu_inv of the change of variable matrix P_mu ------- */
   data->P_mu->inv_mat = NM_create(NM_SPARSE, nd, nd);
@@ -1240,10 +1242,11 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   data->P_mu->inv_mat->matrix2->origin = NSM_TRIPLET;
   for(unsigned int i = 0; i < nd; ++i)
     if(i % d == 0)
-      NM_entry(data->P_mu->inv_mat, i, i, problem->mu[(int)(i/d)]);
-    else
+      /* NM_entry(data->P_mu->inv_mat, i, i, problem->mu[(int)(i/d)]); */
       NM_entry(data->P_mu->inv_mat, i, i, 1.);
-
+    else
+      /* NM_entry(data->P_mu->inv_mat, i, i, 1.); */
+      NM_entry(data->P_mu->inv_mat, i, i, 1.0/problem->mu[(int)(i/d)]);
   /* ------ initial parameters initialization ---------- */
   data->internal_params = (IPM_internal_params*)malloc(sizeof(IPM_internal_params));
   data->internal_params->alpha_primal = 1.0;
@@ -1773,7 +1776,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       for(unsigned int i = 0; i < nd; ++ i)
       {
         if(i % d == 0)
-          w[i] = w_tilde[i]/(problem->mu[(int)(i/d)])
+          /* w[i] = w_tilde[i]/(problem->mu[(int)(i/d)]) */
+	  w[i] = w_tilde[i]/(problem->mu[(int)(i/d)])
             + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
       }
 
@@ -2134,11 +2138,11 @@ void gfc3d_ipm_set_default(SolverOptions* options)
   
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] = SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
 
