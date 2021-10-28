@@ -124,7 +124,7 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
 #include <VisitorMaker.hpp>
 
 //#define DEBUG_MESSAGES 1
-#include <debug.h>
+#include "siconos_debug.h"
 
 using namespace Experimental;
 

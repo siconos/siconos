@@ -52,7 +52,7 @@ if(WITH_SERIALIZATION)
 endif()
 
 # --- Tests ---
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
   if(NOT WITH_XML)
     list(APPEND python_excluded_tests tests/test_xml.py)
   endif()

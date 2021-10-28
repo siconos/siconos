@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
+#include "RotationQuaternion.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
 
@@ -35,6 +36,7 @@
 #include "TypeName.hpp"
 
 #include "OneStepNSProblem.hpp"
+
 #include "BlockVector.hpp"
 
 // #define DEBUG_NOCOLOR
@@ -42,7 +44,7 @@
 // #define DEBUG_MESSAGES
 //#define DEBUG_BEGIN_END_ONLY
 //#define DEBUG_WHERE_MESSAGES
-#include <debug.h>
+#include "siconos_debug.h"
 
 
 using namespace RELATION;
@@ -80,6 +82,10 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
     _gamma = 1.0 / 2.0;
     _useGamma = false;
   }
+  _selected_coordinates.resize(8);
+  for (unsigned int i =0; i<8;i++)
+    _selected_coordinates[i]=0;
+
 }
 
 const SimpleMatrix MoreauJeanOSI::getW(SP::DynamicalSystem ds)
@@ -118,8 +124,6 @@ SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("MoreauJeanOSI::initializeWorkVectorsForDS(Model&, double t, SP::DynamicalSystem ds)\n");
-  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
-  ds_work_vectors.resize(MoreauJeanOSI::WORK_LENGTH);
 
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
@@ -131,6 +135,11 @@ void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
   // Compute W (iteration matrix)
   SP::SecondOrderDS sods = std::static_pointer_cast<SecondOrderDS> (ds);
   initializeIterationMatrixW(t, sods);
+
+  // Initialize work vectors
+  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
+  ds_work_vectors.resize(MoreauJeanOSI::WORK_LENGTH);
+
   ds_work_vectors[MoreauJeanOSI::RESIDU_FREE].reset(new SiconosVector(sods->dimension()));
   ds_work_vectors[MoreauJeanOSI::VFREE].reset(new SiconosVector(sods->dimension()));
 
@@ -376,7 +385,7 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
     W.setIsSymmetric(true);
     W.setIsPositiveDefinite(true);
   }
-  
+
   // Remark: W is not LU-factorized nor inversed here.
   // Function PLUForwardBackward will do that if required.
   DEBUG_END("MoreauJeanOSI::initializeIterationMatrixW\n");
@@ -549,6 +558,58 @@ void MoreauJeanOSI::computeW(double t, SecondOrderDS& ds, SiconosMatrix& W)
   // Function PLUForwardBackward will do that if required.
 }
 
+SP::SimpleMatrix MoreauJeanOSI::Winverse(SP::SecondOrderDS ds, bool keepW)
+{
+
+  /* We compute and return the current inverse the W matrix */
+
+  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
+
+  SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(dsv).W;
+  SP::SimpleMatrix Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
+  if (!Winverse)
+  {
+    unsigned int sizeW = ds->dimension();
+    _dynamicalSystemsGraph->properties(dsv).Winverse.reset(new SimpleMatrix(sizeW, sizeW));
+    Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
+    Winverse->eye();
+    if (keepW)
+    {
+      //std::cout << "MoreauJeanOSI keepW" << std::endl;
+      SP::SiconosMatrix Wtmp(new SimpleMatrix(*W));
+      Wtmp->Solve(*Winverse);
+    }
+    else
+    {
+      W->Solve(*Winverse);
+    }
+  }
+  else
+  {
+    Type::Siconos dsType = Type::value(*ds);
+    if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianLinearDiagonalDS)
+    {
+      // Nothing: W does not depend on time.
+    }
+    else
+    {
+      Winverse->eye();
+      if (keepW)
+      {
+        SP::SiconosMatrix Wtmp(new SimpleMatrix(*W));
+        Wtmp->Solve(*Winverse);
+      }
+      else
+      {
+        W->Solve(*Winverse);
+      }
+    }
+  }
+
+  return Winverse;
+}
+
+
 void MoreauJeanOSI::computeInitialNewtonState()
 {
   DEBUG_BEGIN("MoreauJeanOSI::computeInitialNewtonState()\n");
@@ -669,6 +730,7 @@ double MoreauJeanOSI::computeResidu()
       const SiconosVector &v = *d.velocity(); // v = v_k,i+1
       //residuFree.zero();
       DEBUG_EXPR(residuFree.display());
+
       DEBUG_EXPR(vold.display());
       DEBUG_EXPR(v.display());
 
@@ -688,6 +750,9 @@ double MoreauJeanOSI::computeResidu()
         scal(coef, fold, residuFree, false);
 
         // Expensive computes forces(ti,vi,qi)
+        // SiconosVector &qold = *d.qMemory()->getSiconosVector(0);
+        // SiconosVector &vold = *d.velocityMemory()->getSiconosVector(0);
+
         // d.computeForces(told, qold, vold);
         // double coef = -h * (1 - _theta);
         // // residuFree += coef * fL_i
@@ -1251,87 +1316,88 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
 }
 
 
-struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
+// struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
+// {
+//   using SiconosVisitor::visit;
+
+//   OneStepNSProblem& _osnsp;
+//   Interaction& _inter;
+//   InteractionProperties& _interProp;
+
+//   _NSLEffectOnFreeOutput(OneStepNSProblem& p, Interaction& inter, InteractionProperties& interProp) :
+//     _osnsp(p), _inter(inter), _interProp(interProp) {};
+
+
+void  MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nslaw)
 {
-  using SiconosVisitor::visit;
+  double e;
+  e = nslaw.e();
+  Index subCoord(4);
+  subCoord[0] = 0;
+  subCoord[1] = _inter.nonSmoothLaw()->size();
+  subCoord[2] = 0;
+  subCoord[3] = subCoord[1];
+  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
+  subscal(e, _inter.y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord, false);
+}
 
-  OneStepNSProblem * _osnsp;
-  Interaction& _inter;
-  InteractionProperties& _interProp;
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const RelayNSL& nslaw)
+{
+  // since velocity lower-/upper-bounds are fully specified in NSL,
+  // nothing to do here
+}
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem *p, Interaction& inter, InteractionProperties& interProp) :
-    _osnsp(p), _inter(inter), _interProp(interProp) {};
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactFrictionNSL& nslaw)
+{
+  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
-  void visit(const NewtonImpactNSL& nslaw)
+
+  // The normal part is multiplied depends on en
+  if(nslaw.en() > 0.0)
   {
-    double e;
-    e = nslaw.e();
-    Index subCoord(4);
-    subCoord[0] = 0;
-    subCoord[1] = _inter.nonSmoothLaw()->size();
-    subCoord[2] = 0;
-    subCoord[3] = subCoord[1];
-    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
-    subscal(e, *_inter.y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
+    osnsp_rhs(0) +=  nslaw.en() * _inter.y_k(_osnsp.inputOutputLevel())(0);
   }
-
-  void visit(const RelayNSL& nslaw)
+  // The tangential part is multiplied depends on et
+  if(nslaw.et() > 0.0)
   {
-    // since velocity lower-/upper-bounds are fully specified in NSL,
-    // nothing to do here
+    osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
+    if(_inter.nonSmoothLaw()->size()>=2)
+    {
+      osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);    }
   }
+}
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactRollingFrictionNSL& nslaw)
+{
+  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
-  void visit(const NewtonImpactFrictionNSL& nslaw)
+  // The normal part is multiplied depends on en
+  if(nslaw.en() > 0.0)
   {
-    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
-
-    // The normal part is multiplied depends on en
-    if(nslaw.en() > 0.0)
-    {
-      osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
-    }
-    // The tangential part is multiplied depends on et
-    if(nslaw.et() > 0.0)
-    {
-      osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(1);
-      if(_inter.nonSmoothLaw()->size()>=2)
-      {
-        osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(2);
-      }
-    }
+    osnsp_rhs(0) +=  nslaw.en() * _inter.y_k(_osnsp.inputOutputLevel())(0);
   }
-  void visit(const NewtonImpactRollingFrictionNSL& nslaw)
+  // The tangential part is multiplied depends on et
+  if(nslaw.et() > 0.0)
   {
-    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
-
-    // The normal part is multiplied depends on en
-    if(nslaw.en() > 0.0)
+    osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
+    if(_inter.nonSmoothLaw()->size()>=2)
     {
-      osnsp_rhs(0) +=  nslaw.en() * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
-    }
-    // The tangential part is multiplied depends on et
-    if(nslaw.et() > 0.0)
-    {
-      osnsp_rhs(1) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(1);
-      if(_inter.nonSmoothLaw()->size()>=2)
-      {
-        osnsp_rhs(2) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(2);
-      }
+      osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);
     }
   }
-  void visit(const EqualityConditionNSL& nslaw)
-  {
-    ;
-  }
-  void visit(const MixedComplementarityConditionNSL& nslaw)
-  {
-    ;
-  }
-  void visit(const ComplementarityConditionNSL& nslaw)
-  {
-    ;
-  }
-};
+}
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const EqualityConditionNSL& nslaw)
+{
+  ;
+}
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const MixedComplementarityConditionNSL& nslaw)
+{
+  ;
+}
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const ComplementarityConditionNSL& nslaw)
+{
+  ;
+}
+// };
 
 
 void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
@@ -1342,31 +1408,9 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   SP::OneStepNSProblems allOSNS  = _simulation->oneStepNSProblems();
   InteractionsGraph& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
+
   Interaction& inter = *indexSet.bundle(vertex_inter);
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfBlockVectors& inter_work_block = *indexSet.properties(vertex_inter).workBlockVectors;
-
-  // Get relation and non smooth law types
-  assert(inter.relation());
-  RELATION::TYPES relationType = inter.relation()->getType();
-  RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
-
-
-  unsigned int sizeY = inter.nonSmoothLaw()->size();
-
-  unsigned int relativePosition = 0;
-
-  Index coord(8);
-  coord[0] = relativePosition;
-  coord[1] = relativePosition + sizeY;
-  coord[2] = 0;
-  coord[4] = 0;
-  coord[6] = 0;
-  coord[7] = sizeY;
-  SP::SiconosMatrix  F;
-  //  SP::BlockVector deltax;
-
-  //SiconosVector& yForNSsolver = *inter.yForNSsolver()
 
   SiconosVector& osnsp_rhs = *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
@@ -1374,117 +1418,85 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   assert(Xfree);
   DEBUG_EXPR(Xfree->display(););
 
-  Interaction& mainInteraction = inter;
-  assert(mainInteraction.relation());
 
-  if(relationType == NewtonEuler)
+  // 1 - product H Xfree
+  SiconosMatrix& H = *inter.relation()->H();
+  prod(H, *Xfree, osnsp_rhs, true);
+
+  // 2 -  compute additional terms for ScleronomousR and CompliantLinearTIR
+
+  // Get relation and non smooth law types
+  assert(inter.relation());
+  RELATION::TYPES relationType = inter.relation()->getType();
+  RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
+
+  if((relationType == Lagrangian) &&
+     (relationSubType != ScleronomousR))
   {
-    if(std::static_pointer_cast<NewtonEulerR>(mainInteraction.relation())->jachqT())
+    unsigned int sizeY = inter.nonSmoothLaw()->size();
+
+    //Index _selected_coordinates(8);
+    _selected_coordinates[0] = 0;
+    _selected_coordinates[1] = sizeY;
+    _selected_coordinates[2] = 0;
+    _selected_coordinates[3] = sizeY;
+    _selected_coordinates[4] = 0;
+    _selected_coordinates[5] = sizeY;
+    _selected_coordinates[6] = 0;
+    _selected_coordinates[7] = sizeY;
+
+    VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+    // For the relation of type LagrangianRheonomousR
+    if(relationSubType == RheonomousR)
     {
-      SiconosMatrix& CT =  *static_cast<NewtonEulerR&>(*mainInteraction.relation()).jachqT();
-      coord[3] = CT.size(1);
-      coord[5] = CT.size(1);
-      // creates a POINTER link between workX[ds] (xfree) and the
-      // corresponding interactionBlock in each Interaction for each ds of the
-      // current Interaction.
-      // XXX Big quirks !!! -- xhub
-      subprod(CT, *Xfree, osnsp_rhs, coord, true);
-    }
 
-  }
-  else
-  {
 
-    if(mainInteraction.relation()->C())
-    {
-      SiconosMatrix&  C = *mainInteraction.relation()->C() ;
-
-      coord[3] = C.size(1);
-      coord[5] = C.size(1);
-      // creates a POINTER link between workX[ds] (xfree) and the
-      // corresponding interactionBlock in each Interactionfor each ds of the
-      // current Interaction.
-      if(_useGammaForRelation)
+      if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput Configuration not possible");
-//        subprod(C, *deltax, osnsp_rhs, coord, true);
+        std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->computehDot(simulation()->getTkp1(), *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
+        SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+        ID->eye();
+        // This should be optimized -- vacary
+        subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->hDot()), osnsp_rhs, _selected_coordinates, false); // y += hDot
       }
       else
-      {
-        subprod(C, *Xfree, osnsp_rhs, coord, true);
-      }
+        THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
     }
-
-    if(relationType == Lagrangian)
+    if(relationSubType == CompliantLinearTIR)
     {
-      SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
-      ID->eye();
-
-      Index xcoord(8);
-      xcoord[0] = 0;
-      xcoord[1] = sizeY;
-      xcoord[2] = 0;
-      xcoord[3] = sizeY;
-      xcoord[4] = 0;
-      xcoord[5] = sizeY;
-      xcoord[6] = 0;
-      xcoord[7] = sizeY;
-
-      // For the relation of type LagrangianRheonomousR
-      if(relationSubType == RheonomousR)
+      if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
+
+        SiconosMatrix&  C = *inter.relation()->C() ;
+        double h = _simulation->timeStep();
+        osnsp_rhs *= h * _theta ;
+
+        /* we have to check that the value are at the beginnning of the time step */
+        // + C q_k
+        subprod(C, *DSlink[LagrangianR::q0], osnsp_rhs, _selected_coordinates, false);
+        // + h(1-_theta)v_k
+
+        *DSlink[LagrangianR::q1] *= (1-_theta)* h ;
+        subprod(C, *DSlink[LagrangianR::q1], osnsp_rhs, _selected_coordinates, false);
+
+
+        if(std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter.relation())->e())
         {
-          std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->computehDot(simulation()->getTkp1(), *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
-          subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
+          SiconosVector& e = *std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter.relation())->e();
+          osnsp_rhs += e;
         }
-        else
-          THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
       }
-      if(relationSubType == CompliantLinearTIR)
-      {
-        if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
-        {
-
-          SiconosMatrix&  C = *mainInteraction.relation()->C() ;
-          double h = _simulation->timeStep();
-          osnsp_rhs *= h * _theta ;
-
-          /* we have to check that the value are at the beginnning of the time step */
-          // + C q_k
-          subprod(C, *DSlink[LagrangianR::q0], osnsp_rhs, coord, false);
-          // + h(1-_theta)v_k
-
-          *DSlink[LagrangianR::q1] *= (1-_theta)* h ;
-          subprod(C, *DSlink[LagrangianR::q1], osnsp_rhs, coord, false);
-
-
-          if(std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter.relation())->e())
-          {
-            SiconosVector& e = *std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter.relation())->e();
-            osnsp_rhs += e;
-          }
-        }
-        else
-          THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
-      }
-      DEBUG_EXPR(osnsp_rhs.display(););
-
-
-      // For the relation of type LagrangianScleronomousR
-      if(relationSubType == ScleronomousR)
-      {
-
-      }
-
-
+      else
+        THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput not yet implemented for SICONOS_OSNSP ");
     }
-
+    DEBUG_EXPR(osnsp_rhs.display(););
   }
 
+
+  // 3 - add part due to NonSmoothLaw
   if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
   {
-    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter,
+    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(*osnsp, inter,
         indexSet.properties(vertex_inter));
     inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
@@ -1595,44 +1607,62 @@ void MoreauJeanOSI::updatePosition(DynamicalSystem& ds)
   }
   else if(dsType == Type::NewtonEulerDS)
   {
+
+    // Old Version with projection
+    //  NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
+    // SiconosVector &v = *d.twist();
+    // DEBUG_EXPR(d.display());
+    // //compute q
+    // //first step consists in computing  \dot q.
+    // //second step consists in updating q.
+    // //
+    // SiconosMatrix& T = *d.T();
+    // SiconosVector& dotq = *d.dotq();
+    // DEBUG_EXPR(v.display());
+    // prod(T, v, dotq, true);
+    // DEBUG_EXPR(dotq.display());
+    // SiconosVector& q = *d.q();
+    // //  -> get previous time step state
+    // SiconosVector& dotqold = *d.dotqMemory()->getSiconosVector(0);
+    // DEBUG_EXPR(dotqold.display());
+    // // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
+    // double coeff = h * _theta;
+    // scal(coeff, dotq, q) ; // q = h*theta*v
+    // coeff = h * (1 - _theta);
+    // scal(coeff, dotqold, q, false); // q += h(1-theta)*vold
+    // SiconosVector& qold = *d.qMemory()->getSiconosVector(0);
+    // DEBUG_EXPR(qold.display());
+    // q += qold;   // q += qold
+    // DEBUG_PRINT("new q before normalizing\n");
+    // DEBUG_EXPR(q.display());
+    // //q[3:6] must be normalized
+    // d.normalizeq();
+    // DEBUG_PRINT("new q after normalizing\n");
+    // DEBUG_EXPR(q.display());
+
+
     // get dynamical system
-    NewtonEulerDS& d = static_cast<NewtonEulerDS&>(ds);
-    const SiconosVector &v = *d.twist();
-    //DEBUG_EXPR(d.display());
-
-    //compute q
-    //first step consists in computing  \dot q.
-    //second step consists in updating q.
-    //
-    SiconosMatrix& T = *d.T();
-    SiconosVector& dotq = *d.dotq();
-    DEBUG_EXPR(v.display());
-    prod(T, v, dotq, true);
-    DEBUG_EXPR(dotq.display());
-
-    SiconosVector& q = *d.q();
-    //  -> get previous time step state
-    const SiconosVector& dotqold = d.dotqMemory().getSiconosVector(0);
-    DEBUG_EXPR(dotqold.display());
-
-
-    // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
-    double coeff = h * _theta;
-    scal(coeff, dotq, q) ; // q = h*theta*v
-
-    coeff = h * (1 - _theta);
-    scal(coeff, dotqold, q, false); // q += h(1-theta)*vold
+    NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
 
     const SiconosVector& qold = d.qMemory().getSiconosVector(0);
-    DEBUG_EXPR(qold.display());
-    q += qold;   // q += qold
+    const SiconosVector& vold = d.twistMemory().getSiconosVector(0);
+    SiconosVector& q = *d.q();
+    SiconosVector& v = *d.twist();
 
-    DEBUG_PRINT("new q before normalizing\n");
+    SP::SiconosVector velocityIncrement(new SiconosVector(v.size()));
+    double coeff = h * _theta;
+    scal(coeff, v, *velocityIncrement) ; //  velocityIncrement= h*theta*v
+    coeff = h * (1 - _theta);
+    scal(coeff, vold, *velocityIncrement, false); // velocityIncrement += h(1-theta)*vold
+    DEBUG_EXPR(velocityIncrement->display());
+
+    q.setValue(0,velocityIncrement->getValue(0));
+    q.setValue(1,velocityIncrement->getValue(1));
+    q.setValue(2,velocityIncrement->getValue(2));
+    quaternionFromTwistVector(*velocityIncrement, q);
+
     DEBUG_EXPR(q.display());
-
-    //q[3:6] must be normalized
-    d.normalizeq();
-    DEBUG_PRINT("new q after normalizing\n");
+    compositionLawLieGroup(qold, q);
     DEBUG_EXPR(q.display());
 
   }
@@ -1682,11 +1712,13 @@ void MoreauJeanOSI::updateState(const unsigned int)
                " MoreauJeanOSI::updateState() *d.p(_levelMaxForInput) == nullptr.");
         v = *d.p(_levelMaxForInput); // v = p
         if(d.boundaryConditions())
+        {
           for(std::vector<unsigned int>::iterator
               itindex = d.boundaryConditions()->velocityIndices()->begin() ;
               itindex != d.boundaryConditions()->velocityIndices()->end();
               ++itindex)
             v.setValue(*itindex, 0.0);
+        }
         if(dsType == Type::LagrangianLinearDiagonalDS)
         {
           for(unsigned int i=0; i<d.dimension(); ++i)
@@ -1847,9 +1879,9 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
   y += gamma * h * yDot;
   assert(!std::isnan(y));
-  DEBUG_EXPR(
-    if(y <= 0)
-    DEBUG_PRINT("MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");
+  DEBUG_EXPR_WE(
+    if(y <= _constraintActivationThreshold)
+      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y << "<= " <<  _constraintActivationThreshold <<  std::endl;;
   );
   return (y <= _constraintActivationThreshold);
 }

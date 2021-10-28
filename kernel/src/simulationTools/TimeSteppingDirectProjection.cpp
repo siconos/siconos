@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ static CheckSolverFPtr checkSolverOutputProjectOnConstraints = nullptr;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 //#define CORRECTIONSVELOCITIES
 TimeSteppingDirectProjection::TimeSteppingDirectProjection(
   SP::NonSmoothDynamicalSystem nsds,
@@ -571,8 +571,6 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     update();
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
-    if(!_allNSProblems->empty() &&   indexSet->size()>0)
-      saveYandLambdaInOldVariables();
   }
 
   else if(_newtonOptions == SICONOS_TS_NONLINEAR)
@@ -608,8 +606,6 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       if(!isNewtonConverge && !info)
       {
         updateOutput();
-        if(!_allNSProblems->empty() &&  indexSet->size()>0)
-          saveYandLambdaInOldVariables();
       }
     }
     if(!isNewtonConverge)

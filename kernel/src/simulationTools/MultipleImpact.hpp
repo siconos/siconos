@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,9 +120,9 @@ private:
   //! Tolerance to define a negligeable value for a potential energy grandeur
   double _Tol_Ener = DEFAULT_TOL_ENER;
   //! Epsilon to define a zero value for relative velocity in termination condition
-  double _ZeroVel_EndIm = DEFAULT_TOL_VEL;;
+  double _ZeroVel_EndIm = DEFAULT_TOL_VEL;
   //! Epsilon to define a zero value for potential energy in termination condition
-  double _ZeroEner_EndIm = DEFAULT_TOL_ENER;;
+  double _ZeroEner_EndIm = DEFAULT_TOL_ENER;
   //! we start to save data from _stepMinSave to _stepMaxSave
   unsigned int _stepMinSave = 1, _stepMaxSave = _nStepMax;
 public:

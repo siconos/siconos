@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #include "NumericsVector.h"
 
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
@@ -42,12 +42,12 @@ NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, 
   }
 
   NumericsMatrix * Arw_mat = NM_create(NM_SPARSE, vecSize, vecSize);
-  unsigned int nzmax = (dimension * 3 - 2) * varsCount;
+  size_t nzmax = (dimension * 3 - 2) * varsCount;
   NM_triplet_alloc(Arw_mat, nzmax);
   NM_fill(Arw_mat, NM_SPARSE, vecSize, vecSize, Arw_mat->matrix2);
 
   /* Arrow matirx filling */
-  unsigned int pos;
+  size_t pos;
   for(size_t i = 0; i < varsCount; ++i)
   {
     pos = i * dimension;
@@ -94,13 +94,13 @@ NumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, c
   double * dets = (double*)malloc(varsCount * sizeof(double));
   JA_det(vec, vecSize, varsCount, dets);
 
-  for(unsigned int i = 0; i < vecSize; i += dimension)
+  for(int i = 0; i < vecSize; i += dimension)
   {
     NV_dott(vec + i, vec + i, dimension, quad_tmp);
 
-    for(unsigned int j = 0; j < dimension; ++j)
+    for(int j = 0; j < dimension; ++j)
     {
-      for(unsigned int k = 0; k < dimension; ++k)
+      for(int k = 0; k < dimension; ++k)
         quad_tmp->matrix0[j+k*quad_tmp->size0] *= 2.0;
       NM_entry(quad_tmp, j, j, NM_get_value(quad_tmp, j, j) - dets[(int)(i / dimension)] * NM_get_value(R, j, j));
     }

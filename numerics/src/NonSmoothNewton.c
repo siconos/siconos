@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@
 #include "SiconosLapack.h"     // for lapack_int, DGESV
 
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
                        double descentCondition, NewtonFunctionPtr* phi)
 {
-  double * phiVector = (double*)malloc(n * sizeof(*phiVector));
+  double * phiVector = (double*)malloc((size_t)n * sizeof(*phiVector));
   if(phiVector == NULL)
   {
     fprintf(stderr, "NonSmoothNewton: linesearch_Armijo, memory allocation failed for phiVector\n");
@@ -109,7 +109,7 @@ int nonSmoothNewton(
   lapack_int infoDGESV;
 
   /* Memory allocation for phi and its jacobian */
-  double * phiVector = (double*)malloc(n * sizeof(double));
+  double * phiVector = (double*)malloc((size_t)n * sizeof(double));
 
 
   NumericsMatrix * H = NM_create(NM_DENSE, n, n);
@@ -117,9 +117,9 @@ int nonSmoothNewton(
 
   /** Memory allocation for the merit function and its gradient */
   double psi;
-  double * gradient_psi = (double*)malloc(n * sizeof(*gradient_psi));
+  double * gradient_psi = (double*)malloc((size_t)n * sizeof(*gradient_psi));
 
-  lapack_int* ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
+  lapack_int* ipiv = (lapack_int *)malloc((size_t)n * sizeof(lapack_int));
   if(phiVector == NULL || jacobianPhiMatrix == NULL ||  gradient_psi == NULL || ipiv == NULL)
   {
     fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
@@ -262,11 +262,11 @@ int nonSmoothDirectNewton(
   lapack_int infoDGESV = 0;
   int n2 = n*n;
   /* Memory allocation for phi and its jacobian */
-  double * phiVector = (double*)malloc(n * sizeof(*phiVector));
-  double *jacobianPhiMatrix = (double*)malloc(n2 * sizeof(*jacobianPhiMatrix));
+  double * phiVector = (double*)malloc((size_t)n * sizeof(*phiVector));
+  double *jacobianPhiMatrix = (double*)malloc((size_t)n2 * sizeof(*jacobianPhiMatrix));
   /** merit function and its jacobian */
-  double *gradient_psi = (double*)malloc(n * sizeof(*gradient_psi));
-  lapack_int* ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
+  double *gradient_psi = (double*)malloc((size_t)n * sizeof(*gradient_psi));
+  lapack_int* ipiv = (lapack_int *)malloc((size_t)n * sizeof(lapack_int));
   if(phiVector == NULL || jacobianPhiMatrix == NULL ||  gradient_psi == NULL || ipiv == NULL)
   {
     fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");

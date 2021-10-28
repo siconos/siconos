@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ public:
 				       DELTA_X_FOR_RELATION,LOCAL_BUFFER, WORK_LENGTH};
 
   enum EulerMoreauOSI_interaction_workVector_id{OSNSP_RHS, VEC_X, H_ALPHA, VEC_RESIDU_Y,
-						VEC_RESIDU_R, WORK_INTERACTION_LENGTH};
+    VEC_RESIDU_R, YOLD, LAMBDAOLD, WORK_INTERACTION_LENGTH};
 
   enum EulerMoreauOSI_interaction_workBlockVector_id{XFREE, X_PARTIAL_NS, DELTA_X, G_ALPHA, BLOCK_WORK_LENGTH};
 

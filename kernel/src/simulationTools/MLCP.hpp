@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@
 
 #define MLCP_NB_BLOCKS_MAX 200
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
- 
+
   \section MLCPintro Aim of the MLCP class
- 
+
   This class is devoted to the formalization and the resolution of the
   Mixed Linear Complementarity Problem (MLCP) defined by :
 
@@ -52,11 +52,11 @@
      - \f$ B \in R^{m \times m } \f$
      - \f$ C \in R^{n \times m } \f$
      - \f$ D \in R^{m \times n } \f$
- 
+
    The MLCP main components are:
    - a problem (variables A,B,C,D,a,b and size of the problem), which directly corresponds to the MixedLinearComplementarityProblem structure of Numerics
    - the unknowns u,v and z
-   
+
  */
 class MLCP : public LinearOSNS
 {
@@ -86,13 +86,13 @@ public:
   MLCP(int numericsSolverId = SICONOS_MLCP_ENUM);
 
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst
   */
   MLCP(SP::SolverOptions options);
-  
+
   /** destructor
   */
   virtual ~MLCP() {reset();};
@@ -139,23 +139,17 @@ public:
    */
   virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
 
-  /** Pre compute 
-   * \param time current time
-   * \return bool
-   */
-  virtual bool preCompute(double time);
-
   /** Compute the unknown z and w and update the Interaction (y and lambda )
   *  \param time current time
   *  \return int, information about the solver convergence.
   */
   int compute(double time);
 
-  /** initialize
-   * \param sim the Simulation
-   */
-  void initialize(SP::Simulation sim);
-
+  /** Call numerics solver.
+      \return int information about the solver convergence
+      (output from numerics driver, mixedlinearComplementarity_driver, check numerics doc. for details).
+  */
+  int solve();
 
   /** print the data to the screen
   */

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 /// @cond
 using namespace RELATION;
@@ -871,12 +871,12 @@ bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Int
     /*  Contacts which have been closing in the last time step */
     DEBUG_PRINT(" level == 2\n");
     double y = (*(inter->y(0)))(0); // current position
-    double yOld = (*(inter->yOld(0)))(0); // old position
+    double y_k = (inter->y_k(0))(0); // old position
     DEBUG_PRINTF("y= %18.14e\n", y);
-    DEBUG_PRINTF("yOld= %18.14e\n", yOld);
+    DEBUG_PRINTF("y_k= %18.14e\n", y_k);
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
-    return (y <= DEFAULT_TOL_D1MINUS && yOld > DEFAULT_TOL_D1MINUS);
+    return (y <= DEFAULT_TOL_D1MINUS && y_k > DEFAULT_TOL_D1MINUS);
   }
   else
     THROW_EXCEPTION("D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel, IndexSet[i > 2] does not exist.");

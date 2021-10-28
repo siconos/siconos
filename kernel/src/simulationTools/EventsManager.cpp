@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 EventsManager::EventsManager(SP::TimeDiscretisation td): _k(0), _td(td),
   _T(std::numeric_limits<double>::infinity()), _NSeventInsteadOfTD(false)

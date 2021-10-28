@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,21 @@ void quaternionFromAxisAngle(SP::SiconosVector axis, double angle, SP::SiconosVe
 /* For a given  rotation vector, compute the quaternion
  */
 void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q);
+
+void quaternionFromTwistVector(SiconosVector& twist, SiconosVector& q);
+
+/* For a given quaternion q, compute the norm
+ */
+double quaternionNorm(const SiconosVector &q);
+
+
 /* For a given quaternion q, compute the unit quaternion by normalization
  */
 void normalizeq(SP::SiconosVector q);
+
+/* For a given quaternion q, compute the unit quaternion by normalization
+ */
+void normalizeq(SiconosVector &q);
 
 /* For a given quaternion q, compute the associated rotation matrix
  * w.r.t the quaternion that parametrize the rotation in q,
@@ -121,8 +133,8 @@ void changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
 
+void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b, SiconosVector& ab);
 
-
-
+void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b);
 
 #endif // ROTATIONQUATERNION_H

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@
     \param *blocksize0 the list of sums of the number of rows of the
     first column of blocks of M: blocksize0[i] = blocksize0[i-1] +
     ni, ni being the number of rows of the block at row i
-    *blocksize1 the list of sums of the number of columns of the
+    \param *blocksize1 the list of sums of the number of columns of the
     first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,
     ni being the number of columns of the block at column i
     \param filled1 index of the last non empty line + 1
@@ -121,7 +121,7 @@ struct SparseBlockStructuredMatrix
 
   /* the index of the last non empty line + 1 */
   size_t filled1;
-  /* the size of index2_data that corresponds of the number of non null blocks*/
+  /* the size of index2_data that corresponds to the number of non null blocks*/
   size_t filled2;
 
   size_t *index1_data;
@@ -325,6 +325,7 @@ extern "C"
       \param[in,out] y the resulting vector
   */
   void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
+  void SBM_row_prod_no_diag_2x2(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
   void SBM_row_prod_no_diag_1x1(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
 
 

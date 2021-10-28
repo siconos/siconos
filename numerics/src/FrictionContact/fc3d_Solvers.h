@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ typedef void (*PostSolverPtr)(int, double*);
 typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double, SolverOptions*, double,  double*);
 
 /** pointer to function used to free memory for objects used in solvers */
-typedef void (*FreeSolverPtr)();
+typedef void (*FreeSolverPtr)(void);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
 typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem*, FrictionContactProblem*, SolverOptions*  );

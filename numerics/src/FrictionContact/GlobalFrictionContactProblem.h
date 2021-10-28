@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@
  * The structure that defines a Friction-Contact (3D or 2D ) problem
  *
  \rst
- 
+
  Details in :ref:`global_fc_problem`.
  \endrst
 
@@ -62,6 +62,11 @@ struct GlobalFrictionContactProblem
   /** mu \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
   double* mu;
+  
+  /** \f${M^{-1} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+      a matrix with \f$ n\f$ stored in NumericsMatrix structure */
+  NumericsMatrix* M_inverse;
+
   /** opaque environment, solver specific */
   void* env;
 };
@@ -118,16 +123,9 @@ extern "C"
 
   GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactProblem* problem);
 
-  void globalFrictionContact_rescaling(GlobalFrictionContactProblem* problem, double alpha,  double beta, double gamma);
-  void globalFrictionContact_balancing_M(
-    GlobalFrictionContactProblem* problem,
-    BalancingMatrices * B_for_M);
-  void globalFrictionContact_balancing_M_H(
-    GlobalFrictionContactProblem* problem,
-    BalancingMatrices * B_for_M,
-    BalancingMatrices * B_for_H);
 
-  
+
+
   /** Compute the global velocity given the reaction
    * \param[in] problem to be considered
    * \param[in] reaction the reaction, if there is no contacts reaction can be NULL
@@ -138,8 +136,8 @@ extern "C"
     double * reaction,
     double * globalVelocity);
 
-
-
+  /** Refomulation into local problem */
+  FrictionContactProblem *  globalFrictionContact_reformulation_FrictionContact(GlobalFrictionContactProblem* problem);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

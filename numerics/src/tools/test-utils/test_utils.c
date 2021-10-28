@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,10 @@ void print_vector_norm(const char* desc, int m, int n, double* a, int lda)
 
 void free_test_collection(TestCase* collection, int nb_tests)
 {
-  for(int i=0; i<nb_tests; ++i)
+  for(int i=0; i < nb_tests; ++i)
   {
     solver_options_delete(collection[i].options);
+    free(collection[i].options);
     collection[i].options = NULL;
   }
 
@@ -107,6 +108,8 @@ void print_tests_collection_report(TestCase * collection, int n_failed, int * fa
   {
     if(collection[succeeded_tests[t]].will_fail == 1)
       print_test_info(succeeded_tests[t], &collection[succeeded_tests[t]], " was expected to fail but has succeeded");
+    else if(collection[failed_tests[t]].will_fail == 2)  // Or is unstable.
+      print_test_info(failed_tests[t], &collection[failed_tests[t]], " is unstable and has suceeded");
   }
 }
 
@@ -172,7 +175,6 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
     }
     else
       succeeded_tests[n_succeeded++]  = test_num;
-
     printf("\n################# end of  test # %i #######################\n", test_num);
   }
 
@@ -180,6 +182,8 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
   print_tests_collection_report(collection, n_failed, failed_tests, n_succeeded, succeeded_tests);
 
   // tests status.
+  free(failed_tests);
+  free(succeeded_tests);
   return out;
 }
 

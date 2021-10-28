@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ TYPEDEF_STRUCT(LinearComplementarityProblem)
 TYPEDEF_STRUCT(LinearComplementarityProblem_as_ConvexQP)
 TYPEDEF_STRUCT(GlobalFrictionContactProblem)
 TYPEDEF_STRUCT(RollingFrictionContactProblem)
+TYPEDEF_STRUCT(GlobalRollingFrictionContactProblem)
 TYPEDEF_STRUCT(GenericMechanicalProblem)
 TYPEDEF_STRUCT(listNumericsProblem)
 TYPEDEF_STRUCT(FrictionContactProblem_as_VI)

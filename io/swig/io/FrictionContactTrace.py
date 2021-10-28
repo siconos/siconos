@@ -2,7 +2,7 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
   
-# Copyright 2020 INRIA.
+# Copyright 2021 INRIA.
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import siconos.kernel as K
 
 from siconos.kernel import \
     FrictionContact,\
-    GlobalFrictionContact
+    GlobalFrictionContact,\
+    GlobalRollingFrictionContact
 
 from siconos.numerics import \
     FrictionContactProblem,\
-    GlobalFrictionContactProblem
+    GlobalFrictionContactProblem,\
+    GlobalRollingFrictionContactProblem
 
 try:
     import siconos.fclib as F
@@ -61,7 +63,7 @@ class FrictionContactTraceParams():
 
 class FrictionContactTrace(FrictionContact):
 
-    def __init__(self, dim, solver, params=None, nsds=None):
+    def __init__(self, dim, solver_options, params=None, nsds=None):
         if params == None:
             self._params = FrictionContactTraceParams()
         else:
@@ -80,7 +82,7 @@ class FrictionContactTrace(FrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds=nsds
-        super(FrictionContactTrace, self).__init__(dim, solver)
+        super(FrictionContactTrace, self).__init__(dim, solver_options)
 
     def maxiter_condition(self, SO):
         return SO.iparam[N.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -107,7 +109,7 @@ class FrictionContactTrace(FrictionContact):
         if self.getSizeOutput() != 0:
 
             #            M = BlockCSRMatrix()
-            #M.fillM(model.nonSmoothDynamicalSystem().topology().indexSet(1))
+            #M.fillW(model.nonSmoothDynamicalSystem().topology().indexSet(1))
             #M.convert()
 
             #            H = BlockCSRMatrix()
@@ -194,7 +196,7 @@ class GlobalFrictionContactTraceParams():
 
 class GlobalFrictionContactTrace(GlobalFrictionContact):
 
-    def __init__(self, dim, solver, params=None, nsds=None):
+    def __init__(self, dim, solver_options, params=None, nsds=None):
         if params == None:
             self._params = GlobalFrictionContactTraceParams()
         else:
@@ -213,7 +215,7 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds=nsds
-        super(GlobalFrictionContactTrace, self).__init__(dim, solver)
+        super(GlobalFrictionContactTrace, self).__init__(dim, solver_options)
 
     def maxiter_condition(self, SO):
         return SO.iparam[N.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -264,6 +266,103 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
 
                 self._counter += 1
                 N.globalFrictionContact_fclib_write(problem,
+                                                    self._params._title,
+                                                    self._params._description,
+                                                    self._params._mathInfo,
+                                                    filename)
+                guess = F.fclib_solution()
+                guess.u = w_backup
+                guess.r = z_backup
+                F.fclib_write_guesses(1, guess, filename)
+
+
+
+
+                solution = F.fclib_solution()
+                solution.u = self.w()
+                solution.z = self.z()
+                F.fclib_write_solution(solution, filename)
+            
+                
+        self.postCompute()
+
+        return info
+    
+class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
+
+    def __init__(self, dim, solver_options, params=None, nsds=None):
+        if params == None:
+            self._params = GlobalFrictionContactTraceParams()
+        else:
+            self._params = params
+        proba= params._dump_probability
+        maxiter =  params._dump_itermax
+        if proba is not None:
+            self._proba = 1. - proba
+            self.condition = self.random_condition
+        if maxiter is not None:
+            self._maxiter = maxiter
+            if proba is None:
+                self.condition = self.maxiter_condition
+            else:
+                self.condition = self.random_and_maxiter_condition
+        self._counter = 0
+        self._stepcounter = 0
+        self._nsds=nsds
+        super(GlobalRollingFrictionContactTrace, self).__init__(dim, solver_options)
+
+    def maxiter_condition(self, SO):
+        return SO.iparam[N.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
+
+    def random_condition(self, SO):
+        return random.random() > self._proba
+
+    def random_and_maxiter_condition(self, SO):
+        return self.maxiter_condition(SO) and self.random_condition(SO)
+
+    def compute(self,time):
+        info = 0
+
+        cont = self.preCompute(time)
+
+        if (not cont):
+            return 0
+
+        if (self.indexSetLevel() == 999):
+            return 0
+
+        self.updateMu()
+
+        w_backup = self.w().copy()
+        z_backup = self.z().copy()
+        SO = self.numericsSolverOptions()
+
+        info = self.solve()
+        problem = self.globalRollingFrictionContactProblemPtr()
+        if problem.numberOfContacts >0 :
+            if self.condition(SO) and has_fclib:
+            #if True:
+                #problem = self.getNumericsProblemPtr()
+                #print(problem, type(problem))
+ 
+                solver_maxiter=SO.iparam[0]
+                n_format_string=len(str(solver_maxiter))
+                format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
+                
+                filename = format_string.format(self._params._fileName,
+                                                problem.q.shape[0],
+                                                problem.numberOfContacts,
+                                                self._counter)
+                print(filename)
+                if os.path.exists(filename):
+                    os.remove(filename)
+                    print('WARNING: file '+filename+ ' was existing and has been replaced')
+
+                self._counter += 1
+
+                print(type(problem))
+                
+                N.globalRollingFrictionContact_fclib_write(problem,
                                                     self._params._title,
                                                     self._params._description,
                                                     self._params._mathInfo,

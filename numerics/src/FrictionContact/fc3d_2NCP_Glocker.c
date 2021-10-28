@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,8 +160,8 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
 
 
 
-  int storageType = MGlobal->storageType;
-  if(storageType == 0)
+  NM_types storageType = MGlobal->storageType;
+  if(storageType == NM_DENSE)
   {
     int in = 3 * contact, it = in + 1, is = it + 1;
     int inc = n * in;
@@ -181,7 +181,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
     MLocal[7] = MM[inc + it];
     MLocal[8] = MM[inc + is];
   }
-  else if(storageType == 1)
+  else if(storageType == NM_SPARSE_BLOCK)
   {
     int diagPos = SBM_diagonal_block_index(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];

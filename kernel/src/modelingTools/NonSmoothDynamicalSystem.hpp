@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -313,7 +313,7 @@ public:
   /** get the number of Dynamical Systems present in the NSDS
       \return an unsigned int
    */
-  inline unsigned int getNumberOfDS() const
+  inline size_t getNumberOfDS() const
   {
     return _topology->dSG(0)->size();
   }
@@ -343,7 +343,7 @@ public:
    * \param nb the identifier of the DynamicalSystem to get
    * \return a pointer on DynamicalSystem
    */
-  inline SP::DynamicalSystem dynamicalSystem(int nb) const
+  inline SP::DynamicalSystem dynamicalSystem(unsigned int nb) const
   {
     return _topology->getDynamicalSystem(nb);
   }
@@ -362,7 +362,7 @@ public:
   /** get the number of Interactions present in the NSDS.
    *  \return an unsigned int
    */
-  inline unsigned int getNumberOfInteractions() const
+  inline size_t getNumberOfInteractions() const
   {
     return _topology->indexSet0()->size();
   };
@@ -385,7 +385,7 @@ public:
    * \param nb the identifier of the Interaction to get
    * \return a pointer to an Interaction
    */
-  inline SP::Interaction interaction(int nb) const
+  inline SP::Interaction interaction(unsigned int nb) const
   {
     return _topology->getInteraction(nb);
   }
@@ -498,6 +498,11 @@ public:
    of the connected topology
   */
   void pushInteractionsInMemory();
+
+  /** update the plugins of the DS
+   *  \param time to be used for plugins
+   */
+  void updateDSPlugins(double time);
 
   /** compute r thanks to lambda[level] for all Interactions
     * \param time

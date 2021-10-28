@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ Ferris solves the subsequent AVI.
 #include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_avi_caoferris
 #include "avi_caoferris.h"                 // for avi_caoferris_stage3
-#include "debug.h"                         // for DEBUG_PRINT_VEC_INT
+#include "siconos_debug.h"                         // for DEBUG_PRINT_VEC_INT
 
 void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

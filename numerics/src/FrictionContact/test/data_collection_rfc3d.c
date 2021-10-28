@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/RFC3D_sphere_1.dat";
   data_collection_1[n_data++] = "./data/RFC3D_sphere_2.dat";
   data_collection_1[n_data++] = "./data/RFC3D_cube_1.dat";
+  data_collection_1[n_data++] = "./data/rfc3d_sphere_from_grfc3d.dat";
+  data_collection_1[n_data++] = "./data/rfc3d_sphere_from_grfc3d_dense.dat";
   data_collection_1[n_data++] = "---";
 
 

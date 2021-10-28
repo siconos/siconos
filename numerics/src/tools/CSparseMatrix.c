@@ -1,4 +1,4 @@
-/* Siconos, Copyright INRIA 2005-2016.
+/* Copyright 2021 INRIA.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h" // for DEBUG_PRINTF
+#include "siconos_debug.h" // for DEBUG_PRINTF
 
 
 #ifdef DEBUG_MESSAGES
@@ -255,6 +255,9 @@ int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol, CSpars
 int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A)
 {
   assert(A);
+  FILE * foutput = fopen("cs.py", "w");
+  CSparseMatrix_print_in_file(A, 0, foutput);
+  fclose(foutput);
   cs_chol_A->n = A->n;
   css* S = cs_schol(order, A);
   cs_chol_A->S = S;
@@ -271,7 +274,7 @@ int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,  CSparseMatrix_f
   CS_ENTRY *Ax, *Lx;
   css *S;
   csn *N;
-  CS_INT n, lnz, d;
+  CS_INT n, lnz;
   DEBUG_EXPR(cs_print(A,1););
   Ap=A->p;
   Ai=A->i;
@@ -318,8 +321,8 @@ int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,  CSparseMatrix_f
   CS_ENTRY* D;
   cs_ldlt_A->N->B = D= cs_malloc (n, sizeof (CS_ENTRY)) ; /* We use cs_ldlt_A->N->B  for storing D !! */
   CS_ENTRY* Y = cs_malloc (n, sizeof (CS_ENTRY)) ;
-  d = LDL_numeric (n, Ap, Ai, Ax, Lp, Parent, Lnz, Li, Lx, D,
-                   Y, Flag, Pattern, Perm, PermInv) ;
+  LDL_numeric (n, Ap, Ai, Ax, Lp, Parent, Lnz, Li, Lx, D,
+               Y, Flag, Pattern, Perm, PermInv) ;
 
   DEBUG_EXPR(cs_print(cs_ldlt_A->N->L,1););
   DEBUG_EXPR(NV_display(D,n));
@@ -478,7 +481,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
 CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b)
 {
   assert(cs_chol_A);
-
+  
   CS_INT ok;
   CS_INT n = cs_chol_A->n;
   css* S = cs_chol_A->S;
@@ -658,7 +661,7 @@ CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors* cs_ldlt_A, double* x, dou
 
 CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
 {
-  CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai ;
+  CS_INT m=0, n=0, nzmax=0, nz, p, j, *Ap, *Ai ;
   long long foo;
   double *Ax ;
   int info = 0;
@@ -844,6 +847,20 @@ CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, doub
   {
     return 1;
   }
+}
+/* add a block (col-major dense) to triplet matrix only if value is not (nearly) null */
+CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T,  CS_INT row_off, CS_INT col_off, double * x, CS_INT row_size, CS_INT col_size, double threshold)
+{
+  for(size_t j = 0; j < col_size; ++j)
+  {
+    for(size_t i = 0; i < row_size; ++i)
+    {
+      // col-major
+      
+      CSparseMatrix_zentry(T, i + row_off, j + col_off, x[i + j*row_size], DBL_EPSILON);
+    }
+  }
+  return 1;
 }
 
 /* add an entry to a symmetric triplet matrix only if value is not (nearly) null */
@@ -1072,28 +1089,28 @@ void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B)
 
   if(B->nzmax < A->nzmax)
   {
-    B->x = (double *) realloc(B->x, A->nzmax * sizeof(double));
-    B->i = (CS_INT *) realloc(B->i, A->nzmax * sizeof(CS_INT));
+    B->x = (double *) realloc(B->x, (size_t)A->nzmax * sizeof(double));
+    B->i = (CS_INT *) realloc(B->i, (size_t)A->nzmax * sizeof(CS_INT));
   }
   else if(!(B->x))
   {
-    B->x = (double *) malloc(A->nzmax * sizeof(double));
+    B->x = (double *) malloc((size_t)A->nzmax * sizeof(double));
   }
 
   if(A->nz >= 0)
   {
     /* triplet */
-    B->p = (CS_INT *) realloc(B->p, A->nzmax * sizeof(CS_INT));
+    B->p = (CS_INT *) realloc(B->p, (size_t)A->nzmax * sizeof(CS_INT));
   }
   else if((A->nz == -1) && (B->n < A->n))
   {
     /* csc */
-    B->p = (CS_INT *) realloc(B->p, (A->n + 1) * sizeof(CS_INT));
+    B->p = (CS_INT *) realloc(B->p, ((size_t)A->n + 1) * sizeof(CS_INT));
   }
   else if((A->nz == -2) && (B->m < A->m))
   {
     /* csr */
-    B->p = (CS_INT *) realloc(B->p, (A->m + 1) * sizeof(CS_INT));
+    B->p = (CS_INT *) realloc(B->p, ((size_t)A->m + 1) * sizeof(CS_INT));
   }
 
 
@@ -1102,23 +1119,25 @@ void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B)
   B->m = A->m;
   B->n = A->n;
 
-  memcpy(B->x, A->x, A->nzmax * sizeof(double));
-  memcpy(B->i, A->i, A->nzmax * sizeof(CS_INT));
+  memcpy(B->x, A->x, (size_t)A->nzmax * sizeof(double));
+  memcpy(B->i, A->i, (size_t)A->nzmax * sizeof(CS_INT));
 
-  size_t size_cpy = -1;
+  size_t size_cpy=0;
   if(A->nz >= 0)
   {
-    size_cpy = A->nzmax;
+    size_cpy = (size_t)A->nzmax;
   }
   else if(A->nz == -1)
   {
-    size_cpy = A->n + 1;
+    size_cpy = (size_t)A->n + 1;
   }
   else if(A->nz == -2)
   {
-    size_cpy = A->m + 1;
+    size_cpy = (size_t)A->m + 1;
   }
-
+  else
+    numerics_error("CSparseMatrix_copy", "Wrong nz value in CSparseMatrix.");
+ 
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
 }
 

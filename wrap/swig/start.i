@@ -41,7 +41,7 @@ SWIG_init(void);
 
 #include <assert.h>
 //#define DEBUG_MESSAGES 1
-#include <debug.h>
+#include "siconos_debug.h"
 #include "SiconosConfig.h"
 #include "numerics_verbose.h"
 

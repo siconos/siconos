@@ -232,7 +232,7 @@ BounceResult bounceTest(std::string moving,
   osnspb->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = 1e-5;
 
   osnspb->setMaxSize(16384);
-  osnspb->setMStorageType(1);
+  osnspb->setMStorageType(NM_SPARSE_BLOCK);
   osnspb->setNumericsVerboseMode(0);
   osnspb->setKeepLambdaAndYState(true);
 

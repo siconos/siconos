@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 #include "Tools.hpp"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 #include "SiconosException.hpp"
 
 
@@ -45,7 +45,7 @@ BlockVector::BlockVector()
 
 BlockVector::BlockVector(const BlockVector &v)
 {
-  unsigned int nbBlocks = v.numberOfBlocks();
+  Index::size_type nbBlocks = v.numberOfBlocks();
   _tabIndex.reset(new Index());
   _tabIndex->reserve(nbBlocks);
   _vect.reserve(nbBlocks);
@@ -292,15 +292,15 @@ void BlockVector::setAllVect(VectorOfVectors& v)
   _update();
 }
 
-SP::SiconosVector BlockVector::operator [](unsigned int pos)
-{
-  return  _vect[pos];
-}
+// SP::SiconosVector BlockVector::operator [](unsigned int pos)
+// {
+//   return  _vect[pos];
+// }
 
-SPC::SiconosVector BlockVector::operator [](unsigned int pos) const
-{
-  return  _vect[pos];
-}
+// SPC::SiconosVector BlockVector::operator [](unsigned int pos) const
+// {
+//   return  _vect[pos];
+// }
 
 unsigned int BlockVector::getNumVectorAtPos(unsigned int pos) const
 {
@@ -360,7 +360,7 @@ BlockVector& BlockVector::operator -= (const BlockVector& vIn)
     VectorOfVectors::iterator it1;
 
     for(it1 = _vect.begin(); it1 != _vect.end(); ++it1)
-      **it1 -= *(vIn[i++]);
+      **it1 -= *(vIn.vector(i++));
   }
   else // use of a temporary SimpleVector... bad way, to be improved. But this case happens rarely ...
   {
@@ -403,7 +403,7 @@ BlockVector& BlockVector::operator += (const BlockVector& vIn)
     VectorOfVectors::iterator it1;
 
     for(it1 = _vect.begin(); it1 != _vect.end(); ++it1)
-      **it1 += *(vIn[i++]);
+      **it1 += *(vIn.vector(i++));
   }
   else // use of a temporary SimpleVector... bad way, to be improved. But this case happens rarely ...
   {
@@ -498,7 +498,7 @@ void BlockVector::setBlock(const SiconosVector& vIn, unsigned int sizeB, unsigne
     SP::SiconosVector currentBlock = _vect[blockOutStart];
 
     // Size of the subBlock of vOut to be set.
-    unsigned int subSizeB = currentBlock->size() - posOut;
+    size_t subSizeB = currentBlock->size() - posOut;
     unsigned int posIn = startIn;
 
     // Set first sub-block (currentBlock) values, between index posOut and posOut+subSizeB,

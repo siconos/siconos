@@ -23,4 +23,6 @@ RUN dnf --setopt=deltarpm=false install -y \
         lapack-devel \
         suitesparse-devel \
         swig \
-        git-core && dnf clean all
+        git-core \
+        bullet-devel \
+        bullet-extras-devel && dnf clean all

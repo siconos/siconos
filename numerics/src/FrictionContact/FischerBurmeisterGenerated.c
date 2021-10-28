@@ -2,7 +2,7 @@
 #include <assert.h>  // for assert
 //#define DEBUG_MESSAGES 1
 //#define DEBUG_WHERE_MESSAGES 1
-#include <debug.h>   // for DEBUG_PRINT
+#include "siconos_debug.h"   // for DEBUG_PRINT
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for sqrt, pow, fabs
 #include <op3x3.h>   // for cpy3x3, cpy3, SET3

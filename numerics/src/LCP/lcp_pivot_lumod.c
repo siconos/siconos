@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_NO_MATRIX
-#include "debug.h"                         // for DEBUG_EXPR_WE, DEBUG_PRINT
+#include "siconos_debug.h"                         // for DEBUG_EXPR_WE, DEBUG_PRINT
 #include "lcp_cst.h"                       // for SICONOS_LCP_PIVOT_LEMKE
 #include "lcp_pivot.h"                     // for LCP_PATHSEARCH_LEAVING_T
 #include "lumod_wrapper.h"                 // for SN_lumod_dense_solve, SN_l...

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ using namespace std::placeholders;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
-#include "debug.h"
+#include "siconos_debug.h"
 
 
 using namespace RELATION;
@@ -198,12 +198,19 @@ void NonSmoothDynamicalSystem::pushInteractionsInMemory()
     SP::InteractionsGraph indexSet0 = _topology->indexSet0();
     for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      indexSet0->bundle(*ui)->swapInOldVariables();
       indexSet0->bundle(*ui)->swapInMemory();
     }
   }
 }
-
+void NonSmoothDynamicalSystem::updateDSPlugins(double time)
+{
+  //could be better to call bind method
+  DynamicalSystemsGraph::VIterator vi;
+  for(vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
+  {
+    dynamicalSystems()->bundle(*vi)->updatePlugins(time);
+  }
+}
 void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
 {
 

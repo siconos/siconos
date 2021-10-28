@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,6 +121,18 @@ extern "C"
    */
   int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
+  /** General interface to solvers for global friction-contact 2D problem
+    \param[in] problem the structure which handles the Friction-Contact problem
+    \param[in,out] reaction global vector (n)
+    \param[in,out] velocity global vector (n)
+    \param[in,out] globalVelocity global vector
+    \param[in,out] options structure used to define the solver(s) and their parameters
+    \return result (0 if successful otherwise 1).
+  */
+  int gfc2d_driver(GlobalFrictionContactProblem* problem, double *reaction ,
+                                     double *velocity, double* globalVelocity,
+                                     SolverOptions* options);
+  
   /** General interface to solvers for global friction-contact 3D problem
     \param[in] problem the structure which handles the Friction-Contact problem
     \param[in,out] reaction global vector (n)
@@ -132,6 +144,17 @@ extern "C"
   int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction ,
                                      double *velocity, double* globalVelocity,
                                      SolverOptions* options);
+
+  /** General interface to solvers for global rolling friction-contact 3D problem
+   *  \param[in] problem the structure which handles the Friction-Contact problem
+   *  \param[in,out] reaction global vector (n)
+   *  \param[in,out] velocity global vector (n)
+   *  \param[in,out] options structure used to define the solver(s) and their parameters
+   *  \return result (0 if successful otherwise 1).
+   */
+  int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem,
+                            double *reaction, double *velocity, double* globalVelocity,
+                            SolverOptions* options);
 
   /** General interface to solvers for friction-contact 3D problem
    *  \param[in] problem the structure which handles the Friction-Contact problem

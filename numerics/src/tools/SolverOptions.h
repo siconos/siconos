@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,6 +184,12 @@ extern "C"
    */
   SolverOptions * solver_options_get_internal_solver(SolverOptions * options, size_t n);
 
+  /** set internal solver
+      \param options parent options
+      \param number of the targeted solver
+      \param the solver options to be used as internal solver number n
+   */
+  void solver_options_set_internal_solver(SolverOptions * options, size_t n, SolverOptions* NSO);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

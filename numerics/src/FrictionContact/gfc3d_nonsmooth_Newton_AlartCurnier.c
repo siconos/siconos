@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 #include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
 #include <assert.h>                              // for assert
-#include <debug.h>                               // for DEBUG_PRINTF, DEBUG_...
+#include "siconos_debug.h"                               // for DEBUG_PRINTF, DEBUG_...
 #include <float.h>                               // for DBL_EPSILON
 #include <math.h>                                // for fabs, INFINITY
 #ifndef __cplusplus

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include "debug.h"
+ */
 
-/* add a global counter for the incrementation in debug output */
+#include <stdlib.h>      // for malloc
+#include "test_utils.h"  // for data_collection
 
-unsigned int debug_counter = 0;
+const char ** data_collection()
+{
+
+  int n_data_1=150;
+
+  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
+  int n_data=0;
+  data_collection_1[n_data++] = "./data/Box_Stacks-i0122-82-5.hdf5";
+  data_collection_1[n_data++] = "---";
+  return data_collection_1;
+}
+

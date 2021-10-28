@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  internalSolverPtr internalsolver;
+  internalSolverPtr internalsolver=0;
   // dwork will be used to save friction threshold
   options->dWork = (double *) malloc(nc * sizeof(double));
   options->dWorkSize = nc;

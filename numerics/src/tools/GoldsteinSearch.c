@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 #include <math.h>              // for NAN
 #include <stdio.h>             // for printf, size_t
 #include "SiconosSets.h"       // for project_on_set
-#include "debug.h"             // for DEBUG_EXPR_WE, DEBUG_PRINT, DEBUG_PRINTF
+#include "siconos_debug.h"             // for DEBUG_EXPR_WE, DEBUG_PRINT, DEBUG_PRINTF
 #include "numerics_verbose.h"  // for verbose
 #include "SiconosBlas.h"       // for cblas_daxpy, cblas_dcopy, cblas_ddot
 

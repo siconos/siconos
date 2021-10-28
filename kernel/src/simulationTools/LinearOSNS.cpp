@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9,7 +9,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, softwareﬁ
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -49,8 +49,8 @@ using namespace RELATION;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
-
+#include "siconos_debug.h"
+//#define WITH_TIMER
 void LinearOSNS::initVectorsMemory()
 {
   // Memory allocation for _w, M, z and q.
@@ -83,35 +83,257 @@ void LinearOSNS::initVectorsMemory()
 void LinearOSNS::initOSNSMatrix()
 {
   // Default size for M = maxSize()
-  if(! _M)
+  if (_assemblyType == REDUCED_BLOCK or  _assemblyType == REDUCED_DIRECT)
   {
-    switch(_numericsMatrixStorageType)
+    if(! _M)
     {
-    case NM_DENSE:
-    case NM_SPARSE:
-    {
-      _M.reset(new OSNSMatrix(maxSize(), _numericsMatrixStorageType));
-      break;
-    }
-    case NM_SPARSE_BLOCK:
-    {
-      // = number of Interactionin the largest considered indexSet
-      if(indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
+      switch(_numericsMatrixStorageType)
       {
-        _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _numericsMatrixStorageType));
-      }
-      else
+      case NM_DENSE:
+      case NM_SPARSE:
       {
-        _M.reset(new OSNSMatrix(1, _numericsMatrixStorageType));
+        _M.reset(new OSNSMatrix(0, _numericsMatrixStorageType));
+        break;
       }
-      break;
-    }
-    {
-      default:
-        THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      case NM_SPARSE_BLOCK:
+      {
+        // = number of Interactionin the largest considered indexSet
+        if(indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
+        {
+          _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _numericsMatrixStorageType));
+        }
+        else
+        {
+          _M.reset(new OSNSMatrix(1, _numericsMatrixStorageType));
+        }
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
       }
     }
   }
+
+  if (_assemblyType == GLOBAL)
+  {
+    // Default size for M = _maxSize
+    if(!_W)
+    {
+      // if (_numericsMatrixStorageType == NM_DENSE)
+      //   _W.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+      // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
+      //   _W.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
+
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _W.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _W.reset(new OSNSMatrix(0, NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _W.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+
+    if(!_H)
+    {
+
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _H.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _H.reset(new OSNSMatrix(0, simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+
+  }
+  if (_assemblyType == REDUCED_DIRECT)
+  {
+    // Default size for M = _maxSize
+    if(!_W_inverse)
+    {
+      // if (_numericsMatrixStorageType == NM_DENSE)
+      //   _W_inverse.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+      // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
+      //   _W_inverse.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
+
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _W_inverse.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _W_inverse.reset(new OSNSMatrix(0, NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _W_inverse.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+
+    if(!_H)
+    {
+
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _H.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _H.reset(new OSNSMatrix(0, simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+
+  }
+  if (_assemblyType == GLOBAL_REDUCED)
+  {
+    // Default size for M = _maxSize
+    if(!_W)
+    {
+      // if (_numericsMatrixStorageType == NM_DENSE)
+      //   _W.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+      // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
+      //   _W.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
+
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _W.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _W.reset(new OSNSMatrix(0, NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _W.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+    // Default size for M = _maxSize
+    if(!_W_inverse)
+    {
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _W_inverse.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _W_inverse.reset(new OSNSMatrix(0, NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _W_inverse.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+
+    if(!_H)
+    {
+
+      switch(_numericsMatrixStorageType)
+      {
+      case NM_DENSE:
+      {
+        _H.reset(new OSNSMatrix(_maxSize, NM_DENSE));
+        break;
+      }
+      case NM_SPARSE:
+      {
+        _H.reset(new OSNSMatrix(0, simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE));
+        break;
+      }
+      case NM_SPARSE_BLOCK:
+      {
+        _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK));
+        break;
+      }
+      {
+        default:
+          THROW_EXCEPTION("LinearOSNS::initOSNSMatrix unknown _storageType");
+      }
+      }
+    }
+
+  }
+
+
+
+
+
+
 }
 void LinearOSNS::initialize(SP::Simulation sim)
 {
@@ -184,10 +406,10 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
 
-  // --- Check compatible nslaws ---- 
+  // --- Check compatible nslaws ----
   checkCompatibleNSLaw(*nslaw);
-  
-  
+
+
   // --- Check block size ---
   assert(indexSet->properties(vd).block->size(0) == nslaw->size());
   assert(indexSet->properties(vd).block->size(1) == nslaw->size());
@@ -234,7 +456,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     if(relationType == FirstOrder)
     {
 
-      
+
 
       rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
@@ -276,20 +498,10 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     else if(relationType == Lagrangian ||
             relationType == NewtonEuler)
     {
-
+      // Applying boundary conditions
       SP::BoundaryCondition bc;
-      Type::Siconos dsType = Type::value(*ds);
-      if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS
-          || dsType == Type::LagrangianLinearDiagonalDS)
-      {
-        SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
-        if(d->boundaryConditions()) bc = d->boundaryConditions();
-      }
-      else if(dsType == Type::NewtonEulerDS)
-      {
-        SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
-        if(d->boundaryConditions()) bc = d->boundaryConditions();
-      }
+      SP::SecondOrderDS d = std::static_pointer_cast<SecondOrderDS> (ds);
+      if(d->boundaryConditions()) bc = d->boundaryConditions();
       if(bc)
       {
         for(std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
@@ -302,6 +514,8 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
           leftInteractionBlock->setCol(*itindex, *coltmp);
         }
       }
+
+      Type::Siconos dsType = Type::value(*ds);
       if(osiType == OSI::MOREAUJEANBILBAOOSI || dsType == Type::LagrangianLinearDiagonalDS)
       {
         SP::SiconosMatrix work(new SimpleMatrix(*leftInteractionBlock));
@@ -482,36 +696,10 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
           relationType1 == NewtonEuler ||
           relationType2 == NewtonEuler)
   {
-
-    //Type::Siconos dsType = Type::value(*ds);
-
-
-    // if (d->boundaryConditions())
-    // {
-    //   for (std::vector<unsigned int>::iterator itindex =
-    //          d->boundaryConditions()->velocityIndices()->begin() ;
-    //        itindex != d->boundaryConditions()->velocityIndices()->end();
-    //        ++itindex)
-    //   {
-    //     // (nslawSize1,sizeDS));
-    //     SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
-    //     coltmp->zero();
-    //     leftInteractionBlock->setCol(*itindex, *coltmp);
-    //   }
-    // }
-
+    // Applying boundary conditions
     SP::BoundaryCondition bc;
-    Type::Siconos dsType = Type::value(*ds);
-    if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearDiagonalDS)
-    {
-      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
-      if(d->boundaryConditions()) bc = d->boundaryConditions();
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-      SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
-      if(d->boundaryConditions()) bc = d->boundaryConditions();
-    }
+    SP::SecondOrderDS d = std::static_pointer_cast<SecondOrderDS> (ds);
+    if(d->boundaryConditions()) bc = d->boundaryConditions();
     if(bc)
     {
       for(std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
@@ -522,8 +710,10 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
         SP::SiconosVector coltmp(new SiconosVector(nslawSize1));
         coltmp->zero();
         leftInteractionBlock->setCol(*itindex, *coltmp);
-      }
+        }
     }
+
+    Type::Siconos dsType = Type::value(*ds);
 
     if(osiType == OSI::MOREAUJEANBILBAOOSI || dsType == Type::LagrangianLinearDiagonalDS)
     {
@@ -605,6 +795,9 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   OSI::TYPES osi1Type = osi1.getType();
   OSI::TYPES osi2Type = osi2.getType();
 
+
+
+
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
@@ -659,11 +852,6 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
     SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
     setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-
-  else if(osi1Type == OSI::MOREAUJEANGOSI && osi2Type == OSI::MOREAUJEANGOSI)
-  {
-
-  }
   else
     THROW_EXCEPTION("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
   DEBUG_EXPR(_q->display());
@@ -696,6 +884,66 @@ void LinearOSNS::computeq(double time)
 
 
 
+void LinearOSNS::computeM()
+{
+  if (_assemblyType == REDUCED_BLOCK)
+  {
+
+    InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+
+    // Computes new _interactionBlocks if required
+    updateInteractionBlocks();
+
+    //    _M->fill(indexSet);
+    _M->fillM(indexSet, !_hasBeenUpdated);
+
+  }
+  else if (_assemblyType ==REDUCED_DIRECT)
+  {
+    InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+    DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+#ifdef WITH_TIMER
+    std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+    start = std::chrono::system_clock::now();
+#endif
+    // fill _Winverse
+    _W_inverse->fillWinverse(DSG0);
+#ifdef WITH_TIMER
+    end = std::chrono::system_clock::now();
+    int elapsed = std::chrono::duration_cast<std::chrono::microseconds> (end-start).count();
+    std::cout << "\nLinearOSNS: fill W inverse " << elapsed << " ms" << std::endl;
+#endif
+    // fill H
+    _H->fillHtrans(DSG0, indexSet);
+#ifdef WITH_TIMER
+    end_old=end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+      (end-end_old).count();
+    std::cout << "LinearOSNS: FillH " << elapsed << " ms" << std::endl;
+#endif
+    // ComputeM
+    _M->computeM(_W_inverse->numericsMatrix(), _H->numericsMatrix());
+#ifdef WITH_TIMER
+    end_old=end;
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+      (end-end_old).count();
+    std::cout << "LinearOSNS: _computeM " << elapsed << " ms" << std::endl;
+#endif
+  }
+  else
+    THROW_EXCEPTION("LinearOSNS::computeM unknown _assemblyTYPE");
+
+  DEBUG_EXPR(_M->display(););
+  // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
+  // if (M_NM )
+  //   NM_display(M_NM);
+
+  // getchar();
+
+}
+
 bool LinearOSNS::preCompute(double time)
 {
   DEBUG_BEGIN("bool LinearOSNS::preCompute(double time)\n");
@@ -713,7 +961,7 @@ bool LinearOSNS::preCompute(double time)
   // Get topology
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
-
+  int elapsed =0;
   //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do
@@ -730,16 +978,19 @@ bool LinearOSNS::preCompute(double time)
     DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
     return false;
   }
-
+#ifdef WITH_TIMER
+  std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
+  start = std::chrono::system_clock::now();
+#endif
   if(!_hasBeenUpdated || !isLinear)
   {
-    // Computes new _interactionBlocks if required
-    updateInteractionBlocks();
 
-    //    _M->fill(indexSet);
-    _M->fillW(indexSet, !_hasBeenUpdated);
-    DEBUG_EXPR(_M->display(););
-
+    computeM();
+#ifdef WITH_TIMER
+    end = std::chrono::system_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds> (end-start).count();
+    std::cout << "\nLinearOSNS: ComputeM " << elapsed << " ms" << std::endl;
+#endif
     //      updateOSNSMatrix();
     _sizeOutput = _M->size();
 
@@ -758,7 +1009,10 @@ bool LinearOSNS::preCompute(double time)
     }
 
     // Reset _w and _z with previous values of y and lambda
-    // (i.e. val saved in yOutputOld and lambdaOld of the interaction).
+    // VA 31/05/2021. Values was before the one of the Newton Loop
+    // (i.e. values saved in yOutputOld and lambdaOld of the interaction)
+    // should be better but needs memory comsumption
+
     // Note : sizeOuput can be unchanged, but positions may have changed. (??)
     if(_keepLambdaAndYState)
     {
@@ -769,13 +1023,15 @@ bool LinearOSNS::preCompute(double time)
         // Get the position of inter-interactionBlock in the vector w
         // or z
         unsigned int pos = indexSet.properties(*ui).absolute_position;
-        SiconosVector& yOutputOld = *inter.yOld(inputOutputLevel());
-        SiconosVector& lambdaOld = *inter.lambdaOld(inputOutputLevel());
+        // VA 30/08/2021  : Warning. the values of y_k and lambda_k that are stored in Memory
+        // may be undefined at the first time step.
+        const SiconosVector& yOutput_k = inter.y_k(inputOutputLevel());
+        const SiconosVector& lambda_k = inter.lambda_k(inputOutputLevel());
 
-        if(_sizeOutput >= yOutputOld.size() + pos)
+        if(_sizeOutput >= yOutput_k.size() + pos)
         {
-          setBlock(yOutputOld, _w, yOutputOld.size(), 0, pos);
-          setBlock(lambdaOld, _z, lambdaOld.size(), 0, pos);
+          setBlock(yOutput_k, _w, yOutput_k.size(), 0, pos);
+          setBlock(lambda_k, _z, lambda_k.size(), 0, pos);
         }
       }
     }
@@ -787,9 +1043,22 @@ bool LinearOSNS::preCompute(double time)
   }
   // else
   // nothing to do (IsLinear and not changed)
-
+#ifdef WITH_TIMER
+  end_old=end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+    (end-end_old).count();
+  std::cout << "LinearOSNS: init w and z " << elapsed << " ms" << std::endl;
+#endif
   // Computes q of LinearOSNS
   computeq(time);
+#ifdef WITH_TIMER
+  end_old=end;
+  end = std::chrono::system_clock::now();
+  elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+    (end-end_old).count();
+  std::cout << "LinearOSNS: compute q " << elapsed << " ms" << std::endl;
+#endif
   DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
   return true;
 

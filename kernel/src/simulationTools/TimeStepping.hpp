@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,6 @@ protected:
    */
   unsigned int _newtonOptions;
 
-
   /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
 
@@ -109,6 +108,21 @@ protected:
   /** boolean variable to resetAllLamda at each step (default true)
    */
   bool _resetAllLambda;
+
+  /** boolean variable to skip  updateOutput at the end of the step (default false)
+   */
+  bool _skip_last_updateOutput;
+
+  /** boolean variable to skip  updateInput at the end of the step (default false)
+   * useful for Global integrators that do not need to compute input in the linear case
+   */
+  bool _skip_last_updateInput;
+
+  /** boolean variable to skip  resetLambdas (default false)
+   */
+  bool _skip_resetLambdas;
+
+
 
   /** Default Constructor
    */
@@ -179,7 +193,7 @@ public:
 
   /** Reset all lambdas of all interactions */
   void resetLambdas();
-  
+
   /** step from current event to next event of EventsManager
   */
   void advanceToEvent();
@@ -212,7 +226,7 @@ public:
    */
   void initializeNewtonLoop();
 
-
+  void computeInitialNewtonState();
   void prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion
@@ -221,8 +235,6 @@ public:
    */
   bool newtonCheckConvergence(double criterion);
 
-  /*save y_k^p, the current Newton iteration*/
-  void saveYandLambdaInOldVariables();
 
   /** run the simulation, from t0 to T
    * with default parameters if any setting has been done
@@ -245,7 +257,7 @@ public:
   {
     return _isNewtonConverge;
   };
-  
+
   bool displayNewtonConvergence()
   {
     return _displayNewtonConvergence;
@@ -254,7 +266,7 @@ public:
   {
     _displayNewtonConvergence = newval;
   };
-  
+
   void setWarnOnNonConvergence(bool newval)
   {
     _warnOnNonConvergence = newval;
@@ -264,14 +276,38 @@ public:
     return _warnOnNonConvergence;
   };
   void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
-  
+
   void displayNewtonConvergenceInTheLoop();
-  
+
   void setResetAllLambda(bool newval)
   {
     _resetAllLambda = newval;
   };
 
+  void setSkipLastUpdateOutput(bool newval)
+  {
+    _skip_last_updateOutput = newval;
+  };
+  bool skipLastUpdateOutput()
+  {
+    return _skip_last_updateOutput;
+  };
+  void setSkipLastUpdateInput(bool newval)
+  {
+    _skip_last_updateInput = newval;
+  };
+  bool skipLastUpdateInput()
+  {
+    return _skip_last_updateInput;
+  };
+  void setSkipResetLambdas(bool newval)
+  {
+    _skip_resetLambdas = newval;
+  };
+  bool skipResetLambdas()
+  {
+    return _skip_resetLambdas;
+  };
 
   /** To specify if the output interaction residu must be computed.
    *  \param v set to true when the output interaction residu must be computed

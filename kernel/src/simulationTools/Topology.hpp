@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,9 @@
  */
 class Topology : public std::enable_shared_from_this<Topology>
 {
+public:
+
+//  typedef std::vector<SP::InteractionsGraph>::size_type IG_size_t;
 
 private:
   /** serialization hooks
@@ -223,7 +226,7 @@ public:
   /** get a pointer to the graph at level num of Interactions
    *  \return a SP::InteractionsGraph
    */
-  inline unsigned int numberOfIndexSet() const
+  inline size_t numberOfIndexSet() const
   {
     return _IG.size();
   };
@@ -261,7 +264,7 @@ public:
   /** get the number of Interactions Graphs
    *  \return the number of Interactions Graphs
    */
-  inline unsigned int indexSetsSize() const
+  inline size_t indexSetsSize() const
   {
     return _IG.size();
   };
@@ -270,7 +273,7 @@ public:
    * \param level
    *  \return size of the  InteractionGraphs at a given level
    */
-  inline unsigned int indexSetSize(unsigned int level) const
+  inline size_t indexSetSize(unsigned int level) const
   {
     return _IG[level]->size();
   };

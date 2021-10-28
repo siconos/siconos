@@ -16,7 +16,6 @@
 %ignore SimpleMatrix::SimpleMatrix(SiconosMatrix const &);
 %ignore SimpleMatrix::operator ()(unsigned int,unsigned int) const;
 %ignore SimpleMatrix::operator =(SiconosMatrix const &);
-%ignore SiconosVector::vector(unsigned int) const;
 %ignore SiconosVector::operator ()(unsigned int) const;
 %ignore SiconosVector::operator [](unsigned int) const;
 %ignore operator ==(SiconosVector const &,SiconosVector const &);
@@ -24,7 +23,7 @@
 %ignore BlockVector::end() const;
 %ignore BlockVector::operator ()(unsigned int) const;
 %ignore BlockVector::vector(unsigned int) const;
-%ignore BlockVector::operator [](unsigned int) const;
+//%ignore BlockVector::operator [](unsigned int) const;
 %ignore OneStepIntegrator::dynamicalSystemsBegin() const;
 %ignore OneStepIntegrator::dynamicalSystemsEnd() const;
 %ignore *::ACCEPT_NONVIRTUAL_VISITORS;
@@ -40,3 +39,8 @@
 %ignore operator +(SiconosVector const &,SiconosVector const &);
 %ignore operator -(SiconosVector const &,SiconosVector const &);
 %ignore operator -(SiconosMatrix const &,SiconosMatrix const &);
+
+%ignore xMemory() const;
+%ignore normalizeq(SiconosVector &q);
+
+  

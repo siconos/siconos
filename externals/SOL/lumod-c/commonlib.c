@@ -1,4 +1,4 @@
-#ifdef INTEGERTIME
+#if defined(INTEGERTIME) || defined(CLOCKTIME)
 # include <time.h>
 #else
 # include <sys/timeb.h>

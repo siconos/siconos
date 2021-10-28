@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "VariationalInequality_computeError.h"  // for variationalInequalit...
-#include "debug.h"                               // for DEBUG_PRINTF
+#include "siconos_debug.h"                               // for DEBUG_PRINTF
 #include "numerics_verbose.h"                    // for numerics_printf_verbose
 
 const char* const   SICONOS_VI_EG_STR = "VI_EG";

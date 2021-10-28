@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"                  // for DEBUG_EXPR, DEBUG_PRINT, DEBUG_PR...
+#include "siconos_debug.h"                  // for DEBUG_EXPR, DEBUG_PRINT, DEBUG_PR...
 #include "numerics_verbose.h"       // for numerics_printf_verbose, numerics...
 #include "SiconosBlas.h"                  // for cblas_daxpy, cblas_dcopy, cblas_d...
 
@@ -203,7 +203,7 @@ void convexQP_ADMM(ConvexQP* problem,
   double * tmp =  options->dWork;
 
   /* Compute M + rho A^T A (storage in M)*/
-  NumericsMatrix *Atrans;
+  NumericsMatrix *Atrans=0;
   if(!A)
   {
     if(M->storageType != A->storageType)
@@ -564,7 +564,8 @@ void convexQP_ADMM(ConvexQP* problem,
   }
   else
   {
-    NM_clear(Atrans);
+    if(Atrans)
+      NM_clear(Atrans);
   }
 
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"                                     // for DEBUG_PRINTF
+#include "siconos_debug.h"                                     // for DEBUG_PRINTF
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -124,7 +124,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
 
 
 
-  double  * rho;
+  double* rho=0;
   for(size_t contact =0; contact <nc ; contact++)
   {
     if(options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN ||

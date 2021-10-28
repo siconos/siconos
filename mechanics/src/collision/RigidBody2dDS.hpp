@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@
 #define RigidBody2dDS_h
 
 #include <MechanicsFwd.hpp>
-#include <LagrangianDS.hpp>
+#include <LagrangianLinearTIDS.hpp>
 #include <SiconosVisitor.hpp>
 #include <SiconosContactor.hpp>
 
-class RigidBody2dDS : public LagrangianDS,
+class RigidBody2dDS : public LagrangianLinearTIDS,
                       public std::enable_shared_from_this<RigidBody2dDS>
 {
 protected:
@@ -37,7 +37,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(RigidBody2dDS);
 
-  RigidBody2dDS() : LagrangianDS() {};
+  RigidBody2dDS() : LagrangianLinearTIDS() {};
 
   /** a scalar mass in the case of RigidBody2dDS */
   double _scalarMass;
@@ -92,7 +92,8 @@ public:
 
   /** visitors hook
    */
-  ACCEPT_BASE_VISITORS(LagrangianDS);
+  ACCEPT_BASE_VISITORS(LagrangianLinearTIDS);
+  
 };
 
 #endif /* RigidBody2dDS_h */

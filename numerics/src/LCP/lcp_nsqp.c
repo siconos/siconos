@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,13 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "QP_Solvers.h"                    // for ql0001_
 #include "SiconosConfig.h"                 // for HAS_FORTRAN, HAVE_QL0001
+#ifdef HAS_FORTRAN
 #include "SiconosFortran.h"                // for CNAME
-#include "SolverOptions.h"                 // for SICONOS_DPARAM_TOL, Solver...
+#else
+#include "numerics_verbose.h"
+#endif
 
+#include "SolverOptions.h"                 // for SICONOS_DPARAM_TOL, Solver...
 void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */

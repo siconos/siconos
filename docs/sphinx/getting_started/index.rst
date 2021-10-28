@@ -33,12 +33,23 @@ Check :ref:`siconos_examples` manual for an overview of the various problems han
 Try it
 ------
 
-The easiest way to start with Siconos : try tutorial notebooks available here :
+You can use one of the end-user docker images available in `siconos-tutorials registry <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/container_registry>`_ .
+
+For example, start a jupyter container including siconos, all running examples and some tutorials notebooks,
+
+.. code-block:: bash
+
+
+docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-release-4.4
+# Then, access in your browser at http://localhost:8888
+# and start siconos-notebooks/index.ipynb
+
+Another possible (but unstable) way to start with Siconos, try the tutorial notebooks available here :
 
 .. image:: https://mybinder.org/badge.svg
    :target: https://mybinder.org/v2/git/https%3A%2F%2Fgricad-gitlab.univ-grenoble-alpes.fr%2Fnonsmooth%2Fsiconos-tutorial.git/b08a0514b22b3927b58bddce3c4018f27ac0fc7d?filepath=siconos-notebooks%2Findex.ipynb
 
-This page propose a Python interactive interface (notebooks) to Siconos, that you can use through your web browser, online.
+This page proposes a Python interactive interface (notebooks) to Siconos, that you can use through your web browser, online.
 
 
 Siconos usage in a few steps
@@ -59,7 +70,7 @@ Python API is generated (swig) from C++ and thus both API are quite equivalent a
 Anyway, for new users we recommend the Python API which is easier to understand.
 
 Below are two examples (Python and C++) of a Siconos process. We just build and print a first-order dynamical
-system (See :class:`FirstOrderLineraDS`).
+system (See :class:`FirstOrderLinearDS`).
 
 **Example of Siconos Python API usage**
 
@@ -69,11 +80,11 @@ system (See :class:`FirstOrderLineraDS`).
    import siconos.kernel as sk
    # import numpy package
    import numpy as np
-   
+
    # Create a dynamical system
    size = 10
    x0 = np.random.random(size)
-   ds = sk.FirstOrderLineraDS(x0)
+   ds = sk.FirstOrderLinearDS(x0)
    print(ds)
 
 **Example of Siconos C++ API usage**
@@ -89,7 +100,7 @@ Write a c++ file, e.g. run.cpp
     SP::SiconosVector x0(new SiconosVector(size));
     SP::SimpleMatrix A(new SimpleMatrix(size, size));
     A->randomize();
-    
+
     SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(x0, A));
     ds->display();
    }
@@ -100,7 +111,7 @@ And, compile, link and execute (in one shot, thanks to siconos script)::
 
 
 For new simulation, start with the :ref:`template for c++ driver file <template_siconos_driver>`
-or try to mimic one of the examples distributed with the software (https://github.com/siconos/siconos/tree/master/examples).
+or try to mimic one of the examples available at (https://github.com/siconos/siconos-tutorials).
   
 More
 ----

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ using namespace RELATION;
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 // initial step size guess (typical value 1e-3)
 #define INITIAL_GUESS_TS 1.e-3
@@ -48,15 +48,17 @@ class Hem5OSI_impl
 public:
   Hem5OSI_impl(Hem5OSI* h) : hem5osi(h) {}
   Hem5OSI *hem5osi;
+#ifdef HAS_FORTRAN
   fprobfunction fprob;
   soloutfunction solout;
+#endif
 };
 
 // ===== Out of class objects and functions =====
 
 // global object and wrapping functions -> required for function plug-in and call in fortran routine.
 SP::Hem5OSI hem5_global_object;
-
+#ifdef HAS_FORTRAN
 // This first function must have the same signature as argument FPROB  in HEM5
 extern "C" fprobfunction Hem5OSI_fprob_wrapper;
 
@@ -117,7 +119,7 @@ void Hem5OSI_solout_wrapper(integer* MODE,
          q, v,  u,
          DOWK, IDOWK);
 }
-
+#endif
 // ===== Main class implementation ====
 
 Hem5OSI::Hem5OSI():
@@ -286,7 +288,7 @@ void Hem5OSI::computeJacobianRhs(double t)
     ds->computeJacobianRhsx(t);
   }
 }
-
+#ifdef HAS_FORTRAN
 void Hem5OSI_impl::fprob(integer* IFCN,
                          integer* NQ,
                          integer* NV,
@@ -485,6 +487,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
 
   DEBUG_PRINTF("END : Hem5OSI::fprob(integer* IFCN,...) with IFCN = %i \n \n", (int)*IFCN);
 }
+#endif
 // void Hem5OSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 // {
 //   std::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
@@ -599,10 +602,15 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
   }
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
   if(relationType == Lagrangian)
   {
     inter_work_block[Hem5OSI::xfree].reset(new BlockVector());
     inter_work_block[Hem5OSI::xfree]->insertPtr(workVds1[Hem5OSI::FREE]);
+    LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
+    DSlink[LagrangianR::q2].reset(new BlockVector());
+    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
   }
   // else if (relationType == NewtonEuler)
   // {
@@ -615,7 +623,10 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if(relationType == Lagrangian)
     {
+      
       inter_work_block[Hem5OSI::xfree]->insertPtr(workVds2[Hem5OSI::FREE]);
+      LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
+      DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
@@ -644,7 +655,7 @@ void Hem5OSI::initialize()
 
 
 }
-
+#ifdef HAS_FORTRAN
 void Hem5OSI_impl::solout(integer* MODE,
                           integer* NSTEP,
                           integer* NQ,
@@ -659,7 +670,7 @@ void Hem5OSI_impl::solout(integer* MODE,
 
 {
 }
-
+#endif
 unsigned int Hem5OSI::numberOfConstraints()
 {
   DEBUG_PRINT("Hem5OSI::updateConstraints() \n");
@@ -954,7 +965,7 @@ struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[Hem5OSI::OSNSP_RHS];
-    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false); // q = q + e * q
+    subscal(e, _inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false); // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)

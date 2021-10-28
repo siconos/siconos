@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public:
       \return int information about the solver convergence
       (output from numerics driver, linearComplementarity_driver, check numerics doc. for details).
    */
-  int numericsCompute();
+  int solve();
 
   /** Compute the unknowns z and w and update the corresponding Interactions (y and lambda )
       \param time : current time

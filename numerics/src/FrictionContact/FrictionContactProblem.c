@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 #include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"              // for DEBUG_PRINT, DEBUG_PRINTF
+#include "siconos_debug.h"              // for DEBUG_PRINT, DEBUG_PRINTF
 #include "numerics_verbose.h"   // for CHECK_IO, numerics_error, numerics_pr...
 #include "io_tools.h"
 #if defined(WITH_FCLIB)
@@ -251,7 +251,7 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
 
   /* Splitting matrix M */
 
-  int storageType = problem->M->storageType;
+  NM_types storageType = problem->M->storageType;
   NumericsMatrix * M =  problem->M;
 
   splitted_problem->M_nn =  NM_create(problem->M->storageType, nc, nc);

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 #include "RollingFrictionContactProblem.h"     // for RollingFrictionContact...
 #include "SiconosLapack.h"                     // for DGETRF, DGETRS, LA_NOTRANS
 #include "SolverOptions.h"                     // for SolverOptions, solver_...
-#include "debug.h"                             // for DEBUG_PRINTF, DEBUG_END
+#include "siconos_debug.h"                             // for DEBUG_PRINTF, DEBUG_END
 #include "numerics_verbose.h"                  // for numerics_printf_verbose
 #include "projectionOnRollingCone.h"           // for projectionOnRollingCone
 #include "rolling_fc3d_local_problem_tools.h"  // for rolling_fc3d_local_pro...
@@ -97,9 +97,11 @@ int rolling_fc3d_projectionOnCone_solve(
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
   //double an = 1./(MLocal[0]+mu_i);
-  //double an = 1. / (MLocal[0]);
-
-  double an=1.0;
+  double an = 1. / (MLocal[0]);
+  for (unsigned int i =1; i <5; i++)
+  {
+    an = fmin(an,1. / (MLocal[i+i*5]));
+  }
 
   /* int incx = 1, incy = 1; */
   double velocity[5];

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,15 +86,15 @@ int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* op
 int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   int aux = 3 * (problem->size) + (problem->size) * (problem->size);
-  int LWORK;
   if(options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS])
   {
-    LWORK = -1;
-    //int info = 0;
-    double dgelsSize = 0;
-    //DGELS(problem->M->size0, problem->size , 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
-    aux += (int) dgelsSize;
-    LWORK = (int) dgelsSize;
+    // to be reviewed ...
+    /* int LWORK = -1; */
+    /* int info = 0; */
+    /* double dgelsSize = 0; */
+    /* DGELS(problem->M->size0, problem->size , 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info); */
+    /* aux += (int) dgelsSize; */
+    /* LWORK = (int) dgelsSize; */
   }
   return aux;
 }

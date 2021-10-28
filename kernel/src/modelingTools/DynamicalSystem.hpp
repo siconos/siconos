@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,12 +80,12 @@ private:
   ACCEPT_SERIALIZATION(DynamicalSystem);
 
   /** used to set ds number */
-  static unsigned int __count;
+  static size_t __count;
 
 protected:
 
   /** An id number for the DynamicalSystem */
-  unsigned int _number;
+  size_t _number;
 
   /** the dimension of the system (\e ie size of the state vector x) */
   unsigned int _n;
@@ -199,7 +199,7 @@ public:
     @{ */
 
   /** returns the id of the dynamical system */
-  inline int number() const
+  inline size_t number() const
   {
     return _number;
   }
@@ -207,9 +207,9 @@ public:
   /** set the id of the DynamicalSystem
    *  \return the previous value of number
    */
-  inline int setNumber(int new_number)
+  inline size_t setNumber(size_t new_number)
   {
-    int old_n = _number;
+    size_t old_n = _number;
     _number = new_number;
     return old_n;
   }
@@ -398,7 +398,7 @@ public:
   /** returns the number of step saved in memory for state vector
    *  \return int
    */
-  inline int stepsInMemory() const
+  inline unsigned int stepsInMemory() const
   {
     return _stepsInMemory;
   }
@@ -406,7 +406,7 @@ public:
   /** set number of steps to be saved
    *  \param steps
    */
-  inline void setStepsInMemory(int steps)
+  inline void setStepsInMemory(unsigned int steps)
   {
     _stepsInMemory = steps;
   }
@@ -438,9 +438,9 @@ public:
   /** reset the global DynamicSystem counter (for ids)
    *  \return the previous value of count
    */
-  static inline int resetCount(int new_count=0)
+  static inline size_t resetCount(size_t new_count=0)
   {
-    int old_count = __count;
+    size_t old_count = __count;
     __count = new_count;
     return old_count;
   };

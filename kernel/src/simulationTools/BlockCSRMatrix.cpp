@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@
 #include "SparseBlockMatrix.h" // From numerics, for SparseBlockStructuredMatrix
 #include "Tools.hpp"
 
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
-#include "debug.h"
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES 1
+#include "siconos_debug.h"
 
 // Default constructor: empty matrix
 BlockCSRMatrix::BlockCSRMatrix():
@@ -151,7 +151,7 @@ void BlockCSRMatrix::fill(InteractionsGraph& indexSet)
   DEBUG_EXPR(display(););
 }
 
-void BlockCSRMatrix::fillM(InteractionsGraph& indexSet)
+void BlockCSRMatrix::fillW(InteractionsGraph& indexSet)
 {
   /* on adjoint graph a dynamical system may be on several edges */
   std::map<SP::DynamicalSystem, bool> involvedDS;
@@ -161,7 +161,7 @@ void BlockCSRMatrix::fillM(InteractionsGraph& indexSet)
   {
     if(Type::value(*indexSet.bundle(*ei)) != Type::NewtonEulerDS)
     {
-      THROW_EXCEPTION("BlockCSRMatrix::fillM only for Newton EulerDS");
+      THROW_EXCEPTION("BlockCSRMatrix::fillW only for Newton EulerDS");
     }
 
     _nr = 0;
@@ -272,6 +272,7 @@ void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
 // convert _blockCSR to numerics structure
 void BlockCSRMatrix::convert()
 {
+  DEBUG_BEGIN("void BlockCSRMatrix::convert()\n");
   _sparseBlockStructuredMatrix->blocknumber0 = _nr;
   _sparseBlockStructuredMatrix->blocknumber1 = _nr;  // nc not always set
   _sparseBlockStructuredMatrix->nbblocks = (*_blockCSR).nnz();
@@ -301,6 +302,7 @@ void BlockCSRMatrix::convert()
   //    block[i] = *i2;
   //  }
   //     }
+  DEBUG_END("void BlockCSRMatrix::convert()\n");
 }
 
 // Display data

@@ -149,23 +149,19 @@ if(BUILD_AS_CPP)
     COMPILE_FLAGS -fpermissive) # to allow some nonconforming code to compile
   # set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
   # We require C++ 11. PUBLIC to propagate to numerics.
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
-    target_compile_features(externals PUBLIC cxx_std_17)
-  else()
-    set_property(TARGET externals PROPERTY CXX_STANDARD 17)
-  endif()
+
+  target_compile_features(externals PUBLIC cxx_std_17)
+  
 else()
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
-  if(${CMAKE_VERSION} VERSION_GREATER "3.8.0")
-    target_compile_features(externals PUBLIC c_std_11)
-  else()
-    set_property(TARGET externals PROPERTY C_STANDARD 11)
-  endif()
+  target_compile_features(externals PUBLIC c_std_11)
 endif()
 
-# externals lib needs blas while tests need Blas AND lapack.
+# externals lib needs blas and lapack while tests need Blas AND lapack.
 # Link only at build time.
 target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
+# HEM5 calls DGETRF and DGETRS from LAPACK
+target_link_libraries(externals PRIVATE $<BUILD_INTERFACE:LAPACK::LAPACK>)
 target_include_directories(externals PRIVATE blas_lapack)
 #target_include_directories(externals PRIVATE ${BLAS_INCLUDE_DIR})
 
@@ -177,13 +173,16 @@ get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
 list(REMOVE_ITEM externals_COMPILE_FLAGS -Wall)
 list(REMOVE_ITEM externals_COMPILE_FLAGS -Wunused-variable)
 set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
+# This is ugly, but helps with old lumod code (12.08.2021) --xhub
+target_compile_definitions(externals PRIVATE CLOCKTIME)
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
 target_compile_options(externals PRIVATE "-Wno-unused-parameter")
 # An awful command asking to add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
 # See https://scivision.co/gfortran-type-mismatch-error/
-target_compile_options(externals PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
-
+if(WITH_FORTRAN)
+  target_compile_options(externals PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
+endif()
 # - Extras, optional -
 # --- SuiteSparse ---
 # It is allowed to switch between system or local suitesparse,

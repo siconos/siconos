@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                         // for DEBUG_END, DEBUG_BEGIN
+#include "siconos_debug.h"                         // for DEBUG_END, DEBUG_BEGIN
 #include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_PIVOTIN...
 #include "numerics_verbose.h"              // for numerics_error, verbose
 
@@ -359,10 +359,10 @@ int linearComplementarity_driver(LinearComplementarityProblem* problem, double *
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
 
-  int storageType = problem->M->storageType;
+  NM_types storageType = problem->M->storageType;
   DEBUG_PRINTF("storageType = %i\n", storageType);
   /* Sparse Block Storage */
-  if(storageType == 1)
+  if(storageType == NM_SPARSE_BLOCK)
   {
     info = lcp_driver_SparseBlockMatrix(problem, z, w, options);
   }

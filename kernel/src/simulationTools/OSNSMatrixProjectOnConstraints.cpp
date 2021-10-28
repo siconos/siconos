@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,19 @@
 #include "SimpleMatrix.hpp"
 using namespace RELATION;
 using namespace Siconos;
-//#define OSNSMPROJ_DEBUG
 
 
-OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, int stor):
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "siconos_debug.h"
+
+
+OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor):
   OSNSMatrix(n, m, stor)
 {
 }
 
-
-
-// Destructor : pointers are smart
 OSNSMatrixProjectOnConstraints::~OSNSMatrixProjectOnConstraints()
 {
 }
@@ -60,20 +62,17 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
   // Interactionin indexSet
   unsigned dim = 0;
   InteractionsGraph::VIterator vd, vdend;
-#ifdef OSNSMPROJ_DEBUG
-  std::cout << "indexSet :" << indexSet << std::endl;
-  indexSet.display();
-#endif
+  DEBUG_EXPR_WE(std::cout << "indexSet :" << &indexSet << std::endl;
+             indexSet.display(););
   for(std::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
   {
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
 
     //    (*interactionBlocksPositions)[indexSet.bundle(*vd)] = dim;
-#ifdef OSNSMPROJ_DEBUG
-    std::cout << " dim :" << dim << std::endl;
-    std::cout << "vd :" << *vd << std::endl;
+    DEBUG_EXPR_WE(std::cout << " dim :" << dim << std::endl;
+                  std::cout << "vd :" << *vd << std::endl;);
 
-#endif
+
     assert(indexSet.blockProj[*vd]);
     indexSet.properties(*vd).absolute_position_proj = dim;
     SP::Interaction inter = indexSet.bundle(*vd);
@@ -85,7 +84,7 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
   return dim;
 }
 
-void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool update)
+void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool update)
 {
 
   if(update)
@@ -95,7 +94,7 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
     _dimRow = _dimColumn;
   }
 
-  if(_storageType == 0)
+  if(_storageType == NM_DENSE)
   {
 
     // === Memory allocation, if required ===
@@ -151,11 +150,11 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
       assert(pos < _dimRow);
       assert(col < _dimColumn);
 
-#ifdef OSNSMPROJ_DEBUG
-      printf("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      printf("OSNSMatrix upper: %i %i\n", (indexSet.upper_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
-      printf("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
-#endif
+
+      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
+      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", (indexSet.upper_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
+      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
+
 
       std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
@@ -167,7 +166,7 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
     }
 
   }
-  else // if _storageType == 1
+  else // if _storageType == NM_SPARSE_BLOCK
   {
     if(! _M2)
       _M2.reset(new BlockCSRMatrix(indexSet));
@@ -181,13 +180,7 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
 
 unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)
 {
-#ifdef OSNSMPROJ_DEBUG
-  std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)" << std::endl;
-#endif
-
-
-
-
+  DEBUG_BEGIN( "OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)\n");
   RELATION::TYPES relationType;
   relationType = inter->relation()->getType();
   unsigned int nslawSize = inter->nonSmoothLaw()->size();
@@ -203,25 +196,21 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Intera
       // if(ri->_isOnContact)
       //   equalitySize = 1;
       size = 1;
-#ifdef OSNSMPROJ_DEBUG
-      std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : NewtonImpact * nslaw and  relationType NewtonEuler. size=1" << std::endl;
-#endif
+      DEBUG_EXPR_WE(std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : NewtonImpact * nslaw and  relationType NewtonEuler. size=1" << std::endl;);
     }
     else if(relationType == Lagrangian)
     {
       size = 1;
-#ifdef OSNSMPROJ_DEBUG
-      std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : NewtonImpact * nslaw and relationType Lagrangian. size=1" << std::endl;
-#endif
+      DEBUG_EXPR_WE(std::cout <<
+                 "OSNSMatrixProjectOnConstraints::computeSizeForProjection : NewtonImpact * nslaw and relationType Lagrangian. size=1"
+                 << std::endl;);
     }
     else
     {
       THROW_EXCEPTION("MLCPProjectOnConstraints::computeSizeForProjection. relation is not of the right type. neither Lagrangian nor NewtonEuler ");
     }
   }
-#ifdef OSNSMPROJ_DEBUG
-  std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : size= " << size << std::endl;
-#endif
+  DEBUG_END( "OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Interaction inter)\n");
   return size;
 
 }

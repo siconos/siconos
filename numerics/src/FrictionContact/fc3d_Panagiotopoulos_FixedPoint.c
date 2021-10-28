@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,8 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  normalInternalSolverPtr internalsolver_normal;
-  tangentInternalSolverPtr internalsolver_tangent;
+  normalInternalSolverPtr internalsolver_normal=0;
+  tangentInternalSolverPtr internalsolver_tangent=0;
   options->dWork = (double *) calloc(nc, sizeof(double));
   options->dWorkSize = nc;
   double * mu = options->dWork;
@@ -91,8 +91,8 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
 
   createSplittedFrictionContactProblem(problem, splitted_problem);
 
-  LinearComplementarityProblem* normal_lcp_problem;
-  ConvexQP * tangent_cqp;
+  LinearComplementarityProblem* normal_lcp_problem=0;
+  ConvexQP * tangent_cqp=0;
 
   if(options->numberOfInternalSolvers !=2)
     numerics_error("fc3d_Panagiotopoulos_FixedPoint", " the solver requires 2 internal solver");
@@ -180,6 +180,8 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
       printf(" ========================== Call SICONOS_CONVEX_VI_FPP solver for Friction-Contact 3D problem ==========================\n");
     internalsolver_tangent = &convexQP_VI_solver;
   }
+  else
+    numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the tangent part.");
 
   int cumul_internal=0;
   //verbose=1;

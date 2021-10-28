@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ TYPEDEF_SPTR(GlobalFrictionContactProblem)
  */
 class GlobalFrictionContact : public LinearOSNS
 {
-private:
+protected:
   /** default constructor */
   GlobalFrictionContact() = default;
 
@@ -95,9 +95,6 @@ protected:
 
   /** contains the impact contributions */
   SP::SiconosVector _b;
-
-  /** contains the matrix H of a GlobalFrictionContact system */
-  SP::OSNSMatrix _H;
 
   /** friction coefficients */
   SP::MuStorage _mu;
@@ -143,7 +140,7 @@ public:
   /** get dimension of the problem
    *  \return an unsigned ing
    */
-  inline unsigned int getGlobalSizeOutput() const
+  inline size_t getGlobalSizeOutput() const
   {
     return _sizeGlobalOutput;
   }
@@ -164,20 +161,7 @@ public:
     _globalVelocities = newPtr;
   }
 
-  // --- H ---
 
-  /** get H
-   *  \return pointer on a OSNSMatrix
-   */
-  inline SP::OSNSMatrix H() const
-  {
-    return _H;
-  }
-
-  /** set the value of H
-   *  \param H the new matrix
-   */
-  void setH(SP::OSNSMatrix H) { _H = H;}
 
   /** get a pointer to mu, the list of the friction coefficients
    *  \return pointer on a std::vector<double>
@@ -196,8 +180,7 @@ public:
   }
 
   // --- Others functions ---
-  /** initialize the _M and _H matrix */
-  virtual void initOSNSMatrix();
+
 
   /** Memory allocation or resizing for z,w,q,b, globalVelocities */
   void initVectorsMemory();

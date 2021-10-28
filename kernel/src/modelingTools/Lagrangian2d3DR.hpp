@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,6 @@ protected:
    * on _relPc1, _relPc2. */
   SP::SiconosVector _Pc1;
   SP::SiconosVector _Pc2;
-
-  /* Contact Points in coordinates relative to attached DS->q.  Set
-   * these if _Pc1/_Pc2 are not calculated within the Newton loop. */
-  SP::SiconosVector _relPc1;
-  SP::SiconosVector _relPc2;
 
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
@@ -119,8 +114,7 @@ public:
   Lagrangian2d3DR():
     LagrangianScleronomousR(),
     _Pc1(new SiconosVector(2)), _Pc2(new SiconosVector(2)),
-    _relPc1(new SiconosVector(2)), _relPc2(new SiconosVector(2)),
-    _Nc(new SiconosVector(2)), _relNc(new SiconosVector(2))
+    _Nc(new SiconosVector(2))
   {
     /*_ds1=nullptr;_ds2=nullptr;*/
   }
@@ -159,37 +153,11 @@ public:
   {
     return _Nc;
   }
-
-  inline SP::SiconosVector relPc1() const
-  {
-    return _relPc1;
-  }
-  inline SP::SiconosVector relPc2() const
-  {
-    return _relPc2;
-  }
+  
   inline SP::SiconosVector relNc() const
   {
     return _relNc;
   }
-
-  /** Set the coordinates of first contact point in ds1 frame.
-   * It will be used to compute _Pc1 during computeh().
-  * \param npc new coordinates
-  */
-  void setRelPc1(SP::SiconosVector npc)
-  {
-    _relPc1 = npc;
-  };
-
-  /** Set the coordinates of second contact point in ds2 frame
-   * It will be used to compute _Pc2 during computeh().
-  * \param npc new coordinates
-  */
-  void setRelPc2(SP::SiconosVector npc)
-  {
-    _relPc2 = npc;
-  };
 
   /** Set the coordinates of inside normal vector at the contact point in ds2 frame.
    * It will be used to compute _Nc during computeh().

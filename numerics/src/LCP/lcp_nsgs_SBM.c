@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,16 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 #include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES 1 */
-#include "debug.h"                         // for DEBUG_BEGIN, DEBUG_END
 #include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_NSGS_LO...
 #include "numerics_verbose.h"              // for numerics_error, verbose
 #include "sanitizer.h"                     // for cblas_dcopy_msan
+
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES 1 */
+#include "siconos_debug.h"                         // for DEBUG_BEGIN, DEBUG_END
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
 
 void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
@@ -58,6 +62,8 @@ void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* 
   */
   cblas_dcopy_msan(local_problem->size, &q[pos], 1, local_problem->q, 1);
   SBM_row_prod_no_diag(blmat->blocksize0[blmat->blocknumber0 - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
+  DEBUG_EXPR(NM_display(local_problem->M););
+  DEBUG_EXPR(NV_display(local_problem->q,2););
 
 }
 

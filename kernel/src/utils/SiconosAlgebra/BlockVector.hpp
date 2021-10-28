@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public:
   }
 
   /** \return the number of SiconosVectors in the container */
-  inline unsigned int numberOfBlocks() const
+  inline Index::size_type numberOfBlocks() const
   {
     return _tabIndex->size();
   };
@@ -197,17 +197,17 @@ public:
     return _vect[pos];
   };
 
-  /** get a block (SiconosVector) of the vector
-   * \param pos index of the required block
-   * \return the expected block
-   */
-  SP::SiconosVector operator [](unsigned int pos) ;
+  // /** get a block (SiconosVector) of the vector
+  //  * \param pos index of the required block
+  //  * \return the expected block
+  //  */
+  // SP::SiconosVector operator [](unsigned int pos) ;
 
-  /** get a block (SiconosVector) of the vector
-   * \param pos index of the required block
-   * \return the expected block
-   */
-  SPC::SiconosVector operator [](unsigned int pos) const;
+  // /** get a block (SiconosVector) of the vector
+  //  * \param pos index of the required block
+  //  * \return the expected block
+  //  */
+  // SPC::SiconosVector operator [](unsigned int pos) const;
 
   /** set a block with a given vector (copy!)
    * \param pos index of the block to set

@@ -1,4 +1,7 @@
 FROM archlinux/base
+WORKDIR /home
+ENV CI_PROJECT_DIR /home
+COPY ci_gitlab/dockerfiles/install_oce.sh /home/install_oce.sh
 RUN pacman -Sy && pacman --noconfirm -S \
         git \
         boost \
@@ -24,9 +27,6 @@ RUN pacman -Sy && pacman --noconfirm -S \
         bullet \
         freetype2 \
         freeglut \
-        glu
-WORKDIR /home
-ENV CI_PROJECT_DIR /home
-COPY install_oce.sh /home/install_oce.sh
-RUN sh /home/install_oce.sh
-
+        tk tcl \
+        glu && pacman --noconfirm -Scc
+RUN sh /home/install_oce.sh clone_oce

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ extern "C"
        \param[in,out] info termination value
        \param[in,out] options structure
   */
-  void fc2d_nsgs_sbm(FrictionContactProblem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   
   /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.

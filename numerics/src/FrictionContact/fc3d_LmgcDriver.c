@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include "SiconosConfig.h"           // for WITH_FCLIB // IWYU pragma: keep
 #include "SolverOptions.h"           // for SolverOptions, SICONOS_IPARAM_IT...
 #include "SparseBlockMatrix.h"       // for SBCM_free_3x3, SBCM_new_3x3, SBC...
-#include "debug.h"                   // for DEBUG_EXPR
+#include "siconos_debug.h"                   // for DEBUG_EXPR
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H

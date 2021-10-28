@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2020 INRIA.
+// Copyright 2021 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -411,7 +411,8 @@ struct IsDense : public Question<bool>
 {
   PyObject * SiconosVector_to_numpy(SiconosVector const & v)
   {
-    npy_intp this_vector_dim[1] = { v.size() };
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0] = v.size();
 
     PyObject * larray;
     PYARRAY_FROM_SHARED_SICONOS_DATA_REF(NPY_DOUBLE, 1, this_vector_dim, v, larray);
@@ -421,7 +422,9 @@ struct IsDense : public Question<bool>
 
   PyObject * SP_SiconosVector_to_numpy(SP::SiconosVector v)
   {
-    npy_intp this_vector_dim[1] = { v->size() };
+    npy_intp this_vector_dim[1];
+    this_vector_dim[0] = v->size();
+
     PyObject* lresult;
     PYARRAY_FROM_SHARED_SICONOS_DATA(NPY_DOUBLE, 1, this_vector_dim, v, lresult);
     return lresult;
@@ -600,10 +603,15 @@ struct IsDense : public Question<bool>
 {
   // This part is required to handle BlockVector in
   // 'plugin' functions like computeh in Relations.
-  PyObject * BlockVector_to_numpy(BlockVector const & v)
+  PyObject * BlockVector_to_numpy(BlockVector & v)
   {
     return SP_SiconosVector_to_numpy(v.prepareVectorForPlugin());
   }
+  PyObject * const_BlockVector_to_numpy(const BlockVector & v)
+  {
+    return SP_SiconosVector_to_numpy(v.prepareVectorForPlugin());
+  }
+
 
   PyObject * SP_BlockVector_to_numpy(SP::BlockVector v)
   {
@@ -976,6 +984,14 @@ struct IsDense : public Question<bool>
   $result = BlockVector_to_numpy(*$1);
 }
 
+%typemap(out, fragment="BlockVector") const BlockVector & ()
+{
+  // %typemap(out, fragment="BlockVector") BlockVector& ()
+  $result = const_BlockVector_to_numpy(*$1);
+}
+
+
+
 // director input : TYPE -> numpy
 %typemap(directorin, fragment="BlockVector") BlockVector & ()
 {
@@ -983,6 +999,11 @@ struct IsDense : public Question<bool>
   $input = BlockVector_to_numpy($1_name);
 }
 
+%typemap(directorin, fragment="BlockVector") const BlockVector & ()
+{
+  //%typemap(directorin, fragment="BlockVector") BlockVector & ()
+  $input = const_BlockVector_to_numpy($1_name);
+}
 
 //%typemap(directorout, fragment="NumPy_Fragments") (SiconosMatrix&) ()
 //{

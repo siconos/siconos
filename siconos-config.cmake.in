@@ -33,8 +33,6 @@ set(installed_targets "@installed_targets@")
 # Path (relative to siconos install) to cmake extra tools
 set(SICONOS_CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/@ConfigPackageLocation@)
 list(APPEND CMAKE_MODULE_PATH ${SICONOS_CMAKE_MODULE_PATH})
-# include siconos project targets
-include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
 
 set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
 
@@ -56,9 +54,10 @@ set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
 if(@WITH_FCLIB@)
-  if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+  #if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
     set(FCLIB_ROOT @FCLIB_ROOT@)
-  else()
+  #else()
+  if(${CMAKE_VERSION} VERSION_LESS "3.13.0")
     set(FCLIB_DIR @FCLIB_DIR@)
   endif()
   
@@ -66,6 +65,9 @@ if(@WITH_FCLIB@)
   # and/or FCLIB_ROOT (cmake >= 3.12).
   find_dependency(FCLIB 3.0.0 CONFIG REQUIRED)
 endif()
+
+# include siconos project targets
+include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
 
 if(${mechanisms_installed})
   set_and_check(siconos_mechanisms_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos_mechanisms")

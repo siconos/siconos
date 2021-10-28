@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include "SiconosBlas.h"    // for cblas_dcopy, cblas_daxpy, cblas_ddot
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h" // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
+#include "siconos_debug.h" // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
 
 #ifdef __cplusplus
 #undef restrict
@@ -37,7 +37,7 @@
 int NMS(NMS_data* data_NMS, void* data, functions_LSA* functions, double* restrict z, double* restrict z_N, int force_watchdog_step, int force_d_step_merit_check, double check_ratio)
 {
   double theta_iter;
-  int n = data_NMS->size;
+  int n = (int)data_NMS->size;
 
   /* H could be sparse ... */
   NumericsMatrix* Htmp = data_NMS->H;

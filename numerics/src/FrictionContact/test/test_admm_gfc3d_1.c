@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,15 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
-  for(int d =0; d <n_data; d++)
-  {
-    // GFC3D, NSGS_WR.
-    collection[current].filename = data_collection[d];
-    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    current++;
-  }
+  /* for(int d =0; d <n_data; d++) */
+  /* { */
+  /*   // GFC3D, NSGS_WR. */
+  /*   collection[current].filename = data_collection[d]; */
+  /*   collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS_WR); */
+  /*   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5; */
+  /*   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000; */
+  /*   current++; */
+  /* } */
 
   for(int d =0; d <n_data; d++)
   {
@@ -96,6 +96,17 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 30000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
     collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_BALANCING_M;
+    current++;
+  }
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D, ADMM, set rho strategy and rescaling
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
     current++;
   }
   return collection;

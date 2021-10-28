@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@
 
 typedef struct fclib_local fclib_local;
 typedef struct fclib_global fclib_global;
+typedef struct fclib_global_rolling fclib_global_rolling;
 typedef struct fclib_solution fclib_solution;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -61,6 +62,11 @@ extern "C"
                                         char * mathInfo,
                                         const char *path);
 
+  int globalRollingFrictionContact_fclib_write(GlobalRollingFrictionContactProblem* problem,
+                                               char * title,
+                                               char * description,
+                                               char * mathInfo,
+                                               const char *path);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

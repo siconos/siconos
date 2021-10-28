@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR
+#include "siconos_debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -58,7 +58,7 @@ const char* const   SICONOS_GENERIC_MECHANICAL_NSGS_STR = "GMP_NSGS";
 int gmp_compute_error(GenericMechanicalProblem* pGMP, double *reaction, double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
-  int storageType = pGMP->M->storageType;
+  NM_types storageType = pGMP->M->storageType;
   NumericsMatrix* numMat = pGMP->M;
   int currentRowNumber = 0;
   int ii;
@@ -66,7 +66,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double *reaction, double *
   int curSize = 0;
   *err = 0.0;
   double localError = 0;
-  double * bufForLocalProblemDense = (storageType == 0) ? (double*) malloc(pGMP->maxLocalSize * pGMP->maxLocalSize * sizeof(double)) : 0;
+  double * bufForLocalProblemDense = (storageType == NM_DENSE) ? (double*) malloc(pGMP->maxLocalSize * pGMP->maxLocalSize * sizeof(double)) : 0;
 
 #ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
   numerics_printf("GenericMechanical compute_error BEGIN:\n");
@@ -93,7 +93,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double *reaction, double *
     /*add the missing product to the velocity: the diagonal one*/
 
     double * diagBlock = 0;
-    if(storageType == 0)  /*dense*/
+    if(storageType == NM_DENSE)  /*dense*/
     {
       NM_extract_diag_block(numMat, currentRowNumber, posInX, curSize, &bufForLocalProblemDense);
       diagBlock = bufForLocalProblemDense;
@@ -220,7 +220,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double *reaction, double *
   else
     numerics_printf("GenericMechanical_driver compute_error END:, err<tol: error : %e\n", *err);
 #endif
-  if(storageType == 0)
+  if(storageType == NM_DENSE)
     free(bufForLocalProblemDense);
 
   if(*err > tol)
@@ -250,7 +250,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
   SScmp++;
 #endif
   listNumericsProblem * curProblem = 0;
-  int storageType = pGMP->M->storageType;
+  NM_types storageType = pGMP->M->storageType;
   NumericsMatrix* numMat = pGMP->M;
   int iterMax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   int it = 0;
@@ -271,7 +271,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
   double * pBuffVelocity = NULL;
   int withLS = options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH];
   double * pCoefLS = &(options->dparam[SICONOS_DPARAM_GMP_COEFF_LS]);
-  double * bufForLocalProblemDense = (storageType == 0) ? (double*) malloc(pGMP->maxLocalSize * pGMP->maxLocalSize * sizeof(double)) : 0;
+  double * bufForLocalProblemDense = (storageType == NM_DENSE) ? (double*) malloc(pGMP->maxLocalSize * pGMP->maxLocalSize * sizeof(double)) : 0;
 
   if(options->dWork)
   {
@@ -312,7 +312,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
       //diagBlockNumber = NM_extract_diag_blockPos(m,currentRowNumber);
       //diagBlockNumber = NM_extract_diag_blockPos(numMat,currentRowNumber,posInX,size);
       double * diagBlock = 0;
-      if(storageType == 0)  /*dense*/
+      if(storageType == NM_DENSE)  /*dense*/
       {
         NM_extract_diag_block(numMat, currentRowNumber, posInX, curSize, &bufForLocalProblemDense);
         diagBlock = bufForLocalProblemDense;
@@ -509,7 +509,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
     fclose(toto);
 #endif
 
-    //    if (storageType==0)
+    //    if (storageType==NM_DENSE)
     //      free(bufForLocalProblemDense);
     //    exit(0);
   }
@@ -539,7 +539,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
   if(! options->dWork)
     free(pPrevReaction);
   *info = tolViolate;
-  if(storageType == 0)
+  if(storageType == NM_DENSE)
     free(bufForLocalProblemDense);
   DEBUG_END("gmp_gauss_seidel(...)\n");
 }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 
-#include "debug.h"
+#include "siconos_debug.h"
 
 typedef void (*FONLR_h)(double time, unsigned x_size, double *x, unsigned size_lambda, double* lambda, double *, unsigned z_size, double *z);
 typedef FONLR_h FONLR_g;

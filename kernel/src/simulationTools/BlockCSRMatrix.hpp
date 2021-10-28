@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,7 +190,7 @@ public:
    * \param i block position
    * \return unsigned int
   */
-  unsigned int getSizeOfDiagonalBlock(int i) const
+  IndexInt::value_type getSizeOfDiagonalBlock(int i) const
   {
     if (i == 0) return _diagsize0->at(0);
     else return (_diagsize0->at(i) - _diagsize0->at(i - 1));
@@ -216,7 +216,7 @@ public:
    * \warning only for NewtonEulerDS
    * \param indexSet of the active constraints
    */
-  void fillM(InteractionsGraph& indexSet);
+  void fillW(InteractionsGraph& indexSet);
 
   /** fill the matrix with the H matrix 
    * \warning only for NewtonEuler3DR

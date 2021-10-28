@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ private:
 
 public:
   Contact2d3DR();
+  virtual ~Contact2d3DR() = default;
+
 
   /* For users that may require extra information about contacts. */
   SP::SiconosVector base[2];
@@ -39,12 +41,12 @@ public:
   SP::SiconosContactor contactor[2];
   SP::RigidBody2dDS ds[2];
 
-  /** to compute the output y = h(q,z) of the Relation
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-      \param y the resulting vector
-  */
-  virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  // /** to compute the output y = h(q,z) of the Relation
+  //     \param q coordinates of the dynamical systems involved in the relation
+  //     \param z user defined parameters (optional)
+  //     \param y the resulting vector
+  // */
+  // virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
   /** Update this contact point information.
    * \param pos1 Position on ds1 in ds1 frame.

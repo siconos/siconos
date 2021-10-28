@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,13 +146,40 @@ protected:
    */
   bool _isWSymmetricDefinitePositive;
 
+
+
+  /** A set of work indices for the selected coordinates when
+      we subprod in computeFreeOuput*/
+  std::vector<std::size_t> _selected_coordinates;
+
   /** nslaw effects
    */
-  struct _NSLEffectOnFreeOutput;
+  //struct _NSLEffectOnFreeOutput;
+  struct _NSLEffectOnFreeOutput : public SiconosVisitor
+  {
+    using SiconosVisitor::visit;
+
+    OneStepNSProblem& _osnsp;
+    Interaction& _inter;
+    InteractionProperties& _interProp;
+
+    _NSLEffectOnFreeOutput(OneStepNSProblem& p, Interaction& inter, InteractionProperties& interProp) :
+      _osnsp(p), _inter(inter), _interProp(interProp) {};
+
+    void visit(const NewtonImpactNSL& nslaw);
+    void visit(const RelayNSL& nslaw);
+    void visit(const NewtonImpactFrictionNSL& nslaw);
+    void visit(const NewtonImpactRollingFrictionNSL& nslaw);
+    void visit(const EqualityConditionNSL& nslaw);
+    void visit(const MixedComplementarityConditionNSL& nslaw);
+    void visit(const ComplementarityConditionNSL& nslaw);
+  };
+
   friend struct _NSLEffectOnFreeOutput;
 
 public:
 
+  
   enum MoreauJeanOSI_ds_workVector_id{RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH};
 
   enum MoreauJeanOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
@@ -189,7 +216,7 @@ public:
     return _isWSymmetricDefinitePositive;
   };
 
-  inline void setIsWSymmetricDefinitePositive(bool b) 
+  inline void setIsWSymmetricDefinitePositive(bool b)
   {
     _isWSymmetricDefinitePositive = b ;
   };
@@ -327,7 +354,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
+  virtual void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -342,7 +369,7 @@ public:
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */
-  unsigned int numberOfIndexSets() const {return 2;};
+   unsigned int numberOfIndexSets() const {return 2;};
 
   /** initialize iteration matrix W MoreauJeanOSI matrix at time t
    *  \param time
@@ -357,6 +384,15 @@ public:
    */
   void computeW(double time , SecondOrderDS& ds, SiconosMatrix& W);
 
+  /** get and compute if needed W MoreauJeanOSI matrix at time t
+   *  \param time (double)
+   *  \param ds a  DynamicalSystem
+   *  \param Winverse the result in Winverse
+   *  \param keepW
+   */
+  SP::SimpleMatrix Winverse(SP::SecondOrderDS ds, bool keepW = false);
+
+  
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
@@ -378,11 +414,10 @@ public:
    */
   void computeInitialNewtonState();
 
-
   /** return the maximum of all norms for the "MoreauJeanOSI-discretized" residus of DS
       \return a double
    */
-  double computeResidu();
+  virtual double computeResidu();
 
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input (_r or _p)

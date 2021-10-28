@@ -1,21 +1,20 @@
-/* Siconos, Copyright INRIA 2005-2020.
- * Siconos is a program dedicated to modeling, simulation and control
+/* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Copyright 2021 INRIA.
  *
- * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
 #ifndef NumericsDataVersion_h
 #define NumericsDataVersion_h
 
@@ -44,13 +43,13 @@ static inline void NDV_set_value(NumericsDataVersion* v, version_t value)
 static inline void NDV_reset(NumericsDataVersion* v)
 {
   v->number = 0;
-};
+}
 
 static inline void NDV_inc(NumericsDataVersion* v)
 {
   assert (v->number < UINT64_MAX);
   v->number += 1;
-};
+}
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

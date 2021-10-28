@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,14 @@
 /** stl vector of double */
 typedef std::vector<double> MuStorage;
 TYPEDEF_SPTR(MuStorage)
+
+typedef enum
+{
+  REDUCED_BLOCK,
+  GLOBAL,
+  REDUCED_DIRECT,
+  GLOBAL_REDUCED
+} LINEAROSNS_ASSEMBLY_TYPE;
 
 /** Base (abstract) class for linear non-smooth problems
 
@@ -61,9 +69,22 @@ protected:
   /** vector q of a LinearOSNS system */
   SP::SiconosVector _q;
 
-  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage
+  /** matrix W of a LinearOSNS system */
+  SP::OSNSMatrix _W;
+
+  /** matrix W of a LinearOSNS system */
+  SP::OSNSMatrix _W_inverse;
+
+  /** matrix H of a LinearOSNS system */
+  SP::OSNSMatrix _H;
+
+  /** Assembly strategy */
+  LINEAROSNS_ASSEMBLY_TYPE _assemblyType;
+
+
+  /** Storage type for M - NM_DENSE: SiconosMatrix (dense), NM_SPARSE_BLOCK: Sparse Storage
       (embedded into OSNSMatrix) */
-  int _numericsMatrixStorageType = NM_DENSE;
+  NM_types _numericsMatrixStorageType = NM_DENSE;
 
   /** a boolean to decide if _w and _z vectors are initialized with
       previous values of Y and Lambda when a change occurs in problem
@@ -86,12 +107,12 @@ protected:
 public:
 
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst
   */
-  LinearOSNS(SP::SolverOptions options): OneStepNSProblem(options){};
+  LinearOSNS(SP::SolverOptions options, LINEAROSNS_ASSEMBLY_TYPE assemblyType = REDUCED_BLOCK): OneStepNSProblem(options){_assemblyType = assemblyType;};
 
   /** destructor
    */
@@ -163,6 +184,23 @@ public:
     _M = newM;
   }
 
+
+  // --- H ---
+
+  /** get H
+   *  \return pointer on a OSNSMatrix
+   */
+  inline SP::OSNSMatrix H() const
+  {
+    return _H;
+  }
+
+  /** set the value of H
+   *  \param H the new matrix
+   */
+  void setH(SP::OSNSMatrix H) { _H = H;}
+
+
   /** get the value of q, the constant vector in the LinearOSNS
       \return SiconosVector
    */
@@ -188,9 +226,9 @@ public:
   }
 
   /** get the type of storage used for M
-      \return int (0: dense, 1:sparse)
+      \return NM_types (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  inline int getMStorageType() const
+  inline NM_types getMStorageType() const
   {
     return _numericsMatrixStorageType;
   };
@@ -198,11 +236,18 @@ public:
   /** set which type of storage will be used for M
    * \warning this function does not allocate any memory for M,
    * it just sets an indicator for future use
-   * \param i (0:dense, 1:sparse)
+   * \param i (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  inline void setMStorageType(int i)
+  inline void setMStorageType(NM_types i)
   {
     _numericsMatrixStorageType = i;
+  };
+  
+  /** set which type of assembly will be used for M
+   */
+  inline void setAssemblyType(LINEAROSNS_ASSEMBLY_TYPE assemblyType)
+  {
+    _assemblyType = assemblyType;
   };
 
   /** Memory allocation or resizing for z,w,q */
@@ -210,7 +255,7 @@ public:
 
   /** initialize the _M matrix */
   virtual void initOSNSMatrix();
- 
+
   /** To initialize the LinearOSNS problem(computes topology ...)
       \param sim the simulation owning this OSNSPB
   */
@@ -226,6 +271,11 @@ public:
    */
   virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
 
+  /** compute matrix M
+   */
+  virtual void computeM();
+
+
   /** To compute a part of the "q" vector of the OSNS
       \param vertex, vertex (interaction) which corresponds to the considered block
       \param pos the position of the first element of yOut to be set
@@ -239,7 +289,7 @@ public:
 
   /** build problem coefficients (if required)
       \param time the current time
-      \return true if succeeded
+      \return true if the indexSet is not empty
    */
   virtual bool preCompute(double time);
 
@@ -267,7 +317,7 @@ public:
   }
 
   virtual bool checkCompatibleNSLaw(NonSmoothLaw& nslaw) =0;
-  
+
   /* visitors hook */
   ACCEPT_STD_VISITORS();
 

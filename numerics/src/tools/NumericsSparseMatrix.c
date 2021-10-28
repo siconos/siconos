@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"             // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
+#include "siconos_debug.h"             // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
 #include "numerics_verbose.h"  // for numerics_error_nonfatal, CHECK_IO
 #include "string.h"            // for memcpy, memset
 
@@ -87,7 +87,7 @@ void NSM_inc_version(NumericsSparseMatrix* M, NSM_t type)
 }
 
 /* internal compare function */
-static inline NM_types nsm_max(const NumericsSparseMatrix* M,
+static inline NSM_t nsm_max(const NumericsSparseMatrix* M,
                                NSM_t type1,
                                NSM_t type2)
 {
@@ -121,8 +121,10 @@ CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M)
   case NSM_HALF_TRIPLET: return M->half_triplet;
   case NSM_CSR: return M->csr;
   case NSM_CSC: return M->csc;
-  default: numerics_error("NSM_latest", "unknown matrix type");
+  default:
+    numerics_error("NSM_latest", "unknown matrix type");
   }
+  return 0;
 }
 
 void NSM_reset_version(NumericsSparseMatrix*M, NSM_t id)
@@ -155,7 +157,9 @@ void NSM_null(NumericsSparseMatrix* A)
 
 double* NSM_data(NumericsSparseMatrix* A)
 {
-  assert (NSM_latest_id(A) == A->origin);
+  // assert (NSM_latest_id(A) == A->origin);
+  assert (NSM_version(A, A->origin) ==
+            NSM_version(A, NSM_latest_id(A)));
 
   switch(A->origin)
   {
@@ -341,8 +345,8 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
   }
   if(A->diag_indx)
   {
-    B->diag_indx = (CS_INT*) malloc(A_->m * sizeof(CS_INT));
-    memcpy(B->diag_indx, A->diag_indx, A_->m * sizeof(CS_INT));
+    B->diag_indx = (CS_INT*) malloc((size_t)A_->m * sizeof(CS_INT));
+    memcpy(B->diag_indx, A->diag_indx, (size_t)A_->m * sizeof(CS_INT));
   }
 
 
@@ -426,14 +430,16 @@ NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* 
 
   if(p->iWork)
   {
-    assert(p->iWorkSize>0);
+    // assert(p->iWorkSize>0); This assertion is commented since it may happen that we
+    //                         allocate a chunk of memory of size 0 (for an empty matrix !!)
     free(p->iWork);
     p->iWork = NULL;
   }
 
   if(p->dWork)
   {
-    assert(p->dWorkSize>0);
+    // assert(p->dWorkSize>0); This assertion is commented since it may happen that we
+    //                         allocate a chunk of memory of size 0 (for an empty matrix !!)
     free(p->dWork);
     p->dWork = NULL;
   }
@@ -630,7 +636,7 @@ void NSM_write_in_file(const NumericsSparseMatrix* m, FILE* file)
 NumericsSparseMatrix * NSM_new_from_file(FILE* file)
 {
   int info;
-  int _origin =0;
+  NSM_t _origin =0;
   CHECK_IO(fscanf(file, "%d", &_origin), &info);
   NumericsSparseMatrix * out = NSM_new();
   out->origin = _origin;
@@ -669,7 +675,7 @@ NumericsSparseMatrix * NSM_new_from_file(FILE* file)
 
 NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
 {
-  int _origin = NSM_TRIPLET;
+  NSM_t _origin = NSM_TRIPLET;
   NumericsSparseMatrix * out = NSM_new();
   out->origin = _origin;
 
@@ -716,7 +722,7 @@ static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
   assert(A);
   if(A->diag_indx) return A->diag_indx;
 
-  CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
+  CS_INT* indices = (CS_INT*) malloc((size_t)M->size0 * sizeof(CS_INT));
   A->diag_indx = indices;
   /* XXX hack --xhub  */
   if(A->origin == NSM_TRIPLET)
@@ -784,7 +790,7 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
    * on the existence  of the diagonal elements. This makes sure that the matrix is replaced
    * by one that has all diagonal elements. The copy of the matrix could be optimized. */
 
-  indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
+  indices = (CS_INT*) malloc((size_t)M->size0 * sizeof(CS_INT));
   A->diag_indx = indices;
   /* XXX hack --xhub  */
   if(A->origin == NSM_TRIPLET)
@@ -810,34 +816,34 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
     Np[0] = 0;
     if(Ai[0] == 0)
     {
-      memcpy(Ni, Ai, end*sizeof(CS_INT));
+      memcpy(Ni, Ai, (size_t)end*sizeof(CS_INT));
       Np[1] = Ap[1];
-      memcpy(Nx, Ax, end*sizeof(double));
+      memcpy(Nx, Ax, (size_t)end*sizeof(double));
     }
     else
     {
       Ni[0] = 0;
       Np[1] = Ap[1] + 1;
       Nx[0] = 0.;
-      memcpy(&Ni[1], Ai, end*sizeof(CS_INT));
-      memcpy(&Nx[1], Ax, end*sizeof(double));
+      memcpy(&Ni[1], Ai, (size_t)end*sizeof(CS_INT));
+      memcpy(&Nx[1], Ax, (size_t)end*sizeof(double));
       ++inc;
     }
 
     /* Could optimize further and copy everything using memcpy */
-    for(size_t j = 1; j < (size_t)M->size0; ++j)
+    for(CS_INT j = 1; j < M->size0; ++j)
     {
       CS_INT rem = 0;
       for(CS_INT p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
       {
-        if(Ai[p] < (CS_INT) j)
+        if(Ai[p] <  j)
         {
           Ni[p+inc] = Ai[p];
           Nx[p+inc] = Ax[p];
         }
         else
         {
-          if(Ai[p] > (CS_INT) j)
+          if(Ai[p] >  j)
           {
             Ni[p+inc] = j;
             Nx[p+inc] = 0.;
@@ -852,8 +858,8 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
           Np[j] = Ap[j] + inc;
         }
         end = Ap[j+1] - rem;
-        memcpy(&Ni[rem+inc], &Ai[rem], end*sizeof(CS_INT));
-        memcpy(&Nx[rem+inc], &Ax[rem], end*sizeof(double));
+        memcpy(&Ni[rem+inc], &Ai[rem], (size_t)end*sizeof(CS_INT));
+        memcpy(&Nx[rem+inc], &Ax[rem], (size_t)end*sizeof(double));
         assert(inc <= M->size0);
       }
     }
@@ -907,6 +913,8 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
         for(CS_INT p = Mp[j]; p < Mp[j+1]; ++p)
         {
           CS_INT row_nb = Mi[p];
+          /* Warning : the following strategy work only if the csc storage is
+             correclty ordered. Use NSM_fix_csc to be sure*/
           if(row_nb >= (CS_INT) pos_row)
           {
             if(row_nb >= (CS_INT)(pos_row + block_row_size))

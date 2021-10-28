@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@
 #include "VI_cst.h"                                       // for SICONOS_VI_...
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
-#include "debug.h"  // lines 32-32
+#include "siconos_debug.h"  // lines 32-32
 #include "fc3d_Solvers.h"                                 // for fc3d_set_in...
 #include "fc3d_compute_error.h"                           // for fc3d_comput...
 #include "numerics_verbose.h"                             // for verbose

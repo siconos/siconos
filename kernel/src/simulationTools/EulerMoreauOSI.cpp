@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
-#include <debug.h>
+#include "siconos_debug.h"
 
 using namespace RELATION;
 
@@ -179,6 +179,8 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
       inter_work[EulerMoreauOSI::VEC_X].reset(new SiconosVector(sizeOfDS));
       inter_work[EulerMoreauOSI::VEC_RESIDU_Y].reset(new SiconosVector(sizeY));
       inter_work[EulerMoreauOSI::H_ALPHA].reset(new SiconosVector(sizeY));
+      inter_work[EulerMoreauOSI::YOLD].reset(new SiconosVector(sizeY));
+      inter_work[EulerMoreauOSI::LAMBDAOLD].reset(new SiconosVector(sizeY));
 
       if(relationSubType == NonLinearR || relationSubType == Type2R)
       {
@@ -847,6 +849,20 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
       }
     }
   }
+  // update alpha variables
+  InteractionsGraph::VIterator ui, uiend;
+  SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    Interaction & inter = *indexSet0->bundle(*ui);
+    InteractionProperties& interProp = indexSet0->properties(*ui);
+
+    VectorOfVectors& inter_work = *interProp.workVectors;
+    *inter_work[EulerMoreauOSI::YOLD] = *(inter.y(0));
+    *inter_work[EulerMoreauOSI::LAMBDAOLD] = *(inter.lambda(0));
+
+  }
 
 
 
@@ -1231,16 +1247,15 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 
 
       if(r.D())
-        prod(*r.D(), *(inter.lambdaOld(level)), y, true);
+        prod(*r.D(), *inter_work[EulerMoreauOSI::LAMBDAOLD], y, true);
       else
-        prod(*relationMat[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
+        prod(*relationMat[FirstOrderR::mat_D], *inter_work[EulerMoreauOSI::LAMBDAOLD], y, true);
 
       y *= -1.0;
-      //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
-      DEBUG_PRINT("FirstOrderType2R::computeOutput : yOld(level) \n");
-      DEBUG_EXPR(inter.yOld(level)->display());
+      DEBUG_PRINT("FirstOrderType2R::computeOutput : y old(level) \n");
+      DEBUG_EXPR(inter_work[EulerMoreauOSI::YOLD]->display());
 
-      y += *inter.yOld(level);
+      y += *inter_work[EulerMoreauOSI::YOLD]
 
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : ResiduY() \n");
       SiconosVector& residuY = *inter_work[EulerMoreauOSI::VEC_RESIDU_Y];
@@ -1294,16 +1309,15 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 
 
       if(r.D())
-        prod(*r.D(), *(inter.lambdaOld(level)), y, true);
+        prod(*r.D(), *inter_work[EulerMoreauOSI::LAMBDAOLD], y, true);
       else
-        prod(*relationMat[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
+        prod(*relationMat[FirstOrderR::mat_D], *inter_work[EulerMoreauOSI::LAMBDAOLD], y, true);
 
       y *= -1.0;
-      //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
-      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : yOld(level) \n");
-      DEBUG_EXPR(inter.yOld(level)->display());
+      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : y Old(level) \n");
+      DEBUG_EXPR(inter_work[EulerMoreauOSI::YOLD]->display());
 
-      y += *inter.yOld(level);
+      y += *inter_work[EulerMoreauOSI::YOLD];
 
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : ResiduY() \n");
       SiconosVector& residuY = *inter_work[EulerMoreauOSI::VEC_RESIDU_Y];
@@ -1367,6 +1381,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
     VectorOfSMatrices& relationMat = inter.relationMatrices();
 
     InteractionProperties& interProp = indexSet0->properties(*ui);
+    VectorOfVectors& inter_work = *interProp.workVectors;
     VectorOfSMatrices& inter_work_mat = *interProp.workMatrices;
     VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
@@ -1375,7 +1390,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
     {
       FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter.relation());
       SiconosVector lambda = *inter.lambda(level);
-      lambda -= *(inter.lambdaOld(level));
+      lambda -= *inter_work[EulerMoreauOSI::LAMBDAOLD];
 
       if(r.B())
         prod(*r.B(), lambda, *inter_work_block[EulerMoreauOSI::G_ALPHA], false);
@@ -1399,7 +1414,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
 
 
       SiconosVector lambda = *inter.lambda(level);
-      lambda -= *(inter.lambdaOld(level));
+      lambda -= *inter_work[EulerMoreauOSI::LAMBDAOLD];
 
       // Remind that g_alpha has only one block
       SiconosVector& g_alpha = *(*inter_work_block[EulerMoreauOSI::G_ALPHA]).vector(0);

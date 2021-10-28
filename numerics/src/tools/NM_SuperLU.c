@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 */
 
 #include "SiconosConfig.h" // for WITH_SUPERLU, SUPERLU_MAJOR_VERSION ... // IWYU pragma: keep
+#include "siconos_debug.h"
+#include "numerics_verbose.h"
+
 #ifdef WITH_SUPERLU
 
 #include <slu_ddefs.h>
-#include "debug.h"
 #include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
-#include "numerics_verbose.h"
 
 
 /** \struct NM_SuperLU_WS NumericsMatrix_internal.h

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,6 +301,27 @@ static inline void mtv3x3(double* restrict a, double* restrict v, double* restri
   *r = *a++ * *pv++;
   *r += *a++ * *pv++;
   *r += *a * *pv;
+}
+
+/** add a matrix vector multiplication
+ * \param[in] a a[4]
+ * \param[in] v v[2]
+ * \param[out] r r[2] the result of r += av
+ */
+static inline void mvp2x2(const double* restrict a, const double* restrict v, double* restrict r)
+{
+
+  double* pr;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
 }
 
 /** add a matrix vector multiplication

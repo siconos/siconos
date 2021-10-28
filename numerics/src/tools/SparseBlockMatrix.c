@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@
 /* #define DEBUG_NOCOLOR 1 */
 /* #define DEBUG_STDOUT 1 */
 /* #define DEBUG_MESSAGES 1 */
-#include "debug.h"             // for DEBUG_PRINTF, DEBUG_END, DEBUG_BEGIN
+#include "siconos_debug.h"             // for DEBUG_PRINTF, DEBUG_END, DEBUG_BEGIN
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_war...
 #include "op3x3.h"             // for mvp3x3, mvp_alpha3x3
 #include "NSSTools.h"     // for min, max
@@ -52,7 +52,7 @@
 #endif
 #endif
 
-void SBM_inc_version(SparseBlockStructuredMatrix* M)
+static void SBM_inc_version(SparseBlockStructuredMatrix* M)
 {
   NDV_inc(&(M->version));
 }
@@ -406,7 +406,7 @@ void SBM_gemv_3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStruc
     if(currentRowNumber != 0)
       nbRows -= A->blocksize0[currentRowNumber - 1];
 
-    assert((nbRows <= sizeY));
+    assert((nbRows <= (int)sizeY));
     for(size_t blockNum = A->index1_data[currentRowNumber];
         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
     {
@@ -421,7 +421,7 @@ void SBM_gemv_3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStruc
       if(colNumber != 0)
         nbColumns -= A->blocksize1[colNumber - 1];
 
-      assert((nbColumns <= sizeX));
+      assert((nbColumns <= (int)sizeX));
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       unsigned int posInX = 0;
@@ -829,7 +829,7 @@ static void SBM_index_by_column_compute(const SparseBlockStructuredMatrix* const
   SBM_index_by_column_M->filled4 =  M->nbblocks;
   SBM_index_by_column_M->index4_data = (size_t *)malloc(SBM_index_by_column_M->filled4 * sizeof(size_t));;
 
-  size_t blockNumM = -1;
+  size_t blockNumM = 0;
   SBM_index_by_column_M->index3_data[0] = 0;
   SBM_index_by_column_M->blockMap  = (size_t *)malloc(SBM_index_by_column_M->filled4 * sizeof(size_t));
   unsigned int currentRowNumberofM;
@@ -848,11 +848,11 @@ static void SBM_index_by_column_compute(const SparseBlockStructuredMatrix* const
         colNumberofM = M->index2_data[blockNum];
         if(colNumberofM == currentColNumberofM)
         {
-          blockNumM++;
           assert(blockNumM < M->nbblocks);
           SBM_index_by_column_M->index3_data[currentColNumberofM + 1]++;
           SBM_index_by_column_M->index4_data[blockNumM] = currentRowNumberofM;
           SBM_index_by_column_M->blockMap[blockNumM] = blockNum;
+          blockNumM++;
         }
       }
     }
@@ -909,8 +909,8 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
 
   size_t colNumberAA;
   size_t rowNumberBB;
-  C->nbblocks = -1;
-  C->filled2 = -1;
+  C->nbblocks = 0;
+  C->filled2 = 0;
   /*     \warning The implementation is chosen to optimize cpu effort rather than memory. Otherwise a two loops are needed */
   int nbblocksmax = A->blocknumber0 * B->blocknumber1;
 
@@ -942,10 +942,7 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
           if(rowNumberBB == colNumberAA)
           {
             BlockCexists = 1;
-            C->nbblocks++;
-            /*           printf("C block number %i exists for %i %i ",C->nbblocks, currentRowNumberofA, currentColNumberofB ); */
-
-            C->filled2++;
+             /*           printf("C block number %i exists for %i %i ",C->nbblocks, currentRowNumberofA, currentColNumberofB ); */
 
             unsigned int Cblocksize1 = B->blocksize1[currentColNumberofB];
             if(currentColNumberofB != 0)
@@ -956,7 +953,10 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
 
             C->index1_data[currentRowNumberofA + 1]++ ;
             Cindex2_datatmp[C->nbblocks] = currentColNumberofB ;
-            break;
+            C->nbblocks++;
+            C->filled2++;
+
+           break;
 
           };
         }
@@ -965,8 +965,6 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
 
     }
   }
-  C->nbblocks++;
-  C->filled2++;
   assert(C->nbblocks ==  C->filled2);
   C->block = (double**)malloc(C->nbblocks * sizeof(double*));
   C->index2_data = (size_t*)malloc(C->nbblocks * sizeof(size_t));
@@ -1593,6 +1591,66 @@ void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned i
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
       assert((nbColumns == 3));
       mvp3x3(A->block[blockNum], &x[posInX], y);
+    }
+  }
+}
+void SBM_row_prod_no_diag_2x2(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
+{
+  /*
+     If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
+     i and column j (Warning: i and j are indices of block position,
+     not scalar component positions)
+
+     Then SBM_row_prod_no_diag computes y = sum for i not equal to j of
+     Aij.xj over a row of blocks (or += if init = false)
+
+     currentRowNumber represents the position (block number) of the
+     required line of blocks in the matrix A.
+  */
+
+  /* Number of columns of the current block */
+  unsigned int nbColumns;
+
+  /* Position of the sub-block of x multiplied by the sub-block of
+   * A */
+  unsigned int posInX = 0;
+
+  /* Look for the first element of the wanted row */
+
+  /* Assertions */
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
+  assert(currentRowNumber <= A->blocknumber0);
+
+  /* Loop over all non-null blocks. Works whatever the ordering order
+     of the block is, in A->block, but it requires a set to 0 of all y
+     components
+  */
+  for(size_t blockNum = A->index1_data[currentRowNumber];
+      blockNum < A->index1_data[currentRowNumber + 1];
+      ++blockNum)
+  {
+    /* Get row/column position of the current block */
+    size_t colNumber = A->index2_data[blockNum];
+
+    /* Computes product only for extra diagonal blocks */
+    if(colNumber != currentRowNumber)
+    {
+      /* Get dim(columns) of the current block */
+      nbColumns = A->blocksize1[colNumber];
+      if(colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+
+      /* Get position in x of the sub-block multiplied by A sub-block */
+      posInX = 0;
+      if(colNumber != 0)
+        posInX += A->blocksize0[colNumber - 1];
+      /* Computes y[] += currentBlock*x[] */
+      /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
+      assert((nbColumns == 2));
+      mvp2x2(A->block[blockNum], &x[posInX], y);
     }
   }
 }

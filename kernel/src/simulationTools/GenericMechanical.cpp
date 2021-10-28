@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ using namespace RELATION;
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
 #include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
-#include <debug.h>
+#include "siconos_debug.h"
 
 
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 #include "LCP_Solvers.h"  // for lcp_compute_error_only
 #include "NCP_Solvers.h"  // for ncp_compute_error
-#include "debug.h"        // for DEBUG_END, DEBUG_BEGIN, DEBUG_PRINTF
+#include "siconos_debug.h"        // for DEBUG_END, DEBUG_BEGIN, DEBUG_PRINTF
 
 
 int ncp_compute_error(int n, double* z, double * F, double tol, double* err)

@@ -1,20 +1,38 @@
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2021 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 #===============================================================================
 # cmake utility to compile and install siconos.
-#
-#
-# Siconos development team - September 2015.
-#
 #===============================================================================
 
 # ============= Global 'standard' cmake Settings =============
 
 # Set minimum version for cmake
-# We advise 3.12 at least, but 3.7 is authorized since it's the default version on current debian stable.
-cmake_minimum_required(VERSION 3.7)
+# We advise 3.14 at least, but 3.10 is authorized since it's the default version on some OS still in use.
+cmake_minimum_required(VERSION 3.11)
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
   cmake_policy(SET CMP0074 NEW)
 endif()
-
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
+  cmake_policy(SET CMP0078 OLD)
+endif()
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
+  cmake_policy(SET CMP0086 OLD)
+endif()
 
 # Set cmake modules directories
 # (i.e. the those which contain all user-defined FindXXX.cmake files among other things)

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include <debug.h>
+#include "siconos_debug.h"
 
 using namespace std;
 using namespace RELATION;
@@ -294,16 +294,16 @@ void EventDriven::initOSNS()
     (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->setIndexSetLevel(2);
     (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->initialize(shared_from_this());
     //
-    // Detect NonSmoothEvent at the beginning of the simulation
-    if(topo->indexSetsSize() > 1)
-    {
-      SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
-      if(indexSet1->size() != 0)  // There is one non-smooth event to be added
-      {
-        DEBUG_PRINT("Schedule an event at starting time\n");
-        _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
-      };
-    }
+    // // Detect NonSmoothEvent at the beginning of the simulation
+    // if(topo->indexSetsSize() > 1)
+    // {
+    //   SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
+    //   if(indexSet1->size() != 0)  // There is one non-smooth event to be added
+    //   {
+    //     DEBUG_PRINT("Schedule an event at starting time\n");
+    //     _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
+    //   };
+    // }
   }
   DEBUG_END("EventDriven::initOSNS()\n");
 }
@@ -338,6 +338,53 @@ void EventDriven::initOSIRhs()
     }
   }
   DEBUG_END("void EventDriven::initOSIRhs()\n")
+}
+
+void EventDriven::firstInitialize()
+{
+  if(!_isInitialized)
+  {
+    DEBUG_PRINT(" - 6 - First initialization of the simulation\n");
+
+
+    _T = _nsds->finalT();
+
+    // === Events manager initialization ===
+    _eventsManager->initialize(_T);
+    _tinit = _eventsManager->startingTime();
+
+    // Process events at time _tinit. Useful to save values in memories
+    // for example.  Warning: can not be called during
+    // eventsManager->initialize, because it needs the initialization of
+    // OSI, OSNS ...
+    // _eventsManager->preUpdate(*this);
+
+    _tend =  _eventsManager->nextTime();
+
+    // End of initialize:
+
+    //  - all OSI and OSNS (ie DS and Interactions) states are computed
+    //  - for time _tinit and saved into memories.
+    //  - Sensors or related objects are updated for t=_tinit.
+    //  - current time of the model is equal to t1, time of the first
+    //  - event after _tinit.
+    //  - currentEvent of the simu. corresponds to _tinit and nextEvent
+    //  - to _tend.
+    
+    SP::Topology topo = _nsds->topology();
+    // Detect NonSmoothEvent at the beginning of the simulation
+    if(topo->indexSetsSize() > 1)
+    {
+      SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
+      if(indexSet1->size() != 0)  // There is one non-smooth event to be added
+      {
+        DEBUG_PRINT("Schedule an event at starting time\n");
+        _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
+      };
+    }
+
+    _isInitialized = true;
+  }
 }
 
 void EventDriven::initialize()

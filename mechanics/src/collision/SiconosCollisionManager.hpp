@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,13 +49,7 @@ public:
    *  after removing a body from the NonSmoothDynamicalSystem
    *  otherwise contact will occur with a non-graph body which results
    *  in failure. */
-  virtual void removeBody(const SP::RigidBodyDS& body) {}
-  
-  /** Remove a body from the collision detector. This must be done
-   *  after removing a body from the NonSmoothDynamicalSystem
-   *  otherwise contact will occur with a non-graph body which results
-   *  in failure. */
-  virtual void removeBody(const SP::RigidBody2dDS& body) {}
+  virtual void removeBody(const SP::SecondOrderDS& body) {}
 
   /** Perform an intersection test on all shapes in the contactors and
    * return a vector of all results, ordered by distance from start.

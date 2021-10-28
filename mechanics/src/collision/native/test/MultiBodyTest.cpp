@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,7 +281,7 @@ void Disks::init(std::string disks_input)
 
 
     osnspb_->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
-    osnspb_->setMStorageType(1);            // Sparse storage
+    osnspb_->setMStorageType(NM_SPARSE_BLOCK);            // Sparse storage
     osnspb_->setNumericsVerboseMode(0);
 
     osnspb_->setKeepLambdaAndYState(true);  // inject previous solution

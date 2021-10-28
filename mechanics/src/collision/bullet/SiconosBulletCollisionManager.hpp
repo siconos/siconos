@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ public:
   unsigned int minimumPointsPerturbationThreshold;
   bool enableSatConvex;
   bool enablePolyhedralContactClipping;
+  double Depth2D;
 };
 
 struct SiconosBulletStatistics
@@ -76,10 +77,12 @@ public:
     : new_interactions_created(0)
     , existing_interactions_processed(0)
     , interaction_warnings(0)
+    , interaction_destroyed(0)
     {}
   int new_interactions_created;
   int existing_interactions_processed;
   int interaction_warnings;
+  int interaction_destroyed;
 };
 
 class SiconosBulletCollisionManager : public SiconosCollisionManager

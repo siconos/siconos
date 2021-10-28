@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ using namespace RELATION;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 int LsodarOSI::count_NST = 0;
 int LsodarOSI::count_NFE = 0;
@@ -497,11 +497,11 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 
   // function to compute the Jacobian/x of the rhs.
   jacopointer pointerToJacobianF = LsodarOSI_jacobianf_wrapper; // function to compute the Jacobian/x of the rhs.
-#endif
+
   // function to compute the constraints
   gpointer pointerToG;
   pointerToG = LsodarOSI_g_wrapper; // function to compute the constraints
-
+#endif
 
   // === LSODAR CALL ===
   DEBUG_EXPR(_xWork->display(););
@@ -622,7 +622,7 @@ struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[LsodarOSI::OSNSP_RHS];
-    subscal(e, *_inter->yOld(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false); // q = q + e * q
+    subscal(e, _inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false); // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)

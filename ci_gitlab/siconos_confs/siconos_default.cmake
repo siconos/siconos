@@ -15,12 +15,11 @@
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 
 # --- List of siconos components to build and install ---
-# The complete list is : externals numerics
+# The complete list is : externals numerics kernel control mechanics io
 # mechanisms is "off" by default.
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.
-set(COMPONENTS externals numerics kernel control mechanics CACHE INTERNAL "List of siconos components to build and install")
-#set(COMPONENTS externals numerics CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
@@ -45,13 +44,13 @@ option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = 
 
 
 # --- List of external libraries/dependencies to be searched (or not) ---
-option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
+option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" ON)
 option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)
 option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version. Default = OFF" OFF)
-option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" OFF)
+option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" ON)
 option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
 option(WITH_RENDERER "Install OCC renderer. Default = OFF" OFF)
 option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library. Default = ON" ON)

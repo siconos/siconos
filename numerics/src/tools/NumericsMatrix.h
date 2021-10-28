@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
 #include "NumericsDataVersion.h" // Versioning
+#include "NumericsSparseMatrix.h" // for NSM_linear_solver typedef
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
 #ifndef __cplusplus
@@ -52,7 +53,7 @@ typedef struct
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
   bool isCholeskyfactorized; /**<  true if the matrix has already been Cholesky factorized */
   bool isLDLTfactorized; /**<  true if the matrix has already been LDLT factorized */
-  bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
+  bool isInversed; /**<  true if the matrix contains its inverse (in place inversion) */
 #ifdef SICONOS_HAS_MPI
   MPI_Comm mpi_comm; /**< optional mpi communicator */
 #endif
@@ -65,6 +66,14 @@ typedef struct
 #endif
 } NumericsMatrixInternalData;
 
+/*! Available types of storage for NumericsMatrix */
+typedef enum NumericsMatrix_types {
+  NM_DENSE,        /**< dense format */
+  NM_SPARSE_BLOCK, /**< sparse block format */
+  NM_SPARSE,          /**< compressed column format */
+  NM_UNKNOWN, /** unset. Used in NM_null */
+} NM_types;
+
 /** \struct NumericsMatrix NumericsMatrix.h
     Interface to different type of matrices in numerics component.
 
@@ -72,7 +81,7 @@ typedef struct
 */
 struct NumericsMatrix
 {
-  int storageType; /**< the type of storage:
+  NM_types storageType; /**< the type of storage:
                       0: dense (double*),
                       1: SparseBlockStructuredMatrix,
                       2: classical sparse (csc, csr or triplet) via CSparse (from T. Davis)*/
@@ -103,12 +112,6 @@ typedef struct
 /*! RawNumericsMatrix is used without conversion in python */
 typedef NumericsMatrix RawNumericsMatrix;
 
-/*! Available types of storage for NumericsMatrix */
-typedef enum NumericsMatrix_types {
-  NM_DENSE,        /**< dense format */
-  NM_SPARSE_BLOCK, /**< sparse block format */
-  NM_SPARSE,          /**< compressed column format */
-} NM_types;
 
 typedef enum {
   NM_NONE,          /**< keep nothing */
@@ -130,13 +133,14 @@ extern "C"
   RawNumericsMatrix* NM_new(void);
   RawNumericsMatrix* NM_eye(int size);
   RawNumericsMatrix* NM_scalar(int size, double s);
+
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
    * \param size1 number of columns
    * \return a pointer to a NumericsMatrix
    */
-  RawNumericsMatrix* NM_create(int storageType, int size0, int size1);
+  RawNumericsMatrix* NM_create(NM_types storageType, int size0, int size1);
 
   /** create a NumericsMatrix and possibly set the data
    * \param storageType the type of storage
@@ -222,7 +226,7 @@ extern "C"
    * \param data pointer to the matrix data. If NULL, all matrixX fields are
    * set to NULL
    */
-  void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* data);
+  void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void* data);
 
   /** new NumericsMatrix with sparse storage from minimal set of data
    * \param[in] size0 number of rows
@@ -265,19 +269,19 @@ extern "C"
    * \param[in] A the NumericsMatrix
    * \return true if the matrix has been LU factorized.
    */
-  bool NM_LU_factorized(NumericsMatrix* A);
+  bool NM_LU_factorized(const NumericsMatrix* const A);
 
   /** Check for a previous Cholesky factorization.
    * \param[in] A the NumericsMatrix
    * \return true if the matrix has been Cholesky factorized.
    */
-  bool NM_Cholesky_factorized(NumericsMatrix* A);
+  bool NM_Cholesky_factorized(const NumericsMatrix* const A);
 
   /** Check for a previous LDLT factorization.
    * \param[in] A the NumericsMatrix
    * \return true if the matrix has been Cholesky factorized.
    */
-  bool NM_LDLT_factorized(NumericsMatrix* A);
+  bool NM_LDLT_factorized(const NumericsMatrix* const A);
 
   /** Set the factorization flag.
    * \param[in] A the NumericsMatrix,
@@ -318,23 +322,32 @@ extern "C"
    */
 
   void NM_clear(NumericsMatrix* m);
+
   NumericsMatrix *  NM_free(NumericsMatrix* m);
 
   /** Free memory for a NumericsMatrix except the dense matrix that is assumed not to be owned.
-      Warning: call this function only if you are sure that
-      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
-      Note that this function does not free m.
-      \param m the matrix to be deleted.
+      \param m the matrix to be cleared.
    */
   void NM_clear_not_dense(NumericsMatrix* m);
   NumericsMatrix *  NM_free_not_dense(NumericsMatrix* m);
+  /** Free memory for a NumericsMatrix except the SBM matrix that is assumed not to be owned.
+      Note that this function does not free m.
+      \param m the matrix to be cleared.
+   */
+  void NM_clear_not_SBM(NumericsMatrix* m);
+  NumericsMatrix * NM_free_not_SBM(NumericsMatrix* m);
+  
+
+
+
+ 
   /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.
       \param m the matrix to be deleted.
       \param storageType to be kept.
    */
-  void NM_clear_other_storages(NumericsMatrix* M, int storageType);
+  void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType);
 
   /**************************************************/
   /** setters and getters               *************/
@@ -348,7 +361,7 @@ extern "C"
    * \param i row index
    * \param j column index
    * \param val the value to be inserted.
-   * \param threshold a threshold to filter the small value in magnitude (useful for dense to sparse conversion) 
+   * \param threshold a threshold to filter the small value in magnitude (useful for dense to sparse conversion)
    */
   void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold);
 
@@ -410,6 +423,15 @@ extern "C"
    */
 
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
+  
+  /** get a 2x2 diagonal block of a NumericsMatrix. No allocation is done.
+   * \param[in] M a NumericsMatrix
+   * \param[in] block_row_nb the number of the block row
+   * \param[out] Block the target. In the dense and sparse case (*Block) must be allocated by caller.
+   *   In case of SBM case **Bout contains the resulting block (from the SBM).
+   */
+
+  void NM_extract_diag_block2(NumericsMatrix* M, int block_row_nb, double **Block);
 
   /** get a 5x5 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
@@ -487,6 +509,17 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
+  
+  /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (2 rows and sizeX columns)
+      \param[in] sizeX dim of the vector x
+      \param[in] block_start block number (only used for SBM)
+      \param[in] row_start position of the first row of A (unused if A is SBM)
+      \param[in] A the matrix to be multiplied
+      \param[in] x the vector to be multiplied
+      \param[in,out] y the resulting vector
+      \param[in] init if True y = Ax, else y += Ax
+  */
+  void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
 
   void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
@@ -739,17 +772,19 @@ extern "C"
   int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
   int NM_LDLT_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
 
-  
+
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
+
+
   /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    * \param[in,out] A a NumericsMatrix.
    * \return the matrix inverse.
    */
-  NumericsMatrix* NM_inv(NumericsMatrix* A);
+  NumericsMatrix* NM_LU_inv(NumericsMatrix* A);
 
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
 
@@ -768,11 +803,17 @@ extern "C"
     return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
   }
 
+  /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
+   * \param[in,out] A a NumericsMatrix.
+   * \return the matrix inverse.
+   */
+  NumericsMatrix* NM_gesv_inv(NumericsMatrix* A);
+
   /** Set the linear solver
    * \param A the matrix
-   * \param solver_id the solver
+   * \param solver_id id of the solver
    */
-  void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id);
+  void NM_setSparseSolver(NumericsMatrix* A, NSM_linear_solver solver_id);
 
   /** Get Matrix internal data with initialization if needed.
    * \param[in,out] A a NumericsMatrix.
@@ -838,7 +879,7 @@ extern "C"
    * \param type expected type
    * \param M the matrix to check
    */
-    static inline void NM_assert(const int type, NumericsMatrix* M)
+    static inline void NM_assert(NM_types type, NumericsMatrix* M)
   {
 #ifndef NDEBUG
     assert(M && "NM_assert :: the matrix is NULL");

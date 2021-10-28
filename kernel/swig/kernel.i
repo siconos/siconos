@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2020 INRIA.
+// Copyright 2021 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,7 +48,9 @@
 #include <RotationQuaternion.hpp>
 #include <SiconosVectorIterator.hpp>
 #include <vector>
+#include <cstddef>
 %}
+
 
 // ignores
 %ignore nullDeleter;
@@ -135,10 +137,10 @@ namespace boost
 };
 
 // a std::size_t definition (otherwise swig complains about it)
-namespace std
-{
-  typedef size_t size_t;
-}
+//namespace std
+//{
+//  typedef size_t size_t;
+//}
 
 
 

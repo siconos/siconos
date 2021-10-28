@@ -1,7 +1,7 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2020 INRIA.
+# Copyright 2021 INRIA.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,8 +23,13 @@ of the file were added first, and each subsequent addition is placed on a line
 
 
 --------------------------------------------------------------------------------
-  Current (in development branch siconos/master) --> 4.4.0.rc
+  Current (in development branch siconos/master) --> 4.5.0.rc
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+  v 4.4.0
+--------------------------------------------------------------------------------
+
 Main changes:
 	[...]
 	* [numerics] add sparse linear solver with a sparse rhs based on csparse
@@ -32,7 +37,13 @@ Main changes:
 	* [kernel] new implementation of linear solvers in SimpleMatrix
 	The class SimpleMatrix owns a internal NumericsMatrix thats is used for
 	linear system solving, based on Siconos/Numerics
-	
+	* [numerics] add balancing matrice framework
+	* [numerics] add freezing contacts in Gauss seidel solvers
+	* [externals] add LDL support
+	* [mechanics] modify broadphase for Bullet
+	* [numerics] render the truncation in NM_entry
+	* [numerics] add matrix versioning
+	* [misc] automates the generation of docker end-user images 'siconos-ready'
 
 --------------------------------------------------------------------------------
   v4.3.x
@@ -555,29 +566,6 @@ Changes:
 	- LCP solvers    (solverpack directory)
 	- Relay solvers  ( "             "    )
 	- 2D and 3D contact friction solvers ( " )
-# Siconos-Kernel, Copyright INRIA 2005-2014
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
-# Siconos is a free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# Siconos is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Siconos; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-#
-This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
-Entries are written backwards. That is, items at the bottom
-of the file were added first, and each subsequent addition is placed on a line
-before it.
-Do not hesitate to use the emacs mode Change Log for editing this file
 
 
 --------------------------------------------------------------------------------
@@ -1058,30 +1046,6 @@ Changes:
 	- Moreau Time-stepping scheme
 	- Newton-Raphson
 	- Linear Complementarity Problems
-# Siconos-Numerics, Copyright INRIA 2005-2014
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
-# Siconos is a free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# Siconos is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Siconos; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-#
-
-This is the changelog for the Siconos/Numerics package, www.siconos.gforge.inria.fr.
-Entries are written backwards. That is, items at the bottom
-of the file were added first, and each subsequent addition is placed on a line
-before it.
-Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
   v3.7.0
@@ -1355,29 +1319,6 @@ Changes:
 	- LCP solvers    (solverpack directory)
 	- Relay solvers  ( "             "    )
 	- 2D and 3D contact friction solvers ( " )
-# Siconos-Kernel, Copyright INRIA 2005-2014
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
-# Siconos is a free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# Siconos is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Siconos; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-#
-This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
-Entries are written backwards. That is, items at the bottom
-of the file were added first, and each subsequent addition is placed on a line
-before it.
-Do not hesitate to use the emacs mode Change Log for editing this file
 
 
 --------------------------------------------------------------------------------
@@ -1858,53 +1799,6 @@ Changes:
 	- Moreau Time-stepping scheme
 	- Newton-Raphson
 	- Linear Complementarity Problems
-# Siconos-Kernel, Copyright INRIA 2005-2014
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
-# Siconos is a free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# Siconos is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Siconos; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-#
-This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
-Entries are written backwards. That is, items at the bottom
-of the file were added first, and each subsequent addition is placed on a line
-before it.
-Do not hesitate to use the emacs mode Change Log for editing this file
-
-# Siconos-Mechanics, Copyright INRIA 2013.
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
-# Siconos is a free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# Siconos is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Siconos; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-#
-This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
-Entries are written backwards. That is, items at the bottom
-of the file were added first, and each subsequent addition is placed on a line
-before it.
-Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
   v3.7.0
@@ -1924,30 +1818,6 @@ Main Changes:
 	* Clean doxygen warning
 	* Add computation of the second derivative in time in some joints.
 	* Brute-force import of Multibody Toolbox for mechanisms from CAD software
-# Siconos-Kernel, Copyright INRIA 2005-2010.
-# Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
-# Siconos is a free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# Siconos is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Siconos; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
-#
-This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
-Entries are written backwards. That is, items at the bottom
-of the file were added first, and each subsequent addition is placed on a line
-before it.
-Do not hesitate to use the emacs mode Change Log for editing this file
-
 
 3.7.0
 	* MechanicsIO : bugs fixes in positions and contact forces output.

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ using namespace RELATION;
 // #define DEBUG_NCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 // Constructor from a set of data, use delegated constructor
 MLCP::MLCP(int numericsSolverId):
@@ -160,12 +160,40 @@ void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&
   LinearOSNS::computeDiagonalInteractionBlock(vd);
 }
 
-bool MLCP::preCompute(double time)
+int MLCP::solve()
 {
-  bool res = LinearOSNS::preCompute(time);
+  // Note FP : wrap call to numerics solver inside this function
+  // for python API (e.g. to allow profiling without C struct handling)
+
+  _numerics_problem->q = _q->getArray();
+  _numerics_problem->M = &*_M->numericsMatrix();
   _numerics_problem->n = _n;
   _numerics_problem->m = _m;
-  return res;
+
+
+  // After the first call the mlcp_direct_init must not reset the previous guess
+  // But as the problem may change the MLCP update flag is raised
+  _numerics_solver_options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED] = 1;
+
+  /*If user has not allocted the working memory, do it. */
+  mlcp_driver_init(&*_numerics_problem, &*_numerics_solver_options);
+  
+
+  DEBUG_PRINT("MLCP display");
+  //printf("n %d m %d",n,m);
+  //displayNM(_numerics_problem->M);
+  //      exit(1);
+  //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
+  DEBUG_EXPR(display(););
+
+
+  // Call MLCP Driver
+  int info = 0;
+  info = mlcp_driver(&*_numerics_problem, _z->getArray(), _w->getArray(),
+                         &*_numerics_solver_options);
+
+  return info;
+
 }
 
 int MLCP::compute(double time)
@@ -173,18 +201,12 @@ int MLCP::compute(double time)
   DEBUG_BEGIN("MLCP::compute(double time)\n");
   int info = 0;
   // --- Prepare data for MLCP computing ---
-  bool cont = preCompute(time);
-  if(!cont)
+  bool not_empty = preCompute(time);
+  if(!not_empty)
     return info;
   // cf GenericMechanical for the explanation of this line commented
   // _hasBeenUpdated=true;
   DEBUG_PRINTF("MLCP::compute m n :%d,%d\n", _n, _m);
-
-  /*If user has not allocted the working memory, do it. */
-  mlcp_driver_init(&*_numerics_problem, &*_numerics_solver_options);
-  // After the first call the mlcp_direct_init must not reset the previous guess
-  // But as the problem may change the MLCP update flag is raised
-  _numerics_solver_options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED] = 1;
 
   // --- Call Numerics driver ---
   // Inputs:
@@ -195,33 +217,12 @@ int MLCP::compute(double time)
 
   if(_sizeOutput != 0)
   {
-    _numerics_problem->q = _q->getArray();
-
-    // Call MLCP Driver
-    DEBUG_PRINT("MLCP display");
-    //printf("n %d m %d",n,m);
-    //displayNM(_numerics_problem->M);
-    //      exit(1);
-    //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
-    DEBUG_EXPR(display(););
-
-    try
-    {
-      info = mlcp_driver(&*_numerics_problem, _z->getArray(), _w->getArray(),
-                         &*_numerics_solver_options);
-    }
-    catch(...)
-    {
-      std::cout << "exception caught" <<std::endl;
-      info = 1;
-    }
-
+    info = solve();
     // --- Recovering of the desired variables from MLCP output ---
     if(!info)
       postCompute();
     else
       printf("[kernel] MLCP::compute -- MLCP solver failed\n");
-
   }
   else
   {
@@ -239,13 +240,6 @@ void MLCP::display() const
   LinearOSNS::display();
 }
 
-void MLCP::initialize(SP::Simulation sim)
-{
-  // General initialize for LinearOSNS
-  LinearOSNS::initialize(sim);
-
-  _numerics_problem->M = &*_M->numericsMatrix();
-}
 void  MLCP::updateInteractionBlocks()
 {
   if(!_hasBeenUpdated)

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 #include "NumericsSparseMatrix.h"        // for NumericsSparseMatrix, NSM_TR...
 #include "NumericsVector.h"              // for NV_equal
 #include "SparseBlockMatrix.h"           // for SBM_zero_matrix_for_multiply
-#include "debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
 #include "numericsMatrixTestFunction.h"  // for test_build_first_4_NM, NM_de...
 #include "numerics_verbose.h"            // for numerics_error
 #include "sanitizer.h"                   // for MSAN_INIT_VAR
@@ -2384,7 +2384,7 @@ static int NM_inv_test_sparse(void)
   NM_write_in_file_python(A, fileout);
   fclose(fileout);
 
-  NumericsMatrix * Ainv  = NM_inv(A);
+  NumericsMatrix * Ainv  = NM_LU_inv(A);
 
 
   NumericsMatrix* AAinv = NM_multiply(A,Ainv);
@@ -2418,7 +2418,7 @@ static int test_NM_inv(void)
 
   NumericsMatrix * Id = NM_eye(50);
   NM_csc(Id);
-  NumericsMatrix * Iinv = NM_inv(Id);
+  NumericsMatrix * Iinv = NM_LU_inv(Id);
   NM_csc(Iinv);
   NumericsMatrix* IIinv = NM_multiply(Id,Iinv);
   info = !NM_equal(IIinv, Id);
@@ -2427,7 +2427,7 @@ static int test_NM_inv(void)
   printf("end if test I  ...\n");
 
   NumericsMatrix * A = NMM[0];
-  NumericsMatrix * Ainv = NM_inv(A);
+  NumericsMatrix * Ainv = NM_LU_inv(A);
   NumericsMatrix* AAinv = NM_multiply(A,Ainv);
   NumericsMatrix * IA = NM_eye(A->size0);
   info = !NM_compare(AAinv, IA, 1e-14);
@@ -2435,7 +2435,7 @@ static int test_NM_inv(void)
   printf("end if test A dense  ...\n");
 
   NumericsMatrix * B = NMM[1];
-  NumericsMatrix * Binv = NM_inv(B);
+  NumericsMatrix * Binv = NM_LU_inv(B);
   NumericsMatrix* BBinv = NM_multiply(B,Binv);
   NumericsMatrix * IB = NM_eye(B->size0);
   info = !NM_compare(BBinv, IB, 1e-14);
@@ -2443,7 +2443,7 @@ static int test_NM_inv(void)
   printf("end if test B  SBM ...\n");
 
   NumericsMatrix * C = test_matrix_5();
-  NumericsMatrix * Cinv = NM_inv(C);
+  NumericsMatrix * Cinv = NM_LU_inv(C);
   NumericsMatrix* CCinv = NM_multiply(C,Cinv);
   NumericsMatrix * IC = NM_eye(C->size0);
   info = !NM_compare(CCinv, IC, 1e-14);
@@ -3294,7 +3294,7 @@ static int test_NM_Cholesky_solve_matrix_rhs(void)
   NM_clear(C);
   NM_clear(M1T);
   if(info != 0) return info;
-  
+
   /* free memory */
 
   for(i = 0 ; i < nmm; i++)
@@ -3306,7 +3306,47 @@ static int test_NM_Cholesky_solve_matrix_rhs(void)
   printf("========= End Numerics tests for NumericsMatrix  (test_NM_Cholesky_solve_matrix_rhs) ========= \n");
   return info;
 }
+static int test_NM_Cholesky_solve_vs_posv_expert(void)
+{
+  printf("========= start Numerics tests for NumericsMatrix  (test_NM_Cholesky_solve_vs_posv_expert) ========= \n");
+  int info=1;
+  FILE* finput = fopen("./data/W_102x102.dat", "r");
+  NumericsMatrix *  W = NM_new_from_file(finput);
+  NM_preserve(W);
+  NM_is_symmetric(W);
+  //NM_display(W);
+  fclose(finput);
 
+  int n = W->size0;
+  double * x = (double*)malloc(n* sizeof(double));
+  for(int j=0; j < n; j++)
+    x[j] = 1.0;
+
+  NumericsMatrix * W_copy = NM_create(NM_SPARSE,W->size0, W->size1);
+  NM_copy(W, W_copy);
+  double * x_copy = (double*)malloc(n* sizeof(double));
+  for(int j=0; j < n; j++)
+    x_copy[j] = x[j];
+
+  NM_Cholesky_solve(W_copy, x_copy, 1);
+
+  NM_posv_expert(W, x, NM_KEEP_FACTORS);
+
+  for(int j=0; j < n; j++)
+    x_copy[j] = x_copy[j]-x[j];
+
+  double diff = cblas_dnrm2(n,x_copy,1);
+
+  printf("diff = %e\n", diff);
+
+  if(fabs(diff) >= sqrt(DBL_EPSILON))
+    info = 1;
+  else
+    info=0;
+  printf("========= end Numerics tests for NumericsMatrix  (test_NM_Cholesky_solve_vs_posv_expert) ========= \n");
+  return info;
+
+}
 static int test_NM_LDLT_solve_unit(NumericsMatrix * M, double * b)
 {
   int n = M->size0;
@@ -3421,7 +3461,7 @@ static int test_NM_LDLT_solve(void)
   double * b = NULL;
 
   int n =10;
-  b = (double*)malloc(n* sizeof(double)); 
+  b = (double*)malloc(n* sizeof(double));
 
 
   printf("test 1 ...\n");
@@ -3438,7 +3478,7 @@ static int test_NM_LDLT_solve(void)
   NM_clear(Id);
   free(Id);
   printf("test 1 ...ok \n");
-  
+
   printf("test 2 ...\n");
   NumericsMatrix * Z = NM_create(NM_SPARSE,2,2);
   NM_triplet_alloc(Z,0);
@@ -3763,8 +3803,9 @@ int main(int argc, char *argv[])
   info += test_NM_LU_solve_matrix_rhs();
   info += test_NM_Cholesky_solve_matrix_rhs();
   info += test_NM_Cholesky_solve();
+  info += test_NM_Cholesky_solve_vs_posv_expert();
   info += test_NM_LDLT_solve();
-  
+
 #ifdef WITH_OPENSSL
   info += test_NM_compute_values_sha1();
   info += test_NM_check_values_sha1();

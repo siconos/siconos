@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 */
 
 #include "SiconosConfig.h"    // for HAVE_PATHFERRIS  // IWYU pragma: keep
+#include "SolverOptions_helpers.h" // for SN_set..., SN_get...
 #ifdef HAVE_PATHFERRIS
 
 #include <limits.h>
 #include <stdio.h>
 #include <assert.h>
-#include "SolverOptions_helpers.h" // for SN_set..., SN_get...
 
 #if defined(__cplusplus)
 extern "C"
@@ -48,7 +48,7 @@ extern "C"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 #include "numerics_verbose.h"
 
 #if defined(__cplusplus)

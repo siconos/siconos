@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"                   // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
+#include "siconos_debug.h"                   // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
 #include "rolling_fc_Solvers.h"              // for RollingComputeErrorPtr
 #include "rolling_fc3d_compute_error.h"        // for rolling_fc3d_compute_e...
 #include "numerics_verbose.h"        // for numerics_printf_verbose, numeric...
@@ -171,7 +171,7 @@ static void rolling_fc3d_admm_symmetric(RollingFrictionContactProblem* restrict 
   double* q = problem->q;
   double* mu = problem->mu;
   double* mu_r = problem->mu_r;
-  double alpha_r=0.0;
+  // double alpha_r=0.0;
   RollingFrictionContactProblem *  rescaled_problem =  problem;
   if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
   {

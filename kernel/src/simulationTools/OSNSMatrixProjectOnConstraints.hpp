@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,9 +110,9 @@ public:
   /** Constructor with dimRow and DimColumn of the matrix
    * \param n row size of the rectangle matrix
    * \param m column size of the rectangle matrix
-   * \param stor storage type (0:dense, 1:sparse interactionBlock)
+   * \param stor storage type (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, int stor);
+  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor);
 
   /** compute the size of the vector to project for a given Interaction.
    * \param inter the corresponding interaction
@@ -130,7 +130,7 @@ public:
       \param indexSet the index set of the active constraints
       \param update if true update the size and position
   */
-  void fillW(InteractionsGraph& indexSet, bool update = true);
+  void fillM(InteractionsGraph& indexSet, bool update = true);
 
 };
 

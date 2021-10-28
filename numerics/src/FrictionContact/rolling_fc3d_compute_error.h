@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ extern "C"
       \param worktmp work vector
       \param[in,out] error value
    */
-  void rolling_fc3d_unitary_compute_and_add_error(double r[3] , double u[3], double mu, double mur, double * error, double * worktmp);
+  void rolling_fc3d_unitary_compute_and_add_error(double r[5] , double u[5], double mu, double mur, double * error, double * worktmp);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

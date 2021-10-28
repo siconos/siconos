@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,7 +307,7 @@ void MultipleImpact::PreComputeImpact()
     // Computes new _unitaryBlocks if required
     updateInteractionBlocks();
     // Updates matrix M
-    _M->fillW(indexSet, !_hasBeenUpdated);
+    _M->fillM(indexSet, !_hasBeenUpdated);
     _sizeOutput = _M->size();
   }
   if(_nContact != _sizeOutput)
@@ -404,17 +404,17 @@ void MultipleImpact::InitializeInput()
   {
     SP::Interaction inter = indexSet.bundle(*ui);
     //SP::SiconosVector Vc0 = inter->y(1); // Relative velocity at beginning of impact
-    SP::SiconosVector Vc0 = inter->yOld(1); // Relative velocity at beginning of impact
+    const SiconosVector & Vc0 = inter->y_k(1); // Relative velocity at beginning of impact
 
     unsigned int pos_inter = indexSet.properties(*ui).absolute_position;
 
-    setBlock(*Vc0, _velocityContact, Vc0->size(), 0, pos_inter);
-    SP::SiconosVector ener0(new SiconosVector(Vc0->size()));
+    setBlock(Vc0, _velocityContact, Vc0.size(), 0, pos_inter);
+    SP::SiconosVector ener0(new SiconosVector(Vc0.size()));
     ener0->zero(); // We suppose that the initial potential energy before impact is equal to zero at any contact
     // at the beginning of impact
     setBlock(*ener0, _energyContact, ener0->size(), 0, pos_inter);
     //SP::SiconosVector impulse0= (inter)->lambda(1))->vector(inter->number());
-    SP::SiconosVector impulse0(new SiconosVector(Vc0->size()));
+    SP::SiconosVector impulse0(new SiconosVector(Vc0.size()));
     impulse0->zero(); // We suppose that the impulse before impact is equal to zero at any contact
     // at the beginning of impact
     setBlock(*impulse0, _tolImpulseContact, impulse0->size(), 0, pos_inter);
@@ -444,12 +444,12 @@ void MultipleImpact::initialize(SP::Simulation sim)
 
   if(! _M)
   {
-    if(_numericsMatrixStorageType == 0)
-      _M.reset(new OSNSMatrix(maxSize(), 0));
+    if(_numericsMatrixStorageType == NM_DENSE)
+      _M.reset(new OSNSMatrix(maxSize(), NM_DENSE));
 
     else // if(_numericsMatrixStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
-      _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), 1));
+      _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), NM_SPARSE_BLOCK));
   }
 
 };

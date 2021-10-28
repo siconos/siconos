@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2021 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 #include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
 #include "NumericsMatrix.h"              // for NumericsMatrix, NM_clear, NM_...
 #include "SparseBlockMatrix.h"           // for SBM_clear, SBM_new_from_file
-#include "debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
+#include "siconos_debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
 #include "numericsMatrixTestFunction.h"  // for SBM_dense_equal, test_matrix_2
 #include "numerics_verbose.h"            // for CHECK_RETURN
 #include "sanitizer.h"                   // for MSAN_INIT_VAR
@@ -477,7 +477,7 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   NumericsMatrix C2;
   NM_null(&C2);
 
-  C2.storageType = 0;
+  C2.storageType = NM_DENSE;
   C2.size0 = M1->size0;
   C2.size1 = M3->size1;
   C2.matrix0 = (double *)calloc(C2.size0 * C2.size1, sizeof(double));

@@ -2,7 +2,15 @@
 
 #define _XOPEN_SOURCE 700
 
-#if (__linux ||  __APPLE__)
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <unistd.h>
+#endif
+
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+#if defined(_POSIX_VERSION) && (_POSIX_VERSION >= 200112L)
 #elif _MSC_VER
 #define strdup _strdup
 #else
@@ -15,12 +23,12 @@ static inline char* strdup(const char* src)
 }
 #endif
 
+#include "SiconosConfig.h" // for HAVE_GAMS_C_API
+#include <math.h>
 
 #ifdef HAVE_GAMS_C_API
 #include <stdio.h>
-#include <string.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <float.h>
 
@@ -31,14 +39,14 @@ static inline char* strdup(const char* src)
 
 #include "GAMSlink.h"
 
-#include <math.h>
+
 
 #include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "siconos_debug.h"
 
 #define ETERMINATE 4242
 
@@ -550,3 +558,4 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
 }
 */
 #endif
+

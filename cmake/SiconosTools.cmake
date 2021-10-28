@@ -354,7 +354,7 @@ function(apply_compiler_options COMPONENT)
     ## TMP ?? deactivate warning for unused parameters in C/CXX
     list(APPEND COMP_OPTIONS -Wno-unused-parameter)
     # This option controls warnings when a function is used before being declared.
-    list(APPEND COMP_OPTIONS -Werror=implicit-function-declaration)
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:C>:-Werror=implicit-function-declaration>)
     # - Warn when variables are not initialized.
     # Warning: this may lead to many false warnings.
     # See for instance https://gcc.gnu.org/wiki/Better_Uninitialized_Warnings
@@ -375,9 +375,9 @@ function(apply_compiler_options COMPONENT)
     # Warn if a comparison is always true or always false due to the limited range of the data type
     list(APPEND COMP_OPTIONS -Werror=type-limits)
     # warn when there is a conversion between pointers that have incompatible types.
-    list(APPEND COMP_OPTIONS -Werror=incompatible-pointer-types)
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:C>:-Werror=incompatible-pointer-types>)
     # Warn if a global function is defined without a previous prototype declaration.
-    list(APPEND COMP_OPTIONS -Werror=missing-prototypes)
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:C>:-Werror=missing-prototypes>)
     # Warn whenever a function is defined with a return type that defaults to int.
     list(APPEND COMP_OPTIONS -Werror=return-type)
     # warns about cases where the compiler optimizes based on the assumption that signed overflow does not occur.
@@ -392,7 +392,7 @@ function(apply_compiler_options COMPONENT)
     # warnings from casts to pointer type of an integer of a different size
     list(APPEND COMP_OPTIONS -Werror=int-to-pointer-cast)
     #  warnings from casts from a pointer to an integer type of a different size.
-    list(APPEND COMP_OPTIONS -Werror=pointer-to-int-cast)
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:C>:-Werror=pointer-to-int-cast>)
     # Warn if a global function is defined without a previous declaration.
     list(APPEND COMP_OPTIONS -Werror=missing-declarations)
     # Check calls to printf and scanf, etc., to make sure that the arguments supplied have types appropriate to the format string specified
@@ -400,10 +400,9 @@ function(apply_compiler_options COMPONENT)
     # warn about uses of format functions that represent possible security problems.
     list(APPEND COMP_OPTIONS -Werror=format-security)
     # Warn when a function declaration hides virtual functions from a base class
-    list(APPEND COMP_OPTIONS -Werror=overloaded-virtual)
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Werror=overloaded-virtual>)
     # Warn when a class has virtual functions and an accessible non-virtual destructor itself
-    list(APPEND COMP_OPTIONS -Werror=non-virtual-dtor)
-
+    list(APPEND COMP_OPTIONS  $<$<COMPILE_LANGUAGE:CXX>:-Werror=non-virtual-dtor>)
     # Clang specific, C/C++
     # Error when option does not exist ...
     list(APPEND COMP_OPTIONS
@@ -412,10 +411,22 @@ function(apply_compiler_options COMPONENT)
       $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unreachable-code>)
   endif()
 
-  # -- Paranoid mode  options --
-  if(COMP_DIAGNOSTICS_LEVEL GREATER 1)
-    # Give an error whenever the base standard (see -Wpedantic) requires a diagnostic,
-    list(APPEND COMP_OPTIONS -pedantic-errors)
+  # More diagnostics ...
+  if(COMP_DIAGNOSTICS_LEVEL EQUAL 2)
+    # implicit conversions that may alter a value
+    list(APPEND COMP_OPTIONS -Wconversion)
+
+    # Gives a warning whenever the base standard (see -Wpedantic) requires a diagnostic,
+    list(APPEND COMP_OPTIONS -pedantic)
+
+    # Warn if a function is declared or defined without specifying the argument types.
+    list(APPEND COMP_OPTIONS -Wstrict-prototypes)
+
+  elseif(COMP_DIAGNOSTICS_LEVEL EQUAL 3)
+    # -- Paranoid mode  options --
+    # Warnings = errors
+     # Gives a warning whenever the base standard (see -Wpedantic) requires a diagnostic,
+    list(APPEND COMP_OPTIONS -Werror=pedantic)
 
     # implicit conversions that may alter a value
     list(APPEND COMP_OPTIONS -Werror=conversion)
@@ -424,7 +435,7 @@ function(apply_compiler_options COMPONENT)
     list(APPEND COMP_OPTIONS -Werror=strict-prototypes)
   endif()
 
-  # Note FP: this part is untested and I don't know to what ends its written?
+  # Note FP: this part is untested and I don't know to what ends it's written?
   # msan? Keep for the record and remove it later?
   if(USE_LIBCXX)
      list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:"-stdlib=libc++ -I${USE_LIBCXX}/include -I${USE_LIBCXX}/include/c++/v1">)

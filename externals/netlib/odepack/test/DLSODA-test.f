@@ -1,21 +1,3 @@
-C Siconos-Numerics, Copyright INRIA 2005-2018.
-C Siconos is a program dedicated to modeling, simulation and control
-C of non smooth dynamical systems.	
-C Siconos is a free software; you can redistribute it and/or modify
-C it under the terms of the GNU Lesser General Public License as published by
-C the Free Software Foundation; either version 2 of the License, or
-C (at your option) any later version.
-C Siconos is distributed in the hope that it will be useful,
-C but WITHOUT ANY WARRANTY; without even the implied warranty of
-C MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-C GNU Lesser General Public License for more details.
-C
-C You should have received a copy of the GNU Lesser General Public License
-C along with Siconos; if not, write to the Free Software
-C Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-C
-C Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr 
-C	
 c-----------------------------------------------------------------------
 c Demonstration program for the DLSODA package.
 c This is the version of 14 June 2001.

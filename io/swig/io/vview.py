@@ -15,6 +15,8 @@ import vtk
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
+import h5py
+
 # Exports from this module
 __all__ = ['VView', 'VViewOptions', 'VExportOptions', 'VViewConfig']
 
@@ -84,6 +86,12 @@ class VViewOptions(object):
         self.with_edges = False
         self.with_random_color = True
         self.with_charts= 0
+        self.depth_2d=0.1
+        self.verbose=0
+
+
+
+
     ## Print usage information
     def usage(self, long=False):
         print(__doc__); print()
@@ -99,7 +107,7 @@ class VViewOptions(object):
             [--advance=<'fps' or float value>] [--fps=float value]
             [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--clipping=near,far] [--ortho=scale]
             [--with-charts=<int value>]
-            [--visible=all,avatars,contactors] [--with-edges]
+            [--visible=all,avatars,contactors] [--with-edges] [--verbose]
             """)
         else:
             print("""Options:
@@ -129,8 +137,8 @@ class VViewOptions(object):
        do not use vtk depth peeling
      --maximum-number-of-peels= value
        maximum number of peels when depth peeling is on
-     --occlusion-ration= value
-       occlusion-ration when depth peeling is on
+     --occlusion-ratio= value
+       occlusion-ratio when depth peeling is on
      --normalcone-ratio = value  (default : 1.0 )
        introduce a ratio between the representation of the contact
        forces arrows the normal cone and the contact points. useful
@@ -150,17 +158,20 @@ class VViewOptions(object):
      --ortho=scale
        start in ortho mode with given parallel scale
        (default=perspective)
-      --with-charts=value
+     --with-charts=value
        display convergence charts
      --visible=all
        all: view all contactors and avatars
        avatars: view only avatar if an avatar is defined (for each
        object) contactors: ignore avatars, view only contactors where
        avatars are contactors with collision_group=-1
-     --with_edges 
+     --with-edges
        add edges in the rendering (experimental for primitives)
-     --with_fixed_color
-       use fixed color defined in the config file    
+     --with-fixed-color
+       use fixed color defined in the config file
+     --depth-2d=<value>
+       specify a depth for 2D objects
+     --verbose=<int verbose_level>
     """)
 
     def parse(self):
@@ -175,7 +186,8 @@ class VViewOptions(object):
                                             'occlusion-ratio=',
                                             'cf-scale=', 'normalcone-ratio=',
                                             'advance=', 'fps=',
-                                            'camera=', 'lookat=', 'up=', 'clipping=', 'ortho=', 'visible=', 'with-edges', 'with-fixed-color', 'with-charts='])
+                                            'camera=', 'lookat=', 'up=', 'clipping=', 'ortho=', 'visible=',
+                                            'with-edges', 'with-fixed-color', 'with-charts=', 'depth-2d=', 'verbose='])
             self.configure(opts, args)
         except getopt.GetoptError as err:
             sys.stderr.write('{0}\n'.format(str(err)))
@@ -184,7 +196,6 @@ class VViewOptions(object):
 
     def configure(self, opts, args):
         for o, a in opts:
-
             if o == '--help':
                 self.usage(long=True)
                 exit(0)
@@ -248,18 +259,29 @@ class VViewOptions(object):
 
             elif o == '--ortho':
                 self.initial_camera[3] = float(a)
-                
+
             elif o == '--with-charts=':
                 self.with_charts = int(a)
 
+            elif o == '--depth-2d':
+                self.depth_2d = float(a)
+
             elif o == '--visible':
                 self.visible_mode = a
-                
+
             elif o == '--with-edges':
                 self.with_edges = True
-                
+
             elif o == '--with-fixed-color':
                 self.with_random_color = False
+
+            elif o == '--verbose':
+                self.verbose = int(a)
+
+
+        if self.verbose >=1:
+            self.display()
+
 
         if self.frames_per_second == 0:
             self.frames_per_second = 25
@@ -270,6 +292,87 @@ class VViewOptions(object):
         else:
             self.usage()
             exit(1)
+
+    def display(self):
+
+        display_str = \
+        """[io.VViewOptions] Display vview options:
+        min_time : {0}
+        min_time : {1}
+        cf_disable : {2}
+        cf_scale_factor : {3}
+        normalcone_ratio {4}
+        time_scale_factor {5}
+        advance_by_time {6}
+        frames_per_second {7}
+        imr {8}
+        depth_peeling {9}
+        maximum_number_of_peels {10}
+        occlusion_ratio {11}
+        global_filter {12}
+        initial_camera {13}
+        visible_mode {14}
+        export {15}
+        gen_para_script {16}
+        with_edges {17}
+        with_random_color {18}
+        with_charts {19}
+        depth_2d {20}
+        verbose {21}""".format(self.min_time,
+                   self.max_time,
+                   self.cf_disable,
+                   self.cf_scale_factor,
+                   self.normalcone_ratio,
+                   self.time_scale_factor,
+                   self.advance_by_time,
+                   self.frames_per_second,
+                   self.imr,
+                   self.depth_peeling,
+                   self.maximum_number_of_peels,
+                   self.occlusion_ratio,
+                   self.global_filter,
+                   self.initial_camera,
+                   self.visible_mode,
+                   self.export,
+                   self.gen_para_script,
+                   self.with_edges,
+                   self.with_random_color,
+                   self.with_charts,
+                   self.depth_2d,
+                   self.verbose
+                   )
+
+
+
+
+
+        print(display_str)
+        # self.cf_scale_factor = 1
+        # self.normalcone_ratio = 1
+        # self.time_scale_factor = 1
+        # self.advance_by_time = None
+        # self.frames_per_second = 25
+        # self.cf_disable = False
+        # if hasattr(vtk.vtkPolyDataMapper(), 'ImmediateModeRenderingOff'):
+        #     self.imr = False
+        # else:
+        #     # vtk 8
+        #     self.imr = True
+        # self.depth_peeling = True
+        # self.maximum_number_of_peels = 100
+        # self.occlusion_ratio = 0.1
+        # self.global_filter = False
+        # self.initial_camera = [None] * 5
+        # self.visible_mode = 'all'
+        # self.export = False
+        # self.gen_para_script = False
+        # self.with_edges = False
+        # self.with_random_color = True
+        # self.with_charts= 0
+        # self.depth=0.1
+        # self.verbose=0
+
+
 
 
 class VExportOptions(VViewOptions):
@@ -282,8 +385,7 @@ class VExportOptions(VViewOptions):
         self.stride = 1
         self.nprocs = 1
         self.gen_para_script = False
- 
-        
+
     def usage(self, long=False):
         print(__doc__); print()
         print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
@@ -301,7 +403,7 @@ class VExportOptions(VViewOptions):
             --stride=n           integer, set export time step/simulation time step
                                  (default: 1)
             --ascii              export file in ascii format
-            ---gen-para-script=n generation of a gnu parallel command for n processus
+            --gen-para-script=n generation of a gnu parallel command for n processus
             """)
 
     def parse(self):
@@ -311,7 +413,8 @@ class VExportOptions(VViewOptions):
                                            ['help', 'version', 'ascii',
                                             'start-step=', 'end-step=',
                                             'stride=', 'global-filter',
-                                            'gen-para-script='])
+                                            'gen-para-script=',
+                                            'depth-2d=', 'verbose='])
             self.configure(opts, args)
         except getopt.GetoptError as err:
                 sys.stderr.write('{0}\n'.format(str(err)))
@@ -340,6 +443,13 @@ class VExportOptions(VViewOptions):
                 self.nprocs = int(a)
             if o in ('--ascii'):
                 self.ascii_mode = True
+            if o in ('--depth-2d'):
+                self.depth_2d = float(a)
+            if o in ('--verbose'):
+                self.verbose = int(a)
+
+        if self.verbose >=1:
+            self.display()
 
         if len(args) > 0:
             self.io_filename = args[0]
@@ -347,7 +457,7 @@ class VExportOptions(VViewOptions):
         else:
             self.usage()
             exit(1)
-            
+
 class VRawDataExportOptions(VViewOptions):
     def __init__(self, io_filename = None):
         super(self.__class__, self).__init__()
@@ -359,8 +469,8 @@ class VRawDataExportOptions(VViewOptions):
         self.start_step = 0
         self.end_step = None
         self.stride = 1
-        
-        self.io_filename = io_filename 
+
+        self.io_filename = io_filename
     def usage(self, long=False):
         print(__doc__); print()
         print('Usage:  {0} [--help]  <HDF5>'
@@ -380,7 +490,7 @@ class VRawDataExportOptions(VViewOptions):
             --no-export-velocity do not export position
             --export-cf          do export of contact friction data
             --export-velocity-in-absolute-frame          do export of contact friction data
-                                 
+
             """)
 
     def parse(self):
@@ -389,7 +499,7 @@ class VRawDataExportOptions(VViewOptions):
             opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                            ['help', 'version', 'ascii',
                                             'start-step=', 'end-step=',
-                                            'stride=', 
+                                            'stride=',
                                             'no-export-position',
                                             'no-export-velocity',
                                             'export-cf',
@@ -426,7 +536,7 @@ class VRawDataExportOptions(VViewOptions):
 
         if self.io_filename is  None:
             if len(args) > 0 :
-                self.io_filename = args[0]       
+                self.io_filename = args[0]
             else:
                 self.usage()
                 exit(1)
@@ -509,6 +619,7 @@ class InputObserver():
         self._slider_repres = slider_repres
 
     def update(self):
+        self.vview.print_verbose('InputObserver -  update at time', self._time)
 
         self.vview.io_reader.SetTime(self._time)
 
@@ -525,6 +636,7 @@ class InputObserver():
                 self.vview.contact_pos_norm[mu].Update()
 
         self.vview.set_dynamic_actors_visibility(self.vview.io_reader._time)
+        self.vview.set_static_actors_visibility(self.vview.io_reader._time)
 
         pos_data = self.vview.io_reader.pos_data
 
@@ -561,65 +673,66 @@ class InputObserver():
 
     def key(self, obj, event):
         key = obj.GetKeySym()
-        print('key', key)
 
+        self.vview.print_verbose('InputObserver -  key', key)
+        key_recognized = True
         if key == 'r':
             self.vview.reload()
             self._slider_repres.SetMinimumValue(self.vview.min_time)
             self._slider_repres.SetMaximumValue(self.vview.max_time)
             self.update()
 
-        if key == 'p':
+        elif key == 'p':
             self._image_counter += 1
             self.vview.image_maker.Update()
             self.vview.writer.SetFileName(
                 'vview-{0}.png'.format(self._image_counter))
             self.vview.writer.Write()
 
-        if key == 'Up':
+        elif key == 'Up':
             self._time_step = self._time_step * 2.
             self._time += self._time_step
 
-        if key == 'Down':
+        elif key == 'Down':
             self._time_step = self._time_step / 2.
             self._time -= self._time_step
 
-        if key == 'Left':
+        elif key == 'Left':
             self._time -= self._time_step
 
-        if key == 'Right':
+        elif key == 'Right':
             self._time += self._time_step
 
-        if key == 't':
+        elif key == 't':
             print('Decrease the opacity of bodies')
             self._opacity -= .1
             self.set_opacity()
 
-        if key == 'T':
+        elif key == 'T':
             print('Increase the opacity of bodies')
             self._opacity += .1
             self.set_opacity()
 
-        if key == 'y':
+        elif key == 'y':
             print('Decrease the opacity of static bodies')
             self._opacity_static -= .1
             self.set_opacity_static()
 
-        if key == 'Y':
+        elif key == 'Y':
             print('Increase the opacity of static bodies')
             self._opacity_static += .1
             self.set_opacity_static()
 
-        if key == 'u':
+        elif key == 'u':
             print('Decrease the opacity of contact elements')
             self._opacity_contact -= .1
             self.set_opacity_contact()
 
-        if key == 'U':
+        elif key == 'U':
             print('Increase the opacity of contact elements')
             self._opacity_contact += .1
             self.set_opacity_contact()
-        if key == 'c':
+        elif key == 'c':
             print('camera position:', self._renderer.GetActiveCamera().GetPosition())
             print('camera focal point', self._renderer.GetActiveCamera().GetFocalPoint())
             print('camera clipping range', self._renderer.GetActiveCamera().GetClippingRange())
@@ -627,11 +740,11 @@ class InputObserver():
             if self._renderer.GetActiveCamera().GetParallelProjection() != 0:
                 print('camera parallel scale', self._renderer.GetActiveCamera().GetParallelScale())
 
-        if key == 'o':
+        elif key == 'o':
             self._renderer.GetActiveCamera().SetParallelProjection(
                 1 - self._renderer.GetActiveCamera().GetParallelProjection())
 
-        if key == 'v':
+        elif key == 'v':
             # Cycle through some useful views
             dist = norm(self._renderer.GetActiveCamera().GetPosition())
             # dist2 = norm([numpy.sqrt(dist**2)/3]*2)
@@ -665,20 +778,22 @@ class InputObserver():
                     self._view_cycle = -1
             self._renderer.ResetCameraClippingRange()
 
-        if key == 'C':
+        elif key == 'C':
             self._renderer.ResetCameraClippingRange()
 
-        if key == 's':
+        elif key == 's':
             self.toggle_recording(True)
 
-        if key == 'e':
+        elif key == 'e':
             # Note 'e' has the effect to also "end" the program due to
             # default behaviour of vtkInteractorStyle, see class
             # documentation.
             self.toggle_recording(False)
+        # else:
+        #     self.vview.print_verbose('InputObserver -  key not recognized')
+        #     key_recognized=False
 
-
-
+        # if(key_recognized):
         self.update()
 
     def time(self, obj, event):
@@ -687,6 +802,7 @@ class InputObserver():
         self.update()
 
     def toggle_recording(self, recording):
+        self.vview.print_verbose('InputObserver -  toggle recording')
         if recording and not self._recording:
             fps = 25
             self._timer_id = (self.vview.interactor_renderer
@@ -854,6 +970,15 @@ class IOReader(VTKPythonAlgorithmBase):
         self.pos_data = self._idpos_data[self._id_t_m, :]
         self.velo_data = self._ivelo_data[self._id_t_m, :]
 
+        static_id_t = max(0, numpy.searchsorted(self._static_times, t, side='right') - 1)
+        if static_id_t < len(self._static_indices)-1:
+            self._static_id_t_m = list(range(self._static_indices[static_id_t],
+                                             self._static_indices[static_id_t+1]))
+        else:
+            self._static_id_t_m = [self._static_indices[static_id_t]]
+
+        self.pos_static_data = self._ispos_data[self._static_id_t_m, :]
+
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName('pos_data')
 
@@ -932,80 +1057,81 @@ class IOReader(VTKPythonAlgorithmBase):
                             self.ids_at_time[mu] = None
 
             else:
+                # for mu in self._mu_coefs:
+                #     self.cpa_at_time[mu] = [[nan, nan, nan]]
+                #     self.cpb_at_time[mu] = [[nan, nan, nan]]
+                #     self.cn_at_time[mu] =  [[nan, nan, nan]]
+                #     self.cf_at_time[mu] =  [[nan, nan, nan]]
+                #     self.ids_at_time[mu] = None
+                pass
+            if self._with_contact_forces:
                 for mu in self._mu_coefs:
-                    self.cpa_at_time[mu] = [[nan, nan, nan]]
-                    self.cpb_at_time[mu] = [[nan, nan, nan]]
-                    self.cn_at_time[mu] =  [[nan, nan, nan]]
-                    self.cf_at_time[mu] =  [[nan, nan, nan]]
-                    self.ids_at_time[mu] = None
+                    self.cpa[mu] = numpy_support.numpy_to_vtk(
+                        self.cpa_at_time[mu])
+                    self.cpa[mu].SetName('contact_positions_a')
 
-            for mu in self._mu_coefs:
-                self.cpa[mu] = numpy_support.numpy_to_vtk(
-                    self.cpa_at_time[mu])
-                self.cpa[mu].SetName('contact_positions_a')
+                    self.cpb[mu] = numpy_support.numpy_to_vtk(
+                        self.cpb_at_time[mu])
+                    self.cpb[mu].SetName('contact_positions_b')
 
-                self.cpb[mu] = numpy_support.numpy_to_vtk(
-                    self.cpb_at_time[mu])
-                self.cpb[mu].SetName('contact_positions_b')
+                    self.cn[mu] = numpy_support.numpy_to_vtk(
+                        self.cn_at_time[mu])
+                    self.cn[mu].SetName('contact_normals')
 
-                self.cn[mu] = numpy_support.numpy_to_vtk(
-                    self.cn_at_time[mu])
-                self.cn[mu].SetName('contact_normals')
+                    self.cf[mu] = numpy_support.numpy_to_vtk(
+                        self.cf_at_time[mu])
+                    self.cf[mu].SetName('contact_forces')
 
-                self.cf[mu] = numpy_support.numpy_to_vtk(
-                    self.cf_at_time[mu])
-                self.cf[mu].SetName('contact_forces')
+                    # field info for vview (should go in point data)
+                    self._contact_field[mu].AddArray(self.cpa[mu])
+                    self._contact_field[mu].AddArray(self.cpb[mu])
+                    self._contact_field[mu].AddArray(self.cn[mu])
+                    self._contact_field[mu].AddArray(self.cf[mu])
 
-                # field info for vview (should go in point data)
-                self._contact_field[mu].AddArray(self.cpa[mu])
-                self._contact_field[mu].AddArray(self.cpb[mu])
-                self._contact_field[mu].AddArray(self.cn[mu])
-                self._contact_field[mu].AddArray(self.cf[mu])
+                    # contact points
+                    self._points[mu].SetData(self.cpa[mu])
+                    self._output[mu].GetPointData().AddArray(self.cpb[mu])
+                    self._output[mu].GetPointData().AddArray(self.cn[mu])
+                    self._output[mu].GetPointData().AddArray(self.cf[mu])
 
-                # contact points
-                self._points[mu].SetData(self.cpa[mu])
-                self._output[mu].GetPointData().AddArray(self.cpb[mu])
-                self._output[mu].GetPointData().AddArray(self.cn[mu])
-                self._output[mu].GetPointData().AddArray(self.cf[mu])
+                    if self.ids_at_time[mu] is not None:
+                        self.ids[mu] = numpy_support.numpy_to_vtk(
+                            self.ids_at_time[mu])
+                        self.ids[mu].SetName('ids')
+                        self._contact_field[mu].AddArray(self.ids[mu])
+                        self._output[mu].GetPointData().AddArray(self.ids[mu])
 
-                if self.ids_at_time[mu] is not None:
-                    self.ids[mu] = numpy_support.numpy_to_vtk(
-                        self.ids_at_time[mu])
-                    self.ids[mu].SetName('ids')
-                    self._contact_field[mu].AddArray(self.ids[mu])
-                    self._output[mu].GetPointData().AddArray(self.ids[mu])
+                        dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
+                        dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
+                        _i, _i, dsa_pos_ids = numpy.intersect1d(
+                            self.pos_data[:, 1],
+                            dsa_ids, return_indices=True)
+                        _i, _i, dsb_pos_ids = numpy.intersect1d(
+                            self.pos_data[:, 1],
+                            dsb_ids, return_indices=True)
 
-                    dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
-                    dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
-                    _i, _i, dsa_pos_ids = numpy.intersect1d(
-                        self.pos_data[:, 1],
-                        dsa_ids, return_indices=True)
-                    _i, _i, dsb_pos_ids = numpy.intersect1d(
-                        self.pos_data[:, 1],
-                        dsb_ids, return_indices=True)
+                        # objects a & b translations
+                        obj_pos_a = self.pos_data[dsa_pos_ids, 2:5]
+                        obj_pos_b = self.pos_data[dsb_pos_ids, 2:5]
 
-                    # objects a & b translations
-                    obj_pos_a = self.pos_data[dsa_pos_ids, 2:5]
-                    obj_pos_b = self.pos_data[dsb_pos_ids, 2:5]
+                        self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
+                                                               obj_pos_b))
 
-                    self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
-                                                           obj_pos_b))
+                        self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
+                            self._all_objs_pos[mu])
+                        self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
 
-                    self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
-                        self._all_objs_pos[mu])
-                    self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
-
-                    self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
-                    self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
+                        self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
+                        self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
 
 
-                    #if dom_imu is not None:
-                    #    self.dom_at_time[mu] = self._dom_data[
-                    #        dom_imu, 1]
-                    #    self.dom[mu] = numpy_support.numpy_to_vtk(
-                    #        self.dom_at_time[mu])
-                    #    self.dom[mu].SetName('domains')
-                    #    self._contact_field[mu].AddArray(self.dom[mu])
+                        #if dom_imu is not None:
+                        #    self.dom_at_time[mu] = self._dom_data[
+                        #        dom_imu, 1]
+                        #    self.dom[mu] = numpy_support.numpy_to_vtk(
+                        #        self.dom_at_time[mu])
+                        #    self.dom[mu].SetName('domains')
+                        #    self._contact_field[mu].AddArray(self.dom[mu])
 
         except Exception:
             traceback.print_exc()
@@ -1034,6 +1160,12 @@ class IOReader(VTKPythonAlgorithmBase):
         # build times steps
         self._times, self._indices = numpy.unique(self._raw_times,
                                                   return_index=True)
+        # all times as hdf5 slice for static objects
+        self._static_raw_times = self._ispos_data[:, 0]
+
+        # build times steps for static objects
+        self._static_times, self._static_indices = numpy.unique(self._static_raw_times,
+                                                                return_index=True)
         dcf = self._times[1:]-self._times[:-1]
         self._avg_timestep = numpy.mean(dcf)
         self._min_timestep = numpy.min(dcf)
@@ -1131,6 +1263,7 @@ class VView(object):
     def __init__(self, io, options, config=None):
         self.opts = options
         self.config = [config,VViewConfig()][config is None]
+
         self.gui_initialized = False
         self.io = io
         self.refs = []
@@ -1191,6 +1324,14 @@ class VView(object):
         else:
             self.io_reader.ExportOff()
 
+    def print_verbose(self, *args, **kwargs):
+        if self.opts.verbose:
+            print('[io.vview]', *args, **kwargs)
+
+    def print_verbose_level(self, level, *args, **kwargs):
+        if level <= self.opts.verbose:
+            print('[io.vview]', *args, **kwargs)
+
     def reload(self):
 
         if self.opts.cf_disable:
@@ -1211,7 +1352,7 @@ class VView(object):
         self.set_dynamic_actors_visibility(self.time0)
 
     def init_contact_pos(self, mu):
-
+        self.print_verbose_level(2,'contact positions', mu)
         self.contact_posa[mu] = vtk.vtkDataObjectToDataSetFilter()
         self.contact_posb[mu] = vtk.vtkDataObjectToDataSetFilter()
 
@@ -1251,7 +1392,7 @@ class VView(object):
 #            self.contact_pos_norm[mu].SetScalarComponent(0, "domains", 0)
 
     def init_cf_sources(self, mu, transform):
-
+        self.print_verbose_level(2,'contact sources', mu)
         self.cf_collector.AddInputData(self.io_reader._output[mu])
         self.cf_collector.AddInputData(self.io_reader._objs_output[mu])
         self.contact_posa[mu].SetInputData(self.io_reader._output[mu])
@@ -1442,7 +1583,7 @@ class VView(object):
         self.sactorb[mu].SetMapper(self.smapperb[mu])
 
     def init_shape(self, shape_name):
-
+        self.print_verbose_level(2,'init_shape', shape_name)
         shape_type = (self.io.shapes()[shape_name].attrs['type'])
         try:
             # work-around h5py unicode bug
@@ -1458,7 +1599,11 @@ class VView(object):
 
         if shape_type in ['vtp', 'stl']:
             with io_tmpfile() as tmpf:
-                tmpf[0].write((self.io.shapes()[shape_name][:][0]).decode('utf-8'))
+                ## fix compatibility with h5py version: to be removed in the future
+                if (h5py.version.version_tuple.major >=3 ):
+                    tmpf[0].write((self.io.shapes()[shape_name][:][0]).decode('utf-8'))
+                else:
+                    tmpf[0].write(str(self.io.shapes()[shape_name][:][0]))
                 tmpf[0].flush()
                 reader = self.vtk_reader[shape_type]()
                 reader.SetFileName(tmpf[1])
@@ -1592,11 +1737,11 @@ class VView(object):
                 number_of_vertices = data.shape[0]
                 convex.GetPointIds().SetNumberOfIds(data.shape[0]*2)
                 for id_, vertice in enumerate(data):
-                    points.InsertNextPoint(vertice[0], vertice[1], -0.05)
+                    points.InsertNextPoint(vertice[0], vertice[1], - self.opts.depth_2d/2.0)
                     convex.GetPointIds().SetId(id_, id_)
-                    points.InsertNextPoint(vertice[0], vertice[1], 0.05)
+                    points.InsertNextPoint(vertice[0], vertice[1], + self.opts.depth_2d/2.0)
                     convex.GetPointIds().SetId(id_+number_of_vertices, id_+number_of_vertices)
-                    
+
             source = ConvexSource(convex, points)
             self.readers[shape_name] = source
 
@@ -1667,20 +1812,19 @@ class VView(object):
                 source = vtk.vtkMultiBlockDataGroupFilter()
                 add_compatiblity_methods(source)
                 source.AddInputData(data)
-                
+
             elif primitive == 'Disk':
                 source = vtk.vtkCylinderSource()
-                source.SetResolution(200)
+                source.SetResolution(100)
                 source.SetRadius(attrs[0])
-                source.SetHeight(0.1)
+                source.SetHeight(self.opts.depth_2d)
 
             elif primitive == 'Box2d':
                 source = vtk.vtkCubeSource()
                 source.SetXLength(attrs[0])
                 source.SetYLength(attrs[1])
-                source.SetZLength(0.1)
+                source.SetZLength(self.opts.depth_2d)
 
-                
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
             if not self.opts.imr:
@@ -1694,9 +1838,10 @@ class VView(object):
                     mapper_edge.SetInputConnection(source.GetOutputPort())
                 self.mappers_edges[shape_name] = (y for y in [mapper_edge])
 
-                
+
 
     def init_shapes(self):
+        self.print_verbose_level(1,'init_shapes')
         for shape_name in self.io.shapes():
             self.init_shape(shape_name)
 
@@ -1710,6 +1855,7 @@ class VView(object):
 
 
     def init_contactor(self, contactor_instance_name, instance, instid):
+        self.print_verbose_level(2,'init_contactor',  contactor_instance_name)
         contactor = instance[contactor_instance_name]
         contact_shape_indx = None
         if 'shape_name' not in contactor.attrs:
@@ -1740,32 +1886,34 @@ class VView(object):
             actor = vtk.vtkActor()
             if self.opts.with_edges:
                 actor_edge = vtk.vtkActor()
+
             if instance.attrs.get('mass', 0) > 0:
                 # objects that may move
                 self.dynamic_actors[instid].append((actor, contact_shape_indx,
                                                     collision_group))
                 actor.GetProperty().SetOpacity(
                     self.config.get('dynamic_opacity', 0.7))
+
                 actor.GetProperty().SetColor(
-                    self.config.get('dynamic_bodies_color', [0.3,0.3,0.3]))
-                
+                    instance.attrs.get('color',
+                                       self.config.get('dynamic_bodies_color', [0.3,0.3,0.3])))
                 if self.opts.with_edges:
                     self.dynamic_actors[instid].append((actor_edge, contact_shape_indx,
                                                     collision_group))
                     actor_edge.GetProperty().SetOpacity(
                         self.config.get('dynamic_opacity', 1.0))
                     actor_edge.GetProperty().SetRepresentationToWireframe()
-                
+
             else:
                 # objects that are not supposed to move
                 self.static_actors[instid].append((actor, contact_shape_indx,
                                                    collision_group))
                 actor.GetProperty().SetOpacity(
-
                     self.config.get('static_opacity', 1.0))
                 actor.GetProperty().SetColor(
-                        self.config.get('static_bodies_color', [0.5,0.5,0.5]))
-                
+                    instance.attrs.get('color',
+                                       self.config.get('static_bodies_color', [0.5,0.5,0.5])))
+
             if self.opts.with_random_color :
                 actor.GetProperty().SetColor(random_color())
                 if self.opts.with_edges:
@@ -1839,8 +1987,9 @@ class VView(object):
         self.cell_connectors[instid] = CellConnector(
             instid,
             data_names=['instance', 'translation',
-                        'velocity', 'kinetic_energy'],
-            data_sizes=[1, 3, 6, 1])
+                        'velocity(linear)','velocity(angular)',
+                        'kinetic_energy'],
+            data_sizes=[1, 3, 3, 3, 1])
         self.cell_connectors[instid].SetInputConnection(
             transformer.GetOutputPort())
 
@@ -1849,6 +1998,7 @@ class VView(object):
         self.cell_connectors[instid].Update()
 
     def init_instance(self, instance_name):
+        self.print_verbose_level(2,'init_instance',  instance_name)
         instance = self.io.instances()[instance_name]
         instid = int(instance.attrs['id'])
         self.transforms[instid] = []
@@ -1857,10 +2007,9 @@ class VView(object):
             self.times_of_birth[instid] = instance.attrs['time_of_birth']
         if 'time_of_death' in instance.attrs:
             self.times_of_death[instid] = instance.attrs['time_of_death']
-
         if 'mass' in instance.attrs:
             # a dynamic instance
-            self.mass[instid] = instance.attrs['id']
+            self.mass[instid] = instance.attrs['mass']
             if 'inertia' in instance.attrs:
                 inertia = instance.attrs['inertia']
                 if self.io.dimension() ==3 :
@@ -1891,6 +2040,7 @@ class VView(object):
             self.init_contactor(contactor_instance_name, instance,  instid)
 
     def init_instances(self):
+        self.print_verbose_level(1,'init_instances')
         for instance_name in self.io.instances():
             self.init_instance(instance_name)
 
@@ -1898,6 +2048,8 @@ class VView(object):
     def set_position_i(self, instance, q0, q1, q2, q3, q4, q5, q6):
         # all objects are set to a nan position at startup,
         # so they are invisibles
+
+
         if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
             or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
             print('Bad position for object number', int(instance),' :',  q0, q1, q2, q3, q4, q5, q6)
@@ -1922,6 +2074,7 @@ class VView(object):
                                      axis[2])
 
     def set_position(self, data):
+        self.print_verbose_level(2,'set_position')
         self.set_position_v(data[:, 1],
                             data[:, 2],
                             data[:, 3],
@@ -1940,15 +2093,28 @@ class VView(object):
         # here the numpy vectorization is used with a column vector and a
         # scalar for the time arg
         self.set_visibility_v = numpy.vectorize(self.set_dynamic_instance_visibility)
+        self.set_visibility_static_v = numpy.vectorize(self.set_static_instance_visibility)
 
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in cc:
-                cc[instance]._datas[2][:] = [v0, v1, v2, v3, v4, v5]
-                cc[instance]._datas[3][:] = \
-                    0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
-                         numpy.dot([v3, v4, v5],
-                                   numpy.dot(self.inertia[instance],
-                                             [v3, v4, v5])))
+                cc[instance]._datas[2][:] = [v0, v1, v2]
+                cc[instance]._datas[3][:] = [v3, v4, v5]
+                if self.io.dimension() == 3 :
+                    cc[instance]._datas[4][:] = \
+                        0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
+                             numpy.dot([v3, v4, v5],
+                                       numpy.dot(self.inertia[instance],
+                                                 [v3, v4, v5])))
+                elif self.io.dimension() == 2 :
+                    kinetic_energy= 0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
+                                         self.inertia[instance]*(v5*v5))
+                    #print('velo', instance, v0, v1, v2, v3, v4, v5)
+                    #print('mass', self.mass[instance])
+                    #print('inertia', self.inertia[instance])
+                    #print('kinetic_energy', kinetic_energy)
+                    cc[instance]._datas[4][:] = kinetic_energy
+
+
 
         self.set_velocity_v = numpy.vectorize(set_velocity)
 
@@ -1988,8 +2154,35 @@ class VView(object):
             for actor, index, group in self.dynamic_actors[instance]:
                 actor.VisibilityOff()
 
+    # set visibility for all actors associated to a static instance
+    def set_static_instance_visibility(self, instance, time):
+        tob = self.times_of_birth.get(instance, -1)
+        tod = self.times_of_death.get(instance, infinity)
+        has_avatar = False
+        if self.opts.visible_mode=='avatars' or self.opts.visible_mode=='contactors':
+            for actor, index, group in self.static_actors[instance]:
+                if group==-1:
+                    has_avatar = True
+                    break
+        if (tob <= time and tod >= time):
+            for actor, index, group in self.static_actors[instance]:
+                if not has_avatar or visible_mode=='all':
+                    actor.VisibilityOn()
+                elif visible_mode=='avatars' and group==-1 and has_avatar:
+                    actor.VisibilityOn()
+                elif visible_mode=='contactors' and group!=-1 and has_avatar:
+                    actor.VisibilityOn()
+                else:
+                    actor.VisibilityOff()
+        else:
+            for actor, index, group in self.static_actors[instance]:
+                actor.VisibilityOff()
+
     def set_dynamic_actors_visibility(self, time):
         self.set_visibility_v(list(self.dynamic_actors.keys()), time)
+
+    def set_static_actors_visibility(self, time):
+        self.set_visibility_static_v(list(self.static_actors.keys()), time)
 
     # callback maker for scale manipulation
     def make_scale_observer(self, glyphs):
@@ -2116,16 +2309,19 @@ class VView(object):
 
         if numpy.shape(self.io_reader._spos_data)[0] > 0:
             self.set_position(self.io_reader._spos_data)
+        #    print('self.io_reader._spos_data', self.io_reader._spos_data)
             # static objects are always visible
-            for instance, actors in self.static_actors.items():
-                for actor,_,_ in actors:
-                     actor.VisibilityOn()
+            #for instance, actors in self.static_actors.items():
+            #    for actor,_,_ in actors:
+            #         actor.VisibilityOn()
 
         self.set_position(*self.pos_t0)
 
+        self.set_static_actors_visibility(self.time0)
         self.set_dynamic_actors_visibility(self.time0)
 
     def setup_vtk_renderer(self):
+        self.print_verbose_level(1,'setup_tvk_renderer')
         self.renderer_window.AddRenderer(self.renderer)
         self.interactor_renderer.SetRenderWindow(self.renderer_window)
         self.interactor_renderer.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
@@ -2193,7 +2389,11 @@ class VView(object):
         self.renderer.AddLight(hlight)
         self.renderer.SetBackground(*self.config.get('background_color', [.0,.0,.0]))
 
+        self.renderer_window.SetSize(*self.config['window_size'])
+        self.renderer_window.SetWindowName('vview: ' + self.opts.io_filename)
+
     def setup_charts(self):
+        self.print_verbose_level(1,'setup_charts')
         # Warning! numpy support offer a view on numpy array
         # the numpy array must not be garbage collected!
         nxtime = self.io_reader._isolv_data[:, 0]
@@ -2246,9 +2446,6 @@ class VView(object):
         tview_prec.GetInteractor().AddObserver('RightButtonReleaseEvent',
                                                self.input_observer.prec_plot_observer)
 
-        # screen_size = self.renderer_window.GetScreenSize()
-        self.renderer_window.SetSize(*self.config['window_size'])
-        self.renderer_window.SetWindowName('vview: ' + self.opts.io_filename)
         tview_iter.GetRenderer().GetRenderWindow().SetSize(600, 200)
         tview_prec.GetRenderer().GetRenderWindow().SetSize(600, 200)
 
@@ -2265,6 +2462,7 @@ class VView(object):
         self.tview_prec = tview_prec
 
     def setup_sliders(self, times):
+        self.print_verbose_level(1,'setup_sliders')
         if len(times) > 0:
             slider_repres = vtk.vtkSliderRepresentation2D()
 
@@ -2346,6 +2544,7 @@ class VView(object):
                 0.1, 0.9, 0.3, 0.9)
 
     def setup_axes(self):
+        self.print_verbose_level(1,'setup_axes')
         # display coordinates axes
         self.axes = vtk.vtkAxesActor()
         self.axes.SetTotalLength(1.0, 1.0, 1.0)
@@ -2359,7 +2558,7 @@ class VView(object):
 
     # this should be extracted from the VView class
     def export(self):
-
+        self.print_verbose('export start')
         times = self.io_reader._times[
                 self.opts.start_step:self.opts.end_step:self.opts.stride]
         ntime = len(times)
@@ -2368,9 +2567,12 @@ class VView(object):
             # just the generation of a parallel command
             options_str = ''
             if self.opts.ascii_mode:
-                options_str += '--ascii'
+                options_str += '--ascii '
             if self.opts.global_filter:
-                options_str += '--global-filter'
+                options_str += '--global-filter '
+            if self.opts.depth_2d != 0.1:
+                options_str += ' --depth-2d='+str(self.opts.depth_2d)
+
             ntimes_proc = int(ntime / self.opts.nprocs)
             s = ''
             for i in range(self.opts.nprocs):
@@ -2392,20 +2594,23 @@ class VView(object):
 
             packet = int(ntime/100)+1
 
-            # independant of time
-            spos_data = self.io_reader._spos_data
-            if spos_data.size > 0:
-                self.set_position_v(spos_data[:, 1], spos_data[:, 2],
-                                    spos_data[:, 3],
-                                    spos_data[:, 4], spos_data[:, 5],
-                                    spos_data[:, 6],
-                                    spos_data[:, 7], spos_data[:, 8])
 
             for time in times:
                 k = k + self.opts.stride
                 if (k % packet == 0):
                     sys.stdout.write('.')
+
                 self.io_reader.SetTime(time)
+
+                spos_data = self.io_reader.pos_static_data
+                #print('spos_data at time 1' , time, spos_data)
+                if spos_data.size > 0:
+                    self.set_position_v(spos_data[:, 1], spos_data[:, 2],
+                                        spos_data[:, 3],
+                                        spos_data[:, 4], spos_data[:, 5],
+                                        spos_data[:, 6],
+                                        spos_data[:, 7], spos_data[:, 8])
+
 
                 pos_data = self.io_reader.pos_data
                 velo_data = self.io_reader.velo_data
@@ -2444,7 +2649,7 @@ class VView(object):
                 big_data_writer.Write()
 
             big_data_writer.Write()
-            
+
     def export_raw_data(self):
 
         times = self.io_reader._times[
@@ -2468,7 +2673,7 @@ class VView(object):
         position_output = {}
         velocity_output = {}
         velocity_absolute_output = {}
-                
+
         for time in times:
             k = k + self.opts.stride
             if (k % packet == 0):
@@ -2477,13 +2682,13 @@ class VView(object):
 
             pos_data = self.io_reader.pos_data
             velo_data = self.io_reader.velo_data
-            
+
             ndyna=pos_data.shape[0]
-            
+
 
             for i in range(ndyna):
                 bdy_id = int(pos_data[i,1])
-                
+
                 ######## position output ########
                 if self.opts._export_position :
                     nvalue=pos_data.shape[1]
@@ -2501,7 +2706,7 @@ class VView(object):
                         position_output_body[-1].extend(pos_data[i,2:nvalue])
                     position_output_body[-1].append(bdy_id)
 
-                
+
                 ######## velocity output ########
                 if self.opts._export_velocity :
                     nvalue=velo_data.shape[1]
@@ -2513,7 +2718,7 @@ class VView(object):
                     velocity_output_body[-1].append(time)
                     velocity_output_body[-1].extend(velo_data[i,2:nvalue])
                     velocity_output_body[-1].append(bdy_id)
-                    
+
                 ######## velocity in absolute frame output ########
                 if self.opts._export_velocity_in_absolute_frame :
                     nvalue=velo_data.shape[1]
@@ -2536,7 +2741,7 @@ class VView(object):
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
             bdy_id)
             numpy.savetxt(filename_output, output)
-            
+
         for bdy_id in velocity_output.keys():
             output = numpy.array(velocity_output[bdy_id])
             filename_output = '{0}-velocity-body_{1}.dat'.format(
@@ -2550,14 +2755,14 @@ class VView(object):
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
             bdy_id)
             numpy.savetxt(filename_output, output)
-            
+
         cf_output = {}
         for time in times:
             #print('time', time)
             k = k + self.opts.stride
             if (k % packet == 0):
                 sys.stdout.write('.')
-                
+
             self.io_reader.SetTime(time)
 
             cf_data = self.io_reader.cf_data
@@ -2579,20 +2784,20 @@ class VView(object):
                     cf_output_contact[-1].append(time)
                     cf_output_contact[-1].extend(cf_data[i,2:nvalue])
                     cf_output_contact[-1].append(contact_id)
-  
+
         for contact_id in cf_output.keys():
             output = numpy.array(cf_output[contact_id])
             filename_output = '{0}-cf-contact_{1}.dat'.format(
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
             contact_id)
             numpy.savetxt(filename_output, output)
-    
-            
-        sys.stdout.write('\n')
-            
-            
-    def initialize_vtk(self):
 
+
+        sys.stdout.write('\n')
+
+
+    def initialize_vtk(self):
+        self.print_verbose('initialize_vtk')
         if not self.opts.gen_para_script:
 
             self.objects_collector = vtk.vtkMultiBlockDataGroupFilter()
@@ -2682,7 +2887,7 @@ class VView(object):
                 self.renderer.ResetCamera()
 
     def initialize_gui(self):
-
+        self.print_verbose('initialize_gui')
         self.setup_vtk_renderer()
         self.setup_sliders(self.io_reader._times)
         if self.opts.with_charts:
@@ -2692,10 +2897,11 @@ class VView(object):
         self.gui_initialized = True
 
     def run(self):
+        self.print_verbose('vview start')
         self.initialize_vtk()
         self.initialize_gui()
         self.interactor_renderer.Start()
-
+        self.print_verbose('vview end')
 ##
 ## Program starts
 ##
