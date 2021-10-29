@@ -326,6 +326,71 @@ void ContactPointVisitor::operator()(const DiskDiskR& rel)
 
 }
 
+// CircleCircleR should be named DiskCircleR
+template<>
+void ContactPointVisitor::operator()(const CircleCircleR& rel)
+{
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
+  auto& q = *DSlink[LagrangianR::q0];
+
+  double x1 = q(0); double y1 = q(1); const double r1 = rel.getRadius1();
+  double x2 = q(3); double y2 = q(4); const double r2 = rel.getRadius2();
+  double d = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+
+  double ncx = d > 0 ? (x2-x1)/d : 0;
+  double ncy = d > 0 ? (y2-y1)/d : 0;
+
+  double cpax, cpay, cpbx, cpby;
+  if (r1 < r2) // disk1 inside circle2
+  {
+    cpax = x1 - ncx * r1;
+    cpay = y1 - ncy * r1;
+
+    cpbx = x2 - ncx * r2;
+    cpby = y2 - ncy * r2;
+  }
+  else // disk2 inside circle1
+  {
+    cpbx = x2 + ncx * r2;
+    cpby = y2 + ncx * r2;
+
+    cpax = x1 + ncx * r1;
+    cpay = y1 + ncy * r1;
+  }
+  double id = inter->number();
+  double mu = ask<ForMu>(*inter->nonSmoothLaw());
+  const SimpleMatrix& jachq = *rel.jachq();
+  SiconosVector cf(jachq.size(1));
+  prod(*inter->lambda(1), jachq, cf, true);
+
+  answer.resize(16);
+
+  answer.setValue(0, mu);
+  answer.setValue(1, cpax);
+  answer.setValue(2, cpay);
+
+  answer.setValue(3, cpbx);
+  answer.setValue(4, cpby);
+
+  answer.setValue(5, ncx);
+  answer.setValue(6, ncy);
+
+  answer.setValue(7, cf(0));
+  answer.setValue(8, cf(1));
+
+  answer.setValue(9, inter->y(0)->getValue(0));
+  answer.setValue(10, inter->y(0)->getValue(1));
+
+  answer.setValue(11, inter->y(1)->getValue(0));
+  answer.setValue(12, inter->y(1)->getValue(1));
+
+  answer.setValue(13, inter->lambda(1)->getValue(0));
+  answer.setValue(14, inter->lambda(1)->getValue(1));
+
+  answer.setValue(15, id);
+
+}
+
 template<>
 void ContactPointVisitor::operator()(const DiskPlanR& rel)
 {
@@ -576,6 +641,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
         NewtonEuler5DR,
         Lagrangian2d2DR,
         Lagrangian2d3DR,
+        CircleCircleR,
         DiskDiskR,
         DiskPlanR>,
       ContactPointVisitor>::Make ContactPointInspector;

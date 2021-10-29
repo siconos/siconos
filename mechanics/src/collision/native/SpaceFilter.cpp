@@ -256,7 +256,9 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
         {
           // a new relation
           rel.reset(new CircleCircleR(r1, r2));
-          (*(parent->circlecircle_relations))[CircleCircleRDeclared(r1, r2)] = rel;
+          // FIX : this could work with stateless relations.
+          // This is not the case: cf LagrangianR.
+          //(*(parent->circlecircle_relations))[CircleCircleRDeclared(r1, r2)] = rel;
         }
         else
         {
@@ -277,7 +279,8 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
           // a new relation
           rel.reset(new DiskDiskR(r1, r2));
 
-          // FIX : this does not work!!
+          // FIX : this could work with stateless relations.
+          // This is not the case cf LagrangianR:
           // parent->diskdisk_relations[DiskDiskRDeclared(r1,r2)] = rel;
         }
         else
