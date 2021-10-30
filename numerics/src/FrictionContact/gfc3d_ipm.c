@@ -1498,7 +1498,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   NumericsMatrix *JR; /* Reduced Jacobian with NT scaling */
   long JR_nzmax;
   double * Hvw = (double*)calloc(nd, sizeof(double));
-  double err;
+  double err = 1e300;
   char fws = ' '; /* finish without scaling */
 
   /* list of active constraints : = 0 if x_0 <= epsilon, = 1 if lambda_2 <= epsilon , = 3 either */
@@ -1590,7 +1590,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   while(iteration < max_iter)
   {
-    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (NV_max(error, 4) <= 1e-7) && (fws==' '))
+    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (err <= 1e-7) && (fws==' '))
     {
       // To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
       options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
@@ -1777,8 +1777,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       {
         if(i % d == 0)
           /* w[i] = w_tilde[i]/(problem->mu[(int)(i/d)]) */
-	  w[i] = w_tilde[i]/(problem->mu[(int)(i/d)])
-            + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
+	  w[i] = w_tilde[i] + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
       }
 
     }
@@ -2138,7 +2137,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
   
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] = SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
