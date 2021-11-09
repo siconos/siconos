@@ -119,7 +119,8 @@ enum FRICTION_SOLVER
   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 4002,
 
   /** Non-smooth Gauss Seidel, global formulation */
-  SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR = 5000
+  SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR = 5000,
+  SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM = 5001
 
 };
 
@@ -197,6 +198,7 @@ extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCo
 extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
 
 extern const char* const   SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR ;
+extern const char* const   SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM_STR ;
 
 enum SICONOS_FRICTION_3D_IPARAM
 {
@@ -531,6 +533,7 @@ enum SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_ENUM
 
 enum SICONOS_FRICTION_3D_IPM_IPARAM_ENUM
 {
+  /** index in iparam to use NT scaling technique */
   SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING= 11,
   /** index in iparam to store the sparse storage parameter */
   SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE= 12,
@@ -542,6 +545,7 @@ enum SICONOS_FRICTION_3D_IPM_IPARAM_ENUM
   SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM= 15,
   /** index in iparam to finish the solution without scaling */
   SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING= 16,
+  /** index in iparam to toggle between smooth or non-smooth cases */
   SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S= 17
 };
 

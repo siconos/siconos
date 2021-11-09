@@ -50,6 +50,19 @@ extern "C"
 
   int grfc3d_checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options);
 
+
+  void grfc3d_IPM(GlobalFrictionContactProblem*  problem, double*  reaction,
+                  double*  velocity, double*  globalVelocity,
+                  int*  info, SolverOptions*  options);
+
+  void grfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void grfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void grfc3d_IPM_set_default(SolverOptions* options);
+
+
+
   
   /* /\** \addtogroup SetSolverOptions @{ */
   /*  *\/ */

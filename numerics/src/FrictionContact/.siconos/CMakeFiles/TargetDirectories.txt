@@ -1,0 +1,7 @@
+/Users/minhnguyen/siconos/numerics/src/FrictionContact/.siconos/CMakeFiles/install/local.dir
+/Users/minhnguyen/siconos/numerics/src/FrictionContact/.siconos/CMakeFiles/rebuild_cache.dir
+/Users/minhnguyen/siconos/numerics/src/FrictionContact/.siconos/CMakeFiles/edit_cache.dir
+/Users/minhnguyen/siconos/numerics/src/FrictionContact/.siconos/CMakeFiles/install/strip.dir
+/Users/minhnguyen/siconos/numerics/src/FrictionContact/.siconos/CMakeFiles/install.dir
+/Users/minhnguyen/siconos/numerics/src/FrictionContact/.siconos/CMakeFiles/list_install_components.dir
+/Users/minhnguyen/siconos/numerics/src/FrictionContact/.siconos/CMakeFiles/gfc3d_ipm.dir
