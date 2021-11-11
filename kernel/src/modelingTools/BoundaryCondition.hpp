@@ -96,6 +96,11 @@ public:
    */
   virtual void computePrescribedVelocity(double time);
 
+
+  /** display */
+  void display();
+  
+
 protected:
   /** serialization hooks
   */

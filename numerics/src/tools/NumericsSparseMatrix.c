@@ -430,14 +430,16 @@ NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* 
 
   if(p->iWork)
   {
-    assert(p->iWorkSize>0);
+    // assert(p->iWorkSize>0); This assertion is commented since it may happen that we
+    //                         allocate a chunk of memory of size 0 (for an empty matrix !!)
     free(p->iWork);
     p->iWork = NULL;
   }
 
   if(p->dWork)
   {
-    assert(p->dWorkSize>0);
+    // assert(p->dWorkSize>0); This assertion is commented since it may happen that we
+    //                         allocate a chunk of memory of size 0 (for an empty matrix !!)
     free(p->dWork);
     p->dWork = NULL;
   }

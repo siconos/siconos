@@ -182,5 +182,7 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
   print_tests_collection_report(collection, n_failed, failed_tests, n_succeeded, succeeded_tests);
 
   // tests status.
+  free(failed_tests);
+  free(succeeded_tests);
   return out;
 }

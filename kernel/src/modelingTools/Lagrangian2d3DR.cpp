@@ -54,21 +54,22 @@ void Lagrangian2d3DR::computeJachq(const BlockVector& q, BlockVector& z)
 
 
   /* construct tangent vector */
-  double Tx = Ny;
-  double Ty = - Nx;
+  double Tx = -Ny;
+  double Ty = Nx;
 
 
-  double lever_arm_x = G1x-Px ;
-  double lever_arm_y = G1y-Py ;
+  double lever_arm_x = Px-G1x ;
+  double lever_arm_y = Py-G1y ;
+  DEBUG_PRINTF("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
   DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
   _jachq->setValue(0,0,Nx);
   _jachq->setValue(0,1,Ny);
-  _jachq->setValue(0,2,lever_arm_y*Nx - lever_arm_x*Ny);
+  _jachq->setValue(0,2,lever_arm_x*Ny - lever_arm_y*Nx);
 
   _jachq->setValue(1,0,Tx);
   _jachq->setValue(1,1,Ty);
-  _jachq->setValue(1,2,lever_arm_y*Tx - lever_arm_x*Ty);
+  _jachq->setValue(1,2,lever_arm_x*Ty - lever_arm_y*Tx);
 
   _jachq->setValue(2,0,0.0);
   _jachq->setValue(2,1,0.0);
@@ -80,14 +81,16 @@ void Lagrangian2d3DR::computeJachq(const BlockVector& q, BlockVector& z)
     DEBUG_PRINT("take into account second ds\n");
     double G2x = q.getValue(3);
     double G2y = q.getValue(4);
+    lever_arm_x = Px-G2x;
+    lever_arm_y = Py-G2y;
 
     _jachq->setValue(0,3,-Nx);
     _jachq->setValue(0,4,-Ny);
-    _jachq->setValue(0,5,- ((G2y-Py)*Nx - (G2x-Px)*Ny));
+    _jachq->setValue(0,5,lever_arm_y * Nx - lever_arm_x*Ny);
 
     _jachq->setValue(1,3,-Tx);
     _jachq->setValue(1,4,-Ty);
-    _jachq->setValue(1,5,-((G2y-Py)*Tx - (G2x-Px)*Ty));
+    _jachq->setValue(1,5,lever_arm_y * Tx - lever_arm_x*Ty);
 
     _jachq->setValue(2,3,0.0);
     _jachq->setValue(2,4,0.0);
@@ -115,31 +118,7 @@ void Lagrangian2d3DR::computeh(const BlockVector& q, BlockVector& z, SiconosVect
 {
   DEBUG_BEGIN("Lagrangian2d3DR::computeh(...)\n");
   DEBUG_EXPR(q.display());
-  // Contact points and normal are stored as relative to q1 and q2, if
-  // no q2 then pc2 and normal are absolute.
 
-  // Update pc1 based on q and relPc1
-
-  double angle= q(2);
-  DEBUG_PRINTF("angle (ds1)= %e\n", angle);
-  (*_Pc1)(0) = q(0) + cos(angle) * (*_relPc1)(0)- sin(angle) * (*_relPc1)(1);
-  (*_Pc1)(1) = q(1) + sin(angle) * (*_relPc1)(0)+ cos(angle) * (*_relPc1)(1);
-  if(q.size() == 6)
-  {
-    // To be checked
-    DEBUG_PRINT("take into account second ds\n");
-    angle = q(5);
-    DEBUG_PRINTF("angle (ds2) = %e\n", angle);
-    (*_Pc2)(0) = q(3) + cos(angle) * (*_relPc2)(0)- sin(angle) * (*_relPc2)(1);
-    (*_Pc2)(1) = q(4) + sin(angle) * (*_relPc2)(0)+ cos(angle) * (*_relPc2)(1);
-    (*_Nc)(0) =  cos(angle) * (*_relNc)(0)- sin(angle) * (*_relNc)(1);
-    (*_Nc)(1) =  sin(angle) * (*_relNc)(0)+ cos(angle) * (*_relNc)(1);
-  }
-  else
-  {
-    *_Pc2 = *_relPc2;
-    *_Nc = *_relNc;
-  }
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(_Nc->display(););
@@ -150,6 +129,7 @@ void Lagrangian2d3DR::computeh(const BlockVector& q, BlockVector& z, SiconosVect
   DEBUG_EXPR(display(););
   DEBUG_END("Lagrangian2d3DR::computeh(...)\n")
 }
+
 void Lagrangian2d3DR::display() const
 {
   LagrangianR::display();
@@ -166,26 +146,9 @@ void Lagrangian2d3DR::display() const
   else
     std::cout << " nullptr :" << std::endl;
 
-  std::cout << " _relPc1 :" << std::endl;
-  if(_relPc1)
-    _relPc1->display();
-  else
-    std::cout << " nullptr :" << std::endl;
-
-  std::cout << " _relPc2 :" << std::endl;
-  if(_relPc2)
-    _relPc2->display();
-  else
-    std::cout << " nullptr :" << std::endl;
-
   std::cout << " _Nc :" << std::endl;
   if(_Nc)
     _Nc->display();
-  else
-    std::cout << " nullptr :" << std::endl;
-  std::cout << " _relNc :" << std::endl;
-  if(_relNc)
-    _relNc->display();
   else
     std::cout << " nullptr :" << std::endl;
 

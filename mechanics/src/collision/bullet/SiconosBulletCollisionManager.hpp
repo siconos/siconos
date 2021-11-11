@@ -77,10 +77,12 @@ public:
     : new_interactions_created(0)
     , existing_interactions_processed(0)
     , interaction_warnings(0)
+    , interaction_destroyed(0)
     {}
   int new_interactions_created;
   int existing_interactions_processed;
   int interaction_warnings;
+  int interaction_destroyed;
 };
 
 class SiconosBulletCollisionManager : public SiconosCollisionManager

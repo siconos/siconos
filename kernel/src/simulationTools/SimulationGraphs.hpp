@@ -99,6 +99,7 @@ struct DynamicalSystemProperties
   SP::OneStepIntegrator osi;              /**< Integrator used for the given DynamicalSystem */
   SP::SimpleMatrix W;                     /**< Matrix for integration */
   SP::SimpleMatrix WBoundaryConditions;   /**< Matrix for integration of boundary conditions*/
+  SP::SimpleMatrix Winverse;              /**< Matrix for integration */
   unsigned int absolute_position;         /**< Absolute position of the ds variables in the unknown vector in osnsp*/
 //  SP::SiconosMemory _xMemory            /**< old value of x, TBD */
 

@@ -43,22 +43,24 @@ public:
   SP::SiconosContactor contactor[2];
   SP::RigidBody2dDS ds[2];
 
-  /** to compute the output y = h(q,z) of the Relation
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-      \param y the resulting vector
-  */
-  virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  // /** to compute the output y = h(q,z) of the Relation
+  //     \param q coordinates of the dynamical systems involved in the relation
+  //     \param z user defined parameters (optional)
+  //     \param y the resulting vector
+  // */
+  // virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
   /** Update this contact point information.
    * \param pos1 Position on ds1 in ds1 frame.
    * \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
    * \param normal Normal in ds2 frame (or world frame if ds2=null).
    */
-  virtual void updateContactPoints(const SiconosVector& pos1,
+  // virtual void updateContactPoints(const SiconosVector& pos1,
+  //                                  const SiconosVector& pos2,
+  //                                  const SiconosVector& normal);
+  virtual void updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
                                    const SiconosVector& pos2,
                                    const SiconosVector& normal);
-
   virtual void preDelete() {}
 
   ACCEPT_STD_VISITORS();

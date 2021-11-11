@@ -84,7 +84,7 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
   return dim;
 }
 
-void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool update)
+void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool update)
 {
 
   if(update)

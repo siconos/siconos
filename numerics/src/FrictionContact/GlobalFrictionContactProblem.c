@@ -47,6 +47,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void)
   problem->q = NULL;
   problem->b = NULL;
   problem->mu = NULL;
+  problem->M_inverse = NULL;
   problem->env = NULL;
   problem->numberOfContacts = 0;
   problem->dimension = 0;
@@ -201,6 +202,13 @@ void globalFrictionContact_free(GlobalFrictionContactProblem* problem)
   }
   problem->b = NULL;
 
+  if(problem->M_inverse)
+  {
+    NM_clear(problem->M_inverse);
+    free(problem->M_inverse);
+  }
+  problem->M_inverse = NULL;
+
   if(problem->env) assert(0 && "globalFrictionContact_free :: problem->env != NULL, don't know what to do");
 
   free(problem);
@@ -253,6 +261,13 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
   }
   else
     printf("No mu vector:\n");
+  if(problem->M_inverse)
+  {
+    printf("M inverse matrix:\n");
+    NM_display(problem->M_inverse);
+  }
+  else
+    printf("No M inverse matrix:\n");
 
 }
 
@@ -263,8 +278,7 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactPr
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
   int m = 3 * nc;
-
-  GlobalFrictionContactProblem* new = (GlobalFrictionContactProblem*) malloc(sizeof(GlobalFrictionContactProblem));
+  GlobalFrictionContactProblem* new = globalFrictionContactProblem_new();
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
   new->M = NM_new();
@@ -277,6 +291,10 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactPr
   memcpy(new->b, problem->b, m*sizeof(double));
   new->mu = (double*)malloc(nc*sizeof(double));
   memcpy(new->mu, problem->mu, nc*sizeof(double));
+  if (problem->M_inverse)
+  {
+    NM_copy(problem->M_inverse, new->M_inverse);
+  }
   new->env = NULL;
   return new;
 }
@@ -304,7 +322,19 @@ int globalFrictionContact_computeGlobalVelocity(
 
   /* Compute globalVelocity <- M^(-1) globalVelocity*/
   //info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE);
-  info = NM_LU_solve(problem->M, globalVelocity, 1);
+  if (problem->M_inverse)
+  {
+    double alpha = 1.0;
+    double beta2 = 0.0;
+    double* vtmp = (double*)calloc(n , sizeof(double));
+    cblas_dcopy_msan(n,  globalVelocity, 1, vtmp, 1);
+    NM_gemv(alpha, problem->M_inverse, vtmp, beta2, globalVelocity);
+    free(vtmp);
+  }
+  else
+  {
+    info = NM_LU_solve(problem->M, globalVelocity, 1);
+  }
   DEBUG_EXPR(NM_vector_display(globalVelocity, n));
 
   return info;
@@ -326,28 +356,6 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
   localproblem->dimension =  problem->dimension;
   localproblem->mu = (double*)calloc(problem->numberOfContacts,sizeof(double));
   cblas_dcopy_msan(problem->numberOfContacts, problem->mu, 1, localproblem->mu, 1);
-
-  /* assert(M); */
-  /* assert(H); */
-  /* NM_display(M); */
-  /* NM_display(H); */
-  /* NumericsMatrix *MMtmp = NM_new(); */
-  /* NumericsMatrix *HHtmp = NM_new(); */
-
-  /* NM_copy(M,MMtmp); */
-  /* NM_copy(H,HHtmp); */
-
-  /* NM_clearSparse(M); */
-  /* NM_clearSparse(H); */
-
-  /* M = NM_create(NM_DENSE, n, n); */
-  /* H = NM_create(NM_DENSE, n, m); */
-
-  /* NM_to_dense(MMtmp,M); */
-  /* NM_to_dense(HHtmp,H); */
-
-  /* NM_display(M); */
-  /* NM_display(H); */
 
   if(H->storageType != M->storageType)
   {
@@ -469,68 +477,6 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     NM_write_in_file_scilab(localproblem->M, fileout);
     fclose(fileout);
 #endif
-
-#ifdef TEST_COND
-    NumericsMatrix *WnumInverse = NM_new();
-    WnumInverse->storageType = 0;
-    WnumInverse-> size0 = m;
-    WnumInverse-> size1 = m;
-    WnumInverse->matrix1 = NULL;
-    WnumInverse->matrix2 = NULL;
-    WnumInverse->internalData = NULL;
-    WnumInverse->matrix0 = (double*)calloc(m * m , sizeof(double));
-    double * WInverse = WnumInverse->matrix0;
-    SBM_to_dense(W, WnumInverse->matrix0);
-
-    FILE * file1 = fopen("dataW.dat", "w");
-    NM_write_in_file_scilab(WnumInverse, file1);
-    fclose(file1);
-
-    double * WInversetmp = (double*)calloc(m * m,  sizeof(double));
-    memcpy(WInversetmp, WInverse, m * m * sizeof(double));
-    double  condW;
-    condW = cond(WInverse, m, m);
-
-    lapack_int* ipiv = (lapack_int *)calloc(m , sizeof(lapack_int));
-    int infoDGETRF = 0;
-    DGETRF(m, m, WInverse, m, ipiv, &infoDGETRF);
-    assert(!infoDGETRF);
-    int infoDGETRI = 0;
-    DGETRI(m, WInverse, m, ipiv, &infoDGETRI);
-
-
-    free(ipiv);
-    assert(!infoDGETRI);
-
-
-    double  condWInverse;
-    condWInverse = cond(WInverse, m, m);
-
-    FILE * file2 = fopen("dataWInverse.dat", "w");
-    NM_write_in_file_scilab(WnumInverse, file2);
-    fclose(file2);
-
-    double tol = 1e-24;
-    pinv(WInversetmp, m, m, tol);
-    NumericsMatrix *WnumInversetmp = NM_new();
-    WnumInversetmp->storageType = 0;
-    WnumInversetmp-> size0 = m;
-    WnumInversetmp-> size1 = m;
-    WnumInversetmp->matrix1 = NULL;
-    WnumInversetmp->matrix2 = NULL;
-    WnumInversetmp->internalData = NULL;
-    WnumInversetmp->matrix0 = WInversetmp ;
-
-    FILE * file3 = fopen("dataWPseudoInverse.dat", "w");
-    NM_write_in_file_scilab(WnumInversetmp, file3);
-    fclose(file3);
-
-
-    free(WInverse);
-    free(WInversetmp);
-    free(WnumInverse);
-#endif
-
     localproblem->q = (double*)calloc(m, sizeof(double));
 
     //Copy localq<- b
@@ -568,21 +514,21 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     fclose(fileout);
 #endif
 
-
-
-
     // Product M^-1 H
     DEBUG_EXPR(NM_display(H););
-    numerics_printf_verbose(1,"inversion of the matrix M ...");
-    NumericsMatrix * Minv  = NM_LU_inv(M);
+    NumericsMatrix * Minv;
+    if (problem->M_inverse)
+    {
+      numerics_printf_verbose(1,"use the given inverse of the matrix M ...");
+      Minv = problem->M_inverse;
+    }
+    else
+    {
+      numerics_printf_verbose(1,"inversion of the matrix M ...");
+      Minv  = NM_LU_inv(M);
+    }
     DEBUG_EXPR(NM_display(Minv););
 
-
-    /* NumericsMatrix* MinvH = NM_create(NM_SPARSE,n,m); */
-    /* NM_triplet_alloc(MinvH, n); */
-    /* MinvH->matrix2->origin = NSM_TRIPLET; */
-    /* DEBUG_EXPR(NM_display(MinvH);); */
-    /* NM_gemm(1.0, Minv, H, 0.0, MinvH); */
     numerics_printf_verbose(1,"multiplication  H^T M^{-1} H ...");
     NumericsMatrix* MinvH = NM_multiply(Minv,H);
     DEBUG_EXPR(NM_display(MinvH););
@@ -590,23 +536,7 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     // Product H^T M^-1 H
     NM_csc_trans(H);
 
-
-    NumericsMatrix* Htrans = NM_new();
-    Htrans->storageType = NM_SPARSE;
-    Htrans-> size0 = m;
-    Htrans-> size1 = n;
-    NM_csc_alloc(Htrans, 0);
-    Htrans->matrix2->origin = NSM_CSC;
-    Htrans->matrix2->csc = NM_csc_trans(H);
-    DEBUG_EXPR(NM_display(Htrans););
-
-    /* localproblem->M = NM_create(NM_SPARSE, m, m); */
-    /* NumericsMatrix *W = localproblem->M; */
-    /* int nzmax= m*m; */
-    /* NM_csc_empty_alloc(W, nzmax); */
-    /* W->matrix2->origin = NSM_CSC; */
-    /* NM_gemm(1.0, Htrans, MinvH, 0.0, W); */
-
+    NumericsMatrix* Htrans = NM_transpose(H);
     localproblem->M = NM_multiply(Htrans,MinvH);
     DEBUG_EXPR(NM_display(localproblem->M););
 
@@ -620,10 +550,9 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
 
     /* compute localq <- H^T M^(-1) q + b */
     numerics_printf_verbose(1,"Compute localq = H^T M^(-1) q +b  ...");
+
     double* qtmp = (double*)calloc(n, sizeof(double));
     NM_gemv(1.0, Minv, problem->q, 0.0, qtmp);   /* qtmp <- M^(-1) q  */
-    DEBUG_EXPR(NV_display(qtmp,n););
-    DEBUG_EXPR(NV_display(problem->q,n););
     localproblem->q = (double*)calloc(m, sizeof(double));
     cblas_dcopy_msan(m, problem->b, 1, localproblem->q, 1);     /*Copy localq <- b */
     NM_gemv(1.0, Htrans, qtmp, 1.0, localproblem->q); /* localq <- H^T qtmp + localq   */
@@ -633,10 +562,19 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
     NV_write_in_file_python(localproblem->q, H->size1, fileout);
     fclose(fileout);
 #endif
+   if (!problem->M_inverse)
+   {
+    NM_clear(Minv);
+    free(Minv);
+   }
+   NM_clear(MinvH);
+   free(MinvH);
+   NM_clear(Htrans);
+   free(Htrans);
+   free(qtmp);
 
-
-    DEBUG_EXPR(frictionContact_display(localproblem););
-    //getchar();
+   DEBUG_EXPR(frictionContact_display(localproblem););
+   //getchar();
   }
   else
   {

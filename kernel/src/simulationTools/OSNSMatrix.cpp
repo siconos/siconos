@@ -26,7 +26,11 @@
 #include "Interaction.hpp"
 #include "DynamicalSystem.hpp"
 #include "NumericsSparseMatrix.h"
-
+#include "CSparseMatrix_internal.h"
+#include "OneStepIntegrator.hpp"
+#include "MoreauJeanOSI.hpp"
+#include "MoreauJeanGOSI.hpp"
+#include "SecondOrderDS.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -65,7 +69,9 @@ OSNSMatrix::OSNSMatrix(unsigned int n, NM_types stor):
     break;
   }
   default:
-  {} // do nothing here
+  {
+    _triplet_nzmax = _dimRow ; /* at least a non zero element per row */
+  } // do nothing here
   }
 
   DEBUG_END("OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
@@ -112,7 +118,7 @@ OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor):
   DEBUG_BEGIN("OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor)\n");
 //  _numericsMatrix.reset(new NumericsMatrix);
 //  NM_null(_numericsMatrix.get());
-  fillW(indexSet);
+  fillM(indexSet);
   DEBUG_END("OSNSMatrix::OSNSMatrix(InteractionsGraph& indexSet, NM_types stor)\n");
 }
 
@@ -180,9 +186,9 @@ unsigned OSNSMatrix::updateSizeAndPositions(DynamicalSystemsGraph & DSG)
 }
 
 // Fill the matrix W
-void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
+void OSNSMatrix::fillM(InteractionsGraph& indexSet, bool update)
 {
-  DEBUG_BEGIN("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
+  DEBUG_BEGIN("void OSNSMatrix::fillM(SP::InteractionsGraph indexSet, bool update)\n");
   DEBUG_PRINTF(" update = %i\n", update);
   if(update)  // If index set vertices list has changed
   {
@@ -277,7 +283,7 @@ void OSNSMatrix::fillW(InteractionsGraph& indexSet, bool update)
   }
   if(update)
     convert();
-  DEBUG_END("void OSNSMatrix::fillW(SP::InteractionsGraph indexSet, bool update)\n");
+  DEBUG_END("void OSNSMatrix::fillM(SP::InteractionsGraph indexSet, bool update)\n");
 }
 
 // convert current matrix to NumericsMatrix structure
@@ -323,11 +329,11 @@ void OSNSMatrix::convert()
   DEBUG_END("OSNSMatrix::convert()\n");
 }
 
-// Fill the matrix M
+// Fill the matrix W
 // Used only in GlobalFrictionContact
-void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
+void OSNSMatrix::fillW(DynamicalSystemsGraph & DSG, bool update)
 {
-  DEBUG_BEGIN("void OSNSMatrix::fillM(SP::DynamicalSystemsGraph DSG, bool update)\n");
+  DEBUG_BEGIN("void OSNSMatrix::fillW(SP::DynamicalSystemsGraph DSG, bool update)\n");
 
   if(update)
   {
@@ -349,7 +355,7 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
       _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM),NM_free);
 
       NumericsMatrix& M_NM = *numericsMatrix();
-      NM_triplet_alloc(&M_NM, sizeM); // At least one element per row
+      NM_triplet_alloc(&M_NM, _triplet_nzmax);
       CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
 
       unsigned int pos =0;
@@ -363,28 +369,125 @@ void OSNSMatrix::fillM(DynamicalSystemsGraph & DSG, bool update)
         W->fillTriplet(Mtriplet, pos, pos);
         DEBUG_PRINTF("pos = %u \n", pos);
       }
+      _triplet_nzmax =  NM_nnz(&M_NM);
     }
     break;
   }
   default:
   {
-    THROW_EXCEPTION("OSNSMatrix::fillM unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::fillW unknown _storageType");
   }
   }
 
 
-  DEBUG_END("void OSNSMatrix::fillM(SP::DynamicalSystemsGraph DSG, bool update)\n");
+  DEBUG_END("void OSNSMatrix::fillW(SP::DynamicalSystemsGraph DSG, bool update)\n");
 }
 
+
+// Fill the matrix Winverse
+// Used only in GlobalFrictionContact
+void OSNSMatrix::fillWinverse(DynamicalSystemsGraph & DSG, bool update)
+{
+  DEBUG_BEGIN("void OSNSMatrix::fillWinverse(SP::DynamicalSystemsGraph DSG, bool update)\n");
+
+  if(update)
+  {
+    _dimColumn = updateSizeAndPositions(DSG);
+    _dimRow = _dimColumn;
+  }
+
+  switch(_storageType)
+  {
+  case NM_SPARSE:
+  {
+    if(update)
+    {
+      size_t sizeM = _dimRow;
+      DEBUG_PRINTF("sizeM = %lu \n", sizeM);
+
+      // We choose a triplet matrix format for inserting values.
+      // This simplifies the memory manipulation.
+      _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM),NM_free);
+
+      NumericsMatrix& M_NM = *numericsMatrix();
+      NM_triplet_alloc(&M_NM, _triplet_nzmax);
+      CSparseMatrix* Mtriplet = NM_triplet(&M_NM);
+
+      unsigned int pos =0;
+      // Loop over the DS for filling M
+      DynamicalSystemsGraph::VIterator dsi, dsend;
+      for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
+      {
+        SP::SimpleMatrix Winverse;
+
+        OneStepIntegrator& osi = *DSG.properties(*dsi).osi;
+        SP::DynamicalSystem ds =  DSG.bundle(*dsi);
+        SP::SecondOrderDS sods =  std::static_pointer_cast<SecondOrderDS> (ds);
+
+        if (typeid(osi) == typeid(MoreauJeanGOSI))
+        {
+          Winverse =  static_cast<MoreauJeanGOSI&>(osi).Winverse(sods, true);
+        }
+        else if (typeid(osi) == typeid(MoreauJeanOSI))
+        {
+          Winverse =  static_cast<MoreauJeanOSI&>(osi).Winverse(sods);
+        }
+        else
+          THROW_EXCEPTION("OSNSMatrix::fillWinverse not yet implemented for this type of OSI  ");
+
+        pos = DSG.properties(*dsi).absolute_position;
+        Winverse->fillTriplet(Mtriplet, pos, pos);
+        DEBUG_PRINTF("pos = %u \n", pos);
+        //W->display();
+      }
+
+      // // Ugly inversion
+      // for (unsigned int k =0 ; k < M_NM.size0; k++)
+      // {
+      //   Mtriplet->x[k] = 1.0/Mtriplet->x[k];
+      // }
+      //NM_display(numericsMatrix().get());
+      _triplet_nzmax =  NM_nnz(&M_NM);
+      //getchar();
+    }
+    break;
+  }
+  default:
+  {
+    THROW_EXCEPTION("OSNSMatrix::fillWinverse unknown _storageType");
+  }
+  }
+
+
+  DEBUG_END("void OSNSMatrix::fillW(SP::DynamicalSystemsGraph DSG, bool update)\n");
+}
+
+
+#include <float.h>
 // Fill the matrix H
 void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet, bool update)
 {
   DEBUG_BEGIN("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
+
+  fillHtrans(DSG, indexSet, update);
+
+  SP::NumericsMatrix Htrans = _numericsMatrix;
+  _numericsMatrix.reset(NM_transpose(Htrans.get()), NM_free);
+  _dimColumn = updateSizeAndPositions(indexSet);
+  _dimRow = updateSizeAndPositions(DSG);
+
+  DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
+}
+
+// Fill the matrix Htrans
+void OSNSMatrix::fillHtrans(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet, bool update)
+{
+  DEBUG_BEGIN("void OSNSMatrix::fillHtrans(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
   if(update)
   {
 
-    _dimColumn = updateSizeAndPositions(indexSet);
-    _dimRow = updateSizeAndPositions(DSG);
+    _dimRow = updateSizeAndPositions(indexSet);
+    _dimColumn = updateSizeAndPositions(DSG);
   }
 
   switch(_storageType)
@@ -397,49 +500,114 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
       // This simplifies the memory manipulation.
       _numericsMatrix.reset(NM_create(NM_SPARSE, _dimRow, _dimColumn),NM_free);
       NumericsMatrix& H_NM = *numericsMatrix();
-      NM_triplet_alloc(&H_NM, _dimColumn);// At least one element per column
+      NM_triplet_alloc(&H_NM, _triplet_nzmax);
       CSparseMatrix* Htriplet= NM_triplet(&H_NM);
 
-
-      unsigned int pos = 0, pos_ds=0;
+      unsigned int pos = 0, abs_pos_ds=0;
       SP::SiconosMatrix leftInteractionBlock;
+
+
       InteractionsGraph::VIterator ui, uiend;
       for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet.bundle(*ui);
+        size_t sizeY = inter.dimension();
+        leftInteractionBlock = inter.getLeftInteractionBlock();
+
+        double * array = &*leftInteractionBlock->getArray();
+        //double * array_with_bc= nullptr;
+
         SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
         SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
 
         bool endl = false;
         size_t posBlock = indexSet.properties(*ui).source_pos;
-        size_t pos2 = indexSet.properties(*ui).target_pos;
+        size_t pos_ds2 = indexSet.properties(*ui).target_pos;
 
         pos =  indexSet.properties(*ui).absolute_position;
-        for(SP::DynamicalSystem ds = ds1; !endl; ds = ds2, posBlock = pos2)
+
+        for(SP::DynamicalSystem ds = ds1; !endl; ds = ds2, posBlock = pos_ds2)
         {
           endl = (ds == ds2);
           size_t sizeDS = ds->dimension();
-          size_t sizeY = inter.dimension();
-          // this whole part is a hack. Just should just get the rightblock
-          leftInteractionBlock = inter.getLeftInteractionBlockForDS(posBlock, sizeY, sizeDS);
-          leftInteractionBlock->trans();
-          pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
-          DEBUG_PRINTF("pos = %u", pos);
-          DEBUG_PRINTF("pos_ds = %u", pos_ds);
-          leftInteractionBlock->fillTriplet(Htriplet, pos_ds, pos);
+
+          SecondOrderDS* sods = dynamic_cast<SecondOrderDS*> (ds.get());
+
+          if (sods)
+          {
+            SP::BoundaryCondition bc;
+            if(sods->boundaryConditions())
+            {
+              // bc = sods->boundaryConditions();
+              // NM_dense_display(array,sizeY,sizeDS,sizeY);
+              // array_with_bc = (double *) calloc(sizeY*sizeDS,sizeof(double));
+              // memcpy(array_with_bc, array ,sizeY*sizeDS,sizeof(double));
+              // NM_dense_display(array_with_bc,sizeY,sizeDS,sizeY);
+              // for(std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin() ;
+              //     itindex != bc->velocityIndices()->end();
+              //     ++itindex)
+              // {
+
+
+              //   for (unsigned int row; row < sizeY; row++  )
+              //   {
+              //     array_with_bc[row + (sizeY) * (posBlock + *itindex)] = 0.0
+              //   }
+              //     // (nslawSize,sizeDS));
+              //   //SP::SiconosVector coltmp(new SiconosVector(nslawSize));
+              //   //coltmp->zero();
+              //   std::cout <<  "bc indx "<< *itindex << std::endl;
+              // }
+
+
+              // //getchar();
+              THROW_EXCEPTION("OSNSMatrix::fillHtrans boundary conditions not yet implemented.");
+            }
+          }
+
+
+          abs_pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
+          CSparseMatrix_block_dense_zentry(Htriplet,  pos, abs_pos_ds, array+posBlock*sizeY, sizeY, sizeDS, DBL_EPSILON);
         }
       }
-
+      _triplet_nzmax =  NM_nnz(&H_NM);
     }
     break;
   }
   default:
   {
-    THROW_EXCEPTION("OSNSMatrix::fillH unknown _storageType");
+    THROW_EXCEPTION("OSNSMatrix::fillHtrans unknown _storageType");
   }
   }
-  DEBUG_END("void OSNSMatrix::fillH(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
+  DEBUG_END("void OSNSMatrix::fillHtrans(SP::DynamicalSystemsGraph DSG, InteractionsGraph& indexSet, bool update)\n");
 }
+
+void OSNSMatrix::computeM(SP::NumericsMatrix Winverse, SP::NumericsMatrix Htrans)
+{
+   // Compute M = H^T * Winverse * H
+  NumericsMatrix *   H_NM = NM_transpose(Htrans.get());
+
+
+  NumericsMatrix *   NM1 = NM_multiply(Winverse.get(), H_NM);
+
+
+  _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1), NM_free);
+
+
+    // NumericsMatrix *   NM1 = NM_multiply(Winverse.get(), H.get());
+    // NumericsMatrix *   Htrans_NM = NM_transpose(H.get());
+
+    // _numericsMatrix.reset(NM_multiply(Htrans_NM, NM1), NM_free);
+
+
+
+    _dimRow = _numericsMatrix->size0;
+    _dimColumn = _numericsMatrix->size1;
+
+    NM_free(NM1);
+    NM_free(H_NM);
+}
+
 
 
 // Display data

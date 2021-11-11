@@ -1,6 +1,6 @@
 # --- set siconos current version ---
 set(MAJOR_VERSION 4)
-set(MINOR_VERSION 4)
+set(MINOR_VERSION 5)
 set(PATCH_VERSION 0)
 set(SICONOS_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 
@@ -32,7 +32,7 @@ set(SICONOS_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 # If any interfaces have been removed since the last public release, then set
 # age to 0.
 
-set(SO_current 6)
+set(SO_current 7)
 set(SO_revision 0)
 set(SO_age 0)
 

@@ -304,6 +304,27 @@ static inline void mtv3x3(double* restrict a, double* restrict v, double* restri
 }
 
 /** add a matrix vector multiplication
+ * \param[in] a a[4]
+ * \param[in] v v[2]
+ * \param[out] r r[2] the result of r += av
+ */
+static inline void mvp2x2(const double* restrict a, const double* restrict v, double* restrict r)
+{
+
+  double* pr;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+}
+
+/** add a matrix vector multiplication
  * \param[in] a a[9]
  * \param[in] v v[3]
  * \param[out] r r[3] the result of r += av

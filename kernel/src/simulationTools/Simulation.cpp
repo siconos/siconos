@@ -194,6 +194,11 @@ void Simulation::updateIndexSets()
 
 }
 
+void Simulation::updateDSPlugins(double time)
+{
+  _nsds->updateDSPlugins(time);
+}
+
 void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 {
   if(_allNSProblems->size() > (unsigned int)Id)
@@ -349,25 +354,9 @@ void Simulation::initializeIndexSets()
   }
 }
 
-void Simulation::initialize()
+
+void Simulation::firstInitialize()
 {
-  DEBUG_BEGIN("Simulation::initialize()");
-  DEBUG_EXPR_WE(std::cout << "Simulation name :"<< name() << std::endl;);
-
-  // 1 - Process any pending OSI->DS associations
-  initializeOSIAssociations();
-
-  // 2 - Initialize index sets for OSIs
-  initializeIndexSets();
-
-  // 3 - allow the InteractionManager to add/remove any interactions it wants
-  updateWorldFromDS();
-  updateInteractions();
-
-  // 4 - initialize new ds and interactions
-  initializeNSDSChangelog();
-
-  // 5 - First initialization of the simulation
   if(!_isInitialized)
   {
     DEBUG_PRINT(" - 6 - First initialization of the simulation\n");
@@ -397,7 +386,43 @@ void Simulation::initialize()
 
     _isInitialized = true;
   }
+}
 
+void Simulation::initialize()
+{
+  DEBUG_BEGIN("Simulation::initialize()");
+  DEBUG_EXPR_WE(std::cout << "Simulation name :"<< name() << std::endl;);
+
+  // 1 - Process any pending OSI->DS associations
+  initializeOSIAssociations();
+
+  // 2 - Initialize index sets for OSIs
+  initializeIndexSets();
+
+  // 3 - allow the InteractionManager to add/remove any interactions it wants
+  updateWorldFromDS();
+  updateInteractions();
+
+  // 4 - initialize new ds and interactions
+  initializeNSDSChangelog();
+
+  // 5 - updateOutput
+  updateOutput();
+
+  // 6 - Initialize OneStepNSProblem(s)
+  DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
+
+  //Initialize OneStepNSProblem(s). Depends on the type of simulation.
+  //Warning FP : must be done in any case, even if the interactions set
+  // is empty.
+  if(Type::value(*this) != Type::EventDriven)
+  {
+    initOSNS();
+  }
+
+
+  // 7 - First initialization of the simulation
+  firstInitialize();
 
   DEBUG_END("Simulation::initialize()\n");
 }
@@ -563,14 +588,14 @@ void Simulation::processEvents()
   DEBUG_BEGIN("void Simulation::processEvents()\n");
   _eventsManager->processEvents(*this);
 
-  if(_eventsManager->hasNextEvent())
-  {
-    // For TimeStepping Scheme, need to update IndexSets, but not for EventDriven scheme
-    if(Type::value(*this) != Type::EventDriven)
-    {
-      updateIndexSets();
-    }
-  }
+  // if(_eventsManager->hasNextEvent())
+  // {
+  //   // For TimeStepping Scheme, need to update IndexSets, but not for EventDriven scheme
+  //   if(Type::value(*this) != Type::EventDriven)
+  //   {
+  //     updateIndexSets();
+  //   }
+  // }
   DEBUG_END("void Simulation::processEvents()\n");
 }
 
@@ -606,6 +631,15 @@ void Simulation::updateInteractions()
   // detected by Simulation::initialize() changelog code.
   if(_interman)
     _interman->updateInteractions(shared_from_this());
+}
+
+void Simulation::computeResidu()
+{
+  DEBUG_BEGIN("Simulation::computeResidu()\n");
+  OSIIterator itOSI;
+  for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+    (*itOSI)->computeResidu();
+  DEBUG_END("Simulation::computeResidu()\n");
 }
 
 void Simulation::updateInput(unsigned int)

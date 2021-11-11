@@ -1,6 +1,6 @@
 include(tools4tests)
 
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
 
   # If WITH_SYSTEM_SUITESPARSE, suite sparse is an imported target
   # that must sometimes be taken into account by tests.
@@ -231,7 +231,12 @@ if(WITH_${COMPONENT}_TESTING)
     EXTRA_SOURCES data_collection_gfc3d_1.c test_nsn_gfc3d_1.c)
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_1
-    EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c)
+    EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c )
+
+  
+  new_tests_collection(
+    DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc2d_1.c test_first_order_gfc2d_1.c )
 
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
@@ -273,10 +278,10 @@ if(WITH_${COMPONENT}_TESTING)
       )
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_solvers_wr_gfc3d_fclib.c DEPS FCLIB::fclib
+      EXTRA_SOURCES data_collection_gfc3d_fclib_1.c test_solvers_wr_gfc3d_fclib.c DEPS FCLIB::fclib
       HDF5 ON
       )
-    
+
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
@@ -305,7 +310,14 @@ if(WITH_${COMPONENT}_TESTING)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_1
     EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_1.c)
+
+  
+  new_tests_collection(
+    DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_2
+    EXTRA_SOURCES data_collection_fc2d_2.c test_fc2d_2.c)
   # test fc2d dense, for enum solvers. Files from data_collection_fc2d_1.c lead to timeout.
+  
+  
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_ENUM
     EXTRA_SOURCES data_collection_fc2d_enum.c test_fc2d_enum.c)

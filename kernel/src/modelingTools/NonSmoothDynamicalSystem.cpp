@@ -198,12 +198,19 @@ void NonSmoothDynamicalSystem::pushInteractionsInMemory()
     SP::InteractionsGraph indexSet0 = _topology->indexSet0();
     for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
-      indexSet0->bundle(*ui)->swapInOldVariables();
       indexSet0->bundle(*ui)->swapInMemory();
     }
   }
 }
-
+void NonSmoothDynamicalSystem::updateDSPlugins(double time)
+{
+  //could be better to call bind method
+  DynamicalSystemsGraph::VIterator vi;
+  for(vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
+  {
+    dynamicalSystems()->bundle(*vi)->updatePlugins(time);
+  }
+}
 void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
 {
 

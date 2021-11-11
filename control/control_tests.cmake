@@ -1,6 +1,6 @@
 include(tools4tests)
 
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
   # ----  Control tests ----
   begin_tests(src/tests DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
 

@@ -1,6 +1,6 @@
 include(tools4tests)
 
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
 
   # ---- Collision/native tests ----
   begin_tests(src/collision/native/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")

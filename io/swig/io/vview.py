@@ -91,7 +91,7 @@ class VViewOptions(object):
 
 
 
-        
+
     ## Print usage information
     def usage(self, long=False):
         print(__doc__); print()
@@ -137,8 +137,8 @@ class VViewOptions(object):
        do not use vtk depth peeling
      --maximum-number-of-peels= value
        maximum number of peels when depth peeling is on
-     --occlusion-ration= value
-       occlusion-ration when depth peeling is on
+     --occlusion-ratio= value
+       occlusion-ratio when depth peeling is on
      --normalcone-ratio = value  (default : 1.0 )
        introduce a ratio between the representation of the contact
        forces arrows the normal cone and the contact points. useful
@@ -158,19 +158,19 @@ class VViewOptions(object):
      --ortho=scale
        start in ortho mode with given parallel scale
        (default=perspective)
-      --with-charts=value
+     --with-charts=value
        display convergence charts
      --visible=all
        all: view all contactors and avatars
        avatars: view only avatar if an avatar is defined (for each
        object) contactors: ignore avatars, view only contactors where
        avatars are contactors with collision_group=-1
-     --with_edges
+     --with-edges
        add edges in the rendering (experimental for primitives)
-     --with_fixed_color
+     --with-fixed-color
        use fixed color defined in the config file
-     --depth-2d
-       fix depth for 2D objects     
+     --depth-2d=<value>
+       specify a depth for 2D objects
      --verbose=<int verbose_level>
     """)
 
@@ -262,7 +262,7 @@ class VViewOptions(object):
 
             elif o == '--with-charts=':
                 self.with_charts = int(a)
-                
+
             elif o == '--depth-2d':
                 self.depth_2d = float(a)
 
@@ -274,14 +274,14 @@ class VViewOptions(object):
 
             elif o == '--with-fixed-color':
                 self.with_random_color = False
-                
+
             elif o == '--verbose':
                 self.verbose = int(a)
 
 
         if self.verbose >=1:
             self.display()
-        
+
 
         if self.frames_per_second == 0:
             self.frames_per_second = 25
@@ -296,7 +296,7 @@ class VViewOptions(object):
     def display(self):
 
         display_str = \
-        """[io.VViewOptions] Display vview options: 
+        """[io.VViewOptions] Display vview options:
         min_time : {0}
         min_time : {1}
         cf_disable : {2}
@@ -341,11 +341,11 @@ class VViewOptions(object):
                    self.depth_2d,
                    self.verbose
                    )
-        
 
 
 
-        
+
+
         print(display_str)
         # self.cf_scale_factor = 1
         # self.normalcone_ratio = 1
@@ -372,7 +372,7 @@ class VViewOptions(object):
         # self.depth=0.1
         # self.verbose=0
 
-            
+
 
 
 class VExportOptions(VViewOptions):
@@ -447,7 +447,7 @@ class VExportOptions(VViewOptions):
                 self.depth_2d = float(a)
             if o in ('--verbose'):
                 self.verbose = int(a)
-        
+
         if self.verbose >=1:
             self.display()
 
@@ -620,7 +620,7 @@ class InputObserver():
 
     def update(self):
         self.vview.print_verbose('InputObserver -  update at time', self._time)
-        
+
         self.vview.io_reader.SetTime(self._time)
 
         if self._times is None:
@@ -637,7 +637,7 @@ class InputObserver():
 
         self.vview.set_dynamic_actors_visibility(self.vview.io_reader._time)
         self.vview.set_static_actors_visibility(self.vview.io_reader._time)
-        
+
         pos_data = self.vview.io_reader.pos_data
 
         self.vview.set_position(pos_data)
@@ -792,7 +792,7 @@ class InputObserver():
         # else:
         #     self.vview.print_verbose('InputObserver -  key not recognized')
         #     key_recognized=False
-        
+
         # if(key_recognized):
         self.update()
 
@@ -969,6 +969,15 @@ class IOReader(VTKPythonAlgorithmBase):
         self._index = id_t
         self.pos_data = self._idpos_data[self._id_t_m, :]
         self.velo_data = self._ivelo_data[self._id_t_m, :]
+
+        static_id_t = max(0, numpy.searchsorted(self._static_times, t, side='right') - 1)
+        if static_id_t < len(self._static_indices)-1:
+            self._static_id_t_m = list(range(self._static_indices[static_id_t],
+                                             self._static_indices[static_id_t+1]))
+        else:
+            self._static_id_t_m = [self._static_indices[static_id_t]]
+
+        self.pos_static_data = self._ispos_data[self._static_id_t_m, :]
 
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName('pos_data')
@@ -1151,6 +1160,12 @@ class IOReader(VTKPythonAlgorithmBase):
         # build times steps
         self._times, self._indices = numpy.unique(self._raw_times,
                                                   return_index=True)
+        # all times as hdf5 slice for static objects
+        self._static_raw_times = self._ispos_data[:, 0]
+
+        # build times steps for static objects
+        self._static_times, self._static_indices = numpy.unique(self._static_raw_times,
+                                                                return_index=True)
         dcf = self._times[1:]-self._times[:-1]
         self._avg_timestep = numpy.mean(dcf)
         self._min_timestep = numpy.min(dcf)
@@ -1248,7 +1263,7 @@ class VView(object):
     def __init__(self, io, options, config=None):
         self.opts = options
         self.config = [config,VViewConfig()][config is None]
-        
+
         self.gui_initialized = False
         self.io = io
         self.refs = []
@@ -1312,7 +1327,7 @@ class VView(object):
     def print_verbose(self, *args, **kwargs):
         if self.opts.verbose:
             print('[io.vview]', *args, **kwargs)
-            
+
     def print_verbose_level(self, level, *args, **kwargs):
         if level <= self.opts.verbose:
             print('[io.vview]', *args, **kwargs)
@@ -1724,7 +1739,7 @@ class VView(object):
                 for id_, vertice in enumerate(data):
                     points.InsertNextPoint(vertice[0], vertice[1], - self.opts.depth_2d/2.0)
                     convex.GetPointIds().SetId(id_, id_)
-                    points.InsertNextPoint(vertice[0], vertice[1], -self.opts.depth_2d/2.0)
+                    points.InsertNextPoint(vertice[0], vertice[1], + self.opts.depth_2d/2.0)
                     convex.GetPointIds().SetId(id_+number_of_vertices, id_+number_of_vertices)
 
             source = ConvexSource(convex, points)
@@ -1923,15 +1938,17 @@ class VView(object):
             actor = vtk.vtkActor()
             if self.opts.with_edges:
                 actor_edge = vtk.vtkActor()
+
             if instance.attrs.get('mass', 0) > 0:
                 # objects that may move
                 self.dynamic_actors[instid].append((actor, contact_shape_indx,
                                                     collision_group))
                 actor.GetProperty().SetOpacity(
                     self.config.get('dynamic_opacity', 0.7))
-                actor.GetProperty().SetColor(
-                    self.config.get('dynamic_bodies_color', [0.3,0.3,0.3]))
 
+                actor.GetProperty().SetColor(
+                    instance.attrs.get('color',
+                                       self.config.get('dynamic_bodies_color', [0.3,0.3,0.3])))
                 if self.opts.with_edges:
                     self.dynamic_actors[instid].append((actor_edge, contact_shape_indx,
                                                     collision_group))
@@ -1944,10 +1961,10 @@ class VView(object):
                 self.static_actors[instid].append((actor, contact_shape_indx,
                                                    collision_group))
                 actor.GetProperty().SetOpacity(
-
                     self.config.get('static_opacity', 1.0))
                 actor.GetProperty().SetColor(
-                        self.config.get('static_bodies_color', [0.5,0.5,0.5]))
+                    instance.attrs.get('color',
+                                       self.config.get('static_bodies_color', [0.5,0.5,0.5])))
 
             if self.opts.with_random_color :
                 actor.GetProperty().SetColor(random_color())
@@ -2084,7 +2101,7 @@ class VView(object):
         # all objects are set to a nan position at startup,
         # so they are invisibles
 
-        
+
         if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
             or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
             print('Bad position for object number', int(instance),' :',  q0, q1, q2, q3, q4, q5, q6)
@@ -2148,8 +2165,8 @@ class VView(object):
                     #print('inertia', self.inertia[instance])
                     #print('kinetic_energy', kinetic_energy)
                     cc[instance]._datas[4][:] = kinetic_energy
-                        
-                    
+
+
 
         self.set_velocity_v = numpy.vectorize(set_velocity)
 
@@ -2188,7 +2205,7 @@ class VView(object):
         else:
             for actor, index, group in self.dynamic_actors[instance]:
                 actor.VisibilityOff()
-                
+
     # set visibility for all actors associated to a static instance
     def set_static_instance_visibility(self, instance, time):
         tob = self.times_of_birth.get(instance, -1)
@@ -2215,7 +2232,7 @@ class VView(object):
 
     def set_dynamic_actors_visibility(self, time):
         self.set_visibility_v(list(self.dynamic_actors.keys()), time)
-        
+
     def set_static_actors_visibility(self, time):
         self.set_visibility_static_v(list(self.static_actors.keys()), time)
 
@@ -2351,7 +2368,7 @@ class VView(object):
             #         actor.VisibilityOn()
 
         self.set_position(*self.pos_t0)
-            
+
         self.set_static_actors_visibility(self.time0)
         self.set_dynamic_actors_visibility(self.time0)
 
@@ -2602,9 +2619,12 @@ class VView(object):
             # just the generation of a parallel command
             options_str = ''
             if self.opts.ascii_mode:
-                options_str += '--ascii'
+                options_str += '--ascii '
             if self.opts.global_filter:
-                options_str += '--global-filter'
+                options_str += '--global-filter '
+            if self.opts.depth_2d != 0.1:
+                options_str += ' --depth-2d='+str(self.opts.depth_2d)
+
             ntimes_proc = int(ntime / self.opts.nprocs)
             s = ''
             for i in range(self.opts.nprocs):
@@ -2626,20 +2646,23 @@ class VView(object):
 
             packet = int(ntime/100)+1
 
-            # independant of time
-            spos_data = self.io_reader._spos_data
-            if spos_data.size > 0:
-                self.set_position_v(spos_data[:, 1], spos_data[:, 2],
-                                    spos_data[:, 3],
-                                    spos_data[:, 4], spos_data[:, 5],
-                                    spos_data[:, 6],
-                                    spos_data[:, 7], spos_data[:, 8])
 
             for time in times:
                 k = k + self.opts.stride
                 if (k % packet == 0):
                     sys.stdout.write('.')
+
                 self.io_reader.SetTime(time)
+
+                spos_data = self.io_reader.pos_static_data
+                #print('spos_data at time 1' , time, spos_data)
+                if spos_data.size > 0:
+                    self.set_position_v(spos_data[:, 1], spos_data[:, 2],
+                                        spos_data[:, 3],
+                                        spos_data[:, 4], spos_data[:, 5],
+                                        spos_data[:, 6],
+                                        spos_data[:, 7], spos_data[:, 8])
+
 
                 pos_data = self.io_reader.pos_data
                 velo_data = self.io_reader.velo_data

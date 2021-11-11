@@ -75,7 +75,7 @@ void GlobalRollingFrictionContact::initialize(SP::Simulation sim)
 SP::GlobalRollingFrictionContactProblem GlobalRollingFrictionContact::globalRollingFrictionContactProblem()
 {
   SP::GlobalRollingFrictionContactProblem numerics_problem(globalRollingFrictionContactProblem_new());
-  numerics_problem->M = &*_M->numericsMatrix();
+  numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
   numerics_problem->b = _b->getArray();
@@ -89,7 +89,7 @@ SP::GlobalRollingFrictionContactProblem GlobalRollingFrictionContact::globalRoll
 GlobalRollingFrictionContactProblem *GlobalRollingFrictionContact::globalRollingFrictionContactProblemPtr()
 {
   GlobalRollingFrictionContactProblem *numerics_problem = &_numerics_problem;
-  numerics_problem->M = &*_M->numericsMatrix();
+  numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
   numerics_problem->b = _b->getArray();
@@ -177,9 +177,9 @@ bool GlobalRollingFrictionContact::preCompute(double time)
     size_t sizeM = 0;
 
 
-    // fill _M
-    _M->fillM(DSG0);
-    sizeM = _M->size();
+    // fill _W
+    _W->fillW(DSG0);
+    sizeM = _W->size();
     _sizeGlobalOutput = sizeM;
     DEBUG_PRINTF("sizeM = %lu \n", sizeM);
 
@@ -198,8 +198,9 @@ bool GlobalRollingFrictionContact::preCompute(double time)
       DEBUG_PRINTF("offset = %lu \n", offset);
 
       OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
-      OSI::TYPES osiType = Osi.getType();
-      if(osiType == OSI::MOREAUJEANGOSI)
+
+
+      if (typeid(Osi) == typeid(MoreauJeanGOSI))
       {
         VectorOfVectors& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
 
@@ -216,7 +217,7 @@ bool GlobalRollingFrictionContact::preCompute(double time)
       }
       else
       {
-        THROW_EXCEPTION("GlobalRollingFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osiType));
+        THROW_EXCEPTION("GlobalRollingFrictionContact::computeq. Not yet implemented for Integrator type.");
       }
       offset += dss;
     }
@@ -252,15 +253,13 @@ bool GlobalRollingFrictionContact::preCompute(double time)
       OneStepIntegrator& Osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
       OneStepIntegrator& Osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
 
-      OSI::TYPES osi1Type = Osi1.getType();
-      OSI::TYPES osi2Type = Osi2.getType();
-      if(osi1Type == OSI::MOREAUJEANGOSI  && osi2Type == OSI::MOREAUJEANGOSI)
+      if (typeid(Osi1) == typeid(MoreauJeanGOSI) and typeid(Osi2) == typeid(MoreauJeanGOSI))
       {
-        static_cast<MoreauJeanGOSI&>(Osi1).NSLcontrib(inter, *this);
+        static_cast<MoreauJeanGOSI&>(Osi1).NonSmoothLawContributionToOutput(inter, *this);
       }
       else
       {
-        THROW_EXCEPTION("GlobalRollingFrictionContact::computeq. Not yet implemented for Integrator type : " + std::to_string(osi1Type));
+        THROW_EXCEPTION("GlobalRollingFrictionContact::computeq. Not yet implemented for Integrator type.");
       }
       SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
       pos =  indexSet.properties(*ui).absolute_position;
@@ -352,7 +351,46 @@ void GlobalRollingFrictionContact::updateMu()
 }
 void GlobalRollingFrictionContact::display() const
 {
-  GlobalFrictionContact::display();
+
+  std::cout << "===== " << _contactProblemDim << "D Global Rolling Friction Contact Problem " <<std::endl;
+  std::cout << "size (_sizeOutput) " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim << " contacts)."<<std::endl;
+  std::cout << "and  size (_sizeGlobalOutput) " << _sizeGlobalOutput  <<std::endl;
+  std::cout << "_numericsMatrixStorageType" << _numericsMatrixStorageType<< std::endl;
+  std::cout << " - Matrix M  : " <<std::endl;
+  // if (_W) _W->display();
+  // else std::cout << "-> nullptr" <<std::endl;
+  NumericsMatrix* W_NM = _W->numericsMatrix().get();
+  if(W_NM)
+  {
+    NM_display(W_NM);
+  }
+  std::cout << " - Matrix H : " <<std::endl;
+  // if (_H) _H->display();
+  // else std::cout << "-> nullptr" <<std::endl;
+  NumericsMatrix* H_NM = _H->numericsMatrix().get();
+  if(H_NM)
+  {
+    NM_display(H_NM);
+  }
+
+  std::cout << " - Vector q : " <<std::endl;
+  if(_q) _q->display();
+  else std::cout << "-> nullptr" <<std::endl;
+  std::cout << " - Vector b : " <<std::endl;
+  if(_b) _b->display();
+  else std::cout << "-> nullptr" <<std::endl;
+
+  std::cout << " - Vector z (reaction) : " <<std::endl;
+  if(_z) _z->display();
+  else std::cout << "-> nullptr" <<std::endl;
+
+  std::cout << " - Vector w (local velocities): " <<std::endl;
+  if(_w) _w->display();
+  else std::cout << "-> nullptr" <<std::endl;
+
+  std::cout << " - Vector globalVelocities : " <<std::endl;
+  if(_globalVelocities) _globalVelocities->display();
+  else std::cout << "-> nullptr" <<std::endl;
 
 
   std::cout << " - Vector mu : " <<std::endl;
@@ -374,6 +412,7 @@ void GlobalRollingFrictionContact::display() const
     std::cout  << std::endl;
   }
   else std::cout << "-> nullptr" <<std::endl;
+  std::cout << "============================================================" <<std::endl;
 
 
 }

@@ -87,7 +87,7 @@
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
 			<FrictionContact Type="2">
-				<NonSmoothSolver Name="F2D_NSGS">
+				<NonSmoothSolver Name="FC2D_NSGS">
 					<iparam  vectorSize='5'>101 0 0 0 0</iparam>
 					<dparam  vectorSize='5'>1e-5 0 0 0 0</dparam>
 				</NonSmoothSolver>

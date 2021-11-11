@@ -32,4 +32,7 @@ RUN apt update  && apt install -y -qq \
         valgrind \
         python3-lxml \
         python3-h5py \
+        pkg-config \
         vim && apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
+
+

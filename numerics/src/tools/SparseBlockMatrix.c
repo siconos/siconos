@@ -1594,6 +1594,66 @@ void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned i
     }
   }
 }
+void SBM_row_prod_no_diag_2x2(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
+{
+  /*
+     If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
+     i and column j (Warning: i and j are indices of block position,
+     not scalar component positions)
+
+     Then SBM_row_prod_no_diag computes y = sum for i not equal to j of
+     Aij.xj over a row of blocks (or += if init = false)
+
+     currentRowNumber represents the position (block number) of the
+     required line of blocks in the matrix A.
+  */
+
+  /* Number of columns of the current block */
+  unsigned int nbColumns;
+
+  /* Position of the sub-block of x multiplied by the sub-block of
+   * A */
+  unsigned int posInX = 0;
+
+  /* Look for the first element of the wanted row */
+
+  /* Assertions */
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
+  assert(currentRowNumber <= A->blocknumber0);
+
+  /* Loop over all non-null blocks. Works whatever the ordering order
+     of the block is, in A->block, but it requires a set to 0 of all y
+     components
+  */
+  for(size_t blockNum = A->index1_data[currentRowNumber];
+      blockNum < A->index1_data[currentRowNumber + 1];
+      ++blockNum)
+  {
+    /* Get row/column position of the current block */
+    size_t colNumber = A->index2_data[blockNum];
+
+    /* Computes product only for extra diagonal blocks */
+    if(colNumber != currentRowNumber)
+    {
+      /* Get dim(columns) of the current block */
+      nbColumns = A->blocksize1[colNumber];
+      if(colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+
+      /* Get position in x of the sub-block multiplied by A sub-block */
+      posInX = 0;
+      if(colNumber != 0)
+        posInX += A->blocksize0[colNumber - 1];
+      /* Computes y[] += currentBlock*x[] */
+      /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
+      assert((nbColumns == 2));
+      mvp2x2(A->block[blockNum], &x[posInX], y);
+    }
+  }
+}
 void SBM_row_prod_no_diag_1x1(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
 {
   /*

@@ -51,7 +51,7 @@ extern "C"
       \param worktmp work vector
       \param[in,out] error value
    */
-  void rolling_fc3d_unitary_compute_and_add_error(double r[3] , double u[3], double mu, double mur, double * error, double * worktmp);
+  void rolling_fc3d_unitary_compute_and_add_error(double r[5] , double u[5], double mu, double mur, double * error, double * worktmp);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

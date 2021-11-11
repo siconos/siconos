@@ -229,6 +229,9 @@ public:
 
   virtual SP::SimpleMatrix C() const = 0;
 
+  virtual SP::SimpleMatrix H() const = 0;
+
+  
   /** return true if the relation is linear.
       \return bool
    */

@@ -28,10 +28,10 @@
 #include "fc2d_Solvers.h"            // for fc2d_cpg, fc2d_enum
 #include "numerics_verbose.h"        // for numerics_error, verbose, numeric...
 
-const char* const   SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
-const char* const   SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
-const char* const   SICONOS_FRICTION_2D_LEMKE_STR  = "F2D_LEMKE";
-const char* const   SICONOS_FRICTION_2D_ENUM_STR  = "F2D_ENUM";
+const char* const   SICONOS_FRICTION_2D_NSGS_STR  = "FC2D_NSGS";
+const char* const   SICONOS_FRICTION_2D_CPG_STR  = "FC2D_CPG";
+const char* const   SICONOS_FRICTION_2D_LEMKE_STR  = "FC2D_LEMKE";
+const char* const   SICONOS_FRICTION_2D_ENUM_STR  = "FC2D_ENUM";
 //#define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
@@ -47,8 +47,9 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
 
 #ifdef DUMP_PROBLEM
   char fname[256];
-  sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
-  printf("Dump of FrictionContactProblem%.5d.dat", fccounter);
+  int ncc = problem->numberOfContacts;
+  sprintf(fname, "fc2d_granularflowonwall_%.5d_%.5d.dat", ncc, fccounter++);
+  printf("Dump %s file\n", fname);
 
   FILE * foutput  =  fopen(fname, "w");
   frictionContact_printInFile(problem, foutput);
@@ -80,36 +81,30 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
 
   /* Non Smooth Gauss Seidel (NSGS) */
 
-  if(problem->M->storageType == 1)
+  if(problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE )
   {
 
     if(options->solverId == SICONOS_FRICTION_2D_NSGS)
     {
       numerics_printf(" ======================= Call Sparse NSGS solver for Friction-Contact 2D problem ======================");
-      fc2d_nsgs_sbm(problem, reaction, velocity, &info, options);
+      fc2d_nsgs(problem, reaction, velocity, &info, options);
     }
     else
     {
 
-      SparseBlockStructuredMatrix * M =  problem->M->matrix1;
-      int n = M->blocksize0[M->blocknumber0 - 1];
-      int m = M->blocksize1[M->blocknumber1 - 1];
-      double * denseMat = (double*)malloc(n*m*sizeof(double));
-      SBM_to_dense(M, denseMat);
+      NumericsMatrix* M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
+      NM_to_dense(problem->M, M_dense);
+      NumericsMatrix* M_original = problem->M;
+      problem->M = M_dense;
 
-      problem->M->matrix0  = denseMat;
-      problem->M->storageType =0;
       info = fc2d_driver(problem, reaction, velocity, options);
 
-      NM_clearDense(problem->M);
-      problem->M->matrix1  = M;
-      problem->M->storageType =1;
-
-
+      NM_free(M_dense);
+      problem->M = M_original;
     }
 
   }
-  else if(problem->M->storageType == 0)
+  else if(problem->M->storageType == NM_DENSE)
   {
 
     switch(options->solverId)

@@ -1,6 +1,7 @@
-numpy
-scipy
+#numpy
+#scipy
 pyhull
-pytest
-h5py
+#pytest
+#h5py
 lxml
+matplotlib

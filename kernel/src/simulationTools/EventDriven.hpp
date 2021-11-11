@@ -110,6 +110,10 @@ public:
 
   /** Overload Simulation::initialize */
   void initialize();
+ 
+  /** First (and unique) run of initialization step.
+  */
+  void firstInitialize();
 
   /* Getters and setters */
 
