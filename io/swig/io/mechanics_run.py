@@ -2715,10 +2715,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 bullet_options.minimumPointsPerturbationThreshold = \
                     3 * multipoints_iterations
 
+        # MB: this may be in conflict with 'dimension' attribute
         if bullet_options.dimension == SICONOS_BULLET_2D:
             self._dimension = 2
         else:
-            self._dimension = 3
+            if (self._out.attrs.get('dimension', None) is None):
+                # this is a second place to set the default
+                self._dimension = 3
 
         self._interman = interaction_manager(bullet_options)
 
