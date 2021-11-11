@@ -821,7 +821,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['skip_last_update_input']=False
         d['skip_reset_lambdas']=False
         d['osns_assembly_type']= None
-                
+
 
         super(self.__class__, self).__init__(d)
 
@@ -1248,7 +1248,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             inertia_ok = True
 
                 if inertia_ok:
-                    # create the dynamics object with mass and inertia  
+                    # create the dynamics object with mass and inertia
                     body = body_class(translation + orientation,
                                       velocity, mass, inertia)
                     body.setUseContactorInertia(False)
@@ -1837,7 +1837,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             orientation= (angle,)
                             translation = (translation[0],translation[1])
                             velocity =  (velocity[0],velocity[1],velocity[5])
-     
+
                     else:
                         # start from initial conditions
                         translation = obj.attrs['translation']
@@ -1906,7 +1906,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         #print('ind_time', ind_time)
         #print('self._scheduled_deaths', self._scheduled_deaths )
         #print('self._deaths', self._deaths )
-         
+
         current_times_of_deaths = set(self._scheduled_deaths[:ind_time])
         #print('current_times_of_deaths', current_times_of_deaths )
         self._scheduled_deaths = self._scheduled_deaths[ind_time:]
@@ -2146,7 +2146,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
     def output_results(self,with_timer=False):
-                            
+
         self.log(self.output_static_objects, with_timer)()
 
         self.log(self.output_dynamic_objects, with_timer)()
@@ -2182,7 +2182,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if so.dparam[i] <= 1e24:
                     d['solver_options']['dparam['+ str(i)+']'] = float(so.dparam[i])
             # d['solver_options']['numberOfInternalSolvers']=so.numberOfInternalSolvers        # fix it
-            
+
         sop = d['solver_options_pos']
         if sop :
             d['solver_options_pos'] = {}
@@ -2216,7 +2216,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         d['friction_contact_trace_params']='not serialized'   # fix it
         d['osi'] = 'not serialized'        # fix it
         d['time_stepping'] = 'not serialized'        # fix it
-        
+
         d['start_run_iteration_hook']='not serialized'        # fix it
         d['end_run_iteration_hook']='not serialized'          # fix it
         if d['set_external_forces'] is not None:
@@ -2224,7 +2224,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 d['set_external_forces']= d['set_external_forces'].__name__ + '(name serialized)'
             except :
                 d['set_external_forces']= 'not serialized'
-                
+
         if d['controller'] is not None:
             try :
                 d['controller']= d['controller'].__name__ + '(name serialized)'
@@ -2390,7 +2390,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)
                 if s.displayNewtonConvergence():
                     s.displayNewtonConvergenceInTheLoop()
-                    
+
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration)
 
@@ -2586,7 +2586,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.print_verbose('\nyou should consider to use a run_options dictionnary')
             self.print_verbose('we create a run_options for you and fill it with given options')
             self.print_verbose('some new options may not be available without run_options')
-                
+
             run_options=MechanicsHdf5Runner_run_options()
             run_options['with_timer']=with_timer
             run_options['time_stepping']=time_stepping
@@ -2632,9 +2632,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['start_run_iteration_hook']=start_run_iteration_hook
             run_options['end_run_iteration_hook']=end_run_iteration_hook
             run_options['skip_last_update_output']=skip_last_update_output
-            
 
-        
+
+
         self._run_options=run_options
 
         self.print_verbose('run with run_options ...')
@@ -2645,7 +2645,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.print_verbose('setup model simulation ...')
         if run_options['set_external_forces'] is not None:
             self._set_external_forces = run_options['set_external_forces']
-            
+
         interaction_manager=run_options['interaction_manager']
         if  interaction_manager is None:
             interaction_manager = default_manager_class
@@ -2721,8 +2721,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self._dimension = 3
 
         self._interman = interaction_manager(bullet_options)
-       
-        
+
+
         joints = list(self.joints())
         if hasattr(self._interman, 'useEqualityConstraints'):
             if len(joints) == 0:
@@ -2849,7 +2849,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         msg = "Unknown nslaw type"
                         msg += str(set(nslaw_type_list))
                         raise RuntimeError(msg)
-                    
+
             if osnspb_assembly_type :
                 osnspb.setMStorageType(sn.NM_SPARSE)
                 osnspb.setAssemblyType(osnspb_assembly_type)
@@ -2918,7 +2918,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         simulation.setNewtonMaxIteration(run_options['Newton_max_iter'])
         simulation.setNewtonTolerance(run_options['Newton_tolerance'])
 
-        
+
         simulation.setSkipLastUpdateOutput(run_options.get('skip_last_update_output'))
         simulation.setSkipLastUpdateInput(run_options.get('skip_last_update_input'))
         simulation.setSkipResetLambdas(run_options.get('skip_reset_lambdas'))

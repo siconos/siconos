@@ -578,7 +578,7 @@ class MechanicsHdf5(object):
                                use_compression=self._use_compression)
         self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
                                       use_compression=self._use_compression)
-        
+
         try:
             self._log_data = group(self._data, 'log')
         except Exception as e:
@@ -958,10 +958,10 @@ class MechanicsHdf5(object):
         the computation of inertia and center of mass if not provided.
 
         The  body-fixed frame is assumed to be the global inertial
-        frame. This means that 
-        1. By default, the center of mass is located at the origin. 
+        frame. This means that
+        1. By default, the center of mass is located at the origin.
         The initial translation is applied from this point, so that x_g(0) = translation
-        2. the  orientation is identical to the inertial frame. 
+        2. the  orientation is identical to the inertial frame.
         The initial orientation is applied to the inertial frame to obtain
         the body-fixed frame.
 
