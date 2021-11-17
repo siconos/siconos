@@ -20,12 +20,12 @@
 #include <stdlib.h>                        // for exit, EXIT_FAILURE
 #include "Friction_cst.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
 #include "GlobalRollingFrictionContactProblem.h"  // for GlobalFrictionContactProblem
-#include "NonSmoothDrivers.h"              // for gfc3d_driver
+#include "NonSmoothDrivers.h"              // for g_rolling_fc3d_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "NumericsMatrix.h"                // 
 
-#include "global_rolling_fc_Solvers.h"                 // for gfc3d_ACLMFixedPoint, gfc3...
+#include "global_rolling_fc_Solvers.h"     // for grfc3d...
 #include "numerics_verbose.h"              // for numerics_printf_verbose
 //#include "gfc3d_compute_error.h"
 //#include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
@@ -37,6 +37,7 @@
 #endif
 
 const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR = "GFC3D_NSGS_WR";
+
 #ifdef WITH_FCLIB
 #include "string.h"                  // for strcpy, strcat
 #include "fclib_interface.h"         // for frictionContact_fclib_write, fri...
@@ -126,13 +127,13 @@ int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem, double *
     grfc3d_nsgs_wr(problem, reaction, velocity, globalVelocity, &info, options);
     break;
   }
-  /* case SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM: */
-  /* { */
-  /*   grfc3d_IPM(problem, reaction, velocity, */
-  /*              globalVelocity, &info, options); */
-  /*   break; */
+   case SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM:
+  {
+     grfc3d_IPM(problem, reaction, velocity,
+                globalVelocity, &info, options);
+     break;
 
-  /* } */
+  }
   default:
   {
     fprintf(stderr, "Numerics, grfc3d_driver failed. Unknown solver %d.\n", options->solverId);

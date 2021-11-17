@@ -44,6 +44,7 @@
 #include "fc2d_Solvers.h"                   // for fc2d_nsgs_set_default
 #include "fc3d_Solvers.h"                   // for fc3d_nsgs_set_default
 #include "gfc3d_Solvers.h"                  // for gfc3d_aclmfp_set_default
+#include "global_rolling_fc_Solvers.h"      // for grfc3d_IPM_set_default
 #include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
 #include "mlcp_cst.h"                       // for SICONOS_MLCP_DIRECT_ENUM_STR
 #include "numerics_verbose.h"               // for numerics_printf, numerics...
@@ -895,7 +896,12 @@ SolverOptions * solver_options_create(int solverId)
     rfc3d_nsgs_set_default(options);
     break;
   }
-
+  case SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM:
+  {
+    options = solver_options_initialize(solverId, 20000, 1e-6, 0);
+    grfc3d_IPM_set_default(options);
+    break;
+  }
 
   case SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint:
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:

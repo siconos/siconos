@@ -1,4 +1,4 @@
-/* Siconos is a program dedicated to modeling, simulation and control
+ /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
  * Copyright 2021 INRIA.
