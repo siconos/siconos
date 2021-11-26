@@ -27,26 +27,30 @@
 #include "SiconosBlas.h"         // for cblas_dscal, cblas_dcopy
 #include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
+#include "io_tools.h"          // for check_hdf5_file
 
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "siconos_debug.h"             // for DEBUG_PRINT, DEBUG_PRINTF
+#if defined(WITH_FCLIB)
+#include "fclib_interface.h"    // for globalRollingFrictionContact_fclib_read
+#endif
 
 
 GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new(void)
 {
-  GlobalRollingFrictionContactProblem* fcp = (GlobalRollingFrictionContactProblem*) malloc(sizeof(GlobalRollingFrictionContactProblem));
-  fcp->dimension = 0;
-  fcp->numberOfContacts = 0;
-  fcp->M = NULL;
-  fcp->H = NULL;
-  fcp->q = NULL;
-  fcp->b = NULL;
-  fcp->mu = NULL;
-  fcp->mu_r = NULL;
+  GlobalRollingFrictionContactProblem* problem = (GlobalRollingFrictionContactProblem*) malloc(sizeof(GlobalRollingFrictionContactProblem));
+  problem->dimension = 0;
+  problem->numberOfContacts = 0;
+  problem->M = NULL;
+  problem->H = NULL;
+  problem->q = NULL;
+  problem->b = NULL;
+  problem->mu = NULL;
+  problem->mu_r = NULL;
 
-  return fcp;
+  return problem;
 }
 
 
@@ -59,6 +63,7 @@ void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* p
   printf("GlobalRollingFrictionContact Display :\n-------------\n");
   printf("dimension :%d \n", problem->dimension);
   printf("numberOfContacts:%d \n", problem->numberOfContacts);
+  int m = problem->M->size0;
 
   if(problem->M)
   {
@@ -79,17 +84,17 @@ void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* p
   if(problem->q)
   {
     printf("q vector:\n");
-    NM_vector_display(problem->q,n);
+    for(unsigned int i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
   }
   else
     printf("No q vector:\n");
   if(problem->b)
   {
     printf("b vector:\n");
-    NM_vector_display(problem->b,n);
+    for(unsigned int i = 0; i < n; i++) printf("b[ %i ] = %12.8e\n", i, problem->b[i]);
   }
   else
-    printf("No q vector:\n");
+    printf("No b vector:\n");
 
   if(problem->mu)
   {
@@ -210,12 +215,33 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContact_newFromFile(FI
 GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filename(const char* filename)
 {
   GlobalRollingFrictionContactProblem* problem = NULL;
-  FILE * file = fopen(filename, "r");
-  if(!file)
-    numerics_error("GlobalRollingFrictionContactProblem", "Can not open file ", filename);
+  printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 001 OK\n");
+  int is_hdf5 = check_hdf5_file(filename);
 
-  problem = globalRollingFrictionContact_newFromFile(file);
-  fclose(file);
+  if(is_hdf5)
+  {
+    printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 002 OK\n");
+#if defined(WITH_FCLIB)
+    printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 003 OK\n");
+    problem = globalRollingFrictionContact_fclib_read(filename);
+    printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 004 OK\n");
+#else
+    numerics_error("GlobalRollingFrictionContactProblem",
+                   "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
+                   filename);
+#endif
+  }
+
+  else
+  {
+    FILE * file = fopen(filename, "r");
+    if(!file)
+      numerics_error("GlobalRollingFrictionContactProblem", "Can not open file ", filename);
+
+    problem = globalRollingFrictionContact_newFromFile(file);
+    fclose(file);
+  }
+  printf("\n globalRollingFrictionContactProblem 009 OK\n");
   return problem;
 }
 
