@@ -37,6 +37,7 @@
 #endif
 
 const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR_STR = "GFC3D_NSGS_WR";
+const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM_STR = "GRFC3D_IPM"; // for printing the name of solver
 
 #ifdef WITH_FCLIB
 #include "string.h"                  // for strcpy, strcat
@@ -58,13 +59,16 @@ int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem, double *
 {
 #ifdef FCLIB_OUTPUT
 #ifdef WITH_FCLIB
+  printf("\n grfc3d_driver.c g_rolling_fc3d_driver 001 OK\n");
   fccounter ++;
   int freq_output=1;
   int nc = problem->numberOfContacts;
   if(nc >0)
   {
+    printf("\n grfc3d_driver.c g_rolling_fc3d_driver 002 OK\n");
     if(fccounter % freq_output == 0)
     {
+      printf("\n grfc3d_driver.c g_rolling_fc3d_driver 003 OK\n");
       char fname[256];
       sprintf(fname, "GRFC3D-%.5d-%.5d.hdf5",  (int)nc, fccounter);
       printf("Dump GRFC3D-%.5d-%.5d.hdf5.\n",  (int)nc, fccounter);
@@ -84,6 +88,7 @@ int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem, double *
                                                description,
                                                mathInfo,
                                                fname);
+      printf("\n grfc3d_driver.c g_rolling_fc3d_driver 004 OK\n");
     }
     /* fclose(foutput); */
   }
@@ -92,7 +97,7 @@ int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem, double *
 #endif
 #endif
 
-
+  printf("\n grfc3d_driver.c g_rolling_fc3d_driver 005 OK\n");
 
 
   assert(options->isSet);
@@ -129,9 +134,11 @@ int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem, double *
   }
    case SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM:
   {
-     grfc3d_IPM(problem, reaction, velocity,
+    printf("\n grfc3d_driver.c g_rolling_fc3d_driver grfc3d_IPM 006 OK\n");
+    grfc3d_IPM(problem, reaction, velocity,
                 globalVelocity, &info, options);
-     break;
+    printf("\n grfc3d_driver.c g_rolling_fc3d_driver grfc3d_IPM 007 OK\n");
+    break;
 
   }
   default:
