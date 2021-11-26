@@ -232,7 +232,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
     *error = *error/relative_scaling;
 
   DEBUG_PRINTF("relative error  of -M v + H R + q = %e\n", *error);
-
+  //printf("relative error  of -M v + H R + q = %e\n", *error);
   /* CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS)); */
 
   double error_complementarity =0.0;
@@ -244,12 +244,29 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
 
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accuaret to machine precision */
+  
+  /* cblas_dcopy(m, problem->b, 1, velocity, 1); */
+  /* NM_tgemv(1, H, globalVelocity, 1.0, velocity); */
+  /* double norm_u = cblas_dnrm2(m,velocity,1); */
+  /* DEBUG_PRINTF("norm of velocity %e\n", norm_u); */
 
-  cblas_dcopy(m, problem->b, 1, velocity, 1);
-  NM_tgemv(1, H, globalVelocity, 1.0, velocity);
-  double norm_u = cblas_dnrm2(m,velocity,1);
-  DEBUG_PRINTF("norm of velocity %e\n", norm_u);
-
+  /* computation of the relative feasibility error = relative norm of the primal residual*/
+  /* |H*v+w-u|/max{|H*v|, |w|, |u|}*/
+  double *primal_residual = (double*)calloc(m,sizeof(double));
+  NM_tgemv(1, H, globalVelocity, 0.0, primal_residual);
+  double norm_Hv = cblas_dnrm2(m, primal_residual, 1);
+  cblas_daxpy(m, 1.0, problem->b, 1, primal_residual, 1);
+  cblas_daxpy(m, -1.0, velocity, 1, primal_residual, 1);
+  double norm_w = cblas_dnrm2(m, problem->b, 1);
+  double norm_u = cblas_dnrm2(m, velocity, 1);
+  relative_scaling = fmax(norm_Hv, fmax(norm_w, norm_u));
+  double norm_primal_residual = cblas_dnrm2(m, primal_residual, 1);
+  if(fabs(relative_scaling) > DBL_EPSILON)
+    *error += norm_primal_residual/relative_scaling;
+  else
+    *error += norm_primal_residual;
+  free(primal_residual);
+  
   double worktmp[3];
   for(int ic = 0 ; ic < nc ; ic++)
   {
@@ -262,6 +279,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
 
   relative_scaling = fmax(norm_u, norm_r);
+  //relative_scaling = fmax(1.0, relative_scaling);
   if(fabs(relative_scaling) > DBL_EPSILON)
     error_complementarity = error_complementarity/relative_scaling;
   DEBUG_PRINTF("relative error in complementarity= %e\n", error_complementarity);
