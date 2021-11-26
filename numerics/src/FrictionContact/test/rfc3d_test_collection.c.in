@@ -47,8 +47,6 @@ int main (int argc, char *argv[])
   int number_of_tests;
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
-  printf("\n rfc3d_test_collection.c.in 001 OK \n");
-
 
 #if defined(TEST_FIRST_ORDER_COLLECTION)
   collection[8].will_fail = 1; /* RFC3D_NSGS ProjectionOnCone, on ./data/rfc3d_sphere_from_grfc3d_dense.dat */

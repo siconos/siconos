@@ -147,8 +147,7 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
   {
     // print solver details
     printf("\n################# start of test # %i #######################\n", test_num);
-    printf("Solver : %s (id: %d) \n", solver_options_id_to_name(collection[test_num].options->solverId),
-           collection[test_num].options->solverId);
+    printf("Solver : %s (id: %d) \n", solver_options_id_to_name(collection[test_num].options->solverId), collection[test_num].options->solverId);
     /* verbose=1; */
     solver_options_print(collection[test_num].options);
     /* verbose=0; */

@@ -243,6 +243,10 @@ double complemResidualNorm_p_F(NumericsMatrix * Qp, NumericsMatrix * Qpinv,
 double dualGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m);
 
 
+/* computation of the relative gap  */
+double relGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m, const double gapVal);
+
+
 /* Establish an array of calculation errors  */
 void setErrorArray(double * error, const double pinfeas, const double dinfeas,
                           const double dualgap, const double complem, const double complem_p);
@@ -326,5 +330,6 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const uns
    by Tutuncu, Toh and Todd, Math.Prog 2003, pp. 195-196
 */
 NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const unsigned int vecSize, const size_t varsCount);
+
 
 #endif

@@ -659,7 +659,23 @@ double complemResidualNorm_p_F(NumericsMatrix * Qp, NumericsMatrix * Qpinv,
 }
 
 /* computation of the duality gap  */
+/* Dual gap = (primal value - dual value)/ (1 + abs(primal value) + abs(dual value)) */
 double dualGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m)
+{
+  double * Mv = (double*)calloc(m, sizeof(double));
+  double vMv, pval, dval;
+
+  NM_gemv(0.5, M, globalVelocity, 0.0, Mv);
+  vMv = cblas_ddot(m, globalVelocity, 1, Mv, 1); // vMv = .5 * v' * M * v
+  free(Mv);
+  pval = vMv - cblas_ddot(m, f, 1, globalVelocity, 1);
+  dval = -vMv - cblas_ddot(nd, w, 1, reaction, 1);
+  return (pval - dval)/ (1 + fabs(pval) + fabs(dval));
+}
+
+/* computation of the relative gap  */
+/* Rel gap = gapVal / (1 + abs(primal value) + abs(dual value)) */
+double relGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m, const double gapVal)
 {
   double * Mv = (double*)calloc(m, sizeof(double));
   double vMv, pval, dval;
@@ -669,7 +685,7 @@ double dualGap(NumericsMatrix * M, const double * f, const double * w, const dou
   free(Mv);
   pval = vMv - cblas_ddot(m, f, 1, globalVelocity, 1);
   dval = -vMv - cblas_ddot(nd, w, 1, reaction, 1);
-  return (pval - dval)/ (1 + fabs(pval) + fabs(dval));
+  return gapVal / (1 + fabs(pval) + fabs(dval));
 }
 
 void setErrorArray(double * error, const double pinfeas, const double dinfeas,

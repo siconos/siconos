@@ -62,6 +62,10 @@ extern "C"
                                         char * mathInfo,
                                         const char *path);
 
+  GlobalRollingFrictionContactProblem* from_fclib_global_rolling(const fclib_global_rolling *fclib_problem);
+
+  GlobalRollingFrictionContactProblem* globalRollingFrictionContact_fclib_read(const char *path);
+
   int globalRollingFrictionContact_fclib_write(GlobalRollingFrictionContactProblem* problem,
                                                char * title,
                                                char * description,
