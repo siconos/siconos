@@ -72,7 +72,7 @@ endif()
 
 
 # --- Tests ---
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
   if(NOT WITH_OCE)
     list(APPEND python_excluded_tests tests/test_occ_inertia.py)
   else()

@@ -1,6 +1,6 @@
 include(tools4tests)
 
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
   if(HAS_FORTRAN)
     begin_tests(netlib/odepack/test DEPS "LAPACK::LAPACK")
     set(odepacktests DLSODES DLSODAR DLSODI DLSODPK

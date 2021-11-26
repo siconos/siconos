@@ -1,6 +1,6 @@
 include(tools4tests)
 
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
   
   
   if(WITH_SERIALIZATION)

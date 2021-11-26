@@ -29,7 +29,7 @@ endif()
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
   if(NOT HAS_FORTRAN)
     list(APPEND python_excluded_tests tests/test_smc.py)
   endif()
