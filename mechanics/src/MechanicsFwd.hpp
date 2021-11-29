@@ -75,11 +75,12 @@
   REGISTER(SiconosMesh)                         \
   REGISTER(SiconosHeightMap)                    \
   REGISTER(SiconosDisk)                         \
-  REGISTER(SiconosBox2d)                         \
+  REGISTER(SiconosBox2d)                        \
   REGISTER(SiconosConvexHull2d)                  \
-  REGISTER(SiconosCollisionQueryResult)         \
+  REGISTER(SiconosCollisionQueryResult)          \
   REGISTER(SiconosCollisionManager)             \
-  REGISTER(SiconosBulletCollisionManager)
+  REGISTER(SiconosBulletCollisionManager)       \
+  REGISTER(BodyShapeRecord)
 
 #include <SiconosVisitables.hpp>
 

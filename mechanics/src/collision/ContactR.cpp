@@ -64,9 +64,12 @@ void ContactR::updateContactPoints(const SiconosVector& pos1,
 void ContactR::display() const
 {
   std::cout << "ContactR display()" << std::endl;
-  std::cout << "&staticBody[0]" << &staticBody[0] << std::endl;
-  if (staticBody[0])
+  if (bodyShapeRecordA)
   {
-    std::cout << "staticBody[0]->number : " << staticBody[0]->number << std::endl;
+    std::cout << "bodyShapeRecordA : " << bodyShapeRecordA << std::endl;
+  }
+  if (bodyShapeRecordB)
+  {
+    std::cout << "bodyShapeRecordB : " << bodyShapeRecordB << std::endl;
   }
 }

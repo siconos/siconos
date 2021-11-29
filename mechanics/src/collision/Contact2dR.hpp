@@ -36,13 +36,10 @@ public:
   /**/
   virtual ~Contact2dR() = default;
 
-
   /* For users that may require extra information about contacts. */
-  SP::SiconosVector base[2];
-  SP::SiconosShape shape[2];
-  SP::SiconosContactor contactor[2];
-  SP::RigidBody2dDS ds[2];
-  SP::StaticBody staticBody[1];
+  SP::BodyShapeRecord bodyShapeRecordA;
+  SP::BodyShapeRecord bodyShapeRecordB;
+
 
   // /** to compute the output y = h(q,z) of the Relation
   //     \param q coordinates of the dynamical systems involved in the relation
