@@ -254,7 +254,7 @@ BounceResult bounceTest(std::string moving,
   simulation->insertInteractionManager(collisionMan);
 
   // Add static shapes (centered at zero by default)
-  collisionMan->insertStaticContactorSet(static_contactors);
+  collisionMan->addStaticBody(static_contactors);
 
   // Add a non-smooth law
   SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 2));
