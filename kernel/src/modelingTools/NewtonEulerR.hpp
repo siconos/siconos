@@ -343,6 +343,8 @@ public:
     return _contactForce;
   };
 
+  virtual void display() const {}
+  
   ACCEPT_STD_VISITORS();
 
 };

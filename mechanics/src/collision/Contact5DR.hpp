@@ -38,6 +38,7 @@ public:
   SP::SiconosShape shape[2];
   SP::SiconosContactor contactor[2];
   SP::RigidBodyDS ds[2];
+  SP::StaticBody staticBody[1];
 
   /** to compute the output y = h(t,q) of the Relation
       \param time current time value

@@ -116,7 +116,7 @@ protected:
   virtual SP::BulletR makeBulletR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
                                   SP::RigidBodyDS ds2, SP::SiconosShape shape2,
                                   const btManifoldPoint &);
-  
+
   /** Provided so that creation of collision points can be overridden.
    * See modify_normals.py in examples/Mechanics/Hacks */
   virtual SP::Bullet5DR makeBullet5DR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
@@ -136,11 +136,20 @@ protected:
                                           const btManifoldPoint &);
 
 public:
-  StaticContactorSetID insertStaticContactorSet(
-    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector());
 
-  bool removeStaticContactorSet(StaticContactorSetID id);
+  /** Add a static body in the collision detector.
+   */
+  SP::StaticBody addStaticBody(
+    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector(), int number=0);
 
+  /** Remove a body from the collision detector.
+   */
+  void removeStaticBody(const SP::StaticBody& body);
+
+  /** Remove a body from the collision detector. This must be done
+   *  after removing a body from the NonSmoothDynamicalSystem
+   *  otherwise contact will occur with a non-graph body which results
+   *  in failure. */
   void removeBody(const SP::SecondOrderDS& body);
 
   void updateInteractions(SP::Simulation simulation);

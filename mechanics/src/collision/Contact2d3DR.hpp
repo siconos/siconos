@@ -40,6 +40,7 @@ public:
   SP::SiconosShape shape[2];
   SP::SiconosContactor contactor[2];
   SP::RigidBody2dDS ds[2];
+  SP::StaticBody staticBody[1];
 
   // /** to compute the output y = h(q,z) of the Relation
   //     \param q coordinates of the dynamical systems involved in the relation

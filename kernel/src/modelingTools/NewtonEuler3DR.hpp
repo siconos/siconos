@@ -65,6 +65,8 @@ public:
    */
   virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
 
+  virtual void display() const {}
+
   ACCEPT_STD_VISITORS();
 };
 #endif // NEWTONEULERRELATIONFC3D_H

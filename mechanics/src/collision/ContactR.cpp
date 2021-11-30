@@ -61,3 +61,12 @@ void ContactR::updateContactPoints(const SiconosVector& pos1,
   assert(!((*_relNc)(0)==0 && (*_relNc)(1)==0 && (*_relNc)(2)==0)
          && "nc = 0, problems..\n");
 }
+void ContactR::display() const
+{
+  std::cout << "ContactR display()" << std::endl;
+  std::cout << "&staticBody[0]" << &staticBody[0] << std::endl;
+  if (staticBody[0])
+  {
+    std::cout << "staticBody[0]->number : " << staticBody[0]->number << std::endl;
+  }
+}

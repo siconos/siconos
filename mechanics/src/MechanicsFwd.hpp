@@ -56,6 +56,7 @@
   REGISTER(Bullet2d3DR)                         \
   REGISTER(RigidBodyDS)                         \
   REGISTER(RigidBody2dDS)                       \
+  REGISTER(StaticBody)                          \
   REGISTER(ContactR)                            \
   REGISTER(Contact5DR)                          \
   REGISTER(Contact2dR)                          \
