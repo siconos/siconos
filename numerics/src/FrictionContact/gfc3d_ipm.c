@@ -379,13 +379,13 @@ static void primalResidual(const double * velocity, NumericsMatrix * H, const do
   //double *u_minus_Hv = (double*)calloc(nd, sizeof(double));
 
   NM_gemv(-1.0, H, globalVelocity, 0.0, out);
-  /* rn = cblas_dnrm2(nd, out, 1); */
+  rn = cblas_dnrm2(nd, out, 1);
   cblas_daxpy(nd, 1.0, velocity, 1, out, 1);
   cblas_daxpy(nd, -1.0, w, 1, out, 1);
-  /* rn = fmax(rn, cblas_dnrm2(nd, velocity, 1)); */
-  /* rn = fmax(rn, cblas_dnrm2(nd, w, 1)); */
-  /* *rnorm = (rn > DBL_EPSILON ? cblas_dnrm2(nd, out, 1)/rn : cblas_dnrm2(nd, out, 1)); */
-  *rnorm = cblas_dnrm2(nd, out, 1); 
+  rn = fmax(rn, cblas_dnrm2(nd, velocity, 1));
+  rn = fmax(rn, cblas_dnrm2(nd, w, 1));
+  *rnorm = (rn > DBL_EPSILON ? cblas_dnrm2(nd, out, 1)/rn : cblas_dnrm2(nd, out, 1));
+  /* *rnorm = cblas_dnrm2(nd, out, 1);  */
 }
 
 /* Returns the dual constraint vector for global fricprob ( M*globalVelocity - f - H'*reaction ) */
@@ -397,14 +397,14 @@ static void dualResidual(NumericsMatrix * M, const double * globalVelocity, Nume
   double rn; 
 
   NM_gemv(1.0, M, globalVelocity, 0.0, out);
-  /* rn = cblas_dnrm2(m, out, 1); */
+  rn = cblas_dnrm2(m, out, 1);
   cblas_daxpy(m, -1.0, f, 1, out, 1);
   NM_tgemv(1.0, H, reaction, 0.0, HTr);
   cblas_daxpy(m, -1.0, HTr, 1, out, 1);
-  /* rn = fmax(rn, cblas_dnrm2(m, f, 1)); */
-  /* rn = fmax(rn, cblas_dnrm2(m, HTr, 1)); */
-  /* *rnorm = (rn >DBL_EPSILON ? cblas_dnrm2(m, out, 1)/rn : cblas_dnrm2(m, out, 1)); */
-  *rnorm = cblas_dnrm2(m, out, 1);
+  rn = fmax(rn, cblas_dnrm2(m, f, 1));
+  rn = fmax(rn, cblas_dnrm2(m, HTr, 1));
+  *rnorm = (rn >DBL_EPSILON ? cblas_dnrm2(m, out, 1)/rn : cblas_dnrm2(m, out, 1));
+  /* *rnorm = cblas_dnrm2(m, out, 1); */
   free(HTr);
 }
 
@@ -1352,6 +1352,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     NM_clear(MT);
   }
 
+ 
   //for(int i = 0; i < n ; i++) printf("mu[%d] = %g\n", i, problem->mu[i]); 
 
   /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE,
@@ -1405,6 +1406,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double *w_tilde = problem->b;
   double *w = data->tmp_vault_nd[0];
   double *f = problem->q;
+
+  /* TO TEST IF THE PROBLEM TO SOLVE IS FEASIBLE OR NOT */
+  /* problem->M = NM_eye(m); */
+  /* for(int  i = 0; i<m; i++) */
+  /*   { */
+  /*     f[i] = 0.0; */
+  /*   } */
 
   double *iden;
 
@@ -1590,7 +1598,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   while(iteration < max_iter)
   {
-    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (err <= 1e-7) && (fws==' '))
+    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (err <= 1e-5) && (fws==' '))
     {
       // To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
       options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
@@ -1604,8 +1612,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
  
     if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING]) 
     {
-      // Nesterov_Todd_vector(0, velocity, reaction, nd, n, p);
-      // Qp = QRmat(p, nd, n);
+      //Nesterov_Todd_vector(0, velocity, reaction, nd, n, p);
+      //printf("norm p = %9.2e\n",cblas_dnrm2(nd, p, 1));
+      //Qp = QRmat(p, nd, n);
+      //printf("%9.2e %9.2e %9.2e\n",p[0],p[1],p[2]);
+      
       Qp = NTmat(velocity, reaction, nd, n);
       Qpinv = NTmatinv(velocity, reaction, nd, n);
       
@@ -2146,6 +2157,10 @@ void gfc3d_ipm_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
+
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NT_SCALING_Q] = 0;
+
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-8;
