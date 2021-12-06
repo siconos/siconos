@@ -541,7 +541,7 @@ enum SICONOS_FRICTION_3D_IPM_IPARAM_ENUM
   SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING= 16,
   /** index in iparam to update the vector w for solving nonconvex problem */
   SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S = 17,
-  /** index in iparam to use Qp or F formula for computing Nesterov-Todd scaling 
+  /** index in iparam to use Qp or F formula for computing Nesterov-Todd scaling [ =1 for Qp formula, =0 for "F" formula */
   SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD = 18
 };
 
