@@ -153,6 +153,11 @@ extern "C"
   RawNumericsMatrix* NM_create_from_filename(const char *filename);
   RawNumericsMatrix* NM_create_from_file(FILE *file);
 
+  /** Copy NumericsMatrix version.
+   * \param[in] A a NumericsMatrix
+   * \param[in,out] B a NumericsMatrix
+   */
+  void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B);
 
   /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
    *  Reallocations are performed if B cannot hold a copy of A
