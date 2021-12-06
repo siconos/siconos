@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2021 INRIA. 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,8 @@ typedef struct
 /* } */
 /*   NTmatrix; */
 
+typedef long double float_type;
+/* typedef double float_type; */
 
 /* ------------------------- Helper functions declaration ------------------------------ */
 
@@ -225,14 +227,14 @@ void QNTpinvz(const double * const x, const double * const y,const double * cons
 void Jxinvprody(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out);
 
 /* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
-static long double dnrm2l(const unsigned int n, const double * x);
+static float_type dnrm2l(const unsigned int n, const double * x);
 
 /* ------------------------- Helper functions implementation ------------------------------ */
 
 /* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
-static long double dnrm2l(const unsigned int n, const double * x)
+static float_type dnrm2l(const unsigned int n, const double * x)
 {
-  long double norm, scale, ssq, absxi, quo;
+  float_type norm, scale, ssq, absxi, quo;
 
   if (n < 1)
     norm = 0.0;
@@ -333,7 +335,7 @@ static double getStepLength(const double * const x, const double * const dx, con
 {
   unsigned int dimension = (int)(vecSize / varsCount);
   unsigned int pos;
-  long double aL, bL, cL, dL, alphaL;
+  float_type aL, bL, cL, dL, alphaL;
   double min_alpha;
 
   min_alpha = 1e20; //1.0;
@@ -543,9 +545,9 @@ double norm2VecDiff (const double * vec1, const double * vec2, const unsigned in
 void Qx05y(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, c1y, c2y, nxb, fx1, fx2, dx;
+  float_type l1, l2, c1y, c2y, nxb, fx1, fx2, dx;
   size_t j;
-  long double *xb = (long double*)calloc(dimension-1, sizeof(long double));
+  float_type *xb = (float_type*)calloc(dimension-1, sizeof(float_type));
 
   for (int i = 0; i < dimension - 1; xb[i] = 1/sqrtl(dimension-1), i++);
 
@@ -573,9 +575,9 @@ void Qx05y(const double * const x, const double * const y, const unsigned int ve
 void Qx50y(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, c1y, c2y, nxb, fx1, fx2, dx;
+  float_type l1, l2, c1y, c2y, nxb, fx1, fx2, dx;
   size_t j;
-  long double *xb = (long double*)calloc(dimension-1, sizeof(long double));
+  float_type *xb = (float_type*)calloc(dimension-1, sizeof(float_type));
 
   for (int i = 0; i < dimension - 1; xb[i] = 1/sqrtl(dimension-1), i++);
 
@@ -636,7 +638,7 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
 void Jinv(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, normx;
+  float_type l1, l2, normx;
   size_t j;
 
   for(size_t i = 0; i < varsCount; i++)
@@ -689,7 +691,7 @@ void Jinv(const double * const x, const unsigned int vecSize, const size_t varsC
 void Jsqrt(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, normx;
+  float_type l1, l2, normx;
 
   for(size_t j = 0; j < vecSize; j+=dimension)
   {
@@ -704,7 +706,7 @@ void Jsqrt(const double * const x, const unsigned int vecSize, const size_t vars
 void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, normx;
+  float_type l1, l2, normx;
   size_t j;
 
   for(size_t i = 0; i < varsCount; i++)
@@ -776,7 +778,7 @@ void Qxy(const double * const x, const double * const y, const unsigned int vecS
   unsigned int dimension = (int)(vecSize / varsCount);
   size_t j;
   double xy;
-  long double dx, nxb;
+  float_type dx, nxb;
 
   for(size_t i = 0; i < varsCount; i++)
   {
@@ -825,7 +827,7 @@ void QNTpinvz(const double * const x, const double * const y,const double * cons
 void Jxinvprody(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double nxb, detx, tmp;
+  float_type nxb, detx, tmp;
   size_t j;
 
   for(size_t i = 0; i < varsCount; i++)
@@ -853,7 +855,7 @@ NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize, const
 
   NumericsMatrix* quad_tmp = NM_create(NM_DENSE, dimension, dimension);
 
-  long double nvec, nvecb, dvec;
+  float_type nvec, nvecb, dvec;
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
@@ -876,9 +878,9 @@ NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize, const
 }
 
 /* Returns a long double as the square root of determinant of a vector related to the Jordan product */
-static long double gammal(const double * const x, const size_t dimension)
+static float_type gammal(const double * const x, const size_t dimension)
 {
-  long double nxb, detx;
+  float_type nxb, detx;
   nxb = dnrm2l(dimension-1, x+1);
   detx = (x[0] + nxb) * (x[0] - nxb);
   return(sqrtl(detx));
@@ -898,9 +900,9 @@ NumericsMatrix* NTmat(const double* const x, const double* const z, const unsign
 
   NumericsMatrix* G = NM_create(NM_DENSE, dimension, dimension);
 
-  long double nvec, nvecb, dvec;
+  float_type nvec, nvecb, dvec;
 
-  long double gamx, gamz, w, gamt;
+  float_type gamx, gamz, w, gamt;
   double * t = (double*)calloc(dimension, sizeof(double));
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
@@ -950,9 +952,9 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const uns
 
   NumericsMatrix* G = NM_create(NM_DENSE, dimension, dimension);
 
-  long double nvec, nvecb, dvec;
+  float_type nvec, nvecb, dvec;
 
-  long double gamx, gamz, w, gamt;
+  float_type gamx, gamz, w, gamt;
   double * t = (double*)calloc(dimension, sizeof(double));
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
@@ -1002,9 +1004,9 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const uns
 
   NumericsMatrix* G = NM_create(NM_DENSE, dimension, dimension);
 
-  long double nvec, nvecb, dvec;
+  float_type nvec, nvecb, dvec;
 
-  long double gamx, gamz, w, w2, gamt;
+  float_type gamx, gamz, w, w2, gamt;
   double * t = (double*)calloc(dimension, sizeof(double));
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
@@ -1612,14 +1614,16 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
  
     if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING]) 
     {
-      //Nesterov_Todd_vector(0, velocity, reaction, nd, n, p);
-      //printf("norm p = %9.2e\n",cblas_dnrm2(nd, p, 1));
-      //Qp = QRmat(p, nd, n);
-      //printf("%9.2e %9.2e %9.2e\n",p[0],p[1],p[2]);
-      
-      Qp = NTmat(velocity, reaction, nd, n);
-      Qpinv = NTmatinv(velocity, reaction, nd, n);
-      
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
+	{
+	  Nesterov_Todd_vector(0, velocity, reaction, nd, n, p);
+	  Qp = QRmat(p, nd, n);
+	}
+      else
+	{
+	  Qp = NTmat(velocity, reaction, nd, n);
+	  Qpinv = NTmatinv(velocity, reaction, nd, n);
+	}
       // check some functions
       /*      
       NM_display(Qp);
@@ -1666,9 +1670,15 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
     {
-      //Nesterov_Todd_vector(0, velocity, reaction, nd, n, r_p);           // Nesterov and Todd scaling p-vector
-      //complem_p = complemResidualNorm_p(velocity, reaction, nd, n);  // Norm of the Jordan product of the scaled vectors velocity and reaction
-      complem_p = complemResidualNorm_p_F(Qp, Qpinv, velocity, reaction, nd, n);
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
+	{
+	  Nesterov_Todd_vector(0, velocity, reaction, nd, n, r_p);       // Nesterov and Todd scaling p-vector
+	  complem_p = complemResidualNorm_p(velocity, reaction, nd, n);  // Norm of the Jordan product of the scaled vectors velocity and reaction
+	}
+      else
+	{
+	  complem_p = complemResidualNorm_p_F(Qp, Qpinv, velocity, reaction, nd, n);
+	}
     }
     complem = complemResidualNorm(velocity, reaction, nd, n);
 
@@ -1772,10 +1782,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       //double delta = barr_param <= 1e-4 ? barr_param : 1e-4;  
       //NM_insert(JR, NM_add(1.0, NM_eye(nd), delta, Qp2),m, m);
 
-      //r_Qp = Quad_repr(r_p, nd, n);                           // Should be replaced by a function returning the product Qp * vector
-      NM_copy(H, QpH); /* useful ? */
-      NM_gemm(1.0, Qp, H, 0.0, QpH);
-      NM_insert(JR, NM_transpose(QpH), 0, m);                // Should be useless when unsing a symmetric factorization procedure
+      //r_Qp = Quad_repr(r_p, nd, n);              
+      //NM_copy(H, QpH); /* useful ? */
+      //NM_gemm(1.0, Qp, H, 0.0, QpH);               
+                                            
+      QpH = NM_multiply(Qp,H); // This product should be replaced by a function returning the product Qp * vector
+      NM_insert(JR, NM_transpose(QpH), 0, m);      // Should be useless when unsing a symmetric factorization procedure
       NM_insert(JR, QpH, m, 0);
     }
 
@@ -1835,8 +1847,16 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       NV_insert(r_rhs, m + nd, dualConstraint, m, 0);
       NM_gemv(1.0, H, globalVelocity, 0.0, Hvw);
       cblas_daxpy(nd, 1.0, w, 1, Hvw, 1);              // Hvw <- H*v + w, kept in memory for the computation of r_du
-      //QNTpz(velocity, reaction, Hvw, nd, n, r_rhs+m);  // Could also be done with Qxy(r_p, Hvw, nd, n, r_rhs+m);
-      NM_gemv(1.0, Qp, Hvw, 0.0, r_rhs+m);
+      
+
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
+	{
+	  QNTpz(velocity, reaction, Hvw, nd, n, r_rhs+m);  // Could also be done with Qxy(p, Hvw, nd, n, r_rhs+m);
+	}
+      else
+	{
+	  NM_gemv(1.0, Qp, Hvw, 0.0, r_rhs+m);
+	}
       cblas_dscal(nd, -1.0, r_rhs+m, 1);
       cblas_dcopy(m+nd, r_rhs, 1, r_rhs_2, 1);         // kept a copy of r_rhs that will be used for the solution of the second linear system
     }
@@ -1870,8 +1890,15 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
       /* retrieve the solutions */
       cblas_dcopy(m, r_rhs, 1, d_globalVelocity, 1);
-      //QNTpz(velocity, reaction, r_rhs+m, nd, n, d_reaction);
-      NM_gemv(1.0, Qp, r_rhs+m, 0.0, d_reaction);
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
+	{
+	  QNTpz(velocity, reaction, r_rhs+m, nd, n, d_reaction);
+	}
+      else
+	{
+	  NM_gemv(1.0, Qp, r_rhs+m, 0.0, d_reaction);
+	}
+      
       NM_gemv(1.0, H, d_globalVelocity, 0.0, d_velocity);
       cblas_daxpy(nd, 1.0, Hvw, 1, d_velocity, 1);
       cblas_daxpy(nd, -1.0, velocity, 1, d_velocity, 1);
@@ -1974,8 +2001,14 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       double * r_dudr = (double*)calloc(nd,sizeof(double));
       double * r_ududr = (double*)calloc(nd,sizeof(double));
 
-      // Qxy(r_p, velocity, nd, n, r_Qp_u);                                 // u_hat
-      NM_gemv(1.0, Qp, velocity, 0.0, r_Qp_u); 
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
+	{
+	  Qxy(p, velocity, nd, n, r_Qp_u);      // u_hat
+	}
+      else
+	{
+	  NM_gemv(1.0, Qp, velocity, 0.0, r_Qp_u);
+	}
       
       cblas_dcopy(nd, r_Qp_u, 1, r_Qp_du, 1);
       cblas_daxpy(nd, 1.0, r_rhs+m, 1, r_Qp_du, 1);
@@ -2003,8 +2036,14 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
       /* retrieve the solutions */
       NV_copy(r_rhs_2, m, r_dv);
-      //Qxy(r_p, r_rhs_2+m, nd, n, r_dr);
-      NM_gemv(1.0, Qp, r_rhs_2+m, 0.0, r_dr);
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
+	{
+	  Qxy(p, r_rhs_2+m, nd, n, r_dr);
+	}
+      else
+	{
+	  NM_gemv(1.0, Qp, r_rhs_2+m, 0.0, r_dr);
+	}
       NM_gemv(1.0, H, r_dv, 0.0, r_du);
       NV_add(r_du, Hvw, nd, r_du);
       NV_sub(r_du, velocity, nd, r_du);
@@ -2158,9 +2197,9 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NT_SCALING_Q] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
-  options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = 0; //SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-8;
