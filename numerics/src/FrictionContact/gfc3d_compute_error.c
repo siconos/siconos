@@ -34,6 +34,8 @@
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
 
+#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
+
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                         double*  reaction, double*  velocity,
                         double*  globalVelocity,
@@ -97,7 +99,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   double relative_scaling = fmax(norm_q, fmax(norm_Mv,norm_Hr));
   *error = cblas_dnrm2(n,tmp_1,1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
-  if(fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > MIN_RELATIVE_SCALING)
     *error = *error/relative_scaling;
 
   DEBUG_PRINTF("relative error  of -M v + H R + q = %e\n", *error);
@@ -131,7 +133,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
 
   relative_scaling = fmax(norm_u, norm_r);
-  if(fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > MIN_RELATIVE_SCALING)
     error_complementarity = error_complementarity/relative_scaling;
   DEBUG_PRINTF("relative error in complementarity= %e\n", error_complementarity);
 
@@ -228,7 +230,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   double relative_scaling = fmax(norm_q, fmax(norm_Mv,norm_Hr));
   *error = cblas_dnrm2(n,tmp_1,1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
-  if(fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > MIN_RELATIVE_SCALING)
     *error = *error/relative_scaling;
 
   DEBUG_PRINTF("relative error  of -M v + H R + q = %e\n", *error);
@@ -261,7 +263,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   double norm_u = cblas_dnrm2(m, velocity, 1);
   relative_scaling = fmax(norm_Hv, fmax(norm_w, norm_u));
   double norm_primal_residual = cblas_dnrm2(m, primal_residual, 1);
-  if(fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > MIN_RELATIVE_SCALING)
     *error += norm_primal_residual/relative_scaling;
   else
     *error += norm_primal_residual;
@@ -280,7 +282,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
 
   relative_scaling = fmax(norm_u, norm_r);
   //relative_scaling = fmax(1.0, relative_scaling);
-  if(fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > MIN_RELATIVE_SCALING)
     error_complementarity = error_complementarity/relative_scaling;
   DEBUG_PRINTF("relative error in complementarity= %e\n", error_complementarity);
 
