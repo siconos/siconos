@@ -865,7 +865,7 @@ static  NumericsMatrix *  QNTpH(const double * const x, const double * const y, 
     for (CS_INT k = 0 ; k < H->size1 ; k++)
     {
       QpHp[k] = nz ;                   /* column k of QpH starts here */
-      if (nz + H->size0> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size0))
+      if (nz + H->size1> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size1))
       {
         return NULL;             /* out of memory */
       }
@@ -1607,7 +1607,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
   NumericsMatrix* r_Qp = NULL;                                                // matrix Qp
   NumericsMatrix *minus_M = NM_create(M->storageType, M->size0, M->size1);    // store the matrix -M to build the matrix of the Newton linear system
-  NumericsMatrix *QpH_old = NM_create(H->storageType, H->size0, H->size1);        // store the matrix Qp*H
+  //NumericsMatrix *QpH_old = NM_create(H->storageType, H->size0, H->size1);        // store the matrix Qp*H
   double * r_rhs = (double*)calloc(m+nd, sizeof(double));
   double * r_rhs_2 = (double*)calloc(m+nd, sizeof(double));
   double * r_dv = (double*)calloc(m,sizeof(double));
@@ -1902,7 +1902,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       //NM_copy(H, QpH); /* useful ? */
       //NM_gemm(1.0, Qp, H, 0.0, QpH);
 
-      QpH_old = NM_multiply(Qp,H); // This product should be replaced by a function returning the product Qp * vector
+      //QpH_old = NM_multiply(Qp,H); // This product should be replaced by a function returning the product Qp * vector
 
       NumericsMatrix * QpH = QNTpH(velocity, reaction, H, nd, n);
 
