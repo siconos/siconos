@@ -203,11 +203,15 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   NumericsMatrix *H = problem->H;
   NumericsMatrix *M = problem->M;
 
-  if(!options->dWork || options->dWorkSize < 2*n)
+  int d_work_size= 2*n > m ? 2*n : m;
+  if(!options->dWork || options->dWorkSize < d_work_size)
   {
-    options->dWork = (double *)calloc(2*n,sizeof(double));
-    options->dWorkSize = 2*n;
+    if (options->dWork)
+      free(options->dWork);
+    options->dWork = (double *)calloc(d_work_size,sizeof(double));
+    options->dWorkSize = d_work_size;
   }
+
   double* tmp = options->dWork;
   double* tmp_1 = &options->dWork[n];
 
@@ -254,7 +258,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
 
   /* computation of the relative feasibility error = relative norm of the primal residual*/
   /* |H*v+w-u|/max{|H*v|, |w|, |u|}*/
-  double *primal_residual = (double*)calloc(m,sizeof(double));
+  double *primal_residual = tmp;
   NM_tgemv(1, H, globalVelocity, 0.0, primal_residual);
   double norm_Hv = cblas_dnrm2(m, primal_residual, 1);
   cblas_daxpy(m, 1.0, problem->b, 1, primal_residual, 1);
@@ -267,7 +271,6 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
     *error += norm_primal_residual/relative_scaling;
   else
     *error += norm_primal_residual;
-  free(primal_residual);
   
   double worktmp[3];
   for(int ic = 0 ; ic < nc ; ic++)

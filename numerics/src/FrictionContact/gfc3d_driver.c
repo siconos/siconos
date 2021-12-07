@@ -250,12 +250,14 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
   }
   case SICONOS_GLOBAL_FRICTION_3D_IPM:
   {
+
     GlobalFrictionContactProblem* balanced_problem = gfc3d_balancing_problem(problem,options);
     gfc3d_balancing_go_to_balanced_variables(balanced_problem, options,
                                              reaction, velocity, globalVelocity);
 
     gfc3d_IPM(balanced_problem, reaction, velocity,
               globalVelocity, &info, options);
+
 
     gfc3d_balancing_check_drift(balanced_problem,problem, reaction, velocity, globalVelocity,
                                 options);
