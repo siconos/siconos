@@ -1708,6 +1708,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
 
       hasNotConverged = 0;
+
       // numerics_printf_verbose(-1, "%9.2e %9.2e %9.2e\n", norm2VecDiff(tmpsol, globalVelocity, m), norm2VecDiff(tmpsol+m, velocity, nd), norm2VecDiff(tmpsol+m+nd, reaction, nd));
       break;
     }
@@ -1757,7 +1758,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       }
       NM_insert(J, minus_H, m + nd, 0);
       NM_insert(J, NM_eye(nd), m + nd, m);
-      NM_insert(J, NM_scalar(nd, -1e-6), m + nd, m + nd);
+      //NM_insert(J, NM_scalar(nd, -1e-6), m + nd, m + nd);
     }
     else
     {
@@ -1805,7 +1806,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     }
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
-      printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
+           printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
+
 
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] == 0)
     {
@@ -1990,7 +1992,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       cblas_dcopy(m, rhs, 1, d_globalVelocity, 1);
       cblas_dcopy(nd, rhs+m, 1, d_velocity, 1);
       cblas_dcopy(nd, rhs+m+nd, 1, d_reaction, 1);
-
     }
     else
     {
@@ -2199,7 +2200,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
-  options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = 0; //SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-8;
