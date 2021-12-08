@@ -17,8 +17,9 @@
  */
 
 #include "CSparseMatrix_internal.h"
-#include "global_rolling_fc_Solvers.h"  // for GRFCProb, SolverOpt, Friction_cst, grfc3d_...
-#include "gfc3d_compute_error.h"
+#include "grfc3d_Solvers.h"  // for GRFCProb, SolverOpt, Friction_cst, grfc3d_...
+#include "grfc3d_compute_error.h"       // for grfc3d_compute_error
+#include "projectionOnCone.h"           // for projectionOnRollingCone
 #include "SiconosLapack.h"
 
 #include "SparseBlockMatrix.h"
@@ -35,7 +36,7 @@
 #include "NumericsSparseMatrix.h"
 #include "NumericsMatrix.h"
 
-#include "projectionOnCone.h"
+#include <time.h>                       // for clock()
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -80,7 +81,8 @@ typedef struct
 typedef struct
 {
   /* initial interior points */
-  IPM_point* starting_point;
+  IPM_point* starting_point;        // initial point
+  IPM_point* original_point;        // original point which is not changed by the matrix P_mu
   IPM_grfc3d_point* grfc3d_point;
 
   /* change of variable matrix */
@@ -221,6 +223,43 @@ static NumericsMatrix* compute_J_matrix(const unsigned int varsCount)
 
 
 
+/* print iteres under a Matlab format in a file */
+/* iteration = index of the iteration
+   v = global velocity
+   u = velocity
+   r = reaction
+   d = dimenion
+   n = number of contact points
+   m = number of degrees of freedom
+*/
+static void printInteresProbMatlabFile(int iteration, double * v, double * u, double * r, int d, int n, int m, double time, FILE * file)
+{
+  // fprintf(file,"v(%3i,:) = [",iteration+1);
+  // for(int i = 0; i < m; i++)
+  // {
+  //   fprintf(file, "%20.16e, ", v[i]);
+  // }
+  // fprintf(file,"];\n");
+
+  // fprintf(file,"u(%3i,:) = [",iteration+1);
+  // for(int i = 0; i < n*d; i++)
+  // {
+  //   fprintf(file, "%20.16e, ", u[i]);
+  // }
+  // fprintf(file,"];\n");
+
+  // fprintf(file,"r(%3i,:) = [",iteration+1);
+  // for(int i = 0; i < n*d; i++)
+  // {
+  //   fprintf(file, "%20.16e, ", r[i]);
+  // }
+  // fprintf(file,"];\n");
+  fprintf(file, "%d %lf", iteration, time);
+
+  return;
+}
+
+
 
 
 
@@ -254,6 +293,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
                double* restrict velocity, double* restrict globalVelocity,
                int* restrict info, SolverOptions* restrict options)
 {
+  clock_t t1 = clock();
   printf("\n\n#################### grfc3d_ipm.c 001 OK ####################\n\n");
 
  // verbose = 3;
@@ -263,8 +303,8 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   unsigned int nd = problem->H->size1;
   unsigned int d = problem->dimension;
   unsigned int n = problem->numberOfContacts;
-  unsigned int short_dim = d-2;
-  unsigned int n_dminus2 = n*short_dim;
+  unsigned int d_minus_2 = d-2;
+  unsigned int n_dminus2 = n*d_minus_2;
   unsigned int posX = 0; // Used as the index in the source array
   unsigned int posY = 0; // Used as the index in the destination array
 
@@ -394,9 +434,8 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
-  tol = 1e-12;
   unsigned int max_iter = options->iparam[SICONOS_IPARAM_MAX_ITER];
-
+  //printf("#################### max_iter = %d ####################\n", max_iter);
   double sgmp1 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1];
   double sgmp2 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2];
   double sgmp3 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3];
@@ -476,7 +515,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   short * a_velo = (short*)calloc(n, sizeof(short));
   short * a_reac = (short*)calloc(n, sizeof(short));
 
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 1)
+  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
   {
     J = compute_J_matrix(n);
   }
@@ -512,6 +551,8 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   NumericsMatrix* Qp_tilde = NULL;
   NumericsMatrix* Qpinv_bar = NULL;
   NumericsMatrix* Qpinv_tilde = NULL;
+  NumericsMatrix* Qp2_bar = NULL;
+  NumericsMatrix* Qp2_tilde = NULL;
   NumericsMatrix* F_1 = NULL;
   NumericsMatrix* Finv_1 = NULL;
   NumericsMatrix* Fsqr_1 = NULL;
@@ -520,7 +561,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   NumericsMatrix* Fsqr_2 = NULL;
   NumericsMatrix* tmpmat = NULL;
   NumericsMatrix* Qp_F = NULL;
-  NumericsMatrix* Qp2 = NULL;
   NumericsMatrix* F2 = NULL;
   double * velocity_1t = data->tmp_vault_n_dminus2[6];
   double * velocity_2t = data->tmp_vault_n_dminus2[7];
@@ -537,7 +577,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double * tmp1 = data->tmp_vault_n_dminus2[18];
   double * tmp2 = data->tmp_vault_n_dminus2[19];
 
-  FILE * iterates;
+  FILE * matlab_file;
   FILE * matrixH;
 
   /* write matrix H in file */
@@ -557,43 +597,51 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   // /* writing data in a Matlab file */
   // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
   // {
-  //   iterates = fopen("iterates.m", "w");
-  //   printDataProbMatlabFile(M, f, H, w, d, n, m, problem->mu, iterates);
+  //   char matlab_file_name[256];
+  //   sprintf(matlab_file_name,"nc-%d-.m", problem->numberOfContacts)
+  //   matlab_file = fopen(matlab_file_name, "w");
+  //   printInteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, matlab_file);
+  //   fclose(iterates);
   // }
 
 
 
 
-
-
-  // ComputeErrorGlobalPtr computeError = NULL;
-
-  // if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1)
-  // {
-  //   computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
-  // }
-  // else
-  // {
-  //   computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error_convex;
-  // }
+  ComputeErrorGlobalRollingPtr computeError = NULL;
+  computeError = (ComputeErrorGlobalRollingPtr)&grfc3d_compute_error;
 
 
 
 
   /* -------------------------- Check the full criterion -------------------------- */
-  double norm_q = cblas_dnrm2(m, problem->q, 1);
-  double norm_b = cblas_dnrm2(nd, problem->b, 1);
+
 
   while(iteration < max_iter)
   {
+
+
+    // /* writing data in a Matlab file */
+    // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
+    // {
+    //   char matlab_file_name[256];
+    //   sprintf(matlab_file_name,"n_nc-%d-.m", problem->numberOfContacts);
+    //   matlab_file = fopen(matlab_file_name, "w");
+    //   printInteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, matlab_file);
+    //   fclose(matlab_file);
+    // }
+
+
+
+
+
     /* -------------------------- Extract vectors -------------------------- */
     /* 2. velocity_1 = (t, u_bar), velocity_2 = (t_prime, u_tilde) */
     extract_vector(velocity, nd, n, 2, 3, velocity_1);
     extract_vector(velocity, nd, n, 4, 5, velocity_2);
     for(unsigned int i = 0; i < n; i++)
     {
-      velocity_1[i*(d-2)] = t[i];
-      velocity_2[i*(d-2)] = t_prime[i];
+      velocity_1[i*d_minus_2] = t[i];
+      velocity_2[i*d_minus_2] = t_prime[i];
     }
 
     /* 3. reaction_1 = (r0, r_bar), reaction_2 = (r0, r_tilde) */
@@ -659,7 +707,9 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     // Note: primal objectif func = 1/2 * v' * M *v + f' * v
     relgap = relGap(M, f, w, globalVelocity, reaction, nd, m, gapVal);
 
-    barr_param = gapVal / nd;
+    // barr_param = (gapVal / nd)*sigma;
+    // barr_param = gapVal / nd;
+    barr_param = gapVal / n;
     //barr_param = complemResidualNorm(velocity, reaction, nd, n);
     //barr_param = (fws=='*' ? complemResidualNorm(velocity, reaction, nd, n)/n : complemResidualNorm_p(velocity, reaction, nd, n)/n) ;
     //barr_param = fabs(barr_param);
@@ -695,21 +745,38 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     setErrorArray(error_array, pinfeas, dinfeas, relgap, complem_1, complem_2);
 
 
-  //   /* ----- return to original variables ------ */
-  //   NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->grfc3d_point->t_velocity);
-  //   /* cblas_dcopy(nd, data->grfc3d_point->t_velocity, 1, velocity, 1); */
-  //   NM_gemv(1.0, P_mu, reaction, 0.0, data->grfc3d_point->t_reaction);
-  //   /* cblas_dcopy(nd, data->grfc3d_point->t_reaction, 1, reaction, 1); */
+    /* ----- return to original variables ------ */
+    NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->original_point->velocity);
+    /* cblas_dcopy(nd, data->grfc3d_point->t_velocity, 1, velocity, 1); */
+    NM_gemv(1.0, P_mu, reaction, 0.0, data->original_point->reaction);
+    /* cblas_dcopy(nd, data->grfc3d_point->t_reaction, 1, reaction, 1); */
 
-  //   /* cblas_daxpy(nd, -1.0, data->grfc3d_point->t_velocity, 1, data->grfc3d_point->t_reaction, 1); */
-  //   /* for (int k = 0; k < n; projectionOnCone(data->grfc3d_point->t_reaction+k*d, problem->mu[k]), k++); */
+    /* cblas_daxpy(nd, -1.0, data->grfc3d_point->t_velocity, 1, data->grfc3d_point->t_reaction, 1); */
+    /* for (int k = 0; k < n; projectionOnCone(data->grfc3d_point->t_reaction+k*d, problem->mu[k]), k++); */
 
-    // (*computeError)(problem,
-    //                 data->grfc3d_point->t_reaction, data->grfc3d_point->t_velocity, globalVelocity,
-    //                 tol, options,
-    //                 norm_q, norm_b,  &err);
+    if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1)     // non-smooth case
+    {
+      (*computeError)(problem,
+                    data->original_point->reaction, data->original_point->velocity, globalVelocity,
+                    tol, &error, 1);
+    }
+    else    // convex case
+    {
+      (*computeError)(problem,
+                    data->original_point->reaction, data->original_point->velocity, globalVelocity,
+                    tol, &error, 0);
+    }
 
-    error = fmax(barr_param, fmax(complem_1, fmax(complem_2, fmax(pinfeas, dinfeas))));
+
+
+
+
+
+
+
+
+
+    // error = fmax(barr_param, fmax(complem_1, fmax(complem_2, fmax(pinfeas, dinfeas))));
 
 
 
@@ -731,7 +798,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
                               iteration, fws, relgap, pinfeas, dinfeas, complem_1, complem_2, error, barr_param);
 
       //if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
-      //  printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
+      //  printInteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
 
       hasNotConverged = 0;
       // numerics_printf_verbose(-1, "%9.2e %9.2e %9.2e\n", norm2VecDiff(tmpsol, globalVelocity, m), norm2VecDiff(tmpsol+m, velocity, nd), norm2VecDiff(tmpsol+m+nd, reaction, nd));
@@ -744,19 +811,37 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
     /* -------------------------- Compute NT directions -------------------------- */
-    if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 1)
+    if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)         // with NT scaling
     {
-      // Nesterov_Todd_vector(0, velocity_1, reaction_1, n_dminus2, n, p_bar);
-      // Qp_bar = QRmat(p_bar, n_dminus2, n);
-      F_1 = NTmat(velocity_1, reaction_1, n_dminus2, n);
-      Finv_1 = NTmatinv(velocity_1, reaction_1, n_dminus2, n);
-      Fsqr_1 = NTmatsqr(velocity_1, reaction_1, n_dminus2, n);
+      if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 1)      // use Qp (1st formule)
+      {
+        // Nesterov_Todd_vector(0, velocity_1, reaction_1, n_dminus2, n, p_bar);
+        // Qp_bar = QRmat(p_bar, n_dminus2, n);
 
-      // Nesterov_Todd_vector(0, velocity_2, reaction_2, n_dminus2, n, p_tilde);
-      // Qp_tilde = QRmat(p_tilde, n_dminus2, n);
-      F_2 = NTmat(velocity_2, reaction_2, n_dminus2, n);
-      Finv_2 = NTmatinv(velocity_2, reaction_2, n_dminus2, n);
-      Fsqr_2 = NTmatsqr(velocity_2, reaction_2, n_dminus2, n);
+
+        // Nesterov_Todd_vector(0, velocity_2, reaction_2, n_dminus2, n, p_tilde);
+        // Qp_tilde = QRmat(p_tilde, n_dminus2, n);
+      }
+      else if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 2) // use F (2nd formule)
+      {
+        F_1 = NTmat(velocity_1, reaction_1, n_dminus2, n);
+        Finv_1 = NTmatinv(velocity_1, reaction_1, n_dminus2, n);
+        Fsqr_1 = NTmatsqr(velocity_1, reaction_1, n_dminus2, n);
+
+        F_2 = NTmat(velocity_2, reaction_2, n_dminus2, n);
+        Finv_2 = NTmatinv(velocity_2, reaction_2, n_dminus2, n);
+        Fsqr_2 = NTmatsqr(velocity_2, reaction_2, n_dminus2, n);
+      }
+
+
+
+
+
+
+
+
+
+
 
       // check some functions
       /*
@@ -805,10 +890,9 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
        *      |  0    F_2 | n(d-2)
        */
 
-
       Jac = NM_create(NM_SPARSE, m + nd + n*(d+1), m + nd + n*(d+1));
       // Jac_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
-      Jac_nzmax = M_nzmax + H_nzmax + H_nzmax + nd;
+      Jac_nzmax = M_nzmax + 2*H_nzmax + 6*n + 2*9*n*n;
       NM_triplet_alloc(Jac, Jac_nzmax);
       Jac->matrix2->origin = NSM_TRIPLET;
       NM_insert(Jac, M, 0, 0);
@@ -816,12 +900,14 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
       NM_insert(Jac, minus_H, m, 0);
       NM_insert(Jac, J, m, m+nd);
       NM_insert(Jac, NM_transpose(J), m+nd, m);
-
       // TO DO: need to optimise this point because only F will be changed at each iteration
       NM_insert(Jac, Fsqr_1, m+nd, m+nd);
-      NM_insert(Jac, Fsqr_2, m+nd+n*short_dim, m+nd+n*short_dim);
+      NM_insert(Jac, Fsqr_2, m+nd+n*d_minus_2, m+nd+n*d_minus_2);
     }
+    else // without NT scaling
+    {
 
+    }
 
 
 
@@ -917,7 +1003,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
  //    }
  //
  //    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
- //      printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
+ //      printInteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
 
 
 
@@ -947,7 +1033,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
      */
     cblas_dcopy(m, dualConstraint, 1, rhs, 1);
     cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 1)
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
     {
       cblas_dcopy(n_dminus2, reaction_1, 1, rhs+m+nd, 1);
       assert((m+nd+2*n_dminus2) == (m+nd+n*(d+1))); // m + nd + n(d+1): size of rhs
@@ -976,7 +1062,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 1)
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
     {
       /* Solving full symmetric Newton system with NT scaling via LDLT factorization */
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
@@ -1023,7 +1109,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     for(unsigned int i = 0; i < n; i++)
     {
       posX = i*d;
-      posY = i*short_dim;
+      posY = i*d_minus_2;
       d_velocity[posX] = d_velocity_1[posY] + d_velocity_2[posY];
       d_velocity[posX+1] = d_velocity_1[posY + 1];
       d_velocity[posX+2] = d_velocity_1[posY + 2];
@@ -1075,13 +1161,15 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     cblas_daxpy(nd, alpha_dual, d_reaction, 1, r_plus_dr, 1);
 
     /* affine barrier parameter */
-    barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / nd;
+    // barr_param_a = (cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / nd)*sigma;
+    // barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / nd;
+    barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / n;
     //barr_param_a = complemResidualNorm(v_plus_dv, r_plus_dr, nd, n);
     // barr_param_a = (fws=='*' ? complemResidualNorm(v_plus_dv, r_plus_dr, nd, n)/n : complemResidualNorm_p(v_plus_dv, r_plus_dr, nd, n)/n);
 
     /* computing the centralization parameter */
     e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(fmin(alpha_primal, alpha_dual),2)) : sgmp3;
-    sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
+    sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/5;
 
 
 
@@ -1181,7 +1269,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     /* -------------------------- Corrector step of Mehrotra -------------------------- */
     cblas_dcopy(m, dualConstraint, 1, rhs, 1);
     cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 1)
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
     {
       /* Right-hand side for symmetric Newton system with NT scaling */
 
@@ -1243,7 +1331,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 1)
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
     {
       /* Solving full symmetric Newton system with NT scaling via LDLT factorization */
       // NSM_linearSolverParams(Jac)->solver = NSM_HSL;
@@ -1273,7 +1361,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     for(unsigned int i = 0; i < n; i++)
     {
       posX = i*d;
-      posY = i*short_dim;
+      posY = i*d_minus_2;
       d_velocity[posX] = d_velocity_1[posY] + d_velocity_2[posY];
       d_velocity[posX+1] = d_velocity_1[posY + 1];
       d_velocity[posX+2] = d_velocity_1[posY + 2];
@@ -1426,14 +1514,41 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   /* -------------------------- Return to original variables -------------------------- */
   // TO DO this point
-  // NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->grfc3d_point->t_velocity);
-  // cblas_dcopy(nd, data->grfc3d_point->t_velocity, 1, velocity, 1);
-
-  // NM_gemv(1.0, P_mu, reaction, 0.0, data->grfc3d_point->t_reaction);
-  // cblas_dcopy(nd, data->grfc3d_point->t_reaction, 1, reaction, 1);
+  NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->original_point->velocity);
+  NM_gemv(1.0, P_mu, reaction, 0.0, data->original_point->reaction);
+  cblas_dcopy(m, globalVelocity, 1, data->original_point->globalVelocity, 1);
 
   options->dparam[SICONOS_DPARAM_RESIDU] = error; //NV_max(error, 4);
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
+
+
+
+
+  clock_t t2 = clock();
+  long clk_tck = CLOCKS_PER_SEC;
+
+  /* writing data in a Matlab file */
+  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
+  {
+    char matlab_file_name[256];
+    sprintf(matlab_file_name,"sigma_nc-%d-.m", problem->numberOfContacts);
+    matlab_file = fopen(matlab_file_name, "w");
+    printInteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, (double)(t2-t1)/(double)clk_tck, matlab_file);
+    fclose(matlab_file);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   if(internal_allocation)
   {
@@ -1446,16 +1561,76 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   free(minus_H);
   NM_clear(H);
   free(H);
+  NM_clear(minus_M);
+  free(minus_M);
+  NM_clear(QpH);
+  free(QpH);
+  NM_clear(J);
+  free(J);
+  NM_clear(F_1);
+  free(F_1);
+  NM_clear(Finv_1);
+  free(Finv_1);
+  NM_clear(Fsqr_1);
+  free(Fsqr_1);
+  NM_clear(F_2);
+  free(F_2);
+  NM_clear(Finv_2);
+  free(Finv_2);
+  NM_clear(Fsqr_2);
+  free(Fsqr_2);
+  // NM_clear(Jac); // already
+  // free(Jac);
+  // NM_clear(Fsqr_1);
+  // free(Fsqr_1);
+  // NM_clear(F_2);
+  // free(F_2);
+  // NM_clear(Finv_2);
+  // free(Finv_2);
+  // NM_clear(Fsqr_2);
+  // free(Fsqr_2);
 
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
-    fclose(iterates);
+
+  free(t);
+  free(t_prime);
+  free(velocity_1);
+  free(velocity_2);
+  free(reaction_1);
+  free(reaction_2);
+  free(d_globalVelocity);
+  free(d_velocity);
+  free(d_velocity_1);
+  free(d_velocity_2);
+  free(d_reaction);
+  free(d_reaction_1);
+  free(d_reaction_2);
+  free(d_t);
+  free(d_t_prime);
+  free(tmpsol);
+  free(r_p);
+  free(Hvw);
+  free(a_velo);
+  free(a_reac);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
+  //   fclose(iterates);
 
   //  fclose(dfile);
 
   *info = hasNotConverged;
-
-
-
 
 
 
@@ -1527,31 +1702,39 @@ void grfc3d_IPM_init(GlobalRollingFrictionContactProblem* problem, SolverOptions
   }
 
 
+  /* original point which is not changed by the matrix P_mu */
+  data->original_point = (IPM_point*)malloc(sizeof(IPM_point));
+  data->original_point->globalVelocity = (double*)calloc(m, sizeof(double));
+  data->original_point->velocity = (double*)calloc(nd, sizeof(double));
+  data->original_point->reaction = (double*)calloc(nd, sizeof(double));
+
+
+
   /* --------- allocate memory for IPM grfc3d point ----------- */
-  data->grfc3d_point = (IPM_grfc3d_point*)malloc(sizeof(IPM_grfc3d_point));
+  // data->grfc3d_point = (IPM_grfc3d_point*)malloc(sizeof(IPM_grfc3d_point));
 
   /* 1. t, t_prime */
-  data->grfc3d_point->t = (double*)calloc(n, sizeof(double));
-  data->grfc3d_point->t_prime = (double*)calloc(n, sizeof(double));
-  for(unsigned int i = 0; i < n; ++ i)
-  {
-    data->grfc3d_point->t[i] = 1.0;
-    data->grfc3d_point->t_prime[i] = 1.0;
-  }
+  // data->grfc3d_point->t = (double*)calloc(n, sizeof(double));
+  // data->grfc3d_point->t_prime = (double*)calloc(n, sizeof(double));
+  // for(unsigned int i = 0; i < n; ++ i)
+  // {
+  //   data->grfc3d_point->t[i] = 1.0;
+  //   data->grfc3d_point->t_prime[i] = 1.0;
+  // }
 
   /*
    * 2. velocity_1 = (t, u_bar), velocity_2 = (t_prime, u_tilde)
    * We will assign these variables later, in the while loop
    */
-  data->grfc3d_point->velocity_1 = (double*)calloc(n_dminus2, sizeof(double));
-  data->grfc3d_point->velocity_2 = (double*)calloc(n_dminus2, sizeof(double));
+  // data->grfc3d_point->velocity_1 = (double*)calloc(n_dminus2, sizeof(double));
+  // data->grfc3d_point->velocity_2 = (double*)calloc(n_dminus2, sizeof(double));
 
   /*
    * 3. reaction_1 = (r0, r_bar), reaction_2 = (r0, r_tilde)
    * We will assign these variables later, in the while loop
    */
-  data->grfc3d_point->reaction_1 = (double*)calloc(n_dminus2, sizeof(double));
-  data->grfc3d_point->reaction_2 = (double*)calloc(n_dminus2, sizeof(double));
+  // data->grfc3d_point->reaction_1 = (double*)calloc(n_dminus2, sizeof(double));
+  // data->grfc3d_point->reaction_2 = (double*)calloc(n_dminus2, sizeof(double));
 
 
   /* ------ initialize the change of variable matrix P_mu ------- */
@@ -1622,12 +1805,13 @@ void grfc3d_IPM_init(GlobalRollingFrictionContactProblem* problem, SolverOptions
 /* deallocate memory */
 void grfc3d_IPM_free(GlobalRollingFrictionContactProblem* problem, SolverOptions* options)
 {
-if(options->dWork)
+  if(options->dWork)
   {
     free(options->dWork);
-    options->dWork=NULL;
+    options->dWork = NULL;
     options->dWorkSize = 0;
   }
+
   if(options->solverData)
   {
     Grfc3d_IPM_data * data = (Grfc3d_IPM_data *)options->solverData;
@@ -1642,6 +1826,19 @@ if(options->dWork)
     data->starting_point->reaction = NULL;
 
     free(data->starting_point);
+    data->starting_point = NULL;
+
+    free(data->original_point->globalVelocity);
+    data->original_point->globalVelocity = NULL;
+
+    free(data->original_point->velocity);
+    data->original_point->velocity = NULL;
+
+    free(data->original_point->reaction);
+    data->original_point->reaction = NULL;
+
+    free(data->original_point);
+    data->original_point = NULL;
 
     NM_clear(data->P_mu->mat);
     free(data->P_mu->mat);
@@ -1652,6 +1849,7 @@ if(options->dWork)
     data->P_mu->inv_mat = NULL;
 
     free(data->P_mu);
+    data->P_mu = NULL;
 
     for(unsigned int i = 0; i < 2; ++i)
       free(data->tmp_vault_m[i]);
@@ -1673,28 +1871,32 @@ if(options->dWork)
     free(data->tmp_vault_n);
     data->tmp_vault_n = NULL;
 
-    free(data->grfc3d_point->velocity_1);
-    data->grfc3d_point->velocity_1 = NULL;
+    // free(data->grfc3d_point->velocity_1);
+    // data->grfc3d_point->velocity_1 = NULL;
 
-    free(data->grfc3d_point->velocity_2);
-    data->grfc3d_point->velocity_2 = NULL;
+    // free(data->grfc3d_point->velocity_2);
+    // data->grfc3d_point->velocity_2 = NULL;
 
-    free(data->grfc3d_point->reaction_1);
-    data->grfc3d_point->reaction_1 = NULL;
+    // free(data->grfc3d_point->reaction_1);
+    // data->grfc3d_point->reaction_1 = NULL;
 
-    free(data->grfc3d_point->reaction_2);
-    data->grfc3d_point->reaction_2 = NULL;
+    // free(data->grfc3d_point->reaction_2);
+    // data->grfc3d_point->reaction_2 = NULL;
 
-    free(data->grfc3d_point->t);
-    data->grfc3d_point->t = NULL;
+    // free(data->grfc3d_point->t);
+    // data->grfc3d_point->t = NULL;
 
-    free(data->grfc3d_point->t_prime);
-    data->grfc3d_point->t_prime = NULL;
+    // free(data->grfc3d_point->t_prime);
+    // data->grfc3d_point->t_prime = NULL;
 
-    free(data->grfc3d_point);
+    // free(data->grfc3d_point);
 
     free(data->internal_params);
+    data->internal_params = NULL;
   }
+
+  free(options->solverData);
+  options->solverData = NULL;
 
 } // end of grfc3d_IPM_free
 
@@ -1710,7 +1912,8 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
+  /* 0: without scaling;  1: NT scaling using Qp;   2: NT scaling using F */
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 2;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
@@ -1718,7 +1921,7 @@ void grfc3d_IPM_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
 
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
@@ -1726,3 +1929,4 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09; //0.09
 
 } // end of grfc3d_IPM_set_default
+

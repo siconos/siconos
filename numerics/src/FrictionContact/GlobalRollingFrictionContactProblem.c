@@ -215,16 +215,16 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContact_newFromFile(FI
 GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filename(const char* filename)
 {
   GlobalRollingFrictionContactProblem* problem = NULL;
-  printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 001 OK\n");
+  //printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 001 OK\n");
   int is_hdf5 = check_hdf5_file(filename);
 
   if(is_hdf5)
   {
-    printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 002 OK\n");
+    //printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 002 OK\n");
 #if defined(WITH_FCLIB)
-    printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 003 OK\n");
+    //printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 003 OK\n");
     problem = globalRollingFrictionContact_fclib_read(filename);
-    printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 004 OK\n");
+    //printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 004 OK\n");
 #else
     numerics_error("GlobalRollingFrictionContactProblem",
                    "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
@@ -241,7 +241,7 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filen
     problem = globalRollingFrictionContact_newFromFile(file);
     fclose(file);
   }
-  printf("\n globalRollingFrictionContactProblem 009 OK\n");
+  //printf("\n globalRollingFrictionContactProblem 009 OK\n");
   return problem;
 }
 

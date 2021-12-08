@@ -44,7 +44,7 @@
 #include "fc2d_Solvers.h"                   // for fc2d_nsgs_set_default
 #include "fc3d_Solvers.h"                   // for fc3d_nsgs_set_default
 #include "gfc3d_Solvers.h"                  // for gfc3d_aclmfp_set_default
-#include "global_rolling_fc_Solvers.h"      // for grfc3d_IPM_set_default
+#include "grfc3d_Solvers.h"      // for grfc3d_IPM_set_default
 #include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
 #include "mlcp_cst.h"                       // for SICONOS_MLCP_DIRECT_ENUM_STR
 #include "numerics_verbose.h"               // for numerics_printf, numerics...

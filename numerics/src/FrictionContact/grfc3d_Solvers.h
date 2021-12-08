@@ -18,7 +18,7 @@
 #ifndef GLOBALROLLINGFRICTIONCONTACT3DSOLVERS_H
 #define GLOBALROLLINGFRICTIONCONTACT3DSOLVERS_H
 
-/*!\file fc3d_Solvers.h
+/*!\file grfc3d_Solvers.h
   \brief Subroutines for the resolution of contact problems with rolling friction (3-dimensional and 2-dimensional case).
 
 */
@@ -26,6 +26,11 @@
 #include "GlobalRollingFrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
+
+/** pointer to function used to update velocity and compute error */
+typedef void (* ComputeErrorGlobalRollingPtr)(GlobalRollingFrictionContactProblem* ,
+                                      double * , double * , double* ,
+                                      double , double * , int );
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
