@@ -123,8 +123,6 @@ typedef long double float_type;
 /*          On the implementation and usage of SDPT3 - a Matlab software package */
 /*          for semidefinite-quadratic-linear programming, version 4.0 */
 /*          Draft, 17 July 2006 */
-static double getNewtonStepLength(const double * const x, const double * const dx,
-                                  const unsigned int vecSize, const unsigned int varsCount, const double gamma);
 
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double. */
 static double getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
@@ -265,68 +263,6 @@ static float_type dnrm2l(const unsigned int n, const double * x)
     }
   }
   return norm;
-}
-
-/* Returns the step length for variables update in IPM */
-static double getNewtonStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
-                                  const unsigned int varsCount, const double gamma)
-{
-  unsigned int dimension = (int)(vecSize / varsCount);
-  double * alpha_list = (double*)calloc(varsCount, sizeof(double));
-
-  unsigned int pos;
-  double ai, bi, ci, di, alpha, min_alpha;
-  double  *xi2, *dxi2, *xi_dxi;
-
-  const double *dxi, *xi;
-
-  dxi2 = (double*)calloc(dimension, sizeof(double));
-  xi2 = (double*)calloc(dimension, sizeof(double));
-  xi_dxi = (double*)calloc(dimension, sizeof(double));
-
-  for(unsigned int i = 0; i < varsCount; ++i)
-  {
-    pos = i * dimension;
-    xi = x + pos;
-    dxi = dx + pos;
-
-    NV_power2(dxi, dimension, dxi2);
-    ai = dxi2[0] - NV_reduce((dxi2 + 1), dimension - 1);
-
-    NV_prod(xi, dxi, dimension, xi_dxi);
-    bi = xi_dxi[0] - NV_reduce((xi_dxi + 1), dimension - 1);
-    //   bi = gamma*bi;
-
-    NV_power2(xi, dimension, xi2);
-    ci = xi2[0] - NV_reduce((xi2 + 1), dimension - 1);
-    //    ci = gamma*gamma*ci;
-
-    di = bi * bi - ai * ci;
-
-    if(ai < 0 || (bi < 0 && ai < (bi * bi) / ci))
-      alpha = ((-bi - sqrt(di)) / ai);
-    else if((fabs(ai) < DBL_EPSILON) && (bi < 0))
-      alpha = (-ci / (2 * bi));
-    else
-      alpha = DBL_MAX;
-    //NV_display(xi2, dimension);
-    //printf("**************** %3i ai = %9.2e b = %9.2e ci = %9.2e alpha = %9.2e\n",i, ai, bi, ci, alpha);
-
-    if(fabs(alpha) < DBL_EPSILON)
-      alpha = 0.0;
-
-    alpha_list[i] = alpha;
-  }
-
-  min_alpha = NV_min(alpha_list, varsCount);
-
-  free(xi2);
-  free(dxi2);
-  free(xi_dxi);
-  free(alpha_list);
-
-  return fmin(1.0, gamma * min_alpha);
-  //return fmin(1.0, min_alpha);
 }
 
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double. */
