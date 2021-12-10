@@ -34,7 +34,7 @@
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
 
-#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
+#define MIN_RELATIVE_SCALING 1e300
 
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                         double*  reaction, double*  velocity,
@@ -280,6 +280,8 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   }
 
   error_complementarity = sqrt(error_complementarity);
+
+  //  error_complementarity = cblas_ddot(m, velocity, 1, reaction, 1)/m;
 
   DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
 
