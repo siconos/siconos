@@ -34,7 +34,7 @@
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"
 
-#define MIN_RELATIVE_SCALING 1e300
+#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
 
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                         double*  reaction, double*  velocity,
@@ -296,7 +296,8 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   DEBUG_PRINTF("relative error = %e\n", *error);
   numerics_printf_verbose(1,"---- GFC3D - Compute Error Convex case");
   if(*error > tolerance)
-  {
+
+    {
     DEBUG_END("gfc3d_compute_error_convex(...)\n");
     return 1;
   }
