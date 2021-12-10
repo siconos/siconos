@@ -71,7 +71,7 @@ void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* optio
   size_t nc = problem->numberOfContacts;
   size_t n = problem->M->size0;
   size_t m = 3 * nc;
-  if(!options->dWork || options->dWorkSize != m+n)
+  if(!options->dWork || options->dWorkSize < m+n)
   {
     options->dWork = (double*)calloc(m+n,sizeof(double));
     options->dWorkSize = m+n;
@@ -316,8 +316,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
                 double* restrict velocity, double* restrict globalVelocity,
                 int* restrict info, SolverOptions* restrict options)
 {
-  /* verbose=2; */
-
+  verbose=1;
+  printf("start  gfc3d_ADMM - 0\n");
   int* iparam = options->iparam;
   double* dparam = options->dparam;
   size_t nc = problem_original->numberOfContacts;
@@ -340,7 +340,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
     original_problem->norm_b = cblas_dnrm2(m, original_problem->b, 1);
     original_problem->norm_q = cblas_dnrm2(n, original_problem->q, 1);
   }
-
+  printf("start  gfc3d_ADMM - 1\n");
 
 
   double* q = problem->q;
@@ -372,7 +372,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
       NM_copy_to_sparse(H_original, problem->H, DBL_EPSILON);
     }
   }
-
+  printf("start  gfc3d_ADMM - 1.1\n");
 
   /**************************************************************************/
   /***************** Strategies for dealing with symmetry *******************/
@@ -395,7 +395,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   {
     /* The symmetric version of the algorithm is used even if
      *  the system is not symmetric using the LU solver */
-    if(verbose >= 1)
+    if(verbose >= 1 && problem->M->size0 < 100)
     {
       if(!(NM_is_symmetric(problem->M)))
       {
@@ -426,7 +426,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   else
     numerics_error("gfc3d_admm", "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented", options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
 
-
+  printf("start  gfc3d_ADMM - 2\n");
 
   assert((int)problem->H->size1 == problem->numberOfContacts * problem->dimension);
 
@@ -567,6 +567,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
 
 
   int update_b =1;
+
   ComputeErrorGlobalPtr computeError = NULL;
 
   if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]==
@@ -576,6 +577,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   }
   else
   {
+    update_b=0;
     computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error_convex;
   }
 
@@ -595,11 +597,15 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-
+  printf("start  gfc3d_ADMM - 2\n");
   assert(rho>0);
   /**************************************************************************/
   /***********************************************  ADMM iterations *********/
   /**************************************************************************/
+  numerics_printf_verbose(1, "| iter | rho       | full (e)  | primal r. | eps_primal|  dual r.  | eps_dual  |   error   | tolerance |");
+  numerics_printf_verbose(1, "--------------------------------------------------------------------------------------------------------");
+
+  
   while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
@@ -912,10 +918,11 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
     if(r <= epsilon_primal && s <= epsilon_dual)
       stopping_criterion =1;
 
-    numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e, full residual (e) = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
-    numerics_printf_verbose(1,"---- GFC3D - ADMM  -                            primal residual = %14.7e, epsilon_primal = %14.7e", r,  epsilon_primal);
-    numerics_printf_verbose(1,"---- GFC3D - ADMM  -                            dual residual = %14.7e, epsilon_dual = %14.7e", s,  epsilon_dual);
-
+    /* numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e, full residual (e) = %14.7e, tol = %14.7e", iter, rho, residual, tolerance); */
+    /* numerics_printf_verbose(1,"---- GFC3D - ADMM  -                            primal residual = %14.7e, epsilon_primal = %14.7e", r,  epsilon_primal); */
+    /* numerics_printf_verbose(1,"---- GFC3D - ADMM  -                            dual residual = %14.7e, epsilon_dual = %14.7e", s,  epsilon_dual); */
+    numerics_printf_verbose(1, "|  %3i%c | %9.2e | %.3e | %.3e | %.3e | %.3e | %.3e | %.3e | %.3e |",
+                            iter, rho, residual, r, epsilon_primal, s, epsilon_primal, error, dparam[SICONOS_DPARAM_TOL]);
 
     int adapt_tolerance = 1;
     /* We check the full criterion at a given frequency */
@@ -944,25 +951,29 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
       //double error_original=0.0;
       if(iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]>0)
       {
-        (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
+        (*computeError)(problem,  reaction, u, v,  tolerance, options,
                         norm_q, norm_b,  &error);
         /* printf("############ error  = %g\n", error); */
 
         gfc3d_balancing_back_to_original_variables(problem,
                                                    options,
-                                                   reaction, velocity, v);
-        (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
+                                                   reaction, u, v);
+        (*computeError)(original_problem,  reaction, u, v,  tolerance, options,
                         original_problem->norm_q, original_problem->norm_b,  &error);
         //error_original = error;
         /* printf("############ error original = %g\n", error_original); */
       }
       else
       {
-        (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
+        (*computeError)(problem,  reaction, u, v,  tolerance, options,
                         norm_q, norm_b,  &error);
         /* printf("############ error  = %g\n", error); */
       }
 
+      
+      tmp_m =  options->dWork; /* options->dWork may be reallocated by computeError */
+      tmp_n =  &options->dWork[m];
+  
 
 
 
@@ -1029,12 +1040,12 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
       gfc3d_balancing_back_to_original_variables(problem,
                                                  options,
                                                  reaction, velocity, v);
-      (*computeError)(original_problem,  reaction, velocity, v,  tolerance, options,
+      (*computeError)(original_problem,  reaction, u, v,  tolerance, options,
                       original_problem->norm_q, original_problem->norm_b,  &error);
     }
     else
     {
-      (*computeError)(problem,  reaction, velocity, v,  tolerance, options,
+      (*computeError)(problem,  reaction, u, v,  tolerance, options,
                       norm_q, norm_b,  &error);
     }
     if(error < dparam[SICONOS_DPARAM_TOL])
