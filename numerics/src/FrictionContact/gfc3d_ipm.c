@@ -515,16 +515,16 @@ static double dualGap(NumericsMatrix * M, const double * f, const double * w, co
   free(Mv);
   pval = vMv - cblas_ddot(m, f, 1, globalVelocity, 1);
   dval = -vMv - cblas_ddot(nd, w, 1, reaction, 1);
-  return (pval - dval)/ (1 + fabs(pval) + fabs(dval));
+  return (pval - dval)/ (1 + (fabs(pval) + fabs(dval))/2);
 }
 
-static void setErrorArray(double * error, const double pinfeas, const double dinfeas,
-                          const double dualgap, const double complem, const double complem_p)
+static void setErrorArray(double * error, const double pinfeas, const double dinfeas, const double udotr,
+                          const double dualgap, const double complem)
 {
   error[0] = pinfeas;
   error[1] = dinfeas;
-  error[2] = dualgap;
-  error[3] = complem_p;
+  error[2] = udotr;
+  error[3] = dualgap;
   error[4] = complem;
 }
 
@@ -585,12 +585,24 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
   {
     j = i*dimension;
     nxb = dnrm2l(dimension-1, x+j+1);
+    /* if (isnan(nxb)) */
+    /*   { */
+    /* 	printf("%Le\n",nxb); */
+    /* 	//getchar(); */
+    /*   } */
+
     if (nxb > 0)
       for (int k = 0; k < dimension-1; xb[k] = x[j+1+k]/nxb, k++);
 
     l1 = x[j]+nxb;
     l2 = x[j]-nxb;
     dx = 1/sqrtl(l1*l2);
+    /* if (isnan(dx)) */
+    /*   { */
+    /* 	printf("%Le %Le\n",l1,l2); */
+    /* 	getchar(); */
+    /*   } */
+	      
     c1y = y[j];
     for (int k = 0; k < dimension-1; c1y += xb[k]*y[j+1+k], k++);
     c2y = 2*y[j] - c1y;
@@ -715,6 +727,11 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = 1/sqrtl(x[j]+normx)/2;
     l2 = 1/sqrtl(x[j]-normx)/2;
+    /* if (isnan(l2)) */
+    /*   { */
+    /* 	printf("Jsqrtinv: %e %Le %Le\n",x[j], normx, x[j]*(1-x[j]/normx)); */
+    /* 	getchar(); */
+    /*   } */
     out[j] = l1+l2;
     for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++);
   }
@@ -937,7 +954,249 @@ static  NumericsMatrix *  QNTpH(const double * const x, const double * const y, 
   return QpH;
 }
 
+/* Returns the product Q_{p}*z where p is the NT vector related to the pair (x,y) */
+static  NumericsMatrix *  QNTpH_2(const double * const x, const double * const y, NumericsMatrix* H, const unsigned int vecSize, const size_t varsCount)
+{
+  double * a = (double*)calloc(vecSize, sizeof(double));
+  double * b = (double*)calloc(vecSize, sizeof(double));
+  double * z_beta = (double *)calloc(H->size0,sizeof(double));
+  
+  Qx05y(x, y, vecSize, varsCount,a);
+  Jsqrtinv(a, vecSize, varsCount, b);
+  Qx05y(x, b, vecSize, varsCount, a);
 
+  NumericsMatrix * QpH = NM_new();
+
+
+  //Qx50y(a, z, vecSize, varsCount, out);
+  NM_types storage = H->storageType;
+  switch(storage)
+  {
+    /* case NM_DENSE: */
+    /*   cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
+    /*   break; */
+    /* /\* SparseBlock storage *\/ */
+    /* case NM_SPARSE_BLOCK: */
+    /*   SBM_gemv_3x3(sizeX, sizeY, A->matrix1, x, y); */
+    /*   break; */
+    /* coordinate */
+    
+    
+  case NM_SPARSE:
+  {
+    CSparseMatrix* H_csc = NM_csc(H);
+    CSparseMatrix* QpH_csc  = cs_spalloc (H->size0, H->size1, H_csc->nzmax , 1, 0) ;        /* allocate result */
+    
+    CS_INT  *Hp, *Hi ;
+    Hp = H_csc->p ; Hi = H_csc->i ;
+    CS_INT  *QpHp, *QpHi ;
+    QpHp = QpH_csc->p ;
+    CS_ENTRY *Hx, *QpHx ;
+    Hx = H_csc->x ;
+    unsigned int dimension = (int)(vecSize / varsCount);
+    
+    //double * z_beta = (double *)calloc(H->size0,sizeof(double));
+    int * beta = (int *)malloc(H->size0/3 *sizeof(int));
+    for (CS_INT k=0 ; k <  H->size0/3; k++)
+      beta[k] =-1;
+
+
+    CS_INT nz = 0;
+    for (CS_INT k = 0 ; k < H->size1 ; k++)
+    {
+  
+      CS_INT i, p, *Hp, *Hi ;
+      Hp = H_csc->p ; Hi = H_csc->i ; Hx = H_csc->x ;
+
+      /* search for beta and z_beta that are non null in the column k of H */
+      CS_INT n_beta=-1, beta_old=-1;
+      for (p = Hp [k] ; p < Hp [k+1] ; p++)
+      {
+        i = Hi[p];
+        z_beta[i] =  Hx[p];
+        CS_INT beta_current = i/3;
+        if (beta_old != beta_current )
+        {
+           n_beta++;
+           beta_old=beta_current;
+        }
+        beta[n_beta] = beta_current;
+      }
+      n_beta++;
+
+      QpHp[k] = nz ;                   /* column k of QpH starts here */
+      /* reallocate if needed */
+      if (nz + H->size1> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size1))
+      {
+        return NULL;             /* out of memory */
+      }
+      QpHi = QpH_csc->i ; QpHx = QpH_csc->x ;         /* C->i and C->x may be reallocated */
+
+      /* multiplication and storage */
+      for (int b =0; b< n_beta;b++)
+      {
+        CS_INT alpha=beta[b];
+        double out[3];
+
+        Qx50y(&a[alpha*3], &z_beta[alpha*3], 3, 1, out);
+
+        /* store out in QpH */
+        QpHi[nz]  = alpha*3;
+        QpHx[nz++] = out[0];
+        QpHi[nz]  = alpha*3+1;
+        QpHx[nz++] = out[1];
+        QpHi[nz]  = alpha*3+2;
+        QpHx[nz++] = out[2];
+
+        z_beta[alpha*3] =0.0;
+        z_beta[alpha*3+1] =0.0;
+        z_beta[alpha*3+2] =0.0;
+        beta[b]=-1;
+      }
+    } // end loop k
+    QpHp[H->size1] = nz ;
+    cs_sprealloc (QpH_csc, 0) ;
+
+    QpH->storageType=H->storageType;
+    numericsSparseMatrix(QpH)->csc = QpH_csc;
+    QpH->size0 = (int)QpH->matrix2->csc->m;
+    QpH->size1 = (int)QpH->matrix2->csc->n;
+    numericsSparseMatrix(QpH)->origin = NSM_CSC;
+
+    break;
+  }
+  break;
+  default:
+    fprintf(stderr, "Numerics, GFC3D IPM, QNTpH failed, unknown storage type for H.\n");
+    exit(EXIT_FAILURE);
+  }
+
+
+  free(a);
+  free(b);
+  free(z_beta);
+  return QpH;
+}
+
+/* Returns the product Q_{p}*z where p is the NT vector related to the pair (x,y) */
+static  NumericsMatrix *  QNTpH_3(const double * const x, const double * const y, NumericsMatrix* H, const unsigned int vecSize, const size_t varsCount)
+{
+  double * a = (double*)calloc(vecSize, sizeof(double));
+  double * b = (double*)calloc(vecSize, sizeof(double));
+
+  Qx05y(x, y, vecSize, varsCount,a);
+  Jsqrtinv(a, vecSize, varsCount, b);
+  Qx05y(x, b, vecSize, varsCount, a);
+
+  NumericsMatrix * QpH = NM_new();
+
+
+  //Qx50y(a, z, vecSize, varsCount, out);
+  NM_types storage = H->storageType;
+    switch(storage)
+  {
+  /* case NM_DENSE: */
+  /*   cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
+  /*   break; */
+  /* /\* SparseBlock storage *\/ */
+  /* case NM_SPARSE_BLOCK: */
+  /*   SBM_gemv_3x3(sizeX, sizeY, A->matrix1, x, y); */
+  /*   break; */
+  /* coordinate */
+  case NM_SPARSE:
+  {
+    CSparseMatrix* H_csc = NM_csc(H);
+    CSparseMatrix* QpH_csc  = cs_spalloc (H->size0, H->size1, H_csc->nzmax , 1, 0) ;        /* allocate result */
+
+    CS_INT i, p, *Hp, *Hi ;
+    Hp = H_csc->p ; Hi = H_csc->i ;
+
+    CS_INT  *QpHp, *QpHi ;
+    QpHp = QpH_csc->p ;
+
+    CS_ENTRY *Hx, *QpHx ;
+    Hx = H_csc->x ;
+
+
+    unsigned int dimension = (int)(vecSize / varsCount); // should be used to work properly on different dimension of cones.
+
+    double * z_beta = b;
+    for (CS_INT k=0 ; k <  H->size0; k++)
+      z_beta[k]=0;
+
+    int * beta = (int *)malloc(H->size0/3 *sizeof(int));
+    for (CS_INT k=0 ; k <  H->size0/3; k++)
+      beta[k] =-1;
+
+
+    CS_INT nz = 0;
+    for (CS_INT k = 0 ; k < H->size1 ; k++)
+    {
+      /* search for beta and z_beta that are non null in the column k of H */
+      CS_INT n_beta=-1, beta_old=-1;
+      for (p = Hp [k] ; p < Hp [k+1] ; p++)
+      {
+        i = Hi[p];
+        z_beta[i] =  Hx[p];
+        CS_INT beta_current = i/3;
+        if (beta_old != beta_current )
+        {
+           n_beta++;
+           beta_old=beta_current;
+        }
+        beta[n_beta] = beta_current;
+      }
+      n_beta++;
+
+      QpHp[k] = nz ;                   /* column k of QpH starts here */
+
+      /* reallocate if needed */
+      if (nz + H->size1> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size1))
+      {
+        return NULL;             /* out of memory */
+      }
+      QpHi = QpH_csc->i ; QpHx = QpH_csc->x ;         /* C->i and C->x may be reallocated */
+
+      /* multiplication and storage */
+      for (int b =0; b< n_beta;b++)
+      {
+        CS_INT alpha=beta[b];
+
+        Qx50y(&a[alpha*3], &z_beta[alpha*3], 3, 1, QpHx+nz);
+
+        /* store out in QpH */
+        QpHi[nz++]  = alpha*3;
+        QpHi[nz++]  = alpha*3+1;
+        QpHi[nz++]  = alpha*3+2;
+
+        z_beta[alpha*3] =0.0;
+        z_beta[alpha*3+1] =0.0;
+        z_beta[alpha*3+2] =0.0;
+        beta[b]=-1;
+      }
+    } // end loop k
+
+    QpHp[H->size1] = nz ;
+    cs_sprealloc (QpH_csc, 0) ;
+
+    QpH->storageType=H->storageType;
+    numericsSparseMatrix(QpH)->csc = QpH_csc;
+    QpH->size0 = (int)QpH->matrix2->csc->m;
+    QpH->size1 = (int)QpH->matrix2->csc->n;
+    numericsSparseMatrix(QpH)->origin = NSM_CSC;
+
+    break;
+  }
+  break;
+  default:
+    fprintf(stderr, "Numerics, GFC3D IPM, QNTpH failed, unknown storage type for H.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  free(a);
+  free(b);
+  return QpH;
+}
 
 /* returns the Jordan product x^{-1} o y by using the formula x^{-1} = R*x/det(x), where R is the reflection matrix */
 void Jxinvprody(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out)
@@ -1574,21 +1833,26 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double complem = 1e300;
   double complem_p = 1e300;
   double dualgap = 1e300;
+  double udotr = 1e300;
   double error[5];
-  error[0] = pinfeas;
-  error[1] = dinfeas;
-  error[2] = dualgap;
-  error[3] = complem_p;
-  error[4] = complem;
+
+  double *primalConstraint = data->tmp_vault_nd[1];
+  double *dualConstraint = data->tmp_vault_m[0];
+  double *complemConstraint = data->tmp_vault_nd[2];
+
+  primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas);
+  dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas);
+  udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
+  dualgap = dualGap(M, f, w, globalVelocity, reaction, nd, m);
+  complem = complemResidualNorm(velocity, reaction, nd, n);
+
+  setErrorArray(error, pinfeas, dinfeas, udotr, dualgap, complem);
 
   double gmm = gmmp0;
   double barr_param_a, e;
   double norm_f = cblas_dnrm2(m, f, 1);
   double norm_w = cblas_dnrm2(nd, w, 1);
 
-  double *primalConstraint = data->tmp_vault_nd[1];
-  double *dualConstraint = data->tmp_vault_m[0];
-  double *complemConstraint = data->tmp_vault_nd[2];
 
   double *d_globalVelocity = (double*)calloc(m,sizeof(double));
   double *d_velocity = (double*)calloc(nd,sizeof(double));
@@ -1607,7 +1871,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
   NumericsMatrix* r_Qp = NULL;                                                // matrix Qp
   NumericsMatrix *minus_M = NM_create(M->storageType, M->size0, M->size1);    // store the matrix -M to build the matrix of the Newton linear system
-  //NumericsMatrix *QpH_old = NM_create(H->storageType, H->size0, H->size1);        // store the matrix Qp*H
+  //NumericsMatrix *QpH = NM_create(H->storageType, H->size0, H->size1);        // store the matrix Qp*H
   double * r_rhs = (double*)calloc(m+nd, sizeof(double));
   double * r_rhs_2 = (double*)calloc(m+nd, sizeof(double));
   double * r_dv = (double*)calloc(m,sizeof(double));
@@ -1660,7 +1924,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   /* ---- IPM iterations ---- */
   numerics_printf_verbose(-1, "problem dimensions d, n, m: %1i, %6i, %6i\n",d, n, m);
-  numerics_printf_verbose(-1, "| it  |  dualgap  | pinfeas  | dinfeas  | complem  | complemp | full err | barparam | alpha_p  | alpha_d  |  sigma   | |dv|/|v| | |du|/|u| | |dr|/|r| |");
+  numerics_printf_verbose(-1, "| it  |  dualgap  | pinfeas  | dinfeas  |  <u, r>  | complem  | full err | barparam | alpha_p  | alpha_d  |  sigma   | |dv|/|v| | |du|/|u| | |dr|/|r| |");
   numerics_printf_verbose(-1, "--------------------------------------------------------------------------------------------------------------------------------------------");
 
   double * p = data->tmp_vault_nd[8];
@@ -1716,7 +1980,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   while(iteration < max_iter)
   {
-    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (err <= 1e-5) && (fws==' '))
+    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (err <= 1e-6) && (fws==' '))
     {
       // To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
       options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
@@ -1797,8 +2061,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 	}
     }
     complem = complemResidualNorm(velocity, reaction, nd, n);
+    udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
 
-    setErrorArray(error, pinfeas, dinfeas, dualgap, complem, complem_p);
+    setErrorArray(error, pinfeas, dinfeas, udotr, dualgap, complem);
 
     /* ----- return to original variables ------ */
     NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->tmp_point->t_velocity);
@@ -1815,10 +2080,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
                     norm_q, norm_b,  &err);
 
     // check exit condition
-    if (err <= tol) //((NV_max(error, 4) <= tol) || (err <= tol))
+    if (NV_max(error, 3) <= tol) //|| (err <= tol))
     {
       numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
-                              iteration, fws, dualgap, pinfeas, dinfeas, complem, complem_p, err, barr_param);
+                              iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem, err, barr_param);
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
         printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
@@ -1896,16 +2161,15 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       NM_insert(JR, NM_eye(nd), m, m);
 
       /* add a regularization term  */
-      //double delta = barr_param <= 1e-4 ? barr_param : 1e-4;
-      //NM_insert(JR, NM_add(1.0, NM_eye(nd), delta, Qp2),m, m);
+      /* NM_insert(JR, NM_add(1.0, NM_eye(nd), delta, Qp2),m, m); */
 
       //r_Qp = Quad_repr(r_p, nd, n);
       //NM_copy(H, QpH); /* useful ? */
       //NM_gemm(1.0, Qp, H, 0.0, QpH);
 
-      //QpH_old = NM_multiply(Qp,H); // This product should be replaced by a function returning the product Qp * vector
+      //QpH = NM_multiply(Qp,H); // This product should be replaced by a function returning the product Qp * vector
 
-      NumericsMatrix * QpH = QNTpH(velocity, reaction, H, nd, n);
+      NumericsMatrix * QpH = QNTpH_3(velocity, reaction, H, nd, n);
 
 
       //NM_compare(QpH, QpH_new,1e-10);
@@ -2200,16 +2464,58 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     gmm = gmmp1 + gmmp2 * fmin(alpha_primal, alpha_dual);
 
     numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
-                            iteration, fws, dualgap, pinfeas, dinfeas, complem, complem_p, err, barr_param, alpha_primal, alpha_dual, sigma,
+                            iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem, err, barr_param, alpha_primal, alpha_dual, sigma,
                             cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
                             cblas_dnrm2(nd, d_velocity, 1)/cblas_dnrm2(nd, velocity, 1),
                             cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1));
 
     /* ----- Update variables ----- */
+
+    if (NV_isnan(d_globalVelocity, m) | NV_isnan(d_velocity, nd) | NV_isnan(d_reaction, nd))
+    {
+      hasNotConverged = 2;
+      break;
+    }
+
+    int j;
+    
     cblas_daxpy(m, alpha_primal, d_globalVelocity, 1, globalVelocity, 1);
+
+    /* for (int k = 0; k < nd; k++) */
+    /* { */
+    /*   j = k*d; */
+    /*   if (cblas_dnrm2(d, velocity+j, 1) < DBL_EPSILON) */
+    /*   { */
+    /* 	// printf("%i %e\n", k, cblas_dnrm2(d-1, velocity+j+1, 1)); */
+    /* 	for (int i = 0; i < d; d_velocity[j+i] = 0.0, i++); */
+    /*   } */
+    /* } */
+    
     cblas_daxpy(nd, alpha_primal, d_velocity, 1, velocity, 1);
     cblas_daxpy(nd, alpha_dual, d_reaction, 1, reaction, 1);
 
+    /* printf("Norm velocity:  %12.8e\n", cblas_dnrm2(nd, velocity, 1)); */
+    /* printf("Norm reaction:  %12.8e\n", cblas_dnrm2(nd, reaction, 1)); */
+    /* printf("Norm GlobalVe:  %12.8e\n", cblas_dnrm2(m, globalVelocity, 1)); */
+
+    
+    /* for (int k = 0; k < n; k++) */
+    /* { */
+    /*   j = k*d; */
+    /*   if (velocity[j] <= cblas_dnrm2(d-1, velocity+j+1, 1)) */
+    /*   { */
+    /* 	//    	printf("u[%i] %e\n", j, velocity[j]-cblas_dnrm2(d-1, velocity+j+1, 1)); */
+    /* 	velocity[j] = ((1+DBL_EPSILON)*cblas_dnrm2(d-1, velocity+j+1, 1)); */
+    /* 	//getchar(); */
+    /*   } */
+    /*   if (reaction[j] <= cblas_dnrm2(d-1, reaction+j+1, 1)) */
+    /*   { */
+    /* 	//    	printf("r[%i] %e\n", j, reaction[j]-cblas_dnrm2(d-1, reaction+j+1, 1)); */
+    /* 	reaction[j] = ((1+DBL_EPSILON)*cblas_dnrm2(d-1, reaction+j+1, 1)); */
+    /* 	//getchar(); */
+    /*   } */
+    /* } */
+ 
     if (NV_isnan(globalVelocity, m) | NV_isnan(velocity, nd) | NV_isnan(reaction, nd))
     {
       hasNotConverged = 2;
@@ -2321,13 +2627,11 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
-
-  options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
