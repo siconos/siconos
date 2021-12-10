@@ -346,28 +346,6 @@ static void dualResidual(NumericsMatrix * M, const double * globalVelocity, Nume
   free(HTr);
 }
 
-/* Returns the 2-norm of primal residual vector = | H * globalVelocity + w - velocity |_2 / (1 + |w|_inf) */
-/* static double primalResidualNorm(const double * velocity, NumericsMatrix * H, */
-/*                                  const double * globalVelocity, const double * w) */
-/* { */
-/*   double * resid = (double*)calloc(H->size0, sizeof(double)); */
-/*   primalResidualVector(velocity, H, globalVelocity, w, resid); */
-/*   double norm_2 = cblas_dnrm2(H->size0, resid, 1); */
-/*   free(resid); */
-/*   return norm_2 / (1 + NV_norm_inf(w, H->size0)); */
-/* } */
-
-/* Returns the 2-norm of the dual residual vector  = | M * globalVelocity - H * reaction + f |_2 / (1 + |f|_inf)  */
-/* static double dualResidualNorm(NumericsMatrix * M, const double * globalVelocity, */
-/*                                NumericsMatrix * H, const double * reaction, const double * f) */
-/* { */
-/*   double * resid = (double*)calloc(H->size1, sizeof(double)); */
-/*   dualResidualVector(M, globalVelocity, H, reaction, f, resid); */
-/*   double norm_2 = cblas_dnrm2(H->size1, resid, 1); */
-/*   free(resid); */
-/*   return norm_2 / (1 + NV_norm_inf(f, H->size1)); */
-/* } */
-
 /* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product velocity o reaction  */
 static double complemResidualNorm(const double * const velocity, const double * const reaction,
                                   const unsigned int vecSize, const unsigned int varsCount)
@@ -383,11 +361,9 @@ static double complemResidualNorm(const double * const velocity, const double * 
 static double complemResidualNorm_p(const double * const velocity, const double * const reaction,
                                     const unsigned int vecSize, const unsigned int varsCount)
 {
-
   double * resid = (double*)calloc(vecSize, sizeof(double));
   double * u_p = (double*)calloc(vecSize, sizeof(double));
   double * r_p = (double*)calloc(vecSize, sizeof(double));
-  //double * p_inv = (double*)calloc(vecSize, sizeof(double));
   double * a = (double*)calloc(vecSize, sizeof(double));
   double * b = (double*)calloc(vecSize, sizeof(double));
 
@@ -401,19 +377,9 @@ static double complemResidualNorm_p(const double * const velocity, const double 
 
   double norm2 = cblas_dnrm2(vecSize, resid, 1);
 
-  /* Qxy(p, velocity, vecSize, varsCount, u_p); */
-  /* JA_inv(p, vecSize, varsCount, p_inv); */
-  /* Qxy(p_inv, reaction, vecSize, varsCount, r_p); */
-  /* JA_prod(u_p, r_p, vecSize, varsCount, resid); */
-
-  /* norm2 = cblas_dnrm2(vecSize, resid, 1); */
-  /* printf("complemnt-2 = %.15e\n",norm2); */
-  //norm2 = norm2/ cblas_dnrm2(vecSize, velocity, 1);
-  //norm2 = norm2 / cblas_dnrm2(vecSize, reaction, 1);
   free(resid);
   free(u_p);
   free(r_p);
-  //free(p_inv);
   free(a);
   free(b);
 
@@ -454,8 +420,7 @@ static double dualGap(NumericsMatrix * M, const double * f, const double * w, co
   return (pval - dval)/ (1 + (fabs(pval) + fabs(dval))/2);
 }
 
-static void setErrorArray(double * error, const double pinfeas, const double dinfeas, const double udotr,
-                          const double dualgap, const double complem)
+static void setErrorArray(double * error, const double pinfeas, const double dinfeas, const double udotr, const double dualgap, const double complem)
 {
   error[0] = pinfeas;
   error[1] = dinfeas;
@@ -549,38 +514,6 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
   }
   free(xb);
 }
-/* void Qx50y(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out) */
-/* { */
-/*   unsigned int dimension = (int)(vecSize / varsCount); */
-/*   double l1, l2, c1y, c2y, normx, fx1, fx2, dx;  */
-/*   size_t j; */
-/*   double *xn = (double*)calloc(dimension-1, sizeof(double)); */
-
-/*   for (int i = 0; i < dimension - 1; xn[i] = 1/sqrt(dimension-1), i++); */
-
-/*   for(size_t i = 0; i < varsCount; i++) */
-/*     { */
-/*       j = i*dimension; */
-/*       normx = cblas_dnrm2(dimension-1, x+j+1, 1); */
-/*       if (normx > 0) */
-/* 	{ */
-/* 	  cblas_dcopy(dimension-1, x+j+1, 1, xn, 1); */
-/* 	  cblas_dscal(dimension-1, 1.0/normx, xn, 1); */
-/* 	} */
-/*       cblas_dcopy(dimension-1, x+j+1, 1, xn, 1); */
-/*       cblas_dscal(dimension-1, 1.0/normx, xn, 1); */
-/*       l1 = 1/(x[j]+normx); */
-/*       l2 = 1/(x[j]-normx); */
-/*       dx = sqrt(l1*l2); */
-/*       c1y = y[j] + cblas_ddot(dimension-1, xn, 1, y+j+1, 1); */
-/*       c2y = 2*y[j] - c1y; */
-/*       fx1 = (l1*c1y + dx*c2y)/2; */
-/*       fx2 = (dx*c1y + l2*c2y)/2; */
-/*       out[j] = fx1 + fx2 - dx*y[j]; */
-/*       for (int k = 0; k < dimension-1; out[j+k+1] = fx1*xn[k] - fx2*xn[k] + dx*y[j+k+1], k++); */
-/*     } */
-/*   free(xn); */
-/* } */
 
 /* PA: Jordan algebra, returns inv(x) */
 void Jinv(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out)
@@ -599,41 +532,6 @@ void Jinv(const double * const x, const unsigned int vecSize, const size_t varsC
     for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++);
   }
 }
-
-/* /\* PA: Return J_sqrt(x) *\/ */
-/* void Jsqrt(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out) */
-/* { */
-/*   unsigned int dimension = (int)(vecSize / varsCount); */
-/*   double l1, l2, normx; */
-/*   size_t j; */
-
-/*   for(size_t i = 0; i < varsCount; i++) */
-/*     { */
-/*       j = i*dimension; */
-/*       normx = cblas_dnrm2(dimension-1, x+j+1, 1); */
-/*       l1 = sqrt(x[j]+normx)/2; */
-/*       l2 = sqrt(x[j]-normx)/2; */
-/*       out[j] = l1+l2; */
-/*       for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++); */
-/*     } */
-/* } */
-/* /\* PA: Return J_sqrtinv(x) *\/ */
-/* void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out) */
-/* { */
-/*   unsigned int dimension = (int)(vecSize / varsCount); */
-/*   double l1, l2, normx; */
-/*   size_t j; */
-
-/*   for(size_t i = 0; i < varsCount; i++) */
-/*     { */
-/*       j = i*dimension; */
-/*       normx = cblas_dnrm2(dimension-1, x+j+1, 1); */
-/*       l1 = 1/sqrt(x[j]+normx)/2; */
-/*       l2 = 1/sqrt(x[j]-normx)/2; */
-/*       out[j] = l1+l2; */
-/*       for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++); */
-/*     } */
-/* } */
 
 /* Returns J_sqrt(x) */
 void Jsqrt(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out)
@@ -778,244 +676,6 @@ void QNTpinvz(const double * const x, const double * const y,const double * cons
 
 /* Returns the product Q_{p}*z where p is the NT vector related to the pair (x,y) */
 static  NumericsMatrix *  QNTpH(const double * const x, const double * const y, NumericsMatrix* H, const unsigned int vecSize, const size_t varsCount)
-{
-  double * a = (double*)calloc(vecSize, sizeof(double));
-  double * b = (double*)calloc(vecSize, sizeof(double));
-
-  Qx05y(x, y, vecSize, varsCount,a);
-  Jsqrtinv(a, vecSize, varsCount, b);
-  Qx05y(x, b, vecSize, varsCount, a);
-
-  NumericsMatrix * QpH = NM_new();
-
-
-  //Qx50y(a, z, vecSize, varsCount, out);
-  NM_types storage = H->storageType;
-    switch(storage)
-  {
-  /* case NM_DENSE: */
-  /*   cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
-  /*   break; */
-  /* /\* SparseBlock storage *\/ */
-  /* case NM_SPARSE_BLOCK: */
-  /*   SBM_gemv_3x3(sizeX, sizeY, A->matrix1, x, y); */
-  /*   break; */
-  /* coordinate */
-  case NM_SPARSE:
-  {
-    CSparseMatrix* H_csc = NM_csc(H);
-    CSparseMatrix* QpH_csc  = cs_spalloc (H->size0, H->size1, H_csc->nzmax , 1, 0) ;        /* allocate result */
-
-    CS_INT  *Hp, *Hi ;
-    Hp = H_csc->p ; Hi = H_csc->i ;
-    CS_INT  *QpHp, *QpHi ;
-    QpHp = QpH_csc->p ;
-    CS_ENTRY *Hx, *QpHx ;
-    Hx = H_csc->x ;
-    unsigned int dimension = (int)(vecSize / varsCount);
-
-    CS_INT nz = 0;
-    for (CS_INT k = 0 ; k < H->size1 ; k++)
-    {
-      QpHp[k] = nz ;                   /* column k of QpH starts here */
-      if (nz + H->size1> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size1))
-      {
-        return NULL;             /* out of memory */
-      }
-      QpHi = QpH_csc->i ; QpHx = QpH_csc->x ;         /* C->i and C->x may be reallocated */
-
-      for(size_t alpha = 0; alpha < varsCount; alpha++) /* loop on the block of Qp (equivalently on a) */
-      {
-        CS_INT i, p, *Hp, *Hi ;
-        Hp = H_csc->p ; Hi = H_csc->i ; Hx = H_csc->x ;
-
-        double z_beta[3] = {0., 0., 0.};
-        double out[3];
-
-        CS_INT mark = -1;
-        for (p = Hp [k] ; p < Hp [k+1] ; p++)
-        {
-          i = Hi[p];
-          CS_INT beta = i/3;
-          if (beta != alpha)
-          {
-            continue;
-          }
-          else
-          {
-            mark=beta;
-            /* printf("add element in z_beta \n"); */
-            z_beta[i%3] = Hx[p];
-          }
-          if (beta > alpha)
-            break;
-        }
-        if (mark !=-1)
-        {
-          /* Multiplication*/
-          Qx50y(&a[alpha*3], z_beta, 3, 1, out);
-
-          /* store out in QpH */
-          QpHi[nz]  = alpha*3;
-          QpHx[nz++] = out[0];
-          QpHi[nz]  = alpha*3+1;
-          QpHx[nz++] = out[1];
-          QpHi[nz]  = alpha*3+2;
-          QpHx[nz++] = out[2];
-        }
-      } //end loop alpha
-      //getchar();
-    } //end loop k
-    QpHp[H->size1] = nz ;
-    cs_sprealloc (QpH_csc, 0) ;
-
-    QpH->storageType=H->storageType;
-    numericsSparseMatrix(QpH)->csc = QpH_csc;
-    QpH->size0 = (int)QpH->matrix2->csc->m;
-    QpH->size1 = (int)QpH->matrix2->csc->n;
-    numericsSparseMatrix(QpH)->origin = NSM_CSC;
-
-    break;
-  }
-  break;
-  default:
-    fprintf(stderr, "Numerics, GFC3D IPM, QNTpH failed, unknown storage type for H.\n");
-    exit(EXIT_FAILURE);
-  }
-
-
-
-  free(a);
-  free(b);
-  return QpH;
-}
-
-/* Returns the product Q_{p}*z where p is the NT vector related to the pair (x,y) */
-static  NumericsMatrix *  QNTpH_2(const double * const x, const double * const y, NumericsMatrix* H, const unsigned int vecSize, const size_t varsCount)
-{
-  double * a = (double*)calloc(vecSize, sizeof(double));
-  double * b = (double*)calloc(vecSize, sizeof(double));
-  double * z_beta = (double *)calloc(H->size0,sizeof(double));
-  
-  Qx05y(x, y, vecSize, varsCount,a);
-  Jsqrtinv(a, vecSize, varsCount, b);
-  Qx05y(x, b, vecSize, varsCount, a);
-
-  NumericsMatrix * QpH = NM_new();
-
-
-  //Qx50y(a, z, vecSize, varsCount, out);
-  NM_types storage = H->storageType;
-  switch(storage)
-  {
-    /* case NM_DENSE: */
-    /*   cblas_dgemv(CblasColMajor, CblasNoTrans, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
-    /*   break; */
-    /* /\* SparseBlock storage *\/ */
-    /* case NM_SPARSE_BLOCK: */
-    /*   SBM_gemv_3x3(sizeX, sizeY, A->matrix1, x, y); */
-    /*   break; */
-    /* coordinate */
-    
-    
-  case NM_SPARSE:
-  {
-    CSparseMatrix* H_csc = NM_csc(H);
-    CSparseMatrix* QpH_csc  = cs_spalloc (H->size0, H->size1, H_csc->nzmax , 1, 0) ;        /* allocate result */
-    
-    CS_INT  *Hp, *Hi ;
-    Hp = H_csc->p ; Hi = H_csc->i ;
-    CS_INT  *QpHp, *QpHi ;
-    QpHp = QpH_csc->p ;
-    CS_ENTRY *Hx, *QpHx ;
-    Hx = H_csc->x ;
-    unsigned int dimension = (int)(vecSize / varsCount);
-    
-    //double * z_beta = (double *)calloc(H->size0,sizeof(double));
-    int * beta = (int *)malloc(H->size0/3 *sizeof(int));
-    for (CS_INT k=0 ; k <  H->size0/3; k++)
-      beta[k] =-1;
-
-
-    CS_INT nz = 0;
-    for (CS_INT k = 0 ; k < H->size1 ; k++)
-    {
-  
-      CS_INT i, p, *Hp, *Hi ;
-      Hp = H_csc->p ; Hi = H_csc->i ; Hx = H_csc->x ;
-
-      /* search for beta and z_beta that are non null in the column k of H */
-      CS_INT n_beta=-1, beta_old=-1;
-      for (p = Hp [k] ; p < Hp [k+1] ; p++)
-      {
-        i = Hi[p];
-        z_beta[i] =  Hx[p];
-        CS_INT beta_current = i/3;
-        if (beta_old != beta_current )
-        {
-           n_beta++;
-           beta_old=beta_current;
-        }
-        beta[n_beta] = beta_current;
-      }
-      n_beta++;
-
-      QpHp[k] = nz ;                   /* column k of QpH starts here */
-      /* reallocate if needed */
-      if (nz + H->size1> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size1))
-      {
-        return NULL;             /* out of memory */
-      }
-      QpHi = QpH_csc->i ; QpHx = QpH_csc->x ;         /* C->i and C->x may be reallocated */
-
-      /* multiplication and storage */
-      for (int b =0; b< n_beta;b++)
-      {
-        CS_INT alpha=beta[b];
-        double out[3];
-
-        Qx50y(&a[alpha*3], &z_beta[alpha*3], 3, 1, out);
-
-        /* store out in QpH */
-        QpHi[nz]  = alpha*3;
-        QpHx[nz++] = out[0];
-        QpHi[nz]  = alpha*3+1;
-        QpHx[nz++] = out[1];
-        QpHi[nz]  = alpha*3+2;
-        QpHx[nz++] = out[2];
-
-        z_beta[alpha*3] =0.0;
-        z_beta[alpha*3+1] =0.0;
-        z_beta[alpha*3+2] =0.0;
-        beta[b]=-1;
-      }
-    } // end loop k
-    QpHp[H->size1] = nz ;
-    cs_sprealloc (QpH_csc, 0) ;
-
-    QpH->storageType=H->storageType;
-    numericsSparseMatrix(QpH)->csc = QpH_csc;
-    QpH->size0 = (int)QpH->matrix2->csc->m;
-    QpH->size1 = (int)QpH->matrix2->csc->n;
-    numericsSparseMatrix(QpH)->origin = NSM_CSC;
-
-    break;
-  }
-  break;
-  default:
-    fprintf(stderr, "Numerics, GFC3D IPM, QNTpH failed, unknown storage type for H.\n");
-    exit(EXIT_FAILURE);
-  }
-
-
-  free(a);
-  free(b);
-  free(z_beta);
-  return QpH;
-}
-
-/* Returns the product Q_{p}*z where p is the NT vector related to the pair (x,y) */
-static  NumericsMatrix *  QNTpH_3(const double * const x, const double * const y, NumericsMatrix* H, const unsigned int vecSize, const size_t varsCount)
 {
   double * a = (double*)calloc(vecSize, sizeof(double));
   double * b = (double*)calloc(vecSize, sizeof(double));
@@ -1665,7 +1325,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     NM_clear(MT);
   }
 
-
   //for(int i = 0; i < n ; i++) printf("mu[%d] = %g\n", i, problem->mu[i]);
 
   /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE,
@@ -1940,29 +1599,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 	  Qp = NTmat(velocity, reaction, nd, n);
 	  Qpinv = NTmatinv(velocity, reaction, nd, n);
 	}
-      // check some functions
-      /*
-      NM_display(Qp);
-      F = NTmat(velocity, reaction, nd, n);
-      NM_display(F);
-      Qp_F = NM_add(1.0, Qp, -1.0, F);
-      printf("### norm_inf(Qp-F) = %9.2e   norm_inf(Qp-F)/norm(Qp) = %9.2e\n", NM_norm_inf(Qp_F), NM_norm_inf(Qp_F)/NM_norm_inf(Qp));
-      Finv = NTmatinv(velocity, reaction, nd, n);
-      tmpmat = NM_multiply(F, Finv);
-      Nesterov_Todd_vector(2, velocity, reaction, nd, n, p2);
-      Qp2 = QRmat(p2, nd, n);
-      //Qp2 = NM_multiply(F, F);
-      F2 = NTmatsqr(velocity, reaction, nd, n);
-      Qp_F = NM_add(1.0, Qp2, -1.0, F2);
-      printf("### norm_inf(Qp2-F2) = %9.2e   norm_inf(Qp2-F2)/norm(Qp2) = %9.2e\n", NM_norm_inf(Qp_F), NM_norm_inf(Qp_F)/NM_norm_inf(Qp2));
-      NM_display(tmpmat);
-      NM_clear(tmpmat);
-      free(tmpmat);
-      NM_clear(Qp_F);
-      free(Qp_F);
-      NM_clear(F);
-      free(F);
-      */
     }
 
     primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas); // velocity - H * globalVelocity - w
@@ -2105,7 +1741,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
       //QpH = NM_multiply(Qp,H); // This product should be replaced by a function returning the product Qp * vector
 
-      NumericsMatrix * QpH = QNTpH_3(velocity, reaction, H, nd, n);
+      NumericsMatrix * QpH = QNTpH(velocity, reaction, H, nd, n);
 
 
       //NM_compare(QpH, QpH_new,1e-10);
