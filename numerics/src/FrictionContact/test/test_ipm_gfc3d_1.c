@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+#include <float.h>                        // for DBL_EPSILON
+#include <math.h>                         // for fabs, sqrt
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_ADMM
 #include "NumericsFwd.h"                 // for SolverOptions
@@ -36,7 +38,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // GFC3D,IPM
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_IPM);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10; //sqrt(DBL_EPSILON);
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
     current++;
   }

@@ -38,6 +38,8 @@
 
 #include <time.h>                       // for clock()
 
+#include "gfc3d_ipm.h"
+
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"
