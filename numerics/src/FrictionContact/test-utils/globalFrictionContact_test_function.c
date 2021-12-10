@@ -67,8 +67,8 @@ int globalFrictionContact_test_function(TestCase* current)
   /* strcat(fsolname, probname); */
   /* strcat(fsolname, "_sol.m"); */
 
-  FILE * foutput  =  fopen("checkinput.dat", "w");
-  info = globalFrictionContact_printInFile(problem, foutput);
+  /* FILE * foutput  =  fopen("checkinput.dat", "w"); */
+  /* info = globalFrictionContact_printInFile(problem, foutput); */
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
@@ -166,7 +166,7 @@ int globalFrictionContact_test_function(TestCase* current)
   free(reaction);
   free(velocity);
   free(globalvelocity);
-  fclose(foutput);
+  /* fclose(foutput); */
   globalFrictionContact_free(problem);
   return info;
 
