@@ -31,6 +31,7 @@
 #include <time.h>
 #include "SiconosConfig.h"                 // for HAVE_GAMS_C_API // IWYU pragma: keep
 #include <string.h>
+#include "SiconosLapack.h"
 
 void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem * problem, FILE * file);
 
@@ -112,6 +113,10 @@ int globalFrictionContact_test_function(TestCase* current)
   /* fclose(mfile); */
   
   int print_size = 10;
+
+  printf("Norm velocity:  %12.8e\n", cblas_dnrm2(NC*dim, velocity, 1));
+  printf("Norm reaction:  %12.8e\n", cblas_dnrm2(NC*dim, reaction, 1));
+  printf("Norm GlobalVe:  %12.8e\n", cblas_dnrm2(n, globalvelocity, 1));
 
   if(dim * NC >= print_size)
   {
