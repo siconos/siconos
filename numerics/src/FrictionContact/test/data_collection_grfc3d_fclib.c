@@ -49,7 +49,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-1050-nc-356-7786.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-1050-nc-357-7778.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-1050-nc-360-7775.hdf5";
-    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-1050-nc-361-7776.hdf5";
+    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-1050-nc-361-7776.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-1056-nc-351-7839.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-108-nc-21-214.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-114-nc-22-219.hdf5";
@@ -234,7 +234,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-972-nc-328-7120.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-990-nc-327-7308.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-990-nc-329-7310.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-996-nc-333-7321.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/Global/siconos/Rolling/RollingSpheres/RollingSpheres-ndof-996-nc-333-7321.hdf5";
   }
 
   data_collection_1[n_data++] = "---";

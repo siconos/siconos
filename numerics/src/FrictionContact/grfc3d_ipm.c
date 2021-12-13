@@ -546,6 +546,8 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   double * p_bar = data->tmp_vault_n_dminus2[4];
   double * p_tilde = data->tmp_vault_n_dminus2[5];
+  double * p2_bar = data->tmp_vault_n_dminus2[20];
+  double * p2_tilde = data->tmp_vault_n_dminus2[21];
   // double * pinv = data->tmp_vault_nd[10];
   NumericsMatrix* Qp_bar = NULL;
   NumericsMatrix* Qp_tilde = NULL;
@@ -815,22 +817,30 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     {
       if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 1)      // use Qp (1st formule)
       {
-        // Nesterov_Todd_vector(0, velocity_1, reaction_1, n_dminus2, n, p_bar);
-        // Qp_bar = QRmat(p_bar, n_dminus2, n);
+        Nesterov_Todd_vector(0, velocity_1, reaction_1, n_dminus2, n, p_bar);
+        Qp_bar = QRmat(p_bar, n_dminus2, n);
+        Nesterov_Todd_vector(2, velocity_1, reaction_1, n_dminus2, n, p2_bar);
+        Qp2_bar = QRmat(p2_bar, n_dminus2, n);
 
-
-        // Nesterov_Todd_vector(0, velocity_2, reaction_2, n_dminus2, n, p_tilde);
-        // Qp_tilde = QRmat(p_tilde, n_dminus2, n);
+        Nesterov_Todd_vector(0, velocity_2, reaction_2, n_dminus2, n, p_tilde);
+        Qp_tilde = QRmat(p_tilde, n_dminus2, n);
+        Nesterov_Todd_vector(2, velocity_2, reaction_2, n_dminus2, n, p2_tilde);
+        Qp2_tilde = QRmat(p2_tilde, n_dminus2, n);
       }
       else if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 2) // use F (2nd formule)
       {
-        F_1 = NTmat(velocity_1, reaction_1, n_dminus2, n);
-        Finv_1 = NTmatinv(velocity_1, reaction_1, n_dminus2, n);
-        Fsqr_1 = NTmatsqr(velocity_1, reaction_1, n_dminus2, n);
+        // F_1 = NTmat(velocity_1, reaction_1, n_dminus2, n);
+        // Fsqr_1 = NTmatsqr(velocity_1, reaction_1, n_dminus2, n);
 
-        F_2 = NTmat(velocity_2, reaction_2, n_dminus2, n);
-        Finv_2 = NTmatinv(velocity_2, reaction_2, n_dminus2, n);
-        Fsqr_2 = NTmatsqr(velocity_2, reaction_2, n_dminus2, n);
+        // F_2 = NTmat(velocity_2, reaction_2, n_dminus2, n);
+        // Fsqr_2 = NTmatsqr(velocity_2, reaction_2, n_dminus2, n);
+
+
+        Qp_bar = NTmat(velocity_1, reaction_1, n_dminus2, n);
+        Qp2_bar = NTmatsqr(velocity_1, reaction_1, n_dminus2, n);
+
+        Qp_tilde = NTmat(velocity_2, reaction_2, n_dminus2, n);
+        Qp2_tilde = NTmatsqr(velocity_2, reaction_2, n_dminus2, n);
       }
 
 
@@ -890,9 +900,36 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
        *      |  0    F_2 | n(d-2)
        */
 
+
+
+      /*   1. Build the Jacobian matrix
+       *
+       *           m    nd   n(d+1)
+       *        |  M    -H'    0   | m
+       *        |                  |
+       *  Jac = | -H     0     J   | nd
+       *        |                  |
+       *        |  0     J'    Q^2 | n(d+1)
+       *
+       *  where J is a block matrix
+       *
+       *  and
+       *
+       *        n(d-2)    n(d-2)
+       *      | Qp_bar      0    | n(d-2)
+       *  Q = |                  |
+       *      |  0      Qp_tilde | n(d-2)
+       */
+
+
+
+
+
+
+
       Jac = NM_create(NM_SPARSE, m + nd + n*(d+1), m + nd + n*(d+1));
       // Jac_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
-      Jac_nzmax = M_nzmax + 2*H_nzmax + 6*n + 2*9*n*n;
+      Jac_nzmax = M_nzmax + 2*H_nzmax + 2*9*n*n + 6*n;
       NM_triplet_alloc(Jac, Jac_nzmax);
       Jac->matrix2->origin = NSM_TRIPLET;
       NM_insert(Jac, M, 0, 0);
@@ -901,8 +938,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
       NM_insert(Jac, J, m, m+nd);
       NM_insert(Jac, NM_transpose(J), m+nd, m);
       // TO DO: need to optimise this point because only F will be changed at each iteration
-      NM_insert(Jac, Fsqr_1, m+nd, m+nd);
-      NM_insert(Jac, Fsqr_2, m+nd+n*d_minus_2, m+nd+n*d_minus_2);
+      // NM_insert(Jac, Fsqr_1, m+nd, m+nd);
+      // NM_insert(Jac, Fsqr_2, m+nd+n*d_minus_2, m+nd+n*d_minus_2);
+      NM_insert(Jac, Qp2_bar, m+nd, m+nd);
+      NM_insert(Jac, Qp2_tilde, m+nd+n*d_minus_2, m+nd+n*d_minus_2);
     }
     else // without NT scaling
     {
@@ -1273,32 +1312,64 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     {
       /* Right-hand side for symmetric Newton system with NT scaling */
 
-      /* 2nd terms: 2 * mu * sigma * F_1 * (F_1 * u_1)^-1  */
-      NM_gemv(1.0, F_1, velocity_1, 0.0, velocity_1t);                                 // velocity_1t       = F_1 * u_1
-      NM_gemv(1.0, F_2, velocity_2, 0.0, velocity_2t);                                 // velocity_2t       = F_2 * u_2
-      JA_inv(velocity_1t, n_dminus2, n, velocity_1t_inv);                      // velocity_1t_inv   = (F_1 * u_1)^-1
-      JA_inv(velocity_2t, n_dminus2, n, velocity_2t_inv);                      // velocity_2t_inv   = (F_2 * u_2)^-1
-      NM_gemv(1.0, F_1, velocity_1t_inv, 0.0, F_velocity_1t_inv);                      // F_velocity_1t_inv = F_1 * (F_1 * u_1)^-1
-      NM_gemv(1.0, F_2, velocity_2t_inv, 0.0, F_velocity_2t_inv);                      // F_velocity_2t_inv = F_2 * (F_2 * u_2)^-1
-      cblas_dscal(n_dminus2, 2 * barr_param * sigma, F_velocity_1t_inv, 1);    // F_velocity_1t_inv = 2nd term
-      cblas_dscal(n_dminus2, 2 * barr_param * sigma, F_velocity_2t_inv, 1);    // F_velocity_2t_inv = 2nd term
+
+      // /* 2nd terms: 2 * mu * sigma * F_1 * (F_1 * u_1)^-1  */
+      // NM_gemv(1.0, F_1, velocity_1, 0.0, velocity_1t);                                 // velocity_1t       = F_1 * u_1
+      // NM_gemv(1.0, F_2, velocity_2, 0.0, velocity_2t);                                 // velocity_2t       = F_2 * u_2
+      // JA_inv(velocity_1t, n_dminus2, n, velocity_1t_inv);                      // velocity_1t_inv   = (F_1 * u_1)^-1
+      // JA_inv(velocity_2t, n_dminus2, n, velocity_2t_inv);                      // velocity_2t_inv   = (F_2 * u_2)^-1
+      // NM_gemv(1.0, F_1, velocity_1t_inv, 0.0, F_velocity_1t_inv);                      // F_velocity_1t_inv = F_1 * (F_1 * u_1)^-1
+      // NM_gemv(1.0, F_2, velocity_2t_inv, 0.0, F_velocity_2t_inv);                      // F_velocity_2t_inv = F_2 * (F_2 * u_2)^-1
+      // cblas_dscal(n_dminus2, 2 * barr_param * sigma, F_velocity_1t_inv, 1);    // F_velocity_1t_inv = 2nd term
+      // cblas_dscal(n_dminus2, 2 * barr_param * sigma, F_velocity_2t_inv, 1);    // F_velocity_2t_inv = 2nd term
 
 
-      /* 3rd terms: (F_1 * du_1) o (Finv_1 * dr_1)  */
-      NM_gemv(1.0, F_1, d_velocity_1, 0.0, d_velocity_1t);                                 // d_velocity_1t = F_1 * du_1
-      NM_gemv(1.0, F_2, d_velocity_2, 0.0, d_velocity_2t);                                 // d_velocity_2t = F_2 * du_2
+      // /* 3rd terms: (F_1 * du_1) o (Finv_1 * dr_1)  */
+      // NM_gemv(1.0, F_1, d_velocity_1, 0.0, d_velocity_1t);                                 // d_velocity_1t = F_1 * du_1
+      // NM_gemv(1.0, F_2, d_velocity_2, 0.0, d_velocity_2t);                                 // d_velocity_2t = F_2 * du_2
+      // // TO DO: should review this point to optimise coding
+      // QNTpinvz(velocity_1, reaction_1, d_reaction_1, n_dminus2, n, d_reaction_1t); // d_reaction_1t = Finv_1 * dr_1
+      // QNTpinvz(velocity_2, reaction_2, d_reaction_2, n_dminus2, n, d_reaction_2t); // d_reaction_2t = Finv_2 * dr_2
+      // JA_prod(d_velocity_1t, d_reaction_1t, n_dminus2, n, dvdr_jprod_1);           // dvdr_jprod_1  = 3rd term
+      // JA_prod(d_velocity_2t, d_reaction_2t, n_dminus2, n, dvdr_jprod_2);           // dvdr_jprod_1  = 3rd term
+
+
+      // /* updated rhs = r_1 - 2nd term + 3rd term */
+      // NV_sub(reaction_1, F_velocity_1t_inv, n_dminus2, tmp1);
+      // NV_sub(reaction_2, F_velocity_2t_inv, n_dminus2, tmp2);
+      // NV_add(tmp1, dvdr_jprod_1, n_dminus2, complemConstraint_1);
+      // NV_add(tmp2, dvdr_jprod_2, n_dminus2, complemConstraint_2);
+
+      /* 2nd terms: 2 * mu * sigma * Qp_bar * (Qp_bar * u_1)^-1  */
+      NM_gemv(1.0, Qp_bar, velocity_1, 0.0, velocity_1t);                                 // velocity_1t       = Qp_bar * u_1
+      NM_gemv(1.0, Qp_tilde, velocity_2, 0.0, velocity_2t);                                 // velocity_2t       = Qp_tilde * u_2
+      JA_inv(velocity_1t, n_dminus2, n, velocity_1t_inv);                      // velocity_1t_inv   = (Qp_bar * u_1)^-1
+      JA_inv(velocity_2t, n_dminus2, n, velocity_2t_inv);                      // velocity_2t_inv   = (Qp_tilde * u_2)^-1
+      NM_gemv(1.0, Qp_bar, velocity_1t_inv, 0.0, Qp_velocity_1t_inv);                      // Qp_velocity_1t_inv = Qp_bar * (Qp_bar * u_1)^-1
+      NM_gemv(1.0, Qp_tilde, velocity_2t_inv, 0.0, Qp_velocity_2t_inv);                      // Qp_velocity_2t_inv = Qp_tilde * (Qp_tilde * u_2)^-1
+      cblas_dscal(n_dminus2, 2 * barr_param * sigma, Qp_velocity_1t_inv, 1);    // Qp_velocity_1t_inv = 2nd term
+      cblas_dscal(n_dminus2, 2 * barr_param * sigma, Qp_velocity_2t_inv, 1);    // Qp_velocity_2t_inv = 2nd term
+
+
+      /* 3rd terms: (Qp_bar * du_1) o (Qpinv_1 * dr_1)  */
+      NM_gemv(1.0, Qp_bar, d_velocity_1, 0.0, d_velocity_1t);                                 // d_velocity_1t = Qp_bar * du_1
+      NM_gemv(1.0, Qp_tilde, d_velocity_2, 0.0, d_velocity_2t);                                 // d_velocity_2t = Qp_tilde * du_2
       // TO DO: should review this point to optimise coding
-      QNTpinvz(velocity_1, reaction_1, d_reaction_1, n_dminus2, n, d_reaction_1t); // d_reaction_1t = Finv_1 * dr_1
-      QNTpinvz(velocity_2, reaction_2, d_reaction_2, n_dminus2, n, d_reaction_2t); // d_reaction_2t = Finv_2 * dr_2
+      QNTpinvz(velocity_1, reaction_1, d_reaction_1, n_dminus2, n, d_reaction_1t); // d_reaction_1t = Qpinv_1 * dr_1
+      QNTpinvz(velocity_2, reaction_2, d_reaction_2, n_dminus2, n, d_reaction_2t); // d_reaction_2t = Qpinv_2 * dr_2
       JA_prod(d_velocity_1t, d_reaction_1t, n_dminus2, n, dvdr_jprod_1);           // dvdr_jprod_1  = 3rd term
       JA_prod(d_velocity_2t, d_reaction_2t, n_dminus2, n, dvdr_jprod_2);           // dvdr_jprod_1  = 3rd term
 
 
       /* updated rhs = r_1 - 2nd term + 3rd term */
-      NV_sub(reaction_1, F_velocity_1t_inv, n_dminus2, tmp1);
-      NV_sub(reaction_2, F_velocity_2t_inv, n_dminus2, tmp2);
+      NV_sub(reaction_1, Qp_velocity_1t_inv, n_dminus2, tmp1);
+      NV_sub(reaction_2, Qp_velocity_2t_inv, n_dminus2, tmp2);
       NV_add(tmp1, dvdr_jprod_1, n_dminus2, complemConstraint_1);
       NV_add(tmp2, dvdr_jprod_2, n_dminus2, complemConstraint_2);
+
+
+
+
     }
     else
     {
@@ -1567,18 +1638,27 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   free(QpH);
   NM_clear(J);
   free(J);
-  NM_clear(F_1);
-  free(F_1);
-  NM_clear(Finv_1);
-  free(Finv_1);
-  NM_clear(Fsqr_1);
-  free(Fsqr_1);
-  NM_clear(F_2);
-  free(F_2);
-  NM_clear(Finv_2);
-  free(Finv_2);
-  NM_clear(Fsqr_2);
-  free(Fsqr_2);
+
+
+
+  //free(p_bar);
+  NM_clear(Qp_bar);
+  free(Qp_bar);
+  //free(p2_bar);
+  NM_clear(Qp2_bar);
+  free(Qp2_bar);
+  //free(p_tilde);
+  NM_clear(Qp_tilde);
+  free(Qp_tilde);
+  //free(p2_tilde);
+  NM_clear(Qp2_tilde);
+  free(Qp2_tilde);
+
+
+
+
+
+
   // NM_clear(Jac); // already
   // free(Jac);
   // NM_clear(Fsqr_1);
@@ -1791,9 +1871,9 @@ void grfc3d_IPM_init(GlobalRollingFrictionContactProblem* problem, SolverOptions
   for(unsigned int i = 0; i < 10; ++i)
     data->tmp_vault_nd[i] = (double*)calloc(nd, sizeof(double));
 
-  data->tmp_vault_n_dminus2 = (double**)malloc(20 * sizeof(double*));
-  for(unsigned int i = 0; i < 20; ++i)
-    data->tmp_vault_n_dminus2[i] = (double*)calloc(nd, sizeof(double));
+  data->tmp_vault_n_dminus2 = (double**)malloc(25 * sizeof(double*));
+  for(unsigned int i = 0; i < 25; ++i)
+    data->tmp_vault_n_dminus2[i] = (double*)calloc(n_dminus2, sizeof(double));
 
   data->tmp_vault_n = (double**)malloc(2 * sizeof(double*));
   for(unsigned int i = 0; i < 2; ++i)
@@ -1861,7 +1941,7 @@ void grfc3d_IPM_free(GlobalRollingFrictionContactProblem* problem, SolverOptions
     free(data->tmp_vault_nd);
     data->tmp_vault_nd = NULL;
 
-    for(unsigned int i = 0; i < 20; ++i)
+    for(unsigned int i = 0; i < 25; ++i)
       free(data->tmp_vault_n_dminus2[i]);
     free(data->tmp_vault_n_dminus2);
     data->tmp_vault_n_dminus2 = NULL;
@@ -1913,7 +1993,7 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
   /* 0: without scaling;  1: NT scaling using Qp;   2: NT scaling using F */
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 2;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
