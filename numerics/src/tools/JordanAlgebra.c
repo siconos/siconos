@@ -24,7 +24,8 @@
 
 //#define DEBUG_MESSAGES
 #include "siconos_debug.h"
-
+typedef long double float_type;
+/* typedef double float_type; */
 
 NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
 {
@@ -386,9 +387,9 @@ void JA_det(const double * const vec, const unsigned int vecSize, const size_t v
 }
 
 /* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
-long double dnrm2l(const unsigned int n, const double * x)
+float_type dnrm2l(const unsigned int n, const double * x)
 {
-  long double norm, scale, ssq, absxi, quo;
+  float_type norm, scale, ssq, absxi, quo;
 
   if (n < 1)
     norm = 0.0;
@@ -421,303 +422,13 @@ long double dnrm2l(const unsigned int n, const double * x)
   return norm;
 }
 
-/* Returns the step length for variables update in IPM */
-double getNewtonStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
-                                  const unsigned int varsCount, const double gamma)
-{
-  unsigned int dimension = (int)(vecSize / varsCount);
-  double * alpha_list = (double*)calloc(varsCount, sizeof(double));
-
-  unsigned int pos;
-  double ai, bi, ci, di, alpha, min_alpha;
-  double  *xi2, *dxi2, *xi_dxi;
-
-  const double *dxi, *xi;
-
-  dxi2 = (double*)calloc(dimension, sizeof(double));
-  xi2 = (double*)calloc(dimension, sizeof(double));
-  xi_dxi = (double*)calloc(dimension, sizeof(double));
-
-  for(unsigned int i = 0; i < varsCount; ++i)
-  {
-    pos = i * dimension;
-    xi = x + pos;
-    dxi = dx + pos;
-
-    NV_power2(dxi, dimension, dxi2);
-    ai = dxi2[0] - NV_reduce((dxi2 + 1), dimension - 1);
-
-    NV_prod(xi, dxi, dimension, xi_dxi);
-    bi = xi_dxi[0] - NV_reduce((xi_dxi + 1), dimension - 1);
-    //   bi = gamma*bi;
-
-    NV_power2(xi, dimension, xi2);
-    ci = xi2[0] - NV_reduce((xi2 + 1), dimension - 1);
-    //    ci = gamma*gamma*ci;
-
-    di = bi * bi - ai * ci;
-
-    if(ai < 0 || (bi < 0 && ai < (bi * bi) / ci))
-      alpha = ((-bi - sqrt(di)) / ai);
-    else if((fabs(ai) < DBL_EPSILON) && (bi < 0))
-      alpha = (-ci / (2 * bi));
-    else
-      alpha = DBL_MAX;
-    //NV_display(xi2, dimension);
-    //printf("**************** %3i ai = %9.2e b = %9.2e ci = %9.2e alpha = %9.2e\n",i, ai, bi, ci, alpha);
-
-    if(fabs(alpha) < DBL_EPSILON)
-      alpha = 0.0;
-
-    alpha_list[i] = alpha;
-  }
-
-  min_alpha = NV_min(alpha_list, varsCount);
-
-  free(xi2);
-  free(dxi2);
-  free(xi_dxi);
-  free(alpha_list);
-
-  return fmin(1.0, gamma * min_alpha);
-  //return fmin(1.0, min_alpha);
-}
-
-/* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double. */
-double getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
-                            const unsigned int varsCount, const double gamma)
-{
-  unsigned int dimension = (int)(vecSize / varsCount);
-  unsigned int pos;
-  long double aL, bL, cL, dL, alphaL;
-  double min_alpha;
-
-  min_alpha = 1e20; //1.0;
-
-  for(unsigned int i = 0; i < varsCount; ++i)
-  {
-    pos = i * dimension;
-    aL = dnrm2l(dimension-1, dx+pos+1);
-    aL = (dx[pos] - aL)*(dx[pos] + aL);
-    bL = x[pos]*dx[pos];
-    for (int k = 1; k < dimension; bL -= x[pos+k]*dx[pos+k], k++);
-    cL = dnrm2l(dimension-1, x+pos+1);
-    cL = (x[pos] - cL)*(x[pos] + cL);
-    dL = bL*bL - aL*cL;
-    if(aL < 0 || (bL < 0 && dL > 0 ))
-      if (bL>0)
-        alphaL = -(bL+sqrtl(dL))/aL;
-      else
-        alphaL = cL/(-bL+sqrtl(dL));
-    else if((fabsl(aL) == 0.0) && (bL < 0))
-      alphaL = -cL/bL/2;
-    else
-      alphaL = DBL_MAX;
-    min_alpha = ((alphaL < min_alpha) ? alphaL : min_alpha);
-  }
-  min_alpha = gamma*min_alpha;
-  min_alpha = ((min_alpha < 1.0) ? min_alpha : 1.0);
-  return min_alpha;
-}
-
-/* Returns the primal constraint vector for global fricprob: out = velocity - H x globalVelocity - w */
-/* and the relative 2-norm of this vector: |out|/max{|velocity|, |H x globalVelocity|, |w|} */
-void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-                           double * out, double * rnorm)
-{
-  size_t nd = H->size0;
-  double rn;
-
-
-  /* The memory for the result vectors should be allocated using calloc
-   * since H is a sparse matrix. In other case the behaviour will be undefined.*/
-  //  double *Hv = (double*)calloc(nd, sizeof(double));
-  //double *u_minus_Hv = (double*)calloc(nd, sizeof(double));
-
-  NM_gemv(-1.0, H, globalVelocity, 0.0, out);
-  /* rn = cblas_dnrm2(nd, out, 1); */
-  cblas_daxpy(nd, 1.0, velocity, 1, out, 1);
-  cblas_daxpy(nd, -1.0, w, 1, out, 1);
-  /* rn = fmax(rn, cblas_dnrm2(nd, velocity, 1)); */
-  /* rn = fmax(rn, cblas_dnrm2(nd, w, 1)); */
-  /* *rnorm = (rn > DBL_EPSILON ? cblas_dnrm2(nd, out, 1)/rn : cblas_dnrm2(nd, out, 1)); */
-  *rnorm = cblas_dnrm2(nd, out, 1);
-}
-
-/* Returns the dual constraint vector for global fricprob ( M*globalVelocity - f - H'*reaction ) */
-void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
-                         double * out, double * rnorm )
-{
-  double m = H->size1;
-  double *HTr = (double*)calloc(m, sizeof(double));
-  double rn;
-
-  NM_gemv(1.0, M, globalVelocity, 0.0, out);
-  /* rn = cblas_dnrm2(m, out, 1); */
-  cblas_daxpy(m, -1.0, f, 1, out, 1);
-  NM_tgemv(1.0, H, reaction, 0.0, HTr);
-  cblas_daxpy(m, -1.0, HTr, 1, out, 1);
-  /* rn = fmax(rn, cblas_dnrm2(m, f, 1)); */
-  /* rn = fmax(rn, cblas_dnrm2(m, HTr, 1)); */
-  /* *rnorm = (rn >DBL_EPSILON ? cblas_dnrm2(m, out, 1)/rn : cblas_dnrm2(m, out, 1)); */
-  *rnorm = cblas_dnrm2(m, out, 1);
-  free(HTr);
-}
-
-/* Returns the 2-norm of primal residual vector = | H * globalVelocity + w - velocity |_2 / (1 + |w|_inf) */
-/* double primalResidualNorm(const double * velocity, NumericsMatrix * H, */
-/*                                  const double * globalVelocity, const double * w) */
-/* { */
-/*   double * resid = (double*)calloc(H->size0, sizeof(double)); */
-/*   primalResidualVector(velocity, H, globalVelocity, w, resid); */
-/*   double norm_2 = cblas_dnrm2(H->size0, resid, 1); */
-/*   free(resid); */
-/*   return norm_2 / (1 + NV_norm_inf(w, H->size0)); */
-/* } */
-
-/* Returns the 2-norm of the dual residual vector  = | M * globalVelocity - H * reaction + f |_2 / (1 + |f|_inf)  */
-/* double dualResidualNorm(NumericsMatrix * M, const double * globalVelocity, */
-/*                                NumericsMatrix * H, const double * reaction, const double * f) */
-/* { */
-/*   double * resid = (double*)calloc(H->size1, sizeof(double)); */
-/*   dualResidualVector(M, globalVelocity, H, reaction, f, resid); */
-/*   double norm_2 = cblas_dnrm2(H->size1, resid, 1); */
-/*   free(resid); */
-/*   return norm_2 / (1 + NV_norm_inf(f, H->size1)); */
-/* } */
-
-/* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product velocity o reaction  */
-double complemResidualNorm(const double * const velocity, const double * const reaction,
-                                  const unsigned int vecSize, const unsigned int varsCount)
-{
-  double * resid = (double*)calloc(vecSize, sizeof(double));
-  JA_prod(velocity, reaction, vecSize, varsCount, resid);
-  double norm2 = cblas_dnrm2(vecSize, resid, 1);
-  free(resid);
-  return norm2;
-}
-
-/* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product (Qp*velocity) o (Qp_inv * reaction)  */
-double complemResidualNorm_p(const double * const velocity, const double * const reaction,
-                                    const unsigned int vecSize, const unsigned int varsCount)
-{
-
-  double * resid = (double*)calloc(vecSize, sizeof(double));
-  double * u_p = (double*)calloc(vecSize, sizeof(double));
-  double * r_p = (double*)calloc(vecSize, sizeof(double));
-  //double * p_inv = (double*)calloc(vecSize, sizeof(double));
-  double * a = (double*)calloc(vecSize, sizeof(double));
-  double * b = (double*)calloc(vecSize, sizeof(double));
-
-  Qx05y(velocity, reaction, vecSize, varsCount,a);
-  Jsqrtinv(a, vecSize, varsCount, b);
-  Qx05y(velocity, b, vecSize, varsCount, a);
-
-  Qx50y(a, velocity, vecSize, varsCount, u_p);
-  Qx05y(a, reaction, vecSize, varsCount, r_p);
-  JA_prod(u_p, r_p, vecSize, varsCount, resid);
-
-  double norm2 = cblas_dnrm2(vecSize, resid, 1);
-
-  /* Qxy(p, velocity, vecSize, varsCount, u_p); */
-  /* JA_inv(p, vecSize, varsCount, p_inv); */
-  /* Qxy(p_inv, reaction, vecSize, varsCount, r_p); */
-  /* JA_prod(u_p, r_p, vecSize, varsCount, resid); */
-
-  /* norm2 = cblas_dnrm2(vecSize, resid, 1); */
-  /* printf("complemnt-2 = %.15e\n",norm2); */
-  //norm2 = norm2/ cblas_dnrm2(vecSize, velocity, 1);
-  //norm2 = norm2 / cblas_dnrm2(vecSize, reaction, 1);
-  free(resid);
-  free(u_p);
-  free(r_p);
-  //free(p_inv);
-  free(a);
-  free(b);
-
-  return norm2;
-}
-
-/* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product (Qp*velocity) o (Qp_inv * reaction)  */
-/* This computation is done with the formula "F" */
-double complemResidualNorm_p_F(NumericsMatrix * Qp, NumericsMatrix * Qpinv,
-              const double * const velocity, const double * const reaction,
-                                      const unsigned int vecSize, const unsigned int varsCount)
-{
-  double * resid = (double*)calloc(vecSize, sizeof(double));
-  double * u_p = (double*)calloc(vecSize, sizeof(double));
-  double * r_p = (double*)calloc(vecSize, sizeof(double));
-
-  NM_gemv(1.0, Qp, velocity, 0.0, u_p);
-  NM_gemv(1.0, Qpinv, reaction, 0.0, r_p);
-  JA_prod(u_p, r_p, vecSize, varsCount, resid);
-  double norm2 = cblas_dnrm2(vecSize, resid, 1);
-  free(resid);
-  free(u_p);
-  free(r_p);
-  return norm2;
-}
-
-/* computation of the duality gap  */
-/* Dual gap = (primal value - dual value)/ (1 + abs(primal value) + abs(dual value)) */
-double dualGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m)
-{
-  double * Mv = (double*)calloc(m, sizeof(double));
-  double vMv, pval, dval;
-
-  NM_gemv(0.5, M, globalVelocity, 0.0, Mv);
-  vMv = cblas_ddot(m, globalVelocity, 1, Mv, 1); // vMv = .5 * v' * M * v
-  free(Mv);
-  pval = vMv - cblas_ddot(m, f, 1, globalVelocity, 1);
-  dval = -vMv - cblas_ddot(nd, w, 1, reaction, 1);
-  return (pval - dval)/ (1 + fabs(pval) + fabs(dval));
-}
-
-/* computation of the relative gap  */
-/* Rel gap = gapVal / (1 + abs(primal value) + abs(dual value)) */
-double relGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m, const double gapVal)
-{
-  double * Mv = (double*)calloc(m, sizeof(double));
-  double vMv, pval, dval;
-
-  NM_gemv(0.5, M, globalVelocity, 0.0, Mv);
-  vMv = cblas_ddot(m, globalVelocity, 1, Mv, 1);
-  free(Mv);
-  pval = vMv - cblas_ddot(m, f, 1, globalVelocity, 1);
-  dval = -vMv - cblas_ddot(nd, w, 1, reaction, 1);
-  return gapVal / (1 + fabs(pval) + fabs(dval));
-}
-
-void setErrorArray(double * error, const double pinfeas, const double dinfeas,
-                          const double dualgap, const double complem, const double complem_p)
-{
-  error[0] = pinfeas;
-  error[1] = dinfeas;
-  error[2] = dualgap;
-  error[3] = complem_p;
-  error[4] = complem;
-}
-
-/* Return the 2-norm of the difference between two vectors */
-double norm2VecDiff (const double * vec1, const double * vec2, const unsigned int vecSize)
-{
-  double *vecDiff;
-  double nvd;
-  vecDiff = (double*)calloc(vecSize,sizeof(double));
-  cblas_dcopy(vecSize, vec1, 1, vecDiff, 1);
-  cblas_daxpy(vecSize, -1.0, vec2, 1, vecDiff, 1);
-  nvd = cblas_dnrm2(vecSize, vecDiff, 1);
-  free(vecDiff);
-  return nvd;
-}
-
 /* Returns the product Q_sqrt(x)*y */
 void Qx05y(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, c1y, c2y, nxb, fx1, fx2, dx;
+  float_type l1, l2, c1y, c2y, nxb, fx1, fx2, dx;
   size_t j;
-  long double *xb = (long double*)calloc(dimension-1, sizeof(long double));
+  float_type *xb = (float_type*)calloc(dimension-1, sizeof(float_type));
 
   for (int i = 0; i < dimension - 1; xb[i] = 1/sqrtl(dimension-1), i++);
 
@@ -745,9 +456,9 @@ void Qx05y(const double * const x, const double * const y, const unsigned int ve
 void Qx50y(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, c1y, c2y, nxb, fx1, fx2, dx;
+  float_type l1, l2, c1y, c2y, nxb, fx1, fx2, dx;
   size_t j;
-  long double *xb = (long double*)calloc(dimension-1, sizeof(long double));
+  float_type *xb = (float_type*)calloc(dimension-1, sizeof(float_type));
 
   for (int i = 0; i < dimension - 1; xb[i] = 1/sqrtl(dimension-1), i++);
 
@@ -755,12 +466,24 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
   {
     j = i*dimension;
     nxb = dnrm2l(dimension-1, x+j+1);
+    /* if (isnan(nxb)) */
+    /*   { */
+    /* 	printf("%Le\n",nxb); */
+    /* 	//getchar(); */
+    /*   } */
+
     if (nxb > 0)
       for (int k = 0; k < dimension-1; xb[k] = x[j+1+k]/nxb, k++);
 
     l1 = x[j]+nxb;
     l2 = x[j]-nxb;
     dx = 1/sqrtl(l1*l2);
+    /* if (isnan(dx)) */
+    /*   { */
+    /* 	printf("%Le %Le\n",l1,l2); */
+    /* 	getchar(); */
+    /*   } */
+	      
     c1y = y[j];
     for (int k = 0; k < dimension-1; c1y += xb[k]*y[j+1+k], k++);
     c2y = 2*y[j] - c1y;
@@ -771,44 +494,12 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
   }
   free(xb);
 }
-/* void Qx50y(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out) */
-/* { */
-/*   unsigned int dimension = (int)(vecSize / varsCount); */
-/*   double l1, l2, c1y, c2y, normx, fx1, fx2, dx;  */
-/*   size_t j; */
-/*   double *xn = (double*)calloc(dimension-1, sizeof(double)); */
-
-/*   for (int i = 0; i < dimension - 1; xn[i] = 1/sqrt(dimension-1), i++); */
-
-/*   for(size_t i = 0; i < varsCount; i++) */
-/*     { */
-/*       j = i*dimension; */
-/*       normx = cblas_dnrm2(dimension-1, x+j+1, 1); */
-/*       if (normx > 0) */
-/*  { */
-/*    cblas_dcopy(dimension-1, x+j+1, 1, xn, 1); */
-/*    cblas_dscal(dimension-1, 1.0/normx, xn, 1); */
-/*  } */
-/*       cblas_dcopy(dimension-1, x+j+1, 1, xn, 1); */
-/*       cblas_dscal(dimension-1, 1.0/normx, xn, 1); */
-/*       l1 = 1/(x[j]+normx); */
-/*       l2 = 1/(x[j]-normx); */
-/*       dx = sqrt(l1*l2); */
-/*       c1y = y[j] + cblas_ddot(dimension-1, xn, 1, y+j+1, 1); */
-/*       c2y = 2*y[j] - c1y; */
-/*       fx1 = (l1*c1y + dx*c2y)/2; */
-/*       fx2 = (dx*c1y + l2*c2y)/2; */
-/*       out[j] = fx1 + fx2 - dx*y[j]; */
-/*       for (int k = 0; k < dimension-1; out[j+k+1] = fx1*xn[k] - fx2*xn[k] + dx*y[j+k+1], k++); */
-/*     } */
-/*   free(xn); */
-/* } */
 
 /* PA: Jordan algebra, returns inv(x) */
 void Jinv(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, normx;
+  float_type l1, l2, normx;
   size_t j;
 
   for(size_t i = 0; i < varsCount; i++)
@@ -822,46 +513,11 @@ void Jinv(const double * const x, const unsigned int vecSize, const size_t varsC
   }
 }
 
-/* /\* PA: Return J_sqrt(x) *\/ */
-/* void Jsqrt(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out) */
-/* { */
-/*   unsigned int dimension = (int)(vecSize / varsCount); */
-/*   double l1, l2, normx; */
-/*   size_t j; */
-
-/*   for(size_t i = 0; i < varsCount; i++) */
-/*     { */
-/*       j = i*dimension; */
-/*       normx = cblas_dnrm2(dimension-1, x+j+1, 1); */
-/*       l1 = sqrt(x[j]+normx)/2; */
-/*       l2 = sqrt(x[j]-normx)/2; */
-/*       out[j] = l1+l2; */
-/*       for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++); */
-/*     } */
-/* } */
-/* /\* PA: Return J_sqrtinv(x) *\/ */
-/* void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out) */
-/* { */
-/*   unsigned int dimension = (int)(vecSize / varsCount); */
-/*   double l1, l2, normx; */
-/*   size_t j; */
-
-/*   for(size_t i = 0; i < varsCount; i++) */
-/*     { */
-/*       j = i*dimension; */
-/*       normx = cblas_dnrm2(dimension-1, x+j+1, 1); */
-/*       l1 = 1/sqrt(x[j]+normx)/2; */
-/*       l2 = 1/sqrt(x[j]-normx)/2; */
-/*       out[j] = l1+l2; */
-/*       for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++); */
-/*     } */
-/* } */
-
 /* Returns J_sqrt(x) */
 void Jsqrt(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, normx;
+  float_type l1, l2, normx;
 
   for(size_t j = 0; j < vecSize; j+=dimension)
   {
@@ -876,7 +532,7 @@ void Jsqrt(const double * const x, const unsigned int vecSize, const size_t vars
 void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double l1, l2, normx;
+  float_type l1, l2, normx;
   size_t j;
 
   for(size_t i = 0; i < varsCount; i++)
@@ -885,6 +541,11 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = 1/sqrtl(x[j]+normx)/2;
     l2 = 1/sqrtl(x[j]-normx)/2;
+    /* if (isnan(l2)) */
+    /*   { */
+    /* 	printf("Jsqrtinv: %e %Le %Le\n",x[j], normx, x[j]*(1-x[j]/normx)); */
+    /* 	getchar(); */
+    /*   } */
     out[j] = l1+l2;
     for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++);
   }
@@ -943,11 +604,12 @@ void Nesterov_Todd_vector_b(const double * const x, const double * const y, cons
 
 /* Computation of Qx*y by means of the formula 2*(x'*y)*x - det(x)*R*y */
 void Qxy(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * z)
+
 {
   unsigned int dimension = (int)(vecSize / varsCount);
   size_t j;
   double xy;
-  long double dx, nxb;
+  float_type dx, nxb;
 
   for(size_t i = 0; i < varsCount; i++)
   {
@@ -996,7 +658,7 @@ void QNTpinvz(const double * const x, const double * const y,const double * cons
 void Jxinvprody(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out)
 {
   unsigned int dimension = (int)(vecSize / varsCount);
-  long double nxb, detx, tmp;
+  float_type nxb, detx, tmp;
   size_t j;
 
   for(size_t i = 0; i < varsCount; i++)
@@ -1024,7 +686,7 @@ NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize, const
 
   NumericsMatrix* quad_tmp = NM_create(NM_DENSE, dimension, dimension);
 
-  long double nvec, nvecb, dvec;
+  float_type nvec, nvecb, dvec;
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
@@ -1047,9 +709,9 @@ NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize, const
 }
 
 /* Returns a long double as the square root of determinant of a vector related to the Jordan product */
-long double gammal(const double * const x, const size_t dimension)
+float_type gammal(const double * const x, const size_t dimension)
 {
-  long double nxb, detx;
+  float_type nxb, detx;
   nxb = dnrm2l(dimension-1, x+1);
   detx = (x[0] + nxb) * (x[0] - nxb);
   return(sqrtl(detx));
@@ -1069,9 +731,9 @@ NumericsMatrix* NTmat(const double* const x, const double* const z, const unsign
 
   NumericsMatrix* G = NM_create(NM_DENSE, dimension, dimension);
 
-  long double nvec, nvecb, dvec;
+  float_type nvec, nvecb, dvec;
 
-  long double gamx, gamz, w, gamt;
+  float_type gamx, gamz, w, gamt;
   double * t = (double*)calloc(dimension, sizeof(double));
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
@@ -1098,7 +760,7 @@ NumericsMatrix* NTmat(const double* const x, const double* const z, const unsign
     for(unsigned int j = 1; j < dimension; ++j)
     {
       for(unsigned int k = 1; k < dimension; ++k)
-  G->matrix0[j+dimension*k] = (j==k) ? (1+t[j]*t[k]/(1+t[0]))*w : t[j]*t[k]/(1+t[0])*w;
+	G->matrix0[j+dimension*k] = (j==k) ? (1+t[j]*t[k]/(1+t[0]))*w : t[j]*t[k]/(1+t[0])*w;
     }
     NM_insert(out, G, i, i);
   }
@@ -1121,9 +783,9 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const uns
 
   NumericsMatrix* G = NM_create(NM_DENSE, dimension, dimension);
 
-  long double nvec, nvecb, dvec;
+  float_type nvec, nvecb, dvec;
 
-  long double gamx, gamz, w, gamt;
+  float_type gamx, gamz, w, gamt;
   double * t = (double*)calloc(dimension, sizeof(double));
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
@@ -1150,7 +812,7 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const uns
     for(unsigned int j = 1; j < dimension; ++j)
     {
       for(unsigned int k = 1; k < dimension; ++k)
-  G->matrix0[j+dimension*k] = (j==k) ? (1+t[j]*t[k]/(1+t[0]))/w : t[j]*t[k]/(1+t[0])/w;
+	G->matrix0[j+dimension*k] = (j==k) ? (1+t[j]*t[k]/(1+t[0]))/w : t[j]*t[k]/(1+t[0])/w;
     }
     NM_insert(out, G, i, i);
   }
@@ -1173,9 +835,9 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const uns
 
   NumericsMatrix* G = NM_create(NM_DENSE, dimension, dimension);
 
-  long double nvec, nvecb, dvec;
+  float_type nvec, nvecb, dvec;
 
-  long double gamx, gamz, w, w2, gamt;
+  float_type gamx, gamz, w, w2, gamt;
   double * t = (double*)calloc(dimension, sizeof(double));
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
@@ -1203,7 +865,7 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const uns
     for(unsigned int j = 1; j < dimension; ++j)
     {
       for(unsigned int k = 1; k < dimension; ++k)
-  G->matrix0[j+dimension*k] = (j==k) ? (1+2*t[j]*t[k])*w2 : 2*t[j]*t[k]*w2;
+	G->matrix0[j+dimension*k] = (j==k) ? (1+2*t[j]*t[k])*w2 : 2*t[j]*t[k]*w2;
     }
     NM_insert(out, G, i, i);
   }
@@ -1211,7 +873,3 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const uns
   free(G);
   return out;
 }
-
-
-
-
