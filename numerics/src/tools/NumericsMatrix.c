@@ -2722,6 +2722,32 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double 
   DEBUG_END("NM_copy_to_sparse(...)\n")
 }
 
+void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B)
+{
+  assert(A);
+  assert(B);
+  switch(A->storageType)
+  {
+  case NM_DENSE:
+  {
+    NM_set_version(B, NM_DENSE, NM_version(A, NM_DENSE));
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    NM_set_version(B, NM_SPARSE_BLOCK, NM_version(A, NM_SPARSE_BLOCK));
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(A->matrix2);
+    assert(B->matrix2);
+    NSM_version_copy(A->matrix2, B->matrix2);
+    break;
+  }
+  }
+}
+
 void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 {
   assert(A);
@@ -3418,12 +3444,6 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 
   NumericsMatrix * C = NM_new();
 
-  /* should we copy the whole internal data ? */
-  /*NM_internalData_copy(A, C);*/
-  NM_copy(A,C);
-  NM_MPI_copy(A, C);
-  NM_MUMPS_copy(A, C);
-
   /* At the time of writing, we are able to transform anything into NM_SPARSE,
    * hence we use this format whenever possible */
   if(A->storageType == NM_SPARSE || B->storageType == NM_SPARSE || C->storageType == NM_SPARSE)
@@ -3443,8 +3463,11 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 
     C->size0 = A->size0;
     C->size1 = B->size1;
+
+    assert(!C->matrix0);
     C->matrix0 = (double *)malloc(C->size0*C->size1*sizeof(double));
     assert(C->matrix0);
+
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, B->size0,
                 1.0, A->matrix0, A->size0, B->matrix0, B->size0, 0.0, C->matrix0, A->size0);
     NM_clearSparseBlock(C);
@@ -3511,6 +3534,19 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
   {
     assert(0 && "NM_multiply unknown storageType");
   }
+  }
+
+  NM_MPI_copy(A, C);
+  NM_MUMPS_copy(A, C);
+
+  if (B->storageType == NM_SPARSE)
+  {
+    /* anything * sparse -> sparse */
+    NM_version_copy(B, C);
+  }
+  else
+  {
+    NM_version_copy(A, C);
   }
   return C;
   DEBUG_END("NM_multiply(...) \n")

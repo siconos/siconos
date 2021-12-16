@@ -120,6 +120,13 @@ extern "C"
    */
   NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
 
+  /** Copy NumericsSparseMatrix version.
+   * \param A a NumericsSparseMatrix
+   * \param B a NumericsSparseMatrix
+   */
+  void NSM_version_copy(const NumericsSparseMatrix* const A,
+                        NumericsSparseMatrix* B);
+
   /** Copy a NumericsSparseMatrix.
    * \param A a NumericsSparseMatrix
    * \param B a NumericsSparseMatrix
