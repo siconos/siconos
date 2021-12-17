@@ -172,6 +172,16 @@ public:
     return _cellsize;
   };
 
+  void setBBoxfactor(unsigned int value)
+  {
+    _bboxfactor = value;
+  }
+
+  void setCellsize(unsigned int value)
+  {
+    _cellsize = value;
+  }
+
   /** get the neighbours
    * */
 //  std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
@@ -191,6 +201,8 @@ public:
    *  \param simulation the current simulation setup
    */
   virtual void updateInteractions(SP::Simulation simulation);
+
+  void insertLine(double a, double b, double c);
 
   /** Destructor.
    */

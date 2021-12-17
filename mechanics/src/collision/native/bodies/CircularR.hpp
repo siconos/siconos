@@ -49,12 +49,12 @@ public:
   */
   CircularR(double r1, double r2): _r1(r1), _r2(r2) {};
 
-  double getRadius1()
+  double getRadius1() const
   {
     return _r1;
   };
 
-  double getRadius2()
+  double getRadius2() const
   {
     return _r2;
   };

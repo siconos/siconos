@@ -325,14 +325,26 @@ void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
 }
 std::vector<SP::DynamicalSystem> NonSmoothDynamicalSystem::dynamicalSystemsVector() const
 {
-    std::vector<SP::DynamicalSystem> dynamicalSystemsVector;
-    DynamicalSystemsGraph &dsg = *dynamicalSystems();
-    DynamicalSystemsGraph::VIterator dsi, dsiend;
-    std::tie(dsi, dsiend) = dsg.vertices();
-    for(; dsi != dsiend; ++dsi)
-    {
-      dynamicalSystemsVector.push_back(dsg.bundle(*dsi));
-    }
-
-    return dynamicalSystemsVector;
+  std::vector<SP::DynamicalSystem> dynamicalSystemsVector;
+  DynamicalSystemsGraph &dsg = *dynamicalSystems();
+  DynamicalSystemsGraph::VIterator dsi, dsiend;
+  std::tie(dsi, dsiend) = dsg.vertices();
+  for(; dsi != dsiend; ++dsi)
+  {
+    dynamicalSystemsVector.push_back(dsg.bundle(*dsi));
   }
+
+  return dynamicalSystemsVector;
+}
+std::vector<SP::Interaction> NonSmoothDynamicalSystem::InteractionsVector() const
+{
+  std::vector<SP::Interaction> interactionsVector;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  InteractionsGraph::VIterator ui, uiend;
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    interactionsVector.push_back(indexSet0->bundle(*ui));
+  }
+
+  return interactionsVector;
+}
