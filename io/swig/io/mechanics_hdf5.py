@@ -561,7 +561,7 @@ class MechanicsHdf5(object):
             self._dynamic_data.attrs['info'] = 'time,  ds id  ,  translation ,'
             self._dynamic_data.attrs['info'] += 'orientation'
 
-        self._cf_data = data(self._data, 'cf', 26,
+        self._cf_data = data(self._data, 'cf', 27,
                              use_compression=self._use_compression)
         if self._mode == 'w':
             self._cf_data.attrs['info'] = 'time [0],  mu [1],  contact point A [2:4] ,'
