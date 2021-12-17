@@ -2746,10 +2746,11 @@ void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     break;
   }
   default:
+  {
     numerics_error("NM_version_copy", "unknown id");
-    return 0;
   }
   assert (false);
+  }
 }
 
 void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
