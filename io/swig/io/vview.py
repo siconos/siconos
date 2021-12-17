@@ -1814,16 +1814,68 @@ class VView(object):
                 source.AddInputData(data)
 
             elif primitive == 'Disk':
-                source = vtk.vtkCylinderSource()
-                source.SetResolution(100)
-                source.SetRadius(attrs[0])
-                source.SetHeight(self.opts.depth_2d)
+                cylinder = vtk.vtkCylinderSource()
+                cylinder.SetResolution(100)
+                cylinder.SetRadius(attrs[0])
+                cylinder.SetHeight(self.opts.depth_2d)
+                cylinder.Update()
+
+                line1 = vtk.vtkLineSource()
+                line1.SetPoint1(attrs[0]/2, self.opts.depth_2d, 0)
+                line1.SetPoint2(attrs[0], self.opts.depth_2d, 0)
+
+                tube1 = vtk.vtkTubeFilter()
+                tube1.SetInputConnection(line1.GetOutputPort())
+                tube1.SetRadius(attrs[0]/20)
+                tube1.SetNumberOfSides(10)
+                tube1.Update()
+
+                data = vtk.vtkMultiBlockDataSet()
+                data.SetNumberOfBlocks(2)
+                data.SetBlock(0, tube1.GetOutput())
+                data.SetBlock(1, cylinder.GetOutput())
+
+                source = vtk.vtkMultiBlockDataGroupFilter()
+                add_compatiblity_methods(source)
+                source.AddInputData(data)
+
+            elif primitive == 'Circle':
+                circle = vtk.vtkDiskSource()
+                circle.SetOuterRadius(attrs[0]*1.005)
+                circle.SetInnerRadius(attrs[0])
+                circle.SetRadialResolution(90)
+                circle.SetCircumferentialResolution(90)
+
+                source = circle
 
             elif primitive == 'Box2d':
                 source = vtk.vtkCubeSource()
                 source.SetXLength(attrs[0])
                 source.SetYLength(attrs[1])
                 source.SetZLength(self.opts.depth_2d)
+
+            elif primitive == 'Line':
+                line = vtk.vtkLineSource()
+                (a, b, c) = attrs
+                a2pb2 = a*a+b*b
+                assert (a2pb2 > 0)
+                x0 = a*c/a2pb2
+                y0 = a*b/a2pb2
+
+                x1 = x0 + b
+                y1 = y0 - a
+
+                x2 = x0 - b
+                y2 = y0 + a
+
+                line.SetPoint1(x1, y1, 0)
+                line.SetPoint2(x2, y2, 0)
+
+                source = vtk.vtkTubeFilter()
+                source.SetInputConnection(line.GetOutputPort())
+                source.SetRadius(.1)
+                source.SetNumberOfSides(30)
+                source.Update()
 
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
