@@ -2745,7 +2745,11 @@ void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     NSM_version_copy(A->matrix2, B->matrix2);
     break;
   }
+  default:
+    numerics_error("NM_version_copy", "unknown id");
+    return 0;
   }
+  assert (false);
 }
 
 void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
