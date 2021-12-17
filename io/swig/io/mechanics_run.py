@@ -821,7 +821,9 @@ class MechanicsHdf5Runner_run_options(dict):
         d['skip_last_update_input']=False
         d['skip_reset_lambdas']=False
         d['osns_assembly_type']= None
-
+        d['output_contact_forces']=True,
+        d['output_contact_info']=True,
+            
 
         super(self.__class__, self).__init__(d)
 
@@ -2101,7 +2103,33 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 return len(contact_points)
             return 0
         return 0
-
+    def output_contact_info(self):
+        """
+        Outputs contact forces
+        _contact_index_set default value is 1.
+        """
+        if self._nsds.\
+                topology().indexSetsSize() > 1:
+            time = self.current_time()
+            contact_info = self._io.contactInfo(self._nsds,
+                                                    self._contact_index_set)
+            if contact_info is not None:
+                current_line = self._cf_info.shape[0]
+                # Increase the number of lines in cf_data
+                # (h5 dataset with chunks)
+                self._cf_info.resize(current_line + contact_info.shape[0], 0)
+                times = np.empty((contact_info.shape[0], 1))
+                times.fill(time)
+                
+                self._cf_info[current_line:, :] = \
+                    np.concatenate((times,
+                                    contact_info),
+                                   axis=1)
+                # return the number of contacts
+                return len(contact_info)
+            return 0
+        return 0
+    
     def output_domains(self):
         """
         Outputs domains of contact points
@@ -2154,6 +2182,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self._output_contact_forces:
             self.log(self.output_contact_forces, with_timer)()
+
+        if self._output_contact_info:
+            self.log(self.output_contact_info, with_timer)()
 
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
@@ -2429,6 +2460,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             output_backup=False,
             output_backup_frequency=None,
             output_contact_forces=True,
+            output_contact_info=True,
             friction_contact_trace_params=None,
             contact_index_set=1,
             osi=sk.MoreauJeanOSI,
@@ -2631,6 +2663,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['start_run_iteration_hook']=start_run_iteration_hook
             run_options['end_run_iteration_hook']=end_run_iteration_hook
             run_options['skip_last_update_output']=skip_last_update_output
+            run_options['output_contact_forces']=output_contact_forces
+            run_options['output_contact_info']=output_contact_info
 
 
 
@@ -2661,7 +2695,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if run_options['output_backup'] is not None:
             self._output_backup = run_options['output_backup']
 
-        self._output_contact_forces = output_contact_forces
+        if run_options['output_contact_forces'] is not None:
+            self._output_contact_forces = run_options['output_contact_forces']
+
+        if run_options['output_contact_info'] is not None:
+            self._output_contact_info = run_options['output_contact_info']
+
         if run_options['gravity_scale'] is not None:
             self._gravity_scale = run_options['gravity_scale']
 
