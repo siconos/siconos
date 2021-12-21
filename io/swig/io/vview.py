@@ -1057,13 +1057,12 @@ class IOReader(VTKPythonAlgorithmBase):
                             self.ids_at_time[mu] = None
 
             else:
-                # for mu in self._mu_coefs:
-                #     self.cpa_at_time[mu] = [[nan, nan, nan]]
-                #     self.cpb_at_time[mu] = [[nan, nan, nan]]
-                #     self.cn_at_time[mu] =  [[nan, nan, nan]]
-                #     self.cf_at_time[mu] =  [[nan, nan, nan]]
-                #     self.ids_at_time[mu] = None
-                pass
+                for mu in self._mu_coefs:
+                    self.cpa_at_time[mu] = [[nan, nan, nan]]
+                    self.cpb_at_time[mu] = [[nan, nan, nan]]
+                    self.cn_at_time[mu] =  [[nan, nan, nan]]
+                    self.cf_at_time[mu] =  [[nan, nan, nan]]
+                    self.ids_at_time[mu] = None
             if self._with_contact_forces:
                 for mu in self._mu_coefs:
                     self.cpa[mu] = numpy_support.numpy_to_vtk(
@@ -1757,6 +1756,7 @@ class VView(object):
             assert shape_type == 'primitive'
             primitive = self.io.shapes()[shape_name].attrs['primitive']
             attrs = self.io.shapes()[shape_name][:][0]
+
             if primitive == 'Sphere':
                 source = vtk.vtkSphereSource()
                 source.SetRadius(attrs[0])
@@ -2515,6 +2515,9 @@ class VView(object):
             slider_widget.AddObserver("InteractionEvent", self.input_observer.time)
         else:
             self.input_observer = InputObserver(self)
+
+        self.input_observer.set_opacity()
+
         self.interactor_renderer.AddObserver('KeyPressEvent', self.input_observer.key)
 
         self.interactor_renderer.AddObserver(
