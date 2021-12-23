@@ -32,6 +32,8 @@
 #include "NumericsVector.h"
 #endif
 
+#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
+
 void grfc3d_unitary_compute_and_add_error(
   double* r,
   double* u,
@@ -130,10 +132,10 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem,
   double error_primal = cblas_dnrm2(m,tmp_m_2,1);   // error_primal = |-Mv + Hr - q|
 // printf("\n\n#################### 001 error = %12.16e ####################\n", *error);
   double relative_scaling = fmax(norm_q, fmax(norm_Mv, norm_Hr));
-  if(relative_scaling > DBL_EPSILON)
+  if(relative_scaling > MIN_RELATIVE_SCALING)
     *error = error_primal/relative_scaling;         // error = |-Mv + Hr - q|/max{|Mv|, |Hr|, |q|}
   else
-    *error = 1e300;
+    *error = error_primal;
 // printf("#################### 002 error = %12.16e ####################\n", *error);
   free(tmp_m_1);
   free(tmp_m_2);
@@ -151,10 +153,10 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem,
   double error_dual = cblas_dnrm2(nd,tmp_nd_2,1);       // error_dual = |H'v + b - u|
 
   relative_scaling = fmax(norm_u, fmax(norm_b, norm_HTv));
-  if(relative_scaling > DBL_EPSILON)
+  if(relative_scaling > MIN_RELATIVE_SCALING)
     *error += error_dual/relative_scaling;         // error = |H'v + b - u|/max{|H'v|, |b|, |u|}
   else
-    *error += 1e300;
+    *error += error_dual;
 // printf("#################### 003 error = %12.16e ####################\n", *error);
   free(tmp_nd_1);
   free(tmp_nd_2);
@@ -173,10 +175,10 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem,
   error_complementarity = sqrt(error_complementarity);
 
   relative_scaling = fmax(norm_u, norm_r);
-  if(relative_scaling > DBL_EPSILON)
+  if(relative_scaling > MIN_RELATIVE_SCALING)
     *error += error_complementarity/relative_scaling;
   else
-    *error += 1e300;
+    *error += error_complementarity;
 
 // printf("#################### 004 error = %12.16e ####################\n\n", *error);
   //numerics_printf_verbose(1,"---- GRFC3D - Compute Error ");
