@@ -149,13 +149,13 @@ static void extract_vector(const double * const vec, const unsigned int vecSize,
   unsigned int out_dim = vec_dim - 2;
   assert(out_dim > 0);
 
-  unsigned int posX = 0;
-  unsigned int posY = 0;
+  size_t posX = 0;
+  size_t posY = 0;
 
-  for(unsigned int k = 0; k < varsCount; k++)
+  for(size_t k = 0; k < varsCount; k++)
   {
     out[posX++] = vec[posY];
-    for(unsigned int l = i-1; l < j; l++)
+    for(size_t l = i-1; l < j; l++)
     {
       out[posX++] = vec[posY + l];
     }
@@ -167,14 +167,14 @@ static void extract_vector(const double * const vec, const unsigned int vecSize,
 /** Compute a block matrix J of form
  *      |  1     0     0                 1     0     0                    ...  |
  *      |                                                                      |
- *  J = |  0     1     0                 0     0     0                    ...  |
+ *      |  0     1     0                 0     0     0                    ...  |
  *      |                                                                      |
  *      |  0     0     1                 0     0     0                    ...  |
  *      |                                                                      |
  *      |  0     0     0                 0     1     0                    ...  |
  *      |                                                                      |
  *      |  0     0     0                 0     0     1                    ...  |
- *      |                                                                      |
+ *  J = |                                                                      |
  *      |                 .     .     .                  .     .     .    ...  |
  *      |                                                                      |
  *      |                 .     .     .                  .     .     .    ...  |
@@ -191,7 +191,7 @@ static NumericsMatrix* compute_J_matrix(const unsigned int varsCount)
 {
   assert(varsCount > 0);
 
-  NumericsMatrix * J = NM_create(NM_SPARSE, 5*varsCount*2, 3*varsCount*2);
+  NumericsMatrix * J = NM_create(NM_SPARSE, 5*varsCount, 3*varsCount*2);
   NumericsMatrix * J_1 = NM_create(NM_SPARSE, 5, 3);
   NumericsMatrix * J_2 = NM_create(NM_SPARSE, 5, 3);
 
@@ -304,10 +304,16 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   unsigned int nd = problem->H->size1;
   unsigned int d = problem->dimension;
   unsigned int n = problem->numberOfContacts;
+  unsigned int m_plus_nd = m+nd;
   unsigned int d_minus_2 = d-2;
   unsigned int n_dminus2 = n*d_minus_2;
-  unsigned int posX = 0; // Used as the index in the source array
-  unsigned int posY = 0; // Used as the index in the destination array
+  unsigned int n_dplus1 = n*(d+1);
+
+
+
+
+  size_t posX = 0; // Used as the index in the source array
+  size_t posY = 0; // Used as the index in the destination array
 
   NumericsMatrix* M = NULL;
   NumericsMatrix* H_origin = NULL;
@@ -364,7 +370,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   // initialize solver if it is not set
   int internal_allocation=0;
-  if(!options->dWork || (options->dWorkSize != (size_t)(m + nd + n*(d+1))))
+  if(!options->dWork || (options->dWorkSize != (size_t)(m + nd + n_dplus1)))
   {
     grfc3d_IPM_init(problem, options);
     internal_allocation = 1;
@@ -384,7 +390,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   // cblas_dcopy(m, f, 1, minus_f, 1);
   // cblas_dscal(m, -1.0, minus_f, 1);
 
-  double *iden;
+  double *iden = JA_iden(n_dminus2, n);
 
   // change of variable
   // H_origin --> H
@@ -475,43 +481,33 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double *d_t = (double*)calloc(n, sizeof(double));
   double *d_t_prime = (double*)calloc(n, sizeof(double));
 
-  double *tmpsol = (double*)calloc(m+2*nd,sizeof(double)); // temporary solution
-
   double *rhs = options->dWork;
   double *rhs_tmp = NULL;
   double *gv_plus_dgv = data->tmp_vault_m[1];
-  double *vr_jprod = data->tmp_vault_nd[2];
+  //double *vr_jprod = data->tmp_vault_nd[2];
   double *v_plus_dv = data->tmp_vault_nd[3];
   double *r_plus_dr = data->tmp_vault_nd[4];
   double *dvdr_jprod_1 = data->tmp_vault_n_dminus2[2];
   double *dvdr_jprod_2 = data->tmp_vault_n_dminus2[3];
+  double *vr_jprod_1 = data->tmp_vault_n_dminus2[22];
+  double *vr_jprod_2 = data->tmp_vault_n_dminus2[23];
 
-  double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
-  NumericsMatrix* r_Qp = NULL;                                                // matrix Qp
   NumericsMatrix *minus_M = NM_create(M->storageType, M->size0, M->size1);    // store the matrix -M to build the matrix of the Newton linear system
-  NumericsMatrix *QpH = NM_create(H->storageType, H->size0, H->size1);        // store the matrix Qp*H
 
   NumericsMatrix *Jac; /* Jacobian matrix */
   long Jac_nzmax;
   size_t M_nzmax = NM_nnz(M);
   size_t H_nzmax = NM_nnz(H);
 
-  NumericsMatrix *J; /* use for Jac in the NT scaling case */
-  long J_nzmax;
+  NumericsMatrix *J = compute_J_matrix(n); /* use for Jac in the NT scaling case */
 
-
-  double * Hvw = (double*)calloc(nd, sizeof(double));
   double full_error = 1e300;
   char fws = ' '; /* finish without scaling */
 
-  /* list of active constraints : = 0 if x_0 <= epsilon, = 1 if lambda_2 <= epsilon , = 3 either */
-  short * a_velo = (short*)calloc(n, sizeof(short));
-  short * a_reac = (short*)calloc(n, sizeof(short));
-
-  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
-  {
-    J = compute_J_matrix(n);
-  }
+  // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
+  // {
+  //   J = compute_J_matrix(n);
+  // }
 
 
 
@@ -607,8 +603,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
   /* -------------------------- Check the full criterion -------------------------- */
-
-
   while(iteration < max_iter)
   {
 
@@ -661,18 +655,13 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
-  //   /* -------------------------- ?????? -------------------------- */
-  //   if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (err <= 1e-7) && (fws==' '))
-  //   {
-  //     // To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
-  //     options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
-  //     options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 0;
-  //     fws = '*';
-  //     // copy of the current solution into a temporary vector to evaluate the distance of this solution to the final one
-  //     cblas_dcopy(m, globalVelocity, 1, tmpsol, 1);
-  //     cblas_dcopy(nd, velocity, 1, tmpsol+m, 1);
-  //     cblas_dcopy(nd, reaction, 1, tmpsol+m+nd, 1);
-  //   }
+    /* -------------------------- ?????? -------------------------- */
+    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (full_error <= 1e-6) && (fws==' '))
+    {
+      // To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling//
+      options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
+      fws = '*';
+    }
 
 
 
@@ -707,17 +696,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     //barr_param = (fws=='*' ? complemResidualNorm(velocity, reaction, nd, n)/n : complemResidualNorm_p(velocity, reaction, nd, n)/n) ;
     //barr_param = fabs(barr_param);
 
-    /*
-      double * rr = (double*)calloc(nd,sizeof(double));
-      cblas_dcopy(nd, reaction, 1, rr, 1);
-      cblas_daxpy(nd, -1.0, velocity, 1, rr, 1);
-      for (int k = 0; k < n; projectionOnCone(rr+k*d, 1), k++);
-      cblas_daxpy(nd, -1.0, reaction, 1, rr, 1);
-      double nproj = cblas_dnrm2(nd, rr, 1);
-      free(rr);
-    */
-
-
 
     complem_1 = complemResidualNorm(velocity_1, reaction_1, n_dminus2, n); // (t, u_bar) o (r0, r_bar)
     complem_2 = complemResidualNorm(velocity_2, reaction_2, n_dminus2, n); // (t', u_tilde) o (r0, r_tilde)
@@ -742,13 +720,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
-
-
-
-
-
-
-
     // error = fmax(barr_param, fmax(complem_1, fmax(complem_2, fmax(pinfeas, dinfeas))));
 
 
@@ -764,6 +735,22 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     error_array[3] = u2dotr2;
     error_array[4] = complem_1;
     error_array[5] = complem_2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -788,7 +775,8 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
     /* -------------------------- Compute NT directions -------------------------- */
-    if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])         // with NT scaling
+    /* with NT scaling */
+    if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
     {
       if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] == SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
       {
@@ -824,242 +812,196 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
        *
        *  and
        *
-       *        n(d-2)    n(d-2)
-       *      | Qp_bar      0    | n(d-2)
-       *  Q = |                  |
-       *      |  0      Qp_tilde | n(d-2)
+       *          n(d-2)    n(d-2)
+       *        | Qp_bar      0    | n(d-2)
+       *   Q  = |                  |
+       *        |  0      Qp_tilde | n(d-2)
        */
 
-      Jac = NM_create(NM_SPARSE, m + nd + n*(d+1), m + nd + n*(d+1));
+      Jac = NM_create(NM_SPARSE, m + nd + n_dplus1, m + nd + n_dplus1);
       Jac_nzmax = M_nzmax + 2*H_nzmax + 2*9*n*n + 6*n;
       NM_triplet_alloc(Jac, Jac_nzmax);
       Jac->matrix2->origin = NSM_TRIPLET;
       NM_insert(Jac, M, 0, 0);
       NM_insert(Jac, NM_transpose(minus_H), 0, m);
       NM_insert(Jac, minus_H, m, 0);
-      NM_insert(Jac, J, m, m+nd);
-      NM_insert(Jac, NM_transpose(J), m+nd, m);
-      // TO DO: need to optimise this point because only F will be changed at each iteration
-      NM_insert(Jac, Qp2_bar, m+nd, m+nd);
-      NM_insert(Jac, Qp2_tilde, m+nd+n*d_minus_2, m+nd+n*d_minus_2);
-
-
-      // if (iteration == 0)
-      // {
-      //   Jac = NM_create(NM_SPARSE, m + nd + n*(d+1), m + nd + n*(d+1));
-      //   Jac_nzmax = M_nzmax + 2*H_nzmax + 2*9*n*n + 6*n;
-      //   NM_triplet_alloc(Jac, Jac_nzmax);
-      //   Jac->matrix2->origin = NSM_TRIPLET;
-      //   NM_insert(Jac, M, 0, 0);
-      //   NM_insert(Jac, NM_transpose(minus_H), 0, m);
-      //   NM_insert(Jac, minus_H, m, 0);
-      //   NM_insert(Jac, J, m, m+nd);
-      //   NM_insert(Jac, NM_transpose(J), m+nd, m);
-      //   NM_insert(Jac, Qp2_bar, m+nd, m+nd);
-      //   NM_insert(Jac, Qp2_tilde, m+nd+n*d_minus_2, m+nd+n*d_minus_2);
-      // }
-      // else
-      // {
-      //   Jac->destructible->internalData->isLDLTfactorized = 0;
-      //   if (Jac->matrix2->triplet && Qp2_bar->matrix2->triplet && Qp2_tilde->matrix2->triplet)
-      //   {
-      //     CS_INT  *Jac_i, *Jac_p, *Qp2_bar_i, *Qp2_bar_p, *Qp2_tilde_i, *Qp2_tilde_p;
-      //     CS_ENTRY *Jac_x, *Qp2_bar_x, *Qp2_tilde_x;
-      //     unsigned int start_i_Jac, start_j_Jac, start_i_Qp_bar, start_j_Qp_bar, start_i_Qp_tilde, start_j_Qp_tilde;
-
-      //     int mnd = m+nd;
-      //     int mndndminus2 = m+nd+n*d_minus_2;
-
-      //     Jac_i = Jac->matrix2->triplet->i;
-      //     Jac_p = Jac->matrix2->triplet->p;
-      //     Jac_x = Jac->matrix2->triplet->x;
-
-      //     start_i_Jac = mnd;
-      //     start_j_Jac = mnd;
-
-      //     Qp2_bar_i = Qp2_bar->matrix2->triplet->i;
-      //     Qp2_bar_p = Qp2_bar->matrix2->triplet->p;
-      //     Qp2_bar_x = Qp2_bar->matrix2->triplet->x;
-
-      //     Qp2_tilde_i = Qp2_tilde->matrix2->triplet->i;
-      //     Qp2_tilde_p = Qp2_tilde->matrix2->triplet->p;
-      //     Qp2_tilde_x = Qp2_tilde->matrix2->triplet->x;
-
-      //     for (unsigned int i = 0 ; i < Jac->matrix2->triplet->nz ; i++)
-      //     {
-      //       if (Jac_i[i] >= start_i_Jac && Jac_p[i] >= start_j_Jac)
-      //       {
-      //         for (unsigned int j = 0 ; j < Qp2_bar->matrix2->triplet->nz ; j++)
-      //         {
-      //           if ((Qp2_bar_i[j] == Jac_i[i]-mnd) && (Qp2_bar_p[j] == Jac_p[i]-mnd))
-      //           {
-      //             // printf ("bar    %g %g : ", (double) (Jac_i [i]), (double) (Jac_p [i])) ;
-      //             // printf ("%g\n", Jac_x ? Jac_x [i] : 1) ;
-      //             Jac_x[i] = Qp2_bar_x[j];
-      //             break;
-      //           }
-      //         }
-
-      //         for (unsigned int j = 0 ; j < Qp2_tilde->matrix2->triplet->nz ; j++)
-      //         {
-      //           if ((Qp2_tilde_i[j] == Jac_i[i]-mndndminus2) && (Qp2_tilde_p[j] == Jac_p[i]-mndndminus2))
-      //           {
-      //             // printf ("tilde    %g %g : ", (double) (Jac_i [i]), (double) (Jac_p [i])) ;
-      //             // printf ("%g\n", Jac_x ? Jac_x [i] : 1) ;
-      //             Jac_x[i] = Qp2_tilde_x[j];
-      //             break;
-      //           }
-      //         }
-      //       }
-      //     }
-      //   }
-      // }
-
-
-
-
-
-
-
-
-
-
-
-
+      NM_insert(Jac, J, m, m_plus_nd);
+      NM_insert(Jac, NM_transpose(J), m_plus_nd, m);
+      NM_insert(Jac, Qp2_bar, m_plus_nd, m_plus_nd);
+      NM_insert(Jac, Qp2_tilde, m_plus_nd+n_dminus2, m_plus_nd+n_dminus2);
     }
-    else // without NT scaling
+
+    /* without NT scaling */
+    else
     {
-
-
-
-
       /*   1. Build the Jacobian matrix
        *
-       *           m    nd     n(d-2)   n(d-2)
-       *        |  M    -H'       0        0    | m
-       *        |                               |
-       *  Jac = | -H     0     [...... J .....] | nd
-       *        |                               |
-       *        |  0  block_1  arw(r1)     0    | n(d-2)
-       *        |                               |
-       *        |  0  block_2     0     arw(r2) | n(d-2)
+       *               m     nd      n(d-2)    n(d-2)
+       *            |  M     -H'        0         0    | m
+       *            |                                  |
+       *    Jac   = | -H      0      [...... J ......] | nd
+       *            |                                  |
+       *            |  0   block_1   arw(r1)      0    | n(d-2)
+       *            |                                  |
+       *            |  0   block_2      0      arw(r2) | n(d-2)
        *
        *  where
        *
-       *         m     nd       nd
-       *      | 1     0     1    0 | m
-       *      |                    |
-       *  J = | 0     I     0    0 | nd
-       *      |                    |
-       *      | 0     0     0    I | nd
+       *                1       2        2
+       *            |   t     u_bar'     0  | 1
+       *  block_1 = |                       |         x n blocks
+       *            | u_bar     tI       0  | 2
        *
        *  and
        *
-       *      n(d-2)  n(d-2)
-       *      | F_1    0  | n(d-2)
-       *  F = |           |
-       *      |  0    F_2 | n(d-2)
-
-
-       *                    n(d-2)                              n(d-2)
-       *      | arw(u0,u_bar)^-1 arw(r0,r_bar) ,                  0                | n(d-2)
-       *  A = |                                                                    |
-       *      |               0                , arw(t,u_tidle)^-1 arw(r0,r_tidle) | n(d-2)
+       *                1       2        2
+       *            |   t'      0     u_tilde' | 1
+       *  block_2 = |                          |      x n blocks
+       *            | u_tilde   0       t'I    | 2
        *
        */
+      Jac = NM_create(NM_SPARSE, m + nd + n_dplus1, m + nd + n_dplus1);
+      Jac_nzmax = M_nzmax + 2*H_nzmax + 2*9*n*n + 6*n;
+      NM_triplet_alloc(Jac, Jac_nzmax);
+      Jac->matrix2->origin = NSM_TRIPLET;
+      NM_insert(Jac, M, 0, 0);
+      NM_insert(Jac, NM_transpose(minus_H), 0, m);
+      NM_insert(Jac, minus_H, m, 0);
+      NM_insert(Jac, J, m, m_plus_nd);
+
+      /* Create matrices block_1, block_2 */
+      int n3, n5;
+      n3 = 3*n;
+      n5 = 5*n;
+      NumericsMatrix * block_1 = NM_create(NM_SPARSE, n5, n3);
+      NumericsMatrix * block_2 = NM_create(NM_SPARSE, n5, n3);
+      long blocks_nzmax = 3*2*n;
+      NM_triplet_alloc(block_1, blocks_nzmax);
+      NM_triplet_alloc(block_2, blocks_nzmax);
+      NM_fill(block_1, NM_SPARSE, n5, n3, block_1->matrix2);
+      NM_fill(block_2, NM_SPARSE, n5, n3, block_2->matrix2);
+      block_1->matrix2->origin = NSM_TRIPLET;
+      block_2->matrix2->origin = NSM_TRIPLET;
+
+      for(size_t i = 0; i < n; ++i)
+      {
+        posX = i * d_minus_2;   // row = 3*i
+        posY = i * d;           // col = 5*i
+        NM_entry(block_1, posX, posY, velocity_1[posX]);
+        NM_entry(block_2, posX, posY, velocity_2[posX]);
+
+        for(size_t j = 1; j < d_minus_2; ++j)
+        {
+          NM_entry(block_1, posX, posY + j, velocity_1[posX + j]);
+          NM_entry(block_1, posX + j, posY, velocity_1[posX + j]);
+          NM_entry(block_1, posX + j, posY + j, velocity_1[posX]);
+
+          NM_entry(block_2, posX, posY + j + 2, velocity_2[posX + j]);
+          NM_entry(block_2, posX + j, posY, velocity_2[posX + j]);
+          NM_entry(block_2, posX + j, posY + j + 2, velocity_2[posX]);
+        }
+      }
+
+      /* Continue adding into Jac matrix */
+      NM_insert(Jac, block_1, m_plus_nd, m);
+      NM_insert(Jac, Arrow_repr(reaction_1, n_dminus2, n), m_plus_nd, m_plus_nd);
+      NM_insert(Jac, block_2, m_plus_nd+n_dminus2, m);
+      NM_insert(Jac, Arrow_repr(reaction_2, n_dminus2, n), m_plus_nd+n_dminus2, m_plus_nd+n_dminus2);
 
 
 
+
+
+
+
+    // if (iteration == 5)
+    // {
+    //   printf("\n\n========== PRINTING FOR DEBUG ==========\n");
+    //   printf("\n\niteration: %d\n", iteration);
+    //   // printf("Vector v:\n");
+    //   // NM_vector_display(globalVelocity,m);
+    //   // printf("\n\nVector u:\n");
+    //   // NM_vector_display(velocity,nd);
+    //   // printf("\n\nVector r:\n");
+    //   // NM_vector_display(reaction,nd);
+    //   printf("\n\nVector t:\n");
+    //   NM_vector_display(t,n);
+    //   printf("\n\nVector t_prime:\n");
+    //   NM_vector_display(t_prime,n);
+    //   printf("\n\nVector u_1:\n");
+    //   NM_vector_display(velocity_1,n_dminus2);
+    //   printf("\n\nVector u_2:\n");
+    //   NM_vector_display(velocity_2,n_dminus2);
+    //   printf("\n\nVector r_1:\n");
+    //   NM_vector_display(reaction_1,n_dminus2);
+    //   printf("\n\nVector r_2:\n");
+    //   NM_vector_display(reaction_2,n_dminus2);
+
+    //   // printf("Vector dv:\n");
+    //   // NM_vector_display(d_globalVelocity,m);
+    //   // printf("\n\nVector du:\n");
+    //   // NM_vector_display(d_velocity,nd);
+    //   // printf("\n\nVector dr:\n");
+    //   // NM_vector_display(d_reaction,nd);
+    //   // printf("\n\nVector dt:\n");
+    //   // NM_vector_display(d_t,n);
+    //   // printf("\n\nVector dt_prime:\n");
+    //   // NM_vector_display(d_t_prime,n);
+    //   // printf("\n\nVector du_1:\n");
+    //   // NM_vector_display(d_velocity_1,n_dminus2);
+    //   // printf("\n\nVector du_2:\n");
+    //   // NM_vector_display(d_velocity_2,n_dminus2);
+    //   // printf("\n\nVector dr_1:\n");
+    //   // NM_vector_display(d_reaction_1,n_dminus2);
+    //   // printf("\n\nVector dr_2:\n");
+    //   // NM_vector_display(d_reaction_2,n_dminus2);
+
+    //   printf("\n\nblock_1:\n");
+    //   NM_display(block_1);
+    //   printf("\n\nblock_2:\n");
+    //   NM_display(block_2);
+    //   printf("\n\nJac:\n");
+    //   NM_display(Jac);
+    //   printf("\n\nrhs:\n");
+    //   NM_vector_display(rhs, m_plus_nd+n_dplus1);
+
+    //   // printf("\n\nalpha_primal_1 = %f\n", alpha_primal_1);
+    //   // printf("\n\nalpha_primal_2 = %f\n", alpha_primal_2);
+    //   // printf("\n\nalpha_primal = %f\n", alpha_primal);
+    //   // printf("\n\nalpha_dual_1 = %f\n", alpha_dual_1);
+    //   // printf("\n\nalpha_dual_2 = %f\n", alpha_dual_2);
+    //   // printf("\n\nalpha_dual = %f\n", alpha_dual);
+
+    //   // printf("\n\ncomplem_1 = %9.16f\n", complem_1);
+    //   // printf("\n\ncomplem_2 = %9.16f\n", complem_2);
+    //   // printf("\n\nerror = %f\n", error);
+    //   printf("========== END PRINTING FOR DEBUG ==========\n\n");
+    //   break;
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      NM_clear(block_1);
+      free(block_1);
+      NM_clear(block_2);
+      free(block_2);
     }
-
-
-
-
-    // if (iteration < 5)
-    // {
-    //   // printf("\n\nrhs 1 = \n");
-    //   // NV_display(rhs, m+nd+n*(d+1));
-    //   printf("\n\n iteration = %d\n",iteration);
-    //   if(NM_LDLT_factorized(Jac)) printf("Num 1 : NM_LDLT_factorized(Jac) is TRUE\n");
-    //   else printf("Num 1 : NM_LDLT_factorized(Jac) is FALSE\n");
-    //   if(NM_destructible(Jac)) printf("Num 1 : NM_destructible(Jac) is TRUE\n");
-    //   else printf("Num 1 : NM_destructible(Jac) is FALSE\n");
-
-    //   if (iteration == 4) break;
-    // }
-
-
-
-
-
-
-
-
-    // if (iteration < 3)
-    // {
-    //   printf("\n\n iteration = %d\n",iteration);
-    //   printf("Jac = \n");
-    //   // NM_display(Jac);
-
-    //   if (Jac->matrix2->triplet)
-    //   {
-
-    //     CS_INT p, j, m, n, nzmax, nz, *Ap, *Ai ;
-    //     CS_ENTRY *Ax ;
-    //     cs *A = Jac->matrix2->triplet;
-    //     m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
-    //     nzmax = A->nzmax ; nz = A->nz ;
-    //     for (p = m+nd ; p < nz ; p++)
-    //     {
-    //         printf ("    %g %g : ", (double) (Ai [p]), (double) (Ap [p])) ;
-    //         printf ("%g\n", Ax ? Ax [p] : 1) ;
-    //     }
-    //   }
-
-    //   printf("\n\nQp2_bar = \n");
-    //   NM_display(Qp2_bar);
-    //   printf("\n\nQp2_tilde = \n");
-    //   NM_display(Qp2_tilde);
-
-    //   if (iteration == 2) break;
-    // }
-
-
-
-
-
-
-
-
-      // /* Create the 2x2 blocks reduced matrix
-      //  *         m       nd
-      //  *      |  -M     QpH^T  | m
-      //  * JR = |                |
-      //  *      |  QpH     I     | nd
-      //  *
-      //  *  where QpH = Qp * H
-      //  */
-      // JR = NM_create(NM_SPARSE, m + nd, m + nd);
-      // JR_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
-      // NM_triplet_alloc(JR, JR_nzmax);
-      // JR->matrix2->origin = NSM_TRIPLET;
-      // NM_insert(JR, minus_M, 0, 0);
-
-      // /* without regularization */
-      // NM_insert(JR, NM_eye(nd), m, m);
-
-      // /* add a regularization term  */
-      // //double delta = barr_param <= 1e-4 ? barr_param : 1e-4;
-      // //NM_insert(JR, NM_add(1.0, NM_eye(nd), delta, Qp2),m, m);
-
-      // //r_Qp = Quad_repr(r_p, nd, n);                           // Should be replaced by a function returning the product Qp * vector
-      // NM_copy(H, QpH); /* useful ? */
-      // NM_gemm(1.0, Qp, H, 0.0, QpH);
-      // NM_insert(JR, NM_transpose(QpH), 0, m);                // Should be useless when unsing a symmetric factorization procedure
-      // NM_insert(JR, QpH, m, 0);
-
-
-
 
 
 
@@ -1079,13 +1021,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
  //    }
  //
- //    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
- //      printInteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
-
-
-
-
-
 
 
 
@@ -1112,27 +1047,20 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
     {
-      cblas_dcopy(n_dminus2, reaction_1, 1, rhs+m+nd, 1);
-      assert((m+nd+2*n_dminus2) == (m+nd+n*(d+1))); // m + nd + n(d+1): size of rhs
-      cblas_dcopy(n_dminus2, reaction_2, 1, rhs+m+nd+n_dminus2, 1);
+      cblas_dcopy(n_dminus2, reaction_1, 1, rhs+m_plus_nd, 1);
+      assert((m_plus_nd+2*n_dminus2) == (m_plus_nd+n_dplus1)); // m + nd + n(d+1): size of rhs
+      cblas_dcopy(n_dminus2, reaction_2, 1, rhs+m_plus_nd+n_dminus2, 1);
     }
     else
     {
       JA_prod(velocity_1, reaction_1, n_dminus2, n, complemConstraint_1);
       JA_prod(velocity_2, reaction_2, n_dminus2, n, complemConstraint_2);
-      cblas_dcopy(n_dminus2, complemConstraint_1, 1, rhs+m+nd, 1);
-      assert((m+nd+2*n_dminus2) == (m+nd+n*(d+1))); // m + nd + n(d+1): size of rhs
-      cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m+nd+n_dminus2, 1);
+      cblas_dcopy(n_dminus2, complemConstraint_1, 1, rhs+m_plus_nd, 1);
+      assert((m_plus_nd+2*n_dminus2) == (m_plus_nd+n_dplus1)); // m + nd + n(d+1): size of rhs
+      cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m_plus_nd+n_dminus2, 1);
 
     }
-    cblas_dscal(m + nd + n*(d+1), -1.0, rhs, 1);
-
-
-
-
-
-
-
+    cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
 
 
 
@@ -1150,42 +1078,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
       /* Solving non-symmetric Newton system without NT scaling via LU factorization */
       NM_LU_solve(Jac, rhs, 1);
     }
-
-
-
-
-
-
-
-    // if (iteration < 5)
-    // {
-    //   // printf("\n\nrhs 1 = \n");
-    //   // NV_display(rhs, m+nd+n*(d+1));
-    //   // printf("\n\n iteration = %d\n",iteration);
-    //   if(NM_LDLT_factorized(Jac)) printf("Num 2 : NM_LDLT_factorized(Jac) is TRUE\n");
-    //   else printf("Num 2 : NM_LDLT_factorized(Jac) is FALSE\n");
-    //   if(NM_destructible(Jac)) printf("Num 2 : NM_destructible(Jac) is TRUE\n");
-    //   else printf("Num 2 : NM_destructible(Jac) is FALSE\n");
-
-
-    //   if (iteration == 4) break;
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1218,11 +1110,11 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     extract_vector(d_reaction, nd, n, 2, 3, d_reaction_1);
     extract_vector(d_reaction, nd, n, 4, 5, d_reaction_2);
 
-    cblas_dcopy(n_dminus2, rhs+m+nd, 1, d_velocity_1, 1);
-    assert((m+nd+2*n_dminus2) == (m+nd+n*(d+1))); // m + nd + n(d+1): size of rhs
-    cblas_dcopy(n_dminus2, rhs+m+nd+n_dminus2, 1, d_velocity_2, 1);
+    cblas_dcopy(n_dminus2, rhs+m_plus_nd, 1, d_velocity_1, 1);
+    assert((m_plus_nd+2*n_dminus2) == (m_plus_nd+n_dplus1)); // m + nd + n(d+1): size of rhs
+    cblas_dcopy(n_dminus2, rhs+m_plus_nd+n_dminus2, 1, d_velocity_2, 1);
 
-    for(unsigned int i = 0; i < n; i++)
+    for(size_t i = 0; i < n; i++)
     {
       posX = i*d;
       posY = i*d_minus_2;
@@ -1245,19 +1137,93 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     alpha_dual_1 = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
     alpha_dual_2 = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
-    // alpha_primal = fmin(alpha_primal_1, alpha_primal_2);
-    // alpha_dual = fmin(alpha_dual_1, alpha_dual_2);
-
-    // if (alpha_primal < alpha_dual)
-    //   alpha_dual = alpha_primal;
-    // else
-    //   alpha_primal = alpha_dual;
     alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
     alpha_dual = alpha_primal;
 
     /* updating the gamma parameter used to compute the step-length */
     // gmm = gmmp1 + gmmp2 * fmin(alpha_primal, alpha_dual);
     gmm = gmmp1 + gmmp2 * alpha_primal;
+
+
+
+
+
+
+
+
+
+
+    // if (iteration == 0)
+    // {
+    //   printf("\n\n========== PRINTING FOR DEBUG ==========\n");
+    //   printf("\n\niteration: %d\n", iteration);
+    //   // printf("Vector v:\n");
+    //   // NM_vector_display(globalVelocity,m);
+    //   // printf("\n\nVector u:\n");
+    //   // NM_vector_display(velocity,nd);
+    //   // printf("\n\nVector r:\n");
+    //   // NM_vector_display(reaction,nd);
+    //   printf("\n\nVector t:\n");
+    //   NM_vector_display(t,n);
+    //   printf("\n\nVector t_prime:\n");
+    //   NM_vector_display(t_prime,n);
+    //   printf("\n\nVector u_1:\n");
+    //   NM_vector_display(velocity_1,n_dminus2);
+    //   printf("\n\nVector u_2:\n");
+    //   NM_vector_display(velocity_2,n_dminus2);
+    //   printf("\n\nVector r_1:\n");
+    //   NM_vector_display(reaction_1,n_dminus2);
+    //   printf("\n\nVector r_2:\n");
+    //   NM_vector_display(reaction_2,n_dminus2);
+
+    //   // printf("Vector dv:\n");
+    //   // NM_vector_display(d_globalVelocity,m);
+    //   // printf("\n\nVector du:\n");
+    //   // NM_vector_display(d_velocity,nd);
+    //   // printf("\n\nVector dr:\n");
+    //   // NM_vector_display(d_reaction,nd);
+    //   // printf("\n\nVector dt:\n");
+    //   // NM_vector_display(d_t,n);
+    //   // printf("\n\nVector dt_prime:\n");
+    //   // NM_vector_display(d_t_prime,n);
+    //   // printf("\n\nVector du_1:\n");
+    //   // NM_vector_display(d_velocity_1,n_dminus2);
+    //   // printf("\n\nVector du_2:\n");
+    //   // NM_vector_display(d_velocity_2,n_dminus2);
+    //   // printf("\n\nVector dr_1:\n");
+    //   // NM_vector_display(d_reaction_1,n_dminus2);
+    //   // printf("\n\nVector dr_2:\n");
+    //   // NM_vector_display(d_reaction_2,n_dminus2);
+
+    //   printf("\n\nblock_1:\n");
+    //   NM_display(block_1);
+    //   printf("\n\nblock_2:\n");
+    //   NM_display(block_2);
+    //   printf("\n\nJac:\n");
+    //   NM_display(Jac);
+    //   printf("\n\nrhs:\n");
+    //   NM_vector_display(rhs, m_plus_nd+n_dplus1);
+
+    //   // printf("\n\nalpha_primal_1 = %f\n", alpha_primal_1);
+    //   // printf("\n\nalpha_primal_2 = %f\n", alpha_primal_2);
+    //   // printf("\n\nalpha_primal = %f\n", alpha_primal);
+    //   // printf("\n\nalpha_dual_1 = %f\n", alpha_dual_1);
+    //   // printf("\n\nalpha_dual_2 = %f\n", alpha_dual_2);
+    //   // printf("\n\nalpha_dual = %f\n", alpha_dual);
+
+    //   // printf("\n\ncomplem_1 = %9.16f\n", complem_1);
+    //   // printf("\n\ncomplem_2 = %9.16f\n", complem_2);
+    //   // printf("\n\nerror = %f\n", error);
+    //   printf("========== END PRINTING FOR DEBUG ==========\n\n");
+    //   break;
+    // }
+
+
+
+
+
+
+
 
 
 
@@ -1298,28 +1264,167 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
-    // if (iteration == 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* -------------------------- Corrector step of Mehrotra -------------------------- */
+    cblas_dcopy(m, dualConstraint, 1, rhs, 1);
+    cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
+    {
+      /* Right-hand side for symmetric Newton system with NT scaling */
+      /* 2nd terms: 2 * barr_param * sigma * Qp_bar * (Qp_bar * u_1)^-1  */
+      NM_gemv(1.0, Qp_bar, velocity_1, 0.0, velocity_1t);                         // velocity_1t        = Qp_bar * u_1
+      NM_gemv(1.0, Qp_tilde, velocity_2, 0.0, velocity_2t);                       // velocity_2t        = Qp_tilde * u_2
+      JA_inv(velocity_1t, n_dminus2, n, velocity_1t_inv);                         // velocity_1t_inv    = (Qp_bar * u_1)^-1
+      JA_inv(velocity_2t, n_dminus2, n, velocity_2t_inv);                         // velocity_2t_inv    = (Qp_tilde * u_2)^-1
+      NM_gemv(1.0, Qp_bar, velocity_1t_inv, 0.0, Qp_velocity_1t_inv);             // Qp_velocity_1t_inv = Qp_bar * (Qp_bar * u_1)^-1
+      NM_gemv(1.0, Qp_tilde, velocity_2t_inv, 0.0, Qp_velocity_2t_inv);           // Qp_velocity_2t_inv = Qp_tilde * (Qp_tilde * u_2)^-1
+      cblas_dscal(n_dminus2, 2 * barr_param * sigma, Qp_velocity_1t_inv, 1);      // Qp_velocity_1t_inv = 2nd term
+      cblas_dscal(n_dminus2, 2 * barr_param * sigma, Qp_velocity_2t_inv, 1);      // Qp_velocity_2t_inv = 2nd term
+
+
+      /* 3rd terms: (Qp_bar * du_1) o (Qpinv_1 * dr_1)  */
+      NM_gemv(1.0, Qp_bar, d_velocity_1, 0.0, d_velocity_1t);                      // d_velocity_1t     = Qp_bar * du_1
+      NM_gemv(1.0, Qp_tilde, d_velocity_2, 0.0, d_velocity_2t);                    // d_velocity_2t     = Qp_tilde * du_2
+      QNTpinvz(velocity_1, reaction_1, d_reaction_1, n_dminus2, n, d_reaction_1t); // d_reaction_1t     = Qpinv_1 * dr_1
+      QNTpinvz(velocity_2, reaction_2, d_reaction_2, n_dminus2, n, d_reaction_2t); // d_reaction_2t     = Qpinv_2 * dr_2
+      JA_prod(d_velocity_1t, d_reaction_1t, n_dminus2, n, dvdr_jprod_1);           // dvdr_jprod_1      = 3rd term
+      JA_prod(d_velocity_2t, d_reaction_2t, n_dminus2, n, dvdr_jprod_2);           // dvdr_jprod_1      = 3rd term
+
+
+      /* updated rhs = r_1 - 2nd term + 3rd term */
+      NV_sub(reaction_1, Qp_velocity_1t_inv, n_dminus2, tmp1);
+      NV_sub(reaction_2, Qp_velocity_2t_inv, n_dminus2, tmp2);
+      NV_add(tmp1, dvdr_jprod_1, n_dminus2, complemConstraint_1);
+      NV_add(tmp2, dvdr_jprod_2, n_dminus2, complemConstraint_2);
+    }
+    else
+    {
+      /* Right-hand side for non-symmetric Newton system without NT scaling */
+      /* 1st terms: u_1 o r_1  */
+      JA_prod(velocity_1, reaction_1, n_dminus2, n, vr_jprod_1);
+      JA_prod(velocity_2, reaction_2, n_dminus2, n, vr_jprod_2);
+
+      /* 2nd terms: 2 * barr_param * sigma * e  */
+      iden = JA_iden(n_dminus2, n);
+      cblas_dscal(n_dminus2, 2 * barr_param * sigma, iden, 1);
+
+      /* 3rd terms: du_1 o dr_1  */
+      JA_prod(d_velocity_1, d_reaction_1, n_dminus2, n, dvdr_jprod_1);
+      JA_prod(d_velocity_2, d_reaction_2, n_dminus2, n, dvdr_jprod_2);
+
+      /* updated rhs = 1st term - 2nd term + 3rd term */
+      NV_sub(vr_jprod_1, iden, n_dminus2, tmp1);
+      NV_sub(vr_jprod_2, iden, n_dminus2, tmp2);
+      NV_add(tmp1, dvdr_jprod_1, n_dminus2, complemConstraint_1);
+      NV_add(tmp2, dvdr_jprod_2, n_dminus2, complemConstraint_2);
+      free(iden);
+    }
+
+
+    /* Update only 2 complementarities of rhs  */
+    // cblas_dcopy(m, dualConstraint, 1, rhs, 1);
+    // cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
+    cblas_dcopy(n_dminus2, complemConstraint_1, 1, rhs+m_plus_nd, 1);
+    cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m_plus_nd+n_dminus2, 1);
+    cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
+
+
+
+
+
+
+
+
+
+
+
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
+    {
+      /* Solving full symmetric Newton system with NT scaling via LDLT factorization */
+      // NSM_linearSolverParams(Jac)->solver = NSM_HSL;
+      NM_LDLT_solve(Jac, rhs, 1);
+    }
+    else
+    {
+      /* Solving non-symmetric Newton system without NT scaling via LU factorization */
+      NM_LU_solve(Jac, rhs, 1);
+    }
+
+
+
+
+    NM_clear(Jac);
+    free(Jac);
+
+
+
+    /* Retrieve the solutions */
+    cblas_dcopy(m, rhs, 1, d_globalVelocity, 1);
+    cblas_dcopy(nd, rhs+m, 1, d_reaction, 1);
+    extract_vector(d_reaction, nd, n, 2, 3, d_reaction_1);
+    extract_vector(d_reaction, nd, n, 4, 5, d_reaction_2);
+
+    cblas_dcopy(n_dminus2, rhs+m_plus_nd, 1, d_velocity_1, 1);
+    assert((m_plus_nd+2*n_dminus2) == (m_plus_nd+n_dplus1)); // m + nd + n(d+1): size of rhs
+    cblas_dcopy(n_dminus2, rhs+m_plus_nd+n_dminus2, 1, d_velocity_2, 1);
+
+    for(size_t i = 0; i < n; i++)
+    {
+      posX = i*d;
+      posY = i*d_minus_2;
+      d_velocity[posX] = d_velocity_1[posY] + d_velocity_2[posY];
+      d_velocity[posX+1] = d_velocity_1[posY + 1];
+      d_velocity[posX+2] = d_velocity_1[posY + 2];
+      d_velocity[posX+3] = d_velocity_2[posY + 1];
+      d_velocity[posX+4] = d_velocity_2[posY + 2];
+      d_t[i] = d_velocity_1[posY];
+      d_t_prime[i] = d_velocity_2[posY];
+    }
+
+
+
+
+
+
+
+
+
+
+
+    // if (iteration == 0)
     // {
     //   printf("\n\n========== PRINTING FOR DEBUG ==========\n");
     //   printf("\n\niteration: %d\n", iteration);
-    //   printf("Vector v:\n");
-    //   NM_vector_display(globalVelocity,m);
-    //   printf("\n\nVector u:\n");
-    //   NM_vector_display(velocity,nd);
-    //   printf("\n\nVector r:\n");
-    //   NM_vector_display(reaction,nd);
-    //   printf("\n\nVector t:\n");
-    //   NM_vector_display(t,n);
-    //   printf("\n\nVector t_prime:\n");
-    //   NM_vector_display(t_prime,n);
-    //   printf("\n\nVector u_1:\n");
-    //   NM_vector_display(velocity_1,n_dminus2);
-    //   printf("\n\nVector u_2:\n");
-    //   NM_vector_display(velocity_2,n_dminus2);
-    //   printf("\n\nVector r_1:\n");
-    //   NM_vector_display(reaction_1,n_dminus2);
-    //   printf("\n\nVector r_2:\n");
-    //   NM_vector_display(reaction_2,n_dminus2);
+    //   // printf("Vector v:\n");
+    //   // NM_vector_display(globalVelocity,m);
+    //   // printf("\n\nVector u:\n");
+    //   // NM_vector_display(velocity,nd);
+    //   // printf("\n\nVector r:\n");
+    //   // NM_vector_display(reaction,nd);
+    //   // printf("\n\nVector t:\n");
+    //   // NM_vector_display(t,n);
+    //   // printf("\n\nVector t_prime:\n");
+    //   // NM_vector_display(t_prime,n);
+    //   // printf("\n\nVector u_1:\n");
+    //   // NM_vector_display(velocity_1,n_dminus2);
+    //   // printf("\n\nVector u_2:\n");
+    //   // NM_vector_display(velocity_2,n_dminus2);
+    //   // printf("\n\nVector r_1:\n");
+    //   // NM_vector_display(reaction_1,n_dminus2);
+    //   // printf("\n\nVector r_2:\n");
+    //   // NM_vector_display(reaction_2,n_dminus2);
 
     //   printf("Vector dv:\n");
     //   NM_vector_display(d_globalVelocity,m);
@@ -1343,27 +1448,18 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     //   printf("\n\nJac:\n");
     //   NM_display(Jac);
     //   printf("\n\nrhs:\n");
-    //   NM_vector_display(rhs, m+nd+n*(d+1));
+    //   NM_vector_display(rhs, m_plus_nd+n_dplus1);
 
-    //   printf("\n\nalpha_primal_1 = %f\n", alpha_primal_1);
-    //   printf("\n\nalpha_primal_2 = %f\n", alpha_primal_2);
-    //   printf("\n\nalpha_primal = %f\n", alpha_primal);
-    //   printf("\n\nalpha_dual_1 = %f\n", alpha_dual_1);
-    //   printf("\n\nalpha_dual_2 = %f\n", alpha_dual_2);
-    //   printf("\n\nalpha_dual = %f\n", alpha_dual);
+    //   // printf("\n\nalpha_primal_1 = %f\n", alpha_primal_1);
+    //   // printf("\n\nalpha_primal_2 = %f\n", alpha_primal_2);
+    //   // printf("\n\nalpha_primal = %f\n", alpha_primal);
+    //   // printf("\n\nalpha_dual_1 = %f\n", alpha_dual_1);
+    //   // printf("\n\nalpha_dual_2 = %f\n", alpha_dual_2);
+    //   // printf("\n\nalpha_dual = %f\n", alpha_dual);
 
-    //   double * var_tmp = (double*)calloc(n_dminus2, sizeof(double));
-    //   printf("\n\ncomplem_1 = %f\n", complem_1);
-    //   JA_prod(velocity_1, reaction_1, n_dminus2, n, var_tmp);
-    //   printf("\n\nu_1 o r_1 = \n");
-    //   NM_vector_display(var_tmp,n_dminus2);
-
-    //   printf("\n\ncomplem_2 = %f\n", complem_2);
-    //   JA_prod(velocity_2, reaction_2, n_dminus2, n, var_tmp);
-    //   printf("\n\nu_2 o r_2 = \n");
-    //   NM_vector_display(var_tmp,n_dminus2);
-    //   printf("\n\nerror = %f\n", error);
-    //   free(var_tmp);
+    //   printf("\n\ncomplem_1 = %9.16f\n", complem_1);
+    //   printf("\n\ncomplem_2 = %9.16f\n", complem_2);
+    //   // printf("\n\nerror = %f\n", error);
     //   printf("========== END PRINTING FOR DEBUG ==========\n\n");
     //   break;
     // }
@@ -1382,201 +1478,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
-    /* -------------------------- Corrector step of Mehrotra -------------------------- */
-    cblas_dcopy(m, dualConstraint, 1, rhs, 1);
-    cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
-    {
-      /* Right-hand side for symmetric Newton system with NT scaling */
-
-
-      // /* 2nd terms: 2 * mu * sigma * F_1 * (F_1 * u_1)^-1  */
-      // NM_gemv(1.0, F_1, velocity_1, 0.0, velocity_1t);                                 // velocity_1t       = F_1 * u_1
-      // NM_gemv(1.0, F_2, velocity_2, 0.0, velocity_2t);                                 // velocity_2t       = F_2 * u_2
-      // JA_inv(velocity_1t, n_dminus2, n, velocity_1t_inv);                      // velocity_1t_inv   = (F_1 * u_1)^-1
-      // JA_inv(velocity_2t, n_dminus2, n, velocity_2t_inv);                      // velocity_2t_inv   = (F_2 * u_2)^-1
-      // NM_gemv(1.0, F_1, velocity_1t_inv, 0.0, F_velocity_1t_inv);                      // F_velocity_1t_inv = F_1 * (F_1 * u_1)^-1
-      // NM_gemv(1.0, F_2, velocity_2t_inv, 0.0, F_velocity_2t_inv);                      // F_velocity_2t_inv = F_2 * (F_2 * u_2)^-1
-      // cblas_dscal(n_dminus2, 2 * barr_param * sigma, F_velocity_1t_inv, 1);    // F_velocity_1t_inv = 2nd term
-      // cblas_dscal(n_dminus2, 2 * barr_param * sigma, F_velocity_2t_inv, 1);    // F_velocity_2t_inv = 2nd term
-
-
-      // /* 3rd terms: (F_1 * du_1) o (Finv_1 * dr_1)  */
-      // NM_gemv(1.0, F_1, d_velocity_1, 0.0, d_velocity_1t);                                 // d_velocity_1t = F_1 * du_1
-      // NM_gemv(1.0, F_2, d_velocity_2, 0.0, d_velocity_2t);                                 // d_velocity_2t = F_2 * du_2
-      // // TO DO: should review this point to optimise coding
-      // QNTpinvz(velocity_1, reaction_1, d_reaction_1, n_dminus2, n, d_reaction_1t); // d_reaction_1t = Finv_1 * dr_1
-      // QNTpinvz(velocity_2, reaction_2, d_reaction_2, n_dminus2, n, d_reaction_2t); // d_reaction_2t = Finv_2 * dr_2
-      // JA_prod(d_velocity_1t, d_reaction_1t, n_dminus2, n, dvdr_jprod_1);           // dvdr_jprod_1  = 3rd term
-      // JA_prod(d_velocity_2t, d_reaction_2t, n_dminus2, n, dvdr_jprod_2);           // dvdr_jprod_1  = 3rd term
-
-
-      // /* updated rhs = r_1 - 2nd term + 3rd term */
-      // NV_sub(reaction_1, F_velocity_1t_inv, n_dminus2, tmp1);
-      // NV_sub(reaction_2, F_velocity_2t_inv, n_dminus2, tmp2);
-      // NV_add(tmp1, dvdr_jprod_1, n_dminus2, complemConstraint_1);
-      // NV_add(tmp2, dvdr_jprod_2, n_dminus2, complemConstraint_2);
-
-      /* 2nd terms: 2 * mu * sigma * Qp_bar * (Qp_bar * u_1)^-1  */
-      NM_gemv(1.0, Qp_bar, velocity_1, 0.0, velocity_1t);                                 // velocity_1t       = Qp_bar * u_1
-      NM_gemv(1.0, Qp_tilde, velocity_2, 0.0, velocity_2t);                                 // velocity_2t       = Qp_tilde * u_2
-      JA_inv(velocity_1t, n_dminus2, n, velocity_1t_inv);                      // velocity_1t_inv   = (Qp_bar * u_1)^-1
-      JA_inv(velocity_2t, n_dminus2, n, velocity_2t_inv);                      // velocity_2t_inv   = (Qp_tilde * u_2)^-1
-      NM_gemv(1.0, Qp_bar, velocity_1t_inv, 0.0, Qp_velocity_1t_inv);                      // Qp_velocity_1t_inv = Qp_bar * (Qp_bar * u_1)^-1
-      NM_gemv(1.0, Qp_tilde, velocity_2t_inv, 0.0, Qp_velocity_2t_inv);                      // Qp_velocity_2t_inv = Qp_tilde * (Qp_tilde * u_2)^-1
-      cblas_dscal(n_dminus2, 2 * barr_param * sigma, Qp_velocity_1t_inv, 1);    // Qp_velocity_1t_inv = 2nd term
-      cblas_dscal(n_dminus2, 2 * barr_param * sigma, Qp_velocity_2t_inv, 1);    // Qp_velocity_2t_inv = 2nd term
-
-
-      /* 3rd terms: (Qp_bar * du_1) o (Qpinv_1 * dr_1)  */
-      NM_gemv(1.0, Qp_bar, d_velocity_1, 0.0, d_velocity_1t);                                 // d_velocity_1t = Qp_bar * du_1
-      NM_gemv(1.0, Qp_tilde, d_velocity_2, 0.0, d_velocity_2t);                                 // d_velocity_2t = Qp_tilde * du_2
-      // TO DO: should review this point to optimise coding
-      QNTpinvz(velocity_1, reaction_1, d_reaction_1, n_dminus2, n, d_reaction_1t); // d_reaction_1t = Qpinv_1 * dr_1
-      QNTpinvz(velocity_2, reaction_2, d_reaction_2, n_dminus2, n, d_reaction_2t); // d_reaction_2t = Qpinv_2 * dr_2
-      JA_prod(d_velocity_1t, d_reaction_1t, n_dminus2, n, dvdr_jprod_1);           // dvdr_jprod_1  = 3rd term
-      JA_prod(d_velocity_2t, d_reaction_2t, n_dminus2, n, dvdr_jprod_2);           // dvdr_jprod_1  = 3rd term
-
-
-      /* updated rhs = r_1 - 2nd term + 3rd term */
-      NV_sub(reaction_1, Qp_velocity_1t_inv, n_dminus2, tmp1);
-      NV_sub(reaction_2, Qp_velocity_2t_inv, n_dminus2, tmp2);
-      NV_add(tmp1, dvdr_jprod_1, n_dminus2, complemConstraint_1);
-      NV_add(tmp2, dvdr_jprod_2, n_dminus2, complemConstraint_2);
-
-
-
-
-    }
-    else
-    {
-      // TO DO: to implement
-      // /* Right-hand side for non-symmetric Newton system without NT scaling */
-      // iden = JA_iden(nd, n);
-      // cblas_dscal(nd, 2 * barr_param * sigma, iden, 1);
-      // JA_prod(velocity, reaction, nd, n, vr_jprod);
-      // //JA_prod(d_velocity, d_reaction, nd, n, dvdr_jprod);
-      // NV_sub(vr_jprod, iden, nd, complemConstraint);
-      // //NV_add(vr_prod_sub_iden, dvdr_jprod, nd, complemConstraint);
-      // free(iden);
-    }
-
-
-    /* Update only 2 complementarities of rhs  */
-    // cblas_dcopy(m, dualConstraint, 1, rhs, 1);
-    // cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
-    cblas_dcopy(n_dminus2, complemConstraint_1, 1, rhs+m+nd, 1);
-    cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m+nd+n_dminus2, 1);
-    cblas_dscal(m + nd + n*(d+1), -1.0, rhs, 1);
-
-
-
-
-
-
-
-
-
-
-
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
-    {
-      /* Solving full symmetric Newton system with NT scaling via LDLT factorization */
-      NSM_linearSolverParams(Jac)->solver = NSM_HSL;
-      NM_LDLT_solve(Jac, rhs, 1);
-    }
-    else
-    {
-      /* Solving non-symmetric Newton system without NT scaling via LU factorization */
-      NM_LU_solve(Jac, rhs, 1);
-    }
-
-    // numericsSparseMatrix(Jac)->linearSolverParams = NSM_linearSolverParams_free(numericsSparseMatrix(Jac)->linearSolverParams);
-
-    // if (iteration < 5)
-    // {
-    //   // printf("\n\n iteration = %d\n",iteration);
-    //   if(NM_LDLT_factorized(Jac)) printf("Num 3 : NM_LDLT_factorized(Jac) is TRUE\n");
-    //   else printf("Num 3 : NM_LDLT_factorized(Jac) is FALSE\n");
-    //   if(NM_destructible(Jac)) printf("Num 3 : NM_destructible(Jac) is TRUE\n");
-    //   else printf("Num 3 : NM_destructible(Jac) is FALSE\n");
-    //   // printf("Jac = \n");
-    //   // // NM_display(Jac);
-
-    //   // if (Jac->destructible->matrix2->triplet)
-    //   // {
-
-    //   //   CS_INT p, j, m, n, nzmax, nz, *Ap, *Ai ;
-    //   //   CS_ENTRY *Ax ;
-    //   //   cs *A = Jac->matrix2->triplet;
-    //   //   m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
-    //   //   nzmax = A->nzmax ; nz = A->nz ;
-    //   //   for (p = m+nd ; p < nz ; p++)
-    //   //   {
-    //   //       printf ("    %g %g : ", (double) (Ai [p]), (double) (Ap [p])) ;
-    //   //       printf ("%g\n", Ax ? Ax [p] : 1) ;
-    //   //   }
-    //   // }
-
-    //   // printf("\n\nQp2_bar = \n");
-    //   // NM_display(Qp2_bar);
-    //   // printf("\n\nQp2_tilde = \n");
-    //   // NM_display(Qp2_tilde);
-
-    //   // printf("\n\nrhs 2 = \n");
-    //   // NV_display(rhs, m+nd+n*(d+1));
-
-
-
-
-    //   if (iteration == 4) break;
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // TO DO: whether we need to reallocate + reinitiaite Jac ?
-    NM_clear(Jac);
-    free(Jac);
-
-
-    /* Retrieve the solutions */
-    cblas_dcopy(m, rhs, 1, d_globalVelocity, 1);
-    cblas_dcopy(nd, rhs+m, 1, d_reaction, 1);
-    extract_vector(d_reaction, nd, n, 2, 3, d_reaction_1);
-    extract_vector(d_reaction, nd, n, 4, 5, d_reaction_2);
-
-    cblas_dcopy(n_dminus2, rhs+m+nd, 1, d_velocity_1, 1);
-    assert((m+nd+2*n_dminus2) == (m+nd+n*(d+1))); // m + nd + n(d+1): size of rhs
-    cblas_dcopy(n_dminus2, rhs+m+nd+n_dminus2, 1, d_velocity_2, 1);
-
-    for(unsigned int i = 0; i < n; i++)
-    {
-      posX = i*d;
-      posY = i*d_minus_2;
-      d_velocity[posX] = d_velocity_1[posY] + d_velocity_2[posY];
-      d_velocity[posX+1] = d_velocity_1[posY + 1];
-      d_velocity[posX+2] = d_velocity_1[posY + 2];
-      d_velocity[posX+3] = d_velocity_2[posY + 1];
-      d_velocity[posX+4] = d_velocity_2[posY + 2];
-      d_t[i] = d_velocity_1[posY];
-      d_t_prime[i] = d_velocity_2[posY];
-    }
-
-
-
-
-
 
 
 
@@ -1589,22 +1490,14 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     alpha_dual_1   = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
     alpha_dual_2   = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
-    // alpha_primal = fmin(alpha_primal_1, alpha_primal_2);
-    // alpha_dual = fmin(alpha_dual_1, alpha_dual_2);
-
-    // if (alpha_primal < alpha_dual)
-    //   alpha_dual = alpha_primal;
-    // else
-    //   alpha_primal = alpha_dual;
     alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
     alpha_dual = alpha_primal;
 
     /* updating the gamma parameter used to compute the step-length */
-    // gmm = gmmp1 + gmmp2 * fmin(alpha_primal, alpha_dual);
     gmm = gmmp1 + gmmp2 * alpha_primal;
 
 
-
+    /* print out all useful parameters */
     numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
                             iteration, fws, relgap, pinfeas, dinfeas, u1dotr1, u2dotr2, complem_1, complem_2, full_error, barr_param, alpha_primal, alpha_dual, sigma,
                             cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
@@ -1636,89 +1529,15 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     iteration++;
   } // end of while loop
 
- //  /* printing complementarity products */
-
- //  /*
- //    printf("\nsmallest eigenvalue | ");
- //    printf("velocity               reaction             velocity+reaction\n");
- //    double * veloprea = (double*)calloc(nd, sizeof(double));
- //    cblas_dcopy(nd, reaction, 1, veloprea, 1);
- //    cblas_daxpy(nd, 1.0, velocity, 1, veloprea, 1);
- //    long double vpv, vpr;
- //    for (int i = 0; i < (i>100 ? 100:n); i++)
- //    {
- //    vpv = velocity[i*d+1]*velocity[i*d+1];
- //    for (int k = 2; k < d; vpv = vpv + velocity[i*d+k]*velocity[i*d+k], k++);
- //    vpv = velocity[i*d] - sqrtl(vpv);
- //    vpr = reaction[i*d+1]*reaction[i*d+1];
- //    for (int k = 2; k < d; vpr = vpr + reaction[i*d+k]*reaction[i*d+k], k++);
- //    vpr = reaction[i*d] - sqrtl(vpr);
- //    printf("%19c %3i %20.14e %20.14e %20.14e %20.14e %20.14e\n", ' ', i,
- //    velocity[i*d]-cblas_dnrm2(d-1, velocity+i*d+1, 1),
- //    reaction[i*d]-cblas_dnrm2(d-1, reaction+i*d+1, 1),
- //    velocity[i*d]+cblas_dnrm2(d-1, velocity+i*d+1, 1),
- //    reaction[i*d]+cblas_dnrm2(d-1, reaction+i*d+1, 1),
- //    veloprea[i*d]-cblas_dnrm2(d-1, veloprea+i*d+1, 1));
- //    printf("%20c    %20.14Le %20.14Le\n", 'L', vpv, vpr);
- //    }
- //    free(veloprea);
- //  */
-
- //  /* determining active constraints */
- //  /*
- //    int j;
- //    for (int i = 0; i < n; i++)
- //    {
- //    j = i*d;
- //    if (velocity[j] <= 1e-8)
- //    a_velo[i] = 0;
- //    else if (velocity[j] - dnrm2l(d-1, velocity+j+1) <= 1e-8)
- //    a_velo[i] = 1;
- //    else
- //    a_velo[i] = 2;
-
- //    if (reaction[j] <= 1e-8)
- //    a_reac[i] = 0;
- //    else if (reaction[j] - dnrm2l(d-1, reaction+j+1) <= 1e-8)
- //    a_reac[i] = 1;
- //    else
- //    a_reac[i] = 2;
- //    }
- //  */
 
   /* -------------------------- Return to original variables -------------------------- */
-  // TO DO this point
-  NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->original_point->velocity);
-  NM_gemv(1.0, P_mu, reaction, 0.0, data->original_point->reaction);
-  cblas_dcopy(m, globalVelocity, 1, data->original_point->globalVelocity, 1);
+  // TO DO: If we need this point, plz uncomment
+  // NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->original_point->velocity);
+  // NM_gemv(1.0, P_mu, reaction, 0.0, data->original_point->reaction);
+  // cblas_dcopy(m, globalVelocity, 1, data->original_point->globalVelocity, 1);
 
   options->dparam[SICONOS_DPARAM_RESIDU] = full_error; //NV_max(error, 4);
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
@@ -1743,19 +1562,28 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
-
-
-
-
-
-
-
-
-
   if(internal_allocation)
   {
     grfc3d_IPM_free(problem,options);
   }
+
+  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] > 0)
+  {
+    NM_clear(Qp_bar);
+    free(Qp_bar);
+    NM_clear(Qp2_bar);
+    free(Qp2_bar);
+    NM_clear(Qp_tilde);
+    free(Qp_tilde);
+    NM_clear(Qp2_tilde);
+    free(Qp2_tilde);
+  }
+
+
+
+
+
+
 
   NM_clear(H_origin);
   free(H_origin);
@@ -1765,42 +1593,11 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   free(H);
   NM_clear(minus_M);
   free(minus_M);
-  NM_clear(QpH);
-  free(QpH);
   NM_clear(J);
   free(J);
 
-
-
-  //free(p_bar);
-  NM_clear(Qp_bar);
-  free(Qp_bar);
-  //free(p2_bar);
-  NM_clear(Qp2_bar);
-  free(Qp2_bar);
-  //free(p_tilde);
-  NM_clear(Qp_tilde);
-  free(Qp_tilde);
-  //free(p2_tilde);
-  NM_clear(Qp2_tilde);
-  free(Qp2_tilde);
-
-
-
-
-
-
   // NM_clear(Jac); // already
   // free(Jac);
-  // NM_clear(Fsqr_1);
-  // free(Fsqr_1);
-  // NM_clear(F_2);
-  // free(F_2);
-  // NM_clear(Finv_2);
-  // free(Finv_2);
-  // NM_clear(Fsqr_2);
-  // free(Fsqr_2);
-
 
   free(t);
   free(t_prime);
@@ -1817,12 +1614,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   free(d_reaction_2);
   free(d_t);
   free(d_t_prime);
-  free(tmpsol);
-  free(r_p);
-  free(Hvw);
-  free(a_velo);
-  free(a_reac);
-
 
 
 
@@ -2123,7 +1914,7 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
   //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_F;
 
@@ -2131,7 +1922,7 @@ void grfc3d_IPM_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 1;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
