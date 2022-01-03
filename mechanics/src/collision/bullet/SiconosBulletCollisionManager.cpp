@@ -2175,7 +2175,7 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
   /* note: stored pointer to shared_ptr! */
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
-  DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
+  DEBUG_PRINTF("unlinking interaction %p, number %zu \n", &**p_inter, (*p_inter)->number());
 
   // SP::BulletR rel_bulletR(std::dynamic_pointer_cast<BulletR>((*p_inter)->relation()));
   // SP::Bullet5DR rel_bullet5DR(std::dynamic_pointer_cast<Bullet5DR>((*p_inter)->relation()));
@@ -2338,11 +2338,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   CProfileManager::dumpAll();
   CProfileManager::Stop_Profile();
 #endif
-  DEBUG_EXPR(
-    int num_contact_points =0;
-    for(it=t.begin(); it!=itend; ++it)  num_contact_points++;
-    std::cout << "Number of contacts points detected by bullet: " << num_contact_points << std::endl; );
-
+ 
   DEBUG_PRINT("SiconosBulletCollisionManager :: iterating contact points:\n");
   //getchar();
   // 2. deleted contact points have been removed from the graph during the
@@ -2351,10 +2347,14 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   // 3. for each contact point, if there is no interaction, create one
   IterateContactPoints t(_impl->_collisionWorld);
   IterateContactPoints::iterator it, itend=t.end();
+  DEBUG_EXPR_WE(
+    int num_contact_points =0;
+    for(it=t.begin(); it!=itend; ++it)  num_contact_points++;
+    std::cout << "Number of contacts points detected by bullet: " << num_contact_points << std::endl; );
 
   for(it=t.begin(); it!=itend; ++it)
   {
-    DEBUG_PRINTF("SiconosBulletCollisionManager ::   -- %p, %p, %p\n", it->objectA, it->objectB, it->point);
+    DEBUG_PRINTF("\n\n\nSiconosBulletCollisionManager ::   -- %p, %p, %p\n", it->objectA, it->objectB, it->point);
 
     // Get the RigidBodyDS and SiconosShape pointers
 
@@ -2378,17 +2378,26 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     if(pairA->ds == pairB->ds)
       continue;
 
-    // if (pairA->staticBody)
-    //   std::cout << "pairA is associated to a static body " << std::endl;
-    // if (pairB->staticBody)
-    //   std::cout << "pairB is associated to a static body " << std::endl;
-    //getchar();
-
     // If the two bodies are already connected by another type of
     // relation (e.g. EqualityCondition == they have a joint between
     // them), then don't create contact constraints, because it leads
     // to an ill-conditioned problem.
 
+    DEBUG_EXPR_WE(
+      if (pairA->ds && pairB->ds)
+      {
+        DEBUG_PRINTF("SiconosBulletCollisionManager ::   -- ds1 :  %zu,  ds2: %zu\n",
+                     pairA->ds->number(),
+                     pairB->ds->number());
+      }
+      if (pairA->ds && pairB->staticBody)
+      {
+        DEBUG_PRINTF("SiconosBulletCollisionManager ::   -- ds1 :  %zu  staticbody: %i\n",
+                     pairA->ds->number(),
+                     pairB->staticBody->number);
+      }
+      );
+    
     DEBUG_PRINTF("SiconosBulletCollisionManager :: _with_equality_constraints  -- %i\n", _with_equality_constraints);
 
 
@@ -2433,7 +2442,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       if(match)
         continue;
     }
-
+    DEBUG_PRINTF("SiconosBulletCollisionManager :: it->point->m_userPersistentData  %p \n", it->point->m_userPersistentData);
     if(it->point->m_userPersistentData)
     {
       /* interaction already exists */
@@ -2449,7 +2458,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       if(rel_bulletR || rel_bullet5DR)
       {
-        DEBUG_PRINT("SiconosBulletCollisionManager :: BulletR case || rel_bullet5DR");
+        DEBUG_PRINT("SiconosBulletCollisionManager :: BulletR case || rel_bullet5DR\n");
         // We need to check for other type of dynamical systems.
         SP::RigidBodyDS rbdsA =  std::static_pointer_cast<RigidBodyDS>(pairA->ds);
         SP::RigidBodyDS rbdsB =  std::static_pointer_cast<RigidBodyDS>(pairB->ds);
