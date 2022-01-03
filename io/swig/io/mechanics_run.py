@@ -809,7 +809,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['output_backup']=False
         d['output_backup_frequency']=None
         d['friction_contact_trace_params']=None
-        d['contact_index_set']=1
+        d['output_contact_index_set']=1
         d['osi']=sk.MoreauJeanOSI
         d['constraint_activation_threshold']=0.0
         d['explode_Newton_solve']=False
@@ -922,7 +922,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._births = dict()
         self._deaths = dict()
         self._initializing = True
-        self._contact_index_set = 1
+        self._output_contact_index_set = 1
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
         self._ds_positions=None
@@ -2040,13 +2040,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     def output_contact_forces(self):
         """
         Outputs contact forces
-        _contact_index_set default value is 1.
+        _output_contact_index_set default value is 1.
         """
         if self._nsds.\
                 topology().indexSetsSize() > 1:
             time = self.current_time()
             contact_points = self._io.contactPoints(self._nsds,
-                                                    self._contact_index_set)
+                                                    self._output_contact_index_set)
             if contact_points is not None:
                 current_line = self._cf_data.shape[0]
                 # Increase the number of lines in cf_data
@@ -2106,13 +2106,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
     def output_contact_info(self):
         """
         Outputs contact forces
-        _contact_index_set default value is 1.
+        _output_contact_index_set default value is 1.
         """
         if self._nsds.\
                 topology().indexSetsSize() > 1:
             time = self.current_time()
             contact_info = self._io.contactInfo(self._nsds,
-                                                    self._contact_index_set)
+                                                    self._output_contact_index_set)
             if contact_info is not None:
                 current_line = self._cf_info.shape[0]
                 # Increase the number of lines in cf_data
@@ -2462,7 +2462,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             output_contact_forces=True,
             output_contact_info=True,
             friction_contact_trace_params=None,
-            contact_index_set=1,
+            output_contact_index_set=1,
             osi=sk.MoreauJeanOSI,
             constraint_activation_threshold=0.0,
             explode_Newton_solve=False,
@@ -2594,8 +2594,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             Set this to activate the wrapping of the one-step NS problem into
             FrictionContactTrace object. More log, more trace.
             Default = None.
-        contact_index_set: int, optional
-          number of the index set from which contact
+        output_contact_index_set: int, optional
+          index of the index set from which contact
           point information is retrieved. Default = 1
         osi: sk.OneStepIntegrator, optional
             class type used to describe one-step integration,
@@ -2654,7 +2654,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['output_backup']=output_backup
             run_options['output_backup_frequency']=output_backup_frequency
             run_options['friction_contact_trace_params']=friction_contact_trace_params
-            run_options['contact_index_set']=contact_index_set
+            run_options['output_contact_index_set']=output_contact_index_set
             run_options['osi']=osi
             run_options['constraint_activation_threshold']=constraint_activation_threshold
             run_options['explode_Newton_solve']=explode_Newton_solve
@@ -2783,7 +2783,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         self.import_scene(t0, body_class, shape_class, face_class, edge_class)
 
-        self._contact_index_set = run_options.get('contact_index_set')
+        self._output_contact_index_set = run_options.get('output_contact_index_set')
 
         # (1) OneStepIntegrators
         osi = run_options.get('osi')
