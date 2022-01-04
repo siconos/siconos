@@ -273,9 +273,13 @@ void NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix*
     NSM_set_version(B, NSM_CSC, NSM_version(B, NSM_CSC));
     break;
   }
+  default:
+  {
+    numerics_error("NSM_version_copy", "unknown id");
+  }
+  assert (false);
   }
 }
-
 
 void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B)
 {
