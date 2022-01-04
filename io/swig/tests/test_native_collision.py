@@ -124,6 +124,8 @@ def check():
         disk2_vidx = numpy.argwhere(velocities[id_t_m, 1] == 2)
         circle_vidx = numpy.argwhere(velocities[:, 1] == 3)
 
+        circle_vidx= circle_vidx.reshape(circle_vidx.shape[0])
+
         disk1_evx = velocities[id_t_m, 2][disk1_vidx]
         disk1_evy = velocities[id_t_m, 3][disk1_vidx]
 
@@ -145,6 +147,10 @@ def check():
         disk1_idx = numpy.argwhere(positions[:, 1] == 1)
         disk2_idx = numpy.argwhere(positions[:, 1] == 2)
         circle_idx = numpy.argwhere(positions[:, 1] == 3)
+
+        disk1_idx= disk1_idx.reshape(disk1_idx.shape[0])
+        disk2_idx= disk2_idx.reshape(disk2_idx.shape[0])
+        circle_idx= circle_idx.reshape(circle_idx.shape[0])
 
         disk1_x = positions[disk1_idx, 2]
         disk1_y = positions[disk1_idx, 3]
