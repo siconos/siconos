@@ -2183,8 +2183,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._output_contact_forces:
             self.log(self.output_contact_forces, with_timer)()
 
-        if self._output_contact_info:
+        if self._output_contact_info and backend == 'bullet':
             self.log(self.output_contact_info, with_timer)()
+        else:
+            self.print_verbose('[warning] output_contact_info is only available with bullet backend for the moment')
+            self.print_verbose('          to remove this message set output_contact_info options to False')
 
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
