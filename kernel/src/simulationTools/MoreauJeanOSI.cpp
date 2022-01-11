@@ -1361,7 +1361,7 @@ void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactFrictionNSL&
   if(nslaw.et() > 0.0)
   {
     osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
-    if(_inter.nonSmoothLaw()->size()>=2)
+    if(_inter.nonSmoothLaw()->size()>2)
     {
       osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);    }
   }
@@ -1379,7 +1379,7 @@ void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactRollingFrict
   if(nslaw.et() > 0.0)
   {
     osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
-    if(_inter.nonSmoothLaw()->size()>=2)
+    if(_inter.nonSmoothLaw()->size()>2)
     {
       osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);
     }
