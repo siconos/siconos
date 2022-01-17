@@ -296,7 +296,7 @@ void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned i
 
 void FirstOrderLinearR::display() const
 {
-  std::cout << " ===== Linear Time Invariant relation display ===== " <<std::endl;
+  std::cout << " ===== Linear relation display ===== " <<std::endl;
   std::cout << "| C " <<std::endl;
   if(_C) _C->display();
   else std::cout << "->nullptr" <<std::endl;

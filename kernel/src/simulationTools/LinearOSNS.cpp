@@ -44,11 +44,12 @@
 #include "OSNSMatrix.hpp"
 
 #include "Tools.hpp"
+#include <chrono>
 
 using namespace RELATION;
 // #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 //#define WITH_TIMER
 void LinearOSNS::initVectorsMemory()
