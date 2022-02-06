@@ -702,9 +702,11 @@ class ShapeCollection():
                         raise AssertionError("len(r) != 2")
                     #assert(len(r) == 2)
                     hm = SiconosHeightMap(hm_data, r[0], r[1])
-                    dims = list(r) + [np.max(hm_data) - np.min(hm_data)]
+                    #dims = list(r) + [np.max(hm_data) - np.min(hm_data)]
+                    #hm.setInsideMargin(
+                    #    hm_data.attrs.get('insideMargin', np.min(dims) * 0.02))
                     hm.setInsideMargin(
-                        hm_data.attrs.get('insideMargin', np.min(dims) * 0.02))
+                        hm_data.attrs.get('insideMargin', 0)
                     hm.setOutsideMargin(
                         hm_data.attrs.get('outsideMargin', 0))
 
