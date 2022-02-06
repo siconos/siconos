@@ -422,6 +422,43 @@ float_type dnrm2l(const unsigned int n, const double * x)
   return norm;
 }
 
+
+/* Returns the square of 2-norm of a vector - uses long double - based on blas_dnrm2 */
+float_type dnrm2sqrl(const unsigned int n, const double * x)
+{
+  float_type norm, scale, ssq, absxi, quo;
+
+  if (n < 1)
+    norm = 0.0;
+  else if (n == 1)
+    norm = fabsl(x[0]);
+  else
+  {
+    scale = 0.0;
+    ssq = 1.0;
+    for (size_t i = 0; i < n; i++)
+    {
+      if (x[i] != 0)
+      {
+        absxi = fabs(x[i]);
+        if (scale < absxi)
+        {
+          quo = scale/absxi;
+          ssq = 1.0 + ssq * (quo * quo);
+          scale = absxi;
+        }
+        else
+        {
+          quo = absxi/scale;
+          ssq = ssq + (quo * quo);
+        }
+      }
+      norm = scale * scale * ssq;
+    }
+  }
+  return norm;
+}
+
 /* Returns the product Q_sqrt(x)*y */
 void Qx05y(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out)
 {
