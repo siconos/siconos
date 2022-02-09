@@ -263,7 +263,7 @@ public:
   BodyBulletShapeRecord(SP::SiconosVector b, SP::SecondOrderDS d, SP::SiconosShape sh,
                         SP::btCollisionObject btobj,SP::SiconosContactor con, SP::StaticBody staticCSR):
     BodyShapeRecord(b, d, sh, con, staticCSR), btobject(btobj) {}
-  SP::btCollisionObject btobject;  
+  SP::btCollisionObject btobject;
 };
 
 typedef std::map<const StaticBody*, std::vector<std::shared_ptr<BodyBulletShapeRecord> > >
@@ -315,11 +315,6 @@ SHAPE_RECORD(BodyCH2dRecord, SP::RigidBody2dDS, SP::SiconosConvexHull2d,  SP::bt
 typedef std::map<const SecondOrderDS*, std::vector<std::shared_ptr<BodyBulletShapeRecord> > >
 BodyShapeMap;
 
-        
-
-
-
-
 class CollisionUpdater;
 
 class SiconosBulletCollisionManager_impl
@@ -335,9 +330,6 @@ protected:
    * btCollisionObject, so need a map DS->btXShape. */
   BodyShapeMap bodyShapeMap;
 
-  std::map< const  BodyBulletShapeRecord *, std::shared_ptr<BodyBulletShapeRecord> > _bulletShapeRecordMap;   
-
-  
   StaticBodyShapeMap  staticBodyShapeMap;
 
   SP::Simulation _simulation;
@@ -485,7 +477,7 @@ SP::StaticBody SiconosBulletCollisionManager::addStaticBody(
   rec->number=number;
   //std::cout << "SiconosBulletCollisionManager::addStaticBody number : " << number <<  std::endl;
   _impl->createCollisionObjectsForBodyContactorSet(SP::SecondOrderDS(), rec, rec->base, cs);
-  
+
   return rec;
 }
 
@@ -755,8 +747,6 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   btobject->setUserPointer(
     reinterpret_cast<void*>(
       static_cast<BodyShapeRecord*>(&*record)));
-
-  _bulletShapeRecordMap[&*record] = record;
 
   // initial parameter update (change version to make something happen)
   record->shape_version -= 1;
@@ -2338,7 +2328,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   CProfileManager::dumpAll();
   CProfileManager::Stop_Profile();
 #endif
- 
+
   DEBUG_PRINT("SiconosBulletCollisionManager :: iterating contact points:\n");
   //getchar();
   // 2. deleted contact points have been removed from the graph during the
@@ -2397,7 +2387,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
                      pairB->staticBody->number);
       }
       );
-    
+
     DEBUG_PRINTF("SiconosBulletCollisionManager :: _with_equality_constraints  -- %i\n", _with_equality_constraints);
 
 
@@ -2540,10 +2530,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
                                       *it->point));
 
           if(!rel) continue;
-          
+
           // Fill in extra contact information
-          rel->bodyShapeRecordA = _impl->_bulletShapeRecordMap[pairA];
-          rel->bodyShapeRecordB = _impl->_bulletShapeRecordMap[pairB];
+          rel->bodyShapeRecordA = createSPtrBodyBulletShapeRecord(*const_cast<BodyBulletShapeRecord*>(pairA));
+          rel->bodyShapeRecordB = createSPtrBodyBulletShapeRecord(*const_cast<BodyBulletShapeRecord*>(pairB));
           rel->btObject[0] = pairA->btobject;
           rel->btObject[1] = pairB->btobject;
 
@@ -2582,8 +2572,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           if(!rel) continue;
 
            // Fill in extra contact information
-          rel->bodyShapeRecordA = _impl->_bulletShapeRecordMap[pairA];
-          rel->bodyShapeRecordB = _impl->_bulletShapeRecordMap[pairB];
+          rel->bodyShapeRecordA = createSPtrBodyBulletShapeRecord(*const_cast<BodyBulletShapeRecord*>(pairA));
+          rel->bodyShapeRecordB = createSPtrBodyBulletShapeRecord(*const_cast<BodyBulletShapeRecord*>(pairB));
           rel->btObject[0] = pairA->btobject;
           rel->btObject[1] = pairB->btobject;
 
@@ -2626,8 +2616,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           if(!rel) continue;
 
           // Fill in extra contact information
-          rel->bodyShapeRecordA = _impl->_bulletShapeRecordMap[pairA];
-          rel->bodyShapeRecordB = _impl->_bulletShapeRecordMap[pairB];
+          rel->bodyShapeRecordA = createSPtrBodyBulletShapeRecord(*const_cast<BodyBulletShapeRecord*>(pairA));
+          rel->bodyShapeRecordB = createSPtrBodyBulletShapeRecord(*const_cast<BodyBulletShapeRecord*>(pairB));
           rel->btObject[0] = pairA->btobject;
           rel->btObject[1] = pairB->btobject;
 
@@ -2666,8 +2656,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           if(!rel) continue;
 
           // Fill in extra contact information
-          rel->bodyShapeRecordA = _impl->_bulletShapeRecordMap[pairA];
-          rel->bodyShapeRecordB = _impl->_bulletShapeRecordMap[pairB];
+          rel->bodyShapeRecordA = createSPtrBodyBulletShapeRecord(*const_cast<BodyBulletShapeRecord*>(pairA));
+          rel->bodyShapeRecordB = createSPtrBodyBulletShapeRecord(*const_cast<BodyBulletShapeRecord*>(pairB));
           rel->btObject[0] = pairA->btobject;
           rel->btObject[1] = pairB->btobject;
 
