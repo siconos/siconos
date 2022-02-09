@@ -23,6 +23,9 @@
 #include "SiconosPointers.hpp"
 
 DEFINE_SPTR(btCollisionShape);
+DEFINE_SPTR(BodyBulletShapeRecord);
+
+
 DEFINE_SPTR(btBoxShape);
 DEFINE_SPTR(btCylinderShape);
 DEFINE_SPTR(btConeShape);

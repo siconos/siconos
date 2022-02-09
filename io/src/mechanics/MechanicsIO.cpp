@@ -8,8 +8,6 @@
 #undef OCC_CLASSES
 #undef MECHANISMS_CLASSES
 
-#include <RigidBodyDS.hpp>
-#include <RigidBody2dDS.hpp>
 
 #define BULLET_CLASSES() \
   REGISTER(BulletR)\
@@ -34,6 +32,16 @@ DUMMY(Bullet5DR, NewtonEuler5DR);
 DUMMY(Bullet2dR, Lagrangian2d2DR);
 DUMMY(Bullet2d3DR, Lagrangian2d3DR);
 #endif
+
+
+// The following classes are common classes of mechanics/src
+#include <RigidBodyDS.hpp>
+#include <RigidBody2dDS.hpp>
+#include <ContactR.hpp>
+#include <Contact5DR.hpp>
+#include <Contact2dR.hpp>
+#include <Contact2d3DR.hpp>
+#include <BodyShapeRecord.hpp>
 
 #define OCC_CLASSES() \
   REGISTER(OccBody) \
@@ -77,6 +85,10 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
   REGISTER(NewtonEuler1DR)                      \
   REGISTER(NewtonEuler3DR)                      \
   REGISTER(NewtonEuler5DR)                      \
+  REGISTER(ContactR)                            \
+  REGISTER(Contact5DR)                          \
+  REGISTER(Contact2dR)                          \
+  REGISTER(Contact2d3DR)                        \
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
@@ -185,7 +197,6 @@ struct ContactPointVisitor : public SiconosVisitor
   void operator()(const T& rel)
   {
   }
-
 };
 
 /* then specializations : */
@@ -230,6 +241,7 @@ void ContactPointVisitor::operator()(const NewtonEuler3DR& rel)
   answer.setValue(21,inter->lambda(1)->getValue(2));
   answer.setValue(22, id);
 }
+
 /* then specializations : */
 template<>
 void ContactPointVisitor::operator()(const NewtonEuler5DR& rel)
@@ -532,6 +544,101 @@ void ContactPointVisitor::operator()(const Lagrangian2d3DR& rel)
   answer.setValue(15, id);
 };
 
+/* Get contact informations */
+/* default: a visitor that do nothing */
+struct ContactInfoVisitor : public SiconosVisitor
+{
+  SP::Interaction inter;
+  // std::vector<int> answer; better with a vector of int
+  SiconosVector answer;
+
+  template<typename T>
+  void operator()(const T& rel)
+  {
+  }
+};
+
+/* then specializations : */
+template<>
+void ContactInfoVisitor::operator()(const NewtonEuler3DR& rel)
+{
+  double id = inter->number();
+  answer.resize(10);
+  // answer[0]= id;
+  // answer[1]= 0; // reserve for ds1.number
+  // answer[2]= 0; // reserve for ds2.number
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+
+}
+
+
+template<>
+void ContactInfoVisitor::operator()(const ContactR& rel)
+{
+  double id = inter->number();
+  answer.resize(4);
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+  if (rel.bodyShapeRecordB->staticBody)
+  {
+    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+  }
+  else
+    answer.setValue(3, 0);
+}
+
+template<>
+void ContactInfoVisitor::operator()(const Contact5DR& rel)
+{
+  double id = inter->number();
+  answer.resize(4);
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+  if (rel.bodyShapeRecordB->staticBody)
+  {
+    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+  }
+  else
+    answer.setValue(3, 0);
+}
+
+template<>
+void ContactInfoVisitor::operator()(const Contact2dR& rel)
+{
+  double id = inter->number();
+  answer.resize(4);
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+  if (rel.bodyShapeRecordB->staticBody)
+  {
+    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+  }
+  else
+    answer.setValue(3, 0);
+}
+
+template<>
+void ContactInfoVisitor::operator()(const Contact2d3DR& rel)
+{
+  double id = inter->number();
+  answer.resize(4);
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+  if (rel.bodyShapeRecordB->staticBody)
+  {
+    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+  }
+  else
+    answer.setValue(3, 0);
+}
+
+
 
 struct ContactPointDomainVisitor : public SiconosVisitor
 {
@@ -682,7 +789,68 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
 
   return result;
 }
+SP::SimpleMatrix MechanicsIO::contactInfo(const NonSmoothDynamicalSystem& nsds,
+    unsigned int index_set) const
+{
+  DEBUG_BEGIN("SP::SimpleMatrix MechanicsIO::contactInfo");
+  SP::SimpleMatrix result(new SimpleMatrix());
+  InteractionsGraph::VIterator vi, viend;
+  if(nsds.topology()->numberOfIndexSet() > 0)
+  {
+    InteractionsGraph& graph =
+      *nsds.topology()->indexSet(index_set);
+    unsigned int current_row;
+    result->resize(graph.vertices_number(), 25);
 
+    int data_size =0;
+    for(current_row=0, std::tie(vi,viend) = graph.vertices();
+        vi!=viend; ++vi)
+    {
+      DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+
+      /* create a visitor for specified classes */
+      typedef Visitor < Classes < NewtonEuler3DR,
+                                  ContactR,
+                                  Contact5DR,
+                                  Contact2dR,
+                                  Contact2d3DR>,
+                        ContactInfoVisitor>::Make ContactInfoInspector;
+      ContactInfoInspector inspector;
+      inspector.inter = graph.bundle(*vi);
+      graph.bundle(*vi)->relation()->accept(inspector);
+      SiconosVector& data = inspector.answer;
+      data_size = data.size();
+
+      if(data_size ==0)
+      {
+        // Nothing is done since the relation does not appear as a relation
+        // related to a contact points (perhaps a joint)
+      }
+      else
+      {
+
+        // We add at the end the number of ds1 and ds2
+        DEBUG_EXPR(data.display(););
+        DynamicalSystem& ds1 = *graph.properties(*vi).source;
+        DynamicalSystem& ds2 = *graph.properties(*vi).target;
+        data.setValue(1, ds1.number());
+        data.setValue(2, ds1.number());
+      }
+      if(result->size(1) != data.size())
+      {
+        result->resize(graph.vertices_number(), data.size());
+      }
+      result->setRow(current_row++, data);
+
+    }
+    result->resize(current_row, data_size);
+    DEBUG_EXPR(result->display(););
+
+  }
+  DEBUG_END("SP::SimpleMatrix MechanicsIO::contactInfo");
+
+  return result;
+}
 SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) const
 {
   SP::SimpleMatrix result(new SimpleMatrix());
@@ -714,6 +882,3 @@ SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) cons
   }
   return result;
 }
-
-
-

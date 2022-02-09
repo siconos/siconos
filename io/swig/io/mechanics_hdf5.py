@@ -492,6 +492,7 @@ class MechanicsHdf5(object):
         self._velocities_data = None
         self._dynamic_data = None
         self._cf_data = None
+        self._cf_info = None
         self._domain_data = None
         self._solv_data = None
         self._run_options = None
@@ -571,6 +572,14 @@ class MechanicsHdf5(object):
             self._cf_data.attrs['info'] += 'reaction impulse (local frame) [20:22],  interaction id [23],'
             self._cf_data.attrs['info'] += 'ds 1 number [24],  ds 2 number [25]'
 
+        self._cf_info = data(self._data, 'cf_info', 5,
+                             use_compression=self._use_compression)
+
+        if self._mode == 'w':
+            self._cf_info.attrs['info'] = 'time [0],  interaction id [1]'
+            self._cf_info.attrs['info'] += 'ds 1 number [2],  ds 2 number [3]'
+            self._cf_info.attrs['info'] += 'static body number [4]'
+
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
                                      use_compression=self._use_compression)
@@ -639,6 +648,12 @@ class MechanicsHdf5(object):
         Contact points information.
         """
         return self._cf_data
+    
+    def contact_info_data(self):
+        """
+        Contact points information.
+        """
+        return self._cf_info
 
     def domains_data(self):
         """

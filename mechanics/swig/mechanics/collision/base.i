@@ -38,10 +38,13 @@ PY_FULL_REGISTER(ContactR, Mechanics);
 PY_FULL_REGISTER(RigidBodyDS, Mechanics);
 PY_FULL_REGISTER(Contact2dR, Mechanics);
 PY_FULL_REGISTER(Contact2d3DR, Mechanics);
+PY_FULL_REGISTER(Contact5DR, Mechanics);
 PY_FULL_REGISTER(RigidBody2dDS, Mechanics);
 PY_FULL_REGISTER(SiconosCollisionQueryResult, Mechanics);
 PY_FULL_REGISTER(SiconosCollisionManager, Mechanics);
 PY_FULL_REGISTER(StaticBody, Mechanics);
+
+PY_FULL_REGISTER(BodyShapeRecord, Mechanics);
 
 %inline
 {
@@ -49,5 +52,16 @@ PY_FULL_REGISTER(StaticBody, Mechanics);
   {
     return std::dynamic_pointer_cast<ContactR>(rel);
   };
-
+  SP::Contact2dR cast_Contact2dR(SP::Relation rel)
+  {
+    return std::dynamic_pointer_cast<Contact2dR>(rel);
+  };
+  SP::Contact2d3DR cast_Contact2d3DR(SP::Relation rel)
+  {
+    return std::dynamic_pointer_cast<Contact2d3DR>(rel);
+  };
+  SP::Contact5DR cast_Contact5DR(SP::Relation rel)
+  {
+    return std::dynamic_pointer_cast<Contact5DR>(rel);
+  };
 }
