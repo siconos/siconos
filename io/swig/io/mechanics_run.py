@@ -12,9 +12,9 @@ from scipy import constants
 import numpy as np
 import h5py
 ## fix compatibility with h5py version
-if (h5py.version.version_tuple.major >=3 ):
+if hasattr(h5py, 'vlen_dtype'):
     h5py_vlen_dtype = h5py.vlen_dtype
-else:
+elif hasattr(h5py, 'new_vlen'):
     h5py_vlen_dtype = h5py.new_vlen
 
 import bisect
