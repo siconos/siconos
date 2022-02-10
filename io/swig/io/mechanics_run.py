@@ -791,6 +791,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['h']=0.0005
         d['multipoints_iterations']=None
         d['theta']=0.50001
+        d['gamma']=None
         d['Newton_options']=sk.SICONOS_TS_NONLINEAR
         d['Newton_max_iter']=20
         d['Newton_tolerance']=1e-10
@@ -2446,6 +2447,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             h=0.0005,
             multipoints_iterations=None,
             theta=0.50001,
+            gamma=None,
             Newton_options=sk.SICONOS_TS_NONLINEAR,
             Newton_max_iter=20,
             set_external_forces=None,
@@ -2528,6 +2530,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if true (default) use bullet "multipoint iterations"
         theta : real, optional
             parameter for Moreau-Jean OSI (default 0.50001)
+        gamma : real, optional
+            parameter for Moreau-Jean OSI (default 1/2.)
         Newton_options: int, optional
             sk.TimeStepping options to control the Newton loop
             (default sk.SICONOS_TS_NONLINEAR)
@@ -2639,6 +2643,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['h']=h
             run_options['multipoints_iterations']=multipoints_iterations
             run_options['theta']=theta
+            run_options['gamma']=gamma
             run_options['Newton_options']=Newton_options
             run_options['Newton_max_iter']=Newton_max_iter
             run_options['interaction_manager']= None
@@ -2795,6 +2800,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._osi = osi(run_options.get('theta'))
         self._osi.setConstraintActivationThreshold(
             run_options['constraint_activation_threshold'])
+
+        if run_options.get('gamma'):
+            self._osi.setGamma(run_options.get('gamma'))
+
+        
         # (2) Time discretisation --
         timedisc = sk.TimeDiscretisation(t0, h)
 
