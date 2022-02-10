@@ -151,10 +151,13 @@ class VViewOptions(object):
        frames per second of generated video (default 25)
      --camera=x,y,z
        initial position of the camera (default=above looking down)
+       current camera position can be obtained with the key c
      --lookat=x,y,z
        initial direction to look (default=center of bounding box)
      --up=x,y,z
        initial up direction of the camera (default=y-axis)
+     --clipping=x,y,z
+       initial clippring range of the camera
      --ortho=scale
        start in ortho mode with given parallel scale
        (default=perspective)
