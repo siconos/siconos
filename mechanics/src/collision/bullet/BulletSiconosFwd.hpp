@@ -54,6 +54,9 @@ DEFINE_SPTR(btConvexShape);
 DEFINE_SPTR(btCollisionObject);
 DEFINE_SAPTR(btCollisionObject);
 
+DEFINE_SPTR(btCollisionObjectWrapper);
+
+
 DEFINE_SPTR(btCollisionWorld);
 DEFINE_SPTR(btDefaultCollisionConfiguration);
 DEFINE_SPTR(btCollisionDispatcher);

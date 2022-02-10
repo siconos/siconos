@@ -111,7 +111,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-
+#include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 
 // 2D shapes
 #include "BulletCollision/CollisionShapes/btConvexShape.h"
@@ -408,7 +408,7 @@ protected:
   /* A helper function used to initialise new shapes, generic to the
    * shape type */
   template<typename ST, typename BT, typename DST, typename BR>
-  void createCollisionObjectHelper(SP::SiconosVector base, const DST& ds,
+  SP::btCollisionObject  createCollisionObjectHelper(SP::SiconosVector base, const DST& ds,
                                    ST& shape, BT& btshape, BodyShapeMap& bodyShapeMap,
                                    SP::SiconosContactor contactor,
                                    StaticBodyShapeMap &StaticBodyShapeMap, SP::StaticBody staticBody);
@@ -682,7 +682,7 @@ static void initPolyhedralFeatures(btPolyhedralConvexShape& btshape)
 static void initPolyhedralFeatures(btCollisionShape& btshape) {}
 
 template<typename ST, typename BT, typename DST, typename BR>
-void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
+SP::btCollisionObject SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   SP::SiconosVector base, const DST& ds, ST& shape, BT& btshape,
   BodyShapeMap& bodyShapeMap, SP::SiconosContactor contactor,
   StaticBodyShapeMap &StaticBodyShapeMap, SP::StaticBody staticBody)
@@ -751,6 +751,10 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   // initial parameter update (change version to make something happen)
   record->shape_version -= 1;
   updateShape(*record);
+
+
+  return btobject;
+
 }
 
 btTransform SiconosBulletCollisionManager_impl::offsetTransform(const SiconosVector& position,
@@ -1480,12 +1484,17 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
                                data->size(0), heightfield, vmin, vmax));
 
   // initialization
-  createCollisionObjectHelper<SP::SiconosHeightMap,
-                              SP::BTHEIGHTSHAPE,
-                              SP::RigidBodyDS,
-                              BodyHeightRecord>
-                              (base, ds, heightmap, btheight, bodyShapeMap, contactor,
-                               staticBodyShapeMap, staticBody);
+  SP::btCollisionObject btobject = createCollisionObjectHelper<SP::SiconosHeightMap,
+                                                               SP::BTHEIGHTSHAPE,
+                                                               SP::RigidBodyDS,
+                                                               BodyHeightRecord>
+    (base, ds, heightmap, btheight, bodyShapeMap, contactor,
+     staticBodyShapeMap, staticBody);
+
+
+  // this flag allows to call the call gContactAddedCallback when the callback has just been in the manifold
+  // In the case of the heightmap, we use it to tweak the normal to avoid internal edge contact.
+  btobject->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 }
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
@@ -2186,6 +2195,69 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
   return false;
 }
 
+
+
+static void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, const btCollisionObjectWrapper* colObj1Wrap, int partId0, int index0)
+{
+	//btAssert(colObj0->getCollisionShape()->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE);
+	if (colObj0Wrap->getCollisionShape()->getShapeType() != TRIANGLE_SHAPE_PROXYTYPE)
+		return;
+
+
+	btTriangleInfoMap* triangleInfoMapPtr = nullptr;
+
+	if (colObj0Wrap->getCollisionObject()->getCollisionShape()->getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
+	{
+		btHeightfieldTerrainShape* heightfield = (btHeightfieldTerrainShape*)colObj0Wrap->getCollisionObject()->getCollisionShape();
+		triangleInfoMapPtr = heightfield->getTriangleInfoMap();
+
+		btVector3 newNormal = btVector3(0, 0, 1);
+
+		const btTriangleShape* tri_shape = static_cast<const btTriangleShape*>(colObj0Wrap->getCollisionShape());
+		btVector3 tri_normal;
+		tri_shape->calcNormal(tri_normal);
+		newNormal = tri_normal;
+		//					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
+    btVector3 oldNormal =  	cp.m_normalWorldOnB;
+
+    //printf("old normal %e\t%e\t%e\n", oldNormal.x(),  oldNormal.y(), oldNormal.z());
+    //printf("new normal %e\t%e\t%e\n", newNormal.x(),  newNormal.y(), newNormal.z());
+    //printf("cp.m_distance1 = %e\n", cp.m_distance1 );
+
+    btScalar cosine =  oldNormal.dot(newNormal);
+    //printf("cosine %e\n", cosine);
+    if (cosine < 0.0)
+    {
+      newNormal = -1.0*tri_normal;
+      cosine =  oldNormal.dot(newNormal);
+    }
+    //btScalar diff  = oldNormal.distance(newNormal);
+    //printf("diff %e\n", diff);
+    if ((1.0 - cosine) > 3e-03 ) // around 5 degrees
+    {
+      //printf("--------------------------------------> change edge  normal to triangle normal\n");
+      cp.m_normalWorldOnB = newNormal;
+    }
+    else return;
+
+		// Reproject collision point along normal. (what about cp.m_distance1?)
+		cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
+		cp.m_localPointB = colObj0Wrap->getWorldTransform().invXform(cp.m_positionWorldOnB);
+		return;
+	}
+}
+
+
+
+bool SiconosBulletCollisionManager::bulletContactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1)
+{
+  //printf("--------- bulletContactAddedCallback start\n");
+	//btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
+  siconosBulletAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
+  //printf("--------- bulletContactAddedCallback end\n");
+
+	return true;
+}
 SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::RigidBodyDS ds1,
     SP::SiconosShape shape1,
     SP::RigidBodyDS ds2,
@@ -2252,9 +2324,6 @@ public:
 
 };
 
-
-
-
 void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)
 {
   DEBUG_BEGIN("SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)\n");
@@ -2309,6 +2378,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   // 0. set up bullet callbacks
   gSimulation = &*simulation;
   gContactDestroyedCallback = this->bulletContactClear;
+  gContactAddedCallback = this->bulletContactAddedCallback;
 
   // Important parameter controlling contact point making and breaking
   gContactBreakingThreshold = _options.contactBreakingThreshold;

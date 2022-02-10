@@ -99,6 +99,10 @@ protected:
 
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
+
+  // callback to modify the contact point when it has just been added in the manifold.
+  static bool bulletContactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
+                                         const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1);
   static Simulation *gSimulation;
 
 public:
