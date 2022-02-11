@@ -760,6 +760,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   /* NM_display_storageType(problem->H); */
   /* NM_display(problem->H); */
   /* NV_display(problem->b, nd); */
+  /* for (int k = 0; k < nd;  k++) */
+  /*   problem->b[k]=0.0; */
   /* for(int  i = 0; i<nd*m; i++) */
   /*   problem->H->matrix0[i] *= 0.1; */
 
@@ -989,7 +991,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   while(iteration < max_iter)
   {
-    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (err <= 1e-6) && (fws==' '))
+    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == 1) && (udotr <= 1e-7) && (fws==' '))
     {
       // To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
       options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
@@ -1058,7 +1060,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     /* cblas_dcopy(nd, data->tmp_point->t_reaction, 1, reaction, 1); */
 
     /* cblas_daxpy(nd, -1.0, data->tmp_point->t_velocity, 1, data->tmp_point->t_reaction, 1); */
-    /* for (int k = 0; k < n; projectionOnCone(data->tmp_point->t_reaction+k*d, problem->mu[k]), k++); */
+    /* for( int k = 0; k < n; projectionOnCone(data->tmp_point->t_reaction+k*d, problem->mu[k]), k++); */
 
     (*computeError)(problem,
                     data->tmp_point->t_reaction, data->tmp_point->t_velocity, globalVelocity,
@@ -1171,10 +1173,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       NM_insert(JR, QpH, m, 0);
     }
 
-
     /** Correction of w to take into account the dependence
         on the tangential velocity */
-    if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1)
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1) 
     {
       for(unsigned int i = 0; i < nd; ++ i)
       {
@@ -1182,7 +1183,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
           /* w[i] = w_tilde[i]/(problem->mu[(int)(i/d)]) */
           w[i] = w_tilde[i] + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
       }
-
     }
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
       printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
@@ -1514,31 +1514,24 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   /* printing complementarity products */
 
-  /*
-    printf("\nsmallest eigenvalue | ");
-    printf("velocity               reaction             velocity+reaction\n");
-    double * veloprea = (double*)calloc(nd, sizeof(double));
-    cblas_dcopy(nd, reaction, 1, veloprea, 1);
-    cblas_daxpy(nd, 1.0, velocity, 1, veloprea, 1);
-    long double vpv, vpr;
-    for (int i = 0; i < (i>100 ? 100:n); i++)
-    {
-    vpv = velocity[i*d+1]*velocity[i*d+1];
-    for (int k = 2; k < d; vpv = vpv + velocity[i*d+k]*velocity[i*d+k], k++);
-    vpv = velocity[i*d] - sqrtl(vpv);
-    vpr = reaction[i*d+1]*reaction[i*d+1];
-    for (int k = 2; k < d; vpr = vpr + reaction[i*d+k]*reaction[i*d+k], k++);
-    vpr = reaction[i*d] - sqrtl(vpr);
-    printf("%19c %3i %20.14e %20.14e %20.14e %20.14e %20.14e\n", ' ', i,
-    velocity[i*d]-cblas_dnrm2(d-1, velocity+i*d+1, 1),
-    reaction[i*d]-cblas_dnrm2(d-1, reaction+i*d+1, 1),
-    velocity[i*d]+cblas_dnrm2(d-1, velocity+i*d+1, 1),
-    reaction[i*d]+cblas_dnrm2(d-1, reaction+i*d+1, 1),
-    veloprea[i*d]-cblas_dnrm2(d-1, veloprea+i*d+1, 1));
-    printf("%20c    %20.14Le %20.14Le\n", 'L', vpv, vpr);
-    }
-    free(veloprea);
-  */
+    /* double * veloprea = (double*)calloc(nd, sizeof(double)); */
+    /* cblas_dcopy(nd, reaction, 1, veloprea, 1); */
+    /* cblas_daxpy(nd, 1.0, velocity, 1, veloprea, 1); */
+    /* for (int i = 0; i < n; i++) */
+    /* { */
+    /*   if ((veloprea[i*d]-cblas_dnrm2(d-1, veloprea+i*d+1, 1)) <= 1e-6) */
+    /*   { */
+    /* 	printf("SC failure "); */
+    /* 	printf("%3i u: %20.14e %20.14e r: %20.14e %20.14e v+r: %20.14e\n", i, */
+    /* 	       velocity[i*d]-cblas_dnrm2(d-1, velocity+i*d+1, 1), */
+    /* 	       velocity[i*d]+cblas_dnrm2(d-1, velocity+i*d+1, 1), */
+    /* 	       reaction[i*d]-cblas_dnrm2(d-1, reaction+i*d+1, 1), */
+    /* 	       reaction[i*d]+cblas_dnrm2(d-1, reaction+i*d+1, 1), */
+    /* 	       veloprea[i*d]-cblas_dnrm2(d-1, veloprea+i*d+1, 1)); */
+    /* 	getchar(); */
+    /*   } */
+    /* } */
+    /* free(veloprea); */
 
   /* determining active constraints */
   /*
@@ -1613,7 +1606,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
 

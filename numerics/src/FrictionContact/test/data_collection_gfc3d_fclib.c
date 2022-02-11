@@ -27,7 +27,7 @@ const char ** data_collection()
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
 
-  int listprob[7] = {1, 1, 1, 1, 1, 1, 1};
+  int listprob[7] = {1, 0, 0, 0, 0, 0, 0};
   /* 0: BoxStacks      #28  problems */
   /* 1: Capsules       #200 problems */
   /* 2: KaplasTower    #240 problems */
@@ -1170,6 +1170,18 @@ const char ** data_collection()
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9984-nc-2042-3066.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9984-nc-2103-3062.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9984-nc-2186-3077.hdf5";
+    /* infeasible problems ? */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12288-nc-2781-3756.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12288-nc-2902-3764.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4560-nc-146-1215.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-162-1234.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-188-1312.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-194-1297.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-210-1300.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-215-1277.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4650-nc-187-1323.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4800-nc-214-1334.hdf5"; */
+    /* data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6528-nc-764-1938.hdf5"; */
   }
 
   data_collection_1[n_data++] = "---";
