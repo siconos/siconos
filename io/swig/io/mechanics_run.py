@@ -127,12 +127,6 @@ def setup_default_classes():
     default_simulation_class = TimeStepping
     default_body_class = RigidBodyDS
     if backend == 'bullet':
-        if not have_bullet:
-            msg = '[mechanics_run] WARNING: Bullet is the collision backend'
-            msg += 'but the module siconos.mechanics.collision.bullet'
-            msg += 'can not be imported. Check your installation.'
-            print(msg)
-
         def m(bullet_options):
             if bullet_options is None:
                 bullet_options = SiconosBulletOptions()
@@ -2756,7 +2750,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             msg += '                             with  bullet_options.perturbationIterations and bullet_options.minimumPointsPerturbationThreshold.'
             raise RuntimeError(msg)
 
-        if  bullet_options is None:
+        if bullet_options is None and have_bullet:
             bullet_options = SiconosBulletOptions()
             if multipoints_iterations :
                 bullet_options.perturbationIterations = 3 * multipoints_iterations
@@ -2764,7 +2758,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     3 * multipoints_iterations
 
         # MB: this may be in conflict with 'dimension' attribute
-        if bullet_options.dimension == SICONOS_BULLET_2D:
+        if bullet_options is not None and \
+           bullet_options.dimension == SICONOS_BULLET_2D:
             self._dimension = 2
         else:
             if (self._out.attrs.get('dimension', None) is None):
