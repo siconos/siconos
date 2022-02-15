@@ -1,11 +1,10 @@
 """Diode Bridge simulation. See examples manual.
 Test purpose --> compare with reference results.
 """
-import os
-from siconos.tests_setup import working_dir
+
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
-    ComplementarityConditionNSL, Interaction, NonSmoothDynamicalSystem, EulerMoreauOSI, \
-    TimeDiscretisation, LCP, TimeStepping
+    ComplementarityConditionNSL, Interaction, NonSmoothDynamicalSystem,\
+    EulerMoreauOSI, TimeDiscretisation, LCP, TimeStepping
 from numpy import empty
 from siconos.kernel import SimpleMatrix, getMatrix
 from numpy.linalg import norm
@@ -35,7 +34,8 @@ B = [[0., 0., -1. / capacitance, 1. / capacitance],
      [0., 0., 0., 0.]]
 
 
-def test_diode_bridge():
+# uses pytest fixture datafile
+def test_diode_bridge(datafile):
     """Build diode bridge model"""
     # dynamical system
     bridge_ds = FirstOrderLinearDS(init_state, A)
@@ -67,9 +67,8 @@ def test_diode_bridge():
     non_smooth_problem = LCP()
 
     # (4) Simulation setup with (1) (2) (3)
-    bridge_simulation = TimeStepping(diode_bridge,time_discretisation,
+    bridge_simulation = TimeStepping(diode_bridge, time_discretisation,
                                      integrator, non_smooth_problem)
-
 
     k = 0
     h = bridge_simulation.timeStep()
@@ -114,7 +113,7 @@ def test_diode_bridge():
     k += 1
     while k < N:
         bridge_simulation.computeOneStep()
-        #non_smooth_problem.display()
+        # non_smooth_problem.display()
         data_plot[k, 0] = bridge_simulation.nextTime()
         #  inductor voltage
         data_plot[k, 1] = x[0]
@@ -136,7 +135,6 @@ def test_diode_bridge():
     #
     # comparison with the reference file
     #
-    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,
-                                              "data/diode_bridge.ref")))
+    ref = getMatrix(SimpleMatrix(datafile("diode_bridge.ref")))
     assert norm(data_plot - ref) < 1e-12
     return ref, data_plot

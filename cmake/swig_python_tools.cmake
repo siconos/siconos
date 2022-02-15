@@ -80,18 +80,29 @@ macro(add_siconos_swig_sub_module fullname)
 
   # --- build swig module ---
   set(ADDITIONAL_SWIG_DEFINES ${ADDITIONAL_SWIG_DEFINES} -DBOOST_NOEXCEPT)
-  swig_add_library(${_name} LANGUAGE python SOURCES ${swig_file})
+  swig_add_library(${_name}
+    TYPE MODULE
+    LANGUAGE python
+    OUTPUT_DIR "${SICONOS_SWIG_ROOT_DIR}/${_path}" # where to write the language specific files
+    OUTFILE_DIR ${CMAKE_CURRENT_BINARY_DIR}   # where the generated source file will be placed 
+    SOURCES ${swig_file})
+
   
   # Link with current component
-  target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
+  target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${COMPONENT})
   # Python and numpy
-  target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} Python3::NumPy)
+  target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE Python3::NumPy)
 
+  # Include for "common" swig" files (e.g. start.i ...)
+  target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${SICONOS_SWIG_SOURCE_DIR})
+  target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${SICONOS_SWIG_ROOT_DIR}) # for component-docstrings.i
+  target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}) # for component-docstrings.i
+   
   # List of siconos modules, used in __init__.py.
   # --> fix this to have 'real' modules names (e.g. control.observer ...)
-  set(current_module ${SWIG_MODULE_${_name}_REAL_NAME})
-  set(SICONOS_PYTHON_MODULES ""
-    CACHE INTERNAL "Modules available in Siconos Python package.")
+  #  set(current_module ${SWIG_MODULE_${_name}_REAL_NAME})
+  #set(SICONOS_PYTHON_MODULES ""
+  #  CACHE INTERNAL "Modules available in Siconos Python package.")
   # set(SICONOS_PYTHON_MODULES "${SICONOS_PYTHON_MODULES}, '${current_module}'"
   #   CACHE INTERNAL "Modules available in Siconos Python package.")
   
@@ -152,12 +163,12 @@ macro(add_siconos_swig_sub_module fullname)
   endif()
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
-  if(UNIX AND NOT APPLE)
-    # do not link against the Python library on unix, it is useless
-    swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
-  else()
-    swig_link_libraries(${_name} ${Python3_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
-  endif()
+  # if(UNIX AND NOT APPLE)
+  #   # do not link against the Python library on unix, it is useless
+  #   swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
+  # else()
+  #   swig_link_libraries(${_name} ${Python3_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
+  # endif()
 
   # set dependency of sphinx apidoc to this target
   if(WITH_DOCUMENTATION AND WITH_${COMPONENT}_DOXY2SWIG)

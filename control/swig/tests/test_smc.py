@@ -1,11 +1,8 @@
-#!/usr/bin/env python
-from siconos.tests_setup import working_dir
-import os
-
 # this test is taken almost ve@rbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
-    from siconos.kernel import FirstOrderLinearDS, NonSmoothDynamicalSystem, TimeDiscretisation, \
-        TimeStepping, ZeroOrderHoldOSI, TD_EVENT
+
+    from siconos.kernel import FirstOrderLinearDS, NonSmoothDynamicalSystem, \
+     TimeDiscretisation, TimeStepping, ZeroOrderHoldOSI, TD_EVENT
     from siconos.control.simulation import ControlManager
     from siconos.control.sensor import LinearSensor
     from siconos.control.controller import LinearSMCOT2
@@ -56,7 +53,7 @@ def test_smc1():
     tSensor = TimeDiscretisation(t0, hControl)
     tActuator = TimeDiscretisation(t0, hControl)
     # Creation of the Simulation
-    processSimulation = TimeStepping(process,processTD, 0)
+    processSimulation = TimeStepping(process, processTD, 0)
     processSimulation.setName("plant simulation")
 
     # Declaration of the integrator
@@ -101,8 +98,8 @@ def test_smc1():
 
 
 # Same test, but with the simplified interface
-def test_smc2():
-    from siconos.kernel import FirstOrderLinearDS, getMatrix, SimpleMatrix
+def test_smc2(datafile):  # uses datafile pytest fixture
+    from siconos.kernel import FirstOrderLinearDS
     from siconos.control.sensor import LinearSensor
     from siconos.control.controller import LinearSMCOT2
     from siconos.control.simulation import ControlZOHSimulation
@@ -161,7 +158,7 @@ def test_smc2():
     tmpData = sim.data()
     dataPlot = tmpData
     # compare with the reference
-    ref = np.loadtxt(os.path.join(working_dir, "data/smc_2.ref.gz"))
+    ref = np.loadtxt(datafile("smc_2.ref.gz"))
     np.savetxt("smc_2.dat", dataPlot)
     print("%e" % norm(dataPlot - ref))
     if (norm(dataPlot - ref) > 5e-12):
@@ -169,8 +166,8 @@ def test_smc2():
         print("ERROR: The result is rather different from the reference file.")
     assert norm(dataPlot - ref) < 5e-12
 
+
 if __name__ == '__main__':
     print('test_smc1')
     test_smc1()
     test_smc2()
-    

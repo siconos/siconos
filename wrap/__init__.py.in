@@ -3,7 +3,7 @@
  nonsmooth systems modelisation and simulation.
 
 """
-__version__=0
+__version__ = 0
 
 version = '@SICONOS_VERSION@'
 __all__ = [@SICONOS_PYTHON_MODULES@]

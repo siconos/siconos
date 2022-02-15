@@ -1,0 +1,30 @@
+[metadata]
+name = siconos
+version = @SICONOS_VERSION@
+author = Siconos team
+author_email = siconos-team@inria.fr
+description = Modeling and simulation of nonsmooth dynamical systems.
+long_description = file: README.md
+long_description_content_type = text/markdown
+url = https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/
+project_urls =
+    Sources  = https://github.com/siconos/siconos
+# Classifiers: https://pypi.org/classifiers/
+classifiers =
+    Programming Language :: Python :: 3
+    Programming Language :: C++
+    License :: OSI Approved :: Apache Software License
+    Operating System :: Unix
+    Operating System :: MacOS
+    Intended Audience :: Science/Research
+    Topic :: Scientific/Engineering
+
+[options]
+include_package_data = True
+package_dir =
+    = .
+packages = find:
+python_requires = >=3.6
+
+[options.packages.find]
+where = .

@@ -71,6 +71,38 @@ function(get_sources COMPONENT)
   set(${COMPONENT}_SRCS ${SOURCES_FILES} PARENT_SCOPE)
 endfunction()
 
+
+
+function(collect_files)
+
+  set(oneValueArgs VAR) # output variable name
+  set(multiValueArgs DIRS EXTS)
+  cmake_parse_arguments(collect "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  # Scan all dirs and check all exts ...
+  foreach(DIR IN LISTS collect_DIRS)
+    foreach(_EXT IN LISTS collect_EXTS)
+      if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+        file(GLOB FILES_LIST
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
+          ${DIR}/*.${_EXT})
+      else()
+        file(GLOB FILES_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${DIR}/*.${_EXT})
+      endif()
+      if(FILES_LIST)
+	list(APPEND COLLECTION ${FILES_LIST})
+      endif()
+    endforeach()
+  endforeach()
+  if(COLLECTION)
+    list(LENGTH COLLECTION _FILES_LEN)
+    if (_FILES_LEN GREATER 1)
+      list(REMOVE_DUPLICATES COLLECTION)
+    endif()
+  endif()
+  set(${collect_VAR} ${COLLECTION} PARENT_SCOPE)
+
+endfunction()
+
 # Print cmake variable 'V' value
 macro(PRINT_VAR V)
   message(STATUS "${V} = ${${V}}")

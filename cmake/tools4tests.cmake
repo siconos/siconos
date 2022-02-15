@@ -358,8 +358,7 @@ function(build_plugin)
   foreach(dep IN LISTS plug_DEPS)
     target_link_libraries(${plug_name} PRIVATE ${dep})
   endforeach()
-
-  set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
+  set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
   set_target_properties(${plug_name} PROPERTIES PREFIX "")
   if(NOT WITH_CXX)
     set_source_files_properties(${plug_FILE} PROPERTIES LANGUAGE C)
@@ -421,14 +420,9 @@ endmacro()
 #  - with PYTHONPATH set to ${CMAKE_BINARY_DIR}/wrap
 # 
 function(add_python_test test_name test_file)
-  # add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
   add_test(${test_name} ${PYTHON_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${test_file})
-  set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
+  set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
-  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/wrap")
-  if(LDLIBPATH)
-    set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
-  endif()
 endfunction()
 
 
@@ -447,7 +441,7 @@ endfunction()
 # This routine copy the directory of tests to binary dir to allow 'py.test' run in the build.
 # 
 # binary dir will then look like :
-# wrap/siconos
+# wrap/tests
 # wrap/siconos/mechanics
 # wrap/siconos/mechanics/tests
 #
@@ -469,7 +463,7 @@ function(build_python_tests)
 
   
   # build plugins, if any
-  # Note : all built libraries are saved in SICONOS_SWIG_ROOT_DIR/plugins
+  # Note : all built libraries are saved in SICONOS_SWIG_BINARY_DIR/tests/plugins
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins)
     file(GLOB plugfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/*.cpp)
     foreach(plug ${plugfiles})
@@ -477,14 +471,14 @@ function(build_python_tests)
     endforeach()
   endif()
     
-  # copy test dir to binary dir (inside siconos package)
+  # copy test dir to binary dir (tests dir inside swig working dir)
   # ---> allows py.test run in binary dir
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/data)
     file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/data
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
     foreach(datafile ${data4tests})
       configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/data/${datafile}
-	${SICONOS_SWIG_ROOT_DIR}/tests/data/${datafile} COPYONLY)
+	${SICONOS_SWIG_BINARY_DIR}/tests/data/${datafile} COPYONLY)
     endforeach()
   endif()
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD)
@@ -492,10 +486,11 @@ function(build_python_tests)
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/*)
     foreach(datafile ${data4tests})
       configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/${datafile}
-	${SICONOS_SWIG_ROOT_DIR}/tests/CAD/${datafile} COPYONLY)
+	${SICONOS_SWIG_BINARY_DIR}/tests/CAD/${datafile} COPYONLY)
     endforeach()
   endif()
 
+  # windows stuff, probably obsolete ...
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
     set(EMULATOR "wine")
     set(DRIVE_LETTER "Z:")
@@ -512,15 +507,11 @@ function(build_python_tests)
       get_filename_component(testname ${file} NAME_WE)
       get_filename_component(exename ${file} NAME)
       # Each file is copied into siconos/tests.
-      configure_file(${file} ${SICONOS_SWIG_ROOT_DIR}/tests COPYONLY)
+      configure_file(${file} ${SICONOS_SWIG_BINARY_DIR}/tests COPYONLY)
       set(name "python_${testname}")
-      set(exename ${SICONOS_SWIG_ROOT_DIR}/tests/${exename})
-      set_ldlibpath()
+      set(exename ${SICONOS_SWIG_BINARY_DIR}/tests/${exename})
+      # set_ldlibpath()
       add_python_test(${name} ${exename})
     endforeach()
   endif()
 endfunction()
-
-if(WITH_TESTING)
-  set_ldlibpath()
-endif()

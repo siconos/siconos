@@ -1,28 +1,25 @@
-#!/usr/bin/env python
-
-'''
-Test the xml input
-'''
-
-import os
-from siconos.tests_setup import working_dir
+"""Test the xml input
+"""
 
 try:
     import pytest
+
     xfail = pytest.mark.xfail
-except:
+except ImportError:
     import py.test
+
     xfail = py.test.mark.xfail
 
 from siconos.fromXml import buildModelXML
 import siconos.kernel as SK
 import numpy as np
+import siconos
 
 
-def test_xml1():
-    ''' the BouncingBall '''
+def test_xml1(datafile):
+    """the BouncingBall"""
 
-    bouncingBall, s = buildModelXML(os.path.join(working_dir, 'data/BBallTS.xml'))
+    bouncingBall, s = buildModelXML(datafile("BBallTS.xml"))
 
     dsN = SK.dynamicalSystems(bouncingBall.topology().dSG(0))[0].number()
     ball = bouncingBall.dynamicalSystem(dsN)
@@ -58,20 +55,21 @@ def test_xml1():
     print("End of computation - Number of iterations done: {:}".format(k))
     print("====> Output file writing ...")
     dataPlot.resize(k, outputSize)
-    np.savetxt("BBallTS.dat", dataPlot)
+    # np.savetxt("BBallTS.dat", dataPlot)
 
     # Comparison with a reference file
-    dataPlotRef = SK.getMatrix(SK.SimpleMatrix(os.path.join(working_dir, 'data/BBallTSXML.ref')))
+    dataPlotRef = SK.getMatrix(
+        SK.SimpleMatrix(datafile("BBallTSXML.ref"))
+    )
     if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-12:
         print(dataPlot - dataPlotRef)
         print("ERROR: The result is rather different from the reference file.")
 
 
-def test_xml2():
-    ''' BallInBowl '''
+def test_xml2(datafile):
+    """BallInBowl"""
     # --- buildModelXML loading from xml file ---
-    bouncingBall, s = buildModelXML(os.path.join(working_dir,
-                                              'data/BallInBowl.xml'))
+    bouncingBall, s = buildModelXML(datafile("BallInBowl.xml"))
 
     # --- Get the simulation ---
     k = 0
@@ -132,14 +130,13 @@ def test_xml2():
 
     # dataPlot (ascii) output
     # ioMatrix::write(dataPlot,"noDim")
-    np.savetxt("BallInBowl.dat", dataPlot)
+    # np.savetxt("BallInBowl.dat", dataPlot)
 
 
-def test_xml3():
-    ''' DryFriction '''
+def test_xml3(datafile):
+    """DryFriction"""
     # --- buildModelXML loading from xml file ---
-    oscillator, s = buildModelXML(os.path.join(working_dir,
-                                            'data/DryFriction.xml'))
+    oscillator, s = buildModelXML(datafile("DryFriction.xml"))
 
     # --- Get the simulation ---
     k = 0
@@ -192,21 +189,20 @@ def test_xml3():
     print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
-    np.savetxt("DryFriction.dat",  dataPlot)
+    # np.savetxt("DryFriction.dat", dataPlot)
 
 
 @xfail
-def test_xml4():
-    ''' CamFollower '''
+def test_xml4(datafile):
+    """CamFollower"""
     # --- buildModelXML loading from xml file ---
-    CamFollower, s = buildModelXML(os.path.join(working_dir,
-                                             'data/CamFollower_TIDS.xml'))
+    CamFollower, s = buildModelXML(datafile("CamFollower_TIDS.xml"))
 
     # --- Get and initialize the simulation ---
     k = 0
     T = CamFollower.finalT()
     t0 = CamFollower.t0()
-    h = S.timeStep()
+    h = s.timeStep()
     N = int((T - t0) / h)
 
     # --- Get the values to be plotted ---
@@ -249,9 +245,9 @@ def test_xml4():
         # get current time step
         k += 1
 
-        S.computeOneStep()
+        s.computeOneStep()
         # --- Get values to be plotted ---
-        dataPlot[k, 0] = S.nextTime()
+        dataPlot[k, 0] = s.nextTime()
         #  dataPlot[k, 1] = Follower.q()[0]
         #  dataPlot[k, 2] = ball.velocity()[0]
         dataPlot[k, 1] = Follower.q()[0]
@@ -259,27 +255,30 @@ def test_xml4():
         dataPlot[k, 3] = inter.lambda_(1)[0]
         dataPlot[k, 4] = Follower.fExt()[0]
 
-        CamEqForce = CamState(S.nextTime(), rpm, CamPosition, CamVelocity, CamAcceleration)
+        CamEqForce = CamState(
+            s.nextTime(), rpm, CamPosition, CamVelocity, CamAcceleration
+        )
 
         dataPlot[k, 5] = CamPosition
         dataPlot[k, 6] = CamVelocity
         dataPlot[k, 7] = CamPosition + Follower.q()[0]
         # transfer of state i+1 into state i and time incrementation
 
-        S.nextStep()
+        s.nextStep()
 
     # Number of time iterations
     print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
-    np.savetxt("CamFollower.dat", dataPlot)
+    # np.savetxt("CamFollower.dat", dataPlot)
 
-import siconos
-if siconos.WITH_FORTRAN :
-    def test_xml5():
-        ''' Bouncing Ball ED '''
+
+if siconos.WITH_FORTRAN:
+
+    def test_xml5(datafile):
+        """Bouncing Ball ED"""
         # --- buildModelXML loading from xml file ---
-        bouncingBall,s = buildModelXML(os.path.join(working_dir, 'data/BBallED.xml'))
+        bouncingBall, s = buildModelXML(datafile("BBallED.xml"))
 
         # --- Get and initialize the simulation ---
         dsN = SK.dynamicalSystems(bouncingBall.topology().dSG(0))[0].number()
@@ -319,7 +318,8 @@ if siconos.WITH_FORTRAN :
                 nonSmooth = True
 
             s.processEvents()
-            # If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
+            # If the treated event is non smooth, the pre-impact state has been solved
+            # in memory vectors during process.
             if nonSmooth:
                 dataPlot[k, 0] = s.startingTime()
                 dataPlot[k, 1] = ball.qMemory().getSiconosVector(1)[0]
@@ -335,9 +335,10 @@ if siconos.WITH_FORTRAN :
 
         # --- Output files ---
         dataPlot.resize(k, outputSize)
-        np.savetxt("BBallED.dat",  dataPlot)
+        # np.savetxt("BBallED.dat", dataPlot)
         # Comparison with a reference file
-        dataPlotRef = SK.getMatrix(SK.SimpleMatrix(os.path.join(working_dir, 'data/BouncingBallEDXml.ref')))
+        dataPlotRef = SK.getMatrix(
+            SK.SimpleMatrix(datafile("BouncingBallEDXml.ref")))
 
         if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-11:
             print("Warning. The results is rather different from the reference file.")
@@ -345,10 +346,10 @@ if siconos.WITH_FORTRAN :
             exit(1)
 
 
-def test_xml6():
-    ''' BeadPlan '''
+def test_xml6(datafile):
+    """BeadPlan"""
     # --- buildModelXML loading from xml file ---
-    oscillator, s = buildModelXML(os.path.join(working_dir, 'data/BeadPlan.xml'))
+    oscillator, s = buildModelXML(datafile("BeadPlan.xml"))
 
     # --- Get and initialize the simulation ---
 
@@ -395,10 +396,9 @@ def test_xml6():
     print("Number of iterations done: {:}".format(k))
 
     # dataPlot (ascii) output
-    np.savetxt("BeadPlan.dat", dataPlot)
+    # np.savetxt("BeadPlan.dat", dataPlot)
 
 
-if __name__ == '__main__':
-    print('test_xml1')
+if __name__ == "__main__":
+    print("test_xml1")
     test_xml1()
-    
