@@ -28,11 +28,10 @@
 #include "siconos_debug.h"                        // for DEBUG_EXPR, DEBUG_PRINTF
 #include "projectionOnRollingCone.h"              // for projectionOnRollingCone
 #include "numerics_verbose.h"                     // for numerics_error, numerics_w...
-#ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
-#endif
 
-#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
+
+#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)    // = sqrt(1e-16)
 
 void grfc3d_unitary_compute_and_add_error(
   double* r,
@@ -87,7 +86,7 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem,
   /* Checks inputs */
   if(problem == NULL || globalVelocity == NULL || velocity == NULL || reaction == NULL || error == NULL)
     numerics_error("grfc3d_compute_error", "null input");
-
+// printf("\n\ngrfc3d_compute_error\n\n");
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   assert(nc > 0);
@@ -99,65 +98,59 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem,
   NumericsMatrix *H = problem->H;
   NumericsMatrix *M = problem->M;
 
+
   double norm_r = cblas_dnrm2(nd,reaction,1);
-  double norm_u = cblas_dnrm2(m,velocity,1);
+  double norm_u = cblas_dnrm2(nd,velocity,1);
   double norm_q = cblas_dnrm2(m, problem->q, 1);        // = f
   double norm_b = cblas_dnrm2(nd, problem->b, 1);       // = w
 
-  /* --- Relative primal residual = |-Mv + Hr + q|/max{|Mv|, |Hr|, |q|} --- */
+
+
+  /* --- Relative primal residual = |-Mv + Hr + f|/max{|Mv|, |Hr|, |f|} --- */
   double* tmp_m_1 = (double *)calloc(m,sizeof(double));
   double* tmp_m_2 = (double *)calloc(m,sizeof(double));
 
-
-  cblas_dcopy_msan(m, problem->q, 1, tmp_m_2, 1);        // tmp_m_2 = q
-  // if(tmp_m_2)
-  // {
-  //   printf("\nDEBUG q vector:\n");
-  //   for(unsigned int i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, tmp_m_2[i]);
-  // }
+  cblas_dcopy_msan(m, problem->q, 1, tmp_m_2, 1);        // tmp_m_2 = f
 
   NM_gemv(1.0, H, reaction, 0.0, tmp_m_1);        // tmp_m_1 = Hr
   double norm_Hr = cblas_dnrm2(m,tmp_m_1,1);
-  cblas_daxpy(m, 1.0, tmp_m_1, 1, tmp_m_2, 1);      // tmp_m_2 = Hr + q
+  cblas_daxpy(m, 1.0, tmp_m_1, 1, tmp_m_2, 1);      // tmp_m_2 = Hr + f
   NM_gemv(-1.0, M, globalVelocity, 0.0, tmp_m_1); // tmp_m_1 = -Mv
   double norm_Mv = cblas_dnrm2(m,tmp_m_1,1);
-  cblas_daxpy(m, 1.0, tmp_m_1, 1, tmp_m_2, 1);      // tmp_m_2 = -Mv + Hr + q
+  cblas_daxpy(m, 1.0, tmp_m_1, 1, tmp_m_2, 1);      // tmp_m_2 = -Mv + Hr + f
 
-  // if(tmp_m_2)
-  // {
-  //   printf("\nDEBUG error_primal:\n");
-  //   for(unsigned int i = 0; i < m; i++) printf("error_primal[ %i ] = %12.16e\n", i, tmp_m_2[i]);
-  // }
-
-  double error_primal = cblas_dnrm2(m,tmp_m_2,1);   // error_primal = |-Mv + Hr - q|
-// printf("\n\n#################### 001 error = %12.16e ####################\n", *error);
+  double error_primal = cblas_dnrm2(m,tmp_m_2,1);   // error_primal = |-Mv + Hr - f|
   double relative_scaling = fmax(norm_q, fmax(norm_Mv, norm_Hr));
   if(relative_scaling > MIN_RELATIVE_SCALING)
-    *error = error_primal/relative_scaling;         // error = |-Mv + Hr - q|/max{|Mv|, |Hr|, |q|}
+    *error = error_primal/relative_scaling;         // error = |-Mv + Hr - f|/max{|Mv|, |Hr|, |f|}
   else
     *error = error_primal;
-// printf("#################### 002 error = %12.16e ####################\n", *error);
+// printf("relative_scaling = %5.30e\n", relative_scaling);
+// printf("error_primal = %5.30e\n", error_primal);
+// printf("error = %5.30e\n\n", *error);
   free(tmp_m_1);
   free(tmp_m_2);
 
 
-  /* --- Relative dual residual = |H'v + b - u|/max{|H'v|, |b|, |u|} --- */
+  /* --- Relative dual residual = |H'v + w - u|/max{|H'v|, |w|, |u|} --- */
   double* tmp_nd_1 = (double *)calloc(nd,sizeof(double));
   double* tmp_nd_2 = (double *)calloc(nd,sizeof(double));
 
-  cblas_dcopy_msan(nd, problem->b, 1, tmp_nd_2, 1);        // tmp_nd_2 = b
+  cblas_dcopy_msan(nd, problem->b, 1, tmp_nd_2, 1);        // tmp_nd_2 = w
   NM_tgemv(1.0, H, globalVelocity, 0.0, tmp_nd_1);        // tmp_nd_1 = H'v
   double norm_HTv = cblas_dnrm2(nd,tmp_nd_1,1);
-  cblas_daxpy(nd, 1.0, tmp_nd_1, 1, tmp_nd_2, 1);      // tmp_nd_2 = H'v + b
-  cblas_daxpy(nd, -1.0, velocity, 1, tmp_nd_2, 1);      // tmp_nd_2 = H'v + b - u
-  double error_dual = cblas_dnrm2(nd,tmp_nd_2,1);       // error_dual = |H'v + b - u|
+  cblas_daxpy(nd, 1.0, tmp_nd_1, 1, tmp_nd_2, 1);      // tmp_nd_2 = H'v + w
+  cblas_daxpy(nd, -1.0, velocity, 1, tmp_nd_2, 1);      // tmp_nd_2 = H'v + w - u
+  double error_dual = cblas_dnrm2(nd,tmp_nd_2,1);       // error_dual = |H'v + w - u|
 
   relative_scaling = fmax(norm_u, fmax(norm_b, norm_HTv));
   if(relative_scaling > MIN_RELATIVE_SCALING)
-    *error += error_dual/relative_scaling;         // error = |H'v + b - u|/max{|H'v|, |b|, |u|}
+    *error += error_dual/relative_scaling;         // error = |H'v + w - u|/max{|H'v|, |w|, |u|}
   else
     *error += error_dual;
-// printf("#################### 003 error = %12.16e ####################\n", *error);
+// printf("relative_scaling = %5.30e\n", relative_scaling);
+// printf("error_dual = %5.30e\n", error_dual);
+// printf("error = %5.30e\n\n", *error);
   free(tmp_nd_1);
   free(tmp_nd_2);
 
@@ -180,9 +173,27 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem,
   else
     *error += error_complementarity;
 
-// printf("#################### 004 error = %12.16e ####################\n\n", *error);
-  //numerics_printf_verbose(1,"---- GRFC3D - Compute Error ");
   DEBUG_END("grfc3d_compute_error(...)\n");
+
+
+  // printf("\n\ngrfc3d_compute_error\n");
+  // printf("error_primal = %5.30e\n", error_primal);
+  // printf("error_dual = %5.30e\n", error_dual);
+//   printf("relative_scaling = %5.30e\n", relative_scaling);
+//   printf("error_complementarity = %5.30e\n", error_complementarity);
+//   printf("error = %5.30e\n", *error);
+
+
+// printf("velocity = ");
+// NV_display(velocity, nd);
+
+// printf("\nnorm_r = %5.30e\n", norm_r);
+// printf("norm_u 2 = %5.30e\n", norm_u);
+// printf("norm_w = %5.30e\n", norm_b);
+// printf("norm_HTv = %5.30e\n", norm_HTv);
+// printf("norm_w = %5.30e\n", norm_b);
+
+
 
   if(*error > tolerance)
     return 1;
