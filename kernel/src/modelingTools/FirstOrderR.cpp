@@ -22,8 +22,3 @@ void FirstOrderR::initialize(Interaction& inter)
   inter.relationMatrices().resize(FirstOrderR::relationMatricesSize);
   inter.relationVectors().resize(FirstOrderR::relationVectorsSize);
 }
-
-void FirstOrderR::checkSize(Interaction& inter)
-{
-
-}

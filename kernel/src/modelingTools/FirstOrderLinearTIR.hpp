@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file FirstOrderLinearTIR.hpp
 
  */
@@ -25,7 +25,8 @@
 
 /** Linear Time Invariant Relation, derived from class FirstOrderR
 
-Linear Relation for First Order Dynamical Systems:
+Linear Relation for First Order Dynamical Systems with time-independant
+operators
 
 \rst
 
@@ -37,36 +38,30 @@ Linear Relation for First Order Dynamical Systems:
 \endrst
 
  */
-class FirstOrderLinearTIR : public FirstOrderR
-{
+class FirstOrderLinearTIR : public FirstOrderR {
 
 protected:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(FirstOrderLinearTIR);
+
+  /** e operator (constant vector) */
+  SP::SiconosVector _e{nullptr};
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
    */
-  virtual void initialize(Interaction& inter);
+  void initialize(Interaction &inter) override;
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
-  virtual void checkSize(Interaction& inter);
-
-  SP::SiconosVector _e;
+  void checkSize(Interaction &inter) override;
 
 public:
-
-  /** default constructor, protected
-  */
-  FirstOrderLinearTIR();
-
   /** create the Relation from a set of data
-  *  \param C the matrix C
-  *  \param B the matrix B
-  */
+   *  \param C the matrix C
+   *  \param B the matrix B
+   */
   FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B);
 
   /** create the Relation from a set of data
@@ -76,85 +71,70 @@ public:
    *  \param e the e matrix
    *  \param B the B matrix
    */
-  FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F, SP::SiconosVector e, SP::SimpleMatrix B);
+  FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
+                      SP::SimpleMatrix F, SP::SiconosVector e,
+                      SP::SimpleMatrix B);
 
   /** destructor
    */
-  virtual ~FirstOrderLinearTIR() {};
+  virtual ~FirstOrderLinearTIR() noexcept = default;
 
-  // GETTERS/SETTERS
-
-  /** default function to compute h
+  /** default function to compute h = y = Cx(t) + Fz + Dlambda + e
    *  \param x
    *  \param lambda
    *  \param z
-   *  \param y value of h
+   *  \param y the resulting vector
    */
-  void computeh(BlockVector& x, SiconosVector& lambda, BlockVector& z, SiconosVector& y);
+  void computeh(const BlockVector &x, const SiconosVector &lambda, BlockVector &z,
+                SiconosVector &y);
 
-  /** default function to compute g
+  /** default function to compute g = Blambda
    *  \param lambda
    *  \param r non-smooth input
    */
-  void computeg(SiconosVector& lambda, BlockVector& r);
+  void computeg(const SiconosVector &lambda, BlockVector &r);
 
   /** default function to compute y
    *  \param time current time
    *  \param inter Interaction using this Relation
    *  \param level
    */
-  virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
-  
+  void computeOutput(double time, Interaction &inter,
+                     unsigned int level = 0) override;
+
   /** default function to compute r
    *  \param time current time
    *  \param inter Interaction using this Relation
    *  \param level
    */
-  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
+  void computeInput(double time, Interaction &inter,
+                    unsigned int level = 0) override;
 
   /** print the data to the screen
    */
-  void display() const;
-
-  /** compute the jacobian of h: nothing to be done here
-   *  \param time current time
-   *  \param inter Interaction using this Relation
-   */
-  virtual void computeJach(double time, Interaction& inter) {};
-
-  /** compute the jacobian of g: nothing to be done here
-   *  \param time current time
-   *  \param inter Interaction using this Relation
-   */
-  virtual void computeJacg(double time, Interaction& inter) {};
- 
+  void display() const override;
 
   /** set e
    *  \param  newe the new value of e
    */
-  inline void setePtr(SP::SiconosVector newe)
-  {
-    _e = newe;
-  }
+  inline void setePtr(SP::SiconosVector newe) { _e = newe; }
 
   /** get e
    *  \return e matrix
    */
-  inline SP::SiconosVector e() const
-  {
-    return _e;
-  }
+  inline SP::SiconosVector e() const { return _e; }
 
-  /**
+  /** determine if the Relation is linear
    * \return true if the relation is linear.
    */
-  virtual bool isLinear()
-  {
-    return true;
-  }
+  inline bool isLinear() override { return true; }
+
+  // Jacobians: required to fullfill base abstract class API but do nothing.
+  // Note FP: final would be better than override but swig cannot handle it.
+  void computeJach(double time, Interaction &inter) override{};
+  void computeJacg(double time, Interaction &inter) override{};
 
   ACCEPT_STD_VISITORS();
-
 };
 
 TYPEDEF_SPTR(FirstOrderLinearTIR)

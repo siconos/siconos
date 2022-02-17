@@ -40,16 +40,18 @@ void FirstOrderNonLinearR::initialize(Interaction& inter)
   unsigned int sizeDS = inter.getSizeOfDS();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
-  relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-  relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
-  relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
+  relationMat[FirstOrderR::mat_C] = std::make_shared<SimpleMatrix>(sizeY, sizeDS);
+  relationMat[FirstOrderR::mat_D] = std::make_shared<SimpleMatrix>(sizeY, sizeY);
+  relationMat[FirstOrderR::mat_B] = std::make_shared<SimpleMatrix>(sizeDS, sizeY);
+  relationMat[FirstOrderR::mat_K] = std::make_shared<SimpleMatrix>(sizeDS, sizeDS);
 
-  // F ? e ?
+  // F ?
 }
 
 void FirstOrderNonLinearR::checkSize(Interaction& inter)
-{}
+{
+
+}
 
 void FirstOrderNonLinearR::computeh(double time, const BlockVector& x, const SiconosVector& lambda, BlockVector& z, SiconosVector& y)
 {

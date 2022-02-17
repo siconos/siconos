@@ -47,18 +47,23 @@ typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
  * - g: saved in DS as r ( input[0])
  * - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
+ * 
+ * Remark FP: at the time, this class works only on the linear case, when:
+ *   - \f$ \nabla_x h = C \f$, \f$ \nabla_\lambda h = D \f$ and  \f$ \nabla_\lambda g = K \f$ are constants.
+ * Trying to update these jacobians with plugins functions leads to an exception.
+ * Solution: create a derived class and overide computeJachx and computeJach.
  */
 class FirstOrderType2R : public FirstOrderR
 {
 protected:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(FirstOrderType2R);
+
 
 public:
 
   /** Basic contructor */
-  FirstOrderType2R();
+  FirstOrderType2R() : FirstOrderR(RELATION::Type2R){};
 
   /** data constructor
    *  \param pluginh name of the plugin to compute h
@@ -76,7 +81,7 @@ public:
 
   /** destructor
   */
-  ~FirstOrderType2R() {};
+  virtual ~FirstOrderType2R() noexcept = default;
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation

@@ -27,11 +27,6 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-
-FirstOrderType2R::FirstOrderType2R():
-  FirstOrderR(RELATION::Type2R)
-{}
-
 FirstOrderType2R::FirstOrderType2R(const std::string& pluginh, const std::string& pluging):
   FirstOrderR(RELATION::Type2R)
 {
@@ -67,15 +62,15 @@ void FirstOrderType2R::initialize(Interaction& inter)
 
 
   if(!_C)
-    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
+    relationMat[FirstOrderR::mat_C] = std::make_shared<SimpleMatrix>(sizeY, sizeDS);
   if(!_D)
-    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+    relationMat[FirstOrderR::mat_D] = std::make_shared<SimpleMatrix>(sizeY, sizeY);
   if(!_F)
-    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
+    relationMat[FirstOrderR::mat_F] = std::make_shared<SimpleMatrix>(sizeY, sizeZ);
   if(!_B)
-    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
+    relationMat[FirstOrderR::mat_B] = std::make_shared<SimpleMatrix>(sizeDS, sizeY);
   if(!_K)
-    relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
+    relationMat[FirstOrderR::mat_K] = std::make_shared<SimpleMatrix>(sizeDS, sizeDS);
 
 //  if (!_jacgx)
 //  {
@@ -104,7 +99,7 @@ void FirstOrderType2R::computeg(double time, const SiconosVector& lambda, BlockV
 void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeOutput \n");
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  auto& DSlink = inter.linkToDSVariables();
   BlockVector& x = *DSlink[FirstOrderR::x];
   // copy into Siconos continuous memory vector
   SiconosVector& y = *inter.y(level);
@@ -117,7 +112,7 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned i
 void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeInput \n");
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  auto& DSlink = inter.linkToDSVariables();
   // copy into Siconos continuous memory vector
   SiconosVector& lambda = *inter.lambda(level);
   computeg(time, lambda, *DSlink[FirstOrderR::r]);
@@ -132,6 +127,7 @@ void FirstOrderType2R::computeJachlambda(double time, const BlockVector& x, cons
 void FirstOrderType2R::computeJachx(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& C)
 {
   THROW_EXCEPTION("FirstOrderType2R::computeJachx must be overload.");
+  // Note FP: so this class should be virtual, isn't it?
 }
 
 void FirstOrderType2R::computeJach(double time, Interaction& inter)
