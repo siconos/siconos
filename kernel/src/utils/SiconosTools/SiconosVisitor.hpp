@@ -92,9 +92,9 @@
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
   template<typename Archive> friend class SiconosSerializer;            \
-  virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
-  virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
-  virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
+  void accept(SiconosVisitor& tourist) const override { tourist.visit(*this); } \
+  void acceptSerializer(SiconosVisitor& serializer) override{ serializer.visit(*this); } \
+  inline Type::Siconos acceptType(FindType& ft) const override { return ft.visit(*this); } \
 
 #define ACCEPT_NONVIRTUAL_VISITORS()                                    \
   template<typename Archive> friend class SiconosSerializer;            \
@@ -103,7 +103,7 @@
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
 #define ACCEPT_SP_VISITORS()                                            \
-  virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
+  void acceptSP(SP::SiconosVisitor tourist) override { tourist->visit(shared_from_this()); }
 
 #define ACCEPT_VISITORS()                       \
   ACCEPT_SP_VISITORS()                          \

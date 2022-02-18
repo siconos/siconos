@@ -14,15 +14,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file Lagrangian2d1DR.hpp
 
  */
 #ifndef Lagrangian2d1DR_H
 #define Lagrangian2d1DR_H
 
-#include "LagrangianScleronomousR.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianScleronomousR.hpp"
 
 using namespace RELATION;
 /** Lagrangian2d1DR
@@ -36,11 +36,10 @@ using namespace RELATION;
  *
  */
 
-class Lagrangian2d1DR : public LagrangianScleronomousR
-{
+class Lagrangian2d1DR : public LagrangianScleronomousR {
 protected:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(Lagrangian2d1DR);
 
   /* Current Contact Points, may be updated within Newton loop based
@@ -56,8 +55,9 @@ protected:
   /* _Nc must be calculated relative to q2 */
   SP::SiconosVector _relNc;
 
-  /* Rotation matrix converting the absolute coordinate to the contact frame coordinate.
-   * This matrix contains the unit vector(s)of the contact frame in row.
+  /* Rotation matrix converting the absolute coordinate to the contact frame
+   * coordinate. This matrix contains the unit vector(s)of the contact frame in
+   * row.
    */
   SP::SimpleMatrix _RotationAbsToContactFrame;
 
@@ -69,110 +69,82 @@ protected:
   SP::SimpleMatrix _NPG1;
   SP::SimpleMatrix _NPG2;
 
-
   /*buffer matrices*/
   SP::SimpleMatrix _AUX1;
   SP::SimpleMatrix _AUX2;
 
   /** Set the coordinates of first contact point.  Must only be done
-  * in a computeh() override.
-  * \param npc new coordinates
-  */
-  void setpc1(SP::SiconosVector npc)
-  {
-    _Pc1 = npc;
-  };
+   * in a computeh() override.
+   * \param npc new coordinates
+   */
+  void setpc1(SP::SiconosVector npc) { _Pc1 = npc; };
 
   /** Set the coordinates of second contact point.  Must only be done
-  * in a computeh() override.
-  * \param npc new coordinates
-  */
-  void setpc2(SP::SiconosVector npc)
-  {
-    _Pc2 = npc;
-  };
+   * in a computeh() override.
+   * \param npc new coordinates
+   */
+  void setpc2(SP::SiconosVector npc) { _Pc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point.
    * Must only be done in a computeh() override.
-  * \param nnc new coordinates
-  */
-  void setnc(SP::SiconosVector nnc)
-  {
-    _Nc = nnc;
-  };
+   * \param nnc new coordinates
+   */
+  void setnc(SP::SiconosVector nnc) { _Nc = nnc; };
 
 public:
-
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
-  *  seems parametrize the projection algorithm
-  *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
-  */
+   *  seems parametrize the projection algorithm
+   *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
+   */
   bool _isOnContact = false;
 
   /** constructorx
-  */
-  Lagrangian2d1DR():
-    LagrangianScleronomousR(),
-    _Pc1(new SiconosVector(2)), _Pc2(new SiconosVector(2)),
-    _Nc(new SiconosVector(2))
+   */
+  Lagrangian2d1DR()
+      : LagrangianScleronomousR(), _Pc1(new SiconosVector(2)),
+        _Pc2(new SiconosVector(2)), _Nc(new SiconosVector(2))
   {
     /*_ds1=nullptr;_ds2=nullptr;*/
   }
 
   /** destructor
-  */
-  virtual ~Lagrangian2d1DR() {};
+   */
+  virtual ~Lagrangian2d1DR() noexcept {};
 
-  virtual void initialize(Interaction& inter);
+  void initialize(Interaction &inter) override;
 
   /** to compute the output y = h(q,z) of the Relation
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  void computeh(const BlockVector &q, BlockVector &z,
+                SiconosVector &y) override;
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  virtual void computeJachq(const BlockVector& q, BlockVector& z);
+  void computeJachq(const BlockVector &q, BlockVector &z) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline SP::SiconosVector pc1() const
-  {
-    return _Pc1;
-  }
-  inline SP::SiconosVector pc2() const
-  {
-    return _Pc2;
-  }
-  inline SP::SiconosVector nc() const
-  {
-    return _Nc;
-  }
+  inline SP::SiconosVector pc1() const { return _Pc1; }
+  inline SP::SiconosVector pc2() const { return _Pc2; }
+  inline SP::SiconosVector nc() const { return _Nc; }
 
-  inline SP::SiconosVector relNc() const
-  {
-    return _relNc;
-  }
+  inline SP::SiconosVector relNc() const { return _relNc; }
 
-
-  /** Set the coordinates of inside normal vector at the contact point in ds2 frame.
-   * It will be used to compute _Nc during computeh().
-  * \param nnc new coordinates
-  */
-  void setRelNc(SP::SiconosVector nnc)
-  {
-    _relNc = nnc;
-  };
-  void display() const;
+  /** Set the coordinates of inside normal vector at the contact point in ds2
+   * frame. It will be used to compute _Nc during computeh(). \param nnc new
+   * coordinates
+   */
+  void setRelNc(SP::SiconosVector nnc) { _relNc = nnc; };
+  void display() const override;
 
   // visitors hook
   ACCEPT_STD_VISITORS();
-
 };
 TYPEDEF_SPTR(Lagrangian2d1DR)
 #endif // NEWTONEULERRIMPACT_H

@@ -60,7 +60,7 @@ public:
 
   /** visitors hook
    */
-  ACCEPT_BASE_VISITORS(LagrangianDS);
+  ACCEPT_BASE_STD_VISITORS(LagrangianDS);
 
 };
 #endif /* Disk_H */

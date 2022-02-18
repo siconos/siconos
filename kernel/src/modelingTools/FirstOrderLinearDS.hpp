@@ -23,8 +23,8 @@
 
 #include "FirstOrderNonLinearDS.hpp"
 
-
-/** First Order Linear Systems - \f$M(t) \dot x = A(t)x(t)+ b(t) + r, \quad x(t_0)=x_0\f$.
+/** First Order Linear Systems - \f$M(t) \dot x = A(t)x(t)+ b(t) + r, \quad
+   x(t_0)=x_0\f$.
 
     This class represents first order linear systems of the form:
 
@@ -34,7 +34,7 @@
 
         M(t) \\dot x = A(t)x(t)+ b(t) + r,
         x(t_0)=x_0
-    
+
     \endrst
 
     where
@@ -53,13 +53,10 @@
     - \f$M(t)\f$
 
 */
-class FirstOrderLinearDS : public FirstOrderNonLinearDS
-{
+class FirstOrderLinearDS : public FirstOrderNonLinearDS {
 protected:
-
   /* serialization hooks */
   ACCEPT_SERIALIZATION(FirstOrderLinearDS);
-
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
   SP::SiconosMatrix _A;
@@ -93,25 +90,25 @@ protected:
    * false by default */
   bool _hasConstantB;
 
-
   /** default constructor
    */
-  FirstOrderLinearDS(): FirstOrderNonLinearDS() {};
+  FirstOrderLinearDS() : FirstOrderNonLinearDS(){};
 
   /** Reset all the plugins */
-  virtual void _zeroPlugin();
+  void _zeroPlugin() override;
 
 public:
-
   /** plugin signature */
-  typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, double*);
+  typedef void (*LDSPtrFunction)(double, unsigned int, double *, unsigned int,
+                                 double *);
 
   /** constructor from initial state and plugins
    *  \param newX0 the initial state of this DynamicalSystem
    *  \param APlugin plugin for A
    *  \param bPlugin plugin for b
    */
-  FirstOrderLinearDS(SP::SiconosVector newX0, const std::string& APlugin, const std::string& bPlugin);
+  FirstOrderLinearDS(SP::SiconosVector newX0, const std::string &APlugin,
+                     const std::string &bPlugin);
 
   /** constructor from initial state and plugin for A
    *  \param newX0 the initial state of this DynamicalSystem
@@ -129,32 +126,33 @@ public:
    *  \param newA matrix A
    *  \param newB b
    */
-  FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB);
+  FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA,
+                     SP::SiconosVector newB);
 
   /** Copy constructor
    * \param FOLDS the original FirstOrderLinearDS we want to copy
    */
-  FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS);
+  FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS);
 
   /** destructor */
-  virtual ~FirstOrderLinearDS() {};
+  virtual ~FirstOrderLinearDS(){};
 
   /*! @name Right-hand side computation */
 
   /** Initialization function for the rhs and its jacobian.
    *  \param time time of initialization.
    */
-  virtual void initRhs(double time) ;
+  void initRhs(double time) override;
 
   /** update right-hand side for the current state
    *  \param time of interest
    */
-  virtual void computeRhs(double time);
+  void computeRhs(double time) override;
 
   /** update \f$\nabla_x rhs\f$ for the current state
    *  \param time of interest
    */
-  void computeJacobianRhsx(double time);
+  void computeJacobianRhsx(double time) override;
 
   ///@}
 
@@ -164,18 +162,12 @@ public:
   /** get the matrix \f$A\f$
    *  \return pointer (SP) on a matrix
    */
-  inline SP::SiconosMatrix A() const
-  {
-    return _A;
-  }
+  inline SP::SiconosMatrix A() const { return _A; }
 
   /** get jacobian of f(x,t,z) with respect to x (pointer link)
    *  \return SP::SiconosMatrix
    */
-  virtual SP::SiconosMatrix jacobianfx() const
-  {
-    return _A;
-  };
+  SP::SiconosMatrix jacobianfx() const override{ return _A; };
 
   /** set A to pointer newPtr
    *  \param newA the new A matrix
@@ -189,15 +181,12 @@ public:
   /** set A to a new matrix
    * \param newA the new A matrix
    **/
-  void setA(const SiconosMatrix& newA);
+  void setA(const SiconosMatrix &newA);
 
   /** get b vector (pointer link)
    *  \return a SP::SiconosVector
    */
-  inline SP::SiconosVector b() const
-  {
-    return _b;
-  }
+  inline SP::SiconosVector b() const { return _b; }
 
   /** set b vector (pointer link)
    *  \param b a SiconosVector
@@ -211,18 +200,11 @@ public:
   /** set b vector (copy)
    *  \param b a SiconosVector
    */
-  void setb(const SiconosVector& b);
+  void setb(const SiconosVector &b);
 
+  inline bool hasConstantA() const { return _hasConstantA; }
 
-  inline bool hasConstantA() const
-  {
-    return _hasConstantA;
-  }
-
-  inline bool hasConstantB() const
-  {
-    return _hasConstantB;
-  }
+  inline bool hasConstantB() const { return _hasConstantB; }
   // --- plugins related functions
   /*! @name Plugins management  */
 
@@ -231,13 +213,14 @@ public:
   /** Call all plugged-function to initialize plugged-object values
       \param time value
   */
-  virtual void updatePlugins(double time);
+  void updatePlugins(double time) override;
 
-  /** set a specified function to compute the matrix A => same action as setComputeJacobianfxFunction
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
+  /** set a specified function to compute the matrix A => same action as
+   * setComputeJacobianfxFunction \param pluginPath the complete path to the
+   * plugin \param functionName the function name to use in this plugin
    */
-  void setComputeAFunction(const std::string& pluginPath, const std::string& functionName);
+  void setComputeAFunction(const std::string &pluginPath,
+                           const std::string &functionName);
 
   /** set a specified function to compute the matrix A
    *  \param fct a pointer on a function
@@ -248,7 +231,8 @@ public:
    *  \param pluginPath the complete path to the plugin file
    *  \param functionName the function name to use in this plugin
    */
-  void setComputebFunction(const std::string& pluginPath, const std::string& functionName);
+  void setComputebFunction(const std::string &pluginPath,
+                           const std::string &functionName);
 
   /** set a specified function to compute the vector b
    *  \param fct a pointer on a function
@@ -270,18 +254,12 @@ public:
   /** Get _pluginA
    * \return the plugin for A
    */
-  inline SP::PluggedObject getPluginA() const
-  {
-    return _pluginA;
-  };
+  inline SP::PluggedObject getPluginA() const { return _pluginA; };
 
   /** Get _pluginb
    * \return the plugin for b
    */
-  inline SP::PluggedObject getPluginB() const
-  {
-    return _pluginb;
-  };
+  inline SP::PluggedObject getPluginB() const { return _pluginb; };
 
   /** Set _pluginA
    * \param newPluginA the new plugin
@@ -305,20 +283,16 @@ public:
 
   /** data display on screen
    */
-  void display(bool brief = true) const;
+  void display(bool brief = true) const override;
 
   /** True if the system is linear.
    * \return a boolean
    */
-  virtual bool isLinear()
-  {
-    return true;
-  }
+  bool isLinear() override { return true; }
 
   ///@}
 
   ACCEPT_STD_VISITORS();
-
 };
 
 #endif // FirstOrderLinearDS_H

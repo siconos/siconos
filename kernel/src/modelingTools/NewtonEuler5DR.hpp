@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file NewtonEuler5DR.hpp
  */
 
@@ -28,38 +28,37 @@
  *
  */
 
-class NewtonEuler5DR : public NewtonEuler1DR
-{
+class NewtonEuler5DR : public NewtonEuler1DR {
 
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(NewtonEuler3DR);
 
   void RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1);
-  void RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
+  void RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1,
+                                      SP::SiconosVector q2);
 
 protected:
-
 public:
-  NewtonEuler5DR(): NewtonEuler1DR() {}
+  NewtonEuler5DR() : NewtonEuler1DR() {}
 
   /** destructor
-  */
-  virtual ~NewtonEuler5DR() {};
+   */
+  virtual ~NewtonEuler5DR() noexcept = default;
 
   /** initialize components specific to derived classes.
    * \param inter the interaction using this relation
    */
-  virtual void initialize(Interaction& inter);
+  void initialize(Interaction &inter) override;
 
-  /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)
-   * but here we compute the operator from the the contact point locations
-   * and the local frame at contact
-   *  \param inter interaction that owns the relation
-   *  \param q0  the block vector to the dynamical system position
+  /* Default implementation consists in multiplying jachq and T (see
+   * NewtonEulerR::computeJachqT) but here we compute the operator from the the
+   * contact point locations and the local frame at contact \param inter
+   * interaction that owns the relation \param q0  the block vector to the
+   * dynamical system position
    */
-  virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
+  void computeJachqT(Interaction &inter, SP::BlockVector q0) override;
 
   ACCEPT_STD_VISITORS();
 };

@@ -396,19 +396,18 @@ void GlobalRollingFrictionContact::display() const
   std::cout << " - Vector mu : " <<std::endl;
   if(_mu)
   {
-    for (int i = 0; i < _mu->size(); i++) {
-      std::cout << (*_mu)[i] << " ";
-    }
-    std::cout << std::endl;
+    for (auto coeff : *_mu)
+      std::cout << coeff  << " " ;
+    std::cout << "\n";
   }
   else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << " - Vector mu_r : " <<std::endl;
   if(_mu_r)
   {
-    for (int i = 0; i < _mu_r->size(); i++) {
-      std::cout << (*_mu_r)[i] << " ";
-    }
+    for (auto coeff : *_mu_r)
+      std::cout << coeff << " ";
+
     std::cout  << std::endl;
   }
   else std::cout << "-> nullptr" <<std::endl;

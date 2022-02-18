@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file NewtonImpactNSL.hpp
 
 */
@@ -24,44 +24,44 @@
 #include "NonSmoothLaw.hpp"
 
 /** Newton impact Non Smooth Law
-    
-  This class formalizes the Newton Impact law together with a complementarity condition. i.e.
+
+  This class formalizes the Newton Impact law together with a complementarity
+  condition. i.e.
 
   \rst
 
   .. math::
       :nowrap:
-      
+
       \left\{\begin{array}{l}
       y \geq 0, \lambda \geq 0, y^{T} \lambda=0\\
-      if y \leq 0 \quad \mbox{then} \quad \\dot y(t^{+}) - e \\dot y(t^{-}) \geq 0, \quad  \lambda \geq 0, (\\dot y(t^{+}) - e \\dot y(t^{-}))^{T} \lambda=0
+      if y \leq 0 \quad \mbox{then} \quad \\dot y(t^{+}) - e \\dot y(t^{-}) \geq
+  0, \quad  \lambda \geq 0, (\\dot y(t^{+}) - e \\dot y(t^{-}))^{T} \lambda=0
       \end{array}\right.
 
   \endrst
- 
+
   nsLawSize is equal to 1.
- 
+
 */
-class NewtonImpactNSL : public NonSmoothLaw
-{
+class NewtonImpactNSL : public NonSmoothLaw {
 
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(NewtonImpactNSL);
 
   /** The Newton normal coefficient of restitution  */
   double _e;
 
 public:
-
   /** default constructor
    */
   NewtonImpactNSL();
 
   /** constructor with the value of the NewtonImpactNSL attributes
-  *  \param e the value of the coefficient of restitution
-  */
+   *  \param e the value of the coefficient of restitution
+   */
   NewtonImpactNSL(double e);
 
   /** Apply multiple-axis impact */
@@ -72,29 +72,23 @@ public:
   ~NewtonImpactNSL();
 
   /** check the ns law to see if it is verified
-  *  \return a boolean value whioch determines if the NS Law is verified
-  */
-  bool isVerified() const;
+   *  \return a boolean value whioch determines if the NS Law is verified
+   */
+  bool isVerified() const override;
 
   /** getter of e
-  *  \return the value of e
-  */
-  inline double e() const
-  {
-    return _e;
-  };
+   *  \return the value of e
+   */
+  inline double e() const { return _e; };
 
   /** setter of e
-  *  \param newVal a double to set e
-  */
-  inline void setE(double newVal)
-  {
-    _e = newVal;
-  };
+   *  \param newVal a double to set e
+   */
+  inline void setE(double newVal) { _e = newVal; };
 
   /** print the data to the screen
-  */
-  void display() const;
+   */
+  void display() const override;
 
   /** Visitors hook
    */
@@ -102,6 +96,5 @@ public:
 };
 
 DEFINE_SPTR(NewtonImpactNSL)
-
 
 #endif // NewtonImpactNSL_H

@@ -14,30 +14,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file BodyShapeRecord.hpp
   \brief Definition of an abstract Body shape record
-  The objective of this class is to keep associate ds and static body woth the shape
-in a contactor.
+  The objective of this class is to keep associate ds and static body woth the
+shape in a contactor.
 */
-
 
 #ifndef BodyShapeRecord_h
 #define BodyShapeRecord_h
-
 
 // We need to maintain a record associating each body with a shape,
 // contactor, and collision object for each shape type.  We also need
 // to access generic shape stuff (group, margin) by a pointer from the
 // collision callback, so we need a record base class.
-class BodyShapeRecord
-{
+class BodyShapeRecord {
 public:
   BodyShapeRecord(SP::SiconosVector b, SP::SecondOrderDS d, SP::SiconosShape sh,
                   SP::SiconosContactor con, SP::StaticBody staticCSR)
-    : base(b), ds(d), sshape(sh), contactor(con), staticBody(staticCSR),
-      shape_version(sh->version()) {}
+      : base(b), ds(d), sshape(sh), contactor(con),
+        shape_version(sh->version()), staticBody(staticCSR)
+  {
+  }
   virtual ~BodyShapeRecord() {}
 
   SP::SiconosVector base;

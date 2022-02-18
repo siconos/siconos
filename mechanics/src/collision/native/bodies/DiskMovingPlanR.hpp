@@ -72,14 +72,14 @@ public:
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y);
+  void computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y) override;
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param time current time value
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(double time, const BlockVector& q, BlockVector& z);
+  void computeJachq(double time, const BlockVector& q, BlockVector& z) override;
 
   using LagrangianRheonomousR::computehDot;
   /** to compute the time-derivative of the output y = h(t,q,z), saved in attribute _hDot (access: hDot())
@@ -87,7 +87,7 @@ public:
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computehDot(double time, const BlockVector& q, BlockVector& z);
+  void computehDot(double time, const BlockVector& q, BlockVector& z) override;
 
   double distance(double, double, double);
 

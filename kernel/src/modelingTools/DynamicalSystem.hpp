@@ -446,7 +446,7 @@ public:
   };
 
   /** reset the state x() to the initial state x0 */
-  virtual void resetToInitialState();
+  virtual void resetToInitialState() = 0;
   
   /** True if the system is linear.
    * \return a boolean

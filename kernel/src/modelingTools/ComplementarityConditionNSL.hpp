@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file ComplementarityConditionNSL.hpp
 
 */
@@ -26,31 +26,28 @@
 /** Complementarity NonSmoothLaw
  *
  **/
-class ComplementarityConditionNSL : public NonSmoothLaw
-{
+class ComplementarityConditionNSL : public NonSmoothLaw {
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(ComplementarityConditionNSL);
 
   /** default constructor
    */
-  ComplementarityConditionNSL() {};
+  ComplementarityConditionNSL(){};
 
 public:
   /** basic constructor
-  *  \param size of the non smooth law
-  */
+   *  \param size of the non smooth law
+   */
   ComplementarityConditionNSL(unsigned int size);
-
 
   /** Destructor */
   ~ComplementarityConditionNSL();
 
-
   /** print the data to the screen
-  */
-  inline void display()const {};
+   */
+  inline void display() const override{};
 
   /** Visitors hook
    */

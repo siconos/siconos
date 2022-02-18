@@ -307,8 +307,8 @@ public:
   SP::SimpleMatrix getOSIMatrix(OneStepIntegrator& osi, SP::DynamicalSystem ds);
 
   /* visitors hook */
-  ACCEPT_STD_VISITORS();
-
+  VIRTUAL_ACCEPT_VISITORS(OneStepNSProblem);
+  
 };
 
 #endif // ONESTEPNSPROBLEM_H

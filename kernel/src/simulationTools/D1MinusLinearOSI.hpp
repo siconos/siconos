@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file
  * D1MinusLinearOSI Time-Integrator for Dynamical Systems
@@ -31,18 +31,19 @@
 #include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
 
-
 /** Time-Integrator for Dynamical Systems
  *
  * Reference:
  *
- * Timestepping schemes for nonsmooth dynamics based on discontinuous Galerkin methods:
+ * Timestepping schemes for nonsmooth dynamics based on discontinuous Galerkin
+ methods:
  * Definition and outlook
  * Thorsten Schindler; Vincent Acary
  * Mathematics and Computers in Simulation,
  * Elsevier, 2014, 95, pp. 180-199
  *
- *  A D1MinusLinearOSI instance is defined by the list of concerned dynamical systems.
+ *  A D1MinusLinearOSI instance is defined by the list of concerned dynamical
+ systems.
  *
  *  Main functions:
  *
@@ -56,38 +57,52 @@
  *
  * \section sec_D1MinusLinear_implementation Some details on the implementation
  *
- * \subsection sec_D1MinusLinear_implementation_various Various implementations at various levels.
+ * \subsection sec_D1MinusLinear_implementation_various Various implementations
+ at various levels.
  *
  * To be completed
  *
- * The (lower-case) lambda vector that corresponds to the (non-impulsive) contact forces are computed
- * for the closed contact with vanishing relative velocity (the number of the index set depends on the type of D1minulinear)
+ * The (lower-case) lambda vector that corresponds to the (non-impulsive)
+ contact forces are computed
+ * for the closed contact with vanishing relative velocity (the number of the
+ index set depends on the type of D1minulinear)
  * The result, stored in lambda(2) and p(2) is computed by solving
  *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
  * at different specific time
  *
- * The impact equation are solved at the velocity level as in MoreauJeanOSI using
- * lambda(1) and p(1). The number of the index set depends on the type of D1minulinear
+ * The impact equation are solved at the velocity level as in MoreauJeanOSI
+ using
+ * lambda(1) and p(1). The number of the index set depends on the type of
+ D1minulinear
  *
  *
- * \subsection sec_D1MinusLinear_implementation_halfAcc  HalfExplicitAccelerationLevel
+ * \subsection sec_D1MinusLinear_implementation_halfAcc
+ HalfExplicitAccelerationLevel
  *
- * The (lower-case) lambda \f$\lambda\f$ that corresponds to the (non-impulsive) contact
- * forces are computed at the acceleration level for the closed contact with vanishing
+ * The (lower-case) lambda \f$\lambda\f$ that corresponds to the (non-impulsive)
+ contact
+ * forces are computed at the acceleration level for the closed contact with
+ vanishing
  * relative velocity (indexSet2)
  *
- * The problem, solved for  lambda(2) and p(2)   (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
- * is solved at time told for \f$\lambda^+_{k}\f$ and time t for \f$\lambda^-_{k+1}\f$
+ * The problem, solved for  lambda(2) and p(2)
+ (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * is solved at time told for \f$\lambda^+_{k}\f$ and time t for
+ \f$\lambda^-_{k+1}\f$
  *
- * The problem, solved for  lambda(1) and p(1)   (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ * The problem, solved for  lambda(1) and p(1)
+ (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
  * is solved at time t for \f$Lambda_{k+1}\f$.
  *
  * We use four index sets to compute the multipliers:
  * <ul>
  * <li> indexSet0 is the set of all constraints </li>
- * <li> indexSet1 is the set of closed constraints (computed with \f$ q_{k,1} \f$) </li>
- * <li> indexSet2 is the set of closed constraints and vanishing velocities (computed with \f$q_{k,1}\f$ and \f$v_{k,1}\f$  )  </li>
- * <li> indexSet3 is the set of the constraints that have been closed within the time--step (computed with \f$q_{k,0}\f$ and \f$q_{k,1}\f$  )  </li>
+ * <li> indexSet1 is the set of closed constraints (computed with \f$ q_{k,1}
+ \f$) </li>
+ * <li> indexSet2 is the set of closed constraints and vanishing velocities
+ (computed with \f$q_{k,1}\f$ and \f$v_{k,1}\f$  )  </li>
+ * <li> indexSet3 is the set of the constraints that have been closed within the
+ time--step (computed with \f$q_{k,0}\f$ and \f$q_{k,1}\f$  )  </li>
  * </ul>
  *
  * \f[
@@ -98,68 +113,67 @@
  * v_{k,1} = v_{k,0} + h M^{-1}_k (P^+_{2,k}+F^+_{k}) \\[2mm]
  * q_{k,1} = q_{k,0} + \frac{h}{2} (v_{k,0} + v_{k,1})  \\[2mm]
  * F^-_{k+1} = F(t^{-}_{k+1},q_{k,1},v_{k,1}) \\[2mm]
- * R_{free} = - \frac{h}{2}  M^{-1}_k (P^+_{2,k}+F^+_{k}) -  \frac{h}{2}  M^{-1}_{k+1} (P^-_{2,k+1}+F^-_{k+1}) \\[2mm]
+ * R_{free} = - \frac{h}{2}  M^{-1}_k (P^+_{2,k}+F^+_{k}) -  \frac{h}{2}
+ M^{-1}_{k+1} (P^-_{2,k+1}+F^-_{k+1}) \\[2mm]
  * \end{cases}
  * \f]
  *
- * \subsection sec_D1MinusLinear_implementation_halfVel  HalfExplicitVelocityLevel
+ * \subsection sec_D1MinusLinear_implementation_halfVel
+ HalfExplicitVelocityLevel
  *
  *
  */
 
+const double DEFAULT_TOL_D1MINUS = 1e-8;
 
-const double DEFAULT_TOL_D1MINUS  = 1e-8;
-
-
-
-class D1MinusLinearOSI : public OneStepIntegrator
-{
-public :
-
+class D1MinusLinearOSI : public OneStepIntegrator {
+public:
 protected:
-
   /** nslaw effects */
-  struct _NSLEffectOnFreeOutput : public SiconosVisitor
-  {
+  struct _NSLEffectOnFreeOutput : public SiconosVisitor {
 
     using SiconosVisitor::visit;
 
-    OneStepNSProblem* _osnsp;
+    OneStepNSProblem *_osnsp;
     SP::Interaction _inter;
-    InteractionProperties& _interProp;
-    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter, InteractionProperties& interProp) :
-      _osnsp(p), _inter(inter), _interProp(interProp) {};
+    InteractionProperties &_interProp;
+    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter,
+                           InteractionProperties &interProp)
+        : _osnsp(p), _inter(inter), _interProp(interProp){};
 
-    void visit(const NewtonImpactNSL& nslaw);
-    void visit(const EqualityConditionNSL& nslaw)
-    {
-      ;
-    }
+    void visit(const NewtonImpactNSL &nslaw);
+    void visit(const EqualityConditionNSL &nslaw) { ; }
   };
 
-  //friend struct _NSLEffectOnFreeOutput;
-  bool _isThereImpactInTheTimeStep ;
+  // friend struct _NSLEffectOnFreeOutput;
+  bool _isThereImpactInTheTimeStep;
   unsigned int _typeOfD1MinusLinearOSI;
 
-
 public:
-
   /** Switching variable for various versions of D1MinusLinear
    */
-  enum ListOfTypeOfD1MinusLinearOSI {halfexplicit_acceleration_level,
-                                     halfexplicit_acceleration_level_full,
-                                     explicit_velocity_level,
-                                     halfexplicit_velocity_level,
-                                     numberOfTypeOfD1MinusLinearOSI
-                                    };
+  enum ListOfTypeOfD1MinusLinearOSI {
+    halfexplicit_acceleration_level,
+    halfexplicit_acceleration_level_full,
+    explicit_velocity_level,
+    halfexplicit_velocity_level,
+    numberOfTypeOfD1MinusLinearOSI
+  };
 
-  enum D1MinusLinearOSI_ds_workVector_id {RESIDU_FREE, FREE, FREE_TDG, WORK_LENGTH};
+  enum D1MinusLinearOSI_ds_workVector_id {
+    RESIDU_FREE,
+    FREE,
+    FREE_TDG,
+    WORK_LENGTH
+  };
 
-  enum D1MinusLinearOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
+  enum D1MinusLinearOSI_interaction_workVector_id {
+    OSNSP_RHS,
+    WORK_INTERACTION_LENGTH
+  };
 
-  enum D1MinusLinearOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+  enum D1MinusLinearOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
 
- 
   /** basic constructor
    */
   D1MinusLinearOSI();
@@ -175,7 +189,7 @@ public:
   D1MinusLinearOSI(unsigned int type);
 
   /** destructor */
-  virtual ~D1MinusLinearOSI() {};
+  virtual ~D1MinusLinearOSI(){};
 
   /** Set the type of the D1MinusLinear
    * \param type  the type to set
@@ -195,27 +209,24 @@ public:
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
-  unsigned int typeOfD1MinusLinearOSI()
-  {
-    return _typeOfD1MinusLinearOSI;
-  };
+  unsigned int typeOfD1MinusLinearOSI() { return _typeOfD1MinusLinearOSI; };
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */
-  unsigned int numberOfIndexSets() const;
+  unsigned int numberOfIndexSets() const override;
 
   /** initialization of the D1MinusLinearOSI integrator; for linear time
    *  invariant systems, we compute time invariant operator
    */
-  virtual void initialize_nonsmooth_problems();
+  void initialize_nonsmooth_problems() override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -223,66 +234,70 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
-  
-  /** return the maximum of all norms for the residus of DS
-   *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
-   *  \return double
-   */
-  virtual double computeResidu();
+  void initializeWorkVectorsForInteraction(Interaction &inter,
+                                           InteractionProperties &interProp,
+                                           DynamicalSystemsGraph &DSG) override;
 
-  /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level
-   *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
+  /** return the maximum of all norms for the residus of DS
+   *  \post{ds->residuFree will be calculated, ds->q() contains new position,
+   * ds->velocity contains predicted velocity} \return double
+   */
+  double computeResidu() override;
+
+  /** return the maximum of all norms for the residus of DS for the type
+   * explicit_acceleration_level \post{ds->residuFree will be calculated,
+   * ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
   virtual double computeResiduHalfExplicitAccelerationLevel();
 
-  /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level_full
-   *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
+  /** return the maximum of all norms for the residus of DS for the type
+   * explicit_acceleration_level_full \post{ds->residuFree will be calculated,
+   * ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
   virtual double computeResiduHalfExplicitAccelerationLevelFull();
 
-  /** return the maximum of all norms for the residus of DS for the type explicit_acceleration_level_full
-   *  \post{ds->residuFree will be calculated, ds->q() contains new position, ds->velocity contains predicted velocity}
+  /** return the maximum of all norms for the residus of DS for the type
+   * explicit_acceleration_level_full \post{ds->residuFree will be calculated,
+   * ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
   virtual double computeResiduHalfExplicitVelocityLevel();
 
-
-  /** integrates the Dynamical System linked to this integrator without taking non-smooth effects into account
-   *  \post{ds->velocity contains predicted velocity}
+  /** integrates the Dynamical System linked to this integrator without taking
+   * non-smooth effects into account \post{ds->velocity contains predicted
+   * velocity}
    */
-  virtual void computeFreeState();
+  void computeFreeState() override;
 
-  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex_inter of the interaction graph
-   * \param osnsp pointer to OneStepNSProblem
+  /** integrates the Interaction linked to this integrator, without taking
+   * non-smooth effects into account \param vertex_inter of the interaction
+   * graph \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
+                         OneStepNSProblem *osnsp) override;
 
-  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex_inter of the interaction graph
-   * \param osnsp pointer to OneStepNSProblem
+  /** integrates the Interaction linked to this integrator, without taking
+   * non-smooth effects into account \param vertex_inter of the interaction
+   * graph \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutputHalfExplicitAccelerationLevel(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+  virtual void computeFreeOutputHalfExplicitAccelerationLevel(
+      InteractionsGraph::VDescriptor &vertex_inter, OneStepNSProblem *osnsp);
 
-  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex_inter of the interaction graph
-   * \param osnsp pointer to OneStepNSProblem
+  /** integrates the Interaction linked to this integrator, without taking
+   * non-smooth effects into account \param vertex_inter of the interaction
+   * graph \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutputHalfExplicitVelocityLevel(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
+  virtual void computeFreeOutputHalfExplicitVelocityLevel(
+      InteractionsGraph::VDescriptor &vertex_inter, OneStepNSProblem *osnsp);
 
-
-
-  /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param ti initial time
-   *  \param tf end time
+  /** integrate the system, between tinit and tend (->iout=true), with possible
+   * stop at tout (->iout=false) \param ti initial time \param tf end time
    *  \param t real end time
    *  \param flag useless flag (for D1MinusLinearOSI, used in LsodarOSI)
    */
-  virtual void integrate(double& ti, double& tf, double& t , int& flag)
+  void integrate(double &ti, double &tf, double &t, int &flag) override
   {
     THROW_EXCEPTION("D1MinusLinearOSI::integrate - not implemented!");
   }
@@ -291,24 +306,7 @@ public:
    *  \param level level of interest for the dynamics: not used at the time
    *  \post{ds->velocity contains new velocity}
    */
-  virtual void updateState(const unsigned int level);
-
-
-  /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
-   * \param inter the involved interaction
-   * \param i the index set level
-   * \return a boolean if it needs to be added or not
-   */
-  virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
-
-  /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
-   * \param inter the involved interaction
-   * \param i the index set level
-   * \return a boolean if it needs to be removed or not
-  */
-  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
+  void updateState(const unsigned int level) override;
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -316,34 +314,58 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be added or not
    */
-  virtual bool addInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
+  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
    * \param inter the involved interaction
    * \param i the index set level
    * \return a boolean if it needs to be removed or not
-  */
-  virtual bool removeInteractionFromIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
+   */
+  bool removeInteractionFromIndexSet(SP::Interaction inter,
+                                     unsigned int i) override;
 
   /** Apply the rule to one Interaction to known if is it should be included
-    * in the IndexSet of level i
-    * \param inter the involved interaction
-    * \param i the index set level
-    * \return a boolean if it needs to be added or not
-    */
-  virtual bool addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Interaction inter, unsigned int i);
+   * in the IndexSet of level i
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be added or not
+   */
+  virtual bool
+  addInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter,
+                                                        unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
    * \param inter the involved interaction
    * \param i the index set level
    * \return a boolean if it needs to be removed or not
-  */
-  virtual bool removeInteractionFromIndexSetHalfExplicitVelocityLevel(SP::Interaction inter, unsigned int i);
+   */
+  virtual bool removeInteractionFromIndexSetHalfExplicitAccelerationLevel(
+      SP::Interaction inter, unsigned int i);
+
+  /** Apply the rule to one Interaction to known if is it should be included
+   * in the IndexSet of level i
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be added or not
+   */
+  virtual bool
+  addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Interaction inter,
+                                                    unsigned int i);
+
+  /** Apply the rule to one Interaction to known if is it should be removed
+   * in the IndexSet of level i
+   * \param inter the involved interaction
+   * \param i the index set level
+   * \return a boolean if it needs to be removed or not
+   */
+  virtual bool
+  removeInteractionFromIndexSetHalfExplicitVelocityLevel(SP::Interaction inter,
+                                                         unsigned int i);
 
   /** displays the data of the D1MinusLinearOSI's integrator */
-  virtual void display()
+  void display() override
   {
     THROW_EXCEPTION("D1MinusLinearOSI::display - not implemented!");
   }
@@ -351,9 +373,10 @@ public:
   /** preparations for Newton iteration
    *  \param time time
    */
-  virtual void prepareNewtonIteration(double time)
+  void prepareNewtonIteration(double time) override
   {
-    THROW_EXCEPTION("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
+    THROW_EXCEPTION(
+        "D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
   }
 
   /** visitors hook */

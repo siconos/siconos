@@ -96,10 +96,10 @@ public:
   /** check the ns law to see if it is verified
   *  \return true if the NS Law is verified, false otherwise
   */
-  virtual bool isVerified() const;
+  bool isVerified() const override;;
 
   /** print the data to the screen */
-  virtual void display() const;
+  void display() const override;;
 
   /** visitors hook
    */

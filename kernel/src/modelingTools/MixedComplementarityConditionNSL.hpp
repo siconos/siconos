@@ -54,7 +54,7 @@ public:
 
   /** print the data to the screen
   */
-  inline void display()const {};
+  inline void display()const override {};
 
   /** get the number of equality present in the MLCP
    *  \return an unsigned int

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /** \file CircleCircleR.hpp
  *
@@ -23,23 +23,22 @@
 #ifndef CircleCircleR_h
 #define CircleCircleR_h
 
-#include "MechanicsFwd.hpp"
 #include "CircularR.hpp"
+#include "MechanicsFwd.hpp"
 
 /** \class CircleCircleR
  *  \brief Two disks relation - Inherits from LagrangianScleronomousR
  */
-class CircleCircleR : public CircularR, public std::enable_shared_from_this<CircleCircleR>
-{
+class CircleCircleR : public CircularR,
+                      public std::enable_shared_from_this<CircleCircleR> {
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(CircleCircleR);
 
-  CircleCircleR() {};
+  CircleCircleR(){};
 
 public:
-
   /** Constructor
   \param rdisk1 radius
   \param rdisk2 radius
@@ -53,10 +52,10 @@ public:
       \param x2 x position of second disk
       \param y2 y position of second disk
       \param r2 radius of second disk
-      \return distance 
+      \return distance
   */
-  double distance(double x1, double y1, double r1,
-                  double x2, double y2, double r2);
+  double distance(double x1, double y1, double r1, double x2, double y2,
+                  double r2) override;
 
   using LagrangianScleronomousR::computeh;
 
@@ -65,19 +64,19 @@ public:
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  void computeh(const BlockVector &q, BlockVector &z,
+                SiconosVector &y) override;
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector& q, BlockVector& z);
+  void computeJachq(const BlockVector &q, BlockVector &z) override;
 
   /** visitors hook
    */
   ACCEPT_VISITORS();
 
-  ~CircleCircleR() {};
-
+  ~CircleCircleR(){};
 };
 #endif /* CircleCircleR_h */

@@ -24,11 +24,12 @@
 
 #include "LagrangianDS.hpp"
 
+/** Lagrangian Linear Systems with time invariant coefficients - \f$M\dot v + Cv
+  + Kq = F_{ext}(t,z) + p \f$
 
-/** Lagrangian Linear Systems with time invariant coefficients - \f$M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
-
-    The class LagrangianLinearTIDS  allows to define  and compute a generic ndof-dimensional
-    Lagrangian Linear Time Invariant Dynamical System of the form :
+    The class LagrangianLinearTIDS  allows to define  and compute a generic
+  ndof-dimensional Lagrangian Linear Time Invariant Dynamical System of the form
+  :
 
     \f$
     M \ddot q + C \dot q + K q =  F_{ext}(t,z) + p,
@@ -36,14 +37,21 @@
 
     where
     - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
-    - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
-    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
-    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In particular case of Non Smooth evolution,
-    the variable p contains the impulse and not the force.
-    -  \f$ M \in  R^{ndof \times ndof} \f$ is the Mass matrix (access : mass() method).
-    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix (access : K() method).
-    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix (access : C() method).
-    -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
+    - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of
+  the  generalized coordinates.
+    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time
+  derivative of the  generalized coordinates.
+    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In
+  particular case of Non Smooth evolution, the variable p contains the impulse
+  and not the force.
+    -  \f$ M \in  R^{ndof \times ndof} \f$ is the Mass matrix (access : mass()
+  method).
+    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix (access : K()
+  method).
+    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix (access : C()
+  method).
+    -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some
+  sort of discret state.
 
    The equation of motion is also shortly denoted as:
     \f$
@@ -57,7 +65,8 @@
 
     This vector is saved and may be accessed using forces() method.
 
-    If required (e.g. for Event-Driven like simulation), reformulation as a first-order system is also available, and writes:
+    If required (e.g. for Event-Driven like simulation), reformulation as a
+  first-order system is also available, and writes:
 
     - \f$ n= 2 ndof \f$
     - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
@@ -93,8 +102,7 @@
 
   \endrst
 */
-class LagrangianLinearTIDS : public LagrangianDS
-{
+class LagrangianLinearTIDS : public LagrangianDS {
 
 protected:
   /* serialization hooks */
@@ -107,10 +115,9 @@ protected:
   SP::SiconosMatrix _C;
 
   /** default constructor */
-  LagrangianLinearTIDS():LagrangianDS() {};
+  LagrangianLinearTIDS() : LagrangianDS(){};
 
 public:
-
   /*! @name public constructors */
   //@{
 
@@ -122,15 +129,16 @@ public:
    *  \param C damping matrix
    */
   LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0,
-                       SP::SiconosMatrix M, SP::SiconosMatrix K, SP::SiconosMatrix C);
+                       SP::SiconosMatrix M, SP::SiconosMatrix K,
+                       SP::SiconosMatrix C);
 
-  /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v = F_{ext}(t,z) + p\f$.
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param M mass matrix
+  /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
+   * = F_{ext}(t,z) + p\f$. \param q0 initial coordinates \param v0 initial
+   * velocity \param M mass matrix
    */
-  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M):
-    LagrangianDS(q0, v0, M){};
+  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0,
+                       SP::SiconosMatrix M)
+      : LagrangianDS(q0, v0, M){};
 
   /** destructor */
   ~LagrangianLinearTIDS(){};
@@ -143,14 +151,15 @@ public:
   /** allocate (if needed)  and compute rhs and its jacobian.
    * \param t time of initialization
    */
-  void initRhs(double t) ;
+  void initRhs(double t) override;
 
   /** Compute \f$F(v,q,t,z)\f$
    *  \param time the current time
    *  \param q SP::SiconosVector: pointers on q
    *  \param velocity SP::SiconosVector: pointers on velocity
    */
-  void computeForces(double time, SP::SiconosVector q, SP::SiconosVector velocity);
+  void computeForces(double time, SP::SiconosVector q,
+                     SP::SiconosVector velocity) override;
 
   ///@}
 
@@ -160,23 +169,17 @@ public:
   /** get a copy of the stiffness matrix
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getK() const
-  {
-    return *_K;
-  }
+  inline const SimpleMatrix getK() const { return *_K; }
 
   /** get stiffness matrix (pointer link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix K() const
-  {
-    return _K;
-  }
+  inline SP::SiconosMatrix K() const { return _K; }
 
   /** set (copy) the value of the stiffness matrix
    *  \param K new stiffness matrix
    */
-  void setK(const SiconosMatrix& K);
+  void setK(const SiconosMatrix &K);
 
   /** set stiffness matrix (pointer link)
    *  \param newPtr pointer to the new Stiffness matrix
@@ -191,36 +194,27 @@ public:
   /** get damping matrix (pointer link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix C() const
-  {
-    return _C;
-  }
+  inline SP::SiconosMatrix C() const { return _C; }
 
   /** set (copy) the value of the damping matrix
    *  \param C new damping matrix
    */
-  void setC(const SiconosMatrix& C);
+  void setC(const SiconosMatrix &C);
 
   /** set damping matrix (pointer link)
    * \param newPtr pointer to the new damping matrix
    */
-  void setCPtr(SP::SiconosMatrix newPtr) ;
+  void setCPtr(SP::SiconosMatrix newPtr);
 
   /** get \f$ \nabla_qF(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianqForces() const
-  {
-    return _K;
-  }
+  inline SP::SiconosMatrix jacobianqForces() const override { return _K; }
 
   /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianvForces() const
-  {
-    return _C;
-  }
+  inline SP::SiconosMatrix jacobianvForces() const  override{ return _C; }
 
   ///@}
 
@@ -229,18 +223,14 @@ public:
 
   /**\return true if the Dynamical system is linear.
    */
-  virtual bool isLinear()
-  {
-    return true;
-  }
+  virtual bool isLinear() override { return true; }
 
   /** print the data onto the screen
    */
-  void display(bool brief =true) const;
+  void display(bool brief = true) const override;
 
   ///@}
 
   ACCEPT_STD_VISITORS();
-
 };
 #endif // LAGRANGIANTIDS_H

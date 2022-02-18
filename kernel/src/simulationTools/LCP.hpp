@@ -81,7 +81,7 @@ public:
   LCP(SP::SolverOptions options);
 
   /** destructor */
-  ~LCP(){};
+  ~LCP() noexcept = default;
 
   /** Call numerics solver.
       \return int information about the solver convergence
@@ -94,11 +94,11 @@ public:
       \return int, information about the solver convergence
       (output from numerics driver, linearComplementarity_driver, check numerics doc. for details).
    */
-  int compute(double time);
+  int compute(double time) override;
 
 
    /* Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw) override;
   /* visitors hook */
   ACCEPT_STD_VISITORS();
 

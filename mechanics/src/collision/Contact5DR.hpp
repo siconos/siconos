@@ -43,7 +43,7 @@ public:
       \param q coordinates of the dynamical systems involved in the relation
       \param y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  void computeh(double time, const BlockVector& q0, SiconosVector& y) override;
 
   /** Update this contact point information.
    * \param pos1 Position on ds1 in ds1 frame.

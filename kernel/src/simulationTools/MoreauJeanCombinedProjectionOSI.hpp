@@ -14,52 +14,49 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file
-  MoreauJeanOSI Time-Integrator for Dynamical Systems for Combined Projection Algorithm
+  MoreauJeanOSI Time-Integrator for Dynamical Systems for Combined Projection
+  Algorithm
 */
 
 #ifndef MOREAUCOMBINEDPROJECTIONOSI_H
 #define MOREAUCOMBINEDPROJECTIONOSI_H
 
-#include "OneStepIntegrator.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "OneStepIntegrator.hpp"
 #include "SimpleMatrix.hpp"
-
 
 const unsigned int MOREAUCOMBINEDPROJECTIONOSISTEPSINMEMORY = 1;
 
 /**  \class MoreauJeanCombinedProjectionOSI
  *   \brief One Step time Integrator for First Order Dynamical Systems  for
- *    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Combined Projection Algorithm
+ *    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Combined
+ * Projection Algorithm
  *
  * This class reimplement a special activation of constraints
  * in the MoreauJeanOSI for the Combined Projection Algorithm
  *
  * References :
  *
- * V. Acary. Projected event-capturing time-stepping schemes for nonsmooth mechanical systems with unilateral contact
- * and coulomb’s friction.
- * Computer Methods in Applied Mechanics and Engineering, 256:224 – 250, 2013. ISSN 0045-7825.
- * URL http://www.sciencedirect.com/science/article/pii/S0045782512003829.
+ * V. Acary. Projected event-capturing time-stepping schemes for nonsmooth
+ * mechanical systems with unilateral contact and coulomb’s friction. Computer
+ * Methods in Applied Mechanics and Engineering, 256:224 – 250, 2013. ISSN
+ * 0045-7825. URL
+ * http://www.sciencedirect.com/science/article/pii/S0045782512003829.
  *
  */
-class MoreauJeanCombinedProjectionOSI : public MoreauJeanOSI
-{
+class MoreauJeanCombinedProjectionOSI : public MoreauJeanOSI {
 protected:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(MoreauJeanCombinedProjectionOSI);
 
   /** Default constructor
    */
-  MoreauJeanCombinedProjectionOSI() {};
-
-
-
+  MoreauJeanCombinedProjectionOSI(){};
 
 public:
-
   /** constructor from theta value only
    *  \param theta value for all these DS.
    */
@@ -67,7 +64,7 @@ public:
 
   /** destructor
    */
-  virtual ~MoreauJeanCombinedProjectionOSI() {};
+  virtual ~MoreauJeanCombinedProjectionOSI(){};
 
   // --- OTHER FUNCTIONS ---
 
@@ -76,7 +73,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -85,14 +82,13 @@ public:
    * \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(Interaction &inter,
-                     InteractionProperties& interProp,
-                     DynamicalSystemsGraph & DSG);
+                                           InteractionProperties &interProp,
+                                           DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */
-  unsigned int numberOfIndexSets() const {return 3;};
-
+  unsigned int numberOfIndexSets() const override { return 3; };
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -100,7 +96,7 @@ public:
    * \param i level
    * \return bool
    */
-  virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
@@ -108,12 +104,11 @@ public:
    * \param i level
    * \return bool
    */
-  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
+  bool removeInteractionFromIndexSet(SP::Interaction inter,
+                                     unsigned int i) override;
 
-  /** visitors hook
-  */
+  // visitors hook
   ACCEPT_STD_VISITORS();
-
 };
 
 #endif // MOREAUCOMBINEDPROJECTIONOSI_H

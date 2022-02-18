@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file LagrangianLinearTIR.hpp
 
  */
@@ -22,7 +22,6 @@
 #define LAGRANGIANLINEARRELATION_H
 
 #include "LagrangianR.hpp"
-
 
 /**  Lagrangian Linear Relation.
 
@@ -35,8 +34,7 @@ Lagrangian Relation with:
 C is the only required input to built a LagrangianLinearTIR.
 
  */
-class LagrangianLinearTIR : public LagrangianR
-{
+class LagrangianLinearTIR : public LagrangianR {
 
 protected:
   /* serialization hooks */
@@ -49,32 +47,32 @@ protected:
   SP::SiconosVector _e;
 
 public:
-
   /** Default constructor
-  */
-  LagrangianLinearTIR() : LagrangianR(RELATION::LinearTIR) {};
+   */
+  LagrangianLinearTIR() : LagrangianR(RELATION::LinearTIR){};
 
   /** create the Relation from a set of data
-  *  \param C the matrix C
-  */
+   *  \param C the matrix C
+   */
   LagrangianLinearTIR(SP::SimpleMatrix C);
 
   /** create the Relation from a set of data
-  *  \param C the matrix C
-  *  \param F the matrix F
-  *  \param e the vector e
-  */
-  LagrangianLinearTIR(SP::SimpleMatrix C,  SP::SimpleMatrix F, SP::SiconosVector e);
+   *  \param C the matrix C
+   *  \param F the matrix F
+   *  \param e the vector e
+   */
+  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix F,
+                      SP::SiconosVector e);
 
   /** create the Relation from a set of data
-  *  \param C the matrix C
-  *  \param e the vector e
-  */
+   *  \param C the matrix C
+   *  \param e the vector e
+   */
   LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e);
 
   /** destructor
-  */
-  virtual ~LagrangianLinearTIR() {};
+   */
+  virtual ~LagrangianLinearTIR(){};
 
   /** initialize LagrangianLinearTIR specific operators.
    * \param inter an Interaction using this relation
@@ -83,46 +81,40 @@ public:
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
-  void checkSize(Interaction& inter);
+  void checkSize(Interaction &inter) override;
+  ;
 
   /** default function to compute y
-  *  \param time not used
-  *  \param inter the Interaction we want to update
-  *  \param derivativeNumber the derivative of y we want to compute
-  */
-  void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber = 0);
+   *  \param time not used
+   *  \param inter the Interaction we want to update
+   *  \param derivativeNumber the derivative of y we want to compute
+   */
+  void computeOutput(double time, Interaction &inter,
+                     unsigned int derivativeNumber = 0) override;
+  ;
 
   /** default function to compute r
-  *  \param time not used
-  *  \param inter the Interaction we want to update
-  *  \param level the derivative of lambda we want to compute
-  */
-  void computeInput(double time, Interaction& inter, unsigned int level = 0);
+   *  \param time not used
+   *  \param inter the Interaction we want to update
+   *  \param level the derivative of lambda we want to compute
+   */
+  void computeInput(double time, Interaction &inter,
+                    unsigned int level = 0) override;
+  ;
 
   /* compute all the H Jacobian
    *  \param time not used
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJach(double time, Interaction& inter)
-  {
-    ;
-  }
-
+  void computeJach(double time, Interaction &inter) override {}
 
   /* compute all the G Jacobian
    *  \param time not used
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJacg(double time, Interaction& inter)
-  {
-    ;
-  }
-
-
-
-
+  void computeJacg(double time, Interaction &inter) override {}
 
   // GETTERS/SETTERS
 
@@ -130,74 +122,51 @@ public:
   /** get C
    *  \return pointer on a plugged matrix
    */
-  inline SP::SimpleMatrix C() const
+  inline SP::SimpleMatrix C() const override
   {
     return _jachq;
   }
 
-
   /** set C to pointer newPtr
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setCPtr(SP::SimpleMatrix newPtr)
-  {
-    _jachq = newPtr;
-  }
+  inline void setCPtr(SP::SimpleMatrix newPtr) { _jachq = newPtr; }
 
   // -- D --
 
   /** get D
    *  \return pointer on a plugged matrix
    */
-  inline SP::SimpleMatrix D() const
-  {
-    return _jachlambda;
-  }
-
+  inline SP::SimpleMatrix D() const { return _jachlambda; }
 
   /** set D to pointer newPtr
    * \param newPtr a SP to plugged matrix
    */
-  inline void setDPtr(SP::SimpleMatrix newPtr)
-  {
-    _jachlambda = newPtr;
-  }
+  inline void setDPtr(SP::SimpleMatrix newPtr) { _jachlambda = newPtr; }
 
   // -- F --
 
   /** get F
-  *  \return pointer on a plugged matrix
-  */
-  inline SP::SimpleMatrix F() const
-  {
-    return _F;
-  }
+   *  \return pointer on a plugged matrix
+   */
+  inline SP::SimpleMatrix F() const { return _F; }
 
   /** set F to pointer newPtr
    * \param newPtr a SP to plugged matrix
    */
-  inline void setFPtr(SP::SimpleMatrix newPtr)
-  {
-    _F = newPtr;
-  }
+  inline void setFPtr(SP::SimpleMatrix newPtr) { _F = newPtr; }
 
   // -- e --
 
   /** get e
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector e() const
-  {
-    return _e;
-  }
+  inline SP::SiconosVector e() const { return _e; }
 
   /** set e to pointer newPtr
    *  \param newPtr a SP to plugged vector
    */
-  inline void setEPtr(SP::SiconosVector newPtr)
-  {
-    _e = newPtr;
-  }
+  inline void setEPtr(SP::SiconosVector newPtr) { _e = newPtr; }
 
   /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SimpleMatrix
@@ -205,18 +174,17 @@ public:
 
   /** print the data to the screen
    */
-  void display() const;
+  void display() const override;
 
   /**
    * \return true if the relation is linear.
    */
 
-  virtual bool isLinear()
+  bool isLinear() override // final would be better but swig does not like it
   {
     return true;
   }
   ACCEPT_STD_VISITORS();
-
 };
 
 TYPEDEF_SPTR(LagrangianLinearTIR)

@@ -101,11 +101,6 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisa
   (*_allNSProblems).resize(nb);
 }
 
-// --- Destructor ---
-TimeStepping::~TimeStepping()
-{
-}
-
 void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
 {
   _allOSI->insert(osi);

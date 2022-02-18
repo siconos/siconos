@@ -14,8 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 
 /** \file DiskPlanR.hpp
  */
@@ -23,29 +22,28 @@
 #ifndef DiskPlanR_h
 #define DiskPlanR_h
 
-#include "MechanicsFwd.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "MechanicsFwd.hpp"
 
 /** \class DiskPlanR
  *  \brief disk - plan relation - Inherits from LagrangianScleronomousR
  */
-class DiskPlanR : public LagrangianScleronomousR, public std::enable_shared_from_this<DiskPlanR>
-{
+class DiskPlanR : public LagrangianScleronomousR,
+                  public std::enable_shared_from_this<DiskPlanR> {
 private:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(DiskPlanR);
 
-  double r, A, B, C, sqrA2pB2,
-    AC, B2, A2, AB, BC, xCenter, yCenter, width, halfWidth, x1, x2, y1, y2;
+  double r, A, B, C, sqrA2pB2, AC, B2, A2, AB, BC, xCenter, yCenter, width,
+      halfWidth, x1, x2, y1, y2;
   bool finite;
 
   void init(double, double, double, double, double, double, double);
 
-  DiskPlanR() : LagrangianScleronomousR() {};
+  DiskPlanR() : LagrangianScleronomousR(){};
 
 public:
-
   /** Infinite Plan
 
   \param r disk radius
@@ -65,55 +63,31 @@ public:
     \param yCenter
     \param width
     */
-  DiskPlanR(double disk, double A, double B, double C,
-            double xCenter, double yCenter, double width);
+  DiskPlanR(double disk, double A, double B, double C, double xCenter,
+            double yCenter, double width);
 
   /** Finite Plan
-  */
+   */
   DiskPlanR(double, double, double, double, double);
 
   /* distance between disk and plan */
   double distance(double x, double y, double r) const;
 
-  double getRadius() const
-  {
-    return r;
-  };
+  double getRadius() const { return r; };
 
-  double getA() const
-  {
-    return A;
-  };
+  double getA() const { return A; };
 
-  double getB() const
-  {
-    return B;
-  };
+  double getB() const { return B; };
 
-  double getC() const
-  {
-    return C;
-  };
+  double getC() const { return C; };
 
-  double gethypotAB() const
-  {
-    return sqrA2pB2;
-  };
+  double gethypotAB() const { return sqrA2pB2; };
 
-  double getXCenter() const
-  {
-    return xCenter;
-  };
+  double getXCenter() const { return xCenter; };
 
-  double getYCenter() const
-  {
-    return yCenter;
-  };
+  double getYCenter() const { return yCenter; };
 
-  double getWidth() const
-  {
-    return width;
-  };
+  double getWidth() const { return width; };
 
   using LagrangianScleronomousR::computeh;
   /** to compute the output y = h(t,q,z) of the Relation
@@ -121,31 +95,27 @@ public:
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  void computeh(const BlockVector &q, BlockVector &z,
+                SiconosVector &y) override;
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector& q, BlockVector& z);
+  void computeJachq(const BlockVector &q, BlockVector &z) override;
 
   bool equal(double, double, double, double) const;
 
   bool equal(double, double, double, double, double, double, double) const;
 
-  bool equal(const DiskPlanR&) const;
+  bool equal(const DiskPlanR &) const;
 
-  bool isFinite() const
-  {
-    return finite;
-  };
+  bool isFinite() const { return finite; };
 
   /** visitor hooks
    */
-  ACCEPT_VISITORS();
+  ACCEPT_STD_VISITORS();
 
-  ~DiskPlanR() {};
-
+  ~DiskPlanR(){};
 };
 #endif /* DiskPlanR */
-

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file
  * TimeSteppingD1Minus simulation
@@ -30,8 +30,7 @@
  *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
  *  on Discontinuous Galerkin Methods: Definition and Outlook
  */
-class TimeSteppingD1Minus : public Simulation
-{
+class TimeSteppingD1Minus : public Simulation {
 private:
   /** serialization hooks */
   ACCEPT_SERIALIZATION(TimeSteppingD1Minus);
@@ -41,16 +40,16 @@ private:
 
 protected:
   /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
-  virtual void initOSNS();
+  void initOSNS() override;
 
 public:
-
   /** constructor with the time-discretisation
    * \param nsds the current nonsmooth dynamical system
    * \param td pointer to a TimeDiscretisation
    * \param nb number of non smooth problem
    */
-  TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td , int nb);
+  TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds,
+                      SP::TimeDiscretisation td, int nb);
 
   /** destructor */
   ~TimeSteppingD1Minus();
@@ -61,18 +60,18 @@ public:
    *  1 : ACTIVE interactions for IMPACTS
    *  2 : ACTIVE interactions for CONTACTS
    */
-  virtual void updateIndexSet(unsigned int i);
+  void updateIndexSet(unsigned int i) override;
 
   /** run the simulation, from t0 to T */
-  virtual void run();
+  void run() override;
 
   /** step from current event to next event of EventsManager */
-  virtual void advanceToEvent();
+  void advanceToEvent() override;
 
   /** update input
    *  \param level lambda order used to compute input
    */
-  void updateInput(unsigned int level);
+  void updateInput(unsigned int level) override;
 
   /** compute residu */
   void computeResidu();

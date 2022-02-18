@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file
   Time-Stepping simulation with projections on constraints
 */
@@ -23,13 +23,10 @@
 
 #include "TimeStepping.hpp"
 
-
-
 /** Time-Stepping scheme
  *
  */
-class TimeSteppingCombinedProjection : public TimeStepping
-{
+class TimeSteppingCombinedProjection : public TimeStepping {
 protected:
   /** serialization hooks
    */
@@ -44,18 +41,16 @@ protected:
   unsigned int _cumulatedNewtonNbIterations;
 
   /** Number of iteration of projection
-  */
+   */
   unsigned int _nbProjectionIteration;
 
   /** Number of cumulated iteration of projection
-  */
+   */
   unsigned int _nbCumulatedProjectionIteration;
 
   /** Number of iteration for stabilizating indexsets
-  */
+   */
   unsigned int _nbIndexSetsIteration;
-
-
 
   /** tolerance for the violation of the equality
    *  constraints at the  position level.
@@ -67,7 +62,6 @@ protected:
    */
   double _constraintTolUnilateral;
 
-
   /** maximum violation for the violation of the unilateral
    *  constraints at the  position level.
    */
@@ -78,9 +72,6 @@ protected:
    */
   double _maxViolationEquality;
 
-
-
-
   /** Default maximum number of projection iteration*/
   unsigned int _projectionMaxIteration;
 
@@ -90,64 +81,52 @@ protected:
   /** disabled or enabled projection (Debug Projection) */
   bool _doCombinedProj;
 
-  /** disabled or enabled projection On Equality (or Unilateral) for unilateral constraints */
+  /** disabled or enabled projection On Equality (or Unilateral) for unilateral
+   * constraints */
   bool _doCombinedProjOnEquality;
 
-  /** Boolean to check if the index sets are stabilized in the Combined Projection Algorithm */
+  /** Boolean to check if the index sets are stabilized in the Combined
+   * Projection Algorithm */
   bool _isIndexSetsStable;
 
-  /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
-   *  \param level unsigned int: the level of the set to be updated
+  /** update indexSets[i] of the topology, using current y and lambda values of
+   * Interactions. \param level unsigned int: the level of the set to be updated
    */
-  void updateIndexSet(unsigned int level);
-
+  void updateIndexSet(unsigned int level) override;
 
   struct _SimulationEffectOnOSNSP;
   friend struct _SimulationEffectOnOSNSP;
 
-
 public:
-
-  virtual void initOSNS();
-
-
-
+  void initOSNS() override;
 
   /** Constructor with the time-discretisation.
    * \param nsds the nsds that we want to simulate
    *  \param td a pointer to a timeDiscretisation (linked to the model
    *  that owns this simulation)
    *  \param osi a one step integrator
-   * \param osnspb_velo a one step non smooth problem for the velocity formulation
-   *  \param osnspb_pos a one step non smooth problem for the position formulation
-   *  \param _level
+   * \param osnspb_velo a one step non smooth problem for the velocity
+   * formulation \param osnspb_pos a one step non smooth problem for the
+   * position formulation \param _level
    */
-  TimeSteppingCombinedProjection(
-    SP::NonSmoothDynamicalSystem nsds,
-    SP::TimeDiscretisation td,
-    SP::OneStepIntegrator osi,
-    SP::OneStepNSProblem osnspb_velo,
-    SP::OneStepNSProblem osnspb_pos,
-    unsigned int _level = 2);
-
+  TimeSteppingCombinedProjection(SP::NonSmoothDynamicalSystem nsds,
+                                 SP::TimeDiscretisation td,
+                                 SP::OneStepIntegrator osi,
+                                 SP::OneStepNSProblem osnspb_velo,
+                                 SP::OneStepNSProblem osnspb_pos,
+                                 unsigned int _level = 2);
 
   /** default constructor
    */
-  TimeSteppingCombinedProjection() {};
+  TimeSteppingCombinedProjection(){};
 
   virtual ~TimeSteppingCombinedProjection();
 
-  virtual void updateWorldFromDS()
-  {
-    ;
-  }
+  void updateWorldFromDS() override { ; }
   /** get the Number of iteration of projection
    * \return unsigned int nbProjectionIteration
    */
-  inline unsigned int nbProjectionIteration()
-  {
-    return _nbProjectionIteration;
-  }
+  inline unsigned int nbProjectionIteration() { return _nbProjectionIteration; }
   /** get the Number of cumulated iteration of projection
    * \return unsigned int
    */
@@ -167,69 +146,43 @@ public:
   /** get the Number of iteration for stabilizating indexsets
    * \return unsigned int
    */
-  inline unsigned int nbIndexSetsIteration()
-  {
-    return _nbIndexSetsIteration;
-  }
+  inline unsigned int nbIndexSetsIteration() { return _nbIndexSetsIteration; }
 
-  inline void setConstraintTol(double v)
-  {
-    _constraintTol = v;
-  }
+  inline void setConstraintTol(double v) { _constraintTol = v; }
 
   inline void setConstraintTolUnilateral(double v)
   {
     _constraintTolUnilateral = v;
   }
 
-  inline double maxViolationUnilateral()
-  {
-    return _maxViolationUnilateral;
-  }
-  inline double maxViolationEquality()
-  {
-    return _maxViolationEquality;
-  }
-
+  inline double maxViolationUnilateral() { return _maxViolationUnilateral; }
+  inline double maxViolationEquality() { return _maxViolationEquality; }
 
   inline void setProjectionMaxIteration(unsigned int v)
   {
     _projectionMaxIteration = v;
   }
 
-  inline void setDoCombinedProj(unsigned int v)
-  {
-    _doCombinedProj = v;
-  }
+  inline void setDoCombinedProj(unsigned int v) { _doCombinedProj = v; }
 
-  inline bool doCombinedProjOnEquality()
-  {
-    return _doCombinedProjOnEquality;
-  }
-
+  inline bool doCombinedProjOnEquality() { return _doCombinedProjOnEquality; }
 
   /**
    */
-  void advanceToEvent();
+  void advanceToEvent() override;
   /**
    */
   void advanceToEventOLD();
 
   /*
    */
-  void computeCriteria(bool * runningProjection);
+  void computeCriteria(bool *runningProjection);
 
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();
-
 };
 
 DEFINE_SPTR(TimeSteppingCombinedProjection)
 
 #endif // TIMESTEPPINGCOMBINEDPROJECTION_H
-
-
-
-
-

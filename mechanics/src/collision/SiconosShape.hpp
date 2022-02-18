@@ -219,8 +219,7 @@ public:
 
   double length() { return _length; }
 
-  /** visitors hook
-   */
+  // visitors hook
   ACCEPT_VISITORS();
 };
 

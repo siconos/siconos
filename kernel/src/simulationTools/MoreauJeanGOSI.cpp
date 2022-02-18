@@ -47,11 +47,11 @@ using namespace RELATION;
 /// for non-owned shared pointers (passing const SiconosVector into
 /// functions that take SP::SiconosVector without copy -- warning
 /// const abuse!)
-static void null_deleter(const SiconosVector *) {}
-template <typename T> static std::shared_ptr<T> ptr(const T& a)
-{
-  return std::shared_ptr<SiconosVector>(&*(T*)&a, null_deleter);
-}
+//static void null_deleter(const SiconosVector *) {}
+// template <typename T> static std::shared_ptr<T> ptr(const T& a)
+// {
+//   return std::shared_ptr<SiconosVector>(&*(T*)&a, null_deleter);
+// }
 
 
 void MoreauJeanGOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)

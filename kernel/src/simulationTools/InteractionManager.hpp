@@ -66,6 +66,8 @@ protected:
   friend class EventDriven;
 
   ACCEPT_SERIALIZATION(InteractionManager);
+  VIRTUAL_ACCEPT_VISITORS(InteractionManager);
+
 };
 
 #endif /* InteractionManager_h */

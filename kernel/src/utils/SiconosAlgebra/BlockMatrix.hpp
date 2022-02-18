@@ -97,10 +97,9 @@ public:
 
   /** destructor
    */
-  ~BlockMatrix(void);
+  ~BlockMatrix(void) noexcept;
 
-
-  inline bool checkSymmetry(double tol) const
+  inline bool checkSymmetry(double tol) const override
   {
     return false;
   };
@@ -109,148 +108,148 @@ public:
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int
    */
-  unsigned int numberOfBlocks(unsigned int i) const;
+  unsigned int numberOfBlocks(unsigned int i) const override;
 
   /** get DenseMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a DenseMat
    */
-  const DenseMat getDense(unsigned int row = 0, unsigned int col = 0) const;
+  const DenseMat getDense(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get TriangMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a TriangMat
    */
-  const TriangMat getTriang(unsigned int row = 0, unsigned int col = 0) const;
+  const TriangMat getTriang(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get SymMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a SymMat
    */
-  const SymMat getSym(unsigned int row = 0, unsigned int col = 0)const;
+  const SymMat getSym(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get BandedMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a BandedMat
    */
-  const BandedMat getBanded(unsigned int row = 0, unsigned int col = 0)const;
+  const BandedMat getBanded(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get SparseMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a SparseMat
    */
-  const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0)const;
+  const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get SparseCoordinateMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a SparseCoordinateMat
    */
-  const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0)const;
+  const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get ZeroMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a ZeroMat
    */
-  const ZeroMat getZero(unsigned int row = 0, unsigned int col = 0) const;
+  const ZeroMat getZero(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get  getIdentity matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return an IdentityMat
    */
-  const IdentityMat getIdentity(unsigned int row = 0, unsigned int col = 0) const;
+  const IdentityMat getIdentity(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on DenseMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a DenseMat*
    */
-  DenseMat* dense(unsigned int row = 0, unsigned int col = 0)const;
+  DenseMat* dense(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get a pointer on TriangMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a TriangMat*
    */
-  TriangMat* triang(unsigned int row = 0, unsigned int col = 0)const;
+  TriangMat* triang(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get a pointer on SymMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col `an unsigned int, position of the block (column)
    *  \return a SymMat*
    */
-  SymMat* sym(unsigned int row = 0, unsigned int col = 0)const;
-
+  SymMat* sym(unsigned int row = 0, unsigned int col = 0)const override;
+ 
   /** get a pointer on BandedMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a BandedMat*
    */
-  BandedMat* banded(unsigned int row = 0, unsigned int col = 0)const;
+  BandedMat* banded(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get a pointer on SparseMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a SparseMat*
    */
-  SparseMat* sparse(unsigned int row = 0, unsigned int col = 0)const;
+  SparseMat* sparse(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get a pointer on SparseCoordinateMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a SparseCoordinateMat*
    */
-  SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0)const;
+  SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0)const override;
 
   /** get a pointer on ZeroMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return a ZeroMat*
    */
-  ZeroMat* zero_mat(unsigned int row = 0, unsigned int col = 0) const;
+  ZeroMat* zero_mat(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on Identity matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
    *  \return an IdentityMat*
    */
-  IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const;
+  IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** return the address of the array of double values of the matrix
    *  \param row position for the required block ->useless for SimpleMatrix
    *  \param col position for the required block ->useless for SimpleMatrix
    *  \return double* : the pointer on the double array
    */
-  double* getArray(unsigned int row = 0, unsigned int col = 0) const;
+  double* getArray(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** sets all the values of the matrix to 0.0
    */
-  void zero();
+  void zero() override;
 
   /** Initialize the matrix with random values
    */
-  void randomize();
+  void randomize() override;
 
   /** Initialize a symmetric matrix with random values
    */
-  void randomize_sym();
+  void randomize_sym() override;
 
   /** set an identity matrix
    */
-  void eye();
+  void eye() override;
 
   /** get the number of rows or columns of the matrix
    *  \param index 0 for rows, 1 for columns
    *  \return an int
    */
-  unsigned int size(unsigned int index) const;
+  unsigned int size(unsigned int index) const override;
 
   /** resize the matrix with nbrow rows and nbcol columns, lower and upper are useful only for SparseMat.The existing elements of the Block matrix are preseved when specified.
    * \param nbrow
@@ -260,69 +259,69 @@ public:
    * \param b
    */
   void resize(unsigned int nbrow, unsigned int nbcol, unsigned int lower = 0,
-              unsigned int upper = 0, bool b = true);
+              unsigned int upper = 0, bool b = true) override;
 
   /** compute the infinite norm of the Block matrix
    *  \return a double
    */
-  double normInf() const;
+  double normInf() const override;
 
   /** display data on standard output
    */
-  void display() const;
+  void display() const override;
   
   /** display data on standard output
    */
-  void displayExpert(bool brief = true) const;
+  void displayExpert(bool brief = true) const override;
 
   /** put data of the matrix into a std::string
    * \return std::string
    */
-  std::string toString() const;
+  std::string toString() const override;
 
   /** send data of the matrix to an ostream
    * \param os An output stream
    * \param bm a BlockMatrix
    * \return The same output stream
    */
-  friend std::ostream& operator<<(std::ostream& os, const BlockMatrix& bm);
+  friend std::ostream& operator<<(std::ostream& os, const BlockMatrix& bm) ;
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 
    *  \param j an unsigned int 
    *  \return the element matrix[i,j]
    */
-  double& operator()(unsigned int i, unsigned int j);
+  double& operator()(unsigned int i, unsigned int j) override;
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 
    *  \param j an unsigned int
    *  \return the element matrix[i,j]
    */
-  double operator()(unsigned int i, unsigned int j) const;
+  double operator()(unsigned int i, unsigned int j) const override;
 
   /** return the element matrix[i,j]
    *  \param i an unsigned int 
    *  \param j an unsigned int 
    *  \return a double
    */
-  double getValue(unsigned int i, unsigned int j) const;
+  double getValue(unsigned int i, unsigned int j) const override;
 
   /** set the element matrix[i,j]
    *  \param i an unsigned int i
    *  \param j an unsigned int j
    *  \param value
    */
-  void setValue(unsigned int i, unsigned int j, double value);
+  void setValue(unsigned int i, unsigned int j, double value) override;
 
   /** transpose in place: x->trans() is x = transpose of x.
    */
-  void trans();
+  void trans() override;
 
   /** transpose a matrix: x->trans(m) is x = transpose of m.
    *  \param m the matrix to be transposed.
    */
-  void trans(const SiconosMatrix& m);
+  void trans(const SiconosMatrix& m) override;
 
   /** get the vector tabRow
    *  \return a vector of int
@@ -343,7 +342,7 @@ public:
   /** get the vector tabRow
    *  \return a pointer to vector of int
    */
-  inline const SP::Index tabRow() const
+  inline const SP::Index tabRow() const override
   {
     return _tabRow;
   };
@@ -351,7 +350,7 @@ public:
   /** get the vector tabCol
    *  \return a pointer to vector of int
    */
-  inline const SP::Index tabCol() const
+  inline const SP::Index tabCol() const override
   {
     return _tabCol;
   };
@@ -361,38 +360,38 @@ public:
    *  \param col unsigned int
    *  \return SP::SiconosMatrix the requested block
    */
-  SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0);
+  SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) override;
 
   /** get block at position row-col
    *  \param row unsigned int
    *  \param col unsigned int
    *  \return SP::SiconosMatrix the requested block
    */
-  SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const;
+  SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get row index of current matrix and save it in  v
    *  \param r index of required line
    *  \param[out] v a vector
    */
-  void  getRow(unsigned int r, SiconosVector& v) const;
+  void  getRow(unsigned int r, SiconosVector& v) const override;
 
   /** set line row of the current matrix with vector v
    *  \param r index of required line
    *  \param v a vector
    */
-  void  setRow(unsigned int r, const SiconosVector& v);
+  void  setRow(unsigned int r, const SiconosVector& v) override;
 
   /** get column index of current matrix and save it into vOut
    *  \param c index of required column
    *  \param[out] v a vector
    */
-  void  getCol(unsigned int c, SiconosVector& v) const;
+  void  getCol(unsigned int c, SiconosVector& v) const override;
 
   /** set column col of the current matrix with vector
    *  \param c index of required column
    *  \param v a vector
    */
-  void  setCol(unsigned int c, const SiconosVector& v);
+  void  setCol(unsigned int c, const SiconosVector& v) override;
 
   /** add a part of the input matrix (starting from (i,j) pos) to the current matrix
    *  \param i an unsigned int i (in-out)
@@ -412,7 +411,7 @@ public:
    * \param m the matrix to be copied
    * \return  BlockMatrix&
    */
-  BlockMatrix& operator = (const SiconosMatrix& m);
+  BlockMatrix& operator = (const SiconosMatrix& m) override;
 
   /** assignment
    *  \param m the matrix to be copied
@@ -424,22 +423,22 @@ public:
    *  \param m the matrix to be copied
    * \return  BlockMatrix&
    */
-  BlockMatrix& operator = (const DenseMat& m);
+  BlockMatrix& operator = (const DenseMat& m) override;
 
   /** operator +=
    *  \param m the matrix to add
    * \return  BlockMatrix&
    */
-  BlockMatrix& operator +=(const SiconosMatrix& m);
+  BlockMatrix& operator +=(const SiconosMatrix& m) override;
 
   /**operator -=
    *  \param m the matrix to subtract
    * \return  BlockMatrix&
    */
-  BlockMatrix& operator -=(const SiconosMatrix& m);
+  BlockMatrix& operator -=(const SiconosMatrix& m) override;
 
 
-  void updateNumericsMatrix()
+  void updateNumericsMatrix() override
   {
     THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
   };
@@ -448,30 +447,30 @@ public:
   /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
-  void PLUFactorizationInPlace();
+  void PLUFactorizationInPlace() override;
   
-  void Factorize();
+  void Factorize() override;
 
  
   /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
    */
-  void PLUInverseInPlace();
+  void PLUInverseInPlace() override;
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
    *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
-  void PLUForwardBackwardInPlace(SiconosMatrix &B);
-  void Solve(SiconosMatrix &B);
+  void PLUForwardBackwardInPlace(SiconosMatrix &B) override;
+  void Solve(SiconosMatrix &B) override;
   
   
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
    *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
-  void PLUForwardBackwardInPlace(SiconosVector &B);
-  void Solve(SiconosVector &B);
+  void PLUForwardBackwardInPlace(SiconosVector &B) override;
+  void Solve(SiconosVector &B) override;
   
   /** visitors hook
    */
@@ -485,7 +484,7 @@ public:
   /** number of non-zero in the matrix
    * \param tol the tolerance under which a number is considered zero
    */
-  virtual size_t nnz(double tol = 1.e-14);
+  virtual size_t nnz(double tol = 1.e-14) override;
 };
 
 //DEFINE_SPTR(BlockMatrix)

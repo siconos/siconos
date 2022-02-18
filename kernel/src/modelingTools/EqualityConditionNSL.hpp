@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file EqualityConditionNSL.hpp
 
 */
@@ -23,37 +23,33 @@
 
 #include "NonSmoothLaw.hpp"
 
-
 /** Equality NonSmoothLaw
  *
  **/
-class EqualityConditionNSL : public NonSmoothLaw
-{
+class EqualityConditionNSL : public NonSmoothLaw {
 private:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(EqualityConditionNSL);
 
   /** default constructor
    */
-  EqualityConditionNSL() {};
+  EqualityConditionNSL() = default;
 
 public:
   /** basic constructor
-  *  \param size of the non smooth law
-  */
+   *  \param size of the non smooth law
+   */
   EqualityConditionNSL(unsigned int size);
 
   /** Destructor */
   ~EqualityConditionNSL();
 
-
-  /** print the data to the screen
-  */
-  inline void display()const {};
-
-  /** Visitors hook
+  /** display the data of the NonSmoothLaw on the standard output
+   *
    */
+  void display() const override{};
+
+  // Visitors hook
   ACCEPT_STD_VISITORS();
 };
 

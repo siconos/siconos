@@ -3,24 +3,24 @@
 #define _MULTIPLEIMPACTNSL_
 //==================================================================================================================
 #include "NonSmoothLaw.hpp"
-#include "SiconosPointers.hpp"          // for DEFINE_SPTR
-#include "SiconosSerialization.hpp"     // for ACCEPT_SERIALIZATION
-#include "SiconosVisitor.hpp"           // for ACCEPT_STD_VISITORS
+#include "SiconosPointers.hpp"      // for DEFINE_SPTR
+#include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
+#include "SiconosVisitor.hpp"       // for ACCEPT_STD_VISITORS
 
 //==================================================================================================================
-class MultipleImpactNSL : public NonSmoothLaw
-{
+class MultipleImpactNSL : public NonSmoothLaw {
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(MultipleImpactNSL);
 
-  //Energytical restitution coefficient
+  // Energytical restitution coefficient
   double _ResCof;
-  //Normal stiffness at contact
+  // Normal stiffness at contact
   double _Stiff;
-  //Elasticity coefficient
+  // Elasticity coefficient
   double _ElasCof;
+
 public:
   // Default Constructor
   MultipleImpactNSL();
@@ -29,20 +29,11 @@ public:
   // Destructor
   ~MultipleImpactNSL();
   // Get the value of the energytical restitution coefficientx
-  inline double ResCof() const
-  {
-    return _ResCof;
-  };
+  inline double ResCof() const { return _ResCof; };
   // Get the value of the stiffness
-  inline double Stiff() const
-  {
-    return _Stiff;
-  };
+  inline double Stiff() const { return _Stiff; };
   // Get the value of the elasticity coefficient
-  inline double ElasCof() const
-  {
-    return _ElasCof;
-  }
+  inline double ElasCof() const { return _ElasCof; }
   // Set the value to the restitution coefficient
   void setResCof(double newResCof);
   // Set the value to the stiffness
@@ -50,25 +41,11 @@ public:
   // Set the value to the elasticity cofficient
   void setElasCoeff(double _newElasCoef);
   //
-  bool isVerified() const;
+  bool isVerified() const override;
   // Display the information about the multiple impact law
-  void display() const;
-  //Visitors hook
+  void display() const override;
+  // Visitors hook
   ACCEPT_STD_VISITORS();
 };
 DEFINE_SPTR(MultipleImpactNSL)
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-

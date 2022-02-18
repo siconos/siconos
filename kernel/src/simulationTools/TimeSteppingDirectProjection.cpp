@@ -65,11 +65,6 @@ TimeSteppingDirectProjection::TimeSteppingDirectProjection(
 
 }
 
-// --- Destructor ---
-TimeSteppingDirectProjection::~TimeSteppingDirectProjection()
-{
-}
-
 void TimeSteppingDirectProjection::initOSNS()
 {
   TimeStepping::initOSNS();

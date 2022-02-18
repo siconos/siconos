@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SphereLDSSphereLDSR.hpp
   \brief Two spheres relation - Inherits from LagrangianScleronomousR
@@ -23,22 +23,22 @@
 #ifndef SphereLDSSphereLDSR_h
 #define SphereLDSSphereLDSR_h
 
-#include "MechanicsFwd.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "MechanicsFwd.hpp"
 
-class SphereLDSSphereLDSR : public LagrangianScleronomousR, public std::enable_shared_from_this<SphereLDSSphereLDSR>
-{
+class SphereLDSSphereLDSR
+    : public LagrangianScleronomousR,
+      public std::enable_shared_from_this<SphereLDSSphereLDSR> {
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(SphereLDSSphereLDSR);
 
   double r1, r2, r1pr2;
 
-  SphereLDSSphereLDSR() {};
+  SphereLDSSphereLDSR(){};
 
 public:
-
   /** Constructor
 
   \param r1 disk1 radius
@@ -46,7 +46,8 @@ public:
   */
   SphereLDSSphereLDSR(double r1, double r2);
 
-  double distance(double, double, double, double, double, double, double, double);
+  double distance(double, double, double, double, double, double, double,
+                  double);
 
   using LagrangianScleronomousR::computeh;
   /** to compute the output y = h(t,q,z) of the Relation
@@ -54,17 +55,17 @@ public:
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  void computeh(const BlockVector &q, BlockVector &z,
+                SiconosVector &y) override;
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector& q, BlockVector& z);
+  void computeJachq(const BlockVector &q, BlockVector &z) override;
 
   /** visitors hook
    */
-  ACCEPT_VISITORS();
-
+  ACCEPT_STD_VISITORS();
 };
 #endif /* SphereLDSSphereLDSR_h */

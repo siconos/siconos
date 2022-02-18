@@ -211,7 +211,7 @@ BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMa
 
 }
 
-BlockMatrix::~BlockMatrix()
+BlockMatrix::~BlockMatrix() noexcept
 {
 
   _mat->clear();

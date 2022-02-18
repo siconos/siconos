@@ -139,7 +139,10 @@ void FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned int level)
     _r.reset(new SiconosVector(_n));
 }
 
-
+void FirstOrderNonLinearDS::resetToInitialState()
+{
+  *(_x[0]) = *_x0;
+}
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 

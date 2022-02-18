@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SphereNEDSSphereNEDSR.hpp
   \brief Two spheres relation with the Newton Euler formalism and quaternions.
@@ -25,20 +25,19 @@
 
 #include "MechanicsFwd.hpp"
 #include "NewtonEuler3DR.hpp"
-class SphereNEDSSphereNEDSR : public NewtonEuler3DR,
-  public std::enable_shared_from_this<SphereNEDSSphereNEDSR>
-{
+class SphereNEDSSphereNEDSR
+    : public NewtonEuler3DR,
+      public std::enable_shared_from_this<SphereNEDSSphereNEDSR> {
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(SphereNEDSSphereNEDSR);
 
   double r1, r2, r1pr2;
 
-  SphereNEDSSphereNEDSR() {};
+  SphereNEDSSphereNEDSR(){};
 
 public:
-
   /** Constructor
 
   \param r1 disk1 radius
@@ -46,20 +45,20 @@ public:
   */
   SphereNEDSSphereNEDSR(double r1, double r2);
 
-  double distance(double, double, double, double, double, double, double, double);
+  double distance(double, double, double, double, double, double, double,
+                  double);
 
   /** to compute the output y = h(t,q,z) of the Relation
       \param time current time value
       \param q coordinates of the dynamical systems involved in the relation
       \param y the resulting vector
   */
-  void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  void computeh(double time, const BlockVector &q0, SiconosVector &y) override;
 
-  //void computeJachq(double);
+  // void computeJachq(double);
 
   /** visitors hook
    */
   ACCEPT_VISITORS();
-
 };
 #endif /* SphereNEDSSphereNEDSR_h */
