@@ -67,6 +67,7 @@
   REGISTER(LagrangianLinearTIR)                        \
   REGISTER(Lagrangian2d1DR)                            \
   REGISTER(Lagrangian2d2DR)                            \
+  REGISTER(Lagrangian2d3DR)                            \
   REGISTER(NewtonEulerDS)                              \
   REGISTER(NewtonEulerR)                               \
   REGISTER_STRUCT(DynamicalSystemsGraph)               \

@@ -26,10 +26,6 @@
 #include <Interaction.hpp>
 #include <BlockVector.hpp>
 
-Contact2dR::Contact2dR()
-  : Lagrangian2d2DR()
-{
-}
 
 // void Contact2dR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 // {

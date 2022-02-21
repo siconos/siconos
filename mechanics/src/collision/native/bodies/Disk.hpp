@@ -35,9 +35,6 @@ private:
 
   void MassSetup();
 
-protected:
-  Disk() : CircularDS() = default;
-
 public:
   /** Constructor
       \param radius

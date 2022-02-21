@@ -26,15 +26,14 @@
 class Contact2dR : public Lagrangian2d2DR
 {
 private:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(Contact2dR);
 
 public:
-  Contact2dR();
+  Contact2dR():Lagrangian2d2DR{} {};
 
   /**/
-  virtual ~Contact2dR() = default;
+  virtual ~Contact2dR() noexcept = default;
 
   /* For users that may require extra information about contacts. */
   SP::BodyShapeRecord bodyShapeRecordA;

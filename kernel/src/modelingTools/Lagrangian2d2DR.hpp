@@ -21,7 +21,7 @@
 #ifndef Lagrangian2d2DR_H
 #define Lagrangian2d2DR_H
 
-#include "LagrangianDS.hpp"
+#include "SiconosFwd.hpp"
 #include "LagrangianScleronomousR.hpp"
 
 using namespace RELATION;
@@ -88,7 +88,7 @@ public:
 
   /** destructor
    */
-  virtual ~Lagrangian2d2DR() noexcept {};
+  virtual ~Lagrangian2d2DR() noexcept = default;
 
   void initialize(Interaction &inter) override;
 

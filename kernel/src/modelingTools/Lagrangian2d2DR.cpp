@@ -18,7 +18,7 @@
 #include "Lagrangian2d2DR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
-
+#include "SimpleMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -34,7 +34,7 @@ void Lagrangian2d2DR::initialize(Interaction& inter)
     THROW_EXCEPTION("Lagrangian2d2DR::initialize(Interaction& inter). The size of ds must of size 3");
   }
   unsigned int qSize = 3 * (inter.getSizeOfDS() / 3);
-  _jachq.reset(new SimpleMatrix(2, qSize));
+  _jachq = std::make_shared<SimpleMatrix>(2, qSize);
 }
 
 double Lagrangian2d2DR::distance() const

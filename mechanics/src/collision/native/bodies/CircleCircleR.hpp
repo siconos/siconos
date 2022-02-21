@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 /** \file CircleCircleR.hpp
  *
@@ -23,30 +23,28 @@
 #ifndef CircleCircleR_h
 #define CircleCircleR_h
 
-#include "CircularR.hpp"
 #include "MechanicsFwd.hpp"
+#include "CircularR.hpp"
 
 /** \class CircleCircleR
  *  \brief Two disks relation - Inherits from LagrangianScleronomousR
  */
-class CircleCircleR : public CircularR,
-                      public std::enable_shared_from_this<CircleCircleR> {
+class CircleCircleR : public CircularR, public std::enable_shared_from_this<CircleCircleR>
+{
 private:
-  /** serialization hooks
-   */
+  // serialization hooks
+
   ACCEPT_SERIALIZATION(CircleCircleR);
 
-  // CircleCircleR():CircularR() = default{};
-
 public:
+
+  ~CircleCircleR() noexcept = default;
+
   /** Constructor
   \param rdisk1 radius
   \param rdisk2 radius
   */
   CircleCircleR(double rdisk1, double rdisk2);
-
-
-  ~CircleCircleR() noexcept = default;
 
   /** compute distance between 2 disks
       \param x1 x position of first disk
@@ -55,26 +53,28 @@ public:
       \param x2 x position of second disk
       \param y2 y position of second disk
       \param r2 radius of second disk
-      \return distance
+      \return distance 
   */
-  double distance(double x1, double y1, double r1, double x2, double y2,
-                  double r2) override;
+  double distance(double x1, double y1, double r1,
+                  double x2, double y2, double r2);
+
+  using LagrangianScleronomousR::computeh;
 
   /** to compute the output y = h(q,z) of the Relation
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(const BlockVector &q, BlockVector &z,
-                SiconosVector &y) override;
+  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector &q, BlockVector &z) override;
+  void computeJachq(const BlockVector& q, BlockVector& z);
 
   // visitors hook
   ACCEPT_VISITORS();
+
 };
 #endif /* CircleCircleR_h */
