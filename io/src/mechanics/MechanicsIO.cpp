@@ -834,7 +834,7 @@ SP::SimpleMatrix MechanicsIO::contactInfo(const NonSmoothDynamicalSystem& nsds,
         DynamicalSystem& ds1 = *graph.properties(*vi).source;
         DynamicalSystem& ds2 = *graph.properties(*vi).target;
         data.setValue(1, ds1.number());
-        data.setValue(2, ds1.number());
+        data.setValue(2, ds2.number());
       }
       if(result->size(1) != data.size())
       {

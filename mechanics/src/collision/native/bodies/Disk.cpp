@@ -34,6 +34,3 @@ Disk::Disk(double r, double m,
 {
   MassSetup();
 }
-
-Disk::~Disk()
-{}

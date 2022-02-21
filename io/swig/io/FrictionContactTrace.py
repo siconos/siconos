@@ -38,7 +38,6 @@ except :
     has_fclib=False
     print("No module named siconos.fclib.")
 
-import imp
 import sys
 import time
 import getopt

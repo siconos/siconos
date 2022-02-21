@@ -76,17 +76,17 @@ protected:
   ACCEPT_SERIALIZATION(LagrangianR);
 
   /** Jacobian matrices of \f$y = h(t,q,\dot q,\ldots)\f$ */
-  SP::SimpleMatrix _jachlambda;
+  SP::SimpleMatrix _jachlambda{nullptr};
 
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
    *  i.e. \f$\nabla^\top_q h(t,q,\dot q,\ldots)\f$
    */
-  SP::SimpleMatrix _jachq;
+  SP::SimpleMatrix _jachq{nullptr};
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
    *  i.e. \f$\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f$
    */
-  SP::SimpleMatrix _jachqDot;
+  SP::SimpleMatrix _jachqDot{nullptr};
 
   /**The time-derivative of Jacobian of the constraints with respect
      to the generalized coordinates  \f$ q\f$
@@ -94,9 +94,9 @@ protected:
    * This value is useful to compute the second-order
    * time--derivative of the constraints with respect to time.
    */
-  SP::SimpleMatrix _dotjachq;
+  SP::SimpleMatrix _dotjachq{nullptr};
 
-  SP::PluggedObject _pluginJachq;
+  SP::PluggedObject _pluginJachq{nullptr};
 
   /** basic constructor
    * \param lagType the sub-type of the relation
@@ -104,13 +104,19 @@ protected:
   LagrangianR(RELATION::SUBTYPES lagType): Relation(RELATION::Lagrangian, lagType) {}
 
 
-  virtual void _zeroPlugin();
+  void _zeroPlugin() override;
 
 public:
 
   /** destructor
   */
-  virtual ~LagrangianR() {};
+  virtual ~LagrangianR() noexcept = default;
+
+
+  /** initialize the relation (check sizes, memory allocation ...)
+   * \param inter the interaction using this relation
+   */
+  inline void initialize(Interaction &inter) override {};
 
   // -- Jach --
 
@@ -142,40 +148,19 @@ public:
     _jachq = newPtr ;
   }
 
-  inline SP::SimpleMatrix C() const
+  inline SP::SimpleMatrix C() const override
   {
     return _jachq;
   }
   
-  inline SP::SimpleMatrix H() const
+  inline SP::SimpleMatrix H() const override
   {
     return _jachq;
   }
 
-  /** initialize components specific to derived classes.
-   * \param inter the interaction using this relation
-   */
-  virtual void initialize(Interaction& inter) {};
-
-  /** check sizes of the relation specific operators.
-   * \param inter an Interaction using this relation
-   */
-  virtual void checkSize(Interaction& inter) = 0;
-
-  /* compute all the H Jacobian 
-   * \param time
-   * \param inter
-   */
-  virtual void computeJach(double time, Interaction& inter) = 0 ;
-  /* compute all the G Jacobian
-   * \param time
-   * \param inter
-   */
-  virtual void computeJacg(double time, Interaction& inter) = 0 ;
-
   /** main relation members display
   */
-  void display() const;
+  void display() const override;
 
 };
 TYPEDEF_SPTR(LagrangianR)

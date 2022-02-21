@@ -30,8 +30,7 @@ class SphereLDSSphereLDSR
     : public LagrangianScleronomousR,
       public std::enable_shared_from_this<SphereLDSSphereLDSR> {
 private:
-  /** serialization hooks
-   */
+  // serialization hooks
   ACCEPT_SERIALIZATION(SphereLDSSphereLDSR);
 
   double r1, r2, r1pr2;
@@ -49,23 +48,20 @@ public:
   double distance(double, double, double, double, double, double, double,
                   double);
 
-  using LagrangianScleronomousR::computeh;
   /** to compute the output y = h(t,q,z) of the Relation
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(const BlockVector &q, BlockVector &z,
-                SiconosVector &y) override;
+  void computeh(const BlockVector &q, BlockVector &z, SiconosVector &y);
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector &q, BlockVector &z) override;
+  void computeJachq(const BlockVector &q, BlockVector &z);
 
-  /** visitors hook
-   */
-  ACCEPT_STD_VISITORS();
+  // visitors hook
+  ACCEPT_VISITORS();
 };
 #endif /* SphereLDSSphereLDSR_h */

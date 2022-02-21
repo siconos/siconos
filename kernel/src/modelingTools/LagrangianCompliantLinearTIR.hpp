@@ -49,10 +49,10 @@ protected:
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIR);
 
   /** F matrix, coefficient of z */
-  SP::SimpleMatrix _F;
+  SP::SimpleMatrix _F{nullptr};
 
   /** e*/
-  SP::SiconosVector _e;
+  SP::SiconosVector _e{nullptr};
 
 public:
   /** Default constructor
@@ -84,7 +84,7 @@ public:
 
   /** destructor
    */
-  virtual ~LagrangianCompliantLinearTIR(){};
+  virtual ~LagrangianCompliantLinearTIR() noexcept = default;
 
   /** initialize LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
@@ -126,12 +126,6 @@ public:
   void computeJacg(double time, Interaction &inter) override {}
 
   // GETTERS/SETTERS
-
-  // -- C --
-  /** get C
-   *  \return pointer on a plugged matrix
-   */
-  inline SP::SimpleMatrix C() const override { return _jachq; }
 
   /** set C to pointer newPtr
    *  \param newPtr a SP to plugged matrix

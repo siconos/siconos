@@ -14,12 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosVisitor.hpp
   \brief A general visitor interface for siconos objects.
 */
-
 
 #ifndef SiconosVisitor_hpp
 #define SiconosVisitor_hpp
@@ -52,8 +51,8 @@
 
 */
 
-#include "SiconosPointers.hpp"
 #include "SiconosException.hpp"
+#include "SiconosPointers.hpp"
 /* all Siconos classes that may be visited are defined there */
 #include "SiconosVisitables.hpp"
 
@@ -103,7 +102,7 @@
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
 #define ACCEPT_SP_VISITORS()                                            \
-  void acceptSP(SP::SiconosVisitor tourist) override { tourist->visit(shared_from_this()); }
+  void acceptSP(SP::SiconosVisitor tourist) override{ tourist->visit(shared_from_this()); }
 
 #define ACCEPT_VISITORS()                       \
   ACCEPT_SP_VISITORS()                          \
@@ -211,7 +210,7 @@ struct FindType
 struct SiconosVisitor
 {
   SICONOS_VISITABLES()
-  virtual ~SiconosVisitor() {};
+  virtual ~SiconosVisitor() noexcept = default;
 };
 
 /* some functions in Type namespace */

@@ -52,8 +52,7 @@
 class LagrangianCompliantR : public LagrangianR {
 
 protected:
-  /** serialization hooks
-   */
+  // serialization hooks
   ACCEPT_SERIALIZATION(LagrangianCompliantR);
 
   /** LagrangianR plug-in to compute h(q,lambda,z)
@@ -66,7 +65,7 @@ protected:
    * @param sizeZ : size of vector z.
    * @param[in,out] z : a vector of user-defined parameters
    */
-  SP::PluggedObject _pluginJachlambda;
+  SP::PluggedObject _pluginJachlambda{nullptr};
 
   /** default constructor
    */
@@ -97,7 +96,7 @@ public:
 
   /** destructor
    */
-  virtual ~LagrangianCompliantR(){};
+  virtual ~LagrangianCompliantR() noexcept = default;
 
   /** to compute the output y = h(q,z) of the Relation
       \param time current time value

@@ -109,12 +109,12 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction using this relation
    */
-  void initialize(Interaction &inter);
+  void initialize(Interaction &inter) override;
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
-  virtual void checkSize(Interaction &inter);
+  void checkSize(Interaction &inter) override;
 
   /** default function to compute \f$h\f$
    * \param time    current time
@@ -160,7 +160,7 @@ public:
                                  const SiconosVector &lambda, BlockVector &z,
                                  SimpleMatrix &D);
 
-  virtual void computeJach(double time, Interaction &inter);
+  void computeJach(double time, Interaction &inter) override;
 
   /** default function to compute \f$ B = \nabla_{\lambda}g \f$
    * \param time current time
@@ -184,28 +184,28 @@ public:
                             const SiconosVector &lambda, BlockVector &z,
                             SimpleMatrix &K);
 
-  virtual void computeJacg(double time, Interaction &inter);
+  void computeJacg(double time, Interaction &inter) override;
 
   /** default function to compute y, using the data from the Interaction and DS
    *  \param time current time (not used)
    *  \param inter Interaction using this Relation
    *  \param level not used
    */
-  virtual void computeOutput(double time, Interaction &inter,
-                             unsigned int level = 0);
+  void computeOutput(double time, Interaction &inter,
+                     unsigned int level = 0) override;
 
   /** default function to compute r, using the data from the Interaction and DS
    *  \param time current time (not used)
    *  \param inter Interaction using this Relation
    *  \param level not used
    */
-  virtual void computeInput(double time, Interaction &inter,
-                            unsigned int level = 0);
+  void computeInput(double time, Interaction &inter,
+                    unsigned int level = 0) override;
 
   /** return true if the relation requires the computation of residu
    * \return true if residu are required, false otherwise
    */
-  virtual bool requireResidu() { return true; }
+  bool requireResidu() override { return true; }
 };
 TYPEDEF_SPTR(FirstOrderNonLinearR)
 

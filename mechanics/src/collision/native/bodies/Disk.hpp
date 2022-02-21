@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /** \file Disk.hpp
  */
@@ -22,28 +22,23 @@
 #ifndef Disk_H
 #define Disk_H
 
-#include "MechanicsFwd.hpp"
 #include "CircularDS.hpp"
+#include "MechanicsFwd.hpp"
 /** \class Disk
  *  \brief Definition of a 2D disk - Inherits from LagrangianDS
  */
 
-
-class Disk : public CircularDS, public std::enable_shared_from_this<Disk>
-{
+class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
 private:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(Disk);
-
 
   void MassSetup();
 
 protected:
-  Disk() : CircularDS() {};
+  Disk() : CircularDS() = default;
 
 public:
-
   /** Constructor
       \param radius
       \param mass
@@ -51,17 +46,14 @@ public:
       \param velocity vector
   */
 
-  Disk(double radius, double mass, SP::SiconosVector position, SP::SiconosVector velocity);
+  Disk(double radius, double mass, SP::SiconosVector position,
+       SP::SiconosVector velocity);
 
   /** destructor
    */
-  virtual ~Disk();
+  virtual ~Disk() noexcept = default;
 
-
-  /** visitors hook
-   */
-  ACCEPT_BASE_STD_VISITORS(LagrangianDS);
-
+  // visitors hook
+  ACCEPT_BASE_VISITORS(LagrangianDS);
 };
 #endif /* Disk_H */
-

@@ -104,8 +104,7 @@
 class LagrangianScleronomousR : public LagrangianR {
 
 protected:
-  /** serialization hooks
-   */
+  // serialization hooks
   ACCEPT_SERIALIZATION(LagrangianScleronomousR);
 
   /** LagrangianScleronomousR plug-in to compute G0(q,z), gradient of h
@@ -123,17 +122,16 @@ protected:
    * \f$\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f$
    * stored in _dotjachq
    */
-  SP::PluggedObject _plugindotjacqh;
+  SP::PluggedObject _plugindotjacqh{nullptr};
 
   /** Product of the time--derivative of Jacobian with the velocity qdot */
-  SP::SiconosVector _dotjacqhXqdot;
+  SP::SiconosVector _dotjacqhXqdot{nullptr};
 
   /** reset all plugins */
   void _zeroPlugin() override;
 
   /** basic constructor */
-  LagrangianScleronomousR() : LagrangianR(RELATION::ScleronomousR)
-  {
+  LagrangianScleronomousR() : LagrangianR(RELATION::ScleronomousR) {
     _zeroPlugin();
   }
 
@@ -170,7 +168,14 @@ public:
 
   /** destructor
    */
-  virtual ~LagrangianScleronomousR(){};
+  virtual ~LagrangianScleronomousR() noexcept = default;
+
+  void initialize(Interaction &inter) override;
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  void checkSize(Interaction &inter) override;
 
   /** \return the product of  the time--derivative of Jacobian with the velocity
    * qdot */
@@ -234,13 +239,6 @@ public:
    */
   void computeInput(double time, Interaction &inter,
                     unsigned int level = 0) override;
-
-  void initialize(Interaction &inter) override;
-
-  /** check sizes of the relation specific operators.
-   * \param inter an Interaction using this relation
-   */
-  void checkSize(Interaction &inter) override;
 
   ACCEPT_STD_VISITORS();
 };

@@ -70,6 +70,8 @@ public:
    */
   DiskPlanR(double, double, double, double, double);
 
+  ~DiskPlanR() noexcept = default;
+
   /* distance between disk and plan */
   double distance(double x, double y, double r) const;
 
@@ -89,20 +91,18 @@ public:
 
   double getWidth() const { return width; };
 
-  using LagrangianScleronomousR::computeh;
   /** to compute the output y = h(t,q,z) of the Relation
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(const BlockVector &q, BlockVector &z,
-                SiconosVector &y) override;
+  void computeh(const BlockVector &q, BlockVector &z, SiconosVector &y);
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector &q, BlockVector &z) override;
+  void computeJachq(const BlockVector &q, BlockVector &z);
 
   bool equal(double, double, double, double) const;
 
@@ -112,10 +112,8 @@ public:
 
   bool isFinite() const { return finite; };
 
-  /** visitor hooks
-   */
-  ACCEPT_STD_VISITORS();
+  // visitor hooks
+  ACCEPT_VISITORS();
 
-  ~DiskPlanR(){};
 };
 #endif /* DiskPlanR */

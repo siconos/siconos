@@ -31,8 +31,7 @@
 class SphereNEDSPlanR : public NewtonEuler3DR,
                         public std::enable_shared_from_this<SphereNEDSPlanR> {
 private:
-  /** serialization hooks
-   */
+  // serialization hooks
   ACCEPT_SERIALIZATION(SphereNEDSPlanR);
 
   /* Ax + By + Cz + D = 0 */
@@ -64,13 +63,11 @@ public:
 
   // void computeJachq(double);
 
-  bool equal(double _A, double _B, double _C, double _D, double _r) const
-  {
+  bool equal(double _A, double _B, double _C, double _D, double _r) const {
     return (A == _A && B == _B && C == _C && D == _D && r == _r);
   }
 
-  /** visitors hook
-   */
+  // visitors hook
   ACCEPT_VISITORS();
 };
 #endif /* SphereNEDSPlanR_h */

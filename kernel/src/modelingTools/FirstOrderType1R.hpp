@@ -86,7 +86,7 @@ public:
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  inline void checkSize(Interaction &inter) override {};
 
   /** to compute the output y = h(t,x,...) of the Relation
       \param time current time value

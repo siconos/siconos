@@ -1065,6 +1065,7 @@ public:
 
   virtual void computeTdot();
 
+  ACCEPT_STD_VISITORS();
   //@}
 };
 #endif // NEWTONEULERNLDS_H

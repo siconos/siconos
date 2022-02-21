@@ -56,11 +56,6 @@ void LagrangianRheonomousR::initialize(Interaction& inter)
   }
 }
 
-void LagrangianRheonomousR::checkSize(Interaction& inter)
-{
-  LagrangianR::checkSize(inter);
-}
-
 void LagrangianRheonomousR::setComputehDotFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginhDot->setComputeFunction(pluginPath, functionName);

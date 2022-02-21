@@ -29,8 +29,7 @@
 class SphereLDSPlanR : public LagrangianScleronomousR,
                        public std::enable_shared_from_this<SphereLDSPlanR> {
 private:
-  /** serialization hooks
-   */
+  // serialization hooks
   ACCEPT_SERIALIZATION(SphereLDSPlanR);
 
   /* Ax + By + Cz + D = 0 */
@@ -52,8 +51,6 @@ public:
 
   double distance(double, double, double, double);
 
-  using LagrangianScleronomousR::computeh;
-
   /** to compute the output y = h(q,z) of the Relation
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
@@ -68,8 +65,7 @@ public:
   */
   void computeJachq(const BlockVector &q, BlockVector &z) override;
 
-  bool equal(double _A, double _B, double _C, double _D, double _r) const
-  {
+  bool equal(double _A, double _B, double _C, double _D, double _r) const {
     return (A == _A && B == _B && C == _C && D == _D && r == _r);
   }
 

@@ -30,7 +30,6 @@
 
 void Lagrangian2d3DR::initialize(Interaction& inter)
 {
-  LagrangianR::initialize(inter);
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
 
   if((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6))

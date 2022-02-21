@@ -72,11 +72,7 @@ public:
 
   /** destructor
    */
-  virtual ~LagrangianLinearTIR(){};
-
-  /** initialize LagrangianLinearTIR specific operators.
-   * \param inter an Interaction using this relation
-   */
+  virtual ~LagrangianLinearTIR() noexcept = default;
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation

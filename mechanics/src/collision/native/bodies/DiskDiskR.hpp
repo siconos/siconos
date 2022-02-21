@@ -23,7 +23,6 @@
 
 #include "CircularR.hpp"
 #include "MechanicsFwd.hpp"
-
 #include <SiconosVisitor.hpp>
 
 /** \class DiskDiskR
@@ -32,13 +31,12 @@
 class DiskDiskR : public CircularR,
                   public std::enable_shared_from_this<DiskDiskR> {
 private:
-  /** serialization hooks
-   */
+  // serialization hooks
   ACCEPT_SERIALIZATION(DiskDiskR);
 
-  double r1pr2;
+  double r1pr2{0.};
 
-  DiskDiskR() : CircularR(){};
+  DiskDiskR() : CircularR() = default;
 
 public:
   /** Constructor
@@ -46,6 +44,7 @@ public:
   \param disk2 radius
   */
   DiskDiskR(double disk1, double disk2);
+  ~DiskDiskR() noexcept = default;
 
   double distance(double, double, double, double, double, double) override;
 
@@ -63,10 +62,8 @@ public:
   */
   void computeJachq(const BlockVector &q, BlockVector &z) override;
 
-  /** visitors hook
-   */
+  // visitors hook
   ACCEPT_VISITORS();
 
-  ~DiskDiskR(){};
 };
 #endif /* DiskDiskR_h */

@@ -36,7 +36,7 @@ private:
    */
   ACCEPT_SERIALIZATION(CircleCircleR);
 
-  CircleCircleR(){};
+  // CircleCircleR():CircularR() = default{};
 
 public:
   /** Constructor
@@ -44,6 +44,9 @@ public:
   \param rdisk2 radius
   */
   CircleCircleR(double rdisk1, double rdisk2);
+
+
+  ~CircleCircleR() noexcept = default;
 
   /** compute distance between 2 disks
       \param x1 x position of first disk
@@ -56,8 +59,6 @@ public:
   */
   double distance(double x1, double y1, double r1, double x2, double y2,
                   double r2) override;
-
-  using LagrangianScleronomousR::computeh;
 
   /** to compute the output y = h(q,z) of the Relation
       \param q coordinates of the dynamical systems involved in the relation
@@ -73,10 +74,7 @@ public:
   */
   void computeJachq(const BlockVector &q, BlockVector &z) override;
 
-  /** visitors hook
-   */
+  // visitors hook
   ACCEPT_VISITORS();
-
-  ~CircleCircleR(){};
 };
 #endif /* CircleCircleR_h */

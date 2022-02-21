@@ -71,24 +71,24 @@
 class LagrangianRheonomousR : public LagrangianR {
 
 protected:
-  /** serialization hooks
-   */
+  // serialization hooks
   ACCEPT_SERIALIZATION(LagrangianRheonomousR);
 
   /** plugged vector used to compute hDot */
-  SP::SiconosVector _hDot;
+  SP::SiconosVector _hDot{nullptr};
 
   /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
    */
-  SP::PluggedObject _pluginhDot;
+  SP::PluggedObject _pluginhDot{nullptr};
+
+  /** reset all plugins */
+  void _zeroPlugin() override;
 
   /** default constructor
    */
-  LagrangianRheonomousR() : LagrangianR(RELATION::RheonomousR)
-  {
+  LagrangianRheonomousR() : LagrangianR(RELATION::RheonomousR) {
     _zeroPlugin();
-  };
-  void _zeroPlugin() override;
+  }
 
 public:
   /** constructor from a set of data
@@ -107,7 +107,7 @@ public:
 
   /** destructor
    */
-  virtual ~LagrangianRheonomousR(){};
+  virtual ~LagrangianRheonomousR() noexcept = default;
 
   /** initialize G matrices or components specific to derived classes.
    * \param inter the Interaction
@@ -117,7 +117,7 @@ public:
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  inline void checkSize(Interaction &inter) override {};
 
   // -- hDot --
 

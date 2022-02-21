@@ -67,11 +67,6 @@ void FirstOrderType1R::initialize(Interaction& inter)
     relationMat[FirstOrderR::mat_B]= std::make_shared<SimpleMatrix>(sizeDS, sizeY);
 }
 
-
-void FirstOrderType1R::checkSize(Interaction& inter)
-{
-
-}
 void FirstOrderType1R::computeh(double time, const BlockVector& x, BlockVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");

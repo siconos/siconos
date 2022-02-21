@@ -19,34 +19,30 @@
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianR.hpp"
-#include "Interaction.hpp"
-#include "LagrangianDS.hpp"
+#include "PluggedObject.hpp"
+#include "SimpleMatrix.hpp"
 
 #include <iostream>
-
-void LagrangianR::checkSize(Interaction& inter)
-{
-  // do nothing here, overload this if you need something done
-}
 
 void LagrangianR::_zeroPlugin()
 {
   Relation::_zeroPlugin();
-  _pluginJachq.reset(new PluggedObject());
+  _pluginJachq = std::make_shared<PluggedObject>();
 }
+
 void LagrangianR::display() const
 {
   Relation::display();
-  std::cout << " _jachq :" << std::endl;
+  std::cout << " _jachq :" << "\n";
   if(_jachq)
     _jachq->display();
-  std::cout << " _jachqDot :" << std::endl;
+  std::cout << " _jachqDot :" << "\n";
   if(_jachqDot)
     _jachqDot->display();
-  std::cout << " _jachlambda :" << std::endl;
+  std::cout << " _jachlambda :" << "\n";
   if(_jachlambda)
     _jachlambda->display();
   else
-    std::cout << " nullptr :" << std::endl;
+    std::cout << " nullptr :" << "\n";
 
 }

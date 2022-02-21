@@ -8,7 +8,7 @@
 
 #define KERNEL_CLASSES()                               \
   REGISTER(DynamicalSystem)                            \
-  REGISTER(Relation)				       \
+  REGISTER(Relation)                                   \
   REGISTER(NonSmoothLaw)                               \
   REGISTER(MixedComplementarityConditionNSL)           \
   REGISTER(EqualityConditionNSL)                       \

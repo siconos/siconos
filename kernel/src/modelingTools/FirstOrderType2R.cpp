@@ -79,10 +79,6 @@ void FirstOrderType2R::initialize(Interaction& inter)
 //  }
 }
 
-
-
-void FirstOrderType2R::checkSize(Interaction& inter) {}
-
 void FirstOrderType2R::computeh(double time, const BlockVector& x, const SiconosVector& lambda, SiconosVector& y)
 {
   auto xp = x.prepareVectorForPlugin();
