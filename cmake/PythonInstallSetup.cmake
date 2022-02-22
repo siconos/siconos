@@ -65,7 +65,7 @@ function(set_python_install_path)
     # -- PY_INSTALL_DIR 
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
       "import site; print(site.ENABLE_USER_SITE)" OUTPUT_VARIABLE ENABLE_USER_SITE)
-    string(STRIP ${ENABLE_USER} ENABLE_USER)
+    string(STRIP ${ENABLE_USER_SITE} ENABLE_USER_SITE)
 
     if(ENABLE_USER_SITE)
       execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
