@@ -141,11 +141,6 @@ endif()
 # Common setup
 include(SiconosSetup)
 
-# ========= Python bindings =========
-if(WITH_PYTHON_WRAPPER)
-  add_subdirectory(wrap)
-endif()
-
 # ========= Tests setup =========
 if(WITH_TESTING)
   include(CTest)
@@ -160,12 +155,17 @@ endif()
 # and docstrings from doxygen, depending on the
 # enabled options.
 add_subdirectory(docs)
-
+set(SICONOS_PYTHON_LIBS "" CACHE INTERNAL "")
 # ========= Setup each required component =========
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
   add_subdirectory(${COMPONENT})
 endforeach()
+
+# ========= Python bindings =========
+if(WITH_PYTHON_WRAPPER)
+  add_subdirectory(wrap)
+endif()
 
 # ========= Documentation setup =========
 # Finalize documentation setups.

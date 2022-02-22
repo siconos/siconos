@@ -150,31 +150,18 @@ if(WITH_FCLIB)
   if(NOT ${FCLIB_FOUND})
     # if(FCLIB_NOT_FOUND)
     include(FetchContent)
-    #message(FATAL_ERROR "Can not find fclib package. Try to set FCLIB_ROOT.")
     message(STATUS "FCLIB can not be found locally. Try to download and install it from github repository.")
   
     FetchContent_Declare(fclib
-    #GIT_REPOSITORY    https://github.com/fperignon/fclib.git
-   
        GIT_REPOSITORY    https://github.com/FrictionalContactLibrary/fclib.git
        GIT_TAG           origin/master
       #     #CMAKE_ARGS FCLIB_HEADER_ONLY=OFF
       LOG_CONFIGURE TRUE
       LOG_BUILD TRUE
       #     LOG_INSTALL TRUE
-    )
-    FetchContent_GetProperties(fclib)
-    if(NOT fclib_POPULATED)
-      # Fetch the content using previously declared details
-      FetchContent_Populate(fclib)
-      # Bring the populated content into the build
-      add_subdirectory(${fclib_SOURCE_DIR} ${fclib_BINARY_DIR})
-      add_library(FCLIB::fclib ALIAS fclib)
-      set(FCLIB_ROOT "${CMAKE_INSTALL_PREFIX}" CACHE PATH "fclib install path")
-    endif()
-
-    #FetchContent_MakeAvailable(fclib)
- 
+      )
+    FetchContent_MakeAvailable(fclib)
+    add_library(FCLIB::fclib ALIAS fclib)
   endif()
 
   target_link_libraries(numerics PUBLIC FCLIB::fclib)

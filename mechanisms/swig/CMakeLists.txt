@@ -30,7 +30,6 @@ swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
 
 # -- install the script --
-set(CURRENT_PYTHON_PATH ${SICONOS_PYTHON_INSTALL_DIR})
 set(EXAMPLE_PATH ./) # @EXAMPLE_PATH@ is required in siconos_mechanisms script
 configure_file(siconos_mechanisms.py.in ${CMAKE_BINARY_DIR}/scripts/siconos_mechanisms.py)
 configure_file(mechanisms/mbtbDefaultOptions.py ${SICONOS_SWIG_ROOT_DIR}/mechanisms/mbtbDefaultOptions.py)
@@ -40,7 +39,6 @@ install(PROGRAMS ${CMAKE_BINARY_DIR}/scripts/siconos_mechanisms.py DESTINATION b
 # --- Tests ---
 if(WITH_TESTING)
   # -- prepare siconos_mechanisms tests --
-  set(CURRENT_PYTHON_PATH ${CMAKE_BINARY_DIR}/wrap)
   set(EXAMPLE_PATH ${SICONOS_SWIG_ROOT_DIR}/tests/) # @EXAMPLE_PATH@ is required in siconos_mechanisms script
   # Each file is copied into siconos/tests.
   configure_file(siconos_mechanisms.py.in  ${SICONOS_SWIG_ROOT_DIR}/tests/siconos_mechanisms.py)

@@ -17,14 +17,15 @@ classifiers =
     Operating System :: Unix
     Operating System :: MacOS
     Intended Audience :: Science/Research
-    Topic :: Scientific/Engineering
-
+    Topic :: Scientific/Engineering	
 [options]
 include_package_data = True
 package_dir =
     = .
 packages = find:
 python_requires = >=3.6
-
 [options.packages.find]
 where = .
+[options.package_data]
+* =
+

@@ -46,13 +46,12 @@ PythonInstallSetup
 #]=======================================================================]
 
 
+# Finding where pip or python will put things is a real nightmare, especially on Debian
+# like systems where pip use site-packages, the distro dist-packages and so on.
+# See https://www.python.org/dev/peps/pep-0668/
 function(set_python_install_path)
   # set(PIP_INSTALL_OPTIONS "--record;${CMAKE_BINARY_DIR}/python_install_manifest.txt")
   set(PIP_INSTALL_OPTIONS)
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-    "import sys; print('%d.%d'%(sys.version_info.major,sys.version_info.minor))"
-    OUTPUT_VARIABLE PY_VERSION)
-  string(STRIP ${PY_VERSION} PY_VERSION)
 
   if(siconos_python_install STREQUAL "user")
     # --- Case 1 : siconos_python_install=user ---
@@ -82,11 +81,14 @@ function(set_python_install_path)
     # -- pip options
     list(APPEND PIP_INSTALL_OPTIONS --prefix=${CMAKE_INSTALL_PREFIX})
 
-    # -- PY_INSTALL_DIR 
+    # -- PY_INSTALL_DIR
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
       "import site; print('/lib'+site.getsitepackages()[0].split('lib')[-1])" OUTPUT_VARIABLE PY_INSTALL_DIR)
 
     set(PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}${PY_INSTALL_DIR})
+    # Remark : with prefix, on some systems getsitepackages will return dist-packages, while pip will
+    # install things in site-packages.
+    string(REPLACE dist-packages site-packages PY_INSTALL_DIR ${PY_INSTALL_DIR})
 
   else()  # Default behavior: let pip choose where things will be installed.
     # Anyway, we need PY_INSTALL_DIR for swig/cmake install process.
@@ -95,9 +97,8 @@ function(set_python_install_path)
     
   endif()
   # Move vars to cache.
-  string(STRIP ${PY_INSTALL_DIR} PY_INSTALL_DIR)
+  string(STRIP "${PY_INSTALL_DIR}" PY_INSTALL_DIR)
   set(SICONOS_PYTHON_INSTALL_DIR ${PY_INSTALL_DIR} CACHE PATH "Install directory for python bindings.")
-  #string(STRIP ${python_install_options} python_install_options)
   set(PIP_INSTALL_OPTIONS ${PIP_INSTALL_OPTIONS} CACHE STRING "Options passed to pip during installation.")
 endfunction()
 

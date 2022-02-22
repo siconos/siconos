@@ -163,12 +163,6 @@ macro(add_siconos_swig_sub_module fullname)
   endif()
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
-  # if(UNIX AND NOT APPLE)
-  #   # do not link against the Python library on unix, it is useless
-  #   swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
-  # else()
-  #   swig_link_libraries(${_name} ${Python3_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
-  # endif()
 
   # set dependency of sphinx apidoc to this target
   if(WITH_DOCUMENTATION AND WITH_${COMPONENT}_DOXY2SWIG)
@@ -187,11 +181,12 @@ macro(add_siconos_swig_sub_module fullname)
 
   # --- install python files and target ---
   # install path ...
-  set(DEST "${SICONOS_PYTHON_INSTALL_DIR}/${SICONOS_PYTHON_PACKAGE}/${_path}")
-
-  #install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${_name}.py DESTINATION ${DEST})
-  install(TARGETS ${SWIG_MODULE_${_name}_REAL_NAME} LIBRARY DESTINATION ${DEST})
-  
+  #set(DEST "${SICONOS_PYTHON_INSTALL_DIR}/${SICONOS_PYTHON_PACKAGE}/${_path}")
+  #install(TARGETS ${SWIG_MODULE_${_name}_REAL_NAME} LIBRARY DESTINATION ${DEST})
+  #get_target_property(pylibs ${SWIG_MODULE_${_name}_REAL_NAME} LOCATION)
+  # Save lib name into a file, used later to provide information to pip
+  # which is suppposed to deal with the installation of swig libraries.
+  file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/wrap/libs/${_name}_lib CONTENT "${_path}/$<TARGET_FILE_NAME:${SWIG_MODULE_${_name}_REAL_NAME}>")
 endmacro()
 
 macro(swig_module_setup modules_list)
