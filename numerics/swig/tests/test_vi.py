@@ -1,4 +1,4 @@
-# Copyright 2021 INRIA
+# Copyright 2022 INRIA
 
 import numpy as np
 
