@@ -29,9 +29,6 @@ Whatever your system is, you will need first to :
 * Create anywhere (but not in *path_to_sources*) a build directory.
 * Check :ref:`siconos_dependencies`. Most of them are commonly or at least easily installed
   on many standard systems.
-* Check the list of platforms and configs for which siconos has been succesfully (or not ...)  installed :
-
-  http://cdash-bipop.inrialpes.fr/index.php?project=Siconos
   
 The quick way
 -------------
@@ -223,8 +220,14 @@ Developers or advanced users options
 * WITH_MUMPS=ON/OFF : to enable/disable mumps library (http://mumps.enseeiht.fr)
 
 * WITH_FCLIB=ON/OFF : to enable/disable fclib interface (https://github.com/FrictionalContactLibrary/fclib). 
-  This option is ON by default and if not found it will be downloaded and installed automatically as part of Siconos.
+  This option is ON by default.
+  The last version of fclib (master branch of the github repository) will be downloaded and installed automatically as part of Siconos
+  If you need a specific version or prefer using a version already installed on your system, add the following option to your cmake command:
 
+  .. code-block:: bash
+
+	cmake -DFCLIB_ROOT=<path-to-your-fclib-installation> ...
+	
 * WITH_DOXYGEN_WARNINGS=ON/OFF : verbose mode to explore doxygen warnings generated for siconos
 
 * WITH_SERIALIZATION:

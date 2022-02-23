@@ -25,4 +25,5 @@ RUN dnf --setopt=deltarpm=false install -y \
         swig \
         git-core \
         bullet-devel \
+	python3-h5py \
         bullet-extras-devel && dnf clean all

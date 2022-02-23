@@ -1,6 +1,5 @@
 FROM debian:buster
 RUN apt update  && apt install -y -qq \
-        cmake \
         git-core \
         make \
         libboost-dev \
@@ -34,5 +33,5 @@ RUN apt update  && apt install -y -qq \
         python3-h5py \
         pkg-config \
         vim && apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
-
+RUN python3 -m pip install cmake
 
