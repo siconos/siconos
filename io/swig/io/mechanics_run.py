@@ -2926,7 +2926,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 osnspb = FCTrace(3, solver_options, friction_contact_trace_params, nsds)
                 osnspb.setMaxSize(osnspb_max_size)
-                osnspb.setMStorageType(sn.NM_DENSE)
+                osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
 
         numerics_verbose=run_options.get('numerics_verbose')
         osnspb.setNumericsVerboseMode(numerics_verbose)
