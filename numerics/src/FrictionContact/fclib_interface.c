@@ -136,8 +136,8 @@ FrictionContactProblem* frictionContact_fclib_read(const char *path)
   return from_fclib_local(fclib_problem);
 }
 
-int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description, char * mathInfo,
-                                const char *path, int ndof)
+int frictionContact_fclib_write_csr(FrictionContactProblem* problem, char * title, char * description, char * mathInfo,
+                                    const char *path, int ndof)
 {
   int info = 0;
 
@@ -168,6 +168,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 
   if(problem ->M->storageType == NM_DENSE)  /* Dense Matrix */
   {
+    /* DEBUG_PRINT("NM_DENSE case\n"); */
     fclib_problem->W->nzmax = problem->M->size0 * problem->M->size1;
     fclib_problem->W->p = (int*)malloc((fclib_problem->W->m + 1) * sizeof(int));
     fclib_problem->W->i = (int*)malloc((fclib_problem->W->nzmax) * sizeof(int));
@@ -188,6 +189,7 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   }
   else if(problem ->M->storageType == NM_SPARSE_BLOCK)  /* Sparse block storage */
   {
+    /* DEBUG_PRINT("NM_SPARSE_BLOCK case\n"); */
     spmat = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
     int MAYBE_UNUSED res = SBM_to_sparse_init_memory(problem ->M->matrix1, spmat);
     res = SBM_to_sparse(problem->M->matrix1, spmat);
@@ -241,6 +243,65 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   {
     cs_spfree(spmat);
   }
+  free(fclib_problem->W->p);
+  free(fclib_problem->W->i);
+  free(fclib_problem->W);
+  free(fclib_problem->info);
+
+  free(fclib_problem);
+
+  return info;
+
+}
+int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, char * description, char * mathInfo,
+                                const char *path, int ndof)
+{
+  int info = 0;
+
+  fclib_local   *fclib_problem;
+
+  fclib_problem = (fclib_local*)malloc(sizeof(fclib_local));
+
+  fclib_problem->spacedim = problem->dimension;
+  fclib_problem->mu =  problem->mu;
+  fclib_problem->q =  problem->q;
+
+  fclib_problem->s =  NULL;
+
+  fclib_problem->info = (struct fclib_info*)malloc(sizeof(struct fclib_info)) ;
+  fclib_problem->info->title = title;
+  fclib_problem->info->description = description;
+  fclib_problem->info->math_info = mathInfo;
+
+  fclib_problem->W = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
+  fclib_problem->R = NULL;
+  fclib_problem->V = NULL;
+
+  fclib_problem->W->m = problem->M->size0;
+  fclib_problem->W->n = problem->M->size1;
+
+  CSparseMatrix * spmat = NM_triplet(problem->M);
+
+  fclib_problem->W = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
+  fclib_problem->W->n = (int) spmat->n;
+  fclib_problem->W->m = (int) spmat->m;
+
+  /* We output only values up to nz and we set nzmax to nz */
+  /* There is no interest to save in fclib file values from nz to nzmax */
+  fclib_problem->W->nzmax= (int) spmat->nz;
+  fclib_problem->W->p= (int*) malloc(sizeof(int)*(spmat->nz));
+  csi_to_int(spmat->p, fclib_problem->W->p, (unsigned) spmat->nz);
+  fclib_problem->W->i= (int*) malloc(sizeof(int)*(spmat->nz));
+  csi_to_int(spmat->i, fclib_problem->W->i, (unsigned) spmat->nz);
+  fclib_problem->W->x= spmat->x;
+  fclib_problem->W->nz= (int) spmat->nz;
+  fclib_problem->W->info=NULL;
+
+  info = fclib_write_local(fclib_problem, path);
+
+  info = fclib_create_int_attributes_in_info(path, "numberOfDegreeOfFreedom",
+         ndof);
+
   free(fclib_problem->W->p);
   free(fclib_problem->W->i);
   free(fclib_problem->W);
@@ -307,7 +368,7 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
        to fill transform M into a triplet or csc before returning
      */
 
-    fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
+    fprintf(stderr, "from_fclib_global not implemented for csr matrices.\n");
     exit(EXIT_FAILURE); ;
   }
   else
@@ -344,7 +405,7 @@ GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_proble
   else if(fclib_problem->H->nz == -2)
   {
     /* compressed rows */
-    fprintf(stderr, "from_fclib_local not implemented for csr matrices.\n");
+    fprintf(stderr, "from_fclib_global not implemented for csr matrices.\n");
     exit(EXIT_FAILURE); ;
   }
   else
@@ -421,17 +482,20 @@ int globalFrictionContact_fclib_write(
   /* only sparse storage */
   assert(problem->M->matrix2);
   assert(problem->H->matrix2);
+
   CSparseMatrix * spmat = NM_triplet(problem->M);
 
   fclib_problem->M = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
   fclib_problem->M->n = (int) spmat->n;
   fclib_problem->M->m = (int) spmat->m;
-  fclib_problem->M->nzmax= (int) spmat->nzmax;
 
-  fclib_problem->M->p= (int*) malloc(sizeof(int)*(spmat->nzmax));
-  csi_to_int(spmat->p, fclib_problem->M->p, (unsigned) spmat->nzmax);
-  fclib_problem->M->i= (int*) malloc(sizeof(int)*(spmat->nzmax));
-  csi_to_int(spmat->i, fclib_problem->M->i, (unsigned) spmat->nzmax);
+  /* We output only values up to nz and we set nzmax to nz */
+  /* There is no interest to save in fclib file values from nz to nzmax */
+  fclib_problem->M->nzmax= (int) spmat->nz;
+  fclib_problem->M->p= (int*) malloc(sizeof(int)*(spmat->nz));
+  csi_to_int(spmat->p, fclib_problem->M->p, (unsigned) spmat->nz);
+  fclib_problem->M->i= (int*) malloc(sizeof(int)*(spmat->nz));
+  csi_to_int(spmat->i, fclib_problem->M->i, (unsigned) spmat->nz);
   fclib_problem->M->x= spmat->x;
   fclib_problem->M->nz= (int) spmat->nz;
   fclib_problem->M->info=NULL;
@@ -441,13 +505,13 @@ int globalFrictionContact_fclib_write(
   fclib_problem->H = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
   fclib_problem->H->n = (int) spmat->n;
   fclib_problem->H->m = (int) spmat->m;
-  fclib_problem->H->nzmax= (int) spmat->nzmax;
-  fclib_problem->H->p= (int*) malloc(sizeof(int)*spmat->nzmax);
+  fclib_problem->H->nzmax= (int) spmat->nz;
+  fclib_problem->H->p= (int*) malloc(sizeof(int)*spmat->nz);
   csi_to_int(spmat->p, fclib_problem->H->p,
-             (unsigned) spmat->nzmax);
-  fclib_problem->H->i= (int*) malloc(sizeof(int)*spmat->nzmax);
+             (unsigned) spmat->nz);
+  fclib_problem->H->i= (int*) malloc(sizeof(int)*spmat->nz);
   csi_to_int(spmat->i, fclib_problem->H->i,
-             (unsigned) spmat->nzmax);
+             (unsigned) spmat->nz);
   fclib_problem->H->x= spmat->x;
   fclib_problem->H->nz= (int) spmat->nz;
   fclib_problem->H->info=NULL;
@@ -522,14 +586,17 @@ int globalRollingFrictionContact_fclib_write(
   fclib_problem->M = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
   fclib_problem->M->n = (int) spmat->n;
   fclib_problem->M->m = (int) spmat->m;
-  fclib_problem->M->nzmax= (int) spmat->nzmax;
 
-  fclib_problem->M->p= (int*) malloc(sizeof(int)*(spmat->nzmax));
+  /* we output only values up to nz and we set nzmax to nz */
+  /* There is no interest to save in fclib file values from nz to nzmax */
+  fclib_problem->M->nzmax= (int) spmat->nz;
+
+  fclib_problem->M->p= (int*) malloc(sizeof(int)*(spmat->nz));
   csi_to_int(spmat->p, fclib_problem->M->p,
-             (unsigned) spmat->nzmax);
-  fclib_problem->M->i= (int*) malloc(sizeof(int)*(spmat->nzmax));
+             (unsigned) spmat->nz);
+  fclib_problem->M->i= (int*) malloc(sizeof(int)*(spmat->nz));
   csi_to_int(spmat->i, fclib_problem->M->i,
-             (unsigned) spmat->nzmax);
+             (unsigned) spmat->nz);
   fclib_problem->M->x= spmat->x;
   fclib_problem->M->nz= (int) spmat->nz;
   fclib_problem->M->info=NULL;
@@ -539,13 +606,13 @@ int globalRollingFrictionContact_fclib_write(
   fclib_problem->H = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
   fclib_problem->H->n = (int) spmat->n;
   fclib_problem->H->m = (int) spmat->m;
-  fclib_problem->H->nzmax= (int) spmat->nzmax;
-  fclib_problem->H->p= (int*) malloc(sizeof(int)*spmat->nzmax);
+  fclib_problem->H->nzmax= (int) spmat->nz;
+  fclib_problem->H->p= (int*) malloc(sizeof(int)*spmat->nz);
   csi_to_int(spmat->p, fclib_problem->H->p,
-             (unsigned) spmat->nzmax);
-  fclib_problem->H->i= (int*) malloc(sizeof(int)*spmat->nzmax);
+             (unsigned) spmat->nz);
+  fclib_problem->H->i= (int*) malloc(sizeof(int)*spmat->nz);
   csi_to_int(spmat->i, fclib_problem->H->i,
-             (unsigned) spmat->nzmax);
+             (unsigned) spmat->nz);
   fclib_problem->H->x= spmat->x;
   fclib_problem->H->nz= (int) spmat->nz;
   fclib_problem->H->info=NULL;
