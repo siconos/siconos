@@ -2216,6 +2216,7 @@ static void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp, const b
 		const btTriangleShape* tri_shape = static_cast<const btTriangleShape*>(colObj0Wrap->getCollisionShape());
 		btVector3 tri_normal;
 		tri_shape->calcNormal(tri_normal);
+
 		newNormal = tri_normal;
 		//					cp.m_distance1 = cp.m_distance1 * newNormal.dot(cp.m_normalWorldOnB);
     btVector3 oldNormal =  	cp.m_normalWorldOnB;
@@ -2224,21 +2225,34 @@ static void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp, const b
     //printf("new normal %e\t%e\t%e\n", newNormal.x(),  newNormal.y(), newNormal.z());
     //printf("cp.m_distance1 = %e\n", cp.m_distance1 );
 
+
+    // Option 1 - we test if the normal are similar or not before changing the normal
+
+    // btScalar cosine =  oldNormal.dot(newNormal);
+    // //printf("cosine %e\n", cosine);
+    // if (cosine < 0.0)
+    // {
+    //   newNormal = -1.0*tri_normal;
+    //   cosine =  oldNormal.dot(newNormal);
+    // }
+    // //btScalar diff  = oldNormal.distance(newNormal);
+    // //printf("diff %e\n", diff);
+    // if ((1.0 - cosine) > 3e-03 ) // around 5 degrees
+    // {
+    //   //printf("--------------------------------------> change edge  normal to triangle normal\n");
+    //   cp.m_normalWorldOnB = newNormal;
+    // }
+    // else return;
+
+    // Option 2 - we take in any cases the normal to the triangle face
+
     btScalar cosine =  oldNormal.dot(newNormal);
-    //printf("cosine %e\n", cosine);
     if (cosine < 0.0)
     {
       newNormal = -1.0*tri_normal;
-      cosine =  oldNormal.dot(newNormal);
     }
-    //btScalar diff  = oldNormal.distance(newNormal);
-    //printf("diff %e\n", diff);
-    if ((1.0 - cosine) > 3e-03 ) // around 5 degrees
-    {
-      //printf("--------------------------------------> change edge  normal to triangle normal\n");
-      cp.m_normalWorldOnB = newNormal;
-    }
-    else return;
+    cp.m_normalWorldOnB = newNormal;
+
 
 		// Reproject collision point along normal. (what about cp.m_distance1?)
 		cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
