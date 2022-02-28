@@ -49,7 +49,8 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include "NumericsSparseMatrix.h"
 #include "CSparseMatrix.h"
 
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 #ifdef DEBUG_MESSAGES
@@ -397,6 +398,8 @@ void SimpleMatrix::Factorize()
 
 void SimpleMatrix::Solve(SiconosMatrix &B)
 {
+  DEBUG_BEGIN("SimpleMatrix::Solve(SiconosMatrix &B)\n");
+
   if(B.isBlock())
     THROW_EXCEPTION("SimpleMatrix Solve(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
 
@@ -493,11 +496,12 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
 
   if(info != 0)
     THROW_EXCEPTION("SimpleMatrix::Solve failed.");
+  DEBUG_END("SimpleMatrix::Solve(SiconosMatrix &B)\n");
 }
 
 void SimpleMatrix::Solve(SiconosVector &B)
 {
-  DEBUG_BEGIN("SimpleMatrix::PLUSolve(SiconosVector &B)\n");
+  DEBUG_BEGIN("SimpleMatrix::Solve(SiconosVector &B)\n");
 
   if(!isFactorized())
   {
