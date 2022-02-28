@@ -67,6 +67,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 
 #include "BodyShapeRecord.hpp"
 
+#include "BulletUtils.hpp"
 
 #include <map>
 #include <limits>
@@ -118,7 +119,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include "BulletCollision/CollisionShapes/btBox2dShape.h"
 #include "BulletCollision/CollisionShapes/btConvex2dShape.h"
 
-// 2D specific contact detection algorithm (Takane from bullet Planar2D.cpp example)
+// 2D specific contact detection algorithm (Taken from bullet Planar2D.cpp example)
 #include "BulletCollision/CollisionDispatch/btBox2dBox2dCollisionAlgorithm.h"
 #include "BulletCollision/CollisionDispatch/btConvex2dConvex2dAlgorithm.h"
 #include "BulletCollision/NarrowPhaseCollision/btMinkowskiPenetrationDepthSolver.h"
@@ -1741,6 +1742,24 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBox2dRecord &record)
 }
 
 
+static int find_index_closest_point_btConvexHullShape(btVector3 &pointA, btConvexHullShape &btch)
+{
+  int numPoints = btch.getNumPoints();
+  const btVector3* points = btch.getPoints();
+  btScalar min_dist = 1e30;
+  int p_idx=-1;
+  for (int p = 0 ; p < numPoints; p++)
+  {
+    btScalar l2 = (points[p]-pointA).length2();
+    if (l2 < min_dist)
+    {
+      min_dist= l2;
+      p_idx=p;
+    }
+  }
+  return p_idx;
+}
+
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
@@ -1768,7 +1787,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // {
   //   pts[r*3+0] = (*ch2d->vertices())(r, 0) * _options.worldScale;
   //   pts[r*3+1] = (*ch2d->vertices())(r, 1) * _options.worldScale;
-  //   pts[r*3+2] = _options.Depth2D * _options.worldScale;
+  //   pts[r*3+2] = 0.0;
   // }
 
   // Second way. We double the points
@@ -1803,35 +1822,57 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // btConvexHullShape* childShape1 = new btConvexHullShape(&pts[0],rows, sizeof(btScalar)*3);
 
   btConvexHullShape * btch;
-  btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible loss of memory since we cannot SP here
+  btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible loss of memory
 
-// Warning inside margin is not taken into account as in 3D
+  btScalar shrunkBy = 0.0;
+
   if(ch2d->insideMargin() == 0)
   {
-    // Create a convex hull directly with no further processing.
-    // TODO: In case of worldScale=1, maybe we could avoid the copy to pts.
-    btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible loss of memory since we cannot SP here
+    shrunkBy = -1.0;
   }
   else
   {
     // Internal margin implemented by shrinking the hull
     // TODO: Do we need the shrink clamp? (last parameter)
+    // If "shrinkClamp" is positive, "shrink" is clamped to not exceed "shrinkClamp * innerRadius", where "innerRadius"
+    //  is the minimum distance of a face to the center of the convex hull.
+
+
+
+    // btConvexHullComputer shrinkCH_0;
+    // DEBUG_PRINTF("Internal margin implemented by shrinking the hull of %e\n", 0.0);
+    // btScalar shrunkBy_0 = shrinkCH_0.compute(&pts[0], sizeof(btScalar)*3, rows,
+    //                                          0.0,
+    //                                          0);
+    // for(int i=0; i < shrinkCH_0.vertices.size(); i++)
+    // {
+    //   printf("shrinkCH_0.original_vertex_index[%i] %i \n", i, shrinkCH_0.original_vertex_index[i] );
+    // }
+
     btConvexHullComputer shrinkCH;
-    btScalar shrunkBy = shrinkCH.compute(&pts[0], sizeof(btScalar)*3, rows,
+    DEBUG_PRINTF("Internal margin implemented by shrinking the hull of %e\n", ch2d->insideMargin() * _options.worldScale);
+    shrunkBy = shrinkCH.compute(&pts[0], sizeof(btScalar)*3, rows,
                                          ch2d->insideMargin() * _options.worldScale,
                                          0);
     if(shrunkBy < 0)
     {
       // TODO: Warning
       // "insideMargin is too large, convex hull would be too small.";
-      btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible loss of memory since we cannot SP here
-      ch2d->setInsideMargin(0);
+      DEBUG_PRINTF("insideMargin is too large, convex hull would be too small. shrunkby %e\n ", shrunkBy);
+      DEBUG_PRINT("come back to original convex hull\n" );
+
+      //btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible loss of memory since we cannot SP here
+      ch2d->setInsideMargin(0.);
     }
     else
     {
+      delete(btch);
       btch = new btConvexHullShape;
       for(int i=0; i < shrinkCH.vertices.size(); i++)
       {
+        //printf("shrinkCH.original_vertex_index[%i] %i \n", i, shrinkCH_0.original_vertex_index[i] );
+        //printf("shrinkCH.original_vertex_index[%i] %i \n", i, shrinkCH.original_vertex_index[i] );
+        //const btVector3 &v(shrinkCH.vertices[shrinkCH_0.original_vertex_index[i] ]);
         const btVector3 &v(shrinkCH.vertices[i]);
 #if defined(BT_BULLET_VERSION) && (BT_BULLET_VERSION <= 281)
         btch->addPoint(v);
@@ -1839,27 +1880,60 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
         btch->addPoint(v, false);
 #endif
       }
+      DEBUG_PRINTF("shrinking by : %e\n", shrunkBy  / _options.worldScale);
       ch2d->setInsideMargin(shrunkBy / _options.worldScale);
     }
   }
 
-  // Add external margin and recalc bounding box
-  DEBUG_PRINTF("ch2d->insideMargin() = %8.4e\t, ch2d->outsideMargin() = %8.4e\n", ch2d->insideMargin(), ch2d->outsideMargin());
-  btch->setMargin((ch2d->insideMargin() + ch2d->outsideMargin()) * _options.worldScale);
+  DEBUG_EXPR(display_info_btConvexHullShape(*btch););
+
+  // recalc bounding box
   btch->recalcLocalAabb();
 
+
   SP::btConvex2dShape btconvex2d(new btConvex2dShape(btch));
+
+  //Add external margin
+  // set the margin of the  btConvex2dShape. This will set the margin of the child shape  btConvexHullShape
+  DEBUG_PRINTF("ch2d->insideMargin() = %8.4e\t, ch2d->outsideMargin() = %8.4e\n", ch2d->insideMargin(), ch2d->outsideMargin());
   btconvex2d->setMargin((ch2d->insideMargin() + ch2d->outsideMargin()) * _options.worldScale);
 
+
   // initialization
-  createCollisionObjectHelper<SP::SiconosConvexHull2d,
-                              SP::btConvex2dShape,
-                              SP::RigidBody2dDS,
-                              BodyCH2dRecord>
-                              (base, ds, ch2d, btconvex2d, bodyShapeMap, contactor,
-                               staticBodyShapeMap, staticBody);
+  SP::btCollisionObject btobject = createCollisionObjectHelper<SP::SiconosConvexHull2d,
+                                                               SP::btConvex2dShape,
+                                                               SP::RigidBody2dDS,
+                                                               BodyCH2dRecord>
+    (base, ds, ch2d, btconvex2d, bodyShapeMap, contactor,
+     staticBodyShapeMap, staticBody);
+
+  if (ch2d->avoidInternalEdgeContact())
+  {
+    // this flag allows to call the call gContactAddedCallback when the callback has just been in the manifold
+    // In the case of the heightmap, we use it to tweak the normal to avoid internal edge contact.
+    btobject->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+
+
+    // keep track of the points of the selected edge
+    // UGLY. the only way we found to keep track of the edge since the shinkring method
+    // re-sorts the vertices.
+    if (shrunkBy > 0)
+    {
+      // find the closest point to original point of index _normal_edge_pointA
+      int r=ch2d->_normal_edge_pointA;
+      btVector3 pointA = btVector3(pts[r*3+0], pts[r*3+1], pts[r*3+2]);
+      ch2d->_normal_edge_pointA = find_index_closest_point_btConvexHullShape(pointA, *btch);
+      // find the closest point to original point of index _normal_edge_pointB
+      r=ch2d->_normal_edge_pointB;
+      btVector3 pointB = btVector3(pts[r*3+0], pts[r*3+1], pts[r*3+2]);
+      ch2d->_normal_edge_pointB = find_index_closest_point_btConvexHullShape(pointB, *btch);
+    }
+  }
+
+
   DEBUG_END("void SiconosBulletCollisionManager_impl::createCollisionObject(..., ch2d, ..) \n");
 }
+
 
 void SiconosBulletCollisionManager_impl::updateShape(BodyCH2dRecord &record)
 {
@@ -1874,6 +1948,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCH2dRecord &record)
     // TODO
     //btbox->setLocalScaling(btVector3(sx, sy, sz));
     btconvex2d->setMargin((ch2d->insideMargin() + ch2d->outsideMargin()) * _options.worldScale);
+    //btconvex2d->setMargin((ch2d->outsideMargin()) * _options.worldScale);
 
     SP::RigidBody2dDS rbds=std::static_pointer_cast<RigidBody2dDS>(record.ds);
     if(record.ds && rbds->useContactorInertia())
@@ -2131,6 +2206,7 @@ public:
         {
           data.manifold = world->getDispatcher()->
                           getManifoldByIndexInternal(manifold_index);
+          //display_info_manifold(*data.manifold);
           data.objectA = data.manifold->getBody0();
           data.objectB = data.manifold->getBody1();
           numContacts = data.manifold->getNumContacts();
@@ -2199,9 +2275,87 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
 
 static void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, const btCollisionObjectWrapper* colObj1Wrap, int partId0, int index0)
 {
+
+
+  DEBUG_BEGIN("siconosBulletAdjustInternalEdgeContacts \n");
+
+  DEBUG_EXPR(display_info_contact_point(cp);
+             display_info_collision_object(colObj0Wrap->getCollisionObject());
+             display_info_collision_object(colObj1Wrap->getCollisionObject()););
+
+
 	//btAssert(colObj0->getCollisionShape()->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE);
-	if (colObj0Wrap->getCollisionShape()->getShapeType() != TRIANGLE_SHAPE_PROXYTYPE)
-		return;
+	// if (colObj0Wrap->getCollisionShape()->getShapeType() != TRIANGLE_SHAPE_PROXYTYPE)
+	// 	return;
+  if (colObj0Wrap->getCollisionObject()->getCollisionShape()->getShapeType() == CONVEX_2D_SHAPE_PROXYTYPE)
+	{
+
+
+    //printf("CONVEX_2D_SHAPE_PROXYTYPE  : %i\n",  CONVEX_2D_SHAPE_PROXYTYPE );
+    const btCollisionObject*  objectA= colObj0Wrap->getCollisionObject();
+    const BodyBulletShapeRecord *pairA = reinterpret_cast<const BodyBulletShapeRecord*>(objectA->getUserPointer());
+    SP::SiconosShape sshape = pairA->sshape;
+
+    // pairA->display();
+    // const btCollisionObject*  objectB= colObj1Wrap->getCollisionObject();
+    // const BodyBulletShapeRecord *pairB = reinterpret_cast<const BodyBulletShapeRecord*>(objectB->getUserPointer());
+    // pairB->display();
+
+    SP::SiconosConvexHull2d ch2d(std::dynamic_pointer_cast<SiconosConvexHull2d>(sshape));
+
+    if (ch2d && ch2d->avoidInternalEdgeContact())
+    {
+      DEBUG_PRINTF("a Siconos ch2d shape and ch2d->avoidInternalEdgeContact() true \n");
+
+      // Retrieve the first two points assuming that it corresponds to the edge of interest
+
+      btConvex2dShape*  btConvex2d = (btConvex2dShape*)colObj0Wrap->getCollisionObject()->getCollisionShape();
+      btConvexShape * btconvex = (btConvexShape *) (btConvex2d->getChildShape());
+      btConvexHullShape * btch = (btConvexHullShape *) btconvex;
+      int numPoints= btch->getNumPoints();
+
+
+      // printf("number of points in convex hull : %i\n ", numPoints);
+      const btVector3* points = btch->getPoints();
+      // if (numPoints  > 4)
+      // {
+      //   printf("Warning: number of points in convex hull is more than 2\n     We consider the two first point as the contact edge.\n");
+      //   int p=ch2d->_normal_edge_pointA;
+      //   printf("   point # %i x , y, x : %e\t, %e\t, %e\t \n", p,  points[p].x(), points[p].y(), points[p].z());
+      //   p=ch2d->_normal_edge_pointB;
+      //   printf("   point # %i x , y, x : %e\t, %e\t, %e\t \n", p,  points[p].x(), points[p].y(), points[p].z());
+      // }
+
+      // for (int p = 0 ; p < numPoints; p++)
+      // {
+      //   printf("   point # %i x , y, x : %e\t, %e\t, %e\t \n", p,  points[p].x(), points[p].y(), points[p].z());
+      // }
+
+      // Compute the normal to the selected edge
+      int idx_A =  ch2d->_normal_edge_pointA;
+      int idx_B =  ch2d->_normal_edge_pointB;
+
+
+      btScalar AB_x  = points[idx_B].x() - points[idx_A].x();
+      btScalar AB_y  = points[idx_B].y() - points[idx_A].y();
+      btVector3 normal = btVector3(-AB_y,  AB_x,btScalar(0.f));
+      normal.safeNormalize();
+
+      DEBUG_PRINTF(" new  normal x , y, z : %e\t, %e\t, %e\t \n", normal.x(), normal.y(), normal.z());
+
+      cp.m_normalWorldOnB = normal;
+
+      // Reproject collision point along normal. (what about cp.m_distance1?)
+      cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
+      cp.m_localPointB = colObj0Wrap->getWorldTransform().invXform(cp.m_positionWorldOnB);
+
+    }
+
+    
+    DEBUG_END("siconosBulletAdjustInternalEdgeContacts \n");
+    return;
+    //getchar();
+  }
 
 
 	btTriangleInfoMap* triangleInfoMapPtr = nullptr;
@@ -2257,6 +2411,7 @@ static void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp, const b
 		// Reproject collision point along normal. (what about cp.m_distance1?)
 		cp.m_positionWorldOnB = cp.m_positionWorldOnA - cp.m_normalWorldOnB * cp.m_distance1;
 		cp.m_localPointB = colObj0Wrap->getWorldTransform().invXform(cp.m_positionWorldOnB);
+    DEBUG_END("siconosBulletAdjustInternalEdgeContacts \n");
 		return;
 	}
 }
@@ -2796,6 +2951,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     }
     //getchar();
   }
+  //getchar();
 #ifdef BULLET_TIMER
   end_old =end;
   end = std::chrono::system_clock::now();

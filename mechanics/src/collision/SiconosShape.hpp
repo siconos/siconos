@@ -511,9 +511,9 @@ protected:
 
 
 public:
-  /* index of the first point of the selected to compute the normal edge (default=0) */
+  /* index of the first point of the selected edge to compute the normal edge (default=0) */
   int _normal_edge_pointA;
-  /* index of the first point of the selected to compute the normal edge (default=1) */
+  /* index of the first point of the selected edge to compute the normal edge (default=1) */
   int _normal_edge_pointB;
 
 
