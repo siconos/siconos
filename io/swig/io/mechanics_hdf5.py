@@ -905,7 +905,8 @@ class MechanicsHdf5(object):
             self._number_of_permanent_interactions += 1
 
     def add_convex_shape(self, name, points,
-                         insideMargin=None, outsideMargin=None):
+                         insideMargin=None, outsideMargin=None,
+                         avoid_internal_edge_contact=False):
         """
         Add a convex shape defined by a list of points.
         """
@@ -929,6 +930,8 @@ class MechanicsHdf5(object):
             shape[:] = points[:]
             shape.attrs['type'] = 'convex'
             shape.attrs['id'] = self._number_of_shapes
+            if avoid_internal_edge_contact:
+                shape.attrs['avoid_internal_edge_contact'] = True
             self._number_of_shapes += 1
 
     def add_primitive_shape(self, name, primitive, params,

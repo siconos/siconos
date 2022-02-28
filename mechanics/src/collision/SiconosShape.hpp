@@ -505,9 +505,20 @@ protected:
   ACCEPT_SERIALIZATION(SiconosConvexHull2d);
   SP::SiconosMatrix _vertices;
 
+  /* boolean to use the normal to the selected edge of the convexhull
+     to avoid contact with vertex */
+  bool _avoidInternalEdgeContact;
+
+
 public:
+  /* index of the first point of the selected to compute the normal edge (default=0) */
+  int _normal_edge_pointA;
+  /* index of the first point of the selected to compute the normal edge (default=1) */
+  int _normal_edge_pointB;
+
+
   SiconosConvexHull2d(SP::SiconosMatrix vertices)
-    : SiconosShape(), _vertices(vertices)
+    : SiconosShape(), _vertices(vertices), _avoidInternalEdgeContact(false), _normal_edge_pointA(0), _normal_edge_pointB(1)
   {
     if (_vertices && _vertices->size(1) != 2)
       THROW_EXCEPTION("Convex hull vertices matrix must have 2 columns in 2d.");
@@ -521,6 +532,12 @@ public:
   {
     _vertices = vertices;
     _version ++;
+  }
+  bool avoidInternalEdgeContact() const {return _avoidInternalEdgeContact;}
+
+  void setAvoidInternalEdgeContact(bool value)
+  {
+    _avoidInternalEdgeContact = value;
   }
 
   /** visitors hook

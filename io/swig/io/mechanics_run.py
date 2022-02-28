@@ -719,6 +719,10 @@ class ShapeCollection():
                         dims = [points[:, 0].max() - points[:, 0].min(),
                                 points[:, 1].max() - points[:, 1].min()]
 
+                    avoid_internal_edge_contact = self.shape(shape_name).attrs.get('avoid_internal_edge_contact', False)
+                    if avoid_internal_edge_contact:
+                        convex.setAvoidInternalEdgeContact(True)
+
                     convex.setInsideMargin(
                         self.shape(shape_name).attrs.get('insideMargin',
                                                          min(dims) * 0.02))
