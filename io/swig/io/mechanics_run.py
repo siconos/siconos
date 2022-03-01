@@ -785,7 +785,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['h']=0.0005
         d['multipoints_iterations']=None
         d['theta']=0.50001
-        d['gamma']=None
+        d['gamma']=0.0
         d['Newton_options']=sk.SICONOS_TS_NONLINEAR
         d['Newton_max_iter']=20
         d['Newton_tolerance']=1e-10
@@ -2441,7 +2441,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             h=0.0005,
             multipoints_iterations=None,
             theta=0.50001,
-            gamma=None,
+            gamma=0.0,
             Newton_options=sk.SICONOS_TS_NONLINEAR,
             Newton_max_iter=20,
             set_external_forces=None,
@@ -2525,7 +2525,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         theta : real, optional
             parameter for Moreau-Jean OSI (default 0.50001)
         gamma : real, optional
-            parameter for Moreau-Jean OSI (default 1/2.)
+            parameter for Moreau-Jean OSI (default 0.)
         Newton_options: int, optional
             sk.TimeStepping options to control the Newton loop
             (default sk.SICONOS_TS_NONLINEAR)
