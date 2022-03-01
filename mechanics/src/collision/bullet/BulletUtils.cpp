@@ -24,9 +24,12 @@
 #include "siconos_debug.h"
 
 #include <BulletCollision/GImpact/btGImpactShape.h>
-
+#include "BulletCollision/CollisionShapes/btConvex2dShape.h"
 void display_info_collision_object(const btCollisionObject* collisionObject)
 {
+
+  printf("---- collision_object \n");
+
   const btCollisionShape* collisionShape = collisionObject->getCollisionShape();
   printf("collisionShape : %p\n", collisionShape);
   printf("collisionShape->getShapeType(): %i\n", collisionShape->getShapeType());
@@ -72,6 +75,21 @@ void display_info_collision_object(const btCollisionObject* collisionObject)
       btGImpactMeshShapePart* mesh_part =gimpact_mesh_shape->getMeshPart(mesh_part_index);
     }
   }
+  if (collisionShape->getShapeType() == CONVEX_2D_SHAPE_PROXYTYPE)
+  {
+    printf("CONVEX_2D_SHAPE_PROXYTYPE shape type\n");
+    btConvex2dShape*  btConvex2d = (btConvex2dShape*)collisionShape;
+    btConvexShape * btconvexchild = (btConvexShape *) (btConvex2d->getChildShape());
+
+    printf("btconvexchild->getShapeType(): %i\n", btconvexchild->getShapeType());
+    printf("btconvexchild->getName(): %s\n", btconvexchild->getName());
+
+    if(btconvexchild->getShapeType() ==  CONVEX_HULL_SHAPE_PROXYTYPE)
+    {
+      btConvexHullShape * btch = (btConvexHullShape *) btconvexchild;
+      display_info_btConvexHullShape(*btch);
+    }
+  }
   //getchar();
 }
 
@@ -93,10 +111,44 @@ void display_info_manifold(const btPersistentManifold& manifold)
   for (int index =0; index < manifold.getNumContacts(); index++)
   {
     const btManifoldPoint& point =  manifold.getContactPoint(index);
-    printf("   contact point number %i : \n", index);
-    btVector3  pA = point.m_localPointA;
-    printf("   pA x , y, x : %e\t, %e\t, %e\t \n", pA.x(), pA.y(), pA.z());
-    btVector3  pB = point.m_localPointB;
-    printf("   pB x , y, x : %e\t, %e\t, %e\t \n", pB.x(), pB.y(), pB.z());
+    display_info_contact_point(point);
   }
+}
+void display_info_contact_point(const btManifoldPoint& cp)
+{
+  printf("   --------- contact point: %p \n", &cp);
+  printf("   m_partId0: %i  m_index0 : %i \n", cp.m_partId0, cp.m_index0);
+
+  btVector3  lpA = cp.m_localPointA;
+  printf("   lpA x , y, x : %e\t, %e\t, %e\t \n", lpA.x(), lpA.y(), lpA.z());
+  btVector3  lpB = cp.m_localPointB;
+  printf("   lpB x , y, x : %e\t, %e\t, %e\t \n", lpB.x(), lpB.y(), lpB.z());
+
+  btVector3  pA = cp.m_positionWorldOnA;
+  printf("   pA x , y, x : %e\t, %e\t, %e\t \n", pA.x(), pA.y(), pA.z());
+  btVector3  pB = cp.m_positionWorldOnB;
+  printf("   pB x , y, x : %e\t, %e\t, %e\t \n", pB.x(), pB.y(), pB.z());
+
+  btVector3  normalOnB =  	cp.m_normalWorldOnB;
+  printf("   normalOnB x , y, x : %e\t, %e\t, %e\t \n", normalOnB.x(), normalOnB.y(), normalOnB.z());
+  printf("   distance1 = %e\n", cp.m_distance1);
+  printf("\n");
+
+}
+void display_info_btConvexHullShape(const btConvexHullShape& btch)
+{
+  int numPoints= btch.getNumPoints();
+  printf("   number of points in convex hull shape: %i\n", numPoints);
+  int numVertices = btch.getNumVertices();
+  int numEdges = btch.getNumVertices();
+  int numPlanes = btch.getNumPlanes();
+  printf("   number of vertices: %i \t, edge: %i\t, planes: %i\n",numVertices, numEdges, numPlanes );
+  const btVector3* points = btch.getPoints();
+  for (int p = 0 ; p < numPoints; p++)
+  {
+    printf("   point # %i x , y, z : %e\t, %e\t, %e\t \n", p,  points[p].x(), points[p].y(), points[p].z());
+  }
+
+
+
 }

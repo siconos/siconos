@@ -23,9 +23,10 @@
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <btBulletCollisionCommon.h>
-#include <BulletCollision/GImpact/btGImpactShape.h>
 
 void display_info_collision_object(const btCollisionObject* collisionObject);
 void display_info_manifold(const btPersistentManifold& manifold);
+void display_info_contact_point(const btManifoldPoint& cp);
+void display_info_btConvexHullShape(const btConvexHullShape& cp);
 
 #endif
