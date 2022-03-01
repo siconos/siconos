@@ -273,12 +273,8 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
   fclib_problem->info->description = description;
   fclib_problem->info->math_info = mathInfo;
 
-  fclib_problem->W = (struct fclib_matrix*)malloc(sizeof(struct fclib_matrix));
   fclib_problem->R = NULL;
   fclib_problem->V = NULL;
-
-  fclib_problem->W->m = problem->M->size0;
-  fclib_problem->W->n = problem->M->size1;
 
   CSparseMatrix * spmat = NM_triplet(problem->M);
 
