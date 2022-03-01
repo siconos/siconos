@@ -46,6 +46,23 @@ public:
   unsigned int shape_version;
   SP::StaticBody staticBody;
 
+
+  void display() const
+  {
+    std::cout << "BodyShapeRecord display" << std::endl;
+
+    if (ds)
+    {
+      std::cout << "ds number: " << ds->number() << std::endl;
+    }
+    if (staticBody)
+    {
+      std::cout << "static Body number :" << staticBody->number << std::endl;
+    }
+
+  };
+
+
   VIRTUAL_ACCEPT_VISITORS();
 };
 
