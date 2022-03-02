@@ -47,47 +47,7 @@
 
 #include <boost/math/quaternion.hpp>
 
-//static
-//void copyQuatRot(boost::math::quaternion<double>& from, SiconosVector& to)
-//{
-//  to(3) = from.R_component_1();
-//  to(4) = from.R_component_2();
-//  to(5) = from.R_component_3();
-//  to(6) = from.R_component_4();
-//}
-
-static
-void copyQuatRot(const SiconosVector& from, boost::math::quaternion<double>& to)
-{
-  to = boost::math::quaternion<double>(from(3), from(4), from(5), from(6));
-}
-
-static
-void copyQuatPos(const boost::math::quaternion<double>& from, SiconosVector& to)
-{
-  to(0) = from.R_component_2();
-  to(1) = from.R_component_3();
-  to(2) = from.R_component_4();
-}
-
-static
-void copyQuatPos(const SiconosVector& from, boost::math::quaternion<double>& to)
-{
-  to = boost::math::quaternion<double>(0, from(0), from(1), from(2));
-}
-
-static
-void copyQuatPos(const btVector3& from, boost::math::quaternion<double>& to)
-{
-  to = boost::math::quaternion<double>(0, from.x(), from.y(), from.z());
-}
-
-static void copyBtVector3(const btVector3 &from, SiconosVector& to)
-{
-  to(0) = from.x();
-  to(1) = from.y();
-  to(2) = from.z();
-}
+#include "BulletSiconosCommon.hpp"
 
 Bullet5DR::Bullet5DR()
   : Contact5DR()

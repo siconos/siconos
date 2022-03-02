@@ -46,62 +46,11 @@
 #endif
 
 #include <boost/math/quaternion.hpp>
-
-//static
-//void copyQuatRot2d(boost::math::quaternion<double>& from, SiconosVector& to)
-//{
-//  double angle = 2.0 * acos(from.R_component_1());
-//  to(2) = angle;
-//}
-
-static
-void copyQuatRot2d(const SiconosVector& from, boost::math::quaternion<double>& to)
-{
-  double half_angle = from(2)/2.0;
-
-  to = boost::math::quaternion<double>(cos(half_angle), 0.0, 0.0, sin(half_angle));
-}
-
-static
-void copyQuatPos2d(const boost::math::quaternion<double>& from, SiconosVector& to)
-{
-  to(0) = from.R_component_2();
-  to(1) = from.R_component_3();
-}
-
-static
-void copyQuatPos2d(const SiconosVector& from, boost::math::quaternion<double>& to)
-{
-  to = boost::math::quaternion<double>(0, from(0), from(1), 0.0);
-}
-
-static
-void copyQuatPos2d(const btVector3& from, boost::math::quaternion<double>& to)
-{
-  to = boost::math::quaternion<double>(0, from.x(), from.y(), 0.0);
-}
-
-static void copyBtVector32d(const btVector3 &from, SiconosVector& to)
-{
-  to(0) = from.x();
-  to(1) = from.y();
-}
-
+#include "BulletSiconosCommon.hpp"
 Bullet2d3DR::Bullet2d3DR()
   : Contact2d3DR()
 {
 }
-
-#ifdef DEBUG_MESSAGES
-static
-void display_quat(boost::math::quaternion<double>& quat)
-{
-  std::cout << "q_0: " << quat.R_component_1()
-            << " q_1: " << quat.R_component_2()
-            << " q_2: " << quat.R_component_3()
-            << " q_3: " << quat.R_component_4() << std::endl;
-}
-#endif
 
 void Bullet2d3DR::updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
     const btManifoldPoint& point,
