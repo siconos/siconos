@@ -49,11 +49,25 @@ Contact2d3DR::Contact2d3DR()
 //   DEBUG_END("Contact2d3DR::computeh(...)\n");
 // }
 
-void Contact2d3DR::updateContactPoints(const SiconosVector& pos1,
-                                       const SiconosVector& pos2,
-                                       const SiconosVector& normal)
+// void Contact2d3DR::updateContactPoints(const SiconosVector& pos1,
+//                                        const SiconosVector& pos2,
+//                                        const SiconosVector& normal)
+// {
+//   // Copy relative positions
+//   *_relPc1 = pos1;
+//   *_relPc2 = pos2;
+
+//   // Update normal
+//   *_relNc = normal;
+
+//   assert(!((*_relNc)(0)==0 && (*_relNc)(1)==0)
+//          && "nc = 0, problems..\n");
+// }
+void Contact2d3DR::updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
+                                                      const SiconosVector& pos2,
+                                                      const SiconosVector& normal)
 {
-  // Copy relative positions
+  // Copy  positions
   *_Pc1 = pos1;
   *_Pc2 = pos2;
 

@@ -46,7 +46,7 @@
 #endif
 
 #include <boost/math/quaternion.hpp>
-#include "BulletSiconosCommon.hpp"
+//#include "BulletSiconosCommon.hpp"
 
 
 Bullet2dR::Bullet2dR()
@@ -71,6 +71,10 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   DEBUG_PRINTF("point.getPositionWorldOnB().x() = %8.5e\t", point.getPositionWorldOnB().x());
   DEBUG_PRINTF("point.getPositionWorldOnB().y() = %8.5e\t", point.getPositionWorldOnB().y());
   DEBUG_PRINTF("point.getPositionWorldOnB().z() = %8.5e\n", point.getPositionWorldOnB().z());
+
+  DEBUG_PRINTF("point.m_normalWorldOnB.x() = %8.5e\t", point.m_normalWorldOnB.x());
+  DEBUG_PRINTF("point.m_normalWorldOnB.y() = %8.5e\t", point.m_normalWorldOnB.y());
+  DEBUG_PRINTF("point.m_normalWorldOnB.z() = %8.5e\n", point.m_normalWorldOnB.z());
 
 
 
@@ -181,25 +185,25 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
 
   //SiconosVector va(2), vb(2), vn(2);
 
-  const btVector3& pt_A= point.getPositionWorldOnA();
-  const btVector3& pt_B= point.getPositionWorldOnB();
+  const btVector3& pt_A= point.getPositionWorldOnA()/scaling;
+  const btVector3& pt_B= point.getPositionWorldOnB()/scaling;
 
   if(flip)
   {
-    (*_Pc1)(0) = pt_B.x()/scaling;
-    (*_Pc1)(1) = pt_B.y()/scaling;
-    (*_Pc2)(0) = pt_A.x()/scaling;
-    (*_Pc2)(1) = pt_A.y()/scaling;
+    (*_Pc1)(0) = pt_B.x();
+    (*_Pc1)(1) = pt_B.y();
+    (*_Pc2)(0) = pt_A.x();
+    (*_Pc2)(1) = pt_A.y();
   }
   else
   {
-    (*_Pc1)(0) = pt_A.x()/scaling;
-    (*_Pc1)(1) = pt_A.y()/scaling;
-    (*_Pc2)(0) = pt_B.x()/scaling;
-    (*_Pc2)(1) = pt_B.y()/scaling;
+    (*_Pc1)(0) = pt_A.x();
+    (*_Pc1)(1) = pt_A.y();
+    (*_Pc2)(0) = pt_B.x();
+    (*_Pc2)(1) = pt_B.y();
   }
 
-  const btVector3& normal = point.m_normalWorldOnB;
+  const btVector3& normal = point.m_normalWorldOnB*(flip?-1:1);
   (*_Nc)(0) =  normal.x();
   (*_Nc)(1) =  normal.y();
 

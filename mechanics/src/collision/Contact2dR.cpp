@@ -63,7 +63,7 @@ void Contact2dR::updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
                                                     const SiconosVector& pos2,
                                                     const SiconosVector& normal)
 {
-  // Copy relative positions
+  // Copy positions
   *_Pc1 = pos1;
   *_Pc2 = pos2;
 

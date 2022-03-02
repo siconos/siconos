@@ -37,7 +37,7 @@
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-#include <btBulletCollisionCommon.h>
+//#include <btBulletCollisionCommon.h>
 
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -75,101 +75,125 @@ void Bullet2d3DR::updateContactPointsFromManifoldPoint(const btPersistentManifol
   DEBUG_PRINTF("point.m_normalWorldOnB.z() = %8.5e\n", point.m_normalWorldOnB.z());
 
 
-  ::boost::math::quaternion<double> rq1, rq2, posa;
-  ::boost::math::quaternion<double> pq1, pq2, posb;
+  // ::boost::math::quaternion<double> rq1, rq2, posa;
+  // ::boost::math::quaternion<double> pq1, pq2, posb;
 
 
-  /* Compute quaternion representation of the position of ds1 and the rotation */
-  DEBUG_EXPR(ds1->q()->display(););
-  copyQuatPos2d(*ds1->q(), pq1);
+  // /* Compute quaternion representation of the position of ds1 and the rotation */
+  // DEBUG_EXPR(ds1->q()->display(););
+  // copyQuatPos2d(*ds1->q(), pq1);
 
-  copyQuatRot2d(*ds1->q(), rq1);
-  DEBUG_EXPR(display_quat(pq1););
-  DEBUG_EXPR(display_quat(rq1););
-
-
-  if(ds2)
-  {
-    DEBUG_EXPR(ds2->q()->display(););
-    copyQuatPos2d(*ds2->q(), pq2);
-    copyQuatRot2d(*ds2->q(), rq2);
-  }
+  // copyQuatRot2d(*ds1->q(), rq1);
+  // DEBUG_EXPR(display_quat(pq1););
+  // DEBUG_EXPR(display_quat(rq1););
 
 
-  /* Compute a quaternion representation of the position of the contact points
-   * to prepare rotations
-   * posa : global position of the contact point A on ds1 if flip =0
-   * posb : global position of the contact point B on ds2 if flip =0
-   */
-  copyQuatPos2d(point.getPositionWorldOnA() / scaling, posa);
-  copyQuatPos2d(point.getPositionWorldOnB() / scaling, posb);
+  // if(ds2)
+  // {
+  //   DEBUG_EXPR(ds2->q()->display(););
+  //   copyQuatPos2d(*ds2->q(), pq2);
+  //   copyQuatRot2d(*ds2->q(), rq2);
+  // }
 
+
+  // /* Compute a quaternion representation of the position of the contact points
+  //  * to prepare rotations
+  //  * posa : global position of the contact point A on ds1 if flip =0
+  //  * posb : global position of the contact point B on ds2 if flip =0
+  //  */
+  // copyQuatPos2d(point.getPositionWorldOnA() / scaling, posa);
+  // copyQuatPos2d(point.getPositionWorldOnB() / scaling, posb);
+
+
+  // if(flip)
+  // {
+  //   ::boost::math::quaternion<double> tmp = posa;
+  //   posa = posb;
+  //   posb = tmp;
+  // }
+
+  // /* after flips :
+  //  * posa : global position of the contact point A on ds1
+  //  * posb : global position of the contact point B on ds2
+  //  */
+  // DEBUG_EXPR(display_quat(posa););
+  // DEBUG_EXPR(display_quat(posb););
+
+
+  // SiconosVector va(2), vb(2);
+  // if(flip)
+  // {
+  //   /* Rotate the relatice position of the contact point */
+  //   copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
+
+  //   if(ds2)
+  //     copyQuatPos2d((1.0/rq2) * (posb - pq2) * rq2, vb);
+  //   else
+  //   {
+  //     // If no body2, position is relative to 0,0,0
+  //     copyBtVector32d(point.getPositionWorldOnA() / scaling, vb);
+  //   }
+  // }
+  // else
+  // {
+  //   copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
+  //   if(ds2)
+  //     copyQuatPos2d((1.0/rq2) * (posb - pq2) * rq2, vb);
+  //   else
+  //   {
+  //     // If no body2, position is relative to 0,0,0
+  //     copyBtVector32d(point.getPositionWorldOnB() / scaling, vb);
+  //   }
+  // }
+
+
+
+  // SiconosVector vn(3);
+  // // Get new normal
+  // if(ds2)
+  // {
+  //   btQuaternion qn(point.m_normalWorldOnB.x(),
+  //                   point.m_normalWorldOnB.y(),
+  //                   point.m_normalWorldOnB.z(), 0);
+  //   btQuaternion qb1 = manifold.getBody1()->getWorldTransform().getRotation();
+  //   // un-rotate normal into body1 frame
+  //   qn = qb1.inverse() * qn * qb1;
+  //   vn(0) = qn.x();
+  //   vn(1) = qn.y();
+  //   vn(2) = qn.z();
+  //   vn = vn/vn.norm2();
+  // }
+  // else
+  //   copyBtVector32d(point.m_normalWorldOnB, vn);
+
+  // vn.resize(2);
+  // DEBUG_EXPR(va.display(););
+  // DEBUG_EXPR(vb.display(););
+  // DEBUG_EXPR(vn.display(););
+  // Contact2d3DR::updateContactPoints(va, vb, vn*(flip?-1:1));
+  // DEBUG_END("Bullet2d3DR::updateContactPointsFromManifoldPoint(...)\n");
+
+  const btVector3& pt_A= point.getPositionWorldOnA()/scaling;
+  const btVector3& pt_B= point.getPositionWorldOnB()/scaling;
 
   if(flip)
   {
-    ::boost::math::quaternion<double> tmp = posa;
-    posa = posb;
-    posb = tmp;
-  }
-
-  /* after flips :
-   * posa : global position of the contact point A on ds1
-   * posb : global position of the contact point B on ds2
-   */
-  DEBUG_EXPR(display_quat(posa););
-  DEBUG_EXPR(display_quat(posb););
-
-
-  SiconosVector va(2), vb(2);
-  if(flip)
-  {
-    /* Rotate the relatice position of the contact point */
-    copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
-
-    if(ds2)
-      copyQuatPos2d((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else
-    {
-      // If no body2, position is relative to 0,0,0
-      copyBtVector32d(point.getPositionWorldOnA() / scaling, vb);
-    }
+    (*_Pc1)(0) = pt_B.x();
+    (*_Pc1)(1) = pt_B.y();
+    (*_Pc2)(0) = pt_A.x();
+    (*_Pc2)(1) = pt_A.y();
   }
   else
   {
-    copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
-    if(ds2)
-      copyQuatPos2d((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else
-    {
-      // If no body2, position is relative to 0,0,0
-      copyBtVector32d(point.getPositionWorldOnB() / scaling, vb);
-    }
+    (*_Pc1)(0) = pt_A.x();
+    (*_Pc1)(1) = pt_A.y();
+    (*_Pc2)(0) = pt_B.x();
+    (*_Pc2)(1) = pt_B.y();
   }
 
+  const btVector3& normal = point.m_normalWorldOnB*(flip?-1:1);
+  (*_Nc)(0) =  normal.x();
+  (*_Nc)(1) =  normal.y();
 
-
-  SiconosVector vn(3);
-  // Get new normal
-  if(ds2)
-  {
-    btQuaternion qn(point.m_normalWorldOnB.x(),
-                    point.m_normalWorldOnB.y(),
-                    point.m_normalWorldOnB.z(), 0);
-    btQuaternion qb1 = manifold.getBody1()->getWorldTransform().getRotation();
-    // un-rotate normal into body1 frame
-    qn = qb1.inverse() * qn * qb1;
-    vn(0) = qn.x();
-    vn(1) = qn.y();
-    vn(2) = qn.z();
-    vn = vn/vn.norm2();
-  }
-  else
-    copyBtVector32d(point.m_normalWorldOnB, vn);
-
-  vn.resize(2);
-  DEBUG_EXPR(va.display(););
-  DEBUG_EXPR(vb.display(););
-  DEBUG_EXPR(vn.display(););
-  Contact2d3DR::updateContactPoints(va, vb, vn*(flip?-1:1));
-  DEBUG_END("Bullet2d3DR::updateContactPointsFromManifoldPoint(...)\n");
+  //Contact2d3DR::updateContactPointsInAbsoluteFrame(va, vb, vn*(flip?-1:1));
 }
