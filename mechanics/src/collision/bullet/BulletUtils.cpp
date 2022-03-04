@@ -23,7 +23,7 @@
 #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
 
-#include <BulletCollision/GImpact/btGImpactShape.h>
+#include <BulletCollision/Gimpact/btGImpactShape.h>
 #include "BulletCollision/CollisionShapes/btConvex2dShape.h"
 void display_info_collision_object(const btCollisionObject* collisionObject)
 {
