@@ -411,7 +411,7 @@ static  NumericsMatrix *  QNTpH(const double * const x, const double * const y, 
       QpHp[k] = nz ;                   /* column k of QpH starts here */
 
       /* reallocate if needed */
-      if (10000*nz + H->size1> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size1))
+      if ((nz + H->size0)> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size0))
       {
         return NULL;             /* out of memory */
       }
