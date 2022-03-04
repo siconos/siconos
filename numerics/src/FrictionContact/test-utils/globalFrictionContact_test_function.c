@@ -125,11 +125,6 @@ int globalFrictionContact_test_function(TestCase* current)
     {
       printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
     }
-    printf(" ..... \n");
-    for(k = 0 ; k < print_size; k++)
-    {
-      printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
-    }
   }
   else
   {
@@ -137,14 +132,27 @@ int globalFrictionContact_test_function(TestCase* current)
     {
       printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
     }
-    printf("\n");
-    for(k = 0 ; k < dim*NC; k++)
+  }
+  printf(" ..... \n");
+  if(n >= print_size)
+  {
+    printf("First values (%i)\n", print_size);
+    for(k = 0 ; k < print_size; k++)
     {
       printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
     }
   }
-  printf("\n");
+  else
+  {
+    for(k = 0 ; k < n; k++)
+    {
+      printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
+    }
+  }
 
+
+
+  
   for(k = 0; k < dim * NC; ++k)
   {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
