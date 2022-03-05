@@ -820,7 +820,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['osns_assembly_type']= None
         d['output_contact_forces']=True,
         d['output_contact_info']=True,
-            
+
 
         super(self.__class__, self).__init__(d)
 
@@ -923,7 +923,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
         self._ds_positions=None
-
+        self._ds_boundary_conditions={}
+        
     def __enter__(self):
         super(MechanicsHdf5Runner, self).__enter__()
 
@@ -1735,6 +1736,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 inertia, body_class, shape_class, birth=birth,
                 number=self.instances()[name].attrs['id'])
 
+        # import boundary conditions
+        bc_name = self._ds_boundary_conditions.get(name, None)
+        if bc_name is not None:
+            self.import_boundary_conditions(bc_name)
+
         # schedule its death immediately
         time_of_death = obj.attrs.get('time_of_death', None)
 
@@ -1766,6 +1772,21 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # import dynamical systems
         if self._interman is not None and 'input' in self._data:
+
+
+            # We map the boundary conditions with the object into  self._ds_boundary_conditions.
+            # In that way, boundary conditions will be imported once the
+            # object is created in import_object and not necessarily at the
+            # beginning of the simulation.
+            for name in self.boundary_conditions():
+                ds1_name = self.boundary_conditions()[name].attrs['object1']
+                self._ds_boundary_conditions[ds1_name] = name
+                # only one boundary condition per object. list is not needed
+                # ds_bc = self._ds_boundary_conditions.get(ds1_name, None)
+                # if ds_bc is None:
+                #     self._ds_boundary_conditions[ds1_name] = [name]
+                # else:
+                #     self._ds_boundary_conditions[ds1_name].append(name)
 
             # get pointers
             dpos_data = self.dynamic_data()
@@ -1857,13 +1878,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             for name in self._nslaws_data:
                 self.import_nonsmooth_law(name)
 
+
+            # As for the  boundary conditions, the joints should be imported
+            # after the importation of the object, or the two objects. If one
+            # of the object has a time of birth this will fail.
+
             self.print_verbose('import joints ...')
             for name in self.joints():
                 self.import_joint(name)
-
-            self.print_verbose('import boundary conditions ...')
-            for name in self.boundary_conditions():
-                self.import_boundary_conditions(name)
 
             self.print_verbose('import permanent interactions ...')
             for name in self.permanent_interactions():
@@ -2117,7 +2139,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._cf_info.resize(current_line + contact_info.shape[0], 0)
                 times = np.empty((contact_info.shape[0], 1))
                 times.fill(time)
-                
+
                 self._cf_info[current_line:, :] = \
                     np.concatenate((times,
                                     contact_info),
@@ -2126,7 +2148,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 return len(contact_info)
             return 0
         return 0
-    
+
     def output_domains(self):
         """
         Outputs domains of contact points
@@ -2799,7 +2821,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if run_options.get('gamma'):
             self._osi.setGamma(run_options.get('gamma'))
 
-        
+
         # (2) Time discretisation --
         timedisc = sk.TimeDiscretisation(t0, h)
 
