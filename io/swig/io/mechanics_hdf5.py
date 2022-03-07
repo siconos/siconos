@@ -1164,7 +1164,7 @@ class MechanicsHdf5(object):
                                                collision_group2=0):
         """
         Add a nonsmooth law for contact between 2 groups.
-        Only NewtonImpactFrictionNSL are supported.
+        Only NewtonImpactRollingFrictionNSL are supported.
         name is an user identifiant and must be unique,
         mu is the coefficient of friction,
         e is the coefficient of restitution on the contact normal,
@@ -1174,11 +1174,16 @@ class MechanicsHdf5(object):
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type'] = 'NewtonImpactRollingFrictionNSL'
-            nslaw.attrs['mu'] = mu
-            nslaw.attrs['mu_r'] = mu_r
-            nslaw.attrs['e'] = e
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'NewtonImpactRollingFrictionNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+                
+        nslaw.attrs['mu'] = mu
+        nslaw.attrs['mu_r'] = mu_r
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
 
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                        collision_group2=0):
@@ -1194,10 +1199,15 @@ class MechanicsHdf5(object):
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type'] = 'NewtonImpactFrictionNSL'
-            nslaw.attrs['mu'] = mu
-            nslaw.attrs['e'] = e
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'NewtonImpactFrictionNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+
+        nslaw.attrs['mu'] = mu
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
 
     # Note, default groups are -1 here, indicating not to add them to
     # the nslaw lookup table for contacts, since 1D impacts are
@@ -1218,9 +1228,14 @@ class MechanicsHdf5(object):
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type'] = 'NewtonImpactNSL'
-            nslaw.attrs['e'] = e
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'NewtonImpactNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
 
     # Note, default groups are -1 here, indicating not to add them to
     # the nslaw lookup table for contacts, since 1D impacts are
@@ -1241,11 +1256,16 @@ class MechanicsHdf5(object):
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type'] = 'RelayNSL'
-            nslaw.attrs['size'] = size
-            nslaw.attrs['lb'] = lb
-            nslaw.attrs['ub'] = ub
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'RelayNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name', name ,' but not the same type')
+
+        nslaw.attrs['size'] = size
+        nslaw.attrs['lb'] = lb
+        nslaw.attrs['ub'] = ub
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
 
     def add_joint(self, name, object1, object2=None,
                   points=[[0, 0, 0]], axes=[[0, 1, 0]],
