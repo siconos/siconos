@@ -906,9 +906,18 @@ class MechanicsHdf5(object):
 
     def add_convex_shape(self, name, points,
                          insideMargin=None, outsideMargin=None,
-                         avoid_internal_edge_contact=False):
         """
         Add a convex shape defined by a list of points.
+        
+        outsideMargin is the value of margin that substract from the actual contact distance
+
+        If insideMargin is positive, the convex hull is shrunken by that amount 
+        (each face is moved by "shrink" length units towards the center along its normal).
+        This value is then added to outsideMargin to compensate the shrink. The convex hull
+        appears for the user as in its original size.
+
+        
+
         """
         # infer the dimension of the problem
         if np.shape(points)[1] == 2:
@@ -938,6 +947,9 @@ class MechanicsHdf5(object):
                             insideMargin=None, outsideMargin=None):
         """
         Add a primitive shape.
+
+        Todo: Comments on insideMargin and outsideMargin that depends on the
+              primitive shape type.
         """
         # infer the dimension of the problem
         if primitive == 'Disk' or primitive == 'Box2d' or primitive == 'Line' \
