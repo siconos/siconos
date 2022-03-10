@@ -381,7 +381,7 @@ static  NumericsMatrix *  QNTpH(const double * const x, const double * const y, 
       QpHp[k] = nz ;                   /* column k of QpH starts here */
 
       /* reallocate if needed */
-      if (nz + H->size1> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size1))
+      if (10000*nz + H->size1> QpH_csc->nzmax && !cs_sprealloc (QpH_csc, 2*(QpH_csc->nzmax)+H->size1))
       {
         return NULL;             /* out of memory */
       }
@@ -802,6 +802,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   /*     f[i] = 0.0; */
   /*   } */
 
+  /* for(int  i = 0; i<m; i++) */
+  /*   { */
+  /*     printf("%3.0i %10.6f\n", i, f[i]); */
+  /*   } */
+
+  //f[1] = 3;
+  
   double *iden;
 
   // change of variable
@@ -1073,8 +1080,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
                               iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem, err, barr_param);
 
-      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
-        printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
+      /* if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) */
+      /*   printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates); */
 
       hasNotConverged = 0;
 
@@ -1484,20 +1491,19 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     /* printf("Norm reaction:  %12.8e\n", cblas_dnrm2(nd, reaction, 1)); */
     /* printf("Norm GlobalVe:  %12.8e\n", cblas_dnrm2(m, globalVelocity, 1)); */
 
-    
     /* for (int k = 0; k < n; k++) */
     /* { */
     /*   j = k*d; */
     /*   if (velocity[j] <= cblas_dnrm2(d-1, velocity+j+1, 1)) */
     /*   { */
-    /* 	//    	printf("u[%i] %e\n", j, velocity[j]-cblas_dnrm2(d-1, velocity+j+1, 1)); */
-    /* 	velocity[j] = ((1+DBL_EPSILON)*cblas_dnrm2(d-1, velocity+j+1, 1)); */
+    /* 	printf("u[%i] %e\n", j, velocity[j]-cblas_dnrm2(d-1, velocity+j+1, 1)); */
+    /* 	//velocity[j] = ((1+DBL_EPSILON)*cblas_dnrm2(d-1, velocity+j+1, 1)); */
     /* 	//getchar(); */
     /*   } */
     /*   if (reaction[j] <= cblas_dnrm2(d-1, reaction+j+1, 1)) */
     /*   { */
-    /* 	//    	printf("r[%i] %e\n", j, reaction[j]-cblas_dnrm2(d-1, reaction+j+1, 1)); */
-    /* 	reaction[j] = ((1+DBL_EPSILON)*cblas_dnrm2(d-1, reaction+j+1, 1)); */
+    /* 	printf("r[%i] %e\n", j, reaction[j]-cblas_dnrm2(d-1, reaction+j+1, 1)); */
+    /* 	//reaction[j] = ((1+DBL_EPSILON)*cblas_dnrm2(d-1, reaction+j+1, 1)); */
     /* 	//getchar(); */
     /*   } */
     /* } */
