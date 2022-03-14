@@ -355,7 +355,7 @@ void SimpleMatrix::Factorize()
   {
     if (isPositiveDefinite()) // Cholesky Factorization
     {
-      //std::cout << "Cholesky Factorize"<< std::endl;
+      DEBUG_PRINT("Cholesky Factorize\n");
       info  = NM_Cholesky_factorize(NM);
 
       if(info != 0)
@@ -375,6 +375,7 @@ void SimpleMatrix::Factorize()
   }
   else //  LU Factorization  by default
   {
+    DEBUG_PRINT("LU Factorize\n");
     info  = NM_LU_factorize(NM);
 
     if(info != 0)
@@ -453,7 +454,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   {
     if (isPositiveDefinite()) // Cholesky Solving
     {
-      //std::cout << "Cholesky Solve"<< std::endl;
+      DEBUG_PRINT("Cholesky Solve\n");
 #ifdef SPARSE_RHS_COPY_TO_DENSE
       info  = NM_Cholesky_solve(NM, b, B.size(1));
 #else
@@ -471,6 +472,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   }
   else //  LU Factorization  by default
   {
+    DEBUG_PRINT("LU Solve\n");
 #ifdef SPARSE_RHS_COPY_TO_DENSE
     info  = NM_LU_solve(NM, b, B.size(1));
 #else
@@ -541,7 +543,7 @@ void SimpleMatrix::Solve(SiconosVector &B)
   {
     if (isPositiveDefinite()) // Cholesky Factorization
     {
-      //std::cout << "Cholesky Solve"<< std::endl;
+      DEBUG_PRINT("Cholesky Solve\n");
       info  = NM_Cholesky_solve(NM, b, 1);
 
       if(info != 0)
@@ -556,6 +558,7 @@ void SimpleMatrix::Solve(SiconosVector &B)
   }
   else //  LU Factorization  by default
   {
+    DEBUG_PRINT("LU Solve\n");
     info  = NM_LU_solve(NM, b, 1);
 
     if(info != 0)
