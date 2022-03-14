@@ -49,9 +49,11 @@ void grfc3d_unitary_compute_and_add_error(
     worktmp[0] = r[0] - u[0];
   }
   else
+  {
     worktmp[0] = r[0] - u[0]
                       - mu  * sqrt(u[1] * u[1] + u[2] * u[2])
                       - mur * sqrt(u[3] * u[3] + u[4] * u[4]);
+  }
 
   worktmp[1] = r[1] -  u[1] ;
   worktmp[2] = r[2] -  u[2] ;
@@ -179,9 +181,9 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem,
   // printf("\n\ngrfc3d_compute_error\n");
   // printf("error_primal = %5.30e\n", error_primal);
   // printf("error_dual = %5.30e\n", error_dual);
-//   printf("relative_scaling = %5.30e\n", relative_scaling);
-//   printf("error_complementarity = %5.30e\n", error_complementarity);
-//   printf("error = %5.30e\n", *error);
+  // printf("relative_scaling = %5.30e\n", relative_scaling);
+  // printf("error_complementarity = %5.30e\n", error_complementarity);
+  // printf("error = %5.30e\n", *error);
 
 
 // printf("velocity = ");
