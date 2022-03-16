@@ -906,6 +906,7 @@ class MechanicsHdf5(object):
 
     def add_convex_shape(self, name, points,
                          insideMargin=None, outsideMargin=None,
+                         avoid_internal_edge_contact=False):
         """
         Add a convex shape defined by a list of points.
         
