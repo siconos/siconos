@@ -23,4 +23,4 @@ echo "----> install bullet ..."
 make install > /dev/null
 # Clean up
 rm -rf $CI_PROJECT_DIR/bullet3
-rm -rf $CI_PROJECT_DIR/build/bullet
+rm -rf $CI_PROJECT_DIR/build/bullet3

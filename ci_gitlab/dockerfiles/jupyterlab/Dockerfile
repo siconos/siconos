@@ -26,7 +26,8 @@ RUN  apt update && apt install -y -qq \
         libbullet-dev \
         libfreetype6-dev \
         freeglut3-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
-RUN pip3 install pytest lxml pyhull
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install pytest lxml pyhull
 WORKDIR /home
 COPY ci_gitlab/dockerfiles/install_bullet.sh .
 ENV CI_PROJECT_DIR /home

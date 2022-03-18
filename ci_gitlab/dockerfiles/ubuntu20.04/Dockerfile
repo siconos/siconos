@@ -19,6 +19,7 @@ RUN apt update  && apt upgrade -y &&  apt install -y -qq \
         python3-packaging \
         python3-h5py && apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 # RUN sh /home/install_fclib.sh
+RUN python3 -m pip install --upgrade pip
 WORKDIR /home
 COPY ci_gitlab/dockerfiles/install_bullet.sh .
 ENV CI_PROJECT_DIR /home
