@@ -25,5 +25,9 @@ RUN dnf --setopt=deltarpm=false install -y \
         swig \
         git-core \
         bullet-devel \
-	python3-h5py \
-        bullet-extras-devel && dnf clean all
+	python3-h5py && dnf clean all
+WORKDIR /home
+COPY ci_gitlab/dockerfiles/install_bullet.sh .
+ENV CI_PROJECT_DIR /home
+RUN sh /home/install_bullet.sh
+

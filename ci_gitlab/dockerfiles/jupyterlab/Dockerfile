@@ -18,7 +18,6 @@ RUN  apt update && apt install -y -qq \
         liblpsolve55-dev \
         libhdf5-dev \
         libboost-serialization-dev \
-        libbullet-dev \
         libfreetype6-dev \
         freeglut3-dev \
         swig \
@@ -28,3 +27,8 @@ RUN  apt update && apt install -y -qq \
         libfreetype6-dev \
         freeglut3-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
 RUN pip3 install pytest lxml pyhull
+WORKDIR /home
+COPY ci_gitlab/dockerfiles/install_bullet.sh .
+ENV CI_PROJECT_DIR /home
+RUN sh /home/install_bullet.sh
+

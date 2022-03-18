@@ -240,6 +240,26 @@ Developers or advanced users options
 
 * WITH_BULLET=ON/OFF : enable/disable bullet (http://bulletphysics.org/wordpress/) for contact detection.
 
+  Bullet minimal required version is 3.17.
+  
+  WITH_BULLET can be replaced by Bullet_ROOT=<some_path> to specify the path to your Bullet installation.
+
+  Moreover, if you don't want to bother you with Bullet install, run
+
+  .. code-block:: bash
+
+	cmake -DINSTAll_BULLET=ON ...
+
+  Bullet will be downloaded, built and installed as a siconos part, at the same place as Siconos.
+
+  Last option, you can use the script ci_gitlab/Dockerfiles/install_bullet.sh to install Bullet 3.21 on your system (need to be root or sudo).
+
+  .. code-block:: bash
+
+        export CI_PROJECT_DIR=<some path where bullet will be cloned and built>
+	source ci_gitlab/Dockerfiles/install_bullet.sh 
+
+
 * WITH_OCE=ON/OFF : enable/disable OpenCascade bindings (https://github.com/tpaviot/oce)
 
 * WITH_FREECAD=ON/OFF : enable/disable Freecad python bindings (http://www.freecadweb.org)
