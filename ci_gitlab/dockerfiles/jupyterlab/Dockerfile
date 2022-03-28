@@ -12,8 +12,7 @@ RUN  apt update && apt install -y -qq \
         libboost-timer-dev \
         libboost-chrono-dev \
         libgmp-dev \
-        libopenblas-dev \
-        liblapacke-dev \
+	libsuitesparse
         lp-solve \
         liblpsolve55-dev \
         libhdf5-dev \

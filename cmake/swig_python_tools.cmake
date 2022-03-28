@@ -32,7 +32,7 @@ macro(add_siconos_swig_sub_module fullname)
   endif()
   
   # add as dependencies all the i files
-  file(GLOB ${_name}_I_FILES ${CMAKE_CURRENT_SOURCE_DIR}/${_path}/*.i)
+  file(GLOB ${_name}_I_FILES  CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_path}/*.i)
   foreach(_f IN LISTS ${_name}_I_FILES)
     list(APPEND SWIG_MODULE_${_name}_EXTRA_DEPS ${_f})
   endforeach()
@@ -181,12 +181,17 @@ macro(add_siconos_swig_sub_module fullname)
 
   # --- install python files and target ---
   # install path ...
-  #set(DEST "${SICONOS_PYTHON_INSTALL_DIR}/${SICONOS_PYTHON_PACKAGE}/${_path}")
+  set(DEST "${SICONOS_PYTHON_INSTALL_DIR}/${SICONOS_PYTHON_PACKAGE}/${_path}")
   #install(TARGETS ${SWIG_MODULE_${_name}_REAL_NAME} LIBRARY DESTINATION ${DEST})
-  #get_target_property(pylibs ${SWIG_MODULE_${_name}_REAL_NAME} LOCATION)
   # Save lib name into a file, used later to provide information to pip
   # which is suppposed to deal with the installation of swig libraries.
-  file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/wrap/libs/${_name}_lib CONTENT "${_path}/$<TARGET_FILE_NAME:${SWIG_MODULE_${_name}_REAL_NAME}>")
+  file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/wrap/libs/${_name}_lib CONTENT "\t${_path}/$<TARGET_FILE_NAME:${SWIG_MODULE_${_name}_REAL_NAME}>\n")
+  file(APPEND ${CMAKE_BINARY_DIR}/wrap/libs/liblist "${_name}_lib\n")
+  #  file(WRITE ${CMAKE_BINARY_DIR}/wrap/libs/${_name}_lib2 "${SWIG_MODULE_${_name}_REAL_NAME}\n")
+  #  file(APPEND ${CMAKE_BINARY_DIR}/wrap/libs/${_name}_lib2 "${DEST}\n")
+  install(TARGETS ${SWIG_MODULE_${_name}_REAL_NAME} LIBRARY DESTINATION ${DEST})
+  
+  
 endmacro()
 
 macro(swig_module_setup modules_list)

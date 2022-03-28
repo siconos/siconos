@@ -64,16 +64,10 @@ option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
 
 # -- Installation setup ---
 # Set python install mode:
-# - user --> behave as 'python setup.py install --user'
-# - standard --> install in python site-package (ie behave as python setup.py install)
-# - prefix --> install in python CMAKE_INSTALL_PREFIX (ie behave as python setup.py install --prefix=CMAKE_INSTALL_PREFIX)
-if(UNIX)
-  # on unix, there is no reason to use the standard option. By default, CMAKE_INSTALL_PREFIX is set to /usr/local and therefore,
-  # the python packages should be installed in /usr/local/...
-  set(siconos_python_install "prefix" CACHE STRING "Install mode for siconos python package")
-else()
-  set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
-endif()
+# - user --> pip install --user
+# - standard --> pip install
+# - prefix --> pip install --prefix=CMAKE_INSTALL_PREFIX
+set(siconos_python_install "prefix" CACHE STRING "Install mode for siconos python package")if(UNIX)
 
 # If OFF, headers from libraries in externals will not be installed.
 option(INSTALL_EXTERNAL_HEADERS

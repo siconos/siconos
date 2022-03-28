@@ -16,8 +16,6 @@ set(SICONOS_PYTHON_PACKAGE siconos CACHE INTERNAL "Name of the Siconos python pa
 # and get pip install options (PIP_INSTALL_OPTIONS).
 include(PythonInstallSetup)
 set_python_install_path()
-message(STATUS "Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR},")
-message(STATUS "with the command ${PYTHON_EXECUTABLE} -m pip install ${PIP_INSTALL_OPTIONS} ...")
   
 #  ----------- swig -----------
 
@@ -106,3 +104,14 @@ if(WITH_TESTING)
   # -- test config--
   file(MAKE_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
 endif()
+
+# ====== Create (and setup) build/install target ======
+add_custom_target(python-install
+  COMMAND ${PYTHON_EXECUTABLE} -m pip install ${CMAKE_BINARY_DIR}/wrap ${PIP_INSTALL_OPTIONS}  --use-feature=in-tree-build
+  VERBATIM USES_TERMINAL
+  COMMAND_EXPAND_LISTS
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "build/install siconos package")
+file(WRITE ${CMAKE_BINARY_DIR}/wrap/libs/liblist "")
+
+# execute python-install when target install is called
+install(CODE "execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} python-install WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")

@@ -152,7 +152,7 @@ if(WITH_FCLIB)
   # - User asks explicitely for a specific (already installed) version of fclib
   #   by providing fclib_ROOT on cmake command line
   # - else: use fetchcontent to download and install fclib as a siconos part
-
+  message(STATUS "Start setup for fclib ... ")
   if(FCLIB_ROOT)
     find_package(FCLIB 3.0.0 CONFIG REQUIRED)
   else()
@@ -172,7 +172,8 @@ if(WITH_FCLIB)
   endif()
 
   target_link_libraries(numerics PUBLIC FCLIB::fclib)
- 
+  message(STATUS "End setup for fclib ... ")
+
 endif()
 
 # - SuiteSparse -
