@@ -155,7 +155,7 @@ endif()
 # and docstrings from doxygen, depending on the
 # enabled options.
 add_subdirectory(docs)
-set(SICONOS_PYTHON_LIBS "" CACHE INTERNAL "")
+
 # ========= Setup each required component =========
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
