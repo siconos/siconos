@@ -196,8 +196,8 @@ fedora-33:test:
 
 jupyterlab:configure:
   variables:
-     BLAS_ROOT: $CONDA_PREFIX
-     GMP_ROOT: $CONDA_PREFIX
+     CMAKE_PREFIX_PATH: $CONDA_PREFIX
+     OPENBLAS_NUM_THREADS: 1
      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
      cdash_submit: 1
      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake

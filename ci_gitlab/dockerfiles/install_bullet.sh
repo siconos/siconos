@@ -15,6 +15,7 @@ fi
 mkdir -p $CI_PROJECT_DIR/build/bullet3
 cd $CI_PROJECT_DIR/
 git clone https://github.com/bulletphysics/bullet3.git > /dev/null
+cd bullet3
 git checkout tags/3.21
 cd $CI_PROJECT_DIR/build/bullet3
 cmake -DBUILD_PYBULLET=ON -DBUILD_PYBULLET_NUMPY=ON -DCMAKE_BUILD_TYPE=Release -DOpenGL_GL_PREFERENCE=GLVND $CI_PROJECT_DIR/bullet3 -Wno-dev
