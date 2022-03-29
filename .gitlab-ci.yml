@@ -78,6 +78,7 @@ debian-buster:build:
   variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends:
     - .siconos-build
     - .full-ci-rules
@@ -87,6 +88,7 @@ debian-buster:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
     needs: ["debian-buster:build"]
     extends:
       - .siconos-test
@@ -105,6 +107,7 @@ ubuntu20.04-fclib:build:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
     cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_fclib.cmake
   extends:
     - .siconos-build
     - .full-ci-rules
@@ -114,6 +117,7 @@ ubuntu20.04-fclib:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_fclib.cmake
     needs: ["ubuntu20.04-fclib:build"]
     extends:
       - .siconos-test
@@ -131,6 +135,7 @@ ubuntu20.04:build:
   variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends:
     - .siconos-build
   needs: ["ubuntu20.04:configure"]
@@ -139,6 +144,7 @@ ubuntu20.04:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
     needs: ["ubuntu20.04:build"]
     extends:
       - .siconos-test
@@ -155,6 +161,7 @@ ubuntu20.04-debug:build:
   variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
   extends:
     - .siconos-build
   needs: ["ubuntu20.04-debug:configure"]
@@ -163,6 +170,7 @@ ubuntu20.04-debug:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
     needs: ["ubuntu20.04-debug:build"]
     extends:
       - .siconos-test
@@ -180,6 +188,7 @@ fedora-33:build:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-33
     cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends:
     - .siconos-build
     - .full-ci-rules
@@ -189,6 +198,7 @@ fedora-33:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-33
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
     needs: ["fedora-33:build"]
     extends:
     - .siconos-test
@@ -196,11 +206,11 @@ fedora-33:test:
 
 jupyterlab:configure:
   variables:
-     CMAKE_PREFIX_PATH: $CONDA_PREFIX
      OPENBLAS_NUM_THREADS: 1
      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
      cdash_submit: 1
      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
+     CMAKE_PREFIX_PATH: /opt/conda
   extends:
     - .siconos-configure
 
@@ -208,6 +218,7 @@ jupyterlab:build:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
     cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
   extends:
     - .siconos-build
   needs: ["jupyterlab:configure"]
@@ -216,6 +227,7 @@ jupyterlab:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
       cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
     needs: ["jupyterlab:build"]
     extends:
     - .siconos-test
