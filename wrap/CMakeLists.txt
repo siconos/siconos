@@ -25,9 +25,10 @@ endif()
 configure_file(setup.cfg.in setup.cfg)
 
 
+configure_file(append-swig-pythonlibs.py.in append-swig-pythonlibs.py)
 add_custom_target(python-write-setup
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND ${PYTHON_EXECUTABLE}  ${CMAKE_BINARY_DIR}/tmp.py
+  COMMAND ${PYTHON_EXECUTABLE}  ${CMAKE_CURRENT_BINARY_DIR}/append-swig-pythonlibs.py
   COMMENT "Append the list of shared libraries that must be installed by pip to setup.cfg."
   )
 
