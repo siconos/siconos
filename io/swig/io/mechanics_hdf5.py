@@ -599,7 +599,7 @@ class MechanicsHdf5(object):
         # if the hdf5 file contains already some objects, we correcly initialize
         # the object counter
         if len(self._input) >= 0:
-            type_obj = [obj.attrs['type'] for (name, obj) in self._input.items()]
+            type_obj = [obj.attrs['type'] for  obj in self._input.values()]
             self._number_of_dynamic_objects = type_obj.count('dynamic')
             self._number_of_static_objects = type_obj.count('static')
 
