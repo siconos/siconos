@@ -39,6 +39,7 @@
 #include "gfc3d_ipm.h"                  // for primalResidual, dualResidual, ...
 #include "grfc3d_ipm.h"                 // for dnrm2sqrl
 #include "cs.h"
+#include "projectionOnRollingCone.h"    // for projectionOnRollingCone
 
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -954,9 +955,88 @@ static void printVectorMatlabFile(int iteration, double * vec, int vecSize, FILE
 }
 
 
+/* This function replaces for grfc3d_compute_error */
+/* Compute:
+    + Relative dual residual:
+      ++ error_dual   = |Mv - H'r - f|/max{|Mv|, |Hr|, |f|}               if max >= tol
+                      = |Mv - H'r - f|                                    otherwise
+    + Relative primal residual:
+      ++ error_primal = |u - Hv - w|/max{|H'v|, |w|, |u|}                 if max >= tol
+                      = |u - Hv - w|                                      otherwise
+    + Projection error
+      For convex case
+      ++ error_proj   = |r - projectionOnRollingCone(r-u)|/max{|r|, |u|}  if max >= tol
+                      = |r - projectionOnRollingCone(r-u)|                otherwise
+
+      For non-convex case
+      ++ error_proj   = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|/max{|r|, |u|}  if max >= tol
+                      = |r - projectionOnRollingCone(r-u-mu*|uT|-mur*||wR)|                otherwise
+*/
+static void compute_errors(NumericsMatrix * M, NumericsMatrix * H, const double * w, const double * f,
+                           double*  r, double*  u, double*  v,
+                           double *primalConstraint, double *pinfeas,
+                           double *dualConstraint, double *dinfeas,
+                           double tolerance, double *proj_error, int problemIsNotConvex)
+{
+  /* Checks inputs */
+  if(M == NULL || H == NULL || w == NULL || f == NULL || r == NULL || u == NULL || v == NULL)
+    numerics_error("compute_errors", "null input");
+
+  size_t nd = H->size0;
+  size_t m = H->size1;
+  size_t n = nd/5;
+  // printf("\n\nn = %zu, m = %zu\n\n", n, m);
+  double norm_r = cblas_dnrm2(nd,r,1);
+  double norm_u = cblas_dnrm2(nd,u,1);
+  double max_val = 0.;
+
+  double worktmp[5];
+
+  /* --- Relative dual residual --- */
+  double *HTr = (double*)calloc(m, sizeof(double));
+
+  NM_gemv(1.0, M, v, 0.0, dualConstraint);      // dualConstraint = Mv
+  max_val = cblas_dnrm2(m, dualConstraint, 1);
+  cblas_daxpy(m, -1.0, f, 1, dualConstraint, 1);// dualConstraint = Mv - f
+  NM_tgemv(1.0, H, r, 0.0, HTr);         // HTr = H'r
+  cblas_daxpy(m, -1.0, HTr, 1, dualConstraint, 1); // dualConstraint = Mv - f - H'r
+  max_val = fmax(max_val, cblas_dnrm2(m, f, 1));
+  max_val = fmax(max_val, cblas_dnrm2(m, HTr, 1)); // max_val = max{|Mv|, |f|, |H'r|}
+
+  *dinfeas = cblas_dnrm2(m, dualConstraint, 1);
+  if(max_val >= tolerance)
+    *dinfeas /= max_val;
+  free(HTr);
 
 
+  /* --- Relative primal residual --- */
+  max_val = 0.;
+  NM_gemv(-1.0, H, v, 0.0, primalConstraint);  // primalConstraint = Hv
+  max_val = cblas_dnrm2(nd, primalConstraint, 1);
+  cblas_daxpy(nd, -1.0, w, 1, primalConstraint, 1);         // primalConstraint = -Hv - w
+  cblas_daxpy(nd, 1.0, u, 1, primalConstraint, 1); // primalConstraint = u - Hv - w
+  max_val = fmax(max_val, norm_u);
+  max_val = fmax(max_val, cblas_dnrm2(nd, w, 1));           // max_val = max{|Hv|, |u|, |w|}
 
+  *pinfeas = cblas_dnrm2(nd, primalConstraint, 1);
+  if(max_val >= tolerance)
+    *pinfeas /= max_val;
+
+
+  /* --- Projection error --- */
+  *proj_error = 0.;
+  for(size_t i = 0 ; i < n ; i++)
+  {
+    grfc3d_unitary_compute_and_add_error(&r[i*5], &u[i*5], 1., 1., proj_error, worktmp, problemIsNotConvex);
+  }
+  *proj_error = sqrt(*proj_error);
+
+  max_val = fmax(norm_u, norm_r);
+  if(max_val >= tolerance)
+    *proj_error /= max_val;
+
+
+}
 
 
 
@@ -1187,7 +1267,8 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double relgap = 1e300;
   double u1dotr1 = 1e300;     // u1 = velecity_1, r1 = reaction_1
   double u2dotr2 = 1e300;     // u2 = velecity_2, r2 = reaction_2
-  double error_array[6];
+  double proj_error = 1e300;  // projection error
+  double error_array[7];
 
 
   // // For computing NT Non-reduced at the same time
@@ -1505,7 +1586,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   /* -------------------------- Display IPM iterations -------------------------- */
   numerics_printf_verbose(-1, "problem dimensions d, n, m: %1i, %6i, %6i\n",d, n, m);
-  numerics_printf_verbose(-1, "| it  |  rel gap  | pinfeas  | dinfeas  | <u1, r1> | <u2, r2> | complem1 | complem2 | full err | barparam | alpha_p  | alpha_d  |  sigma   | |dv|/|v| | |du|/|u| | |dr|/|r| |");
+  numerics_printf_verbose(-1, "| it  |  rel gap  | pinfeas  | dinfeas  | <u1, r1> | <u2, r2> | proj err | complem1 | complem2 | full err | barparam | alpha_p  | alpha_d  |  sigma   | |dv|/|v| | |du|/|u| | |dr|/|r| |");
   numerics_printf_verbose(-1, "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
 
@@ -1622,7 +1703,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
     // barr_param = (gapVal / nd)*sigma;
     // barr_param = gapVal / nd;
-    barr_param = gapVal / (n);
+    barr_param = gapVal / n;
     //barr_param = complemResidualNorm(velocity, reaction, nd, n);
     //barr_param = (fws=='*' ? complemResidualNorm(velocity, reaction, nd, n)/n : complemResidualNorm_p(velocity, reaction, nd, n)/n) ;
     //barr_param = fabs(barr_param);
@@ -1685,25 +1766,75 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
 
+    // error_array[0] = pinfeas;
+    // error_array[1] = dinfeas;
+    // error_array[2] = u1dotr1;
+    // error_array[3] = u2dotr2;
+    // error_array[4] = complem_1;
+    // error_array[5] = complem_2;
     error_array[0] = pinfeas;
     error_array[1] = dinfeas;
     error_array[2] = u1dotr1;
     error_array[3] = u2dotr2;
-    error_array[4] = complem_1;
-    error_array[5] = complem_2;
+    error_array[4] = proj_error;
+    error_array[5] = complem_1;
+    error_array[6] = complem_2;
+
+    // if (iteration >= 0)
+    // {
+    //   printf("\n\nAVANT du calcul par la nouvelle routine:\n");
+    //   printf("pinfeas = %9.30e \t |primalConstraint| = %9.30e\n", pinfeas, cblas_dnrm2(nd, primalConstraint, 1));
+    //   printf("dinfeas = %9.30e \t |dualConstraint| = %9.30e\n", dinfeas, cblas_dnrm2(m, dualConstraint, 1));
+    // }
+
+    // double *primalConstraint_CHECK = (double*)calloc(nd,sizeof(double));
+    // double *dualConstraint_CHECK = (double*)calloc(m,sizeof(double));
+    // double pinfeas_CHECK = 1e300;
+    // double dinfeas_CHECK = 1e300;
 
 
 
+    if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1)         // non-smooth case
+    {
+      compute_errors(M, H, w, f, reaction, velocity, globalVelocity,
+                     primalConstraint, &pinfeas, dualConstraint, &dinfeas,
+                     tol, &proj_error, 1);
+    }
+
+    else if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 0)    // convex case
+    {
+      // compute_errors(M, H, w, f, reaction, velocity, globalVelocity,
+      //                primalConstraint_CHECK, &pinfeas_CHECK, dualConstraint_CHECK, &dinfeas_CHECK,
+      //                tol, &proj_error, 0);
+      compute_errors(M, H, w, f, reaction, velocity, globalVelocity,
+                     primalConstraint, &pinfeas, dualConstraint, &dinfeas,
+                     tol, &proj_error, 0);
+    }
 
 
-
+    // if (iteration >= 0)
+    // {
+    //   printf("\nAPRES du calcul par la nouvelle routine:\n");
+    //   printf("pinfeas = %9.30e \t |primalConstraint| = %9.30e\n", pinfeas_CHECK, cblas_dnrm2(nd, primalConstraint_CHECK, 1));
+    //   printf("dinfeas = %9.30e \t |dualConstraint| = %9.30e\n", dinfeas_CHECK, cblas_dnrm2(m, dualConstraint_CHECK, 1));
+    //   printf("proj_error = %9.30e\n\n", proj_error);
+    //   //break;
+    // }
+    // if (iteration >= 0)
+    // {
+    //   printf("\nAPRES du calcul par la nouvelle routine:\n");
+    //   printf("pinfeas = %9.30e \t |primalConstraint| = %9.30e\n", pinfeas, cblas_dnrm2(nd, primalConstraint, 1));
+    //   printf("dinfeas = %9.30e \t |dualConstraint| = %9.30e\n", dinfeas, cblas_dnrm2(m, dualConstraint, 1));
+    //   printf("proj_error = %9.30e\n\n", proj_error);
+    //   //break;
+    // }
 
     // check exit condition
-    //if (error <= tol) //((NV_max(error, 4) <= tol) || (err <= tol))
-    if (NV_max(error_array, 4) <= tol)
+    // if (full_error <= tol) //((NV_max(error, 4) <= tol) || (err <= tol))
+    if (fmax(pinfeas, fmax(dinfeas, NV_min(error_array+2, 3))) <= tol)
     {
-      numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
-                              iteration, fws, relgap, pinfeas, dinfeas, u1dotr1, u2dotr2, complem_1, complem_2, full_error, barr_param);
+      numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
+                              iteration, fws, relgap, pinfeas, dinfeas, u1dotr1, u2dotr2, proj_error, complem_1, complem_2, full_error, barr_param);
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
         printInteresProbMatlabFile(iteration, globalVelocity, velocity_1, velocity_2, reaction_1, reaction_2, d, n, m, iterates);
@@ -1711,9 +1842,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
       hasNotConverged = 0;
       break;
     }
-
-
-
 
 
 
@@ -2355,21 +2483,24 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
     // if (iteration >= 0)
     // {
-    //   //printf("\n\n========== PRINTING FOR DEBUG ==========\n");
+    //   printf("\n\n========== PRINTING FOR DEBUG ==========\n");
     //   printf("iteration: %d\n", iteration);
 
-    //   double *diff = (double*)calloc(n, sizeof(double));
+    //   // double *diff = (double*)calloc(n, sizeof(double));
 
-    //   for(size_t i = 0; i < n; i++)
-    //   {
-    //     diff[i] = d_velocity[i] - d_t[i] - d_t_prime[i];
-    //   }
-    //   float_type norm_diff = dnrm2l(n, diff);
-    //   printf("norm_diff 1 = %5.40Le\n", norm_diff);
-    //   free(diff);
+    //   // for(size_t i = 0; i < n; i++)
+    //   // {
+    //   //   diff[i] = d_velocity[i] - d_t[i] - d_t_prime[i];
+    //   // }
+    //   // float_type norm_diff = dnrm2l(n, diff);
+    //   // printf("norm_diff 1 = %5.40Le\n", norm_diff);
+    //   // free(diff);
 
+    //   printf("|du| = %9.30e\n", cblas_dnrm2(nd,d_velocity,1));
+    //   printf("|dr| = %9.30e\n", cblas_dnrm2(nd,d_reaction,1));
+    //   printf("|dv| = %9.30e\n\n", cblas_dnrm2(nd,d_globalVelocity,1));
     //   // printf("========== END PRINTING FOR DEBUG ==========\n\n");
-    //   // break;
+    //   //break;
     // }
 
 
@@ -2959,18 +3090,21 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     //   //printf("\n\n========== PRINTING FOR DEBUG ==========\n");
     //   // printf("iteration: %d\n", iteration);
 
-    //   double *diff = (double*)calloc(n, sizeof(double));
+    //   // double *diff = (double*)calloc(n, sizeof(double));
 
-    //   for(size_t i = 0; i < n; i++)
-    //   {
-    //     diff[i] = d_velocity[i] - d_t[i] - d_t_prime[i];
-    //   }
-    //   float_type norm_diff2 = dnrm2l(n, diff);
-    //   printf("norm_diff 2 = %5.40Le\n", norm_diff2);
-    //   free(diff);
+    //   // for(size_t i = 0; i < n; i++)
+    //   // {
+    //   //   diff[i] = d_velocity[i] - d_t[i] - d_t_prime[i];
+    //   // }
+    //   // float_type norm_diff2 = dnrm2l(n, diff);
+    //   // printf("norm_diff 2 = %5.40Le\n", norm_diff2);
+    //   // free(diff);
 
-    //   // printf("========== END PRINTING FOR DEBUG ==========\n\n");
-    //   // break;
+    //   printf("|du| = %9.30e\n", cblas_dnrm2(nd,d_velocity,1));
+    //   printf("|dr| = %9.30e\n", cblas_dnrm2(nd,d_reaction,1));
+    //   printf("|dv| = %9.30e\n\n", cblas_dnrm2(nd,d_globalVelocity,1));
+    //   printf("========== END PRINTING FOR DEBUG ==========\n\n");
+    //   break;
     // }
 
 
@@ -3035,8 +3169,8 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
     /* print out all useful parameters */
-    numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
-                            iteration, fws, relgap, pinfeas, dinfeas, u1dotr1, u2dotr2, complem_1, complem_2, full_error, barr_param, alpha_primal, alpha_dual, sigma,
+    numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
+                            iteration, fws, relgap, pinfeas, dinfeas, u1dotr1, u2dotr2, proj_error, complem_1, complem_2, full_error, barr_param, alpha_primal, alpha_dual, sigma,
                             cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
                             cblas_dnrm2(nd, d_velocity, 1)/cblas_dnrm2(nd, velocity, 1),
                             cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1));
@@ -3612,11 +3746,11 @@ void grfc3d_IPM_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
 
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
