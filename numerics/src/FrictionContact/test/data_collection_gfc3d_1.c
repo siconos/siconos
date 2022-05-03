@@ -25,12 +25,12 @@ const char ** data_collection()
 
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
-  /* data_collection_1[n_data++] = "./data/GFC3D_Example0.dat"; */
+  data_collection_1[n_data++] = "./data/GFC3D_Example0.dat";
   /* data_collection_1[n_data++] = "./data/GFC3D_Example00.dat"; */
   /* data_collection_1[n_data++] = "./data/GFC3D_Example00_badly_scaled.dat"; */
   /* data_collection_1[n_data++] = "./data/GFC3D_Example1.dat"; */
   /* data_collection_1[n_data++] = "./data/GFC3D_OneContact.dat"; */
-  data_collection_1[n_data++] = "./data/GFC3D_TwoRods1.dat";
+  /* data_collection_1[n_data++] = "./data/GFC3D_TwoRods1.dat"; */
   data_collection_1[n_data++] = "---";
 
   return data_collection_1;
