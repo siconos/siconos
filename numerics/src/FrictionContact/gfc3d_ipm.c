@@ -921,7 +921,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double *vr_prod_sub_iden = data->tmp_vault_nd[6];
   double *dvdr_jprod = data->tmp_vault_nd[7];
 
-  double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
+  //double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
   NumericsMatrix* r_Qp = NULL;                                                // matrix Qp
   NumericsMatrix *minus_M = NM_create(M->storageType, M->size0, M->size1);    // store the matrix -M to build the matrix of the Newton linear system
   //NumericsMatrix *QpH = NM_create(H->storageType, H->size0, H->size1);        // store the matrix Qp*H
@@ -1082,7 +1082,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     {
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
       {
-        Nesterov_Todd_vector(0, velocity, reaction, nd, n, r_p);       // Nesterov and Todd scaling p-vector
+        //Nesterov_Todd_vector(0, velocity, reaction, nd, n, r_p);       // Nesterov and Todd scaling p-vector
         complem_p = complemResidualNorm_p(velocity, reaction, nd, n);  // Norm of the Jordan product of the scaled vectors velocity and reaction
       }
       else
@@ -1213,8 +1213,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       /* } */
       /* //getchar(); */
 
-      NM_insert(JR, NM_transpose(QpH), 0, m);      // Should be useless when unsing a symmetric factorization procedure
+      NumericsMatrix * QpHt = NM_transpose(QpH);
+      NM_insert(JR,QpHt, 0, m);      // Should be useless when unsing a symmetric factorization procedure
       NM_insert(JR, QpH, m, 0);
+      NM_free(QpH);
+      NM_free(QpHt);
     }
 
     /* for(unsigned int i = 0; i < nd; ++ i) */
@@ -1485,7 +1488,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       cblas_dcopy(m, r_dv, 1, d_globalVelocity, 1);
       cblas_dcopy(nd, r_du, 1, d_velocity, 1);
       cblas_dcopy(nd, r_dr, 1, d_reaction, 1);
-
     }
 
 
@@ -1626,6 +1628,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   free(minus_H);
   NM_clear(H);
   free(H);
+  NM_clear(minus_M);
+  free(minus_M);
 
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
     fclose(iterates);
@@ -1641,7 +1645,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   free(r_dr_a);
   free(r_du_a);
   free(r_dv_a);
-
+  free(Hvw);
+  free(a_velo);
+  free(a_reac);
   *info = hasNotConverged;
 }
 
@@ -1654,11 +1660,11 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
 
