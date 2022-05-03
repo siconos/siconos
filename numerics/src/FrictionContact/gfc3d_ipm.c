@@ -41,6 +41,7 @@
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"
 
+#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
 
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";
 
@@ -156,7 +157,7 @@ double getStepLength(const double * const x, const double * const dx, const unsi
 /* Returns the primal constraint vector for global fricprob: out = velocity - H x globalVelocity - w */
 /* and the relative 2-norm of this vector: |out|/max{|velocity|, |H x globalVelocity|, |w|} */
 void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-                    double * out, double * rnorm)
+                    double * out, double * rnorm, const double tol)
 {
   size_t nd = H->size0;
   double rn;
@@ -173,13 +174,13 @@ void primalResidual(const double * velocity, NumericsMatrix * H, const double * 
   cblas_daxpy(nd, -1.0, w, 1, out, 1);
   rn = fmax(rn, cblas_dnrm2(nd, velocity, 1));
   rn = fmax(rn, cblas_dnrm2(nd, w, 1));
-  *rnorm = (rn > DBL_EPSILON ? cblas_dnrm2(nd, out, 1)/rn : cblas_dnrm2(nd, out, 1));
+  *rnorm = (rn > tol ? cblas_dnrm2(nd, out, 1)/rn : cblas_dnrm2(nd, out, 1));
   /* *rnorm = cblas_dnrm2(nd, out, 1);  */
 }
 
 /* Returns the dual constraint vector for global fricprob ( M*globalVelocity - f - H'*reaction ) */
 void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
-                  double * out, double * rnorm )
+                  double * out, double * rnorm, const double tol )
 {
   double m = H->size1;
   double *HTr = (double*)calloc(m, sizeof(double));
@@ -192,7 +193,7 @@ void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMat
   cblas_daxpy(m, -1.0, HTr, 1, out, 1);
   rn = fmax(rn, cblas_dnrm2(m, f, 1));
   rn = fmax(rn, cblas_dnrm2(m, HTr, 1));
-  *rnorm = (rn >DBL_EPSILON ? cblas_dnrm2(m, out, 1)/rn : cblas_dnrm2(m, out, 1));
+  *rnorm = (rn > tol ? cblas_dnrm2(m, out, 1)/rn : cblas_dnrm2(m, out, 1));
   /* *rnorm = cblas_dnrm2(m, out, 1); */
   free(HTr);
 }
@@ -258,6 +259,7 @@ double complemResidualNorm_p_F(NumericsMatrix * Qp, NumericsMatrix * Qpinv,
 }
 
 /* computation of the duality gap  */
+/* dualgap = gapVal / (1 + (abs(primal value) + abs(dual value))/2) */
 double dualGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m)
 {
   double * Mv = (double*)calloc(m, sizeof(double));
@@ -271,7 +273,6 @@ double dualGap(NumericsMatrix * M, const double * f, const double * w, const dou
   return (pval - dval)/ (1 + (fabs(pval) + fabs(dval))/2);
 }
 
-/* computation of the relative gap  */
 /* Rel gap = gapVal / (1 + abs(primal value) + abs(dual value)) */
 double relGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m, const double gapVal)
 {
@@ -286,13 +287,42 @@ double relGap(NumericsMatrix * M, const double * f, const double * w, const doub
   return gapVal / (1 + fabs(pval) + fabs(dval));
 }
 
-void setErrorArray(double * error, const double pinfeas, const double dinfeas, const double udotr, const double dualgap, const double complem)
+/* Computation of the projection error |r - proj(r-u)|/max{|r|, |u|} */
+double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
+{
+   double worktmp[3];
+   double out = 0.0;
+   double norm_u, norm_r, relative_scaling;
+
+   for(int ic = 0 ; ic < nc ; ic++)
+     {
+       worktmp[0] = reaction[3*ic] -  velocity[3*ic] ;
+       worktmp[1] = reaction[3*ic+1] -  velocity[3*ic+1] ;
+       worktmp[2] = reaction[3*ic+2] -  velocity[3*ic+2] ;
+       projectionOnCone(worktmp, 1.0);
+       worktmp[0] = reaction[3*ic] -  worktmp[0];
+       worktmp[1] = reaction[3*ic+1] -  worktmp[1];
+       worktmp[2] = reaction[3*ic+2] -  worktmp[2];
+       out +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+     }
+   out = sqrt(out);
+   norm_u = cblas_dnrm2(3*nc, velocity, 1);
+   norm_r = cblas_dnrm2(3*nc, reaction, 1);
+   relative_scaling = fmax(norm_u, norm_r);
+   if(relative_scaling > tol)
+     out = out/relative_scaling;
+   return out;
+}
+
+
+void setErrorArray(double * error, const double pinfeas, const double dinfeas, const double udotr, const double dualgap, const double complem, const double projerr)
 {
   error[0] = pinfeas;
   error[1] = dinfeas;
   error[2] = udotr;
   error[3] = dualgap;
   error[4] = complem;
+  error[5] = projerr;
 }
 
 /* Return the 2-norm of the difference between two vectors */
@@ -717,7 +747,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
                int* restrict info, SolverOptions* restrict options)
 {
   // verbose = 3;
-
+  // printf("DBL_EPSILON %25.15e\n",DBL_EPSILON);
   // the size of the problem detection
   unsigned int m = problem->M->size0;
   unsigned int nd = problem->H->size1;
@@ -740,6 +770,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   }
 
   //for(int i = 0; i < n ; i++) printf("mu[%d] = %g\n", i, problem->mu[i]);
+  //for(int i = 0; i < n ; i++) problem->mu[i]=0.75;
 
   /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE,
      we force the copy into a NM_SPARSE storageType */
@@ -807,7 +838,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   /*     printf("%3.0i %10.6f\n", i, f[i]); */
   /*   } */
 
-  //f[1] = 3;
+  /* f[1] = 1; */
+  
   
   double *iden;
 
@@ -852,19 +884,22 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double complem_p = 1e300;
   double dualgap = 1e300;
   double udotr = 1e300;
-  double error[5];
+  double projerr = 1e300;
+  double error[6];
+  double totalresidual;
 
   double *primalConstraint = data->tmp_vault_nd[1];
   double *dualConstraint = data->tmp_vault_m[0];
   double *complemConstraint = data->tmp_vault_nd[2];
 
-  primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas);
-  dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas);
+  primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, tol);
+  dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol);
   udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
   dualgap = dualGap(M, f, w, globalVelocity, reaction, nd, m);
   complem = complemResidualNorm(velocity, reaction, nd, n);
+  projerr = projectionError(velocity, reaction, n, tol);
 
-  setErrorArray(error, pinfeas, dinfeas, udotr, dualgap, complem);
+  setErrorArray(error, pinfeas, dinfeas, udotr, dualgap, complem, projerr);
 
   double gmm = gmmp0;
   double barr_param_a, e;
@@ -942,7 +977,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   /* ---- IPM iterations ---- */
   numerics_printf_verbose(-1, "problem dimensions d, n, m: %1i, %6i, %6i\n",d, n, m);
-  numerics_printf_verbose(-1, "| it  |  dualgap  | pinfeas  | dinfeas  |  <u, r>  | complem  | full err | barparam | alpha_p  | alpha_d  |  sigma   | |dv|/|v| | |du|/|u| | |dr|/|r| |");
+  numerics_printf_verbose(-1, "| it  |  dualgap  | pinfeas  | dinfeas  |  <u, r>  | complem  | proj err | barparam | alpha_p  | alpha_d  |  sigma   | |dv|/|v| | |du|/|u| | |dr|/|r| |");
   numerics_printf_verbose(-1, "--------------------------------------------------------------------------------------------------------------------------------------------");
 
   double * p = data->tmp_vault_nd[8];
@@ -1024,8 +1059,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       }
     }
 
-    primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas); // velocity - H * globalVelocity - w
-    dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas);  // M*globalVelocity - H'*reaction - f
+    primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, tol); // velocity - H * globalVelocity - w
+    dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol);  // M*globalVelocity - H'*reaction - f
     dualgap = dualGap(M, f, w, globalVelocity, reaction, nd, m);
     barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / n;
     //barr_param = complemResidualNorm(velocity, reaction, nd, n);
@@ -1057,28 +1092,30 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     complem = complemResidualNorm(velocity, reaction, nd, n);
     udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
-
-    setErrorArray(error, pinfeas, dinfeas, udotr, dualgap, complem);
+    projerr = projectionError(velocity, reaction, n, tol);
+    
+    setErrorArray(error, pinfeas, dinfeas, udotr, dualgap, complem, projerr);
 
     /* ----- return to original variables ------ */
-    NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->tmp_point->t_velocity);
+    //    NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->tmp_point->t_velocity);
     /* cblas_dcopy(nd, data->tmp_point->t_velocity, 1, velocity, 1); */
-    NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
+    //    NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
     /* cblas_dcopy(nd, data->tmp_point->t_reaction, 1, reaction, 1); */
 
     /* cblas_daxpy(nd, -1.0, data->tmp_point->t_velocity, 1, data->tmp_point->t_reaction, 1); */
     /* for( int k = 0; k < n; projectionOnCone(data->tmp_point->t_reaction+k*d, problem->mu[k]), k++); */
 
-    (*computeError)(problem,
-                    data->tmp_point->t_reaction, data->tmp_point->t_velocity, globalVelocity,
-                    tol, options,
-                    norm_q, norm_b,  &err);
+    /* (*computeError)(problem, */
+    /*                 data->tmp_point->t_reaction, data->tmp_point->t_velocity, globalVelocity, */
+    /*                 tol, options, */
+    /*                 norm_q, norm_b,  &err); */
 
     // check exit condition
-    if (NV_max(error, 3) <= tol) //|| (err <= tol))
+    totalresidual = fmax(fmax(error[0], error[1]),fmin(error[2], error[5])); 
+    if ( totalresidual <= tol) 
     {
       numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
-                              iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem, err, barr_param);
+                              iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem, projerr, barr_param);
 
       /* if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) */
       /*   printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates); */
@@ -1134,7 +1171,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       }
       NM_insert(J, minus_H, m + nd, 0);
       NM_insert(J, NM_eye(nd), m + nd, m);
-      //NM_insert(J, NM_scalar(nd, -1e-6), m + nd, m + nd);
+      //NM_insert(J, NM_scalar(nd, -1e-8), m + nd, m + nd);
     }
     else
     {
@@ -1180,16 +1217,23 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       NM_insert(JR, QpH, m, 0);
     }
 
+    /* for(unsigned int i = 0; i < nd; ++ i) */
+    /* 	w[i] = 0.0; */
+
     /** Correction of w to take into account the dependence
         on the tangential velocity */
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1) 
+    if ( (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1) && iteration <= 0)
     {
+      printf("update w\n");
       for(unsigned int i = 0; i < nd; ++ i)
       {
         if(i % d == 0)
-          /* w[i] = w_tilde[i]/(problem->mu[(int)(i/d)]) */
-          w[i] = w_tilde[i] + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
+          {/* w[i] = w_tilde[i]/(problem->mu[(int)(i/d)]) */
+	    w[i] = w_tilde[i] + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
+	  }
       }
+      /* for(unsigned int i = 0; i < nd; ++ i) */
+      /* 	printf("%20.14e\n",w[i]); */
     }
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
       printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
@@ -1457,7 +1501,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     gmm = gmmp1 + gmmp2 * fmin(alpha_primal, alpha_dual);
 
     numerics_printf_verbose(-1, "| %3i%c| %9.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
-                            iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem, err, barr_param, alpha_primal, alpha_dual, sigma,
+                            iteration, fws, dualgap, pinfeas, dinfeas, udotr, complem, projerr, barr_param, alpha_primal, alpha_dual, sigma,
                             cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
                             cblas_dnrm2(nd, d_velocity, 1)/cblas_dnrm2(nd, velocity, 1),
                             cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1));
@@ -1568,7 +1612,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
   cblas_dcopy(nd, data->tmp_point->t_reaction, 1, reaction, 1);
 
-  options->dparam[SICONOS_DPARAM_RESIDU] = err; //NV_max(error, 4);
+  options->dparam[SICONOS_DPARAM_RESIDU] = totalresidual; //NV_max(error, 4);
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
   if(internal_allocation)
@@ -1610,11 +1654,11 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
 
