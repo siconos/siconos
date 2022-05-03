@@ -53,7 +53,7 @@ double getStepLength(const double * const x, const double * const dx, const unsi
  * \param rnorm is the relative norm of out = |out|/max{|velocity|, |H x globalVelocity|, |w|}
  */
 void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-                           double * out, double * rnorm);
+		    double * out, double * rnorm, const double tol);
 
 
 /**
@@ -67,7 +67,7 @@ void primalResidual(const double * velocity, NumericsMatrix * H, const double * 
  * \param rnorm is the relative 2-norm of out = |out| / max{|M x globalVelocity|, |f|, |H' x r|}
  */
 void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
-                         double * out, double * rnorm);
+		  double * out, double * rnorm, const double tol);
 
 
 /**
@@ -126,7 +126,7 @@ double relGap(NumericsMatrix * M, const double * f, const double * w, const doub
 
 /* Establish an array of calculation errors  */
 void setErrorArray(double * error, const double pinfeas, const double dinfeas,
-                          const double dualgap, const double complem, const double complem_p);
+		   const double dualgap, const double complem, const double complem_p, const double projerr);
 
 
 /* Return the 2-norm of the difference between two vectors */
