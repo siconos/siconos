@@ -454,7 +454,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double gapVal = 1e300;
   // double dualgap = 1e300;
   double relgap = 1e300;
-  double error_array[5];
+  double error_array[6];
   error_array[0] = pinfeas;
   error_array[1] = dinfeas;
   error_array[2] = relgap;
@@ -686,10 +686,10 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
     /* Primal residual = velocity - H * globalVelocity - w */
-    primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas);
+    primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, tol);
 
     /* Dual residual = M*globalVelocity - H'*reaction + f */
-    dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas);
+    dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol);
 
 
 
@@ -744,7 +744,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
     complem_2 = complemResidualNorm(velocity_2, reaction_2, n_dminus2, n);
 
     // setErrorArray(error, pinfeas, dinfeas, dualgap, complem, complem_p);
-    setErrorArray(error_array, pinfeas, dinfeas, relgap, complem_1, complem_2);
+    setErrorArray(error_array, pinfeas, dinfeas, relgap, complem_1, complem_2, 0.0);
 
 
     /* ----- return to original variables ------ */
@@ -1915,11 +1915,11 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
   /* 0: without scaling;  1: NT scaling using Qp;   2: NT scaling using F */
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 2;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
 
