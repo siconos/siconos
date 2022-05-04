@@ -596,6 +596,13 @@ class MechanicsHdf5(object):
 
         self._input = group(self._data, 'input')
 
+        # if the hdf5 file contains already some objects, we correcly initialize
+        # the object counter
+        if len(self._input) >= 0:
+            type_obj = [obj.attrs['type'] for  obj in self._input.values()]
+            self._number_of_dynamic_objects = type_obj.count('dynamic')
+            self._number_of_static_objects = type_obj.count('static')
+
         self._nslaws_data = group(self._data, 'nslaws')
         return self
 
@@ -649,7 +656,7 @@ class MechanicsHdf5(object):
         Contact points information.
         """
         return self._cf_data
-    
+
     def contact_info_data(self):
         """
         Contact points information.
@@ -909,15 +916,15 @@ class MechanicsHdf5(object):
                          avoid_internal_edge_contact=False):
         """
         Add a convex shape defined by a list of points.
-        
+
         outsideMargin is the value of margin that substract from the actual contact distance
 
-        If insideMargin is positive, the convex hull is shrunken by that amount 
+        If insideMargin is positive, the convex hull is shrunken by that amount
         (each face is moved by "shrink" length units towards the center along its normal).
         This value is then added to outsideMargin to compensate the shrink. The convex hull
         appears for the user as in its original size.
 
-        
+
 
         """
         # infer the dimension of the problem
