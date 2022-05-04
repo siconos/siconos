@@ -41,7 +41,7 @@ endif()
 if(USE_DOXYGEN)
 
   # Search doxygen and set config
-  find_package(Doxygen REQUIRED)
+  find_package(Doxygen REQUIRED dot)
   # Output path for doxygen documentation
   if(NOT DOXYGEN_OUTPUT)
     set(DOXYGEN_OUTPUT ${DOC_ROOT_DIR}/doxygen CACHE INTERNAL "Path to doxygen outputs.")
@@ -86,9 +86,9 @@ if(WITH_DOCUMENTATION)
   if(Python3_VERSION VERSION_LESS 3.6)
     message(FATAL_ERROR "Python >= 3.6 is required to generate documentation.")
   endif()
-  find_python_module(breathe REQUIRED)
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
+  find_python_module(breathe REQUIRED)
   # Sphinx theme for documentation
   find_python_module(sphinx_bootstrap_theme REQUIRED)
 

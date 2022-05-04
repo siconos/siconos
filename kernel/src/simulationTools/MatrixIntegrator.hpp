@@ -33,7 +33,7 @@
 class MatrixIntegrator
 {
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(MatrixIntegrator);
 
 protected:

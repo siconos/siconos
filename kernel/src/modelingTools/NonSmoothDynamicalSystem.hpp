@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 /*! \file NonSmoothDynamicalSystem.hpp
- * \brief container for DynamicalSystem and Interaction
+ * container for DynamicalSystem and Interaction
  */
 #ifndef NSDS_H
 #define NSDS_H
@@ -25,7 +25,8 @@
 #include "Topology.hpp"
 #include "DynamicalSystem.hpp"
 
-/** the NonSmoothDynamicalSystem consists in Dynamical Systems and Interactions
+/** 
+    the NonSmoothDynamicalSystem consists in Dynamical Systems and Interactions
     structured into a graph defined in a Topology.
     In the DynamicalSystem graph, DynamicalSystem objects are nodes and Interaction objects
     are edges.
@@ -75,8 +76,7 @@ public:
   };
 
 private:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
 
   /** initial time of the simulation */
@@ -126,8 +126,9 @@ protected:
 public:
 
   /** NSDS constructor.
-   * \param t0 initial time
-   * \param T final time
+   *
+   *  \param t0 initial time
+   *  \param T final time
    */
   NonSmoothDynamicalSystem(double t0, double T);
 
@@ -136,15 +137,15 @@ public:
   ~NonSmoothDynamicalSystem();
 
   // --- GETTERS/SETTERS ---
-/** get the current time
-   *  \return a double
+  /** \return the current time value
    */
   inline double currentTime() const
   {
     return _t;
   }
-
+  
   /** set the current time
+   *
    *  \param newValue the new time
    */
   inline void setCurrentTime(double newValue)
@@ -152,8 +153,7 @@ public:
     _t = newValue;
   }
 
-  /** get initial time
-   *  \return a double
+  /** \return initial time
    */
   inline double t0() const
   {
@@ -161,6 +161,7 @@ public:
   }
 
   /** set initial time of the time discretisation
+   *
    *  \param newT0
    */
   inline void sett0(double newT0)
@@ -168,8 +169,7 @@ public:
     _t0 = newT0;
   };
 
-  /** get final time
-   *  \return a double
+  /** \return final time
    */
   inline double finalT() const
   {
@@ -177,6 +177,7 @@ public:
   }
 
   /** set final time
+   *
    *  \param newValue the new final time for the Simulatiom
    */
   void setT(double newValue)
@@ -185,6 +186,7 @@ public:
   };
 
   /** get the title of the simulation
+   *
    *  \return std::string : the title
    */
   inline const std::string  title() const
@@ -193,6 +195,7 @@ public:
   }
 
   /** set the title of the simulation
+   *
    *  \param s : the title
    */
   inline void setTitle(const std::string & s)
@@ -201,6 +204,7 @@ public:
   }
 
   /** get the author of the simulation
+   *
    *  \return std::string : the author
    */
   inline const std::string  author() const
@@ -209,6 +213,7 @@ public:
   }
 
   /** set the author of the simulation
+   *
    *  \param s std::string : the author
    */
   inline void setAuthor(const std::string & s)
@@ -217,6 +222,7 @@ public:
   }
 
   /** allows to get the description of the simulation
+   *
    *  \return std::string : the description
    */
   inline const std::string  description() const
@@ -225,6 +231,7 @@ public:
   }
 
   /** set the author of the simulation
+   *
    *  \param s std::string : the author
    */
   inline void setDescription(const std::string & s)
@@ -233,6 +240,7 @@ public:
   }
 
   /** allows to get the date of the simulation
+   *
    *  \return std::string : the date
    */
   inline const std::string  date() const
@@ -241,6 +249,7 @@ public:
   }
 
   /** set the date of the simulation
+   *
    *  \param s std::string : the date
    */
   inline void setDate(const std::string & s)
@@ -249,6 +258,7 @@ public:
   }
 
   /** get problem type (true if BVP)
+   *
    *  \return a bool
    */
   inline bool isBVP() const
@@ -257,6 +267,7 @@ public:
   }
 
   /** get problem type (true if IVP)
+   *
    *  \return a bool
    */
   inline bool isIVP() const
@@ -265,6 +276,7 @@ public:
   }
 
   /** set the NonSmoothDynamicalSystem to BVP, else it is IVP
+   *
    *  \param newBvp true if BVP, false otherwise
    */
   inline void setBVP(const bool& newBvp)
@@ -274,7 +286,8 @@ public:
 
 
   /** get a reference to the changelog for an NSDS.
-   * \return a reference to the changelog.
+   *
+   *  \return a reference to the changelog.
    */
   inline const ChangeLog& changeLog()
   {
@@ -282,7 +295,8 @@ public:
   };
 
   /** get an iterator to the last item in the changelog.
-   * \return an iterator pointing at the last item in the changelog.
+   *
+   *  \return an iterator pointing at the last item in the changelog.
    */
   inline ChangeLogIter changeLogPosition()
   {
@@ -293,7 +307,8 @@ public:
   };
 
   /** get an iterator to the beginning of the changelog.
-   * \return an iterator pointing at the beginning of the changelog.
+   *
+   *  \return an iterator pointing at the beginning of the changelog.
    */
   inline ChangeLogIter changeLogBegin()
   {
@@ -302,6 +317,7 @@ public:
   };
 
   /** clear the changelog up to a given position.
+   *
    *  \param it  This iterator must point to somewhere in the changelog
    *             for this NSDS.
    */
@@ -310,8 +326,7 @@ public:
 
   // === DynamicalSystems management ===
 
-  /** get the number of Dynamical Systems present in the NSDS
-      \return an unsigned int
+  /** \return the number of Dynamical Systems present in the NSDS
    */
   inline size_t getNumberOfDS() const
   {
@@ -319,7 +334,8 @@ public:
   }
 
   /** get all the dynamical systems declared in the NonSmoothDynamicalSystem.
-   * \return a SP::DynamicalSystemsGraph
+   *
+   *  \return a SP::DynamicalSystemsGraph
    */
   inline const SP::DynamicalSystemsGraph dynamicalSystems() const
   {
@@ -327,21 +343,24 @@ public:
   }
 
   /** get all the dynamical systems declared in the NonSmoothDynamicalSystem.
-   * into a std::vector<SP::DynamicalSystem>
-   * Useful for iterates on DynamicalSystems in Python for instance
-   * \return std::vector<SP::DynamicalSystem>
+   *  into a std::vector<SP::DynamicalSystem>
+   *  Useful for iterates on DynamicalSystems in Python for instance
+   *
+   *  \return std::vector<SP::DynamicalSystem>
    */
   std::vector<SP::DynamicalSystem> dynamicalSystemsVector() const;
 
 
   /** add a dynamical system into the DS graph (as a vertex)
-   * \param ds a pointer to the system to add
+   *
+   *  \param ds a pointer to the system to add
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** get Dynamical system number I
-   * \param nb the identifier of the DynamicalSystem to get
-   * \return a pointer on DynamicalSystem
+   *
+   *  \param nb the identifier of the DynamicalSystem to get
+   *  \return a pointer on DynamicalSystem
    */
   inline SP::DynamicalSystem dynamicalSystem(unsigned int nb) const
   {
@@ -353,13 +372,15 @@ public:
   }
 
   /** remove a dynamical system
-   * \param ds a pointer to the dynamical system to remove
+   *
+   *  \param ds a pointer to the dynamical system to remove
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds);
 
   // === Interactions management ===
 
   /** get the number of Interactions present in the NSDS.
+   *
    *  \return an unsigned int
    */
   inline size_t getNumberOfInteractions() const
@@ -368,6 +389,7 @@ public:
   };
 
   /** return the graph of  Interactions present in the NSDS.
+   *
    *  \return SP::InteractionGraph
    */
   inline const SP::InteractionsGraph  interactions() const
@@ -377,13 +399,16 @@ public:
 
 
   /** remove an interaction to the system
-   * \param inter a pointer to the interaction to remove
+   *
+   *  \param inter a pointer to the interaction to remove
+   *
    */
   void removeInteraction(SP::Interaction inter);
 
   /** get Interaction number I
-   * \param nb the identifier of the Interaction to get
-   * \return a pointer to an Interaction
+   *
+   *  \param nb the identifier of the Interaction to get
+   *  \return a pointer to an Interaction
    */
   inline SP::Interaction interaction(unsigned int nb) const
   {
@@ -391,8 +416,9 @@ public:
   }
 
   /** get Interaction named name
-   * \param name of the Interaction to get
-   * \return a pointer to an Interaction
+   *
+   *  \param name of the Interaction to get
+   *  \return a pointer to an Interaction
    */
   inline SP::Interaction interaction(std::string name) const
   {
@@ -400,22 +426,25 @@ public:
   }
 
   /** get all the interactions declared in the NonSmoothDynamicalSystem.
-   * into a std::vector<SP::Interaction>
-   * Useful for iterates on Interaction in Python for instance
-   * \return std::vector<SP::Interaction>
+   *  into a std::vector<SP::Interaction>
+   *  Useful for iterates on Interaction in Python for instance
+   *
+   *  \return std::vector<SP::Interaction>
    */
   std::vector<SP::Interaction> InteractionsVector() const;
 
   /** link an interaction to two dynamical systems
-   * \param inter the interaction
-   * \param ds1 a DynamicalSystem
-   * \param ds2 a DynamicalSystem (optional)
+   *
+   *  \param inter the interaction
+   *  \param ds1 a DynamicalSystem
+   *  \param ds2 a DynamicalSystem (optional)
    */
   void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
   /** set the name for this Dynamical System
-   * \param ds a pointer to the system
-   * \param name the name of the DynamicalSystem
+   *
+   *  \param ds a pointer to the system
+   *  \param name the name of the DynamicalSystem
    */
   inline void setName(SP::DynamicalSystem ds, const std::string& name)
   {
@@ -423,8 +452,9 @@ public:
   };
 
   /** get the name for this Dynamical System
-   * \param ds a pointer to the system
-   * \return name the name of the DynamicalSystem, or empty string if not found.
+   *
+   *  \param ds a pointer to the system
+   *  \return name the name of the DynamicalSystem, or empty string if not found.
    */
   std::string name(SP::DynamicalSystem ds)
   {
@@ -432,8 +462,9 @@ public:
   }
 
   /** set the name for this Interaction
-   * \param interaction a pointer to the Interaction
-   * \param name the name of the Interaction
+   *
+   *  \param interaction a pointer to the Interaction
+   *  \param name the name of the Interaction
    */
   inline void setName(SP::Interaction interaction, const std::string& name)
   {
@@ -441,8 +472,9 @@ public:
   };
 
   /** get the name for this Interaction
-   * \param inter a pointer to the Interaction
-   * \return name the name of the Interaction, or empty string if not found.
+   *
+   *  \param inter a pointer to the Interaction
+   *  \return name the name of the Interaction, or empty string if not found.
    */
   std::string name(SP::Interaction inter)
   {
@@ -450,9 +482,10 @@ public:
   }
 
   /** specify id the given Interaction is for controlling the DS
-   * \param inter the Interaction
-   * \param isControlInteraction true if the Interaction is used for
-   * control purposes
+   *
+   *  \param inter the Interaction
+   *  \param isControlInteraction true if the Interaction is used for
+   *  control purposes
    **/
   void setControlProperty(SP::Interaction inter, const bool isControlInteraction)
   {
@@ -461,6 +494,7 @@ public:
 
 
   /** get the topology of the system
+   *
    *  \return a pointer on Topology
    */
   inline SP::Topology topology() const
@@ -474,6 +508,7 @@ public:
 
   /** return false is one of the interations is not linear.  else
    *  return true.
+   *
    *  \return a bool
    */
   inline bool isLinear() const
@@ -484,7 +519,8 @@ public:
   void clear();
 
   /** set symmetry in the blocks computation
-   * \param val a bool
+   *
+   *  \param val a bool
    */
   void setSymmetric(bool val);
 
@@ -493,7 +529,8 @@ public:
   void reset();
 
   /** Set all DS non-smooth part to zero for a given level.
-   * \param level the level to will be zeroed
+   *
+   *  \param level the level to will be zeroed
    */
   void reset(unsigned int level);
 
@@ -502,47 +539,54 @@ public:
   void swapInMemory();
 
   /** save interaction states in memories. Applied to all interactions
-   of the connected topology
+      of the connected topology
   */
   void pushInteractionsInMemory();
 
   /** update the plugins of the DS
+   *
    *  \param time to be used for plugins
    */
   void updateDSPlugins(double time);
 
   /** compute r thanks to lambda[level] for all Interactions
-    * \param time
-    * \param level lambda level
+   *
+   *  \param time
+   *  \param level lambda level
    */
   void updateInput(double time, unsigned int level);
 
   /** compute output for all the interactions for a given level
-   * \param time
-   * \param level y order to be computed
+   *
+   *  \param time
+   *  \param level y order to be computed
    */
   void updateOutput(double time, unsigned int level = 0);
 
   /** compute output for all the interactions and for a level range
-   * \param time
-   * \param level_min y min order to be computed
-   * \param level_max y max order to be computed
+   *
+   *  \param time
+   *  \param level_min y min order to be computed
+   *  \param level_max y max order to be computed
    */
   void updateOutput(double time, unsigned int level_min, unsigned int level_max);
 
   /** compute Jacobians for all the interactions (in indexSet0)
-   * \param time
+   *
+   *  \param time
    */
   void computeInteractionJacobians(double time);
 
-  /** compute Jacobians for all the interactions of a given index set.
-   \param time
-   \param indexSet InteractionsGraph of interest
+  /** compute Jacobians for all the interactions of a given index set
+   * 
+   *  \param time
+   *  \param indexSet InteractionsGraph of interest
    */
   void computeInteractionJacobians(double time, InteractionsGraph& indexSet);
 
-  /** visit all dynamical systems in this system.
-   * \param visitor an SP::SiconosVisitor that can visit classes derived from DS
+  /** visit all dynamical systems in this system
+   *
+   *  \param visitor an SP::SiconosVisitor that can visit classes derived from DS
    */
   void visitDynamicalSystems(SP::SiconosVisitor visitor);
 };

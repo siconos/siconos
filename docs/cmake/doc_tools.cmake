@@ -96,13 +96,14 @@ function(doxy2rst_sphinx COMPONENT)
     add_custom_target(${COMPONENT}-xml2rst
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
       "from gendoctools.cpp2rst import create_breathe_files as f; f('${component_HEADERS}', '${CMAKE_SOURCE_DIR}', '${COMPONENT}', '${SPHINX_DIR}','${DOXY_CONFIG_XML}')"
-        VERBATIM
-        DEPENDS ${COMPONENT}-doxy2xml
-        )
-      
-      add_custom_command(TARGET  ${COMPONENT}-xml2rst POST_BUILD
-        COMMENT "${COMPONENT} : rst (c++ API) files have been generated in ${SPHINX_DIR}/reference/cpp.")
-    endif()
+      VERBATIM
+      DEPENDS ${COMPONENT}-doxy2xml
+      )
+    add_dependencies(rst_api ${COMPONENT}-xml2rst)
+  
+    add_custom_command(TARGET  ${COMPONENT}-xml2rst POST_BUILD
+      COMMENT "${COMPONENT} : rst (c++ API) files have been generated in ${SPHINX_DIR}/reference/cpp.")
+  endif()
 endfunction()
 
 # --------------------------------------
@@ -198,12 +199,12 @@ function(docstrings2rst module_path module_name)
   # A target to postprocess latex forms in docstrings into
   # something readable by sphinx.
   # Calls a python function defined in gendoctools (replace_latex)
-  add_custom_target(${module_name}_replace_latex
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-    "from gendoctools.common import replace_latex as f; f('${pymodule_name}', '${SICONOS_SWIG_ROOT_DIR}/tmp_${COMPONENT}/')"
-    VERBATIM
-    DEPENDS ${SWIG_MODULE_${module_name}_REAL_NAME}
-    COMMENT "Insert latex into docstrings.")
+  # add_custom_target(${module_name}_replace_latex
+  #   COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+  #   "from gendoctools.common import replace_latex as f; f('${pymodule_name}', '${SICONOS_SWIG_ROOT_DIR}/tmp_${COMPONENT}/')"
+  #   VERBATIM
+  #   DEPENDS ${SWIG_MODULE_${module_name}_REAL_NAME}
+  #   COMMENT "Insert latex into docstrings.")
   
   # Path where rst files (docstrings --> rst) will be written.
   set(SPHINX_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/)
@@ -220,13 +221,14 @@ function(docstrings2rst module_path module_name)
     COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${PYTHON_EXECUTABLE} -c
     "from gendoctools.python2rst import docstrings2rst as f; f('${COMPONENT}', '${module_path}', '${module_name}', '${SPHINX_OUTPUT_DIR}', '${SICONOS_SWIG_ROOT_DIR}')"
     VERBATIM
-    DEPENDS ${module_name}_replace_latex
+    DEPENDS ${SWIG_MODULE_${module_name}_REAL_NAME}
     COMMENT "Create rst files from python docstrings for module siconos.${module_name}")
+
   
   # Create dependency between autodoc target and siconos python modules.
-  foreach(dep IN LISTS PROCESSED_PYTHON_MODULES)
-    add_dependencies(${module_name}_autodoc ${dep})
-  endforeach()
+  #foreach(dep IN LISTS PROCESSED_PYTHON_MODULES)
+  #  add_dependencies(${module_name}_autodoc ${dep})
+  #endforeach()
   
   # rst_api needs autodoc.
   add_dependencies(rst_api ${module_name}_autodoc)

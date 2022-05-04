@@ -26,14 +26,14 @@ contactors maintained by a SiconosCollisionManager.
 
 #include <MechanicsFwd.hpp>
 
-/** \brief Holds one result of a line segment intersection query
-    against the graph of body contactors maintained by a
-    SiconosCollisionManager. */
+/**
+   Holds one result of a line segment intersection query
+   against the graph of body contactors maintained by a
+   SiconosCollisionManager
+*/
 class SiconosCollisionQueryResult
 {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(SiconosCollisionQueryResult);
 
 public:
@@ -42,7 +42,7 @@ public:
   double distance;
 
   /** Body owning the contactor that was intersected, may be null for
-   * static contactors. */
+   *  static contactors. */
   SP::SecondOrderDS body;
 
   /** The shape that was intersected. */

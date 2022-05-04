@@ -23,7 +23,7 @@ enum SOCLCP_SOLVER
   /** SOCLCP for one cone (used mainly inside NSGS solvers) */
   SICONOS_SOCLCP_ProjectionOnCone = 1150,
   SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration = 1151,
-  SICONOS_SOCLCP_ProjectionOnConeWithRegularization = 1152
+  SICONOS_SOCLCP_ProjectionOnConeWithRegularization = 1152,
   /* SICONOS_SOCLCP_AlartCurnierNewton = 550, */
   /* SICONOS_SOCLCP_NCPGlockerFBNewton = 551, */
   /* SICONOS_SOCLCP_NCPGlockerFBPATH = 556, */
@@ -34,8 +34,7 @@ enum SOCLCP_SOLVER
   /* SICONOS_SOCLCP_DampedAlartCurnierNewton = 561, */
   /* SICONOS_SOCLCP_QUARTIC = 562, */
   /* SICONOS_SOCLCP_QUARTIC_NU = 563, */
-
-  /** SOCLCP local solvers on global formulation */
+  /* SOCLCP local solvers on global formulation */
   /* SICONOS_SOCLCP_GLOBAL_NSGS_WR = 600, */
   /* SICONOS_SOCLCP_GLOBAL_NSGSV_WR = 601, */
   /* SICONOS_SOCLCP_GLOBAL_PROX_WR = 602, */
@@ -44,7 +43,6 @@ enum SOCLCP_SOLVER
   /* SICONOS_SOCLCP_GLOBAL_NSGS = 605, */
   /* SICONOS_SOCLCP_GLOBAL_NSN_AC_WR = 606, */
   /* SICONOS_SOCLCP_GLOBAL_AC = 607 */
-
 };
 
 

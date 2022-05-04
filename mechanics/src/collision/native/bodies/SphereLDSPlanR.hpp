@@ -29,7 +29,6 @@
 class SphereLDSPlanR : public LagrangianScleronomousR, public std::enable_shared_from_this<SphereLDSPlanR>
 {
 private:
-  // serialization hooks
   ACCEPT_SERIALIZATION(SphereLDSPlanR);
 
 
@@ -41,12 +40,13 @@ private:
 public:
 
   /** Constructor
-  \param r disk radius
-  \param A
-  \param B
-  \param C
-  \param D
-  */
+   *
+   *  \param r disk radius
+   *  \param A
+   *  \param B
+   *  \param C
+   *  \param D
+   */
   SphereLDSPlanR(double r, double A, double B, double C, double D);
 
   ~SphereLDSPlanR() noexcept = default;
@@ -56,16 +56,20 @@ public:
   using LagrangianScleronomousR::computeh;
 
 
-  /** to compute the output y = h(q,z) of the Relation
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-      \param y the resulting vector
+  /**
+     to compute the output y = h(q,z) of the Relation
+     
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
+     \param y the resulting vector
   */
   void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
+  /**
+     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+     
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
   */
   void computeJachq(const BlockVector& q, BlockVector& z);
 
@@ -74,7 +78,6 @@ public:
     return (A == _A && B == _B && C == _C && D == _D && r == _r) ;
   }
 
-  // visitors hook
   ACCEPT_VISITORS();
 
 };

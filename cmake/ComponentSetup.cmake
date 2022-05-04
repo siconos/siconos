@@ -125,7 +125,7 @@ function(configure_component_documentation COMPONENT)
   # and so they must be built during cmake run.
   if(WITH_PYTHON_WRAPPER)
     include(doxy2swig_docstrings)
-    doxy2swig_docstrings(${COMPONENT})
+    doxy2swig_docstrings(NAME ${COMPONENT} HEADERS ${component_HEADERS})
   endif()
   
   # update the main doxy file, without building the doc

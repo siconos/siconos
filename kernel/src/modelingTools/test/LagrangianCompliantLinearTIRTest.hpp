@@ -26,8 +26,7 @@ class LagrangianCompliantLinearTIRTest : public CppUnit::TestFixture
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIRTest);
 
 

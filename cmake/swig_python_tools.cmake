@@ -27,9 +27,9 @@ macro(add_siconos_swig_sub_module fullname)
     set(SWIG_MODULE_${_name}_EXTRA_DEPS ${SWIG_MODULE_${COMPONENT}_EXTRA_DEPS})
   endif()
 
-  if(WITH_DOXY2SWIG)
-    list(APPEND SWIG_MODULE_${_name}_EXTRA_DEPS ${COMPONENTS}_docstrings)
-  endif()
+  # if(WITH_DOXY2SWIG)
+  #   list(APPEND SWIG_MODULE_${_name}_EXTRA_DEPS ${COMPONENTS}_docstrings)
+  # endif()
   
   # add as dependencies all the i files
   file(GLOB ${_name}_I_FILES  CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_path}/*.i)
@@ -95,8 +95,8 @@ macro(add_siconos_swig_sub_module fullname)
 
   # Include for "common" swig" files (e.g. start.i ...)
   target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${SICONOS_SWIG_SOURCE_DIR})
-  target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${SICONOS_SWIG_ROOT_DIR}) # for component-docstrings.i
-  target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}) # for component-docstrings.i
+  #target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${SICONOS_SWIG_ROOT_DIR}) # for component-docstrings.i
+  #target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}) # for component-docstrings.i
    
   # List of siconos modules, used in __init__.py.
   # --> fix this to have 'real' modules names (e.g. control.observer ...)
@@ -162,10 +162,11 @@ macro(add_siconos_swig_sub_module fullname)
     endif()
   endif()
   # Check dependencies and then link ...
-  add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
-
+  if(TARGET ${COMPONENT})
+    add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
+  endif()
   # set dependency of sphinx apidoc to this target
-  if(WITH_DOCUMENTATION AND WITH_${COMPONENT}_DOXY2SWIG)
+  if(WITH_DOCUMENTATION AND WITH_DOXY2SWIG)
     include(doc_tools)
     docstrings2rst(${_path} ${_name})
   endif()

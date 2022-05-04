@@ -29,27 +29,25 @@
 
 const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
 
-/**  \class MoreauJeanDirectProjectionOSI
- *   \brief One Step time Integrator for First Order Dynamical Systems  for
- *    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Direct
- * Projection Algorithm
- *
- * This class reimplement a special activation of constraints
- * in the MoreauJeanOSI for the Direct Projection Algorithm
- *
- * References :
- *
- * V. Acary. Projected event-capturing time-stepping schemes for nonsmooth
- * mechanical systems with unilateral contact and coulomb’s friction. Computer
- * Methods in Applied Mechanics and Engineering, 256:224 – 250, 2013. ISSN
- * 0045-7825. URL
- * http://www.sciencedirect.com/science/article/pii/S0045782512003829.
- *
- */
+/**
+    One Step time Integrator for First Order Dynamical Systems  for
+    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Direct
+    Projection Algorithm
+
+    This class reimplement a special activation of constraints
+    in the MoreauJeanOSI for the Direct Projection Algorithm
+
+    References :
+
+    V. Acary. Projected event-capturing time-stepping schemes for nonsmooth
+    mechanical systems with unilateral contact and coulomb’s friction. Computer
+    Methods in Applied Mechanics and Engineering, 256:224 – 250, 2013. ISSN
+    0045-7825. URL
+    http://www.sciencedirect.com/science/article/pii/S0045782512003829.
+
+*/
 class MoreauJeanDirectProjectionOSI : public MoreauJeanOSI {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(MoreauJeanDirectProjectionOSI);
 
   /** Default constructor
@@ -63,11 +61,13 @@ protected:
 
 public:
   /** constructor from theta value only
+   *
    *  \param theta value for all these DS.
    */
   explicit MoreauJeanDirectProjectionOSI(double theta);
 
   /** constructor from theta value only
+   *
    *  \param theta value for all these DS.
    *  \param gamma value for all these DS.
    */
@@ -97,64 +97,60 @@ public:
 
   inline double activateYPosThreshold() { return _activateYPosThreshold; };
 
-  inline void setActivateYPosThreshold(double newValue)
-  {
-    _activateYPosThreshold = newValue;
-  };
+  inline void setActivateYPosThreshold(double newValue) { _activateYPosThreshold = newValue; };
 
   inline double activateYVelThreshold() { return _activateYVelThreshold; };
 
-  inline void setActivateYVelThreshold(double newValue)
-  {
-    _activateYVelThreshold = newValue;
-  };
+  inline void setActivateYVelThreshold(double newValue) { _activateYVelThreshold = newValue; };
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param t time of initialization
-   * \param ds the dynamical system
+   *
+   *  \param t time of initialization
+   *  \param ds the dynamical system
    */
   void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param inter the interaction
-   * \param interProp the properties on the graph
-   * \param DSG the dynamical systems graph
+   *
+   *  \param inter the interaction
+   *  \param interProp the properties on the graph
+   *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(Interaction &inter,
                                            InteractionProperties &interProp,
                                            DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
-   * \return unsigned int
+   *
+   *  \return unsigned int
    */
   unsigned int numberOfIndexSets() const override { return 2; };
 
   /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
-   * \param inter concerned interaction
-   * \param i level
-   * \return bool
+   *  in the IndexSet of level i
+   *
+   *  \param inter concerned interaction
+   *  \param i level
+   *  \return bool
    */
   bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
-   * \param inter concerned interaction
-   * \param i level
-   * \return bool
+   *  in the IndexSet of level i
+   *
+   *  \param inter concerned interaction
+   *  \param i level
+   *  \return bool
    */
-  bool removeInteractionFromIndexSet(SP::Interaction inter,
-                                     unsigned int i) override;
+  bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i) override;
 
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input (_r or _p)
    */
   void computeFreeState() override;
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

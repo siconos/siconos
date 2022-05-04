@@ -40,14 +40,25 @@ import importlib
 import textwrap
 import inspect
 from pathlib import Path
+import shutil
 import operator
 from gendoctools import common, with_doxy2swig
 
 # with_doxy2swig = '@WITH_DOXY2SWIG@' is 'ON'
 # Needed only when WITH_DOXY2SWIG is ON
-if with_doxy2swig:
-    from gendoctools.sicodoxy2swig import SiconosDoxy2Swig
+#if with_doxy2swig:
+#    from gendoctools.sicodoxy2swig import SiconosDoxy2Swig
 
+
+modules_docs = {
+    'siconos_externals' : 'API or tools related to external software libraries used by Siconos.',
+    'siconos_numerics': 'a collection of low-level algorithms for solving basic algebra and optimization problem arising in the simulation of nonsmooth dynamical systems.',
+    'siconos_kernel': 'high-level API to modelise and simulate nonsmooth dynamical systems.',
+    'siconos_control': 'control toolbox',
+    'siconos_mechanics': 'toolbox for collision detection and joints',
+    'siconos_mechanisms': 'toolbox for collision detection and joints (legacy version, won’t be sustained in long term)',
+    'siconos_io': 'tools related to input/outputs (hdf5, vtk …)',
+    }
 
 def xml2swig(header_name, xml_path, swig_working_dir,
              case_sense_names, docstrings_features, all_index):
@@ -152,6 +163,7 @@ def build_docstrings(headers, component_name, doxygen_config_filename,
     * This function is supposed to be called by a target generated
     with cmake (make <component>_docstrings)
     """
+    return
     doxyconf = common.parse_doxygen_config(doxygen_config_filename)
     case_sense_names = doxyconf['CASE_SENSE_NAMES'].find('YES') > -1
     xml_path = Path(doxyconf['OUTPUT_DIRECTORY'].lstrip(),
@@ -164,7 +176,9 @@ def build_docstrings(headers, component_name, doxygen_config_filename,
 
     docstrings_features = {}
     all_index = {}
+
     for hfile in headers:
+        print(hfile)
         xml2swig(hfile, xml_path, swig_working_dir,
                  case_sense_names, docstrings_features, all_index)
 
@@ -224,6 +238,10 @@ def docstrings2rst(component_name, module_path, module_name,
           * pyfunctions.rst to collect all pyfunc *
 
     """
+
+    inoutfile = Path(swig_working_dir,module_path, module_name + '.py')
+    postprocess_docstrings(inoutfile)
+
     # --- Set current module name and import it in 'comp' ---
     # Test case with submodules (e.g. sensor in control)
     if module_path in ('.', ''):
@@ -243,6 +261,10 @@ def docstrings2rst(component_name, module_path, module_name,
     if not sphinx_directory.exists():
         os.makedirs(sphinx_directory)
 
+    write_python_module_autodoc(module_name, sphinx_directory)
+   
+        
+    return
     # --- Collect features from pickle file ---
     # (output from previous call of build_docstrings)
     # pickle files are at the same location as the module
@@ -552,21 +574,23 @@ def process_enums(module, module_name, features, sphinx_directory,
     common.replace_latex(outputname, latex_dir)
 
 
-def build_python_api_main(outputdir, rst_header, components):
+def build_python_api_main(outputdir, components):
     """Parse existing rst files (one for each class,
     + those for functions) generated for python API
     and collect them into  python_api.rst
     in sphinx/reference directory.
+
+    Call: make rst_api
 
     Parameters
     ----------
     outputdir : Path()
          sphinx directory which contains rst files
          generated for the api (e.g. by doxy2swig)
-    rst_header : string
-         text to put on top of the python_api file.
+    components : list
+         list of active siconos python modules
     """
-    mainrst_filename = Path(outputdir, 'python_api.rst')
+    mainrst_filename = Path(outputdir, 'index.rst')
     # list documented (python) packages
     docpython_dir = Path(outputdir, 'python')
     packages = [f for f in docpython_dir.glob('*')]
@@ -577,17 +601,89 @@ def build_python_api_main(outputdir, rst_header, components):
         for pname in packages:
             if pname.count(p) > 0:
                 pack[pname] = components[p]
-    packages = [p[0] for p in sorted(pack.items(), key=operator.itemgetter(1))]
-    with open(mainrst_filename, 'w') as f:
-        label = '.. _siconos_python_reference:\n\n\n'
-        title = 'Siconos Python API reference'
-        title += '\n' + len(title) * '#' + '\n\n'
-        title += 'This is the documentation of '
-        title += '`python <https://www.python.org/>`_ '
-        title += 'interface to Siconos.\n\n\n'
-        f.write(label)
-        f.write(title)
-        f.write(rst_header)
-        for p in packages:
-            directive = '.. include:: python/' + p + '/autodoc_all.rst\n\n'
-            f.write(directive)
+    packages = [p[0] for p in sorted(pack.items(), key=operator.itemgetter(1))]    
+
+    if len(packages) > 0:
+        with open(mainrst_filename, 'a') as f:
+            # label = '.. _siconos_python_reference:\n\n\n'
+            title = 'Siconos Python API reference'
+            title += '\n' + len(title) * '#' + '\n\n'
+            title += 'This is the documentation of '
+            title += '`python <https://www.python.org/>`_ '
+            title += 'interface to Siconos.\n\n\n'
+            header = '.. toctree::\n    :maxdepth:3\n\n'
+            f.write(title)
+            f.write(header)
+            for p in packages:
+                if p in modules_docs:
+                    title = p.replace('_','.') + ': ' + modules_docs[p]
+                    directive = title + ' <python/' + p + '/autodoc>\n'
+                else:
+                    directive = 'python/' + p + '/autodoc\n\n'
+                directive = textwrap.indent(directive, '    ')
+                f.write(directive)
+            f.write('\n')
+           
+
+def postprocess_docstrings(inoutfile):
+    """Format python files to make their docstrings complient with sphinx.
+
+    
+    inoutfile: name (full path) of the python file to process
+
+    Docstrings are generated by swig (opt -doxygen) and must be postprocessed
+    to ensure a proper output when treated with sphinx autodoc.
+    
+    """
+    # Copy the source file to a tmp file
+    inoutfile = Path(inoutfile).resolve()
+    target = Path(inoutfile.parent, inoutfile.stem + '.copy').resolve()
+    shutil.copyfile(inoutfile, target)
+
+    # Read input (the original) into a string and replace what must be replaced
+    fout = open(target, 'w')
+    txt = inoutfile.read_text()
+    # Remove some leading spaces at the beginning of the docstring
+    txt2 = txt.replace('r"""\n         ', 'r"""\n        ')
+    txt2 = txt.replace('r"""\n     ', 'r"""\n    ')
+    # Add line before type description in docstring, else wrong sphinx processing
+    # txt2 = txt2.replace('         :type', '\n    :type')
+    # txt2 = txt2.replace('         :param', '\n    :param')
+    # txt2 = txt2.replace('       :type', '\n    :type')
+    # txt2 = txt2.replace('       :param', '\n    :param')
+
+    
+    txt2 = txt2.replace('    :type', '\n    :type')
+    txt2 = txt2.replace('    :param', '\n    :param')
+    txt2 = txt2.replace('    :rtype', '\n    :rtype')
+    txt2 = txt2.replace('    :return', '\n    :return')
+
+
+
+    # Remove double trailing tab before param description in docstring, else wrong sphinx processing
+    #txt2 = txt2.replace('         :param', '    :param')
+    #txt2 = txt2.replace('     :param', '    :param')
+    # Dump output into the copy
+    fout.write(txt2)
+    fout.close()
+    # Move copy to original
+    #shutil.move(target, inoutfile)
+
+def write_python_module_autodoc(module_name, sphinx_directory):
+    """Write main autodoc file for current module
+
+    Call sphinx autodoc automodule.
+    """
+    outputname = Path(sphinx_directory, 'autodoc.rst')
+    title = module_name + '\n'
+    title += len(title) * '=' + '\n\n'
+    basename = '/reference/python/' + module_name.replace(r'.', '_')
+    header = '**Module documentation**\n\n'
+    with open(outputname, 'wt') as out:
+        out.write(title)
+        out.write(header)
+
+        directive = f'.. automodule:: {module_name}\n'
+        directive += '\t:members:\n'
+        directive += '\t:show-inheritance:\n\n'        
+        out.write(directive)

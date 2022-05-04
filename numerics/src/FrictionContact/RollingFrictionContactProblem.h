@@ -14,108 +14,112 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef ROLLINGFRICTIONCONTACTPROBLEM_H
 #define ROLLINGFRICTIONCONTACTPROBLEM_H
 
-/*!\file FrictionContactProblem.h
-  \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
+/*!\file RollingFrictionContactProblem.h
+  Definition of a structure to handle friction-contact (2D or 3D) problems.
 */
 
-#include <stdio.h>        // for FILE
-#include "NumericsFwd.h"  // for RollingFrictionContactProblem, NumericsMatrix
+#include "NumericsFwd.h"   // for RollingFrictionContactProblem, NumericsMatrix
 #include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
-/** \struct RollingFrictionContactProblem RollingFrictionContactProblem.h
- *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem.
+#include <stdio.h> // for FILE
+
+/** 
+    The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)
+    problem.
 */
-struct RollingFrictionContactProblem
-{
+struct RollingFrictionContactProblem {
   /** dimension of the contact space (3D or 2D ) */
   int dimension;
   /** the number of contacts \f$ n_c \f$ */
   int numberOfContacts;
-  /** \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+  /** \f$ {M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
      a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure */
-  NumericsMatrix* M;
-  /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
-  double* q;
-  /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
+  NumericsMatrix *M;
+  /** \f$ {q} \in {{\mathrm{I\!R}}}^{n} \f$ */
+  double *q;
+  /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */
-  double* mu;
-  /** \f${\mu_r} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
-      (\f$ n_c =\f$ numberOfContacts) */
-  double* mu_r;
+  double *mu;
+  /** \f$ {\mu_r} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction
+     coefficients
+      (\f$ n_c = \f$ numberOfContacts) */
+  double *mu_r;
 };
 
-
-
-
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
+/* create an empty RollingFrictionContactProblem
+ * \return an empty fcp */
+RollingFrictionContactProblem *rollingFrictionContactProblem_new(void);
 
-  /* create an empty RollingFrictionContactProblem
-   * \return an empty fcp */
-  RollingFrictionContactProblem* rollingFrictionContactProblem_new(void);
+/** new RollingFrictionContactProblem from minimal set of data
+ *
+ *  \param[in] dim the problem dimension
+ *  \param[in] nc the number of contact
+ *  \param[in] M the NumericsMatrix
+ *  \param[in] q the q vector
+ *  \param[in] mu the mu vector
+ *  \return a pointer to a RollingFrictionContactProblem structure
+ */
+RollingFrictionContactProblem *rollingFrictionContactProblem_new_with_data(
+    int dim, int nc, NumericsMatrix *M, double *q, double *mu, double *mu_r);
 
-  /** new RollingFrictionContactProblem from minimal set of data
-   * \param[in] dim the problem dimension
-   * \param[in] nc the number of contact
-   * \param[in] M the NumericsMatrix
-   * \param[in] q the q vector
-   * \param[in] mu the mu vector
-   * \return a pointer to a RollingFrictionContactProblem structure
-   */
-  RollingFrictionContactProblem* rollingFrictionContactProblem_new_with_data(int dim, int nc,
-                                                                             NumericsMatrix* M, double* q,
-                                                                             double* mu, double * mu_r);
+/** free a RollingFrictionContactProblem
+ *
+ *  \param problem the problem to free
+ */
+void rollingFrictionContactProblem_free(RollingFrictionContactProblem *problem);
 
-  /** free a RollingFrictionContactProblem
-   * \param problem the problem to free
-   */
-  void rollingFrictionContactProblem_free(RollingFrictionContactProblem* problem);
+/** display a RollingFrictionContactProblem
+ *
+ *  \param problem the problem to display
+ */
+void rollingFrictionContact_display(RollingFrictionContactProblem *problem);
 
+/** print a RollingFrictionContactProblem in a file (numerics .dat format)
+ *
+ *  \param problem the problem to print out
+ *  \param file the dest file
+ *  \return 0 if successfull
+ */
+int rollingFrictionContact_printInFile(RollingFrictionContactProblem *problem,
+                                       FILE *file);
 
-  /** display a RollingFrictionContactProblem
-   * \param problem the problem to display
-   */
-  void rollingFrictionContact_display(RollingFrictionContactProblem*  problem);
+/** print a RollingFrictionContactProblem in a file (numerics .dat format) from
+ *  its filename
+ *
+ *  \param problem the problem to print out
+ *  \param filename the dest file
+ *  \return 0 if successfull
+ */
+int rollingFrictionContact_printInFilename(
+    RollingFrictionContactProblem *problem, char *filename);
 
-  /** print a RollingFrictionContactProblem in a file (numerics .dat format)
-   * \param problem the problem to print out
-   * \param file the dest file
-   * \return 0 if successfull
-   */
-  int rollingFrictionContact_printInFile(RollingFrictionContactProblem*  problem, FILE* file);
+/** read a RollingFrictionContactProblem from a file descriptor
+ *
+ *  \param file descriptor
+ *  \return problem the problem to read
+ */
+RollingFrictionContactProblem *rollingFrictionContact_newFromFile(FILE *file);
 
-  /** print a RollingFrictionContactProblem in a file (numerics .dat format) from its filename
-   * \param problem the problem to print out
-   * \param filename the dest file
-   * \return 0 if successfull
-   */
-  int rollingFrictionContact_printInFilename(RollingFrictionContactProblem*  problem, char * filename);
+/** read a RollingFrictionContactProblem from a file (.dat or hdf5 if fclib is
+ *  on) from its filename
+ *
+ *  \param filename the name of the input file
+ *  \return problem the problem to read
+ */
+RollingFrictionContactProblem *
+rollingFrictionContact_new_from_filename(const char *filename);
 
-  /** read a RollingFrictionContactProblem from a file descriptor
-   * \param file descriptor
-   * \return problem the problem to read
-   */
-  RollingFrictionContactProblem*  rollingFrictionContact_newFromFile(FILE* file);
-
-  /** read a RollingFrictionContactProblem from a file (.dat or hdf5 if fclib is on) from its filename
-   * \param filename the name of the input file
-   * \return problem the problem to read
-   */
-  RollingFrictionContactProblem* rollingFrictionContact_new_from_filename(const char * filename);
-
-  void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProblem* problem,
-                                                 double * reaction,
-                                                 double * velocity,
-                                                 double tol,
-                                                 int do_print)  ;
+void rollingFrictionContactProblem_compute_statistics(
+    RollingFrictionContactProblem *problem, double *reaction, double *velocity,
+    double tol, int do_print);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

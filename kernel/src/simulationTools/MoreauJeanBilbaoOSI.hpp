@@ -25,21 +25,21 @@
 
 #include <limits>
 
-/** One-step integrator for event-capturing simulation combining Moreau-Jean and
+/**
+   One-step integrator for event-capturing simulation combining Moreau-Jean and
    Bilbao numerical scheme.
-
-    Numerical scheme which combines an exact method (Bilbao) for the linear
+   
+   Numerical scheme which combines an exact method (Bilbao) for the linear
    (non-contacting) part of the equations of motion with a Moreau-Jean
    time-stepping for the nonsmooth part.
 
-    \rst
-      Check details in :ref:`modal_moreau_jean`.
-    \endrst
+   Check details in users'guide.
+
 
 */
 class MoreauJeanBilbaoOSI : public OneStepIntegrator {
 protected:
-  /* serialization hooks */
+
   ACCEPT_SERIALIZATION(MoreauJeanBilbaoOSI);
 
   /** nslaw effects */
@@ -65,8 +65,9 @@ public:
     BLOCK_WORK_LENGTH
   };
 
-  /* Constructor - No extra parameters: depends only on connected ds and
-   * simulation time step*/
+  /** Constructor - No extra parameters: depends only on connected ds and
+   *  simulation time step
+   */
   MoreauJeanBilbaoOSI();
 
   /** destructor */
@@ -74,16 +75,18 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param t time of initialization
-   * \param ds the dynamical system
+   *
+   *  \param t time of initialization
+   *  \param ds the dynamical system
    */
   void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param inter the interaction
-   * \param interProp the properties on the graph
-   * \param DSG the dynamical systems graph
+   *
+   *  \param inter the interaction
+   *  \param interProp the properties on the graph
+   *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(Interaction &inter,
                                            InteractionProperties &interProp,
@@ -96,7 +99,8 @@ public:
   void initialize_nonsmooth_problems() override;
 
   /** get the number of index sets required for the simulation
-   * \return unsigned int
+   *
+   *  \return unsigned int
    */
   unsigned int numberOfIndexSets() const override { return 2; };
 
@@ -104,8 +108,9 @@ public:
                           double &theta, double &sigma_star);
 
   /** get iteration_matrix (pointer link) corresponding to DynamicalSystem ds
-   * \param ds a pointer to DynamicalSystem
-   * \return pointer to a SiconosMatrix
+   *
+   *  \param ds a pointer to DynamicalSystem
+   *  \return pointer to a SiconosMatrix
    */
   inline SP::SimpleMatrix iteration_matrix(SP::DynamicalSystem ds)
   {
@@ -115,14 +120,19 @@ public:
   }
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
-   * stop at tout (->iout=false) \param tinit initial time \param tend end time
+   *  stop at tout (->iout=false)
+   *
+   *  \param tinit initial time
+   *  \param tend end time
    *  \param tout real end time
    *  \param idid flag used in EventDriven schemes
    */
   void integrate(double &tinit, double &tend, double &tout, int &idid) override;
 
   /** return the maximum of all norms for the "MoreauJeanOSI-discretized"
-     residus of DS \return a double
+      residus of DS
+
+      \return a double
    */
   double computeResidu() override;
 
@@ -132,8 +142,10 @@ public:
   void computeFreeState() override;
 
   /** integrates the Interaction linked to this integrator, without taking
-   * non-smooth effects into account \param vertex_inter vertex of the
-   * interaction graph \param osnsp pointer to OneStepNSProblem
+   *  non-smooth effects into account
+   *
+   *  \param vertex_inter vertex of the interaction graph
+   *  \param osnsp pointer to OneStepNSProblem
    */
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
@@ -144,9 +156,10 @@ public:
   void updatePosition(DynamicalSystem &ds);
 
   /** update the state of the DynamicalSystem attached to this Integrator
+   *
    *  \param level level of interest for the dynamics
-   * level is set to 0 by default since in all time-stepping schemes we update
-   * all the state whatever the value of level is.
+   *  level is set to 0 by default since in all time-stepping schemes we update
+   *  all the state whatever the value of level is.
    */
   void updateState(const unsigned int level) override;
 
@@ -157,19 +170,24 @@ public:
   void prepareNewtonIteration(double time) override;
 
   /** Apply the rule to one Interaction to know if it should be included in the
-   * IndexSet of level i \param inter the Interaction to test \param i level of
-   * the IndexSet \return Boolean
+   *  IndexSet of level i
+   *
+   *  \param inter the Interaction to test
+   *  \param i level of the IndexSet
+   *  \return Boolean
    */
   bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
 
   /** Apply the rule to one Interaction to know if it should be removed from the
-   * IndexSet of level i \param inter the Interaction to test \param i level of
-   * the IndexSet \return Boolean
+   *  IndexSet of level i
+   *
+   *  \param inter the Interaction to test
+   *  \param i level of the IndexSet
+   *  \return Boolean
    */
   bool removeInteractionFromIndexSet(SP::Interaction inter,
                                      unsigned int i) override;
 
-  /* visitors hook */
   ACCEPT_STD_VISITORS();
 };
 

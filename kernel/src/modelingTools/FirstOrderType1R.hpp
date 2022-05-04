@@ -17,9 +17,9 @@
  */
 
 /*! \file FirstOrderType1R.hpp
-\brief non linear relations, with y depending on dynamical systems state and r
-on lambda.
- */
+  non linear relations, with y depending on dynamical systems state and r
+  on lambda.
+*/
 
 #ifndef FirstOrderType1R_H
 #define FirstOrderType1R_H
@@ -27,49 +27,50 @@ on lambda.
 #include "FirstOrderR.hpp"
 
 /** Pointer to function for plug-in for operators related to output and its
- * gradients.*/
+    gradients.*/
 typedef void (*Type1Ptr)(unsigned int, double *, unsigned int, double *,
                          unsigned int, double *);
 
-/** FirstOrder Non Linear Relation.
- *
- * Derived from FirstOrderR - See this class for more comments.
- *
- *  Relation for First Order Dynamical Systems, with:
- * \rststar
- * .. math::
- *
- *    y &= h(x,z)\\
- *    r &= g(\lambda,z)
- *
- * \endrststar
- *
- * Operators (and their corresponding plug-in):
-- h: saved in Interaction as y (plug-in: output[0])
-- \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
-- g: saved in DS as r ( input[0])
-- \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
- *
- */
+/** 
+    FirstOrder Non Linear Relation.
+
+    Derived from FirstOrderR - See this class for more comments.
+
+    Relation for First Order Dynamical Systems, with:
+    
+    \f[
+
+       y &= h(x,z)\\
+       r &= g(\lambda,z)
+    \f]
+
+    Operators (and their corresponding plug-in):
+    - h: saved in Interaction as y (plug-in: output[0])
+    - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
+    - g: saved in DS as r ( input[0])
+    - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
+*/
 class FirstOrderType1R : public FirstOrderR {
 protected:
-  // serialization hooks
+  
   ACCEPT_SERIALIZATION(FirstOrderType1R);
 
 public:
   /** default constructor */
   FirstOrderType1R() : FirstOrderR(RELATION::Type1R){};
-
-  /** build from plugin for \f$h(x,z)\f$ and \f$g(\lambda, z)\f$
+  
+  /** build from plugin for  \f$ h(x,z) \f$  and  \f$ g(\lambda, z) \f$ 
+   *
    *  \param pluginh the plugin to compute h
    *  \param pluging the plugin to compute g
    */
   FirstOrderType1R(const std::string &pluginh, const std::string &pluging);
 
-  /** build from plugin for \f$h(x,z)\f$,\f$g(\lambda, z) \f$ and their
-   * gradients \param pluginh the plugin to compute h \param pluging the plugin
-   * to compute g \param pluginJachx the plugin to compute \f$\nabla_x h\f$
-   *  \param pluginJacglambda the plugin to compute \f$\nabla_{\lambda} g\f$
+  /** build from plugin for  \f$ h(x,z) \f$ , \f$ g(\lambda, z) \f$ and their
+   *  gradients \param pluginh the plugin to compute h \param pluging the plugin
+   *  to compute g \param pluginJachx the plugin to compute  \f$ \nabla_x h \f$ 
+   *
+   *  \param pluginJacglambda the plugin to compute  \f$ \nabla_{\lambda} g \f$ 
    */
   FirstOrderType1R(const std::string &pluginh, const std::string &pluging,
                    const std::string &pluginJachx,
@@ -79,16 +80,20 @@ public:
   virtual ~FirstOrderType1R() noexcept = default;
 
   /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction that owns this relation
+   *
+   *  \param inter the interaction that owns this relation
    */
   void initialize(Interaction &inter) override;
 
   /** check sizes of the relation specific operators.
-   * \param inter an Interaction using this relation
+   *
+   *  \param inter an Interaction using this relation
    */
   inline void checkSize(Interaction &inter) override {};
 
-  /** to compute the output y = h(t,x,...) of the Relation
+  /** 
+      to compute the output y = h(t,x,...) of the Relation
+      
       \param time current time value
       \param x coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
@@ -97,16 +102,20 @@ public:
   void computeh(double time, const BlockVector &x, BlockVector &z,
                 SiconosVector &y);
 
-  /** to compute the nonsmooth input r = g(t,x,...) of the Relation
+  /** 
+      to compute the nonsmooth input r = g(t,x,...) of the Relation
+      
       \param time current time value
-      \param lambda interaction \f$\lambda\f$ vector
+      \param lambda interaction  \f$ \lambda \f$  vector
       \param z user defined parameters (optional)
       \param r the resulting vector
   */
   void computeg(double time, const SiconosVector &lambda, BlockVector &z,
                 BlockVector &r);
 
-  /** to compute \f$ C = \nabla_x h \f$
+  /** 
+      to compute \f$ C = \nabla_x h \f$
+      
       \param time current time value
       \param x coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
@@ -115,7 +124,9 @@ public:
   void computeJachx(double time, const BlockVector &x, BlockVector &z,
                     SimpleMatrix &C);
 
-  /** default function to compute \f$\nabla_z h\f$
+  /** 
+      default function to compute  \f$ \nabla_z h \f$ 
+      
       \param time current time value
       \param x coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
@@ -124,10 +135,12 @@ public:
   void computeJachz(double time, const BlockVector &x, BlockVector &z,
                     SimpleMatrix &F);
 
-  /** to compute \f$ B = \nabla_{\lambda}g \f$
+  /** 
+      to compute \f$ B = \nabla_{\lambda}g \f$
+      
       \param time current time value
       \param x coordinates of the dynamical systems involved in the relation
-      \param lambda interaction \f$\lambda\f$ vector
+      \param lambda interaction  \f$ \lambda \f$  vector
       \param z user defined parameters (optional)
       \param[out] B the resulting matrix
   */
@@ -135,6 +148,7 @@ public:
                          BlockVector &z, SimpleMatrix &B);
 
   /** default function to compute y, using the data from the Interaction and DS
+   *
    *  \param time current time (not used)
    *  \param inter Interaction using this Relation
    *  \param level not used
@@ -143,6 +157,7 @@ public:
                              unsigned int level = 0) override;
 
   /** default function to compute r, using the data from the Interaction and DS
+   *
    *  \param time current time (not used)
    *  \param inter Interaction using this Relation
    *  \param level not used
@@ -154,8 +169,10 @@ public:
 
   void computeJacg(double time, Interaction &inter) override;
 
-  /** return true if the relation requires the computation of residu
-      \return true if residu are required, false otherwise
+  /**
+     return true if the relation requires the computation of residu
+     
+     \return true if residu are required, false otherwise
    */
   bool requireResidu()  override { return true; }
 

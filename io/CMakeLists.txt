@@ -200,10 +200,6 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     add_subdirectory(swig)
   endif()
   
-  if(WITH_PYTHON_WRAPPER)
-    add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
-  endif()
-  
   # ---- Installation ----
   # Call siconos_component_install_setup(<COMPONENT>)
   # to prepare installation of the current target.

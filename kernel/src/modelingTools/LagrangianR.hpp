@@ -25,42 +25,38 @@
 #include "Interaction.hpp"
 #include "PluginTypes.hpp"
 
-/** Lagrangian Non Linear Relation (generic interface)
-
-    This class is an interface for specific Lagrangian Relations used for Lagrangian dynamical systems.
-
-    \rst
-    see :ref:`relations` for details about the different types of Lagrangian relations.
-    \endrst
-
-
-    - \f$y = h(t,q,\dot q,\ldots)\f$ describes the constraint (the relation)
-
-    - The Jacobian of the constraints with respect to the coodinates \f$q\f$
-    i.e. \f$\nabla^T_q h(t,q,\dot q,\ldots)\f$, is accessed with jachq().
-
-    This Jacobian is mainly used for Newton linearization and to compute the time-derivative of the constraint,
-
-    \f$y = h(q,\ldots)\f$ that is \f$\dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot q +\ldots\f$ 
-
-    This object can also store more general linearized part of the gap function.
-    If \f$y=h(q)\f$ models a gap function, then the time derivative
-    can be generically  written as
-
-    \f$\dot y (t) = H(q,\ldots) \dot q  +\ldots. \f$
-    The matrix \f$H(q,\ldots) \f$ can also be accessed using jachq().
-
-    - The Jacobian of the constraints with respect to the generalized velocities \f$\dot q\f$
-
-    i.e. \f$\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f$ is accessed using jachqDot().
-
-    - The time-derivative of Jacobian of the constraints with respect to the generalized coordinates \f$ q\f$
-
-    i.e. \f$\frac{d}{dt} \nabla^\top_{q} h(t,q,\dot q,\ldots).\f$, is accessed using dotJachq().
-
-    This value is useful to compute the second-order time--derivative of the constraints with respect to time.
-
-    All these operators can be defined with user-defined plugins.
+/**
+   Lagrangian Non Linear Relation (generic interface)
+   
+   This class is an interface for specific Lagrangian Relations used for Lagrangian dynamical systems.
+   
+   -  \f$ y = h(t,q,\dot q,\ldots) \f$  describes the constraint (the relation)
+   
+   - The Jacobian of the constraints with respect to the coodinates  \f$ q \f$ 
+   i.e.  \f$ \nabla^T_q h(t,q,\dot q,\ldots) \f$ , is accessed with jachq().
+   
+   This Jacobian is mainly used for Newton linearization and to compute the time-derivative of the constraint,
+   
+   \f$ y = h(q,\ldots) \f$  that is  \f$ \dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot q +\ldots \f$  
+   
+   This object can also store more general linearized part of the gap function.
+   If  \f$ y=h(q) \f$  models a gap function, then the time derivative
+   can be generically  written as
+   
+   \f$ \dot y (t) = H(q,\ldots) \dot q  +\ldots.  \f$ 
+   The matrix  \f$ H(q,\ldots) \f$ can also be accessed using jachq().
+   
+   - The Jacobian of the constraints with respect to the generalized velocities  \f$ \dot q \f$
+   
+   i.e.  \f$ \nabla^\top_{\dot q} h(t,q,\dot q,\ldots) \f$  is accessed using jachqDot().
+   
+   - The time-derivative of Jacobian of the constraints with respect to the generalized coordinates \f$ q \f$ 
+   
+   i.e.  \f$ \frac{d}{dt} \nabla^\top_{q} h(t,q,\dot q,\ldots). \f$ , is accessed using dotJachq().
+   
+   This value is useful to compute the second-order time--derivative of the constraints with respect to time.
+   
+   All these operators can be defined with user-defined plugins.
 
  */
 
@@ -71,35 +67,35 @@ public:
   enum LagrangianRDS  {z, q0, q1, q2, p0, p1, p2, DSlinkSize};
 
 protected:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(LagrangianR);
 
-  /** Jacobian matrices of \f$y = h(t,q,\dot q,\ldots)\f$ */
+  /** Jacobian matrices of  \f$ y = h(t,q,\dot q,\ldots) \f$  */
   SP::SimpleMatrix _jachlambda{nullptr};
 
-  /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
-   *  i.e. \f$\nabla^\top_q h(t,q,\dot q,\ldots)\f$
+  /** The Jacobian of the constraints with respect to the generalized coodinates   \f$ q \f$ 
+   *  i.e.  \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$ 
    */
   SP::SimpleMatrix _jachq{nullptr};
 
-  /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
-   *  i.e. \f$\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f$
+  /**The Jacobian of the constraints with respect to the generalized velocities   \f$ \dot q \f$ 
+   *  i.e.  \f$ \nabla^\top_{\dot q} h(t,q,\dot q,\ldots) \f$ 
    */
   SP::SimpleMatrix _jachqDot{nullptr};
 
-  /**The time-derivative of Jacobian of the constraints with respect
-     to the generalized coordinates  \f$ q\f$
-   * i.e. \f$\frac{d}{dt} \nabla^\top_{ q} h(t,q,\dot q,\ldots).\f$
-   * This value is useful to compute the second-order
-   * time--derivative of the constraints with respect to time.
+  /** The time-derivative of Jacobian of the constraints with respect
+   *  to the generalized coordinates   \f$  q \f$ 
+   *  i.e.  \f$ \frac{d}{dt} \nabla^\top_{ q} h(t,q,\dot q,\ldots). \f$ 
+   *  This value is useful to compute the second-order
+   *  time--derivative of the constraints with respect to time.
    */
   SP::SimpleMatrix _dotjachq{nullptr};
 
   SP::PluggedObject _pluginJachq{nullptr};
 
   /** basic constructor
-   * \param lagType the sub-type of the relation
+   *
+   *  \param lagType the sub-type of the relation
    */
   LagrangianR(RELATION::SUBTYPES lagType): Relation(RELATION::Lagrangian, lagType) {}
 
@@ -109,20 +105,22 @@ protected:
 public:
 
   /** destructor
-  */
+   */
   virtual ~LagrangianR() noexcept = default;
 
 
   /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction using this relation
+   *
+   *  \param inter the interaction using this relation
    */
   inline void initialize(Interaction &inter) override {};
 
   // -- Jach --
 
   /** get a pointer on matrix Jach[index]
-  *  \return a pointer on a SimpleMatrix
-  */
+   *
+   *  \return a pointer on a SimpleMatrix
+   */
   inline SP::SimpleMatrix jachq() const
   {
     return _jachq;
@@ -141,8 +139,9 @@ public:
   }
 
   /** set Jach[index] to pointer newPtr (pointer link)
-  *  \param newPtr the new matrix
-  */
+   *
+   *  \param newPtr the new matrix
+   */
   inline void setJachqPtr(SP::SimpleMatrix newPtr)
   {
     _jachq = newPtr ;

@@ -176,8 +176,7 @@ public:
   VMap vertex_descriptor;
 
 protected:
-  /** serialization hooks
-  */
+  
   typedef void serializable;
   template<typename Archive>
   friend void siconos_io(Archive&, SiconosGraph < V, E, VProperties, EProperties,

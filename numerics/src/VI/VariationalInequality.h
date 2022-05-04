@@ -56,48 +56,55 @@ extern "C"
 {
 #endif
   /** display a VariationalInequalityProblem
-   * \param vi the problem to display
+   *
+   *  \param vi the problem to display
    */
   void variationalInequality_display(VariationalInequality*  vi);
 
   /** print a VariationalInequalityProblem in a file (numerics .dat format)
-   * \param vi the problem to print out
-   * \param file the dest file
-   * \return ok if successfull
+   *
+   *  \param vi the problem to print out
+   *  \param file the dest file
+   *  \return ok if successfull
    */
   int variationalInequality_printInFile(VariationalInequality*  vi, FILE* file);
 
   /** read a VariationalInequalityProblem in a file (numerics .dat format)
-   * \param vi the problem to read
-   * \param file the target file
-   * \return ok if successfull
+   *
+   *  \param vi the problem to read
+   *  \param file the target file
+   *  \return ok if successfull
    */
   int variationalInequality_newFromFile(VariationalInequality*  vi, FILE* file);
 
   /** free a VariationalInequalityProblem
-   * \param vi the problem to free
+   *
+   *  \param vi the problem to free
    */
   void freeVariationalInequalityProblem(VariationalInequality* vi);
 
   /** Clear VariationalInequality structure: set all pointeurs to NULL, double and int to 0.
-   * \param vi the problem to clear
+   *  \param vi the problem to clear
    */
   void variationalInequality_clear(VariationalInequality* vi);
 
   /** new VariationalInequality problem
-    * \param size size of the ambient space for the VI
-    * \return a initialized VariationalInequality struct
-    */
+   *
+   *  \param size size of the ambient space for the VI
+   *  \return a initialized VariationalInequality struct
+   */
   VariationalInequality* variationalInequality_new(int size);
 
   /** new VariationalInequality problem
-    * \return an empty VI
-    */
+   *
+   *  \return an empty VI
+   */
   VariationalInequality* newVI(void);
 
   /** get the environment from the struct
-   * \param vi a VariationalInequality problem
-   * \return the environment from the struct
+   *
+   *  \param vi a VariationalInequality problem
+   *  \return the environment from the struct
    */
   static inline void* VI_get_env(void* vi)
   {

@@ -23,21 +23,22 @@
 
 #include "LagrangianR.hpp"
 
-/**  Lagrangian Linear Relation.
+/** 
+    Lagrangian Linear Relation.
 
-Lagrangian Relation with:
-
-\f$y= Cq + e + Fz\f$
-
-\f$ p = C^t \lambda \f$
-
-C is the only required input to built a LagrangianLinearTIR.
-
- */
+    Lagrangian Relation with:
+    
+    \f$ y= Cq + e + Fz \f$ 
+    
+    \f$ p = C^t \lambda \f$
+    
+    C is the only required input to built a LagrangianLinearTIR.
+    
+*/
 class LagrangianLinearTIR : public LagrangianR {
 
 protected:
-  /* serialization hooks */
+
   ACCEPT_SERIALIZATION(LagrangianLinearTIR);
 
   /** F matrix, coefficient of z */
@@ -52,11 +53,13 @@ public:
   LagrangianLinearTIR() : LagrangianR(RELATION::LinearTIR){};
 
   /** create the Relation from a set of data
+   *
    *  \param C the matrix C
    */
   LagrangianLinearTIR(SP::SimpleMatrix C);
 
   /** create the Relation from a set of data
+   *
    *  \param C the matrix C
    *  \param F the matrix F
    *  \param e the vector e
@@ -65,6 +68,7 @@ public:
                       SP::SiconosVector e);
 
   /** create the Relation from a set of data
+   *
    *  \param C the matrix C
    *  \param e the vector e
    */
@@ -75,12 +79,14 @@ public:
   virtual ~LagrangianLinearTIR() noexcept = default;
 
   /** check sizes of the relation specific operators.
-   * \param inter an Interaction using this relation
+   *
+   *  \param inter an Interaction using this relation
    */
   void checkSize(Interaction &inter) override;
   ;
 
   /** default function to compute y
+   *
    *  \param time not used
    *  \param inter the Interaction we want to update
    *  \param derivativeNumber the derivative of y we want to compute
@@ -90,22 +96,24 @@ public:
   ;
 
   /** default function to compute r
+   *
    *  \param time not used
    *  \param inter the Interaction we want to update
    *  \param level the derivative of lambda we want to compute
    */
   void computeInput(double time, Interaction &inter,
                     unsigned int level = 0) override;
-  ;
 
-  /* compute all the H Jacobian
+  /** compute all the H Jacobian
+   *
    *  \param time not used
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
   void computeJach(double time, Interaction &inter) override {}
 
-  /* compute all the G Jacobian
+  /** compute all the G Jacobian
+   *
    *  \param time not used
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
@@ -115,8 +123,7 @@ public:
   // GETTERS/SETTERS
 
   // -- C --
-  /** get C
-   *  \return pointer on a plugged matrix
+  /** \return pointer on a plugged matrix
    */
   inline SP::SimpleMatrix C() const override
   {
@@ -124,56 +131,52 @@ public:
   }
 
   /** set C to pointer newPtr
+   *
    *  \param newPtr a SP to plugged matrix
    */
   inline void setCPtr(SP::SimpleMatrix newPtr) { _jachq = newPtr; }
 
   // -- D --
 
-  /** get D
-   *  \return pointer on a plugged matrix
+  /** \return pointer on a plugged matrix
    */
   inline SP::SimpleMatrix D() const { return _jachlambda; }
 
   /** set D to pointer newPtr
-   * \param newPtr a SP to plugged matrix
+   *
+   *  \param newPtr a SP to plugged matrix
    */
   inline void setDPtr(SP::SimpleMatrix newPtr) { _jachlambda = newPtr; }
 
   // -- F --
 
-  /** get F
-   *  \return pointer on a plugged matrix
+  /** \return pointer on a plugged matrix
    */
   inline SP::SimpleMatrix F() const { return _F; }
 
   /** set F to pointer newPtr
-   * \param newPtr a SP to plugged matrix
+   *
+   *  \param newPtr a SP to plugged matrix
    */
   inline void setFPtr(SP::SimpleMatrix newPtr) { _F = newPtr; }
 
   // -- e --
 
-  /** get e
-   *  \return pointer on a plugged vector
+  /** \return pointer on a plugged vector
    */
   inline SP::SiconosVector e() const { return _e; }
 
   /** set e to pointer newPtr
+   *
    *  \param newPtr a SP to plugged vector
    */
   inline void setEPtr(SP::SiconosVector newPtr) { _e = newPtr; }
-
-  /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SimpleMatrix
-   */
 
   /** print the data to the screen
    */
   void display() const override;
 
-  /**
-   * \return true if the relation is linear.
+  /** \return true if the relation is linear.
    */
 
   bool isLinear() override // final would be better but swig does not like it

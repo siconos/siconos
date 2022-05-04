@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-/*! \file debug.h
+/*! \file siconos_debug.h
   \brief Some debug facilities
 */
 

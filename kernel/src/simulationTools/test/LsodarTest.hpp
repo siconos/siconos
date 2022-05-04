@@ -34,8 +34,7 @@ class LsodarTest : public CppUnit::TestFixture
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(LsodarTest);
 
 

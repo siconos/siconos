@@ -19,18 +19,7 @@ if(NOT WITH_CXX)
   list(REMOVE_ITEM ${COMPONENT}_SWIG_DEFS "-dirvtable")
 endif()
 
-if(WITH_FCLIB)
-  list(APPEND ${COMPONENT}_PYTHON_MODULES "./fclib")
-  # if(NOT FCLib_FCLIB_HEADER_ONLY)
-  #   list(APPEND CMAKE_SWIG_FLAGS "-DFCLIB_NOT_HEADER_ONLY")
-  # endif()
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
-    set_property(SOURCE fclib.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
-  else() #USE_TARGET_INCLUDE property is not available in old cmake versions.
-    find_package(FCLIB 3.0.0 CONFIG REQUIRED)
-    list(APPEND CMAKE_SWIG_FLAGS "-I${FCLIB_INCLUDE_DIR}")
-  endif()
-else()
+if(NOT WITH_FCLIB)
   list(APPEND python_excluded_tests tests/test_fclib.py)
 endif()
 
@@ -96,3 +85,7 @@ if(WITH_TESTING)
     EXCLUDE ${python_excluded_tests}
     DEPS externals)
 endif()
+
+#if(WITH_DOXY2SWIG)
+#add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
+#endif()

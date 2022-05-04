@@ -17,7 +17,7 @@
 */
 
 /*! \file DynamicalSystem.hpp
-  \brief Abstract class - General interface for all Dynamical Systems.
+  Abstract class - General interface for all Dynamical Systems.
 */
 
 #ifndef DynamicalSystem_H
@@ -38,32 +38,34 @@
 #include "SiconosVisitor.hpp"
 
 #include <iostream>
-/** Abstract interface to Dynamical Systems
+/** 
 
-This class is used to describe dynamical systems of the form :
+    Abstract interface to Dynamical Systems
 
-\f$ g(\dot x, x, t, z) = 0\f$
-
-where
-
-- \f$ x \in R^{n} \f$ is the state.
-- \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
-  variables, some sort of discret state.  For example, z may be used
-  to set some perturbation parameters, to control the system (z
-  set by actuators) and so on.
-- \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
-
-By default, the DynamicalSystem is considered to be an Initial Value
-Problem (IVP) and the initial conditions are given by
-
-\f$x(t_0)=x_0\f$
-
-Under some specific conditions, the system can be written as:
-
-\f$\dot x = rhs(x, t, z)\f$
-
-In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
-
+    This class is used to describe dynamical systems of the form :
+    
+    \f$ g(\dot x, x, t, z) = 0 \f$
+    
+    where
+    
+    - \f$ x \in R^{n} \f$ is the state.
+    - \f$ z \in R^{zSize} \f$ is a vector of arbitrary algebraic
+    variables, some sort of discret state.  For example, z may be used
+    to set some perturbation parameters, to control the system (z
+    set by actuators) and so on.
+    - \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
+    
+    By default, the DynamicalSystem is considered to be an Initial Value
+    Problem (IVP) and the initial conditions are given by
+    
+    \f$ x(t_0)=x_0 \f$
+    
+    Under some specific conditions, the system can be written as:
+    
+    \f$ \dot x = rhs(x, t, z) \f$
+    
+    In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
+    
 */
 
 class DynamicalSystem
@@ -76,7 +78,6 @@ public:
   enum DSWorkVectorId {local_buffer, freeresidu, free, acce_memory, acce_like, sizeWorkV};
 
 private:
-  /* serialization hooks */
   ACCEPT_SERIALIZATION(DynamicalSystem);
 
   /** used to set ds number */
@@ -93,7 +94,7 @@ protected:
   /** initial state of the system */
   SP::SiconosVector _x0;
 
-  /** the input vector due to the non-smooth law \f$ r \in R^{n}\f$
+  /** the input vector due to the non-smooth law \f$ r \in R^{n} \f$
    * (multiplier, force, ...)
    * \remark V.A. 17/09/2011 :
    * This should be a VectorOfVectors as for _x when higher relative degree
@@ -102,7 +103,7 @@ protected:
   SP::SiconosVector _r;
 
   /** state of the system,
-   *  \f$  x \in R^{n}\f$ - With _x[0]=\f$ x \f$ , _x[1]= \f$ \dot{x} \f$ . */
+   *  \f$  x \in R^{n} \f$ - With _x[0]= \f$ x \f$ , _x[1]= \f$ \dot{x} \f$ . */
   VectorOfVectors _x;
 
   /** jacobian according to x of the right-hand side (\f$ rhs = \dot x =
@@ -150,30 +151,32 @@ public:
   /** destructor */
   virtual ~DynamicalSystem() {};
 
-  /*! @name Right-hand side computation */
-  //@{
-
   /** allocate (if needed)  and compute rhs and its jacobian.
-   * \param time of initialization
+   *
+   *  \param time of initialization
    */
   virtual void initRhs(double time) = 0 ;
 
   /** set nonsmooth input to zero
+   *
    *  \param level input-level to be initialized.
    */
   virtual void initializeNonSmoothInput(unsigned int level) = 0;
 
   /** compute all component of the dynamical system, for the current state.
+   *
    *  \param time current time (the one used to update ds component)
    */
   void update(double time);
 
   /** update right-hand side for the current state
+   *
    *  \param time of interest
    */
   virtual void computeRhs(double time) = 0;
 
-  /** update \f$\nabla_x rhs\f$ for the current state
+  /** update \f$ \nabla_x rhs \f$ for the current state
+   *
    *  \param time of interest
    */
   virtual void computeJacobianRhsx(double time) = 0;
@@ -182,21 +185,10 @@ public:
   virtual void resetAllNonSmoothParts() = 0;
 
   /** set nonsmooth part of the rhs to zero for a given level
-   * \param level
+   *
+   *  \param level
    */
   virtual void resetNonSmoothPart(unsigned int level) = 0;
-
-  ///@}
-
-  /*! @name Attributes access
-
-    For each 'Member' : \n
-    - Member() returns a pointer to the object
-    - getMember() a copy of the object
-    - setMember() set the content of Member with a copy
-    - setMemberPtr() set a pointer link to Member
-
-    @{ */
 
   /** returns the id of the dynamical system */
   inline size_t number() const
@@ -205,6 +197,7 @@ public:
   }
 
   /** set the id of the DynamicalSystem
+   *
    *  \return the previous value of number
    */
   inline size_t setNumber(size_t new_number)
@@ -220,7 +213,8 @@ public:
     return _n;
   }
 
-  /** returns the dimension of the system 
+  /** 
+      returns the dimension of the system 
       (depends on system type, e.g. n for first order,
       ndof for Lagrangian).
    */
@@ -242,16 +236,19 @@ public:
   }
 
   /** set initial state (copy)
+   *
    *  \param newValue input vector to copy
    */
   void setX0(const SiconosVector& newValue);
 
   /** set initial state (pointer link)
+   *
    *  \param newPtr vector (pointer) to set x0
    */
   void setX0Ptr(SP::SiconosVector newPtr);
 
   /** returns a pointer to the state vector \f$ x \f$
+   *
    *  \return SP::SiconosVector
    */
   inline SP::SiconosVector x() const
@@ -260,7 +257,8 @@ public:
   }
  
   /** get a copy of the current state vector \f$ x \f$
-   * \return SiconosVector
+   *
+   *  \return SiconosVector
    */
   inline const SiconosVector& getx() const
   {
@@ -268,16 +266,19 @@ public:
   }
 
   /** set content of current state vector \f$ x \f$
+   *
    *  \param newValue SiconosVector 
    */
   void setX(const SiconosVector& newValue);
 
   /** set state vector \f$ x \f$ (pointer link)
+   *
    *  \param newPtr SP::SiconosVector 
    */
   void setXPtr(SP::SiconosVector newPtr);
 
   /** returns a pointer to r vector (input due to nonsmooth behavior)
+   *
    *  \return SP::SiconosVector
    */
   inline SP::SiconosVector r() const
@@ -286,6 +287,7 @@ public:
   }
 
   /** get a copy of r vector (input due to nonsmooth behavior)
+   *
    *  \return a SiconosVector
    */
   inline const SiconosVector getR() const
@@ -294,16 +296,19 @@ public:
   }
 
   /** set r vector (input due to nonsmooth behavior) content (copy)
+   *
    *  \param newValue SiconosVector 
    */
   void setR(const SiconosVector& newValue );
 
   /** set r vector (input due to nonsmooth behavior) (pointer link)
+   *
    *  \param newPtr SP::SiconosVector newPtr
    */
   void setRPtr(SP::SiconosVector newPtr);
 
   /** returns a pointer to the right-hand side vector, (i.e. \f$ \dot x \f$)
+   *
    *  \return SP::SiconosVector
    */
   inline SP::SiconosVector rhs() const
@@ -312,6 +317,7 @@ public:
   }
 
   /** get a copy of the right-hand side vector, (i.e. \f$ \dot x \f$)
+   *
    *  \return SiconosVector
    */
   inline SiconosVector& getRhs() const
@@ -320,16 +326,19 @@ public:
   }
 
   /** set the value of the right-hand side, \f$ \dot x \f$
+   *
    *  \param newValue SiconosVector
    */
   virtual void setRhs(const SiconosVector& newValue);
 
   /** set right-hand side, \f$ \dot x \f$ (pointer link)
+   *
    *  \param newPtr SP::SiconosVector
    */
   virtual void setRhsPtr(SP::SiconosVector newPtr);
 
-  /** returns a pointer to \f$\nabla_x rhs()\f$
+  /** returns a pointer to \f$ \nabla_x rhs()\f$
+   *
    *  \return SP::SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianRhsx() const
@@ -337,17 +346,20 @@ public:
     return _jacxRhs;
   }
 
-  /** set the value of \f$\nabla_x rhs()\f$$
+  /** set the value of \f$ \nabla_x rhs() \f$
+   *
    *  \param newValue SiconosMatrix
    */
   void setJacobianRhsx(const SiconosMatrix& newValue);
 
-  /** set \f$\nabla_x rhs()\f$, pointer link
+  /** set \f$ \nabla_x rhs() \f$, pointer link
+   *
    *  \param newPtr SP::SiconosMatrix  
    */
   void setJacobianRhsxPtr(SP::SiconosMatrix newPtr);
 
   /** returns a pointer to \f$ z \f$, the vector of algebraic parameters.
+   *
    *  \return SP::SiconosVector
    */
   inline SP::SiconosVector z() const
@@ -356,7 +368,8 @@ public:
   }
 
   /** get a copy of \f$ z \f$, the vector of algebraic parameters.
-   * \return a SiconosVector
+   *
+   *  \return a SiconosVector
    */
   inline const SiconosVector& getz() const
   {
@@ -364,22 +377,20 @@ public:
   }
 
   /** set the value of \f$ z \f$ (copy)
+   *
    *  \param newValue SiconosVector 
    */
   void setz(const SiconosVector& newValue) ;
 
   /** set \f$ z \f$ (pointer link)
+   *
    *  \param newPtr SP::SiconosVector 
    */
   void setzPtr(SP::SiconosVector newPtr);
 
-  /** @} end of members access group. */
-
-  /*! @name Memory vectors management  */
-  //@{
-
   /** get all the values of the state vector x stored in a SiconosMemory object
-   * (not const due to LinearSMC::actuate)
+   *  (not const due to LinearSMC::actuate)
+   *
    *  \return a reference to the SiconosMemory object
    */
   inline SiconosMemory& xMemory()
@@ -388,6 +399,7 @@ public:
   }
 
   /** get all the values of the state vector x stored in a SiconosMemory object
+   *
    *  \return a const reference to the SiconosMemory object
    */
   inline const SiconosMemory& xMemory() const
@@ -396,6 +408,7 @@ public:
   }
 
   /** returns the number of step saved in memory for state vector
+   *
    *  \return int
    */
   inline unsigned int stepsInMemory() const
@@ -404,6 +417,7 @@ public:
   }
   
   /** set number of steps to be saved
+   *
    *  \param steps
    */
   inline void setStepsInMemory(unsigned int steps)
@@ -412,6 +426,7 @@ public:
   }
   
   /** initialize the SiconosMemory objects: reserve memory for i vectors in memory and reset all to zero.
+   *
    *  \param steps the size of the SiconosMemory (i)
    */
   virtual void initMemory(unsigned int steps);
@@ -421,21 +436,14 @@ public:
    */
   virtual void swapInMemory() = 0;
 
-  //@}
-
-  /*! @name Plugins management  */
-  //@{ 
   /** call all plugged functions for the current state
-   * \param time  the current time
+   *
+   *  \param time  the current time
    */
   virtual void updatePlugins(double time) = 0;
   
-  ///@}
-
-  /*! @name Miscellaneous public methods */
-  //@{
-
   /** reset the global DynamicSystem counter (for ids)
+   *
    *  \return the previous value of count
    */
   static inline size_t resetCount(size_t new_count=0)
@@ -448,8 +456,7 @@ public:
   /** reset the state x() to the initial state x0 */
   virtual void resetToInitialState() = 0;
   
-  /** True if the system is linear.
-   * \return a boolean
+  /** \return true if the system is linear
    */
   virtual bool isLinear()
   {
@@ -460,9 +467,6 @@ public:
    */
   virtual void display(bool brief = true) const = 0;
 
-  ///@}
-
-  //visitors hook
   VIRTUAL_ACCEPT_VISITORS(DynamicalSystem);
   
 };

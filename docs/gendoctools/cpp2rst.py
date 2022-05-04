@@ -41,6 +41,15 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
+components_docs = {
+    'externals' : 'API or tools related to external software libraries used by Siconos.',
+    'numerics': 'a collection of low-level algorithms for solving basic algebra and optimization problem arising in the simulation of nonsmooth dynamical systems.',
+    'kernel': 'high-level API to modelise and simulate nonsmooth dynamical systems.',
+    'control': 'control toolbox',
+    'mechanics': 'toolbox for collision detection and joints',
+    'mechanisms': 'toolbox for collision detection and joints (legacy version, won’t be sustained in long term)',
+    'io': 'tools related to input/outputs (hdf5, vtk …)',
+    }
 
 def create_breathe_files(headers, srcdir, component_name,
                          sphinx_directory, doxygen_config_filename):
@@ -276,10 +285,10 @@ def autodoc_collect(outputname, files_list, all_index, component_name,
             name = f.stem
             if 'class' in name:
                 shorttitle = name.split('class')[-1]
-                text = '* :class:`' + shorttitle + '` : '
+                text = '* :cpp:class:`' + shorttitle + '` : '
             elif 'struct' in name:
                 shorttitle = name.split('struct')[-1]
-                text = '* :class:`' + shorttitle + '` : '
+                text = '* :cpp:class:`' + shorttitle + '` : '
             elif name.find('file_') > -1:
                 shorttitle = name.split('file_')[-1].replace('_', '.')
                 name = basename + name
@@ -360,22 +369,24 @@ def filter_comments(headername):
         return re.sub(pattern, replacer, text)
 
 
-def build_cpp_api_main(outputdir, rst_header, components):
+def build_cpp_api_main(outputdir, components):
     """Parse existing rst files (one for each class,
     + those for functions) generated for C++ API
     and collect them into  cpp_api.rst
     in sphinx/reference directory.
+
+    Call: make rst_api
 
     Parameters
     ----------
     outputdir : Path()
          sphinx directory which contains rst files
          generated for the api (e.g. by doxy2swig)
-    rst_header : string
-         text to put on top of the python_api file.
+    components : list
+         list of active siconos python modules
     """
 
-    mainrst_filename = Path(outputdir, 'cpp_api.rst')
+    mainrst_filename = Path(outputdir, 'index.rst')
     # list documented (cpp) packages
     docpp_dir = Path(outputdir, 'cpp')
     packages = [f for f in docpp_dir.glob('*')]
@@ -383,36 +394,48 @@ def build_cpp_api_main(outputdir, rst_header, components):
     # trick to print components in the expected order.
     packages = [p for p in components if p in packages]
     indent = 4 * ' '
-    class_diag = 'Class diagrams (UML view)'
-    class_diag += '\n' + len(class_diag) * '=' + '\n\n'
-    class_diag += ':doc:`/reference/class_diagrams`\n\n'
-
-    with open(mainrst_filename, 'w') as f:
-        label = '.. _siconos_cpp_reference:\n\n\n'
+    
+    with open(mainrst_filename, 'a') as f:
+        # label = '.. _siconos_cpp_reference:\n\n\n'
         title = 'Siconos C/C++ API reference'
         title += '\n' + len(title) * '#' + '\n\n'
         title += 'This is the documentation of C/C++ interface to Siconos.\n\n\n'
-        f.write(label)
+        # f.write(label)
         f.write(title)
-        f.write(rst_header)
-        tab_directive = '.. csv-table::\n'
-        tab_directive += textwrap.indent(':widths: 60 40\n\n', indent)
-        column_titles = '**Classes and structs**, **Files**\n'
-        tab_directive += textwrap.indent(column_titles, indent)
+        header = '.. toctree::\n    :maxdepth:3\n\n'
+        f.write(header)
 
+        class_diag = 'Class diagrams (UML view)'
+        class_diag += ' </reference/class_diagrams>\n'
+        class_diag = textwrap.indent(class_diag, '    ')
         f.write(class_diag)
         for p in packages:
-            title = p.title() + ' component\n'
-            title += len(title) * '=' + '\n\n'
-            ppath = 'cpp/' + p
-            f.write(title)
-            pgm_listings = 'Check :ref:`' + p + '_pgm_listings`'
-            pgm_listings += ' for a complete list of headers for this component.'
-            f.write(pgm_listings + '\n\n')
-            #f.write(tab_directive)
-            directive = '.. include:: ' + ppath + '/autodoc_classes.rst'
-            directive += '\n'#','
-            directive += '.. include:: ' + ppath + '/autodoc_files.rst\n'
-            indent = ''
-            f.write(textwrap.indent(directive, indent))
-            f.write('\n')
+            # Create main autodoc file for the current component
+            write_cpp_component_autodoc(p, docpp_dir)
+            # And add it to the current toc
+            title = p.title() + ': ' + components_docs[p]
+            directive = title + ' <cpp/' + p + '/main_autodoc>\n'
+            directive = textwrap.indent(directive, '    ')
+            f.write(directive)
+        f.write('\n')
+
+
+def write_cpp_component_autodoc(component, sphinx_directory):
+    """Write main autodoc file for current component
+
+    """
+    outputname = Path(sphinx_directory, component, 'main_autodoc.rst')
+    with open(outputname, 'wt') as f:
+        title = component.title() + ' component C/C++ API documentation\n'
+        title += len(title) * '=' + '\n\n'
+        ppath = '/reference/cpp/' + component
+        f.write(title)
+        pgm_listings = 'Check :ref:`' + component + '_pgm_listings`'
+        pgm_listings += ' for a complete list of headers for this component.'
+        f.write(pgm_listings + '\n\n')
+        directive = '.. include:: ' + ppath + '/autodoc_classes.rst\n\n'
+        directive += '.. include:: ' + ppath + '/autodoc_files.rst\n'
+        indent = ''
+        f.write(textwrap.indent(directive, indent))
+        f.write('\n')
+      

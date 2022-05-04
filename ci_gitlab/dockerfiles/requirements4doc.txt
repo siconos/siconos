@@ -3,7 +3,7 @@ lxml
 pytest
 matplotlib
 h5py
-breathe<=4.18.2
+python-breathe
 sphinx-rtd-theme
 sphinxcontrib-bibtex
 sphinxcontrib-websupport

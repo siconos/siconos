@@ -20,7 +20,7 @@
 
 /*!\file fc3d_nonsmooth_Newton_FischerBurmeister.h
 
-  \brief Typedef and functions declarations related to Fischer-Burmeister
+  Typedef and functions declarations related to Fischer-Burmeister
   formulation for 3 dimension frictional contact problems in Local Coordinates.
 
   Subroutines used when the friction-contact 3D problem is written
@@ -55,12 +55,13 @@ extern "C"
                                              double* B);
 
   /** Nonsmooth Newton solver based on the Fischer--Burmeister function for the
-   * local (reduced) frictional contact problem in the dense form
-   * \param problem the problem to solve in dense or sparse block form
-   * \param reaction solution and initial guess for reaction
-   * \param velocity solution and initial guess for velocity
-   * \param info returned info
-   * \param options  the solver options
+   *  local (reduced) frictional contact problem in the dense form
+   *
+   *  \param problem the problem to solve in dense or sparse block form
+   *  \param reaction solution and initial guess for reaction
+   *  \param velocity solution and initial guess for velocity
+   *  \param info returned info
+   *  \param options  the solver options
    */
   void fc3d_nonsmooth_Newton_FischerBurmeister(
     FrictionContactProblem* problem,
@@ -70,8 +71,10 @@ extern "C"
     SolverOptions *options);
 
 
-  /** The Fischer & Burmeister function for several contacts.
+  /** 
+      The Fischer & Burmeister function for several contacts.
       On each contact, the specified Fischer Burmeister function in iparam[9] is called.
+      
       \param problemSize the number of contacts.
       \param computeACFun3x3 the block 3x3 Fischer & Burmeister function.
       \param reaction3D the reactions at each contact (size: 3 x problemSize)

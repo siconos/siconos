@@ -3,7 +3,7 @@
 
 %include start.i
 // generated docstrings from doxygen xml output
-%include control-docstrings.i
+ // %include control-docstrings.i
 
 #undef WITH_IO
 #undef WITH_SERIALIZATION

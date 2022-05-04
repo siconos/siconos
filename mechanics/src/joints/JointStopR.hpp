@@ -28,14 +28,13 @@
 #include <Tools.hpp>
 #include <SiconosVector.hpp>
 
-/** \class JointStopR
- *  \brief This class implements a stop on a DoF for any NewtonEulerJointR.
- */
+/**
+   This class implements a stop on a DoF for any NewtonEulerJointR.
+*/
 class JointStopR : public NewtonEulerR
 {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(JointStopR);
   JointStopR() : NewtonEulerR() {}
 
@@ -51,13 +50,13 @@ protected:
 public:
 
   /** Initialize a joint stop for a common case: a single axis with a
-   * single stop, either positive or negative. For use with
-   * NewtonImpactNSL. */
+   *  single stop, either positive or negative. For use with
+   *  NewtonImpactNSL. */
   JointStopR(SP::NewtonEulerJointR joint, double pos, bool dir,
              unsigned int axis=0);
 
   /** Initialize a multidimensional joint stop, e.g. the cone stop on
-   * a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
+   *  a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
   JointStopR(SP::NewtonEulerJointR joint, SP::SiconosVector pos,
              SP::SiconosVector dir, SP::UnsignedIntVector axes);
 
@@ -74,10 +73,12 @@ public:
              unsigned int axis=0);
 #endif
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
@@ -85,19 +86,19 @@ public:
 
   virtual unsigned int numberOfConstraints();
 
-  /* Return the joint axis number assigned to a stop index. */
+  /** Return the joint axis number assigned to a stop index. */
   unsigned int axis(unsigned int _index) { return _axis->at(_index); }
 
-  /* Return the joint position assigned to a stop index. */
+  /** Return the joint position assigned to a stop index. */
   double position(unsigned int _index) { return _pos->getValue(_index); }
 
-  /* Return the direction (1 or -1) assigned to a stop index. */
+  /** Return the direction (1 or -1) assigned to a stop index. */
   double direction(unsigned int _index) { return _dir->getValue(_index); }
 
-  /* Return the joint assigned to this joint stop relation. */
+  /** Return the joint assigned to this joint stop relation. */
   SP::NewtonEulerJointR joint() { return _joint; }
 
-  /* Return the number of joint axes indexed by this relation. */
+  /** Return the number of joint axes indexed by this relation. */
   unsigned int numberOfAxes() { return _axis->size(); }
 
   /** destructor

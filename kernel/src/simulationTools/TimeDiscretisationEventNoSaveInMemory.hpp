@@ -32,8 +32,7 @@ class TimeDiscretisationEventNoSaveInMemory : public Event
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(TimeDiscretisationEventNoSaveInMemory);
 
 

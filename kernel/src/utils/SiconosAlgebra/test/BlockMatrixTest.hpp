@@ -29,8 +29,7 @@ class BlockMatrixTest : public CppUnit::TestFixture
 
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(BlockMatrixTest);
 
 

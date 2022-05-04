@@ -17,7 +17,7 @@
  */
 
 /*! \file NonSmoothLaw.hpp
-        \brief Base (abstract) class for a nonsmooth law
+  Base (abstract) class for a nonsmooth law
 */
 
 #ifndef NSLAW_H
@@ -29,32 +29,33 @@
 #include "SiconosSerialization.hpp" // For ACCEPT_SERIALIZATION
 #include "SiconosVisitor.hpp"
 
-/** Non Smooth Laws (NSL) Base Class
- *
- * This class is the base class for all nonsmooth laws in Siconos.
- * A nonsmooth law characterize the (nonsmooth) relationship between 2
- * variables, usually designated by \f$y\f$ and \f$\lambda\f$. \f$y\f$ is most
- * of time seen as the "input" from DynamicalSystems and is given by a Relation
- * linked to this nonsmoothlaw. \f$\lambda\f$ is then the "output" and through
- * the same Relation is fed back to one or more DynamicalSystem.
- *
- * classical examples of nonsmooth law include:
- * - RelayNSL: \f$-y \in \mathcal{N}_{[-1,1]}(\lambda)\quad
- * \Longleftrightarrow\quad -\lambda \in \mbox{sgn} (y)\f$
- * - NormalConeNSL: given a polytope $K$, \f$-\lambda \in \partial
- * \sigma_{-K}(y)\quad\Longleftrightarrow\quad y\in\mathcal{N}_{-K}(-\lambda)\f$
- * - ComplementarityConditionNSL: \f$0\leq y \perp \lambda \geq 0\f$
- * - NewtonImpactNSL and NewtonImpactFrictionNSL for impact, without or with
- * friction
- * - MultipleImpactNSL for a multiple impact law
- * - MixedComplementarityConditionNSL
- *
- * The computation of both \f$y\f$ and \f$\lambda\f$ is carried on by a solver
- * in Numerics through a OneStepNSProblem object.
+/**
+   Non Smooth Laws (NSL) Base Class
+   
+   This class is the base class for all nonsmooth laws in Siconos.
+   A nonsmooth law characterize the (nonsmooth) relationship between 2
+   variables, usually designated by \f$ y \f$ and \f$ \lambda \f$. \f$ y \f$ is most
+   of time seen as the "input" from DynamicalSystems and is given by a Relation
+   linked to this nonsmoothlaw. \f$ \lambda \f$ is then the "output" and through
+   the same Relation is fed back to one or more DynamicalSystem.
+   
+   classical examples of nonsmooth law include:
+   - RelayNSL: \f$ -y \in \mathcal{N}_{[-1,1]}(\lambda)\quad
+   \Longleftrightarrow\quad -\lambda \in \mbox{sgn} (y) \f$
+   - NormalConeNSL: given a polytope \f$ K \f$, \f$ -\lambda \in \partial
+   \sigma_{-K}(y)\quad\Longleftrightarrow\quad y\in\mathcal{N}_{-K}(-\lambda) \f$
+   - ComplementarityConditionNSL: \f$ 0\leq y \perp \lambda \geq 0 \f$
+   - NewtonImpactNSL and NewtonImpactFrictionNSL for impact, without or with
+   friction
+   - MultipleImpactNSL for a multiple impact law
+   - MixedComplementarityConditionNSL
+   
+   The computation of both \f$ y \f$ and \f$ \lambda \f$ is carried on by a solver
+   in Numerics through a OneStepNSProblem object.
+
  */
 class NonSmoothLaw {
 protected:
-  // serialization hooks
   ACCEPT_SERIALIZATION(NonSmoothLaw);
 
   /** "size" of the NonSmoothLaw */
@@ -69,15 +70,17 @@ protected:
 
 public:
   /** basic constructor
-   * \param size the nonsmooth law size
+   *
+   *  \param size the nonsmooth law size
    */
   NonSmoothLaw(unsigned int size) : _size(size) {}
 
   /** destructor */
   virtual ~NonSmoothLaw() noexcept = default;
 
-  /** \return a boolean value which determines if the NS Law is verified.
-      Not implemented for the moment.
+  /**
+     \return a boolean value which determines if the NS Law is verified.
+     Not implemented for the moment.
   */
   virtual bool isVerified() const
   {
@@ -91,7 +94,6 @@ public:
   /** display the data of the NonSmoothLaw on the standard output */
   virtual void display() const = 0;
 
-  /// visitors hook
   VIRTUAL_ACCEPT_VISITORS(NonSmoothLaw);
 };
 #endif

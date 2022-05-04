@@ -40,10 +40,8 @@
 class BlockMatrix : public SiconosMatrix
 {
 private:
-  /** serialization hooks
-  */
-  ACCEPT_SERIALIZATION(BlockMatrix);
 
+  ACCEPT_SERIALIZATION(BlockMatrix);
 
   /** A container of pointers to SiconosMatrix
    */
@@ -472,8 +470,6 @@ public:
   void PLUForwardBackwardInPlace(SiconosVector &B) override;
   void Solve(SiconosVector &B) override;
   
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 
   friend class SimpleMatrix;

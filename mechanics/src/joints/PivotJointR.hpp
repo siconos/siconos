@@ -22,15 +22,13 @@
 
 #include "KneeJointR.hpp"
 
-/** \class PivotJointR
- * \brief This class implements a pivots joint between one or two Newton/Euler Dynamical system. - Inherits from KneeJointR
- *
- */
+/**
+   This class implements a pivots joint between one or two Newton/Euler Dynamical system. - Inherits from KneeJointR
+*/
 class PivotJointR : public KneeJointR
 {
 protected:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(PivotJointR);
 
   /*Axis coordonates*/
@@ -67,7 +65,8 @@ protected:
   double AscalA(double q2to1x, double q2to1y, double q2to1z);
 
   /** Return the normal of the angular DoF axis of rotation.
-   * \param axis must be 0 */
+   *
+   *  \param axis must be 0 */
   virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
                           bool absoluteRef=true);
 
@@ -78,6 +77,7 @@ public:
   PivotJointR();
 
   /** Constructor based on one or two dynamical systems, a point and an axis.
+   * 
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
    *            for absolute frame.
@@ -92,24 +92,25 @@ public:
               SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
 
   /** Initialize the joint constants based on the provided base positions.
-   * \param q1 A SiconosVector of size 7 indicating translation and
-   *           orientation in inertial coordinates.
-   * \param q2 An optional SiconosVector of size 7 indicating
-   *           translation and orientation; if null, the inertial
-   *           frame will be considered as the second base. */
+   *
+   *  \param q1 A SiconosVector of size 7 indicating translation and
+   *  orientation in inertial coordinates.
+   *  \param q2 An optional SiconosVector of size 7 indicating
+   *  translation and orientation; if null, the inertial
+   *  frame will be considered as the second base. */
   virtual void setBasePositions(SP::SiconosVector q1,
                                 SP::SiconosVector q2 = SP::SiconosVector());
 
-  /** destructor
-   */
   virtual ~PivotJointR() {};
 
   SP::SiconosVector A() { return _A; }
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
@@ -122,18 +123,24 @@ public:
                                SP::BlockVector q0, SimpleMatrix& jachq,
                                unsigned int axis);
 
-  /** Get the number of constraints defined in the joint
-      \return the number of constraints
+  /**
+     Get the number of constraints defined in the joint
+     
+     \return the number of constraints
    */
   virtual unsigned int numberOfConstraints() { return 5; }
 
-  /** Return the number of degrees of freedom of this joint.
-      \return the number of degrees of freedom (DoF)
+  /**
+     Return the number of degrees of freedom of this joint.
+     
+     \return the number of degrees of freedom (DoF)
    */
   virtual unsigned int numberOfDoF() { return 1; }
 
-  /** Return the type of a degree of freedom of this joint.
-      \return the type of the degree of freedom (DoF)
+  /**
+     Return the type of a degree of freedom of this joint.
+     
+     \return the type of the degree of freedom (DoF)
   */
   virtual DoF_Type typeOfDoF(unsigned int axis) {
     if (axis==0) return DOF_TYPE_ANGULAR;

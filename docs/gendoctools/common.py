@@ -257,3 +257,5 @@ def replace_latex(inoutfile, latex_sources):
         for line in source_lines:
             f.write(line)
     shutil.move(target, inoutfile)
+
+

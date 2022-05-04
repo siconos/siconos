@@ -156,6 +156,9 @@ endif()
 # enabled options.
 add_subdirectory(docs)
 
+if(WITH_FCLIB)
+  include(fclib_setup)
+endif()
 # ========= Setup each required component =========
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")

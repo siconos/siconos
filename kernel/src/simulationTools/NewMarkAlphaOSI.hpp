@@ -38,8 +38,7 @@
  */
 class NewMarkAlphaOSI : public OneStepIntegrator {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(NewMarkAlphaOSI);
   /** Parameters of the numerical scheme:  beta, gamma, alpha_m, alpha_f */
   double _beta, _gamma, _alpha_m, _alpha_f;

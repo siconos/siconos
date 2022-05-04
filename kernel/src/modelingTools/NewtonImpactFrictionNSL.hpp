@@ -30,8 +30,6 @@
 class NewtonImpactFrictionNSL : public NonSmoothLaw {
 
 private:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(NewtonImpactFrictionNSL);
 
   /** The Newton coefficient of restitution
@@ -47,11 +45,13 @@ private:
 
 public:
   /** basic constructor
+   *
    *  \param size size of the ns law
    */
   NewtonImpactFrictionNSL(unsigned int size);
 
   /** constructor with the value of the NewtonImpactFrictionNSL attributes
+   *
    *  \param en double : normal e coefficient
    *  \param et double : tangent e coefficient
    *  \param mu double : friction coefficient
@@ -63,39 +63,40 @@ public:
   ~NewtonImpactFrictionNSL();
 
   /** check the ns law to see if it is verified
+   *
    *  \return a boolean value whioch determines if the NS Law is verified
    */
   bool isVerified(void) const override;
 
   // GETTERS/SETTERS
 
-  /** getter of en
-   *  \return the value of en
+  /** \return the value of en
    */
   inline double en() const { return _en; };
 
   /** setter of en
+   *
    *  \param newVal a double to set en
    */
   inline void setEn(double newVal) { _en = newVal; };
 
-  /** getter of et
-   *  \return the value of et
+  /** \return the value of et
    */
   inline double et() const { return _et; };
 
   /** setter of et
-   * \param newVal a double to set et
+   *
+   *  \param newVal a double to set et
    */
   inline void setEt(double newVal) { _et = newVal; };
 
-  /** getter of mu
-   * \return the value of mu
+  /** \return the value of mu
    */
   inline double mu() const { return _mu; };
 
   /** setter of mu
-   * \param newVal a double to set mu
+   *
+   *  \param newVal a double to set mu
    */
   inline void setMu(double newVal) { _mu = newVal; };
 
@@ -105,8 +106,6 @@ public:
    */
   void display() const override;
 
-  /** Visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 DEFINE_SPTR(NewtonImpactFrictionNSL)

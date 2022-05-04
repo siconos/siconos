@@ -28,31 +28,30 @@
 #include <RelayProblem.h>
 TYPEDEF_SPTR(RelayProblem)
 
-/** Formalization and Resolution of a Linear Complementarity Problem (Relay)
+/**
+   Formalization and Resolution of a Linear Complementarity Problem (Relay)
 
-  \section Relayintro Aim of the Relay class
+   This class is devoted to the formalization and the resolution of the
+   Relay NonSmooth problems.
 
-  This class is devoted to the formalization and the resolution of the
-  Relay NonSmooth problems.
-  \f[
-  w =  q + M z
-  \f]
-  \f[
-  w \geq 0, z \geq 0,  z^{T} w =0
-  \f]
-  where
-     - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
-     - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
-
-  \todo : add "recover" function to start from old values of z and w.
-  \todo : review this introduction ...
+   \f[
+   w =  q + M z
+   \f]
+   \f[
+   w \geq 0, z \geq 0,  z^{T} w =0
+   \f]
+   where
+   - \f$ w \in R^{n} \f$  and \f$ z \in R^{n} \f$ are the unknowns,
+   - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
+   
+   \todo : add "recover" function to start from old values of z and w.
+   \todo : review this introduction ...
 */
 class Relay : public LinearOSNS
 {
 
 protected:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(Relay);
 
 
@@ -76,16 +75,15 @@ protected:
 public:
 
   /** constructor from numerics solver id
+   *
    *  \param numericsSolverId id of numerics solver, default =  SICONOS_RELAY_AVI_CAOFERRIS
    */
   Relay(int numericsSolverId = SICONOS_RELAY_AVI_CAOFERRIS);
 
-  /**  constructor from a pre-defined solver options set.
-       \param options, the options set,
-       \rst
-       see :ref:`problems_and_solvers` for details.
-       \endrst
-  */
+  /** constructor from a pre-defined solver options set
+   *
+   *  \param options the options set
+   */
   Relay(SP::SolverOptions options);
 
   /** destructor
@@ -94,6 +92,7 @@ public:
 
   // --- lb ---
   /** get the value of lb, the   lower bounds of the Relay system
+   *
    *  \return the vector of lower bounds
    */
   inline const SiconosVector& getLb() const
@@ -102,6 +101,7 @@ public:
   }
 
   /** get lb, the lower bounds of the Relay system
+   *
    *  \return the vector of lower bounds
    */
   inline SP::SiconosVector lb() const
@@ -110,6 +110,7 @@ public:
   }
 
   /** set lb to pointer newPtr
+   *
    *  \param newLb new lower bound
    */
   inline void setLb(SP::SiconosVector newLb)
@@ -120,6 +121,7 @@ public:
 
   // --- ub ---
   /** get the value of ub, the  upper bounds of the Relay system
+   *
    *  \return the vector of upper bounds
    */
   inline const SiconosVector& getUb() const
@@ -128,6 +130,7 @@ public:
   }
 
   /** get lb, the lower bounds of the Relay system
+   *
    *  \return the vector of upper bounds
    */
   inline SP::SiconosVector ub() const
@@ -136,6 +139,7 @@ public:
   }
 
   /** set ub to pointer newPtr
+   *
    *  \param newUb new upper bound
    */
   inline void setUb(SP::SiconosVector newUb)
@@ -146,12 +150,13 @@ public:
   void initialize(SP::Simulation sim);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
+   *
    *  \param time current time
    *  \return information about the solver convergence.
    */
   int compute(double time);
 
-   /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  /** Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
 
 

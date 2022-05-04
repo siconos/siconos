@@ -23,23 +23,18 @@
 
 #include "TimeStepping.hpp"
 
-/** \class TimeSteppingDirectProjection
- *  \brief Time-Stepping scheme with a direct projection onto the constraint
- *  thanks to the GGL augmentation of the system
- *
- *  For details, have a look on
- *   Projected event-capturing time-stepping schemes for nonsmooth mechanical
- * systems with unilateral contact and Coulomb's friction Vincent Acary Computer
- * Methods in Applied Mechanics and Engineering, Elsevier, 2013, 256, pp.
- * 224-250
- *
- *
- *
- */
+/**
+   Time-Stepping scheme with a direct projection onto the constraint
+   thanks to the GGL augmentation of the system
+   
+   For details, have a look on
+   Projected event-capturing time-stepping schemes for nonsmooth mechanical
+   systems with unilateral contact and Coulomb's friction Vincent Acary Computer
+   Methods in Applied Mechanics and Engineering, Elsevier, 2013, 256, pp.
+   224-250
+*/
 class TimeSteppingDirectProjection : public TimeStepping {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(TimeSteppingDirectProjection);
 
   /** level of IndexSet on which we project (default =1 (activated contact))
@@ -79,13 +74,14 @@ protected:
 
 public:
   /** Constructor with the time-discretisation.
-   * \param nsds the nsds that we want to simulate
+   * 
+   *  \param nsds the nsds that we want to simulate
    *  \param td a pointer to a timeDiscretisation (linked to the model
-   *     that owns this simulation)
+   *  that owns this simulation)
    *  \param osi a one step integrator
    *  \param osnspb_velo a one step non smooth problem for the velocity
-   * formulation \param osnspb_pos a one step non smooth problem for the
-   * position formulation \param _level
+   *  formulation \param osnspb_pos a one step non smooth problem for the
+   *  position formulation \param _level
    */
   TimeSteppingDirectProjection(SP::NonSmoothDynamicalSystem nsds,
                                SP::TimeDiscretisation td,
@@ -104,8 +100,7 @@ public:
 
   void updateWorldFromDS() override {}
 
-  /** get the Number of iteration of projection
-      \return _nbProjectionIteration
+  /** \return the Number of iteration of projection
    */
   inline unsigned int nbProjectionIteration() { return _nbProjectionIteration; }
 
@@ -128,20 +123,14 @@ public:
   inline void setDoProj(unsigned int v) { _doProj = v; }
   inline void setDoOnlyProj(unsigned int v) { _doOnlyProj = v; }
 
-  /**
-   */
   void advanceToEvent() override;
 
   void nextStep() override;
 
-  /*
-   */
   void computeCriteria(bool *runningProjection);
 
   void newtonSolve(double criterion, unsigned int maxStep) override;
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

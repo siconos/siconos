@@ -23,32 +23,27 @@
 
 #include "NonSmoothLaw.hpp"
 
-/** Newton impact Non Smooth Law
-
-  This class formalizes the Newton Impact law together with a complementarity
-  condition. i.e.
-
-  \rst
-
-  .. math::
-      :nowrap:
-
-      \left\{\begin{array}{l}
-      y \geq 0, \lambda \geq 0, y^{T} \lambda=0\\
-      if y \leq 0 \quad \mbox{then} \quad \\dot y(t^{+}) - e \\dot y(t^{-}) \geq
-  0, \quad  \lambda \geq 0, (\\dot y(t^{+}) - e \\dot y(t^{-}))^{T} \lambda=0
-      \end{array}\right.
-
-  \endrst
-
-  nsLawSize is equal to 1.
+/**
+   Newton impact Non Smooth Law
+   
+   This class formalizes the Newton Impact law together with a complementarity
+   condition. i.e.
+   
+   \f[
+   \left\{\begin{array}{l}
+   y \geq 0, \lambda \geq 0, y^{T} \lambda=0\				\
+   if y \leq 0 \quad \mbox{then} \quad \\dot y(t^{+}) - e \\dot y(t^{-}) \geq
+   0, \quad  \lambda \geq 0, (\\dot y(t^{+}) - e \\dot y(t^{-}))^{T} \lambda=0
+   \end{array}\right.
+   \f]
+   
+   
+   nsLawSize is equal to 1.
 
 */
 class NewtonImpactNSL : public NonSmoothLaw {
 
 private:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(NewtonImpactNSL);
 
   /** The Newton normal coefficient of restitution  */
@@ -60,6 +55,7 @@ public:
   NewtonImpactNSL();
 
   /** constructor with the value of the NewtonImpactNSL attributes
+   *
    *  \param e the value of the coefficient of restitution
    */
   NewtonImpactNSL(double e);
@@ -72,16 +68,17 @@ public:
   ~NewtonImpactNSL();
 
   /** check the ns law to see if it is verified
+   *
    *  \return a boolean value whioch determines if the NS Law is verified
    */
   bool isVerified() const override;
 
-  /** getter of e
-   *  \return the value of e
+  /** \return the value of e
    */
   inline double e() const { return _e; };
 
   /** setter of e
+   *
    *  \param newVal a double to set e
    */
   inline void setE(double newVal) { _e = newVal; };
@@ -90,8 +87,6 @@ public:
    */
   void display() const override;
 
-  /** Visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

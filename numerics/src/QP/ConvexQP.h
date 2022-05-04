@@ -53,43 +53,50 @@ extern "C"
 {
 #endif
   /** display a ConvexQPProblem
-   * \param cqp the problem to display
+   *
+   *  \param cqp the problem to display
    */
   void convexQP_display(ConvexQP*  cqp);
 
   /** print a ConvexQPProblem in a file (numerics .dat format)
-   * \param cqp the problem to print out
-   * \param file the dest file
-   * \return ok if successfull
+   *
+   *  \param cqp the problem to print out
+   *  \param file the dest file
+   *  \return ok if successfull
    */
   int convexQP_printInFile(ConvexQP*  cqp, FILE* file);
 
   /** read a ConvexQPProblem in a file (numerics .dat format)
-   * \param cqp the problem to read
-   * \param file the target file
-   * \return ok if successfull
+   *
+   *  \param cqp the problem to read
+   *  \param file the target file
+   *  \return ok if successfull
    */
   int convexQP_newFromFile(ConvexQP*  cqp, FILE* file);
 
   /** free a ConvexQPProblem
-   * \param cqp the problem to free
+   *
+   *  \param cqp the problem to free
    */
   void convexQP_free(ConvexQP* cqp);
 
   /** Clear ConvexQP structure: set all pointeurs to NULL, double and int to 0.
-   * \param cqp the problem to clear
+   *
+   *  \param cqp the problem to clear
    */
   void convexQP_clear(ConvexQP* cqp);
 
   /** new ConvexQP problem
-    * \param size size of the ambient space for the CQP
-    * \return a initialized ConvexQP struct
-    */
+   *
+   *  \param size size of the ambient space for the CQP
+   *  \return a initialized ConvexQP struct
+   */
   ConvexQP* convexQP_new(int size);
 
   /** get the environment from the struct
-   * \param cqp a ConvexQP problem
-   * \return the environment from the struct
+   *
+   *  \param cqp a ConvexQP problem
+   *  \return the environment from the struct
    */
   static inline void* convexQP_get_env(void* cqp)
   {

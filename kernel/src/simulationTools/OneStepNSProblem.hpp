@@ -27,21 +27,22 @@
 #include "SimulationTypeDef.hpp"
 #include "SimulationGraphs.hpp"
 
-/** Non Smooth Problem Formalization and Simulation
-
-  This is an abstract class, that provides an interface to define a
-  non smooth problem:
-  - a formulation (ie the way the problem is written)
-  - a solver (algorithm and solving formulation, that can be
-        different from problem formulation)
-  - routines to compute the problem solution.
-
-  Two types of problem formulation are available :
+/**
+   Non Smooth Problem Formalization and Simulation
+   
+   This is an abstract class, that provides an interface to define a
+   non smooth problem:
+   - a formulation (ie the way the problem is written)
+   - a solver (algorithm and solving formulation, that can be
+   different from problem formulation)
+   - routines to compute the problem solution.
+   
+   Two types of problem formulation are available :
    - Quadratic Problem
    - Linear Problem 
-
+   
    See derived classes (QP and LinearOSNS) for details. 
-
+   
    For Linear problems, the following formulations exists: 
    - Linear Complementarity (LCP)
    - Mixed Linear Complementarity (MLCP)
@@ -54,13 +55,14 @@
    - GlobalFrictionContact
 
    The usual way to build and initialize a one-step nonsmooth problem is :
+
    - call constructor with the id of the required Numerics solver.
    (see Solver class or Numerics documentation for details on algorithm name and parameters).
    - initialize(simulation)
    Initialize process is usually done through model->initialize(simulation). 
    See Examples for practical details.
 
-   \section osns_options Options for Numerics and the driver for solvers
+   Options for Numerics and the driver for solvers
 
    When the Numerics driver is called a set of solver options (name, tolerance, max. number of iterations ...)
    is required --> SolverOptions.
@@ -73,7 +75,6 @@ class OneStepNSProblem
 {
 
 protected:
-  /* serialization hooks */
   ACCEPT_SERIALIZATION(OneStepNSProblem);
 
   /** Numerics solver properties */
@@ -120,12 +121,10 @@ private:
   OneStepNSProblem& operator=(const OneStepNSProblem&) = delete;
 
 public:
-  /**  constructor from a pre-defined solver options set.
-       \param options, the options set,
-       \rst
-       see :ref:`problems_and_solvers` for details.
-       \endrst
-  */
+  /** constructor from a pre-defined solver options set.
+   *
+   *  \param options the options set
+   */
   OneStepNSProblem(SP::SolverOptions options): _numerics_solver_options(options){};
 
   /** destructor
@@ -136,6 +135,7 @@ public:
 
 
   /** To get the SolverOptions structure
+   *
    *  \return , the numerics structure used to save solver parameters
    */
   inline SP::SolverOptions numericsSolverOptions() const
@@ -151,6 +151,7 @@ public:
   }
 
   /** get the simulation which owns this nonsmooth problem
+   *
    *  \return a pointer on Simulation
    */
   inline SP::Simulation simulation() const
@@ -159,6 +160,7 @@ public:
   }
 
   /** set the Simulation of the OneStepNSProblem
+   *
    *  \param newS a pointer to Simulation
    */
   inline void setSimulationPtr(SP::Simulation newS)
@@ -167,6 +169,7 @@ public:
   }
 
   /** get indexSetLevel
+   *
    *  \return an unsigned int
    */
   inline unsigned int indexSetLevel() const
@@ -175,6 +178,7 @@ public:
   }
 
   /** set the value of level min
+   *
    *  \param newVal an unsigned int
    */
   inline void setIndexSetLevel(unsigned int newVal)
@@ -183,6 +187,7 @@ public:
   }
 
   /** get the Input/Output level
+   *
    *  \return an unsigned int
    */
   inline unsigned int inputOutputLevel() const
@@ -191,6 +196,7 @@ public:
   }
 
   /** set the value of Input/Output level
+   *
    *  \param newVal an unsigned int
    */
   inline void setInputOutputLevel(unsigned int newVal)
@@ -199,6 +205,7 @@ public:
   }
 
   /** get maximum value allowed for the dimension of the problem
+   *
    *  \return an unsigned int
    */
   inline unsigned int maxSize() const
@@ -207,6 +214,7 @@ public:
   }
 
   /** set the value of maxSize
+   *
    *  \param newVal an unsigned int
    */
   inline void setMaxSize(const unsigned int newVal)
@@ -221,7 +229,9 @@ public:
   /**  set the verbose level in numerics solver*/
   void setNumericsVerboseLevel(int level);
 
-  /** Check if the OSNSPb has interactions.
+  /** 
+      Check if the OSNSPb has interactions
+
       \return bool = true if the  osnsp has interactions, i.e. indexSet(_indexSetLevel)->size >0 
    */
   bool hasInteractions() const;
@@ -229,53 +239,60 @@ public:
   virtual void display() const {}
 
   /** Display the set of blocks for  a given indexSet
-   * \param  indexSet  the concerned index set
+   *
+   *  \param  indexSet  the concerned index set
    */
   virtual void displayBlocks(SP::InteractionsGraph indexSet);
 
   /** compute interactionBlocks if necessary (this depends on the type of
-   * OSNS, on the indexSets ...)
+   *  OSNS, on the indexSets ...)
    */
   virtual void updateInteractionBlocks();
 
   /** compute extra-diagonal interactionBlock-matrix
+   *
    *  \param ed an edge descriptor
    */
   virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor& ed ) = 0;
 
   /** compute diagonal Interaction block
-   * \param vd a vertex descriptor
+   *
+   *  \param vd a vertex descriptor
    */
   virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd) = 0;
 
-  /**
-   * \return bool _hasBeenUpdated
+  /** \return bool _hasBeenUpdated
    */
   bool hasBeenUpdated()
   {
     return _hasBeenUpdated;
   }
 
-  /** 
-   * \param v to set _hasBeenUpdated.
+  /** turn activation flag 
+   *
+   *  \param v to set _hasBeenUpdated.
    */
   void setHasBeenUpdated(bool v)
   {
     _hasBeenUpdated = v;
   }
 
-  /** initialize the problem(compute topology ...)
-      \param sim the simulation, owner of this OSNSPB
-    */
+  /**
+     initialize the problem (topology and so on)
+     
+     \param sim the simulation that owns this OSNSPB
+  */
   virtual void initialize(SP::Simulation sim);
 
   /** prepare data of the osns for solving
+   *
    *  \param time the current time
    *  \return true if the computation of the OSNS has to be carry on, false otherwise
    */
   virtual bool preCompute(double time) = 0;
 
   /** To run the solver for ns problem
+   *
    *  \param time  current time
    *  \return int information about the solver convergence.
    */
@@ -285,28 +302,25 @@ public:
    */
   virtual void postCompute() = 0;
 
-  /** change the solver type and its default parameters.
-
+  /** 
+      change the solver type and its default parameters
+      
       - clear memory for the existing options set
       - create and initialize a new one
-
-      \rst
-      Check the available solvers id in :ref:`problems_and_solvers`.
-      \endrst
-
-      \param solverId the new solver. 
+      
+      \param solverId the new solver 
    */
   void setSolverId(int solverId);
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
       (Ex: for MoreauJeanOSI, W)
+      
       \param osi the OSI of the concerned dynamical system
       \param ds the concerned dynamical system
-      \return the required matrix.
+      \return the required matrix
   */
   SP::SimpleMatrix getOSIMatrix(OneStepIntegrator& osi, SP::DynamicalSystem ds);
 
-  /* visitors hook */
   VIRTUAL_ACCEPT_VISITORS(OneStepNSProblem);
   
 };
