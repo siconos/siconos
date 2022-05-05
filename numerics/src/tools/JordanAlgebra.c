@@ -709,7 +709,7 @@ NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize, const
 }
 
 /* Returns a long double as the square root of determinant of a vector related to the Jordan product */
-float_type gammal(const double * const x, const size_t dimension)
+float_type ld_gammal(const double * const x, const size_t dimension)
 {
   float_type nxb, detx;
   nxb = dnrm2l(dimension-1, x+1);
@@ -738,15 +738,15 @@ NumericsMatrix* NTmat(const double* const x, const double* const z, const unsign
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
-    gamx = gammal(x+i, dimension);
-    gamz = gammal(z+i, dimension);
+    gamx = ld_gammal(x+i, dimension);
+    gamz = ld_gammal(z+i, dimension);
     w = sqrtl(gamz/gamx);
     t[0] = z[i]/w + w*x[i];
     for(unsigned int j = 1; j < dimension; ++j)
     {
       t[j] = z[i+j]/w - w*x[i+j];
     }
-    gamt = gammal(t, dimension);
+    gamt = ld_gammal(t, dimension);
     for(unsigned int j = 0; j < dimension; ++j)
     {
       t[j] = t[j]/gamt;
@@ -790,15 +790,15 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const uns
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
-    gamx = gammal(x+i, dimension);
-    gamz = gammal(z+i, dimension);
+    gamx = ld_gammal(x+i, dimension);
+    gamz = ld_gammal(z+i, dimension);
     w = sqrtl(gamz/gamx);
     t[0] = z[i]/w + w*x[i];
     for(unsigned int j = 1; j < dimension; ++j)
     {
       t[j] = z[i+j]/w - w*x[i+j];
     }
-    gamt = gammal(t, dimension);
+    gamt = ld_gammal(t, dimension);
     for(unsigned int j = 0; j < dimension; ++j)
     {
       t[j] = t[j]/gamt;
@@ -842,8 +842,8 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const uns
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
-    gamx = gammal(x+i, dimension);
-    gamz = gammal(z+i, dimension);
+    gamx = ld_gammal(x+i, dimension);
+    gamz = ld_gammal(z+i, dimension);
     w2 = gamz/gamx;
     w = sqrtl(w2);
     t[0] = z[i]/w + w*x[i];
@@ -851,7 +851,7 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const uns
     {
       t[j] = z[i+j]/w - w*x[i+j];
     }
-    gamt = gammal(t, dimension);
+    gamt = ld_gammal(t, dimension);
     for(unsigned int j = 0; j < dimension; ++j)
     {
       t[j] = t[j]/gamt;
