@@ -244,7 +244,7 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
 
     MHHT = NM_free(MHHT);
     HT = NM_free(HT);
-    
+
     DEBUG_EXPR(NM_display(B_for_MHHT->D1););
     DEBUG_EXPR(NM_display(B_for_MHHT->D2););
 
@@ -268,7 +268,7 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
       NM_triplet(data->B_for_H->D2)->x[i] = NM_triplet(B_for_MHHT->D2)->x[i+n]; //D2H
     }
 
-
+    B_for_MHHT = NM_BalancingMatrices_free(B_for_MHHT);
 
     /****** balanced problem          ***************************************/
     gfc3d_balancing_MHHT(rescaled_problem, data->B_for_M, data->B_for_H);
