@@ -47,18 +47,17 @@ typedef struct {
 /**
   Structure used to send options (name, parameters and so on) to a specific
   solver (mainly from Kernel to Numerics).
-  
-  \rst
+
   Creation, update and destruction:
   
-  :func:`solver_options_create`
+  - solver_options_create()
   
-  :func:`solver_options_update_internal`
+  - solver_options_update_internal()
   
-  :func:`solver_options_delete`
+  - solver_options_delete()
+
   
-  Details: :ref:`solver_options`
-  \endrst
+  Details in users'guide.
 
 */
 struct SolverOptions {

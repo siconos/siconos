@@ -632,7 +632,7 @@ extern "C"
      Copy a NumericsMatrix into another with dense storage.
      
      \param A source matrix (any kind of storage)
-      \param B targeted matrix, must be dense with the same dimension as A
+     \param B targeted matrix, must be dense with the same dimension as A
   */
   int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
 
@@ -640,10 +640,10 @@ extern "C"
      Screen display of the matrix content stored as a double * array in Fortran style
      
      \param m the matrix to be displayed
-      \param nRow the number of rows
-      \param nCol the number of columns
-      \param lDim the leading dimension of M
-   */
+     \param nRow the number of rows
+     \param nCol the number of columns
+     \param lDim the leading dimension of M
+  */
   void NM_dense_display_matlab(double * m, int nRow, int nCol, int lDim);
 
   /**

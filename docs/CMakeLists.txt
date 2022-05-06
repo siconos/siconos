@@ -21,16 +21,12 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
 # used to generate docstrings, rst files and so on.
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gendoctools/__init__.py.in ${CMAKE_BINARY_DIR}/share/gendoctools/__init__.py @ONLY)
 file(GLOB files_py RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gendoctools/*.py)
+
 foreach(fname IN LISTS files_py)
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/${fname}"
     "${CMAKE_BINARY_DIR}/share/${fname}" COPYONLY)
 endforeach()
-if(WITH_DOXY2SWIG)
-  configure_file(${CMAKE_SOURCE_DIR}/externals/swig/doxy2swig.py ${CMAKE_BINARY_DIR}/share/gendoctools/doxy2swig.py COPYONLY)
-endif()
-
-# configure_file(${CMAKE_CURRENT_SOURCE_DIR}/replace_py_escape.sh ${CMAKE_BINARY_DIR}/share/replace_py_escape.sh COPYONLY)
 
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
@@ -167,17 +163,17 @@ if(WITH_DOCUMENTATION)
   add_custom_command(TARGET html POST_BUILD
     COMMENT "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
   
-  # -- To build latex doc : make latex -- 
-  set(SPHINX_LATEX_PARAMETERS
-    -b latex # latex output
-    -d build/doctrees # path to doctree files
-    ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
-    )
-  
-  add_custom_target(latex
-    COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_LATEX_PARAMETERS}
-    ${CMAKE_CURRENT_BINARY_DIR}/build/latex
-    )
+  # -- To build latex doc : make latex --
+  # Outdated ... 
+  # set(SPHINX_LATEX_PARAMETERS
+  #   -b latex # latex output
+  #   -d build/doctrees # path to doctree files
+  #   ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
+  #   )
+  # add_custom_target(latex
+  #   COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_LATEX_PARAMETERS}
+  #   ${CMAKE_CURRENT_BINARY_DIR}/build/latex
+  #   )
 
   add_custom_target(doc DEPENDS html)
 

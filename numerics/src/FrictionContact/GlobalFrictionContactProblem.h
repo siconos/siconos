@@ -31,13 +31,6 @@
 
 /**
     The structure that defines a Friction-Contact (3D or 2D ) problem
-
-    \rst
-
-    Details in :ref:`global_fc_problem`.
-
-    \endrst
-
 */
 
 struct GlobalFrictionContactProblem {
@@ -60,7 +53,7 @@ struct GlobalFrictionContactProblem {
   /** norm-2 of b */
   double norm_b;
   /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction
-     coefficients
+      coefficients
       (\f$ n_c = \f$ numberOfContacts) */
   double *mu;
 
@@ -93,7 +86,7 @@ void globalFrictionContact_display(GlobalFrictionContactProblem *problem);
    Saves problem struct into a file.
 
    \param[in] problem structure
-   \param[in] file, file descriptor
+   \param[in] file file descriptor
    \return file status (1 if everything has worked properly)
 */
 int globalFrictionContact_printInFile(GlobalFrictionContactProblem *problem,
@@ -103,7 +96,7 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem *problem,
    Saves problem struct into a file.
 
    \param[in] problem structure
-   \param[in] filename, name of the input file
+   \param[in] filename name of the input file
    \return file status (1 if everything has worked properly)
 */
 int globalFrictionContact_printInFileName(GlobalFrictionContactProblem *problem,
@@ -128,7 +121,7 @@ globalFrictionContact_new_from_filename(const char *filename);
 /**
    Release memory for the problem structure
 
-   \param[inout] problem, global-Friction problem structure to be freed.
+   \param[inout] problem global-Friction problem structure to be freed
 */
 void globalFrictionContact_free(GlobalFrictionContactProblem *problem);
 

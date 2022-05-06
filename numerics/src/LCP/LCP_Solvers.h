@@ -344,9 +344,6 @@ extern "C"
   void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z);
 
   /** Computes error criterion and update \f$ w = Mz + q \f$.
-   *  \rst 
-   *  see :ref:`lcp_error`
-   *  \endrst 
    *
    *  \param[in] problem structure that represents the LCP (M, q...)
    *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.

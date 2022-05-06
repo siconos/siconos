@@ -27,7 +27,7 @@
 cmake_minimum_required(VERSION 3.14) 
 
 cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
-cmake_policy(SET CMP0078 OLD) # UseSWIG generates standard target names.
+#cmake_policy(SET CMP0078 NEW) # UseSWIG generates standard target names.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
 cmake_policy(SET CMP0079 NEW) # target_link_libraries() allows use with targets in other directories
 
@@ -159,6 +159,7 @@ add_subdirectory(docs)
 if(WITH_FCLIB)
   include(fclib_setup)
 endif()
+
 # ========= Setup each required component =========
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")

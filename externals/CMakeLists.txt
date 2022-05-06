@@ -124,11 +124,6 @@ include(WindowsExternalsSetup)
 include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
-# --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
-endif()
-  
 # - Extra setup for the component -
 if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
   target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})

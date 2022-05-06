@@ -11,6 +11,8 @@ include(WindowsSiconosSetup)
 # Siconos current version
 include(SiconosVersion)
 
+include(FetchContent)
+
 # -- Set include directories that are required by ALL components
 # and only those!
 # Other includes must be specified to individual targets only.

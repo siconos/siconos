@@ -83,7 +83,8 @@ extern "C"
    */
   void freeVariationalInequalityProblem(VariationalInequality* vi);
 
-  /** Clear VariationalInequality structure: set all pointeurs to NULL, double and int to 0.
+  /** Clear VariationalInequality structure: set all pointeurs to NULL, double and int to 0
+   *
    *  \param vi the problem to clear
    */
   void variationalInequality_clear(VariationalInequality* vi);

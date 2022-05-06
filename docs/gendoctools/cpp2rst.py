@@ -52,7 +52,7 @@ components_docs = {
     }
 
 def create_breathe_files(headers, srcdir, component_name,
-                         sphinx_directory, doxygen_config_filename):
+                         sphinx_directory, xml_output):
     """Create rst files for sphinx from xml (doxygen) outputs generated
        from headers.
 
@@ -67,8 +67,8 @@ def create_breathe_files(headers, srcdir, component_name,
          component (numerics, kernel, ...) of interest
     sphinx_directory : string
         root directory for sphinx rst files
-    doxygen_config_filename : string
-         name (full path) of the doxygen configuration file
+    xml_output : string
+         (full) path to the requested xml outputs 
 
     Notes:
     * for each header, rst files (class, struct, file and source codes)
@@ -87,7 +87,7 @@ def create_breathe_files(headers, srcdir, component_name,
     headers = bt.parse_cmake_list(headers)
     rst_files = []
     # Parse doxygen config (specific to the current component)
-    doxyconf = common.parse_doxygen_config(doxygen_config_filename)
+    #doxyconf = common.parse_doxygen_config(doxygen_config_filename)
     xmlconf = {}
     # Output path for cpp api documentation
     sphinx_directory = Path(sphinx_directory, 'reference',
@@ -96,10 +96,9 @@ def create_breathe_files(headers, srcdir, component_name,
         os.makedirs(sphinx_directory)
 
     # Check if doxygen doc is case-sensitive
-    xmlconf['CASE_SENSE_NAMES'] = doxyconf['CASE_SENSE_NAMES'].find('YES') > -1
+    xmlconf['CASE_SENSE_NAMES'] = True
     # Get xml files path
-    xmlconf['XML_OUTPUT'] = Path(doxyconf['OUTPUT_DIRECTORY'].lstrip(),
-                                 doxyconf['XML_OUTPUT'].lstrip())
+    xmlconf['XML_OUTPUT'] = Path(xml_output)
     all_index = {}
     # -- Create rst for classes, structs and files found in xml directory --
     for hfile in headers:

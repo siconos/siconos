@@ -10,29 +10,31 @@
 # Result is saved in CACHE variable DOXY_INPUTS
 # This variables is unique and stands for all
 # components!
+#
+# NOT USEFUL ANYMORE ?
 # ---------------------------------------------
-macro(update_doxygen_inputs COMP)
-  # Scan all dirs of current component and append
-  # them to DOXY_INPUTS/
-  # Do not include dirs matching 'test' and dirs listed
-  # in <COMP>_EXCLUDE_DOXY.
-  foreach(_dir IN LISTS ${COMP}_DIRS)
-    list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
-    if(NOT ${_dir} MATCHES test AND ${check_dir} EQUAL -1)
-      list(APPEND DOXY_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/${_dir})
-    endif()
-  endforeach()
-  if(DOXY_INPUTS)
-    list(REMOVE_DUPLICATES DOXY_INPUTS)
-  endif()
-  # convert cmake list to a single string
-  foreach(_dir ${DOXY_INPUTS})
-    set(_INPUTS "${_INPUTS} ${_dir}")
-  endforeach()
+# macro(update_doxygen_inputs COMP)
+#   # Scan all dirs of current component and append
+#   # them to DOXY_INPUTS/
+#   # Do not include dirs matching 'test' and dirs listed
+#   # in <COMP>_EXCLUDE_DOXY.
+#   foreach(_dir IN LISTS ${COMP}_DIRS)
+#     list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
+#     if(NOT ${_dir} MATCHES test AND ${check_dir} EQUAL -1)
+#       list(APPEND DOXY_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/${_dir})
+#     endif()
+#   endforeach()
+#   if(DOXY_INPUTS)
+#     list(REMOVE_DUPLICATES DOXY_INPUTS)
+#   endif()
+#   # convert cmake list to a single string
+#   #foreach(_dir ${DOXY_INPUTS})
+#   #  set(_INPUTS "${_INPUTS} ${_dir}")
+#   #endforeach()
 
-  # Save doxy_inputs to cache.
-  set(${COMP}_DOXYGEN_INPUTS ${_INPUTS} CACHE INTERNAL "List of inputs (directories) used by doxygen to generate doc for <COMP>.")
-endmacro()
+#   # Save doxy_inputs to cache.
+#   set(${COMP}_DOXYGEN_INPUTS ${DOXY_INPUTS} CACHE INTERNAL "List of inputs (directories) used by doxygen to generate doc for <COMP>.")
+# endmacro()
 
 
 # --------------------------------------------------
@@ -64,29 +66,17 @@ function(doxy2rst_sphinx COMPONENT)
   
   # Doxygen conf for xml outputs for breathe. It might be different
   # from the one used for xml outputs for swig.
-  set(DOXY_QUIET "YES")
-  set(DOXY_WARNINGS "NO")
-  set(GENERATE_HTML NO)
-  set(GENERATE_XML YES)
-  set(EXTRACT_ALL NO)
-  set(EXTRACT_PRIVATE NO)
-  set(XML_OUTPUT xml4rst/${COMPONENT})
   file(MAKE_DIRECTORY ${DOXYGEN_4_RST}/${COMPONENT})
-  # Set config file name
-  set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMPONENT}doxy-xml.config")
+
+  include(doxycommon)
+  set(DOXYGEN_GENERATE_HTML NO)
+  set(DOXYGEN_GENERATE_XML YES)
+  set(DOXYGEN_XML_OUTPUT xml4rst/${COMPONENT})
+  doxygen_add_docs(
+    ${COMPONENT}-doxy2xml ${CMAKE_SOURCE_DIR}/${COMPONENT}/src
+    COMMENT "Generate xml/doxygen files for ${COMPONENT} (conf: ${DOXY_CONFIG_XML})."
+    )
   
-  # Get list of inputs
-  set(DOXYGEN_INPUTS ${${COMPONENT}_DOXYGEN_INPUTS})
-    
-  configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxyxml2sphinx.config.in ${DOXY_CONFIG_XML} @ONLY)
-
-  # Create a new target used to create doxygen outputs (xml).
-  # Required for documentation and/or for serialization.
-  add_custom_target(${COMPONENT}-doxy2xml
-    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML}
-    OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMPONENT}doxy4rst.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMPONENT}doxy4rst.log
-    COMMENT "Generate xml/doxygen files for ${COMPONENT} (conf: ${DOXY_CONFIG_XML}).") 
-
   if(WITH_${COMPONENT}_DOCUMENTATION)
     # Path where rst files will be generated.
     set(SPHINX_DIR "${CMAKE_BINARY_DIR}/docs/sphinx")
@@ -95,7 +85,7 @@ function(doxy2rst_sphinx COMPONENT)
     # It calls a python function defined in gendoctools (create_breathe_files)
     add_custom_target(${COMPONENT}-xml2rst
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-      "from gendoctools.cpp2rst import create_breathe_files as f; f('${component_HEADERS}', '${CMAKE_SOURCE_DIR}', '${COMPONENT}', '${SPHINX_DIR}','${DOXY_CONFIG_XML}')"
+      "from gendoctools.cpp2rst import create_breathe_files as f; f('${component_HEADERS}', '${CMAKE_SOURCE_DIR}', '${COMPONENT}', '${SPHINX_DIR}','${DOXYGEN_OUTPUT}/${DOXYGEN_XML_OUTPUT}')"
       VERBATIM
       DEPENDS ${COMPONENT}-doxy2xml
       )
@@ -132,30 +122,21 @@ macro(finalize_doc)
     # 'inputs' are updated by each component, during call to update_doxygen_inputs macro.
     # Doc will be built when 'make doxygen' is called.
     # config file name
-    set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config" CACHE INTERNAL "Doxygen configuration file : used to produce html (doxygen only) and xml files for sphinx (breathe).")
-    # The generation of the config and the creation of the target will be done later,
-    # after the update of inputs by each component, with macro 'finalize_doc'
-    set(DOXY_QUIET "YES")
-    set(DOXY_WARNINGS "NO")
-    set(GENERATE_HTML YES)
-    set(GENERATE_XML NO)
-    set(EXTRACT_ALL NO)
-    if(USE_DEVEL_DOXYGEN) # OFF  by default. Activate to extract all.
-      set(EXTRACT_ALL YES)
-    endif()
+
     # Build list of all dirs taken into accound by doxygen to build
     # doc, from each component own list.
     set(DOXYGEN_INPUTS)
     foreach(COMP IN LISTS COMPONENTS)
-      set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${${COMP}_DOXYGEN_INPUTS}")
+      list(APPEND DOXYGEN_INPUTS ${CMAKE_SOURCE_DIR}/${COMP}/src)
     endforeach()
-    configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy.config.in ${DOXY_CONFIG} @ONLY)
-
-    # A new target to create  html files (doxygen) from code sources.
-    # One target for all components.
-    add_custom_target(doxygen-html
-      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG}
-      COMMENT "Run doxygen ${DOXY_CONFIG} ...")
+    
+    include(doxycommon)
+    set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_HTML_OUTPUT ${DOC_ROOT_DIR}/html/doxygen)
+    set(DOXYGEN_GENERATE_XML NO)
+    doxygen_add_docs(
+      doxygen-html ${DOXYGEN_INPUTS}
+      COMMENT "Generate doxygen html doc ...")
     
     add_custom_command(TARGET doxygen-html POST_BUILD
       COMMENT "Doxygen documentation has been built in : \n - ${DOXYGEN_OUTPUT} (xml) \n - ${DOC_ROOT_DIR}/html/doxygen (html).")
@@ -191,47 +172,33 @@ macro(finalize_doc)
 endmacro()
 
 
+# create a target to generate sphinx (rst) documentation
+# from docstrings in python files (sphinx autodoc stuff)
+# Note that docstrings are automatically generated using -doxygen option from swig.
+function(docstrings2rst)
+  set(oneValueArgs PATH NAME)
 
-function(docstrings2rst module_path module_name)
-  set(pymodule_name ${SICONOS_SWIG_ROOT_DIR}/${module_path}/${module_name}.py)
+  cmake_parse_arguments(module "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  set(pymodule_fullname ${SICONOS_SWIG_ROOT_DIR}/${module_PATH}/${module_NAME}.py)
   
-  message("Start setup for generation of rst files from python docstrings for ${pymodule_name}")
-  # A target to postprocess latex forms in docstrings into
-  # something readable by sphinx.
-  # Calls a python function defined in gendoctools (replace_latex)
-  # add_custom_target(${module_name}_replace_latex
-  #   COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-  #   "from gendoctools.common import replace_latex as f; f('${pymodule_name}', '${SICONOS_SWIG_ROOT_DIR}/tmp_${COMPONENT}/')"
-  #   VERBATIM
-  #   DEPENDS ${SWIG_MODULE_${module_name}_REAL_NAME}
-  #   COMMENT "Insert latex into docstrings.")
+  message("Start setup for generation of rst files from python docstrings for ${pymodule_fullname}")
   
   # Path where rst files (docstrings --> rst) will be written.
   set(SPHINX_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/)
-  # python modules for previous components are required to apidoc (e.g. kernel.py for control).
-  # So we get this last comp and add a dependency.
-  list(APPEND PROCESSED_PYTHON_MODULES ${SWIG_MODULE_${module_name}_REAL_NAME})
-  list(REMOVE_DUPLICATES PROCESSED_PYTHON_MODULES)
-  set(PROCESSED_PYTHON_MODULES ${PROCESSED_PYTHON_MODULES} CACHE INTERNAL "python modules for siconos")
   
   # A new target to convert python/swig docstrings (swig outputs) into rst files (sphinx inputs)
   # Calls a python function defined in gendoctools (module_docstrings2rst)
   # --> make <comp>_autodoc
-  add_custom_target(${module_name}_autodoc
+  add_custom_target(${module_NAME}_autodoc
     COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${PYTHON_EXECUTABLE} -c
-    "from gendoctools.python2rst import docstrings2rst as f; f('${COMPONENT}', '${module_path}', '${module_name}', '${SPHINX_OUTPUT_DIR}', '${SICONOS_SWIG_ROOT_DIR}')"
+    "from gendoctools.python2rst import docstrings2rst as f; f('${module_PATH}', '${module_NAME}', '${SPHINX_OUTPUT_DIR}')"
     VERBATIM
-    DEPENDS ${SWIG_MODULE_${module_name}_REAL_NAME}
-    COMMENT "Create rst files from python docstrings for module siconos.${module_name}")
+    DEPENDS ${SWIG_MODULE_${module_NAME}_REAL_NAME}
+    COMMENT "Create rst files from python docstrings for module siconos..${module_NAME}")
 
-  
-  # Create dependency between autodoc target and siconos python modules.
-  #foreach(dep IN LISTS PROCESSED_PYTHON_MODULES)
-  #  add_dependencies(${module_name}_autodoc ${dep})
-  #endforeach()
-  
   # rst_api needs autodoc.
-  add_dependencies(rst_api ${module_name}_autodoc)
+  add_dependencies(rst_api ${module_NAME}_autodoc)
   
 endfunction()
   

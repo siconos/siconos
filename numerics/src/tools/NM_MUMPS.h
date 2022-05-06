@@ -172,8 +172,8 @@ extern "C"
 #endif /* WITH_MUMPS */
   /** copy MUMPS id if compiled WITH_MUMPS, otherwise do nothing.
    *
-   *  \param A, the source NumericsMatrix
-   *  \param B, the destination NumericsMatrix
+   *  \param A the source NumericsMatrix
+   *  \param B the destination NumericsMatrix
    */
   void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B);
 

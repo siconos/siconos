@@ -30,14 +30,14 @@
    
    \f[
         y = h(q,t,z) \\
-        \\dot y =  \nabla^\top_q(q,t,z)\\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
+        \dot y =  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
    \f]
 
    or more generally
 
    \f[
 
-        \\dot y =  H(q,t,z)\\dot q + \frac{\partial }{\partial t}h(q,t,z)
+        \dot y =  H(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
    \f]
 
    and by duality

@@ -75,8 +75,8 @@
     \f[
 
         rhs(x,t,z) = \left[\begin{array}{c}
-	\\dot q  \\
-        \ddot q = M^{-1}\left[F_{ext}(t, z) - C \\dot q - K q  + p \right] \\
+	\dot q  \\
+        \ddot q = M^{-1}\left[F_{ext}(t, z) - C \dot q - K q  + p \right] \\
         \end{array}\right]
 
     \f]

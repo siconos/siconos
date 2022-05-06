@@ -28,13 +28,6 @@
 
 /**
    Structure that contains and defines a LCP Problem.
-
-   \rst
-
-   See the detailed documentation in :ref:`lcp_problem`
-
-   \endrst
-
 */
 struct LinearComplementarityProblem {
 

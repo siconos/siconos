@@ -33,6 +33,7 @@ location might be used later as input to BULLET_ROOT.
 function(set_bullet_target)
   if(BULLET_DEFINITIONS)
     string(REPLACE "-D" "" BULLET_DEFINITIONS ${BULLET_DEFINITIONS})
+    set(BULLET_DEFINITIONS ${BULLET_DEFINITIONS} PARENT_SCOPE)
   endif()
   create_target(NAME BULLET::BULLET
     LIBRARIES "${BULLET_LIBRARIES}"
@@ -63,9 +64,6 @@ if(INSTALL_BULLET)
   # Bullet conf. See what's done in https://github.com/bulletphysics/bullet3/blob/master/build_cmake_pybullet_double.sh
   set(BUILD_PYBULLET ON CACHE INTERNAL "")
   set(BUILD_PYBULLET_NUMPY ON CACHE INTERNAL "")
-  if(BULLET_USE_DOUBLE_PRECISION)
-    set(USE_DOUBLE_PRECISION ON CACHE INTERNAL "")
-  endif()
   set(BT_USE_EGL ON CACHE INTERNAL "")
   set(OpenGL_GL_PREFERENCE GLVND CACHE INTERNAL "")
   # Bullet allows cmake 2, setup a few things to avoid warnings.
@@ -94,12 +92,10 @@ if(INSTALL_BULLET)
     cmake_policy(POP)
   endif()
   include(${bullet_BINARY_DIR}/BulletConfig.cmake)
+  
   set(BULLET_INCLUDE_DIRS $<BUILD_INTERFACE:${bullet_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${bullet_INSTALL_DIR}/${BULLET_INCLUDE_DIRS}>)
   set_bullet_target()
   message(STATUS "Built, installed and used bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}.")
-  if(BULLET_USE_DOUBLE_PRECISION)
-    message(STATUS "Bullet use double precision for floating point numbers.")
-  endif()
 
 elseif(WITH_BULLET OR Bullet_ROOT)
   # Up to cmake 3.22 there is no way to get Bullet version using find_package standard.
@@ -125,9 +121,6 @@ elseif(WITH_BULLET OR Bullet_ROOT)
   set(BULLET_INCLUDE_DIRS ${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS})
   set_bullet_target()
   message(STATUS "Found bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}")
-  if(BULLET_USE_DOUBLE_PRECISION)
-    message(STATUS "Bullet use double precision for floating point numbers.")
-  endif()
 
 endif()
 

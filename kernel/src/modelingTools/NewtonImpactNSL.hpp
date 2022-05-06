@@ -32,8 +32,8 @@
    \f[
    \left\{\begin{array}{l}
    y \geq 0, \lambda \geq 0, y^{T} \lambda=0\				\
-   if y \leq 0 \quad \mbox{then} \quad \\dot y(t^{+}) - e \\dot y(t^{-}) \geq
-   0, \quad  \lambda \geq 0, (\\dot y(t^{+}) - e \\dot y(t^{-}))^{T} \lambda=0
+   if y \leq 0 \quad \mbox{then} \quad \dot y(t^{+}) - e \dot y(t^{-}) \geq
+   0, \quad  \lambda \geq 0, (\dot y(t^{+}) - e \dot y(t^{-}))^{T} \lambda=0
    \end{array}\right.
    \f]
    

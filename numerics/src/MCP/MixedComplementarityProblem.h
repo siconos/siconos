@@ -96,13 +96,13 @@ extern "C" {
  */
 void mixedComplementarityProblem_free(MixedComplementarityProblem *mcp);
 
-/** create an empty MCP problem
- *  \return an MixedComplementarityProblem instance
+/** \return an empty MixedComplementarityProblem instance
  */
 MixedComplementarityProblem *mixedComplementarityProblem_new(void);
 
 /** Delete a MixedComplementarityProblem_old
- *  \param problem  pointer to a MixedComplementarityProblem_old to delete
+ *
+ *  \param problem pointer to a MixedComplementarityProblem_old to delete
  */
 void mixedComplementarityProblem_old_free(
     MixedComplementarityProblem_old *problem);

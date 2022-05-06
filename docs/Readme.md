@@ -9,21 +9,15 @@ make doc
 
 Build html documentation in siconos/build_dir/docs/build/html
 
-```
-make latex
-```
-
---> to create tex files (experimental !)
-
 
 # To publish web site and documentation :
 
-* just add [doc-build] in your commit message. This will automatically activate a job of continuous integration that will create and publish the html documentation.
+* Visit CI status page of Siconos on gricad-gitlab:
 
-* /!\ Push to gricad-gitlab project, not to github, the mirroring process will do the job /!\
-
-* Check CI status: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/pipelines
-
+	https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/pipelines
+	
+Pick a pipeline and "play" (manual) the generate-doc job.
+	
 * Check (public) website : https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos
 
 Note for developers:

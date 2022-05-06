@@ -346,7 +346,7 @@ extern "C"
   /** Compute the max by columns of a sparse matrix
    * 
    *  \param A the sparse matrix
-   *  \param max, the vector of maximum by columns
+   *  \param max the vector of maximum by columns
    *  \param j the column index
    */
   int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double * max);
@@ -354,10 +354,9 @@ extern "C"
   /** Compute the max in absolute value  by columns of a sparse matrix
    * 
    *  \param A the sparse matrix
-   *  \param max, the vector of maximum by columns
+   *  \param max the vector of maximum by columns
    *  \param j the column index
    */
-
   int CSparseMatrix_max_abs_by_columns(const CSparseMatrix *A, double * max);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

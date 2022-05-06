@@ -40,9 +40,7 @@
    \langle x - z, q + Mz \rangle \geq 0 \ \text{for all }x\in K
    \f]
 
-   \rst
-   See  :ref:`avi_problem`.
-   \endrst
+   See users'guide for details.
 
 */
 struct AffineVariationalInequalities {

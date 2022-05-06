@@ -31,13 +31,13 @@
     \f] 
 
     \f[
-    \dot y = \nabla^\top_q h(q,z) \\dot q
+    \dot y = \nabla^\top_q h(q,z) \dot q
     \f]
 
     or more generally
 
     \f[
-     \dot y = H(q,z) \\dot q
+     \dot y = H(q,z) \dot q
     \f]
 
     and by duality

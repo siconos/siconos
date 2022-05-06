@@ -8,7 +8,10 @@ endif()
 if(WITH_DOXY2SWIG)
   find_package(SWIG 4.0 REQUIRED)
 else()
-  find_package(SWIG 3.0 REQUIRED)
+  find_package(SWIG 4.0)
+  if(NOT SWIG_FOUND)
+    find_package(SWIG 3.0 REQUIRED) # 4 is better but 3.0 is enough when swig -doxygen is not required.
+  endif()
 endif()
 include(${SWIG_USE_FILE})
 

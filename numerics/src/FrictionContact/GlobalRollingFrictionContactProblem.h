@@ -51,7 +51,7 @@ struct GlobalRollingFrictionContactProblem {
       (\f$ n_c = \f$ numberOfContacts) */
   double *mu;
   /** \f$ {\mu_r} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction
-     coefficients
+      coefficients
       (\f$ n_c = \f$ numberOfContacts) */
   double *mu_r;
 };
