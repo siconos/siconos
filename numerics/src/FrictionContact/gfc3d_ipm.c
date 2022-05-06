@@ -1225,7 +1225,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     /** Correction of w to take into account the dependence
         on the tangential velocity */
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 0)
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1)
     {
       printf("update w\n");
       for(unsigned int i = 0; i < nd; ++ i)
@@ -1668,7 +1668,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] = SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
