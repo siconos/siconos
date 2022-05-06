@@ -194,7 +194,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     gfc3d_balancing_check_drift(balanced_problem,problem, reaction, velocity, globalVelocity,
                                 options);
 
-    problem = gfc3d_balancing_free(problem, options);
+    balanced_problem = gfc3d_balancing_free(balanced_problem, options);
 
     break;
 
@@ -262,8 +262,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     gfc3d_balancing_check_drift(balanced_problem,problem, reaction, velocity, globalVelocity,
                                 options);
 
-    problem = gfc3d_balancing_free(problem, options);
-
+    balanced_problem = gfc3d_balancing_free(balanced_problem, options);
     break;
 
   }

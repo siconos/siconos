@@ -192,7 +192,7 @@ NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize, const
 
 
 /* Returns a long double as the square root of determinant of a vector related to the Jordan product */
-float_type gammal(const double * const x, const size_t dimension);
+float_type ld_gammal(const double * const x, const size_t dimension);
 
 
 /*

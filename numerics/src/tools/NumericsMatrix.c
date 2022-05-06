@@ -2254,6 +2254,8 @@ NumericsMatrix* NM_eye(int size)
 {
   NumericsMatrix* M = NM_create(NM_SPARSE, size, size);
   /* version incremented in NSM_triplet_eye */
+  NSM_clear(M->matrix2);
+  free(M->matrix2);
   M->matrix2 = NSM_triplet_eye(size);
   return M;
 }
@@ -5329,6 +5331,9 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
   NumericsMatrix* D1_k = B->D1;
   NumericsMatrix* D2_k = B->D2;
 
+  double * D1_k_x= D1_k->matrix2->triplet->x;
+  double * D2_k_x= D2_k->matrix2->triplet->x;
+
   unsigned int size0 = B->size0;
   unsigned int size1 = B->size1;
 
@@ -5371,11 +5376,20 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
     }
 
     /* Update balancing matrix */
-    NM_gemm(1.0, D1_k, D_R, 0.0, D1_tmp);
-    NM_copy(D1_tmp, D1_k);
+    /* NM_gemm(1.0, D1_k, D_R, 0.0, D1_tmp); */
+    /* NM_copy(D1_tmp, D1_k); */
 
-    NM_gemm(1.0, D2_k, D_C, 0.0, D2_tmp);
-    NM_copy(D2_tmp, D2_k);
+    /* NM_gemm(1.0, D2_k, D_C, 0.0, D2_tmp); */
+    /* NM_copy(D2_tmp, D2_k); */
+
+    for(unsigned int i=0 ; i < size0; i++)
+    {
+      D1_k_x[i] = D1_k_x[i] * D_R_x[i];
+    }
+    for(unsigned int i=0 ; i < size1; i++)
+    {
+      D2_k_x[i] = D2_k_x[i] * D_C_x[i];
+    }
 
     /* NM_display(D1_k); */
     /* DEBUG_PRINTF("D1_k ");NV_display(NM_triplet(D1_k)->x, size); */
