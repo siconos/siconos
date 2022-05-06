@@ -38,7 +38,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // GFC3D,IPM
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_IPM);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10; //sqrt(DBL_EPSILON);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
     current++;
   }
