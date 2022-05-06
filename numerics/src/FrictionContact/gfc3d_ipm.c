@@ -444,7 +444,7 @@ static  NumericsMatrix *  QNTpH(const double * const x, const double * const y, 
     QpH->size0 = (int)QpH->matrix2->csc->m;
     QpH->size1 = (int)QpH->matrix2->csc->n;
     numericsSparseMatrix(QpH)->origin = NSM_CSC;
-
+    free(beta);
     break;
   }
   break;
@@ -452,7 +452,6 @@ static  NumericsMatrix *  QNTpH(const double * const x, const double * const y, 
     fprintf(stderr, "Numerics, GFC3D IPM, QNTpH failed, unknown storage type for H.\n");
     exit(EXIT_FAILURE);
   }
-
   free(a);
   free(b);
   return QpH;
@@ -1190,7 +1189,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       NM_insert(JR, minus_M, 0, 0);
 
       /* without regularization */
-      NM_insert(JR, NM_eye(nd), m, m);
+      NumericsMatrix * eye_nd = NM_eye(nd); // should be done only one time at the beginning
+      NM_insert(JR, eye_nd, m, m);
+      eye_nd = NM_free(eye_nd);
 
       /* add a regularization term  */
       /* NM_insert(JR, NM_add(1.0, NM_eye(nd), delta, Qp2),m, m); */
@@ -1415,7 +1416,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         NSM_linearSolverParams(J)->solver = NSM_HSL;
         NM_LDLT_solve(J, rhs, 1);
       }
-
+      
+      
       NM_clear(J);
       free(J);
 
@@ -1492,9 +1494,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       cblas_dcopy(nd, r_du, 1, d_velocity, 1);
       cblas_dcopy(nd, r_dr, 1, d_reaction, 1);
     }
-
-    free(Qp);
-    free(Qp2);
+    if (Qp)
+      Qp = NM_free(Qp);
+    if (Qp2)
+      Qp2 = NM_free(Qp2);
+    if (Qpinv)
+      Qpinv = NM_free(Qpinv);
     
     alpha_primal = getStepLength(velocity, d_velocity, nd, n, gmm);
     alpha_dual = getStepLength(reaction, d_reaction, nd, n, gmm);
@@ -1654,9 +1659,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   free(a_velo);
   free(a_reac);
 
+  free(tmpsol);
+  
   free(d_globalVelocity);
   free(d_velocity);
   free(d_reaction);
+
   
   *info = hasNotConverged;
 }
