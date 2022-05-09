@@ -4,16 +4,16 @@
 
 # wrap - Set extra dependencies
 set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS
-  ${SICONOS_SWIG_SRC_DIRS}/KernelTypes.i
+  ${SICONOS_SWIG_SOURCE_DIR}/KernelTypes.i
   KernelRegistration.i
-  ${SICONOS_SWIG_SRC_DIRS}/solverOptions.i
-  ${SICONOS_SWIG_SRC_DIRS}/handleException.i
-  ${SICONOS_SWIG_SRC_DIRS}/start.i
-  ${SICONOS_SWIG_SRC_DIRS}/ignored_functions.i
-  ${SICONOS_SWIG_SRC_DIRS}/end.i
-  ${SICONOS_SWIG_SRC_DIRS}/numpy.i
-  ${SICONOS_SWIG_SRC_DIRS}/pyRegister.i
-  ${SICONOS_SWIG_SRC_DIRS}/graph.i)
+  ${SICONOS_SWIG_SOURCE_DIR}/solverOptions.i
+  ${SICONOS_SWIG_SOURCE_DIR}/handleException.i
+  ${SICONOS_SWIG_SOURCE_DIR}/start.i
+  ${SICONOS_SWIG_SOURCE_DIR}/ignored_functions.i
+  ${SICONOS_SWIG_SOURCE_DIR}/end.i
+  ${SICONOS_SWIG_SOURCE_DIR}/numpy.i
+  ${SICONOS_SWIG_SOURCE_DIR}/pyRegister.i
+  ${SICONOS_SWIG_SOURCE_DIR}/graph.i)
 
 # List of modules to be built in the python bindings
 set(${COMPONENT}_PYTHON_MODULES "./${COMPONENT}")
@@ -36,7 +36,8 @@ endif()
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
-target_link_libraries(_kernel numerics)
+target_link_libraries(_kernel PUBLIC numerics)
+target_include_directories(_kernel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}) # addons.hpp ...
 
 ## FP : when serialization is ON, we need includes from io in kernel ...
 # This has to be reviewed.

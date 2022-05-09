@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,12 @@
 #include "OSNSMatrix.hpp"
 
 #include "Tools.hpp"
+#include <chrono>
 
 using namespace RELATION;
 // #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 //#define WITH_TIMER
 void LinearOSNS::initVectorsMemory()
@@ -961,7 +962,7 @@ bool LinearOSNS::preCompute(double time)
   // Get topology
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
-  int elapsed =0;
+  //int elapsed =0;
   //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do

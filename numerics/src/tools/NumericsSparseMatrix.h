@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,6 +121,13 @@ extern "C"
    * \return NULL on success
    */
   NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
+
+  /** Copy NumericsSparseMatrix version.
+   * \param A a NumericsSparseMatrix
+   * \param B a NumericsSparseMatrix
+   */
+  void NSM_version_copy(const NumericsSparseMatrix* const A,
+                        NumericsSparseMatrix* B);
 
   /** Copy a NumericsSparseMatrix.
    * \param A a NumericsSparseMatrix

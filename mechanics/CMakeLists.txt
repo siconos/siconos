@@ -86,32 +86,9 @@ target_link_libraries(mechanics PUBLIC
 
 target_include_directories(mechanics PRIVATE ${Boost_INCLUDE_DIRS})
 
-# -- Bullet --
-# Must :
-# - check if bullet is available on the system
-# Will:
-# - set SICONOS_HAS_BULLET var (distributed in siconosConfig.cmake)
-if(WITH_BULLET)
-  # Bullet is included in CMake "find" packages.
-  # Check https://cmake.org/cmake/help/latest/module/FindBullet.html
-  # --> set BULLET_INCLUDE_DIRS, BULLET_FOUND, BULLET_LIBRARIES.
-  # --> Accept : BULLET_ROOT (as install path or Windows build path)
-  find_package(Bullet REQUIRED)
-  if(BULLET_FOUND)
-    # Set var for cmakedefine (config.h.cmake) and tests.
-    set(SICONOS_HAS_BULLET TRUE CACHE INTERNAL "True if Bullet API has been found and is activated.")
-    create_target(NAME BULLET::BULLET
-      LIBRARIES "${BULLET_LIBRARIES}"
-      INCLUDE_DIRS "${BULLET_INCLUDE_DIRS}")
-    # Add bullet headers and libs to the build.
-    # first draft ... turn this to private later
-    target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:BULLET::BULLET>)
-    if(BULLET_USE_DOUBLE_PRECISION)
-      # Do we need this as public or private? Check if mechanics io needs this option?
-      target_compile_definitions(${COMPONENT} PUBLIC $<BUILD_INTERFACE:BT_USE_DOUBLE_PRECISION>)
-    endif()
-  endif()
-endif()
+# Bullet setup
+# Different options are available. Check BulletSetup.cmake file
+include(bullet_setup)
 
 # -- OCE --
 # - add occ to the build process

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,13 @@ public:
    \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
   */
   SP::SimpleMatrix contactPoints(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1) const;
+
+  /** get the coordinates of all contact points, normals, reactions and velocities
+   * \param nsds current nonsmooth dynamical system
+   * \param index_set the index set number.
+   \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
+  */
+  SP::SimpleMatrix contactInfo(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1) const;
 
   /** get the domain of each contact point
    * \param nsds current nonsmooth dynamical system

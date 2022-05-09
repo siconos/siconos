@@ -1,0 +1,12 @@
+import shutil
+filename="@CMAKE_CURRENT_BINARY_DIR@/libs/liblist"
+outfile = open("@CMAKE_CURRENT_BINARY_DIR@/setup.cfg", 'a+')
+with open(filename, 'r') as ff:
+    files = ff.readlines()
+    for tgt in files:
+        print(tgt, tgt.strip())
+        fname = '@CMAKE_CURRENT_BINARY_DIR@/libs/' + tgt.strip()
+        with open(fname, 'r') as ft:
+            shutil.copyfileobj(ft, outfile)
+
+outfile.close()

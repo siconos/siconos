@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,10 @@
 class DiskDiskR : public CircularR, public std::enable_shared_from_this<DiskDiskR>
 {
 private:
-  /** serialization hooks
-  */
+  //
   ACCEPT_SERIALIZATION(DiskDiskR);
 
   double r1pr2;
-
-  DiskDiskR() : CircularR() {};
 
 public:
 
@@ -47,6 +44,8 @@ public:
   \param disk2 radius
   */
   DiskDiskR(double disk1, double disk2);
+
+  ~DiskDiskR() noexcept = default;
 
   double distance(double, double, double, double, double, double);
 
@@ -63,11 +62,8 @@ public:
   */
   void computeJachq(const BlockVector& q, BlockVector& z);
 
-  /** visitors hook
-   */
+  // visitors hook
   ACCEPT_VISITORS();
-
-  ~DiskDiskR() {};
 
 };
 #endif /* DiskDiskR_h */

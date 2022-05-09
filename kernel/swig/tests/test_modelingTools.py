@@ -1,8 +1,6 @@
 """A few tests for classes and functions from kernel/modelingtools
 
 """
-#!/usr/bin/env python
-
 import numpy as np
 import siconos.kernel as K
 
@@ -19,7 +17,7 @@ h = 0.005
 q = np.array([1, 0, 0])
 v = np.array([0, 0, 0])
 mass = np.eye(3)
-mass[2, 2] = 3. / 5 * r * r
+mass[2, 2] = 3.0 / 5 * r * r
 
 weight = np.array([-m * g, 0, 0])
 tol = np.finfo(np.double).eps
@@ -49,4 +47,3 @@ def test_LagrangianLinearTIR():
 def test_Nsds():
     bouncing_ball = K.NonSmoothDynamicalSystem(t0, T)
     assert bouncing_ball.t0() == t0
-

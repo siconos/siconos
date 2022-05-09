@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,11 +54,6 @@ void LagrangianRheonomousR::initialize(Interaction& inter)
     unsigned int sizeDS = inter.getSizeOfDS();
     _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
   }
-}
-
-void LagrangianRheonomousR::checkSize(Interaction& inter)
-{
-  LagrangianR::checkSize(inter);
 }
 
 void LagrangianRheonomousR::setComputehDotFunction(const std::string& pluginPath, const std::string& functionName)

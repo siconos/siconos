@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,10 @@ protected:
 
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
+
+  // callback to modify the contact point when it has just been added in the manifold.
+  static bool bulletContactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
+                                         const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1);
   static Simulation *gSimulation;
 
 public:
@@ -116,7 +120,7 @@ protected:
   virtual SP::BulletR makeBulletR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
                                   SP::RigidBodyDS ds2, SP::SiconosShape shape2,
                                   const btManifoldPoint &);
-  
+
   /** Provided so that creation of collision points can be overridden.
    * See modify_normals.py in examples/Mechanics/Hacks */
   virtual SP::Bullet5DR makeBullet5DR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
@@ -136,11 +140,20 @@ protected:
                                           const btManifoldPoint &);
 
 public:
-  StaticContactorSetID insertStaticContactorSet(
-    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector());
 
-  bool removeStaticContactorSet(StaticContactorSetID id);
+  /** Add a static body in the collision detector.
+   */
+  SP::StaticBody addStaticBody(
+    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector(), int number=0);
 
+  /** Remove a body from the collision detector.
+   */
+  void removeStaticBody(const SP::StaticBody& body);
+
+  /** Remove a body from the collision detector. This must be done
+   *  after removing a body from the NonSmoothDynamicalSystem
+   *  otherwise contact will occur with a non-graph body which results
+   *  in failure. */
   void removeBody(const SP::SecondOrderDS& body);
 
   void updateInteractions(SP::Simulation simulation);

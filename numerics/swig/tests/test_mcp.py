@@ -1,27 +1,24 @@
-# Copyright 2021 INRIA
-#!/usr/bin/env python
+# Copyright 2022 INRIA
 import numpy as np
 
 import siconos.numerics as sn
 
 
 def mcp_function(z):
-    M = np.array([[2., 1.],
-                  [1., 2.]])
+    M = np.array([[2.0, 1.0], [1.0, 2.0]])
 
-    q = np.array([-5., -6.])
-    return np.dot(M,z) + q
+    q = np.array([-5.0, -6.0])
+    return np.dot(M, z) + q
 
 
 def mcp_Nablafunction(z):
-    M = np.array([[2., 1.],
-                  [1., 2.]])
+    M = np.array([[2.0, 1.0], [1.0, 2.0]])
     return M
 
 
 # solution
-zsol = np.array([4. / 3., 7. / 3.])
-wsol = np.array([0., 0.])
+zsol = np.array([4.0 / 3.0, 7.0 / 3.0])
+wsol = np.array([0.0, 0.0])
 
 ztol = 1e-8
 
@@ -32,8 +29,8 @@ def test_new():
 
 def test_mcp_FB():
     mcp = sn.MCP_old(1, 1, mcp_function, mcp_Nablafunction)
-    z = np.array([0., 0.])
-    w = np.array([0., 0.])
+    z = np.array([0.0, 0.0])
+    w = np.array([0.0, 0.0])
 
     options = sn.SolverOptions(sn.SICONOS_MCP_OLD_FB)
     sn.mcp_old_driver_init(mcp, options)
@@ -41,7 +38,7 @@ def test_mcp_FB():
     sn.mcp_old_driver_reset(mcp, options)
     print("z = ", z)
     print("w = ", w)
-    assert (np.linalg.norm(z - zsol) <= ztol)
+    assert np.linalg.norm(z - zsol) <= ztol
     assert not info
 
 

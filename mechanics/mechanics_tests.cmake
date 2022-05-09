@@ -6,7 +6,7 @@ if(WITH_TESTING)
   begin_tests(src/collision/native/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
   new_test(SOURCES MultiBodyTest.cpp ${SIMPLE_TEST_MAIN})
 
-  if(WITH_BULLET)
+  if(SICONOS_HAS_BULLET)
     begin_tests(src/collision/bullet/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
     new_test(SOURCES  ContactTest.cpp ${SIMPLE_TEST_MAIN})
     new_test(SOURCES  Contact2dTest.cpp ${SIMPLE_TEST_MAIN})

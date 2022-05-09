@@ -3,7 +3,6 @@
 from siconos.kernel import SiconosVector
 import sys
 import os
-from siconos.tests_setup import working_dir
 
 v1 = SiconosVector([1.0, 2.0, 3.0])
 
@@ -38,7 +37,8 @@ def test_serialization3():
     assert(v2.getValue(1) == 2.0)
     assert(v2.getValue(2) == 3.0)
 
-def test_serialization4():
+# uses pytest fixture datafile
+def test_serialization4(datafile):
     from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
         LagrangianLinearTIR, Interaction, NonSmoothDynamicalSystem, \
         MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
@@ -169,7 +169,6 @@ def test_serialization4():
     from siconos.kernel import SimpleMatrix, getMatrix
     from numpy.linalg import norm
 
-    ref = getMatrix(SimpleMatrix(os.path.join(working_dir,
-                                              "data/result.ref")))
+    ref = getMatrix(SimpleMatrix(datafile("data/result.ref")))
 
     assert (norm(dataPlot - ref) < 1e-12)

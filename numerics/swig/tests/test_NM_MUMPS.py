@@ -2,6 +2,7 @@
 
 # kept alone as we may want to run it with mpirun
 
+
 def test_nm_mumps():
 
     # this may be run with mpirun -np <nb processes>
@@ -23,7 +24,7 @@ def test_nm_mumps():
     # rank 0 executes NM_MUMPS(M, 0)
     numerics.NM_MUMPS(M, -1)
 
-    if (comm.Get_rank() > 0):
+    if comm.Get_rank() > 0:
         # when rank 0 executes NM_MUMPS(M, 0)
         exit(0)
 
@@ -33,10 +34,10 @@ def test_nm_mumps():
     #     2*x - y = 1
     #     x   + y = 1
     # solution x: 2/3, y: 1/3 */
-    numerics.NM_entry(M, 0, 0, 2.)
-    numerics.NM_entry(M, 0, 1, -1.)
-    numerics.NM_entry(M, 1, 0, 1.)
-    numerics.NM_entry(M, 1, 1, 1.)
+    numerics.NM_entry(M, 0, 0, 2.0)
+    numerics.NM_entry(M, 0, 1, -1.0)
+    numerics.NM_entry(M, 1, 0, 1.0)
+    numerics.NM_entry(M, 1, 1, 1.0)
 
     b = numpy.array([1.0, 1.0])
     numerics.NM_MUMPS_set_matrix(M)
@@ -51,7 +52,7 @@ def test_nm_mumps():
     # send end of listening for ranks > 0
     numerics.NM_MUMPS(M, 0)
 
-    print('solution:', b)
+    print("solution:", b)
 
-    assert(abs(b[0] - 2./3.) < 1e-7)
-    assert(abs(b[1] - 1./3.) < 1e-7)
+    assert abs(b[0] - 2.0 / 3.0) < 1e-7
+    assert abs(b[1] - 1.0 / 3.0) < 1e-7

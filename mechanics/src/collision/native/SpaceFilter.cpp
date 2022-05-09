@@ -256,7 +256,9 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
         {
           // a new relation
           rel.reset(new CircleCircleR(r1, r2));
-          (*(parent->circlecircle_relations))[CircleCircleRDeclared(r1, r2)] = rel;
+          // FIX : this could work with stateless relations.
+          // This is not the case: cf LagrangianR.
+          //(*(parent->circlecircle_relations))[CircleCircleRDeclared(r1, r2)] = rel;
         }
         else
         {
@@ -277,7 +279,8 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
           // a new relation
           rel.reset(new DiskDiskR(r1, r2));
 
-          // FIX : this does not work!!
+          // FIX : this could work with stateless relations.
+          // This is not the case cf LagrangianR:
           // parent->diskdisk_relations[DiskDiskRDeclared(r1,r2)] = rel;
         }
         else
@@ -1330,5 +1333,24 @@ double SpaceFilter::minDistance(SP::Hashed h)
   }
 
   return dmin;
+
+}
+
+void SpaceFilter::insertLine(double a, double b, double c)
+{
+  size_t row;
+  if (!_plans)
+  {
+    _plans = SP::SimpleMatrix(new SimpleMatrix(1,6));
+    row = 0;
+  }
+  else
+  {
+    _plans->resize(_plans->size(0)+1,6);
+    row = _plans->size(0)-1;
+  }
+  (*_plans)(row, 0) = a;
+  (*_plans)(row, 1) = b;
+  (*_plans)(row, 2) = c;
 
 }

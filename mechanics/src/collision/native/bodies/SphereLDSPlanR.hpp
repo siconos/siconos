@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,7 @@
 class SphereLDSPlanR : public LagrangianScleronomousR, public std::enable_shared_from_this<SphereLDSPlanR>
 {
 private:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(SphereLDSPlanR);
 
 
@@ -38,8 +37,6 @@ private:
   double r, A, B, C, D, nN, nU;
   /* u ^ v  = n */
   double u1, u2, u3, v1, v2, v3, n1, n2, n3, ru1, ru2, ru3, rv1, rv2, rv3;
-
-  SphereLDSPlanR() {};
 
 public:
 
@@ -52,6 +49,8 @@ public:
   */
   SphereLDSPlanR(double r, double A, double B, double C, double D);
 
+  ~SphereLDSPlanR() noexcept = default;
+  
   double distance(double, double, double, double);
 
   using LagrangianScleronomousR::computeh;
@@ -75,8 +74,7 @@ public:
     return (A == _A && B == _B && C == _C && D == _D && r == _r) ;
   }
 
-  /** visitors hook
-   */
+  // visitors hook
   ACCEPT_VISITORS();
 
 };

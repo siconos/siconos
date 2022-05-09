@@ -151,10 +151,13 @@ class VViewOptions(object):
        frames per second of generated video (default 25)
      --camera=x,y,z
        initial position of the camera (default=above looking down)
+       current camera position can be obtained with the key c
      --lookat=x,y,z
        initial direction to look (default=center of bounding box)
      --up=x,y,z
        initial up direction of the camera (default=y-axis)
+     --clipping=x,y,z
+       initial clippring range of the camera
      --ortho=scale
        start in ortho mode with given parallel scale
        (default=perspective)
@@ -1057,13 +1060,12 @@ class IOReader(VTKPythonAlgorithmBase):
                             self.ids_at_time[mu] = None
 
             else:
-                # for mu in self._mu_coefs:
-                #     self.cpa_at_time[mu] = [[nan, nan, nan]]
-                #     self.cpb_at_time[mu] = [[nan, nan, nan]]
-                #     self.cn_at_time[mu] =  [[nan, nan, nan]]
-                #     self.cf_at_time[mu] =  [[nan, nan, nan]]
-                #     self.ids_at_time[mu] = None
-                pass
+                for mu in self._mu_coefs:
+                    self.cpa_at_time[mu] = [[nan, nan, nan]]
+                    self.cpb_at_time[mu] = [[nan, nan, nan]]
+                    self.cn_at_time[mu] =  [[nan, nan, nan]]
+                    self.cf_at_time[mu] =  [[nan, nan, nan]]
+                    self.ids_at_time[mu] = None
             if self._with_contact_forces:
                 for mu in self._mu_coefs:
                     self.cpa[mu] = numpy_support.numpy_to_vtk(
@@ -1757,6 +1759,7 @@ class VView(object):
             assert shape_type == 'primitive'
             primitive = self.io.shapes()[shape_name].attrs['primitive']
             attrs = self.io.shapes()[shape_name][:][0]
+
             if primitive == 'Sphere':
                 source = vtk.vtkSphereSource()
                 source.SetRadius(attrs[0])
@@ -1814,16 +1817,68 @@ class VView(object):
                 source.AddInputData(data)
 
             elif primitive == 'Disk':
-                source = vtk.vtkCylinderSource()
-                source.SetResolution(100)
-                source.SetRadius(attrs[0])
-                source.SetHeight(self.opts.depth_2d)
+                cylinder = vtk.vtkCylinderSource()
+                cylinder.SetResolution(100)
+                cylinder.SetRadius(attrs[0])
+                cylinder.SetHeight(self.opts.depth_2d)
+                cylinder.Update()
+
+                line1 = vtk.vtkLineSource()
+                line1.SetPoint1(attrs[0]/2, self.opts.depth_2d, 0)
+                line1.SetPoint2(attrs[0], self.opts.depth_2d, 0)
+
+                tube1 = vtk.vtkTubeFilter()
+                tube1.SetInputConnection(line1.GetOutputPort())
+                tube1.SetRadius(attrs[0]/20)
+                tube1.SetNumberOfSides(10)
+                tube1.Update()
+
+                data = vtk.vtkMultiBlockDataSet()
+                data.SetNumberOfBlocks(2)
+                data.SetBlock(0, tube1.GetOutput())
+                data.SetBlock(1, cylinder.GetOutput())
+
+                source = vtk.vtkMultiBlockDataGroupFilter()
+                add_compatiblity_methods(source)
+                source.AddInputData(data)
+
+            elif primitive == 'Circle':
+                circle = vtk.vtkDiskSource()
+                circle.SetOuterRadius(attrs[0]*1.005)
+                circle.SetInnerRadius(attrs[0])
+                circle.SetRadialResolution(90)
+                circle.SetCircumferentialResolution(90)
+
+                source = circle
 
             elif primitive == 'Box2d':
                 source = vtk.vtkCubeSource()
                 source.SetXLength(attrs[0])
                 source.SetYLength(attrs[1])
                 source.SetZLength(self.opts.depth_2d)
+
+            elif primitive == 'Line':
+                line = vtk.vtkLineSource()
+                (a, b, c) = attrs
+                a2pb2 = a*a+b*b
+                assert (a2pb2 > 0)
+                x0 = a*c/a2pb2
+                y0 = a*b/a2pb2
+
+                x1 = x0 + b
+                y1 = y0 - a
+
+                x2 = x0 - b
+                y2 = y0 + a
+
+                line.SetPoint1(x1, y1, 0)
+                line.SetPoint2(x2, y2, 0)
+
+                source = vtk.vtkTubeFilter()
+                source.SetInputConnection(line.GetOutputPort())
+                source.SetRadius(.1)
+                source.SetNumberOfSides(30)
+                source.Update()
 
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
@@ -2515,6 +2570,9 @@ class VView(object):
             slider_widget.AddObserver("InteractionEvent", self.input_observer.time)
         else:
             self.input_observer = InputObserver(self)
+
+        self.input_observer.set_opacity()
+
         self.interactor_renderer.AddObserver('KeyPressEvent', self.input_observer.key)
 
         self.interactor_renderer.AddObserver(

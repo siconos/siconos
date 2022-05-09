@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,22 +26,19 @@
 class Contact2dR : public Lagrangian2d2DR
 {
 private:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(Contact2dR);
 
 public:
-  Contact2dR();
+  Contact2dR():Lagrangian2d2DR{} {};
 
   /**/
-  virtual ~Contact2dR() = default;
-
+  virtual ~Contact2dR() noexcept = default;
 
   /* For users that may require extra information about contacts. */
-  SP::SiconosVector base[2];
-  SP::SiconosShape shape[2];
-  SP::SiconosContactor contactor[2];
-  SP::RigidBody2dDS ds[2];
+  SP::BodyShapeRecord bodyShapeRecordA;
+  SP::BodyShapeRecord bodyShapeRecordB;
+
 
   // /** to compute the output y = h(q,z) of the Relation
   //     \param q coordinates of the dynamical systems involved in the relation

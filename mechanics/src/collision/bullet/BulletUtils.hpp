@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "NonSmoothLaw.hpp"
-#include "SiconosException.hpp"
+#ifndef BulletUtils_hpp
+#define BulletUtils_hpp
 
+#include "BulletSiconosFwd.hpp"
+#include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <btBulletCollisionCommon.h>
 
-// Constructors
-// warning -> this is an abstract class, so constructors are usefull only for
-// calls in derived classes constructors
+void display_info_collision_object(const btCollisionObject* collisionObject);
+void display_info_manifold(const btPersistentManifold& manifold);
+void display_info_contact_point(const btManifoldPoint& cp);
+void display_info_btConvexHullShape(const btConvexHullShape& cp);
 
-NonSmoothLaw::NonSmoothLaw(unsigned int size): _size(size)
-{}
-
-NonSmoothLaw::~NonSmoothLaw()
-{}
-
-bool NonSmoothLaw::isVerified() const
-{
-  THROW_EXCEPTION("NonSmoothLaw::isVerified, not yet implemented!");
-  return false;
-}
-
-
+#endif

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,58 +14,46 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /** \file CircleCircleR.hpp
  */
 #ifndef CircularR_h
 #define CircularR_h
 
-#include "MechanicsFwd.hpp"
 #include "Interaction.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "MechanicsFwd.hpp"
 
 /**  \class CircularR
  *   \brief Two circle relation - Inherits from LagrangianScleronomousR
  */
 
-class CircularR : public LagrangianScleronomousR
-{
+class CircularR : public LagrangianScleronomousR {
 protected:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(CircularR);
 
   double _r1, _r2;
 
-  CircularR() : LagrangianScleronomousR() {};
-
 public:
-
   /** Constructor
 
   \param disk1 radius
   \param disk2 radius
   */
-  CircularR(double r1, double r2): _r1(r1), _r2(r2) {};
+  CircularR(double r1, double r2) : _r1(r1), _r2(r2){};
 
-  double getRadius1()
-  {
-    return _r1;
-  };
+  virtual ~CircularR() noexcept = default;
 
-  double getRadius2()
-  {
-    return _r2;
-  };
+  double getRadius1() const { return _r1; };
 
-  virtual double distance(double, double, double, double, double, double)
-  {
+  double getRadius2() const { return _r2; };
+
+  virtual double distance(double, double, double, double, double, double) {
     assert(0);
-    return(0);
+    return (0);
   };
-
-  ~CircularR() {};
 
 };
 #endif /* CircularR_h */

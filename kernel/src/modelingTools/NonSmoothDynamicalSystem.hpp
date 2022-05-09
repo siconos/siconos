@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -327,9 +327,9 @@ public:
   }
 
   /** get all the dynamical systems declared in the NonSmoothDynamicalSystem.
-   * into a std::vector<SP::DynamicalSystems>
+   * into a std::vector<SP::DynamicalSystem>
    * Useful for iterates on DynamicalSystems in Python for instance
-   * \return std::vector<SP::DynamicalSystems>
+   * \return std::vector<SP::DynamicalSystem>
    */
   std::vector<SP::DynamicalSystem> dynamicalSystemsVector() const;
 
@@ -398,6 +398,13 @@ public:
   {
     return _topology->getInteraction(name);
   }
+
+  /** get all the interactions declared in the NonSmoothDynamicalSystem.
+   * into a std::vector<SP::Interaction>
+   * Useful for iterates on Interaction in Python for instance
+   * \return std::vector<SP::Interaction>
+   */
+  std::vector<SP::Interaction> InteractionsVector() const;
 
   /** link an interaction to two dynamical systems
    * \param inter the interaction

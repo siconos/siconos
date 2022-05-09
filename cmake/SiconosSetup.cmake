@@ -176,8 +176,7 @@ endif()
 
 # -- Python bindings --
 if(WITH_PYTHON_WRAPPER)
-  find_package(SWIG 3.0 REQUIRED)
-  include(${SWIG_USE_FILE})
+  include(swig_setup)
 endif()
 
 # ---- Extra 'developers only' options ----

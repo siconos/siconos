@@ -56,6 +56,7 @@
   REGISTER(Bullet2d3DR)                         \
   REGISTER(RigidBodyDS)                         \
   REGISTER(RigidBody2dDS)                       \
+  REGISTER(StaticBody)                          \
   REGISTER(ContactR)                            \
   REGISTER(Contact5DR)                          \
   REGISTER(Contact2dR)                          \
@@ -74,11 +75,12 @@
   REGISTER(SiconosMesh)                         \
   REGISTER(SiconosHeightMap)                    \
   REGISTER(SiconosDisk)                         \
-  REGISTER(SiconosBox2d)                         \
+  REGISTER(SiconosBox2d)                        \
   REGISTER(SiconosConvexHull2d)                  \
-  REGISTER(SiconosCollisionQueryResult)         \
+  REGISTER(SiconosCollisionQueryResult)          \
   REGISTER(SiconosCollisionManager)             \
-  REGISTER(SiconosBulletCollisionManager)
+  REGISTER(SiconosBulletCollisionManager)       \
+  REGISTER(BodyShapeRecord)
 
 #include <SiconosVisitables.hpp>
 

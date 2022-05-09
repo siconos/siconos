@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file NewtonImpactFrictionNSL.hpp
   Newton-Impact Non-Smooth Law
 */
@@ -27,12 +27,11 @@
 /** Newton Impact-Friction Non Smooth Law
  *
  */
-class NewtonImpactFrictionNSL : public NonSmoothLaw
-{
+class NewtonImpactFrictionNSL : public NonSmoothLaw {
 
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(NewtonImpactFrictionNSL);
 
   /** The Newton coefficient of restitution
@@ -47,7 +46,6 @@ private:
   NewtonImpactFrictionNSL();
 
 public:
-
   /** basic constructor
    *  \param size size of the ns law
    */
@@ -67,68 +65,49 @@ public:
   /** check the ns law to see if it is verified
    *  \return a boolean value whioch determines if the NS Law is verified
    */
-  bool isVerified(void) const;
+  bool isVerified(void) const override;
 
   // GETTERS/SETTERS
 
   /** getter of en
    *  \return the value of en
    */
-  inline double en() const
-  {
-    return _en;
-  };
+  inline double en() const { return _en; };
 
   /** setter of en
    *  \param newVal a double to set en
    */
-  inline void setEn(double newVal)
-  {
-    _en = newVal;
-  };
+  inline void setEn(double newVal) { _en = newVal; };
 
   /** getter of et
    *  \return the value of et
    */
-  inline double et() const
-  {
-    return _et;
-  };
+  inline double et() const { return _et; };
 
   /** setter of et
    * \param newVal a double to set et
    */
-  inline void setEt(double newVal)
-  {
-    _et = newVal;
-  };
+  inline void setEt(double newVal) { _et = newVal; };
 
   /** getter of mu
    * \return the value of mu
    */
-  inline double mu() const
-  {
-    return _mu;
-  };
+  inline double mu() const { return _mu; };
 
   /** setter of mu
    * \param newVal a double to set mu
    */
-  inline void setMu(double newVal)
-  {
-    _mu = newVal;
-  };
+  inline void setMu(double newVal) { _mu = newVal; };
 
   // OTHER FUNCTIONS
 
   /** print the data to the screen
    */
-  void display() const;
+  void display() const override;
 
   /** Visitors hook
    */
   ACCEPT_STD_VISITORS();
-
 };
 DEFINE_SPTR(NewtonImpactFrictionNSL)
 #endif // NewtonImpactFrictionNSL_H

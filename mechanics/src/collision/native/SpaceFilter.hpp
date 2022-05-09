@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SpaceFilter.hpp
  *  \brief Spatial filtering of interactions for 2D/3D objects
  */
-
 
 /** Basic broad phase contact detection between 2D/3D mechanical systems
  *
@@ -36,10 +35,11 @@
 #define SpaceFilter_hpp
 
 #include "MechanicsFwd.hpp"
+
+#include <InteractionManager.hpp>
 #include <SiconosFwd.hpp>
 #include <SiconosSerialization.hpp>
 #include <SiconosVisitor.hpp>
-#include <InteractionManager.hpp>
 
 /* local forwards (see SpaceFilter_impl.hpp) */
 DEFINE_SPTR(space_hash);
@@ -49,14 +49,12 @@ DEFINE_SPTR(CircleCircleRDeclaredPool);
 DEFINE_SPTR(Hashed);
 
 class SpaceFilter : public InteractionManager,
-                    public std::enable_shared_from_this<SpaceFilter>
-{
+                    public std::enable_shared_from_this<SpaceFilter> {
 
 protected:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(SpaceFilter);
-
 
   /** the bounding box factor is multiplicated by the largest object
       dimension */
@@ -75,27 +73,22 @@ protected:
   SP::space_hash _hash_table;
 
   /* relations pool */
-  SP::DiskDiskRDeclaredPool  diskdisk_relations;
-  SP::DiskPlanRDeclaredPool  diskplan_relations;
+  SP::DiskDiskRDeclaredPool diskdisk_relations;
+  SP::DiskPlanRDeclaredPool diskplan_relations;
   SP::CircleCircleRDeclaredPool circlecircle_relations;
 
-  void _PlanCircularFilter(SP::Simulation,
-                           double A, double B, double C,
+  void _PlanCircularFilter(SP::Simulation, double A, double B, double C,
                            double xCenter, double yCenter, double width,
                            SP::CircularDS ds);
 
-  void _MovingPlanCircularFilter(SP::Simulation,
-                                 unsigned int i,
-                                 SP::CircularDS ds,
-                                 double time);
+  void _MovingPlanCircularFilter(SP::Simulation, unsigned int i,
+                                 SP::CircularDS ds, double time);
 
-  void _PlanSphereLDSFilter(SP::Simulation,
-                            double A, double B, double C, double D,
-                            SP::SphereLDS ds);
+  void _PlanSphereLDSFilter(SP::Simulation, double A, double B, double C,
+                            double D, SP::SphereLDS ds);
 
-  void _PlanSphereNEDSFilter(SP::Simulation,
-                             double A, double B, double C, double D,
-                             SP::SphereNEDS ds);
+  void _PlanSphereNEDSFilter(SP::Simulation, double A, double B, double C,
+                             double D, SP::SphereNEDS ds);
 
   /* visitors defined as Inner class */
   /* note : cf Thinking in C++, vol2, the inner class idiom. */
@@ -104,8 +97,6 @@ protected:
   struct _CircularFilter;
   struct _SphereLDSFilter;
   struct _SphereNEDSFilter;
-
-
 
   /* the body hasher */
   struct _BodyHash;
@@ -121,7 +112,6 @@ protected:
   /* to compute distance */
   struct _DiskDistance;
 
-
   friend struct SpaceFilter::_CircularFilter;
   friend struct SpaceFilter::_SphereLDSFilter;
   friend struct SpaceFilter::_SphereNEDSFilter;
@@ -133,14 +123,10 @@ protected:
   friend struct SpaceFilter::_DiskDistance;
 
 public:
+  SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
+              SP::SiconosMatrix plans, SP::FMatrix moving_plans);
 
-  SpaceFilter(unsigned int bboxfactor,
-              unsigned int cellsize,
-              SP::SiconosMatrix plans,
-              SP::FMatrix moving_plans);
-
-  SpaceFilter(unsigned int bboxfactor,
-              unsigned int cellsize,
+  SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
               SP::SiconosMatrix plans);
 
   SpaceFilter();
@@ -163,19 +149,17 @@ public:
   /** get parameters
    */
 
-  inline unsigned int bboxfactor()
-  {
-    return _bboxfactor;
-  };
-  inline unsigned int cellsize()
-  {
-    return _cellsize;
-  };
+  inline unsigned int bboxfactor() { return _bboxfactor; };
+  inline unsigned int cellsize() { return _cellsize; };
+
+  void setBBoxfactor(unsigned int value) { _bboxfactor = value; }
+
+  void setCellsize(unsigned int value) { _cellsize = value; }
 
   /** get the neighbours
    * */
-//  std::pair<space_hash::iterator, space_hash::iterator> neighbours(SP::Hashed h);
-
+  //  std::pair<space_hash::iterator, space_hash::iterator>
+  //  neighbours(SP::Hashed h);
 
   /** Just test the presence of neighbours.
       \param h hashed component of a body.
@@ -190,11 +174,13 @@ public:
   /** Broadphase contact detection: add interactions in indexSet 0.
    *  \param simulation the current simulation setup
    */
-  virtual void updateInteractions(SP::Simulation simulation);
+  void updateInteractions(SP::Simulation simulation) override;
+
+  void insertLine(double a, double b, double c);
 
   /** Destructor.
    */
-  virtual ~SpaceFilter() {};
+  virtual ~SpaceFilter(){};
 
   /** visitor hook
    */

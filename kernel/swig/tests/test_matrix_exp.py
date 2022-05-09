@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2021 INRIA.
+# Copyright 2022 INRIA.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,10 +16,9 @@
 # limitations under the License.
 
 import numpy as np
-import siconos.kernel as SK
 import siconos.numerics as SN
 from scipy.linalg import expm
-from siconos.functions import compute_dt_matrices
+from siconos.utils.functions import compute_dt_matrices
 
 kmax = 10 if SN.compiled_in_debug_mode() else 100
 
@@ -31,31 +28,30 @@ def check_error(n, m, h, TV=False):
     failed = False
     A = np.random.random((n, n))
     B = np.random.random((n, m))
-    
+
     try:
         Ainv = np.linalg.inv(A)
         Aexp = expm(A * h)
         Psi = Ainv.dot((Aexp - np.eye(n)).dot(B))
         err_inv = np.linalg.norm(A.dot(np.linalg.inv(A)) - np.eye(n))
-    except Exception as e :
-        print('Exception in check_error(I) :', e)
+    except Exception as e:
+        print("Exception in check_error(I) :", e)
         pass
 
-    print('err_inv:', err_inv)
+    print("err_inv:", err_inv)
     if err_inv < 1.0e-12:
         try:
             (AexpS, PsiS) = compute_dt_matrices(A, B, h, TV)
             err_phi = np.linalg.norm((Aexp - AexpS))
             err_psi = np.linalg.norm(Psi - PsiS)
             if err_phi > 5.0e-12 or err_psi > 5.0e-12:
-                print('err_phi', err_phi, 'err_psi', err_psi)
+                print("err_phi", err_phi, "err_psi", err_psi)
                 failed = True
-        except Exception as e :
-            print('Exception in check_error(II) :', e)
+        except Exception as e:
+            print("Exception in check_error(II) :", e)
             print(A.shape)
             failed = True
     return failed
-
 
 
 def test_TI():
@@ -84,7 +80,6 @@ def test_SISO():
     assert not err
 
 
-
 def test_TV():
     h = 1.0e-4
     k = 0
@@ -97,6 +92,7 @@ def test_TV():
 
     assert not err
 
-if __name__ == '__main__':
-    print('test_TI')
+
+if __name__ == "__main__":
+    print("test_TI")
     test_TI()

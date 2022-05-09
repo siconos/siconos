@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include "NumericsSparseMatrix.h"
 #include "CSparseMatrix.h"
 
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 #ifdef DEBUG_MESSAGES
@@ -354,7 +355,7 @@ void SimpleMatrix::Factorize()
   {
     if (isPositiveDefinite()) // Cholesky Factorization
     {
-      //std::cout << "Cholesky Factorize"<< std::endl;
+      DEBUG_PRINT("Cholesky Factorize\n");
       info  = NM_Cholesky_factorize(NM);
 
       if(info != 0)
@@ -374,6 +375,7 @@ void SimpleMatrix::Factorize()
   }
   else //  LU Factorization  by default
   {
+    DEBUG_PRINT("LU Factorize\n");
     info  = NM_LU_factorize(NM);
 
     if(info != 0)
@@ -397,6 +399,8 @@ void SimpleMatrix::Factorize()
 
 void SimpleMatrix::Solve(SiconosMatrix &B)
 {
+  DEBUG_BEGIN("SimpleMatrix::Solve(SiconosMatrix &B)\n");
+
   if(B.isBlock())
     THROW_EXCEPTION("SimpleMatrix Solve(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
 
@@ -450,7 +454,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   {
     if (isPositiveDefinite()) // Cholesky Solving
     {
-      //std::cout << "Cholesky Solve"<< std::endl;
+      DEBUG_PRINT("Cholesky Solve\n");
 #ifdef SPARSE_RHS_COPY_TO_DENSE
       info  = NM_Cholesky_solve(NM, b, B.size(1));
 #else
@@ -468,6 +472,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
   }
   else //  LU Factorization  by default
   {
+    DEBUG_PRINT("LU Solve\n");
 #ifdef SPARSE_RHS_COPY_TO_DENSE
     info  = NM_LU_solve(NM, b, B.size(1));
 #else
@@ -493,11 +498,12 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
 
   if(info != 0)
     THROW_EXCEPTION("SimpleMatrix::Solve failed.");
+  DEBUG_END("SimpleMatrix::Solve(SiconosMatrix &B)\n");
 }
 
 void SimpleMatrix::Solve(SiconosVector &B)
 {
-  DEBUG_BEGIN("SimpleMatrix::PLUSolve(SiconosVector &B)\n");
+  DEBUG_BEGIN("SimpleMatrix::Solve(SiconosVector &B)\n");
 
   if(!isFactorized())
   {
@@ -537,7 +543,7 @@ void SimpleMatrix::Solve(SiconosVector &B)
   {
     if (isPositiveDefinite()) // Cholesky Factorization
     {
-      //std::cout << "Cholesky Solve"<< std::endl;
+      DEBUG_PRINT("Cholesky Solve\n");
       info  = NM_Cholesky_solve(NM, b, 1);
 
       if(info != 0)
@@ -552,6 +558,7 @@ void SimpleMatrix::Solve(SiconosVector &B)
   }
   else //  LU Factorization  by default
   {
+    DEBUG_PRINT("LU Solve\n");
     info  = NM_LU_solve(NM, b, 1);
 
     if(info != 0)

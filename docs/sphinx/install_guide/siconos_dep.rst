@@ -5,8 +5,16 @@ Siconos required and optional dependencies
 
 * a compiler suite, with c++, c and gfortran compilers.
 
-* cmake (version > 2.8.7, 3.x will be better) (https://cmake.org)
+ c++ 17 compatibility is requuired.
 
+* cmake (version > 3.14) (https://cmake.org)
+
+  cmake is very easy to install or update, whatever your system is:
+
+  .. code-block:: bash
+
+     python3 -m pip install cmake
+  
 * boost (http://www.boost.org)
 
 * blas and lapack (see :ref:`about_blas_lapack`)
@@ -19,8 +27,8 @@ To generate the documentation, you will need :
 
 For the python bindings:
 
-* python (>= 2.7)
-* swig (>= 2.0)
+* python (>= 3.6)
+* swig (>= 3.0)
 
 To run tests:
 

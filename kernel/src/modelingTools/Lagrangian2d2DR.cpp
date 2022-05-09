@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #include "Lagrangian2d2DR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
-
+#include "SimpleMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -27,7 +27,6 @@
 
 void Lagrangian2d2DR::initialize(Interaction& inter)
 {
-  LagrangianR::initialize(inter);
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
 
   if((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6))
@@ -35,7 +34,7 @@ void Lagrangian2d2DR::initialize(Interaction& inter)
     THROW_EXCEPTION("Lagrangian2d2DR::initialize(Interaction& inter). The size of ds must of size 3");
   }
   unsigned int qSize = 3 * (inter.getSizeOfDS() / 3);
-  _jachq.reset(new SimpleMatrix(2, qSize));
+  _jachq = std::make_shared<SimpleMatrix>(2, qSize);
 }
 
 double Lagrangian2d2DR::distance() const

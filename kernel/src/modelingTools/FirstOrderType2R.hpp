@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,18 +47,23 @@ typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
  * - g: saved in DS as r ( input[0])
  * - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
+ * 
+ * Remark FP: at the time, this class works only on the linear case, when:
+ *   - \f$ \nabla_x h = C \f$, \f$ \nabla_\lambda h = D \f$ and  \f$ \nabla_\lambda g = K \f$ are constants.
+ * Trying to update these jacobians with plugins functions leads to an exception.
+ * Solution: create a derived class and overide computeJachx and computeJach.
  */
 class FirstOrderType2R : public FirstOrderR
 {
 protected:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(FirstOrderType2R);
+
 
 public:
 
   /** Basic contructor */
-  FirstOrderType2R();
+  FirstOrderType2R() : FirstOrderR(RELATION::Type2R){};
 
   /** data constructor
    *  \param pluginh name of the plugin to compute h
@@ -76,17 +81,17 @@ public:
 
   /** destructor
   */
-  ~FirstOrderType2R() {};
+  virtual ~FirstOrderType2R() noexcept = default;
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
    */
-  virtual void initialize(Interaction& inter);
+  void initialize(Interaction& inter) override;
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
-  virtual void checkSize(Interaction& inter);
+  inline void checkSize(Interaction& inter) override {};
 
   /** to compute the output y = h(t,x,...) of the Relation
       \param time current time value
@@ -131,28 +136,28 @@ public:
   *  \param inter Interaction using this Relation
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter,
-                             unsigned int level = 0);
+  void computeOutput(double time, Interaction& inter,
+                             unsigned int level = 0) override;
 
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter,
-                            unsigned int level = 0);
+  void computeInput(double time, Interaction& inter,
+                            unsigned int level = 0) override;
 
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise
    */
-  virtual bool requireResidu()
+  bool requireResidu() override
   {
     return true;
   }
 
-  virtual void computeJach(double time, Interaction& inter);
+  void computeJach(double time, Interaction& inter) override;
 
-  virtual void computeJacg(double time, Interaction& inter);
+  void computeJacg(double time, Interaction& inter) override;
 
   ACCEPT_STD_VISITORS();
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file NewtonEulerR.hpp
 
  */
 #ifndef NEWTONEULERRELATION_H
 #define NEWTONEULERRELATION_H
 
-#include "Relation.hpp"
 #include "PluginTypes.hpp"
+#include "Relation.hpp"
 
 /** NewtonEuler (Non Linear) Relation (generic interface)
  *
@@ -35,31 +35,30 @@
  * If y = h(...), all the gradients of are handled by G object.
  * For example, G[0] = \f$ \nabla_q h(q,...) \f$.
  *
- * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
- * For more details, see the DevNotes.pdf, chapter NewtonEuler.
+ * In corresponding derived classes, h and Gi are connected to plug-in functions
+ * (user-defined). For more details, see the DevNotes.pdf, chapter NewtonEuler.
  */
 
-class NewtonEulerR : public Relation
-{
+class NewtonEulerR : public Relation {
 public:
-// add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS  {z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
+  // add deltaq ??? -- xhub 30/03/2014
+  enum NewtonEulerRDS { z, q0, velocity, dotq, p0, p1, p2, DSlinkSize };
 
 protected:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(NewtonEulerR);
 
   /** Jacobian matrices of H */
   /** Jacobian matrices of \f$y = h(t,q,\dot q,\ldots)\f$ */
 
-  /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
-   *  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
+  /**The Jacobian of the constraints with respect to the generalized coodinates
+   * \f$q\f$ i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
    */
   SP::SimpleMatrix _jachq;
 
-  /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
-   *  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
+  /**The Jacobian of the constraints with respect to the generalized velocities
+   * \f$\dot q\f$ i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
    */
   SP::SimpleMatrix _jachqDot;
 
@@ -78,12 +77,14 @@ protected:
   SP::SiconosVector _e;
   /*Used for the projection formulation*/
 
-  /**vector of contact forces, ie: _contactForce = B lambda. Useful for the end user.*/
+  /**vector of contact forces, ie: _contactForce = B lambda. Useful for the end
+   * user.*/
   SP::SiconosVector _contactForce;
 
   /**updated in computeJachqT:
   In the case of the bilateral constrains, it is _jachq._T.
-  In the case of a local frame, _jachqT is built from the geometrical datas(local frame, point of contact).*/
+  In the case of a local frame, _jachqT is built from the geometrical
+  datas(local frame, point of contact).*/
   SP::SimpleMatrix _jachqT;
 
   /** local storage of _T as working vector to compute JachqT from q */
@@ -92,35 +93,30 @@ protected:
   /** basic constructor
   \param lagType the sub-type of the relation
   */
-  NewtonEulerR(RELATION::SUBTYPES lagType): Relation(RELATION::NewtonEuler, lagType) {}
-
-
+  NewtonEulerR(RELATION::SUBTYPES lagType)
+      : Relation(RELATION::NewtonEuler, lagType)
+  {
+  }
 
 public:
-  NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR){};
-
+  NewtonEulerR() : Relation(RELATION::NewtonEuler, RELATION::NonLinearR){};
 
   /** destructor
-  */
-  virtual ~NewtonEulerR() {};
+   */
+  virtual ~NewtonEulerR(){};
 
   // -- Jach --
 
   /** get a pointer on matrix Jach[index]
-  *  \return a pointer on a SimpleMatrix
-  */
-  inline SP::SimpleMatrix jachq() const
-  {
-    return _jachq;
-  }
+   *  \return a pointer on a SimpleMatrix
+   */
+  inline SP::SimpleMatrix jachq() const { return _jachq; }
 
-  //proj_with_q  inline SP::SimpleMatrix jachqProj() const { return _jachqProj; }
+  // proj_with_q  inline SP::SimpleMatrix jachqProj() const { return _jachqProj;
+  // }
   void setJachq(SP::SimpleMatrix newJachq);
 
-  inline SP::SimpleMatrix jachqDot() const
-  {
-    return _jachqDot;
-  }
+  inline SP::SimpleMatrix jachqDot() const { return _jachqDot; }
   inline SP::SimpleMatrix dotJachq() const
   {
     assert(_dotjachq);
@@ -133,41 +129,23 @@ public:
     return _secondOrderTimeDerivativeTerms;
   };
 
-  inline SP::SimpleMatrix jachlambda() const
-  {
-    return _jachlambda;
-  }
-  inline SP::SimpleMatrix jacglambda() const
-  {
-    return _jacglambda;
-  }
-  inline void setE(SP::SiconosVector newE)
-  {
-    _e = newE;
-  }
+  inline SP::SimpleMatrix jachlambda() const { return _jachlambda; }
+  inline SP::SimpleMatrix jacglambda() const { return _jacglambda; }
+  inline void setE(SP::SiconosVector newE) { _e = newE; }
 
-  inline SP::SimpleMatrix jachqT() const
-  {
-    return _jachqT;
-  }
-  inline void setJachqT(SP::SimpleMatrix newJachqT)
-  {
-    _jachqT = newJachqT;
-  }
-  inline SP::SimpleMatrix H() const
-  {
-    return _jachqT;
-  }
+  inline SP::SimpleMatrix jachqT() const { return _jachqT; }
+  inline void setJachqT(SP::SimpleMatrix newJachqT) { _jachqT = newJachqT; }
+  inline SP::SimpleMatrix H() const  override{ return _jachqT; }
 
   /** set Jach[index] to pointer newPtr (pointer link)
-  *  \param newPtr the new matrix
-  */
+   *  \param newPtr the new matrix
+   */
   void setJachqPtr(SP::SimpleMatrix newPtr);
 
   /** Plugin object for the time--derivative of Jacobian i.e.
-  * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
-  * stored in _dotjachq
-  */
+   * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
+   * stored in _dotjachq
+   */
   SP::PluggedObject _plugindotjacqh;
 
   /**  the additional  terms of the second order time derivative of y
@@ -177,39 +155,35 @@ public:
    */
   SP::SiconosVector _secondOrderTimeDerivativeTerms;
 
-
   /** initialize components specific to derived classes.
    * \param inter  Interaction associated with the Relation
    */
-  virtual void initialize(Interaction& inter);
+  void initialize(Interaction &inter) override;
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
-  virtual void checkSize(Interaction& inter);
+  void checkSize(Interaction &inter) override;
 
   /** to compute the output y = h(t,q,z) of the Relation
       \param time current time value
       \param q coordinates of the dynamical systems involved in the relation
       \param y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector &q0, SiconosVector &y);
 
   /** default function to compute jacobianH
    * \param time current time
    * \param inter the interaction using this relation
    */
 
-  virtual void computeJachlambda(double time, Interaction& inter)
-  {
-    ;
-  }
+  virtual void computeJachlambda(double time, Interaction &inter) { ; }
   /** compute the jacobian of h w.r.t. q
    * \param time current time
    * \param inter the interaction using this relation
    * \param q0  the container of the block vector to the dynamical system
    */
-  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0)
+  virtual void computeJachq(double time, Interaction &inter, SP::BlockVector q0)
   {
     ;
   }
@@ -218,40 +192,31 @@ public:
    * \param time current time
    * \param inter the interaction using this relation
    */
-  virtual void computeJachqDot(double time, Interaction& inter)
+  virtual void computeJachqDot(double time, Interaction &inter)
   {
-    /* \warning. This method should never be called, since we are only considering
-     * holonomic NewtonEulerR up to now
+    /* \warning. This method should never be called, since we are only
+     * considering holonomic NewtonEulerR up to now
      */
-    assert(0) ;
+    assert(0);
   }
-  virtual void computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot);
+  virtual void computeDotJachq(double time, const BlockVector &workQ,
+                               BlockVector &workZ, const BlockVector &workQdot);
 
-
   /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
    * \param time current time
    * \param inter the interaction using this relation
    */
-  virtual void computeJacglambda(double time, Interaction& inter)
-  {
-    ;
-  }
+  virtual void computeJacglambda(double time, Interaction &inter) { ; }
   /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
    * \param time current time
    * \param inter the interaction using this relation
    */
-  virtual void computeJacgq(double time, Interaction& inter)
-  {
-    ;
-  }
+  virtual void computeJacgq(double time, Interaction &inter) { ; }
   /** compute the jacobian of h w.r.t. \f$\dot{q}\f$
    * \param time current time
    * \param inter the interaction using this relation
    */
-  virtual void computeJacgqDot(double time, Interaction& inter)
-  {
-    ;
-  }
+  virtual void computeJacgqDot(double time, Interaction &inter) { ; }
 
   /* default implementation consists in multiplying jachq and T
    * in this implementation we use _T which is consitent which directly
@@ -260,21 +225,20 @@ public:
    *
    *  \param inter interaction that owns the relation
    *  \param q0  the block vector to the dynamical system position
-  */
-  virtual void computeJachqT(Interaction& inter, SP::BlockVector q0);
-
+   */
+  virtual void computeJachqT(Interaction &inter, SP::BlockVector q0);
 
   /** compute all the jacobian of h
    * \param time current time
    * \param inter the interaction using this relation
    */
-  virtual void computeJach(double time, Interaction& inter);
+  void computeJach(double time, Interaction &inter) override;
 
   /** compute all the jacobian of g
    * \param time current time
    * \param inter the interaction using this relation
    */
-  virtual void computeJacg(double time, Interaction& inter)
+  void computeJacg(double time, Interaction &inter) override
   {
     computeJacgq(time, inter);
     computeJacgqDot(time, inter);
@@ -290,60 +254,55 @@ public:
       \param ds2 second ds linked to this interaction (target). If there is
       only one ds in the inter, call this function with ..., ds, ds)
    */
-  void computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2);
+  void computeSecondOrderTimeDerivativeTerms(double time, Interaction &inter,
+                                             VectorOfBlockVectors &DSlink,
+                                             SP::DynamicalSystem ds1,
+                                             SP::DynamicalSystem ds2);
 
   /** to compute output
    * \param time current time
    * \param inter the interaction using this relation
-   * \param derivativeNumber number of the derivative to compute, optional, default = 0.
+   * \param derivativeNumber number of the derivative to compute, optional,
+   * default = 0.
    */
-  virtual void computeOutput(double time, Interaction& inter, unsigned int derivativeNumber = 0);
+  void computeOutput(double time, Interaction &inter,
+                     unsigned int derivativeNumber = 0) override;
 
   /** to compute the input
    * \param time current time
    * \param inter the interaction using this relation
    * \param level number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
+  void computeInput(double time, Interaction &inter,
+                    unsigned int level = 0) override;
 
   /**
-  * return a SP on the C matrix.
-  * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
-  * \return SP::SimpleMatrix
-  */
-  virtual inline SP::SimpleMatrix C() const
-  {
-    return _jachq;
-  }
+   * return a SP on the C matrix.
+   * The matrix C in the linear case, else it returns Jacobian of the output
+   * with respect to x. \return SP::SimpleMatrix
+   */
+  inline SP::SimpleMatrix C() const override { return _jachq; }
   /**
-  * return a SP on the D matrix.
-  * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
-  * \return SP::SimpleMatrix
-  */
-  virtual inline SP::SimpleMatrix D() const
-  {
-    return _jachlambda;
-  }
+   * return a SP on the D matrix.
+   * The matrix D in the linear case, else it returns Jacobian of the output
+   * with respect to lambda. \return SP::SimpleMatrix
+   */
+  virtual inline SP::SimpleMatrix D() const { return _jachlambda; }
   /**
-  * return a SP on the B matrix.
-  * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
-  * \return SP::SimpleMatrix
-  */
-  virtual inline SP::SimpleMatrix B() const
-  {
-    return _jacglambda;
-  }
+   * return a SP on the B matrix.
+   * The matrix B in the linear case, else it returns Jacobian of the input with
+   * respect to lambda. \return SP::SimpleMatrix
+   */
+  virtual inline SP::SimpleMatrix B() const { return _jacglambda; }
   /** A buffer containing the forces due to this.
   It is an output unused for the computation.
   Fix : is it usefull ?
   \return SP::SiconosVector
   */
-  inline SP::SiconosVector contactForce() const
-  {
-    return _contactForce;
-  };
+  inline SP::SiconosVector contactForce() const { return _contactForce; };
+
+  void display() const override {}
 
   ACCEPT_STD_VISITORS();
-
 };
 #endif // NEWTONEULERRELATION_H

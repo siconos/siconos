@@ -1,0 +1,5 @@
+# Doc: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+# Rules: https://llvm.org/docs/CodingStandards.html 
+BasedOnStyle: LLVM
+BreakBeforeBraces: Stroustrup
+IncludeBlocks: Regroup

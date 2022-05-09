@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosVisitor.hpp
   \brief A general visitor interface for siconos objects.
 */
-
 
 #ifndef SiconosVisitor_hpp
 #define SiconosVisitor_hpp
@@ -52,8 +51,8 @@
 
 */
 
-#include "SiconosPointers.hpp"
 #include "SiconosException.hpp"
+#include "SiconosPointers.hpp"
 /* all Siconos classes that may be visited are defined there */
 #include "SiconosVisitables.hpp"
 
@@ -92,9 +91,9 @@
 /** hooks to be inserted in class definition */
 #define ACCEPT_STD_VISITORS()                                           \
   template<typename Archive> friend class SiconosSerializer;            \
-  virtual void accept(SiconosVisitor& tourist) const { tourist.visit(*this); } \
-  virtual void acceptSerializer(SiconosVisitor& serializer) { serializer.visit(*this); } \
-  virtual inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
+  void accept(SiconosVisitor& tourist) const override { tourist.visit(*this); } \
+  void acceptSerializer(SiconosVisitor& serializer) override{ serializer.visit(*this); } \
+  inline Type::Siconos acceptType(FindType& ft) const override { return ft.visit(*this); } \
 
 #define ACCEPT_NONVIRTUAL_VISITORS()                                    \
   template<typename Archive> friend class SiconosSerializer;            \
@@ -103,7 +102,7 @@
   inline Type::Siconos acceptType(FindType& ft) const { return ft.visit(*this); } \
 
 #define ACCEPT_SP_VISITORS()                                            \
-  virtual void acceptSP(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
+  void acceptSP(SP::SiconosVisitor tourist) override{ tourist->visit(shared_from_this()); }
 
 #define ACCEPT_VISITORS()                       \
   ACCEPT_SP_VISITORS()                          \
@@ -211,7 +210,7 @@ struct FindType
 struct SiconosVisitor
 {
   SICONOS_VISITABLES()
-  virtual ~SiconosVisitor() {};
+  virtual ~SiconosVisitor() noexcept = default;
 };
 
 /* some functions in Type namespace */

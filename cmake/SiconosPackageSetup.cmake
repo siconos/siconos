@@ -28,7 +28,8 @@ if(WITH_PYTHON_WRAPPER)
   # deal with files installed for python 
   add_custom_target(uninstall
     echo >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
-    COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/python_install_manifest.txt >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
+    #COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/python_install_manifest.txt >> ${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt
+    COMMAND PYTHONPATH=${SICONOS_PYTHON_INSTALL_DIR} ${PYTHON_EXECUTABLE} -m pip uninstall siconos
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 else()
   add_custom_target(uninstall

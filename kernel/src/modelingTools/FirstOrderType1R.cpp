@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,27 +51,22 @@ void FirstOrderType1R::initialize(Interaction& inter)
   FirstOrderR::initialize(inter);
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = inter.dimension();
-  unsigned int sizeDS = inter.getSizeOfDS();
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
+  auto sizeY = inter.dimension();
+  auto sizeDS = inter.getSizeOfDS();
+  auto& DSlink = inter.linkToDSVariables();
+  auto sizeZ = DSlink[FirstOrderR::z]->size();
 
   VectorOfSMatrices& relationMat = inter.relationMatrices();
   if(!_C)
-    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
+    relationMat[FirstOrderR::mat_C] = std::make_shared<SimpleMatrix>(sizeY, sizeDS);
   if(!_D)
-    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+    relationMat[FirstOrderR::mat_D] = std::make_shared<SimpleMatrix>(sizeY, sizeY);
   if(!_F)
-    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
+    relationMat[FirstOrderR::mat_F]= std::make_shared<SimpleMatrix>(sizeY, sizeZ);
   if(!_B)
-    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
+    relationMat[FirstOrderR::mat_B]= std::make_shared<SimpleMatrix>(sizeDS, sizeY);
 }
 
-
-void FirstOrderType1R::checkSize(Interaction& inter)
-{
-
-}
 void FirstOrderType1R::computeh(double time, const BlockVector& x, BlockVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
@@ -96,7 +91,7 @@ void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned i
 {
   SiconosVector& y = *inter.y(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  auto& DSlink = inter.linkToDSVariables();
   // copy into Siconos continuous memory vector
   computeh(time, *DSlink[FirstOrderR::x], *DSlink[FirstOrderR::z], y);
 }
@@ -107,7 +102,7 @@ void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned in
 
   SiconosVector& lambda = *inter.lambda(level);
 
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  auto& DSlink = inter.linkToDSVariables();
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   BlockVector& r = *DSlink[FirstOrderR::r];
   BlockVector& z = *DSlink[FirstOrderR::z];
@@ -119,7 +114,7 @@ void FirstOrderType1R::computeJachx(double time, const BlockVector& x, BlockVect
 {
   //
   assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
-  if(_C && _pluginJachx)
+  if(_pluginJachx)
   {
     auto xp = x.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
@@ -130,7 +125,7 @@ void FirstOrderType1R::computeJachx(double time, const BlockVector& x, BlockVect
 
 void FirstOrderType1R::computeJachz(double time, const BlockVector& x, BlockVector& z, SimpleMatrix& F)
 {
-  if(_F && _pluginJachz && _pluginJachz->fPtr)
+  if(_pluginJachz && _pluginJachz->fPtr)
   {
     auto xp = x.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
@@ -142,7 +137,7 @@ void FirstOrderType1R::computeJachz(double time, const BlockVector& x, BlockVect
 void FirstOrderType1R::computeJacglambda(double time, const SiconosVector& lambda, BlockVector& z, SimpleMatrix& B)
 {
   assert(_pluginJacglambda && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
-  if(_B && _pluginJacglambda)
+  if(_pluginJacglambda)
   {
     auto zp = z.prepareVectorForPlugin();
     ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), lambda.getArray(), B.size(0), B.getArray(), zp->size(), &(*zp)(0));
@@ -152,8 +147,8 @@ void FirstOrderType1R::computeJacglambda(double time, const SiconosVector& lambd
 
 void FirstOrderType1R::computeJach(double time, Interaction& inter)
 {
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfSMatrices& relationMat = inter.relationMatrices();
+  auto& DSlink = inter.linkToDSVariables();
+  auto& relationMat = inter.relationMatrices();
 
   if(!_C)
   {
@@ -173,8 +168,8 @@ void FirstOrderType1R::computeJach(double time, Interaction& inter)
 
 void FirstOrderType1R::computeJacg(double time, Interaction& inter)
 {
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfSMatrices& relationMat = inter.relationMatrices();
+  auto& DSlink = inter.linkToDSVariables();
+  auto& relationMat = inter.relationMatrices();
   if(!_B)
   {
     computeJacglambda(time, *inter.lambda(0), *DSlink[FirstOrderR::z], *relationMat[FirstOrderR::mat_B]);

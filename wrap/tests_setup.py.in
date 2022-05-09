@@ -1,2 +1,0 @@
-working_dir = "@SICONOS_SWIG_ROOT_DIR@/tests"
-"""Path to data files used in tests."""
