@@ -989,6 +989,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   NumericsMatrix* Qp_F = NULL;
   NumericsMatrix* Qp2 = NULL;
   NumericsMatrix* F2 = NULL;
+  NumericsMatrix * eye_nd = NM_eye(nd);
   double * velocity_t = data->tmp_vault_nd[11];
   double * d_velocity_t = data->tmp_vault_nd[12];
   double * d_reaction_t = data->tmp_vault_nd[13];
@@ -1045,12 +1046,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
     {
-      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
-      {
-        Nesterov_Todd_vector(0, velocity, reaction, nd, n, p);
-        Qp = QRmat(p, nd, n);
-      }
-      else
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_F)
       {
         Qp = NTmat(velocity, reaction, nd, n);
         Qpinv = NTmatinv(velocity, reaction, nd, n);
@@ -1166,10 +1162,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         Nesterov_Todd_vector(2, velocity, reaction, nd, n, p2);
         Qp2 = QRmat(p2, nd, n);
         NM_insert(J, Qp2, m, m);
-        NM_insert(J, NM_eye(nd), m, m + nd);
+        NM_insert(J, eye_nd, m, m + nd);
       }
       NM_insert(J, minus_H, m + nd, 0);
-      NM_insert(J, NM_eye(nd), m + nd, m);
+      NM_insert(J, eye_nd, m + nd, m);
       //NM_insert(J, NM_scalar(nd, -1e-8), m + nd, m + nd);
     }
     else
@@ -1189,9 +1185,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       NM_insert(JR, minus_M, 0, 0);
 
       /* without regularization */
-      NumericsMatrix * eye_nd = NM_eye(nd); // should be done only one time at the beginning
       NM_insert(JR, eye_nd, m, m);
-      eye_nd = NM_free(eye_nd);
 
       /* add a regularization term  */
       /* NM_insert(JR, NM_add(1.0, NM_eye(nd), delta, Qp2),m, m); */
@@ -1477,7 +1471,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       NV_copy(r_rhs_2, m, r_dv);
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD]==SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
       {
-        Qxy(p, r_rhs_2+m, nd, n, r_dr);
+	//       Qxy(p, r_rhs_2+m, nd, n, r_dr);
+	QNTpz(velocity, reaction, r_rhs_2+m, nd, n, r_dr);
       }
       else
       {
@@ -1640,6 +1635,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   free(H);
   NM_clear(minus_M);
   free(minus_M);
+
+  eye_nd = NM_free(eye_nd);
 
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
     fclose(iterates);
