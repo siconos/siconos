@@ -378,7 +378,23 @@ GlobalFrictionContactProblem* globalFrictionContact_fclib_read(const char *path)
     return NULL;
   }
 
-  return from_fclib_global(fclib_problem);
+  GlobalFrictionContactProblem* gfc3d = from_fclib_global(fclib_problem);
+
+  // gfc3d problem points to the following chunks of memory
+  // allocated in fclib_read_global
+  // we set them to NULL before calling fclib_delete_global to keep them
+  fclib_problem->f = NULL;
+  fclib_problem->w = NULL;
+  fclib_problem->mu = NULL;
+  fclib_problem->M->x = NULL;
+  fclib_problem->H->x = NULL;
+  if (fclib_problem->G)
+    fclib_problem->G->x = NULL;
+
+  fclib_delete_global(fclib_problem);
+  free(fclib_problem);
+
+  return gfc3d;
 }
 
 
