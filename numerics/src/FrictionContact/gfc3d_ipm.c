@@ -288,7 +288,7 @@ double relGap(NumericsMatrix * M, const double * f, const double * w, const doub
 }
 
 /* Computation of the projection error |r - proj(r-u)|/max{|r|, |u|} */
-double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
+static double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
 {
    double worktmp[3];
    double out = 0.0;
@@ -468,7 +468,7 @@ static  NumericsMatrix *  QNTpH(const double * const x, const double * const y, 
    f = m-vector
    H = n*d x m matrix
    w = n*d-vector */
-void printDataProbMatlabFile(NumericsMatrix * M, double * f, NumericsMatrix * H, double * w, int d, int n, int m, double * mu, FILE * file)
+static void printDataProbMatlabFile(NumericsMatrix * M, double * f, NumericsMatrix * H, double * w, int d, int n, int m, double * mu, FILE * file)
 {
   fprintf(file,"d = %3i;\n",d);
   fprintf(file,"n = %6i;\n",n);
@@ -515,7 +515,7 @@ void printDataProbMatlabFile(NumericsMatrix * M, double * f, NumericsMatrix * H,
    n = number of contact points
    m = number of degrees of freedom
 */
-void printIteresProbMatlabFile(int iteration, double * v, double * u, double * r, int d, int n, int m, FILE * file)
+static void printIteresProbMatlabFile(int iteration, double * v, double * u, double * r, int d, int n, int m, FILE * file)
 {
   fprintf(file,"v(%3i,:) = [",iteration+1);
   for(int i = 0; i < m; i++)
@@ -541,7 +541,7 @@ void printIteresProbMatlabFile(int iteration, double * v, double * u, double * r
   return;
 }
 
-void printVectorMatlabFile(int iteration, double * vec, int vecSize, FILE * file)
+static void printVectorMatlabFile(int iteration, double * vec, int vecSize, FILE * file)
 {
   fprintf(file,"vector(%4i,:) = [",iteration+1);
   for(int i = 0; i < vecSize; i++)
