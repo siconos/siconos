@@ -5,3 +5,4 @@ pyhull
 #h5py
 lxml
 matplotlib
+vtk
