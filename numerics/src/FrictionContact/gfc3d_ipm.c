@@ -634,9 +634,9 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   data->starting_point->reaction = (double*)calloc(nd, sizeof(double));
   for(unsigned int i = 0; i < nd; ++ i)
   {
-    data->starting_point->reaction[i] = 0.0351;
+    data->starting_point->reaction[i] = 0.01; //0.0351;
     if(i % d == 0)
-      data->starting_point->reaction[i] = 0.2056;
+      data->starting_point->reaction[i] = 0.1; //0.2056;
   }
 
   /* ------ initialize the change of variable matrix P_mu ------- */
@@ -863,6 +863,42 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(nd, data->starting_point->reaction, 1, reaction, 1);
   cblas_dcopy(nd, data->starting_point->velocity, 1, velocity, 1);
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
+
+  /* COMPUTATION OF A NEW STARTING POINT */
+
+  // set the reaction vector to an arbitrary value in the interior of the cone
+  for (unsigned int  i = 0; i<nd; i++)
+      if (i % d == 0)
+	reaction[i] = 0.1;
+      else
+	reaction[i] = 0.01;
+
+  // computation of the global velocity vector: v = M\(H'*r+f)    
+  for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = f[i];
+  NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
+  NM_Cholesky_solve(M, globalVelocity, 1);
+
+  // computation of the velocity u = proj(H*v + w), then move u in the interior of the cone
+  /* for (unsigned int  i = 0; i<nd; i++) */
+  /*   velocity[i] = w[i]; */
+  /* NM_gemv(1.0, H, globalVelocity, 1.0, velocity); */
+  /* for (unsigned int i = 0; i < n; i++) */
+  /*   { */
+  /*     projectionOnCone(velocity+3*i, 0.1); */
+  /*     if (velocity[3*i] == 0) */
+  /* 	{ */
+  /* 	  velocity[3*i] = 0.1; */
+  /* 	  velocity[3*i+1] = 0.01; */
+  /* 	  velocity[3*i+2] = 0.01; */
+  /* 	} */
+  /*   } */
+
+  for (unsigned int  i = 0; i<nd; i++)
+      if (i % d == 0)
+	velocity[i] = 0.1;
+      else
+	velocity[i] = 0.01;
+
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   unsigned int max_iter = options->iparam[SICONOS_IPARAM_MAX_ITER];
@@ -1123,8 +1159,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       break;
     }
 
-    /*    1. Build the Jacobian matrix
-     *
+    /*  Build the Jacobian matrix without reducing the linear system.
+     *       
+     *      
+     *  In the case where the NT scaling is not used, the matrix to factorize is the following:
+     * 
      *         m     nd       nd
      *      |  M     0      -H^T  | m
      *      |                     |
@@ -1132,7 +1171,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
      *      |                     |
      *      | -H     I        0   | nd
      *
-     *  or
+     *  
+     *  In the case where the NT scaling is used, the matrix to factorize is the following:
      *
      *         m     nd       nd
      *      |  M     0      -H^T  | m
@@ -1173,13 +1213,29 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     else
     {
-      /* Create the 2x2 blocks reduced matrix
+      /* Build the Jacobian matrix corresponding to a reduced linear system. The variable du (velocity) is eliminated.
+       * 
+       * In this case, NT scaling is always performed, but two posible ways can be done to solve the linear system. 
+       *
+       * In a first approach, the reduced matrix is of the following form:
+       *
+       *         m       nd
+       *      |  -M      H^T   | m
+       * JR = |                |
+       *      |   H     Qp^2   | nd
+       *
+       * where Qp^2 is the square of the quadratic representation of the vector p.
+       *
+       * A second possibility, which deals with a better contioned matrix, is to factorize the following reduced matrix:
+       *
        *         m       nd
        *      |  -M     QpH^T  | m
        * JR = |                |
        *      |  QpH     I     | nd
        *
-       *  where QpH = Qp * H
+       *  where QpH = Qp * H. 
+       *
+       *  The matrix QpH is computed by means of the function QNTpH.
        */
       JR = NM_create(NM_SPARSE, m + nd, m + nd);
       JR_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
@@ -1345,7 +1401,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       alpha_dual = alpha_primal;
     else
       alpha_primal = alpha_dual;
-
 
     /* updating the gamma parameter used to compute the step-length */
     gmm = gmmp1 + gmmp2 * fmin(alpha_primal, alpha_dual);
