@@ -120,7 +120,7 @@ function(add_swig_sub_module)
   target_include_directories(${target_NAME} PRIVATE ${SICONOS_SWIG_SOURCE_DIR})
   target_include_directories(${target_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   target_include_directories(${target_NAME} PRIVATE ${target_INCLUDES})
-  
+
   # List of siconos modules, used in __init__.py.
   
   # if(WITH_SERIALIZATION)
@@ -187,6 +187,7 @@ function(add_swig_sub_module)
     include(doc_tools)
     # Create the target to generate rst/sphinx from docstrings (swig outputs).
     docstrings2rst(PATH ${python_module_path} NAME ${python_module_name})
+    add_dependencies(${python_module_name}_autodoc ${target_NAME})
   endif()
   
   # Copy __init__.py file if needed

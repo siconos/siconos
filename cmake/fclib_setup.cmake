@@ -14,11 +14,12 @@ if(WITH_FCLIB)
       GIT_TAG           origin/master
       GIT_SHALLOW TRUE
       UPDATE_DISCONNECTED TRUE # Do not update git repo at each run
-      # CMAKE_ARGS FCLIB_HEADER_ONLY=OFF
+      CMAKE_ARGS WITH_CXX ${WITH_CXX}
       LOG_CONFIGURE TRUE
       LOG_BUILD TRUE
       #     LOG_INSTALL TRUE
       )
+    set(WITH_TESTS ${WITH_TESTING})
     FetchContent_MakeAvailable(fclib)
     add_library(FCLIB::fclib ALIAS fclib)
   endif()
