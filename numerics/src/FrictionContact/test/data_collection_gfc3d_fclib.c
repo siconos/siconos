@@ -35,7 +35,7 @@ const char ** data_collection()
   /* 4: Spheres        #200 problems */
   /* 5: Sphere1mm      #41  problems */
   /* 6: Chute*         #182 problems */
-  /*   TOTAL          #1092 problems */
+  /*   TOTAL          #1091 problems */
 
   if (listprob[0]==1)
   {
