@@ -31,8 +31,7 @@
 class Circle : public CircularDS, public std::enable_shared_from_this<Circle>
 {
 private:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(Circle);
 
 
@@ -46,19 +45,19 @@ protected:
 public:
 
   /** Constructor
-      \param radius
-      \param mass
-      \param position vector
-      \param velocity vector
-  */
-
+   *
+   *  \param radius
+   *  \param mass
+   *  \param position vector
+   *  \param velocity vector
+   */
+  
   Circle(double radius, double mass, SP::SiconosVector position, SP::SiconosVector velocity);
 
   /** destructor
    */
   virtual ~Circle();
 
-  /** visitors hook */
   ACCEPT_BASE_SP_VISITORS(LagrangianDS);
 
 };

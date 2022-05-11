@@ -32,7 +32,7 @@
  */
 class TimeSteppingD1Minus : public Simulation {
 private:
-  /** serialization hooks */
+
   ACCEPT_SERIALIZATION(TimeSteppingD1Minus);
 
   /** default constructor */
@@ -79,7 +79,6 @@ public:
   /** integrate DynamicalSystems taking not into account non-smooth part */
   void computeFreeState();
 
-  /** visitors hook */
   ACCEPT_STD_VISITORS();
 };
 

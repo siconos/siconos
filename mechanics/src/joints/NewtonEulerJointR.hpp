@@ -25,19 +25,18 @@
 #include <SiconosFwd.hpp>
 #include <NewtonEulerR.hpp>
 
-/** \class NewtonEulerJointR
- *  \brief This class implements an abstract Joint relation (articulation) between one or two Newton/Euler dynamical systems.
- */
+/** 
+    This class implements an abstract Joint relation (articulation) between one or two Newton/Euler dynamical systems.
+*/
 class NewtonEulerJointR : public NewtonEulerR
 {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(NewtonEulerJointR);
 
   /** A flag determining whether this joint should block
-   * "self-collision", i.e., if true, bodies connected by this joint
-   * will not enter into unilateral contact. */
+   *  "self-collision", i.e., if true, bodies connected by this joint
+   *  will not enter into unilateral contact. */
   bool _allowSelfCollide;
 
   /** Points used to defined the joint constraint. */
@@ -57,82 +56,85 @@ protected:
 public:
 
   /** Empty constructor. The relation may be initialized later by
-   * setPoint, setAbsolute, and setBasePositions. */
+   *  setPoint, setAbsolute, and setBasePositions. */
   NewtonEulerJointR(): NewtonEulerR()
                      , _allowSelfCollide(false)
                      , _absoluteRef(true) {};
 
   /** Set a point for this joint. The role of each point is specific
-   * to the joint subclass. Won't take effect until
-   * setBasePositions is called.
+   *  to the joint subclass. Won't take effect until
+   *  setBasePositions is called.
    *
-   * \param index The index of the points.
-   * \param point A SiconosVector of size 3.
+   *  \param index The index of the points.
+   *  \param point A SiconosVector of size 3.
    */
   void setPoint(unsigned int index, SP::SiconosVector point)
     { _points[index] = point; }
 
   /** Get a point for this joint.
    *
-   * \param index The index of the point.
-   * \return The requested point.
+   *  \param index The index of the point.
+   *  \return The requested point.
    */
   SP::SiconosVector point(unsigned int index)
     { return _points[index]; }
 
   /** Get the vector of points for this joint.
-   * \return The vector of points.
+   *
+   *  \return The vector of points.
    */
   VectorOfVectors& points()
     { return _points; }
 
   /** Set an axis for this joint. The role of each axis is specific to
-   * the joint subclass. Won't take effect until setBasePositions
-   * is called.
+   *  the joint subclass. Won't take effect until setBasePositions
+   *  is called.
    *
-   * \param index The index of the points.
-   * \param axis A SiconosVector of size 3.
+   *  \param index The index of the points.
+   *  \param axis A SiconosVector of size 3.
    */
   void setAxis(unsigned int index, SP::SiconosVector axis)
     { _axes[index] = axis; }
 
   /** Get an axis for this joint.
    *
-   * \param index The index of the point.
-   * \return The requested axis.
+   *  \param index The index of the point.
+   *  \return The requested axis.
    */
   SP::SiconosVector axis(unsigned int index)
     { return _axes[index]; }
 
   /** Get the vector of axes for this joint.
-   * \return The vector of axes.
+   *
+   *  \return The vector of axes.
    */
   VectorOfVectors& axes()
     { return _axes; }
 
   /** Set whether points and axes should be interpreted in absolute or
-   * relative frame. Won't take effect until setBasePositions is
-   * called.
+   *  relative frame. Won't take effect until setBasePositions is
+   *  called.
    *
-   * \param absoluteRef true for absolute frame, false for relative frame.
+   *  \param absoluteRef true for absolute frame, false for relative frame.
    */
   void setAbsolute(bool absoluteRef)
     { _absoluteRef = absoluteRef; }
 
   /** Get whether points and axes are interpreted in absolute or
-   * relative frame.
+   *  relative frame.
    *
-   * \return True for absolute frame, false for relative frame.
+   *  \return True for absolute frame, false for relative frame.
    */
   bool absolute()
     { return _absoluteRef; }
 
   /** Initialize the joint constants based on the provided base positions.
-   * \param q1 A SiconosVector of size 7 indicating translation and
-   *           orientation in inertial coordinates.
-   * \param q2 An optional SiconosVector of size 7 indicating
-   *           translation and orientation; if null, the inertial
-   *           frame will be considered as the second base. */
+   *
+   *  \param q1 A SiconosVector of size 7 indicating translation and
+   *  orientation in inertial coordinates.
+   *  \param q2 An optional SiconosVector of size 7 indicating
+   *  translation and orientation; if null, the inertial
+   *  frame will be considered as the second base. */
   virtual void setBasePositions(SP::SiconosVector q1,
                                 SP::SiconosVector q2=SP::SiconosVector()) = 0;
 
@@ -146,16 +148,16 @@ public:
                                unsigned int axis=0) {}
 
   /** Project a vector onto the given 0-indexed free axis. Useful for
-   * calculating velocities in the axis, or for calculating
-   * axis-aligned forces applied to connected bodies.  If axis is of
-   * angular type (see typeOfDoF), then the projection is onto the
-   * axis of rotation.
+   *  calculating velocities in the axis, or for calculating
+   *  axis-aligned forces applied to connected bodies.  If axis is of
+   *  angular type (see typeOfDoF), then the projection is onto the
+   *  axis of rotation.
    *
-   * \param v The vector to project
-   * \param q0 The state q of one or more NewtonEulerDS
-   * \param ans The vector to receive the projection.
-   * \param absoluteRef If true, v and ans are in the inertial frame,
-   *                    otherwise the q1 frame is assumed.
+   *  \param v The vector to project
+   *  \param q0 The state q of one or more NewtonEulerDS
+   *  \param ans The vector to receive the projection.
+   *  \param absoluteRef If true, v and ans are in the inertial frame,
+   *  otherwise the q1 frame is assumed.
    */
   void projectVectorDoF(const SiconosVector& v, const BlockVector& q0,
                         SiconosVector& ans, int axis,
@@ -166,16 +168,16 @@ public:
                                      bool absoluteRef=true);
 
   /** Retrieve a normal in the direction of a 0-indexed free
-   * axis. Useful for calculating velocities in the axis, or for
-   * calculating axis-aligned forces applied to connected bodies.  If
-   * axis is of angular type (see typeOfDoF), then the returned normal
-   * is the axis of rotation.
+   *  axis. Useful for calculating velocities in the axis, or for
+   *  calculating axis-aligned forces applied to connected bodies.  If
+   *  axis is of angular type (see typeOfDoF), then the returned normal
+   *  is the axis of rotation.
    *
-   * \param ans The vector to receive the projection.
-   * \param q0 The state q of one or more NewtonEulerDS
-   * \param axis 
-   * \param absoluteRef If true, ans is in the inertial frame,
-   *                    otherwise the q1 frame is assumed.
+   *  \param ans The vector to receive the projection.
+   *  \param q0 The state q of one or more NewtonEulerDS
+   *  \param axis 
+   *  \param absoluteRef If true, ans is in the inertial frame,
+   *  otherwise the q1 frame is assumed.
    */
   void normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
                  bool absoluteRef=true);
@@ -189,13 +191,17 @@ public:
   /** Set the value of the _allowSelfCollide flag. */
   void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }
 
-  /** Get the number of constraints defined in the joint
-      \return the number of constraints
+  /**
+     Get the number of constraints defined in the joint
+     
+     \return the number of constraints
    */
   virtual unsigned int numberOfConstraints() = 0;
 
-  /** Return the number of degrees of freedom of this joint.
-      \return the number of degrees of freedom (DoF)
+  /**
+     Return the number of degrees of freedom of this joint.
+     
+     \return the number of degrees of freedom (DoF)
    */
   virtual unsigned int numberOfDoF() = 0;
 
@@ -205,13 +211,13 @@ public:
     DOF_TYPE_ANGULAR=2,
   } DoF_Type;
 
-  /** Return the type of a degree of freedom of this joint.
-      \return the type of the degree of freedom (DoF)
+  /**
+     Return the type of a degree of freedom of this joint.
+     
+     \return the type of the degree of freedom (DoF)
    */
   virtual DoF_Type typeOfDoF(unsigned int axis) = 0;
 
-  /** destructor
-   */
   virtual ~NewtonEulerJointR() {};
 };
 #endif  //NewtonEulerJointRELATION_H

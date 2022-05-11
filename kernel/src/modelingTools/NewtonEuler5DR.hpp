@@ -22,17 +22,14 @@
 #define NEWTONEULERRELATIONRFC3D_H
 
 #include "NewtonEuler1DR.hpp"
-/** NewtonEuler3DR
- *
- * This class is an interface for relation with impact and RFC3D.
- *
- */
+/**
+   This class is an interface for relation with impact and RFC3D.
+   
+*/
 
 class NewtonEuler5DR : public NewtonEuler1DR {
 
 private:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(NewtonEuler3DR);
 
   void RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1);
@@ -48,15 +45,17 @@ public:
   virtual ~NewtonEuler5DR() noexcept = default;
 
   /** initialize components specific to derived classes.
-   * \param inter the interaction using this relation
+   *
+   *  \param inter the interaction using this relation
    */
   void initialize(Interaction &inter) override;
 
-  /* Default implementation consists in multiplying jachq and T (see
-   * NewtonEulerR::computeJachqT) but here we compute the operator from the the
-   * contact point locations and the local frame at contact \param inter
-   * interaction that owns the relation \param q0  the block vector to the
-   * dynamical system position
+  /** Default implementation consists in multiplying jachq and T (see
+   *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
+   *  contact point locations and the local frame at contact
+   * 
+   *  \param inter interaction that owns the relation
+   *  \param q0  the block vector to the dynamical system position
    */
   void computeJachqT(Interaction &inter, SP::BlockVector q0) override;
 

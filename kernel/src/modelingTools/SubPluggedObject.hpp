@@ -30,8 +30,7 @@ typedef void (*matrixPlugin)(double, unsigned int, unsigned int, double*, unsign
 class SubPluggedObject : public PluggedObject
 {
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(SubPluggedObject);
   /** function pointer to the parent PluggedObject*/
   void * _parentfPtr;

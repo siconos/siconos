@@ -1,7 +1,6 @@
 // signatures
-// docstrings are generated from doxygen thanks to an external tool
-// (doxy2swig.py)
-//%feature("autodoc", 0);
+// docstrings are generated from doxygen using swig option -doxygen.
+// Do not use %feature("autodoc", 3) !!
 
 // named parameters (broken with overloaded function)
 // %feature("kwargs");
@@ -76,5 +75,8 @@ SWIGEXPORT PyObject* SWIG_init(void);
 
  // swig / STL. http://www.swig.org/Doc4.0/Library.html#Library_stl_cpp_library
 %include stl.i
+
+%feature("doxygen:alias:rst") "\verbatim embed:rst"
+%feature("doxygen:alias:endrst") "\endverbatim"
 
 #endif

@@ -52,18 +52,46 @@ extern "C"
                                           double error);
 
 
-  /** Check for trivial solution in the friction-contact 3D problem
-       \param dim of the problem
-       \param q global vector (n)
-       \param velocity global vector (n), in-out parameter
-       \param reaction global vector (n), in-out parameters
-       \param globalVelocity the velocity in global coordinates
-       \param options the pointer to the array of options to set
-       \return int =0 if a trivial solution has been found, else = -1
-   */
+  /**
+     Check for trivial solution in the friction-contact 3D problem
+     
+     \param dim of the problem
+     \param q global vector (n)
+     \param velocity global vector (n), in-out parameter
+     \param reaction global vector (n), in-out parameters
+     \param globalVelocity the velocity in global coordinates
+     \param options the pointer to the array of options to set
+     \return int =0 if a trivial solution has been found, else = -1
+  */
   int gfc3d_checkTrivialCaseGlobal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
 
-/** Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
+/** 
+    Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
+
+    \param problem the friction-contact 3D problem to solve
+    \param velocity global vector (n), in-out parameter
+    \param reaction global vector (n), in-out parameters
+    \param globalVelocity global vector (m), in-out parameters
+    \param info return 0 if the solution is found
+    \param options the solver options :
+    iparam[0] : Maximum iteration number
+    iparam[4] : localsolver choice 
+    - 0: projection on Cone,
+    - 1: Newton/AlartCurnier, 
+    - 2: projection on Cone with local iteration,
+    dparam[0] : tolerance
+    dparam[2] : localtolerance
+    dparam[1] : (out) error
+  */
+  void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+
+  void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+
+  void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
+
+  /** 
+      Proximal point solver with reformulation for friction-contact 3D problem
+  
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
@@ -76,28 +104,11 @@ extern "C"
       dparam[2] : localtolerance
       dparam[1] : (out) error
   */
-  void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
-
-  void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
-
-  void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
-
-  /** Proximal point solver with reformulation for friction-contact 3D problem
-    \param problem the friction-contact 3D problem to solve
-    \param velocity global vector (n), in-out parameter
-    \param reaction global vector (n), in-out parameters
-    \param globalVelocity global vector (m), in-out parameters
-    \param info return 0 if the solution is found
-    \param options the solver options :
-    iparam[0] : Maximum iteration number
-    iparam[4] : localsolver choice 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
-    dparam[0] : tolerance
-    dparam[2] : localtolerance
-    dparam[1] : (out) error
-  */
   void gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
-  /** Fixed Point iteration on De Saxe formulation solver with reformulation for friction-contact 3D problem
+  /**
+     Fixed Point iteration on De Saxe formulation solver with reformulation for friction-contact 3D problem
+     
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -111,7 +122,9 @@ extern "C"
   */
   void gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
-  /** Fied Point iteration on Tresca Friction Cylinder with reformulation for friction-contact 3D problem
+  /**
+     Fixed Point iteration on Tresca Friction Cylinder with reformulation for friction-contact 3D problem
+     
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -125,70 +138,80 @@ extern "C"
   */
   void gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
-  /**  Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
-        \param problem the friction-contact 3D problem to solve
-        \param velocity global vector (n), in-out parameter
-        \param reaction global vector (n), in-out parameters
-        \param globalVelocity global vector (m), in-out parameters
-        \param info return 0 if the solution is found
-        \param options the solver options :
-        iparam[0] : Maximum iteration number
-        dparam[0] : tolerance
-        dparam[2] : localtolerance
-        dparam[1] : (out) error
-    */
+  /**
+     Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
+     
+     \param problem the friction-contact 3D problem to solve
+     \param velocity global vector (n), in-out parameter
+     \param reaction global vector (n), in-out parameters
+     \param globalVelocity global vector (m), in-out parameters
+     \param info return 0 if the solution is found
+     \param options the solver options :
+     iparam[0] : Maximum iteration number
+     dparam[0] : tolerance
+     dparam[2] : localtolerance
+     dparam[1] : (out) error
+  */
   void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
 
-  /** Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
-        \param problem the friction-contact 3D problem to solve
-        \param velocity global vector (n), in-out parameter
-        \param reaction global vector (n), in-out parameters
-        \param globalVelocity global vector (m), in-out parameters
-        \param info return 0 if the solution is found
-        \param options the solver options :
-        iparam[0] : Maximum iteration number
-        iparam[4] ; local strategy
-        dparam[0] : tolerance
-        dparam[2] : localtolerance
-        dparam[1] : (out) error
-        \todo Implement ProdTransSBM
-        \todo Improve the splitting Algorithm with a smaller granularity
-        \todo Use a global projection perhaps
-    */
+  /**
+     Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
+     
+     \param problem the friction-contact 3D problem to solve
+     \param velocity global vector (n), in-out parameter
+     \param reaction global vector (n), in-out parameters
+     \param globalVelocity global vector (m), in-out parameters
+     \param info return 0 if the solution is found
+     \param options the solver options :
+     iparam[0] : Maximum iteration number
+     iparam[4] ; local strategy
+     dparam[0] : tolerance
+     dparam[2] : localtolerance
+     dparam[1] : (out) error
+     \todo Implement ProdTransSBM
+     \todo Improve the splitting Algorithm with a smaller granularity
+     \todo Use a global projection perhaps
+  */
   void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, SolverOptions* options);
 
-   /** Solver based on the fixed-point iteration proposed by Cadoux for friction-contact 3D problem
-        \param problem the friction-contact 3D problem to solve
-        \param velocity global vector (n), in-out parameter
-        \param reaction global vector (n), in-out parameters
-        \param globalVelocity global vector (m), in-out parameters
-        \param info return 0 if the solution is found
-        \param options the solver options :
-        iparam[0] : Maximum iteration number
-        iparam[4] ; local strategy
-        dparam[0] : tolerance
-        dparam[2] : localtolerance
-        dparam[1] : (out) error
-    */
-  void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem*  problem, double*  reaction, double*  velocity,
-                            double*  globalVelocity, int*  info, SolverOptions* options);
-
-  /** solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+  /** 
+      Solver based on the fixed-point iteration proposed by Cadoux for friction-contact 3D problem
+      
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
+      \param globalVelocity global vector (m), in-out parameters
       \param info return 0 if the solution is found
-      \param options the solver options
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+      iparam[4] ; local strategy
+      dparam[0] : tolerance
+      dparam[2] : localtolerance
+      dparam[1] : (out) error
+  */
+  void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem*  problem, double*  reaction, double*  velocity,
+                            double*  globalVelocity, int*  info, SolverOptions* options);
+
+  /**
+     solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+     
+     \param problem the friction-contact 3D problem to solve
+     \param velocity global vector (n), in-out parameter
+     \param reaction global vector (n), in-out parameters
+     \param info return 0 if the solution is found
+     \param options the solver options
   */
   void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double *reaction,
                            double *velocity, int* info, SolverOptions* options);
 
-  /** solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI reformulation
-      \param problem the friction-contact 3D problem to solve
-      \param velocity global vector (n), in-out parameter
-      \param reaction global vector (n), in-out parameters
-      \param info return 0 if the solution is found
-      \param options the solver options
+  /**
+     solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI reformulation
+     
+     \param problem the friction-contact 3D problem to solve
+     \param velocity global vector (n), in-out parameter
+     \param reaction global vector (n), in-out parameters
+     \param info return 0 if the solution is found
+     \param options the solver options
   */
   void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double *reaction,
                              double *velocity, int* info, SolverOptions* options);
@@ -220,7 +243,8 @@ extern "C"
 
   void gfc3d_ipm_set_default(SolverOptions* options);
 
-  /** \addtogroup SetSolverOptions @{
+  /** \addtogroup SetSolverOptions
+   * @{
    */
   void gfc3d_nsn_ac_set_default(SolverOptions* options);
   void gfc3d_aclmfp_set_default(SolverOptions* options);

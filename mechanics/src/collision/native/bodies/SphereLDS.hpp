@@ -31,8 +31,7 @@
 class SphereLDS : public LagrangianDS, public std::enable_shared_from_this<SphereLDS>
 {
 protected:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(SphereLDS);
 
   double radius;
@@ -84,9 +83,6 @@ public:
   void computeJacobianFGyrq(SP::SiconosVector, SP::SiconosVector);
   void computeJacobianFGyrqDot(SP::SiconosVector, SP::SiconosVector);
 
-
-  /** visitors hook
-   */
   ACCEPT_BASE_VISITORS(LagrangianDS);
 
 };

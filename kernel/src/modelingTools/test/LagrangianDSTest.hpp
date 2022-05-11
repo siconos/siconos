@@ -26,8 +26,7 @@ class LagrangianDSTest : public CppUnit::TestFixture
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(LagrangianDSTest);
 
 

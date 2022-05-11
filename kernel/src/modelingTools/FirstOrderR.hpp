@@ -17,8 +17,8 @@
  */
 
 /*! \file FirstOrderR.hpp
-\brief General interface for relations.
- */
+  General interface for relations.
+*/
 
 #ifndef FirstOrderR_H
 #define FirstOrderR_H
@@ -26,30 +26,31 @@
 #include "Interaction.hpp"
 #include "Relation.hpp"
 
-/** FirstOrder Relation
- *
- * This is an abstract class for all relation operating on first order systems.
- * The following subclasses can be used:
- *
- * - FirstOrderNonlinearR: for fully nonlinear relations: \f$ y = h(t, X,
- * \lambda, Z)\f$, \f$ R = g(t, X, \lambda, Z)\f$.
- * - FirstOrderType2R: specialization with \f$ y = h(t, X, \lambda, Z)\f$, \f$ R
- * = g(t, \lambda, Z)\f$.
- * - FirstOrderType1R: further specialization with \f$ y = h(t, X, Z)\f$, \f$ R
- * = g(t, \lambda, Z)\f$.
- * - FirstOrderLinearR: linear case: \f$ y = C(t)x + D(t)\lambda + F(t) z +
- * e\f$, \f$ R = B(t)\lambda\f$.
- * - FirstOrderLinearTIR: time-invariant linear case: \f$ y = Cx + D\lambda + F z
- * + e\f$, \f$ R = B\lambda\f$.
- *
- * If the relation involves only one DynamicalSystem, then \f$R = r\f$, \f$X =
- * x\f$, and \f$Z = z\f$. With two, then \f$R = [r_1, r_2] \f$, \f$X = [x_1 x_2]
- * \f$, and \f$Z = [z_1 z_2]\f$.
- *
- * Remember that $y$ and $\lambda$ are relation from the Interaction, and have
- * the same size.
- *
- */
+/**
+   FirstOrder Relation
+
+   This is an abstract class for all relation operating on first order systems.
+   The following subclasses can be used:
+
+   - FirstOrderNonlinearR: for fully nonlinear relations: \f$ y = h(t, X,
+   \lambda, Z) \f$ , \f$ R = g(t, X, \lambda, Z) \f$ .
+   - FirstOrderType2R: specialization with \f$ y = h(t, X, \lambda, Z) \f$ , \f$ R
+   = g(t, \lambda, Z) \f$ .
+   - FirstOrderType1R: further specialization with \f$ y = h(t, X, Z) \f$ , \f$ R
+   = g(t, \lambda, Z) \f$ .
+   - FirstOrderLinearR: linear case: \f$ y = C(t)x + D(t)\lambda + F(t) z +
+   e \f$ , \f$ R = B(t)\lambda \f$ .
+   - FirstOrderLinearTIR: time-invariant linear case: \f$ y = Cx + D\lambda + F z
+   + e \f$ , \f$ R = B\lambda \f$ .
+
+   If the relation involves only one DynamicalSystem, then  \f$ R = r \f$ ,  \f$ X =
+   x \f$ , and  \f$ Z = z \f$ . With two, then  \f$ R = [r_1, r_2] \f$,  \f$ X = [x_1 x_2]
+   \f$, and  \f$ Z = [z_1 z_2] \f$ .
+
+   Remember that \f$ y \f$ and \f$ \lambda \f$ are relation from the Interaction, and have
+   the same size.
+   
+*/
 class FirstOrderR : public Relation {
 public:
   enum FirstOrderRDS { x, z, r, DSlinkSize };
@@ -64,10 +65,11 @@ public:
   };
 
 protected:
-  // serialization hooks
+  
   ACCEPT_SERIALIZATION(FirstOrderR);
 
   /** basic constructor
+   *
    *  \param newType the type of the relation
    */
   FirstOrderR(RELATION::SUBTYPES newType)
@@ -101,57 +103,68 @@ public:
   virtual ~FirstOrderR() noexcept = default;
 
   /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction using this relation
+   *
+   *  \param inter the interaction using this relation
    */
   void initialize(Interaction &inter) override;
 
   /** set C to pointer newC
+   *
    *  \param newC the C matrix
    */
   inline void setCPtr(SP::SimpleMatrix newC) { _C = newC; }
 
   /** set B to pointer newB
+   *
    *  \param newB the B matrix
    */
   inline void setBPtr(SP::SimpleMatrix newB) { _B = newB; }
 
   /** set D to pointer newPtr
+   *
    *  \param newD the D matrix
    */
   inline void setDPtr(SP::SimpleMatrix newD) { _D = newD; }
 
   /** set F to pointer newPtr
+   *
    *  \param newF the F matrix
    */
   inline void setFPtr(SP::SimpleMatrix newF) { _F = newF; }
 
   /** get C
+   *
    *  \return C matrix
    */
   inline SP::SimpleMatrix C() const override { return _C; }
   // Note FP: final would be better than override but swig cannot handle it.
 
   /** get H
+   *
    *  \return C matrix
    */
   inline SP::SimpleMatrix H() const override { return _C; }
 
   /** get D
+   *
    *  \return D matrix
    */
   inline SP::SimpleMatrix D() const { return _D; }
 
   /** get F
+   *
    *  \return F matrix
    */
   inline SP::SimpleMatrix F() const { return _F; }
 
   /** get B
+   *
    *  \return B matrix
    */
   inline SP::SimpleMatrix B() const { return _B; }
 
   /** get K
+   *
    *  \return K matrix
    */
   inline SP::SimpleMatrix K() const { return _K; }

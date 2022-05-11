@@ -45,7 +45,7 @@ D is mandatory and may represent a stiffness in the relation
 class LagrangianCompliantLinearTIR : public LagrangianR {
 
 protected:
-  /* serialization hooks */
+  
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIR);
 
   /** F matrix, coefficient of z */

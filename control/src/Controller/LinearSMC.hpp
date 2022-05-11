@@ -27,18 +27,21 @@
 #include "CommonSMC.hpp"
 
 
-/** Linear sliding mode controller
- *
- *  This controller implements the following sliding mode control strategy:
- *  \f$\begin{equation} u = u_{\mathrm{eq}} + u_s\qquad\text{where}\begin{cases} u_{\mathrm{eq}} \text{is the equivalent control input}\\u_s = -sgn(\sigma)\end{cases},\end{equation}\f$
- *
- * where \f$ \sigma = Cx\f$ is the user-defined sliding variable.
- *
- *  */
+/**
+   Linear sliding mode controller
+   
+   This controller implements the following sliding mode control strategy:
+   \f[
+   \begin{equation} u = u_{\mathrm{eq}} + u_s\qquad\text{where}\begin{cases} u_{\mathrm{eq}} \text{is the equivalent control input}\\u_s = -sgn(\sigma)\end{cases},\end{equation}
+   \f]
+   
+   where \f$ \sigma = Cx \f$ is the user-defined sliding variable.
+   
+*/
 class LinearSMC : public CommonSMC
 {
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(LinearSMC);
 
 
@@ -50,16 +53,18 @@ protected:
 public:
 
   /** Constructor for the ActuatorFactory
-   * \param sensor the ControlSensor feeding the Actuator
-   * \param type do not set this yourself ! this is used in derived classes
+   *
+   *  \param sensor the ControlSensor feeding the Actuator
+   *  \param type do not set this yourself ! this is used in derived classes
    */
   LinearSMC(SP::ControlSensor sensor, unsigned int type = LINEAR_SMC);
 
   /** Constructor with all the data
-   * \param sensor the ControlSensor feeding the Actuator
-   * \param B the matrix 
-   * \param D the D matrix in the FirstOrderLinearR
-   * \param type do not set this yourself ! this is used in derived classes
+   *
+   *  \param sensor the ControlSensor feeding the Actuator
+   *  \param B the matrix 
+   *  \param D the D matrix in the FirstOrderLinearR
+   *  \param type do not set this yourself ! this is used in derived classes
    */
   LinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B,
             SP::SimpleMatrix D = std::shared_ptr<SimpleMatrix>(),
@@ -70,19 +75,20 @@ public:
   virtual ~LinearSMC();
 
   /** Compute the new control law at each event
-   * Here we are using the following formula:
-   * \f$u = u_{\mathrm{eq}} + u_s\f$
+   *  Here we are using the following formula:
+   *  \f$ u = u_{\mathrm{eq}} + u_s \f$
    */
   virtual void actuate();
 
   /** Set the D matrix
-  * \param D the new D matrix
-  */
+   *
+   *  \param D the new D matrix
+   */
   inline void setDPtr(SP::SimpleMatrix D)
   {
     _D = D;
   };
 
-
+  
 };
 #endif

@@ -31,18 +31,20 @@ extern "C"
 #endif
 
   /** Error computation for global friction-contact 3D problem
-   * The computation of the error uses as input the reaction (reaction) and the global velocity (globalVelocity)
-   * The value of the local velocity (velocity) is recomputed
-   * \param problem the structure which defines the friction-contact problem
-   * \param[in] reaction
-   * \param[in] velocity
-   * \param[out] globalVelocity
-   * \param tolerance value for error computation
-   * \param options pointer to SolverOptions
-   * \param norm_q norm of q or a normalization value
-   * \param norm_b norm of b or a normalization value
-   * \param[in,out] error value
-   * \return 0 if successfull
+   *  
+   *  The computation of the error uses as input the reaction (reaction) and the global velocity (globalVelocity)
+   *  The value of the local velocity (velocity) is recomputed
+   *  
+   *  \param problem the structure which defines the friction-contact problem
+   *  \param[in] reaction
+   *  \param[in] velocity
+   *  \param[out] globalVelocity
+   *  \param tolerance value for error computation
+   *  \param options pointer to SolverOptions
+   *  \param norm_q norm of q or a normalization value
+   *  \param norm_b norm of b or a normalization value
+   *  \param[in,out] error value
+   *  \return 0 if successfull
    */
   int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                           double *reaction , double *velocity,

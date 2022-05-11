@@ -160,7 +160,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
                                                                // determination
   // always needed -> DynamicalSystemProperties
 
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(DynamicalSystemsGraph);
 
   // to be installed with INSTALL_GRAPH_PROPERTIES
@@ -208,7 +208,7 @@ struct InteractionsGraph : public _InteractionsGraph
     lower_blockProj._store->erase(ed);
   }
 
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(InteractionsGraph);
 };
 

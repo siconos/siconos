@@ -11,6 +11,8 @@ include(WindowsSiconosSetup)
 # Siconos current version
 include(SiconosVersion)
 
+include(FetchContent)
+
 # -- Set include directories that are required by ALL components
 # and only those!
 # Other includes must be specified to individual targets only.
@@ -135,6 +137,13 @@ if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS OR WITH_GENERAT
 endif()
 
 # ----- Required dependencies (whatever Siconos components are) -----
+# -- Python bindings --
+if(WITH_PYTHON_WRAPPER)
+  include(swig_setup)
+endif()
+
+
+
 
 # =========== Blas/Lapack ===========
 # Find package stuff provided by cmake deals
@@ -172,11 +181,6 @@ endif()
 # -- Open Cascade Community Edition --
 if(WITH_OCE)
   include(oce_setup)
-endif()
-
-# -- Python bindings --
-if(WITH_PYTHON_WRAPPER)
-  include(swig_setup)
 endif()
 
 # ---- Extra 'developers only' options ----

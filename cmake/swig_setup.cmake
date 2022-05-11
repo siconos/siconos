@@ -5,7 +5,14 @@ if(NOT WITH_PYTHON_WRAPPER)
   return()
 endif()
 
-find_package(SWIG 3.0 REQUIRED)
+if(WITH_DOXY2SWIG)
+  find_package(SWIG 4.0 REQUIRED)
+else()
+  find_package(SWIG 4.0)
+  if(NOT SWIG_FOUND)
+    find_package(SWIG 3.0 REQUIRED) # 4 is better but 3.0 is enough when swig -doxygen is not required.
+  endif()
+endif()
 include(${SWIG_USE_FILE})
 
 # Name of the generated Python package
@@ -45,6 +52,11 @@ list(APPEND CMAKE_SWIG_FLAGS "-dirprot")
 # - without "dirprot", swig wrap public methods and only the 
 # protected methods needed to the interface to compile.
 # - with "dirprot" swig will attemp to wrap all the public and protected methods at once.
+
+# Turn on wrapping of protected members for director classes
+if(WITH_DOXY2SWIG)
+  list(APPEND CMAKE_SWIG_FLAGS "-doxygen")
+endif()
 
 # -dirvtable      - Generate a pseudo virtual table for directors for faster dispatch
 # - without "dirprot", swig wrap public methods and only the 
@@ -107,7 +119,7 @@ endif()
 
 # ====== Create (and setup) build/install target ======
 add_custom_target(python-install
-  COMMAND ${PYTHON_EXECUTABLE} -m pip install ${CMAKE_BINARY_DIR}/wrap ${PIP_INSTALL_OPTIONS}  --use-feature=in-tree-build
+  COMMAND ${PYTHON_EXECUTABLE} -m pip install ${CMAKE_BINARY_DIR}/wrap ${PIP_INSTALL_OPTIONS}
   VERBATIM USES_TERMINAL
   COMMAND_EXPAND_LISTS
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "build/install siconos package")

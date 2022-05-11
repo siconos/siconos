@@ -24,18 +24,17 @@
 
 #include "MLCP.hpp"
 #include "OSNSMatrixProjectOnConstraints.hpp"
-/** Formalization and Resolution of a Mixed Linear Complementarity Problem
- * (MLCP)
- *
- * This class is devoted to the formalization and the resolution of the
- * Mixed Linear Complementarity Problem (MLCP) for the specific problem
- * of the projection onto the constraints in Mechanics
- *
- */
+/**
+   Formalization and Resolution of a Mixed Linear Complementarity Problem
+   (MLCP)
+   
+   This class is devoted to the formalization and the resolution of the
+   Mixed Linear Complementarity Problem (MLCP) for the specific problem
+   of the projection onto the constraints in Mechanics
+   
+*/
 class MLCPProjectOnConstraints : public MLCP {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(MLCPProjectOnConstraints);
 
   /** ?? */
@@ -49,26 +48,27 @@ protected:
 
 public:
   /** compute the number of inequality and equality for a given tuple of
-     Interactions update the global number of equality(_n) and inequality (_m)
-      set up _numerics_problem parameters (blocksRows and blocksIsComp )
-      \param inter1 first interaction considered
-      \param inter2 second interaction
+   *  Interactions update the global number of equality(_n) and inequality (_m)
+   *  set up _numerics_problem parameters (blocksRows and blocksIsComp )
+   *
+   *  \param inter1 first interaction considered
+   *  \param inter2 second interaction
   */
   void computeOptions(SP::Interaction inter1, SP::Interaction inter2) override;
 
   /** constructor from data
-   \param numericsSolverId solver id
-   \param alpha alpha parameter value
+   * 
+   *  \param numericsSolverId solver id
+   *  \param alpha alpha parameter value
    */
   MLCPProjectOnConstraints(int numericsSolverId = SICONOS_MLCP_ENUM,
                            double alpha = 1.0);
 
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set,
-       \rst
-       see :ref:`problems_and_solvers` for details.
-       \endrst
-  */
+   *
+   *   \param options the options set,
+   *   \param alpha alpha parameter value
+   */
   MLCPProjectOnConstraints(SP::SolverOptions options, double alpha = 1.0);
 
   /** destructor
@@ -76,7 +76,7 @@ public:
   ~MLCPProjectOnConstraints(){};
 
   /**
-      \return alpha value
+     \return alpha value
   */
   double alpha() { return _alpha; };
 
@@ -99,12 +99,12 @@ public:
   void initOSNSMatrix() override;
 
   /** compute interactionBlocks if necessary (this depends on the type of
-   * OSNS, on the indexSets ...)
+   *  OSNS, on the indexSets ...)
    */
   void updateInteractionBlocks() override;
 
   /** compute interactionBlocks if necessary (this depends on the type of
-   * OSNS, on the indexSets ...)
+   *  OSNS, on the indexSets ...)
    */
   virtual void updateInteractionBlocksOLD();
 
@@ -128,6 +128,7 @@ public:
                      unsigned int pos) override;
 
   /** compute vector q
+   *
    *  \param time the current time
    */
   void computeq(double time) override;
@@ -148,8 +149,6 @@ public:
    */
   virtual void postComputeNewtonEulerR(SP::Interaction inter, unsigned int pos);
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

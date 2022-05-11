@@ -55,7 +55,7 @@ struct listNumericsProblem
 };
 
 
-/** \enum ids for the possible/allowed numerics problem formulations
+/** \enum SICONOS_NUMERICS_PROBLEM_TYPE ids for the possible/allowed numerics problem formulations
  */
 enum SICONOS_NUMERICS_PROBLEM_TYPE
 {

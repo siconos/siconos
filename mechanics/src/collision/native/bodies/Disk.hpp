@@ -30,18 +30,18 @@
 
 class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
 private:
-  // serialization hooks
   ACCEPT_SERIALIZATION(Disk);
 
   void MassSetup();
 
 public:
   /** Constructor
-      \param radius
-      \param mass
-      \param position vector
-      \param velocity vector
-  */
+   *
+   *  \param radius
+   *  \param mass
+   *  \param position vector
+   *  \param velocity vector
+   */
 
   Disk(double radius, double mass, SP::SiconosVector position,
        SP::SiconosVector velocity);
@@ -50,7 +50,6 @@ public:
    */
   virtual ~Disk() noexcept = default;
 
-  // visitors hook
   ACCEPT_BASE_VISITORS(LagrangianDS);
 };
 #endif /* Disk_H */

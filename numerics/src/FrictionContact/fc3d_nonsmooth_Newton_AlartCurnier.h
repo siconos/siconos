@@ -77,12 +77,13 @@ extern "C"
                                    double* B);
 
   /** Nonsmooth Newton solver based on the Alart--Curnier function for the
-   * local (reduced) frictional contact problem in the dense form
-   * \param problem the problem to solve in dense form
-   * \param reaction solution and initial guess for reaction
-   * \param velocity solution and initial guess for velocity
-   * \param info returned info
-   * \param options  the solver options
+   *  local (reduced) frictional contact problem in the dense form
+   *
+   *  \param problem the problem to solve in dense form
+   *  \param reaction solution and initial guess for reaction
+   *  \param velocity solution and initial guess for velocity
+   *  \param info returned info
+   *  \param options  the solver options
    */
   void fc3d_nonsmooth_Newton_AlartCurnier(
     FrictionContactProblem* problem,
@@ -93,7 +94,9 @@ extern "C"
 
   
 
-  /** The Alart & Curnier function for several contacts.
+  /** 
+      The Alart & Curnier function for several contacts.
+      
       \param problemSize the number of contacts.
       \param computeACFun3x3 the block 3x3 Alart & Curnier function.
       \param reaction3D the reactions at each contact (size: 3 x problemSize)

@@ -33,8 +33,6 @@ class RigidBody2dDS : public LagrangianLinearTIDS,
                       public std::enable_shared_from_this<RigidBody2dDS>
 {
 protected:
-  /** serialization hooks
-  */
   ACCEPT_SERIALIZATION(RigidBody2dDS);
 
   RigidBody2dDS() : LagrangianLinearTIDS() {};
@@ -78,20 +76,19 @@ public:
   /** Set the value of the _allowSelfCollide flag. */
   void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }
 
-  /** Access the contactor set associated with this body.
-   * \return A SP::SiconosContactorSet */
+  /** \return the contactor set associated with this body */
   SP::SiconosContactorSet contactors() const { return _contactors; }
 
   /** Provide a set of contactors to the body.
-   * \param c A SP::SiconosContactorSet */
+   *
+   *  \param c A SP::SiconosContactorSet */
   void setContactors(SP::SiconosContactorSet c) { _contactors = c; }
 
   /** Make the base position of the contactors equal to the DS q vector.
-   * \return a SP::SiconosVector */
+   *
+   *  \return a SP::SiconosVector */
   virtual SP::SiconosVector base_position() { return q(); }
 
-  /** visitors hook
-   */
   ACCEPT_BASE_VISITORS(LagrangianLinearTIDS);
   
 };

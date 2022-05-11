@@ -38,7 +38,7 @@ class PluggedObject
 {
 private:
 
-  /* serialization hooks */
+  
   ACCEPT_SERIALIZATION(PluggedObject);
 
 protected:

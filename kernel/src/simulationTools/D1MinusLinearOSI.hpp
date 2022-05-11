@@ -379,7 +379,6 @@ public:
         "D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
   }
 
-  /** visitors hook */
   ACCEPT_STD_VISITORS();
 };
 

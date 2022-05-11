@@ -19,7 +19,7 @@
 #ifndef NCP_NEWTON_FB
 #define NCP_NEWTON_FB
 
-/*!\file NCP_newton_FBLSA.h
+/*!\file ncp_newton_FBLSA.h
  * \brief functions for solving NCP using a Newton method on the nonsmooth
  * equation reformulation*/
 

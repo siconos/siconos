@@ -48,8 +48,7 @@ TYPEDEF_SPTR(Hem5OSI_impl);
  */
 class Hem5OSI : public OneStepIntegrator {
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(Hem5OSI);
 
   /** vector of integer data for the integrator
@@ -277,7 +276,6 @@ public:
    */
   void display() override;
 
-  // visitors hook
   ACCEPT_STD_VISITORS();
 };
 

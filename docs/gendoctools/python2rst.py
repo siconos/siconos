@@ -40,166 +40,29 @@ import importlib
 import textwrap
 import inspect
 from pathlib import Path
+import shutil
 import operator
-from gendoctools import common, with_doxy2swig
-
-# with_doxy2swig = '@WITH_DOXY2SWIG@' is 'ON'
-# Needed only when WITH_DOXY2SWIG is ON
-if with_doxy2swig:
-    from gendoctools.sicodoxy2swig import SiconosDoxy2Swig
+from gendoctools import common
 
 
-def xml2swig(header_name, xml_path, swig_working_dir,
-             case_sense_names, docstrings_features, all_index):
-    """For a given header file, creates swig (.i) file using
-    xml outputs from doxygen (Driver : Doxy2SWIG)
-
-    Parameters
-    ----------
-    header_name : Path()
-        Name of the header file (h or hpp)
-    component_name : string
-         component (numerics, kernel, ...) of interest
-    xml_path : string
-        absolute path to xml files.
-    swig_working_dir : Path()
-        Absolute path to siconos swig outputs
-    case_sense_names : bool
-        false if xml output files names are lower case only
-    docstrings_features: dict
-        all docstrings features (keys) with the header used to build them (values)
-    all_index: dict
-        class and files names (keys) with a short description (values) (in-out)
-
-     Notes
-     -----
-     * This function takes into account the value of CASE_SENSE_NAMES parameter
-     in doxygen config.
-     * .i file will be named as the xml input file, with .i as ext.
-     * all latex formula are replaced with temporary strings and postprocess later)
-
-    """
-    header_name = Path(header_name).resolve()
-    # Get xml files related to current header
-    allfiles = common.get_xml_files(header_name, xml_path, case_sense_names)
-
-    # Build .i files
-    for f in allfiles:
-        common.filter_dot_in_xml_formulas(f)
-        # Create doxy2swig parser ...
-        p = SiconosDoxy2Swig(f, swig_working_dir)
-        # And write p.swig_outputname, e.g. classX.i
-        p.run()
-        featname, kind, descr = p.get_xml_compound_infos()
-        if kind in('class', 'struct'):
-            all_index[featname] = descr
-        elif kind == 'file':
-            all_index[header_name.name] = descr
-
-        for feat in p.features:
-            docstrings_features[feat] = header_name
-        if not p.enums:
-            docstrings_features['pydata_' + p.name] = p.enums
-
-    # Look for namespaces files
-
-    namespaces_files = [f for f in xml_path.glob('namespace*.xml')]
-    # Build corresponding .i files
-    for f in namespaces_files:
-        namespace_name = f.stem.split('namespace')[-1]
-        namespace_name = namespace_name.replace(r'_1_1', r'::')
-        common.filter_dot_in_xml_formulas(f)
-        # set output filename == xml file without extension + .i
-        p = SiconosDoxy2Swig(f, swig_working_dir)
-        p.run()
-        hpp_name = p.get_specific_subnodes(p.xmldoc, 'location', recursive=4)
-        hpp_name = Path(hpp_name[0].attributes['file'].value)
-        featname, kind, descr = p.get_xml_compound_infos()
-        if kind in ('class', 'struct'):
-            all_index[featname] = descr
-        elif kind == 'file':
-            all_index[hpp_name.name] = descr
-        for feat in p.features:
-            docstrings_features[feat] = hpp_name
-        if p.enums:
-            docstrings_features['pydata_' + p.name] = p.enums
+modules_docs = {
+    'siconos_externals' : 'API or tools related to external software libraries used by Siconos.',
+    'siconos_numerics': 'a collection of low-level algorithms for solving basic algebra and optimization problem arising in the simulation of nonsmooth dynamical systems.',
+    'siconos_kernel': 'high-level API to modelise and simulate nonsmooth dynamical systems.',
+    'siconos_control': 'control toolbox',
+    'siconos_mechanics': 'toolbox for collision detection and joints',
+    'siconos_mechanisms': 'toolbox for collision detection and joints (legacy version, won’t be sustained in long term)',
+    'siconos_io': 'tools related to input/outputs (hdf5, vtk …)',
+    }
 
 
-def build_docstrings(headers, component_name, doxygen_config_filename,
-                     siconos_swig_path):
-    """Create docstrings (doxy2swig) in swig files from xml (doxygen) generated
-    from headers.
 
-    Parameters
-    ----------
-
-    headers : list (cmake like)
-         headers files to parse
-    component_name : string
-         component (numerics, kernel, ...) of interest
-    doxygen_config_filename : string
-         name (full path) of the doxygen configuration file
-    siconos_swig_path : string
-         path to swig outputs in binary dir (i.e. wrap)
-
-    Note
-    ----
-    * all swig files will be genereted into
-      siconos_swig_path/tmp_component_name directory
-      and concatenated into component_name-docstrings.i
-      that will be the file really used by swig.
-
-    * This function is supposed to be called by a target generated
-    with cmake (make <component>_docstrings)
-    """
-    doxyconf = common.parse_doxygen_config(doxygen_config_filename)
-    case_sense_names = doxyconf['CASE_SENSE_NAMES'].find('YES') > -1
-    xml_path = Path(doxyconf['OUTPUT_DIRECTORY'].lstrip(),
-                    doxyconf['XML_OUTPUT'].lstrip())
-
-    headers = bt.parse_cmake_list(headers)
-    swig_working_dir = Path(siconos_swig_path, 'tmp_' + component_name)
-    if not swig_working_dir.exists():
-        os.makedirs(swig_working_dir)
-
-    docstrings_features = {}
-    all_index = {}
-    for hfile in headers:
-        xml2swig(hfile, xml_path, swig_working_dir,
-                 case_sense_names, docstrings_features, all_index)
-
-    # Save features info in a pickle file
-    pickle_filename = Path(siconos_swig_path, component_name + '.pickle')
-    with open(pickle_filename, 'wb') as currentfile:
-        pickle.dump(docstrings_features, currentfile)
-    # Save classes, files names and descriptions (for toc)
-    pickle_filename = Path(siconos_swig_path, component_name + '_index.pickle')
-    with open(pickle_filename, 'wb') as currentfile:
-        pickle.dump(all_index, currentfile)
-
-    # Creates <component>-docstrings.i
-    outputfile = Path(siconos_swig_path, component_name + '-docstrings.i')
-    swigfiles = [f for f in swig_working_dir.glob('*.i')]
-    with open(outputfile, 'w', encoding='utf8') as outfile:
-        for fname in swigfiles:
-            with open(fname, encoding='utf8') as infile:
-                for line in infile:
-                    outfile.write(line)
-    msg = 'Generates (python) file ' + outputfile.name
-    msg += ' for doctrings in swig.'
-    print(msg)
-
-
-def docstrings2rst(component_name, module_path, module_name,
-                   sphinx_directory, swig_working_dir):
+def docstrings2rst(module_path, module_name, sphinx_directory):
     """Import a module and create 'rst' (autodoc)
     file for each documented (docstrings) object.
 
     Parameters
     ----------
-
-    component_name : string
-         name of the current component (e.g. kernel)
     module_path : string
         current module path, relative to swig working dir
         (usually wrap/siconos), e.g. mechanics/collision for module bodies.
@@ -208,9 +71,6 @@ def docstrings2rst(component_name, module_path, module_name,
     sphinx_directory : string
          directory (absolute) where rst files will
          be written.
-    swig_working_dir : string
-         directory (absolute) where python modules
-         are generated using swig
 
     Notes:
        * module_path is required for module like sensor
@@ -224,6 +84,10 @@ def docstrings2rst(component_name, module_path, module_name,
           * pyfunctions.rst to collect all pyfunc *
 
     """
+
+    #inoutfile = Path(swig_working_dir,module_path, module_name + '.py')
+    # postprocess_docstrings(inoutfile)
+
     # --- Set current module name and import it in 'comp' ---
     # Test case with submodules (e.g. sensor in control)
     if module_path in ('.', ''):
@@ -243,330 +107,38 @@ def docstrings2rst(component_name, module_path, module_name,
     if not sphinx_directory.exists():
         os.makedirs(sphinx_directory)
 
-    # --- Collect features from pickle file ---
-    # (output from previous call of build_docstrings)
-    # pickle files are at the same location as the module
-    # and named module_name.pickle.
-    features_filename = comp.__file__.split(component_name)[0]
-    features_filename += component_name + '.pickle'
-    msg = f'Unable to find {features_filename}.'
-    assert Path(features_filename).resolve().exists(), msg
-    with open(features_filename, 'rb') as f:
-        features = pickle.load(f)
-
-    # Write rst files for python functions and classes of
-    # the current component.
-    all_files = collect_classes_and_functions(comp, module_name,
-                                              sphinx_directory, features)
-
-    # -- Write module 'autodoc' file --
-    # --> <sphinx_directory>/autodoc_all.rst
-    write_python_module_toc(module_name, all_files,
-                            sphinx_directory, swig_working_dir, component_name)
-
-    # -- Process enums --
-    # --> <sphinx_directory>/autodoc_pydata.rst
-    process_enums(comp, module_name, features, sphinx_directory,
-                  swig_working_dir, component_name)
-
-
-def collect_classes_and_functions(module, module_name, sphinx_directory,
-                                  features):
-    """Parse current module objects (output of dir(module))
-    - push them into class or function list according to their kind
-    - generate rst files (one for each class, one for all functions
-      of a header file) with the proper autodoc directives.
-    """
-    # try:
-    #     module = importlib.import_module(module_name)
-    # except ImportError as e:
-    #     raise ImportError(e)
-
-    # --- Clean previous build ---
-    # We have to remove pyfiles each time the function is call
-    # because of 'a' (append) in writing process
-    pyfiles = [f for f in sphinx_directory.glob('*pyfile.rst')]
-    pyfiles += [f for f in sphinx_directory.glob('*pyclass.rst')]
-    for file in pyfiles:
-        file.unlink()
-
-    # Get all members, functions, attributes ...
-    # available in the imported module.
-    objlist = [obj for obj in dir(module) if not obj.startswith('_')]
-    class_files = []
-    pyfunc_files = []
-    for obj in objlist:
-        # For each element of current module,
-        # if this element has doc, we create a
-        # new entry in python classs or functions list
-        # and an text entry (rst-like) in a rst file.
-        current = getattr(module, obj)
-        needs_doc = hasattr(current, '__doc__') and current.__doc__ is not None
-        if needs_doc and current.__doc__.strip():
-            # Create a proper autodoc directive
-            gen, kind, name = create_autodoc(current, module_name)
-            # output rst file name will depends on kind and name
-            # 
-            # Set output rst file name and populate class/function list
-            # according to object kind
-            if kind == 'pyclass':  # one rst file per class
-                outputname = name + '_' + kind + '.rst'
-                outputname = Path(sphinx_directory, outputname)
-                class_files.append(outputname)
-            elif kind == 'pyfunction':
-                # one rst file for all functions from a given header
-                featname = get_feature_headername(name, features)
-                outputname = Path(sphinx_directory,
-                                  featname.stem + '_pyfile.rst')
-                pyfunc_files.append(outputname)
-            else:
-                # pydata, processed later.
-                continue
-            # Write autodoc directive into the rst file.
-            with open(outputname, 'a+') as out:
-                out.write(gen)
-                out.write('\n')
-
-    # Trick to remove duplicates
-    # (since we create one rst files by header, whatever is the
-    # number of functions it contains)
-    pyfunc_files = list(set(pyfunc_files))
-    insert_header_in_functionfiles(pyfunc_files)
-    class_files += pyfunc_files
-    class_files.sort()
-    return class_files
-
-
-def get_feature_headername(name, features):
-    """Map feature name to the header file that contains
-    the feature.
-
-    Parameters
-    ---------
-    name : string
-    features : dictionnary (populated earlier by Sicodoxy2swig)
-
-    Returns a Path()
-
-    Example :
-
-    get_feature_headername('NM_cstr')
-    returns <path_to>numerics/src/tools/NumericsMatrix.h.
-    """
-    if name in features:
-        featname = features[name]
-    elif name.replace('_', '::', 1) in features:
-        # - when two classes wrapped with swig have
-        # the same method (same name),
-        # swig create class1_methodname and class2_methodname.
-        # while features name is class1::methodname.
-        # - the same kind of thing happens for static
-        # class methods.
-        # We have to take these into account ... and the fact
-        # that some methods names may contain '_'
-        # (maxreplace=1 in replace below)
-        featname = features[name.replace('_', '::', 1)]
-    elif name.split('::')[-1] in features:
-        # another way for swig to deal with
-        # namespaces ...
-        featname = features[name.split('::')[-1]]
-    else:
-        keys = list(features.keys())
-        found = False
-        for k in keys:
-            if k.count(name) > 0:
-                featname = features[k]
-                found = True
-                break
-        if not found:
-            raise Exception('Unknown feature name : ', name)
-    return featname
-
-
-def create_autodoc(current, module_name):
-    """Returns autodoc directive for 'current'
-    defined in module_name.
-
-    Parameters
-    ----------
-    current : object
-        'object' of interest, one output from python
-        command dir(module)
-    module_name : string
-        module name (e.g. siconos.kernel)
-    """
-    if inspect.isclass(current):
-        name = current.__name__
-        fullname = module_name + '.' + name
-        kind = 'pyclass'
-        title = fullname + ' (Python class)'
-        directive = '.. autoclass:: ' + fullname + '\n'
-        directive += '    :members:\n\n'
-        #label = '.. index:: single: ' + module_name.split('.')[1] + ';' + name
-        #label += '\n'
-        label = '.. _' + kind + '_' + name + ':\n\n'
-        lenname = len(title)
-        title = label + title + '\n' + lenname * '-' + '\n\n'
-    elif inspect.isfunction(current):
-        name = current.__name__
-        fullname = module_name + '.' + name
-        title = fullname
-        kind = 'pyfunction'
-        directive = '.. autofunction:: ' + fullname + '\n\n'
-        #label = '.. index:: single: ' + module_name.split('.')[1] + ';' + name
-        #label += '\n'
-        label = '.. _' + kind + '_' + name + ':\n\n'
-        title = label + 4 * '-' + '\n\n'
-    else:  # current is neither a class nor a function
-        # try data ...
-        kind = 'pydata'
-        gen = ''  #'.. autodata:: ' + str(current) + '\n\n'
-        name = 'Unknown'
-        return gen, kind, name
-
-    gen = title + directive
-    return gen, kind, name
-
-
-def insert_header_in_functionfiles(pyfunc_files):
-    """Write header on top of each python functions rst file
-
-    pyfunc_files : list of rst files
-    """
-    for fname in pyfunc_files:
-        shortname = fname.stem
-        label = '.. _' + shortname + ':\n\n'
-        title = shortname.split('_pyfile')[0] + ' (functions)'
-        lenname = len(title)
-        title = label + title + '\n' + lenname * '-' + '\n\n'
-        with open(fname, 'r+') as f:
-            lines = f.read()
-            f.seek(0, 0)
-            f.write(title + lines)
-
-
-def write_python_module_toc(module_name, all_files, sphinx_directory,
-                            swig_working_dir, component_name):
-    """Write main autodoc file for current module
-
-    Some kind of table of contents from files listed in all_files.
-    """
-    all_index_filename = Path(swig_working_dir,
-                              component_name + '_index.pickle')
-    msg = f'Unable to find {all_index_filename}.'
-    assert all_index_filename.resolve().exists(), msg
-    with open(all_index_filename, 'rb') as f:
-        all_index = pickle.load(f)
-    outputname = Path(sphinx_directory, 'autodoc_all.rst')
+    outputname = Path(sphinx_directory, 'autodoc.rst')
     title = module_name + '\n'
     title += len(title) * '=' + '\n\n'
     basename = '/reference/python/' + module_name.replace(r'.', '_')
-    # A few lines to illustrate module usage
-    header = '**Usage example** :\n\n.. code-block:: python\n\n'
-    importname = 's' + module_name.split('.')[-1][0]
-    code = 'import ' + module_name + ' as ' + importname
-    code += '\n \nhelp(' + importname + '.SomeClass)\n\n'
-    header += textwrap.indent(code, '    ')
-    header += '**Classes and functions**\n\n'
+    header = '**Module documentation**\n\n'
     with open(outputname, 'wt') as out:
         out.write(title)
         out.write(header)
-        buff = Path(basename, 'autodoc_pydata').as_posix()
-        gen = '* :doc:`Enums and constants <' + buff + '>`\n'
-        for f in all_files:
-            name = f.stem
-            text = ''
-            if '_pyclass' in name:
-                realname = name.split('_pyclass')[0]
-                shorttitle = realname + ' (class) '
-                text = '* :py:class:`' + module_name + '.' + realname + '` : '
-                try:
-                    text += all_index[realname] + '\n'
-                except:
-                    text += ' \n'
-            elif '_pyfile' in name:
-                realname = name.split('_pyfile')[0]
-                shorttitle = realname + ' (functions) '
-                text = '* :doc:`' + shorttitle + '<'
-                text += Path(basename, name).as_posix() + '>` : '
-                if realname + '.h' in all_index:
-                    text += all_index[realname + '.h'] + ' \n'
-                elif realname + '.hpp' in all_index:
-                    text += all_index[realname + '.hpp'] + ' \n'
-                else:
-                    text += ' \n'
-            else:
-                shorttitle = ''
 
-            gen += text
-        out.write(gen + '\n')
-
-    # It might be necessary to parse some latex from doxygen
-    # and convert it to sphinx ...
-    latex_dir = Path(swig_working_dir, 'tmp_' + component_name)
-    common.replace_latex(outputname, latex_dir)
+        directive = f'.. automodule:: {module_name}\n'
+        directive += '\t:members:\n'
+        directive += '\t:show-inheritance:\n\n'        
+        out.write(directive)
 
 
-def process_enums(module, module_name, features, sphinx_directory,
-                  swig_working_dir, component_name):
-    """Parse features to find enums and populate
-    a rst with the proper autodoc directives.
-    """
-    # Get saved enums for the current module
-    outputname = Path(sphinx_directory, 'autodoc_pydata.rst')
-    title = module_name + ' constants (Python API)\n'
-    title += len(title) * '-' + '\n\n'
-    title += 'All the predefined global constants in ' + module_name
-    title += '(generated from C++ enum, global variables, ...) \n\n'
-    enumskeys = [k for k in features if k.find('pydata') > -1]
-    header = '**Usage** :\n\n.. code-block:: python\n\n'
-    importname = 's' + module_name.split('.')[-1][0]
-    code = 'import ' + module_name + ' as ' + importname
-    code += '\n \nprint(' + importname + '.CONSTNAME)\n\n'
-    header += textwrap.indent(code, '    ')
-    title += header
-    title += '\n-----\n\n**List and descriptions of constants** :\n\n'
-
-    with open(outputname, 'wt') as out:
-        out.write(title)
-        for key in enumskeys:
-            enums = features[key]
-            for ename in enums:
-                # Document only data available in python API
-                if hasattr(module, ename):
-                    # and only data with a description
-                    if enums[ename][1].strip():
-                        gen = ''
-                        gen += '.. _pydata_' + ename + ':\n\n'
-                        gen += '.. py:data:: ' + ename + '\n\n'
-                        if enums[ename][0]:
-                            # Add initializer value if set
-                            gen += '    {0} ({1})\n\n'.format(
-                                enums[ename][1].strip(), enums[ename][0])
-                        else:
-                            gen += '    {0} \n\n'.format(enums[ename][1].strip())
-                            out.write(gen)
-    # It might be necessary to parse some
-    # latex from doxygen and convert it to sphinx ...
-    latex_dir = Path(swig_working_dir, 'tmp_' + component_name)
-    common.replace_latex(outputname, latex_dir)
-
-
-def build_python_api_main(outputdir, rst_header, components):
+def build_python_api_main(outputdir, components):
     """Parse existing rst files (one for each class,
     + those for functions) generated for python API
     and collect them into  python_api.rst
     in sphinx/reference directory.
+
+    Call: make rst_api
 
     Parameters
     ----------
     outputdir : Path()
          sphinx directory which contains rst files
          generated for the api (e.g. by doxy2swig)
-    rst_header : string
-         text to put on top of the python_api file.
+    components : list
+         list of active siconos python modules
     """
-    mainrst_filename = Path(outputdir, 'python_api.rst')
+    mainrst_filename = Path(outputdir, 'index.rst')
     # list documented (python) packages
     docpython_dir = Path(outputdir, 'python')
     packages = [f for f in docpython_dir.glob('*')]
@@ -577,17 +149,491 @@ def build_python_api_main(outputdir, rst_header, components):
         for pname in packages:
             if pname.count(p) > 0:
                 pack[pname] = components[p]
-    packages = [p[0] for p in sorted(pack.items(), key=operator.itemgetter(1))]
-    with open(mainrst_filename, 'w') as f:
-        label = '.. _siconos_python_reference:\n\n\n'
-        title = 'Siconos Python API reference'
-        title += '\n' + len(title) * '#' + '\n\n'
-        title += 'This is the documentation of '
-        title += '`python <https://www.python.org/>`_ '
-        title += 'interface to Siconos.\n\n\n'
-        f.write(label)
-        f.write(title)
-        f.write(rst_header)
-        for p in packages:
-            directive = '.. include:: python/' + p + '/autodoc_all.rst\n\n'
-            f.write(directive)
+    packages = [p[0] for p in sorted(pack.items(), key=operator.itemgetter(1))]    
+
+    if len(packages) > 0:
+        with open(mainrst_filename, 'a') as f:
+            # label = '.. _siconos_python_reference:\n\n\n'
+            title = 'Siconos Python API reference'
+            title += '\n' + len(title) * '#' + '\n\n'
+            title += 'This is the documentation of '
+            title += '`python <https://www.python.org/>`_ '
+            title += 'interface to Siconos.\n\n\n'
+            header = '.. toctree::\n    :maxdepth:3\n\n'
+            f.write(title)
+            f.write(header)
+            for p in packages:
+                if p in modules_docs:
+                    title = p.replace('_','.') + ': ' + modules_docs[p]
+                    directive = title + ' <python/' + p + '/autodoc>\n'
+                else:
+                    directive = 'python/' + p + '/autodoc\n\n'
+                directive = textwrap.indent(directive, '    ')
+                f.write(directive)
+            f.write('\n')
+           
+
+# --- BELOW ---
+# old functions, kept for legacy. Used when doxygen option
+# was not available in swig (doxy2swig old times)
+
+# def xml2swig(header_name, xml_path, swig_working_dir,
+#              case_sense_names, docstrings_features, all_index):
+#     """For a given header file, creates swig (.i) file using
+#     xml outputs from doxygen (Driver : Doxy2SWIG)
+
+#     Parameters
+#     ----------
+#     header_name : Path()
+#         Name of the header file (h or hpp)
+#     component_name : string
+#          component (numerics, kernel, ...) of interest
+#     xml_path : string
+#         absolute path to xml files.
+#     swig_working_dir : Path()
+#         Absolute path to siconos swig outputs
+#     case_sense_names : bool
+#         false if xml output files names are lower case only
+#     docstrings_features: dict
+#         all docstrings features (keys) with the header used to build them (values)
+#     all_index: dict
+#         class and files names (keys) with a short description (values) (in-out)
+
+#      Notes
+#      -----
+#      * This function takes into account the value of CASE_SENSE_NAMES parameter
+#      in doxygen config.
+#      * .i file will be named as the xml input file, with .i as ext.
+#      * all latex formula are replaced with temporary strings and postprocess later)
+
+#     """
+#     header_name = Path(header_name).resolve()
+#     # Get xml files related to current header
+#     allfiles = common.get_xml_files(header_name, xml_path, case_sense_names)
+
+#     # Build .i files
+#     for f in allfiles:
+#         common.filter_dot_in_xml_formulas(f)
+#         # Create doxy2swig parser ...
+#         p = SiconosDoxy2Swig(f, swig_working_dir)
+#         # And write p.swig_outputname, e.g. classX.i
+#         p.run()
+#         featname, kind, descr = p.get_xml_compound_infos()
+#         if kind in('class', 'struct'):
+#             all_index[featname] = descr
+#         elif kind == 'file':
+#             all_index[header_name.name] = descr
+
+#         for feat in p.features:
+#             docstrings_features[feat] = header_name
+#         if not p.enums:
+#             docstrings_features['pydata_' + p.name] = p.enums
+
+#     # Look for namespaces files
+
+#     namespaces_files = [f for f in xml_path.glob('namespace*.xml')]
+#     # Build corresponding .i files
+#     for f in namespaces_files:
+#         namespace_name = f.stem.split('namespace')[-1]
+#         namespace_name = namespace_name.replace(r'_1_1', r'::')
+#         common.filter_dot_in_xml_formulas(f)
+#         # set output filename == xml file without extension + .i
+#         p = SiconosDoxy2Swig(f, swig_working_dir)
+#         p.run()
+#         hpp_name = p.get_specific_subnodes(p.xmldoc, 'location', recursive=4)
+#         hpp_name = Path(hpp_name[0].attributes['file'].value)
+#         featname, kind, descr = p.get_xml_compound_infos()
+#         if kind in ('class', 'struct'):
+#             all_index[featname] = descr
+#         elif kind == 'file':
+#             all_index[hpp_name.name] = descr
+#         for feat in p.features:
+#             docstrings_features[feat] = hpp_name
+#         if p.enums:
+#             docstrings_features['pydata_' + p.name] = p.enums
+
+
+# def build_docstrings(headers, component_name, doxygen_config_filename,
+#                      siconos_swig_path):
+#     """Create docstrings (doxy2swig) in swig files from xml (doxygen) generated
+#     from headers.
+
+#     Parameters
+#     ----------
+
+#     headers : list (cmake like)
+#          headers files to parse
+#     component_name : string
+#          component (numerics, kernel, ...) of interest
+#     doxygen_config_filename : string
+#          name (full path) of the doxygen configuration file
+#     siconos_swig_path : string
+#          path to swig outputs in binary dir (i.e. wrap)
+
+#     Note
+#     ----
+#     * all swig files will be genereted into
+#       siconos_swig_path/tmp_component_name directory
+#       and concatenated into component_name-docstrings.i
+#       that will be the file really used by swig.
+
+#     * This function is supposed to be called by a target generated
+#     with cmake (make <component>_docstrings)
+#     """
+#     return
+#     doxyconf = common.parse_doxygen_config(doxygen_config_filename)
+#     case_sense_names = doxyconf['CASE_SENSE_NAMES'].find('YES') > -1
+#     xml_path = Path(doxyconf['OUTPUT_DIRECTORY'].lstrip(),
+#                     doxyconf['XML_OUTPUT'].lstrip())
+
+#     headers = bt.parse_cmake_list(headers)
+#     swig_working_dir = Path(siconos_swig_path, 'tmp_' + component_name)
+#     if not swig_working_dir.exists():
+#         os.makedirs(swig_working_dir)
+
+#     docstrings_features = {}
+#     all_index = {}
+
+#     for hfile in headers:
+#         print(hfile)
+#         xml2swig(hfile, xml_path, swig_working_dir,
+#                  case_sense_names, docstrings_features, all_index)
+
+#     # Save features info in a pickle file
+#     pickle_filename = Path(siconos_swig_path, component_name + '.pickle')
+#     with open(pickle_filename, 'wb') as currentfile:
+#         pickle.dump(docstrings_features, currentfile)
+#     # Save classes, files names and descriptions (for toc)
+#     pickle_filename = Path(siconos_swig_path, component_name + '_index.pickle')
+#     with open(pickle_filename, 'wb') as currentfile:
+#         pickle.dump(all_index, currentfile)
+
+#     # Creates <component>-docstrings.i
+#     outputfile = Path(siconos_swig_path, component_name + '-docstrings.i')
+#     swigfiles = [f for f in swig_working_dir.glob('*.i')]
+#     with open(outputfile, 'w', encoding='utf8') as outfile:
+#         for fname in swigfiles:
+#             with open(fname, encoding='utf8') as infile:
+#                 for line in infile:
+#                     outfile.write(line)
+#     msg = 'Generates (python) file ' + outputfile.name
+#     msg += ' for doctrings in swig.'
+#     print(msg)
+
+
+# def postprocess_docstrings(inoutfile):
+#     """Format python files to make their docstrings complient with sphinx.
+
+    
+#     inoutfile: name (full path) of the python file to process
+
+#     Docstrings are generated by swig (opt -doxygen) and must be postprocessed
+#     to ensure a proper output when treated with sphinx autodoc.
+    
+#     """
+#     # Copy the source file to a tmp file
+#     inoutfile = Path(inoutfile).resolve()
+#     target = Path(inoutfile.parent, inoutfile.stem + '.copy').resolve()
+#     shutil.copyfile(inoutfile, target)
+
+#     # Read input (the original) into a string and replace what must be replaced
+#     fout = open(target, 'w')
+#     txt = inoutfile.read_text()
+#     # Remove some leading spaces at the beginning of the docstring
+#     txt2 = txt.replace('r"""\n         ', 'r"""\n        ')
+#     txt2 = txt.replace('r"""\n     ', 'r"""\n    ')
+#     txt2 = txt2.replace('    :type', '\n    :type')
+#     txt2 = txt2.replace('    :param', '\n    :param')
+#     txt2 = txt2.replace('    :rtype', '\n    :rtype')
+#     txt2 = txt2.replace('    :return', '\n    :return')
+
+#     # Remove double trailing tab before param description in docstring, else wrong sphinx processing
+#     # Dump output into the copy
+#     fout.write(txt2)
+#     fout.close()
+#     # Move copy to original
+#     #shutil.move(target, inoutfile)
+
+
+# def collect_classes_and_functions(module, module_name, sphinx_directory,
+#                                   features):
+#     """Parse current module objects (output of dir(module))
+#     - push them into class or function list according to their kind
+#     - generate rst files (one for each class, one for all functions
+#       of a header file) with the proper autodoc directives.
+#     """
+#     # try:
+#     #     module = importlib.import_module(module_name)
+#     # except ImportError as e:
+#     #     raise ImportError(e)
+
+#     # --- Clean previous build ---
+#     # We have to remove pyfiles each time the function is call
+#     # because of 'a' (append) in writing process
+#     pyfiles = [f for f in sphinx_directory.glob('*pyfile.rst')]
+#     pyfiles += [f for f in sphinx_directory.glob('*pyclass.rst')]
+#     for file in pyfiles:
+#         file.unlink()
+
+#     # Get all members, functions, attributes ...
+#     # available in the imported module.
+#     objlist = [obj for obj in dir(module) if not obj.startswith('_')]
+#     class_files = []
+#     pyfunc_files = []
+#     for obj in objlist:
+#         # For each element of current module,
+#         # if this element has doc, we create a
+#         # new entry in python classs or functions list
+#         # and an text entry (rst-like) in a rst file.
+#         current = getattr(module, obj)
+#         needs_doc = hasattr(current, '__doc__') and current.__doc__ is not None
+#         if needs_doc and current.__doc__.strip():
+#             # Create a proper autodoc directive
+#             gen, kind, name = create_autodoc(current, module_name)
+#             # output rst file name will depends on kind and name
+#             # 
+#             # Set output rst file name and populate class/function list
+#             # according to object kind
+#             if kind == 'pyclass':  # one rst file per class
+#                 outputname = name + '_' + kind + '.rst'
+#                 outputname = Path(sphinx_directory, outputname)
+#                 class_files.append(outputname)
+#             elif kind == 'pyfunction':
+#                 # one rst file for all functions from a given header
+#                 featname = get_feature_headername(name, features)
+#                 outputname = Path(sphinx_directory,
+#                                   featname.stem + '_pyfile.rst')
+#                 pyfunc_files.append(outputname)
+#             else:
+#                 # pydata, processed later.
+#                 continue
+#             # Write autodoc directive into the rst file.
+#             with open(outputname, 'a+') as out:
+#                 out.write(gen)
+#                 out.write('\n')
+
+#     # Trick to remove duplicates
+#     # (since we create one rst files by header, whatever is the
+#     # number of functions it contains)
+#     pyfunc_files = list(set(pyfunc_files))
+#     insert_header_in_functionfiles(pyfunc_files)
+#     class_files += pyfunc_files
+#     class_files.sort()
+#     return class_files
+
+
+# def get_feature_headername(name, features):
+#     """Map feature name to the header file that contains
+#     the feature.
+
+#     Parameters
+#     ---------
+#     name : string
+#     features : dictionnary (populated earlier by Sicodoxy2swig)
+
+#     Returns a Path()
+
+#     Example :
+
+#     get_feature_headername('NM_cstr')
+#     returns <path_to>numerics/src/tools/NumericsMatrix.h.
+#     """
+#     if name in features:
+#         featname = features[name]
+#     elif name.replace('_', '::', 1) in features:
+#         # - when two classes wrapped with swig have
+#         # the same method (same name),
+#         # swig create class1_methodname and class2_methodname.
+#         # while features name is class1::methodname.
+#         # - the same kind of thing happens for static
+#         # class methods.
+#         # We have to take these into account ... and the fact
+#         # that some methods names may contain '_'
+#         # (maxreplace=1 in replace below)
+#         featname = features[name.replace('_', '::', 1)]
+#     elif name.split('::')[-1] in features:
+#         # another way for swig to deal with
+#         # namespaces ...
+#         featname = features[name.split('::')[-1]]
+#     else:
+#         keys = list(features.keys())
+#         found = False
+#         for k in keys:
+#             if k.count(name) > 0:
+#                 featname = features[k]
+#                 found = True
+#                 break
+#         if not found:
+#             raise Exception('Unknown feature name : ', name)
+#     return featname
+
+
+# def create_autodoc(current, module_name):
+#     """Returns autodoc directive for 'current'
+#     defined in module_name.
+
+#     Parameters
+#     ----------
+#     current : object
+#         'object' of interest, one output from python
+#         command dir(module)
+#     module_name : string
+#         module name (e.g. siconos.kernel)
+#     """
+#     if inspect.isclass(current):
+#         name = current.__name__
+#         fullname = module_name + '.' + name
+#         kind = 'pyclass'
+#         title = fullname + ' (Python class)'
+#         directive = '.. autoclass:: ' + fullname + '\n'
+#         directive += '    :members:\n\n'
+#         #label = '.. index:: single: ' + module_name.split('.')[1] + ';' + name
+#         #label += '\n'
+#         label = '.. _' + kind + '_' + name + ':\n\n'
+#         lenname = len(title)
+#         title = label + title + '\n' + lenname * '-' + '\n\n'
+#     elif inspect.isfunction(current):
+#         name = current.__name__
+#         fullname = module_name + '.' + name
+#         title = fullname
+#         kind = 'pyfunction'
+#         directive = '.. autofunction:: ' + fullname + '\n\n'
+#         #label = '.. index:: single: ' + module_name.split('.')[1] + ';' + name
+#         #label += '\n'
+#         label = '.. _' + kind + '_' + name + ':\n\n'
+#         title = label + 4 * '-' + '\n\n'
+#     else:  # current is neither a class nor a function
+#         # try data ...
+#         kind = 'pydata'
+#         gen = ''  #'.. autodata:: ' + str(current) + '\n\n'
+#         name = 'Unknown'
+#         return gen, kind, name
+
+#     gen = title + directive
+#     return gen, kind, name
+
+
+# def insert_header_in_functionfiles(pyfunc_files):
+#     """Write header on top of each python functions rst file
+
+#     pyfunc_files : list of rst files
+#     """
+#     for fname in pyfunc_files:
+#         shortname = fname.stem
+#         label = '.. _' + shortname + ':\n\n'
+#         title = shortname.split('_pyfile')[0] + ' (functions)'
+#         lenname = len(title)
+#         title = label + title + '\n' + lenname * '-' + '\n\n'
+#         with open(fname, 'r+') as f:
+#             lines = f.read()
+#             f.seek(0, 0)
+#             f.write(title + lines)
+
+
+# def write_python_module_toc(module_name, all_files, sphinx_directory,
+#                             swig_working_dir, component_name):
+#     """Write main autodoc file for current module
+
+#     Some kind of table of contents from files listed in all_files.
+#     """
+#     all_index_filename = Path(swig_working_dir,
+#                               component_name + '_index.pickle')
+#     msg = f'Unable to find {all_index_filename}.'
+#     assert all_index_filename.resolve().exists(), msg
+#     with open(all_index_filename, 'rb') as f:
+#         all_index = pickle.load(f)
+#     outputname = Path(sphinx_directory, 'autodoc_all.rst')
+#     title = module_name + '\n'
+#     title += len(title) * '=' + '\n\n'
+#     basename = '/reference/python/' + module_name.replace(r'.', '_')
+#     # A few lines to illustrate module usage
+#     header = '**Usage example** :\n\n.. code-block:: python\n\n'
+#     importname = 's' + module_name.split('.')[-1][0]
+#     code = 'import ' + module_name + ' as ' + importname
+#     code += '\n \nhelp(' + importname + '.SomeClass)\n\n'
+#     header += textwrap.indent(code, '    ')
+#     header += '**Classes and functions**\n\n'
+#     with open(outputname, 'wt') as out:
+#         out.write(title)
+#         out.write(header)
+#         buff = Path(basename, 'autodoc_pydata').as_posix()
+#         gen = '* :doc:`Enums and constants <' + buff + '>`\n'
+#         for f in all_files:
+#             name = f.stem
+#             text = ''
+#             if '_pyclass' in name:
+#                 realname = name.split('_pyclass')[0]
+#                 shorttitle = realname + ' (class) '
+#                 text = '* :py:class:`' + module_name + '.' + realname + '` : '
+#                 try:
+#                     text += all_index[realname] + '\n'
+#                 except:
+#                     text += ' \n'
+#             elif '_pyfile' in name:
+#                 realname = name.split('_pyfile')[0]
+#                 shorttitle = realname + ' (functions) '
+#                 text = '* :doc:`' + shorttitle + '<'
+#                 text += Path(basename, name).as_posix() + '>` : '
+#                 if realname + '.h' in all_index:
+#                     text += all_index[realname + '.h'] + ' \n'
+#                 elif realname + '.hpp' in all_index:
+#                     text += all_index[realname + '.hpp'] + ' \n'
+#                 else:
+#                     text += ' \n'
+#             else:
+#                 shorttitle = ''
+
+#             gen += text
+#         out.write(gen + '\n')
+
+#     # It might be necessary to parse some latex from doxygen
+#     # and convert it to sphinx ...
+#     latex_dir = Path(swig_working_dir, 'tmp_' + component_name)
+#     common.replace_latex(outputname, latex_dir)
+
+
+# def process_enums(module, module_name, features, sphinx_directory,
+#                   swig_working_dir, component_name):
+#     """Parse features to find enums and populate
+#     a rst with the proper autodoc directives.
+#     """
+#     # Get saved enums for the current module
+#     outputname = Path(sphinx_directory, 'autodoc_pydata.rst')
+#     title = module_name + ' constants (Python API)\n'
+#     title += len(title) * '-' + '\n\n'
+#     title += 'All the predefined global constants in ' + module_name
+#     title += '(generated from C++ enum, global variables, ...) \n\n'
+#     enumskeys = [k for k in features if k.find('pydata') > -1]
+#     header = '**Usage** :\n\n.. code-block:: python\n\n'
+#     importname = 's' + module_name.split('.')[-1][0]
+#     code = 'import ' + module_name + ' as ' + importname
+#     code += '\n \nprint(' + importname + '.CONSTNAME)\n\n'
+#     header += textwrap.indent(code, '    ')
+#     title += header
+#     title += '\n-----\n\n**List and descriptions of constants** :\n\n'
+
+#     with open(outputname, 'wt') as out:
+#         out.write(title)
+#         for key in enumskeys:
+#             enums = features[key]
+#             for ename in enums:
+#                 # Document only data available in python API
+#                 if hasattr(module, ename):
+#                     # and only data with a description
+#                     if enums[ename][1].strip():
+#                         gen = ''
+#                         gen += '.. _pydata_' + ename + ':\n\n'
+#                         gen += '.. py:data:: ' + ename + '\n\n'
+#                         if enums[ename][0]:
+#                             # Add initializer value if set
+#                             gen += '    {0} ({1})\n\n'.format(
+#                                 enums[ename][1].strip(), enums[ename][0])
+#                         else:
+#                             gen += '    {0} \n\n'.format(enums[ename][1].strip())
+#                             out.write(gen)
+#     # It might be necessary to parse some
+#     # latex from doxygen and convert it to sphinx ...
+#     latex_dir = Path(swig_working_dir, 'tmp_' + component_name)
+#     common.replace_latex(outputname, latex_dir)
+
+

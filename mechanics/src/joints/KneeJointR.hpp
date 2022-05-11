@@ -24,15 +24,13 @@
 #include <SiconosFwd.hpp>
 #include <NewtonEulerJointR.hpp>
 
-/** \class KneeJointR
- *  \brief This class implements a knee joint between one or two Newton/Euler Dynamical system
- *
- */
+/**
+   This class implements a knee joint between one or two Newton/Euler Dynamical system
+*/
 class KneeJointR : public NewtonEulerJointR
 {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(KneeJointR);
 
   /** Coordinate of the knee point in the body frame of the first dynamical system _d1
@@ -60,17 +58,18 @@ public:
 
 
   /** Empty constructor. The relation may be initialized later by
-   * setPoint, setAbsolute, and setBasePositions. */
+   *  setPoint, setAbsolute, and setBasePositions. */
   KneeJointR();
 
   /** Constructor based on one or two dynamical systems and a point.
+   *
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
-   *            for absolute frame.
+   *  for absolute frame.
    *  \param P SiconosVector of size 3 that defines the point around
-   *           which rotation is allowed.
+   *  which rotation is allowed.
    *  \param absoluteRef if true, P is in the absolute frame,
-   *                     otherwise P is in d1 frame.
+   *  otherwise P is in d1 frame.
    */
   KneeJointR(SP::SiconosVector P, bool absoluteRef,
              SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
@@ -83,29 +82,36 @@ public:
   virtual void initialize(Interaction& inter);
 
   /** Initialize the joint constants based on the provided base positions.
-   * \param q1 A SiconosVector of size 7 indicating translation and
-   *           orientation in inertial coordinates.
-   * \param q2 An optional SiconosVector of size 7 indicating
-   *           translation and orientation; if null, the inertial
-   *           frame will be considered as the second base. */
+   *
+   *  \param q1 A SiconosVector of size 7 indicating translation and
+   *  orientation in inertial coordinates.
+   *  \param q2 An optional SiconosVector of size 7 indicating
+   *  translation and orientation; if null, the inertial
+   *  frame will be considered as the second base. */
   virtual void setBasePositions(SP::SiconosVector q1,
                                 SP::SiconosVector q2 = SP::SiconosVector());
 
-  /* Perform some checks on the initial conditions. */
+  /** Perform some checks on the initial conditions. */
   void checkInitPos(SP::SiconosVector q1, SP::SiconosVector q2);
 
-  /** Get the number of constraints defined in the joint
-      \return the number of constraints
+  /**
+     Get the number of constraints defined in the joint
+     
+     \return the number of constraints
    */
   virtual unsigned int numberOfConstraints() { return 3; }
 
-  /** Get the number of degrees of freedom defined in the joint
-      \return the number of degrees of freedom (DoF)
+  /**
+     Get the number of degrees of freedom defined in the joint
+     
+     \return the number of degrees of freedom (DoF)
    */
   virtual unsigned int numberOfDoF() { return 3; }
 
-  /** Return the type of a degree of freedom of this joint.
-      \return the type of the degree of freedom (DoF)
+  /**
+     Return the type of a degree of freedom of this joint.
+     
+     \return the type of the degree of freedom (DoF)
   */
   virtual DoF_Type typeOfDoF(unsigned int axis) {
     if (axis<3) return DOF_TYPE_ANGULAR;
@@ -115,10 +121,12 @@ public:
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 

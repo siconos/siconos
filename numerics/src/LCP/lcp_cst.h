@@ -73,8 +73,6 @@ enum SICONOS_LCP_IPARAM
    SICONOS_LCP_IPARAM_ENUM_USE_DGELS =10,
    /** index in iparam to store to activate multiple solutions search */
    SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS =11,
-   /** **/
-   
   };
 
 enum SICONOS_LCP_DPARAM

@@ -56,6 +56,7 @@ The complete documentation can be generated in one shot using doc target
 
    cd build-dir
    cmake -DWITH_DOCUMENTATION=ON path_to_siconos_sources
+   make
    make doc
 
 
@@ -120,10 +121,11 @@ Document each class like this
 
 .. code-block:: c++
 
-     /** Short description of the class
-     *
-     * Detailed description
-     * equations (see details about latex below), reference to textbooks chapter and so on
+     /**
+        Short description of the class
+     
+        Detailed description
+        equations (see details about latex below), reference to textbooks chapter and so on
      */
      class SiconosVector
      ...
@@ -133,9 +135,10 @@ Document each class like this
 .. code-block:: c++
 
      /** brief description
-      * \param name_of_param1 description of the param
-      * \param name_of_param2 description of the param
-      * \return description of what is returned
+      *
+      *  \param name_of_param1 description of the param
+      *  \param name_of_param2 description of the param
+      *  \return description of what is returned
      */
      double some_function(int p, int v)
 
@@ -145,12 +148,44 @@ Something like
 .. code-block:: c++
 
    /** get size of A
-   * \param A double A
-   *  \return unsigned int
+   *   \param A double A
+   *   \return unsigned int
    */
    unsigned int size(double * A) const;
 
 is totally useless ...
+
+
+.. warning::
+
+   Space, tab and newline are important and taken into account, especially when generating docstrings and doc from docstrings !
+
+   - always add a newline before the first \param or \return
+   - align properly everything with the first line of the doxygen comment
+
+
+Correct:
+
+.. code-block:: c++
+
+    /** brief description
+     *
+     *  \param name_of_param1 description of the param
+     *  \param name_of_param2 description of the param
+     *  \return description of what is returned
+     */
+
+Wrong (missing newline and wrong indent):
+   
+.. code-block:: c++
+
+    /** brief description
+     * \param name_of_param1 description of the param
+     * \param name_of_param2 description of the param
+     * \return description of what is returned
+     */
+  
+    
 
 .. rubric:: rst inside doxygen commments
 
@@ -158,6 +193,8 @@ Use  "\\rst" / "\\endrst" tags to write reStructuredText (reST) specific (i.e. t
 See details below for references and math formula.
 
 In the case of comments with leading asterisk, use "\\rststar" / "\\endrststar" tags
+
+Rq: most of the time it breaks the rendering of python API outputs.
 
 .. rubric:: Enums, union ...
 
@@ -222,74 +259,13 @@ Math and latex
 
   .. code:: rst
 
-     use this \f$\alpha\f$ to write inline math
+     use this \f$ \alpha \f$ to write inline math
+
+     Important: always put a space after and before \f$     
 
 * displayed math
 
-  - Wrap your formula between "\rst" and "\endrst" tags and write math as you would with sphinx (see http://www.sphinx-doc.org/en/master/ext/math.html).
-  - Between rst tags, replace all occurences of :math:'\'dot (one backlash)  with :math:'\\'dot (two backlashes), else doxygen will fail to produce documentation.
-  
-  A simple example :
-
-  .. code:: rst
-
-     \rst
-     
-     .. math::
-      
-        y &=& h(X,t,\lambda,Z)\\
-        R &=& g(X,t,\lambda,Z)
-
-     \endrst
-
-  * New line after math keyword is required.
-  * Indentation for formula (related to math keyword) is required.
-  
-  For more complicated maths, use nowrap keyword :
-  
-  .. code:: rst
-
-     \rst
-     
-     .. math::
-        :nowrap:
-      
-         \left\{\begin{array}{l}
-         y \geq 0, \lambda \geq 0, y^{T} \lambda=0\\
-         if y \leq 0 \quad \mbox{then} \quad \\dot y(t^{+}) - e \\dot y(t^{-}) \geq 0, \quad  \lambda \geq 0, (\\dot y(t^{+}) - e \\dot y(t^{-}))^{T} \lambda=0
-         \end{array}\right.
-
-     \endrst
-
-     
-If you need comments with leading asterisk, use "\rststar" / "\endrststar" tags :
-
-.. code:: rst
-   
- * \rststar
- *
- * .. math::
- *    :nowrap:
- *
- *    \begin{eqnarray}
- *    \begin{cases}
- *     M v =  q +  H r \\
- *     u = H^\top v + b \\
- *     \hat u = u +\left[
- *       \left[\begin{array}{c}
- *           \mu^\alpha \|u^\alpha_{T}\|\\
- *           0 \\
- *           0
- *         \end{array}\right]^T, \alpha = 1 \ldots n_c
- *      \right]^T \\ \\
- *      C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
- *     \end{cases}
- *    \end{eqnarray}
- *
- * \endrststar
-
-  
-
+  - Wrap your formula between "\f[t" and "\f]" tags and write math as you would with latex.
   
 .. _build_doc:
 
@@ -316,7 +292,6 @@ Tools, config and description
 * `Doxygen`_ : tool able to generate documentation from annotated C++ sources, in html, xml ...
 * `Sphinx`_ : powerful generator of documentation (mostly for Python)
 * `Breathe`_ : an extension to reStructuredText and Sphinx to be able to read and render the Doxygen xml outputs.
-* `Doxy2swig`_ : converter from doxygen XML to SWIG docstring.
 
 
 Images are sometimes better than words : the different operations are  detailed on figures below
@@ -349,8 +324,9 @@ How does it work?
 Doxygen generates xml from comments in headers. Some python scripts are
 used to postprocess those xml files and produce .i files (swig), ending in
 docstrings in generated swig python modules.
-We have written a wrapper to doxy2swig (https://github.com/m7thon/doxy2swig) to fit with our needs.
-Finally, rst files are generated, based on those docstrings, in autodoc format, for sphinx.
+
+Update: we now use "-doxygen" option of swig to generate docstrings in python files from c++ doxygen comments.
+doxy2swig interface is outdated.
 
 *Config and sources:*
 
@@ -358,13 +334,14 @@ Finally, rst files are generated, based on those docstrings, in autodoc format, 
   generation
 * docs/gendoctools/* : python tools used to generate docs. This python package will be installed in <CMAKE_BINARY_DIR>/share
   at build time.
-* docs/config/doxy2swig.config.in : doxygen (xml output) config, for swig and docstrings
+
+
 
 
 .. figure:: /figures/doc_process/build_doxy2swig.*
    :figclass: align-center
 
-   Generation of rst files for Python API
+   Generation of rst files for Python API. Warning: doxy2swig part is outdated and has been replaced by swig -doxygen.
 
 Remark : during generation process, siconos python packages are imported and only
 objects with non-empty docstrings are documented. 
@@ -386,8 +363,6 @@ All rst files (from source dir and generated for Python and C++ API) and process
 * docs/sphinx/\*/\*.rst : inputs for sphinx doc (textbooks)
 * docs/sphinx/figures/\* : all figures used in sphinx doc
 * docs/gendoctools/* : python tools used to generate docs.
-* docs/config/doxy.config.in : doxygen (html output) config
-* docs/config/doxy_warnings.config.in : doxygen (log output) config
 
             
 .. figure:: /figures/doc_process/build_html_process.*
@@ -395,10 +370,11 @@ All rst files (from source dir and generated for Python and C++ API) and process
               
    make doc toolchain
             
-.. figure:: /figures/doc_process/targets_dep.*
-   :figclass: align-center
+..
+   .. figure:: /figures/doc_process/targets_dep.*
+      :figclass: align-center
 
-   make targets (related to doc) dependencies
+      make targets (related to doc) dependencies
 
            
 .. rubric:: Other (exotic) configuration options

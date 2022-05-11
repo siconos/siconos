@@ -28,24 +28,26 @@
 
 typedef  void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
 
-/** \brief This class models simple boundary conditions for
- *   prescribing the velocities in a Dynamical System. A simple
- *   boundary condition is considered to fix a component \f$ j \f$ of
- *   * the velocity vector, i.e., \f$ v_j(t) = bc(t)\f$ where \f$
- *   bc(t)\f$ is a given function of time.
+/** This class models simple boundary conditions for
+ *  prescribing the velocities in a Dynamical System. A simple
+ *  boundary condition is considered to fix a component \f$ j \f$ of
+ *  the velocity vector, i.e., \f$ v_j(t) = bc(t) \f$ where \f$ bc(t) \f$
+ *  is a given function of time.
  *
  */
 class BoundaryCondition
 {
 public:
 
-  /** \brief Basic constructor
+  /** Basic constructor
+   *
    *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    */
 
   BoundaryCondition(SP::UnsignedIntVector newVelocityIndices);
 
-  /** brief Constructor with constant prescribed values
+  /** Constructor with constant prescribed values
+   *
    *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    *  \param newVelocityValues the values of the prescribed velocities
    */
@@ -58,6 +60,7 @@ public:
   // === GETTERS AND SETTERS ===
 
   /** to get the velocityIndices
+   *
    *  \return a pointer on _velocityIndices
    */
   inline SP::UnsignedIntVector velocityIndices()
@@ -66,6 +69,7 @@ public:
   };
 
   /** to get the prescribedVelocity
+   *
    *  \return a pointer on _prescribedVelocity
    */
   inline SP::SiconosVector prescribedVelocity()
@@ -74,6 +78,7 @@ public:
   };
 
   /** to get the prescribedVelocityOld
+   *
    *  \return a pointer on _prescribedVelocityOld
    */
   inline SP::SiconosVector prescribedVelocityOld()
@@ -82,6 +87,7 @@ public:
   };
 
   /** allow to set a specified function to compute prescribedVelocity
+   *
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the name of the function to use in this plugin
    */
@@ -92,6 +98,7 @@ public:
   }
 
   /** default function to compute the precribed velocities
+   *
    *  \param  time : the current time
    */
   virtual void computePrescribedVelocity(double time);
@@ -102,8 +109,7 @@ public:
   
 
 protected:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(BoundaryCondition);
 
   /** protected default constructor */

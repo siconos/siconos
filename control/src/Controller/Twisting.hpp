@@ -28,14 +28,12 @@
 
 /** Modified Twisting Controller with an implicit discretization
  *
- * This is the twisting controller that gives the best result
+ *  This is the twisting controller that gives the best result
  */
 class Twisting : public CommonSMC
 {
 private:
-  /** serialization hooks */
   ACCEPT_SERIALIZATION(Twisting);
-
 
 protected:
   /** default constructor */
@@ -43,21 +41,24 @@ protected:
 
 public:
   /** Constructor for the ActuatorFactory
-   * \param sensor the ControlSensor feeding the Actuator
+   *
+   *  \param sensor the ControlSensor feeding the Actuator
    */
   Twisting(SP::ControlSensor sensor): CommonSMC(TWISTING, sensor) {};
 
   /** Constructor for a nonlinear system.
-   * \param sensor the ControlSensor feeding the Actuator
-   * \param hControl sampling period
+   *
+   *  \param sensor the ControlSensor feeding the Actuator
+   *  \param hControl sampling period
    */
   Twisting(SP::ControlSensor sensor, double hControl);
 
   /** Constructor for the linear case
-   * \param sensor the ControlSensor feeding the Actuator
-   * \param gain control magnitude
-   * \param beta twisting parameter
-   * \param hControl sampling period
+   *
+   *  \param sensor the ControlSensor feeding the Actuator
+   *  \param gain control magnitude
+   *  \param beta twisting parameter
+   *  \param hControl sampling period
    */
   Twisting(SP::ControlSensor sensor, double gain, double beta, double hControl);
 
@@ -66,12 +67,13 @@ public:
   virtual ~Twisting();
 
   /** Compute the new control law at each event
-   * Here we are using the following formula:
+   *  Here we are using the following formula:
    */
   virtual void actuate();
 
   /** set nonsmooth data: NormalConeNSL and AVI osnsp
-   * \param hControl sampling period
+   *
+   *  \param hControl sampling period
    */
   virtual void setNSdata(double hControl);
 

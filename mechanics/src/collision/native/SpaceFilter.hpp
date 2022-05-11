@@ -52,8 +52,7 @@ class SpaceFilter : public InteractionManager,
                     public std::enable_shared_from_this<SpaceFilter> {
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SpaceFilter);
 
   /** the bounding box factor is multiplicated by the largest object
@@ -161,17 +160,22 @@ public:
   //  std::pair<space_hash::iterator, space_hash::iterator>
   //  neighbours(SP::Hashed h);
 
-  /** Just test the presence of neighbours.
-      \param h hashed component of a body.
+  /**
+     Just test the presence of neighbours.
+     
+     \param h hashed component of a body.
    */
   bool haveNeighbours(SP::Hashed h);
 
-  /** Give the minimal distance.
-      \param h hashed component of a body.
+  /**
+     Give the minimal distance.
+     
+     \param h hashed component of a body.
    */
   double minDistance(SP::Hashed h);
 
   /** Broadphase contact detection: add interactions in indexSet 0.
+   *
    *  \param simulation the current simulation setup
    */
   void updateInteractions(SP::Simulation simulation) override;
@@ -182,8 +186,6 @@ public:
    */
   virtual ~SpaceFilter(){};
 
-  /** visitor hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

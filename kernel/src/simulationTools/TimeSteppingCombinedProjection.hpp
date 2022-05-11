@@ -28,8 +28,7 @@
  */
 class TimeSteppingCombinedProjection : public TimeStepping {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(TimeSteppingCombinedProjection);
 
   /** level of IndexSet on which we project
@@ -89,8 +88,9 @@ protected:
    * Projection Algorithm */
   bool _isIndexSetsStable;
 
-  /** update indexSets[i] of the topology, using current y and lambda values of
-   * Interactions. \param level unsigned int: the level of the set to be updated
+  /** update indexSets[i] of the topology, using current y and lambda values of Interactions
+   *
+   *  \param level unsigned int: the level of the set to be updated
    */
   void updateIndexSet(unsigned int level) override;
 
@@ -101,13 +101,14 @@ public:
   void initOSNS() override;
 
   /** Constructor with the time-discretisation.
-   * \param nsds the nsds that we want to simulate
+   *
+   *  \param nsds the nsds that we want to simulate
    *  \param td a pointer to a timeDiscretisation (linked to the model
    *  that owns this simulation)
    *  \param osi a one step integrator
-   * \param osnspb_velo a one step non smooth problem for the velocity
-   * formulation \param osnspb_pos a one step non smooth problem for the
-   * position formulation \param _level
+   *  \param osnspb_velo a one step non smooth problem for the velocity
+   *  formulation \param osnspb_pos a one step non smooth problem for the
+   *  position formulation \param _level
    */
   TimeSteppingCombinedProjection(SP::NonSmoothDynamicalSystem nsds,
                                  SP::TimeDiscretisation td,
@@ -124,11 +125,13 @@ public:
 
   void updateWorldFromDS() override { ; }
   /** get the Number of iteration of projection
-   * \return unsigned int nbProjectionIteration
+   *
+   *  \return unsigned int nbProjectionIteration
    */
   inline unsigned int nbProjectionIteration() { return _nbProjectionIteration; }
   /** get the Number of cumulated iteration of projection
-   * \return unsigned int
+   *
+   *  \return unsigned int
    */
   inline unsigned int nbCumulatedProjectionIteration()
   {
@@ -136,7 +139,8 @@ public:
   }
 
   /** get the  Cumulated Number of steps performed in the Newton Loop
-   * \return unsigned int
+   *
+   *  \return unsigned int
    */
   inline unsigned int cumulatedNewtonNbIterations()
   {
@@ -144,7 +148,8 @@ public:
   }
 
   /** get the Number of iteration for stabilizating indexsets
-   * \return unsigned int
+   *
+   *  \return unsigned int
    */
   inline unsigned int nbIndexSetsIteration() { return _nbIndexSetsIteration; }
 
@@ -167,19 +172,12 @@ public:
 
   inline bool doCombinedProjOnEquality() { return _doCombinedProjOnEquality; }
 
-  /**
-   */
   void advanceToEvent() override;
-  /**
-   */
+
   void advanceToEventOLD();
 
-  /*
-   */
   void computeCriteria(bool *runningProjection);
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

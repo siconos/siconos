@@ -3,3 +3,4 @@
 BasedOnStyle: LLVM
 BreakBeforeBraces: Stroustrup
 IncludeBlocks: Regroup
+ColumnLimit: 95 # To avoid reformating that breaks doxy2swig

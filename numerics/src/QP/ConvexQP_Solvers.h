@@ -32,23 +32,25 @@ extern "C"
 {
 #endif
 
-  /** Projected Gradient solver for Convex QP problem
-      \param problem the variational inequality problem to solve
-      \param z global vector (n), in-out parameter
-      \param w global vector (n), in-out parameters
-      \param info return 0 if the solution is found
-      \param options the solver options :
-      iparam[0] : Maximum iteration number
-
-      dparam[3] : rho  parameter.
-         If rho >0, then self-adaptive (Armijo like) procedure.
-         If rho <0, then constant rho parameter  (rho <-- -rho)
-      Adaptive step-size parameters:
-      Adaptive step-size parameters:
-      dparam[4] = 2/3.0;  tau
-      dparam[5] = 3.0/2.0;  tauinv
-      dparam[6] = 0.9;   L
-      dparam[7] = 0.3;   Lmin
+  /**
+     Projected Gradient solver for Convex QP problem
+     
+     \param problem the variational inequality problem to solve
+     \param z global vector (n), in-out parameter
+     \param w global vector (n), in-out parameters
+     \param info return 0 if the solution is found
+     \param options the solver options :
+     iparam[0] : Maximum iteration number
+     
+     dparam[3] : rho  parameter.
+     If rho >0, then self-adaptive (Armijo like) procedure.
+     If rho <0, then constant rho parameter  (rho <-- -rho)
+     Adaptive step-size parameters:
+     Adaptive step-size parameters:
+     dparam[4] = 2/3.0;  tau
+     dparam[5] = 3.0/2.0;  tauinv
+     dparam[6] = 0.9;   L
+     dparam[7] = 0.3;   Lmin
   */
   void convexQP_ProjectedGradient(ConvexQP* problem,
                                   double *z, double *w,

@@ -48,7 +48,8 @@ extern "C"
    */
   int gmp_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
-  /** \addtogroup SetSolverOptions @{
+  /** \addtogroup SetSolverOptions
+   * @{
    */
   void gmp_set_default(SolverOptions* options);
   /** @} */

@@ -26,7 +26,6 @@
 class Contact2dR : public Lagrangian2d2DR
 {
 private:
-  // serialization hooks
   ACCEPT_SERIALIZATION(Contact2dR);
 
 public:
@@ -48,9 +47,10 @@ public:
   // virtual void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
   /** Update this contact point information.
-   * \param pos1 Position on ds1 in ds1 frame.
-   * \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
-   * \param normal Normal in ds2 frame (or world frame if ds2=null).
+   * 
+   *  \param pos1 Position on ds1 in ds1 frame.
+   *  \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
+   *  \param normal Normal in ds2 frame (or world frame if ds2=null).
    */
   // virtual void updateContactPoints(const SiconosVector& pos1,
   //                                  const SiconosVector& pos2,

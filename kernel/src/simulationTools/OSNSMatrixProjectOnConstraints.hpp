@@ -93,8 +93,7 @@
 class OSNSMatrixProjectOnConstraints : public OSNSMatrix
 {
 protected:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(OSNSMatrixProjectOnConstraints);
 
   /* default constructor

@@ -34,7 +34,7 @@
 class ControlSimulation
 {
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(ControlSimulation);
 
 protected:
@@ -42,7 +42,7 @@ protected:
   ControlSimulation() {};
 
   /** Constructor with the minimal set of data
-   * \param t0 the starting time \f$t_0\f$
+   * \param t0 the starting time \f$ t_0 \f$
    * \param T the end time T
    * \param h the simulation time step
    * */

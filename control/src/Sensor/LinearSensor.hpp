@@ -25,17 +25,13 @@
 
 #include "ControlSensor.hpp"
 
-/** \class LinearSensor
- *  \brief Common linear Sensor to get output of the system
- *
- * A generic linear sensor, to capture the output y defined as y = Cx + Du
- *
- */
+/**
+   A generic linear sensor, to capture the output y defined as y = Cx + Du
+*/
 class LinearSensor : public ControlSensor
 {
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(LinearSensor);
 
   /** A matrix for output */
@@ -59,14 +55,16 @@ private:
 public:
 
   /** Constructor for the SensorFactory
-   * \param ds the SP::DynamicalSystem it observes
+   *
+   *  \param ds the SP::DynamicalSystem it observes
    */
   LinearSensor(SP::DynamicalSystem ds);
 
   /** Constructor with the full set of data
-   * \param ds the SP::DynamicalSystem it observes.
-   * \param C a SP::SiconosMatrix.
-   * \param D a SP::SiconosMatrix (optional).
+   *
+   *  \param ds the SP::DynamicalSystem it observes.
+   *  \param C a SP::SiconosMatrix.
+   *  \param D a SP::SiconosMatrix (optional).
    */
   LinearSensor(SP::DynamicalSystem ds,
       SP::SimpleMatrix C, SP::SimpleMatrix D = SP::SimpleMatrix());
@@ -76,7 +74,7 @@ public:
   virtual ~LinearSensor();
 
   /** initialize sensor data
-   * \param nsds current nonsmooth dynamical system
+   *  \param nsds current nonsmooth dynamical system
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds);
 
@@ -85,12 +83,14 @@ public:
   void capture();
 
   /** Set the C matrix.
-   * \param C a SimpleMatrix
+   *
+   *  \param C a SimpleMatrix
    */
   void setC(const SimpleMatrix& C);
 
   /** Set the C matrix
-   * \param C a SP::SimpleMatrix
+   *
+   *  \param C a SP::SimpleMatrix
    */
   inline void setCPtr(SP::SimpleMatrix C)
   {
@@ -98,12 +98,14 @@ public:
   };
 
   /** Set the D matrix
-   * \param D a SimpleMatrix
+   *
+   *  \param D a SimpleMatrix
    */
   void setD(const SimpleMatrix& D);
 
   /** Set the D matrix
-   * \param D a SP::SimpleMatrix
+   *
+   *  \param D a SP::SimpleMatrix
    */
   inline void setDPtr(SP::SimpleMatrix D)
   {

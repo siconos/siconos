@@ -25,8 +25,6 @@
 class Bullet2d3DR : public Contact2d3DR
 {
 private:
-  /** serialization hooks
-  */
   ACCEPT_SERIALIZATION(Bullet2d3DR);
 
 public:

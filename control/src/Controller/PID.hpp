@@ -33,8 +33,7 @@ private:
   /** default constructor */
   PID() {};
 
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(PID);
 
   /** error vector */
@@ -51,8 +50,9 @@ private:
 public:
 
   /** Constructor.
-   * \param sensor the ControlSensor feeding the Actuator
-   * \param B the B matrix
+   *
+   *  \param sensor the ControlSensor feeding the Actuator
+   *  \param B the B matrix
    */
   PID(SP::ControlSensor sensor, SP::SimpleMatrix B = std::shared_ptr<SimpleMatrix>());
 
@@ -61,28 +61,33 @@ public:
   virtual ~PID();
 
   /** initialize actuator data.
-   * \param nsds a NonSmoothDynamicalSystem
-   * \param s the simulation
+   *
+   *  \param nsds a NonSmoothDynamicalSystem
+   *  \param s the simulation
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 
-  /** Compute the new control law at each event
-   * Here we are using the following formula:
-   * \f$ u_k = u_{k-1} + c_1 e_k + c_2 e_{k-1} + c_3 e_{k-2} \f$ , where
-   * \f{array} c_1 &= K_P - \frac{K_D}{\Delta t} + K_I \Delta t \\
-   * c_2 &= -1 - \frac{2K_D}{\Delta t} \\
-   * c_3 &= \frac{K_D}{\Delta t} \\
-   * \f}
+  /**
+     Compute the new control law at each event
+     Here we are using the following formula:
+     \f$ u_k = u_{k-1} + c_1 e_k + c_2 e_{k-1} + c_3 e_{k-2} \f$ , where
+     \f[
+     c_1 &= K_P - \frac{K_D}{\Delta t} + K_I \Delta t \\
+     c_2 &= -1 - \frac{2K_D}{\Delta t} \\
+     c_3 &= \frac{K_D}{\Delta t} 
+     \f]
    */
   void actuate();
 
   /** Set K
-   * \param K SP::SiconosVector \f$ [K_P, K_I, K_D] \f$
+   *
+   *  \param K SP::SiconosVector \f$ [K_P, K_I, K_D] \f$
    */
   void setK(SP::SiconosVector K);
 
   /** Set the value of _ref to reference
-   * \param reference the new value
+   *
+   *  \param reference the new value
    */
   void inline setRef(double reference)
   {
@@ -90,17 +95,19 @@ public:
   }
 
   /** Get the timestep from the TimeDiscretisation associated with this PID controller
-  *  \param td the TimeDiscretisation for this Actuator
-  */
+   *
+   *  \param td the TimeDiscretisation for this Actuator
+   */
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
   void setDeltaT(double deltaT)
   {
     _curDeltaT = deltaT;
   }
-/** display the data of the Actuator on the standard output
+  
+  /** display the data of the Actuator on the standard output
    */
   virtual void display() const;
-
+  
 };
 #endif
