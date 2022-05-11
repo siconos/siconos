@@ -5,10 +5,11 @@ from math import cos, sin, asin, atan2
 import numpy as np
 import h5py
 ## fix compatibility with h5py version
-if (h5py.version.version_tuple.major >=3 ):
+if hasattr(h5py, 'vlen_dtype'):
     h5py_vlen_dtype = h5py.vlen_dtype
-else:
+elif hasattr(h5py, 'new_vlen'):
     h5py_vlen_dtype = h5py.new_vlen
+
 
 import pickle
 import tempfile
@@ -492,6 +493,7 @@ class MechanicsHdf5(object):
         self._velocities_data = None
         self._dynamic_data = None
         self._cf_data = None
+        self._cf_info = None
         self._domain_data = None
         self._solv_data = None
         self._run_options = None
@@ -571,6 +573,14 @@ class MechanicsHdf5(object):
             self._cf_data.attrs['info'] += 'reaction impulse (local frame) [20:22],  interaction id [23],'
             self._cf_data.attrs['info'] += 'ds 1 number [24],  ds 2 number [25]'
 
+        self._cf_info = data(self._data, 'cf_info', 5,
+                             use_compression=self._use_compression)
+
+        if self._mode == 'w':
+            self._cf_info.attrs['info'] = 'time [0],  interaction id [1]'
+            self._cf_info.attrs['info'] += 'ds 1 number [2],  ds 2 number [3]'
+            self._cf_info.attrs['info'] += 'static body number [4]'
+
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
                                      use_compression=self._use_compression)
@@ -578,13 +588,20 @@ class MechanicsHdf5(object):
                                use_compression=self._use_compression)
         self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
                                       use_compression=self._use_compression)
-        
+
         try:
             self._log_data = group(self._data, 'log')
         except Exception as e:
             print('Warning -  group(self._data, log ) : ', e)
 
         self._input = group(self._data, 'input')
+
+        # if the hdf5 file contains already some objects, we correcly initialize
+        # the object counter
+        if len(self._input) >= 0:
+            type_obj = [obj.attrs['type'] for  obj in self._input.values()]
+            self._number_of_dynamic_objects = type_obj.count('dynamic')
+            self._number_of_static_objects = type_obj.count('static')
 
         self._nslaws_data = group(self._data, 'nslaws')
         return self
@@ -639,6 +656,12 @@ class MechanicsHdf5(object):
         Contact points information.
         """
         return self._cf_data
+
+    def contact_info_data(self):
+        """
+        Contact points information.
+        """
+        return self._cf_info
 
     def domains_data(self):
         """
@@ -889,9 +912,20 @@ class MechanicsHdf5(object):
             self._number_of_permanent_interactions += 1
 
     def add_convex_shape(self, name, points,
-                         insideMargin=None, outsideMargin=None):
+                         insideMargin=None, outsideMargin=None,
+                         avoid_internal_edge_contact=False):
         """
         Add a convex shape defined by a list of points.
+
+        outsideMargin is the value of margin that substract from the actual contact distance
+
+        If insideMargin is positive, the convex hull is shrunken by that amount
+        (each face is moved by "shrink" length units towards the center along its normal).
+        This value is then added to outsideMargin to compensate the shrink. The convex hull
+        appears for the user as in its original size.
+
+
+
         """
         # infer the dimension of the problem
         if np.shape(points)[1] == 2:
@@ -913,15 +947,21 @@ class MechanicsHdf5(object):
             shape[:] = points[:]
             shape.attrs['type'] = 'convex'
             shape.attrs['id'] = self._number_of_shapes
+            if avoid_internal_edge_contact:
+                shape.attrs['avoid_internal_edge_contact'] = True
             self._number_of_shapes += 1
 
     def add_primitive_shape(self, name, primitive, params,
                             insideMargin=None, outsideMargin=None):
         """
         Add a primitive shape.
+
+        Todo: Comments on insideMargin and outsideMargin that depends on the
+              primitive shape type.
         """
         # infer the dimension of the problem
-        if primitive == 'Disk' or primitive == 'Box2d':
+        if primitive == 'Disk' or primitive == 'Box2d' or primitive == 'Line' \
+           or primitive == 'Circle':
             self._dimension = 2
         else:
             if self._dimension == 2:
@@ -930,6 +970,7 @@ class MechanicsHdf5(object):
         self._out.attrs['dimension'] = self._dimension
 
         if name not in self._ref:
+
             shape = self._ref.create_dataset(name, (1, len(params)))
             shape.attrs['id'] = self._number_of_shapes
             shape.attrs['type'] = 'primitive'
@@ -956,10 +997,10 @@ class MechanicsHdf5(object):
         the computation of inertia and center of mass if not provided.
 
         The  body-fixed frame is assumed to be the global inertial
-        frame. This means that 
-        1. By default, the center of mass is located at the origin. 
+        frame. This means that
+        1. By default, the center of mass is located at the origin.
         The initial translation is applied from this point, so that x_g(0) = translation
-        2. the  orientation is identical to the inertial frame. 
+        2. the  orientation is identical to the inertial frame.
         The initial orientation is applied to the inertial frame to obtain
         the body-fixed frame.
 
@@ -1146,7 +1187,7 @@ class MechanicsHdf5(object):
                                                collision_group2=0):
         """
         Add a nonsmooth law for contact between 2 groups.
-        Only NewtonImpactFrictionNSL are supported.
+        Only NewtonImpactRollingFrictionNSL are supported.
         name is an user identifiant and must be unique,
         mu is the coefficient of friction,
         e is the coefficient of restitution on the contact normal,
@@ -1156,11 +1197,16 @@ class MechanicsHdf5(object):
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type'] = 'NewtonImpactRollingFrictionNSL'
-            nslaw.attrs['mu'] = mu
-            nslaw.attrs['mu_r'] = mu_r
-            nslaw.attrs['e'] = e
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'NewtonImpactRollingFrictionNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+                
+        nslaw.attrs['mu'] = mu
+        nslaw.attrs['mu_r'] = mu_r
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
 
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                        collision_group2=0):
@@ -1176,10 +1222,15 @@ class MechanicsHdf5(object):
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type'] = 'NewtonImpactFrictionNSL'
-            nslaw.attrs['mu'] = mu
-            nslaw.attrs['e'] = e
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'NewtonImpactFrictionNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+
+        nslaw.attrs['mu'] = mu
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
 
     # Note, default groups are -1 here, indicating not to add them to
     # the nslaw lookup table for contacts, since 1D impacts are
@@ -1200,9 +1251,14 @@ class MechanicsHdf5(object):
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type'] = 'NewtonImpactNSL'
-            nslaw.attrs['e'] = e
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'NewtonImpactNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
 
     # Note, default groups are -1 here, indicating not to add them to
     # the nslaw lookup table for contacts, since 1D impacts are
@@ -1223,11 +1279,16 @@ class MechanicsHdf5(object):
         if name not in self._nslaws_data:
             nslaw = self._nslaws_data.create_dataset(name, (0,))
             nslaw.attrs['type'] = 'RelayNSL'
-            nslaw.attrs['size'] = size
-            nslaw.attrs['lb'] = lb
-            nslaw.attrs['ub'] = ub
-            nslaw.attrs['gid1'] = collision_group1
-            nslaw.attrs['gid2'] = collision_group2
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'RelayNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name', name ,' but not the same type')
+
+        nslaw.attrs['size'] = size
+        nslaw.attrs['lb'] = lb
+        nslaw.attrs['ub'] = ub
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
 
     def add_joint(self, name, object1, object2=None,
                   points=[[0, 0, 0]], axes=[[0, 1, 0]],

@@ -64,7 +64,7 @@ function(find_python_module module)
     REQUIRED_VARS ${${module}_REQUIRED_VARS}
     VERSION_VAR ${module}_VERSION)
  
-  if(${module}_FOUND)
-    message("-- Found python package ${${module}_file}, version ${${module}_VERSION}")
-  endif()
+  # if(${module}_FOUND)
+  #   message("-- Found python package ${${module}_file}, version ${${module}_VERSION}")
+  # endif()
 endfunction(find_python_module)

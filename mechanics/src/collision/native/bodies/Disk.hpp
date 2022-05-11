@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /** \file Disk.hpp
  */
@@ -22,28 +22,20 @@
 #ifndef Disk_H
 #define Disk_H
 
-#include "MechanicsFwd.hpp"
 #include "CircularDS.hpp"
+#include "MechanicsFwd.hpp"
 /** \class Disk
  *  \brief Definition of a 2D disk - Inherits from LagrangianDS
  */
 
-
-class Disk : public CircularDS, public std::enable_shared_from_this<Disk>
-{
+class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
 private:
-  /** serialization hooks
-  */
+  // serialization hooks
   ACCEPT_SERIALIZATION(Disk);
-
 
   void MassSetup();
 
-protected:
-  Disk() : CircularDS() {};
-
 public:
-
   /** Constructor
       \param radius
       \param mass
@@ -51,17 +43,14 @@ public:
       \param velocity vector
   */
 
-  Disk(double radius, double mass, SP::SiconosVector position, SP::SiconosVector velocity);
+  Disk(double radius, double mass, SP::SiconosVector position,
+       SP::SiconosVector velocity);
 
   /** destructor
    */
-  virtual ~Disk();
+  virtual ~Disk() noexcept = default;
 
-
-  /** visitors hook
-   */
+  // visitors hook
   ACCEPT_BASE_VISITORS(LagrangianDS);
-
 };
 #endif /* Disk_H */
-

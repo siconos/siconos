@@ -29,9 +29,6 @@ Whatever your system is, you will need first to :
 * Create anywhere (but not in *path_to_sources*) a build directory.
 * Check :ref:`siconos_dependencies`. Most of them are commonly or at least easily installed
   on many standard systems.
-* Check the list of platforms and configs for which siconos has been succesfully (or not ...)  installed :
-
-  http://cdash-bipop.inrialpes.fr/index.php?project=Siconos
   
 The quick way
 -------------
@@ -223,8 +220,14 @@ Developers or advanced users options
 * WITH_MUMPS=ON/OFF : to enable/disable mumps library (http://mumps.enseeiht.fr)
 
 * WITH_FCLIB=ON/OFF : to enable/disable fclib interface (https://github.com/FrictionalContactLibrary/fclib). 
-  This option is ON by default and if not found it will be downloaded and installed automatically as part of Siconos.
+  This option is ON by default.
+  The last version of fclib (master branch of the github repository) will be downloaded and installed automatically as part of Siconos
+  If you need a specific version or prefer using a version already installed on your system, add the following option to your cmake command:
 
+  .. code-block:: bash
+
+	cmake -DFCLIB_ROOT=<path-to-your-fclib-installation> ...
+	
 * WITH_DOXYGEN_WARNINGS=ON/OFF : verbose mode to explore doxygen warnings generated for siconos
 
 * WITH_SERIALIZATION:
@@ -236,6 +239,26 @@ Developers or advanced users options
 * BUILD_SHARED_LIBS=ON/OFF : to build shared (ON) or static (OFF) for the siconos package.
 
 * WITH_BULLET=ON/OFF : enable/disable bullet (http://bulletphysics.org/wordpress/) for contact detection.
+
+  Bullet minimal required version is 3.17.
+  
+  WITH_BULLET can be replaced by Bullet_ROOT=<some_path> to specify the path to your Bullet installation.
+
+  Moreover, if you don't want to bother you with Bullet install, run
+
+  .. code-block:: bash
+
+	cmake -DINSTAll_BULLET=ON ...
+
+  Bullet will be downloaded, built and installed as a siconos part, at the same place as Siconos.
+
+  Last option, you can use the script ci_gitlab/Dockerfiles/install_bullet.sh to install Bullet 3.21 on your system (need to be root or sudo).
+
+  .. code-block:: bash
+
+        export CI_PROJECT_DIR=<some path where bullet will be cloned and built>
+	source ci_gitlab/Dockerfiles/install_bullet.sh 
+
 
 * WITH_OCE=ON/OFF : enable/disable OpenCascade bindings (https://github.com/tpaviot/oce)
 

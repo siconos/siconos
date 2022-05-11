@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -275,9 +275,9 @@ public:
   ~SimpleMatrix();
   //************************** GETTERS/SETTERS  **************************
 
-  void updateNumericsMatrix();
+  void updateNumericsMatrix() override;
 
-  NumericsMatrix * numericsMatrix() const
+  NumericsMatrix * numericsMatrix() const override
   {
     return _numericsMatrix.get();
   };
@@ -285,7 +285,7 @@ public:
   /** determines if the matrix has been inversed
    *  \return true if the matrix is inversed
    */
-  inline bool isPLUInversed() const
+  inline bool isPLUInversed() const override
   {
     return _isPLUInversed;
   }
@@ -293,7 +293,7 @@ public:
   /** determines if the matrix has been factorized
    *  \return true if the matrix is factorized
    */
-  inline bool isPLUFactorized() const
+  inline bool isPLUFactorized() const override
   {
     return _isPLUFactorized;
   }
@@ -301,14 +301,14 @@ public:
  /** determines if the matrix has been factorized
    *  \return true if the matrix is factorized
    */
-  inline bool isPLUFactorizedInPlace() const
+  inline bool isPLUFactorizedInPlace() const override
   {
     return _isPLUFactorizedInPlace;
   }
   /** determines if the matrix has been factorized
    *  \return true if the matrix is factorized
    */
-  inline bool isCholeskyFactorized() const
+  inline bool isCholeskyFactorized() const override
   {
     return _isCholeskyFactorized;
   }
@@ -330,148 +330,148 @@ public:
   }
 
 
-  inline SP::VInt ipiv() const
+  inline SP::VInt ipiv() const override
   {
     return _ipiv;
   }
 
 
-  bool checkSymmetry(double tol) const;
+  bool checkSymmetry(double tol) const override;
 
   /** get DenseMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a DenseMat
    */
-  const DenseMat getDense(unsigned int row = 0, unsigned int col = 0) const;
+  const DenseMat getDense(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get TriangMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a TriangMat
    */
-  const TriangMat getTriang(unsigned int row = 0, unsigned int col = 0) const;
+  const TriangMat getTriang(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get SymMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a SymMat
    */
-  const SymMat getSym(unsigned int row = 0, unsigned int col = 0) const;
+  const SymMat getSym(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get BandedMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a BandedMat
    */
-  const BandedMat getBanded(unsigned int row = 0, unsigned int col = 0) const;
+  const BandedMat getBanded(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get SparseMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a SparseMat
    */
-  const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const;
+  const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get SparseCoordinateMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a SparseCoordinateMat
    */
-  const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0) const;
+  const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get ZeroMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a ZeroMat
    */
-  const ZeroMat getZero(unsigned int row = 0, unsigned int col = 0) const;
+  const ZeroMat getZero(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get  getIdentity matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return an IdentityMat
    */
-  const IdentityMat getIdentity(unsigned int row = 0, unsigned int col = 0) const;
+  const IdentityMat getIdentity(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on DenseMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a DenseMat*
    */
-  DenseMat* dense(unsigned int row = 0, unsigned int col = 0) const;
+  DenseMat* dense(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on TriangMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a TriangMat*
    */
-  TriangMat* triang(unsigned int row = 0, unsigned int col = 0) const;
+  TriangMat* triang(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on SymMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a SymMat*
    */
-  SymMat* sym(unsigned int row = 0, unsigned int col = 0) const;
+  SymMat* sym(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on BandedMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a BandedMat*
    */
-  BandedMat* banded(unsigned int row = 0, unsigned int col = 0) const;
+  BandedMat* banded(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on SparseMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a SparseMat*
    */
-  SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const;
+  SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on SparseCoordinateMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a SparseCoordinateMat*
    */
-  SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0) const;
+  SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on ZeroMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  ZeroMat* zero_mat(unsigned int row = 0, unsigned int col = 0) const;
+  ZeroMat* zero_mat(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** get a pointer on Identity matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
    *  \return an IdentityMat*
    */
-  IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const;
+  IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** return the address of the array of double values of the matrix
    *  \param row position for the required block ->useless for SimpleMatrix
    *  \param col position for the required block ->useless for SimpleMatrix
    *  \return double* : the pointer on the double array
    */
-  double* getArray(unsigned int row = 0, unsigned int col = 0) const;
+  double* getArray(unsigned int row = 0, unsigned int col = 0) const override;
 
   /** sets all the values of the matrix to 0.0
    */
-  void zero();
+  void zero() override;
 
   /** Initialize the matrix with random values
    */
-  void randomize();
+  void randomize() override;
 
   /** Initialize a symmetric matrix with random values
    */
-  void randomize_sym();
+  void randomize_sym() override;
 
   /** set an identity matrix
    */
-  void eye();
+  void eye() override;
 
   /** copy the matrix data to the array given in parameter'
    * Works only for dense matrices !
@@ -487,7 +487,7 @@ public:
    *  \param index 0 for rows, 1 for columns
    *  \return the size
    */
-  unsigned int size(unsigned int index) const;
+  unsigned int size(unsigned int index) const override;
 
   /** resize the matrix with nbrow rows and nbcol columns The existing elements of the matrix are preseved when specified.
    *  \param row the new number of rows
@@ -496,12 +496,12 @@ public:
    *  \param upper (only for Banded)
    *  \param preserve preserve existing elements
    */
-  void resize(unsigned int row, unsigned int col, unsigned int lower = 0, unsigned int upper = 0, bool preserve = true);
+  void resize(unsigned int row, unsigned int col, unsigned int lower = 0, unsigned int upper = 0, bool preserve = true) override;
 
   /** compute the infinite norm of the matrix
    *  \return a double
    */
-  double normInf() const;
+  double normInf() const override;
 
   /** Compute the normInf for each column
    * \param vIn column
@@ -515,41 +515,41 @@ public:
 
   /** display data on standard output
    */
-  void display() const;
+  void display() const override;
 
-  void displayExpert(bool  brief = true) const;
+  void displayExpert(bool  brief = true) const override;
   /** put data of the matrix into a std::string
    * \return std::string
    */
-  std::string toString() const;
+  std::string toString() const override;
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
    *  \return the element matrix[i,j]
    */
-  double& operator()(unsigned int i, unsigned int j);
+  double& operator()(unsigned int i, unsigned int j) override;
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
    *  \return the element matrix[i,j]
    */
-  double operator()(unsigned int i, unsigned int j) const;
+  double operator()(unsigned int i, unsigned int j) const override;
 
   /** return the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
    *  \return a double
    */
-  double getValue(unsigned int i, unsigned int j) const;
+  double getValue(unsigned int i, unsigned int j) const override;
 
   /** set the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
    *  \param value
    */
-  void setValue(unsigned int i, unsigned int j, double value);
+  void setValue(unsigned int i, unsigned int j, double value) override;
 
   /** Copy of the content of a given matrix into the current object,
       at position (posRow, posCol).
@@ -588,25 +588,25 @@ public:
    *  \param row index row we want to get
    *  \param[out] vOut SiconosVector that will contain the desired row
    */
-  void getRow(unsigned int row, SiconosVector& vOut) const;
+  void getRow(unsigned int row, SiconosVector& vOut) const override;
 
   /** get column index of current matrix and save it into vOut
    *  \param col index column we want to get
    *  \param[out] vOut SiconosVector that will contain the desired column
    */
-  void getCol(unsigned int col, SiconosVector& vOut) const;
+  void getCol(unsigned int col, SiconosVector& vOut) const override;
 
   /** set line row of the current matrix with vector v
    *  \param row index row we want to set
    *  \param vIn SiconosVector containing the new row
    */
-  void setRow(unsigned int row , const SiconosVector& vIn);
+  void setRow(unsigned int row , const SiconosVector& vIn) override;
 
   /** set column col of the current matrix with vector v
    *  \param col index column we want to set
    *  \param vIn a SiconosVector containing the new column
    */
-  void setCol(unsigned int col, const SiconosVector& vIn);
+  void setCol(unsigned int col, const SiconosVector& vIn) override;
 
   /** get column number index of current matrix, starting from element at position pos and save it into vOut
    *  \param index index of required column
@@ -652,18 +652,18 @@ public:
 
   /** transpose in place: x->trans() is x = transpose of x.
    */
-  void trans();
+  void trans() override;
 
   /** transpose a matrix: x->trans(m) is x = transpose of m.
    *  \param mat the matrix to be transposed.
    */
-  void trans(const SiconosMatrix& mat);
+  void trans(const SiconosMatrix& mat) override;
 
   /** assignment
    * \param m the matrix to be copied
    * \return SimpleMatrix&
    */
-  SimpleMatrix& operator = (const SiconosMatrix& m);
+  SimpleMatrix& operator = (const SiconosMatrix& m) override;
 
   /** assignment
    *  \param m the matrix to be copied
@@ -675,48 +675,48 @@ public:
    * \param m the matrix to be copied
    * \return SimpleMatrix&
    */
-  SimpleMatrix& operator = (const DenseMat& m);
+  SimpleMatrix& operator = (const DenseMat& m) override;
 
   /** operator +=
    *  \param m a matrix to add
    * \return SimpleMatrix&
    */
-  SimpleMatrix& operator +=(const SiconosMatrix& m);
+  SimpleMatrix& operator +=(const SiconosMatrix& m) override;
 
   /** operator -=
    *  \param m a matrix to subtract
    * \return SimpleMatrix&
    */
-  SimpleMatrix& operator -=(const SiconosMatrix& m);
+  SimpleMatrix& operator -=(const SiconosMatrix& m) override;
 
   /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
-  void PLUFactorizationInPlace();
+  void PLUFactorizationInPlace() override;
 
   /** computes a factorization of a general M-by-N matrix
    */
-  void Factorize();
+  void Factorize() override;
 
   /**  compute inverse of this thanks to LU factorization with Partial pivoting.
    * This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
    */
-  void PLUInverseInPlace();
+  void PLUInverseInPlace() override;
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
-  void PLUForwardBackwardInPlace(SiconosMatrix& B);
-  void Solve(SiconosMatrix& B);
+  void PLUForwardBackwardInPlace(SiconosMatrix& B) override;
+  void Solve(SiconosMatrix& B) override;
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
-  void PLUForwardBackwardInPlace(SiconosVector& B);
-  void Solve(SiconosVector& B);
+  void PLUForwardBackwardInPlace(SiconosVector& B) override;
+  void Solve(SiconosVector& B) override;
 
   /** solves a system of linear equations A * X = B  (A=this)
       with a general N-by-N matrix A using the Least squares method
@@ -734,7 +734,7 @@ public:
       assignment for example.
   */
 
-  void resetLU();
+  void resetLU() override;
 
   /** set to false all Cholesky indicators. Useful in case of
       assignment for example.
@@ -750,7 +750,7 @@ public:
   /** set to false all factorization indicators. Useful in case of
       assignment for example.
   */
-  void resetFactorizationFlags();
+  void resetFactorizationFlags() override;
 
 
 

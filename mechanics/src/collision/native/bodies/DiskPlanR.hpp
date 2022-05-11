@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@
 class DiskPlanR : public LagrangianScleronomousR, public std::enable_shared_from_this<DiskPlanR>
 {
 private:
-  /** serialization hooks
-   */
+  // serialization hooks
   ACCEPT_SERIALIZATION(DiskPlanR);
 
   double r, A, B, C, sqrA2pB2,
@@ -41,8 +40,6 @@ private:
   bool finite;
 
   void init(double, double, double, double, double, double, double);
-
-  DiskPlanR() : LagrangianScleronomousR() {};
 
 public:
 
@@ -71,6 +68,8 @@ public:
   /** Finite Plan
   */
   DiskPlanR(double, double, double, double, double);
+
+  ~DiskPlanR() noexcept = default;
 
   /* distance between disk and plan */
   double distance(double x, double y, double r) const;
@@ -140,11 +139,8 @@ public:
     return finite;
   };
 
-  /** visitor hooks
-   */
+  // visitor hooks
   ACCEPT_VISITORS();
-
-  ~DiskPlanR() {};
 
 };
 #endif /* DiskPlanR */

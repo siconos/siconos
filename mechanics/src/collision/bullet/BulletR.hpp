@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef BulletR_hpp
 #define BulletR_hpp
@@ -22,11 +22,10 @@
 #include "BulletSiconosFwd.hpp"
 #include "ContactR.hpp"
 
-class BulletR : public ContactR
-{
+class BulletR : public ContactR {
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(BulletR);
 
 public:
@@ -38,12 +37,11 @@ public:
   SP::btCollisionObject btObject[2];
   SP::btCollisionShape btShape[2];
 
-  virtual
-  void updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-                                            const btManifoldPoint& point,
-                                            bool flip, double scaling,
-                                            SP::NewtonEulerDS ds1,
-                                            SP::NewtonEulerDS ds2);
+  virtual void updateContactPointsFromManifoldPoint(
+      const btPersistentManifold &manifold, const btManifoldPoint &point,
+      bool flip, double scaling, SP::NewtonEulerDS ds1, SP::NewtonEulerDS ds2);
+
+  void display() const override;
 
   ACCEPT_STD_VISITORS();
 };

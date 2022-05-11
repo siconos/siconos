@@ -1,7 +1,7 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2021 INRIA.
+# Copyright 2022 INRIA.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,17 +22,14 @@
 # ============= Global 'standard' cmake Settings =============
 
 # Set minimum version for cmake
-# We advise 3.14 at least, but 3.10 is authorized since it's the default version on some OS still in use.
-cmake_minimum_required(VERSION 3.11)
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
-  cmake_policy(SET CMP0074 NEW)
-endif()
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
-  cmake_policy(SET CMP0078 OLD)
-endif()
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
-  cmake_policy(SET CMP0086 OLD)
-endif()
+# We advise the most recent version of cmake.
+# Use python3 -m pip install cmake to get it.
+cmake_minimum_required(VERSION 3.14) 
+
+cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
+cmake_policy(SET CMP0078 OLD) # UseSWIG generates standard target names.
+cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
+cmake_policy(SET CMP0079 NEW) # target_link_libraries() allows use with targets in other directories
 
 # Set cmake modules directories
 # (i.e. the those which contain all user-defined FindXXX.cmake files among other things)
@@ -123,7 +120,7 @@ list(GET COMPONENTS -1 last_component)
 
 if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD 17)
 else()
   # we may need to compile only numerics and only in C.
   # Really???
@@ -143,11 +140,6 @@ endif()
 
 # Common setup
 include(SiconosSetup)
-
-# ========= Python bindings =========
-if(WITH_PYTHON_WRAPPER)
-  add_subdirectory(wrap)
-endif()
 
 # ========= Tests setup =========
 if(WITH_TESTING)
@@ -169,6 +161,11 @@ foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
   add_subdirectory(${COMPONENT})
 endforeach()
+
+# ========= Python bindings =========
+if(WITH_PYTHON_WRAPPER)
+  add_subdirectory(wrap)
+endif()
 
 # ========= Documentation setup =========
 # Finalize documentation setups.
@@ -219,6 +216,9 @@ message("    Blas headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIR}.")
 message(STATUS "Lapack config:")
 message("    Lapack libraries : ${LAPACK_LIBRARIES}.")
 message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIR}.")
+if(WITH_FCLIB)
+  message(STATUS "Use fclib installed in ${fclib_ROOT}.")
+endif()
 if(WITH_SYSTEM_SUITESPARSE)
   message(STATUS "Use system-provided SuiteSparse library, with:")
   message("    - CXSparse headers path: ${SuiteSparse_CXSparse_INCLUDE_DIR}")
@@ -236,7 +236,8 @@ if(WITH_PYTHON_WRAPPER)
 endif()
 message(STATUS "The project will be installed in ${CMAKE_INSTALL_PREFIX}")
 if(WITH_PYTHON_WRAPPER)
-  message(STATUS "${SICONOS_PYTHON_PACKAGE} python package will be installed in ${SICONOS_PYTHON_INSTALL_DIR}")
+  message(STATUS "Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR},")
+  message(STATUS "with the command ${PYTHON_EXECUTABLE} -m pip install ${PIP_INSTALL_OPTIONS} ...")
 endif()
 message(STATUS "To get more information about dependencies, config or else, ")
 message(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")

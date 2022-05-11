@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@
 class CircleCircleR : public CircularR, public std::enable_shared_from_this<CircleCircleR>
 {
 private:
-  /** serialization hooks
-  */
+  // serialization hooks
+
   ACCEPT_SERIALIZATION(CircleCircleR);
 
-  CircleCircleR() {};
-
 public:
+
+  ~CircleCircleR() noexcept = default;
 
   /** Constructor
   \param rdisk1 radius
@@ -73,11 +73,8 @@ public:
   */
   void computeJachq(const BlockVector& q, BlockVector& z);
 
-  /** visitors hook
-   */
+  // visitors hook
   ACCEPT_VISITORS();
-
-  ~CircleCircleR() {};
 
 };
 #endif /* CircleCircleR_h */

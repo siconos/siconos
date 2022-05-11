@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file MLCPProjectOnConstraints.hpp
 \brief Linear Complementarity Problem formulation and solving
 */
@@ -24,44 +24,44 @@
 
 #include "MLCP.hpp"
 #include "OSNSMatrixProjectOnConstraints.hpp"
-/** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
+/** Formalization and Resolution of a Mixed Linear Complementarity Problem
+ * (MLCP)
  *
  * This class is devoted to the formalization and the resolution of the
  * Mixed Linear Complementarity Problem (MLCP) for the specific problem
  * of the projection onto the constraints in Mechanics
  *
  */
-class MLCPProjectOnConstraints : public MLCP
-{
+class MLCPProjectOnConstraints : public MLCP {
 protected:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(MLCPProjectOnConstraints);
-  
+
   /** ?? */
   double _alpha;
 
-  /** disabled or enabled projection On Equality (or Unilateral) for unilateral constraints */
+  /** disabled or enabled projection On Equality (or Unilateral) for unilateral
+   * constraints */
   bool _doProjOnEquality;
 
-  bool  _useMassNormalization;
+  bool _useMassNormalization;
 
 public:
-
-  /** compute the number of inequality and equality for a given tuple of Interactions
-      update the global number of equality(_n) and inequality (_m)
+  /** compute the number of inequality and equality for a given tuple of
+     Interactions update the global number of equality(_n) and inequality (_m)
       set up _numerics_problem parameters (blocksRows and blocksIsComp )
       \param inter1 first interaction considered
       \param inter2 second interaction
   */
-  virtual void computeOptions(SP::Interaction inter1, SP::Interaction inter2);
-
+  void computeOptions(SP::Interaction inter1, SP::Interaction inter2) override;
 
   /** constructor from data
    \param numericsSolverId solver id
    \param alpha alpha parameter value
    */
-  MLCPProjectOnConstraints(int numericsSolverId = SICONOS_MLCP_ENUM, double alpha = 1.0);
+  MLCPProjectOnConstraints(int numericsSolverId = SICONOS_MLCP_ENUM,
+                           double alpha = 1.0);
 
   /**  constructor from a pre-defined solver options set.
        \param options, the options set,
@@ -72,47 +72,36 @@ public:
   MLCPProjectOnConstraints(SP::SolverOptions options, double alpha = 1.0);
 
   /** destructor
-  */
-  ~MLCPProjectOnConstraints() {};
+   */
+  ~MLCPProjectOnConstraints(){};
 
-  /** 
+  /**
       \return alpha value
   */
-  double alpha()
-  {
-    return _alpha;
-  };
+  double alpha() { return _alpha; };
 
   /** setter for alpha
       \param[in] newval new value for alpha parameter
   */
-  void setAlpha(double newval)
-  {
-    _alpha = newval;
-  };
+  void setAlpha(double newval) { _alpha = newval; };
 
-  inline void setDoProjOnEquality(bool v)
-  {
-    _doProjOnEquality = v;
-  }
-
-
+  inline void setDoProjOnEquality(bool v) { _doProjOnEquality = v; }
 
   /** Display the set of blocks for  a given indexSet
       \param indexSet the graph of interactions
    */
-  void displayBlocks(SP::InteractionsGraph indexSet);
+  void displayBlocks(SP::InteractionsGraph indexSet) override;
 
   /** print the data to the screen
-  */
-  void display() const;
+   */
+  void display() const override;
 
-  virtual void initOSNSMatrix();
+  void initOSNSMatrix() override;
 
   /** compute interactionBlocks if necessary (this depends on the type of
    * OSNS, on the indexSets ...)
    */
-  virtual void updateInteractionBlocks();
+  void updateInteractionBlocks() override;
 
   /** compute interactionBlocks if necessary (this depends on the type of
    * OSNS, on the indexSets ...)
@@ -122,27 +111,30 @@ public:
   /** compute diagonal Interaction block
       \param vd a vertex (interaction) descriptor
   */
-  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd);
+  void computeDiagonalInteractionBlock(
+      const InteractionsGraph::VDescriptor &vd) override;
 
   /** compute diagonal Interaction block
       \param vd a vertex (interaction) descriptor
   */
-  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor& vd);
+  void
+  computeInteractionBlock(const InteractionsGraph::EDescriptor &vd) override;
 
   /** To compute a part of the "q" vector of the OSNS
       \param vd vertex (interaction) which corresponds to the considered block
       \param pos the position of the first element of yOut to be set
   */
-  virtual void computeqBlock(InteractionsGraph::VDescriptor& vd, unsigned int pos);
+  void computeqBlock(InteractionsGraph::VDescriptor &vd,
+                     unsigned int pos) override;
 
   /** compute vector q
    *  \param time the current time
    */
-  void computeq(double time);
-  
+  void computeq(double time) override;
+
   /** post-treatment for  MLCPProjectOnConstraints
    */
-  virtual void postCompute();
+  void postCompute() override;
 
   /** post-treatment for  MLCPProjectOnConstraints for LagrangianR
       \param inter the considered interaction
@@ -159,7 +151,6 @@ public:
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();
-
 };
 
 #endif // MLCPProjectOnConstraints_H

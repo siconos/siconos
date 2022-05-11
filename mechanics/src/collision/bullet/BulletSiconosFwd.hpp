@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@
 #include "SiconosPointers.hpp"
 
 DEFINE_SPTR(btCollisionShape);
+DEFINE_SPTR(BodyBulletShapeRecord);
+
+
 DEFINE_SPTR(btBoxShape);
 DEFINE_SPTR(btCylinderShape);
 DEFINE_SPTR(btConeShape);
@@ -50,6 +53,9 @@ DEFINE_SPTR(btConvexShape);
 
 DEFINE_SPTR(btCollisionObject);
 DEFINE_SAPTR(btCollisionObject);
+
+DEFINE_SPTR(btCollisionObjectWrapper);
+
 
 DEFINE_SPTR(btCollisionWorld);
 DEFINE_SPTR(btDefaultCollisionConfiguration);

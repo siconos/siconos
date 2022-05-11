@@ -2,6 +2,33 @@
 # Some convenience macros
 #
 
+function(collect_files)
+
+  set(oneValueArgs VAR) # output variable name
+  set(multiValueArgs DIRS EXTS)
+  cmake_parse_arguments(collect "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  # Scan all dirs and check all exts ...
+
+  foreach(DIR IN LISTS collect_DIRS)
+    foreach(_EXT IN LISTS collect_EXTS)
+      file(GLOB FILES_LIST
+        RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
+        ${DIR}/*.${_EXT})
+      if(FILES_LIST)
+	list(APPEND COLLECTION ${FILES_LIST})
+      endif()
+    endforeach()
+  endforeach()
+  if(COLLECTION)
+    list(LENGTH COLLECTION _FILES_LEN)
+    if (_FILES_LEN GREATER 1)
+      list(REMOVE_DUPLICATES COLLECTION)
+    endif()
+  endif()
+  set(${collect_VAR} ${COLLECTION} PARENT_SCOPE)
+
+endfunction()
+
 # Collect source files.
 #
 # Usage:
@@ -29,47 +56,17 @@ function(get_sources COMPONENT)
   endforeach()
   list(REMOVE_DUPLICATES SRC_EXTS)
 
-  # Scan all dirs and check all exts ...
-  foreach(DIR IN LISTS source_DIRS)
-    foreach(_EXT IN LISTS SRC_EXTS)
-      if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
-        file(GLOB FILES_LIST
-          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
-          ${DIR}/*.${_EXT})
-      else()
-        file(GLOB FILES_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${DIR}/*.${_EXT})
-      endif()
-      if(FILES_LIST)
-	list(APPEND SOURCES_FILES ${FILES_LIST})
-      endif()
-    endforeach()
-  endforeach()
-  if(SOURCES_FILES)
-    list(LENGTH SOURCES_FILES _SOURCES_FILES_LEN)
-    if (_SOURCES_FILES_LEN GREATER 1)
-      list(REMOVE_DUPLICATES SOURCES_FILES)
-    endif()
-  endif()
+  collect_files(VAR SOURCES_FILES DIRS ${source_DIRS} EXTS ${SRC_EXTS})
 
   # Check if some sources are to be excluded from build
   foreach(_FILE IN LISTS source_EXCLUDE)
-    # if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
-    #   file(GLOB _GFILE CONFIGURE_DEPENDS ${_FILE})
-    # else()
-    #   file(GLOB _GFILE ${_FILE})
-    # endif()
-    # MESSAGE("_GFILE::" ${_GFILE})
-    # MESSAGE("SOURCES_FILES::" ${SOURCES_FILES})
-    # if(_GFILE)
-    #   list(REMOVE_ITEM SOURCES_FILES ${_GFILE})
-    # else()
-    #   message(WARNING "file to be excluded NOT FOUND : ${_FILE}")
-    #endif()
     list(REMOVE_ITEM SOURCES_FILES ${_FILE})
   endforeach()
 
   set(${COMPONENT}_SRCS ${SOURCES_FILES} PARENT_SCOPE)
+
 endfunction()
+
 
 # Print cmake variable 'V' value
 macro(PRINT_VAR V)
@@ -232,15 +229,21 @@ endmacro()
 #
 function(create_target)
   set(oneValueArgs NAME)
-  set(multiValueArgs LIBRARIES INCLUDE_DIRS)
+  set(multiValueArgs LIBRARIES INCLUDE_DIRS LIBRARY_DIRS COMPILE_DEFINITIONS)
   cmake_parse_arguments(target "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   if(NOT TARGET ${target_NAME})
     add_library(${target_NAME} IMPORTED INTERFACE)
     set_property(TARGET ${target_NAME} PROPERTY INTERFACE_LINK_LIBRARIES ${target_LIBRARIES})
+    if(target_LIBRARY_DIRS)
+      set_target_properties(${target_NAME} PROPERTIES INTERFACE_LINK_DIRECTORIES ${target_LIBRARY_DIRS})
+    endif()
     if(target_INCLUDE_DIRS)
       set_target_properties(${target_NAME} PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${target_INCLUDE_DIRS}")
+    endif()
+    if(target_COMPILE_DEFINITIONS)
+      set_target_properties(${target_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS ${target_COMPILE_DEFINITIONS})
     endif()
   endif()
 endfunction()

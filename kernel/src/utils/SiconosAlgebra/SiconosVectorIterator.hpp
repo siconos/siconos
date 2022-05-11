@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ struct SiconosVectorIteratorTypeTpl
     { return v != it.v || p != it.p; }
   bool operator==(const SiconosVectorIteratorTypeTpl& it)
     { return v == it.v && p == it.p; }
-  SiconosVectorIteratorTypeTpl& operator=(const SiconosVectorIteratorTypeTpl& it)
-    { v=it.v; p=it.p; return *this; }
+  // SiconosVectorIteratorTypeTpl& operator=(const SiconosVectorIteratorTypeTpl& it)
+  //  { v=it.v; p=it.p; return *this; }
   SiconosVectorIteratorTypeTpl& operator++()
     { if (p<v->size()) p++; return *this; }
   SiconosVectorIteratorTypeTpl operator++(int) {

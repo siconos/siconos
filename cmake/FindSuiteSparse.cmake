@@ -1,7 +1,7 @@
 #  Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2021 INRIA.
+# Copyright 2022 INRIA.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -124,6 +124,6 @@ if("UMFPACK" IN_LIST SuiteSparse_FIND_COMPONENTS)
     add_library(UMFPACK::UMFPACK IMPORTED INTERFACE)
     set_property(TARGET UMFPACK::UMFPACK PROPERTY INTERFACE_LINK_LIBRARIES ${SuiteSparse_UMFPACK_LIBRARIES})
     set_target_properties(UMFPACK::UMFPACK PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${SutieSparse_UMFPACK_INCLUDE_DIR}")
+        INTERFACE_INCLUDE_DIRECTORIES "${SuiteSparse_UMFPACK_INCLUDE_DIR}")
   endif()
 endif()

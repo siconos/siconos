@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -440,7 +440,7 @@ void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
   // When this function is called, WBoundaryConditionsMap[ds] is
   // supposed to exist and not to be null Memory allocation has been
   // done during initializeIterationMatrixWBoundaryConditions.
-
+  
   Type::Siconos dsType = Type::value(ds);
   if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS ||  dsType == Type::NewtonEulerDS || dsType == Type::LagrangianLinearDiagonalDS)
   {
@@ -453,21 +453,29 @@ void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
     SecondOrderDS& d = static_cast<SecondOrderDS&>(ds);
     SP::BoundaryCondition bc = d.boundaryConditions();
 
+    if(!iteration_matrix.checkSymmetry(1e-10)) // Warning this operation could be quite expensive
+    {
+      // iteration_matrix.display();
+      std::cout <<"Warning, we apply boundary conditions assuming W symmetric" << std::endl;
+    }
+
     for(itindex = bc->velocityIndices()->begin() ;
         itindex != bc->velocityIndices()->end();
         ++itindex)
     {
-      if(!iteration_matrix.checkSymmetry(1e-10))
-      {
-        // iteration_matrix.display();
-        std::cout <<"Warning, we apply boundary conditions assuming W symmetric" << std::endl;
-      }
       iteration_matrix.getCol(*itindex, *columntmp);
       /*\warning we assume that W is symmetric
         we store only the column and not the row */
-
       WBoundaryConditions.setCol(columnindex, *columntmp);
-      double diag = (*columntmp)(*itindex);
+      columnindex ++;
+    }
+
+    columnindex = 0;
+    for(itindex = bc->velocityIndices()->begin() ;
+        itindex != bc->velocityIndices()->end();
+        ++itindex)
+    {
+      double diag = iteration_matrix.getValue(*itindex,*itindex);
       columntmp->zero();
       (*columntmp)(*itindex) = diag;
       iteration_matrix.setCol(*itindex, *columntmp);
@@ -1361,7 +1369,7 @@ void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactFrictionNSL&
   if(nslaw.et() > 0.0)
   {
     osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
-    if(_inter.nonSmoothLaw()->size()>=2)
+    if(_inter.nonSmoothLaw()->size()>2)
     {
       osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);    }
   }
@@ -1379,7 +1387,7 @@ void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactRollingFrict
   if(nslaw.et() > 0.0)
   {
     osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
-    if(_inter.nonSmoothLaw()->size()>=2)
+    if(_inter.nonSmoothLaw()->size()>2)
     {
       osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);
     }

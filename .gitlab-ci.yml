@@ -206,9 +206,11 @@ fedora-33:test:
 
 jupyterlab:configure:
   variables:
+     OPENBLAS_NUM_THREADS: 1
      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
      cdash_submit: 1
      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
+     CMAKE_PREFIX_PATH: /opt/conda
   extends:
     - .siconos-configure
 

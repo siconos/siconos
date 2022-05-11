@@ -2,6 +2,7 @@
 #include <SiconosException.hpp>
 %}
 
+
 %feature("director:except") {
   if ($error != NULL) {
     throw Swig::DirectorMethodException();
@@ -24,7 +25,8 @@
     }
     catch (const Siconos::exception& e)
     {
-      PyErr_SetString(PyExc_Exception, e.what());
+      auto strout = boost::diagnostic_information(e, true);
+      PyErr_SetString(PyExc_Exception, strout.data());
     }
     catch (const Swig::DirectorException& e)
     {

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,15 @@ public:
    *  otherwise contact will occur with a non-graph body which results
    *  in failure. */
   virtual void removeBody(const SP::SecondOrderDS& body) {}
+
+  /** Add a static body in the collision detector.
+   */
+  virtual SP::StaticBody addStaticBody(
+    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector(), int number=0) {return SP::StaticBody();};
+
+  /** Remove a body from the collision detector.
+   */
+  virtual void removeStaticBody(const SP::StaticBody& body) {};
 
   /** Perform an intersection test on all shapes in the contactors and
    * return a vector of all results, ordered by distance from start.
@@ -128,16 +137,6 @@ public:
                    bool sorted=true)
     { return std::vector<SP::SiconosCollisionQueryResult>(); }
 
-public:
-  /** Insert a static contactor set */
-  virtual StaticContactorSetID insertStaticContactorSet(
-    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector())
-    { return (StaticContactorSetID)nullptr; }
-
-  /** Remove a static contactor set.
-   * \param id An identifier returned by insertStaticContactorSet. */
-  virtual bool removeStaticContactorSet(StaticContactorSetID id)
-    { return !id; };
 };
 
 #endif /* SiconosCollisionManager.hpp */

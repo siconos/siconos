@@ -75,7 +75,7 @@ if(HAVE_SICONOS_MECHANICS)
 
       set(MANPAGES_FOR_TOOLS)
       include(tools4tests)
-      set_ldlibpath()
+      # set_ldlibpath()
       macro (GEN_MANPAGE_FROM_HELP TOOL)
         # set PYTHONPATH to swig dir, which contains "siconos", so
         # that "import siconos.*" works
@@ -139,13 +139,13 @@ endif()
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
-# right now the only tests we have require serialization
-if(WITH_SERIALIZATION)
-  if(WITH_TESTING)
-    build_python_tests(
-      # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
-      )
+if(WITH_TESTING)
+  if(NOT WITH_SERIALIZATION)
+    list(APPEND python_excluded_tests tests/test_serialization.py)
   endif()
+  build_python_tests(
+    EXCLUDE "${python_excluded_tests}"
+    )
 endif()
 
 

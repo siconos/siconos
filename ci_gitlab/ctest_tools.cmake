@@ -50,27 +50,21 @@ function(set_site_name)
   cmake_host_system_information(RESULT hostname QUERY HOSTNAME)
   cmake_host_system_information(RESULT fqdn QUERY FQDN)
 
-  if(${CMAKE_VERSION} VERSION_GREATER "3.10.3") 
-    # https://cmake.org/cmake/help/latest/command/cmake_host_system_information.html
-    cmake_host_system_information(RESULT osname QUERY OS_NAME)
-    cmake_host_system_information(RESULT osplatform QUERY OS_PLATFORM)
-    cmake_host_system_information(RESULT hostname QUERY HOSTNAME)
-  else()
-    set(osname ${CMAKE_SYSTEM_NAME})
-    set(osplatform ${CMAKE_SYSTEM_PROCESSOR})
-  endif()
+  cmake_host_system_information(RESULT osname QUERY OS_NAME)
+  cmake_host_system_information(RESULT osplatform QUERY OS_PLATFORM)
+  cmake_host_system_information(RESULT hostname QUERY HOSTNAME)
 
   string(STRIP ${osname} osname)
   string(STRIP ${osplatform} osplatform)
 
   if(CI_GITLAB)
-    string(SUBSTRING $ENV{CI_JOB_IMAGE} 19 -1 dockerimagename) 
+    string(SUBSTRING $ENV{CI_JOB_IMAGE} 39 -1 dockerimagename) 
     string(STRIP ${dockerimagename} dockerimagename)
     set(hostname "[ ${dockerimagename} from gitlab registry]")
   elseif(CI_TRAVIS)
     set(hostname "[ ${hostname} hosted on travis]") 
   endif()
-  
+
   set(_SITE "${osname}-${osplatform}${hostname}")
   string(STRIP _SITE ${_SITE})
   set(CTEST_SITE "${_SITE}" PARENT_SCOPE)
@@ -110,7 +104,6 @@ function(set_cdash_build_name)
   endif()
 
   set(CTEST_BUILD_NAME "${_name}" PARENT_SCOPE)
-  
 endfunction()
 
 # Write a note file for cdash server.
