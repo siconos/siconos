@@ -1031,7 +1031,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double * d_reaction_t = data->tmp_vault_nd[13];
   double * velocity_t_inv = data->tmp_vault_nd[14];
   double * Qp_velocity_t_inv = data->tmp_vault_nd[15];
-  double * tmp1 = data->tmp_vault_nd[16];
+  //double * tmp1 = data->tmp_vault_nd[16];
   FILE * iterates;
   FILE * matrixH;
 
@@ -1458,20 +1458,19 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       else
       {
         /* Right-hand side for symmetric Newton system with NT scaling */
-        NM_gemv(1.0, Qp, velocity, 0.0, velocity_t);
-        NM_gemv(1.0, Qp, d_velocity, 0.0, d_velocity_t);
+	QNTpz(velocity, reaction, d_velocity, nd, n, d_velocity_t);
         QNTpinvz(velocity, reaction, d_reaction, nd, n, d_reaction_t);
+	JA_prod(d_velocity_t, d_reaction_t, nd, n, dvdr_jprod);
+	QNTpz(velocity, reaction, velocity, nd, n, velocity_t);
+	JA_inv(velocity_t, nd, n, velocity_t_inv);
+	JA_prod(velocity_t_inv, dvdr_jprod, nd, n, d_velocity_t);
+	QNTpz(velocity, reaction, d_velocity_t, nd, n, complemConstraint);
 
-        JA_inv(velocity_t, nd, n, velocity_t_inv);
-        NM_gemv(1.0, Qp, velocity_t_inv, 0.0, Qp_velocity_t_inv);
-        JA_inv(velocity, nd, n, Qp_velocity_t_inv);
-        cblas_dscal(nd, 2 * barr_param * sigma, Qp_velocity_t_inv, 1);
-        JA_prod(d_velocity_t, d_reaction_t, nd, n, dvdr_jprod);
-        NV_sub(reaction, Qp_velocity_t_inv, nd, tmp1);
-        /* NV_add(tmp1, dvdr_jprod, nd, complemConstraint); */
-        JA_prod(velocity_t_inv, dvdr_jprod, nd, n, d_velocity_t); // PA: left-Jordan-product by velocity_t_inv
-        NM_gemv(1.0, Qp, d_velocity_t, 0.0, complemConstraint); // PA: left-Jordan procuct by Qp
-        NV_add(tmp1, complemConstraint, nd, complemConstraint);
+	NV_add(reaction, complemConstraint, nd, complemConstraint);
+
+	JA_inv(velocity, nd, n, d_velocity_t);
+	cblas_dscal(nd, 2 * barr_param * sigma, d_velocity_t, 1);
+	NV_sub(complemConstraint, d_velocity_t, nd, complemConstraint);
       }
       cblas_dcopy(m, dualConstraint, 1, rhs, 1);
       cblas_dcopy(nd, complemConstraint, 1, rhs+m, 1);
@@ -1756,7 +1755,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
