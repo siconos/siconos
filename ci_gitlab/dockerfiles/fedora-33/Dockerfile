@@ -23,6 +23,7 @@ RUN dnf --setopt=deltarpm=false install -y \
         lapack-devel \
         suitesparse-devel \
         swig \
+	libglvnd-glx \
         git-core \
         bullet-devel \
 	python3-h5py  && dnf clean all
