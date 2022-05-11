@@ -1298,7 +1298,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] == 0)
     {
-      /* building the right-hand side related to the first system
+      /* Case of a non-reduced system. Building the right-hand side related to the first system
 
          without NT scaling
          rhs = -
@@ -1420,19 +1420,34 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(fmin(alpha_primal, alpha_dual),2)) : sgmp3;
     sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
 
-    /* computing the corrector step of Mehrotra algorithm */
+    /* Computing the corrector step of Mehrotra algorithm */
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] == 0)
     {
+    /* Case of a non-reduced system. Building the right-hand side related to the second system.
+
+         without NT scaling
+         rhs = -
+         [         M*v - H'*r - f             ]  m         dualConstraint
+         [ u o r + da^u o da^r - 2*sigma*mu*e ]  nd        complemConstraint 
+         [         u - H*v - w                ]  nd        primalConstraint
+
+         with NT scaling
+         rhs = -
+         [ M*v - H'*r - f ]  m         dualConstraint
+         [       r        ]  nd        complemConstraint
+         [  u - H*v - w   ]  nd        primalConstraint
+      */
+
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 0)
       {
         /* Right-hand side for non-symmetric Newton system without NT scaling */
         iden = JA_iden(nd, n);
         cblas_dscal(nd, 2 * barr_param * sigma, iden, 1);
         JA_prod(velocity, reaction, nd, n, vr_jprod);
-        //JA_prod(d_velocity, d_reaction, nd, n, dvdr_jprod);
-        NV_sub(vr_jprod, iden, nd, complemConstraint);
-        //NV_add(vr_prod_sub_iden, dvdr_jprod, nd, complemConstraint);
-        free(iden);
+	NV_sub(vr_jprod, iden, nd, complemConstraint);
+	JA_prod(d_velocity, d_reaction, nd, n, dvdr_jprod);
+	NV_add(complemConstraint, dvdr_jprod, nd, complemConstraint);
+	free(iden);
       }
       else
       {
@@ -1469,9 +1484,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         NM_LDLT_solve(J, rhs, 1);
       }
 
+      if (J)
+	J = NM_free(J);
 
-      NM_clear(J);
-      free(J);
+      /* NM_clear(J); */
+      /* free(J); */
 
       //d_globalVelocity = rhs;
       //d_velocity = rhs + m;
@@ -1733,11 +1750,11 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
 
