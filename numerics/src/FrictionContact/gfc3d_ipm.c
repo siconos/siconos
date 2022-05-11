@@ -873,7 +873,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       else
 	reaction[i] = 0.01;
 
-  // computation of the global velocity vector: v = M\(H'*r+f)    
+  // computation of the global velocity vector: v = M\(H'*r+f)
   for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = f[i];
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
   NM_Cholesky_solve(M, globalVelocity, 1);
@@ -1160,10 +1160,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
 
     /*  Build the Jacobian matrix without reducing the linear system.
-     *       
-     *      
+     *
+     *
      *  In the case where the NT scaling is not used, the matrix to factorize is the following:
-     * 
+     *
      *         m     nd       nd
      *      |  M     0      -H^T  | m
      *      |                     |
@@ -1171,7 +1171,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
      *      |                     |
      *      | -H     I        0   | nd
      *
-     *  
+     *
      *  In the case where the NT scaling is used, the matrix to factorize is the following:
      *
      *         m     nd       nd
@@ -1193,12 +1193,18 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       J->matrix2->origin = NSM_TRIPLET;
 
       NM_insert(J, M, 0, 0);
-      NM_insert(J, NM_transpose(minus_H), 0, m + nd);
+      NumericsMatrix * minus_Ht = NM_transpose(minus_H); // should be done only once
+      NM_insert(J, minus_Ht, 0, m + nd);
+      NM_free(minus_Ht);
 
       if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] == 0)
       {
-        NM_insert(J, Arrow_repr(reaction, nd, n), m, m);
-        NM_insert(J, Arrow_repr(velocity, nd, n), m, m + nd);
+        NumericsMatrix * arrow_r = Arrow_repr(reaction, nd, n);
+	NM_insert(J, arrow_r, m, m);
+	NM_free(arrow_r);
+	NumericsMatrix * arrow_v = Arrow_repr(velocity, nd, n) ;
+	NM_insert(J, arrow_v, m, m + nd);
+	NM_free(arrow_v);
       }
       else
       {
@@ -1214,8 +1220,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     else
     {
       /* Build the Jacobian matrix corresponding to a reduced linear system. The variable du (velocity) is eliminated.
-       * 
-       * In this case, NT scaling is always performed, but two posible ways can be done to solve the linear system. 
+       *
+       * In this case, NT scaling is always performed, but two posible ways can be done to solve the linear system.
        *
        * In a first approach, the reduced matrix is of the following form:
        *
@@ -1233,7 +1239,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
        * JR = |                |
        *      |  QpH     I     | nd
        *
-       *  where QpH = Qp * H. 
+       *  where QpH = Qp * H.
        *
        *  The matrix QpH is computed by means of the function QNTpH.
        */
@@ -1428,7 +1434,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
          without NT scaling
          rhs = -
          [         M*v - H'*r - f             ]  m         dualConstraint
-         [ u o r + da^u o da^r - 2*sigma*mu*e ]  nd        complemConstraint 
+         [ u o r + da^u o da^r - 2*sigma*mu*e ]  nd        complemConstraint
          [         u - H*v - w                ]  nd        primalConstraint
 
          with NT scaling
