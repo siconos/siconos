@@ -331,6 +331,7 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
             return 0
 
         self.updateMu()
+        self.updateMur()
 
         w_backup = self.w().copy()
         z_backup = self.z().copy()
@@ -366,10 +367,10 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
                                                     self._params._description,
                                                     self._params._mathInfo,
                                                     filename)
-                guess = F.fclib_solution()
-                guess.u = w_backup
-                guess.r = z_backup
-                F.fclib_write_guesses(1, guess, filename)
+                # guess = F.fclib_solution()
+                # guess.u = w_backup
+                # guess.r = z_backup
+                # F.fclib_write_guesses(1, guess, filename)
 
 
 
