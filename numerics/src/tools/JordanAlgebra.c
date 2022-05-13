@@ -551,7 +551,12 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
   }
 }
 
-/* PA: Return the Nesterov-Todd vector */
+/* Computation of the Nesterov-Todd vector 
+   T = 0 -> p 
+   T = 1 -> p^{-1}
+   T = 2 -> p^2
+   T = 3 -> p^{-2}
+*/
 void Nesterov_Todd_vector(short T, const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * p)
 {
   double * a = (double*)calloc(vecSize, sizeof(double));
@@ -577,9 +582,14 @@ void Nesterov_Todd_vector(short T, const double * const x, const double * const 
     Jinv(a, vecSize, varsCount, p);   // NT-vector p-square
     break;
   }
+  case 3:
+  {
+    NV_copy(a, vecSize, p); 
+    break;
+  }
   default:
   {
-    printf("error in Nesterov_Todd_vector: T must be 0, 1 or 2\n");
+    printf("error in Nesterov_Todd_vector: T must be 0, 1, 2 or 3\n");
     break;
   }
   }
