@@ -25,7 +25,7 @@ if(HAVE_SICONOS_MECHANICS)
     # -- collect python files for the siconos/io module --
     collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR}/io EXTS py)
     if(NOT SICONOS_HAS_OCE)
-      list(REMOVE_ITEM pyfiles io/occtools.py io/vview.py)
+      list(REMOVE_ITEM pyfiles io/occtools.py)
     endif()
 
     foreach(pyfile IN LISTS pyfiles)
