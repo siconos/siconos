@@ -56,6 +56,8 @@ list(APPEND CMAKE_SWIG_FLAGS "-dirprot")
 # Turn on wrapping of protected members for director classes
 if(WITH_DOXY2SWIG)
   list(APPEND CMAKE_SWIG_FLAGS "-doxygen")
+  # Remove some swig -doxygen warnings during .h files parsing.
+  list(APPEND CMAKE_SWIG_FLAGS "-w560,566") 
 endif()
 
 # -dirvtable      - Generate a pseudo virtual table for directors for faster dispatch

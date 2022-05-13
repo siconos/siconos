@@ -37,12 +37,10 @@ fedora33:docker-build:
     IMAGE_NAME: fedora-33
   extends: .docker-build
 
-ubuntu20.4-doc:docker-build:
+ubuntu22.04:docker-build:
   variables:
-    IMAGE_NAME: ubuntu20.04-doc
+    IMAGE_NAME: ubuntu22.04
   extends: .docker-build
-  stage: docker-build-layer3
-  needs: ["ubuntu20.4:docker-build"]
 
 # A specific image, that will be used to install siconos,
 # get examples and provide some notebooks to

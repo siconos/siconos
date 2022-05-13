@@ -1,8 +1,8 @@
-#numpy
-#scipy
-pyhull
-#pytest
-#h5py
+numpy
+scipy
 lxml
+pytest
 matplotlib
+h5py
+pyhull
 vtk

@@ -49,24 +49,10 @@ if(HAVE_SICONOS_MECHANICS)
       # all other components must be built first so that tools don't fail to run
       set(_OTHER_COMPONENTS ${COMPONENTS})
       list(REMOVE_ITEM _OTHER_COMPONENTS ${COMPONENT})
-
-      # swig modules must be built before vview and vexport can generate manpages
-      # this hack is not working with Ninja since target like ${_SWIG_MODULE_NAME}_swig_compilation
-      # exists only for MakeFiles.
-      # List of modules to be built in the python bindings
-      set(${COMPONENT}_PYTHON_MODULES "io/io_base")
-      foreach(_SWIG_MODULE ${${COMPONENT}_PYTHON_MODULES})
-        get_filename_component(_SWIG_MODULE_NAME ${_SWIG_MODULE} NAME)
-	if (${CMAKE_GENERATOR} MATCHES Ninja)
-          list(APPEND _OTHER_COMPONENTS  _${_SWIG_MODULE_NAME})
-	else()
-	  list(APPEND _OTHER_COMPONENTS ${_SWIG_MODULE_NAME}_swig_compilation _${_SWIG_MODULE_NAME})
-	endif()
-      endforeach()
-
+      list(APPEND _OTHER_COMPONENTS  pyio_base)
       set(MANPAGES_FOR_TOOLS)
       include(tools4tests)
-      # set_ldlibpath()
+
       macro (GEN_MANPAGE_FROM_HELP TOOL)
         # set PYTHONPATH to swig dir, which contains "siconos", so
         # that "import siconos.*" works
@@ -78,15 +64,16 @@ if(HAVE_SICONOS_MECHANICS)
             --no-discard-stderr
             -n \"`sed '/Description: /!d\;s///' ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}`\"
             ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
-          DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL} ${_OTHER_COMPONENTS}
+          DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL} pyio_base 
           WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/..
           COMMENT "Generating man/${TOOL}.1 using help2man"
           )
         install(FILES ${CMAKE_BINARY_DIR}/man/${TOOL}.1 DESTINATION share/man/man1)
         list(APPEND MANPAGES_FOR_TOOLS ${CMAKE_BINARY_DIR}/man/${TOOL}.1)
       endmacro()
-      list(FIND COMPONENTS mechanics _HAVE_MECHANICS)
-      if (NOT ${_HAVE_MECHANICS} EQUAL -1)
+
+      
+      if (HAVE_SICONOS_MECHANICS)
         GEN_MANPAGE_FROM_HELP(siconos_vview)
         GEN_MANPAGE_FROM_HELP(siconos_vexport)
         GEN_MANPAGE_FROM_HELP(siconos_export_raw_data)

@@ -18,13 +18,13 @@
 #[=======================================================================[.rst:
 Check if Bullet is required by Siconos.
 If so:
-- look for the proper Bullet version (3.17 is the min)
+- look for the proper Bullet version (3.05 is the min)
 - configure siconos to link with Bullet
 
 The following options control if and how Bullet is used
 
-* WITH_BULLET: activate Bullet and look for it (>=3.17) in the standard paths. Stop if not found.
-* Bullet_ROOT=<some_path>: activate Bullet and look for it (>=3.17) in <some_path>. Stop if not found
+* WITH_BULLET: activate Bullet and look for it (>=3.05) in the standard paths. Stop if not found.
+* Bullet_ROOT=<some_path>: activate Bullet and look for it (>=3.05) in <some_path>. Stop if not found
 * BULLET_INSTALL: activate Bullet, download and install the proper version at the same place as Siconos (CMAKE_INSTALL_PREFIX). This
 location might be used later as input to BULLET_ROOT.
 
@@ -104,16 +104,16 @@ elseif(WITH_BULLET OR Bullet_ROOT)
   find_package(Bullet CONFIG REQUIRED)
   include(${Bullet_CONFIG})
  
-  if(BULLET_VERSION_STRING VERSION_LESS 3.17)
+  if(BULLET_VERSION_STRING VERSION_LESS 3.05)
     set(BULLET_FOUND FALSE)
   endif()
 
   if(NOT BULLET_FOUND)
-    message(FATAL_ERROR "Can not find Bullet in the required version (min 3.17). Please try to install it. \
+    message(FATAL_ERROR "Can not find Bullet in the required version (min 3.05). Please try to install it. \
 
     Alternately: \
 
-    - run cmake for siconos with Bullet_ROOT equal to the path to Bullet version 3.17 \
+    - run cmake for siconos with Bullet_ROOT equal to the path to Bullet version 3.05 \
 
     - run cmake for siconos with -DINSTALL_BULLET=ON. Bullet will then be installed in ${CMAKE_INSTALL_PREFIX} and Siconos configured to run with Bullet.")
   endif()

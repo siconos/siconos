@@ -72,12 +72,12 @@ function(doxy2rst_sphinx COMPONENT)
   set(DOXYGEN_GENERATE_HTML NO)
   set(DOXYGEN_GENERATE_XML YES)
   set(DOXYGEN_XML_OUTPUT xml4rst/${COMPONENT})
-  doxygen_add_docs(
-    ${COMPONENT}-doxy2xml ${CMAKE_SOURCE_DIR}/${COMPONENT}/src
-    COMMENT "Generate xml/doxygen files for ${COMPONENT} (conf: ${DOXY_CONFIG_XML})."
-    )
+  if(EXISTS ${CMAKE_SOURCE_DIR}/${COMPONENT}/src)
+    doxygen_add_docs(
+      ${COMPONENT}-doxy2xml ${CMAKE_SOURCE_DIR}/${COMPONENT}/src
+      COMMENT "Generate xml/doxygen files for ${COMPONENT}."
+      )
   
-  if(WITH_${COMPONENT}_DOCUMENTATION)
     # Path where rst files will be generated.
     set(SPHINX_DIR "${CMAKE_BINARY_DIR}/docs/sphinx")
     
@@ -158,7 +158,9 @@ macro(finalize_doc)
     add_dependencies(html doxypng2sphinx)
 
     foreach(COMP ${COMPONENTS})
-      add_dependencies(html ${COMP}-xml2rst)
+      if(TARGET ${COMP}-xml2rst)
+	add_dependencies(html ${COMP}-xml2rst)
+      endif()
     endforeach()
 
     # --- Generates conf.py, to describe sphinx setup ---
