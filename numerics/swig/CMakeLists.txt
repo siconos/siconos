@@ -29,11 +29,6 @@ if(WITH_MPI)
   list(APPEND SWIG_NUMERICS_COMPILE_DEFINITIONS WITH_MPI4PY)
 endif()
 
-if(WITH_SERIALIZATION)
-  list(APPEND SWIG_NUMERICS_INCLUDES ${CMAKE_SOURCE_DIR}/io/src/serialization)
-endif()
-
-
 add_swig_sub_module(
   FILE numerics.i
   DEPS ${SWIG_NUMERICS_DEPS} numerics externals

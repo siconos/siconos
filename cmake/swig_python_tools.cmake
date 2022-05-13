@@ -78,12 +78,6 @@ function(add_swig_sub_module)
 
   #set_property(SOURCE ${swig_file} PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON) # propagates includes from target to swig.
 
-  
-  # if(WITH_SERIALIZATION)
-  #   set_source_files_properties(${swig_file}
-  #     PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}" CPLUSPLUS ON)
-  # endif()
-
   # --- build swig module ---
   #set(ADDITIONAL_SWIG_DEFINES ${ADDITIONAL_SWIG_DEFINES} -DBOOST_NOEXCEPT)
 
@@ -107,6 +101,10 @@ function(add_swig_sub_module)
   if(target_COMPILE_OPTIONS)
     set_property(TARGET ${target_NAME} PROPERTY SWIG_COMPILE_OPTIONS ${target_COMPILE_OPTIONS})
   endif()
+
+  if(WITH_SERIALIZATION)
+    list(APPEND target_COMPILE_DEFINITIONS WITH_SERIALIZATION)
+  endif()
   if(target_COMPILE_DEFINITIONS)
     set_property(TARGET ${target_NAME} PROPERTY SWIG_COMPILE_DEFINITIONS ${target_COMPILE_DEFINITIONS})
   endif()
@@ -123,15 +121,15 @@ function(add_swig_sub_module)
 
   # List of siconos modules, used in __init__.py.
   
-  # if(WITH_SERIALIZATION)
-  #   target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/io/src/serialization")
-  #   target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} Boost::serialization)
-  #   if(NOT WITH_GENERATION)
-  #     target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/io/src/generation")
-  #   else()
-  #     add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} SerializersGeneration)
-  #     target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE "${CMAKE_BINARY_DIR}/io")
-  #   endif()
+  if(WITH_SERIALIZATION)
+    target_include_directories(${target_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/io/src/serialization")
+    target_link_libraries(${target_NAME} PRIVATE Boost::serialization)
+    if(NOT WITH_GENERATION)
+      target_include_directories(${target_NAME} PRIVATE  "${CMAKE_SOURCE_DIR}/io/src/generation")
+    else()
+      add_dependencies(${target_NAME} SerializersGeneration)
+      target_include_directories(${target_NAME}  PRIVATE "${CMAKE_BINARY_DIR}/io")
+    endif()
 
   #   # SiconosFullGenerated.hpp includes files from all other components.
   #   # (Better way than using *_DOXYGEN_INPUTS?  ${COMPONENT}_DIR is empty here!)
@@ -142,7 +140,7 @@ function(add_swig_sub_module)
   #       target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${_D})
   #     endforeach()
   #   endforeach()
-  # endif()
+  endif()
 
   # WARNING ${swig_generated_file_fullname} is overriden 
   #set(${_name}_generated_file_fullname ${swig_generated_file_fullname})
