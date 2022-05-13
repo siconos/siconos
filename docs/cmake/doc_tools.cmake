@@ -127,7 +127,9 @@ macro(finalize_doc)
     # doc, from each component own list.
     set(DOXYGEN_INPUTS)
     foreach(COMP IN LISTS COMPONENTS)
-      list(APPEND DOXYGEN_INPUTS ${CMAKE_SOURCE_DIR}/${COMP}/src)
+      if(EXISTS ${CMAKE_SOURCE_DIR}/${COMP}/src)
+	list(APPEND DOXYGEN_INPUTS ${CMAKE_SOURCE_DIR}/${COMP}/src)
+      endif()
     endforeach()
     
     include(doxycommon)
