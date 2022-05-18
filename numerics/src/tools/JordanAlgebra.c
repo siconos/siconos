@@ -541,9 +541,9 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = 1/sqrtl(x[j]+normx)/2;
     l2 = 1/sqrtl(x[j]-normx)/2;
-    /* if (isnan(l2)) */
+    /* if (x[j]-normx<1e-14) */
     /*   { */
-    /* 	printf("Jsqrtinv: %e %Le %Le\n",x[j], normx, x[j]*(1-x[j]/normx)); */
+    /* 	printf("Jsqrtinv: %e %Le %Le\n",x[j], x[j]+normx, x[j]-normx); */
     /* 	getchar(); */
     /*   } */
     out[j] = l1+l2;
