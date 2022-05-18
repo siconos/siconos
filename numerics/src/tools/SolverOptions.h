@@ -41,7 +41,7 @@ typedef struct
 
 
 // length of iparam/dparam arrays in solver options.
-#define OPTIONS_PARAM_SIZE 20
+#define OPTIONS_PARAM_SIZE 30
 
 /** \struct SolverOptions_ SolverOptions.h
     Structure used to send options (name, parameters and so on) to a specific solver (mainly from Kernel to Numerics).
