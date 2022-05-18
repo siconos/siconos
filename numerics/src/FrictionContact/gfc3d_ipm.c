@@ -1052,16 +1052,17 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   while(iteration < max_iter)
   {
-    if ((options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] != SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL) && (totalresidual <= 1e-9) && (fws==' '))
-    {
-      // To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
-      options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
-      fws = '*';
-      // copy of the current solution into a temporary vector to evaluate the distance of this solution to the final one
-      /* cblas_dcopy(m, globalVelocity, 1, tmpsol, 1); */
-      /* cblas_dcopy(nd, velocity, 1, tmpsol+m, 1); */
-      /* cblas_dcopy(nd, reaction, 1, tmpsol+m+nd, 1); */
-    }
+    if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING_YES )
+      if ( (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] != SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL) && (totalresidual <= 1e-9) && (fws==' ') )
+      {
+	// To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
+	options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
+	fws = '*';
+	// copy of the current solution into a temporary vector to evaluate the distance of this solution to the final one
+	/* cblas_dcopy(m, globalVelocity, 1, tmpsol, 1); */
+	/* cblas_dcopy(nd, velocity, 1, tmpsol+m, 1); */
+	/* cblas_dcopy(nd, reaction, 1, tmpsol+m+nd, 1); */
+      }
 
     /* Computation of the values of 
      - primal residual: u - H*v - w
@@ -1778,7 +1779,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING_NO;
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
 
