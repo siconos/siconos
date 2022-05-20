@@ -6330,3 +6330,72 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 
   return info;
 }
+
+int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs, double tol, int maxitref, int job )
+{
+
+  lapack_int info = 1;
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_LDLT_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_LDLT_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_LDLT_refine(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
+    assert(A->size0 == A->size1);
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:  
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      switch (p->LDLT_solver)
+      {
+#ifdef WITH_MA57
+      case NSM_HSL:
+      {
+        LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
+        // Solve.
+        for (int irhs=0; irhs <nrhs ; irhs++)
+        {
+          info = LBL_Refine(lbl, &x[irhs*A->size1], &b[irhs*A->size1], NM_half_triplet(A)->x,
+                            tol, maxitref, job); // MA57 is able to accept multiple rhs but the C wrapper lbl not.
+          if(info)
+          {
+            fprintf(stderr, "NM_LDLT_refine. LBL_Refine error return from Refine: %d\n", info);
+          }
+        }
+        break;
+      }
+#endif
+      default:
+      {
+        fprintf(stderr, "NM_LDLT_refine: unknown sparse linearrefiner %d\n", p->LDLT_solver);
+        exit(EXIT_FAILURE);
+      }
+      break;
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_LDLT_refine unknown storageType");
+    }
+
+
+    /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+       CHECK_RETURN is ok for cs, but not for MUMPS and others */
+    /* some time we cannot find a solution to a linear system, and its fine, for
+     * instance with the minFBLSA. Therefore, we should not check here for
+     * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+    DEBUG_END("NM_LDLT_refine(NumericsMatrix* A, double *b, unsigned keep)\n");
+  }
+
+  return info;
+}

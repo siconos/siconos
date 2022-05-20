@@ -776,7 +776,7 @@ extern "C"
   int NM_Cholesky_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
   int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
   int NM_LDLT_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
-
+  int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs, double tol, int maxitref, int job );
 
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
