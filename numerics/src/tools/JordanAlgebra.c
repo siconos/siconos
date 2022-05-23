@@ -660,6 +660,12 @@ void QNTpinvz(const double * const x, const double * const y,const double * cons
   Qx05y(x, b, vecSize, varsCount, a);
   Qx05y(a, z, vecSize, varsCount, out);
 
+  /* alternative */
+  /* Qx05y(y, x, vecSize, varsCount,a); */
+  /* Jsqrt(a, vecSize, varsCount, b); */
+  /* Qx50y(y, b, vecSize, varsCount, a); */
+  /* Qx05y(a, z, vecSize, varsCount, out); */
+
   free(a);
   free(b);
 }
