@@ -180,7 +180,7 @@ static int Process_Error_Code( Ma57_Data *ma57, int nerror ) {
     ma57->icntl[1] = -1;  // Stream for warning messages.
     ma57->icntl[2] = -1;  // Stream for monitoring printing.
     ma57->icntl[3] = -1;  // Stream for printing of statistics.
-    ma57->icntl[4] =  0;  // Verbosity: 0=none, 1=errors, 2=1+warnings,
+    ma57->icntl[4] =  4;  // Verbosity: 0=none, 1=errors, 2=1+warnings,
                           //            3=2+monitor, 4=3+input,output
     ma57->icntl[5] =  5;  // Pivot selection strategy:
                           //  0: AMD using MC47
