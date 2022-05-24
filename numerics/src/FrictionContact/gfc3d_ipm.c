@@ -1261,6 +1261,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     {
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
     {
+      // First linear linear system
       J = NM_create(NM_SPARSE, m + 2*nd, m + 2*nd);
       J_nzmax = (d * d) * (m / d) + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd;
       NM_triplet_alloc(J, J_nzmax);
@@ -1298,6 +1299,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2:
     {
+      // First linear linear system
       J = NM_create(NM_SPARSE, m + 2*nd, m + 2*nd);
       J_nzmax = (d * d) * (m / d) + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd;
       NM_triplet_alloc(J, J_nzmax);
@@ -1333,7 +1335,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QPH:
-    {  
+    {
+      // First linear linear system
       J = NM_create(NM_SPARSE, m + 2*nd, m + 2*nd);
       J_nzmax = (d * d) * (m / d) + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd;
       NM_triplet_alloc(J, J_nzmax);
@@ -1398,6 +1401,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QP2:
     {
+      // First linear linear system
       JR = NM_create(NM_SPARSE, m + nd, m + nd);
       JR_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
       NM_triplet_alloc(JR, JR_nzmax);
@@ -1434,6 +1438,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH:
     {
+      // First linear linear system
       JR = NM_create(NM_SPARSE, m + nd, m + nd);
       JR_nzmax = (d * d) * (m / d) + H_nzmax + H_nzmax + nd;
       NM_triplet_alloc(JR, JR_nzmax);
@@ -1471,6 +1476,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH:
     {
+      // First linear linear system
       JR = NM_create(NM_SPARSE, nd, nd);
       JR_nzmax = 2*H_nzmax + nd;
       NM_triplet_alloc(JR, JR_nzmax);
@@ -1490,7 +1496,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       
       cblas_dcopy(m, f, 1, fHr, 1);                 
       NM_gemv(1.0, Ht, reaction, 1.0, fHr);         // fHr <- H'*r + f
-      NM_gemv(1.0, Minv, fHr, 0.0, MfHr);
+      NM_gemv(1.0, Minv, fHr, 0.0, MfHr);           // MfHr <- M^{-1}* (H'*r + f)
       NM_gemv(-1.0, QpH, MfHr, 0.0, sr_rhs);
       QNTpz(velocity, reaction, w, nd, n, w_h);
       cblas_daxpy(nd, -1.0, w_h, 1, sr_rhs, 1);
@@ -1502,7 +1508,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       QNTpz(velocity, reaction, sr_rhs, nd, n, d_reaction);
       
       NV_add(reaction, d_reaction, nd, rdr);
-      cblas_dcopy(m, f, 1, d_globalVelocity, 1);
+      cblas_dcopy(m, f, 1, MfHr, 1);
       NM_gemv(1.0, Ht, rdr, 1.0, MfHr);
       NM_gemv(1.0, Minv, MfHr, 0.0, d_globalVelocity);
       cblas_daxpy(m, -1.0, globalVelocity, 1, d_globalVelocity, 1);
@@ -1574,6 +1580,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     {
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
     {
+      // Second linear linear system
       JA_prod(d_velocity, d_reaction, nd, n, dvdr_jprod);
       cblas_daxpy(nd, -1.0, dvdr_jprod, 1, rhs_2+m, 1);
       for (int k = 0; k < nd; rhs_2[m+k] += 2*sigma*barr_param, k+=d);
@@ -1590,6 +1597,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2:
     {
+      // Second linear linear system
       QNTpz(velocity, reaction, d_velocity, nd, n, d_velocity_t);
       QNTpinvz(velocity, reaction, d_reaction, nd, n, d_reaction_t);
       JA_prod(d_velocity_t, d_reaction_t, nd, n, dvdr_jprod);
@@ -1616,6 +1624,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QPH:
 
     {
+      // Second linear linear system
       JA_prod(rhs+m, rhs+m+nd, nd, n, dvdr_jprod);
       for (int k = 0; k < nd; dvdr_jprod[k] -=  2*sigma*barr_param, k+=d);
       
@@ -1720,6 +1729,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QP2:
     {
+      // Second linear linear system
       double * r_Qp_u = (double*)calloc(nd,sizeof(double));
       double * r_Qp_du = (double*)calloc(nd,sizeof(double));
       double * r_dudr = (double*)calloc(nd,sizeof(double));
@@ -1755,6 +1765,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH:
     {
+      // Second linear linear system
       double * r_Qp_u = (double*)calloc(nd,sizeof(double));
       double * r_Qp_du = (double*)calloc(nd,sizeof(double));
       double * r_dudr = (double*)calloc(nd,sizeof(double));
@@ -1796,18 +1807,23 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH:
     {
+      // Second linear linear system
       double * vdv = (double*)calloc(m,sizeof(double));
       double * rdr = (double*)calloc(nd,sizeof(double));
       double * rhs_cor = (double*)calloc(nd,sizeof(double));
       double * MfHr = (double*)calloc(m,sizeof(double));
 
+      /* NV_display(d_reaction, nd); */
+      /* NV_display(d_globalVelocity, m); */
+      /* NV_display(d_velocity, nd); */
+      
       QNTpz(velocity, reaction, d_velocity, nd, n, d_velocity_t);
       JA_prod(d_velocity_t, sr_rhs, nd, n, dvdr_jprod);
       for (int k = 0; k < nd; dvdr_jprod[k] -= 2*sigma*barr_param, k+=d);
       QNTpz(velocity, reaction, velocity, nd, n, velocity_t);
       JA_inv(velocity_t, nd, n, velocity_t_inv);
       JA_prod(velocity_t_inv, dvdr_jprod, nd, n, rhs_cor);
-      cblas_daxpy(nd, -1.0, rhs_cor, 1, rhs_2, 1);
+      cblas_daxpy(nd, -1.0, rhs_cor, 1, sr_rhs_2, 1);
 
       NM_Cholesky_solve(JR, sr_rhs_2, 1);
 
@@ -1817,7 +1833,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       QNTpz(velocity, reaction, sr_rhs_2, nd, n, d_reaction);
 
       NV_add(reaction, d_reaction, nd, rdr);
-      cblas_dcopy(m, f, 1, d_globalVelocity, 1);
+      cblas_dcopy(m, f, 1, MfHr, 1);
       NM_gemv(1.0, Ht, rdr, 1.0, MfHr);
       NM_gemv(1.0, Minv, MfHr, 0.0, d_globalVelocity);
       cblas_daxpy(m, -1.0, globalVelocity, 1, d_globalVelocity, 1);
