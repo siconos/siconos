@@ -802,12 +802,19 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   {
     M = problem->M;
   }
-
+  
   NumericsMatrix * Minv = NULL;
   if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH )
   {
-    Minv = NM_LU_inv(M);
+    int block_number_of_M = M->size0/3;
+    unsigned int * blocksizes_of_M = (unsigned int*)malloc(block_number_of_M * sizeof(unsigned int));
+    for (int i = 0; i < block_number_of_M; i++)
+      *(blocksizes_of_M + i) = 3;
+    Minv = NM_inverse_diagonal_block_matrix(M, block_number_of_M, blocksizes_of_M);
+    free(blocksizes_of_M);
   }
+
+  
   
   DEBUG_PRINTF("problem->M->storageType : %i\n",problem->H->storageType);
   if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE
@@ -2045,7 +2052,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
