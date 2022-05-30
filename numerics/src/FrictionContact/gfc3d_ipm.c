@@ -802,18 +802,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   {
     M = problem->M;
   }
- 
-  NumericsMatrix* Minv = NM_LU_inv(M);
 
-  /* NM_display_storageType(problem->H); */
-  /* NM_display(problem->H); */
-  /* NV_display(problem->b, nd); */
-  /* for (int k = 0; k < nd;  k++) */
-  /*   problem->b[k]=0.0; */
-  /* for(int  i = 0; i<nd*m; i++) */
-  /*   problem->H->matrix0[i] *= 0.1; */
-
-
+  NumericsMatrix * Minv = NULL;
+  if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH )
+  {
+    Minv = NM_LU_inv(M);
+  }
+  
   DEBUG_PRINTF("problem->M->storageType : %i\n",problem->H->storageType);
   if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE
      && problem->H->storageType == NM_SPARSE_BLOCK)
@@ -1484,8 +1479,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       
       NumericsMatrix * QpH = QNTpH(velocity, reaction, H, nd, n);
       NumericsMatrix * QpHt = NM_transpose(QpH);
-      JR  = NM_multiply(Minv, QpHt);
-      JR  = NM_multiply(QpH, JR);
+
+      NM_copy(QpHt, JR);
+
+      JR = NM_multiply(Minv, QpHt);
+      JR = NM_multiply(QpH, JR);
       JR = NM_add(1.0, JR, 1.0, eye_nd);
 
       double * fHr = (double*)calloc(m,sizeof(double));
@@ -1998,7 +1996,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   NM_free(H_tilde);
   NM_free(minus_H);
   NM_free(H);
-  NM_free(Minv);
+  if (Minv) NM_free(Minv);
   NM_free(minus_M);
   NM_free(minus_Ht);
   NM_free(eye_nd);
