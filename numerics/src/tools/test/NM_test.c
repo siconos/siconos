@@ -2398,6 +2398,51 @@ static int NM_inv_test_sparse(void)
   return  !NM_equal(AAinv, Id);
 }
 
+static int NM_inverse_diagonal_block_matrix_test(void)
+{
+  int size0 =12;
+  int size1 =12;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+
+  for(int i =0; i < 3; i++)
+  {
+    NM_entry(A, i, i, 1.0);
+  }
+  for(int i =3; i < 6; i++)
+  {
+    NM_entry(A, i, i, 2.0);
+  }
+  for(int i =6; i < 12; i++)
+  {
+    NM_entry(A, i, i, 3.0);
+  }
+  
+
+
+  //NM_entry(A, size0-1, size0-1, 10);
+
+  NM_display(A);
+  FILE * fileout = fopen("dataA.py", "w");
+  NM_write_in_file_python(A, fileout);
+  fclose(fileout);
+
+  unsigned int blocksize[3] = {3,3,6};
+  
+  NumericsMatrix * Ainv  =  NM_inverse_diagonal_block_matrix(A, 3, blocksize);
+
+  //NM_display(Ainv);
+  NumericsMatrix* AAinv = NM_multiply(A,Ainv);
+  //NM_display(AAinv);
+
+  NumericsMatrix * Id  = NM_eye(size0);
+
+  //NM_display(Id);
+
+  //getchar();
+  return  !NM_equal(AAinv, Id);
+}
 
 
 static int test_NM_inv(void)
@@ -3347,6 +3392,10 @@ static int test_NM_Cholesky_solve_vs_posv_expert(void)
   return info;
 
 }
+
+
+
+
 static int test_NM_LDLT_solve_unit(NumericsMatrix * M, double * b)
 {
   int n = M->size0;
@@ -3755,8 +3804,8 @@ static int test_NM_max_by_columns_and_rows(void)
 #ifdef WITH_MA57
 
 
-
-
+#include "lbl.h"
+#include "NM_MA57.h"
 static int test_NM_LDLT_refine_unit(NumericsMatrix * M, double * b)
 {
   int n = M->size0;
@@ -3778,7 +3827,7 @@ static int test_NM_LDLT_refine_unit(NumericsMatrix * M, double * b)
 #elif defined(WITH_MA57)
   p->solver = NSM_HSL;
 #else
- p->solver = NSM_CSPARSE;
+  p->solver = NSM_CSPARSE;
 #endif
 
   double res;
@@ -3799,6 +3848,13 @@ static int test_NM_LDLT_refine_unit(NumericsMatrix * M, double * b)
     info=0;
 #endif
 
+#if defined(WITH_MA57)
+  p = NSM_linearSolverParams(M->destructible);
+  LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
+  printf("Norm of scaled residuals lbl->ma57->rinfo[10-1] = %e \n", lbl->ma57->rinfo[10-1]);
+  printf("Number of refinement iteration lbl->ma57->info[30-1] = %i \n", lbl->ma57->info[30-1]);
+#endif
+  
   printf("LDLT refine without preserving matrix\n");
   NM_unpreserve(M);
 #ifdef WITH_OPENSSL
@@ -4007,6 +4063,7 @@ int main(int argc, char *argv[])
 
 
   info +=    test_NM_inv();
+  info += NM_inverse_diagonal_block_matrix_test();
   info += test_NM_gesv_expert();
   info += test_NM_posv_expert();
 

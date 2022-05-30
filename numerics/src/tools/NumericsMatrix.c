@@ -1,4 +1,3 @@
-
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -4956,7 +4955,7 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
   assert(A->size0 == A->size1);
   int info =-1;
 
-  // get internal data (allocation of needed)
+  // get internal data (allocation if needed)
   NM_internalData(A);
 
   switch(A->storageType)
@@ -4977,6 +4976,74 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
 
   DEBUG_BEGIN("NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)\n");
   return (int)info;
+}
+
+
+NumericsMatrix *  NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number, unsigned int * blocksizes)
+{
+
+  DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
+  assert(A->size0 == A->size1);
+
+  NumericsMatrix * A_inv;
+
+  // get internal data (allocation if needed)
+  NM_internalData(A);
+
+  switch(A->storageType)
+  {
+  case NM_SPARSE_BLOCK:
+  {
+    // get internal data (allocation if needed)
+
+    A_inv = NM_create(NM_SPARSE_BLOCK, A->size0, A->size1);
+    NM_copy(A, A_inv);
+
+    lapack_int* ipiv = (lapack_int*)NM_iWork(A_inv, A_inv->size0, sizeof(lapack_int));
+    assert(A_inv->matrix1);
+    int info = SBM_inverse_diagonal_block_matrix_in_place(A_inv->matrix1, ipiv);
+    NM_internalData(A_inv)->isInversed = true;
+    break;
+  }
+  case NM_SPARSE:
+  {
+    // brute force implementation.
+    // We assume that it is used for convenience
+    // must be optimized for serious use.
+
+    A_inv = NM_create(NM_SPARSE, A->size0, A->size1);
+    NM_triplet_alloc(A_inv, A->size0);
+    int start_row = 0;
+    for (unsigned b =0; b < block_number; b++)
+    {
+      int block_size= blocksizes[b];
+
+      NumericsMatrix * block_NM = NM_create(NM_DENSE, block_size, block_size);
+
+      double ** block_adress = &block_NM->matrix0  ;
+
+      NM_extract_diag_block(A, b, start_row, block_size, block_adress);
+
+
+      NumericsMatrix* block_NM_inv =  NM_LU_inv(block_NM);
+
+      NM_insert(A_inv, block_NM_inv, start_row, start_row);
+
+      NM_free(block_NM);
+      NM_free(block_NM_inv);
+
+      start_row = start_row + block_size;
+
+    }
+    break;
+  }
+
+  default:
+    assert(0 && "NM_inverse_diagonal_block_matrix_in_place :  unknown storageType");
+  }
+
+  DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
+  return A_inv;
 }
 
 
@@ -6350,7 +6417,7 @@ int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs,
 
     switch (A->storageType)
     {
-    case NM_DENSE:  
+    case NM_DENSE:
     case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
     case NM_SPARSE:
     {

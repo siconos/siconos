@@ -341,11 +341,11 @@ extern "C"
    */
   void NM_clear_not_SBM(NumericsMatrix* m);
   NumericsMatrix * NM_free_not_SBM(NumericsMatrix* m);
-  
 
 
 
- 
+
+
   /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.
@@ -428,7 +428,7 @@ extern "C"
    */
 
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 2x2 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
@@ -514,7 +514,7 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
-  
+
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (2 rows and sizeX columns)
       \param[in] sizeX dim of the vector x
       \param[in] block_start block number (only used for SBM)
@@ -783,15 +783,24 @@ extern "C"
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
-
-
-  /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
+  /**  Computation of the inverse of a NumericsMatrix A using NM_LU_expert
    * \param[in,out] A a NumericsMatrix.
    * \return the matrix inverse.
    */
   NumericsMatrix* NM_LU_inv(NumericsMatrix* A);
 
+
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
+
+  /**  Computation of the inverse of a NumericsMatrix A composed of diagonal blocks
+   * for each block a dense inverse is performed and then inserted into the
+   * global inverse
+   * \param[in] A a NumericsMatrix.
+   * \param[in] block_number the number of blocks
+   * \param[in] blocksize the sizes of diagonal blocks
+   * \return the matrix inverse.
+   */
+  NumericsMatrix *  NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number, unsigned int * blocksizes);
 
   /** Direct computation of the solution of a real system of linear
    * equations: A x = b.
@@ -813,6 +822,9 @@ extern "C"
    * \return the matrix inverse.
    */
   NumericsMatrix* NM_gesv_inv(NumericsMatrix* A);
+
+
+
 
   /** Set the linear solver
    * \param A the matrix
