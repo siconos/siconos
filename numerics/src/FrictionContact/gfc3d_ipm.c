@@ -1483,15 +1483,17 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       JR_nzmax = 2*H_nzmax + nd;
       NM_triplet_alloc(JR, JR_nzmax);
       JR->matrix2->origin = NSM_TRIPLET;
+      NumericsMatrix * JR_a = NULL;
+      NumericsMatrix * JR_b = NULL;
       
       NumericsMatrix * QpH = QNTpH(velocity, reaction, H, nd, n);
       NumericsMatrix * QpHt = NM_transpose(QpH);
 
-      NM_copy(QpHt, JR);
-
-      JR = NM_multiply(Minv, QpHt);
-      JR = NM_multiply(QpH, JR);
-      JR = NM_add(1.0, JR, 1.0, eye_nd);
+      JR_a = NM_multiply(Minv, QpHt);
+      JR_b = NM_multiply(QpH, JR_a);
+      JR = NM_add(1.0, JR_b, 1.0, eye_nd);
+      JR_a = NM_free(JR_a);
+      JR_b = NM_free(JR_b); 
 
       double * fHr = (double*)calloc(m,sizeof(double));
       double * MfHr = (double*)calloc(m,sizeof(double));
