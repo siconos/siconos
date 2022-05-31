@@ -1480,9 +1480,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     {
       // First linear linear system
       JR = NM_create(NM_SPARSE, nd, nd);
-      JR_nzmax = 2*H_nzmax + nd;
-      NM_triplet_alloc(JR, JR_nzmax);
-      JR->matrix2->origin = NSM_TRIPLET;
+      //JR_nzmax = 2*H_nzmax + nd;
+      //NM_triplet_alloc(JR, JR_nzmax);
+      //JR->matrix2->origin = NSM_TRIPLET;
+
       NumericsMatrix * JR_a = NULL;
       NumericsMatrix * JR_b = NULL;
       
