@@ -63,8 +63,8 @@ option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
 # Set python install mode:
 # - user --> behave as 'python setup.py install --user'
 # - standard --> install in python site-package (ie behave as python setup.py install)
-# - prefix --> install in python CMAKE_INSTALL_PREFIX (ie behave as python setup.py install --prefix=CMAKE_INSTALL_PREFIX)
-set(siconos_python_install "prefix" CACHE STRING "Install mode for siconos python package")
+set(siconos_python_install "user" CACHE STRING "Install mode for siconos python package")
+
 # If OFF, headers from libraries in externals will not be installed.
 option(INSTALL_EXTERNAL_HEADERS
   "Whether or not headers for external libraries should be installed. Default=OFF" OFF)

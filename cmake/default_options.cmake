@@ -54,7 +54,7 @@ option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)
 option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version. Default = OFF" OFF)
 option(WITH_MA57 "Compilation with the MA57 solver (License HSL). Default = OFF" OFF)
-option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" OFF)
+option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" ON)
 option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
 option(WITH_RENDERER "Install OCC renderer. Default = OFF" OFF)
 option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library. Default = ON" ON)
@@ -66,8 +66,7 @@ option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
 # Set python install mode:
 # - user --> pip install --user
 # - standard --> pip install
-# - prefix --> pip install --prefix=CMAKE_INSTALL_PREFIX
-set(siconos_python_install "prefix" CACHE STRING "Install mode for siconos python package")
+set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
 
 # If OFF, headers from libraries in externals will not be installed.
 option(INSTALL_EXTERNAL_HEADERS

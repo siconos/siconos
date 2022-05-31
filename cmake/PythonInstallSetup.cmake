@@ -44,11 +44,12 @@ PythonInstallSetup
  * else
    ---> install python packages with pip install ...
 #]=======================================================================]
-
-
+  
 # Finding where pip or python will put things is a real nightmare, especially on Debian
 # like systems where pip use site-packages, the distro dist-packages and so on.
 # See https://www.python.org/dev/peps/pep-0668/
+# Note : witth python 3.10, --prefix option of pip always add "local" to install path.
+# We can not handle this in a simple way, so we just keep standard and user options.
 function(set_python_install_path)
   # set(PIP_INSTALL_OPTIONS "--record;${CMAKE_BINARY_DIR}/python_install_manifest.txt")
   set(PIP_INSTALL_OPTIONS)
@@ -76,20 +77,6 @@ function(set_python_install_path)
     else()
       message(FATAL_ERROR "pip (python install) can't use --user option. Please change your install configuration setup (siconos_python_install var).")
     endif()
-
-  elseif(siconos_python_install STREQUAL prefix) # User explicitely asked to use CMAKE_INSTALL_PREFIX
-    # -- pip options
-    list(APPEND PIP_INSTALL_OPTIONS --prefix=${CMAKE_INSTALL_PREFIX})
-
-    # -- PY_INSTALL_DIR
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-      "import site; print('/lib'+site.getsitepackages()[0].split('lib')[-1])" OUTPUT_VARIABLE PY_INSTALL_DIR)
-
-    set(PY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}${PY_INSTALL_DIR})
-    # Remark : with prefix, on some systems getsitepackages will return dist-packages, while pip will
-    # install things in site-packages.
-    string(REPLACE dist-packages site-packages PY_INSTALL_DIR ${PY_INSTALL_DIR})
-
   else()  # Default behavior: let pip choose where things will be installed.
     # Anyway, we need PY_INSTALL_DIR for swig/cmake install process.
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
@@ -99,6 +86,8 @@ function(set_python_install_path)
   # Move vars to cache.
   string(STRIP "${PY_INSTALL_DIR}" PY_INSTALL_DIR)
   set(SICONOS_PYTHON_INSTALL_DIR ${PY_INSTALL_DIR} CACHE PATH "Install directory for python bindings.")
+  # Warning: this SICONOS_PYTHON_INSTALL_DIR will be used during swig setup to choose the place where dynamic libraries generated
+  # by swig and required by python will be installed.
   set(PIP_INSTALL_OPTIONS ${PIP_INSTALL_OPTIONS} CACHE STRING "Options passed to pip during installation.")
 endfunction()
 

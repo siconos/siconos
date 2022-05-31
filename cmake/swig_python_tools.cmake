@@ -203,7 +203,17 @@ function(add_swig_sub_module)
 
   # install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${_name}.py DESTINATION ${DEST})
   install(TARGETS ${target_NAME} LIBRARY DESTINATION ${DEST})
-  
+  # A trick to add so files to the python package dependencies, so
+  # that they are installed by pip.
+  # This is a quite a mess to handle python path. See https://www.python.org/dev/peps/pep-0668/
+  # file(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/libs/liblist liblist)
+  # add_custom_command(
+  #   OUTPUT ${CMAKE_BINARY_DIR}/wrap/libs/liblist
+  #   COMMAND echo $<TARGET_FILE_NAME:${target_NAME} >> ${CMAKE_BINARY_DIR}/wrap/libs/liblist 
+  #   )  
+  # file(READ ${CMAKE_CURRENT_BINARY_DIR}/libs/${fname} VAR)
+  # file(APPEND  ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg "\t${VAR}\n")
+
 endfunction()
 
 
