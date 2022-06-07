@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ int globalFrictionContact_test_function(TestCase* current)
 #endif
 
   clock_t t1 = clock();
-  
+
   if(dim == 2)
   {
 
@@ -111,7 +111,7 @@ int globalFrictionContact_test_function(TestCase* current)
   /* mfile = fopen(fsolname, "w"); */
   /* print_solution_in_Matlab_file(globalvelocity, velocity, reaction, dim, NC, n, mfile); */
   /* fclose(mfile); */
-  
+
   int print_size = 10;
 
   printf("Norm velocity:  %12.8e\n", cblas_dnrm2(NC*dim, velocity, 1));
@@ -125,11 +125,6 @@ int globalFrictionContact_test_function(TestCase* current)
     {
       printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
     }
-    printf(" ..... \n");
-    for(k = 0 ; k < print_size; k++)
-    {
-      printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
-    }
   }
   else
   {
@@ -137,13 +132,24 @@ int globalFrictionContact_test_function(TestCase* current)
     {
       printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
     }
-    printf("\n");
-    for(k = 0 ; k < dim*NC; k++)
+  }
+  printf(" ..... \n");
+  if(n >= print_size)
+  {
+    printf("First values (%i)\n", print_size);
+    for(k = 0 ; k < print_size; k++)
     {
       printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
     }
   }
-  printf("\n");
+  else
+  {
+    for(k = 0 ; k < n; k++)
+    {
+      printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
+    }
+  }
+
 
   for(k = 0; k < dim * NC; ++k)
   {
@@ -159,7 +165,7 @@ int globalFrictionContact_test_function(TestCase* current)
     printf("test: success\n");
   else
     printf("test: failure\n");
-    
+
   printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
   printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
 
@@ -177,7 +183,7 @@ void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem * problem, F
   int d = problem->dimension;
   int n = problem->numberOfContacts;
   int m = problem->M->size0;
-  
+
   fprintf(file,"d = %3i;\n", d);
   fprintf(file,"n = %6i;\n", n);
   fprintf(file,"m = %6i;\n", m);
@@ -239,4 +245,3 @@ void print_solution_in_Matlab_file(double * v, double * u, double * r, int d, in
   fprintf(file, "         ];\n");
   return;
 }
-

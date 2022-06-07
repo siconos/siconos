@@ -1,7 +1,7 @@
 
 import os
 import fileinput
-rootpath = './siconos-tutorials'
+rootpath = './'
 flist = []
 for root, directories, files in os.walk(rootpath):
     for name in files:
@@ -20,12 +20,12 @@ for f in flist:
         #    print(f)
 
 
-instring ='Copyright 2018 INRIA'
+instring ='Copyright 2022 INRIA'
 #instring ='Copyright (C) 2005, 2018 by INRIA'
 #instring ='Siconos-Numerics, Copyright INRIA 2005-2015'
 #instring = 'Siconos, Copyright INRIA 2005-2016'
 
-outstring='Copyright 2021 INRIA'
+outstring='Copyright 2022 INRIA'
 
 with fileinput.input(files=flist, inplace=True) as f:
     for line in f:

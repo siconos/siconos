@@ -1,8 +1,7 @@
-
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2254,6 +2253,8 @@ NumericsMatrix* NM_eye(int size)
 {
   NumericsMatrix* M = NM_create(NM_SPARSE, size, size);
   /* version incremented in NSM_triplet_eye */
+  NSM_clear(M->matrix2);
+  free(M->matrix2);
   M->matrix2 = NSM_triplet_eye(size);
   return M;
 }
@@ -2733,6 +2734,37 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double 
   }
   }
   DEBUG_END("NM_copy_to_sparse(...)\n")
+}
+
+void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B)
+{
+  assert(A);
+  assert(B);
+  switch(A->storageType)
+  {
+  case NM_DENSE:
+  {
+    NM_set_version(B, NM_DENSE, NM_version(A, NM_DENSE));
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    NM_set_version(B, NM_SPARSE_BLOCK, NM_version(A, NM_SPARSE_BLOCK));
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(A->matrix2);
+    assert(B->matrix2);
+    NSM_version_copy(A->matrix2, B->matrix2);
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_version_copy", "unknown id");
+  }
+  assert (false);
+  }
 }
 
 void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
@@ -3431,12 +3463,6 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 
   NumericsMatrix * C = NM_new();
 
-  /* should we copy the whole internal data ? */
-  /*NM_internalData_copy(A, C);*/
-  NM_copy(A,C);
-  NM_MPI_copy(A, C);
-  NM_MUMPS_copy(A, C);
-
   /* At the time of writing, we are able to transform anything into NM_SPARSE,
    * hence we use this format whenever possible */
   if(A->storageType == NM_SPARSE || B->storageType == NM_SPARSE || C->storageType == NM_SPARSE)
@@ -3456,8 +3482,11 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 
     C->size0 = A->size0;
     C->size1 = B->size1;
+
+    assert(!C->matrix0);
     C->matrix0 = (double *)malloc(C->size0*C->size1*sizeof(double));
     assert(C->matrix0);
+
     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, B->size0,
                 1.0, A->matrix0, A->size0, B->matrix0, B->size0, 0.0, C->matrix0, A->size0);
     NM_clearSparseBlock(C);
@@ -3524,6 +3553,19 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
   {
     assert(0 && "NM_multiply unknown storageType");
   }
+  }
+
+  NM_MPI_copy(A, C);
+  NM_MUMPS_copy(A, C);
+
+  if (B->storageType == NM_SPARSE)
+  {
+    /* anything * sparse -> sparse */
+    NM_version_copy(B, C);
+  }
+  else
+  {
+    NM_version_copy(A, C);
   }
   return C;
   DEBUG_END("NM_multiply(...) \n")
@@ -4913,7 +4955,7 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
   assert(A->size0 == A->size1);
   int info =-1;
 
-  // get internal data (allocation of needed)
+  // get internal data (allocation if needed)
   NM_internalData(A);
 
   switch(A->storageType)
@@ -4934,6 +4976,74 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
 
   DEBUG_BEGIN("NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)\n");
   return (int)info;
+}
+
+
+NumericsMatrix *  NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number, unsigned int * blocksizes)
+{
+
+  DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
+  assert(A->size0 == A->size1);
+
+  NumericsMatrix * A_inv;
+
+  // get internal data (allocation if needed)
+  NM_internalData(A);
+
+  switch(A->storageType)
+  {
+  case NM_SPARSE_BLOCK:
+  {
+    // get internal data (allocation if needed)
+
+    A_inv = NM_create(NM_SPARSE_BLOCK, A->size0, A->size1);
+    NM_copy(A, A_inv);
+
+    lapack_int* ipiv = (lapack_int*)NM_iWork(A_inv, A_inv->size0, sizeof(lapack_int));
+    assert(A_inv->matrix1);
+    int info = SBM_inverse_diagonal_block_matrix_in_place(A_inv->matrix1, ipiv);
+    NM_internalData(A_inv)->isInversed = true;
+    break;
+  }
+  case NM_SPARSE:
+  {
+    // brute force implementation.
+    // We assume that it is used for convenience
+    // must be optimized for serious use.
+
+    A_inv = NM_create(NM_SPARSE, A->size0, A->size1);
+    NM_triplet_alloc(A_inv, A->size0);
+    int start_row = 0;
+    for (unsigned b =0; b < block_number; b++)
+    {
+      int block_size= blocksizes[b];
+
+      NumericsMatrix * block_NM = NM_create(NM_DENSE, block_size, block_size);
+
+      double ** block_adress = &block_NM->matrix0  ;
+
+      NM_extract_diag_block(A, b, start_row, block_size, block_adress);
+
+
+      NumericsMatrix* block_NM_inv =  NM_LU_inv(block_NM);
+
+      NM_insert(A_inv, block_NM_inv, start_row, start_row);
+
+      NM_free(block_NM);
+      NM_free(block_NM_inv);
+
+      start_row = start_row + block_size;
+
+    }
+    break;
+  }
+
+  default:
+    assert(0 && "NM_inverse_diagonal_block_matrix_in_place :  unknown storageType");
+  }
+
+  DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
+  return A_inv;
 }
 
 
@@ -5329,6 +5439,9 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
   NumericsMatrix* D1_k = B->D1;
   NumericsMatrix* D2_k = B->D2;
 
+  double * D1_k_x= D1_k->matrix2->triplet->x;
+  double * D2_k_x= D2_k->matrix2->triplet->x;
+
   unsigned int size0 = B->size0;
   unsigned int size1 = B->size1;
 
@@ -5371,11 +5484,20 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
     }
 
     /* Update balancing matrix */
-    NM_gemm(1.0, D1_k, D_R, 0.0, D1_tmp);
-    NM_copy(D1_tmp, D1_k);
+    /* NM_gemm(1.0, D1_k, D_R, 0.0, D1_tmp); */
+    /* NM_copy(D1_tmp, D1_k); */
 
-    NM_gemm(1.0, D2_k, D_C, 0.0, D2_tmp);
-    NM_copy(D2_tmp, D2_k);
+    /* NM_gemm(1.0, D2_k, D_C, 0.0, D2_tmp); */
+    /* NM_copy(D2_tmp, D2_k); */
+
+    for(unsigned int i=0 ; i < size0; i++)
+    {
+      D1_k_x[i] = D1_k_x[i] * D_R_x[i];
+    }
+    for(unsigned int i=0 ; i < size1; i++)
+    {
+      D2_k_x[i] = D2_k_x[i] * D_C_x[i];
+    }
 
     /* NM_display(D1_k); */
     /* DEBUG_PRINTF("D1_k ");NV_display(NM_triplet(D1_k)->x, size); */
@@ -6271,6 +6393,75 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
      * problems, but the calling function has to check the return code.*/
 //  CHECK_RETURN(info);
     DEBUG_END("NM_LDLT_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  }
+
+  return info;
+}
+
+int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs, double tol, int maxitref, int job )
+{
+
+  lapack_int info = 1;
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_LDLT_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_LDLT_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_LDLT_refine(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
+    assert(A->size0 == A->size1);
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      switch (p->LDLT_solver)
+      {
+#ifdef WITH_MA57
+      case NSM_HSL:
+      {
+        LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
+        // Solve.
+        for (int irhs=0; irhs <nrhs ; irhs++)
+        {
+          info = LBL_Refine(lbl, &x[irhs*A->size1], &b[irhs*A->size1], NM_half_triplet(A)->x,
+                            tol, maxitref, job); // MA57 is able to accept multiple rhs but the C wrapper lbl not.
+          if(info)
+          {
+            fprintf(stderr, "NM_LDLT_refine. LBL_Refine error return from Refine: %d\n", info);
+          }
+        }
+        break;
+      }
+#endif
+      default:
+      {
+        fprintf(stderr, "NM_LDLT_refine: unknown sparse linearrefiner %d\n", p->LDLT_solver);
+        exit(EXIT_FAILURE);
+      }
+      break;
+      }
+      break;
+    }
+    default:
+      assert (0 && "NM_LDLT_refine unknown storageType");
+    }
+
+
+    /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+       CHECK_RETURN is ok for cs, but not for MUMPS and others */
+    /* some time we cannot find a solution to a linear system, and its fine, for
+     * instance with the minFBLSA. Therefore, we should not check here for
+     * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+    DEBUG_END("NM_LDLT_refine(NumericsMatrix* A, double *b, unsigned keep)\n");
   }
 
   return info;

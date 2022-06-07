@@ -131,6 +131,7 @@ function(check_interface NAME)
   # The first function in the list is used :
   list(GET ${NAME}_FUNCTIONS 0 func)
   set(fullname ${${NAME}_PREFIX}${func}${${NAME}_SUFFIX})
+  set(CMAKE_REQUIRED_QUIET ON) # No messages
   check_symbol_exists("${fullname}" ${${NAME}_HEADER} HAS_${NAME}_${func})
   # If HAS_${NAME}_${func}, it probably means that the API is OK.
   # Anyway, other required functions will be checked later.
@@ -179,5 +180,6 @@ function(check_interface NAME)
   endforeach()
   set(CMAKE_REQUIRED_LIBRARIES)
   set(CMAKE_REQUIRED_INCLUDES)
+  unset(CMAKE_REQUIRED_QUIET)
 
 endfunction()

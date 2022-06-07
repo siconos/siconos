@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-
 import numpy as np
-from siconos.tests_setup import working_dir
-import os
 import siconos.kernel as sk
 
 ndof = 3
@@ -21,14 +17,15 @@ ds_classes = {
     sk.FirstOrderLinearTIDS: (x0, a_mat),
     sk.LagrangianDS: (q0, v0, inertia),
     sk.LagrangianLinearTIDS: (q0, v0, inertia),
-    sk.NewtonEulerDS: (q_ne, x0, 1., inertia)}
+    sk.NewtonEulerDS: (q_ne, x0, 1.0, inertia),
+}
 
 
 def test_ds_interface():
     """Tests methods that should be available
     for all dynamical systems
     """
-    time = 1.
+    time = 1.0
 
     for args in ds_classes:
         class_name = args
@@ -50,8 +47,7 @@ def test_ds_interface():
 
 
 def test_first_order_nlds():
-    """Build and test first order non linear ds
-    """
+    """Build and test first order non linear ds"""
     ndof = 3
     x0 = np.zeros(ndof, dtype=np.float64)
     ds = sk.FirstOrderNonLinearDS(x0)
@@ -63,12 +59,12 @@ def test_first_order_nlds():
     assert not ds.isLinear()
     assert np.allclose(ds.x0(), x0)
     assert np.allclose(ds.x(), x0)
-    assert np.allclose(ds.rhs(), 0.)
+    assert np.allclose(ds.rhs(), 0.0)
     ds.computef(time, ds.x())
     assert ds.f() is None
     ds.initRhs(time)
     assert ds.jacobianfx() is None
-    assert np.allclose(ds.jacobianRhsx(), 0.)
+    assert np.allclose(ds.jacobianRhsx(), 0.0)
 
 
 def test_first_order_lds():
@@ -80,7 +76,7 @@ def test_first_order_lds():
     time = 1.2
     ds_list = []
     a_mat = np.random.random((ndof, ndof))
-    b_vec = np.random.random((ndof, ))
+    b_vec = np.random.random((ndof,))
     ds_list.append(sk.FirstOrderLinearDS(x0))
     ds_list.append(sk.FirstOrderLinearDS(x0, a_mat))
     ds_list.append(sk.FirstOrderLinearDS(x0, a_mat, b_vec))
@@ -90,7 +86,7 @@ def test_first_order_lds():
         assert ds.dimension() == ndof
         assert np.allclose(ds.x0(), x0)
         assert np.allclose(ds.x(), x0)
-        assert np.allclose(ds.r(), 0.)
+        assert np.allclose(ds.r(), 0.0)
 
         rhs = np.zeros_like(ds.x())
         jac_ref = np.zeros((ndof, ndof), dtype=np.float64)
@@ -116,7 +112,7 @@ def test_first_order_ltids():
     """
     time = 1.2
     ds_list = []
-    b_vec = np.random.random((nn, ))
+    b_vec = np.random.random((nn,))
     ds_list.append(sk.FirstOrderLinearTIDS(x0, a_mat))
     ds_list.append(sk.FirstOrderLinearTIDS(x0, a_mat, b_vec))
 
@@ -125,7 +121,7 @@ def test_first_order_ltids():
         assert ds.dimension() == nn
         assert np.allclose(ds.x0(), x0)
         assert np.allclose(ds.x(), x0)
-        assert np.allclose(ds.r(), 0.)
+        assert np.allclose(ds.r(), 0.0)
 
         rhs = np.dot(a_mat, ds.x())
         if ds.b() is not None:
@@ -137,22 +133,20 @@ def test_first_order_ltids():
 
 
 def test_lagrangian_ds():
-    """Build and test lagrangian ds
-    """
+    """Build and test lagrangian ds"""
     q0[...] = [1, 2, 3]
     v0[...] = [4, 5, 6]
 
     mass = np.asarray(np.diag([1, 2, 3]), dtype=np.float64)
     ds = sk.LagrangianDS(q0, v0, mass)
     ec = ds.computeKineticEnergy()
-    assert ec == 87.
+    assert ec == 87.0
     assert ds.dimension() == ndof
     assert np.allclose(ds.mass(), mass)
 
 
 def test_lagrangian_tids():
-    """Build and test lagrangian linear and time-invariant ds
-    """
+    """Build and test lagrangian linear and time-invariant ds"""
     q0[...] = [1, 2, 3]
     v0[...] = [4, 5, 6]
 
@@ -163,7 +157,7 @@ def test_lagrangian_tids():
     damping.flat[...] = np.arange(9, 18)
     ds = sk.LagrangianLinearTIDS(q0, v0, mass, stiffness, damping)
     ec = ds.computeKineticEnergy()
-    assert ec == 87.
+    assert ec == 87.0
     assert ds.dimension() == ndof
     assert np.allclose(ds.mass(), mass)
     assert np.allclose(ds.K(), stiffness)

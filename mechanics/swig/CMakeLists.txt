@@ -16,24 +16,15 @@ set(${COMPONENT}_PYTHON_MODULES
   "mechanics/collision/bodies")
 
 list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/kernel/swig)
-# TMP fix 
-if(${CMAKE_VERSION} VERSION_LESS "3.13")
-  # Notice that with last cmake versions, it's possible to propagate includes to swig in a better way.
-  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/numerics/src/tools")
-  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIR}")
-endif()
 
+find_python_module(h5py)
+  
 if(WITH_OCE)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "mechanics/occ")
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
-    set_property(SOURCE occ.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
-  else() #USE_TARGET_INCLUDE property is not available in old cmake versions.
-    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${OCE_INCLUDE_DIRS}")
-    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/mechanics/src/occ")
-  endif()
+  set_property(SOURCE occ.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
 endif()
 
-if(WITH_BULLET)
+if(SICONOS_HAS_BULLET)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "mechanics/collision/bullet")
   # list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_BULLET") # Do we really need this??
 
@@ -46,12 +37,7 @@ if(WITH_BULLET)
     list(APPEND ${COMPONENT}_SWIG_DEFS "-DBT_USE_DOUBLE_PRECISION")
   endif()
 
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
-    set_property(SOURCE bullet.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
-  else() #USE_TARGET_INCLUDE property is not available in old cmake versions.
-    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${BULLET_INCLUDE_DIR}")
-    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet")
-  endif()
+  set_property(SOURCE bullet.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
 
 endif()
 

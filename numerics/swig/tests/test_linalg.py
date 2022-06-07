@@ -2,12 +2,9 @@ import siconos.numerics as sn
 import scipy.sparse
 import numpy as np
 import copy
-from siconos.tests_setup import working_dir
 
 
-data_dir = working_dir + '/data/'
-
-dbl_eps = np.finfo(np.float).eps
+dbl_eps = np.finfo(np.float64).eps
 
 
 def check_size(sa, sb):
@@ -16,7 +13,7 @@ def check_size(sa, sb):
 
 
 def compare_with_SBM(sbmat, mat):
-    print('in compare_with_SBM')
+    print("in compare_with_SBM")
     if scipy.sparse.issparse(mat):
         mdense = mat.todense()
 
@@ -28,7 +25,7 @@ def compare_with_SBM(sbmat, mat):
 
 
 def SBM_tests(sbm):
-    print('in SBM_tests')
+    print("in SBM_tests")
     # SBM_to_dense
     # SBM_to_sparse
     # SBM_from_csparse
@@ -53,16 +50,16 @@ def SBM_tests(sbm):
 
 
 def dense_tests(mdense):
-    print('in dense_tests')
+    print("in dense_tests")
     nm = sn.NumericsMatrix(mdense)
     check_size((nm.size0, nm.size1), mdense.shape)
     assert nm is not None
 
 
 def sparse_tests(spm):
-    print('in sparse_tests')
-#    sp_formats = ('bsr', 'coo', 'csc', 'csr', 'dia', 'dok', 'lil')
-    sp_formats = ('bsr', 'coo', 'csc', 'csr', 'dia', 'lil')
+    print("in sparse_tests")
+    #    sp_formats = ('bsr', 'coo', 'csc', 'csr', 'dia', 'dok', 'lil')
+    sp_formats = ("bsr", "coo", "csc", "csr", "dia", "lil")
     spm.check_format(True)
 
     spm_shape = spm.shape
@@ -71,11 +68,11 @@ def sparse_tests(spm):
     check_size((nm.size0, nm.size1), spm_shape)
 
     for fmt in sp_formats:
-        func = getattr(scipy.sparse, fmt + '_matrix')
+        func = getattr(scipy.sparse, fmt + "_matrix")
         mm = func(spm)
-        if fmt in ('csc', 'csr'):
+        if fmt in ("csc", "csr"):
             mm.check_format(True)
-        elif fmt == 'coo':
+        elif fmt == "coo":
             mm._check()
 
         nm = sn.NumericsMatrix(mm)
@@ -84,32 +81,32 @@ def sparse_tests(spm):
         t1 = sn.NM_triplet(nm)
         t1._check()
         check_size(t1.shape, spm_shape)
-        assert ((spm - t1).nnz == 0)
+        assert (spm - t1).nnz == 0
 
         t2 = sn.NM_csc(nm)
         t2.check_format(True)
         check_size(t2.shape, spm_shape)
-        assert ((spm - t2).nnz == 0)
+        assert (spm - t2).nnz == 0
 
         t2bis = sn.NM_csc_trans(nm)
         t2bis.check_format(True)
         check_size(t2bis.T.shape, spm_shape)
-        assert ((spm.T - t2bis).nnz == 0)
+        assert (spm.T - t2bis).nnz == 0
 
         t3 = sn.NM_triplet(mm)
         t3._check()
         check_size(t3.shape, spm_shape)
-        assert ((spm - t3).nnz == 0)
+        assert (spm - t3).nnz == 0
 
         t4 = sn.NM_csc(mm)
         t4.check_format(True)
         check_size(t4.shape, spm_shape)
-        assert ((spm - t4).nnz == 0)
+        assert (spm - t4).nnz == 0
 
         t4bis = sn.NM_csc_trans(mm)
         t4bis.check_format(True)
         check_size(t4bis.T.shape, spm_shape)
-        assert ((spm.T - t4bis).nnz == 0)
+        assert (spm.T - t4bis).nnz == 0
 
 
 def test_create():
@@ -121,28 +118,28 @@ def test_create():
     fcp.M = Min
     fcp.H = Hin
 
-    assert np.max(Min - fcp.M) == 0.
-    assert np.max(Hin - fcp.H) == 0.
+    assert np.max(Min - fcp.M) == 0.0
+    assert np.max(Hin - fcp.H) == 0.0
 
-    sp_formats = ('bsr', 'coo', 'csc', 'csr', 'dia', 'lil')
+    sp_formats = ("bsr", "coo", "csc", "csr", "dia", "lil")
 
     for fmt in sp_formats:
-        func = getattr(scipy.sparse, fmt + '_matrix')
+        func = getattr(scipy.sparse, fmt + "_matrix")
         mm = func(Min)
         hh = func(Hin)
 
         fcp.M = mm
         fcp.H = hh
 
-        assert np.max(Min - fcp.M.todense()) == 0.
-        assert np.max(Hin - fcp.H.todense()) == 0.
+        assert np.max(Min - fcp.M.todense()) == 0.0
+        assert np.max(Hin - fcp.H.todense()) == 0.0
 
 
-def test_convert():
+def test_convert(datafile):
 
     mat = []
 
-    fcp = sn.globalFrictionContact_new_from_filename(data_dir + 'GFC3D_TwoRods1.dat')
+    fcp = sn.globalFrictionContact_new_from_filename(datafile("GFC3D_TwoRods1.dat"))
 
     mat.append(fcp.M)
     mat.append(fcp.H)
@@ -151,19 +148,22 @@ def test_convert():
 
     try:
         # cheap test ...
-        data_fclib = ('LMGC_GFC3D_CubeH8.hdf5', 'LMGC_GlobalFrictionContactProblem00046.hdf5')
+        data_fclib = (
+            datafile("LMGC_GFC3D_CubeH8.hdf5"),
+            datafile("LMGC_GlobalFrictionContactProblem00046.hdf5"),
+        )
 
         for d in data_fclib:
-            fcp = sn.globalFrictionContact_fclib_read(data_dir + d)
+            fcp = sn.globalFrictionContact_fclib_read(d)
             hacklist.append(fcp)
 
             # Ho LMGC
             Mdense = fcp.M.todense()
-            Mdense[np.nonzero(Mdense <= 100*dbl_eps)] = 0.
+            Mdense[np.nonzero(Mdense <= 100 * dbl_eps)] = 0.0
             MM = scipy.sparse.coo_matrix(Mdense)
 
             Hdense = fcp.H.todense()
-            Hdense[np.nonzero(Hdense <= 100*dbl_eps)] = 0.
+            Hdense[np.nonzero(Hdense <= 100 * dbl_eps)] = 0.0
             HH = scipy.sparse.coo_matrix(Hdense)
 
             mat.append(MM)

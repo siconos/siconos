@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,14 +145,14 @@ public:
   /** allocate (if needed)  and compute rhs and its jacobian.
    * \param t time of initialization
    */
-  void initRhs(double t) ;
+  void initRhs(double t) override;
 
   /** Compute \f$F(v,q,t,z)\f$
    *  \param time the current time
    *  \param q generalized coordinates
    *  \param velocity time derivative of the  generalized coordinates
    */
-  void computeForces(double time, SP::SiconosVector q, SP::SiconosVector velocity);
+  void computeForces(double time, SP::SiconosVector q, SP::SiconosVector velocity) override;
 
   ///@}
 
@@ -160,14 +160,14 @@ public:
   //@{
 
   /**\return true if the Dynamical system is linear. */
-  bool isLinear()
+  bool isLinear() override
   {
     return true;
   }
 
   /** print the data of the dynamical system on the standard output
    */
-  void display(bool brief = true) const;
+  void display(bool brief = true) const override;
 
   ///@}
   ACCEPT_STD_VISITORS();

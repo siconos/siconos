@@ -245,8 +245,8 @@ static void family_of_F(const double * const x, const double * const z, const un
   float_type gamx, gamz, gamf, w, w2;
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
-    gamx = gammal(x+i, dimension);
-    gamz = gammal(z+i, dimension);
+    gamx = ld_gammal(x+i, dimension);
+    gamz = ld_gammal(z+i, dimension);
     w = sqrtl(gamz/gamx);
 
     wf[(int)(i/dimension)] = w;
@@ -259,7 +259,7 @@ static void family_of_F(const double * const x, const double * const z, const un
       f[i+j] = z[i+j]/w - w*x[i+j];
     }
 
-    gamf = gammal(f+i, dimension);
+    gamf = ld_gammal(f+i, dimension);
     for(size_t j = 0; j < dimension; ++j)
     {
       f[i+j] = f[i+j]/gamf;
@@ -684,6 +684,24 @@ static  void  PinvTx(const double * const f, const double * const g, const float
       out[i*d5+k+2] += coef*(coef_tmp*ddot_1*g[i*dim+k]+ddot_2*othor[k-1]);
     }
   }
+  // int hasNotConverged = 1;
+  // unsigned int iteration = 0;
+  // double pinfeas = 1e300;
+  // double dinfeas = 1e300;
+  // double complem_1 = 1e300;
+  // double complem_2 = 1e300;
+  // double gapVal = 1e300;
+  // // double dualgap = 1e300;
+  // double relgap = 1e300;
+  // double error_array[6];
+  // error_array[0] = pinfeas;
+  // error_array[1] = dinfeas;
+  // error_array[2] = relgap;
+  // // error_array[3] = complem_p;
+  // // error_array[4] = complem;
+  // error_array[3] = complem_1; // (t, u_bar) o (r0, r_bar)
+  // error_array[4] = complem_2; // (t', u_tilde) o (r0, r_tilde)
+  // // error_array[5] = relgap;
 
   free(othor);
 }
@@ -1656,9 +1674,9 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
     /* Primal residual = velocity - H * globalVelocity - w */
-    primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas);
+    primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, 1e-10);
     /* Dual residual = M*globalVelocity - H'*reaction + f */
-    dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas);
+    dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, 1e-10);
 
 
 
@@ -1913,7 +1931,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
           NM_insert(Jac, NM_transpose(PinvH), 0, m);
           NM_insert(Jac, PinvH, m, 0);
           NM_insert(Jac, NM_eye(nd), m, m);
-
 
 
           NM_clear(PinvH); free(PinvH);
@@ -2189,6 +2206,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
       }
 
     }
+
 
 
 
@@ -3740,13 +3758,14 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
+
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 0;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_F;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REDUCED_SYSTEM] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] = 0;
 

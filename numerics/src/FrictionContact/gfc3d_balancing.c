@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,6 +185,7 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
   NumericsMatrix *H = problem->H;
 
 
+
   data->original_problem = problem;
 
   double alpha_r=0.0, beta_r=0.0;
@@ -237,10 +238,13 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
     NM_insert(MHHT, problem->H, 0, n);
     NumericsMatrix *HT =  NM_transpose(H);
     NM_insert(MHHT, HT, n, 0);
-
     //NM_display(MHHT);
     BalancingMatrices * B_for_MHHT = NM_BalancingMatrices_new(MHHT);
     NM_compute_balancing_matrices(MHHT, 1e-2, 5, B_for_MHHT);
+
+    MHHT = NM_free(MHHT);
+    HT = NM_free(HT);
+
     DEBUG_EXPR(NM_display(B_for_MHHT->D1););
     DEBUG_EXPR(NM_display(B_for_MHHT->D2););
 
@@ -264,7 +268,7 @@ GlobalFrictionContactProblem*  gfc3d_balancing_problem(GlobalFrictionContactProb
       NM_triplet(data->B_for_H->D2)->x[i] = NM_triplet(B_for_MHHT->D2)->x[i+n]; //D2H
     }
 
-
+    B_for_MHHT = NM_BalancingMatrices_free(B_for_MHHT);
 
     /****** balanced problem          ***************************************/
     gfc3d_balancing_MHHT(rescaled_problem, data->B_for_M, data->B_for_H);

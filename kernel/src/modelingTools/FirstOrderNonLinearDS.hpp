@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,7 +147,7 @@ protected:
   FirstOrderNonLinearDS(): DynamicalSystem() {};
 
   /** Reset the PluggedObjects */
-  virtual void _zeroPlugin();
+  void _zeroPlugin() override;
 
 
 public:
@@ -182,30 +182,33 @@ public:
   /** allocate (if needed)  and compute rhs and its jacobian.
    * \param time of initialization
    */
-  virtual void initRhs(double time);
+  virtual void initRhs(double time) override;
 
   /** set nonsmooth input to zero
    *  \param level input-level to be initialized.
    */
-  void initializeNonSmoothInput(unsigned int level) ;
+  void initializeNonSmoothInput(unsigned int level) override;
+
+  /** reset the state to the initial state */
+  void resetToInitialState() override;
 
   /** update right-hand side for the current state
    *  \param time of interest
    */
-  virtual void computeRhs(double time);
+  virtual void computeRhs(double time) override;
 
   /** update \f$\nabla_x rhs\f$ for the current state
    *  \param time of interest
    */
-  void computeJacobianRhsx(double time);
+  void computeJacobianRhsx(double time) override;
 
   /** reset non-smooth part of the rhs (i.e. r), for all 'levels' */
-  virtual void resetAllNonSmoothParts();
+  virtual void resetAllNonSmoothParts() override;
 
   /** set nonsmooth part of the rhs (i.e. r) to zero for a given level
    * \param level
    */
-  virtual void resetNonSmoothPart(unsigned int level);
+  virtual void resetNonSmoothPart(unsigned int level) override;
 
   ///@}
 
@@ -299,12 +302,12 @@ public:
       vectors in memory and reset all to zero.
       *  \param steps the size of the SiconosMemory (i)
       */
-  void initMemory(unsigned int steps);
+  void initMemory(unsigned int steps) override;
 
   /** push the current values of x and r in memory (index 0 of memory is the last inserted vector)
    *  xMemory and rMemory,
    */
-  void swapInMemory();
+  void swapInMemory() override;
 
   //@}
 
@@ -315,7 +318,7 @@ public:
   /** Call all plugged-function to initialize plugged-object values
       \param time value
   */
-  virtual void updatePlugins(double time);
+  virtual void updatePlugins(double time) override;
 
   // --- setters for functions to compute plugins ---
 
@@ -409,7 +412,7 @@ public:
 
   /** print the data of the dynamical system on the standard output
    */
-  void display(bool brief = true) const;
+  void display(bool brief = true) const override;
   ///@}
 
 

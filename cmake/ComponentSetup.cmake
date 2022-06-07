@@ -166,13 +166,8 @@ function(siconos_component_install_setup COMPONENT)
   # Setup the list of all headers to be installed.
   foreach(dir IN LISTS ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES)
 
-    if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
-      file(GLOB _headers CONFIGURE_DEPENDS
-        LIST_DIRECTORIES false ${_FILE} ${dir}/*.h ${dir}/*.hpp)
-    else()
-      file(GLOB _headers
-        LIST_DIRECTORIES false ${_FILE} ${_FILE} ${dir}/*.h ${dir}/*.hpp)
-    endif()
+    file(GLOB _headers CONFIGURE_DEPENDS
+      LIST_DIRECTORIES false ${_FILE} ${dir}/*.h ${dir}/*.hpp)
     list(APPEND _all_headers ${_headers})
     
     # And each include path in install interface must obviously be installed ...

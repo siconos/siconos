@@ -144,41 +144,36 @@ if(Threads_FOUND)
   target_link_libraries(numerics PRIVATE Threads::Threads)
 endif()
 
+include(FetchContent)
+
 # - Fclib - 
 if(WITH_FCLIB)
-  find_package(FCLIB 3.0.0 CONFIG)
-  if(NOT ${FCLIB_FOUND})
-    # if(FCLIB_NOT_FOUND)
-    include(FetchContent)
-    #message(FATAL_ERROR "Can not find fclib package. Try to set FCLIB_ROOT.")
-    message(STATUS "FCLIB can not be found locally. Try to download and install it from github repository.")
-  
+  # Two ways:
+  # - User asks explicitely for a specific (already installed) version of fclib
+  #   by providing fclib_ROOT on cmake command line
+  # - else: use fetchcontent to download and install fclib as a siconos part
+  message(STATUS "Start setup for fclib ... ")
+  if(FCLIB_ROOT)
+    find_package(FCLIB 3.0.0 CONFIG REQUIRED)
+  else()
+    message(STATUS "FCLIB will be downloaded from github repository and installed as a siconos component")
     FetchContent_Declare(fclib
-    #GIT_REPOSITORY    https://github.com/fperignon/fclib.git
-   
-       GIT_REPOSITORY    https://github.com/FrictionalContactLibrary/fclib.git
-       GIT_TAG           origin/master
-      #     #CMAKE_ARGS FCLIB_HEADER_ONLY=OFF
+      GIT_REPOSITORY    https://github.com/FrictionalContactLibrary/fclib.git
+      GIT_TAG           origin/master
+      GIT_SHALLOW TRUE
+      UPDATE_DISCONNECTED TRUE # Do not update git repo at each run
+      # CMAKE_ARGS FCLIB_HEADER_ONLY=OFF
       LOG_CONFIGURE TRUE
       LOG_BUILD TRUE
       #     LOG_INSTALL TRUE
-    )
-    FetchContent_GetProperties(fclib)
-    if(NOT fclib_POPULATED)
-      # Fetch the content using previously declared details
-      FetchContent_Populate(fclib)
-      # Bring the populated content into the build
-      add_subdirectory(${fclib_SOURCE_DIR} ${fclib_BINARY_DIR})
-      add_library(FCLIB::fclib ALIAS fclib)
-      set(FCLIB_ROOT "${CMAKE_INSTALL_PREFIX}" CACHE PATH "fclib install path")
-    endif()
-
-    #FetchContent_MakeAvailable(fclib)
- 
+      )
+    FetchContent_MakeAvailable(fclib)
+    add_library(FCLIB::fclib ALIAS fclib)
   endif()
 
   target_link_libraries(numerics PUBLIC FCLIB::fclib)
- 
+  message(STATUS "End setup for fclib ... ")
+
 endif()
 
 # - SuiteSparse -

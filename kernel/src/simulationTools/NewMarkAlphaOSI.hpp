@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file
   NewMark Alpha Scheme Time-Integrator for Dynamical Systems
 */
@@ -26,18 +26,20 @@
 /**  NewMarkAlpha Scheme Time-Integrator for Dynamical Systems
  *
  *
- * NewMarkAlphaOSI is used to solve constrained dynamical systems represented by index-3 DAE
+ * NewMarkAlphaOSI is used to solve constrained dynamical systems represented by
+ * index-3 DAE
  *
- * NewMarkAlphaOSI is instantiated with values of beta, gamma, alpha_m, alpha_f and the list of concerned
- * dynamical systems. Each DynamicalSystem is associated to a SiconosMatrix named "W"
+ * NewMarkAlphaOSI is instantiated with values of beta, gamma, alpha_m, alpha_f
+ * and the list of concerned dynamical systems. Each DynamicalSystem is
+ * associated to a SiconosMatrix named "W"
  *
- * W matrices are initialized and computed in initializeIterationMatrixW and computeW.
+ * W matrices are initialized and computed in initializeIterationMatrixW and
+ * computeW.
  */
-class NewMarkAlphaOSI : public OneStepIntegrator
-{
+class NewMarkAlphaOSI : public OneStepIntegrator {
 protected:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(NewMarkAlphaOSI);
   /** Parameters of the numerical scheme:  beta, gamma, alpha_m, alpha_f */
   double _beta, _gamma, _alpha_m, _alpha_f;
@@ -53,28 +55,39 @@ protected:
 
   /**
    * Default constructor
-  */
-  NewMarkAlphaOSI() {};
+   */
+  NewMarkAlphaOSI(){};
 
 public:
+  enum NewMarkAlphaOSI_ds_workVector_id {
+    RESIDU_FREE,
+    FREE,
+    ACCE_LIKE,
+    ACCE_MEMORY,
+    WORK_LENGTH
+  };
 
-  enum NewMarkAlphaOSI_ds_workVector_id {RESIDU_FREE, FREE, ACCE_LIKE,
-					 ACCE_MEMORY, WORK_LENGTH};
+  enum NewMarkAlphaOSI_interaction_workVector_id {
+    OSNSP_RHS,
+    WORK_INTERACTION_LENGTH
+  };
 
-  enum NewMarkAlphaOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
+  enum NewMarkAlphaOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
 
-  enum NewMarkAlphaOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
-
-  enum NewMarkAlphaOSI_interaction_workMat_id{DENSE_OUTPUT_COEFFICIENTS, MAT_WORK_LENGTH};
+  enum NewMarkAlphaOSI_interaction_workMat_id {
+    DENSE_OUTPUT_COEFFICIENTS,
+    MAT_WORK_LENGTH
+  };
 
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
-  * \param beta double
-  * \param gamma double
-  * \param alpha_m double
-  * \param alpha_f double
-  * \param flag true of working at velocity level
-  */
-  NewMarkAlphaOSI(double beta, double gamma, double alpha_m, double alpha_f, bool flag);
+   * \param beta double
+   * \param gamma double
+   * \param alpha_m double
+   * \param alpha_f double
+   * \param flag true of working at velocity level
+   */
+  NewMarkAlphaOSI(double beta, double gamma, double alpha_m, double alpha_f,
+                  bool flag);
 
   /** constructor with only the parameter rho_infty
    * \param rho_infty double
@@ -84,47 +97,34 @@ public:
 
   /** destructor
    */
-  virtual ~NewMarkAlphaOSI() {};
-
+  virtual ~NewMarkAlphaOSI(){};
 
   // --- GETTERS/SETTERS ---
 
   /** set value to the parameter beta
    * \param beta value of beta
    */
-  inline void setBeta(double beta)
-  {
-    _beta = beta;
-  };
+  inline void setBeta(double beta) { _beta = beta; };
 
   /** set value to the parameter gamma
    * \param value_gamma double : value of gamma
    */
-  inline void setGamma(double value_gamma)
-  {
-    _gamma = value_gamma;
-  };
+  inline void setGamma(double value_gamma) { _gamma = value_gamma; };
 
   /** set value to the parameter alpha_m
    * \param value_alpha_m double : value of alpha_m
    */
 
-  inline void setAlpha_m(double value_alpha_m)
-  {
-    _alpha_m = value_alpha_m;
-  };
+  inline void setAlpha_m(double value_alpha_m) { _alpha_m = value_alpha_m; };
 
   /** set value to the parameter alpha_f
    * \param value_alpha_f double : value of alpha_f
    */
 
-  inline void setAlpha_f(double value_alpha_f)
-  {
-    _alpha_f = value_alpha_f;
-  };
+  inline void setAlpha_f(double value_alpha_f) { _alpha_f = value_alpha_f; };
 
-  /** set values to the parameters beta, gamma, alpha_f, alpha_m from the value of rho_infty
-   * \param rho_infty double : value of rho_infty
+  /** set values to the parameters beta, gamma, alpha_f, alpha_m from the value
+   * of rho_infty \param rho_infty double : value of rho_infty
    */
 
   inline void setParametersFromRho_infty(double rho_infty)
@@ -138,58 +138,37 @@ public:
   /** get value of beta
    * \return double
    */
-  inline double getBeta()
-  {
-    return _beta;
-  };
+  inline double getBeta() { return _beta; };
 
   /** get value of gamma
    * \return double
    */
-  inline double getGamma()
-  {
-    return _gamma;
-  };
+  inline double getGamma() { return _gamma; };
 
   /** get value of alpha_m
    * \return double
    */
-  inline double getAlpha_m()
-  {
-    return _alpha_m;
-  };
+  inline double getAlpha_m() { return _alpha_m; };
 
   /** get value of alpha_f
    * \return double
    */
 
-  inline double getAlpha_f()
-  {
-    return _alpha_f;
-  };
+  inline double getAlpha_f() { return _alpha_f; };
   /** get the order of the polynomial for dense output
    * \return unsigned int
    */
-  inline unsigned int getOrderDenseOutput()
-  {
-    return _orderDenseOutput;
-  }
+  inline unsigned int getOrderDenseOutput() { return _orderDenseOutput; }
 
   /** set the flag _IsVelocityLevel
    * \param flag bool
    */
-  inline void setFlagVelocityLevel(bool flag)
-  {
-    _IsVelocityLevel = flag;
-  }
+  inline void setFlagVelocityLevel(bool flag) { _IsVelocityLevel = flag; }
 
   /** get the flag _IsVelocityLevel
    * \return bool
    */
-  inline bool getFlagVelocityLevel()
-  {
-    return _IsVelocityLevel;
-  }
+  inline bool getFlagVelocityLevel() { return _IsVelocityLevel; }
 
   /** get matrix W
    * \param ds SP::DynamicalSystem DynamicalSystem concerned
@@ -204,30 +183,30 @@ public:
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** initialize W matrix
-    *  \param ds a pointer to DynamicalSystem
-    */
+   *  \param ds a pointer to DynamicalSystem
+   */
   void initializeIterationMatrixW(SP::DynamicalSystem ds);
 
   /** compute W matrix
    *  \param ds a pointer to DynamicalSystem
    *  \param W the result in W
    */
-  void computeW(SP::DynamicalSystem ds,  SiconosMatrix& W);
+  void computeW(SP::DynamicalSystem ds, SiconosMatrix &W);
 
   /** compute the residual of dynamical equation
    *\return double: maximum residu over all DSs
    */
-  double computeResidu();
+  double computeResidu() override;
 
   /** compute the free state of the discretized dynamical system */
-  void computeFreeState();
+  void computeFreeState() override;
 
-  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex_inter of the interaction graph
-   * \param osnsp pointer to OneStepNSProblem
+  /** integrates the Interaction linked to this integrator, without taking
+   * non-smooth effects into account \param vertex_inter of the interaction
+   * graph \param osnsp pointer to OneStepNSProblem
    */
-  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter,
-                                 OneStepNSProblem* osnsp);
+  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
+                         OneStepNSProblem *osnsp) override;
 
   /** initialize */
   //  void initialize(Model& m);
@@ -237,7 +216,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -246,23 +225,24 @@ public:
    * \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(Interaction &inter,
-		     InteractionProperties& interProp,
-		     DynamicalSystemsGraph & DSG);
+                                           InteractionProperties &interProp,
+                                           DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */
-  unsigned int numberOfIndexSets() const {return 3;};
-  
+  unsigned int numberOfIndexSets() const override { return 3; };
+
   /** prepare for Newton Iteration
    * \param time
    */
-  void prepareNewtonIteration(double time);
+  void prepareNewtonIteration(double time) override;
 
   /** predict first values for the Newton iteration */
   void prediction();
 
-  /** correct state of all levels of Dynamical Systems after each Newton iteration
+  /** correct state of all levels of Dynamical Systems after each Newton
+   * iteration
    */
   void correction();
 
@@ -272,12 +252,12 @@ public:
    *  \param tout double: tout, real end time
    *  \param flag useless for NewMarkAlphaOSI
    */
-  void integrate(double& tinit, double& tend, double& tout, int& flag);
+  void integrate(double &tinit, double &tend, double &tout, int &flag) override;
 
   /** updates the state of the Dynamical Systems
    *  \param level the level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int level);
+  void updateState(const unsigned int level) override;
 
   /** Compute coefficients of the polynomial of the dense output for a given DS
    *  \param ds SP::DynamicalSystem, ds concerned
@@ -294,15 +274,9 @@ public:
 
   /** Displays the data of the NewMarkAlpha's integrator
    */
-  void display();
-
-
-
-
-
+  void display() override;
 
   ACCEPT_STD_VISITORS();
-
 };
 
 #endif // NEWMARKALPHAOSI_H

@@ -4,10 +4,10 @@
 
 # wrap - Set extra dependencies
 set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS
-  ${SICONOS_SWIG_SRC_DIRS}/solverOptions.i
-  ${SICONOS_SWIG_SRC_DIRS}/start.i
-  ${SICONOS_SWIG_SRC_DIRS}/end.i
-  ${SICONOS_SWIG_SRC_DIRS}/numpy.i)
+  ${SICONOS_SWIG_SOURCE_DIR}/solverOptions.i
+  ${SICONOS_SWIG_SOURCE_DIR}/start.i
+  ${SICONOS_SWIG_SOURCE_DIR}/end.i
+  ${SICONOS_SWIG_SOURCE_DIR}/numpy.i)
 
 # List of modules to be built in the python bindings
 set(${COMPONENT}_PYTHON_MODULES "./${COMPONENT}")
@@ -51,8 +51,8 @@ include(swig_python_tools)
 
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
-target_link_libraries(_numerics $<BUILD_INTERFACE:externals>)
-
+target_link_libraries(_numerics PRIVATE $<BUILD_INTERFACE:externals>)
+target_include_directories(_numerics PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 if(WITH_SERIALIZATION)
   target_include_directories(_numerics PRIVATE ${CMAKE_SOURCE_DIR}/io/src/serialization)
 endif()
@@ -60,7 +60,7 @@ endif()
 # If WITH_SYSTEM_SUITESPARSE, suite sparse is an imported target
 # that must be taken into account by swig process.
 if(WITH_SYSTEM_SUITESPARSE)
-  target_link_libraries(_numerics $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
+  target_link_libraries(_numerics PRIVATE $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
 endif()
 
 
@@ -77,7 +77,7 @@ if(WITH_MPI)
 endif()
 
 
-if(WITH_${COMPONENT}_TESTING)
+if(WITH_TESTING)
   if(WITH_MUMPS AND WITH_MPI4PY)
     message(STATUS "add test python mumps + mpi4py")
   else()

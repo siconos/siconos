@@ -72,19 +72,22 @@ endif()
 if(NOT CTEST_BINARY_DIRECTORY)
   set(CTEST_BINARY_DIRECTORY .)
 endif()
-
-# Install dir (used as CMAKE_INSTALL_PREFIX)
-if(NOT SICONOS_INSTALL_DIR)
-  set(SICONOS_INSTALL_DIR /home/install-siconos/)
-endif()
 # Build name (for cdash)
 if(NOT CTEST_BUILD_NAME)
   set_cdash_build_name()
 endif()
 
+# Install dir (used as CMAKE_INSTALL_PREFIX)
+if(NOT SICONOS_INSTALL_DIR)
+  set(SICONOS_INSTALL_DIR /home/install-siconos/)
+endif()
+
+
 if(USER_FILE)
   list(APPEND SICONOS_CMAKE_OPTIONS -DUSER_OPTIONS_FILE=${USER_FILE})
 endif()
+
+
 
 list(APPEND SICONOS_CMAKE_OPTIONS -DCMAKE_INSTALL_PREFIX=${SICONOS_INSTALL_DIR})
 list(APPEND SICONOS_CMAKE_OPTIONS -DWITH_GIT=ON) # required to generate siconos-commit.txt to tag cdash build in the examples.

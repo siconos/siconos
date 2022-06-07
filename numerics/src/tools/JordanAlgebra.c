@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -578,9 +578,9 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = 1/sqrtl(x[j]+normx)/2;
     l2 = 1/sqrtl(x[j]-normx)/2;
-    /* if (isnan(l2)) */
+    /* if (x[j]-normx<1e-14) */
     /*   { */
-    /* 	printf("Jsqrtinv: %e %Le %Le\n",x[j], normx, x[j]*(1-x[j]/normx)); */
+    /* 	printf("Jsqrtinv: %e %Le %Le\n",x[j], x[j]+normx, x[j]-normx); */
     /* 	getchar(); */
     /*   } */
     out[j] = l1+l2;
@@ -588,7 +588,12 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
   }
 }
 
-/* PA: Return the Nesterov-Todd vector */
+/* Computation of the Nesterov-Todd vector 
+   T = 0 -> p 
+   T = 1 -> p^{-1}
+   T = 2 -> p^2
+   T = 3 -> p^{-2}
+*/
 void Nesterov_Todd_vector(short T, const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * p)
 {
   double * a = (double*)calloc(vecSize, sizeof(double));
@@ -614,9 +619,14 @@ void Nesterov_Todd_vector(short T, const double * const x, const double * const 
     Jinv(a, vecSize, varsCount, p);   // NT-vector p-square
     break;
   }
+  case 3:
+  {
+    NV_copy(a, vecSize, p); 
+    break;
+  }
   default:
   {
-    printf("error in Nesterov_Todd_vector: T must be 0, 1 or 2\n");
+    printf("error in Nesterov_Todd_vector: T must be 0, 1, 2 or 3\n");
     break;
   }
   }
@@ -687,6 +697,12 @@ void QNTpinvz(const double * const x, const double * const y,const double * cons
   Qx05y(x, b, vecSize, varsCount, a);
   Qx05y(a, z, vecSize, varsCount, out);
 
+  /* alternative */
+  /* Qx05y(y, x, vecSize, varsCount,a); */
+  /* Jsqrt(a, vecSize, varsCount, b); */
+  /* Qx50y(y, b, vecSize, varsCount, a); */
+  /* Qx05y(a, z, vecSize, varsCount, out); */
+
   free(a);
   free(b);
 }
@@ -746,7 +762,7 @@ NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize, const
 }
 
 /* Returns a long double as the square root of determinant of a vector related to the Jordan product */
-float_type gammal(const double * const x, const size_t dimension)
+float_type ld_gammal(const double * const x, const size_t dimension)
 {
   float_type nxb, detx;
   nxb = dnrm2l(dimension-1, x+1);
@@ -775,15 +791,15 @@ NumericsMatrix* NTmat(const double* const x, const double* const z, const unsign
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
-    gamx = gammal(x+i, dimension);
-    gamz = gammal(z+i, dimension);
+    gamx = ld_gammal(x+i, dimension);
+    gamz = ld_gammal(z+i, dimension);
     w = sqrtl(gamz/gamx);
     t[0] = z[i]/w + w*x[i];
     for(unsigned int j = 1; j < dimension; ++j)
     {
       t[j] = z[i+j]/w - w*x[i+j];
     }
-    gamt = gammal(t, dimension);
+    gamt = ld_gammal(t, dimension);
     for(unsigned int j = 0; j < dimension; ++j)
     {
       t[j] = t[j]/gamt;
@@ -827,15 +843,15 @@ NumericsMatrix* NTmatinv(const double* const x, const double* const z, const uns
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
-    gamx = gammal(x+i, dimension);
-    gamz = gammal(z+i, dimension);
+    gamx = ld_gammal(x+i, dimension);
+    gamz = ld_gammal(z+i, dimension);
     w = sqrtl(gamz/gamx);
     t[0] = z[i]/w + w*x[i];
     for(unsigned int j = 1; j < dimension; ++j)
     {
       t[j] = z[i+j]/w - w*x[i+j];
     }
-    gamt = gammal(t, dimension);
+    gamt = ld_gammal(t, dimension);
     for(unsigned int j = 0; j < dimension; ++j)
     {
       t[j] = t[j]/gamt;
@@ -879,8 +895,8 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const uns
 
   for(unsigned int i = 0; i < vecSize; i += dimension)
   {
-    gamx = gammal(x+i, dimension);
-    gamz = gammal(z+i, dimension);
+    gamx = ld_gammal(x+i, dimension);
+    gamz = ld_gammal(z+i, dimension);
     w2 = gamz/gamx;
     w = sqrtl(w2);
     t[0] = z[i]/w + w*x[i];
@@ -888,7 +904,7 @@ NumericsMatrix* NTmatsqr(const double* const x, const double* const z, const uns
     {
       t[j] = z[i+j]/w - w*x[i+j];
     }
-    gamt = gammal(t, dimension);
+    gamt = ld_gammal(t, dimension);
     for(unsigned int j = 0; j < dimension; ++j)
     {
       t[j] = t[j]/gamt;

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,6 @@
 #include <Interaction.hpp>
 #include <BlockVector.hpp>
 
-Contact2dR::Contact2dR()
-  : Lagrangian2d2DR()
-{
-}
 
 // void Contact2dR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
 // {
@@ -67,7 +63,7 @@ void Contact2dR::updateContactPointsInAbsoluteFrame(const SiconosVector& pos1,
                                                     const SiconosVector& pos2,
                                                     const SiconosVector& normal)
 {
-  // Copy relative positions
+  // Copy positions
   *_Pc1 = pos1;
   *_Pc2 = pos2;
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,8 +307,8 @@ public:
   SP::SimpleMatrix getOSIMatrix(OneStepIntegrator& osi, SP::DynamicalSystem ds);
 
   /* visitors hook */
-  ACCEPT_STD_VISITORS();
-
+  VIRTUAL_ACCEPT_VISITORS(OneStepNSProblem);
+  
 };
 
 #endif // ONESTEPNSPROBLEM_H

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file ComplementarityConditionNSL.hpp
 
 */
@@ -26,31 +26,28 @@
 /** Complementarity NonSmoothLaw
  *
  **/
-class ComplementarityConditionNSL : public NonSmoothLaw
-{
+class ComplementarityConditionNSL : public NonSmoothLaw {
 private:
   /** serialization hooks
-  */
+   */
   ACCEPT_SERIALIZATION(ComplementarityConditionNSL);
 
   /** default constructor
    */
-  ComplementarityConditionNSL() {};
+  ComplementarityConditionNSL(){};
 
 public:
   /** basic constructor
-  *  \param size of the non smooth law
-  */
+   *  \param size of the non smooth law
+   */
   ComplementarityConditionNSL(unsigned int size);
-
 
   /** Destructor */
   ~ComplementarityConditionNSL();
 
-
   /** print the data to the screen
-  */
-  inline void display()const {};
+   */
+  inline void display() const override{};
 
   /** Visitors hook
    */

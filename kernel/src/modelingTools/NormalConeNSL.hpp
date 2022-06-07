@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,10 +96,10 @@ public:
   /** check the ns law to see if it is verified
   *  \return true if the NS Law is verified, false otherwise
   */
-  virtual bool isVerified() const;
+  bool isVerified() const override;;
 
   /** print the data to the screen */
-  virtual void display() const;
+  void display() const override;;
 
   /** visitors hook
    */

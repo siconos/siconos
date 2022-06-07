@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ typedef struct
 
 
 // length of iparam/dparam arrays in solver options.
-#define OPTIONS_PARAM_SIZE 20
+#define OPTIONS_PARAM_SIZE 30
 
 /** \struct SolverOptions_ SolverOptions.h
     Structure used to send options (name, parameters and so on) to a specific solver (mainly from Kernel to Numerics).

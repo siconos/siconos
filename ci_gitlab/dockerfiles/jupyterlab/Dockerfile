@@ -7,24 +7,13 @@ RUN  apt update && apt install -y -qq \
         gfortran \
         g++ \
         libgfortran-10-dev \
-        libboost-dev \
-        libboost-filesystem-dev \
-        libboost-timer-dev \
-        libboost-chrono-dev \
-        libgmp-dev \
-        libopenblas-dev \
-        liblapacke-dev \
-        lp-solve \
-        liblpsolve55-dev \
-        libhdf5-dev \
-        libboost-serialization-dev \
-        libbullet-dev \
-        libfreetype6-dev \
-        freeglut3-dev \
-        swig \
         doxygen \
-        libcppunit-dev \
-        libbullet-dev \
-        libfreetype6-dev \
-        freeglut3-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
-RUN pip3 install pytest lxml pyhull
+        libcppunit-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install pytest lxml pyhull
+RUN conda install -c conda-forge boost hdf5  swig bullet -y
+RUN conda install -c conda-forge lpsolve55 suitesparse -y
+WORKDIR /home
+# COPY ci_gitlab/dockerfiles/install_bullet.sh .
+ENV CI_PROJECT_DIR /home
+# RUN sh /home/install_bullet.sh

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2022 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,8 +192,9 @@ NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize, const
 
 
 /* Returns a long double as the square root of determinant of a vector related to the Jordan product */
-float_type gammal(const double * const x, const size_t dimension);
+float_type ld_gammal(const double * const x, const size_t dimension);
 
+float_type dnrm2l(const unsigned int n, const double * x);
 
 /*
    Returns the NT matrix by performing computation as in
