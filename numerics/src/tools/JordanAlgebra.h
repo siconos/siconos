@@ -182,6 +182,8 @@ void QNTpz(const double * const x, const double * const y,const double * const z
 /* Returns the product Q_{p^{-1}}*z where p is the NT vector related to the pair (x,y) */
 void QNTpinvz(const double * const x, const double * const y,const double * const z, const unsigned int vecSize, const size_t varsCount, double * out);
 
+/* Returns the product Q_{p^{-2}}*z where p is the NT vector related to the pair (x,y) */
+void QNTpinv2z(const double * const x, const double * const y,const double * const z, const unsigned int vecSize, const size_t varsCount, double * out);
 
 /* returns the Jordan product x^{-1} o y by using the formula x^{-1} = R*x/det(x), where R is the reflection matrix */
 void Jxinvprody(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out);
