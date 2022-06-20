@@ -32,11 +32,9 @@
 
 int globalRollingFrictionContact_test_function(TestCase* current)
 {
-
-  //printf("\n globalRollingFrictionContact_test_function 001 OK\n");
   int k;
   GlobalRollingFrictionContactProblem* problem = globalRollingFrictionContact_new_from_filename(current->filename);
-  //printf("\n globalRollingFrictionContact_test_function 002 OK\n");
+
   numerics_set_verbose(1);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
@@ -63,11 +61,9 @@ int globalRollingFrictionContact_test_function(TestCase* current)
   }
   else if(dim == 5)
   {
-    //printf("\n globalRollingFrictionContact_test_function 003 OK\n");
     info = g_rolling_fc3d_driver(problem,
                                reaction, velocity, globalvelocity,
                                current->options);
-    //printf("\n globalRollingFrictionContact_test_function 004 OK\n");
   }
 
 

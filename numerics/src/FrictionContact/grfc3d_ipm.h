@@ -125,3 +125,6 @@ static double complemResidualNorm(const double * const velocity, const double * 
 }
 
 
+NumericsMatrix * compute_JQinv2Jt(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount);
+
+
