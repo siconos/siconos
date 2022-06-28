@@ -1229,23 +1229,26 @@ bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
   {
     return false;
   }
+  double a, b;
   for(int i =0; i< A->size0 ; i++)
   {
     for(int j =0; j< A->size1 ; j++)
     {
       /* DEBUG_PRINTF("error %i %i = %e\n",i,j, fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j))); */
-      if(fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)) >= tol)
+      a = NM_get_value(A, i, j);
+      b = NM_get_value(B, i, j);
+      if(fabs(a - b) >= tol || (isnan(a) && !isnan(b)) || (!isnan(a) && isnan(b)))
       {
 
         DEBUG_PRINTF("A(%i,%i) = %e\t, B(%i,%i) = %e\t,  error = %e\n",
-                     i,j, NM_get_value(A, i, j),
-                     i,j, NM_get_value(B, i, j),
-                     fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+                     i,j, a,
+                     i,j, b,
+                     fabs(a - b));
 
         printf("A(%i,%i) = %e\t, B(%i,%i) = %e\t,  error = %e\n",
-                     i,j, NM_get_value(A, i, j),
-                     i,j, NM_get_value(B, i, j),
-                     fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+                     i,j, a,
+                     i,j, b,
+                     fabs(a - b));
         return false;
       }
     }
