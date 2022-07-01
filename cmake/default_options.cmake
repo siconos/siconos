@@ -15,7 +15,7 @@
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 
 # --- List of siconos components to build and install ---
-# The complete list is : externals numerics kernel control mechanics mechanisms io
+# The complete list is : externals numerics kernel control mechanics io
 # mechanisms is "off" by default.
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.

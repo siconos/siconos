@@ -63,6 +63,14 @@ function(set_python_install_path)
     # (see swig_python_tools.cmake)
     # Find install path for --user (site.USER_SITE)
 
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+      # In that case, we can not allow "user" option for python install:
+      # su/sudo run is usually required for default install path and 
+      # it will break the installation process with some files in (e.g.) ~root/.local/lib/python/... and
+      # some in user home/.local and so on.
+      message(FATAL_ERROR "pip (python install) can't use --user option when using a default CMAKE_INSTALL_PREFIX which requires root privileges. Please either set CMAKE_INSTALL_PREFIX to a path on which you're authorized to write or use siconos_python_install 'standard'.")
+    endif()
+    
     # -- PY_INSTALL_DIR 
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
       "import site; print(site.ENABLE_USER_SITE)" OUTPUT_VARIABLE ENABLE_USER_SITE)
