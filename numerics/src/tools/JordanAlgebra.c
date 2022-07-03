@@ -477,6 +477,7 @@ void Qx05y(const double * const x, const double * const y, const unsigned int ve
       for (int k = 0; k < dimension-1; xb[k] = x[j+1+k]/nxb, k++);
     l1 = x[j]+nxb;
     l2 = x[j]-nxb;
+    if (l2 <= 0.) l2 = DBL_EPSILON; // to avoid negative number b/c of different data types
     dx = sqrtl(l1*l2);
     c1y = y[j];
     for (int k = 0; k < dimension-1; c1y += xb[k]*y[j+1+k], k++);
@@ -497,7 +498,7 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
   size_t j;
   float_type *xb = (float_type*)calloc(dimension-1, sizeof(float_type));
 
-  for (int i = 0; i < dimension - 1; xb[i] = 1/sqrtl(dimension-1), i++);
+  // for (int i = 0; i < dimension - 1; xb[i] = 1/sqrtl(dimension-1), i++); // useful ?
 
   for(size_t i = 0; i < varsCount; i++)
   {
@@ -514,6 +515,7 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
 
     l1 = x[j]+nxb;
     l2 = x[j]-nxb;
+    if (l2 <= 0.) l2 = DBL_EPSILON; // to avoid negative number b/c of different data types
     dx = 1/sqrtl(l1*l2);
     /* if (isnan(dx)) */
     /*   { */
@@ -544,7 +546,9 @@ void Jinv(const double * const x, const unsigned int vecSize, const size_t varsC
     j = i*dimension;
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = 1/(x[j]+normx)/2;
-    l2 = 1/(x[j]-normx)/2;
+    // l2 = 1/(x[j]-normx)/2;
+    l2 = x[j]-normx;
+    if (l2 == 0.) l2 = DBL_EPSILON; else l2 = 1/(x[j]-normx)/2;// to avoid divide by 0 b/c of different data types
     out[j] = l1+l2;
     for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++);
   }
@@ -560,7 +564,9 @@ void Jsqrt(const double * const x, const unsigned int vecSize, const size_t vars
   {
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = sqrtl(x[j]+normx)/2;
-    l2 = sqrtl(x[j]-normx)/2;
+    // l2 = sqrtl(x[j]-normx)/2;
+    l2 = x[j]-normx;
+    if (l2 <= 0.) l2 = DBL_EPSILON; else l2 = sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
     out[j] = l1+l2;
     for(int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++);
   }
@@ -577,7 +583,10 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
     j = i*dimension;
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = 1/sqrtl(x[j]+normx)/2;
-    l2 = 1/sqrtl(x[j]-normx)/2;
+    // l2 = 1/sqrtl(x[j]-normx)/2;
+    l2 = x[j]-normx;
+    if (l2 <= 0.) l2 = DBL_EPSILON; else l2 = 1./sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
+
     /* if (x[j]-normx<1e-14) */
     /*   { */
     /* 	printf("Jsqrtinv: %e %Le %Le\n",x[j], x[j]+normx, x[j]-normx); */
@@ -734,7 +743,9 @@ void Jxinvprody(const double * const x, const double * const y, const unsigned i
     j = i*dimension;
 
     nxb = dnrm2l(dimension-1, x+j+1);
-    detx = (x[j] + nxb) * (x[j] - nxb);
+    // detx = (x[j] + nxb) * (x[j] - nxb);
+    detx = x[j]-nxb;
+    if (detx <= 0.) detx = (x[j] + nxb) * DBL_EPSILON; else detx = (x[j] + nxb) * (x[j] - nxb);// to avoid divide by 0 b/c of different data types
 
     tmp = x[j]*y[j];
     for (int k = 1; k < dimension; tmp -= x[j+k]*y[j+k], k++);
@@ -781,7 +792,10 @@ float_type ld_gammal(const double * const x, const size_t dimension)
 {
   float_type nxb, detx;
   nxb = dnrm2l(dimension-1, x+1);
-  detx = (x[0] + nxb) * (x[0] - nxb);
+  // detx = (x[0] + nxb) * (x[0] - nxb);
+  detx = x[0]-nxb;
+  if (detx <= 0.) detx = (x[0] + nxb) * DBL_EPSILON; else detx = (x[0] + nxb) * (x[0] - nxb);// to avoid negative number b/c of different data types
+
   return(sqrtl(detx));
 }
 

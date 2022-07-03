@@ -601,6 +601,7 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
   double * othor = (double*)calloc(2, sizeof(double));
 
   float_type p0inv=0., data=0., nub=0., nrb=0., det_u=0., det_r=0.;
+  float_type nxb=0., nzb=0.;
 
   int id3, id5;
   for(size_t i = 0; i < varsCount; i++)
@@ -609,7 +610,10 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
     id5 = i*d5;
 
     // p0inv = 1./sqrtl( dnrm2sqrl(d3,x+id3) + dnrm2sqrl(d3,z+id3) - 4.*x[id3]*x[id3]*dnrm2sqrl(d3-1,x+id3+1)/dnrm2sqrl(d3,x+id3) - 4.*z[id3]*z[id3]*dnrm2sqrl(d3-1,z+id3+1)/dnrm2sqrl(d3,z+id3) );
-    p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*dnrm2sqrl(d3,z+id3) + (z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*dnrm2sqrl(d3,x+id3));
+    // p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*dnrm2sqrl(d3,z+id3) + (z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*dnrm2sqrl(d3,x+id3));
+    nxb = dnrm2l(d3-1,x+id3+1);
+    nzb = dnrm2l(d3-1,z+id3+1);
+    p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-nxb)*(x[id3]-nxb)*(x[id3]+nxb)*(x[id3]+nxb)*dnrm2sqrl(d3,z+id3) + (z[id3]-nzb)*(z[id3]-nzb)*(z[id3]+nzb)*(z[id3]+nzb)*dnrm2sqrl(d3,x+id3));
 
 
     // out[0,0]
@@ -621,11 +625,11 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
     // Compute det(r1), det(u1)
     nrb = dnrm2l(d3-1,r1+id3+1);
     nub = dnrm2l(d3-1,u1+id3+1);
-    det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
-    det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    det_r = (r1[id3]+nrb)*(r1[id3]-nrb); //if (det_r < 0) printf("Pinvy r %zu: \n%3.70e %3.70e %3.70e \n%3.50Le %Le %Le\n",i, r1[id3], r1[id3+1], r1[id3+2], nrb, r1[id3]+nrb, r1[id3]-nrb);
+    det_u = (u1[id3]+nub)*(u1[id3]-nub); //if (det_u < 0) printf("Pinvy u %zu: \n%3.50e %3.50e %3.50e \n%3.50Le %Le %Le\n",i, u1[id3], u1[id3+1], u1[id3+2], nub, u1[id3]+nub, u1[id3]-nub);
     for(size_t k = 1; k < d3; k++)
     {
-      out[id5+k] = (1./dnrm2sqrl(d3-1,x+id3+1)) * ( cblas_ddot(d3-1, x+id3+1, 1, y+id5+1, 1)*x[id3+k]/dnrm2l(d3,x+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+1, 1)*othor[k-1]);
+      out[id5+k] = ( cblas_ddot(d3-1, x+id3+1, 1, y+id5+1, 1)*x[id3+k]/dnrm2l(d3,x+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+1, 1)*othor[k-1] ) /dnrm2sqrl(d3-1,x+id3+1);
     }
 
     // out[3:4]
@@ -638,7 +642,7 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
     det_u = (u2[id3]+nub)*(u2[id3]-nub);
     for(size_t k = 1; k < d3; k++)
     {
-      out[id5+k+2] = (1./dnrm2sqrl(d3-1,z+id3+1)) * ( cblas_ddot(d3-1, z+id3+1, 1, y+id5+3, 1)*z[id3+k]/dnrm2l(d3,z+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+3, 1)*othor[k-1]);
+      out[id5+k+2] = ( cblas_ddot(d3-1, z+id3+1, 1, y+id5+3, 1)*z[id3+k]/dnrm2l(d3,z+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+3, 1)*othor[k-1] ) /dnrm2sqrl(d3-1,z+id3+1);
     }
   }
 
@@ -672,6 +676,7 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
   double * othor = (double*)calloc(2, sizeof(double));
 
   float_type p0inv=0., data=0., nub=0., nrb=0., det_u=0., det_r=0.;
+  float_type nxb=0., nzb=0.;
 
   int id3, id5;
   for(size_t i = 0; i < varsCount; i++)
@@ -680,7 +685,10 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
     id5 = i*d5;
 
     // p0inv = 1./sqrtl( dnrm2sqrl(d3,x+id3) + dnrm2sqrl(d3,z+id3) - 4.*x[id3]*x[id3]*dnrm2sqrl(d3-1,x+id3+1)/dnrm2sqrl(d3,x+id3) - 4.*z[id3]*z[id3]*dnrm2sqrl(d3-1,z+id3+1)/dnrm2sqrl(d3,z+id3) );
-    p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*dnrm2sqrl(d3,z+id3) + (z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*dnrm2sqrl(d3,x+id3));
+    // p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*dnrm2sqrl(d3,z+id3) + (z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*dnrm2sqrl(d3,x+id3));
+    nxb = dnrm2l(d3-1,x+id3+1);
+    nzb = dnrm2l(d3-1,z+id3+1);
+    p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-nxb)*(x[id3]-nxb)*(x[id3]+nxb)*(x[id3]+nxb)*dnrm2sqrl(d3,z+id3) + (z[id3]-nzb)*(z[id3]-nzb)*(z[id3]+nzb)*(z[id3]+nzb)*dnrm2sqrl(d3,x+id3));
 
     // out[0,0]
     out[id5] = p0inv*y[id5];
@@ -695,7 +703,7 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
     det_u = (u1[id3]+nub)*(u1[id3]-nub);
     for(size_t k = 1; k < d3; k++)
     {
-      out[id5+k] = -2.*x[id3]*y[id5]*p0inv*x[id3+k]/dnrm2sqrl(d3,x+id3) + (1./dnrm2sqrl(d3-1,x+id3+1)) * ( cblas_ddot(d3-1, x+id3+1, 1, y+id5+1, 1)*x[id3+k]/dnrm2l(d3,x+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+1, 1)*othor[k-1]);
+      out[id5+k] = -2.*x[id3]*y[id5]*p0inv*x[id3+k]/dnrm2sqrl(d3,x+id3) + ( cblas_ddot(d3-1, x+id3+1, 1, y+id5+1, 1)*x[id3+k]/dnrm2l(d3,x+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+1, 1)*othor[k-1] ) /dnrm2sqrl(d3-1,x+id3+1);
     }
 
     // out[3:4]
@@ -708,7 +716,7 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
     det_u = (u2[id3]+nub)*(u2[id3]-nub);
     for(size_t k = 1; k < d3; k++)
     {
-      out[id5+k+2] = -2.*z[id3]*y[id5]*p0inv*z[id3+k]/dnrm2sqrl(d3,z+id3) + (1./dnrm2sqrl(d3-1,z+id3+1)) * ( cblas_ddot(d3-1, z+id3+1, 1, y+id5+3, 1)*z[id3+k]/dnrm2l(d3,z+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+3, 1)*othor[k-1]);
+      out[id5+k+2] = -2.*z[id3]*y[id5]*p0inv*z[id3+k]/dnrm2sqrl(d3,z+id3) + ( cblas_ddot(d3-1, z+id3+1, 1, y+id5+3, 1)*z[id3+k]/dnrm2l(d3,z+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+3, 1)*othor[k-1] ) /dnrm2sqrl(d3-1,z+id3+1);
     }
   }
 
@@ -1003,7 +1011,7 @@ static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, con
 
   float_type p0inv=0., data=0.;
   float_type nub=0., nrb=0., det_u1=0., det_r1=0., det_u2=0., det_r2=0.;
-  // float_type det_x=0., det_z=0.;
+  float_type nxb=0., nzb=0.;
 
 
   NumericsMatrix * out = NM_new();
@@ -1047,8 +1055,10 @@ static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, con
       id5 = i*d5;
 
       // p0inv = 1./sqrtl( dnrm2sqrl(d3,x+id3) + dnrm2sqrl(d3,z+id3) - 4.*x[id3]*x[id3]*dnrm2sqrl(d3-1,x+id3+1)/dnrm2sqrl(d3,x+id3) - 4.*z[id3]*z[id3]*dnrm2sqrl(d3-1,z+id3+1)/dnrm2sqrl(d3,z+id3) );
-
-      p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*dnrm2sqrl(d3,z+id3) + (z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*dnrm2sqrl(d3,x+id3));
+      // p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]-dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*(x[id3]+dnrm2l(d3-1,x+id3+1))*dnrm2sqrl(d3,z+id3) + (z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]-dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*(z[id3]+dnrm2l(d3-1,z+id3+1))*dnrm2sqrl(d3,x+id3));
+      nxb = dnrm2l(d3-1,x+id3+1);
+      nzb = dnrm2l(d3-1,z+id3+1);
+      p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-nxb)*(x[id3]-nxb)*(x[id3]+nxb)*(x[id3]+nxb)*dnrm2sqrl(d3,z+id3) + (z[id3]-nzb)*(z[id3]-nzb)*(z[id3]+nzb)*(z[id3]+nzb)*dnrm2sqrl(d3,x+id3));
 
       othor1[0] = -x[id3+2];
       othor1[1] =  x[id3+1];
@@ -1101,15 +1111,15 @@ static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, con
             if(Hi[p]==id5+1)
             {
               multiplied = 1;
-              if (j==1) outx[nz] += (1./dnrm2sqrl(d3-1,x+id3+1)) * ( (1./dnrm2l(d3,x+id3))*x[id3+1]*x[id3+1] + powl(det_r1/det_u1, 0.25)*othor1[0]*othor1[0] ) * Hx[p]; // 1st row of A^-1/2
-              if (j==2) outx[nz] += (1./dnrm2sqrl(d3-1,x+id3+1)) * ( (1./dnrm2l(d3,x+id3))*x[id3+2]*x[id3+1] + powl(det_r1/det_u1, 0.25)*othor1[1]*othor1[0] ) * Hx[p]; // 2nd row
+              if (j==1) outx[nz] += ( x[id3+1]*x[id3+1]/dnrm2l(d3,x+id3) + powl(det_r1/det_u1, 0.25)*othor1[0]*othor1[0] ) * Hx[p] /dnrm2sqrl(d3-1,x+id3+1); // 1st row of A^-1/2
+              if (j==2) outx[nz] += ( x[id3+2]*x[id3+1]/dnrm2l(d3,x+id3) + powl(det_r1/det_u1, 0.25)*othor1[1]*othor1[0] ) * Hx[p] /dnrm2sqrl(d3-1,x+id3+1); // 2nd row
             }
 
             if(Hi[p]==id5+2)
             {
               multiplied = 1;
-              if (j==1) outx[nz] += (1./dnrm2sqrl(d3-1,x+id3+1)) * ( (1./dnrm2l(d3,x+id3))*x[id3+1]*x[id3+2] + powl(det_r1/det_u1, 0.25)*othor1[0]*othor1[1] ) * Hx[p]; // 1st row of A^-1/2
-              if (j==2) outx[nz] += (1./dnrm2sqrl(d3-1,x+id3+1)) * ( (1./dnrm2l(d3,x+id3))*x[id3+2]*x[id3+2] + powl(det_r1/det_u1, 0.25)*othor1[1]*othor1[1] ) * Hx[p]; // 2nd row
+              if (j==1) outx[nz] += ( x[id3+1]*x[id3+2]/dnrm2l(d3,x+id3) + powl(det_r1/det_u1, 0.25)*othor1[0]*othor1[1] ) * Hx[p] /dnrm2sqrl(d3-1,x+id3+1); // 1st row of A^-1/2
+              if (j==2) outx[nz] += ( x[id3+2]*x[id3+2]/dnrm2l(d3,x+id3) + powl(det_r1/det_u1, 0.25)*othor1[1]*othor1[1] ) * Hx[p] /dnrm2sqrl(d3-1,x+id3+1); // 2nd row
             }
           } // end rows of H
           if (multiplied) { outi[nz++] = j+id5; multiplied = 0;}
@@ -1125,15 +1135,15 @@ static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, con
             if(Hi[p]==id5+3)
             {
               multiplied = 1;
-              if (j==3) outx[nz] += (1./dnrm2sqrl(d3-1,z+id3+1)) * ( (1./dnrm2l(d3,z+id3))*z[id3+1]*z[id3+1] + powl(det_r2/det_u2, 0.25)*othor2[0]*othor2[0] ) * Hx[p]; // 1st row of C^-1/2
-              if (j==4) outx[nz] += (1./dnrm2sqrl(d3-1,z+id3+1)) * ( (1./dnrm2l(d3,z+id3))*z[id3+2]*z[id3+1] + powl(det_r2/det_u2, 0.25)*othor2[1]*othor2[0] ) * Hx[p]; // 2nd row
+              if (j==3) outx[nz] += ( z[id3+1]*z[id3+1]/dnrm2l(d3,z+id3) + powl(det_r2/det_u2, 0.25)*othor2[0]*othor2[0] ) * Hx[p] /dnrm2sqrl(d3-1,z+id3+1); // 1st row of C^-1/2
+              if (j==4) outx[nz] += ( z[id3+2]*z[id3+1]/dnrm2l(d3,z+id3) + powl(det_r2/det_u2, 0.25)*othor2[1]*othor2[0] ) * Hx[p] /dnrm2sqrl(d3-1,z+id3+1); // 2nd row
             }
 
             if(Hi[p]==id5+4)
             {
               multiplied = 1;
-              if (j==3) outx[nz] += (1./dnrm2sqrl(d3-1,z+id3+1)) * ( (1./dnrm2l(d3,z+id3))*z[id3+1]*z[id3+2] + powl(det_r2/det_u2, 0.25)*othor2[0]*othor2[1] ) * Hx[p]; // 1st row of C^-1/2
-              if (j==4) outx[nz] += (1./dnrm2sqrl(d3-1,z+id3+1)) * ( (1./dnrm2l(d3,z+id3))*z[id3+2]*z[id3+2] + powl(det_r2/det_u2, 0.25)*othor2[1]*othor2[1] ) * Hx[p]; // 2nd row
+              if (j==3) outx[nz] += ( z[id3+1]*z[id3+2]/dnrm2l(d3,z+id3) + powl(det_r2/det_u2, 0.25)*othor2[0]*othor2[1] ) * Hx[p] /dnrm2sqrl(d3-1,z+id3+1); // 1st row of C^-1/2
+              if (j==4) outx[nz] += ( z[id3+2]*z[id3+2]/dnrm2l(d3,z+id3) + powl(det_r2/det_u2, 0.25)*othor2[1]*othor2[1] ) * Hx[p] /dnrm2sqrl(d3-1,z+id3+1); // 2nd row
             }
           } // end rows of H
           if (multiplied) { outi[nz++] = j+id5; multiplied = 0;}
@@ -1231,7 +1241,7 @@ csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
     {
         /* --- Nonzero pattern of L(k,:) ------------------------------------ */
         top = cs_ereach (C, k, parent, s, c) ;      /* find pattern of L(k,:) */
-        // if(iteration==8)printf("top = %ld\n", top);
+        if(iteration==8)printf("top = %ld\n", top);
         x [k] = 0. ;                                 /* x (0:k) is now zero */
         for (p = Cp [k] ; p < Cp [k+1] ; p++)       /* x = full(triu(C(:,k))) */
         {
@@ -1239,7 +1249,7 @@ csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
             // if (Ci [p] <= k) x [Ci [p]] = (float_type)Cx [p] ;
         }
         d = x [k] ;                     /* d = C(k,k) */
-        // if(iteration==8)printf("d = C(k,k) = %5.40Le\n", d);
+        if(iteration==8)printf("d = C(k,k) = %5.40Le\n", d);
         x [k] = 0. ;                     /* clear x for k+1st iteration */
         /* --- Triangular solve --------------------------------------------- */
         for ( ; top < n ; top++)    /* solve L(0:k-1,0:k-1) * x = C(:,k) */
@@ -1257,10 +1267,10 @@ csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
             Li [p] = k ;                 /* store L(k,i) in column i */
             // Lx [p] = CS_CONJ (lki) ;
             Lx [p] = conjl (lki) ;
-            // if(iteration==8)
-            // {
-            //   printf("k=%ld, i=%ld, p=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%f, lki=%5.40Le\n",k,i,p,Li[p],Lp[p],Lx [p],lki);
-            // }
+            if(iteration==8)
+            {
+              printf("k=%ld, i=%ld, p=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%f, lki=%5.40Le\n",k,i,p,Li[p],Lp[p],Lx [p],lki);
+            }
         }
         /* --- Compute L(k,k) ----------------------------------------------- */
         // if (CS_REAL (d) <= 0 || CS_IMAG (d) != 0)
@@ -1275,7 +1285,7 @@ csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
         Li [p] = k ;                /* store L(k,k) = sqrt (d) in column k */
         // Lx [p] = sqrt (d) ;
         Lx [p] = sqrtl (d) ;
-        // if(iteration==8)printf("k=%ld, p2=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%f\n",k,p,Li[p],Lp[p],Lx [p]);
+        if(iteration==8)printf("k=%ld, p2=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%e\n",k,p,Li[p],Lp[p],Lx [p]);
     }
     Lp [n] = cp [n] ;               /* finalize L */
     // if(iteration==16) printf("\n\n cs_chol_2 001  \n\n");
@@ -2296,13 +2306,33 @@ void print_NAN_in_matrix(const NumericsMatrix* const m)
 
 void is_in_int_of_Lcone(const double * const x, const size_t vecSize, const size_t varsCount)
 {
-  size_t dim = vecSize/varsCount;
+  size_t dim = vecSize/varsCount, id3 = 0;
   assert(dim == 3);
+  float_type diffL = 0.;
+  double diff = 0.;
   for(size_t i=0; i<varsCount; i++)
   {
-    if (x[i*dim]-cblas_dnrm2(dim-1, x+i*dim+1, 1) < 0.)
+    id3 = i*dim;
+    // diff = (float_type)x[id3]-dnrm2l(dim-1, x+id3+1);
+    diff = x[id3]-cblas_dnrm2(dim-1, x+id3+1, 1);
+    if (diff <= 0.)
     {
-      printf("\ni = %zu: x0 - |x_bar| = %9.30e\n", i, x[i*dim]-cblas_dnrm2(dim-1, x+i*dim+1, 1));
+      printf("\n(double)     x0 = %9.70e", x[id3]);
+      // printf("\n(l doub)     x0 = %9.70Le", (float_type)x[id3]);
+      printf("\n(double) x0+eps = %9.70e", x[id3]+DBL_EPSILON);
+      printf("\n(double)|x_bar| = %9.70e", cblas_dnrm2(dim-1, x+id3+1, 1));
+      printf("\n(l doub)|x_bar| = %9.70Le\n", dnrm2l(dim-1, x+id3+1));
+
+      printf("\ni = %zu: (double)x0 - (double)|x_bar| = (double) %9.70e\n", i, diff);
+
+      diffL = (float_type)(x[id3]-cblas_dnrm2(dim-1, x+id3+1, 1));
+      printf("\ni = %zu: (double)x0 - (double)|x_bar| = (l doub) %9.70Le\n", i, diffL);
+
+      diff = (double)(x[id3]-dnrm2l(dim-1, x+id3+1));
+      printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (double) %9.70e\n", i, diff);
+
+      diffL = x[id3]-dnrm2l(dim-1, x+id3+1);
+      printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (l doub) %9.70Le\n", i, diffL);
     }
   }
 }
@@ -2476,9 +2506,6 @@ NumericsMatrix * compute_JQinv2Jt(const double *u1, const double *r1, const doub
   {
     id3 = i*d3;
     id5 = i*d5;
-
-    // double p0 = cblas_dnrm2(d3,x+id3,1)*cblas_dnrm2(d3,x+id3,1) + cblas_dnrm2(d3,z+id3,1)*cblas_dnrm2(d3,z+id3,1) - 4.*x[id3]*x[id3]*cblas_dnrm2(d3-1,x+id3+1,1)*cblas_dnrm2(d3-1,x+id3+1,1)/(cblas_dnrm2(d3,x+id3,1)*cblas_dnrm2(d3,x+id3,1)) - 4.*z[id3]*z[id3]*cblas_dnrm2(d3-1,z+id3+1,1)*cblas_dnrm2(d3-1,z+id3+1,1)/(cblas_dnrm2(d3,z+id3,1)*cblas_dnrm2(d3,z+id3,1));
-    // if (p0<0) printf("i = %zu: p0 < 0\n", i);
 
     // Assign data for out[0,0]
     cs_entry(out_triplet, id5, id5, dnrm2sqrl(d3, x+id3) + dnrm2sqrl(d3, z+id3));
@@ -3202,6 +3229,7 @@ while(1)
     /* 3. reaction_1 = (r0, r_bar), reaction_2 = (r0, r_tilde) */
     extract_vector(reaction, nd, n, 2, 3, reaction_1);
     extract_vector(reaction, nd, n, 4, 5, reaction_2);
+
 
 
 
@@ -4921,10 +4949,10 @@ while(1)
 
         else if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY] == SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_NO)
         {
-          P_inv = Pinv(velocity_1, reaction_1, velocity_2, reaction_2, n_dminus2, n);
-          PinvH = NM_multiply(P_inv,H);
+          // P_inv = Pinv(velocity_1, reaction_1, velocity_2, reaction_2, n_dminus2, n);
+          // PinvH = NM_multiply(P_inv,H);
 
-          // PinvH = multiply_PinvH(velocity_1, reaction_1, velocity_2, reaction_2, n_dminus2, n, H);     // Same results with NM_multiply but executive time is so dramatic !
+          PinvH = multiply_PinvH(velocity_1, reaction_1, velocity_2, reaction_2, n_dminus2, n, H);     // Same results with NM_multiply but executive time is so dramatic !
           PinvH_T = NM_transpose(PinvH);
         }
       }
@@ -4955,21 +4983,9 @@ while(1)
       NM_insert(Jac, PinvH, m, 0);
       NM_insert(Jac, identity, m, m);
 
-      if (PinvH) PinvH = NM_free(PinvH);
-      if (PinvH_T) PinvH_T = NM_free(PinvH_T);
-
-      if (!Jactmp && iteration == 0)
-      {
-        Jactmp = NM_create(Jac->storageType, Jac->size0, Jac->size1);
-        NM_copy(Jac, Jactmp);
-      }
-      else if (Jactmp && iteration == 0) printf("\n Jac = Jactmp => %i\n", NM_compare(Jac, Jactmp, 1e-20));
-
 
       /* Correction of w to take into account the dependence on the tangential velocity */
       update_w(w, w_origin, velocity, nd, d, options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S]);
-
-
 
 
       /*  2. Build the right-hand-side
@@ -4982,53 +4998,6 @@ while(1)
       NM_gemv(-1.0, H, globalVelocity, 0.0, Hvw);       // Hvw = -H*v
       cblas_daxpy(nd, -1.0, w, 1, Hvw, 1);              // Hvw = -H*v - w
 
-
-
-      if (!dualConstraint_tmp && iteration == 0)
-      {
-        printf("options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] 1 = %d\n",options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S]);
-        dualConstraint_tmp = (double*)calloc(m, sizeof(double));
-        globalVelocity_tmp = (double*)calloc(m, sizeof(double));
-        Hvw_tmp = (double*)calloc(nd, sizeof(double));
-        w_tmp = (double*)calloc(nd, sizeof(double));
-
-        H_tmp = NM_create(H->storageType, H->size0, H->size1);
-        NM_copy(H, H_tmp);
-
-        NV_copy(dualConstraint, m, dualConstraint_tmp);
-        NV_copy(globalVelocity, m, globalVelocity_tmp);
-        NV_copy(Hvw, nd, Hvw_tmp);
-        NV_copy(w, nd, w_tmp);
-      }
-      else if (dualConstraint_tmp && iteration == 0)
-      {
-        printf("options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] 2 = %d\n",options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S]);
-        printf("dualConstraint = dualConstraint_tmp => %i\n", NV_equal(dualConstraint, dualConstraint_tmp, m, 1e-20));
-        printf("H = H_tmp => %i\n", NM_compare(H, H_tmp, 1e-20));
-        printf("globalVelocity = globalVelocity_tmp => %i\n", NV_equal(globalVelocity, globalVelocity_tmp, m, 1e-20));
-        printf("w = w_tmp => %i\n", NV_equal(w, w_tmp, nd, 1e-20));
-        printf("Hvw = Hvw_tmp => %i\n", NV_equal(Hvw, Hvw_tmp, nd, 1e-20));
-      }
-
-      for(size_t i=0; i<nd; i++)
-      {
-        if(isnan(Hvw[i])) printf("iteration = %zu: 2 Hvw[%zu] = %e\n", iteration, i, Hvw[i]);
-        if(isnan(w[i])) printf("iteration = %zu: w[%zu] = %e\n", iteration, i, w[i]);
-      }
-
-      for(size_t i=0; i<m; i++)
-      {
-        if(isnan(globalVelocity[i])) printf("iteration = %zu: globalVelocity[%zu] = %e\n", iteration, i, globalVelocity[i]);
-      }
-      double h;
-      for(int i =0; i< H->size0 ; i++)
-      {
-        for(int j =0; j< H->size1 ; j++)
-        {
-          h = NM_get_value(H, i, j);
-          if(isnan(h)) printf("iteration = %zu: H(%i,%i) = %e\n", iteration, i,j, h);
-        }
-      }
 
 
       // NM_gemv(-1.0, P_inv, Hvw, 0.0, tmp_nd);        // tmp_nd = P^-1*(-H*v-w)
@@ -5076,26 +5045,10 @@ while(1)
       }
 
 
-      if (!rhs_tmp && iteration == 0)
-      {
-        rhs_tmp = (double*)calloc(m_plus_nd, sizeof(double));
-        NV_copy(rhs, m_plus_nd, rhs_tmp);
-      }
-      else if (rhs_tmp && iteration == 0) printf("rhs = rhs_tmp => %i\n", NV_equal(rhs, rhs_tmp, m_plus_nd, 1e-20));
-
-
 
       /* 3. Solving full symmetric Newton system with NT scaling via LDLT factorization */
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
       NM_LDLT_solve(Jac, rhs, 1);
-
-      if (!rhs_tmp2 && iteration == 0)
-      {
-        rhs_tmp2 = (double*)calloc(m_plus_nd, sizeof(double));
-        NV_copy(rhs, m_plus_nd, rhs_tmp2);
-      }
-      else if (rhs_tmp2 && iteration == 0) printf("rhs sol = rhs_tmp2 => %i\n", NV_equal(rhs, rhs_tmp2, m_plus_nd, 1e-20));
-
 
 
 
@@ -5172,45 +5125,6 @@ while(1)
         d_velocity_2[id3] = Qinv2x_tilde[id3];
       }
 
-      for(size_t i=0; i<n_dminus2; i++)
-      {
-        if(isnan(d_velocity_1[i])) printf("iteration = %zu: d_velocity_1[%zu] = %e\n", iteration, i, d_velocity_1[i]);
-        if(isnan(d_velocity_2[i])) printf("iteration = %zu: d_velocity_2[%zu] = %e\n", iteration, i, d_velocity_2[i]);
-      }
-
-
-
-
-      if (!velocity_tmp1 && iteration == 0)
-      {
-        velocity_tmp1 = (double*)calloc(n_dminus2, sizeof(double));
-        velocity_tmp2 = (double*)calloc(n_dminus2, sizeof(double));
-        reaction_tmp1 = (double*)calloc(n_dminus2, sizeof(double));
-        reaction_tmp2 = (double*)calloc(n_dminus2, sizeof(double));
-        d_velocity_tmp1 = (double*)calloc(n_dminus2, sizeof(double));
-        d_velocity_tmp2 = (double*)calloc(n_dminus2, sizeof(double));
-        d_reaction_tmp1 = (double*)calloc(n_dminus2, sizeof(double));
-        d_reaction_tmp2 = (double*)calloc(n_dminus2, sizeof(double));
-        NV_copy(velocity_1, n_dminus2, velocity_tmp1);
-        NV_copy(velocity_2, n_dminus2, velocity_tmp2);
-        NV_copy(reaction_1, n_dminus2, reaction_tmp1);
-        NV_copy(reaction_2, n_dminus2, reaction_tmp2);
-        NV_copy(d_velocity_1, n_dminus2, d_velocity_tmp1);
-        NV_copy(d_velocity_2, n_dminus2, d_velocity_tmp2);
-        NV_copy(d_reaction_1, n_dminus2, d_reaction_tmp1);
-        NV_copy(d_reaction_2, n_dminus2, d_reaction_tmp2);
-      }
-      else if (velocity_tmp1 && iteration == 0)
-      {
-        printf("velocity_1 = velocity_tmp1 => %i\n", NV_equal(velocity_1, velocity_tmp1, n_dminus2, 1e-20));
-        printf("velocity_2 = velocity_tmp2 => %i\n", NV_equal(velocity_2, velocity_tmp2, n_dminus2, 1e-20));
-        printf("reaction_1 = reaction_tmp1 => %i\n", NV_equal(reaction_1, reaction_tmp1, n_dminus2, 1e-20));
-        printf("reaction_2 = reaction_tmp2 => %i\n", NV_equal(reaction_2, reaction_tmp2, n_dminus2, 1e-20));
-        printf("d_velocity_1 = d_velocity_tmp1 => %i\n", NV_equal(d_velocity_1, d_velocity_tmp1, n_dminus2, 1e-20));
-        printf("d_velocity_2 = d_velocity_tmp2 => %i\n", NV_equal(d_velocity_2, d_velocity_tmp2, n_dminus2, 1e-20));
-        printf("d_reaction_1 = d_reaction_tmp1 => %i\n", NV_equal(d_reaction_1, d_reaction_tmp1, n_dminus2, 1e-20));
-        printf("d_reaction_2 = d_reaction_tmp2 => %i\n", NV_equal(d_reaction_2, d_reaction_tmp2, n_dminus2, 1e-20));
-      }
 
 
 
@@ -5441,8 +5355,6 @@ while(1)
         else if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY] == SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_NO)
           PinvTy(velocity_1, reaction_1, velocity_2, reaction_2, n_dminus2, n, tmp_nd, d_reaction); // d_reaction = P^-1'*d_reaction_reduced
       }
-
-
 
 
       //PinvTy(velocity_1, reaction_1, velocity_2, reaction_2, n_dminus2, n, tmp_nd, d_reaction); // d_reaction = P^-1'*d_reaction_reduced
@@ -5943,15 +5855,15 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
 
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_AFTER;
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_AFTER;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY] = SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_NO;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
