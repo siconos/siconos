@@ -2212,69 +2212,69 @@ void print_NAN_in_matrix(const NumericsMatrix* const m)
     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  printf("========== Numerics Matrix\n");
-  printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
+  // printf("========== Numerics Matrix\n");
+  // printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
 
   switch(m->storageType)
   {
     case NM_DENSE:
     {
-      printf("========== storageType = NM_DENSE\n");
+      // printf("========== storageType = NM_DENSE\n");
       break;
     }
     case NM_SPARSE_BLOCK:
     {
       assert(m->matrix1);
-      printf("========== storageType =  NM_SPARSE_BLOCK\n");
+      // printf("========== storageType =  NM_SPARSE_BLOCK\n");
       break;
     }
     case NM_SPARSE:
     {
       assert(m->matrix2);
-      printf("========== storageType = NM_SPARSE\n");
+      // printf("========== storageType = NM_SPARSE\n");
       switch(m->matrix2->origin)
       {
         case NSM_TRIPLET:
         {
-          printf("========== origin =  NSM_TRIPLET\n");
+          // printf("========== origin =  NSM_TRIPLET\n");
           break;
         }
         case NSM_HALF_TRIPLET:
         {
-          printf("========== origin =  NSM_HALF_TRIPLET\n");
+          // printf("========== origin =  NSM_HALF_TRIPLET\n");
           break;
         }
         case NSM_CSC:
         {
-          printf("========== origin =  NSM_CSC\n");
+          // printf("========== origin =  NSM_CSC\n");
           break;
         }
         case NSM_CSR:
         {
-          printf("========== origin =  NSM_CSR\n");
+          // printf("========== origin =  NSM_CSR\n");
           break;
         }
         default:
         {
-          fprintf(stderr, "NM_display ::  unknown origin %d for sparse matrix\n", m->matrix2->origin);
+          // fprintf(stderr, "NM_display ::  unknown origin %d for sparse matrix\n", m->matrix2->origin);
         }
       }
 
-      printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
+      // printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
       CSparseMatrix* A;
       if(m->matrix2->triplet)
       {
-        printf("========== a matrix in format triplet is stored\n");
+        // printf("========== a matrix in format triplet is stored\n");
         A = m->matrix2->triplet;
       }
       else if(m->matrix2->csc)
       {
-        printf("========== a matrix in format csc is stored\n");
+        // printf("========== a matrix in format csc is stored\n");
         A = m->matrix2->csc;
       }
       else if(m->matrix2->trans_csc)
       {
-        printf("========== a matrix in format trans_csc is stored\n");
+        // printf("========== a matrix in format trans_csc is stored\n");
         A = m->matrix2->trans_csc;
       }
 
@@ -3559,7 +3559,18 @@ while(1)
 
 
       /* 3. Solve non-symmetric Newton system without NT scaling via LU factorization */
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1) before, i = %zu\n", iteration);
+
       NM_LU_solve(Jac, rhs, 1);
+
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1) after, i = %zu\n", iteration);
+
+
+
+
+
 
 
 
@@ -3650,7 +3661,14 @@ while(1)
       cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
       /* 7. Solve the 2nd linear system */
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2) before, i = %zu\n", iteration);
+
       NM_LU_solve(Jac, rhs, 1);
+
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2) after, i = %zu\n", iteration);
+
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
       residu_LS_m = dnrm2l(m,rhs_save);
       residu_LS_nd = dnrm2l(nd,rhs_save+m);
