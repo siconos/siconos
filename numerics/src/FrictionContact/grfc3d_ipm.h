@@ -64,7 +64,7 @@ static double getStepLength(const double * const x, const double * const dx, con
 {
   unsigned int dimension = (int)(vecSize / varsCount);
   unsigned int pos;
-  float_type aL, bL, cL, dL, alphaL;
+  float_type aL, bL, cL, dL, alphaL, nxb;
   double min_alpha;
 
   min_alpha = 1e20; //1.0;
@@ -76,8 +76,10 @@ static double getStepLength(const double * const x, const double * const dx, con
     aL = (dx[pos] - aL)*(dx[pos] + aL);
     bL = x[pos]*dx[pos];
     for (int k = 1; k < dimension; bL -= x[pos+k]*dx[pos+k], k++);
-    cL = dnrm2l(dimension-1, x+pos+1);
-    cL = (x[pos] - cL)*(x[pos] + cL);
+    nxb = dnrm2l(dimension-1, x+pos+1);
+    // cL = (x[pos] - nxb)*(x[pos] + nxb);
+    cL = x[pos] - nxb;
+    if (cL <= 0.) cL = DBL_EPSILON*(x[pos] + nxb); else cL = (x[pos] - nxb)*(x[pos] + nxb); // to avoid negative number b/c of different data types
     dL = bL*bL - aL*cL;
     if(aL < 0 || (bL < 0 && dL > 0 ))
       if (bL>0)
