@@ -506,6 +506,7 @@ static  NumericsMatrix *  Pinv(const double *u1, const double *r1, const double 
   double * othor = (double*)calloc(2, sizeof(double));
 
   float_type p0inv=0., data=0., nub=0., nrb=0., det_u=0., det_r=0.;
+  float_type nxb=0., nzb=0.;
 
   int id3, id5;
   for(size_t i = 0; i < varsCount; i++)
@@ -513,7 +514,11 @@ static  NumericsMatrix *  Pinv(const double *u1, const double *r1, const double 
     id3 = i*d3;
     id5 = i*d5;
 
-    p0inv = 1./sqrtl( dnrm2sqrl(d3,x+id3) + dnrm2sqrl(d3,z+id3) - 4.*x[id3]*x[id3]*dnrm2sqrl(d3-1,x+id3+1)/dnrm2sqrl(d3,x+id3) - 4.*z[id3]*z[id3]*dnrm2sqrl(d3-1,z+id3+1)/dnrm2sqrl(d3,z+id3) );
+    // p0inv = 1./sqrtl( dnrm2sqrl(d3,x+id3) + dnrm2sqrl(d3,z+id3) - 4.*x[id3]*x[id3]*dnrm2sqrl(d3-1,x+id3+1)/dnrm2sqrl(d3,x+id3) - 4.*z[id3]*z[id3]*dnrm2sqrl(d3-1,z+id3+1)/dnrm2sqrl(d3,z+id3) );
+    nxb = dnrm2l(d3-1,x+id3+1);
+    nzb = dnrm2l(d3-1,z+id3+1);
+    p0inv = dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3)/sqrtl((x[id3]-nxb)*(x[id3]-nxb)*(x[id3]+nxb)*(x[id3]+nxb)*dnrm2sqrl(d3,z+id3) + (z[id3]-nzb)*(z[id3]-nzb)*(z[id3]+nzb)*(z[id3]+nzb)*dnrm2sqrl(d3,x+id3));
+
 
     // Assign data for out[0,0]
     cs_entry(out_triplet, id5, id5, p0inv);
@@ -538,13 +543,19 @@ static  NumericsMatrix *  Pinv(const double *u1, const double *r1, const double 
     // Compute det(r1), det(u1)
     nrb = dnrm2l(d3-1,r1+id3+1);
     nub = dnrm2l(d3-1,u1+id3+1);
-    det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
-    det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    // det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+    det_r = r1[id3]-nrb;
+    if (det_r < 0.) det_r = (r1[id3]+nrb)*DBL_EPSILON; else det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+
+    // det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    det_u = u1[id3]-nub;
+    if (det_u <= 0.) det_u = (u1[id3]+nub)*DBL_EPSILON; else det_u = (u1[id3]+nub)*(u1[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       for(size_t l = 1; l < d3; l++)
       {
-        data = (1./dnrm2sqrl(d3-1,x+id3+1)) * ( (1./dnrm2l(d3,x+id3))*x[id3+k]*x[id3+l] + powl(det_r/det_u, 0.25)*othor[k-1]*othor[l-1] );
+        data = ( x[id3+k]*x[id3+l]/dnrm2l(d3,x+id3) + powl(det_r/det_u, 0.25)*othor[k-1]*othor[l-1] ) /dnrm2sqrl(d3-1,x+id3+1);
         cs_entry(out_triplet, id5+k, id5+l, data);
       }
     }
@@ -555,13 +566,19 @@ static  NumericsMatrix *  Pinv(const double *u1, const double *r1, const double 
     // Compute det(r2), det(u2)
     nrb = dnrm2l(d3-1,r2+id3+1);
     nub = dnrm2l(d3-1,u2+id3+1);
-    det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
-    det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    // det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+    det_r = r2[id3]-nrb;
+    if (det_r < 0.) det_r = (r2[id3]+nrb)*DBL_EPSILON; else det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+
+    // det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    det_u = u2[id3]-nub;
+    if (det_u <= 0.) det_u = (u2[id3]+nub)*DBL_EPSILON; else det_u = (u2[id3]+nub)*(u2[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       for(size_t l = 1; l < d3; l++)
       {
-        data = (1./dnrm2sqrl(d3-1,z+id3+1)) * ( (1./dnrm2l(d3,z+id3))*z[id3+k]*z[id3+l] + powl(det_r/det_u, 0.25)*othor[k-1]*othor[l-1] );
+        data = ( z[id3+k]*z[id3+l]/dnrm2l(d3,z+id3) + powl(det_r/det_u, 0.25)*othor[k-1]*othor[l-1] ) /dnrm2sqrl(d3-1,z+id3+1);
         cs_entry(out_triplet, id5+k+2, id5+l+2, data);
       }
     }
@@ -625,8 +642,13 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
     // Compute det(r1), det(u1)
     nrb = dnrm2l(d3-1,r1+id3+1);
     nub = dnrm2l(d3-1,u1+id3+1);
-    det_r = (r1[id3]+nrb)*(r1[id3]-nrb); //if (det_r < 0) printf("Pinvy r %zu: \n%3.70e %3.70e %3.70e \n%3.50Le %Le %Le\n",i, r1[id3], r1[id3+1], r1[id3+2], nrb, r1[id3]+nrb, r1[id3]-nrb);
-    det_u = (u1[id3]+nub)*(u1[id3]-nub); //if (det_u < 0) printf("Pinvy u %zu: \n%3.50e %3.50e %3.50e \n%3.50Le %Le %Le\n",i, u1[id3], u1[id3+1], u1[id3+2], nub, u1[id3]+nub, u1[id3]-nub);
+    //det_r = (r1[id3]+nrb)*(r1[id3]-nrb); //if (det_r < 0) printf("Pinvy r %zu: \n%3.70e %3.70e %3.70e \n%3.50Le %Le %Le\n",i, r1[id3], r1[id3+1], r1[id3+2], nrb, r1[id3]+nrb, r1[id3]-nrb);
+    det_r = r1[id3]-nrb;
+    if (det_r < 0.) det_r = (r1[id3]+nrb)*DBL_EPSILON; else det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+
+    //det_u = (u1[id3]+nub)*(u1[id3]-nub); //if (det_u < 0) printf("Pinvy u %zu: \n%3.50e %3.50e %3.50e \n%3.50Le %Le %Le\n",i, u1[id3], u1[id3+1], u1[id3+2], nub, u1[id3]+nub, u1[id3]-nub);
+    det_u = u1[id3]-nub;
+    if (det_u <= 0.) det_u = (u1[id3]+nub)*DBL_EPSILON; else det_u = (u1[id3]+nub)*(u1[id3]-nub);
     for(size_t k = 1; k < d3; k++)
     {
       out[id5+k] = ( cblas_ddot(d3-1, x+id3+1, 1, y+id5+1, 1)*x[id3+k]/dnrm2l(d3,x+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+1, 1)*othor[k-1] ) /dnrm2sqrl(d3-1,x+id3+1);
@@ -638,8 +660,14 @@ static void Pinvy(const double *u1, const double *r1, const double *u2, const do
     // Compute det(r2), det(u2)
     nrb = dnrm2l(d3-1,r2+id3+1);
     nub = dnrm2l(d3-1,u2+id3+1);
-    det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
-    det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    // det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+    det_r = r2[id3]-nrb;
+    if (det_r < 0.) det_r = (r2[id3]+nrb)*DBL_EPSILON; else det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+
+    // det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    det_u = u2[id3]-nub;
+    if (det_u <= 0.) det_u = (u2[id3]+nub)*DBL_EPSILON; else det_u = (u2[id3]+nub)*(u2[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       out[id5+k+2] = ( cblas_ddot(d3-1, z+id3+1, 1, y+id5+3, 1)*z[id3+k]/dnrm2l(d3,z+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+3, 1)*othor[k-1] ) /dnrm2sqrl(d3-1,z+id3+1);
@@ -699,8 +727,14 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
     // Compute det(r1), det(u1)
     nrb = dnrm2l(d3-1,r1+id3+1);
     nub = dnrm2l(d3-1,u1+id3+1);
-    det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
-    det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    // det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+    det_r = r1[id3]-nrb;
+    if (det_r < 0.) det_r = (r1[id3]+nrb)*DBL_EPSILON; else det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+
+    // det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    det_u = u1[id3]-nub;
+    if (det_u <= 0.) det_u = (u1[id3]+nub)*DBL_EPSILON; else det_u = (u1[id3]+nub)*(u1[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       out[id5+k] = -2.*x[id3]*y[id5]*p0inv*x[id3+k]/dnrm2sqrl(d3,x+id3) + ( cblas_ddot(d3-1, x+id3+1, 1, y+id5+1, 1)*x[id3+k]/dnrm2l(d3,x+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+1, 1)*othor[k-1] ) /dnrm2sqrl(d3-1,x+id3+1);
@@ -712,8 +746,14 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
     // Compute det(r2), det(u2)
     nrb = dnrm2l(d3-1,r2+id3+1);
     nub = dnrm2l(d3-1,u2+id3+1);
-    det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
-    det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    // det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+    det_r = r2[id3]-nrb;
+    if (det_r < 0.) det_r = (r2[id3]+nrb)*DBL_EPSILON; else det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+
+    // det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    det_u = u2[id3]-nub;
+    if (det_u <= 0.) det_u = (u2[id3]+nub)*DBL_EPSILON; else det_u = (u2[id3]+nub)*(u2[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       out[id5+k+2] = -2.*z[id3]*y[id5]*p0inv*z[id3+k]/dnrm2sqrl(d3,z+id3) + ( cblas_ddot(d3-1, z+id3+1, 1, y+id5+3, 1)*z[id3+k]/dnrm2l(d3,z+id3) + powl(det_r/det_u, 0.25)*cblas_ddot(d3-1, othor, 1, y+id5+3, 1)*othor[k-1] ) /dnrm2sqrl(d3-1,z+id3+1);
@@ -1065,16 +1105,28 @@ static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, con
       // Compute det(r1), det(u1)
       nrb = dnrm2l(d3-1,r1+id3+1);
       nub = dnrm2l(d3-1,u1+id3+1);
-      det_r1 = (r1[id3]+nrb)*(r1[id3]-nrb);
-      det_u1 = (u1[id3]+nub)*(u1[id3]-nub);
+      // det_r1 = (r1[id3]+nrb)*(r1[id3]-nrb);
+      det_r1 = r1[id3]-nrb;
+      if (det_r1 < 0.) det_r1 = (r1[id3]+nrb)*DBL_EPSILON; else det_r1 = (r1[id3]+nrb)*(r1[id3]-nrb);
+
+      // det_u1 = (u1[id3]+nub)*(u1[id3]-nub);
+      det_u1 = u1[id3]-nub;
+      if (det_u1 <= 0.) det_u1 = (u1[id3]+nub)*DBL_EPSILON; else det_u1 = (u1[id3]+nub)*(u1[id3]-nub);
+
 
       othor2[0] = -z[id3+2];
       othor2[1] =  z[id3+1];
       // Compute det(r2), det(u2)
       nrb = dnrm2l(d3-1,r2+id3+1);
       nub = dnrm2l(d3-1,u2+id3+1);
-      det_r2 = (r2[id3]+nrb)*(r2[id3]-nrb);
-      det_u2 = (u2[id3]+nub)*(u2[id3]-nub);
+      // det_r2 = (r2[id3]+nrb)*(r2[id3]-nrb);
+      det_r2 = r2[id3]-nrb;
+      if (det_r2 < 0.) det_r2 = (r2[id3]+nrb)*DBL_EPSILON; else det_r2 = (r2[id3]+nrb)*(r2[id3]-nrb);
+
+      // det_u2 = (u2[id3]+nub)*(u2[id3]-nub);
+      det_u2 = u2[id3]-nub;
+      if (det_u2 <= 0.) det_u2 = (u2[id3]+nub)*DBL_EPSILON; else det_u2 = (u2[id3]+nub)*(u2[id3]-nub);
+
 
       for (size_t j = 0; j < d5; j++)  // traverse all rows-block of Pinv
       {
@@ -1854,66 +1906,66 @@ static  NumericsMatrix *  multiply_LinvH(const double *u1, const double *r1, con
 
 
 
-/* Return the matrix (J*Q^-2)'*x */
-static  void JQinv2Tx(const double * const f, const double * const g, const float_type * const wf, const float_type * const wg, const size_t vecSize, const size_t varsCount, const double * const x, double * out)
-{
-  size_t dim = (size_t)(vecSize / varsCount); // dim must be 3
-  assert(dim == 3);
-  size_t d5 = dim+2;  // d5 must be 5
-  size_t n_d3 = varsCount*dim;  // n_d3 = x*dim
+// /* Return the matrix (J*Q^-2)'*x */
+// static  void JQinv2Tx(const double * const f, const double * const g, const float_type * const wf, const float_type * const wg, const size_t vecSize, const size_t varsCount, const double * const x, double * out)
+// {
+//   size_t dim = (size_t)(vecSize / varsCount); // dim must be 3
+//   assert(dim == 3);
+//   size_t d5 = dim+2;  // d5 must be 5
+//   size_t n_d3 = varsCount*dim;  // n_d3 = x*dim
 
 
-  float_type coef = 1., w2f = 1., w2g = 1., ddot = 1.;
+//   float_type coef = 1., w2f = 1., w2g = 1., ddot = 1.;
 
-  for(size_t i = 0; i < varsCount; i++)
-  {
-    w2f = wf[i]*wf[i];
-    // For a*x0 + b'*x_bar
-    out[i*dim] = dnrm2sqrl(dim,f+i*dim)*x[i*d5]/w2f; // a*x0
+//   for(size_t i = 0; i < varsCount; i++)
+//   {
+//     w2f = wf[i]*wf[i];
+//     // For a*x0 + b'*x_bar
+//     out[i*dim] = dnrm2sqrl(dim,f+i*dim)*x[i*d5]/w2f; // a*x0
 
-    coef = -2.*f[i*dim]/w2f;
-    for(size_t k = 1; k < dim; k++)
-    {
-      out[i*dim] += coef*f[i*dim+k]*x[i*d5+k]; // + b'*x_bar
-    }
+//     coef = -2.*f[i*dim]/w2f;
+//     for(size_t k = 1; k < dim; k++)
+//     {
+//       out[i*dim] += coef*f[i*dim+k]*x[i*d5+k]; // + b'*x_bar
+//     }
 
-    // For x0*b + A*x_bar
-    ddot = 0.;
-    for(size_t l = 1; l < dim; l++)
-    {
-      ddot += f[i*dim+l]*x[i*d5+l]; // Compute f_bar'*x_bar
-    }
-    for(size_t k = 1; k < dim; k++)
-    {
-      out[i*dim+k] = (x[i*d5+k]+2.*(ddot-f[i*dim]*x[i*d5])*f[i*dim+k])/w2f;
-    }
-  }
+//     // For x0*b + A*x_bar
+//     ddot = 0.;
+//     for(size_t l = 1; l < dim; l++)
+//     {
+//       ddot += f[i*dim+l]*x[i*d5+l]; // Compute f_bar'*x_bar
+//     }
+//     for(size_t k = 1; k < dim; k++)
+//     {
+//       out[i*dim+k] = (x[i*d5+k]+2.*(ddot-f[i*dim]*x[i*d5])*f[i*dim+k])/w2f;
+//     }
+//   }
 
-  for(size_t i = 0; i < varsCount; i++)
-  {
-    w2g = wg[i]*wg[i];
-    // For c*x0 + d'*x_tilde
-    out[i*dim+n_d3] = dnrm2sqrl(dim,g+i*dim)*x[i*d5]/w2g; // c*x0
+//   for(size_t i = 0; i < varsCount; i++)
+//   {
+//     w2g = wg[i]*wg[i];
+//     // For c*x0 + d'*x_tilde
+//     out[i*dim+n_d3] = dnrm2sqrl(dim,g+i*dim)*x[i*d5]/w2g; // c*x0
 
-    coef = -2.*g[i*dim]/w2g;
-    for(size_t k = 1; k < dim; k++)
-    {
-      out[i*dim+n_d3] += coef*g[i*dim+k]*x[i*d5+k+2]; // + d'*x_tilde
-    }
+//     coef = -2.*g[i*dim]/w2g;
+//     for(size_t k = 1; k < dim; k++)
+//     {
+//       out[i*dim+n_d3] += coef*g[i*dim+k]*x[i*d5+k+2]; // + d'*x_tilde
+//     }
 
 
-    // For x0*d + C*x_bar
-    ddot = 0.;
-    for(size_t l = 1; l < dim; l++)
-    {
-      ddot += g[i*dim+l]*x[i*d5+l+2]; // Compute g_bar'*x_tilde
-    }
-    for(size_t k = 1; k < dim; k++)
-    {
-      out[i*dim+k+n_d3] = (x[i*d5+k+2]+2.*(ddot-g[i*dim]*x[i*d5])*g[i*dim+k])/w2g;
-    }
-  }
-}
+//     // For x0*d + C*x_bar
+//     ddot = 0.;
+//     for(size_t l = 1; l < dim; l++)
+//     {
+//       ddot += g[i*dim+l]*x[i*d5+l+2]; // Compute g_bar'*x_tilde
+//     }
+//     for(size_t k = 1; k < dim; k++)
+//     {
+//       out[i*dim+k+n_d3] = (x[i*d5+k+2]+2.*(ddot-g[i*dim]*x[i*d5])*g[i*dim+k])/w2g;
+//     }
+//   }
+// }
 
 
 
@@ -2317,22 +2369,22 @@ void is_in_int_of_Lcone(const double * const x, const size_t vecSize, const size
     diff = x[id3]-cblas_dnrm2(dim-1, x+id3+1, 1);
     if (diff <= 0.)
     {
-      printf("\n(double)     x0 = %9.70e", x[id3]);
-      // printf("\n(l doub)     x0 = %9.70Le", (float_type)x[id3]);
-      printf("\n(double) x0+eps = %9.70e", x[id3]+DBL_EPSILON);
-      printf("\n(double)|x_bar| = %9.70e", cblas_dnrm2(dim-1, x+id3+1, 1));
-      printf("\n(l doub)|x_bar| = %9.70Le\n", dnrm2l(dim-1, x+id3+1));
+      printf("\n(double)     x0 = %9.65e", x[id3]);
+      printf("\n(l doub)     x0 = %9.65Le", (float_type)x[id3]);
+      printf("\n(double) x0+eps = %9.65e", x[id3]+DBL_EPSILON);
+      printf("\n(double)|x_bar| = %9.65e", cblas_dnrm2(dim-1, x+id3+1, 1));
+      printf("\n(l doub)|x_bar| = %9.65Le\n", dnrm2l(dim-1, x+id3+1));
 
-      printf("\ni = %zu: (double)x0 - (double)|x_bar| = (double) %9.70e\n", i, diff);
+      printf("\ni = %zu: (double)x0 - (double)|x_bar| = (double) %9.65e\n", i, diff);
 
       diffL = (float_type)(x[id3]-cblas_dnrm2(dim-1, x+id3+1, 1));
-      printf("\ni = %zu: (double)x0 - (double)|x_bar| = (l doub) %9.70Le\n", i, diffL);
+      printf("\ni = %zu: (double)x0 - (double)|x_bar| = (l doub) %9.65Le\n", i, diffL);
 
       diff = (double)(x[id3]-dnrm2l(dim-1, x+id3+1));
-      printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (double) %9.70e\n", i, diff);
+      printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (double) %9.65e\n", i, diff);
 
       diffL = x[id3]-dnrm2l(dim-1, x+id3+1);
-      printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (l doub) %9.70Le\n", i, diffL);
+      printf("\ni = %zu: (double)x0 - (l doub)|x_bar| = (l doub) %9.65Le\n", i, diffL);
     }
   }
 }
@@ -2435,8 +2487,14 @@ NumericsMatrix * compute_JQinv(const double *u1, const double *r1, const double 
     // det(r1), det(u1)
     nrb = dnrm2l(d3-1,r1+id3+1);
     nub = dnrm2l(d3-1,u1+id3+1);
-    det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
-    det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    // det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+    det_r = r1[id3]-nrb;
+    if (det_r <= 0.) det_r = (r1[id3]+nrb)*DBL_EPSILON; else det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+
+    // det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    det_u = u1[id3]-nub;
+    if (det_u < 0.) det_u = (u1[id3]+nub)*DBL_EPSILON; else det_u = (u1[id3]+nub)*(u1[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       for(size_t l = 1; l < d3; l++)
@@ -2463,8 +2521,14 @@ NumericsMatrix * compute_JQinv(const double *u1, const double *r1, const double 
     // det(r2), det(u2)
     nrb = dnrm2l(d3-1,r2+id3+1);
     nub = dnrm2l(d3-1,u2+id3+1);
-    det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
-    det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    // det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+    det_r = r2[id3]-nrb;
+    if (det_r <= 0.) det_r = (r2[id3]+nrb)*DBL_EPSILON; else det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+
+    // det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    det_u = u2[id3]-nub;
+    if (det_u < 0.) det_u = (u2[id3]+nub)*DBL_EPSILON; else det_u = (u2[id3]+nub)*(u2[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       for(size_t l = 1; l < d3; l++)
@@ -2530,8 +2594,14 @@ NumericsMatrix * compute_JQinv2Jt(const double *u1, const double *r1, const doub
     // Compute det(r1), det(u1)
     nrb = dnrm2l(d3-1,r1+id3+1);
     nub = dnrm2l(d3-1,u1+id3+1);
-    det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
-    det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    // det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+    det_r = r1[id3]-nrb;
+    if (det_r <= 0.) det_r = (r1[id3]+nrb)*DBL_EPSILON; else det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+
+    // det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    det_u = u1[id3]-nub;
+    if (det_u < 0.) det_u = (u1[id3]+nub)*DBL_EPSILON; else det_u = (u1[id3]+nub)*(u1[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       for(size_t l = 1; l < d3; l++)
@@ -2546,8 +2616,14 @@ NumericsMatrix * compute_JQinv2Jt(const double *u1, const double *r1, const doub
     // Compute det(r2), det(u2)
     nrb = dnrm2l(d3-1,r2+id3+1);
     nub = dnrm2l(d3-1,u2+id3+1);
-    det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
-    det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    // det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+    det_r = r2[id3]-nrb;
+    if (det_r <= 0.) det_r = (r2[id3]+nrb)*DBL_EPSILON; else det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+
+    // det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    det_u = u2[id3]-nub;
+    if (det_u < 0.) det_u = (u2[id3]+nub)*DBL_EPSILON; else det_u = (u2[id3]+nub)*(u2[id3]-nub);
+
     for(size_t k = 1; k < d3; k++)
     {
       for(size_t l = 1; l < d3; l++)
@@ -3231,8 +3307,6 @@ while(1)
     extract_vector(reaction, nd, n, 4, 5, reaction_2);
 
 
-
-
     // printf("velocity_1: \n");
     // is_in_int_of_Lcone(velocity_1, n_dminus2, n);
     // printf("velocity_2: \n");
@@ -3244,31 +3318,15 @@ while(1)
 
 
 
-    // if (iteration == 33)
-    // {
-    //   printf("\nVelocity_1:\n");
-    //   print_neg_eigval(velocity_1, n_dminus2, n);
-    //   printf("\nVelocity_2:\n");
-    //   print_neg_eigval(velocity_2, n_dminus2, n);
-    //   printf("\nReaction_1:\n");
-    //   print_neg_eigval(reaction_1, n_dminus2, n);
-    //   printf("\nReaction_2:\n");
-    //   print_neg_eigval(reaction_2, n_dminus2, n);
+    for (size_t i=0; i<n; i++)
+    {
+      id3 = i*d_minus_2;
+      if (fabsl(velocity_1[id3]-dnrm2l(2,velocity_1+id3+1)) <= DBL_EPSILON) {velocity_1[id3] += DBL_EPSILON; printf("i = %zu: velocity_1 += eps\n", i);}
+      if (fabsl(velocity_2[id3]-dnrm2l(2,velocity_2+id3+1)) <= DBL_EPSILON) {velocity_2[id3] += DBL_EPSILON; printf("i = %zu: velocity_2 += eps\n", i);}
+      if (fabsl(reaction_1[id3]-dnrm2l(2,reaction_1+id3+1)) <= DBL_EPSILON) {reaction_1[id3] += DBL_EPSILON; printf("i = %zu: reaction_1 += eps\n", i);}
+      if (fabsl(reaction_2[id3]-dnrm2l(2,reaction_2+id3+1)) <= DBL_EPSILON) {reaction_2[id3] += DBL_EPSILON; printf("i = %zu: reaction_2 += eps\n", i);}
+    }
 
-
-
-    //   id3=0, id5=0;
-    //   double diff = 0.;
-    //   for (size_t i=0; i<n; i++)
-    //   {
-    //     id5 = i*d;
-    //     id3 = i*d_minus_2;
-    //     diff = velocity[id5] - cblas_dnrm2(d_minus_2-1, velocity_1+id3+1, 1) - cblas_dnrm2(d_minus_2-1, velocity_2+id3+1, 1);
-    //     if (diff < 0.) printf("Cone %zu: velocity is no more in int(F)\n", i);
-
-    //     printf("Cone %zu: u0 - t - t' = %3.30e\n", i, velocity[id5] - t[i] - t_prime[i]);
-    //   }
-    // }
 
 
 
@@ -3647,7 +3705,7 @@ while(1)
       // Update complemConstraint = 1st term - 2nd term + 3rd term
       NV_sub(complemConstraint_1, iden, n_dminus2, tmp_n_dminus2_1);
       NV_sub(complemConstraint_2, iden, n_dminus2, tmp_n_dminus2_2);
-      if (iden) free(iden);
+      if (iden) {free(iden); iden = NULL;}
       NV_add(tmp_n_dminus2_1, dvdr_jprod_1, n_dminus2, complemConstraint_1); // complemConstraint_1 = updated rhs_1
       NV_add(tmp_n_dminus2_2, dvdr_jprod_2, n_dminus2, complemConstraint_2); // complemConstraint_1 = updated rhs_2
 
@@ -5597,8 +5655,8 @@ else break;
     // fclose(matlab_file);
   // }
 
-  if (iden) free(iden);
-  if (rhs_save) free(rhs_save);
+  if (iden) {free(iden); iden = NULL;}
+  if (rhs_save) {free(rhs_save); rhs_save = NULL;}
 
   if (minus_M) {minus_M = NM_free(minus_M);}
   if (minus_H) {minus_H = NM_free(minus_H);}
@@ -5627,9 +5685,6 @@ else break;
   //  fclose(dfile);
 
   *info = hasNotConverged;
-
-
-
 
 
 
@@ -5888,8 +5943,8 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;

@@ -48,7 +48,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-55-126.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-58-118.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-63-138.hdf5";
-    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-69-150.hdf5";     // failure for 2x2 PinH
+    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-69-150.hdf5";     // failure for 2x2 PinH
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-79-180.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1206-nc-88-195.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1236-nc-93-199.hdf5";
@@ -100,7 +100,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-3072-nc-518-730.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-3072-nc-519-757.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-3072-nc-522-763.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-3072-nc-526-749.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-3072-nc-526-749.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-3072-nc-531-765.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-3084-nc-566-798.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-3234-nc-576-815.hdf5";

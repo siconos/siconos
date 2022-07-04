@@ -416,6 +416,7 @@ float_type dnrm2l(const unsigned int n, const double * x)
           ssq = ssq + (quo * quo);
         }
       }
+      if(ssq < 0.) printf("\n dnrm2l. NaN HERE\n");
       norm = scale * sqrtl(ssq);
     }
   }
@@ -498,7 +499,7 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
   size_t j;
   float_type *xb = (float_type*)calloc(dimension-1, sizeof(float_type));
 
-  // for (int i = 0; i < dimension - 1; xb[i] = 1/sqrtl(dimension-1), i++); // useful ?
+  for (int i = 0; i < dimension - 1; xb[i] = 1/sqrtl(dimension-1), i++); // useful ?
 
   for(size_t i = 0; i < varsCount; i++)
   {
