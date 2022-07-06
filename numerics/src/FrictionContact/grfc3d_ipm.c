@@ -50,7 +50,7 @@
 #include "NM_MA57.h"
 #endif
 
-
+#define EPS 1e-40
 
 typedef struct
 {
@@ -1269,7 +1269,7 @@ csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
     // CS_ENTRY d, lki, *Lx, *x, *Cx ;
     CS_ENTRY *Lx,  *Cx ;
     float_type d, lki, *x;
-    CS_INT top, i, p, k, n, *Li, *Lp, *cp, *pinv, *s, *c, *parent, *Cp, *Ci ;
+    CS_INT top, i, p, k, n, *Li, *Lp, *cp, *pinv, *s, *c, *parent, *Cp, *Ci;
     cs *L, *C, *E ;
     csn *N ;
     if (!CS_CSC (A) || !S || !S->cp || !S->parent) return (NULL) ;
@@ -1314,14 +1314,14 @@ csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
                 x [Li [p]] -= Lx [p] * lki ;
             }
             // d -= lki * CS_CONJ (lki) ;            /* d = d - L(k,i)*L(k,i) */
-            d -= lki * conjl (lki) ;            /* d = d - L(k,i)*L(k,i) */
+            d -= lki * lki ;            /* d = d - L(k,i)*L(k,i) */
             p = c [i]++ ;
             Li [p] = k ;                 /* store L(k,i) in column i */
             // Lx [p] = CS_CONJ (lki) ;
-            Lx [p] = conjl (lki) ;
+            Lx [p] = lki ;
             if(iteration==8)
             {
-              printf("k=%ld, i=%ld, p=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%f, lki=%5.40Le\n",k,i,p,Li[p],Lp[p],Lx [p],lki);
+              printf("k=%ld, i=%ld, p=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%5.40e, lki=%5.40Le, d=%5.40Le\n",k,i,p,Li[p],Lp[p],Lx [p],lki, d);
             }
         }
         /* --- Compute L(k,k) ----------------------------------------------- */
@@ -1333,11 +1333,12 @@ csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
           printf("\n\n Factorized matrix has a negative eigenvalue at the cone i = %ld. \n\n", k/5+1);
           return (cs_ndone (N, E, c, x, 0)) ; /* not pos def */
         }
+        // if (d < 0.) d = 1e-40;
         p = c [k]++ ;
         Li [p] = k ;                /* store L(k,k) = sqrt (d) in column k */
         // Lx [p] = sqrt (d) ;
         Lx [p] = sqrtl (d) ;
-        if(iteration==8)printf("k=%ld, p2=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%e\n",k,p,Li[p],Lp[p],Lx [p]);
+        if(iteration==8)printf("k=%ld, p2=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%5.40e\n",k,p,Li[p],Lp[p],Lx [p]);
     }
     Lp [n] = cp [n] ;               /* finalize L */
     // if(iteration==16) printf("\n\n cs_chol_2 001  \n\n");
@@ -1892,6 +1893,73 @@ static  NumericsMatrix *  multiply_LinvH(const double *u1, const double *r1, con
 
 
 
+NumericsMatrix * compute_factor_U(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
+{
+  size_t d3 = (size_t)(vecSize / varsCount); // d3 = 3
+  assert(d3 == 3);
+  size_t d5 = d3+2;  // d5 = 5
+
+  double *x = (double*)calloc(vecSize, sizeof(double));
+  double *z = (double*)calloc(vecSize, sizeof(double));
+  Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x); // x = pinv2_bar
+  Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z); // z = pinv2_tilde
+
+  NumericsMatrix * out = NM_create(NM_SPARSE, 5*varsCount, 5*varsCount);
+  NM_triplet_alloc(out, 11*varsCount);
+  CSparseMatrix *out_triplet = out->matrix2->triplet;
+
+  float_type p0=0., detx=0., detz=0., tmpx=0., tmpz=0.;
+
+  int id3, id5;
+  for(size_t i = 0; i < varsCount; i++)
+  {
+    id3 = i*d3;
+    id5 = i*d5;
+
+    detx = x[id3]*x[id3] - x[id3+1]*x[id3+1] - x[id3+2]*x[id3+2]; // det = x0^2 - |x_bar|^2
+    detz = z[id3]*z[id3] - z[id3+1]*z[id3+1] - z[id3+2]*z[id3+2];
+
+    tmpx = x[id3]*x[id3] + x[id3+2]*x[id3+2] - x[id3+1]*x[id3+1]; // tmp = x0^2 - x1^2 + x2^2
+    tmpz = z[id3]*z[id3] + z[id3+2]*z[id3+2] - z[id3+1]*z[id3+1];
+
+    // out[0,0]
+    p0 = sqrtl(detx*detx*dnrm2sqrl(d3,z+id3) + detz*detz*dnrm2sqrl(d3,x+id3))/(dnrm2l(d3,x+id3)*dnrm2l(d3,z+id3));
+    cs_entry(out_triplet, id5, id5, p0);
+
+
+    // out[0, 1:2]
+    if (detx <= 0.) detx = EPS;
+    cs_entry(out_triplet, id5, id5+1, 2*x[id3]*x[id3+1]*sqrtl(detx/(dnrm2sqrl(d3,x+id3)*tmpx)));
+    cs_entry(out_triplet, id5, id5+2, 2*x[id3]*x[id3+2]/sqrtl(tmpx));
+
+    // out[1:2, 1:2]
+    cs_entry(out_triplet, id5+1, id5+1, sqrtl(detx*dnrm2sqrl(d3,x+id3)/tmpx));
+    cs_entry(out_triplet, id5+1, id5+2, 2*x[id3+1]*x[id3+2]/sqrtl(tmpx));
+    cs_entry(out_triplet, id5+2, id5+2, sqrtl(tmpx));
+
+
+    // out[0, 3:4]
+    if (detz <= 0.) detz = EPS;
+    cs_entry(out_triplet, id5, id5+3, 2*z[id3]*z[id3+1]*sqrtl(detz/(dnrm2sqrl(d3,z+id3)*tmpz)));
+    cs_entry(out_triplet, id5, id5+4, 2*z[id3]*z[id3+2]/sqrtl(tmpz));
+
+    // out[3:4, 3:4]
+    cs_entry(out_triplet, id5+3, id5+3, sqrtl(detz*dnrm2sqrl(d3,z+id3)/tmpz));
+    cs_entry(out_triplet, id5+3, id5+4, 2*z[id3+1]*z[id3+2]/sqrtl(tmpz));
+    cs_entry(out_triplet, id5+4, id5+4, sqrtl(tmpz));
+
+
+
+
+  }
+  free(x); free(z);
+  return out;
+}
+
+
+
+
+
 
 
 
@@ -2225,7 +2293,7 @@ static void compute_errors(NumericsMatrix * M, NumericsMatrix * H, const double 
 
   /* --- Relative primal residual = |H'v + w - u|/max{|H'v|, |w|, |u|} --- */
   max_val = 0.;
-  NM_gemv(-1.0, H, v, 0.0, primalConstraint);  // primalConstraint = Hv
+  NM_gemv(-1.0, H, v, 0.0, primalConstraint);  // primalConstraint = -Hv
   max_val = cblas_dnrm2(nd, primalConstraint, 1);
   cblas_daxpy(nd, -1.0, w, 1, primalConstraint, 1);         // primalConstraint = -Hv - w
   cblas_daxpy(nd, 1.0, u, 1, primalConstraint, 1); // primalConstraint = u - Hv - w
@@ -2878,9 +2946,9 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double proj_error = 1e300;  // projection error
   double error_array[7];
 
-  double residu_LS_m = 0.0;
-  double residu_LS_nd = 0.0;
-  double residu_LS_ndplus1 = 0.0;
+  double residu_LS1_m = 0.0, residu_LS2_m = 0.0;
+  double residu_LS1_nd = 0.0, residu_LS2_nd = 0.0;
+  double residu_LS1_ndplus1 = 0.0, residu_LS2_ndplus1 = 0.0;
 
   long blocks_nzmax = 3*2*n;  // for 3x3 no scaling
 
@@ -3279,8 +3347,9 @@ while(1)
   }
   else
   {
-    numerics_printf_verbose(-1, "| it| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| full err| barparam| alpha_p | alpha_d | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| |residu m|residu nd|  n(d+1) |");
-    numerics_printf_verbose(-1, "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+    // numerics_printf_verbose(-1, "| it| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| full err| barparam| alpha_p | alpha_d | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| |residu m|residu nd|  n(d+1) |");
+    numerics_printf_verbose(-1, "| it| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| full err| barparam| alpha_p | alpha_d | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| | 1st residu m nd n(d+1) | 2nd residu m nd n(d+1) |");
+    numerics_printf_verbose(-1, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
   }
 
   // int stop;
@@ -3318,14 +3387,14 @@ while(1)
 
 
 
-    for (size_t i=0; i<n; i++)
-    {
-      id3 = i*d_minus_2;
-      if (fabsl(velocity_1[id3]-dnrm2l(2,velocity_1+id3+1)) <= DBL_EPSILON) {velocity_1[id3] += DBL_EPSILON; printf("i = %zu: velocity_1 += eps\n", i);}
-      if (fabsl(velocity_2[id3]-dnrm2l(2,velocity_2+id3+1)) <= DBL_EPSILON) {velocity_2[id3] += DBL_EPSILON; printf("i = %zu: velocity_2 += eps\n", i);}
-      if (fabsl(reaction_1[id3]-dnrm2l(2,reaction_1+id3+1)) <= DBL_EPSILON) {reaction_1[id3] += DBL_EPSILON; printf("i = %zu: reaction_1 += eps\n", i);}
-      if (fabsl(reaction_2[id3]-dnrm2l(2,reaction_2+id3+1)) <= DBL_EPSILON) {reaction_2[id3] += DBL_EPSILON; printf("i = %zu: reaction_2 += eps\n", i);}
-    }
+    // for (size_t i=0; i<n; i++)
+    // {
+    //   id3 = i*d_minus_2;
+    //   if (fabsl(velocity_1[id3]-dnrm2l(2,velocity_1+id3+1)) <= DBL_EPSILON) {velocity_1[id3] += DBL_EPSILON; printf("i = %zu: velocity_1 += eps\n", i);}
+    //   if (fabsl(velocity_2[id3]-dnrm2l(2,velocity_2+id3+1)) <= DBL_EPSILON) {velocity_2[id3] += DBL_EPSILON; printf("i = %zu: velocity_2 += eps\n", i);}
+    //   if (fabsl(reaction_1[id3]-dnrm2l(2,reaction_1+id3+1)) <= DBL_EPSILON) {reaction_1[id3] += DBL_EPSILON; printf("i = %zu: reaction_1 += eps\n", i);}
+    //   if (fabsl(reaction_2[id3]-dnrm2l(2,reaction_2+id3+1)) <= DBL_EPSILON) {reaction_2[id3] += DBL_EPSILON; printf("i = %zu: reaction_2 += eps\n", i);}
+    // }
 
 
 
@@ -3613,21 +3682,22 @@ while(1)
       cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m_plus_nd+n_dminus2, 1);
 
       cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
-
+      cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
 
       /* 3. Solve non-symmetric Newton system without NT scaling via LU factorization */
-      // print_NAN_in_matrix(Jac);
-      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1) before, i = %zu\n", iteration);
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) before solving, i = %zu\n", iteration);
 
       NM_LU_solve(Jac, rhs, 1);
 
-      // print_NAN_in_matrix(Jac);
-      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1) after, i = %zu\n", iteration);
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) after solving, i = %zu\n", iteration);
 
-
-
-
+      NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
+      residu_LS1_m = dnrm2l(m,rhs_save);
+      residu_LS1_nd = dnrm2l(nd,rhs_save+m);
+      residu_LS1_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
 
 
 
@@ -3682,7 +3752,7 @@ while(1)
       barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / (n);
 
       /* computing the centralization parameter */
-      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(fmin(alpha_primal, alpha_dual),2)) : sgmp3;
+      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * alpha_primal * alpha_primal) : sgmp3;
       sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/d;
       // sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
 
@@ -3714,23 +3784,23 @@ while(1)
       cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
       cblas_dcopy(n_dminus2, complemConstraint_1, 1, rhs+m_plus_nd, 1);
       cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m_plus_nd+n_dminus2, 1);
-      cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
 
+      cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
       cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
       /* 7. Solve the 2nd linear system */
-      // print_NAN_in_matrix(Jac);
-      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2) before, i = %zu\n", iteration);
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) before solving, i = %zu\n", iteration);
 
       NM_LU_solve(Jac, rhs, 1);
 
-      // print_NAN_in_matrix(Jac);
-      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2) after, i = %zu\n", iteration);
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) after solving, i = %zu\n", iteration);
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
-      residu_LS_m = dnrm2l(m,rhs_save);
-      residu_LS_nd = dnrm2l(nd,rhs_save+m);
-      residu_LS_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
+      residu_LS2_m = dnrm2l(m,rhs_save);
+      residu_LS2_nd = dnrm2l(nd,rhs_save+m);
+      residu_LS2_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
 
 
       /* 8. Retrieve the directions for CORRECTOR step */
@@ -3879,7 +3949,7 @@ while(1)
       cblas_dcopy(n_dminus2, reaction_2, 1, rhs+m_plus_nd+n_dminus2, 1);
 
       cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
-
+      cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
 
       /* 3. Solve full symmetric Newton system with NT scaling via LDLT factorization */
@@ -3893,6 +3963,10 @@ while(1)
       if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) after solving, i = %zu\n", iteration);
 
 
+      NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
+      residu_LS1_m = dnrm2l(m,rhs_save);
+      residu_LS1_nd = dnrm2l(nd,rhs_save+m);
+      residu_LS1_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
 
 
       /* 4. Retrieve the directions for PREDICTOR step */
@@ -3940,7 +4014,7 @@ while(1)
       barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / (n);
 
       /* computing the centralization parameter */
-      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(fmin(alpha_primal, alpha_dual),2)) : sgmp3;
+      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * alpha_primal * alpha_primal) : sgmp3;
       sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/d;
 
 
@@ -4026,8 +4100,8 @@ while(1)
       cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
       cblas_dcopy(n_dminus2, complemConstraint_1, 1, rhs+m_plus_nd, 1);
       cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m_plus_nd+n_dminus2, 1);
-      cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
 
+      cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
       cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
       /* 7. Solve the 2nd linear system */
@@ -4066,9 +4140,9 @@ while(1)
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
-      residu_LS_m = dnrm2l(m,rhs_save);
-      residu_LS_nd = dnrm2l(nd,rhs_save+m);
-      residu_LS_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
+      residu_LS2_m = dnrm2l(m,rhs_save);
+      residu_LS2_nd = dnrm2l(nd,rhs_save+m);
+      residu_LS2_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
 
 
       /* 8. Retrieve the directions for CORRECTOR step */
@@ -4189,8 +4263,12 @@ while(1)
       NM_insert(Jac, JQinvT, m_plus_nd, m);
       NM_insert(Jac, identity, m_plus_nd, m_plus_nd);
 
-      if (JQinv) JQinv = NM_free(JQinv);
-      if (JQinvT) JQinvT = NM_free(JQinvT);
+
+
+
+
+      // if (JQinv) JQinv = NM_free(JQinv);
+      // if (JQinvT) JQinvT = NM_free(JQinvT);
 
 
       /* Correction of w to take into account the dependence on the tangential velocity */
@@ -4221,15 +4299,26 @@ while(1)
       cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
       cblas_dcopy(n_dminus2, complemConstraint_1, 1, rhs+m_plus_nd, 1);
       cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m_plus_nd+n_dminus2, 1);
-      cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
 
+      cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
+      cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
 
       /* 3. Solve full symmetric Newton system with NT scaling via LDLT factorization */
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) before solving, i = %zu\n", iteration);
+
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
       NM_LDLT_solve(Jac, rhs, 1);
 
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) after solving, i = %zu\n", iteration);
 
+
+      NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
+      residu_LS1_m = dnrm2l(m,rhs_save);
+      residu_LS1_nd = dnrm2l(nd,rhs_save+m);
+      residu_LS1_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
 
 
       /* 4. Retrieve the directions for PREDICTOR step */
@@ -4291,7 +4380,7 @@ while(1)
       barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / (n);
 
       /* computing the centralization parameter */
-      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(fmin(alpha_primal, alpha_dual),2)) : sgmp3;
+      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * alpha_primal * alpha_primal) : sgmp3;
       sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/d;
 
 
@@ -4387,11 +4476,15 @@ while(1)
       cblas_dcopy(nd, primalConstraint, 1, rhs+m, 1);
       cblas_dcopy(n_dminus2, complemConstraint_1, 1, rhs+m_plus_nd, 1);
       cblas_dcopy(n_dminus2, complemConstraint_2, 1, rhs+m_plus_nd+n_dminus2, 1);
-      cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
 
+      cblas_dscal(m + nd + n_dplus1, -1.0, rhs, 1);
       cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
       /* 7. Solve the 2nd linear system */
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) before solving, i = %zu\n", iteration);
+
+
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
         cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
@@ -4426,11 +4519,15 @@ while(1)
       else
         NM_LDLT_solve(Jac, rhs, 1);
 
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) after solving, i = %zu\n", iteration);
+
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
-      residu_LS_m = dnrm2l(m,rhs_save);
-      residu_LS_nd = dnrm2l(nd,rhs_save+m);
-      residu_LS_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
+      residu_LS2_m = dnrm2l(m,rhs_save);
+      residu_LS2_nd = dnrm2l(nd,rhs_save+m);
+      residu_LS2_ndplus1 = dnrm2l(n_dplus1,rhs_save+m+nd);
+
 
 
 
@@ -4622,15 +4719,25 @@ while(1)
       NM_gemv(-1.0, H, globalVelocity, 0.0, Hvw);       // Hvw = -H*v
       cblas_daxpy(nd, -1.0, w, 1, Hvw, 1);              // Hvw = -H*v - w
       cblas_dcopy(nd, Hvw, 1, rhs+m, 1);
+      cblas_dcopy(m + nd, rhs, 1, rhs_save, 1);
 
-
-      // if(iteration==0) NV_display(rhs, m_plus_nd);
 
       /* 3. Solving full symmetric Newton system with NT scaling via LDLT factorization */
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd)) printf("(1st sys) before solving, i = %zu\n", iteration);
+
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
       NM_LDLT_solve(Jac, rhs, 1);
 
-      // if(iteration==0) NV_display(rhs, m_plus_nd);
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd)) printf("(1st sys) after solving, i = %zu\n", iteration);
+
+
+      NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
+      residu_LS1_m = dnrm2l(m,rhs_save);
+      residu_LS1_nd = dnrm2l(nd,rhs_save+m);
+
+
 
       /* 4. Retrieve the solutions for predictor step */
       cblas_dcopy(m, rhs, 1, d_globalVelocity, 1);
@@ -4699,7 +4806,7 @@ while(1)
       barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / (n);
 
       /* computing the centralization parameter */
-      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(fmin(alpha_primal, alpha_dual),2)) : sgmp3;
+      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * alpha_primal * alpha_primal) : sgmp3;
       sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/d;
 
 
@@ -4806,6 +4913,9 @@ while(1)
 
 
       /* 7. Solve the 2nd linear system */
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd)) printf("(2nd sys) before solving, i = %zu\n", iteration);
+
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
         cblas_dcopy(m + nd, rhs, 1, rhs_save, 1);
@@ -4833,10 +4943,13 @@ while(1)
       else
         NM_LDLT_solve(Jac, rhs, 1);
 
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd)) printf("(2nd sys) after solving, i = %zu\n", iteration);
+
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
-      residu_LS_m = dnrm2l(m,rhs_save);
-      residu_LS_nd = dnrm2l(nd,rhs_save+m);
+      residu_LS2_m = dnrm2l(m,rhs_save);
+      residu_LS2_nd = dnrm2l(nd,rhs_save+m);
 
 
       /* 8. Retrieve the solutions for predictor step */
@@ -5135,12 +5248,22 @@ while(1)
 
       }
 
-
+      cblas_dcopy(m + nd, rhs, 1, rhs_save, 1);
 
       /* 3. Solving full symmetric Newton system with NT scaling via LDLT factorization */
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd)) printf("(1st sys) before solving, i = %zu\n", iteration);
+
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
       NM_LDLT_solve(Jac, rhs, 1);
 
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd)) printf("(1st sys) after solving, i = %zu\n", iteration);
+
+
+      NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
+      residu_LS1_m = dnrm2l(m,rhs_save);
+      residu_LS1_nd = dnrm2l(nd,rhs_save+m);
 
 
       /* 4. Retrieve the solutions for predictor step */
@@ -5251,7 +5374,7 @@ while(1)
       barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / (n);
 
       /* computing the centralization parameter */
-      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(fmin(alpha_primal, alpha_dual),2)) : sgmp3;
+      e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * alpha_primal * alpha_primal) : sgmp3;
       sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/d;
 
 
@@ -5381,6 +5504,9 @@ while(1)
 
 
       /* 7. Solve the 2nd linear system */
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd)) printf("(2nd sys) before solving, i = %zu\n", iteration);
+
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
         cblas_dcopy(m + nd, rhs, 1, rhs_save, 1);
@@ -5408,10 +5534,13 @@ while(1)
       else
         NM_LDLT_solve(Jac, rhs, 1);
 
+      print_NAN_in_matrix(Jac);
+      if (NV_isnan(rhs, m + nd)) printf("(2nd sys) after solving, i = %zu\n", iteration);
+
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
-      residu_LS_m = dnrm2l(m,rhs_save);
-      residu_LS_nd = dnrm2l(nd,rhs_save+m);
+      residu_LS2_m = dnrm2l(m,rhs_save);
+      residu_LS2_nd = dnrm2l(nd,rhs_save+m);
 
 
       /* 8. Retrieve the solutions for predictor step */
@@ -5553,15 +5682,15 @@ while(1)
                             cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
                             cblas_dnrm2(nd, d_velocity, 1)/cblas_dnrm2(nd, velocity, 1),
                             cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1),
-                            residu_LS_m, residu_LS_nd, residu_LS_ndplus1, residu_refine);}
+                            residu_LS2_m, residu_LS2_nd, residu_LS2_ndplus1, residu_refine);}
     else
     {
-      numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+      numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e %.1e %.1e | %.1e %.1e %.1e |",
                             iteration, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, full_error, barr_param, alpha_primal, alpha_dual, sigma,
                             cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
                             cblas_dnrm2(nd, d_velocity, 1)/cblas_dnrm2(nd, velocity, 1),
                             cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1),
-                            residu_LS_m, residu_LS_nd, residu_LS_ndplus1);
+                            residu_LS1_m, residu_LS1_nd, residu_LS1_ndplus1, residu_LS2_m, residu_LS2_nd, residu_LS2_ndplus1);
     }
 
 
@@ -5569,6 +5698,45 @@ while(1)
 
     // 10. Update variables
     cblas_daxpy(m, alpha_primal, d_globalVelocity, 1, globalVelocity, 1);
+
+
+
+
+    // double *primalConstraint_2, *velocity_plus, *global_velocity_plus;
+    // double max_val = 0.;
+
+    // if (iteration == 0)
+    // {
+    //   primalConstraint_2 = (double*)calloc(nd, sizeof(double));
+    //   velocity_plus = (double*)calloc(nd, sizeof(double));
+    //   // global_velocity_plus = (double*)calloc(m, sizeof(double));
+    //   // u1u2 = (double*)calloc(nd, sizeof(double));
+    // }
+
+    // NM_gemv(-alpha_primal, JQinv, rhs+m_plus_nd, 0.0, velocity_plus);
+    // cblas_daxpy(nd, -1.0, velocity, 1, velocity_plus, 1);         // velocity_plus      = - Jz - JQp^-1*dz_hat
+    // double norm_u = cblas_dnrm2(nd,velocity_plus,1);
+
+    // NM_gemv(1.0, H, globalVelocity, 0.0, primalConstraint_2);     // primalConstraint_2 = H(v+dv)
+    // max_val = cblas_dnrm2(nd, primalConstraint_2, 1);
+    // cblas_daxpy(nd, 1.0, w, 1, primalConstraint_2, 1);            // primalConstraint_2 = H(v+dv) + w
+    // cblas_daxpy(nd, 1.0, velocity_plus, 1, primalConstraint_2, 1);// primalConstraint_2 = H(v+dv) + w - Jz - JQp^-1*dz_hat
+
+    // max_val = fmax(max_val, norm_u);
+    // max_val = fmax(max_val, cblas_dnrm2(nd, w, 1));           // max_val = max{|H(v+dv)|, |Jz + JQp^-1*dz_hat|, |w|}
+
+    // double pinfeas_2 = cblas_dnrm2(nd, primalConstraint_2, 1);
+    // if(max_val >= tol) pinfeas_2 /= max_val;
+    // numerics_printf_verbose(-1, "|   |         | %.1e |", pinfeas_2);
+
+
+
+
+
+
+
+
+
     cblas_daxpy(nd, alpha_primal, d_velocity, 1, velocity, 1);
     cblas_daxpy(nd, alpha_dual, d_reaction, 1, reaction, 1);
     cblas_daxpy(n, alpha_dual, d_t, 1, t, 1);
@@ -5579,6 +5747,24 @@ while(1)
       hasNotConverged = 2;
       break;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     if (block_1) {block_1 = NM_free(block_1);}
@@ -5943,16 +6129,16 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ;
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
 
 
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_AFTER;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY] = SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_NO;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY] = SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_YES;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_F;

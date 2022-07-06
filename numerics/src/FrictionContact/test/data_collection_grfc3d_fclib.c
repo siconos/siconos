@@ -37,7 +37,7 @@ const char ** data_collection()
 
   if (listprob[0]==1)
   {
-    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-768-nc-4-3.hdf5";
+    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-768-nc-4-3.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-768-nc-18-28.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-768-nc-20-38.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-768-nc-27-50.hdf5";
@@ -48,7 +48,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-55-126.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-58-118.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-63-138.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-69-150.hdf5";     // failure for 2x2 PinH
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-69-150.hdf5";     // failure for 2x2 PinH
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1152-nc-79-180.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1206-nc-88-195.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-1236-nc-93-199.hdf5";
@@ -190,7 +190,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-6438-nc-1341-1844.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-6528-nc-1353-1865.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-6528-nc-1360-1868.hdf5";
-    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-6528-nc-1361-1873.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-6528-nc-1361-1873.hdf5";      // pinfeas_2
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/Chute/Chute-ndof-6528-nc-1372-1870.hdf5";
 
 
@@ -262,12 +262,12 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-209-18.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-212-19.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-218-20.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-227-22.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-228-21.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-239-24.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-241-25.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-249-29.hdf5";
-    data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-253-28.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-227-22.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-228-21.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-239-24.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-241-25.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-249-29.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-253-28.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-257-30.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-290-31.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-291-33.hdf5";
@@ -361,7 +361,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1566-343.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1587-350.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1592-349.hdf5";
-    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1599-348.hdf5";
+    // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1599-348.hdf5";     // pour voir degradation
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1628-353.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1636-356.hdf5";
     // data_collection_1[n_data++] = "/Users/minhnguyen/fclib-library/GlobalRolling/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1692-365.hdf5";

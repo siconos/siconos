@@ -26,6 +26,7 @@
 #include "siconos_debug.h"
 typedef long double float_type;
 /* typedef double float_type; */
+#define EPS 1e-40
 
 NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
 {
@@ -194,13 +195,15 @@ void JA_eigenvals(const double * const vec, const unsigned int vecSize, const si
   {
     pos = (i / 2.) * dimension;
     //assert(!isnan(vec[pos]));
-    out[i] = vec[pos] + NV_norm_2(vec + pos + 1, dimension - 1);
+    // out[i] = vec[pos] + NV_norm_2(vec + pos + 1, dimension - 1);
+    out[i] = vec[pos] + dnrm2l(dimension - 1, vec + pos + 1);
   }
 
   for(size_t i = 1; i < 2*varsCount; i += 2)
   {
     pos = ((i - 1) / 2.) * dimension;
-    out[i] = vec[pos] - NV_norm_2(vec + pos + 1, dimension - 1);
+    // out[i] = vec[pos] - NV_norm_2(vec + pos + 1, dimension - 1);
+    out[i] = vec[pos] - dnrm2l(dimension - 1, vec + pos + 1);
   }
   DEBUG_EXPR(NV_display(vec,vecSize););
   DEBUG_EXPR(NV_display(out,2*varsCount););
@@ -212,12 +215,14 @@ void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const si
   //const double EPS = 1e-12;
   unsigned int dimension = (int)(vecSize / varsCount);
   register unsigned int pos;
-  double xi_bar_norm;
+  // double xi_bar_norm;
+  float_type xi_bar_norm;
 
   for(size_t i = 0; i < 2*varsCount; i += 2)
   {
     pos = (i / 2.) * dimension;
-    xi_bar_norm = NV_norm_2(vec + pos + 1, dimension - 1);
+    // xi_bar_norm = NV_norm_2(vec + pos + 1, dimension - 1);
+    xi_bar_norm = dnrm2l(dimension - 1, vec + pos + 1);
     out[i][0] = 0.5;
     //NV_const_add(vec + pos + 1, dimension - 1, 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
     NV_const_add(vec + pos + 1, dimension - 1, 1. / (2 * xi_bar_norm), 0, out[i] + 1);
@@ -226,7 +231,8 @@ void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const si
   for(size_t i = 1; i < 2*varsCount; i += 2)
   {
     pos = ((i - 1) / 2.) * dimension;
-    xi_bar_norm = NV_norm_2(vec + pos + 1, dimension - 1);
+    // xi_bar_norm = NV_norm_2(vec + pos + 1, dimension - 1);
+    xi_bar_norm = dnrm2l(dimension - 1, vec + pos + 1);
     out[i][0] = 0.5;
     //NV_const_add(vec + pos + 1, dimension - 1, - 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
     NV_const_add(vec + pos + 1, dimension - 1, - 1. / (2 * xi_bar_norm), 0, out[i] + 1);
@@ -359,8 +365,10 @@ void JA_inv(const double * const vec, const unsigned int vecSize, const size_t v
 
   for(size_t i = 0; i < 2 * varsCount; i += 2)
   {
-    sqrt_eigenval1 = 1. / eigenvals[i];
-    sqrt_eigenval2 = 1. / eigenvals[i + 1];
+    // sqrt_eigenval1 = 1. / eigenvals[i];
+    // sqrt_eigenval2 = 1. / eigenvals[i + 1];
+    if (eigenvals[i] == 0.) sqrt_eigenval1 = 1. / EPS; else sqrt_eigenval1 = 1. / eigenvals[i];
+    if (eigenvals[i+1] == 0.) sqrt_eigenval2 = 1. / EPS; else sqrt_eigenval2 = 1. / eigenvals[i+1];
     pos = (i / 2) * dimension;
     NV_const_add(eigenvecs[i], dimension, sqrt_eigenval1, 0, tmp_vec1);
     NV_const_add(eigenvecs[i + 1], dimension, sqrt_eigenval2, 0, tmp_vec2);
@@ -478,7 +486,7 @@ void Qx05y(const double * const x, const double * const y, const unsigned int ve
       for (int k = 0; k < dimension-1; xb[k] = x[j+1+k]/nxb, k++);
     l1 = x[j]+nxb;
     l2 = x[j]-nxb;
-    if (l2 <= 0.) l2 = DBL_EPSILON; // to avoid negative number b/c of different data types
+    if (l2 <= 0.) l2 = EPS; // to avoid negative number b/c of different data types
     dx = sqrtl(l1*l2);
     c1y = y[j];
     for (int k = 0; k < dimension-1; c1y += xb[k]*y[j+1+k], k++);
@@ -516,7 +524,7 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
 
     l1 = x[j]+nxb;
     l2 = x[j]-nxb;
-    if (l2 <= 0.) l2 = DBL_EPSILON; // to avoid negative number b/c of different data types
+    if (l2 <= 0.) l2 = EPS; // to avoid negative number b/c of different data types
     dx = 1/sqrtl(l1*l2);
     /* if (isnan(dx)) */
     /*   { */
@@ -549,7 +557,7 @@ void Jinv(const double * const x, const unsigned int vecSize, const size_t varsC
     l1 = 1/(x[j]+normx)/2;
     // l2 = 1/(x[j]-normx)/2;
     l2 = x[j]-normx;
-    if (l2 == 0.) l2 = DBL_EPSILON; else l2 = 1/(x[j]-normx)/2;// to avoid divide by 0 b/c of different data types
+    if (l2 == 0.) l2 = EPS; else l2 = 1/(x[j]-normx)/2;// to avoid divide by 0 b/c of different data types
     out[j] = l1+l2;
     for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++);
   }
@@ -567,7 +575,7 @@ void Jsqrt(const double * const x, const unsigned int vecSize, const size_t vars
     l1 = sqrtl(x[j]+normx)/2;
     // l2 = sqrtl(x[j]-normx)/2;
     l2 = x[j]-normx;
-    if (l2 <= 0.) l2 = DBL_EPSILON; else l2 = sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
+    if (l2 <= 0.) l2 = EPS; else l2 = sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
     out[j] = l1+l2;
     for(int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++);
   }
@@ -586,7 +594,7 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
     l1 = 1/sqrtl(x[j]+normx)/2;
     // l2 = 1/sqrtl(x[j]-normx)/2;
     l2 = x[j]-normx;
-    if (l2 <= 0.) l2 = DBL_EPSILON; else l2 = 1./sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
+    if (l2 <= 0.) l2 = EPS; else l2 = 1./sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
 
     /* if (x[j]-normx<1e-14) */
     /*   { */
@@ -746,7 +754,7 @@ void Jxinvprody(const double * const x, const double * const y, const unsigned i
     nxb = dnrm2l(dimension-1, x+j+1);
     // detx = (x[j] + nxb) * (x[j] - nxb);
     detx = x[j]-nxb;
-    if (detx <= 0.) detx = (x[j] + nxb) * DBL_EPSILON; else detx = (x[j] + nxb) * (x[j] - nxb);// to avoid divide by 0 b/c of different data types
+    if (detx <= 0.) detx = (x[j] + nxb) * EPS; else detx = (x[j] + nxb) * (x[j] - nxb);// to avoid divide by 0 b/c of different data types
 
     tmp = x[j]*y[j];
     for (int k = 1; k < dimension; tmp -= x[j+k]*y[j+k], k++);
@@ -795,7 +803,7 @@ float_type ld_gammal(const double * const x, const size_t dimension)
   nxb = dnrm2l(dimension-1, x+1);
   // detx = (x[0] + nxb) * (x[0] - nxb);
   detx = x[0]-nxb;
-  if (detx <= 0.) detx = (x[0] + nxb) * DBL_EPSILON; else detx = (x[0] + nxb) * (x[0] - nxb);// to avoid negative number b/c of different data types
+  if (detx <= 0.) detx = (x[0] + nxb) * EPS; else detx = (x[0] + nxb) * (x[0] - nxb);// to avoid negative number b/c of different data types
 
   return(sqrtl(detx));
 }
