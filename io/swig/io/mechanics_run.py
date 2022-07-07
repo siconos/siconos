@@ -2035,8 +2035,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         Output velocities of dynamic objects
         """
-
-        current_line = self._dynamic_data.shape[0]
+        current_line = self._velocities_data.shape[0]
 
         time = self.current_time()
 
@@ -3030,6 +3029,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.print_verbose('first output static and dynamic objects ...')
         self.output_static_objects()
         self.output_dynamic_objects()
+        self.output_velocities()
+
 
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
