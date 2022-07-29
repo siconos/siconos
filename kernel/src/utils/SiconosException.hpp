@@ -35,11 +35,13 @@
 
 
 
-namespace Siconos
+namespace siconos
 {
 
-
-  /** Siconos generic exception
+  // Note FP, todo: according to https://www.boost.org/doc/libs/1_79_0/libs/exception/doc/boost-exception.html
+  // we should have a look to leaf https://www.boost.org/doc/libs/1_79_0/libs/leaf/doc/html/index.html#boost_exception
+  
+  /** siconos generic exception
 
       Usage :
 
@@ -53,13 +55,13 @@ namespace Siconos
       try{
       ... // call to functions that may throw exceptions
       }
-      catch(Siconos::exception::Exception& e)
+      catch(siconos::exception::Exception& e)
       {
-      Siconos::exception::process(e);
+      siconos::exception::process(e);
       }
       catch(...)
       {
-      Siconos::exception::process();
+      siconos::exception::process();
       }
 
       The outputs are :
@@ -93,16 +95,16 @@ namespace Siconos
        Outputs diagnostic information about exceptions.
        Must be called inside a catch section.
     */
-    static inline void process(Siconos::exception& e)
+    static inline void process(siconos::exception& e)
     {
       std::cerr << boost::diagnostic_information(e, true) << std::endl;
     }
 
   };
 
-}//namespace Siconos
+}//namespace siconos
 
-/** Wrap exception throwing inside Siconos. */
-#define THROW_EXCEPTION(X) BOOST_THROW_EXCEPTION(Siconos::exception() << Siconos::exception::extra_message(X) << Siconos::exception::errno_code(errno) <<Siconos::exception::errno_description(std::strerror(errno)));
+/** Wrap exception throwing inside siconos. */
+#define THROW_EXCEPTION(X) BOOST_THROW_EXCEPTION(siconos::exception() << siconos::exception::extra_message(X) << siconos::exception::errno_code(errno) <<siconos::exception::errno_description(std::strerror(errno)));
 
 #endif

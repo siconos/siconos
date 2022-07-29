@@ -14,38 +14,44 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef SubPluggedObject_H
 #define SubPluggedObject_H
 
 #include "PluggedObject.hpp"
+#include "SiconosException.hpp"
+
+namespace siconos::algebra {
+class SimpleMatrix;
+
+}
+namespace siconos::plugins {
 
 /*! \file SubPluggedObject.hpp
-  \brief utilities for plugin definition to compute extract a column from a matrix computed by an user-defined function.
+  \brief utilities for plugin definition to compute extract a column from a matrix computed by
+  an user-defined function.
 */
 
-typedef void (*matrixPlugin)(double, unsigned int, unsigned int, double*, unsigned int, double*);
+typedef void (*matrixPlugin)(double, unsigned int, unsigned int, double*, unsigned int,
+                             double*);
 
-class SubPluggedObject : public PluggedObject
-{
-private:
-  
+class SubPluggedObject : public PluggedObject {
+ private:
   ACCEPT_SERIALIZATION(SubPluggedObject);
   /** function pointer to the parent PluggedObject*/
-  void * _parentfPtr;
+  void* _parentfPtr{nullptr};
   /** Matrix to temporary storage of the output */
-  SP::SiconosMatrix _tmpMat;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _tmpMat{nullptr};
   /** Column index */
-  unsigned int _indx;
+  unsigned int _indx{0};
   /** Number of columns */
-  unsigned int _p;
+  unsigned int _p{0};
 
-public:
-
+ public:
   /** Default Constructor
    */
-  SubPluggedObject(): PluggedObject(), _parentfPtr(nullptr), _indx(0), _p(0)  { };
+  SubPluggedObject() = default;
 
   /** Constructor with the plugin name
    * \param PO a PluggedObject
@@ -53,13 +59,16 @@ public:
    * \param p the number of column of the matrix
    * \param indx the column index (optional)
    */
-  SubPluggedObject(const PluggedObject& PO, const unsigned int n, const unsigned int p, const unsigned int indx = 0):  _indx(indx), _p(p)
+  SubPluggedObject(const PluggedObject& PO, const unsigned int n, const unsigned int p,
+                   const unsigned int indx = 0)
+      : _indx(indx), _p(p)
   {
     _pluginName = "Sub" + PO.pluginName();
-    _tmpMat.reset(new SimpleMatrix(n, p));
-#if (__GNUG__ && !( __clang__ || __INTEL_COMPILER || __APPLE__ ) && (((__GNUC__ > 5) && (__GNUC_MINOR__ > 0))))
+    _tmpMat = std::make_shared<siconos::algebra::SimpleMatrix>(n, p));
+#if (__GNUG__ && !(__clang__ || __INTEL_COMPILER || __APPLE__) && \
+     (((__GNUC__ > 5) && (__GNUC_MINOR__ > 0))))
 #pragma GCC diagnostic ignored "-Wpmf-conversions"
-    fPtr = (void *)&SubPluggedObject::computeAndExtract;
+    fPtr = (void*)&SubPluggedObject::computeAndExtract;
     _parentfPtr = PO.fPtr;
 #else
     THROW_EXCEPTION("SubPluggedObject must be compiled with GCC !");
@@ -68,16 +77,17 @@ public:
 
   /** Copy constructor
    * \param SPO a PluggedObject we are going to copy
-  */
-  SubPluggedObject(const SubPluggedObject& SPO): PluggedObject(SPO), _indx(SPO.getIndex()), _p(SPO.getp())
+   */
+  SubPluggedObject(const SubPluggedObject& SPO)
+      : PluggedObject(SPO), _indx(SPO.getIndex()), _p(SPO.getp())
   {
     _parentfPtr = SPO.getParentfPtr();
-    _tmpMat.reset(new SimpleMatrix(SPO.getTmpMat()));
+    _tmpMat = std::make_shared<siconos::algebra::SimpleMatrix>(SPO.getTmpMat());
   }
 
   /** destructor
    */
-  ~SubPluggedObject() {};
+  ~SubPluggedObject() = default;
 
   /** Intermediate function to compute the column of a plugged matrix
    * \param time current time
@@ -89,8 +99,7 @@ public:
   void computeAndExtract(double time, unsigned int n, double* M, unsigned int sizez, double* z)
   {
     ((matrixPlugin)_parentfPtr)(time, n, _p, &(*_tmpMat)(0, 0), sizez, z);
-    for (unsigned int i = 0; i < n; i++)
-    {
+    for (unsigned int i = 0; i < n; i++) {
       M[i] = (*_tmpMat)(i, _indx);
     }
   };
@@ -98,42 +107,27 @@ public:
   /* Set column index
    * \param newIndx the new column index
    */
-  inline void setIndex(unsigned int newIndx)
-  {
-    _indx = newIndx;
-  };
+  inline void setIndex(unsigned int newIndx) { _indx = newIndx; };
 
   /* Get column index
    * \return the column index
    */
-  inline unsigned int getIndex() const
-  {
-    return _indx;
-  };
+  inline unsigned int getIndex() const { return _indx; };
 
   /** Get the number of row
    * \return the number of row
    */
-  inline unsigned int getp() const
-  {
-    return _p;
-  };
+  inline unsigned int getp() const { return _p; };
 
   /** Get the user defined plugin
    * \return the user defined plugin
    */
-  inline void * getParentfPtr() const
-  {
-    return _parentfPtr;
-  };
+  inline void* getParentfPtr() const { return _parentfPtr; };
 
   /** Get the user defined plugin
    * \return the user defined plugin
    */
-  inline const SiconosMatrix& getTmpMat() const
-  {
-    return *_tmpMat;
-  };
-
+  inline const siconos::algebra::SiconosMatrix& getTmpMat() const { return *_tmpMat; };
 };
+}  // namespace siconos::plugins
 #endif

@@ -14,15 +14,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosVectorFriends.hpp
   List of friend functions for SiconosVectors.
 */
 
-#ifndef __SiconosVectorFriends__
-#define __SiconosVectorFriends__
+#ifndef SiconosVectorFriends
+#define SiconosVectorFriends
 
+namespace siconos::algebra {
 
 /** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
  *  of vOut (from index startOut)
@@ -32,41 +33,56 @@
  * \param startIn the beginning of the range of elements to copy from
  * \param startOut the beginning of the destination range
  */
-void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut);
+void setBlock(const SiconosVector& vIn, std::shared_ptr<SiconosVector> vOut,
+              unsigned int sizeB, unsigned int startIn, unsigned int startOut);
 
 /** A==B when (A-B).normInf()<tolerance
  * \param 2 SiconosVector
  * \return a boolean
  */
-bool operator ==(const SiconosVector&, const SiconosVector&);
+bool operator==(const SiconosVector&, const SiconosVector&);
 
 /** multiplication of a vector by a scalar
  *  \param a double
  *  \param a SiconosVector
  *  \return a SiconosVector
  */
-SiconosVector operator * (double, const SiconosVector&);
+SiconosVector operator*(double, const SiconosVector&);
 
 /** multiplication of a vector by a double
  *  \param a SiconosVector
  *  \param a double
  *  \return a SiconosVector
  */
-SiconosVector operator * (const SiconosVector&, double);
+SiconosVector operator*(const SiconosVector&, double);
 
 /** division of the vector by a double
  *  \param a SiconosVector
  *  \param a double
  *  \return a SiconosVector
  */
-SiconosVector operator / (const SiconosVector&, double);
+SiconosVector operator/(const SiconosVector&, double);
 
 /** Addition of two vectors
  * \param a SiconosVector
  * \param a SiconosVector
  * \return a SiconosVector
  */
-SiconosVector operator + (const SiconosVector&, const SiconosVector&);
+SiconosVector operator+(const SiconosVector&, const SiconosVector&);
+
+/** formatted output for block vectors
+ */
+std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
+
+/** formatted output for siconos vectors
+ */
+std::ostream& operator<<(std::ostream& os, const SiconosVector& bv);
+
+/** In place multiplication of a vector by a scalar*/
+SiconosVector& operator*=(SiconosVector& v, const double& s);
+
+/** In place division of a vector by a scalar*/
+SiconosVector& operator/=(SiconosVector& v, const double& s);
 
 /** computes z = x + y
     \param x, a  SiconosVector, IN.
@@ -80,7 +96,7 @@ void add(const SiconosVector&, const SiconosVector&, SiconosVector&);
     \param a SiconosVector (y), IN.
     \return a SiconosVector
 */
-SiconosVector operator - (const SiconosVector&, const SiconosVector&);
+SiconosVector operator-(const SiconosVector&, const SiconosVector&);
 
 /** computes z = x - y
     \param a SiconosVector (x), IN.
@@ -124,7 +140,8 @@ SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
  */
 void scal(double a, const SiconosVector& x, SiconosVector& y, bool init = true);
 
-/** multiplication of a vector by a scalar, sub_y = a*sub_x (init = true) or sub_y += a*sub_x (init = false)
+/** multiplication of a vector by a scalar, sub_y = a*sub_x (init = true) or sub_y += a*sub_x
+ (init = false)
  * \param a a double
  * \param x a SiconosVector (IN)
  * \param y a SiconosVector (IN-OUT)
@@ -133,7 +150,8 @@ void scal(double a, const SiconosVector& x, SiconosVector& y, bool init = true);
  The same for y with riy.
  * \param init if true sub_y = a*sub_x else sub_y += a*sub_x (default true)
  */
-void subscal(double a, const SiconosVector& x, SiconosVector& y, const Index& coord, bool init = true);
+void subscal(double a, const SiconosVector& x, SiconosVector& y,
+             const std::vector<std::size_t>& coord, bool init = true);
 
 /** cross product
  *  \param V1 a SiconosVector of dimention 3.
@@ -155,7 +173,7 @@ void abs_wise(const SiconosVector& V, SiconosVector& Vabs);
  *  \param 3, an unsigned int variable giving the position of the maximum element (Output)
  */
 
-void getMax(const SiconosVector&, double &, unsigned int &);
+void getMax(const SiconosVector&, double&, unsigned int&);
 
 /** get minimum element of a vector
  *  \param 1, a SiconosVector (Input).
@@ -163,7 +181,7 @@ void getMax(const SiconosVector&, double &, unsigned int &);
  *  \param 3, an unsigned int variable giving the position of the minimum element (Output)
  */
 
-void getMin(const SiconosVector&, double &, unsigned int &);
+void getMin(const SiconosVector&, double&, unsigned int&);
 
-
+}  // namespace siconos::algebra
 #endif

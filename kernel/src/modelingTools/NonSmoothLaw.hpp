@@ -23,22 +23,20 @@
 #ifndef NSLAW_H
 #define NSLAW_H
 
-#include "SiconosConst.hpp"
-#include "SiconosFwd.hpp"
-#include "SiconosPointers.hpp"
-#include "SiconosSerialization.hpp" // For ACCEPT_SERIALIZATION
-#include "SiconosVisitor.hpp"
+#include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
+#include "SiconosException.hpp"
 
+namespace siconos::modeling {
 /**
    Non Smooth Laws (NSL) Base Class
-   
+
    This class is the base class for all nonsmooth laws in Siconos.
    A nonsmooth law characterize the (nonsmooth) relationship between 2
    variables, usually designated by \f$ y \f$ and \f$ \lambda \f$. \f$ y \f$ is most
    of time seen as the "input" from DynamicalSystems and is given by a Relation
    linked to this nonsmoothlaw. \f$ \lambda \f$ is then the "output" and through
    the same Relation is fed back to one or more DynamicalSystem.
-   
+
    classical examples of nonsmooth law include:
    - RelayNSL: \f$ -y \in \mathcal{N}_{[-1,1]}(\lambda)\quad
    \Longleftrightarrow\quad -\lambda \in \mbox{sgn} (y) \f$
@@ -49,17 +47,17 @@
    friction
    - MultipleImpactNSL for a multiple impact law
    - MixedComplementarityConditionNSL
-   
+
    The computation of both \f$ y \f$ and \f$ \lambda \f$ is carried on by a solver
    in Numerics through a OneStepNSProblem object.
 
  */
 class NonSmoothLaw {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(NonSmoothLaw);
 
   /** "size" of the NonSmoothLaw */
-  unsigned int _size{0};
+  unsigned int _size{1};
 
   // Rule of five ...
   NonSmoothLaw() = default;
@@ -68,7 +66,7 @@ protected:
   NonSmoothLaw &operator=(const NonSmoothLaw &) = delete;
   NonSmoothLaw &operator=(const NonSmoothLaw &&) = delete;
 
-public:
+ public:
   /** basic constructor
    *
    *  \param size the nonsmooth law size
@@ -94,6 +92,7 @@ public:
   /** display the data of the NonSmoothLaw on the standard output */
   virtual void display() const = 0;
 
-  VIRTUAL_ACCEPT_VISITORS(NonSmoothLaw);
+  // VIRTUAL_ACCEPT_VISITORS(NonSmoothLaw);
 };
+}  // namespace siconos::modeling
 #endif

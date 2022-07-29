@@ -19,8 +19,8 @@
 #define SiconosPropertiesTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "../SiconosProperties.hpp"
-#include "../SiconosGraph.hpp"
+#include "SiconosProperties.hpp"
+#include "SiconosGraph.hpp"
 
 class SiconosPropertiesTest : public CppUnit::TestFixture
 {

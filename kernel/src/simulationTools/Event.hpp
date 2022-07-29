@@ -25,7 +25,6 @@
 #include <cmath>
 #include <gmp.h>
 #include <cstddef>
-#include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SiconosPointers.hpp"
 #include "SiconosSerialization.hpp"

@@ -190,7 +190,7 @@ int RollingFrictionContact::compute(double time)
     return info;
   }
   // nothing to do
-  if(indexSetLevel() == LEVELMAX)
+  if(indexSetLevel() == simulation::internal::LEVELMAX)
   {
     return info;
   }

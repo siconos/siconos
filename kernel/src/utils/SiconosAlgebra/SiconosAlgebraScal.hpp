@@ -14,10 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef SA_SCAL_HPP
 #define SA_SCAL_HPP
+
+namespace siconos::algebra {
+
+class SiconosMatrix;
 
 /** multiplication of a matrix by a scalar, B = a*A (init = true) or B += a*A (init = false)
  *  \param a a double
@@ -27,6 +31,6 @@
  */
 void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool = true);
 
-
+}  // namespace siconos::algebra
 
 #endif

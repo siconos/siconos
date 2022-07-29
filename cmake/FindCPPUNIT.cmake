@@ -41,7 +41,7 @@ endif()
 set_find_package_hints(NAME CPPUNIT MODULE cppunit)
 
 find_path(CPPUNIT_INCLUDE_DIR NAMES TestCase.h
-  PATH_SUFFIXES include cppunit
+  PATH_SUFFIXES include cppunit include/cppunit
   ${_CPPUNIT_INC_SEARCH_OPTS}
   )
 

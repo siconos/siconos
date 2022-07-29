@@ -22,36 +22,34 @@
 #define COMPLEMENTARITYCONDITIONNSLAW_H
 
 #include "NonSmoothLaw.hpp"
-
+namespace siconos::modeling {
 /** Complementarity NonSmoothLaw
  *
  **/
 class ComplementarityConditionNSL : public NonSmoothLaw {
-private:
-
+ private:
   ACCEPT_SERIALIZATION(ComplementarityConditionNSL);
 
   /** default constructor
    */
   ComplementarityConditionNSL(){};
 
-public:
+ public:
   /** basic constructor
    *
    *  \param size of the non smooth law
    */
-  ComplementarityConditionNSL(unsigned int size);
+  ComplementarityConditionNSL(unsigned int size) : NonSmoothLaw(size){};
 
   /** Destructor */
-  ~ComplementarityConditionNSL();
+  ~ComplementarityConditionNSL() = default;
 
   /** print the data to the screen
    */
   inline void display() const override{};
 
-  ACCEPT_STD_VISITORS();
+  // ACCEPT_STD_VISITORS();
 };
+}  // namespace siconos::modeling
 
-TYPEDEF_SPTR(ComplementarityConditionNSL)
-
-#endif // COMPLEMENTARITYCONDITIONNSLAW_H
+#endif  // COMPLEMENTARITYCONDITIONNSLAW_H

@@ -22,7 +22,6 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SiconosFwd.hpp"
 #include <fstream>

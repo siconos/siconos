@@ -17,7 +17,7 @@
 */
 #include "TwistingTest.hpp"
 
-#include <ioMatrix.hpp>
+#include <io.hpp>
 #include <FirstOrderLinearTIDS.hpp>
 
 #include "ControlZOHSimulation.hpp"

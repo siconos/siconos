@@ -16,20 +16,28 @@
  * limitations under the License.
 */
 #include "SecondOrderDS.hpp"
-#include "BlockVector.hpp"
-#include "BlockMatrix.hpp"
+#include "SimpleMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "BoundaryCondition.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 #include <iostream>
 
-void SecondOrderDS::setBoundaryConditions(SP::BoundaryCondition newbd)
+void siconos::modeling::SecondOrderDS::setBoundaryConditions(std::shared_ptr<siconos::modeling::BoundaryCondition> newbd)
 {
   if(_boundaryConditions)
   {
-    std::cout << "Warning : SecondOrderDS::setBoundaryConditions. old boundary conditions were pre-existing" <<std::endl;
+    std::cout << "Warning : SecondOrderDS::setBoundaryConditions. old boundary conditions were pre-existing. \n" ;
   }
   _boundaryConditions = newbd;
-  _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
+  _reactionToBoundaryConditions = std::make_shared<siconos::algebra::SiconosVector>(_boundaryConditions->velocityIndices()->size());
 };
+
+
+void siconos::modeling::SecondOrderDS::setMassPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
+{
+  _mass = newPtr;
+  _hasConstantMass = true;
+}

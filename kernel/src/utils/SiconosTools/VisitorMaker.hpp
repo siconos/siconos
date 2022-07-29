@@ -35,7 +35,7 @@
 struct GetVelocity : public SiconosVisitor
 {
 
-  SP::SiconosVector result;
+std::shared_ptr<SiconosVector> result;
 
   template<typename T>
   void operator()(const T& ds)
@@ -48,8 +48,8 @@ struct GetVelocity : public SiconosVisitor
 Visitor < Classes < LagrangianDS, NewtonEulerDS >,
           GetVelocity >::Make getVelocity;
 
-SP::SiconosVector q(new SiconosVector(3));
-SP::SiconosVector v(new SiconosVector(3));
+auto q = std::make_shared<SiconosVector>(3);
+auto v = std::make_shared<SiconosVector>(3);
 
   (*q)(0) = 0.;
   (*q)(1) = 1.;
@@ -59,7 +59,7 @@ SP::SiconosVector v(new SiconosVector(3));
   (*v)(1) = 0;
   (*v)(2) = 10.;
 
-SP::DynamicalSystem ds(new Disk(1, 1, q, v));
+auto ds = std::make_shared<Disk>(1, 1, q, v);
 
 ds->accept(getVelocity)->display();
 

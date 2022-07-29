@@ -1,6 +1,9 @@
 include(tools4tests)
 
 if(WITH_TESTING)
+
+  add_custom_target(externals-tests echo "Start externals tests")
+  
   if(HAS_FORTRAN)
     begin_tests(netlib/odepack/test DEPS "LAPACK::LAPACK")
     set(odepacktests DLSODES DLSODAR DLSODI DLSODPK

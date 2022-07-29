@@ -14,10 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosSharedLibrary.hpp
-*/
+ */
 
 #ifndef SICONOSSHAREDLIBRARY_H
 #define SICONOSSHAREDLIBRARY_H
@@ -35,35 +35,45 @@ typedef HMODULE PluginHandle;
 #endif
 
 #ifdef _SYS_UNX
-#define  DLEXPORT
+#define DLEXPORT
 typedef void* PluginHandle;
 #endif
 
-/** Plug-in utilities
- *
+/** Plug-in utilities */
+namespace siconos::plugins {
+
+// Local stuff, not expected to be in user API
+namespace internal {
+/** loads a plugin
+ * \param pluginPath full path to plugin
+ * \return PluginHandle the object to handle the plugin
  */
-namespace SiconosSharedLibrary
-{
-  /** loads a plugin
-   * \param pluginPath full path to plugin
-   * \return PluginHandle the object to handle the plugin
-   */
-  PluginHandle loadPlugin(const std::string& pluginPath);
+PluginHandle loadPlugin(const std::string& pluginPath);
 
-  /** Gets procedure address
-   * \param plugin the plugin handle
-   * \param procedure the procedure name
-   * \return pointer on procedure
-   */
-  void * getProcAddress(PluginHandle plugin, const std::string& procedure);
-  
-  /**  Closes plugin
-   * \param pluginFile the name of the plugin to close
-   */
-  void closePlugin(const std::string& pluginFile);
-}
+/** Gets procedure address
+ * \param plugin the plugin handle
+ * \param procedure the procedure name
+ * \return pointer on procedure
+ */
+void* getProcAddress(PluginHandle plugin, const std::string& procedure);
 
-/** Alias for SiconosSharedLibrary */
-namespace SSL = SiconosSharedLibrary;
+/**  Closes plugin
+ * \param pluginFile the name of the plugin to close
+ */
+void closePlugin(const std::string& pluginFile);
 
-#endif //SICONOSSHAREDLIBRARY_H
+}  // namespace internal
+
+const std::string getSharedLibraryExtension(void);
+
+const std::string getPluginName(const std::string& s);
+
+const std::string getPluginFunctionName(const std::string& s);
+
+void setFunction(void* fPtr, const std::string& pluginPath, const std::string& fName);
+
+void closePlugin(const std::string& pluginPath);
+
+}  // namespace siconos::plugins
+
+#endif  // SICONOSSHAREDLIBRARY_H

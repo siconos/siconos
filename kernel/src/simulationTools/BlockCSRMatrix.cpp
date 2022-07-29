@@ -295,9 +295,9 @@ void BlockCSRMatrix::convert()
     _sparseBlockStructuredMatrix->diagonal_blocks = nullptr;
   }
   //   // Loop through the non-null blocks
-  //   for (SpMatIt1 i1 = _blockCSR->begin1(); i1 != _blockCSR->end1(); ++i1)
+  //   for (SparseMat::iterator1 i1 = _blockCSR->begin1(); i1 != _blockCSR->end1(); ++i1)
   //     {
-  //       for (SpMatIt2 i2 = i1.begin(); i2 != i1.end(); ++i2)
+  //       for (SparseMat::iterator2 i2 = i1.begin(); i2 != i1.end(); ++i2)
   //  {
   //    block[i] = *i2;
   //  }

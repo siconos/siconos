@@ -20,7 +20,7 @@
 #include "LagrangianDS.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "Simulation.hpp"
-#include "ioMatrix.hpp"
+#include "io.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include "OSNSMatrix.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -950,7 +950,7 @@ void MultipleImpact::ComputeImpact()
   // Close the stream file
   if(_saveData)
   {
-    ioMatrix::write(_namefile.c_str(), "ascii", *_DataMatrix, "noDim");
+    siconos::algebra::io::write(_namefile, *_DataMatrix, siconos::algebra::io::ASCII_OUT, "noDim");
   }
 }
 //=======================================================================================

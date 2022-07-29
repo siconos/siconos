@@ -27,13 +27,11 @@
 #include <utility>                      // for make_pair, pair
 #include <cassert>
 
-namespace SiconosSharedLibrary
-{
 
 std::multimap<const std::string, PluginHandle> openedPlugins;
-typedef std::multimap<const std::string, PluginHandle>::iterator iter;
 
-PluginHandle loadPlugin(const std::string& pluginPath)
+
+PluginHandle siconos::plugins::internal::loadPlugin(const std::string& pluginPath)
 {
   PluginHandle HandleRes;
 #ifdef _WIN32
@@ -69,7 +67,7 @@ PluginHandle loadPlugin(const std::string& pluginPath)
   return HandleRes;
 }
 
-void * getProcAddress(PluginHandle plugin, const std::string& procedure)
+void * siconos::plugins::internal::getProcAddress(PluginHandle plugin, const std::string& procedure)
 {
   void* ptr;
 #ifdef _WIN32
@@ -94,14 +92,15 @@ void * getProcAddress(PluginHandle plugin, const std::string& procedure)
   return ptr;
 }
 
-void closePlugin(const std::string& pluginFile)
+void siconos::plugins::internal::closePlugin(const std::string& pluginFile)
 {
-  iter it = openedPlugins.find(pluginFile);
+  auto it = openedPlugins.find(pluginFile);
   if(it == openedPlugins.end())
   {
     std::cout << "SiconosSharedLibrary::closePlugin - could not find an opened plugin named " << pluginFile << std::endl;
     std::cout << "Plugins in openedPlugins:" << std::endl;
-    for(iter it2 = openedPlugins.begin(); it2 != openedPlugins.end(); ++it2) std::cout <<  it2->first << std::endl;
+    for(auto it2 : openedPlugins)
+      std::cout <<  it2.first << std::endl;
     THROW_EXCEPTION("could not find an opened plugin with this name");
   }
   PluginHandle plugin = it->second;
@@ -116,4 +115,70 @@ void closePlugin(const std::string& pluginFile)
   openedPlugins.erase(it);
 }
 
+const std::string siconos::plugins::getSharedLibraryExtension(void)
+{
+#ifdef _WIN32
+  return ".dll";
+#else
+  return ".so";
+#endif
 }
+
+const std::string siconos::plugins::getPluginName(const std::string& s)
+{
+  std::string res;
+
+  if((s.find("\n", 0) != std::string::npos) || (s.find("\t", 0) != std::string::npos) || (s.find(" ", 0) != std::string::npos))
+  {
+    THROW_EXCEPTION("The 'string' which contains the plugin name contains '\\n' or '\\t' or ' '");
+  }
+  else if((s.find(":", 0) == std::string::npos) && (s.rfind(":", 0) != s.rfind(":", 0)))
+  {
+    THROW_EXCEPTION("The 'string' which contains the plugin name is not well formed. It must be like : plugin_name:plugin_function_name");
+  }
+  else
+  {
+    // return the plugin name
+    int pos = s.find(":", 0);
+    res = s.substr(0, pos);
+    return res + getSharedLibraryExtension();
+  }
+}
+
+const std::string siconos::plugins::getPluginFunctionName(const std::string& s)
+{
+  std::string res;
+
+  if((s.find("\n", 0) != std::string::npos) || (s.find("\t", 0) != std::string::npos) || (s.find(" ", 0) != std::string::npos))
+  {
+    THROW_EXCEPTION("The 'string' which contains the plugin function name contains '\\n' or '\\t' or ' '");
+  }
+  else if((s.find(":", 0) == std::string::npos) && (s.rfind(":", 0) != s.rfind(":", 0)))
+  {
+    THROW_EXCEPTION("The 'string' which contains the plugin name is not well formed. It must be like : plugin_name:plugin_function_name");
+  }
+  else
+  {
+    // return the plugin function name
+    int pos = s.find(":", 0);
+    res = s.substr(pos + 1, s.length());
+    return res;
+  }
+}
+
+void siconos::plugins::setFunction(void* fPtr, const std::string& pluginPath, const std::string& fName)
+{
+  // load the library
+  PluginHandle handle = siconos::plugins::internal::loadPlugin(pluginPath.c_str());
+  // get the function pointer
+  *(void **)(fPtr) = siconos::plugins::internal::getProcAddress(handle, fName.c_str());
+}
+
+void siconos::plugins::closePlugin(const std::string& pluginPath)
+{
+  siconos::plugins::internal::closePlugin(getPluginName(pluginPath));
+}
+
+
+
+

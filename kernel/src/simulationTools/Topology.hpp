@@ -22,7 +22,6 @@
 #ifndef TOPOLOGY_H
 #define TOPOLOGY_H
 
-#include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SimulationGraphs.hpp"
 

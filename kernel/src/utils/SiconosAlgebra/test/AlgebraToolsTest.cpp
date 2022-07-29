@@ -18,6 +18,7 @@
 #include "SiconosConfig.h"
 #include "AlgebraToolsTest.hpp"
 #include "SimpleMatrix.hpp"
+#include "SiconosAlgebraTools.hpp"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(AlgebraToolsTest);
 
@@ -28,7 +29,7 @@ void AlgebraToolsTest::setUp()
 {
   std::string fic1 = "matForExp.dat"; // 3X3
 
-  A.reset(new SimpleMatrix(fic1, true));
+  A = std::make_shared<siconos::algebra::SimpleMatrix>(fic1, true);
 }
 
 void AlgebraToolsTest::tearDown()
@@ -43,10 +44,10 @@ void AlgebraToolsTest::testExpm()
   std::cout << "====================================" <<std::endl;
   std::cout << "--> Test: expm " <<std::endl;
   std::string fic2 = "matSolForExp.dat"; // 3X3
-  SP::SimpleMatrix ref(new SimpleMatrix(fic2, true));
-  SP::SimpleMatrix Exp(new SimpleMatrix(3,3));
+  auto ref = std::make_shared<siconos::algebra::SimpleMatrix>(fic2, true);
+  auto Exp = std::make_shared<siconos::algebra::SimpleMatrix>(3,3);
 
-  Siconos::algebra::tools::expm(*A, *Exp);
+  siconos::algebra::expm(*A, *Exp);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testExpm : ", (*ref - *Exp).normInf() < 1e-6, true);
   std::cout << "--> Expm test ended with success." <<std::endl;
 }

@@ -52,7 +52,8 @@ DEFINE_SPTR(btConvexShape);
 
 
 DEFINE_SPTR(btCollisionObject);
-DEFINE_SAPTR(btCollisionObject);
+class btCollisionObject;
+TYPEDEF_SAPTR(btCollisionObject)
 
 DEFINE_SPTR(btCollisionObjectWrapper);
 
@@ -70,7 +71,8 @@ DEFINE_SPTR(btBroadphaseInterface);
 //DEFINE_SPTR(BulletR);
 //DEFINE_SPTR(Bullet1DR);
 DEFINE_SPTR(CollisionObjects);
-DEFINE_SPTR_STRUCT(StaticObjects);
+struct StaticObjects;
+TYPEDEF_SPTR(StaticObjects);
 
 #include "MechanicsFwd.hpp"
 

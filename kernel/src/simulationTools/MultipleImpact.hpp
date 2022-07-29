@@ -23,21 +23,17 @@
 #define _OSNSMULTIPLEIMPACT_
 
 #include "LinearOSNS.hpp"
-#include "SiconosConst.hpp" // for MACHINE_PREC
 
 #include <string>
 
-#define DEFAULT__tolImpact MACHINE_PREC
-#define DEFAULT_TOL_VEL MACHINE_PREC
-#define DEFAULT_TOL_ENER MACHINE_PREC
+namespace siconos {
 
 /** Formalization and Resolution of a Multiple Impact Non-Smooth problem.
 
-\todo write a short introduction about MultipleImpact ...
+\todo write a short introduction about MultipleImpact ...s
  */
 class MultipleImpact : public LinearOSNS {
 private:
-
   ACCEPT_SERIALIZATION(MultipleImpact);
 
   //! Time-like variable (Impulse)
@@ -49,7 +45,7 @@ private:
   //! Maximal number of steps for each computation
   unsigned int _nStepMax = 100000;
   //! Tolerance to define zero
-  double _tolImpact = DEFAULT__tolImpact;
+  double _tolImpact = std::numeric_limits<double>::epsilon();
   //! Type of the compliance model
   std::string _typeCompLaw = "BiStiffness";
   // Velocity of bodies during impact
@@ -121,15 +117,15 @@ private:
       _IsImpactEnd = false: otherwise */
   bool _IsImpactEnd = true;
   //! Tolerance to define a negligeble value for a velocity grandeur
-  double _Tol_Vel = DEFAULT_TOL_VEL;
+  double _Tol_Vel{std::numeric_limits<double>::epsilon()};
   //! Tolerance to define a negligeable value for a potential energy grandeur
-  double _Tol_Ener = DEFAULT_TOL_ENER;
+  double _Tol_Ener{std::numeric_limits<double>::epsilon()};
   //! Epsilon to define a zero value for relative velocity in termination
   //! condition
-  double _ZeroVel_EndIm = DEFAULT_TOL_VEL;
+  double _ZeroVel_EndIm{std::numeric_limits<double>::epsilon()};
   //! Epsilon to define a zero value for potential energy in termination
   //! condition
-  double _ZeroEner_EndIm = DEFAULT_TOL_ENER;
+  double _ZeroEner_EndIm{std::numeric_limits<double>::epsilon()};
   //! we start to save data from _stepMinSave to _stepMaxSave
   unsigned int _stepMinSave = 1, _stepMaxSave = _nStepMax;
 
@@ -353,5 +349,5 @@ public:
 
   ACCEPT_STD_VISITORS();
 };
-
+} // namespace siconos
 #endif

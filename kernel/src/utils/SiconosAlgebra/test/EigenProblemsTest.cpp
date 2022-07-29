@@ -16,16 +16,21 @@
  * limitations under the License.
 */
 #include "SiconosConfig.h"
+#include <boost/numeric/bindings/std/vector.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 
 #include "EigenProblemsTest.hpp"
-#include "SiconosAlgebra.hpp"
-#include "SimpleMatrixFriends.hpp"
+
+#include "SiconosMatrixFriends.hpp"
 #include "bindings_utils.hpp"
 #include <limits>
 #include <iostream>
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include "SiconosVector.hpp"
+#include "SiconosAlgebraTools.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -35,13 +40,18 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(EigenProblemsTest);
 
+namespace ublas = boost::numeric::ublas;
+
+using complex_matrix = ublas::matrix<std::complex<double>, ublas::column_major> ;
+using complex_vector = ublas::vector<std::complex<double>>;
+
 void EigenProblemsTest::setUp()
 {
   size = 5;
-  A.reset(new SimpleMatrix(size,size));
+  A = std::make_shared<siconos::algebra::SimpleMatrix>(size,size);
   // Initialize A with random values.
   A->randomize();
-  Aref.reset(new SimpleMatrix(*A));
+  Aref = std::make_shared<siconos::algebra::SimpleMatrix>(*A);
 }
 
 void EigenProblemsTest::tearDown()
@@ -52,23 +62,23 @@ void EigenProblemsTest::testSyev()
   std::cout << "--> Test: syev." <<std::endl;
 
   // turn A to a symmetric matrix
-  A->randomize_sym();
+  A->randomize();
   *Aref = *A;
 
   // Initialize EigenVectors with A
-  SP::SiconosVector EigenValues(new SiconosVector(size));
-  SP::SimpleMatrix EigenVectors(new SimpleMatrix(*A));
+  auto EigenValues = std::make_shared<siconos::algebra::SiconosVector>(size);
+  auto EigenVectors = std::make_shared<siconos::algebra::SimpleMatrix>(*A);
 //  *EigenVectors = *A;
 
-  Siconos::eigenproblems::syev(*EigenValues, *EigenVectors);
+  siconos::algebra::syev(*EigenValues, *EigenVectors);
 
-  DenseVect error(size);
+  siconos::algebra::DenseVect error(size);
   error *= 0.0;
 
   for(unsigned int i = 0; i < size; ++i)
   {
-    error.plus_assign(ublas::prod(*A->dense(), column(*EigenVectors->dense(), i)));
-    error.minus_assign((*EigenValues->dense())(i)*column(*EigenVectors->dense(),i));
+    error.plus_assign(ublas::prod(*A->dense(), ublas::column(*EigenVectors->dense(), i)));
+    error.minus_assign((*EigenValues->dense())(i)*ublas::column(*EigenVectors->dense(),i));
   }
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSyev 1: ", norm_2(error) < 10 * std::numeric_limits< double >::epsilon(), true);
@@ -76,10 +86,10 @@ void EigenProblemsTest::testSyev()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSyev 2: ", (*A) == (*Aref), true);
 
   // Now compute only eigenvalues
-  SP::SiconosVector RefEigenValues(new SiconosVector(*EigenValues));
+  auto RefEigenValues = std::make_shared<siconos::algebra::SiconosVector>(*EigenValues);
   *EigenVectors = *A;
   *EigenValues *= 0.0;
-  Siconos::eigenproblems::syev(*EigenValues, *EigenVectors, false);
+  siconos::algebra::syev(*EigenValues, *EigenVectors, false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSyev 3: ", ((*EigenValues) - (*RefEigenValues)).norm2() < 10 * std::numeric_limits< double >::epsilon(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSyev 4: ", (*A) == (*Aref), true);
   std::cout << "--> Syev test ended with success." <<std::endl;
@@ -91,7 +101,7 @@ void EigenProblemsTest::testGeev1()
   // Compute only right eigenvectors.
   complex_matrix fake(1,1), rightV(size,size);
   complex_vector eigenval(size);
-  Siconos::eigenproblems::geev(*A, eigenval, fake, rightV);
+  siconos::algebra::geev(*A, eigenval, fake, rightV);
   complex_vector error(size);
   for(unsigned int i = 0; i < size; ++i) error(i) = 0.0;
   for(unsigned int i = 0; i < size; ++i)
@@ -108,7 +118,7 @@ void EigenProblemsTest::testGeev1()
   complex_vector RefEigenValues(size);
   RefEigenValues = eigenval;
   eigenval *= 0.0;
-  Siconos::eigenproblems::geev(*A, eigenval, fake, fake, false, false);
+  siconos::algebra::geev(*A, eigenval, fake, fake, false, false);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 3: ", norm_2(eigenval - RefEigenValues) < 10 * std::numeric_limits< double >::epsilon(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 4: ", (*A) == (*Aref), true);
@@ -122,7 +132,7 @@ void EigenProblemsTest::testGeev2()
   // Compute only left eigenvectors.
   complex_matrix fake(1,1), leftV(size,size);
   complex_vector eigenval(size);
-  Siconos::eigenproblems::geev(*A, eigenval, leftV, fake, true, false);
+  siconos::algebra::geev(*A, eigenval, leftV, fake, true, false);
   complex_vector error(size);
   for(unsigned int i = 0; i < size; ++i) error(i) = 0.0;
   for(unsigned int i = 0; i < size; ++i)
@@ -145,7 +155,7 @@ void EigenProblemsTest::testGeev3()
   // Compute left and right eigenvectors.
   complex_matrix leftV(size,size), rightV(size,size);
   complex_vector eigenval(size);
-  Siconos::eigenproblems::geev(*A, eigenval, leftV, rightV, true, true);
+  siconos::algebra::geev(*A, eigenval, leftV, rightV, true, true);
   complex_vector error(size);
   for(unsigned int i = 0; i < size; ++i) error(i) = 0.0;
   for(unsigned int i = 0; i < size; ++i)

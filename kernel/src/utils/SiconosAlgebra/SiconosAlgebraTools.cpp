@@ -14,49 +14,130 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-
-#include "SiconosMatrix.hpp"
-#include "BlockVector.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosAlgebraTools.hpp"
-#include <iostream>
 
-namespace Siconos
-{
-namespace Algebra
-{
+#include <boost/numeric/bindings/lapack.hpp>
+#include <boost/numeric/bindings/std/vector.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/ublas/symmetric.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
 
-bool isComparableTo(const BlockVector& v1, const BlockVector& v2)
+#include "BlockVector.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "expm.hpp"  // boost contribs expm_pad
+
+// #include <iostream>
+
+namespace lapack = boost::numeric::bindings::lapack;
+namespace ublas = boost::numeric::ublas;
+
+bool siconos::algebra::isComparableTo(const BlockVector &v1, const BlockVector &v2)
 {
   // return:
   //  - true if both are block but with blocks which are facing each other of the same size.
   //  - false in other cases
   //
-  const Index& I1 = *v1.tabIndex();
-  const Index& I2 = *v2.tabIndex();
+  auto &I1 = *v1.tabIndex();
+  auto &I2 = *v2.tabIndex();
 
   return (I1 == I2);
-
 }
 
-bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
+bool siconos::algebra::isComparableTo(const SiconosMatrix &m1, const SiconosMatrix &m2)
 {
   // return:
   // - true if one of the matrices is a Simple and if they have the same dimensions.
   // - true if both are block but with blocks which are facing each other of the same size.
   // - false in other cases
 
-  if((!m1.isBlock() || !m2.isBlock()) && (m1.size(0) == m2.size(0)) && (m1.size(1) == m2.size(1)))
+  if ((!m1.isBlock() || !m2.isBlock()) && (m1.size(0) == m2.size(0)) &&
+      (m1.size(1) == m2.size(1)))
     return true;
 
-  const SP::Index I1R = m1.tabRow();
-  const SP::Index I2R = m2.tabRow();
-  const SP::Index I1C = m1.tabCol();
-  const SP::Index I2C = m2.tabCol();
+  auto I1R = m1.tabRow();
+  auto I2R = m2.tabRow();
+  auto I1C = m1.tabCol();
+  auto I2C = m2.tabCol();
 
   return ((*I1R == *I2R) && (*I1C == *I2C));
 }
+
+void siconos::algebra::expm(SiconosMatrix &A, SiconosMatrix &Exp, bool computeAndAdd)
+{
+  // Implemented only for dense matrices.
+  // Note FP : Maybe it works for others but it has not been
+  // tested here --> to be done
+  // Do not work with sparse.
+  A.resetFactorizationFlags();
+  Exp.resetFactorizationFlags();
+  assert(Exp.num() == UBLAS_TYPE::DENSE || A.num() == UBLAS_TYPE::DENSE);
+  if (computeAndAdd)
+    *Exp.dense() += boost::numeric::ublas::expm_pad(*A.dense());
+  else
+    *Exp.dense() = boost::numeric::ublas::expm_pad(*A.dense());
 }
+
+int siconos::algebra::syev(SiconosVector &eigenval, SiconosMatrix &eigenvec, bool withVect)
+{
+  int info = 0;
+  // Eigenvec must contains the values of the matrix from which we want
+  // to compute eigenvalues and vectors. It must be a symmetric matrix.
+  // It will be overwritten with eigenvectors.
+
+  // Adaptor to symmetric_mat. Warning : no copy, eigenvec will be modified
+  // by syev.
+  boost::numeric::ublas::symmetric_adaptor<DenseMat, boost::numeric::ublas::lower> s_a(
+      *eigenvec.dense());
+
+  char jobz;
+  if (withVect)
+    jobz = 'V';
+  else
+    jobz = 'N';
+
+#ifdef USE_OPTIMAL_WORKSPACE
+  info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::optimal_workspace());
+#endif
+#ifdef USE_MINIMAL_WORKSPACE
+  info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::minimal_workspace());
+#endif
+  std::cout << "Compute eigenvalues ..." << std::endl;
+  return info;
+}
+
+int siconos::algebra::geev(
+    SiconosMatrix &input_mat, ublas::vector<std::complex<double>> &eigenval,
+    ublas::matrix<std::complex<double>, ublas::column_major> &left_eigenvec,
+    ublas::matrix<std::complex<double>, ublas::column_major> &right_eigenvec, bool withLeft,
+    bool withRight)
+{
+  int info = 0;
+  ublas::matrix<std::complex<double>, ublas::column_major> tmp(*input_mat.dense());
+  // tmp must contains the values of the matrix from which we want
+  // to compute eigenvalues and vectors. It must be a complex matrix.
+  // It will be overwritten with temp results.
+
+  char jobvl, jobvr;
+  if (withLeft)
+    jobvl = 'V';
+  else
+    jobvl = 'N';
+
+  if (withRight)
+    jobvr = 'V';
+  else
+    jobvr = 'N';
+
+#ifdef USE_OPTIMAL_WORKSPACE
+  info += lapack::geev(jobvl, jobvr, tmp, eigenval, left_eigenvec, right_eigenvec,
+                       lapack::optimal_workspace());
+#endif
+#ifdef USE_MINIMAL_WORKSPACE
+  info += lapack::geev(jobvl, jobvr, tmp, eigenval, left_eigenvec, right_eigenvec,
+                       lapack::minimal_workspace());
+#endif
+  return info;
 }

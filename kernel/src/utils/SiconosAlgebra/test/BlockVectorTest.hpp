@@ -78,10 +78,10 @@ private:
   void End();
   // Members
 
-  SP::BlockVector ref;
-  std::vector<double> vq;
-  SP::DenseVect dv;
-  SP::SparseVect sv;
+  std::shared_ptr<siconos::algebra::BlockVector> ref{};
+  std::vector<double> vq{};
+  std::shared_ptr<siconos::algebra::DenseVect> dv{};
+  std::shared_ptr<siconos::algebra::SparseVect> sv{};
   double tol;
 
 public:

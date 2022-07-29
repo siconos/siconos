@@ -28,6 +28,7 @@
 #include "SiconosPointers.hpp" // for TYPEDEF_SPTR
 #include "SiconosFwd.hpp" // for SP::OneStepIntegrator, ...
 
+
 // ================== Objects to handle DS ==================
 
 /** list of indices */

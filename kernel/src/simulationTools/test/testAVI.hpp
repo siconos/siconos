@@ -22,7 +22,6 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "TimeStepping.hpp"
 #include "TimeDiscretisation.hpp"
-#include "ioMatrix.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "NormalConeNSL.hpp"
 #include "Interaction.hpp"

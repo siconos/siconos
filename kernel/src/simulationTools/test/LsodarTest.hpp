@@ -23,7 +23,6 @@
 #include "LsodarOSI.hpp"
 #include "EventDriven.hpp"
 #include "TimeDiscretisation.hpp"
-#include "ioMatrix.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "RelayNSL.hpp"
 #include "Interaction.hpp"

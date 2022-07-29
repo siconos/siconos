@@ -25,7 +25,7 @@
 
 #include <limits>
 
-const unsigned int MOREAUSTEPSINMEMORY = 1;
+constexpr auto MOREAUSTEPSINMEMORY = 1;
 
 /**
    One Step time Integrator, Moreau-Jean algorithm.

@@ -14,15 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef SA_PROD_HPP
 #define SA_PROD_HPP
 
-#include "SiconosAlgebraTypeDef.hpp"
+#include <memory>
+#include <vector>
+
+namespace siconos::algebra {
+
 class SiconosMatrix;
 class SiconosVector;
 class BlockVector;
+class SimpleMatrix;
 
 // NO NEED TO BE FRIEND
 /** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
@@ -84,20 +89,22 @@ void axpy_prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool)
   \param[in,out] y a SiconosVector
   \param init a bool (default = true)
   */
-void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init = true);
+void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
+          bool init = true);
 
 /** subprod(A, x, y) computes sub_y = sub_A*sub_x or sub_y += sub_A*sub_x if init = false
   \param A a SiconosMatrix
   \param x a SiconosVector
   \param[in,out] y a SiconosVector
-  \param coord an Index = [r0A r1A c0A c1A r0x r1x r0y r1y];
-  subA is the sub-matrix of A, for row numbers between r0A and r1A-1 and columns between c0A and c1A-1;
-  The same for x and y with rix and riy.
-  \param init a bool (default = true)
+  \param coord an std::vector<std::size_t> = [r0A r1A c0A c1A r0x r1x r0y r1y];
+  subA is the sub-matrix of A, for row numbers between r0A and r1A-1 and columns between c0A
+  and c1A-1; The same for x and y with rix and riy. \param init a bool (default = true)
   */
-void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, const Index& coord, bool init = true);
+void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
+             const std::vector<std::size_t>& coord, bool init = true);
 
-void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, const Index& coord, bool init = true);
+void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y,
+             const std::vector<std::size_t>& coord, bool init = true);
 
 /** computes y += sub(transpose(A)) x (only = if init = true) where
 subA is a sub-matrix of A.
@@ -108,7 +115,8 @@ subA is a sub-matrix of A.
   \param startCol col index of the first element considered in tA (to get sub(tA))
   \param init if true, start with y = 0, else add subA.x to current y.
 */
-void taxpy(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SP::SiconosVector y, bool init = true);
+void taxpy(const SiconosVector& x, const SiconosMatrix& A, unsigned int startRow,
+           unsigned int startCol, std::shared_ptr<SiconosVector> y, bool init = true);
 
 /** product of two matrices, C = A*B
   \param A a SiconosMatrix
@@ -116,4 +124,6 @@ void taxpy(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, un
   \return C a SimpleMatrix
   */
 const SimpleMatrix prod(const SiconosMatrix& A, const SiconosMatrix& B);
+
+}  // namespace siconos::algebra
 #endif

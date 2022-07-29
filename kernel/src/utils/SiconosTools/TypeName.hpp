@@ -14,50 +14,111 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file TypeName.hpp
-  \brief get a string name from visitable classes 
+  \brief get a string name from visitable classes
 */
 
 #ifndef TypeName_hpp
 #define TypeName_hpp
 
-#include "SiconosVisitor.hpp"
 #include <string>
-namespace Type
-{
-#undef REGISTER
-#define REGISTER(X) case Type:: X : r.reset(new std::string(#X)); break;
+#include <variant>
+// #include "SiconosVisitables.hpp" // For SICONOS_VISITABLES macro
 
-#undef REGISTER_STRUCT
-#define REGISTER_STRUCT(X) REGISTER(X)
-#undef REGISTER_BASE
-#undef REGISTER_BASE_EXTERN
-#define REGISTER_BASE(X,Y) REGISTER(X)
+// #undef REGISTER
+// #define REGISTER(X)                        \
+//   case siconos::internal::type::Siconos:: X:	\
+//     r = std::make_shared<std::string>(#X); \
+//     break;
 
-#define REGISTER_BASE_EXTERN(X,Y) REGISTER_BASE(X,Y)
+// #undef REGISTER_STRUCT
+// #define REGISTER_STRUCT(X) REGISTER(X)
 
-inline std::shared_ptr<std::string> str(const Siconos& X)
-{
-  std::shared_ptr<std::string> r;
+// namespace siconos::internal {
 
-  switch (X)
+// struct SiconosVisitor;
+
+// inline std::shared_ptr<std::string> str(const siconos::internal::type::Siconos& X)
+// {
+//   std::shared_ptr<std::string> r;
+
+//   switch (X) {
+//     SICONOS_VISITABLES()
+//     default:
+//       assert(0);
+//   }
+
+//   return (r);
+// }
+
+// template <class C>
+// std::string name(const C& c)
+// {
+//   return *(siconos::internal::type::str(siconos::internal::type::value(c)));
+// }
+
+
+
+//   template <class T > inline std::shared_ptr<std::string> str(const siconos::internal::type::Siconos& X)
+// {
+//   std::shared_ptr<std::string> r;
+
+//   switch (X) {
+//     SICONOS_VISITABLES()
+//     default:
+//       assert(0);
+//   }
+
+//   return (r);
+// }
+
+  
+// }  // namespace siconos::internal
+
+
+namespace siconos::typesv{
+
+  struct FindType{
+
+    // auto operator()(const siconos::experimental::B& obj) const {return experimental::Type::B; }
+    // auto operator()(const siconos::experimental::C& obj) const {return experimental::Type::C; }
+    // auto operator()(std::shared_ptr<siconos::experimental::B> obj) const {return experimental::Type::B; }
+    // auto operator()(std::shared_ptr<siconos::experimental::C> obj) const {return experimental::Type::C; }
+  };
+  
+  // auto type_value = []( auto& obj) { return obj.name(); };
+
+  static FindType find;
+
+  template <typename C> auto type_value(const C &c) {return std::visit(find, c);}
+  
+  template <typename T> constexpr auto str(const T& X)
   {
-    SICONOS_VISITABLES()
+  
+  switch (X) {
+  case T::B:
+    //r = std::make_shared<std::string>("siconos::experimental::B");
+    return "siconos::experimental::B";
+    break;
+  case T::C:
+    //r = std::make_shared<std::string>("siconos::experimental::C");
+    return "siconos::experimental::C";
+    break;
   default:
     assert(0);
   }
+  }
 
-  return(r);
+  template <class C> std::string type_name(const C& c)
+  {
+     return str(type_value(c));
+  }
+
+  
+    
 }
 
 
-template <class C>
-std::string name(const C& c)
-{
-  return *(Type::str(Type::value(c)));
-}
-
-}
 #endif

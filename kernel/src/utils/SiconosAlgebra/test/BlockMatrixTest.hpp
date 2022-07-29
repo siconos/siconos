@@ -19,7 +19,6 @@
 #define __BlockMatrixTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SiconosPointers.hpp"
 #include "BlockMatrix.hpp"
 
 
@@ -62,11 +61,13 @@ private:
   void testAssignment();
   void testOperators1();
   void End();
+  using BlocksMatrix =
+      boost::numeric::ublas::compressed_matrix<std::shared_ptr<siconos::algebra::SiconosMatrix>>;
 
-  SP::SiconosMatrix B, C, D, E, F, G;
-  std::vector<SP::SiconosMatrix> m;
-  Index tRow, tCol;
-  SP::BlocksMat mapRef;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> B, C, D, E, F, G;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> m;
+  std::vector<std::size_t> tRow, tCol;
+  std::shared_ptr<BlocksMatrix> mapRef;
   double tol;
 
 public:

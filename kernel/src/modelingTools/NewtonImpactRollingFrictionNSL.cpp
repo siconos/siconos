@@ -16,26 +16,10 @@
  * limitations under the License.
 */
 #include "NewtonImpactRollingFrictionNSL.hpp"
-
+#include "SiconosException.hpp"
 #include <iostream>
 
-// Default (private)
-NewtonImpactRollingFrictionNSL::NewtonImpactRollingFrictionNSL():
-  NonSmoothLaw(), _en(0.0), _et(0.0), _mu(0.0), _muR(0.0)
-{}
-
-NewtonImpactRollingFrictionNSL::NewtonImpactRollingFrictionNSL(unsigned int size):
-  NonSmoothLaw(size), _en(0.0), _et(0.0), _mu(0.0), _muR(0.0)
-{}
-
-NewtonImpactRollingFrictionNSL::NewtonImpactRollingFrictionNSL(double newEn, double newEt, double newMu, double newMuR, unsigned int newSize):
-  NonSmoothLaw(newSize), _en(newEn), _et(newEt), _mu(newMu), _muR(newMuR)
-{}
-
-NewtonImpactRollingFrictionNSL::~NewtonImpactRollingFrictionNSL()
-{}
-
-bool NewtonImpactRollingFrictionNSL::isVerified() const
+bool siconos::modeling::NewtonImpactRollingFrictionNSL::isVerified() const
 {
   bool res = false;
   // to do
@@ -43,7 +27,7 @@ bool NewtonImpactRollingFrictionNSL::isVerified() const
   return res;
 }
 
-void NewtonImpactRollingFrictionNSL::display() const
+void siconos::modeling::NewtonImpactRollingFrictionNSL::display() const
 {
   std::cout << "=== Newton impact-friction non-smooth law data display ===" <<std::endl;
   std::cout << " Normal Newton coefficient of restitution: " << _en <<std::endl;

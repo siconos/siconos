@@ -14,21 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __FirstOrderNonLinearDSTest__
 #define __FirstOrderNonLinearDSTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "FirstOrderNonLinearDS.hpp"
 #include "SiconosException.hpp"
 
-class FirstOrderNonLinearDSTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class FirstOrderNonLinearDSTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(FirstOrderNonLinearDSTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderNonLinearDSTest);
@@ -36,7 +33,7 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS1);
-  CPPUNIT_TEST(testBuildFirstOrderNonLinearDS2);
+  //CPPUNIT_TEST(testBuildFirstOrderNonLinearDS2);
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS3);
   CPPUNIT_TEST(testSetX0);
   CPPUNIT_TEST(testSetX0Ptr);
@@ -53,7 +50,7 @@ private:
   // \todo exception test
 
   void testBuildFirstOrderNonLinearDS1();
-  void testBuildFirstOrderNonLinearDS2();
+  //void testBuildFirstOrderNonLinearDS2();
   void testBuildFirstOrderNonLinearDS3();
   void testSetX0();
   void testSetX0Ptr();
@@ -67,16 +64,12 @@ private:
 
   // Members
 
-  SP::SiconosVector x0, xnull;
-  SP::SiconosMatrix J0, M;
-public:
+  std::shared_ptr<siconos::algebra::SiconosVector> x0{nullptr}, xnull{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> J0{nullptr}, M{nullptr};
+
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

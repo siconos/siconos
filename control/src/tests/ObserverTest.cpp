@@ -24,7 +24,7 @@
 #include "PID.hpp"
 #include "SlidingReducedOrderObserver.hpp"
 #include "LuenbergerObserver.hpp"
-#include "ioMatrix.hpp"
+#include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);

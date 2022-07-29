@@ -14,46 +14,43 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
+#include "NormalConeNSL.hpp"
 
 #include <cassert>
 #include <iostream>
-#include "NormalConeNSL.hpp"
 
-#include "SimpleMatrix.hpp"
+#include "SiconosException.hpp"
 #include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 
-
-// Default (private)
-NormalConeNSL::NormalConeNSL(): NonSmoothLaw(), _H(std::shared_ptr<SimpleMatrix>()), _K(std::shared_ptr<SiconosVector>())
-{}
-
-NormalConeNSL::NormalConeNSL(unsigned size, SP::SimpleMatrix H, SP::SiconosVector K):
-  NonSmoothLaw(size), _H(H), _K(K)
+siconos::modeling::NormalConeNSL::NormalConeNSL(
+    unsigned size, std::shared_ptr<siconos::algebra::SimpleMatrix> H,
+    std::shared_ptr<siconos::algebra::SiconosVector> K)
+    : NonSmoothLaw(size), _H(H), _K(K)
 {
   assert(H->size(1) == size &&
-         "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are not equal, check your code !");
+         "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are "
+         "not equal, check your code !");
 }
 
-NormalConeNSL::~NormalConeNSL()
-{}
-
-bool NormalConeNSL::isVerified(void) const
+bool siconos::modeling::NormalConeNSL::isVerified(void) const
 {
   bool res = false;
   // to do
   return res;
 }
 
-void NormalConeNSL::display() const
+void siconos::modeling::NormalConeNSL::display() const
 {
-  std::cout << "------------------------------------" <<std::endl;
-  std::cout << "____ data of the NormalConeNSL" <<std::endl;
-  std::cout << "| nSLawSize : " << _size <<std::endl;
+  std::cout << "------------------------------------" << std::endl;
+  std::cout << "____ data of the NormalConeNSL" << std::endl;
+  std::cout << "| nSLawSize : " << _size << std::endl;
   std::cout << "| H : " << std::endl;
   _H->display();
   std::cout << "| K : " << std::endl;
   _K->display();
-  std::cout << "____________________________" <<std::endl;
-  std::cout << "------------------------------------" <<std::endl;
+  std::cout << "____________________________" << std::endl;
+  std::cout << "------------------------------------" << std::endl;
 }

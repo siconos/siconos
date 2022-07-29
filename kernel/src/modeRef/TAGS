@@ -1,0 +1,1174 @@
+
+DynamicalSystemTypes.hpp,40
+#define DYNAMICALSYSTEMTYPES_HPP25,843
+
+NewtonImpactFrictionNSL.cpp,372
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(23,773
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(27,876
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(31,1000
+NewtonImpactFrictionNSL::~NewtonImpactFrictionNSL(~NewtonImpactFrictionNSL35,1178
+bool NewtonImpactFrictionNSL::isVerified(isVerified38,1234
+void NewtonImpactFrictionNSL::display(display46,1414
+
+NormalConeNSL.hpp,256
+#define NORMALCONENSLAW_H23,805
+class NormalConeNSL 52,1624
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _H;59,1780
+  std::shared_ptr<siconos::algebra::SiconosVector> _K;62,1891
+  inline SimpleMatrix& H(84,2497
+  inline SiconosVector& K(90,2607
+
+Lagrangian2d2DR.cpp,257
+void Lagrangian2d2DR::initialize(initialize28,908
+double Lagrangian2d2DR::distance(distance40,1361
+void Lagrangian2d2DR::computeh(computeh52,1698
+void Lagrangian2d2DR::computeJachq(computeJachq70,2159
+void Lagrangian2d2DR::display(display141,4114
+
+DynamicalSystemFactory.hpp,473
+#define DynamicalSystemFactory_H24,824
+namespace DynamicalSystemFactory33,1017
+typedef SP::DynamicalSystem(*object_creator)object_creator39,1215
+typedef std::map<int,int42,1325
+typedef std::map<int, object_creator> MapFactory;42,1325
+typedef MapFactory::iterator MapFactoryIt;45,1418
+template<class SubType> SP::DynamicalSystem factory(52,1586
+class Registry69,2043
+  MapFactory factory_map;76,2192
+class Registration104,2925
+#define AUTO_REGISTER_DS(115,3158
+
+RelationNamespace.hpp,393
+#define RELATIONNAMESPACE_HPP23,797
+namespace RELATION26,876
+  enum TYPES29,936
+    FirstOrder,32,976
+    Lagrangian,34,1014
+    NewtonEuler36,1052
+  enum SUBTYPES40,1116
+    NonLinearR,43,1158
+    LinearR,45,1192
+    LinearTIR,47,1242
+    ScleronomousR,49,1299
+    RheonomousR,51,1358
+    CompliantR,53,1414
+    CompliantLinearTIR,55,1478
+    Type1R,57,1513
+    Type2R59,1536
+
+LagrangianScleronomousR.hpp,412
+#define LagrangianScleronomousR_H22,769
+class LagrangianScleronomousR 107,2741
+  std::shared_ptr<siconos::plugins::PluggedObject> _plugindotjacqh{_plugindotjacqh130,3525
+  std::shared_ptr<siconos::algebra::SiconosVector> _dotjacqhXqdot{_dotjacqhXqdot133,3679
+  LagrangianScleronomousR(139,3842
+  inline std::shared_ptr<siconos::algebra::SiconosVector> dotjacqhXqdot(193,5974
+  void computeJacg(247,7797
+
+NewtonImpactRollingFrictionNSL.cpp,449
+NewtonImpactRollingFrictionNSL::NewtonImpactRollingFrictionNSL(23,780
+NewtonImpactRollingFrictionNSL::NewtonImpactRollingFrictionNSL(27,908
+NewtonImpactRollingFrictionNSL::NewtonImpactRollingFrictionNSL(31,1057
+NewtonImpactRollingFrictionNSL::~NewtonImpactRollingFrictionNSL(~NewtonImpactRollingFrictionNSL35,1278
+bool NewtonImpactRollingFrictionNSL::isVerified(isVerified38,1348
+void NewtonImpactRollingFrictionNSL::display(display46,1542
+
+NewtonEuler5DR.cpp,297
+void NewtonEuler5DR::initialize(initialize36,1175
+void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(RFC3DcomputeJachqTFromContacts50,1770
+void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(RFC3DcomputeJachqTFromContacts179,6585
+void NewtonEuler5DR::computeJachqT(computeJachqT302,10604
+
+NewtonImpactNSL.hpp,140
+#define NEWTONIMPACTNSL_H22,752
+class NewtonImpactNSL 44,1257
+  double _e;50,1410
+  inline double e(78,1989
+  inline void setE(84,2099
+
+Relation.hpp,1629
+#define RELATION_H24,781
+class Relation 53,1788
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginh{_pluginh61,1891
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachx{_pluginJachx65,2017
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachz{_pluginJachz68,2146
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachlambda{_pluginJachlambda71,2283
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluging{_pluging75,2401
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacglambda{_pluginJacglambda78,2526
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacgx{_pluginJacgx81,2654
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginf{_pluginf84,2758
+  std::shared_ptr<siconos::plugins::PluggedObject> _plugine{_plugine87,2858
+  RELATION::TYPES _relationType;94,3083
+  RELATION::SUBTYPES _subType;97,3191
+  inline RELATION::TYPES getType(120,3782
+  inline RELATION::SUBTYPES getSubType(123,3895
+  virtual bool isLinear(250,8638
+  virtual bool requireResidu(257,8830
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginh(268,9038
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJachx(275,9226
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJachlambda(282,9426
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluging(291,9633
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacLg(298,9825
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginf(305,10021
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPlugine(312,10204
+
+ComplementarityConditionNSL.hpp,159
+#define COMPLEMENTARITYCONDITIONNSLAW_H22,778
+class ComplementarityConditionNSL 29,889
+  ComplementarityConditionNSL(36,1043
+  inline void display(50,1309
+
+LagrangianCompliantLinearTIR.cpp,537
+LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(31,1004
+LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(39,1281
+LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(49,1685
+void LagrangianCompliantLinearTIR::initialize(initialize57,1981
+void LagrangianCompliantLinearTIR::checkSize(checkSize61,2071
+void LagrangianCompliantLinearTIR::computeInput(computeInput83,3085
+void LagrangianCompliantLinearTIR::computeOutput(computeOutput91,3443
+void LagrangianCompliantLinearTIR::display(display111,4004
+
+MixedComplementarityConditionNSL.hpp,256
+#define MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H22,787
+class MixedComplementarityConditionNSL 32,936
+  MixedComplementarityConditionNSL(40,1102
+  unsigned int _equalitySize;41,1143
+  inline void display(57,1508
+  inline unsigned int equalitySize(63,1645
+
+FirstOrderLinearTIR.cpp,498
+FirstOrderLinearTIR::FirstOrderLinearTIR(33,1098
+FirstOrderLinearTIR::FirstOrderLinearTIR(40,1338
+void FirstOrderLinearTIR::initialize(initialize52,1842
+void FirstOrderLinearTIR::checkSize(checkSize67,2265
+void FirstOrderLinearTIR::computeh(computeh107,3822
+void FirstOrderLinearTIR::computeOutput(computeOutput125,4210
+void FirstOrderLinearTIR::computeg(computeg134,4606
+void FirstOrderLinearTIR::computeInput(computeInput138,4722
+void FirstOrderLinearTIR::display(display150,5300
+
+LagrangianLinearTIR.cpp,381
+LagrangianLinearTIR::LagrangianLinearTIR(35,1098
+LagrangianLinearTIR::LagrangianLinearTIR(42,1278
+LagrangianLinearTIR::LagrangianLinearTIR(51,1586
+void LagrangianLinearTIR::checkSize(checkSize59,1786
+void LagrangianLinearTIR::computeOutput(computeOutput76,2552
+void LagrangianLinearTIR::computeInput(computeInput99,3368
+void LagrangianLinearTIR::display(display113,4064
+
+NewtonEuler1DR.cpp,441
+void NewtonEuler1DR::NIcomputeJachqTFromContacts(NIcomputeJachqTFromContacts37,1235
+void NewtonEuler1DR::NIcomputeJachqTFromContacts(NIcomputeJachqTFromContacts91,2745
+void NewtonEuler1DR::initialize(initialize159,4832
+void NewtonEuler1DR::computeJachq(computeJachq179,5703
+void NewtonEuler1DR::computeJachqT(computeJachqT251,8988
+double NewtonEuler1DR::distance(distance268,9436
+void NewtonEuler1DR::computeh(computeh274,9579
+
+EqualityConditionNSL.hpp,99
+#define EQUALITYCONDITIONNSLAW_H22,764
+class EqualityConditionNSL 29,861
+  void display(51,1292
+
+LinearComplementaritySystemsNSDS.cpp,76
+LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(36,1088
+
+NewtonEuler3DR.cpp,292
+void NewtonEuler3DR::initialize(initialize36,1174
+void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(FC3DcomputeJachqTFromContacts47,1604
+void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(FC3DcomputeJachqTFromContacts166,6143
+void NewtonEuler3DR::computeJachqT(computeJachqT264,9236
+
+test/LagrangianCompliantLinearTIRTest.hpp,468
+#define __LagrangianCompliantLinearTIRTest__19,736
+class LagrangianCompliantLinearTIRTest 25,912
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C,66,1900
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B,66,1900
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F,66,1900
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F, D;66,1900
+  std::shared_ptr<siconos::algebra::SiconosVector> e;67,1962
+  SP::NonSmoothDynamicalSystem nsds;68,2016
+
+test/NonSmoothDynamicalSystemTest.hpp,91
+#define __NonSmoothDynamicalSystemTest__19,732
+class NonSmoothDynamicalSystemTest 25,896
+
+test/LagrangianLinearTIRTest.hpp,380
+#define __LagrangianLinearTIRTest__19,727
+class LagrangianLinearTIRTest 25,885
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C,65,1885
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B,65,1885
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F;65,1885
+  std::shared_ptr<siconos::algebra::SiconosVector> e;66,1944
+  SP::NonSmoothDynamicalSystem nsds;67,1998
+
+test/FirstOrderLinearTIRTest.cpp,731
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,766
+void FirstOrderLinearTIRTest::setUp(setUp28,976
+void FirstOrderLinearTIRTest::tearDown(tearDown38,1397
+void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR1(testBuildFirstOrderLinearTIR142,1466
+void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2(testBuildFirstOrderLinearTIR254,2164
+void FirstOrderLinearTIRTest::testSetCPtr(testSetCPtr73,3172
+void FirstOrderLinearTIRTest::testSetDPtr(testSetDPtr87,3641
+void FirstOrderLinearTIRTest::testSetFPtr(testSetFPtr99,3981
+void FirstOrderLinearTIRTest::testSetEPtr(testSetEPtr112,4322
+void FirstOrderLinearTIRTest::testSetBPtr(testSetBPtr125,4663
+void FirstOrderLinearTIRTest::testGetJacPtr(testGetJacPtr138,5112
+
+test/LagrangianRheonomousRTest.cpp,256
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,734
+void LagrangianRheonomousRTest::setUp(setUp28,946
+void LagrangianRheonomousRTest::tearDown(tearDown32,991
+void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0(testBuildLagrangianRheonomousR036,1059
+
+test/LagrangianCompliantRTest.cpp,251
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,733
+void LagrangianCompliantRTest::setUp(setUp28,944
+void LagrangianCompliantRTest::tearDown(tearDown32,988
+void LagrangianCompliantRTest::testBuildLagrangianCompliantR0(testBuildLagrangianCompliantR036,1055
+
+test/LagrangianScleronomousRTest.hpp,89
+#define __LagrangianScleronomousRTest__19,731
+class LagrangianScleronomousRTest 25,897
+
+test/FirstOrderType1RTest.hpp,120
+#define __FirstOrderType1RTest__19,724
+class FirstOrderType1RTest 25,876
+  SP::NonSmoothDynamicalSystem nsds;49,1330
+
+test/FirstOrderLinearRTest.cpp,890
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,730
+void FirstOrderLinearRTest::setUp(setUp28,938
+void FirstOrderLinearRTest::tearDown(tearDown43,1699
+void FirstOrderLinearRTest::testBuildFirstOrderLinearR1(testBuildFirstOrderLinearR147,1766
+void FirstOrderLinearRTest::testBuildFirstOrderLinearR3(testBuildFirstOrderLinearR358,2504
+void FirstOrderLinearRTest::testBuildFirstOrderLinearR4(testBuildFirstOrderLinearR474,3669
+void FirstOrderLinearRTest::testBuildFirstOrderLinearR5(testBuildFirstOrderLinearR586,4349
+void FirstOrderLinearRTest::testSetCPtr(testSetCPtr103,5331
+void FirstOrderLinearRTest::testSetCPtr2(testSetCPtr2120,6218
+void FirstOrderLinearRTest::testSetDPtr(testSetDPtr135,6805
+void FirstOrderLinearRTest::testSetFPtr(testSetFPtr148,7245
+void FirstOrderLinearRTest::testSetEPtr(testSetEPtr162,7686
+void FirstOrderLinearRTest::testSetBPtr(testSetBPtr175,8126
+
+test/LagrangianCompliantRTest.hpp,83
+#define __LagrangianCompliantRTest__19,728
+class LagrangianCompliantRTest 25,888
+
+test/LagrangianRheonomousRTest.hpp,85
+#define __LagrangianRheonomousRTest__19,729
+class LagrangianRheonomousRTest 25,891
+
+test/LagrangianScleronomousRTest.cpp,266
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,736
+void LagrangianScleronomousRTest::setUp(setUp28,950
+void LagrangianScleronomousRTest::tearDown(tearDown32,997
+void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2(testBuildLagrangianScleronomousR236,1067
+
+test/FirstOrderType1RTest.cpp,322
+#define CPPUNIT_ASSERT_NOT_EQUAL(25,778
+void FirstOrderType1RTest::setUp(setUp33,986
+void FirstOrderType1RTest::tearDown(tearDown37,1026
+void FirstOrderType1RTest::testBuildFirstOrderType1R1(testBuildFirstOrderType1R142,1089
+void FirstOrderType1RTest::testBuildFirstOrderType1R2(testBuildFirstOrderType1R263,2431
+
+test/FirstOrderLinearRTest.hpp,446
+#define __FirstOrderLinearRTest__19,725
+class FirstOrderLinearRTest 25,879
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C,76,2080
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B,76,2080
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F,76,2080
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F, D;76,2080
+  std::shared_ptr<siconos::algebra::SiconosVector> e;77,2142
+  SP::NonSmoothDynamicalSystem nsds;78,2196
+
+test/LagrangianCompliantLinearTIRTest.cpp,968
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,741
+void LagrangianCompliantLinearTIRTest::setUp(setUp28,960
+void LagrangianCompliantLinearTIRTest::tearDown(tearDown37,1315
+void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR1(testBuildLagrangianCompliantLinearTIR141,1393
+void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR2(testBuildLagrangianCompliantLinearTIR252,2072
+void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR3(testBuildLagrangianCompliantLinearTIR362,2657
+void LagrangianCompliantLinearTIRTest::testSetCPtr(testSetCPtr74,3426
+void LagrangianCompliantLinearTIRTest::testSetDPtr(testSetDPtr90,4056
+void LagrangianCompliantLinearTIRTest::testSetFPtr(testSetFPtr104,4551
+void LagrangianCompliantLinearTIRTest::testSetEPtr(testSetEPtr116,4918
+void LagrangianCompliantLinearTIRTest::testGetJacPtr(testGetJacPtr127,5266
+void LagrangianCompliantLinearTIRTest::End(End138,5702
+
+test/FirstOrderLinearTIRTest.hpp,450
+#define __FirstOrderLinearTIRTest__19,727
+class FirstOrderLinearTIRTest 25,885
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C,74,2030
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B,74,2030
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F,74,2030
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F, D;74,2030
+  std::shared_ptr<siconos::algebra::SiconosVector> e;75,2092
+  SP::NonSmoothDynamicalSystem nsds;76,2146
+
+test/NonSmoothDynamicalSystemTest.cpp,529
+#define CPPUNIT_ASSERT_NOT_EQUAL(22,802
+void NonSmoothDynamicalSystemTest::setUp(setUp29,1017
+void NonSmoothDynamicalSystemTest::tearDown(tearDown33,1065
+void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem(testinsertDynamicalSystem38,1141
+void NonSmoothDynamicalSystemTest::testinsertInteraction(testinsertInteraction78,2712
+void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem(testremoveDynamicalSystem103,3766
+void NonSmoothDynamicalSystemTest::testremoveInteraction(testremoveInteraction157,6384
+
+test/LagrangianLinearTIRTest.cpp,802
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,732
+void LagrangianLinearTIRTest::setUp(setUp28,942
+void LagrangianLinearTIRTest::tearDown(tearDown36,1213
+void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1(testBuildLagrangianLinearTIR140,1282
+void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR2(testBuildLagrangianLinearTIR251,1886
+void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR3(testBuildLagrangianLinearTIR361,2405
+void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4(testBuildLagrangianLinearTIR473,3103
+void LagrangianLinearTIRTest::testSetCPtr(testSetCPtr85,3642
+void LagrangianLinearTIRTest::testSetFPtr(testSetFPtr97,4098
+void LagrangianLinearTIRTest::testSetEPtr(testSetEPtr109,4435
+void LagrangianLinearTIRTest::testGetJacPtr(testGetJacPtr120,4753
+
+Interaction.cpp,2335
+size_t Interaction::__count 54,1550
+struct Interaction::_setLevels 56,1584
+  using SiconosVisitor::visit;62,1809
+  Interaction* _interaction;64,1841
+  _setLevels(66,1871
+  void visit(69,1936
+  void visit(96,2770
+  void visit(122,3531
+  void visit(139,4005
+  void visit(156,4498
+  void visit(182,5254
+  void visit(200,5761
+  void visit(217,6275
+  void visit(234,6796
+void Interaction::reset(reset254,7309
+Interaction::Interaction(290,8422
+void Interaction::initializeLinkToDsVariables(initializeLinkToDsVariables318,9520
+void Interaction::initializeMemory(initializeMemory348,10554
+void Interaction::resetAllLambda(resetAllLambda384,11868
+void Interaction::resetLambda(resetLambda397,12055
+void Interaction::__initDataFirstOrder(__initDataFirstOrder406,12286
+void Interaction::__initDSDataFirstOrder(__initDSDataFirstOrder429,12867
+void Interaction::__initDataLagrangian(__initDataLagrangian438,13244
+void Interaction::__initDSDataLagrangian(__initDSDataLagrangian461,13897
+void Interaction::__initDataNewtonEuler(__initDataNewtonEuler499,15024
+void Interaction::__initDSDataNewtonEuler(__initDSDataNewtonEuler518,16006
+void Interaction::setY(setY545,17267
+void Interaction::setYPtr(setYPtr557,17546
+void Interaction::setY(setY565,17667
+void Interaction::setYPtr(setYPtr583,18129
+void Interaction::setLambda(setLambda594,18474
+void Interaction::setLambdaPtr(setLambdaPtr604,18771
+void Interaction::setLambda(setLambda611,18897
+void Interaction::setLambdaPtr(setLambdaPtr629,19438
+void Interaction::swapInMemory(swapInMemory643,19859
+void Interaction::computeOutput(computeOutput659,20321
+void Interaction::computeInput(computeInput670,20660
+std::shared_ptr<siconos::algebra::SiconosMatrix> Interaction::getLeftInteractionBlock(getLeftInteractionBlock680,20951
+std::shared_ptr<siconos::algebra::SiconosMatrix> Interaction::getLeftInteractionBlockForDS(getLeftInteractionBlockForDS708,21948
+void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(getLeftInteractionBlockForDSProjectOnConstraints752,23757
+std::shared_ptr<siconos::algebra::SiconosMatrix> Interaction::getRightInteractionBlockForDS(getRightInteractionBlockForDS789,25286
+void Interaction::getExtraInteractionBlock(getExtraInteractionBlock833,27364
+void Interaction::display(display871,28714
+
+Lagrangian2d1DR.cpp,256
+void Lagrangian2d1DR::initialize(initialize33,986
+void Lagrangian2d1DR::computeJachq(computeJachq45,1458
+double Lagrangian2d1DR::distance(distance76,2312
+void Lagrangian2d1DR::computeh(computeh85,2555
+void Lagrangian2d1DR::display(display96,2902
+
+MultipleImpactNSL.hpp,241
+#define _MULTIPLEIMPACTNSL_23,758
+class MultipleImpactNSL 31,999
+  double _ResCof;37,1142
+  double _Stiff;39,1193
+  double _ElasCof;41,1238
+  inline double ResCof(51,1518
+  inline double Stiff(53,1606
+  inline double ElasCof(55,1705
+
+FirstOrderNonLinearR.cpp,947
+typedef void (*FONLR_h)FONLR_h27,880
+typedef FONLR_h FONLR_g;28,1022
+typedef FONLR_h FONLR_C;29,1047
+typedef FONLR_h FONLR_B;30,1072
+typedef FONLR_h FONLR_K;31,1097
+typedef FONLR_h FONLR_D;32,1122
+void FirstOrderNonLinearR::initialize(initialize35,1149
+void FirstOrderNonLinearR::checkSize(checkSize51,1738
+void FirstOrderNonLinearR::computeh(computeh56,1801
+void FirstOrderNonLinearR::computeg(computeg71,2365
+void FirstOrderNonLinearR::computeJachx(computeJachx88,2984
+void FirstOrderNonLinearR::computeJachlambda(computeJachlambda101,3514
+void FirstOrderNonLinearR::computeJacglambda(computeJacglambda114,4093
+void FirstOrderNonLinearR::computeJacgx(computeJacgx127,4672
+void FirstOrderNonLinearR::computeOutput(computeOutput141,5232
+void FirstOrderNonLinearR::computeInput(computeInput151,5668
+void FirstOrderNonLinearR::computeJach(computeJach160,6085
+void FirstOrderNonLinearR::computeJacg(computeJacg178,6603
+
+LagrangianRheonomousR.cpp,628
+LagrangianRheonomousR::LagrangianRheonomousR(36,1045
+void LagrangianRheonomousR::initialize(initialize49,1548
+void LagrangianRheonomousR::setComputehDotFunction(setComputehDotFunction59,1804
+void LagrangianRheonomousR::_zeroPlugin(_zeroPlugin64,1985
+void LagrangianRheonomousR::computeh(computeh70,2104
+void LagrangianRheonomousR::computehDot(computehDot83,2633
+void LagrangianRheonomousR::computeJachq(computeJachq94,2983
+void LagrangianRheonomousR::computeOutput(computeOutput106,3344
+void LagrangianRheonomousR::computeInput(computeInput144,4892
+void LagrangianRheonomousR::computeJach(computeJach154,5321
+
+FirstOrderType2R.hpp,244
+#define FirstOrderType2R_H24,829
+typedef void (*Type2PtrH)Type2PtrH28,885
+typedef void (*Type2PtrG)Type2PtrG29,981
+class FirstOrderType2R 55,1838
+  FirstOrderType2R(65,1977
+  inline void checkSize(97,3137
+  bool requireResidu(170,5689
+
+RelayNSL.hpp,213
+#define RELAYNSLAW_H22,791
+class RelayNSL 62,1694
+  double _lb;68,1826
+  double _ub;71,1888
+  inline double lb(98,2509
+  inline void setLb(104,2630
+  inline double ub(110,2734
+  inline void setUb(116,2842
+
+NewtonEulerR.cpp,636
+void NewtonEulerR::initialize(initialize47,1254
+void NewtonEulerR::checkSize(checkSize98,2794
+void NewtonEulerR::setJachq(setJachq107,3322
+void NewtonEulerR::setJachqPtr(setJachqPtr112,3434
+void NewtonEulerR::computeh(computeh119,3548
+void NewtonEulerR::computeOutput(computeOutput128,3690
+void NewtonEulerR::computeInput(computeInput178,5357
+void NewtonEulerR::computeJachqT(computeJachqT243,8104
+void NewtonEulerR::computeJach(computeJach289,9498
+void NewtonEulerR::computeDotJachq(computeDotJachq306,10121
+void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(computeSecondOrderTimeDerivativeTerms318,10607
+
+RelationFactory.cpp,204
+namespace RelationFactory22,756
+Registry& Registry::get(get25,785
+void Registry::add(add31,863
+SP::Relation Registry::instantiate(instantiate36,952
+Registration::Registration(Registration46,1241
+
+FirstOrderLinearR.hpp,589
+#define FirstOrderLinearR_H22,757
+typedef void (*FOMatPtr1)FOMatPtr126,893
+typedef void (*FOMatPtr2)FOMatPtr230,1098
+typedef void (*FOVecPtr)FOVecPtr33,1256
+class FirstOrderLinearR 51,1618
+  std::shared_ptr<siconos::algebra::SiconosVector> _e{_e58,1761
+  FirstOrderLinearR(75,2230
+  void setComputeCFunction(123,4122
+  void setComputeDFunction(133,4465
+  void setComputeBFunction(143,4813
+  inline void setePtr(234,7585
+  inline std::shared_ptr<siconos::algebra::SiconosVector> e(240,7724
+  bool isLinear(246,7908
+  void computeJach(250,8107
+  void computeJacg(251,8171
+
+FirstOrderR.cpp,48
+void FirstOrderR::initialize(initialize20,719
+
+Lagrangian2d3DR.cpp,259
+void Lagrangian2d3DR::initialize(initialize31,884
+void Lagrangian2d3DR::computeJachq(computeJachq43,1356
+double Lagrangian2d3DR::distance(distance104,2980
+void Lagrangian2d3DR::computeh(computeh116,3317
+void Lagrangian2d3DR::display(display132,3761
+
+LagrangianCompliantR.hpp,231
+#define LagrangianCompliantR_H22,763
+class LagrangianCompliantR 54,1338
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachlambda{_pluginJachlambda71,1950
+  LagrangianCompliantR(75,2062
+  void computeJacg(165,5291
+
+NonSmoothDynamicalSystem.cpp,1799
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(37,1034
+NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem(~NonSmoothDynamicalSystem51,1493
+void NonSmoothDynamicalSystem::Change::display(display57,1576
+void NonSmoothDynamicalSystem::clearChangeLogTo(clearChangeLogTo82,2388
+void NonSmoothDynamicalSystem::display(display101,3113
+void  NonSmoothDynamicalSystem::insertDynamicalSystem(insertDynamicalSystem112,3532
+void  NonSmoothDynamicalSystem::removeDynamicalSystem(removeDynamicalSystem129,4037
+void  NonSmoothDynamicalSystem::removeInteraction(removeInteraction134,4213
+void NonSmoothDynamicalSystem::link(link140,4383
+void NonSmoothDynamicalSystem::clear(clear148,4651
+void NonSmoothDynamicalSystem::setSymmetric(setSymmetric154,4764
+void NonSmoothDynamicalSystem::reset(reset160,4856
+void NonSmoothDynamicalSystem::reset(reset169,5086
+void NonSmoothDynamicalSystem::swapInMemory(swapInMemory178,5338
+void NonSmoothDynamicalSystem::pushInteractionsInMemory(pushInteractionsInMemory187,5607
+void NonSmoothDynamicalSystem::updateDSPlugins(updateDSPlugins205,6173
+void NonSmoothDynamicalSystem::updateInput(updateInput214,6461
+void NonSmoothDynamicalSystem::updateOutput(updateOutput244,7363
+void NonSmoothDynamicalSystem::updateOutput(updateOutput266,8125
+void NonSmoothDynamicalSystem::computeInteractionJacobians(computeInteractionJacobians286,8856
+void NonSmoothDynamicalSystem::computeInteractionJacobians(computeInteractionJacobians302,9447
+void NonSmoothDynamicalSystem::visitDynamicalSystems(visitDynamicalSystems316,10002
+std::vector<SP::DynamicalSystem> NonSmoothDynamicalSystem::dynamicalSystemsVector(dynamicalSystemsVector326,10308
+std::vector<SP::Interaction> NonSmoothDynamicalSystem::InteractionsVector(InteractionsVector339,10731
+
+RelationTypes.hpp,33
+#define RelationTypes_hpp29,924
+
+LagrangianR.cpp,92
+void LagrangianR::_zeroPlugin(_zeroPlugin27,882
+void LagrangianR::display(display33,998
+
+FirstOrderType1R.cpp,660
+FirstOrderType1R::FirstOrderType1R(26,849
+FirstOrderType1R::FirstOrderType1R(36,1376
+void FirstOrderType1R::initialize(initialize48,2158
+void FirstOrderType1R::computeh(computeh70,2912
+void FirstOrderType1R::computeg(computeg80,3301
+void FirstOrderType1R::computeOutput(computeOutput90,3719
+void FirstOrderType1R::computeInput(computeInput99,4104
+void FirstOrderType1R::computeJachx(computeJachx113,4646
+void FirstOrderType1R::computeJachz(computeJachz126,5101
+void FirstOrderType1R::computeJacglambda(computeJacglambda137,5465
+void FirstOrderType1R::computeJach(computeJach148,5911
+void FirstOrderType1R::computeJacg(computeJacg169,6431
+
+Lagrangian2d1DR.hpp,1232
+#define Lagrangian2d1DR_H22,753
+class Lagrangian2d1DR 39,1320
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;46,1529
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;47,1586
+  std::shared_ptr<siconos::algebra::SiconosVector> _Nc;52,1751
+  std::shared_ptr<siconos::algebra::SiconosVector> _relNc;55,1854
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _RotationAbsToContactFrame;61,2087
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationMatrixAbsToBody;64,2192
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG1;68,2371
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG2;69,2428
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX1;72,2508
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX2;73,2565
+  void setpc1(79,2761
+  void setpc2(85,2986
+  void setnc(91,3231
+  bool _isOnContact 98,3515
+  Lagrangian2d1DR(102,3570
+  virtual ~Lagrangian2d1DR(111,3884
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1(132,4687
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2(133,4774
+  inline std::shared_ptr<siconos::algebra::SiconosVector> nc(134,4861
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relNc(136,4947
+  void setRelNc(142,5217
+
+Interaction.hpp,2282
+#define INTERACTION_H25,792
+class Interaction 54,1897
+  static size_t __count;61,2075
+  size_t _number;64,2125
+  unsigned int _lowerLevelForOutput 70,2284
+  unsigned int _upperLevelForOutput 76,2469
+  unsigned int _lowerLevelForInput 82,2669
+  unsigned int _upperLevelForInput 88,2868
+  unsigned int _interactionSize 91,2974
+  unsigned int _sizeOfDS 94,3077
+  bool _has2Bodies 101,3284
+  VectorOfVectors _y;107,3458
+  std::vector<SiconosMemory> _yMemory;110,3535
+  VectorOfVectors _lambda;113,3620
+  std::vector<SiconosMemory> _lambdaMemory;116,3702
+  SP::NonSmoothLaw _nslaw;119,3793
+  SP::Relation _relation;122,3870
+  VectorOfBlockVectors _linkToDSVariables;127,4060
+  VectorOfSMatrices _relationMatrices;129,4104
+  VectorOfVectors _relationVectors;131,4144
+  Interaction(143,4449
+  ~Interaction(210,7097
+  inline size_t number(256,8727
+  inline void setLowerLevelForOutput(265,8876
+  inline void setUpperLevelForOutput(274,9074
+  inline unsigned int lowerLevelForOutput(284,9270
+  inline unsigned int  upperLevelForOutput(294,9444
+  inline void setLowerLevelForInput(303,9625
+  inline void setUpperLevelForInput(312,9826
+  inline unsigned int lowerLevelForInput(323,10024
+  inline unsigned int upperLevelForInput(333,10202
+  inline unsigned int dimension(339,10355
+  inline unsigned int getSizeOfDS(345,10504
+  void setHas2Bodies(357,10823
+  bool has2Bodies(365,11020
+  inline const SiconosVector getCopyOfy(374,11205
+  inline const VectorOfVectors y(384,11415
+  inline std::shared_ptr<siconos::algebra::SiconosVector> y(395,11624
+  inline SiconosMemory& yMemory(435,12685
+  inline const SiconosVector& y_k(444,12902
+  inline const VectorOfVectors getLambda(456,13119
+  inline const SiconosVector getLambda(466,13332
+  inline std::shared_ptr<siconos::algebra::SiconosVector> lambda(477,13606
+  inline SiconosMemory& lambdaMemory(488,13875
+  inline const SiconosVector& lambda_k(498,14111
+  inline SP::Relation relation(534,15109
+  inline SP::NonSmoothLaw nonSmoothLaw(543,15282
+  inline VectorOfBlockVectors & linkToDSVariables(549,15358
+  inline VectorOfVectors & relationVectors(554,15451
+  inline VectorOfSMatrices & relationMatrices(559,15535
+  inline void setDSSizes(571,15893
+  static inline size_t resetCount(588,16266
+
+MultipleImpactNSL.cpp,419
+MultipleImpactNSL::MultipleImpactNSL(5,118
+MultipleImpactNSL::MultipleImpactNSL(7,208
+MultipleImpactNSL::~MultipleImpactNSL(~MultipleImpactNSL21,808
+void MultipleImpactNSL::setResCof(setResCof23,854
+void MultipleImpactNSL::setStiff(setStiff30,1088
+void MultipleImpactNSL::setElasCoeff(setElasCoeff37,1270
+void MultipleImpactNSL::display(display44,1489
+bool MultipleImpactNSL::isVerified(isVerified51,1949
+
+NSLawMatrix.hpp,79
+#define NSLAWMATRIX_H24,818
+class NSLawMatrix 34,1180
+  NSLawMatrix(41,1330
+
+LagrangianRheonomousR.hpp,401
+#define LagrangianRheonomousR_H22,765
+class LagrangianRheonomousR 64,1761
+  std::shared_ptr<siconos::algebra::SiconosVector> _hDot{_hDot71,1920
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginhDot{_pluginhDot75,2053
+  LagrangianRheonomousR(82,2218
+  inline void checkSize(116,3489
+  inline std::shared_ptr<siconos::algebra::SiconosVector> hDot(124,3660
+  void computeJacg(167,5290
+
+SubPluggedObject.hpp,618
+#define SubPluggedObject_H20,719
+typedef void (*matrixPlugin)matrixPlugin28,933
+class SubPluggedObject 30,1032
+  void * _parentfPtr;36,1187
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _tmpMat;38,1260
+  unsigned int _indx;40,1342
+  unsigned int _p;42,1391
+  SubPluggedObject(48,1452
+  SubPluggedObject(56,1753
+  SubPluggedObject(72,2425
+  ~SubPluggedObject(80,2685
+  void computeAndExtract(89,2974
+  inline void setIndex(101,3312
+  inline unsigned int getIndex(109,3446
+  inline unsigned int getp(117,3578
+  inline void * getParentfPtr(125,3715
+  inline const SiconosMatrix& getTmpMat(133,3864
+
+FirstOrderNonLinearR.hpp,137
+#define FirstOrderNonLinearR_H24,826
+class FirstOrderNonLinearR 90,3240
+  FirstOrderNonLinearR(98,3389
+  bool requireResidu(213,7568
+
+FirstOrderType2R.cpp,671
+FirstOrderType2R::FirstOrderType2R(30,951
+FirstOrderType2R::FirstOrderType2R(40,1478
+void FirstOrderType2R::initialize(initialize53,2291
+void FirstOrderType2R::computeh(computeh82,3331
+void FirstOrderType2R::computeg(computeg88,3609
+void FirstOrderType2R::computeOutput(computeOutput95,3850
+void FirstOrderType2R::computeInput(computeInput108,4330
+void FirstOrderType2R::computeJachlambda(computeJachlambda119,4766
+void FirstOrderType2R::computeJachx(computeJachx123,4968
+void FirstOrderType2R::computeJach(computeJach129,5218
+void FirstOrderType2R::computeJacglambda(computeJacglambda146,5754
+void FirstOrderType2R::computeJacg(computeJacg151,5935
+
+RelationFactory.hpp,449
+#define RelationFactory_H24,803
+namespace RelationFactory32,974
+typedef SP::Relation(*object_creator)object_creator36,1114
+typedef std::map<int,int39,1195
+typedef std::map<int, object_creator> MapFactory;39,1195
+typedef MapFactory::iterator MapFactoryIt;42,1288
+template<class SubType> SP::Relation factory(48,1473
+class Registry61,1806
+  MapFactory factory_map;67,1949
+class Registration94,2595
+#define AUTO_REGISTER_RELATION(106,2835
+
+NewtonEulerR.hpp,2700
+#define NEWTONEULERRELATION_H22,754
+class NewtonEulerR 43,1409
+  enum NewtonEulerRDS 46,1495
+  enum NewtonEulerRDS { z,46,1495
+  enum NewtonEulerRDS { z, q0,46,1495
+  enum NewtonEulerRDS { z, q0, velocity,46,1495
+  enum NewtonEulerRDS { z, q0, velocity, dotq,46,1495
+  enum NewtonEulerRDS { z, q0, velocity, dotq, p0,46,1495
+  enum NewtonEulerRDS { z, q0, velocity, dotq, p0, p1,46,1495
+  enum NewtonEulerRDS { z, q0, velocity, dotq, p0, p1, p2,46,1495
+  enum NewtonEulerRDS { z, q0, velocity, dotq, p0, p1, p2, DSlinkSize 46,1495
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachq;58,1863
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqDot;63,2081
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _dotjachq;71,2452
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachlambda;73,2514
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacglambda;74,2577
+  std::shared_ptr<siconos::algebra::SiconosVector> _e;77,2658
+  std::shared_ptr<siconos::algebra::SiconosVector> _contactForce;81,2845
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqT;88,3130
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _T;91,3262
+  NewtonEulerR(97,3402
+  NewtonEulerR(104,3540
+  virtual ~NewtonEulerR(108,3640
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachq(116,3782
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqDot(122,4068
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> dotJachq(123,4164
+  inline std::shared_ptr<siconos::algebra::SiconosVector> secondOrderTimeDerivativeTerms(129,4292
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachlambda(135,4482
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jacglambda(136,4582
+  inline void setE(137,4682
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqT(139,4772
+  inline void setJachqT(140,4864
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> H(141,4972
+  std::shared_ptr<siconos::plugins::PluggedObject> _plugindotjacqh;153,5402
+  std::shared_ptr<siconos::algebra::SiconosVector> _secondOrderTimeDerivativeTerms;160,5630
+  virtual void computeJachlambda(189,6509
+  virtual void computeJachq(196,6795
+  virtual void computeJachqDot(206,7045
+  virtual void computeJacglambda(221,7569
+  virtual void computeJacgq(227,7796
+  virtual void computeJacgqDot(233,8018
+  void computeJacg(257,8875
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C(303,10675
+  virtual inline std::shared_ptr<siconos::algebra::SimpleMatrix> D(308,10919
+  virtual inline std::shared_ptr<siconos::algebra::SimpleMatrix> B(313,11166
+  inline std::shared_ptr<siconos::algebra::SiconosVector> contactForce(322,11476
+  void display(324,11583
+
+RelayNSL.cpp,179
+RelayNSL::RelayNSL(24,759
+RelayNSL::RelayNSL(28,822
+RelayNSL::~RelayNSL(~RelayNSL35,1077
+bool RelayNSL::isVerified(isVerified38,1103
+void RelayNSL::display(display45,1191
+
+FirstOrderLinearR.cpp,829
+FirstOrderLinearR::FirstOrderLinearR(35,1153
+FirstOrderLinearR::FirstOrderLinearR(47,1701
+FirstOrderLinearR::FirstOrderLinearR(61,2312
+FirstOrderLinearR::FirstOrderLinearR(68,2549
+void FirstOrderLinearR::initialize(initialize79,2998
+void FirstOrderLinearR::checkSize(checkSize110,4072
+void FirstOrderLinearR::computeC(computeC166,5604
+void FirstOrderLinearR::computeD(computeD175,5915
+void FirstOrderLinearR::computeF(computeF184,6241
+void FirstOrderLinearR::computee(computee193,6540
+void FirstOrderLinearR::computeB(computeB203,6822
+void FirstOrderLinearR::computeh(computeh212,7144
+void FirstOrderLinearR::computeOutput(computeOutput236,7645
+void FirstOrderLinearR::computeg(computeg246,8094
+void FirstOrderLinearR::computeInput(computeInput252,8296
+void FirstOrderLinearR::display(display260,8585
+
+NonSmoothLaw.hpp,182
+#define NSLAW_H24,784
+class NonSmoothLaw 56,2164
+  unsigned int _size{_size61,2271
+  NonSmoothLaw(75,2638
+  virtual bool isVerified(84,2878
+  inline unsigned int size(91,3050
+
+FirstOrderR.hpp,1485
+#define FirstOrderR_H24,780
+class FirstOrderR 54,1917
+  enum FirstOrderRDS 56,1963
+  enum FirstOrderRDS { x,56,1963
+  enum FirstOrderRDS { x, z,56,1963
+  enum FirstOrderRDS { x, z, r,56,1963
+  enum FirstOrderRDS { x, z, r, DSlinkSize 56,1963
+  enum FirstOrderRVec 57,2009
+  enum FirstOrderRVec { e,57,2009
+  enum FirstOrderRVec { e, relationVectorsSize 57,2009
+  enum FirstOrderRMat 58,2059
+    mat_C,59,2083
+    mat_D,60,2094
+    mat_F,61,2105
+    mat_B,62,2116
+    mat_K,63,2127
+    relationMatricesSize64,2138
+  FirstOrderR(75,2302
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _C{nullptr}nullptr84,2656
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _D{nullptr}nullptr88,2807
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _F{nullptr}nullptr91,2950
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _B{nullptr}nullptr95,3101
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _K{nullptr}nullptr98,3244
+  inline void setCPtr(115,3637
+  inline void setBPtr(121,3799
+  inline void setDPtr(127,3963
+  inline void setFPtr(133,4127
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C(139,4265
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> H(146,4480
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> D(152,4618
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> F(158,4747
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> B(164,4876
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> K(170,5005
+
+Lagrangian2d3DR.hpp,1233
+#define Lagrangian2d3DR_H22,753
+class Lagrangian2d3DR 39,1320
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;46,1529
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;47,1586
+  std::shared_ptr<siconos::algebra::SiconosVector> _Nc;52,1751
+  std::shared_ptr<siconos::algebra::SiconosVector> _relNc;55,1854
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _RotationAbsToContactFrame;61,2087
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationMatrixAbsToBody;64,2192
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG1;68,2371
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG2;69,2428
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX1;72,2508
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX2;73,2565
+  void setpc1(80,2768
+  void setpc2(87,3000
+  void setnc(94,3252
+  bool _isOnContact 101,3540
+  Lagrangian2d3DR(105,3594
+  virtual ~Lagrangian2d3DR(114,3908
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1(139,4728
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2(140,4815
+  inline std::shared_ptr<siconos::algebra::SiconosVector> nc(141,4902
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relNc(143,4988
+  void setRelNc(150,5265
+
+LagrangianCompliantR.cpp,602
+LagrangianCompliantR::LagrangianCompliantR(32,1049
+void LagrangianCompliantR::_zeroPlugin(_zeroPlugin40,1669
+void LagrangianCompliantR::initialize(initialize47,1807
+void LagrangianCompliantR::checkSize(checkSize56,2061
+void LagrangianCompliantR::computeh(computeh59,2122
+void LagrangianCompliantR::computeJachq(computeJachq71,2505
+void LagrangianCompliantR::computeJachlambda(computeJachlambda83,2906
+void LagrangianCompliantR::computeOutput(computeOutput95,3330
+void LagrangianCompliantR::computeInput(computeInput123,4436
+void LagrangianCompliantR::computeJach(computeJach134,4872
+
+NonSmoothDynamicalSystem.hpp,2539
+#define NSDS_H22,798
+class NonSmoothDynamicalSystem41,1366
+    addDynamicalSystem,46,1426
+    addDynamicalSystem, rmDynamicalSystem,46,1426
+    addDynamicalSystem, rmDynamicalSystem, addInteraction,46,1426
+    addDynamicalSystem, rmDynamicalSystem, addInteraction, rmInteraction,46,1426
+    addDynamicalSystem, rmDynamicalSystem, addInteraction, rmInteraction, clearTopology46,1426
+  } ChangeType;47,1514
+  class Change49,1531
+    ChangeType typeOfChange;55,1655
+    SP::DynamicalSystem ds;56,1684
+    SP::Interaction i;57,1712
+    Change(59,1736
+    Change(60,1818
+    Change(61,1892
+  typedef std::list<Change> ChangeLog;65,1968
+  class ChangeLogIter66,2007
+    ChangeLogIter(70,2103
+    ChangeLogIter(71,2126
+    const ChangeLog *_log;_log74,2250
+    ChangeLog::const_iterator it;75,2277
+  double _t0 83,2418
+  double _t 91,2651
+  double _T 94,2709
+  std::string _title 97,2770
+    _author 98,2801
+    _description 99,2823
+    _date=100,2850
+  bool _BVP 103,2945
+  std::list<Change> _changeLog;106,3018
+  SP::Topology _topology;109,3087
+  bool _mIsLinear 113,3173
+  NonSmoothDynamicalSystem(124,3524
+  inline double currentTime(142,3833
+  inline void setCurrentTime(151,3968
+  inline double t0(158,4075
+  inline void sett0(167,4207
+  inline double finalT(174,4299
+  void setT(183,4446
+  inline const std::string  title(192,4591
+  inline void setTitle(201,4737
+  inline const std::string  author(210,4897
+  inline void setAuthor(219,5059
+  inline const std::string  description(228,5241
+  inline void setDescription(237,5413
+  inline const std::string  date(246,5591
+  inline void setDate(255,5745
+  inline bool isBVP(264,5883
+  inline bool isIVP(273,6006
+  inline void setBVP(282,6183
+  inline const ChangeLog& changeLog(292,6360
+  inline ChangeLogIter changeLogPosition(301,6569
+  inline ChangeLogIter changeLogBegin(313,6900
+  inline size_t getNumberOfDS(331,7350
+  inline const SP::DynamicalSystemsGraph dynamicalSystems(340,7566
+  inline SP::DynamicalSystem dynamicalSystem(365,8316
+  inline void displayDynamicalSystems(369,8438
+  inline size_t getNumberOfInteractions(386,8830
+  inline const SP::InteractionsGraph  interactions(395,9038
+  inline SP::Interaction interaction(413,9450
+  inline SP::Interaction interaction(423,9691
+  inline void setName(449,10533
+  std::string name(459,10826
+  inline void setName(469,11061
+  std::string name(479,11367
+  void setControlProperty(490,11658
+  inline SP::Topology topology(500,11898
+  inline bool isLinear(514,12174
+
+LagrangianR.hpp,1462
+#define LAGRANGIANRELATION_H22,751
+class LagrangianR 64,2422
+  enum LagrangianRDS 67,2468
+  enum LagrangianRDS  {z,z67,2468
+  enum LagrangianRDS  {z, q0,67,2468
+  enum LagrangianRDS  {z, q0, q1,67,2468
+  enum LagrangianRDS  {z, q0, q1, q2,67,2468
+  enum LagrangianRDS  {z, q0, q1, q2, p0,67,2468
+  enum LagrangianRDS  {z, q0, q1, q2, p0, p1,67,2468
+  enum LagrangianRDS  {z, q0, q1, q2, p0, p1, p2,67,2468
+  enum LagrangianRDS  {z, q0, q1, q2, p0, p1, p2, DSlinkSize}DSlinkSize67,2468
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachlambda{nullptr}nullptr74,2647
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachq{nullptr}nullptr79,2876
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqDot{nullptr}nullptr84,3111
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _dotjachq{nullptr}nullptr92,3501
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachq{nullptr}nullptr94,3572
+  LagrangianR(100,3732
+  inline void initialize(116,4064
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachq(124,4235
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqDot(128,4333
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> dotJachq(132,4437
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachlambda(136,4541
+  inline void setJachqPtr(145,4751
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C(150,4864
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> H(155,4970
+
+FirstOrderType1R.hpp,199
+#define FirstOrderType1R_H25,842
+typedef void (*Type1Ptr)Type1Ptr31,991
+class FirstOrderType1R 53,1603
+  FirstOrderType1R(60,1743
+  inline void checkSize(92,2945
+  bool requireResidu(177,5905
+
+NormalConeNSL.cpp,224
+NormalConeNSL::NormalConeNSL(28,841
+NormalConeNSL::NormalConeNSL(31,967
+NormalConeNSL::~NormalConeNSL(~NormalConeNSL38,1312
+bool NormalConeNSL::isVerified(isVerified41,1348
+void NormalConeNSL::display(display48,1441
+
+NewtonImpactFrictionNSL.hpp,319
+#define NEWTONIMPACTFRICTIONNSLAW_H23,801
+class NewtonImpactFrictionNSL 30,916
+  double _en;37,1080
+  double _et;38,1094
+  double _mu;40,1138
+  inline double en(75,1981
+  inline void setEn(81,2095
+  inline double et(85,2186
+  inline void setEt(91,2300
+  inline double mu(95,2391
+  inline void setMu(101,2505
+
+Lagrangian2d2DR.hpp,597
+#define Lagrangian2d2DR_H22,753
+class Lagrangian2d2DR 39,1318
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;45,1526
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;46,1583
+  std::shared_ptr<siconos::algebra::SiconosVector> _Nc;51,1748
+  void setpc1(57,1943
+  void setpc2(63,2168
+  void setnc(69,2413
+  bool _isOnContact 76,2697
+  Lagrangian2d2DR(80,2752
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1(113,3976
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2(114,4063
+  inline std::shared_ptr<siconos::algebra::SiconosVector> nc(115,4150
+
+LagrangianScleronomousR.cpp,775
+LagrangianScleronomousR::LagrangianScleronomousR(39,1158
+LagrangianScleronomousR::LagrangianScleronomousR(52,1793
+void LagrangianScleronomousR::_zeroPlugin(_zeroPlugin65,2232
+void LagrangianScleronomousR::initialize(initialize72,2400
+void LagrangianScleronomousR::checkSize(checkSize83,2659
+void LagrangianScleronomousR::computeh(computeh88,2725
+void LagrangianScleronomousR::computeJachq(computeJachq103,3220
+void LagrangianScleronomousR::computeDotJachq(computeDotJachq115,3614
+void  LagrangianScleronomousR::computedotjacqhXqdot(computedotjacqhXqdot127,4056
+void LagrangianScleronomousR::computeOutput(computeOutput138,4662
+void LagrangianScleronomousR::computeInput(computeInput177,6107
+void LagrangianScleronomousR::computeJach(computeJach194,6997
+
+DynamicalSystemFactory.cpp,218
+namespace DynamicalSystemFactory22,763
+Registry& Registry::get(get25,799
+void Registry::add(add31,877
+SP::DynamicalSystem Registry::instantiate(instantiate36,966
+Registration::Registration(Registration46,1297
+
+NewtonImpactRollingFrictionNSL.hpp,418
+#define NEWTONIMPACTROLLINGFRICTIONNSLAW_H23,815
+class NewtonImpactRollingFrictionNSL 30,937
+  double _en;38,1116
+  double _et;39,1130
+  double _mu;41,1174
+  double _muR;44,1219
+  inline double en(81,2207
+  inline void setEn(87,2321
+  inline double et(91,2412
+  inline void setEt(97,2526
+  inline double mu(101,2617
+  inline double muR(105,2698
+  inline void setMu(111,2814
+  inline void setMuR(117,2940
+
+NewtonEuler5DR.hpp,97
+#define NEWTONEULERRELATIONRFC3D_H22,761
+class NewtonEuler5DR 30,905
+  NewtonEuler5DR(41,1298
+
+NewtonImpactNSL.cpp,282
+NewtonImpactNSL::NewtonImpactNSL(22,744
+NewtonImpactNSL::NewtonImpactNSL(25,809
+NewtonImpactNSL::NewtonImpactNSL(29,882
+NewtonImpactNSL::~NewtonImpactNSL(~NewtonImpactNSL33,977
+bool NewtonImpactNSL::isVerified(isVerified36,1017
+void NewtonImpactNSL::display(display44,1189
+
+ComplementarityConditionNSL.cpp,160
+ComplementarityConditionNSL::ComplementarityConditionNSL(21,736
+ComplementarityConditionNSL::~ComplementarityConditionNSL(~ComplementarityConditionNSL24,836
+
+LagrangianCompliantLinearTIR.hpp,686
+#define LAGRANGIANCOMPLIANTLINEARRELATION_H21,783
+class LagrangianCompliantLinearTIR 45,1117
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _F{_F52,1281
+  std::shared_ptr<siconos::algebra::SiconosVector> _e{_e55,1355
+  LagrangianCompliantLinearTIR(60,1460
+  void computeJach(119,3770
+  void computeJacg(126,3999
+  inline void setCPtr(133,4165
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> D(140,4339
+  inline void setDPtr(145,4509
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> F(152,4688
+  inline void setFPtr(157,4849
+  inline std::shared_ptr<siconos::algebra::SiconosVector> e(164,5019
+  inline void setEPtr(169,5182
+  bool isLinear(183,5503
+
+Relation.cpp,750
+Relation::Relation(25,817
+void Relation::_zeroPlugin(_zeroPlugin30,953
+void Relation::display(display42,1449
+void Relation::setComputeJachlambdaFunction(setComputeJachlambdaFunction47,1601
+void Relation::setComputeJachxFunction(setComputeJachxFunction52,1825
+void Relation::setComputeJachzFunction(setComputeJachzFunction57,2034
+void Relation::setComputegFunction(setComputegFunction61,2242
+void Relation::setComputeFFunction(setComputeFFunction65,2438
+void Relation::setComputeEFunction(setComputeEFunction69,2634
+void Relation::setComputeJacgxFunction(setComputeJacgxFunction74,2831
+void Relation::setComputeJacglambdaFunction(setComputeJacglambdaFunction79,3040
+void Relation::setComputehFunction(setComputehFunction84,3264
+
+MixedComplementarityConditionNSL.cpp,185
+MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(21,741
+MixedComplementarityConditionNSL::~MixedComplementarityConditionNSL(~MixedComplementarityConditionNSL26,932
+
+FirstOrderR_helpers.hpp,202
+#define FirstOrderR_helpers_H24,799
+namespace FirstOrderRHelpers28,858
+static inline void JacglambdaSetter(31,890
+static inline void JachxSetter(45,1337
+static inline void JachlambdaSetter(61,1772
+
+FirstOrderLinearTIR.hpp,331
+#define FirstOrderLinearTIR_H22,761
+class FirstOrderLinearTIR 38,1077
+  std::shared_ptr<siconos::algebra::SiconosVector> _e{_e45,1223
+  inline void setePtr(126,3589
+  inline std::shared_ptr<siconos::algebra::SiconosVector> e(132,3728
+  inline bool isLinear(138,3911
+  void computeJach(142,4117
+  void computeJacg(143,4181
+
+LagrangianLinearTIR.hpp,722
+#define LAGRANGIANLINEARRELATION_H22,766
+class LagrangianLinearTIR 38,1042
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _F;45,1186
+  std::shared_ptr<siconos::algebra::SiconosVector> _e;48,1251
+  LagrangianLinearTIR(53,1347
+  void computeJach(113,3185
+  void computeJacg(121,3420
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C(128,3568
+  inline void setCPtr(137,3756
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> D(143,3918
+  inline void setDPtr(149,4094
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> F(155,4261
+  inline void setFPtr(161,4428
+  inline std::shared_ptr<siconos::algebra::SiconosVector> e(167,4586
+  inline void setEPtr(173,4754
+  bool isLinear(182,4979
+
+NewtonEuler1DR.hpp,1606
+#define NEWTONEULERIMPACT_H22,754
+class NewtonEuler1DR 36,1267
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;42,1463
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;43,1520
+  std::shared_ptr<siconos::algebra::SiconosVector> _relPc1;47,1717
+  std::shared_ptr<siconos::algebra::SiconosVector> _relPc2;48,1777
+  std::shared_ptr<siconos::algebra::SiconosVector> _Nc;53,1947
+  std::shared_ptr<siconos::algebra::SiconosVector> _relNc;56,2051
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationAbsoluteToContactFrame;62,2287
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationBodyToAbsoluteFrame;65,2398
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG1;69,2583
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG2;70,2640
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX1;73,2720
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX2;74,2777
+  void setpc1(81,2980
+  void setpc2(88,3212
+  void setnc(95,3465
+  bool _isOnContact 106,3998
+  NewtonEuler1DR(110,4052
+  virtual ~NewtonEuler1DR(120,4556
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1(148,5578
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2(149,5665
+  inline std::shared_ptr<siconos::algebra::SiconosVector> nc(150,5752
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relPc1(152,5838
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relPc2(153,5931
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relNc(154,6024
+  void setRelPc1(161,6280
+  void setRelPc2(168,6537
+  void setRelNc(175,6816
+  void display(176,6905
+
+NewtonEuler3DR.hpp,156
+#define NEWTONEULERRELATIONFC3D_H22,760
+class NewtonEuler3DR 35,1301
+  NewtonEuler3DR(45,1654
+  virtual ~NewtonEuler3DR(49,1719
+  void display(66,2340
+
+LinearComplementaritySystemsNSDS.hpp,566
+#define LinearComplementaritySystemsNSDS_H22,833
+class LinearComplementaritySystemsNSDS:LinearComplementaritySystemsNSDS37,1219
+  SP::FirstOrderLinearTIDS _ds;47,1418
+  SP::FirstOrderLinearTIR _relation;49,1492
+  SP::ComplementarityConditionNSL _nslaw;51,1566
+  SP::Interaction _interaction;53,1631
+  LinearComplementaritySystemsNSDS(58,1730
+  ~LinearComplementaritySystemsNSDS(74,2429
+  SP::FirstOrderLinearTIDS ds(78,2501
+  SP::FirstOrderLinearTIR relation(83,2559
+  SP::ComplementarityConditionNSL nslaw(88,2628
+  SP::Interaction interaction(92,2698
+
+EqualityConditionNSL.cpp,125
+EqualityConditionNSL::EqualityConditionNSL(21,729
+EqualityConditionNSL::~EqualityConditionNSL(~EqualityConditionNSL24,815

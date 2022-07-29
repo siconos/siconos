@@ -14,550 +14,517 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SimpleMatrix.hpp"
-#include "BlockMatrixIterators.hpp"
-#include "BlockMatrix.hpp"
-
-#include "SiconosAlgebra.hpp"
-#include "SimpleMatrixFriends.hpp" // for operators
+// #include "BlockMatrix.hpp"
 #include "SiconosException.hpp"
-using namespace Siconos;
+#include "SiconosMatrixFriends.hpp"  // for operators
+#include "SimpleMatrix.hpp"
 //#define DEBUG_MESSAGES
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/ublas/banded.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/symmetric.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
+
 #include "siconos_debug.h"
 
-SP::SimpleMatrix operator * (const SP::SimpleMatrix A, const SP::SimpleMatrix B)
+std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::algebra::operator*(
+    const std::shared_ptr<SimpleMatrix> A, const std::shared_ptr<SimpleMatrix> B)
 {
-  SP::SimpleMatrix aux(new SimpleMatrix((DenseMat)prod(*(*A).dense(), *(*B).dense())));
+  auto aux = std::make_shared<SimpleMatrix>((DenseMat)prod(*(*A).dense(), *(*B).dense()));
   return aux;
 }
 
-const SimpleMatrix operator * (const SiconosMatrix & A, double a)
+const siconos::algebra::SimpleMatrix siconos::algebra::operator*(const SiconosMatrix &A,
+                                                                 double a)
 {
   // To compute B = a * A
 
-  Siconos::UBLAS_TYPE numA = A.num();
+  auto numA = A.num();
 
-  if(numA == ZERO)  // if A = 0
+  if (numA == UBLAS_TYPE::ZERO)  // if A = 0
   {
-    //DenseMat p(zero_matrix(A.size(0),A.size(1)));
-    //return p;
+    // DenseMat p(zero_matrix(A.size(0),A.size(1)));
+    // return p;
     return A;
   }
-  else if(numA == IDENTITY)
-  {
-    return (DenseMat)(a**A.identity());
+  else if (numA == UBLAS_TYPE::IDENTITY) {
+    return (DenseMat)(a * *A.identity());
   }
-  else if(numA == Siconos::BLOCK)  // A block
+  else if (numA == UBLAS_TYPE::BLOCK)  // A block
   {
-    SimpleMatrix tmp(A); // ... copy ...
+    SimpleMatrix tmp(A);  // ... copy ...
     tmp *= a;
     return tmp;
   }
-  else if(numA == DENSE)  // dense)
-    return (DenseMat)(a** A.dense());
-  else if(numA == TRIANGULAR)
-    return (TriangMat)(a ** A.triang());
-  else if(numA == SYMMETRIC)
-    return (SymMat)(a ** A.sym());
-  else if(numA == SPARSE)
-    return (SparseMat)(a ** A.sparse());
-  else if(numA == BANDED)
-    return (BandedMat)(a ** A.banded());
-  else
-  {
+  else if (numA == UBLAS_TYPE::DENSE)  // dense)
+    return (DenseMat)(a * *A.dense());
+  else if (numA == UBLAS_TYPE::TRIANGULAR)
+    return (TriangMat)(a * *A.triang());
+  else if (numA == UBLAS_TYPE::SYMMETRIC)
+    return (SymMat)(a * *A.sym());
+  else if (numA == UBLAS_TYPE::SPARSE)
+    return (SparseMat)(a * *A.sparse());
+  else if (numA == UBLAS_TYPE::BANDED)
+    return (BandedMat)(a * *A.banded());
+  else {
     THROW_EXCEPTION("invalid type of matrix");
   }
 }
 
-SimpleMatrix operator * (double a, const SiconosMatrix & A)
+siconos::algebra::SimpleMatrix siconos::algebra::operator*(double a, const SiconosMatrix &A)
 {
   // To compute B = a * A
 
-  Siconos::UBLAS_TYPE numA = A.num();
+  auto numA = A.num();
 
-  if(numA == ZERO)  // if A = 0
+  if (numA == UBLAS_TYPE::ZERO)  // if A = 0
   {
-    //DenseMat p(zero_matrix(A.size(0),A.size(1)));
-    //return p;
+    // DenseMat p(zero_matrix(A.size(0),A.size(1)));
+    // return p;
     return A;
   }
-  else if(numA == IDENTITY)
-  {
-    return (DenseMat)(a**A.identity());
+  else if (numA == UBLAS_TYPE::IDENTITY) {
+    return (DenseMat)(a * *A.identity());
   }
-  else if(numA == 0)  // A block
+  else if (numA == UBLAS_TYPE::BLOCK)  // A block
   {
-    SimpleMatrix tmp(A); // ... copy ...
+    SimpleMatrix tmp(A);  // ... copy ...
     tmp *= a;
     return tmp;
   }
-  else if(numA == DENSE)  // dense)
-    return (DenseMat)(a** A.dense());
-  else if(numA == TRIANGULAR)
-    return (TriangMat)(a ** A.triang());
-  else if(numA == SYMMETRIC)
-    return (SymMat)(a ** A.sym());
-  else if(numA == SPARSE)
-    return (SparseMat)(a ** A.sparse());
-  else if(numA == SPARSE_COORDINATE)
-    return (SparseCoordinateMat)(a ** A.sparseCoordinate());
-  else if(numA == BANDED)
-    return (BandedMat)(a ** A.banded());
-  else
-  {
+  else if (numA == UBLAS_TYPE::DENSE)  // dense)
+    return (DenseMat)(a * *A.dense());
+  else if (numA == UBLAS_TYPE::TRIANGULAR)
+    return (TriangMat)(a * *A.triang());
+  else if (numA == UBLAS_TYPE::SYMMETRIC)
+    return (SymMat)(a * *A.sym());
+  else if (numA == UBLAS_TYPE::SPARSE)
+    return (SparseMat)(a * *A.sparse());
+  else if (numA == UBLAS_TYPE::SPARSE_COORDINATE)
+    return (SparseCoordinateMat)(a * *A.sparseCoordinate());
+  else if (numA == UBLAS_TYPE::BANDED)
+    return (BandedMat)(a * *A.banded());
+  else {
     THROW_EXCEPTION("invalid type of matrix");
   }
 }
 
-const SimpleMatrix operator / (const SiconosMatrix & A, double a)
+const siconos::algebra::SimpleMatrix siconos::algebra::operator/(const SiconosMatrix &A,
+                                                                 double a)
 {
   // To compute B = A/a
 
-  if(a == 0.0)
-     THROW_EXCEPTION("division by zero.");
+  if (a == 0.0) THROW_EXCEPTION("division by zero.");
 
-  Siconos::UBLAS_TYPE numA = A.num();
+  auto numA = A.num();
 
-  if(numA == ZERO)  // if A = 0
+  if (numA == UBLAS_TYPE::ZERO)  // if A = 0
   {
-    //DenseMat p(zero_matrix(A.size(0),A.size(1)));
-    //return p;
+    // DenseMat p(zero_matrix(A.size(0),A.size(1)));
+    // return p;
     return A;
   }
-  else if(numA == IDENTITY)
-  {
+  else if (numA == UBLAS_TYPE::IDENTITY) {
     return (DenseMat)(*A.identity() / a);
   }
-  else if(numA == 0)  // A block
+  else if (numA == UBLAS_TYPE::BLOCK)  // A block
   {
-    SimpleMatrix tmp(A); // ... copy ...
+    SimpleMatrix tmp(A);  // ... copy ...
     tmp /= a;
     return tmp;
   }
-  else if(numA == DENSE)  // dense)
+  else if (numA == UBLAS_TYPE::DENSE)  // dense)
     return (DenseMat)(*A.dense() / a);
-  else if(numA == TRIANGULAR)
+  else if (numA == UBLAS_TYPE::TRIANGULAR)
     return (TriangMat)(*A.triang() / a);
-  else if(numA == SYMMETRIC)
+  else if (numA == UBLAS_TYPE::SYMMETRIC)
     return (SymMat)(*A.sym() / a);
-  else if(numA == SPARSE)
+  else if (numA == UBLAS_TYPE::SPARSE)
     return (SparseMat)(*A.sparse() / a);
-  else if(numA == BANDED)
+  else if (numA == UBLAS_TYPE::BANDED)
     return (BandedMat)(*A.banded() / a);
-  else
-  {
-     THROW_EXCEPTION("invalid type of matrix");
+  else {
+    THROW_EXCEPTION("invalid type of matrix");
   }
 }
 
 // const SimpleMatrix operator + (const  SimpleMatrix& A, const  SimpleMatrix& B){
 //   return (DenseMat)(*A.dense() + *B.dense());
 // }
-SimpleMatrix operator + (const  SimpleMatrix& A, const  SimpleMatrix& B)
+siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SimpleMatrix &A,
+                                                           const SimpleMatrix &B)
 {
-
   return (DenseMat)(*A.dense() + *B.dense());
 }
 
-void operator +=(SP::SiconosMatrix A, SP::SimpleMatrix B)
+void siconos::algebra::operator +=(std::shared_ptr<SiconosMatrix> A, std::shared_ptr<SimpleMatrix> B)
 {
   *A += *B;
 }
 
-
-SP::SimpleMatrix operator +(const SP::SimpleMatrix A, const SP::SimpleMatrix B)
+std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::algebra::operator+(
+    const std::shared_ptr<SimpleMatrix> A, const std::shared_ptr<SimpleMatrix> B)
 {
-  return SP::SimpleMatrix(new SimpleMatrix(*A + *B));
+  return std::make_shared<SimpleMatrix>(*A + *B);
 }
 
-
-
-const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
+const siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SiconosMatrix &A,
+                                                                 const SiconosMatrix &B)
 {
   // To compute C = A + B
 
-  if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
-     THROW_EXCEPTION("inconsistent sizes");
+  if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
+    THROW_EXCEPTION("inconsistent sizes");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
+  auto numA = A.num();
+  auto numB = B.num();
 
   // == A or B equal to null ==
-  if(numA == ZERO)  // A = 0
+  if (numA == UBLAS_TYPE::ZERO)  // A = 0
   {
-    if(numB == ZERO)  // B = 0
+    if (numB == UBLAS_TYPE::ZERO)  // B = 0
       return SimpleMatrix(A.size(0), A.size(1));
     else
       return SimpleMatrix(B);
   }
 
-  if(numB == ZERO)
-    return SimpleMatrix(A);
+  if (numB == UBLAS_TYPE::ZERO) return SimpleMatrix(A);
 
   // == A and B different from 0 ==
 
-  if(numA == numB && numA != 0)  // all matrices are of the same type and NOT block
+  if (numA == numB &&
+      numA != UBLAS_TYPE::BLOCK)  // all matrices are of the same type and NOT block
   {
-    if(numA == DENSE)
+    if (numA == UBLAS_TYPE::DENSE)
       return (DenseMat)(*A.dense() + *B.dense());
-    else if(numA == TRIANGULAR)
+    else if (numA == UBLAS_TYPE::TRIANGULAR)
       return (TriangMat)(*A.triang() + *B.triang());
-    else if(numA == SYMMETRIC)
+    else if (numA == UBLAS_TYPE::SYMMETRIC)
       return (SymMat)(*A.sym() + *B.sym());
-    else if(numA == SPARSE)
-    {
+    else if (numA == UBLAS_TYPE::SPARSE) {
       SparseMat tmp(*A.sparse());
       tmp += *B.sparse();
       return tmp;
       // return (SparseMat)(*A.sparse() + *B.sparse());
     }
-    else if(numA == SPARSE_COORDINATE)
-    {
+    else if (numA == UBLAS_TYPE::SPARSE_COORDINATE) {
       SparseMat tmp(*A.sparseCoordinate());
       tmp += *B.sparseCoordinate();
       return tmp;
     }
-    else if(numA == BANDED)
-    {
+    else if (numA == UBLAS_TYPE::BANDED) {
       BandedMat tmp(*A.banded());
       tmp += *B.banded();
       return tmp;
     }
     else
-       THROW_EXCEPTION("invalid type of matrix");
+      THROW_EXCEPTION("invalid type of matrix");
   }
-  else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
+  else if (numA != UBLAS_TYPE::BLOCK && numB != UBLAS_TYPE::BLOCK &&
+           numA != numB)  // A and B of different types and none is block
   {
-    if(numA == DENSE)
-    {
-      if(numB == TRIANGULAR)
+    if (numA == UBLAS_TYPE::DENSE) {
+      if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.dense() + *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.dense() + *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.dense() + *B.sparse());
-      else if(numB == SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.dense() + *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.dense() + *B.banded());
-      else if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.dense() + *B.identity());
       else
-         THROW_EXCEPTION("invalid type of matrix");
+        THROW_EXCEPTION("invalid type of matrix");
     }
-    else if(numA == TRIANGULAR)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::TRIANGULAR) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.triang() + *B.dense());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.triang() + *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.triang() + *B.sparse());
-      else if(numB == SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.triang() + *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.triang() + *B.banded());
-      else if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.triang() + *B.identity());
       else
-         THROW_EXCEPTION("invalid type of matrix");
+        THROW_EXCEPTION("invalid type of matrix");
     }
-    else if(numA == SYMMETRIC)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::SYMMETRIC) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.sym() + *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.sym() + *B.triang());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.sym() + *B.sparse());
-      else if(numB == SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.sym() + *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.sym() + *B.banded());
-      else if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.sym() + *B.identity());
       else
-         THROW_EXCEPTION("invalid type of matrix");
+        THROW_EXCEPTION("invalid type of matrix");
     }
-    else if(numA == SPARSE)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::SPARSE) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.sparse() + *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.sparse() + *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.sparse() + *B.sym());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.sparse() + *B.banded());
-      else if(numB ==IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.sparse() + *B.identity());
       else
-         THROW_EXCEPTION("invalid type of matrix");
+        THROW_EXCEPTION("invalid type of matrix");
     }
 
-    else if(numA == BANDED)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::BANDED) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.banded() + *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.banded() + *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.banded() + *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.banded() + *B.sparse());
-      else if(numB == SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.banded() + *B.sparseCoordinate());
-      else if(numB ==IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.banded() + *B.identity());
-      else
-      {
-         THROW_EXCEPTION("invalid type of matrix");
+      else {
+        THROW_EXCEPTION("invalid type of matrix");
       }
     }
 
-    else if(numA == IDENTITY)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::IDENTITY) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.identity() + *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.identity() + *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.identity() + *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.identity() + *B.sparse());
-      else if(numB == SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.identity() + *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.identity() + *B.banded());
     }
     else
-       THROW_EXCEPTION("invalid type of matrix");
+      THROW_EXCEPTION("invalid type of matrix");
   }
-  else if(numB != 0)  // B Simple, whatever is A
+  else if (numB != UBLAS_TYPE::BLOCK)  // B Simple, whatever is A
   {
     SimpleMatrix tmp(B);
     tmp += A;
     return tmp;
   }
-  else // B Block, A simple or block
+  else  // B Block, A simple or block
   {
     SimpleMatrix tmp(A);
     tmp += B;
     return tmp;
   }
-   THROW_EXCEPTION("invalid type of matrix");
-
+  THROW_EXCEPTION("invalid type of matrix");
 }
 
-const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
+const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMatrix &A,
+                                                                 const SiconosMatrix &B)
 {
   // To compute C = A - B
 
-  if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
-     THROW_EXCEPTION("inconsistent sizes");
+  if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
+    THROW_EXCEPTION("inconsistent sizes");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
-
+  auto numA = A.num();
+  auto numB = B.num();
 
   // == B equal to null ==
-  if(numB == ZERO)
-    return SimpleMatrix(A);
+  if (numB == UBLAS_TYPE::ZERO) return SimpleMatrix(A);
 
   // == B different from 0 ==
 
-  if(numA == numB && numA != 0)  // all matrices are of the same type and NOT block
+  if (numA == numB &&
+      numA != UBLAS_TYPE::BLOCK)  // all matrices are of the same type and NOT block
   {
-    if(numA == DENSE)
+    if (numA == UBLAS_TYPE::DENSE)
       return (DenseMat)(*A.dense() - *B.dense());
-    else if(numA == TRIANGULAR)
+    else if (numA == UBLAS_TYPE::TRIANGULAR)
       return (TriangMat)(*A.triang() - *B.triang());
-    else if(numA == SYMMETRIC)
+    else if (numA == UBLAS_TYPE::SYMMETRIC)
       return (SymMat)(*A.sym() - *B.sym());
-    else if(numA == SPARSE)
-    {
+    else if (numA == UBLAS_TYPE::SPARSE) {
       SparseMat tmp(*A.sparse());
       tmp -= *B.sparse();
       return tmp;
-      //return (SparseMat)(*A.sparse() - *B.sparse());
+      // return (SparseMat)(*A.sparse() - *B.sparse());
     }
-    else if(numA==SPARSE_COORDINATE)
-    {
+    else if (numA == UBLAS_TYPE::SPARSE_COORDINATE) {
       SparseCoordinateMat tmp(*A.sparseCoordinate());
       tmp -= *B.sparseCoordinate();
       return tmp;
     }
-    else if(numA == BANDED)
-    {
+    else if (numA == UBLAS_TYPE::BANDED) {
       BandedMat tmp(*A.banded());
       tmp -= *B.banded();
       return tmp;
-      //return (BandedMat)(*A.banded() - *B.banded());
+      // return (BandedMat)(*A.banded() - *B.banded());
     }
-    else
-    {
-       THROW_EXCEPTION("invalid type of matrix");
+    else {
+      THROW_EXCEPTION("invalid type of matrix");
     }
   }
-  else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
+  else if (numA != UBLAS_TYPE::BLOCK && numB != UBLAS_TYPE::BLOCK &&
+           numA != numB)  // A and B of different types and none is block
   {
-    if(numA == DENSE)
-    {
-      if(numB == TRIANGULAR)
+    if (numA == UBLAS_TYPE::DENSE) {
+      if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.dense() - *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.dense() - *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.dense() - *B.sparse());
-      else if(numB ==SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.dense() - *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.dense() - *B.banded());
-      else if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.dense() - *B.identity());
-      else
-      {
-         THROW_EXCEPTION("invalid type of matrix");
+      else {
+        THROW_EXCEPTION("invalid type of matrix");
       }
     }
-    else if(numA == TRIANGULAR)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::TRIANGULAR) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.triang() - *B.dense());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.triang() - *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.triang() - *B.sparse());
-      else if(numB ==SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.triang() - *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.triang() - *B.banded());
-      else  if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.triang() - *B.identity());
-      else
-      {
-         THROW_EXCEPTION("invalid type of matrix");
+      else {
+        THROW_EXCEPTION("invalid type of matrix");
       }
     }
-    else if(numA == SYMMETRIC)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::SYMMETRIC) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.sym() - *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.sym() - *B.triang());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.sym() - *B.sparse());
-      else if(numB ==SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.sym() - *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.sym() - *B.banded());
-      else  if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.sym() - *B.identity());
-      else
-      {
-         THROW_EXCEPTION("invalid type of matrix");
+      else {
+        THROW_EXCEPTION("invalid type of matrix");
       }
     }
-    else if(numA == SPARSE)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::SPARSE) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.sparse() - *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.sparse() - *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.sparse() - *B.sym());
-      else if(numB ==SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.sparse() - *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.sparse() - *B.banded());
-      else  if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.sparse() - *B.identity());
-      else
-      {
-         THROW_EXCEPTION("invalid type of matrix");
+      else {
+        THROW_EXCEPTION("invalid type of matrix");
       }
     }
 
-    else if(numA == BANDED)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::BANDED) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.banded() - *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.banded() - *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.banded() - *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.banded() - *B.sparse());
-      else if(numB ==SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.banded() - *B.sparseCoordinate());
-      else if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.banded() - *B.identity());
-      else
-      {
-         THROW_EXCEPTION("invalid type of matrix");
+      else {
+        THROW_EXCEPTION("invalid type of matrix");
       }
     }
 
-    else if(numA == ZERO)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::ZERO) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.zero_mat() - *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.zero_mat() - *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.zero_mat() - *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.zero_mat() - *B.sparse());
-      else if(numB ==SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.zero_mat() - *B.sparseCoordinate());
-      else if(numB == IDENTITY)
+      else if (numB == UBLAS_TYPE::IDENTITY)
         return (DenseMat)(*A.zero_mat() - *B.identity());
-      else
-      {
-         THROW_EXCEPTION("invalid type of matrix");
+      else {
+        THROW_EXCEPTION("invalid type of matrix");
       }
     }
-    else if(numA == IDENTITY)
-    {
-      if(numB == DENSE)
+    else if (numA == UBLAS_TYPE::IDENTITY) {
+      if (numB == UBLAS_TYPE::DENSE)
         return (DenseMat)(*A.identity() - *B.dense());
-      else if(numB == TRIANGULAR)
+      else if (numB == UBLAS_TYPE::TRIANGULAR)
         return (DenseMat)(*A.identity() - *B.triang());
-      else if(numB == SYMMETRIC)
+      else if (numB == UBLAS_TYPE::SYMMETRIC)
         return (DenseMat)(*A.identity() - *B.sym());
-      else if(numB == SPARSE)
+      else if (numB == UBLAS_TYPE::SPARSE)
         return (DenseMat)(*A.identity() - *B.sparse());
-      else if(numB ==SPARSE_COORDINATE)
+      else if (numB == UBLAS_TYPE::SPARSE_COORDINATE)
         return (DenseMat)(*A.identity() - *B.sparseCoordinate());
-      else if(numB == BANDED)
+      else if (numB == UBLAS_TYPE::BANDED)
         return (DenseMat)(*A.identity() - *B.banded());
-      else
-      {
-         THROW_EXCEPTION("invalid type of matrix");
+      else {
+        THROW_EXCEPTION("invalid type of matrix");
       }
     }
-    else
-    {
-       THROW_EXCEPTION("invalid type of matrix");
+    else {
+      THROW_EXCEPTION("invalid type of matrix");
     }
   }
-  else // A and/or B are/is Block
+  else  // A and/or B are/is Block
   {
     SimpleMatrix tmp(A);
     tmp -= B;
     return tmp;
   }
-
-
 }
 
 //========================
 // Matrices comparison
 //========================
 
-bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
+bool siconos::algebra::operator==(const SiconosMatrix &m, const SiconosMatrix &x)
 {
   //  if( ! isComparableTo( m, x))
   //    return false;
@@ -565,14 +532,16 @@ bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
   double norm = (m - x).normInf();
   DEBUG_EXPR((m - x).display());
   DEBUG_PRINTF("norm = %12.8e \n", norm);
-  DEBUG_PRINTF("std::numeric_limits<double>::epsilon() = %12.8e \n", std::numeric_limits<double>::epsilon());
-  DEBUG_EXPR(std::cout << std::boolalpha << (norm <= std::numeric_limits<double>::epsilon()) <<std::endl;);
+  DEBUG_PRINTF("std::numeric_limits<double>::epsilon() = %12.8e \n",
+               std::numeric_limits<double>::epsilon());
+  DEBUG_EXPR(std::cout << std::boolalpha << (norm <= std::numeric_limits<double>::epsilon())
+                       << std::endl;);
   double atol = 1e-14;
   double rtol = std::numeric_limits<double>::epsilon();
-  return (norm <= atol + rtol * x.normInf()) ;
+  return (norm <= atol + rtol * x.normInf());
 }
 
-bool operator != (const SiconosMatrix &m, const SiconosMatrix &x)
+bool siconos::algebra::operator!=(const SiconosMatrix &m, const SiconosMatrix &x)
 {
   double norm = (m - x).normInf();
   return (norm > std::numeric_limits<double>::epsilon());

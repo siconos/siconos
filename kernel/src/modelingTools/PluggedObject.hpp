@@ -14,64 +14,58 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef PluggedObject_H
 #define PluggedObject_H
 
 #include <string>
+
 #include "SiconosSerialization.hpp"
-#include "SiconosPointers.hpp"
 
 /*! \file PluggedObject.hpp
-  \brief utilities for plugin definition to compute matrices or vectors from user-defined functions.
+  \brief utilities for plugin definition to compute matrices or vectors from user-defined
+  functions.
 */
 
-
-/** Class to deal with plugged functions 
+namespace siconos::plugins {
+/** Class to deal with plugged functions
 
 A plugin is a C-function defined in some external file.
 
 This object handles a function pointer to this C-function.
 */
-class PluggedObject
-{
-private:
-
-  
+class PluggedObject {
+ private:
   ACCEPT_SERIALIZATION(PluggedObject);
 
-protected:
-
+ protected:
   /** Plugin name, should be of the form "fileName:functionName" */
-  std::string _pluginName;
+  std::string _pluginName{"unplugged"};
 
-public:
-
+ public:
   /** plug-in */
-  void * fPtr;
+  void* fPtr{nullptr};
 
   /** Default Constructor
    */
-  PluggedObject();
+  PluggedObject() = default;
 
   /** Constructor with the plugin name
-   * \param name a std::string of the form "fileName:functionName", without an extension for pluginFile
+   * \param name a std::string of the form "fileName:functionName", without an extension for
+   * pluginFile
    */
   PluggedObject(const std::string& name);
 
   /** Copy constructor
    * \param PO a PluggedObject we are going to copy
-  */
-  PluggedObject(const PluggedObject & PO);
+   */
+  PluggedObject(const PluggedObject& PO);
 
   /** bool to checked if a function is properly connected to the current object
    * \return a boolean, true if fPtr is set
    */
-  inline bool isPlugged() const
-  {
-    return (fPtr != nullptr);
-  };
+  inline bool isPlugged() const { return (fPtr != nullptr); };
 
   /** destructor
    */
@@ -84,7 +78,8 @@ public:
   void setComputeFunction(const std::string& pluginPath, const std::string& functionName);
 
   /* Connect a function to fPtr
-   * \param plugin a std::string of the form "fileName:functionName,  without an extension for pluginFile"
+   * \param plugin a std::string of the form "fileName:functionName,  without an extension for
+   * pluginFile"
    */
   void setComputeFunction(const std::string& plugin);
 
@@ -105,11 +100,8 @@ public:
   /** Return the name of the plugin used to compute fPtr
    * \return _pluginName (a std::string)
    */
-  inline std::string pluginName(void) const
-  {
-    return _pluginName;
-  };
-
+  inline std::string pluginName(void) const { return _pluginName; };
 };
+}  // namespace siconos::plugins
 
 #endif

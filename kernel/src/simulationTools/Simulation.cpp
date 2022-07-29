@@ -343,7 +343,7 @@ void Simulation::initializeIndexSets()
   SP::Topology topo = _nsds->topology();
   unsigned int indxSize = topo->indexSetsSize();
   assert(_numberOfIndexSets >0);
-  if((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets))
+  if((indxSize == simulation::internal::LEVELMAX) || (indxSize < _numberOfIndexSets))
   {
     DEBUG_PRINT("Topology : a different number of indexSets has been found \n");
     DEBUG_PRINT("Topology :  we resize the number of index sets \n");

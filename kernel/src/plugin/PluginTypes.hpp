@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file PluginTypes.hpp
   \brief list of typedef for pointers to functions used in plugin mechanism.
@@ -23,8 +23,10 @@
 #ifndef PLUGINTYPES_HPP
 #define PLUGINTYPES_HPP
 
+namespace siconos::plugins {
 /** Pointer to function used for plug-in for matrix-type operators that depends only on time */
-typedef void (*MatrixFunctionOfTime)(double, unsigned int, unsigned int, double*, unsigned int, double*);
+typedef void (*MatrixFunctionOfTime)(double, unsigned int, unsigned int, double*, unsigned int,
+                                     double*);
 
 /** Pointer to function used for plug-in for vector-type operators that depends only on time */
 typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int, double*);
@@ -33,20 +35,24 @@ typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int
 typedef void (*FPtr1)(double, unsigned int, double*, double*, unsigned int, double*);
 
 /** */
-typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int, double*);
+typedef void (*FPtr2)(unsigned int, double*, unsigned int, double*, double*, unsigned int,
+                      double*);
 
 /** */
 typedef void (*FPtr3)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
 
-typedef void (*FPtr4bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr4bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*,
+                         unsigned int, double*);
 
 /** */
-typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr4)(unsigned int, double*, double, unsigned int, double*, unsigned int,
+                      double*);
 
 /** */
 typedef void (*FPtr5)(unsigned int, double*, double*, double*, unsigned int, double*);
 
-typedef void (*FPtr5bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr5bis)(unsigned int, double*, unsigned int, double*, unsigned int, double*,
+                         unsigned int, double*);
 
 /** */
 typedef void (*FPtr6)(double, unsigned int, double*, double*, double*, unsigned int, double*);
@@ -54,8 +60,10 @@ typedef void (*FPtr6)(double, unsigned int, double*, double*, double*, unsigned 
 /** */
 typedef void (*FPtr7)(unsigned int, double*, double*, unsigned int, double*);
 
-typedef void (*OutPtr)(unsigned int, double*, double, unsigned int, double*, double*, unsigned int, double*);
+typedef void (*OutPtr)(unsigned int, double*, double, unsigned int, double*, double*,
+                       unsigned int, double*);
 
-typedef void (*InPtr)(unsigned int, double*, double, unsigned int, double*, unsigned int, double*);
-
+typedef void (*InPtr)(unsigned int, double*, double, unsigned int, double*, unsigned int,
+                      double*);
+}  // namespace siconos::plugins
 #endif

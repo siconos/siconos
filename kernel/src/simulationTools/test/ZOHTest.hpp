@@ -23,7 +23,6 @@
 #include "ZeroOrderHoldOSI.hpp"
 #include "TimeStepping.hpp"
 #include "TimeDiscretisation.hpp"
-#include "ioMatrix.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "RelayNSL.hpp"
 #include "Interaction.hpp"

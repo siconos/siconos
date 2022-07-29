@@ -14,28 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "SiconosGraphTest.hpp"
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosGraphTest);
 
+void SiconosGraphTest::setUp() {}
 
-void SiconosGraphTest::setUp()
-{
-}
+void SiconosGraphTest::tearDown() {}
 
-void SiconosGraphTest::tearDown()
-{
-}
+using G =
+  siconos::internal::SiconosGraph<std::string, int, boost::no_property, boost::no_property, boost::no_property>;
+
+using AG =
+    siconos::internal::SiconosGraph<int, std::string, boost::no_property, boost::no_property, boost::no_property>;
 
 // Default constructor
 void SiconosGraphTest::t1()
 {
-
-  typedef SiconosGraph < std::string, int,
-          boost::no_property, boost::no_property, boost::no_property > G;
-
   G g;
 
   G::VDescriptor vd1, vd2;
@@ -51,10 +48,6 @@ void SiconosGraphTest::t1()
 
 void SiconosGraphTest::t2()
 {
-
-  typedef SiconosGraph < std::string, int,
-          boost::no_property, boost::no_property, boost::no_property > G;
-
   G g;
 
   G::VDescriptor vd1, vd2;
@@ -67,15 +60,10 @@ void SiconosGraphTest::t2()
 
   CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd1))) == "hello");
   CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd2))) == "goodbye");
-
 }
 
 void SiconosGraphTest::t3()
 {
-
-  typedef SiconosGraph < std::string, int,
-          boost::no_property, boost::no_property, boost::no_property > G;
-
   G g;
 
   G::VDescriptor vd1, vd2;
@@ -106,12 +94,6 @@ void SiconosGraphTest::t3()
 
 void SiconosGraphTest::t4()
 {
-
-  typedef SiconosGraph < std::string, int,
-          boost::no_property, boost::no_property, boost::no_property > G;
-  typedef SiconosGraph < int, std::string,
-          boost::no_property, boost::no_property, boost::no_property > AG;
-
   G g;
   AG ag;
 
@@ -131,17 +113,14 @@ void SiconosGraphTest::t4()
   CPPUNIT_ASSERT(ag.bundle(ag.descriptor(3)) == 3);
 }
 
-template<class SicGraph, class AdjointSicGraph>
-struct num_inf
-{
-  num_inf(int n, SicGraph& sg, AdjointSicGraph& asg)
-    : _n(n), _sg(sg), _asg(asg) {}
+template <class SicGraph, class AdjointSicGraph>
+struct num_inf {
+  num_inf(int n, SicGraph& sg, AdjointSicGraph& asg) : _n(n), _sg(sg), _asg(asg) {}
   bool operator()(typename SicGraph::EDescriptor e)
   {
     std::cout << _sg.bundle(e) << "<?" << _n << std::endl;
-    if((_sg.bundle(e) < _n) && _asg.is_vertex(_sg.bundle(e)))
-    {
-      CPPUNIT_ASSERT(_asg.bundle(_asg.descriptor(_sg.bundle(e))) == _sg.bundle(e)) ;
+    if ((_sg.bundle(e) < _n) && _asg.is_vertex(_sg.bundle(e))) {
+      CPPUNIT_ASSERT(_asg.bundle(_asg.descriptor(_sg.bundle(e))) == _sg.bundle(e));
 
       std::cout << "removing adjoint vertex :" << _sg.bundle(e) << " <" << _n << std::endl;
       _asg.remove_vertex(_sg.bundle(e));
@@ -149,10 +128,8 @@ struct num_inf
       CPPUNIT_ASSERT(!_asg.is_vertex(_sg.bundle(e)));
       return true;
     }
-    else
-    {
-      return (_sg.bundle(e) < _n)
-             ;
+    else {
+      return (_sg.bundle(e) < _n);
     }
   }
   int _n;
@@ -162,12 +139,6 @@ struct num_inf
 
 void SiconosGraphTest::t5()
 {
-
-  typedef SiconosGraph < std::string, int,
-          boost::no_property, boost::no_property, boost::no_property > G;
-  typedef SiconosGraph < int, std::string,
-          boost::no_property, boost::no_property, boost::no_property > AG;
-
   G g;
   AG ag;
 
@@ -213,21 +184,14 @@ void SiconosGraphTest::t5()
   CPPUNIT_ASSERT(g.edges_number() == 1);
 
   CPPUNIT_ASSERT(ag.size() == 1);
-
 }
 
 void SiconosGraphTest::t6()
 {
-  typedef SiconosGraph < std::string, int,
-          boost::no_property, boost::no_property, boost::no_property > G;
-  typedef SiconosGraph < int, std::string,
-          boost::no_property, boost::no_property, boost::no_property > AG;
-
   G g;
   AG ag;
 
   G::VDescriptor vd1;
-
 
   vd1 = g.add_vertex("hello");
 
@@ -248,7 +212,6 @@ void SiconosGraphTest::t6()
   g.add_edge(vd1, vd1, 10, ag);
   g.add_edge(vd1, vd1, 11, ag);
 
-
   std::cout << "t6:add_edges\n";
 
   g.display();
@@ -261,14 +224,12 @@ void SiconosGraphTest::t6()
 
   CPPUNIT_ASSERT(ag.size() == g.edges_number());
   CPPUNIT_ASSERT(ag.size() == 10);
-//  CPPUNIT_ASSERT(ag.edges_number() == 1);
+  //  CPPUNIT_ASSERT(ag.edges_number() == 1);
 
   AG::EIterator dsi, dsend;
-  for(std::tie(dsi, dsend) = ag.edges(); dsi != dsend; ++dsi)
-  {
+  for (std::tie(dsi, dsend) = ag.edges(); dsi != dsend; ++dsi) {
     std::string& str = ag.bundle(*dsi);
     std::cout << "t6:found edge " << str << std::endl;
-
   }
 
   g.remove_out_edge_if(vd1, num_inf<G, AG>(10, g, ag));
@@ -288,19 +249,10 @@ void SiconosGraphTest::t6()
   g.remove_out_edge_if(vd1, num_inf<G, AG>(3, g, ag));
 
   CPPUNIT_ASSERT(ag.size() == g.edges_number());
-
-
 }
-
 
 void SiconosGraphTest::t7()
 {
-
-  typedef SiconosGraph < std::string, int,
-          boost::no_property, boost::no_property, boost::no_property > G;
-  typedef SiconosGraph < int, std::string,
-          boost::no_property, boost::no_property, boost::no_property > AG;
-
   G g;
   AG ag;
 
@@ -312,8 +264,6 @@ void SiconosGraphTest::t7()
   vd4 = g.add_vertex("one");
   vd5 = g.add_vertex("two");
   vd6 = g.add_vertex("three");
-
-
 
   g.add_edge(vd1, vd2, 1, ag);
   g.add_edge(vd2, vd3, 2, ag);
@@ -337,20 +287,17 @@ void SiconosGraphTest::t7()
   AG::AVIterator ui, uiend;
   std::cout << "adjacent to 100:\n";
   int tot = 0, k = 1;
-  for(std::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend; ++ui, k *= 10)
-  {
+  for (std::tie(ui, uiend) = ag.adjacent_vertices(ag.descriptor(100)); ui != uiend;
+       ++ui, k *= 10) {
     std::cout << "yo " << ag.bundle(*ui) << std::endl;
     tot += k * ag.bundle(*ui);
   }
   std::cout << tot << std::endl;
   CPPUNIT_ASSERT(tot == 300541);
-
 }
 
 void SiconosGraphTest::t8()
 {
-  typedef SiconosGraph < std::string, int,
-          boost::no_property, boost::no_property, boost::no_property > G;
   G g;
 
   G::VDescriptor vd1, vd2, vd3, vd4, vd5, vd6;
@@ -368,5 +315,4 @@ void SiconosGraphTest::t8()
   CPPUNIT_ASSERT(g.bundle(vd4) == "one");
   CPPUNIT_ASSERT(g.bundle(vd5) == "two");
   CPPUNIT_ASSERT(g.bundle(vd6) == "three");
-
 }

@@ -21,13 +21,17 @@
 #ifndef LsodarOSI_H
 #define LsodarOSI_H
 
-#include "OneStepIntegrator.hpp"
-
 #include <vector>
+
+#include "OneStepIntegrator.hpp"
 
 #define ATOL_DEFAULT 100 * MACHINE_PREC;
 #define RTOL_DEFAULT 10 * MACHINE_PREC;
 
+namespace siconos::integrators {
+
+
+  
 /**
    LsodarOSI solver (odepack)
 
@@ -51,7 +55,7 @@
    Input only.
 */
 class LsodarOSI : public OneStepIntegrator {
-private:
+ private:
   ACCEPT_SERIALIZATION(LsodarOSI);
 
   /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
@@ -83,7 +87,7 @@ private:
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
 
-public:
+ public:
   enum LsodarOSI_ds_workVector_id { FREE, WORK_LENGTH };
 
   enum LsodarOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
@@ -167,7 +171,7 @@ public:
    *  if jt = 1 or 4, the user must supply a subroutine jac
    *  (the name is arbitrary) as described above under jac.
    *  if jt = 2 or 5, a dummy argument can be used.
-   *  
+   *
    *  \param newJT new value for the jt parameter.
    */
   inline void setJT(integer newJT) { _intData[8] = newJT; };
@@ -290,7 +294,7 @@ public:
   /** integrates the Interaction linked to this integrator, without taking
    *  non-smooth effects into account
    *
-   *  \param vertex_descr descriptor vertex of the interaction graph 
+   *  \param vertex_descr descriptor vertex of the interaction graph
    *  \param osnsp pointer to OneStepNSProblem
    */
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_descr,
@@ -314,5 +318,6 @@ public:
 
   ACCEPT_STD_VISITORS();
 };
+}  // namespace siconos::integrators
 
-#endif // LsodarOSI_H
+#endif  // LsodarOSI_H

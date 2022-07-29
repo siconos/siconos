@@ -32,7 +32,7 @@ set(${COMPONENT}_DIRS
   src/utils/ProgressBar
   src/plugin
   src/modelingTools
-  src/simulationTools
+  # src/simulationTools
 )
 
 # -- Documentation --
@@ -65,7 +65,7 @@ include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
 # We require C++ 17. PUBLIC to propagate to other components.
-target_compile_features(kernel PUBLIC cxx_std_17)
+target_compile_features(kernel PUBLIC cxx_std_20)
 
 # --- Extra setup for the component ---
 # remove boring warnings from boost bindings includes

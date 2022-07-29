@@ -21,30 +21,30 @@ Include files related to modeling part of Siconos.
 
 */
 
-#include "EqualityConditionNSL.hpp"
-#include "ComplementarityConditionNSL.hpp"
-#include "MixedComplementarityConditionNSL.hpp"
-#include "RelayNSL.hpp"
-#include "NewtonImpactNSL.hpp"
-#include "MultipleImpactNSL.hpp"
-#include "NewtonImpactFrictionNSL.hpp"
-#include "NormalConeNSL.hpp"
-#include "NewtonImpactRollingFrictionNSL.hpp"
+// #include "EqualityConditionNSL.hpp"
+// #include "ComplementarityConditionNSL.hpp"
+// #include "MixedComplementarityConditionNSL.hpp"
+// #include "RelayNSL.hpp"
+// #include "NewtonImpactNSL.hpp"
+// #include "MultipleImpactNSL.hpp"
+// #include "NewtonImpactFrictionNSL.hpp"
+// #include "NormalConeNSL.hpp"
+// #include "NewtonImpactRollingFrictionNSL.hpp"
 
-#include "Interaction.hpp"
+// #include "Interaction.hpp"
 
-#include "RelationTypes.hpp"
-#include "FirstOrderType1R.hpp"
-#include "FirstOrderType2R.hpp"
+// #include "RelationTypes.hpp"
+// #include "FirstOrderType1R.hpp"
+// #include "FirstOrderType2R.hpp"
 
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
-#include "FirstOrderLinearTIDS.hpp"
-#include "NewtonEulerDS.hpp"
-#include "NewtonEulerR.hpp"
-#include "NewtonEuler1DR.hpp"
-#include "NewtonEuler3DR.hpp"
-#include "NewtonEuler5DR.hpp"
+// #include "FirstOrderLinearTIDS.hpp"
+// #include "NewtonEulerDS.hpp"
+// #include "NewtonEulerR.hpp"
+// #include "NewtonEuler1DR.hpp"
+// #include "NewtonEuler3DR.hpp"
+// #include "NewtonEuler5DR.hpp"
 
 #include "BoundaryCondition.hpp"
 #include "HarmonicBC.hpp"
@@ -52,6 +52,6 @@ Include files related to modeling part of Siconos.
 
 
 
-#include "NonSmoothDynamicalSystem.hpp"
-#include "LinearComplementaritySystemsNSDS.hpp"
+// #include "NonSmoothDynamicalSystem.hpp"
+// #include "LinearComplementaritySystemsNSDS.hpp"
 

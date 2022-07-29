@@ -22,28 +22,27 @@
 #define EQUALITYCONDITIONNSLAW_H
 
 #include "NonSmoothLaw.hpp"
-
+namespace siconos::modeling {
 /** Equality NonSmoothLaw
  *
  **/
 class EqualityConditionNSL : public NonSmoothLaw {
-private:
-  
+ private:
   ACCEPT_SERIALIZATION(EqualityConditionNSL);
 
   /** default constructor
    */
   EqualityConditionNSL() = default;
 
-public:
+ public:
   /** basic constructor
    *
    *  \param size of the non smooth law
    */
-  EqualityConditionNSL(unsigned int size);
+  EqualityConditionNSL(unsigned int size) : NonSmoothLaw(size){};
 
   /** Destructor */
-  ~EqualityConditionNSL();
+  ~EqualityConditionNSL() = default;
 
   /** display the data of the NonSmoothLaw on the standard output
    *
@@ -51,9 +50,8 @@ public:
   void display() const override{};
 
   // Visitors hook
-  ACCEPT_STD_VISITORS();
+  // ACCEPT_STD_VISITORS();
 };
+}  // namespace siconos::modeling
 
-TYPEDEF_SPTR(EqualityConditionNSL)
-
-#endif // EQUALITYCONDITIONNSLAW_H
+#endif  // EQUALITYCONDITIONNSLAW_H
