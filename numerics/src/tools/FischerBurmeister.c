@@ -157,8 +157,10 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
   }
   // workV1 = "z" in Facchinei--Pang (2003) p. 808
   // "z_i" = 1 if z_i = w_i = 0.0
-  // nabla_F^T.workV1 --> workV2
-  cblas_dgemv(CblasColMajor,CblasTrans, n2, n2, 1.0, nabla_F_dense, n2, &workV1[n1], 1, 0.0, &workV2[n1], 1);
+  // (nabla_F[n1:n,n1:n])^T.workV1 --> workV2
+  // Thanks to octave-user on github for reporting and fixing this issue
+  // cf https://github.com/siconos/siconos/issues/452#issuecomment-1166539393
+  cblas_dgemv(CblasColMajor, CblasTrans, n2, n2, 1.0, &nabla_F_dense[n * n1 + n1], n, &workV1[n1], 1, 0.0, &workV2[n1], 1);
   for(int i = n1; i < n; ++i)
   {
     if(workV1[i] != 0.0)  // i in beta
