@@ -365,10 +365,10 @@ void JA_inv(const double * const vec, const unsigned int vecSize, const size_t v
 
   for(size_t i = 0; i < 2 * varsCount; i += 2)
   {
-    // sqrt_eigenval1 = 1. / eigenvals[i];
-    // sqrt_eigenval2 = 1. / eigenvals[i + 1];
-    if (eigenvals[i] == 0.) sqrt_eigenval1 = 1. / 1e-20; else sqrt_eigenval1 = 1. / eigenvals[i];
-    if (eigenvals[i+1] == 0.) sqrt_eigenval2 = 1. / 1e-20; else sqrt_eigenval2 = 1. / eigenvals[i+1];
+    sqrt_eigenval1 = 1. / eigenvals[i];
+    sqrt_eigenval2 = 1. / eigenvals[i + 1];
+    // if (eigenvals[i] == 0.) sqrt_eigenval1 = 1. / 1e-20; else sqrt_eigenval1 = 1. / eigenvals[i];
+    // if (eigenvals[i+1] == 0.) sqrt_eigenval2 = 1. / 1e-20; else sqrt_eigenval2 = 1. / eigenvals[i+1];
     pos = (i / 2) * dimension;
     NV_const_add(eigenvecs[i], dimension, sqrt_eigenval1, 0, tmp_vec1);
     NV_const_add(eigenvecs[i + 1], dimension, sqrt_eigenval2, 0, tmp_vec2);
@@ -487,7 +487,7 @@ void Qx05y(const double * const x, const double * const y, const unsigned int ve
     l1 = x[j]+nxb;
     l2 = x[j]-nxb;
     // if (l2 <= 0.) {printf("Qx05y. i = %zu: l2 = %3.50Le => l2 = EPS\n", i, l2); l2 = EPS;} // to avoid negative number b/c of different data types
-    if (l2 <= 0.) l2 = fabsl(l2); // to avoid negative number b/c of different data types
+    // if (l2 <= 0.) l2 = fabsl(l2); // to avoid negative number b/c of different data types
     // if (l2 <= 0.) {printf("Qx05y. i = %zu: l2 = %3.50Le => l2 = fabsl(l2)\n", i, l2); l2 = fabsl(l2);} // to avoid negative number b/c of different data types
     // if (l2 <= 0.) {printf("Qx05y. i = %zu: l2 = %3.50Le => l2 = fabsl(l2)/10\n", i, l2); l2 = fabsl(l2)/10.;} // to avoid negative number b/c of different data types
     dx = sqrtl(l1*l2);
@@ -528,7 +528,7 @@ void Qx50y(const double * const x, const double * const y, const unsigned int ve
     l1 = x[j]+nxb;
     l2 = x[j]-nxb;
     //if (l2 <= 0.) {printf("Qx50y. i = %zu: l2 = %3.50Le => l2 = EPS\n", i, l2); l2 = EPS;} // to avoid negative number b/c of different data types
-    if (l2 <= 0.) l2 = fabsl(l2); // to avoid negative number b/c of different data types
+    // if (l2 <= 0.) l2 = fabsl(l2); // to avoid negative number b/c of different data types
     // if (l2 <= 0.) {printf("Qx50y. i = %zu: l2 = %3.50Le => l2 = fabsl(l2)\n", i, l2); l2 = fabsl(l2);} // to avoid negative number b/c of different data types
     // if (l2 <= 0.) {printf("Qx50y. i = %zu: l2 = %3.50Le => l2 = fabsl(l2)/10\n", i, l2); l2 = fabsl(l2)/10.;} // to avoid negative number b/c of different data types
     dx = 1/sqrtl(l1*l2);
@@ -561,9 +561,9 @@ void Jinv(const double * const x, const unsigned int vecSize, const size_t varsC
     j = i*dimension;
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = 1/(x[j]+normx)/2;
-    // l2 = 1/(x[j]-normx)/2;
-    l2 = x[j]-normx;
-    if (l2 == 0.) l2 = 1./1e-20; else l2 = 1/l2/2;// to avoid divide by 0 b/c of different data types
+    l2 = 1/(x[j]-normx)/2;
+    // l2 = x[j]-normx;
+    // if (l2 == 0.) l2 = 1./1e-20; else l2 = 1/l2/2;// to avoid divide by 0 b/c of different data types
     // if (l2 == 0.) {printf("Jinv. i = %zu: l2 = %3.50Le => l2 = 1./1e-20\n", i, l2); l2 = 1./1e-20;} else l2 = 1/(x[j]-normx)/2;// to avoid divide by 0 b/c of different data types
     out[j] = l1+l2;
     for (int k = 1; k < dimension; out[j+k] = l1*(x[j+k]/normx) - l2*(x[j+k]/normx), k++);
@@ -580,10 +580,10 @@ void Jsqrt(const double * const x, const unsigned int vecSize, const size_t vars
   {
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = sqrtl(x[j]+normx)/2;
-    // l2 = sqrtl(x[j]-normx)/2;
-    l2 = x[j]-normx;
+    l2 = sqrtl(x[j]-normx)/2;
+    // l2 = x[j]-normx;
     // if (l2 <= 0.) {printf("Jsqrt. i = %zu: l2 = %3.50Le => l2 = EPS\n", j, l2); l2 = EPS;} else l2 = sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
-    if (l2 <= 0.) l2 = sqrtl(fabsl(l2))/2; else l2 = sqrtl(l2)/2;// to avoid negative number b/c of different data types
+    // if (l2 <= 0.) l2 = sqrtl(fabsl(l2))/2; else l2 = sqrtl(l2)/2;// to avoid negative number b/c of different data types
     // if (l2 <= 0.) {printf("Jsqrt. i = %zu: l2 = %3.50Le => l2 = sqrtl(fabsl(x[j]-normx))/2\n", j, l2); l2 = sqrtl(fabsl(x[j]-normx))/2;} else l2 = sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
     // if (l2 <= 0.) {printf("Jsqrt. i = %zu: l2 = %3.50Le => l2 = sqrtl(fabsl(x[j]-normx)/10)/2\n", j, l2); l2 = sqrtl(fabsl(x[j]-normx)/10.)/2;} else l2 = sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
     out[j] = l1+l2;
@@ -602,10 +602,10 @@ void Jsqrtinv(const double * const x, const unsigned int vecSize, const size_t v
     j = i*dimension;
     normx = dnrm2l(dimension-1, x+j+1);
     l1 = 1/sqrtl(x[j]+normx)/2;
-    // l2 = 1/sqrtl(x[j]-normx)/2;
-    l2 = x[j]-normx;
+    l2 = 1/sqrtl(x[j]-normx)/2;
+    // l2 = x[j]-normx;
     // if (l2 <= 0.) {printf("Jsqrtinv. i = %zu: l2 = %3.50Le => l2 = 1./sqrtl(EPS)\n", i, l2); l2 = 1./sqrtl(EPS);} else l2 = 1./sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
-    if (l2 <= 0.) l2 = 1./sqrtl(fabsl(l2))/2; else l2 = 1./sqrtl(l2)/2;// to avoid negative number b/c of different data types
+    // if (l2 <= 0.) l2 = 1./sqrtl(fabsl(l2))/2; else l2 = 1./sqrtl(l2)/2;// to avoid negative number b/c of different data types
     // if (l2 <= 0.) {printf("Jsqrtinv. i = %zu: l2 = %3.50Le => l2 = 1./sqrtl(fabsl(x[j]-normx))/2\n", i, l2); l2 = 1./sqrtl(fabsl(x[j]-normx))/2;} else l2 = 1./sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
     // if (l2 <= 0.) {printf("Jsqrtinv. i = %zu: l2 = %3.50Le => l2 = 1./sqrtl(fabsl(x[j]-normx)/10)/2\n", i, l2); l2 = 1./sqrtl(fabsl(x[j]-normx)/10.)/2;} else l2 = 1./sqrtl(x[j]-normx)/2;// to avoid negative number b/c of different data types
 
@@ -768,10 +768,10 @@ void Jxinvprody(const double * const x, const double * const y, const unsigned i
     detx = (x[j] + nxb) * (x[j] - nxb);
     // detx = x[j]-nxb;
     // if (detx <= 0.) {printf("Jxinvprody. i = %zu: l2 = %3.50Le => l2 = EPS\n", i, detx); detx = (x[j] + nxb) * EPS;}
-    if (detx <= 0.) detx = fabsl(detx);
+    // if (detx <= 0.) detx = fabsl(detx);
     // if (detx <= 0.) {printf("Jxinvprody. i = %zu: l2 = %3.50Le => det = (x[j] + nxb) * fabsl(x[j]-nxb)\n", i, detx); detx = (x[j] + nxb) * fabsl(x[j]-nxb);}
     // if (detx <= 0.) {printf("Jxinvprody. i = %zu: l2 = %3.50Le => det = (x[j] + nxb) * fabsl(x[j]-nxb)/10\n", i, detx); detx = (x[j] + nxb) * fabsl(x[j]-nxb)/10.;}
-    else detx = (x[j] + nxb) * (x[j] - nxb);// to avoid divide by 0 b/c of different data types
+    // else detx = (x[j] + nxb) * (x[j] - nxb);// to avoid divide by 0 b/c of different data types
 
     tmp = x[j]*y[j];
     for (int k = 1; k < dimension; tmp -= x[j+k]*y[j+k], k++);
@@ -821,10 +821,10 @@ float_type ld_gammal(const double * const x, const size_t dimension)
   detx = (x[0] + nxb) * (x[0] - nxb);
   // detx = x[0]-nxb;
   // if (detx <= 0.) {printf("ld_gammal. l2 = %3.50Le => l2 = EPS\n", detx); detx = (x[0] + nxb) * EPS;}
-  if (detx <= 0.) detx = fabsl(detx);
+  // if (detx <= 0.) detx = fabsl(detx);
   // if (detx <= 0.) {printf("ld_gammal. l2 = %3.50Le => detx = (x[0] + nxb) * fabsl(x[0]-nxb)\n", detx); detx = (x[0] + nxb) * fabsl(x[0]-nxb);}
   // if (detx <= 0.) {printf("ld_gammal. l2 = %3.50Le => detx = (x[0] + nxb) * fabsl(x[0]-nxb)/10\n", detx); detx = (x[0] + nxb) * fabsl(x[0]-nxb)/10.;}
-  else detx = (x[0] + nxb) * (x[0] - nxb);// to avoid negative number b/c of different data types
+  // else detx = (x[0] + nxb) * (x[0] - nxb);// to avoid negative number b/c of different data types
 
   return(sqrtl(detx));
 }
