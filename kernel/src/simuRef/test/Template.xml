@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SiconosModel>
+<Title>Template file for tests</Title>
+<Author>F. Perignon</Author>
+<Description>None</Description>
+<Date>06/02/08</Date>
+<Time><t0>0.0</t0><T>10.0</T></Time>
+<NSDS>
+	<DS_Definition>		
+		<LagrangianLinearTIDS number='1'>
+			<Id> Bead1 </Id>				
+			<StepsInMemory>1</StepsInMemory>
+			<q0 vectorSize='3'>5.5 0.0 0.0</q0>
+			<Velocity0  vectorSize='3'>0.0 0.0 0.0</Velocity0>
+			<FExt vectorSize='3'>-9.8 0. 0.</FExt>
+			<Mass matrixRowSize='3' matrixColSize='3'>	
+				<row>1.0 0.0 0.0</row>
+				<row>0.0 1.0 0.0</row>
+				<row>0.0 0.0 0.006</row>
+			</Mass>			
+			</LagrangianLinearTIDS>		
+			<LagrangianLinearTIDS number='2'>
+				<Id> Bead2 </Id>				
+				<StepsInMemory>1</StepsInMemory>
+				<q0 vectorSize='3'>10.50 0.0 0.0</q0>
+				<Velocity0  vectorSize='3'>0.0 0.0  0.0</Velocity0>
+				<FExt vectorSize='3'>-9.8 0. 0.</FExt>
+				<Mass matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 0.006</row>
+				</Mass>			
+			</LagrangianLinearTIDS>			
+			<LagrangianLinearTIDS number='3'>
+				<Id> Bead3 </Id>				
+				<StepsInMemory>1</StepsInMemory>
+				<q0 vectorSize='3'>15.50 0.0 0.0</q0>
+				<Velocity0  vectorSize='3'>0.0  0.0  0.0</Velocity0>
+				<FExt vectorSize='3'>-9.8 0. 0.</FExt>
+				<Mass matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 0.006</row>
+				</Mass>			
+			</LagrangianLinearTIDS>
+		</DS_Definition>
+		<Interaction_Definition>
+            <Interaction number='1' Id='Bead1-Bead2'>
+                <size> 1 </size>
+               <DS_Concerned vectorSize='2'>1 2</DS_Concerned>
+               <Interaction_Content>
+                  <LagrangianLinearRelation>
+                     <H matrixRowSize='1' matrixColSize='6'>
+                     <row>-1.0  0.0  0.0  1.0  0.0  0.0</row>
+                      </H>
+    		      <b vectorSize='1'>-0.2</b>
+              </LagrangianLinearRelation>
+                  <NewtonImpactLaw>
+		  <size>1</size>
+                  <e>0.9</e>
+                  </NewtonImpactLaw>
+               </Interaction_Content>
+            </Interaction>
+            <Interaction number='2' Id='Bead2-Bead3'>
+               <size> 1 </size>
+               <DS_Concerned vectorSize='2'>2 3</DS_Concerned>
+               <Interaction_Content>
+                  <LagrangianLinearRelation>
+                     <H matrixRowSize='1' matrixColSize='6'>
+                     <row>-1.0  0.0  0.0  1.0  0.0  0.0</row>
+                      </H>
+         		      <b vectorSize='1'>-0.2</b>
+            </LagrangianLinearRelation>
+                  <NewtonImpactLaw>
+		  <size>1</size>
+                  <e>0.9</e>
+                  </NewtonImpactLaw>
+               </Interaction_Content>
+            </Interaction>
+            <Interaction number='3' Id='Bead1-Ground'>
+               <size>1</size>
+               <DS_Concerned vectorSize='1'>1</DS_Concerned>
+               <Interaction_Content>
+                  <LagrangianLinearRelation>
+                     <H matrixRowSize='1' matrixColSize='3'>
+                     <row>1.0  0.0  0.0</row>
+                      </H>
+		      <b vectorSize='1'>-0.1</b>
+                  </LagrangianLinearRelation>
+                  <NewtonImpactLaw>
+  		  <size>1</size><e>0.9</e>
+                  </NewtonImpactLaw>
+               </Interaction_Content>
+            </Interaction>
+	</Interaction_Definition>		
+	</NSDS>
+	<Simulation type='TimeStepping'>
+		<TimeDiscretisation isConstant='true'>	
+			<h>0.005</h>
+		</TimeDiscretisation>				
+		<OneStepIntegrator_Definition>
+			<Moreau>
+				<DS_Concerned vectorSize='3'>1 2 3</DS_Concerned>		
+				<Theta vectorSize='3'>0.5 0.5 0.5</Theta>
+			</Moreau>					
+		</OneStepIntegrator_Definition>
+		<OneStepNSProblem>
+		 	<LCP>
+			 <NonSmoothSolver Name="NSGS">
+			 <iparam vectorSize='5'>1 2 3 4 5</iparam>
+			 <dparam vectorSize='5'>1.2 3.2 5.2 7.2 9.2</dparam>
+			 </NonSmoothSolver>
+			</LCP>
+		 </OneStepNSProblem>
+	</Simulation>
+</SiconosModel>

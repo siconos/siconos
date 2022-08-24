@@ -1,0 +1,2009 @@
+
+D1MinusLinearOSIHalfExplicitAccelerationLevelOSI.cpp,576
+static void null_deleter(42,1282
+double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel(computeResiduHalfExplicitAccelerationLevel44,1334
+void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(computeFreeOutputHalfExplicitAccelerationLevel670,25705
+bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitAccelerationLevel(addInteractionInIndexSetHalfExplicitAccelerationLevel886,33811
+bool D1MinusLinearOSI::removeInteractionFromIndexSetHalfExplicitAccelerationLevel(removeInteractionFromIndexSetHalfExplicitAccelerationLevel940,35833
+
+MLCPProjectOnConstraints.hpp,308
+#define MLCPProjectOnConstraints_H23,832
+class MLCPProjectOnConstraints 36,1232
+  double _alpha;41,1353
+  bool _doProjOnEquality;45,1471
+  bool _useMassNormalization;47,1498
+  ~MLCPProjectOnConstraints(76,2494
+  double alpha(81,2564
+  void setAlpha(86,2684
+  inline void setDoProjOnEquality(88,2738
+
+MatrixIntegrator.hpp,527
+#define MatrixIntegrator_H21,720
+class MatrixIntegrator33,980
+  SP::SiconosMatrix _mat;42,1112
+  SP::SiconosMatrix _E;45,1166
+  SP::PluggedObject _plugin;48,1238
+  SP::SubPluggedObject _spo;51,1321
+  bool _isConst;54,1411
+  std::shared_ptr<DynamicalSystem> _DS;57,1467
+  SP::NonSmoothDynamicalSystem _nsds;60,1558
+  SP::TimeDiscretisation _TD;63,1641
+  SP::EventDriven _sim;66,1714
+  SP::LsodarOSI _OSI;69,1784
+  MatrixIntegrator(75,1961
+  inline const SiconosMatrix& mat(108,3292
+  inline bool isConst(111,3417
+
+MLCP.hpp,331
+#define MLCP_H23,792
+#define MLCP_NB_BLOCKS_MAX 29,858
+class MLCP 60,1772
+  int _n 66,1885
+  int _m 69,1957
+  int _curBlock 71,1972
+  SP::MixedLinearComplementarityProblem _numerics_problem;74,2021
+  virtual ~MLCP(92,2463
+  inline int getn(112,3084
+  inline SP::MixedLinearComplementarityProblem getNumericsMLCP(119,3260
+
+LCP.cpp,160
+LCP::LCP(33,996
+LCP::LCP(38,1145
+bool LCP::checkCompatibleNSLaw(checkCompatibleNSLaw42,1261
+int LCP::solve(solve61,1918
+int LCP::compute(compute90,2803
+
+TimeDiscretisationEvent.hpp,70
+#define TIMEDISCREVENT_H22,756
+class TimeDiscretisationEvent 29,881
+
+EventFactory.hpp,434
+#define EventFactory_H24,794
+namespace EventFactory31,911
+typedef SP::Event(*object_creator)object_creator35,1056
+typedef std::map<int,int38,1141
+typedef std::map<int, object_creator> MapFactory;38,1141
+typedef MapFactory::iterator MapFactoryIt;41,1234
+template<class SubType> SP::Event factory(48,1429
+class Registry58,1592
+  MapFactory factory_map;64,1735
+class Registration94,2350
+#define AUTO_REGISTER_EVENT(109,2611
+
+EventsManager.hpp,965
+#define EventsManager_H23,819
+const unsigned long int GAPLIMIT_DEFAULT 30,941
+typedef std::vector<SP::Event> EventsContainer;33,1081
+class EventsManager65,2793
+  EventsContainer _events;77,3102
+  SP::Event _eNonSmooth;80,3176
+  unsigned int _k;83,3245
+  SP::TimeDiscretisation _td;86,3317
+  double _T;89,3379
+  static unsigned long int _GapLimit2Events;92,3466
+  bool _NSeventInsteadOfTD;96,3610
+  virtual ~EventsManager(124,4187
+  inline void setGapLimitEvents(136,4446
+  inline unsigned long int getGapLimitEvents(145,4621
+  inline SP::Event currentEvent(163,5096
+  inline SP::Event nextEvent(172,5255
+  inline EventsContainer& events(181,5408
+  inline bool hasNextEvent(190,5584
+  double getTk(257,7713
+  inline double getTkp1(266,7921
+  inline double getTkp2(280,8312
+  inline double getTkp3(294,8776
+  inline double currentTimeStep(307,9077
+  inline const TimeDiscretisation& timeDiscretisation(316,9266
+  inline void updateT(322,9415
+
+Event.hpp,754
+#define Event_H23,762
+const double DEFAULT_TICK 39,1111
+class Event62,1944
+  mpz_t _timeOfEvent;70,2072
+  mpz_t _tickIncrement;73,2148
+  int _type;76,2206
+  double _dTime;80,2288
+  static double _tick;84,2381
+  static bool _eventCreated;87,2506
+  unsigned int _k;90,2572
+  SP::TimeDiscretisation _td;93,2670
+  bool _reschedule;96,2737
+  Event(99,2787
+  inline double getTick(131,3532
+  inline const mpz_t * getTimeOfEvent(146,3792
+  inline double getDoubleTimeOfEvent(155,3965
+  inline void incrementTime(160,4038
+  inline void setTime(171,4343
+  inline int getType(181,4536
+  inline void setType(190,4688
+  inline void setK(199,4832
+  inline SP::TimeDiscretisation getTimeDiscretisation(211,5141
+  inline bool reschedule(231,5808
+
+RollingFrictionContact.hpp,585
+#define RollingFrictionContact_H22,775
+typedef int (*RollingDriver)RollingDriver30,1012
+class RollingFrictionContact 68,2070
+  int _contactProblemDim;74,2242
+  SP::MuStorage _mu;77,2302
+  SP::MuStorage _muR;80,2357
+  RollingDriver _rolling_frictionContact_driver;84,2472
+  RollingFrictionContactProblem _numerics_problem;86,2522
+  virtual ~RollingFrictionContact(107,3134
+  inline int getRollingFrictionContactDim(115,3301
+  inline const MuStorage getMu(122,3502
+  inline SP::MuStorage mu(129,3683
+  inline double getMu(137,3931
+  inline void setNumericsDriver(148,4176
+
+MoreauJeanGOSI.cpp,567
+void MoreauJeanGOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS57,1804
+void MoreauJeanGOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction97,3590
+double MoreauJeanGOSI::computeResidu(computeResidu170,6054
+void MoreauJeanGOSI::computeFreeState(computeFreeState467,17064
+void MoreauJeanGOSI::NonSmoothLawContributionToOutput(NonSmoothLawContributionToOutput474,17218
+void MoreauJeanGOSI::integrate(integrate487,17922
+void MoreauJeanGOSI::updateState(updateState491,18015
+void MoreauJeanGOSI::display(display570,20759
+
+TimeSteppingDirectProjection.cpp,484
+static CheckSolverFPtr checkSolverOutputProjectOnConstraints 32,1043
+TimeSteppingDirectProjection::TimeSteppingDirectProjection(38,1249
+void TimeSteppingDirectProjection::initOSNS(initOSNS68,2173
+void TimeSteppingDirectProjection::nextStep(nextStep79,2552
+void TimeSteppingDirectProjection::advanceToEvent(advanceToEvent96,2991
+void TimeSteppingDirectProjection::computeCriteria(computeCriteria480,19205
+void TimeSteppingDirectProjection::newtonSolve(newtonSolve540,21723
+
+OneStepNSProblem.hpp,993
+#define ONESTEPNSPROBLEM_H23,815
+class OneStepNSProblem74,2536
+  SP::SolverOptions _numerics_solver_options;81,2652
+  unsigned int _sizeOutput 84,2738
+  SP::Simulation _simulation;87,2835
+  unsigned int _indexSetLevel 90,2928
+  unsigned int _inputOutputLevel 95,3132
+  unsigned int _maxSize 103,3503
+  std::set<float> _nslawtype;106,3560
+  bool _hasBeenUpdated 109,3688
+  OneStepNSProblem(128,4130
+  virtual ~OneStepNSProblem(132,4238
+  inline SP::SolverOptions numericsSolverOptions(141,4425
+  inline unsigned int getSizeOutput(148,4588
+  inline SP::Simulation simulation(157,4773
+  inline void setSimulationPtr(166,4951
+  inline unsigned int indexSetLevel(175,5101
+  inline void setIndexSetLevel(184,5261
+  inline unsigned int inputOutputLevel(193,5425
+  inline void setInputOutputLevel(202,5600
+  inline unsigned int maxSize(211,5802
+  inline void setMaxSize(220,5948
+  virtual void display(239,6413
+  bool hasBeenUpdated(266,7205
+  void setHasBeenUpdated(275,7344
+
+InteractionManager.hpp,211
+#define InteractionManager_h24,824
+class InteractionManager31,970
+  InteractionManager(34,1005
+  virtual ~InteractionManager(35,1044
+  virtual void updateInteractions(39,1175
+  NSLawMatrix _nslaws;62,2029
+
+OneStepIntegrator.cpp,914
+OneStepIntegrator::_initializeDSWorkVectors(_initializeDSWorkVectors31,1016
+void OneStepIntegrator::initialize(initialize52,1669
+void OneStepIntegrator::update_interaction_output(update_interaction_output66,2060
+void OneStepIntegrator::_check_and_update_interaction_levels(_check_and_update_interaction_levels110,3511
+void OneStepIntegrator::resetAllNonSmoothParts(resetAllNonSmoothParts132,4206
+void OneStepIntegrator::resetNonSmoothPart(resetNonSmoothPart142,4502
+void OneStepIntegrator::updateOutput(updateOutput152,4813
+void OneStepIntegrator::updateInput(updateInput158,5063
+void OneStepIntegrator::updateOutput(updateOutput167,5378
+void OneStepIntegrator::updateInput(updateInput173,5615
+double OneStepIntegrator::computeResiduOutput(computeResiduOutput180,5851
+double OneStepIntegrator::computeResiduInput(computeResiduInput187,6134
+void OneStepIntegrator::display(display198,6419
+
+TimeStepping.cpp,1330
+static CheckSolverFPtr checkSolverOutput 57,1805
+TimeStepping::TimeStepping(59,1858
+TimeStepping::TimeStepping(88,2973
+void TimeStepping::insertIntegrator(insertIntegrator104,3684
+void TimeStepping::updateIndexSet(updateIndexSet140,5093
+void TimeStepping::initOSNS(initOSNS324,11994
+void TimeStepping::nextStep(nextStep366,13423
+void TimeStepping::computeFreeState(computeFreeState373,13575
+void TimeStepping::computeOneStep(computeOneStep383,14022
+void TimeStepping::run(run390,14085
+void TimeStepping::resetLambdas(resetLambdas406,14606
+void TimeStepping::advanceToEvent(advanceToEvent422,15025
+void   TimeStepping::prepareNewtonIteration(prepareNewtonIteration433,15320
+void TimeStepping::displayNewtonConvergenceInTheLoop(displayNewtonConvergenceInTheLoop446,15651
+void TimeStepping::displayNewtonConvergenceAtTheEnd(displayNewtonConvergenceAtTheEnd477,16847
+void TimeStepping::computeInitialNewtonState(computeInitialNewtonState503,17653
+void TimeStepping::initializeNewtonLoop(initializeNewtonLoop513,17961
+void TimeStepping::newtonSolve(newtonSolve595,20376
+bool TimeStepping::newtonCheckConvergence(newtonCheckConvergence700,23784
+void TimeStepping::DefaultCheckSolverOutput(DefaultCheckSolverOutput793,26463
+void TimeStepping::setCheckSolverFunction(setCheckSolverFunction827,28297
+
+Simulation.hpp,2172
+#define SIMULATION_H23,796
+class Simulation 40,1191
+  std::string _name;46,1346
+  SP::EventsManager _eventsManager;49,1403
+  double _tinit;52,1487
+  double _tend;55,1550
+  double _tout;61,1739
+  double _T;63,1756
+  SP::OSISet _allOSI;66,1813
+  SP::OneStepNSProblems _allNSProblems;70,1921
+  SP::NonSmoothDynamicalSystem _nsds;74,2028
+  std::shared_ptr<siconos::modeling::Interaction>Manager _interman;78,2102
+  unsigned int _numberOfIndexSets;85,2447
+  double _tolerance;90,2635
+  bool _printStat;93,2710
+  bool _staticLevels;97,2816
+  std::ofstream statOut;100,2874
+  bool _useRelativeConvergenceCriterion;106,3016
+  bool _relativeConvergenceCriterionHeld;112,3238
+  double _relativeConvergenceTol;117,3383
+  bool _isInitialized;119,3418
+  NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition;122,3483
+  std::map<std::map125,3612
+  std::map< SP::OneStepIntegrator, std::list<std::shared_ptr<DynamicalSystem>> >  _OSIDSmap;125,3612
+  Simulation(142,3999
+  inline const std::string name(178,5148
+  inline void setName(186,5292
+  inline SP::EventsManager eventsManager(215,6222
+  inline double timeStep(238,6751
+  inline const SP::OSISet oneStepIntegrators(252,7063
+  inline size_t numberOfOSI(261,7258
+  inline const SP::OneStepNSProblems oneStepNSProblems(288,7970
+  inline size_t numberOfOSNSProblems(297,8190
+  inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem(325,8978
+  void setNonSmoothDynamicalSystemPtr(333,9201
+  double tolerance(343,9413
+  void setTolerance(353,9621
+  inline void setPrintStat(363,9809
+  inline bool getPrintStat(370,9939
+  void insertInteractionManager(400,10830
+  void update(444,12122
+  inline void setUseRelativeConvergenceCriteron(475,12994
+  inline bool useRelativeConvergenceCriteron(481,13181
+  inline void setRelativeConvergenceTol(491,13374
+  inline double relativeConvergenceTol(499,13528
+  inline void setRelativeConvergenceCriterionHeld(508,13686
+  inline bool relativeConvergenceCriterionHeld(516,13885
+  void setStaticLevels(548,14920
+  virtual bool computeResiduY(560,15187
+  virtual bool computeResiduR(562,15239
+  virtual void updateWorldFromDS(585,16264
+
+ZeroOrderHoldOSI.cpp,1417
+ZeroOrderHoldOSI::ZeroOrderHoldOSI(53,1559
+void ZeroOrderHoldOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS63,1776
+void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction145,5473
+double ZeroOrderHoldOSI::computeResidu(computeResidu220,8166
+void ZeroOrderHoldOSI::computeFreeState(computeFreeState263,9760
+void ZeroOrderHoldOSI::prepareNewtonIteration(prepareNewtonIteration324,12192
+struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput 343,12703
+  using SiconosVisitor::visit;345,12777
+  OneStepNSProblem * _osnsp;347,12809
+  std::shared_ptr<siconos::modeling::Interaction> _inter;348,12838
+  InteractionProperties& _interProp;349,12896
+  _NSLEffectOnFreeOutput(350,12933
+  void visit(353,13127
+  void visit(366,13532
+  void visit(375,13831
+  void visit(379,13893
+void ZeroOrderHoldOSI::computeFreeOutput(computeFreeOutput386,13972
+void ZeroOrderHoldOSI::integrate(integrate527,18253
+void ZeroOrderHoldOSI::updateState(updateState533,18449
+bool ZeroOrderHoldOSI::addInteractionInIndexSet(addInteractionInIndexSet592,20701
+bool ZeroOrderHoldOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet610,21353
+const SiconosMatrix& ZeroOrderHoldOSI::Ad(Ad615,21529
+const SiconosMatrix& ZeroOrderHoldOSI::Bd(Bd622,21808
+void ZeroOrderHoldOSI::display(display630,22088
+void ZeroOrderHoldOSI::updateMatrices(updateMatrices649,22806
+
+MultipleImpact.cpp,2567
+MultipleImpact::MultipleImpact(28,965
+void MultipleImpact::setTolImpact(setTolImpact34,1302
+void MultipleImpact::SetSaveData(SetSaveData39,1388
+void MultipleImpact::SetNameOutput(SetNameOutput44,1456
+void MultipleImpact::SetTolVel(SetTolVel49,1545
+void MultipleImpact::SetTolEner(SetTolEner54,1614
+void MultipleImpact::SetZeroVelEndImp(SetZeroVelEndImp59,1685
+void MultipleImpact::SetZeroEnerEndImp(SetZeroEnerEndImp64,1767
+void MultipleImpact::SetNstepSave(SetNstepSave69,1851
+void MultipleImpact::SetNstepMax(SetNstepMax74,1929
+void MultipleImpact::SetStepMinMaxSave(SetStepMinMaxSave79,2005
+void MultipleImpact::set_typeCompLaw(set_typeCompLaw85,2133
+void MultipleImpact::SetSizeDataSave(SetSizeDataSave92,2431
+void MultipleImpact::WriteVectorIntoMatrix(WriteVectorIntoMatrix97,2615
+bool MultipleImpact::isZero(isZero105,2947
+bool MultipleImpact::isVelNegative(isVelNegative113,3166
+bool MultipleImpact::isEnerZero(isEnerZero122,3383
+unsigned int MultipleImpact::EstimateNdataCols(EstimateNdataCols130,3607
+void MultipleImpact::AllocateMemory(AllocateMemory151,4589
+void MultipleImpact::BuildParaContact(BuildParaContact266,7574
+void MultipleImpact::PreComputeImpact(PreComputeImpact295,8912
+void MultipleImpact::InitializeInput(InitializeInput398,11918
+void MultipleImpact::initialize(initialize433,13761
+void MultipleImpact::PrimConVelocity(PrimConVelocity457,14643
+void MultipleImpact::PrimConEnergy(PrimConEnergy472,15417
+bool MultipleImpact::IsEnermaxZero(IsEnermaxZero488,16172
+bool MultipleImpact::IsVcminNegative(IsVcminNegative499,16453
+void MultipleImpact::Check_stateContact(Check_stateContact510,16756
+bool MultipleImpact::IsMulImpactTerminate(IsMulImpactTerminate533,17448
+void MultipleImpact::SelectPrimaContact(SelectPrimaContact559,18234
+void MultipleImpact::Compute_distributionVector(Compute_distributionVector576,18946
+void MultipleImpact::ComputeImpulseContact(ComputeImpulseContact657,23056
+void MultipleImpact::Compute_velocityContact(Compute_velocityContact689,24507
+void MultipleImpact::Compute_energyContact(Compute_energyContact703,25186
+void MultipleImpact::UpdateDuringImpact(UpdateDuringImpact768,28102
+void MultipleImpact::SaveDataOneStep(SaveDataOneStep798,29621
+void MultipleImpact::ComputeImpact(ComputeImpact851,32387
+void MultipleImpact::PostComputeImpact(PostComputeImpact957,36571
+bool MultipleImpact::checkCompatibleNSLaw(checkCompatibleNSLaw996,38495
+int MultipleImpact::compute(compute1023,39372
+void MultipleImpact::display(display1038,39820
+
+Relay.hpp,529
+#define Relay_H23,795
+class Relay 50,1433
+  std::shared_ptr<siconos::algebra::SiconosVector> _lb;59,1580
+  std::shared_ptr<siconos::algebra::SiconosVector> _ub;62,1702
+  SP::RelayProblem _numerics_problem;65,1814
+  ~Relay(91,2351
+  inline const SiconosVector& getLb(98,2500
+  inline std::shared_ptr<siconos::algebra::SiconosVector> lb(107,2673
+  inline void setLb(116,2844
+  inline const SiconosVector& getUb(127,3080
+  inline std::shared_ptr<siconos::algebra::SiconosVector> ub(136,3253
+  inline void setUb(145,3424
+
+FrictionContact.hpp,490
+#define FrictionContact_H22,768
+typedef int (*Driver)Driver30,984
+class FrictionContact 70,2153
+  int _contactProblemDim;76,2311
+  SP::MuStorage _mu;79,2371
+  Driver _frictionContact_driver;83,2485
+  FrictionContactProblem _numerics_problem;85,2520
+  virtual ~FrictionContact(104,3102
+  inline int getFrictionContactDim(112,3255
+  inline const MuStorage getMu(119,3449
+  inline SP::MuStorage mu(126,3630
+  inline double getMu(132,3867
+  inline void setNumericsDriver(143,4103
+
+test/ZOHTest.hpp,535
+#define __ZOHTest__19,711
+class ZOHTest 32,1055
+  unsigned int _n;64,1728
+  double _h;65,1747
+  double _t0;66,1760
+  double _T;67,1774
+  double _tol;68,1787
+  SP::NonSmoothDynamicalSystem _model;69,1802
+  SP::TimeStepping _sim;70,1841
+  SP::FirstOrderLinearDS _DS;71,1866
+  SP::TimeDiscretisation _TD;72,1896
+  SP::ZeroOrderHoldOSI _ZOH;73,1926
+  SP::SiconosMatrix _A;74,1955
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;75,1979
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0;76,2034
+  ZOHTest(81,2101
+
+test/testAVI.hpp,562
+#define __AVITest__19,711
+class AVITest 34,1084
+  unsigned int _n;56,1392
+  double _h;57,1411
+  double _t0;58,1424
+  double _T;59,1438
+  double _tol;60,1451
+  double _theta;61,1466
+  SP::NonSmoothDynamicalSystem _nsds;62,1483
+  SP::TimeStepping _sim;63,1521
+  SP::FirstOrderLinearTIDS _DS;64,1546
+  SP::TimeDiscretisation _TD;65,1578
+  SP::OneStepIntegrator _osi;66,1608
+  SP::SiconosMatrix _A;67,1638
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;68,1662
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0;69,1717
+  AVITest(74,1784
+
+test/EulerMoreauTest.cpp,421
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,752
+static void computef1(27,953
+static void computeA1(33,1072
+void EulerMoreauTest::setUp(setUp41,1216
+void EulerMoreauTest::init(init48,1369
+void EulerMoreauTest::tearDown(tearDown64,1783
+void EulerMoreauTest::testCstGradTIDS(testCstGradTIDS67,1820
+void EulerMoreauTest::testCstGradDS(testCstGradDS92,2650
+void EulerMoreauTest::testCstGradNLDS(testCstGradNLDS117,3470
+
+test/OSNSMatrixTest.cpp,599
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,723
+void OSNSMatrixTest::setUp(setUp28,924
+void OSNSMatrixTest::tearDown(tearDown43,1362
+void OSNSMatrixTest::testBuildOSNSMatrix0(testBuildOSNSMatrix047,1421
+void OSNSMatrixTest::testBuildOSNSMatrix1(testBuildOSNSMatrix161,2106
+void OSNSMatrixTest::testBuildOSNSMatrix2(testBuildOSNSMatrix275,2941
+void OSNSMatrixTest::testFill(testFill118,4985
+void OSNSMatrixTest::testConvert(testConvert179,8001
+void OSNSMatrixTest::testFill2(testFill2219,9582
+void OSNSMatrixTest::testConvert2(testConvert2282,12638
+void OSNSMatrixTest::End(End322,14227
+
+test/LsodarTest.cpp,391
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,747
+static void computef1(27,943
+static void computeA1(33,1062
+void LsodarTest::setUp(setUp41,1206
+void LsodarTest::init(init48,1354
+void LsodarTest::tearDown(tearDown64,1745
+void LsodarTest::testCstGradTIDS(testCstGradTIDS67,1777
+void LsodarTest::testCstGradDS(testCstGradDS92,2602
+void LsodarTest::testCstGradNLDS(testCstGradNLDS117,3417
+
+test/OSNSPTest.hpp,53
+#define __OSNSPTest__19,713
+class OSNSPTest 23,782
+
+test/LsodarTest.hpp,549
+#define __LsodarTest__19,714
+class LsodarTest 32,1053
+  unsigned int _n;58,1513
+  double _h;59,1532
+  double _t0;60,1545
+  double _T;61,1559
+  double _tol;62,1572
+  SP::NonSmoothDynamicalSystem _model;63,1587
+  SP::EventDriven _sim;64,1626
+  std::shared_ptr<DynamicalSystem> _DS;65,1650
+  SP::TimeDiscretisation _TD;66,1690
+  SP::LsodarOSI _Lsodar;67,1720
+  SP::SiconosMatrix _A;68,1745
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;69,1769
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0;70,1824
+  LsodarTest(75,1891
+
+test/OSNSPTest.cpp,286
+void OSNSPTest::setUp(setUp26,848
+void OSNSPTest::tearDown(tearDown29,876
+void OSNSPTest::testOSNSBuild_default(testOSNSBuild_default32,907
+void OSNSPTest::testOSNSBuild_solverid(testOSNSBuild_solverid42,1212
+void OSNSPTest::testOSNSBuild_options(testOSNSBuild_options51,1544
+
+test/ZOHTest.cpp,535
+#define CPPUNIT_ASSERT_NOT_EQUAL(22,778
+void ZOHTest::setUp(setUp29,972
+void ZOHTest::init(init36,1117
+void ZOHTest::tearDown(tearDown48,1472
+void ZOHTest::testMatrixExp0(testMatrixExp051,1501
+void ZOHTest::testMatrixExp1(testMatrixExp173,2483
+void ZOHTest::testMatrixIntegration1(testMatrixIntegration195,3482
+void ZOHTest::testMatrixIntegration2(testMatrixIntegration2137,5115
+void ZOHTest::testMatrixIntegration3(testMatrixIntegration3200,7544
+void ZOHTest::testMatrixIntegration4(testMatrixIntegration4272,10257
+
+test/testAVI.cpp,188
+#define CPPUNIT_ASSERT_NOT_EQUAL(21,744
+void AVITest::setUp(setUp28,938
+void AVITest::init(init35,1083
+void AVITest::tearDown(tearDown46,1416
+void AVITest::testAVI(testAVI49,1445
+
+test/EulerMoreauTest.hpp,575
+#define __EulerMoreauTest__19,719
+class EulerMoreauTest 32,1069
+  unsigned int _n;58,1544
+  double _h;59,1563
+  double _t0;60,1576
+  double _T;61,1590
+  double _tol;62,1603
+  SP::NonSmoothDynamicalSystem _model;63,1618
+  SP::TimeStepping _sim;64,1657
+  std::shared_ptr<DynamicalSystem> _DS;65,1682
+  SP::TimeDiscretisation _TD;66,1722
+  SP::EulerMoreauOSI _EulerMoreau;67,1752
+  SP::SiconosMatrix _A;68,1787
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;69,1811
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0;70,1866
+  EulerMoreauTest(75,1933
+
+test/OSNSMatrixTest.hpp,238
+#define __OSNSMatrixTest__19,718
+class OSNSMatrixTest 26,878
+  unsigned int n;62,1590
+  double tol;63,1608
+  std::shared_ptr<InteractionsGraph> indexSet;64,1622
+  MapOfMapOfInteractionMatrices blocks;65,1669
+  Model * temp 66,1709
+
+LinearOSNS.cpp,630
+void LinearOSNS::initVectorsMemory(initVectorsMemory55,1750
+void LinearOSNS::initOSNSMatrix(initOSNSMatrix84,2347
+void LinearOSNS::initialize(initialize339,9084
+void LinearOSNS::computeDiagonalInteractionBlock(computeDiagonalInteractionBlock358,9594
+void LinearOSNS::computeInteractionBlock(computeInteractionBlock572,18870
+void LinearOSNS::computeqBlock(computeqBlock753,26966
+void LinearOSNS::computeq(computeq862,31712
+void LinearOSNS::computeM(computeM888,32545
+bool LinearOSNS::preCompute(preCompute948,34406
+void LinearOSNS::postCompute(postCompute1068,38174
+void LinearOSNS::display(display1108,39523
+
+MoreauJeanOSI.cpp,2451
+static void null_deleter(55,1744
+template <typename T> static std::shared_ptr<T> ptr(56,1795
+MoreauJeanOSI::MoreauJeanOSI(62,1971
+const SimpleMatrix MoreauJeanOSI::getW(getW91,2594
+std::shared_ptr<siconos::algebra::SimpleMatrix> MoreauJeanOSI::W(W100,2987
+const SimpleMatrix MoreauJeanOSI::getWBoundaryConditions(getWBoundaryConditions107,3238
+SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(WBoundaryConditions117,3786
+void MoreauJeanOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS124,4044
+void MoreauJeanOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction171,6060
+void MoreauJeanOSI::initialize_nonsmooth_problems(initialize_nonsmooth_problems251,9007
+void MoreauJeanOSI::initializeIterationMatrixW(initializeIterationMatrixW259,9337
+void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(_initializeIterationMatrixWBoundaryConditions395,13904
+void MoreauJeanOSI::_computeWBoundaryConditions(_computeWBoundaryConditions432,15860
+void MoreauJeanOSI::computeW(computeW494,18217
+std::shared_ptr<siconos::algebra::SimpleMatrix> MoreauJeanOSI::Winverse(Winverse569,20544
+void MoreauJeanOSI::computeInitialNewtonState(computeInitialNewtonState621,21926
+void MoreauJeanOSI::applyBoundaryConditions(applyBoundaryConditions651,23148
+double MoreauJeanOSI::computeResidu(computeResidu685,24579
+void MoreauJeanOSI::computeFreeState(computeFreeState1059,38779
+void MoreauJeanOSI::prepareNewtonIteration(prepareNewtonIteration1285,47703
+void  MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(visit1339,49443
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(visit1352,49858
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(visit1358,50028
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(visit1377,50653
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(visit1396,51285
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(visit1400,51378
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(visit1404,51483
+void MoreauJeanOSI::computeFreeOutput(computeFreeOutput1411,51591
+void MoreauJeanOSI::integrate(integrate1517,55757
+void MoreauJeanOSI::updatePosition(updatePosition1589,58114
+void MoreauJeanOSI::updateState(updateState1681,61434
+bool MoreauJeanOSI::addInteractionInIndexSet(addInteractionInIndexSet1873,68599
+bool MoreauJeanOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet1898,69635
+void MoreauJeanOSI::display(display1905,69811
+
+BlockCSRMatrix.hpp,806
+#define BLOCKCSRMATRIX_H23,819
+    double 37,1335
+    double *, boost::numeric::ublas::basic_row_major<boost::numeric::ublas::basic_row_major37,1335
+    CompressedRowMat;39,1463
+class BlockCSRMatrix 102,3844
+  unsigned int _nr;108,3986
+  unsigned int _nc;111,4079
+  SP::CompressedRowMat _blockCSR;114,4166
+  SP::SparseBlockStructuredMatrix _sparseBlockStructuredMatrix;117,4277
+  SP::IndexInt _diagsize0;122,4518
+  SP::IndexInt _diagsize1;127,4721
+  SP::IndexInt rowPos;130,4801
+  SP::IndexInt colPos;133,4877
+  inline unsigned int numberOfBlocksInARow(168,5685
+  inline SP::SparseBlockStructuredMatrix getNumericsMatSparse(180,5977
+  inline SP::CompressedRowMat getMSparse(189,6169
+  IndexInt::value_type getSizeOfDiagonalBlock(196,6368
+  inline SP::IndexInt getPositionsIndex(209,6714
+
+AVI.cpp,526
+struct AVI::_BoundsNSLEffect 38,1183
+  using SiconosVisitor::visit;41,1239
+  AVI* _parent;43,1271
+  std::shared_ptr<siconos::modeling::Interaction> _inter;44,1287
+  unsigned int _pos;45,1345
+  _BoundsNSLEffect(48,1368
+  void visit(51,1516
+  void visit(71,2099
+  void visit(77,2157
+AVI::AVI(88,2316
+AVI::AVI(93,2465
+void AVI::initialize(initialize100,2634
+bool AVI::checkCompatibleNSLaw(checkCompatibleNSLaw133,4232
+int AVI::compute(compute149,4706
+void AVI::display(display190,5742
+AVI::~AVI(~AVI196,5877
+
+TimeSteppingCombinedProjection.hpp,1337
+#define TIMESTEPPINGCOMBINEDPROJECTION_H22,805
+class TimeSteppingCombinedProjection 29,908
+  unsigned int _indexSetLevelForProjection;37,1164
+  unsigned int _cumulatedNewtonNbIterations;40,1273
+  unsigned int _nbProjectionIteration;44,1365
+  unsigned int _nbCumulatedProjectionIteration;48,1461
+  unsigned int _nbIndexSetsIteration;52,1570
+  double _constraintTol;57,1707
+  double _constraintTolUnilateral;62,1833
+  double _maxViolationUnilateral;67,1977
+  double _maxViolationEquality;72,2118
+  unsigned int _projectionMaxIteration;75,2206
+  unsigned int _kIndexSetMax;78,2312
+  bool _doCombinedProj;81,2402
+  bool _doCombinedProjOnEquality;85,2527
+  bool _isIndexSetsStable;89,2663
+  TimeSteppingCombinedProjection(122,3885
+  void updateWorldFromDS(126,3970
+  inline unsigned int nbProjectionIteration(131,4120
+  inline unsigned int nbCumulatedProjectionIteration(136,4297
+  inline unsigned int cumulatedNewtonNbIterations(145,4513
+  inline unsigned int nbIndexSetsIteration(154,4715
+  inline void setConstraintTol(156,4795
+  inline void setConstraintTolUnilateral(158,4861
+  inline double maxViolationUnilateral(163,4955
+  inline double maxViolationEquality(164,5032
+  inline void setProjectionMaxIteration(166,5106
+  inline void setDoCombinedProj(171,5204
+  inline bool doCombinedProjOnEquality(173,5278
+
+NonSmoothEvent.cpp,240
+#define DEBUG_STDOUT23,848
+#define DEBUG_MESSAGES24,869
+NonSmoothEvent::NonSmoothEvent(29,973
+NonSmoothEvent::NonSmoothEvent(32,1032
+NonSmoothEvent::~NonSmoothEvent(~NonSmoothEvent35,1108
+void NonSmoothEvent::process(process38,1146
+
+MoreauJeanCombinedProjectionOSI.hpp,297
+#define MOREAUCOMBINEDPROJECTIONOSI_H24,834
+const unsigned int MOREAUCOMBINEDPROJECTIONOSISTEPSINMEMORY 30,964
+class MoreauJeanCombinedProjectionOSI 49,1675
+  MoreauJeanCombinedProjectionOSI(55,1839
+  virtual ~MoreauJeanCombinedProjectionOSI(66,2063
+  unsigned int numberOfIndexSets(93,3060
+
+TimeDiscretisation.cpp,651
+TimeDiscretisation::TimeDiscretisation(26,816
+TimeDiscretisation::TimeDiscretisation(36,1033
+TimeDiscretisation::TimeDiscretisation(49,1237
+TimeDiscretisation::TimeDiscretisation(60,1416
+TimeDiscretisation::TimeDiscretisation(69,1637
+TimeDiscretisation::TimeDiscretisation(TimeDiscretisation81,1856
+TimeDiscretisation::~TimeDiscretisation(~TimeDiscretisation107,2236
+void TimeDiscretisation::setTkVector(setTkVector119,2402
+void TimeDiscretisation::setT0(setT0125,2499
+double TimeDiscretisation::currentTimeStep(currentTimeStep134,2743
+double TimeDiscretisation::getTk(getTk153,3127
+void TimeDiscretisation::display(display171,3440
+
+LsodarOSI.hpp,1761
+#define LsodarOSI_H22,759
+#define ATOL_DEFAULT 28,833
+#define RTOL_DEFAULT 29,874
+namespace siconos::integrators 31,915
+class LsodarOSI 57,1682
+  std::vector<integer> _intData;64,1906
+  unsigned int _sizeTol;66,1990
+  unsigned int _itol;69,2044
+  SA::doublereal rtol;72,2095
+  SA::doublereal atol;74,2146
+  SA::doublereal rwork;76,2194
+  SA::integer iwork;78,2246
+  SA::integer jroot;80,2326
+  std::shared_ptr<siconos::algebra::BlockVector> _xWork;82,2390
+  std::shared_ptr<siconos::algebra::SiconosVector> _xtmp;84,2448
+  enum LsodarOSI_ds_workVector_id 91,2615
+  enum LsodarOSI_ds_workVector_id { FREE,91,2615
+  enum LsodarOSI_ds_workVector_id { FREE, WORK_LENGTH 91,2615
+  enum LsodarOSI_interaction_workVector_id 93,2673
+  enum LsodarOSI_interaction_workVector_id { OSNSP_RHS,93,2673
+  enum LsodarOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH 93,2673
+  enum LsodarOSI_interaction_workBlockVector_id 95,2757
+  enum LsodarOSI_interaction_workBlockVector_id { xfree,95,2757
+  enum LsodarOSI_interaction_workBlockVector_id { xfree, BLOCK_WORK_LENGTH 95,2757
+  static int count_NST;98,2908
+  static int count_NFE;100,2991
+  ~LsodarOSI(107,3084
+  inline const std::vector<integer> intData(113,3196
+  inline integer intData(120,3374
+  inline void setIntData(127,3561
+  inline const SA::doublereal getRtol(133,3734
+  inline const SA::doublereal getAtol(139,3887
+  inline int getMaxNstep(145,4039
+  inline const SA::doublereal getRwork(151,4181
+  inline SA::integer getIwork(157,4309
+  inline SA::integer getJroot(163,4449
+  inline void setJT(177,5165
+  unsigned int numberOfIndexSets(273,8294
+  void prepareNewtonIteration(292,8975
+  static int count_rhs_call(311,9582
+  static int count_steps(317,9745
+
+MoreauJeanBilbaoOSI.hpp,632
+#define MoreauJeanBilbaoOSI_H22,762
+class MoreauJeanBilbaoOSI 40,1188
+  enum MoreauJeanBilbaoOSI_ds_workVector_id 51,1407
+    TWO_DT_SIGMA_STAR,52,1453
+    ONE_MINUS_THETA,53,1476
+    VFREE,54,1497
+    WORK_LENGTH55,1508
+  enum MoreauJeanBilbaoOSI_interaction_workVector_id 58,1530
+    OSNSP_RHS,59,1585
+    WORK_INTERACTION_LENGTH60,1600
+  enum MoreauJeanBilbaoOSI_interaction_workBlockVector_id 63,1634
+    xfree,64,1694
+    BLOCK_WORK_LENGTH65,1705
+  virtual ~MoreauJeanBilbaoOSI(74,1886
+  unsigned int numberOfIndexSets(105,3048
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> iteration_matrix(115,3424
+
+Hem5OSI.hpp,2184
+#define Hem5OSI_H22,786
+#define HEM5_ATOL_DEFAULT 28,858
+#define HEM5_RTOL_DEFAULT 29,904
+class Hem5OSI 49,1749
+  std::vector<integer> _intData;64,2409
+  integer _idid;66,2443
+  SA::doublereal rtol;69,2489
+  SA::doublereal atol;71,2540
+  SA::doublereal rwork;73,2588
+  SA::integer iwork;75,2640
+  doublereal _timeStep;77,2662
+  std::shared_ptr<siconos::algebra::BlockVector> _qWork;80,2757
+  std::shared_ptr<siconos::algebra::BlockVector> _vWork;82,2857
+  std::shared_ptr<siconos::algebra::BlockVector> _uWork;84,2957
+  std::shared_ptr<siconos::algebra::BlockVector> _aWork;86,3057
+  std::shared_ptr<siconos::algebra::BlockVector> _lambdaWork;88,3162
+  std::shared_ptr<siconos::algebra::BlockVector> _forcesWork;90,3272
+  std::shared_ptr<siconos::algebra::SiconosVector> _qtmp;92,3335
+  std::shared_ptr<siconos::algebra::SiconosVector> _vtmp;93,3393
+  std::shared_ptr<siconos::algebra::SiconosVector> _utmp;94,3451
+  std::shared_ptr<siconos::algebra::SiconosVector> _atmp;95,3509
+  std::shared_ptr<siconos::algebra::SiconosVector> _lambdatmp;96,3567
+  std::shared_ptr<siconos::algebra::SiconosVector> _forcestmp;97,3630
+  SP::Hem5OSI_impl _impl;105,3802
+  enum Hem5OSI_ds_workVector_id 108,3858
+  enum Hem5OSI_ds_workVector_id { FREE,108,3858
+  enum Hem5OSI_ds_workVector_id { FREE, WORK_LENGTH 108,3858
+  enum Hem5OSI_interaction_workVector_id 110,3914
+  enum Hem5OSI_interaction_workVector_id { OSNSP_RHS,110,3914
+  enum Hem5OSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH 110,3914
+  enum Hem5OSI_interaction_workBlockVector_id 112,3996
+  enum Hem5OSI_interaction_workBlockVector_id { xfree,112,3996
+  enum Hem5OSI_interaction_workBlockVector_id { xfree, BLOCK_WORK_LENGTH 112,3996
+  ~Hem5OSI(120,4161
+  inline const std::vector<integer> intData(125,4266
+  inline integer intData(131,4412
+  inline void setIntData(136,4552
+  inline const SA::doublereal getRtol(144,4726
+  inline const SA::doublereal getAtol(149,4872
+  inline int getMaxNstep(154,5017
+  inline const SA::doublereal getRwork(159,5155
+  inline SA::integer getIwork(164,5278
+  unsigned int numberOfIndexSets(251,8170
+  void prepareNewtonIteration(266,8821
+
+D1MinusLinearOSI.cpp,1204
+#define D1MINUSLINEAR_STD40,1244
+void D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(visit52,1629
+D1MinusLinearOSI::D1MinusLinearOSI(65,2018
+D1MinusLinearOSI::D1MinusLinearOSI(75,2334
+void D1MinusLinearOSI::setTypeOfD1MinusLinearOSI(setTypeOfD1MinusLinearOSI86,2644
+unsigned int D1MinusLinearOSI::numberOfIndexSets(numberOfIndexSets100,2890
+void D1MinusLinearOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS114,3313
+void D1MinusLinearOSI::initialize_nonsmooth_problems(initialize_nonsmooth_problems159,5439
+void D1MinusLinearOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction208,7668
+double D1MinusLinearOSI::computeResidu(computeResidu328,11881
+void D1MinusLinearOSI::computeFreeState(computeFreeState361,13149
+void D1MinusLinearOSI::updateState(updateState431,15555
+void D1MinusLinearOSI::computeFreeOutput(computeFreeOutput514,18389
+bool D1MinusLinearOSI::addInteractionInIndexSet(addInteractionInIndexSet538,19361
+bool D1MinusLinearOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet554,20046
+double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevelFull(computeResiduHalfExplicitAccelerationLevelFull570,20761
+
+Equality.hpp,71
+#define Equality_H23,801
+class Equality 46,1475
+  ~Equality(69,1954
+
+OSNSMatrix.hpp,627
+#define OSNSM_H23,793
+class OSNSMatrix92,3458
+  unsigned int _dimRow;99,3552
+  unsigned int _dimColumn;102,3604
+  NM_types _storageType;105,3682
+  size_t _triplet_nzmax;108,3767
+  SP::NumericsMatrix _numericsMatrix;111,3835
+  SP::SiconosMatrix _M1;114,3946
+  SP::BlockCSRMatrix _M2;118,4085
+  virtual ~OSNSMatrix(182,6058
+  inline unsigned int size(188,6166
+  inline void setSize(197,6311
+  inline unsigned int sizeColumn(206,6461
+  inline NM_types storagetype(215,6622
+  inline void setStorageType(224,6806
+  inline SP::NumericsMatrix numericsMatrix(233,6966
+  inline SP::SiconosMatrix defaultMatrix(242,7140
+
+SchatzmanPaoliOSI.cpp,1794
+SchatzmanPaoliOSI::SchatzmanPaoliOSI(42,1358
+SchatzmanPaoliOSI::SchatzmanPaoliOSI(55,1732
+const SimpleMatrix SchatzmanPaoliOSI::getW(getW69,2083
+std::shared_ptr<siconos::algebra::SimpleMatrix> SchatzmanPaoliOSI::W(W78,2488
+const SimpleMatrix SchatzmanPaoliOSI::getWBoundaryConditions(getWBoundaryConditions85,2750
+SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(WBoundaryConditions95,3310
+void SchatzmanPaoliOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS101,3592
+void SchatzmanPaoliOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction152,5614
+void SchatzmanPaoliOSI::initializeIterationMatrixW(initializeIterationMatrixW229,8360
+void SchatzmanPaoliOSI::initializeIterationMatrixWBoundaryConditions(initializeIterationMatrixWBoundaryConditions297,10946
+void SchatzmanPaoliOSI::computeWBoundaryConditions(computeWBoundaryConditions315,11765
+void SchatzmanPaoliOSI::computeW(computeW333,12491
+double SchatzmanPaoliOSI::computeResidu(computeResidu370,13618
+void SchatzmanPaoliOSI::computeFreeState(computeFreeState498,18814
+void SchatzmanPaoliOSI::prepareNewtonIteration(prepareNewtonIteration580,22075
+struct SchatzmanPaoliOSI::_NSLEffectOnFreeOutput 595,22587
+  using SiconosVisitor::visit;597,22662
+  OneStepNSProblem* _osnsp;599,22694
+  std::shared_ptr<siconos::modeling::Interaction> _inter;600,22722
+  InteractionProperties& _interProp;601,22780
+  _NSLEffectOnFreeOutput(603,22818
+  void visit(606,23012
+  void visit(625,23654
+  void visit(636,24026
+  void visit(640,24088
+void SchatzmanPaoliOSI::computeFreeOutput(computeFreeOutput647,24167
+void SchatzmanPaoliOSI::integrate(integrate743,27345
+void SchatzmanPaoliOSI::updateState(updateState748,27508
+void SchatzmanPaoliOSI::display(display914,34062
+
+GlobalRollingFrictionContact.hpp,538
+#define GlobalRollingFrictionContact_H22,787
+typedef int (*GRFC3D_Driver)GRFC3D_Driver31,1107
+class GlobalRollingFrictionContact 74,3255
+  int _contactProblemDim 85,3535
+  SP::MuStorage _mu_r;88,3605
+  GRFC3D_Driver _g_rolling_driver;91,3716
+  GlobalRollingFrictionContactProblem _numerics_problem;93,3752
+  virtual ~GlobalRollingFrictionContact(112,4376
+  inline int getGlobalRollingFrictionContactDim(120,4555
+  inline size_t getGlobalSizeOutput(129,4727
+  inline SP::MuStorage mur(138,4933
+  inline double getMur(147,5158
+
+OSNSMatrixProjectOnConstraints.hpp,184
+#define OSNSMPROJECTONCONSTRAINT_H23,857
+class OSNSMatrixProjectOnConstraints 93,3255
+  OSNSMatrixProjectOnConstraints(101,3416
+  using OSNSMatrix::updateSizeAndPositions;103,3456
+
+OneStepIntegratorTypes.hpp,391
+#define OSITYPES_HPP24,822
+namespace OSI27,887
+enum TYPES31,947
+  EULERMOREAUOSI,34,988
+  MOREAUJEANOSI,36,1034
+  MOREAUJEANGOSI,38,1063
+  LSODAROSI,40,1135
+  HEM5OSI,42,1186
+  MOREAUDIRECTPROJECTIONOSI,44,1241
+  MOREAUCOMBINEDPROJECTIONOSI,46,1316
+  D1MINUSLINEAROSI,48,1407
+  SCHATZMANPAOLIOSI,50,1459
+  ZOHOSI,52,1508
+  NEWMARKALPHAOSI,54,1546
+  MOREAUJEANBILBAOOSI56,1593
+
+NewMarkAlphaOSI.cpp,1322
+NewMarkAlphaOSI::NewMarkAlphaOSI(35,1202
+NewMarkAlphaOSI::NewMarkAlphaOSI(52,1759
+const SimpleMatrix NewMarkAlphaOSI::getW(getW69,2348
+std::shared_ptr<siconos::algebra::SimpleMatrix> NewMarkAlphaOSI::W(W76,2731
+void NewMarkAlphaOSI::initializeIterationMatrixW(initializeIterationMatrixW83,3120
+void NewMarkAlphaOSI::computeW(computeW101,3950
+double NewMarkAlphaOSI::computeResidu(computeResidu158,5769
+void NewMarkAlphaOSI::computeFreeState(computeFreeState256,9576
+void NewMarkAlphaOSI::computeFreeOutput(computeFreeOutput300,11244
+void NewMarkAlphaOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS411,16078
+void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction469,18991
+void NewMarkAlphaOSI::prepareNewtonIteration(prepareNewtonIteration576,23024
+void NewMarkAlphaOSI::prediction(prediction596,23814
+void NewMarkAlphaOSI::correction(correction654,26296
+void NewMarkAlphaOSI::integrate(integrate708,28913
+void NewMarkAlphaOSI::updateState(updateState714,29214
+void NewMarkAlphaOSI::computeCoefsDenseOutput(computeCoefsDenseOutput743,30362
+void NewMarkAlphaOSI::prepareEventLocalization(prepareEventLocalization826,34385
+void NewMarkAlphaOSI::DenseOutputallDSs(DenseOutputallDSs839,34900
+void NewMarkAlphaOSI::display(display899,37678
+
+TimeDiscretisationEventNoSaveInMemory.hpp,108
+#define TIMEDISCRETISATIONEVENTNOSAVEINMEMORY_H22,779
+class TimeDiscretisationEventNoSaveInMemory 31,1024
+
+GenericMechanical.hpp,135
+#define GENERICMECHANICAL_H22,770
+class GenericMechanical 49,1948
+  GenericMechanicalProblem *_pnumerics_GMP;_pnumerics_GMP54,2050
+
+GlobalFrictionContact.cpp,1274
+GlobalFrictionContact::GlobalFrictionContact(45,1463
+GlobalFrictionContact::GlobalFrictionContact(51,1748
+void GlobalFrictionContact::initVectorsMemory(initVectorsMemory68,2140
+void GlobalFrictionContact::initialize(initialize90,2594
+SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactProblem(globalFrictionContactProblem118,3374
+GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProblemPtr(globalFrictionContactProblemPtr135,4034
+bool GlobalFrictionContact::checkCompatibleNSLaw(checkCompatibleNSLaw153,4677
+bool GlobalFrictionContact::preCompute(preCompute179,5507
+    typedef std::unordered_map<std::shared_ptr<DynamicalSystem>, SiconosMatrix*> dsMatMap;217,6857
+    typedef std::unordered_map<std::shared_ptr<DynamicalSystem>, size_t> dsPosMap;218,6948
+    typedef std::map<std::shared_ptr<DynamicalSystem>, SiconosMatrix*> dsMatMap;220,7037
+    typedef std::map<std::shared_ptr<DynamicalSystem>, size_t> dsPosMap;221,7118
+int GlobalFrictionContact::compute(compute385,12839
+int GlobalFrictionContact::solve(solve406,13204
+void GlobalFrictionContact::postCompute(postCompute421,13578
+void GlobalFrictionContact::display(display494,16482
+void GlobalFrictionContact::updateMu(updateMu540,18106
+
+EventDriven.cpp,1705
+#define DEFAULT_TOL_ED 43,1260
+EventDriven::EventDriven(48,1429
+EventDriven::EventDriven(60,1849
+double EventDriven::_TOL_ED 72,2253
+void EventDriven::insertIntegrator(insertIntegrator77,2303
+void EventDriven::updateIndexSet(updateIndexSet92,2771
+void EventDriven::updateIndexSetsWithDoubleCondition(updateIndexSetsWithDoubleCondition196,6719
+void EventDriven::initOSNS(initOSNS240,8115
+void EventDriven::initOSIs(initOSIs311,11283
+void EventDriven::initOSIRhs(initOSIRhs316,11318
+void EventDriven::firstInitialize(firstInitialize343,12282
+void EventDriven::initialize(initialize390,13809
+void EventDriven::computef(computef405,14172
+void EventDriven::computeJacobianfx(computeJacobianfx477,16790
+unsigned int EventDriven::computeSizeOfg(computeSizeOfg537,19032
+void EventDriven::computeg(computeg543,19112
+void EventDriven::updateImpactState(updateImpactState632,21668
+void EventDriven::updateSmoothState(updateSmoothState643,21934
+void EventDriven::updateState(updateState653,22267
+void EventDriven::updateOutput(updateOutput666,22449
+void EventDriven::advanceToEvent(advanceToEvent673,22640
+double EventDriven::computeResiduConstraints(computeResiduConstraints855,29632
+void EventDriven::prepareNewtonIteration(prepareNewtonIteration903,31312
+bool EventDriven::newtonCheckConvergence(newtonCheckConvergence943,32776
+void EventDriven::predictionNewtonIteration(predictionNewtonIteration954,33074
+void EventDriven::correctionNewtonIteration(correctionNewtonIteration982,34225
+void EventDriven::newtonSolve(newtonSolve1002,34896
+double EventDriven::detectEvents(detectEvents1049,36513
+void EventDriven::LocalizeFirstEvent(LocalizeFirstEvent1149,39614
+
+MoreauJeanDirectProjectionOSI.cpp,1535
+#define FIRSTWAY_ACTIVATION30,983
+#define SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD 40,1204
+#define SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD 41,1263
+#define SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD 42,1320
+#define SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD 43,1381
+MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(46,1442
+MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(59,1999
+void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS72,2577
+void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction108,4101
+void MoreauJeanDirectProjectionOSI::computeFreeState(computeFreeState193,6654
+bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(addInteractionInIndexSet199,6778
+bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet204,6975
+bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(addInteractionInIndexSet212,7217
+bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet244,8474
+bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(addInteractionInIndexSet276,9596
+bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet298,10556
+bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(addInteractionInIndexSet321,11596
+bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet342,12441
+
+EulerMoreauOSI.cpp,2073
+EulerMoreauOSI::EulerMoreauOSI(42,1446
+EulerMoreauOSI::EulerMoreauOSI(54,1768
+const SimpleMatrix EulerMoreauOSI::getW(getW67,2069
+std::shared_ptr<siconos::algebra::SimpleMatrix> EulerMoreauOSI::W(W76,2467
+const SimpleMatrix EulerMoreauOSI::getWBoundaryConditions(getWBoundaryConditions83,2720
+SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(WBoundaryConditions93,3271
+void EulerMoreauOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS99,3547
+void EulerMoreauOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction127,4918
+void EulerMoreauOSI::initializeIterationMatrixW(initializeIterationMatrixW268,11052
+void EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(initializeIterationMatrixWBoundaryConditions323,13231
+void EulerMoreauOSI::computeWBoundaryConditions(computeWBoundaryConditions342,13974
+void EulerMoreauOSI::computeW(computeW360,14691
+void EulerMoreauOSI::computeKhat(computeKhat447,17307
+double EulerMoreauOSI::computeResidu(computeResidu463,17913
+void EulerMoreauOSI::computeFreeState(computeFreeState668,25337
+void EulerMoreauOSI::prepareNewtonIteration(prepareNewtonIteration800,30517
+struct EulerMoreauOSI::_NSLEffectOnFreeOutput 875,33271
+  using SiconosVisitor::visit;877,33343
+  OneStepNSProblem * _osnsp;879,33375
+  std::shared_ptr<siconos::modeling::Interaction> _inter;880,33404
+  _NSLEffectOnFreeOutput(882,33463
+  void visit(885,33600
+  void visit(889,33662
+void EulerMoreauOSI::computeFreeOutput(computeFreeOutput897,33754
+void EulerMoreauOSI::integrate(integrate1084,39787
+void EulerMoreauOSI::updateState(updateState1103,40451
+void EulerMoreauOSI::display(display1175,43012
+void EulerMoreauOSI::updateOutput(updateOutput1194,43853
+void EulerMoreauOSI::updateInput(updateInput1203,44128
+void EulerMoreauOSI::updateOutput(updateOutput1212,44399
+void EulerMoreauOSI::updateInput(updateInput1362,50693
+double EulerMoreauOSI::computeResiduOutput(computeResiduOutput1456,54198
+double EulerMoreauOSI::computeResiduInput(computeResiduInput1474,54845
+
+TimeSteppingD1Minus.cpp,546
+void TimeSteppingD1Minus::initOSNS(initOSNS49,1375
+TimeSteppingD1Minus::TimeSteppingD1Minus(68,1846
+TimeSteppingD1Minus::~TimeSteppingD1Minus(~TimeSteppingD1Minus73,2017
+void TimeSteppingD1Minus::updateIndexSet(updateIndexSet77,2066
+void TimeSteppingD1Minus::run(run162,5291
+void TimeSteppingD1Minus::advanceToEvent(advanceToEvent176,5708
+void TimeSteppingD1Minus::updateInput(updateInput257,8356
+void TimeSteppingD1Minus::computeResidu(computeResidu312,10174
+void TimeSteppingD1Minus::computeFreeState(computeFreeState318,10319
+
+QP.cpp,65
+int QP::compute(compute21,711
+void QP::display(display27,806
+
+D1MinusLinearOSIHalfExplicitVelocityLevelOSI.cpp,605
+static void null_deleter(44,1431
+template <typename T> static std::shared_ptr<T> ptr(45,1482
+double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel(computeResiduHalfExplicitVelocityLevel50,1616
+void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(computeFreeOutputHalfExplicitVelocityLevel687,25934
+bool D1MinusLinearOSI::addInteractionInIndexSetHalfExplicitVelocityLevel(addInteractionInIndexSetHalfExplicitVelocityLevel848,31571
+bool D1MinusLinearOSI::removeInteractionFromIndexSetHalfExplicitVelocityLevel(removeInteractionFromIndexSetHalfExplicitVelocityLevel886,32914
+
+AVI.hpp,103
+#define AVI_H24,775
+class AVI 48,1524
+  SP::AffineVariationalInequalities _numerics_problem;56,1659
+
+TimeSteppingCombinedProjection.cpp,828
+TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(47,1257
+TimeSteppingCombinedProjection::~TimeSteppingCombinedProjection(~TimeSteppingCombinedProjection77,2184
+struct TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP 83,2257
+  using SiconosVisitor::visit;86,2348
+  TimeSteppingCombinedProjection * _parent;88,2380
+  _SimulationEffectOnOSNSP(90,2425
+  void visit(96,2554
+  void visit(102,2710
+  void visit(106,2807
+void TimeSteppingCombinedProjection::initOSNS(initOSNS114,2908
+void TimeSteppingCombinedProjection::advanceToEventOLD(advanceToEventOLD143,3825
+void TimeSteppingCombinedProjection::advanceToEvent(advanceToEvent156,3976
+void TimeSteppingCombinedProjection::computeCriteria(computeCriteria658,20601
+void TimeSteppingCombinedProjection::updateIndexSet(updateIndexSet754,23795
+
+NonSmoothEvent.hpp,62
+#define NONSMOOTHEVENT_H22,748
+class NonSmoothEvent 33,1028
+
+MoreauJeanCombinedProjectionOSI.cpp,500
+MoreauJeanCombinedProjectionOSI::MoreauJeanCombinedProjectionOSI(36,1064
+void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS46,1324
+void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction77,2622
+bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(addInteractionInIndexSet160,5179
+bool MoreauJeanCombinedProjectionOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet193,6327
+
+TimeDiscretisation.hpp,460
+#define TIMEDISCRETISATION_H23,811
+typedef std::vector<double> TkVector;30,967
+class TimeDiscretisation66,2769
+  double _h;72,2903
+  TkVector _tkV;75,3021
+  double _t0;78,3062
+  mpf_t _hgmp;81,3144
+  mpf_t _tkp1;84,3228
+  mpf_t _tk;87,3312
+  mpf_t _t0gmp;90,3383
+  inline double getT0(105,3742
+  inline const mpf_t* currentTimeStep(165,5224
+  inline bool hConst(174,5406
+  inline bool hGmp(183,5614
+  inline const TkVector& getTkVector(199,5935
+
+LsodarOSI.cpp,1598
+int LsodarOSI::count_NST 45,1367
+int LsodarOSI::count_NFE 46,1397
+SP::LsodarOSI global_object;51,1581
+extern "C" void LsodarOSI_f_wrapper(55,1831
+extern "C" void LsodarOSI_g_wrapper(62,2208
+extern "C" void LsodarOSI_jacobianf_wrapper(69,2648
+LsodarOSI::LsodarOSI(74,2888
+void LsodarOSI::setTol(setTol98,3545
+void LsodarOSI::setMinMaxStepSizes(setMinMaxStepSizes121,4651
+void LsodarOSI::setMaxNstep(setMaxNstep128,4810
+void LsodarOSI::setTol(setTol134,4931
+void LsodarOSI::setMaxOrder(setMaxOrder141,5102
+void LsodarOSI::updateData(updateData148,5278
+void LsodarOSI::fillXWork(fillXWork176,6221
+void LsodarOSI::computeRhs(computeRhs182,6421
+void LsodarOSI::computeJacobianRhs(computeJacobianRhs217,7907
+void LsodarOSI::f(f234,8481
+void LsodarOSI::g(g239,8668
+void LsodarOSI::jacobianfx(jacobianfx244,8878
+void LsodarOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS250,9130
+void LsodarOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction298,10659
+void LsodarOSI::initialize(initialize401,14203
+void LsodarOSI::integrate(integrate480,18018
+void LsodarOSI::updateState(updateState577,22007
+struct LsodarOSI::_NSLEffectOnFreeOutput 605,22979
+  using SiconosVisitor::visit;607,23046
+  OneStepNSProblem * _osnsp;609,23078
+  std::shared_ptr<siconos::modeling::Interaction> _inter;610,23107
+  InteractionProperties& _interProp;611,23165
+  _NSLEffectOnFreeOutput(612,23202
+  void visit(615,23396
+  void visit(629,23856
+void LsodarOSI::computeFreeOutput(computeFreeOutput637,23959
+void LsodarOSI::display(display763,28713
+
+D1MinusLinearOSI.hpp,1428
+#define D1MINUSLINEAR_H25,815
+const double DEFAULT_TOL_D1MINUS 127,4026
+class D1MinusLinearOSI 129,4068
+  struct _NSLEffectOnFreeOutput 133,4162
+    using SiconosVisitor::visit;135,4221
+    OneStepNSProblem *_osnsp;_osnsp137,4255
+    std::shared_ptr<siconos::modeling::Interaction> _inter;138,4285
+    InteractionProperties &_interProp;_interProp139,4345
+    _NSLEffectOnFreeOutput(140,4384
+    void visit(145,4656
+  bool _isThereImpactInTheTimeStep;149,4761
+  unsigned int _typeOfD1MinusLinearOSI;150,4797
+  enum ListOfTypeOfD1MinusLinearOSI 155,4915
+    halfexplicit_acceleration_level,156,4953
+    halfexplicit_acceleration_level_full,157,4990
+    explicit_velocity_level,158,5032
+    halfexplicit_velocity_level,159,5061
+    numberOfTypeOfD1MinusLinearOSI160,5094
+  enum D1MinusLinearOSI_ds_workVector_id 163,5135
+    RESIDU_FREE,164,5178
+    FREE,165,5195
+    FREE_TDG,166,5205
+    WORK_LENGTH167,5219
+  enum D1MinusLinearOSI_interaction_workVector_id 170,5241
+    OSNSP_RHS,171,5293
+    WORK_INTERACTION_LENGTH172,5308
+  enum D1MinusLinearOSI_workBlockVector_id 175,5342
+  enum D1MinusLinearOSI_workBlockVector_id { xfree,175,5342
+  enum D1MinusLinearOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH 175,5342
+  virtual ~D1MinusLinearOSI(192,5922
+  unsigned int typeOfD1MinusLinearOSI(212,6726
+  void integrate(300,10656
+  void display(368,13604
+  void prepareNewtonIteration(376,13777
+
+MoreauJeanBilbaoOSI.cpp,1506
+MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI(41,1210
+void MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS51,1415
+void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction79,2769
+void MoreauJeanBilbaoOSI::initialize_nonsmooth_problems(initialize_nonsmooth_problems152,5526
+void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(_initialize_iteration_matrix159,5790
+void MoreauJeanBilbaoOSI::compute_parameters(compute_parameters214,8281
+double MoreauJeanBilbaoOSI::computeResidu(computeResidu233,9041
+void MoreauJeanBilbaoOSI::computeFreeState(computeFreeState238,9103
+struct MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput 279,11002
+  using SiconosVisitor::visit;281,11079
+  OneStepNSProblem * _osnsp;283,11111
+  Interaction& _inter;284,11140
+  InteractionProperties& _interProp;285,11163
+  _NSLEffectOnFreeOutput(286,11200
+  void visit(289,11359
+void MoreauJeanBilbaoOSI::computeFreeOutput(computeFreeOutput304,11769
+void MoreauJeanBilbaoOSI::integrate(integrate348,13564
+void MoreauJeanBilbaoOSI::updatePosition(updatePosition353,13762
+void MoreauJeanBilbaoOSI::updateState(updateState372,14377
+void MoreauJeanBilbaoOSI::display(display412,16054
+void MoreauJeanBilbaoOSI::prepareNewtonIteration(prepareNewtonIteration434,16886
+bool MoreauJeanBilbaoOSI::addInteractionInIndexSet(addInteractionInIndexSet443,17078
+bool MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(removeInteractionFromIndexSet472,18233
+
+Hem5OSI.cpp,1818
+#define INITIAL_GUESS_TS 42,1339
+class Hem5OSI_impl46,1451
+  Hem5OSI_impl(49,1480
+  Hem5OSI *hem5osi;hem5osi50,1523
+  fprobfunction fprob;52,1562
+  soloutfunction solout;53,1585
+SP::Hem5OSI hem5_global_object;60,1774
+extern "C" fprobfunction Hem5OSI_fprob_wrapper;63,1904
+void Hem5OSI_fprob_wrapper(65,1953
+extern "C" soloutfunction Hem5OSI_solout_wrapper;97,3632
+void Hem5OSI_solout_wrapper(98,3682
+Hem5OSI::Hem5OSI(125,4517
+void Hem5OSI::setTol(setTol141,4984
+void Hem5OSI::setTol(setTol148,5256
+void Hem5OSI::setMaxStepSize(setMaxStepSize156,5544
+void Hem5OSI::setMaxNstep(setMaxNstep161,5622
+void Hem5OSI::updateIntData(updateIntData166,5709
+void Hem5OSI::updateData(updateData230,8024
+void Hem5OSI::fillqWork(fillqWork256,8844
+void Hem5OSI::fillvWork(fillvWork263,9013
+void Hem5OSI::computeRhs(computeRhs270,9182
+void Hem5OSI::computeJacobianRhs(computeJacobianRhs281,9499
+void Hem5OSI_impl::fprob(fprob292,9851
+void Hem5OSI::initializeWorkVectorsForDS(initializeWorkVectorsForDS500,17153
+void Hem5OSI::initializeWorkVectorsForInteraction(initializeWorkVectorsForInteraction544,18440
+void Hem5OSI::initialize(initialize639,21761
+void Hem5OSI_impl::solout(solout659,22319
+unsigned int Hem5OSI::numberOfConstraints(numberOfConstraints674,22871
+void Hem5OSI::integrate(integrate691,23411
+void Hem5OSI::updateState(updateState920,31286
+struct Hem5OSI::_NSLEffectOnFreeOutput 948,32254
+  using SiconosVisitor::visit;950,32319
+  OneStepNSProblem * _osnsp;952,32351
+  std::shared_ptr<siconos::modeling::Interaction> _inter;953,32380
+  InteractionProperties& _interProp;954,32438
+  _NSLEffectOnFreeOutput(955,32475
+  void visit(958,32670
+  void visit(972,33128
+void Hem5OSI::computeFreeOutput(computeFreeOutput979,33230
+void Hem5OSI::display(display1101,37727
+
+NewMarkAlphaOSI.hpp,1457
+#define NEWMARKALPHAOSI_H22,792
+class NewMarkAlphaOSI 39,1313
+  double _beta,44,1493
+  double _beta, _gamma,44,1493
+  double _beta, _gamma, _alpha_m,44,1493
+  double _beta, _gamma, _alpha_m, _alpha_f;44,1493
+  unsigned int _orderDenseOutput;47,1587
+  bool _IsVelocityLevel;53,1852
+  NewMarkAlphaOSI(58,1915
+  enum NewMarkAlphaOSI_ds_workVector_id 61,1947
+    RESIDU_FREE,62,1989
+    FREE,63,2006
+    ACCE_LIKE,64,2016
+    ACCE_MEMORY,65,2031
+    WORK_LENGTH66,2048
+  enum NewMarkAlphaOSI_interaction_workVector_id 69,2070
+    OSNSP_RHS,70,2121
+    WORK_INTERACTION_LENGTH71,2136
+  enum NewMarkAlphaOSI_workBlockVector_id 74,2170
+  enum NewMarkAlphaOSI_workBlockVector_id { xfree,74,2170
+  enum NewMarkAlphaOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH 74,2170
+  enum NewMarkAlphaOSI_interaction_workMat_id 76,2243
+    DENSE_OUTPUT_COEFFICIENTS,77,2291
+    MAT_WORK_LENGTH78,2322
+  virtual ~NewMarkAlphaOSI(99,2895
+  inline void setBeta(106,3033
+  inline void setGamma(111,3181
+  inline void setAlpha_m(117,3352
+  inline void setAlpha_f(123,3531
+  inline void setParametersFromRho_infty(129,3760
+  inline double getBeta(140,4065
+  inline double getGamma(145,4162
+  inline double getAlpha_m(150,4263
+  inline double getAlpha_f(156,4369
+  inline unsigned int getOrderDenseOutput(160,4507
+  inline void setFlagVelocityLevel(165,4646
+  inline bool getFlagVelocityLevel(170,4782
+  unsigned int numberOfIndexSets(233,7172
+
+OSNSMatrix.cpp,672
+OSNSMatrix::OSNSMatrix(41,1342
+OSNSMatrix::OSNSMatrix(48,1536
+OSNSMatrix::OSNSMatrix(81,2405
+OSNSMatrix::OSNSMatrix(115,3385
+OSNSMatrix::OSNSMatrix(127,3819
+unsigned OSNSMatrix::updateSizeAndPositions(updateSizeAndPositions135,4081
+unsigned OSNSMatrix::updateSizeAndPositions(updateSizeAndPositions164,5190
+void OSNSMatrix::fillM(fillM189,5991
+void OSNSMatrix::convert(convert290,9726
+void OSNSMatrix::fillW(fillW334,10923
+void OSNSMatrix::fillWinverse(fillWinverse389,12448
+void OSNSMatrix::fillH(fillH468,14774
+void OSNSMatrix::fillHtrans(fillHtrans483,15394
+void OSNSMatrix::computeM(computeM585,19066
+void OSNSMatrix::display(display614,19718
+
+SchatzmanPaoliOSI.hpp,1095
+#define SCHATZMANPAOLIOSI_H23,792
+const unsigned int SCHATZMANPAOLISTEPSINMEMORY 28,883
+class SchatzmanPaoliOSI 56,1802
+  enum SchatzmanPaoliOSI_ds_workVector_id 58,1863
+    RESIDU_FREE,59,1907
+    FREE,60,1924
+    LOCAL_BUFFER,61,1934
+    WORK_LENGTH62,1952
+  enum SchatzmanPaoliOSI_interaction_workVector_id 65,1974
+    OSNSP_RHS,66,2027
+    WORK_INTERACTION_LENGTH67,2042
+  enum SchatzmanPaoliOSI_workBlockVector_id 70,2076
+  enum SchatzmanPaoliOSI_workBlockVector_id { xfree,70,2076
+  enum SchatzmanPaoliOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH 70,2076
+  double _theta;78,2326
+  double _gamma;83,2505
+  bool _useGamma;87,2591
+  bool _useGammaForRelation;91,2678
+  SchatzmanPaoliOSI(100,2840
+  virtual ~SchatzmanPaoliOSI(118,3214
+  inline double theta(177,5109
+  inline void setTheta(183,5225
+  inline double gamma(191,5358
+  inline void setGamma(197,5474
+  inline bool useGamma(209,5646
+  inline void setUseGamma(215,5790
+  inline bool useGammaForRelation(221,5941
+  inline void setUseGammaForRelation(227,6135
+  unsigned int numberOfIndexSets(259,7265
+
+Equality.cpp,296
+Equality::Equality(Equality27,886
+Equality::Equality(33,1060
+bool Equality::checkCompatibleNSLaw(checkCompatibleNSLaw37,1133
+int Equality::compute(compute52,1634
+void Equality::initialize(initialize85,2479
+void Equality::updateM(updateM93,2753
+void Equality::display(display114,3170
+
+OSNSMatrixProjectOnConstraints.cpp,436
+OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(39,1163
+OSNSMatrixProjectOnConstraints::~OSNSMatrixProjectOnConstraints(~OSNSMatrixProjectOnConstraints44,1304
+unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(updateSizeAndPositions48,1375
+void OSNSMatrixProjectOnConstraints::fillM(fillM87,2828
+unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(computeSizeForProjection181,5838
+
+GlobalRollingFrictionContact.cpp,1335
+GlobalRollingFrictionContact::GlobalRollingFrictionContact(43,1408
+GlobalRollingFrictionContact::GlobalRollingFrictionContact(49,1714
+void GlobalRollingFrictionContact::initialize(initialize61,2156
+SP::GlobalRollingFrictionContactProblem GlobalRollingFrictionContact::globalRollingFrictionContactProblem(globalRollingFrictionContactProblem75,2547
+GlobalRollingFrictionContactProblem *GlobalRollingFrictionContact::globalRollingFrictionContactProblemPtr(globalRollingFrictionContactProblemPtr89,3154
+bool GlobalRollingFrictionContact::checkCompatibleNSLaw(checkCompatibleNSLaw104,3737
+bool GlobalRollingFrictionContact::preCompute(preCompute129,4582
+    typedef std::unordered_map<std::shared_ptr<DynamicalSystem>, SiconosMatrix*> dsMatMap;168,5987
+    typedef std::unordered_map<std::shared_ptr<DynamicalSystem>, size_t> dsPosMap;169,6078
+    typedef std::map<std::shared_ptr<DynamicalSystem>, SiconosMatrix*> dsMatMap;171,6167
+    typedef std::map<std::shared_ptr<DynamicalSystem>, size_t> dsPosMap;172,6248
+int GlobalRollingFrictionContact::compute(compute294,10081
+int GlobalRollingFrictionContact::solve(solve314,10565
+void GlobalRollingFrictionContact::updateMur(updateMur330,10971
+void GlobalRollingFrictionContact::updateMu(updateMu341,11396
+void GlobalRollingFrictionContact::display(display352,11819
+
+GlobalFrictionContact.hpp,798
+#define GlobalFrictionContact_H22,780
+typedef int (*GFC3D_Driver)GFC3D_Driver31,1068
+class GlobalFrictionContact 76,3151
+  int _contactProblemDim 87,3401
+  size_t _sizeGlobalOutput 90,3476
+  std::shared_ptr<siconos::algebra::SiconosVector> _globalVelocities;93,3589
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;96,3703
+  SP::MuStorage _mu;99,3790
+  GFC3D_Driver _gfc_driver;102,3899
+  GlobalFrictionContactProblem _numerics_problem;104,3928
+  virtual ~GlobalFrictionContact(123,4518
+  inline int getGlobalFrictionContactDim(131,4683
+  inline size_t getGlobalSizeOutput(140,4848
+  inline std::shared_ptr<siconos::algebra::SiconosVector> globalVelocities(149,5010
+  inline void setGlobalVelocities(158,5223
+  inline SP::MuStorage mu(169,5480
+  inline double getMu(178,5702
+
+GenericMechanical.cpp,650
+GenericMechanical::GenericMechanical(43,1495
+GenericMechanical::GenericMechanical(52,1789
+void GenericMechanical::initialize(initialize63,2248
+bool GenericMechanical::checkCompatibleNSLaw(checkCompatibleNSLaw73,2572
+void GenericMechanical::computeDiagonalInteractionBlock(computeDiagonalInteractionBlock79,2747
+void GenericMechanical::computeInteractionBlock(computeInteractionBlock160,5667
+int GenericMechanical::compute(compute165,5805
+void GenericMechanical::display(display228,7617
+void  GenericMechanical::updateInteractionBlocks(updateInteractionBlocks235,7758
+GenericMechanical::~GenericMechanical(~GenericMechanical246,8097
+
+TimeDiscretisationEventNoSaveInMemory.cpp,432
+TimeDiscretisationEventNoSaveInMemory::TimeDiscretisationEventNoSaveInMemory(25,861
+TimeDiscretisationEventNoSaveInMemory::TimeDiscretisationEventNoSaveInMemory(28,966
+TimeDiscretisationEventNoSaveInMemory::~TimeDiscretisationEventNoSaveInMemory(~TimeDiscretisationEventNoSaveInMemory31,1096
+void TimeDiscretisationEventNoSaveInMemory::process(process34,1180
+void TimeDiscretisationEventNoSaveInMemory::update(update37,1260
+
+EventDriven.hpp,1150
+#define EventDriven_H22,755
+class EventDriven 34,1056
+  int _istate;43,1263
+  static double _TOL_ED;56,1520
+  bool _isNewtonConverge;59,1624
+  unsigned int _newtonMaxIteration;62,1702
+  unsigned int _newtonNbIterations;65,1793
+  double _newtonResiduDSMax;68,1881
+  double _newtonResiduYMax;71,1968
+  double _newtonTolerance;74,2054
+  unsigned int _localizeEventMaxIter;77,2139
+  unsigned int _numberOfOneStepNSproblems;80,2245
+  std::shared_ptr<InteractionsGraph> _indexSet0;83,2349
+  std::shared_ptr<DynamicalSystemsGraph> _DSG0;86,2475
+  EventDriven(107,3057
+  inline void setIstate(126,3421
+  inline double istate(131,3552
+  inline void setToleranceED(137,3671
+  inline double toleranceED(142,3791
+  bool isNewtonConverge(148,3932
+  unsigned int getNewtonNbIterations(154,4104
+  void setNewtonMaxIteration(160,4283
+  void setLocalizeEventsMaxIteration(169,4501
+  double newtonMaxIteration(178,4693
+  unsigned int LocalizeEventsMaxIteration(184,4887
+  double newtonResiduDSMax(190,5054
+  double newtonResiduYMax(196,5202
+  void setNewtonTolerance(202,5343
+  double newtonTolerance(208,5477
+  void updateInput(277,7844
+
+SimulationTypeDef.hpp,783
+#define SimulationTypedef_H24,806
+typedef std::vector<unsigned int> IndexInt;35,1067
+typedef std::set<SP::OneStepIntegrator> OSISet;41,1234
+typedef OSISet::iterator OSIIterator;45,1341
+typedef std::vector<SP::OneStepNSProblem> OneStepNSProblems;50,1464
+typedef OneStepNSProblems::iterator OSNSIterator;53,1568
+#define DEFAULT_TOLERANCE 59,1756
+enum SICONOS_OSNSP61,1801
+  SICONOS_OSNSP_DEFAULT 63,1822
+enum SICONOS_OSNSP_ED65,1853
+  SICONOS_OSNSP_ED_SMOOTH_ACC,67,1877
+  SICONOS_OSNSP_ED_IMPACT,68,1908
+  SICONOS_OSNSP_ED_SMOOTH_POS69,1935
+enum SICONOS_OSNSP_TS71,1968
+  SICONOS_OSNSP_TS_VELOCITY 73,1992
+  SICONOS_OSNSP_TS_POS 74,2025
+const int SICONOS_NB_OSNSP_TS 76,2055
+const int SICONOS_NB_OSNSP_TSP 77,2090
+#define TD_EVENT 80,2150
+#define NS_EVENT 81,2169
+
+EulerMoreauOSI.hpp,1393
+#define EulerMoreauOSI_H22,751
+class EulerMoreauOSI 117,4265
+  double _theta;123,4486
+  double _gamma;128,4666
+  bool _useGamma;132,4751
+  bool _useGammaForRelation;136,4837
+  EulerMoreauOSI(146,5000
+  enum EulerMoreauOSI_ds_workVector_id 149,5031
+    RESIDU,150,5072
+    RESIDU_FREE,151,5084
+    FREE,152,5101
+    X_PARTIAL_NS_FOR_RELATION,153,5111
+    DELTA_X_FOR_RELATION,154,5142
+    LOCAL_BUFFER,155,5168
+    WORK_LENGTH156,5186
+  enum EulerMoreauOSI_interaction_workVector_id 159,5208
+    OSNSP_RHS,160,5258
+    VEC_X,161,5273
+    H_ALPHA,162,5284
+    VEC_RESIDU_Y,163,5297
+    VEC_RESIDU_R,164,5315
+    YOLD,165,5333
+    LAMBDAOLD,166,5343
+    WORK_INTERACTION_LENGTH167,5358
+  enum EulerMoreauOSI_interaction_workBlockVector_id 170,5392
+    XFREE,171,5447
+    X_PARTIAL_NS,172,5458
+    DELTA_X,173,5476
+    G_ALPHA,174,5489
+    BLOCK_WORK_LENGTH175,5502
+  enum EulerMoreauOSI_interaction_workMat_id 178,5530
+    MAT_KHAT,179,5577
+    MAT_KTILDE,180,5591
+    MAT_WORK_LENGTH181,5607
+  virtual ~EulerMoreauOSI(199,5963
+  inline double theta(243,7343
+  inline void setTheta(249,7459
+  inline double gamma(257,7592
+  inline void setGamma(263,7708
+  inline bool useGamma(275,7880
+  inline void setUseGamma(281,8053
+  inline bool useGammaForRelation(287,8184
+  inline void setUseGammaForRelation(293,8378
+  unsigned int numberOfIndexSets(331,9704
+
+MoreauJeanDirectProjectionOSI.hpp,855
+#define MOREAUPROJECTONCONSTRAINTSOSI_H24,836
+const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY 30,968
+class MoreauJeanDirectProjectionOSI 49,1677
+  MoreauJeanDirectProjectionOSI(55,1837
+  double _deactivateYPosThreshold;57,1875
+  double _deactivateYVelThreshold;58,1910
+  double _activateYPosThreshold;59,1945
+  double _activateYVelThreshold;60,1978
+  virtual ~MoreauJeanDirectProjectionOSI(78,2402
+  inline double deactivateYPosThreshold(84,2505
+  inline void setDeactivateYPosThreshold(86,2586
+  inline double deactivateYVelThreshold(91,2695
+  inline void setDeactivateYVelThreshold(93,2776
+  inline double activateYPosThreshold(98,2885
+  inline void setActivateYPosThreshold(100,2962
+  inline double activateYVelThreshold(102,3059
+  inline void setActivateYVelThreshold(104,3136
+  unsigned int numberOfIndexSets(129,4151
+
+QP.hpp,615
+#define QP_H21,718
+class QP 31,852
+  SP::SiconosMatrix _Q;39,978
+  std::shared_ptr<siconos::algebra::SiconosVector> _p;42,1050
+  ~QP(53,1283
+  inline const SimpleMatrix getQ(62,1403
+  inline SP::SiconosMatrix q(71,1533
+  inline void setQ(80,1679
+  inline void setQPtr(89,1834
+  inline const SiconosVector getP(100,2128
+  inline std::shared_ptr<siconos::algebra::SiconosVector> p(109,2301
+  inline void setP(118,2478
+  inline void setPPtr(127,2635
+  void computeInteractionBlock(146,3052
+  void computeDiagonalInteractionBlock(151,3150
+  virtual bool preCompute(156,3256
+  void postCompute(162,3341
+
+TimeSteppingD1Minus.hpp,103
+#define TIMESTEPPINGD1MINUS_H24,771
+class TimeSteppingD1Minus 33,1020
+  TimeSteppingD1Minus(39,1153
+
+MatrixIntegrator.cpp,256
+MatrixIntegrator::MatrixIntegrator(37,1114
+MatrixIntegrator::MatrixIntegrator(44,1359
+MatrixIntegrator::MatrixIntegrator(MatrixIntegrator55,1801
+void MatrixIntegrator::commonInit(commonInit62,2034
+void MatrixIntegrator::integrate(integrate102,3362
+
+MLCP.cpp,515
+MLCP::MLCP(37,1189
+MLCP::MLCP(42,1376
+void  MLCP::reset(reset56,1843
+void MLCP::computeOptions(computeOptions68,2220
+bool MLCP::checkCompatibleNSLaw(checkCompatibleNSLaw111,4190
+void MLCP::computeInteractionBlock(computeInteractionBlock133,4937
+void MLCP::computeDiagonalInteractionBlock(computeDiagonalInteractionBlock149,5670
+int MLCP::solve(solve163,6209
+int MLCP::compute(compute199,7265
+void MLCP::display(display235,8218
+void  MLCP::updateInteractionBlocks(updateInteractionBlocks243,8503
+
+MLCPProjectOnConstraints.cpp,1173
+void MLCPProjectOnConstraints::initOSNSMatrix(initOSNSMatrix43,1423
+MLCPProjectOnConstraints::MLCPProjectOnConstraints(55,1692
+MLCPProjectOnConstraints::MLCPProjectOnConstraints(63,1908
+void MLCPProjectOnConstraints::display(display71,2101
+void MLCPProjectOnConstraints::updateInteractionBlocks(updateInteractionBlocks77,2340
+void MLCPProjectOnConstraints::displayBlocks(displayBlocks305,10749
+void MLCPProjectOnConstraints::updateInteractionBlocksOLD(updateInteractionBlocksOLD382,13540
+void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(computeDiagonalInteractionBlock513,18452
+  void MLCPProjectOnConstraints::computeInteractionBlock(computeInteractionBlock778,29258
+    void MLCPProjectOnConstraints::computeqBlock(computeqBlock992,38989
+    void MLCPProjectOnConstraints::computeq(computeq1009,39886
+    void MLCPProjectOnConstraints::postCompute(postCompute1033,40698
+    void MLCPProjectOnConstraints::postComputeLagrangianR(postComputeLagrangianR1092,42582
+    void MLCPProjectOnConstraints::postComputeNewtonEulerR(postComputeNewtonEulerR1211,47266
+    void MLCPProjectOnConstraints::computeOptions(computeOptions1225,47959
+
+EventsManager.cpp,817
+unsigned long int EventsManager::_GapLimit2Events 29,971
+EventsManager::EventsManager(37,1177
+void EventsManager::initialize(initialize55,1961
+Event& EventsManager::insertEvent(insertEvent61,2078
+Event& EventsManager::insertEvent(insertEvent71,2502
+void EventsManager::noSaveInMemory(noSaveInMemory78,2677
+void EventsManager::preUpdate(preUpdate92,3058
+double EventsManager::startingTime(startingTime116,3670
+double EventsManager::nextTime(nextTime123,3866
+bool EventsManager::needsIntegration(needsIntegration130,4051
+void EventsManager::scheduleNonSmoothEvent(scheduleNonSmoothEvent139,4409
+void EventsManager::processEvents(processEvents190,6103
+void EventsManager::update(update199,6254
+unsigned int EventsManager::insertEv(insertEv242,7598
+void EventsManager::display(display292,8931
+
+EventFactory.cpp,198
+namespace EventFactory25,775
+Registry& Registry::get(get28,801
+void Registry::add(add34,879
+SP::Event Registry::instantiate(instantiate39,968
+Registration::Registration(Registration49,1271
+
+TimeDiscretisationEvent.cpp,306
+TimeDiscretisationEvent::TimeDiscretisationEvent(26,912
+TimeDiscretisationEvent::TimeDiscretisationEvent(29,989
+TimeDiscretisationEvent::~TimeDiscretisationEvent(~TimeDiscretisationEvent32,1091
+void TimeDiscretisationEvent::process(process35,1147
+void TimeDiscretisationEvent::update(update46,1574
+
+LCP.hpp,102
+#define LCP_H23,784
+class LCP 53,1701
+  SP::LinearComplementarityProblem _numerics_problem;60,1855
+
+Event.cpp,287
+double Event::_tick 25,817
+bool Event::_eventCreated 26,853
+Event::Event(28,889
+Event::~Event(~Event37,1164
+void Event::update(update43,1241
+void Event::setTimeDiscretisation(setTimeDiscretisation54,1436
+void Event::setTick(setTick67,1704
+void Event::display(display77,1927
+
+RollingFrictionContact.cpp,700
+RollingFrictionContact::RollingFrictionContact(30,1015
+RollingFrictionContact::RollingFrictionContact(35,1240
+void RollingFrictionContact::initialize(initialize62,1982
+void RollingFrictionContact::updateMu(updateMu106,3521
+SP::RollingFrictionContactProblem RollingFrictionContact::frictionContactProblem(frictionContactProblem121,4096
+RollingFrictionContactProblem *RollingFrictionContact::frictionContactProblemPtr(frictionContactProblemPtr133,4596
+int RollingFrictionContact::solve(solve145,5077
+bool RollingFrictionContact::checkCompatibleNSLaw(checkCompatibleNSLaw159,5371
+int RollingFrictionContact::compute(compute183,6211
+void RollingFrictionContact::display(display216,6897
+
+MoreauJeanGOSI.hpp,263
+#define MoreauJeanGOSI_H22,752
+class MoreauJeanGOSI 33,921
+  enum MoreauJeanGOSI_ds_workVector_id 39,1092
+    RESIDU_FREE,40,1133
+    FREE,41,1150
+    LOCAL_BUFFER,42,1160
+    WORK_LENGTH43,1178
+  MoreauJeanGOSI(55,1493
+  virtual ~MoreauJeanGOSI(61,1667
+
+OneStepNSProblem.cpp,585
+bool OneStepNSProblem::hasInteractions(hasInteractions44,1379
+void OneStepNSProblem::updateInteractionBlocks(updateInteractionBlocks49,1532
+void OneStepNSProblem::displayBlocks(displayBlocks316,11606
+void OneStepNSProblem::initialize(initialize358,12891
+std::shared_ptr<siconos::algebra::SimpleMatrix> OneStepNSProblem::getOSIMatrix(getOSIMatrix373,13436
+void OneStepNSProblem::setSolverId(setSolverId471,17755
+void OneStepNSProblem::setNumericsVerboseMode(setNumericsVerboseMode478,17991
+void OneStepNSProblem::setNumericsVerboseLevel(setNumericsVerboseLevel483,18085
+
+TimeSteppingDirectProjection.hpp,902
+#define TIMESTEPPINGDIRECTPROJECTION_H22,803
+class TimeSteppingDirectProjection 36,1273
+  unsigned int _indexSetLevelForProjection;42,1481
+  unsigned int _nbProjectionIteration;46,1572
+  double _constraintTol;51,1710
+  double _constraintTolUnilateral;56,1836
+  double _maxViolationUnilateral;61,1980
+  double _maxViolationEquality;66,2121
+  unsigned int _projectionMaxIteration;69,2209
+  unsigned int _doProj;72,2309
+  unsigned int _doOnlyProj;73,2333
+  TimeSteppingDirectProjection(97,3242
+  void updateWorldFromDS(101,3342
+  inline unsigned int nbProjectionIteration(105,3440
+  inline void setConstraintTol(107,3522
+  inline void setConstraintTolUnilateral(109,3588
+  inline double maxViolationUnilateral(114,3682
+  inline double maxViolationEquality(116,3760
+  inline void setProjectionMaxIteration(118,3834
+  inline void setDoProj(123,3932
+  inline void setDoOnlyProj(124,3989
+
+InteractionManager.cpp,142
+void InteractionManager::insertNonSmoothLaw(insertNonSmoothLaw10,152
+SP::NonSmoothLaw InteractionManager::nonSmoothLaw(nonSmoothLaw21,593
+
+ExtraAdditionalTerms.hpp,117
+#define ExtraAdditionalTerms_hpp24,844
+struct ExtraAdditionalTerms 29,938
+  virtual ~ExtraAdditionalTerms(59,2184
+
+OneStepIntegrator.hpp,1974
+#define ONESTEPINTEGRATOR_H24,845
+namespace siconos::integrators 36,1180
+namespace SA 38,1214
+class OneStepIntegrator 62,1787
+  OSI::TYPES _integratorType;67,1963
+  std::shared_ptr<DynamicalSystemsGraph> _dynamicalSystemsGraph;75,2307
+  unsigned int _sizeMem;78,2420
+  unsigned int _steps;81,2479
+  unsigned int _levelMinForOutput;86,2608
+  unsigned int _levelMaxForOutput;91,2749
+  unsigned int _levelMinForInput;96,2888
+  unsigned int _levelMaxForInput;101,3026
+  bool _isInitialized;103,3061
+  bool _explicitJacobiansOfRelation;110,3269
+  SP::Simulation _simulation;113,3360
+  OneStepIntegrator(119,3477
+  SP::ExtraAdditionalTerms _extraAdditionalTerms;131,3861
+  OneStepIntegrator(149,4477
+  virtual ~OneStepIntegrator(165,4828
+  inline OSI::TYPES getType(169,4938
+  inline std::shared_ptr<DynamicalSystemsGraph> dynamicalSystemsGraph(177,5225
+  inline void setDynamicalSystemsGraph(185,5430
+  inline unsigned int getSizeMem(195,5701
+  inline SP::Simulation simulation(201,5886
+  inline void setSimulationPtr(207,6057
+  virtual unsigned int levelMinForOutput(213,6282
+  virtual unsigned int levelMaxForOutput(219,6508
+  virtual unsigned int levelMinForInput(225,6733
+  virtual unsigned int levelMaxForInput(231,6956
+  inline bool isInitialized(239,7185
+  inline void setIsInitialized(241,7244
+  bool explicitJacobiansOfRelation(243,7317
+  void setExplicitJacobiansOfRelation(245,7396
+  virtual void initialize_nonsmooth_problems(254,7646
+  virtual void computeInitialNewtonState(286,9039
+  virtual double computeResidu(296,9313
+  virtual void computeFreeState(309,9665
+  virtual void computeFreeOutput(323,10103
+  void updateState(379,12276
+  virtual bool addInteractionInIndexSet(416,13317
+  virtual bool removeInteractionFromIndexSet(430,13736
+  inline SP::ExtraAdditionalTerms extraAdditionalTerms(442,14092
+  inline void setExtraAdditionalTerms(449,14392
+  inline bool checkOSI(459,14714
+  inline bool checkOSI(470,15074
+
+Simulation.cpp,2147
+Simulation::Simulation(47,1418
+Simulation::Simulation(74,2306
+Simulation::~Simulation(~Simulation92,2957
+double Simulation::getTk(getTk99,3079
+double Simulation::getTkp1(getTkp1104,3151
+double Simulation::getTkp2(getTkp2109,3227
+double Simulation::currentTimeStep(currentTimeStep114,3303
+double Simulation::startingTime(startingTime119,3395
+double Simulation::nextTime(nextTime124,3481
+bool Simulation::hasNextEvent(hasNextEvent129,3559
+void Simulation::clear(clear136,3688
+void Simulation::insertIntegrator(insertIntegrator150,3840
+void Simulation::associate(associate155,3930
+std::shared_ptr<InteractionsGraph> Simulation::indexSet(indexSet163,4084
+SP::OneStepNSProblem Simulation::oneStepNSProblem(oneStepNSProblem168,4203
+void Simulation::updateIndexSets(updateIndexSets176,4438
+void Simulation::updateDSPlugins(updateDSPlugins197,4960
+void Simulation::insertNonSmoothProblem(insertNonSmoothProblem202,5043
+void Simulation::initializeOSIAssociations(initializeOSIAssociations217,5439
+void Simulation::initializeNSDSChangelog(initializeNSDSChangelog250,6641
+void Simulation::initializeIndexSets(initializeIndexSets323,9617
+void Simulation::firstInitialize(firstInitialize358,10772
+void Simulation::initialize(initialize391,11802
+void Simulation::initializeInteraction(initializeInteraction430,12779
+int Simulation::computeOneStepNSProblem(computeOneStepNSProblem494,15180
+std::shared_ptr<siconos::algebra::SiconosVector> Simulation::y(y519,15889
+std::shared_ptr<siconos::algebra::SiconosVector> Simulation::lambda(lambda545,16900
+void Simulation::run(run572,17939
+void Simulation::processEvents(processEvents586,18351
+void Simulation::clearNSDSChangeLog(clearNSDSChangeLog602,18777
+void Simulation::updateT(updateT607,18871
+void Simulation::link(link614,18952
+void Simulation::unlink(unlink623,19268
+void Simulation::updateInteractions(updateInteractions628,19408
+void Simulation::computeResidu(computeResidu636,19649
+void Simulation::updateInput(updateInput645,19900
+void Simulation::updateState(updateState659,20294
+void Simulation::updateOutput(updateOutput673,20718
+
+TimeStepping.hpp,2008
+#define TimeStepping_H22,782
+typedef void (*CheckSolverFPtr)CheckSolverFPtr27,901
+#define SICONOS_TS_LINEAR 42,1354
+#define SICONOS_TS_LINEAR_IMPLICIT 43,1382
+#define SICONOS_TS_NONLINEAR 44,1419
+class TimeStepping 46,1451
+  double _newtonTolerance;51,1618
+  unsigned int _newtonMaxIteration;54,1699
+  unsigned int _newtonNbIterations;57,1790
+  unsigned int _newtonCumulativeNbIterations;60,1893
+  unsigned int _newtonOptions;68,2238
+  double _newtonResiduDSMax;71,2321
+  double _newtonResiduYMax;74,2408
+  double _newtonResiduRMax;77,2493
+  bool _computeResiduY;82,2675
+  bool _computeResiduR;87,2853
+  bool _isNewtonConverge;91,2957
+  bool _newtonUpdateInteractionsPerIteration;96,3093
+  bool _displayNewtonConvergence;100,3192
+  bool _warnOnNonConvergence;104,3294
+  bool _resetAllLambda;108,3399
+  bool _skip_last_updateOutput;113,3520
+  bool _skip_last_updateInput;119,3737
+  bool _skip_resetLambdas;123,3836
+  TimeStepping(127,3896
+  unsigned int getNewtonNbIterations(212,6711
+  unsigned int getNewtonCumulativeNbIterations(218,6944
+  bool isNewtonConverge(257,8069
+  bool displayNewtonConvergence(259,8127
+  void setDisplayNewtonConvergence(260,8200
+  void setWarnOnNonConvergence(265,8298
+  bool warnOnNonConvergence(266,8379
+  void setResetAllLambda(271,8563
+  void setSkipLastUpdateOutput(273,8633
+  bool skipLastUpdateOutput(277,8724
+  void setSkipLastUpdateInput(278,8791
+  bool skipLastUpdateInput(279,8872
+  void setSkipResetLambdas(280,8937
+  bool skipResetLambdas(281,9011
+  void setComputeResiduY(287,9228
+  bool computeResiduY(293,9399
+  void setComputeResiduR(299,9618
+  bool computeResiduR(305,9789
+  void setNewtonTolerance(311,9943
+  double newtonTolerance(317,10099
+  void setNewtonMaxIteration(323,10281
+  unsigned int newtonMaxIteration(332,10494
+  void setNewtonOptions(338,10640
+  unsigned int newtonOptions(345,10863
+  double newtonResiduDSMax(351,11004
+  double newtonResiduYMax(357,11145
+  double newtonResiduRMax(363,11284
+
+ZeroOrderHoldOSI.hpp,648
+#define ZEROORDERHOLD_H24,840
+const unsigned int ZOHSTEPSINMEMORY 29,927
+class ZeroOrderHoldOSI 47,1530
+  bool _useGammaForRelation;56,1757
+  enum ZeroOrderHoldOSI_ds_workVector_id 59,1795
+    RESIDU_FREE,60,1838
+    FREE,61,1855
+    DELTA_X_FOR_RELATION,62,1865
+    WORK_LENGTH63,1891
+  enum ZeroOrderHoldOSI_interaction_workVector_id 66,1913
+    OSNSP_RHS,67,1965
+    H_ALPHA,68,1980
+    WORK_INTERACTION_LENGTH69,1993
+  enum ZeroOrderHoldOSI_interaction_workBlockVector_id 72,2027
+    xfree,73,2084
+    DELTA_X,74,2095
+    BLOCK_WORK_LENGTH75,2108
+  virtual ~ZeroOrderHoldOSI(84,2212
+  unsigned int numberOfIndexSets(130,3737
+
+MultipleImpact.hpp,1332
+#define _OSNSMULTIPLEIMPACT_23,820
+namespace siconos 29,896
+class MultipleImpact 35,1055
+  std::shared_ptr<siconos::algebra::SiconosVector> _velocityContact;56,1927
+  std::shared_ptr<siconos::algebra::SiconosVector> _oldVelocityContact;59,2084
+  std::shared_ptr<siconos::algebra::SiconosVector> _energyContact;61,2231
+  std::shared_ptr<siconos::algebra::SiconosVector> _WorkcContact;63,2359
+  std::shared_ptr<siconos::algebra::SiconosVector> _distributionVector;65,2500
+  SP::IndexInt _stateContact;73,3030
+  std::shared_ptr<siconos::algebra::SiconosVector> _Kcontact;75,3088
+  std::shared_ptr<siconos::algebra::SiconosVector> _restitutionContact;77,3192
+  std::shared_ptr<siconos::algebra::SiconosVector> _elasticyCoefficientcontact;79,3305
+  std::shared_ptr<siconos::algebra::SiconosVector> _deltaImpulseContact;81,3423
+  std::shared_ptr<siconos::algebra::SiconosVector> _tolImpulseContact;83,3528
+  std::shared_ptr<siconos::algebra::SiconosVector> _impulseContactUpdate;85,3646
+  std::shared_ptr<siconos::algebra::SiconosVector> _forceContact;87,3744
+  SP::SiconosMatrix _DataMatrix;112,5057
+  MultipleImpact(135,6097
+  ~MultipleImpact(144,6362
+  inline std::string get_typeCompLaw(149,6471
+  inline double getTolImpact(164,6846
+  inline double GetStepSize(179,7180
+  inline double DurationImpact(184,7311
+
+Relay.cpp,497
+Relay::Relay(35,983
+Relay::Relay(40,1140
+struct Relay::_BoundsNSLEffect 47,1277
+  using SiconosVisitor::visit;50,1335
+  Relay* _parent;52,1367
+  std::shared_ptr<siconos::modeling::Interaction> _inter;53,1385
+  unsigned int _pos;54,1443
+  _BoundsNSLEffect(57,1466
+  void visit(60,1616
+  void visit(70,1838
+void Relay::initialize(initialize82,2105
+bool Relay::checkCompatibleNSLaw(checkCompatibleNSLaw104,2539
+int Relay::compute(compute122,3110
+void Relay::display(display195,5144
+
+FrictionContact.cpp,602
+FrictionContact::FrictionContact(31,1021
+FrictionContact::FrictionContact(36,1218
+void FrictionContact::initialize(initialize59,1839
+void FrictionContact::updateMu(updateMu100,3189
+SP::FrictionContactProblem FrictionContact::frictionContactProblem(frictionContactProblem112,3587
+FrictionContactProblem *FrictionContact::frictionContactProblemPtr(frictionContactProblemPtr123,4018
+int FrictionContact::solve(solve134,4437
+bool FrictionContact::checkCompatibleNSLaw(checkCompatibleNSLaw150,4792
+int FrictionContact::compute(compute173,5589
+void FrictionContact::display(display206,6254
+
+LinearOSNS.hpp,1460
+#define LinearOSNS_H23,806
+typedef std::vector<double> MuStorage;30,962
+  REDUCED_BLOCK,34,1041
+  GLOBAL,35,1058
+  REDUCED_DIRECT,36,1068
+  GLOBAL_REDUCED37,1086
+} LINEAROSNS_ASSEMBLY_TYPE;38,1103
+class LinearOSNS 54,1438
+  std::shared_ptr<siconos::algebra::SiconosVector> _w;60,1573
+  std::shared_ptr<siconos::algebra::SiconosVector> _z;63,1670
+  SP::OSNSMatrix _M;66,1767
+  std::shared_ptr<siconos::algebra::SiconosVector> _q;69,1830
+  SP::OSNSMatrix _W;72,1927
+  SP::OSNSMatrix _W_inverse;75,1990
+  SP::OSNSMatrix _H;78,2061
+  LINEAROSNS_ASSEMBLY_TYPE _assemblyType;81,2110
+  NM_types _numericsMatrixStorageType 85,2280
+  bool _keepLambdaAndYState 90,2483
+  LinearOSNS(111,3058
+  virtual ~LinearOSNS(119,3264
+  inline const SiconosVector getW(127,3400
+  inline std::shared_ptr<siconos::algebra::SiconosVector> w(134,3559
+  inline void setWPtr(141,3769
+  inline const SiconosVector getz(149,3970
+  inline std::shared_ptr<siconos::algebra::SiconosVector> z(156,4123
+  inline void setzPtr(163,4333
+  inline SP::OSNSMatrix M(170,4517
+  inline void setMPtr(177,4651
+  inline SP::OSNSMatrix H(185,4787
+  void setH(191,4905
+  inline const SiconosVector getQ(198,5055
+  inline std::shared_ptr<siconos::algebra::SiconosVector> q(205,5228
+  inline void setQPtr(212,5394
+  inline NM_types getMStorageType(219,5595
+  inline void setMStorageType(230,5905
+  inline void setAssemblyType(234,6045
+  void setKeepLambdaAndYState(306,7948
+
+MoreauJeanOSI.hpp,1777
+#define MoreauJeanOSI_H22,750
+constexpr auto MOREAUSTEPSINMEMORY 28,828
+class MoreauJeanOSI 116,4346
+  double _theta;121,4478
+  double _gamma;127,4670
+  bool _useGamma;131,4761
+  double _constraintActivationThreshold;136,4829
+  bool _useGammaForRelation;140,4938
+  bool _explicitNewtonEulerDSOperators;144,5038
+  bool _isWSymmetricDefinitePositive;148,5156
+  std::vector<std::size_t> _selected_coordinates;154,5306
+  struct _NSLEffectOnFreeOutput 159,5419
+    using SiconosVisitor::visit;160,5477
+    OneStepNSProblem &_osnsp;_osnsp162,5511
+    Interaction &_inter;_inter163,5541
+    InteractionProperties &_interProp;_interProp164,5566
+    _NSLEffectOnFreeOutput(166,5606
+  enum MoreauJeanOSI_ds_workVector_id 182,6224
+    RESIDU_FREE,183,6264
+    VFREE,184,6281
+    BUFFER,185,6292
+    QTMP,186,6304
+    WORK_LENGTH187,6314
+  enum MoreauJeanOSI_interaction_workVector_id 190,6336
+    OSNSP_RHS,191,6385
+    WORK_INTERACTION_LENGTH192,6400
+  enum MoreauJeanOSI_interaction_workBlockVector_id 195,6434
+    xfree,196,6488
+    BLOCK_WORK_LENGTH197,6499
+  virtual ~MoreauJeanOSI(211,6860
+  inline bool isWSymmetricDefinitePositive(230,7462
+  inline void setIsWSymmetricDefinitePositive(235,7565
+  inline double theta(265,8448
+  inline void setTheta(271,8564
+  inline double gamma(279,8697
+  inline void setGamma(285,8813
+  inline bool useGamma(297,8985
+  inline void setUseGamma(303,9143
+  inline bool useGammaForRelation(309,9302
+  inline void setUseGammaForRelation(315,9499
+  inline void setConstraintActivationThreshold(322,9729
+  inline double constraintActivationThreshold(328,9884
+  inline bool explicitNewtonEulerDSOperators(337,10086
+  setExplicitNewtonEulerDSOperators(347,10338
+  unsigned int numberOfIndexSets(389,11783
+
+BlockCSRMatrix.cpp,475
+BlockCSRMatrix::BlockCSRMatrix(37,1162
+BlockCSRMatrix::BlockCSRMatrix(48,1456
+BlockCSRMatrix::BlockCSRMatrix(65,2106
+BlockCSRMatrix::~BlockCSRMatrix(~BlockCSRMatrix79,2639
+void BlockCSRMatrix::fill(fill83,2699
+void BlockCSRMatrix::fillW(fillW154,4907
+void BlockCSRMatrix::fillH(fillH196,6077
+void BlockCSRMatrix::convert(convert273,8217
+void BlockCSRMatrix::display(display309,9589
+unsigned int BlockCSRMatrix::getNbNonNullBlocks(getNbNonNullBlocks330,10859
+
+SimulationTools.hpp,0
