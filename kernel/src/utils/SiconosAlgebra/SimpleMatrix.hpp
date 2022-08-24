@@ -24,7 +24,7 @@
 
 // #include <iosfwd>  // for ostream
 
-// #include "SiconosAlgebraTypeDef.hpp"  // for DENSE, DenseMat, Index, BandedMat
+// #include "SiconosAlgebraTypes.hpp"  // for DENSE, DenseMat, Index, BandedMat
 // #include "SiconosFwd.hpp"             // for SiconosVector, SiconosMatrix
 #include "SiconosMatrix.hpp"          // for SiconosMatrix, MATRIX_UBL...
 #include "SiconosSerialization.hpp"   // For ACCEPT_SERIALIZATION
@@ -53,9 +53,9 @@ class SimpleMatrix : public SiconosMatrix {
   ACCEPT_SERIALIZATION(SimpleMatrix);
 
   /** Union of The Boost Matrices : DenseMat, TriangMat, SymMat ...
-      (See SiconosMatrix.h for more details on MATRIX_UBLAS_TYPE);
+      (See SiconosMatrix.h for more details on MATRIX_UblasType);
   */
-  MATRIX_UBLAS_TYPE mat;
+  MATRIX_UblasType mat;
 
  private:
   using VInt = std::vector<int>;
@@ -185,11 +185,11 @@ class SimpleMatrix : public SiconosMatrix {
    *  \param row number of rows.
    *  \param col number of columns.
    *  \param typ the type of matrix
-   *  \param upper if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if
-   * Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal \param lower if
-   * Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   *  \param upper if Siconos::UblasType==SPARSE, number of non-zero terms, if
+   * Siconos::UblasType == BANDED, number of diags. under the main diagonal \param lower if
+   * Siconos::UblasType == BANDED, number of diags. over the main diagonal
    */
-  SimpleMatrix(unsigned int row, unsigned int col, UBLAS_TYPE typ = UBLAS_TYPE::DENSE,
+  SimpleMatrix(unsigned int row, unsigned int col, UblasType typ = UblasType::DENSE,
                unsigned int upper = 1, unsigned int lower = 1);
 
   /** constructor with the the dimensions of the Boost matrix, a default value and the type.
@@ -198,12 +198,12 @@ class SimpleMatrix : public SiconosMatrix {
    *  \param col number of columns.
    *  \param inputValue double a, so that *this = [a a a ...]
    *  \param typ the type of matrix
-   *  \param upper if Siconos::UBLAS_TYPE==SPARSE, number of non-zero terms, if
-   * Siconos::UBLAS_TYPE == BANDED, number of diags. under the main diagonal \param lower if
-   * Siconos::UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   *  \param upper if Siconos::UblasType==SPARSE, number of non-zero terms, if
+   * Siconos::UblasType == BANDED, number of diags. under the main diagonal \param lower if
+   * Siconos::UblasType == BANDED, number of diags. over the main diagonal
    */
   SimpleMatrix(unsigned int row, unsigned int col, double inputValue,
-               UBLAS_TYPE typ = UBLAS_TYPE::DENSE, unsigned int upper = 1,
+               UblasType typ = UblasType::DENSE, unsigned int upper = 1,
                unsigned int lower = 1);
 
   /** copy constructor

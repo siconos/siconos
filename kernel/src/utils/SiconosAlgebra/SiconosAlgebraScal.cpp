@@ -28,7 +28,7 @@
 
 #include "BlockMatrix.hpp"
 #include "SiconosAlgebraTools.hpp"    // for isComparableTo
-#include "SiconosAlgebraTypeDef.hpp"  // UBLAS_TYPE
+#include "SiconosAlgebraTypes.hpp"  // UblasType
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SimpleMatrix.hpp"
@@ -49,13 +49,13 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
     auto numA = A.num();
     auto numB = B.num();
 
-    if (numB == UBLAS_TYPE::ZERO || numB == UBLAS_TYPE::IDENTITY)  // B = 0 or identity.
+    if (numB == UblasType::ZERO || numB == UblasType::IDENTITY)  // B = 0 or identity.
       THROW_EXCEPTION("forbidden for B being a zero or identity matrix.");
 
-    if (numA == UBLAS_TYPE::ZERO) {
+    if (numA == UblasType::ZERO) {
       if (init) B.zero();  // else nothing
     }
-    else if (numA == UBLAS_TYPE::IDENTITY) {
+    else if (numA == UblasType::IDENTITY) {
       if (init) {
         B.eye();
         B *= a;
@@ -69,7 +69,7 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
       if (numA == numB)  // if A and B are of the same type ...
       {
         switch (numA) {
-          case UBLAS_TYPE::BLOCK:  // A and B are block
+          case UblasType::BLOCK:  // A and B are block
             if (isComparableTo(A, B)) {
               const BlockMatrix &Aref = static_cast<const BlockMatrix &>(A);
               BlockMatrix &Bref = static_cast<BlockMatrix &>(B);
@@ -95,31 +95,31 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
             }
             break;
 
-          case UBLAS_TYPE::DENSE:  // if both are dense
+          case UblasType::DENSE:  // if both are dense
             if (init)
               noalias(*B.dense()) = a * *A.dense();
             else
               noalias(*B.dense()) += a * *A.dense();
             break;
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             if (init)
               noalias(*B.triang()) = a * *A.triang();
             else
               noalias(*B.triang()) += a * *A.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             if (init)
               noalias(*B.sym()) = a * *A.sym();
             else
               noalias(*B.sym()) += a * *A.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             if (init)
               noalias(*B.sparse()) = a * *A.sparse();
             else
               noalias(*B.sparse()) += a * *A.sparse();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             if (init)
               noalias(*B.banded()) = a * *A.banded();
             else
@@ -131,7 +131,7 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
       }
       else  // if A and B are of different types.
       {
-        if (numA == UBLAS_TYPE::BLOCK || numB == UBLAS_TYPE::BLOCK)  // if A or B is block
+        if (numA == UblasType::BLOCK || numB == UblasType::BLOCK)  // if A or B is block
         {
           if (init) {
             B = A;
@@ -144,24 +144,24 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
           }
         }
         else {
-          if (numB != UBLAS_TYPE::DENSE)
+          if (numB != UblasType::DENSE)
             THROW_EXCEPTION("Inconsistent types between A and B (must be dense?)");
 
           if (init) {
             switch (numA) {
-              case UBLAS_TYPE::DENSE:
+              case UblasType::DENSE:
                 noalias(*B.dense()) = a * *A.dense();
                 break;
-              case UBLAS_TYPE::TRIANGULAR:
+              case UblasType::TRIANGULAR:
                 noalias(*B.dense()) = a * *A.triang();
                 break;
-              case UBLAS_TYPE::SYMMETRIC:
+              case UblasType::SYMMETRIC:
                 noalias(*B.dense()) = a * *A.sym();
                 break;
-              case UBLAS_TYPE::SPARSE:
+              case UblasType::SPARSE:
                 noalias(*B.dense()) = a * *A.sparse();
                 break;
-              case UBLAS_TYPE::BANDED:
+              case UblasType::BANDED:
                 noalias(*B.dense()) = a * *A.banded();
                 break;
               default:
@@ -172,19 +172,19 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
 
           {
             switch (numA) {
-              case UBLAS_TYPE::DENSE:
+              case UblasType::DENSE:
                 noalias(*B.dense()) += a * *A.dense();
                 break;
-              case UBLAS_TYPE::TRIANGULAR:
+              case UblasType::TRIANGULAR:
                 noalias(*B.dense()) += a * *A.triang();
                 break;
-              case UBLAS_TYPE::SYMMETRIC:
+              case UblasType::SYMMETRIC:
                 noalias(*B.dense()) += a * *A.sym();
                 break;
-              case UBLAS_TYPE::SPARSE:
+              case UblasType::SPARSE:
                 noalias(*B.dense()) += a * *A.sparse();
                 break;
-              case UBLAS_TYPE::BANDED:
+              case UblasType::BANDED:
                 noalias(*B.dense()) += a * *A.banded();
                 break;
               default:

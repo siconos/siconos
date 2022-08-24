@@ -60,26 +60,26 @@ namespace ublas = boost::numeric::ublas;
 siconos::algebra::SiconosMatrix& siconos::algebra::operator*=(SiconosMatrix& m,
                                                               const double& s)
 {
-  if (m._num == UBLAS_TYPE::BLOCK)  // BlockMatrix
+  if (m._num == UblasType::BLOCK)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     for (auto it = mB._mat->begin1(); it != mB._mat->end1(); ++it) {
       for (auto it2 = it.begin(); it2 != it.end(); ++it2) (**it2) *= s;
     }
   }
-  else if (m._num == UBLAS_TYPE::DENSE)
+  else if (m._num == UblasType::DENSE)
     *m.dense() *= s;
-  else if (m._num == UBLAS_TYPE::TRIANGULAR)
+  else if (m._num == UblasType::TRIANGULAR)
     *m.triang() *= s;
-  else if (m._num == UBLAS_TYPE::SYMMETRIC)
+  else if (m._num == UblasType::SYMMETRIC)
     *m.sym() *= s;
-  else if (m._num == UBLAS_TYPE::SPARSE)
+  else if (m._num == UblasType::SPARSE)
     *m.sparse() *= s;
-  else if (m._num == UBLAS_TYPE::SPARSE_COORDINATE)
+  else if (m._num == UblasType::SPARSE_COORDINATE)
     *m.sparseCoordinate() *= s;
-  else if (m._num == UBLAS_TYPE::BANDED)
+  else if (m._num == UblasType::BANDED)
     *m.banded() *= s;
-  else if (m._num == UBLAS_TYPE::ZERO) {
+  else if (m._num == UblasType::ZERO) {
   }     // nothing!
   else  // if(_num == 7)
     THROW_EXCEPTION("invalid type of matrix");
@@ -90,26 +90,26 @@ siconos::algebra::SiconosMatrix& siconos::algebra::operator*=(SiconosMatrix& m,
 siconos::algebra::SiconosMatrix& siconos::algebra::operator/=(SiconosMatrix& m,
                                                               const double& s)
 {
-  if (m._num == UBLAS_TYPE::BLOCK)  // BlockMatrix
+  if (m._num == UblasType::BLOCK)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     for (auto it = mB._mat->begin1(); it != mB._mat->end1(); ++it) {
       for (auto it2 = it.begin(); it2 != it.end(); ++it2) (**it2) /= s;
     }
   }
-  else if (m._num == UBLAS_TYPE::DENSE)
+  else if (m._num == UblasType::DENSE)
     *m.dense() /= s;
-  else if (m._num == UBLAS_TYPE::TRIANGULAR)
+  else if (m._num == UblasType::TRIANGULAR)
     *m.triang() /= s;
-  else if (m._num == UBLAS_TYPE::SYMMETRIC)
+  else if (m._num == UblasType::SYMMETRIC)
     *m.sym() /= s;
-  else if (m._num == UBLAS_TYPE::SPARSE)
+  else if (m._num == UblasType::SPARSE)
     *m.sparse() /= s;
-  else if (m._num == UBLAS_TYPE::SPARSE_COORDINATE)
+  else if (m._num == UblasType::SPARSE_COORDINATE)
     *m.sparseCoordinate() /= s;
-  else if (m._num == UBLAS_TYPE::BANDED)
+  else if (m._num == UblasType::BANDED)
     *m.banded() /= s;
-  else if (m._num == UBLAS_TYPE::ZERO) {
+  else if (m._num == UblasType::ZERO) {
   }     // nothing!
   else  // if(_num == 7)
     THROW_EXCEPTION("invalid type of matrix");
@@ -120,7 +120,7 @@ siconos::algebra::SiconosMatrix& siconos::algebra::operator/=(SiconosMatrix& m,
 size_t siconos::algebra::SiconosMatrix::nnz(double tol)
 {
   size_t nnz = 0;
-  if (_num == UBLAS_TYPE::DENSE)  // dense
+  if (_num == UblasType::DENSE)  // dense
   {
     double* arr = getArray();
     for (size_t i = 0; i < size(0) * size(1); ++i) {
@@ -129,7 +129,7 @@ size_t siconos::algebra::SiconosMatrix::nnz(double tol)
       }
     }
   }
-  else if (_num == UBLAS_TYPE::SPARSE) {
+  else if (_num == UblasType::SPARSE) {
     nnz = sparse()->nnz();
   }
   else
@@ -154,7 +154,7 @@ bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off
 
   CS_INT pval = Mp[col_off];
 
-  if (_num == UBLAS_TYPE::DENSE)  // dense
+  if (_num == UblasType::DENSE)  // dense
   {
     double* arr = getArray();
     for (size_t j = 0, joff = col_off; j < ncol; ++j) {
@@ -174,7 +174,7 @@ bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off
       Mp[++joff] = pval;
     }
   }
-  else if (_num == UBLAS_TYPE::SPARSE) {
+  else if (_num == UblasType::SPARSE) {
     const auto& ptr = sparse()->index1_data();
     const auto& indx = sparse()->index2_data();
     const ublas::unbounded_array<double>& vals = sparse()->value_data();
@@ -212,7 +212,7 @@ bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol)
 
   CS_INT pval = 0;
 
-  if (_num == UBLAS_TYPE::DENSE)  // dense
+  if (_num == UblasType::DENSE)  // dense
   {
     double* arr = getArray();
     for (size_t j = 0, joff = 0; j < ncol; ++j) {
@@ -232,7 +232,7 @@ bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol)
       Mp[++joff] = pval;
     }
   }
-  else if (_num == UBLAS_TYPE::SPARSE) {
+  else if (_num == UblasType::SPARSE) {
     const auto& ptr = sparse()->index1_data();
     const auto& indx = sparse()->index2_data();
     const ublas::unbounded_array<double>& vals = sparse()->value_data();
@@ -272,7 +272,7 @@ bool siconos::algebra::SiconosMatrix::fromCSC(CSparseMatrix* csc)
 
   // size_t nnz = csc->p[n];
 
-  if (_num == UBLAS_TYPE::SPARSE) {
+  if (_num == UblasType::SPARSE) {
     sparse()->clear();
     CS_INT pval = 0;
     // push_back in order should be in constant time
@@ -320,7 +320,7 @@ bool siconos::algebra::SiconosMatrix::fromCSC(CSparseMatrix* csc)
     // // }
     // for(size_t j = 0 ; j < n+1; ++j) printf("ptr[%i] = %i\t", j, ptr[j]);
   }
-  else if (_num == UBLAS_TYPE::DENSE) {
+  else if (_num == UblasType::DENSE) {
     CS_INT pval = 0;
     // push_back in order should be in constant time
     // http://www.guwi17.de/ublas/matrix_sparse_usage.html
@@ -344,7 +344,7 @@ bool siconos::algebra::SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t
   size_t nrow = size(0);
   size_t ncol = size(1);
 
-  if (_num == UBLAS_TYPE::DENSE)  // dense
+  if (_num == UblasType::DENSE)  // dense
   {
     double* arr = getArray();
     for (size_t j = 0; j < ncol; ++j) {
@@ -407,33 +407,33 @@ void siconos::algebra::SiconosMatrix::private_addprod(unsigned startRow, unsigne
          "private_addprod(A,start,x,y) error: not yet implemented for x and y of different "
          "types.");
 
-  if (numY == UBLAS_TYPE::DENSE && numX == UBLAS_TYPE::DENSE) {
+  if (numY == UblasType::DENSE && numX == UblasType::DENSE) {
     assert(y.dense() != x.dense());
 
-    if (numA == UBLAS_TYPE::DENSE)
+    if (numA == UblasType::DENSE)
       noalias(*y.dense()) += prod(
           ublas::subrange(*dense(), startRow, startRow + sizeY, startCol, startCol + sizeX),
           *x.dense());
-    else if (numA == UBLAS_TYPE::TRIANGULAR)
+    else if (numA == UblasType::TRIANGULAR)
       noalias(*y.dense()) += prod(
           ublas::subrange(*triang(), startRow, startRow + sizeY, startCol, startCol + sizeX),
           *x.dense());
-    else if (numA == UBLAS_TYPE::SYMMETRIC)
+    else if (numA == UblasType::SYMMETRIC)
       noalias(*y.dense()) +=
           prod(ublas::subrange(*sym(), startRow, startRow + sizeY, startCol, startCol + sizeX),
                *x.dense());
-    else if (numA == UBLAS_TYPE::SPARSE)
+    else if (numA == UblasType::SPARSE)
       noalias(*y.dense()) += prod(
           ublas::subrange(*sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX),
           *x.dense());
-    else  // if(numA==UBLAS_TYPE::BANDED)
+    else  // if(numA==UblasType::BANDED)
       noalias(*y.dense()) += prod(
           ublas::subrange(*banded(), startRow, startRow + sizeY, startCol, startCol + sizeX),
           *x.dense());
   }
   else  // x and y sparse
   {
-    if (numA == UBLAS_TYPE::SPARSE)
+    if (numA == UblasType::SPARSE)
       *y.sparse() += prod(
           ublas::subrange(*sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX),
           *x.sparse());

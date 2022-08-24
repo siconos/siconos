@@ -22,8 +22,9 @@
 #ifndef NEWTONEULERNLDS_H
 #define NEWTONEULERNLDS_H
 
-#include <limits>
 #include <math.h>
+
+#include <limits>
 
 #include "DynamicalSystem.hpp"
 #include "SecondOrderDS.hpp"
@@ -745,7 +746,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param fct a pointer on the plugin function
    */
   void setComputeFIntFunction(FInt_NE fct);
- 
+
   /** set a specified function to compute _mInt
    *
    *  \param fct a pointer on the plugin function
@@ -1097,7 +1098,8 @@ class NewtonEulerDS : public SecondOrderDS {
 
   virtual void computeTdot();
 
-  //  ACCEPT_STD_VISITORS();
+  // visitors hook
+  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERNLDS_H

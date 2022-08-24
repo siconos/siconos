@@ -43,21 +43,21 @@ namespace ublas = boost::numeric::ublas;
 
 double siconos::algebra::SimpleMatrix::normInf() const
 {
-  if (_num == UBLAS_TYPE::DENSE)
+  if (_num == UblasType::DENSE)
     return norm_inf(*mat.Dense);
-  else if (_num == UBLAS_TYPE::TRIANGULAR)
+  else if (_num == UblasType::TRIANGULAR)
     return norm_inf(*mat.Triang);
-  else if (_num == UBLAS_TYPE::SYMMETRIC)
+  else if (_num == UblasType::SYMMETRIC)
     return norm_inf(*mat.Sym);
-  else if (_num == UBLAS_TYPE::SPARSE)
+  else if (_num == UblasType::SPARSE)
     return norm_inf(*mat.Sparse);
-  else if (_num == UBLAS_TYPE::SPARSE_COORDINATE)
+  else if (_num == UblasType::SPARSE_COORDINATE)
     return norm_inf(*mat.SparseCoordinate);
-  else if (_num == UBLAS_TYPE::BANDED)
+  else if (_num == UblasType::BANDED)
     return norm_inf(*mat.Banded);
-  else if (_num == UBLAS_TYPE::ZERO)
+  else if (_num == UblasType::ZERO)
     return 0;
-  else if (_num == UBLAS_TYPE::IDENTITY)
+  else if (_num == UblasType::IDENTITY)
     return 1;
 
   THROW_EXCEPTION("Matrix type not supported");
@@ -66,7 +66,7 @@ double siconos::algebra::SimpleMatrix::normInf() const
 
 void siconos::algebra::SimpleMatrix::normInfByColumn(std::shared_ptr<SiconosVector> vIn) const
 {
-  if (_num == UBLAS_TYPE::DENSE) {
+  if (_num == UblasType::DENSE) {
     if (vIn->size() != size(1))
       THROW_EXCEPTION("the given vector does not have the right length");
     DenseVect tmpV = DenseVect(size(0));
@@ -84,21 +84,21 @@ void siconos::algebra::SimpleMatrix::normInfByColumn(std::shared_ptr<SiconosVect
 
 double siconos::algebra::SimpleMatrix::det() const
 {
-  if (_num == UBLAS_TYPE::DENSE)
+  if (_num == UblasType::DENSE)
     return siconos::externals::ublas::determinant(*mat.Dense);
-  else if (_num == UBLAS_TYPE::TRIANGULAR)
+  else if (_num == UblasType::TRIANGULAR)
     return siconos::externals::ublas::determinant(*mat.Triang);
-  else if (_num == UBLAS_TYPE::SYMMETRIC)
+  else if (_num == UblasType::SYMMETRIC)
     return siconos::externals::ublas::determinant(*mat.Sym);
-  else if (_num == UBLAS_TYPE::SPARSE)
+  else if (_num == UblasType::SPARSE)
     return siconos::externals::ublas::determinant(*mat.Sparse);
-  else if (_num == UBLAS_TYPE::SPARSE_COORDINATE)
+  else if (_num == UblasType::SPARSE_COORDINATE)
     return siconos::externals::ublas::determinant(*mat.Sparse);
-  else if (_num == UBLAS_TYPE::BANDED)
+  else if (_num == UblasType::BANDED)
     return siconos::externals::ublas::determinant(*mat.Banded);
-  else if (_num == UBLAS_TYPE::ZERO)
+  else if (_num == UblasType::ZERO)
     return 0;
-  else if (_num == UBLAS_TYPE::IDENTITY)
+  else if (_num == UblasType::IDENTITY)
     return 1;
   THROW_EXCEPTION("Matrix type not supported");
   return std::numeric_limits<double>::infinity();
@@ -107,27 +107,27 @@ double siconos::algebra::SimpleMatrix::det() const
 void siconos::algebra::SimpleMatrix::trans()
 {
   switch (_num) {
-    case UBLAS_TYPE::DENSE:
+    case UblasType::DENSE:
       *mat.Dense = ublas::trans(*mat.Dense);
       break;
-    case UBLAS_TYPE::TRIANGULAR:
+    case UblasType::TRIANGULAR:
       THROW_EXCEPTION(
           "failed, the matrix is triangular matrix and can not be transposed in place.");
       break;
-    case UBLAS_TYPE::SYMMETRIC:
+    case UblasType::SYMMETRIC:
       break;
-    case UBLAS_TYPE::SPARSE:
+    case UblasType::SPARSE:
       *mat.Sparse = ublas::trans(*mat.Sparse);
       break;
-    case UBLAS_TYPE::SPARSE_COORDINATE:
+    case UblasType::SPARSE_COORDINATE:
       *mat.Sparse = ublas::trans(*mat.Sparse);
       break;
-    case UBLAS_TYPE::BANDED:
+    case UblasType::BANDED:
       *mat.Banded = ublas::trans(*mat.Banded);
       break;
-    case UBLAS_TYPE::ZERO:
+    case UblasType::ZERO:
       break;
-    case UBLAS_TYPE::IDENTITY:
+    case UblasType::IDENTITY:
       break;
     default:
       THROW_EXCEPTION("Matrix type not supported");
@@ -144,57 +144,57 @@ void siconos::algebra::SimpleMatrix::trans(const SiconosMatrix &m)
   else {
     auto numM = m.num();
     switch (numM) {
-      case UBLAS_TYPE::DENSE:
-        if (_num != UBLAS_TYPE::DENSE)
+      case UblasType::DENSE:
+        if (_num != UblasType::DENSE)
           THROW_EXCEPTION("try to transpose a dense matrix into another type.");
         noalias(*mat.Dense) = ublas::trans(*m.dense());
         break;
-      case UBLAS_TYPE::TRIANGULAR:
-        if (_num != UBLAS_TYPE::DENSE)
+      case UblasType::TRIANGULAR:
+        if (_num != UblasType::DENSE)
           THROW_EXCEPTION("try to transpose a triangular matrix into a non-dense one.");
         noalias(*mat.Dense) = ublas::trans(*m.triang());
         break;
-      case UBLAS_TYPE::SYMMETRIC:
+      case UblasType::SYMMETRIC:
         *this = m;
         break;
-      case UBLAS_TYPE::SPARSE:
-        if (_num == UBLAS_TYPE::DENSE)
+      case UblasType::SPARSE:
+        if (_num == UblasType::DENSE)
           noalias(*mat.Dense) = ublas::trans(*m.sparse());
-        else if (_num == UBLAS_TYPE::SPARSE)
+        else if (_num == UblasType::SPARSE)
           noalias(*mat.Sparse) = ublas::trans(*m.sparse());
-        else if (_num == UBLAS_TYPE::SPARSE_COORDINATE)
+        else if (_num == UblasType::SPARSE_COORDINATE)
           noalias(*mat.SparseCoordinate) = ublas::trans(*m.sparse());
         else
           THROW_EXCEPTION(
               "try to transpose a sparse matrix into a forbidden type (not dense nor "
               "sparse).");
         break;
-      case UBLAS_TYPE::SPARSE_COORDINATE:
-        if (_num == UBLAS_TYPE::DENSE)
+      case UblasType::SPARSE_COORDINATE:
+        if (_num == UblasType::DENSE)
           noalias(*mat.Dense) = ublas::trans(*m.sparseCoordinate());
-        else if (_num == UBLAS_TYPE::SPARSE)
+        else if (_num == UblasType::SPARSE)
           noalias(*mat.Sparse) = ublas::trans(*m.sparseCoordinate());
-        else if (_num == UBLAS_TYPE::SPARSE_COORDINATE)
+        else if (_num == UblasType::SPARSE_COORDINATE)
           noalias(*mat.SparseCoordinate) = ublas::trans(*m.sparseCoordinate());
         else
           THROW_EXCEPTION(
               "try to transpose a sparse coordinate matrix into a forbidden type "
               "(not dense nor sparse coordinate).");
         break;
-      case UBLAS_TYPE::BANDED:
-        if (_num == UBLAS_TYPE::DENSE)
+      case UblasType::BANDED:
+        if (_num == UblasType::DENSE)
           noalias(*mat.Dense) = ublas::trans(*m.banded());
-        else if (_num == UBLAS_TYPE::BANDED)
+        else if (_num == UblasType::BANDED)
           noalias(*mat.Banded) = ublas::trans(*m.banded());
         else
           THROW_EXCEPTION(
               "try to transpose a banded matrix into a forbidden type (not dense nor "
               "banded).");
         break;
-      case UBLAS_TYPE::ZERO:
+      case UblasType::ZERO:
         *this = m;
         break;
-      case UBLAS_TYPE::IDENTITY:
+      case UblasType::IDENTITY:
         *this = m;
         break;
       default:

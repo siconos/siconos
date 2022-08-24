@@ -58,8 +58,11 @@ class MixedComplementarityConditionNSL : public NonSmoothLaw {
    */
   inline unsigned int equalitySize() { return _equalitySize; };
 
-  // Visitors hook
-  // ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override
+  {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::modeling
 #endif  // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H

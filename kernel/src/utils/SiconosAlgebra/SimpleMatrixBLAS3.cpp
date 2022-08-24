@@ -72,107 +72,107 @@ namespace bindings_blas = boost::numeric::bindings::blas;
 //     THROW_EXCEPTION("Matrix product ( C=prod(A,B) ): not yet implemented for BlockMatrix
 //     objects.");
 
-//   if(numA == UBLAS_TYPE::IDENTITY || numB == UBLAS_TYPE::ZERO)  // A = identity or B = 0
+//   if(numA == UblasType::IDENTITY || numB == UblasType::ZERO)  // A = identity or B = 0
 //     return SimpleMatrix(B);
 
-//   else if(numB == UBLAS_TYPE::IDENTITY || numA == UBLAS_TYPE::ZERO)  // B = identity or A = 0
+//   else if(numB == UblasType::IDENTITY || numA == UblasType::ZERO)  // B = identity or A = 0
 //     return SimpleMatrix(A);
 
 //   else // neither A or B is equal to identity or zero.
 //   {
-//     if(numB == UBLAS_TYPE::DENSE)
+//     if(numB == UblasType::DENSE)
 //     {
-//       if(numA == UBLAS_TYPE::DENSE)
+//       if(numA == UblasType::DENSE)
 //       {
 //         DenseMat p(A.size(0), B.size(1));
 //         bindings_blas::blas::gemm(1.0, *A.dense(), *B.dense(), 1.0, p);
 //         //      return (DenseMat)(prod(*A.dense(),*B.dense()));
 //         return p;
 //       }
-//       else if(numA == UBLAS_TYPE::TRIANGULAR)
+//       else if(numA == UblasType::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.dense()));
-//       else if(numA == UBLAS_TYPE::SYMMETRIC)
+//       else if(numA == UblasType::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.dense()));
-//       else if(numA == UBLAS_TYPE::SPARSE)
+//       else if(numA == UblasType::SPARSE)
 //         return (DenseMat)(prod(*A.sparse(), *B.dense()));
-//       else if(numA == UBLAS_TYPE::SPARSE_COORDINATE)
+//       else if(numA == UblasType::SPARSE_COORDINATE)
 //         return (DenseMat)(prod(*A.sparseCoordinate(), *B.dense()));
-//       else// if(numA==UBLAS_TYPE::BANDED)
+//       else// if(numA==UblasType::BANDED)
 //         return (DenseMat)(prod(*A.banded(), *B.dense()));
 //     }
-//     else if(numB == UBLAS_TYPE::TRIANGULAR)
+//     else if(numB == UblasType::TRIANGULAR)
 //     {
-//       if(numA == UBLAS_TYPE::DENSE)
+//       if(numA == UblasType::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.triang()));
-//       else if(numA == UBLAS_TYPE::TRIANGULAR)
+//       else if(numA == UblasType::TRIANGULAR)
 //         return (TriangMat)(prod(*A.triang(), *B.triang()));
-//       else if(numA == UBLAS_TYPE::SYMMETRIC)
+//       else if(numA == UblasType::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.triang()));
-//       else if(numA == UBLAS_TYPE::SPARSE)
+//       else if(numA == UblasType::SPARSE)
 //         return (DenseMat)(prod(*A.sparse(), *B.triang()));
-//       else if(numA == UBLAS_TYPE::SPARSE_COORDINATE)
+//       else if(numA == UblasType::SPARSE_COORDINATE)
 //         return (DenseMat)(prod(*A.sparseCoordinate(), *B.triang()));
-//       else //if(numA==UBLAS_TYPE::BANDED)
+//       else //if(numA==UblasType::BANDED)
 //         return (DenseMat)(prod(*A.banded(), *B.triang()));
 //     }
-//     else if(numB == UBLAS_TYPE::SYMMETRIC)
+//     else if(numB == UblasType::SYMMETRIC)
 //     {
-//       if(numA == UBLAS_TYPE::DENSE)
+//       if(numA == UblasType::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.sym()));
-//       else if(numA == UBLAS_TYPE::TRIANGULAR)
+//       else if(numA == UblasType::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.sym()));
-//       else if(numA == UBLAS_TYPE::SYMMETRIC)
+//       else if(numA == UblasType::SYMMETRIC)
 //         return (SymMat)(prod(*A.sym(), *B.sym()));
-//       else if(numA == UBLAS_TYPE::SPARSE)
+//       else if(numA == UblasType::SPARSE)
 //         return (DenseMat)(prod(*A.sparse(), *B.sym()));
-//       else if(numA == UBLAS_TYPE::SPARSE_COORDINATE)
+//       else if(numA == UblasType::SPARSE_COORDINATE)
 //         return (DenseMat)(prod(*A.sparseCoordinate(), *B.sym()));
-//       else // if (numA == UBLAS_TYPE::BANDED)
+//       else // if (numA == UblasType::BANDED)
 //         return (DenseMat)(prod(*A.banded(), *B.sym()));
 //     }
-//     else if(numB == UBLAS_TYPE::SPARSE)
+//     else if(numB == UblasType::SPARSE)
 //     {
-//       if(numA == UBLAS_TYPE::DENSE)
+//       if(numA == UblasType::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.sparse()));
-//       else if(numA == UBLAS_TYPE::TRIANGULAR)
+//       else if(numA == UblasType::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.sparse()));
-//       else if(numA == UBLAS_TYPE::SYMMETRIC)
+//       else if(numA == UblasType::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.sparse()));
-//       else if(numA == UBLAS_TYPE::SPARSE)
+//       else if(numA == UblasType::SPARSE)
 //         return (SparseMat)(prod(*A.sparse(), *B.sparse()));
-//       else if(numA == UBLAS_TYPE::SPARSE_COORDINATE)
+//       else if(numA == UblasType::SPARSE_COORDINATE)
 //         return (SparseMat)(prod(*A.sparseCoordinate(), *B.sparse()));
-//       else //if(numA==UBLAS_TYPE::BANDED){
+//       else //if(numA==UblasType::BANDED){
 //         return (DenseMat)(prod(*A.banded(), *B.sparse()));
 //     }
-//     else if(numB == UBLAS_TYPE::SPARSE_COORDINATE)
+//     else if(numB == UblasType::SPARSE_COORDINATE)
 //     {
-//       if(numA == UBLAS_TYPE::DENSE)
+//       if(numA == UblasType::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.sparseCoordinate()));
-//       else if(numA == UBLAS_TYPE::TRIANGULAR)
+//       else if(numA == UblasType::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.sparseCoordinate()));
-//       else if(numA == UBLAS_TYPE::SYMMETRIC)
+//       else if(numA == UblasType::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.sparseCoordinate()));
-//       else if(numA == UBLAS_TYPE::SPARSE)
+//       else if(numA == UblasType::SPARSE)
 //         return (SparseMat)(prod(*A.sparse(), *B.sparseCoordinate()));
-//       else if(numA == UBLAS_TYPE::SPARSE_COORDINATE)
+//       else if(numA == UblasType::SPARSE_COORDINATE)
 //         return (SparseMat)(prod(*A.sparseCoordinate(), *B.sparseCoordinate()));
-//       else //if(numA==UBLAS_TYPE::BANDED){
+//       else //if(numA==UblasType::BANDED){
 //         return (DenseMat)(prod(*A.banded(), *B.sparseCoordinate()));
 //     }
-//     else //if(numB==UBLAS_TYPE::BANDED)
+//     else //if(numB==UblasType::BANDED)
 //     {
-//       if(numA == UBLAS_TYPE::DENSE)
+//       if(numA == UblasType::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.banded()));
-//       else if(numA == UBLAS_TYPE::TRIANGULAR)
+//       else if(numA == UblasType::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.banded()));
-//       else if(numA == UBLAS_TYPE::SYMMETRIC)
+//       else if(numA == UblasType::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.banded()));
-//       else if(numA == UBLAS_TYPE::SPARSE)
+//       else if(numA == UblasType::SPARSE)
 //         return (DenseMat)(prod(*A.sparse(), *B.banded()));
-//       else if(numA == UBLAS_TYPE::SPARSE_COORDINATE)
+//       else if(numA == UblasType::SPARSE_COORDINATE)
 //         return (DenseMat)(prod(*A.sparseCoordinate(), *B.banded()));
-//       else //if(numA==UBLAS_TYPE::BANDED)
+//       else //if(numA==UblasType::BANDED)
 //         return (DenseMat)(prod(*A.banded(), *B.banded()));
 //     }
 //   }
@@ -195,13 +195,13 @@ dim : dim[0] number of raw, dim[1] number of col
 //   if (numA == 0 || numB == 0 || numC == 0)
 //     THROW_EXCEPTION("Matrix function prod(A,B,C,index): inconsistent sizes");
 //   // === if C is zero or identity => read-only ===
-//   if (numC == UBLAS_TYPE::Zero || numC == UBLAS_TYPE::IDENTITY)
+//   if (numC == UblasType::Zero || numC == UblasType::IDENTITY)
 //     THROW_EXCEPTION("Matrix product ( prod(A,B,C,index) ): wrong type for resulting matrix C
 //     (read-only: zero or identity).");
 
-//   if (numA == UBLAS_TYPE::IDENTITY || numC == UBLAS_TYPE::Zero) // A = identity or 0
-//     THROW_EXCEPTION("Matrix function prod(A,B,C,index): numA == UBLAS_TYPE::IDENTITY || numC ==
-//     UBLAS_TYPE::Zero not yet implemented");
+//   if (numA == UblasType::IDENTITY || numC == UblasType::Zero) // A = identity or 0
+//     THROW_EXCEPTION("Matrix function prod(A,B,C,index): numA == UblasType::IDENTITY || numC ==
+//     UblasType::Zero not yet implemented");
 
 //   int rawB = B.size(0);
 //   int colB = B.size(1);
@@ -235,16 +235,16 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
   auto numB = B.num();
   auto numC = C.num();
   // == TODO: implement block product ==
-  if (numA == UBLAS_TYPE::BLOCK || numB == UBLAS_TYPE::BLOCK)
+  if (numA == UblasType::BLOCK || numB == UblasType::BLOCK)
     THROW_EXCEPTION(
         "Matrix product ( prod(A,B,C) ): not yet implemented for BlockMatrix objects.");
 
   // === if C is zero or identity => read-only ===
-  if (numC == UBLAS_TYPE::ZERO || numC == UBLAS_TYPE::IDENTITY)
+  if (numC == UblasType::ZERO || numC == UblasType::IDENTITY)
     THROW_EXCEPTION("Matrix product ( prod(A,B,C) ): wrong type for resulting matrix C "
                     "(read-only: zero or identity).");
 
-  if (numA == UBLAS_TYPE::IDENTITY) // A = identity ...
+  if (numA == UblasType::IDENTITY) // A = identity ...
   {
     if (!init)
       C += B;
@@ -252,7 +252,7 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
       C = B; // if C and B are two different objects.
   }
 
-  else if (numB == UBLAS_TYPE::IDENTITY) // B = identity
+  else if (numB == UblasType::IDENTITY) // B = identity
   {
     if (!init)
       C += A;
@@ -260,12 +260,12 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
       C = A; // if C and A are two different objects.
   }
 
-  else if (numA == UBLAS_TYPE::ZERO || numB == UBLAS_TYPE::ZERO) // if A or B = 0
+  else if (numA == UblasType::ZERO || numB == UblasType::ZERO) // if A or B = 0
   {
     if (init)
       C.zero(); // else nothing
   }
-  else if (numC == UBLAS_TYPE::BLOCK) // if C is Block - Temp. solution
+  else if (numC == UblasType::BLOCK) // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     axpy_prod(A, B, tmp, init);
@@ -274,83 +274,83 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
   else // neither A or B is equal to identity or zero.
   {
     switch (numC) {
-    case UBLAS_TYPE::DENSE:
-      if (numB == UBLAS_TYPE::DENSE) {
-        if (numA == UBLAS_TYPE::DENSE)
+    case UblasType::DENSE:
+      if (numB == UblasType::DENSE) {
+        if (numA == UblasType::DENSE)
           ublas::axpy_prod(*A.dense(), *B.dense(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::TRIANGULAR)
+        else if (numA == UblasType::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.dense(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SYMMETRIC)
+        else if (numA == UblasType::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.dense(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SPARSE)
+        else if (numA == UblasType::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.dense(), *C.dense(), init);
-        else // if(numA==UBLAS_TYPE::BANDED)
+        else // if(numA==UblasType::BANDED)
           ublas::axpy_prod(*A.banded(), *B.dense(), *C.dense(), init);
       }
-      else if (numB == UBLAS_TYPE::TRIANGULAR) {
-        if (numA == UBLAS_TYPE::DENSE)
+      else if (numB == UblasType::TRIANGULAR) {
+        if (numA == UblasType::DENSE)
           ublas::axpy_prod(*A.dense(), *B.triang(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::TRIANGULAR)
+        else if (numA == UblasType::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.triang(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SYMMETRIC)
+        else if (numA == UblasType::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.triang(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SPARSE)
+        else if (numA == UblasType::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.triang(), *C.dense(), init);
-        else // if(numA==UBLAS_TYPE::BANDED)
+        else // if(numA==UblasType::BANDED)
           ublas::axpy_prod(*A.banded(), *B.triang(), *C.dense(), init);
       }
-      else if (numB == UBLAS_TYPE::SYMMETRIC) {
-        if (numA == UBLAS_TYPE::DENSE)
+      else if (numB == UblasType::SYMMETRIC) {
+        if (numA == UblasType::DENSE)
           ublas::axpy_prod(*A.dense(), *B.sym(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::TRIANGULAR)
+        else if (numA == UblasType::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.sym(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SYMMETRIC)
+        else if (numA == UblasType::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.sym(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SPARSE)
+        else if (numA == UblasType::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.sym(), *C.dense(), init);
-        else // if (numA == UBLAS_TYPE::BANDED)
+        else // if (numA == UblasType::BANDED)
           ublas::axpy_prod(*A.banded(), *B.sym(), *C.dense(), init);
       }
-      else if (numB == UBLAS_TYPE::SPARSE) {
-        if (numA == UBLAS_TYPE::DENSE)
+      else if (numB == UblasType::SPARSE) {
+        if (numA == UblasType::DENSE)
           ublas::axpy_prod(*A.dense(), *B.sparse(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::TRIANGULAR)
+        else if (numA == UblasType::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.sparse(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SYMMETRIC)
+        else if (numA == UblasType::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.sparse(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SPARSE)
+        else if (numA == UblasType::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.sparse(), *C.dense(), init);
-        else // if(numA==UBLAS_TYPE::BANDED){
+        else // if(numA==UblasType::BANDED){
           ublas::axpy_prod(*A.banded(), *B.sparse(), *C.dense(), init);
       }
-      else // if(numB==UBLAS_TYPE::BANDED)
+      else // if(numB==UblasType::BANDED)
       {
-        if (numA == UBLAS_TYPE::DENSE)
+        if (numA == UblasType::DENSE)
           ublas::axpy_prod(*A.dense(), *B.banded(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::TRIANGULAR)
+        else if (numA == UblasType::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.banded(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SYMMETRIC)
+        else if (numA == UblasType::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.banded(), *C.dense(), init);
-        else if (numA == UBLAS_TYPE::SPARSE)
+        else if (numA == UblasType::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.banded(), *C.dense(), init);
-        else // if(numA==UBLAS_TYPE::BANDED)
+        else // if(numA==UblasType::BANDED)
           ublas::axpy_prod(*A.banded(), *B.banded(), *C.dense(), init);
       }
       break;
-    case UBLAS_TYPE::TRIANGULAR:
-      // if(numA!= UBLAS_TYPE::TRIANGULAR || numB != UBLAS_TYPE::TRIANGULAR)
+    case UblasType::TRIANGULAR:
+      // if(numA!= UblasType::TRIANGULAR || numB != UblasType::TRIANGULAR)
       THROW_EXCEPTION(
           "Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       // ublas::axpy_prod(*A.triang(), *B.triang(),*C.triang(), init);
       break;
-    case UBLAS_TYPE::SYMMETRIC:
-      //        if(numA!= UBLAS_TYPE::SYMMETRIC || numB != UBLAS_TYPE::SYMMETRIC)
+    case UblasType::SYMMETRIC:
+      //        if(numA!= UblasType::SYMMETRIC || numB != UblasType::SYMMETRIC)
       THROW_EXCEPTION(
           "Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       // ublas::axpy_prod(*A.sym(), *B.sym(),*C.sym(),init);
       break;
-    case UBLAS_TYPE::SPARSE:
-      if (numA != UBLAS_TYPE::SPARSE || numB != UBLAS_TYPE::SPARSE)
+    case UblasType::SPARSE:
+      if (numA != UblasType::SPARSE || numB != UblasType::SPARSE)
         THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): wrong type for C (according to A "
                         "and B types).");
       ublas::sparse_prod(*A.sparse(), *B.sparse(), *C.sparse(), init);
@@ -373,7 +373,7 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
 //   auto numA = A.num();
 //   auto numB = B.num();
 //   auto numC = C.num();
-//   if(numA != UBLAS_TYPE::DENSE || numB != UBLAS_TYPE::DENSE || numC != UBLAS_TYPE::DENSE)
+//   if(numA != UblasType::DENSE || numB != UblasType::DENSE || numC != UblasType::DENSE)
 //     THROW_EXCEPTION("gemm(...) failed: reserved to dense matrices.");
 
 //   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
@@ -401,9 +401,9 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
 //   if(numA == 0 || numB == 0 || numC == 0)
 //     THROW_EXCEPTION("gemm(...) not yet implemented for block matrices.");
 
-//   if(numA == UBLAS_TYPE::DENSE && numB == UBLAS_TYPE::DENSE && numC == UBLAS_TYPE::DENSE)
+//   if(numA == UblasType::DENSE && numB == UblasType::DENSE && numC == UblasType::DENSE)
 //     bindings_blas::blas::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
-//   else if(numA == UBLAS_TYPE::DENSE && numB == UBLAS_TYPE::DENSE && numC != UBLAS_TYPE::DENSE)
+//   else if(numA == UblasType::DENSE && numB == UblasType::DENSE && numC != UblasType::DENSE)
 //   {
 //     // Copy C into tmpC ...
 //     tmpC = new DenseMat(*C.dense());

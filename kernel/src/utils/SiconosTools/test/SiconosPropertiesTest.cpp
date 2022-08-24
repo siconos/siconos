@@ -20,7 +20,7 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosPropertiesTest);
 
-using G = siconos::internal::SiconosGraph<std::string, std::string, boost::no_property,
+using G = siconos::graphs::SiconosGraph<std::string, std::string, boost::no_property,
                                          boost::no_property, boost::no_property>;
 
 void SiconosPropertiesTest::setUp() {}
@@ -32,7 +32,7 @@ void SiconosPropertiesTest::t1()
 {
   auto g = std::make_shared<G>();
 
-  auto mv = siconos::internal::vertexProperties<int>(*g);
+  auto mv = siconos::graphs::vertexProperties<int>(*g);
 
   auto v1 = g->add_vertex("A");
   auto v2 = g->add_vertex("B");
@@ -61,7 +61,7 @@ void SiconosPropertiesTest::t2()
 {
   auto g = std::make_shared<G>();
 
-  auto mv = siconos::internal::vertexProperties<int>(*g);
+  auto mv = siconos::graphs::vertexProperties<int>(*g);
 
   auto v1 = g->add_vertex("A");
   auto v2 = g->add_vertex("B");
@@ -94,7 +94,7 @@ void SiconosPropertiesTest::t3()
 {
   auto g = std::make_shared<G>();
 
-  auto mv = siconos::internal::vertexProperties<int>(*g);
+  auto mv = siconos::graphs::vertexProperties<int>(*g);
 
   auto v1 = g->add_vertex("A");
   auto v2 = g->add_vertex("B");

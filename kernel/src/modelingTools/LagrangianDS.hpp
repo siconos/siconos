@@ -24,7 +24,7 @@
 #define LAGRANGIANDS_H
 
 #include "DynamicalSystem.hpp"
-#include "PluginTypes.hpp"  // for FPtr6, ...
+#include "PluginTypes.hpp"  // for siconos::plugins::FPtr6, ...
 #include "SecondOrderDS.hpp"
 namespace siconos::modeling {
 /**
@@ -961,7 +961,8 @@ class LagrangianDS : public SecondOrderDS {
    */
   void init_forces() override;
 
-  //  ACCEPT_STD_VISITORS();
+  // visitors hook
+  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
 };
 
 }  // namespace siconos::modeling

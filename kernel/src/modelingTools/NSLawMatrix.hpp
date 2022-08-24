@@ -32,13 +32,14 @@ namespace siconos::modeling {
  *  NonSmoothLaws associated to pairs of integers.  It can be used
  *  e.g. to maintain a list of non-smooth laws associated with contact
  *  between types of objects. */
-class NSLawMatrix : public boost::numeric::ublas::symmetric_matrix<SP::NonSmoothLaw> {
+class NSLawMatrix
+    : public boost::numeric::ublas::symmetric_matrix<std::shared_ptr<NonSmoothLaw>> {
  protected:
   ACCEPT_SERIALIZATION(NSLawMatrix);
 
  public:
   NSLawMatrix(NSLawMatrix::size_type i = 1)
-      : boost::numeric::ublas::symmetric_matrix<SP::NonSmoothLaw>(i)
+      : boost::numeric::ublas::symmetric_matrix<std::shared_ptr<NonSmoothLaw>>(i)
   {
   }
 };

@@ -21,7 +21,7 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 
 #include "BlockVector.hpp"
-#include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosAlgebraTypes.hpp"
 #include "SiconosConfig.h"
 #include "SiconosVector.hpp"
 
@@ -71,7 +71,7 @@ void BlockVectorTest::testConstructor1()
   //  auto  z = v->vector(0);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->size() == 3, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->num() ==
-  //  siconos::algebra::UBLAS_TYPE::DENSE, true); std::cout << "--> Constructor 1 test ended
+  //  siconos::algebra::UblasType::DENSE, true); std::cout << "--> Constructor 1 test ended
   //  with success." <<std::endl;
 }
 
@@ -80,7 +80,7 @@ void BlockVectorTest::testConstructor2()
   std::cout << "--> Test: constructor 2." << std::endl;
   auto w = std::make_shared<siconos::algebra::SiconosVector>(3, 2);
   // auto  z=
-  // std::make_shared<siconos::algebra::SiconosVector>(5,3,siconos::algebra::UBLAS_TYPE::SPARSE);
+  // std::make_shared<siconos::algebra::SiconosVector>(5,3,siconos::algebra::UblasType::SPARSE);
   // Problem if z sparse: " Assertion failed in file
   // /usr/include/boost/numeric/ublas/vector_sparse.hpp at line 1253: *this != (*this) ().end
   // () "
@@ -106,11 +106,11 @@ void BlockVectorTest::testConstructor2()
   auto ww = v->vector(0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testConstructor2 : ", ww->num() == siconos::algebra::UBLAS_TYPE::DENSE, true);
+      "testConstructor2 : ", ww->num() == siconos::algebra::UblasType::DENSE, true);
   ww = v->vector(1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->size() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testConstructor2 : ", ww->num() == siconos::algebra::UBLAS_TYPE::DENSE, true);
+      "testConstructor2 : ", ww->num() == siconos::algebra::UblasType::DENSE, true);
 
   auto x2 = std::make_shared<BlockVector>();
   x2->insertPtr(w);
@@ -130,11 +130,11 @@ void BlockVectorTest::testConstructor2()
   auto ww2 = v2->vector(0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testConstructor2 : ", ww2->num() == siconos::algebra::UBLAS_TYPE::DENSE, true);
+      "testConstructor2 : ", ww2->num() == siconos::algebra::UblasType::DENSE, true);
   ww2 = v2->vector(1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testConstructor2 : ", ww2->num() == siconos::algebra::UBLAS_TYPE::DENSE, true);
+      "testConstructor2 : ", ww2->num() == siconos::algebra::UblasType::DENSE, true);
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 
@@ -143,7 +143,7 @@ void BlockVectorTest::testConstructor3()
   std::cout << "--> Test: constructor 3." << std::endl;
   auto w = std::make_shared<siconos::algebra::SiconosVector>(3, 2);
   auto z = std::make_shared<siconos::algebra::SiconosVector>(
-      5, 3, siconos::algebra::UBLAS_TYPE::SPARSE);
+      5, 3, siconos::algebra::UblasType::SPARSE);
   auto v = std::make_shared<BlockVector>(w, z);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->size() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->numberOfBlocks() == 2, true);

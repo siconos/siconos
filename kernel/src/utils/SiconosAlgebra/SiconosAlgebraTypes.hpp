@@ -16,14 +16,13 @@
  * limitations under the License.
  */
 
-/** ! \file SiconosAlgebraTypeDef.hpp
-    \brief Header file for Siconos Algebra objects
-
-    This file provides aliases for matrix and vector objects and so on ...
+/** ! \file SiconosAlgebraTypes.hpp
+    
+    Enum to list matrices and vectors types (dense, sparse ...)
 */
 
-#ifndef SiconosAlgebraTypeDef
-#define SiconosAlgebraTypeDef
+#ifndef SiconosAlgebraTypes
+#define SiconosAlgebraTypes
 
 // Make sure Fortran function have a calling convention compatible with gfortran
 #ifndef BIND_FORTRAN_LOWERCASE_UNDERSCORE
@@ -35,21 +34,13 @@
 #define BOOST_ALL_NO_LIB
 #endif
 
-//#include <array>
-//#include <boost/numeric/ublas/fwd.hpp>
-//#include <complex>
-// #include <limits>
-//#include <vector>
-
-//#include "SiconosConfig.h"
-
 namespace siconos::algebra {
 
-/** siconos::UBLAS_TYPE is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
+/** siconos::UblasType is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
     SPARSE, BANDED. It is used to describe the type of matrix or
     vector we want to construct.
 */
-enum class UBLAS_TYPE {
+enum class UblasType {
   BLOCK = 0,
   /** id for dense matrix or vector */
   DENSE = 1,
@@ -68,36 +59,6 @@ enum class UBLAS_TYPE {
   /** id for sparse matrix or vector */
   SPARSE_COORDINATE = 8
 };
-
-
-// /** Complex matrix, column major */
-// using complex_matrix =
-//     boost::numeric::ublas::matrix<std::complex<double>, boost::numeric::ublas::column_major>;
-
-// Notes:
-// Vector definition in boost: vector<T,A> see
-// http://www.boost.org/libs/numeric/ublas/doc/vector.htm T: value type A: storage type
-
-
-// /** Complex vector */
-// using complex_vector = boost::numeric::ublas::vector<std::complex<double>>;
-
-
-/** Some containers for vectors - Used for example in Relation to compute y and r
- * when there are 2 DS*/
-//using VectorOfBlockVectors = std::vector<std::shared_ptr<BlockVector>>;
-
-////** Some containers for matrices - Used for example to handle the
-///    various jacobian in LagrangianDS. */
-/// typedef std::vector<std::shared_ptr<SiconosMatrix>> VectorOfMatrices;
-
-/// /** Some containers for matrices - Used for example to handle the
-///    various jacobian in LagrangianDS. */
-/// typedef std::vector<std::shared_ptr<SimpleMatrix>> VectorOfSMatrices;
-
-/// /** type of object used to save indices */
-/// typedef std::vector<std::size_t> Index;
-
 }  // namespace siconos::algebra
 
 // Set this to use lapack::optimal_workspace where required in lapack routines.

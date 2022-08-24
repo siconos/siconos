@@ -382,7 +382,8 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   void display(bool brief = true) const override;
 
-  // ACCEPT_STD_VISITORS();
+  // visitors hook
+  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
 };
 }  // namespace siconos::modeling
 #endif

@@ -25,8 +25,9 @@
 #include "SiconosAlgebraProd.hpp"
 #include "SiconosMatrixSetBlock.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosVectorFriends.hpp"  // inner_prod
+#include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
-
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -285,7 +286,7 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time)
 
   // Compute _dotq
   computeT();
-  prod(*_T, *_twist, *_dotq, true);
+  siconos::algebra::prod(*_T, *_twist, *_dotq, true);
   _x[1] = std::make_shared<siconos::algebra::SiconosVector>(*_dotq, *_acceleration);
 
   // Nothing to do for the initialization of the wrench
@@ -302,7 +303,7 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time)
 
   /** \warning the derivative of T w.r.t to q is neglected */
   _rhsMatrices[jacobianXBloc00_] = std::make_shared<siconos::algebra::SimpleMatrix>(
-      _qDim, _qDim, siconos::algebra::UBLAS_TYPE::ZERO);
+      _qDim, _qDim, siconos::algebra::UblasType::ZERO);
 
   _rhsMatrices[jacobianXBloc01_] = std::make_shared<siconos::algebra::SimpleMatrix>(*_T);
   bool flag1 = false, flag2 = false;
@@ -327,11 +328,11 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time)
 
   if (!_rhsMatrices[zeroMatrix_])
     _rhsMatrices[zeroMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(
-        6, 6, siconos::algebra::UBLAS_TYPE::ZERO);
+        6, 6, siconos::algebra::UblasType::ZERO);
 
   if (!_rhsMatrices[zeroMatrixqDim_])
     _rhsMatrices[zeroMatrixqDim_] = std::make_shared<siconos::algebra::SimpleMatrix>(
-        6, _qDim, siconos::algebra::UBLAS_TYPE::ZERO);
+        6, _qDim, siconos::algebra::UblasType::ZERO);
 
   if (flag1 && flag2)
     _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
@@ -851,7 +852,7 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time)
 
   // Compute _dotq
   computeT();
-  prod(*_T, *_twist, *_dotq, true);
+  siconos::algebra::prod(*_T, *_twist, *_dotq, true);
 
   _x[1]->setBlock(0, *_dotq);
   _x[1]->setBlock(_qDim, *_acceleration);
@@ -895,7 +896,7 @@ static void computeMGyr_internal(std::shared_ptr<siconos::algebra::SiconosMatrix
     omega.setValue(0, twist->getValue(3));
     omega.setValue(1, twist->getValue(4));
     omega.setValue(2, twist->getValue(5));
-    prod(*I, omega, iomega, true);
+    siconos::algebra::prod(*I, omega, iomega, true);
     cross_product(omega, iomega, *mGyr);
   }
 }
@@ -1063,7 +1064,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMGyrtwist(double time)
     omega.setValue(1, _twist->getValue(4));
     omega.setValue(2, _twist->getValue(5));
     siconos::algebra::SiconosVector Iomega(3);
-    prod(*_I, omega, Iomega, true);
+    siconos::algebra::prod(*_I, omega, Iomega, true);
     siconos::algebra::SiconosVector ei(3);
     siconos::algebra::SiconosVector Iei(3);
     siconos::algebra::SiconosVector ei_Iomega(3);
@@ -1073,7 +1074,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMGyrtwist(double time)
     for (int i = 0; i < 3; i++) {
       ei.zero();
       ei.setValue(i, 1.0);
-      prod(*_I, ei, Iei, true);
+      siconos::algebra::prod(*_I, ei, Iei, true);
       cross_product(omega, Iei, omega_Iei);
       cross_product(ei, Iomega, ei_Iomega);
       for (int j = 0; j < 3; j++)
@@ -1351,8 +1352,8 @@ double siconos::modeling::NewtonEulerDS::computeKineticEnergy()
   DEBUG_EXPR(_mass->display());
 
   siconos::algebra::SiconosVector tmp(6);
-  prod(*_mass, *_twist, tmp, true);
-  double K = 0.5 * inner_prod(tmp, *_twist);
+  siconos::algebra::prod(*_mass, *_twist, tmp, true);
+  double K = 0.5 * siconos::algebra::inner_prod(tmp, *_twist);
 
   DEBUG_PRINTF("Kinetic Energy = %e\n", K);
   DEBUG_END("siconos::modeling::NewtonEulerDS::computeKineticEnergy()\n");
@@ -1459,4 +1460,10 @@ void siconos::modeling::NewtonEulerDS::addExtForceAtPos(
 
   computeExtForceAtPos(_q, _isMextExpressedInInertialFrame, force, forceAbsRef, pos, posAbsRef,
                        _fExt, _mExt, true);
+}
+
+void siconos::modeling::NewtonEulerDS::acceptSP(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
+{
+  tourist->visit(*this);
 }

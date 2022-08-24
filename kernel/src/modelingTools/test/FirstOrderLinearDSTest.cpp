@@ -125,9 +125,9 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   invM(1, 1) = 1. / (2. * time);
   invM(2, 2) = 1. / (3. * time);
   siconos::algebra::SiconosVector tmp(3);
-  tmp = (time * *x01 + 2. * prod(*A0, *x0));
-  prod(invM, tmp, tmp);
-  prod(invM, 2 * *A0, Mref);
+  tmp = (time * *x01 + 2. * siconos::algebra::prod(*A0, *x0));
+  siconos::algebra::prod(invM, tmp, tmp);
+  siconos::algebra::prod(invM, 2 * *A0, Mref);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->rhs()) == tmp, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(

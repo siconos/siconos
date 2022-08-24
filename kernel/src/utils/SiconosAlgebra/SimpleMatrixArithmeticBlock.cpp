@@ -33,7 +33,7 @@ void siconos::algebra::SimpleMatrix::addBlock(unsigned int row_min, unsigned int
   // add m to current matrix elements, starting from row row_min and column col_min, to the
   // values of the matrix m. m may be a BlockMatrix.
 
-  if (_num == UBLAS_TYPE::ZERO || _num == UBLAS_TYPE::IDENTITY)
+  if (_num == UblasType::ZERO || _num == UblasType::IDENTITY)
     THROW_EXCEPTION(
         "SimpleMatrix::addBlock(pos,..., m) forbidden for zero or identity matrix.");
 
@@ -57,7 +57,7 @@ void siconos::algebra::SimpleMatrix::addBlock(unsigned int row_min, unsigned int
 
   auto numM = m.num();
 
-  if (numM == UBLAS_TYPE::BLOCK)  // if m is a block matrix ...
+  if (numM == UblasType::BLOCK)  // if m is a block matrix ...
   {
     const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
     auto posRow = row_min;
@@ -72,35 +72,35 @@ void siconos::algebra::SimpleMatrix::addBlock(unsigned int row_min, unsigned int
       posCol = 0;
     }
   }
-  else if (numM == UBLAS_TYPE::ZERO)  // if m = 0
+  else if (numM == UblasType::ZERO)  // if m = 0
   {
     // nothing to do !
   }
   else  // if m is a SimpleMatrix
   {
-    if (_num == UBLAS_TYPE::DENSE) {
+    if (_num == UblasType::DENSE) {
       switch (numM) {
-        case UBLAS_TYPE::DENSE:
+        case UblasType::DENSE:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) +=
               *(m.dense());
           break;
-        case UBLAS_TYPE::TRIANGULAR:
+        case UblasType::TRIANGULAR:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) +=
               *(m.triang());
           break;
-        case UBLAS_TYPE::SYMMETRIC:
+        case UblasType::SYMMETRIC:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) +=
               *(m.sym());
           break;
-        case UBLAS_TYPE::SPARSE:
+        case UblasType::SPARSE:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) +=
               *(m.sparse());
           break;
-        case UBLAS_TYPE::BANDED:
+        case UblasType::BANDED:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) +=
               *(m.banded());
           break;
-        case UBLAS_TYPE::IDENTITY:
+        case UblasType::IDENTITY:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) +=
               *(m.identity());
           break;
@@ -121,7 +121,7 @@ void siconos::algebra::SimpleMatrix::subBlock(unsigned int row_min, unsigned int
   // sub m to current matrix elements, starting from row row_min and column col_min, to the
   // values of the matrix m. m may be a BlockMatrix.
 
-  if (_num == UBLAS_TYPE::ZERO || _num == UBLAS_TYPE::IDENTITY)
+  if (_num == UblasType::ZERO || _num == UblasType::IDENTITY)
     THROW_EXCEPTION(
         "SimpleMatrix::subBlock(pos,..., m) forbidden for zero or identity matrix.");
 
@@ -145,7 +145,7 @@ void siconos::algebra::SimpleMatrix::subBlock(unsigned int row_min, unsigned int
 
   auto numM = m.num();
 
-  if (numM == UBLAS_TYPE::BLOCK)  // if m is a block matrix ...
+  if (numM == UblasType::BLOCK)  // if m is a block matrix ...
   {
     const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
     auto posRow = row_min;
@@ -160,35 +160,35 @@ void siconos::algebra::SimpleMatrix::subBlock(unsigned int row_min, unsigned int
       posCol = 0;
     }
   }
-  else if (numM == UBLAS_TYPE::ZERO)  // if m = 0
+  else if (numM == UblasType::ZERO)  // if m = 0
   {
     // nothing to do !
   }
   else  // if m is a SimpleMatrix
   {
-    if (_num == UBLAS_TYPE::DENSE) {
+    if (_num == UblasType::DENSE) {
       switch (numM) {
-        case UBLAS_TYPE::DENSE:
+        case UblasType::DENSE:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -=
               *(m.dense());
           break;
-        case UBLAS_TYPE::TRIANGULAR:
+        case UblasType::TRIANGULAR:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -=
               *(m.triang());
           break;
-        case UBLAS_TYPE::SYMMETRIC:
+        case UblasType::SYMMETRIC:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -=
               *(m.sym());
           break;
-        case UBLAS_TYPE::SPARSE:
+        case UblasType::SPARSE:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -=
               *(m.sparse());
           break;
-        case UBLAS_TYPE::BANDED:
+        case UblasType::BANDED:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -=
               *(m.banded());
           break;
-        case UBLAS_TYPE::IDENTITY:
+        case UblasType::IDENTITY:
           noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -=
               *(m.identity());
           break;

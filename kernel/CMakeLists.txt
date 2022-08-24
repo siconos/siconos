@@ -27,12 +27,11 @@ set(${COMPONENT}_DIRS
   src/utils
   src/utils/SiconosAlgebra
   src/utils/SiconosMemory
-  src/utils/SiconosSharedLibrary
   src/utils/SiconosTools
   src/utils/ProgressBar
-  src/plugin
+  src/utils/plugins
   src/modelingTools
-  # src/simulationTools
+  src/simulationTools
 )
 
 # -- Documentation --

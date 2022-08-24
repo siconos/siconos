@@ -49,8 +49,11 @@ class EqualityConditionNSL : public NonSmoothLaw {
    */
   void display() const override{};
 
-  // Visitors hook
-  // ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override
+  {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::modeling
 

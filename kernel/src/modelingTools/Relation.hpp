@@ -29,7 +29,9 @@
 
 namespace siconos::algebra {
 class SimpleMatrix;
-}
+class SiconosVector;
+class BlockVector;
+}  // namespace siconos::algebra
 
 namespace siconos::plugins {
 class PluggedObject;
@@ -151,6 +153,7 @@ class Relation {
  private:
   // Rule of five ...
   Relation(const Relation &) = delete;
+  Relation(const Relation &&) = delete;
   Relation &operator=(const Relation &) = delete;
   Relation &operator=(const Relation &&) = delete;
 

@@ -44,7 +44,7 @@
 // =================================================
 
 siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m)
-    : SiconosMatrix(UBLAS_TYPE::BLOCK), _dimRow(0), _dimCol(0)
+    : SiconosMatrix(UblasType::BLOCK), _dimRow(0), _dimCol(0)
 {
   _tabRow = std::make_shared<std::vector<std::size_t>>();
   _tabCol = std::make_shared<std::vector<std::size_t>>();
@@ -99,7 +99,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m)
 }
 
 siconos::algebra::BlockMatrix::BlockMatrix(const BlockMatrix &m)
-    : SiconosMatrix(UBLAS_TYPE::BLOCK), _dimRow(0), _dimCol(0)
+    : SiconosMatrix(UblasType::BLOCK), _dimRow(0), _dimCol(0)
 {
   unsigned int nbRows = m.numberOfBlocks(0);
   unsigned int nbCols = m.numberOfBlocks(1);
@@ -138,7 +138,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(const BlockMatrix &m)
 
 siconos::algebra::BlockMatrix::BlockMatrix(
     const std::vector<std::shared_ptr<SiconosMatrix>> &m, unsigned int row, unsigned int col)
-    : SiconosMatrix(UBLAS_TYPE::BLOCK), _dimRow(0), _dimCol(0)
+    : SiconosMatrix(UblasType::BLOCK), _dimRow(0), _dimCol(0)
 {
   if (m.size() != (row * col))
     THROW_EXCEPTION("number of blocks inconsistent with provided dimensions.");
@@ -179,7 +179,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> A,
                                            std::shared_ptr<SiconosMatrix> B,
                                            std::shared_ptr<SiconosMatrix> C,
                                            std::shared_ptr<SiconosMatrix> D)
-    : SiconosMatrix(UBLAS_TYPE::BLOCK), _dimRow(0), _dimCol(0)
+    : SiconosMatrix(UblasType::BLOCK), _dimRow(0), _dimCol(0)
 {
   if (A->size(0) != B->size(0) || C->size(0) != D->size(0) || A->size(1) != C->size(1) ||
       B->size(1) != D->size(1))
@@ -240,7 +240,7 @@ const siconos::algebra::DenseMat siconos::algebra::BlockMatrix::getDense(
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
 
-  if (tmp->num() != UBLAS_TYPE::DENSE)
+  if (tmp->num() != UblasType::DENSE)
     THROW_EXCEPTION("the matrix at (row, col) is not a Dense matrix");
 
   return (tmp->getDense());
@@ -251,7 +251,7 @@ const siconos::algebra::TriangMat siconos::algebra::BlockMatrix::getTriang(
     unsigned int row, unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::TRIANGULAR) {
+  if (tmp->num() != UblasType::TRIANGULAR) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Triangular matrix");
   }
   return (tmp->getTriang());
@@ -262,7 +262,7 @@ const siconos::algebra::SymMat siconos::algebra::BlockMatrix::getSym(unsigned in
                                                                      unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::SYMMETRIC) {
+  if (tmp->num() != UblasType::SYMMETRIC) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Symmmetric matrix");
   }
   return (tmp->getSym());
@@ -273,7 +273,7 @@ const siconos::algebra::SparseMat siconos::algebra::BlockMatrix::getSparse(
     unsigned int row, unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::SPARSE) {
+  if (tmp->num() != UblasType::SPARSE) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Sparse matrix");
   }
   return (tmp->getSparse());
@@ -284,7 +284,7 @@ const siconos::algebra::SparseCoordinateMat siconos::algebra::BlockMatrix::getSp
     unsigned int row, unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::SPARSE_COORDINATE) {
+  if (tmp->num() != UblasType::SPARSE_COORDINATE) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Sparse matrix");
   }
   return (tmp->getSparseCoordinate());
@@ -294,7 +294,7 @@ const siconos::algebra::BandedMat siconos::algebra::BlockMatrix::getBanded(
     unsigned int row, unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::BANDED) {
+  if (tmp->num() != UblasType::BANDED) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Banded matrix");
   }
   return (tmp->getBanded());
@@ -305,7 +305,7 @@ const siconos::algebra::ZeroMat siconos::algebra::BlockMatrix::getZero(unsigned 
                                                                        unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::ZERO) {
+  if (tmp->num() != UblasType::ZERO) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Zero matrix");
   }
   return (tmp->getZero());
@@ -316,7 +316,7 @@ const siconos::algebra::IdentityMat siconos::algebra::BlockMatrix::getIdentity(
     unsigned int row, unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::IDENTITY) {
+  if (tmp->num() != UblasType::IDENTITY) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Identity matrix");
   }
   return (tmp->getIdentity());
@@ -327,7 +327,7 @@ siconos::algebra::DenseMat *siconos::algebra::BlockMatrix::dense(unsigned int ro
                                                                  unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::DENSE) {
+  if (tmp->num() != UblasType::DENSE) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Dense matrix");
   }
 
@@ -338,7 +338,7 @@ siconos::algebra::TriangMat *siconos::algebra::BlockMatrix::triang(unsigned int 
                                                                    unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::TRIANGULAR) {
+  if (tmp->num() != UblasType::TRIANGULAR) {
     THROW_EXCEPTION("The matrix at (row, col) is not a Triangular matrix");
   }
   return (tmp->triang());
@@ -347,7 +347,7 @@ siconos::algebra::SymMat *siconos::algebra::BlockMatrix::sym(unsigned int row,
                                                              unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::SYMMETRIC) {
+  if (tmp->num() != UblasType::SYMMETRIC) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Symmmetric matrix");
   }
   return (tmp->sym());
@@ -357,7 +357,7 @@ siconos::algebra::SparseMat *siconos::algebra::BlockMatrix::sparse(unsigned int 
                                                                    unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::SPARSE) {
+  if (tmp->num() != UblasType::SPARSE) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Sparse matrix");
   }
   return (tmp->sparse());
@@ -366,7 +366,7 @@ siconos::algebra::SparseCoordinateMat *siconos::algebra::BlockMatrix::sparseCoor
     unsigned int row, unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::SPARSE_COORDINATE) {
+  if (tmp->num() != UblasType::SPARSE_COORDINATE) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Sparse coordinate matrix");
   }
   return (tmp->sparseCoordinate());
@@ -376,7 +376,7 @@ siconos::algebra::BandedMat *siconos::algebra::BlockMatrix::banded(unsigned int 
                                                                    unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::BANDED) {
+  if (tmp->num() != UblasType::BANDED) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Banded matrix");
   }
   return (tmp->banded());
@@ -386,7 +386,7 @@ siconos::algebra::ZeroMat *siconos::algebra::BlockMatrix::zero_mat(unsigned int 
                                                                    unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::ZERO) {
+  if (tmp->num() != UblasType::ZERO) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Zero matrix");
   }
   return (tmp->zero_mat(row, col));
@@ -396,7 +396,7 @@ siconos::algebra::IdentityMat *siconos::algebra::BlockMatrix::identity(unsigned 
                                                                        unsigned int col) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UBLAS_TYPE::IDENTITY) {
+  if (tmp->num() != UblasType::IDENTITY) {
     THROW_EXCEPTION("the matrix at (row, col) is not a Identity matrix");
   }
   return (tmp->identity());
@@ -715,7 +715,7 @@ void siconos::algebra::BlockMatrix::addSimple(unsigned int &indRow, unsigned int
 
   // iterators through this
   unsigned int currentRow = 0, currentCol = 0;
-  UBLAS_TYPE currentNum;
+  UblasType currentNum;
   for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
     for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
       if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
@@ -727,22 +727,22 @@ void siconos::algebra::BlockMatrix::addSimple(unsigned int &indRow, unsigned int
         currentNum = (*it2)->num();
         if (numM != currentNum) THROW_EXCEPTION("inconsistent types.");
 
-        if (numM == UBLAS_TYPE::DENSE)
+        if (numM == UblasType::DENSE)
           noalias(*(*it2)->dense()) += boost::numeric::ublas::subrange(
               *m.dense(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::TRIANGULAR)
+        else if (numM == UblasType::TRIANGULAR)
           noalias(*(*it2)->triang()) += boost::numeric::ublas::subrange(
               *m.triang(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::SYMMETRIC)
+        else if (numM == UblasType::SYMMETRIC)
           noalias(*(*it2)->sym()) += boost::numeric::ublas::subrange(
               *m.sym(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::SPARSE)
+        else if (numM == UblasType::SPARSE)
           noalias(*(*it2)->sparse()) += boost::numeric::ublas::subrange(
               *m.sparse(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::BANDED)
+        else if (numM == UblasType::BANDED)
           noalias(*(*it2)->banded()) += boost::numeric::ublas::subrange(
               *m.banded(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::ZERO) {
+        else if (numM == UblasType::ZERO) {
         }
         else
           THROW_EXCEPTION("inconsistent types.");
@@ -772,7 +772,7 @@ void siconos::algebra::BlockMatrix::subSimple(unsigned int &indRow, unsigned int
 
   // iterators through this
   unsigned int currentRow = 0, currentCol = 0;
-  UBLAS_TYPE currentNum;
+  UblasType currentNum;
   for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
     for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
       if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
@@ -784,22 +784,22 @@ void siconos::algebra::BlockMatrix::subSimple(unsigned int &indRow, unsigned int
         currentNum = (*it2)->num();
         if (numM != currentNum) THROW_EXCEPTION("inconsistent types.");
 
-        if (numM == UBLAS_TYPE::DENSE)
+        if (numM == UblasType::DENSE)
           noalias(*(*it2)->dense()) -= boost::numeric::ublas::subrange(
               *m.dense(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::TRIANGULAR)
+        else if (numM == UblasType::TRIANGULAR)
           noalias(*(*it2)->triang()) -= boost::numeric::ublas::subrange(
               *m.triang(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::SYMMETRIC)
+        else if (numM == UblasType::SYMMETRIC)
           noalias(*(*it2)->sym()) -= boost::numeric::ublas::subrange(
               *m.sym(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::SPARSE)
+        else if (numM == UblasType::SPARSE)
           noalias(*(*it2)->sparse()) -= boost::numeric::ublas::subrange(
               *m.sparse(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::BANDED)
+        else if (numM == UblasType::BANDED)
           noalias(*(*it2)->banded()) -= boost::numeric::ublas::subrange(
               *m.banded(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UBLAS_TYPE::ZERO) {
+        else if (numM == UblasType::ZERO) {
         }
         else
           THROW_EXCEPTION("inconsistent types.");

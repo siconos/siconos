@@ -334,13 +334,13 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
 
   auto numVIn = vIn.num();
   unsigned int currentSize;
-  UBLAS_TYPE currentNum;
+  UblasType currentNum;
   unsigned int index = 0;
   for (auto& it : _vect) {
     currentSize = it->size();
     currentNum = it->num();
     if (numVIn != currentNum) THROW_EXCEPTION("inconsistent types.");
-    if (numVIn == UBLAS_TYPE::DENSE)
+    if (numVIn == UblasType::DENSE)
       noalias(*it->dense()) -= ublas::subrange(*vIn.dense(), index, index + currentSize);
     else
       noalias(*it->sparse()) -= ublas::subrange(*vIn.sparse(), index, index + currentSize);
@@ -380,7 +380,7 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
   unsigned int dim = vIn.size();  // size of the block to be added.
   if (dim > _sizeV) THROW_EXCEPTION("invalid ranges");
   auto numVIn = vIn.num();
-  UBLAS_TYPE currentNum;
+  UblasType currentNum;
   unsigned int currentSize;
   unsigned int index = 0;
 
@@ -388,7 +388,7 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
     currentSize = it->size();
     currentNum = it->num();
     if (numVIn != currentNum) THROW_EXCEPTION("inconsistent types.");
-    if (numVIn == UBLAS_TYPE::DENSE)
+    if (numVIn == UblasType::DENSE)
       noalias(*it->dense()) += ublas::subrange(*vIn.dense(), index, index + currentSize);
     else
       noalias(*it->sparse()) += ublas::subrange(*vIn.sparse(), index, index + currentSize);

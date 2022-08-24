@@ -19,11 +19,13 @@
 
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
-#include "SiconosAlgebraProd.hpp"    // for matrix-vector prod
-#include "SiconosSharedLibrary.hpp"  // for getPluginfunctionname ...
+#include "PluggedObject.hpp"       // for getPluginfunctionname ...
+#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
+#include "SiconosConst.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosVectorFriends.hpp"  // inner_prod
+#include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
-#include "KernelConst.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -215,11 +217,11 @@ void siconos::modeling::LagrangianDS::initRhs(double time)
   }
 
   if (!_rhsMatrices[zeroMatrix_])
-    _rhsMatrices[zeroMatrix_] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, siconos::algebra::UBLAS_TYPE::ZERO);
+    _rhsMatrices[zeroMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(
+        _ndof, _ndof, siconos::algebra::UblasType::ZERO);
   if (!_rhsMatrices[idMatrix_])
-    _rhsMatrices[idMatrix_] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, siconos::algebra::UBLAS_TYPE::IDENTITY);
+    _rhsMatrices[idMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(
+        _ndof, _ndof, siconos::algebra::UblasType::IDENTITY);
 
   if (flag1 && flag2)
     _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
@@ -745,7 +747,7 @@ void siconos::modeling::LagrangianDS::allocateFInt()
 }
 
 void siconos::modeling::LagrangianDS::setComputeMassFunction(const std::string& pluginPath,
-                                               const std::string& functionName)
+                                                             const std::string& functionName)
 {
   _pluginMass->setComputeFunction(pluginPath, functionName);
   if (!_mass) _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
@@ -897,11 +899,17 @@ double siconos::modeling::LagrangianDS::computeKineticEnergy()
   DEBUG_EXPR(velo->display());
 
   auto tmp = std::make_shared<siconos::algebra::SiconosVector>(*velo);
-  if (_mass) prod(*_mass, *velo, *tmp, true);
+  if (_mass) siconos::algebra::prod(*_mass, *velo, *tmp, true);
 
-  double K = 0.5 * inner_prod(*tmp, *velo);
+  double K = 0.5 * siconos::algebra::inner_prod(*tmp, *velo);
 
   DEBUG_PRINTF("Kinetic Energy = %e\n", K);
   DEBUG_END("siconos::modeling::LagrangianDS::computeKineticEnergy()\n");
   return K;
+}
+
+void siconos::modeling::LagrangianDS::acceptSP(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
+{
+  tourist->visit(*this);
 }

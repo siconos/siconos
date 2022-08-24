@@ -95,11 +95,11 @@ bool siconos::algebra::io::write(const std::string &fileName, const SiconosVecto
   else {
     if (outputType != "noDim") outfile << m.size() << std::endl;
 
-    if (m.num() == UBLAS_TYPE::DENSE) {
+    if (m.num() == UblasType::DENSE) {
       DenseVect *p = m.dense();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
     }
-    else if (m.num() == UBLAS_TYPE::SPARSE) {
+    else if (m.num() == UblasType::SPARSE) {
       SparseVect *p = m.sparse();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
     }
@@ -168,7 +168,7 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
 
   if (outputType != "noDim") outfile << m.size(0) << " " << m.size(1) << std::endl;
 
-  if (m.num() == UBLAS_TYPE::DENSE) {
+  if (m.num() == UblasType::DENSE) {
     double tmp;
     for (auto i = 0; i < m.size(0); i++) {
       for (auto j = 0; j < m.size(1); j++) {
@@ -180,7 +180,7 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
       outfile << std::endl;
     }
   }
-  else if (m.num() == UBLAS_TYPE::TRIANGULAR) {
+  else if (m.num() == UblasType::TRIANGULAR) {
     auto p = m.triang();
 
     for (auto row = p->begin1(); row != p->end1(); ++row) {
@@ -188,14 +188,14 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
       outfile << std::endl;
     }
   }
-  else if (m.num() == UBLAS_TYPE::SYMMETRIC) {
+  else if (m.num() == UblasType::SYMMETRIC) {
     auto p = m.sym();
     for (auto row = p->begin1(); row != p->end1(); ++row) {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
       outfile << std::endl;
     }
   }
-  else if (m.num() == UBLAS_TYPE::SPARSE) {
+  else if (m.num() == UblasType::SPARSE) {
     auto p = m.sparse();
     for (auto row = p->begin1(); row != p->end1(); ++row) {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));

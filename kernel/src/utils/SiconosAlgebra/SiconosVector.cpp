@@ -88,13 +88,13 @@ siconos::algebra::SiconosVector::SiconosVector()
 }
 
 // parameters: dimension and type.
-siconos::algebra::SiconosVector::SiconosVector(unsigned row, siconos::algebra::UBLAS_TYPE type)
+siconos::algebra::SiconosVector::SiconosVector(unsigned row, siconos::algebra::UblasType type)
 {
-  if (type == UBLAS_TYPE::SPARSE) {
+  if (type == UblasType::SPARSE) {
     _dense = false;
     vect.Sparse = new SparseVect(ublas::zero_vector<double>(row));
   }
-  else if (type == UBLAS_TYPE::DENSE) {
+  else if (type == UblasType::DENSE) {
     _dense = true;
     vect.Dense = new DenseVect(ublas::zero_vector<double>(row));
   }
@@ -105,14 +105,14 @@ siconos::algebra::SiconosVector::SiconosVector(unsigned row, siconos::algebra::U
 
 // parameters: dimension, default value for all components and type.
 siconos::algebra::SiconosVector::SiconosVector(unsigned row, double val,
-                                               siconos::algebra::UBLAS_TYPE type)
+                                               siconos::algebra::UblasType type)
 {
-  if (type == UBLAS_TYPE::SPARSE) {
+  if (type == UblasType::SPARSE) {
     _dense = false;
     vect.Sparse = new SparseVect(row);
     fill(val);
   }
-  else if (type == UBLAS_TYPE::DENSE) {
+  else if (type == UblasType::DENSE) {
     _dense = true;
     vect.Dense = new DenseVect(ublas::scalar_vector<double>(row, val));
   }
@@ -123,9 +123,9 @@ siconos::algebra::SiconosVector::SiconosVector(unsigned row, double val,
 
 // parameters: a vector (stl) of double and the type.
 siconos::algebra::SiconosVector::SiconosVector(const std::vector<double>& v,
-                                               siconos::algebra::UBLAS_TYPE typ)
+                                               siconos::algebra::UblasType typ)
 {
-  if (typ != UBLAS_TYPE::DENSE) THROW_EXCEPTION("invalid type");
+  if (typ != UblasType::DENSE) THROW_EXCEPTION("invalid type");
 
   _dense = true;
   vect.Dense = new DenseVect(v.size());
@@ -137,7 +137,7 @@ siconos::algebra::SiconosVector::SiconosVector(const SiconosVector& svect)
     : std::enable_shared_from_this<SiconosVector>()
 {
   // if (siconos::tools::ask<IsDense>(svect))  // dense
-  if (svect.num() == UBLAS_TYPE::DENSE) {
+  if (svect.num() == UblasType::DENSE) {
     _dense = true;
     vect.Dense = new DenseVect(svect.size());
     noalias(*vect.Dense) = (*svect.dense());
@@ -188,12 +188,12 @@ siconos::algebra::SiconosVector::SiconosVector(const SiconosVector& v1,
   auto num1 = v1.num();
   auto num2 = v2.num();
   //  if (siconos::tools::ask<IsDense>(v1) && siconos::tools::ask<IsDense>(v2)) {
-  if (num1 == UBLAS_TYPE::DENSE && num2 == UBLAS_TYPE::DENSE) {
+  if (num1 == UblasType::DENSE && num2 == UblasType::DENSE) {
     _dense = true;
     vect.Dense = new DenseVect(size1 + v2.size());
   }
   //  else if (siconos::tools::ask<IsSparse>(v1) && siconos::tools::ask<IsSparse>(v2)) {
-  else if (num1 == UBLAS_TYPE::SPARSE && num2 == UBLAS_TYPE::SPARSE) {
+  else if (num1 == UblasType::SPARSE && num2 == UblasType::SPARSE) {
     _dense = false;
     vect.Sparse = new SparseVect(size1 + v2.size());
   }
@@ -298,7 +298,7 @@ double siconos::algebra::SiconosVector::normInf() const
 {
   if (_dense)
     return norm_inf(*vect.Dense);
-  else  // if(num==UBLAS_TYPE::SPARSE)
+  else  // if(num==UblasType::SPARSE)
     return norm_inf(*vect.Sparse);
 }
 
@@ -306,7 +306,7 @@ double siconos::algebra::SiconosVector::norm2() const
 {
   if (_dense)
     return ublas::norm_2(*vect.Dense);
-  else  // if(num==UBLAS_TYPE::SPARSE)
+  else  // if(num==UblasType::SPARSE)
     return ublas::norm_2(*vect.Sparse);
 }
 //======================================
@@ -442,19 +442,19 @@ void siconos::algebra::SiconosVector::toBlock(SiconosVector& vOut, unsigned int 
   auto numOut = vOut.num();
 
   if (numIn == numOut) {
-    if (numIn == UBLAS_TYPE::DENSE)
+    if (numIn == UblasType::DENSE)
       noalias(ublas::subrange(*vOut.dense(), startOut, endOut)) =
           ublas::subrange(*vect.Dense, startIn, startIn + sizeB);
-    else  // if(numIn == UBLAS_TYPE::SPARSE)// vIn / vOut are Sparse
+    else  // if(numIn == UblasType::SPARSE)// vIn / vOut are Sparse
       noalias(ublas::subrange(*vOut.sparse(), startOut, endOut)) =
           ublas::subrange(*vect.Sparse, startIn, startIn + sizeB);
   }
   else  // vIn and vout of different types ...
   {
-    if (numIn == UBLAS_TYPE::DENSE)  // vIn Dense
+    if (numIn == UblasType::DENSE)  // vIn Dense
       noalias(ublas::subrange(*vOut.sparse(), startOut, endOut)) =
           ublas::subrange(*vect.Dense, startIn, startIn + sizeB);
-    else  // if(numIn == UBLAS_TYPE::SPARSE)// vIn Sparse
+    else  // if(numIn == UblasType::SPARSE)// vIn Sparse
       noalias(ublas::subrange(*vOut.dense(), startOut, endOut)) =
           ublas::subrange(*vect.Sparse, startIn, startIn + sizeB);
   }
@@ -510,13 +510,13 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator=(
   auto vInNum = vIn.num();
   {
     switch (num()) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         switch (vInNum) {
-          case UBLAS_TYPE::DENSE:
+          case UblasType::DENSE:
             // bindings_blas::copy(*vIn.dense(),*vect.Dense);
             noalias(*vect.Dense) = *vIn.dense();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*vect.Dense) = *vIn.sparse();
             break;
           default:
@@ -524,10 +524,10 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator=(
             break;
         }
         break;
-      case UBLAS_TYPE::SPARSE:
-        if (vInNum == UBLAS_TYPE::DENSE)
+      case UblasType::SPARSE:
+        if (vInNum == UblasType::DENSE)
           noalias(*vect.Sparse) = *vIn.dense();
-        else if (vInNum == UBLAS_TYPE::SPARSE)
+        else if (vInNum == UblasType::SPARSE)
           noalias(*vect.Sparse) = *vIn.sparse();
         else
           THROW_EXCEPTION("invalid type");
@@ -543,9 +543,8 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator=(
 siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator=(
     const BlockVector& vIn)
 {
-  VectorOfVectors::const_iterator it;
   unsigned int pos = 0;
-  for (it = vIn.begin(); it != vIn.end(); ++it) {
+  for (auto it = vIn.begin(); it != vIn.end(); ++it) {
     setBlock(pos, **it);
     pos += (*it)->size();
   }
@@ -604,10 +603,10 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator+=(
   {
     // Note: using this *= 2.0 is much more time-consuming.
     switch (num()) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         *vect.Dense += *vect.Dense;
         break;
-      case UBLAS_TYPE::SPARSE:
+      case UblasType::SPARSE:
         *vect.Sparse += *vect.Sparse;
         break;
       default:
@@ -620,12 +619,12 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator+=(
   auto vInNum = vIn.num();
   {
     switch (num()) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         switch (vInNum) {
-          case UBLAS_TYPE::DENSE:
+          case UblasType::DENSE:
             noalias(*vect.Dense) += *vIn.dense();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*vect.Dense) += *vIn.sparse();
             break;
           default:
@@ -633,8 +632,8 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator+=(
             break;
         }
         break;
-      case UBLAS_TYPE::SPARSE:
-        if (vInNum == UBLAS_TYPE::SPARSE)
+      case UblasType::SPARSE:
+        if (vInNum == UblasType::SPARSE)
           noalias(*vect.Sparse) += *vIn.sparse();
         else
           THROW_EXCEPTION("can not add a dense to a sparse.");
@@ -669,12 +668,12 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator-=(
   auto vInNum = vIn.num();
   {
     switch (num()) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         switch (vInNum) {
-          case UBLAS_TYPE::DENSE:
+          case UblasType::DENSE:
             noalias(*vect.Dense) -= *vIn.dense();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*vect.Dense) -= *vIn.sparse();
             break;
           default:
@@ -682,8 +681,8 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator-=(
             break;
         }
         break;
-      case UBLAS_TYPE::SPARSE:
-        if (vInNum == UBLAS_TYPE::SPARSE)
+      case UblasType::SPARSE:
+        if (vInNum == UblasType::SPARSE)
           noalias(*vect.Sparse) -= *vIn.sparse();
         else
           THROW_EXCEPTION("can not sub a dense to a sparse.");
@@ -733,13 +732,13 @@ siconos::algebra::SiconosVector siconos::algebra::operator*(const SiconosVector&
 {
   auto numM = m.num();
 
-  if (numM == UBLAS_TYPE::DENSE) {
+  if (numM == UblasType::DENSE) {
     // Copy m into p and call bindings_blas::scal(d,p), p = d*p.
     DenseVect p = *m.dense();
     bindings_blas::scal(d, p);
     return p;
   }
-  else  // if(numM==UBLAS_TYPE::SPARSE)
+  else  // if(numM==UblasType::SPARSE)
   {
     return (SparseVect)(*m.sparse() * d);
   }
@@ -749,13 +748,13 @@ siconos::algebra::SiconosVector siconos::algebra::operator*(double d, const Sico
 {
   auto numM = m.num();
 
-  if (numM == UBLAS_TYPE::DENSE) {
+  if (numM == UblasType::DENSE) {
     // Copy m into p and call bindings_blas::scal(d,p), p = d*p.
     DenseVect p = *m.dense();
     bindings_blas::scal(d, p);
     return p;
   }
-  else  // if(numM==UBLAS_TYPE::SPARSE)
+  else  // if(numM==UblasType::SPARSE)
   {
     return (SparseVect)(*m.sparse() * d);
   }
@@ -765,13 +764,13 @@ siconos::algebra::SiconosVector siconos::algebra::operator/(const SiconosVector&
 {
   auto numM = m.num();
 
-  if (numM == UBLAS_TYPE::DENSE) {
+  if (numM == UblasType::DENSE) {
     DenseVect p = *m.dense();
     bindings_blas::scal((1.0 / d), p);
     return p;
   }
 
-  else  // if(numM==UBLAS_TYPE::SPARSE){
+  else  // if(numM==UblasType::SPARSE){
     return (SparseVect)(*m.sparse() / d);
 }
 
@@ -789,7 +788,7 @@ siconos::algebra::SiconosVector siconos::algebra::operator+(const SiconosVector&
 
   if (numX == numY)  // x, y SiconosVector of the same type
   {
-    if (numX == UBLAS_TYPE::DENSE) {
+    if (numX == UblasType::DENSE) {
       //    bindings_blas::xpy(*x.dense(),p);
       //    return p;
       return (DenseVect)(*x.dense() + *y.dense());
@@ -800,7 +799,7 @@ siconos::algebra::SiconosVector siconos::algebra::operator+(const SiconosVector&
 
   else  // x, y SiconosVector with y and x of different types
   {
-    if (numX == UBLAS_TYPE::DENSE)
+    if (numX == UblasType::DENSE)
       return (DenseVect)(*x.dense() + *y.sparse());
     else
       return (DenseVect)(*x.sparse() + *y.dense());
@@ -827,27 +826,27 @@ void siconos::algebra::add(const SiconosVector& x, const SiconosVector& y, Sicon
   }
   else  // No common memory between x,y and z
   {
-    if (numZ != UBLAS_TYPE::BLOCK)  // z is a SiconosVector
+    if (numZ != UblasType::BLOCK)  // z is a SiconosVector
     {
-      if (numX == numY && numX != UBLAS_TYPE::BLOCK)  // x, y SiconosVector of the same type
+      if (numX == numY && numX != UblasType::BLOCK)  // x, y SiconosVector of the same type
       {
-        if (numX == UBLAS_TYPE::DENSE) {
-          if (numZ != UBLAS_TYPE::DENSE)
+        if (numX == UblasType::DENSE) {
+          if (numZ != UblasType::DENSE)
             THROW_EXCEPTION("Addition of two dense vectors into a sparse.");
           noalias(*z.dense()) = *x.dense() + *y.dense();
         }
         else {
-          if (numZ == UBLAS_TYPE::DENSE)
+          if (numZ == UblasType::DENSE)
             noalias(*z.dense()) = *x.sparse() + *y.sparse();
           else
             noalias(*z.sparse()) = *x.sparse() + *y.sparse();
         }
       }
-      else if (numX != UBLAS_TYPE::BLOCK &&
-               numY != UBLAS_TYPE::BLOCK)  // x and y of different types => z must be dense.
+      else if (numX != UblasType::BLOCK &&
+               numY != UblasType::BLOCK)  // x and y of different types => z must be dense.
       {
-        if (numZ != UBLAS_TYPE::DENSE) THROW_EXCEPTION("z can not be sparse.");
-        if (numX == UBLAS_TYPE::DENSE)
+        if (numZ != UblasType::DENSE) THROW_EXCEPTION("z can not be sparse.");
+        if (numX == UblasType::DENSE)
           noalias(*z.dense()) = *x.dense() + *y.sparse();
         else
           noalias(*z.dense()) = *x.sparse() + *y.dense();
@@ -870,7 +869,7 @@ siconos::algebra::SiconosVector siconos::algebra::operator-(const SiconosVector&
 
   if (numX == numY)  // x, y SiconosVector of the same type
   {
-    if (numX == UBLAS_TYPE::DENSE) {
+    if (numX == UblasType::DENSE) {
       //    bindings_blas::xpy(*x.dense(),p);
       //    return p;
       return (DenseVect)(*x.dense() - *y.dense());
@@ -880,7 +879,7 @@ siconos::algebra::SiconosVector siconos::algebra::operator-(const SiconosVector&
   }
   else  // x, y SiconosVector with y and x of different types
   {
-    if (numX == UBLAS_TYPE::DENSE)
+    if (numX == UblasType::DENSE)
       return (DenseVect)(*x.dense() - *y.sparse());
     else
       return (DenseVect)(*x.sparse() - *y.dense());
@@ -904,13 +903,13 @@ void siconos::algebra::sub(const SiconosVector& x, const SiconosVector& y, Sicon
   else if (&z == &y)  // y and z are the same object
   {
     {
-      if (numX == UBLAS_TYPE::DENSE) {
-        if (numZ != UBLAS_TYPE::DENSE)
+      if (numX == UblasType::DENSE) {
+        if (numZ != UblasType::DENSE)
           THROW_EXCEPTION("Subtraction of two dense vectors into a sparse.");
         *z.dense() = *x.dense() - *y.dense();
       }
       else {
-        if (numZ == UBLAS_TYPE::DENSE)
+        if (numZ == UblasType::DENSE)
           *z.dense() = *x.sparse() - *y.dense();
         else
           *z.sparse() = *x.sparse() - *y.sparse();
@@ -919,27 +918,27 @@ void siconos::algebra::sub(const SiconosVector& x, const SiconosVector& y, Sicon
   }
   else  // No common memory between x or y and z
   {
-    if (numZ != UBLAS_TYPE::BLOCK)  // z is a SiconosVector
+    if (numZ != UblasType::BLOCK)  // z is a SiconosVector
     {
-      if (numX == numY && numX != UBLAS_TYPE::BLOCK)  // x, y SiconosVector of the same type
+      if (numX == numY && numX != UblasType::BLOCK)  // x, y SiconosVector of the same type
       {
-        if (numX == UBLAS_TYPE::DENSE) {
-          if (numZ != UBLAS_TYPE::DENSE)
+        if (numX == UblasType::DENSE) {
+          if (numZ != UblasType::DENSE)
             THROW_EXCEPTION("Addition of two dense vectors into a sparse.");
           noalias(*z.dense()) = *x.dense() - *y.dense();
         }
         else {
-          if (numZ == UBLAS_TYPE::DENSE)
+          if (numZ == UblasType::DENSE)
             noalias(*z.dense()) = *x.sparse() - *y.sparse();
           else
             noalias(*z.sparse()) = *x.sparse() - *y.sparse();
         }
       }
-      else if (numX != UBLAS_TYPE::BLOCK &&
-               numY != UBLAS_TYPE::BLOCK)  // x and y of different types => z must be dense.
+      else if (numX != UblasType::BLOCK &&
+               numY != UblasType::BLOCK)  // x and y of different types => z must be dense.
       {
-        if (numZ != UBLAS_TYPE::DENSE) THROW_EXCEPTION("z can not be sparse.");
-        if (numX == UBLAS_TYPE::DENSE)
+        if (numZ != UblasType::DENSE) THROW_EXCEPTION("z can not be sparse.");
+        if (numX == UblasType::DENSE)
           noalias(*z.dense()) = *x.dense() - *y.sparse();
         else
           noalias(*z.dense()) = *x.sparse() - *y.dense();
@@ -959,7 +958,7 @@ void siconos::algebra::axpby(double a, const SiconosVector& x, double b, Siconos
 
   if (numX == numY)  // x and y of the same type
   {
-    if (numX == UBLAS_TYPE::DENSE)  // all dense
+    if (numX == UblasType::DENSE)  // all dense
     {
       bindings_blas::scal(b, *y.dense());
       bindings_blas::axpy(a, *x.dense(), *y.dense());
@@ -978,7 +977,7 @@ void siconos::algebra::axpby(double a, const SiconosVector& x, double b, Siconos
   {
     y *= b;
     {
-      if (numX == UBLAS_TYPE::DENSE)
+      if (numX == UblasType::DENSE)
         *y.sparse() += a * *x.dense();
       else
         *y.dense() += a * *x.sparse();
@@ -997,7 +996,7 @@ void siconos::algebra::axpy(double a, const SiconosVector& x, SiconosVector& y)
 
   if (numX == numY)  // x and y of the same type
   {
-    if (numX == UBLAS_TYPE::DENSE)  // all dense
+    if (numX == UblasType::DENSE)  // all dense
       bindings_blas::axpy(a, *x.dense(), *y.dense());
 
     else  // all sparse
@@ -1012,7 +1011,7 @@ void siconos::algebra::axpy(double a, const SiconosVector& x, SiconosVector& y)
   else  // x and y of different types
   {
     {
-      if (numX == UBLAS_TYPE::DENSE)
+      if (numX == UblasType::DENSE)
         *y.sparse() += a * *x.dense();
       else
         *y.dense() += a * *x.sparse();
@@ -1028,12 +1027,12 @@ double siconos::algebra::inner_prod(const SiconosVector& x, const SiconosVector&
   auto numX = x.num();
 
   if (numX == numM) {
-    if (numM == UBLAS_TYPE::DENSE)
+    if (numM == UblasType::DENSE)
       return bindings_blas::dot(*x.dense(), *m.dense());
     else
       return inner_prod(*x.sparse(), *m.sparse());
   }
-  else if (numM == UBLAS_TYPE::DENSE)
+  else if (numM == UblasType::DENSE)
     return inner_prod(*x.sparse(), *m.dense());
   else
     return inner_prod(*x.dense(), *m.sparse());
@@ -1045,20 +1044,20 @@ siconos::algebra::SimpleMatrix siconos::algebra::outer_prod(const SiconosVector 
   auto numM = m.num();
   auto numX = x.num();
 
-  if(numM == UBLAS_TYPE::DENSE)
+  if(numM == UblasType::DENSE)
   {
-    if(numX == UBLAS_TYPE::DENSE)
+    if(numX == UblasType::DENSE)
       return (DenseMat)(outer_prod(*x.dense(), *m.dense()));
 
-    else// if(numX == UBLAS_TYPE::SPARSE)
+    else// if(numX == UblasType::SPARSE)
       return (DenseMat)(outer_prod(*x.sparse(), *m.dense()));
   }
-  else // if(numM == UBLAS_TYPE::SPARSE)
+  else // if(numM == UblasType::SPARSE)
   {
-    if(numX == UBLAS_TYPE::DENSE)
+    if(numX == UblasType::DENSE)
       return (DenseMat)(outer_prod(*x.dense(), *m.sparse()));
 
-    else //if(numX == UBLAS_TYPE::SPARSE)
+    else //if(numX == UblasType::SPARSE)
       return (DenseMat)(outer_prod(*x.sparse(), *m.sparse()));
   }
 }
@@ -1083,7 +1082,7 @@ void siconos::algebra::scal(double a, const SiconosVector& x, SiconosVector& y, 
     auto numY = y.num();
     auto numX = x.num();
     if (numX == numY) {
-      if (numX == UBLAS_TYPE::DENSE)  // ie if both are Dense
+      if (numX == UblasType::DENSE)  // ie if both are Dense
       {
         if (init)
           // bindings_blas::axpby(a,*x.dense(),0.0,*y.dense());
@@ -1100,7 +1099,7 @@ void siconos::algebra::scal(double a, const SiconosVector& x, SiconosVector& y, 
       }
     }
     else {
-      if (numY == UBLAS_TYPE::BLOCK || numX == UBLAS_TYPE::BLOCK)  // if y or x is block
+      if (numY == UblasType::BLOCK || numX == UblasType::BLOCK)  // if y or x is block
       {
         if (init) {
           y = x;
@@ -1113,7 +1112,7 @@ void siconos::algebra::scal(double a, const SiconosVector& x, SiconosVector& y, 
         }
       }
       else {
-        if (numY == UBLAS_TYPE::DENSE)  // if y is dense
+        if (numY == UblasType::DENSE)  // if y is dense
         {
           if (init)
             noalias(*y.dense()) = a * *x.sparse();
@@ -1146,7 +1145,7 @@ void siconos::algebra::subscal(double a, const SiconosVector& x, SiconosVector& 
 
   if (&x == &y)  // if x and y are the same object
   {
-    if (numX == UBLAS_TYPE::DENSE)  // Dense
+    if (numX == UblasType::DENSE)  // Dense
     {
       ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
       if (coord[0] == coord[2]) {
@@ -1163,7 +1162,7 @@ void siconos::algebra::subscal(double a, const SiconosVector& x, SiconosVector& 
           subY += a * subX;
       }
     }
-    else  // if (numX == UBLAS_TYPE::SPARSE) // Sparse
+    else  // if (numX == UblasType::SPARSE) // Sparse
     {
       ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[2], coord[3]));
       if (coord[0] == coord[2]) {
@@ -1183,7 +1182,7 @@ void siconos::algebra::subscal(double a, const SiconosVector& x, SiconosVector& 
   }
   else {
     if (numX == numY) {
-      if (numX == UBLAS_TYPE::DENSE)  // ie if both are Dense
+      if (numX == UblasType::DENSE)  // ie if both are Dense
       {
         ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[0], coord[1]));
         ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
@@ -1206,7 +1205,7 @@ void siconos::algebra::subscal(double a, const SiconosVector& x, SiconosVector& 
     }
     else  // x and y of different types ...
     {
-      if (numY == UBLAS_TYPE::DENSE)  // y dense, x sparse
+      if (numY == UblasType::DENSE)  // y dense, x sparse
       {
         ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
         ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[0], coord[1]));
@@ -1291,19 +1290,19 @@ void siconos::algebra::setBlock(const SiconosVector& vIn, std::shared_ptr<Sicono
   auto numOut = vOut->num();
   assert(vOut->size() >= endOut && "The output vector is too small");
   if (numIn == numOut) {
-    if (numIn == UBLAS_TYPE::DENSE)  // vIn / vOut are Dense
+    if (numIn == UblasType::DENSE)  // vIn / vOut are Dense
       noalias(ublas::subrange(*vOut->dense(), startOut, endOut)) =
           ublas::subrange(*vIn.dense(), startIn, startIn + sizeB);
-    else  // if(numIn == UBLAS_TYPE::SPARSE)// vIn / vOut are Sparse
+    else  // if(numIn == UblasType::SPARSE)// vIn / vOut are Sparse
       noalias(ublas::subrange(*vOut->sparse(), startOut, endOut)) =
           ublas::subrange(*vIn.sparse(), startIn, startIn + sizeB);
   }
   else  // vIn and vout of different types ...
   {
-    if (numIn == UBLAS_TYPE::DENSE)  // vIn Dense
+    if (numIn == UblasType::DENSE)  // vIn Dense
       noalias(ublas::subrange(*vOut->sparse(), startOut, endOut)) =
           ublas::subrange(*vIn.dense(), startIn, startIn + sizeB);
-    else  // if(numIn == UBLAS_TYPE::SPARSE)// vIn Sparse
+    else  // if(numIn == UblasType::SPARSE)// vIn Sparse
       noalias(ublas::subrange(*vOut->dense(), startOut, endOut)) =
           ublas::subrange(*vIn.sparse(), startIn, startIn + sizeB);
   }

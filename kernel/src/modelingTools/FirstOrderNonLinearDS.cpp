@@ -18,9 +18,10 @@
 
 #include "FirstOrderNonLinearDS.hpp"
 
+#include "PluggedObject.hpp"  // for getPluginName ...
 #include "PluginTypes.hpp"
-#include "SiconosSharedLibrary.hpp"  // for getPluginName ...
 #include "SiconosVector.hpp"
+#include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -318,4 +319,10 @@ void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int l
   // V.A. 28/05/2012:  for the moment various level are not used for First Order systems
   // assert(0);
   _r->zero();
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::acceptSP(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
+{
+  tourist->visit(*this);
 }

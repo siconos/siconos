@@ -51,7 +51,7 @@
 #include <queue>
 #include <vector>
 
-namespace siconos::internal {
+namespace siconos::graphs {
 
 /** some local type traits */
 template <typename T>
@@ -369,7 +369,7 @@ class EdgeSubProperties : public SubProperties<T, G, typename G::EIndexAccess> {
       : SubProperties<T, G, typename G::EIndexAccess>(p, g){};
 };
 
-}  // namespace siconos::internal
+}  // namespace siconos::graphs
 
 /* convenience macro for properties declarations */
 
@@ -378,15 +378,14 @@ class EdgeSubProperties : public SubProperties<T, G, typename G::EIndexAccess> {
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/tuple/elem.hpp>
 
-#define I_DECLARE_MEMBERS(r, gt, p)                                                    \
-  siconos::BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3, 0, p),                                  \
-                        Properties)<BOOST_PP_TUPLE_ELEM(3, 1, p), BOOST_PP_CAT(_, gt)> \
+#define I_DECLARE_MEMBERS(r, gt, p)                                           \
+  BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3, 0, p),                                  \
+               Properties)<BOOST_PP_TUPLE_ELEM(3, 1, p), BOOST_PP_CAT(_, gt)> \
       BOOST_PP_TUPLE_ELEM(3, 2, p);
 
-#define I_CONS_MEMBERS(r, gt, p)                                     \
-  BOOST_PP_TUPLE_ELEM(3, 2, p)                                       \
-  (siconos::BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3, 0, p), Properties) < \
-       BOOST_PP_TUPLE_ELEM(3, 1, p),                                 \
+#define I_CONS_MEMBERS(r, gt, p)                                                          \
+  BOOST_PP_TUPLE_ELEM(3, 2, p)                                                            \
+  (BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3, 0, p), Properties) < BOOST_PP_TUPLE_ELEM(3, 1, p), \
    BOOST_PP_CAT(_, gt) > (*static_cast<BOOST_PP_CAT(_, gt)*>(this))),
 
 #define INSTALL_GRAPH_PROPERTIES(GraphType, PROPERTIES)                                   \

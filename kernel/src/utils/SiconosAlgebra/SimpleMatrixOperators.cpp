@@ -30,29 +30,29 @@ double &siconos::algebra::SimpleMatrix::operator()(unsigned int row, unsigned in
 {
   assert((row < size(0) && col < size(1)) && "SimpleMatrix:operator(): Index out of range");
 
-  if (_num == UBLAS_TYPE::DENSE)
+  if (_num == UblasType::DENSE)
     return (*mat.Dense)(row, col);
-  else if (_num == UBLAS_TYPE::TRIANGULAR)
+  else if (_num == UblasType::TRIANGULAR)
     return (*mat.Triang)(row, col);
-  else if (_num == UBLAS_TYPE::SYMMETRIC)
+  else if (_num == UblasType::SYMMETRIC)
     return (*mat.Sym)(row, col);
-  else if (_num == UBLAS_TYPE::SPARSE) {
+  else if (_num == UblasType::SPARSE) {
     double *d = (*mat.Sparse).find_element(row, col);
     if (d == nullptr) THROW_EXCEPTION("Index out of range");
     double &ref = *d;
     return ref;
   }
-  else if (_num == UBLAS_TYPE::SPARSE_COORDINATE) {
+  else if (_num == UblasType::SPARSE_COORDINATE) {
     double *d = (*mat.SparseCoordinate).find_element(row, col);
     if (d == nullptr) THROW_EXCEPTION("Index out of range");
     double &ref = *d;
     return ref;
   }
-  else if (_num == UBLAS_TYPE::BANDED)
+  else if (_num == UblasType::BANDED)
     return (*mat.Banded)(row, col);
-  else if (_num == UBLAS_TYPE::ZERO)
+  else if (_num == UblasType::ZERO)
     return const_cast<double &>((*mat.Zero)(row, col));
-  else if (_num == UBLAS_TYPE::IDENTITY)
+  else if (_num == UblasType::IDENTITY)
     return const_cast<double &>((*mat.Identity)(row, col));
   else {
     THROW_EXCEPTION("invalid type of matrix");
@@ -63,21 +63,21 @@ double siconos::algebra::SimpleMatrix::operator()(unsigned int row, unsigned int
 {
   assert((row < size(0) && col < size(1)) && "SimpleMatrix:operator(): Index out of range");
 
-  if (_num == UBLAS_TYPE::DENSE)
+  if (_num == UblasType::DENSE)
     return (*mat.Dense)(row, col);
-  else if (_num == UBLAS_TYPE::TRIANGULAR)
+  else if (_num == UblasType::TRIANGULAR)
     return (*mat.Triang)(row, col);
-  else if (_num == UBLAS_TYPE::SYMMETRIC)
+  else if (_num == UblasType::SYMMETRIC)
     return (*mat.Sym)(row, col);
-  else if (_num == UBLAS_TYPE::SPARSE)
+  else if (_num == UblasType::SPARSE)
     return (*mat.Sparse)(row, col);
-  else if (_num == UBLAS_TYPE::SPARSE_COORDINATE)
+  else if (_num == UblasType::SPARSE_COORDINATE)
     return (*mat.SparseCoordinate)(row, col);
-  else if (_num == UBLAS_TYPE::BANDED)
+  else if (_num == UblasType::BANDED)
     return (*mat.Banded)(row, col);
-  else if (_num == UBLAS_TYPE::ZERO)
+  else if (_num == UblasType::ZERO)
     return 0.0;
-  else if (_num == UBLAS_TYPE::IDENTITY)
+  else if (_num == UblasType::IDENTITY)
     return (row == col);
   else {
     THROW_EXCEPTION("invalid type of matrix");
@@ -98,17 +98,17 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
     resize(m.size(0), m.size(1));
   }
 
-  if (numM == UBLAS_TYPE::ZERO) {
+  if (numM == UblasType::ZERO) {
     zero();
     return *this;
   }
 
-  if (numM == UBLAS_TYPE::IDENTITY) {
+  if (numM == UblasType::IDENTITY) {
     eye();
     return *this;
   }
 
-  if (numM == UBLAS_TYPE::BLOCK) {
+  if (numM == UblasType::BLOCK) {
     const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
     unsigned int posRow = 0;
     unsigned int posCol = 0;
@@ -124,24 +124,24 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
   }
   else {
     switch (_num) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         switch (numM) {
-          case UBLAS_TYPE::DENSE:
+          case UblasType::DENSE:
             noalias(*(mat.Dense)) = *m.dense();
             break;
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Dense)) = *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.Dense)) = *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.Dense)) = *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.Dense)) = *m.sparseCoordinate();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Dense)) = *m.banded();
             break;
           default:
@@ -149,9 +149,9 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
             break;
         }
         break;
-      case UBLAS_TYPE::TRIANGULAR:
+      case UblasType::TRIANGULAR:
         switch (numM) {
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Triang)) = *m.triang();
             break;
           default:
@@ -159,30 +159,30 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
             break;
         }
         break;
-      case UBLAS_TYPE::SYMMETRIC:
-        if (numM == UBLAS_TYPE::IDENTITY)
+      case UblasType::SYMMETRIC:
+        if (numM == UblasType::IDENTITY)
           noalias(*(mat.Sym)) = *m.sym();
         else
           THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");
         break;
-      case UBLAS_TYPE::SPARSE:
+      case UblasType::SPARSE:
         switch (numM) {
-          case UBLAS_TYPE::DENSE:
+          case UblasType::DENSE:
             noalias(*(mat.Sparse)) = *m.dense();
             break;
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Sparse)) = *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.Sparse)) = *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.Sparse)) = *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.Sparse)) = *m.sparseCoordinate();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Sparse)) = *m.banded();
             break;
           default:
@@ -190,24 +190,24 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
             break;
         }
         break;
-      case UBLAS_TYPE::SPARSE_COORDINATE:
+      case UblasType::SPARSE_COORDINATE:
         switch (numM) {
-          case UBLAS_TYPE::DENSE:
+          case UblasType::DENSE:
             noalias(*(mat.SparseCoordinate)) = *m.dense();
             break;
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.SparseCoordinate)) = *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.SparseCoordinate)) = *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.SparseCoordinate)) = *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.SparseCoordinate)) = *m.sparseCoordinate();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.SparseCoordinate)) = *m.banded();
             break;
           default:
@@ -215,9 +215,9 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
             break;
         }
         break;
-      case UBLAS_TYPE::BANDED:
+      case UblasType::BANDED:
         switch (numM) {
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Banded)) = *m.banded();
             break;
           default:
@@ -242,34 +242,34 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
 
   if (size(0) != m.size(0) || size(1) != m.size(1)) resize(m.size(0), m.size(1));
 
-  if (numM == UBLAS_TYPE::ZERO) {
+  if (numM == UblasType::ZERO) {
     zero();
     return *this;
   }
-  else if (numM == UBLAS_TYPE::IDENTITY) {
+  else if (numM == UblasType::IDENTITY) {
     eye();
     return *this;
   }
 
   switch (_num) {
-    case UBLAS_TYPE::DENSE:
+    case UblasType::DENSE:
       switch (numM) {
-        case UBLAS_TYPE::DENSE:
+        case UblasType::DENSE:
           noalias(*(mat.Dense)) = *m.dense();
           break;
-        case UBLAS_TYPE::TRIANGULAR:
+        case UblasType::TRIANGULAR:
           noalias(*(mat.Dense)) = *m.triang();
           break;
-        case UBLAS_TYPE::SYMMETRIC:
+        case UblasType::SYMMETRIC:
           noalias(*(mat.Dense)) = *m.sym();
           break;
-        case UBLAS_TYPE::SPARSE:
+        case UblasType::SPARSE:
           noalias(*(mat.Dense)) = *m.sparse();
           break;
-        case UBLAS_TYPE::SPARSE_COORDINATE:
+        case UblasType::SPARSE_COORDINATE:
           noalias(*(mat.Dense)) = *m.sparseCoordinate();
           break;
-        case UBLAS_TYPE::BANDED:
+        case UblasType::BANDED:
           noalias(*(mat.Dense)) = *m.banded();
           break;
         default:
@@ -277,9 +277,9 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
           break;
       }
       break;
-    case UBLAS_TYPE::TRIANGULAR:
+    case UblasType::TRIANGULAR:
       switch (numM) {
-        case UBLAS_TYPE::TRIANGULAR:
+        case UblasType::TRIANGULAR:
           noalias(*(mat.Triang)) = *m.triang();
           break;
         default:
@@ -287,27 +287,27 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
           break;
       }
       break;
-    case UBLAS_TYPE::SYMMETRIC:
-      if (numM == UBLAS_TYPE::SYMMETRIC)
+    case UblasType::SYMMETRIC:
+      if (numM == UblasType::SYMMETRIC)
         noalias(*(mat.Sym)) = *m.sym();
       else
         THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");
       break;
-    case UBLAS_TYPE::SPARSE:
+    case UblasType::SPARSE:
       switch (numM) {
-        case UBLAS_TYPE::DENSE:
+        case UblasType::DENSE:
           noalias(*(mat.Sparse)) = *m.dense();
           break;
-        case UBLAS_TYPE::TRIANGULAR:
+        case UblasType::TRIANGULAR:
           noalias(*(mat.Sparse)) = *m.triang();
           break;
-        case UBLAS_TYPE::SYMMETRIC:
+        case UblasType::SYMMETRIC:
           noalias(*(mat.Sparse)) = *m.sym();
           break;
-        case UBLAS_TYPE::SPARSE:
+        case UblasType::SPARSE:
           noalias(*(mat.Sparse)) = *m.sparse();
           break;
-        case UBLAS_TYPE::BANDED:
+        case UblasType::BANDED:
           noalias(*(mat.Sparse)) = *m.banded();
           break;
         default:
@@ -315,24 +315,24 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
           break;
       }
       break;
-    case UBLAS_TYPE::SPARSE_COORDINATE:
+    case UblasType::SPARSE_COORDINATE:
       switch (numM) {
-        case UBLAS_TYPE::DENSE:
+        case UblasType::DENSE:
           noalias(*(mat.SparseCoordinate)) = *m.dense();
           break;
-        case UBLAS_TYPE::TRIANGULAR:
+        case UblasType::TRIANGULAR:
           noalias(*(mat.SparseCoordinate)) = *m.triang();
           break;
-        case UBLAS_TYPE::SYMMETRIC:
+        case UblasType::SYMMETRIC:
           noalias(*(mat.SparseCoordinate)) = *m.sym();
           break;
-        case UBLAS_TYPE::SPARSE:
+        case UblasType::SPARSE:
           noalias(*(mat.SparseCoordinate)) = *m.sparse();
           break;
-        case UBLAS_TYPE::SPARSE_COORDINATE:
+        case UblasType::SPARSE_COORDINATE:
           noalias(*(mat.SparseCoordinate)) = *m.sparseCoordinate();
           break;
-        case UBLAS_TYPE::BANDED:
+        case UblasType::BANDED:
           noalias(*(mat.SparseCoordinate)) = *m.banded();
           break;
         default:
@@ -341,9 +341,9 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
       }
       break;
 
-    case UBLAS_TYPE::BANDED:
+    case UblasType::BANDED:
       switch (numM) {
-        case UBLAS_TYPE::BANDED:
+        case UblasType::BANDED:
           noalias(*(mat.Banded)) = *m.banded();
           break;
         default:
@@ -361,7 +361,7 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
 
 siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const DenseMat &m)
 {
-  if (_num != UBLAS_TYPE::DENSE) THROW_EXCEPTION("the current matrix is not dense.");
+  if (_num != UblasType::DENSE) THROW_EXCEPTION("the current matrix is not dense.");
 
   if (size(0) != m.size1() || size(1) != m.size2()) THROW_EXCEPTION("Inconsistent sizes.");
 
@@ -378,28 +378,28 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
 siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const SiconosMatrix &m)
 {
   auto numM = m.num();
-  if (numM == UBLAS_TYPE::ZERO)  // m = 0
+  if (numM == UblasType::ZERO)  // m = 0
     return *this;
 
   if (&m == this)  // auto-assignment
   {
     switch (_num) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         *mat.Dense += *mat.Dense;
         break;
-      case UBLAS_TYPE::TRIANGULAR:
+      case UblasType::TRIANGULAR:
         *mat.Triang += *mat.Triang;
         break;
-      case UBLAS_TYPE::SYMMETRIC:
+      case UblasType::SYMMETRIC:
         *mat.Sym += *mat.Sym;
         break;
-      case UBLAS_TYPE::SPARSE:
+      case UblasType::SPARSE:
         *mat.Sparse += *mat.Sparse;
         break;
-      case UBLAS_TYPE::SPARSE_COORDINATE:
+      case UblasType::SPARSE_COORDINATE:
         *mat.SparseCoordinate += *mat.SparseCoordinate;
         break;
-      case UBLAS_TYPE::BANDED:
+      case UblasType::BANDED:
         *mat.Banded += *mat.Banded;
         break;
       default:
@@ -411,7 +411,7 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const
 
   if (size(0) != m.size(0) || size(1) != m.size(1)) resize(m.size(0), m.size(1));
 
-  if (numM == UBLAS_TYPE::BLOCK) {
+  if (numM == UblasType::BLOCK) {
     const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
     unsigned int posRow = 0;
     unsigned int posCol = 0;
@@ -428,27 +428,27 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const
   else  // if m is a SimpleMatrix
   {
     switch (_num) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         switch (numM) {
-          case UBLAS_TYPE::DENSE:
+          case UblasType::DENSE:
             noalias(*(mat.Dense)) += *m.dense();
             break;
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Dense)) += *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.Dense)) += *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.Dense)) += *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.Dense)) += *m.sparseCoordinate();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Dense)) += *m.banded();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.Dense)) += *m.identity();
             break;
           default:
@@ -456,12 +456,12 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const
             break;
         }
         break;
-      case UBLAS_TYPE::TRIANGULAR:
+      case UblasType::TRIANGULAR:
         switch (numM) {
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Triang)) += *m.triang();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.Triang)) += *m.identity();
             break;
           default:
@@ -469,32 +469,32 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const
             break;
         }
         break;
-      case UBLAS_TYPE::SYMMETRIC:
-        if (numM == UBLAS_TYPE::SYMMETRIC)
+      case UblasType::SYMMETRIC:
+        if (numM == UblasType::SYMMETRIC)
           noalias(*(mat.Sym)) += *m.sym();
-        else if (numM == UBLAS_TYPE::IDENTITY)
+        else if (numM == UblasType::IDENTITY)
           noalias(*(mat.Sym)) += *m.identity();
         else
           THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");
         break;
-      case UBLAS_TYPE::SPARSE:
+      case UblasType::SPARSE:
         switch (numM) {
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Sparse)) += *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.Sparse)) += *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.Sparse)) += *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.Sparse)) += *m.sparseCoordinate();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Sparse)) += *m.banded();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.Sparse)) += *m.identity();
             break;
           default:
@@ -502,24 +502,24 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const
             break;
         }
         break;
-      case UBLAS_TYPE::SPARSE_COORDINATE:
+      case UblasType::SPARSE_COORDINATE:
         switch (numM) {
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.SparseCoordinate)) += *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.SparseCoordinate)) += *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.SparseCoordinate)) += *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.SparseCoordinate)) += *m.sparseCoordinate();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.SparseCoordinate)) += *m.banded();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.SparseCoordinate)) += *m.identity();
             break;
           default:
@@ -527,12 +527,12 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const
             break;
         }
         break;
-      case UBLAS_TYPE::BANDED:
+      case UblasType::BANDED:
         switch (numM) {
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Banded)) += *m.banded();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.Banded)) += *m.identity();
             break;
           default:
@@ -552,28 +552,28 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const
 siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(const SiconosMatrix &m)
 {
   auto numM = m.num();
-  if (numM == UBLAS_TYPE::ZERO)  // m = 0
+  if (numM == UblasType::ZERO)  // m = 0
     return *this;
 
   if (&m == this)  // auto-assignment
   {
     switch (_num) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         *mat.Dense -= *mat.Dense;
         break;
-      case UBLAS_TYPE::TRIANGULAR:
+      case UblasType::TRIANGULAR:
         *mat.Triang -= *mat.Triang;
         break;
-      case UBLAS_TYPE::SYMMETRIC:
+      case UblasType::SYMMETRIC:
         *mat.Sym -= *mat.Sym;
         break;
-      case UBLAS_TYPE::SPARSE:
+      case UblasType::SPARSE:
         *mat.Sparse -= *mat.Sparse;
         break;
-      case UBLAS_TYPE::SPARSE_COORDINATE:
+      case UblasType::SPARSE_COORDINATE:
         *mat.SparseCoordinate -= *mat.SparseCoordinate;
         break;
-      case UBLAS_TYPE::BANDED:
+      case UblasType::BANDED:
         *mat.Banded -= *mat.Banded;
         break;
       default:
@@ -584,7 +584,7 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(const
   }
   if (size(0) != m.size(0) || size(1) != m.size(1)) THROW_EXCEPTION("inconsistent sizes.");
 
-  if (numM == UBLAS_TYPE::BLOCK)  // m is a BlockMatrix
+  if (numM == UblasType::BLOCK)  // m is a BlockMatrix
   {
     const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
     unsigned int posRow = 0;
@@ -602,27 +602,27 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(const
   else  // if m is a SimpleMatrix
   {
     switch (_num) {
-      case UBLAS_TYPE::DENSE:
+      case UblasType::DENSE:
         switch (numM) {
-          case UBLAS_TYPE::DENSE:
+          case UblasType::DENSE:
             noalias(*(mat.Dense)) -= *m.dense();
             break;
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Dense)) -= *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.Dense)) -= *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.Dense)) -= *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.Dense)) -= *m.sparseCoordinate();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Dense)) -= *m.banded();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.Dense)) -= *m.identity();
             break;
           default:
@@ -630,12 +630,12 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(const
             break;
         }
         break;
-      case UBLAS_TYPE::TRIANGULAR:
+      case UblasType::TRIANGULAR:
         switch (numM) {
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Triang)) -= *m.triang();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.Triang)) -= *m.identity();
             break;
           default:
@@ -643,32 +643,32 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(const
             break;
         }
         break;
-      case UBLAS_TYPE::SYMMETRIC:
-        if (numM == UBLAS_TYPE::SYMMETRIC)
+      case UblasType::SYMMETRIC:
+        if (numM == UblasType::SYMMETRIC)
           noalias(*(mat.Sym)) -= *m.sym();
-        else if (numM == UBLAS_TYPE::IDENTITY)
+        else if (numM == UblasType::IDENTITY)
           noalias(*(mat.Sym)) -= *m.identity();
         else
           THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");
         break;
-      case UBLAS_TYPE::SPARSE:
+      case UblasType::SPARSE:
         switch (numM) {
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.Sparse)) -= *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.Sparse)) -= *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.Sparse)) -= *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.Sparse)) -= *m.sparse();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Sparse)) -= *m.banded();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.Sparse)) -= *m.identity();
             break;
           default:
@@ -676,24 +676,24 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(const
             break;
         }
         break;
-      case UBLAS_TYPE::SPARSE_COORDINATE:
+      case UblasType::SPARSE_COORDINATE:
         switch (numM) {
-          case UBLAS_TYPE::TRIANGULAR:
+          case UblasType::TRIANGULAR:
             noalias(*(mat.SparseCoordinate)) -= *m.triang();
             break;
-          case UBLAS_TYPE::SYMMETRIC:
+          case UblasType::SYMMETRIC:
             noalias(*(mat.SparseCoordinate)) -= *m.sym();
             break;
-          case UBLAS_TYPE::SPARSE:
+          case UblasType::SPARSE:
             noalias(*(mat.SparseCoordinate)) -= *m.sparse();
             break;
-          case UBLAS_TYPE::SPARSE_COORDINATE:
+          case UblasType::SPARSE_COORDINATE:
             noalias(*(mat.SparseCoordinate)) -= *m.sparseCoordinate();
             break;
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.SparseCoordinate)) -= *m.banded();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.SparseCoordinate)) -= *m.identity();
             break;
           default:
@@ -702,12 +702,12 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(const
         }
         break;
 
-      case UBLAS_TYPE::BANDED:
+      case UblasType::BANDED:
         switch (numM) {
-          case UBLAS_TYPE::BANDED:
+          case UblasType::BANDED:
             noalias(*(mat.Banded)) -= *m.banded();
             break;
-          case UBLAS_TYPE::IDENTITY:
+          case UblasType::IDENTITY:
             noalias(*(mat.Banded)) -= *m.identity();
             break;
           default:

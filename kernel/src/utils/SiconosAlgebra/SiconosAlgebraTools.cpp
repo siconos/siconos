@@ -73,7 +73,7 @@ void siconos::algebra::expm(SiconosMatrix &A, SiconosMatrix &Exp, bool computeAn
   // Do not work with sparse.
   A.resetFactorizationFlags();
   Exp.resetFactorizationFlags();
-  assert(Exp.num() == UBLAS_TYPE::DENSE || A.num() == UBLAS_TYPE::DENSE);
+  assert(Exp.num() == UblasType::DENSE || A.num() == UblasType::DENSE);
   if (computeAndAdd)
     *Exp.dense() += boost::numeric::ublas::expm_pad(*A.dense());
   else

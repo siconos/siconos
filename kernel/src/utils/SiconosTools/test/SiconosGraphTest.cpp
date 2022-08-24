@@ -25,10 +25,10 @@ void SiconosGraphTest::setUp() {}
 void SiconosGraphTest::tearDown() {}
 
 using G =
-  siconos::internal::SiconosGraph<std::string, int, boost::no_property, boost::no_property, boost::no_property>;
+  siconos::graphs::SiconosGraph<std::string, int, boost::no_property, boost::no_property, boost::no_property>;
 
 using AG =
-    siconos::internal::SiconosGraph<int, std::string, boost::no_property, boost::no_property, boost::no_property>;
+    siconos::graphs::SiconosGraph<int, std::string, boost::no_property, boost::no_property, boost::no_property>;
 
 // Default constructor
 void SiconosGraphTest::t1()

@@ -80,7 +80,7 @@ class HarmonicBC : public BoundaryCondition {
   std::shared_ptr<siconos::algebra::SiconosVector> _phiV{nullptr};
 
   //   /*Link to the precribed DynamicalSystem*/
-  //   SP::DynamicalSystem _DS;
+  //   std::shared_ptr<DynamicalSystem> _DS;
 };
 }  // namespace siconos::modeling
 #endif  // HARMONICBC_HPP

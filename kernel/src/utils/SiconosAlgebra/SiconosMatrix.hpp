@@ -28,7 +28,7 @@
 #include <memory>                       // shared_ptr
 #include <vector>
 
-#include "SiconosAlgebraTypeDef.hpp"  // for UBLAS_TYPE
+#include "SiconosAlgebraTypes.hpp"  // for UblasType
 #include "CSparseMatrix.h"             // for CSparseMatrix
 
 // // #include "SiconosFwd.hpp"            // for SiconosMatrix
@@ -83,7 +83,7 @@ class SiconosVector;
 /** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat, SymMat, Zero and
  * Identity mat pointers.
  */
-union MATRIX_UBLAS_TYPE {
+union MATRIX_UblasType {
   DenseMat *Dense;                        // num = 1
   TriangMat *Triang;                      // num = 2
   SymMat *Sym;                            // num = 3
@@ -116,7 +116,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *  0-> BlockMatrix, 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat,
    * 6->zeroMat, 7->IdentityMat
    */
-  UBLAS_TYPE _num{UBLAS_TYPE::DENSE};
+  UblasType _num{UblasType::DENSE};
 
   /** bool _isSymmetric;
    *  Boolean = true if the Matrix is symmetric
@@ -135,7 +135,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *
    *  \param type unsigned int type-number of the vector
    */
-  SiconosMatrix(UBLAS_TYPE type) : _num(type){};
+  SiconosMatrix(UblasType type) : _num(type){};
 
   /** computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix
    * of A (all columns, and rows between start and start+sizeY). If x is a block vector, it
@@ -173,7 +173,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    */
   inline bool isBlock(void) const
   {
-    if (_num == UBLAS_TYPE::BLOCK)
+    if (_num == UblasType::BLOCK)
       return true;
     else
       return false;
@@ -254,7 +254,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *
    *  \return an unsigned int.
    */
-  inline siconos::algebra::UBLAS_TYPE num() const { return _num; };
+  inline siconos::algebra::UblasType num() const { return _num; };
 
   /** get the number of block (i=0, row, i=1 col)
    *

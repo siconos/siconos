@@ -70,7 +70,7 @@ BOOST_INSTALL_PROPERTY(vertex, siconos_bundle);
 BOOST_INSTALL_PROPERTY(edge, siconos_bundle);
 }  // namespace boost
 
-namespace siconos::internal {
+namespace siconos::graphs {
 template <class V, class E, class VProperties, class EProperties, class GProperties>
 class SiconosGraph {
  public:
@@ -784,6 +784,6 @@ class SiconosGraph {
 #endif
 #endif
 };
-}  // namespace siconos::internal
+}  // namespace siconos::graphs
 
 #endif

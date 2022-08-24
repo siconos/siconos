@@ -23,12 +23,60 @@
 
 #include "SiconosSerialization.hpp"
 
+#ifndef _WIN32
+#define _SYS_UNX
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+#define DLEXPORT __declspec(dllexport)
+typedef HMODULE PluginHandle;
+#endif
+
+#ifdef _SYS_UNX
+#define DLEXPORT
+typedef void* PluginHandle;
+#endif
+
 /*! \file PluggedObject.hpp
-  \brief utilities for plugin definition to compute matrices or vectors from user-defined
+  \brief utilities for plugin definition to compute operators from user-defined
   functions.
 */
 
 namespace siconos::plugins {
+
+// Local stuff, not expected to be in user API
+namespace internal {
+/** loads a plugin
+ * \param pluginPath full path to plugin
+ * \return PluginHandle the object to handle the plugin
+ */
+PluginHandle loadPlugin(const std::string& pluginPath);
+
+/** Gets procedure address
+ * \param plugin the plugin handle
+ * \param procedure the procedure name
+ * \return pointer on procedure
+ */
+void* getProcAddress(PluginHandle plugin, const std::string& procedure);
+
+/**  Closes plugin
+ * \param pluginFile the name of the plugin to close
+ */
+void closePlugin(const std::string& pluginFile);
+
+}  // namespace internal
+
+const std::string getSharedLibraryExtension(void);
+
+const std::string getPluginName(const std::string& s);
+
+const std::string getPluginFunctionName(const std::string& s);
+
+void setFunction(void* fPtr, const std::string& pluginPath, const std::string& fName);
+
+void closePlugin(const std::string& pluginPath);
+
 /** Class to deal with plugged functions
 
 A plugin is a C-function defined in some external file.

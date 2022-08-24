@@ -35,7 +35,7 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     : LagrangianDS(q0, velocity0)
 {
   _mass = std::make_shared<siconos::algebra::SimpleMatrix>(dimension(), dimension(),
-                                                           siconos::algebra::UBLAS_TYPE::BANDED, 0, 0);
+                                                           siconos::algebra::UblasType::BANDED, 0, 0);
   for (unsigned int i = 0; i < dimension(); ++i) (*_mass)(i, i) = (*mass)(i);
   _stiffness = stiffness;
   _damping = damping;

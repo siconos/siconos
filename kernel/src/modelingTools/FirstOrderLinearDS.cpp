@@ -19,7 +19,6 @@
 
 #include "SiconosAlgebraProd.hpp"  // For prod matrix-vectors
 #include "SiconosException.hpp"
-#include "SiconosSharedLibrary.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 // #define DEBUG_MESSAGES
@@ -184,7 +183,7 @@ void siconos::modeling::FirstOrderLinearDS::computeRhs(double time)
 
   if (_A) {
     computeA(time);
-    prod(*_A, *_x[0], *_x[1], false);
+    siconos::algebra::prod(*_A, *_x[0], *_x[1], false);
   }
 
   // compute and add b if required

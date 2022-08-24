@@ -19,7 +19,7 @@
 #define SiconosGraphTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "../SiconosGraph.hpp"
+#include "SiconosGraph.hpp"
 
 class SiconosGraphTest : public CppUnit::TestFixture
 {

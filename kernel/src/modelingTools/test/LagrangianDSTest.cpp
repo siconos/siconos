@@ -89,7 +89,7 @@ void LagrangianDSTest::testBuildLagrangianDS1()
                                true);
 
   double time = 1.;
-  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3, siconos::algebra::UBLAS_TYPE::ZERO);
+  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3, siconos::algebra::UblasType::ZERO);
 
   ds->computeForces(time, ds->q(), ds->velocity());
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->forces()) == zero, true);
@@ -162,7 +162,7 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   ds->initRhs(time);
   siconos::algebra::SiconosVector x0(*q0, *velocity0);
   siconos::algebra::SiconosVector rhs0(*velocity0, zero);
-  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3, siconos::algebra::UBLAS_TYPE::ZERO);
+  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3, siconos::algebra::UblasType::ZERO);
   siconos::algebra::SimpleMatrix i0(3, 3);  // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
   i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->n() == 2 * 3, true);
@@ -188,7 +188,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0, plugin);
 
   siconos::algebra::SiconosVector zero(3);
-  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3, siconos::algebra::UBLAS_TYPE::ZERO);
+  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3, siconos::algebra::UblasType::ZERO);
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
   //     "testBuildLagrangianDS5 : ", Type::value(*ds) == Type::LagrangianDS, true);

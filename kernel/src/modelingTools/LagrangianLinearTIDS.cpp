@@ -166,6 +166,6 @@ void siconos::modeling::LagrangianLinearTIDS::computeForces(
     computeFExt(time);
     *_forces += *_fExt;
   }
-  if (_K) *_forces -= prod(*_K, *q2);
-  if (_C) *_forces -= prod(*_C, *v2);
+  if (_K) *_forces -= siconos::algebra::prod(*_K, *q2);
+  if (_C) *_forces -= siconos::algebra::prod(*_C, *v2);
 }

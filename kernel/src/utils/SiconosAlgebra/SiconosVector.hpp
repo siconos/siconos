@@ -25,7 +25,7 @@
 #include <boost/numeric/ublas/fwd.hpp>
 #include <vector>
 
-#include "SiconosAlgebraTypeDef.hpp"  // For UBLAS_TYPE
+#include "SiconosAlgebraTypes.hpp"  // For UblasType
 #include "SiconosSerialization.hpp"   // For ACCEPT_SERIALIZATION
 
 namespace siconos::algebra {
@@ -42,7 +42,7 @@ using DenseVect = boost::numeric::ublas::vector<double, std::vector<double>>;
 using SparseVect = boost::numeric::ublas::compressed_vector<double>;
 
 /** Union to gather all types of ublas vectors used in Siconos */
-union VECTOR_UBLAS_TYPE {
+union VECTOR_UblasType {
   DenseVect *Dense;    // num = 1
   SparseVect *Sparse;  // num = 4
 };
@@ -62,7 +62,7 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
   /**
    * Union of pointers to the ublas vector type (dense or sparse)
    */
-  VECTOR_UBLAS_TYPE vect;
+  VECTOR_UblasType vect;
 
  public:
   // for iterator interface */
@@ -79,7 +79,7 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
    *  \param row the size of the vector
    *  \param type the type of vector (dense or sparse)
    */
-  SiconosVector(unsigned row, UBLAS_TYPE type = UBLAS_TYPE::DENSE);
+  SiconosVector(unsigned row, UblasType type = UblasType::DENSE);
 
   /** creates a vector and initializes its content with a single value
    *
@@ -88,7 +88,7 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
    *  \param type type of vector (dense or sparse)
    */
   SiconosVector(unsigned row, double val,
-                siconos::algebra::UBLAS_TYPE type = UBLAS_TYPE::DENSE);
+                siconos::algebra::UblasType type = UblasType::DENSE);
 
   /** creates a dense vector from a copy of a stl vector.
    *
@@ -96,7 +96,7 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
    *  \param type of the vector (dense or sparse)
    */
   SiconosVector(const std::vector<double> &vec,
-                siconos::algebra::UBLAS_TYPE type = UBLAS_TYPE::DENSE);
+                siconos::algebra::UblasType type = UblasType::DENSE);
 
   /** copy constructor
    *
@@ -151,12 +151,12 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
    *
    *  \return an unsigned int
    */
-  siconos::algebra::UBLAS_TYPE num() const
+  siconos::algebra::UblasType num() const
   {
     if (_dense)
-      return UBLAS_TYPE::DENSE;
+      return UblasType::DENSE;
     else
-      return UBLAS_TYPE::SPARSE;
+      return UblasType::SPARSE;
   }
 
   /** get a pointer to the ublas embedded vector if it's type is Dense

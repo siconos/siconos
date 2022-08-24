@@ -24,6 +24,7 @@
 #define INTERACTION_H
 
 #include <assert.h>
+
 #include <memory>
 #include <vector>
 
@@ -68,7 +69,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   ACCEPT_SERIALIZATION(Interaction);
 
   /* internal counter used to set interaction number */
-  static size_t __count;
+  static size_t count_;
 
   /** Interaction id */
   size_t _number{0};
@@ -114,34 +115,35 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
    */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _y;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _y = {};
 
   /** memory of previous coordinates of the system */
   std::vector<siconos::algebra::SiconosMemory> _yMemory;
 
   /** result of the computeInput function */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _lambda;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _lambda = {};
 
   /** memory of previous coordinates of the system */
   std::vector<siconos::algebra::SiconosMemory> _lambdaMemory;
 
   /** the Non-smooth Law of the interaction*/
-  std::shared_ptr<NonSmoothLaw> _nslaw;
+  std::shared_ptr<NonSmoothLaw> _nslaw{nullptr};
 
   /** the type of Relation of the interaction */
-  std::shared_ptr<Relation> _relation;
+  std::shared_ptr<Relation> _relation{nullptr};
 
   /** pointer links to DS variables needed for computation,
    *  mostly used in Relations (computeOutput and computeInput)
    * and OneStepIntegrator classes. */
-  std::vector<std::shared_ptr<siconos::algebra::BlockVector>> _linkToDSVariables;
+  std::vector<std::shared_ptr<siconos::algebra::BlockVector>> _linkToDSVariables= {};
 
-  std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> _relationMatrices;
+  std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> _relationMatrices= {};
 
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _relationVectors;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _relationVectors= {};
 
-  struct _setLevels;
-  friend struct Interaction::_setLevels;
+  // internal struct used to handle visitors process to set Interaction levels
+  // depending on the nslaw and the relation.
+  struct SetLevels;
 
   // === PRIVATE FUNCTIONS ===
 
@@ -150,7 +152,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   Interaction& operator=(const Interaction&) = delete;
 
  protected:
-  Interaction(){}; /* for serialization only */
+  Interaction() = default; /* for serialization only */
 
  private:
   /*! @name DSlink graph property management */
@@ -227,7 +229,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   Interaction(std::shared_ptr<NonSmoothLaw> NSL, std::shared_ptr<Relation> rel);
 
   /** destructor  */
-  ~Interaction(){};
+  ~Interaction() = default;
 
   /**
      Update interactions attributes.
@@ -426,11 +428,8 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \param level
    *  \return a memory
    */
-  inline siconos::algebra::SiconosMemory& yMemory(unsigned int level)
-  {
-    return _yMemory[level];
-  }
-  
+  siconos::algebra::SiconosMemory& yMemory(unsigned int level);
+
   /** get the last value of the  output y stored in memory
    *
    *  \param level
@@ -472,10 +471,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \param level
    *  \return a memory
    */
-  inline siconos::algebra::SiconosMemory& lambdaMemory(unsigned int level)
-  {
-    return _lambdaMemory[level];
-  }
+  siconos::algebra::SiconosMemory& lambdaMemory(unsigned int level);
 
   /** get the last value of the multiplier lambda stored in memory
    *
@@ -562,8 +558,8 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    */
   static inline size_t resetCount(size_t new_count = 0)
   {
-    size_t old_count = __count;
-    __count = new_count;
+    size_t old_count = count_;
+    count_ = new_count;
     return old_count;
   };
 

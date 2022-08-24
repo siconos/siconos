@@ -29,12 +29,12 @@
 
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
-//#include "SiconosFwd.hpp"
 #include "SiconosMemory.hpp"
-// #include "SiconosPointers.hpp"
-// #include "SiconosVector.hpp"
-// #include "SiconosVisitor.hpp"
-// #include "SimpleMatrix.hpp"
+
+namespace siconos::internal{
+
+  class SiconosVisitor;
+}
 
 namespace siconos::algebra {
 
@@ -419,7 +419,8 @@ class DynamicalSystem {
    */
   virtual void display(bool brief = true) const = 0;
 
-  // VIRTUAL_ACCEPT_VISITORS(DynamicalSystem);
+  // visitors stuff.
+  virtual void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
 };
 }  // namespace siconos::modeling
 #endif  // DynamicalSystem_H

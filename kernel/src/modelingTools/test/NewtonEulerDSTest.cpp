@@ -366,7 +366,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
 // {
 //   std::cout << "-->Test: computeDS." <<std::endl;
 //   DynamicalSystem * ds(new NewtonEulerDS(tmpxml2));
-//   SP::NewtonEulerDS copy =  std::static_pointer_cast<NewtonEulerDS>(ds);
+//   std::shared_ptr<NewtonEulerDS> copy =  std::static_pointer_cast<NewtonEulerDS>(ds);
 //   double time = 1.5;
 //   ds->initialize("EventDriven", time);
 //   ds->computeRhs(time);
@@ -381,12 +381,12 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
 //   auto vf = ds->rhs();
 
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->vector(0)) == *velocity0, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(M, *(vf->vector(1))) ==
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", siconos::algebra::prod(M, *(vf->vector(1))) ==
 //   (copy->getFExt() - copy->getFInt() - copy->getFGyr()) , true);
 
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->block(1, 0))) ==
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", siconos::algebra::prod(M, *(jx->block(1, 0))) ==
 //   (copy->getJacobianFL(0)) , true); CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ",
-//   prod(M, *(jx->block(1, 1))) == (copy->getJacobianFL(1)) , true); std::cout << "-->
+//   siconos::algebra::prod(M, *(jx->block(1, 1))) == (copy->getJacobianFL(1)) , true); std::cout << "-->
 //   computeDS test ended with success." <<std::endl;
 
 // }

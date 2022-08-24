@@ -47,9 +47,9 @@
 //   if(A.size(0) != y.size())
 //     THROW_EXCEPTION("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   Siconos::UblasType numA = A.num();
+//   Siconos::UblasType numX = x.num();
+//   Siconos::UblasType numY = y.num();
 
 //   if(numA == 0)  // If A is Block
 //     THROW_EXCEPTION("axpy_prod(A,x,y) error: not yet implemented for block matrices.");
@@ -155,9 +155,9 @@
 //     THROW_EXCEPTION("gemv(...) not yet implemented for block vectors or matrices.");
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   Siconos::UblasType numA = A.num();
+//   Siconos::UblasType numX = x.num();
+//   Siconos::UblasType numY = y.num();
 //   if(numA != DENSE || numX != DENSE || numY != DENSE)
 //     THROW_EXCEPTION("gemv(...) failed: reserved to dense matrices or vectors.");
 
@@ -172,9 +172,9 @@
 //     THROW_EXCEPTION("gemv(...) not yet implemented for block vectors or matrices.");
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   Siconos::UblasType numA = A.num();
+//   Siconos::UblasType numX = x.num();
+//   Siconos::UblasType numY = y.num();
 //   if(numA != DENSE || numX != DENSE || numY != DENSE)
 //     THROW_EXCEPTION("gemv(...) failed: reserved to dense matrices or vectors.");
 

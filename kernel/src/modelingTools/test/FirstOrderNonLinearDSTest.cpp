@@ -108,7 +108,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
 // void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
 // {
 //   std::cout << "--> Test: constructor 1." <<std::endl;
-//   SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(*source));
+//   std::shared_ptr<FirstOrderNonLinearDS> ds(new FirstOrderNonLinearDS(*source));
 //   auto source = std::make_shared<FirstOrderNonLinearDS>(x0);
 //   auto ds = std::make_shared<FirstOrderNonLinearDS>(x0);
 

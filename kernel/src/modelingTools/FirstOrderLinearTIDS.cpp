@@ -48,7 +48,7 @@ void siconos::modeling::FirstOrderLinearTIDS::computeRhs(double time)
 {
   *_x[1] = *_r;  // Warning: r update is done in Interactions/Relations
 
-  if (_A) prod(*_A, *_x[0], *_x[1], false);
+  if (_A) siconos::algebra::prod(*_A, *_x[0], *_x[1], false);
 
   // compute and add b if required
   if (_b) *_x[1] += *_b;

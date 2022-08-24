@@ -33,7 +33,7 @@ void Registry::add(int name, object_creator creator)
   factory_map[name] = creator;
 }
 
-SP::DynamicalSystem Registry::instantiate(int name, const SiconosVector& x0)
+std::shared_ptr<DynamicalSystem> Registry::instantiate(int name, const siconos::algebra::SiconosVector& x0)
 {
   MapFactoryIt it = factory_map.find(name) ;
 

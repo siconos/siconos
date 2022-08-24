@@ -21,7 +21,6 @@
 
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
-#include "SiconosSharedLibrary.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"

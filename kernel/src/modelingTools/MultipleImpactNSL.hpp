@@ -60,8 +60,11 @@ class MultipleImpactNSL : public NonSmoothLaw {
   bool isVerified() const override;
   // Display the information about the multiple impact law
   void display() const override;
-  // Visitors hook
-  // ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override
+  {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::modeling
 #endif

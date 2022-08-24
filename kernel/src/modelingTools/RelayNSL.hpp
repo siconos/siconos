@@ -120,7 +120,11 @@ class RelayNSL : public NonSmoothLaw {
    */
   void display() const override;
 
-  // ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override
+  {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::modeling
 #endif  // RELAYNSLAW_H

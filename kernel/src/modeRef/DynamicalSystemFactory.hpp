@@ -36,7 +36,7 @@ namespace DynamicalSystemFactory
 /** A pointer to function, returning a pointer to DynamicalSystem,
     built with its type (related to the class name) and a vector of
     initial conditions. */
-typedef SP::DynamicalSystem(*object_creator)(int, const SiconosVector&) ;
+typedef std::shared_ptr<DynamicalSystem>(*object_creator)(int, const siconos::algebra::SiconosVector&) ;
 
 /** The type of the factory map */
 typedef std::map<int, object_creator> MapFactory;
@@ -47,11 +47,11 @@ typedef MapFactory::iterator MapFactoryIt;
 /** Template function to return a new object of type SubType
  * \param name
  * \param x0
- * \return SP::DynamicalSystem
+ * \return std::shared_ptr<DynamicalSystem>
  */
-template<class SubType> SP::DynamicalSystem factory(int name, const SiconosVector& x0)
+template<class SubType> std::shared_ptr<DynamicalSystem> factory(int name, const siconos::algebra::SiconosVector& x0)
 {
-  SP::DynamicalSystem res(new SubType(name, x0));
+  std::shared_ptr<DynamicalSystem> res(new SubType(name, x0));
   return res;
 }
 
@@ -63,7 +63,7 @@ template<class SubType> SP::DynamicalSystem factory(int name, const SiconosVecto
  *     DynamicalSystemFactory::Registry&
  *        regDynamicalSystem(DynamicalSystemFactory::Registry::get()) ;
  *
- *     SP::DynamicalSystem yourDynamicalSystem =
+ *     std::shared_ptr<DynamicalSystem> yourDynamicalSystem =
  *        regDynamicalSystem.instantiate(type, x0);
  */
 class Registry
@@ -91,9 +91,9 @@ public :
   /** Function to instantiate a new DynamicalSystem
    * \param i an int, the name of the object added (type name!)
    * \param x0 the initial condition (SP)
-   * \return  SP::DynamicalSystem
+   * \return  std::shared_ptr<DynamicalSystem>
    */
-  SP::DynamicalSystem instantiate(int i, const SiconosVector& x0);
+  std::shared_ptr<DynamicalSystem> instantiate(int i, const siconos::algebra::SiconosVector& x0);
 } ;
 
 /** Registration Class for sensors.

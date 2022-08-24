@@ -20,7 +20,7 @@
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
-#include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosAlgebraTypes.hpp"
 #include "SiconosConfig.h"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"

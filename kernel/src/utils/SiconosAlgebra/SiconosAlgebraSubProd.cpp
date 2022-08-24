@@ -64,20 +64,20 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
   auto numX = x.num();
   auto numY = y.num();
 
-  if (numA == UBLAS_TYPE::BLOCK)  // If A,x or y is Block
+  if (numA == UblasType::BLOCK)  // If A,x or y is Block
     THROW_EXCEPTION("not yet implemented for A block matrices.");
 
-  if (numA == UBLAS_TYPE::ZERO)  // A = 0
+  if (numA == UblasType::ZERO)  // A = 0
   {
     if (init) {
-      if (numY == UBLAS_TYPE::DENSE)
+      if (numY == UblasType::DENSE)
         ublas::subrange(*y.dense(), coord[6], coord[7]) *= 0.0;
-      else  // if(numY==UBLAS_TYPE::SPARSE)
+      else  // if(numY==UblasType::SPARSE)
         ublas::subrange(*y.sparse(), coord[6], coord[7]) *= 0.0;
     }
     // else nothing
   }
-  else if (numA == UBLAS_TYPE::IDENTITY)  // A = identity
+  else if (numA == UblasType::IDENTITY)  // A = identity
   {
     if (!init)
       ublas::subrange(*y.dense(), coord[6], coord[7]) +=
@@ -98,30 +98,30 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
       if (init) {
         if (&x != &y)  // if no common memory between x and y.
         {
-          if (numX == UBLAS_TYPE::DENSE) {
+          if (numX == UblasType::DENSE) {
             ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[4], coord[5]));
 
-            if (numY != UBLAS_TYPE::DENSE)
+            if (numY != UblasType::DENSE)
               THROW_EXCEPTION("y (output) must be a dense vector.");
             ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
 
-            if (numA == UBLAS_TYPE::DENSE) {
+            if (numA == UblasType::DENSE) {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                                  ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::TRIANGULAR) {
+            else if (numA == UblasType::TRIANGULAR) {
               ublas::matrix_range<TriangMat> subA(*A.triang(),
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::SYMMETRIC) {
+            else if (numA == UblasType::SYMMETRIC) {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                                ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::SPARSE) {
+            else if (numA == UblasType::SPARSE) {
 #ifdef BOOST_LIMITATION
               THROW_EXCEPTION(
                   "ublas::matrix_range<SparseMat> does not exist for your boost "
@@ -133,7 +133,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               noalias(subY) = ublas::prod(subA, subX);
 #endif
             }
-            else  // if(numA==UBLAS_TYPE::BANDED)
+            else  // if(numA==UblasType::BANDED)
             {
               ublas::matrix_range<BandedMat> subA(*A.banded(),
                                                   ublas::range(coord[0], coord[1]),
@@ -141,21 +141,21 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               noalias(subY) = ublas::prod(subA, subX);
             }
           }
-          else  // if(numX == UBLAS_TYPE::SPARSE)
+          else  // if(numX == UblasType::SPARSE)
           {
             ublas::vector_range<SparseVect> subX(*x.sparse(),
                                                  ublas::range(coord[4], coord[5]));
-            if (numY != UBLAS_TYPE::DENSE && numA != UBLAS_TYPE::SPARSE)
+            if (numY != UblasType::DENSE && numA != UblasType::SPARSE)
               THROW_EXCEPTION("y (output) must be a dense vector.");
 
-            if (numA == UBLAS_TYPE::DENSE) {
+            if (numA == UblasType::DENSE) {
               ublas::vector_range<DenseVect> subY(*y.dense(),
                                                   ublas::range(coord[6], coord[7]));
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                                  ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::TRIANGULAR) {
+            else if (numA == UblasType::TRIANGULAR) {
               ublas::vector_range<DenseVect> subY(*y.dense(),
                                                   ublas::range(coord[6], coord[7]));
               ublas::matrix_range<TriangMat> subA(*A.triang(),
@@ -163,14 +163,14 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
                                                   ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::SYMMETRIC) {
+            else if (numA == UblasType::SYMMETRIC) {
               ublas::vector_range<DenseVect> subY(*y.dense(),
                                                   ublas::range(coord[6], coord[7]));
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                                ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::SPARSE) {
+            else if (numA == UblasType::SPARSE) {
 #ifdef BOOST_LIMITATION
               THROW_EXCEPTION(
                   "ublas::matrix_range<SparseMat> does not exist for your boost "
@@ -180,7 +180,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
 
-              if (numY == UBLAS_TYPE::DENSE) {
+              if (numY == UblasType::DENSE) {
                 ublas::vector_range<DenseVect> subY(*y.dense(),
                                                     ublas::range(coord[6], coord[7]));
                 noalias(subY) = ublas::prod(subA, subX);
@@ -192,7 +192,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               }
 #endif
             }
-            else  // if(numA==UBLAS_TYPE::BANDED)
+            else  // if(numA==UblasType::BANDED)
             {
               ublas::vector_range<DenseVect> subY(*y.dense(),
                                                   ublas::range(coord[6], coord[7]));
@@ -205,25 +205,25 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
         }
         else  // if x and y are the same object => alias
         {
-          if (numX == UBLAS_TYPE::DENSE) {
+          if (numX == UblasType::DENSE) {
             ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[4], coord[5]));
-            if (numA == UBLAS_TYPE::DENSE) {
+            if (numA == UblasType::DENSE) {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                                  ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::TRIANGULAR) {
+            else if (numA == UblasType::TRIANGULAR) {
               ublas::matrix_range<TriangMat> subA(*A.triang(),
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::SYMMETRIC) {
+            else if (numA == UblasType::SYMMETRIC) {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                                ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::SPARSE) {
+            else if (numA == UblasType::SPARSE) {
 #ifdef BOOST_LIMITATION
               THROW_EXCEPTION(
                   "ublas::matrix_range<SparseMat> and vector_range<SparseVect> does not exist "
@@ -235,7 +235,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               subY = ublas::prod(subA, subY);
 #endif
             }
-            else  // if(numA==UBLAS_TYPE::BANDED)
+            else  // if(numA==UblasType::BANDED)
             {
               ublas::matrix_range<BandedMat> subA(*A.banded(),
                                                   ublas::range(coord[0], coord[1]),
@@ -243,27 +243,27 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               subY = ublas::prod(subA, subY);
             }
           }
-          else  // if(numX == UBLAS_TYPE::SPARSE)
+          else  // if(numX == UblasType::SPARSE)
           {
             ublas::vector_range<SparseVect> subY(*y.sparse(),
                                                  ublas::range(coord[4], coord[5]));
-            if (numA == UBLAS_TYPE::DENSE) {
+            if (numA == UblasType::DENSE) {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                                  ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::TRIANGULAR) {
+            else if (numA == UblasType::TRIANGULAR) {
               ublas::matrix_range<TriangMat> subA(*A.triang(),
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::SYMMETRIC) {
+            else if (numA == UblasType::SYMMETRIC) {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                                ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::SPARSE) {
+            else if (numA == UblasType::SPARSE) {
 #ifdef BOOST_LIMITATION
               THROW_EXCEPTION(
                   "ublas::matrix_range<SparseMat> does not exist for your boost "
@@ -275,7 +275,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               subY = ublas::prod(subA, subY);
 #endif
             }
-            else  // if(numA==UBLAS_TYPE::BANDED)
+            else  // if(numA==UblasType::BANDED)
             {
               ublas::matrix_range<BandedMat> subA(*A.banded(),
                                                   ublas::range(coord[0], coord[1]),
@@ -289,30 +289,30 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
       {
         if (&x != &y)  // if no common memory between x and y.
         {
-          if (numX == UBLAS_TYPE::DENSE) {
+          if (numX == UblasType::DENSE) {
             ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[4], coord[5]));
 
-            if (numY != UBLAS_TYPE::DENSE)
+            if (numY != UblasType::DENSE)
               THROW_EXCEPTION("y (output) must be a dense vector.");
             ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
 
-            if (numA == UBLAS_TYPE::DENSE) {
+            if (numA == UblasType::DENSE) {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                                  ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::TRIANGULAR) {
+            else if (numA == UblasType::TRIANGULAR) {
               ublas::matrix_range<TriangMat> subA(*A.triang(),
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::SYMMETRIC) {
+            else if (numA == UblasType::SYMMETRIC) {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                                ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::SPARSE) {
+            else if (numA == UblasType::SPARSE) {
 #ifdef BOOST_LIMITATION
               THROW_EXCEPTION(
                   "ublas::matrix_range<SparseMat> does not exist for your boost "
@@ -324,7 +324,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               noalias(subY) += ublas::prod(subA, subX);
 #endif
             }
-            else  // if(numA==UBLAS_TYPE::BANDED)
+            else  // if(numA==UblasType::BANDED)
             {
               ublas::matrix_range<BandedMat> subA(*A.banded(),
                                                   ublas::range(coord[0], coord[1]),
@@ -332,21 +332,21 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               noalias(subY) += ublas::prod(subA, subX);
             }
           }
-          else  // if(numX == UBLAS_TYPE::SPARSE)
+          else  // if(numX == UblasType::SPARSE)
           {
             ublas::vector_range<SparseVect> subX(*x.sparse(),
                                                  ublas::range(coord[4], coord[5]));
-            if (numY != UBLAS_TYPE::DENSE && numA != UBLAS_TYPE::SPARSE)
+            if (numY != UblasType::DENSE && numA != UblasType::SPARSE)
               THROW_EXCEPTION("y (output) must be a dense vector.");
 
-            if (numA == UBLAS_TYPE::DENSE) {
+            if (numA == UblasType::DENSE) {
               ublas::vector_range<DenseVect> subY(*y.dense(),
                                                   ublas::range(coord[6], coord[7]));
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                                  ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::TRIANGULAR) {
+            else if (numA == UblasType::TRIANGULAR) {
               ublas::vector_range<DenseVect> subY(*y.dense(),
                                                   ublas::range(coord[6], coord[7]));
               ublas::matrix_range<TriangMat> subA(*A.triang(),
@@ -354,14 +354,14 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
                                                   ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::SYMMETRIC) {
+            else if (numA == UblasType::SYMMETRIC) {
               ublas::vector_range<DenseVect> subY(*y.dense(),
                                                   ublas::range(coord[6], coord[7]));
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                                ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == UBLAS_TYPE::SPARSE) {
+            else if (numA == UblasType::SPARSE) {
 #ifdef BOOST_LIMITATION
               THROW_EXCEPTION(
                   "ublas::matrix_range<SparseMat> does not exist for your boost "
@@ -370,7 +370,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               ublas::matrix_range<SparseMat> subA(*A.sparse(),
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
-              if (numY == UBLAS_TYPE::DENSE) {
+              if (numY == UblasType::DENSE) {
                 ublas::vector_range<DenseVect> subY(*y.dense(),
                                                     ublas::range(coord[6], coord[7]));
                 noalias(subY) += ublas::prod(subA, subX);
@@ -382,7 +382,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               }
 #endif
             }
-            else  // if(numA==UBLAS_TYPE::BANDED)
+            else  // if(numA==UblasType::BANDED)
             {
               ublas::vector_range<DenseVect> subY(*y.dense(),
                                                   ublas::range(coord[6], coord[7]));
@@ -395,25 +395,25 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
         }
         else  // if x and y are the same object => alias
         {
-          if (numX == UBLAS_TYPE::DENSE) {
+          if (numX == UblasType::DENSE) {
             ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[4], coord[5]));
-            if (numA == UBLAS_TYPE::DENSE) {
+            if (numA == UblasType::DENSE) {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                                  ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::TRIANGULAR) {
+            else if (numA == UblasType::TRIANGULAR) {
               ublas::matrix_range<TriangMat> subA(*A.triang(),
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::SYMMETRIC) {
+            else if (numA == UblasType::SYMMETRIC) {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                                ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::SPARSE) {
+            else if (numA == UblasType::SPARSE) {
 #ifdef BOOST_LIMITATION
               THROW_EXCEPTION(
                   "ublas::matrix_range<SparseMat> does not exist for your boost "
@@ -425,7 +425,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               subY += ublas::prod(subA, subY);
 #endif
             }
-            else  // if(numA==UBLAS_TYPE::BANDED)
+            else  // if(numA==UblasType::BANDED)
             {
               ublas::matrix_range<BandedMat> subA(*A.banded(),
                                                   ublas::range(coord[0], coord[1]),
@@ -433,27 +433,27 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               subY += ublas::prod(subA, subY);
             }
           }
-          else  // if(numX == UBLAS_TYPE::SPARSE)
+          else  // if(numX == UblasType::SPARSE)
           {
             ublas::vector_range<SparseVect> subY(*y.sparse(),
                                                  ublas::range(coord[4], coord[5]));
-            if (numA == UBLAS_TYPE::DENSE) {
+            if (numA == UblasType::DENSE) {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                                  ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::TRIANGULAR) {
+            else if (numA == UblasType::TRIANGULAR) {
               ublas::matrix_range<TriangMat> subA(*A.triang(),
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::SYMMETRIC) {
+            else if (numA == UblasType::SYMMETRIC) {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                                ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == UBLAS_TYPE::SPARSE) {
+            else if (numA == UblasType::SPARSE) {
 #ifdef BOOST_LIMITATION
               THROW_EXCEPTION(
                   "ublas::matrix_range<SparseMat> does not exist for your boost "
@@ -465,7 +465,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
               subY += ublas::prod(subA, subY);
 #endif
             }
-            else  // if(numA==UBLAS_TYPE::BANDED)
+            else  // if(numA==UblasType::BANDED)
             {
               ublas::matrix_range<BandedMat> subA(*A.banded(),
                                                   ublas::range(coord[0], coord[1]),
@@ -507,7 +507,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const BlockVector &x, Sic
     bool firstLoop = true;
     subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
     for (const auto &vec : x) {
-      if (vec->num() == UBLAS_TYPE::BLOCK)
+      if (vec->num() == UblasType::BLOCK)
         THROW_EXCEPTION("not yet implemented for x block of blocks ...");
       if (xPos >= firstBlockNum && xPos <= lastBlockNum) {
         tmp = x.vector(xPos);

@@ -25,6 +25,7 @@
 
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosException.hpp"
+#include "SiconosVisitor.hpp"
 
 namespace siconos::modeling {
 /**
@@ -92,7 +93,8 @@ class NonSmoothLaw {
   /** display the data of the NonSmoothLaw on the standard output */
   virtual void display() const = 0;
 
-  // VIRTUAL_ACCEPT_VISITORS(NonSmoothLaw);
+  // visitors stuff.
+  virtual void accept(siconos::internal::SiconosVisitor &) const = 0;
 };
 }  // namespace siconos::modeling
 #endif

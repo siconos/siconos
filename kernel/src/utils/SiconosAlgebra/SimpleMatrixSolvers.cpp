@@ -61,7 +61,7 @@ void siconos::algebra::SimpleMatrix::PLUFactorizationInPlace()
               << std::endl;
     return;
   }
-  if (_num == UBLAS_TYPE::DENSE) {
+  if (_num == UblasType::DENSE) {
     if (!_ipiv)
       _ipiv = std::make_shared<VInt>(size(0));
     else
@@ -98,7 +98,7 @@ void siconos::algebra::SimpleMatrix::PLUFactorizationInPlace()
 void siconos::algebra::SimpleMatrix::PLUInverseInPlace()
 {
   if (!_isPLUFactorized) PLUFactorizationInPlace();
-  if (_num != UBLAS_TYPE::DENSE)
+  if (_num != UblasType::DENSE)
     THROW_EXCEPTION(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
 #if defined(HAS_LAPACK_dgetri)
@@ -121,7 +121,7 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
         "implemented for a BlockMatrix B.");
   int info = 0;
 
-  if (_num == UBLAS_TYPE::DENSE) {
+  if (_num == UblasType::DENSE) {
     if (!_isPLUFactorized)  // call gesv => LU-factorize+solve
     {
       // solve system:
@@ -144,7 +144,7 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       // B now contains solution:
     }
     else  // call getrs: only solve using previous lu-factorization
-      if (B.num() == UBLAS_TYPE::DENSE)
+      if (B.num() == UblasType::DENSE)
         info = lapack::getrs(*mat.Dense, *_ipiv, *(B.dense()));
       else
         THROW_EXCEPTION(
@@ -156,11 +156,11 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       PLUFactorizationInPlace();
     }
     // and then solve
-    if (B.num() == UBLAS_TYPE::DENSE) {
+    if (B.num() == UblasType::DENSE) {
       inplace_solve(*sparse(), *(B.dense()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.dense()), ublas::upper_tag());
     }
-    else if (B.num() == UBLAS_TYPE::SPARSE) {
+    else if (B.num() == UblasType::SPARSE) {
       inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
     }
@@ -183,7 +183,7 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
       *(B.dense());  // Conversion of vector to matrix. Temporary solution.
   int info;
 
-  if (_num == UBLAS_TYPE::DENSE) {
+  if (_num == UblasType::DENSE) {
     if (!_isPLUFactorized)  // call gesv => LU-factorize+solve
     {
       // solve system:
@@ -350,12 +350,12 @@ void siconos::algebra::SimpleMatrix::Factorize()
 
     if (info != 0) {
       _isPLUFactorized = false;
-      if (_num == UBLAS_TYPE::DENSE) _isPLUFactorizedInPlace = true;
+      if (_num == UblasType::DENSE) _isPLUFactorizedInPlace = true;
       THROW_EXCEPTION("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
     }
     else {
       _isPLUFactorized = true;
-      if (_num == UBLAS_TYPE::DENSE) _isPLUFactorizedInPlace = true;
+      if (_num == UblasType::DENSE) _isPLUFactorizedInPlace = true;
     }
   }
   DEBUG_END("void SimpleMatrix::Factorize()\n");
@@ -384,10 +384,10 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
   double *b;
   std::shared_ptr<SimpleMatrix> Bdense;
 
-  if (B.num() == UBLAS_TYPE::DENSE) {
+  if (B.num() == UblasType::DENSE) {
     b = B.getArray();
   }
-  else if (B.num() == UBLAS_TYPE::SPARSE) {
+  else if (B.num() == UblasType::SPARSE) {
     // First way.
     // We copy to dense since our sparse solver is not able to take
     // into account for sparse r.h.s, yet.
@@ -443,7 +443,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
     }
   }
 
-  if (B.num() == UBLAS_TYPE::SPARSE) {
+  if (B.num() == UblasType::SPARSE) {
 #ifdef SPARSE_RHS_COPY_TO_DENSE
     B = *Bdense;  // we copy back to sparse.
                   // B.displayExpert();
@@ -471,11 +471,11 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B)
   double *b;
   std::shared_ptr<SiconosVector> Bdense;
 
-  if (B.num() == UBLAS_TYPE::DENSE) {
+  if (B.num() == UblasType::DENSE) {
     NM = _numericsMatrix.get();
     b = B.getArray();
   }
-  else if (B.num() == UBLAS_TYPE::SPARSE) {
+  else if (B.num() == UblasType::SPARSE) {
     // First way. We copy to dense since our sparse solver is not able to take into account
     // sparse r.h.s
     Bdense = std::make_shared<SiconosVector>(size(0));
@@ -518,7 +518,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B)
     }
   }
 
-  if (B.num() == UBLAS_TYPE::SPARSE) {
+  if (B.num() == UblasType::SPARSE) {
     B = *Bdense;  // we copy back to sparse.
   }
 

@@ -21,6 +21,7 @@
 #include <assert.h>
 
 #include <iostream>
+
 //#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -29,206 +30,218 @@
 #include "ComplementarityConditionNSL.hpp"
 #include "DynamicalSystem.hpp"
 #include "FirstOrderNonLinearDS.hpp"
-//#include "FirstOrderR.hpp"
+#include "FirstOrderR.hpp"
 #include "LagrangianDS.hpp"
-//#include "LagrangianR.hpp"
-#include "NewtonEulerDS.hpp"  // ??
-//#include "NewtonEulerR.hpp"   // ??
+#include "LagrangianR.hpp"
+//#include "FirstOrderLinearTIR.hpp"
+#include "NewtonEulerDS.hpp"
+#include "NewtonEulerR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
 //#include "RelationTypes.hpp"
 #include "RelayNSL.hpp"
 #include "SiconosMatrixSetBlock.hpp"
+#include "SimpleMatrix.hpp"
 // include "SimulationGraphs.hpp"
+#include "Relation.hpp"
+#include "SiconosVector.hpp"
+#include "SiconosVisitor.hpp"
 #include "siconos_debug.h"
 
 // Test : the following line is allowed only from C++17.
 #include <variant>
 
-size_t siconos::modeling::Interaction::__count = 0;
+size_t siconos::modeling::Interaction::count_ = 0;
 
-struct siconos::modeling::Interaction::_setLevels : public SiconosVisitor {
+struct siconos::modeling::Interaction::SetLevels : public siconos::internal::SiconosVisitor {
   /* we set the _lowerLevelForOutput, _upperLevelForOutput,
      _lowerLevelForOutput, _upperLevelForOutput
      w.r.t to the choice of the nslaw and the relation
   */
-  using SiconosVisitor::visit;
+  // using SiconosVisitor::visit;
 
-  Interaction* _interaction;
+  Interaction* interaction_{nullptr};
 
-  _setLevels(Interaction* inter) : _interaction(inter){};
+  SetLevels(Interaction* inter) : interaction_(inter){};
 
-  void visit(const ComplementarityConditionNSL& nslaw)
+  void visit(const ComplementarityConditionNSL& nslaw) const
   {
-    auto relationType = _interaction->relation()->getType();
-    auto subType = _interaction->relation()->getSubType();
+    auto relationType = interaction_->relation()->getType();
+    auto subType = interaction_->relation()->getSubType();
 
-    if (relationType == FirstOrder) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(0);
+    if (relationType == RelationTypes::FirstOrder) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(0);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(0);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(0);
     }
-    else if (relationType == Lagrangian && subType == CompliantLinearTIR) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(0);
+    else if (relationType == RelationTypes::Lagrangian &&
+             subType == RelationSubTypes::CompliantLinearTIR) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(0);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(0);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(0);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     };
   }
 
-  void visit(const RelayNSL& nslaw)
+  void visit(const RelayNSL& nslaw) const
   {
-    RelationTypes relationType = _interaction->relation()->getType();
-    if (relationType == FirstOrder) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(0);
+    RelationTypes relationType = interaction_->relation()->getType();
+    if (relationType == RelationTypes::FirstOrder) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(0);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(0);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(0);
     }
-    else if (relationType == Lagrangian || relationType == NewtonEuler) {
+    else if (relationType == RelationTypes::Lagrangian ||
+             relationType == RelationTypes::NewtonEuler) {
       // For friction
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(1);
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(1);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(1);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(1);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     };
   }
 
-  void visit(const NormalConeNSL& nslaw)
+  void visit(const NormalConeNSL& nslaw) const
   {
-    RelationTypes relationType = _interaction->relation()->getType();
-    if (relationType == FirstOrder) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(0);
+    RelationTypes relationType = interaction_->relation()->getType();
+    if (relationType == RelationTypes::FirstOrder) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(0);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(0);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(0);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     };
   }
 
-  void visit(const MixedComplementarityConditionNSL& nslaw)
+  void visit(const MixedComplementarityConditionNSL& nslaw) const
   {
-    RelationTypes relationType = _interaction->relation()->getType();
-    if (relationType == FirstOrder) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(0);
+    RelationTypes relationType = interaction_->relation()->getType();
+    if (relationType == RelationTypes::FirstOrder) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(0);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(0);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(0);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     };
   }
 
-  void visit(const EqualityConditionNSL& nslaw)
+  void visit(const EqualityConditionNSL& nslaw) const
   {
-    RelationTypes relationType = _interaction->relation()->getType();
-    if (relationType == Lagrangian || relationType == NewtonEuler) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(1);
+    RelationTypes relationType = interaction_->relation()->getType();
+    if (relationType == RelationTypes::Lagrangian ||
+        relationType == RelationTypes::NewtonEuler) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(1);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(1);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(1);
     }
-    else if (relationType == FirstOrder) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(0);
+    else if (relationType == RelationTypes::FirstOrder) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(0);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(0);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(0);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     };
   }
-  void visit(const NewtonImpactNSL& nslaw)
+  void visit(const NewtonImpactNSL& nslaw) const
   {
-    RelationTypes relationType = _interaction->relation()->getType();
-    if (relationType == Lagrangian || relationType == NewtonEuler) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(1);
+    RelationTypes relationType = interaction_->relation()->getType();
+    if (relationType == RelationTypes::Lagrangian ||
+        relationType == RelationTypes::NewtonEuler) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(1);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(1);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(1);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     }
   }
 
-  void visit(const NewtonImpactFrictionNSL& nslaw)
+  void visit(const NewtonImpactFrictionNSL& nslaw) const
   {
-    RelationTypes relationType = _interaction->relation()->getType();
-    if (relationType == Lagrangian || relationType == NewtonEuler) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(1);
+    RelationTypes relationType = interaction_->relation()->getType();
+    if (relationType == RelationTypes::Lagrangian ||
+        relationType == RelationTypes::NewtonEuler) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(1);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(1);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(1);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     }
   }
-  void visit(const NewtonImpactRollingFrictionNSL& nslaw)
+  void visit(const NewtonImpactRollingFrictionNSL& nslaw) const
   {
-    RelationTypes relationType = _interaction->relation()->getType();
-    if (relationType == Lagrangian || relationType == NewtonEuler) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(1);
+    RelationTypes relationType = interaction_->relation()->getType();
+    if (relationType == RelationTypes::Lagrangian ||
+        relationType == RelationTypes::NewtonEuler) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(1);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(1);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(1);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     }
   }
-  void visit(const MultipleImpactNSL& nslaw)
+  void visit(const MultipleImpactNSL& nslaw) const
   {
-    RelationTypes relationType = _interaction->relation()->getType();
-    if (relationType == Lagrangian || relationType == NewtonEuler) {
-      _interaction->setLowerLevelForOutput(0);
-      _interaction->setUpperLevelForOutput(1);
+    RelationTypes relationType = interaction_->relation()->getType();
+    if (relationType == RelationTypes::Lagrangian ||
+        relationType == RelationTypes::NewtonEuler) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(1);
 
-      _interaction->setLowerLevelForInput(0);
-      _interaction->setUpperLevelForInput(1);
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(1);
     }
     else {
       THROW_EXCEPTION(
-          "siconos::modeling::Interaction::_setLevels::visit - unknown relation type for the "
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
           "nslaw ");
     }
   }
@@ -266,7 +279,7 @@ void siconos::modeling::Interaction::reset()
 
 siconos::modeling::Interaction::Interaction(std::shared_ptr<NonSmoothLaw> NSL,
                                             std::shared_ptr<Relation> rel)
-    : _number(__count++), _interactionSize(NSL->size()), _y(2), _nslaw(NSL), _relation(rel)
+    : _number(count_++), _interactionSize(NSL->size()), _y(2), _nslaw(NSL), _relation(rel)
 {
   // -- Constructor --
   // i.e. what should be done when (and only there) the interaction
@@ -279,9 +292,7 @@ siconos::modeling::Interaction::Interaction(std::shared_ptr<NonSmoothLaw> NSL,
   assert(_nslaw && "siconos::modeling::Interaction::__inits, non smooth law == nullptr");
 
   // -- Set upper/lower levels, according to the nslaw --
-  std::shared_ptr<_setLevels> setLevels = std::make_shared<_setLevels>(this);
-  //  setLevels.reset(new _setLevels(this));
-  _nslaw->accept(*(setLevels.get()));
+  _nslaw->accept(*(std::make_shared<SetLevels>(this)));
 
   // Ensure consistency between interaction and nslaw sizes
   if (_interactionSize != _nslaw->size())
@@ -301,20 +312,20 @@ void siconos::modeling::Interaction::initializeLinkToDsVariables(DynamicalSystem
   // The dynamical systems linked to the interaction (2 at most, ds2 may be equal to ds1).
   RelationTypes relationType = _relation->getType();
 
-  if (relationType == FirstOrder)
+  if (relationType == RelationTypes::FirstOrder)
     __initDataFirstOrder(DSlink, ds1, ds2);
 
-  else if (relationType == Lagrangian)
+  else if (relationType == RelationTypes::Lagrangian)
     __initDataLagrangian(DSlink, ds1, ds2);
 
-  else if (relationType == NewtonEuler)
+  else if (relationType == RelationTypes::NewtonEuler)
     __initDataNewtonEuler(DSlink, ds1, ds2);
 
   else
     THROW_EXCEPTION(
         "siconos::modeling::Interaction::initData unknown initialization procedure for \
         a relation of type: " +
-        std::to_string(relationType));
+        std::to_string(static_cast<std::underlying_type<RelationTypes>::type>(relationType)));
 
   _relation->initialize(*this);
 }
@@ -382,7 +393,7 @@ void siconos::modeling::Interaction::__initDataFirstOrder(
   DSlink[FirstOrderR::z] = std::make_shared<siconos::algebra::BlockVector>();
   auto relationSubType = _relation->getSubType();
 
-  if (relationSubType != LinearTIR) {
+  if (relationSubType != RelationSubTypes::LinearTIR) {
     // we need extra continuous memory vector
     // todo
   }
@@ -447,13 +458,13 @@ void siconos::modeling::Interaction::__initDSDataLagrangian(
 
   if (lds.z()) {
     if (!DSlink[LagrangianR::z])
-      DSlink[LagrangianR::z] = std::make_shared<siconos::algebra::BlockVector>());
+      DSlink[LagrangianR::z] = std::make_shared<siconos::algebra::BlockVector>();
     DSlink[LagrangianR::z]->insertPtr(lds.z());
   }
   for (unsigned int k = 0; k < 3; k++) {
     if (lds.p(k)) {
       if (!DSlink[LagrangianR::p0 + k])
-        DSlink[LagrangianR::p0+k] = std::make_shared<siconos::algebra::BlockVector>());
+        DSlink[LagrangianR::p0 + k] = std::make_shared<siconos::algebra::BlockVector>();
       DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
     }
   }
@@ -538,7 +549,8 @@ void siconos::modeling::Interaction::setYPtr(
   _y = newVector;  // smart ptr
 }
 
-void siconos::modeling::Interaction::setY(const unsigned int index, const SiconosVector& newY)
+void siconos::modeling::Interaction::setY(const unsigned int index,
+                                          const siconos::algebra::SiconosVector& newY)
 {
   assert(_y.size() > index && "siconos::modeling::Interaction::setY, index out of range ");
 
@@ -587,8 +599,8 @@ void siconos::modeling::Interaction::setLambdaPtr(
   _lambda = newVector;  // smart ptr
 }
 
-void siconos::modeling::Interaction::setLambda(const unsigned int index,
-                                               const SiconosVector& newLambda)
+void siconos::modeling::Interaction::setLambda(
+    const unsigned int index, const siconos::algebra::SiconosVector& newLambda)
 {
   assert(_lambda.size() <= index &&
          "siconos::modeling::Interaction::setLambda, index out of range");
@@ -625,6 +637,11 @@ const siconos::algebra::SiconosVector siconos::modeling::Interaction::getCopyOfy
   return *(_y[i]);
 }
 
+siconos::algebra::SiconosMemory& siconos::modeling::Interaction::yMemory(unsigned int level)
+{
+  return _yMemory[level];
+}
+
 const siconos::algebra::SiconosVector& siconos::modeling::Interaction::y_k(
     const unsigned int i) const
 {
@@ -636,6 +653,12 @@ const siconos::algebra::SiconosVector siconos::modeling::Interaction::getLambda(
 {
   assert(_lambda[i]);
   return *(_lambda[i]);
+}
+
+siconos::algebra::SiconosMemory& siconos::modeling::Interaction::lambdaMemory(
+    unsigned int level)
+{
+  return _lambdaMemory[level];
 }
 
 const siconos::algebra::SiconosVector& siconos::modeling::Interaction::lambda_k(
@@ -680,29 +703,29 @@ void siconos::modeling::Interaction::computeInput(double time, unsigned int leve
 std::shared_ptr<siconos::algebra::SiconosMatrix>
 siconos::modeling::Interaction::getLeftInteractionBlock() const
 {
-  RelationTypes relationType = relation()->getType();
+  auto relationType = relation()->getType();
 
-  if (relationType == Lagrangian) {
+  if (relationType == RelationTypes::Lagrangian) {
     std::shared_ptr<LagrangianR> r = std::static_pointer_cast<LagrangianR>(relation());
     return r->jachq();
   }
-  else if (relationType == NewtonEuler) {
+  else if (relationType == RelationTypes::NewtonEuler) {
     std::shared_ptr<NewtonEulerR> r = std::static_pointer_cast<NewtonEulerR>(relation());
     return r->jachqT();
   }
-  else if (relationType == FirstOrder) {
+  else if (relationType == RelationTypes::FirstOrder) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> CMat =
         std::static_pointer_cast<FirstOrderR>(relation())->C();
     auto relationSubType = relation()->getSubType();
     if (CMat)
       return CMat;
-    else if (relationSubType != LinearTIR)
+    else if (relationSubType != RelationSubTypes::LinearTIR)
       return _relationMatrices[FirstOrderR::mat_C];
   }
   THROW_EXCEPTION(
       "siconos::modeling::Interaction::getLeftInteractionBlock, not yet implemented for "
       "relations of type " +
-      std::to_string(relationType));
+      std::to_string(static_cast<std::underlying_type<RelationTypes>::type>(relationType)));
 
   return std::shared_ptr<siconos::algebra::SiconosMatrix>();
 }
@@ -712,21 +735,21 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos, u
                                                              unsigned int sizeDS) const
 {
   std::shared_ptr<siconos::algebra::SiconosMatrix> originalMatrix;
-  RelationTypes relationType = relation()->getType();
-  if (relationType == FirstOrder) {
+  auto relationType = relation()->getType();
+  if (relationType == RelationTypes::FirstOrder) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> CMat =
         std::static_pointer_cast<FirstOrderR>(relation())->C();
     auto relationSubType = relation()->getSubType();
     if (CMat)
       originalMatrix = CMat;
-    else if (relationSubType != LinearTIR)
+    else if (relationSubType != RelationSubTypes::LinearTIR)
       originalMatrix = _relationMatrices[FirstOrderR::mat_C];
   }
-  else if (relationType == Lagrangian) {
+  else if (relationType == RelationTypes::Lagrangian) {
     std::shared_ptr<LagrangianR> r = std::static_pointer_cast<LagrangianR>(relation());
     originalMatrix = r->jachq();
   }
-  else if (relationType == NewtonEuler) {
+  else if (relationType == RelationTypes::NewtonEuler) {
     std::shared_ptr<NewtonEulerR> r = std::static_pointer_cast<NewtonEulerR>(relation());
     originalMatrix = r->jachqT();
   }
@@ -734,24 +757,25 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos, u
     THROW_EXCEPTION(
         "siconos::modeling::Interaction::getLeftInteractionBlockForDS, not yet implemented "
         "for relations of type " +
-        std::to_string(relationType));
+        std::to_string(
+            static_cast<std::underlying_type<RelationSubTypes>::type>(relationType)));
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock =
+  auto InteractionBlock =
       std::make_shared<siconos::algebra::SimpleMatrix>(size, sizeDS, originalMatrix->num());
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
-  Index subDim(2);
+  std::vector<std::size_t> subDim(2);
   subDim[0] = InteractionBlock->size(0);
   subDim[1] = InteractionBlock->size(1);
   // Position (row,col) of first element to be read in originalMatrix
   // and of first element to be set in InteractionBlock
-  Index subPos(4);
+  std::vector<std::size_t> subPos(4);
   subPos[0] = 0;  //_relativePosition;
   subPos[1] = pos;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(originalMatrix, InteractionBlock, subDim, subPos);
+  setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
   return InteractionBlock;
 }
 
@@ -771,8 +795,8 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
   //   THROW_EXCEPTION("siconos::modeling::Interaction::getLeftInteractionBlockForDSForProject-
   //   ds is not from NewtonEulerDS.");
 
-  RelationTypes relationType = relation()->getType();
-  if (relationType != NewtonEuler)
+  auto relationType = relation()->getType();
+  if (relationType != RelationTypes::NewtonEuler)
     THROW_EXCEPTION(
         "siconos::modeling::Interaction::getLeftInteractionBlockForDSForProject- relation is "
         "not from NewtonEulerR.");
@@ -784,17 +808,17 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
-  Index subDim(2);
+  std::vector<std::size_t> subDim(2);
   subDim[0] = InteractionBlock->size(0);
   subDim[1] = InteractionBlock->size(1);
   // Position (row,col) of first element to be read in originalMatrix
   // and of first element to be set in InteractionBlock
-  Index subPos(4);
+  std::vector<std::size_t> subPos(4);
   subPos[0] = 0;  //_relativePosition;
   subPos[1] = pos;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(originalMatrix, InteractionBlock, subDim, subPos);
+  setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix>
@@ -804,31 +828,33 @@ siconos::modeling::Interaction::getRightInteractionBlockForDS(unsigned int pos,
 {
   std::shared_ptr<siconos::algebra::SiconosMatrix>
       originalMatrix;  // Complete matrix, Relation member.
-  RelationTypes relationType = relation()->getType();
+  auto relationType = relation()->getType();
   auto relationSubType = relation()->getSubType();
 
-  if (relationType == FirstOrder) {
+  if (relationType == RelationTypes::FirstOrder) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> BMat =
         std::static_pointer_cast<FirstOrderR>(relation())->B();
     if (BMat)
       originalMatrix = BMat;
-    else if (relationSubType != LinearTIR)
+    else if (relationSubType != RelationSubTypes::LinearTIR)
       originalMatrix = _relationMatrices[FirstOrderR::mat_B];
     else
       THROW_EXCEPTION(
           "siconos::modeling::Interaction::getRightInteractionBlockForDS, FirstOrderLinearTIR "
           "relation but no B matrix found!");
   }
-  else if (relationType == Lagrangian || relationType == NewtonEuler) {
+  else if (relationType == RelationTypes::Lagrangian ||
+           relationType == RelationTypes::NewtonEuler) {
     THROW_EXCEPTION(
         "siconos::modeling::Interaction::getRightInteractionBlockForDS, call not permit " +
-        std::to_string(relationType));
+        std::to_string(static_cast<std::underlying_type<RelationTypes>::type>(relationType)));
   }
   else
     THROW_EXCEPTION(
         "siconos::modeling::Interaction::getRightInteractionBlockForDS, not yet implemented "
         "for relations of type " +
-        std::to_string(relationType));
+        std::to_string(
+            static_cast<std::underlying_type<RelationSubTypes>::type>(relationType)));
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock =
       std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, size, originalMatrix->num());
@@ -841,17 +867,17 @@ siconos::modeling::Interaction::getRightInteractionBlockForDS(unsigned int pos,
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
-  Index subDim(2);
+  std::vector<std::size_t> subDim(2);
   subDim[0] = InteractionBlock->size(0);
   subDim[1] = InteractionBlock->size(1);
   // Position (row,col) of first element to be read in originalMatrix
   // and of first element to be set in InteractionBlock
-  Index subPos(4);
+  std::vector<std::size_t> subPos(4);
   subPos[0] = pos;
   subPos[1] = 0;  //_relativePosition;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(originalMatrix, InteractionBlock, subDim, subPos);
+  setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
   return InteractionBlock;
 }
 
@@ -867,25 +893,26 @@ void siconos::modeling::Interaction::getExtraInteractionBlock(
   auto relationSubType = relation()->getSubType();
   std::shared_ptr<siconos::algebra::SiconosMatrix> D;
 
-  if (relationType == FirstOrder) {
+  if (relationType == RelationTypes::FirstOrder) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> DMat =
         std::static_pointer_cast<FirstOrderR>(relation())->D();
     if (DMat)
       D = DMat;
-    else if (relationSubType != LinearTIR)
+    else if (relationSubType != RelationSubTypes::LinearTIR)
       D = _relationMatrices[FirstOrderR::mat_D];
   }
-  else if (relationType == Lagrangian) {
+  else if (relationType == RelationTypes::Lagrangian) {
     D = std::static_pointer_cast<LagrangianR>(relation())->jachlambda();
   }
-  else if (relationType == NewtonEuler) {
+  else if (relationType == RelationTypes::NewtonEuler) {
     D = std::static_pointer_cast<NewtonEulerR>(relation())->jachlambda();
   }
   else
     THROW_EXCEPTION(
         "siconos::modeling::Interaction::getExtraInteractionBlockForDS, not yet implemented "
         "for relations of type " +
-        std::to_string(relationType));
+        std::to_string(
+            static_cast<std::underlying_type<RelationSubTypes>::type>(relationType)));
 
   if (!D) {
     InteractionBlock->zero();
@@ -896,38 +923,38 @@ void siconos::modeling::Interaction::getExtraInteractionBlock(
 }
 void siconos::modeling::Interaction::display(bool brief) const
 {
-  std::cout << "======= Interaction display number " << _number << " =======" << std::endl;
+  std::cout << "======= Interaction display number " << _number << " =======\n";
 
-  cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << endl;
-  cout << "| upperLevelForOutput : " << _upperLevelForOutput << endl;
-  cout << "| lowerLevelForInput : " << _lowerLevelForInput << endl;
-  cout << "| upperLevelForInput : " << _upperLevelForInput << endl;
-  cout << "| interactionSize : " << _interactionSize << endl;
-  cout << "| _sizeOfDS : " << _sizeOfDS << endl;
+  std::cout << "| lowerLevelForOutput : " << _lowerLevelForOutput << "\n";
+  std::cout << "| upperLevelForOutput : " << _upperLevelForOutput << "\n";
+  std::cout << "| lowerLevelForInput : " << _lowerLevelForInput << "\n";
+  std::cout << "| upperLevelForInput : " << _upperLevelForInput << "\n";
+  std::cout << "| interactionSize : " << _interactionSize << "\n";
+  std::cout << "| _sizeOfDS : " << _sizeOfDS << "\n";
 
-  cout << "| ";
+  std::cout << "| ";
   _relation->display();
   _nslaw->display();
   for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++) {
     std::cout << "| y[" << i << "] : ";
     if (_y[i]) {
-      if (_y[i]->size() >= 5) std::cout << std::endl;
+      if (_y[i]->size() >= 5) std::cout << "\n";
       _y[i]->display();
     }
     else
-      std::cout << "->nullptr" << std::endl;
+      std::cout << "->nullptr\n";
   }
   for (unsigned int i = 0; i < _upperLevelForInput + 1; i++) {
     std::cout << "| lambda[" << i << "] : ";
     if (_lambda[i]) {
-      if (_lambda[i]->size() >= 5) std::cout << std::endl;
+      if (_lambda[i]->size() >= 5) std::cout << "\n";
       _lambda[i]->display();
     }
     else
-      std::cout << "->nullptr" << std::endl;
+      std::cout << "->nullptr\n";
   }
   if (!brief) {
-    std::cout << "| _yMemory size: " << _yMemory.size() << std::endl;
+    std::cout << "| _yMemory size: " << _yMemory.size() << "\n";
     ;
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++) {
       std::cout << "| y_Memory[" << i << "] : ";
@@ -935,5 +962,5 @@ void siconos::modeling::Interaction::display(bool brief) const
     }
   }
 
-  std::cout << "===================================" << std::endl;
+  std::cout << "===================================\n";
 }
