@@ -2717,7 +2717,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if run_options['time_stepping'] is None:
             self._time_stepping = default_simulation_class
-
+       
         if run_options['output_frequency'] is not None:
             self._output_frequency = run_options['output_frequency']
 
@@ -3083,7 +3083,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 osnspb._stepcounter = self._k
 
             if self._run_options.get('explode_Newton_solve'):
-                if(self._time_stepping_class == TimeStepping):
+                if(self._time_stepping == sk.TimeStepping):
                     self.log(self.explode_Newton_solve, with_timer,
                              before=False)(with_timer)
                 else:
