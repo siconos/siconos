@@ -2304,28 +2304,28 @@ static void printInteresProbMatlabFile(int iteration, double * v, double * u_1, 
   fprintf(file,"v(%3i,:) = [",iteration+1);
   for(int i = 0; i < m; i++)
   {
-    fprintf(file, "%20.16e, ", v[i]);
+    fprintf(file, "%20.26e, ", v[i]);
   }
   fprintf(file,"];\n");
 
   fprintf(file,"u1(%3i,:) = [",iteration+1);
   for(int i = 0; i < n*(d-2); i++)
   {
-    fprintf(file, "%20.16e, ", u_1[i]);
+    fprintf(file, "%20.26e, ", u_1[i]);
   }
   fprintf(file,"];\n");
 
   fprintf(file,"u2(%3i,:) = [",iteration+1);
   for(int i = 0; i < n*(d-2); i++)
   {
-    fprintf(file, "%20.16e, ", u_2[i]);
+    fprintf(file, "%20.26e, ", u_2[i]);
   }
   fprintf(file,"];\n");
 
   fprintf(file,"r1(%3i,:) = [",iteration+1);
   for(int i = 0; i < n*(d-2); i++)
   {
-    fprintf(file, "%20.16e, ", r_1[i]);
+    fprintf(file, "%20.26e, ", r_1[i]);
   }
   fprintf(file,"];\n");
 
@@ -2338,6 +2338,101 @@ static void printInteresProbMatlabFile(int iteration, double * v, double * u_1, 
 
   return;
 }
+
+
+
+static void printInteresProbPythonFile(int iteration, double *v, double *u, double *u_1, double *u_2, double *r, double *r_1, double *r_2, int d, int n, int m, FILE * file)
+{
+  int n_dminus2 =  n*(d-2);
+  int nd = n*d;
+
+  // v
+  if (iteration == 0) fprintf(file,"v = np.array([");
+  else fprintf(file,"x = np.array([");
+  for(int i = 0; i < m; i++)
+  {
+    if (i == m-1) fprintf(file, "%20.26e", v[i]);
+    else fprintf(file, "%20.26e, ", v[i]);
+  }
+  fprintf(file,"])\n");
+  if (iteration > 0) fprintf(file,"v = np.vstack((v, x))\n");
+
+
+  // u
+  if (iteration == 0) fprintf(file,"u = np.array([");
+  else fprintf(file,"x = np.array([");
+  for(int i = 0; i < nd; i++)
+  {
+    if (i == nd-1) fprintf(file, "%20.26e", u[i]);
+    else fprintf(file, "%20.26e, ", u[i]);
+  }
+  fprintf(file,"])\n");
+  if (iteration > 0) fprintf(file,"u = np.vstack((u, x))\n");
+
+  // u1
+  if (iteration == 0) fprintf(file,"u1 = np.array([");
+  else fprintf(file,"x = np.array([");
+  for(int i = 0; i < n_dminus2; i++)
+  {
+    if (i == n_dminus2-1) fprintf(file, "%20.26e", u_1[i]);
+    else fprintf(file, "%20.26e, ", u_1[i]);
+  }
+  fprintf(file,"])\n");
+  if (iteration > 0) fprintf(file,"u1 = np.vstack((u1, x))\n");
+
+  // u2
+  if (iteration == 0) fprintf(file,"u2 = np.array([");
+  else fprintf(file,"x = np.array([");
+  for(int i = 0; i < n_dminus2; i++)
+  {
+    if (i == n_dminus2-1) fprintf(file, "%20.26e", u_2[i]);
+    else fprintf(file, "%20.26e, ", u_2[i]);
+  }
+  fprintf(file,"])\n");
+  if (iteration > 0) fprintf(file,"u2 = np.vstack((u2, x))\n");
+
+
+  // r
+  if (iteration == 0) fprintf(file,"r = np.array([");
+  else fprintf(file,"x = np.array([");
+  for(int i = 0; i < nd; i++)
+  {
+    if (i == nd-1) fprintf(file, "%20.26e", r[i]);
+    else fprintf(file, "%20.26e, ", r[i]);
+  }
+  fprintf(file,"])\n");
+  if (iteration > 0) fprintf(file,"r = np.vstack((r, x))\n");
+
+
+  // r1
+  if (iteration == 0) fprintf(file,"r1 = np.array([");
+  else fprintf(file,"x = np.array([");
+  for(int i = 0; i < n_dminus2; i++)
+  {
+    if (i == n_dminus2-1) fprintf(file, "%20.26e", r_1[i]);
+    else fprintf(file, "%20.26e, ", r_1[i]);
+  }
+  fprintf(file,"])\n");
+  if (iteration > 0) fprintf(file,"r1 = np.vstack((r1, x))\n");
+
+  // r2
+  if (iteration == 0) fprintf(file,"r2 = np.array([");
+  else fprintf(file,"x = np.array([");
+  for(int i = 0; i < n_dminus2; i++)
+  {
+    if (i == n_dminus2-1) fprintf(file, "%20.26e", r_2[i]);
+    else fprintf(file, "%20.26e, ", r_2[i]);
+  }
+  fprintf(file,"])\n");
+  if (iteration > 0) fprintf(file,"r2 = np.vstack((r2, x))\n");
+
+  return;
+}
+
+
+
+
+
 
 static void printVectorMatlabFile(int iteration, double * vec, int vecSize, FILE * file)
 {
@@ -3066,13 +3161,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   cblas_dcopy(nd, data->starting_point->velocity, 1, velocity, 1);
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
-  // TO DO remember to deallocation at the end
-  double *old_reaction = (double*)calloc(nd, sizeof(double));
-  double *old_velocity = (double*)calloc(nd, sizeof(double));
-  double *old_t = (double*)calloc(n, sizeof(double));
-  double *old_t_prime = (double*)calloc(n, sizeof(double));
-
-
   size_t no_n = 0, no_m = 0, no_ndp1 = 0, no_nd = 0, no_ndm2 = 0;
 
 
@@ -3220,7 +3308,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double *Qinv2x_bar = NULL, *Qinv2x_tilde = NULL;
 
   double * Hvw = NULL;
-  double *rhs_save = NULL;
+  double *rhs_save = NULL, *rhs_dx = NULL;
   double *iden = NULL;
 
   double *Hrf = NULL, *HMHrfw = NULL, *rdr = NULL, *MfHrdr = NULL;
@@ -3253,6 +3341,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   {
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
       rhs_save = (double*)calloc(m + nd + n_dplus1, sizeof(double));
+      rhs_dx = (double*)calloc(m + nd + n_dplus1, sizeof(double));
 
       minus_H = NM_create(H->storageType, H->size0, H->size1); // -H
       NM_copy(H, minus_H);
@@ -3485,11 +3574,13 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
 
   /* -------------------------- Print into matlab file -------------------------- */
-  FILE * iterates;
+  FILE *iterates, *iterates_python;
   FILE * matrixH;
   char matlab_name[100];
   sprintf(matlab_name, "iteratesNC%zu.m",n);
 
+  char python_name[100];
+  sprintf(python_name, "PrimitiveSoup-nc-%zu.py",n);
 
 
 
@@ -3545,6 +3636,7 @@ while(1)
   {
     // iterates = fopen("iterates.m", "w");
     iterates = fopen(matlab_name, "w");
+
     printDataProbMatlabFile(M, f, H, w, d, n, m, problem->mu, problem->mu_r, iterates);
   }
 
@@ -3581,6 +3673,7 @@ while(1)
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
     {
       numerics_printf_verbose(-1,"LS solution: 3x3 no scaling\n");
+      numerics_printf_verbose(-1,"SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT = %d\n", options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT]);
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2:
@@ -3632,8 +3725,8 @@ while(1)
   }
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
   {
-    numerics_printf_verbose(-1, "| it No| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| full err| barparam| alpha_p | alpha_d | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| |residu m|residu nd| n(d+1)|resi refine|");
-    numerics_printf_verbose(-1, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+    numerics_printf_verbose(-1, "| it  No| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| full err| barparam| alpha_p | alpha_d | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| | 1st residu m nd n(d+1) | 2nd residu m nd n(d+1) |resi refine|");
+    numerics_printf_verbose(-1, "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
   }
   else
   {
@@ -3647,60 +3740,6 @@ while(1)
   /* -------------------------- Check the full criterion -------------------------- */
   while(iteration < max_iter)
   {
-
-
-
-    float_type diffL = 0.;
-    for (size_t i=0; i<n; i++)
-    {
-      // id3 = i*d_minus_2;
-      id5 = i*d;
-      diffL = t[i]-sqrtl(velocity[id5+1]*velocity[id5+1] + velocity[id5+2]*velocity[id5+2]);
-      if (diffL < 0.)
-      {
-        printf("i = %zu: (Avant) velocity_1 lambda_2 = %5.65Le\n", i, diffL);
-        velocity[id5] -= alpha_primal*d_t[i];
-        velocity[id5+1] = old_velocity[id5+1];
-        velocity[id5+2] = old_velocity[id5+2];
-        t[i] = old_t[i];
-        diffL = t[i]-sqrtl(velocity[id5+1]*velocity[id5+1] + velocity[id5+2]*velocity[id5+2]);
-        printf("i = %zu: (Apres) velocity_1 lambda_2 = %5.65Le\n", i, diffL);
-      }
-
-      diffL = t_prime[i]-sqrtl(velocity[id5+3]*velocity[id5+3] + velocity[id5+4]*velocity[id5+4]);
-      if (diffL < 0.)
-      {
-        printf("i = %zu: (Avant) velocity_2 lambda_2 = %5.65Le\n", i, diffL);
-        velocity[id5] -= alpha_primal*d_t_prime[i];
-        velocity[id5+3] = old_velocity[id5+3];
-        velocity[id5+4] = old_velocity[id5+4];
-        t_prime[i] = old_t_prime[i];
-        diffL = t_prime[i]-sqrtl(velocity[id5+1]*velocity[id5+1] + velocity[id5+2]*velocity[id5+2]);
-        printf("i = %zu: (Apres) velocity_2 lambda_2 = %5.65Le\n", i, diffL);
-      }
-
-      diffL = reaction[id5]-sqrtl(reaction[id5+1]*reaction[id5+1] + reaction[id5+2]*reaction[id5+2]);
-      if (diffL < 0.)
-      {
-        printf("i = %zu: (Avant) reaction_1 lambda_2 = %5.65Le\n", i, diffL);
-        cblas_dcopy(d, old_reaction+id5, 1, reaction+id5, 1);
-        diffL = reaction[id5]-sqrtl(reaction[id5+1]*reaction[id5+1] + reaction[id5+2]*reaction[id5+2]);
-        printf("i = %zu: (Apres) reaction_1 lambda_2 = %5.65Le\n", i, diffL);
-      }
-
-      diffL = reaction[id5]-sqrtl(reaction[id5+3]*reaction[id5+3] + reaction[id5+4]*reaction[id5+4]);
-      if (diffL < 0.)
-      {
-        printf("i = %zu: (Avant) reaction_2 lambda_2 = %5.65Le\n", i, diffL);
-        cblas_dcopy(d, old_reaction+id5, 1, reaction+id5, 1);
-        diffL = reaction[id5]-sqrtl(reaction[id5+3]*reaction[id5+3] + reaction[id5+4]*reaction[id5+4]);
-        printf("i = %zu: (Apres) reaction_2 lambda_2 = %5.65Le\n", i, diffL);
-      }
-    }
-
-
-
-
     /* -------------------------- Extract vectors -------------------------- */
     /* 2. velocity_1 = (t, u_bar), velocity_2 = (t_prime, u_tilde) */
     extract_vector(velocity, nd, n, 2, 3, velocity_1);
@@ -3748,6 +3787,22 @@ while(1)
       printInteresProbMatlabFile(iteration, globalVelocity, velocity_1, velocity_2, reaction_1, reaction_2, d, n, m, iterates);
     }
 
+
+
+    /* writing solution data in a Python file */
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_PYTHON_FILE])
+    {
+      if (iteration == 0) iterates_python = fopen(python_name, "w");
+      // if (iteration == 0)
+      // {
+      //   fprintf(iterates_python,"v = np.array([])\n");
+      //   fprintf(iterates_python,"u1 = np.array([])\n");
+      //   fprintf(iterates_python,"u2 = np.array([])\n");
+      //   fprintf(iterates_python,"r1 = np.array([])\n");
+      //   fprintf(iterates_python,"r2 = np.array([])\n");
+      // }
+      printInteresProbPythonFile(iteration, globalVelocity, velocity, velocity_1, velocity_2, reaction, reaction_1, reaction_2, d, n, m, iterates_python);
+    }
 
 
     // if (iteration <= 1)
@@ -3831,7 +3886,7 @@ while(1)
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
-        numerics_printf_verbose(-1, "| %2i %2d| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+        numerics_printf_verbose(-1, "| %2i %3d| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
                               iteration, nRefine, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, full_error, barr_param) ;
       }
       else
@@ -3843,6 +3898,9 @@ while(1)
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
         printInteresProbMatlabFile(iteration, globalVelocity, velocity_1, velocity_2, reaction_1, reaction_2, d, n, m, iterates);
+
+      // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_PYTHON_FILE])
+      //   printInteresProbPythonFile(iteration, globalVelocity, velocity_1, velocity_2, reaction_1, reaction_2, d, n, m, iterates_python);
 
       hasNotConverged = 0;
       break;
@@ -3888,26 +3946,44 @@ while(1)
        *  block_2 = |                          |      x n blocks
        *            | u_tilde   0       t'I    | 2
        *
+       *
+       * ANOTHER VERSION
+       *               m     nd     n(d+1)
+       *            |  M     -H'     0  | m
+       *            |                   |
+       *    Jac   = | -H      0      J  | nd
+       *            |                   |
+       *            |  0     ZJ'     R  | n(d+1)
+       *
+       *  where
+       *  Z = diag(arw(t ,u_bar), arw(t',u_tilde)),
+       *  R = diag(arw(r0,r_bar), arw(r0,r_tilde))
+       *
        */
       Jac = NM_create(NM_SPARSE, m + nd + n_dplus1, m + nd + n_dplus1);
       Jac_nzmax = M_nzmax + 2*H_nzmax + 2*9*n*n + 6*n;
       NM_triplet_alloc(Jac, Jac_nzmax);
       Jac->matrix2->origin = NSM_TRIPLET;
+
+      // if(!identity) identity = NM_eye(nd);
+      // NM_scal(-barr_param, identity);
+
       NM_insert(Jac, M, 0, 0);
       NM_insert(Jac, minus_Ht, 0, m);
       NM_insert(Jac, minus_H, m, 0);
+      // NM_insert(Jac, identity, m, m);
       NM_insert(Jac, J, m, m_plus_nd);
 
-      /* Create matrices block_1, block_2 */
-      block_1 = NM_create(NM_SPARSE, nd, n_dminus2);
-      block_2 = NM_create(NM_SPARSE, nd, n_dminus2);
+      // /* Create matrices block_1, block_2 */
+      // block_1 = NM_create(NM_SPARSE, nd, n_dminus2);
+      // block_2 = NM_create(NM_SPARSE, nd, n_dminus2);
       // long blocks_nzmax = 3*2*n;
-      NM_triplet_alloc(block_1, blocks_nzmax);
-      NM_triplet_alloc(block_2, blocks_nzmax);
-      NM_fill(block_1, NM_SPARSE, nd, n_dminus2, block_1->matrix2);
-      NM_fill(block_2, NM_SPARSE, nd, n_dminus2, block_2->matrix2);
-      block_1->matrix2->origin = NSM_TRIPLET;
-      block_2->matrix2->origin = NSM_TRIPLET;
+      // NM_triplet_alloc(block_1, blocks_nzmax);
+      // NM_triplet_alloc(block_2, blocks_nzmax);
+      // NM_fill(block_1, NM_SPARSE, nd, n_dminus2, block_1->matrix2);
+      // NM_fill(block_2, NM_SPARSE, nd, n_dminus2, block_2->matrix2);
+      // block_1->matrix2->origin = NSM_TRIPLET;
+      // block_2->matrix2->origin = NSM_TRIPLET;
 
       // for(size_t i = 0; i < n; ++i)
       // {
@@ -3955,6 +4031,7 @@ while(1)
       if (arrowMat_u2) arrowMat_u2 = NM_free(arrowMat_u2);
       if (arrowMat_r1) arrowMat_r1 = NM_free(arrowMat_r1);
       if (arrowMat_r2) arrowMat_r2 = NM_free(arrowMat_r2);
+      if (identity) identity = NM_free(identity);
 
       // printf("det(Jac) = %5.50e\n", detMat(Jac)); hasNotConverged = 3; break;
 
@@ -4086,7 +4163,34 @@ while(1)
       print_NAN_in_matrix(Jac);
       if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
 
-      NM_LU_solve(Jac, rhs, 1);
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
+      {
+        // cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_dx, 1);  // rhs_dx = b
+        // residu_refine = 1e30;
+        // nRefine = 1;
+
+        // NM_LU_solve(Jac, rhs, 1);                 // solve Ax = b
+        // NM_gemv(-1.0, Jac, rhs, 1.0, rhs_dx);     // rhs_dx   = b - Ax
+        // residu_refine = dnrm2l(m + nd + n_dplus1, rhs_dx);
+        // if (iteration == 18) printf("%d: residu_refine = %e\n",nRefine, residu_refine);
+
+        // while(residu_refine > tol && nRefine < 300)
+        // {
+        //   nRefine++;
+
+        //   NM_LU_solve(Jac, rhs_dx, 1);           // solve A(dx) = rhs_dx
+
+        //   NV_add(rhs_dx, rhs, m + nd + n_dplus1, rhs);  // x = x + dx
+        //   cblas_dcopy(m + nd + n_dplus1, rhs_save, 1, rhs_dx, 1);  // rhs_save = b (rhs_save does not change)
+        //   NM_gemv(-1.0, Jac, rhs, 1.0, rhs_dx);  // rhs_dx   = b - Ax
+        //   residu_refine = dnrm2l(m + nd + n_dplus1, rhs_dx);
+        //   if (iteration == 18) printf("%d: residu_refine = %e\n",nRefine, residu_refine);
+        // }
+
+        nRefine = NM_LU_refine(Jac, rhs, 1e-10, max_iter, &residu_refine);
+      }
+      else
+        NM_LU_solve(Jac, rhs, 1);
 
       if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
 
@@ -4552,10 +4656,6 @@ while(1)
       NM_insert(Jac, JQinv, m, m_plus_nd);
       NM_insert(Jac, JQinvT, m_plus_nd, m);
       NM_insert(Jac, identity, m_plus_nd, m_plus_nd);
-
-
-
-
 
       // if (JQinv) JQinv = NM_free(JQinv);
       // if (JQinvT) JQinvT = NM_free(JQinvT);
@@ -5064,12 +5164,23 @@ while(1)
       for(size_t i = 0; i < n; i++)
       {
         id3 = i*d_minus_2;
-        // id5 = i*d;
         d_velocity_1[id3] = Qinv2x_bar[id3];
         d_velocity_2[id3] = Qinv2x_tilde[id3];
-
-        // d_velocity[id5]   = d_velocity_1[id3] + d_velocity_2[id3];
       }
+
+      // cblas_dcopy(n_dminus2, Qinv2x_bar, 1, d_velocity_1, 1);
+      // cblas_dcopy(n_dminus2, Qinv2x_tilde, 1, d_velocity_2, 1);
+      // for(size_t i = 0; i < n; i++)
+      // {
+      //   id3 = i*d_minus_2;
+      //   id5 = i*d;
+
+      //   d_velocity[id5]   = d_velocity_1[id3] + d_velocity_2[id3];
+      //   d_velocity[id5+1] = d_velocity_1[id3 + 1];
+      //   d_velocity[id5+2] = d_velocity_1[id3 + 2];
+      //   d_velocity[id5+3] = d_velocity_2[id3 + 1];
+      //   d_velocity[id5+4] = d_velocity_2[id3 + 2];
+      // }
 
 
 
@@ -5662,6 +5773,20 @@ while(1)
         d_velocity_2[id3] = Qinv2x_tilde[id3];
       }
 
+      // cblas_dcopy(n_dminus2, Qinv2x_bar, 1, d_velocity_1, 1);
+      // cblas_dcopy(n_dminus2, Qinv2x_tilde, 1, d_velocity_2, 1);
+      // for(size_t i = 0; i < n; i++)
+      // {
+      //   id3 = i*d_minus_2;
+      //   id5 = i*d;
+
+      //   d_velocity[id5]   = d_velocity_1[id3] + d_velocity_2[id3];
+      //   d_velocity[id5+1] = d_velocity_1[id3 + 1];
+      //   d_velocity[id5+2] = d_velocity_1[id3 + 2];
+      //   d_velocity[id5+3] = d_velocity_2[id3 + 1];
+      //   d_velocity[id5+4] = d_velocity_2[id3 + 2];
+      // }
+
 
 
 
@@ -5949,6 +6074,21 @@ while(1)
         d_t_prime[i] = d_velocity_2[id3];
       }
 
+      // cblas_dcopy(n_dminus2, Qinv2x_bar, 1, d_velocity_1, 1);
+      // cblas_dcopy(n_dminus2, Qinv2x_tilde, 1, d_velocity_2, 1);
+      // for(size_t i = 0; i < n; i++)
+      // {
+      //   id3 = i*d_minus_2;
+      //   id5 = i*d;
+      //   d_velocity[id5]   = d_velocity_1[id3] + d_velocity_2[id3];
+      //   d_velocity[id5+1] = d_velocity_1[id3 + 1];
+      //   d_velocity[id5+2] = d_velocity_1[id3 + 2];
+      //   d_velocity[id5+3] = d_velocity_2[id3 + 1];
+      //   d_velocity[id5+4] = d_velocity_2[id3 + 2];
+
+      //   d_t[i] = d_velocity_1[id3];
+      //   d_t_prime[i] = d_velocity_2[id3];
+      // }
 
 
 
@@ -6078,7 +6218,7 @@ while(1)
       if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] == SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_F)
       {
         // TO DO
-        printf("\n\n SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ with formula F: not yet!\n\n");
+        printf("\n\n SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_JQJ with formula F: not yet!\n\n");
       }
 
       else if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] == SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
@@ -6239,7 +6379,7 @@ while(1)
       if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] == SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_F)
       {
         // TO DO
-        printf("\n\n SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ with formula F: not yet!\n\n");
+        printf("\n\n SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_JQJ with formula F: not yet!\n\n");
       }
 
       else if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] == SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP)
@@ -6608,6 +6748,22 @@ while(1)
         d_t_prime[i] = d_velocity_2[id3];
       }
 
+      // cblas_dcopy(n_dminus2, Qinv2x_bar, 1, d_velocity_1, 1);
+      // cblas_dcopy(n_dminus2, Qinv2x_tilde, 1, d_velocity_2, 1);
+      // for(size_t i = 0; i < n; i++)
+      // {
+      //   id3 = i*d_minus_2;
+      //   id5 = i*d;
+      //   d_velocity[id5]   = d_velocity_1[id3] + d_velocity_2[id3];
+      //   d_velocity[id5+1] = d_velocity_1[id3 + 1];
+      //   d_velocity[id5+2] = d_velocity_1[id3 + 2];
+      //   d_velocity[id5+3] = d_velocity_2[id3 + 1];
+      //   d_velocity[id5+4] = d_velocity_2[id3 + 2];
+
+      //   d_t[i] = d_velocity_1[id3];
+      //   d_t_prime[i] = d_velocity_2[id3];
+      // }
+
 
 
       break;
@@ -6684,12 +6840,12 @@ while(1)
     //                         cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1));
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
     {
-      numerics_printf_verbose(-1, "| %2i %2d| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+      numerics_printf_verbose(-1, "| %2i %3d| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e %.1e %.1e | %.1e %.1e %.1e | %.1e |",
                             iteration, nRefine, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, full_error, barr_param, alpha_primal, alpha_dual, sigma,
                             cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
                             cblas_dnrm2(nd, d_velocity, 1)/cblas_dnrm2(nd, velocity, 1),
                             cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1),
-                            residu_LS2_m, residu_LS2_nd, residu_LS2_ndplus1, residu_refine);}
+                            residu_LS1_m, residu_LS1_nd, residu_LS1_ndplus1, residu_LS2_m, residu_LS2_nd, residu_LS2_ndplus1, residu_refine);}
     else
     {
       numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e %.1e %.1e | %.1e %.1e %.1e |",
@@ -6705,12 +6861,6 @@ while(1)
 
 
     // 10. Update variables
-    cblas_dcopy(nd, reaction, 1, old_reaction, 1);
-    cblas_dcopy(nd, velocity, 1, old_velocity, 1);
-    cblas_dcopy(n, t, 1, old_t, 1);
-    cblas_dcopy(n, t_prime, 1, old_t_prime, 1);
-
-
     cblas_daxpy(m, alpha_primal, d_globalVelocity, 1, globalVelocity, 1);
     cblas_daxpy(nd, alpha_primal, d_velocity, 1, velocity, 1);
     cblas_daxpy(nd, alpha_dual, d_reaction, 1, reaction, 1);
@@ -6850,6 +7000,7 @@ else break;
 
   if (iden) {free(iden); iden = NULL;}
   if (rhs_save) {free(rhs_save); rhs_save = NULL;}
+  if (rhs_dx) {free(rhs_dx); rhs_dx = NULL;}
 
   if (Minv) {Minv = NM_free(Minv);}
   if (HMinv) {HMinv = NM_free(HMinv);}
@@ -6878,8 +7029,11 @@ else break;
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
     fclose(iterates);
 
-  //  fclose(dfile);
-
+  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_PYTHON_FILE])
+  {
+    fprintf(iterates_python,"it = %lu\n", iteration+1);
+    fclose(iterates_python);
+  }
   *info = hasNotConverged;
 
 
@@ -7145,8 +7299,8 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
@@ -7155,15 +7309,16 @@ void grfc3d_IPM_set_default(SolverOptions* options)
 
 
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_AFTER;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY] = SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_NO;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_F;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_PYTHON_FILE] = 0;
 
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-9;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;

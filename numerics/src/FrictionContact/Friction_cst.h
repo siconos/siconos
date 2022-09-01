@@ -554,6 +554,8 @@ enum SICONOS_FRICTION_3D_IPM_IPARAM_ENUM
   SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT = 9,
   /** index in iparam to perform Cholesky factorization **/
   SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY = 8,
+  /** index in iparam to print iterates (including problem data) into a Python file */
+  SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_PYTHON_FILE= 7,
 };
 
 enum SICONOS_FRICTION_3D_IPM_DPARAM_ENUM
