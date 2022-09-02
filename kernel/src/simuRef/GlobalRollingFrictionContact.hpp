@@ -22,7 +22,7 @@
 #define GlobalRollingFrictionContact_H
 
 #include "GlobalFrictionContact.hpp"
-#include "SiconosVector.hpp"
+#include "siconos::algebra::SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "GlobalRollingFrictionContactProblem.h"
 #include "Friction_cst.h"
@@ -85,7 +85,7 @@ protected:
   int _contactProblemDim = 5;
 
   /** rolling friction coefficients */
-  SP::MuStorage _mu_r;
+  std::shared_ptr<std::vector<double>> _mu_r;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   GRFC3D_Driver _g_rolling_driver;
@@ -105,7 +105,7 @@ public:
    *
    *  \param options the options set
    */
-  GlobalRollingFrictionContact(int dimPb, SP::SolverOptions options);
+  GlobalRollingFrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options);
 
   /** destructor
    */
@@ -135,7 +135,7 @@ public:
    *
    *  \return pointer on a std::vector<double>
    */
-  inline SP::MuStorage mur() const
+  inline std::shared_ptr<std::vector<double>> mur() const
   {
     return _mu_r;
   }
@@ -155,7 +155,7 @@ public:
    *
    *  \param sim the simulation, owner of this OSNSPB
    */
-   void initialize(SP::Simulation sim);
+   void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
 
   /** \return the friction contact problem from Numerics
    */

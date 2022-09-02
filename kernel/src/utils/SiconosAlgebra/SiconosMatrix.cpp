@@ -48,10 +48,7 @@
 // #include <vector>                                     // for vector, operator==
 
 #include "BlockMatrix.hpp"           // for BlockMatrix
-#include "CSparseMatrix_internal.h"  // for CSparseMatrix
-#include "NumericsSparseMatrix.h"    // for NSM_fix_csc
-// #include "SiconosAlgebra.hpp"
-// #include "SiconosException.hpp"
+#include "NumericsToolsNamespace.h" // for CSparseMatrix,  NSM_fix_csc
 #include "SiconosVector.hpp"  // for SiconosVector
 // #include "SimpleMatrixFriends.hpp"  // for isComparableTo
 
@@ -138,8 +135,8 @@ size_t siconos::algebra::SiconosMatrix::nnz(double tol)
   return nnz;
 }
 
-bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off,
-                                              size_t col_off, double tol)
+bool siconos::algebra::SiconosMatrix::fillCSC(siconos::numerics::CSparseMatrix* csc,
+                                              size_t row_off, size_t col_off, double tol)
 {
   assert(csc);
   double* Mx = csc->x;  // data
@@ -200,7 +197,8 @@ bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off
   return true;
 }
 
-bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol)
+bool siconos::algebra::SiconosMatrix::fillCSC(siconos::numerics::CSparseMatrix* csc,
+                                              double tol)
 {
   assert(csc);
   double* Mx = csc->x;  // data
@@ -258,7 +256,7 @@ bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol)
   return true;
 }
 
-bool siconos::algebra::SiconosMatrix::fromCSC(CSparseMatrix* csc)
+bool siconos::algebra::SiconosMatrix::fromCSC(siconos::numerics::CSparseMatrix* csc)
 {
   assert(csc);
 
@@ -337,8 +335,8 @@ bool siconos::algebra::SiconosMatrix::fromCSC(CSparseMatrix* csc)
   return true;
 }
 
-bool siconos::algebra::SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off,
-                                                  size_t col_off, double tol)
+bool siconos::algebra::SiconosMatrix::fillTriplet(siconos::numerics::CSparseMatrix* triplet,
+                                                  size_t row_off, size_t col_off, double tol)
 {
   assert(triplet);
   size_t nrow = size(0);
@@ -351,8 +349,9 @@ bool siconos::algebra::SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t
       for (size_t i = 0; i < nrow; ++i) {
         // col-major
 
-        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j * nrow],
-                             std::numeric_limits<double>::epsilon());
+        siconos::numerics::CSparseMatrix_zentry(triplet, i + row_off, j + col_off,
+                                                arr[i + j * nrow],
+                                                std::numeric_limits<double>::epsilon());
       }
     }
   }

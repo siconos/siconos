@@ -62,7 +62,7 @@ public:
        see :ref:`problems_and_solvers` for details.
        \endrst
   */
-  Equality(SP::SolverOptions options);
+  Equality(std::shared_ptr<siconos::numerics::SolverOptions> options);
   
   /** destructor
    */
@@ -71,7 +71,7 @@ public:
   /** initialize
    * \param sim the simulation
    */
-  void initialize(SP::Simulation sim);
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param time double : current time

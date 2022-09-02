@@ -73,7 +73,7 @@ class LinearComplementaritySystemsNSDS : public NonSmoothDynamicalSystem {
 
   /** destructor
    */
-  ~LinearComplementaritySystemsNSDS() = default;
+  ~LinearComplementaritySystemsNSDS() noexcept = default;
 
   // --- GETTERS/SETTERS ---
 

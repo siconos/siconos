@@ -98,15 +98,15 @@ class NewtonEulerR : public Relation {
    *
    *  \param lagType the sub-type of the relation
    */
-  NewtonEulerR(RelationSubTypes lagType) : Relation(RelationTypes::NewtonEuler, lagType) {}
+  NewtonEulerR(RelationSubType lagType) : Relation(RelationType::NewtonEuler, lagType) {}
 
  public:
   /** Default constructor */
-  NewtonEulerR() : Relation(RelationTypes::NewtonEuler, RelationSubTypes::NonLinearR){};
+  NewtonEulerR() : Relation(RelationType::NewtonEuler, RelationSubType::NonLinearR){};
 
   /** destructor
    */
-  virtual ~NewtonEulerR() = default;
+  virtual ~NewtonEulerR() noexcept = default;
 
   // -- Jach --
 

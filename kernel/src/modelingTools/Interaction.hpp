@@ -229,7 +229,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   Interaction(std::shared_ptr<NonSmoothLaw> NSL, std::shared_ptr<Relation> rel);
 
   /** destructor  */
-  ~Interaction() = default;
+  ~Interaction() noexcept = default;
 
   /**
      Update interactions attributes.

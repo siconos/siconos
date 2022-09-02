@@ -54,11 +54,11 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR1()
   auto folr =
       std::make_shared<siconos::modeling::FirstOrderLinearR>("TestPlugin:C", "TestPlugin:B");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ",
-                               folr->getType() == siconos::modeling::RelationTypes::FirstOrder,
+                               folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderLinearR1 : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearR, true);
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ",
   //   folr->C()->pluginName()=="TestPlugin:C", true);
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ",
@@ -73,11 +73,11 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR3()
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearR>(
       "TestPlugin:C", "TestPlugin:D", "TestPlugin:F", "TestPlugin:e", "TestPlugin:B");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ",
-                               folr->getType() == siconos::modeling::RelationTypes::FirstOrder,
+                               folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderLinearR3 : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearR, true);
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ",
   //   folr->C()->pluginName()=="TestPlugin:C", true);
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ",
@@ -99,11 +99,11 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4a : ", folr->C() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4b : ", folr->B() == B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4c : ",
-                               folr->getType() == siconos::modeling::RelationTypes::FirstOrder,
+                               folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderLinearR4d : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearR, true);
   std::cout << "--> Constructor 4 test ended with success." << std::endl;
 }
 
@@ -118,11 +118,11 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5d : ", folr->e() == e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5e : ", folr->B() == B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5f : ",
-                               folr->getType() == siconos::modeling::RelationTypes::FirstOrder,
+                               folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderLinearR5g : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearR, true);
   std::cout << "--> Constructor 5 test ended with success." << std::endl;
 }
 

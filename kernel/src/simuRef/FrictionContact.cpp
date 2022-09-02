@@ -29,11 +29,11 @@ using namespace RELATION;
 
 
 FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
-  FrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+  FrictionContact(dimPb, std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(numericsSolverId),
                   solver_options_delete))
 {}
 
-FrictionContact::FrictionContact(int dimPb, SP::SolverOptions options):
+FrictionContact::FrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options):
   LinearOSNS(options), _contactProblemDim(dimPb)
 {
   if(dimPb == 2 && options->solverId == SICONOS_FRICTION_3D_NSGS)
@@ -53,10 +53,10 @@ FrictionContact::FrictionContact(int dimPb, SP::SolverOptions options):
   else
     THROW_EXCEPTION("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
 
-  _mu.reset(new MuStorage());
+  _mu = std::make_shared<std::vector<double>>();
 }
 
-void FrictionContact::initialize(SP::Simulation sim)
+void FrictionContact::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
@@ -69,7 +69,7 @@ void FrictionContact::initialize(SP::Simulation sim)
   // Connect to the right function according to dim. of the problem
 
   // get topology
-  SP::Topology topology =
+  auto topology =
     simulation()->nonSmoothDynamicalSystem()->topology();
 
   // Note that interactionBlocks is up to date since updateInteractionBlocks
@@ -86,9 +86,9 @@ void FrictionContact::initialize(SP::Simulation sim)
   if(topology->indexSet0()->size()>0)
   {
     // Get index set from Simulation
-    std::shared_ptr<InteractionsGraph> indexSet =
+    auto indexSet =
       simulation()->indexSet(indexSetLevel());
-    InteractionsGraph::VIterator ui, uiend;
+    siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>
@@ -100,8 +100,8 @@ void FrictionContact::initialize(SP::Simulation sim)
 void FrictionContact::updateMu()
 {
   _mu->clear();
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(indexSetLevel());
-  InteractionsGraph::VIterator ui, uiend;
+  auto indexSet = simulation()->indexSet(indexSetLevel());
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>

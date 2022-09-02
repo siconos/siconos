@@ -66,13 +66,13 @@ private:
   integer _idid;
 
   /** relative tolerance */
-  SA::doublereal rtol;
+  boost::shared_array<doublereal> rtol;
   /** absolute tolerance */
-  SA::doublereal atol;
+  boost::shared_array<doublereal> atol;
   /** real work array */
-  SA::doublereal rwork;
+  boost::shared_array<doublereal> rwork;
   /** integer work array */
-  SA::integer iwork;
+  boost::shared_array<integer> iwork;
 
   doublereal _timeStep; // initial step size guess
 
@@ -141,12 +141,12 @@ public:
   /** get relative tolerance parameter for Hem5
    *  \return a doublereal*
    */
-  inline const SA::doublereal getRtol() const { return rtol; }
+  inline const boost::shared_array<doublereal> getRtol() const { return rtol; }
 
   /** get absolute tolerance parameter for Hem5
    *  \return a doublereal*
    */
-  inline const SA::doublereal getAtol() const { return atol; }
+  inline const boost::shared_array<doublereal> getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
    *\return an interger
@@ -156,19 +156,19 @@ public:
   /** get real work vector parameter for lsodar
    *  \return a doublereal*
    */
-  inline const SA::doublereal getRwork() const { return rwork; }
+  inline const boost::shared_array<doublereal> getRwork() const { return rwork; }
 
   /** get iwork
    *  \return a pointer to integer
    */
-  inline SA::integer getIwork() const { return iwork; }
+  inline boost::shared_array<integer> getIwork() const { return iwork; }
 
   /** set itol, rtol and atol (tolerance parameters for Hem5)
    *  \param itol integer (itol value)
    *  \param rtol doublereal * (rtol)
    *  \param atol doublereal * (atol)
    */
-  void setTol(integer itol, SA::doublereal rtol, SA::doublereal atol);
+  void setTol(integer itol, boost::shared_array<doublereal> rtol, boost::shared_array<doublereal> atol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for Hem5)
    *  \param itol integer (itol value)
@@ -241,9 +241,9 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter,
+                                           siconos::graphs::InteractionProperties &interProp,
+                                           siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -269,7 +269,7 @@ public:
    * non-smooth effects into account \param vertex_inter of the interaction
    * graph \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
 
   /** print the data to the screen

@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "Tools.hpp"
-#include "RelationTypes.hpp"
+#include "RelationType.hpp"
 #include "NewtonEulerR.hpp"
 #include "LagrangianR.hpp"
 #include "NonSmoothLaw.hpp"
@@ -36,7 +36,7 @@ using namespace Siconos;
 #include "siconos_debug.h"
 
 
-OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor):
+OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, siconos::numerics::NM_types stor):
   OSNSMatrix(n, m, stor)
 {
 }
@@ -45,7 +45,7 @@ OSNSMatrixProjectOnConstraints::~OSNSMatrixProjectOnConstraints()
 {
 }
 
-unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGraph& indexSet)
+unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(siconos::graphs::InteractionsGraph& indexSet)
 {
   // === Description ===
 
@@ -61,7 +61,7 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
   // Computes real size of the current matrix = sum of the dim. of all
   // Interactionin indexSet
   unsigned dim = 0;
-  InteractionsGraph::VIterator vd, vdend;
+  siconos::graphs::InteractionsGraph::VIterator vd, vdend;
   DEBUG_EXPR_WE(std::cout << "indexSet :" << &indexSet << std::endl;
              indexSet.display(););
   for(std::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
@@ -84,7 +84,7 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
   return dim;
 }
 
-void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool update)
+void OSNSMatrixProjectOnConstraints::fillM(siconos::graphs::InteractionsGraph& indexSet, bool update)
 {
 
   if(update)
@@ -94,7 +94,7 @@ void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool upd
     _dimRow = _dimColumn;
   }
 
-  if(_storageType == NM_DENSE)
+  if(_storageType == siconos::numerics::NM_DENSE)
   {
 
     // === Memory allocation, if required ===
@@ -102,7 +102,7 @@ void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool upd
     if(update)
     {
       if(! _M1)
-        _M1.reset(new SimpleMatrix(_dimRow, _dimColumn));
+        _M1 = std::make_shared<siconos::algebra::SimpleMatrix>(_dimRow, _dimColumn));
       else
       {
         if(_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
@@ -120,7 +120,7 @@ void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool upd
     // below.
     // === Loop through "active" Interactions (ie present in
     // indexSets[level]) ===
-    InteractionsGraph::VIterator vi, viend;
+    siconos::graphs::InteractionsGraph::VIterator vi, viend;
     for(std::tie(vi, viend) = indexSet.vertices();
         vi != viend; ++vi)
     {
@@ -132,12 +132,12 @@ void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool upd
     }
 
 
-    InteractionsGraph::EIterator ei, eiend;
+    siconos::graphs::InteractionsGraph::EIterator ei, eiend;
     for(std::tie(ei, eiend) = indexSet.edges();
         ei != eiend; ++ei)
     {
-      InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
-      InteractionsGraph::VDescriptor vd2 = indexSet.target(*ei);
+      siconos::graphs::InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
+      siconos::graphs::InteractionsGraph::VDescriptor vd2 = indexSet.target(*ei);
 
       std::shared_ptr<siconos::modeling::Interaction> inter1 = indexSet.bundle(vd1);
       std::shared_ptr<siconos::modeling::Interaction> inter2 = indexSet.bundle(vd2);
@@ -156,20 +156,20 @@ void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool upd
       DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
 
 
-      std::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *(indexSet.upper_blockProj[*ei]));
 
-      std::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *(indexSet.lower_blockProj[*ei]));
     }
 
   }
-  else // if _storageType == NM_SPARSE_BLOCK
+  else // if _storageType == siconos::numerics::NM_SPARSE_BLOCK
   {
     if(! _M2)
-      _M2.reset(new BlockCSRMatrix(indexSet));
+      _M2.reset = std::make_shared<siconos::numerics::BlockCSRMatrix>(indexSet));
     else
       _M2->fill(indexSet);
   }
@@ -181,7 +181,7 @@ void OSNSMatrixProjectOnConstraints::fillM(InteractionsGraph& indexSet, bool upd
 unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(std::shared_ptr<siconos::modeling::Interaction> inter)
 {
   DEBUG_BEGIN( "OSNSMatrixProjectOnConstraints::computeSizeForProjection(std::shared_ptr<siconos::modeling::Interaction> inter)\n");
-  RELATION::TYPES relationType;
+  auto relationType;
   relationType = inter->relation()->getType();
   unsigned int nslawSize = inter->nonSmoothLaw()->size();
 
@@ -198,7 +198,7 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(std::share
       size = 1;
       DEBUG_EXPR_WE(std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : NewtonImpact * nslaw and  relationType NewtonEuler. size=1" << std::endl;);
     }
-    else if(relationType == Lagrangian)
+    else if(relationType == siconos::modeling::RelationType::Lagrangian)
     {
       size = 1;
       DEBUG_EXPR_WE(std::cout <<

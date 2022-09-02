@@ -125,7 +125,7 @@ public:
    *  nullptr. get W[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds = std::shared_ptr<siconos::modeling::DynamicalSystem>());
+  const siconos::algebra::SimpleMatrix getW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds = std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
   /** get W corresponding to DynamicalSystem ds
    *
@@ -144,7 +144,7 @@ public:
 
   /** set W[ds] to pointer newPtr
    *
-   *  \param newPtr SP::SiconosMatrix
+   *  \param newPtr std::shared_ptr<siconos::algebra::SiconosMatrix>
    *  \param ds a pointer to DynamicalSystem
    */
   void setWPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr, std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
@@ -157,7 +157,7 @@ public:
    *  nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix
+  const siconos::algebra::SimpleMatrix
   getWBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds = std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
@@ -166,7 +166,7 @@ public:
    *  nullptr. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
-  SP::SiconosMatrix WBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> WBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- theta --
 
@@ -248,9 +248,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter,
+                                           siconos::graphs::InteractionProperties &interProp,
+                                           siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -287,7 +287,7 @@ public:
    *  invocation)
    */
   void initializeIterationMatrixWBoundaryConditions(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const DynamicalSystemsGraph::VDescriptor &dsv);
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv);
 
   /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized"
    *  residus of DS \return a double
@@ -303,7 +303,7 @@ public:
    *  non-smooth effects into account \param vertex_inter of the interaction
    *  graph \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
 
   void prepareNewtonIteration(double time) override;

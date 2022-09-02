@@ -34,8 +34,8 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
   auto R1 = std::make_shared<siconos::modeling::LagrangianCompliantR>(
       "TestPlugin:hCompl", "TestPlugin:G0Compl", "TestPlugin:G1Compl");
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianCompliantR3a : ", R1->getType() == siconos::modeling::RelationTypes::Lagrangian, true);
+      "testBuildLagrangianCompliantR3a : ", R1->getType() == siconos::modeling::RelationType::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3b : ",
-                               R1->getSubType() == siconos::modeling::RelationSubTypes::CompliantR, true);
+                               R1->getSubType() == siconos::modeling::RelationSubType::CompliantR, true);
   std::cout << " data Constructor LagrangianCompliantR ok" << std::endl;
 }

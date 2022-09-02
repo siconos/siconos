@@ -59,7 +59,7 @@ class BoundaryCondition {
                     std::shared_ptr<siconos::algebra::SiconosVector> newVelocityValues);
 
   /** destructor */
-  virtual ~BoundaryCondition() = default;
+  virtual ~BoundaryCondition() noexcept = default;
 
   // Rule of five
   BoundaryCondition(const BoundaryCondition&) = delete;

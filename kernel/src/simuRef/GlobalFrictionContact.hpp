@@ -22,7 +22,7 @@
 #define GlobalFrictionContact_H
 
 #include "LinearOSNS.hpp"
-#include "SiconosVector.hpp"
+#include "siconos::algebra::SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "GlobalFrictionContactProblem.h"
 #include "Friction_cst.h"
@@ -96,7 +96,7 @@ protected:
   std::shared_ptr<siconos::algebra::SiconosVector> _b;
 
   /** friction coefficients */
-  SP::MuStorage _mu;
+  std::shared_ptr<std::vector<double>> _mu;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   GFC3D_Driver _gfc_driver;
@@ -116,7 +116,7 @@ public:
    *
    *  \param options the options set
    */
-  GlobalFrictionContact(int dimPb, SP::SolverOptions options);
+  GlobalFrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options);
 
   /** destructor
    */
@@ -144,7 +144,7 @@ public:
 
   /** get globalVelocities
    *
-   *  \return pointer on a SiconosVector
+   *  \return pointer on a siconos::algebra::SiconosVector
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> globalVelocities() const
   {
@@ -166,7 +166,7 @@ public:
    *
    *  \return pointer on a std::vector<double>
    */
-  inline SP::MuStorage mu() const
+  inline std::shared_ptr<std::vector<double>> mu() const
   {
     return _mu;
   }
@@ -190,7 +190,7 @@ public:
    *
    *  \param sim the simulation, owner of this OSNSPB
    */
-  virtual void initialize(SP::Simulation sim);
+  virtual void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
 
   /** \return the friction contact problem from Numerics
    */

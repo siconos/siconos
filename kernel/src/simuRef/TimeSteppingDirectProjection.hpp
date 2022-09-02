@@ -83,11 +83,11 @@ public:
    *  formulation \param osnspb_pos a one step non smooth problem for the
    *  position formulation \param _level
    */
-  TimeSteppingDirectProjection(SP::NonSmoothDynamicalSystem nsds,
-                               SP::TimeDiscretisation td,
-                               SP::OneStepIntegrator osi,
-                               SP::OneStepNSProblem osnspb_velo,
-                               SP::OneStepNSProblem osnspb_pos,
+  TimeSteppingDirectProjection(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+                               std::shared_ptr<TimeDiscretisation> td,
+                               std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+                               std::shared_ptr<OneStepNSProblem> osnspb_velo,
+                               std::shared_ptr<OneStepNSProblem> osnspb_pos,
                                unsigned int _level = 1);
 
   void initOSNS() override;

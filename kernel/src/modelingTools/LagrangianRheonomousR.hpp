@@ -79,7 +79,7 @@ class LagrangianRheonomousR : public LagrangianR {
 
   /** default constructor
    */
-  LagrangianRheonomousR() : LagrangianR(RelationSubTypes::RheonomousR) { _zeroPlugin(); }
+  LagrangianRheonomousR() : LagrangianR(RelationSubType::RheonomousR) { _zeroPlugin(); }
 
  public:
   /** constructor from a set of data

@@ -37,8 +37,8 @@ void siconos::modeling::Relation::_zeroPlugin()
 void siconos::modeling::Relation::display() const
 {
   std::cout << "=====> Relation of type "
-            << static_cast<std::underlying_type<RelationTypes>::type>(_relationType)
-            << " and subtype " << static_cast<std::underlying_type<RelationSubTypes>::type>(_subType)
+            << static_cast<std::underlying_type<RelationType>::type>(_relationType)
+            << " and subtype " << static_cast<std::underlying_type<RelationSubType>::type>(_subType)
             << "\n";
 }
 

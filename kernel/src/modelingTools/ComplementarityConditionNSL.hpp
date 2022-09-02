@@ -42,7 +42,7 @@ class ComplementarityConditionNSL : public NonSmoothLaw {
   ComplementarityConditionNSL(unsigned int size) : NonSmoothLaw(size){};
 
   /** Destructor */
-  ~ComplementarityConditionNSL() = default;
+  ~ComplementarityConditionNSL() noexcept = default;
 
   /** print the data to the screen
    */
@@ -52,7 +52,7 @@ class ComplementarityConditionNSL : public NonSmoothLaw {
   {
     tourist.visit(*this);
   }
-
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 

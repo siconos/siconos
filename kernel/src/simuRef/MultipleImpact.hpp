@@ -70,7 +70,7 @@ private:
    place at this contact without potential energy (beginning of impact or
    repeating impact) if *_stateContact[i] = 2 => impact takes place with
    not-zero potential energy */
-  SP::IndexInt _stateContact;
+  std::shared_ptr<std::vector<unsigned int>> _stateContact;
   //! Stiffness at contacts
   std::shared_ptr<siconos::algebra::SiconosVector> _Kcontact;
   //! Restitution coefficient of contacts
@@ -109,7 +109,7 @@ private:
   unsigned int _nStepSave =
       100; //! If IsNumberOfStepsEst = false ==> user choose the step size
   //! Matrix on which the data during impact is saved
-  SP::SiconosMatrix _DataMatrix;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _DataMatrix;
   //! Number of points to be save during impacts
   unsigned int _sizeDataSave = 1000;
   /** indicator on the termination of the multiple impact process
@@ -323,19 +323,19 @@ public:
   /**initialize
    * \param sim
    */
-  void initialize(SP::Simulation sim) override;
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> sim) override;
 
   bool checkCompatibleNSLaw(NonSmoothLaw &nslaw) override;
   /** print the data to the screen */
   void display() const override;
 
-  /** To write a SiconosVector into a matrix
+  /** To write a siconos::algebra::SiconosVector into a matrix
    * \param v
    * \param row position starting to write
    * \param col position starting to write
    */
 
-  void WriteVectorIntoMatrix(const SiconosVector &v, const unsigned int row,
+  void WriteVectorIntoMatrix(const siconos::algebra::SiconosVector &v, const unsigned int row,
                              const unsigned int col);
 
   /** Save data for each step

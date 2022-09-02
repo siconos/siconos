@@ -88,9 +88,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter,
+                                           siconos::graphs::InteractionProperties &interProp,
+                                           siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   void _initialize_iteration_matrix(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
@@ -147,7 +147,7 @@ public:
    *  \param vertex_inter vertex of the interaction graph
    *  \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
 
   /** update the state of the dynamical systems

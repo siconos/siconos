@@ -36,7 +36,7 @@
 
 bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
                                 const std::ios_base::openmode &mode, int prec,
-                                const std::string &inputType, const std::ios::fmtflags &flags)
+                                WriteType inputType, const std::ios::fmtflags &flags)
 {
   // Read and check the file
   std::ifstream infile(fileName, mode);
@@ -52,7 +52,7 @@ bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
 
   if (mode == BINARY_IN) {
     double *x = m.getArray();
-    if (inputType != "noDim") {
+    if (inputType == WriteType::python) {
       unsigned int dim;
       infile.read((char *)(&dim), sizeof(m.size()));
     }
@@ -62,7 +62,7 @@ bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
     DenseVect *p = m.dense();
     // Read the dimension of the vector in the first line of the input file
     // Just use to check that sizes are consistents.
-    if (inputType != "noDim") {
+    if (inputType == WriteType::python) {
       unsigned int dim;
       infile >> dim;
       if (dim != p->size()) p->resize(dim);
@@ -76,8 +76,7 @@ bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
 
 bool siconos::algebra::io::write(const std::string &fileName, const SiconosVector &m,
                                  const std::ios_base::openmode &mode, int prec,
-                                 const std::string &outputType,
-                                 const std::ios::fmtflags &flags)
+                                 const WriteType outputType, const std::ios::fmtflags &flags)
 {
   std::ofstream outfile(fileName, mode);
   outfile.flags(flags);
@@ -86,14 +85,14 @@ bool siconos::algebra::io::write(const std::string &fileName, const SiconosVecto
   outfile.precision(prec);
   if (mode == BINARY_OUT) {
     double *x = m.getArray();
-    if (outputType != "noDim") {
+    if (outputType == WriteType::python) {
       unsigned int dim = m.size();
       outfile.write((char *)&dim, sizeof(dim));
     }
     outfile.write((char *)(&x[0]), sizeof(double) * m.size());
   }
   else {
-    if (outputType != "noDim") outfile << m.size() << std::endl;
+    if (outputType == WriteType::python) outfile << m.size() << std::endl;
 
     if (m.num() == UblasType::DENSE) {
       DenseVect *p = m.dense();
@@ -152,8 +151,7 @@ bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
 }
 
 bool siconos::algebra::io::write(const std::string &filename, const SiconosMatrix &m,
-                                 const std::ios_base::openmode &mode,
-                                 const std::string &outputType)
+                                 const std::ios_base::openmode &mode, WriteType outputType)
 {
   // Open file and various checks
   std::ofstream outfile(filename, mode);
@@ -166,7 +164,7 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
   outfile.setf(std::ios::scientific);
   // Writing
 
-  if (outputType != "noDim") outfile << m.size(0) << " " << m.size(1) << std::endl;
+  if (outputType == WriteType::python) outfile << m.size(0) << " " << m.size(1) << std::endl;
 
   if (m.num() == UblasType::DENSE) {
     double tmp;
@@ -220,7 +218,7 @@ double siconos::algebra::io::compareRefFile(const SimpleMatrix &data, std::strin
 {
   auto ref = std::make_shared<SimpleMatrix>(0, 0);
   bool compare = false;
-  //SimpleMatrix ref{0, 0};
+  // SimpleMatrix ref{0, 0};
   try {
     compare = read(filename, *ref, mode);
   }

@@ -43,7 +43,7 @@ class MultipleImpactNSL : public NonSmoothLaw {
   // Constructor with parameters
   MultipleImpactNSL(double, double, double, unsigned int _dim = 1);
   // Destructor
-  ~MultipleImpactNSL() = default;
+  ~MultipleImpactNSL() noexcept = default;
   // Get the value of the energytical restitution coefficientx
   inline double ResCof() const { return _ResCof; };
   // Get the value of the stiffness
@@ -65,6 +65,7 @@ class MultipleImpactNSL : public NonSmoothLaw {
   {
     tourist.visit(*this);
   }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif

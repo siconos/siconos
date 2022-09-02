@@ -49,7 +49,7 @@ class LagrangianLinearTIR : public LagrangianR {
  public:
   /** Default constructor
    */
-  LagrangianLinearTIR() : LagrangianR(RelationSubTypes::LinearTIR){};
+  LagrangianLinearTIR() : LagrangianR(RelationSubType::LinearTIR){};
 
   /** create the Relation from a set of data
    *

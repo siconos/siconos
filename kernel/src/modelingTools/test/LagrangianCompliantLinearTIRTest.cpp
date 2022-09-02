@@ -46,11 +46,11 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr->C() == C,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1c : ",
-                               folr->getType() == siconos::modeling::RelationTypes::Lagrangian,
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianCompliantLinearTIR1d : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::CompliantLinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::CompliantLinearTIR, true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
@@ -60,11 +60,11 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR2()
   std::cout << "--> Test: constructor 2." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D, F, e);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR2f : ",
-                               folr->getType() == siconos::modeling::RelationTypes::Lagrangian,
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianCompliantLinearTIR2g : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::CompliantLinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::CompliantLinearTIR, true);
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 
@@ -78,11 +78,11 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3d : ", folr->e() == e,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3f : ",
-                               folr->getType() == siconos::modeling::RelationTypes::Lagrangian,
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianCompliantLinearTIR3g : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::CompliantLinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::CompliantLinearTIR, true);
   std::cout << "--> Constructor 3 test ended with success." << std::endl;
 }
 

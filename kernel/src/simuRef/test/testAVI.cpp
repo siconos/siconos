@@ -27,16 +27,16 @@ CPPUNIT_TEST_SUITE_REGISTRATION(AVITest);
 
 void AVITest::setUp()
 {
-  _A.reset(new SimpleMatrix(_n, _n, 0));
-  _b.reset(new SiconosVector(_n, 0));
-  _x0.reset(new SiconosVector(_n, 0));
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
+  _b = std::make_shared<siconos::algebra::SiconosVector>(_n, 0));
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0));
 }
 
 void AVITest::init()
 {
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
-  _TD.reset(new TimeDiscretisation(_t0, _h));
-  _nsds.reset(new NonSmoothDynamicalSystem(_t0, _T));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b));
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h));
+  _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T));
   _osi.reset(new EulerMoreauOSI(_theta));
   _nsds->insertDynamicalSystem(_DS);
   _sim.reset(new TimeStepping(_nsds, _TD, 0));
@@ -61,29 +61,29 @@ void AVITest::testAVI()
   _x0->zero();
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 10.0;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> B(new SimpleMatrix(_n, _n, 0));
-  std::shared_ptr<siconos::algebra::SimpleMatrix> C(new SimpleMatrix(_n, _n));
+  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
+  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n));
   (*B)(1, 0) = G;
   (*B)(1, 1) = G*beta;
   C->eye();
   SP::FirstOrderLinearTIR rel(new FirstOrderLinearTIR(C, B));
   // H-K representation: the feasible set is given by all the element λ such that Hλ ≥ K
-  std::shared_ptr<siconos::algebra::SimpleMatrix> H(new SimpleMatrix(4, 2));
+  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(4, 2));
   (*H)(0, 0) = 1.0;
   (*H)(1, 0) = -_h/2.0;
   (*H)(2, 0) = -1.0;
   (*H)(3, 0) = _h/2.0;
   (*H)(1, 1) = 1.0;
   (*H)(3, 1) = -1.0;
-  std::shared_ptr<siconos::algebra::SiconosVector> K(new SiconosVector(4));
+  std::shared_ptr<siconos::algebra::SiconosVector> K = std::make_shared<siconos::algebra::SiconosVector>(4));
   (*K)(0) = -1.0;
   (*K)(1) = -1.0;
   (*K)(2) = -1.0;
   (*K)(3) = -1.0;
-  SP::NonSmoothLaw nslaw(new NormalConeNSL(_n, H, K));
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
-  _TD.reset(new TimeDiscretisation(_t0, _h));
-  _nsds.reset(new NonSmoothDynamicalSystem(_t0, _T));
+  auto nslaw(new NormalConeNSL(_n, H, K));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b));
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h));
+  _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T));
   std::shared_ptr<siconos::modeling::Interaction> inter(new Interaction(nslaw, rel));
   _osi.reset(new EulerMoreauOSI(_theta));
   _nsds->insertDynamicalSystem(_DS);
@@ -94,9 +94,9 @@ void AVITest::testAVI()
   _sim->insertNonSmoothProblem(osnspb);
 
 
-  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
-  SiconosVector& xProc = *_DS->x();
-  SiconosVector& lambda = *inter->lambda(0);
+  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
+  siconos::algebra::SiconosVector& xProc = *_DS->x();
+  siconos::algebra::SiconosVector& lambda = *inter->lambda(0);
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
   dataPlot(0, 1) = (*_x0)(0);
@@ -118,10 +118,10 @@ void AVITest::testAVI()
   dataPlot.resize(k, dataPlot.size(1));
   ioMatrix::write("testAVI.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
-  SimpleMatrix dataPlotRef(dataPlot);
+  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("testAVI.ref", "ascii", dataPlotRef);
-  std::shared_ptr<siconos::algebra::SiconosVector> err(new SiconosVector(dataPlot.size(1)));
+  std::shared_ptr<siconos::algebra::SiconosVector> err = std::make_shared<siconos::algebra::SiconosVector>(dataPlot.size(1)));
   (dataPlot - dataPlotRef).normInfByColumn(err);
   err->display();
 

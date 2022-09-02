@@ -28,11 +28,11 @@ using namespace RELATION;
 
 
 RollingFrictionContact::RollingFrictionContact(int dimPb, int numericsSolverId):
-  RollingFrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+  RollingFrictionContact(dimPb, std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(numericsSolverId),
                          solver_options_delete))
 {}
 
-RollingFrictionContact::RollingFrictionContact(int dimPb, SP::SolverOptions options):
+RollingFrictionContact::RollingFrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options):
   LinearOSNS(options), _contactProblemDim(dimPb)
 {
 
@@ -54,12 +54,12 @@ RollingFrictionContact::RollingFrictionContact(int dimPb, SP::SolverOptions opti
   else
     THROW_EXCEPTION("Wrong dimension value (only 5 (3D) or 3 (2D) are allowed for RollingFrictionContact constructor.");
 
-  _mu.reset(new MuStorage());
-  _muR.reset(new MuStorage());
+  _mu = std::make_shared<std::vector<double>>();
+  _muR = std::make_shared<std::vector<double>>();
 
 }
 
-void RollingFrictionContact::initialize(SP::Simulation sim)
+void RollingFrictionContact::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
@@ -72,7 +72,7 @@ void RollingFrictionContact::initialize(SP::Simulation sim)
   // Connect to the right function according to dim. of the problem
 
   // get topology
-  SP::Topology topology =
+  auto topology =
     simulation()->nonSmoothDynamicalSystem()->topology();
 
   // Note that interactionBlocks is up to date since updateInteractionBlocks
@@ -90,9 +90,9 @@ void RollingFrictionContact::initialize(SP::Simulation sim)
   if(topology->indexSet0()->size()>0)
   {
     // Get index set from Simulation
-    std::shared_ptr<InteractionsGraph> indexSet =
+    auto indexSet =
       simulation()->indexSet(indexSetLevel());
-    InteractionsGraph::VIterator ui, uiend;
+    siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       _mu->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>
@@ -107,8 +107,8 @@ void RollingFrictionContact::updateMu()
 {
   _mu->clear();
   _muR->clear();
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(indexSetLevel());
-  InteractionsGraph::VIterator ui, uiend;
+  auto indexSet = simulation()->indexSet(indexSetLevel());
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _mu->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>

@@ -99,7 +99,7 @@ class LagrangianR : public Relation {
    *
    *  \param lagType the sub-type of the relation
    */
-  LagrangianR(RelationSubTypes lagType) : Relation(RelationTypes::Lagrangian, lagType) {}
+  LagrangianR(RelationSubType lagType) : Relation(RelationType::Lagrangian, lagType) {}
 
   void _zeroPlugin() override;
 

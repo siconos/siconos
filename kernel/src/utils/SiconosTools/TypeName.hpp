@@ -23,8 +23,10 @@
 #ifndef TypeName_hpp
 #define TypeName_hpp
 
+#include <cassert>
 #include <string>
 #include <variant>
+
 // #include "SiconosVisitables.hpp" // For SICONOS_VISITABLES macro
 
 // #undef REGISTER
@@ -59,9 +61,8 @@
 //   return *(siconos::internal::type::str(siconos::internal::type::value(c)));
 // }
 
-
-
-//   template <class T > inline std::shared_ptr<std::string> str(const siconos::internal::type::Siconos& X)
+//   template <class T > inline std::shared_ptr<std::string> str(const
+//   siconos::internal::type::Siconos& X)
 // {
 //   std::shared_ptr<std::string> r;
 
@@ -74,51 +75,188 @@
 //   return (r);
 // }
 
-  
 // }  // namespace siconos::internal
 
+namespace siconos::modeling {
 
-namespace siconos::typesv{
+class FirstOrderNonLinearDS;
+class NewtonEulerDS;
+class LagrangianDS;
+class FirstOrderLinearDS;
+class FirstOrderLinearTIDS;
+class LagrangianLinearTIDS;
+class LagrangianLinearDiagonalDS;
+class RelayNSL;
+class NormalConeNSL;
+class NewtonImpactRollingFrictionNSL;
+class NewtonImpactNSL;
+class NewtonImpactFrictionNSL;
+class MultipleImpactNSL;
+class MixedComplementarityConditionNSL;
+class EqualityConditionNSL;
+class ComplementarityConditionNSL;
 
-  struct FindType{
+enum class Type {
+  FirstOrderNonLinearDS,
+  NewtonEulerDS,
+  LagrangianDS,
+  FirstOrderLinearDS,
+  FirstOrderLinearTIDS,
+  LagrangianLinearTIDS,
+  LagrangianLinearDiagonalDS,
+  // NSLaws
+  RelayNSL,
+  NormalConeNSL,
+  NewtonImpactRollingFrictionNSL,
+  NewtonImpactNSL,
+  NewtonImpactFrictionNSL,
+  MultipleImpactNSL,
+  MixedComplementarityConditionNSL,
+  EqualityConditionNSL,
+  ComplementarityConditionNSL,
+};
 
-    // auto operator()(const siconos::experimental::B& obj) const {return experimental::Type::B; }
-    // auto operator()(const siconos::experimental::C& obj) const {return experimental::Type::C; }
-    // auto operator()(std::shared_ptr<siconos::experimental::B> obj) const {return experimental::Type::B; }
-    // auto operator()(std::shared_ptr<siconos::experimental::C> obj) const {return experimental::Type::C; }
+}  // namespace siconos::modeling
+
+namespace siconos::types {
+
+struct FindType {
+  // auto operator()(const siconos::experimental::B& obj) const {return experimental::Type::B;
+  // } auto operator()(const siconos::experimental::C& obj) const {return
+  // experimental::Type::C; } auto operator()(std::shared_ptr<siconos::experimental::B> obj)
+  // const {return experimental::Type::B; } auto
+  // operator()(std::shared_ptr<siconos::experimental::C> obj) const {return
+  // experimental::Type::C; }
+
+  // DS
+  auto visit(const siconos::modeling::FirstOrderNonLinearDS&) const
+  {
+    return siconos::modeling::Type::FirstOrderNonLinearDS;
   };
-  
-  // auto type_value = []( auto& obj) { return obj.name(); };
-
-  static FindType find;
-
-  template <typename C> auto type_value(const C &c) {return std::visit(find, c);}
-  
-  template <typename T> constexpr auto str(const T& X)
+  auto visit(const siconos::modeling::NewtonEulerDS&) const
   {
-  
-  switch (X) {
-  case T::B:
-    //r = std::make_shared<std::string>("siconos::experimental::B");
-    return "siconos::experimental::B";
-    break;
-  case T::C:
-    //r = std::make_shared<std::string>("siconos::experimental::C");
-    return "siconos::experimental::C";
-    break;
-  default:
-    assert(0);
-  }
-  }
-
-  template <class C> std::string type_name(const C& c)
+    return siconos::modeling::Type::NewtonEulerDS;
+  };
+  auto visit(const siconos::modeling::LagrangianDS&) const
   {
-     return str(type_value(c));
-  }
+    return siconos::modeling::Type::LagrangianDS;
+  };
+  auto visit(const siconos::modeling::LagrangianLinearTIDS&) const
+  {
+    return siconos::modeling::Type::LagrangianLinearTIDS;
+  };
+  auto visit(const siconos::modeling::LagrangianLinearDiagonalDS&) const
+  {
+    return siconos::modeling::Type::LagrangianLinearDiagonalDS;
+  };
 
-  
-    
+  // NSlaws
+  auto visit(const siconos::modeling::RelayNSL&) const
+  {
+    return siconos::modeling::Type::RelayNSL;
+  };
+  auto visit(const siconos::modeling::NormalConeNSL&) const
+  {
+    return siconos::modeling::Type::NormalConeNSL;
+  };
+  auto visit(const siconos::modeling::NewtonImpactRollingFrictionNSL&) const
+  {
+    return siconos::modeling::Type::NewtonImpactRollingFrictionNSL;
+  };
+  auto visit(const siconos::modeling::NewtonImpactNSL&) const
+  {
+    return siconos::modeling::Type::NewtonImpactNSL;
+  };
+  auto visit(const siconos::modeling::NewtonImpactFrictionNSL&) const
+  {
+    return siconos::modeling::Type::NewtonImpactFrictionNSL;
+  };
+  auto visit(const siconos::modeling::MultipleImpactNSL&) const
+  {
+    return siconos::modeling::Type::MultipleImpactNSL;
+  };
+  auto visit(const siconos::modeling::MixedComplementarityConditionNSL&) const
+  {
+    return siconos::modeling::Type::MixedComplementarityConditionNSL;
+  };
+  auto visit(const siconos::modeling::EqualityConditionNSL&) const
+  {
+    return siconos::modeling::Type::EqualityConditionNSL;
+  };
+  auto visit(const siconos::modeling::ComplementarityConditionNSL&) const
+  {
+    return siconos::modeling::Type::ComplementarityConditionNSL;
+  };
+};
+
+// auto type_value = []( auto& obj) { return obj.name(); };
+
+static FindType find;
+
+template <typename C>
+inline auto type_value(const C& c)
+{
+  return c.acceptType(find);
 }
 
+template <typename T>
+constexpr auto str(const T& X)
+{
+  switch (X) {
+    case T::FirstOrderNonLinearDS:
+      return "siconos::modeling::FirstOrderNonLinearDS";
+      break;
+    case T::NewtonEulerDS:
+      return "siconos::modeling::NewtonEulerDS";
+      break;
+    case T::LagrangianDS:
+      return "siconos::modeling::LagrangianDS";
+      break;
+    case T::LagrangianLinearTIDS:
+      return "siconos::modeling::LagrangianLinearTIDS";
+      break;
+    case T::LagrangianLinearDiagonalDS:
+      return "siconos::modeling::LagrangianLinearDiagonalDS";
+      break;
+    case T::RelayNSL:
+      return "siconos::modeling::RelayNSL";
+      break;
+    case T::NormalConeNSL:
+      return "siconos::modeling::NormalConeNSL";
+      break;
+    case T::NewtonImpactRollingFrictionNSL:
+      return "siconos::modeling::NewtonImpactRollingFrictionNSL";
+      break;
+    case T::NewtonImpactNSL:
+      return "siconos::modeling::NewtonImpactNSL";
+      break;
+    case T::NewtonImpactFrictionNSL:
+      return "siconos::modeling::NewtonImpactFrictionNSL";
+      break;
+    case T::MultipleImpactNSL:
+      return "siconos::modeling::MultipleImpactNSL";
+      break;
+    case T::MixedComplementarityConditionNSL:
+      return "siconos::modeling::MixedComplementarityConditionNSL";
+      break;
+    case T::EqualityConditionNSL:
+      return "siconos::modeling::EqualityConditionNSL";
+      break;
+    case T::ComplementarityConditionNSL:
+      return "siconos::modeling::ComplementarityConditionNSL";
+      break;
+    default:
+      assert(0);
+      return "unknown";
+  }
+}
+
+template <class C>
+std::string type_name(const C& c)
+{
+  return str(type_value(c));
+}
+
+}  // namespace siconos::types
 
 #endif

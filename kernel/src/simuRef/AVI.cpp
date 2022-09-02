@@ -55,7 +55,7 @@ struct AVI::_BoundsNSLEffect : public SiconosVisitor
       S
     }
     // take the
-    SiconosVector& K = nslaw.K();
+    siconos::algebra::SiconosVector& K = nslaw.K();
     SimpleMatrix& H = nslaw.H();
     _numerics_problem->size = nslaw.size();
     _numerics_problem->d = nullptr;
@@ -86,18 +86,18 @@ struct AVI::_BoundsNSLEffect : public SiconosVisitor
 
 
 AVI::AVI(int numericsSolverId):
-  AVI(SP::SolverOptions(solver_options_create(numericsSolverId),
+  AVI(std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(numericsSolverId),
                         solver_options_delete))
 {}
 
-AVI::AVI(SP::SolverOptions options):
+AVI::AVI(std::shared_ptr<siconos::numerics::SolverOptions> options):
   LinearOSNS(options), _numerics_problem(new AffineVariationalInequalities)
 {
   _numerics_problem->poly.split = new polyhedron;
 }
 
 
-void AVI::initialize(SP::Simulation sim)
+void AVI::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   LinearOSNS::initialize(sim);
 
@@ -105,21 +105,21 @@ void AVI::initialize(SP::Simulation sim)
   // It is not clear whether having multiple NonsmoothLaw would be beneficial given the exponential complexity of most solvers
   // TODO We should support RelayNSL with generic rectangles -- xhub
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   unsigned nbInter = 0;
   for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     NormalConeNSL& nc = static_cast<NormalConeNSL&>(*indexSet.bundle(*ui)->nonSmoothLaw());
     assert(Type::value(nc) == Type::NormalConeNSL &&
            "AVI::initialize :: found a NonSmoothLaw that is not of the NormalConeNSL type! This is currently not supported");
-    SiconosVector& K = nc.K();
+    siconos::algebra::SiconosVector& K = nc.K();
     SimpleMatrix& H = nc.H();
     _numerics_problem->size = nc.size();
     _numerics_problem->d = nullptr;
     _numerics_problem->poly.split->id = SICONOS_SET_POLYHEDRON;
     _numerics_problem->poly.split->size_ineq = K.size();
     _numerics_problem->poly.split->size_eq = 0;
-    _numerics_problem->poly.split->H = NM_create_from_data(NM_DENSE, K.size(), nc.size(), H.getArray());
+    _numerics_problem->poly.split->H = siconos::numerics::NM_create_from_data(siconos::numerics::NM_DENSE, K.size(), nc.size(), H.getArray());
     _numerics_problem->poly.split->K = K.getArray();
     _numerics_problem->poly.split->Heq = nullptr;
     _numerics_problem->poly.split->Keq= nullptr;

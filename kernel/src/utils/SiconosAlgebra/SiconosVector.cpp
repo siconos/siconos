@@ -648,11 +648,10 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator+=(
 siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator+=(
     const BlockVector& vIn)
 {
-  VectorOfVectors::const_iterator it;
   unsigned int pos = 0;
-  for (it = vIn.begin(); it != vIn.end(); ++it) {
-    addBlock(pos, **it);
-    pos += (*it)->size();
+  for (auto it : vIn){
+    addBlock(pos, *it);
+    pos += it->size();
   }
   return *this;
 }
@@ -698,9 +697,8 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator-=(
 siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator-=(
     const BlockVector& vIn)
 {
-  VectorOfVectors::const_iterator it;
   unsigned int pos = 0;
-  for (it = vIn.begin(); it != vIn.end(); ++it) {
+  for (auto it = vIn.begin(); it != vIn.end(); ++it) {
     subBlock(pos, **it);
     pos += (*it)->size();
   }

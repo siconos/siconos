@@ -79,7 +79,7 @@ class NormalConeNSL : public NonSmoothLaw {
   NormalConeNSL(unsigned size, std::shared_ptr<siconos::algebra::SimpleMatrix> H,
                 std::shared_ptr<siconos::algebra::SiconosVector> K);
 
-  virtual ~NormalConeNSL() = default;
+  virtual ~NormalConeNSL() noexcept = default;
 
   /** get H
    *
@@ -108,6 +108,7 @@ class NormalConeNSL : public NonSmoothLaw {
   {
     tourist.visit(*this);
   }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 

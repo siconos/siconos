@@ -17,6 +17,7 @@
  */
 /*! \file Utils.hpp
  *  Include files related to utils directory
+ *  Must be used only by final user.
  */
 
 #include "BlockMatrix.hpp"

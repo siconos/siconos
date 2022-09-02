@@ -42,7 +42,7 @@ namespace siconos::modeling {
 class Interaction;
 
 /** List of possible Relations types*/
-enum class RelationTypes {
+enum class RelationType {
   /** First Order */
   FirstOrder,
   /** Lagrangian */
@@ -52,7 +52,7 @@ enum class RelationTypes {
 };
 
 /** List of possible Relations subtypes*/
-enum class RelationSubTypes {
+enum class RelationSubType {
   /** non linear */
   NonLinearR,
   /** linear */
@@ -134,17 +134,17 @@ class Relation {
   virtual void _zeroPlugin();
 
   /** type of the Relation: FirstOrder or Lagrangian */
-  RelationTypes _relationType;
+  RelationType _relationType;
 
   /** sub-type of the Relation (exple: LinearTIR or ScleronomousR ...) */
-  RelationSubTypes _subType;
+  RelationSubType _subType;
 
   /** basic constructor
    *
    *  \param type type of the relation
    *  \param subtype subtype of the relation
    */
-  Relation(RelationTypes type, RelationSubTypes subtype)
+  Relation(RelationType type, RelationSubType subtype)
       : _relationType(type), _subType(subtype)
   {
     _zeroPlugin();
@@ -165,10 +165,10 @@ class Relation {
   virtual ~Relation() noexcept = default;
 
   /** \return the type of the Relation (FirstOrder or Lagrangian) */
-  inline RelationTypes getType() const { return _relationType; }
+  inline RelationType getType() const { return _relationType; }
 
   /** \return the subType of the Relation */
-  inline RelationSubTypes getSubType() const { return _subType; }
+  inline RelationSubType getSubType() const { return _subType; }
 
   /** To set a plug-in function to compute output function h
    *

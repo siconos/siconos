@@ -88,7 +88,7 @@ class FirstOrderLinearTIDS : public FirstOrderLinearDS {
   // FirstOrderLinearTIDS(const FirstOrderLinearTIDS &FOLTIDS) : FirstOrderLinearDS(FOLTIDS){};
 
   /** destructor */
-  ~FirstOrderLinearTIDS() = default;
+  ~FirstOrderLinearTIDS() noexcept = default;
 
   /** Initialization function for the rhs and its jacobian.
    *

@@ -135,7 +135,7 @@ class LagrangianScleronomousR : public LagrangianR {
   void _zeroPlugin() override;
 
   /** basic constructor */
-  LagrangianScleronomousR() : LagrangianR(RelationSubTypes::ScleronomousR) { _zeroPlugin(); }
+  LagrangianScleronomousR() : LagrangianR(RelationSubType::ScleronomousR) { _zeroPlugin(); }
 
  public:
   /** constructor from a set of data

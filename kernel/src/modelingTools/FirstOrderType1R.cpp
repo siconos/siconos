@@ -25,7 +25,7 @@
 
 siconos::modeling::FirstOrderType1R::FirstOrderType1R(const std::string& pluginh,
                                                       const std::string& pluging)
-    : FirstOrderR(RelationSubTypes::Type1R)
+    : FirstOrderR(RelationSubType::Type1R)
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
@@ -40,7 +40,7 @@ siconos::modeling::FirstOrderType1R::FirstOrderType1R(const std::string& pluginh
                                                       const std::string& pluging,
                                                       const std::string& pluginJachx,
                                                       const std::string& pluginJacglambda)
-    : FirstOrderR(RelationSubTypes::Type1R)
+    : FirstOrderR(RelationSubType::Type1R)
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in

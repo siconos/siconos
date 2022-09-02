@@ -27,6 +27,7 @@
 #include <stdio.h>          // for size_t, FILE, NULL
 #include <stdlib.h>         // for malloc
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
+#include "NM_types.h" // NM_DENSE ...
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
 #include "NumericsDataVersion.h" // Versioning
 #include "NumericsSparseMatrix.h" // for NSM_linear_solver typedef
@@ -65,14 +66,6 @@ typedef struct
                                                  * the same hash */
 #endif
 } NumericsMatrixInternalData;
-
-/*! Available types of storage for NumericsMatrix */
-typedef enum NumericsMatrix_types {
-  NM_DENSE,        /**< dense format */
-  NM_SPARSE_BLOCK, /**< sparse block format */
-  NM_SPARSE,          /**< compressed column format */
-  NM_UNKNOWN, /**< unset. Used in NM_null */
-} NM_types;
 
 /** \struct NumericsMatrix NumericsMatrix.h
     Interface to different type of matrices in numerics component.

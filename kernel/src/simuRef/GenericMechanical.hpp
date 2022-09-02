@@ -65,7 +65,7 @@ public:
    *
    *  \param options the options set
    */
-  GenericMechanical(SP::SolverOptions options);
+  GenericMechanical(std::shared_ptr<siconos::numerics::SolverOptions> options);
 
   /** destructor
    */
@@ -79,7 +79,7 @@ public:
    *
    *  \param sim the simulation, owner of this OSNSPB
    */
-  void initialize(SP::Simulation sim) override;
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> sim) override;
 
   /** Compute the unknown reaction and velocity and update the Interaction (y
    *  and lambda )
@@ -94,14 +94,14 @@ public:
    *  \param ed an edge descriptor
    */
   void
-  computeInteractionBlock(const InteractionsGraph::EDescriptor &ed) override;
+  computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor &ed) override;
 
   /** compute diagonal Interaction block
    *
    *  \param vd  a vertex descriptor
    */
   void computeDiagonalInteractionBlock(
-      const InteractionsGraph::VDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::VDescriptor &vd) override;
 
   /** print the data to the screen */
   void display() const override;

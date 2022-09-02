@@ -43,11 +43,11 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1()
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->C() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1c : ",
-                               folr->getType() == siconos::modeling::RelationTypes::Lagrangian,
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianLinearTIR1d : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
@@ -57,11 +57,11 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR2()
   std::cout << "--> Test: constructor 2." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C, F, e);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2f : ",
-                               folr->getType() == siconos::modeling::RelationTypes::Lagrangian,
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianLinearTIR2g : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 
@@ -73,11 +73,11 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3a : ", folr->C() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3d : ", folr->e() == e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3f : ",
-                               folr->getType() == siconos::modeling::RelationTypes::Lagrangian,
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianLinearTIR3g : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
   std::cout << "--> Constructor 3 test ended with success." << std::endl;
 }
 
@@ -87,11 +87,11 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4()
   std::cout << "--> Test: constructor 4." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR4c : ",
-                               folr->getType() == siconos::modeling::RelationTypes::Lagrangian,
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianLinearTIR4d : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
   std::cout << "--> Constructor 4 test ended with success." << std::endl;
 }
 // set C as a matrix and then plug it

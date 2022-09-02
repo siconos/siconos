@@ -40,20 +40,20 @@ static void computeA1(double, unsigned int, double*, double* A, unsigned int, do
 
 void EulerMoreauTest::setUp()
 {
-  _A.reset(new SimpleMatrix(_n, _n, 0));
-  _b.reset(new SiconosVector(_n, 0));
-  _x0.reset(new SiconosVector(_n, 0));
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
+  _b = std::make_shared<siconos::algebra::SiconosVector>(_n, 0));
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0));
 }
 
 void EulerMoreauTest::init(bool initDS)
 {
   if(initDS)
   {
-    _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
+    _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
   }
 
-  _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h));
+  _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T));
   _sim.reset(new TimeStepping(_model, _TD, 0));
   _EulerMoreau.reset(new EulerMoreauOSI(.5));
   _model->insertDynamicalSystem(_DS);
@@ -74,7 +74,7 @@ void EulerMoreauTest::testCstGradTIDS()
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b));
 
   init(false);
 
@@ -99,7 +99,7 @@ void EulerMoreauTest::testCstGradDS()
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS.reset(new FirstOrderLinearDS(_x0, _A, _b));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(_x0, _A, _b));
 
   init(false);
 
@@ -124,7 +124,7 @@ void EulerMoreauTest::testCstGradNLDS()
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS.reset(new FirstOrderNonLinearDS(_x0));
+  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(_x0));
 
   FirstOrderNonLinearDS& DSNL = static_cast<FirstOrderNonLinearDS&>(*_DS);
   DSNL.setComputeFFunction(&computef1);

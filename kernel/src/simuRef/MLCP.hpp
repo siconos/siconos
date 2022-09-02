@@ -85,7 +85,7 @@ public:
    *
    *  \param options the options set
    */
-  MLCP(SP::SolverOptions options);
+  MLCP(std::shared_ptr<siconos::numerics::SolverOptions> options);
 
   /** destructor
    */
@@ -130,14 +130,14 @@ public:
    *  \param ed an edge descriptor
    */
   void
-  computeInteractionBlock(const InteractionsGraph::EDescriptor &ed) override;
+  computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor &ed) override;
 
   /** compute diagonal Interaction block
    *
    *  \param vd a vertex descriptor
    */
   void computeDiagonalInteractionBlock(
-      const InteractionsGraph::VDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::VDescriptor &vd) override;
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    * 

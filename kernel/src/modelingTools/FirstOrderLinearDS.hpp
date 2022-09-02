@@ -142,7 +142,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   // FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS);
 
   /** destructor */
-  virtual ~FirstOrderLinearDS() = default;
+  virtual ~FirstOrderLinearDS() noexcept = default;
 
   /** Initialization function for the rhs and its jacobian.
    *

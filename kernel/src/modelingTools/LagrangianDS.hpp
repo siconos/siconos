@@ -332,7 +332,7 @@ class LagrangianDS : public SecondOrderDS {
                const std::string &plugin);
 
   /** destructor */
-  virtual ~LagrangianDS() = default;
+  virtual ~LagrangianDS() noexcept = default;
 
   /** reset the state to the initial state */
   void resetToInitialState() override;
@@ -963,6 +963,8 @@ class LagrangianDS : public SecondOrderDS {
 
   // visitors hook
   void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  
 };
 
 }  // namespace siconos::modeling

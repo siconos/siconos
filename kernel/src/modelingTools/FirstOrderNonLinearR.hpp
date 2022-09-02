@@ -93,7 +93,7 @@ class FirstOrderNonLinearR : public FirstOrderR {
  public:
   /** basic constructor
    */
-  FirstOrderNonLinearR() : FirstOrderR(RelationSubTypes::NonLinearR) {}
+  FirstOrderNonLinearR() : FirstOrderR(RelationSubType::NonLinearR) {}
 
   /** destructor */
   virtual ~FirstOrderNonLinearR() noexcept = default;

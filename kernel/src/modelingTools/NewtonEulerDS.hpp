@@ -325,7 +325,7 @@ class NewtonEulerDS : public SecondOrderDS {
                 std::shared_ptr<siconos::algebra::SiconosMatrix> inertia);
 
   /** destructor */
-  virtual ~NewtonEulerDS() = default;
+  virtual ~NewtonEulerDS() noexcept = default;
 
   /** reset the state to the initial state */
   void resetToInitialState() override;
@@ -1100,6 +1100,7 @@ class NewtonEulerDS : public SecondOrderDS {
 
   // visitors hook
   void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERNLDS_H

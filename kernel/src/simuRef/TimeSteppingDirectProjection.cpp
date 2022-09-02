@@ -36,23 +36,23 @@ static CheckSolverFPtr checkSolverOutputProjectOnConstraints = nullptr;
 #include "siconos_debug.h"
 //#define CORRECTIONSVELOCITIES
 TimeSteppingDirectProjection::TimeSteppingDirectProjection(
-  SP::NonSmoothDynamicalSystem nsds,
-  SP::TimeDiscretisation td,
-  SP::OneStepIntegrator osi,
-  SP::OneStepNSProblem osnspb_velo,
-  SP::OneStepNSProblem osnspb_pos,
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+  std::shared_ptr<TimeDiscretisation> td,
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+  std::shared_ptr<OneStepNSProblem> osnspb_velo,
+  std::shared_ptr<OneStepNSProblem> osnspb_pos,
   unsigned int level)
   : TimeStepping(nsds,td, osi, osnspb_velo)
 {
 
   //if (Type::value(osi) != Type::MoreauJeanDirectProjectionOSI)
-  OSI::TYPES typeOSI;
+  siconos::integrators::IntegratorType typeOSI;
   typeOSI = (osi)->getType();
   if(typeOSI != OSI::MOREAUDIRECTPROJECTIONOSI)
     THROW_EXCEPTION("TimeSteppingDirectProjection::TimeSteppingDirectProjection.  wrong type of OneStepIntegrator");
 
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
-  insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
+  insertNonSmoothProblem(osnspb_pos, siconos::simulation::SICONOS_OSNSP_TS_POS);
 
   _indexSetLevelForProjection = level;
   _constraintTol = 1e-04;
@@ -69,11 +69,11 @@ void TimeSteppingDirectProjection::initOSNS()
 {
   TimeStepping::initOSNS();
 
-  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setIndexSetLevel(_indexSetLevelForProjection);
-  (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setInputOutputLevel(0);
+  (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]->setIndexSetLevel(_indexSetLevelForProjection);
+  (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]->setInputOutputLevel(0);
 
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
-  (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+  (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+  (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
 }
 
 void TimeSteppingDirectProjection::nextStep()
@@ -83,8 +83,8 @@ void TimeSteppingDirectProjection::nextStep()
 
   // Zeroing Lambda Muliplier of indexSet()
 
-  std::shared_ptr<InteractionsGraph> indexSet = _nsds->topology()->indexSet(0);
-  InteractionsGraph::VIterator ui, uiend;
+  auto indexSet = _nsds->topology()->indexSet(0);
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*ui);
@@ -121,17 +121,17 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   DEBUG_PRINT("TimeSteppingDirectProjection::newtonSolve begin projection:\n");
 
-  std::shared_ptr<DynamicalSystemsGraph> dsGraph = _nsds->dynamicalSystems();
+  std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dsGraph = _nsds->dynamicalSystems();
 
 
 #ifdef TSPROJ_CORRECTIONVELOCITIES
-  for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
+  for(auto &vi : *dsGraph)
   {
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds = dsGraph->bundle(*vi);
+    auto ds = dsGraph->bundle(vi);
     Type::Siconos dsType = Type::value(*ds);
     if(dsType != Type::NewtonEulerDS)
       THROW_EXCEPTION("TS:: - ds is not from NewtonEulerDS.");
-    SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
+    auto neds = std::static_pointer_cast<NewtonEulerDS>(ds);
     *(neds->deltaq()) = *(neds->q());
   }
 #endif
@@ -156,8 +156,8 @@ void TimeSteppingDirectProjection::advanceToEvent()
     computeCriteria(&runningProjection);
   // Zeroing Lambda Muliplier of indexSet()
 
-  std::shared_ptr<InteractionsGraph> indexSet = _nsds->topology()->indexSet(0);
-  InteractionsGraph::VIterator ui, uiend;
+  auto indexSet = _nsds->topology()->indexSet(0);
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*ui);
@@ -169,17 +169,17 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
   {
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds = dsGraph->bundle(*aVi2);
+    auto ds = dsGraph->bundle(*aVi2);
     Type::Siconos dsType = Type::value(*ds);
     auto& workVectors = *dsGraph->properties(*aVi2).workVectors;
     if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
+      auto neds = std::static_pointer_cast<NewtonEulerDS>(ds);
       *workVectors[MoreauJeanOSI::QTMP] = *neds->q();
     }
     else if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+      auto d = std::static_pointer_cast<LagrangianDS> (ds);
       *workVectors[MoreauJeanOSI::QTMP] = * d->q();
 
     }
@@ -192,8 +192,8 @@ void TimeSteppingDirectProjection::advanceToEvent()
     _nbProjectionIteration++;
     DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n", _nbProjectionIteration);
 
-    std::shared_ptr<InteractionsGraph> indexSet = _nsds->topology()->indexSet(0);
-    InteractionsGraph::VIterator ui, uiend;
+    auto indexSet = _nsds->topology()->indexSet(0);
+    siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*ui);
@@ -204,11 +204,11 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
     DEBUG_PRINT("TimeSteppingProjectOnConstraint compute OSNSP.\n");
 
-    info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
+    info = computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_POS);
 
     DEBUG_PRINTF("IndexSet0->size() = %i\n", (int)_nsds->topology()->indexSet(0)->size());
     DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)_nsds->topology()->indexSet(1)->size());
-    DEBUG_EXPR(oneStepNSProblem(SICONOS_OSNSP_TS_POS)->display());
+    DEBUG_EXPR(oneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_POS)->display());
 
 
     if(info && _warnOnNonConvergence)
@@ -218,14 +218,14 @@ void TimeSteppingDirectProjection::advanceToEvent()
     _nsds->updateInput(nextTime(),0);
 
     DEBUG_EXPR_WE(std ::cout << "After update input" << std::endl;
-                  std::shared_ptr<InteractionsGraph> indexSet1 = _nsds->topology()->indexSet(1);
+                  auto indexSet1 = _nsds->topology()->indexSet(1);
                   std ::cout << "lamda(1) in IndexSet1" << std::endl;
                   for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
   {
     std::shared_ptr<siconos::modeling::Interaction> inter = indexSet1->bundle(*ui);
       inter->lambda(1)->display();
     }
-    std::shared_ptr<InteractionsGraph> indexSet0 = _nsds->topology()->indexSet(0);
+    auto indexSet0 = _nsds->topology()->indexSet(0);
                                       std ::cout << "lamda(0) in indexSet0" << std::endl;
                                       for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
@@ -237,13 +237,13 @@ void TimeSteppingDirectProjection::advanceToEvent()
     // This part should be in MoreauJeanOSIProjectOnConstraintsOS::updateState(level =0)
     for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds = dsGraph->bundle(*aVi2);
+      auto ds = dsGraph->bundle(*aVi2);
       auto& workVectors = *dsGraph->properties(*aVi2).workVectors;
 
       Type::Siconos dsType = Type::value(*ds);
       if(dsType == Type::NewtonEulerDS)
       {
-        SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
+        auto neds = std::static_pointer_cast<NewtonEulerDS>(ds);
         std::shared_ptr<siconos::algebra::SiconosVector> q = neds->q();
         std::shared_ptr<siconos::algebra::SiconosVector> qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
@@ -267,7 +267,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       }
       else if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
-        SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+        auto d = std::static_pointer_cast<LagrangianDS> (ds);
         std::shared_ptr<siconos::algebra::SiconosVector> q = d->q();
         std::shared_ptr<siconos::algebra::SiconosVector> qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
@@ -285,14 +285,14 @@ void TimeSteppingDirectProjection::advanceToEvent()
     computeCriteria(&runningProjection);
 
     //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
-    //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
-    //(std::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
+    //(*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]->display();
+    //(std::static_pointer_cast<LinearOSNS>((*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]))->z()->display();
 
     DEBUG_EXPR_WE(std::cout << "TimeSteppingDirectProjection::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
                   std ::cout << "After update state in position" << std::endl;
                   std ::cout << "lamda(1) in IndexSet1" << std::endl;
-                  std::shared_ptr<InteractionsGraph> indexSet1 = _nsds->topology()->indexSet(1);
-                  std::shared_ptr<InteractionsGraph> indexSet0 = _nsds->topology()->indexSet(0);
+                  auto indexSet1 = _nsds->topology()->indexSet(1);
+                  auto indexSet0 = _nsds->topology()->indexSet(0);
 
                   for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
   {
@@ -329,17 +329,17 @@ void TimeSteppingDirectProjection::advanceToEvent()
   // We update forces to start the Newton Loop the next tiem step with a correct value in swap
   for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
   {
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds = dsGraph->bundle(*aVi2);
+    auto ds = dsGraph->bundle(*aVi2);
     Type::Siconos dsType = Type::value(*ds);
     if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
+      auto neds = std::static_pointer_cast<NewtonEulerDS>(ds);
       double time = nextTime();
       neds->computeForces(time, neds->q(), neds->twist());
     }
     else if(dsType == Type::LagrangianDS)
     {
-      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+      auto d = std::static_pointer_cast<LagrangianDS> (ds);
       double time = nextTime();
       d->computeForces(time, d->q(), d->velocity());
     }
@@ -372,13 +372,13 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   //   for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   //   {
-  //     std::shared_ptr<siconos::modeling::DynamicalSystem> ds = dsGraph->bundle(*vi);
+  //     auto ds = dsGraph->bundle(*vi);
   //     Type::Siconos dsType = Type::value(*ds);
   //     if(dsType !=Type::NewtonEulerDS)
   //       THROW_EXCEPTION("TS:: - ds is not from NewtonEulerDS.");
   //     // std::shared_ptr<siconos::algebra::SiconosVector> dotq = neds->dotq();
   //     // std::shared_ptr<siconos::algebra::SiconosVector> q = neds->q();
-  //     // std::shared_ptr<siconos::algebra::SiconosVector> qold = neds->qMemory()->getSiconosVector(0);
+  //     // std::shared_ptr<siconos::algebra::SiconosVector> qold = neds->qMemory()->getsiconos::algebra::SiconosVector(0);
   //     // double h = timeStep();
   //     // dotq->setValue(3,(q->getValue(3)-qold->getValue(3))/h);
   //     // dotq->setValue(4,(q->getValue(4)-qold->getValue(4))/h);
@@ -386,7 +386,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //     // dotq->setValue(6,(q->getValue(6)-qold->getValue(6))/h);
 
   //     /*compute the new velocity seeing the work of fext*/
-  //     SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
+  //     auto neds = std::static_pointer_cast<NewtonEulerDS>(ds);
   //     *(neds->deltaq())-=*(neds->q());
   //     DEBUG_EXPR(printf("TSProj NewtonSolve :deltaq:");
   //     (neds->deltaq())->display(););
@@ -400,7 +400,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //       //if (n2q < 1e-14)
   //       // continue;
 
-  //       std::shared_ptr<siconos::algebra::SiconosVector> FextNorm(new SiconosVector(3));
+  //       std::shared_ptr<siconos::algebra::SiconosVector> FextNorm = std::make_shared<siconos::algebra::SiconosVector>(3));
   //       FextNorm->setValue(0,neds->fExt()->getValue(0));
   //       FextNorm->setValue(1,neds->fExt()->getValue(1));
   //       FextNorm->setValue(2,neds->fExt()->getValue(2));
@@ -462,7 +462,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //       neds->velocity()->display();
   // )
   //     }
-  //     SP::SiconosMatrix T = neds->T();
+  //     auto T = neds->T();
   //     std::shared_ptr<siconos::algebra::SiconosVector> dotq = neds->dotq();
   //     siconos::algebra::prod(*T,*neds->velocity(),*dotq,true);
   //     if(!_allNSProblems->empty())
@@ -480,8 +480,8 @@ void TimeSteppingDirectProjection::advanceToEvent()
 void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
 {
 
-  std::shared_ptr<InteractionsGraph> indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
-  InteractionsGraph::VIterator aVi, viend;
+  auto indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
+  siconos::graphs::InteractionsGraph::VIterator aVi, viend;
 
   double maxViolationEquality = -1e24;
   double minViolationEquality = +1e24;
@@ -544,10 +544,10 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
   int info = 0;
   //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = _nsds->isLinear();
-  std::shared_ptr<InteractionsGraph> indexSet = _nsds->topology()->indexSet(0);
+  auto indexSet = _nsds->topology()->indexSet(0);
   initializeNewtonLoop();
 
-  if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
+  if((_newtonOptions == TimeSteppingType::LINEAR || _newtonOptions == TimeSteppingType::LINEAR_IMPLICIT)
       || isLinear)
   {
     _newtonNbIterations++;
@@ -556,7 +556,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     // updateOutput(0);
     // updateIndexSets();
     if(!_allNSProblems->empty() &&  indexSet->size()>0)
-      info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+      info = computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
     if(!checkSolverOutputProjectOnConstraints)
       DefaultCheckSolverOutput(info);
@@ -568,7 +568,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     //isNewtonConverge = newtonCheckConvergence(criterion);
   }
 
-  else if(_newtonOptions == SICONOS_TS_NONLINEAR)
+  else if(_newtonOptions == TimeSteppingType::NONLINEAR)
   {
     while((!isNewtonConverge) && (_newtonNbIterations < maxStep) && (!info))
     {
@@ -583,11 +583,11 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       // empty here (check with SpaceFilter and one disk not on
       // the ground : MultiBodyTest::t2)
 
-      // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
+      // if((*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->simulation())
       // is also relevant here.
       if(!_allNSProblems->empty() && indexSet->size()>0)
       {
-        info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+        info = computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_VELOCITY);
       }
       // Check output from solver (convergence or not ...)
       if(!checkSolverOutputProjectOnConstraints)

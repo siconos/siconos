@@ -43,10 +43,10 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R1()
                                                                   "TestPlugin:gT1");
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1b : ",
-                               R1->getType() == siconos::modeling::RelationTypes::FirstOrder,
+                               R1->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1c : ",
-                               R1->getSubType() == siconos::modeling::RelationSubTypes::Type1R,
+                               R1->getSubType() == siconos::modeling::RelationSubType::Type1R,
                                true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1d : ",
   //  R1->gethName()=="TestPlugin:hT1", true);
@@ -68,10 +68,10 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R2()
   auto R2 = std::make_shared<siconos::modeling::FirstOrderType1R>(
       "TestPlugin:hT1", "TestPlugin:gT1", "TestPlugin:Jh0T1", "TestPlugin:Jg0T1");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2b : ",
-                               R2->getType() == siconos::modeling::RelationTypes::FirstOrder,
+                               R2->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2c : ",
-                               R2->getSubType() == siconos::modeling::RelationSubTypes::Type1R,
+                               R2->getSubType() == siconos::modeling::RelationSubType::Type1R,
                                true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2d : ",
   //  R2->gethName()=="TestPlugin:hT1", true);

@@ -22,7 +22,7 @@
 
 #include "OneStepNSProblem.hpp"
 #include "SimpleMatrix.hpp"
-#include "SiconosVector.hpp"
+#include "siconos::algebra::SiconosVector.hpp"
 
 
 /** Quadratic Problem
@@ -36,7 +36,7 @@ private:
 
 
   /** contains the Q matrix of a QP problem */
-  SP::SiconosMatrix _Q;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _Q;
 
   /** contains the p vector of a QP problem */
   std::shared_ptr<siconos::algebra::SiconosVector> _p;
@@ -68,7 +68,7 @@ public:
    *
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix q() const
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> q() const
   {
     return _Q;
   }
@@ -86,7 +86,7 @@ public:
    *
    *  \param newPtr the new matrix
    */
-  inline void setQPtr(SP::SiconosMatrix newPtr)
+  inline void setQPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
     _Q = newPtr;
   }
@@ -94,17 +94,17 @@ public:
   // --- P ---
   /** get the value of p, the initial state of the DynamicalSystem
    *
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
+   *  \return siconos::algebra::SiconosVector
+   *  \warning: siconos::algebra::SiconosVector is an abstract class => can not be an lvalue => return siconos::algebra::SiconosVector
    */
-  inline const SiconosVector getP() const
+  inline const siconos::algebra::SiconosVector getP() const
   {
     return *_p;
   }
 
   /** get p, the initial state of the DynamicalSystem
    *
-   *  \return pointer on a SiconosVector
+   *  \return pointer on a siconos::algebra::SiconosVector
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> p() const
   {
@@ -113,16 +113,16 @@ public:
 
   /** set the value of p to newValue
    *
-   *  \param newValue SiconosVector 
+   *  \param newValue siconos::algebra::SiconosVector 
    */
-  inline void setP(const SiconosVector& newValue)
+  inline void setP(const siconos::algebra::SiconosVector& newValue)
   {
     *_p = newValue;
   }
 
   /** set p to pointer newPtr
    *
-   *  \param newPtr SiconosVector * 
+   *  \param newPtr siconos::algebra::SiconosVector * 
    */
   inline void setPPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr)
   {
@@ -143,12 +143,12 @@ public:
   void display() const;
 
   /* pure virtual in OneStepNSProblem.hpp */
-  void computeInteractionBlock(const InteractionsGraph::EDescriptor&)
+  void computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor&)
   {
     assert(false);
   }
 
-  void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&)
+  void computeDiagonalInteractionBlock(const siconos::graphs::InteractionsGraph::VDescriptor&)
   {
     assert(false);
   }

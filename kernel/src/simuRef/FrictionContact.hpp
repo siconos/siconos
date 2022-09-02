@@ -76,7 +76,7 @@ protected:
   int _contactProblemDim;
 
   /** * friction coefficients */
-  SP::MuStorage _mu;
+  std::shared_ptr<std::vector<double>> _mu;
 
   /** Pointer to the function used to call the Numerics driver to solve the
    * problem */
@@ -97,7 +97,7 @@ public:
    *
    *  \param options the options set
    */
-  FrictionContact(int dimPb, SP::SolverOptions options);
+  FrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options);
 
   /** destructor
    */
@@ -116,14 +116,14 @@ public:
    *
    *  \return a vector of double
    */
-  inline const MuStorage getMu() const { return *_mu; }
+  inline const std::vector<double> getMu() const { return *_mu; }
 
   /** get a pointer to mu, the list of the friction coefficients
    *
    *  \return pointer on a std::vector<double>
    */
 
-  inline SP::MuStorage mu() const { return _mu; }
+  inline std::shared_ptr<std::vector<double>> mu() const { return _mu; }
 
   /** get the value of the component number i of mu, the vector of the friction
    *  coefficients \param i the component number (starting from 0) \return double
@@ -152,7 +152,7 @@ public:
      
      \param simulation the simulation, owner of this OSNSPB
    */
-  void initialize(SP::Simulation simulation) override;
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> simulation) override;
 
   /** \return the friction contact problem from Numerics
    */

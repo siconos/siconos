@@ -35,7 +35,7 @@ void OSNSMatrixTest::setUp()
   s->initialize();
   // Get a set of Interactions
   indexSet = s->indexSet(0);
-  SP::OneStepNSProblem osns = s->getOneStepNSProblems()->begin()->second;
+  auto osns = s->getOneStepNSProblems()->begin()->second;
   osns->computeAllBlocks();
   blocks = osns->getBlocks();
 }
@@ -50,7 +50,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix0()
   std::cout << " ===== OSNSMatrix tests start ...===== " <<std::endl;
   std::cout << "===========================================" <<std::endl;
   std::cout << "------- Default constructor test -------" <<std::endl;
-  SP::OSNSMatrix  M = new OSNSMatrix();
+  auto  M = new OSNSMatrix();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->size() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->storagetype() == 0, true);
   std::cout << "------- Default constructor OSNSMatrix ok -------" <<std::endl;
@@ -61,7 +61,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix0()
 void OSNSMatrixTest::testBuildOSNSMatrix1()
 {
   std::cout << "------- Constructor with dim. test -------" <<std::endl;
-  SP::OSNSMatrix  M(new OSNSMatrix(n));
+  auto  M(new OSNSMatrix(n));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->size() == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->storagetype() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix(), true);
@@ -76,12 +76,12 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
 {
   std::cout << "------- Constructor with index set and list of blocks -------" <<std::endl;
 
-  SP::OSNSMatrix  M(new OSNSMatrix(indexSet, blocks));
+  auto  M(new OSNSMatrix(indexSet, blocks));
 
   unsigned int dim = 0;
   for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
-  SimpleMatrix MRef(dim, dim);
+  siconos::algebra::SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
@@ -119,13 +119,13 @@ void OSNSMatrixTest::testFill()
 {
   std::cout << "------- fill function test -------" <<std::endl;
   // Start from empty matrix and fill it
-  SP::OSNSMatrix  M(new OSNSMatrix());
+  auto  M = std::make_shared<siconos::simulation::OSNSMatrix>();
   M->fill(indexSet, blocks);
 
   unsigned int dim = 0;
   for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
-  SimpleMatrix MRef(dim, dim);
+  siconos::algebra::SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
@@ -155,7 +155,7 @@ void OSNSMatrixTest::testFill()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
   // Start from matrix with maxSize = M and and fill it (with resize)
-  M.reset(new OSNSMatrix(30));
+  M = std::make_shared<OSNSMatrix>(30));
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->storagetype() == 0, true);
@@ -180,15 +180,15 @@ void OSNSMatrixTest::testConvert()
 {
   std::cout << "------- convert function test -------" <<std::endl;
   // Start from empty matrix and fill it
-  SP::OSNSMatrix  M(new OSNSMatrix());
+  auto  M = std::make_shared<siconos::simulation::OSNSMatrix>();
   M->fill(indexSet, blocks);
 
   M->convert();
-  SP::NumericsMatrix NumMat = M->numericsMatrix();
+  auto NumMat = M->numericsMatrix();
   unsigned int dim = 0;
   for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
-  SimpleMatrix MRef(dim, dim);
+  siconos::algebra::SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
@@ -220,13 +220,13 @@ void OSNSMatrixTest::testFill2()
 {
   std::cout << "------- fill2 function test (sparse storage) -------" <<std::endl;
   // Start from empty matrix and fill it
-  SP::OSNSMatrix  M(new OSNSMatrix());
+  auto  M = std::make_shared<siconos::simulation::OSNSMatrix>();
   M->fill(indexSet, blocks);
 
   unsigned int dim = 0;
   for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
-  SimpleMatrix MRef(dim, dim);
+  siconos::algebra::SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
@@ -257,7 +257,7 @@ void OSNSMatrixTest::testFill2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
   // Start from matrix with maxSize = M and and fill it (with resize)
-  M.reset(new OSNSMatrix(30));
+  M = std::make_shared<OSNSMatrix>(30));
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->storagetype() == 0, true);
@@ -283,15 +283,15 @@ void OSNSMatrixTest::testConvert2()
 {
   std::cout << "------- convert2 function test -------" <<std::endl;
   // Start from empty matrix and fill it
-  SP::OSNSMatrix  M(new OSNSMatrix());
+  auto  M = std::make_shared<siconos::simulation::OSNSMatrix>();
   M->fill(indexSet, blocks);
 
   M->convert();
-  SP::NumericsMatrix NumMat = M->numericsMatrix();
+  auto NumMat = M->numericsMatrix();
   unsigned int dim = 0;
   for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
-  SimpleMatrix MRef(dim, dim);
+  siconos::algebra::SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
   for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {

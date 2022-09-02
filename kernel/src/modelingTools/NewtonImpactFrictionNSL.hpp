@@ -62,7 +62,7 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
       : NonSmoothLaw(size), _en(en), _et(et), _mu(mu){};
 
   /** Destructor */
-  ~NewtonImpactFrictionNSL() = default;
+  ~NewtonImpactFrictionNSL() noexcept = default;
 
   /** check the ns law to see if it is verified
    *
@@ -113,6 +113,7 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
   {
     tourist.visit(*this);
   }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // NewtonImpactFrictionNSL_H

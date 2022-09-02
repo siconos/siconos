@@ -78,13 +78,13 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS(double t, std::sh
   Type::Siconos dsType = Type::value(*ds);
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
-    SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
-    workVectors[MoreauJeanOSI::QTMP].reset(new SiconosVector(d->dimension()));
+    auto d = std::static_pointer_cast<LagrangianDS> (ds);
+    workVectors[MoreauJeanOSI::QTMP] = std::make_shared<siconos::algebra::SiconosVector>(d->dimension()));
   }
   else if(dsType == Type::NewtonEulerDS)
   {
-    SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS>(ds);
-    workVectors[MoreauJeanOSI::QTMP].reset(new SiconosVector(d->getqDim()));
+    auto d = std::static_pointer_cast<NewtonEulerDS>(ds);
+    workVectors[MoreauJeanOSI::QTMP] = std::make_shared<siconos::algebra::SiconosVector>(d->getqDim()));
   }
   else
   {
@@ -95,7 +95,7 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS(double t, std::sh
     DEBUG_PRINTF("ds->initializeNonSmoothInput(%i)\n", k);
     ds->initializeNonSmoothInput(k);
     DEBUG_EXPR_WE(
-      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+      auto d = std::static_pointer_cast<LagrangianDS> (ds);
       if(d->p(k))
       std::cout << "d->p(" << k <<" ) exists" << std::endl;
     );
@@ -105,27 +105,27 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS(double t, std::sh
 
 }
 
-void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
-    DynamicalSystemsGraph & DSG)
+void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter, InteractionProperties& interProp,
+    siconos::graphs::DynamicalSystemsGraph & DSG)
 {
-  DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_BEGIN("MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter, InteractionProperties& interProp, siconos::graphs::DynamicalSystemsGraph & DSG)\n");
 
   MoreauJeanOSI::initializeWorkVectorsForInteraction(inter, interProp,DSG);
 
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds1= interProp.source;
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds2= interProp.target;
+  auto ds1= interProp.source;
+  auto ds2= interProp.target;
   assert(ds1);
   assert(ds2);
 
   auto& DSlink = inter.linkToDSVariables();
   Relation &relation =  *inter.relation();
-  RELATION::TYPES relationType = relation.getType();
+  auto relationType = relation.getType();
 
 
   unsigned int p0 =0;
-  if(relationType == Lagrangian)
+  if(relationType == siconos::modeling::RelationType::Lagrangian)
   {
-    p0 = LagrangianR::p0;
+    p0 = siconos::modeling::LagrangianR::p0;
   }
   else if(relationType == NewtonEuler)
   {
@@ -148,7 +148,7 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(Interact
   {
     DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
-    if(relationType == Lagrangian)
+    if(relationType == siconos::modeling::RelationType::Lagrangian)
     {
       LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
       DSlink[p0]->setVectorPtr(0,lds.p(0));
@@ -169,7 +169,7 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(Interact
     {
       DEBUG_PRINTF("ds2->number() %i is taken into account\n",ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
-      if(relationType == Lagrangian)
+      if(relationType == siconos::modeling::RelationType::Lagrangian)
       {
         LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
         DSlink[p0]->setVectorPtr(1,lds.p(0));
@@ -184,7 +184,7 @@ void MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(Interact
 
 
 
-  DEBUG_END("MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_END("MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter, InteractionProperties& interProp, siconos::graphs::DynamicalSystemsGraph & DSG)\n");
 
 
 }

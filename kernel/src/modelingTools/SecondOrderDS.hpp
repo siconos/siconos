@@ -171,7 +171,7 @@ class SecondOrderDS : public DynamicalSystem {
 
  public:
   /** destructor */
-  virtual ~SecondOrderDS() = default;
+  virtual ~SecondOrderDS() noexcept = default;
 
   /** get p
    *

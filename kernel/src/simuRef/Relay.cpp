@@ -33,11 +33,11 @@ using namespace RELATION;
 
 
 Relay::Relay(int numericsSolverId):
-  Relay(SP::SolverOptions(solver_options_create(numericsSolverId),
+  Relay(std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(numericsSolverId),
                           solver_options_delete))
 {}
 
-Relay::Relay(SP::SolverOptions options):
+Relay::Relay(std::shared_ptr<siconos::numerics::SolverOptions> options):
   LinearOSNS(options), _numerics_problem(new RelayProblem)
 {}
 
@@ -79,7 +79,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
 };
 
 
-void Relay::initialize(SP::Simulation sim)
+void Relay::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   LinearOSNS::initialize(sim);
   //cout << "Relay::initialize" <<std::endl;
@@ -87,14 +87,14 @@ void Relay::initialize(SP::Simulation sim)
 
   // initialize memory for _lb and _ub
   if(! _lb)
-    _lb.reset(new SiconosVector(maxSize()));
+    _lb = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_lb->size() != maxSize())
       _lb->resize(maxSize());
   }
   if(! _ub)
-    _ub.reset(new SiconosVector(maxSize()));
+    _ub = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_ub->size() != maxSize())
@@ -129,7 +129,7 @@ int Relay::compute(double time)
 
   // fill _lb and _ub wiht the value of the NonSmooth Law
 
-  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+  siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
   //cout << " _sizeOutput =" <<_sizeOutput <<std::endl;
   if(_lb->size() != _sizeOutput)
@@ -143,7 +143,7 @@ int Relay::compute(double time)
     _ub->zero();
   }
 
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*ui);

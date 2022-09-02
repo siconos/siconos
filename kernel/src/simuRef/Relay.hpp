@@ -84,7 +84,7 @@ public:
    *
    *  \param options the options set
    */
-  Relay(SP::SolverOptions options);
+  Relay(std::shared_ptr<siconos::numerics::SolverOptions> options);
 
   /** destructor
    */
@@ -95,7 +95,7 @@ public:
    *
    *  \return the vector of lower bounds
    */
-  inline const SiconosVector& getLb() const
+  inline const siconos::algebra::SiconosVector& getLb() const
   {
     return *_lb;
   }
@@ -124,7 +124,7 @@ public:
    *
    *  \return the vector of upper bounds
    */
-  inline const SiconosVector& getUb() const
+  inline const siconos::algebra::SiconosVector& getUb() const
   {
     return *_ub;
   }
@@ -147,7 +147,7 @@ public:
     _ub = newUb;
   }
 
-  void initialize(SP::Simulation sim);
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *

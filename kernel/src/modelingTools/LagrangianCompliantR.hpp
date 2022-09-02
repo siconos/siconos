@@ -71,7 +71,7 @@ class LagrangianCompliantR : public LagrangianR {
 
   /** default constructor
    */
-  LagrangianCompliantR() : LagrangianR(RelationSubTypes::CompliantR){};
+  LagrangianCompliantR() : LagrangianR(RelationSubType::CompliantR){};
 
   /** initialize G matrices or components specific to derived classes
    *

@@ -84,7 +84,7 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
   SiconosMemory(const SiconosMemory& mem);
 
   /** destructor */
-  ~SiconosMemory() = default;
+  ~SiconosMemory() noexcept = default;
 
   /** Assignment
    */

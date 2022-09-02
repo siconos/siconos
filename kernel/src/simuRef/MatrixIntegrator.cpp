@@ -34,10 +34,10 @@
 
 #include "siconos_debug.h"
 
-MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const  TimeDiscretisation & td, SP::SiconosMatrix E): _E(E)
+MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const  TimeDiscretisation & td, std::shared_ptr<siconos::algebra::SiconosMatrix> E): _E(E)
 {
   commonInit(ds, nsds, td);
-  _mat.reset(new SimpleMatrix(*E));
+  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(*E));
   _mat->zero();
 }
 
@@ -46,7 +46,7 @@ MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDyn
 {
   commonInit(ds, nsds, td);
   unsigned int n = ds.n();
-  _mat.reset(new SimpleMatrix(n, p, 0));
+  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, p, 0));
   _spo.reset(new SubPluggedObject(*_plugin, n, p));
   std::static_pointer_cast<FirstOrderLinearDS>(_DS)->setPluginB(_spo);
   _isConst = false;
@@ -55,13 +55,13 @@ MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDyn
 MatrixIntegrator::MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const  TimeDiscretisation & td)
 {
   unsigned int n = ds.n();
-  _mat.reset(new SimpleMatrix(n, n, 0));
+  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, n, 0));
   commonInit(ds, nsds, td);
 }
 
 void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation & td)
 {
-  _TD.reset(new TimeDiscretisation(td));
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(td));
 
   DEBUG_EXPR(ds.display(););
 
@@ -69,13 +69,13 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
   Type::Siconos dsType = Type::value(ds);
   if(dsType == Type::FirstOrderLinearTIDS)
   {
-    _DS.reset(new FirstOrderLinearTIDS(static_cast<const FirstOrderLinearTIDS&>(ds)));
+    _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(static_cast<const FirstOrderLinearTIDS&>(ds)));
     _isConst = _TD->hConst();
   }
   else if(dsType == Type::FirstOrderLinearDS)
   {
     const FirstOrderLinearDS& cfolds = static_cast<const FirstOrderLinearDS&>(ds);
-    _DS.reset(new FirstOrderLinearDS(cfolds));
+    _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(cfolds));
     // std::static_pointer_cast<FirstOrderLinearDS>(_DS)->zeroPlugin();
     if(cfolds.getPluginA()->isPlugged())
     {
@@ -87,11 +87,11 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
   _DS->setNumber(9999999);
   DEBUG_EXPR(_DS->display(););
   // integration stuff
-  _nsds.reset(new NonSmoothDynamicalSystem(nsds.t0(), nsds.finalT()));
+  _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(nsds.t0(), nsds.finalT()));
 
-  _OSI.reset(new LsodarOSI());
+  _OSI = std::make_shared<siconos::simulation::LsodarOSI>());
   _nsds->insertDynamicalSystem(_DS);
-  _sim.reset(new EventDriven(_nsds, _TD, 0));
+  _sim = std::make_shared<siconos::simulation::EventDriven>(_nsds, _TD, 0));
   _sim->associate(_OSI, _DS);
   _sim->setName("Matrix integrator simulation");
   //change tolerance
@@ -102,13 +102,13 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
 void MatrixIntegrator::integrate()
 {
   DEBUG_BEGIN("MatrixIntegrator::integrate()\n");
-  SiconosVector& x0 = *_DS->x0();
-  SiconosVector& x = *_DS->x();
+  siconos::algebra::SiconosVector& x0 = *_DS->x0();
+  siconos::algebra::SiconosVector& x = *_DS->x();
 
   std::shared_ptr<siconos::algebra::SiconosVector> Ecol = static_cast<FirstOrderLinearDS&>(*_DS).b();
   if(!Ecol && _E)
   {
-    Ecol.reset(new SiconosVector(_DS->n(), 0));
+    Ecol = std::make_shared<siconos::algebra::SiconosVector>(_DS->n(), 0));
     static_cast<FirstOrderLinearDS&>(*_DS).setbPtr(Ecol);
   }
   unsigned int p = _mat->size(1);

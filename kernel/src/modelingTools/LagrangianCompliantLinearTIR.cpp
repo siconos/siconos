@@ -30,7 +30,7 @@
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> D)
-    : LagrangianR(RelationSubTypes::CompliantLinearTIR)
+    : LagrangianR(RelationSubType::CompliantLinearTIR)
 {
   _jachq = C;
   _jachlambda = D;
@@ -42,7 +42,7 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> D,
     std::shared_ptr<siconos::algebra::SimpleMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubTypes::CompliantLinearTIR)
+    : LagrangianR(RelationSubType::CompliantLinearTIR)
 {
   _jachq = C;
   _jachlambda = D;
@@ -55,7 +55,7 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> D,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubTypes::CompliantLinearTIR)
+    : LagrangianR(RelationSubType::CompliantLinearTIR)
 {
   _jachq = C;
   _jachlambda = D;

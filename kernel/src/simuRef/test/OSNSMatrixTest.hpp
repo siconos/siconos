@@ -61,7 +61,7 @@ private:
 
   unsigned int n;
   double tol;
-  std::shared_ptr<InteractionsGraph> indexSet;
+  std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet;
   MapOfMapOfInteractionMatrices blocks;
   Model * temp ;
 public:

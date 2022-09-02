@@ -36,7 +36,7 @@
 siconos::modeling::LagrangianRheonomousR::LagrangianRheonomousR(
     const std::string& pluginh, const std::string& pluginJacobianhq,
     const std::string& pluginDoth)
-    : LagrangianR(RelationSubTypes::RheonomousR)
+    : LagrangianR(RelationSubType::RheonomousR)
 {
   _zeroPlugin();
   // h

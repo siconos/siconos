@@ -31,9 +31,7 @@
 // #include <memory>                                // for __sha...
 
 #include "BlockMatrix.hpp"  // for Block...
-// #include "CSparseMatrix.h"
-#include "NumericsMatrix.h"
-// #include "NumericsSparseMatrix.h"
+#include "NumericsToolsNamespace.h" // for NumericsMatrix and NumericsSparseMatrix
 #include "SiconosException.hpp"     // for Sicon...
 #include "SiconosMatrixFriends.hpp"  // friends declarationx
 // #include "Tools.hpp"                // for toString
@@ -45,8 +43,6 @@
 #include "siconos_debug.h"
 #ifdef DEBUG_MESSAGES
 #include <cs.h>
-
-#include "NumericsVector.h"
 #endif
 
 namespace ublas = boost::numeric::ublas;
@@ -409,25 +405,25 @@ siconos::algebra::SimpleMatrix::~SimpleMatrix()
 void siconos::algebra::SimpleMatrix::updateNumericsMatrix()
 {
   /* set the numericsMatrix */
-  NumericsMatrix *NM;
+  siconos::numerics::NumericsMatrix *NM;
   if (_num == UblasType::DENSE) {
     _numericsMatrix.reset(
-        NM_new(), NM_free_not_dense);  // When we reset, we do not free the matrix0
+        siconos::numerics::NM_new(), siconos::numerics::NM_free_not_dense);  // When we reset, we do not free the matrix0
                                        // that is linked to the array of the boost container
     NM = _numericsMatrix.get();
     double *data = (double *)(getArray());
     DEBUG_EXPR(NV_display(data, size(0) * size(1)););
-    NM_fill(NM, NM_DENSE, size(0), size(1), data);  // Pointer link
+    siconos::numerics::NM_fill(NM, siconos::numerics::NM_DENSE, size(0), size(1), data);  // Pointer link
   }
   else {
     // For all the other cases, we build a sparse matrix and we call numerics for the
     // factorization of a sparse matrix.
-    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)), NM_free);
+    _numericsMatrix.reset(siconos::numerics::NM_create(siconos::numerics::NM_SPARSE, size(0), size(1)), siconos::numerics::NM_free);
     NM = _numericsMatrix.get();
-    _numericsMatrix->matrix2->origin = NSM_CSC;
-    NM_csc_alloc(NM, nnz());
-    fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
-    DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
+    _numericsMatrix->matrix2->origin = siconos::numerics::NSM_CSC;
+    siconos::numerics::NM_csc_alloc(NM, nnz());
+    fillCSC(siconos::numerics::numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
+    DEBUG_EXPR(cs_print(siconos::numerics::numericsSparseMatrix(NM)->csc, 0););
   }
 }
 

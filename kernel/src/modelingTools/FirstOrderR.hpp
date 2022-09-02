@@ -64,7 +64,7 @@ class FirstOrderR : public Relation {
    *
    *  \param newType the type of the relation
    */
-  FirstOrderR(RelationSubTypes newType) : Relation(RelationTypes::FirstOrder, newType) {};
+  FirstOrderR(RelationSubType newType) : Relation(RelationType::FirstOrder, newType) {};
 
   /* The following matrices are used if the relation is linear w.r.t to some
    * variables. If the matrices are allocated, the computation of the Jacobian

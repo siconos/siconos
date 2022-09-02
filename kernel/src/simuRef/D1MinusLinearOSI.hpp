@@ -67,7 +67,7 @@
  * for the closed contact with vanishing relative velocity (the number of the
  index set depends on the type of D1minulinear)
  * The result, stored in lambda(2) and p(2) is computed by solving
- *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ *       (*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]
  * at different specific time
  *
  * The impact equation are solved at the velocity level as in MoreauJeanOSI
@@ -86,12 +86,12 @@
  * relative velocity (indexSet2)
  *
  * The problem, solved for  lambda(2) and p(2)
- (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ (*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]
  * is solved at time told for \f$\lambda^+_{k}\f$ and time t for
  \f$\lambda^-_{k+1}\f$
  *
  * The problem, solved for  lambda(1) and p(1)
- (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ (*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]
  * is solved at time t for \f$Lambda_{k+1}\f$.
  *
  * We use four index sets to compute the multipliers:
@@ -136,9 +136,9 @@ protected:
 
     OneStepNSProblem *_osnsp;
     std::shared_ptr<siconos::modeling::Interaction> _inter;
-    InteractionProperties &_interProp;
+    siconos::graphs::InteractionProperties &_interProp;
     _NSLEffectOnFreeOutput(OneStepNSProblem *p, std::shared_ptr<siconos::modeling::Interaction> inter,
-                           InteractionProperties &interProp)
+                           siconos::graphs::InteractionProperties &interProp)
         : _osnsp(p), _inter(inter), _interProp(interProp){};
 
     void visit(const NewtonImpactNSL &nslaw);
@@ -234,9 +234,9 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter,
+                                           siconos::graphs::InteractionProperties &interProp,
+                                           siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->q() contains new position,
@@ -275,7 +275,7 @@ public:
    * non-smooth effects into account \param vertex_inter of the interaction
    * graph \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
 
   /** integrates the Interaction linked to this integrator, without taking
@@ -283,14 +283,14 @@ public:
    * graph \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutputHalfExplicitAccelerationLevel(
-      InteractionsGraph::VDescriptor &vertex_inter, OneStepNSProblem *osnsp);
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter, OneStepNSProblem *osnsp);
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
    * graph \param osnsp pointer to OneStepNSProblem
    */
   virtual void computeFreeOutputHalfExplicitVelocityLevel(
-      InteractionsGraph::VDescriptor &vertex_inter, OneStepNSProblem *osnsp);
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter, OneStepNSProblem *osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
    * stop at tout (->iout=false) \param ti initial time \param tf end time

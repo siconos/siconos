@@ -22,6 +22,7 @@
 #include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
+#include "BlockVector.hpp"
 #include <iostream>
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -32,7 +33,7 @@
 siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : FirstOrderR(RelationSubTypes::LinearTIR)
+    : FirstOrderR(RelationSubType::LinearTIR)
 {
   _C = C;
   _B = B;
@@ -45,7 +46,7 @@ siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e,
     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : FirstOrderR(RelationSubTypes::LinearTIR)
+    : FirstOrderR(RelationSubType::LinearTIR)
 {
   _C = C;
   _B = B;

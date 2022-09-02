@@ -94,6 +94,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
    blas_lapack     # For SiconosLapack.h in numerics
    SOL/lumod-c # For lumod_dense.h in numerics
    hairer # For kernel
+   tools # Fortran stuff
    )
 if (WITH_MA57)
   list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES lbl/include/)
@@ -197,7 +198,9 @@ endif()
 # 
 # common install
 # No headers installed for externals.
-set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES)
+set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
+  tools
+  )
 # set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
 siconos_component_install_setup(${COMPONENT})
 

@@ -104,7 +104,7 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
                              std::shared_ptr<siconos::algebra::SiconosVector> stiffness);
 
   /* destructor */
-  ~LagrangianLinearDiagonalDS() = default;
+  ~LagrangianLinearDiagonalDS() noexcept = default;
 
 
   /** get stiffness matrix (diagonal only, pointer link)
@@ -144,7 +144,7 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    */
   void display(bool brief = true) const override;
 
-  // ACCEPT_STD_VISITORS();
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // LAGRANGIANLINEARDIAGONALDS_H

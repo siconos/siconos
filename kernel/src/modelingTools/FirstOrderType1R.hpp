@@ -58,7 +58,7 @@ class FirstOrderType1R : public FirstOrderR {
 
  public:
   /** default constructor */
-  FirstOrderType1R() : FirstOrderR(RelationSubTypes::Type1R){};
+  FirstOrderType1R() : FirstOrderR(RelationSubType::Type1R){};
 
   /** build from plugin for  \f$ h(x,z) \f$  and  \f$ g(\lambda, z) \f$
    *

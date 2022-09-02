@@ -41,12 +41,12 @@
 
 // Constructor from solver id - Uses delegated constructor
 GlobalRollingFrictionContact::GlobalRollingFrictionContact(int dimPb, const int numericsSolverId):
-  GlobalRollingFrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+  GlobalRollingFrictionContact(dimPb, std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(numericsSolverId),
                         solver_options_delete))
 {}
 
 // Constructor based on a pre-defined solver options set.
-GlobalRollingFrictionContact::GlobalRollingFrictionContact(int dimPb, SP::SolverOptions options):
+GlobalRollingFrictionContact::GlobalRollingFrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options):
   GlobalFrictionContact(dimPb,options), _g_rolling_driver(&g_rolling_fc3d_driver)
 {
   // Only rolling fc3d for the moment.
@@ -54,20 +54,20 @@ GlobalRollingFrictionContact::GlobalRollingFrictionContact(int dimPb, SP::Solver
     THROW_EXCEPTION("GlobalRollingFrictionContact No solver for 2 dimensional problems");
 
   //Reset default storage type for numerics matrices.
-  _numericsMatrixStorageType = NM_SPARSE;
+  _numericsMatrixStorageType = siconos::numerics::NM_SPARSE;
 }
 
 
-void GlobalRollingFrictionContact::initialize(SP::Simulation sim)
+void GlobalRollingFrictionContact::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
 
   GlobalFrictionContact::initialize(sim);
   // get topology
-  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
 
   // Fill vector of rolling friction coefficients
-  std::shared_ptr<InteractionsGraph> I0 = topology->indexSet0();
-  _mu_r.reset(new MuStorage());
+  auto I0 = topology->indexSet0();
+  _mu_r = std::make_shared<std::vector<double>>();
   _mu_r->reserve(I0->size());
 
 }
@@ -137,7 +137,7 @@ bool GlobalRollingFrictionContact::preCompute(double time)
   // M, _sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
   DEBUG_PRINTF("indexSetLevel = %i\n", indexSetLevel());
   if(indexSetLevel() == simulation::internal::LEVELMAX)
   {
@@ -146,7 +146,7 @@ bool GlobalRollingFrictionContact::preCompute(double time)
   }
   if(!_hasBeenUpdated)
   {
-    InteractionsGraph& indexSet = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
+    siconos::graphs::InteractionsGraph& indexSet = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
     DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
 
@@ -189,10 +189,10 @@ bool GlobalRollingFrictionContact::preCompute(double time)
       _q->resize(_sizeGlobalOutput);
 
     size_t offset = 0;
-    DynamicalSystemsGraph::VIterator dsi, dsend;
+    siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
     for(std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
     {
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG0.bundle(*dsi);
+      auto ds = DSG0.bundle(*dsi);
       Type::Siconos dsType = Type::value(*ds);
       size_t dss = ds->dimension();
       DEBUG_PRINTF("offset = %lu \n", offset);
@@ -206,12 +206,12 @@ bool GlobalRollingFrictionContact::preCompute(double time)
 
         if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-          SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
+          siconos::algebra::SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
           setBlock(vfree, _q, dss, 0, offset);
         }
         else  if(dsType == Type::NewtonEulerDS)
         {
-          SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
+          siconos::algebra::SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
           setBlock(vfree, _q, dss, 0, offset);
         }
       }
@@ -228,7 +228,7 @@ bool GlobalRollingFrictionContact::preCompute(double time)
 
     // fill H
     _H->fillH(DSG0, indexSet);
-    DEBUG_EXPR(NM_display(_H->numericsMatrix().get()););
+    DEBUG_EXPR(siconos::numerics::NM_display(_H->numericsMatrix().get()););
 
     _sizeOutput =_H->sizeColumn();
     DEBUG_PRINTF("_sizeOutput = %i\n ", _sizeOutput);
@@ -239,7 +239,7 @@ bool GlobalRollingFrictionContact::preCompute(double time)
       _b->resize(_sizeOutput);
 
     size_t pos = 0;
-    InteractionsGraph::VIterator ui, uiend;
+    siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
     {
       std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*ui);
@@ -248,8 +248,8 @@ bool GlobalRollingFrictionContact::preCompute(double time)
       _mu->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>(inter->nonSmoothLaw())->mu());
       _mu_r->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>(inter->nonSmoothLaw())->muR());
 
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds1 = indexSet.properties(*ui).source;
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds2 = indexSet.properties(*ui).target;
+      auto ds1 = indexSet.properties(*ui).source;
+      auto ds2 = indexSet.properties(*ui).target;
       OneStepIntegrator& Osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
       OneStepIntegrator& Osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
 
@@ -261,7 +261,7 @@ bool GlobalRollingFrictionContact::preCompute(double time)
       {
         THROW_EXCEPTION("GlobalRollingFrictionContact::computeq. Not yet implemented for Integrator type.");
       }
-      SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
+      siconos::algebra::SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
       pos =  indexSet.properties(*ui).absolute_position;
       size_t sizeY = inter->dimension();
       setBlock(osnsp_rhs, _b, sizeY, 0, pos);
@@ -330,8 +330,8 @@ int GlobalRollingFrictionContact::solve(SP::GlobalRollingFrictionContactProblem 
 void GlobalRollingFrictionContact::updateMur()
 {
   _mu_r->clear();
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(indexSetLevel());
-  InteractionsGraph::VIterator ui, uiend;
+  auto indexSet = simulation()->indexSet(indexSetLevel());
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _mu_r->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>
@@ -341,8 +341,8 @@ void GlobalRollingFrictionContact::updateMur()
 void GlobalRollingFrictionContact::updateMu()
 {
   _mu_r->clear();
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(indexSetLevel());
-  InteractionsGraph::VIterator ui, uiend;
+  auto indexSet = simulation()->indexSet(indexSetLevel());
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _mu_r->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>
@@ -362,7 +362,7 @@ void GlobalRollingFrictionContact::display() const
   NumericsMatrix* W_NM = _W->numericsMatrix().get();
   if(W_NM)
   {
-    NM_display(W_NM);
+    siconos::numerics::NM_display(W_NM);
   }
   std::cout << " - Matrix H : " <<std::endl;
   // if (_H) _H->display();
@@ -370,7 +370,7 @@ void GlobalRollingFrictionContact::display() const
   NumericsMatrix* H_NM = _H->numericsMatrix().get();
   if(H_NM)
   {
-    NM_display(H_NM);
+    siconos::numerics::NM_display(H_NM);
   }
 
   std::cout << " - Vector q : " <<std::endl;

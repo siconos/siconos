@@ -37,7 +37,7 @@
 // constructor from a set of data
 siconos::modeling::LagrangianScleronomousR::LagrangianScleronomousR(
     const std::string& pluginh, const std::string& pluginJacobianhq)
-    : LagrangianR(RelationSubTypes::ScleronomousR)
+    : LagrangianR(RelationSubType::ScleronomousR)
 {
   _zeroPlugin();
   setComputehFunction(siconos::plugins::getPluginName(pluginh),
@@ -53,7 +53,7 @@ siconos::modeling::LagrangianScleronomousR::LagrangianScleronomousR(
 siconos::modeling::LagrangianScleronomousR::LagrangianScleronomousR(
     const std::string& pluginh, const std::string& pluginJacobianhq,
     const std::string& pluginDotJacobianhq)
-    : LagrangianR(RelationSubTypes::ScleronomousR)
+    : LagrangianR(RelationSubType::ScleronomousR)
 {
   _zeroPlugin();
   setComputehFunction(siconos::plugins::getPluginName(pluginh),

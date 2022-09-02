@@ -42,25 +42,25 @@ using namespace RELATION;
 
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
   GenericMechanical(
-    SP::SolverOptions(solver_options_create(SICONOS_GENERIC_MECHANICAL_NSGS),
+    std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(SICONOS_GENERIC_MECHANICAL_NSGS),
                       solver_options_delete))
 {
   solver_options_update_internal(_numerics_solver_options.get(), 1, FC3D_Solver_Id);
 }
 
 
-GenericMechanical::GenericMechanical(SP::SolverOptions options):
+GenericMechanical::GenericMechanical(std::shared_ptr<siconos::numerics::SolverOptions> options):
   LinearOSNS(options)
 {
-  DEBUG_BEGIN("GenericMechanical::GenericMechanical(SP::SolverOptions options)\n");
+  DEBUG_BEGIN("GenericMechanical::GenericMechanical(std::shared_ptr<siconos::numerics::SolverOptions> options)\n");
   //assert(options->solverId == SICONOS_GENERIC_MECHANICAL_NSGS); this will be checked in the driver
-  _numericsMatrixStorageType = NM_SPARSE_BLOCK;
+  _numericsMatrixStorageType = siconos::numerics::NM_SPARSE_BLOCK;
   _pnumerics_GMP = genericMechanicalProblem_new();
-  DEBUG_END("GenericMechanical::GenericMechanical(SP::SolverOptions options)\n");
+  DEBUG_END("GenericMechanical::GenericMechanical(std::shared_ptr<siconos::numerics::SolverOptions> options)\n");
 }
 
 
-void GenericMechanical::initialize(SP::Simulation sim)
+void GenericMechanical::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
@@ -76,15 +76,15 @@ bool GenericMechanical::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
   return true;
 }
 
-void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
+void GenericMechanical::computeDiagonalInteractionBlock(const siconos::graphs::InteractionsGraph::VDescriptor& vd)
 {
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(indexSetLevel());
+  auto indexSet = simulation()->indexSet(indexSetLevel());
   //bool isTimeInvariant = simulation()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
   /*Build the corresponding numerics problems*/
 
-  std::shared_ptr<siconos::modeling::DynamicalSystem> DS1 = indexSet->properties(vd).source;
-  std::shared_ptr<siconos::modeling::DynamicalSystem> DS2 = indexSet->properties(vd).target;
+  auto DS1 = indexSet->properties(vd).source;
+  auto DS2 = indexSet->properties(vd).target;
   std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(vd);
 
   DEBUG_PRINT("GenericMechanical::computeInteractionBlock: add problem of type ");
@@ -157,7 +157,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
   LinearOSNS::computeDiagonalInteractionBlock(vd);
 }
 
-void GenericMechanical::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
+void GenericMechanical::computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor& ed)
 {
   LinearOSNS::computeInteractionBlock(ed);
 }

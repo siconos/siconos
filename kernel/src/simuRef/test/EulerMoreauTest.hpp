@@ -60,12 +60,12 @@ private:
   double _t0;
   double _T;
   double _tol;
-  SP::NonSmoothDynamicalSystem _model;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _model;
   SP::TimeStepping _sim;
   std::shared_ptr<siconos::modeling::DynamicalSystem> _DS;
-  SP::TimeDiscretisation _TD;
+  std::shared_ptr<TimeDiscretisation> _TD;
   SP::EulerMoreauOSI _EulerMoreau;
-  SP::SiconosMatrix _A;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
   std::shared_ptr<siconos::algebra::SiconosVector> _b;
   std::shared_ptr<siconos::algebra::SiconosVector> _x0;
 

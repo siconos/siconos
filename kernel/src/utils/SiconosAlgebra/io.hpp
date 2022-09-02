@@ -44,19 +44,32 @@ constexpr std::ios_base::openmode ASCII_IN = std::ios_base::in;
 /** Format to write ascii data */
 constexpr std::ios_base::openmode ASCII_OUT = std::ios_base::out;
 
+/** Select which data are written in the file
+    - python (default):
+    row
+    a0 a1 a2 ...
+    - nodim:
+    a0 a1 a2 ...
+
+ */
+enum class WriteType {
+  python, /**< default: dimensions on the first line and then the content of the object */
+  nodim,  /**< only matrix/vector values, no dimensions at the beginning of the file */
+};
+
 /** Read a SiconosVector from a file
  *  \param[in] fileName the file containing the vector
  *  \param[in,out] m the SiconosVector to be filled
  *  \param[in] mode ios_base::openmode, mode for reading (like  ios::in|ios:binary ...)
  *       default = ascii
  *  \param[in] precision value for float output. Default = 15.
- *  \param[in] inputType (see outputType in write function)
+ *  \param[in] with or without dimensions (see WriteType enum)
  *  \param[in] flags for reading
  *  \return bool true if read ok, else false ...
  */
 bool read(const std::string &fileName, SiconosVector &m,
           const std::ios_base::openmode &mode = ASCII_IN, int precision = 15,
-          const std::string &inputType = "python",
+          const WriteType = WriteType::python,
           const std::ios::fmtflags &flags = std::cin.flags());
 
 /** Write a SiconosVector to a file
@@ -67,11 +80,10 @@ bool read(const std::string &fileName, SiconosVector &m,
     \param[in,out] m the SiconosVector to be written
     \param[in] precision value for float output. Default = 15.
     \param[in] outputType output format, choose between
-        - "boost": [row] (a0, a1,..)
-        - "python" (default):
+        - python (default):
         row
         a0 a1 a2 ...
-        - "noDim":
+        - noDim:
         a0 a1 a2 ...
         Reading input format is the one corresponding to "python".
     \param[in] flags
@@ -79,7 +91,7 @@ bool read(const std::string &fileName, SiconosVector &m,
 */
 bool write(const std::string &fileName, const SiconosVector &m,
            const std::ios_base::openmode &mode = ASCII_OUT, int precision = 15,
-           const std::string &outputType = "python",
+           const WriteType = WriteType::python,
            const std::ios_base::fmtflags &flags = std::cout.flags());
 
 /**
@@ -90,7 +102,8 @@ bool write(const std::string &fileName, const SiconosVector &m,
    \param[in] mode the storage type used in the file (either ASCII_IN or BINARY_IN)
    \return true if read ok, else false ...
 */
-bool read(const std::string &fileName, SiconosMatrix &m, const std::ios_base::openmode &mode);
+bool read(const std::string &fileName, SiconosMatrix &m,
+          const std::ios_base::openmode &mode = ASCII_IN);
 
 /**
    Write a SiconosMatrix
@@ -99,18 +112,19 @@ bool read(const std::string &fileName, SiconosMatrix &m, const std::ios_base::op
    \param[in] m the SiconosMatrix to write
    \param[in] mode the storage type used in the file (either ASCII_OUT or BINARY_OUT)
    \param[in] outputType type of output:
-   - "python"(default):
+   - python (default):
    row col
    a00 a01 a02 ...
    a10 ...
-   - "noDim":
+   - noDim:
    a00 a01 a02 ...
    a10 ...
    Reading input format is the one corresponding to "python".
    \return true if read ok, else false ...
 */
 bool write(const std::string &fileName, const SiconosMatrix &m,
-           const std::ios_base::openmode &mode, const std::string &outputType = "python");
+           const std::ios_base::openmode &mode = ASCII_OUT,
+           const WriteType = WriteType::python);
 
 /** Function to load data from a file and compare it with the provided
  *  data.  Returns the measured difference between files if the file

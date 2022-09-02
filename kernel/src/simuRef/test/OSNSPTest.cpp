@@ -51,7 +51,7 @@ void OSNSPTest::testOSNSBuild_solverid()
 void OSNSPTest::testOSNSBuild_options()
 {
   // Build from solver id
-  SP::SolverOptions options(solver_options_create(SICONOS_FRICTION_3D_ADMM),
+  std::shared_ptr<siconos::numerics::SolverOptions> options(solver_options_create(SICONOS_FRICTION_3D_ADMM),
                             solver_options_delete);
   SP::FrictionContact problem = std::make_shared<FrictionContact>(3, options);
 

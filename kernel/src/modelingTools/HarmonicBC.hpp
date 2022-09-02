@@ -50,7 +50,7 @@ class HarmonicBC : public BoundaryCondition {
              std::shared_ptr<siconos::algebra::SiconosVector> phi);
 
   /** destructor */
-  virtual ~HarmonicBC() = default;
+  virtual ~HarmonicBC() noexcept = default;
 
   /** default function to compute the precribed velocities
    *

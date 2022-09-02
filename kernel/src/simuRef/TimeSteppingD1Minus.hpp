@@ -36,7 +36,7 @@ private:
   ACCEPT_SERIALIZATION(TimeSteppingD1Minus);
 
   /** default constructor */
-  TimeSteppingD1Minus() {}
+  TimeSteppingD1Minus() = default;
 
 protected:
   /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
@@ -48,11 +48,14 @@ public:
    * \param td pointer to a TimeDiscretisation
    * \param nb number of non smooth problem
    */
-  TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds,
-                      SP::TimeDiscretisation td, int nb);
+  TimeSteppingD1Minus(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+                      std::shared_ptr<TimeDiscretisation> td, int nb);
 
   /** destructor */
-  ~TimeSteppingD1Minus();
+  ~TimeSteppingD1Minus() noexcept = default;
+
+  /** Overload Simulation::initialize */
+  void initialize() override;
 
   /** updateIndexSet using current y and lambda values of interactions
    *  \param i the  number of the set to be updated

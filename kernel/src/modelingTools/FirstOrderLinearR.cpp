@@ -34,7 +34,7 @@
 // Constructor with C and B plug-in names
 siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(const std::string &Cname,
                                                         const std::string &Bname)
-    : FirstOrderR(RelationSubTypes::LinearR)
+    : FirstOrderR(RelationSubType::LinearR)
 {
   // Warning: we cannot allocate memory for C/D matrix since no interaction
   // is connected to the relation. This will be done during initialize.
@@ -50,7 +50,7 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(const std::string &Cname
                                                         const std::string &Fname,
                                                         const std::string &Ename,
                                                         const std::string &Bname)
-    : FirstOrderR(RelationSubTypes::LinearR)
+    : FirstOrderR(RelationSubType::LinearR)
 {
   _pluginJachx->setComputeFunction(Cname);
   _pluginJachlambda->setComputeFunction(Dname);
@@ -63,7 +63,7 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(const std::string &Cname
 siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : FirstOrderR(RelationSubTypes::LinearR)
+    : FirstOrderR(RelationSubType::LinearR)
 {
   _C = C;
   _B = B;
@@ -76,7 +76,7 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> E,
     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : FirstOrderR(RelationSubTypes::LinearR)
+    : FirstOrderR(RelationSubType::LinearR)
 {
   _C = C;
   _B = B;

@@ -57,8 +57,8 @@ void D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactNSL& nsla
   subCoord[1] = _inter->nonSmoothLaw()->size();
   subCoord[2] = 0;
   subCoord[3] = subCoord[1];
-  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[D1MinusLinearOSI::OSNSP_RHS];
-  subscal(e, osnsp_rhs, osnsp_rhs, subCoord, false);
+  siconos::algebra::SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[D1MinusLinearOSI::OSNSP_RHS];
+  siconos::algebra::subscal(e, osnsp_rhs, osnsp_rhs, subCoord, false);
 }
 
 
@@ -122,26 +122,26 @@ void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, std::shared_ptr<sico
 
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
-    SP::LagrangianDS lds = std::static_pointer_cast<LagrangianDS> (ds);
+    auto lds = std::static_pointer_cast<LagrangianDS> (ds);
     lds->init_generalized_coordinates(2); // acceleration is required for the ds
     lds->init_inverse_mass(); // invMass required to update post-impact velocity
 
     ds_work_vectors.resize(D1MinusLinearOSI::WORK_LENGTH);
-    ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE].reset(new SiconosVector(lds->dimension()));
-    ds_work_vectors[D1MinusLinearOSI::FREE].reset(new SiconosVector(lds->dimension()));
-    ds_work_vectors[D1MinusLinearOSI::FREE_TDG].reset(new SiconosVector(lds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE] = std::make_shared<siconos::algebra::SiconosVector>(lds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::FREE] = std::make_shared<siconos::algebra::SiconosVector>(lds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::FREE_TDG] = std::make_shared<siconos::algebra::SiconosVector>(lds->dimension()));
     // Update dynamical system components (for memory swap).
     lds->computeForces(t, lds->q(), lds->velocity());
     lds->swapInMemory();
   }
   else if(dsType == Type::NewtonEulerDS)
   {
-    SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS> (ds);
+    auto neds = std::static_pointer_cast<NewtonEulerDS> (ds);
     neds->init_inverse_mass(); // invMass required to update post-impact velocity
     ds_work_vectors.resize(D1MinusLinearOSI::WORK_LENGTH);
-    ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE].reset(new SiconosVector(neds->dimension()));
-    ds_work_vectors[D1MinusLinearOSI::FREE].reset(new SiconosVector(neds->dimension()));
-    ds_work_vectors[D1MinusLinearOSI::FREE_TDG].reset(new SiconosVector(neds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE] = std::make_shared<siconos::algebra::SiconosVector>(neds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::FREE] = std::make_shared<siconos::algebra::SiconosVector>(neds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::FREE_TDG] = std::make_shared<siconos::algebra::SiconosVector>(neds->dimension()));
     //Compute a first value of the forces to store it in _forcesMemory
     neds->computeForces(t, neds->q(), neds->twist());
     neds->swapInMemory();
@@ -158,43 +158,43 @@ void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, std::shared_ptr<sico
 
 void D1MinusLinearOSI::initialize_nonsmooth_problems()
 {
-  SP::OneStepNSProblems allOSNSP  = _simulation->oneStepNSProblems(); // all OSNSP
+  auto allOSNSP  = _simulation->oneStepNSProblems(); // all OSNSP
 
   bool isOSNSPinitialized = false ;
   switch(_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
     // set evaluation levels (first is of velocity, second of acceleration type)
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
 
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
     isOSNSPinitialized = true ;
-    DEBUG_EXPR((*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->display());
+    DEBUG_EXPR((*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->display());
     break;
   case halfexplicit_acceleration_level_full:
     // set evaluation levels (first is of velocity, second of acceleration type)
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
 
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(2);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
     isOSNSPinitialized = true ;
     break;
   case halfexplicit_velocity_level:
     // set evaluation levels (first is of velocity, second of acceleration type)
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->initialize(_simulation);
 
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(1); /** !!! */
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
-    (*allOSNSP)[SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setIndexSetLevel(1); /** !!! */
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->setInputOutputLevel(2);
+    (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
     isOSNSPinitialized = true ;
     break;
   }
@@ -205,14 +205,14 @@ void D1MinusLinearOSI::initialize_nonsmooth_problems()
   }
 }
 
-void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
-    InteractionProperties& interProp,
-    DynamicalSystemsGraph & DSG)
+void D1MinusLinearOSI::initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter,
+    siconos::graphs::InteractionProperties& interProp,
+    siconos::graphs::DynamicalSystemsGraph & DSG)
 {
 
-  DEBUG_BEGIN("D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds1= interProp.source;
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds2= interProp.target;
+  DEBUG_BEGIN("D1MinusLinearOSI::initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter, siconos::graphs::InteractionProperties& interProp, siconos::graphs::DynamicalSystemsGraph & DSG)\n");
+  auto ds1= interProp.source;
+  auto ds2= interProp.target;
   assert(ds1);
   assert(ds2);
   DEBUG_PRINTF("interaction number %i\n", inter.number());
@@ -220,7 +220,7 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   if(!interProp.workVectors)
   {
-    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors = std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
     interProp.workVectors->resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
   }
   if(!interProp.workBlockVectors)
@@ -233,9 +233,9 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   auto& inter_work_block = *interProp.workBlockVectors;
 
   Relation &relation =  *inter.relation();
-  RELATION::TYPES relationType = relation.getType();
+  auto relationType = relation.getType();
 
-  inter_work[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
+  inter_work[D1MinusLinearOSI::OSNSP_RHS] = std::make_shared<siconos::algebra::SiconosVector>(inter.dimension()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -296,13 +296,13 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
 
 
-  if(relationType == Lagrangian)
+  if(relationType == siconos::modeling::RelationType::Lagrangian)
   {
     LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
-    DSlink[LagrangianR::p2].reset(new BlockVector());
-    DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
-    DSlink[LagrangianR::q2].reset(new BlockVector());
-    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
+    DSlink[siconos::modeling::LagrangianR::p2] = std::make_shared<siconos::algebra::BlockVector>();
+    DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
+    DSlink[siconos::modeling::LagrangianR::q2] = std::make_shared<siconos::algebra::BlockVector>();
+    DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
   }
   else if(relationType == NewtonEuler)
   {
@@ -311,18 +311,18 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   if(ds1 != ds2)
   {
-    if(relationType == Lagrangian)
+    if(relationType == siconos::modeling::RelationType::Lagrangian)
     {
       LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
-      DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
-      DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
+      DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
+      DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     else if(relationType == NewtonEuler)
     {
     }
   }
 
-  DEBUG_END("D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_END("D1MinusLinearOSI::initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter, siconos::graphs::InteractionProperties& interProp, siconos::graphs::DynamicalSystemsGraph & DSG)\n");
 }
 
 double D1MinusLinearOSI::computeResidu()
@@ -361,25 +361,25 @@ double D1MinusLinearOSI::computeResidu()
 void D1MinusLinearOSI::computeFreeState()
 {
   DEBUG_BEGIN("D1MinusLinearOSI::computeFreeState()\n");
-  DynamicalSystemsGraph::VIterator dsi, dsend;
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds = _dynamicalSystemsGraph->bundle(*dsi);
+    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       // Lagrangian Systems
-      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+      auto d = std::static_pointer_cast<LagrangianDS> (ds);
 
 
       // get left state from memory
-      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
+      const siconos::algebra::SiconosVector& vold = d->velocityMemory().getsiconos::algebra::SiconosVector(0); // right limit
       DEBUG_EXPR(vold.display());
-      SiconosVector& residuFree = *ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE];
-      SiconosVector &vfree  = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
+      siconos::algebra::SiconosVector& residuFree = *ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE];
+      siconos::algebra::SiconosVector &vfree  = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
 
       // get right information
       vfree =  residuFree;
@@ -396,17 +396,17 @@ void D1MinusLinearOSI::computeFreeState()
     else if(dsType == Type::NewtonEulerDS)
     {
       // NewtonEuler Systems
-      SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
+      auto d = std::static_pointer_cast<NewtonEulerDS> (ds);
 
       // get left state from memory
-      const SiconosVector& vold = d->twistMemory().getSiconosVector(0); // right limit
+      const siconos::algebra::SiconosVector& vold = d->twistMemory().getsiconos::algebra::SiconosVector(0); // right limit
       DEBUG_EXPR(vold.display());
 
 
       // get right information
-      //SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
-      SiconosVector &vfree = *d->twist(); // POINTER CONSTRUCTOR : contains free velocity
-      SiconosVector& residuFree = *ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE];
+      //auto M = std::make_shared<siconos::algebra::SimpleMatrix>(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
+      siconos::algebra::SiconosVector &vfree = *d->twist(); // POINTER CONSTRUCTOR : contains free velocity
+      siconos::algebra::SiconosVector& residuFree = *ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE];
 
       vfree = residuFree;
       DEBUG_EXPR(residuFree.display());
@@ -432,12 +432,12 @@ void D1MinusLinearOSI::updateState(const unsigned int)
 {
   DEBUG_BEGIN("D1MinusLinearOSI::updateState(const unsigned int)\n");
 
-  DynamicalSystemsGraph::VIterator dsi, dsend;
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
 
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds = _dynamicalSystemsGraph->bundle(*dsi);
+    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     Type::Siconos dsType = Type::value(*ds);
 
@@ -445,7 +445,7 @@ void D1MinusLinearOSI::updateState(const unsigned int)
     /* Lagrangian DS*/
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
-      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+      auto d = std::static_pointer_cast<LagrangianDS> (ds);
       std::shared_ptr<siconos::algebra::SiconosVector> v = d->velocity();
 
       DEBUG_PRINT("Position and velocity before update\n");
@@ -457,7 +457,7 @@ void D1MinusLinearOSI::updateState(const unsigned int)
       {
         DEBUG_EXPR(d->p(1)->display());
         /* copy the value of the impulse */
-        std::shared_ptr<siconos::algebra::SiconosVector> dummy(new SiconosVector(*(d->p(1))));
+        std::shared_ptr<siconos::algebra::SiconosVector> dummy = std::make_shared<siconos::algebra::SiconosVector>(*(d->p(1))));
         /* Compute the velocity jump due to the impulse */
         if(d->inverseMass())
         {
@@ -475,13 +475,13 @@ void D1MinusLinearOSI::updateState(const unsigned int)
     /*  NewtonEuler Systems */
     else if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
+      auto d = std::static_pointer_cast<NewtonEulerDS> (ds);
       std::shared_ptr<siconos::algebra::SiconosVector> v = d->twist(); // POINTER CONSTRUCTOR : contains new velocity
       if(d->p(1))
       {
 
         // Update the velocity
-        std::shared_ptr<siconos::algebra::SiconosVector> dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
+        std::shared_ptr<siconos::algebra::SiconosVector> dummy = std::make_shared<siconos::algebra::SiconosVector>(*(d->p(1)))); // value = nonsmooth impulse
         if(d->inverseMass())
         {
           d->update_inverse_mass();
@@ -490,7 +490,7 @@ void D1MinusLinearOSI::updateState(const unsigned int)
         *v += *dummy; // add free velocity
 
         // update \f$ \dot q \f$
-        SP::SiconosMatrix T = d->T();
+        auto T = d->T();
         std::shared_ptr<siconos::algebra::SiconosVector> dotq = d->dotq();
         siconos::algebra::prod(*T, *v, *dotq, true);
 
@@ -511,7 +511,7 @@ void D1MinusLinearOSI::updateState(const unsigned int)
 
 
 
-void D1MinusLinearOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
+void D1MinusLinearOSI::computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
   DEBUG_PRINT("D1MinusLinearOSI::computeFreeOutput(), start\n");
   switch(_typeOfD1MinusLinearOSI)

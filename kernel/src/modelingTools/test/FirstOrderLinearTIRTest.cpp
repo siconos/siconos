@@ -46,11 +46,11 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1a : ", folr->C() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1b : ", folr->B() == B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1c : ",
-                               folr->getType() == siconos::modeling::RelationTypes::FirstOrder,
+                               folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderLinearTIR1d : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
@@ -65,11 +65,11 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2d : ", folr->e() == e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2e : ", folr->B() == B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2f : ",
-                               folr->getType() == siconos::modeling::RelationTypes::FirstOrder,
+                               folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderLinearTIR2g : ",
-      folr->getSubType() == siconos::modeling::RelationSubTypes::LinearTIR, true);
+      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 

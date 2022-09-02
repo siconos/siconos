@@ -26,6 +26,8 @@
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosException.hpp"
 #include "SiconosVisitor.hpp"
+#include "TypeName.hpp" // visitor to get ds type
+
 
 namespace siconos::modeling {
 /**
@@ -95,6 +97,7 @@ class NonSmoothLaw {
 
   // visitors stuff.
   virtual void accept(siconos::internal::SiconosVisitor &) const = 0;
+  virtual Type acceptType(siconos::types::FindType &ft) const = 0;
 };
 }  // namespace siconos::modeling
 #endif

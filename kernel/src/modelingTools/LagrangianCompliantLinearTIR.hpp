@@ -56,7 +56,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
  public:
   /** Default constructor
    */
-  LagrangianCompliantLinearTIR() : LagrangianR(RelationSubTypes::CompliantLinearTIR){};
+  LagrangianCompliantLinearTIR() : LagrangianR(RelationSubType::CompliantLinearTIR){};
 
   /** create the Relation from a set of data
    *  \param C the matrix C

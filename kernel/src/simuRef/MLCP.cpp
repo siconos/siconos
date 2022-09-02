@@ -35,11 +35,11 @@ using namespace RELATION;
 
 // Constructor from a set of data, use delegated constructor
 MLCP::MLCP(int numericsSolverId):
-  MLCP(SP::SolverOptions(solver_options_create(numericsSolverId),
+  MLCP(std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(numericsSolverId),
                          solver_options_delete)) {}
 
 // Constructor from a set of data
-MLCP::MLCP(SP::SolverOptions options):
+MLCP::MLCP(std::shared_ptr<siconos::numerics::SolverOptions> options):
   LinearOSNS(options)
 {
   _numerics_problem.reset(mixedLinearComplementarity_new());
@@ -130,10 +130,10 @@ bool MLCP::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
 
 
 
-void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
+void MLCP::computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor& ed)
 {
-  DEBUG_BEGIN("MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n")
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(indexSetLevel());
+  DEBUG_BEGIN("MLCP::computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor& ed)\n")
+  auto indexSet = simulation()->indexSet(indexSetLevel());
   std::shared_ptr<siconos::modeling::Interaction> inter1 = indexSet->bundle(indexSet->source(ed));
   std::shared_ptr<siconos::modeling::Interaction> inter2 = indexSet->bundle(indexSet->target(ed));
 
@@ -143,13 +143,13 @@ void MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
   if(!_hasBeenUpdated || !isLinear)
     LinearOSNS::computeInteractionBlock(ed);
 
-  DEBUG_END("MLCP::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n")
+  DEBUG_END("MLCP::computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor& ed)\n")
 }
 
-void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)
+void MLCP::computeDiagonalInteractionBlock(const siconos::graphs::InteractionsGraph::VDescriptor& vd)
 {
 
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(indexSetLevel());
+  auto indexSet = simulation()->indexSet(indexSetLevel());
   std::shared_ptr<siconos::modeling::DynamicalSystem> DS1 = indexSet->properties(vd).source;
   std::shared_ptr<siconos::modeling::DynamicalSystem> DS2 = indexSet->properties(vd).target;
   std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(vd);

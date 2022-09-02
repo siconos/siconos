@@ -26,11 +26,11 @@ using namespace RELATION;
 
 Equality::Equality(int numericsSolverId)
 //:
-// Equality(SP::SolverOptions(solver_options_create(numericsSolverId),
+// Equality(std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(numericsSolverId),
 //                            solver_options_delete))
 {}
 
-Equality::Equality(SP::SolverOptions options):
+Equality::Equality(std::shared_ptr<siconos::numerics::SolverOptions> options):
   LinearOSNS(options)
 {}
 
@@ -70,9 +70,9 @@ int Equality::compute(double time)
     double* q_ = q()->getArray();
     double* z_ =  _z->getArray();
     for(size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
-    //info = NM_gesv(&*_M->numericsMatrix(), z_, true);
-    //info = NM_LU_solve(NM_preserve(&*_M->numericsMatrix()), z_, 1);
-    info = NM_LU_solve(&*_M->numericsMatrix(), z_, 1);
+    //info = siconos::numerics::NM_gesv(&*_M->numericsMatrix(), z_, true);
+    //info = siconos::numerics::NM_LU_solve(siconos::numerics::NM_preserve(&*_M->numericsMatrix()), z_, 1);
+    info = siconos::numerics::NM_LU_solve(&*_M->numericsMatrix(), z_, 1);
 
 
     // --- Recovering of the desired variables from EQUALITY output ---
@@ -82,24 +82,24 @@ int Equality::compute(double time)
   return info;
 }
 
-void Equality::initialize(SP::Simulation sim)
+void Equality::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
-  //std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(levelMin());
-  //_M.reset(new OSNSMatrix(indexSet,_numericsMatrixStorageType));
+  //auto indexSet = simulation()->indexSet(levelMin());
+  //_M = std::make_shared<OSNSMatrix>(indexSet,_numericsMatrixStorageType));
 }
 
 void Equality::updateM()
 {
   assert(0);
   // Get index set from Simulation
-  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+  siconos::graphs::InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
   if(!_M)
   {
     // Creates and fills M using Interactionof indexSet
-    _M.reset(new OSNSMatrix(indexSet, _numericsMatrixStorageType));
+    _M = std::make_shared<OSNSMatrix>(indexSet, _numericsMatrixStorageType));
   }
   else
   {

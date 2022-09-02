@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-#include "SiconosConfig.h"
-
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
+
+#include "SiconosConfig.h"
 
 //#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 #include <boost/numeric/bindings/blas.hpp>
@@ -34,13 +34,10 @@
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
 #include "BlockMatrix.hpp"
-#include "CSparseMatrix.h"
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
+#include "NumericsToolsNamespace.h"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "cholesky.hpp"
-
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -48,7 +45,6 @@
 #ifdef DEBUG_MESSAGES
 #include <cs.h>
 
-#include "NumericsVector.h"
 #endif
 
 namespace lapack = boost::numeric::bindings::lapack;
@@ -320,7 +316,7 @@ void siconos::algebra::SimpleMatrix::Factorize()
   /* set the numericsMatrix */
 
   updateNumericsMatrix();
-  NumericsMatrix *NM = numericsMatrix();
+  siconos::numerics::NumericsMatrix *NM = numericsMatrix();
 
   /* Factorization calling the right method in Numerics */
   int info = 1;
@@ -328,7 +324,7 @@ void siconos::algebra::SimpleMatrix::Factorize()
     if (isPositiveDefinite())  // Cholesky Factorization
     {
       DEBUG_PRINT("Cholesky Factorize\n");
-      info = NM_Cholesky_factorize(NM);
+      info = siconos::numerics::NM_Cholesky_factorize(NM);
 
       if (info != 0) {
         _isCholeskyFactorized = false;
@@ -346,7 +342,7 @@ void siconos::algebra::SimpleMatrix::Factorize()
   else  //  LU Factorization  by default
   {
     DEBUG_PRINT("LU Factorize\n");
-    info = NM_LU_factorize(NM);
+    info = siconos::numerics::NM_LU_factorize(NM);
 
     if (info != 0) {
       _isPLUFactorized = false;
@@ -377,7 +373,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
     Factorize();
   }
   // and then solve
-  NumericsMatrix *NM = _numericsMatrix.get();
+  siconos::numerics::NumericsMatrix *NM = _numericsMatrix.get();
 
 #ifdef SPARSE_RHS_COPY_TO_DENSE
 
@@ -397,7 +393,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
 
     // Second way
     // use inplace_solve of ublas (see above with SolveInPlace)
-    // For that, we need to fill our factorization given by NM_LU_factorize
+    // For that, we need to fill our factorization given by siconos::numerics::NM_LU_factorize
     // into a ublas sparse matrix
     // inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
     // inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
@@ -408,8 +404,8 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
 
 #else
   B.updateNumericsMatrix();
-  NumericsMatrix *NM_B = B.numericsMatrix();
-  // NM_display(NM_B);
+  siconos::numerics::NumericsMatrix *NM_B = B.numericsMatrix();
+  // siconos::numerics::NM_display(NM_B);
 #endif
 
   if (isSymmetric()) {
@@ -417,9 +413,9 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
     {
       DEBUG_PRINT("Cholesky Solve\n");
 #ifdef SPARSE_RHS_COPY_TO_DENSE
-      info = NM_Cholesky_solve(NM, b, B.size(1));
+      info = siconos::numerics::NM_Cholesky_solve(NM, b, B.size(1));
 #else
-      info = NM_Cholesky_solve_matrix_rhs(NM, NM_B);
+      info = siconos::numerics::NM_Cholesky_solve_matrix_rhs(NM, NM_B);
 #endif
       if (info != 0) {
         THROW_EXCEPTION("SimpleMatrix::Solve failed (Cholesky)");
@@ -434,9 +430,9 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
   {
     DEBUG_PRINT("LU Solve\n");
 #ifdef SPARSE_RHS_COPY_TO_DENSE
-    info = NM_LU_solve(NM, b, B.size(1));
+    info = siconos::numerics::NM_LU_solve(NM, b, B.size(1));
 #else
-    info = NM_LU_solve_matrix_rhs(NM, NM_B);
+    info = siconos::numerics::NM_LU_solve_matrix_rhs(NM, NM_B);
 #endif
     if (info != 0) {
       THROW_EXCEPTION("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
@@ -449,7 +445,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
                   // B.displayExpert();
 #else
     /* we need to fill back again */
-    // B.fromCSC(NM_csc(NM_B));
+    // B.fromCSC(siconos::numerics::NM_csc(NM_B));
 #endif
   }
 
@@ -467,7 +463,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B)
 
   // and then solve
   int info = 1;
-  NumericsMatrix *NM;
+  siconos::numerics::NumericsMatrix *NM;
   double *b;
   std::shared_ptr<SiconosVector> Bdense;
 
@@ -497,7 +493,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B)
     if (isPositiveDefinite())  // Cholesky Factorization
     {
       DEBUG_PRINT("Cholesky Solve\n");
-      info = NM_Cholesky_solve(NM, b, 1);
+      info = siconos::numerics::NM_Cholesky_solve(NM, b, 1);
 
       if (info != 0) {
         THROW_EXCEPTION("SimpleMatrix::Solve failed (Cholesky)");

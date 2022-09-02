@@ -42,7 +42,7 @@ class EqualityConditionNSL : public NonSmoothLaw {
   EqualityConditionNSL(unsigned int size) : NonSmoothLaw(size){};
 
   /** Destructor */
-  ~EqualityConditionNSL() = default;
+  ~EqualityConditionNSL() noexcept = default;
 
   /** display the data of the NonSmoothLaw on the standard output
    *
@@ -54,6 +54,7 @@ class EqualityConditionNSL : public NonSmoothLaw {
   {
     tourist.visit(*this);
   }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 

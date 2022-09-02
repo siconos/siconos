@@ -84,7 +84,7 @@ class RelayNSL : public NonSmoothLaw {
    */
   RelayNSL(unsigned int size, double lb = -1.0, double ub = 1.0);
 
-  ~RelayNSL() = default;
+  ~RelayNSL() noexcept = default;
 
   /** check the ns law to see if it is verified
    *
@@ -125,6 +125,7 @@ class RelayNSL : public NonSmoothLaw {
   {
     tourist.visit(*this);
   }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // RELAYNSLAW_H

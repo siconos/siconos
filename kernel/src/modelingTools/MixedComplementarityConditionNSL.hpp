@@ -46,7 +46,7 @@ class MixedComplementarityConditionNSL : public NonSmoothLaw {
       : NonSmoothLaw(newSize + equalitySize), _equalitySize{equalitySize} {};
 
   /** Destructor */
-  ~MixedComplementarityConditionNSL() = default;
+  ~MixedComplementarityConditionNSL() noexcept = default;
 
   /** print the data to the screen
    */
@@ -63,6 +63,7 @@ class MixedComplementarityConditionNSL : public NonSmoothLaw {
   {
     tourist.visit(*this);
   }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H

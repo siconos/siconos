@@ -101,7 +101,7 @@ protected:
   OSNSMatrixProjectOnConstraints() {};
 
   using OSNSMatrix::updateSizeAndPositions;
-  virtual unsigned updateSizeAndPositions(InteractionsGraph& indexSet);
+  virtual unsigned updateSizeAndPositions(siconos::graphs::InteractionsGraph& indexSet);
 
 public:
 
@@ -109,9 +109,9 @@ public:
   /** Constructor with dimRow and DimColumn of the matrix
    * \param n row size of the rectangle matrix
    * \param m column size of the rectangle matrix
-   * \param stor storage type (NM_DENSE, NM_SPARSE_BLOCK)
+   * \param stor storage type (siconos::numerics::NM_DENSE, siconos::numerics::NM_SPARSE_BLOCK)
    */
-  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor);
+  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, siconos::numerics::NM_types stor);
 
   /** compute the size of the vector to project for a given Interaction.
    * \param inter the corresponding interaction
@@ -129,7 +129,7 @@ public:
       \param indexSet the index set of the active constraints
       \param update if true update the size and position
   */
-  void fillM(InteractionsGraph& indexSet, bool update = true);
+  void fillM(siconos::graphs::InteractionsGraph& indexSet, bool update = true);
 
 };
 

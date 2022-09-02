@@ -30,7 +30,7 @@
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
 #include "SiconosMemory.hpp"
-
+#include "TypeName.hpp" // visitor to get ds type
 namespace siconos::internal{
 
   class SiconosVisitor;
@@ -163,7 +163,7 @@ class DynamicalSystem {
 
  public:
   /** destructor */
-  virtual ~DynamicalSystem() = default;
+  virtual ~DynamicalSystem() noexcept = default;
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
@@ -421,6 +421,7 @@ class DynamicalSystem {
 
   // visitors stuff.
   virtual void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
+  virtual Type acceptType(siconos::types::FindType &ft) const = 0;
 };
 }  // namespace siconos::modeling
 #endif  // DynamicalSystem_H

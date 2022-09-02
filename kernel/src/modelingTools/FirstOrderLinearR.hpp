@@ -73,7 +73,7 @@ class FirstOrderLinearR : public FirstOrderR {
  public:
   /** default constructor
    */
-  FirstOrderLinearR() : FirstOrderR(RelationSubTypes::LinearR){};
+  FirstOrderLinearR() : FirstOrderR(RelationSubType::LinearR){};
 
   /** Constructor with C and B plugin names
    *

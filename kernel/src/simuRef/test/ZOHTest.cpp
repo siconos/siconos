@@ -28,16 +28,16 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ZOHTest);
 
 void ZOHTest::setUp()
 {
-  _A.reset(new SimpleMatrix(_n, _n, 0));
-  _b.reset(new SiconosVector(_n, 0));
-  _x0.reset(new SiconosVector(_n, 0));
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
+  _b = std::make_shared<siconos::algebra::SiconosVector>(_n, 0));
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0));
 }
 
 void ZOHTest::init()
 {
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
-  _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b));
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h));
+  _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T));
   _sim.reset(new TimeStepping(_model, _TD, 0));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->insertDynamicalSystem(_DS);
@@ -58,7 +58,7 @@ void ZOHTest::testMatrixExp0()
   init();
   _sim->computeOneStep();
   _sim->nextStep();
-  std::shared_ptr<siconos::algebra::SimpleMatrix> tmpM(new SimpleMatrix(_n, _n, 0));
+  auto tmpM = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
   tmpM->eye();
   *tmpM = (*tmpM) * exp(_h);
   const SimpleMatrix& Phi = _ZOH->Ad(_DS);
@@ -81,7 +81,7 @@ void ZOHTest::testMatrixExp1()
   init();
   _sim->computeOneStep();
   _sim->nextStep();
-  std::shared_ptr<siconos::algebra::SimpleMatrix> tmpM(new SimpleMatrix(_n, _n, 0));
+  auto tmpM = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
   tmpM->eye();
   (*tmpM)(0, 1) = _h;
   const SimpleMatrix& Phi = _ZOH->Ad(_DS);
@@ -104,8 +104,8 @@ void ZOHTest::testMatrixIntegration1()
   _x0->zero();
   (*_x0)(0) = 1;
   init();
-  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 3);
-  SiconosVector& xProc = *_DS->x();
+  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 3);
+  siconos::algebra::SiconosVector& xProc = *_DS->x();
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
   dataPlot(0, 1) = (*_x0)(0);
@@ -125,7 +125,7 @@ void ZOHTest::testMatrixIntegration1()
   dataPlot.resize(k, 3);
   ioMatrix::write("testMatrixIntegration1.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
-  SimpleMatrix dataPlotRef(dataPlot);
+  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   //magic line to compute the following:
   // python -c "import numpy as np; t = np.linspace(0, 9.9, 100); np.savetxt('testMatrixIntegration1.ref', np.transpose([t, np.cos(t), -np.sin(t)]))" && sed -i "1i100 3" testMatrixIntegration1.ref
@@ -144,17 +144,17 @@ void ZOHTest::testMatrixIntegration2()
   _x0->zero();
   (*_x0)(0) = 1;
   (*_x0)(1) = -1;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> B(new SimpleMatrix(_n, _n));
-  std::shared_ptr<siconos::algebra::SimpleMatrix> C(new SimpleMatrix(_n, _n));
+  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n));
+  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n));
   B->eye();
   C->eye();
   SP::FirstOrderLinearTIR rel(new FirstOrderLinearTIR(C, B));
-  std::shared_ptr<siconos::algebra::SimpleMatrix> D(new SimpleMatrix(_n, _n, 0));
+  auto D = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
   rel->setDPtr(D);
-  SP::NonSmoothLaw nslaw(new RelayNSL(_n));
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
-  _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
+  auto nslaw(new RelayNSL(_n));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b));
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h));
+  _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T));
   std::shared_ptr<siconos::modeling::Interaction> inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->insertDynamicalSystem(_DS);
@@ -165,9 +165,9 @@ void ZOHTest::testMatrixIntegration2()
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
-  SiconosVector& xProc = *_DS->x();
-  SiconosVector& lambda = *inter->lambda(0);
+  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
+  siconos::algebra::SiconosVector& xProc = *_DS->x();
+  siconos::algebra::SiconosVector& lambda = *inter->lambda(0);
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
   dataPlot(0, 1) = (*_x0)(0);
@@ -190,7 +190,7 @@ void ZOHTest::testMatrixIntegration2()
   std::cout <<std::endl <<std::endl;
   ioMatrix::write("testMatrixIntegration2.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
-  SimpleMatrix dataPlotRef(dataPlot);
+  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("testMatrixIntegration2.ref", "ascii", dataPlotRef);
   std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" <<std::endl;
@@ -209,18 +209,18 @@ void ZOHTest::testMatrixIntegration3()
   _x0->zero();
   (*_x0)(0) = 1;
   (*_x0)(1) = 1;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> B(new SimpleMatrix(_n, _n, 0));
-  std::shared_ptr<siconos::algebra::SimpleMatrix> C(new SimpleMatrix(_n, _n));
+  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
+  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n));
   (*B)(1, 0) = 2;
   (*B)(1, 1) = 1;
   C->eye();
   SP::FirstOrderLinearTIR rel(new FirstOrderLinearTIR(C, B));
-  std::shared_ptr<siconos::algebra::SimpleMatrix> D(new SimpleMatrix(_n, _n, 0));
+  auto D = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
   rel->setDPtr(D);
-  SP::NonSmoothLaw nslaw(new RelayNSL(_n));
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
-  _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
+  auto nslaw(new RelayNSL(_n));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b));
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h));
+  _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T));
   std::shared_ptr<siconos::modeling::Interaction> inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->insertDynamicalSystem(_DS);
@@ -231,10 +231,10 @@ void ZOHTest::testMatrixIntegration3()
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
-  SiconosVector& xProc = *_DS->x();
-  SiconosVector& lambda = *inter->lambda(0);
-  SiconosVector sampledControl(_n);
+  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
+  siconos::algebra::SiconosVector& xProc = *_DS->x();
+  siconos::algebra::SiconosVector& lambda = *inter->lambda(0);
+  siconos::algebra::SiconosVector sampledControl(_n);
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
   dataPlot(0, 1) = (*_x0)(0);
@@ -262,7 +262,7 @@ void ZOHTest::testMatrixIntegration3()
   std::cout <<std::endl <<std::endl;
   ioMatrix::write("testMatrixIntegration3.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
-  SimpleMatrix dataPlotRef(dataPlot);
+  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("testMatrixIntegration3.ref", "ascii", dataPlotRef);
   std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" <<std::endl;
@@ -281,18 +281,18 @@ void ZOHTest::testMatrixIntegration4()
   _x0->zero();
   (*_x0)(0) = 1;
   (*_x0)(1) = 1;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> B(new SimpleMatrix(_n, _n, 0));
-  std::shared_ptr<siconos::algebra::SimpleMatrix> C(new SimpleMatrix(_n, _n));
+  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
+  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n));
   (*B)(1, 0) = 2;
   (*B)(1, 1) = 1;
   C->eye();
   SP::FirstOrderLinearTIR rel(new FirstOrderLinearTIR(C, B));
-  std::shared_ptr<siconos::algebra::SimpleMatrix> D(new SimpleMatrix(_n, _n, 0));
+  auto D = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0));
   rel->setDPtr(D);
-  SP::NonSmoothLaw nslaw(new RelayNSL(_n));
-  _DS.reset(new FirstOrderLinearDS(_x0, _A, _b));
-  _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
+  auto nslaw(new RelayNSL(_n));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(_x0, _A, _b));
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h));
+  _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T));
   std::shared_ptr<siconos::modeling::Interaction> inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
   _model->insertDynamicalSystem(_DS);
@@ -303,10 +303,10 @@ void ZOHTest::testMatrixIntegration4()
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
-  SiconosVector& xProc = *_DS->x();
-  SiconosVector& lambda = *inter->lambda(0);
-  SiconosVector sampledControl(_n);
+  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
+  siconos::algebra::SiconosVector& xProc = *_DS->x();
+  siconos::algebra::SiconosVector& lambda = *inter->lambda(0);
+  siconos::algebra::SiconosVector sampledControl(_n);
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
   dataPlot(0, 1) = (*_x0)(0);
@@ -334,7 +334,7 @@ void ZOHTest::testMatrixIntegration4()
   std::cout <<std::endl <<std::endl;
   ioMatrix::write("testMatrixIntegration4.dat", "ascii", dataPlot, "noDim");
   // Reference Matrix
-  SimpleMatrix dataPlotRef(dataPlot);
+  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   ioMatrix::read("testMatrixIntegration4.ref", "ascii", dataPlotRef);
   std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf() << " -------" <<std::endl;

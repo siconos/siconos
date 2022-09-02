@@ -28,20 +28,6 @@
 #include "SiconosSerialization.hpp"
 #include "SimulationGraphs.hpp"
 
-// namespace siconos::modeling {
-// class DynamicalSystem;
-// class Interaction;
-// }  // namespace siconos::modeling
-
-// namespace siconos::simulation {
-// class OneStepIntegrator;
-// }  // namespace siconos::simulation
-
-// namespace siconos::graphs {
-// class DynamicalSystemsGraph;
-// class InteractionsGraph;
-// }  // namespace siconos::graphs
-
 namespace siconos::simulation {
 
 /**
@@ -139,7 +125,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
   Topology();
 
   /** destructor */
-  ~Topology();
+  ~Topology() noexcept;
 
   // === GETTERS/SETTERS ===
 
@@ -215,7 +201,7 @@ class Topology : public std::enable_shared_from_this<Topology> {
    *  \param OSI the integrator to use for this DS
    */
   void setOSI(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-              std::shared_ptr<siconos::simulation::OneStepIntegrator> OSI);
+              std::shared_ptr<siconos::integrators::OneStepIntegrator> OSI);
 
   /** link two dynamical systems to a relation
    *

@@ -32,9 +32,6 @@ namespace siconos::algebra {
 
 class SiconosVector;
 
-/** Some containers for vectors - Used for example to handle x and its
-    derivatives in DynamicalSystem. */
-using VectorOfVectors = std::vector<std::shared_ptr<SiconosVector>>;
 
 /**
    "Block" vector : container (list) of SiconosVector
@@ -46,6 +43,9 @@ using VectorOfVectors = std::vector<std::shared_ptr<SiconosVector>>;
 */
 class BlockVector {
  private:
+
+  using VectorOfVectors = std::vector<std::shared_ptr<SiconosVector>>;
+
   ACCEPT_SERIALIZATION(BlockVector);
 
   /** Size (ie total number of scalar elements, not number of blocks) */

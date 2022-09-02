@@ -59,12 +59,12 @@ private:
   double _T;
   double _tol;
   double _theta;
-  SP::NonSmoothDynamicalSystem _nsds;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds;
   SP::TimeStepping _sim;
   SP::FirstOrderLinearTIDS _DS;
-  SP::TimeDiscretisation _TD;
-  SP::OneStepIntegrator _osi;
-  SP::SiconosMatrix _A;
+  std::shared_ptr<TimeDiscretisation> _TD;
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> _osi;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
   std::shared_ptr<siconos::algebra::SiconosVector> _b;
   std::shared_ptr<siconos::algebra::SiconosVector> _x0;
 

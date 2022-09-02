@@ -68,12 +68,12 @@ public:
    *  \param options the options set
    *
    */
-  AVI(SP::SolverOptions options);
+  AVI(std::shared_ptr<siconos::numerics::SolverOptions> options);
 
   /** destructor */
   virtual ~AVI();
   
-  void initialize(SP::Simulation sim);
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
 
   /** Compute the unknown z and update the Interaction (y and lambda)
    *

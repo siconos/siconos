@@ -37,7 +37,7 @@ class FixedBC : public BoundaryCondition {
   FixedBC(std::shared_ptr<std::vector<unsigned int>> newVelocityIndices): BoundaryCondition(newVelocityIndices){};
 
   /** destructor */
-  virtual ~FixedBC() = default;
+  virtual ~FixedBC() noexcept = default;
 
   /** default function to compute the precribed velocities
    *

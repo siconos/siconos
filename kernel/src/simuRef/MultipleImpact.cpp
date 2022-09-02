@@ -94,7 +94,7 @@ void MultipleImpact::SetSizeDataSave(unsigned int var)
   _sizeDataSave = var;
 }
 //---------------------------------------------------------------------------------------------------
-void MultipleImpact::WriteVectorIntoMatrix(const SiconosVector& m, const unsigned int pos_row, const unsigned int pos_col)
+void MultipleImpact::WriteVectorIntoMatrix(const siconos::algebra::SiconosVector& m, const unsigned int pos_row, const unsigned int pos_col)
 {
   for(unsigned int i = 0; i < m.size(); ++i)
   {
@@ -131,8 +131,8 @@ unsigned int MultipleImpact::EstimateNdataCols()
 {
   unsigned int _numberCols = 1;
   // Number of columns for data at contacts
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(0); // get indexSet[0]
-  InteractionsGraph::VIterator ui, uiend;
+  auto indexSet = simulation()->indexSet(0); // get indexSet[0]
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     //_numberCols = _numberCols + 3*(indexSet->bundle(*ui)->interaction()->nonSmoothLaw()->size()) + 1;
@@ -140,7 +140,7 @@ unsigned int MultipleImpact::EstimateNdataCols()
   }
   // Number of columns for data at particles
   std::shared_ptr<DynamicalSystemsGraph> DSG = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  DynamicalSystemsGraph::VIterator dsi, dsiend;
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
   for(std::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
     _numberCols = _numberCols + (DSG->bundle(*dsi)->dimension());
@@ -151,7 +151,7 @@ unsigned int MultipleImpact::EstimateNdataCols()
 void MultipleImpact::AllocateMemory()
 {
   if(!_velocityContact)
-    _velocityContact.reset(new SiconosVector(maxSize()));
+    _velocityContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_velocityContact->size() != maxSize())
@@ -159,7 +159,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_oldVelocityContact)
-    _oldVelocityContact.reset(new SiconosVector(maxSize()));
+    _oldVelocityContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_oldVelocityContact->size() != maxSize())
@@ -167,7 +167,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(! _energyContact)
-    _energyContact.reset(new SiconosVector(maxSize()));
+    _energyContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_energyContact->size() != maxSize())
@@ -175,7 +175,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_WorkcContact)
-    _WorkcContact.reset(new SiconosVector(maxSize()));
+    _WorkcContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_WorkcContact->size() != maxSize())
@@ -183,7 +183,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_distributionVector)
-    _distributionVector.reset(new SiconosVector(maxSize()));
+    _distributionVector = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_distributionVector->size() != maxSize())
@@ -191,7 +191,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_stateContact)
-    _stateContact.reset(new IndexInt(maxSize()));
+    _stateContact = std::make_shared<std::vector<unsigned int>(maxSize());
   else
   {
     if(_stateContact->size() != maxSize())
@@ -199,7 +199,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_Kcontact)
-    _Kcontact.reset(new SiconosVector(maxSize()));
+    _Kcontact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_Kcontact->size() != maxSize())
@@ -207,7 +207,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_restitutionContact)
-    _restitutionContact.reset(new SiconosVector(maxSize()));
+    _restitutionContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_restitutionContact->size() != maxSize())
@@ -215,14 +215,14 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_elasticyCoefficientcontact)
-    _elasticyCoefficientcontact.reset(new SiconosVector(maxSize()));
+    _elasticyCoefficientcontact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_elasticyCoefficientcontact->size() != maxSize())
       _elasticyCoefficientcontact->resize(maxSize());
   };
   if(!_tolImpulseContact)
-    _tolImpulseContact.reset(new SiconosVector(maxSize()));
+    _tolImpulseContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_tolImpulseContact->size() != maxSize())
@@ -230,7 +230,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_deltaImpulseContact)
-    _deltaImpulseContact.reset(new SiconosVector(maxSize()));
+    _deltaImpulseContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_deltaImpulseContact->size() != maxSize())
@@ -238,7 +238,7 @@ void MultipleImpact::AllocateMemory()
   };
   //
   if(!_impulseContactUpdate)
-    _impulseContactUpdate.reset(new SiconosVector(maxSize()));
+    _impulseContactUpdate = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_impulseContactUpdate->size() != maxSize())
@@ -246,7 +246,7 @@ void MultipleImpact::AllocateMemory()
   }
   //
   if(!_forceContact)
-    _forceContact.reset(new SiconosVector(maxSize()));
+    _forceContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize()));
   else
   {
     if(_forceContact->size() != maxSize())
@@ -255,7 +255,7 @@ void MultipleImpact::AllocateMemory()
   // for the data matrix
   unsigned int _numberCols = EstimateNdataCols();
   if(!_DataMatrix)
-    _DataMatrix.reset(new SimpleMatrix(_sizeDataSave, _numberCols));
+    _DataMatrix = std::make_shared<siconos::algebra::SimpleMatrix>(_sizeDataSave, _numberCols));
   else
   {
     if((_DataMatrix->size(0) != _sizeDataSave) || (_DataMatrix->size(1) != _numberCols))
@@ -265,13 +265,13 @@ void MultipleImpact::AllocateMemory()
 //=====================================================================================
 void MultipleImpact::BuildParaContact()
 {
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(1); // get indexSet[1]
+  auto indexSet = simulation()->indexSet(1); // get indexSet[1]
   //Loop over the Interactionof the indexSet(1)
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*ui);
-    SP::NonSmoothLaw nslaw = inter->nonSmoothLaw();
+    auto nslaw = inter->nonSmoothLaw();
     SP::MultipleImpactNSL Mulnslaw = std::dynamic_pointer_cast<MultipleImpactNSL>(nslaw);
     assert(Mulnslaw && "In MultipleImpact::BuildStiffResCofVec, non-smooth law used must be MultipleImpactNSL!!!");
     // Get the position of inter-interactionBlock in the vector _velocityContact
@@ -300,7 +300,7 @@ void MultipleImpact::PreComputeImpact()
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel()); // get indexSet[1]
   _nContact = indexSet.size();
   //2. Compute matrix _M
-  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
   if(!_hasBeenUpdated || !isLinear)
   {
@@ -399,22 +399,22 @@ void MultipleImpact::InitializeInput()
 {
   //Loop over alls Interactioninvolved in the indexSet[1]
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel()); // get indexSet[1]
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*ui);
     //std::shared_ptr<siconos::algebra::SiconosVector> Vc0 = inter->y(1); // Relative velocity at beginning of impact
-    const SiconosVector & Vc0 = inter->y_k(1); // Relative velocity at beginning of impact
+    const siconos::algebra::SiconosVector & Vc0 = inter->y_k(1); // Relative velocity at beginning of impact
 
     unsigned int pos_inter = indexSet.properties(*ui).absolute_position;
 
     setBlock(Vc0, _velocityContact, Vc0.size(), 0, pos_inter);
-    std::shared_ptr<siconos::algebra::SiconosVector> ener0(new SiconosVector(Vc0.size()));
+    std::shared_ptr<siconos::algebra::SiconosVector> ener0 = std::make_shared<siconos::algebra::SiconosVector>(Vc0.size()));
     ener0->zero(); // We suppose that the initial potential energy before impact is equal to zero at any contact
     // at the beginning of impact
     setBlock(*ener0, _energyContact, ener0->size(), 0, pos_inter);
     //std::shared_ptr<siconos::algebra::SiconosVector> impulse0= (inter)->lambda(1))->vector(inter->number());
-    std::shared_ptr<siconos::algebra::SiconosVector> impulse0(new SiconosVector(Vc0.size()));
+    std::shared_ptr<siconos::algebra::SiconosVector> impulse0 = std::make_shared<siconos::algebra::SiconosVector>(Vc0.size()));
     impulse0->zero(); // We suppose that the impulse before impact is equal to zero at any contact
     // at the beginning of impact
     setBlock(*impulse0, _tolImpulseContact, impulse0->size(), 0, pos_inter);
@@ -430,7 +430,7 @@ void MultipleImpact::InitializeInput()
 
 }
 //=========================================================================================
-void MultipleImpact::initialize(SP::Simulation sim)
+void MultipleImpact::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
 
   // General initialize for OneStepNSProblem
@@ -438,18 +438,18 @@ void MultipleImpact::initialize(SP::Simulation sim)
   // Allocate the memory
   AllocateMemory();
   // get topology
-  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
   // Note that _interactionBlocks is up to date since updateInteractionBlocks
   // has been called during OneStepNSProblem::initialize()
 
   if(! _M)
   {
-    if(_numericsMatrixStorageType == NM_DENSE)
-      _M.reset(new OSNSMatrix(maxSize(), NM_DENSE));
+    if(_numericsMatrixStorageType == siconos::numerics::NM_DENSE)
+      _M = std::make_shared<OSNSMatrix>(maxSize(), siconos::numerics::NM_DENSE));
 
     else // if(_numericsMatrixStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
-      _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), NM_SPARSE_BLOCK));
+      _M = std::make_shared<OSNSMatrix>(simulation()->indexSet(indexSetLevel())->size(), NM_SPARSE_BLOCK));
   }
 
 };
@@ -774,10 +774,10 @@ void MultipleImpact::UpdateDuringImpact()
   std::shared_ptr<siconos::algebra::SiconosVector> y;
   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
   unsigned int pos;
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
-    Interaction& inter = *indexSet.bundle(*ui);
+    auto& inter = *indexSet.bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector _velocityContact/_tolImpulseContact
     pos = indexSet.properties(*ui).absolute_position;
     // Get Y and Lambda for the current Interaction
@@ -803,18 +803,18 @@ void MultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
   //(*_DataMatrix)(_ithPoint,0) = _timeVariable;
   (*_DataMatrix)(_ithPoint, 0) = _impulseVariable;
   // Save the data related to UnitaryRelations
-  std::shared_ptr<InteractionsGraph> indexSet0 = simulation()->indexSet(0);
-  std::shared_ptr<InteractionsGraph> indexSet1 = simulation()->indexSet(indexSetLevel());
+  auto indexSet0 = simulation()->indexSet(0);
+  auto indexSet1 = simulation()->indexSet(indexSetLevel());
   unsigned int pos;
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   unsigned int col_pos = 1;
   for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     std::shared_ptr<siconos::modeling::Interaction> inter = indexSet0->bundle(*ui);
     std::shared_ptr<siconos::algebra::SiconosVector> ydot = inter->y(1);
-    std::shared_ptr<siconos::algebra::SiconosVector> P_inter(new SiconosVector(inter->dimension()));
-    std::shared_ptr<siconos::algebra::SiconosVector> F_inter(new SiconosVector(inter->dimension()));
-    std::shared_ptr<siconos::algebra::SiconosVector> E_inter(new SiconosVector(1));
+    std::shared_ptr<siconos::algebra::SiconosVector> P_inter = std::make_shared<siconos::algebra::SiconosVector>(inter->dimension()));
+    std::shared_ptr<siconos::algebra::SiconosVector> F_inter = std::make_shared<siconos::algebra::SiconosVector>(inter->dimension()));
+    std::shared_ptr<siconos::algebra::SiconosVector> E_inter = std::make_shared<siconos::algebra::SiconosVector>(1));
     if(indexSet1->is_vertex(inter))  // if Interaction belongs to the IndexSet[1]
     {
       pos = indexSet0->properties(*ui).absolute_position;
@@ -835,11 +835,11 @@ void MultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
     col_pos = col_pos + F_inter->size();
   } // Save the data related to DS
   std::shared_ptr<DynamicalSystemsGraph> DSG = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-  DynamicalSystemsGraph::VIterator dsi, dsiend;
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
   for(std::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi)
   {
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG->bundle(*dsi); // DS
-    SP::LagrangianDS Lagds = std::dynamic_pointer_cast<LagrangianDS>(ds);
+    auto ds = DSG->bundle(*dsi); // DS
+    auto Lagds = std::dynamic_pointer_cast<LagrangianDS>(ds);
     std::shared_ptr<siconos::algebra::SiconosVector> qdot = Lagds->velocity();
     // Write
 
@@ -963,10 +963,10 @@ void MultipleImpact::PostComputeImpact()
   std::shared_ptr<siconos::algebra::SiconosVector> y;
   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
   unsigned int pos;
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
-    Interaction& inter = *indexSet.bundle(*ui);
+    auto& inter = *indexSet.bundle(*ui);
     // Get the relative position of inter-interactionBlock in the vector _velocityContact/_tolImpulseContact
     pos = indexSet.properties(*ui).absolute_position;
     // Get Y and Lambda for the current Interaction
@@ -1045,19 +1045,19 @@ void MultipleImpact::display() const
   std::cout << "Duration of the multiple impacs process: " << _timeVariable <<std::endl;
   // Display post-impact velocities
   std::shared_ptr<DynamicalSystemsGraph> DSG0 = simulation()->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  DynamicalSystemsGraph::VIterator ui, uiend;
+  siconos::graphs::DynamicalSystemsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = DSG0->vertices(); ui != uiend; ++ui)
   {
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG0->bundle(*ui);
-    SP::LagrangianDS lag_ds = std::dynamic_pointer_cast<LagrangianDS>(ds);
+    auto ds = DSG0->bundle(*ui);
+    auto lag_ds = std::dynamic_pointer_cast<LagrangianDS>(ds);
     std::cout << "DS number: " << ds->number() <<std::endl;
     std::cout << "Pre-impact velocity: ";
-    (lag_ds->velocityMemory().getSiconosVector(1)).display();
+    (lag_ds->velocityMemory().getsiconos::algebra::SiconosVector(1)).display();
     std::cout << "Post-impact velocity: ";
     (lag_ds->velocity())->display();
   }
   // Display impulses at contact points
-  std::shared_ptr<InteractionsGraph> IndexSet0 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+  auto IndexSet0 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
   InteractionsGraph::VIterator vi, viend;
   for(std::tie(vi, viend) = IndexSet0->vertices(); vi != viend; ++vi)
   {

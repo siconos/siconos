@@ -143,7 +143,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
       : LagrangianDS(q0, v0, M){};
 
   /** destructor */
-  ~LagrangianLinearTIDS() = default;
+  ~LagrangianLinearTIDS() noexcept = default;
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
@@ -222,7 +222,8 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   void display(bool brief = true) const override;
 
-  // ACCEPT_STD_VISITORS();
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+
 };
 }  // namespace siconos::modeling
 #endif  // LAGRANGIANTIDS_H

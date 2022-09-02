@@ -32,7 +32,7 @@
 siconos::modeling::LagrangianCompliantR::LagrangianCompliantR(
     const std::string& pluginh, const std::string& pluginJacobianhq,
     const std::string& pluginJacobianhlambda)
-    : LagrangianR(RelationSubTypes::CompliantR)
+    : LagrangianR(RelationSubType::CompliantR)
 {
   _zeroPlugin();
   setComputehFunction(siconos::plugins::getPluginName(pluginh),

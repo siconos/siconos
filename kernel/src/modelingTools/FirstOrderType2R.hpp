@@ -60,7 +60,7 @@ class FirstOrderType2R : public FirstOrderR {
 
  public:
   /** Basic contructor */
-  FirstOrderType2R() : FirstOrderR(RelationSubTypes::Type2R){};
+  FirstOrderType2R() : FirstOrderR(RelationSubType::Type2R){};
 
   /** data constructor
    *

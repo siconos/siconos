@@ -33,10 +33,10 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
   auto R1 = std::make_shared<siconos::modeling::LagrangianRheonomousR>(
       "TestPlugin:hRheo", "TestPlugin:G0Rheo", "TestPlugin:hDot");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3a : ",
-                               R1->getType() == siconos::modeling::RelationTypes::Lagrangian,
+                               R1->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianRheonomousR3b : ",
-      R1->getSubType() == siconos::modeling::RelationSubTypes::RheonomousR, true);
+      R1->getSubType() == siconos::modeling::RelationSubType::RheonomousR, true);
   std::cout << " data Constructor LagrangianRheonomousR ok" << std::endl;
 }

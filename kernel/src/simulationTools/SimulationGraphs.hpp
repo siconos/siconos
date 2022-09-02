@@ -28,7 +28,6 @@
 
 namespace siconos::algebra {
 
-class VectorOfVectors;
 class SiconosMatrix;
 class BlockVector;
 class SimpleMatrix;
@@ -47,9 +46,13 @@ class Interaction;
 
 namespace siconos::simulation {
 
-class OneStepIntegrator;
 class MatrixIntegrator;
 }  // namespace siconos::simulation
+
+namespace siconos::integrators {
+
+class OneStepIntegrator;
+}  // namespace siconos::integrators
 
 namespace siconos::graphs {
 
@@ -107,7 +110,7 @@ struct InteractionProperties {
   unsigned int absolute_position_proj{0}; /**< Absolute position of the interaction variables
                                           in the unknown vector in osnsp for projection*/
   bool forControl{false}; /**< true if the relation is used to add a control input to a DS */
-  std::shared_ptr<siconos::algebra::VectorOfVectors>
+  std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
       workVectors; /**< set of SiconosVector, useful to ensure contiguous memory vectors, used
                       as buffers in OneStepIntegrator classes. */
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>
@@ -124,11 +127,11 @@ jacobians or other temporary matrices. */
 struct DynamicalSystemProperties {
   std::shared_ptr<siconos::algebra::SiconosMatrix> upper_block{nullptr}; /**< i,j block i<j */
   std::shared_ptr<siconos::algebra::SiconosMatrix> lower_block{nullptr}; /**< i,j block i>j */
-  std::shared_ptr<siconos::algebra::VectorOfVectors> workVectors{
+  std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>> workVectors{
       nullptr}; /**< Used for instance in Newton iteration */
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>> workMatrices{
       nullptr}; /**< Mostly for Lagrangian system.*/
-  std::shared_ptr<siconos::simulation::OneStepIntegrator> osi{
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> osi{
       nullptr}; /**< Integrator used for the given DynamicalSystem */
   std::shared_ptr<siconos::algebra::SimpleMatrix> W{nullptr}; /**< Matrix for integration */
   std::shared_ptr<siconos::algebra::SimpleMatrix> WBoundaryConditions{

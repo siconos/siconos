@@ -32,7 +32,7 @@
 // Minimum data (C as pointer) constructor
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C)
-    : LagrangianR(RelationSubTypes::LinearTIR)
+    : LagrangianR(RelationSubType::LinearTIR)
 {
   _jachq = C;
 }
@@ -42,7 +42,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubTypes::LinearTIR)
+    : LagrangianR(RelationSubType::LinearTIR)
 {
   _jachq = C;
   _F = F;
@@ -53,7 +53,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubTypes::LinearTIR)
+    : LagrangianR(RelationSubType::LinearTIR)
 {
   _jachq = C;
   _e = e;

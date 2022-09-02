@@ -43,12 +43,12 @@
 
 // Constructor from solver id - Uses delegated constructor
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolverId):
-  GlobalFrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+  GlobalFrictionContact(dimPb, std::shared_ptr<siconos::numerics::SolverOptions>(solver_options_create(numericsSolverId),
                         solver_options_delete))
 {}
 
 // Constructor based on a pre-defined solver options set.
-GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions options):
+GlobalFrictionContact::GlobalFrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options):
   LinearOSNS(options,GLOBAL), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
 {
   if(dimPb == 2)
@@ -61,7 +61,7 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions option
   }
 
   //Reset default storage type for numerics matrices.
-  _numericsMatrixStorageType = NM_SPARSE;
+  _numericsMatrixStorageType = siconos::numerics::NM_SPARSE;
 }
 
 
@@ -71,7 +71,7 @@ void GlobalFrictionContact::initVectorsMemory()
   LinearOSNS::initVectorsMemory();
 
   if(!_globalVelocities)
-    _globalVelocities.reset(new SiconosVector(_maxSize));
+    _globalVelocities = std::make_shared<siconos::algebra::SiconosVector>(_maxSize));
   else
   {
     if(_globalVelocities->size() != _maxSize)
@@ -79,7 +79,7 @@ void GlobalFrictionContact::initVectorsMemory()
   }
 
   if(!_b)
-    _b.reset(new SiconosVector(_maxSize));
+    _b = std::make_shared<siconos::algebra::SiconosVector>(_maxSize));
   else
   {
     if(_b->size() != _maxSize)
@@ -87,7 +87,7 @@ void GlobalFrictionContact::initVectorsMemory()
   }
 }
 
-void GlobalFrictionContact::initialize(SP::Simulation sim)
+void GlobalFrictionContact::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
@@ -100,13 +100,13 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
   initVectorsMemory();
 
   // get topology
-  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
 
   // Note that interactionBlocks is up to date since updateInteractionBlocks has been called during OneStepNSProblem::initialize()
 
   // Fill vector of friction coefficients
-  std::shared_ptr<InteractionsGraph> I0 = topology->indexSet0();
-  _mu.reset(new MuStorage());
+  auto I0 = topology->indexSet0();
+  _mu = std::make_shared<std::vector<double>>();
   _mu->reserve(I0->size());
 
 
@@ -187,7 +187,7 @@ bool GlobalFrictionContact::preCompute(double time)
   // M, _sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
+  auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
   DEBUG_PRINTF("indexSetLevel = %i\n", indexSetLevel());
   if(indexSetLevel() == simulation::internal::LEVELMAX)
   {
@@ -259,22 +259,22 @@ bool GlobalFrictionContact::preCompute(double time)
       _q->resize(_sizeGlobalOutput);
 
     size_t offset = 0;
-    DynamicalSystemsGraph::VIterator dsi, dsend;
+    siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
     for(std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
     {
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG0.bundle(*dsi);
+      auto ds = DSG0.bundle(*dsi);
       Type::Siconos dsType = Type::value(*ds);
       size_t dss = ds->dimension();
 
       //OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
-      //OSI::TYPES osiType = Osi.getType();
+      //siconos::integrators::IntegratorType osiType = Osi.getType();
       SP::MoreauJeanGOSI mjgosi =  std::dynamic_pointer_cast<MoreauJeanGOSI>(DSG0.properties(DSG0.descriptor(ds)).osi);
       if(mjgosi)
       {
         auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
         if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::NewtonEulerDS)
         {
-          SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
+          siconos::algebra::SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
           setBlock(vfree, _q, dss, 0, offset);
         }
       }
@@ -298,7 +298,7 @@ bool GlobalFrictionContact::preCompute(double time)
 
     // fill H
     _H->fillH(DSG0, indexSet);
-    DEBUG_EXPR(NM_display(_H->numericsMatrix().get()););
+    DEBUG_EXPR(siconos::numerics::NM_display(_H->numericsMatrix().get()););
 
     _sizeOutput =_H->sizeColumn();
     DEBUG_PRINTF("_sizeOutput = %i\n ", _sizeOutput);
@@ -315,7 +315,7 @@ bool GlobalFrictionContact::preCompute(double time)
       _b->resize(_sizeOutput);
 
     size_t pos = 0;
-    InteractionsGraph::VIterator ui, uiend;
+    siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
     {
       std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*ui);
@@ -323,8 +323,8 @@ bool GlobalFrictionContact::preCompute(double time)
       assert(Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
       _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu()); //curious !!
 
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds1 = indexSet.properties(*ui).source;
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds2 = indexSet.properties(*ui).target;
+      auto ds1 = indexSet.properties(*ui).source;
+      auto ds2 = indexSet.properties(*ui).target;
       OneStepIntegrator& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
       OneStepIntegrator& osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
 
@@ -338,7 +338,7 @@ bool GlobalFrictionContact::preCompute(double time)
       {
         THROW_EXCEPTION("GlobalFrictionContact::computeq. Not yet implemented for the given Integrator type ");
       }
-      SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
+      siconos::algebra::SiconosVector& osnsp_rhs = *(*indexSet.properties(*ui).workVectors)[MoreauJeanGOSI::OSNSP_RHS];
       pos =  indexSet.properties(*ui).absolute_position;
       size_t sizeY = inter->dimension();
       setBlock(osnsp_rhs, _b, sizeY, 0, pos);
@@ -434,10 +434,10 @@ void GlobalFrictionContact::postCompute()
 
   size_t pos = 0;
 
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += _contactProblemDim)
   {
-    Interaction& inter = *indexSet.bundle(*ui);
+    auto& inter = *indexSet.bundle(*ui);
     // Get Y and Lambda for the current Interaction
     y = inter.y(inputOutputLevel());
     lambda = inter.lambda(inputOutputLevel());
@@ -451,8 +451,8 @@ void GlobalFrictionContact::postCompute()
   DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   unsigned int sizeDS;
-  SP::OneStepIntegrator  Osi; 
-  DynamicalSystemsGraph::VIterator dsi, dsend;
+  std::shared_ptr<siconos::integrators::OneStepIntegrator>  Osi; 
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   pos=0;
   for(std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
   {
@@ -504,7 +504,7 @@ void GlobalFrictionContact::display() const
   NumericsMatrix* W_NM = _W->numericsMatrix().get();
   if(W_NM)
   {
-    NM_display(W_NM);
+    siconos::numerics::NM_display(W_NM);
   }
   std::cout << " - Matrix H : " <<std::endl;
   // if (_H) _H->display();
@@ -512,7 +512,7 @@ void GlobalFrictionContact::display() const
   NumericsMatrix* H_NM = _H->numericsMatrix().get();
   if(H_NM)
   {
-    NM_display(H_NM);
+    siconos::numerics::NM_display(H_NM);
   }
 
   std::cout << " - Vector q : " <<std::endl;
@@ -540,7 +540,7 @@ void GlobalFrictionContact::display() const
 void GlobalFrictionContact::updateMu()
 {
   _mu->clear();
-  std::shared_ptr<InteractionsGraph> indexSet = simulation()->indexSet(indexSetLevel());
+  auto indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
   for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
