@@ -440,6 +440,8 @@ protected:
   btTransform offsetTransform(const SiconosVector& position,
                               const SiconosVector& offset);
 
+  btTransform offsetTransform(const SiconosVector& position);
+
   /** Helper to set the inertia of a NewtonEulerDS based on a
    * btCollisionShape */
   void updateContactorInertia(SP::NewtonEulerDS ds, SP::btCollisionShape btshape);
@@ -743,8 +745,8 @@ SP::btCollisionObject SiconosBulletCollisionManager_impl::createCollisionObjectH
   assert(record->shape);
   assert(record->btshape);
   assert(record->contactor);
-  assert(record->contactor->offset);
-  assert(record->contactor->offset->size() == 7);
+  //assert(record->contactor->offset);
+  //assert(record->contactor->offset->size() == 7);
 
   // Allow Bullet to report colliding DSs.  We need to access it from
   // the collision callback as the record base class so down-cast it.
@@ -779,6 +781,18 @@ btTransform SiconosBulletCollisionManager_impl::offsetTransform(const SiconosVec
                      btVector3(position(0), position(1), position(2)) + rboffset);
 }
 
+btTransform SiconosBulletCollisionManager_impl::offsetTransform(const SiconosVector& position)
+{
+  /* Adjust offset position according to current rotation */
+  btQuaternion rbase(position(4), position(5),
+                     position(6), position(3));
+
+  /* Set the absolute shape position */
+  return btTransform(rbase ,
+                     btVector3(position(0), position(1), position(2)));
+}
+
+
 void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyBulletShapeRecord &record)
 {
   DEBUG_BEGIN("SiconosBulletCollisionManager_impl::updateShapePosition(...)\n");
@@ -812,7 +826,16 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyBulletSha
   DEBUG_PRINT("Position of the shape given to bullet:")
   DEBUG_EXPR_WE(q.display(););
 
-  btTransform t = offsetTransform(q, *record.contactor->offset);
+  btTransform t;
+  if (record.contactor->offset)
+  {
+    t = offsetTransform(q, *record.contactor->offset);
+  }
+  else
+  {
+    t  =  offsetTransform(q);
+  }
+
   t.setOrigin(t.getOrigin() * _options.worldScale);
   DEBUG_PRINTF("transformation = %f,%f,%f\n", float(t.getOrigin().getX()), float(t.getOrigin().getY()), float(t.getOrigin().getZ()));
   DEBUG_PRINTF("Rotation axis = %f,%f,%f\n", float(t.getRotation().getAxis().getX()), float(t.getRotation().getAxis().getY()), float(t.getRotation().getAxis().getZ()));
@@ -971,7 +994,15 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyPlaneRecord& record)
   SP::BTPLANESHAPE btplane(record.btshape);
 
   SiconosVector o(7);
-  o = *record.contactor->offset;
+  if (record.contactor->offset)
+  {
+    o = *record.contactor->offset;
+  }
+  else
+  {
+    o.zero();
+    o(3) = 1.0;
+  }
 
   // Adjust the offset according to plane implementation
 #ifdef USE_BOX_FOR_PLANE
@@ -1552,7 +1583,19 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyHeightRecord &record)
   o(2) = z_offset;
   o(3) = 1;
 
-  btTransform t = offsetTransform(*record.contactor->offset, o);
+  btTransform t;
+  if (record.contactor->offset)
+  {
+    t = offsetTransform(*record.contactor->offset, o);
+  }
+  else
+  {
+    SiconosVector offset(7);
+    offset.zero();
+    offset(3) = 1.0;
+    t = offsetTransform(offset, o);
+  }
+
   o(0) = t.getOrigin().getX();
   o(1) = t.getOrigin().getY();
   o(2) = t.getOrigin().getZ();
@@ -2354,7 +2397,7 @@ static void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp, const b
 
     }
 
-    
+
     DEBUG_END("siconosBulletAdjustInternalEdgeContacts \n");
     return;
     //getchar();
@@ -2514,7 +2557,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 #ifdef BULLET_TIMER
   end = std::chrono::system_clock::now();
   int elapsed = std::chrono::duration_cast<std::chrono::milliseconds> (end-start).count();
-  
+
   std::cout << "\n[mechanics] -2 : visit " << elapsed << " ms" << std::endl;
 #endif
   // Clear cache automatically before collision detection if requested
