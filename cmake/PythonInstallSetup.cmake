@@ -96,6 +96,7 @@ function(set_python_install_path)
   set(SICONOS_PYTHON_INSTALL_DIR ${PY_INSTALL_DIR} CACHE PATH "Install directory for python bindings.")
   # Warning: this SICONOS_PYTHON_INSTALL_DIR will be used during swig setup to choose the place where dynamic libraries generated
   # by swig and required by python will be installed.
-  set(PIP_INSTALL_OPTIONS ${PIP_INSTALL_OPTIONS} CACHE STRING "Options passed to pip during installation.")
+  list(APPEND PIP_INSTALL_OPTIONS --no-build-isolation) # To allow siconos install when network is not available
+set(PIP_INSTALL_OPTIONS ${PIP_INSTALL_OPTIONS} CACHE STRING "Options passed to pip during installation.")
 endfunction()
 
