@@ -1,4 +1,4 @@
-name: CMake
+name: build ubuntu_latest Debug + testing
 
 on: [push]
 

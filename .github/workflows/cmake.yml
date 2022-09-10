@@ -1,4 +1,4 @@
-name: CMake
+name: build ubuntu-latest release testing
 
 on: [push]
 
