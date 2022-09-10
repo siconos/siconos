@@ -75,7 +75,8 @@ static int test_0(void)
     printf("x[%i]=%f\t",i,x[i]);
     printf("PX[%i]=%f\n",i,PX[i]);
   }
-
+  free(q);
+  NM_free(M);
   return 0;
 }
 
@@ -158,6 +159,9 @@ static int test_1(void)
   }
 
   solver_options_delete(options);
+  free(options);
+  free(q);
+  NM_free(M);
   return info;
 }
 
@@ -249,6 +253,9 @@ static int test_2(void)
   }
 
   solver_options_delete(options);
+  free(options);
+  free(q);
+  NM_free(M);
   return info;
 }
 
@@ -365,6 +372,10 @@ static int test_3(void)
   }
 
   solver_options_delete(options);
+  free(options);
+  free(q);
+  free(b);
+  NM_free(A); NM_free(M);
   return info;
 }
 
@@ -481,6 +492,10 @@ static int test_4(void)
   }
 
   solver_options_delete(options);
+  free(options);
+  free(q);
+  free(b);
+  NM_free(M); NM_free(A);
   return info;
 }
 
@@ -596,7 +611,12 @@ static int test_5(void)
   }
 
   solver_options_delete(options);
+  free(options);
   options = NULL;
+  free(b);
+  free(q);
+  NM_free(A);
+  NM_free(M);
   return info;
 }
 
