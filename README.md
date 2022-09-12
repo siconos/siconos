@@ -1,5 +1,5 @@
 # Siconos
-[![build ubuntu-latest release testing](https://github.com/siconos/siconos/actions/workflows/cmake.yml/badge.svg)](https://github.com/siconos/siconos/actions/workflows/cmake.yml)
+[![ubuntu-latest release testing](https://github.com/siconos/siconos/actions/workflows/cmake_ubuntu_latest_release.yml/badge.svg)](https://github.com/siconos/siconos/actions/workflows/cmake_ubuntu_latest_release.yml)
 |[![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/master/COPYING)|
  
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
