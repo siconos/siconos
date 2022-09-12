@@ -209,6 +209,7 @@ static int test_2(void)
   cqp.M = M;
   cqp.ProjectionOnC = &PXtest_2 ;
   cqp.q = q;
+  cqp.m = 10;
   /* convexQP_display(&cqp); */
 
 
@@ -225,7 +226,7 @@ static int test_2(void)
 
   cqp.ProjectionOnC(&cqp,z,PX);
 
-  for(i =0; i< n ; i++)
+  for(i =0; i< cqp.m ; i++)
   {
     printf("z[%i]=%f\t",i,z[i]);
     printf("PX[%i]=%f\n",i,PX[i]);
@@ -234,6 +235,7 @@ static int test_2(void)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
+  printf("\n");
   SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
@@ -339,7 +341,7 @@ static int test_3(void)
 
   cqp.ProjectionOnC(&cqp,z,PX);
 
-  for(i =0; i< n ; i++)
+  for(i =0; i< cqp.m ; i++)
   {
     printf("z[%i]=%f\t",i,z[i]);
     printf("PX[%i]=%f\n",i,PX[i]);
@@ -348,6 +350,7 @@ static int test_3(void)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
+  printf("\n");
   SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
 
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
@@ -460,7 +463,7 @@ static int test_4(void)
 
   cqp.ProjectionOnC(&cqp,z,PX);
 
-  for(i =0; i< n ; i++)
+  for(i =0; i< cqp.m ; i++)
   {
     printf("z[%i]=%f\t",i,z[i]);
     printf("PX[%i]=%f\n",i,PX[i]);
@@ -469,6 +472,7 @@ static int test_4(void)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
+  printf("\n");
   SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
@@ -579,7 +583,7 @@ static int test_5(void)
 
   cqp.ProjectionOnC(&cqp,z,PX);
 
-  for(i =0; i< n ; i++)
+  for(i =0; i< cqp.m ; i++)
   {
     printf("z[%i]=%f\t",i,z[i]);
     printf("PX[%i]=%f\n",i,PX[i]);
@@ -588,6 +592,7 @@ static int test_5(void)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
+  printf("\n");
   SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;

@@ -35,10 +35,10 @@ struct ConvexQP
   int size; /**< size  \f$ n \f$ */
   int m; /**< m \f$ m \f$ */
   void *env; /**< pointer onto env object (which is self is the simplest case)*/
-  NumericsMatrix *M; /**< Matrix M that defines the quadratic term in the cost function. **/
-  double *q; /**< vector q that defines the linear term in the cost function. **/
-  NumericsMatrix *A; /**< Matrix A that defines the constraints. If it is NULL, we assume that A is the identity matrix **/
-  double *b;  /**< vector b that defines the constant term in the constraints. **/
+  NumericsMatrix *M; /**< a n x n matrix M that defines the quadratic term in the cost function. **/
+  double *q; /**< a vector q of size n that defines the linear term in the cost function. **/
+  NumericsMatrix *A; /**< a m x n matrix A that defines the constraints. If it is NULL, we assume that A is the identity matrix **/
+  double *b;  /**< a vector b of size m that defines the constant term in the constraints. **/
   void (*ProjectionOnC)(void *self, double *x, double * PX); /**< Projection on C  */
   double normConvexQP; /**< Norm of the  problem to compute relative solution */
   int istheNormConvexQPset; /**< Boolean to know if the norm is set 
