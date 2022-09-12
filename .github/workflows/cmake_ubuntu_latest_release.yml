@@ -1,4 +1,4 @@
-name: build ubuntu-latest release testing
+name: ubuntu-latest release testing
 
 on: [push]
 
