@@ -28,11 +28,20 @@
 
 namespace siconos::numerics {
 
-#include "SolverOptions.h"
-#include "NonSmoothDrivers.h"
+#include "AffineVariationalInequalities.h"
+#include "FrictionContactProblem.h"
+#include "GenericMechanicalProblem.h"
+#include "GenericMechanical_Solvers.h"
+#include "GlobalFrictionContactProblem.h"
+#include "GlobalRollingFrictionContactProblem.h"
 #include "LCP_Solvers.h"
 #include "LinearComplementarityProblem.h"
-
+#include "MLCP_Solvers.h"
+#include "MixedLinearComplementarityProblem.h"
+#include "NonSmoothDrivers.h"
+#include "RelayProblem.h"
+#include "RollingFrictionContactProblem.h"
+#include "SolverOptions.h"
 }  // namespace siconos::numerics
 
 #endif

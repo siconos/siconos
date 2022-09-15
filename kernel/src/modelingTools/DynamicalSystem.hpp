@@ -134,7 +134,7 @@ class DynamicalSystem {
   // ===== CONSTRUCTORS =====
 
   /** default constructor */
-  DynamicalSystem() : DynamicalSystem{0} {};
+  DynamicalSystem() = default;
 
   /** minimal constructor, from state dimension
       result in \f$ \dot x = r \f$
@@ -145,7 +145,7 @@ class DynamicalSystem {
   /** Copy constructor
    * \param ds the DynamicalSystem to copy
    */
-  DynamicalSystem(const DynamicalSystem &ds) = delete;
+  DynamicalSystem(const DynamicalSystem &ds);
 
   // Rule of five
   DynamicalSystem &operator=(const DynamicalSystem &) = delete;
@@ -155,11 +155,6 @@ class DynamicalSystem {
   /** Initialize all PluggedObject whether they are used or not.
    */
   virtual void _zeroPlugin() = 0;
-
-  // /** Common code for constructors
-  //     should be replaced in C++11 by delegating constructors
-  //  */
-  // void _init();
 
  public:
   /** destructor */

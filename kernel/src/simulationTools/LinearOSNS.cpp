@@ -18,12 +18,18 @@
 #include "LinearOSNS.hpp"
 
 #include "BoundaryCondition.hpp"
+#include "D1MinusLinearOSI.hpp"
 #include "DynamicalSystem.hpp"
+#include "EulerMoreauOSI.hpp"
 #include "Interaction.hpp"
+#include "LsodarOSI.hpp"
+#include "MoreauJeanBilbaoOSI.hpp"
 #include "MoreauJeanOSI.hpp"
+#include "NewMarkAlphaOSI.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepIntegrator.hpp"
 #include "Relation.hpp"
+#include "SchatzmanPaoliOSI.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosAlgebraProd.hpp"  // for prod
 #include "SiconosConst.hpp"
@@ -33,13 +39,7 @@
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
-// #include "MoreauJeanBilbaoOSI.hpp"
-// #include "D1MinusLinearOSI.hpp"
-// #include "EulerMoreauOSI.hpp"
-// #include "SchatzmanPaoliOSI.hpp"
-#include "LsodarOSI.hpp"
-#include "NewMarkAlphaOSI.hpp"
-// #include "ZeroOrderHoldOSI.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 // #include "NewtonEulerR.hpp"
 // #include "FirstOrderLinearR.hpp"
 // #include "FirstOrderLinearTIR.hpp"
@@ -444,47 +444,43 @@ void siconos::simulation::LinearOSNS::computeDiagonalInteractionBlock(
     // Computing depends on relation type -> move this in Interaction method?
     if (relationType == siconos::modeling::RelationType::FirstOrder) {
       ////// TODO : BACK WHEN NAMESPACE OK
-      // rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
-      // if(osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI)
-      // {
-      //   if((static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).useGamma() ||
-      //   (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).useGammaForRelation())
-      //   {
-      //     *rightInteractionBlock *=
-      //     (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).gamma();
-      //   }
-      // }
+      rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
-      // // for ZOH, we have a different formula ...
-      // if((osiType == siconos::integrators::IntegratorType::ZOHOSI) &&
-      // indexSet->properties(vd).forControl)
-      // {
-      //   *rightInteractionBlock =
-      //   static_cast<siconos::integrators::ZeroOrderHoldOSI&>(osi).Bd(ds);
-      //   siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-      //   *currentInteractionBlock, false);
-      // }
-      // else
-      // {
-      //   // centralInteractionBlock contains a lu-factorized matrix and we solve
-      //   // centralInteractionBlock * X = rightInteractionBlock with PLU
-      //   auto centralInteractionBlock = getOSIMatrix(osi, ds);
-      //   centralInteractionBlock->Solve(*rightInteractionBlock);
-      //   auto& workMInter = *indexSet->properties(vd).workMatrices;
-      //   static_cast<siconos::integrators::EulerMoreauOSI&>(osi).computeKhat(*inter,
-      //   *rightInteractionBlock,
-      //       workMInter, h);
+      if (osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI) {
+        if ((static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).useGamma() ||
+            (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).useGammaForRelation()) {
+          *rightInteractionBlock *=
+              (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).gamma();
+        }
+      }
 
-      //   //      integration of r with theta method removed
-      //   //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
-      //   (*rightInteractionBlock); //left = C, right = W.B
-      //   //gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
-      //   *leftInteractionBlock *= h;
-      //   siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-      //   *currentInteractionBlock, false);
-      //   //left = C, right = inv(W).B
-      // }
+      // for ZOH, we have a different formula ...
+      if ((osiType == siconos::integrators::IntegratorType::ZOHOSI) &&
+          indexSet->properties(vd).forControl) {
+        *rightInteractionBlock =
+            static_cast<siconos::integrators::ZeroOrderHoldOSI&>(osi).Bd(ds);
+        siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
+                               *currentInteractionBlock, false);
+      }
+      else {
+        // centralInteractionBlock contains a lu-factorized matrix and we solve
+        // centralInteractionBlock * X = rightInteractionBlock with PLU
+        auto centralInteractionBlock = getOSIMatrix(osi, ds);
+        centralInteractionBlock->Solve(*rightInteractionBlock);
+        auto& workMInter = *indexSet->properties(vd).workMatrices;
+        static_cast<siconos::integrators::EulerMoreauOSI&>(osi).computeKhat(
+            *inter, *rightInteractionBlock, workMInter, h);
+
+        //      integration of r with theta method removed
+        //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
+        // (*rightInteractionBlock);  // left = C, right = W.B
+        // gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
+        *leftInteractionBlock *= h;
+        siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
+                               *currentInteractionBlock, false);
+        // left = C, right = inv(W).B
+      }
     }
     else if (relationType == siconos::modeling::RelationType::Lagrangian ||
              relationType == siconos::modeling::RelationType::NewtonEuler) {
@@ -808,41 +804,38 @@ void siconos::simulation::LinearOSNS::computeqBlock(
   auto sizeY = inter->nonSmoothLaw()->size();
 
   // We assume that the osi of ds1 (osi1) is integrating the interaction
-  // if ((osi1Type == siconos::integrators::IntegratorType::EULERMOREAUOSI &&
-  //      osi2Type == siconos::integrators::IntegratorType::EULERMOREAUOSI) ||
-  //     (osi1Type == siconos::integrators::IntegratorType::ZOHOSI &&
-  //      osi2Type == siconos::integrators::IntegratorType::ZOHOSI)) {
-  //   osi1.computeFreeOutput(vertex_inter, this);
-  //   auto& osnsp_rhs =
-  //     *(*indexSet->properties(vertex_inter).workVectors)[siconos::integrators::EulerMoreauOSI::OSNSP_RHS];
-  //   siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  // }
-  // // else
-  //   if (osi1Type == siconos::integrators::IntegratorType::ZOHOSI &&
-  //          osi2Type == siconos::integrators::IntegratorType::ZOHOSI) {
-  //   osi1.computeFreeOutput(vertex_inter, this);
-  //   auto& osnsp_rhs =
-  //       *(*indexSet->properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
-  //   siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  // }
-  // else
-  if ((osi1Type == siconos::integrators::IntegratorType::MOREAUJEANOSI &&
-       osi2Type == siconos::integrators::IntegratorType::MOREAUJEANOSI)  //  ||
-      // (osi1Type == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI &&
-      //  osi2Type == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI)
-  ) {
+  if ((osi1Type == siconos::integrators::IntegratorType::EULERMOREAUOSI &&
+       osi2Type == siconos::integrators::IntegratorType::EULERMOREAUOSI) ||
+      (osi1Type == siconos::integrators::IntegratorType::ZOHOSI &&
+       osi2Type == siconos::integrators::IntegratorType::ZOHOSI)) {
+    osi1.computeFreeOutput(vertex_inter, this);
+    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
+                             .workVectors)[siconos::integrators::EulerMoreauOSI::OSNSP_RHS];
+    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+  }
+  else if (osi1Type == siconos::integrators::IntegratorType::ZOHOSI &&
+           osi2Type == siconos::integrators::IntegratorType::ZOHOSI) {
+    osi1.computeFreeOutput(vertex_inter, this);
+    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
+                             .workVectors)[siconos::integrators::ZeroOrderHoldOSI::OSNSP_RHS];
+    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+  }
+  else if ((osi1Type == siconos::integrators::IntegratorType::MOREAUJEANOSI &&
+            osi2Type == siconos::integrators::IntegratorType::MOREAUJEANOSI)   ||
+           (osi1Type == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI &&
+            osi2Type == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI)) {
     osi1.computeFreeOutput(vertex_inter, this);
     auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
                              .workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
     siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-  // else if ((osi1Type == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI &&
-  //           osi2Type == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI)) {
-  //   osi1.computeFreeOutput(vertex_inter, this);
-  //   auto& osnsp_rhs =
-  //       *(*indexSet->properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
-  //   siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  // }
+  else if ((osi1Type == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI &&
+            osi2Type == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI)) {
+    osi1.computeFreeOutput(vertex_inter, this);
+    auto& osnsp_rhs =
+        *(*indexSet->properties(vertex_inter).workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
+    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+  }
   else if ((osi1Type == siconos::integrators::IntegratorType::LSODAROSI &&
             osi2Type == siconos::integrators::IntegratorType::LSODAROSI)) {
     osi1.computeFreeOutput(vertex_inter, this);
@@ -857,20 +850,20 @@ void siconos::simulation::LinearOSNS::computeqBlock(
                              .workVectors)[siconos::integrators::NewMarkAlphaOSI::OSNSP_RHS];
     siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
-  // else if ((osi1Type == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI &&
-  //           osi2Type == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI)) {
-  //   osi1.computeFreeOutput(vertex_inter, this);
-  //   auto& osnsp_rhs =
-  //       *(*indexSet->properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
-  //   siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  // }
-  // else if ((osi1Type == siconos::integrators::IntegratorType::D1MINUSLINEAROSI &&
-  //           osi2Type == siconos::integrators::IntegratorType::D1MINUSLINEAROSI)) {
-  //   osi1.computeFreeOutput(vertex_inter, this);
-  //   auto& osnsp_rhs =
-  //       *(*indexSet->properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
-  //   siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  // }
+  else if ((osi1Type == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI &&
+            osi2Type == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI)) {
+    osi1.computeFreeOutput(vertex_inter, this);
+    auto& osnsp_rhs =
+        *(*indexSet->properties(vertex_inter).workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
+    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+  }
+  else if ((osi1Type == siconos::integrators::IntegratorType::D1MINUSLINEAROSI &&
+            osi2Type == siconos::integrators::IntegratorType::D1MINUSLINEAROSI)) {
+    osi1.computeFreeOutput(vertex_inter, this);
+    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
+                             .workVectors)[siconos::integrators::D1MinusLinearOSI::OSNSP_RHS];
+    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+  }
   else {
     auto t1 = static_cast<std::underlying_type<siconos::integrators::IntegratorType>::type>(
         osi1Type);

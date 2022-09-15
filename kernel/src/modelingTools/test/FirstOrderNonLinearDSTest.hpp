@@ -33,7 +33,7 @@ class FirstOrderNonLinearDSTest : public CppUnit::TestFixture {
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS1);
-  //CPPUNIT_TEST(testBuildFirstOrderNonLinearDS2);
+  CPPUNIT_TEST(testBuildFirstOrderNonLinearDS2);
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS3);
   CPPUNIT_TEST(testSetX0);
   CPPUNIT_TEST(testSetX0Ptr);
@@ -50,7 +50,7 @@ class FirstOrderNonLinearDSTest : public CppUnit::TestFixture {
   // \todo exception test
 
   void testBuildFirstOrderNonLinearDS1();
-  //void testBuildFirstOrderNonLinearDS2();
+  void testBuildFirstOrderNonLinearDS2();
   void testBuildFirstOrderNonLinearDS3();
   void testSetX0();
   void testSetX0Ptr();

@@ -31,7 +31,8 @@ namespace siconos::fortran {
 
 #include "SiconosFortran.h"
 #include "odepack.h"
-
+#include "hairer.h"
+  
   // using dlsodar = CNAME(dlsodar);
 
 }  // namespace siconos::odepack

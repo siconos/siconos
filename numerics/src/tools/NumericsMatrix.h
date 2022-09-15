@@ -23,14 +23,12 @@
   \brief Structure definition and functions related to matrix storage in Numerics
 */
 
-#include <assert.h>         // for assert
 #include <stdio.h>          // for size_t, FILE, NULL
-#include <stdlib.h>         // for malloc
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
 #include "NM_types.h" // NM_DENSE ...
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
-#include "NumericsDataVersion.h" // Versioning
 #include "NumericsSparseMatrix.h" // for NSM_linear_solver typedef
+#include "NumericsDataVersion.h"
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
 #ifndef __cplusplus
@@ -40,6 +38,7 @@
 #ifdef WITH_OPENSSL
 #include <openssl/sha.h>
 #endif
+
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -983,27 +982,7 @@ extern "C"
    *  \param type expected type
    *  \param M the matrix to check
    */
-    static inline void NM_assert(NM_types type, NumericsMatrix* M)
-  {
-#ifndef NDEBUG
-    assert(M && "NM_assert :: the matrix is NULL");
-    assert(M->storageType == type && "NM_assert :: the matrix has the wrong type");
-    switch(type)
-    {
-      case NM_DENSE:
-        assert(M->matrix0);
-        break;
-      case NM_SPARSE_BLOCK:
-        assert(M->matrix1);
-        break;
-      case NM_SPARSE:
-        assert(M->matrix2);
-        break;
-      default:
-        assert(0 && "NM_assert :: unknown storageType");
-    }
-#endif
-  }
+  void NM_assert(NM_types type, NumericsMatrix* M);
 
   /** Check the matrix (the sparse format for now)
    *

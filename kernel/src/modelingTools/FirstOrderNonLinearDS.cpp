@@ -70,30 +70,30 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
   // dot x  = f(x, z , t) + r
 }
 
-// // Copy constructor
-// siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
-//     const FirstOrderNonLinearDS &FONLDS)
-//     : DynamicalSystem(FONLDS)
-// {
-//   if (FONLDS.M()) _M = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.M()));
-//   if (FONLDS.f()) _f = std::make_shared<siconos::algebra::SiconosVector>(*(FONLDS.f()));
-//   if (FONLDS.jacobianfx())
-//     _jacobianfx = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.jacobianfx()));
-//   if (FONLDS.getPluginF())
-//     _pluginf = std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginF()));
-//   if (FONLDS.getPluginJacxf())
-//     _pluginJacxf =
-//         std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginJacxf()));
-//   if (FONLDS.getPluginM())
-//     _pluginM = std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginM()));
-//   if (FONLDS.invM())
-//     _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.invM()));
+// Copy constructor
+siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
+    const FirstOrderNonLinearDS &FONLDS)
+    : DynamicalSystem(FONLDS)
+{
+  if (FONLDS.M()) _M = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.M()));
+  if (FONLDS.f()) _f = std::make_shared<siconos::algebra::SiconosVector>(*(FONLDS.f()));
+  if (FONLDS.jacobianfx())
+    _jacobianfx = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.jacobianfx()));
+  if (FONLDS.getPluginF())
+    _pluginf = std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginF()));
+  if (FONLDS.getPluginJacxf())
+    _pluginJacxf =
+        std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginJacxf()));
+  if (FONLDS.getPluginM())
+    _pluginM = std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginM()));
+  if (FONLDS.invM())
+    _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.invM()));
 
-//   // Memory stuff to me moved to graph/osi
-//   if (FONLDS.fold())
-//     _fold = std::make_shared<siconos::algebra::SiconosVector>(*(FONLDS.fold()));
-//   _rMemory = FONLDS.rMemory();
-// }
+  // Memory stuff to me moved to graph/osi
+  if (FONLDS.fold())
+    _fold = std::make_shared<siconos::algebra::SiconosVector>(*(FONLDS.fold()));
+  _rMemory = FONLDS.rMemory();
+}
 
 void siconos::modeling::FirstOrderNonLinearDS::_zeroPlugin()
 {

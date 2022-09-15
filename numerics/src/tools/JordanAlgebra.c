@@ -20,6 +20,8 @@
 #include "cblas.h"
 #include "math.h"
 #include "NumericsVector.h"
+#include <stdlib.h> // for exit
+#include <assert.h>
 
 //#define DEBUG_MESSAGES
 #include "siconos_debug.h"

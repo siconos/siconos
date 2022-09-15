@@ -23,9 +23,10 @@
 #include "SiconosException.hpp"
 
 namespace siconos::algebra {
-class SimpleMatrix;
+class SiconosMatrix;
 
 }
+
 namespace siconos::plugins {
 
 /*! \file SubPluggedObject.hpp
@@ -48,10 +49,12 @@ class SubPluggedObject : public PluggedObject {
   /** Number of columns */
   unsigned int _p{0};
 
+  SubPluggedObject() = delete;
+  
  public:
-  /** Default Constructor
-   */
-  SubPluggedObject() = default;
+  // /** Default Constructor
+  //  */
+  // SubPluggedObject() = default;
 
   /** Constructor with the plugin name
    * \param PO a PluggedObject
@@ -60,30 +63,17 @@ class SubPluggedObject : public PluggedObject {
    * \param indx the column index (optional)
    */
   SubPluggedObject(const PluggedObject& PO, const unsigned int n, const unsigned int p,
-                   const unsigned int indx = 0)
-      : _indx(indx), _p(p)
-  {
-    _pluginName = "Sub" + PO.pluginName();
-    _tmpMat = std::make_shared<siconos::algebra::SimpleMatrix>(n, p));
-#if (__GNUG__ && !(__clang__ || __INTEL_COMPILER || __APPLE__) && \
-     (((__GNUC__ > 5) && (__GNUC_MINOR__ > 0))))
-#pragma GCC diagnostic ignored "-Wpmf-conversions"
-    fPtr = (void*)&SubPluggedObject::computeAndExtract;
-    _parentfPtr = PO.fPtr;
-#else
-    THROW_EXCEPTION("SubPluggedObject must be compiled with GCC !");
-#endif
-  };
+                   const unsigned int indx = 0);
 
-  /** Copy constructor
-   * \param SPO a PluggedObject we are going to copy
-   */
-  SubPluggedObject(const SubPluggedObject& SPO)
-      : PluggedObject(SPO), _indx(SPO.getIndex()), _p(SPO.getp())
-  {
-    _parentfPtr = SPO.getParentfPtr();
-    _tmpMat = std::make_shared<siconos::algebra::SimpleMatrix>(SPO.getTmpMat());
-  }
+  // /** Copy constructor
+  //  * \param SPO a PluggedObject we are going to copy
+  //  */
+  // SubPluggedObject(const SubPluggedObject& SPO)
+  //     : PluggedObject(SPO), _indx(SPO.getIndex()), _p(SPO.getp())
+  // {
+  //   _parentfPtr = SPO.getParentfPtr();
+  //   _tmpMat = std::make_shared<siconos::algebra::SimpleMatrix>(SPO.getTmpMat());
+  // }
 
   /** destructor
    */
@@ -96,13 +86,8 @@ class SubPluggedObject : public PluggedObject {
    * \param sizez the size of z
    * \param z a vector used as a parameter
    */
-  void computeAndExtract(double time, unsigned int n, double* M, unsigned int sizez, double* z)
-  {
-    ((matrixPlugin)_parentfPtr)(time, n, _p, &(*_tmpMat)(0, 0), sizez, z);
-    for (unsigned int i = 0; i < n; i++) {
-      M[i] = (*_tmpMat)(i, _indx);
-    }
-  };
+  void computeAndExtract(double time, unsigned int n, double* M, unsigned int sizez,
+                         double* z);
 
   /* Set column index
    * \param newIndx the new column index

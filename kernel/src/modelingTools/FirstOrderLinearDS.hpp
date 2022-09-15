@@ -135,11 +135,11 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
                      std::shared_ptr<siconos::algebra::SiconosMatrix> newA,
                      std::shared_ptr<siconos::algebra::SiconosVector> newB);
 
-  // /** Copy constructor
-  //  *
-  //  *  \param FOLDS the original FirstOrderLinearDS we want to copy
-  //  */
-  // FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS);
+  /** Copy constructor
+   *
+   *  \param FOLDS the original FirstOrderLinearDS we want to copy
+   */
+  FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS);
 
   /** destructor */
   virtual ~FirstOrderLinearDS() noexcept = default;

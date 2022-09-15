@@ -19,6 +19,7 @@
 #include <math.h>    // for fabs
 #include <stdio.h>   // for fprintf, printf, FILE, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
+#include <assert.h>
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */

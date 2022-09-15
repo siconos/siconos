@@ -27,18 +27,14 @@
 #include <iostream>
 // #include <iterator>
 // #include <ranges>
- #include <sstream>
+#include <sstream>
 // #include <string>
 
-
 namespace siconos::tools {
-
-
 
 constexpr auto PBSTR = "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||";
 constexpr auto PBWIDTH = 60;
 
-  
 /** A function to convert any type to std::string*/
 template <class T>
 std::string toString(const T& obj)
@@ -78,7 +74,13 @@ void print(auto const description, std::ranges::range auto const& container)
 }
 
 void progressBar(double percentage);
-  
+
+template <typename T>
+std::string enum_to_string(T value)
+{
+  return std::to_string(static_cast<std::underlying_type<T>::type>(value));
+}
+
 }  // namespace siconos::tools
 
 #endif

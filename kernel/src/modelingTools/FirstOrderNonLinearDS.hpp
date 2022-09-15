@@ -134,7 +134,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   std::shared_ptr<siconos::algebra::SiconosMatrix> _invM{nullptr};
 
   /** default constructor */
-  FirstOrderNonLinearDS() : DynamicalSystem(){};
+  FirstOrderNonLinearDS() = default;
 
   /** Reset the PluggedObjects */
   void _zeroPlugin() override;
@@ -160,14 +160,14 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   FirstOrderNonLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
                         const std::string &fPlugin, const std::string &jacobianfxPlugin);
 
-  // /** Copy constructor
-  //  *
-  //  *  \param FONLDS the FirstOrderNonLinearDS to copy
-  //  */
-  // FirstOrderNonLinearDS(const FirstOrderNonLinearDS &FONLDS);
+  /** Copy constructor
+   *
+   *  \param FONLDS the FirstOrderNonLinearDS to copy
+   */
+  FirstOrderNonLinearDS(const FirstOrderNonLinearDS &FONLDS);
 
   /** destructor */
-  virtual ~FirstOrderNonLinearDS(){};
+  virtual ~FirstOrderNonLinearDS() noexcept = default;
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *

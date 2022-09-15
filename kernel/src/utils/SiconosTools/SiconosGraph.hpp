@@ -31,8 +31,6 @@
 #endif
 
 #include <SiconosConfig.h>
-
-#include <boost/config.hpp>
 #include <boost/version.hpp>
 #if !defined(SICONOS_USE_MAP_FOR_HASH)
 #include <unordered_map>

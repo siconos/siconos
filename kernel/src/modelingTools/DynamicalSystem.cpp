@@ -50,28 +50,27 @@ siconos::modeling::DynamicalSystem::DynamicalSystem(unsigned int dimension) :  _
   _z = std::make_shared<siconos::algebra::SiconosVector>(1);
 }
 
-// Copy constructor. Fp: deleted for the moment, since it's not implemented in all derived classes.
-// siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem &ds)
-//     :  _n(ds.n()), _stepsInMemory(ds.stepsInMemory())
-// {
-//   // The following data should always be initialize
-//   if (ds.x0())
-//     _x0 = std::make_shared<siconos::algebra::SiconosVector>(*(ds.x0()));
-//   if (ds.r())
-//     _r = std::make_shared<siconos::algebra::SiconosVector>(*(ds.r()));
-//   _x.resize(2);
-//   if (ds.x())
-//     _x[0] = std::make_shared<siconos::algebra::SiconosVector>(*(ds.x()));
-//   if (ds.rhs())
-//     _x[1] = std::make_shared<siconos::algebra::SiconosVector>(*(ds.rhs()));
-//   if (ds.jacobianRhsx())
-//     _jacxRhs = std::make_shared<siconos::algebra::SimpleMatrix>(*(ds.jacobianRhsx()));
+siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem &ds)
+    :  _n(ds.n()), _stepsInMemory(ds.stepsInMemory())
+{
+  // The following data should always be initialize
+  if (ds.x0())
+    _x0 = std::make_shared<siconos::algebra::SiconosVector>(*(ds.x0()));
+  if (ds.r())
+    _r = std::make_shared<siconos::algebra::SiconosVector>(*(ds.r()));
+  _x.resize(2);
+  if (ds.x())
+    _x[0] = std::make_shared<siconos::algebra::SiconosVector>(*(ds.x()));
+  if (ds.rhs())
+    _x[1] = std::make_shared<siconos::algebra::SiconosVector>(*(ds.rhs()));
+  if (ds.jacobianRhsx())
+    _jacxRhs = std::make_shared<siconos::algebra::SimpleMatrix>(*(ds.jacobianRhsx()));
 
-//   _z = std::make_shared<siconos::algebra::SiconosVector>(*(ds.z()));
+  _z = std::make_shared<siconos::algebra::SiconosVector>(*(ds.z()));
 
-//   _xMemory = ds.xMemory();
-//   _stepsInMemory = ds.stepsInMemory();
-// }
+  _xMemory = ds.xMemory();
+  _stepsInMemory = ds.stepsInMemory();
+}
 
 void siconos::modeling::DynamicalSystem::resetToInitialState()
 {

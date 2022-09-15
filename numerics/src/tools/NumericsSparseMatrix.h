@@ -28,7 +28,6 @@
 #include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
 #include "NumericsFwd.h"    // for NumericsSparseMatrix, NSM_linear_solver_p...
 #include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
-
 #include "NumericsDataVersion.h"
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
@@ -46,8 +45,7 @@ typedef enum { SN_LINALG_UNKNOWN, SN_LINALG_MKL } linalg_data_id;
 extern "C"
 {
 #endif
-
-
+ 
   /** \enum NSM_linear_solver NumericsSparseMatrix.h
    * id for linear algebra solvers */
   typedef enum { NSM_CSPARSE, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT, NSM_HSL } NSM_linear_solver;

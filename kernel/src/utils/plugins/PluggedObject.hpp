@@ -91,7 +91,12 @@ class PluggedObject {
   /** Plugin name, should be of the form "fileName:functionName" */
   std::string _pluginName{"unplugged"};
 
+  PluggedObject(const PluggedObject&& PO) = delete;
+  PluggedObject operator=(const PluggedObject& PO) = delete;
+  PluggedObject operator=(const PluggedObject&& PO) = delete;
+
  public:
+
   /** plug-in */
   void* fPtr{nullptr};
 
@@ -117,7 +122,7 @@ class PluggedObject {
 
   /** destructor
    */
-  virtual ~PluggedObject();
+  virtual ~PluggedObject() noexcept;
 
   /** Connect a function to fPtr
    \param pluginPath name of the file where the function is defined (WITH extension)

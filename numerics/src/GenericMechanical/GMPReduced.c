@@ -457,7 +457,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
 #endif
   free(Rreduced);
   free(Vreduced);
-  genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
+  genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
   free(Qreduced);
   free(reducedProb);
 }
@@ -615,7 +615,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction, d
 #endif
   free(Rreduced);
   free(Vreduced);
-  genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
+  genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
   free(Me);
   free(Mi);
   free(Qe);

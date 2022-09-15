@@ -24,6 +24,7 @@
 #include "JordanAlgebra.h"
 #include "NumericsVector.h"
 #include "math.h"
+#include <stdlib.h>
 
 static int Arrow_repr_3d_test()
 {

@@ -104,34 +104,33 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
 }
 
-// // copy
-// void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
-// {
-//   std::cout << "--> Test: constructor 1." <<std::endl;
-//   std::shared_ptr<FirstOrderNonLinearDS> ds(new FirstOrderNonLinearDS(*source));
-//   auto source = std::make_shared<FirstOrderNonLinearDS>(x0);
-//   auto ds = std::make_shared<FirstOrderNonLinearDS>(x0);
+// copy
+void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
+{
+  std::cout << "--> Test: constructor 1." <<std::endl;
+  auto source = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(x0);
+  auto ds = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*source);
 
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", Type::value(*ds) == Type::FirstOrderNonLinearDS, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->n() == 3, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->getX0() == *x0, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->f() == nullptr, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianfx() == nullptr, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->M() == nullptr, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->invM() == nullptr, true);
-//   SiconosVector zero(3);
-//   double time = 1.5;
-//   ds->update(time);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianRhsx() == nullptr, true);
 
-//   ds->initRhs(time);
-//   SimpleMatrix m0(3,3);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->jacobianRhsx()) == m0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->n() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *ds->x0() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->f() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianfx() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->M() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->invM() == nullptr, true);
+  siconos::algebra::SiconosVector zero(3);
+  double time = 1.5;
+  ds->update(time);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->jacobianRhsx() == nullptr, true);
 
-//   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
-// }
+  ds->initRhs(time);
+  siconos::algebra::SimpleMatrix m0(3,3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->jacobianRhsx()) == m0, true);
+
+  std::cout << "--> Constructor 2 test ended with success." <<std::endl;
+}
 
 
 // x0 + plugins for f and its gradient

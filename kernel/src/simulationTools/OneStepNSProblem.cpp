@@ -17,25 +17,25 @@
  */
 #include "OneStepNSProblem.hpp"
 
+#include "EulerMoreauOSI.hpp"
 #include "Interaction.hpp"
+#include "LsodarOSI.hpp"
+#include "MoreauJeanOSI.hpp"
+#include "NewMarkAlphaOSI.hpp"
 #include "OneStepIntegrator.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
-// #include "EulerMoreauOSI.hpp"
-#include "MoreauJeanOSI.hpp"
-#include "LsodarOSI.hpp"
-#include "NewMarkAlphaOSI.hpp"
-// #include "MoreauJeanBilbaoOSI.hpp"
-// #include "SchatzmanPaoliOSI.hpp"
+#include "MoreauJeanBilbaoOSI.hpp"
+#include "SchatzmanPaoliOSI.hpp"
 #include "LagrangianDS.hpp"
-// #include "NewtonEulerDS.hpp"
-// #include "ZeroOrderHoldOSI.hpp"
+#include "NewtonEulerDS.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NumericsSolversNamespace.h"  // for SolverOptions tools
 #include "NumericsToolsNamespace.h"    // for verbose mode
-
+#include "Tools.hpp"                   // enum_to_string
+#include "ZeroOrderHoldOSI.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -366,30 +366,22 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
     block = (static_cast<siconos::integrators::MoreauJeanOSI&>(Osi))
                 .W(ds);  // get its W matrix ( pointer link!)
   }
-  // WIP TMP
-  // else if(osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI)
-  // {
-  //   block =
-  //   (static_cast<siconos::integrators::MoreauJeanBilbaoOSI&>(Osi)).iteration_matrix(ds);  //
-  //   get its W matrix ( pointer link!)
-  // }
-  // else if(osiType == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI)
-  // {
-  //   block = (static_cast<siconos::integrators::SchatzmanPaoliOSI&>(Osi)).W(ds);  // get its
-  //   W matrix ( pointer link!)
-  // }
-  // else if(osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI)
-  // {
-  //   block = (static_cast<siconos::integrators::EulerMoreauOSI&>(Osi)).W(ds); // get its W
-  //   matrix ( pointer link!)
-  // }
-  else if (osiType ==
-           siconos::integrators::IntegratorType::LSODAROSI)  // Warning: LagrangianDS only at
-                                                             // the time !!!
+  else if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI) {
+    block =
+        (static_cast<siconos::integrators::MoreauJeanBilbaoOSI&>(Osi)).iteration_matrix(ds);
+  }
+  else if (osiType == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI) {
+    block = (static_cast<siconos::integrators::SchatzmanPaoliOSI&>(Osi)).W(ds);
+  }
+  else if (osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI) {
+    block = (static_cast<siconos::integrators::EulerMoreauOSI&>(Osi)).W(ds);
+  }
+  else if (osiType == siconos::integrators::IntegratorType::LSODAROSI)
+  // Warning: LagrangianDS only at
+  // the time !!!
   {
     // get lu-factorized mass
     if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      block = (std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds))->inverseMass();
       block = lds->inverseMass();
     }
     else
@@ -401,9 +393,7 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
     if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto allOSNS = Osi.simulation()->oneStepNSProblems();
       // If LCP at acceleration level
-      if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this) {
-        // block =
-        // (std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds))->inverseMass();
+      if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this) {
         block = lds->inverseMass();
       }
       else  // It LCP at position level
@@ -417,57 +407,52 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
           "NewmarkAlphaOSI only with LagrangianDS systems.");
     }
   }  // End Newmark OSI
-  // else if(osiType == siconos::integrators::IntegratorType::D1MINUSLINEAROSI)
-  // {
-  //   DEBUG_PRINT("siconos::simulation::OneStepNSProblem::getOSIMatrix  for osiType
-  //   siconos::integrators::IntegratorType::D1MINUSLINEAR\n");
-  //   /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all
-  //   OSNSP*/ if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-  //   {
-  //     // std::shared_ptr<siconos::algebra::siconos::algebra::SimpleMatrix> Mold;
-  //     // Mold =
-  //     std::make_shared<siconos::algebra::SimpleMatrix>(*(std::static_pointer_cast<LagrangianDS>(ds))->mass());
-  //     // DEBUG_EXPR(Mold->display(););
-  //     // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isFactorized() = "<<
-  //     Mold->isFactorized() << std::endl;);
-  //     //(std::static_pointer_cast<LagrangianDS>(ds))->computeMass();
-  //     auto Mass = ((std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds))->mass())
-  //     ; DEBUG_EXPR(Mass->display();); DEBUG_EXPR_WE(std::cout <<  std::boolalpha << "
-  //     Mass->isFactorized() = "<< Mass->isFactorized() << std::endl;);
+  else if (osiType == siconos::integrators::IntegratorType::D1MINUSLINEAROSI) {
+    DEBUG_PRINT(
+        "siconos::simulation::OneStepNSProblem::getOSIMatrix  for osiType "
+        "siconos::integrators::IntegratorType::D1MINUSLINEAR\n");
+    /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all
+    OSNSP*/
+    if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      // SP::SimpleMatrix Mold;
+      // Mold.reset(new SimpleMatrix(*(std::static_pointer_cast<LagrangianDS>(ds))->mass()));
+      // DEBUG_EXPR(Mold->display(););
+      // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isFactorized() = "<<
+      // Mold->isFactorized() << std::endl;);
+      //(std::static_pointer_cast<LagrangianDS>(ds))->computeMass();
+      auto Mass = ((std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds))->mass());
+      DEBUG_EXPR(Mass->display(););
+      DEBUG_EXPR_WE(std::cout << std::boolalpha
+                              << " Mass->isFactorized() = " << Mass->isFactorized() << "\n";);
 
-  //     //DEBUG_EXPR(std::cout << (*Mass-*Mold).normInf() << std::endl;);
-  //     /*Copy of the current mass matrix. */
-  //     block = std::make_shared<siconos::algebra::SimpleMatrix>(*Mass);
-  //   }
-  //   else if(dsType == Type::NewtonEulerDS)
-  //   {
-  //     auto d = std::static_pointer_cast<siconos::modeling::NewtonEulerDS> (ds);
-  //     //   d->computeMass();
-  //     //   d->mass()->resetFactorizationFlags();
-  //     DEBUG_EXPR(d->mass()->display(););
-  //     block = std::make_shared<siconos::algebra::SimpleMatrix>(*(d->mass()));
-  //   }
-  //   else
-  //     THROW_EXCEPTION("siconos::simulation::OneStepNSProblem::getOSIMatrix not yet
-  //     implemented for D1MinusLinearOSI integrator with dynamical system of type " +
-  //     std::to_string(dsType));
-  // }
-  // // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
-  // else if(osiType == siconos::integrators::IntegratorType::ZOHOSI)
-  // {
-  //   if(!block)
-  //     block =
-  //     std::make_shared<siconos::algebra::SimpleMatrix>((static_cast<siconos::integrators::ZeroOrderHoldOSI&>(Osi)).Ad(ds));
-  //   else
-  //     *block = (static_cast<siconos::integrators::ZeroOrderHoldOSI&>(Osi)).Ad(ds);
-  // }
+      // DEBUG_EXPR(std::cout << (*Mass-*Mold).normInf() << std::endl;);
+      /*Copy of the current mass matrix. */
+      block = std::make_shared<siconos::algebra::SimpleMatrix>(*Mass);
+    }
+    else if (auto d = dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      //   d->computeMass();
+      //   d->mass()->resetFactorizationFlags();
+      DEBUG_EXPR(d->mass()->display(););
+      block = std::make_shared<siconos::algebra::SimpleMatrix>(*(d->mass()));
+    }
+    else
+      THROW_EXCEPTION(
+          "siconos::simulation::OneStepNS::getOSIMatrix for D1Minus, only implemented for "
+          "Lagrangian or NewtonEuler");
+  }
+  // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
+  else if (osiType == siconos::integrators::IntegratorType::ZOHOSI) {
+    if (!block)
+      block = std::make_shared<siconos::algebra::SimpleMatrix>(
+          (static_cast<siconos::integrators::ZeroOrderHoldOSI&>(Osi)).Ad(ds));
+    else
+      *block = (static_cast<siconos::integrators::ZeroOrderHoldOSI&>(Osi)).Ad(ds);
+  }
   else
     THROW_EXCEPTION(
         "siconos::simulation::OneStepNSProblem::getOSIMatrix not yet implemented for "
         "Integrator of type " +
-        std::to_string(
-            static_cast<std::underlying_type<siconos::integrators::IntegratorType>::type>(
-                osiType)));
+        siconos::tools::enum_to_string(osiType));
   return block;
 }
 

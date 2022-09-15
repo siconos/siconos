@@ -47,7 +47,7 @@ This should be used only by final user.
 // #include "GlobalRollingFrictionContact.hpp"
 
 #include "LsodarOSI.hpp"
-// #include "Hem5OSI.hpp"
+#include "Hem5OSI.hpp"
 #include "MoreauJeanOSI.hpp"
 // #include "MoreauJeanBilbaoOSI.hpp"
 // #include "EulerMoreauOSI.hpp"

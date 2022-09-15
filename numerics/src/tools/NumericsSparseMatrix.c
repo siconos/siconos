@@ -17,6 +17,7 @@
 */
 #include "CSparseMatrix_internal.h"     // for CSparseMatrix, CS_INT, cs_dl_spfree
 #include "NumericsSparseMatrix.h"
+#include "NumericsDataVersion.h"
 #include <assert.h>            // for assert
 #ifndef __cplusplus
 #include <stdbool.h>           // for bool, false, true

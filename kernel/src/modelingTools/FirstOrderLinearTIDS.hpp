@@ -81,11 +81,11 @@ class FirstOrderLinearTIDS : public FirstOrderLinearDS {
                        std::shared_ptr<siconos::algebra::SiconosVector> b)
       : FirstOrderLinearDS(x0, A, b){};
 
-  // /** Copy constructor
-  //  *
-  //  *  \param FOLTIDS the FirstOrderLinearTIDS to copy
-  //  */
-  // FirstOrderLinearTIDS(const FirstOrderLinearTIDS &FOLTIDS) : FirstOrderLinearDS(FOLTIDS){};
+  /** Copy constructor
+   *
+   *  \param FOLTIDS the FirstOrderLinearTIDS to copy
+   */
+  FirstOrderLinearTIDS(const FirstOrderLinearTIDS &FOLTIDS) : FirstOrderLinearDS(FOLTIDS){};
 
   /** destructor */
   ~FirstOrderLinearTIDS() noexcept = default;

@@ -196,7 +196,7 @@ siconos::plugins::PluggedObject::PluggedObject(const PluggedObject& PO)
     setComputeFunction();
 }
 
-siconos::plugins::PluggedObject::~PluggedObject()
+siconos::plugins::PluggedObject::~PluggedObject() noexcept
 {
   if ((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
     siconos::plugins::closePlugin(_pluginName);

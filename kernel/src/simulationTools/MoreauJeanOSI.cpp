@@ -18,45 +18,36 @@
 #include "MoreauJeanOSI.hpp"
 
 #include "BlockVector.hpp"
+#include "BoundaryCondition.hpp"
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
+#include "LagrangianCompliantLinearTIR.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianLinearDiagonalDS.hpp"
+#include "LagrangianLinearTIDS.hpp"
+#include "LagrangianRheonomousR.hpp"
+#include "NewtonEulerDS.hpp"
+#include "NewtonImpactFrictionNSL.hpp"         // for nslaw visitor
+#include "NewtonImpactNSL.hpp"                 // for nslaw visitor
+#include "NewtonImpactRollingFrictionNSL.hpp"  // for nslaw visitor
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
+#include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and compositionLawLieGroup
 #include "SiconosAlgebraProd.hpp"  // for prod, subprod ...
 #include "SiconosAlgebraScal.hpp"  // for prod, subprod ...
 #include "SiconosException.hpp"
+#include "SiconosPointers.hpp"  // For createSPtr
 #include "SiconosVector.hpp"
 #include "SiconosVectorFriends.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
-#include "BoundaryCondition.hpp"
-#include "LagrangianLinearDiagonalDS.hpp"
-#include "LagrangianLinearTIDS.hpp"
-#include "NewtonEulerDS.hpp"
-#include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and compositionLawLieGroup
-#include "LagrangianCompliantLinearTIR.hpp"
-#include "LagrangianRheonomousR.hpp"
-#include "NewtonImpactNSL.hpp"  // for nslaw visitor
-#include "NewtonImpactFrictionNSL.hpp"         // for nslaw visitor
-#include "NewtonImpactRollingFrictionNSL.hpp"  // for nslaw visitor
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 //#define DEBUG_BEGIN_END_ONLY
 //#define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
-
-/// for non-owned shared pointers (passing const SiconosVector into
-/// functions that take std::shared_ptr<siconos::algebra::SiconosVector> without copy --
-/// warning const abuse!)
-static void null_deleter(const siconos::algebra::SiconosVector *) {}
-template <typename T>
-static std::shared_ptr<T> ptr(const T &a)
-{
-  return std::shared_ptr<siconos::algebra::SiconosVector>(&*(T *)&a, null_deleter);
-}
 
 siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFreeOutput(
     siconos::simulation::OneStepNSProblem &p, siconos::modeling::Interaction &inter,
@@ -134,8 +125,8 @@ const siconos::algebra::SimpleMatrix siconos::integrators::MoreauJeanOSI::getW(
   assert(ds && "siconos::integrators::MoreauJeanOSI::getW(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
          "siconos::integrators::MoreauJeanOSI::getW(ds): W[ds] == nullptr.");
-  return *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
-              .W;  // Copy !!
+  // Copy !!
+  return *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
 std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::MoreauJeanOSI::W(
@@ -696,9 +687,11 @@ void siconos::integrators::MoreauJeanOSI::computeInitialNewtonState()
         // We want to be explicit on this function since we do not compute their
         // Jacobians.
         auto &d = static_cast<siconos::modeling::NewtonEulerDS &>(ds);
-        const auto &qold = d.qMemory().getSiconosVector(0);
+        auto qold = d.qMemory().getSiconosVector(0);
+        auto pqold = siconos::pointers::createSPtr<siconos::algebra::SiconosVector>(qold);
+
         // std::shared_ptr<siconos::algebra::SiconosVector> q = d->q();
-        siconos::modeling::computeT(ptr(qold), d.T());
+        siconos::modeling::computeT(pqold, d.T());
       }
     }
     // The goal is to converge in one iteration if the system is almost linear

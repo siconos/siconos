@@ -20,7 +20,6 @@
 #include <assert.h>                        // for assert
 #include <stdlib.h>                        // for malloc, free, exit, EXIT_F...
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "GenericMechanical_Solvers.h"     // for NUMERICS_GMP_FREE_GMP, NUM...
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix, NM_new
 #include "RelayProblem.h"                  // for RelayProblem
@@ -77,7 +76,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int
     pGMP->lastListElem = pElem->prevProblem;
     free(pElem);
   }
-  if(level & NUMERICS_GMP_FREE_MATRIX)
+  if(level == GMP_FREE_MATRIX)
   {
     assert(pGMP->M);
     NM_types storageType = pGMP->M->storageType;
@@ -89,9 +88,10 @@ void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int
     free(pGMP->M);
   }
 
-  if(level & NUMERICS_GMP_FREE_GMP)
+  if(level == GMP_FREE_GMP)
     free(pGMP);
 }
+
 void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
 {
   listNumericsProblem * newProblem = (listNumericsProblem*) malloc(sizeof(listNumericsProblem));

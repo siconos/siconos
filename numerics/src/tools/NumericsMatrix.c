@@ -5055,6 +5055,28 @@ void NM_setSparseSolver(NumericsMatrix* A, NSM_linear_solver solver_id)
 }
 
 
+//  assert that a NumericsMatrix has the right structure given its type
+void NM_assert(NM_types type, NumericsMatrix* M)
+{
+#ifndef NDEBUG
+    assert(M && "NM_assert :: the matrix is NULL");
+    assert(M->storageType == type && "NM_assert :: the matrix has the wrong type");
+    switch(type)
+    {
+      case NM_DENSE:
+        assert(M->matrix0);
+        break;
+      case NM_SPARSE_BLOCK:
+        assert(M->matrix1);
+        break;
+      case NM_SPARSE:
+        assert(M->matrix2);
+        break;
+      default:
+        assert(0 && "NM_assert :: unknown storageType");
+    }
+#endif
+}
 
 int NM_check(const NumericsMatrix* const A)
 {

@@ -86,22 +86,22 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
   _b = newB;
 }
 
-// // Copy constructor
-// siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS)
-//     : FirstOrderNonLinearDS(FOLDS)
-// {
-//   _zeroPlugin();
-//   if (FOLDS.A()) _A = std::make_shared<siconos::algebra::SimpleMatrix>(*(FOLDS.A()));
-//   if (FOLDS.b()) _b = std::make_shared<siconos::algebra::SiconosVector>(*(FOLDS.b()));
+// Copy constructor
+siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS)
+    : FirstOrderNonLinearDS(FOLDS)
+{
+  _zeroPlugin();
+  if (FOLDS.A()) _A = std::make_shared<siconos::algebra::SimpleMatrix>(*(FOLDS.A()));
+  if (FOLDS.b()) _b = std::make_shared<siconos::algebra::SiconosVector>(*(FOLDS.b()));
 
-//   _hasConstantA = FOLDS.hasConstantA();
-//   _hasConstantB = FOLDS.hasConstantB();
+  _hasConstantA = FOLDS.hasConstantA();
+  _hasConstantB = FOLDS.hasConstantB();
 
-//   if (Type::value(FOLDS) == Type::FirstOrderLinearDS) {
-//     _pluginA = std::make_shared<siconos::plugins::PluggedObject>(*(FOLDS.getPluginA()));
-//     _pluginb = std::make_shared<siconos::plugins::PluggedObject>(*(FOLDS.getPluginB()));
-//   }
-// }
+  if (not _hasConstantA)
+    _pluginA = std::make_shared<siconos::plugins::PluggedObject>(*(FOLDS.getPluginA()));
+  if (not _hasConstantB)
+    _pluginb = std::make_shared<siconos::plugins::PluggedObject>(*(FOLDS.getPluginB()));
+}
 
 void siconos::modeling::FirstOrderLinearDS::initRhs(double time)
 {
