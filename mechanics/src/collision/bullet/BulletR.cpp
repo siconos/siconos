@@ -49,6 +49,8 @@
 
 #include "BulletSiconosCommon.hpp"
 
+#include "BodyShapeRecord.hpp"
+
 BulletR::BulletR()
   : ContactR()
 {
@@ -112,19 +114,38 @@ void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& m
   // Get new normal
   if(ds2)
   {
+
+
     btQuaternion qn(point.m_normalWorldOnB.x(),
                     point.m_normalWorldOnB.y(),
                     point.m_normalWorldOnB.z(), 0);
+
+    // get world transform of the body 1 (corresponds to Body B)
     btQuaternion qb1 = manifold.getBody1()->getWorldTransform().getRotation();
+
     // un-rotate normal into body1 frame
     qn = qb1.inverse() * qn * qb1;
+
+    // Apply offset
+    if (bodyShapeRecordB->contactor->offset) // VA: Are we sure that is is always bodyShapeRecordB->contactor->offset ?
+    {
+      const SiconosVector& offset   = *bodyShapeRecordB->contactor->offset;
+      btQuaternion roffset(offset(4), offset(5), offset(6), offset(3));
+      qn = roffset* qn * roffset.inverse();
+    }
+
     vn(0) = qn.x();
     vn(1) = qn.y();
     vn(2) = qn.z();
     vn = vn/vn.norm2();
+
+
   }
   else
     copyBtVector3(point.m_normalWorldOnB, vn);
+
+
+
 
   ContactR::updateContactPoints(va, vb, vn*(flip?-1:1));
 }

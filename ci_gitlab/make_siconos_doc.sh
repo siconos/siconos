@@ -22,6 +22,6 @@
 
 mkdir $CI_PROJECT_DIR/build
 cd $CI_PROJECT_DIR/build
-cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$user_file -DWITH_GIT=ON
+cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$user_file -DWITH_GIT=ON -DCMAKE_INSTALL_PREFIX=/usr/local
 make -j 4
 make doc -j 4

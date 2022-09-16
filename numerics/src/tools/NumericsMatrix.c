@@ -2881,7 +2881,18 @@ NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)
 
 CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
+  assert(A);
+
+  if(numericsSparseMatrix(A)->triplet && (NM_max_version(A) >
+                                          NSM_version(numericsSparseMatrix(A),
+                                                      NSM_TRIPLET)))
+  {
+    NM_clearTriplet(A);
+  }
+
   if(!numericsSparseMatrix(A)->triplet)
+//    ||
+//     NSM_version(numericsSparseMatrix(A), NSM_TRIPLET) < NSM_max_version(numericsSparseMatrix(A)))
   {
     switch(A->storageType)
     {
@@ -2996,6 +3007,16 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 
 CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
 {
+  assert(A);
+
+  if(numericsSparseMatrix(A)->half_triplet &&
+     (NM_max_version(A) >
+      NSM_version(numericsSparseMatrix(A),
+                  NSM_HALF_TRIPLET)))
+  {
+    NM_clearHalfTriplet(A);
+  }
+
   if(!numericsSparseMatrix(A)->half_triplet)
   {
     switch(A->storageType)
@@ -3113,6 +3134,13 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
   DEBUG_BEGIN("NM_csc(NumericsMatrix *A)\n");
   assert(A);
 
+  if(numericsSparseMatrix(A)->csc && (NM_max_version(A) >
+                                      NSM_version(numericsSparseMatrix(A),
+                                                  NSM_CSC)))
+  {
+    NM_clearCSC(A);
+  }
+
   if(!numericsSparseMatrix(A)->csc)
   {
     assert(A->matrix2);
@@ -3183,6 +3211,13 @@ CSparseMatrix* NM_csc_trans(NumericsMatrix* A)
 CSparseMatrix* NM_csr(NumericsMatrix *A)
 {
   assert(A);
+
+  if(numericsSparseMatrix(A)->csr && (NM_max_version(A) >
+                                      NSM_version(numericsSparseMatrix(A),
+                                                  NSM_CSR)))
+  {
+    NM_clearCSR(A);
+  }
 
   if(!numericsSparseMatrix(A)->csr)
   {

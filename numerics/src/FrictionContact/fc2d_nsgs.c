@@ -395,7 +395,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
   local_problem->M->storageType = NM_DENSE;
   local_problem->M->size0=2;
   local_problem->M->size1=2;
-  
+
   local_problem->q = (double*)malloc(2 * sizeof(double));
 
   double localreaction[2];
@@ -429,6 +429,11 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
           if (freeze_contacts[i] >0)
             number_of_freezed_contact++;
         }
+        if (number_of_freezed_contact >= nc-1)
+        {
+          //printf("number of freezed contact too large\n");
+          for(unsigned int c = 0 ; c < nc ; ++c)  freeze_contacts[c] =0;
+        }
       }
       for(unsigned int pos = 0, contact = 0; contact < nc; ++contact, ++pos, ++pos)
       {
@@ -460,16 +465,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
         if ( (relative_convergence_criteria ||  small_reaction_criteria) && iter >=10)
         {
           /* we  freeze the contact for n iterations*/
-          if (number_of_freezed_contact < nc-1)
-          {
-            number_of_freezed_contact++;
             freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
-          }
-          else
-          {
-            numerics_printf_verbose(2,"Number of freezed contacts too large w.r.t number of contact. we defreeze all contacts\n");
-            for(unsigned int c = 0 ; c < nc ; ++c)  freeze_contacts[c] =0;
-          }
           DEBUG_EXPR
             (
               printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",

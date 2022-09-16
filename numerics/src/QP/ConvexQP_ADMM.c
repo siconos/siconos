@@ -266,7 +266,8 @@ void convexQP_ADMM(ConvexQP* problem,
       }
       else
       {
-        Atrans = NM_transpose(A);
+	if (Atrans) NM_free(Atrans);
+	Atrans = NM_transpose(A);
         NM_gemm(rho, Atrans, A, 1.0, W);
       }
       DEBUG_PRINT("M + rho A^T A: ");
@@ -556,16 +557,16 @@ void convexQP_ADMM(ConvexQP* problem,
     convexQP_ADMM_free(problem,options);
   }
 
-  NM_clear(W);
+  NM_free(W);
   if(AisIdentity)
   {
-    NM_clear(A);
+    NM_free(A);
     free(b);
   }
   else
   {
     if(Atrans)
-      NM_clear(Atrans);
+      NM_free(Atrans);
   }
 
 

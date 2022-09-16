@@ -691,6 +691,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
    * common cases to avoid checking booleans on every iteration. **/
   else
   {
+    /* verbose=1; */
     while((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
@@ -698,6 +699,24 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
       double light_error_2 = 0.0;
       fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
+      unsigned int number_of_freezed_contact=0;
+      double tmp_criteria1 = tolerance*tolerance*100*100;
+      double tmp_criteria2 = *norm_r* *norm_r/(nc*nc*1000);
+
+      if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
+      {
+        for(unsigned int i = 0 ; i < nc ; ++i)
+        {
+          if (freeze_contacts[i] >0)
+            number_of_freezed_contact++;
+        }
+        if (number_of_freezed_contact >= nc-1)
+        {
+          //printf("number of freezed contact too large\n");
+          for(unsigned int c = 0 ; c < nc ; ++c)  freeze_contacts[c] =0;
+        }
+
+      }
       for(unsigned int i = 0 ; i < nc ; ++i)
       {
         if(iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE
@@ -740,19 +759,26 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
         if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
         {
-          if ((light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10)
-               || squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc*1000)))
-              && iter >=10)
+          double  squared_norm_localreaction = squared_norm(localreaction);
+          int relative_convergence_criteria = light_error_2<= tmp_criteria1  *squared_norm_localreaction ;
+          int small_reaction_criteria = squared_norm_localreaction <=  tmp_criteria2;
+
+          if ( (relative_convergence_criteria ||  small_reaction_criteria) && iter >=10)
+          /* if ((light_error_2 *squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) */
+          /*      || squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc*1000))) */
+          /*     && iter >=10) */
           {
+
             /* we  freeze the contact for n iterations*/
             freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
 
             DEBUG_EXPR
-              (printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e\n",
-                      light_error_2*squared_norm(localreaction), tolerance*tolerance/(nc*nc*10));
-               printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc))/1000. ==> %e <= %e\n",
-                      squared_norm(localreaction) ,  (*norm_r* *norm_r/(nc*nc))/1000.);
-               printf("Contact % i is freezed for %i steps\n", contact,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
+              (
+                printf("first criteria : light_error_2*squared_norm(localreaction) <= tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
+                     light_error_2*squared_norm(localreaction), tolerance*tolerance/(nc*nc*10), relative_convergence_criteria );
+                printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
+                       squared_norm(localreaction) ,  *norm_r* *norm_r/(nc*nc*1000), small_reaction_criteria);
+                printf("Contact % i is freezed for %i steps\n", contact,  iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]);
                 );
           }
         }
@@ -767,6 +793,18 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
 
       }
+
+      /* DEBUG_EXPR( */
+      /*   if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0) */
+      /*   { */
+      /*     int frozen_contact=0; */
+      /*     for(unsigned int ii = 0 ; ii < nc ; ++ii) if (freeze_contacts[ii] >0) frozen_contact++; */
+      /*     numerics_printf_verbose(1,"number of frozen contacts %i at iter : %i", frozen_contact, iter ); */
+      /*   } */
+      /*   ); */
+
+
+
 
       if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
       {
@@ -804,12 +842,12 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
       /*   int frozen_contact=0; */
       /*   for(unsigned int i = 0 ; i < nc ; ++i) */
       /*   { */
-      /*     if (freeze_contacts[contact] >0) */
+      /*     if (freeze_contacts[i] >0) */
       /*     { */
       /*       frozen_contact++; */
       /*     } */
       /*   } */
-      /*   printf("number of frozen contacts %i at iter : %i\n", frozen_contact, iter ); */
+      /*   printf("number of frozen contacts %i at iter : %i over number of contacts: %i\n", frozen_contact, iter, nc ); */
       /* } */
     }
   }
