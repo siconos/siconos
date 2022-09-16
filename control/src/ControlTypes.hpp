@@ -14,11 +14,41 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include "SensorEvent.hpp"
-#include "Sensor.hpp"
+ */
 
-void siconos::control::SensorEvent::process(siconos::simulation::Simulation& sim)
-{
-  _sensor->capture();
-}
+/*! \file ControlTypes.hpp
+  \brief Enum related to the control toolbox.  */
+
+#ifndef ControlType_H
+#define ControlType_H
+
+namespace siconos::control {
+
+/** Actuator types */
+
+enum class ActuatorType {
+
+  PID = 100,
+  LINEAR_SMC = 101,
+  EXPLICIT_LINEAR_SMC = 103,
+  LINEAR_SMC_OT2 = 104,
+  LINEAR_SMC_IMPROVED = 105,
+  TWISTING = 106,
+  REGULAR_TWISTING = 107,
+  EXPLICIT_TWISTING = 108,
+};
+
+/** Sensor types */
+enum class SensorType {
+  LINEAR_SENSOR = 100,
+};
+
+/** Observer types */
+enum class ObserverType {
+  LUENBERGER = 100,
+  SLIDING_REDUCED_ORDER = 101,
+};
+
+}  // namespace siconos::control
+
+#endif

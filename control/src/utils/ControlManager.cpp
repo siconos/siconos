@@ -89,64 +89,64 @@ void ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)
   DEBUG_END("ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)\n");
 }
 
-SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds)
+std::shared_ptr<Sensor> ControlManager::addSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds)
 {
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  SP::Sensor s = (* (_allSensors.insert(regSensor.instantiate(type, ds))).first);
+  auto s = (* (_allSensors.insert(regSensor.instantiate(type, ds))).first);
   linkSensorSimulation(s, td);
   return s;
 }
 
-SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds, const NonSmoothDynamicalSystem& nsds)
+std::shared_ptr<Sensor> ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds, const NonSmoothDynamicalSystem& nsds)
 {
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  SP::Sensor s = *(_allSensors.insert(regSensor.instantiate(type, ds))).first;
+  auto s = *(_allSensors.insert(regSensor.instantiate(type, ds))).first;
   linkSensorSimulation(s, td);
   s->initialize(nsds);
   return s;
 }
 
-SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor)
+std::shared_ptr<Actuator> ControlManager::addActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor)
 {
   if(!sensor)
     THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  SP::Actuator act = (* (_allActuators.insert(regActuator.instantiate(type, sensor))).first);
+  auto act = (* (_allActuators.insert(regActuator.instantiate(type, sensor))).first);
   linkActuatorSimulation(act, td);
   return act;
 }
 
-SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const NonSmoothDynamicalSystem& nsds)
+std::shared_ptr<Actuator> ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const NonSmoothDynamicalSystem& nsds)
 {
   if(!sensor)
     THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  SP::Actuator act = *(_allActuators.insert(regActuator.instantiate(type, sensor))).first;
+  auto act = *(_allActuators.insert(regActuator.instantiate(type, sensor))).first;
   linkActuatorSimulation(act, td);
   act->initialize(nsds,*_sim);
   return act;
 }
 
-SP::Observer ControlManager::addObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0)
+std::shared_ptr<Observer> ControlManager::addObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0)
 {
   if(!sensor)
     THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
   ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
-  SP::Observer obs = (* (_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first);
+  auto obs = (* (_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first);
   linkObserverSimulation(obs, td);
   return obs;
 }
 
-SP::Observer ControlManager::addAndRecordObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0, const NonSmoothDynamicalSystem& nsds)
+std::shared_ptr<Observer> ControlManager::addAndRecordObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0, const NonSmoothDynamicalSystem& nsds)
 {
   ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
-  SP::Observer obs = *(_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first;
+  auto obs = *(_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first;
   linkObserverSimulation(obs, td);
   obs->initialize(nsds,*_sim);
   return obs;
 }
 
-void ControlManager::addSensorPtr(SP::Sensor s, SP::TimeDiscretisation td)
+void ControlManager::addSensorPtr(std::shared_ptr<Sensor> s, SP::TimeDiscretisation td)
 {
   if(!s)
     THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
@@ -154,7 +154,7 @@ void ControlManager::addSensorPtr(SP::Sensor s, SP::TimeDiscretisation td)
   linkSensorSimulation(s, td);
 }
 
-void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
+void ControlManager::addAndRecordSensorPtr(std::shared_ptr<Sensor> s, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
 {
   if(!s)
     THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
@@ -163,7 +163,7 @@ void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation 
   s->initialize(nsds);
 }
 
-void ControlManager::addActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td)
+void ControlManager::addActuatorPtr(std::shared_ptr<Actuator> act, SP::TimeDiscretisation td)
 {
   if(!act)
     THROW_EXCEPTION("ControlManager::addActuator - actuator is not valid !");
@@ -171,7 +171,7 @@ void ControlManager::addActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td)
   linkActuatorSimulation(act, td);
 }
 
-void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
+void ControlManager::addAndRecordActuatorPtr(std::shared_ptr<Actuator> act, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
 {
   if(!act)
     THROW_EXCEPTION("ControlManager::addActuator - actuator is not valid !");
@@ -180,7 +180,7 @@ void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretis
   act->initialize(nsds,*_sim);
 }
 
-void ControlManager::addObserverPtr(SP::Observer obs, SP::TimeDiscretisation td)
+void ControlManager::addObserverPtr(std::shared_ptr<Observer> obs, SP::TimeDiscretisation td)
 {
   if(!obs)
     THROW_EXCEPTION("ControlManager::addActuator - observer is not valid !");
@@ -188,7 +188,7 @@ void ControlManager::addObserverPtr(SP::Observer obs, SP::TimeDiscretisation td)
   linkObserverSimulation(obs, td);
 }
 
-void ControlManager::addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
+void ControlManager::addAndRecordObserverPtr(std::shared_ptr<Observer> obs, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
 {
   if(!obs)
     THROW_EXCEPTION("ControlManager::addActuator - observer is not valid !");
@@ -197,21 +197,21 @@ void ControlManager::addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretis
   obs->initialize(nsds,*_sim);
 }
 
-void ControlManager::linkSensorSimulation(SP::Sensor s, SP::TimeDiscretisation td)
+void ControlManager::linkSensorSimulation(std::shared_ptr<Sensor> s, SP::TimeDiscretisation td)
 {
   Event& ev = _sim->eventsManager()->insertEvent(SENSOR_EVENT, td);
   static_cast<SensorEvent&>(ev).setSensorPtr(s);
   s->setTimeDiscretisation(*td);
 }
 
-void ControlManager::linkActuatorSimulation(SP::Actuator act, SP::TimeDiscretisation td)
+void ControlManager::linkActuatorSimulation(std::shared_ptr<Actuator> act, SP::TimeDiscretisation td)
 {
   Event& ev = _sim->eventsManager()->insertEvent(ACTUATOR_EVENT, td);
   static_cast<ActuatorEvent&>(ev).setActuatorPtr(act);
   act->setTimeDiscretisation(*td);
 }
 
-void ControlManager::linkObserverSimulation(SP::Observer obs, SP::TimeDiscretisation td)
+void ControlManager::linkObserverSimulation(std::shared_ptr<Observer> obs, SP::TimeDiscretisation td)
 {
   Event& ev = _sim->eventsManager()->insertEvent(OBSERVER_EVENT, td);
   static_cast<ObserverEvent&>(ev).setObserverPtr(obs);

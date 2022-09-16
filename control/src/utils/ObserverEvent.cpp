@@ -17,12 +17,8 @@
 */
 #include "ObserverEvent.hpp"
 #include "Observer.hpp"
-#include "EventFactory.hpp"
-#include "TimeDiscretisation.hpp"
 
-void ObserverEvent::process(Simulation& sim)
+void siconos::control::ObserverEvent::process(siconos::simulation::Simulation& sim)
 {
   _observer->process();
 }
-
-AUTO_REGISTER_EVENT(OBSERVER_EVENT, ObserverEvent)

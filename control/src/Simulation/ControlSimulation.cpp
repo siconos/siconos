@@ -99,7 +99,7 @@ void ControlSimulation::addDynamicalSystem(SP::DynamicalSystem ds, const std::st
   }
 }
 
-void ControlSimulation::addSensor(SP::Sensor sensor, const double h)
+void ControlSimulation::addSensor(std::shared_ptr<Sensor> sensor, const double h)
 {
   if(h < _h)
   {
@@ -110,7 +110,7 @@ void ControlSimulation::addSensor(SP::Sensor sensor, const double h)
   _CM->addSensorPtr(sensor, td);
 }
 
-void ControlSimulation::addActuator(SP::Actuator actuator, const double h)
+void ControlSimulation::addActuator(std::shared_ptr<Actuator> actuator, const double h)
 {
   if(h < _h)
   {
@@ -121,7 +121,7 @@ void ControlSimulation::addActuator(SP::Actuator actuator, const double h)
   _CM->addActuatorPtr(actuator, td);
 }
 
-void ControlSimulation::addObserver(SP::Observer observer, const double h)
+void ControlSimulation::addObserver(std::shared_ptr<Observer> observer, const double h)
 {
   if(h < _h)
   {

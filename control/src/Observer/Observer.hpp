@@ -94,7 +94,7 @@ public:
   /** Constructor with a TimeDiscretisation.
    *
    *  \param type the type of the Observer, which corresponds to the class type
-   *  \param sensor the SP::Sensor to get the measurements
+   *  \param sensor the std::shared_ptr<Sensor> to get the measurements
    *  \param xHat0 the initial guess for the state
    *  \param newId the id of the Observer
    */
@@ -103,7 +103,7 @@ public:
   /** Constructor with a TimeDiscretisation.
    *
    *  \param type the type of the Observer, which corresponds to the class type.
-   *  \param sensor the SP::Sensor to get the measurements
+   *  \param sensor the std::shared_ptr<Sensor> to get the measurements
    *  \param xHat0 the initial guess for the state
    *  \param ds the SP::DynamicalSystem used as a model for the real DynamicalSystem
    *  \param newId the id of the Observer

@@ -125,19 +125,19 @@ public:
    * \param sensor the sensor to be added
    * \param h sampling period (or timestep) for the Sensor
    */
-  void addSensor(SP::Sensor sensor, const double h);
+  void addSensor(std::shared_ptr<Sensor> sensor, const double h);
 
   /** Add an Actuator
    * \param actuator the controller to be added
    * \param h sampling period (or timestep) for the Actuator
    */
-  void addActuator(SP::Actuator actuator, const double h);
+  void addActuator(std::shared_ptr<Actuator> actuator, const double h);
 
   /** Add an Observer
    * \param observer the observer to be added
    * \param h sampling period (or timestep) for the Observer
    */
-  void addObserver(SP::Observer observer, const double h);
+  void addObserver(std::shared_ptr<Observer> observer, const double h);
 
   /** store the simulation data in a row of the matrix
    * \param indx the current row index

@@ -29,13 +29,13 @@
 #include <set>
 
 /** A set of Sensors */
-typedef std::set<SP::Sensor> Sensors;
+typedef std::set<std::shared_ptr<Sensor>> Sensors;
 
 /** A set of Actuators */
-typedef std::set<SP::Actuator> Actuators;
+typedef std::set<std::shared_ptr<Actuator>> Actuators;
 
 /** A set of Observers */
-typedef std::set<SP::Observer> Observers;
+typedef std::set<std::shared_ptr<Observer>> Observers;
 
 /** An iterator through a set of Sensors */
 typedef Sensors::iterator SensorsIterator;
@@ -95,21 +95,21 @@ protected:
    *  \param s a Sensor
    *  \param td a TimeDiscretisation asociated with this Sensor
    */
-  void linkSensorSimulation(SP::Sensor s, SP::TimeDiscretisation td);
+  void linkSensorSimulation(std::shared_ptr<Sensor> s, SP::TimeDiscretisation td);
 
   /** Create associated Event and give the opportunity to get the TimeDiscretisation
    *
    *  \param act a Sensor
    *  \param td a TimeDiscretisation asociated with this Sensor
    */
-  void linkActuatorSimulation(SP::Actuator act, SP::TimeDiscretisation td);
+  void linkActuatorSimulation(std::shared_ptr<Actuator> act, SP::TimeDiscretisation td);
 
   /** Create associated Event and give the opportunity to get the TimeDiscretisation
    *
    *  \param obs a Sensor
    *  \param td a TimeDiscretisation asociated with this Sensor
    */
-  void linkObserverSimulation(SP::Observer obs, SP::TimeDiscretisation td);
+  void linkObserverSimulation(std::shared_ptr<Observer> obs, SP::TimeDiscretisation td);
 
 public:
 
@@ -164,9 +164,9 @@ public:
    *  \param name the type of the Sensor
    *  \param td the SP::TimeDiscretisation of the Sensor
    *  \param ds the DynamicalSystem used in the Sensor
-   *  \return a SP::Sensor to the added Sensor
+   *  \return a std::shared_ptr<Sensor> to the added Sensor
    */
-  SP::Sensor addSensor(int name, SP::TimeDiscretisation td, SP::DynamicalSystem ds);
+  std::shared_ptr<Sensor> addSensor(int name, SP::TimeDiscretisation td, SP::DynamicalSystem ds);
 
   /** To build, add, initialize a new Sensor in the Manager and record
    *  it in the simulation This function is only useful to add a new
@@ -177,27 +177,27 @@ public:
    *  \param td the SP::TimeDiscretisation of the Sensor
    *  \param ds the DynamicalSystem used in the Sensor
    *  \param nsds the NonSmoothDynamicalSystem
-   *  \return a SP::Sensor to the added Sensor
+   *  \return a std::shared_ptr<Sensor> to the added Sensor
    */
-  SP::Sensor addAndRecordSensor(int name, SP::TimeDiscretisation td, SP::DynamicalSystem ds, const NonSmoothDynamicalSystem& nsds);
+  std::shared_ptr<Sensor> addAndRecordSensor(int name, SP::TimeDiscretisation td, SP::DynamicalSystem ds, const NonSmoothDynamicalSystem& nsds);
 
   /** Add an existing Sensor to the Manager
    *
-   *  \param s a SP::Sensor to the Sensor we want to add
+   *  \param s a std::shared_ptr<Sensor> to the Sensor we want to add
    *  \param td the TimeDiscretisation used for the associated Event
    */
-  void addSensorPtr(SP::Sensor s, SP::TimeDiscretisation td);
+  void addSensorPtr(std::shared_ptr<Sensor> s, SP::TimeDiscretisation td);
 
   /** To add, initialize an existing Sensor in the manager and record
    *  it in the simulation This function is only useful to add a new
    *  Sensor after the initialization of the manager else call
    *  addSensor()
    *
-   *  \param s a SP::Sensor to the Sensor we want to add
+   *  \param s a std::shared_ptr<Sensor> to the Sensor we want to add
    *  \param td the TimeDiscretisation used for the associated Event
    *  \param nsds current nonsmooth dynamical system
    */
-  void addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
+  void addAndRecordSensorPtr(std::shared_ptr<Sensor> s, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
 
   /** To build and add a new Actuator in the Manager
    *
@@ -206,7 +206,7 @@ public:
    *  \param sensor the ControlSensor used to feed the Actuator
    *  \return the added Actuator
    */
-  SP::Actuator addActuator(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor);
+  std::shared_ptr<Actuator> addActuator(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor);
 
   /** To build, add, initialize a new Actuator in the manager and
    *  record it in the simulation This function is only useful to add a
@@ -217,27 +217,27 @@ public:
    *  \param t the SP::TimeDiscretisation of the Actuator
    *  \param sensor the ControlSensor used to feed the Actuator
    *  \param nsds the NonSmoothDynamicalSystem
-   *  \return a SP::Actuator to the added Actuator
+   *  \return a std::shared_ptr<Actuator> to the added Actuator
    */
-  SP::Actuator addAndRecordActuator(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const NonSmoothDynamicalSystem& nsds);
+  std::shared_ptr<Actuator> addAndRecordActuator(int name, SP::TimeDiscretisation t, SP::ControlSensor sensor, const NonSmoothDynamicalSystem& nsds);
 
   /** Add an existing Actuator to the manager
    *
-   *  \param act a SP::Actuator to the Actuator we want to add
+   *  \param act a std::shared_ptr<Actuator> to the Actuator we want to add
    *  \param td the TimeDiscretisation used for the associated Event
    */
-  void addActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td);
+  void addActuatorPtr(std::shared_ptr<Actuator> act, SP::TimeDiscretisation td);
 
   /** To add, initialize an existing Actuator in the manager and record
    *  it in the simulation This function is only useful to add a new
    *  Actuator after the initialization of the manager otherwise call
    *  addActuator()
    *
-   *  \param act a SP::Actuator to the Actuator we want to add
+   *  \param act a std::shared_ptr<Actuator> to the Actuator we want to add
    *  \param td the TimeDiscretisation used for the associated Event
    *  \param nsds current nonsmooth dynamical system
  */
-  void addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
+  void addAndRecordActuatorPtr(std::shared_ptr<Actuator> act, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
 
   /** To build and add a new Observer in the Manager
    *
@@ -247,7 +247,7 @@ public:
    *  \param xHat0 the initial guess for the state
    *  \return a SP::ACtuator to the added Observer
    */
-  SP::Observer addObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0);
+  std::shared_ptr<Observer> addObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0);
 
   /** To build, add, initialize a new Observer in the manager and
    *  record it in the simulation This function is only useful to add a
@@ -261,25 +261,25 @@ public:
    *  \param nsds current nonsmooth dynamical system
    *  \return the added Observer
    */
-  SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0, const NonSmoothDynamicalSystem& nsds);
+  std::shared_ptr<Observer> addAndRecordObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0, const NonSmoothDynamicalSystem& nsds);
 
   /** Add an existing Observer to the manager
    *
-   *  \param obs a SP::Observer to the Observer we want to add
+   *  \param obs a std::shared_ptr<Observer> to the Observer we want to add
    *  \param td the TimeDiscretisation used for the associated Event
    */
-  void addObserverPtr(SP::Observer obs, SP::TimeDiscretisation td);
+  void addObserverPtr(std::shared_ptr<Observer> obs, SP::TimeDiscretisation td);
 
   /** To add, initialize an existing Observer in the manager and record
    *  it in the simulation This function is only useful to add a new
    *  Observer after the initialization of the manager otherwise call
    *  addObserver()
    *
-   *  \param obs a SP::Observer to the Observer we want to add
+   *  \param obs a std::shared_ptr<Observer> to the Observer we want to add
    *  \param td the TimeDiscretisation used for the associated Event
    *  \param nsds current nonsmooth dynamical system
    */
-  void addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
+  void addAndRecordObserverPtr(std::shared_ptr<Observer> obs, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
 
 
   /** initialize all Sensors, Observers and Actuators.

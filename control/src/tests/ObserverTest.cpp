@@ -87,7 +87,7 @@ void ObserverTest::test_SMO_ZOH()
   simZOH->addDynamicalSystem(_DS);
   simZOH->addSensor(_sensor, _h);
   simZOH->addActuator(_pid, _h);
-  SP::Observer smo(new SlidingReducedOrderObserver(_sensor, *_xHat0, _C, _L));
+  auto smo(new SlidingReducedOrderObserver(_sensor, *_xHat0, _C, _L));
   simZOH->addObserver(smo, _h);
   simZOH->initialize();
   simZOH->run();
@@ -107,7 +107,7 @@ void ObserverTest::test_SMO_Lsodar()
   simLsodar->addDynamicalSystem(_DS);
   simLsodar->addSensor(_sensor, _h);
   simLsodar->addActuator(_pid, _h);
-  SP::Observer smo(new SlidingReducedOrderObserver(_sensor, *_xHat0, _C, _L));
+  auto smo(new SlidingReducedOrderObserver(_sensor, *_xHat0, _C, _L));
   simLsodar->addObserver(smo, _h);
   simLsodar->initialize();
   simLsodar->run();
@@ -127,7 +127,7 @@ void ObserverTest::test_Luenberger_ZOH()
   simZOH->addDynamicalSystem(_DS);
   simZOH->addSensor(_sensor, _h);
   simZOH->addActuator(_pid, _h);
-  SP::Observer luenberger(new LuenbergerObserver(_sensor, *_xHat0, _C, _L));
+  auto luenberger(new LuenbergerObserver(_sensor, *_xHat0, _C, _L));
   simZOH->addObserver(luenberger, _h);
   simZOH->initialize();
   simZOH->run();
@@ -147,7 +147,7 @@ void ObserverTest::test_Luenberger_Lsodar()
   simLsodar->addDynamicalSystem(_DS);
   simLsodar->addSensor(_sensor, _h);
   simLsodar->addActuator(_pid, _h);
-  SP::Observer luenberger(new LuenbergerObserver(_sensor, *_xHat0, _C, _L));
+  auto luenberger(new LuenbergerObserver(_sensor, *_xHat0, _C, _L));
   simLsodar->addObserver(luenberger, _h);
   simLsodar->initialize();
   simLsodar->run();
