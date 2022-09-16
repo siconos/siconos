@@ -50,6 +50,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 #ifndef WITH_MUMPS
     if(d>=4 && d<9) // Capsules tests work only with mumps
       collection[current - 1].will_fail = 1;
+#else
+    if(d==4) // first  Capsules test is also unstable with mumps
+      collection[current - 1].will_fail = 1;
 #endif
   }
 
