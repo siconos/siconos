@@ -333,7 +333,7 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
   NM_version_sync(A);
 }
 
-void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
+void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A, const double* const x, double* y, int init)
 {
 
   assert(A);
@@ -2657,7 +2657,7 @@ void NM_clearSparseStorage(NumericsMatrix *A)
 }
 
 
-void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold)
+void NM_dense_to_sparse(NumericsMatrix*  A, NumericsMatrix* B, double threshold)
 {
   assert(A->matrix0);
   assert(B->matrix2->triplet);
@@ -2680,7 +2680,7 @@ void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double
   }
   NM_version_sync(A);
 }
-int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
+int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B)
 {
   int info = 1;
   if(!B->matrix0)
@@ -2752,7 +2752,7 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
 }
 
 
-void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold)
+void NM_copy_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold)
 {
   DEBUG_BEGIN("NM_copy_to_sparse(...)\n")
   assert(A);
