@@ -181,7 +181,7 @@ extern "C"
    *  \param threshold if the original matrix is dense, a threshold can be applied
    *  on the absolute value of the entries
    */
-  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold);
+  void NM_copy_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold);
 
   /** create a NumericsMatrix similar to the another one. The structure is the same
    *
@@ -534,7 +534,7 @@ extern "C"
       \param[in,out] y the resulting vector
       \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
-  void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
+  void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix*  A, const double* const x, double* y, int init);
 
   /** 
       Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
@@ -626,7 +626,7 @@ extern "C"
 
   // matrix and vector display
 
-  void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold);
+  void NM_dense_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold);
 
   /**
      Copy a NumericsMatrix into another with dense storage.
@@ -634,7 +634,7 @@ extern "C"
      \param A source matrix (any kind of storage)
      \param B targeted matrix, must be dense with the same dimension as A
   */
-  int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
+  int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B);
 
   /**
      Screen display of the matrix content stored as a double * array in Fortran style
