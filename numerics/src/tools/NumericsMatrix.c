@@ -251,8 +251,8 @@ void NM_version_sync(NumericsMatrix* M)
     {
     case NM_DENSE:
     {
-    assert (M->matrix0);
-    break;
+      assert (M->matrix0);
+      break;
     }
     case NM_SPARSE_BLOCK:
     {
@@ -273,7 +273,7 @@ void NM_version_sync(NumericsMatrix* M)
       {
         assert(M->matrix2->half_triplet);
         break;
-    }
+      }
       case NSM_CSC:
       {
         assert(M->matrix2->csc);
@@ -287,11 +287,9 @@ void NM_version_sync(NumericsMatrix* M)
       }
     }
     }
-  }
 #endif
+  }
 }
-
-
 
 void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
                     double* const x, double* y)
