@@ -14,80 +14,88 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SimulationGraphs.hpp"
 #include "ControlLinearAdditionalTermsED.hpp"
 #include "DynamicalSystem.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 #include "SiconosAlgebraProd.hpp"
-#include "Topology.hpp"
-#include "MatrixIntegrator.hpp"
 
-typedef void (*AdditionalTermsEDfctU)(double, unsigned, double*, unsigned, double*, double*, unsigned, double*);
 
-void ControlLinearAdditionalTermsED::init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation& td)
+namespace siconos::control {
+
+typedef void (*AdditionalTermsEDfctU)(double, unsigned, double*, unsigned, double*, double*,
+                                      unsigned, double*);
+}
+
+void siconos::control::ControlLinearAdditionalTermsED::init(
+    siconos::graphs::DynamicalSystemsGraph& DSG0,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    const siconos::simulation::TimeDiscretisation& td)
 {
-
-  DynamicalSystemsGraph::VIterator dsvi, dsvdend;
-  for(std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
-  {
-    DynamicalSystem& ds = *DSG0.bundle(*dsvi);
-    if(DSG0.pluginU.hasKey(*dsvi))
-    {
-      DSG0.tmpXdot[*dsvi].reset(new SiconosVector(ds.getx().size()));
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
+  for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
+    auto& ds = *DSG0.bundle(*dsvi);
+    if (DSG0.pluginU.hasKey(*dsvi)) {
+      DSG0.tmpXdot[*dsvi] =
+          std::make_shared<siconos::algebra::SiconosVector>(ds.getx().size());
     }
-    if(DSG0.pluginJacgx.hasKey(*dsvi))
-    {
-      DSG0.jacgx[*dsvi].reset(new SimpleMatrix(ds.getx().size(), ds.getx().size()));
+    if (DSG0.pluginJacgx.hasKey(*dsvi)) {
+      DSG0.jacgx[*dsvi] = std::make_shared<siconos::algebra::SimpleMatrix>(ds.getx().size(), ds.getx().size());
     }
-
   }
 }
 
-
-void ControlLinearAdditionalTermsED::addSmoothTerms(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double t, SiconosVector& xdot)
+void siconos::control::ControlLinearAdditionalTermsED::addSmoothTerms(
+    siconos::graphs::DynamicalSystemsGraph& DSG0,
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double t,
+    siconos::algebra::SiconosVector& xdot)
 {
   // check whether we have a system with a control input
-  if(DSG0.u.hasKey(dsgVD))
-  {
-    if(DSG0.B.hasKey(dsgVD))
-    {
-      prod(DSG0.B.getRef(dsgVD), DSG0.u.getRef(dsgVD), xdot, false); // xdot += B*u
+  if (DSG0.u.hasKey(dsgVD)) {
+    if (DSG0.B.hasKey(dsgVD)) {
+      siconos::algebra::prod(DSG0.B.getRef(dsgVD), DSG0.u.getRef(dsgVD), xdot,
+                             false);  // xdot += B*u
     }
-    else if(DSG0.pluginU.hasKey(dsgVD))
-    {
-      DynamicalSystem& ds = *DSG0.bundle(dsgVD);
-      SiconosVector& u = DSG0.u.getRef(dsgVD);
-      SiconosVector& tmpXdot = DSG0.tmpXdot.getRef(dsgVD);
-      ((AdditionalTermsEDfctU)DSG0.pluginU.getRef(dsgVD).fPtr)(t, xdot.size(), ds.getx().getArray(), u.size(), u.getArray(), tmpXdot.getArray(), ds.getz().size(), ds.getz().getArray());
-      xdot += tmpXdot; // xdot += g(x, u)
+    else if (DSG0.pluginU.hasKey(dsgVD)) {
+      auto& ds = *DSG0.bundle(dsgVD);
+      auto& u = DSG0.u.getRef(dsgVD);
+      auto& tmpXdot = DSG0.tmpXdot.getRef(dsgVD);
+      ((AdditionalTermsEDfctU)DSG0.pluginU.getRef(dsgVD).fPtr)(
+          t, xdot.size(), ds.getx().getArray(), u.size(), u.getArray(), tmpXdot.getArray(),
+          ds.getz().size(), ds.getz().getArray());
+      xdot += tmpXdot;  // xdot += g(x, u)
     }
-    else
-    {
-      THROW_EXCEPTION("ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
+    else {
+      THROW_EXCEPTION(
+          "siconos::control::ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
     }
   }
   // check whether the DynamicalSystem is an Observer
-  if(DSG0.e.hasKey(dsgVD))
-  {
+  if (DSG0.e.hasKey(dsgVD)) {
     assert(DSG0.L.hasKey(dsgVD));
-    prod(*DSG0.L[dsgVD], *DSG0.e[dsgVD], xdot, false); // xdot += -L*e
+    siconos::algebra::prod(*DSG0.L[dsgVD], *DSG0.e[dsgVD], xdot, false);  // xdot += -L*e
   }
 }
 
-void ControlLinearAdditionalTermsED::addJacobianRhsContribution(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double t, SiconosMatrix& jacRhs)
+void siconos::control::ControlLinearAdditionalTermsED::addJacobianRhsContribution(
+    siconos::graphs::DynamicalSystemsGraph& DSG0,
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double t,
+    siconos::algebra::SiconosMatrix& jacRhs)
 {
   // check whether we have a system with a control input
-  if(DSG0.pluginJacgx.hasKey(dsgVD))
-  {
-    DynamicalSystem& ds = *DSG0.bundle(dsgVD);
-    SiconosVector& u = DSG0.u.getRef(dsgVD);
-    SimpleMatrix& tmpJacgx = DSG0.jacgx.getRef(dsgVD);
-    ((AdditionalTermsEDfctU)DSG0.pluginJacgx.getRef(dsgVD).fPtr)(t, ds.getx().size(), ds.getx().getArray(), u.size(), u.getArray(), tmpJacgx.getArray(), ds.getz().size(), ds.getz().getArray());
-    jacRhs += tmpJacgx; // JacRhs += \nabla_x g(x, u)
+  if (DSG0.pluginJacgx.hasKey(dsgVD)) {
+    auto& ds = *DSG0.bundle(dsgVD);
+    auto& u = DSG0.u.getRef(dsgVD);
+    auto& tmpJacgx = DSG0.jacgx.getRef(dsgVD);
+    ((AdditionalTermsEDfctU)DSG0.pluginJacgx.getRef(dsgVD).fPtr)(
+        t, ds.getx().size(), ds.getx().getArray(), u.size(), u.getArray(), tmpJacgx.getArray(),
+        ds.getz().size(), ds.getz().getArray());
+    jacRhs += tmpJacgx;  // JacRhs += \nabla_x g(x, u)
   }
-  else
-  {
-    THROW_EXCEPTION("ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
+  else {
+    THROW_EXCEPTION(
+        "siconos::control::ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
   }
 }

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file LinearSMCOT2.hpp
   \brief General interface to define a sliding mode controller with
@@ -26,62 +26,71 @@
 #define LinearSMCOT2_H
 
 #include "CommonSMC.hpp"
-#include "OneStepIntegratorTypes.hpp"
 
-class LinearSMCOT2 : public CommonSMC
-{
-private:
-  /** default constructor */
-  LinearSMCOT2() {};
+namespace siconos::modeling {
+class FirstOrderLinearDS;
+}
+namespace siconos::integrators {
+class LsodarOSI;
+}
+
+namespace siconos::simulation {
+class EventDriven;
+}
+
+namespace siconos::control {
+
+class LinearSMCOT2 : public CommonSMC {
+ private:
   /** Current value of the state (\f$ x_k\f$)*/
-  SP::SiconosVector _X;
+  std::shared_ptr<siconos::algebra::SiconosVector> _X{nullptr};
   /** Predicted current value of the state (\f$ \hat{x}_k = \Phi x_{k-1} + \Gamma u_{k-1}\f$)*/
-  SP::SiconosVector _Xhat;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Xhat{nullptr};
   /** Next value of the state only with the influence of the dynamic \f$ \XPhi = \Phi x_k\f$*/
-  SP::SiconosVector _XPhi;
+  std::shared_ptr<siconos::algebra::SiconosVector> _XPhi{nullptr};
   /** Model for the computation of _XPhi*/
-  SP::NonSmoothDynamicalSystem _nsdsPhi;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsdsPhi{nullptr};
   /** DynamicalSystem for the computation of _XPhi*/
-  SP::FirstOrderLinearDS _DSPhi;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DSPhi{nullptr};
   /** TimeDiscretisation for the computation of _XPhi*/
-  SP::TimeDiscretisation _tdPhi;
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _tdPhi{nullptr};
   /** OneSteoIntegrator for the computation of _XPhi*/
-  SP::LsodarOSI _PhiOSI;
+  std::shared_ptr<siconos::integrators::LsodarOSI> _PhiOSI{nullptr};
   /** Simulation for the computation of _XPhi*/
-  SP::EventDriven _simulPhi;
+  std::shared_ptr<siconos::simulation::EventDriven> _simulPhi{nullptr};
   /** Model for the computation of Xhat*/
-  SP::NonSmoothDynamicalSystem _nsdsPred;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsdsPred{nullptr};
   /** TimeDiscretisation for the computation of Xhat*/
-  SP::TimeDiscretisation _tdPred;
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _tdPred{nullptr};
   /** OneSteoIntegrator for the computation of Xhat*/
-  SP::LsodarOSI _PredOSI;
+  std::shared_ptr<siconos::integrators::LsodarOSI> _PredOSI{nullptr};
   /** Simulation for the computation of Xhat*/
-  SP::EventDriven _simulPred;
+  std::shared_ptr<siconos::simulation::EventDriven> _simulPred{nullptr};
   /** DynamicalSystem for the computation of _Xhat*/
-  SP::FirstOrderLinearDS _DSPred;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DSPred{nullptr};
   /** Coefficient*/
-  double _coeff;
+  double _coeff{0.};
 
   ACCEPT_SERIALIZATION(LinearSMCOT2);
 
-public:
-
+ public:
   /** Constructor
    *
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  LinearSMCOT2(SP::ControlSensor sensor);
+  LinearSMCOT2(std::shared_ptr<ControlSensor> sensor);
 
   /** destructor
-  */
-  virtual ~LinearSMCOT2();
+   */
+  virtual ~LinearSMCOT2() noexcept = default;
 
   /** initialize actuator data.
    *
    *  \param nsds current nonsmooth dynamical system
    *  \param s current simulation setup
    */
-  void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
+  void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                  const siconos::simulation::Simulation& s);
 
   /** Compute the new control law at each event
    *  Here we are using the following formula:
@@ -91,10 +100,13 @@ public:
 
   /** This is derived in child classes if they need to copy the TimeDiscretisation
    *  associated with this Sensor
-   *   
+   *
    *  \param td the TimeDiscretisation for this Sensor
-  */
-  virtual void setTimeDiscretisation(const TimeDiscretisation& td);
-
+   */
+  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td);
 };
+// Register the observer into the factory
+static ActuatorRegistration<LinearSMCOT2> reg_LSMCOT2(ActuatorType::LinearSMCOT2);
+
+}  // namespace siconos::control
 #endif

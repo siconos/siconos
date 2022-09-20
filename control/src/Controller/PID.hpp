@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file PID.hpp
   \brief Proportional-Integral-Derivative Controller
@@ -23,49 +23,47 @@
 #ifndef PID_H
 #define PID_H
 
+#include <boost/circular_buffer_fwd.hpp>
 #include "Actuator.hpp"
-#include "SiconosAlgebraTypeDef.hpp"
-#include <boost/circular_buffer.hpp>
 
-class PID : public Actuator
-{
-private:
-  /** default constructor */
-  PID() {};
+namespace siconos::control {
 
+class PID : public Actuator {
+ private:
 
   ACCEPT_SERIALIZATION(PID);
 
   /** error vector */
-  std::shared_ptr<boost::circular_buffer<double> > _err;
+  std::shared_ptr<boost::circular_buffer<double> > _err{nullptr};
 
   /** reference we are tracking */
-  double _ref;
+  double _ref{0.};
 
-  double _curDeltaT;
+  double _curDeltaT{0.};
 
   /** vector of gains */
-  SP::SiconosVector _K;
+  std::shared_ptr<siconos::algebra::SiconosVector> _K{nullptr};
 
-public:
-
+ public:
   /** Constructor.
    *
    *  \param sensor the ControlSensor feeding the Actuator
    *  \param B the B matrix
    */
-  PID(SP::ControlSensor sensor, SP::SimpleMatrix B = std::shared_ptr<SimpleMatrix>());
+  PID(std::shared_ptr<ControlSensor> sensor,
+      std::shared_ptr<siconos::algebra::SimpleMatrix> B = nullptr);
 
   /** destructor
    */
-  virtual ~PID();
+  virtual ~PID() noexcept = default;
 
   /** initialize actuator data.
    *
-   *  \param nsds a NonSmoothDynamicalSystem
+   *  \param nsds a siconos::modeling::NonSmoothDynamicalSystem
    *  \param s the simulation
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 
   /**
      Compute the new control law at each event
@@ -74,40 +72,37 @@ public:
      \f[
      c_1 &= K_P - \frac{K_D}{\Delta t} + K_I \Delta t \\
      c_2 &= -1 - \frac{2K_D}{\Delta t} \\
-     c_3 &= \frac{K_D}{\Delta t} 
+     c_3 &= \frac{K_D}{\Delta t}
      \f]
    */
   void actuate();
 
   /** Set K
    *
-   *  \param K SP::SiconosVector \f$ [K_P, K_I, K_D] \f$
+   *  \param K std::shared_ptr<siconos::algebra::SiconosVector> \f$ [K_P, K_I, K_D] \f$
    */
-  void setK(SP::SiconosVector K);
+  void setK(std::shared_ptr<siconos::algebra::SiconosVector> K);
 
   /** Set the value of _ref to reference
    *
    *  \param reference the new value
    */
-  void inline setRef(double reference)
-  {
-    _ref = reference;
-  }
+  void inline setRef(double reference) { _ref = reference; }
 
   /** Get the timestep from the TimeDiscretisation associated with this PID controller
    *
    *  \param td the TimeDiscretisation for this Actuator
    */
-  virtual void setTimeDiscretisation(const TimeDiscretisation& td);
+  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td);
 
-  void setDeltaT(double deltaT)
-  {
-    _curDeltaT = deltaT;
-  }
-  
+  void setDeltaT(double deltaT) { _curDeltaT = deltaT; }
+
   /** display the data of the Actuator on the standard output
    */
   virtual void display() const;
-  
 };
+// Register the observer into the factory
+static ActuatorRegistration<PID> reg_APID(ActuatorType::PID);
+
+}  // namespace siconos::control
 #endif

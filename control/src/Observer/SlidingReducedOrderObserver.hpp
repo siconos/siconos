@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SlidingReducedOrderObserver.hpp
   Discrete-time Sliding Observer
@@ -24,39 +24,35 @@
 #define SlidingReducedOrderObserver_H
 
 #include "Observer.hpp"
-#include "SiconosAlgebraTypeDef.hpp"
 
-class SlidingReducedOrderObserver : public Observer
-{
-private:
-  
+namespace siconos::control {
+class SlidingReducedOrderObserver : public Observer {
+ private:
   ACCEPT_SERIALIZATION(SlidingReducedOrderObserver);
 
-  /** default constructor */
-  SlidingReducedOrderObserver() {};
-
-protected:
-
+ protected:
   /** the vector defining the measurements (\f$ y = Cx \f$) */
-  SP::SimpleMatrix _C;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _C{nullptr};
 
   /** matrix multiplying the innovation term */
-  SP::SimpleMatrix _L;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _L{nullptr};
 
-  double _theta;
+  double _theta{0.};
 
   // clumsy hack to do nothing the first time this Observer is called
-  bool _pass;
+  bool _pass{false};
 
-public:
-
+ public:
   /** Constructor with the standard interface
    *
-   *  \param sensor the SP::ControlSensor that feed us with measurements
+   *  \param sensor the std::shared_ptr<ControlSensor> that feed us with measurements
    *  \param xHat0 the initial guess for the state
    */
-  SlidingReducedOrderObserver(SP::ControlSensor sensor, const SiconosVector& xHat0):
-    Observer(SLIDING_REDUCED_ORDER, sensor, xHat0), _pass(false) {}
+  SlidingReducedOrderObserver(std::shared_ptr<ControlSensor> sensor,
+                              const siconos::algebra::SiconosVector& xHat0)
+      : Observer(ObserverType::SlidingReducedOrder, sensor, xHat0)
+  {
+  }
 
   /** Constructor with all the data
    *
@@ -65,11 +61,18 @@ public:
    *  \param C observation matrix
    *  \param L gain matrix
    */
-  SlidingReducedOrderObserver(SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SimpleMatrix C, SP::SimpleMatrix L):
-    Observer(SLIDING_REDUCED_ORDER, sensor, xHat0), _C(C), _L(L), _pass(false) {}
+  SlidingReducedOrderObserver(std::shared_ptr<ControlSensor> sensor,
+                              const siconos::algebra::SiconosVector& xHat0,
+                              std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                              std::shared_ptr<siconos::algebra::SimpleMatrix> L)
+      : Observer(ObserverType::SlidingReducedOrder, sensor, xHat0), _C(C), _L(L)
+  {
+  }
+
+  ~SlidingReducedOrderObserver() noexcept = default;
 
   /** Update the estimate at each event
-  */
+   */
   virtual void process();
 
   /** Initialization
@@ -77,25 +80,25 @@ public:
    *  \param nsds current nonsmooth dynamical system
    *  \param s current simulation setup
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 
   /** Set the L matrix
    *
    *  \param L the new L matrix
    */
-  inline void setLPtr(SP::SimpleMatrix L)
-  {
-    _L = L;
-  };
+  inline void setLPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> L) { _L = L; };
 
   /** Set the C matrix
    *
    *  \param C the new C matrix
    */
-  inline void setCPtr(SP::SimpleMatrix C)
-  {
-    _C = C;
-  };
-
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> C) { _C = C; };
 };
+
+// Register the observer into the factory
+static ObserverRegistration<SlidingReducedOrderObserver> reg_OSRO(
+    ObserverType::SlidingReducedOrder);
+
+}  // namespace siconos::control
 #endif

@@ -386,7 +386,7 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
     }
     else
       THROW_EXCEPTION(
-          "siconos::simulation::OneStepNSProblem::getOSIMatrix is implemented for LSodarOSI "
+          "siconos::simulation::OneStepNSProblem::getOSIMatrix is implemented for LsodarOSI "
           "only with LagrangianDS systems.");
   }
   else if (osiType == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {

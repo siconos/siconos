@@ -14,69 +14,68 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file LinearSensor.hpp
  * A generic linear sensor, to capture the output y defined as y = Cx + Du
-*/
+ */
 
 #ifndef LinearSensor_H
 #define LinearSensor_H
 
 #include "ControlSensor.hpp"
 
+namespace siconos::control {
 /**
    A generic linear sensor, to capture the output y defined as y = Cx + Du
 */
-class LinearSensor : public ControlSensor
-{
-private:
-  
+class LinearSensor : public ControlSensor {
+ private:
   ACCEPT_SERIALIZATION(LinearSensor);
 
   /** A matrix for output */
-  SP::SiconosMatrix _data;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _data{nullptr};
   /** A matrix for saving all values */
-  SP::SimpleMatrix _dataPlot;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _dataPlot{nullptr};
   /** counter */
-  unsigned int _k;
+  unsigned int _k{0};
 
   /** Canonical matrices */
-  SP::SimpleMatrix _matC;
-  SP::SimpleMatrix _matD;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _matC{nullptr};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _matD{nullptr};
 
   /** Number of time steps*/
-  unsigned int _nSteps;
+  unsigned int _nSteps{0};
 
-  /** Default constructor
-   */
-  LinearSensor() {};
+  // /** Default constructor
+  //  */
+  // LinearSensor(){};
 
-public:
-
+ public:
   /** Constructor for the SensorFactory
    *
-   *  \param ds the SP::DynamicalSystem it observes
+   *  \param ds the std::shared_ptr<siconos::modeling::DynamicalSystem> it observes
    */
-  LinearSensor(SP::DynamicalSystem ds);
+  LinearSensor(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** Constructor with the full set of data
    *
-   *  \param ds the SP::DynamicalSystem it observes.
-   *  \param C a SP::SiconosMatrix.
-   *  \param D a SP::SiconosMatrix (optional).
+   *  \param ds the std::shared_ptr<siconos::modeling::DynamicalSystem> it observes.
+   *  \param C a std::shared_ptr<siconos::algebra::SiconosMatrix>.
+   *  \param D a std::shared_ptr<siconos::algebra::SiconosMatrix> (optional).
    */
-  LinearSensor(SP::DynamicalSystem ds,
-      SP::SimpleMatrix C, SP::SimpleMatrix D = SP::SimpleMatrix());
+  LinearSensor(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+               std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+               std::shared_ptr<siconos::algebra::SimpleMatrix> D = nullptr);
 
   /** Destructor
    */
-  virtual ~LinearSensor();
+  virtual ~LinearSensor() noexcept = default;
 
   /** initialize sensor data
    *  \param nsds current nonsmooth dynamical system
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds);
 
   /** capture data when the SensorEvent is processed ( for example set data[SensorEvent]=... )
    */
@@ -86,31 +85,29 @@ public:
    *
    *  \param C a SimpleMatrix
    */
-  void setC(const SimpleMatrix& C);
+  void setC(const siconos::algebra::SimpleMatrix& C);
 
   /** Set the C matrix
    *
-   *  \param C a SP::SimpleMatrix
+   *  \param C a std::shared_ptr<siconos::algebra::SimpleMatrix>
    */
-  inline void setCPtr(SP::SimpleMatrix C)
-  {
-    _matC = C;
-  };
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> C) { _matC = C; };
 
   /** Set the D matrix
    *
    *  \param D a SimpleMatrix
    */
-  void setD(const SimpleMatrix& D);
+  void setD(const siconos::algebra::SimpleMatrix& D);
 
   /** Set the D matrix
    *
-   *  \param D a SP::SimpleMatrix
+   *  \param D a std::shared_ptr<siconos::algebra::SimpleMatrix>
    */
-  inline void setDPtr(SP::SimpleMatrix D)
-  {
-    _matD = D;
-  };
+  inline void setDPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> D) { _matD = D; };
 };
 
+// Register the sensor into the factory
+static SensorRegistration<LinearSensor> reg_SL(SensorType::Linear);
+
+}  // namespace siconos::control
 #endif

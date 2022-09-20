@@ -24,8 +24,7 @@
 #include <vector>
 
 #include "OneStepIntegrator.hpp"
-#include "SiconosConst.hpp"         // MACHINE_PREC
-#include "SiconosExternalsTypes.h"  // siconos::fortran::integer, siconos::fortran::doublereal ...
+#include "SiconosConst.hpp"  // MACHINE_PREC
 
 namespace siconos::integrators {
 
@@ -61,7 +60,7 @@ class LsodarOSI : public OneStepIntegrator {
   /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
    *  See opkdmain.f and lsodar routine for details on those variables.
    */
-  std::vector<siconos::fortran::integer> _intData = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<int> _intData = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   /** _sizeTol size of the vector ot tolerances */
   unsigned int _sizeTol{1};
 
@@ -69,15 +68,15 @@ class LsodarOSI : public OneStepIntegrator {
   unsigned int _itol{1};
 
   /** relative tolerance */
-  boost::shared_array<siconos::fortran::doublereal> rtol;
+  boost::shared_array<double> rtol;
   /** absolute tolerance */
-  boost::shared_array<siconos::fortran::doublereal> atol;
+  boost::shared_array<double> atol;
   /** real work array */
-  boost::shared_array<siconos::fortran::doublereal> rwork;
+  boost::shared_array<double> rwork;
   /** integer work array */
-  boost::shared_array<siconos::fortran::integer> iwork;
+  boost::shared_array<int> iwork;
   /** integer array used for output of root information */
-  boost::shared_array<siconos::fortran::integer> jroot;
+  boost::shared_array<int> jroot;
   /** temporary vector to save x values */
   std::shared_ptr<siconos::algebra::BlockVector> _xWork{nullptr};
 
@@ -106,18 +105,18 @@ class LsodarOSI : public OneStepIntegrator {
    */
   ~LsodarOSI() noexcept = default;
 
-  /** get vector of siconos::fortran::integer parameters for lsodar
+  /** get vector of int parameters for lsodar
    *
-   *  \return a vector<siconos::fortran::integer>
+   *  \return a vector<int>
    */
-  inline const std::vector<siconos::fortran::integer> intData() const { return _intData; }
+  inline const std::vector<int> intData() const { return _intData; }
 
   /** get _intData[i]
    *
    *  \param i index number (starting from 0)
-   *  \return an siconos::fortran::integer
+   *  \return an int
    */
-  inline siconos::fortran::integer intData(unsigned int i) const { return _intData[i]; }
+  inline int intData(unsigned int i) const { return _intData[i]; }
 
   /** set _intData[i]
    *
@@ -128,21 +127,15 @@ class LsodarOSI : public OneStepIntegrator {
 
   /** get relative tolerance parameter for lsodar
    *
-   *  \return a siconos::fortran::doublereal*
+   *  \return a double*
    */
-  inline const boost::shared_array<siconos::fortran::doublereal> getRtol() const
-  {
-    return rtol;
-  }
+  inline const boost::shared_array<double> getRtol() const { return rtol; }
 
   /** get absolute tolerance parameter for lsodar
    *
-   *  \return a siconos::fortran::doublereal*
+   *  \return a double*
    */
-  inline const boost::shared_array<siconos::fortran::doublereal> getAtol() const
-  {
-    return atol;
-  }
+  inline const boost::shared_array<double> getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
    *
@@ -152,24 +145,21 @@ class LsodarOSI : public OneStepIntegrator {
 
   /** get real work vector parameter for lsodar
    *
-   *  \return a siconos::fortran::doublereal*
+   *  \return a double*
    */
-  inline const boost::shared_array<siconos::fortran::doublereal> getRwork() const
-  {
-    return rwork;
-  }
+  inline const boost::shared_array<double> getRwork() const { return rwork; }
 
   /** get iwork
    *
-   *  \return a pointer to siconos::fortran::integer
+   *  \return a pointer to int
    */
-  inline boost::shared_array<siconos::fortran::integer> getIwork() const { return iwork; }
+  inline boost::shared_array<int> getIwork() const { return iwork; }
 
   /** get output of root information
    *
-   *  \return a pointer to siconos::fortran::integer
+   *  \return a pointer to int
    */
-  inline boost::shared_array<siconos::fortran::integer> getJroot() const { return jroot; }
+  inline boost::shared_array<int> getJroot() const { return jroot; }
 
   /** set Jt value, Jacobian type indicator. Excerpts from the lsodar
    *  documentation. 1 means a user-supplied full (neq by neq) jacobian. 2 means
@@ -183,7 +173,7 @@ class LsodarOSI : public OneStepIntegrator {
    *
    *  \param newJT new value for the jt parameter.
    */
-  inline void setJT(siconos::fortran::integer newJT) { _intData[8] = newJT; };
+  inline void setJT(int newJT) { _intData[8] = newJT; };
 
   /** set itol, rtol and atol (tolerance parameters for lsodar)
    *
@@ -191,9 +181,8 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param newRtol rtol value
    *  \param newAtol atol value
    */
-  void setTol(siconos::fortran::integer newItol,
-              boost::shared_array<siconos::fortran::doublereal> newRtol,
-              boost::shared_array<siconos::fortran::doublereal> newAtol);
+  void setTol(int newItol, boost::shared_array<double> newRtol,
+              boost::shared_array<double> newAtol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
    *
@@ -201,41 +190,38 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param newRtol rtol value
    *  \param newAtol atol value
    */
-  void setTol(siconos::fortran::integer newItol, siconos::fortran::doublereal newRtol,
-              siconos::fortran::doublereal newAtol);
+  void setTol(int newItol, double newRtol, double newAtol);
 
   /** set the maximum number of steps for one call of Lsodar
    *
    *  \param maxNumberSteps the maximum number of steps
    */
-  void setMaxNstep(siconos::fortran::integer maxNumberSteps);
+  void setMaxNstep(int maxNumberSteps);
 
   /** set the minimum and maximum step sizes
    *
    *  \param minStep minimum step size
    *  \param maxStep maximum step size
    */
-  void setMinMaxStepSizes(siconos::fortran::doublereal minStep,
-                          siconos::fortran::doublereal maxStep);
+  void setMinMaxStepSizes(double minStep, double maxStep);
 
   /** set maximum method order
    *
    *  \param maxorderNonStiff maximum order for nonstiff methods
    *  \param maxorderStiff maximum order for stiff methods
    */
-  void setMaxOrder(siconos::fortran::integer maxorderNonStiff,
-                   siconos::fortran::integer maxorderStiff);
+  void setMaxOrder(int maxorderNonStiff, int maxorderStiff);
 
   /** update doubleData and iwork memory size, when changes occur in _intData.
    */
   void updateData();
 
-  /** fill xWork with a siconos::fortran::doublereal
+  /** fill xWork with a double
    *
    *  \param size size of x array
    *  \param array x array of double
    */
-  void fillXWork(siconos::fortran::integer *size, siconos::fortran::doublereal *array);
+  void fillXWork(int *size, double *array);
 
   /** compute rhs(t) for all dynamical systems in the set
    *
@@ -250,17 +236,11 @@ class LsodarOSI : public OneStepIntegrator {
    */
   void computeJacobianRhs(double t, siconos::graphs::DynamicalSystemsGraph &DSG0);
 
-  void f(siconos::fortran::integer *sizeOfX, siconos::fortran::doublereal *time,
-         siconos::fortran::doublereal *x, siconos::fortran::doublereal *xdot);
+  void f(int *sizeOfX, double *time, double *x, double *xdot);
 
-  void g(siconos::fortran::integer *nEq, siconos::fortran::doublereal *time,
-         siconos::fortran::doublereal *x, siconos::fortran::integer *ng,
-         siconos::fortran::doublereal *gOut);
+  void g(int *nEq, double *time, double *x, int *ng, double *gOut);
 
-  void jacobianfx(siconos::fortran::integer *, siconos::fortran::doublereal *,
-                  siconos::fortran::doublereal *, siconos::fortran::integer *,
-                  siconos::fortran::integer *, siconos::fortran::doublereal *,
-                  siconos::fortran::integer *);
+  void jacobianfx(int *, double *, double *, int *, int *, double *, int *);
 
   /** initialization of the integrator
    */

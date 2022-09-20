@@ -21,11 +21,9 @@
 */
 
 #include "ControlSensor.hpp"
-#include <cmath>
-#include "TimeDiscretisation.hpp"
 #include "SiconosVector.hpp"
 
-void ControlSensor::initialize(const  NonSmoothDynamicalSystem& nsds)
+void siconos::control::ControlSensor::initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds)
 {
   Sensor::initialize(nsds);
 //  if (_delay > 0)
@@ -51,7 +49,7 @@ void ControlSensor::initialize(const  NonSmoothDynamicalSystem& nsds)
 //    THROW_EXCEPTION("ControlSensor::initialize the delay value should be >= 0");
 }
 
-unsigned int ControlSensor::getYDim() const
+unsigned int siconos::control::ControlSensor::getYDim() const
 {
   return _storedY->size();
 }

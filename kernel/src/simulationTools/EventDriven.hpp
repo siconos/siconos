@@ -22,7 +22,7 @@
 #define EventDriven_H
 
 #include "Simulation.hpp"
-#include "SiconosExternalsTypes.h"  // siconos::fortran::integer, siconos::fortran::doublereal ...
+// #include "SiconosExternalsTypes.h"  // siconos::fortran::integer, siconos::fortran::doublereal ...
 
 namespace siconos::simulation {
 
@@ -226,8 +226,8 @@ class EventDriven : public Simulation {
    *  \param x state vector
    *  \param xdot derivative of x
    */
-  void computef(siconos::integrators::OneStepIntegrator &osi, siconos::fortran::integer *sizeOfX,
-                siconos::fortran::doublereal *time, siconos::fortran::doublereal *x, siconos::fortran::doublereal *xdot);
+  void computef(siconos::integrators::OneStepIntegrator &osi, int *sizeOfX,
+                double *time, double *x, double *xdot);
 
   /** compute jacobian of the right-hand side
    *
@@ -237,8 +237,8 @@ class EventDriven : public Simulation {
    *  \param x state vector
    *  \param jacob jacobian of f according to x
    */
-  void computeJacobianfx(siconos::integrators::OneStepIntegrator &osi, siconos::fortran::integer *sizeOfX, siconos::fortran::doublereal *time,
-                         siconos::fortran::doublereal *x, siconos::fortran::doublereal *jacob);
+  void computeJacobianfx(siconos::integrators::OneStepIntegrator &osi, int *sizeOfX, double *time,
+                         double *x, double *jacob);
 
   /** compute the size of constraint function g(x,t,...) for osi
    *
@@ -249,15 +249,15 @@ class EventDriven : public Simulation {
   /** compute constraint function g(x,t,...) for osi.
    *
    *  \param osi pointer to OneStepIntegrator.
-   *  \param sizeX siconos::fortran::integer*, size of vector x
-   *  \param time siconos::fortran::doublereal*, time
-   *  \param x siconos::fortran::doublereal*, x:array of double
-   *  \param sizeG siconos::fortran::integer*, size of vector g (ie number of constraints)
-   *  \param g siconos::fortran::doublereal*, g (in-out parameter)
+   *  \param sizeX int*, size of vector x
+   *  \param time double*, time
+   *  \param x double*, x:array of double
+   *  \param sizeG int*, size of vector g (ie number of constraints)
+   *  \param g double*, g (in-out parameter)
    */
   virtual void computeg(std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-                        siconos::fortran::integer *sizeX, siconos::fortran::doublereal *time, siconos::fortran::doublereal *x, siconos::fortran::integer *sizeG,
-                        siconos::fortran::doublereal *g);
+                        int *sizeX, double *time, double *x, int *sizeG,
+                        double *g);
 
   /** update input for impact case (ie compute p[1])
    */

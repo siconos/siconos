@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file FirstOrderR_helpers.hpp
 \brief Set of helpers for FirstOrderR
@@ -25,54 +25,54 @@
 
 #include "FirstOrderR.hpp"
 
-namespace FirstOrderRHelpers
-{
+namespace siconos::modeling::FirstOrderRHelpers {
 
-static inline void JacglambdaSetter(FirstOrderR& rel, std::shared_ptr<siconos::algebra::SimpleMatrix> B, std::string& pluginName)
+static inline void JacglambdaSetter(siconos::modeling::FirstOrderR& rel,
+                                    std::shared_ptr<siconos::algebra::SimpleMatrix> B,
+                                    std::string& pluginName)
 {
-  if (B)
-  {
+  if (B) {
     rel.setBPtr(B);
   }
-  else if (!pluginName.empty())
-  {
-    rel.setComputeJacglambdaFunction(siconos::plugins::getPluginName(pluginName), siconos::plugins::getPluginFunctionName(pluginName));
+  else if (!pluginName.empty()) {
+    rel.setComputeJacglambdaFunction(siconos::plugins::getPluginName(pluginName),
+                                     siconos::plugins::getPluginFunctionName(pluginName));
   }
   else
     THROW_EXCEPTION("FirstOrderRHelpers::JacglambdaSetter no B or pluginJacglambda given");
 }
 
-static inline void JachxSetter(FirstOrderR& rel, std::shared_ptr<siconos::algebra::SimpleMatrix> C, std::string& pluginName)
+static inline void JachxSetter(siconos::modeling::FirstOrderR& rel,
+                               std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                               std::string& pluginName)
 {
-  if (C)
-  {
+  if (C) {
     rel.setCPtr(C);
   }
-  else if (!pluginName.empty())
-  {
-    rel.setComputeJachxFunction(siconos::plugins::getPluginName(pluginName), siconos::plugins::getPluginFunctionName(pluginName));
+  else if (!pluginName.empty()) {
+    rel.setComputeJachxFunction(siconos::plugins::getPluginName(pluginName),
+                                siconos::plugins::getPluginFunctionName(pluginName));
   }
-  else
-  {
+  else {
     THROW_EXCEPTION("FirstOrderRHelpers::JachxSetter no C or pluginJachx given");
   }
 }
 
-static inline void JachlambdaSetter(FirstOrderR& rel, std::shared_ptr<siconos::algebra::SimpleMatrix> D, std::string& pluginName)
+static inline void JachlambdaSetter(siconos::modeling::FirstOrderR& rel,
+                                    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+                                    std::string& pluginName)
 {
-  if (D)
-  {
+  if (D) {
     rel.setCPtr(D);
   }
-  else if (!pluginName.empty())
-  {
-    rel.setComputeJachlambdaFunction(siconos::plugins::getPluginName(pluginName), siconos::plugins::getPluginFunctionName(pluginName));
+  else if (!pluginName.empty()) {
+    rel.setComputeJachlambdaFunction(siconos::plugins::getPluginName(pluginName),
+                                     siconos::plugins::getPluginFunctionName(pluginName));
   }
-  else
-  {
+  else {
     THROW_EXCEPTION("FirstOrderRHelpers::JachlambdaSetter no D or pluginJachlambda given");
   }
 }
-}
+}  // namespace siconos::modeling::FirstOrderRHelpers
 
 #endif

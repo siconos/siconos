@@ -63,14 +63,18 @@ class SensorEvent : public siconos::simulation::Event {
   void setSensorPtr(std::shared_ptr<Sensor> newSensor) { _sensor = newSensor; };
 
   /** Call the capture method of the linked Sensor
-   *  \param sim a SP::Simulation (ignored).
+   *  \param sim a std::shared_ptr<siconos::simulation::Simulation> (ignored).
    */
   void process(siconos::simulation::Simulation& sim);
 };
 
-  // Register the event into the factory
-  static EventRegistration<SensorEvent> reg_SE(EventType::Sensor);
 
 }  // namespace siconos::control
+
+namespace siconos::simulation{
+
+    // Register the event into the factory
+  static EventRegistration<siconos::control::SensorEvent> reg_SE(EventType::Sensor);
+}
 
 #endif  // SensorEvent_H

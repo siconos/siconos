@@ -19,10 +19,11 @@
 #define __SMCTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SiconosFwd.hpp"
-#include "SiconosControlFwd.hpp"
 #include <FirstOrderLinearTIDS.hpp>
-
+#include "Twisting.hpp"
+#include "ExplicitLinearSMC.hpp"
+#include "LinearSensor.hpp"
+#include "LinearSMC.hpp"
 #include <SiconosConfig.h>
 
 class SMCTest : public CppUnit::TestFixture
@@ -69,19 +70,19 @@ private:
   double _tol;
   double _beta;
   double _xFinal;
-  SP::FirstOrderLinearTIDS _DS;
-  SP::SiconosMatrix _A;
-  SP::SimpleMatrix _B;
-  SP::SimpleMatrix _C;
-  SP::SimpleMatrix _Csurface;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
-  SP::SiconosVector _K;
-  SP::LinearSensor _sensor;
-  SP::LinearSMC _iSMC;
-  SP::ExplicitLinearSMC _eSMC;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _B;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _C;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface;
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0;
+  std::shared_ptr<siconos::algebra::SiconosVector> _K;
+  std::shared_ptr<siconos::control::LinearSensor> _sensor;
+  std::shared_ptr<siconos::control::LinearSMC> _iSMC;
+  std::shared_ptr<siconos::control::ExplicitLinearSMC> _eSMC;
 #ifdef HAS_EXTREME_POINT_ALGO
-  SP::Twisting _itw;
+  std::shared_ptr<siconos::control::Twisting> _itw;
 #endif
 
 

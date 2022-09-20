@@ -59,20 +59,25 @@ class ObserverEvent : public siconos::simulation::Event {
   /** set the Observer linked to this Event
    *  \param newObserver the std::shared_ptr<Observer>
    */
-  void setObserverPtr(std::shared_ptr<siconos::simulation::Observer> newObserver)
+  void setObserverPtr(std::shared_ptr<Observer> newObserver)
   {
     _observer = newObserver;
   };
 
   /** Call the capture method of the linked Observer
-   *  \param sim a SP::Simulation (ignored).
+   *  \param sim a std::shared_ptr<siconos::simulation::Simulation> (ignored).
    */
-  void process(Simulation& sim);
+  void process(siconos::simulation::Simulation& sim);
 };
 
-// Register the event into the factory
-static EventRegistration<ObserverEvent> reg_OB(EventType::Observer);
 
 }  // namespace siconos::control
+
+namespace siconos::simulation{
+// Register the event into the factory
+  static EventRegistration<siconos::control::ObserverEvent> reg_OB(EventType::Observer);
+
+
+}
 
 #endif  // ObserverEvent_H

@@ -53,50 +53,26 @@ std::shared_ptr<siconos::integrators::LsodarOSI> global_object;
 
 // This first function must have the same signature as argument F (arg 1) in DLSODAR (see
 // opkdmain.f in Numerics)
-extern "C" void LsodarOSI_f_wrapper(siconos::fortran::integer* sizeOfX,
-                                    siconos::fortran::doublereal* time,
-                                    siconos::fortran::doublereal* x,
-                                    siconos::fortran::doublereal* xdot);
-extern "C" void LsodarOSI_f_wrapper(siconos::fortran::integer* sizeOfX,
-                                    siconos::fortran::doublereal* time,
-                                    siconos::fortran::doublereal* x,
-                                    siconos::fortran::doublereal* xdot)
+extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot);
+extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot)
 {
   return global_object->f(sizeOfX, time, x, xdot);
 }
 
 // Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see opkdmain.f in
 // Numerics)
-extern "C" void LsodarOSI_g_wrapper(siconos::fortran::integer* nEq,
-                                    siconos::fortran::doublereal* time,
-                                    siconos::fortran::doublereal* x,
-                                    siconos::fortran::integer* ng,
-                                    siconos::fortran::doublereal* gOut);
-extern "C" void LsodarOSI_g_wrapper(siconos::fortran::integer* nEq,
-                                    siconos::fortran::doublereal* time,
-                                    siconos::fortran::doublereal* x,
-                                    siconos::fortran::integer* ng,
-                                    siconos::fortran::doublereal* gOut)
+extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut);
+extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut)
 {
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
 // Function to wrap jacobianf: same signature as argument JAC (arg 16) in DLSODAR (see
 // opkdmain.f in Numerics)
-extern "C" void LsodarOSI_jacobianf_wrapper(siconos::fortran::integer* sizeOfX,
-                                            siconos::fortran::doublereal* time,
-                                            siconos::fortran::doublereal* x,
-                                            siconos::fortran::integer* ml,
-                                            siconos::fortran::integer* mu,
-                                            siconos::fortran::doublereal* jacob,
-                                            siconos::fortran::integer* nrowpd);
-extern "C" void LsodarOSI_jacobianf_wrapper(siconos::fortran::integer* sizeOfX,
-                                            siconos::fortran::doublereal* time,
-                                            siconos::fortran::doublereal* x,
-                                            siconos::fortran::integer* ml,
-                                            siconos::fortran::integer* mu,
-                                            siconos::fortran::doublereal* jacob,
-                                            siconos::fortran::integer* nrowpd)
+extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time, double* x, int* ml,
+                                            int* mu, double* jacob, int* nrowpd);
+extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time, double* x, int* ml,
+                                            int* mu, double* jacob, int* nrowpd)
 {
   return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
@@ -106,17 +82,15 @@ siconos::integrators::LsodarOSI::LsodarOSI()
 {
   _sizeMem = 2;
 
-  rtol.reset(new siconos::fortran::doublereal[_sizeTol]);  // rtol, relative tolerance
-  atol.reset(new siconos::fortran::doublereal[_sizeTol]);  // atol, absolute tolerance
+  rtol.reset(new double[_sizeTol]);  // rtol, relative tolerance
+  atol.reset(new double[_sizeTol]);  // atol, absolute tolerance
   // Set atol and rtol values ...
   rtol[0] = RTOL_DEFAULT;  // rtol
   atol[0] = ATOL_DEFAULT;  // atol
 }
 
-void siconos::integrators::LsodarOSI::setTol(
-    siconos::fortran::integer newItol,
-    boost::shared_array<siconos::fortran::doublereal> newRtol,
-    boost::shared_array<siconos::fortran::doublereal> newAtol)
+void siconos::integrators::LsodarOSI::setTol(int newItol, boost::shared_array<double> newRtol,
+                                             boost::shared_array<double> newAtol)
 {
   //            The input parameters ITOL, RTOL, and ATOL determine
   //         the error control performed by the solver.  The solver will
@@ -139,31 +113,27 @@ void siconos::integrators::LsodarOSI::setTol(
   atol = newAtol;
 }
 
-void siconos::integrators::LsodarOSI::setMinMaxStepSizes(siconos::fortran::doublereal minStep,
-                                                         siconos::fortran::doublereal maxStep)
+void siconos::integrators::LsodarOSI::setMinMaxStepSizes(double minStep, double maxStep)
 {
   _intData[5] = 1;  // set IOPT = 1
   rwork[5] = minStep;
   rwork[6] = maxStep;
 }
 
-void siconos::integrators::LsodarOSI::setMaxNstep(siconos::fortran::integer maxNumberSteps)
+void siconos::integrators::LsodarOSI::setMaxNstep(int maxNumberSteps)
 {
   _intData[5] = 1;  // set IOPT = 1
   iwork[5] = maxNumberSteps;
 }
 
-void siconos::integrators::LsodarOSI::setTol(siconos::fortran::integer newItol,
-                                             siconos::fortran::doublereal newRtol,
-                                             siconos::fortran::doublereal newAtol)
+void siconos::integrators::LsodarOSI::setTol(int newItol, double newRtol, double newAtol)
 {
   _itol = newItol;    // itol
   rtol[0] = newRtol;  // rtol
   atol[0] = newRtol;  // atol
 }
 
-void siconos::integrators::LsodarOSI::setMaxOrder(siconos::fortran::integer maxorderNonStiff,
-                                                  siconos::fortran::integer maxorderStiff)
+void siconos::integrators::LsodarOSI::setMaxOrder(int maxorderNonStiff, int maxorderStiff)
 {
   _intData[5] = 1;  // set IOPT = 1
   iwork[7] = maxorderNonStiff;
@@ -175,7 +145,7 @@ void siconos::integrators::LsodarOSI::updateData()
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
 
-  iwork.reset(new siconos::fortran::integer[_intData[7]]);
+  iwork.reset(new int[_intData[7]]);
   for (int i = 0; i < _intData[7]; i++) iwork[i] = 0;
 
   // This is for documentation purposes only
@@ -190,15 +160,14 @@ void siconos::integrators::LsodarOSI::updateData()
   // Set   the maximum order to be allowed for the stiff  (BDF) method.
   // iwork[8] = 0;
 
-  rwork.reset(new siconos::fortran::doublereal[_intData[6]]);
+  rwork.reset(new double[_intData[6]]);
   for (int i = 0; i < _intData[6]; i++) rwork[i] = 0.0;
 
-  jroot.reset(new siconos::fortran::integer[_intData[1]]);
+  jroot.reset(new int[_intData[1]]);
   for (int i = 0; i < _intData[1]; i++) jroot[i] = 0;
 }
 
-void siconos::integrators::LsodarOSI::fillXWork(siconos::fortran::integer* sizeOfX,
-                                                siconos::fortran::doublereal* x)
+void siconos::integrators::LsodarOSI::fillXWork(int* sizeOfX, double* x)
 {
   assert((unsigned int)(*sizeOfX) == _xWork->size() &&
          "siconos::integrators::LsodarOSI::fillXWork xWork and sizeOfX have different sizes");
@@ -250,32 +219,21 @@ void siconos::integrators::LsodarOSI::computeJacobianRhs(
   }
 }
 
-void siconos::integrators::LsodarOSI::f(siconos::fortran::integer* sizeOfX,
-                                        siconos::fortran::doublereal* time,
-                                        siconos::fortran::doublereal* x,
-                                        siconos::fortran::doublereal* xdot)
+void siconos::integrators::LsodarOSI::f(int* sizeOfX, double* time, double* x, double* xdot)
 {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computef(*this, sizeOfX, time, x, xdot);
 }
 
-void siconos::integrators::LsodarOSI::g(siconos::fortran::integer* nEq,
-                                        siconos::fortran::doublereal* time,
-                                        siconos::fortran::doublereal* x,
-                                        siconos::fortran::integer* ng,
-                                        siconos::fortran::doublereal* gOut)
+void siconos::integrators::LsodarOSI::g(int* nEq, double* time, double* x, int* ng,
+                                        double* gOut)
 {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
-void siconos::integrators::LsodarOSI::jacobianfx(siconos::fortran::integer* sizeOfX,
-                                                 siconos::fortran::doublereal* time,
-                                                 siconos::fortran::doublereal* x,
-                                                 siconos::fortran::integer* ml,
-                                                 siconos::fortran::integer* mu,
-                                                 siconos::fortran::doublereal* jacob,
-                                                 siconos::fortran::integer* nrowpd)
+void siconos::integrators::LsodarOSI::jacobianfx(int* sizeOfX, double* time, double* x,
+                                                 int* ml, int* mu, double* jacob, int* nrowpd)
 {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computeJacobianfx(*this, sizeOfX, time, x, jacob);
@@ -316,7 +274,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
   // 6 - liw, size of iwork
   _intData[7] = 20 + _intData[0];
 
-  // memory allocation for siconos::fortran::doublereal*, according to _intData values
+  // memory allocation for double*, according to _intData values
   updateData();
 
   _xtmp = std::make_shared<siconos::algebra::SiconosVector>(_xWork->size());
@@ -459,7 +417,7 @@ void siconos::integrators::LsodarOSI::initialize()
   //     *_dynamicalSystemsGraph);
   //   }
 
-  //   Siconos::Fortran::Integer parameters for LSODAROSI are saved in vector intParam.
+  //   int parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
 
   // 2 - Ng, number of constraints:
@@ -525,9 +483,8 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend, tout, istate);
 
   // For details on DLSODAR parameters, see opkdmain.f in externals/odepack
-  siconos::fortran::doublereal tend_DR =
-      tend;  // next point where output is desired (different from t!)
-  siconos::fortran::doublereal tinit_DR = tinit;  // current (starting) time
+  double tend_DR = tend;    // next point where output is desired (different from t!)
+  double tinit_DR = tinit;  // current (starting) time
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
@@ -574,7 +531,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   // === Post ===
   if (_intData[4] < 0)  // if istate < 0 => LSODAROSI failed
   {
-    std::cout << "LSodar::integrate(...) failed - Istate = " << _intData[4] << std::endl;
+    std::cout << "Lsodar::integrate(...) failed - Istate = " << _intData[4] << std::endl;
     std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so small "
                  "tolerance (ATOL and RTOL), or small maximum number of steps for one call "
                  "(MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP"

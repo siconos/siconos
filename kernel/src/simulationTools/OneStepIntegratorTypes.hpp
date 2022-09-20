@@ -33,7 +33,7 @@ enum class IntegratorType {
   MOREAUJEANOSI,
   /** ?? */
   MOREAUJEANGOSI,
-  /** LSodar (ode solver with rootfinding process) */
+  /** Lsodar (ode solver with rootfinding process) */
   LSODAROSI,
   /** odepack HEM5 (Hairer) solver */
   HEM5OSI,

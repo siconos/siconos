@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file ControlLsodarSimulation.hpp
  * \brief Simulation with Control using Lsodar
@@ -25,12 +25,12 @@
 
 #include "ControlSimulation.hpp"
 
+namespace siconos::control {
 class ControlLsodarSimulation : public ControlSimulation {
-
-public:
+ public:
   ControlLsodarSimulation(double t0, double T, double h);
 
   virtual void run();
-
 };
+}  // namespace siconos::control
 #endif

@@ -14,64 +14,63 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file ControlSensor.hpp
  * A generic control sensor
-*/
+ */
 
 #ifndef ControlSensor_H
 #define ControlSensor_H
 
-#include "Sensor.hpp"
 #include <boost/circular_buffer.hpp>
+
+#include "Sensor.hpp"
+
+namespace siconos::control {
 
 /** Generic control Sensor to get the output of the system
  */
-class ControlSensor : public Sensor
-{
-private:
-  
+class ControlSensor : public Sensor {
+ private:
   ACCEPT_SERIALIZATION(ControlSensor);
 
-protected:
+ protected:
   /** A vector for the current value of the output */
-  SP::SiconosVector _storedY;
+  std::shared_ptr<siconos::algebra::SiconosVector> _storedY{nullptr};
 
   /** delay between the measurement on the DynamicalSystem and the avaibility of the value */
-  double _delay;
+  double _delay{0.};
 
   /** A buffer to store the value of \f$ y_k \f$ if there is a delay */
-  boost::circular_buffer<SP::SiconosVector> _bufferY;
-
-  /** Default constructor
-   */
-  ControlSensor() {};
+  boost::circular_buffer<std::shared_ptr<siconos::algebra::SiconosVector>> _bufferY;
 
   /** Simple Constructor
    *
    *  \param type the type of the Sensor
-   *  \param ds the SP::DynamicalSystem it observes
+   *  \param ds the std::shared_ptr<siconos::modeling::DynamicalSystem> it observes
    *  \param delay the delay between the measurement and the avaibility of the data
    */
-  ControlSensor(unsigned int type, SP::DynamicalSystem ds, double delay = 0):
-    Sensor(type, ds), _delay(delay) {}
+  ControlSensor(SensorType type, std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                double delay = 0)
+      : Sensor(type, ds), _delay(delay)
+  {
+  }
 
-public:
-
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds);
+ public:
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds);
 
   /** Get the dimension of the output
    *
    *  \return an unsigned int
    */
-  unsigned int getYDim() const ;
+  unsigned int getYDim() const;
 
   /** Get a pointer to the output
    *
-   *  \return SP::SiconosVector to the output
+   *  \return std::shared_ptr<siconos::algebra::SiconosVector> to the output
    */
-  inline const SiconosVector& y() const
+  inline const siconos::algebra::SiconosVector& y() const
   {
     if (_delay == 0)
       return *_storedY;
@@ -79,10 +78,7 @@ public:
       return *_bufferY.front();
   };
 
-  inline SP::SiconosVector yTk() const
-  {
-    return _storedY;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> yTk() const { return _storedY; }
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */
@@ -90,4 +86,5 @@ public:
   // just to help Doxygen's imperfect detection of abstract classes.
   virtual void capture() = 0;
 };
+}  // namespace siconos::control
 #endif

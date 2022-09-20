@@ -67,9 +67,12 @@ class ActuatorEvent : public siconos::simulation::Event {
    */
   void process(siconos::simulation::Simulation& sim);
 
-  // Register the event into the factory
-  static EventRegistration<ActuatorEvent> reg_AC(EventType::Actuator);
-
 };
 }  // namespace siconos::control
+
+namespace siconos::simulation{
+    // Register the event into the factory
+  static EventRegistration<siconos::control::ActuatorEvent> reg_AC(EventType::Actuator);
+
+}
 #endif  // ActuatorEvent_H

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file RegularTwisting.hpp
   \brief twisting algorithm with a direct discretization
@@ -25,26 +25,19 @@
 
 #include "Twisting.hpp"
 
+namespace siconos::control {
 
 /** Twisting Controller with a straightforward discretization */
-class RegularTwisting : public Twisting
-{
-private:
-  
+class RegularTwisting : public Twisting {
+ private:
   ACCEPT_SERIALIZATION(RegularTwisting);
 
-
-protected:
-  /** default constructor */
-  RegularTwisting() {};
-
-public:
-
+ public:
   /** Constructor for a nonlinear system or the ActuatorFactory
    * \param sensor the ControlSensor feeding the Actuator
    * \param hControl sampling period
    */
-  RegularTwisting(SP::ControlSensor sensor);
+  RegularTwisting(std::shared_ptr<ControlSensor> sensor);
 
   /** Constructor for the linear case
    * \param sensor the ControlSensor feeding the Actuator
@@ -52,11 +45,14 @@ public:
    * \param beta twisting parameter
    * \param hControl sampling period
    */
-  RegularTwisting(SP::ControlSensor sensor, double gain, double beta);
+  RegularTwisting(std::shared_ptr<ControlSensor> sensor, double gain, double beta);
 
   /** destructor
    */
-  virtual ~RegularTwisting();
-
+  virtual ~RegularTwisting() noexcept = default;
 };
+// Register the observer into the factory
+static ActuatorRegistration<RegularTwisting> reg_AELSMC(ActuatorType::RegularTwisting);
+
+}  // namespace siconos::control
 #endif

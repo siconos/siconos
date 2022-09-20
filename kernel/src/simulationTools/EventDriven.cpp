@@ -403,16 +403,16 @@ void siconos::simulation::EventDriven::initialize()
 }
 
 void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepIntegrator& osi,
-                                                siconos::fortran::integer* sizeOfX,
-                                                siconos::fortran::doublereal* time,
-                                                siconos::fortran::doublereal* x,
-                                                siconos::fortran::doublereal* xdot)
+                                                int* sizeOfX,
+                                                double* time,
+                                                double* x,
+                                                double* xdot)
 {
   DEBUG_BEGIN(
       "siconos::simulation::EventDriven::computef(OneStepIntegrator& osi, "
-      "siconos::fortran::integer * sizeOfX, "
-      "siconos::fortran::doublereal * time, siconos::fortran::doublereal * x, "
-      "siconos::fortran::doublereal * xdot)\n");
+      "int * sizeOfX, "
+      "double * time, double * x, "
+      "double * xdot)\n");
   // computeF is supposed to fill xdot in, using the definition of the
   // dynamical systems belonging to the osi
 
@@ -470,15 +470,15 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
   }
   DEBUG_END(
       "siconos::simulation::EventDriven::computef(OneStepIntegrator& osi, "
-      "siconos::fortran::integer * sizeOfX, "
-      "siconos::fortran::doublereal * time, siconos::fortran::doublereal * x, "
-      "siconos::fortran::doublereal * xdot)\n");
+      "int * sizeOfX, "
+      "double * time, double * x, "
+      "double * xdot)\n");
 }
 
 void siconos::simulation::EventDriven::computeJacobianfx(
-    siconos::integrators::OneStepIntegrator& osi, siconos::fortran::integer* sizeOfX,
-    siconos::fortran::doublereal* time, siconos::fortran::doublereal* x,
-    siconos::fortran::doublereal* jacob)
+    siconos::integrators::OneStepIntegrator& osi, int* sizeOfX,
+    double* time, double* x,
+    double* jacob)
 {
   assert(osi.getType() == siconos::integrators::IntegratorType::LSODAROSI);
 
@@ -537,9 +537,9 @@ unsigned int siconos::simulation::EventDriven::computeSizeOfg()
 
 void siconos::simulation::EventDriven::computeg(
     std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-    siconos::fortran::integer* sizeOfX, siconos::fortran::doublereal* time,
-    siconos::fortran::doublereal* x, siconos::fortran::integer* ng,
-    siconos::fortran::doublereal* gOut)
+    int* sizeOfX, double* time,
+    double* x, int* ng,
+    double* gOut)
 {
   assert(_nsds);
   assert(_nsds->topology());
@@ -766,7 +766,7 @@ void siconos::simulation::EventDriven::advanceToEvent()
       // std::shared_ptr<siconos::integrators::LsodarOSI> lsodar =
       // std::static_pointer_cast<LsodarOSI>(it);
       // boost::shared_array<siconos::fortran::integer> iwork = lsodar->getIwork();
-      // boost::shared_array<siconos::fortran::doublereal> rwork = lsodar->getRwork();
+      // boost::shared_array<double> rwork = lsodar->getRwork();
       //  std::cout << "Number of steps used: " << iwork[10] <<"\n";
       //  std::cout << "Method order last used: " << iwork[13] <<"\n";
       //  std::cout << "Step size last used: " << rwork[10] <<"\n";
@@ -794,7 +794,7 @@ void siconos::simulation::EventDriven::advanceToEvent()
       //     std::shared_ptr<siconos::integrators::LsodarOSI> lsodar =
       //     std::static_pointer_cast<LsodarOSI>(it); statOut << "Results at time " << _tout <<
       //     ":" <<"\n"; boost::shared_array<siconos::fortran::integer> iwork =
-      //     lsodar->getIwork(); boost::shared_array<siconos::fortran::doublereal> Rwork =
+      //     lsodar->getIwork(); boost::shared_array<double> Rwork =
       //     lsodar->getRwork(); statOut << "Number of steps: " << iwork[10] << ", number of f
       //     evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "."
       //     <<"\n";

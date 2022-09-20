@@ -54,7 +54,7 @@ enum class EventType {
   /** Sensor (control toolbox) */
   Sensor,
   /** Observer (control toolbox) */
-  Obsesrver,
+  Observer,
   /** User defined: extra ids to allow users to define their own events */
   UserDefined1,
   UserDefined2

@@ -105,6 +105,7 @@ void randomize(M &m, T min = 0., T max = 100.)
   for (auto it = m.begin1(); it != m.end1(); ++it)
     generate(it.begin(), it.end(), RndIntGen<T>(min, max));
 }
+
 }  // namespace internal
 }  // namespace siconos::algebra
 
