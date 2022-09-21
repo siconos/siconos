@@ -92,8 +92,8 @@ class PluggedObject {
   std::string _pluginName{"unplugged"};
 
   PluggedObject(const PluggedObject&& PO) = delete;
-  PluggedObject operator=(const PluggedObject& PO) = delete;
-  PluggedObject operator=(const PluggedObject&& PO) = delete;
+  PluggedObject& operator=(const PluggedObject& PO) = delete;
+  PluggedObject& operator=(const PluggedObject&& PO) = delete;
 
  public:
 

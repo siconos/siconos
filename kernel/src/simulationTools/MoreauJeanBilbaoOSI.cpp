@@ -283,7 +283,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState()
     auto& vfree = *work_ds[siconos::integrators::MoreauJeanBilbaoOSI::VFREE];
     // Compute vfree
     auto dimension = lldds.dimension();
-    for (auto k = 0; k < dimension; ++k)
+    for (decltype(dimension) k = 0; k < dimension; ++k)
       vfree(k) = v_i(k) - inv_iteration_matrix(k, k) * (time_step * stiffness(k) * q_i(k) +
                                                         two_dt_sigma_star(k) * v_i(k));
     DEBUG_EXPR(vfree.display(););
@@ -338,8 +338,6 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   //   Lagrangian Linear Relations are allowed.");
 
   auto sizeY = inter.nonSmoothLaw()->size();
-  unsigned int relativePosition = 0;
-
   std::vector<std::size_t> coord{0, sizeY, 0, 0, 0, 0, 0, sizeY};
   // buffer used to save output
   auto& x_free = *inter_work_block[siconos::integrators::MoreauJeanBilbaoOSI::xfree];

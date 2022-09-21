@@ -29,7 +29,7 @@
 #include "SimulationGraphs.hpp"
 
 namespace siconos::numerics {
-class SolverOptions;
+struct SolverOptions;
 }
 
 namespace siconos::simulation {

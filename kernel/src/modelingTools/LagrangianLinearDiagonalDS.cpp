@@ -91,9 +91,9 @@ void siconos::modeling::LagrangianLinearDiagonalDS::computeForces(
   }
 
   if (_stiffness)
-    for (auto i = 0; i < _ndof; ++i) (*_forces)(i) -= (*_stiffness)(i) * (*q2)(i);
+    for (decltype(_ndof) i = 0; i < _ndof; ++i) (*_forces)(i) -= (*_stiffness)(i) * (*q2)(i);
   if (_damping)
-    for (auto i = 0; i < _ndof; ++i) (*_forces)(i) -= (*_damping)(i) * (*v2)(i);
+    for (decltype(_ndof) i = 0; i < _ndof; ++i) (*_forces)(i) -= (*_damping)(i) * (*v2)(i);
 
   // if (_stiffness)
   // {

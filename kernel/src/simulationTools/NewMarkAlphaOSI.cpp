@@ -273,7 +273,6 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
 
-  auto& DSlink = inter->linkToDSVariables();
   auto& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
   // Get the type of relation
   auto relationType = inter->relation()->getType();

@@ -50,21 +50,21 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
       ++counter;
     }
 
-    for (auto i = 0; i < x.size(); ++i) {
+    for (decltype(x.size()) i = 0; i < x.size(); ++i) {
       legend.append(" " + nameDS + "_" + std::to_string(i));
     }
 
     if (DSG0.u.hasKey(*dsvi)) {
       auto sizeU = DSG0.u[*dsvi]->size();
       nb += sizeU;
-      for (auto i = 0; i < sizeU; ++i) {
+      for (decltype(sizeU) i = 0; i < sizeU; ++i) {
         legend.append(" " + nameDS + "_u_" + std::to_string(i));
       }
     }
 
     if (DSG0.e.hasKey(*dsvi)) {
       auto sizeE = DSG0.e[*dsvi]->size();
-      for (auto i = 0; i < sizeE; ++i) {
+      for (decltype(sizeE) i = 0; i < sizeE; ++i) {
         legend.append(" " + nameDS + "_e_" + std::to_string(i));
       }
       nb += DSG0.e[*dsvi]->size();
@@ -84,13 +84,13 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
     }
     auto& y = *IG0.bundle(*ivi)->y(0);
     nb += y.size();
-    for (auto i = 0; i < y.size(); ++i) {
+    for (decltype(y.size()) i = 0; i < y.size(); ++i) {
       legend.append(" " + nameInter + "_y_" + std::to_string(i));
     }
 
     auto& lambda = *IG0.bundle(*ivi)->lambda(0);
     nb += lambda.size();
-    for (auto i = 0; i < lambda.size(); ++i) {
+    for (decltype(lambda.size()) i = 0; i < lambda.size(); ++i) {
       legend.append(" " + nameInter + "_lambda_" + std::to_string(i));
     }
   }
@@ -116,14 +116,14 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
     auto i = column;
     auto& x = *DSG0.bundle(*dsvi)->x();
-    for (auto j = 0; j < x.size(); ++i, ++j) {
+    for (decltype(x.size()) j = 0; j < x.size(); ++i, ++j) {
       data(indx, i) = x(j);
     }
     column += x.size();
 
     if (DSG0.u.hasKey(*dsvi)) {
       auto& u = *DSG0.u[*dsvi];
-      for (auto j = 0; j < u.size(); ++i, ++j) {
+      for (decltype(u.size()) j = 0; j < u.size(); ++i, ++j) {
         data(indx, i) = u(j);
       }
       column += u.size();
@@ -131,7 +131,7 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
 
     if (DSG0.e.hasKey(*dsvi)) {
       auto& e = *DSG0.e[*dsvi];
-      for (auto j = 0; j < e.size(); ++i, ++j) {
+      for (decltype(e.size()) j = 0; j < e.size(); ++i, ++j) {
         data(indx, i) = e(j);
       }
       column += e.size();
@@ -142,13 +142,13 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
   for (std::tie(ivi, ivdend) = IG0.vertices(); ivi != ivdend; ++ivi) {
     auto i = column;
     auto& y = *IG0.bundle(*ivi)->y(0);
-    for (auto j = 0; j < y.size(); ++i, ++j) {
+    for (decltype(y.size()) j = 0; j < y.size(); ++i, ++j) {
       data(indx, i) = y(j);
     }
     column += y.size();
 
     auto& lambda = *IG0.bundle(*ivi)->lambda(0);
-    for (auto j = 0; j < lambda.size(); ++i, ++j) {
+    for (decltype(lambda.size()) j = 0; j < lambda.size(); ++i, ++j) {
       data(indx, i) = lambda(j);
     }
     column += lambda.size();

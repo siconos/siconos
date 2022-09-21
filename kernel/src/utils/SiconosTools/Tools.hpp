@@ -78,7 +78,7 @@ void progressBar(double percentage);
 template <typename T>
 std::string enum_to_string(T value)
 {
-  return std::to_string(static_cast<std::underlying_type<T>::type>(value));
+  return std::to_string(static_cast<typename std::underlying_type<T>::type>(value));
 }
 
 }  // namespace siconos::tools

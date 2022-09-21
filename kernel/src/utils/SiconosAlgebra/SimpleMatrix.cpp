@@ -376,7 +376,7 @@ siconos::algebra::SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii
   }
 }
 
-siconos::algebra::SimpleMatrix::~SimpleMatrix()
+siconos::algebra::SimpleMatrix::~SimpleMatrix() noexcept
 {
   if (_num == UblasType::DENSE) {
     delete (mat.Dense);

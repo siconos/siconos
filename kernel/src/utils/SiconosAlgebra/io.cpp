@@ -168,8 +168,8 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
 
   if (m.num() == UblasType::DENSE) {
     double tmp;
-    for (auto i = 0; i < m.size(0); i++) {
-      for (auto j = 0; j < m.size(1); j++) {
+    for (decltype(m.size(0)) i = 0; i < m.size(0); i++) {
+      for (decltype(m.size(1)) j = 0; j < m.size(1); j++) {
         tmp = m(i, j);
         if (fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
         outfile << tmp << " ";

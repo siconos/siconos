@@ -32,8 +32,8 @@ class SimpleMatrix;
 }  // namespace siconos::algebra
 
 namespace siconos::graphs {
-class DynamicalSystemsGraph;
-class InteractionsGraph;
+struct DynamicalSystemsGraph;
+struct InteractionsGraph;
 }  // namespace siconos::graphs
 namespace siconos::modeling {
 class NonSmoothDynamicalSystem;
@@ -126,8 +126,8 @@ class ControlSimulation {
   ControlSimulation() = delete;
   ControlSimulation(const ControlSimulation&) = delete;
   ControlSimulation(const ControlSimulation&&) = delete;
-  ControlSimulation operator=(const ControlSimulation&) = delete;
-  ControlSimulation operator=(const ControlSimulation&&) = delete;
+  ControlSimulation& operator=(const ControlSimulation&) = delete;
+  ControlSimulation& operator=(const ControlSimulation&&) = delete;
 
  public:
   /** destructor */

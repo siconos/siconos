@@ -957,7 +957,7 @@ void siconos::simulation::MLCPProjectOnConstraints::computeqBlock(
       std::static_pointer_cast<OSNSMatrixProjectOnConstraints>(_M)->computeSizeForProjection(
           inter);
   DEBUG_PRINTF("pos = %i", pos);
-  for (auto i = 0; i < sizeY; i++) _q->setValue(pos + i, inter->y(0)->getValue(0 + i));
+  for (decltype(sizeY) i = 0; i < sizeY; i++) _q->setValue(pos + i, inter->y(0)->getValue(0 + i));
 
   DEBUG_EXPR(_q->display(););
   DEBUG_END(

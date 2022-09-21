@@ -129,8 +129,8 @@ class Actuator {
   Actuator() = delete;
   Actuator(const Actuator&) = delete;
   Actuator(const Actuator&&) = delete;
-  Actuator operator=(const Actuator&) = delete;
-  Actuator operator=(const Actuator&&) = delete;
+  Actuator& operator=(const Actuator&) = delete;
+  Actuator& operator=(const Actuator&&) = delete;
 
  public:
   /** General Constructor

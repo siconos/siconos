@@ -45,11 +45,11 @@ class NewtonEuler3DR : public NewtonEuler1DR {
 
  protected:
  public:
-  NewtonEuler3DR() : NewtonEuler1DR() {}
+  NewtonEuler3DR() = default;
 
   /** destructor
    */
-  virtual ~NewtonEuler3DR(){};
+  virtual ~NewtonEuler3DR() noexcept = default;
 
   /** initialize components specific to derived classes.
    *

@@ -118,7 +118,7 @@ class NewtonEuler1DR : public NewtonEulerR {
 
   /** destructor
    */
-  virtual ~NewtonEuler1DR(){};
+  virtual ~NewtonEuler1DR() noexcept = default;
 
   void computeJachq(double time, Interaction &inter,
                     std::shared_ptr<siconos::algebra::BlockVector> q0) override;

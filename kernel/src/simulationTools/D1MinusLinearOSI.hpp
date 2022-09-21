@@ -131,7 +131,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
   enum class D1MinusType {
     halfexplicit_acceleration_level,
     halfexplicit_acceleration_level_full,
-    explicit_velocity_level,
+    // explicit_velocity_level,
     halfexplicit_velocity_level,
   };
 
@@ -172,7 +172,6 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \param type unsigned int that specifies the type of D1MinusLinear
    * D1MinusLinearOSI::halfexplicit_acceleration_level,
    * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
-   * D1MinusLinearOSI::explicit_velocity_level,
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
@@ -185,7 +184,6 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * \return unsigned int type  the type to set
    * D1MinusLinearOSI::halfexplicit_acceleration_level,
    * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
-   * D1MinusLinearOSI::explicit_velocity_level,
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */

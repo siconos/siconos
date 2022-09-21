@@ -16,39 +16,28 @@
  * limitations under the License.
  */
 
-#include <boost/numeric/bindings/blas/level3.hpp>
-#include <boost/numeric/bindings/ublas/matrix.hpp>
+// Note Franck : sounds useless. It seems it's defined in bindings
+// (to be checked, especially on windows)
+// #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
+// #include <boost/numeric/bindings/blas/level3.hpp>
+// #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
-
-// Note Franck : sounds useless. It seems it's defined in bindings
-// (to be checked, especially on windows)
-
-// #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
-
 // needed for blas3
 #include <assert.h>
-
 // for ublas::axpy_prod, ...
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
-
 // require for matrix stuff like value_type
 //#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-
-// #include "BlockMatrix.hpp"
-// #include "SiconosAlgebra.hpp"
-// #include "SiconosAlgebraProd.hpp" // for prod
 #include "SimpleMatrix.hpp"
-
 #include "SiconosAlgebraProd.hpp"
 #include "SiconosMatrix.hpp"
 
-
 namespace ublas = boost::numeric::ublas;
-namespace bindings_blas = boost::numeric::bindings::blas;
+// namespace bindings_blas = boost::numeric::bindings::blas;
 
 //======================
 // Product of matrices

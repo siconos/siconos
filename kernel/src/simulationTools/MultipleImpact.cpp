@@ -476,7 +476,7 @@ bool siconos::simulation::MultipleImpact::IsVcminNegative()
 //=======================================================================================
 void siconos::simulation::MultipleImpact::Check_stateContact()
 {
-  for (auto i = 0; i < _nContact; ++i) {
+  for (decltype(_nContact) i = 0; i < _nContact; ++i) {
     if (isEnerZero((*_energyContact)(i)))  // potential energy is zero
     {
       if (!isVelNegative(
@@ -499,7 +499,7 @@ void siconos::simulation::MultipleImpact::Check_stateContact()
 bool siconos::simulation::MultipleImpact::IsMulImpactTerminate()
 {
   _IsImpactEnd = true;
-  for (auto i = 0; i < _nContact; ++i) {
+  for (decltype(_nContact) i = 0; i < _nContact; ++i) {
     if (((*_energyContact)(i) > _ZeroEner_EndIm) ||
         ((*_velocityContact)(i) <
          -_ZeroVel_EndIm))  // if potential energy is not equal to zero or the relative
@@ -555,7 +555,7 @@ void siconos::simulation::MultipleImpact::Compute_distributionVector()
                                  // velocity
   {
     double ratio_vel;
-    for (auto i = 0; i < _nContact; ++i) {
+    for (decltype(_nContact) i = 0; i < _nContact; ++i) {
       if ((*_stateContact)[i] != 0)  // the impact can takes place at this contact
       {
         _mu = (*_elasticyCoefficientcontact)(
@@ -590,7 +590,7 @@ void siconos::simulation::MultipleImpact::Compute_distributionVector()
   }
   // Case 2: case of primary contact selected according to the potential energy
   else {
-    for (auto i = 0; i < _nContact; ++i) {
+    for (decltype(_nContact) i = 0; i < _nContact; ++i) {
       //
       _mu = (*_elasticyCoefficientcontact)(i);
       _stiff = (*_Kcontact)(i);
@@ -647,7 +647,7 @@ void siconos::simulation::MultipleImpact::ComputeImpulseContact()
   (*_impulseContactUpdate) = (*_impulseContactUpdate) + (*_deltaImpulseContact);
   // Compute the contact force
   double PowCompLaw;
-  for (auto i = 0; i < _nContact; ++i) {
+  for (decltype(_nContact) i = 0; i < _nContact; ++i) {
     PowCompLaw = (*_elasticyCoefficientcontact)(i);
     if (isEnerZero((*_energyContact)(i)))  // if potential energy at this contact is zero
     {
@@ -701,7 +701,7 @@ void siconos::simulation::MultipleImpact::Compute_energyContact()
   if (_typeCompLaw == "BiStiffness")
   // For Bistiffness model
   {
-    for (auto i = 0; i < _nContact; ++i) {
+    for (decltype(_nContact) i = 0; i < _nContact; ++i) {
       if ((0.5 * ((*_oldVelocityContact)(i) + (*_velocityContact)(i))) <=
           0.0)  // Contact located in the compression phase
       {

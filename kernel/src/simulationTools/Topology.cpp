@@ -40,7 +40,7 @@ siconos::simulation::Topology::Topology()
 }
 
 // destructor
-siconos::simulation::Topology::~Topology() { clear(); }
+siconos::simulation::Topology::~Topology() noexcept { clear(); }
 
 std::pair<siconos::graphs::DynamicalSystemsGraph::EDescriptor,
           siconos::graphs::InteractionsGraph::VDescriptor>

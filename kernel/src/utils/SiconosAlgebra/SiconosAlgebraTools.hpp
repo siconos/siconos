@@ -98,7 +98,7 @@ struct RndIntGen {
 
 /** Random init of a boost ublas matrix
  */
-template <typename M, typename T = M::value_type>
+template <typename M, typename T = typename M::value_type>
 void randomize(M &m, T min = 0., T max = 100.)
 {
   // using value_type = typename M::value_type;

@@ -139,7 +139,7 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
 
   /** destructor
    */
-  ~SiconosVector();
+  ~SiconosVector() noexcept;
 
   /** get the vector size, ie the total number of (double) elements in the vector
    *

@@ -284,7 +284,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    *
    *  \return a set of pointers to OneStepNSProblem
    */
-  inline const auto oneStepNSProblems() const { return _allNSProblems; };
+  inline auto oneStepNSProblems() const { return _allNSProblems; };
 
   /** get the number of OSNSP in the Simulation (ie the size of allNSProblems)
    *

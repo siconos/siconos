@@ -503,7 +503,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const BlockVector &x, Sic
     subprod(A, *tmp, y, subCoord, init);
   }
   else {
-    auto xPos = 0;  // Position in x of the current sub-vector of x
+    decltype(firstBlockNum) xPos = 0;  // Position in x of the current sub-vector of x
     bool firstLoop = true;
     subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
     for (const auto &vec : x) {

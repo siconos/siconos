@@ -34,7 +34,7 @@ siconos::simulation::Event::Event(double time, EventType newType, bool reschedul
   _eventCreated = true;
 }
 
-siconos::simulation::Event::~Event()
+siconos::simulation::Event::~Event() noexcept
 {
   mpz_clear(_timeOfEvent);
   mpz_clear(_tickIncrement);

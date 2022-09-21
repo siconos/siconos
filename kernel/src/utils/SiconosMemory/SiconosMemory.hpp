@@ -59,11 +59,10 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
    this[_indx] is to the oldest element in the set */
   std::vector<siconos::algebra::SiconosVector>::size_type _indx = 0;
 
-  /* Forbid  assignment */
-  // SiconosMemory(const SiconosMemory& Mem) = delete;
+  //  Forbid  assignment
   // void operator=(const SiconosMemory&) = delete;
   SiconosMemory(const std::vector<siconos::algebra::SiconosVector>&) = delete;
-  void operator=(const std::vector<siconos::algebra::SiconosVector>& V);
+  SiconosMemory& operator=(const std::vector<siconos::algebra::SiconosVector>& V) = delete;
 
  public:
   /** creates an empty SiconosMemory. */
@@ -88,7 +87,7 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
 
   /** Assignment
    */
-  void operator=(const SiconosMemory&);
+  SiconosMemory& operator=(const SiconosMemory&);
 
   /** Return the vector number i from the memory
    *

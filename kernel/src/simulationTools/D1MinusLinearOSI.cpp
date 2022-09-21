@@ -495,12 +495,13 @@ bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet(
       return addInteractionInIndexSetHalfExplicitAccelerationLevel(inter, i);
     case D1MinusType::halfexplicit_velocity_level:
       return addInteractionInIndexSetHalfExplicitVelocityLevel(inter, i);
+    default:
+      THROW_EXCEPTION(
+          "siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet() - not "
+          "implemented "
+          "for type of D1MinusLinearOSI: " +
+          siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
   }
-  THROW_EXCEPTION(
-      "siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet() - not implemented "
-      "for type of D1MinusLinearOSI: " +
-      siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
-
   return 0;
 }
 
@@ -514,10 +515,11 @@ bool siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet(
       return removeInteractionFromIndexSetHalfExplicitAccelerationLevel(inter, i);
     case D1MinusType::halfexplicit_velocity_level:
       return removeInteractionFromIndexSetHalfExplicitVelocityLevel(inter, i);
+    default:
+      THROW_EXCEPTION(
+          "siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet() - not "
+          "implemented for type of D1MinusLinearOSI: " +
+          siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
   }
-  THROW_EXCEPTION(
-      "siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet() - not "
-      "implemented for type of D1MinusLinearOSI: " +
-      siconos::tools::enum_to_string(_typeOfD1MinusLinearOSI));
   return 0;
 }

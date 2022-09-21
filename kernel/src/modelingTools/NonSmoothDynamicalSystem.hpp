@@ -23,18 +23,19 @@
 
 #include <list>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "SiconosSerialization.hpp"
 
 namespace siconos::internal {
-class SiconosVisitor;
+struct SiconosVisitor;
 }
 
 namespace siconos::graphs {
 
-class DynamicalSystemsGraph;
-class InteractionsGraph;
+struct DynamicalSystemsGraph;
+struct InteractionsGraph;
 }  // namespace siconos::graphs
 
 namespace siconos::simulation {
@@ -117,7 +118,7 @@ class NonSmoothDynamicalSystem {
   double _T = 0.;
 
   /** information concerning the Model */
-  std::string _title = "none";
+  std::string _title{"none"};
   std::string _author = "none";
   std::string _description = "none";
   std::string _date = "unknown";
@@ -136,15 +137,12 @@ class NonSmoothDynamicalSystem {
   bool _mIsLinear = true;
 
   // Rule of five
+  NonSmoothDynamicalSystem() = delete;
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&) = delete;
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&&) = delete;
   NonSmoothDynamicalSystem& operator=(const NonSmoothDynamicalSystem&) = delete;
   NonSmoothDynamicalSystem& operator=(const NonSmoothDynamicalSystem&&) = delete;
 
-  // Forbid default constructor except for serialization. No use to
-  //   build a NSDS with t0=T.*/
- protected:
-  NonSmoothDynamicalSystem() = default;
 
  public:
   /** NSDS constructor.
@@ -156,7 +154,7 @@ class NonSmoothDynamicalSystem {
 
   /** destructor
    */
-  ~NonSmoothDynamicalSystem();
+  ~NonSmoothDynamicalSystem() noexcept;
 
   // --- GETTERS/SETTERS ---
   /** \return the current time value

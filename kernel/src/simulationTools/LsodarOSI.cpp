@@ -614,8 +614,8 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
 
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&&) = delete;
-  _NSLEffectOnFreeOutput operator=(const _NSLEffectOnFreeOutput&) = delete;
-  _NSLEffectOnFreeOutput operator=(const _NSLEffectOnFreeOutput&&) = delete;
+  _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&) = delete;
+  _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&&) = delete;
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override
   {

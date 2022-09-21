@@ -57,7 +57,7 @@ siconos::simulation::GenericMechanical::GenericMechanical(
       "numerics::SolverOptions> options)\n");
 }
 
-siconos::simulation::GenericMechanical::~GenericMechanical()
+siconos::simulation::GenericMechanical::~GenericMechanical() noexcept
 {
   genericMechanicalProblem_free(_pnumerics_GMP, siconos::numerics::GMP_FREE_GMP);
   _pnumerics_GMP = nullptr;
@@ -120,7 +120,7 @@ void siconos::simulation::GenericMechanical::computeDiagonalInteractionBlock(
           _pnumerics_GMP, siconos::numerics::SICONOS_NUMERICS_PROBLEM_RELAY, size));
       auto nsLaw =
           std::static_pointer_cast<siconos::modeling::RelayNSL>(inter->nonSmoothLaw());
-      for (int i = 0; i < size; i++) {
+      for (decltype(size) i = 0; i < size; i++) {
         pAux->lb[i] = nsLaw->lb();
         pAux->ub[i] = nsLaw->ub();
       }

@@ -33,7 +33,7 @@
 #include "TypeName.hpp" // visitor to get ds type
 namespace siconos::internal{
 
-  class SiconosVisitor;
+  struct SiconosVisitor;
 }
 
 namespace siconos::algebra {

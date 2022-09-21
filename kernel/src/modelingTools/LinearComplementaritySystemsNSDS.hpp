@@ -52,10 +52,6 @@ class LinearComplementaritySystemsNSDS : public NonSmoothDynamicalSystem {
   /** an interaction*/
   std::shared_ptr<Interaction> _interaction{nullptr};
 
- protected:
-  // for serialization only
-  LinearComplementaritySystemsNSDS() = default;
-
  public:
   /** constructor with t0 and T
    *

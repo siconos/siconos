@@ -414,12 +414,6 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
     /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all
     OSNSP*/
     if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      // SP::SimpleMatrix Mold;
-      // Mold.reset(new SimpleMatrix(*(std::static_pointer_cast<LagrangianDS>(ds))->mass()));
-      // DEBUG_EXPR(Mold->display(););
-      // DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " Mold->isFactorized() = "<<
-      // Mold->isFactorized() << std::endl;);
-      //(std::static_pointer_cast<LagrangianDS>(ds))->computeMass();
       auto Mass = ((std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds))->mass());
       DEBUG_EXPR(Mass->display(););
       DEBUG_EXPR_WE(std::cout << std::boolalpha

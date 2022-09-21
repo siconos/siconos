@@ -225,7 +225,7 @@ siconos::algebra::SiconosVector::SiconosVector(const BlockVector& input)
   }
 }
 
-siconos::algebra::SiconosVector::~SiconosVector()
+siconos::algebra::SiconosVector::~SiconosVector() noexcept
 {
   if (_dense)
     delete (vect.Dense);
@@ -513,7 +513,6 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator=(
       case UblasType::DENSE:
         switch (vInNum) {
           case UblasType::DENSE:
-            // bindings_blas::copy(*vIn.dense(),*vect.Dense);
             noalias(*vect.Dense) = *vIn.dense();
             break;
           case UblasType::SPARSE:
@@ -787,8 +786,6 @@ siconos::algebra::SiconosVector siconos::algebra::operator+(const SiconosVector&
   if (numX == numY)  // x, y SiconosVector of the same type
   {
     if (numX == UblasType::DENSE) {
-      //    bindings_blas::xpy(*x.dense(),p);
-      //    return p;
       return (DenseVect)(*x.dense() + *y.dense());
     }
     else
@@ -868,8 +865,6 @@ siconos::algebra::SiconosVector siconos::algebra::operator-(const SiconosVector&
   if (numX == numY)  // x, y SiconosVector of the same type
   {
     if (numX == UblasType::DENSE) {
-      //    bindings_blas::xpy(*x.dense(),p);
-      //    return p;
       return (DenseVect)(*x.dense() - *y.dense());
     }
     else
@@ -1083,7 +1078,6 @@ void siconos::algebra::scal(double a, const SiconosVector& x, SiconosVector& y, 
       if (numX == UblasType::DENSE)  // ie if both are Dense
       {
         if (init)
-          // bindings_blas::axpby(a,*x.dense(),0.0,*y.dense());
           noalias(*y.dense()) = a * *x.dense();
         else
           noalias(*y.dense()) += a * *x.dense();

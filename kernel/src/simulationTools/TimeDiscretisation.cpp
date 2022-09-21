@@ -65,7 +65,7 @@ TimeDiscretisation{td.getTkVector()}
 }
 
 // --- Destructor ---
-siconos::simulation::TimeDiscretisation::~TimeDiscretisation()
+siconos::simulation::TimeDiscretisation::~TimeDiscretisation() noexcept
 {
   if (!_tkV.empty()) _tkV.clear();
 

@@ -45,7 +45,7 @@ siconos::algebra::SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
   }
 }
 
-void siconos::algebra::SiconosMemory::operator=(const SiconosMemory& V)
+siconos::algebra::SiconosMemory& siconos::algebra::SiconosMemory::operator=(const SiconosMemory& V)
 {
   if (size() != V.size()) {
     this->resize(V.size());  // => copy construction of old content
@@ -57,6 +57,7 @@ void siconos::algebra::SiconosMemory::operator=(const SiconosMemory& V)
   }
   _indx = V._indx;
   _nbVectorsInMemory = V._nbVectorsInMemory;
+  return *this;
 }
 
 // (Re)set the size of an existing SiconosMemory

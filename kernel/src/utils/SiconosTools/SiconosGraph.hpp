@@ -159,7 +159,7 @@ class SiconosGraph {
    */
   SiconosGraph() : _stamp(0){};
 
-  ~SiconosGraph() { g.clear(); };
+  ~SiconosGraph() noexcept { g.clear(); };
 
   const graph_t& storage() const { return g; }
 

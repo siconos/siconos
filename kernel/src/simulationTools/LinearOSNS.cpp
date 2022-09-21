@@ -43,7 +43,7 @@
 // #include "NewtonEulerR.hpp"
 // #include "FirstOrderLinearR.hpp"
 // #include "FirstOrderLinearTIR.hpp"
-//#include "LagrangianLinearTIR.hpp"
+#include "LagrangianLinearDiagonalDS.hpp"
 #include "LagrangianCompliantLinearTIR.hpp"
 // #include "NewtonImpactNSL.hpp"
 // #include "MultipleImpactNSL.hpp"
@@ -498,30 +498,28 @@ void siconos::simulation::LinearOSNS::computeDiagonalInteractionBlock(
         }
       }
 
-      auto dsType = siconos::types::type_value(*ds);
-      // if(osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI || dsType ==
-      // Type::LagrangianLinearDiagonalDS)
-      // {
-      //   auto work(new SimpleMatrix(*leftInteractionBlock));
-      //   // Get inverse of the iteration matrix
-      //   SiconosMatrix& inv_iteration_matrix = *getOSIMatrix(osi, ds);
-      //   // work = HW (remind that W contains the inverse of the iteration matrix)
-      //   siconos::algebra::axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *work,
-      //   true); leftInteractionBlock->trans(); siconos::algebra::prod(*work,*
-      //   leftInteractionBlock, *currentInteractionBlock, false); if(relationSubType ==
-      //   CompliantLinearTIR)
-      //   {
-      //     if(osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI)
-      //     {
-      //       * currentInteractionBlock *= (static_cast<MoreauJeanOSI&>(osi)).theta() ;
-      //       * currentInteractionBlock +=
-      //       *std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep()
-      //       ;
-      //     }
-      //   }
-      // }
-      // else
-      {
+      if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
+          std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearDiagonalDS>(ds)) {
+        auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
+        // Get inverse of the iteration matrix
+        auto& inv_iteration_matrix = *getOSIMatrix(osi, ds);
+        // work = HW (remind that W contains the inverse of the iteration matrix)
+        siconos::algebra::axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *work, true);
+        leftInteractionBlock->trans();
+        siconos::algebra::prod(*work, *leftInteractionBlock, *currentInteractionBlock, false);
+        if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
+          if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
+            *currentInteractionBlock *=
+                (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+            *currentInteractionBlock +=
+                *std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
+                     inter->relation())
+                     ->D() /
+                simulation()->timeStep();
+          }
+        }
+      }
+      else {
         DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n");
         DEBUG_EXPR(leftInteractionBlock->display(););
         // (inter1 == inter2)
@@ -821,7 +819,7 @@ void siconos::simulation::LinearOSNS::computeqBlock(
     siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
   else if ((osi1Type == siconos::integrators::IntegratorType::MOREAUJEANOSI &&
-            osi2Type == siconos::integrators::IntegratorType::MOREAUJEANOSI)   ||
+            osi2Type == siconos::integrators::IntegratorType::MOREAUJEANOSI) ||
            (osi1Type == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI &&
             osi2Type == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI)) {
     osi1.computeFreeOutput(vertex_inter, this);
@@ -833,7 +831,8 @@ void siconos::simulation::LinearOSNS::computeqBlock(
             osi2Type == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI)) {
     osi1.computeFreeOutput(vertex_inter, this);
     auto& osnsp_rhs =
-        *(*indexSet->properties(vertex_inter).workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
+        *(*indexSet->properties(vertex_inter)
+               .workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
     siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
   else if ((osi1Type == siconos::integrators::IntegratorType::LSODAROSI &&
@@ -853,8 +852,8 @@ void siconos::simulation::LinearOSNS::computeqBlock(
   else if ((osi1Type == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI &&
             osi2Type == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI)) {
     osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs =
-        *(*indexSet->properties(vertex_inter).workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
+    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
+                             .workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
     siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
   }
   else if ((osi1Type == siconos::integrators::IntegratorType::D1MINUSLINEAROSI &&

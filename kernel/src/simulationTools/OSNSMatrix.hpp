@@ -39,8 +39,8 @@ class SiconosMatrix;
 
 namespace siconos::graphs {
 
-class InteractionsGraph;
-class DynamicalSystemsGraph;
+struct InteractionsGraph;
+struct DynamicalSystemsGraph;
 
 }  // namespace siconos::graphs
 

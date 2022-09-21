@@ -94,7 +94,7 @@ class BlockVector {
 
   /** destructor
    */
-  ~BlockVector(){};
+  ~BlockVector() noexcept = default;
 
   /**
      Set a subblock of the current vector with the content (copy) of a SiconosVector

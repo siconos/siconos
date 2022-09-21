@@ -512,8 +512,8 @@ void siconos::simulation::EventDriven::computeJacobianfx(
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto jacotmp =
           std::dynamic_pointer_cast<siconos::algebra::BlockMatrix>(lds->jacobianRhsx());
-      for (auto j = 0; j < lds->n(); ++j) {
-        for (auto k = 0; k < lds->dimension(); ++k) jacob[i++] = jacotmp->getValue(k, j);
+      for (decltype(lds->n()) j = 0; j < lds->n(); ++j) {
+        for (decltype(lds->dimension()) k = 0; k < lds->dimension(); ++k) jacob[i++] = jacotmp->getValue(k, j);
       }
     }
     else if (auto lds =
@@ -578,7 +578,7 @@ void siconos::simulation::EventDriven::computeg(
     lambda = inter->lambda(2);           // input of level 2 at this Interaction
     if (!(indexSet2->is_vertex(inter)))  // if Interaction is not in the indexSet[2]
     {
-      for (auto i = 0; i < nsLawSize; ++i) {
+      for (decltype(nsLawSize) i = 0; i < nsLawSize; ++i) {
         if ((*y)(i) > tolerance_) {
           gOut[k] = (*y)(i);
         }
@@ -595,7 +595,7 @@ void siconos::simulation::EventDriven::computeg(
     }
     else  // If Interaction is in the indexSet[2]
     {
-      for (auto i = 0; i < nsLawSize; ++i) {
+      for (decltype(nsLawSize) i = 0; i < nsLawSize; ++i) {
         if ((*lambda)(i) > tolerance_) {
           gOut[k] = (*lambda)(i);  // g = lambda[2]
         }

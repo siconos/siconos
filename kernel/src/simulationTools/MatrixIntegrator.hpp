@@ -92,8 +92,8 @@ class MatrixIntegrator {
   MatrixIntegrator() = delete;
   MatrixIntegrator(const MatrixIntegrator&) = delete;
   MatrixIntegrator(const MatrixIntegrator&&) = delete;
-  MatrixIntegrator operator=(const MatrixIntegrator&) = delete;
-  MatrixIntegrator operator=(const MatrixIntegrator&&) = delete;
+  MatrixIntegrator& operator=(const MatrixIntegrator&) = delete;
+  MatrixIntegrator& operator=(const MatrixIntegrator&&) = delete;
 
  public:
   /** Constructor to compute \f$\int exp(A\tau)E\amthrm{d}\tau\f$

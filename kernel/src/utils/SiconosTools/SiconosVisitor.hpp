@@ -90,8 +90,8 @@ struct SiconosVisitor {
   SiconosVisitor() = default;
   SiconosVisitor(const SiconosVisitor&) = delete;
   SiconosVisitor(const SiconosVisitor&&) = delete;
-  SiconosVisitor operator=(const SiconosVisitor&&) = delete;
-  SiconosVisitor operator=(const SiconosVisitor&) = delete;
+  SiconosVisitor& operator=(const SiconosVisitor&&) = delete;
+  SiconosVisitor& operator=(const SiconosVisitor&) = delete;
   
   // declaration of visitors used in Interactions to set level values.
   // Note FP: use variant for nslaws ?

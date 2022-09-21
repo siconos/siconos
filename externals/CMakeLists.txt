@@ -145,8 +145,10 @@ if(BUILD_AS_CPP)
   target_compile_features(externals PUBLIC cxx_std_17)
   
 else()
-  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
-  target_compile_features(externals PUBLIC c_std_11)
+  #set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
+  #target_compile_features(externals PUBLIC c_std_11)
+  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
+  target_compile_features(externals PUBLIC cxx_std_17)
 endif()
 
 # externals lib needs blas and lapack while tests need Blas AND lapack.

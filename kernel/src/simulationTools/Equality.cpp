@@ -72,7 +72,7 @@ int siconos::simulation::Equality::compute(double time)
   if (_sizeOutput != 0) {
     auto* q_ = q()->getArray();
     auto* z_ = _z->getArray();
-    for (auto i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
+    for (decltype(_sizeOutput) i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
     // info = siconos::numerics::NM_gesv(&*_M->numericsMatrix(), z_, true);
     // info =
     // siconos::numerics::NM_LU_solve(siconos::numerics::NM_preserve(&*_M->numericsMatrix()),

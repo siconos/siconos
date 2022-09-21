@@ -99,8 +99,8 @@ class ControlManager {
   ControlManager() = delete;
   ControlManager(const ControlManager&) = delete;
   ControlManager(const ControlManager&&) = delete;
-  ControlManager operator=(const ControlManager&) = delete;
-  ControlManager operator=(const ControlManager&&) = delete;
+  ControlManager& operator=(const ControlManager&) = delete;
+  ControlManager& operator=(const ControlManager&&) = delete;
 
   /** Create associated Event and give the opportunity to get the TimeDiscretisation
    *

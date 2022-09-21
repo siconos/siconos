@@ -51,7 +51,7 @@ siconos::modeling::NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0,
   // implement this changelog
 };
 
-siconos::modeling::NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem() { clear(); }
+siconos::modeling::NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem() noexcept { clear(); }
 
 // changelog
 void siconos::modeling::NonSmoothDynamicalSystem::Change::display() const

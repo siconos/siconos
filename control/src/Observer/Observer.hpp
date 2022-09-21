@@ -112,8 +112,8 @@ class Observer {
   Observer() = delete;
   Observer(const Observer&) = delete;
   Observer(const Observer&&) = delete;
-  Observer operator=(const Observer&) = delete;
-  Observer operator=(const Observer&&) = delete;
+  Observer& operator=(const Observer&) = delete;
+  Observer& operator=(const Observer&&) = delete;
 
  public:
   /** Constructor with a TimeDiscretisation.

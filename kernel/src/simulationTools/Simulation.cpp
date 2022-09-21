@@ -62,7 +62,7 @@ siconos::simulation::Simulation::Simulation(
 }
 
 // --- Destructor ---
-siconos::simulation::Simulation::~Simulation()
+siconos::simulation::Simulation::~Simulation() noexcept
 {
   clear();
   // -> see shared ressources for this

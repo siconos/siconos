@@ -647,7 +647,6 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
   // get relation and non smooth law information
   auto relationType = inter->relation()->getType();  // relation
   auto relationSubType = inter->relation()->getSubType();
-  unsigned int relativePosition = 0;
   auto sizeY = inter->nonSmoothLaw()->size();  // related NSL
 
   std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};

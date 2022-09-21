@@ -55,7 +55,7 @@ void siconos::control::ExplicitLinearSMC::actuate()
 
   if (_D)  // we are using a saturation
   {
-    for (auto i = 0; i < sDim; i++) {
+    for (decltype(sDim) i = 0; i < sDim; i++) {
       if ((*_sigma)(i) > (*_D)(i, i))
         (*_us)(i) = -_alpha;
       else if ((*_sigma)(i) < -(*_D)(i, i))
@@ -69,7 +69,7 @@ void siconos::control::ExplicitLinearSMC::actuate()
     }
   }
   else {
-    for (auto i = 0; i < sDim; i++) {
+    for (decltype(sDim) i = 0; i < sDim; i++) {
       if ((*_sigma)(i) > 0)
         (*_us)(i) = -_alpha;
       else if ((*_sigma)(i) < 0)

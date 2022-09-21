@@ -171,6 +171,11 @@ if(WITH_PYTHON_WRAPPER)
   add_subdirectory(wrap)
 endif()
 
+# -- New version, with pybind11
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
+endif()
+
 # ========= Documentation setup =========
 # Finalize documentation setups.
 # Must be called AFTER each component config.

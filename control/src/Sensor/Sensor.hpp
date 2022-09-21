@@ -28,7 +28,7 @@
 #include <memory>
 #include <string>
 
-#include "siconosSerialization.hpp"
+#include "SiconosSerialization.hpp"
 
 namespace siconos::algebra {
 class SiconosVector;
@@ -127,8 +127,8 @@ class Sensor {
   Sensor() = delete;
   Sensor(const Sensor&) = delete;
   Sensor(const Sensor&&) = delete;
-  Sensor operator=(const Sensor&) = delete;
-  Sensor operator=(const Sensor&&) = delete;
+  Sensor& operator=(const Sensor&) = delete;
+  Sensor& operator=(const Sensor&&) = delete;
 
  public:
   /** Constructor with a TimeDiscretisation.
