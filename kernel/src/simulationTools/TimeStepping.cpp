@@ -681,6 +681,13 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       // --
       if(!_isNewtonConverge && _newtonNbIterations < maxStep)
       {
+        // if you want to update the interactions within the Newton Loop,
+        // you can uncomment this line
+        // For stability reasons, we keep fix the interactions in the loop
+        // for a good Newton loop, we must have access the Hessian of constraints.
+        // updateInteractions();
+        // initializeNSDSChangelog();
+
         updateOutput();
       }
       _isNewtonConverge = newtonCheckConvergence(criterion);
