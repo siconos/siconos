@@ -260,7 +260,7 @@ jupyterlab:install:
 
 # Start CI in siconos-tutorials, when required
 # How? Use [with examples] in your commit message.
-# Based on the specific docker image build and saved during ubuntu20:install step.
+# Based on the specific docker image build and saved during ubuntu22:install step.
 bridge:examples:
   variables:
     SICONOS_DOCKER_NAME: siconos-$CI_COMMIT_REF_NAME
@@ -269,7 +269,7 @@ bridge:examples:
   trigger: 
     project: nonsmooth/siconos-tutorials
     strategy: depend
-  needs: ["ubuntu20:install"]
+  needs: ["ubuntu22:install"]
   extends:
     - .examples-rules
     
