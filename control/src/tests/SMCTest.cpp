@@ -161,6 +161,7 @@ void SMCTest::test_eSMC_Lsodar()
   simLsodar->addActuator(_eSMC, _h);
   simLsodar->initialize();
   simLsodar->run();
+
   auto& data = *simLsodar->data();
   siconos::algebra::io::write("eSMC_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);

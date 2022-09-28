@@ -445,7 +445,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
                   // B.displayExpert();
 #else
     /* we need to fill back again */
-    // B.fromCSC(siconos::numerics::NM_csc(NM_B));
+    B.fromCSC(siconos::numerics::NM_csc(NM_B));
 #endif
   }
 

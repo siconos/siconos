@@ -124,6 +124,7 @@ void TwistingTest::test_ExplicitTwisting_Lsodar()
   simLsodar->addActuator(_expl_tw, _h);
   simLsodar->initialize();
   simLsodar->run();
+
   auto& data = *simLsodar->data();
   siconos::algebra::io::write("explicitTwisting_Lsodar.dat", data,
                               siconos::algebra::io::ASCII_OUT,

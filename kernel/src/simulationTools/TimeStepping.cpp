@@ -18,18 +18,18 @@
 
 #include "TimeStepping.hpp"
 
+#include <functional>
 #include <iostream>
 
 #include "EqualityConditionNSL.hpp"
 #include "EventsManager.hpp"
 #include "Interaction.hpp"
+#include "OneStepIntegrator.hpp"
 #include "OneStepNSProblem.hpp"
 #include "RelayNSL.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "Topology.hpp"
-#include <functional>
-#include "OneStepIntegrator.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -660,6 +660,13 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       // if we compute the boolean before "if", the updateOutput is not done !!
       // --
       if (!_isNewtonConverge && _newtonNbIterations < maxStep) {
+        // if you want to update the interactions within the Newton Loop,
+        // you can uncomment this line
+        // For stability reasons, we keep fix the interactions in the loop
+        // for a good Newton loop, we must have access the Hessian of constraints.
+        // updateInteractions();
+        // initializeNSDSChangelog();
+
         updateOutput();
       }
       _isNewtonConverge = newtonCheckConvergence(criterion);

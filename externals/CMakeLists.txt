@@ -140,15 +140,13 @@ if(BUILD_AS_CPP)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX
     COMPILE_FLAGS -fpermissive) # to allow some nonconforming code to compile
   # set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
-  # We require C++ 11. PUBLIC to propagate to numerics.
+  # We require C++ 20. PUBLIC to propagate to numerics.
 
-  target_compile_features(externals PUBLIC cxx_std_17)
+  target_compile_features(externals PUBLIC cxx_std_20)
   
-else()
-  #set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
-  #target_compile_features(externals PUBLIC c_std_11)
-  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
-  target_compile_features(externals PUBLIC cxx_std_17)
+else() # Do we really need this ?
+  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
+  target_compile_features(externals PUBLIC c_std_11)
 endif()
 
 # externals lib needs blas and lapack while tests need Blas AND lapack.
@@ -169,9 +167,15 @@ list(REMOVE_ITEM externals_COMPILE_FLAGS -Wunused-variable)
 set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
 # This is ugly, but helps with old lumod code (12.08.2021) --xhub
 target_compile_definitions(externals PRIVATE CLOCKTIME)
-target_compile_options(externals PRIVATE "-w")
+target_compile_options(externals PRIVATE "-Wno-unused-local-typedef") # Else boost bindings lead to many warnings
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
 target_compile_options(externals PRIVATE "-Wno-unused-parameter")
+
+# no warnings in fortran
+target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-w>)
+
+  
+
 # An awful command asking to add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
 # See https://scivision.co/gfortran-type-mismatch-error/
 if(WITH_FORTRAN)

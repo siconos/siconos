@@ -100,6 +100,7 @@ void SimpleMatrixTest::setUp()
       if (i != j) (*SP2)(i, j) = 3 * i + j;
 
   SP3 = std::make_shared<siconos::algebra::SparseMat>(3, 3);
+
   (*SP3)(0, 0) = 1.0;
   (*SP3)(0, 2) = 2.0;
   (*SP3)(1, 2) = 3.0;
@@ -1045,7 +1046,6 @@ void SimpleMatrixTest::testOperators4bis()
   auto tmp5 = std::make_shared<SimpleMatrix>(*S2);
 
   auto tmp6 = std::make_shared<SimpleMatrix>(*SP);
-
   *tmp += *tmp2;
   for (unsigned int i = 0; i < tmp->size(0); ++i)
     for (unsigned int j = 0; j < tmp->size(1); ++j)
@@ -1193,6 +1193,7 @@ void SimpleMatrixTest::testOperators5()
   *tmp -= *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getBanded() - *Band) == 0,
                                true);
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators: ", tmp->num() == siconos::algebra::UblasType::BANDED, true);
 
@@ -3052,6 +3053,7 @@ void SimpleMatrixTest::testOperators11()
   std::cout << "--> Test: operator11." << std::endl;
   double m = 2.2;
   int i = 3;
+
   auto tmp1 = std::make_shared<SimpleMatrix>(*S);
   auto res = std::make_shared<SimpleMatrix>(3, 3, siconos::algebra::UblasType::SYMMETRIC);
   *res = m * *tmp1;
@@ -3148,6 +3150,7 @@ void SimpleMatrixTest::testProd()  // y = A*x
   *yB = prod(*A, *x);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
+
     for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*yB)(i)-sum) < tol, true);
   }
@@ -3747,6 +3750,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 void SimpleMatrixTest::testFromAndFillCSC()
 {
   std::cout << "Start SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
+
   auto Sparse4 = std::make_shared<SimpleMatrix>(*SP4);
   Sparse4->updateNumericsMatrix();
   auto NM = Sparse4->numericsMatrix();
@@ -3761,7 +3765,8 @@ void SimpleMatrixTest::testFromAndFillCSC()
   NM_1->matrix2->origin = siconos::numerics::NSM_CSC;
   siconos::numerics::NM_csc_alloc(NM_1, Sparse4->nnz());
   Sparse4->fillCSC(siconos::numerics::NM_csc(NM_1));
-  // siconos::numerics::NM_display(NM_1);  --> Note FP : fails when exiting the function ... To be investigating
+  // siconos::numerics::NM_display(NM_1);  --> Note FP : fails when exiting the function ... To
+  // be investigating
   // ...
   NM_1 = siconos::numerics::NM_free(NM_1);
   std::cout << "End SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
@@ -3900,6 +3905,7 @@ void SimpleMatrixTest::testSolve()
   std::cout << "\n\n--> Test: Solve. Sparse. LU." << std::endl;
 
   // Test sparse matrix identity
+
   auto Sparse = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
   auto Sparse_backup =
       std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
@@ -3939,6 +3945,7 @@ void SimpleMatrixTest::testSolve()
                                true);
 
   // test sparse matrix 4x4 SP4
+
   Sparse = std::make_shared<SimpleMatrix>(*SP4);
   b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
   for (int i = 0; i < Sparse->size(0); i++) {

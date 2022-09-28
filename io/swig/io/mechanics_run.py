@@ -2716,8 +2716,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             interaction_manager = default_manager_class
 
         if run_options['time_stepping'] is None:
-            self._time_stepping = default_simulation_class
-       
+            self._time_stepping_class = default_simulation_class
+        else:
+            self._time_stepping_class = run_options['time_stepping']
+
         if run_options['output_frequency'] is not None:
             self._output_frequency = run_options['output_frequency']
 
@@ -2969,7 +2971,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
-        if self._time_stepping == sk.TimeSteppingDirectProjection:
+        if self._time_stepping_class == sk.TimeSteppingDirectProjection:
             if solver_options_pos is None:
                 osnspb_pos = sk.MLCPProjectOnConstraints(sn.SICONOS_MLCP_ENUM, 1.0)
             else:
@@ -2980,14 +2982,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # "not yet implemented for sparse storage"
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)
             osnspb_pos.setKeepLambdaAndYState(True)
-            simulation = self._time_stepping(nsds, timedisc, self._osi,
+            simulation = self._time_stepping_class(nsds, timedisc, self._osi,
                                        osnspb, osnspb_pos)
             simulation.setProjectionMaxIteration(projection_itermax)
             simulation.setConstraintTolUnilateral(
                 projection_tolerance_unilateral)
             simulation.setConstraintTol(projection_tolerance)
         else:
-            simulation = self._time_stepping(nsds, timedisc)
+            simulation = self._time_stepping_class(nsds, timedisc)
             simulation.insertIntegrator(self._osi)
             simulation.insertNonSmoothProblem(osnspb)
 
@@ -3083,11 +3085,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 osnspb._stepcounter = self._k
 
             if self._run_options.get('explode_Newton_solve'):
-                if(self._time_stepping == sk.TimeStepping):
+                if(self._time_stepping_class == sk.TimeStepping):
                     self.log(self.explode_Newton_solve, with_timer,
                              before=False)(with_timer)
                 else:
-                    print('simulation of type', type(self._time_stepping_class),
+                    self.print_verbose('| [warning]. simulation of type', self._time_stepping_class.__name__,
                           ' has no exploded version')
                     self.log(self._simulation.computeOneStep, with_timer)()
             else:

@@ -45,6 +45,15 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 5e-2;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     current++;
+#ifdef WITH_MUMPS
+    if (s==2)
+    {
+      //  test is  unstable with mumps (FC3D_NSN_FB, on ./data/RockPile_tob1.dat)
+      collection[current - 1].will_fail = 1;
+    }
+
+#endif
+
   }
 
   collection[0].will_fail= 2; // (FC3D_NSN_AC, on ./data/RockPile_tob1.dat)  is unstable

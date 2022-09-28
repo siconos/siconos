@@ -71,6 +71,7 @@ endif()
 set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
 include(FindPythonModule)
 find_python_module(packaging REQUIRED) # for siconos runtime
+find_python_module(wheel REQUIRED) # for siconos runtime
 
 get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)

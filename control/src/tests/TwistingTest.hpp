@@ -85,7 +85,7 @@ class TwistingTest : public CppUnit::TestFixture {
   std::shared_ptr<siconos::control::ExplicitTwisting> _expl_tw;
 
  public:
-  TwistingTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7e-11), _beta(0.2) {}
+  TwistingTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.2) {}
   void setUp();
   void tearDown();
 };

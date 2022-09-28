@@ -10,7 +10,6 @@ set(${COMPONENT}_PYTHON_MODULES
   "mechanics/collision/bodies.i")
 
 find_python_module(h5py)
-find_python_module(vtk REQUIRED) # Required for native (if not present, python_test_native_collision will fail)
   
 configure_file(mechanics/collision/tools.py ${SICONOS_SWIG_ROOT_DIR}/mechanics/collision/tools.py)
 configure_file(mechanics/collision/convexhull.py  ${SICONOS_SWIG_ROOT_DIR}/mechanics/collision/convexhull.py )
@@ -34,6 +33,7 @@ if(SICONOS_HAS_BULLET)
     COMPILE_OPTIONS "-w312,322,325,350,351,362,383,389,394,395,401,402,403,503,512,520"
     COMPILE_DEFINITIONS ${BULLET_DEFINITIONS}
     )
+  find_python_module(vtk REQUIRED) # Required for native (if not present, python_test_native_collision will fail)
 endif()
 
 if(WITH_OCE)

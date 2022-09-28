@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 
-#include "BlockMatrix.hpp"
-#include "SiconosConfig.h"
-#include "SiconosException.hpp"
-#include "SimpleMatrix.hpp"
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
 
+#include "BlockMatrix.hpp"
+#include "SiconosConfig.h"
+#include "SiconosException.hpp"
+#include "SimpleMatrix.hpp"
 
 double &siconos::algebra::SimpleMatrix::operator()(unsigned int row, unsigned int col)
 {
@@ -88,7 +88,8 @@ double siconos::algebra::SimpleMatrix::operator()(unsigned int row, unsigned int
 // Assignment
 //=============
 
-siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const SiconosMatrix &m)
+siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(
+    const SiconosMatrix &m)
 {
   if (&m == this) return *this;  // auto-assignment.
 
@@ -234,7 +235,8 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
   return *this;
 }
 
-siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const SimpleMatrix &m)
+siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(
+    const SimpleMatrix &m)
 {
   if (&m == this) return *this;  // auto-assignment.
 
@@ -375,7 +377,8 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(const 
 // Op. and assignment (+=, -= ... )
 //=================================
 
-siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const SiconosMatrix &m)
+siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(
+    const SiconosMatrix &m)
 {
   auto numM = m.num();
   if (numM == UblasType::ZERO)  // m = 0
@@ -549,7 +552,8 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator+=(const
   return *this;
 }
 
-siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(const SiconosMatrix &m)
+siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator-=(
+    const SiconosMatrix &m)
 {
   auto numM = m.num();
   if (numM == UblasType::ZERO)  // m = 0
