@@ -121,57 +121,58 @@ ubuntu20.04-fclib:test:
       - .siconos-test
       - .full-ci-rules
 
-ubuntu20.04:configure:
+ubuntu22.04:configure:
    variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
      cdash_submit: 1
      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
    extends:
     - .siconos-configure
 
-ubuntu20.04:build:
+ubuntu22.04:build:
   variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
       cdash_submit: 1
       user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends:
     - .siconos-build
-  needs: ["ubuntu20.04:configure"]
+  needs: ["ubuntu22.04:configure"]
 
-ubuntu20.04:test:
+ubuntu22.04:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
       cdash_submit: 1
       user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-    needs: ["ubuntu20.04:build"]
+    needs: ["ubuntu22.04:build"]
     extends:
       - .siconos-test
  
-ubuntu20.04-debug:configure:
+ubuntu22.04-debug:configure:
    variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
      cdash_submit: 1
      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
    extends:
     - .siconos-configure
 
-ubuntu20.04-debug:build:
+ubuntu22.04-debug:build:
   variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
       cdash_submit: 1
       user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
   extends:
     - .siconos-build
-  needs: ["ubuntu20.04-debug:configure"]
+  needs: ["ubuntu22.04-debug:configure"]
 
-ubuntu20.04-debug:test:
+ubuntu22.04-debug:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
       cdash_submit: 1
       user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
-    needs: ["ubuntu20.04-debug:build"]
+    needs: ["ubuntu22.04-debug:build"]
     extends:
       - .siconos-test
+
 
 fedora-33:configure:
   variables:
@@ -232,12 +233,12 @@ jupyterlab:test:
 
 # Generate sico install
 
-ubuntu20:install:
+ubuntu22:install:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
     siconos_docker_name: siconos-$CI_COMMIT_REF_NAME
   extends: .siconos-install
-  needs: ["ubuntu20.04:build"]
+  needs: ["ubuntu22.04:build"]
 
 debian-buster:install:
   variables:
@@ -298,6 +299,15 @@ siconos-oce:
 ubuntu18.04:full:
       variables:
         IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu18.04
+        cdash_submit: 1
+        user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+      extends:
+        - .siconos-full
+      when: manual
+
+ubuntu20.04:full:
+      variables:
+        IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
         cdash_submit: 1
         user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
       extends:
