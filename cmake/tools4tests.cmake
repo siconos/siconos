@@ -287,6 +287,8 @@ function(set_siconos_test_properties)
   # Test timer
   set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
   
+  # set_tests_properties(${TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
+  set_tests_properties(${TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;ERROR;Assertion")
 endfunction()
 
 # ================================================
