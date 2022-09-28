@@ -158,9 +158,8 @@ void SMCTest::test_eSMC_Lsodar()
   simLsodar->run();
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("eSMC_Lsodar.dat", "ascii", data, "noDim");
-  double error =0.0;
-  bool test = !((error=ioMatrix::compareRefFile(data, "eSMC.ref", _tol)) >= 0.0
-                && error > _tol);
+  auto error = ioMatrix::compareRefFile(data, "eSMC.ref", _tol);
+  bool test = !(error >= 0.0 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }

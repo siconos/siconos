@@ -491,7 +491,7 @@ void SimpleMatrix::Solve(SiconosMatrix &B)
     //B.displayExpert();
 #else
     /* we need to fill back again */
-    //B.fromCSC(NM_csc(NM_B));
+    B.fromCSC(NM_csc(NM_B));
 #endif
   }
 

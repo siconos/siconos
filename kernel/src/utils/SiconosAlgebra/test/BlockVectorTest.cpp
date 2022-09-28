@@ -477,8 +477,7 @@ void BlockVectorTest::testInsert()
   xB->insertPtr(y);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->numberOfBlocks() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->size() == (7 + size), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->vector(2) != y, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", *xB->vector(2) == *y, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->vector(2) == y, true);
 
   xB->insertPtr(y);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->numberOfBlocks() == 4, true);
