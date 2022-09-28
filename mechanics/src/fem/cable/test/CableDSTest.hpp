@@ -14,50 +14,40 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#ifndef __LagrangianLinearTIDSTest__
-#define __LagrangianLinearTIDSTest__
+ */
+#ifndef __CABLEDSTest__
+#define __CABLEDSTest__
 
-#include <cppunit/TestCase.h>
+#include "CableDS.hpp"
+
 #include <cppunit/extensions/HelperMacros.h>
-#include "LagrangianLinearTIDS.hpp"
-#include "SiconosException.hpp"
 
-class LagrangianLinearTIDSTest : public CppUnit::TestFixture
-{
-
+class CableDSTest : public CppUnit::TestFixture {
 private:
-  
-  ACCEPT_SERIALIZATION(LagrangianLinearTIDSTest);
-
-
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianLinearTIDSTest);
+  CPPUNIT_TEST_SUITE(CableDSTest);
 
-  // tests to be done ...
+  CPPUNIT_TEST(testNoFext);
+  CPPUNIT_TEST(testConstantFext);
+  CPPUNIT_TEST(testVariableFext);
 
-  CPPUNIT_TEST(testBuildLagrangianLinearTIDS1);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIDS2);
   CPPUNIT_TEST_SUITE_END();
 
-  // \todo exception test
+  void testNoFext();
+  void testConstantFext();
+  void testVariableFext();
 
-  void testBuildLagrangianLinearTIDS1();
-  void testBuildLagrangianLinearTIDS2();
-
-  // Members
-
-  SP::SiconosVector q0, velocity0;
-  SP::SiconosMatrix mass, K, C, rhsK, rhsC, minus_inv_M;
-
+  
 public:
+
+  int ndof{10};
+  std::shared_ptr<SiconosVector> q0{nullptr};
+  std::shared_ptr<SiconosVector> v0{nullptr};
+  std::shared_ptr<SiconosMatrix> mass{nullptr};
+  
+  
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-
