@@ -366,9 +366,6 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   double tolerance = dparam[SICONOS_DPARAM_TOL];
 
-  /* Matrix M/vector q of the LCP */
-  double * q = problem->q;
-
   unsigned int nc = problem->numberOfContacts;
   double norm_q = cblas_dnrm2(nc*2, problem->q, 1);
   double norm_r[] = {INFINITY};
@@ -401,7 +398,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
   double localreaction[2];
 
   /*****  Gauss-Seidel iterations *****/
-  unsigned int iter = 0; /* Current iteration number */
+  int iter = 0; /* Current iteration number */
   double error = INFINITY; /* Current error */
   int has_not_converged = 1;
 
