@@ -28,16 +28,22 @@ namespace siconos::algebra {
 
 /** Iterator for SiconosVector covering both possible types. */
 template <typename V, typename T, typename TRef>
-struct SiconosVectorIteratorTypeTpl : public std::iterator<std::forward_iterator_tag, T> {
-  V *v;
-  size_t p;
-  SiconosVectorIteratorTypeTpl() : v(nullptr), p(0){};
-  SiconosVectorIteratorTypeTpl(V &_v, size_t _p) : v(&_v), p(_p){};
-  bool operator!=(const SiconosVectorIteratorTypeTpl &it) { return v != it.v || p != it.p; }
-  bool operator==(const SiconosVectorIteratorTypeTpl &it) { return v == it.v && p == it.p; }
-  // SiconosVectorIteratorTypeTpl& operator=(const SiconosVectorIteratorTypeTpl& it)
-  //  { v=it.v; p=it.p; return *this; }
-  SiconosVectorIteratorTypeTpl &operator++()
+struct SiconosVectorIteratorTypeTpl {
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = T;
+  using difference_type = T;
+  using pointer = T*;
+  using reference = T&;
+
+  V* v{nullptr};
+  size_t p{0};
+  // SiconosVectorIteratorTypeTpl() = default;
+  SiconosVectorIteratorTypeTpl(V& _v, size_t _p) : v(&_v), p(_p){};
+
+  bool operator!=(const SiconosVectorIteratorTypeTpl& it) { return v != it.v || p != it.p; }
+  bool operator==(const SiconosVectorIteratorTypeTpl& it) { return v == it.v && p == it.p; }
+
+  SiconosVectorIteratorTypeTpl& operator++()
   {
     if (p < v->size()) p++;
     return *this;
@@ -48,6 +54,7 @@ struct SiconosVectorIteratorTypeTpl : public std::iterator<std::forward_iterator
     if (p < v->size()) p++;
     return tmp;
   }
+
   TRef operator*() { return (*v)(p); }
 };
 
@@ -55,29 +62,33 @@ struct SiconosVectorIteratorTypeTpl : public std::iterator<std::forward_iterator
  *       are easier to deal with in SWIG */
 
 /** Specialization for non-const SiconosVector */
-using SiconosVectorIteratorType =
-    SiconosVectorIteratorTypeTpl<SiconosVector, double, double &>;
+using SiconosVectorIteratorType = SiconosVectorIteratorTypeTpl<SiconosVector, double, double&>;
 
 struct SiconosVectorIterator : public SiconosVectorIteratorType {
-  SiconosVectorIterator() : SiconosVectorIteratorType() {}
+  // SiconosVectorIterator() : SiconosVectorIteratorType() = default;
 
-  SiconosVectorIterator(SiconosVectorIteratorType &it) : SiconosVectorIteratorType(*it.v, it.p) {}
+  SiconosVectorIterator(SiconosVectorIteratorType& it) : SiconosVectorIteratorType(*it.v, it.p)
+  {
+  }
 
-  SiconosVectorIterator(SiconosVector &_v, size_t _p) : SiconosVectorIteratorType(_v, _p) {}
+  SiconosVectorIterator(SiconosVector& _v, size_t _p) : SiconosVectorIteratorType(_v, _p) {}
 };
 
 /** Specialization for const SiconosVector */
 using SiconosVectorConstIteratorType =
     SiconosVectorIteratorTypeTpl<const SiconosVector, const double, double>;
 struct SiconosVectorConstIterator : public SiconosVectorConstIteratorType {
-  SiconosVectorConstIterator() : SiconosVectorConstIteratorType() {}
-  
-  SiconosVectorConstIterator(SiconosVectorConstIteratorType &it)
-      : SiconosVectorConstIteratorType(*it.v, it.p) {}
+  // SiconosVectorConstIterator() : SiconosVectorConstIteratorType() = default;
 
-  SiconosVectorConstIterator(const SiconosVector &_v, size_t _p)
+  SiconosVectorConstIterator(SiconosVectorConstIteratorType& it)
+      : SiconosVectorConstIteratorType(*it.v, it.p)
+  {
+  }
+
+  SiconosVectorConstIterator(const SiconosVector& _v, size_t _p)
       : SiconosVectorConstIteratorType(_v, _p)
-  {}
+  {
+  }
 };
 
 }  // namespace siconos::algebra

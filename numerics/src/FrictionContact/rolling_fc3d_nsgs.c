@@ -531,7 +531,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
       double light_error_2 = 0.0;
 
       rolling_fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
-      int number_of_freezed_contact=0;
+      unsigned int number_of_freezed_contact=0;
       if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
       {
         for(unsigned int i = 0 ; i < nc ; ++i)

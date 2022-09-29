@@ -14,16 +14,7 @@ else()
   endif()
 endif()
 include(${SWIG_USE_FILE})
-
-# Name of the generated Python package
-set(SICONOS_PYTHON_PACKAGE siconos CACHE INTERNAL "Name of the Siconos python package.")
-  
-# --------------- Python install setup ---------------
-# Set path for siconos-python installation (SICONOS_PYTHON_INSTALL_DIR)
-# and get pip install options (PIP_INSTALL_OPTIONS).
-include(PythonInstallSetup)
-set_python_install_path()
-  
+ 
 #  ----------- swig -----------
 
 # -- Swig  preprocessor def. common to all swig targets --
