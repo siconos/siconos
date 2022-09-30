@@ -580,6 +580,12 @@ public:
     _fExt = newPtr;
     _hasConstantFExt = true;
   }
+	
+  /** get mExt
+   *
+   *  \return pointer on a plugged vector
+   */
+   inline SP::SiconosVector mExt() const { return _mExt; }
 
   /** set mExt to pointer newPtr
    *
