@@ -174,7 +174,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
  protected:
   // visitor stuff to handle properly nslaw effects.
   struct _NSLEffectOnFreeOutput : public siconos::internal::SiconosVisitor {
-    // using siconos::internal::SiconosVisitor::visit;
+    using siconos::internal::SiconosVisitor::visit;
 
     siconos::simulation::OneStepNSProblem &_osnsp;
     siconos::modeling::Interaction &_inter;

@@ -17,17 +17,17 @@
  */
 #include "Relay.hpp"
 
-#include "SiconosVisitor.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
+#include "SiconosVisitor.hpp"
 
 // #include <iostream>
 // #include <assert.h>
-#include "Tools.hpp"
-#include "Simulation.hpp"
-#include "RelayNSL.hpp"
 #include "Interaction.hpp"
-#include "SiconosVector.hpp"
 #include "OSNSMatrix.hpp"
+#include "RelayNSL.hpp"
+#include "SiconosVector.hpp"
+#include "Simulation.hpp"
+#include "Tools.hpp"
 
 // // --- Numerics headers ---
 // #include "NonSmoothDrivers.h"
@@ -52,6 +52,8 @@ siconos::simulation::Relay::Relay(std::shared_ptr<siconos::numerics::SolverOptio
 
 struct siconos::simulation::Relay::_BoundsNSLEffect
     : public siconos::internal::SiconosVisitor {
+  using siconos::internal::SiconosVisitor::visit;
+
   Relay* _parent{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
   unsigned int _pos;

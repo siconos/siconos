@@ -27,56 +27,6 @@
 #include <string>
 #include <variant>
 
-// #include "SiconosVisitables.hpp" // For SICONOS_VISITABLES macro
-
-// #undef REGISTER
-// #define REGISTER(X)                        \
-//   case siconos::internal::type::Siconos:: X:	\
-//     r = std::make_shared<std::string>(#X); \
-//     break;
-
-// #undef REGISTER_STRUCT
-// #define REGISTER_STRUCT(X) REGISTER(X)
-
-// namespace siconos::internal {
-
-// struct SiconosVisitor;
-
-// inline std::shared_ptr<std::string> str(const siconos::internal::type::Siconos& X)
-// {
-//   std::shared_ptr<std::string> r;
-
-//   switch (X) {
-//     SICONOS_VISITABLES()
-//     default:
-//       assert(0);
-//   }
-
-//   return (r);
-// }
-
-// template <class C>
-// std::string name(const C& c)
-// {
-//   return *(siconos::internal::type::str(siconos::internal::type::value(c)));
-// }
-
-//   template <class T > inline std::shared_ptr<std::string> str(const
-//   siconos::internal::type::Siconos& X)
-// {
-//   std::shared_ptr<std::string> r;
-
-//   switch (X) {
-//     SICONOS_VISITABLES()
-//     default:
-//       assert(0);
-//   }
-
-//   return (r);
-// }
-
-// }  // namespace siconos::internal
-
 namespace siconos::modeling {
 
 class FirstOrderNonLinearDS;

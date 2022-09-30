@@ -140,7 +140,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
 
   // visitor stuff to handle properly nslaw effects.
   struct _NSLEffectOnFreeOutput : public siconos::internal::SiconosVisitor {
-    // using siconos::internal::SiconosVisitor::visit;
+    using siconos::internal::SiconosVisitor::visit;
 
     siconos::simulation::OneStepNSProblem *_osnsp{nullptr};
     std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};

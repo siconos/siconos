@@ -63,7 +63,7 @@ endif()
 #determine the order of preference between Apple - style and unix - style package components
 #--> look for python framework when all other possibilities failed.
 set(Python3_FIND_FRAMEWORK LAST)
-if(WITH_PYTHON_WRAPPER)
+if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
   find_package(Python3 COMPONENTS Development Interpreter NumPy REQUIRED)
 else()
   find_package(Python3 COMPONENTS Interpreter REQUIRED)

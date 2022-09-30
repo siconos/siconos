@@ -529,6 +529,8 @@ void siconos::integrators::SchatzmanPaoliOSI::prepareNewtonIteration(double time
 
 struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
+  using siconos::internal::SiconosVisitor::visit;
+
   siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter;
   siconos::graphs::InteractionProperties& _interProp;

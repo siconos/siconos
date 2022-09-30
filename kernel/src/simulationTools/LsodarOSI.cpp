@@ -601,7 +601,7 @@ void siconos::integrators::LsodarOSI::updateState(const unsigned int level)
 
 struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
-  // using SiconosVisitor::visit;
+  using SiconosVisitor::visit;
 
   siconos::simulation::OneStepNSProblem& _osnsp;
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
@@ -612,6 +612,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
 
+  
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&&) = delete;
   _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&) = delete;

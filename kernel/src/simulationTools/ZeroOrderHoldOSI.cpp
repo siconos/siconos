@@ -37,7 +37,7 @@
 #include "Simulation.hpp"
 #include "Topology.hpp"
 
-//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -328,6 +328,9 @@ void siconos::integrators::ZeroOrderHoldOSI::prepareNewtonIteration(double time)
 
 struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
+
+  using siconos::internal::SiconosVisitor::visit;
+
   siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
   siconos::graphs::InteractionProperties& _interProp;

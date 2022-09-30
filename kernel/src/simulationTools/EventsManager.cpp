@@ -21,15 +21,6 @@
 #include "SiconosConst.hpp"  // siconos::internal::GAPLIMIT_DEFAULT
 #include "SiconosException.hpp"
 #include "TimeDiscretisation.hpp"
-// #include <gmp.h>
-
-// #include <cmath>
-// #include <iostream>
-// #include <limits>  // for ULONG_MAX
-// #include <set>
-
-// #include "EventFactory.hpp"
-// #include "Simulation.hpp"
 #include "TimeDiscretisationEvent.hpp"
 
 unsigned long int siconos::simulation::EventsManager::_GapLimit2Events =
@@ -236,7 +227,7 @@ void siconos::simulation::EventsManager::update(Simulation& sim)
     std::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k + 2);
     if (!std::isnan(tkp2)) {
       insertEv(_events[0]);
-    }    
+    }
   }
   // reschedule if needed
   else if (_events[0]->reschedule()) {
@@ -258,7 +249,6 @@ void siconos::simulation::EventsManager::update(Simulation& sim)
 
   // Now we can update _k if we have processed a TD_EVENT
   if (_events[0]->getType() == EventType::TD) _k++;
-
 }
 
 unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event> new_event)
@@ -277,8 +267,8 @@ unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event>
     // delta = t(ev) - t(new_event)
     mpz_sub(delta_time, *(ev->getTimeOfEvent()), *t1);
     auto compare = mpz_cmp_ui(delta_time, _GapLimit2Events);
-    
-    //if (mpz_cmp_ui(delta_time, _GapLimit2Events) > 0)
+
+    // if (mpz_cmp_ui(delta_time, _GapLimit2Events) > 0)
     if (compare > 0)  // new event time > current event time ==> insert
     {
       _events.insert(it, new_event);
@@ -291,10 +281,9 @@ unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event>
       if (mpz_cmp_ui(abs_delta_time, _GapLimit2Events) <= 0)  // the two are too close
       {
         // reschedule new_event at the same time as the one of the current event
-	// and only if its type is different from the type of the current event
+        // and only if its type is different from the type of the current event
         mpz_set(*t1, *(ev->getTimeOfEvent()));
-        if(eType != ev->getType())
-        {
+        if (eType != ev->getType()) {
           _events.insert(it, new_event);
           inserted = true;
           break;

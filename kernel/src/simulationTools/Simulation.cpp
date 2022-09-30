@@ -21,24 +21,13 @@
 #include "InteractionManager.hpp"
 #include "SiconosConst.hpp"  // siconos::internal::LEVELMAX
 #include "SiconosException.hpp"
-// #include "EventDriven.hpp"
 #include "EventsManager.hpp"
 #include "Interaction.hpp"
-// #include "LagrangianDS.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
-// #include "Relation.hpp"
 #include "Topology.hpp"
 // // One Step Integrators
 #include "OneStepIntegrator.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosVector.hpp"
-// // One Step Non Smooth Problems
-// #include "LCP.hpp"
-// #include "NonSmoothLaw.hpp"
-// #include "QP.hpp"
-// #include "Relay.hpp"
-// #include "TypeName.hpp"
-//#include <fstream>
 // for Debug
 //#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR

@@ -6,4 +6,5 @@ matplotlib
 h5py
 pyhull
 wheel
+pybind11
 vtk

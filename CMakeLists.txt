@@ -121,6 +121,7 @@ list(GET COMPONENTS -1 last_component)
 if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
   set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
 else()
   # we may need to compile only numerics and only in C.
   # Really???
@@ -160,6 +161,11 @@ if(WITH_FCLIB)
   include(fclib_setup)
 endif()
 
+# -- New version, with pybind11
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
+endif()
+
 # ========= Setup each required component =========
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
@@ -171,10 +177,6 @@ if(WITH_PYTHON_WRAPPER)
   add_subdirectory(wrap)
 endif()
 
-# -- New version, with pybind11
-if(WITH_PYB11_WRAPPER)
-  add_subdirectory(python)
-endif()
 
 # ========= Documentation setup =========
 # Finalize documentation setups.

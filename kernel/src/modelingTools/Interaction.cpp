@@ -59,7 +59,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
      _lowerLevelForOutput, _upperLevelForOutput
      w.r.t to the choice of the nslaw and the relation
   */
-  // using SiconosVisitor::visit;
+  using SiconosVisitor::visit;
 
   Interaction* interaction_{nullptr};
 

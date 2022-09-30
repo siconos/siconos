@@ -22,7 +22,6 @@
 #define EventDriven_H
 
 #include "Simulation.hpp"
-// #include "SiconosExternalsTypes.h"  // siconos::fortran::integer, siconos::fortran::doublereal ...
 
 namespace siconos::simulation {
 
