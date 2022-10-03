@@ -47,7 +47,7 @@ function(set_bullet_target)
 endfunction()
 
 # Three ways:
-  # - iNSTALL_BULLET=ON : use fetchcontent to download and install Bullet as a siconos part;
+  # - BULLET_INSTALL=ON : use fetchcontent to download and install Bullet as a siconos part;
   # - WITH_BULLET is ON, nothing more: look for bullet, check version and link with siconos-mechanics.
   # - User asks explicitely for a specific (already installed) version of Bullet
   #   by providing Bullet_ROOT on cmake command line.
@@ -58,7 +58,7 @@ endfunction()
 # - Download, build and install Bullet
 # - Create a target BULLET::BULLET
 # - Link mechanics with this target
-if(INSTALL_BULLET)
+if(BULLET_INSTALL)
   include(FetchContent)
   message(STATUS "Bullet will be downloaded from github repository and installed as a siconos component")
   # Bullet conf. See what's done in https://github.com/bulletphysics/bullet3/blob/master/build_cmake_pybullet_double.sh
@@ -115,7 +115,7 @@ elseif(WITH_BULLET OR Bullet_ROOT)
 
     - run cmake for siconos with Bullet_ROOT equal to the path to Bullet version 3.05 \
 
-    - run cmake for siconos with -DINSTALL_BULLET=ON. Bullet will then be installed in ${CMAKE_INSTALL_PREFIX} and Siconos configured to run with Bullet.")
+    - run cmake for siconos with -DBULLET_INSTALL=ON. Bullet will then be installed in ${CMAKE_INSTALL_PREFIX} and Siconos configured to run with Bullet.")
   endif()
 
   set(BULLET_INCLUDE_DIRS ${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS})

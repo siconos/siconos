@@ -248,7 +248,7 @@ Developers or advanced users options
 
   .. code-block:: bash
 
-	cmake -DINSTAll_BULLET=ON ...
+	cmake -DBULLET_INSTALL=ON ...
 
   Bullet will be downloaded, built and installed as a siconos part, at the same place as Siconos.
 
