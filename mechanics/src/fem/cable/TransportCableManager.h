@@ -29,5 +29,10 @@ public:
 private:
 	TransportCableModel m_model;
 	TransportCableResult m_results;
+
+	void computeDS();
+
+    void compute_mass(double elem_length, double elem_rho);
+    void compute_external_load(double elem_length, double elem_rho);
 };
 

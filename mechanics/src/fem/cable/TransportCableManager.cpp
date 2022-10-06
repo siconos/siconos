@@ -47,12 +47,7 @@ int TransportCableManager::computeFEM(const json & a_args, const string & a_outf
 		);
 
 		if (method == "all") {
-			//P.computeDS();
-                  auto cable =
-                      std::make_shared<siconos::mechanics::fem::CableDS>(q0, v0, mass);
-
-
-
+			computeDS();                 
 		}
 		exportTC(a_args, a_outfile, output);
 
@@ -80,3 +75,63 @@ int TransportCableManager::simulation(const json & a_model, const json & a_args,
 	}
 	return vRet;
 }
+
+void TransportCableManager::computeDS()
+{
+	// model is loaded
+	// q0 must be computed
+	// q0 = q	
+	double rho = m_model.get_cable().get_rho();
+
+	// compute mass -> results.mass
+	compute_mass(m_results.elem_length, rho);
+
+	// compute external forces -> results.b
+    compute_external_load(m_results.elem_length, rho);
+
+	// create dynamics model
+    auto cable = std::make_shared<siconos::mechanics::fem::CableDS>(m_results.q0, 
+																	m_results.v0,
+                                                                    m_results.mass, 
+		m_model.get_cable().get_EA(),
+        m_results.elem_length
+		);
+
+	cable->setFExtPtr(m_results.b);
+
+
+}
+void TransportCableManager::compute_mass(double a_length, double a_rho)
+{
+  /*get_mass_damp(elem_length,elem_rho,damping)
+	where
+	elem_length is the initial length of each element
+	elem_rho is the vector which e-th element is the linear density of element number e
+
+  */
+	int ndof = m_results.q0->size();
+	m_results.mass = std::make_shared<SimpleMatrix>(ndof, ndof, Siconos::UBLAS_TYPE::SPARSE);
+	double k = a_rho * a_length / 3.0;
+	for (size_t i = 0; i < ndof - 3; i++) {
+		m_results.mass->setValue(i, i, 4 * k);
+		m_results.mass->setValue(i, i + 3, k);
+		m_results.mass->setValue(i + 3, i, k);
+	}
+	for (size_t i = 0; i < 3; i++) {
+		m_results.mass->setValue(i + ndof - 3, i + ndof - 3, 4 * k);
+		m_results.mass->setValue(i, i + ndof - 3, k);
+		m_results.mass->setValue(i + ndof - 3, i, k);
+	}
+}
+
+void TransportCableManager::compute_external_load(double a_length, double a_rho)
+{
+	size_t ndof = m_results.q0->size();
+	m_results.b = std::make_shared<SiconosVector>(ndof);
+  	  
+	double k = -9.81 * a_rho * a_length;
+	for (size_t i = 2; i < ndof; i += 3) {
+         m_results.b->setValue(i, k);
+	}
+}
+
