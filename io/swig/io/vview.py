@@ -2044,8 +2044,8 @@ class VView(object):
             instid,
             data_names=['instance', 'translation',
                         'velocity(linear)','velocity(angular)',
-                        'kinetic_energy'],
-            data_sizes=[1, 3, 3, 3, 1])
+                        'kinetic_energy', 'displacement'],
+            data_sizes=[1, 3, 3, 3, 1, 3])
 
         if self.cell_connectors.get(instid, None) == None :
             self.cell_connectors[instid] = [ cc ]
@@ -2183,10 +2183,11 @@ class VView(object):
 
         self.set_velocity_v = numpy.vectorize(set_velocity)
 
-        def set_translation(instance, x0, x1, x2 ):
+        def set_translation(instance, x0, x1, x2, x0_0, x1_0, x2_0 ):
             if instance in cc:
                 for ccc in cc[instance]:
                     ccc._datas[1][:] = [x0, x1, x2]
+                    ccc._datas[5][:] = [x0-x0_0, x1-x1_0, x2-x2_0]
 
         self.set_translation_v = numpy.vectorize(set_translation)
 
@@ -2664,11 +2665,13 @@ class VView(object):
 
             packet = int(ntime/100)+1
 
+            initial_time =True
 
             for time in times:
                 k = k + self.opts.stride
                 if (k % packet == 0):
                     sys.stdout.write('.')
+                    sys.stdout.flush()
 
                 self.io_reader.SetTime(time)
 
@@ -2684,6 +2687,12 @@ class VView(object):
 
                 pos_data = self.io_reader.pos_data
                 velo_data = self.io_reader.velo_data
+
+                if initial_time:
+                    initial_pos_data = self.io_reader.pos_data
+                    initial_velo_data = self.io_reader.velo_data
+                    initial_time = False
+
 
                 self.set_position_v(
                     pos_data[:, 1], pos_data[:, 2], pos_data[:, 3],
@@ -2704,6 +2713,9 @@ class VView(object):
                     pos_data[:, 2],
                     pos_data[:, 3],
                     pos_data[:, 4],
+                    initial_pos_data[:, 2],
+                    initial_pos_data[:, 3],
+                    initial_pos_data[:, 4]
                 )
 
                 self.set_instance_v(pos_data[:, 1])
