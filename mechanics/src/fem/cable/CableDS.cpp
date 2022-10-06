@@ -21,11 +21,39 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
-siconos::mechanics::fem::CableDS::CableDS(
-    std::shared_ptr<SiconosVector> q0, std::shared_ptr<SiconosVector> velocity0,
-    std::shared_ptr<SiconosMatrix> mass, ExternalForcesFunction fext)
-    : LagrangianDS(q0, velocity0, mass), computefext_{fext}
+std::shared_ptr<SimpleMatrix> TRNp_Np = siconos::mechanics::fem::CableDS::TRNp_NpMatrix();
+
+std::shared_ptr<SimpleMatrix> siconos::mechanics::fem::CableDS::TRNp_NpMatrix()
 {
+  std::shared_ptr<SimpleMatrix> vTRNp_Np =
+      std::make_shared<SimpleMatrix>(6, 6, Siconos::UBLAS_TYPE::SPARSE);
+  /* vector<vector<double>> TRNp_Np = {{1, 0, 0, -1, 0, 0},
+                                                                         {0, 1, 0, 0, -1, 0},
+                                     {0, 0, 1, 0, 0, -1},
+                                                                         {-1, 0, 0, 1, 0, 0},
+                                     {0, -1, 0, 0, 1, 0},
+                                                                         {0, 0, -1, 0, 0, 1}};
+                                                                         */
+  vTRNp_Np->eye();
+  vTRNp_Np->setValue(3, 1, -1);
+  vTRNp_Np->setValue(4, 2, -1);
+  vTRNp_Np->setValue(5, 3, -1);
+  vTRNp_Np->setIsSymmetric(true);
+
+  return vTRNp_Np;
+}
+
+siconos::mechanics::fem::CableDS::CableDS(std::shared_ptr<SiconosVector> q0,
+                                          std::shared_ptr<SiconosVector> velocity0,
+                                          std::shared_ptr<SiconosMatrix> mass, double a_EA,
+                                          double a_elem_length,
+                                          ExternalForcesFunction fext)
+    : LagrangianDS(q0, velocity0), computefext_{fext}
+{
+  _EA = a_EA;
+  _l_e = a_elem_length;
+
+
   // Constructor with initial state and mass.
   // We assume that q0, v0 and mass are computed by the "cable model" based on mesh and other
   // inputs Maybe these things are to be computed inside the DS? To be discussed ...
@@ -61,8 +89,7 @@ siconos::mechanics::fem::CableDS::CableDS(
   // matrices.
   // Those are attributes of LagrangianDS class.
 
-  _jacobianqForces =
-      std::make_shared<SimpleMatrix>(_ndof, _ndof, Siconos::UBLAS_TYPE::SPARSE);
+  _jacobianqForces = std::make_shared<SimpleMatrix>(_ndof, _ndof, Siconos::UBLAS_TYPE::SPARSE);
 
   _jacobianqDotForces =
       std::make_shared<SimpleMatrix>(_ndof, _ndof, Siconos::UBLAS_TYPE::SPARSE);
@@ -93,6 +120,8 @@ void siconos::mechanics::fem::CableDS::computeForces(double time,
   //  - compute internal forces and save them somewhere or directly in _forces
   //  - assume that jacobian are uptodate or maybe recompute them
   // *_forces = ...
+  tangentStiffnessMatrix(q);
+
   //  - compute external forces in fExt (or just get them if they are constant)
   if (!_hasConstantFExt)
     computeFExt(time);
@@ -105,7 +134,7 @@ void siconos::mechanics::fem::CableDS::computeJacobianqForces(double time)
 {
   // Call a local routine which compute tangent stiffness and update a local operator
 
-  tangentStiffnessMatrix();
+  //tangentStiffnessMatrix();
 }
 
 // \f$ \nabla_v F \f$
@@ -118,19 +147,138 @@ void siconos::mechanics::fem::CableDS::computeJacobianvForces(double time)
 
 // Probably not needed since mass will be constant. Called  by the integrator at each time step
 // to override mass operator.
-void siconos::mechanics::fem::CableDS::computeMass(std::shared_ptr<SiconosVector> position)
-{
+void siconos::mechanics::fem::CableDS::computeMass(std::shared_ptr<SiconosVector> position) {}
 
-  // _mass = ...
-}
-
-void siconos::mechanics::fem::CableDS::tangentStiffnessMatrix(/** ...*/)
+void siconos::mechanics::fem::CableDS::tangentStiffnessMatrix(std::shared_ptr<SiconosVector> q)
 {
   // must update jacobianqForces
+  // KT
+  // intforces: K
+
+  size_t nb_elem = _ndof - 3;
+  double k = _EA / _l_e;
+  std::shared_ptr<SiconosVector> Tq = std::make_shared<SiconosVector>(6);
+  std::shared_ptr<SimpleMatrix> TqqT = std::make_shared<SimpleMatrix>(6, 6);
+
+  // tous les points moins le dernier
+  for (size_t i = 0; i < nb_elem - 3; i += 3) {
+    double n_e = 0;
+    for (size_t j = 0; j < 3; j++) {
+      double d = ((*q)(i + j) - (*q)(i + 3 + j));
+      n_e += d * d;
+    }
+    n_e = sqrt(n_e);
+
+    double eps = n_e / _l_e - 1;
+    double f_e = fabs(eps);
+    double kf = k / (1 + 1 / f_e);
+    if (eps > 0) {
+      // fi
+      matmult(q, i, Tq);
+      for (size_t j = 0; j < 6; j++) {
+        (*_forces)(i + j) += kf * (*Tq)(j);
+      }
+
+      // KT
+      matmult2(Tq, TqqT);
+      double kKT = 1 / (1 + f_e);
+      kKT = k * kKT * kKT * (1 / (_l_e * n_e));
+      for (size_t j = 0; j < 6; j++) {
+        for (size_t l = 0; l < 6; l++) {
+          (*_jacobianqForces)(i + j, i + l) += kKT * (*TqqT)(j,l);
+        }
+      }
+    }
+    for (size_t j = 0; j < 6; j++) {
+      for (size_t l = 0; l < 6; l++) {
+        (*_jacobianqForces)(i + j, i + l) += kf * (*TRNp_Np)(j, l);
+      }
+    }
+  }
+  // dernier point, à voir si on mets dans une seule boucle avec des if
+  // dernier élément - premier élément
+  double n_e = 0;
+  for (size_t j = 0; j < 3; j++) {
+    double d = ((*q)(nb_elem + j) - (*q)(j));
+    n_e += d * d;
+  }
+  n_e = sqrt(n_e);
+  
+  double eps = n_e / _l_e - 1;
+  double f_e = fabs(eps);
+  double kf = k / (1 + 1 / f_e);
+  if (eps > 0) {
+    // fi
+    matmult(q, nb_elem, Tq);
+    for (size_t j = 0; j < 3; j++) {
+      (*_forces)(nb_elem + j) += kf * (*Tq)(j);
+      (*_forces)(j) += kf * (*Tq)(j + 3);
+    }
+
+    // KT
+    matmult2(Tq, TqqT);
+    double kKT = 1 / (1 + f_e);
+    kKT = k * kKT * kKT * (1 / (_l_e * n_e));
+    for (size_t j = 0; j < 3; j++) {
+      for (size_t l = 0; l < 3; l++) {
+        (*_jacobianqForces)(nb_elem + j, nb_elem + l) += kKT * (*TqqT)(j, l);
+        (*_jacobianqForces)(nb_elem + j, l) += kKT * (*TqqT)(j, l + 3);
+        (*_jacobianqForces)(j, nb_elem + l) += kKT * (*TqqT)(j + 3, l);
+        (*_jacobianqForces)(j,l) += kKT * (*TqqT)(j + 3, l + 3);
+      }
+    }
+  }
+  for (size_t j = 0; j < 3; j++) {
+    for (size_t l = 0; l < 3; l++) {
+      (*_jacobianqForces)(nb_elem + j, nb_elem + l) += kf * (*TRNp_Np)(j, l);
+      (*_jacobianqForces)(nb_elem + j, l) += kf * (*TRNp_Np)(j, l + 3);
+      (*_jacobianqForces)(j, nb_elem + l) += kf * (*TRNp_Np)(j + 3, l);
+      (*_jacobianqForces)(j, l) += kf * (*TRNp_Np)(j + 3, l + 3);
+    }
+  }
 }
 
 void siconos::mechanics::fem::CableDS::dampingMatrix(/** ...*/)
 {
 
   // must update jacobianqDotForces
+  // constant ?
+  // C = damp*M
+}
+
+void siconos::mechanics::fem::CableDS::matmult(
+                                               const std::shared_ptr<SiconosVector> &V,
+                                               size_t a_startIdx,
+                                               std::shared_ptr<SiconosVector> &R)
+{
+  R->zero();
+  size_t n = R->size();
+  if (n + a_startIdx < V->size()) {
+    for (size_t i = 0; i < n; i++) {
+      for (size_t j = 0; j < n; j++) {
+        (*R)(i) += (*TRNp_Np)(i, j) * (*V)(j + a_startIdx);
+      }
+    }
+  }
+  else {
+    for (size_t i = 0; i < n; i++) {
+      for (size_t j = 0; j < 3; j++) {
+        (*R)(i) += (*TRNp_Np)(i, j) * (*V)(j + a_startIdx);
+      }
+      for (size_t j = 3; j < 6; j++) {
+        (*R)(i) += (*TRNp_Np)(i, j) * (*V)(j-3);
+      }
+    }
+  }  
+}
+
+void siconos::mechanics::fem::CableDS::matmult2(const std::shared_ptr<SiconosVector> &V,
+                                                std::shared_ptr<SimpleMatrix> &R)
+{  
+  size_t n = V->size();  
+  for (size_t i = 0; i < n; i++) {
+    for (size_t j = 0; j < n; j++) {
+      (*R)(i,j) = (*V)(i) * (*V)(j);
+    }
+  }
 }

@@ -56,9 +56,23 @@ protected:
 
   ExternalForcesFunction computefext_{nullptr};
 
+  double _EA{1};
+  double _l_e{1};
+
+  static std::shared_ptr<SimpleMatrix> TRNp_Np;
+
+  void matmult(const std::shared_ptr<SiconosVector> &V,
+               size_t a_startIdx, std::shared_ptr<SiconosVector> &R);
+  void matmult2(const std::shared_ptr<SiconosVector> &V, 
+               std::shared_ptr<SimpleMatrix> &R);
+  
+
+
 public:
   CableDS(std::shared_ptr<SiconosVector> q0, std::shared_ptr<SiconosVector> velocity0,
-          std::shared_ptr<SiconosMatrix> mass, ExternalForcesFunction fext = nullptr);
+          std::shared_ptr<SiconosMatrix> mass, 
+	  double a_EA, double a_elem_length,
+	  ExternalForcesFunction fext = nullptr);
 
   ~CableDS() noexcept = default;
 
@@ -83,9 +97,11 @@ public:
   //
   void computeFExt(double time) override;
 
-  void tangentStiffnessMatrix();
+  void tangentStiffnessMatrix(std::shared_ptr<SiconosVector> q);
   void dampingMatrix();
   // + some access op to be added later, if required
+
+  static std::shared_ptr<SimpleMatrix> TRNp_NpMatrix();
 };
 } // namespace siconos::mechanics::fem
 

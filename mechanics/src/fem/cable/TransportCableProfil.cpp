@@ -1,0 +1,169 @@
+#include "TransportCableProfil.h"
+
+
+
+TransportCableProfil::TransportCableProfil(const TransportCableModel &a_model, TransportCableResult &a_results)
+	: r_model(a_model), 
+	r_results(a_results),
+	puller12(r_model.get_piles1().back(), r_model.get_piles2().back(), r_results.puller12),
+	puller21(r_model.get_piles2().front(), r_model.get_piles1().front(), r_results.puller21)
+{
+	rope2.set_Down(true);
+}
+
+TransportCableProfil::~TransportCableProfil()
+{
+}
+
+void TransportCableProfil::computeInitialProfil(int nb_nodes, int nodes_per_pulley, double a_tol, int a_nmax)
+{
+	Cable meca = r_model.get_cable();
+	Carriers vehicules = r_model.get_carriers();
+	meca.set_rho(meca.get_rho() + vehicules.get_rho());
+
+	r_results.rope1.compute(meca, r_model.get_piles1(), nb_nodes, a_tol, a_nmax);
+	meca.set_T(rope1.get_T0());
+    r_results.rope2.compute(meca, r_model.get_piles2(), nb_nodes, a_tol, a_nmax);
+
+	puller12.set_T(r_results.rope1.get_LastT());
+    puller21.set_T(r_results.rope2.get_T0());
+
+	puller12.compute(nodes_per_pulley);
+	puller21.compute(nodes_per_pulley);
+	
+	// prépare les supports: pile -> support
+	r_results.prepareSupport();
+	
+}
+
+void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol, double mu_s,
+                                      double mu_p)
+{
+	double Lt = puller12.get_L(rope2);
+	double Lb = puller21.get_L(rope1);
+        double L = r_results.rope1.get_L() + Lt + r_results.rope2.get_L() + Lb;
+
+	int n_Pt = (int)rint(nb_elem*Lt / L);
+	int n_Pb = (int)rint(nb_elem*Lb / L);
+
+	int n1 = r_results.rope1.computeNbNodes(nb_elem, L);
+    int n2 = r_results.rope2.computeNbNodes(nb_elem, L);
+	int n = n_Pt + n1 + n_Pb + n2;
+
+	vector<Point> &q = r_results.q;
+	q.resize(n);
+    int offset = r_results.rope1.computeMesh(q, 0);
+	offset = puller12.compute(n_Pt + 1, q, offset);
+    offset = r_results.rope2.computeMesh(q, offset);
+	puller21.compute(n_Pb+1, q, offset);
+
+	r_results.elem_length = L / nb_elem;
+	compute_punct_load(n, L);
+
+	compute_ineq_constraint(q, a_tol, mu_s, mu_p);
+	/*dgi = np.zeros(nb_node)
+	dgi[gi <= 0] = gi[gi <= 0]
+	q = q - np.matmul(np.transpose(Gi), 1.1*dgi)*/
+	vector<double> &g = r_results.g;
+	vector<vector<Point>> &G = r_results.G;
+    double k = 1 + a_eps;
+	for (size_t i=0; i < n; i++) {
+		Point p;
+		if (g[i] < 0) {
+			for (size_t j = 0; j < n; j++) {
+				p.add(p, G[j][i]);
+			}
+			p.mult(k*g[i]);
+			q[i].diff(q[i], p);
+		}
+	}
+}
+
+void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_prop)
+{
+	/*
+	get_punct_load(nb_elem,Lc,rho_vehicules,d_inter_vehicules)
+
+	where
+
+	nb_elem is the number of element in the mesh
+	Lc is the total lentgh of cable
+	rho_vehicules is the fictitious linear density due to vehicules and d_inter_vehicules
+	is the distance between each vehicules (unstretched length)
+
+	Returns a vector which n-th element is the mass hanged to node n the first vehicule is placed
+	randomly between 0 and d_inter_vehicules on the cable
+	*/	
+	const Carriers &vehicules = r_model.get_carriers();
+	vector<double> lc = linspace(0, 1, nb_elem);	
+
+	int nb_vehicules = (int)(lc.back()*Lc / vehicules.get_d_inter_vehicules());
+	double m = vehicules.get_rho() * lc.back()*Lc / nb_vehicules;
+	
+	double start = vehicules.get_d_inter_vehicules();
+	if (d_prop < 0 || d_prop>1)
+		start *= rand() / RAND_MAX;
+	else
+		start *= d_prop;
+
+	vector<double> &punct = r_results.punct;
+	punct.resize(nb_elem, 0);
+	size_t k = 1;
+	for (size_t i = 1; i < nb_elem; i++) {
+		int ind = (int)((lc[i] * Lc - start) / vehicules.get_d_inter_vehicules());
+		if (ind > k) {
+			punct[i-1] = m;
+			k++;
+			if (k > nb_vehicules)
+				break;
+		}
+	}
+	if (k < nb_vehicules)
+		punct[0] = m;
+
+}
+
+void TransportCableProfil::compute_ineq_constraint(const vector<Point> &a_X, double a_tol, double mu_s, double mu_p)
+{
+	/*
+	@author: charl
+
+	get_ineq_constraint(q,supports)
+
+	where
+
+	X is the coordinates of cable particles
+	supports is the list of obstacles which i-th element is containing [ positions, radius ] associated
+	to piles (cylinder with circled base in xy plane)
+	pulleys is the list of pulleys which i-th element is containing [ positions, radius ] associated
+	to pulleys (cylinder with circled base in xz plane)
+
+	Return the inequality constraint vector for the support contained into supports and the active
+	set vector which i-th element is :
+		- NaN if the constraint is inactive
+		- Obstacle index in supports if the constraint is active
+	*/	
+	r_results.prepareIneqConstraint((int)a_X.size());
+	
+	vector<double>& g = r_results.g;
+	vector<int>& act = r_results.act;
+	vector<vector<Point>>& G = r_results.G;
+	vector<vector<Point>>& T = r_results.T;
+	vector<Point>& blocked = r_results.blocked;
+	vector<Point>& blocked_value = r_results.blocked_value;
+	vector<double>& eye_c = r_results.eye_c;
+	vector<Support>& supports = r_results.supports;
+
+	int k = 0;
+	for (auto &s : supports) {
+		size_t i = 0;
+		for (auto &p : a_X) {			
+			s.compute(p, k, a_tol, mu_s, g[i], act[i], G[i][i], T[i][i], blocked[i], blocked_value[i], eye_c[i]);			
+			i++;
+		}
+		k++;
+	}
+	int ns = (int)supports.size();
+	puller12.compute(a_X, ns, a_tol, mu_p, r_results);
+	puller21.compute(a_X, ns+1, a_tol, mu_p, r_results);
+}
