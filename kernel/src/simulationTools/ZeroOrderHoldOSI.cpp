@@ -328,7 +328,6 @@ void siconos::integrators::ZeroOrderHoldOSI::prepareNewtonIteration(double time)
 
 struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
-
   using siconos::internal::SiconosVisitor::visit;
 
   siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
@@ -576,7 +575,7 @@ bool siconos::integrators::ZeroOrderHoldOSI::removeInteractionFromIndexSet(
 }
 
 const siconos::algebra::SiconosMatrix& siconos::integrators::ZeroOrderHoldOSI::Ad(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
 {
   auto& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
   auto dsgVD = DSG0.descriptor(ds);
@@ -584,14 +583,14 @@ const siconos::algebra::SiconosMatrix& siconos::integrators::ZeroOrderHoldOSI::A
 }
 
 const siconos::algebra::SiconosMatrix& siconos::integrators::ZeroOrderHoldOSI::Bd(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
 {
   auto& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
   auto dsgVD = DSG0.descriptor(ds);
   return DSG0.Bd.at(dsgVD)->mat();
 }
 
-void siconos::integrators::ZeroOrderHoldOSI::display()
+void siconos::integrators::ZeroOrderHoldOSI::display() const
 {
   OneStepIntegrator::display();
 

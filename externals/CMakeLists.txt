@@ -40,6 +40,7 @@ if(WITH_CXX)
     # FP : in which case do we need this, since boost serialization is required ??
     list(APPEND ${COMPONENT}_DIRS boost_serialization)
   endif()
+  
 endif()
 
 # -- Source files to be excluded from build --
@@ -125,6 +126,7 @@ include(WindowsExternalsSetup)
 include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
+
 # - Extra setup for the component -
 if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
   target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})
@@ -174,8 +176,6 @@ target_compile_options(externals PRIVATE "-Wno-unused-parameter")
 
 # no warnings in fortran
 target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-w>)
-
-  
 
 # An awful command asking to add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
 # See https://scivision.co/gfortran-type-mismatch-error/

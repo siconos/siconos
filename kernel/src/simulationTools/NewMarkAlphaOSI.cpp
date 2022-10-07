@@ -905,4 +905,4 @@ void siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs(double t)
   }
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void siconos::integrators::NewMarkAlphaOSI::display() {}
+void siconos::integrators::NewMarkAlphaOSI::display() const {}

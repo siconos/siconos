@@ -509,7 +509,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */
-  void display() override;
+  void display() const override;
 };
 }  // namespace siconos::integrators
 #endif  // MoreauJeanOSI_H

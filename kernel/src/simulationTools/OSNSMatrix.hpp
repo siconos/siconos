@@ -156,9 +156,9 @@ class OSNSMatrix {
  private:
   // Rule of five
   OSNSMatrix(const OSNSMatrix&) = delete;
-  OSNSMatrix(const OSNSMatrix&&) = delete;
+  OSNSMatrix(OSNSMatrix&&) = delete;
   OSNSMatrix& operator=(const OSNSMatrix&) = delete;
-  OSNSMatrix& operator=(const OSNSMatrix&&) = delete;
+  OSNSMatrix& operator=(OSNSMatrix&&) = delete;
 
  public:
   /** Default constructor -> empty matrix

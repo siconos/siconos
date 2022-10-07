@@ -23,11 +23,10 @@
 #ifndef NSLAW_H
 #define NSLAW_H
 
-#include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosException.hpp"
+#include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosVisitor.hpp"
-#include "TypeName.hpp" // visitor to get ds type
-
+#include "TypeName.hpp"  // visitor to get ds type
 
 namespace siconos::modeling {
 /**
@@ -67,7 +66,7 @@ class NonSmoothLaw {
   NonSmoothLaw(const NonSmoothLaw &) = delete;
   NonSmoothLaw(NonSmoothLaw &&) = delete;
   NonSmoothLaw &operator=(const NonSmoothLaw &) = delete;
-  NonSmoothLaw &operator=(const NonSmoothLaw &&) = delete;
+  NonSmoothLaw &operator=(NonSmoothLaw &&) = delete;
 
  public:
   /** basic constructor

@@ -144,8 +144,7 @@ class Relation {
    *  \param type type of the relation
    *  \param subtype subtype of the relation
    */
-  Relation(RelationType type, RelationSubType subtype)
-      : _relationType(type), _subType(subtype)
+  Relation(RelationType type, RelationSubType subtype) : _relationType(type), _subType(subtype)
   {
     _zeroPlugin();
   };
@@ -153,9 +152,9 @@ class Relation {
  private:
   // Rule of five ...
   Relation(const Relation &) = delete;
-  Relation(const Relation &&) = delete;
+  Relation(Relation &&) = delete;
   Relation &operator=(const Relation &) = delete;
-  Relation &operator=(const Relation &&) = delete;
+  Relation &operator=(Relation &&) = delete;
 
  protected:
   Relation() = default; /* for serialization only */

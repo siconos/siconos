@@ -111,9 +111,9 @@ class Observer {
   // Rule of five
   Observer() = delete;
   Observer(const Observer&) = delete;
-  Observer(const Observer&&) = delete;
+  Observer(Observer&&) = delete;
   Observer& operator=(const Observer&) = delete;
-  Observer& operator=(const Observer&&) = delete;
+  Observer& operator=(Observer&&) = delete;
 
  public:
   /** Constructor with a TimeDiscretisation.

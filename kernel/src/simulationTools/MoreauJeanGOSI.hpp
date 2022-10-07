@@ -109,7 +109,7 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
 
   /** Displays the data of the MoreauJeanGOSI's integrator
    */
-  void display() override;
+  void display() const override;
 };
 }  // namespace siconos::integrators
 #endif  // MoreauJeanGOSI_H

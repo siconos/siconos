@@ -20,23 +20,21 @@
 
 #include <boost/numeric/bindings/blas.hpp>
 #include <boost/numeric/bindings/std/vector.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>            // for >>
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/ublas/vector_sparse.hpp>
 
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-
 #include "BlockVector.hpp"
-//#include "Question.hpp"  // for question visitor
+// #include "Question.hpp"  // for question visitor
 #include "SiconosConfig.h"
 #include "SiconosException.hpp"
 #include "SiconosVectorFriends.hpp"  // declaration of all friend functions
-//#define DEBUG_MESSAGES
+// #define DEBUG_MESSAGES
 #include "SiconosVectorIterator.hpp"
-#include "siconos_debug.h"
-
 #include "SimpleMatrix.hpp"
+#include "siconos_debug.h"
 // #include <algorithm>  // std::transform
 // #include <cmath>      // std::exp(double)
 
@@ -648,7 +646,7 @@ siconos::algebra::SiconosVector& siconos::algebra::SiconosVector::operator+=(
     const BlockVector& vIn)
 {
   unsigned int pos = 0;
-  for (auto it : vIn){
+  for (auto it : vIn) {
     addBlock(pos, *it);
     pos += it->size();
   }
@@ -1023,35 +1021,35 @@ double siconos::algebra::inner_prod(const SiconosVector& x, const SiconosVector&
     if (numM == UblasType::DENSE)
       return bindings_blas::dot(*x.dense(), *m.dense());
     else
-      return inner_prod(*x.sparse(), *m.sparse());
+      return ublas::inner_prod(*x.sparse(), *m.sparse());
   }
   else if (numM == UblasType::DENSE)
-    return inner_prod(*x.sparse(), *m.dense());
+    return ublas::inner_prod(*x.sparse(), *m.dense());
   else
-    return inner_prod(*x.dense(), *m.sparse());
+    return ublas::inner_prod(*x.dense(), *m.sparse());
 }
 
 // outer_prod(v,w) = trans(v)*w
-siconos::algebra::SimpleMatrix siconos::algebra::outer_prod(const SiconosVector &x, const SiconosVector& m)
+siconos::algebra::SimpleMatrix siconos::algebra::outer_prod(const SiconosVector& x,
+                                                            const SiconosVector& m)
 {
   auto numM = m.num();
   auto numX = x.num();
 
-  if(numM == UblasType::DENSE)
-  {
-    if(numX == UblasType::DENSE)
-      return (DenseMat)(outer_prod(*x.dense(), *m.dense()));
+  if (numM == UblasType::DENSE) {
+    if (numX == UblasType::DENSE)
+      return (DenseMat)(ublas::outer_prod(*x.dense(), *m.dense()));
 
-    else// if(numX == UblasType::SPARSE)
-      return (DenseMat)(outer_prod(*x.sparse(), *m.dense()));
+    else  // if(numX == UblasType::SPARSE)
+      return (DenseMat)(ublas::outer_prod(*x.sparse(), *m.dense()));
   }
-  else // if(numM == UblasType::SPARSE)
+  else  // if(numM == UblasType::SPARSE)
   {
-    if(numX == UblasType::DENSE)
-      return (DenseMat)(outer_prod(*x.dense(), *m.sparse()));
+    if (numX == UblasType::DENSE)
+      return (DenseMat)(ublas::outer_prod(*x.dense(), *m.sparse()));
 
-    else //if(numX == UblasType::SPARSE)
-      return (DenseMat)(outer_prod(*x.sparse(), *m.sparse()));
+    else  // if(numX == UblasType::SPARSE)
+      return (DenseMat)(ublas::outer_prod(*x.sparse(), *m.sparse()));
   }
 }
 

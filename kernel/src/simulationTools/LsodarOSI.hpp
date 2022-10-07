@@ -302,7 +302,7 @@ class LsodarOSI : public OneStepIntegrator {
 
   /** print the data to the screen
    */
-  void display() override;
+  void display() const override;
 
   /** Return current number of rhs call (for all lsodar-like OSIs!)
    *

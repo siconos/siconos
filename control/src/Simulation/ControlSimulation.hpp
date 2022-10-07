@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <string>
+
 #include "SiconosSerialization.hpp"
 
 namespace siconos::algebra {
@@ -125,9 +126,9 @@ class ControlSimulation {
   // Rule of five
   ControlSimulation() = delete;
   ControlSimulation(const ControlSimulation&) = delete;
-  ControlSimulation(const ControlSimulation&&) = delete;
+  ControlSimulation(ControlSimulation&&) = delete;
   ControlSimulation& operator=(const ControlSimulation&) = delete;
-  ControlSimulation& operator=(const ControlSimulation&&) = delete;
+  ControlSimulation& operator=(ControlSimulation&&) = delete;
 
  public:
   /** destructor */

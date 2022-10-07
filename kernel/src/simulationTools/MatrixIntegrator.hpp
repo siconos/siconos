@@ -91,9 +91,9 @@ class MatrixIntegrator {
   // Rule of five
   MatrixIntegrator() = delete;
   MatrixIntegrator(const MatrixIntegrator&) = delete;
-  MatrixIntegrator(const MatrixIntegrator&&) = delete;
+  MatrixIntegrator(MatrixIntegrator&&) = delete;
   MatrixIntegrator& operator=(const MatrixIntegrator&) = delete;
-  MatrixIntegrator& operator=(const MatrixIntegrator&&) = delete;
+  MatrixIntegrator& operator=(MatrixIntegrator&&) = delete;
 
  public:
   /** Constructor to compute \f$\int exp(A\tau)E\amthrm{d}\tau\f$

@@ -337,7 +337,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
       std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
 
   /** displays the data of the D1MinusLinearOSI's integrator */
-  void display() override { THROW_EXCEPTION("D1MinusLinearOSI::display - not implemented!"); }
+  void display() const override { THROW_EXCEPTION("D1MinusLinearOSI::display - not implemented!"); }
 
   /** preparations for Newton iteration
    *  \param time time

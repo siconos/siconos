@@ -63,7 +63,7 @@ include(WindowsKernelSetup)
 include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
-# We require C++ 17. PUBLIC to propagate to other components.
+# We require C++ 20. PUBLIC to propagate to other components.
 target_compile_features(kernel PUBLIC cxx_std_20)
 
 # --- Extra setup for the component ---
@@ -71,7 +71,10 @@ target_compile_features(kernel PUBLIC cxx_std_20)
 set_source_files_properties(
   ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/EigenProblems.cpp
   ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixSolvers.cpp
-  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable")
+  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SiconosAlgebraTools.cpp
+  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable;-Wno-unused-local-typedefs")
+
+
 
 # Links with other Siconos components
 target_link_libraries(kernel PRIVATE externals numerics)

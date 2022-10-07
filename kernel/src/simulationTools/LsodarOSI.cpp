@@ -612,7 +612,6 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
 
-  
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&&) = delete;
   _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&) = delete;
@@ -778,7 +777,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     }
   }
 }
-void siconos::integrators::LsodarOSI::display()
+void siconos::integrators::LsodarOSI::display() const
 {
   OneStepIntegrator::display();
   std::cout << " --- > LsodarOSI specific values: \n";

@@ -172,10 +172,10 @@ class SimpleMatrix : public SiconosMatrix {
   // private_prod(std::shared_ptr<const SiconosVector>, std::shared_ptr<const SiconosMatrix>,
   // unsigned int, std::shared_ptr<BlockVector>, bool);
 
- public:
   /** Default constructor */
-  SimpleMatrix();
+  SimpleMatrix() = delete;
 
+ public:
   /** constructor with the type and the dimension of the Boost matrix
    *
    *  \param row number of rows.
@@ -814,7 +814,7 @@ class SimpleMatrix : public SiconosMatrix {
 
   friend const SimpleMatrix operator/(const SiconosMatrix&, double);
 
-  friend const SimpleMatrix operator+(const SiconosMatrix&, const SiconosMatrix&);
+  //  friend const SimpleMatrix operator+(const SiconosMatrix&, const SiconosMatrix&);
 
   friend std::shared_ptr<SimpleMatrix> operator+(const std::shared_ptr<SimpleMatrix>,
                                                  const std::shared_ptr<SimpleMatrix>);

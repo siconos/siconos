@@ -288,7 +288,7 @@ class Hem5OSI : public OneStepIntegrator {
 
   /** print the data to the screen
    */
-  void display() override;
+  void display() const override;
 };
 }  // namespace siconos::integrators
 #endif  // Hem5OSI_H

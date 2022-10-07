@@ -22,24 +22,24 @@
 #include <boost/numeric/bindings/blas.hpp>
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/ublas/banded.hpp>
+#include <boost/numeric/ublas/io.hpp>            // for opera...
+#include <boost/numeric/ublas/matrix_proxy.hpp>  // for matri...
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/io.hpp>            // for opera...
-#include <boost/numeric/ublas/matrix_proxy.hpp>  // for matri...
 // #include <iostream>                              // for ostream
 // #include <memory>                                // for __sha...
 
-#include "BlockMatrix.hpp"  // for Block...
-#include "NumericsToolsNamespace.h" // for NumericsMatrix and NumericsSparseMatrix
-#include "SiconosException.hpp"     // for Sicon...
+#include "BlockMatrix.hpp"           // for Block...
+#include "NumericsToolsNamespace.h"  // for NumericsMatrix and NumericsSparseMatrix
+#include "SiconosException.hpp"      // for Sicon...
 #include "SiconosMatrixFriends.hpp"  // friends declarationx
 // #include "Tools.hpp"                // for toString
-#include "SiconosAlgebraTools.hpp"    // for randomize ...
+#include "SiconosAlgebraTools.hpp"  // for randomize ...
 #include "SiconosAlgebraTypes.hpp"  // for UblasType
-#include "bindings_utils.hpp"         // for fill
-#include "io.hpp"                     // for read
-//#define DEBUG_MESSAGES
+#include "bindings_utils.hpp"       // for fill
+#include "io.hpp"                   // for read
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 #ifdef DEBUG_MESSAGES
 #include <cs.h>
@@ -52,15 +52,14 @@ namespace bindings_blas = boost::numeric::bindings::blas;
 //                CONSTRUCTORS
 // =================================================
 
-siconos::algebra::SimpleMatrix::SimpleMatrix() : SiconosMatrix(UblasType::DENSE)
-{
-  mat.Dense = new DenseMat(ublas::zero_matrix<double>());
-}
+// siconos::algebra::SimpleMatrix::SimpleMatrix() : SiconosMatrix(UblasType::DENSE)
+// {
+//   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
+// }
 
 // parameters: dimensions and type.
-siconos::algebra::SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col,
-                                             UblasType typ, unsigned int upper,
-                                             unsigned int lower)
+siconos::algebra::SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, UblasType typ,
+                                             unsigned int upper, unsigned int lower)
     : SiconosMatrix(UblasType::DENSE)
 {
   if (typ == UblasType::DENSE) {
@@ -352,8 +351,7 @@ siconos::algebra::SimpleMatrix::SimpleMatrix(const BandedMat &m)
   mat.Banded = new BandedMat(m);
 }
 
-siconos::algebra::SimpleMatrix::SimpleMatrix(const ZeroMat &m)
-    : SiconosMatrix(UblasType::ZERO)
+siconos::algebra::SimpleMatrix::SimpleMatrix(const ZeroMat &m) : SiconosMatrix(UblasType::ZERO)
 {
   mat.Zero = new ZeroMat(m);
 }
@@ -408,21 +406,27 @@ void siconos::algebra::SimpleMatrix::updateNumericsMatrix()
   siconos::numerics::NumericsMatrix *NM;
   if (_num == UblasType::DENSE) {
     _numericsMatrix.reset(
-        siconos::numerics::NM_new(), siconos::numerics::NM_free_not_dense);  // When we reset, we do not free the matrix0
-                                       // that is linked to the array of the boost container
+        siconos::numerics::NM_new(),
+        siconos::numerics::NM_free_not_dense);  // When we reset, we do not free the matrix0
+                                                // that is linked to the array of the boost
+                                                // container
     NM = _numericsMatrix.get();
     double *data = (double *)(getArray());
     DEBUG_EXPR(NV_display(data, size(0) * size(1)););
-    siconos::numerics::NM_fill(NM, siconos::numerics::NM_DENSE, size(0), size(1), data);  // Pointer link
+    siconos::numerics::NM_fill(NM, siconos::numerics::NM_DENSE, size(0), size(1),
+                               data);  // Pointer link
   }
   else {
     // For all the other cases, we build a sparse matrix and we call numerics for the
     // factorization of a sparse matrix.
-    _numericsMatrix.reset(siconos::numerics::NM_create(siconos::numerics::NM_SPARSE, size(0), size(1)), siconos::numerics::NM_free);
+    _numericsMatrix.reset(
+        siconos::numerics::NM_create(siconos::numerics::NM_SPARSE, size(0), size(1)),
+        siconos::numerics::NM_free);
     NM = _numericsMatrix.get();
     _numericsMatrix->matrix2->origin = siconos::numerics::NSM_CSC;
     siconos::numerics::NM_csc_alloc(NM, nnz());
-    fillCSC(siconos::numerics::numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
+    fillCSC(siconos::numerics::numericsSparseMatrix(NM)->csc,
+            std::numeric_limits<double>::epsilon());
     DEBUG_EXPR(cs_print(siconos::numerics::numericsSparseMatrix(NM)->csc, 0););
   }
 }
@@ -889,21 +893,23 @@ std::ostream &siconos::algebra::operator<<(std::ostream &os, const SimpleMatrix 
 
 void siconos::algebra::SimpleMatrix::assign(const SimpleMatrix &smat)
 {
-  switch (_num) {
-    case UblasType::SPARSE: {
-      switch (smat.num()) {
-        case UblasType::SPARSE: {
-          mat.Sparse->assign(smat.getSparse());
-          break;
-        }
-        default: {
-        }
-      }
-    }
-    default: {
-      THROW_EXCEPTION("do not know how to assign for the given storage type ");
-    }
+  if (_num != UblasType::SPARSE)
+    THROW_EXCEPTION("Assign only implemented for UblasType::SPARSE matrix.");
+
+  // switch (_num) {
+  //   case UblasType::SPARSE:
+
+  switch (smat.num()) {
+    case UblasType::SPARSE:
+      mat.Sparse->assign(smat.getSparse());
+      break;
+    default:
+      break;
   }
+  // default:
+  //     THROW_EXCEPTION("do not know how to assign for the given storage type ");
+  //     break;
+  // }
 }
 
 // void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init)

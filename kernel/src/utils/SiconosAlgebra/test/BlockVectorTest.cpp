@@ -16,14 +16,7 @@
  * limitations under the License.
  */
 #include "BlockVectorTest.hpp"
-
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
-
 #include "BlockVector.hpp"
-#include "SiconosAlgebraTypes.hpp"
-#include "SiconosConfig.h"
-#include "SiconosVector.hpp"
 
 using namespace boost::numeric::ublas;
 using BlockVector = siconos::algebra::BlockVector;
@@ -32,7 +25,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BlockVectorTest);
 
 void BlockVectorTest::setUp()
 {
-  tol = 1e-14;
   ref = std::make_shared<BlockVector>(1, 5);
   for (unsigned int i = 0; i < 5; ++i) (*ref)(i) = i;
 
@@ -57,22 +49,22 @@ void BlockVectorTest::testConstructor1()
   std::cout << "==================================" << std::endl;
   std::cout << "--> Test: constructor 1." << std::endl;
   auto w = std::make_shared<siconos::algebra::SiconosVector>(3, 2);
-  //  auto  v= std::make_shared<BlockVector>(1, w->size())); // Copy from a Simple
+  // auto v = std::make_shared<BlockVector>(1, w->size());  // Copy from a Simple
 
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->numberOfBlocks() == 1, true);
-  //  for (unsigned int i=0;i<v->size();i++)
-  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*v)(i) == 2, true);
-  //
-  //  auto tab = v->tabIndex();
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", tab->size() == 1, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*tab)[0] == 3, true);
-  //
-  //  auto  z = v->vector(0);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->size() == 3, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->num() ==
-  //  siconos::algebra::UblasType::DENSE, true); std::cout << "--> Constructor 1 test ended
-  //  with success." <<std::endl;
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->numberOfBlocks() == 1, true);
+  // for (unsigned int i = 0; i < v->size(); i++)
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*v)(i) == 2, true);
+
+  // auto tab = v->tabIndex();
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", tab->size() == 1, true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*tab)[0] == 3, true);
+
+  // auto z = v->vector(0);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->size() == 3, true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
+  //     "testConstructor1 : ", z->num() == siconos::algebra::UblasType::DENSE, true);
+  // std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
 void BlockVectorTest::testConstructor2()
@@ -82,12 +74,11 @@ void BlockVectorTest::testConstructor2()
   // auto  z=
   // std::make_shared<siconos::algebra::SiconosVector>(5,3,siconos::algebra::UblasType::SPARSE);
   // Problem if z sparse: " Assertion failed in file
-  // /usr/include/boost/numeric/ublas/vector_sparse.hpp at line 1253: *this != (*this) ().end
-  // () "
+  // /usr/include/boost/numeric/ublas/vector_sparse.hpp at line 1253:
+  // *this != (*this)().end() "
 
   auto z = std::make_shared<siconos::algebra::SiconosVector>(5, 3);
-  auto x =
-      std::make_shared<BlockVector>();  // Copy from a siconos::algebra::SiconosVector(Simple)
+  auto x = std::make_shared<BlockVector>();  // Copy from a siconos::algebra::SiconosVector(Simple)
   x->insertPtr(w);
   x->insertPtr(z);
 
@@ -310,7 +301,8 @@ void BlockVectorTest::testSetBlock()
 
   BSV->setBlock(*vIn, sizeB, posIn, posOut);
   for (unsigned int i = 0; i < sizeB; ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i + posOut) == (*vIn)(i + posIn),
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i + posOut) == (*vIn)(i +
+    posIn),
                                  true);
 
   std::cout << "--> setBlock3 test ended with success." << std::endl;
@@ -390,7 +382,8 @@ void BlockVectorTest::testOperators1()
   // Block += Block
   *v += *xB;
   for (unsigned int i = 0; i < size1 + size2; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators1: ", fabs((*v)(i)-4 - (*xB)(i)) < tol, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators1: ", fabs((*v)(i)-4 - (*xB)(i)) < tol,
+    true);
   std::cout << "--> operators1 test ended with success." << std::endl;
 }
 
@@ -421,7 +414,8 @@ void BlockVectorTest::testOperators2()
   // Block += Block
   *v -= *xB;
   for (unsigned int i = 0; i < size1 + size2; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators2: ", fabs((*v)(i)-4 + (*xB)(i)) < tol, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators2: ", fabs((*v)(i)-4 + (*xB)(i)) < tol,
+    true);
 
   std::cout << "--> operators2 test ended with success." << std::endl;
 }

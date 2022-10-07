@@ -530,6 +530,7 @@ void siconos::modeling::LagrangianDS::computeForces(
     double time, std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity)
 {
+  std::cout << "LDS ...\n" ;
   if (!_forces) {
     _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
   }

@@ -155,6 +155,7 @@ void siconos::modeling::LagrangianLinearTIDS::computeForces(
       "siconos::modeling::LagrangianLinearTIDS::computeForces(double time, "
       "std::shared_ptr<siconos::algebra::SiconosVector> q2, "
       "std::shared_ptr<siconos::algebra::SiconosVector> v2) \n");
+  std::cout << "LTIDS ...\n" ;
 
   if (!_forces) {
     _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);

@@ -178,7 +178,8 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    *  \param ds a pointer to DynamicalSystem
    *  \param W the result in W
    */
-  void computeW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds, siconos::algebra::SiconosMatrix &W);
+  void computeW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                siconos::algebra::SiconosMatrix &W);
 
   /** compute the residual of dynamical equation
    *\return double: maximum residu over all DSs
@@ -262,7 +263,7 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
 
   /** Displays the data of the NewMarkAlpha's integrator
    */
-  void display() override;
+  void display() const override;
 };
 }  // namespace siconos::integrators
 #endif  // NEWMARKALPHAOSI_H

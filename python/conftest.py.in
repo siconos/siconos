@@ -1,0 +1,19 @@
+import pytest
+from pathlib import Path
+
+
+# Define data dir (where to find input files)
+@pytest.fixture(scope="module")
+def datadir():
+    return Path("@CMAKE_CURRENT_BINARY_DIR@") / "tests" / "data"
+
+
+# datafile(fname) will return the full path
+# to some file name in datadir
+@pytest.fixture
+def datafile(datadir):
+
+    def _datafile(fname):
+        return (datadir / fname).as_posix()
+
+    return _datafile

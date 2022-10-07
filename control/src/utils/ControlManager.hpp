@@ -98,9 +98,9 @@ class ControlManager {
   // Rule of five
   ControlManager() = delete;
   ControlManager(const ControlManager&) = delete;
-  ControlManager(const ControlManager&&) = delete;
+  ControlManager(ControlManager&&) = delete;
   ControlManager& operator=(const ControlManager&) = delete;
-  ControlManager& operator=(const ControlManager&&) = delete;
+  ControlManager& operator=(ControlManager&&) = delete;
 
   /** Create associated Event and give the opportunity to get the TimeDiscretisation
    *

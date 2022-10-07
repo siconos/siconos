@@ -91,12 +91,11 @@ class PluggedObject {
   /** Plugin name, should be of the form "fileName:functionName" */
   std::string _pluginName{"unplugged"};
 
-  PluggedObject(const PluggedObject&& PO) = delete;
+  PluggedObject(PluggedObject&& PO) = delete;
   PluggedObject& operator=(const PluggedObject& PO) = delete;
-  PluggedObject& operator=(const PluggedObject&& PO) = delete;
+  PluggedObject& operator=(PluggedObject&& PO) = delete;
 
  public:
-
   /** plug-in */
   void* fPtr{nullptr};
 

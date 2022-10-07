@@ -153,11 +153,11 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator/(const SiconosMa
 // const SimpleMatrix operator + (const  SimpleMatrix& A, const  SimpleMatrix& B){
 //   return (DenseMat)(*A.dense() + *B.dense());
 // }
-siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SimpleMatrix &A,
-                                                           const SimpleMatrix &B)
-{
-  return (DenseMat)(*A.dense() + *B.dense());
-}
+// siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SimpleMatrix &A,
+//                                                            const SimpleMatrix &B)
+// {
+//   return (DenseMat)(*A.dense() + *B.dense());
+// }
 
 void siconos::algebra::operator +=(std::shared_ptr<SiconosMatrix> A, std::shared_ptr<SimpleMatrix> B)
 {

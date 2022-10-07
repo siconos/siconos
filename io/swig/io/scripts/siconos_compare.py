@@ -1,4 +1,4 @@
-#!/usr/bin/env @PYTHON_EXECUTABLE@
+#!/usr/bin/env @Python_EXECUTABLE@
 """
 Description: Numerically compare the contents of two Siconos mechanics-IO HDF5 simulation files.
 

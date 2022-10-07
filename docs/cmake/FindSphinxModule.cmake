@@ -19,7 +19,7 @@ function(find_sphinx_module parent module)
   if(ARGC GREATER 2 AND ARGV2 STREQUAL "REQUIRED")
     set(${module}_FIND_REQUIRED TRUE)
   endif()
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+  execute_process(COMMAND ${Python_EXECUTABLE} -c
     "import re; from ${parent} import ${module}; print(${module}.__file__)"
     RESULT_VARIABLE _${module}_status
     OUTPUT_VARIABLE _${module}_location

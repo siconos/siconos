@@ -126,9 +126,9 @@ class Sensor {
   // Rule of five
   Sensor() = delete;
   Sensor(const Sensor&) = delete;
-  Sensor(const Sensor&&) = delete;
+  Sensor(Sensor&&) = delete;
   Sensor& operator=(const Sensor&) = delete;
-  Sensor& operator=(const Sensor&&) = delete;
+  Sensor& operator=(Sensor&&) = delete;
 
  public:
   /** Constructor with a TimeDiscretisation.

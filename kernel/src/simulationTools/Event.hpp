@@ -122,9 +122,9 @@ class Event {
   // Rule of five
   Event() = delete;
   Event(const Event&) = delete;
-  Event(const Event&&) = delete;
+  Event(Event&&) = delete;
   Event& operator=(const Event&) = delete;
-  Event& operator=(const Event&&) = delete;
+  Event& operator=(Event&&) = delete;
 
  public:
   /** constructor with time value and type as input
@@ -287,7 +287,6 @@ class EventRegistration {
     EventFactory::instance()->registerCreator(newtype,
                                               [](double a) { return std::make_shared<T>(a); });
   }
-
 };
 
 }  // namespace siconos::simulation

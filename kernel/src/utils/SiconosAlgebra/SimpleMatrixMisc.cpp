@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
+#include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
@@ -33,9 +33,7 @@
 #include "SimpleMatrix.hpp"
 #include "determinant.hpp"
 
-
 namespace ublas = boost::numeric::ublas;
-
 
 //=======================
 //       get norm

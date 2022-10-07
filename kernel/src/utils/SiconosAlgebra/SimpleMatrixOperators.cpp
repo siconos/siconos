@@ -161,7 +161,7 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(
         }
         break;
       case UblasType::SYMMETRIC:
-        if (numM == UblasType::IDENTITY)
+        if (numM == UblasType::IDENTITY || numM == UblasType::SYMMETRIC)
           noalias(*(mat.Sym)) = *m.sym();
         else
           THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");
@@ -309,6 +309,9 @@ siconos::algebra::SimpleMatrix &siconos::algebra::SimpleMatrix::operator=(
         case UblasType::SPARSE:
           noalias(*(mat.Sparse)) = *m.sparse();
           break;
+        case UblasType::SPARSE_COORDINATE:
+          noalias(*(mat.Sparse)) = *m.sparseCoordinate();
+	  break;
         case UblasType::BANDED:
           noalias(*(mat.Sparse)) = *m.banded();
           break;

@@ -22,7 +22,7 @@
 #ifndef ONESTEPNSPROBLEM_H
 #define ONESTEPNSPROBLEM_H
 
-//#include <memory>
+// #include <memory>
 #include <set>
 
 #include "SiconosSerialization.hpp"
@@ -120,9 +120,9 @@ class OneStepNSProblem {
 
  private:
   OneStepNSProblem(const OneStepNSProblem&) = delete;
-  OneStepNSProblem(const OneStepNSProblem&&) = delete;
+  OneStepNSProblem(OneStepNSProblem&&) = delete;
   OneStepNSProblem& operator=(const OneStepNSProblem&) = delete;
-  OneStepNSProblem& operator=(const OneStepNSProblem&&) = delete;
+  OneStepNSProblem& operator=(OneStepNSProblem&&) = delete;
 
  public:
   /** constructor from a pre-defined solver options set.

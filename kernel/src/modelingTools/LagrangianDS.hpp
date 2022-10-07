@@ -304,8 +304,8 @@ class LagrangianDS : public SecondOrderDS {
   /** constructor from initial state only,  \f$ dv = p  \f$
    *
    *  \param position siconos::algebra::SiconosVector : initial coordinates of this
-   *  DynamicalSystem \param velocity siconos::algebra::SiconosVector : initial velocity of this
-   *  DynamicalSystem
+   *  DynamicalSystem \param velocity siconos::algebra::SiconosVector : initial velocity of
+   * this DynamicalSystem
    */
   LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                std::shared_ptr<siconos::algebra::SiconosVector> velocity);
@@ -313,8 +313,8 @@ class LagrangianDS : public SecondOrderDS {
   /** constructor from initial state and mass,  \f$ Mdv = p \f$
    *
    *  \param position siconos::algebra::SiconosVector : initial coordinates of this
-   *  DynamicalSystem \param velocity siconos::algebra::SiconosVector : initial velocity of this
-   *  DynamicalSystem \param mass SiconosMatrix : mass matrix
+   *  DynamicalSystem \param velocity siconos::algebra::SiconosVector : initial velocity of
+   * this DynamicalSystem \param mass SiconosMatrix : mass matrix
    */
   LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                std::shared_ptr<siconos::algebra::SiconosVector> velocity,
@@ -323,9 +323,8 @@ class LagrangianDS : public SecondOrderDS {
   /** constructor from initial state and mass (plugin)  \f$ Mdv = p \f$
    *
    *  \param position siconos::algebra::SiconosVector : initial coordinates of this
-   *  DynamicalSystem \param velocity siconos::algebra::SiconosVector : initial velocity of this
-   *  DynamicalSystem \param plugin std::string: plugin path to compute mass
-   *  matrix
+   *  DynamicalSystem \param velocity siconos::algebra::SiconosVector : initial velocity of
+   * this DynamicalSystem \param plugin std::string: plugin path to compute mass matrix
    */
   LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                std::shared_ptr<siconos::algebra::SiconosVector> velocity,
@@ -964,7 +963,6 @@ class LagrangianDS : public SecondOrderDS {
   // visitors hook
   void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
-  
 };
 
 }  // namespace siconos::modeling

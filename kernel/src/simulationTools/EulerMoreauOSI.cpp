@@ -1165,7 +1165,7 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int)
   }
 }
 
-void siconos::integrators::EulerMoreauOSI::display()
+void siconos::integrators::EulerMoreauOSI::display() const
 {
   OneStepIntegrator::display();
 

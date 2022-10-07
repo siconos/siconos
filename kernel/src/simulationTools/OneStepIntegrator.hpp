@@ -153,9 +153,9 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   OneStepIntegrator() = delete;
 
   OneStepIntegrator(const OneStepIntegrator&) = delete;
-  OneStepIntegrator(const OneStepIntegrator&&) = delete;
+  OneStepIntegrator(OneStepIntegrator&&) = delete;
   OneStepIntegrator& operator=(const OneStepIntegrator&) = delete;
-  OneStepIntegrator& operator=(const OneStepIntegrator&&) = delete;
+  OneStepIntegrator& operator=(OneStepIntegrator&&) = delete;
 
  public:
   /** destructor
@@ -394,7 +394,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
 
   /** print the data to the screen
    */
-  virtual void display() = 0;
+  virtual void display() const = 0;
 
   /** Apply the rule to one Interaction to known if is it should be included
    *  in the IndexSet of level i
@@ -441,7 +441,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       \param dsi the iterator on the node of the graph corresponding to the dynamical system
      of interest.
    */
-  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VIterator dsi)
+  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VIterator dsi) const
   {
     return (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
   };
@@ -452,7 +452,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       \param dsgv the descriptor of the node in the graph corresponding to the dynamical
      system of interest.
    */
-  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VDescriptor dsgv)
+  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VDescriptor dsgv) const
   {
     return (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
   };

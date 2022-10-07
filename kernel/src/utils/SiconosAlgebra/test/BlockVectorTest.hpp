@@ -38,7 +38,6 @@ private:
 
   // tests to be done ...
 
-  //  CPPUNIT_TEST(testBuildBlockVector);
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
   CPPUNIT_TEST(testConstructor3);
@@ -78,11 +77,11 @@ private:
   void End();
   // Members
 
-  std::shared_ptr<siconos::algebra::BlockVector> ref{};
+  std::shared_ptr<siconos::algebra::BlockVector> ref{nullptr};
   std::vector<double> vq{};
-  std::shared_ptr<siconos::algebra::DenseVect> dv{};
-  std::shared_ptr<siconos::algebra::SparseVect> sv{};
-  double tol;
+  std::shared_ptr<siconos::algebra::DenseVect> dv{nullptr};
+  std::shared_ptr<siconos::algebra::SparseVect> sv{nullptr};
+  double tol{1.e-14};
 
 public:
   void setUp();

@@ -114,9 +114,9 @@ class EventsManager {
   // rule of five
   EventsManager() = delete;
   EventsManager(const EventsManager&) = delete;
-  EventsManager(const EventsManager&&) = delete;
+  EventsManager(EventsManager&&) = delete;
   EventsManager& operator=(const EventsManager&) = delete;
-  EventsManager& operator=(const EventsManager&&) = delete;
+  EventsManager& operator=(EventsManager&&) = delete;
 
  public:
   /**  constructor

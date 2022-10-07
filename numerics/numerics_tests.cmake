@@ -47,7 +47,7 @@ if(WITH_TESTING)
   new_test(SOURCES SparseMatrix_test.c DEPS "${suitesparse}")
 
   if(HAS_ONE_LP_SOLVER)
-    new_test(SOURCES vertex_problem.c)
+    new_test(SOURCES vertex_problem.c DEPS externals)
   endif(HAS_ONE_LP_SOLVER)
 
   # ----------- LCP solvers tests -----------

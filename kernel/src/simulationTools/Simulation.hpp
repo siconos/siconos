@@ -149,9 +149,9 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
  private:
   // Rule of five
   Simulation(const Simulation&) = delete;
-  Simulation(const Simulation&&) = delete;
+  Simulation(Simulation&&) = delete;
   Simulation& operator=(const Simulation&) = delete;
-  Simulation& operator=(const Simulation&&) = delete;
+  Simulation& operator=(Simulation&&) = delete;
 
  public:
   /** default constructor, for serialization
@@ -575,7 +575,6 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
       OneStepNSProblem, TImediscretisation).
   */
   virtual void firstInitialize();
-  
 };
 }  // namespace siconos::simulation
 #endif  // SIMULATION_H

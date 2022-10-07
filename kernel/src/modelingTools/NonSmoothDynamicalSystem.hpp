@@ -139,10 +139,9 @@ class NonSmoothDynamicalSystem {
   // Rule of five
   NonSmoothDynamicalSystem() = delete;
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&) = delete;
-  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&&) = delete;
+  NonSmoothDynamicalSystem(NonSmoothDynamicalSystem&&) = delete;
   NonSmoothDynamicalSystem& operator=(const NonSmoothDynamicalSystem&) = delete;
-  NonSmoothDynamicalSystem& operator=(const NonSmoothDynamicalSystem&&) = delete;
-
+  NonSmoothDynamicalSystem& operator=(NonSmoothDynamicalSystem&&) = delete;
 
  public:
   /** NSDS constructor.

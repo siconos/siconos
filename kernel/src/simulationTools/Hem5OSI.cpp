@@ -41,8 +41,8 @@
 // #include "NewtonEulerR.hpp"
 #include "OneStepNSProblem.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 // initial step size guess (typical value 1e-3)
@@ -884,7 +884,6 @@ void siconos::integrators::Hem5OSI::updateState(const unsigned int level)
 
 struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
-
   using siconos::internal::SiconosVisitor::visit;
 
   siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
@@ -1030,7 +1029,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     }
   }
 }
-void siconos::integrators::Hem5OSI::display()
+void siconos::integrators::Hem5OSI::display() const
 {
   OneStepIntegrator::display();
   std::cout << " --- > Hem5OSI specific values: \n";

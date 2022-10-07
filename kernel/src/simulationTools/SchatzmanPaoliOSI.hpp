@@ -297,7 +297,7 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
 
   /** Displays the data of the SchatzmanPaoliOSI's integrator
    */
-  void display() override;
+  void display() const override;
 };
 }  // namespace siconos::integrators
 #endif  // SCHATZMANPAOLIOSI_H

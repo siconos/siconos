@@ -17,14 +17,14 @@
  */
 #include "MoreauJeanGOSI.hpp"
 
-#include "SiconosAlgebraProd.hpp"
+#include "BlockVector.hpp"
+#include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NonSmoothLaw.hpp"
-#include "Relation.hpp"
-#include "BlockVector.hpp"
-#include "Interaction.hpp"
 #include "OneStepNSProblem.hpp"
+#include "Relation.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
@@ -32,7 +32,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
-//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
 /// for non-owned shared pointers (passing const siconos::algebra::SiconosVector into
@@ -529,7 +529,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int)
   DEBUG_END("siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int )\n");
 }
 
-void siconos::integrators::MoreauJeanGOSI::display()
+void siconos::integrators::MoreauJeanGOSI::display() const
 {
   OneStepIntegrator::display();
 

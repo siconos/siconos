@@ -45,8 +45,8 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-//#define DEBUG_BEGIN_END_ONLY
-//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
 siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFreeOutput(
@@ -1860,7 +1860,7 @@ bool siconos::integrators::MoreauJeanOSI::removeInteractionFromIndexSet(
   return !(addInteractionInIndexSet(inter, i));
 }
 
-void siconos::integrators::MoreauJeanOSI::display()
+void siconos::integrators::MoreauJeanOSI::display() const
 {
   OneStepIntegrator::display();
 

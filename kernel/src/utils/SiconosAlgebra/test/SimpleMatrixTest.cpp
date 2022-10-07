@@ -23,13 +23,15 @@
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
 
-#include "NumericsToolsNamespace.h"
-#include "SiconosAlgebraProd.hpp"
+#include "NumericsToolsNamespace.h"  // for NM_csc, NM_free ...
+#include "SiconosAlgebraProd.hpp"  // for prod 
 #include "SiconosAlgebraScal.hpp"
-#include "SiconosConfig.h"
 #include "SiconosMatrixFriends.hpp"
 #include "SiconosMatrixSetBlock.hpp"
-#include "SiconosVectorFriends.hpp"
+#include "SiconosAlgebraTypes.hpp"
+#include "Tools.hpp"
+namespace ublas = boost::numeric::ublas;
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -43,6 +45,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SimpleMatrixTest);
 // (Triang, Symm etc ...).
 
 using SimpleMatrix = siconos::algebra::SimpleMatrix;
+
+
 
 void SimpleMatrixTest::setUp()
 {
@@ -421,7 +425,7 @@ void SimpleMatrixTest::testSetBlock()
   subPos[2] = 1;
   subPos[3] = 2;
 
-  setBlock(*MIn, MOut, subDim, subPos);
+  siconos::algebra::setBlock(*MIn, MOut, subDim, subPos);
 
   for (unsigned int i = subPos[2]; i < subPos[2] + subDim[0]; ++i)
     for (unsigned int j = subPos[3]; j < subPos[3] + subDim[1]; ++j)
@@ -430,7 +434,7 @@ void SimpleMatrixTest::testSetBlock()
 
   // Copy of a sub-block of a Simple into a Block
   Cb->zero();
-  setBlock(*MIn, Cb, subDim, subPos);
+  siconos::algebra::setBlock(*MIn, Cb, subDim, subPos);
 
   for (unsigned int i = subPos[2]; i < subPos[2] + subDim[0]; ++i)
     for (unsigned int j = subPos[3]; j < subPos[3] + subDim[1]; ++j)
@@ -440,7 +444,7 @@ void SimpleMatrixTest::testSetBlock()
   // Copy of a sub-block of a Block into a Simple
 
   MOut = std::make_shared<SimpleMatrix>(5, 5);
-  setBlock(*Ab, MOut, subDim, subPos);
+  siconos::algebra::setBlock(*Ab, MOut, subDim, subPos);
 
   for (unsigned int i = subPos[2]; i < subPos[2] + subDim[0]; ++i)
     for (unsigned int j = subPos[3]; j < subPos[3] + subDim[1]; ++j)
@@ -557,6 +561,7 @@ void SimpleMatrixTest::testTrans()
   // Sym
   ref = std::make_shared<SimpleMatrix>(*S);
   tRef = std::make_shared<SimpleMatrix>(*ref);
+  std::cout << siconos::tools::enum_to_string(ref->num()) << " " << siconos::tools::enum_to_string(tRef->num()) << "\n";
   tRef->trans(*ref);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef) == (*ref), true);
   // Sparse
@@ -1525,8 +1530,8 @@ void SimpleMatrixTest::testOperators6Ter()
     for (unsigned int j = i; j < res->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res)(i, j) == 0, true);
 
-  // prod(*tmp, *tmp2, *res);
-  // prod(*T,*T, *tmp, true);
+  // siconos::algebra::prod(*tmp, *tmp2, *res);
+  // siconos::algebra::prod(*T,*T, *tmp, true);
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(res->getTriang() - *tmp) ==
   // 0, true);
 
@@ -1545,9 +1550,9 @@ void SimpleMatrixTest::testOperators6Ter()
     for (unsigned int j = i; j < res->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res)(i, j) == 0, true);
 
-  // prod(*tmp , *tmp2, *res, true);
+  // siconos::algebra::prod(*tmp , *tmp2, *res, true);
 
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(res->getSym() - prod(*S, *S))
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(res->getSym() - ublas::prod(*S, *S))
   // == 0, true);
 
   // Sparse +,-,* Sparse
@@ -1557,8 +1562,8 @@ void SimpleMatrixTest::testOperators6Ter()
   *res = *tmp + *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
 
-  // *res = prod(*tmp , *tmp2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(*res->sparse() - prod(*SP,
+  // *res = siconos::algebra::prod(*tmp , *tmp2);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(*res->sparse() - ublas::prod(*SP,
   // *SP)) < tol, true);
 
   *res = *tmp - *tmp2;
@@ -1578,9 +1583,9 @@ void SimpleMatrixTest::testOperators6Ter()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
 
-  // *res = prod(*tmp , *tmp2);
+  // *res = siconos::algebra::prod(*tmp , *tmp2);
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(*res->sparseCoordinate() -
-  // prod(*SP_coor, *SP_coor)) < tol, true);
+  // ublas::prod(*SP_coor, *SP_coor)) < tol, true);
 
   *res = *tmp - *tmp2;
   tmp->zero();
@@ -2215,13 +2220,13 @@ void SimpleMatrixTest::testOperators7()
 //    std::cout << "--> Test: operator8." <<std::endl;
 
 //   // // Simple = Simple * Simple
-//   // *C = prod(*A, *B);
+//   // *C = ublas::prod(*A, *B);
 //   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8: ", norm_inf(*C->dense() -
-//   prod(*A->dense(), *B->dense())) < tol, true);
+//   ublas::prod(*A->dense(), *B->dense())) < tol, true);
 
 //   // Block = Simple * Simple
-//   // *Cb = prod(*A, *B);
-//   // siconos::algebra::DenseMat Dtmp = prod(*A->dense(), *B->dense());
+//   // *Cb = ublas::prod(*A, *B);
+//   // siconos::algebra::DenseMat Dtmp = ublas::prod(*A->dense(), *B->dense());
 //   // auto tmp = std::make_shared<SimpleMatrix>(Dtmp);
 //   // for (unsigned int i = 0; i < C->size(0); ++i)
 //   //   for (unsigned int j = i ; j < C->size(1); ++j)
@@ -2240,89 +2245,89 @@ void SimpleMatrixTest::testOperators7()
 
 //   // Dense * ...
 //   // triang
-//   *res = prod(*tmp1, *tmp2);
+//   *res = ublas::prod(*tmp1, *tmp2);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp1->getDense(), tmp2->getTriang())) < tol, true);
+//   ublas::prod(tmp1->getDense(), tmp2->getTriang())) < tol, true);
 //   // Sym
-//   *res = prod(*tmp1, *tmp3);
+//   *res = ublas::prod(*tmp1, *tmp3);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp1->getDense(), tmp3->getSym())) < tol, true);
+//   ublas::prod(tmp1->getDense(), tmp3->getSym())) < tol, true);
 //   // Sparse
-//   *res = prod(*tmp1, *tmp4);
+//   *res = ublas::prod(*tmp1, *tmp4);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp1->getDense(), tmp4->getSparse())) < tol, true);
+//   ublas::prod(tmp1->getDense(), tmp4->getSparse())) < tol, true);
 //   // Banded
-//   *res = prod(*tmp1, *tmp5);
+//   *res = ublas::prod(*tmp1, *tmp5);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp1->getDense(), tmp5->getBanded())) < tol, true);
+//   ublas::prod(tmp1->getDense(), tmp5->getBanded())) < tol, true);
 //   // triang * ...
 //   // dense
-//   *res = prod(*tmp2, *tmp1);
+//   *res = ublas::prod(*tmp2, *tmp1);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp2->getTriang(), tmp1->getDense())) < tol, true);
+//   ublas::prod(tmp2->getTriang(), tmp1->getDense())) < tol, true);
 //   // Sym
-//   *res = prod(*tmp2, *tmp3);
+//   *res = ublas::prod(*tmp2, *tmp3);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp2->getTriang(), tmp3->getSym())) < tol, true);
+//   ublas::prod(tmp2->getTriang(), tmp3->getSym())) < tol, true);
 //   // Sparse
-//   *res = prod(*tmp2, *tmp4);
+//   *res = ublas::prod(*tmp2, *tmp4);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp2->getTriang(), tmp4->getSparse())) < tol, true);
+//   ublas::prod(tmp2->getTriang(), tmp4->getSparse())) < tol, true);
 //   // Banded
-//   *res = prod(*tmp2, *tmp5);
+//   *res = ublas::prod(*tmp2, *tmp5);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp2->getTriang(), tmp5->getBanded())) < tol, true);
+//   ublas::prod(tmp2->getTriang(), tmp5->getBanded())) < tol, true);
 //   // sym * ...
 //   // dense
-//   *res = prod(*tmp3, *tmp1);
+//   *res = ublas::prod(*tmp3, *tmp1);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp3->getSym(), tmp1->getDense())) < tol, true);
+//   ublas::prod(tmp3->getSym(), tmp1->getDense())) < tol, true);
 //   // triang
-//   *res = prod(*tmp3, *tmp2);
+//   *res = ublas::prod(*tmp3, *tmp2);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp3->getSym(), tmp2->getTriang())) < tol, true);
+//   ublas::prod(tmp3->getSym(), tmp2->getTriang())) < tol, true);
 //   // Sparse
-//   *res = prod(*tmp3, *tmp4);
+//   *res = ublas::prod(*tmp3, *tmp4);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp3->getSym(), tmp4->getSparse())) < tol, true);
+//   ublas::prod(tmp3->getSym(), tmp4->getSparse())) < tol, true);
 //   // Banded
-//   *res = prod(*tmp3, *tmp5);
+//   *res = ublas::prod(*tmp3, *tmp5);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp3->getSym(), tmp5->getBanded())) < tol, true);
+//   ublas::prod(tmp3->getSym(), tmp5->getBanded())) < tol, true);
 //   // Sparse * ...
 //   // dense
-//   *res = prod(*tmp4, *tmp1);
+//   *res = ublas::prod(*tmp4, *tmp1);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp4->getSparse(), tmp1->getDense())) < tol, true);
+//   ublas::prod(tmp4->getSparse(), tmp1->getDense())) < tol, true);
 //   // triang
-//   *res = prod(*tmp4, *tmp2);
+//   *res = ublas::prod(*tmp4, *tmp2);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp4->getSparse(), tmp2->getTriang())) < tol, true);
+//   ublas::prod(tmp4->getSparse(), tmp2->getTriang())) < tol, true);
 //   // Sym
-//   *res = prod(*tmp4, *tmp3);
+//   *res = ublas::prod(*tmp4, *tmp3);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp4->getSparse(), tmp3->getSym())) < tol, true);
+//   ublas::prod(tmp4->getSparse(), tmp3->getSym())) < tol, true);
 //   // Banded
-//   *res = prod(*tmp4, *tmp5);
+//   *res = ublas::prod(*tmp4, *tmp5);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp4->getSparse(), tmp5->getBanded())) < tol, true);
+//   ublas::prod(tmp4->getSparse(), tmp5->getBanded())) < tol, true);
 //   // Banded * ...
 //   // dense
-//   *res = prod(*tmp5, *tmp1);
+//   *res = ublas::prod(*tmp5, *tmp1);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp5->getBanded(), tmp1->getDense())) < tol, true);
+//   ublas::prod(tmp5->getBanded(), tmp1->getDense())) < tol, true);
 //   // triang
-//   *res = prod(*tmp5, *tmp2);
+//   *res = ublas::prod(*tmp5, *tmp2);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp5->getBanded(), tmp2->getTriang())) < tol, true);
+//   ublas::prod(tmp5->getBanded(), tmp2->getTriang())) < tol, true);
 //   // Sparse
-//   *res = prod(*tmp5, *tmp4);
+//   *res = ublas::prod(*tmp5, *tmp4);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp5->getBanded(), tmp4->getSparse())) < tol, true);
+//   ublas::prod(tmp5->getBanded(), tmp4->getSparse())) < tol, true);
 //   // Sym
-//   *res = prod(*tmp5, *tmp3);
+//   *res = ublas::prod(*tmp5, *tmp3);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(*res->dense() -
-//   prod(tmp5->getBanded(), tmp3->getSym())) < tol, true);
+//   ublas::prod(tmp5->getBanded(), tmp3->getSym())) < tol, true);
 
 //   std::cout << "-->  test operators8 ended with success." <<std::endl;
 // }
@@ -2331,14 +2336,14 @@ void SimpleMatrixTest::testOperators8Bis()
 {
   std::cout << "--> Test: operator8Bis." << std::endl;
   // Simple = Simple * Simple
-  prod(*A, *B, *C);
+  siconos::algebra::prod(*A, *B, *C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testOperators8Bis: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol,
+      "testOperators8Bis: ", norm_inf(*C->dense() - ublas::prod(*A->dense(), *B->dense())) < tol,
       true);
 
   // Block = Simple * Simple
-  prod(*A, *B, *Cb);
-  siconos::algebra::DenseMat Dtmp = prod(*A->dense(), *B->dense());
+  siconos::algebra::prod(*A, *B, *Cb);
+  siconos::algebra::DenseMat Dtmp = ublas::prod(*A->dense(), *B->dense());
   auto tmp = std::make_shared<SimpleMatrix>(Dtmp);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
@@ -2358,109 +2363,109 @@ void SimpleMatrixTest::testOperators8Bis()
 
   // Dense * ...
   // triang
-  prod(*tmp1, *tmp2, *res);
+  siconos::algebra::prod(*tmp1, *tmp2, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp1->getDense(), tmp2->getTriang())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp1->getDense(), tmp2->getTriang())) < tol, true);
   // Sym
-  prod(*tmp1, *tmp3, *res);
+  siconos::algebra::prod(*tmp1, *tmp3, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp1->getDense(), tmp3->getSym())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp1->getDense(), tmp3->getSym())) < tol, true);
   // Sparse
-  prod(*tmp1, *tmp4, *res);
+  siconos::algebra::prod(*tmp1, *tmp4, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp1->getDense(), tmp4->getSparse())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp1->getDense(), tmp4->getSparse())) < tol, true);
   // Banded
-  prod(*tmp1, *tmp5, *res);
+  siconos::algebra::prod(*tmp1, *tmp5, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp1->getDense(), tmp5->getBanded())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp1->getDense(), tmp5->getBanded())) < tol, true);
   // triang * ...
   // dense
-  prod(*tmp2, *tmp1, *res);
+  siconos::algebra::prod(*tmp2, *tmp1, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp2->getTriang(), tmp1->getDense())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp2->getTriang(), tmp1->getDense())) < tol, true);
   // Sym
-  prod(*tmp2, *tmp3, *res);
+  siconos::algebra::prod(*tmp2, *tmp3, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp2->getTriang(), tmp3->getSym())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp2->getTriang(), tmp3->getSym())) < tol, true);
   // Sparse
-  prod(*tmp2, *tmp4, *res);
+  siconos::algebra::prod(*tmp2, *tmp4, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp2->getTriang(), tmp4->getSparse())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp2->getTriang(), tmp4->getSparse())) < tol, true);
   // Banded
-  prod(*tmp2, *tmp5, *res);
+  siconos::algebra::prod(*tmp2, *tmp5, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp2->getTriang(), tmp5->getBanded())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp2->getTriang(), tmp5->getBanded())) < tol, true);
   // sym * ...
   // dense
-  prod(*tmp3, *tmp1, *res);
+  siconos::algebra::prod(*tmp3, *tmp1, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp3->getSym(), tmp1->getDense())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp3->getSym(), tmp1->getDense())) < tol, true);
   // triang
-  prod(*tmp3, *tmp2, *res);
+  siconos::algebra::prod(*tmp3, *tmp2, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp3->getSym(), tmp2->getTriang())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp3->getSym(), tmp2->getTriang())) < tol, true);
   // Sparse
-  prod(*tmp3, *tmp4, *res);
+  siconos::algebra::prod(*tmp3, *tmp4, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp3->getSym(), tmp4->getSparse())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp3->getSym(), tmp4->getSparse())) < tol, true);
   // Banded
-  prod(*tmp3, *tmp5, *res);
+  siconos::algebra::prod(*tmp3, *tmp5, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp3->getSym(), tmp5->getBanded())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp3->getSym(), tmp5->getBanded())) < tol, true);
   // Sparse * ...
   // dense
-  prod(*tmp4, *tmp1, *res);
+  siconos::algebra::prod(*tmp4, *tmp1, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp4->getSparse(), tmp1->getDense())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp4->getSparse(), tmp1->getDense())) < tol, true);
   // triang
-  prod(*tmp4, *tmp2, *res);
+  siconos::algebra::prod(*tmp4, *tmp2, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp4->getSparse(), tmp2->getTriang())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp4->getSparse(), tmp2->getTriang())) < tol, true);
   // Sym
-  prod(*tmp4, *tmp3, *res);
+  siconos::algebra::prod(*tmp4, *tmp3, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp4->getSparse(), tmp3->getSym())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp4->getSparse(), tmp3->getSym())) < tol, true);
   // Banded
-  prod(*tmp4, *tmp5, *res);
+  siconos::algebra::prod(*tmp4, *tmp5, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp4->getSparse(), tmp5->getBanded())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp4->getSparse(), tmp5->getBanded())) < tol, true);
   // Banded * ...
   // dense
-  prod(*tmp5, *tmp1, *res);
+  siconos::algebra::prod(*tmp5, *tmp1, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp5->getBanded(), tmp1->getDense())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp5->getBanded(), tmp1->getDense())) < tol, true);
   // triang
-  prod(*tmp5, *tmp2, *res);
+  siconos::algebra::prod(*tmp5, *tmp2, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp5->getBanded(), tmp2->getTriang())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp5->getBanded(), tmp2->getTriang())) < tol, true);
   // Sparse
-  prod(*tmp5, *tmp4, *res);
+  siconos::algebra::prod(*tmp5, *tmp4, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp5->getBanded(), tmp4->getSparse())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp5->getBanded(), tmp4->getSparse())) < tol, true);
   // Sym
-  prod(*tmp5, *tmp3, *res);
+  siconos::algebra::prod(*tmp5, *tmp3, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Bis: ",
-      norm_inf(*res->dense() - prod(tmp5->getBanded(), tmp3->getSym())) < tol, true);
+      norm_inf(*res->dense() - ublas::prod(tmp5->getBanded(), tmp3->getSym())) < tol, true);
 
   std::cout << "-->  test operators8Bis ended with success." << std::endl;
 }
@@ -2469,22 +2474,22 @@ void SimpleMatrixTest::testOperators8Ter()
 {
   std::cout << "--> Test: operator8Ter." << std::endl;
   // Simple = Simple * Simple
-  axpy_prod(*A, *B, *C, true);
+  siconos::algebra::axpy_prod(*A, *B, *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testOperators8Ter: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol,
+      "testOperators8Ter: ", norm_inf(*C->dense() - ublas::prod(*A->dense(), *B->dense())) < tol,
       true);
 
   // Simple += Simple * Simple
   auto backUp = std::make_shared<SimpleMatrix>(*C);
 
-  axpy_prod(*A, *B, *C, false);
+  siconos::algebra::axpy_prod(*A, *B, *C, false);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8Ter: ",
-      norm_inf(*C->dense() - prod(*A->dense(), *B->dense()) - *backUp->dense()) < tol, true);
+      norm_inf(*C->dense() - ublas::prod(*A->dense(), *B->dense()) - *backUp->dense()) < tol, true);
   // Block = Simple * Simple
-  axpy_prod(*A, *B, *Cb, true);
-  siconos::algebra::DenseMat Dtmp = prod(*A->dense(), *B->dense());
+  siconos::algebra::axpy_prod(*A, *B, *Cb, true);
+  siconos::algebra::DenseMat Dtmp = ublas::prod(*A->dense(), *B->dense());
   auto tmp = std::make_shared<SimpleMatrix>(Dtmp);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
@@ -2493,8 +2498,8 @@ void SimpleMatrixTest::testOperators8Ter()
 
   *backUp = *Cb;
   // Block += Simple * Simple
-  axpy_prod(*A, *B, *Cb, false);
-  Dtmp = prod(*A->dense(), *B->dense());
+  siconos::algebra::axpy_prod(*A, *B, *Cb, false);
+  Dtmp = ublas::prod(*A->dense(), *B->dense());
   *tmp = Dtmp;
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
@@ -2509,17 +2514,17 @@ void SimpleMatrixTest::testOperators8_4()  // C += A*B
   std::cout << "--> Test: operator8_4." << std::endl;
   // Simple = Simple * Simple
   C->zero();
-  prod(*A, *B, *C, false);
-  prod(*A, *B, *C, false);
+  siconos::algebra::prod(*A, *B, *C, false);
+  siconos::algebra::prod(*A, *B, *C, false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testOperators8_4: ", norm_inf(*C->dense() - 2 * prod(*A->dense(), *B->dense())) < tol,
+      "testOperators8_4: ", norm_inf(*C->dense() - 2 * ublas::prod(*A->dense(), *B->dense())) < tol,
       true);
 
   // Block = Simple * Simple
   Cb->zero();
-  prod(*A, *B, *Cb, false);
-  prod(*A, *B, *Cb, false);
-  siconos::algebra::DenseMat Dtmp = prod(*A->dense(), *B->dense());
+  siconos::algebra::prod(*A, *B, *Cb, false);
+  siconos::algebra::prod(*A, *B, *Cb, false);
+  siconos::algebra::DenseMat Dtmp = ublas::prod(*A->dense(), *B->dense());
   auto tmp = std::make_shared<SimpleMatrix>(Dtmp);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
@@ -2530,7 +2535,7 @@ void SimpleMatrixTest::testOperators8_4()  // C += A*B
 
 void SimpleMatrixTest::testOperators8_5()
 {
-  // == Test subprod ==
+  // == Test siconos::algebra::subprod ==
 
   std::cout << "--> Test: operator8_5." << std::endl;
   std::vector<std::size_t> coord(8);
@@ -2551,7 +2556,7 @@ void SimpleMatrixTest::testOperators8_5()
   // v == x but x is a 3-blocks vector.
 
   // Simple = Simple * Simple, all dense
-  // subprod but with full matrix/vectors
+  // siconos::algebra::subprod but with full matrix/vectors
   coord[0] = 0;
   coord[1] = size;
   coord[2] = 0;
@@ -2560,16 +2565,16 @@ void SimpleMatrixTest::testOperators8_5()
   coord[5] = size;
   coord[6] = 0;
   coord[7] = size;
-  subprod(*A, *v, *y, coord, true);
+  siconos::algebra::subprod(*A, *v, *y, coord, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testOperators8_5: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense())) < tol,
+      "testOperators8_5: ", norm_inf(*y->dense() - ublas::prod(*A->dense(), *v->dense())) < tol,
       true);
 
   // Simple = Simple * Block, all dense
-  // subprod but with full matrix/vectors
-  //  subprod(*A,*x,*y, coord, true);
+  // siconos::algebra::subprod but with full matrix/vectors
+  //  siconos::algebra::subprod(*A,*x,*y, coord, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->dense()-
-  //  prod(*A->dense(),*v->dense()))<tol, true);
+  //  ublas::prod(*A->dense(),*v->dense()))<tol, true);
 
   coord[0] = 0;
   coord[1] = 2;
@@ -2581,7 +2586,7 @@ void SimpleMatrixTest::testOperators8_5()
   coord[7] = 4;
   y->zero();
   // Simple = Simple * Simple, all dense
-  subprod(*A, *v, *y, coord, true);
+  siconos::algebra::subprod(*A, *v, *y, coord, true);
   double res = (*A)(0, 1) * (*v)(3) + (*A)(0, 2) * (*v)(4);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A)(1, 1) * (*v)(3) + (*A)(1, 2) * (*v)(4);
@@ -2592,7 +2597,7 @@ void SimpleMatrixTest::testOperators8_5()
   }
   y->zero();
   // Simple = Simple * Block, all dense
-  //  subprod(*A,*x,*y, coord, true);
+  //  siconos::algebra::subprod(*A,*x,*y, coord, true);
   //  res = (*A)(0,1)*(*x)(3) + (*A)(0,2)*(*x)(4);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res-(*y)(2))<tol, true);
   //  res = (*A)(1,1)*(*x)(3) + (*A)(1,2)*(*x)(4);
@@ -2609,7 +2614,7 @@ void SimpleMatrixTest::testOperators8_5()
   for (unsigned i = 0; i < A2->size(0); ++i)
     for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
 
-  subprod(*A2, *v, *y, coord, true);
+  siconos::algebra::subprod(*A2, *v, *y, coord, true);
   res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
@@ -2623,7 +2628,7 @@ void SimpleMatrixTest::testOperators8_5()
   for (unsigned i = 0; i < A2->size(0); ++i)
     for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
 
-  subprod(*A2, *v, *y, coord, true);
+  siconos::algebra::subprod(*A2, *v, *y, coord, true);
   res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
@@ -2638,7 +2643,7 @@ void SimpleMatrixTest::testOperators8_5()
   for (unsigned i = 0; i < A2->size(0); ++i)
     for (unsigned j = i; j < A2->size(1); ++j) A2->setValue(i, j, 3 * i + j);
 
-  subprod(*A2, *v, *y, coord, true);
+  siconos::algebra::subprod(*A2, *v, *y, coord, true);
   res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
@@ -2653,7 +2658,7 @@ void SimpleMatrixTest::testOperators8_5()
   for (signed i = 0; i < signed(A2->size(0)); ++i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++j)
       (*A2)(i, j) = 3 * i + j;
-  subprod(*A2, *v, *y, coord, true);
+  siconos::algebra::subprod(*A2, *v, *y, coord, true);
   res = (*A2)(0, 1) * (*v)(3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
@@ -2668,7 +2673,7 @@ void SimpleMatrixTest::testOperators8_5()
 
 void SimpleMatrixTest::testOperators8_6()
 {
-  // == Test subprod, with += ==
+  // == Test siconos::algebra::subprod, with += ==
 
   std::cout << "--> Test: operator8_6." << std::endl;
   std::vector<std::size_t> coord(8);
@@ -2691,7 +2696,7 @@ void SimpleMatrixTest::testOperators8_6()
   *y = *v;
 
   // Simple = Simple * Simple, all dense
-  // subprod but with full matrix/vectors
+  // siconos::algebra::subprod but with full matrix/vectors
   coord[0] = 0;
   coord[1] = size;
   coord[2] = 0;
@@ -2700,17 +2705,17 @@ void SimpleMatrixTest::testOperators8_6()
   coord[5] = size;
   coord[6] = 0;
   coord[7] = size;
-  subprod(*A, *v, *y, coord, false);
+  siconos::algebra::subprod(*A, *v, *y, coord, false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators8_6: ",
-      norm_inf(*y->dense() - prod(*A->dense(), *v->dense()) - *v->dense()) < tol, true);
+      norm_inf(*y->dense() - ublas::prod(*A->dense(), *v->dense()) - *v->dense()) < tol, true);
 
   // Simple = Simple * Block, all dense
-  // subprod but with full matrix/vectors
+  // siconos::algebra::subprod but with full matrix/vectors
   *y = *v;
-  //  subprod(*A,*x,*y, coord, false);
+  //  siconos::algebra::subprod(*A,*x,*y, coord, false);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->dense()-
-  //  prod(*A->dense(),*v->dense())- *v->dense())<tol, true);
+  //  ublas::prod(*A->dense(),*v->dense())- *v->dense())<tol, true);
 
   coord[0] = 0;
   coord[1] = 2;
@@ -2723,7 +2728,7 @@ void SimpleMatrixTest::testOperators8_6()
 
   // Simple = Simple * Simple, all dense
   *y = *v;
-  subprod(*A, *v, *y, coord, false);
+  siconos::algebra::subprod(*A, *v, *y, coord, false);
   double res = (*A)(0, 1) * (*v)(3) + (*A)(0, 2) * (*v)(4) + (*v)(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A)(1, 1) * (*v)(3) + (*A)(1, 2) * (*v)(4) + (*v)(3);
@@ -2734,7 +2739,7 @@ void SimpleMatrixTest::testOperators8_6()
   }
   *y = *v;
   // Simple = Simple * Block, all dense
-  //  subprod(*A,*x,*y, coord, false);
+  //  siconos::algebra::subprod(*A,*x,*y, coord, false);
   //  res = (*A)(0,1)*(*x)(3) + (*A)(0,2)*(*x)(4) + (*v)(2);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res-(*y)(2))<tol, true);
   //  res = (*A)(1,1)*(*x)(3) + (*A)(1,2)*(*x)(4) + (*v)(3);
@@ -2753,7 +2758,7 @@ void SimpleMatrixTest::testOperators8_6()
     for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
 
   *y = *v;
-  subprod(*A2, *v, *y, coord, false);
+  siconos::algebra::subprod(*A2, *v, *y, coord, false);
   res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
@@ -2769,7 +2774,7 @@ void SimpleMatrixTest::testOperators8_6()
     for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
 
   *y = *v;
-  subprod(*A2, *v, *y, coord, false);
+  siconos::algebra::subprod(*A2, *v, *y, coord, false);
   res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
@@ -2785,7 +2790,7 @@ void SimpleMatrixTest::testOperators8_6()
     for (unsigned j = i; j < A2->size(1); ++j) A2->setValue(i, j, 3 * i + j);
 
   *y = *v;
-  subprod(*A2, *v, *y, coord, false);
+  siconos::algebra::subprod(*A2, *v, *y, coord, false);
   res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
@@ -2801,7 +2806,7 @@ void SimpleMatrixTest::testOperators8_6()
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++j)
       (*A2)(i, j) = 3 * i + j;
   *y = *v;
-  subprod(*A2, *v, *y, coord, false);
+  siconos::algebra::subprod(*A2, *v, *y, coord, false);
   res = (*A2)(0, 1) * (*v)(3) + (*v)(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
   res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
@@ -2928,52 +2933,52 @@ void SimpleMatrixTest::testOperators9Bis()
   double a = 2.2;
 
   // Simple = a * Simple or Simple/a
-  scal(a, *A, *C);
+  siconos::algebra::scal(a, *A, *C);
   for (unsigned int i = 0; i < C->size(0); ++i)
     for (unsigned int j = i; j < C->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9Bis: ", fabs((*C)(i, j) - a * (*A)(i, j)) < tol, true);
 
-  scal(1.0 / a, *A, *C);
+  siconos::algebra::scal(1.0 / a, *A, *C);
   for (unsigned int i = 0; i < C->size(0); ++i)
     for (unsigned int j = i; j < C->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9Bis: ", fabs((*C)(i, j) - (*A)(i, j) / a) < tol, true);
   // Simple = a * Block
 
-  scal(a, *Ab, *C);
+  siconos::algebra::scal(a, *Ab, *C);
   for (unsigned int i = 0; i < C->size(0); ++i)
     for (unsigned int j = i; j < C->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9Bis: ", fabs((*C)(i, j) - a * (*Ab)(i, j)) < tol, true);
 
-  scal(1.0 / a, *Ab, *C);
+  siconos::algebra::scal(1.0 / a, *Ab, *C);
   for (unsigned int i = 0; i < C->size(0); ++i)
     for (unsigned int j = i; j < C->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9Bis: ", fabs((*C)(i, j) - (*Ab)(i, j) / a) < tol, true);
 
   // Block = a * Block
-  scal(a, *Ab, *Cb);
+  siconos::algebra::scal(a, *Ab, *Cb);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9Bis: ", fabs((*Cb)(i, j) - a * (*Ab)(i, j)) < tol, true);
 
-  scal(1.0 / a, *Ab, *Cb);
+  siconos::algebra::scal(1.0 / a, *Ab, *Cb);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9Bis: ", fabs((*Cb)(i, j) - (*Ab)(i, j) / a) < tol, true);
 
   // Block = a * Simple
-  scal(a, *A, *Cb);
+  siconos::algebra::scal(a, *A, *Cb);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9Bis: ", fabs((*Cb)(i, j) - a * (*A)(i, j)) < tol, true);
 
-  scal(1.0 / a, *A, *Cb);
+  siconos::algebra::scal(1.0 / a, *A, *Cb);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -2990,8 +2995,8 @@ void SimpleMatrixTest::testOperators9Ter()
   double a = 2.2;
   C->zero();
   // Simple = a * Simple or Simple/a
-  scal(a, *A, *C, false);
-  scal(a, *A, *C, false);
+  siconos::algebra::scal(a, *A, *C, false);
+  siconos::algebra::scal(a, *A, *C, false);
   for (unsigned int i = 0; i < C->size(0); ++i)
     for (unsigned int j = i; j < C->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -2999,8 +3004,8 @@ void SimpleMatrixTest::testOperators9Ter()
 
   // Simple = a * Block
   C->zero();
-  scal(a, *Ab, *C, false);
-  scal(a, *Ab, *C, false);
+  siconos::algebra::scal(a, *Ab, *C, false);
+  siconos::algebra::scal(a, *Ab, *C, false);
   for (unsigned int i = 0; i < C->size(0); ++i)
     for (unsigned int j = i; j < C->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -3008,8 +3013,8 @@ void SimpleMatrixTest::testOperators9Ter()
 
   // Block = a * Block
   Cb->zero();
-  scal(a, *Ab, *Cb, false);
-  scal(a, *Ab, *Cb, false);
+  siconos::algebra::scal(a, *Ab, *Cb, false);
+  siconos::algebra::scal(a, *Ab, *Cb, false);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -3017,8 +3022,8 @@ void SimpleMatrixTest::testOperators9Ter()
 
   // Block = a * Simple
   Cb->zero();
-  scal(a, *A, *Cb, false);
-  scal(a, *A, *Cb, false);
+  siconos::algebra::scal(a, *A, *Cb, false);
+  siconos::algebra::scal(a, *A, *Cb, false);
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -3115,7 +3120,7 @@ void SimpleMatrixTest::testOperators13()
 
 void SimpleMatrixTest::testProd()  // y = A*x
 {
-  std::cout << "--> Test: prod. mat-vect" << std::endl;
+  std::cout << "--> Test: ublas::prod. mat-vect" << std::endl;
 
   auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
   auto x = std::make_shared<siconos::algebra::SiconosVector>(size, 4.3);
@@ -3126,10 +3131,10 @@ void SimpleMatrixTest::testProd()  // y = A*x
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
   yB->zero();
 
-  // Matrix - vector product
+  // Matrix - vector ublas::product
 
   // Simple = Simple * Simple
-  *y = prod(*A, *x);
+  *y = siconos::algebra::prod(*A, *x);
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
@@ -3137,7 +3142,7 @@ void SimpleMatrixTest::testProd()  // y = A*x
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
-  //  *y = prod(*A , *xB);
+  //  *y = siconos::algebra::prod(*A , *xB);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3147,7 +3152,7 @@ void SimpleMatrixTest::testProd()  // y = A*x
   //  }
 
   // Block = Simple * Simple
-  *yB = prod(*A, *x);
+  *yB = siconos::algebra::prod(*A, *x);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
 
@@ -3156,7 +3161,7 @@ void SimpleMatrixTest::testProd()  // y = A*x
   }
 
   // Block = Simple * Block
-  //  *yB = prod(*A ,*xB);
+  //  *yB = siconos::algebra::prod(*A ,*xB);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3193,41 +3198,41 @@ void SimpleMatrixTest::testProd()  // y = A*x
   auto res2 = std::make_shared<siconos::algebra::SiconosVector>(3);
 
   // Triang * ...
-  *res2 = prod(*tmp2, *v);
+  *res2 = siconos::algebra::prod(*tmp2, *v);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProd: ", norm_2(*res2->dense() - prod(tmp2->getTriang(), *v->dense())) < tol, true);
-  *res2 = prod(*tmp2, *w);
+      "testProd: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *v->dense())) < tol, true);
+  *res2 = siconos::algebra::prod(*tmp2, *w);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProd: ", norm_2(*res2->dense() - prod(tmp2->getTriang(), *w->sparse())) < tol,
+      "testProd: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *w->sparse())) < tol,
       true);
   //   Sym * ...
-  *res2 = prod(*tmp3, *v);
+  *res2 = siconos::algebra::prod(*tmp3, *v);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProd: ", norm_2(*res2->dense() - prod(tmp3->getSym(), *v->dense())) < tol, true);
-  *res2 = prod(*tmp3, *w);
+      "testProd: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *v->dense())) < tol, true);
+  *res2 = siconos::algebra::prod(*tmp3, *w);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProd: ", norm_2(*res2->dense() - prod(tmp3->getSym(), *w->sparse())) < tol, true);
+      "testProd: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *w->sparse())) < tol, true);
   // Sparse * ...
-  *res = prod(*tmp4, *vv);
+  *res = siconos::algebra::prod(*tmp4, *vv);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProd: ", norm_2(*res->dense() - prod(tmp4->getSparse(), *vv->dense())) < tol, true);
-  *res = prod(*tmp4, *ww);
+      "testProd: ", ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *vv->dense())) < tol, true);
+  *res = siconos::algebra::prod(*tmp4, *ww);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProd: ", norm_2(*res->dense() - prod(tmp4->getSparse(), *ww->sparse())) < tol,
+      "testProd: ", ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *ww->sparse())) < tol,
       true);
   // Triang * ...
-  *res = prod(*tmp5, *v);
+  *res = siconos::algebra::prod(*tmp5, *v);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProd: ", norm_2(*res->dense() - prod(tmp5->getBanded(), *v->dense())) < tol, true);
-  *res = prod(*tmp5, *w);
+      "testProd: ", ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *v->dense())) < tol, true);
+  *res = siconos::algebra::prod(*tmp5, *w);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProd: ", norm_2(*res->dense() - prod(tmp5->getBanded(), *w->sparse())) < tol, true);
-  std::cout << "-->  test prod ended with success." << std::endl;
+      "testProd: ", ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *w->sparse())) < tol, true);
+  std::cout << "-->  test ublas::prod ended with success." << std::endl;
 }
 
 void SimpleMatrixTest::testProdBis()
 {
-  std::cout << "--> Test: prod. mat-vect (bis)" << std::endl;
+  std::cout << "--> Test: ublas::prod. mat-vect (bis)" << std::endl;
 
   auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
   auto x = std::make_shared<siconos::algebra::SiconosVector>(size, 4.3);
@@ -3238,10 +3243,10 @@ void SimpleMatrixTest::testProdBis()
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
   yB->zero();
 
-  // Matrix - vector product
+  // Matrix - vector ublas::product
 
   // Simple = Simple * Simple
-  prod(*A, *x, *y);
+  siconos::algebra::prod(*A, *x, *y);
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
@@ -3249,7 +3254,7 @@ void SimpleMatrixTest::testProdBis()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
-  prod(*A, *xB, *y);
+  siconos::algebra::prod(*A, *xB, *y);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*xB)(j);
@@ -3257,7 +3262,7 @@ void SimpleMatrixTest::testProdBis()
   }
 
   // Block = Simple * Simple
-  prod(*A, *x, *yB);
+  siconos::algebra::prod(*A, *x, *yB);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*x)(j);
@@ -3265,7 +3270,7 @@ void SimpleMatrixTest::testProdBis()
   }
 
   // Block = Simple * Block
-  //  prod(*A ,*xB,*yB);
+  //  siconos::algebra::prod(*A ,*xB,*yB);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3302,46 +3307,46 @@ void SimpleMatrixTest::testProdBis()
   auto res2 = std::make_shared<siconos::algebra::SiconosVector>(3);
 
   // Triang * ...
-  prod(*tmp2, *v, *res2);
+  siconos::algebra::prod(*tmp2, *v, *res2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdBis: ", norm_2(*res2->dense() - prod(tmp2->getTriang(), *v->dense())) < tol,
+      "testProdBis: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *v->dense())) < tol,
       true);
-  prod(*tmp2, *w, *res2);
+  siconos::algebra::prod(*tmp2, *w, *res2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdBis: ", norm_2(*res2->dense() - prod(tmp2->getTriang(), *w->sparse())) < tol,
+      "testProdBis: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *w->sparse())) < tol,
       true);
   //   Sym * ...
-  prod(*tmp3, *v, *res2);
+  siconos::algebra::prod(*tmp3, *v, *res2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdBis: ", norm_2(*res2->dense() - prod(tmp3->getSym(), *v->dense())) < tol, true);
-  prod(*tmp3, *w, *res2);
+      "testProdBis: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *v->dense())) < tol, true);
+  siconos::algebra::prod(*tmp3, *w, *res2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdBis: ", norm_2(*res2->dense() - prod(tmp3->getSym(), *w->sparse())) < tol,
+      "testProdBis: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *w->sparse())) < tol,
       true);
   // Sparse * ...
-  prod(*tmp4, *vv, *res);
+  siconos::algebra::prod(*tmp4, *vv, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdBis: ", norm_2(*res->dense() - prod(tmp4->getSparse(), *vv->dense())) < tol,
+      "testProdBis: ", ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *vv->dense())) < tol,
       true);
-  prod(*tmp4, *ww, *res);
+  siconos::algebra::prod(*tmp4, *ww, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdBis: ", norm_2(*res->dense() - prod(tmp4->getSparse(), *ww->sparse())) < tol,
+      "testProdBis: ", ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *ww->sparse())) < tol,
       true);
   // Banded * ...
-  prod(*tmp5, *v, *res);
+  siconos::algebra::prod(*tmp5, *v, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdBis: ", norm_2(*res->dense() - prod(tmp5->getBanded(), *v->dense())) < tol,
+      "testProdBis: ", ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *v->dense())) < tol,
       true);
-  prod(*tmp5, *w, *res);
+  siconos::algebra::prod(*tmp5, *w, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdBis: ", norm_2(*res->dense() - prod(tmp5->getBanded(), *w->sparse())) < tol,
+      "testProdBis: ", ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *w->sparse())) < tol,
       true);
-  std::cout << "-->  test prodBis ended with success." << std::endl;
+  std::cout << "-->  test ublas::prodBis ended with success." << std::endl;
 }
 
 void SimpleMatrixTest::testProdTer()
 {
-  std::cout << "--> Test: prod. mat-vect (ter)" << std::endl;
+  std::cout << "--> Test: ublas::prod. mat-vect (ter)" << std::endl;
 
   auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
   auto x = std::make_shared<siconos::algebra::SiconosVector>(size, 4.3);
@@ -3352,10 +3357,10 @@ void SimpleMatrixTest::testProdTer()
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
   yB->zero();
 
-  // Matrix - vector product
+  // Matrix - vector ublas::product
 
   // Simple = Simple * Simple
-  // axpy_prod(*A, *x, *y, true);
+  // siconos::algebra::axpy_prod(*A, *x, *y, true);
   // double sum;
   // for (unsigned int i = 0; i < size; ++i)
   // {
@@ -3367,7 +3372,7 @@ void SimpleMatrixTest::testProdTer()
 
   // auto backUp= std::make_shared<siconos::algebra::SiconosVector>(*y);
   //  // Simple += Simple * Simple
-  //  axpy_prod(*A, *x, *y, false);
+  //  siconos::algebra::axpy_prod(*A, *x, *y, false);
   //  for (unsigned int i = 0; i < size; ++i)
   //  {
   //    sum = 0;
@@ -3378,7 +3383,7 @@ void SimpleMatrixTest::testProdTer()
   //  }
 
   // Simple = Simple * Block
-  //  axpy_prod(*A ,*xB,*y, true);
+  //  siconos::algebra::axpy_prod(*A ,*xB,*y, true);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3389,7 +3394,7 @@ void SimpleMatrixTest::testProdTer()
   //
   //*backUp = *y;
   // Simple += Simple * Block
-  //  axpy_prod(*A ,*xB,*y, false);
+  //  siconos::algebra::axpy_prod(*A ,*xB,*y, false);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3400,7 +3405,7 @@ void SimpleMatrixTest::testProdTer()
   //  }
   //
   //  // Block = Simple * Simple
-  //  axpy_prod(*A ,*x,*yB, true);
+  //  siconos::algebra::axpy_prod(*A ,*x,*yB, true);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3411,7 +3416,7 @@ void SimpleMatrixTest::testProdTer()
   //
   //  // Block += Simple * Simple
   //  *backUp = *yB;
-  //  axpy_prod(*A ,*x,*yB, false);
+  //  siconos::algebra::axpy_prod(*A ,*x,*yB, false);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3422,7 +3427,7 @@ void SimpleMatrixTest::testProdTer()
   //  }
   //
   //  // Block = Simple * Block
-  //  axpy_prod(*A ,*xB,*yB,true);
+  //  siconos::algebra::axpy_prod(*A ,*xB,*yB,true);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3433,7 +3438,7 @@ void SimpleMatrixTest::testProdTer()
   //
   //  // Block += Simple * Block
   //  *backUp = *yB;
-  //  axpy_prod(*A ,*xB,*yB,false);
+  //  siconos::algebra::axpy_prod(*A ,*xB,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3470,46 +3475,46 @@ void SimpleMatrixTest::testProdTer()
   auto res2 = std::make_shared<siconos::algebra::SiconosVector>(3);
 
   // Triang * ...
-  prod(*tmp2, *v, *res2);
+  siconos::algebra::prod(*tmp2, *v, *res2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdTer: ", norm_2(*res2->dense() - prod(tmp2->getTriang(), *v->dense())) < tol,
+      "testProdTer: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *v->dense())) < tol,
       true);
-  prod(*tmp2, *w, *res2);
+  siconos::algebra::prod(*tmp2, *w, *res2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdTer: ", norm_2(*res2->dense() - prod(tmp2->getTriang(), *w->sparse())) < tol,
+      "testProdTer: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *w->sparse())) < tol,
       true);
   //   Sym * ...
-  prod(*tmp3, *v, *res2);
+  siconos::algebra::prod(*tmp3, *v, *res2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdTer: ", norm_2(*res2->dense() - prod(tmp3->getSym(), *v->dense())) < tol, true);
-  prod(*tmp3, *w, *res2);
+      "testProdTer: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *v->dense())) < tol, true);
+  siconos::algebra::prod(*tmp3, *w, *res2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdTer: ", norm_2(*res2->dense() - prod(tmp3->getSym(), *w->sparse())) < tol,
+      "testProdTer: ", ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *w->sparse())) < tol,
       true);
   // Sparse * ...
-  prod(*tmp4, *vv, *res);
+  siconos::algebra::prod(*tmp4, *vv, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdTer: ", norm_2(*res->dense() - prod(tmp4->getSparse(), *vv->dense())) < tol,
+      "testProdTer: ", ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *vv->dense())) < tol,
       true);
-  prod(*tmp4, *ww, *res);
+  siconos::algebra::prod(*tmp4, *ww, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdTer: ", norm_2(*res->dense() - prod(tmp4->getSparse(), *ww->sparse())) < tol,
+      "testProdTer: ", ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *ww->sparse())) < tol,
       true);
   // Banded * ...
-  prod(*tmp5, *v, *res);
+  siconos::algebra::prod(*tmp5, *v, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdTer: ", norm_2(*res->dense() - prod(tmp5->getBanded(), *v->dense())) < tol,
+      "testProdTer: ", ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *v->dense())) < tol,
       true);
-  prod(*tmp5, *w, *res);
+  siconos::algebra::prod(*tmp5, *w, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testProdTer: ", norm_2(*res->dense() - prod(tmp5->getBanded(), *w->sparse())) < tol,
+      "testProdTer: ", ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *w->sparse())) < tol,
       true);
-  std::cout << "-->  test prodTer ended with success." << std::endl;
+  std::cout << "-->  test ublas::prodTer ended with success." << std::endl;
 }
 
 void SimpleMatrixTest::testProd4()  // y += A*x
 {
-  std::cout << "--> Test: prod. mat-vect (4)" << std::endl;
+  std::cout << "--> Test: ublas::prod. mat-vect (4)" << std::endl;
 
   auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
   auto x = std::make_shared<siconos::algebra::SiconosVector>(size, 4.3);
@@ -3520,12 +3525,12 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
   yB->zero();
 
-  // Matrix - vector product
+  // Matrix - vector ublas::product
 
   // Simple = Simple * Simple
   y->zero();
-  prod(*A, *x, *y, false);
-  prod(*A, *x, *y, false);
+  siconos::algebra::prod(*A, *x, *y, false);
+  siconos::algebra::prod(*A, *x, *y, false);
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
@@ -3534,8 +3539,8 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   }
   // Simple = Simple * Block
   y->zero();
-  prod(*A, *xB, *y, false);
-  prod(*A, *xB, *y, false);
+  siconos::algebra::prod(*A, *xB, *y, false);
+  siconos::algebra::prod(*A, *xB, *y, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*A)(i, j) * (*xB)(j);
@@ -3544,8 +3549,8 @@ void SimpleMatrixTest::testProd4()  // y += A*x
 
   // Block = Simple * Simple
   yB->zero();
-  prod(*A, *x, *yB, false);
-  prod(*A, *x, *yB, false);
+  siconos::algebra::prod(*A, *x, *yB, false);
+  siconos::algebra::prod(*A, *x, *yB, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*A)(i, j) * (*x)(j);
@@ -3554,8 +3559,8 @@ void SimpleMatrixTest::testProd4()  // y += A*x
 
   // Block = Simple * Block
   yB->zero();
-  //  prod(*A ,*xB,*yB,false);
-  //  prod(*A ,*xB,*yB,false);
+  //  siconos::algebra::prod(*A ,*xB,*yB,false);
+  //  siconos::algebra::prod(*A ,*xB,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3563,12 +3568,12 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   //      sum += 2*(*A)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
-  std::cout << "-->  test prod4 ended with success." << std::endl;
+  std::cout << "-->  test ublas::prod4 ended with success." << std::endl;
 }
 
 void SimpleMatrixTest::testProd5()  // y += a*A*x
 {
-  std::cout << "--> Test: prod. mat-vect (5)" << std::endl;
+  std::cout << "--> Test: ublas::prod. mat-vect (5)" << std::endl;
 
   auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
   auto x = std::make_shared<siconos::algebra::SiconosVector>(size, 4.3);
@@ -3579,12 +3584,12 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
   yB->zero();
 
-  // Matrix - vector product
+  // Matrix - vector ublas::product
   double a = 3.0;
   // Simple = Simple * Simple
   y->zero();
-  prod(a, *A, *x, *y, false);
-  prod(a, *A, *x, *y, false);
+  siconos::algebra::prod(a, *A, *x, *y, false);
+  siconos::algebra::prod(a, *A, *x, *y, false);
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
@@ -3593,8 +3598,8 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   }
   // Simple = Simple * Block
   y->zero();
-  //  prod(a,*A ,*xB,*y,false);
-  //  prod(a,*A ,*xB,*y,false);
+  //  siconos::algebra::prod(a,*A ,*xB,*y,false);
+  //  siconos::algebra::prod(a,*A ,*xB,*y,false);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3605,8 +3610,8 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
 
   // Block = Simple * Simple
   yB->zero();
-  //  prod(a,*A ,*x,*yB,false);
-  //  prod(a,*A ,*x,*yB,false);
+  //  siconos::algebra::prod(a,*A ,*x,*yB,false);
+  //  siconos::algebra::prod(a,*A ,*x,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3617,8 +3622,8 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   //
   // Block = Simple * Block
   yB->zero();
-  //  prod(a,*A ,*xB,*yB,false);
-  //  prod(a,*A ,*xB,*yB,false);
+  //  siconos::algebra::prod(a,*A ,*xB,*yB,false);
+  //  siconos::algebra::prod(a,*A ,*xB,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3626,12 +3631,12 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   //      sum += a*2*(*A)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
-  std::cout << "-->  test prod5 ended with success." << std::endl;
+  std::cout << "-->  test ublas::prod5 ended with success." << std::endl;
 }
 
 void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 {
-  std::cout << "--> Test: prod. mat-vect (6)" << std::endl;
+  std::cout << "--> Test: ublas::prod. mat-vect (6)" << std::endl;
 
   auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
   auto x = std::make_shared<siconos::algebra::SiconosVector>(size, 4.3);
@@ -3644,12 +3649,12 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 
   auto tmp = std::make_shared<SimpleMatrix>(*A);
   tmp->trans();
-  // Matrix - vector product
+  // Matrix - vector ublas::product
 
   // Simple = Simple * Simple
   y->zero();
-  prod(*x, *A, *y);
-  prod(*x, *A, *y, false);
+  siconos::algebra::prod(*x, *A, *y);
+  siconos::algebra::prod(*x, *A, *y, false);
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
@@ -3658,8 +3663,8 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   }
   // Simple = Simple * Block
   y->zero();
-  //  prod(*xB,*A,*y);
-  //  prod(*xB,*A,*y,false);
+  //  siconos::algebra::prod(*xB,*A,*y);
+  //  siconos::algebra::prod(*xB,*A,*y,false);
   //
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
@@ -3671,8 +3676,8 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 
   // Block = Simple * Simple
   yB->zero();
-  prod(*x, *A, *yB);
-  prod(*x, *A, *yB, false);
+  siconos::algebra::prod(*x, *A, *yB);
+  siconos::algebra::prod(*x, *A, *yB, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*tmp)(i, j) * (*x)(j);
@@ -3681,8 +3686,8 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 
   // Block = Simple * Block
   yB->zero();
-  //  prod(*xB,*A ,*yB);
-  //  prod(*xB,*A ,*yB,false);
+  //  siconos::algebra::prod(*xB,*A ,*yB);
+  //  siconos::algebra::prod(*xB,*A ,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
@@ -3690,7 +3695,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   //      sum += 2*(*tmp)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
-  std::cout << "-->  test prod6 ended with success." << std::endl;
+  std::cout << "-->  test ublas::prod6 ended with success." << std::endl;
 }
 
 // void SimpleMatrixTest::testGemv()
@@ -3737,13 +3742,13 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 //   auto backUp = std::make_shared<SimpleMatrix>(*C);
 
 //   gemm(a, *A, *B, b, *C);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a * prod(*A->dense(),
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a * ublas::prod(*A->dense(),
 //   *B->dense()) - b**backUp->dense()) < tol, true);
 
 //   *C = *backUp;
 //   gemmtranspose(a, *A, *B, b, *C);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm (trans): ", norm_inf(*C->dense() - a *
-//   prod(trans(*A->dense()), trans(*B->dense())) - b**backUp->dense()) < tol, true); std::cout
+//   siconos::algebra::prod(trans(*A->dense()), trans(*B->dense())) - b**backUp->dense()) < tol, true); std::cout
 //   << "-->  test gemm ended with success." <<std::endl;
 // }
 
@@ -3840,7 +3845,7 @@ void SimpleMatrixTest::testFactorize()
   auto DenseT = std::make_shared<SimpleMatrix>(*Dense);
   DenseT->trans();
   auto DDT = std::make_shared<SimpleMatrix>(Dense->size(0), Dense->size(1));
-  prod(*Dense, *DenseT, *DDT);
+  siconos::algebra::prod(*Dense, *DenseT, *DDT);
   DDT->display();
   DDT->setIsSymmetric(true);
   DDT->setIsPositiveDefinite(true);
@@ -3867,7 +3872,7 @@ void SimpleMatrixTest::testSolve()
   Dense->Solve(*b);
   Dense->display();
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*D_backup, *b) - *backup).norm2() < tol,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*D_backup, *b) - *backup).norm2() < tol,
                                true);
 
   // // Test dense matrix and sparse rhs
@@ -3881,7 +3886,7 @@ void SimpleMatrixTest::testSolve()
   // Dense->Solve(*b_sparse);
   // b_sparse->display();
 
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*D_backup,*b_sparse) - *backup).norm2()
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*D_backup,*b_sparse) - *backup).norm2()
   // < tol, true);
 
   std::cout << "\n\n--> Test: Solve. Dense. Cholesky." << std::endl;
@@ -3893,13 +3898,13 @@ void SimpleMatrixTest::testSolve()
   auto DenseT = std::make_shared<SimpleMatrix>(*Dense);
   DenseT->trans();
   auto DDT = std::make_shared<SimpleMatrix>(Dense->size(0), Dense->size(1));
-  prod(*Dense, *DenseT, *DDT);
+  siconos::algebra::prod(*Dense, *DenseT, *DDT);
   auto DDT_backup = std::make_shared<SimpleMatrix>(*DDT);
   DDT->setIsSymmetric(true);
   DDT->setIsPositiveDefinite(true);
   DDT->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*DDT_backup, *b) - *backup).norm2() < tol,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*DDT_backup, *b) - *backup).norm2() < tol,
                                true);
 
   std::cout << "\n\n--> Test: Solve. Sparse. LU." << std::endl;
@@ -3919,7 +3924,7 @@ void SimpleMatrixTest::testSolve()
   Sparse->Solve(*b);
   b->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testSolve: ", (prod(*Sparse_backup, *b) - *backup).norm2() < tol, true);
+      "testSolve: ", (siconos::algebra::prod(*Sparse_backup, *b) - *backup).norm2() < tol, true);
 
   // test sparse matrix 3x3
   Sparse = std::make_shared<SimpleMatrix>(*SP3);
@@ -3930,7 +3935,7 @@ void SimpleMatrixTest::testSolve()
   backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
   Sparse->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse, *b) - *backup).norm2() < tol,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol,
                                true);
 
   // Solve again with another r.h.s.
@@ -3941,7 +3946,7 @@ void SimpleMatrixTest::testSolve()
   backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
   Sparse->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse, *b) - *backup).norm2() < tol,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol,
                                true);
 
   // test sparse matrix 4x4 SP4
@@ -3954,7 +3959,7 @@ void SimpleMatrixTest::testSolve()
   backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
   Sparse->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*Sparse, *b) - *backup).norm2() < tol,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol,
                                true);
 
   std::cout << "\n\n--> Test: Solve. Sparse. LU.  Sparse rhs" << std::endl;
@@ -3968,9 +3973,9 @@ void SimpleMatrixTest::testSolve()
   // std::cout << "Sparse :" << std::endl;
   // Sparse->display();
   // std::cout << "A A^{-1}" << std::endl;
-  // (prod(*Sparse,*Sparse_rhs)).display();
+  // (siconos::algebra::prod(*Sparse,*Sparse_rhs)).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testSolve: ", (prod(*Sparse, *Sparse_rhs) - *Sparse).normInf() < tol, true);
+      "testSolve: ", (siconos::algebra::prod(*Sparse, *Sparse_rhs) - *Sparse).normInf() < tol, true);
 
   // test sparse matrix 3x3 sparse RhS. inverse
   Sparse = std::make_shared<SimpleMatrix>(*SP3);
@@ -3983,9 +3988,9 @@ void SimpleMatrixTest::testSolve()
   // Sparse_rhs->display();
   // std::cout << "A A^{-1}" << std::endl;
 
-  // (prod(*Sparse,*Sparse_rhs)).display();
+  // (siconos::algebra::prod(*Sparse,*Sparse_rhs)).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testSolve: ", (prod(*Sparse, *Sparse_rhs) - *Id).normInf() < tol, true);
+      "testSolve: ", (siconos::algebra::prod(*Sparse, *Sparse_rhs) - *Id).normInf() < tol, true);
 
   std::cout << "\n\n--> Test: Solve. Sparse. Cholesky." << std::endl;
 
@@ -4004,7 +4009,7 @@ void SimpleMatrixTest::testSolve()
   Sparse->Solve(*b);
   b->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testSolve: ", (prod(*Sparse_backup, *b) - *backup).norm2() < tol, true);
+      "testSolve: ", (siconos::algebra::prod(*Sparse_backup, *b) - *backup).norm2() < tol, true);
 
   // test sparse matrix 3x3
   Sparse = std::make_shared<SimpleMatrix>(*SP3);
@@ -4017,12 +4022,12 @@ void SimpleMatrixTest::testSolve()
   SparseT->trans();
   auto SST = std::make_shared<SimpleMatrix>(Sparse->size(0), Sparse->size(1),
                                             siconos::algebra::UblasType::SPARSE);
-  prod(*Sparse, *SparseT, *SST);
+  siconos::algebra::prod(*Sparse, *SparseT, *SST);
   SST->setIsSymmetric(true);
   SST->setIsPositiveDefinite(true);
   SST->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST, *b) - *backup).norm2() < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
 
   // Solve again with another r.h.s.
   b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
@@ -4032,7 +4037,7 @@ void SimpleMatrixTest::testSolve()
   backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
   SST->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST, *b) - *backup).norm2() < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
 
   // test sparse matrix 4x4 SP4
   Sparse = std::make_shared<SimpleMatrix>(*SP4);
@@ -4045,12 +4050,12 @@ void SimpleMatrixTest::testSolve()
   SparseT->trans();
   SST = std::make_shared<SimpleMatrix>(Sparse->size(0), Sparse->size(1),
                                        siconos::algebra::UblasType::SPARSE);
-  prod(*Sparse, *SparseT, *SST);
+  siconos::algebra::prod(*Sparse, *SparseT, *SST);
   SST->setIsSymmetric(true);
   SST->setIsPositiveDefinite(true);
   SST->Solve(*b);
   b->display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST, *b) - *backup).norm2() < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
 
   std::cout << "\n\n--> Test: Solve. Sparse. Cholesky.  Sparse rhs" << std::endl;
 
@@ -4060,7 +4065,7 @@ void SimpleMatrixTest::testSolve()
   SparseT->trans();
   SST = std::make_shared<SimpleMatrix>(Sparse->size(0), Sparse->size(1),
                                        siconos::algebra::UblasType::SPARSE);
-  prod(*Sparse, *SparseT, *SST);
+  siconos::algebra::prod(*Sparse, *SparseT, *SST);
   Sparse_rhs = std::make_shared<SimpleMatrix>(*SST);
   // std::cout << "SST" << std::endl;
   // SST->display();
@@ -4069,14 +4074,14 @@ void SimpleMatrixTest::testSolve()
   SST->Solve(*Sparse_rhs);
   // Sparse_rhs->display();
   // std::cout << "A A^{-1}" << std::endl;
-  // (prod(*SST,*Sparse_rhs)).display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST, *Sparse_rhs) - *SST).normInf() < tol,
+  // (siconos::algebra::prod(*SST,*Sparse_rhs)).display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *SST).normInf() < tol,
                                true);
 
   // test sparse matrix 3x3 sparse RhS. inverse
   SST = std::make_shared<SimpleMatrix>(Sparse->size(0), Sparse->size(1),
                                        siconos::algebra::UblasType::SPARSE);
-  prod(*Sparse, *SparseT, *SST);
+  siconos::algebra::prod(*Sparse, *SparseT, *SST);
   Sparse_rhs = std::make_shared<SimpleMatrix>(3, 3, siconos::algebra::UblasType::SPARSE);
   Sparse_rhs->eye();
   // std::cout << "SST" << std::endl;
@@ -4089,8 +4094,8 @@ void SimpleMatrixTest::testSolve()
   // Sparse_rhs->display();
   // std::cout << "A A^{-1}" << std::endl;
 
-  // (prod(*SST,*Sparse_rhs)).display();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (prod(*SST, *Sparse_rhs) - *Id).normInf() < tol,
+  // (siconos::algebra::prod(*SST,*Sparse_rhs)).display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *Id).normInf() < tol,
                                true);
 
   std::cout << "-->  test Solve ended with success." << std::endl;

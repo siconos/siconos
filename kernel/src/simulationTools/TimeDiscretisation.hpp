@@ -97,9 +97,9 @@ class TimeDiscretisation {
 
   // Rule of five
   TimeDiscretisation() = delete;
-  TimeDiscretisation(const TimeDiscretisation&&) = delete;
+  TimeDiscretisation(TimeDiscretisation&&) = delete;
   TimeDiscretisation& operator=(const TimeDiscretisation&) = delete;
-  TimeDiscretisation& operator=(const TimeDiscretisation&&) = delete;
+  TimeDiscretisation& operator=(TimeDiscretisation&&) = delete;
 
   /** Get the origin of time t0
    * \return the origin of time

@@ -85,9 +85,8 @@ private:
   void testConstructor5();
   void testConstructor6();
   void testConstructor7();
-  void testBlock2Contiguous();
+  // void testBlock2Contiguous();
   void testZero();
-  void testFill();
   void testNorm();
   void testResize();
   void testSetBlock();

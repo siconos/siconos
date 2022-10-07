@@ -84,7 +84,7 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
    *  \return pointer to a SiconosMatrix
    */
   const siconos::algebra::SiconosMatrix &Ad(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const;
 
   /** get \f$ B_d \f$ corresponding to DynamicalSystem ds
    *
@@ -92,7 +92,7 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
    *  \return pointer to a SiconosMatrix
    */
   const siconos::algebra::SiconosMatrix &Bd(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const;
 
   // --- OTHER FUNCTIONS ---
 
@@ -190,7 +190,7 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
 
   /** Displays the data of the ZeroOrderHoldOSI's integrator
    */
-  void display() override;
+  void display() const override;
 
   void updateMatrices(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 };

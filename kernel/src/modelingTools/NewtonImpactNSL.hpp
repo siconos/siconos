@@ -49,11 +49,11 @@ class NewtonImpactNSL : public NonSmoothLaw {
   /** The Newton normal coefficient of restitution  */
   double _e{0.};
 
- public:
   /** default constructor
    */
-  NewtonImpactNSL() = default;
+  NewtonImpactNSL() = delete;
 
+ public:
   /** constructor with the value of the NewtonImpactNSL attributes
    *
    *  \param e the value of the coefficient of restitution

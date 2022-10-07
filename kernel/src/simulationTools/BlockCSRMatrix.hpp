@@ -24,14 +24,14 @@ Definition of a compressed row sparse block matrix of SiconosMatrix*
 
 #include <boost/numeric/ublas/fwd.hpp>  // Boost forward declarations
 #include <vector>
+
 #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
 #include "SimulationGraphs.hpp"
 
-namespace siconos::numerics{
+namespace siconos::numerics {
 
-#include "NumericsFwd.h" // for SparseBlockStructuredMatrix
+#include "NumericsFwd.h"  // for SparseBlockStructuredMatrix
 }
-
 
 namespace siconos::simulation {
 
@@ -119,7 +119,8 @@ class BlockCSRMatrix {
   std::shared_ptr<CompressedRowMat> _blockCSR{nullptr};
 
   /** Specific structure required when a (Numerics) solver block is used */
-  std::shared_ptr<siconos::numerics::SparseBlockStructuredMatrix> _sparseBlockStructuredMatrix{nullptr};
+  std::shared_ptr<siconos::numerics::SparseBlockStructuredMatrix> _sparseBlockStructuredMatrix{
+      nullptr};
 
   /** Vector used to save the sum of rows of diagonal blocks of M:
       _diagsize0[i] = _diagsize0[i-1] + ni, ni being the size of the
@@ -140,9 +141,9 @@ class BlockCSRMatrix {
   // Rule of five
   BlockCSRMatrix() = delete;
   BlockCSRMatrix(const BlockCSRMatrix &) = delete;
-  BlockCSRMatrix(const BlockCSRMatrix &&) = delete;
+  BlockCSRMatrix(BlockCSRMatrix &&) = delete;
   BlockCSRMatrix &operator=(const BlockCSRMatrix &) = delete;
-  BlockCSRMatrix &operator=(const BlockCSRMatrix &&) = delete;
+  BlockCSRMatrix &operator=(BlockCSRMatrix &&) = delete;
 
  public:
   /** Constructor with dimension (number of blocks)

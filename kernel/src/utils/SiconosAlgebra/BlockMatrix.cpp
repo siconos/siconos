@@ -60,9 +60,6 @@ siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m)
 
     unsigned int i, j;
     bool firstLoop = true;
-    //BlocksMatrix::const_iterator2 it2;
-    //    BlocksMatrix::const_iterator1 it1;
-
     // We scan all the blocks of m ...
     for (auto it1 = mB._mat->begin1(); it1 != mB._mat->end1(); ++it1) {
       _dimRow += (*(it1.begin()))->size(0);

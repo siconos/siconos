@@ -837,7 +837,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int)
   DEBUG_END("siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int)\n");
 }
 
-void siconos::integrators::SchatzmanPaoliOSI::display()
+void siconos::integrators::SchatzmanPaoliOSI::display() const
 {
   OneStepIntegrator::display();
 

@@ -114,9 +114,9 @@ class Topology : public std::enable_shared_from_this<Topology> {
 
   // Rules of five ...
   Topology(const Topology&) = delete;
-  Topology(const Topology&&) = delete;
+  Topology(Topology&&) = delete;
   Topology& operator=(const Topology&) = delete;
-  Topology& operator=(const Topology&&) = delete;
+  Topology& operator=(Topology&&) = delete;
 
  public:
   // --- CONSTRUCTORS/DESTRUCTOR ---

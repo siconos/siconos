@@ -1,4 +1,4 @@
-#!/usr/bin/env @Python3_EXECUTABLE@
+#!/usr/bin/env @Python_EXECUTABLE@
 """Classes and functions used at runtime
 to configure, build and execute siconos examples
 
@@ -161,7 +161,7 @@ def main():
         env = os.environ
         # If the driver file is python, set python exe
         if args.is_python:
-            cmd += ['@Python3_EXECUTABLE@']
+            cmd += ['@Python_EXECUTABLE@']
             # for python modules
             if('PYTHONPATH') in env:
                 env['PYTHONPATH'] += ':' + \

@@ -6,14 +6,21 @@ function(collect_files)
 
   set(oneValueArgs VAR) # output variable name
   set(multiValueArgs DIRS EXTS)
+  set(options RECURSIVE)
   cmake_parse_arguments(collect "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
   # Scan all dirs and check all exts ...
 
   foreach(DIR IN LISTS collect_DIRS)
     foreach(_EXT IN LISTS collect_EXTS)
-      file(GLOB FILES_LIST
-        RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
-        ${DIR}/*.${_EXT})
+      if(collect_RECURSIVE)
+	file(GLOB_RECURSE FILES_LIST
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
+          ${DIR}/*.${_EXT})
+      else()
+	file(GLOB FILES_LIST
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
+          ${DIR}/*.${_EXT})
+      endif()
       if(FILES_LIST)
 	list(APPEND COLLECTION ${FILES_LIST})
       endif()

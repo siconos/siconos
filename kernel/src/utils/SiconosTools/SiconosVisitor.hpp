@@ -62,11 +62,10 @@ class SiconosVector;
 class BlockVector;
 }  // namespace siconos::algebra
 
-
 // We have to declare all the classes that might be visited.
 namespace siconos::modeling {
-  // NS laws
-  class EqualityConditionNSL;
+// NS laws
+class EqualityConditionNSL;
 class ComplementarityConditionNSL;
 class MixedComplementarityConditionNSL;
 class MultipleImpactNSL;
@@ -76,23 +75,22 @@ class NewtonImpactRollingFrictionNSL;
 class NormalConeNSL;
 class RelayNSL;
 
-  // DS
-  class FirstOrderNonLinearDS;
-  class NewtonEulerDS;
-  class LagrangianDS;
-  
+// DS
+class FirstOrderNonLinearDS;
+class NewtonEulerDS;
+class LagrangianDS;
+
 }  // namespace siconos::modeling
 
 namespace siconos::internal {
 
 struct SiconosVisitor {
-
   SiconosVisitor() = default;
-  SiconosVisitor(const SiconosVisitor&) = delete;
-  SiconosVisitor(const SiconosVisitor&&) = delete;
-  SiconosVisitor& operator=(const SiconosVisitor&&) = delete;
-  SiconosVisitor& operator=(const SiconosVisitor&) = delete;
-  
+  SiconosVisitor(const SiconosVisitor &) = delete;
+  SiconosVisitor(SiconosVisitor &&) = delete;
+  SiconosVisitor &operator=(SiconosVisitor &&) = delete;
+  SiconosVisitor &operator=(const SiconosVisitor &) = delete;
+
   // declaration of visitors used in Interactions to set level values.
   // Note FP: use variant for nslaws ?
   // Pros: less virtual functions (no more class hierarchy in nslaws), can use std::visit

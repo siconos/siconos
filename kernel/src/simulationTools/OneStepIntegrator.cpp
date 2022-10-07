@@ -27,6 +27,7 @@
 #include "Relation.hpp"
 #include "EventsManager.hpp"
 #include "SiconosVisitor.hpp"
+#include "Tools.hpp" // enum_to_string
 
 // FP WIP
 // struct siconos::integrators::OneStepIntegrator::IterationMatrixVisitor : public siconos::internal::SiconosVisitor {
@@ -251,11 +252,11 @@ bool siconos::integrators::OneStepIntegrator::removeInteractionFromIndexSet(
   return 0;
 };
 
-void siconos::integrators::OneStepIntegrator::display()
+void siconos::integrators::OneStepIntegrator::display() const
 {
   std::cout << "==== OneStepIntegrator display =====\n";
   std::cout << "| _integratorType : "
-            << static_cast<std::underlying_type<IntegratorType>::type>(_integratorType)
+            << siconos::tools::enum_to_string(_integratorType)
             << "\n";
   std::cout << "| _sizeMem: " << _sizeMem << "\n";
   std::cout << "====================================\n";

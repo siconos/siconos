@@ -105,7 +105,7 @@ const SimpleMatrix operator+(const SiconosMatrix& A, const SiconosMatrix& B);
 std::shared_ptr<SimpleMatrix> operator+(const std::shared_ptr<SimpleMatrix> A,
                                         const std::shared_ptr<SimpleMatrix> B);
 
-SimpleMatrix operator+(const SimpleMatrix& A, const SimpleMatrix& B);
+// SimpleMatrix operator+(const SimpleMatrix& A, const SimpleMatrix& B);
 
 /** Addition of two matrices C = A+B
  *  \param A a SiconosMatrix

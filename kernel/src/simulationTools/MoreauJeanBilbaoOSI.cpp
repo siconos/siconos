@@ -419,7 +419,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int)
   DEBUG_END("siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int)");
 }
 
-void siconos::integrators::MoreauJeanBilbaoOSI::display()
+void siconos::integrators::MoreauJeanBilbaoOSI::display() const
 {
   OneStepIntegrator::display();
 

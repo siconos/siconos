@@ -155,7 +155,7 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
 
   /** print the data to the screen
    */
-  void display() override;
+  void display() const override;
 
   void prepareNewtonIteration(double time) override;
 

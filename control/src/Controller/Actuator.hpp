@@ -128,9 +128,9 @@ class Actuator {
   // Rule of five
   Actuator() = delete;
   Actuator(const Actuator&) = delete;
-  Actuator(const Actuator&&) = delete;
+  Actuator(Actuator&&) = delete;
   Actuator& operator=(const Actuator&) = delete;
-  Actuator& operator=(const Actuator&&) = delete;
+  Actuator& operator=(Actuator&&) = delete;
 
  public:
   /** General Constructor
