@@ -21,7 +21,7 @@
 #include "Material.hpp"
 #include "SiconosAlgebraProd.hpp"
 #include "SimpleMatrixFriends.hpp"
-#include "op3X3.h"
+#include "op3x3.h"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR

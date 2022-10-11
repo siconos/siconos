@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <tuple> 
 // --- Constructor from a list of attributes
 siconos::mechanics::fem::native::Mesh::Mesh(int dim, int numberOfVertices, int numberOfElements):
   _dim(dim),_numberOfVertices(numberOfVertices),_numberOfElements(numberOfElements)
