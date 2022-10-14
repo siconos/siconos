@@ -24,7 +24,7 @@
 
 #include "LinearOSNS.hpp"
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 
 /** Formalization and Resolution of a Multiple Impact Non-Smooth problem.
 
@@ -345,5 +345,5 @@ class MultipleImpact : public LinearOSNS {
    */
   unsigned int EstimateNdataCols();
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif

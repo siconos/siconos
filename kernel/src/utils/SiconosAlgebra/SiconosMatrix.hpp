@@ -23,6 +23,7 @@
 #ifndef SICOMAT
 #define SICOMAT
 
+
 #include <boost/numeric/ublas/fwd.hpp>  // boost::numeric fwd
 #include <memory>                       // shared_ptr
 #include <vector>

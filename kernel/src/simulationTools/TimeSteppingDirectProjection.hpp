@@ -88,8 +88,9 @@ class TimeSteppingDirectProjection : public TimeStepping {
       std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
       std::shared_ptr<TimeDiscretisation> td,
       std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-      std::shared_ptr<OneStepNSProblem> osnspb_velo,
-      std::shared_ptr<OneStepNSProblem> osnspb_pos, unsigned int _level = 1);
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
+      unsigned int _level = 1);
 
   void initOSNS() override;
 

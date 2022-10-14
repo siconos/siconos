@@ -141,10 +141,10 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
       the nslaw
 
       \param vertex_inter of the interaction graph
-      \param osnsp a pointer to the siconos::simulation::OneStepNSProblem
+      \param osnsp a pointer to the siconos::nonsmooth_formulations::OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::simulation::OneStepNSProblem *osnsp) override;
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
   /** Apply the rule to one Interaction to known if is it should be included
    *  in the IndexSet of level i

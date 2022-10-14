@@ -172,7 +172,7 @@ void ZOHTest::testMatrixIntegration2()
   _model->setControlProperty(inter, true);
   _sim = std::make_shared<siconos::simulation::TimeStepping>(_model, _TD, 1);
   _sim->associate(_ZOH, _DS);
-  auto osnspb = std::make_shared<siconos::simulation::Relay>();
+  auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
   siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
@@ -241,7 +241,7 @@ void ZOHTest::testMatrixIntegration3()
   _model->setControlProperty(inter, true);
   _sim = std::make_shared<siconos::simulation::TimeStepping>(_model, _TD, 1);
   _sim->associate(_ZOH, _DS);
-  auto osnspb = std::make_shared<siconos::simulation::Relay>();
+  auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
   siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
@@ -316,7 +316,7 @@ void ZOHTest::testMatrixIntegration4()
   _model->setControlProperty(inter, true);
   _sim = std::make_shared<siconos::simulation::TimeStepping>(_model, _TD, 1);
   _sim->associate(_ZOH, _DS);
-  auto osnspb = std::make_shared<siconos::simulation::Relay>();
+  auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
   siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);

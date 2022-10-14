@@ -64,7 +64,7 @@
 #include "siconos_debug.h"
 //#define WITH_TIMER
 
-void siconos::simulation::LinearOSNS::initVectorsMemory()
+void siconos::nonsmooth_formulations::LinearOSNS::initVectorsMemory()
 {
   // Memory allocation for _w, M, z and q.
   // If one of them has already been allocated, nothing is done.
@@ -87,7 +87,7 @@ void siconos::simulation::LinearOSNS::initVectorsMemory()
     if (_q->size() != maxSize()) _q->resize(maxSize());
   }
 }
-void siconos::simulation::LinearOSNS::initOSNSMatrix()
+void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix()
 {
   // Default size for M = maxSize()
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK or
@@ -115,7 +115,7 @@ void siconos::simulation::LinearOSNS::initOSNSMatrix()
           {
             default:
               THROW_EXCEPTION(
-                  "siconos::simulation::LinearOSNS::initOSNSMatrix unknown _storageType");
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown _storageType");
           }
       }
     }
@@ -150,7 +150,7 @@ void siconos::simulation::LinearOSNS::initOSNSMatrix()
           {
             default:
               THROW_EXCEPTION(
-                  "siconos::simulation::LinearOSNS::initOSNSMatrix unknown _storageType");
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown _storageType");
           }
       }
     }
@@ -176,7 +176,7 @@ void siconos::simulation::LinearOSNS::initOSNSMatrix()
           {
             default:
               THROW_EXCEPTION(
-                  "siconos::simulation::LinearOSNS::initOSNSMatrix unknown _storageType");
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown _storageType");
           }
       }
     }
@@ -210,7 +210,7 @@ void siconos::simulation::LinearOSNS::initOSNSMatrix()
           {
             default:
               THROW_EXCEPTION(
-                  "siconos::simulation::LinearOSNS::initOSNSMatrix unknown _storageType");
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown _storageType");
           }
       }
     }
@@ -236,7 +236,7 @@ void siconos::simulation::LinearOSNS::initOSNSMatrix()
           {
             default:
               THROW_EXCEPTION(
-                  "siconos::simulation::LinearOSNS::initOSNSMatrix unknown _storageType");
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown _storageType");
           }
       }
     }
@@ -270,7 +270,7 @@ void siconos::simulation::LinearOSNS::initOSNSMatrix()
           {
             default:
               THROW_EXCEPTION(
-                  "siconos::simulation::LinearOSNS::initOSNSMatrix unknown _storageType");
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown _storageType");
           }
       }
     }
@@ -294,7 +294,7 @@ void siconos::simulation::LinearOSNS::initOSNSMatrix()
           {
             default:
               THROW_EXCEPTION(
-                  "siconos::simulation::LinearOSNS::initOSNSMatrix unknown _storageType");
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown _storageType");
           }
       }
     }
@@ -320,13 +320,13 @@ void siconos::simulation::LinearOSNS::initOSNSMatrix()
           {
             default:
               THROW_EXCEPTION(
-                  "siconos::simulation::LinearOSNS::initOSNSMatrix unknown _storageType");
+                  "siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix unknown _storageType");
           }
       }
     }
   }
 }
-void siconos::simulation::LinearOSNS::initialize(
+void siconos::nonsmooth_formulations::LinearOSNS::initialize(
     std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // - Checks memory allocation for main variables (_M,q,_w,z)
@@ -345,11 +345,11 @@ void siconos::simulation::LinearOSNS::initialize(
   initOSNSMatrix();
 }
 
-void siconos::simulation::LinearOSNS::computeDiagonalInteractionBlock(
+void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(
     const siconos::graphs::InteractionsGraph::VDescriptor& vd)
 {
   DEBUG_BEGIN(
-      "siconos::simulation::LinearOSNS::computeDiagonalInteractionBlock(const "
+      "siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(const "
       "siconos::graphs::InteractionsGraph::VDescriptor& vd)\n");
 
   // Compute diagonal block (graph property) for a given interaction.
@@ -552,7 +552,7 @@ void siconos::simulation::LinearOSNS::computeDiagonalInteractionBlock(
     }
     else
       THROW_EXCEPTION(
-          "siconos::simulation::LinearOSNS::computeDiagonalInteractionBlock not yet "
+          "siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock not yet "
           "implemented for relation of type " +
           std::to_string(
               static_cast<std::underlying_type<siconos::modeling::RelationType>::type>(
@@ -561,15 +561,15 @@ void siconos::simulation::LinearOSNS::computeDiagonalInteractionBlock(
     pos = pos2;
   }
   DEBUG_END(
-      "siconos::simulation::LinearOSNS::computeDiagonalInteractionBlock(const "
+      "siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBlock(const "
       "siconos::graphs::InteractionsGraph::VDescriptor& vd) ends \n");
 }
 
-void siconos::simulation::LinearOSNS::computeInteractionBlock(
+void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     const siconos::graphs::InteractionsGraph::EDescriptor& ed)
 {
   DEBUG_BEGIN(
-      "siconos::simulation::LinearOSNS::computeInteractionBlock(const "
+      "siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(const "
       "siconos::graphs::InteractionsGraph::EDescriptor& ed)\n");
 
   // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if
@@ -743,21 +743,21 @@ void siconos::simulation::LinearOSNS::computeInteractionBlock(
   }
   else
     THROW_EXCEPTION(
-        "siconos::simulation::LinearOSNS::computeInteractionBlock not yet implemented for "
+        "siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock not yet implemented for "
         "relation of type " +
         std::to_string(
             static_cast<std::underlying_type<siconos::modeling::RelationType>::type>(
                 relationType1)));
   DEBUG_END(
-      "siconos::simulation::LinearOSNS::computeInteractionBlock(const "
+      "siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(const "
       "siconos::graphs::InteractionsGraph::EDescriptor& ed)\n");
 }
 
-void siconos::simulation::LinearOSNS::computeqBlock(
+void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos)
 {
   DEBUG_BEGIN(
-      "siconos::simulation::LinearOSNS::computeqBlock(std::shared_ptr<siconos::modeling::"
+      "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(std::shared_ptr<siconos::modeling::"
       "Interaction> inter, unsigned int pos)\n");
   auto indexSet = simulation()->indexSet(indexSetLevel());
 
@@ -869,19 +869,19 @@ void siconos::simulation::LinearOSNS::computeqBlock(
     auto t2 = static_cast<std::underlying_type<siconos::integrators::IntegratorType>::type>(
         osi2Type);
     THROW_EXCEPTION(
-        "siconos::simulation::LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 "
+        "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 "
         "of type " +
         std::to_string(t1) + std::to_string(t2));
   }
   DEBUG_EXPR(_q->display());
   DEBUG_END(
-      "siconos::simulation::LinearOSNS::computeqBlock(std::shared_ptr<siconos::modeling::"
+      "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(std::shared_ptr<siconos::modeling::"
       "Interaction> inter, unsigned int pos)\n");
 }
 
-void siconos::simulation::LinearOSNS::computeq(double time)
+void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time)
 {
-  DEBUG_BEGIN("void siconos::simulation::LinearOSNS::computeq(double time)\n");
+  DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time)\n");
   if (_q->size() != _sizeOutput) _q->resize(_sizeOutput);
   _q->zero();
 
@@ -898,10 +898,10 @@ void siconos::simulation::LinearOSNS::computeq(double time)
     pos = indexSet->properties(*ui).absolute_position;
     computeqBlock(*ui, pos);  // free output is saved in y
   }
-  DEBUG_END("void siconos::simulation::LinearOSNS::computeq(double time)\n");
+  DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time)\n");
 }
 
-void siconos::simulation::LinearOSNS::computeM()
+void siconos::nonsmooth_formulations::LinearOSNS::computeM()
 {
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK) {
     auto& indexSet = *simulation()->indexSet(indexSetLevel());
@@ -944,7 +944,7 @@ void siconos::simulation::LinearOSNS::computeM()
 #endif
   }
   else
-    THROW_EXCEPTION("siconos::simulation::LinearOSNS::computeM unknown _assemblyTYPE");
+    THROW_EXCEPTION("siconos::nonsmooth_formulations::LinearOSNS::computeM unknown _assemblyTYPE");
 
   DEBUG_EXPR(_M->display(););
   // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
@@ -954,9 +954,9 @@ void siconos::simulation::LinearOSNS::computeM()
   // getchar();
 }
 
-bool siconos::simulation::LinearOSNS::preCompute(double time)
+bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)
 {
-  DEBUG_BEGIN("bool siconos::simulation::LinearOSNS::preCompute(double time)\n");
+  DEBUG_BEGIN("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
   // This function is used to prepare data for the
   // LinearComplementarityProblem
 
@@ -976,14 +976,14 @@ bool siconos::simulation::LinearOSNS::preCompute(double time)
 
   // nothing to do
   if (indexSetLevel() == siconos::internal::LEVELMAX) {
-    DEBUG_END("bool siconos::simulation::LinearOSNS::preCompute(double time)\n");
+    DEBUG_END("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
     return false;
   }
 
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
   if (indexSet.size() == 0) {
-    DEBUG_END("bool siconos::simulation::LinearOSNS::preCompute(double time)\n");
+    DEBUG_END("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
     return false;
   }
 #ifdef WITH_TIMER
@@ -1057,13 +1057,13 @@ bool siconos::simulation::LinearOSNS::preCompute(double time)
   elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - end_old).count();
   std::cout << "LinearOSNS: compute q " << elapsed << " ms" << std::endl;
 #endif
-  DEBUG_END("bool siconos::simulation::LinearOSNS::preCompute(double time)\n");
+  DEBUG_END("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
   return true;
 }
 
-void siconos::simulation::LinearOSNS::postCompute()
+void siconos::nonsmooth_formulations::LinearOSNS::postCompute()
 {
-  DEBUG_BEGIN("void siconos::simulation::LinearOSNS::postCompute()\n");
+  DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
   // This function is used to set y/lambda values using output from
   // lcp_driver (w,z).  Only Interactions (ie Interactions) of
   // indexSet(leveMin) are concerned.
@@ -1097,10 +1097,10 @@ void siconos::simulation::LinearOSNS::postCompute()
     siconos::algebra::setBlock(*_z, lambda, lambda->size(), pos, 0);
     DEBUG_EXPR(lambda->display(););
   }
-  DEBUG_END("void siconos::simulation::LinearOSNS::postCompute()\n");
+  DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
 }
 
-void siconos::simulation::LinearOSNS::display() const
+void siconos::nonsmooth_formulations::LinearOSNS::display() const
 {
   std::cout << "==========================" << std::endl;
   std::cout << "this : " << this << std::endl;

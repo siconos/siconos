@@ -26,5 +26,6 @@
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
+#include "SiconosAlgebraTools.hpp"
 #include "Tools.hpp"
 #include "io.hpp"

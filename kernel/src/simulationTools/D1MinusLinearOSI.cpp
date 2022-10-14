@@ -40,7 +40,7 @@
 #include "siconos_debug.h"
 
 siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFreeOutput(
-    siconos::simulation::OneStepNSProblem* p,
+    siconos::nonsmooth_formulations::OneStepNSProblem* p,
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::graphs::InteractionProperties& interProp)
     : _osnsp(p), _inter(inter), _interProp(interProp){};
@@ -460,7 +460,7 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int)
 
 void siconos::integrators::D1MinusLinearOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   DEBUG_PRINT("siconos::integrators::D1MinusLinearOSI::computeFreeOutput(), start\n");
   switch (_typeOfD1MinusLinearOSI) {

@@ -31,7 +31,7 @@ namespace siconos::numerics {
 struct LinearComplementarityProblem;
 }
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 
 /**
     Formalization and Resolution of a Linear Complementarity Problem (LCP)
@@ -102,5 +102,5 @@ class LCP : public LinearOSNS {
   /* Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) override;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif  // LCP_H

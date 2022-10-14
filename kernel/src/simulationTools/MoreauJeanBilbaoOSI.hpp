@@ -138,7 +138,7 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param osnsp pointer to OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::simulation::OneStepNSProblem *osnsp) override;
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
   /** update the state of the dynamical systems
       \param ds the dynamical to update

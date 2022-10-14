@@ -51,6 +51,10 @@ void EigenProblemsTest::setUp()
   // Initialize A with random values.
   A->randomize();
   Aref = std::make_shared<siconos::algebra::SimpleMatrix>(*A);
+
+  Asym = std::make_shared<siconos::algebra::SimpleMatrix>(
+      size, size, siconos::algebra::UblasType::SYMMETRIC);
+  Asym->randomize();
 }
 
 void EigenProblemsTest::tearDown() {}
@@ -59,9 +63,10 @@ void EigenProblemsTest::testSyev()
 {
   std::cout << "--> Test: syev." << std::endl;
 
-  // turn A to a symmetric matrix
-  A->randomize();
-  *Aref = *A;
+  // turn A into a symmetric matrix
+  Asym->randomize();
+  *A = *Asym;
+  *Aref = *Asym;
 
   // Initialize EigenVectors with A
   auto EigenValues = std::make_shared<siconos::algebra::SiconosVector>(size);
@@ -77,10 +82,11 @@ void EigenProblemsTest::testSyev()
     error.plus_assign(ublas::prod(*A->dense(), ublas::column(*EigenVectors->dense(), i)));
     error.minus_assign((*EigenValues->dense())(i)*ublas::column(*EigenVectors->dense(), i));
   }
-  std::cout << ublas::norm_2(error) << " " << 10. * std::numeric_limits<double>::epsilon() << "\n";
   // Check ...
+
+  auto nerr = ublas::norm_2(error);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-			       "testSyev 1: ", ublas::norm_2(error) < 10. * std::numeric_limits<double>::epsilon(), true);
+      "testSyev 1: ", nerr < 2000. * std::numeric_limits<double>::epsilon(), true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSyev 2: ", (*A) == (*Aref), true);
 
@@ -89,10 +95,10 @@ void EigenProblemsTest::testSyev()
   *EigenVectors = *A;
   *EigenValues *= 0.0;
   siconos::algebra::syev(*EigenValues, *EigenVectors, false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSyev 3: ",
-                               ((*EigenValues) - (*RefEigenValues)).norm2() <
-                                   10 * std::numeric_limits<double>::epsilon(),
-                               true);
+  nerr = ((*EigenValues) - (*RefEigenValues)).norm2();
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testSyev 3: ", nerr < 2000 * std::numeric_limits<double>::epsilon(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSyev 4: ", (*A) == (*Aref), true);
   std::cout << "--> Syev test ended with success." << std::endl;
 }
@@ -113,18 +119,20 @@ void EigenProblemsTest::testGeev1()
 
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testGeev1 1: ", ublas::norm_2(error) < 10 * std::numeric_limits<double>::epsilon(), true);
+      "testGeev1 1: ", ublas::norm_2(error) < 3000 * std::numeric_limits<double>::epsilon(),
+      true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 2: ", (*A) == (*Aref), true);
   // Now compute only eigenvalues
   complex_vector RefEigenValues(size);
   RefEigenValues = eigenval;
   eigenval *= 0.0;
+  std::cout << ublas::norm_2(eigenval - RefEigenValues) << "\n";
   siconos::algebra::geev(*A, eigenval, fake, fake, false, false);
-
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testGeev1 3: ",
-      ublas::norm_2(eigenval - RefEigenValues) < 10 * std::numeric_limits<double>::epsilon(), true);
+      ublas::norm_2(eigenval - RefEigenValues) < 10 * std::numeric_limits<double>::epsilon(),
+      true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 4: ", (*A) == (*Aref), true);
 
   std::cout << "--> geev1 test ended with success." << std::endl;
@@ -145,7 +153,8 @@ void EigenProblemsTest::testGeev2()
   }
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testGeev2 1: ", ublas::norm_2(error) < 10 * std::numeric_limits<double>::epsilon(), true);
+      "testGeev2 1: ", ublas::norm_2(error) <  3000 * std::numeric_limits<double>::epsilon(),
+      true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev2 2: ", (*A) == (*Aref), true);
 
@@ -168,11 +177,10 @@ void EigenProblemsTest::testGeev3()
     error.plus_assign(ublas::prod(conj(column(leftV, i)), *A->dense()));
     error.minus_assign(eigenval(i) * conj(column(leftV, i)));
   }
-  std::cout << ublas::norm_2(error) << std::endl;
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testGeev3 1: ", ublas::norm_2(error) < size * 10 * std::numeric_limits<double>::epsilon(),
-      true);
+      "testGeev3 1: ",
+      ublas::norm_2(error) < size * 2000 * std::numeric_limits<double>::epsilon(), true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev3 2: ", (*A) == (*Aref), true);
 

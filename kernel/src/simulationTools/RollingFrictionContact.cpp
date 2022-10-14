@@ -25,7 +25,7 @@
 #include "Simulation.hpp"
 #include "Topology.hpp"
 
-siconos::simulation::RollingFrictionContact::RollingFrictionContact(int dimPb,
+siconos::nonsmooth_formulations::RollingFrictionContact::RollingFrictionContact(int dimPb,
                                                                     int numericsSolverId)
     : RollingFrictionContact(dimPb,
                              std::shared_ptr<siconos::numerics::SolverOptions>(
@@ -34,7 +34,7 @@ siconos::simulation::RollingFrictionContact::RollingFrictionContact(int dimPb,
 {
 }
 
-siconos::simulation::RollingFrictionContact::RollingFrictionContact(
+siconos::nonsmooth_formulations::RollingFrictionContact::RollingFrictionContact(
     int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options)
     : LinearOSNS(options), _contactProblemDim(dimPb)
 {
@@ -59,7 +59,7 @@ siconos::simulation::RollingFrictionContact::RollingFrictionContact(
   _muR = std::make_shared<std::vector<double>>();
 }
 
-void siconos::simulation::RollingFrictionContact::initialize(
+void siconos::nonsmooth_formulations::RollingFrictionContact::initialize(
     std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
@@ -103,7 +103,7 @@ void siconos::simulation::RollingFrictionContact::initialize(
   }
 }
 
-void siconos::simulation::RollingFrictionContact::updateMu()
+void siconos::nonsmooth_formulations::RollingFrictionContact::updateMu()
 {
   _mu->clear();
   _muR->clear();
@@ -121,7 +121,7 @@ void siconos::simulation::RollingFrictionContact::updateMu()
 }
 
 std::shared_ptr<siconos::numerics::RollingFrictionContactProblem>
-siconos::simulation::RollingFrictionContact::frictionContactProblem()
+siconos::nonsmooth_formulations::RollingFrictionContact::frictionContactProblem()
 {
   auto numerics_problem = std::make_shared<siconos::numerics::RollingFrictionContactProblem>();
   numerics_problem->dimension = _contactProblemDim;
@@ -134,7 +134,7 @@ siconos::simulation::RollingFrictionContact::frictionContactProblem()
 }
 
 // RollingFrictionContactProblem *
-// siconos::simulation::RollingFrictionContact::frictionContactProblemPtr()
+// siconos::nonsmooth_formulations::RollingFrictionContact::frictionContactProblemPtr()
 // {
 //   RollingFrictionContactProblem *numerics_problem = &_numerics_problem;
 //   numerics_problem->dimension = _contactProblemDim;
@@ -146,7 +146,7 @@ siconos::simulation::RollingFrictionContact::frictionContactProblem()
 //   return numerics_problem;
 // }
 
-int siconos::simulation::RollingFrictionContact::solve(
+int siconos::nonsmooth_formulations::RollingFrictionContact::solve(
     std::shared_ptr<siconos::numerics::RollingFrictionContactProblem> problem)
 {
   if (!problem) {
@@ -157,7 +157,7 @@ int siconos::simulation::RollingFrictionContact::solve(
                                             &*_numerics_solver_options);
 }
 
-bool siconos::simulation::RollingFrictionContact::checkCompatibleNSLaw(
+bool siconos::nonsmooth_formulations::RollingFrictionContact::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw &nslaw)
 {
   float type_number =
@@ -167,14 +167,14 @@ bool siconos::simulation::RollingFrictionContact::checkCompatibleNSLaw(
   if (siconos::types::type_value(nslaw) !=
       siconos::modeling::Type::NewtonImpactRollingFrictionNSL) {
     THROW_EXCEPTION(
-        "\nsiconos::simulation::RollingFrictionContact::checkCompatibleNSLaw -  \n\
+        "\nsiconos::nonsmooth_formulations::RollingFrictionContact::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
                       Compatible siconos::modeling::NonSmoothLaw are: NewtonImpactRollingFrictionNSL (2D or 3D) \n");
     return false;
   }
   if (_nslawtype.size() > 1) {
     THROW_EXCEPTION(
-        "\nsiconos::simulation::RollingFrictionContact::checkCompatibleNSLaw -  \n\
+        "\nsiconos::nonsmooth_formulations::RollingFrictionContact::checkCompatibleNSLaw -  \n\
                      Compatible siconos::modeling::NonSmoothLaw are: NewtonImpactRollingFrictionNSL (2D or 3D), but you cannot mix them \n");
     return false;
   }
@@ -182,7 +182,7 @@ bool siconos::simulation::RollingFrictionContact::checkCompatibleNSLaw(
   return true;
 }
 
-int siconos::simulation::RollingFrictionContact::compute(double time)
+int siconos::nonsmooth_formulations::RollingFrictionContact::compute(double time)
 {
   int info = 0;
   // --- Prepare data for RollingFrictionContact computing ---
@@ -212,7 +212,7 @@ int siconos::simulation::RollingFrictionContact::compute(double time)
   return info;
 }
 
-void siconos::simulation::RollingFrictionContact::display() const
+void siconos::nonsmooth_formulations::RollingFrictionContact::display() const
 {
   std::cout << "===== " << _contactProblemDim << "D Rolling Friction Contact Problem "
             << std::endl;

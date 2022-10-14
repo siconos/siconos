@@ -22,20 +22,21 @@
 
 #include "BlockCSRMatrix.hpp"
 #include "Interaction.hpp"
-#include "NumericsToolsNamespace.h"  // For NumericsMatrix
-#include "SecondOrderDS.hpp"
-#include "SimpleMatrix.hpp"
 #include "MoreauJeanGOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NonSmoothLaw.hpp"
+#include "NumericsToolsNamespace.h"  // For NumericsMatrix
+#include "SecondOrderDS.hpp"
 #include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 // Constructor with dimensions (one input: square matrix only)
-siconos::simulation::OSNSMatrix::OSNSMatrix(unsigned int n, siconos::numerics::NM_types stor)
+siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n,
+                                                        siconos::numerics::NM_types stor)
     : _dimRow(n), _dimColumn(n), _storageType(stor)
 {
   // Note:
@@ -54,7 +55,7 @@ siconos::simulation::OSNSMatrix::OSNSMatrix(unsigned int n, siconos::numerics::N
     }
     case siconos::numerics::NM_SPARSE_BLOCK: {
       DEBUG_PRINTF(" _M2 is reset with a matrix of size = %i\n", n);
-      _M2 = std::make_shared<BlockCSRMatrix>(n);
+      _M2 = std::make_shared<siconos::simulation::BlockCSRMatrix>(n);
       break;
     }
     default: {
@@ -65,8 +66,8 @@ siconos::simulation::OSNSMatrix::OSNSMatrix(unsigned int n, siconos::numerics::N
   DEBUG_END("siconos:simulation::OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
 }
 
-siconos::simulation::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m,
-                                            siconos::numerics::NM_types stor)
+siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m,
+                                                        siconos::numerics::NM_types stor)
     : _dimRow(n), _dimColumn(m), _storageType(stor)
 {
   // Note:
@@ -86,7 +87,7 @@ siconos::simulation::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m,
       break;
     }
     case siconos::numerics::NM_SPARSE_BLOCK: {
-      _M2 = std::make_shared<BlockCSRMatrix>(n);
+      _M2 = std::make_shared<siconos::simulation::BlockCSRMatrix>(n);
       break;
     }
     default: {
@@ -99,8 +100,8 @@ siconos::simulation::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m,
 }
 
 // Build from index set (i.e. get size from number of interactions in the set)
-siconos::simulation::OSNSMatrix::OSNSMatrix(siconos::graphs::InteractionsGraph& indexSet,
-                                            siconos::numerics::NM_types stor)
+siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
+    siconos::graphs::InteractionsGraph& indexSet, siconos::numerics::NM_types stor)
     : _dimRow(0), _dimColumn(0), _storageType(stor)
 {
   DEBUG_BEGIN(
@@ -115,7 +116,8 @@ siconos::simulation::OSNSMatrix::OSNSMatrix(siconos::graphs::InteractionsGraph& 
 }
 
 // construct by copy of SiconosMatrix
-siconos::simulation::OSNSMatrix::OSNSMatrix(const siconos::algebra::SiconosMatrix& MSource)
+siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
+    const siconos::algebra::SiconosMatrix& MSource)
     : _dimRow(MSource.size(0)),
       _dimColumn(MSource.size(1)),
       _storageType(siconos::numerics::NM_DENSE)
@@ -125,7 +127,7 @@ siconos::simulation::OSNSMatrix::OSNSMatrix(const siconos::algebra::SiconosMatri
   _M1 = std::make_shared<siconos::algebra::SimpleMatrix>(MSource);
 }
 
-unsigned siconos::simulation::OSNSMatrix::updateSizeAndPositions(
+unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
     siconos::graphs::InteractionsGraph& indexSet)
 {
   // === Description ===
@@ -154,7 +156,7 @@ unsigned siconos::simulation::OSNSMatrix::updateSizeAndPositions(
 
   return dim;
 }
-unsigned siconos::simulation::OSNSMatrix::updateSizeAndPositions(
+unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
     siconos::graphs::DynamicalSystemsGraph& DSG)
 {
   // === Description ===
@@ -179,8 +181,8 @@ unsigned siconos::simulation::OSNSMatrix::updateSizeAndPositions(
 }
 
 // Fill the matrix W
-void siconos::simulation::OSNSMatrix::fillM(siconos::graphs::InteractionsGraph& indexSet,
-                                            bool update)
+void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
+    siconos::graphs::InteractionsGraph& indexSet, bool update)
 {
   DEBUG_BEGIN(
       "void "
@@ -260,7 +262,7 @@ void siconos::simulation::OSNSMatrix::fillM(siconos::graphs::InteractionsGraph& 
   else if (_storageType == siconos::numerics::NM_SPARSE_BLOCK) {
     if (!_M2) {
       DEBUG_PRINT("Reset _M2 shared pointer with make_shared<BlockCSRMatrix>(indexSet) \n ");
-      _M2 = std::make_shared<BlockCSRMatrix>(indexSet);
+      _M2 = std::make_shared<siconos::simulation::BlockCSRMatrix>(indexSet);
     }
     else {
       DEBUG_PRINT("fill existing _M2\n");
@@ -277,7 +279,7 @@ void siconos::simulation::OSNSMatrix::fillM(siconos::graphs::InteractionsGraph& 
 }
 
 // convert current matrix to NumericsMatrix structure
-void siconos::simulation::OSNSMatrix::convert()
+void siconos::nonsmooth_formulations::OSNSMatrix::convert()
 {
   DEBUG_BEGIN("siconos:simulation::OSNSMatrix::convert()\n");
   DEBUG_PRINTF("_storageType = %i\n", _storageType);
@@ -316,8 +318,8 @@ void siconos::simulation::OSNSMatrix::convert()
 
 // Fill the matrix W
 // Used only in GlobalFrictionContact
-void siconos::simulation::OSNSMatrix::fillW(siconos::graphs::DynamicalSystemsGraph& DSG,
-                                            bool update)
+void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
+    siconos::graphs::DynamicalSystemsGraph& DSG, bool update)
 {
   DEBUG_BEGIN(
       "void siconos:simulation::OSNSMatrix::fillW(std::shared_ptr<DynamicalSystemsGraph> DSG, "
@@ -372,8 +374,8 @@ void siconos::simulation::OSNSMatrix::fillW(siconos::graphs::DynamicalSystemsGra
 
 // Fill the matrix Winverse
 // Used only in GlobalFrictionContact
-void siconos::simulation::OSNSMatrix::fillWinverse(siconos::graphs::DynamicalSystemsGraph& DSG,
-                                                   bool update)
+void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
+    siconos::graphs::DynamicalSystemsGraph& DSG, bool update)
 {
   DEBUG_BEGIN(
       "void "
@@ -455,9 +457,9 @@ void siconos::simulation::OSNSMatrix::fillWinverse(siconos::graphs::DynamicalSys
 
 #include <float.h>
 // Fill the matrix H
-void siconos::simulation::OSNSMatrix::fillH(siconos::graphs::DynamicalSystemsGraph& DSG,
-                                            siconos::graphs::InteractionsGraph& indexSet,
-                                            bool update)
+void siconos::nonsmooth_formulations::OSNSMatrix::fillH(
+    siconos::graphs::DynamicalSystemsGraph& DSG, siconos::graphs::InteractionsGraph& indexSet,
+    bool update)
 {
   DEBUG_BEGIN(
       "void "
@@ -481,9 +483,9 @@ void siconos::simulation::OSNSMatrix::fillH(siconos::graphs::DynamicalSystemsGra
 }
 
 // Fill the matrix Htrans
-void siconos::simulation::OSNSMatrix::fillHtrans(siconos::graphs::DynamicalSystemsGraph& DSG,
-                                                 siconos::graphs::InteractionsGraph& indexSet,
-                                                 bool update)
+void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
+    siconos::graphs::DynamicalSystemsGraph& DSG, siconos::graphs::InteractionsGraph& indexSet,
+    bool update)
 {
   DEBUG_BEGIN(
       "void "
@@ -587,7 +589,7 @@ void siconos::simulation::OSNSMatrix::fillHtrans(siconos::graphs::DynamicalSyste
       "DSG, siconos::graphs::InteractionsGraph& indexSet, bool update)\n");
 }
 
-void siconos::simulation::OSNSMatrix::computeM(
+void siconos::nonsmooth_formulations::OSNSMatrix::computeM(
     std::shared_ptr<siconos::numerics::NumericsMatrix> Winverse,
     std::shared_ptr<siconos::numerics::NumericsMatrix> Htrans)
 {
@@ -613,7 +615,7 @@ void siconos::simulation::OSNSMatrix::computeM(
 }
 
 // Display data
-void siconos::simulation::OSNSMatrix::display() const
+void siconos::nonsmooth_formulations::OSNSMatrix::display() const
 {
   if (_storageType == siconos::numerics::NM_DENSE) {
     std::cout

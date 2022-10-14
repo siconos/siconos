@@ -25,15 +25,15 @@
 
 #include "ExtraAdditionalTerms.hpp"
 #include "OneStepIntegratorTypes.hpp"  // IntegratorType
-// #include "SiconosException.hpp"
-// #include "SiconosVisitor.hpp"  // for VIRTUAL_ACCEPT_VISITORS
 #include "SimulationGraphs.hpp"
-// #include "SimulationTypeDef.hpp"
 
 namespace siconos::simulation {
 class Simulation;
-class OneStepNSProblem;
 }  // namespace siconos::simulation
+
+namespace siconos::nonsmooth_formulations {
+class OneStepNSProblem;
+}
 
 namespace siconos::integrators {
 
@@ -312,10 +312,10 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    * into account
    *
    *  \param vertex_inter of the interaction graph
-   *  \param osnsp pointer to OneStepNSProblem
+   *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   virtual void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-                                 siconos::simulation::OneStepNSProblem* osnsp);
+                                 siconos::nonsmooth_formulations::OneStepNSProblem* osnsp);
 
   /** compute the residu of the output of the relation (y)
    *  This computation depends on the type of OSI

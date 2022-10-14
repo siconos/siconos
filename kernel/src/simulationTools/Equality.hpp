@@ -24,7 +24,7 @@
 
 #include "LinearOSNS.hpp"
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 /** Formalization and Resolution of a Linear Complementarity Problem (Equality)
 
   \section Equalityintro Aim of the Equality class
@@ -88,6 +88,6 @@ class Equality : public LinearOSNS {
    */
   void display() const;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 
 #endif  // Equality_H

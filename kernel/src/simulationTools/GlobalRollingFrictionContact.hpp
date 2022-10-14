@@ -32,7 +32,7 @@ struct SolverOptions;
 
 }  // namespace siconos::numerics
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 
 /**
     Formalization and Resolution of a Friction-Contact Problem
@@ -194,5 +194,5 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
   void updateMur();
   void display() const;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif  // GlobalRollingFrictionContact_H

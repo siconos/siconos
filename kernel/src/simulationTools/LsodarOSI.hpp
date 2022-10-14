@@ -298,7 +298,7 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param osnsp pointer to OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_descr,
-                         siconos::simulation::OneStepNSProblem *osnsp) override;
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
   /** print the data to the screen
    */

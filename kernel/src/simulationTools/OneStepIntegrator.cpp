@@ -17,28 +17,30 @@
  */
 
 #include "OneStepIntegrator.hpp"
-#include "Simulation.hpp"
+
+#include "BlockVector.hpp"
 #include "DynamicalSystem.hpp"
+#include "EventsManager.hpp"
 #include "Interaction.hpp"
+#include "Relation.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "Topology.hpp"
-#include "BlockVector.hpp"
-#include "Relation.hpp"
-#include "EventsManager.hpp"
 #include "SiconosVisitor.hpp"
-#include "Tools.hpp" // enum_to_string
+#include "Simulation.hpp"
+#include "Tools.hpp"  // enum_to_string
+#include "Topology.hpp"
 
 // FP WIP
-// struct siconos::integrators::OneStepIntegrator::IterationMatrixVisitor : public siconos::internal::SiconosVisitor {
+// struct siconos::integrators::OneStepIntegrator::IterationMatrixVisitor : public
+// siconos::internal::SiconosVisitor {
 
-//   std::shared_ptr<siconos::algebra::SimpleMatrix> visit(const MoreauJeanOSI& osi,  std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
+//   std::shared_ptr<siconos::algebra::SimpleMatrix> visit(const MoreauJeanOSI& osi,
+//   std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
 //   {
 //     return osi.W(ds);
 //   }
 
 // };
-
 
 std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
 siconos::integrators::OneStepIntegrator::_initializeDSWorkVectors(
@@ -214,7 +216,7 @@ void siconos::integrators::OneStepIntegrator::computeFreeState()
 
 void siconos::integrators::OneStepIntegrator::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   // default : error
   THROW_EXCEPTION(
@@ -255,8 +257,7 @@ bool siconos::integrators::OneStepIntegrator::removeInteractionFromIndexSet(
 void siconos::integrators::OneStepIntegrator::display() const
 {
   std::cout << "==== OneStepIntegrator display =====\n";
-  std::cout << "| _integratorType : "
-            << siconos::tools::enum_to_string(_integratorType)
+  std::cout << "| _integratorType : " << siconos::tools::enum_to_string(_integratorType)
             << "\n";
   std::cout << "| _sizeMem: " << _sizeMem << "\n";
   std::cout << "====================================\n";

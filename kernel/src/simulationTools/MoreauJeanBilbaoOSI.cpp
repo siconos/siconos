@@ -295,11 +295,11 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
   using SiconosVisitor::visit;
 
-  siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
+  siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
   siconos::modeling::Interaction& _inter;
   siconos::graphs::InteractionProperties& _interProp;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;
-  _NSLEffectOnFreeOutput(siconos::simulation::OneStepNSProblem* p,
+  _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          siconos::modeling::Interaction& inter,
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
@@ -319,7 +319,7 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
 
 void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   auto& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));

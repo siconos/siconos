@@ -40,7 +40,8 @@ class TimeSteppingD1Minus : public Simulation {
   // TimeSteppingD1Minus() = default;
 
  protected:
-  /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
+  /** initialisation specific to TimeSteppingD1Minus for
+   * siconos::nonsmooth_formulations::OneStepNSProblem */
   void initOSNS() override;
 
  public:

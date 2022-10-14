@@ -32,22 +32,23 @@
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "TimeStepping.hpp"
-#include "Topology.hpp"
 #include "Tools.hpp"
+#include "Topology.hpp"
 
 static siconos::simulation::CheckSolverFPtr checkSolverOutputProjectOnConstraints = nullptr;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
-//#define CORRECTIONSVELOCITIES
+// #define CORRECTIONSVELOCITIES
 
 siconos::simulation::TimeSteppingDirectProjection::TimeSteppingDirectProjection(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
     std::shared_ptr<TimeDiscretisation> td,
     std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-    std::shared_ptr<OneStepNSProblem> osnspb_velo,
-    std::shared_ptr<OneStepNSProblem> osnspb_pos, unsigned int level)
+    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
+    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
+    unsigned int level)
     : TimeStepping{nsds, td, osi, osnspb_velo}, _indexSetLevelForProjection{level}
 {
   if (not std::dynamic_pointer_cast<siconos::integrators::MoreauJeanDirectProjectionOSI>(osi))
@@ -331,10 +332,10 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent()
   DEBUG_END("siconos::simulation::TimeSteppingDirectProjection::newtonSolve()\n");
 
   return;
-  //#ifdef TSPROJ_CORRECTIONVELOCITIES
-  //   /*The following reduces the velocity because the position step increase the energy of
-  //   the system. This formulation works only with simple systems.To activate it, comment the
-  //   next line.*/
+  // #ifdef TSPROJ_CORRECTIONVELOCITIES
+  //    /*The following reduces the velocity because the position step increase the energy of
+  //    the system. This formulation works only with simple systems.To activate it, comment the
+  //    next line.*/
 
   //   for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   //   {
@@ -441,7 +442,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent()
   //         updateOutput(level);
   //     }
   //   }
-  //#endif
+  // #endif
 }
 
 void siconos::simulation::TimeSteppingDirectProjection::computeCriteria(

@@ -33,8 +33,10 @@ struct SolverOptions;
 }
 
 namespace siconos::simulation {
-
 class Simulation;
+}
+
+namespace siconos::nonsmooth_formulations {
 
 /**
  Non Smooth Problem Formalization and Simulation
@@ -300,5 +302,5 @@ class OneStepNSProblem {
       siconos::integrators::OneStepIntegrator& osi,
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif  // ONESTEPNSPROBLEM_H

@@ -31,7 +31,7 @@ struct RelayProblem;
 struct SolverOptions;
 }  // namespace siconos::numerics
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 
 /**
    Formalization and Resolution of a Linear Complementarity Problem (Relay)
@@ -124,6 +124,6 @@ class Relay : public LinearOSNS {
    */
   void display() const;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 
 #endif  // Relay_H

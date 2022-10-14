@@ -403,9 +403,7 @@ void siconos::simulation::EventDriven::initialize()
 }
 
 void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepIntegrator& osi,
-                                                int* sizeOfX,
-                                                double* time,
-                                                double* x,
+                                                int* sizeOfX, double* time, double* x,
                                                 double* xdot)
 {
   DEBUG_BEGIN(
@@ -476,8 +474,7 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
 }
 
 void siconos::simulation::EventDriven::computeJacobianfx(
-    siconos::integrators::OneStepIntegrator& osi, int* sizeOfX,
-    double* time, double* x,
+    siconos::integrators::OneStepIntegrator& osi, int* sizeOfX, double* time, double* x,
     double* jacob)
 {
   assert(osi.getType() == siconos::integrators::IntegratorType::LSODAROSI);
@@ -513,7 +510,8 @@ void siconos::simulation::EventDriven::computeJacobianfx(
       auto jacotmp =
           std::dynamic_pointer_cast<siconos::algebra::BlockMatrix>(lds->jacobianRhsx());
       for (decltype(lds->n()) j = 0; j < lds->n(); ++j) {
-        for (decltype(lds->dimension()) k = 0; k < lds->dimension(); ++k) jacob[i++] = jacotmp->getValue(k, j);
+        for (decltype(lds->dimension()) k = 0; k < lds->dimension(); ++k)
+          jacob[i++] = jacotmp->getValue(k, j);
       }
     }
     else if (auto lds =
@@ -536,10 +534,8 @@ unsigned int siconos::simulation::EventDriven::computeSizeOfg()
 }
 
 void siconos::simulation::EventDriven::computeg(
-    std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-    int* sizeOfX, double* time,
-    double* x, int* ng,
-    double* gOut)
+    std::shared_ptr<siconos::integrators::OneStepIntegrator> osi, int* sizeOfX, double* time,
+    double* x, int* ng, double* gOut)
 {
   assert(_nsds);
   assert(_nsds->topology());

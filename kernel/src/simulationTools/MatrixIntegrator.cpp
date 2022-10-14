@@ -26,7 +26,7 @@
 #include "SimpleMatrix.hpp"
 #include "SubPluggedObject.hpp"
 #include "TimeDiscretisation.hpp"
-//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -36,11 +36,17 @@
 
 siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     const siconos::modeling::DynamicalSystem& ds,
-    const siconos::modeling::NonSmoothDynamicalSystem& nsds, const TimeDiscretisation& td,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> E)
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    std::shared_ptr<TimeDiscretisation> td, std::shared_ptr<siconos::algebra::SiconosMatrix> E)
     : _E(E)
 {
-  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(td);
+  std::cout << "M2\n";
+
+  td->display();
+
+  // Copy td
+  auto tmp = std::make_shared<siconos::simulation::TimeDiscretisation>(*td);
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(*td);
 
   DEBUG_EXPR(ds.display(););
 
@@ -76,11 +82,13 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     _mat = std::make_shared<siconos::algebra::SimpleMatrix>(*E);
     _mat->zero();
   }
+  std::cout << "End \n";
 }
 
 siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     const siconos::modeling::DynamicalSystem& ds,
-    const siconos::modeling::NonSmoothDynamicalSystem& nsds, const TimeDiscretisation& td,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    std::shared_ptr<TimeDiscretisation> td,
     std::shared_ptr<siconos::plugins::PluggedObject> plugin, const unsigned int p)
     : MatrixIntegrator{ds, nsds, td, nullptr}
 {
@@ -94,9 +102,11 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
 
 siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     const siconos::modeling::DynamicalSystem& ds,
-    const siconos::modeling::NonSmoothDynamicalSystem& nsds, const TimeDiscretisation& td)
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    std::shared_ptr<TimeDiscretisation> td)
     : MatrixIntegrator{ds, nsds, td, nullptr}
 {
+  std::cout << "M1\n";
   unsigned int n = ds.n();
   _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, n, 0);
 }

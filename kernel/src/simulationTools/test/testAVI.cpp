@@ -92,7 +92,7 @@ void AVITest::testAVI()
   _nsds->link(inter, _DS);
   _sim = std::make_shared<siconos::simulation::TimeStepping>(_nsds, _TD);
   _sim->associate(_osi, _DS);
-  auto osnspb = std::make_shared<siconos::simulation::AVI>();
+  auto osnspb = std::make_shared<siconos::nonsmooth_formulations::AVI>();
   _sim->insertNonSmoothProblem(osnspb);
 
   siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);

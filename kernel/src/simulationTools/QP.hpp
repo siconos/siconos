@@ -22,7 +22,7 @@
 
 #include "OneStepNSProblem.hpp"
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 
 /** Quadratic Problem
  *
@@ -115,6 +115,6 @@ class QP : public OneStepNSProblem {
 
   void postCompute() { assert(false); }
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 
 #endif  // QP_H

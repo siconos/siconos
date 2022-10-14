@@ -26,14 +26,15 @@
 namespace siconos::numerics {
 
 #include <Friction_cst.h>  // contains only enum. Ok. For SICONOS_FRICTION_3D_ONECONTACT_NSN
-#include "GenericMechanical_cst.h" // for SICONOS_GENERIC_MECHANICAL_NSGS
+
+#include "GenericMechanical_cst.h"  // for SICONOS_GENERIC_MECHANICAL_NSGS
 
 struct GenericMechanicalProblem;
 struct SolverOptions;
 
 }  // namespace siconos::numerics
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 /**
     Formalization and Resolution of a generic mechanical problem: It mixes
     bilateral equality, complementarity, impact and friction problems.
@@ -124,6 +125,6 @@ class GenericMechanical : public LinearOSNS {
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 
 #endif  // GenericMechanical_H

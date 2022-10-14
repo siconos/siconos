@@ -44,9 +44,12 @@ struct DynamicalSystemsGraph;
 
 }  // namespace siconos::graphs
 
-namespace siconos::simulation {
-
+namespace siconos::simulation{
 class BlockCSRMatrix;
+}
+
+namespace siconos::nonsmooth_formulations {
+
 
 /**
  Interface to some specific storage types for matrices used in
@@ -135,7 +138,7 @@ class OSNSMatrix {
 
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
       (_storageType = siconos::numerics::NM_SPARSE_BLOCK) */
-  std::shared_ptr<BlockCSRMatrix> _M2{nullptr};
+  std::shared_ptr<siconos::simulation::BlockCSRMatrix> _M2{nullptr};
 
   /** For each Interaction in the graph, compute its absolute position
    *
@@ -299,5 +302,5 @@ class OSNSMatrix {
    */
   void display() const;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif

@@ -91,8 +91,10 @@ target_link_libraries(kernel PUBLIC Boost::boost)
 
 if(WITH_BOOST_LOG)
   find_package(Boost 1.61 REQUIRED COMPONENTS log)
-  target_compile_definition(kernel PRIVATE BOOST_LOG_DYN_LINK)
+  target_compile_definitions(kernel PRIVATE BOOST_LOG_DYN_LINK)
 endif()
+
+# target_compile_definitions(kernel PRIVATE BOOST_UBLAS_SHALLOW_ARRAY_ADAPTOR)
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)

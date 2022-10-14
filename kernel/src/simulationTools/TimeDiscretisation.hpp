@@ -26,6 +26,7 @@
 
 #include <limits>
 #include <vector>
+#include <functional>
 
 #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
 
@@ -73,15 +74,26 @@ class TimeDiscretisation {
  private:
   ACCEPT_SERIALIZATION(TimeDiscretisation);
 
+  // Function proto used to get current time step or current time value
+  using TimeFunction = std::function<double(std::size_t)>;
+
   /** Default value for the time step (tk+1 - tk) */
-  double _h{0.};
+  double default_time_step_{0.};
 
   /** vector of time values at each step (=> size = n1+n2+1 - Default size = 2 - Max size=
    * nSteps+1) */
-  std::vector<double> _tkV = {};
+  std::vector<double> time_instants_ = {};
 
   /** Origin of time*/
-  double _t0{std::numeric_limits<double>::quiet_NaN()};
+  double t0_{std::numeric_limits<double>::quiet_NaN()};
+
+  /** Check if time-step is constant or not */
+  bool step_is_constant_{true};
+
+  // Note FP : gmp stuff should be moved into a derived class ? Or CRTP ?
+  // Or removed since never used ...
+  /** Check if gmp is on **/
+  bool gmp_is_on_{false};
 
   /** Timestep stored as mpf_t, for high precision computations */
   mpf_t _hgmp;
@@ -104,16 +116,17 @@ class TimeDiscretisation {
   /** Get the origin of time t0
    * \return the origin of time
    */
-  inline double getT0() const { return _t0; }
+  inline double getT0() const { return t0_; }
 
  public:
-  /** constructor with the vector of instant times values.
+  /** constructor with the vector of instant times values. To be used only for variable
+   * time-step time discretisations.
    *
    *  \param newTk a vector of double
    */
   TimeDiscretisation(const std::vector<double>& newTk);
 
-  /** constructor with the size of the default time step and t0
+  /** constructor with the size of the default time step and t0. Fixed time-step only.
    *
    *  \param t0 initial time value
    *  \param h the time step
@@ -128,7 +141,7 @@ class TimeDiscretisation {
    */
   TimeDiscretisation(double t0, std::string hstr);
 
-  /** constructor with the number of steps, t0 and T
+  /** constructor with the number of steps, t0 and T. Fixed time-step only.
    *
    *  \param nSteps the number of steps
    *  \param t0 initial time value
@@ -145,13 +158,18 @@ class TimeDiscretisation {
   // Destructor
   ~TimeDiscretisation() noexcept;
 
-  // --- GETTERS/SETTERS ---
-
   /** \return the timestep \f$ t_{k+1} - t_k \f$
    *
-   *  \param k the index of the timestep
+   *  \param k (default=0 for fixed time step) the index of the timestep.
    */
-  double timeStep(unsigned int k);
+  TimeFunction timeStep{nullptr};
+
+  /** get the value of tk at step kx
+   *
+   *  \param indx the step
+   *  \return a double
+   */
+  TimeFunction getTk{nullptr};
 
   /** get the timestep in gmp format
    *
@@ -163,40 +181,14 @@ class TimeDiscretisation {
    *
    *  \return true if the timestep is constant
    */
-  inline bool hConst() const { return _tkV.empty() ? true : false; };
+  inline bool hConst() const {return step_is_constant_;};
 
   /** determine whether the TimeDiscretisation is using GMP
    *
    *  \return true if the TimeDiscretisation is using GMP
    */
-  inline bool hGmp() const { return ((_h == 0.0) && (_tkV.empty())) ? true : false; }
+  inline bool hGmp() const { return gmp_is_on_; }
 
-  /** get the value of tk at step kx
-   *
-   *  \param indx the step
-   *  \return a double
-   */
-  double getTk(const unsigned int indx);
-
-  /** get the time instants vector
-   *
-   *  \return a reference a std::vector<double>
-   */
-  inline const std::vector<double>& getTkVector() const { return _tkV; };
-
-  /** set the time instants vector
-   *
-   *  \param newTk a vector of double
-   */
-  void setTkVector(const std::vector<double>& newTk);
-
-  /** change t0 before the simulation starts (useful for delays)
-   *
-   *  \param val the new value for t0
-   */
-  void setT0(double val);
-
-  // --- OTHER FUNCTIONS ---
   /** print the discretisation data to the screen
    */
   void display() const;

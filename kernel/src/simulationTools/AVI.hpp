@@ -32,7 +32,7 @@ namespace siconos::numerics {
 struct AffineVariationalInequalities;
 }  // namespace siconos::numerics
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 /**
    Formalization and Resolution of an Affine Variational Inequality (AVI)
 
@@ -90,6 +90,6 @@ class AVI : public LinearOSNS {
    */
   void display() const;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 
 #endif  // AVI_H

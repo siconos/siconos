@@ -22,9 +22,7 @@
 #ifndef LinearOSNS_H
 #define LinearOSNS_H
 
-//#include "NumericsNamespace.h" // For NM_DENSE
 #include "OneStepNSProblem.hpp"
-//#include "SiconosVector.hpp"
 
 namespace siconos::numerics {
 
@@ -40,7 +38,8 @@ namespace siconos::modeling {
 class NonSmoothLaw;
 }
 
-namespace siconos::simulation {
+
+namespace siconos::nonsmooth_formulations {
 
 class OSNSMatrix;
 
@@ -291,5 +290,5 @@ class LinearOSNS : public OneStepNSProblem {
 
   virtual bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) = 0;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif  // LinearOSNS_H

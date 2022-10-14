@@ -194,7 +194,7 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    * graph \param osnsp pointer to OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::simulation::OneStepNSProblem *osnsp) override;
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
   /** initialize */
   //  void initialize(Model& m);

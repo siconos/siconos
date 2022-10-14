@@ -46,7 +46,7 @@ private:
   void End();
 
   unsigned int size;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> A, Aref;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> A, Aref, Asym;
 
 public:
   void setUp();

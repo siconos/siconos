@@ -25,7 +25,6 @@
 
 #include "OneStepIntegrator.hpp"
 #include "SiconosConst.hpp"         // MACHINE_PREC
-#include "SiconosExternalsTypes.h"  // siconos::fortran::integer, siconos::fortran::doublereal ...
 
 namespace siconos::integrators {
 
@@ -63,20 +62,20 @@ class Hem5OSI : public OneStepIntegrator {
    * output formula _intData[6] LWK length of real array rwork _intData[7] LIWK
    * length of integer array iwork See hem5.f
    */
-  std::vector<siconos::fortran::integer> _intData = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<int> _intData = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-  siconos::fortran::integer _idid{0};
+  int _idid{0};
 
   /** relative tolerance */
-  boost::shared_array<siconos::fortran::doublereal> rtol;
+  boost::shared_array<double> rtol;
   /** absolute tolerance */
-  boost::shared_array<siconos::fortran::doublereal> atol;
+  boost::shared_array<double> atol;
   /** real work array */
-  boost::shared_array<siconos::fortran::doublereal> rwork;
-  /** siconos::fortran::integer work array */
-  boost::shared_array<siconos::fortran::integer> iwork;
+  boost::shared_array<double> rwork;
+  /** int work array */
+  boost::shared_array<int> iwork;
 
-  siconos::fortran::doublereal _timeStep{INITIAL_GUESS_TS};  // initial step size guess
+  double _timeStep{INITIAL_GUESS_TS};  // initial step size guess
 
   /** temporary vector to save q values */
   std::shared_ptr<siconos::algebra::BlockVector> _qWork{nullptr};
@@ -119,16 +118,16 @@ class Hem5OSI : public OneStepIntegrator {
    */
   ~Hem5OSI() noexcept = default;
 
-  /** get vector of siconos::fortran::integer parameters for lsodar
-   *  \return a vector<siconos::fortran::integer>
+  /** get vector of int parameters for lsodar
+   *  \return a vector<int>
    */
-  inline const std::vector<siconos::fortran::integer> intData() const { return _intData; }
+  inline const std::vector<int> intData() const { return _intData; }
 
   /** get _intData[i]
    * \param i index
-   * \return an siconos::fortran::integer
+   * \return an int
    */
-  inline siconos::fortran::integer intData(unsigned int i) const { return _intData[i]; }
+  inline int intData(unsigned int i) const { return _intData[i]; }
   /** set _intData[i]
    * \param i index
    * \param newValue
@@ -136,17 +135,17 @@ class Hem5OSI : public OneStepIntegrator {
   inline void setIntData(unsigned int i, int newValue) { _intData[i] = newValue; }
 
   /** get relative tolerance parameter for Hem5
-   *  \return a siconos::fortran::doublereal*
+   *  \return a double*
    */
-  inline const boost::shared_array<siconos::fortran::doublereal> getRtol() const
+  inline const boost::shared_array<double> getRtol() const
   {
     return rtol;
   }
 
   /** get absolute tolerance parameter for Hem5
-   *  \return a siconos::fortran::doublereal*
+   *  \return a double*
    */
-  inline const boost::shared_array<siconos::fortran::doublereal> getAtol() const
+  inline const boost::shared_array<double> getAtol() const
   {
     return atol;
   }
@@ -157,44 +156,44 @@ class Hem5OSI : public OneStepIntegrator {
   inline int getMaxNstep() const { return iwork[11]; }
 
   /** get real work vector parameter for lsodar
-   *  \return a siconos::fortran::doublereal*
+   *  \return a double*
    */
-  inline const boost::shared_array<siconos::fortran::doublereal> getRwork() const
+  inline const boost::shared_array<double> getRwork() const
   {
     return rwork;
   }
 
   /** get iwork
-   *  \return a pointer to siconos::fortran::integer
+   *  \return a pointer to int
    */
-  inline boost::shared_array<siconos::fortran::integer> getIwork() const { return iwork; }
+  inline boost::shared_array<int> getIwork() const { return iwork; }
 
   /** set itol, rtol and atol (tolerance parameters for Hem5)
-   *  \param itol siconos::fortran::integer (itol value)
-   *  \param rtol siconos::fortran::doublereal * (rtol)
-   *  \param atol siconos::fortran::doublereal * (atol)
+   *  \param itol int (itol value)
+   *  \param rtol double * (rtol)
+   *  \param atol double * (atol)
    */
-  void setTol(siconos::fortran::integer itol,
-              boost::shared_array<siconos::fortran::doublereal> rtol,
-              boost::shared_array<siconos::fortran::doublereal> atol);
+  void setTol(int itol,
+              boost::shared_array<double> rtol,
+              boost::shared_array<double> atol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for Hem5)
-   *  \param itol siconos::fortran::integer (itol value)
+   *  \param itol int (itol value)
    *  \param rtol double (rtol)
    *  \param atol double (atol)
    */
-  void setTol(siconos::fortran::integer itol, siconos::fortran::doublereal rtol,
-              siconos::fortran::doublereal atol);
+  void setTol(int itol, double rtol,
+              double atol);
 
   /** set the maximul number of steps for one call of Hem5OSI
-   *\param nstepmax an siconos::fortran::integer
+   *\param nstepmax an int
    */
-  void setMaxNstep(siconos::fortran::integer nstepmax);
+  void setMaxNstep(int nstepmax);
 
   /** set the minimum and maximum step sizes
    * \param maxstepsize double (maximul step size)
    */
-  void setMaxStepSize(siconos::fortran::doublereal maxstepsize);
+  void setMaxStepSize(double maxstepsize);
 
   /** update _intData
    */
@@ -204,17 +203,17 @@ class Hem5OSI : public OneStepIntegrator {
    */
   void updateData();
 
-  /** fill qWork with a siconos::fortran::doublereal
-   *  \param sizex siconos::fortran::integer*, size of x array
-   *  \param x siconos::fortran::doublereal* x:array of double
+  /** fill qWork with a double
+   *  \param sizex int*, size of x array
+   *  \param x double* x:array of double
    */
-  void fillqWork(siconos::fortran::integer *sizex, siconos::fortran::doublereal *x);
+  void fillqWork(int *sizex, double *x);
 
-  /** fill vWork with a siconos::fortran::doublereal
-   *  \param sizex siconos::fortran::integer*, size of x array
-   *  \param x siconos::fortran::doublereal* x:array of double
+  /** fill vWork with a double
+   *  \param sizex int*, size of x array
+   *  \param x double* x:array of double
    */
-  void fillvWork(siconos::fortran::integer *sizex, siconos::fortran::doublereal *x);
+  void fillvWork(int *sizex, double *x);
 
   /** compute rhs(t) for all dynamical systems in the set
    */
@@ -226,17 +225,17 @@ class Hem5OSI : public OneStepIntegrator {
 
   unsigned int numberOfConstraints();
 
-  void f(siconos::fortran::integer *sizeOfX, siconos::fortran::doublereal *time,
-         siconos::fortran::doublereal *x, siconos::fortran::doublereal *xdot);
+  void f(int *sizeOfX, double *time,
+         double *x, double *xdot);
 
-  void g(siconos::fortran::integer *nEq, siconos::fortran::doublereal *time,
-         siconos::fortran::doublereal *x, siconos::fortran::integer *ng,
-         siconos::fortran::doublereal *gOut);
+  void g(int *nEq, double *time,
+         double *x, int *ng,
+         double *gOut);
 
-  void jacobianfx(siconos::fortran::integer *, siconos::fortran::doublereal *,
-                  siconos::fortran::doublereal *, siconos::fortran::integer *,
-                  siconos::fortran::integer *, siconos::fortran::doublereal *,
-                  siconos::fortran::integer *);
+  void jacobianfx(int *, double *,
+                  double *, int *,
+                  int *, double *,
+                  int *);
 
   /** initialization of the integrator
    */
@@ -281,10 +280,10 @@ class Hem5OSI : public OneStepIntegrator {
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to OneStepNSProblem
+   * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::simulation::OneStepNSProblem *osnsp) override;
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
   /** print the data to the screen
    */

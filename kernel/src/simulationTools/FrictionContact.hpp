@@ -32,7 +32,7 @@ struct SolverOptions;
 
 }  // namespace siconos::numerics
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 
 /** Pointer to function of the type used for drivers for FrictionContact
  * problems in Numerics */
@@ -189,5 +189,5 @@ class FrictionContact : public LinearOSNS {
   /* Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif  // FrictionContact_H

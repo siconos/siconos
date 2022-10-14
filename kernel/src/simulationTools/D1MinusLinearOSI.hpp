@@ -25,7 +25,7 @@
 #define D1MINUSLINEAR_H
 
 #ifdef DEBUG_D1MINUSLINEAR
-//#define DEBUG_MESSAGES
+// #define DEBUG_MESSAGES
 #endif
 
 #include "OneStepIntegrator.hpp"
@@ -142,11 +142,11 @@ class D1MinusLinearOSI : public OneStepIntegrator {
   struct _NSLEffectOnFreeOutput : public siconos::internal::SiconosVisitor {
     using siconos::internal::SiconosVisitor::visit;
 
-    siconos::simulation::OneStepNSProblem *_osnsp{nullptr};
+    siconos::nonsmooth_formulations::OneStepNSProblem *_osnsp{nullptr};
     std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
     siconos::graphs::InteractionProperties &_interProp;
 
-    _NSLEffectOnFreeOutput(siconos::simulation::OneStepNSProblem *p,
+    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem *p,
                            std::shared_ptr<siconos::modeling::Interaction> inter,
                            siconos::graphs::InteractionProperties &interProp);
 
@@ -245,26 +245,27 @@ class D1MinusLinearOSI : public OneStepIntegrator {
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to OneStepNSProblem
+   * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::simulation::OneStepNSProblem *osnsp) override;
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to siconos::simulation::OneStepNSProblem
+   * graph \param osnsp pointer to
+   * siconos::simulation::siconos::nonsmooth_formulations::OneStepNSProblem
    */
   virtual void computeFreeOutputHalfExplicitAccelerationLevel(
       siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::simulation::OneStepNSProblem *osnsp);
+      siconos::nonsmooth_formulations::OneStepNSProblem *osnsp);
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to siconos::simulation::OneStepNSProblem
+   * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   virtual void computeFreeOutputHalfExplicitVelocityLevel(
       siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::simulation::OneStepNSProblem *osnsp);
+      siconos::nonsmooth_formulations::OneStepNSProblem *osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
    * stop at tout (->iout=false) \param ti initial time \param tf end time
@@ -337,7 +338,10 @@ class D1MinusLinearOSI : public OneStepIntegrator {
       std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
 
   /** displays the data of the D1MinusLinearOSI's integrator */
-  void display() const override { THROW_EXCEPTION("D1MinusLinearOSI::display - not implemented!"); }
+  void display() const override
+  {
+    THROW_EXCEPTION("D1MinusLinearOSI::display - not implemented!");
+  }
 
   /** preparations for Newton iteration
    *  \param time time

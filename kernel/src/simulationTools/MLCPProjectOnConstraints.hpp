@@ -24,7 +24,7 @@
 
 #include "MLCP.hpp"
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 /**
    Formalization and Resolution of a Mixed Linear Complementarity Problem
    (MLCP)
@@ -154,5 +154,5 @@ class MLCPProjectOnConstraints : public MLCP {
   virtual void postComputeNewtonEulerR(std::shared_ptr<siconos::modeling::Interaction> inter,
                                        unsigned int pos);
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif  // MLCPProjectOnConstraints_H

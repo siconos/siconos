@@ -34,20 +34,20 @@
 // #define DEBUG_NOCOLOR
 #include "siconos_debug.h"
 
-siconos::simulation::LCP::LCP(int numericsSolverId)
+siconos::nonsmooth_formulations::LCP::LCP(int numericsSolverId)
     : LCP(std::shared_ptr<siconos::numerics::SolverOptions>(
           siconos::numerics::solver_options_create(numericsSolverId),
           siconos::numerics::solver_options_delete))
 {
 }
 
-siconos::simulation::LCP::LCP(std::shared_ptr<siconos::numerics::SolverOptions> options)
+siconos::nonsmooth_formulations::LCP::LCP(std::shared_ptr<siconos::numerics::SolverOptions> options)
     : LinearOSNS(options),
       _numerics_problem(std::make_shared<siconos::numerics::LinearComplementarityProblem>())
 {
 }
 
-bool siconos::simulation::LCP::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
+bool siconos::nonsmooth_formulations::LCP::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
 {
   float type_number = (float)(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
@@ -56,7 +56,7 @@ bool siconos::simulation::LCP::checkCompatibleNSLaw(siconos::modeling::NonSmooth
           siconos::types::type_value(nslaw) == siconos::modeling::Type::NewtonImpactNSL ||
           siconos::types::type_value(nslaw) == siconos::modeling::Type::MultipleImpactNSL)) {
     THROW_EXCEPTION(
-        "\nsiconos::simulation::LCP::checkCompatibleNSLaw -  \n\
+        "\nsiconos::nonsmooth_formulations::LCP::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with LCP one step nonsmooth problem. \n \
                       Compatible NonSmoothLaw are: ComplementarityConditionNSL, MultipleImpactNSL or NewtonImpactNSL\n");
     return false;
@@ -65,7 +65,7 @@ bool siconos::simulation::LCP::checkCompatibleNSLaw(siconos::modeling::NonSmooth
   return true;
 }
 
-int siconos::simulation::LCP::solve()
+int siconos::nonsmooth_formulations::LCP::solve()
 {
   // Note FP : wrap call to numerics solver inside this function
   // for python API (e.g. to allow profiling without C struct handling)
@@ -91,9 +91,9 @@ int siconos::simulation::LCP::solve()
   return info;
 }
 
-int siconos::simulation::LCP::compute(double time)
+int siconos::nonsmooth_formulations::LCP::compute(double time)
 {
-  DEBUG_BEGIN("siconos::simulation::LCP::compute(double time)\n");
+  DEBUG_BEGIN("siconos::nonsmooth_formulations::LCP::compute(double time)\n");
   int info = 0;
 
   // --- Prepare data for LCP computing ---
@@ -101,7 +101,7 @@ int siconos::simulation::LCP::compute(double time)
   bool not_empty = preCompute(time);
   if (!not_empty) {
     DEBUG_PRINT("Nothing to compute\n");
-    DEBUG_END("siconos::simulation::LCP::compute(double time)\n");
+    DEBUG_END("siconos::nonsmooth_formulations::LCP::compute(double time)\n");
     return info;
   }
   // --- Call Numerics driver ---
@@ -121,6 +121,6 @@ int siconos::simulation::LCP::compute(double time)
 
     DEBUG_EXPR(display());
   }
-  DEBUG_END("siconos::simulation::LCP::compute(double time)\n");
+  DEBUG_END("siconos::nonsmooth_formulations::LCP::compute(double time)\n");
   return info;
 }

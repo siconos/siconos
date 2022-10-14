@@ -22,22 +22,22 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-int siconos::simulation::QP::compute(double)
+int siconos::nonsmooth_formulations::QP::compute(double)
 {
-  THROW_EXCEPTION("siconos::simulation::QP::compute not yet implemented");
+  THROW_EXCEPTION("siconos::nonsmooth_formulations::QP::compute not yet implemented");
   return 1;
 }
 
-void siconos::simulation::QP::display() const
+void siconos::nonsmooth_formulations::QP::display() const
 {
-  THROW_EXCEPTION("siconos::simulation::QP::compute not yet implemented");
+  THROW_EXCEPTION("siconos::nonsmooth_formulations::QP::compute not yet implemented");
 }
 
-void siconos::simulation::QP::setQ(const siconos::algebra::SiconosMatrix& newValue)
+void siconos::nonsmooth_formulations::QP::setQ(const siconos::algebra::SiconosMatrix& newValue)
 {
   *_Q = newValue;
 }
-void siconos::simulation::QP::setP(const siconos::algebra::SiconosVector& newValue)
+void siconos::nonsmooth_formulations::QP::setP(const siconos::algebra::SiconosVector& newValue)
 {
   *_p = newValue;
 }

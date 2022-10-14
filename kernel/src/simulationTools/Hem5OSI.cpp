@@ -18,28 +18,24 @@
 
 #include "Hem5OSI.hpp"
 
-#include "ExternalsSolversNamespace.h"
-#include "SiconosAlgebraProd.hpp"    // for prod and subprod
-#include "SiconosVectorFriends.hpp"  // for subscal
-// #include "EventDriven.hpp"
 #include "BlockVector.hpp"
+#include "ExternalsSolversNamespace.h"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
-#include "SiconosException.hpp"
-#include "SiconosVector.hpp"
-#include "Simulation.hpp"
-#include "Tools.hpp"  // enum_to_string
-// #include "NonSmoothDynamicalSystem.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "MultipleImpactNSL.hpp"
 #include "NewtonImpactNSL.hpp"
+#include "OneStepNSProblem.hpp"
+#include "SiconosAlgebraProd.hpp"  // for prod and subprod
+#include "SiconosException.hpp"
+#include "SiconosVector.hpp"
+#include "SiconosVectorFriends.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
+#include "Simulation.hpp"
+#include "Tools.hpp"  // enum_to_string
 #include "Topology.hpp"
-// #include "MultipleImpactNSL.hpp"
-// #include "NewtonImpactFrictionNSL.hpp"
-// #include "NewtonEulerR.hpp"
-#include "OneStepNSProblem.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -71,24 +67,12 @@ std::shared_ptr<siconos::integrators::Hem5OSI> hem5_global_object;
 // This first function must have the same signature as argument FPROB  in HEM5
 extern "C" siconos::fortran::fprobfunction Hem5OSI_fprob_wrapper;
 
-void Hem5OSI_fprob_wrapper(siconos::fortran::integer* IFCN, siconos::fortran::integer* NQ,
-                           siconos::fortran::integer* NV, siconos::fortran::integer* NU,
-                           siconos::fortran::integer* NL, siconos::fortran::integer* LDG,
-                           siconos::fortran::integer* LDF, siconos::fortran::integer* LDA,
-                           siconos::fortran::integer* NBLK, siconos::fortran::integer* NMRC,
-                           siconos::fortran::integer* NPGP, siconos::fortran::integer* NPFL,
-                           siconos::fortran::integer* INDGR, siconos::fortran::integer* INDGC,
-                           siconos::fortran::integer* INDFLR,
-                           siconos::fortran::integer* INDFLC,
-                           siconos::fortran::doublereal* time, siconos::fortran::doublereal* q,
-                           siconos::fortran::doublereal* v, siconos::fortran::doublereal* u,
-                           siconos::fortran::doublereal* xl, siconos::fortran::doublereal* G,
-                           siconos::fortran::doublereal* GQ, siconos::fortran::doublereal* F,
-                           siconos::fortran::doublereal* GQQ, siconos::fortran::doublereal* GT,
-                           siconos::fortran::doublereal* FL,
-                           siconos::fortran::doublereal* QDOT,
-                           siconos::fortran::doublereal* UDOT,
-                           siconos::fortran::doublereal* AM)
+void Hem5OSI_fprob_wrapper(int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF,
+                           int* LDA, int* NBLK, int* NMRC, int* NPGP, int* NPFL, int* INDGR,
+                           int* INDGC, int* INDFLR, int* INDFLC, double* time, double* q,
+                           double* v, double* u, double* xl, double* G, double* GQ, double* F,
+                           double* GQQ, double* GT, double* FL, double* QDOT, double* UDOT,
+                           double* AM)
 {
   return hem5_global_object->_impl->fprob(IFCN, NQ, NV, NU, NL, LDG, LDF, LDA, NBLK, NMRC,
                                           NPGP, NPFL, INDGR, INDGC, INDFLR, INDFLC, time, q, v,
@@ -97,17 +81,10 @@ void Hem5OSI_fprob_wrapper(siconos::fortran::integer* IFCN, siconos::fortran::in
 
 // This first function must have the same signature as argument SOLOUT in HEM5
 extern "C" siconos::fortran::soloutfunction Hem5OSI_solout_wrapper;
-void Hem5OSI_solout_wrapper(siconos::fortran::integer* MODE, siconos::fortran::integer* NSTEP,
-                            siconos::fortran::integer* NQ, siconos::fortran::integer* NV,
-                            siconos::fortran::integer* NU, siconos::fortran::integer* NL,
-                            siconos::fortran::integer* LDG, siconos::fortran::integer* LDF,
-                            siconos::fortran::integer* LDA, siconos::fortran::integer* LRDO,
-                            siconos::fortran::integer* LIDO,
-                            siconos::fortran::fprobpointer FPROB,
-                            siconos::fortran::doublereal* q, siconos::fortran::doublereal* v,
-                            siconos::fortran::doublereal* u,
-                            siconos::fortran::doublereal* DOWK,
-                            siconos::fortran::integer* IDOWK)
+void Hem5OSI_solout_wrapper(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, int* NL,
+                            int* LDG, int* LDF, int* LDA, int* LRDO, int* LIDO,
+                            siconos::fortran::fprobpointer FPROB, double* q, double* v,
+                            double* u, double* DOWK, int* IDOWK)
 {
   return hem5_global_object->_impl->solout(MODE, NSTEP, NQ, NV, NU, NL, LDG, LDF, LDA, LRDO,
                                            LIDO, FPROB, q, v, u, DOWK, IDOWK);
@@ -123,10 +100,8 @@ siconos::integrators::Hem5OSI::Hem5OSI()
 {
 }
 
-void siconos::integrators::Hem5OSI::setTol(
-    siconos::fortran::integer newItol,
-    boost::shared_array<siconos::fortran::doublereal> newRtol,
-    boost::shared_array<siconos::fortran::doublereal> newAtol)
+void siconos::integrators::Hem5OSI::setTol(int newItol, boost::shared_array<double> newRtol,
+                                           boost::shared_array<double> newAtol)
 {
   _intData[4] = newItol;
   // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
@@ -134,9 +109,7 @@ void siconos::integrators::Hem5OSI::setTol(
   rtol = newRtol;
   atol = newAtol;
 }
-void siconos::integrators::Hem5OSI::setTol(siconos::fortran::integer newItol,
-                                           siconos::fortran::doublereal newRtol,
-                                           siconos::fortran::doublereal newAtol)
+void siconos::integrators::Hem5OSI::setTol(int newItol, double newRtol, double newAtol)
 {
   _intData[4] = newItol;
   // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
@@ -145,19 +118,16 @@ void siconos::integrators::Hem5OSI::setTol(siconos::fortran::integer newItol,
   atol[0] = newRtol;  // atol
 }
 
-void siconos::integrators::Hem5OSI::setMaxStepSize(siconos::fortran::doublereal _maxStep)
-{
-  rwork[5] = _maxStep;
-}
+void siconos::integrators::Hem5OSI::setMaxStepSize(double _maxStep) { rwork[5] = _maxStep; }
 
-void siconos::integrators::Hem5OSI::setMaxNstep(siconos::fortran::integer _maxNumberSteps)
+void siconos::integrators::Hem5OSI::setMaxNstep(int _maxNumberSteps)
 {
   iwork[11] = _maxNumberSteps;
 }
 
 void siconos::integrators::Hem5OSI::updateIntData()
 {
-  //   Siconos::Fortran::Integer parameters for HEM5 are saved in vector intData.
+  //   int parameters for HEM5 are saved in vector intData.
 
   // 1 - _intData[0] NQ size of the position vector q
   _intData[0] = _qWork->size();
@@ -214,7 +184,7 @@ void siconos::integrators::Hem5OSI::updateIntData()
   _intData[6] = 19 + 27 * (int)_intData[0] + 28 * (int)_intData[1] + 27 * (int)_intData[2] +
                 5 * ((int)_intData[1] + (int)_intData[3]) + 4 * NZA + 2 * IXS + LL;
 
-  // 6 - LIWK length of siconos::fortran::integer array iwork
+  // 6 - LIWK length of int array iwork
   _intData[7] =
       95 + 2 * ((int)_intData[1] + (int)_intData[3]) + 2 * IS + 12 * LDG + 4 * LDF + 4 * NZA;
   _intData[7] *= 2;
@@ -230,29 +200,27 @@ void siconos::integrators::Hem5OSI::updateData()
   //  if(_intData[0]==1) sizeTol = 1;
   //  else sizeTol = _intData[0];
 
-  rtol.reset(new siconos::fortran::doublereal[sizeTol]);  // rtol, relative tolerance
+  rtol.reset(new double[sizeTol]);  // rtol, relative tolerance
 
-  atol.reset(new siconos::fortran::doublereal[sizeTol]);  // atol, absolute tolerance
+  atol.reset(new double[sizeTol]);  // atol, absolute tolerance
   for (unsigned int i = 0; i < sizeTol; i++) {
     atol[i] = 0.0;
   }
 
-  iwork.reset(new siconos::fortran::integer[_intData[7]]);
+  iwork.reset(new int[_intData[7]]);
   for (int i = 0; i < _intData[7]; i++) iwork[i] = 0;
 
-  rwork.reset(new siconos::fortran::doublereal[_intData[6]]);
+  rwork.reset(new double[_intData[6]]);
   for (int i = 0; i < _intData[6]; i++) rwork[i] = 0.0;
 }
 
-void siconos::integrators::Hem5OSI::fillqWork(siconos::fortran::integer* NQ,
-                                              siconos::fortran::doublereal* q)
+void siconos::integrators::Hem5OSI::fillqWork(int* NQ, double* q)
 {
   unsigned int sizeQ = (unsigned int)(*NQ);
   for (unsigned int i = 0; i < sizeQ; ++i) (*_qWork)(i) = q[i];
 }
 
-void siconos::integrators::Hem5OSI::fillvWork(siconos::fortran::integer* NV,
-                                              siconos::fortran::doublereal* v)
+void siconos::integrators::Hem5OSI::fillvWork(int* NV, double* v)
 {
   unsigned int sizeV = (unsigned int)(*NV);
   for (unsigned int i = 0; i < sizeV; ++i) (*_vWork)(i) = v[i];
@@ -279,24 +247,13 @@ void siconos::integrators::Hem5OSI::computeJacobianRhs(double t)
 }
 #ifdef HAS_FORTRAN
 void siconos::integrators::Hem5OSI_impl::fprob(
-    siconos::fortran::integer* IFCN, siconos::fortran::integer* NQ,
-    siconos::fortran::integer* NV, siconos::fortran::integer* NU,
-    siconos::fortran::integer* NL, siconos::fortran::integer* LDG,
-    siconos::fortran::integer* LDF, siconos::fortran::integer* LDA,
-    siconos::fortran::integer* NBLK, siconos::fortran::integer* NMRC,
-    siconos::fortran::integer* NPGP, siconos::fortran::integer* NPFL,
-    siconos::fortran::integer* INDGR, siconos::fortran::integer* INDGC,
-    siconos::fortran::integer* INDFLR, siconos::fortran::integer* INDFLC,
-    siconos::fortran::doublereal* time, siconos::fortran::doublereal* q,
-    siconos::fortran::doublereal* v, siconos::fortran::doublereal* u,
-    siconos::fortran::doublereal* xl, siconos::fortran::doublereal* G,
-    siconos::fortran::doublereal* GQ, siconos::fortran::doublereal* F,
-    siconos::fortran::doublereal* GQQ, siconos::fortran::doublereal* GT,
-    siconos::fortran::doublereal* FL, siconos::fortran::doublereal* QDOT,
-    siconos::fortran::doublereal* UDOT, siconos::fortran::doublereal* AM)
+    int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF, int* LDA, int* NBLK,
+    int* NMRC, int* NPGP, int* NPFL, int* INDGR, int* INDGC, int* INDFLR, int* INDFLC,
+    double* time, double* q, double* v, double* u, double* xl, double* G, double* GQ,
+    double* F, double* GQQ, double* GT, double* FL, double* QDOT, double* UDOT, double* AM)
 {
   DEBUG_PRINTF(
-      "siconos::integrators::Hem5OSI::fprob(siconos::fortran::integer* IFCN,...) with IFCN = "
+      "siconos::integrators::Hem5OSI::fprob(int* IFCN,...) with IFCN = "
       "%i \n",
       (int)*IFCN);
   DEBUG_PRINTF("NQ = %i\t NV = %i \t NU = %i, NL = %i \n", (int)*NQ, (int)*NV, (int)*NU,
@@ -438,23 +395,23 @@ void siconos::integrators::Hem5OSI_impl::fprob(
   }
 
   DEBUG_PRINTF(
-      "END : siconos::integrators::Hem5OSI::fprob(siconos::fortran::integer* IFCN,...) with "
+      "END : siconos::integrators::Hem5OSI::fprob(int* IFCN,...) with "
       "IFCN = %i \n \n",
       (int)*IFCN);
 }
 #endif
-// void siconos::integrators::Hem5OSI::g(siconos::fortran::integer* nEq,
-// siconos::fortran::doublereal*  time, siconos::fortran::doublereal* x,
-// siconos::fortran::integer* ng, siconos::fortran::doublereal* gOut)
+// void siconos::integrators::Hem5OSI::g(int* nEq,
+// double*  time, double* x,
+// int* ng, double* gOut)
 // {
 //   std::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq,
 //   time, x, ng, gOut);
 // }
 
-// void siconos::integrators::Hem5OSI::jacobianfx(siconos::fortran::integer* sizeOfX,
-// siconos::fortran::doublereal* time, siconos::fortran::doublereal* x,
-// siconos::fortran::integer* ml, siconos::fortran::integer* mu,  siconos::fortran::doublereal*
-// jacob, siconos::fortran::integer* nrowpd)
+// void siconos::integrators::Hem5OSI::jacobianfx(int* sizeOfX,
+// double* time, double* x,
+// int* ml, int* mu,  double*
+// jacob, int* nrowpd)
 // {
 //   std::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(shared_from_this(),
 //   sizeOfX, time, x, jacob);
@@ -609,16 +566,12 @@ void siconos::integrators::Hem5OSI::initialize()
   // }
 }
 #ifdef HAS_FORTRAN
-void siconos::integrators::Hem5OSI_impl::solout(
-    siconos::fortran::integer* MODE, siconos::fortran::integer* NSTEP,
-    siconos::fortran::integer* NQ, siconos::fortran::integer* NV,
-    siconos::fortran::integer* NU, siconos::fortran::integer* NL,
-    siconos::fortran::integer* LDG, siconos::fortran::integer* LDF,
-    siconos::fortran::integer* LDA, siconos::fortran::integer* LRDO,
-    siconos::fortran::integer* LIDO, siconos::fortran::fprobpointer FPROB,
-    siconos::fortran::doublereal* q, siconos::fortran::doublereal* v,
-    siconos::fortran::doublereal* u, siconos::fortran::doublereal* DOWK,
-    siconos::fortran::integer* IDOWK)
+void siconos::integrators::Hem5OSI_impl::solout(int* MODE, int* NSTEP, int* NQ, int* NV,
+                                                int* NU, int* NL, int* LDG, int* LDF, int* LDA,
+                                                int* LRDO, int* LIDO,
+                                                siconos::fortran::fprobpointer FPROB,
+                                                double* q, double* v, double* u, double* DOWK,
+                                                int* IDOWK)
 
 {
 }
@@ -646,9 +599,8 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
       "int& idid) with \n");
   DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, idid = %i\n", tinit, tend, tout, idid);
 
-  siconos::fortran::doublereal tend_DR =
-      tend;  // next point where output is desired (different from t!)
-  siconos::fortran::doublereal tinit_DR = tinit;  // current (starting) time
+  double tend_DR = tend;    // next point where output is desired (different from t!)
+  double tinit_DR = tinit;  // current (starting) time
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
@@ -747,7 +699,7 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   // C    IPAR(2) = IWK(22) = NBLK (NUMBER OF BLOCK OF AM)
   // C    IPAR(3) = IWK(23) = NPGP (0 IF GP AS THE SAME PATTERN AS PREVIOUS CALL)
   // C    IPAR(4) = IWK(24) = NPFL (0 IF FL AS THE SAME PATTERN AS PREVIOUS CALL)
-  // C    IPAR(5) = IWK(25) = IS (SIZE OF SICONOS::FORTRAN::INTEGER WORK SPACE FOR MA28 (MIN
+  // C    IPAR(5) = IWK(25) = IS (SIZE OF INT WORK SPACE FOR MA28 (MIN
   // 13*NM)) C    IPAR(6) = IWK(26) = IXS (SIZE OF REAL WORK SPACE FOR MA28 (MIN NM+4*NZA)) C
   // IPAR(7) = IWK(27) = PREVL C    IPAR(8) = IWK(28) = IO C    IPAR(9) = FLAG TO INDICATE IF
   // UMDFAC HAS BEEN CALLED AT LEAST ONCE
@@ -777,13 +729,13 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   assert(_intData[7]);
 
   // Management of vectors of Size 0
-  siconos::fortran::doublereal* pointerToU;
+  double* pointerToU;
   if (_intData[2] == 0)
     pointerToU = nullptr;
   else
     pointerToU = &(*_utmp)(0);
 
-  siconos::fortran::doublereal* pointerToXL;
+  double* pointerToXL;
   if (_intData[3] == 0)
     pointerToXL = nullptr;
   else
@@ -886,13 +838,13 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
   using siconos::internal::SiconosVisitor::visit;
 
-  siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
+  siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
   siconos::graphs::InteractionProperties& _interProp;
 
   _NSLEffectOnFreeOutput() = delete;
 
-  _NSLEffectOnFreeOutput(siconos::simulation::OneStepNSProblem* p,
+  _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
@@ -915,7 +867,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
 
 void siconos::integrators::Hem5OSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   auto allOSNS = _simulation->oneStepNSProblems();
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());

@@ -35,15 +35,6 @@
 // #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
-/// for non-owned shared pointers (passing const siconos::algebra::SiconosVector into
-/// functions that take std::shared_ptr<siconos::algebra::SiconosVector> without copy --
-/// warning const abuse!)
-// static void null_deleter(const siconos::algebra::SiconosVector *) {}
-//  template <typename T> static std::shared_ptr<T> ptr(const T& a)
-//  {
-//    return std::shared_ptr<siconos::algebra::SiconosVector>(&*(T*)&a, null_deleter);
-//  }
-
 void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
     double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
 {
@@ -438,7 +429,7 @@ void siconos::integrators::MoreauJeanGOSI::computeFreeState()
 
 void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
     std::shared_ptr<siconos::modeling::Interaction> inter,
-    siconos::simulation::OneStepNSProblem& osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem& osnsp)
 {
   if (inter->relation()->getType() == siconos::modeling::RelationType::Lagrangian ||
       inter->relation()->getType() == siconos::modeling::RelationType::NewtonEuler) {

@@ -31,7 +31,7 @@
 // START visitor for nslaw
 //  NOT USED FOR THE MOMENT
 //  #if 0
-//  struct siconos::simulation::AVI::_BoundsNSLEffect : public
+//  struct siconos::nonsmooth_formulations::AVI::_BoundsNSLEffect : public
 //  siconos::internal::SiconosVisitor
 //  {
 
@@ -77,23 +77,25 @@
 //  * END visitor for nslaw
 // */
 
-siconos::simulation::AVI::AVI(int numericsSolverId)
+siconos::nonsmooth_formulations::AVI::AVI(int numericsSolverId)
     : AVI(std::shared_ptr<siconos::numerics::SolverOptions>(
           siconos::numerics::solver_options_create(numericsSolverId),
           siconos::numerics::solver_options_delete))
 {
 }
 
-siconos::simulation::AVI::AVI(std::shared_ptr<siconos::numerics::SolverOptions> options)
+siconos::nonsmooth_formulations::AVI::AVI(
+    std::shared_ptr<siconos::numerics::SolverOptions> options)
     : LinearOSNS(options),
       _numerics_problem(std::make_shared<siconos::numerics::AffineVariationalInequalities>())
 {
   _numerics_problem->poly.split = new siconos::numerics::polyhedron;
 }
 
-siconos::simulation::AVI::~AVI() noexcept { delete _numerics_problem->poly.split; }
+siconos::nonsmooth_formulations::AVI::~AVI() noexcept { delete _numerics_problem->poly.split; }
 
-void siconos::simulation::AVI::initialize(std::shared_ptr<siconos::simulation::Simulation> sim)
+void siconos::nonsmooth_formulations::AVI::initialize(
+    std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   LinearOSNS::initialize(sim);
 
@@ -108,7 +110,8 @@ void siconos::simulation::AVI::initialize(std::shared_ptr<siconos::simulation::S
     auto& nc =
         static_cast<siconos::modeling::NormalConeNSL&>(*indexSet.bundle(*ui)->nonSmoothLaw());
     assert(siconos::types::type_value(nc) == siconos::modeling::Type::NormalConeNSL &&
-           "siconos::simulation::AVI::initialize :: found a NonSmoothLaw that is not of the "
+           "siconos::nonsmooth_formulations::AVI::initialize :: found a NonSmoothLaw that is "
+           "not of the "
            "NormalConeNSL type! This is currently not supported");
     auto& K = nc.K();
     auto& H = nc.H();
@@ -126,18 +129,20 @@ void siconos::simulation::AVI::initialize(std::shared_ptr<siconos::simulation::S
     // we do not support more than one interaction
     if (!(nbInter++ == 0))
       THROW_EXCEPTION(
-          "siconos::simulation::AVI::initialize :: more than one Interactions for this "
+          "siconos::nonsmooth_formulations::AVI::initialize :: more than one Interactions for "
+          "this "
           "OneStepNSProblem is not support ATM!");
   }
 }
-bool siconos::simulation::AVI::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
+bool siconos::nonsmooth_formulations::AVI::checkCompatibleNSLaw(
+    siconos::modeling::NonSmoothLaw& nslaw)
 {
   float type_number = static_cast<float>(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
 
   if (not(siconos::types::type_value(nslaw) == siconos::modeling::Type::NormalConeNSL)) {
     THROW_EXCEPTION(
-        "\nsiconos::simulation::AVI::checkCompatibleNSLaw -  \n\
+        "\nsiconos::nonsmooth_formulations::AVI::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with AVVI one step nonsmooth problem. \n \
                       Compatible NonSmoothLaw are: NormalConeNSL\n");
     return false;
@@ -145,7 +150,7 @@ bool siconos::simulation::AVI::checkCompatibleNSLaw(siconos::modeling::NonSmooth
   return true;
 }
 
-int siconos::simulation::AVI::compute(double time)
+int siconos::nonsmooth_formulations::AVI::compute(double time)
 {
   int info = 0;
   // --- Prepare data for AVI computing ---
@@ -154,7 +159,8 @@ int siconos::simulation::AVI::compute(double time)
 
   if (_numerics_problem->size != _sizeOutput) {
     THROW_EXCEPTION(
-        "siconos::simulation::AVI::compute - size mismatch between AVI size and and the "
+        "siconos::nonsmooth_formulations::AVI::compute - size mismatch between AVI size and "
+        "and the "
         "current size");
   }
 
@@ -184,7 +190,7 @@ int siconos::simulation::AVI::compute(double time)
   return info;
 }
 
-void siconos::simulation::AVI::display() const
+void siconos::nonsmooth_formulations::AVI::display() const
 {
   std::cout << "======= AVI of size " << _sizeOutput << " with: \n";
   LinearOSNS::display();

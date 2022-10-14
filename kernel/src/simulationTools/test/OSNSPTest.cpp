@@ -31,7 +31,7 @@ void OSNSPTest::tearDown() {}
 void OSNSPTest::testOSNSBuild_default()
 {
   // Build from solver id
-  auto problem = std::make_shared<siconos::simulation::FrictionContact>();
+  auto problem = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>();
 
   auto options = problem->numericsSolverOptions();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -42,7 +42,7 @@ void OSNSPTest::testOSNSBuild_default()
 void OSNSPTest::testOSNSBuild_solverid()
 {
   // Build from solver id
-  auto problem = std::make_shared<siconos::simulation::FrictionContact>(
+  auto problem = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>(
       3, siconos::numerics::SICONOS_FRICTION_3D_ADMM);
 
   auto options = problem->numericsSolverOptions();
@@ -57,7 +57,7 @@ void OSNSPTest::testOSNSBuild_options()
   std::shared_ptr<siconos::numerics::SolverOptions> options{
       siconos::numerics::solver_options_create(siconos::numerics::SICONOS_FRICTION_3D_ADMM),
       siconos::numerics::solver_options_delete};
-  auto problem = std::make_shared<siconos::simulation::FrictionContact>(3, options);
+  auto problem = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>(3, options);
 
   auto options_link = problem->numericsSolverOptions();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(

@@ -22,11 +22,13 @@
 #ifndef __SiconosVector__
 #define __SiconosVector__
 
-#include <boost/numeric/ublas/fwd.hpp>
+// #include <boost/numeric/ublas/fwd.hpp>
+// #include <boost/numeric/ublas/storage.hpp>
+#include <boost/numeric/ublas/vector.hpp>
 #include <vector>
 
-#include "SiconosAlgebraTypes.hpp"  // For UblasType
-#include "SiconosSerialization.hpp"   // For ACCEPT_SERIALIZATION
+#include "SiconosAlgebraTypes.hpp"   // For UblasType
+#include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 
 namespace siconos::algebra {
 
@@ -35,8 +37,43 @@ struct SiconosVectorConstIterator;
 class BlockVector;
 class SimpleMatrix;
 
+// adaptor to allow construction of a boost vector from memory without
+// copy
+// Source
+// https://stackoverflow.com/questions/1735841/initializing-a-ublas-vector-from-a-c-array
+// Example:
+//
+// using vector_adaptor = boost::numeric::ublas::vector<double,shallow_array_adaptor<double> >;
+// double a[size];
+// vector_adaptor v(shallow_array_adaptor<double>(size, &tab[0]));
+// std::vector w(size)
+// vector_adaptor v2(shallow_array_adaptor<double>(size, w.data()));
+//
+// Experimental: works only if  BOOST_UBLAS_SHALLOW_ARRAY_ADAPTOR is defined (see
+// kernel/CMakeLists.txt)
+// and breaks many things in bindings, ublas ...
+//
+// template <typename T>
+// class shallow_array_adaptor : public boost::numeric::ublas::shallow_array_adaptor<T> {
+//  public:
+//   typedef boost::numeric::ublas::shallow_array_adaptor<T> base_type;
+//   typedef typename base_type::size_type size_type;
+//   typedef typename base_type::pointer pointer;
+
+//   shallow_array_adaptor(size_type n) : base_type(n) {}
+//   shallow_array_adaptor(size_type n, pointer data) : base_type(n, data) {}
+//   shallow_array_adaptor(const shallow_array_adaptor &c) : base_type(c) {}
+
+//   void swap(shallow_array_adaptor &a)
+//   {
+//     if (base_type::begin() != a.begin())
+//       std::swap_ranges(base_type::begin(), base_type::end(), a.begin());
+//   }
+// };
+
 /** dense vector of double, std::vector storage */
-using DenseVect = boost::numeric::ublas::vector<double, std::vector<double>>;
+using DenseVect = boost::numeric::ublas::vector<double, std::vector<double> >;
+// using DenseVect = boost::numeric::ublas::vector<double, shallow_array_adaptor<double> >;
 
 /** sparse vector of double */
 using SparseVect = boost::numeric::ublas::compressed_vector<double>;
@@ -87,8 +124,7 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
    *  \param val value to initialize its content
    *  \param type type of vector (dense or sparse)
    */
-  SiconosVector(unsigned row, double val,
-                siconos::algebra::UblasType type = UblasType::DENSE);
+  SiconosVector(unsigned row, double val, siconos::algebra::UblasType type = UblasType::DENSE);
 
   /** creates a dense vector from a copy of a stl vector.
    *

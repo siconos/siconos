@@ -18,24 +18,21 @@
  */
 #include "SchatzmanPaoliOSI.hpp"
 
-#include "Interaction.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "SiconosAlgebraScal.hpp"
-#include "SiconosVectorFriends.hpp"
-#include "SimpleMatrix.hpp"
-#include "Simulation.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
-// #include "NewtonEulerDS.hpp"
-#include "LagrangianLinearTIDS.hpp"
-#include "LagrangianR.hpp"
-// #include "LagrangianRheonomousR.hpp"
 #include "BlockVector.hpp"
+#include "Interaction.hpp"
+#include "LagrangianLinearTIDS.hpp"
 #include "LagrangianLinearTIR.hpp"
+#include "LagrangianR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosAlgebraProd.hpp"
+#include "SiconosAlgebraScal.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosVectorFriends.hpp"
 #include "SiconosVisitor.hpp"
+#include "SimpleMatrix.hpp"
+#include "Simulation.hpp"
 #include "Tools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -531,11 +528,11 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
   using siconos::internal::SiconosVisitor::visit;
 
-  siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
+  siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter;
   siconos::graphs::InteractionProperties& _interProp;
 
-  _NSLEffectOnFreeOutput(siconos::simulation::OneStepNSProblem* p,
+  _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
@@ -576,11 +573,12 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
 
 void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   DEBUG_BEGIN(
       "siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(siconos::graphs::"
-      "InteractionsGraph::VDescriptor& vertex_inter, siconos::simulation::OneStepNSProblem* "
+      "InteractionsGraph::VDescriptor& vertex_inter, "
+      "siconos::nonsmooth_formulations::OneStepNSProblem* "
       "osnsp)\n");
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
@@ -669,7 +667,8 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
 
   DEBUG_END(
       "siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(siconos::graphs::"
-      "InteractionsGraph::VDescriptor& vertex_inter, siconos::simulation::OneStepNSProblem* "
+      "InteractionsGraph::VDescriptor& vertex_inter, "
+      "siconos::nonsmooth_formulations::OneStepNSProblem* "
       "osnsp)\n");
 }
 void siconos::integrators::SchatzmanPaoliOSI::integrate(double& tinit, double& tend,

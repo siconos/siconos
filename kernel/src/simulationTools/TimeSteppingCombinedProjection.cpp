@@ -19,26 +19,24 @@
 #include "TimeSteppingCombinedProjection.hpp"
 
 #include "LagrangianLinearTIDS.hpp"
-//#include "MLCPProjectOnConstraints.hpp"
+// #include "MLCPProjectOnConstraints.hpp"
+#include "Interaction.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NonSmoothLaw.hpp"
-#include "Relation.hpp"
-#include "Interaction.hpp"
 #include "OneStepNSProblem.hpp"
+#include "Relation.hpp"
 #include "SiconosVector.hpp"
 #include "Topology.hpp"
-//#define TSPROJ_DEBUG_LEVEL1
-//#define TSPROJ_WITHOUT_PROJECTION
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-//#define DEBUG_WHERE_MESSAGES
+// #define TSPROJ_DEBUG_LEVEL1
+// #define TSPROJ_WITHOUT_PROJECTION
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
 namespace siconos::simulation {
-struct MLCPProjectOnConstraints : OneStepNSProblem {
-
-
+struct MLCPProjectOnConstraints : siconos::nonsmooth_formulations::OneStepNSProblem {
   void setDoProjOnEquality(bool){};
 };  // TMPTMPTPTMTP
 }  // namespace siconos::simulation
@@ -47,8 +45,9 @@ siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProject
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
     std::shared_ptr<TimeDiscretisation> td,
     std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-    std::shared_ptr<OneStepNSProblem> osnspb_velo,
-    std::shared_ptr<OneStepNSProblem> osnspb_pos, unsigned int level)
+    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
+    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
+    unsigned int level)
     : TimeStepping{nsds, td, osi, osnspb_velo}, _indexSetLevelForProjection{level}
 {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);

@@ -57,7 +57,7 @@ siconos::simulation::TimeStepping::TimeStepping(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
     std::shared_ptr<TimeDiscretisation> td,
     std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-    std::shared_ptr<OneStepNSProblem> osnspb)
+    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb)
     : Simulation(nsds, td)
 {
   if (osi) insertIntegrator(osi);

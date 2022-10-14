@@ -18,18 +18,18 @@
 #include "Simulation.hpp"
 
 #include "DynamicalSystem.hpp"
+#include "EventsManager.hpp"
+#include "Interaction.hpp"
 #include "InteractionManager.hpp"
 #include "SiconosConst.hpp"  // siconos::internal::LEVELMAX
 #include "SiconosException.hpp"
-#include "EventsManager.hpp"
-#include "Interaction.hpp"
 #include "Topology.hpp"
 // // One Step Integrators
 #include "OneStepIntegrator.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosVector.hpp"
 // for Debug
-//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -44,7 +44,8 @@ siconos::simulation::Simulation::Simulation(
   assert(_nsds);
   _allOSI =
       std::make_shared<std::set<std::shared_ptr<siconos::integrators::OneStepIntegrator>>>();
-  _allNSProblems = std::make_shared<std::vector<std::shared_ptr<OneStepNSProblem>>>();
+  _allNSProblems = std::make_shared<
+      std::vector<std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>>();
   _eventsManager = std::make_shared<EventsManager>(td);
   _eventsManager->updateT(_nsds->finalT());
   _nsdsChangeLogPosition = _nsds->changeLogBegin();
@@ -115,7 +116,7 @@ std::shared_ptr<siconos::graphs::InteractionsGraph> siconos::simulation::Simulat
   return _nsds->topology()->indexSet(i);
 }
 
-std::shared_ptr<siconos::simulation::OneStepNSProblem>
+std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
 siconos::simulation::Simulation::oneStepNSProblem(int Id)
 {
   if (!(*_allNSProblems)[Id])
@@ -149,7 +150,7 @@ void siconos::simulation::Simulation::updateDSPlugins(double time)
 }
 
 void siconos::simulation::Simulation::insertNonSmoothProblem(
-    std::shared_ptr<OneStepNSProblem> osns, int Id)
+    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osns, int Id)
 {
   if (_allNSProblems->size() > (unsigned int)Id) {
     if ((*_allNSProblems)[Id])

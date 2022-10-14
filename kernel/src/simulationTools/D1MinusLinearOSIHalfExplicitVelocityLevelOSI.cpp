@@ -631,7 +631,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
 void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   DEBUG_PRINT(
       "\n siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel "

@@ -50,7 +50,7 @@
 #include "siconos_debug.h"
 
 siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFreeOutput(
-    siconos::simulation::OneStepNSProblem &p, siconos::modeling::Interaction &inter,
+    siconos::nonsmooth_formulations::OneStepNSProblem &p, siconos::modeling::Interaction &inter,
     siconos::graphs::InteractionProperties &interProp)
     : _osnsp(p), _inter(inter), _interProp(interProp){};
 
@@ -1362,13 +1362,13 @@ void siconos::integrators::MoreauJeanOSI::prepareNewtonIteration(double time)
 
 void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-    siconos::simulation::OneStepNSProblem *osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem *osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& "
-      "vertex_inter, OneStepNSProblem* osnsp)\n");
+      "vertex_inter, siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)\n");
   auto allOSNS = _simulation->oneStepNSProblems();
   auto &indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
@@ -1477,7 +1477,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
 
   DEBUG_END(
       "siconos::integrators::MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& "
-      "vertex_inter, OneStepNSProblem* osnsp)\n");
+      "vertex_inter, siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)\n");
 }
 
 void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend, double &tout,

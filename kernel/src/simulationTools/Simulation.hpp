@@ -41,10 +41,13 @@ namespace siconos::integrators {
 class OneStepIntegrator;
 }
 
+namespace siconos::nonsmooth_formulations {
+class OneStepNSProblem;
+}
+
 namespace siconos::simulation {
 
 class EventsManager;
-class OneStepNSProblem;
 class InteractionManager;
 class TimeDiscretisation;
 
@@ -87,7 +90,9 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   /** the non smooth problems (each problem is identified thanks to
       its id) */
-  std::shared_ptr<std::vector<std::shared_ptr<OneStepNSProblem>>> _allNSProblems{nullptr};
+  std::shared_ptr<
+      std::vector<std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>>
+      _allNSProblems{nullptr};
 
   /** A pointer to the simulated nonsmooth dynamical system
    */
@@ -298,7 +303,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
      \param id number of the required osnspb
      \return a pointer to OneStepNSProblem
   */
-  std::shared_ptr<OneStepNSProblem> oneStepNSProblem(int id);
+  std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> oneStepNSProblem(int id);
 
   /**
       add a OneStepNSProblem in the Simulation
@@ -308,8 +313,9 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
       at impact level SICONOS_OSNSP_ED_IMPACT, at acceleration level
       SICONOS_OSNSP_ED_ACCELERATION
    */
-  virtual void insertNonSmoothProblem(std::shared_ptr<OneStepNSProblem> osns,
-                                      int Id = SICONOS_OSNSP_DEFAULT);
+  virtual void insertNonSmoothProblem(
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osns,
+      int Id = SICONOS_OSNSP_DEFAULT);
 
   /** get the NonSmoothDynamicalSystem
    *
@@ -368,7 +374,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   virtual void updateIndexSet(unsigned int level) = 0;
 
   /** Complete initialisation of the Simulation (OneStepIntegrators,
-      OneStepNSProblem, TImediscretisation).
+      siconos::nonsmooth_formulations::OneStepNSProblem, TImediscretisation).
   */
   virtual void initialize() = 0;
 
@@ -392,7 +398,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   /** computes a one step NS problem
    *
-   *  \param nb the id of the OneStepNSProblem to be computed
+   *  \param nb the id of the siconos::nonsmooth_formulations::OneStepNSProblem to be computed
    *  \return information about the solver convergence.
    */
   int computeOneStepNSProblem(int nb);
@@ -438,7 +444,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   virtual void run();
 
-  /** initialisation for OneStepNSProblem.
+  /** initialisation for siconos::nonsmooth_formulations::OneStepNSProblem.
    */
   virtual void initOSNS() = 0;
 
@@ -572,7 +578,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   void initializeIndexSets();
 
   /** Complete initialisation of the Simulation (OneStepIntegrators,
-      OneStepNSProblem, TImediscretisation).
+      siconos::nonsmooth_formulations::OneStepNSProblem, TImediscretisation).
   */
   virtual void firstInitialize();
 };

@@ -270,7 +270,7 @@ class EventsManager {
    *
    *  \return the TimeDiscretisation in use for the time integration
    */
-  inline const TimeDiscretisation& timeDiscretisation() const { return *_td; };
+  inline std::shared_ptr<TimeDiscretisation> timeDiscretisation() const { return _td; };
 
   /** update final time
    *

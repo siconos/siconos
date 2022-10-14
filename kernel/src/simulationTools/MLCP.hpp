@@ -33,7 +33,7 @@ struct SolverOptions;
 
 }  // namespace siconos::numerics
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 
 /**
     Formalization and Resolution of a Mixed Linear Complementarity Problem
@@ -169,5 +169,5 @@ class MLCP : public LinearOSNS {
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif  // MLCP_H

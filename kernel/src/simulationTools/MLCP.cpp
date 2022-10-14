@@ -31,7 +31,7 @@
 #include "siconos_debug.h"
 
 // Constructor from a set of data, use delegated constructor
-siconos::simulation::MLCP::MLCP(int numericsSolverId)
+siconos::nonsmooth_formulations::MLCP::MLCP(int numericsSolverId)
     : MLCP(std::shared_ptr<siconos::numerics::SolverOptions>(
           siconos::numerics::solver_options_create(numericsSolverId),
           siconos::numerics::solver_options_delete))
@@ -39,7 +39,7 @@ siconos::simulation::MLCP::MLCP(int numericsSolverId)
 }
 
 // Constructor from a set of data
-siconos::simulation::MLCP::MLCP(std::shared_ptr<siconos::numerics::SolverOptions> options)
+siconos::nonsmooth_formulations::MLCP::MLCP(std::shared_ptr<siconos::numerics::SolverOptions> options)
     : LinearOSNS(options)
 {
   _numerics_problem = std::make_shared<siconos::numerics::MixedLinearComplementarityProblem>();
@@ -53,7 +53,7 @@ siconos::simulation::MLCP::MLCP(std::shared_ptr<siconos::numerics::SolverOptions
   _numerics_problem->isStorageType2 = 0;
 }
 
-siconos::simulation::MLCP::~MLCP() noexcept
+siconos::nonsmooth_formulations::MLCP::~MLCP() noexcept
 {
   if (_numerics_problem->blocksRows) free(_numerics_problem->blocksRows);
   _numerics_problem->blocksRows = nullptr;
@@ -63,12 +63,12 @@ siconos::simulation::MLCP::~MLCP() noexcept
   _numerics_solver_options.reset();
 }
 
-void siconos::simulation::MLCP::computeOptions(
+void siconos::nonsmooth_formulations::MLCP::computeOptions(
     std::shared_ptr<siconos::modeling::Interaction> inter1,
     std::shared_ptr<siconos::modeling::Interaction> inter2)
 {
   DEBUG_BEGIN(
-      "siconos::simulation::MLCP::computeOptions(std::shared_ptr<siconos::modeling::"
+      "siconos::nonsmooth_formulations::MLCP::computeOptions(std::shared_ptr<siconos::modeling::"
       "Interaction> inter1, "
       "std::shared_ptr<siconos::modeling::Interaction> inter2)\n");
   // Get dimension of the siconos::modeling::NonSmoothLaw (ie dim of the interactionBlock)
@@ -110,12 +110,12 @@ void siconos::simulation::MLCP::computeOptions(
     }
   }
   DEBUG_END(
-      "siconos::simulation::MLCP::computeOptions(std::shared_ptr<siconos::modeling::"
+      "siconos::nonsmooth_formulations::MLCP::computeOptions(std::shared_ptr<siconos::modeling::"
       "Interaction> inter1, "
       "std::shared_ptr<siconos::modeling::Interaction> inter2)\n");
 }
 
-bool siconos::simulation::MLCP::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
+bool siconos::nonsmooth_formulations::MLCP::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
 {
   float type_number = static_cast<float>(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
@@ -128,7 +128,7 @@ bool siconos::simulation::MLCP::checkCompatibleNSLaw(siconos::modeling::NonSmoot
           siconos::types::type_value(nslaw) ==
               siconos::modeling::Type::EqualityConditionNSL)) {
     THROW_EXCEPTION(
-        "\nsiconos::simulation::MLCP::checkCompatibleNSLaw -  \n\
+        "\nsiconos::nonsmooth_formulations::MLCP::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with LCP one step nonsmooth problem. \n \
                       Compatible siconos::modeling::NonSmoothLaw are: ComplementarityConditionNSL, EqualityConditionNSL or NewtonImpactNSL\n");
     return false;
@@ -137,11 +137,11 @@ bool siconos::simulation::MLCP::checkCompatibleNSLaw(siconos::modeling::NonSmoot
   return true;
 }
 
-void siconos::simulation::MLCP::computeInteractionBlock(
+void siconos::nonsmooth_formulations::MLCP::computeInteractionBlock(
     const siconos::graphs::InteractionsGraph::EDescriptor& ed)
 {
   DEBUG_BEGIN(
-      "siconos::simulation::MLCP::computeInteractionBlock(const "
+      "siconos::nonsmooth_formulations::MLCP::computeInteractionBlock(const "
       "siconos::graphs::InteractionsGraph::EDescriptor& "
       "ed)\n")
   auto indexSet = simulation()->indexSet(indexSetLevel());
@@ -154,12 +154,12 @@ void siconos::simulation::MLCP::computeInteractionBlock(
   if (!_hasBeenUpdated || !isLinear) LinearOSNS::computeInteractionBlock(ed);
 
   DEBUG_END(
-      "siconos::simulation::MLCP::computeInteractionBlock(const "
+      "siconos::nonsmooth_formulations::MLCP::computeInteractionBlock(const "
       "siconos::graphs::InteractionsGraph::EDescriptor& "
       "ed)\n")
 }
 
-void siconos::simulation::MLCP::computeDiagonalInteractionBlock(
+void siconos::nonsmooth_formulations::MLCP::computeDiagonalInteractionBlock(
     const siconos::graphs::InteractionsGraph::VDescriptor& vd)
 {
   auto indexSet = simulation()->indexSet(indexSetLevel());
@@ -172,7 +172,7 @@ void siconos::simulation::MLCP::computeDiagonalInteractionBlock(
   LinearOSNS::computeDiagonalInteractionBlock(vd);
 }
 
-int siconos::simulation::MLCP::solve()
+int siconos::nonsmooth_formulations::MLCP::solve()
 {
   // Note FP : wrap call to numerics solver inside this function
   // for python API (e.g. to allow profiling without C struct handling)
@@ -203,16 +203,16 @@ int siconos::simulation::MLCP::solve()
   return info;
 }
 
-int siconos::simulation::MLCP::compute(double time)
+int siconos::nonsmooth_formulations::MLCP::compute(double time)
 {
-  DEBUG_BEGIN("siconos::simulation::MLCP::compute(double time)\n");
+  DEBUG_BEGIN("siconos::nonsmooth_formulations::MLCP::compute(double time)\n");
   int info = 0;
   // --- Prepare data for MLCP computing ---
   bool not_empty = preCompute(time);
   if (!not_empty) return info;
   // cf GenericMechanical for the explanation of this line commented
   // _hasBeenUpdated=true;
-  DEBUG_PRINTF("siconos::simulation::MLCP::compute m n :%d,%d\n", _n, _m);
+  DEBUG_PRINTF("siconos::nonsmooth_formulations::MLCP::compute m n :%d,%d\n", _n, _m);
 
   // --- Call Numerics driver ---
   // Inputs:
@@ -227,16 +227,16 @@ int siconos::simulation::MLCP::compute(double time)
     if (!info)
       postCompute();
     else
-      printf("[kernel] siconos::simulation::MLCP::compute -- MLCP solver failed\n");
+      printf("[kernel] siconos::nonsmooth_formulations::MLCP::compute -- MLCP solver failed\n");
   }
   else {
-    DEBUG_PRINT("siconos::simulation::MLCP::compute : sizeoutput is null\n");
+    DEBUG_PRINT("siconos::nonsmooth_formulations::MLCP::compute : sizeoutput is null\n");
   }
-  DEBUG_END("siconos::simulation::MLCP::compute(double time)\n");
+  DEBUG_END("siconos::nonsmooth_formulations::MLCP::compute(double time)\n");
   return info;
 }
 
-void siconos::simulation::MLCP::display() const
+void siconos::nonsmooth_formulations::MLCP::display() const
 {
   std::cout << "======= MLCP of size " << _sizeOutput << " with: \n";
   std::cout << " m (number of inequality constraints)" << _m << std::endl;
@@ -244,7 +244,7 @@ void siconos::simulation::MLCP::display() const
   LinearOSNS::display();
 }
 
-void siconos::simulation::MLCP::updateInteractionBlocks()
+void siconos::nonsmooth_formulations::MLCP::updateInteractionBlocks()
 {
   if (!_hasBeenUpdated) {
     _curBlock = 0;

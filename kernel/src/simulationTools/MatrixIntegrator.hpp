@@ -104,7 +104,7 @@ class MatrixIntegrator {
    */
   MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
                    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-                   const TimeDiscretisation& td,
+                   std::shared_ptr<TimeDiscretisation> td,
                    const std::shared_ptr<siconos::algebra::SiconosMatrix> E);
 
   /** Constructor to compute \f$\int exp(A\tau)E(\tau)\mathrm{d}\tau\f$
@@ -116,7 +116,7 @@ class MatrixIntegrator {
    */
   MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
                    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-                   const TimeDiscretisation& td,
+                   std::shared_ptr<TimeDiscretisation> td,
                    std::shared_ptr<siconos::plugins::PluggedObject> plugin,
                    const unsigned int p);
 
@@ -127,7 +127,7 @@ class MatrixIntegrator {
    */
   MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
                    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-                   const TimeDiscretisation& td);
+                   std::shared_ptr<TimeDiscretisation> td);
 
   /** Computes the next value of _mat */
   void integrate();

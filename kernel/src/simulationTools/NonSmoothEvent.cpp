@@ -18,10 +18,10 @@
 #include "NonSmoothEvent.hpp"
 
 #include "Event.hpp"
-#include "SiconosException.hpp"
 #include "EventDriven.hpp"
-#include "SimulationGraphs.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#include "SiconosException.hpp"
+#include "SimulationGraphs.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #include "siconos_debug.h"
@@ -29,11 +29,10 @@
 void siconos::simulation::NonSmoothEvent::process(Simulation& simulation)
 {
   auto eventDriven = dynamic_cast<EventDriven*>(&simulation);
-  if(!eventDriven)
+  if (!eventDriven)
     THROW_EXCEPTION("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
-    
-  if (!(simulation.oneStepNSProblems()->empty())) {
 
+  if (!(simulation.oneStepNSProblems()->empty())) {
     // Compute y[0], y[1] and update index sets. => already done
     // during advance to event ...
 

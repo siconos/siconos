@@ -176,11 +176,11 @@ class MoreauJeanOSI : public OneStepIntegrator {
   struct _NSLEffectOnFreeOutput : public siconos::internal::SiconosVisitor {
     using siconos::internal::SiconosVisitor::visit;
 
-    siconos::simulation::OneStepNSProblem &_osnsp;
+    siconos::nonsmooth_formulations::OneStepNSProblem &_osnsp;
     siconos::modeling::Interaction &_inter;
     siconos::graphs::InteractionProperties &_interProp;
 
-    _NSLEffectOnFreeOutput(siconos::simulation::OneStepNSProblem &p,
+    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem &p,
                            siconos::modeling::Interaction &inter,
                            siconos::graphs::InteractionProperties &interProp);
 
@@ -457,7 +457,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  \param osnsp pointer to OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::simulation::OneStepNSProblem *osnsp) override;
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
   /** Apply the rule to one Interaction to know if it should be included in the
    *  IndexSet of level i

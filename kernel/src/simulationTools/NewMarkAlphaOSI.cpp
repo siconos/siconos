@@ -264,7 +264,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeState()
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   DEBUG_BEGIN(
       "siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(siconos::graphs::"

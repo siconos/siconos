@@ -330,10 +330,10 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
   using siconos::internal::SiconosVisitor::visit;
 
-  siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
+  siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
   siconos::graphs::InteractionProperties& _interProp;
-  _NSLEffectOnFreeOutput(siconos::simulation::OneStepNSProblem* p,
+  _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
@@ -369,7 +369,7 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
 
 void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   DEBUG_BEGIN("void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(...)\n");
   /** \warning: ensures that it can also work with two different osi for two different ds ?

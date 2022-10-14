@@ -76,7 +76,8 @@ class EventDriven : public Simulation {
   /** Maximum number of iterations to localize events */
   unsigned int _localizeEventMaxIter{100};
 
-  /**  number of OneStepNSProblem considered in the simulation */
+  /**  number of siconos::nonsmooth_formulations::OneStepNSProblem considered in the simulation
+   */
   unsigned int _numberOfOneStepNSproblems{2};
 
   /** store the indexSet0 for performance reason (Lsodar)*/
@@ -225,8 +226,8 @@ class EventDriven : public Simulation {
    *  \param x state vector
    *  \param xdot derivative of x
    */
-  void computef(siconos::integrators::OneStepIntegrator &osi, int *sizeOfX,
-                double *time, double *x, double *xdot);
+  void computef(siconos::integrators::OneStepIntegrator &osi, int *sizeOfX, double *time,
+                double *x, double *xdot);
 
   /** compute jacobian of the right-hand side
    *
@@ -236,8 +237,8 @@ class EventDriven : public Simulation {
    *  \param x state vector
    *  \param jacob jacobian of f according to x
    */
-  void computeJacobianfx(siconos::integrators::OneStepIntegrator &osi, int *sizeOfX, double *time,
-                         double *x, double *jacob);
+  void computeJacobianfx(siconos::integrators::OneStepIntegrator &osi, int *sizeOfX,
+                         double *time, double *x, double *jacob);
 
   /** compute the size of constraint function g(x,t,...) for osi
    *
@@ -255,8 +256,7 @@ class EventDriven : public Simulation {
    *  \param g double*, g (in-out parameter)
    */
   virtual void computeg(std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-                        int *sizeX, double *time, double *x, int *sizeG,
-                        double *g);
+                        int *sizeX, double *time, double *x, int *sizeG, double *g);
 
   /** update input for impact case (ie compute p[1])
    */

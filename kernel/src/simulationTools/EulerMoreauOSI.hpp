@@ -402,10 +402,10 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *  non-smooth effects into account
    *
    *  \param vertex_inter of the interaction graph
-   *  \param osnsp pointer to OneStepNSProblem
+   *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::simulation::OneStepNSProblem *osnsp) override;
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
   /** computes all the W matrices
    *

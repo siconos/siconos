@@ -30,13 +30,15 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-siconos::simulation::OSNSMatrixProjectOnConstraints::OSNSMatrixProjectOnConstraints(
-    unsigned int n, unsigned int m, siconos::numerics::NM_types stor)
+siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::
+    OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m,
+                                   siconos::numerics::NM_types stor)
     : OSNSMatrix(n, m, stor)
 {
 }
 
-unsigned siconos::simulation::OSNSMatrixProjectOnConstraints::updateSizeAndPositions(
+unsigned
+siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::updateSizeAndPositions(
     siconos::graphs::InteractionsGraph& indexSet)
 {
   // === Description ===
@@ -73,7 +75,7 @@ unsigned siconos::simulation::OSNSMatrixProjectOnConstraints::updateSizeAndPosit
   return dim;
 }
 
-void siconos::simulation::OSNSMatrixProjectOnConstraints::fillM(
+void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
     siconos::graphs::InteractionsGraph& indexSet, bool update)
 {
   if (update) {
@@ -151,11 +153,13 @@ void siconos::simulation::OSNSMatrixProjectOnConstraints::fillM(
   if (update) convert();
 }
 
-unsigned int siconos::simulation::OSNSMatrixProjectOnConstraints::computeSizeForProjection(
+unsigned int
+siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::computeSizeForProjection(
     std::shared_ptr<siconos::modeling::Interaction> inter)
 {
   DEBUG_BEGIN(
-      "siconos::simulation::OSNSMatrixProjectOnConstraints::computeSizeForProjection(std::"
+      "siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::"
+      "computeSizeForProjection(std::"
       "shared_ptr<siconos::"
       "modeling::Interaction> inter)\n");
   auto relationType = inter->relation()->getType();
@@ -172,17 +176,19 @@ unsigned int siconos::simulation::OSNSMatrixProjectOnConstraints::computeSizeFor
       // if(ri->_isOnContact)
       //   equalitySize = 1;
       size = 1;
-      DEBUG_EXPR_WE(std::cout << "siconos::simulation::OSNSMatrixProjectOnConstraints::"
-                                 "computeSizeForProjection : "
-                                 "NewtonImpact * nslaw and  relationType NewtonEuler. size=1"
-                              << std::endl;);
+      DEBUG_EXPR_WE(
+          std::cout << "siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::"
+                       "computeSizeForProjection : "
+                       "NewtonImpact * nslaw and  relationType NewtonEuler. size=1"
+                    << std::endl;);
     }
     else if (relationType == siconos::modeling::RelationType::Lagrangian) {
       size = 1;
-      DEBUG_EXPR_WE(std::cout << "siconos::simulation::OSNSMatrixProjectOnConstraints::"
-                                 "computeSizeForProjection : "
-                                 "NewtonImpact * nslaw and relationType Lagrangian. size=1"
-                              << std::endl;);
+      DEBUG_EXPR_WE(
+          std::cout << "siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::"
+                       "computeSizeForProjection : "
+                       "NewtonImpact * nslaw and relationType Lagrangian. size=1"
+                    << std::endl;);
     }
     else {
       THROW_EXCEPTION(
@@ -191,7 +197,8 @@ unsigned int siconos::simulation::OSNSMatrixProjectOnConstraints::computeSizeFor
     }
   }
   DEBUG_END(
-      "siconos::simulation::OSNSMatrixProjectOnConstraints::computeSizeForProjection(std::"
+      "siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::"
+      "computeSizeForProjection(std::"
       "shared_ptr<siconos::"
       "modeling::Interaction> inter)\n");
   return size;

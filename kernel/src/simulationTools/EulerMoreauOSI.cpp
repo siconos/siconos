@@ -880,10 +880,10 @@ void siconos::integrators::EulerMoreauOSI::prepareNewtonIteration(double time)
 // {
 //   using SiconosVisitor::visit;
 
-//   siconos::simulation::OneStepNSProblem* _osnsp{nullptr};
+//   siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
 //   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
 
-//   _NSLEffectOnFreeOutput(siconos::simulation::OneStepNSProblem* p,
+//   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
 //                          std::shared_ptr<siconos::modeling::Interaction> inter)
 //       : _osnsp(p), _inter(inter){};
 
@@ -895,7 +895,7 @@ void siconos::integrators::EulerMoreauOSI::prepareNewtonIteration(double time)
 
 void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */

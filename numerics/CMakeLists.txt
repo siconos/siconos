@@ -288,7 +288,7 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   src/Relay
   src/FrictionContact
   # src/FrictionContact/Generated
-  # src/GenericMechanical
+  src/GenericMechanical
   )
 
 # List header files (in dir above) that must not be installed 

@@ -35,14 +35,14 @@
 
 // #include <limits>
 
-siconos::simulation::Relay::Relay(int numericsSolverId)
+siconos::nonsmooth_formulations::Relay::Relay(int numericsSolverId)
     : Relay(std::shared_ptr<siconos::numerics::SolverOptions>(
           siconos::numerics::solver_options_create(numericsSolverId),
           siconos::numerics::solver_options_delete))
 {
 }
 
-siconos::simulation::Relay::Relay(std::shared_ptr<siconos::numerics::SolverOptions> options)
+siconos::nonsmooth_formulations::Relay::Relay(std::shared_ptr<siconos::numerics::SolverOptions> options)
     : LinearOSNS(
           options)  //,  _numerics_problem(std::make_shared<siconos::numerics::RelayProblem>())
 {
@@ -50,7 +50,7 @@ siconos::simulation::Relay::Relay(std::shared_ptr<siconos::numerics::SolverOptio
 
 /* nslaw dispatch on bounds */
 
-struct siconos::simulation::Relay::_BoundsNSLEffect
+struct siconos::nonsmooth_formulations::Relay::_BoundsNSLEffect
     : public siconos::internal::SiconosVisitor {
   using siconos::internal::SiconosVisitor::visit;
 
@@ -79,11 +79,11 @@ struct siconos::simulation::Relay::_BoundsNSLEffect
   }
 };
 
-void siconos::simulation::Relay::initialize(
+void siconos::nonsmooth_formulations::Relay::initialize(
     std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   LinearOSNS::initialize(sim);
-  // cout << "siconos::simulation::Relay::initialize" <<std::endl;
+  // cout << "siconos::nonsmooth_formulations::Relay::initialize" <<std::endl;
 
   // initialize memory for _lb and _ub
   if (!_lb)
@@ -97,7 +97,7 @@ void siconos::simulation::Relay::initialize(
     if (_ub->size() != maxSize()) _ub->resize(maxSize());
   }
 }
-bool siconos::simulation::Relay::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
+bool siconos::nonsmooth_formulations::Relay::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
 {
   float type_number = static_cast<float>(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
@@ -106,7 +106,7 @@ bool siconos::simulation::Relay::checkCompatibleNSLaw(siconos::modeling::NonSmoo
               siconos::modeling::Type::ComplementarityConditionNSL ||
           siconos::types::type_value(nslaw) == siconos::modeling::Type::RelayNSL)) {
     THROW_EXCEPTION(
-        "\nsiconos::simulation::Relay::checkCompatibleNSLaw -  \n\
+        "\nsiconos::nonsmooth_formulations::Relay::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with Relay one step nonsmooth problem. \n \
                       Compatible siconos::modeling::NonSmoothLaw are: ComplementarityConditionNSL or RelayNSL\n");
     return false;
@@ -115,7 +115,7 @@ bool siconos::simulation::Relay::checkCompatibleNSLaw(siconos::modeling::NonSmoo
   return true;
 }
 
-int siconos::simulation::Relay::compute(double time)
+int siconos::nonsmooth_formulations::Relay::compute(double time)
 {
   int info = 0;
   // --- Prepare data for Relay computing ---
@@ -182,7 +182,7 @@ int siconos::simulation::Relay::compute(double time)
   return info;
 }
 
-void siconos::simulation::Relay::display() const
+void siconos::nonsmooth_formulations::Relay::display() const
 {
   std::cout << "======= Relay of size " << _sizeOutput << " with: " << std::endl;
   LinearOSNS::display();

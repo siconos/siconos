@@ -42,7 +42,7 @@
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
-bool siconos::simulation::OneStepNSProblem::hasInteractions() const
+bool siconos::nonsmooth_formulations::OneStepNSProblem::hasInteractions() const
 {
   return _simulation->nonSmoothDynamicalSystem()
              ->topology()
@@ -50,9 +50,9 @@ bool siconos::simulation::OneStepNSProblem::hasInteractions() const
              ->size() > 0;
 }
 
-void siconos::simulation::OneStepNSProblem::updateInteractionBlocks()
+void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks()
 {
-  DEBUG_PRINT("siconos::simulation::OneStepNSProblem::updateInteractionBlocks() starts\n");
+  DEBUG_PRINT("siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks() starts\n");
   // The present functions checks various conditions and possibly
   // compute interactionBlocks matrices.
   //
@@ -84,7 +84,7 @@ void siconos::simulation::OneStepNSProblem::updateInteractionBlocks()
   // (patch 65198 on standard boost install)
   if (indexSet->properties().symmetric) {
     DEBUG_PRINT(
-        "siconos::simulation::OneStepNSProblem::updateInteractionBlocks(). Symmetric case");
+        "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(). Symmetric case");
     siconos::graphs::InteractionsGraph::VIterator vi, viend;
     for (std::tie(vi, viend) = indexSet->vertices(); vi != viend; ++vi) {
       std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*vi);
@@ -189,13 +189,13 @@ void siconos::simulation::OneStepNSProblem::updateInteractionBlocks()
   else  // not symmetric => follow out_edges for each vertices
   {
     DEBUG_PRINT(
-        "siconos::simulation::OneStepNSProblem::updateInteractionBlocks(). Non symmetric "
+        "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(). Non symmetric "
         "case\n");
 
     siconos::graphs::InteractionsGraph::VIterator vi, viend;
     for (std::tie(vi, viend) = indexSet->vertices(); vi != viend; ++vi) {
       DEBUG_PRINT(
-          "siconos::simulation::OneStepNSProblem::updateInteractionBlocks(). Computation of "
+          "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(). Computation of "
           "diaganal block\n");
       std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*vi);
       auto nslawSize = inter->nonSmoothLaw()->size();
@@ -235,7 +235,7 @@ void siconos::simulation::OneStepNSProblem::updateInteractionBlocks()
 
       for (std::tie(oei, oeiend) = indexSet->out_edges(*vi); oei != oeiend; ++oei) {
         DEBUG_PRINT(
-            "siconos::simulation::OneStepNSProblem::updateInteractionBlocks(). Computation of "
+            "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(). Computation of "
             "extra-diaganal block\n");
 
         /* on adjoint graph there is at most 2 edges between source and target */
@@ -295,13 +295,13 @@ void siconos::simulation::OneStepNSProblem::updateInteractionBlocks()
 
   DEBUG_EXPR(displayBlocks(indexSet););
 
-  DEBUG_PRINT("siconos::simulation::OneStepNSProblem::updateInteractionBlocks() ends\n");
+  DEBUG_PRINT("siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks() ends\n");
 }
 
-void siconos::simulation::OneStepNSProblem::displayBlocks(
+void siconos::nonsmooth_formulations::OneStepNSProblem::displayBlocks(
     std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet)
 {
-  std::cout << "siconos::simulation::OneStepNSProblem::displayBlocks(std::shared_ptr<siconos::"
+  std::cout << "siconos::nonsmooth_formulations::OneStepNSProblem::displayBlocks(std::shared_ptr<siconos::"
                "graphs::InteractionsGraph> indexSet) "
             << std::endl;
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
@@ -332,12 +332,12 @@ void siconos::simulation::OneStepNSProblem::displayBlocks(
   }
 }
 
-void siconos::simulation::OneStepNSProblem::initialize(
+void siconos::nonsmooth_formulations::OneStepNSProblem::initialize(
     std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // Link with the simulation that owns this osnsp
 
-  assert(sim && "siconos::simulation::OneStepNSProblem::initialize(sim), sim is null.");
+  assert(sim && "siconos::nonsmooth_formulations::OneStepNSProblem::initialize(sim), sim is null.");
 
   _simulation = sim;
 
@@ -349,7 +349,7 @@ void siconos::simulation::OneStepNSProblem::initialize(
 }
 
 std::shared_ptr<siconos::algebra::SimpleMatrix>
-siconos::simulation::OneStepNSProblem::getOSIMatrix(
+siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
     siconos::integrators::OneStepIntegrator& Osi,
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
 {
@@ -386,7 +386,7 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
     }
     else
       THROW_EXCEPTION(
-          "siconos::simulation::OneStepNSProblem::getOSIMatrix is implemented for LsodarOSI "
+          "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix is implemented for LsodarOSI "
           "only with LagrangianDS systems.");
   }
   else if (osiType == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
@@ -403,13 +403,13 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
     }
     else {
       THROW_EXCEPTION(
-          "siconos::simulation::OneStepNSProblem::getOSIMatrix is implemented for "
+          "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix is implemented for "
           "NewmarkAlphaOSI only with LagrangianDS systems.");
     }
   }  // End Newmark OSI
   else if (osiType == siconos::integrators::IntegratorType::D1MINUSLINEAROSI) {
     DEBUG_PRINT(
-        "siconos::simulation::OneStepNSProblem::getOSIMatrix  for osiType "
+        "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix  for osiType "
         "siconos::integrators::IntegratorType::D1MINUSLINEAR\n");
     /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all
     OSNSP*/
@@ -431,7 +431,7 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
     }
     else
       THROW_EXCEPTION(
-          "siconos::simulation::OneStepNS::getOSIMatrix for D1Minus, only implemented for "
+          "siconos::nonsmooth_formulations::OneStepNS::getOSIMatrix for D1Minus, only implemented for "
           "Lagrangian or NewtonEuler");
   }
   // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
@@ -444,25 +444,25 @@ siconos::simulation::OneStepNSProblem::getOSIMatrix(
   }
   else
     THROW_EXCEPTION(
-        "siconos::simulation::OneStepNSProblem::getOSIMatrix not yet implemented for "
+        "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix not yet implemented for "
         "Integrator of type " +
         siconos::tools::enum_to_string(osiType));
   return block;
 }
 
-void siconos::simulation::OneStepNSProblem::setSolverId(int solverId)
+void siconos::nonsmooth_formulations::OneStepNSProblem::setSolverId(int solverId)
 {
   // And create a new one, with default parameters values.
   _numerics_solver_options.reset(siconos::numerics::solver_options_create(solverId),
                                  siconos::numerics::solver_options_delete);
 }
 
-void siconos::simulation::OneStepNSProblem::setNumericsVerboseMode(bool vMode)
+void siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseMode(bool vMode)
 {
   siconos::numerics::numerics_set_verbose(vMode);
 }
 
-void siconos::simulation::OneStepNSProblem::setNumericsVerboseLevel(int level)
+void siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseLevel(int level)
 {
   siconos::numerics::numerics_set_verbose(level);
 }

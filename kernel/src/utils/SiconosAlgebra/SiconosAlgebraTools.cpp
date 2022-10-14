@@ -27,7 +27,8 @@
 #include "BlockVector.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "expm.hpp"  // boost contribs expm_pad
+#include "Tools.hpp"  // enum_to_string
+#include "expm.hpp"   // boost contribs expm_pad
 
 // #include <iostream>
 
@@ -89,21 +90,29 @@ int siconos::algebra::syev(SiconosVector &eigenval, SiconosMatrix &eigenvec, boo
 
   // Adaptor to symmetric_mat. Warning : no copy, eigenvec will be modified
   // by syev.
-  boost::numeric::ublas::symmetric_adaptor<DenseMat, boost::numeric::ublas::lower> s_a(
-      *eigenvec.dense());
+
+#ifdef USE_OPTIMAL_WORKSPACE
+  auto opt = lapack::optimal_workspace();
+#endif
+#ifdef USE_MINIMAL_WORKSPACE
+  auto opt = lapack::minimal_workspace();
+#endif
 
   char jobz;
   if (withVect)
     jobz = 'V';
   else
     jobz = 'N';
+  auto num = eigenvec.num();
+  if (num == UblasType::DENSE) {
+    boost::numeric::ublas::symmetric_adaptor<DenseMat, boost::numeric::ublas::lower> s_a(
+        *eigenvec.dense());
+    info += lapack::syev(jobz, s_a, *eigenval.dense(), opt);
+  }
+  else
+    THROW_EXCEPTION("Not yet implemented for matrix of type." +
+                    siconos::tools::enum_to_string(num));
 
-#ifdef USE_OPTIMAL_WORKSPACE
-  info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::optimal_workspace());
-#endif
-#ifdef USE_MINIMAL_WORKSPACE
-  info += lapack::syev(jobz, s_a, *eigenval.dense(), lapack::minimal_workspace());
-#endif
   std::cout << "Compute eigenvalues ..." << std::endl;
   return info;
 }

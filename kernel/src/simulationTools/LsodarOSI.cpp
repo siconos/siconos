@@ -603,11 +603,11 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
     : public siconos::internal::SiconosVisitor {
   using SiconosVisitor::visit;
 
-  siconos::simulation::OneStepNSProblem& _osnsp;
+  siconos::nonsmooth_formulations::OneStepNSProblem& _osnsp;
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
   siconos::graphs::InteractionProperties& _interProp;
 
-  _NSLEffectOnFreeOutput(siconos::simulation::OneStepNSProblem& p,
+  _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem& p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
@@ -639,7 +639,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
 
 void siconos::integrators::LsodarOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::simulation::OneStepNSProblem* osnsp)
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
 {
   auto allOSNS = _simulation->oneStepNSProblems();
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());

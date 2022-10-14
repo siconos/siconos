@@ -28,7 +28,7 @@ namespace siconos::modeling {
 class Interaction;
 }
 
-namespace siconos::simulation {
+namespace siconos::nonsmooth_formulations {
 
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
@@ -130,5 +130,5 @@ class OSNSMatrixProjectOnConstraints : public OSNSMatrix {
   */
   void fillM(siconos::graphs::InteractionsGraph& indexSet, bool update = true);
 };
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 #endif

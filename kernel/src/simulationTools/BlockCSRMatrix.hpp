@@ -43,7 +43,7 @@ namespace siconos::simulation {
 
 /**
    Definition of a compressed sparse row matrix of SiconosMatrix,
-   used in OneStepNSProblem to store the M matrix.
+   used in siconos::nonsmooth_formulations::OneStepNSProblem to store the M matrix.
 
    This class defines a specific compressed row sparse storage for
    blocks matrices, each block being a SiconosMatrix*.
