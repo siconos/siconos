@@ -81,6 +81,16 @@ void TransportCableManager::computeDS()
 	// model is loaded
 	// q0 must be computed
 	// q0 = q	
+	int ndof = m_results.q.size()*3;
+	m_results.q0 = std::make_shared<SiconosVector>(ndof); 
+	m_results.v0 = std::make_shared<SiconosVector>(ndof); 
+	size_t i = 0;
+	for (auto &q : m_results.q) { 
+		m_results.q0->setValue(i++, q.x);
+        m_results.q0->setValue(i++, q.y);
+        m_results.q0->setValue(i++, q.z);        
+    }
+		
 	double rho = m_model.get_cable().get_rho();
 
 	// compute mass -> results.mass
@@ -101,6 +111,8 @@ void TransportCableManager::computeDS()
 
 
 }
+
+
 void TransportCableManager::compute_mass(double a_length, double a_rho)
 {
   /*get_mass_damp(elem_length,elem_rho,damping)

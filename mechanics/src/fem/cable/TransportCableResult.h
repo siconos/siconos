@@ -2,8 +2,8 @@
 #include "Ropeway.h"
 #include "Pulley.h"
 #include "Support.h"
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+//#include "SiconosVector.hpp"
+//#include "SimpleMatrix.hpp"
 
 class TransportCableResult
 {
@@ -41,11 +41,11 @@ public:
 	vector<Point> blocked;
 	vector<Point> blocked_value;
 	
-	std::shared_ptr<SiconosVector> q0{nullptr};
-    std::shared_ptr<SiconosVector> v0{nullptr};
+	std::shared_ptr<class SiconosVector> q0{nullptr};
+    std::shared_ptr<class SiconosVector> v0{nullptr};
 
-    std::shared_ptr<SiconosMatrix> mass{nullptr};
-    std::shared_ptr<SiconosVector> b{nullptr};
+    std::shared_ptr<class SiconosMatrix> mass{nullptr};
+    std::shared_ptr<class SiconosVector> b{nullptr};
 
 
 

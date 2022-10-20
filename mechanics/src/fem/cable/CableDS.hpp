@@ -59,7 +59,7 @@ protected:
   double _EA{1};
   double _l_e{1};
 
-  static std::shared_ptr<SimpleMatrix> TRNp_Np;
+  std::shared_ptr<SimpleMatrix> TRNp_Np;
 
   void matmult(const std::shared_ptr<SiconosVector> &V,
                size_t a_startIdx, std::shared_ptr<SiconosVector> &R);
@@ -101,7 +101,7 @@ public:
   void dampingMatrix();
   // + some access op to be added later, if required
 
-  static std::shared_ptr<SimpleMatrix> TRNp_NpMatrix();
+  std::shared_ptr<SimpleMatrix> TRNp_NpMatrix();
 };
 } // namespace siconos::mechanics::fem
 

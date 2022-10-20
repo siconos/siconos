@@ -8,7 +8,6 @@ TransportCableProfil::TransportCableProfil(const TransportCableModel &a_model, T
 	puller12(r_model.get_piles1().back(), r_model.get_piles2().back(), r_results.puller12),
 	puller21(r_model.get_piles2().front(), r_model.get_piles1().front(), r_results.puller21)
 {
-	rope2.set_Down(true);
 }
 
 TransportCableProfil::~TransportCableProfil()
@@ -22,7 +21,7 @@ void TransportCableProfil::computeInitialProfil(int nb_nodes, int nodes_per_pull
 	meca.set_rho(meca.get_rho() + vehicules.get_rho());
 
 	r_results.rope1.compute(meca, r_model.get_piles1(), nb_nodes, a_tol, a_nmax);
-	meca.set_T(rope1.get_T0());
+    meca.set_T(r_results.rope1.get_T0());
     r_results.rope2.compute(meca, r_model.get_piles2(), nb_nodes, a_tol, a_nmax);
 
 	puller12.set_T(r_results.rope1.get_LastT());
@@ -39,9 +38,9 @@ void TransportCableProfil::computeInitialProfil(int nb_nodes, int nodes_per_pull
 void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol, double mu_s,
                                       double mu_p)
 {
-	double Lt = puller12.get_L(rope2);
-	double Lb = puller21.get_L(rope1);
-        double L = r_results.rope1.get_L() + Lt + r_results.rope2.get_L() + Lb;
+	double Lt = puller12.get_L(r_results.rope2);
+	double Lb = puller21.get_L(r_results.rope1);
+    double L = r_results.rope1.get_L() + Lt + r_results.rope2.get_L() + Lb;
 
 	int n_Pt = (int)rint(nb_elem*Lt / L);
 	int n_Pb = (int)rint(nb_elem*Lb / L);

@@ -1,4 +1,6 @@
 #include "TransportCableResult.h"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 
 
 

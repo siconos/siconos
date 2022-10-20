@@ -21,7 +21,6 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
-std::shared_ptr<SimpleMatrix> TRNp_Np = siconos::mechanics::fem::CableDS::TRNp_NpMatrix();
 
 std::shared_ptr<SimpleMatrix> siconos::mechanics::fem::CableDS::TRNp_NpMatrix()
 {
@@ -52,6 +51,7 @@ siconos::mechanics::fem::CableDS::CableDS(std::shared_ptr<SiconosVector> q0,
 {
   _EA = a_EA;
   _l_e = a_elem_length;
+  TRNp_Np = siconos::mechanics::fem::CableDS::TRNp_NpMatrix();
 
 
   // Constructor with initial state and mass.
