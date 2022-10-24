@@ -107,6 +107,9 @@ Example of usage:
 %ignore getDSBlocks;
 %ignore getInvMBlock;
 
+%ignore osnsp_rhs;
+
+
 // SiconosMemory
 %ignore swap;
 

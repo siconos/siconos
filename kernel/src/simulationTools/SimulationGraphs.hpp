@@ -85,6 +85,8 @@ struct InteractionProperties
   SP::VectorOfVectors workVectors;     /**< set of SiconosVector, useful to ensure contiguous memory vectors, used as buffers in OneStepIntegrator classes. */
   SP::VectorOfBlockVectors workBlockVectors;     /**< set of BlockVector, used as buffers in OneStepIntegrator classes. */
   SP::VectorOfSMatrices workMatrices;  /**< Internal buffers used on simulation size, to store jacobians or other temporary matrices. */
+  SP::OneStepIntegrator osi1;              /**< Integrator 1  used for the given Interaction */
+  SP::OneStepIntegrator osi2;              /**< Integrator 2  used for the given Interaction */
 
   ACCEPT_SERIALIZATION(InteractionProperties);
 };

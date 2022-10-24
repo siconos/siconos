@@ -30,19 +30,19 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
 
 /**
    ZeroOrderHoldOSI Time-Integrator for Dynamical Systems
-   
+
    See User's guide for details.
-   
+
    ZeroOrderHoldOSI class is used to define some time-integrators methods for a
    list of dynamical systems.
    A ZeroOrderHoldOSI instance is defined by the value of theta and the list of
    concerned dynamical systems.  Each DynamicalSystem is associated to
-   
+
    - computeFreeState(): computes xfree of dynamical systems
    state without taking the non-smooth part into account
-   
+
    - updateState(): update the state x of the dynamical systems
-   
+
 */
 class ZeroOrderHoldOSI : public OneStepIntegrator {
 protected:
@@ -143,12 +143,19 @@ public:
   /** Compute the Output (y) which corresponds to the free state (state without
       taking into account the nonsmooth input) plus the possible contribution of
       the nslaw
-      
+
       \param vertex_inter of the interaction graph
       \param osnsp a pointer to the OneStepNSProblem
    */
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
+
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+   */
+  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
+  {
+    return *(*indexSet.properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
+  };
 
   /** Apply the rule to one Interaction to known if is it should be included
    *  in the IndexSet of level i
@@ -158,7 +165,7 @@ public:
    *  \return true if y<=0
    */
   bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
-  
+
   /** Apply the rule to one Interaction to known if is it should be removed
    *  in the IndexSet of level i
    *

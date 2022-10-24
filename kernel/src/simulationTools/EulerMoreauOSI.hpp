@@ -23,9 +23,9 @@
 
 #include "OneStepIntegrator.hpp"
 
-/** 
+/**
     One Step time Integrator for First Order Dynamical Systems.
- 
+
     This integrator is the work horse of the event--capturing time stepping
     schemes for first order systems. It is mainly based on some extensions of the
     Backward Euler and \f$ \theta-\gamma \f$  schemes proposed in the pionnering
@@ -78,7 +78,7 @@
     nonsmooth problem''.
 
     Another variant can also be used (FullThetaGamma scheme)
-    
+
     \f[
     \begin{cases}
     M x_{k+1} = M x_{k} +h f(x_{k+\theta},t_{k+1}) + h r(t_{k+\gamma})\\[2mm]
@@ -101,7 +101,7 @@
     For first order systems, the implementation uses _r for storing the
     the input due to the nonsmooth law. This EulerMoreauOSI scheme assumes that
     the relative degree is zero or one and one level for _r is sufficient
-    
+
     Main functions:
 
     - computeFreeState(): computes xfree (or vfree), dynamical systems
@@ -410,6 +410,14 @@ public:
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
 
+
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+   */
+  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,   InteractionsGraph& indexSet) override
+  {
+    return *(*indexSet.properties(vertex_inter).workVectors)[EulerMoreauOSI::OSNSP_RHS];
+  };
+
   /** computes all the W matrices
    *
    *  \param time current time
@@ -417,7 +425,7 @@ public:
   void prepareNewtonIteration(double time) override;
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
-   *  stop at tout (->iout=false) 
+   *  stop at tout (->iout=false)
    *
    *  \param tinit initial time
    *  \param tend end time
