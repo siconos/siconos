@@ -28,6 +28,7 @@
 #include "SimulationTypeDef.hpp"
 #include "OneStepIntegratorTypes.hpp"
 #include "SimulationGraphs.hpp"
+#include "Simulation.hpp"
 
 /**
    Generic class to manage DynamicalSystem(s) time-integration
@@ -461,9 +462,9 @@ public:
     _extraAdditionalTerms = eat;
   }
   /**
-      True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
 
-      \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
+     \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
    */
   inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
   {
@@ -471,15 +472,24 @@ public:
   };
 
   /**
-      True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
 
-      \param dsgv the descriptor of the node in the graph corresponding to the dynamical system of interest.
+     \param dsgv the descriptor of the node in the graph corresponding to the dynamical system of interest.
    */
   inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
   {
     return  (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
   };
 
+  /**
+     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+
+     \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
+   */
+  inline bool checkInteractionOSI(InteractionsGraph & indexSet0, InteractionsGraph::VIterator ui)
+  {
+    return  (indexSet0.properties(*ui).osi1.get()) == this;
+  };
 
   virtual SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,  InteractionsGraph& indexSet) = 0;
 

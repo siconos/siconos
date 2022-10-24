@@ -149,31 +149,51 @@ void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
   }
 }
 
+void OneStepIntegrator::updateOutput(double time, unsigned int level)
+{
+  InteractionsGraph::VIterator ui, uiend;
+  InteractionsGraph & indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for(std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
+  {
+    if(!checkInteractionOSI(indexSet0, ui)) continue;
+    Interaction & inter = *indexSet0.bundle(*ui);
+    assert(inter.lowerLevelForOutput() <= level);
+    assert(inter.upperLevelForOutput() >= level);
+    inter.computeOutput(time, level);
+  }
+}
+
+
 void OneStepIntegrator::updateOutput(double time)
 {
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  _simulation->nonSmoothDynamicalSystem()->updateOutput(time,_levelMinForOutput, _levelMaxForOutput);
+  for(unsigned int level = _levelMinForOutput; level<=_levelMaxForOutput; ++level)
+    OneStepIntegrator::updateOutput(time, level);
 }
+
 
 void OneStepIntegrator::updateInput(double time)
 {
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
   for(unsigned int level = _levelMinForInput;
-      level < _levelMaxForInput + 1;
-      level++)
-    _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
-}
-
-void OneStepIntegrator::updateOutput(double time, unsigned int level)
-{
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  _simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
+          level < _levelMaxForInput + 1;
+       level++)
+     OneStepIntegrator::updateInput(time, level);
 }
 
 void OneStepIntegrator::updateInput(double time, unsigned int level)
 {
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  _simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
+  // We compute input using lambda(level).
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  InteractionsGraph & indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for(std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
+  {
+    if(!checkInteractionOSI(indexSet0, ui)) continue;
+    Interaction & inter = *indexSet0.bundle(*ui);
+    assert(inter.lowerLevelForInput() <= level);
+    assert(inter.upperLevelForInput() >= level);
+    inter.computeInput(time, level);
+  }
+
 }
 
 
