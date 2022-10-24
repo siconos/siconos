@@ -157,7 +157,7 @@ void NonSmoothDynamicalSystem::setSymmetric(bool val)
 }
 
 
-void NonSmoothDynamicalSystem::reset()
+void NonSmoothDynamicalSystem::resetNonSmoothPart()
 {
   DynamicalSystemsGraph::VIterator vi;
   for(vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
@@ -166,7 +166,7 @@ void NonSmoothDynamicalSystem::reset()
   }
 }
 
-void NonSmoothDynamicalSystem::reset(unsigned int level)
+void NonSmoothDynamicalSystem::resetNonSmoothPart(unsigned int level)
 {
   DynamicalSystemsGraph::VIterator vi;
   for(vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
@@ -222,7 +222,7 @@ void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
   //  assert(level>=0);
 
   // Set dynamical systems non-smooth part to zero.
-  reset(level);
+  resetNonSmoothPart(level);
 
   // We compute input using lambda(level).
   InteractionsGraph::VIterator ui, uiend;

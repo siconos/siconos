@@ -499,7 +499,7 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   if( osi1Type != osi2Type)
   {
     THROW_EXCEPTION("Simulation::initializeInteraction: integration of Interaction not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
-  }	  
+  }
 }
 
 
@@ -659,6 +659,9 @@ void Simulation::updateInput(unsigned int)
 {
   DEBUG_BEGIN("Simulation::updateInput()\n");
   OSIIterator itOSI;
+
+  nonSmoothDynamicalSystem()->resetNonSmoothPart();
+
   // 1 - compute input (lambda -> r)
   if(!_allNSProblems->empty())
   {

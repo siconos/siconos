@@ -1365,7 +1365,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
   //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
 
   // Set dynamical systems non-smooth part to zero.
-  _simulation->nonSmoothDynamicalSystem()->reset(level);
+  _simulation->nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
 
 
   InteractionsGraph::VIterator ui, uiend;
