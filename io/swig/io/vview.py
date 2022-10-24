@@ -1913,6 +1913,7 @@ class VView(object):
         self.print_verbose_level(2,'init_contactor',  contactor_instance_name)
         contactor = instance[contactor_instance_name]
         contact_shape_indx = None
+
         if 'shape_name' not in contactor.attrs:
             print("Warning: old format: ctr.name must be ctr.shape_name for contact {0}".format(contactor_instance_name))
             shape_attr_name='name'
@@ -2039,18 +2040,26 @@ class VView(object):
                             center_of_mass),
              offset_orientation))
 
-        self.cell_connectors[instid] = CellConnector(
+        cc = CellConnector(
             instid,
             data_names=['instance', 'translation',
                         'velocity(linear)','velocity(angular)',
-                        'kinetic_energy'],
-            data_sizes=[1, 3, 3, 3, 1])
-        self.cell_connectors[instid].SetInputConnection(
+                        'kinetic_energy', 'displacement'],
+            data_sizes=[1, 3, 3, 3, 1, 3])
+
+        if self.cell_connectors.get(instid, None) == None :
+            self.cell_connectors[instid] = [ cc ]
+        else:
+            self.cell_connectors[instid].append(cc)
+
+
+        cc.SetInputConnection(
             transformer.GetOutputPort())
 
         self.objects_collector.AddInputConnection(
-            self.cell_connectors[instid].GetOutputPort())
-        self.cell_connectors[instid].Update()
+            cc.GetOutputPort())
+        cc.Update()
+
 
     def init_instance(self, instance_name):
         self.print_verbose_level(2,'init_instance',  instance_name)
@@ -2152,36 +2161,40 @@ class VView(object):
 
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in cc:
-                cc[instance]._datas[2][:] = [v0, v1, v2]
-                cc[instance]._datas[3][:] = [v3, v4, v5]
-                if self.io.dimension() == 3 :
-                    cc[instance]._datas[4][:] = \
-                        0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
-                             numpy.dot([v3, v4, v5],
-                                       numpy.dot(self.inertia[instance],
-                                                 [v3, v4, v5])))
-                elif self.io.dimension() == 2 :
-                    kinetic_energy= 0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
-                                         self.inertia[instance]*(v5*v5))
-                    #print('velo', instance, v0, v1, v2, v3, v4, v5)
-                    #print('mass', self.mass[instance])
-                    #print('inertia', self.inertia[instance])
-                    #print('kinetic_energy', kinetic_energy)
-                    cc[instance]._datas[4][:] = kinetic_energy
+                for ccc in cc[instance]:
+                    ccc._datas[2][:] = [v0, v1, v2]
+                    ccc._datas[3][:] = [v3, v4, v5]
+                    if self.io.dimension() == 3 :
+                        ccc._datas[4][:] = \
+                            0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
+                                 numpy.dot([v3, v4, v5],
+                                           numpy.dot(self.inertia[instance],
+                                                     [v3, v4, v5])))
+                    elif self.io.dimension() == 2 :
+                        kinetic_energy= 0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
+                                             self.inertia[instance]*(v5*v5))
+                        #print('velo', instance, v0, v1, v2, v3, v4, v5)
+                        #print('mass', self.mass[instance])
+                        #print('inertia', self.inertia[instance])
+                        #print('kinetic_energy', kinetic_energy)
+                        ccc._datas[4][:] = kinetic_energy
 
 
 
         self.set_velocity_v = numpy.vectorize(set_velocity)
 
-        def set_translation(instance, x0, x1, x2 ):
+        def set_translation(instance, x0, x1, x2, x0_0, x1_0, x2_0 ):
             if instance in cc:
-                cc[instance]._datas[1][:] = [x0, x1, x2]
+                for ccc in cc[instance]:
+                    ccc._datas[1][:] = [x0, x1, x2]
+                    ccc._datas[5][:] = [x0-x0_0, x1-x1_0, x2-x2_0]
 
         self.set_translation_v = numpy.vectorize(set_translation)
 
         def set_instance(instance):
             if instance in cc:
-                cc[instance]._datas[0][:] = [instance]
+                for ccc in cc[instance]:
+                    ccc._datas[0][:] = [instance]
 
         self.set_instance_v = numpy.vectorize(set_instance)
 
@@ -2652,11 +2665,13 @@ class VView(object):
 
             packet = int(ntime/100)+1
 
+            initial_time =True
 
             for time in times:
                 k = k + self.opts.stride
                 if (k % packet == 0):
                     sys.stdout.write('.')
+                    sys.stdout.flush()
 
                 self.io_reader.SetTime(time)
 
@@ -2672,6 +2687,12 @@ class VView(object):
 
                 pos_data = self.io_reader.pos_data
                 velo_data = self.io_reader.velo_data
+
+                if initial_time:
+                    initial_pos_data = self.io_reader.pos_data
+                    initial_velo_data = self.io_reader.velo_data
+                    initial_time = False
+
 
                 self.set_position_v(
                     pos_data[:, 1], pos_data[:, 2], pos_data[:, 3],
@@ -2692,6 +2713,9 @@ class VView(object):
                     pos_data[:, 2],
                     pos_data[:, 3],
                     pos_data[:, 4],
+                    initial_pos_data[:, 2],
+                    initial_pos_data[:, 3],
+                    initial_pos_data[:, 4]
                 )
 
                 self.set_instance_v(pos_data[:, 1])
