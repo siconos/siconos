@@ -420,12 +420,13 @@ public:
   virtual void updateDSPlugins(double time);
 
   /** update input
-   *
    *  \param level lambda order used to compute input
-   *  level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  virtual void updateInput(unsigned int level=0);
-
+  virtual void updateInput(unsigned int level);
+  
+  /** update all input terms
+   */
+  virtual void updateAllInput();
   /** update state of each dynamical system
    */
   virtual void updateState(unsigned int level=0);

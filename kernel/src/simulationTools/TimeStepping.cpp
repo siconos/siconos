@@ -547,7 +547,7 @@ void TimeStepping::initializeNewtonLoop()
     initOSNS();
 
 
-    updateInput(); //??
+    updateAllInput(); //??
 
   }
   // else  if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT) || isLinear)
@@ -626,7 +626,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     if (!_skip_last_updateInput)
       updateOutput();
 
-    updateInput();
+    updateAllInput();
     updateState();
     if (!_skip_last_updateOutput)
       updateOutput();
@@ -670,7 +670,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
           checkSolverOutput(info, this);
       }
 
-      updateInput();
+      updateAllInput();
       updateState();
 
       // -- VA 01/07/2021

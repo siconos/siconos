@@ -68,11 +68,6 @@ public:
   /** step from current event to next event of EventsManager */
   void advanceToEvent() override;
 
-  /** update input
-   *  \param level lambda order used to compute input
-   */
-  void updateInput(unsigned int level) override;
-
   /** compute residu */
   void computeResidu();
 

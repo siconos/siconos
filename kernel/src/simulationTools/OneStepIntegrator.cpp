@@ -167,7 +167,7 @@ void OneStepIntegrator::updateOutput(double time, unsigned int level)
 void OneStepIntegrator::updateOutput(double time)
 {
   for(unsigned int level = _levelMinForOutput; level<=_levelMaxForOutput; ++level)
-    OneStepIntegrator::updateOutput(time, level);
+    updateOutput(time, level);
 }
 
 
@@ -176,11 +176,13 @@ void OneStepIntegrator::updateInput(double time)
   for(unsigned int level = _levelMinForInput;
           level < _levelMaxForInput + 1;
        level++)
-     OneStepIntegrator::updateInput(time, level);
+    updateInput(time, level);
 }
 
 void OneStepIntegrator::updateInput(double time, unsigned int level)
 {
+  // Warning: This reset may be prone to issue with multiple osis.
+  // resetNonSmoothPart(level);
   // We compute input using lambda(level).
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
