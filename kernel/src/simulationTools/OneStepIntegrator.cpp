@@ -197,7 +197,6 @@ void OneStepIntegrator::updateInput(double time, unsigned int level)
     assert(inter.upperLevelForInput() >= level);
     inter.computeInput(time, level);
   }
-
 }
 
 

@@ -407,6 +407,11 @@ public:
    *
    *  \param time current time
    *  \param level level of interest for the dynamics
+   *  \warning VA: 27/10/2022 Whatever the level, the updateInput method loops over indexSet0
+   *  This is sometimes necessary for some OSI but for some others it may burden the computational
+   *  time for nothing. For instance, in standard MoreauJEANOSI, p[1] is only defined on indexSet1.
+   *  we should go towards
+   *  virtual void updateInput(double time, unsigned int pLevel, unsigned int indexSetLevel );
    */
   virtual void updateInput(double time, unsigned int level);
 
