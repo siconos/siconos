@@ -181,7 +181,6 @@ void OneStepIntegrator::updateInput(double time)
 
 void OneStepIntegrator::updateInput(double time, unsigned int level)
 {
-  // Warning: This reset may be prone to issue with multiple osis.
   // resetNonSmoothPart(level);
   // We compute input using lambda(level).
   //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
