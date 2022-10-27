@@ -660,11 +660,14 @@ void Simulation::updateAllInput()
   DEBUG_BEGIN("Simulation::updateInput()\n");
   OSIIterator itOSI;
 
-  nonSmoothDynamicalSystem()->resetNonSmoothPart();
+  //nonSmoothDynamicalSystem()->resetNonSmoothPart();
   
   // 1 - compute input (lambda -> r)
   if(!_allNSProblems->empty())
   {
+    for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->resetAllNonSmoothParts(); 
+
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
       (*itOSI)->updateInput(nextTime());
     //_nsds->updateInput(nextTime(),levelInput);
@@ -677,11 +680,14 @@ void Simulation::updateInput(unsigned int level)
   DEBUG_BEGIN("Simulation::updateInput()\n");
   OSIIterator itOSI;
 
-  nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
+  //nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
   
   // 1 - compute input (lambda -> r)
   if(!_allNSProblems->empty())
   {
+    for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->resetNonSmoothPart(level); 
+
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
 	    (*itOSI)->updateInput(nextTime(),level);
   }

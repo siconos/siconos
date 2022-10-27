@@ -184,6 +184,9 @@ void OneStepIntegrator::updateInput(double time, unsigned int level)
   // Warning: This reset may be prone to issue with multiple osis.
   // resetNonSmoothPart(level);
   // We compute input using lambda(level).
+  //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
+
+  //resetNonSmoothPart(level);
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   InteractionsGraph & indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
