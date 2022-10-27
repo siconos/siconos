@@ -524,10 +524,6 @@ public:
    */
   void setSymmetric(bool val);
 
-  /** Set all DS non-smooth part to zero.
-   */
-  void resetNonSmoothPart();
-
   /** Set all DS non-smooth part to zero for a given level.
    *
    *  \param level the level to will be zeroed

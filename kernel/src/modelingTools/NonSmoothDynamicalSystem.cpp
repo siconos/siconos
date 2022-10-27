@@ -157,15 +157,6 @@ void NonSmoothDynamicalSystem::setSymmetric(bool val)
 }
 
 
-void NonSmoothDynamicalSystem::resetNonSmoothPart()
-{
-  DynamicalSystemsGraph::VIterator vi;
-  for(vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
-  {
-    dynamicalSystems()->bundle(*vi)->resetNonSmoothPart(1);
-  }
-}
-
 void NonSmoothDynamicalSystem::resetNonSmoothPart(unsigned int level)
 {
   DynamicalSystemsGraph::VIterator vi;
