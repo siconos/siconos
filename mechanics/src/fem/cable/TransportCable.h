@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include "nlohmann\json.hpp"
+#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 using ojson = nlohmann::ordered_json;
