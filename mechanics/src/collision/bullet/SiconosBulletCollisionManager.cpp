@@ -145,6 +145,11 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #pragma GCC diagnostic pop
 #endif
 
+// This value is compared to the initial distance computed
+// at the creation of the interaction
+// if distance < - WARNING_TOLERANCE_AT_CREATION_INTERACTION
+// a warning is raised. 
+#define WARNING_TOLERANCE_AT_CREATION_INTERACTION 1e-5
 
 // Comment this to try un-queued static contactor behaviour
 #define QUEUE_STATIC_CONTACTORS 1
@@ -2835,7 +2840,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
           // flag.
-          if(rel->distance() < 0.0)
+          if(rel->distance() < - WARNING_TOLERANCE_AT_CREATION_INTERACTION)
           {
             DEBUG_PRINTF("SiconosBulletCollisionManager :: Interactions must be created with positive "
                          "distance (%f).\n", rel->distance());
@@ -2875,7 +2880,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
           // flag.
-          if(rel->distance() < 0.0)
+          if(rel->distance() <  - WARNING_TOLERANCE_AT_CREATION_INTERACTION)
           {
             DEBUG_PRINTF("SiconosBulletCollisionManager :: Interactions must be created with positive "
                          "distance (%f).\n", rel->distance());
@@ -2919,7 +2924,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
           // flag.
-          if(rel->distance() < 0.0)
+          if(rel->distance() <  - WARNING_TOLERANCE_AT_CREATION_INTERACTION)
           {
             DEBUG_PRINTF("Interactions must be created with positive "
                          "distance (%f).\n", rel->distance());
@@ -2963,7 +2968,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
           // flag.
-          if(rel->distance() < 0.0)
+          if(rel->distance() <  - WARNING_TOLERANCE_AT_CREATION_INTERACTION)
           {
             DEBUG_PRINTF("SiconosBulletCollisionManager :: Interactions must be created with positive "
                          "distance (%f).\n", rel->distance());

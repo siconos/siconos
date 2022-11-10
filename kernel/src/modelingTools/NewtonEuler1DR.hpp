@@ -31,7 +31,7 @@
    the method computeh, by setting the member pc1, pc2, nc and y.  The
    matrix jachq is used both for the building of the OSNSP (with T)
    and for the predictor of activation of deactivation of the Interaction.
-   
+
 */
 class NewtonEuler1DR : public NewtonEulerR {
 protected:
@@ -89,7 +89,7 @@ protected:
 
   /** Set the coordinates of inside normal vector at the contact point.
    *  Must only be done in a computeh() override.
-   * 
+   *
    *  \param nnc new coordinates
    */
   void setnc(SP::SiconosVector nnc) { _Nc = nnc; };
@@ -101,7 +101,7 @@ private:
 public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
    *  seems parametrize the projection algorithm
-   *  the projection is done on the surface  \f$ y=0 \f$  or on  \f$ y \geq 0 \f$ 
+   *  the projection is done on the surface  \f$ y=0 \f$  or on  \f$ y \geq 0 \f$
    */
   bool _isOnContact = false;
 
@@ -133,14 +133,23 @@ public:
    */
   void computeJachqT(Interaction &inter, SP::BlockVector q0) override;
 
-  /** 
+  /**
       to compute the output y = h(t,q,z) of the Relation
-      
+
       \param time current time value
       \param q coordinates of the dynamical systems involved in the relation
       \param y the resulting vector
   */
   void computeh(double time, const BlockVector &q0, SiconosVector &y) override;
+
+  /**
+      to compute the output y = h(t,q,z) of the Relation
+      with the relative contact points
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+   */
+  void computehFromRelativeContactPoints(double time, const BlockVector &q0, SiconosVector &y);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
@@ -162,14 +171,14 @@ public:
 
   /** Set the coordinates of second contact point in ds2 frame
    *  It will be used to compute _Pc2 during computeh().
-   * 
+   *
    *  \param npc new coordinates
    */
   void setRelPc2(SP::SiconosVector npc) { _relPc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point in ds2
    *  frame. It will be used to compute _Nc during computeh().
-   *  
+   *
    *  \param nnc new coordinates
    */
   void setRelNc(SP::SiconosVector nnc) { _relNc = nnc; };

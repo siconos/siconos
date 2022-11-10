@@ -29,29 +29,29 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
 /**
    SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
- 
+
    SchatzmanPaoliOSI class is used to define some time-integrators methods for a
    list of dynamical systems.
 
    A SchatzmanPaoliOSI instance is defined by the value of theta and the list of
    concerned dynamical systems.  Each DynamicalSystem is associated to
    a SiconosMatrix, named "W"
-   
+
    W matrices are initialized and computed in initializeIterationMatrixW and
    computeW. Depending on the DS type, they may depend on time and DS
    state (x).
 
    For Lagrangian systems, the implementation uses _p[0] for storing the
    discrete multiplier.
-   
+
    Main functions:
-   
+
    - computeFreeState(): computes xfree (or vfree), dynamical systems
    state without taking non-smooth part into account \n
-   
+
    - updateState(): computes x (q,v), the complete dynamical systems
    states.
-   
+
 */
 class SchatzmanPaoliOSI : public OneStepIntegrator {
 public:
@@ -305,6 +305,13 @@ public:
    */
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
+
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+   */
+  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
+  {
+    return *(*indexSet.properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
+  };
 
   void prepareNewtonIteration(double time) override;
 

@@ -28,7 +28,7 @@
 /**
    One-step integrator for event-capturing simulation combining Moreau-Jean and
    Bilbao numerical scheme.
-   
+
    Numerical scheme which combines an exact method (Bilbao) for the linear
    (non-contacting) part of the equations of motion with a Moreau-Jean
    time-stepping for the nonsmooth part.
@@ -149,6 +149,13 @@ public:
    */
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
+
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+   */
+  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
+  {
+    return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
+  };
 
   /** update the state of the dynamical systems
       \param ds the dynamical to update

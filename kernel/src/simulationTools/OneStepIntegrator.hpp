@@ -28,31 +28,32 @@
 #include "SimulationTypeDef.hpp"
 #include "OneStepIntegratorTypes.hpp"
 #include "SimulationGraphs.hpp"
+#include "Simulation.hpp"
 
 /**
    Generic class to manage DynamicalSystem(s) time-integration
-    
+
    This is a virtual class, interface for some specific integrators.
-   
+
    At the time, available integrators are:
-   
-   - EulerMoreauOSI 
-   - MoreauJeanOSI 
-   - MoreauJeanCombinedProjectionOSI 
-   - MoreauJeanDirectProjectionOSI 
-   - MoreauJeanBilbaoOSI 
-   - D1MinusLinearOSI 
-   - SchatzmanPaoliOSI 
-   - LsodarOSI 
-   - Hem5OSI 
-   - NewMarkAlphaOSI 
-   - ZeroOrderHoldOSI 
+
+   - EulerMoreauOSI
+   - MoreauJeanOSI
+   - MoreauJeanCombinedProjectionOSI
+   - MoreauJeanDirectProjectionOSI
+   - MoreauJeanBilbaoOSI
+   - D1MinusLinearOSI
+   - SchatzmanPaoliOSI
+   - LsodarOSI
+   - Hem5OSI
+   - NewMarkAlphaOSI
+   - ZeroOrderHoldOSI
 */
 class OneStepIntegrator :public std::enable_shared_from_this<OneStepIntegrator>
 {
 
 protected:
-  
+
   ACCEPT_SERIALIZATION(OneStepIntegrator);
 
   /** type/name of the Integrator */
@@ -122,7 +123,7 @@ protected:
   /**
      Compare interaction and current OSI levels for input and output.
      Reset interaction if they are not compliant.
-     
+
      \param inter a reference to an Interaction
   */
   void _check_and_update_interaction_levels(Interaction& inter);
@@ -166,7 +167,7 @@ public:
   /**
      get the graph of dynamical systems associated with the Integrator
      warning: returns the whole ds graph, not only ds integrated by the present osi.
-     
+
      \return a SP::DynamicalSystemsGraph
   */
   inline SP::DynamicalSystemsGraph dynamicalSystemsGraph() const
@@ -183,7 +184,7 @@ public:
   };
 
   /** get number of internal memory vectors needed in dynamical systems integrated with this osi.
-   *  
+   *
    *  \return an unsigned int
    */
   inline unsigned int getSizeMem() const
@@ -218,7 +219,7 @@ public:
     return _levelMinForOutput;
   }
 
-  /** 
+  /**
       maximal level required for output var used with this integration scheme.
       var[level] is the derivative of order 'level' of var.
    */
@@ -227,7 +228,7 @@ public:
     return _levelMaxForOutput;
   }
 
-  /** 
+  /**
       minimal level required for input var used with this integration scheme.
       var[level] is the derivative of order 'level' of var.
    */
@@ -236,7 +237,7 @@ public:
     return _levelMinForInput;
   }
 
-  /** 
+  /**
       maximal level required for input var used with this integration scheme.
       var[level] is the derivative of order 'level' of var.
    */
@@ -246,7 +247,7 @@ public:
   }
 
   /** get the number of index sets required for the simulation
-   * 
+   *
    *  \return unsigned int
    */
   virtual unsigned int numberOfIndexSets() const = 0;
@@ -276,7 +277,7 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * 
+   *
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
@@ -284,7 +285,7 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * 
+   *
    *  \param inter the interaction
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
@@ -296,7 +297,7 @@ public:
 
   /**
      compute interaction output (y) for all levels and swaps in memory
-     
+
      \param inter the interaction to update
      \param time value for output computation
      \param interaction_properties properties of the interaction, in the Interaction Graph I0
@@ -309,7 +310,7 @@ public:
   }
 
   /** return the maximum of all norms for the discretized residus of DS
-   * 
+   *
    *  \return a double
    */
   virtual double computeResidu(){
@@ -318,7 +319,7 @@ public:
     return 0.0;
   }
 
-  /** 
+  /**
       integrates the Dynamical System linked to this integrator, without taking constraints
       into account.
   */
@@ -355,7 +356,7 @@ public:
   virtual double computeResiduInput(double time, SP::InteractionsGraph indexSet);
 
   /** integrate the system, between tinit and tend, with possible stop at tout
-   *  
+   *
    *  \param tinit start time
    *  \param tend expected end time
    *  \param tout real end time
@@ -368,13 +369,13 @@ public:
   void resetAllNonSmoothParts();
 
   /** set to zero all the r vectors of the DynamicalSystems of the present OSI for a given level
-   * 
+   *
    *  \param level
    */
   void resetNonSmoothPart(unsigned int level);
 
   /** update the state of the DynamicalSystem attached to this Integrator
-   *  
+   *
    *  \param level level of interest for the dynamics
    *  level is set to 0 by default since in all time-stepping schemes we update all the state
    *  whatever the value of level
@@ -403,9 +404,14 @@ public:
   virtual void updateOutput(double time, unsigned int level);
 
   /** update the input of the Interaction attached to this Integrator
-   * 
+   *
    *  \param time current time
    *  \param level level of interest for the dynamics
+   *  \warning VA: 27/10/2022 Whatever the level, the updateInput method loops over indexSet0
+   *  This is sometimes necessary for some OSI but for some others it may burden the computational
+   *  time for nothing. For instance, in standard MoreauJEANOSI, p[1] is only defined on indexSet1.
+   *  we should go towards
+   *  virtual void updateInput(double time, unsigned int pLevel, unsigned int indexSetLevel );
    */
   virtual void updateInput(double time, unsigned int level);
 
@@ -417,7 +423,7 @@ public:
 
   /** Apply the rule to one Interaction to known if is it should be included
    *  in the IndexSet of level i
-   * 
+   *
    *  \param inter
    *  \param i
    *  \return bool
@@ -431,7 +437,7 @@ public:
 
   /** Apply the rule to one Interaction to know if is it should be removed
    *  from the IndexSet of level i
-   * 
+   *
    *  \param inter
    *  \param i
    *  \return bool
@@ -443,7 +449,7 @@ public:
   };
 
   /** get the ExtraAdditionalTerms.
-   *  
+   *
    *  \return the ExtraAdditionalTerms
    */
   inline SP::ExtraAdditionalTerms extraAdditionalTerms()
@@ -460,25 +466,38 @@ public:
   {
     _extraAdditionalTerms = eat;
   }
-  /** 
-      True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
-      
-      \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
+  /**
+     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+
+     \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
    */
   inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
   {
     return  (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
   };
 
-  /** 
-      True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
-      
-      \param dsgv the descriptor of the node in the graph corresponding to the dynamical system of interest.
+  /**
+     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+
+     \param dsgv the descriptor of the node in the graph corresponding to the dynamical system of interest.
    */
   inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
   {
     return  (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
   };
+
+  /**
+     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+
+     \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
+   */
+  inline bool checkInteractionOSI(InteractionsGraph & indexSet0, InteractionsGraph::VIterator ui)
+  {
+    return  (indexSet0.properties(*ui).osi1.get()) == this;
+  };
+
+  virtual SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,  InteractionsGraph& indexSet) = 0;
+
 
   VIRTUAL_ACCEPT_VISITORS(OneStepIntegrator);
 

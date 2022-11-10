@@ -197,13 +197,14 @@ static NM_types nm_max(const NumericsMatrix* M,
              NM_types type1,
              NM_types type2)
 {
-  return NM_version(M, type1) > NM_version(M, type2) ?
-    type1 : type2;
+  return NM_version(M, type2) > NM_version(M, type1) ?
+    type2 : type1;
 }
 
 static NM_types NM_latest_id(const NumericsMatrix* M)
 {
-  return nm_max(M, nm_max(M, NM_DENSE, NM_SPARSE_BLOCK), NM_SPARSE);
+  NM_types t = nm_max(M, nm_max(M, NM_DENSE, NM_SPARSE_BLOCK), NM_SPARSE);
+  return t;
 }
 
 
@@ -234,6 +235,61 @@ static void NM_inc_version(NumericsMatrix* M, NM_types id)
   }
 }
 
+void NM_version_sync(NumericsMatrix* M)
+{
+  if (M->matrix2)
+  {
+    NSM_version_sync(M->matrix2);
+  }
+
+  if (NM_max_version(M) > 0)
+  {
+    M->storageType = NM_latest_id(M);
+
+#ifndef NDEBUG
+    switch (M->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert (M->matrix0);
+      break;
+    }
+    case NM_SPARSE_BLOCK:
+    {
+      assert (M->matrix1);
+      break;
+    }
+    case NM_SPARSE:
+    {
+      assert (M->matrix2);
+      switch (M->matrix2->origin)
+      {
+      case NSM_TRIPLET:
+      {
+        assert(M->matrix2->triplet);
+        break;
+      }
+      case NSM_HALF_TRIPLET:
+      {
+        assert(M->matrix2->half_triplet);
+        break;
+      }
+      case NSM_CSC:
+      {
+        assert(M->matrix2->csc);
+        break;
+      }
+      case NSM_CSR:
+      {
+        assert(M->matrix2->csr);
+        break;
+      }
+      }
+    }
+    }
+#endif
+  }
+}
 
 void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
                     double* const x, double* y)
@@ -271,9 +327,11 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");
     exit(EXIT_FAILURE);
   }
+
+  NM_version_sync(A);
 }
 
-void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
+void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix* A, const double* const x, double* y, int init)
 {
 
   assert(A);
@@ -310,6 +368,7 @@ void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatri
     exit(EXIT_FAILURE);
   }
 
+  NM_version_sync(A);
 }
 
 void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start, NumericsMatrix* A, double* restrict x, double* restrict y, double* restrict xsave, bool init)
@@ -408,6 +467,8 @@ void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row
     exit(EXIT_FAILURE);
   }
   }
+
+  NM_version_sync(A);
 }
 
 
@@ -507,6 +568,8 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
     exit(EXIT_FAILURE);
   }
   }
+
+  NM_version_sync(A);
 }
 void NM_row_prod_no_diag2(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init)
 {
@@ -669,7 +732,10 @@ void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, Num
     exit(EXIT_FAILURE);
   }
   }
+
+  NM_version_sync(A);
 }
+
 void NM_internalData_free(NumericsMatrix* m)
 {
   assert(m && "NM_internalData_free, m == NULL");
@@ -891,6 +957,8 @@ void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType)
   default:
     numerics_error("NM_clear_other_storages ","unknown storageType %d for matrix\n", M->storageType);
   }
+
+  NM_version_sync(M);
 }
 
 
@@ -1048,6 +1116,8 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val, double threshold)
       M->size1 = j+1;
     }
   }
+
+  NM_version_sync(M);
 }
 
 void NM_entry(NumericsMatrix* M, int i, int j, double val)
@@ -1114,6 +1184,8 @@ void NM_entry(NumericsMatrix* M, int i, int j, double val)
   {
     M->size1 = j+1;
   }
+
+  NM_version_sync(M);
 }
 
 
@@ -1618,6 +1690,8 @@ void NM_read_in_filename(NumericsMatrix* const m, const char *filename)
     NM_read_in_file(m, finput);
     fclose(finput);
   }
+
+  NM_version_sync(m);
 }
 
 void NM_read_in_file(NumericsMatrix* const m, FILE *file)
@@ -1656,6 +1730,8 @@ void NM_read_in_file(NumericsMatrix* const m, FILE *file)
     printf("NM_read_in_file :: unknown matrix storage");
     exit(EXIT_FAILURE);
   }
+
+  NM_version_sync(m);
 }
 
 
@@ -2034,6 +2110,8 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
     printf("NM_add_to_diag3 :: unsupported matrix storage %d", M->storageType);
     exit(EXIT_FAILURE);
   }
+
+  NM_version_sync(M);
 }
 void NM_add_to_diag5(NumericsMatrix* M, double alpha)
 {
@@ -2076,6 +2154,8 @@ void NM_add_to_diag5(NumericsMatrix* M, double alpha)
     printf("NM_add_to_diag5 :: unsupported matrix storage %d", M->storageType);
     exit(EXIT_FAILURE);
   }
+
+  NM_version_sync(M);
 }
 
 NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B)
@@ -2150,6 +2230,8 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
     numerics_error("NM_add:","unsupported matrix storage %d", A->storageType);
   }
   }
+
+  NM_version_sync(C);
   return C;
 
 }
@@ -2189,8 +2271,9 @@ void  NM_scal(double alpha, NumericsMatrix* A)
     numerics_error("NM_scal:","unsupported matrix storage %d", A->storageType);
   }
   }
-  return;
 
+  NM_version_sync(A);
+  return;
 }
 
 
@@ -2250,6 +2333,7 @@ NumericsMatrix* NM_eye(int size)
   NumericsMatrix* M = NM_create(NM_SPARSE, size, size);
   /* version incremented in NSM_triplet_eye */
   M->matrix2 = NSM_triplet_eye(size);
+  NM_version_sync(M);
   return M;
 }
 NumericsMatrix* NM_create(NM_types storageType, int size0, int size1)
@@ -2338,6 +2422,8 @@ void NM_fill(NumericsMatrix* M, NM_types storageType, int size0, int size1, void
       exit(EXIT_FAILURE);
     }
   }
+
+  NM_version_sync(M);
 }
 
 NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1)
@@ -2387,6 +2473,7 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
   NM_MPI_copy(A, Atrans);
   NM_MUMPS_copy(A, Atrans);
 
+  NM_version_sync(Atrans);
   return Atrans;
 }
 
@@ -2568,7 +2655,7 @@ void NM_clearSparseStorage(NumericsMatrix *A)
 }
 
 
-void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold)
+void NM_dense_to_sparse(NumericsMatrix*  A, NumericsMatrix* B, double threshold)
 {
   assert(A->matrix0);
   assert(B->matrix2->triplet);
@@ -2589,8 +2676,9 @@ void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double
     /* increment the version to the max */
     NSM_inc_version(B->matrix2, NSM_TRIPLET);
   }
+  NM_version_sync(A);
 }
-int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
+int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B)
 {
   int info = 1;
   if(!B->matrix0)
@@ -2656,13 +2744,13 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
     NM_inc_version(B , NM_DENSE);
   }
 
+  NM_version_sync(A);
   return info;
-
 
 }
 
 
-void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold)
+void NM_copy_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold)
 {
   DEBUG_BEGIN("NM_copy_to_sparse(...)\n")
   assert(A);
@@ -2720,6 +2808,8 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double 
   }
   }
   DEBUG_END("NM_copy_to_sparse(...)\n")
+
+  NM_version_sync(A);
 }
 
 void NM_version_copy(const NumericsMatrix* const A, NumericsMatrix* B)
@@ -2866,6 +2956,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   assert(NM_destructible(B) == NM_destructible(A));
   assert(NM_max_version(B) == NM_max_version(A));
 
+  NM_version_sync(B);
 }
 
 NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)
@@ -2881,14 +2972,14 @@ NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)
 
 CSparseMatrix* NM_triplet(NumericsMatrix* A)
 {
-  assert(A);
-
   if(numericsSparseMatrix(A)->triplet && (NM_max_version(A) >
                                           NSM_version(numericsSparseMatrix(A),
-                                                      NSM_TRIPLET)))
+                                          NSM_TRIPLET)))
   {
     NM_clearTriplet(A);
   }
+
+  assert(NM_version(A, A->storageType) == NM_max_version(A));
 
   if(!numericsSparseMatrix(A)->triplet)
 //    ||
@@ -2999,6 +3090,8 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
   }
   assert(A->matrix2->triplet);
 
+  NM_version_sync(A);
+
   assert(NM_max_version(A) == NSM_version(A->matrix2, NSM_TRIPLET));
 
   return A->matrix2->triplet;
@@ -3008,11 +3101,11 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
 {
   assert(A);
+  assert(NM_version(A, A->storageType) == NM_max_version(A));
 
-  if(numericsSparseMatrix(A)->half_triplet &&
-     (NM_max_version(A) >
-      NSM_version(numericsSparseMatrix(A),
-                  NSM_HALF_TRIPLET)))
+  if(numericsSparseMatrix(A)->half_triplet && (NM_max_version(A) >
+                                               NSM_version(numericsSparseMatrix(A),
+                                                           NSM_HALF_TRIPLET)))
   {
     NM_clearHalfTriplet(A);
   }
@@ -3125,14 +3218,19 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
     }
   }
   assert(A->matrix2->half_triplet);
-
+  NM_version_sync(A);
   return A->matrix2->half_triplet;
 }
 
 CSparseMatrix* NM_csc(NumericsMatrix *A)
 {
+
+  assert(NM_version(A, A->storageType) == NM_max_version(A));
+
   DEBUG_BEGIN("NM_csc(NumericsMatrix *A)\n");
   assert(A);
+
+  assert(NM_version(A, A->storageType) == NM_max_version(A));
 
   if(numericsSparseMatrix(A)->csc && (NM_max_version(A) >
                                       NSM_version(numericsSparseMatrix(A),
@@ -3192,6 +3290,7 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
   assert(NSM_version(A->matrix2, NSM_CSR) <=
          NSM_version(A->matrix2, NSM_CSC));
 
+  NM_version_sync(A);
   return A->matrix2->csc;
 }
 
@@ -3205,12 +3304,14 @@ CSparseMatrix* NM_csc_trans(NumericsMatrix* A)
                                                          * allocation */
   }
 
+  NM_version_sync(A);
   return A->matrix2->trans_csc;
 }
 
 CSparseMatrix* NM_csr(NumericsMatrix *A)
 {
   assert(A);
+  assert(NM_version(A, A->storageType) == NM_max_version(A));
 
   if(numericsSparseMatrix(A)->csr && (NM_max_version(A) >
                                       NSM_version(numericsSparseMatrix(A),
@@ -3263,6 +3364,7 @@ CSparseMatrix* NM_csr(NumericsMatrix *A)
   assert(NSM_version(A->matrix2, NSM_CSR) <=
          NSM_version(A->matrix2, NSM_CSR));
 
+  NM_version_sync(A);
   return A->matrix2->csr;
 }
 
@@ -3302,6 +3404,7 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
     assert(0 && "NM_gemv unknown storageType");
   }
   }
+  NM_version_sync(A);
 }
 
 /* Numerics Matrix wrapper  for y <- alpha trans(A) x + beta y */
@@ -3327,6 +3430,7 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
     assert(0 && "NM_tgemv unknown storageType");
   }
   }
+  NM_version_sync(A);
 }
 
 /* Insert the submatrix B into the matrix A on the position defined in
@@ -3473,6 +3577,7 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
   }
   }
   DEBUG_END("NM_insert\n");
+  NM_version_sync(A);
   return;
 }
 
@@ -3588,6 +3693,8 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
   {
     NM_version_copy(A, C);
   }
+  NM_version_sync(A);
+
   return C;
   DEBUG_END("NM_multiply(...) \n")
 }
@@ -3701,7 +3808,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
 
   NM_MPI_copy(A, C);
   NM_MUMPS_copy(A, C);
-
+  NM_version_sync(A);
 }
 
 NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
@@ -3710,6 +3817,7 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
   {
     NM_internalData_new(A);
   }
+  NM_version_sync(A);
   return A->internalData;
 }
 
@@ -4865,6 +4973,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
   }
 
   DEBUG_END("NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)\n");
+  NM_version_sync(A);
   return (int)info;
 }
 
@@ -4877,6 +4986,7 @@ int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs
     info = NM_gesv_expert(A, &b[A->size0*i],  keep);
     if(info) break;
   }
+  NM_version_sync(A);
   return info;
 }
 NumericsMatrix* NM_gesv_inv(NumericsMatrix* A)
@@ -4996,6 +5106,7 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
 
 
   DEBUG_BEGIN("NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)\n");
+  NM_version_sync(A);
   return (int)info;
 }
 
@@ -5058,6 +5169,7 @@ void NM_update_size(NumericsMatrix* A)
   default:
     DEBUG_PRINT("NM_update_size :: default case");
   }
+  NM_version_sync(A);
 }
 
 
@@ -5745,6 +5857,7 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
 
   assert (NM_Cholesky_factorized(Ao) == NM_Cholesky_factorized(A));
   DEBUG_END("int NM_Cholesky_factorize(NumericsMatrix* Ao) \n");
+  NM_version_sync(Ao);
   return info;
 }
 
@@ -5860,7 +5973,7 @@ int NM_Cholesky_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 //  CHECK_RETURN(info);
     DEBUG_END("NM_Cholesky_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
   }
-
+  NM_version_sync(A);
   return info;
 }
 
@@ -5988,6 +6101,7 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
     }
   }
   DEBUG_END("NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)\n");
+  NM_version_sync(Ao);
   return info;
 }
 
@@ -6202,6 +6316,7 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
 
   assert (NM_LDLT_factorized(Ao) == NM_LDLT_factorized(A));
   DEBUG_END("int NM_LDLT_factorize(NumericsMatrix* Ao) \n");
+  NM_version_sync(Ao);
   return info;
 }
 
@@ -6335,6 +6450,6 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 //  CHECK_RETURN(info);
     DEBUG_END("NM_LDLT_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
   }
-
+  NM_version_sync(A);
   return info;
 }

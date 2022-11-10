@@ -1514,6 +1514,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   DEBUG_END("MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
 }
 
+
 void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& notUsed)
 {
   // Last parameter is not used (required for LsodarOSI but not for MoreauJeanOSI).

@@ -474,6 +474,9 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
   OneStepIntegrator& osi2 = *DSG.properties(DSG.descriptor(ds2)).osi;
 
   InteractionProperties& i_prop = indexSet0->properties(ui);
+  i_prop.osi1 = DSG.properties(DSG.descriptor(ds1)).osi;
+  i_prop.osi2 = DSG.properties(DSG.descriptor(ds2)).osi;
+
   if(&osi1 == &osi2)
   {
     osi1.initializeWorkVectorsForInteraction(*inter, i_prop,  DSG);
@@ -487,6 +490,16 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
     osi2.update_interaction_output(*inter, time, i_prop);
   }
   DEBUG_END("Simulation::initializeInteraction(double time, SP::Interaction inter)\n");
+
+  OSI::TYPES osi1Type = osi1.getType();
+  OSI::TYPES osi2Type = osi2.getType();
+
+  // Check consistency of the OneStepIntegrator
+  // We assume that the osi of ds1 (osi1) is integrating the interaction (to be reworked for more general case)
+  if( osi1Type != osi2Type)
+  {
+    THROW_EXCEPTION("Simulation::initializeInteraction: integration of Interaction not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
+  }
 }
 
 
@@ -642,16 +655,41 @@ void Simulation::computeResidu()
   DEBUG_END("Simulation::computeResidu()\n");
 }
 
-void Simulation::updateInput(unsigned int)
+void Simulation::updateAllInput()
 {
   DEBUG_BEGIN("Simulation::updateInput()\n");
   OSIIterator itOSI;
+
+  //nonSmoothDynamicalSystem()->resetNonSmoothPart();
+  
   // 1 - compute input (lambda -> r)
   if(!_allNSProblems->empty())
   {
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->resetAllNonSmoothParts(); 
+
+    for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
       (*itOSI)->updateInput(nextTime());
     //_nsds->updateInput(nextTime(),levelInput);
+  }
+  DEBUG_END("Simulation::updateInput()\n");
+}
+
+void Simulation::updateInput(unsigned int level)
+{
+  DEBUG_BEGIN("Simulation::updateInput()\n");
+  OSIIterator itOSI;
+
+  //nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
+  
+  // 1 - compute input (lambda -> r)
+  if(!_allNSProblems->empty())
+  {
+    for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->resetNonSmoothPart(level); 
+
+    for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+	    (*itOSI)->updateInput(nextTime(),level);
   }
   DEBUG_END("Simulation::updateInput()\n");
 }

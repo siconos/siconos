@@ -36,11 +36,11 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
    J.J. Moreau for the time integration of mechanical systems
    with unilateral contact, impact and Coulomb's friction with \f$ \theta \f$
    scheme
-   
+
    For the linear Lagrangian system, the scheme reads as
-   
+
    \f[
-   
+
    \begin{cases}
    M (v_{k+1}-v_k)
    + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G
@@ -49,7 +49,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
    U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha
    \in \mathcal I_1, \\[1mm] P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I
    \setminus \mathcal I_1, \end{array} \end{cases}
-   
+
    \f]
 
    with  \f$ \theta \in [0,1] \f$. The index set \f$ \mathcal I_1 \f$ is the
@@ -57,41 +57,41 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
    to the rule that allows us to apply the Signorini  condition at the velocity
    level.
    In the numerical practice, we choose to define this set by
-   
+
    \f[
    \mathcal I_1 = \{\alpha \in \mathcal I \mid G^\top (q_{k} + h v_{k}) + w \leq 0\text{ and } U_k \leq 0 \}.
    \f]
-   
+
    For more details, we refer to
-   
+
    M. Jean and J.J. Moreau. Dynamics in the presence of unilateral contacts and
    dry friction: a numerical approach.
    In G. Del Pietro and F. Maceri, editors, Unilateral problems in structural
    analysis.
    II, pages 151–196. CISM 304, Spinger Verlag, 1987.
-   
+
    J.J. Moreau. Unilateral contact and dry friction in finite freedom dynamics.
    In J.J. Moreau and Panagiotopoulos P.D., editors, Nonsmooth Mechanics and
    Applications,
    number 302 in CISM, Courses and lectures, pages 1–82. CISM 302, Spinger
    Verlag, Wien- New York, 1988a.
- 
+
    J.J. Moreau. Numerical aspects of the sweeping process.
    Computer Methods in Applied Mechanics and Engineering, 177:329–349, 1999.
-   
+
    M. Jean. The non smooth contact dynamics method.
    Computer Methods in Applied Mechanics and Engineering, 177:235–257, 1999.
-   
+
    and for a review :
-   
+
    V. Acary and B. Brogliato. Numerical Methods for Nonsmooth Dynamical Systems:
    Applications in Mechanics and Electronics, volume 35 of Lecture Notes in
    Applied and Computational Mechanics. Springer Verlag, 2008.
-   
+
    MoreauJeanOSI class is used to define some time-integrators methods for a
    list of dynamical systems. A MoreauJeanOSI instance is defined by the value
    of theta and the list of concerned dynamical systems.
-   
+
    Each DynamicalSystem is associated to a SiconosMatrix, named "W", the
    "teration" matrix"
    W matrices are initialized and computed in initializeIterationMatrixW and
@@ -100,18 +100,18 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
    For mechanical systems, the implementation uses _p for storing the
    the input due to the nonsmooth law. This MoreauJeanOSI scheme assumes that
    the relative degree is two.
-   
+
    For Lagrangian systems, the implementation uses _p[1] for storing the discrete impulse.
-   
+
    Main functions:
-   
+
    - computeFreeState(): computes xfree (or vfree), dynamical systems
    state without taking non-smooth part into account \n
-   
+
    - updateState(): computes x (q,v), the complete dynamical systems
    states.
    See User's guide for details.
-   
+
 */
 class MoreauJeanOSI : public OneStepIntegrator {
 protected:
@@ -147,7 +147,7 @@ protected:
    */
   bool _isWSymmetricDefinitePositive;
 
-  /** 
+  /**
       A set of work indices for the selected coordinates when
       we subprod in computeFreeOuput
   */
@@ -213,7 +213,7 @@ public:
   // --- GETTERS/SETTERS ---
 
   /** get the value of W corresponding to DynamicalSystem ds
-   * 
+   *
    *  \param ds a pointer to DynamicalSystem, optional, default =
    *  nullptr. get W[0] in that case
    *  \return SimpleMatrix
@@ -240,7 +240,7 @@ public:
   // -- WBoundaryConditions --
 
   /** Get the value of WBoundaryConditions corresponding to DynamicalSystem ds
-   * 
+   *
    *  \param ds a pointer to DynamicalSystem, optional, default =
    *  nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
@@ -249,7 +249,7 @@ public:
   getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
-   * 
+   *
    *  \param ds a pointer to DynamicalSystem, optional, default =
    *  nullptr. get WBoundaryConditions[0] in that case
    *  \return pointer to a SiconosMatrix
@@ -365,7 +365,7 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * 
+   *
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
@@ -389,7 +389,7 @@ public:
   unsigned int numberOfIndexSets() const override { return 2; };
 
   /** initialize iteration matrix W MoreauJeanOSI matrix at time t
-   * 
+   *
    *  \param time
    *  \param ds a pointer to DynamicalSystem
    */
@@ -440,8 +440,8 @@ public:
 
   /**
      return the maximum of all norms for the "MoreauJeanOSI-discretized"
-     residus of DS 
-     
+     residus of DS
+
      \return a double
    */
   double computeResidu() override;
@@ -460,10 +460,17 @@ public:
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
 
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+   */
+  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,   InteractionsGraph& indexSet) override
+  {
+    return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
+  };
+
   /** Apply the rule to one Interaction to know if it should be included in the
-   *  IndexSet of level i 
-   * 
-   *  \param inter the Interaction to test 
+   *  IndexSet of level i
+   *
+   *  \param inter the Interaction to test
    *  \param i level of the IndexSet
    *  \return Boolean
    */
@@ -495,9 +502,9 @@ public:
   void integrate(double &tinit, double &tend, double &tout,
                  int &notUsed) override;
 
-  /** 
+  /**
       update the state of the dynamical systems
-      
+
       \param ds the dynamical to update
    */
   virtual void updatePosition(DynamicalSystem &ds);
@@ -507,6 +514,8 @@ public:
    *  \param level the level of interest for the dynamics: not used at the time
    */
   void updateState(const unsigned int level) override;
+
+
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */
