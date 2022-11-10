@@ -42,7 +42,7 @@ protected:
   //  ACCEPT_SERIALIZATION(Cable2d3DR);
 
   /* index of the node of the Fem cable involved in this relation */
-  unsigned int _node_index;
+  unsigned int _node_dof_index;
 
   /* Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
@@ -92,7 +92,7 @@ public:
    */
   Cable2d3DR(unsigned int node_index)
     : LagrangianScleronomousR()
-    , _node_index(node_index)
+    , _node_dof_index(node_index)
     , _Pc1(new SiconosVector(3))
     , _Pc2(new SiconosVector(3))
     , _Normal(new SiconosVector(3))
@@ -103,11 +103,11 @@ public:
   /** constructor
    */
   Cable2d3DR(unsigned int node_index,
-	     std::shared_ptr<SiconosVector> pc1, std::shared_ptr<SiconosVector> pc2,
+	     std::shared_ptr<SiconosVector> pc2,
 	     std::shared_ptr<SiconosVector> normal, std::shared_ptr<SiconosVector> tangent )
       : LagrangianScleronomousR()
-      , _node_index(node_index)	
-      , _Pc1(pc1)
+      , _node_dof_index(node_index)	
+      , _Pc1(new SiconosVector(3))
       , _Pc2(pc2)
       , _Normal(normal)
       , _Tangent(tangent)

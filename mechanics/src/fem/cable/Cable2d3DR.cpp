@@ -31,13 +31,7 @@
 
 void siconos::mechanics::fem::Cable2d3DR::initialize(Interaction& inter)
 {
-  //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
-
-  if((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6))
-  {
-    THROW_EXCEPTION("Cable2d3DR::initialize(Interaction& inter). The size of ds must of size 3");
-  }
-  unsigned int qSize = 3 * (inter.getSizeOfDS() / 3);
+  unsigned int qSize = inter.getSizeOfDS();
   _jachq.reset(new SimpleMatrix(2, qSize));
 }
 
@@ -49,23 +43,20 @@ void siconos::mechanics::fem::Cable2d3DR::computeJachq(const BlockVector& q, Blo
   double Ny = _Normal->getValue(1);
   double Nz = _Normal->getValue(2);
 
-  double Tx = _Normal->getValue(0);
-  double Ty = _Normal->getValue(1);
-  double Tz = _Normal->getValue(2);
+  double Tx = _Tangent->getValue(0);
+  double Ty = _Tangent->getValue(1);
+  double Tz = _Tangent->getValue(2);
   
-  double Px = _Pc1->getValue(0);
-  double Py = _Pc1->getValue(1);
-
   DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e,\t N_z= %4.2e\n", Nx, Ny, Nz);
   DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e,\t T_z= %4.2e\n", Tx, Ty, Tz);
 
-  _jachq->setValue(0,_node_index*3,  Nx);
-  _jachq->setValue(0,_node_index*3+1,Ny);
-  _jachq->setValue(0,_node_index*3+2,Nz);
+  _jachq->setValue(0,_node_dof_index,  Nx);
+  _jachq->setValue(0,_node_dof_index+1,Ny);
+  _jachq->setValue(0,_node_dof_index+2,Nz);
   
-  _jachq->setValue(1,_node_index*3,  Tx);
-  _jachq->setValue(1,_node_index*3+1,Ty);
-  _jachq->setValue(1,_node_index*3+2,Tz);
+  _jachq->setValue(1,_node_dof_index,  Tx);
+  _jachq->setValue(1,_node_dof_index+1,Ty);
+  _jachq->setValue(1,_node_dof_index+2,Tz);
 
   if(q.size() ==6)
   {
@@ -94,6 +85,10 @@ void siconos::mechanics::fem::Cable2d3DR::computeh(const BlockVector& q, BlockVe
   DEBUG_BEGIN("Cable2d3DR::computeh(...)\n");
 
   LagrangianScleronomousR::computeh(q, z, y);
+  SiconosVector & position = *((q.getAllVect())[0]);
+  _Pc1->setValue(0, position(_node_dof_index));
+  _Pc1->setValue(1, position(_node_dof_index+1));
+  _Pc1->setValue(2, position(_node_dof_index+2));
   y.setValue(0, distance());
   DEBUG_EXPR(y.display(););
   DEBUG_EXPR(display(););
@@ -104,7 +99,7 @@ void siconos::mechanics::fem::Cable2d3DR::display() const
 {
   LagrangianR::display();
 
-  std::cout << " _node_index :" << _node_index<< std::endl;
+  std::cout << " _node_dof_index :" << _node_dof_index<< std::endl;
   
   std::cout << " _Pc1 :" << std::endl;
   if(_Pc1)
@@ -125,8 +120,8 @@ void siconos::mechanics::fem::Cable2d3DR::display() const
     std::cout << " nullptr :" << std::endl;
   
   std::cout << " _Tangent :" << std::endl;
-  if(_Normal)
-    _Normal->display();
+  if(_Tangent)
+    _Tangent->display();
   else
     std::cout << " nullptr :" << std::endl;
 
