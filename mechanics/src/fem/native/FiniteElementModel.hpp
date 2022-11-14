@@ -21,6 +21,7 @@
  */
 #ifndef FINITEELEMENTMODEL_H
 #define FINITEELEMENTMODEL_H
+#include <list>
 #include <vector>
 #include <iostream>
 #include <map>
@@ -329,6 +330,12 @@ public:
   FiniteElementModel(std::shared_ptr<Mesh> mesh):
     _mesh(mesh) {};
 
+
+  std::shared_ptr<Mesh> mesh()
+  {
+    return _mesh;
+  }
+
   std::vector<std::shared_ptr<FElement> > &  elements()
   {
     return _elements;
@@ -388,6 +395,7 @@ public:
 
   void applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces, std::shared_ptr<SiconosVector> forces);
 
+  std::shared_ptr< std::list<std::shared_ptr<FENode> > > contactingNodes(int contact_entity_tag);
   void display(bool brief) const;
 };
 DEFINE_SPTR(FiniteElementModel)

@@ -17,6 +17,7 @@
  */
 
 #include "FiniteElementModel.hpp"
+#include "SiconosException.hpp"
 #include "SimpleMatrix.hpp"
 #include "Material.hpp"
 #include "SiconosAlgebraProd.hpp"
@@ -206,6 +207,10 @@ void siconos::mechanics::fem::native::FiniteElementModel::computeElementaryMassM
       }
       double detJ = J[0]*J[3] - J[1]*J[2];
       DEBUG_PRINTF("detJ = %e\n", detJ);
+
+      if (detJ <=0)
+	THROW_EXCEPTION("computeElementaryMassMatrix. detJ <=0");
+
       // DEBUG_EXPR(std::cout << "Gauss points : "<< gp_eta << " "  << gp_ksi << " "  << gp_w << " "   << std::endl;);
 
       double coeff = gp_w * massDensity * detJ;
@@ -892,6 +897,34 @@ void siconos::mechanics::fem::native::FiniteElementModel::applyNodalForces(
     }
   }
   DEBUG_END("siconos::mechanics::fem::native::FiniteElementModel::applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces, std::shared_ptr<SiconosVector> forces)\n");
+}
+
+std::shared_ptr<std::list<std::shared_ptr< siconos::mechanics::fem::native::FENode> > > siconos::mechanics::fem::native::FiniteElementModel::contactingNodes(int contact_entity_tag)
+{
+  DEBUG_BEGIN("siconos::mechanics::fem::native::FiniteElementModel::applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces, std::shared_ptr<SiconosVector> forces)\n");
+
+  // std::shared_ptr<unisgned int> f_index  = std::make_shared<IndexInt>(0);
+  std::shared_ptr<std::list<std::shared_ptr<FENode> > > contacting_nodes =  std::make_shared<std::list<std::shared_ptr<FENode> >>();;
+
+  for(MElement * e : _mesh->elements())
+  {
+    if(e->tags(0) == contact_entity_tag)
+    {
+      for(MVertex * v : e->vertices())
+      {
+        std::shared_ptr<FENode> n = _vertexToNode[v];
+
+        if(find(contacting_nodes->begin(), contacting_nodes->end(), n) == contacting_nodes->end())  // check if the node is already existing
+        {
+          std::cout <<"node number in contact zone " <<  n->num()  << " vertex number " << v->num() << std::endl;
+	  contacting_nodes->push_back(n);
+        }
+      }
+    }
+  }
+
+  DEBUG_END("siconos::mechanics::fem::native::FiniteElementModel::applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces, std::shared_ptr<SiconosVector> forces)\n");
+  return contacting_nodes;
 }
 
 

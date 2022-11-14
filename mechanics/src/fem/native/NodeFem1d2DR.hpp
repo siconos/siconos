@@ -21,8 +21,8 @@
 #ifndef NodeFem1d2DR_H
 #define NodeFem1d2DR_H
 
-#include "LagrangianDS.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "FiniteElementLinearTIDS.hpp"
 
 using namespace RELATION;
 /** NodeFem1d2DR
@@ -41,8 +41,9 @@ protected:
 
   //  ACCEPT_SERIALIZATION(NodeFem1d2DR);
 
-  /* index of the node of the Fem cable involved in this relation */
-  unsigned int _node_index;
+  /* node of the Fem cable involved in this relation */
+  std::shared_ptr<native::FENode> _node;
+  
 
   /* Current Contact Points */
 
@@ -73,9 +74,9 @@ public:
 
   /** constructor
    */
-  NodeFem1d2DR(unsigned int node_index)
+  NodeFem1d2DR(std::shared_ptr<native::FENode> node)
     : LagrangianScleronomousR()
-    , _node_index(node_index)
+    , _node(node)
     , _Pc1(new SiconosVector(2))
     , _Pc2(new SiconosVector(2))
     , _Normal(new SiconosVector(2))
@@ -84,11 +85,11 @@ public:
   
   /** constructor
    */
-  NodeFem1d2DR(unsigned int node_index,
+  NodeFem1d2DR(std::shared_ptr<native::FENode>  node,
 	       std::shared_ptr<SiconosVector> pc2,
 	       std::shared_ptr<SiconosVector> normal)
       : LagrangianScleronomousR()
-      , _node_index(node_index)
+      , _node(node)
       , _Pc1(new SiconosVector(2))
       , _Pc2(pc2)
       , _Normal(normal)
@@ -122,7 +123,7 @@ public:
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline unsigned int node_index() const {return _node_index;}
+  inline std::shared_ptr<native::FENode> node() const {return _node;}
   inline std::shared_ptr<SiconosVector> pc1() const { return _Pc1; }
   inline std::shared_ptr<SiconosVector> pc2() const { return _Pc2; }
   inline std::shared_ptr<SiconosVector> normal() const { return _Normal; }
@@ -141,8 +142,8 @@ public:
   
   /** update the contact points from references
    */
-  void updateContactPoint(SiconosVector& pc1, SiconosVector& pc2,
-			  SiconosVector& normal, SiconosVector& tangent)
+  void updateContactPoint(SiconosVector& pc2,
+			  SiconosVector& normal)
   {
     *_Pc2= pc2;
     *_Normal = normal;
@@ -150,8 +151,8 @@ public:
   
   /** update the contact points from array
    */
-  void updateContactPoint(double pc1[3], double pc2[3],
-			  double normal[3], double tangent[3])
+  void updateContactPoint(double pc2[2],
+			  double normal[2])
   {
     _Pc2->setValue(0, pc2[0]);
     _Pc2->setValue(1, pc2[1]);

@@ -44,8 +44,8 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeJachq(const BlockVector& q, B
   DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
 
 
-  _jachq->setValue(0,_node_index,  Nx);
-  _jachq->setValue(0,_node_index+1,Ny);
+  _jachq->setValue(0,(*_node->dofIndex())[0],Nx);
+  _jachq->setValue(0,(*_node->dofIndex())[1],Ny);
   
 
   if(q.size() ==6)
@@ -76,8 +76,8 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeh(const BlockVector& q, Block
 
   LagrangianScleronomousR::computeh(q, z, y);
   SiconosVector & displacement = *((q.getAllVect())[0]);
-  _Pc1->setValue(0, displacement(_node_index));
-  _Pc1->setValue(1, displacement(_node_index+1));
+  _Pc1->setValue(0, displacement((*_node->dofIndex())[0])+_node->x());
+  _Pc1->setValue(1, displacement((*_node->dofIndex())[1])+_node->y());
   y.setValue(0, distance());
   
   DEBUG_EXPR(y.display(););
@@ -89,7 +89,11 @@ void siconos::mechanics::fem::NodeFem1d2DR::display() const
 {
   LagrangianR::display();
 
-  std::cout << " _node_index :" << _node_index<< std::endl;
+  std::cout << " _node :" << std::endl;
+  if(_node)
+    _node->display();
+  else
+    std::cout << " nullptr :" << std::endl;
   
   std::cout << " _Pc1 :" << std::endl;
   if(_Pc1)
