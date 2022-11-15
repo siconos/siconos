@@ -390,12 +390,19 @@ public:
       std::shared_ptr<SimpleMatrix> D, double thickness);
 
 
+  /** apply Dirichlet Boundary conditions for a given tag on element. 
+   **/
   void applyDirichletBoundaryConditions(int physical_entity_tag, std::shared_ptr<IndexInt> node_dof_index,
                                         std::shared_ptr<BoundaryCondition> _boundaryCondition);
-
+  /** apply Neuman Boundary conditions (nodal forces) for a given tag on element. 
+   **/
   void applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces, std::shared_ptr<SiconosVector> forces);
-
+  /** get tje list of possible contacting nodesfor a given tag on element. 
+   **/
   std::shared_ptr< std::list<std::shared_ptr<FENode> > > contactingNodes(int contact_entity_tag);
+
+  
+  
   void display(bool brief) const;
 };
 DEFINE_SPTR(FiniteElementModel)

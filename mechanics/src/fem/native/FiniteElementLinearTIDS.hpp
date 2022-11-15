@@ -84,7 +84,10 @@ public:
 
   void applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces);
 
-
+  /** Compute kinetic energy
+   */
+  double kineticEnergy() const;
+  double elasticPotentialEnergy() const;
 
   void display(bool brief) const override;
 

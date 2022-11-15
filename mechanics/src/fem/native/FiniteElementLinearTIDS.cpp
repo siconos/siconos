@@ -21,7 +21,8 @@
 #include "Material.hpp"
 #include "SiconosMatrix.hpp"
 #include "BoundaryCondition.hpp"
-
+#include "SiconosAlgebraProd.hpp"
+#include "SimpleMatrixFriends.hpp"
 
 
 // #define DEBUG_STDOUT
@@ -100,6 +101,27 @@ void siconos::mechanics::fem::native::FiniteElementLinearTIDS::applyNodalForces(
 
 };
 
+
+double siconos::mechanics::fem::native::FiniteElementLinearTIDS::kineticEnergy() const
+{
+
+  SiconosVector * tmp = new SiconosVector(_ndof);
+  SiconosVector& velocity = *(_q[1]);
+  prod(*_mass, velocity, *tmp, true);
+  double kineticEnergy = 0.5*inner_prod(velocity,*tmp);
+  return kineticEnergy;
+}
+
+double siconos::mechanics::fem::native::FiniteElementLinearTIDS::elasticPotentialEnergy() const
+{
+
+  SiconosVector * tmp = new SiconosVector(_ndof);
+  SiconosVector& displacement = *(_q[0]);
+  prod(*_K, displacement, *tmp, true);
+  double potentialEnergy = 0.5*inner_prod(displacement,   *tmp);
+  return potentialEnergy;
+  
+}
 void siconos::mechanics::fem::native::FiniteElementLinearTIDS::display(bool brief) const
 {
   std::cout << "===== FiniteElementLinearTIDS display ===== " <<std::endl;
