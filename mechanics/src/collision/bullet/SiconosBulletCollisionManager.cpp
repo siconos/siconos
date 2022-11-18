@@ -2451,8 +2451,10 @@ static void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint& cp, const b
 
     // Option 2 - we take in any cases the normal to the triangle face
 
-    btScalar cosine =  oldNormal.dot(newNormal);
-    if (cosine < 0.0)
+    // btScalar cosine =  oldNormal.dot(newNormal);
+    // if (cosine < 0.0)
+    // We assume that the normal to the triangle face must be upward.
+    if (tri_normal.z() < 0.0)
     {
       newNormal = -1.0*tri_normal;
     }
