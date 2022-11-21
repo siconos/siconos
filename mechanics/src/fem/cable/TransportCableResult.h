@@ -20,12 +20,12 @@ public:
 
 	int to_json(ojson &j, const std::string &a_option = "all");
 
-	Pulley puller12;
-	Pulley puller21;
+	int puller12idx;
+	int puller21idx;
 	Ropeway rope1;
 	Ropeway rope2;
 
-	vector<Support> supports;
+	vector<std::shared_ptr<Support>> supports;
 
 	vector<Point> q;
 

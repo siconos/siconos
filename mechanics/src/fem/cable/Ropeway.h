@@ -13,11 +13,14 @@ public:
 		int nb_nodes, 
 		double a_tol = 1e-20, 
 		int a_nmax = 20);
-	void prepareSupport(vector<Support> &a_supports) const;
+        void prepareSupport(vector<std::shared_ptr<Support>> &a_supports,
+                            int &a_pulleyIdx) const;
 
 	int computeNbNodes(int nb_elem, double L);
 	int computeMesh(vector<Point> &a_q, int q_offset);
 
+	const Pile &get_FirstPile();
+	const Pile &get_LastPile();
 	double get_T0();
 	double get_LastT();
 	double get_L();
@@ -27,6 +30,8 @@ public:
 	void set_Down(bool a_value);
 
 private:
+        void addSupport(const Rope &a_rope, vector<std::shared_ptr<Support>> &a_supports,
+                        int &a_pulleyIdx) const;
 	vector<Rope> m_ropes;
 	bool m_down;
 };

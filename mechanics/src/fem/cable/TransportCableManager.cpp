@@ -1,6 +1,7 @@
 #include "TransportCableManager.h"
 #include "TransportCableProfil.h"
 #include "CableDS.hpp"
+#include "CableCollisionManager.h"
 //#include "TCException.h"
 
 
@@ -108,6 +109,9 @@ void TransportCableManager::computeDS()
 		);
 
 	cable->setFExtPtr(m_results.b);
+
+	// contact conditions
+	auto collisions = std::make_shared<CableCollisionManager>(cable, m_results.supports);
 
 
 }

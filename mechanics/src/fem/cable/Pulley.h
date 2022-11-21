@@ -1,25 +1,34 @@
 #pragma once
+#include "Support.h"
 #include "Point.h"
 
-class Pulley
+class Pulley :
+	public Support
 {
 public:
-	Pulley();
+    Pulley(const Pile &a_pile);
 	virtual ~Pulley();
-	void init(const double &a_radius, const Point &a_center);
 
-	const double &get_radius();
+	virtual void prepare(const Rope &a_rope);
+	virtual void prepare(const Pile &a_start, const Pile &a_end, double T);
+
+	int compute(int nb, vector<Point> &a_q, int q_offset = 0) const;
+
+	virtual void compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T);
+    virtual bool isContact(const Point &a_p, const double &a_tol);
+
+
+	virtual const double &get_radius() const;
 	const Point &get_center();
 	
 
-	void set_T(double T);
-	double get_L(const class Ropeway &a_rope);
+	double get_L(const class Ropeway &a_rope) const;
 
 	friend void to_json(ojson &j, const Pulley &p);
 
 private:
-	Point center;
 	double m_radiusP;
 	double m_TR; // tension
+    double dy;
 };
 

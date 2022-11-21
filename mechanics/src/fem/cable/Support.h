@@ -1,26 +1,32 @@
 #pragma once
 #include "Rope.h"
+#include "SiconosVector.hpp"
 
 class Support
 {
 public:
-	Support(const Rope &a_rope);
+	Support(const Pile &a_pile);
 	virtual ~Support();
-	const double &get_radius() const;
+	virtual const double &get_radius() const;
 
-	void compute(const Point &a_p, int k, double a_tol, double mu_s,
+	virtual void prepare(const Rope &a_rope);
+    virtual void prepare(const Pile &a_start, const Pile &a_end, double T);
+
+
+	virtual void compute(
+		const Point &a_p, 
+		double a_tol,
 		double &g, 
-		int &act, 
 		Point &G,
-		Point &T,
-		Point &blocked,
-		Point &blocked_value,
-		double &eye_c);
+		Point &T);
+
+	virtual bool isContact(const Point &a_p, const double &a_tol);
+	virtual void getContact(const Point &a_p, SiconosVector &pc2, SiconosVector &normal, SiconosVector &tangent);
 
 	friend void to_json(ojson &j, const Support &p);
 
-private:
-	const Pile &m_pile;
+protected:
+	const Pile &r_pile;
 	Point m_p;
 };
 

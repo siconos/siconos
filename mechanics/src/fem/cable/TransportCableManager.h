@@ -1,7 +1,6 @@
 #pragma once
 #include "TransportCableModel.h"
 #include "TransportCableResult.h"
-#include "Pulleywrap.h"
 
 template <typename T> T getParam(const json &a_arg, const string &a_name, T a_default)
 {

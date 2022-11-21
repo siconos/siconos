@@ -9,6 +9,7 @@ public:
 	double z;
 
 	Point();
+    Point(double x, double y, double z);
 	virtual ~Point();
 
 	virtual void from_json(const json &j);

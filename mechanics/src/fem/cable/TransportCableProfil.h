@@ -2,7 +2,6 @@
 #include "TransportCableModel.h"
 #include "TransportCableResult.h"
 #include "Ropeway.h"
-#include "Pulleywrap.h"
 #include "Support.h"
 
 class TransportCableProfil
@@ -26,9 +25,6 @@ private:
 	const TransportCableModel &r_model;
 	TransportCableResult &r_results;
 	
-	Pulleywrap puller12;
-	Pulleywrap puller21;
-
 	void compute_punct_load(int nb_elem, double Lc, double d_prop=0.8);
 	void compute_ineq_constraint(const vector<Point> &a_X, double a_tol=1e-3, double mu_s=0.8, double mu_p=1.1);
 };

@@ -2,12 +2,9 @@
 
 
 
-Support::Support(const Rope &a_rope)
-	: m_pile(a_rope.get_pile0())
+Support::Support(const Pile &a_pile) : r_pile(a_pile)
 {
-	m_p = m_pile;
-	double radius = sgn(a_rope.get_SR().z) * get_radius();
-	m_p.z -= radius;
+	m_p = r_pile;	
 }
 
 
@@ -17,17 +14,24 @@ Support::~Support()
 
 const double & Support::get_radius() const
 {
-	return m_pile.get_radius();
+	return r_pile.get_radius(); }
+
+
+void Support::prepare(const Rope &a_rope)
+{
+  double radius = sgn(a_rope.get_SR().z) * get_radius();
+  m_p.z -= radius;
 }
 
-void Support::compute(const Point &a_p, int k, double a_tol, double mu_s,
+void Support::prepare(const Pile &a_start, const Pile &a_end, double T) {}
+
+
+void Support::compute(
+	const Point &a_p, 
+	double a_tol, 
 	double &g,
-	int &act,
 	Point &G,
-	Point &T,
-	Point &blocked,
-	Point &blocked_value,
-	double &eye_c)
+	Point &T)
 {
 	double dx = a_p.x - m_p.x;
 	double dz = a_p.z - m_p.z;
@@ -35,16 +39,33 @@ void Support::compute(const Point &a_p, int k, double a_tol, double mu_s,
 	double nx = dx / (go+get_radius());
 	double nz = dz / (go+get_radius());
 	if (go <= a_tol) {
-		g = go;
-		act = k;
-		eye_c = mu_s;
+		g = go;	
 		G.x = nx;
 		G.z = nz;
 		T.x = -nz;
-		T.z = nx;
-		blocked.y = 1;
-		blocked_value.y = m_p.y;
+		T.z = nx;		
 	}
+}
+
+bool Support::isContact(const Point &a_p, const double &a_tol) 
+{ 
+	double dx = a_p.x - m_p.x;
+	double dz = a_p.z - m_p.z;
+	double go = sqrt(dx * dx + dz * dz) - get_radius();  
+	return (go > a_tol);		
+}
+
+void Support::getContact(const Point &a_p, SiconosVector &pc2, SiconosVector &normal,
+                         SiconosVector &tangent)
+{
+  double dx = a_p.x - m_p.x;
+  double dz = a_p.z - m_p.z;
+  double go = sqrt(dx * dx + dz * dz) - get_radius();
+  normal.setValue(0, dx / (go + get_radius()));
+  normal.setValue(2, dz / (go + get_radius()));
+  tangent.setValue(0, -normal.getValue(2));
+  tangent.setValue(2, normal.getValue(0));
+  
 }
 
 void to_json(ojson & j, const Support & s)

@@ -1,5 +1,6 @@
 #include "Ropeway.h"
 #include "Cable.h"
+#include "Pulley.h"
 #include <algorithm>
 
 
@@ -53,20 +54,33 @@ void Ropeway::compute(const Cable &a_meca, const vector<Pile> &a_piles, int nb_n
 	}
 }
 
-void Ropeway::prepareSupport(vector<Support>& a_supports) const
+void Ropeway::prepareSupport(vector<std::shared_ptr<Support>> &a_supports,
+                             int &a_pulleyIdx) const
 {
 	if(!m_down) {
 		for (auto &r : m_ropes) {
-			if (!r.get_pile0().isStation())
-				a_supports.push_back(Support(r));
+            addSupport(r, a_supports, a_pulleyIdx);
 		}
 	}
 	else {
 		for (auto r = m_ropes.rbegin(); r != m_ropes.rend(); r++) {
-			if (!r->get_pile0().isStation())
-				a_supports.push_back(Support(*r));
+            addSupport(*r, a_supports, a_pulleyIdx);            	
 		}
 	}
+}
+
+void Ropeway::addSupport(const Rope &a_rope, vector<std::shared_ptr<Support>> &a_supports,
+                         int &a_pulleyIdx) const
+{
+  const Pile &rPile0 = a_rope.get_pile0();
+  if (!rPile0.isStation()) {        
+    a_supports.push_back(std::make_shared<Support>(rPile0));
+    a_supports[a_supports.size() - 1]->prepare(a_rope);
+  }
+  else if (a_pulleyIdx<0) { // non déjà ajouté    
+    a_pulleyIdx = a_supports.size();
+    a_supports.push_back(std::make_shared <Pulley>(rPile0));
+  }
 }
 
 int Ropeway::computeNbNodes(int nb_elem, double L)
@@ -92,6 +106,16 @@ int Ropeway::computeMesh(vector<Point>& a_q, int q_offset)
 		}
 	}	
 	return offset;
+}
+
+const Pile &Ropeway::get_FirstPile()
+{ 
+	return m_ropes.front().get_pile0();
+}
+
+const Pile &Ropeway::get_LastPile()
+{ 
+	return m_ropes.back().get_pile0(); 
 }
 
 double Ropeway::get_T0()
@@ -144,5 +168,6 @@ int Ropeway::to_json(ojson & j)
 
 void Ropeway::set_Down(bool a_value)
 {
-	m_down = a_value;
-}
+	m_down = a_value; }
+
+

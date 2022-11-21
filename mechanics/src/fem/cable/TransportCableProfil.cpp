@@ -4,9 +4,7 @@
 
 TransportCableProfil::TransportCableProfil(const TransportCableModel &a_model, TransportCableResult &a_results)
 	: r_model(a_model), 
-	r_results(a_results),
-	puller12(r_model.get_piles1().back(), r_model.get_piles2().back(), r_results.puller12),
-	puller21(r_model.get_piles2().front(), r_model.get_piles1().front(), r_results.puller21)
+	r_results(a_results)
 {
 }
 
@@ -16,6 +14,8 @@ TransportCableProfil::~TransportCableProfil()
 
 void TransportCableProfil::computeInitialProfil(int nb_nodes, int nodes_per_pulley, double a_tol, int a_nmax)
 {
+
+	// calcul les positions, tensions des cordes
 	Cable meca = r_model.get_cable();
 	Carriers vehicules = r_model.get_carriers();
 	meca.set_rho(meca.get_rho() + vehicules.get_rho());
@@ -24,22 +24,27 @@ void TransportCableProfil::computeInitialProfil(int nb_nodes, int nodes_per_pull
     meca.set_T(r_results.rope1.get_T0());
     r_results.rope2.compute(meca, r_model.get_piles2(), nb_nodes, a_tol, a_nmax);
 
-	puller12.set_T(r_results.rope1.get_LastT());
-    puller21.set_T(r_results.rope2.get_T0());
+	  // prépare les supports: pile, station -> support
+    r_results.prepareSupport();
 
-	puller12.compute(nodes_per_pulley);
-	puller21.compute(nodes_per_pulley);
+
+	/*puller12.compute(nodes_per_pulley);
+	puller21.compute(nodes_per_pulley);*/
 	
-	// prépare les supports: pile -> support
-	r_results.prepareSupport();
+	
 	
 }
 
 void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol, double mu_s,
                                       double mu_p)
-{
-	double Lt = puller12.get_L(r_results.rope2);
-	double Lb = puller21.get_L(r_results.rope1);
+{  
+  std::shared_ptr<Pulley> puller12 =
+      std::dynamic_pointer_cast<Pulley>( r_results.supports[r_results.puller12idx]);
+
+  std::shared_ptr<Pulley> puller21 =  std::dynamic_pointer_cast<Pulley>(r_results.supports[r_results.puller12idx]);
+
+	double Lt = puller12->get_L(r_results.rope2);
+	double Lb = puller21->get_L(r_results.rope1);
     double L = r_results.rope1.get_L() + Lt + r_results.rope2.get_L() + Lb;
 
 	int n_Pt = (int)rint(nb_elem*Lt / L);
@@ -52,9 +57,9 @@ void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol, d
 	vector<Point> &q = r_results.q;
 	q.resize(n);
     int offset = r_results.rope1.computeMesh(q, 0);
-	offset = puller12.compute(n_Pt + 1, q, offset);
+	offset = puller12->compute(n_Pt + 1, q, offset);
     offset = r_results.rope2.computeMesh(q, offset);
-	puller21.compute(n_Pb+1, q, offset);
+	puller21->compute(n_Pb+1, q, offset);
 
 	r_results.elem_length = L / nb_elem;
 	compute_punct_load(n, L);
@@ -145,24 +150,15 @@ void TransportCableProfil::compute_ineq_constraint(const vector<Point> &a_X, dou
 	r_results.prepareIneqConstraint((int)a_X.size());
 	
 	vector<double>& g = r_results.g;
-	vector<int>& act = r_results.act;
 	vector<vector<Point>>& G = r_results.G;
 	vector<vector<Point>>& T = r_results.T;
-	vector<Point>& blocked = r_results.blocked;
-	vector<Point>& blocked_value = r_results.blocked_value;
-	vector<double>& eye_c = r_results.eye_c;
-	vector<Support>& supports = r_results.supports;
+        vector<std::shared_ptr<Support>> &supports = r_results.supports;
 
-	int k = 0;
 	for (auto &s : supports) {
 		size_t i = 0;
 		for (auto &p : a_X) {			
-			s.compute(p, k, a_tol, mu_s, g[i], act[i], G[i][i], T[i][i], blocked[i], blocked_value[i], eye_c[i]);			
+			s->compute(p, a_tol, g[i], G[i][i], T[i][i]);			
 			i++;
 		}
-		k++;
 	}
-	int ns = (int)supports.size();
-	puller12.compute(a_X, ns, a_tol, mu_p, r_results);
-	puller21.compute(a_X, ns+1, a_tol, mu_p, r_results);
 }

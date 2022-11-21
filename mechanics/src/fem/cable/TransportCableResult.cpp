@@ -7,6 +7,9 @@
 TransportCableResult::TransportCableResult()
 {
 	rope2.set_Down(true);
+	elem_length = 0;
+	puller12idx = -1;
+	puller21idx = -1;
 }
 
 
@@ -16,9 +19,17 @@ TransportCableResult::~TransportCableResult()
 
 void TransportCableResult::prepareSupport()
 {
+
 	supports.clear();
-	rope1.prepareSupport(supports);
-	rope2.prepareSupport(supports);
+	puller12idx = -1;
+	puller21idx = -1;
+	rope1.prepareSupport(supports, puller12idx);        
+	rope2.prepareSupport(supports, puller21idx);
+
+	supports[puller12idx]->prepare(rope1.get_LastPile(), rope2.get_LastPile(),
+                                  rope1.get_LastT());    
+    supports[puller12idx]->prepare(rope2.get_FirstPile(), rope1.get_FirstPile(),
+                                      rope2.get_T0());
 }
 
 void TransportCableResult::prepareIneqConstraint(int nb_node)
@@ -88,10 +99,13 @@ int TransportCableResult::to_json(ojson & j, const std::string & a_option)
 		rope2.to_json(j["rope2"]);
 	}
 	else {
-		j["supports"] = supports;
+        j["supports"] = ojson::array();
+        for (auto &s : supports) {
+	        j["supports"].push_back(*s);
+        }
 		j["pulleys"] = ojson::array();
-		j["pulleys"].push_back(puller12);
-		j["pulleys"].push_back(puller21);
+		//j["pulleys"].push_back(puller12);
+		//j["pulleys"].push_back(puller21);
 
 		j["q"] = q;
 		j["punct"] = punct;

@@ -20,7 +20,11 @@
 #include <math.h>               // for fabs
 #include <stdio.h>              // for printf, fprintf, fscanf, NULL, fclose
 #include <stdlib.h>             // for malloc, free, exit, EXIT_FAILURE
+#if _MSC_VER
+#include <errno.h> // for errno
+#else
 #include <sys/errno.h>          // for errno
+#endif                          //  MSVC
 #include <string.h>             // for memcpy
 #include "SiconosBlas.h"        // for cblas_dscal
 #include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
