@@ -292,9 +292,11 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
     for(ic = 0 ; ic < dim ; ++ic)
     {
       zb = A[ic][drive];
+      //printf("zb = %e\n", zb);
       if(zb > 0.0)
       {
         z0 = A[ic][0] / zb;
+	//printf("z0 = %e\n", z0);
         if(z0 > ratio) continue;
         if(z0 < ratio)
         {
@@ -309,10 +311,11 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
         }
       }
     }
-
+    numerics_printf_verbose(2,"nb_candidate for pivots = %i, ratio = %e, drive = %d, block = %i  ", nb_candidate, ratio, drive, block);
     if(nb_candidate > 0)
     {
-      DEBUG_PRINTF("pivot_selection_lemke :: lexicomin %d candidates, ratio = %e, drive = %d\n", nb_candidate, ratio, drive);
+      numerics_printf_verbose(2,"pivot_selection_lemke :: lexicomin %d candidates, ratio = %e, drive = %d\n", nb_candidate, ratio, drive);
+
       for(unsigned k = 0; k < nb_candidate; ++k)
       {
         unsigned var = candidate_pivots_indx[k];
@@ -401,10 +404,10 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
 
 
     DEBUG_EXPR_WE(
-      if(max_pivot_helped)
-  {
-    DEBUG_PRINT("pivot_selection_lemke :: lexicomin MAX PIVOT HELPED!\n");
-    });
+		  if(max_pivot_helped)
+		    {
+		      DEBUG_PRINT("pivot_selection_lemke :: lexicomin MAX PIVOT HELPED!\n");
+		    });
     if(block == -1)
     {
       Ifound = 0;
@@ -414,7 +417,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
       break;
     }
 
-    DEBUG_PRINTF("leaving variable %s%d entering variable %s%d\n", basis_to_name(basis[block], dim), basis_to_number(basis[block], dim), basis_to_name(drive, dim), basis_to_number(drive, dim));
+    numerics_printf_verbose(2,"leaving variable (block) %s%d entering variable (drive) %s%d", basis_to_name(basis[block], dim), basis_to_number(basis[block], dim), basis_to_name(drive, dim), basis_to_number(drive, dim));
     if(basis[block] == dim + 1)
       {
 	Ifound = 1;
