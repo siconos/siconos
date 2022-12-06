@@ -992,7 +992,7 @@ int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief, FILE* 
   {
     for(p = 0 ; p < nz ; p++)
     {
-      fprintf(file,"    %lld %lld %g\n", (long long int)Ai [p] + 1, (long long int)Ap [p] + 1, Ax ? Ax [p] : 1) ;
+      fprintf(file,"    %lld %lld %20.16e\n", (long long int)Ai [p] + 1, (long long int)Ap [p] + 1, Ax ? Ax [p] : 1) ;
       if(brief && p > 20)
       {
         fprintf(file,"  ...\n") ;
