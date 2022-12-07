@@ -2593,6 +2593,11 @@ void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double
       CHECK_RETURN(CSparseMatrix_zentry(B->matrix2->triplet, i, j, A->matrix0[i + A->size0*j], threshold));
     }
   }
+  /* we update explicitely the size of B since it may be wrong if
+     the last column if full of zero (for instance for a zero matrix)*/
+  B->matrix2->triplet->m = A->size0;
+  B->matrix2->triplet->n = A->size1;
+
   if (A == B)
   {
     /* on the same matrix, the versions are the same */
