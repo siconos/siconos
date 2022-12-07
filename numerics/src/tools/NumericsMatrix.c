@@ -6184,7 +6184,7 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
           fprintf(stderr, "NM_LDLT_factorize: LBL_Factorize. Error return from Factorize: %d\n", info);
         }
         // Close logging stream.
-        fclose(logfile);
+        // fclose(logfile); // the file is closed after LBL_Finalize
 
       break;
       }
@@ -6335,8 +6335,6 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
       case NSM_HSL:
       {
         LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
-	FILE * logfile = fopen("lbl.log", "a");
-	lbl->ma57->logfile = logfile;
         // Solve.
         for (int irhs=0; irhs <nrhs ; irhs++)
         {
@@ -6346,7 +6344,6 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
             fprintf(stderr, "NM_LDLT_solve. LBL_Solve error return from Solve: %d\n", info);
           }
         }
-	fclose(logfile);
         break;
       }
 #endif
