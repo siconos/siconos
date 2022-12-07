@@ -5167,7 +5167,7 @@ size_t NM_nnz(const NumericsMatrix* M)
     return NSM_nnz(NSM_get_origin(M->matrix2));
   }
   default:
-    numerics_error("NM_nnz", "Unsupported matrix type %d in %s", M->storageType);
+	  numerics_warning("NM_nnz", "Unsupported matrix type %d in %s", M->storageType, "NM_nnz");
     return SIZE_MAX;
   }
 }
