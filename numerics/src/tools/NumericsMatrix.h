@@ -870,18 +870,10 @@ extern "C"
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
-<<<<<<< HEAD
-  /**  Computation of the inverse of a NumericsMatrix A using NM_LU_expert
-   * \param[in,out] A a NumericsMatrix.
-   * \return the matrix inverse.
-=======
-
-
   /** Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    *
    *  \param[in,out] A a NumericsMatrix.
    *  \return the matrix inverse.
->>>>>>> master
    */
   NumericsMatrix* NM_LU_inv(NumericsMatrix* A);
 
