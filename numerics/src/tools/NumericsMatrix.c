@@ -5167,7 +5167,7 @@ size_t NM_nnz(const NumericsMatrix* M)
     return NSM_nnz(NSM_get_origin(M->matrix2));
   }
   default:
-	  numerics_warning("NM_nnz", "Unsupported matrix type %d in %s", M->storageType, "NM_nnz");
+    numerics_warning("NM_nnz", "Unsupported matrix type %d in %s", M->storageType, "NM_nnz");
     return SIZE_MAX;
   }
 }
@@ -5245,6 +5245,25 @@ int NM_is_symmetric(NumericsMatrix* A)
   return 0;
 }
 
+int NM_isnan(NumericsMatrix* M)
+{
+  switch(M->storageType)
+  {
+  case NM_DENSE:
+    assert(M->matrix0);
+    return NV_isnan(M->matrix0, M->size0 * M->size1 );
+  case NM_SPARSE:
+  {
+    assert(M->matrix2);
+    int nnz  = NSM_nnz(NSM_get_origin(M->matrix2));
+    return NV_isnan(NM_csc(M)->x, nnz );
+  }
+  default:
+    numerics_warning("NM_isnan", "Unsupported matrix type %d in %s", M->storageType, "NM_isnan");
+    return 1;
+  }
+}
+
 double NM_symmetry_discrepancy(NumericsMatrix* A)
 {
   int n = A->size0;
@@ -5260,6 +5279,10 @@ double NM_symmetry_discrepancy(NumericsMatrix* A)
   }
   return d;
 }
+
+
+
+
 #include "time.h"
 double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
 {

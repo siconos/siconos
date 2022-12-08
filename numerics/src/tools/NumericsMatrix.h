@@ -1010,6 +1010,12 @@ extern "C"
    */
   void NM_reset_versions(NumericsMatrix* M);
 
+  /* Check if an entry in the matrix is NaN .
+   *\param M the NumericsMatrix
+   *\return int = 1 if a NaN is found, 0 otherwise
+   */
+  int NM_isnan(NumericsMatrix* M);
+
 
 #ifdef WITH_OPENSSL
   /* Compute sha1 hash of matrix values. Matrices of differents size and same
