@@ -248,7 +248,7 @@ Developers or advanced users options
 
   .. code-block:: bash
 
-	cmake -DINSTAll_BULLET=ON ...
+	cmake -DBULLET_INSTALL=ON ...
 
   Bullet will be downloaded, built and installed as a siconos part, at the same place as Siconos.
 
@@ -341,13 +341,6 @@ Here is an example, to build numerics and kernel, with documentation, no tests .
   option(WITH_RENDERER "Install OCE renderer. Default = OFF" OFF)
   option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library. Default = ON" ON)
   option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
-
-  # -- Installation setup ---
-  # Set python install mode:
-  # - user --> behave as 'python setup.py install --user'
-  # - standard --> install in python site-package (ie behave as python setup.py install)
-  # - prefix --> install in python CMAKE_INSTALL_PREFIX (ie behave as python setup.py install --prefix=CMAKE_INSTALL_PREFIX)
-  set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
 
   # If OFF, headers from libraries in externals will not be installed.
   option(INSTALL_EXTERNAL_HEADERS "Whether or not headers for external libraries should be installed. Default=OFF" OFF)

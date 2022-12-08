@@ -22,29 +22,23 @@
 #define NEWTONEULERRELATIONFC3D_H
 
 #include "NewtonEuler1DR.hpp"
-/** NewtonEuler3DR
- *
- * This class is an interface for relation with impact and FC3D.
- * From NewtonEuler1DR, it inherits to the computation of the jacobian, this
- * operator is use for the predictor of activation and deactivation of the
- * Interaction. The OSNSP is build using the matrix jachqT, that is computed
- * from the point if contact pc1, pc2 and Nc. Use this class consists in
- * overload the method computeh, and children class has to set the menber pc1,
- * pc2 and nc.
- *
- *
- */
+/**
+    This class is an interface for relation with impact and FC3D.
+    From NewtonEuler1DR, it inherits to the computation of the jacobian, this
+    operator is use for the predictor of activation and deactivation of the
+    Interaction. The OSNSP is build using the matrix jachqT, that is computed
+    from the point if contact pc1, pc2 and Nc. Use this class consists in
+    overload the method computeh, and children class has to set the menber pc1,
+    pc2 and nc.
 
+*/
 class NewtonEuler3DR : public NewtonEuler1DR {
 
 private:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(NewtonEuler3DR);
 
   void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1);
-  void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1,
-                                     SP::SiconosVector q2);
+  void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
 
 protected:
 public:
@@ -55,15 +49,17 @@ public:
   virtual ~NewtonEuler3DR(){};
 
   /** initialize components specific to derived classes.
-   * \param inter the interaction using this relation
+   *
+   *  \param inter the interaction using this relation
    */
   void initialize(Interaction &inter) override;
 
-  /* Default implementation consists in multiplying jachq and T (see
-   * NewtonEulerR::computeJachqT) but here we compute the operator from the the
-   * contact point locations and the local frame at contact \param inter
-   * interaction that owns the relation \param q0  the block vector to the
-   * dynamical system position
+  /** Default implementation consists in multiplying jachq and T (see
+   *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
+   *  contact point locations and the local frame at contact
+   *
+   *  \param inter  interaction that owns the relation
+   *  \param q0  the block vector to the dynamical system position
    */
   void computeJachqT(Interaction &inter, SP::BlockVector q0) override;
 

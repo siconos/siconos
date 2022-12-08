@@ -1,12 +1,27 @@
 #include "FischerBurmeisterGenerated.h"
-#include <assert.h>  // for assert
-//#define DEBUG_MESSAGES 1
-//#define DEBUG_WHERE_MESSAGES 1
-#include "siconos_debug.h"   // for DEBUG_PRINT
-#include <float.h>   // for DBL_EPSILON
-#include <math.h>    // for sqrt, pow, fabs
-#include <op3x3.h>   // for cpy3x3, cpy3, SET3
-#include <stdlib.h>  // for RAND_MAX
+#include <assert.h>   // for assert
+#undef FB_ASSERT      // assertions will stop execution
+#ifndef NDEBUG
+#define FB_DEBUG 1    // messages about some floating point expressions
+#else
+#undef FB_DEBUG
+#endif
+#undef FULL_FB_DEBUG  // cases debug
+#ifdef FB_DEBUG
+#define DEBUG_MESSAGES 1
+#define DEBUG_WHERE_MESSAGES 1
+#include <stdio.h>    // for printf, siconos_debug.h does not include it
+#endif
+#ifdef FULL_FB_DEBUG
+#define XDEBUG_PRINT(X) DEBUG_PRINT(X)
+#else
+#define XDEBUG_PRINT(X)
+#endif
+#include "siconos_debug.h"   // for DEBUG_PRINT & for DEBUG_PRINTF
+#include <float.h>           // for DBL_EPSILON
+#include <math.h>            // for sqrt, pow, fabs
+#include <op3x3.h>           // for cpy3x3, cpy3, SET3
+#include <stdlib.h>          // for RAND_MAX
 
 #define Sign(x) ((x>0) - (x<0))
 #define Max fmax
@@ -22,17 +37,19 @@
 
 #define ZERO_SQR  ZERO * ZERO
 
-#ifdef FB_DEBUG_POST_CHECK
-#define POST_CHECK_POW(x) assert(isfinite((double)x))
-#define POST_CHECK_ADD(x) assert(isfinite((double)x))
-#define POST_CHECK_MUL(x) assert(isfinite((double)x))
-#define POST_CHECK(x) assert(isfinite((double)x))
+#ifdef FB_ASSERT
+#define FB_WARN(M, X) assert(X && M)
+#elif FB_DEBUG
+#define FB_WARN(M, X) ({(X) ? 0 : ((DEBUG_PRINTF("%s, %s failed\n", #M, #X)));})
 #else
-#define POST_CHECK_POW(x)
-#define POST_CHECK_ADD(x)
-#define POST_CHECK_MUL(x)
-#define POST_CHECK(x)
+#define FB_WARN(M, X) ((void)0)
 #endif
+
+#define POST_CHECK_POW(x) FB_WARN("post check pow", isfinite((double)x))
+#define POST_CHECK_ADD(x) FB_WARN("post check add", isfinite((double)x))
+#define POST_CHECK_MUL(x) FB_WARN("post check mul", isfinite((double)x))
+#define POST_CHECK(x) FB_WARN("post check bool", isfinite((double)x))
+
 
 #define NOT_ZERO(x) fabs(x) > 0
 #define IS_NOT_ZERO(x) fabs(x) > 0
@@ -60,7 +77,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 // hack, should be prevented in sage/sympy/maple or in code generation
-#define sqrt(x) ((( (double)x >= 0. && x <= ZERO_SQR) || ((double)x < 0. && (double)x >= -ZERO)) ? 0. : (assert(x>=0.), sqrt(x)))
+#define sqrt(x) ((( (double)x >= 0. && x <= ZERO_SQR) || ((double)x < 0. && (double)x >= -ZERO)) ? 0. : (FB_WARN("sqrt", x>=0.), sqrt(x)))
 
 // ./fb2.py --ccode --ccodefac --ccodeAB --wrapper --merit
 void fc3d_FischerBurmeisterFABGenerated(
@@ -479,7 +496,7 @@ void fc3d_FischerBurmeisterFABGenerated(
 
   if(x59)
   {
-    DEBUG_PRINT("Case (x59) is True.\n");
+    XDEBUG_PRINT("Case (x59) is True.\n");
     /*@ assert (x21) != 0.;*/
     x53=1.0/x21;
     POST_CHECK_POW(x53);
@@ -501,7 +518,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x37)
   {
-    DEBUG_PRINT("Case (x37) is True.\n");
+    XDEBUG_PRINT("Case (x37) is True.\n");
     x111=rt1 + x14;
     POST_CHECK_ADD(x111);
     /*@ assert (random1*random1 + random2*random2) >= 0.;*/
@@ -531,7 +548,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x189;
   if(x59)
   {
-    DEBUG_PRINT("Case (x59) is True.\n");
+    XDEBUG_PRINT("Case (x59) is True.\n");
     /*@ assert (x21) != 0.;*/
     x53=1.0/x21;
     POST_CHECK_POW(x53);
@@ -553,7 +570,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x37)
   {
-    DEBUG_PRINT("Case (x37) is True.\n");
+    XDEBUG_PRINT("Case (x37) is True.\n");
     /*@ assert (random1*random1 + random2*random2) >= 0.;*/
     /*@ assert (random1*random1 + random2*random2) != 0.;*/
     x113=pow(random1*random1 + random2*random2, -1.0/2.0);
@@ -581,7 +598,7 @@ void fc3d_FischerBurmeisterFABGenerated(
 
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -633,7 +650,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -691,7 +708,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -754,7 +771,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x124;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -802,7 +819,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -892,7 +909,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -962,7 +979,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x125)
   {
-    DEBUG_PRINT("Case (x125) is True.\n");
+    XDEBUG_PRINT("Case (x125) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -1026,7 +1043,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x191;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -1074,7 +1091,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -1164,7 +1181,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -1234,7 +1251,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x125)
   {
-    DEBUG_PRINT("Case (x125) is True.\n");
+    XDEBUG_PRINT("Case (x125) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -1314,7 +1331,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x81;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
     x29=sqrt(8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8);
     POST_CHECK_POW(x29);
@@ -1346,7 +1363,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -1428,7 +1445,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -1549,7 +1566,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x166;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -1643,7 +1660,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -1835,7 +1852,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -1935,7 +1952,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x125)
   {
-    DEBUG_PRINT("Case (x125) is True.\n");
+    XDEBUG_PRINT("Case (x125) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -2037,7 +2054,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x198;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -2127,7 +2144,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -2283,7 +2300,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -2387,7 +2404,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x125)
   {
-    DEBUG_PRINT("Case (x125) is True.\n");
+    XDEBUG_PRINT("Case (x125) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -2486,7 +2503,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x89;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8) >= 0.;*/
     x29=sqrt(8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x8);
     POST_CHECK_POW(x29);
@@ -2518,7 +2535,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -2600,7 +2617,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -2681,7 +2698,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x173;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -2771,7 +2788,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -2927,7 +2944,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -3031,7 +3048,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x125)
   {
-    DEBUG_PRINT("Case (x125) is True.\n");
+    XDEBUG_PRINT("Case (x125) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -3124,7 +3141,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x200;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -3218,7 +3235,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x49)
   {
-    DEBUG_PRINT("Case (x49) is True.\n");
+    XDEBUG_PRINT("Case (x49) is True.\n");
     /*@ assert (x6 + x7) >= 0.;*/
     x40=sqrt(x6 + x7);
     POST_CHECK_POW(x40);
@@ -3408,7 +3425,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x61)
   {
-    DEBUG_PRINT("Case (x61) is True.\n");
+    XDEBUG_PRINT("Case (x61) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -3508,7 +3525,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x125)
   {
-    DEBUG_PRINT("Case (x125) is True.\n");
+    XDEBUG_PRINT("Case (x125) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -3600,7 +3617,7 @@ void fc3d_FischerBurmeisterFABGenerated(
 
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -3656,7 +3673,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -3720,7 +3737,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x176;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -3772,7 +3789,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -3854,7 +3871,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x177)
   {
-    DEBUG_PRINT("Case (x177) is True.\n");
+    XDEBUG_PRINT("Case (x177) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -3928,7 +3945,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x201;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -3980,7 +3997,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4062,7 +4079,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x177)
   {
-    DEBUG_PRINT("Case (x177) is True.\n");
+    XDEBUG_PRINT("Case (x177) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4140,7 +4157,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x107;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -4196,7 +4213,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4247,7 +4264,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x183;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -4313,7 +4330,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4375,7 +4392,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x177)
   {
-    DEBUG_PRINT("Case (x177) is True.\n");
+    XDEBUG_PRINT("Case (x177) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4435,7 +4452,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x186;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -4513,7 +4530,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4575,7 +4592,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x177)
   {
-    DEBUG_PRINT("Case (x177) is True.\n");
+    XDEBUG_PRINT("Case (x177) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4635,7 +4652,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x110;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -4691,7 +4708,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4737,7 +4754,7 @@ void fc3d_FischerBurmeisterFABGenerated(
 
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -4815,7 +4832,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4877,7 +4894,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x177)
   {
-    DEBUG_PRINT("Case (x177) is True.\n");
+    XDEBUG_PRINT("Case (x177) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -4935,7 +4952,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   double x202;
   if(x39)
   {
-    DEBUG_PRINT("Case (x39) is True.\n");
+    XDEBUG_PRINT("Case (x39) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8) >= 0.;*/
     x28=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x8);
     POST_CHECK_POW(x28);
@@ -5001,7 +5018,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x100)
   {
-    DEBUG_PRINT("Case (x100) is True.\n");
+    XDEBUG_PRINT("Case (x100) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -5063,7 +5080,7 @@ void fc3d_FischerBurmeisterFABGenerated(
   }
   else if(x177)
   {
-    DEBUG_PRINT("Case (x177) is True.\n");
+    XDEBUG_PRINT("Case (x177) is True.\n");
     /*@ assert (x26) != 0.;*/
     x50=0.5/x26;
     POST_CHECK_MUL(x50);
@@ -5243,7 +5260,7 @@ void fc3d_FischerBurmeisterFGenerated(
 
   if(x18)
   {
-    DEBUG_PRINT("Case (x18) is True.\n");
+    XDEBUG_PRINT("Case (x18) is True.\n");
     x15=rt1 + x7;
     POST_CHECK_ADD(x15);
     /*@ assert (x11) != 0.;*/
@@ -5265,7 +5282,7 @@ void fc3d_FischerBurmeisterFGenerated(
   }
   else if(x21)
   {
-    DEBUG_PRINT("Case (x21) is True.\n");
+    XDEBUG_PRINT("Case (x21) is True.\n");
     x15=rt1 + x7;
     POST_CHECK_ADD(x15);
     /*@ assert (random1*random1 + random2*random2) >= 0.;*/
@@ -5295,7 +5312,7 @@ void fc3d_FischerBurmeisterFGenerated(
   double x24;
   if(x18)
   {
-    DEBUG_PRINT("Case (x18) is True.\n");
+    XDEBUG_PRINT("Case (x18) is True.\n");
     /*@ assert (x11) != 0.;*/
     x16=1.0/x11;
     POST_CHECK_POW(x16);
@@ -5317,7 +5334,7 @@ void fc3d_FischerBurmeisterFGenerated(
   }
   else if(x21)
   {
-    DEBUG_PRINT("Case (x21) is True.\n");
+    XDEBUG_PRINT("Case (x21) is True.\n");
     /*@ assert (random1*random1 + random2*random2) >= 0.;*/
     /*@ assert (random1*random1 + random2*random2) != 0.;*/
     x19=pow(random1*random1 + random2*random2, -1.0/2.0);
@@ -5698,7 +5715,7 @@ void fc3d_FischerBurmeisterABGenerated(
 
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -5750,7 +5767,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -5804,7 +5821,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -5887,7 +5904,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x117;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -5935,7 +5952,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -6021,7 +6038,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -6107,7 +6124,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x120)
   {
-    DEBUG_PRINT("Case (x120) is True.\n");
+    XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -6192,7 +6209,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x184;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -6240,7 +6257,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -6326,7 +6343,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -6412,7 +6429,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x120)
   {
-    DEBUG_PRINT("Case (x120) is True.\n");
+    XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -6512,7 +6529,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x80;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
     x3=sqrt(8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1);
     POST_CHECK_POW(x3);
@@ -6544,7 +6561,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -6622,7 +6639,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -6755,7 +6772,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x161;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -6849,7 +6866,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -7041,7 +7058,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -7149,7 +7166,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x120)
   {
-    DEBUG_PRINT("Case (x120) is True.\n");
+    XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -7263,7 +7280,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x191;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -7353,7 +7370,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -7509,7 +7526,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -7621,7 +7638,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x120)
   {
-    DEBUG_PRINT("Case (x120) is True.\n");
+    XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -7732,7 +7749,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x88;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1) >= 0.;*/
     x3=sqrt(8.4852813742385695405801016022451221942901611328125*mu + 3.0 + 9.0*x1);
     POST_CHECK_POW(x3);
@@ -7764,7 +7781,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -7842,7 +7859,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -7935,7 +7952,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x168;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -8025,7 +8042,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -8181,7 +8198,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -8293,7 +8310,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x120)
   {
-    DEBUG_PRINT("Case (x120) is True.\n");
+    XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -8398,7 +8415,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x193;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -8492,7 +8509,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x44)
   {
-    DEBUG_PRINT("Case (x44) is True.\n");
+    XDEBUG_PRINT("Case (x44) is True.\n");
     /*@ assert (x24 + x25) >= 0.;*/
     x35=sqrt(x24 + x25);
     POST_CHECK_POW(x35);
@@ -8682,7 +8699,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x60)
   {
-    DEBUG_PRINT("Case (x60) is True.\n");
+    XDEBUG_PRINT("Case (x60) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -8790,7 +8807,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x120)
   {
-    DEBUG_PRINT("Case (x120) is True.\n");
+    XDEBUG_PRINT("Case (x120) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -8894,7 +8911,7 @@ void fc3d_FischerBurmeisterABGenerated(
 
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -8950,7 +8967,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9026,7 +9043,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x171;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -9078,7 +9095,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9168,7 +9185,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x172)
   {
-    DEBUG_PRINT("Case (x172) is True.\n");
+    XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9254,7 +9271,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x194;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -9306,7 +9323,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9396,7 +9413,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x172)
   {
-    DEBUG_PRINT("Case (x172) is True.\n");
+    XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9486,7 +9503,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x104;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -9542,7 +9559,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9605,7 +9622,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x178;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -9671,7 +9688,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9745,7 +9762,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x172)
   {
-    DEBUG_PRINT("Case (x172) is True.\n");
+    XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9817,7 +9834,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x181;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -9895,7 +9912,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -9969,7 +9986,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x172)
   {
-    DEBUG_PRINT("Case (x172) is True.\n");
+    XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -10041,7 +10058,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x107;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -10097,7 +10114,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -10155,7 +10172,7 @@ void fc3d_FischerBurmeisterABGenerated(
 
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -10233,7 +10250,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -10307,7 +10324,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x172)
   {
-    DEBUG_PRINT("Case (x172) is True.\n");
+    XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -10377,7 +10394,7 @@ void fc3d_FischerBurmeisterABGenerated(
   double x195;
   if(x34)
   {
-    DEBUG_PRINT("Case (x34) is True.\n");
+    XDEBUG_PRINT("Case (x34) is True.\n");
     /*@ assert (-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1) >= 0.;*/
     x2=sqrt(-2.828427124746190290949243717477656900882720947265625*mu + 3.0 + x1);
     POST_CHECK_POW(x2);
@@ -10443,7 +10460,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x97)
   {
-    DEBUG_PRINT("Case (x97) is True.\n");
+    XDEBUG_PRINT("Case (x97) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -10517,7 +10534,7 @@ void fc3d_FischerBurmeisterABGenerated(
   }
   else if(x172)
   {
-    DEBUG_PRINT("Case (x172) is True.\n");
+    XDEBUG_PRINT("Case (x172) is True.\n");
     /*@ assert (x30 + x31) >= 0.;*/
     x45=sqrt(x30 + x31);
     POST_CHECK_POW(x45);
@@ -10921,7 +10938,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(
 
   if(x46)
   {
-    DEBUG_PRINT("Case (x46) is True.\n");
+    XDEBUG_PRINT("Case (x46) is True.\n");
     x4=mu*mu;
     POST_CHECK_POW(x4);
     x6=x4*rn*rn + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
@@ -11079,7 +11096,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(
   }
   else if(x54)
   {
-    DEBUG_PRINT("Case (x54) is True.\n");
+    XDEBUG_PRINT("Case (x54) is True.\n");
     x4=mu*mu;
     POST_CHECK_POW(x4);
     x6=x4*rn*rn + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
@@ -11233,7 +11250,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(
   double x63;
   if(x46)
   {
-    DEBUG_PRINT("Case (x46) is True.\n");
+    XDEBUG_PRINT("Case (x46) is True.\n");
     x4=mu*mu;
     POST_CHECK_POW(x4);
     x6=x4*rn*rn + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
@@ -11379,7 +11396,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(
   }
   else if(x54)
   {
-    DEBUG_PRINT("Case (x54) is True.\n");
+    XDEBUG_PRINT("Case (x54) is True.\n");
     x4=mu*mu;
     POST_CHECK_POW(x4);
     x6=x4*rn*rn + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
@@ -11513,7 +11530,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(
   double x68;
   if(x46)
   {
-    DEBUG_PRINT("Case (x46) is True.\n");
+    XDEBUG_PRINT("Case (x46) is True.\n");
     x4=mu*mu;
     POST_CHECK_POW(x4);
     x6=x4*rn*rn + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;
@@ -11659,7 +11676,7 @@ void fc3d_FischerBurmeisterGradFMeritGenerated(
   }
   else if(x54)
   {
-    DEBUG_PRINT("Case (x54) is True.\n");
+    XDEBUG_PRINT("Case (x54) is True.\n");
     x4=mu*mu;
     POST_CHECK_POW(x4);
     x6=x4*rn*rn + rt1*rt1 + rt2*rt2 + x1*x4 + x2*x4 + x5*x5;

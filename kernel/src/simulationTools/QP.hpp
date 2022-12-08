@@ -31,8 +31,7 @@
 class QP : public OneStepNSProblem
 {
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(QP);
 
 
@@ -57,6 +56,7 @@ public:
 
   // --- Q ---
   /** get the value of Q
+   *
    *  \return SimpleMatrix
    */
   inline const SimpleMatrix getQ() const
@@ -65,6 +65,7 @@ public:
   }
 
   /** get Q
+   *
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix q() const
@@ -73,6 +74,7 @@ public:
   }
 
   /** set the value of Q to newValue
+   *
    *  \param newValue SiconosMatrix 
    */
   inline void setQ(const SiconosMatrix& newValue)
@@ -81,6 +83,7 @@ public:
   }
 
   /** set Q to pointer newPtr
+   *
    *  \param newPtr the new matrix
    */
   inline void setQPtr(SP::SiconosMatrix newPtr)
@@ -90,6 +93,7 @@ public:
 
   // --- P ---
   /** get the value of p, the initial state of the DynamicalSystem
+   *
    *  \return SiconosVector
    *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
    */
@@ -99,6 +103,7 @@ public:
   }
 
   /** get p, the initial state of the DynamicalSystem
+   *
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector p() const
@@ -107,6 +112,7 @@ public:
   }
 
   /** set the value of p to newValue
+   *
    *  \param newValue SiconosVector 
    */
   inline void setP(const SiconosVector& newValue)
@@ -115,6 +121,7 @@ public:
   }
 
   /** set p to pointer newPtr
+   *
    *  \param newPtr SiconosVector * 
    */
   inline void setPPtr(SP::SiconosVector newPtr)
@@ -125,7 +132,8 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** To run the solver for ns problem
-   *   \param time current time
+   *
+   *  \param time current time
    *  \return int, information about the solver convergence.
    */
   int compute(double time);

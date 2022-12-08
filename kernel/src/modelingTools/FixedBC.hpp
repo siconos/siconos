@@ -21,18 +21,18 @@
 
 #include "BoundaryCondition.hpp"
 
-/** \brief This class models a simple fixed boundary conditions for
- *   prescribing the velocities in a Dynamical System. A simple
- *   boundary condition is considered to fix a component \f$ j \f$ of
- *   the velocity vector, i.e., \f$ v_j(t) = 0\f$ 
+/** This class models a simple fixed boundary conditions for
+ *  prescribing the velocities in a Dynamical System. A simple
+ *  boundary condition is considered to fix a component \f$ j \f$ of
+ *  the velocity vector, i.e., \f$ v_j(t) = 0 \f$ 
  *
  */
 class FixedBC : public  BoundaryCondition
 {
 public:
 
-  /** \fn FixedBC(SP::UnsignedIntVector  newVelocityIndices);
-   *  \brief Basic constructor
+  /** Basic constructor
+   *
    *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    */
 
@@ -42,13 +42,13 @@ public:
   virtual ~FixedBC();
 
   /** default function to compute the precribed velocities
+   *
    *  \param  time : the current time
    */
   virtual void computePrescribedVelocity(double time);
 
 protected:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(FixedBC);
 
   /** protected default constructor */

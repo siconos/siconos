@@ -38,8 +38,7 @@
  */
 class NewMarkAlphaOSI : public OneStepIntegrator {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(NewMarkAlphaOSI);
   /** Parameters of the numerical scheme:  beta, gamma, alpha_m, alpha_f */
   double _beta, _gamma, _alpha_m, _alpha_f;
@@ -207,6 +206,13 @@ public:
    */
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
+
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+   */
+  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,   InteractionsGraph& indexSet) override
+  {
+    return *(*indexSet.properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
+  };
 
   /** initialize */
   //  void initialize(Model& m);

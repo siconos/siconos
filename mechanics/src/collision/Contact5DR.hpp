@@ -26,8 +26,7 @@
 class Contact5DR : public NewtonEuler5DR
 {
 private:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(Contact5DR);
 
 public:
@@ -38,17 +37,20 @@ public:
   SP::BodyShapeRecord bodyShapeRecordB;
 
 
-  /** to compute the output y = h(t,q) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   void computeh(double time, const BlockVector& q0, SiconosVector& y) override;
 
   /** Update this contact point information.
-   * \param pos1 Position on ds1 in ds1 frame.
-   * \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
-   * \param normal Normal in ds2 frame (or world frame if ds2=null).
+   * 
+   *  \param pos1 Position on ds1 in ds1 frame.
+   *  \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
+   *  \param normal Normal in ds2 frame (or world frame if ds2=null).
    */
   virtual void updateContactPoints(const SiconosVector& pos1,
                                    const SiconosVector& pos2,

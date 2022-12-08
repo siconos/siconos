@@ -32,9 +32,6 @@
 class StaticBody : public std::enable_shared_from_this<StaticBody>
 {
 public:
-  /** serialization hooks
-  */
-  // ACCEPT_SERIALIZATION(StaticBody);
 
   StaticBody() {};
   SP::SiconosContactorSet contactorSet;

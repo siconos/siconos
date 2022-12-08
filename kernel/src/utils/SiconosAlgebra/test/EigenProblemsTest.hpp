@@ -26,8 +26,7 @@ class EigenProblemsTest : public CppUnit::TestFixture
 {
 
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(EigenProblemsTest);
 
   // test suite

@@ -33,8 +33,6 @@
 class SiconosShape
 {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(SiconosShape);
 
   double _inside_margin;
@@ -52,8 +50,8 @@ public:
   virtual ~SiconosShape() {}
 
   /** Set the inside margin of the shape.  This is a distance that the
-   * contour should be shrunk to improve contact detection robustness.
-   * It will have an effect on the roundness of corners. */
+   *  contour should be shrunk to improve contact detection robustness.
+   *  It will have an effect on the roundness of corners. */
   void setInsideMargin (double margin)
   {
     _inside_margin = margin;
@@ -61,11 +59,11 @@ public:
   }
 
   /** Set the outside margin of the shape.  This is the distance from
-    * the contact shell to an external shell used to detect contacts
-    * in advance.  The implementation will detect contact points on
-    * the external shell and project them back to the contact shell.
-    * Note: Currently not working in Bullet implementation!  Better to
-    * leave at zero. */
+   *  the contact shell to an external shell used to detect contacts
+   *  in advance.  The implementation will detect contact points on
+   *  the external shell and project them back to the contact shell.
+   *  Note: Currently not working in Bullet implementation!  Better to
+   *  leave at zero. */
   void setOutsideMargin(double margin)
   {
     _outside_margin = margin;
@@ -78,8 +76,6 @@ public:
 
   unsigned int version() const { return _version; }
 
-  /** visitors hook
-   */
   VIRTUAL_ACCEPT_VISITORS();
 };
 
@@ -87,8 +83,6 @@ class SiconosPlane : public SiconosShape,
                      public std::enable_shared_from_this<SiconosPlane>
 {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(SiconosPlane);
 
 public:
@@ -96,8 +90,6 @@ public:
 
   virtual ~SiconosPlane() {}
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -108,8 +100,6 @@ private:
   SiconosSphere() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(SiconosSphere);
   float _radius;
 
@@ -122,8 +112,6 @@ public:
   float radius() const { return _radius; }
   void setRadius(float r) { _radius = r; _version ++; }
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -134,8 +122,6 @@ private:
   SiconosBox() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(SiconosBox);
   SP::SiconosVector _dimensions;
 
@@ -177,8 +163,6 @@ public:
     _version ++;
   }
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -189,8 +173,7 @@ private:
   SiconosCylinder() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SiconosCylinder);
   double _radius;
   double _length;
@@ -219,7 +202,6 @@ public:
 
   double length() { return _length; }
 
-  // visitors hook
   ACCEPT_VISITORS();
 };
 
@@ -230,8 +212,6 @@ private:
   SiconosCone() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(SiconosCone);
   double _radius;
   double _length;
@@ -260,8 +240,6 @@ public:
 
   double length() { return _length; }
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -272,8 +250,7 @@ private:
   SiconosCapsule() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SiconosCapsule);
   double _radius;
   double _length;
@@ -302,8 +279,6 @@ public:
 
   double length() { return _length; }
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -316,8 +291,7 @@ private:
   SiconosConvexHull() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SiconosConvexHull);
   SP::SiconosMatrix _vertices;
 
@@ -339,8 +313,6 @@ public:
     _version ++;
   }
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -354,8 +326,7 @@ private:
   SiconosMesh() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SiconosMesh);
   SP::VUInt _indexes;
   SP::SiconosMatrix _vertices;
@@ -376,8 +347,6 @@ public:
 
   virtual ~SiconosMesh() {}
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -388,8 +357,7 @@ private:
   SiconosHeightMap() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SiconosHeightMap);
   SP::SiconosMatrix _height_data;
   double _length_x;
@@ -409,8 +377,6 @@ public:
 
   virtual ~SiconosHeightMap() {}
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -422,8 +388,6 @@ private:
   SiconosDisk() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(SiconosDisk);
   float _radius;
 
@@ -436,8 +400,6 @@ public:
   float radius() const { return _radius; }
   void setRadius(float r) { _radius = r; _version ++; }
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -448,8 +410,7 @@ private:
   SiconosBox2d() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SiconosBox2d);
   SP::SiconosVector _dimensions;
 
@@ -488,8 +449,6 @@ public:
     _version ++;
   }
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 
@@ -500,8 +459,7 @@ private:
   SiconosConvexHull2d() : SiconosShape() {};
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SiconosConvexHull2d);
   SP::SiconosMatrix _vertices;
 
@@ -540,13 +498,7 @@ public:
     _avoidInternalEdgeContact = value;
   }
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
-
-
-
-
 
 #endif /* SiconosShape_h */

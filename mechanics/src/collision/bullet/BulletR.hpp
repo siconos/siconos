@@ -24,8 +24,7 @@
 
 class BulletR : public ContactR {
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(BulletR);
 
 public:

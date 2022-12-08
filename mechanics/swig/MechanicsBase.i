@@ -3,7 +3,7 @@
 
 %include start.i
 // generated docstrings from doxygen xml output
-%include mechanics-docstrings.i
+ //%include mechanics-docstrings.i
 
 %include sharedPointers.i
 

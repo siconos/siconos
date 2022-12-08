@@ -32,8 +32,7 @@ class ActuatorEvent : public Event
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(ActuatorEvent);
 
   /** The actuator linked to the present event */

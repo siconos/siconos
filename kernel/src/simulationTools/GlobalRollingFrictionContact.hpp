@@ -31,48 +31,46 @@
 typedef int (*GRFC3D_Driver)(GlobalRollingFrictionContactProblem*, double*, double*, double*, SolverOptions*);
 TYPEDEF_SPTR(GlobalRollingFrictionContactProblem)
 
-/** Formalization and Resolution of a Friction-Contact Problem
- *
- * This class is devoted to the formalization and the resolution of
- * primal friction contact problems defined by :
- *
+/** 
+    Formalization and Resolution of a Friction-Contact Problem
+    
+    This class is devoted to the formalization and the resolution of
+    primal friction contact problems defined by :
 
- \rst
+    \f[
+    M velocity =  q + H reaction \\
+    globalVelocities = H^T velocity + tildeGlobalVelocities
+    \f]
 
- .. math::
+    and  \f$ globalVelocities, reaction \f$ belongs to the Coulomb friction law with unilateral contact.
+ 
+    With:
+    - \f$ velocity \in R^{n} \f$  and \f$ reaction \in R^{n} \f$ the unknowns,
+    - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
+    - \f$ globalVelocities \in R^{m} \f$  and \f$ reaction \in R^{m} \f$ the unknowns,
+    - \f$ tildeGlobalVelocities \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k} \f$)
+    - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
+    - \f$ H \in R^{n \times m } \f$
+    
+    The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the right
+    Numerics driver will be called according to this value.
+    
+    \b Construction:
+    - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
+    Main functions:
+    
+    \b Main functions:
+    - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
+    the interactionBlock-matrices saved in the field interactionBlocks.\n
+    Functions: initialize(), computeInteractionBlock(), preCompute()
+    - solving of the GlobalRollingFrictionContact problem: function compute(), used to call solvers from Numerics through \n
+    the frictionContact2D_driver() or frictionContact3D_driver() interface of Numerics.
+    - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
+    ouput results from the solver (velocity,reaction); function postCompute().
 
-   M velocity =  q + H reaction \\
-   globalVelocities = H^T velocity + tildeGlobalVelocities
-
- \endrst
-
- * and \f$globalVelocities, reaction\f$ belongs to the Coulomb friction law with unilateral contact.
- *
- * With:
- *    - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ the unknowns,
- *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- *    - \f$globalVelocities \in R^{m} \f$  and \f$reaction \in R^{m} \f$ the unknowns,
- *    - \f$tildeGlobalVelocities \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k}\f$)
- *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- *    - \f$H \in R^{n \times m } \f$
- *
- * The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the right
- * Numerics driver will be called according to this value.
- *
- * \b Construction:
- *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
- * Main functions:
- *
- * \b Main functions:
- *  - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and \n
- *  the interactionBlock-matrices saved in the field interactionBlocks.\n
- *  Functions: initialize(), computeInteractionBlock(), preCompute()
- *  - solving of the GlobalRollingFrictionContact problem: function compute(), used to call solvers from Numerics through \n
- * the frictionContact2D_driver() or frictionContact3D_driver() interface of Numerics.
- *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
- *  ouput results from the solver (velocity,reaction); function postCompute().
- *
- */
+    For details regarding the available options, see Nonsmooth problems formulations and available solvers in users' guide.
+    
+*/
 class GlobalRollingFrictionContact : public GlobalFrictionContact
 {
 private:
@@ -80,8 +78,7 @@ private:
   GlobalRollingFrictionContact() = default;
 
 protected:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(GlobalRollingFrictionContact);
 
   /** Type (dimension) of the contact problem (2D or 3D) */
@@ -97,21 +94,17 @@ protected:
 public:
 
   /** constructor (solver id and dimension)
-      \param dimPb dimension (2D or 3D) of the friction-contact problem
-      \param numericsSolverId id of the solver to be used, optional,
-      default : SICONOS_GLOBAL_FRICTION_3D_NSGS
-      \rst
-      see :ref:`problems_and_solvers` for details.
-      \endrst
-  */
+   *     
+   *  \param dimPb dimension (2D or 3D) of the friction-contact problem
+   *  \param numericsSolverId id of the solver to be used, optional,
+   *  default : SICONOS_GLOBAL_FRICTION_3D_NSGS
+   */
   GlobalRollingFrictionContact(int dimPb, int numericsSolverId = SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR);
 
-  /**  constructor from a pre-defined solver options set.
-       \param options, the options set,
-       \rst
-       see :ref:`problems_and_solvers` for details.
-       \endrst
-  */
+  /** constructor from a pre-defined solver options set
+   *
+   *  \param options the options set
+   */
   GlobalRollingFrictionContact(int dimPb, SP::SolverOptions options);
 
   /** destructor
@@ -121,6 +114,7 @@ public:
   // GETTERS/SETTERS
 
   /** get the type of GlobalRollingFrictionContact problem (2D or 3D)
+   *
    *  \return an int (2 or 3)
    */
   inline int getGlobalRollingFrictionContactDim() const
@@ -129,6 +123,7 @@ public:
   }
 
   /** get dimension of the problem
+   *
    *  \return an unsigned ing
    */
   inline size_t getGlobalSizeOutput() const
@@ -137,6 +132,7 @@ public:
   }
 
   /** get a pointer to mu, the list of the friction coefficients
+   *
    *  \return pointer on a std::vector<double>
    */
   inline SP::MuStorage mur() const
@@ -145,6 +141,7 @@ public:
   }
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
+   *
    *  \return the friction coefficient for the ith contact
    */
   inline double getMur(unsigned int i) const
@@ -155,32 +152,34 @@ public:
   // --- Others functions ---
 
   /** initialize the GlobalRollingFrictionContact problem(compute topology ...)
-   * \param sim the simulation, owner of this OSNSPB
+   *
+   *  \param sim the simulation, owner of this OSNSPB
    */
    void initialize(SP::Simulation sim);
 
-  /**
-   * \return the friction contact problem from Numerics
+  /** \return the friction contact problem from Numerics
    */
   SP::GlobalRollingFrictionContactProblem globalRollingFrictionContactProblem();
 
-  /**
-   * \return the friction contact problem from Numerics (raw ptr, do not free)
+  /** \return the friction contact problem from Numerics (raw ptr, do not free)
    */
   GlobalRollingFrictionContactProblem *globalRollingFrictionContactProblemPtr();
 
   /** solve a friction contact problem
-   * \param problem the friction contact problem
-   * \return info solver information result
+   *
+   *  \param problem the friction contact problem
+   *  \return info solver information result
    */
   int solve(SP::GlobalRollingFrictionContactProblem problem = SP::GlobalRollingFrictionContactProblem());
 
   /** Construction of the problem
+   *
    *  \param time current time
    */
   virtual bool preCompute(double time);
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
+   *
    *  \param time current time
    */
   virtual int compute(double time);

@@ -33,6 +33,7 @@ class OccR : public NewtonEuler3DR
 {
 public:
   /** Constructor from contact points.
+   *
    *  \param contact1 : the first contact.
    *  \param contact2 : the second contact.
    */
@@ -41,6 +42,7 @@ public:
        const DistanceCalculatorType& distance_calculator = CadmbtbDistanceType());
 
   /** Compute h.
+   *
    *  \param time : the time.
    *  \param q0 : the state vector.
    *  \param y : output vector.
@@ -48,27 +50,29 @@ public:
   void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
   /** Set offset1, offset from first contact.
-   * \param val : the new value.
+   *
+   *  \param val : the new value.
    */
   void setOffset1(double val) { _offset1 = val; };
 
   /** Set offset2, offset from second contact.
-   * \param val : the new value.
+   *
+   *  \param val : the new value.
    */
   void setOffset2(double val) { _offset2 = val; };
 
   /** Get geometer.
-   * \return a SP::Geometer object.
+   *
+   *  \return a SP::Geometer object.
    */
   SP::Geometer geometer() { return _geometer; }
 
   /** Set geometer.
-   * \param geometer the new geometer
+   *
+   *  \param geometer the new geometer
    */
   void setGeometer(SP::Geometer geometer) { _geometer = geometer; }
 
-  /** visitor hooks
-   */
   ACCEPT_STD_VISITORS();
 
 protected:

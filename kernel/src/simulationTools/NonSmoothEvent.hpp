@@ -34,8 +34,7 @@ class NonSmoothEvent : public Event
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(NonSmoothEvent);
 
 

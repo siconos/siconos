@@ -31,7 +31,6 @@
 class SphereNEDSPlanR : public NewtonEuler3DR,
                         public std::enable_shared_from_this<SphereNEDSPlanR> {
 private:
-  // serialization hooks
   ACCEPT_SERIALIZATION(SphereNEDSPlanR);
 
   /* Ax + By + Cz + D = 0 */
@@ -43,21 +42,23 @@ private:
 
 public:
   /** Constructor
-
-  \param r disk radius
-  \param A
-  \param B
-  \param C
-  \param D
-  */
+   *
+   *  \param r disk radius
+   *  \param A
+   *  \param B
+   *  \param C
+   *  \param D
+   */
   SphereNEDSPlanR(double r, double A, double B, double C, double D);
 
   double distance(double, double, double, double);
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   void computeh(double time, const BlockVector &q0, SiconosVector &y) override;
 
@@ -67,7 +68,6 @@ public:
     return (A == _A && B == _B && C == _C && D == _D && r == _r);
   }
 
-  // visitors hook
   ACCEPT_VISITORS();
 };
 #endif /* SphereNEDSPlanR_h */

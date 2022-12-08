@@ -23,48 +23,49 @@
 
 #include "FirstOrderR.hpp"
 
-/** Linear Time Invariant Relation, derived from class FirstOrderR
+/** 
+    Linear Time Invariant Relation, derived from class FirstOrderR
 
-Linear Relation for First Order Dynamical Systems with time-independant
-operators
-
-\rst
-
- .. math::
-
-     y &=& Cx(t) + Fz + D\lambda + e\\
-     R &=& B\lambda
-
-\endrst
-
- */
+    Linear Relation for First Order Dynamical Systems with time-independant
+    operators
+    
+    \f[
+    y &=& Cx(t) + Fz + D\lambda + e \\      
+    R &=& B\lambda 
+    \f]
+    
+*/
 class FirstOrderLinearTIR : public FirstOrderR {
 
 protected:
-  // serialization hooks
+
   ACCEPT_SERIALIZATION(FirstOrderLinearTIR);
 
   /** e operator (constant vector) */
   SP::SiconosVector _e{nullptr};
 
   /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction that owns this relation
+   *
+   *  \param inter the interaction that owns this relation
    */
   void initialize(Interaction &inter) override;
 
   /** check sizes of the relation specific operators.
-   * \param inter an Interaction using this relation
+   *
+   *  \param inter an Interaction using this relation
    */
   void checkSize(Interaction &inter) override;
 
 public:
   /** create the Relation from a set of data
+   *
    *  \param C the matrix C
    *  \param B the matrix B
    */
   FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B);
 
   /** create the Relation from a set of data
+   *
    *  \param C the C matrix
    *  \param D the D matrix
    *  \param F the F matrix
@@ -80,6 +81,7 @@ public:
   virtual ~FirstOrderLinearTIR() noexcept = default;
 
   /** default function to compute h = y = Cx(t) + Fz + Dlambda + e
+   *
    *  \param x
    *  \param lambda
    *  \param z
@@ -89,12 +91,14 @@ public:
                 SiconosVector &y);
 
   /** default function to compute g = Blambda
+   *
    *  \param lambda
    *  \param r non-smooth input
    */
   void computeg(const SiconosVector &lambda, BlockVector &r);
 
   /** default function to compute y
+   *
    *  \param time current time
    *  \param inter Interaction using this Relation
    *  \param level
@@ -103,6 +107,7 @@ public:
                      unsigned int level = 0) override;
 
   /** default function to compute r
+   *
    *  \param time current time
    *  \param inter Interaction using this Relation
    *  \param level
@@ -115,17 +120,20 @@ public:
   void display() const override;
 
   /** set e
+   *
    *  \param  newe the new value of e
    */
   inline void setePtr(SP::SiconosVector newe) { _e = newe; }
 
   /** get e
+   *
    *  \return e matrix
    */
   inline SP::SiconosVector e() const { return _e; }
 
   /** determine if the Relation is linear
-   * \return true if the relation is linear.
+   *
+   *  \return true if the relation is linear.
    */
   inline bool isLinear() override { return true; }
 

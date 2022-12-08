@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file ioMatrix.hpp
     \brief input/output for SiconosMatrix
@@ -24,57 +24,63 @@
 #ifndef __ioMatrix__
 #define __ioMatrix__
 
-#include <string>
-#include "SiconosFwd.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosFwd.hpp"
+
+#include <string>
 
 /** io object specialization */
 
-namespace ioMatrix
-{
-/** Specialization to read a SiconosMatrix
-    \param[in] fileName the name of the file to read
-    \param[in] mode the storage type used in the file (either ascii or binary)
-    \param[in,out] m the SiconosMatrix to be filled
-    \return true if read ok, else false ...
-*/
-bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m);
-
-/** Specialization to write a SiconosMatrix
-    \param[in] fileName the name of the file to write in
-    \param[in] mode the storage type used in the file (either ascii or binary)
-    \param[in] m the SiconosMatrix to write
-    \param[in] outputType type of output:
-    - "python"(default):
-    row col
-    a00 a01 a02 ...
-    a10 ...
-    - "noDim":
-    a00 a01 a02 ...
-    a10 ...
-    Reading input format is the one corresponding to "python".
-    \return true if read ok, else false ...
-*/
-bool write(const std::string& fileName, const std::string& mode, const SiconosMatrix& m, const std::string& outputType = "python");
-
-/** Function to load data from a file and compare it with the provided
- * data.  Returns the measured difference between files if the file
- * was loaded and the comparison was performed, which must be >= 0.0,
- * otherwise -1.0 is returned.  Caller needs to check diff <= epsilon
- * to verify the result.
- * \param data The data to compare against the file.
- * \param filename The name of the file to load and compare.
- * \param epsilon The comparison threshold.
- * \param index An optional list of column indexes, size==0 indicates all columns.
- * \param ref If provided, loaded matrix is returned in this pointer.
- * \param mode Mode string to pass to ioMatrix::read.
- * \param verbose True to print verbose output.
- * \return Positive or 0.0 if the file was loaded and the comparison was performed,
-           otherwise -1.
- */
-double compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
-                      Index index=Index(), SP::SimpleMatrix* ref=nullptr,
-                      std::string mode="ascii", bool verbose=true);
-}
+namespace ioMatrix {
+  /**
+     Read a SiconosMatrix
+     
+     \param[in] fileName the name of the file to read
+     \param[in] mode the storage type used in the file (either ascii or binary)
+     \param[in,out] m the SiconosMatrix to be filled
+     \return true if read ok, else false ...
+  */
+  bool read(const std::string &fileName, const std::string &mode, SiconosMatrix &m);
+  
+  /**
+     Write a SiconosMatrix
+     
+     \param[in] fileName the name of the file to write in
+     \param[in] mode the storage type used in the file (either ascii or binary)
+     \param[in] m the SiconosMatrix to write
+     \param[in] outputType type of output:
+     - "python"(default):
+     row col
+     a00 a01 a02 ...
+     a10 ...
+     - "noDim":
+     a00 a01 a02 ...
+     a10 ...
+     Reading input format is the one corresponding to "python".
+     \return true if read ok, else false ...
+  */
+  bool write(const std::string &fileName, const std::string &mode, const SiconosMatrix &m,
+	     const std::string &outputType = "python");
+  
+  /** Function to load data from a file and compare it with the provided
+   *  data.  Returns the measured difference between files if the file
+   *  was loaded and the comparison was performed, which must be >= 0.0,
+   *  otherwise -1.0 is returned.  Caller needs to check diff <= epsilon
+   *  to verify the result.
+   *
+   *  \param data The data to compare against the file.
+   *  \param filename The name of the file to load and compare.
+   *  \param epsilon The comparison threshold.
+   *  \param index An optional list of column indexes, size==0 indicates all columns.
+   *  \param ref If provided, loaded matrix is returned in this pointer.
+   *  \param mode Mode string to pass to ioMatrix::read.
+   *  \param verbose True to print verbose output.
+   *  \return Positive or 0.0 if the file was loaded and the comparison was performed,
+   *  otherwise -1.
+   */
+  double compareRefFile(const SimpleMatrix &data, std::string filename, double epsilon,
+			Index index = Index(), SP::SimpleMatrix *ref = nullptr,
+			std::string mode = "ascii", bool verbose = true);
+} // namespace ioMatrix
 
 #endif

@@ -46,8 +46,7 @@
 class Equality : public LinearOSNS
 {
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(Equality);
 
 public:

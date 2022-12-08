@@ -28,7 +28,7 @@
  **/
 class EqualityConditionNSL : public NonSmoothLaw {
 private:
-  // serialization hooks
+  
   ACCEPT_SERIALIZATION(EqualityConditionNSL);
 
   /** default constructor
@@ -37,6 +37,7 @@ private:
 
 public:
   /** basic constructor
+   *
    *  \param size of the non smooth law
    */
   EqualityConditionNSL(unsigned int size);

@@ -18,13 +18,13 @@
 #[=======================================================================[.rst:
 Check if Bullet is required by Siconos.
 If so:
-- look for the proper Bullet version (3.17 is the min)
+- look for the proper Bullet version (3.05 is the min)
 - configure siconos to link with Bullet
 
 The following options control if and how Bullet is used
 
-* WITH_BULLET: activate Bullet and look for it (>=3.17) in the standard paths. Stop if not found.
-* Bullet_ROOT=<some_path>: activate Bullet and look for it (>=3.17) in <some_path>. Stop if not found
+* WITH_BULLET: activate Bullet and look for it (>=3.05) in the standard paths. Stop if not found.
+* Bullet_ROOT=<some_path>: activate Bullet and look for it (>=3.05) in <some_path>. Stop if not found
 * BULLET_INSTALL: activate Bullet, download and install the proper version at the same place as Siconos (CMAKE_INSTALL_PREFIX). This
 location might be used later as input to BULLET_ROOT.
 
@@ -33,6 +33,7 @@ location might be used later as input to BULLET_ROOT.
 function(set_bullet_target)
   if(BULLET_DEFINITIONS)
     string(REPLACE "-D" "" BULLET_DEFINITIONS ${BULLET_DEFINITIONS})
+    set(BULLET_DEFINITIONS ${BULLET_DEFINITIONS} PARENT_SCOPE)
   endif()
   create_target(NAME BULLET::BULLET
     LIBRARIES "${BULLET_LIBRARIES}"
@@ -46,7 +47,7 @@ function(set_bullet_target)
 endfunction()
 
 # Three ways:
-  # - iNSTALL_BULLET=ON : use fetchcontent to download and install Bullet as a siconos part;
+  # - BULLET_INSTALL=ON : use fetchcontent to download and install Bullet as a siconos part;
   # - WITH_BULLET is ON, nothing more: look for bullet, check version and link with siconos-mechanics.
   # - User asks explicitely for a specific (already installed) version of Bullet
   #   by providing Bullet_ROOT on cmake command line.
@@ -57,15 +58,12 @@ endfunction()
 # - Download, build and install Bullet
 # - Create a target BULLET::BULLET
 # - Link mechanics with this target
-if(INSTALL_BULLET)
+if(BULLET_INSTALL)
   include(FetchContent)
   message(STATUS "Bullet will be downloaded from github repository and installed as a siconos component")
   # Bullet conf. See what's done in https://github.com/bulletphysics/bullet3/blob/master/build_cmake_pybullet_double.sh
   set(BUILD_PYBULLET ON CACHE INTERNAL "")
   set(BUILD_PYBULLET_NUMPY ON CACHE INTERNAL "")
-  if(BULLET_USE_DOUBLE_PRECISION)
-    set(USE_DOUBLE_PRECISION ON CACHE INTERNAL "")
-  endif()
   set(BT_USE_EGL ON CACHE INTERNAL "")
   set(OpenGL_GL_PREFERENCE GLVND CACHE INTERNAL "")
   # Bullet allows cmake 2, setup a few things to avoid warnings.
@@ -94,12 +92,10 @@ if(INSTALL_BULLET)
     cmake_policy(POP)
   endif()
   include(${bullet_BINARY_DIR}/BulletConfig.cmake)
+  
   set(BULLET_INCLUDE_DIRS $<BUILD_INTERFACE:${bullet_SOURCE_DIR}/src> $<INSTALL_INTERFACE:${bullet_INSTALL_DIR}/${BULLET_INCLUDE_DIRS}>)
   set_bullet_target()
   message(STATUS "Built, installed and used bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}.")
-  if(BULLET_USE_DOUBLE_PRECISION)
-    message(STATUS "Bullet use double precision for floating point numbers.")
-  endif()
 
 elseif(WITH_BULLET OR Bullet_ROOT)
   # Up to cmake 3.22 there is no way to get Bullet version using find_package standard.
@@ -108,26 +104,23 @@ elseif(WITH_BULLET OR Bullet_ROOT)
   find_package(Bullet CONFIG REQUIRED)
   include(${Bullet_CONFIG})
  
-  if(BULLET_VERSION_STRING VERSION_LESS 3.17)
+  if(BULLET_VERSION_STRING VERSION_LESS 3.05)
     set(BULLET_FOUND FALSE)
   endif()
 
   if(NOT BULLET_FOUND)
-    message(FATAL_ERROR "Can not find Bullet in the required version (min 3.17). Please try to install it. \
+    message(FATAL_ERROR "Can not find Bullet in the required version (min 3.05). Please try to install it. \
 
     Alternately: \
 
-    - run cmake for siconos with Bullet_ROOT equal to the path to Bullet version 3.17 \
+    - run cmake for siconos with Bullet_ROOT equal to the path to Bullet version 3.05 \
 
-    - run cmake for siconos with -DINSTALL_BULLET=ON. Bullet will then be installed in ${CMAKE_INSTALL_PREFIX} and Siconos configured to run with Bullet.")
+    - run cmake for siconos with -DBULLET_INSTALL=ON. Bullet will then be installed in ${CMAKE_INSTALL_PREFIX} and Siconos configured to run with Bullet.")
   endif()
 
   set(BULLET_INCLUDE_DIRS ${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS})
   set_bullet_target()
   message(STATUS "Found bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}")
-  if(BULLET_USE_DOUBLE_PRECISION)
-    message(STATUS "Bullet use double precision for floating point numbers.")
-  endif()
 
 endif()
 

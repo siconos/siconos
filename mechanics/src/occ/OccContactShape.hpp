@@ -35,21 +35,24 @@ struct OccContactShape
   OccContactShape();
 
   /** Constructor from OpenCascade object.
-      \param shape
+   *
+   *  \param shape
    */
   OccContactShape(TopoDS_Shape& shape)
     : _shape(createSPtrTopoDS_Shape(shape))
   {};
 
   /** Constructor from const OpenCascade object : remove constness.
-      \param shape
+   *
+   *  \param shape
    */
   OccContactShape(const TopoDS_Shape& shape)
     : _shape(createSPtrTopoDS_Shape(const_cast<TopoDS_Shape&>(shape)))
   {};
 
   /** Constructor from OccContactShape
-      \param shape : an OccContactShape
+   *
+   *  \param shape : an OccContactShape
    */
   OccContactShape(const OccContactShape& shape)
     : _shape(shape.shape()) {};
@@ -90,13 +93,17 @@ struct OccContactShape
    */
   ContactTypeValue contactType() const;
 
-  /** Get a face from its index.
-      \param index : the index of the face.
+  /**
+     Get a face from its index.
+     
+     \param index : the index of the face.
   */
   SPC::TopoDS_Face face(unsigned int index) const;
 
-  /** Get an edge from its index.
-      \param index : the index of the face.
+  /**
+     Get an edge from its index.
+     
+     \param index : the index of the face.
   */
   SPC::TopoDS_Edge edge(unsigned int index) const;
 
@@ -105,6 +112,7 @@ struct OccContactShape
   std::string exportBRepToString() const;
 
   /** Import the contact shape from a string.
+   * 
    *  \param brepstr : the string containing the whole brep.
    */
   void importBRepFromString(const std::string& brepstr);
@@ -115,12 +123,14 @@ struct OccContactShape
 
 
   /** Set id.
-   *  \param id the new id
-  */
+   * 
+   * \param id the new id
+   */
   void setId(unsigned int id) { this->_id = id; }
 
   /** Get id.
-   * \return an unsigned int
+   * 
+   *  \return an unsigned int
    */
   unsigned int id() { return this->_id; }
 
@@ -142,8 +152,6 @@ struct OccContactShape
 
   unsigned int _id;
 
-  /** visitors hook
-   */
   VIRTUAL_ACCEPT_VISITORS(OccContactShape);
 
 };

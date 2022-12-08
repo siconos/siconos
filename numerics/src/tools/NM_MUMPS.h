@@ -44,118 +44,136 @@ extern "C"
   void NM_MUMPS_set_irn_jcn(NumericsMatrix* A);
 
   /** Get (and create if necessary) the config data for MUMPS.
-   * \param A, the matrix to be factorized.
+   *
+   *  \param A, the matrix to be factorized.
    */
   DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
 
   /** Set the config data for MUMPS.
-   * \param A the matrix,
-   * \param id the config data,
-   * \return the DMUMPS_STRUC_C config.
+   *
+   *  \param A the matrix,
+   *  \param id the config data,
+   *  \return the DMUMPS_STRUC_C config.
    */
   void NM_MUMPS_set_id(NumericsMatrix* A, DMUMPS_STRUC_C* id);
 
   /** Set control parameters (mpi communicator, verbosity).
-   * \param A, the matrix holding the MUMPS config.
+   *
+   *  \param A, the matrix holding the MUMPS config.
    */
   void NM_MUMPS_set_control_params(NumericsMatrix* A);
 
   /** Set control of parallelism.
-   * \param A, the matrix holding the MUMPS config,
-   * \param par, value of MUMPS par, see MUMPS documentation.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param par, value of MUMPS par, see MUMPS documentation.
    */
   void NM_MUMPS_set_par(NumericsMatrix* A, int par);
 
   /** Set matrix symetry.
-   * \param A, the matrix holding the MUMPS config,
-   * \param sym, value for matrix symmetry, see MUMPS documentation.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param sym, value for matrix symmetry, see MUMPS documentation.
    */
   void NM_MUMPS_set_sym(NumericsMatrix* A, int sym);
 
   /** Set icntl control.
-   * \param A, the matrix holding the MUMPS config,
-   * \param index, the fortran index in the icntl array,
-   * \param val, the new integer value.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param index, the fortran index in the icntl array,
+   *  \param val, the new integer value.
    */
   void NM_MUMPS_set_icntl(NumericsMatrix* A, unsigned int index, int val);
 
   /** Return icntl value.
-   * \param A, the matrix holding the MUMPS config,
-   * \param index, the FORTRAN index in the icntl array,
-   * \return the ICNTL(index) value.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param index, the FORTRAN index in the icntl array,
+   *  \return the ICNTL(index) value.
    */
   int NM_MUMPS_icntl(NumericsMatrix* A, unsigned int index);
 
   /** Set cntl control.
-   * \param A, the matrix holding the MUMPS config,
-   * \param index, the FORTRAN index in the cntl array,
-   * \param val the new double value.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param index, the FORTRAN index in the cntl array,
+   *  \param val the new double value.
    */
   void NM_MUMPS_set_cntl(NumericsMatrix* A, unsigned int index, double val);
 
    /** Return cntl value.
-   * \param A, the matrix holding the MUMPS config,
-   * \param index, the FORTRAN index in the cntl array.
-   * \return the CNTL(index) value.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param index, the FORTRAN index in the cntl array.
+   *  \return the CNTL(index) value.
    */
   double NM_MUMPS_cntl(NumericsMatrix* A, unsigned int index);
 
   /** Set matrix before factorization.
-   * \param A, the matrix holding the MUMPS config,
-   * \param nrhs, the number of right hand side.
-   * \param b, a pointer on double values of the right hand side.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param nrhs, the number of right hand side.
+   *  \param b, a pointer on double values of the right hand side.
    */
   void NM_MUMPS_set_matrix(NumericsMatrix* A);
 
   /** Set dense right hand side.
-   * \param A, the matrix holding the MUMPS config,
-   * \param nrhs, the number of right hand side.
-   * \param b, a pointer on double values of the right hand side.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param nrhs, the number of right hand side.
+   *  \param b, a pointer on double values of the right hand side.
    */
   void NM_MUMPS_set_dense_rhs(NumericsMatrix* A, unsigned int nrhs, double *b);
 
   /** Set sparse right hand side.
-   * \param A, the matrix holding the MUMPS config,
-   * \param B, the matrix holding the right hand side.
-   * B is converted to csc if not already stored in this
-   * representation.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param B, the matrix holding the right hand side.
+   *  B is converted to csc if not already stored in this
+   *  representation.
    */
   void NM_MUMPS_set_sparse_rhs(NumericsMatrix* A, NumericsMatrix* B);
 
   /** Set MUMPS verbosity.
-   * \param A, the matrix holding the MUMPS config,
-   * \param verbosity, an integer: 0 for silent or 1 for verbose.
+   *
+   *  \param A, the matrix holding the MUMPS config,
+   *  \param verbosity, an integer: 0 for silent or 1 for verbose.
    */
   void NM_MUMPS_set_verbosity(NumericsMatrix* A, unsigned int verbosity);
 
   /** Set some default parameters for the solve.
-   * \param A the matrix holding the MUMPS config
+   *
+   *  \param A the matrix holding the MUMPS config
    */
   void NM_MUMPS_set_default_params(NumericsMatrix* A);
 
   /** Display extra information about the solve
-   * \param A the matrix holding the MUMPS config
+   *
+   *  \param A the matrix holding the MUMPS config
    */
   void NM_MUMPS_extra_display(NumericsMatrix* A);
 
   /** call MUMPS. If several MPI process are running, only rank=0
-   * returns after sending the job to all the process, the others will
-   * wait for other job, until job=0.
-   * \param A the matrix holding the MUMPS config
-   * \param job the int that specify the MUMPS job.  job=0 makes all process return.
+   *  returns after sending the job to all the process, the others will
+   *  wait for other job, until job=0.
+   *
+   *  \param A the matrix holding the MUMPS config
+   *  \param job the int that specify the MUMPS job.  job=0 makes all process return.
    */
   void NM_MUMPS(NumericsMatrix* A, int job);
 
   /** Free the config data for MUMPS
-   * \param param p a pointer on the linear solver parameters
+   *
+   *  \param param p a pointer on the linear solver parameters
    */
   void NM_MUMPS_free(void* p);
 
 
 #endif /* WITH_MUMPS */
   /** copy MUMPS id if compiled WITH_MUMPS, otherwise do nothing.
-   * \param A, the source NumericsMatrix
-   * \param B, the destination NumericsMatrix
+   *
+   *  \param A the source NumericsMatrix
+   *  \param B the destination NumericsMatrix
    */
   void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B);
 

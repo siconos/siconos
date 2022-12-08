@@ -38,8 +38,6 @@ using namespace RELATION;
 
 class Lagrangian2d2DR : public LagrangianScleronomousR {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(Lagrangian2d2DR);
 
   /* Current Contact Points, may be updated within Newton loop based
@@ -117,7 +115,6 @@ public:
   inline SP::SiconosVector nc() const { return _Nc; }
   void display() const override;
 
-  // visitors hook
   ACCEPT_STD_VISITORS();
 };
 TYPEDEF_SPTR(Lagrangian2d2DR)

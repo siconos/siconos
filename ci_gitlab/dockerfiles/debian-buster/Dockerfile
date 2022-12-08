@@ -31,9 +31,11 @@ RUN apt update  && apt install -y -qq \
         python3-lxml \
         python3-h5py \
         pkg-config \
+	libxrender1 \	
         vim && apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install cmake
+RUN python3 -m pip install vtk
 WORKDIR /home
 COPY ci_gitlab/dockerfiles/install_bullet.sh .
 ENV CI_PROJECT_DIR /home

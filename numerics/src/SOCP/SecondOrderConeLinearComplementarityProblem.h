@@ -22,8 +22,7 @@
 #include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
 #include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
-/** \struct  SecondOrderConeLinearComplementarityProblem
- *  The structure that defines a Second Order Cone Linear Complementarity Problem.
+/** The structure that defines a Second Order Cone Linear Complementarity Problem.
  */
 struct SecondOrderConeLinearComplementarityProblem
 {
@@ -32,16 +31,16 @@ struct SecondOrderConeLinearComplementarityProblem
 
   /** the number of cones \f$ n_c \f$ in the Cartesian product */
   int nc;
-  /** \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+  /** \f$ M \in {{\mathrm{I\!R}}}^{n \times n} \f$,
      a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure */
   NumericsMatrix* M;
-  /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
+  /** \f$ {q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
-  /** \f${coneIndex} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of indices of the cones
-      (\f$ n_c =\f$ nc) */
+  /** \f$ coneIndex \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of indices of the cones
+      (\f$ n_c = \f$ nc) */
   unsigned int* coneIndex;
-  /** \f${\tau} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of coefficients
-      (\f$ n_c =\f$ nc) */
+  /** \f$ {\tau} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of coefficients
+      (\f$ n_c = \f$ nc) */
   double* tau;
 };
 
@@ -52,52 +51,59 @@ extern "C"
 {
 #endif
 /** display a SecondOrderConeLinearComplementarityProblem
- * \param problem the problem to display
+ *
+ *  \param problem the problem to display
  */
 void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearComplementarityProblem*  problem);
 
 /** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format)
- * \param problem the problem to print out
- * \param file the dest file
- * \return 0 if successfull
+ *
+ *  \param problem the problem to print out
+ *  \param file the dest file
+ *  \return 0 if successfull
  */
 int secondOrderConeLinearComplementarityProblem_printInFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file);
 
 /** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from its filename
- * \param problem the problem to print out
- * \param filename the dest file
- * \return 0 if successfull
+ *
+ *  \param problem the problem to print out
+ *  \param filename the dest file
+ *  \return 0 if successfull
  */
 int secondOrderConeLinearComplementarityProblem_printInFilename(SecondOrderConeLinearComplementarityProblem*  problem, char * filename);
 
 /** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format)
- * \param problem the problem to read
- * \param file the target file
- * \return 0 if successfull
+ *
+ *  \param problem the problem to read
+ *  \param file the target file
+ *  \return 0 if successfull
  */
 int secondOrderConeLinearComplementarityProblem_newFromFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file);
 
 /** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from its filename
- * \param problem the problem to read
- * \param filename the name of the target file
- * \return 0 if successfull
+ *
+ *  \param problem the problem to read
+ *  \param filename the name of the target file
+ *  \return 0 if successfull
  */
 int secondOrderConeLinearComplementarityProblem_newFromFilename(SecondOrderConeLinearComplementarityProblem*  problem, char * filename);
 
 /** free a SecondOrderConeLinearComplementarityProblem
- * \param problem the problem to free
+ *
+ *  \param problem the problem to free
  */
 void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComplementarityProblem* problem);
 
 
 /** new SecondOrderConeLinearComplementarityProblem from minimal set of data
- * \param[in] n the size of the problem
- * \param[in] nc the number of contact
- * \param[in] M the NumericsMatrix
- * \param[in] q the q vector
- * \param[in] coneIndex
- * \param[in] mu the mu vector
- * \return a pointer to a SecondOrderConeLinearComplementarityProblem structure
+ *
+ *  \param[in] n the size of the problem
+ *  \param[in] nc the number of contact
+ *  \param[in] M the NumericsMatrix
+ *  \param[in] q the q vector
+ *  \param[in] coneIndex
+ *  \param[in] mu the mu vector
+ *  \return a pointer to a SecondOrderConeLinearComplementarityProblem structure
  */
 SecondOrderConeLinearComplementarityProblem* secondOrderConeLinearComplementarityProblem_new
 (int n, int nc, NumericsMatrix* M, double* q,

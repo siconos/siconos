@@ -27,8 +27,7 @@ class OSNSMatrixTest : public CppUnit::TestFixture
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(OSNSMatrixTest);
 
 

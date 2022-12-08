@@ -71,14 +71,5 @@ extern "C"
   }
 %enddef
 
-%typemap(in) (int number_of_guesses,  fclib_solution *guesses) (struct fclib_solution* temp) {
-
-  temp = NULL;
-  temp = (fclib_solution *) malloc(sizeof(fclib_solution)*PyObject_Length($input));
-  convert_fcsol_array($input,temp);
-
-  $1 = PyObject_Length($input);
-  $2 = &temp[0];
- }
 
 %include fclib.h

@@ -32,7 +32,7 @@
 class DiskDiskR : public CircularR, public std::enable_shared_from_this<DiskDiskR>
 {
 private:
-  //
+
   ACCEPT_SERIALIZATION(DiskDiskR);
 
   double r1pr2;
@@ -40,29 +40,33 @@ private:
 public:
 
   /** Constructor
-  \param disk1 radius
-  \param disk2 radius
-  */
+   *
+   *  \param disk1 radius
+   *  \param disk2 radius
+   */
   DiskDiskR(double disk1, double disk2);
 
   ~DiskDiskR() noexcept = default;
 
   double distance(double, double, double, double, double, double);
 
-  /** to compute the output y = h(q,z) of the Relation
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-      \param y the resulting vector
+  /**
+     to compute the output y = h(q,z) of the Relation
+     
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
+     \param y the resulting vector
   */
   void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
+  /**
+     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+     
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
   */
   void computeJachq(const BlockVector& q, BlockVector& z);
 
-  // visitors hook
   ACCEPT_VISITORS();
 
 };

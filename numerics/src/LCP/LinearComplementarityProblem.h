@@ -14,84 +14,82 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef LCP_PROBLEM_H
 #define LCP_PROBLEM_H
 
 /*!\file LinearComplementarityProblem.h
-*/
+ */
 
-#include <stdio.h>        // for FILE
-#include "NumericsFwd.h"  // for LinearComplementarityProblem, NumericsMatrix
+#include "NumericsFwd.h"   // for LinearComplementarityProblem, NumericsMatrix
 #include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
-/** Structure that contains and defines a LCP Problem.
+#include <stdio.h> // for FILE
 
-    \rst 
-    
-    See the detailed documentation in :ref:`lcp_problem`
-    
-    \endrst
-
-  */
-struct LinearComplementarityProblem
-{
+/**
+   Structure that contains and defines a LCP Problem.
+*/
+struct LinearComplementarityProblem {
 
   int size; /**<  size of the problem */
-  NumericsMatrix* M; /**< M matrix of the LCP (see the mathematical description)*/
-  double * q; /**< vector of the LCP (see the mathematical description)*/
+  NumericsMatrix
+      *M;    /**< M matrix of the LCP (see the mathematical description)*/
+  double *q; /**< vector of the LCP (see the mathematical description)*/
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  /** \fn void linearComplementarity_display(LinearComplementarityProblem* problem)
-   *  \brief function to display a LinearComplementarityProblem
-   *  \param  problem pointer to a LinearComplementarityProblem to display
-   */
-  void linearComplementarity_display(LinearComplementarityProblem* problem);
 
-  /** \fn int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file)
-   *  \brief function to write in a file a LinearComplementarityProblem
-   *  \param problem pointer to a LinearComplementarityProblem to print
-   *  \param file pointer to a FILE
-   *  \return 0 if ok
-   */
-  int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file);
+/** display a LinearComplementarityProblem
+ *
+ *  \param  problem pointer to a LinearComplementarityProblem to display
+ */
+void linearComplementarity_display(LinearComplementarityProblem *problem);
 
-  /** \fn  int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file)
-   *  \brief function to read and create a LinearComplementarityProblem
-   *   from a file
-   *  \param problem pointer to a LinearComplementarityProblem to create
-   *  \param file pointer to a FILE
-   *  \return 0 if ok
-   */
-  int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file);
+/** function to write in a file a LinearComplementarityProblem
+ *
+ *  \param problem pointer to a LinearComplementarityProblem to print
+ *  \param file pointer to a FILE
+ *  \return 0 if ok
+ */
+int linearComplementarity_printInFile(LinearComplementarityProblem *problem,
+                                      FILE *file);
 
-  /** \fn  int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, FILE* file)
-   *  \brief function to read and create a LinearComplementarityProblem
-   *   from a file
-   *  \param problem pointer to a LinearComplementarityProblem to create
-   *  \param filename that contains the lcp
-   *  \return 0 if ok
-  */
-  int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, const char* filename);
+/** Read and create a LinearComplementarityProblem
+ *  from a file
+ *
+ *  \param problem pointer to a LinearComplementarityProblem to create
+ *  \param file pointer to a FILE
+ *  \return 0 if ok
+ */
+int linearComplementarity_newFromFile(LinearComplementarityProblem *problem,
+                                      FILE *file);
 
-  /** \fn  void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
-   *  \brief function to delete a LinearComplementarityProblem
-   *  \param problem  pointer to a LinearComplementarityProblem to delete
-   */
-  void freeLinearComplementarityProblem(LinearComplementarityProblem* problem);
+/** Read and create a LinearComplementarityProblem
+ *  from a file
+ *
+ *  \param problem pointer to a LinearComplementarityProblem to create
+ *  \param filename that contains the lcp
+ *  \return 0 if ok
+ */
+int linearComplementarity_newFromFilename(LinearComplementarityProblem *problem,
+                                          const char *filename);
 
-  /** Create new LCP and clear its fields
-   * \return a LinearComplementarityProblem
-   */
-  LinearComplementarityProblem* newLCP(void);
+/** Delete a LinearComplementarityProblem
+ *
+ *  \param problem  pointer to a LinearComplementarityProblem to delete
+ */
+void freeLinearComplementarityProblem(LinearComplementarityProblem *problem);
+
+/** Create new LCP and clear its fields
+ *
+ *  \return a LinearComplementarityProblem
+ */
+LinearComplementarityProblem *newLCP(void);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif
-

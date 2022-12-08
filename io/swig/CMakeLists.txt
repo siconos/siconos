@@ -2,19 +2,8 @@
 # cmake utilities to build python-bindings for io component
 #================================================================
 
-# wrap - Set extra dependencies
-set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
 
-# List of modules to be built in the python bindings
-set(${COMPONENT}_PYTHON_MODULES "io/io_base")
-
-set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
-
-set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
-
-list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/kernel/swig)
 if(HAVE_SICONOS_MECHANICS)
-  list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_MECHANICS")
 
   if(INSTALL_PYTHON_SYMLINKS)
     message("Making symlinks for io Python modules")
@@ -33,49 +22,37 @@ if(HAVE_SICONOS_MECHANICS)
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_run' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/run.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_run'\")")
   else()
 
-    configure_file(io/mechanics_hdf5.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_hdf5.py @ONLY)
-    configure_file(io/mechanics_run.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_run.py @ONLY)
-    configure_file(io/FrictionContactTrace.py ${SICONOS_SWIG_ROOT_DIR}/io/FrictionContactTrace.py @ONLY)
-    configure_file(io/vview.py      ${SICONOS_SWIG_ROOT_DIR}/io/vview.py @ONLY)
+    # -- collect python files for the siconos/io module --
+    collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR}/io EXTS py)
+    if(NOT SICONOS_HAS_OCE)
+      list(REMOVE_ITEM pyfiles io/occtools.py)
+    endif()
 
-    configure_file(io/siconos_vview.py ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vview @ONLY)
-    configure_file(io/siconos_vexport.py ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vexport @ONLY)
-    configure_file(io/siconos_export_raw_data.py ${SICONOS_SWIG_ROOT_DIR}/io/siconos_export_raw_data @ONLY)
-    configure_file(io/info.py       ${SICONOS_SWIG_ROOT_DIR}/io/siconos_info @ONLY)
-    configure_file(io/filter.py     ${SICONOS_SWIG_ROOT_DIR}/io/siconos_filter @ONLY)
-    configure_file(io/run.py        ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run @ONLY)
-    configure_file(io/compare.py    ${SICONOS_SWIG_ROOT_DIR}/io/siconos_compare @ONLY)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vview    DESTINATION bin)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vexport  DESTINATION bin)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_export_raw_data  DESTINATION bin)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_info     DESTINATION bin)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_filter   DESTINATION bin)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run      DESTINATION bin)
-    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_compare  DESTINATION bin)
+    foreach(pyfile IN LISTS pyfiles)
+      configure_file(${pyfile} ${SICONOS_SWIG_ROOT_DIR}/${pyfile} @ONLY)
+    endforeach()
+
+    # -- collect python files used to create scripts --
+
+    collect_files(VAR scriptfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR}/io/scripts EXTS py)
+
+    foreach(pyfile IN LISTS scriptfiles)
+      get_filename_component(short_name ${pyfile} NAME_WE)
+      configure_file(${pyfile} ${SICONOS_SWIG_ROOT_DIR}/io/${short_name} @ONLY)
+      install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/${short_name} DESTINATION bin)
+    endforeach()
+
     # automatic manpages using help2man
-
     # See if help2man is available
     find_program(HELP2MAN help2man)
     if (HELP2MAN)
       # all other components must be built first so that tools don't fail to run
       set(_OTHER_COMPONENTS ${COMPONENTS})
       list(REMOVE_ITEM _OTHER_COMPONENTS ${COMPONENT})
-
-      # swig modules must be built before vview and vexport can generate manpages
-      # this hack is not working with Ninja since target like ${_SWIG_MODULE_NAME}_swig_compilation
-      # exists only for MakeFiles.
-      foreach(_SWIG_MODULE ${${COMPONENT}_PYTHON_MODULES})
-        get_filename_component(_SWIG_MODULE_NAME ${_SWIG_MODULE} NAME)
-	if (${CMAKE_GENERATOR} MATCHES Ninja)
-          list(APPEND _OTHER_COMPONENTS  _${_SWIG_MODULE_NAME})
-	else()
-	  list(APPEND _OTHER_COMPONENTS ${_SWIG_MODULE_NAME}_swig_compilation _${_SWIG_MODULE_NAME})
-	endif()
-      endforeach()
-
+      list(APPEND _OTHER_COMPONENTS  pyio_base)
       set(MANPAGES_FOR_TOOLS)
       include(tools4tests)
-      # set_ldlibpath()
+
       macro (GEN_MANPAGE_FROM_HELP TOOL)
         # set PYTHONPATH to swig dir, which contains "siconos", so
         # that "import siconos.*" works
@@ -87,15 +64,16 @@ if(HAVE_SICONOS_MECHANICS)
             --no-discard-stderr
             -n \"`sed '/Description: /!d\;s///' ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}`\"
             ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
-          DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL} ${_OTHER_COMPONENTS}
+          DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL} pyio_base 
           WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/..
           COMMENT "Generating man/${TOOL}.1 using help2man"
           )
         install(FILES ${CMAKE_BINARY_DIR}/man/${TOOL}.1 DESTINATION share/man/man1)
         list(APPEND MANPAGES_FOR_TOOLS ${CMAKE_BINARY_DIR}/man/${TOOL}.1)
       endmacro()
-      list(FIND COMPONENTS mechanics _HAVE_MECHANICS)
-      if (NOT ${_HAVE_MECHANICS} EQUAL -1)
+
+      
+      if (HAVE_SICONOS_MECHANICS)
         GEN_MANPAGE_FROM_HELP(siconos_vview)
         GEN_MANPAGE_FROM_HELP(siconos_vexport)
         GEN_MANPAGE_FROM_HELP(siconos_export_raw_data)
@@ -113,9 +91,6 @@ endif()
 
 if(HAVE_SICONOS_MECHANISMS)
   list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_MECHANISMS")
-  if(${CMAKE_VERSION} VERSION_LESS "3.13")
-    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/mechanisms/src/")
-  endif()
   if(INSTALL_PYTHON_SYMLINKS)
     message("Making symlinks for io Python modules")
     execute_process(COMMAND sh -c "mkdir -p '${SICONOS_SWIG_ROOT_DIR}/io'")
@@ -126,18 +101,24 @@ if(HAVE_SICONOS_MECHANISMS)
   endif()
 endif()
 
-# TMP fix 
-if(${CMAKE_VERSION} VERSION_LESS "3.13")
-  # Notice that with last cmake versions, it's possible to propagate includes to swig in a better way.
-  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/numerics/src/tools")
-  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIR}")
+include(swig_python_tools)
+
+
+set(SWIG_IO_INCLUDES ${CMAKE_SOURCE_DIR}/kernel/swig)
+set(SWIG_IO_DEPS numerics kernel io)
+if(HAVE_SICONOS_MECHANICS)
+  set(SWIG_IO_COMPILE_DEFINITIONS WITH_MECHANICS)
+  list(APPEND SWIG_IO_INCLUDES  ${CMAKE_SOURCE_DIR}/io/src/mechanics)
+  list(APPEND SWIG_IO_DEPS mechanics)
 endif()
 
 
 
-
-include(swig_python_tools)
-swig_module_setup(${COMPONENT}_PYTHON_MODULES)
+add_swig_sub_module(
+  FILE io/io_base.i
+  DEPS ${SWIG_IO_DEPS}
+  INCLUDES ${SWIG_IO_INCLUDES}
+  COMPILE_DEFINITIONS ${SWIG_IO_COMPILE_DEFINITIONS})
 
 if(WITH_TESTING)
   if(NOT WITH_SERIALIZATION)

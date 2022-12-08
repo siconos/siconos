@@ -78,7 +78,7 @@ workflow:
 
 .docker-rules:
    rules:
-    - if: $CI_COMMIT_MESSAGE =~ /^\[docker-build\]/
+    - if: $CI_COMMIT_MESSAGE =~ /\[docker-build\]/
       when: always
 #    - if: $CI_COMMIT_BRANCH == "master"
 #      when: always

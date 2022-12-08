@@ -31,47 +31,43 @@ typedef int (*RollingDriver)(RollingFrictionContactProblem *, double *,
                              double *, SolverOptions *);
 TYPEDEF_SPTR(RollingFrictionContactProblem)
 
-/** Formalization and Resolution of a Friction-Contact Problem
+/**
+   Formalization and Resolution of a Friction-Contact Problem
+   
+   This class is devoted to the formalization and the resolution of
+   friction contact problems defined by :
 
-  This class is devoted to the formalization and the resolution of
-  friction contact problems defined by :
-
-
-  \rst
-
-  .. math::
+   \f[
 
      velocity =  q + M reaction \\
      \\
      velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
 
-  \endrst
+   \f]
 
-  and a Coulomb friction law.
+   and a Coulomb friction law.
+   
+   With:
+   - \f$ velocity \in R^{n} \f$  and \f$ reaction \in R^{n} \f$ the unknowns,
+   - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
+   
+   The dimension of the problem (2D or 3D) is given by the variable
+   contactProblemDim and the proper Numerics driver will be called according to
+   this value.
+   
+   Construction: just set Numerics Solver id
 
-  With:
-     - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ the unknowns,
-     - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+   Main functions:
 
-  The dimension of the problem (2D or 3D) is given by the variable
-  contactProblemDim and the proper Numerics driver will be called according to
-  this value.
+   Usage:
+   - compute(time) formalize, solve and post-process the problem.
 
-  \b Construction: just set Numerics Solver id
-
-  Main functions:
-
-  \b Usage:
-  - compute(time) formalize, solve and post-process the problem.
-
-  pre- and post-pro are common to all LinearOSNS and defined in this class.
-
+   pre- and post-pro are common to all LinearOSNS and defined in this class.
 
  */
 class RollingFrictionContact : public LinearOSNS {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(RollingFrictionContact);
 
   /** Type (dimension) of the contact problem (2D or 3D) */
@@ -91,23 +87,19 @@ protected:
 
 public:
   /** constructor (solver id and dimension)
-      \param dimPb dimension, default = 5
-      \param numericsSolverId id of the solver to be used, optional,
-      default : SICONOS_ROLLING_FRICTION_3D_NSGS
-      \rst
-      see :ref:`problems_and_solvers` for details.
-      \endrst
-  */
+   *
+   *  \param dimPb dimension, default = 5
+   *  \param numericsSolverId id of the solver to be used, optional,
+   *  default : SICONOS_ROLLING_FRICTION_3D_NSGS
+   */
   RollingFrictionContact(
       int dimPb = 5, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
 
-  /**  constructor from a pre-defined solver options set.
-       \param dim, pb dimension, 5 only.
-       \param options, the options set,
-       \rst
-       see :ref:`problems_and_solvers` for details.
-       \endrst
-  */
+  /** constructor from a pre-defined solver options set.
+   *
+   *  \param dim pb dimension, 5 only
+   *  \param options the options set
+   */
   RollingFrictionContact(int dimPb, SP::SolverOptions options);
 
   /** destructor
@@ -117,25 +109,30 @@ public:
   // GETTERS/SETTERS
 
   /** get the type of RollingFrictionContact problem (2D or 3D)
+   *
    *  \return an int (2 or 3)
    */
   inline int getRollingFrictionContactDim() const { return _contactProblemDim; }
 
   // --- Mu ---
   /** get the vector mu, list of the friction coefficients
+   *
    *  \return a vector of double
    */
   inline const MuStorage getMu() const { return *_mu; }
 
   /** get a pointer to mu, the list of the friction coefficients
+   *
    *  \return pointer on a std::vector<double>
    */
 
   inline SP::MuStorage mu() const { return _mu; }
 
   /** get the value of the component number i of mu, the vector of the friction
-   * coefficients \param i the component number (starting from 0) \return double
-   * value of mu
+   *  coefficients
+   *
+   *  \param i the component number (starting from 0)
+   *  \return double value of mu
    */
   inline double getMu(unsigned int i) const { return (*_mu)[i]; }
 
@@ -143,7 +140,9 @@ public:
    */
   void updateMu();
 
-  /** set the driver-function used to solve the problem
+  /** 
+      set the driver-function used to solve the problem
+      
       \param newFunction function of prototype Driver
   */
   inline void setNumericsDriver(RollingDriver newFunction)
@@ -153,42 +152,44 @@ public:
 
   // --- Others functions ---
 
-  /** initialize the RollingFrictionContact problem(compute topology ...)
-      \param simulation the simulation, owner of this OSNSPB
+  /**
+     initialize the RollingFrictionContact problem(compute topology ...)
+      
+     \param simulation the simulation, owner of this OSNSPB
    */
   void initialize(SP::Simulation simulation) override;
 
-  /**
-   * \return the friction contact problem from Numerics
+  /** \return the friction contact problem from Numerics
    */
   SP::RollingFrictionContactProblem frictionContactProblem();
 
-  /**
-   * \return the friction contact problem from Numerics (raw ptr, do not free)
+  /** \return the friction contact problem from Numerics (raw ptr, do not free)
    */
   RollingFrictionContactProblem *frictionContactProblemPtr();
 
   /** solve a friction contact problem
-   * \param problem the friction contact problem
-   * \return info solver information result
+   *
+   *  \param problem the friction contact problem
+   *  \return info solver information result
    */
   int solve(SP::RollingFrictionContactProblem problem =
                 SP::RollingFrictionContactProblem());
 
   /** Compute the unknown reaction and velocity and update the Interaction (y
-   * and lambda ) \param time the current time \return int information about the
-   * solver convergence (0: ok, >0 problem, see Numerics documentation)
+   *  and lambda )
+   *
+   *  \param time the current time
+   *  \return int information about the
+   *  solver convergence (0: ok, >0 problem, see Numerics documentation)
    */
   int compute(double time) override;
 
   /** print the data to the screen */
   void display() const override;
 
-  /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  /** Check the compatibility fol the nslaw with the targeted OSNSP */
   bool checkCompatibleNSLaw(NonSmoothLaw &nslaw) override;
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

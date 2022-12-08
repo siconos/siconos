@@ -23,10 +23,12 @@ RUN dnf --setopt=deltarpm=false install -y \
         lapack-devel \
         suitesparse-devel \
         swig \
+	libglvnd-glx \
         git-core \
         bullet-devel \
-	python3-h5py && dnf clean all
+	python3-h5py  && dnf clean all
 WORKDIR /home
+RUN python3 -m pip install -U wheel vtk
 COPY ci_gitlab/dockerfiles/install_bullet.sh .
 ENV CI_PROJECT_DIR /home
 RUN sh /home/install_bullet.sh

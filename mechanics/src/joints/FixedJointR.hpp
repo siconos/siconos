@@ -24,15 +24,13 @@
 #include <SiconosFwd.hpp>
 #include <NewtonEulerJointR.hpp>
 
-/** \class FixedJointR
- *  \brief This class implements a fixed joint between one or two Newton/Euler Dynamical system
- *
- */
+/**
+   This class implements a fixed joint between one or two Newton/Euler Dynamical system
+*/
 class FixedJointR : public NewtonEulerJointR
 {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(FixedJointR);
 
   /*Initial conditions*/
@@ -44,10 +42,11 @@ public:
    * setBasePositions. */
   FixedJointR() : NewtonEulerJointR() {};
 
-  /* constructor,
-     \param a SP::NewtonEulerDS d1, a dynamical system containing the initial position
-     \param a SP::NewtonEulerDS d2, a dynamical system containing the initial position
-  */
+  /** constructor,
+   *
+   *  \param a SP::NewtonEulerDS d1, a dynamical system containing the initial position
+   *  \param a SP::NewtonEulerDS d2, a dynamical system containing the initial position
+   */
   FixedJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
 
   /** destructor
@@ -55,25 +54,30 @@ public:
   virtual ~FixedJointR() {};
 
   /** Initialize the joint constants based on the provided base positions.
-   * \param q1 A SiconosVector of size 7 indicating translation and
-   *           orientation in inertial coordinates.
-   * \param q2 An optional SiconosVector of size 7 indicating
-   *           translation and orientation; if null, the inertial
-   *           frame will be considered as the second base. */
+   *
+   *  \param q1 A SiconosVector of size 7 indicating translation and
+   *  orientation in inertial coordinates.
+   *  \param q2 An optional SiconosVector of size 7 indicating
+   *  translation and orientation; if null, the inertial
+   *  frame will be considered as the second base. */
   virtual void setBasePositions(SP::SiconosVector q1,
                                 SP::SiconosVector q2 = SP::SiconosVector());
 
-  /** Get the number of constraints defined in the joint
-      \return the number of constraints
+  /**
+     Get the number of constraints defined in the joint
+     
+     \return the number of constraints
    */
   virtual unsigned int numberOfConstraints() { return 6; }
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 

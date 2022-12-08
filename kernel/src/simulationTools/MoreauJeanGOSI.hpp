@@ -26,14 +26,12 @@
 
 #include <limits>
 
-/**  \class MoreauJeanGOSI
- *   \brief A global version of the MoreauJeanOSI integrator
- */
+/** 
+    A global version of the MoreauJeanOSI integrator
+*/
 
 class MoreauJeanGOSI : public MoreauJeanOSI {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(MoreauJeanGOSI);
 
 public:
@@ -49,9 +47,10 @@ public:
   // WORK_INTERACTION_LENGTH};
 
   /** constructor from theta value only
+   *
    *  \param theta value for all linked DS (default = 0.5).
    *  \param gamma value for all linked DS (default = NaN and gamma is not
-   * used).
+   *  used).
    */
   MoreauJeanGOSI(double theta = 0.5,
                  double gamma = std::numeric_limits<double>::quiet_NaN())
@@ -65,23 +64,24 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param t time of initialization
-   * \param ds the dynamical system
+   *
+   *  \param t time of initialization
+   *  \param ds the dynamical system
    */
   void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param inter the interaction
-   * \param interProp the properties on the graph
-   * \param DSG the dynamical systems graph
+   *
+   *  \param inter the interaction
+   *  \param interProp the properties on the graph
+   *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(Interaction &inter,
                                            InteractionProperties &interProp,
                                            DynamicalSystemsGraph &DSG) override;
 
-  /** return the maximum of all norms for the "MoreauJeanGOSI-discretized"
-     residus of DS \return a double
+  /** \return the maximum of all norms for the "MoreauJeanGOSI-discretized" residus of DS
    */
   double computeResidu() override;
 
@@ -91,21 +91,26 @@ public:
   void computeFreeState() override;
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
-   * stop at tout (->iout=false) \param tinit the initial time \param tend the
-   * end time \param tout the real end time \param notUsed useless flag (for
-   * MoreauJeanGOSI, used in LsodarOSI)
+   *  stop at tout (->iout=false)
+   *
+   *  \param tinit the initial time
+   *  \param tend the end time
+   *  \param tout the real end time
+   *  \param notUsed useless flag (for MoreauJeanGOSI, used in LsodarOSI)
    */
   void integrate(double &tinit, double &tend, double &tout,
                  int &notUsed) override;
 
   /** update the state of the dynamical systems
+   *
    *  \param level the level of interest for the dynamics: not used at the time
    */
   void updateState(const unsigned int level) override;
 
   /** Compute the nonsmooth law contribution to the output
-   * \param inter the interaction (for y_k)
-   * \param osnsp the non-smooth integrator
+   *
+   *  \param inter the interaction (for y_k)
+   *  \param osnsp the non-smooth integrator
    */
   void NonSmoothLawContributionToOutput(SP::Interaction inter,
                                         OneStepNSProblem &osnsp);
@@ -114,8 +119,6 @@ public:
    */
   void display() override;
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 
