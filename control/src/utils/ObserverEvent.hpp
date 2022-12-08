@@ -33,8 +33,7 @@ class ObserverEvent : public Event
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(ObserverEvent);
 
 

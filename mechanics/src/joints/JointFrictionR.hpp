@@ -27,14 +27,13 @@
 #include <NewtonEulerJointR.hpp>
 #include <Tools.hpp>
 
-/** \class JointFrictionR
- *  \brief This class implements a friction on a DoF for any NewtonEulerJointR.
- */
+/**
+   This class implements a friction on a DoF for any NewtonEulerJointR.
+*/
 class JointFrictionR : public NewtonEulerR
 {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(JointFrictionR);
   JointFrictionR() : NewtonEulerR() {}
 
@@ -48,19 +47,21 @@ protected:
 public:
 
   /** Initialize a joint friction for a common case: a single axis with a
-   * single friction, either positive or negative. For use with
-   * NewtonImpactNSL. */
+   *  single friction, either positive or negative. For use with
+   *  NewtonImpactNSL. */
   JointFrictionR(SP::NewtonEulerJointR joint, unsigned int axis);
 
   /** Initialize a multidimensional joint friction, e.g. the cone friction on
-   * a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
+   *  a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
   JointFrictionR(SP::NewtonEulerJointR joint,
                  SP::UnsignedIntVector axes=SP::UnsignedIntVector());
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
@@ -68,17 +69,15 @@ public:
 
   virtual unsigned int numberOfConstraints();
 
-  /* Return the joint axis number assigned to a friction axis. */
+  /** Return the joint axis number assigned to a friction axis. */
   unsigned int axis(unsigned int _index) { return _axis->at(_index); }
 
-  /* Return the joint assigned to this friction relation. */
+  /** Return the joint assigned to this friction relation. */
   SP::NewtonEulerJointR joint() { return _joint; }
 
-  /* Return the number of joint axes indexed by this relation. */
+  /** Return the number of joint axes indexed by this relation. */
   unsigned int numberOfAxes() { return _axis->size(); }
 
-  /** destructor
-   */
   virtual ~JointFrictionR() {};
 };
 #endif  //JointFrictionRELATION_H

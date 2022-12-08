@@ -26,7 +26,7 @@ struct ControlZOHAdditionalTerms : ExtraAdditionalTerms
 {
 
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(ControlZOHAdditionalTerms);
 
 public:

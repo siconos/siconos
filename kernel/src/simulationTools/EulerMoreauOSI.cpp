@@ -1361,26 +1361,28 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 
 void EulerMoreauOSI::updateInput(double time, unsigned int level)
 {
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
 
   // Set dynamical systems non-smooth part to zero.
-  _simulation->nonSmoothDynamicalSystem()->reset(level);
+  // Warning: This reset may be prone to issue with multiple osis.
+  // _simulation->nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
 
 
   InteractionsGraph::VIterator ui, uiend;
 
-  SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  InteractionsGraph& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for(std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
   {
-    Interaction& inter = * indexSet0->bundle(*ui);
+    if(!checkInteractionOSI(indexSet0, ui)) continue;
+    Interaction& inter = * indexSet0.bundle(*ui);
+
+    
     assert(inter.lowerLevelForInput() <= level);
     assert(inter.upperLevelForInput() >= level);
 
     VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
     VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-    InteractionProperties& interProp = indexSet0->properties(*ui);
+    InteractionProperties& interProp = indexSet0.properties(*ui);
     VectorOfVectors& inter_work = *interProp.workVectors;
     VectorOfSMatrices& inter_work_mat = *interProp.workMatrices;
     VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;

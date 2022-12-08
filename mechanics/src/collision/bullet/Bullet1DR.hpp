@@ -25,8 +25,7 @@
 
 class Bullet1DR : public NewtonEuler1DR {
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(Bullet1DR);
 
   SP::btManifoldPoint _contactPoints;
@@ -36,10 +35,12 @@ public:
 
   SP::btManifoldPoint contactPoint() const { return _contactPoints; };
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   void computeh(double time, const BlockVector &q, SiconosVector &y) override;
 

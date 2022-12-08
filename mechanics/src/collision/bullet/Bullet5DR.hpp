@@ -25,8 +25,7 @@
 class Bullet5DR : public Contact5DR
 {
 private:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(Bullet5DR);
 
 public:

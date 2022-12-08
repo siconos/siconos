@@ -50,7 +50,7 @@ enum SICONOS_VI_IPARAM
    SICONOS_VI_IPARAM_ACTIVATE_UPDATE = 10,
   };
 
-/** \enum allowed values for iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]   
+/** Allowed values for iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]   
 */
 enum SICONOS_VI_LINESEARCH_METHOD
   {
@@ -80,7 +80,7 @@ enum SICONOS_VI_DPARAM
 
 
 
-/** \enum allowed values for iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]   
+/** Allowed values for iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]   
 */
 enum SICONOS_VI_ERROR_EVALUATION_ENUM
 {

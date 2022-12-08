@@ -26,7 +26,7 @@ struct ControlLinearAdditionalTermsTS : ExtraAdditionalTerms
 {
 
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(ControlLinearAdditionalTermsTS);
 
 public:

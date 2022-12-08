@@ -33,8 +33,7 @@ class RigidBodyDS : public NewtonEulerDS,
                public std::enable_shared_from_this<RigidBodyDS>
 {
 protected:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(RigidBodyDS);
 
   RigidBodyDS() : NewtonEulerDS() {};
@@ -43,7 +42,7 @@ protected:
   bool _useContactorInertia;
 
   /** If false, bodies connected to this body by a joint will not
-   * collide. See also NewtonEulerJointR::_allowSelfCollide */
+   *  collide. See also NewtonEulerJointR::_allowSelfCollide */
   bool _allowSelfCollide = true;
 
 public:
@@ -66,19 +65,20 @@ public:
   void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }
 
   /** Access the contactor set associated with this body.
-   * \return A SP::SiconosContactorSet */
+   *
+   *  \return A SP::SiconosContactorSet */
   SP::SiconosContactorSet contactors() const { return _contactors; }
 
   /** Provide a set of contactors to the body.
-   * \param c A SP::SiconosContactorSet */
+   *
+   *  \param c A SP::SiconosContactorSet */
   void setContactors(SP::SiconosContactorSet c) { _contactors = c; }
 
   /** Make the base position of the contactors equal to the DS q vector.
-   * \return a SP::SiconosVector */
+   *
+   *  \return a SP::SiconosVector */
   virtual SP::SiconosVector base_position() { return q(); }
 
-  /** visitors hook
-   */
   ACCEPT_BASE_VISITORS(NewtonEulerDS);
 };
 

@@ -20,7 +20,7 @@
 
 /*!\file fc3d_AlartCurnier_functions.h
 
-  \brief Typedef and functions declarations related to Alart-Curnier
+  Typedef and functions declarations related to Alart-Curnier
   formulation for 3 dimension frictional contact problems.
 
   Subroutines used when the friction-contact 3D problem is written

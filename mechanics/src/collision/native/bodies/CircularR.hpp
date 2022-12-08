@@ -25,23 +25,22 @@
 #include "LagrangianScleronomousR.hpp"
 #include "MechanicsFwd.hpp"
 
-/**  \class CircularR
- *   \brief Two circle relation - Inherits from LagrangianScleronomousR
- */
+/** 
+    Two circle relation - Inherits from LagrangianScleronomousR
+*/
 
 class CircularR : public LagrangianScleronomousR {
 protected:
-  // serialization hooks
   ACCEPT_SERIALIZATION(CircularR);
 
   double _r1, _r2;
 
 public:
   /** Constructor
-
-  \param disk1 radius
-  \param disk2 radius
-  */
+   *
+   *  \param disk1 radius
+   *  \param disk2 radius
+   */
   CircularR(double r1, double r2) : _r1(r1), _r2(r2){};
 
   virtual ~CircularR() noexcept = default;

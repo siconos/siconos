@@ -19,9 +19,9 @@
 
 /*! \file DiskMovingPlanR.hpp
  */
-/** \class DiskMovingPlanR
- *  \brief disk - moving plan relation - Inherits from LagrangianRheonomousR
- */
+/**
+   disk - moving plan relation - Inherits from LagrangianRheonomousR
+*/
 
 #ifndef DiskMovingPlanR_h
 #define DiskMovingPlanR_h
@@ -42,8 +42,7 @@ class DiskMovingPlanR : public LagrangianRheonomousR,
   public std::enable_shared_from_this<DiskMovingPlanR>
 {
 private:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(DiskMovingPlanR);
 
   double _time, _A, _B, _C, _ADot, _BDot, _CDot, _sqrA2pB2, _r, _AADot, _BBDot, _cubsqrA2pB2;
@@ -67,25 +66,31 @@ public:
 
   void init(double);
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
+     \param y the resulting vector
   */
   void computeh(double time, const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
+  /**
+     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
   */
   void computeJachq(double time, const BlockVector& q, BlockVector& z);
 
-  /** to compute the time-derivative of the output y = h(t,q,z), saved in attribute _hDot (access: hDot())
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
+  /**
+     to compute the time-derivative of the output y = h(t,q,z), saved in attribute _hDot (access: hDot())
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
   */
   void computehDot(double time, const BlockVector& q, BlockVector& z);
 
@@ -129,44 +134,55 @@ public:
 
   bool equal(FTime, FTime, FTime, double) const;
 
-  /** compute A
-      \param t the time
+  /**
+     compute A
+     
+     \param t the time
   */
   void computeA(double t)
   COMPUTE(A)
 
-  /** compute B
-      \param t the time
+  /**
+     compute B
+     
+     \param t the time
   */
   void computeB(double t)
   COMPUTE(B)
 
-  /** compute C
-      \param t the time
+  /**
+     compute C
+     
+     \param t the time
   */
   void computeC(double t)
   COMPUTE(C)
     
-  /** compute ADot
-    \param t the time
+  /**
+     compute ADot
+    
+     \param t the time
   */
   inline void computeADot(double t)
   COMPUTE(ADot)
 
-  /** compute BDot
-      \param t the time
+  /**
+     compute BDot
+     
+     \param t the time
   */
   inline void computeBDot(double t)
   COMPUTE(BDot)
 
 
-  /** compute CDot
-      \param t the time
+  /**
+     compute CDot
+     
+     \param t the time
   */
   inline void computeCDot(double t)
   COMPUTE(CDot)
 
-  // visitor hooks
   ACCEPT_VISITORS();
 
 

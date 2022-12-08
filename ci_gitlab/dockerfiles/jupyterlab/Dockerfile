@@ -10,7 +10,7 @@ RUN  apt update && apt install -y -qq \
         doxygen \
         libcppunit-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
 RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install pytest lxml pyhull
+RUN python3 -m pip install pytest lxml pyhull vtk
 RUN conda install -c conda-forge boost hdf5  swig bullet -y
 RUN conda install -c conda-forge lpsolve55 suitesparse -y
 WORKDIR /home

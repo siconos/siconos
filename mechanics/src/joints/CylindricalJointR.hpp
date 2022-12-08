@@ -26,19 +26,17 @@
 #include <SiconosFwd.hpp>
 #include <NewtonEulerJointR.hpp>
 
-/** \class CylindricalJointR
- *  \brief This class implements a cylindrical joint between one or
- *  two Newton/Euler Dynamical system.  It is similar to a
- *  PrismaticJointR but allows for rotation around the axis.
- *
- * From a given axis, we construct two unit othorgonal vectors to the
- *  axis V1 and V2 such that (axis,V1,V2) is an orthogonal frame
- */
+/** 
+    This class implements a cylindrical joint between one or
+    two Newton/Euler Dynamical system.  It is similar to a
+    PrismaticJointR but allows for rotation around the axis.
+    
+    From a given axis, we construct two unit othorgonal vectors to the
+    axis V1 and V2 such that (axis,V1,V2) is an orthogonal frame
+*/
 class CylindricalJointR : public NewtonEulerJointR
 {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(CylindricalJointR);
 
   /** Axis of the cylindrical point in the q1 frame of reference
@@ -84,29 +82,31 @@ protected:
 public:
 
   /** Empty constructor. The relation may be initialized later by
-   * setPoint, setAbsolute, and setBasePositions. */
+   *  setPoint, setAbsolute, and setBasePositions. */
   CylindricalJointR();
 
   /** Constructor based on one or two dynamical systems, a point and an axis.
+   *
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
-   *            for absolute frame.
+   *  for absolute frame.
    *  \param P SiconosVector of size 3 that defines the point around
-   *           which rotation is allowed.
+   *  which rotation is allowed.
    *  \param A SiconosVector of size 3 that defines the cylindrical axis.
    *  \param absoluteRef if true, P and A are in the absolute frame,
-   *                     otherwise P and A are in d1 frame.
+   *  otherwise P and A are in d1 frame.
    */
   CylindricalJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
                     SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
                     SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
 
   /** Initialize the joint constants based on the provided base positions.
-   * \param q1 A SiconosVector of size 7 indicating translation and
-   *           orientation in inertial coordinates.
-   * \param q2 An optional SiconosVector of size 7 indicating
-   *           translation and orientation; if null, the inertial
-   *           frame will be considered as the second base. */
+   *
+   *  \param q1 A SiconosVector of size 7 indicating translation and
+   *  orientation in inertial coordinates.
+   *  \param q2 An optional SiconosVector of size 7 indicating
+   *  translation and orientation; if null, the inertial
+   *  frame will be considered as the second base. */
   virtual void setBasePositions(SP::SiconosVector q1,
                                 SP::SiconosVector q2 = SP::SiconosVector());
 
@@ -120,10 +120,12 @@ public:
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0 );
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
@@ -143,18 +145,24 @@ public:
   void Jd1(
     double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
 
-  /** Get the number of constraints defined in the joint
-      \return the number of constraints
+  /**
+     Get the number of constraints defined in the joint
+     
+     \return the number of constraints
    */
   virtual unsigned int numberOfConstraints() { return 4; }
 
-  /** Return the number of degrees of freedom of this joint.
-      \return the number of degrees of freedom (DoF)
+  /**
+     Return the number of degrees of freedom of this joint.
+     
+     \return the number of degrees of freedom (DoF)
    */
   virtual unsigned int numberOfDoF() { return 2; }
 
-  /** Return the type of a degree of freedom of this joint.
-      \return the type of the degree of freedom (DoF)
+  /**
+     Return the type of a degree of freedom of this joint.
+     
+     \return the type of the degree of freedom (DoF)
   */
   virtual DoF_Type typeOfDoF(unsigned int axis) {
     if (axis==0) return DOF_TYPE_LINEAR;

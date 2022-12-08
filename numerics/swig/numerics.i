@@ -19,7 +19,16 @@
 //
 
 // numerics.i - SWIG interface for siconos numerics component.
-%module(package="siconos") numerics
+%define DOCSTRING
+"A collection of low-level algorithms for solving basic algebra and optimization problem arising in the simulation of nonsmooth dynamical systems.
+
+Example of usage:
+
+>>> import siconos.numerics as sn
+>>> help(sn.LCP)
+"
+%enddef
+%module(package="siconos", docstring=DOCSTRING) numerics
 
 // basics, mostly numpy.i stuff. 
 %include start.i
@@ -87,7 +96,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 }
 
 // generated docstrings from doxygen xml output
-%include numerics-docstrings.i
+// %include numerics-docstrings.i
 
 // list of functions that returns objects that they have created
 %include numerics_newobjects.i

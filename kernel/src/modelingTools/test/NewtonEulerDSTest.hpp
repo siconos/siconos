@@ -27,8 +27,7 @@ class NewtonEulerDSTest : public CppUnit::TestFixture
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(NewtonEulerDSTest);
 
   // Name of the tests suite

@@ -188,7 +188,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
       }
       break;
     case SYMMETRIC:
-      if(numM == Siconos::IDENTITY)
+      if(numM == Siconos::IDENTITY || numM ==  Siconos::SYMMETRIC )
         noalias(*(mat.Sym)) = *m.sym();
       else
         THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");

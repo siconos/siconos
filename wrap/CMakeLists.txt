@@ -26,26 +26,13 @@ configure_file(setup.cfg.in setup.cfg)
 
 
 configure_file(append-swig-pythonlibs.py.in append-swig-pythonlibs.py)
-add_custom_target(python-write-setup
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND ${PYTHON_EXECUTABLE}  ${CMAKE_CURRENT_BINARY_DIR}/append-swig-pythonlibs.py
-  COMMENT "Append the list of shared libraries that must be installed by pip to setup.cfg."
-  )
-
-add_dependencies(python-install python-write-setup)
-
-# A trick to add so files to the python package dependencies, so
-# that they are installed by pip.
-# This is a quite a mess to handle python path. See https://www.python.org/dev/peps/pep-0668/
-# file(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/libs/liblist liblist)
-# add_custom_command(
-#   OUTPUT ${CMAKE_BINARY_DIR}/wrap/libs/${_name}_lib 
-#   COMMAND echo $<TARGET_FILE_NAME:${SWIG_MODULE_${_name}_REAL_NAME}> >> ${CMAKE_BINARY_DIR}/wrap/libs/${_name}_lib 
+# add_custom_target(python-write-setup
+#   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+#   COMMAND ${PYTHON_EXECUTABLE}  ${CMAKE_CURRENT_BINARY_DIR}/append-swig-pythonlibs.py
+#   COMMENT "Append the list of shared libraries that must be installed by pip to setup.cfg."
 #   )
 
-# file(READ ${CMAKE_CURRENT_BINARY_DIR}/libs/${fname} VAR)
-# file(APPEND  ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg "\t${VAR}\n")
-
+# add_dependencies(python-install python-write-setup)
 
 
 configure_file(pyproject.toml pyproject.toml)

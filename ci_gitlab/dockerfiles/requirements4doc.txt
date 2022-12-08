@@ -1,14 +1,7 @@
-scipy
-lxml
-pytest
-matplotlib
-h5py
-breathe<=4.18.2
+sphinx
+breathe
 sphinx-rtd-theme
 sphinxcontrib-bibtex
 sphinxcontrib-websupport
 sphinx-bootstrap-theme
-sphinxcontrib-napoleon
-numpydoc
 ytsphinx
-

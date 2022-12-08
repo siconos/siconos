@@ -32,7 +32,7 @@
  */
 class TimeSteppingD1Minus : public Simulation {
 private:
-  /** serialization hooks */
+
   ACCEPT_SERIALIZATION(TimeSteppingD1Minus);
 
   /** default constructor */
@@ -68,18 +68,12 @@ public:
   /** step from current event to next event of EventsManager */
   void advanceToEvent() override;
 
-  /** update input
-   *  \param level lambda order used to compute input
-   */
-  void updateInput(unsigned int level) override;
-
   /** compute residu */
   void computeResidu();
 
   /** integrate DynamicalSystems taking not into account non-smooth part */
   void computeFreeState();
 
-  /** visitors hook */
   ACCEPT_STD_VISITORS();
 };
 

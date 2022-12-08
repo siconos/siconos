@@ -19,12 +19,22 @@
 //
 
 // SWIG interface for Siconos Kernel
-%module(package="siconos", directors="1", allprotected="1") kernel
+
+%define DOCSTRING
+"A collection of low-level algorithms for solving basic algebra and optimization problem arising in the simulation of nonsmooth dynamical systems.
+
+Example of usage:
+
+>>> import siconos.kernel as sk
+>>> help(sk.LagrangianDS)
+"
+%enddef
+%module(package="siconos", directors="1", allprotected="1", docstring=DOCSTRING) kernel
 
 %include start.i
 
 // generated docstrings from doxygen xml output
-%include kernel-docstrings.i
+// %include kernel-docstrings.i
 
 #ifdef WITH_SERIALIZATION
 %{
@@ -96,6 +106,9 @@
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
 %ignore getInvMBlock;
+
+%ignore osnsp_rhs;
+
 
 // SiconosMemory
 %ignore swap;

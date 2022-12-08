@@ -27,32 +27,32 @@
 
 const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
-/**  SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
- *
- * SchatzmanPaoliOSI class is used to define some time-integrators methods for a
- * list of dynamical systems.
+/**
+   SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
 
- * A SchatzmanPaoliOSI instance is defined by the value of theta and the list of
- * concerned dynamical systems.  Each DynamicalSystem is associated to
- * a SiconosMatrix, named "W"
- *
- * W matrices are initialized and computed in initializeIterationMatrixW and
- * computeW. Depending on the DS type, they may depend on time and DS
- * state (x).
- *
- *
- * For Lagrangian systems, the implementation uses _p[0] for storing the
- * discrete multiplier.
- *
- * Main functions:
- *
- * - computeFreeState(): computes xfree (or vfree), dynamical systems
- *   state without taking non-smooth part into account \n
- *
- * - updateState(): computes x (q,v), the complete dynamical systems
- *    states.
- *
- */
+   SchatzmanPaoliOSI class is used to define some time-integrators methods for a
+   list of dynamical systems.
+
+   A SchatzmanPaoliOSI instance is defined by the value of theta and the list of
+   concerned dynamical systems.  Each DynamicalSystem is associated to
+   a SiconosMatrix, named "W"
+
+   W matrices are initialized and computed in initializeIterationMatrixW and
+   computeW. Depending on the DS type, they may depend on time and DS
+   state (x).
+
+   For Lagrangian systems, the implementation uses _p[0] for storing the
+   discrete multiplier.
+
+   Main functions:
+
+   - computeFreeState(): computes xfree (or vfree), dynamical systems
+   state without taking non-smooth part into account \n
+
+   - updateState(): computes x (q,v), the complete dynamical systems
+   states.
+
+*/
 class SchatzmanPaoliOSI : public OneStepIntegrator {
 public:
   enum SchatzmanPaoliOSI_ds_workVector_id {
@@ -70,8 +70,7 @@ public:
   enum SchatzmanPaoliOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
 
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SchatzmanPaoliOSI);
 
   /** Stl map that associates a theta parameter for the integration
@@ -102,11 +101,13 @@ protected:
 
 public:
   /** constructor from theta value only
+   *
    *  \param theta value for all these DS.
    */
   SchatzmanPaoliOSI(double theta);
 
   /** constructor from theta value only
+   *
    *  \param theta value for all these DS.
    *  \param gamma value for all these DS.
    */
@@ -119,44 +120,50 @@ public:
   // --- GETTERS/SETTERS ---
 
   /** get the value of W corresponding to DynamicalSystem ds
-   * \param ds a pointer to DynamicalSystem, optional, default =
-   * nullptr. get W[0] in that case
+   *
+   *  \param ds a pointer to DynamicalSystem, optional, default =
+   *  nullptr. get W[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
-   * \param ds a pointer to DynamicalSystem, optional, default =
-   * nullptr. get W[0] in that case
-   * \return pointer to a SiconosMatrix
+   *
+   *  \param ds a pointer to DynamicalSystem, optional, default =
+   *  nullptr. get W[0] in that case
+   *  \return pointer to a SiconosMatrix
    */
   SP::SimpleMatrix W(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
-   * \param newValue SiconosMatrix
-   * \param ds  a pointer to DynamicalSystem,
+   *
+   *  \param newValue SiconosMatrix
+   *  \param ds  a pointer to DynamicalSystem,
    */
   void setW(const SiconosMatrix &newValue, SP::DynamicalSystem ds);
 
   /** set W[ds] to pointer newPtr
-   * \param newPtr SP::SiconosMatrix
-   * \param ds a pointer to DynamicalSystem
+   *
+   *  \param newPtr SP::SiconosMatrix
+   *  \param ds a pointer to DynamicalSystem
    */
   void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
 
   // -- WBoundaryConditions --
 
   /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
-   * \param ds a pointer to DynamicalSystem, optional, default =
-   * nullptr. get WBoundaryConditions[0] in that case
+   *
+   *  \param ds a pointer to DynamicalSystem, optional, default =
+   *  nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix
   getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
-   * \param ds a pointer to DynamicalSystem, optional, default =
-   * nullptr. get WBoundaryConditions[0] in that case
+   *
+   *  \param ds a pointer to DynamicalSystem, optional, default =
+   *  nullptr. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);
@@ -164,11 +171,13 @@ public:
   // -- theta --
 
   /** get theta
+   *
    *  \return a double
    */
   inline double theta() { return _theta; };
 
   /** set the value of theta
+   *
    *  \param newTheta a double
    */
   inline void setTheta(double newTheta) { _theta = newTheta; };
@@ -176,11 +185,13 @@ public:
   // -- gamma --
 
   /** get gamma
+   *
    *  \return a double
    */
   inline double gamma() { return _gamma; };
 
   /** set the value of gamma
+   *
    *  \param newGamma a double
    */
   inline void setGamma(double newGamma)
@@ -192,21 +203,25 @@ public:
   // -- useGamma --
 
   /** get bool useGamma
+   *
    *  \return a bool
    */
   inline bool useGamma() { return _useGamma; };
 
   /** set the boolean to indicate that we use gamma
+   *
    *  \param newUseGamma a bool
    */
   inline void setUseGamma(bool newUseGamma) { _useGamma = newUseGamma; };
 
   /** get bool gammaForRelation for the relation
+   *
    *  \return a
    */
   inline bool useGammaForRelation() { return _useGammaForRelation; };
 
   /** set the boolean to indicate that we use gamma for the relation
+   *
    *  \param newUseGammaForRelation a bool
    */
   inline void setUseGammaForRelation(bool newUseGammaForRelation)
@@ -218,40 +233,39 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the SchatzmanPaoliOSI integrator; for linear time
-      invariant systems, we compute time invariant operator (example :
-      W)
-   */
-  // void initialize(Model& m);
-
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param t time of initialization
-   * \param ds the dynamical system
+   *
+   *  \param t time of initialization
+   *  \param ds the dynamical system
    */
   void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param inter the interaction
-   * \param interProp the properties on the graph
-   * \param DSG the dynamical systems graph
+   *
+   *  \param inter the interaction
+   *  \param interProp the properties on the graph
+   *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(Interaction &inter,
                                            InteractionProperties &interProp,
                                            DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
-   * \return unsigned int
+   *
+   *  \return unsigned int
    */
   unsigned int numberOfIndexSets() const override { return 1; };
   /** initialize iteration matrix W SchatzmanPaoliOSI matrix at time t
+   *
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
    */
   void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W SchatzmanPaoliOSI matrix at time t
+   *
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
    *  \param W the matrix to compute
@@ -259,6 +273,7 @@ public:
   void computeW(double time, SP::DynamicalSystem ds, SiconosMatrix &W);
 
   /** compute WBoundaryConditionsMap[ds] SchatzmanPaoliOSI matrix at time t
+   *
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
    */
@@ -266,15 +281,16 @@ public:
                                   SiconosMatrix &WBoundaryConditions);
 
   /** initialize iteration matrix WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
+   *
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant to avoid
-   * invocation)
+   *  invocation)
    */
   void initializeIterationMatrixWBoundaryConditions(
       SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor &dsv);
 
   /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized"
-   * residus of DS \return a double
+   *  residus of DS \return a double
    */
   double computeResidu() override;
 
@@ -284,22 +300,31 @@ public:
   void computeFreeState() override;
 
   /** integrates the Interaction linked to this integrator, without taking
-   * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to OneStepNSProblem
+   *  non-smooth effects into account \param vertex_inter of the interaction
+   *  graph \param osnsp pointer to OneStepNSProblem
    */
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
 
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+   */
+  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
+  {
+    return *(*indexSet.properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
+  };
+
   void prepareNewtonIteration(double time) override;
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
-   * stop at tout (->iout=false) \param tinit initial time \param tend end time
+   *  stop at tout (->iout=false) \param tinit initial time \param tend end time
+   *
    *  \param tout real end time
    *  \param idid useless flag (for SchatzmanPaoliOSI, used in LsodarOSI)
    */
   void integrate(double &tinit, double &tend, double &tout, int &idid) override;
 
   /** updates the state of the Dynamical Systems
+   *
    *  \param level level of interest for the dynamics: not used at the time
    */
   void updateState(const unsigned int level) override;
@@ -308,8 +333,6 @@ public:
    */
   void display() override;
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

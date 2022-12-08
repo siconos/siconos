@@ -416,6 +416,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
   //  printDenseMatrice("newQ",file,Qreduced,nbRow,1);
 #endif
   NumericsMatrix numM;
+  NM_null(&numM);
   numM.storageType = 0;
   numM.matrix0 = reducedProb;
   numM.matrix1 = 0;
@@ -565,6 +566,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction, d
     curProblem = curProblem->nextProblem;
   }
   NumericsMatrix numM;
+  NM_null(&numM);
   numM.storageType = 0;
   numM.matrix0 = reducedProb;
   numM.matrix1 = 0;
@@ -718,6 +720,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction, double 
     LinearComplementarityProblem aLCP;
     SolverOptions *aLcpOptions = solver_options_create(SICONOS_LCP_ENUM);
     NumericsMatrix M;
+    NM_null(&M);
     M.storageType = 0;
     M.size0 = Mi_size;
     M.size1 = Mi_size;
@@ -740,6 +743,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction, double 
     assert(Me_size >= 0);
     for(size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
     NumericsMatrix M;
+    NM_null(&M);
     NM_fill(&M, NM_DENSE, Me_size, Me_size, reducedProb);
     // *info = NM_gesv(&M, reaction, true);
     *info = NM_LU_solve(&M, reaction, 1);
@@ -765,6 +769,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction, double 
   aMLCP.b = 0;
   aMLCP.q = Qreduced;
   NumericsMatrix M;
+  NM_null(&M);
   M.storageType = 0;
   M.size0 = Mi_size + Me_size;
   M.size1 = Mi_size + Me_size;

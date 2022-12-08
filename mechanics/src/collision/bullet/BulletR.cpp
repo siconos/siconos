@@ -49,85 +49,34 @@
 
 #include "BulletSiconosCommon.hpp"
 
+#include "BodyShapeRecord.hpp"
+
 BulletR::BulletR()
   : ContactR()
 {
 }
 
-void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-    const btManifoldPoint& point,
-    bool flip, double scaling,
-    SP::NewtonEulerDS ds1,
-    SP::NewtonEulerDS ds2)
+void BulletR::updateContactPointsFromManifoldPoint(
+  const btPersistentManifold& manifold,
+  const btManifoldPoint& point,
+  bool flip, double scaling,
+  SP::NewtonEulerDS ds1,
+  SP::NewtonEulerDS ds2)
 {
-  // Get new world positions of contact points and calculate relative
-  // to ds1 and ds2
-
-  ::boost::math::quaternion<double> rq1, rq2, posa;
-  ::boost::math::quaternion<double> pq1, pq2, posb;
-
-  copyQuatPos(*ds1->q(), pq1);
-  copyQuatRot(*ds1->q(), rq1);
-
-  if(ds2)
+  if (flip)
   {
-    copyQuatPos(*ds2->q(), pq2);
-    copyQuatRot(*ds2->q(), rq2);
-  }
-
-  copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
-  copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
-
-  if(flip)
-  {
-    ::boost::math::quaternion<double> tmp = posa;
-    posa = posb;
-    posb = tmp;
-  }
-
-  SiconosVector va(3), vb(3), vn(3);
-  if(flip)
-  {
-    copyQuatPos((1.0/rq1) * (posa - pq1) * rq1, va);
-    if(ds2)
-      copyQuatPos((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else
-    {
-      // If no body2, position is relative to 0,0,0
-      copyBtVector3(point.getPositionWorldOnA() / scaling, vb);
-    }
+    copyBtVector3(-1.0*point.m_normalWorldOnB, *_Nc);
+    copyBtVector3(point.getPositionWorldOnA() / scaling, *_Pc2);
+    copyBtVector3(point.getPositionWorldOnB() / scaling, *_Pc1);
   }
   else
   {
-    copyQuatPos((1.0/rq1) * (posa - pq1) * rq1, va);
-    if(ds2)
-      copyQuatPos((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else
-    {
-      // If no body2, position is relative to 0,0,0
-      copyBtVector3(point.getPositionWorldOnB() / scaling, vb);
-    }
+    copyBtVector3(point.m_normalWorldOnB, *_Nc);
+    copyBtVector3(point.getPositionWorldOnA() / scaling, *_Pc1);
+    copyBtVector3(point.getPositionWorldOnB() / scaling, *_Pc2);
   }
-
-  // Get new normal
-  if(ds2)
-  {
-    btQuaternion qn(point.m_normalWorldOnB.x(),
-                    point.m_normalWorldOnB.y(),
-                    point.m_normalWorldOnB.z(), 0);
-    btQuaternion qb1 = manifold.getBody1()->getWorldTransform().getRotation();
-    // un-rotate normal into body1 frame
-    qn = qb1.inverse() * qn * qb1;
-    vn(0) = qn.x();
-    vn(1) = qn.y();
-    vn(2) = qn.z();
-    vn = vn/vn.norm2();
-  }
-  else
-    copyBtVector3(point.m_normalWorldOnB, vn);
-
-  ContactR::updateContactPoints(va, vb, vn*(flip?-1:1));
 }
+
 void BulletR::display() const
 {
   std::cout << "BulletR display()" << std::endl;

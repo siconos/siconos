@@ -5,23 +5,19 @@ if(NOT WITH_PYTHON_WRAPPER)
   return()
 endif()
 
-find_package(SWIG 3.0 REQUIRED)
+if(WITH_DOXY2SWIG)
+  find_package(SWIG 4.0 REQUIRED)
+else()
+  find_package(SWIG 4.0)
+  if(NOT SWIG_FOUND)
+    find_package(SWIG 3.0 REQUIRED) # 4 is better but 3.0 is enough when swig -doxygen is not required.
+  endif()
+endif()
 include(${SWIG_USE_FILE})
-
-# Name of the generated Python package
-set(SICONOS_PYTHON_PACKAGE siconos CACHE INTERNAL "Name of the Siconos python package.")
-  
-# --------------- Python install setup ---------------
-# Set path for siconos-python installation (SICONOS_PYTHON_INSTALL_DIR)
-# and get pip install options (PIP_INSTALL_OPTIONS).
-include(PythonInstallSetup)
-set_python_install_path()
-  
+ 
 #  ----------- swig -----------
 
 # -- Swig  preprocessor def. common to all swig targets --
-# --> SWIG_DEFS
-
 # -- Flags for all swig call ---
 
 # get system architecture 
@@ -46,26 +42,21 @@ list(APPEND CMAKE_SWIG_FLAGS "-dirprot")
 # protected methods needed to the interface to compile.
 # - with "dirprot" swig will attemp to wrap all the public and protected methods at once.
 
+# Turn on wrapping of protected members for director classes
+if(WITH_DOXY2SWIG)
+  list(APPEND CMAKE_SWIG_FLAGS "-doxygen")
+  # Remove some swig -doxygen warnings during .h files parsing.
+  list(APPEND CMAKE_SWIG_FLAGS "-w560,566") 
+endif()
+
 # -dirvtable      - Generate a pseudo virtual table for directors for faster dispatch
 # - without "dirprot", swig wrap public methods and only the 
 # protected methods needed to the interface to compile.
 # - with "dirprot" swig will attemp to wrap all the public and protected methods at once.
-set(SWIG_DEFS "-dirprot;-dirvtable;-Wextra")
+list(APPEND CMAKE_SWIG_FLAGS "-dirvtable")
 
 list(REMOVE_DUPLICATES CMAKE_SWIG_FLAGS)
 set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS}" CACHE INTERNAL "Swig flags")
-
-# -- Options related to siconos components
-if(WITH_FCLIB)
-  set(SWIG_DEFS "${SWIG_DEFS};-DWITH_FCLIB")
-endif()
-  
-if(HAVE_SICONOS_IO)
-  set(SWIG_DEFS "${SWIG_DEFS};-DWITH_IO")
-  if(WITH_SERIALIZATION)
-    set(SWIG_DEFS "${SWIG_DEFS};-DWITH_SERIALIZATION")
-  endif()
-endif()
 
 # -- Swig files --
 
@@ -83,12 +74,6 @@ set(SICONOS_SWIG_BINARY_DIR ${CMAKE_BINARY_DIR}/wrap
 set(SICONOS_SWIG_INCLUDE_DIRS ${SICONOS_SWIG_SRC_DIRS} ${SICONOS_SWIG_ROOT_DIR} ${Python3_INCLUDE_DIRS}
   CACHE INTERNAL "Directories required for swig includes.")
 
-foreach(_dir ${SICONOS_SWIG_INCLUDE_DIRS})
-  set(SWIG_DEFS "-I${_dir};${SWIG_DEFS}")
-endforeach()
-
-set(SWIG_DEFS "${SWIG_DEFS}" CACHE INTERNAL "Swig extra definitions.")
-
 include_directories(${SICONOS_SWIG_INCLUDE_DIRS})
 
 if(WITH_TESTING)
@@ -105,13 +90,3 @@ if(WITH_TESTING)
   file(MAKE_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
 endif()
 
-# ====== Create (and setup) build/install target ======
-add_custom_target(python-install
-  COMMAND ${PYTHON_EXECUTABLE} -m pip install ${CMAKE_BINARY_DIR}/wrap ${PIP_INSTALL_OPTIONS}  --use-feature=in-tree-build
-  VERBATIM USES_TERMINAL
-  COMMAND_EXPAND_LISTS
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "build/install siconos package")
-file(WRITE ${CMAKE_BINARY_DIR}/wrap/libs/liblist "")
-
-# execute python-install when target install is called
-install(CODE "execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} python-install WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")

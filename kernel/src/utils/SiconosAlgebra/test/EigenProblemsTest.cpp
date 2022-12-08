@@ -101,7 +101,7 @@ void EigenProblemsTest::testGeev1()
   }
 
   // Check ...
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 1: ", norm_2(error) < 10 * std::numeric_limits< double >::epsilon(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 1: ", norm_2(error) < 12 * std::numeric_limits< double >::epsilon(), true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 2: ", (*A) == (*Aref), true);
   // Now compute only eigenvalues

@@ -19,8 +19,8 @@
 /** \file CircularDS.hpp
  */
 
-/** \class CircularDS
-    \brief Definition of a 2D circular shape - Inherits from LagrangianDS
+/**
+   Definition of a 2D circular shape - Inherits from LagrangianDS
 */
 
 
@@ -33,8 +33,6 @@
 class CircularDS : public LagrangianDS
 {
 protected:
-  /** serialization hooks
-  */
   ACCEPT_SERIALIZATION(CircularDS);
 
   double radius;

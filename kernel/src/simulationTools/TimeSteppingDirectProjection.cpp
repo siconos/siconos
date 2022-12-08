@@ -595,7 +595,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       else
         checkSolverOutputProjectOnConstraints(info, this);
 
-      updateInput();
+      updateAllInput();
       updateState();
       isNewtonConverge = newtonCheckConvergence(criterion);
       if(!isNewtonConverge && !info)

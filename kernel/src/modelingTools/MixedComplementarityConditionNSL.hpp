@@ -32,8 +32,7 @@
 class MixedComplementarityConditionNSL : public NonSmoothLaw
 {
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(MixedComplementarityConditionNSL);
 
   /** default constructor
@@ -43,6 +42,7 @@ private:
 
 public:
   /** basic constructor
+   *
    *  \param newSize size of the non smooth law
    *  \param equalitySize size of the equality relation
    */
@@ -57,6 +57,7 @@ public:
   inline void display()const override {};
 
   /** get the number of equality present in the MLCP
+   *
    *  \return an unsigned int
    */
   inline unsigned int equalitySize()

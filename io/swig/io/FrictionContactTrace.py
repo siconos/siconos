@@ -331,6 +331,7 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
             return 0
 
         self.updateMu()
+        self.updateMur()
 
         w_backup = self.w().copy()
         z_backup = self.z().copy()

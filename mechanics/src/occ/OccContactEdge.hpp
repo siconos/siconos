@@ -16,8 +16,6 @@ struct OccContactEdge : public OccContactShape
   unsigned int _index;
   SPC::TopoDS_Edge _edge;
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 
 };

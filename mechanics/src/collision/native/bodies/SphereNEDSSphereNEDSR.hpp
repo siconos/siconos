@@ -29,8 +29,7 @@ class SphereNEDSSphereNEDSR
     : public NewtonEuler3DR,
       public std::enable_shared_from_this<SphereNEDSSphereNEDSR> {
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(SphereNEDSSphereNEDSR);
 
   double r1, r2, r1pr2;
@@ -39,26 +38,26 @@ private:
 
 public:
   /** Constructor
-
-  \param r1 disk1 radius
-  \param r2 disk2 radius
-  */
+   *
+   *  \param r1 disk1 radius
+   *  \param r2 disk2 radius
+   */
   SphereNEDSSphereNEDSR(double r1, double r2);
 
   double distance(double, double, double, double, double, double, double,
                   double);
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   void computeh(double time, const BlockVector &q0, SiconosVector &y) override;
 
   // void computeJachq(double);
 
-  /** visitors hook
-   */
   ACCEPT_VISITORS();
 };
 #endif /* SphereNEDSSphereNEDSR_h */

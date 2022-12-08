@@ -4,7 +4,7 @@
 
 %include start.i
 // generated docstrings from doxygen xml output
-%include io-docstrings.i
+ //%include io-docstrings.i
 %{
 #include <SiconosKernel.hpp>
 %}

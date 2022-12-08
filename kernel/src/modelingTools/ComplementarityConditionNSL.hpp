@@ -28,8 +28,7 @@
  **/
 class ComplementarityConditionNSL : public NonSmoothLaw {
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(ComplementarityConditionNSL);
 
   /** default constructor
@@ -38,6 +37,7 @@ private:
 
 public:
   /** basic constructor
+   *
    *  \param size of the non smooth law
    */
   ComplementarityConditionNSL(unsigned int size);
@@ -49,8 +49,6 @@ public:
    */
   inline void display() const override{};
 
-  /** Visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 

@@ -17,8 +17,8 @@
 */
 
 /*! \file LuenbergerObserver.hpp
-  \brief Classical discrete-time Luenberger Observer
-  */
+  Classical discrete-time Luenberger Observer
+*/
 
 #ifndef LuenbergerObserver_H
 #define LuenbergerObserver_H
@@ -29,7 +29,7 @@
 class LuenbergerObserver : public Observer
 {
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(LuenbergerObserver);
 
   /** default constructor */
@@ -51,17 +51,19 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation, a ControlSensor and an initial estimate of the state.
-   * \param sensor the SP::ControlSensor that feed us with measurements
-   * \param xHat0 the initial guess for the state
+   *
+   *  \param sensor the SP::ControlSensor that feed us with measurements
+   *  \param xHat0 the initial guess for the state
    */
   LuenbergerObserver(SP::ControlSensor sensor, const SiconosVector& xHat0):
     Observer(LUENBERGER, sensor, xHat0), _pass(false) {}
 
   /** Constructor with all the data
-   * \param sensor the ControlSensor that feeds the Observer
-   * \param xHat0 the initial guess for the state
-   * \param C the observation matrix
-   * \param L the gain matrix
+   *
+   *  \param sensor the ControlSensor that feeds the Observer
+   *  \param xHat0 the initial guess for the state
+   *  \param C the observation matrix
+   *  \param L the gain matrix
    */
   LuenbergerObserver(SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SiconosMatrix C, SP::SiconosMatrix L):
     Observer(LUENBERGER, sensor, xHat0), _C(C), _L(L), _pass(false) {}
@@ -71,13 +73,15 @@ public:
   virtual void process();
 
   /** Initialization
-   * \param nsds current nonsmooth dynamical system
-   * \param s current simulation setup
+   *
+   *  \param nsds current nonsmooth dynamical system
+   *  \param s current simulation setup
    */
   virtual void initialize(const NonSmoothDynamicalSystem & nsds, const Simulation& s);
 
   /** Set the L matrix
-   * \param L the new L matrix
+   *  
+   *  \param L the new L matrix
    */
   inline void setLPtr(SP::SiconosMatrix L)
   {
@@ -85,7 +89,8 @@ public:
   };
 
   /** Set the C matrix
-   * \param C the new C matrix
+   *
+   *  \param C the new C matrix
    */
   inline void setCPtr(SP::SiconosMatrix C)
   {

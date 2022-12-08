@@ -110,23 +110,6 @@ function(configure_component_documentation COMPONENT)
   include(doc_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
-
-  # --- documentation ---
-  if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG)
-    # Update list of source directories to be taken
-    # into account by doxygen for the current component
-    # --> set CACHE var ${COMPONENT}_DOXYGEN_INPUTS
-    # Required by doxy2swig_docstrings and doxy2rst_sphinx.
-    update_doxygen_inputs(${COMPONENT})
-  endif()
-  
-  # xml files for python docstrings ...
-  # xml files are required to build docstrings target
-  # and so they must be built during cmake run.
-  if(WITH_PYTHON_WRAPPER)
-    include(doxy2swig_docstrings)
-    doxy2swig_docstrings(${COMPONENT})
-  endif()
   
   # update the main doxy file, without building the doc
   if(WITH_${COMPONENT}_DOCUMENTATION  OR WITH_SERIALIZATION)

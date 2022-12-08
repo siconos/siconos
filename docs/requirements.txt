@@ -3,7 +3,7 @@ lxml
 pytest
 matplotlib
 h5py
-sphinx<2.0
+sphinx
 sphinx-rtd-theme
 sphinxcontrib-bibtex
 sphinxcontrib-websupport

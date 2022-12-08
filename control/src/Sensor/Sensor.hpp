@@ -32,19 +32,9 @@
 
 #include "ControlTypeDef.hpp"
 #include "SiconosControlFwd.hpp"
-/** A map that links a std::string to a pointer to SiconosVector. */
-//typedef std::map<std::string, SP::SiconosVector> VectorMap;
 
-/** An iterator through a map that links a std::string to a pointer to SiconosVector. */
-//typedef VectorMap::iterator VectorMapIterator;
-
-/** A const iterator through a map that links a std::string to a pointer to SiconosVector. */
-//typedef VectorMap::const_iterator VectorMapConstIterator;
-
-/** The object used to store data in the Sensor. To each Event corresponds a Data */
-//typedef std::map<SP::Event, VectorMap>  DataSet;
-
-/** Sensor Base Class
+/**
+   Sensor Base Class
 
    Abstract class, interface to user-defined sensors.
 
@@ -53,7 +43,7 @@
    he needs to save.
 
    A Sensor handles a TimeDiscretisation, which defines the set of all
-   instants where the sensor must operate \n (i.e. each times where
+   instants where the sensor must operate (i.e. each times where
    capture() function will be called). An Event, inserted into the
    EventsManager of the Simulation, is linked to this
    TimeDiscretisation.
@@ -61,7 +51,7 @@
    Moreover, a Sensor is identified thanks to an id and a type (a
    number associated to the derived class type indeed).
 
-   \section BSensor Construction
+   Construction
 
    To build a Sensor it is necessary to use the factory. Inputs are a
    number which identify the derived class type and a
@@ -101,8 +91,7 @@
 class Sensor
 {
 protected:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(Sensor);
 
   /** type of the Sensor */
@@ -129,8 +118,9 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param type the type of the Sensor, which corresponds to the class type.
-   * \param ds the SP::DynamicalSystem we observe.
+   *
+   *  \param type the type of the Sensor, which corresponds to the class type.
+   *  \param ds the SP::DynamicalSystem we observe.
    */
   Sensor(unsigned int type, SP::DynamicalSystem ds);
 
@@ -139,6 +129,7 @@ public:
   virtual ~Sensor();
 
   /** set id of the Sensor
+   *
    *  \param newId the id of the Sensor
    */
   inline void setId(const std::string& newId)
@@ -147,6 +138,7 @@ public:
   };
 
   /** get id of the Sensor
+   *
    *  \return a std::string
    */
   inline const std::string getId() const
@@ -155,6 +147,7 @@ public:
   };
 
   /** get the type of the Sensor
+   *
    *  \return an int
    */
   inline unsigned int getType() const
@@ -163,6 +156,7 @@ public:
   };
 
   /** get the DynamicalSystem linked to this Sensor
+   *
    *  \return SP::DynamicalSystem
    */
   inline SP::DynamicalSystem getDS() const
@@ -171,19 +165,21 @@ public:
   };
 
   /** This is derived in child classes if they need to copy the TimeDiscretisation
-   * associated with this Sensor
-  *  \param td the TimeDiscretisation for this Sensor
-  */
+   *  associated with this Sensor
+   *
+   *  \param td the TimeDiscretisation for this Sensor
+   */
   virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
 
-  /** get all the data saved for this sensor
+  /* get all the data saved for this sensor
    *  \return a DataSet
    */
   //  inline const DataSet getData() const
   //  {return _data;};
 
   /** initialize sensor data.
-   * \param nsds the Model
+   *
+   *  \param nsds the Model
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds) {};
 

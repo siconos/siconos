@@ -33,8 +33,7 @@ class SiconosBodies
 {
 
 protected:
-  /** serialization hooks
-  */
+
   ACCEPT_SERIALIZATION(SiconosBodies);
 
 

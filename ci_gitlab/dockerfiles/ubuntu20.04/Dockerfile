@@ -9,6 +9,7 @@ RUN apt update  && apt upgrade -y &&  apt install -y -qq \
         libfreetype6-dev \
         freeglut3-dev \
         swig \
+ 	libxrender1 \
         libpython3-dev \
         python3 \
         python3-pip \
@@ -20,7 +21,7 @@ RUN apt update  && apt upgrade -y &&  apt install -y -qq \
         python3-h5py && apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 # RUN sh /home/install_fclib.sh
 RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install vtk
+RUN python3 -m pip install -U vtk
 WORKDIR /home
 COPY ci_gitlab/dockerfiles/install_bullet.sh .
 ENV CI_PROJECT_DIR /home

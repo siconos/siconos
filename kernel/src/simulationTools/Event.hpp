@@ -39,36 +39,35 @@ extern "C" double rint(double x);
 // it has to be greater than DBL_EPSILON ...
 const double DEFAULT_TICK = 1e-16;
 
-/** Abstract class that represents generic time events.
- *
- *  This base class simply records the time at which the event will take place. A pure virtual function named process
- *  will be invoked to execute the event.
- *  The time is represented with a mpz_t, from gmp library. See http://gmplib.org.
- *
- * Derived classes:
- * - TimeDiscretisationEvent: events that corresponds to user-defined time-discretisation points
- * - NonSmoothEvent: specific events, detected during simulation, when constraints are violated (thanks to roots-finding algorithm)
- * - SensorEvent: event dedicated to data capture through user-defined sensors.
- *
- *
- * Existing types of events:
- *  0 -> undef
- *  1 -> TimeDiscretisation
- *  2 -> NonSmooth
- *  3 -> Sensor
- *  4 -> Observer
- *  5 -> Actuator
- */
+/** 
+    Abstract class that represents generic time events.
+    
+    This base class simply records the time at which the event will take place. A pure virtual function named process
+    will be invoked to execute the event.
+    The time is represented with a mpz_t, from gmp library. See http://gmplib.org.
+    
+    Derived classes:
+    - TimeDiscretisationEvent: events that corresponds to user-defined time-discretisation points
+    - NonSmoothEvent: specific events, detected during simulation, when constraints are violated (thanks to roots-finding algorithm)
+    - SensorEvent: event dedicated to data capture through user-defined sensors.
+ 
+    Existing types of events:
+    0 -> undef
+    1 -> TimeDiscretisation
+    2 -> NonSmooth
+    3 -> Sensor
+    4 -> Observer
+    5 -> Actuator
+*/
 
 class Event
 {
 protected:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(Event);
 
   /** Date of the present event,
-   *  represented with a mpz_t */
+       represented with a mpz_t */
   mpz_t _timeOfEvent;
 
   /** Number of ticks corresponding to a timestep */
@@ -115,6 +114,7 @@ protected:
 public:
 
   /** constructor with time value and type as input
+   *
    *  \param time the starting type (a double)
    *  \param newType the Event type (an int)
    *  \param reschedule set this to true if the event has to be rescheduled
@@ -126,6 +126,7 @@ public:
   virtual ~Event();
 
   /** get tick value
+   *
    *  \return a double
    */
   inline double getTick() const
@@ -134,11 +135,13 @@ public:
   };
 
   /** set tick value
+   *
    *  \param newTick the new tick value
    */
   static void setTick(double newTick);
 
   /** get the time of the present event (mpz_t format)
+   *
    *  \return a mpz_t
    */
   inline const mpz_t * getTimeOfEvent() const
@@ -147,6 +150,7 @@ public:
   };
 
   /** get the time of the present event (double format)
+   *
    *  \return a double
    */
   inline double getDoubleTimeOfEvent() const
@@ -162,6 +166,7 @@ public:
   }
 
   /** set the time of the present event (double format)
+   *
    *  \param time the new time
    */
   inline void setTime(double time)
@@ -171,6 +176,7 @@ public:
   };
 
   /** get a type of the present event
+   *
    *  \return an std::string
    */
   inline int getType() const
@@ -179,6 +185,7 @@ public:
   };
 
   /** set a new type for the present Event
+   *
    *  \param newType the new Event type
    */
   inline void setType(int newType)
@@ -187,17 +194,20 @@ public:
   };
 
   /** Set the current step k
-   * \param newK the new value of _k
+   *
+   *  \param newK the new value of _k
    */
   inline void setK(unsigned int newK) { _k = newK; };
 
   /** Set the TimeDiscretisation
-   * \param td a TimeDiscretisation for this Event
+   *
+   *  \param td a TimeDiscretisation for this Event
    */
   void setTimeDiscretisation(SP::TimeDiscretisation td);
 
   /** Get the TimeDiscretisation
-   * \return the TimeDiscretisation used in this Event
+   *
+   *  \return the TimeDiscretisation used in this Event
    */
   inline SP::TimeDiscretisation getTimeDiscretisation() const { return _td; };
 
@@ -206,15 +216,17 @@ public:
   void display() const ;
 
   /** virtual function which actions depends on event type
-   * \param sim the simulation that owns this Event (through the EventsManager)
+   *
+   *  \param sim the simulation that owns this Event (through the EventsManager)
    */
   virtual void process(Simulation& sim) = 0;
 
   /** virtual function which actions depends on event type.
-   * The generic implementation present in this object is to increment the
-   * TimeDiscretisation and to chamge the time of the current Event 
-   \param k meaning depends on the type of event. See derived class.
-  */
+   *  The generic implementation present in this object is to increment the
+   *  TimeDiscretisation and to chamge the time of the current Event 
+   *
+   *  \param k meaning depends on the type of event. See derived class.
+   */
   virtual void update(unsigned int k = 0);
 
   inline bool reschedule() const { return _reschedule; };

@@ -755,106 +755,16 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   DEBUG_BEGIN("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
-  // At most 2 DS are linked by an Interaction
-  SP::DynamicalSystem ds1;
-  SP::DynamicalSystem ds2;
-  // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex) ---
-  if(indexSet->properties(vertex_inter).source != indexSet->properties(vertex_inter).target)
-  {
-    DEBUG_PRINT("a two DS Interaction\n");
-    ds1 = indexSet->properties(vertex_inter).source;
-    ds2 = indexSet->properties(vertex_inter).target;
-  }
-  else
-  {
-    DEBUG_PRINT("a single DS Interaction\n");
-    ds1 = indexSet->properties(vertex_inter).source;
-    ds2 = ds1;
-    // \warning this looks like some debug code, but it gets executed even with NDEBUG.
-    // may be compiler does something smarter, but still it should be rewritten. --xhub
-    InteractionsGraph::OEIterator oei, oeiend;
-    for(std::tie(oei, oeiend) = indexSet->out_edges(vertex_inter);
-        oei != oeiend; ++oei)
-    {
-      // note : at most 4 edges
-      ds2 = indexSet->bundle(*oei);
-      if(ds2 != ds1)
-      {
-        assert(false);
-        break;
-      }
-    }
-  }
-  assert(ds1);
-  assert(ds2);
-
-  DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
-  OneStepIntegrator& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
-  OneStepIntegrator& osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
-
-  OSI::TYPES osi1Type = osi1.getType();
-  OSI::TYPES osi2Type = osi2.getType();
-
-
-
+  OneStepIntegrator& osi1 = *indexSet->properties(vertex_inter).osi1;
+  OneStepIntegrator& osi2 = *indexSet->properties(vertex_inter).osi2;
 
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
-  // We assume that the osi of ds1 (osi1) is integrating the interaction
-  if((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
-      (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
-  {
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[EulerMoreauOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if(osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI)
-  {
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI)||
-          (osi1Type == OSI::MOREAUDIRECTPROJECTIONOSI && osi2Type == OSI::MOREAUDIRECTPROJECTIONOSI))
-  {
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if((osi1Type == OSI::MOREAUJEANBILBAOOSI && osi2Type == OSI::MOREAUJEANBILBAOOSI))
-  {
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if((osi1Type == OSI::LSODAROSI && osi2Type == OSI::LSODAROSI))
-  {
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[LsodarOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if((osi1Type == OSI::NEWMARKALPHAOSI && osi2Type == OSI::NEWMARKALPHAOSI))
-  {
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if((osi1Type == OSI::SCHATZMANPAOLIOSI && osi2Type == OSI::SCHATZMANPAOLIOSI))
-  {
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if((osi1Type == OSI::D1MINUSLINEAROSI && osi2Type == OSI::D1MINUSLINEAROSI))
-  {
-    osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
-    setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else
-    THROW_EXCEPTION("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
+  osi1.computeFreeOutput(vertex_inter, this);
+  SiconosVector& osnsp_rhs = osi1.osnsp_rhs(vertex_inter, *indexSet);
+  setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+
   DEBUG_EXPR(_q->display());
   DEBUG_END("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
 }
