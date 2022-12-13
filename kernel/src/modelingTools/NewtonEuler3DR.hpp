@@ -43,12 +43,8 @@ class NewtonEuler3DR : public NewtonEuler1DR {
   void FC3DcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1,
                                      std::shared_ptr<siconos::algebra::SiconosVector> q2);
 
- protected:
  public:
-  NewtonEuler3DR() = default;
-
-  /** destructor
-   */
+  /** destructor */
   virtual ~NewtonEuler3DR() noexcept = default;
 
   /** initialize components specific to derived classes.

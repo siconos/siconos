@@ -14,53 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
-
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
-#include "siconos_debug.h"
+ */
 
 #include "Bullet2dR.hpp"
-#include <RigidBody2dDS.hpp>
-#include <Interaction.hpp>
 
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
-#pragma clang diagnostic ignored "-Woverloaded-virtual"
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-#endif
-
+#include "RigidBody2dDS.hpp"
+#include "SiconosVector.hpp"
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
-#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
-
-#include <btBulletCollisionCommon.h>
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic pop
-#endif
 
 #include <boost/math/quaternion.hpp>
-//#include "BulletSiconosCommon.hpp"
 
+#include "siconos_debug.h"
 
-Bullet2dR::Bullet2dR()
-  : Contact2dR()
+void siconos::collision::bullet::Bullet2dR::updateContactPointsFromManifoldPoint(
+    const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
+    double scaling, std::shared_ptr<siconos::collision::RigidBody2dDS> ds1,
+    std::shared_ptr<siconos::collision::RigidBody2dDS> ds2)
 {
-}
-
-void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-    const btManifoldPoint& point,
-    bool flip, double scaling,
-    SP::RigidBody2dDS ds1,
-    SP::RigidBody2dDS ds2)
-{
-  DEBUG_BEGIN("Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
+  DEBUG_BEGIN(
+      "siconos::collision::bullet::Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
   // Get new world positions of contact points and calculate relative
   // to ds1 and ds2
 
@@ -76,11 +50,8 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   DEBUG_PRINTF("point.m_normalWorldOnB.y() = %8.5e\t", point.m_normalWorldOnB.y());
   DEBUG_PRINTF("point.m_normalWorldOnB.z() = %8.5e\n", point.m_normalWorldOnB.z());
 
-
-
   // ::boost::math::quaternion<double> rq1, rq2, posa;
   // ::boost::math::quaternion<double> pq1, pq2, posb;
-
 
   // /* Compute quaternion representation of the position of ds1
   //    to perform the rotation  and the orientiation */
@@ -91,14 +62,12 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   // DEBUG_EXPR(display_quat(pq1););
   // DEBUG_EXPR(display_quat(rq1););
 
-
   // if(ds2)
   // {
   //   DEBUG_EXPR(ds2->q()->display(););
   //   copyQuatPos2d(*ds2->q(), pq2);
   //   copyQuatRot2d(*ds2->q(), rq2);
   // }
-
 
   // /* Compute a quaternion representation of the position of the contact points
   //  * to prepare rotations
@@ -107,7 +76,6 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   //  */
   // copyQuatPos2d(point.getPositionWorldOnA() / scaling, posa);
   // copyQuatPos2d(point.getPositionWorldOnB() / scaling, posb);
-
 
   // if(flip)
   // {
@@ -128,7 +96,7 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   //   vb : position of the contact point in the body-fixed of B
   // */
 
-  // SiconosVector va(2), vb(2);
+  // siconos::algebra::SiconosVector va(2), vb(2);
   // if(flip)
   // {
   //   /* Rotate the relative position of the contact point */
@@ -154,12 +122,11 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   //   }
   // }
 
-
   // DEBUG_PRINTF("point.m_normalWorldOnB.x() = %8.5e\t", point.m_normalWorldOnB.x());
   // DEBUG_PRINTF("point.m_normalWorldOnB.y() = %8.5e\t", point.m_normalWorldOnB.y());
   // DEBUG_PRINTF("point.m_normalWorldOnB.z() = %8.5e\n", point.m_normalWorldOnB.z());
 
-  // SiconosVector vn(3);
+  // siconos::algebra::SiconosVector vn(3);
   // // Get new normal
   // if(ds2)
   // {
@@ -183,33 +150,30 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   // DEBUG_EXPR(vn.display(););
   // Contact2dR::updateContactPoints(va, vb, vn*(flip?-1:1));
 
-  //SiconosVector va(2), vb(2), vn(2);
+  // siconos::algebra::SiconosVector va(2), vb(2), vn(2);
 
-  const btVector3& pt_A= point.getPositionWorldOnA()/scaling;
-  const btVector3& pt_B= point.getPositionWorldOnB()/scaling;
+  const auto& pt_A = point.getPositionWorldOnA() / scaling;
+  const auto& pt_B = point.getPositionWorldOnB() / scaling;
 
-  if(flip)
-  {
+  if (flip) {
     (*_Pc1)(0) = pt_B.x();
     (*_Pc1)(1) = pt_B.y();
     (*_Pc2)(0) = pt_A.x();
     (*_Pc2)(1) = pt_A.y();
   }
-  else
-  {
+  else {
     (*_Pc1)(0) = pt_A.x();
     (*_Pc1)(1) = pt_A.y();
     (*_Pc2)(0) = pt_B.x();
     (*_Pc2)(1) = pt_B.y();
   }
 
-  const btVector3& normal = point.m_normalWorldOnB*(flip?-1:1);
-  (*_Nc)(0) =  normal.x();
-  (*_Nc)(1) =  normal.y();
+  const auto& normal = point.m_normalWorldOnB * (flip ? -1 : 1);
+  (*_Nc)(0) = normal.x();
+  (*_Nc)(1) = normal.y();
 
+  //  Contact2dR::updateContactPointsInAbsoluteFrame(va, vb, vn*(flip?-1:1));
 
-//  Contact2dR::updateContactPointsInAbsoluteFrame(va, vb, vn*(flip?-1:1));
-
-
-  DEBUG_END("Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
+  DEBUG_END(
+      "siconos::collision::bullet::Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
 }

@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//#define DEBUG_NOCOLOR
-//#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_BEGIN_END_ONLY
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "RotationQuaternion.hpp"
 
 #include <boost/math/quaternion.hpp>
@@ -29,16 +29,15 @@
 
 void siconos::geometry::computeRotationMatrix(
     double q0, double q1, double q2, double q3,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix)
-{
+    std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix) {
   /* Brute force version by multiplication of quaternion
    */
-  // ::boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
-  // ::boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
-  // ::boost::math::quaternion<double>    quatx(0, 1, 0, 0);
-  // ::boost::math::quaternion<double>    quaty(0, 0, 1, 0);
-  // ::boost::math::quaternion<double>    quatz(0, 0, 0, 1);
-  // ::boost::math::quaternion<double>    quatBuff;
+  // boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
+  // boost::math::quaternion<double>    quatcQ(q0, -q1, -q2, -q3);
+  // boost::math::quaternion<double>    quatx(0, 1, 0, 0);
+  // boost::math::quaternion<double>    quaty(0, 0, 1, 0);
+  // boost::math::quaternion<double>    quatz(0, 0, 0, 1);
+  // boost::math::quaternion<double>    quatBuff;
   // quatBuff = quatQ * quatx * quatcQ;
   // rotationMatrix->setValue(0, 0, quatBuff.R_component_2());
   // rotationMatrix->setValue(1, 0, quatBuff.R_component_3());
@@ -67,8 +66,7 @@ void siconos::geometry::computeRotationMatrix(
 }
 
 void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double q3,
-                                         siconos::algebra::SiconosVector& v)
-{
+                                         siconos::algebra::SiconosVector& v) {
   DEBUG_BEGIN(
       "::quaternionRotate(double q0, double q1, double q2, double q3, "
       "siconos::algebra::SiconosVector& v )\n");
@@ -119,14 +117,12 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
 }
 
 void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double q3,
-                                         std::shared_ptr<siconos::algebra::SiconosVector> v)
-{
+                                         std::shared_ptr<siconos::algebra::SiconosVector> v) {
   siconos::geometry::quaternionRotate(q0, q1, q2, q3, *v);
 }
 
 void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double q3,
-                                         std::shared_ptr<siconos::algebra::SimpleMatrix> m)
-{
+                                         std::shared_ptr<siconos::algebra::SimpleMatrix> m) {
   DEBUG_BEGIN(
       "::quaternionRotate(double q0, double q1, double q2, double q3, "
       "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
@@ -164,8 +160,7 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
 }
 
 void siconos::geometry::quaternionRotate(std::shared_ptr<siconos::algebra::SiconosVector> q,
-                                         std::shared_ptr<siconos::algebra::SiconosVector> v)
-{
+                                         std::shared_ptr<siconos::algebra::SiconosVector> v) {
   DEBUG_BEGIN(
       "::quaternionRotate(std::shared_ptr<siconos::algebra::SiconosVector> q, "
       "std::shared_ptr<siconos::algebra::SiconosVector> v )\n");
@@ -177,8 +172,7 @@ void siconos::geometry::quaternionRotate(std::shared_ptr<siconos::algebra::Sicon
 }
 
 void siconos::geometry::quaternionRotate(std::shared_ptr<siconos::algebra::SiconosVector> q,
-                                         std::shared_ptr<siconos::algebra::SimpleMatrix> m)
-{
+                                         std::shared_ptr<siconos::algebra::SimpleMatrix> m) {
   DEBUG_BEGIN(
       "::quaternionRotate(std::shared_ptr<siconos::algebra::SiconosVector> q, "
       "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
@@ -190,8 +184,7 @@ void siconos::geometry::quaternionRotate(std::shared_ptr<siconos::algebra::Sicon
 }
 
 void siconos::geometry::changeFrameAbsToBody(const siconos::algebra::SiconosVector& q,
-                                             siconos::algebra::SiconosVector& v)
-{
+                                             siconos::algebra::SiconosVector& v) {
   DEBUG_BEGIN(
       "::changeFrameAbsToBody(const siconos::algebra::SiconosVector& q, "
       "siconos::algebra::SiconosVector& v )\n");
@@ -203,8 +196,7 @@ void siconos::geometry::changeFrameAbsToBody(const siconos::algebra::SiconosVect
 }
 void siconos::geometry::changeFrameAbsToBody(
     std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SiconosVector> v)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> v) {
   DEBUG_BEGIN(
       "::changeFrameAbsToBody(std::shared_ptr<siconos::algebra::SiconosVector> q, "
       "std::shared_ptr<siconos::algebra::SiconosVector> v )\n");
@@ -216,8 +208,7 @@ void siconos::geometry::changeFrameAbsToBody(
 }
 void siconos::geometry::changeFrameAbsToBody(
     std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> m)
-{
+    std::shared_ptr<siconos::algebra::SimpleMatrix> m) {
   DEBUG_BEGIN(
       "::changeFrameAbsToBody(std::shared_ptr<siconos::algebra::SiconosVector> q, "
       "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
@@ -229,8 +220,7 @@ void siconos::geometry::changeFrameAbsToBody(
 }
 
 void siconos::geometry::changeFrameBodyToAbs(const siconos::algebra::SiconosVector& q,
-                                             siconos::algebra::SiconosVector& v)
-{
+                                             siconos::algebra::SiconosVector& v) {
   DEBUG_BEGIN(
       "::changeFrameBodyToAbs(const siconos::algebra::SiconosVector& q, "
       "siconos::algebra::SiconosVector& v )\n");
@@ -242,8 +232,7 @@ void siconos::geometry::changeFrameBodyToAbs(const siconos::algebra::SiconosVect
 }
 void siconos::geometry::changeFrameBodyToAbs(
     std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SiconosVector> v)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> v) {
   DEBUG_BEGIN(
       "::changeFrameBodyToAbs(std::shared_ptr<siconos::algebra::SiconosVector> q, "
       "std::shared_ptr<siconos::algebra::SiconosVector> v )\n");
@@ -255,8 +244,7 @@ void siconos::geometry::changeFrameBodyToAbs(
 }
 void siconos::geometry::changeFrameBodyToAbs(
     std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> m)
-{
+    std::shared_ptr<siconos::algebra::SimpleMatrix> m) {
   DEBUG_BEGIN(
       "::changeFrameBodyToAbs(std::shared_ptr<siconos::algebra::SiconosVector> q, "
       "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
@@ -269,23 +257,20 @@ void siconos::geometry::changeFrameBodyToAbs(
 
 void siconos::geometry::computeRotationMatrix(
     std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix)
-{
+    std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q->getValue(3), q->getValue(4), q->getValue(5),
                                            q->getValue(6), rotationMatrix);
 }
 void siconos::geometry::computeRotationMatrixTransposed(
     std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix)
-{
+    std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q->getValue(3), -q->getValue(4), -q->getValue(5),
                                            -q->getValue(6), rotationMatrix);
 }
 
 double siconos::geometry::axisAngleFromQuaternion(
     double q0, double q1, double q2, double q3,
-    std::shared_ptr<siconos::algebra::SiconosVector> axis)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> axis) {
   DEBUG_BEGIN(
       "axisAngleFromQuaternion(double q0, double q1, double q2, double q3, "
       "std::shared_ptr<siconos::algebra::SiconosVector> axis )\n");
@@ -296,8 +281,7 @@ double siconos::geometry::axisAngleFromQuaternion(
     axis->setValue(0, q1 / f);
     axis->setValue(1, q2 / f);
     axis->setValue(2, q3 / f);
-  }
-  else {
+  } else {
     axis->zero();
   }
   DEBUG_PRINTF("angle= %12.8e\n", angle);
@@ -310,8 +294,7 @@ double siconos::geometry::axisAngleFromQuaternion(
 
 double siconos::geometry::axisAngleFromConfiguration(
     std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SiconosVector> axis)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> axis) {
   double angle = siconos::geometry::axisAngleFromQuaternion(
       q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6), axis);
   return angle;
@@ -319,8 +302,7 @@ double siconos::geometry::axisAngleFromConfiguration(
 
 void siconos::geometry::rotationVectorFromQuaternion(
     double q0, double q1, double q2, double q3,
-    std::shared_ptr<siconos::algebra::SiconosVector> rotationVector)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> rotationVector) {
   DEBUG_BEGIN(
       "rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, "
       "std::shared_ptr<siconos::algebra::SiconosVector> rotationVector )\n");
@@ -335,8 +317,7 @@ void siconos::geometry::rotationVectorFromQuaternion(
     rotationVector->setValue(0, 0.0);
     rotationVector->setValue(1, 0.0);
     rotationVector->setValue(2, 0.0);
-  }
-  else {
+  } else {
     *rotationVector *= 2.0 * asin(norm_v) / norm_v;
   }
   DEBUG_EXPR(rotationVector->display(););
@@ -347,37 +328,32 @@ void siconos::geometry::rotationVectorFromQuaternion(
 
 void siconos::geometry::rotationVectorFromConfiguration(
     std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SiconosVector> rotationVector)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> rotationVector) {
   siconos::geometry::rotationVectorFromQuaternion(
       q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6), rotationVector);
 }
 
 void siconos::geometry::quaternionFromAxisAngle(
     std::shared_ptr<siconos::algebra::SiconosVector> axis, double angle,
-    std::shared_ptr<siconos::algebra::SiconosVector> q)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> q) {
   q->setValue(3, cos(angle / 2.0));
   q->setValue(4, axis->getValue(0) * sin(angle * 0.5));
   q->setValue(5, axis->getValue(1) * sin(angle * 0.5));
   q->setValue(6, axis->getValue(2) * sin(angle * 0.5));
 }
 
-double siconos::geometry::sin_x(double x)
-{
+double siconos::geometry::sin_x(double x) {
   if (std::abs(x) <= 1e-3) {
     return 1.0 + x * x / 3.0 + pow(x, 4) * 2.0 / 15.0 + pow(x, 6) * 17.0 / 315.0 +
            pow(x, 8) * 62.0 / 2835.0;
-  }
-  else {
+  } else {
     return sin(x) / x;
   }
 }
 
 void siconos::geometry::quaternionFromRotationVector(
     std::shared_ptr<siconos::algebra::SiconosVector> rotationVector,
-    std::shared_ptr<siconos::algebra::SiconosVector> q)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> q) {
   double angle = sqrt(rotationVector->getValue(0) * rotationVector->getValue(0) +
                       rotationVector->getValue(1) * rotationVector->getValue(1) +
                       rotationVector->getValue(2) * rotationVector->getValue(2));
@@ -390,15 +366,13 @@ void siconos::geometry::quaternionFromRotationVector(
   q->setValue(6, rotationVector->getValue(2) * f);
 }
 
-double siconos::geometry::quaternionNorm(const siconos::algebra::SiconosVector& q)
-{
+double siconos::geometry::quaternionNorm(const siconos::algebra::SiconosVector& q) {
   double normq = sqrt(q.getValue(3) * q.getValue(3) + q.getValue(4) * q.getValue(4) +
                       q.getValue(5) * q.getValue(5) + q.getValue(6) * q.getValue(6));
   return normq;
 }
 
-void siconos::geometry::normalizeq(std::shared_ptr<siconos::algebra::SiconosVector> q)
-{
+void siconos::geometry::normalizeq(std::shared_ptr<siconos::algebra::SiconosVector> q) {
   double normq = sqrt(q->getValue(3) * q->getValue(3) + q->getValue(4) * q->getValue(4) +
                       q->getValue(5) * q->getValue(5) + q->getValue(6) * q->getValue(6));
   assert(normq > 0);
@@ -409,8 +383,7 @@ void siconos::geometry::normalizeq(std::shared_ptr<siconos::algebra::SiconosVect
   q->setValue(6, q->getValue(6) * normq);
 }
 
-void siconos::geometry::normalizeq(siconos::algebra::SiconosVector& q)
-{
+void siconos::geometry::normalizeq(siconos::algebra::SiconosVector& q) {
   double normq = sqrt(q.getValue(3) * q.getValue(3) + q.getValue(4) * q.getValue(4) +
                       q.getValue(5) * q.getValue(5) + q.getValue(6) * q.getValue(6));
   assert(normq > 0);
@@ -422,8 +395,7 @@ void siconos::geometry::normalizeq(siconos::algebra::SiconosVector& q)
 }
 
 void siconos::geometry::quaternionFromTwistVector(siconos::algebra::SiconosVector& twist,
-                                                  siconos::algebra::SiconosVector& q)
-{
+                                                  siconos::algebra::SiconosVector& q) {
   assert(twist.size() == 6);
   assert(q.size() == 7);
   double angle =
@@ -439,8 +411,7 @@ void siconos::geometry::quaternionFromTwistVector(siconos::algebra::SiconosVecto
 }
 void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVector& a,
                                                siconos::algebra::SiconosVector& b,
-                                               siconos::algebra::SiconosVector& ab)
-{
+                                               siconos::algebra::SiconosVector& ab) {
   assert(a.size() == 7);
   assert(b.size() == 7);
   assert(ab.size() == 7);
@@ -451,11 +422,11 @@ void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVe
   ab.setValue(2, a.getValue(2) + b.getValue(2));
 
   // For the quaternion that encodes rotation, the composition law is the quaternion product.
-  ::boost::math::quaternion<double> quat_a(a.getValue(3), a.getValue(4), a.getValue(5),
-                                           a.getValue(6));
-  ::boost::math::quaternion<double> quat_b(b.getValue(3), b.getValue(4), b.getValue(5),
-                                           b.getValue(6));
-  ::boost::math::quaternion<double> quat_ab = quat_a * quat_b;
+  boost::math::quaternion<double> quat_a(a.getValue(3), a.getValue(4), a.getValue(5),
+                                         a.getValue(6));
+  boost::math::quaternion<double> quat_b(b.getValue(3), b.getValue(4), b.getValue(5),
+                                         b.getValue(6));
+  boost::math::quaternion<double> quat_ab = quat_a * quat_b;
   ab.setValue(3, quat_ab.R_component_1());
   ab.setValue(4, quat_ab.R_component_2());
   ab.setValue(5, quat_ab.R_component_3());
@@ -463,8 +434,7 @@ void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVe
 }
 
 void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVector& a,
-                                               siconos::algebra::SiconosVector& b)
-{
+                                               siconos::algebra::SiconosVector& b) {
   assert(a.size() == 7);
   assert(b.size() == 7);
 
@@ -474,14 +444,63 @@ void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVe
   b.setValue(2, a.getValue(2) + b.getValue(2));
 
   // For the quaternion that encodes rotation, the composition law is the quaternion product.
-  ::boost::math::quaternion<double> quat_a(a.getValue(3), a.getValue(4), a.getValue(5),
-                                           a.getValue(6));
-  ::boost::math::quaternion<double> quat_b(b.getValue(3), b.getValue(4), b.getValue(5),
-                                           b.getValue(6));
-  ::boost::math::quaternion<double> quat_ab = quat_a * quat_b;
+  boost::math::quaternion<double> quat_a(a.getValue(3), a.getValue(4), a.getValue(5),
+                                         a.getValue(6));
+  boost::math::quaternion<double> quat_b(b.getValue(3), b.getValue(4), b.getValue(5),
+                                         b.getValue(6));
+  boost::math::quaternion<double> quat_ab = quat_a * quat_b;
   b.setValue(3, quat_ab.R_component_1());
   b.setValue(4, quat_ab.R_component_2());
   b.setValue(5, quat_ab.R_component_3());
   b.setValue(6, quat_ab.R_component_4());
   // normalizeq(b);
+}
+
+void siconos::geometry::copyQuatRot(const siconos::algebra::SiconosVector& from,
+                                    boost::math::quaternion<double>& to) {
+  to = boost::math::quaternion<double>{from(3), from(4), from(5), from(6)};
+}
+
+void siconos::geometry::copyQuatPos(const boost::math::quaternion<double>& from,
+                                    siconos::algebra::SiconosVector& to) {
+  to(0) = from.R_component_2();
+  to(1) = from.R_component_3();
+  to(2) = from.R_component_4();
+}
+
+void siconos::geometry::copyQuatPos(const siconos::algebra::SiconosVector& from,
+                                    boost::math::quaternion<double>& to) {
+  to = boost::math::quaternion<double>{0, from(0), from(1), from(2)};
+}
+
+void siconos::geometry::copyQuatRot2d(const siconos::algebra::SiconosVector& from,
+                                      boost::math::quaternion<double>& to) {
+  double half_angle = from(2) / 2.0;
+
+  to = boost::math::quaternion<double>{cos(half_angle), 0.0, 0.0, sin(half_angle)};
+}
+
+void siconos::geometry::copyQuatPos2d(const boost::math::quaternion<double>& from,
+                                      siconos::algebra::SiconosVector& to) {
+  to(0) = from.R_component_2();
+  to(1) = from.R_component_3();
+}
+
+void siconos::geometry::copyQuatPos2d(const siconos::algebra::SiconosVector& from,
+                                      boost::math::quaternion<double>& to) {
+  to = boost::math::quaternion<double>{0, from(0), from(1), 0.0};
+}
+
+boost::math::quaternion<double> siconos::geometry::rotquat(
+    const std::shared_ptr<siconos::algebra::SiconosVector>& v) {
+  if (v)
+    return boost::math::quaternion<double>(v->getValue(3), v->getValue(4), v->getValue(5),
+                                           v->getValue(6));
+  else
+    return boost::math::quaternion<double>(1, 0, 0, 0);
+}
+
+boost::math::quaternion<double> siconos::geometry::posquat(
+    const std::shared_ptr<siconos::algebra::SiconosVector>& v) {
+  return boost::math::quaternion<double>{0, v->getValue(0), v->getValue(1), v->getValue(2)};
 }

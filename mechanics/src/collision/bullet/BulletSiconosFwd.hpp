@@ -53,7 +53,7 @@ DEFINE_SPTR(btConvexShape);
 
 DEFINE_SPTR(btCollisionObject);
 class btCollisionObject;
-TYPEDEF_SAPTR(btCollisionObject)
+ TYPEDEF_SAPTR(btCollisionObject)
 
 DEFINE_SPTR(btCollisionObjectWrapper);
 

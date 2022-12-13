@@ -14,51 +14,49 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file PivotJointR.hpp
-*/
+ */
 #ifndef PivotJointRELATION_H
 #define PivotJointRELATION_H
 
 #include "KneeJointR.hpp"
 
+namespace siconos::joints {
 /**
-   This class implements a pivots joint between one or two Newton/Euler Dynamical system. - Inherits from KneeJointR
+   This class implements a pivots joint between one or two Newton/Euler Dynamical system. -
+   Inherits from KneeJointR
 */
-class PivotJointR : public KneeJointR
-{
-protected:
-
+class PivotJointR : public KneeJointR {
+ protected:
   ACCEPT_SERIALIZATION(PivotJointR);
 
   /*Axis coordonates*/
-  SP::SiconosVector _A;
-  double _A1x, _A1y, _A1z;
-  double _A2x, _A2y, _A2z;
+  std::shared_ptr<siconos::algebra::SiconosVector> _A{nullptr};
+  double _A1x{0.}, _A1y{0.}, _A1z{0.};
+  double _A2x{0.}, _A2y{0.}, _A2z{0.};
 
   /*Initial conditions*/
-  double _cq2q101, _cq2q102, _cq2q103, _cq2q104;
-  double _initial_AscalA, _initial_AscalA1, _initial_AscalA2;
+  double _cq2q101{0.}, _cq2q102{0.}, _cq2q103{0.}, _cq2q104{0.};
+  double _initial_AscalA{0.}, _initial_AscalA1{0.}, _initial_AscalA2{0.};
 
   /** Cumulative number of twists around the joint relative to initial
    * angular difference. */
-  int _twistCount;    // TODO: Should be in a graph work vector?
-  int _previousAngle; // Needed to track _twistCount, TODO: work vector?
+  int _twistCount{0};     // TODO: Should be in a graph work vector?
+  int _previousAngle{0};  // Needed to track _twistCount, TODO: work vector?
 
   void buildA1A2();
 
-  virtual void Jd1d2(double X1, double Y1, double Z1,
-                     double q10, double q11, double q12, double q13,
-                     double X2, double Y2, double Z2,
-                     double q20, double q21, double q22, double q23);
+  virtual void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12,
+                     double q13, double X2, double Y2, double Z2, double q20, double q21,
+                     double q22, double q23) override;
 
-  virtual void Jd1(double X1, double Y1, double Z1,
-                   double q10, double q11, double q12, double q13);
+  virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12,
+                   double q13) override;
 
-  void rot2to1(double q10, double q11, double q12, double q13,
-               double q20, double q21, double q22, double q23,
-               double *q2to1w, double *q2to1x,
-               double *q2to1y, double *q2to1z);
+  void rot2to1(double q10, double q11, double q12, double q13, double q20, double q21,
+               double q22, double q23, double* q2to1w, double* q2to1x, double* q2to1y,
+               double* q2to1z);
 
   double AscalA1(double q2to1x, double q2to1y, double q2to1z);
   double AscalA2(double q2to1x, double q2to1y, double q2to1z);
@@ -67,84 +65,90 @@ protected:
   /** Return the normal of the angular DoF axis of rotation.
    *
    *  \param axis must be 0 */
-  virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
-                          bool absoluteRef=true);
+  virtual void _normalDoF(siconos::algebra::SiconosVector& ans,
+                          const siconos::algebra::BlockVector& q0, int axis,
+                          bool absoluteRef = true) override;
 
-public:
-
+ public:
   /** Empty constructor. The relation may be initialized later by
    * setPoint, setAxis, setAbsolute, and setBasePositions. */
   PivotJointR();
 
   /** Constructor based on one or two dynamical systems, a point and an axis.
-   * 
+   *
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
    *            for absolute frame.
-   *  \param P SiconosVector of size 3 that defines the point around
+   *  \param P siconos::algebra::SiconosVector of size 3 that defines the point around
    *           which rotation is allowed.
-   *  \param A SiconosVector of size 3 that defines the cylindrical axis.
+   *  \param A siconos::algebra::SiconosVector of size 3 that defines the cylindrical axis.
    *  \param absoluteRef if true, P and A are in the absolute frame,
    *                     otherwise P and A are in d1 frame.
    */
-  PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
-              SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
-              SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
+  PivotJointR(std::shared_ptr<siconos::algebra::SiconosVector> P,
+              std::shared_ptr<siconos::algebra::SiconosVector> A, bool absoluteRef,
+              std::shared_ptr<siconos::modeling::NewtonEulerDS> d1 = nullptr,
+              std::shared_ptr<siconos::modeling::NewtonEulerDS> d2 = nullptr);
 
   /** Initialize the joint constants based on the provided base positions.
    *
-   *  \param q1 A SiconosVector of size 7 indicating translation and
+   *  \param q1 A siconos::algebra::SiconosVector of size 7 indicating translation and
    *  orientation in inertial coordinates.
-   *  \param q2 An optional SiconosVector of size 7 indicating
+   *  \param q2 An optional siconos::algebra::SiconosVector of size 7 indicating
    *  translation and orientation; if null, the inertial
    *  frame will be considered as the second base. */
-  virtual void setBasePositions(SP::SiconosVector q1,
-                                SP::SiconosVector q2 = SP::SiconosVector());
+  virtual void setBasePositions(std::shared_ptr<siconos::algebra::SiconosVector> q1,
+                                std::shared_ptr<siconos::algebra::SiconosVector> q2 = nullptr) override;
 
-  virtual ~PivotJointR() {};
+  virtual ~PivotJointR() noexcept = default;
 
-  SP::SiconosVector A() { return _A; }
+  std::shared_ptr<siconos::algebra::SiconosVector> A() { return _A; }
 
   /**
      to compute the output y = h(t,q,z) of the Relation
-     
+
      \param time current time value
      \param q coordinates of the dynamical systems involved in the relation
      \param y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
+                        siconos::algebra::SiconosVector& y) override;
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, const BlockVector& q0, SiconosVector& y,
-                           unsigned int axis);
+  virtual void computehDoF(double time, const siconos::algebra::BlockVector& q0,
+                           siconos::algebra::SiconosVector& y, unsigned int axis) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, Interaction& inter,
-                               SP::BlockVector q0, SimpleMatrix& jachq,
-                               unsigned int axis);
+  virtual void computeJachqDoF(double time, siconos::modeling::Interaction& inter,
+                               std::shared_ptr<siconos::algebra::BlockVector> q0,
+                               siconos::algebra::SimpleMatrix& jachq,
+                               unsigned int axis) override;
 
   /**
      Get the number of constraints defined in the joint
-     
+
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() { return 5; }
+  virtual unsigned int numberOfConstraints() override { return 5; }
 
   /**
      Return the number of degrees of freedom of this joint.
-     
+
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() { return 1; }
+  virtual unsigned int numberOfDoF() override { return 1; }
 
   /**
      Return the type of a degree of freedom of this joint.
-     
+
      \return the type of the degree of freedom (DoF)
   */
-  virtual DoF_Type typeOfDoF(unsigned int axis) {
-    if (axis==0) return DOF_TYPE_ANGULAR;
-    else return DOF_TYPE_INVALID;
+  virtual DofType typeOfDoF(unsigned int axis) override {
+    if (axis == 0)
+      return DofType::ANGULAR;
+    else
+      return DofType::INVALID;
   };
 };
-#endif // PivotJointRELATION_H
+}  // namespace siconos::joints
+#endif  // PivotJointRELATION_H

@@ -14,36 +14,35 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
+#include "SphereNEDSPlanR.hpp"
 
 #include <cmath>
-#include "SphereNEDSPlanR.hpp"
-#include <Interaction.hpp>
-#include <BlockVector.hpp>
 
-SphereNEDSPlanR::SphereNEDSPlanR(double r, double A, double B, double C, double D)
-  : NewtonEuler3DR(), r(r), A(A), B(B), C(C), D(D)
+#include "BlockVector.hpp"
+#include "SiconosVector.hpp"
+
+siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::SphereNEDSPlanR(
+    double r, double A, double B, double C, double D)
+  : siconos::modeling::NewtonEuler3DR{}, r{r}, A{A}, B{B}, C{C}, D{D}
 {
   nN = sqrt(A * A + B * B + C * C);
 
   n1 = A / nN;
   n2 = B / nN;
   n3 = C / nN;
-
-
-
 }
 
-double SphereNEDSPlanR::distance(double x, double y, double z, double rad)
+double siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::distance(
+    double x, double y, double z, double rad)
 {
-
   return (fabs(A * x + B * y + C * z + D) / nN - rad);
 }
 
-
-void SphereNEDSPlanR::computeh(double time, const BlockVector& q0, SiconosVector& y)
+void siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::computeh(
+    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)
 {
-
   double q_0 = q0(0);
   double q_1 = q0(1);
   double q_2 = q0(2);

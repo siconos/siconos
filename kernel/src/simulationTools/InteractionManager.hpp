@@ -23,10 +23,10 @@
 #ifndef InteractionManager_h
 #define InteractionManager_h
 
-
 #include <memory>
-#include "SiconosSerialization.hpp"
+
 #include "NSLawMatrix.hpp"
+#include "SiconosSerialization.hpp"
 
 namespace siconos::modeling {
 class NonSmoothLaw;
@@ -38,8 +38,13 @@ namespace siconos::simulation {
 class Simulation;
 
 class InteractionManager {
+  InteractionManager(const InteractionManager&) = delete;
+  InteractionManager(InteractionManager&&) = delete;
+  InteractionManager operator=(const InteractionManager&&) = delete;
+  InteractionManager operator=(InteractionManager&&) = delete;
+
  public:
-  InteractionManager()  = default;
+  InteractionManager() = default;
 
   virtual ~InteractionManager() noexcept = default;
 

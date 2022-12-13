@@ -8,7 +8,7 @@ class OccSpaceFilter : public SpaceFilter
 public:
   OccSpaceFilter() : SpaceFilter() {};
 
-  virtual void updateInteractions(SP::Simulation) {};
+  virtual void updateInteractions(std::shared_ptr<siconos::simulation::Simulation>) {};
 
 };
 

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SpaceFilter_impl.hpp
  *  \brief implementation details for moving plans
@@ -22,73 +22,44 @@
 
 #ifndef SpaceFilter_impl_hpp
 #define SpaceFilter_impl_hpp
+#include <memory>
 
-#include <map>
+#include "SiconosSerialization.hpp"
 
-#include <NSLawMatrix.hpp>
-#include <SpaceFilter.hpp>
-#include "DiskMovingPlanR.hpp"
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/unordered_set.hpp>
-#include <boost/throw_exception.hpp>
-#include <boost/functional/hash.hpp>
+namespace siconos::modeling {
+class DynamicalSystem;
+}  // namespace siconos::modeling
 
-class FMatrix  : public ublas::matrix < FTime, ublas::column_major,
-                                         std::vector<FTime> >
-{
-  ACCEPT_SERIALIZATION(FMatrix);
-};
+// Internal stuff. Not supposed to be used/viewed in users'interface.
+namespace siconos::collision::native::internal {
 
-class Hashed : public std::enable_shared_from_this<Hashed>
-{
-protected:
-
+class Hashed : public std::enable_shared_from_this<Hashed> {
+ protected:
   ACCEPT_SERIALIZATION(Hashed);
 
-  Hashed() {};
+  Hashed() = default;
+  Hashed(const Hashed&) = delete;
+  Hashed(Hashed&&) = delete;
+  Hashed operator=(const Hashed&) = delete;
+  Hashed operator=(Hashed&&) = delete;
 
-public:
-  SP::DynamicalSystem body;
-  int i;
-  int j;
-  int k;
-  Hashed(SP::DynamicalSystem body, int i, int j, int k = 0) :
-    body(body), i(i), j(j), k(k) {};
+ public:
+  std::shared_ptr<siconos::modeling::DynamicalSystem> body{nullptr};
+  int i{0};
+  int j{0};
+  int k{0};
 
-  Hashed(int i, int j, int k = 0)
-    : i(i), j(j), k(k) {};
+  Hashed(std::shared_ptr<siconos::modeling::DynamicalSystem> body, int i, int j, int k = 0)
+      : body(body), i(i), j(j), k(k){};
 
-  ~Hashed() {};
+  Hashed(int i, int j, int k = 0) : i(i), j(j), k(k){};
 
+  ~Hashed() noexcept = default;
 };
 
-class space_hash : public boost::unordered_multiset < SP::Hashed,
-                                                       boost::hash<SP::Hashed> >
-{
-  ACCEPT_SERIALIZATION(space_hash);
-};
+bool operator==(std::shared_ptr<Hashed> const& a, std::shared_ptr<Hashed> const& b);
 
-/* relations pool */
-typedef std::pair<double, double> CircleCircleRDeclared;
-typedef std::pair<double, double> DiskDiskRDeclared;
-typedef std::array<double, 6> DiskPlanRDeclared;
+std::size_t hash_value(std::shared_ptr<Hashed> const& h);
 
-
-class CircleCircleRDeclaredPool : public std::map<CircleCircleRDeclared, SP::CircularR>
-{
-  ACCEPT_SERIALIZATION(CircleCircleRDeclaredPool);
-};
-
-
-class DiskDiskRDeclaredPool : public std::map<DiskDiskRDeclared, SP::CircularR>
-{
-  ACCEPT_SERIALIZATION(DiskDiskRDeclaredPool);
-};
-
-
-class DiskPlanRDeclaredPool : public std::map<DiskPlanRDeclared, SP::DiskPlanR>
-{
-  ACCEPT_SERIALIZATION(DiskPlanRDeclaredPool);
-};
-
+}  // namespace siconos::collision::native::internal
 #endif

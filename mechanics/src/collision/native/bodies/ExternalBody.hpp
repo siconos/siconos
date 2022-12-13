@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file ExternalBody.hpp
   \brief External visitable lagrangian class.
@@ -22,25 +22,24 @@
 #ifndef ExternalBody_hpp
 #define ExternalBody_hpp
 
-#include "MechanicsFwd.hpp"
 #include <LagrangianDS.hpp>
 
-class ExternalBody :
-  public LagrangianDS,
-  public std::enable_shared_from_this<ExternalBody>
-{
-public:
+namespace siconos::collision::native {
+class SpaceFilter;
+}
 
-  virtual void selfHash(SpaceFilter&) = 0;
+namespace siconos::collision::native::bodies {
 
-  virtual void selfFindInteractions(SP::SpaceFilter) = 0;
+class ExternalBody : public siconos::modeling::LagrangianDS,
+                     public std::enable_shared_from_this<ExternalBody> {
+ public:
+  virtual void selfHash(siconos::collision::native::SpaceFilter&) = 0;
 
-  ACCEPT_BASE_VISITORS(LagrangianDS);
+  virtual void selfFindInteractions(
+      std::shared_ptr<siconos::collision::native::SpaceFilter>) = 0;
 
-protected:
+ protected:
   ACCEPT_SERIALIZATION(ExternalBody);
-
 };
-
-
+}  // namespace siconos::collision::native::bodies
 #endif

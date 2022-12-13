@@ -14,110 +14,82 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
-#include "siconos_debug.h"
-
 #include "BulletR.hpp"
-#include <RigidBodyDS.hpp>
-#include <Interaction.hpp>
 
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunreachable-code"
-#pragma clang diagnostic ignored "-Woverloaded-virtual"
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-#endif
-
-#include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
+#include <BulletCollision/NarrowPhaseCollision/btPersistentManifold.h>
 
-#include <btBulletCollisionCommon.h>
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic pop
-#endif
+#include "BodyShapeRecord.hpp"
+#include "BulletSiconosCommon.hpp"  // for copyQuatPos etc
+#include "NewtonEulerDS.hpp"
+#include "RotationQuaternion.hpp"  // for copyQuatPos etc
+#include "SiconosContactor.hpp"
+#include "SiconosVector.hpp"
+#include "siconos_debug.h"
+// #include <btBulletCollisionCommon.h>
 
 #include <boost/math/quaternion.hpp>
 
-#include "BulletSiconosCommon.hpp"
+// #include "BulletSiconosCommon.hpp"
 
-#include "BodyShapeRecord.hpp"
+// #include "BodyShapeRecord.hpp"
 
-BulletR::BulletR()
-  : ContactR()
-{
-}
-
-void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-    const btManifoldPoint& point,
-    bool flip, double scaling,
-    SP::NewtonEulerDS ds1,
-    SP::NewtonEulerDS ds2)
+void siconos::collision::bullet::BulletR::updateContactPointsFromManifoldPoint(
+    const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
+    double scaling, std::shared_ptr<siconos::modeling::NewtonEulerDS> ds1,
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2)
 {
   // Get new world positions of contact points and calculate relative
   // to ds1 and ds2
 
-  ::boost::math::quaternion<double> rq1, rq2, posa;
-  ::boost::math::quaternion<double> pq1, pq2, posb;
+  boost::math::quaternion<double> rq1, rq2, posa;
+  boost::math::quaternion<double> pq1, pq2, posb;
 
-  copyQuatPos(*ds1->q(), pq1);
-  copyQuatRot(*ds1->q(), rq1);
+  siconos::geometry::copyQuatPos(*ds1->q(), pq1);
+  siconos::geometry::copyQuatRot(*ds1->q(), rq1);
 
-  if(ds2)
-  {
-    copyQuatPos(*ds2->q(), pq2);
-    copyQuatRot(*ds2->q(), rq2);
+  if (ds2) {
+    siconos::geometry::copyQuatPos(*ds2->q(), pq2);
+    siconos::geometry::copyQuatRot(*ds2->q(), rq2);
   }
 
-  copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
-  copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
+  siconos::collision::bullet::copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
+  siconos::collision::bullet::copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
 
-  if(flip)
-  {
-    ::boost::math::quaternion<double> tmp = posa;
+  if (flip) {
+    boost::math::quaternion<double> tmp = posa;
     posa = posb;
     posb = tmp;
   }
 
-  SiconosVector va(3), vb(3), vn(3);
-  if(flip)
-  {
-    copyQuatPos((1.0/rq1) * (posa - pq1) * rq1, va);
-    if(ds2)
-      copyQuatPos((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else
-    {
+  siconos::algebra::SiconosVector va{3}, vb{3}, vn{3};
+  if (flip) {
+    siconos::geometry::copyQuatPos((1.0 / rq1) * (posa - pq1) * rq1, va);
+    if (ds2)
+      siconos::geometry::copyQuatPos((1.0 / rq2) * (posb - pq2) * rq2, vb);
+    else {
       // If no body2, position is relative to 0,0,0
-      copyBtVector3(point.getPositionWorldOnA() / scaling, vb);
+      siconos::collision::bullet::copyBtVector3(point.getPositionWorldOnA() / scaling, vb);
     }
   }
-  else
-  {
-    copyQuatPos((1.0/rq1) * (posa - pq1) * rq1, va);
-    if(ds2)
-      copyQuatPos((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else
-    {
+  else {
+    siconos::geometry::copyQuatPos((1.0 / rq1) * (posa - pq1) * rq1, va);
+    if (ds2)
+      siconos::geometry::copyQuatPos((1.0 / rq2) * (posb - pq2) * rq2, vb);
+    else {
       // If no body2, position is relative to 0,0,0
       copyBtVector3(point.getPositionWorldOnB() / scaling, vb);
     }
   }
 
   // Get new normal
-  if(ds2)
-  {
-
-
-    btQuaternion qn(point.m_normalWorldOnB.x(),
-                    point.m_normalWorldOnB.y(),
+  if (ds2) {
+    btQuaternion qn(point.m_normalWorldOnB.x(), point.m_normalWorldOnB.y(),
                     point.m_normalWorldOnB.z(), 0);
 
     // get world transform of the body 1 (corresponds to Body B)
@@ -127,33 +99,28 @@ void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& m
     qn = qb1.inverse() * qn * qb1;
 
     // Apply offset
-    if (bodyShapeRecordB->contactor->offset) // VA: Are we sure that is is always bodyShapeRecordB->contactor->offset ?
+    if (bodyShapeRecordB->contactor->offset)  // VA: Are we sure that is is always
+                                              // bodyShapeRecordB->contactor->offset ?
     {
-      const SiconosVector& offset   = *bodyShapeRecordB->contactor->offset;
+      const auto& offset = *bodyShapeRecordB->contactor->offset;
       btQuaternion roffset(offset(4), offset(5), offset(6), offset(3));
-      qn = roffset* qn * roffset.inverse();
+      qn = roffset * qn * roffset.inverse();
     }
 
     vn(0) = qn.x();
     vn(1) = qn.y();
     vn(2) = qn.z();
-    vn = vn/vn.norm2();
-
-
+    vn = vn / vn.norm2();
   }
   else
     copyBtVector3(point.m_normalWorldOnB, vn);
 
-
-
-
-  ContactR::updateContactPoints(va, vb, vn*(flip?-1:1));
+  ContactR::updateContactPoints(va, vb, vn * (flip ? -1 : 1));
 }
-void BulletR::display() const
+void siconos::collision::bullet::BulletR::display() const
 {
   std::cout << "BulletR display()" << std::endl;
   ContactR::display();
-
 
   std::cout << "&btObject[0]" << &btObject[0] << std::endl;
   std::cout << "&btObject[1]" << &btObject[1] << std::endl;

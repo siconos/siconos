@@ -94,11 +94,11 @@ class NewtonEulerR : public Relation {
   /** local storage of _T as working vector to compute JachqT from q */
   std::shared_ptr<siconos::algebra::SimpleMatrix> _T{nullptr};
 
-  /** basic constructor
-   *
-   *  \param lagType the sub-type of the relation
-   */
-  NewtonEulerR(RelationSubType lagType) : Relation(RelationType::NewtonEuler, lagType) {}
+  // /** basic constructor
+  //  *
+  //  *  \param lagType the sub-type of the relation
+  //  */
+  // NewtonEulerR(RelationSubType lagType) : Relation(RelationType::NewtonEuler, lagType) {}
 
  public:
   /** Default constructor */
@@ -174,13 +174,13 @@ class NewtonEulerR : public Relation {
    *
    *  \param inter  Interaction associated with the Relation
    */
-  void initialize(Interaction &inter) override;
+  virtual void initialize(Interaction &inter) override;
 
   /** check sizes of the relation specific operators.
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  virtual void checkSize(Interaction &inter) override;
 
   /**
       to compute the output y = h(t,q,z) of the Relation
@@ -262,14 +262,14 @@ class NewtonEulerR : public Relation {
    *  \param time current time
    *  \param inter the interaction using this relation
    */
-  void computeJach(double time, Interaction &inter) override;
+  virtual void computeJach(double time, Interaction &inter) override;
 
   /** compute all the jacobian of g
    *
    *  \param time current time
    *  \param inter the interaction using this relation
    */
-  void computeJacg(double time, Interaction &inter) override
+  virtual void computeJacg(double time, Interaction &inter) override
   {
     computeJacgq(time, inter);
     computeJacgqDot(time, inter);
@@ -297,7 +297,7 @@ class NewtonEulerR : public Relation {
    *  \param derivativeNumber number of the derivative to compute, optional,
    *  default = 0.
    */
-  void computeOutput(double time, Interaction &inter,
+  virtual void computeOutput(double time, Interaction &inter,
                      unsigned int derivativeNumber = 0) override;
 
   /** to compute the input
@@ -306,7 +306,7 @@ class NewtonEulerR : public Relation {
    *  \param inter the interaction using this relation
    *  \param level number of the derivative to compute, optional, default = 0.
    */
-  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+  virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
 
   /** return a SP on the C matrix.
    *  The matrix C in the linear case, else it returns Jacobian of the output
@@ -343,6 +343,11 @@ class NewtonEulerR : public Relation {
   };
 
   void display() const override {}
+ 
+  // Visitors stuff
+  void accept(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+
+  
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRELATION_H

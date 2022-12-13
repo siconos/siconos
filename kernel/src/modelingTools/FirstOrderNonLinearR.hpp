@@ -118,7 +118,8 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *  \param z       current auxiliary variable
    *  \param[out] y  output value
    */
-  virtual void computeh(double time, const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
+  virtual void computeh(double time, const siconos::algebra::BlockVector &x,
+                        const siconos::algebra::SiconosVector &lambda,
                         siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
 
   /** default function to compute  \f$ g \f$
@@ -129,7 +130,8 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *  \param z       current auxiliary variable
    *  \param[out] r  input value
    */
-  virtual void computeg(double time, const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
+  virtual void computeg(double time, const siconos::algebra::BlockVector &x,
+                        const siconos::algebra::SiconosVector &lambda,
                         siconos::algebra::BlockVector &z, siconos::algebra::BlockVector &r);
 
   /** default function to compute \f$ C = \nabla_x h \f$
@@ -140,8 +142,10 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *  \param z       current auxiliary variable
    *  \param[out] C  jacobian matrix
    */
-  virtual void computeJachx(double time, const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
-                            siconos::algebra::BlockVector &z, siconos::algebra::SimpleMatrix &C);
+  virtual void computeJachx(double time, const siconos::algebra::BlockVector &x,
+                            const siconos::algebra::SiconosVector &lambda,
+                            siconos::algebra::BlockVector &z,
+                            siconos::algebra::SimpleMatrix &C);
 
   /** default function to compute \f$ D = \nabla_{\lambda} h \f$
    *
@@ -152,7 +156,9 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *  \param[out] D  jacobian matrix
    */
   virtual void computeJachlambda(double time, const siconos::algebra::BlockVector &x,
-                                 const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &z, siconos::algebra::SimpleMatrix &D);
+                                 const siconos::algebra::SiconosVector &lambda,
+                                 siconos::algebra::BlockVector &z,
+                                 siconos::algebra::SimpleMatrix &D);
 
   void computeJach(double time, Interaction &inter) override;
 
@@ -165,7 +171,9 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *  \param[out] B  jacobian matrix
    */
   virtual void computeJacglambda(double time, const siconos::algebra::BlockVector &x,
-                                 const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &z, siconos::algebra::SimpleMatrix &B);
+                                 const siconos::algebra::SiconosVector &lambda,
+                                 siconos::algebra::BlockVector &z,
+                                 siconos::algebra::SimpleMatrix &B);
 
   /** default function to compute \f$ K = \nabla_{\lambda}g \f$
    *
@@ -175,8 +183,10 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *  \param z       current auxiliary variables
    *  \param[out] K  jacobian matrix
    */
-  virtual void computeJacgx(double time, const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
-                            siconos::algebra::BlockVector &z, siconos::algebra::SimpleMatrix &K);
+  virtual void computeJacgx(double time, const siconos::algebra::BlockVector &x,
+                            const siconos::algebra::SiconosVector &lambda,
+                            siconos::algebra::BlockVector &z,
+                            siconos::algebra::SimpleMatrix &K);
 
   void computeJacg(double time, Interaction &inter) override;
 
@@ -201,7 +211,9 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *  \return true if residu are required, false otherwise
    */
   bool requireResidu() override { return true; }
+
 };
+
 }  // namespace siconos::modeling
 
 #endif

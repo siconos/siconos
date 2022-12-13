@@ -14,36 +14,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef Bullet2dR_hpp
 #define Bullet2dR_hpp
 
-#include "BulletSiconosFwd.hpp"
+#include "BulletDeclarations.h"
 #include "Contact2dR.hpp"
 
-class Bullet2dR : public Contact2dR
-{
-private:
+namespace siconos::collision {
+class RigidBody2dDS;
+}
+namespace siconos::collision::bullet {
+
+class Bullet2dR : public siconos::collision::Contact2dR {
+ private:
   ACCEPT_SERIALIZATION(Bullet2dR);
 
-public:
-  Bullet2dR();
-
-  virtual ~Bullet2dR() {}
+ public:
+  virtual ~Bullet2dR() noexcept = default;
 
   /* For users that may require extra information about contacts. */
-  SP::btCollisionObject btObject[2];
-  SP::btCollisionShape btShape[2];
+  std::shared_ptr<btCollisionObject> btObject[2] = {nullptr, nullptr};
+  std::shared_ptr<btCollisionShape> btShape[2] = {nullptr, nullptr};
 
-  virtual
-  void updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-                                            const btManifoldPoint& point,
-                                            bool flip, double scaling,
-                                            SP::RigidBody2dDS ds1,
-                                            SP::RigidBody2dDS ds2);
-
-  ACCEPT_STD_VISITORS();
+  virtual void updateContactPointsFromManifoldPoint(
+      const btPersistentManifold& manifold, const btManifoldPoint& point, bool flip,
+      double scaling, std::shared_ptr<siconos::collision::RigidBody2dDS> ds1,
+      std::shared_ptr<siconos::collision::RigidBody2dDS> ds2);
 };
-
+}  // namespace siconos::collision::bullet
 #endif

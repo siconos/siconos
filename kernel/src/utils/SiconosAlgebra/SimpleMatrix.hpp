@@ -58,7 +58,7 @@ class SimpleMatrix : public SiconosMatrix {
 
   /** The pivot indices obtained from DGETRF (PLUFactorizationInPlace)
    */
-  std::shared_ptr<VInt> _ipiv;
+  std::shared_ptr<VInt> _ipiv{nullptr};
 
   /** True if the Matrix is PLU Factorized. */
   bool _isPLUFactorized = false;

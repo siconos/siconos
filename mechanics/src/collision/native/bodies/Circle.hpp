@@ -14,36 +14,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file Circle.hpp
  */
 /** \class Circle
  * \brief Definition of a 2D Circle - Inherits from CircularDS
-*/
+ */
 
 #ifndef Circle_H
 #define Circle_H
 
-#include "MechanicsFwd.hpp"
 #include "CircularDS.hpp"
 
-class Circle : public CircularDS, public std::enable_shared_from_this<Circle>
-{
-private:
+namespace siconos::collision::native::bodies {
 
+class Circle : public CircularDS, public std::enable_shared_from_this<Circle> {
+ private:
   ACCEPT_SERIALIZATION(Circle);
-
 
   void MassSetup();
 
-
-protected:
-
-  Circle() : CircularDS() {};
-
-public:
-
+ public:
   /** Constructor
    *
    *  \param radius
@@ -51,15 +43,12 @@ public:
    *  \param position vector
    *  \param velocity vector
    */
-  
-  Circle(double radius, double mass, SP::SiconosVector position, SP::SiconosVector velocity);
 
-  /** destructor
-   */
-  virtual ~Circle();
+  Circle(double radius, double mass, std::shared_ptr<siconos::algebra::SiconosVector> position,
+         std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
-  ACCEPT_BASE_SP_VISITORS(LagrangianDS);
-
+  /** destructor */
+  virtual ~Circle() noexcept = default;
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* Circle_H */
-

@@ -14,51 +14,47 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef Contact5DR_hpp
 #define Contact5DR_hpp
 
-#include "MechanicsFwd.hpp"
-#include "SiconosVector.hpp"
 #include "NewtonEuler5DR.hpp"
 
-class Contact5DR : public NewtonEuler5DR
-{
-private:
+namespace siconos::collision {
+class BodyShapeRecord;
 
+class Contact5DR : public siconos::modeling::NewtonEuler5DR {
+ private:
   ACCEPT_SERIALIZATION(Contact5DR);
 
-public:
-  Contact5DR();
+ public:
 
   /* For users that may require extra information about contacts. */
-  SP::BodyShapeRecord bodyShapeRecordA;
-  SP::BodyShapeRecord bodyShapeRecordB;
-
+  std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordA{nullptr};
+  std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordB{nullptr};
 
   /**
      to compute the output y = h(t,q) of the Relation
-     
+
      \param time current time value
      \param q coordinates of the dynamical systems involved in the relation
      \param y the resulting vector
   */
-  void computeh(double time, const BlockVector& q0, SiconosVector& y) override;
+  void computeh(double time, const siconos::algebra::BlockVector& q0,
+                siconos::algebra::SiconosVector& y) override;
 
   /** Update this contact point information.
-   * 
+   *
    *  \param pos1 Position on ds1 in ds1 frame.
    *  \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
    *  \param normal Normal in ds2 frame (or world frame if ds2=null).
    */
-  virtual void updateContactPoints(const SiconosVector& pos1,
-                                   const SiconosVector& pos2,
-                                   const SiconosVector& normal);
+  virtual void updateContactPoints(const siconos::algebra::SiconosVector& pos1,
+                                   const siconos::algebra::SiconosVector& pos2,
+                                   const siconos::algebra::SiconosVector& normal);
 
   virtual void preDelete() {}
-
-  ACCEPT_STD_VISITORS();
 };
-
+}  // namespace siconos::collision
 #endif

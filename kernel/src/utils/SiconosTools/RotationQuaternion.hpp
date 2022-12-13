@@ -22,6 +22,7 @@
 #ifndef ROTATIONQUATERNION_H
 #define ROTATIONQUATERNION_H
 
+#include <boost/math_fwd.hpp>  // for quaternion
 #include <memory>
 
 namespace siconos::algebra {
@@ -172,6 +173,30 @@ void compositionLawLieGroup(const siconos::algebra::SiconosVector& a,
 
 void compositionLawLieGroup(const siconos::algebra::SiconosVector& a,
                             siconos::algebra::SiconosVector& b);
+
+void copyQuatRot(const siconos::algebra::SiconosVector& from,
+                 boost::math::quaternion<double>& to);
+
+void copyQuatPos(const boost::math::quaternion<double>& from,
+                 siconos::algebra::SiconosVector& to);
+
+void copyQuatPos(const siconos::algebra::SiconosVector& from,
+                 boost::math::quaternion<double>& to);
+
+void copyQuatRot2d(const siconos::algebra::SiconosVector& from,
+                   boost::math::quaternion<double>& to);
+
+void copyQuatPos2d(const boost::math::quaternion<double>& from,
+                   siconos::algebra::SiconosVector& to);
+
+void copyQuatPos2d(const siconos::algebra::SiconosVector& from,
+                   boost::math::quaternion<double>& to);
+
+boost::math::quaternion<double> rotquat(
+    const std::shared_ptr<siconos::algebra::SiconosVector>& v);
+
+boost::math::quaternion<double> posquat(
+    const std::shared_ptr<siconos::algebra::SiconosVector>& v);
 
 }  // namespace siconos::geometry
 #endif  // ROTATIONQUATERNION_H

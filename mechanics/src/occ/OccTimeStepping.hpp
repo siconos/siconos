@@ -10,7 +10,7 @@ class OccTimeStepping : public TimeStepping
 
 public:
 
-  OccTimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td) : TimeStepping(nsds,td) {};
+  OccTimeStepping(SP::NonSmoothDynamicalSystem nsds, std::shared_ptr<siconos::simulation::TimeDiscretisation> td) : TimeStepping(nsds,td) {};
 
   virtual void updateWorldFromDS();
 

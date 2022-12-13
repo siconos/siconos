@@ -387,10 +387,10 @@ class LagrangianDS : public SecondOrderDS {
     THROW_EXCEPTION("LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
   }
 
-  /* function to compute  \f$ F(v,q,t,z) \f$  for the current state
-   *
-   *  \param time the current time
-   */
+  // /* function to compute  \f$ F(v,q,t,z) \f$  for the current state
+  // *
+  // *  \param time the current time
+  //*/
   // virtual void computeForces(double time);
 
   /** Compute  \f$ F(v,q,t,z) \f$

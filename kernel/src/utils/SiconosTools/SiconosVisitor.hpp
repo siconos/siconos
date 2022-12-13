@@ -80,6 +80,10 @@ class FirstOrderNonLinearDS;
 class NewtonEulerDS;
 class LagrangianDS;
 
+// Relations
+class LagrangianR;
+class NewtonEulerR;
+class FirstOrderR;
 }  // namespace siconos::modeling
 
 namespace siconos::internal {
@@ -145,6 +149,22 @@ struct SiconosVisitor {
   };
 
   virtual void visit(const siconos::modeling::NewtonEulerDS &ds) const
+  {
+    THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
+  };
+
+  // Relations
+  virtual void visit(const siconos::modeling::LagrangianR &) const
+  {
+    THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
+  };
+
+  virtual void visit(const siconos::modeling::FirstOrderR &) const
+  {
+    THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
+  };
+
+  virtual void visit(const siconos::modeling::NewtonEulerR &) const
   {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };

@@ -21,27 +21,28 @@
 #ifndef CircularR_h
 #define CircularR_h
 
-#include "Interaction.hpp"
 #include "LagrangianScleronomousR.hpp"
-#include "MechanicsFwd.hpp"
 
-/** 
-    Two circle relation - Inherits from LagrangianScleronomousR
+namespace siconos::collision::native::bodies {
+
+/**
+  Two circle relation - Inherits from LagrangianScleronomousR
 */
 
-class CircularR : public LagrangianScleronomousR {
-protected:
+class CircularR : public siconos::modeling::LagrangianScleronomousR {
+ protected:
   ACCEPT_SERIALIZATION(CircularR);
 
-  double _r1, _r2;
+  double _r1{0.}, _r2{0.};
 
-public:
+ public:
   /** Constructor
    *
    *  \param disk1 radius
    *  \param disk2 radius
    */
-  CircularR(double r1, double r2) : _r1(r1), _r2(r2){};
+  CircularR(double r1, double r2)
+      : siconos::modeling::LagrangianScleronomousR{}, _r1{r1}, _r2{r2} {};
 
   virtual ~CircularR() noexcept = default;
 
@@ -49,10 +50,11 @@ public:
 
   double getRadius2() const { return _r2; };
 
-  virtual double distance(double, double, double, double, double, double) {
-    assert(0);
-    return (0);
-  };
-
+  virtual double distance(double, double, double, double, double, double) = 0;
+  // {
+  //   assert(0);
+  //   return (0);
+  // };
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* CircularR_h */

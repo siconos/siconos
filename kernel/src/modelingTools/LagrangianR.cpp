@@ -24,6 +24,7 @@
 
 #include "PluggedObject.hpp"
 #include "SimpleMatrix.hpp"
+#include "SiconosVisitor.hpp"
 
 void siconos::modeling::LagrangianR::_zeroPlugin()
 {
@@ -47,4 +48,10 @@ void siconos::modeling::LagrangianR::display() const
   else
     std::cout << " nullptr :"
               << "\n";
+}
+
+void siconos::modeling::LagrangianR::accept(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
+{
+  tourist->visit(*this);
 }

@@ -39,7 +39,6 @@ class NewtonEuler5DR : public NewtonEuler1DR {
 
  protected:
  public:
-  NewtonEuler5DR() : NewtonEuler1DR() {}
 
   /** destructor
    */

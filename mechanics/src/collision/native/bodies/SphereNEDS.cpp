@@ -14,23 +14,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <cmath>
 #include "SphereNEDS.hpp"
 
-SphereNEDS::SphereNEDS(double r, double m, SP::SiconosMatrix I,
-                       SP::SiconosVector qinit,
-                       SP::SiconosVector vinit)
-  : NewtonEulerDS(qinit, vinit, m, I), radius(r)
-{
+#include <cmath>
 
+#include "SiconosVector.hpp"
+
+siconos::collision::native::bodies::SphereNEDS::SphereNEDS(
+    double r, double m, std::shared_ptr<siconos::algebra::SiconosMatrix> I,
+    std::shared_ptr<siconos::algebra::SiconosVector> qinit,
+    std::shared_ptr<siconos::algebra::SiconosVector> vinit)
+  : siconos::modeling::NewtonEulerDS{qinit, vinit, m, I}, radius{r}
+{
   // note : _ndof = 3 in NewtonEuleurDS ? (=> _ndof = 6 ?)
 
   assert(qinit->size() == _qDim);
   assert(vinit->size() == 6);  // == _ndof
-
 }
 
-SphereNEDS::~SphereNEDS()
-{}
+double siconos::collision::native::bodies::SphereNEDS::getQ(unsigned int pos)
+{
+  assert(pos < 7);
+  return (_q->getValue(pos));
+};
+
+double siconos::collision::native::bodies::SphereNEDS::getVelocity(unsigned int pos)
+{
+  assert(pos < 6);
+  return (_twist->getValue(pos));
+};

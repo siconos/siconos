@@ -4,10 +4,10 @@
 
 #include <boost/math/quaternion.hpp>
 
-OccBody::OccBody(SP::SiconosVector position,
-                 SP::SiconosVector velocity,
+OccBody::OccBody(std::shared_ptr<siconos::algebra::SiconosVector> position,
+                 std::shared_ptr<siconos::algebra::SiconosVector> velocity,
                  double mass,
-                 SP::SiconosMatrix inertia) :
+                 std::shared_ptr<siconos::algebra::SiconosMatrix> inertia) :
   NewtonEulerDS(position, velocity, mass, inertia),
   _contactShapes(new ContactShapes()),
   _shapes(new TopoDS_Shapes())
@@ -15,8 +15,8 @@ OccBody::OccBody(SP::SiconosVector position,
 
 
 void OccBody::addContactShape(SP::OccContactShape shape,
-                              SP::SiconosVector pos,
-                              SP::SiconosVector ori,
+                              std::shared_ptr<siconos::algebra::SiconosVector> pos,
+                              std::shared_ptr<siconos::algebra::SiconosVector> ori,
                               unsigned int group)
 {
   OffSet offset = {0, 0, 0, 1, 0, 0,0};
@@ -42,8 +42,8 @@ void OccBody::addContactShape(SP::OccContactShape shape,
 }
 
 void OccBody::addShape(SP::TopoDS_Shape shape,
-                       SP::SiconosVector pos,
-                       SP::SiconosVector ori)
+                       std::shared_ptr<siconos::algebra::SiconosVector> pos,
+                       std::shared_ptr<siconos::algebra::SiconosVector> ori)
 {
   OffSet offset = {0, 0, 0, 1, 0, 0,0};
   if(pos)
@@ -81,7 +81,7 @@ void OccBody::updateContactShapes()
 
     boost::math::quaternion<double> r = q * boost::math::quaternion<double>(offset[3], offset[4], offset[5], offset[6]);
 
-    SiconosVector fp = SiconosVector(7);
+    SiconosVector fp = siconos::algebra::SiconosVector(7);
     fp(0) = (*_q)(0)+rv.R_component_2();
     fp(1) = (*_q)(1)+rv.R_component_3();
     fp(2) = (*_q)(2)+rv.R_component_4();
@@ -111,7 +111,7 @@ void OccBody::updateShapes()
 
     boost::math::quaternion<double> r = q * boost::math::quaternion<double>(offset[3], offset[4], offset[5], offset[6]);
 
-    SiconosVector fp = SiconosVector(7);
+    SiconosVector fp = siconos::algebra::SiconosVector(7);
     fp(0) = (*_q)(0)+rv.R_component_2();
     fp(1) = (*_q)(1)+rv.R_component_3();
     fp(2) = (*_q)(2)+rv.R_component_4();

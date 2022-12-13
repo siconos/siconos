@@ -16,41 +16,31 @@
  * limitations under the License.
  */
 
+/** \file BulletSiconosCommon.hpp
+    Library of function to convert between siconos or boost quaternions and bullet vector
+    Note: these functions are in addition of those of RotationQuaternion.hpp (kernel)
+*/
+
 #ifndef BulletSiconosCommon_hpp
 #define BulletSiconosCommon_hpp
 
-#include "SiconosVector.hpp"
-#include <boost/math/quaternion.hpp>
-#include <LinearMath/btVector3.h>
-//void copyQuatRot(boost::math::quaternion<double>& from, SiconosVector& to);
+#include <boost/math_fwd.hpp>  // for quaternion
 
-void copyQuatRot(const SiconosVector& from, boost::math::quaternion<double>& to);
+#include "BulletDeclarations.h"  // for btVector3
 
-void copyQuatPos(const boost::math::quaternion<double>& from, SiconosVector& to);
+namespace siconos::algebra {
+class SiconosVector;
+}
 
-void copyQuatPos(const SiconosVector& from, boost::math::quaternion<double>& to);
+namespace siconos::collision::bullet {
 
 void copyQuatPos(const btVector3& from, boost::math::quaternion<double>& to);
 
-void copyBtVector3(const btVector3 &from, SiconosVector& to);
-
-
-//void copyQuatRot2d(boost::math::quaternion<double>& from, SiconosVector& to);
-
-
-void copyQuatRot2d(const SiconosVector& from, boost::math::quaternion<double>& to);
-
-
-void copyQuatPos2d(const boost::math::quaternion<double>& from, SiconosVector& to);
-
-
-void copyQuatPos2d(const SiconosVector& from, boost::math::quaternion<double>& to);
-
-
+void copyBtVector3(const btVector3& from, siconos::algebra::SiconosVector& to);
 
 void copyQuatPos2d(const btVector3& from, boost::math::quaternion<double>& to);
 
-void copyBtVector32d(const btVector3 &from, SiconosVector& to);
+void copyBtVector32d(const btVector3& from, siconos::algebra::SiconosVector& to);
 
-void display_quat(boost::math::quaternion<double>& quat);
+}  // namespace siconos::collision::bullet
 #endif

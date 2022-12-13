@@ -64,7 +64,7 @@ class FirstOrderR : public Relation {
    *
    *  \param newType the type of the relation
    */
-  FirstOrderR(RelationSubType newType) : Relation(RelationType::FirstOrder, newType) {};
+  FirstOrderR(RelationSubType newType) : Relation(RelationType::FirstOrder, newType){};
 
   /* The following matrices are used if the relation is linear w.r.t to some
    * variables. If the matrices are allocated, the computation of the Jacobian
@@ -159,6 +159,8 @@ class FirstOrderR : public Relation {
    *  \return K matrix
    */
   inline std::shared_ptr<siconos::algebra::SimpleMatrix> K() const { return _K; }
+  // Visitors stuff
+  void accept(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
 };
 }  // namespace siconos::modeling
 #endif

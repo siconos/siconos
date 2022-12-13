@@ -93,9 +93,9 @@ void OccTest::move()
   OccContactShape sphere(mksphere.Shape());
   OccContactFace sphere_contact(sphere, 0);
 
-  SP::SiconosVector position(new SiconosVector(7));
-  SP::SiconosVector velocity(new SiconosVector(6));
-  SP::SimpleMatrix inertia(new SimpleMatrix(3,3));
+  auto position(new siconos::algebra::SiconosVector(7));
+  auto velocity(new siconos::algebra::SiconosVector(6));
+  auto inertia(new SimpleMatrix(3,3));
   position->zero();
   (*position)(0) = 1.;
   (*position)(1) = 2.;
@@ -147,10 +147,10 @@ void OccTest::distance()
   OccContactFace sphere1_contact(sphere1, 0);
   OccContactFace sphere2_contact(sphere2, 0);
 
-  SP::SiconosVector position1(new SiconosVector(7));
-  SP::SiconosVector position2(new SiconosVector(7));
-  SP::SiconosVector velocity(new SiconosVector(6));
-  SP::SimpleMatrix inertia(new SimpleMatrix(3,3));
+  auto position1(new siconos::algebra::SiconosVector(7));
+  auto position2(new siconos::algebra::SiconosVector(7));
+  auto velocity(new siconos::algebra::SiconosVector(6));
+  auto inertia(new SimpleMatrix(3,3));
   position1->zero();
   (*position1)(0) = 0.;
   (*position1)(1) = 0.;

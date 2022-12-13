@@ -14,42 +14,43 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <cmath>
 #include "DiskDiskR.hpp"
+
+#include <cmath> // for hypot
+
 #include "BlockVector.hpp"
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
-DiskDiskR::DiskDiskR(double r, double rr) : CircularR(r, rr)
+siconos::collision::native::bodies::DiskDiskR::DiskDiskR(double r, double rr) : CircularR(r, rr)
 {
   r1pr2 = r + rr;
 }
 
-double DiskDiskR::distance(double x1, double y1, double r1,
-                           double x2, double y2, double r2)
+double siconos::collision::native::bodies::DiskDiskR::distance(double x1, double y1, double r1, double x2,
+                                              double y2, double r2)
 {
   return (hypot(x1 - x2, y1 - y2) - r1pr2);
 }
 
-void DiskDiskR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
+void siconos::collision::native::bodies::DiskDiskR::computeh(const siconos::algebra::BlockVector& q,
+                                            siconos::algebra::BlockVector& z,
+                                            siconos::algebra::SiconosVector& y)
 {
-
   double q_0 = q(0);
   double q_1 = q(1);
   double q_3 = q(3);
   double q_4 = q(4);
 
   y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
-
 }
 
-
-void DiskDiskR::computeJachq(const BlockVector& q, BlockVector& z)
+void siconos::collision::native::bodies::DiskDiskR::computeJachq(const siconos::algebra::BlockVector& q,
+                                                siconos::algebra::BlockVector& z)
 {
-
   assert(_jachq);
-  SiconosMatrix& g = *_jachq;
 
   double x1 = q(0);
   double y1 = q(1);
@@ -74,18 +75,16 @@ void DiskDiskR::computeJachq(const BlockVector& q, BlockVector& z)
   [d     d         d   d      ]
   */
 
-  g(0, 0) = -dxsd;
-  g(1, 0) = dysd;
-  g(0, 1) = -dysd;
-  g(1, 1) = -dxsd;
-  g(0, 2) = 0.;
-  g(1, 2) = -_r1;
-  g(0, 3) = dxsd;
-  g(1, 3) = -dysd;
-  g(0, 4) = dysd;
-  g(1, 4) = dxsd;
-  g(0, 5) = 0.;
-  g(1, 5) = -_r2;
-
+  _jachq->setValue(0, 0, -dxsd);
+  _jachq->setValue(1, 0, dysd);
+  _jachq->setValue(0, 1, -dysd);
+  _jachq->setValue(1, 1, -dxsd);
+  _jachq->setValue(0, 2, 0.);
+  _jachq->setValue(1, 2, -_r1);
+  _jachq->setValue(0, 3, dxsd);
+  _jachq->setValue(1, 3, -dysd);
+  _jachq->setValue(0, 4, dysd);
+  _jachq->setValue(1, 4, dxsd);
+  _jachq->setValue(0, 5, 0.);
+  _jachq->setValue(1, 5, -_r2);
 }
-

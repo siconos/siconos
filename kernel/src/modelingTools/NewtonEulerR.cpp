@@ -30,6 +30,7 @@
 #include "SiconosAlgebraProd.hpp"
 #include "SiconosMatrixSetBlock.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
@@ -409,4 +410,10 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   siconos::algebra::prod(*jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
   DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
+}
+
+void siconos::modeling::NewtonEulerR::accept(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
+{
+  tourist->visit(*this);
 }

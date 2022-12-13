@@ -30,10 +30,10 @@
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
 #include "SiconosMemory.hpp"
-#include "TypeName.hpp" // visitor to get ds type
-namespace siconos::internal{
+#include "TypeName.hpp"  // visitor to get ds type
+namespace siconos::internal {
 
-  struct SiconosVisitor;
+struct SiconosVisitor;
 }
 
 namespace siconos::algebra {

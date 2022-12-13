@@ -25,12 +25,12 @@
 #ifndef SphereNEDSPlanR_h
 #define SphereNEDSPlanR_h
 
-#include "MechanicsFwd.hpp"
 #include "NewtonEuler3DR.hpp"
 
-class SphereNEDSPlanR : public NewtonEuler3DR,
+namespace siconos::collision::native::bodies {
+  class SphereNEDSPlanR : public siconos::modeling::NewtonEuler3DR,
                         public std::enable_shared_from_this<SphereNEDSPlanR> {
-private:
+ private:
   ACCEPT_SERIALIZATION(SphereNEDSPlanR);
 
   /* Ax + By + Cz + D = 0 */
@@ -38,9 +38,7 @@ private:
   /* u ^ v  = n */
   double u1, u2, u3, v1, v2, v3, n1, n2, n3, ru1, ru2, ru3, rv1, rv2, rv3;
 
-  SphereNEDSPlanR(){};
-
-public:
+ public:
   /** Constructor
    *
    *  \param r disk radius
@@ -51,23 +49,26 @@ public:
    */
   SphereNEDSPlanR(double r, double A, double B, double C, double D);
 
+  ~SphereNEDSPlanR() noexcept = default;
+
   double distance(double, double, double, double);
 
   /**
      to compute the output y = h(t,q,z) of the Relation
-     
+
      \param time current time value
      \param q coordinates of the dynamical systems involved in the relation
      \param y the resulting vector
   */
-  void computeh(double time, const BlockVector &q0, SiconosVector &y) override;
+  void computeh(double time, const siconos::algebra::BlockVector &q0,
+                siconos::algebra::SiconosVector &y) override;
 
   // void computeJachq(double);
 
-  bool equal(double _A, double _B, double _C, double _D, double _r) const {
+  bool equal(double _A, double _B, double _C, double _D, double _r) const
+  {
     return (A == _A && B == _B && C == _C && D == _D && r == _r);
   }
-
-  ACCEPT_VISITORS();
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* SphereNEDSPlanR_h */

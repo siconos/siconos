@@ -26,14 +26,6 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "op3x3.h"  // numerics: orthobasefromvector
-
-// #include "SiconosAlgebraProd.hpp"
-// #include "Interaction.hpp"
-// #include "BlockVector.hpp"
-// #include "RotationQuaternion.hpp"
-
-// #include "op3x3.h"
-
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

@@ -14,65 +14,60 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosBodies.hpp
   \brief SiconosBodies class - model + plans + space filter
 */
 #ifndef SiconosBodies_hpp
 #define SiconosBodies_hpp
-#include <MechanicsFwd.hpp>
-#include <SiconosFwd.hpp>
-#include <SiconosSerialization.hpp>
-#include <Simulation.hpp>
+
+#include <memory>
+
+#include "FMatrix.hpp"  // For FMatrix
+#include "SiconosSerialization.hpp"
+
+namespace siconos::algebra {
+class SiconosMatrix;
+}
+
+namespace siconos::simulation {
+class Simulation;
+}
+
+namespace siconos::collision::native {
+
+class SpaceFilter;
 
 /** SiconosBodies : a Siconos Model, some plans and space filtering capabilities
  */
 
-class SiconosBodies
-{
-
-protected:
-
+class SiconosBodies {
+ protected:
   ACCEPT_SERIALIZATION(SiconosBodies);
 
+  std::shared_ptr<siconos::collision::native::FMatrix> _moving_plans{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _plans{nullptr};
+  std::shared_ptr<siconos::simulation::Simulation> _sim{nullptr};
+  std::shared_ptr<siconos::collision::native::SpaceFilter> _playground{nullptr};
 
-  SP::FMatrix _moving_plans;
-  SP::SiconosMatrix _plans;
-  SP::Simulation _sim;
-  SP::SpaceFilter _playground;
-
-public:
+ public:
+  /** destructor */
+  virtual ~SiconosBodies() noexcept = default;
 
   virtual void init() = 0;
 
   virtual void compute();
 
-  SP::Simulation simulation()
-  {
-    return _sim;
-  }
+  std::shared_ptr<siconos::simulation::Simulation> simulation() { return _sim; }
 
+  std::shared_ptr<siconos::collision::native::FMatrix> movingPlans() { return _moving_plans; }
+  std::shared_ptr<siconos::algebra::SiconosMatrix> plans() { return _plans; }
 
-  SP::FMatrix movingPlans()
-  {
-    return _moving_plans;
-  }
-  SP::SiconosMatrix plans()
-  {
-    return _plans;
-  }
-
-
-  SP::SpaceFilter spaceFilter()
+  std::shared_ptr<siconos::collision::native::SpaceFilter> spaceFilter()
   {
     return _playground;
   };
-
-  /** destructor
-   */
-  virtual ~SiconosBodies() {};
-
 };
-
-#endif // SiconosBodies_hpp
+}  // namespace siconos::collision::native
+#endif  // SiconosBodies_hpp

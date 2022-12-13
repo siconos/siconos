@@ -65,5 +65,8 @@ typedef void (*OutPtr)(unsigned int, double*, double, unsigned int, double*, dou
 
 typedef void (*InPtr)(unsigned int, double*, double, unsigned int, double*, unsigned int,
                       double*);
+
+typedef double (*FTime)(double);
+
 }  // namespace siconos::plugins
 #endif

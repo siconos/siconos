@@ -37,6 +37,11 @@ namespace siconos::plugins {
 class PluggedObject;
 }
 
+namespace siconos::internal {
+
+struct SiconosVisitor;
+}
+
 namespace siconos::modeling {
 
 class Interaction;
@@ -139,7 +144,7 @@ class Relation {
   /** sub-type of the Relation (exple: LinearTIR or ScleronomousR ...) */
   RelationSubType _subType;
 
-  /** basic constructor
+  /** base and only constructor
    *
    *  \param type type of the relation
    *  \param subtype subtype of the relation
@@ -151,13 +156,12 @@ class Relation {
 
  private:
   // Rule of five ...
+  Relation() = delete;
   Relation(const Relation &) = delete;
   Relation(Relation &&) = delete;
   Relation &operator=(const Relation &) = delete;
   Relation &operator=(Relation &&) = delete;
 
- protected:
-  Relation() = default; /* for serialization only */
 
  public:
   /** destructor */
@@ -368,6 +372,8 @@ class Relation {
   {
     return _plugine;
   };
+
+  virtual void accept(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
 
   // VIRTUAL_ACCEPT_VISITORS(Relation);
 };
