@@ -61,15 +61,10 @@ int main (int argc, char *argv[])
   int out = run_test_collection(collection, number_of_tests, globalRollingFrictionContact_test_function);
   free_test_collection(collection, number_of_tests);
 
-  //printf("\n grfc3d_test_collection.c.in 002 OK \n");
-
-
   
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
-
-
 
   
   return out;

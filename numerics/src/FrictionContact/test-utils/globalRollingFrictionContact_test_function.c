@@ -29,6 +29,8 @@
 #include "frictionContact_test_utils.h"           // for globalRollingFrictionContact_te...
 #include "test_utils.h"                           // for TestCase
 #include <time.h>                                 // for clock
+#include "JordanAlgebra.h"                        // for dnrm2l
+
 
 int globalRollingFrictionContact_test_function(TestCase* current)
 {
@@ -70,6 +72,10 @@ int globalRollingFrictionContact_test_function(TestCase* current)
   clock_t t2 = clock();
 
   int print_size = 10;
+
+  printf("Norm velocity:  %Le\n", dnrm2l(NC*dim, velocity));
+  printf("Norm reaction:  %Le\n", dnrm2l(NC*dim, reaction));
+  printf("Norm GlobalVe:  %Le\n", dnrm2l(n, globalvelocity));
 
   if(dim * NC >= print_size)
   {
@@ -113,6 +119,8 @@ int globalRollingFrictionContact_test_function(TestCase* current)
   else
     printf("test: failure\n");
 
+  // printf("\nsumry: %d %03.2e %04i %05.4f ", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
+  // printf("%02i %05i %05i %s\n\n", dim, NC, n, current->filename);
   printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
   printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
 

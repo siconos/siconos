@@ -3209,6 +3209,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double sgmp1 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1];
   double sgmp2 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2];
   double sgmp3 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3];
+  double sgmp4 = 0, sgmp5 = 0;
   double gmmp0 = 0.999;
   double gmmp1 = options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1];
   double gmmp2 = options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2];
@@ -4769,8 +4770,11 @@ while(1)
       barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / (n);
 
       /* computing the centralization parameter */
+      // e = barr_param > sgmp1 ? fmax(1.0, 2. * alpha_primal) : sgmp3;
       e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * alpha_primal * alpha_primal) : sgmp3;
-      sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/d;
+      // e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(alpha_primal, sgmp4)) : sgmp3;
+      // sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/sgmp5;
+      sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/5;
 
 
 
@@ -6969,6 +6973,10 @@ else break;
 } // end while (refinement_after)
 
 
+  // if (norm_w == 0.)
+  //   printf("\nw = 0.0\n");
+  // else
+  //   printf("\n|w| = %e\n", norm_w);
 
 
 
@@ -7292,7 +7300,7 @@ void grfc3d_IPM_free(GlobalRollingFrictionContactProblem* problem, SolverOptions
 void grfc3d_IPM_set_default(SolverOptions* options)
 {
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 300;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] = SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
@@ -7301,9 +7309,9 @@ void grfc3d_IPM_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_JQJ;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH;
 
@@ -7318,7 +7326,7 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_PYTHON_FILE] = 0;
 
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-9;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
