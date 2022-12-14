@@ -20,6 +20,12 @@ if(WITH_TESTING)
     DEPS "numerics;CPPUNIT::CPPUNIT"
     )
 
+  add_library(TestPlugin MODULE ${CMAKE_CURRENT_SOURCE_DIR}/src/plugin/test/TestPlugin.cpp)
+  set_target_properties(TestPlugin 
+    PROPERTIES PREFIX ""
+    OUTPUT_NAME ${CMAKE_CURRENT_BINARY_DIR}/TestPlugin)
+
+
   # ---- Siconos tools tests ----
   begin_tests(src/utils/SiconosTools/test DEPS "CPPUNIT::CPPUNIT")
   new_test(SOURCES SiconosGraphTest.cpp ${SIMPLE_TEST_MAIN})

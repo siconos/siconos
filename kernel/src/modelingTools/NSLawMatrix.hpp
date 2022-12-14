@@ -34,8 +34,7 @@
 class NSLawMatrix : public boost::numeric::ublas::symmetric_matrix < SP::NonSmoothLaw >
 {
 protected:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(NSLawMatrix);
 
 public:

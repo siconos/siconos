@@ -24,16 +24,16 @@
 #include "SiconosFwd.hpp" // for OneStepIntegrator, etc
 #include "Simulation.hpp"
 
-/** Simulation based on event driven method, ie events detection (see
- * theoretical manual for more details).
- *
- * WARNING: at the time only written for Lagrangian systems !!!
- *
- */
+/** 
+    Simulation based on event driven method, ie events detection (see
+    theoretical manual for more details).
+    
+    WARNING: at the time only written for Lagrangian systems !!!
+    
+*/
 class EventDriven : public Simulation {
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(EventDriven);
 
   /** flag used in DLSODAR -
@@ -87,12 +87,14 @@ protected:
 
 public:
   /** defaut constructor
-   * \param nsds current nonsmooth dynamical system
-   * \param td time discretisation
+   *
+   *  \param nsds current nonsmooth dynamical system
+   *  \param td time discretisation
    */
   EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
 
   /** constructor with data
+   *
    *  \param nsds current nonsmooth dynamical system
    *  \param td time discretisation
    *  \param nb number of NSProblem
@@ -118,35 +120,42 @@ public:
   /* Getters and setters */
 
   /** Set value to _istate
-   * \param newValue
+   *
+   *  \param newValue
    */
   inline void setIstate(int newValue) { _istate = newValue; }
   /** Get value of _istate
-   * \return _istate a double
+   *
+   *  \return _istate a double
    */
   inline double istate() { return _istate; }
 
   /** Set value to _TOL_ED
-   * \param var the new tolerance
+   *
+   *  \param var the new tolerance
    */
   inline void setToleranceED(double var) { _TOL_ED = var; }
   /** Get value of _epsilon
-   * \return double
+   *
+   *  \return double
    */
   inline double toleranceED() { return _TOL_ED; }
 
   /** To know if Newton Iteratio is convergent
-   * \return _isNewtonConverge
+   *
+   *  \return _isNewtonConverge
    */
   bool isNewtonConverge() { return _isNewtonConverge; };
 
   /** To known the number of steps performed by the Newton algorithm
-   * \return _newtonNbIterations
+   *
+   *  \return _newtonNbIterations
    */
   unsigned int getNewtonNbIterations() { return _newtonNbIterations; }
 
   /** Set value to the maximum number of iterations
-   * \param maxStep maximum number of step
+   *
+   *  \param maxStep maximum number of step
    */
   void setNewtonMaxIteration(unsigned int maxStep)
   {
@@ -154,7 +163,8 @@ public:
   };
 
   /** To set maximum number of iterations to localize events
-   *\param maxIter maximum number of iterations
+   *
+   *  \param maxIter maximum number of iterations
    */
   void setLocalizeEventsMaxIteration(unsigned int maxIter)
   {
@@ -162,31 +172,37 @@ public:
   }
 
   /** get the maximum number of Newton iteration
+   *
    *  \return unsigned int
    */
   double newtonMaxIteration() { return _newtonMaxIteration; };
 
   /** get the maximum number of iterations to localize events
-   * \return unsigned int: maximum number of iterations
+   *
+   *  \return unsigned int: maximum number of iterations
    */
   unsigned int LocalizeEventsMaxIteration() { return _localizeEventMaxIter; }
 
   /** accessor to _newtonResiduDSMax
-   * \return double _newtonResiduDSMax
+   *
+   *  \return double _newtonResiduDSMax
    */
   double newtonResiduDSMax() { return _newtonResiduDSMax; };
 
   /** accessor to _newtonResiduYMax
-   * \return double _newtonResiduYMax
+   *
+   *  \return double _newtonResiduYMax
    */
   double newtonResiduYMax() { return _newtonResiduYMax; };
 
   /** set the Default Newton tolerance
+   *
    *  \param tol new tolerance
    */
   void setNewtonTolerance(double tol) { _newtonTolerance = tol; };
 
   /** get the Newton tolerance
+   *
    *  \return tolerance
    */
   double newtonTolerance() { return _newtonTolerance; };
@@ -194,18 +210,20 @@ public:
   /** Redefine method insertIntegrator of the class Simulation */
   void insertIntegrator(SP::OneStepIntegrator) override;
 
-  /** update indexSets[i] of the topology, using current y and lambda values of
-   * Interactions. \param i the number of the set to be updated
+  /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
+   *
+   *  \param i the number of the set to be updated
    */
 
   void updateIndexSet(unsigned int i) override;
 
   /** update indexSets[1] and [2] (using current y and lambda values of
-   * Interactions) with conditions on y[2] AND lambda[2].
+   *  Interactions) with conditions on y[2] AND lambda[2].
    */
   void updateIndexSetsWithDoubleCondition();
 
   /** compute right-hand side of xdot = f(x,t), for the integrator osi.
+   *
    *  \param osi the integrator (Lsodar)
    *  \param sizeOfX size of vector x
    *  \param time current time given by the integrator
@@ -216,6 +234,7 @@ public:
                 doublereal *x, doublereal *xdot);
 
   /** compute jacobian of the right-hand side
+   *
    *  \param osi the integrator (Lsodar)
    *  \param sizeOfX size of vector x
    *  \param time current time given by the integrator
@@ -226,11 +245,13 @@ public:
                          doublereal *time, doublereal *x, doublereal *jacob);
 
   /** compute the size of constraint function g(x,t,...) for osi
-   * \return unsigned int
+   *
+   *  \return unsigned int
    */
   virtual unsigned int computeSizeOfg();
 
   /** compute constraint function g(x,t,...) for osi.
+   *
    *  \param osi pointer to OneStepIntegrator.
    *  \param sizeX integer*, size of vector x
    *  \param time doublereal*, time
@@ -246,51 +267,48 @@ public:
    */
   void updateImpactState();
 
-  /** update state for smooth dynamic case (i.e. compute p[2] and update
-   * acceleration) */
-
+  /** update state for smooth dynamic case (i.e. compute p[2] and update acceleration) */
   void updateSmoothState();
 
   /** update input
+   *
    *  \param level of lambda  used to compute input
    */
   void updateInput(unsigned int level) override {}
 
   /** update state.
+   *
    *  \param level of lambda  used to compute input
    */
   void updateState(unsigned int level) override;
 
   /** update output and indexSets.
+   *
    *  \param level of lambda  used to compute input
    */
   void updateOutput(unsigned int level) override;
 
-  /** Initialize EventDriven **/
-
-  /** run simulation from one Event to the next, according to events manager
-   * settings.
-   *
+  /** run simulation from one Event to the next, according to events manager settings.
    */
   void advanceToEvent() override;
-
-  /** visitors hook
-   */
 
   /** Methods for NewMarkAlphaOSI scheme */
 
   /** compute maximum residu over all gap functions of Index2 contacts
-   * \return double: maximum residu for all gap functions
+   *
+   *  \return double: maximum residu for all gap functions
    */
   double computeResiduConstraints();
 
   /** prepare for Newton iterations for all OSIs
-   *\return maximum residu over all DSs
+   *
+   *  \return maximum residu over all DSs
    */
   void prepareNewtonIteration();
 
   /** Check convergence of Newton iteration
-   *\return bool: true if convergent, false otherwise
+   *
+   *  \return bool: true if convergent, false otherwise
    */
   bool newtonCheckConvergence(double);
 
@@ -301,15 +319,18 @@ public:
   void correctionNewtonIteration();
 
   /** Newton iteration to get the state of all Dynamical Systems at the end of
-   *step \param criterion tolerance to check convergence \param maxStep maximum
-   *number of steps
+   *  step
+   *
+   *  \param criterion tolerance to check convergence
+   *  \param maxStep maximum number of steps
    */
   void newtonSolve(double criterion, unsigned int maxStep);
 
   /** Detect whether or not events occur during each integration step
-   *\param updateIstate true if we need to update the flag _istate, false
-   *otherwise \return double, maximum of absolute values of constraint fonctions
-   *over all activated ot deactivated contacts
+   *
+   *  \param updateIstate true if we need to update the flag _istate, false otherwise
+   *  \return double, maximum of absolute values of constraint fonctions
+   *  over all activated ot deactivated contacts
    */
   double detectEvents(bool updateIstate = true);
 

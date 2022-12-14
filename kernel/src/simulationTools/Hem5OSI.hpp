@@ -48,8 +48,7 @@ TYPEDEF_SPTR(Hem5OSI_impl);
  */
 class Hem5OSI : public OneStepIntegrator {
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(Hem5OSI);
 
   /** vector of integer data for the integrator
@@ -273,11 +272,17 @@ public:
   void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
                          OneStepNSProblem *osnsp) override;
 
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+   */
+  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
+  {
+    return *(*indexSet.properties(vertex_inter).workVectors)[Hem5OSI::OSNSP_RHS];
+  };
+
   /** print the data to the screen
    */
   void display() override;
 
-  // visitors hook
   ACCEPT_STD_VISITORS();
 };
 

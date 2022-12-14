@@ -32,8 +32,6 @@
 class CircleCircleR : public CircularR, public std::enable_shared_from_this<CircleCircleR>
 {
 private:
-  // serialization hooks
-
   ACCEPT_SERIALIZATION(CircleCircleR);
 
 public:
@@ -46,34 +44,39 @@ public:
   */
   CircleCircleR(double rdisk1, double rdisk2);
 
-  /** compute distance between 2 disks
-      \param x1 x position of first disk
-      \param y1 y position of first disk
-      \param r1 radius of first disk
-      \param x2 x position of second disk
-      \param y2 y position of second disk
-      \param r2 radius of second disk
-      \return distance 
+  /** 
+     compute distance between 2 disks
+      
+     \param x1 x position of first disk
+     \param y1 y position of first disk
+     \param r1 radius of first disk
+     \param x2 x position of second disk
+     \param y2 y position of second disk
+     \param r2 radius of second disk
+     \return distance 
   */
   double distance(double x1, double y1, double r1,
                   double x2, double y2, double r2);
 
   using LagrangianScleronomousR::computeh;
 
-  /** to compute the output y = h(q,z) of the Relation
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-      \param y the resulting vector
+  /**
+     to compute the output y = h(q,z) of the Relation
+     
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
+     \param y the resulting vector
   */
   void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
 
-  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
+  /**
+     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+     
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
   */
   void computeJachq(const BlockVector& q, BlockVector& z);
 
-  // visitors hook
   ACCEPT_VISITORS();
 
 };

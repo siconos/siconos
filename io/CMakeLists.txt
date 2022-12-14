@@ -140,7 +140,7 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     # add dependencies for header generation
     add_custom_target(SerializersGeneration ALL
       DEPENDS ${GENERATED_HEADER} ${GENERATED_HEADER_KERNEL})
-    add_dependencies(_kernel SerializersGeneration)
+    add_dependencies(pykernel SerializersGeneration)
     add_dependencies(${COMPONENT} SerializersGeneration)
   endif()
   
@@ -198,10 +198,6 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
   # --- python bindings ---
   if(WITH_${COMPONENT}_PYTHON_WRAPPER)
     add_subdirectory(swig)
-  endif()
-  
-  if(WITH_PYTHON_WRAPPER)
-    add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
   endif()
   
   # ---- Installation ----

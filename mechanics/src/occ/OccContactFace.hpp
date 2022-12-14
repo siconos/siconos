@@ -16,8 +16,6 @@ struct OccContactFace : public OccContactShape
   unsigned int _index;
   SPC::TopoDS_Face _face;
 
-  /** visitors hook
-   */
   ACCEPT_STD_VISITORS();
 };
 #endif

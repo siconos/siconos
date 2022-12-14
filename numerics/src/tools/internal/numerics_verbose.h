@@ -17,7 +17,7 @@
 */
 
 /*!\file numerics_verbose.h
- * \brief verbosity related functions*/
+ * verbosity related functions*/
 
 #ifndef _NUMERICS_VERBOSE_INTERNAL_H_
 #define _NUMERICS_VERBOSE_INTERNAL_H_
@@ -38,7 +38,7 @@ extern "C"
 {
 #endif
 
-/** Check return code of an expression. */
+/* Check return code of an expression. */
 #define CHECK_RETURN(EXPR)                                              \
   do                                                                    \
   {                                                                     \
@@ -49,7 +49,7 @@ extern "C"
     }                                                                   \
   } while (0)
 
-/** Check return code of a first expression and execute the second */
+/* Check return code of a first expression and execute the second */
 #define CHECK_AND_DO(EXPR, TODOIFOK)                                    \
   do                                                                    \
   {                                                                     \
@@ -86,8 +86,7 @@ extern "C"
     }                                                                   \
   } while (0)
 
-/** ignore IO. Think carefully before using this ...
- */
+/* ignore IO. Think carefully before using this ...*/
 #define IGNORE_IO(EXPR)                                                 \
   do                                                                    \
   {                                                                     \
@@ -113,8 +112,10 @@ extern "C"
 #define WARN_RESULT_IGNORED
 #endif
 
+  
 
   /** msg output and exit with error
+   *
    * \param fn_name name of the function where error occurs
    * \param msg formatted output msg
    */
@@ -122,28 +123,29 @@ extern "C"
 
   /** log error message without exit
    *
-   * \param fn_name name of the function where the error occurs
-   * \param msg formatted output message
+   *  \param fn_name name of the function where the error occurs
+   *  \param msg formatted output message
    */
   void numerics_error_nonfatal(const char* fn_name, const char* msg, ...);
 
   /** log warning
    *
-   * \param fn_name name of the function where warning occurs
-   * \param msg formatted output message
+   *  \param fn_name name of the function where warning occurs
+   *  \param msg formatted output message
    */
   void numerics_warning(const char * fn_name, const char* msg, ...);
 
   /** log message (if verbosity is on)
    *
-   * \param fmt formatted output message
+   *  \param fmt formatted output message
   */
   void numerics_printf(const char * fmt, ...);
 
   /** log message if verbose is non null
-   * \param verbose log message is non null
-   * \param fmt formatted output message
-  */
+   *
+   *  \param verbose log message is non null
+   *  \param fmt formatted output message
+   */
   void numerics_printf_verbose(int verbose, const char * fmt, ...);
 
 #if defined(__cplusplus) && !defined (BUILD_AS_CPP)

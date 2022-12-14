@@ -42,24 +42,25 @@ int globalFrictionContact_test_function(TestCase* current)
 
   int k, info = -1 ;
   GlobalFrictionContactProblem* problem = globalFrictionContact_new_from_filename(current->filename);
+
   /* globalFrictionContact_display(problem); */
 
   /* /\* print problem data in Matlab file *\/ */
   /* char *fname; */
   /* FILE * mfile; */
-  /* char filename[60] = "mdata/"; */
+  /* char filename[60] = "cp iterates.m mdata/"; */
   /* char fsolname[60] = "mdata/"; */
   /* char probname[50] = "\0"; */
   /* fname = strrchr(current->filename, '/'); */
   /* fname++; */
   /* for(int i = 0; *fname != '.'; i++) */
   /* { */
-  /*   probname[i] = (*fname == '-' ? '_' : *fname);  */
+  /*   probname[i] = (*fname == '-' ? '_' : *fname); */
   /*   fname++; */
   /* } */
   /* size_t long_probname = strlen(probname); */
   /* strcat(filename, probname); */
-  /* strcat(filename, ".m");  */
+  /* strcat(filename, ".m"); */
   /* mfile = fopen(filename, "w"); */
   /* print_problem_data_in_Matlab_file(problem, mfile); */
   /* fclose(mfile); */
@@ -69,6 +70,7 @@ int globalFrictionContact_test_function(TestCase* current)
 
   /* FILE * foutput  =  fopen("checkinput.dat", "w"); */
   /* info = globalFrictionContact_printInFile(problem, foutput); */
+
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
@@ -169,6 +171,8 @@ int globalFrictionContact_test_function(TestCase* current)
   printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
   printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
 
+  /* system(filename); */
+
   free(reaction);
   free(velocity);
   free(globalvelocity);
@@ -228,19 +232,19 @@ void print_solution_in_Matlab_file(double * v, double * u, double * r, int d, in
   fprintf(file, "globalVelocity=[\n");
   for(int i = 0; i < m; i++)
   {
-    fprintf(file, "%22.14e\n", v[i]);
+    fprintf(file, "%22.15e\n", v[i]);
   }
   fprintf(file, "               ];\n");
   fprintf(file, "velocity=[\n");
   for(int i = 0; i < n*d; i++)
   {
-    fprintf(file, "%22.14e\n", u[i]);
+    fprintf(file, "%22.15e\n", u[i]);
   }
   fprintf(file, "         ];\n");
   fprintf(file, "reaction=[\n");
   for(int i = 0; i < n*d; i++)
   {
-    fprintf(file, "%22.14e\n", r[i]);
+    fprintf(file, "%22.15e\n", r[i]);
   }
   fprintf(file, "         ];\n");
   return;

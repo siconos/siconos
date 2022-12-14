@@ -85,6 +85,8 @@ struct InteractionProperties
   SP::VectorOfVectors workVectors;     /**< set of SiconosVector, useful to ensure contiguous memory vectors, used as buffers in OneStepIntegrator classes. */
   SP::VectorOfBlockVectors workBlockVectors;     /**< set of BlockVector, used as buffers in OneStepIntegrator classes. */
   SP::VectorOfSMatrices workMatrices;  /**< Internal buffers used on simulation size, to store jacobians or other temporary matrices. */
+  SP::OneStepIntegrator osi1;              /**< Integrator 1  used for the given Interaction */
+  SP::OneStepIntegrator osi2;              /**< Integrator 2  used for the given Interaction */
 
   ACCEPT_SERIALIZATION(InteractionProperties);
 };
@@ -160,7 +162,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph
                                                                // determination
   // always needed -> DynamicalSystemProperties
 
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(DynamicalSystemsGraph);
 
   // to be installed with INSTALL_GRAPH_PROPERTIES
@@ -208,7 +210,7 @@ struct InteractionsGraph : public _InteractionsGraph
     lower_blockProj._store->erase(ed);
   }
 
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(InteractionsGraph);
 };
 

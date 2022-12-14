@@ -30,7 +30,8 @@
 #include "FirstOrderLinearTIR.hpp"
 
 
-/** the LinearComplementaritySystemsNSDS_H inherits frim NDSD
+/** 
+    The LinearComplementaritySystemsNSDS_H inherits frim NSDS
     for a direct instanciation of a LCS
 */
 class LinearComplementaritySystemsNSDS: public NonSmoothDynamicalSystem
@@ -38,18 +39,17 @@ class LinearComplementaritySystemsNSDS: public NonSmoothDynamicalSystem
 
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(LinearComplementaritySystemsNSDS);
 
 
-  /* a first order linear TI dynamical systems */
+  /** a first order linear TI dynamical systems */
   SP::FirstOrderLinearTIDS _ds;
-  /* a first order linear TI relation */
+  /** a first order linear TI relation */
   SP::FirstOrderLinearTIR _relation;
-  /* a complementarity condition */
+  /** a complementarity condition */
   SP::ComplementarityConditionNSL _nslaw;
-  /* an interaction*/
+  /** an interaction*/
   SP::Interaction _interaction;
 
 protected:
@@ -60,8 +60,9 @@ protected:
 public:
 
   /** constructor with t0 and T
-   * \param t0 initial time
-   * \param T final time
+   *
+   *  \param t0 initial time
+   *  \param T final time
    */
   LinearComplementaritySystemsNSDS(double t0, double T,  SP::SiconosVector x0,
                                    SP::SimpleMatrix A,  SP::SimpleMatrix B,

@@ -26,17 +26,16 @@
 #include <NewtonEulerJointR.hpp>
 #include <Tools.hpp>
 
-/** \class CouplerJointR
- *  \brief This class implements a coupling (equality) between two
- *  DoFs of any NewtonEulerJointR.  Can be used e.g. to implement a
- *  screw relation (coupled rotation and translation) based on
- *  CylindricalJointR.
- */
+/**
+   This class implements a coupling (equality) between two
+   DoFs of any NewtonEulerJointR.  Can be used e.g. to implement a
+   screw relation (coupled rotation and translation) based on
+   CylindricalJointR.
+*/
 class CouplerJointR : public NewtonEulerJointR
 {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(CouplerJointR);
 
   SP::NewtonEulerJointR _joint1, _joint2;
@@ -58,11 +57,11 @@ protected:
 public:
 
   /** Empty constructor. The relation may be initialized later by
-   * setPoint, setAbsolute, and setBasePositions. */
+   *  setPoint, setAbsolute, and setBasePositions. */
   CouplerJointR();
 
   /** Initialize a coupler. See setReferences() for an explanation of
-   * the parameters. */
+   *  the parameters. */
   CouplerJointR(SP::NewtonEulerJointR joint1, unsigned int dof1,
                 SP::NewtonEulerJointR joint2, unsigned int dof2,
                 double ratio,
@@ -70,17 +69,19 @@ public:
                 SP::SiconosVector ref2=SP::SiconosVector(), unsigned int ref2_index=0);
 
   /** Initialize a coupler. See setReferences() for an explanation of
-   * the parameters. */
+   *  the parameters. */
   CouplerJointR(SP::NewtonEulerJointR joint1, unsigned int dof1,
                 SP::NewtonEulerJointR joint2, unsigned int dof2,
                 double ratio,
                 SP::NewtonEulerDS refds1, unsigned int ref1_index,
                 SP::NewtonEulerDS refds2, unsigned int ref2_index);
 
-  /** to compute the output y = h(t,q,z) of the Relation
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+  /**
+     to compute the output y = h(t,q,z) of the Relation
+     
+     \param time current time value
+     \param q coordinates of the dynamical systems involved in the relation
+     \param y the resulting vector
   */
   virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
 
@@ -167,18 +168,24 @@ public:
   void setBasePositions(SP::SiconosVector q1,
                         SP::SiconosVector q2=SP::SiconosVector());
 
-  /** Get the number of constraints defined in the joint
-      \return the number of constraints
+  /**
+     Get the number of constraints defined in the joint
+     
+     \return the number of constraints
    */
   virtual unsigned int numberOfConstraints() { return 1; }
 
-  /** Get the number of degrees of freedom defined in the joint
-      \return the number of degrees of freedom (DoF)
+  /**
+     Get the number of degrees of freedom defined in the joint
+     
+     \return the number of degrees of freedom (DoF)
    */
   virtual unsigned int numberOfDoF() { return 1; }
 
-  /** Return the type of a degree of freedom of this joint.
-      \return the type of the degree of freedom (DoF)
+  /**
+     Return the type of a degree of freedom of this joint.
+     
+     \return the type of the degree of freedom (DoF)
   */
   virtual DoF_Type typeOfDoF(unsigned int axis) {
     if (axis<1) return DOF_TYPE_LINEAR;

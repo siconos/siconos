@@ -30,7 +30,9 @@ void NM_MA57_free(void* p)
 {
   NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   LBL_Data * lbl =  (LBL_Data *)params->linear_solver_data;
+  FILE * logfile = lbl->ma57->logfile;
   LBL_Finalize(lbl);
+  fclose(logfile);
   //free(params->linear_solver_data);
   params->linear_solver_data = NULL;
 }

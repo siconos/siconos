@@ -17,7 +17,7 @@
 */
 
 /*! \file SphereNEDS.hpp
-
+  
   \brief Definition of a 3D Sphere as a NewtonEulerDS (with
   quaternions).
 
@@ -32,8 +32,6 @@
 class SphereNEDS : public NewtonEulerDS, public std::enable_shared_from_this<SphereNEDS>
 {
 protected:
-  /** serialization hooks
-  */
   ACCEPT_SERIALIZATION(SphereNEDS);
 
   double radius;
@@ -63,8 +61,6 @@ public:
     return radius;
   };
 
-  /** visitors hook
-   */
   ACCEPT_BASE_VISITORS(NewtonEulerDS);
 
 };

@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 /*!\file CSparseMatrix.h
-  \brief Structure definition and functions related to sparse matrix storage in Numerics
+  Structure definition and functions related to sparse matrix storage in Numerics
 */
 
 #include "SiconosConfig.h"
@@ -125,8 +125,7 @@ extern "C"
 {
 #endif
 
-  /** \struct CSparseMatrix_factors
-   * Information used and produced by CSparse for an LU factorization*/
+  /** Information used and produced by CSparse for an LU factorization*/
   typedef struct {
     CS_INT n;    /**< size of linear system */
     css* S;      /**< symbolic analysis */
@@ -134,100 +133,114 @@ extern "C"
   } CSparseMatrix_factors;
 
  /** compute a LU factorization of A and store it in a workspace
-   * \param order control if ordering is used
-   * \param A the sparse matrix
-   * \param tol the tolerance
-   * \param cs_lu_A the parameter structure that eventually holds the factors
-   * \return 1 if the factorization was successful, 1 otherwise
-   */
+  *
+  *  \param order control if ordering is used
+  *  \param A the sparse matrix
+  *  \param tol the tolerance
+  *  \param cs_lu_A the parameter structure that eventually holds the factors
+  *  \return 1 if the factorization was successful, 1 otherwise
+  */
   int CSparseMatrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_factors * cs_lu_A);
 
   /** compute a Cholesky factorization of A and store it in a workspace
-   * \param order control if ordering is used
-   * \param A the sparse matrix
-   * \param cs_chol_A the parameter structure that eventually holds the factors
-   * \return 1 if the factorization was successful, 1 otherwise
+   * 
+   *  \param order control if ordering is used
+   *  \param A the sparse matrix
+   *  \param cs_chol_A the parameter structure that eventually holds the factors
+   *  \return 1 if the factorization was successful, 1 otherwise
    */
   int CSparseMatrix_chol_factorization(CS_INT order, const CSparseMatrix *A,  CSparseMatrix_factors * cs_chol_A);
 
   /** compute a LDLT factorization of A and store it in a workspace
-   * \param order control if ordering is used
-   * \param A the sparse matrix
-   * \param cs_ldlt_A the parameter structure that eventually holds the factors
-   * \return 1 if the factorization was successful, 1 otherwise
+   * 
+   *  \param order control if ordering is used
+   *  \param A the sparse matrix
+   *  \param cs_ldlt_A the parameter structure that eventually holds the factors
+   *  \return 1 if the factorization was successful, 1 otherwise
    */
   int CSparseMatrix_ldlt_factorization(CS_INT order, const CSparseMatrix *A,  CSparseMatrix_factors * cs_ldlt_A);
 
   /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
-   * \param cs_lu_A contains the LU factors of A, permutation information
-   * \param x workspace
-   * \param[in,out] b on input RHS of the linear system; on output the solution
-   * \return 0 if failed, 1 otherwise*/
+   *
+   *  \param cs_lu_A contains the LU factors of A, permutation information
+   *  \param x workspace
+   *  \param[in,out] b on input RHS of the linear system; on output the solution
+   *  \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b);
 
   /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = B
-   * with a sparse r.h.s
-   * \param cs_lu_A contains the LU factors of A, permutation information
-   * \param X a csc sparse matrix workspace
-   * \param[in,out] B on input sparse RHS of the linear system; on output the solution
-   * \return 0 if failed, 1 otherwise*/
+   *  with a sparse r.h.s
+   *
+   *  \param cs_lu_A contains the LU factors of A, permutation information
+   *  \param X a csc sparse matrix workspace
+   *  \param[in,out] B on input sparse RHS of the linear system; on output the solution
+   *  \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A, CSparseMatrix* X, CSparseMatrix* B);
 
   /** reuse a Cholesky factorization (stored in the cs_chol_A) to solve a linear system Ax = b
-   * \param cs_chol_A contains the Cholesky factors of A, permutation information
-   * \param x workspace
-   * \param[in,out] b on input RHS of the linear system; on output the solution
-   * \return 0 if failed, 1 otherwise*/
+   * 
+   *  \param cs_chol_A contains the Cholesky factors of A, permutation information
+   *  \param x workspace
+   *  \param[in,out] b on input RHS of the linear system; on output the solution
+   *  \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b);
 
   /** reuse a Cholesky factorization (stored in the cs_chol_A) to solve a linear system Ax = B
-   * with a sparse r.h.s
-   * \param cs_chol_A contains the Cholesky factors of A, permutation information
-   * \param X a csc sparse matrix workspace
-   * \param[in,out] b on input sparse RHS of the linear system; on output the solution
-   * \return 0 if failed, 1 otherwise*/
+   *  with a sparse r.h.s
+   * 
+   *  \param cs_chol_A contains the Cholesky factors of A, permutation information
+   *  \param X a csc sparse matrix workspace
+   *  \param[in,out] b on input sparse RHS of the linear system; on output the solution
+   *  \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors* cs_chol_A, CSparseMatrix* X, CSparseMatrix* B);
 
   /** reuse a LDLT factorization (stored in the cs_ldlt_A) to solve a linear system Ax = b
-   * \param cs_ldlt_A contains the LDLT factors of A, permutation information
-   * \param x workspace
-   * \param[in,out] b on input RHS of the linear system; on output the solution
-   * \return 0 if failed, 1 otherwise*/
+   *
+   *  \param cs_ldlt_A contains the LDLT factors of A, permutation information
+   *  \param x workspace
+   *  \param[in,out] b on input RHS of the linear system; on output the solution
+   *  \return 0 if failed, 1 otherwise*/
   CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors* cs_ldlt_A, double* x, double *b);
+
   /** Free a workspace related to a LU factorization
-   * \param cs_lu_A the structure to free
+   * 
+   *  \param cs_lu_A the structure to free
    */
   void CSparseMatrix_free_lu_factors(CSparseMatrix_factors* cs_lu_A);
 
   /** Matrix vector multiplication : y = alpha*A*x+beta*y
-   * \param[in] alpha matrix coefficient
-   * \param[in] A the sparse matrix
-   * \param[in] x pointer on a dense vector of size A->n
-   * \param[in] beta vector coefficient
-   * \param[in, out] y pointer on a dense vector of size A->n
-   * \return 0 if A x or y is NULL else 1
+   *
+   *  \param[in] alpha matrix coefficient
+   *  \param[in] A the sparse matrix
+   *  \param[in] x pointer on a dense vector of size A->n
+   *  \param[in] beta vector coefficient
+   *  \param[in, out] y pointer on a dense vector of size A->n
+   *  \return 0 if A x or y is NULL else 1
    */
   int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A, const double *x,
                            const double beta, double *y);
 
   /** Allocate a CSparse matrix for future copy (as in NSM_copy)
-   * \param m the matrix used as model
-   * \return an newly allocated matrix
+   *
+   *  \param m the matrix used as model
+   *  \return an newly allocated matrix
    */
   CSparseMatrix* CSparseMatrix_alloc_for_copy(const CSparseMatrix* const m);
 
   CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B);
 
   /** print a matrix to std output
-   * \param A matrix to print
-   * \param brief if positive, print only a portion of the matrix
+   * 
+   *  \param A matrix to print
+   *  \param brief if positive, print only a portion of the matrix
    */
   int CSparseMatrix_print(const CSparseMatrix *A, int brief);
 
   /** print a matrix to a text file
-   * \param A matrix to print
-   * \param brief if positive, print only a portion of the matrix
-   * \param file file descriptor*/
+   * 
+   *  \param A matrix to print
+   *  \param brief if positive, print only a portion of the matrix
+   *  \param file file descriptor*/
   int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE* file);
 
   int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief, FILE* file);
@@ -235,13 +248,14 @@ extern "C"
   CSparseMatrix * CSparseMatrix_new_from_file(FILE* file);
 
   /** Add an entry to a triplet matrix only if the absolute value is
-   * greater than  threshold
-   * \param T the sparse matrix
-   * \param i row index
-   * \param j column index
-   * \param x the value
-   * \return integer value : 1 if the absolute value is less than
-   * DBL_EPSILON, otherwise the return value of cs_entry.
+   *  greater than  threshold
+   * 
+   *  \param T the sparse matrix
+   *  \param i row index
+   *  \param j column index
+   *  \param x the value
+   *  \return integer value : 1 if the absolute value is less than
+   *  DBL_EPSILON, otherwise the return value of cs_entry.
    */
   CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold);
 
@@ -249,91 +263,102 @@ extern "C"
   CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T,  CS_INT row_off, CS_INT col_off, double * x, CS_INT row_size, CS_INT col_size, double threshold);
 
   /** Add an entry to a symmetric triplet matrix only if the absolute value is
-   * greater than threshold
-   * \param T the sparse matrix
-   * \param i row index
-   * \param j column index
-   * \param x the value
-   * \return integer value : 1 if the absolute value is less than
-   * DBL_EPSILON, otherwise the return value of cs_entry.
+   *  greater than threshold
+   * 
+   *  \param T the sparse matrix
+   *  \param i row index
+   *  \param j column index
+   *  \param x the value
+   *  \return integer value : 1 if the absolute value is less than
+   *  DBL_EPSILON, otherwise the return value of cs_entry.
    */
   CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold);
 
   /** Add an entry to a triplet matrix
-   * \param T the sparse matrix
-   * \param i row index
-   * \param j column index
-   * \param x the value
+   * 
+   *  \param T the sparse matrix
+   *  \param i row index
+   *  \param j column index
+   *  \param x the value
    */
   CS_INT CSparseMatrix_entry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
 
   /** Add an entry to a symmetric triplet matrix
-   * \param T the sparse matrix
-   * \param i row index
-   * \param j column index
-   * \param x the value
+   * 
+   *  \param T the sparse matrix
+   *  \param i row index
+   *  \param j column index
+   *  \param x the value
    */
   CS_INT CSparseMatrix_symmetric_entry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
 
   /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
-   * \param T the sparse matrix to check
-   * \return 0 if the matrix is fine, 1 otherwise
-   * */
+   * 
+   *  \param T the sparse matrix to check
+   *  \return 0 if the matrix is fine, 1 otherwise
+   */
   int CSparseMatrix_check_triplet(CSparseMatrix *T);
 
   /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
-   * \param T the sparse matrix to check
-   * \return 0 if the matrix is fine, 1 otherwise
-   * */
+   * 
+   *  \param T the sparse matrix to check
+   *  \return 0 if the matrix is fine, 1 otherwise
+   */
   int CSparseMatrix_check_csc(CSparseMatrix *T);
 
   /** Free space allocated for a SparseMatrix. note : cs_spfree also
    *  free the cs_struct this fails when the struct is allocated on
    *  the stack.
-   * \param A the sparse matrix
-   * \return NULL on success
-  */
+   * 
+   *  \param A the sparse matrix
+   *  \return NULL on success
+   */
   CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A);
 
   /** Copy a CSparseMatrix inside another CSparseMatrix.
    *  Reallocations are performed if B cannot hold a copy of A
-   * \param[in] A a CSparseMatrix
-   * \param[in,out] B a CSparseMatrix
+   * 
+   *  \param[in] A a CSparseMatrix
+   *  \param[in,out] B a CSparseMatrix
    */
   void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B);
 
   /** Multiply a matrix with a double alpha*A --> A
-   * \param alpha the  coefficient
-   * \param A the  matrix
+   * 
+   *  \param alpha the  coefficient
+   *  \param A the  matrix
    */
   int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A);
 
 
   /** Return the element A(i,j)
-   * \param A the sparse matrix
-   * \param i the row index
-   * \param j the column index
+   * 
+   *  \param A the sparse matrix
+   *  \param i the row index
+   *  \param j the column index
    */
   double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j);
 
   /** print a matrix to a text file in pyhton format
-   * \param m matrix to print
-   * \param file file descriptor*/
+   * 
+   *  \param m matrix to print
+   *  \param file file descriptor*/
   void CSparseMatrix_write_in_file_python(const CSparseMatrix* const m, FILE* file);
 
   /** Compute the max by columns of a sparse matrix
-   * \param A the sparse matrix
-   * \param max, the vector of maximum by columns
-   * \param j the column index
+   * 
+   *  \param A the sparse matrix
+   *  \param max the vector of maximum by columns
+   *  \param j the column index
    */
   int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double * max);
 
   /** Compute the max in absolute value  by columns of a sparse matrix
-   * \param A the sparse matrix
-   * \param max, the vector of maximum by columns
-   * \param j the column index
+   * 
+   *  \param A the sparse matrix
+   *  \param max the vector of maximum by columns
+   *  \param j the column index
    */
-
   int CSparseMatrix_max_abs_by_columns(const CSparseMatrix *A, double * max);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

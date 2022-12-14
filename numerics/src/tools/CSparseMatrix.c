@@ -255,9 +255,6 @@ int CSparseMatrix_lu_factorization(CS_INT order, const cs *A, double tol, CSpars
 int CSparseMatrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A)
 {
   assert(A);
-  FILE * foutput = fopen("cs.py", "w");
-  CSparseMatrix_print_in_file(A, 0, foutput);
-  fclose(foutput);
   cs_chol_A->n = A->n;
   css* S = cs_schol(order, A);
   cs_chol_A->S = S;
@@ -995,7 +992,7 @@ int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief, FILE* 
   {
     for(p = 0 ; p < nz ; p++)
     {
-      fprintf(file,"    %lld %lld %10.50g\n", (long long int)Ai [p] + 1, (long long int)Ap [p] + 1, Ax ? Ax [p] : 1) ;
+      fprintf(file,"    %lld %lld %20.16e\n", (long long int)Ai [p] + 1, (long long int)Ap [p] + 1, Ax ? Ax [p] : 1) ;
       if(brief && p > 20)
       {
         fprintf(file,"  ...\n") ;

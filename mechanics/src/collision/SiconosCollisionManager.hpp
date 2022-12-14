@@ -33,8 +33,7 @@
 class SiconosCollisionManager : public InteractionManager
 {
 protected:
-  /** serialization hooks
-   */
+  
   ACCEPT_SERIALIZATION(SiconosCollisionManager);
 
 public:
@@ -42,7 +41,7 @@ public:
   virtual ~SiconosCollisionManager() {}
 
   /** An opaque handle can be used to refer to a specific static
-   * contactor set previously added to the collision manager. */
+   *  contactor set previously added to the collision manager. */
   typedef void* StaticContactorSetID;
 
   /** Remove a body from the collision detector. This must be done
@@ -60,18 +59,20 @@ public:
    */
   virtual void removeStaticBody(const SP::StaticBody& body) {};
 
-  /** Perform an intersection test on all shapes in the contactors and
-   * return a vector of all results, ordered by distance from start.
-   \param start The starting point of the line segment in inertial
-                frame (world) coordinates.
-   \param end The ending point of the line segment in inertial frame
-              (world) coordinates.
-   \param closestOnly If true, indicates only interested in first
-                      result closest to half-space boundary, max size
-                      of returned vector = 1.
-   \param sorted If true, results are sorted by distance.
-   \return A vector of SiconosCollisionQueryResult that contain
-           information about the query results.
+  /**
+     Perform an intersection test on all shapes in the contactors and
+     return a vector of all results, ordered by distance from start.
+
+     \param start The starting point of the line segment in inertial
+     frame (world) coordinates.
+     \param end The ending point of the line segment in inertial frame
+     (world) coordinates.
+     \param closestOnly If true, indicates only interested in first
+     result closest to half-space boundary, max size
+     of returned vector = 1.
+     \param sorted If true, results are sorted by distance.
+     \return A vector of SiconosCollisionQueryResult that contain
+     information about the query results.
   */
   virtual std::vector<SP::SiconosCollisionQueryResult>
   lineIntersectionQuery(const SiconosVector& start,
@@ -80,17 +81,19 @@ public:
                         bool sorted=true)
     { return std::vector<SP::SiconosCollisionQueryResult>(); }
 
-  /** Find all shapes that are within a sphere defined by a point and
-   * a radius and return them in an ordered list based on distance to
-   * the center.
-   \param center The center of the sphere in inertial frame (world) coordinates.
-   \param radius The radius of the sphere.
-   \param closestOnly If true, indicates only interested in first
-                      result closest to half-space boundary, max size
-                      of returned vector = 1.
-   \param sorted If true, results are sorted by distance.
-   \return A vector of SiconosCollisionQueryResult that contain
-           information about the query results.
+  /**
+     Find all shapes that are within a sphere defined by a point and
+     a radius and return them in an ordered list based on distance to
+     the center
+     
+     \param center The center of the sphere in inertial frame (world) coordinates.
+     \param radius The radius of the sphere.
+     \param closestOnly If true, indicates only interested in first
+     result closest to half-space boundary, max size
+     of returned vector = 1.
+     \param sorted If true, results are sorted by distance.
+     \return A vector of SiconosCollisionQueryResult that contain
+     information about the query results.
   */
   virtual std::vector<SP::SiconosCollisionQueryResult>
   inSphereQuery(const SiconosVector& center,
@@ -99,18 +102,20 @@ public:
                 bool sorted=true)
     { return std::vector<SP::SiconosCollisionQueryResult>(); }
 
-  /** Find all shapes that are within a box defined by a center point
-   * and a dimensions (3-vector), and return them in an ordered list
-   * based on distance to the center.
-   \param center The center of the box in inertial frame (world)
-   coordinates.
-   \param dimensions The dimensions of the box (3-vector).
-   \param closestOnly If true, indicates only interested in first
-                      result closest to half-space boundary, max size
-                      of returned vector = 1.
-   \param sorted If true, results are sorted by distance.
-   \return A vector of SiconosCollisionQueryResult that contain
-           information about the query results.
+  /**
+     Find all shapes that are within a box defined by a center point
+     and a dimensions (3-vector), and return them in an ordered list
+     based on distance to the center.
+
+     \param center The center of the box in inertial frame (world)
+     coordinates.
+     \param dimensions The dimensions of the box (3-vector).
+     \param closestOnly If true, indicates only interested in first
+     result closest to half-space boundary, max size
+     of returned vector = 1.
+     \param sorted If true, results are sorted by distance.
+     \return A vector of SiconosCollisionQueryResult that contain
+     information about the query results.
   */
   virtual std::vector<SP::SiconosCollisionQueryResult>
   inBoxQuery(const SiconosVector& center,
@@ -119,16 +124,18 @@ public:
              bool sorted=true)
     { return std::vector<SP::SiconosCollisionQueryResult>(); }
 
-  /** Find all shapes that are inside a half-space, defined by a point
-   * and a normal direction.
-   \param point The point defining the boundary of the half-space.
-   \param normal The normal pointing away from the surface of the half-space.
-   \param closestOnly If true, indicates only interested in first
-                      result closest to half-space boundary, max size
-                      of returned vector = 1.
-   \param sorted If true, results are sorted by distance.
-   \return A vector of SiconosCollisionQueryResult that contain
-           information about the query results.
+  /**
+     Find all shapes that are inside a half-space, defined by a point
+     and a normal direction.
+
+     \param point The point defining the boundary of the half-space.
+     \param normal The normal pointing away from the surface of the half-space.
+     \param closestOnly If true, indicates only interested in first
+     result closest to half-space boundary, max size
+     of returned vector = 1.
+     \param sorted If true, results are sorted by distance.
+     \return A vector of SiconosCollisionQueryResult that contain
+     information about the query results.
   */
   virtual std::vector<SP::SiconosCollisionQueryResult>
   inHalfSpaceQuery(const SiconosVector& point,

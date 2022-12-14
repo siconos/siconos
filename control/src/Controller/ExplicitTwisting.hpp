@@ -30,7 +30,7 @@
 class ExplicitTwisting : public CommonSMC
 {
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(ExplicitTwisting);
 
 
@@ -57,7 +57,7 @@ public:
   virtual ~ExplicitTwisting();
 
   /** Compute the new control law at each event
-   * Here we are using the following formula:
+   *  Here we are using the following formula:
    */
   virtual void actuate();
 

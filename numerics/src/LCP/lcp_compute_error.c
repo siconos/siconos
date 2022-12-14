@@ -75,7 +75,7 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z, double *
 
   if(*error > tolerance)
   {
-    numerics_printf("lcp_compute_error : error = %g > tolerance = %g.\n", *error, tolerance);
+    numerics_printf("lcp_compute_error : error = %g > tolerance = %g.", *error, tolerance);
     return 1;
   }
   else

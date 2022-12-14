@@ -38,8 +38,7 @@ using namespace RELATION;
 
 class Lagrangian2d3DR : public LagrangianScleronomousR {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(Lagrangian2d3DR);
 
   /* Current Contact Points, may be updated within Newton loop based
@@ -74,31 +73,34 @@ protected:
   SP::SimpleMatrix _AUX2;
 
   /** Set the coordinates of first contact point.  Must only be done
-   * in a computeh() override.
-   * \param npc new coordinates
+   *  in a computeh() override.
+   *
+   *  \param npc new coordinates
    */
   void setpc1(SP::SiconosVector npc) { _Pc1 = npc; };
 
   /** Set the coordinates of second contact point.  Must only be done
-   * in a computeh() override.
-   * \param npc new coordinates
+   *  in a computeh() override.
+   *
+   *  \param npc new coordinates
    */
   void setpc2(SP::SiconosVector npc) { _Pc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point.
-   * Must only be done in a computeh() override.
-   * \param nnc new coordinates
+   *  Must only be done in a computeh() override.
+   *
+   *  \param nnc new coordinates
    */
   void setnc(SP::SiconosVector nnc) { _Nc = nnc; };
 
 public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
    *  seems parametrize the projection algorithm
-   *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
+   *  the projection is done on the surface \f$ y=0 \f$ or on \f$ y \geq 0 \f$
    */
   bool _isOnContact = false;
 
-  /** constructorx
+  /** constructor
    */
   Lagrangian2d3DR()
       : LagrangianScleronomousR(), _Pc1(new SiconosVector(2)),
@@ -113,17 +115,21 @@ public:
 
   void initialize(Interaction &inter) override;
 
-  /** to compute the output y = h(q,z) of the Relation
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-      \param y the resulting vector
+  /**
+     to compute the output y = h(q,z) of the Relation
+     
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
+     \param y the resulting vector
   */
   void computeh(const BlockVector &q, BlockVector &z,
                 SiconosVector &y) override;
 
-  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
+  /**
+     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+     
+     \param q coordinates of the dynamical systems involved in the relation
+     \param z user defined parameters (optional)
   */
   void computeJachq(const BlockVector &q, BlockVector &z) override;
 
@@ -137,13 +143,13 @@ public:
   inline SP::SiconosVector relNc() const { return _relNc; }
 
   /** Set the coordinates of inside normal vector at the contact point in ds2
-   * frame. It will be used to compute _Nc during computeh(). \param nnc new
-   * coordinates
+   *  frame. It will be used to compute _Nc during computeh().
+   *
+   *  \param nnc new coordinates
    */
   void setRelNc(SP::SiconosVector nnc) { _relNc = nnc; };
   void display() const override;
 
-  // visitors hook
   ACCEPT_STD_VISITORS();
 };
 TYPEDEF_SPTR(Lagrangian2d3DR)

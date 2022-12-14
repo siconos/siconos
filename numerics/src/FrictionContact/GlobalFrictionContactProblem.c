@@ -342,8 +342,6 @@ int globalFrictionContact_computeGlobalVelocity(
 
 FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(GlobalFrictionContactProblem* problem)
 {
-  int info = -1;
-
   NumericsMatrix *M = problem->M;
   NumericsMatrix *H = problem->H;
 

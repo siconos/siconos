@@ -19,7 +19,7 @@
 #ifndef SparseMatrix_internal_H
 #define SparseMatrix_internal_H
 
-/*!\file SparseMatrix_internal.h
+/*!\file CSparseMatrix_internal.h
  * \brief non-public functions and data structures for CSparseMatrix
  *
  * Include this file from .c/.cpp files if there is a need to access

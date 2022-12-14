@@ -24,52 +24,48 @@
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 
-/** NewtonEuler1DR
- *
- * This class is an interface for a relation with impact.  It
- * implements the computation of the jacoboian of h from the points of
- * contacts and the normal.  Use this class consists in overloading
- * the method computeh, by setting the member pc1, pc2, nc and y.  The
- * matrix jachq is used both for the building of the OSNSP (with T)
- * and for the predictor of activation of deactivation of the Interaction.
- *
- */
+/**
+   This class is an interface for a relation with impact.  It
+   implements the computation of the jacoboian of h from the points of
+   contacts and the normal.  Use this class consists in overloading
+   the method computeh, by setting the member pc1, pc2, nc and y.  The
+   matrix jachq is used both for the building of the OSNSP (with T)
+   and for the predictor of activation of deactivation of the Interaction.
 
+*/
 class NewtonEuler1DR : public NewtonEulerR {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(NewtonEuler1DR);
 
-  /* Current Contact Points, may be updated within Newton loop based
+  /** Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
   SP::SiconosVector _Pc1;
   SP::SiconosVector _Pc2;
 
-  /* Contact Points in coordinates relative to attached DS->q.  Set
+  /** Contact Points in coordinates relative to attached DS->q.  Set
    * these if _Pc1/_Pc2 are not calculated within the Newton loop. */
   SP::SiconosVector _relPc1;
   SP::SiconosVector _relPc2;
 
-  /* Inward Normal at the contact.
-   * \todo The meaning of "Inward" has to be explained carefully.
+  /** Inward Normal at the contact.
+   *  \todo The meaning of "Inward" has to be explained carefully.
    */
   SP::SiconosVector _Nc;
 
-  /* _Nc must be calculated relative to q2 */
+  /** _Nc must be calculated relative to q2 */
   SP::SiconosVector _relNc;
 
-  /* Rotation matrix converting the absolute coordinate to the contact frame
-   * coordinate. This matrix contains the unit vector(s)of the contact frame in
-   * row.
+  /** Rotation matrix converting the absolute coordinate to the contact frame
+   *  coordinate. This matrix contains the unit vector(s)of the contact frame in
+   *  row.
    */
   SP::SimpleMatrix _rotationAbsoluteToContactFrame;
 
-  /* Matrix converting */
+  /** Matrix converting */
   SP::SimpleMatrix _rotationBodyToAbsoluteFrame;
 
-  /* Cross product matrices that correspond the lever arm from
-   * contact point to center of mass*/
+  /** Cross product matrices that correspond the lever arm from
+   *  contact point to center of mass*/
   SP::SimpleMatrix _NPG1;
   SP::SimpleMatrix _NPG2;
 
@@ -78,20 +74,23 @@ protected:
   SP::SimpleMatrix _AUX2;
 
   /** Set the coordinates of first contact point.  Must only be done
-   * in a computeh() override.
-   * \param npc new coordinates
+   *  in a computeh() override.
+   *
+   *  \param npc new coordinates
    */
   void setpc1(SP::SiconosVector npc) { _Pc1 = npc; };
 
   /** Set the coordinates of second contact point.  Must only be done
-   * in a computeh() override.
-   * \param npc new coordinates
+   *  in a computeh() override.
+   *
+   *  \param npc new coordinates
    */
   void setpc2(SP::SiconosVector npc) { _Pc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point.
-   * Must only be done in a computeh() override.
-   * \param nnc new coordinates
+   *  Must only be done in a computeh() override.
+   *
+   *  \param nnc new coordinates
    */
   void setnc(SP::SiconosVector nnc) { _Nc = nnc; };
 
@@ -102,11 +101,11 @@ private:
 public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
    *  seems parametrize the projection algorithm
-   *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
+   *  the projection is done on the surface  \f$ y=0 \f$  or on  \f$ y \geq 0 \f$
    */
   bool _isOnContact = false;
 
-  /** constructorx
+  /** constructor
    */
   NewtonEuler1DR()
       : NewtonEulerR(), _Pc1(new SiconosVector(3)), _Pc2(new SiconosVector(3)),
@@ -125,20 +124,32 @@ public:
 
   void initialize(Interaction &inter) override;
 
-  /* Default implementation consists in multiplying jachq and T (see
-   * NewtonEulerR::computeJachqT) but here we compute the operator from the the
-   * contact point locations and the local frame at contact \param inter
-   * interaction that owns the relation \param q0  the block vector to the
-   * dynamical system position
+  /** Default implementation consists in multiplying jachq and T (see
+   *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
+   *  contact point locations and the local frame at contact
+   *
+   *  \param inter interaction that owns the relation
+   *  \param q0 the block vector to the dynamical system position
    */
   void computeJachqT(Interaction &inter, SP::BlockVector q0) override;
 
-  /** to compute the output y = h(t,q,z) of the Relation
+  /**
+      to compute the output y = h(t,q,z) of the Relation
+
       \param time current time value
       \param q coordinates of the dynamical systems involved in the relation
       \param y the resulting vector
   */
   void computeh(double time, const BlockVector &q0, SiconosVector &y) override;
+
+  /**
+      to compute the output y = h(t,q,z) of the Relation
+      with the relative contact points
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+   */
+  void computehFromRelativeContactPoints(double time, const BlockVector &q0, SiconosVector &y);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
@@ -152,24 +163,27 @@ public:
   inline SP::SiconosVector relNc() const { return _relNc; }
 
   /** Set the coordinates of first contact point in ds1 frame.
-   * It will be used to compute _Pc1 during computeh().
-   * \param npc new coordinates
+   *  It will be used to compute _Pc1 during computeh().
+   *
+   *  \param npc new coordinates
    */
   void setRelPc1(SP::SiconosVector npc) { _relPc1 = npc; };
 
   /** Set the coordinates of second contact point in ds2 frame
-   * It will be used to compute _Pc2 during computeh().
-   * \param npc new coordinates
+   *  It will be used to compute _Pc2 during computeh().
+   *
+   *  \param npc new coordinates
    */
   void setRelPc2(SP::SiconosVector npc) { _relPc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point in ds2
-   * frame. It will be used to compute _Nc during computeh(). \param nnc new
-   * coordinates
+   *  frame. It will be used to compute _Nc during computeh().
+   *
+   *  \param nnc new coordinates
    */
   void setRelNc(SP::SiconosVector nnc) { _relNc = nnc; };
   void display() const  override{}
-  // visitors hook
+
   ACCEPT_STD_VISITORS();
 };
 #endif // NEWTONEULERRIMPACT_H

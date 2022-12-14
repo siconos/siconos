@@ -32,8 +32,7 @@ class SensorEvent : public Event
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(SensorEvent);
 
 

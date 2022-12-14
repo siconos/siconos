@@ -29,8 +29,7 @@
 struct ExtraAdditionalTerms {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(ExtraAdditionalTerms);
 
 public:

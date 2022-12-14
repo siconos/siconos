@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-/*! \file debug.h
+/*! \file siconos_debug.h
   \brief Some debug facilities
 */
 
@@ -40,7 +40,7 @@
 #ifdef DEBUG_MESSAGES
 
 #ifdef DEBUG_WHERE_MESSAGES
-#define DEBUG_WHERESTR  "%s:%d:\n"
+#define DEBUG_WHERESTR  "%s:%d:"
 #define DEBUG_WHEREARG  __FILE__, __LINE__
 #else
 #define DEBUG_WHERESTR  "%s"
@@ -71,8 +71,8 @@ extern unsigned int debug_counter;
 
 //#define DEBUG_PREFIX   printf("%i",debug_counter); for (unsigned int i =0 ; i < debug_counter; i++) printf(".");
 #define DEBUG_PREFIX                                                   \
-  if (debug_counter > 0)                                               \
-    for (unsigned int i = 0 ; i < debug_counter-1; i++) printf("|  ");
+  ((debug_counter > 0)  ?                                               \
+   ({ for (unsigned int i = 0 ; i < debug_counter-1; i++) printf("|  ");}) : ({(void)0;}))
 
 #define DEBUG_BEGIN(M)  DEBUG_PREFIX; if (debug_counter  < 24 ) debug_counter++;   DEBUG_INTERNAL_PRINTF("-= BEGIN ==== %s",M)
 #define DEBUG_END(M)    if (debug_counter >0)  debug_counter-- ; DEBUG_PREFIX;   DEBUG_INTERNAL_PRINTF("-= END   ==== %s",M)
@@ -84,9 +84,9 @@ extern unsigned int debug_counter;
 #define DEBUG_EXPR_WE(E)
 #define DEBUG_GLOBAL_VAR_DECL(D)
 #else
-#define DEBUG_PRINTF(_fmt, ...)  DEBUG_PREFIX; DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__)
+#define DEBUG_PRINTF(_fmt, ...)  ({DEBUG_PREFIX; DEBUG_INTERNAL_PRINTF(DEBUG_WHERESTR _fmt, DEBUG_WHEREARG, __VA_ARGS__);})
 #define DEBUG_PRINT(M)  DEBUG_PRINTF("%s",M)
-#define DEBUG_EXPR(E) DEBUG_PRINTF("%s: ", #E) do { E ; } while(0)
+#define DEBUG_EXPR(E) DEBUG_PRINTF("%s: ", #E); do { E ; } while(0)
 #define DEBUG_EXPR_WE(E) do { E ; } while(0)
 #define DEBUG_GLOBAL_VAR_DECL(D) D
 #endif

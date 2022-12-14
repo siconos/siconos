@@ -26,8 +26,7 @@ class NonSmoothDynamicalSystemTest : public CppUnit::TestFixture
 {
 
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystemTest);
 
 

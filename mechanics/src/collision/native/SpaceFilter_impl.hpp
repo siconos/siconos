@@ -42,8 +42,7 @@ class FMatrix  : public ublas::matrix < FTime, ublas::column_major,
 class Hashed : public std::enable_shared_from_this<Hashed>
 {
 protected:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(Hashed);
 
   Hashed() {};

@@ -1,0 +1,13 @@
+"""Python API for siconos mechanics component
+"""
+__all__ = ["collision", "joints"]
+
+
+with_oce = "@SICONOS_HAS_OCE@" == "TRUE"
+if with_oce:
+    __all__.append("occ")
+
+
+with_bullet = "@SICONOS_HAS_BULLET@" == "TRUE"
+   
+    

@@ -31,22 +31,24 @@ private:
   /** default constructor */
   ExplicitLinearSMC() {};
 
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(ExplicitLinearSMC);
 
-  /** \f$\sigma = Cx\f$ */
+  /** \f$ \sigma = Cx \f$ */
   SP::SiconosVector _sigma;
 
 public:
 
-  /** Constructor.
-   * \param sensor the ControlSensor feeding the Actuator
+  /** Constructor
+   *
+   *  \param sensor the ControlSensor feeding the Actuator
    */
   ExplicitLinearSMC(SP::ControlSensor sensor);
 
   /** Constructor.with all data
-   * \param sensor the ControlSensor feeding the Actuator
-   * \param B the B matrix
+   *
+   *  \param sensor the ControlSensor feeding the Actuator
+   *  \param B the B matrix
    */
   ExplicitLinearSMC(SP::ControlSensor sensor, SP::SimpleMatrix B);
 
@@ -55,14 +57,15 @@ public:
   virtual ~ExplicitLinearSMC();
 
   /** Initializer
-   * \param nsds current nonsmooth dynamical system
-   * \param s current simulation setup
+   *
+   *  \param nsds current nonsmooth dynamical system
+   *  \param s current simulation setup
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation &s);
 
   /** Compute the new control law at each event
-   * Here we are using the following formula:
-   * TODO
+   *  Here we are using the following formula:
+   *  TODO
    */
   void actuate();
 

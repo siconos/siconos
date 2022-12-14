@@ -83,7 +83,7 @@ function(begin_tests SOURCE_DIR)
     unset(GLOBAL_TEST_DEPS)
     set(GLOBAL_TEST_DEPS ${TEST_DEPS} PARENT_SCOPE)
   endif()
-  
+
 endfunction()
 
 macro(test_windows_setup test_name test_sources)
@@ -207,13 +207,14 @@ function(new_test)
     endif()
     # SiconosFullGenerated.hpp includes files from all other components.
     # (Better way than using *_DOXYGEN_INPUTS?  ${COMPONENT}_DIR is empty here!)
-    foreach(_C IN LISTS COMPONENTS)
-      string(STRIP "${${_C}_DOXYGEN_INPUTS}" _dirs)
-      string(REPLACE " " ";" _dirs "${_dirs}")
-      foreach(_D IN LISTS _dirs)
-        target_include_directories(${TEST_NAME} PRIVATE ${_D})
-      endforeach()
-    endforeach()
+    # TODO: check and review the usefulness of this
+    # foreach(_C IN LISTS COMPONENTS)
+    #   string(STRIP "${${_C}_DOXYGEN_INPUTS}" _dirs)
+    #   string(REPLACE " " ";" _dirs "${_dirs}")
+    #   foreach(_D IN LISTS _dirs)
+    #     target_include_directories(${TEST_NAME} PRIVATE ${_D})
+    #   endforeach()
+    # endforeach()
   endif()
 
   # Link with extra deps (set for each test in new_test call)
@@ -285,6 +286,13 @@ function(set_siconos_test_properties)
   
   # Test timer
   set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+  
+  # set_tests_properties(${TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
+  set_tests_properties(${TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;ERROR;Assertion")
+
+  # env variables (mostly for plugins : the test must be able to find TestPlugin.so if required)
+  set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR};DYLD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}")
+  
   
 endfunction()
 

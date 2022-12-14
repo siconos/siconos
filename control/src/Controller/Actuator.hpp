@@ -33,7 +33,8 @@
 #include "ControlTypeDef.hpp"
 #include "SiconosControlFwd.hpp"
 
-/** Actuators Base Class
+/**
+   Actuators Base Class
 
    Abstract class, interface to user-defined actuators.
 
@@ -44,7 +45,7 @@
    needs to save.
 
    An Actuator handles a TimeDiscretisation, which defines the set of
-   all instants where the Actuator must operate \n (i.e. each times
+   all instants where the Actuator must operate (i.e. each times
    where actuate() function will be called). An Event, inserted into
    the EventsManager of the Simulation, is linked to this
    TimeDiscretisation.
@@ -52,7 +53,7 @@
    Moreover, an Actuator is identified thanks to an id and a type (a
    number associated to the derived class type indeed).
 
-   \section BActuator Construction
+   Construction
 
    To build an Actuator it is necessary to use the factory. Inputs are
    a number which identify the derived class type and a
@@ -78,8 +79,7 @@ class Actuator
 
 private:
 
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(Actuator);
 
 protected:
@@ -99,7 +99,7 @@ protected:
   /** name of the plugin for g (nonlinear affine in control system)*/
   std::string _plugingName;
 
-  /** name of the plugin to compute \f$\nabla_x g\f$ for the nonlinear case*/
+  /** name of the plugin to compute \f$ \nabla_x g \f$ for the nonlinear case*/
   std::string _pluginJacgxName;
 
   /** ControlSensor feeding the Controller */
@@ -112,14 +112,16 @@ protected:
 public:
 
   /** General Constructor
-   * \param type the type of the Actuator, which corresponds to the class type
-   * \param sensor the ControlSensor feeding the Actuator
+   *
+   *  \param type the type of the Actuator, which corresponds to the class type
+   *  \param sensor the ControlSensor feeding the Actuator
    */
   Actuator(unsigned int type, SP::ControlSensor sensor);
 
   /** General Constructor with dynamics affine in control
-   * \param type the type of the Actuator, which corresponds to the class type
-   * \param sensor the ControlSensor feeding the Actuator
+   *
+   *  \param type the type of the Actuator, which corresponds to the class type
+   *  \param sensor the ControlSensor feeding the Actuator
    */
   Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B);
 
@@ -128,6 +130,7 @@ public:
   virtual ~Actuator();
 
   /** set id of the Actuator
+   *
    *  \param newId the new id.
    */
   inline void setId(const std::string& newId)
@@ -136,6 +139,7 @@ public:
   };
 
   /** get id of the Actuator
+   *
    *  \return a std::string
    */
   inline const std::string getId() const
@@ -144,6 +148,7 @@ public:
   };
 
   /** get the type of the Actuator (ie class name)
+   *
    *  \return an integer
    */
   inline unsigned int getType() const
@@ -152,17 +157,20 @@ public:
   };
 
   /** Get the control value
-   * \return current control value u
+   *
+   *  \return current control value u
    */
   inline const SiconosVector& u() const { return *_u; };
 
   /** Set the control size
-   * \param size dimension of the control input u
+   *
+   *  \param size dimension of the control input u
    */
   void setSizeu(unsigned size);
 
   /** Set the B matrix
-   * \param B the new B matrix
+   *
+   *  \param B the new B matrix
    */
   inline void setB(SP::SimpleMatrix B)
   {
@@ -170,7 +178,8 @@ public:
   };
 
   /** Set the name of the plugin for computing g
-   * \param g the name of the plugin to compute g
+   *
+   *  \param g the name of the plugin to compute g
    */
   inline void setg(const std::string& g)
   {
@@ -178,19 +187,22 @@ public:
   };
 
   /** add a Sensor in the actuator.
+   *
    *  \param newSensor a Sensor that will be connected to the Actuator
    */
   void addSensorPtr(SP::ControlSensor newSensor);
 
   /** This is derived in child classes if they need to copy the TimeDiscretisation
-   * associated with this Actuator
-  *  \param td the TimeDiscretisation for this Actuator
-  */
+   *  associated with this Actuator
+   *
+   *  \param td the TimeDiscretisation for this Actuator
+   */
   virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
 
   /** initialize actuator data.
-   * \param nsds the NonSmoothDynamicalSystem
-   * \param s the simulation
+   *
+   *  \param nsds the NonSmoothDynamicalSystem
+   *  \param s the simulation
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
 
@@ -203,8 +215,9 @@ public:
   virtual void display() const;
 
   /** get the NSDS used in the Controller, if there is one
-   * \return "NULL" shared_ptr if there is no internal simulation, otherwise
-   * it return the Model hoding the simulation
+   *
+   *  \return "NULL" shared_ptr if there is no internal simulation, otherwise
+   *  it returns the Model hoding the simulation
    */
   virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const;
 };

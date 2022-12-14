@@ -37,22 +37,23 @@ typedef enum {
   GLOBAL_REDUCED
 } LINEAROSNS_ASSEMBLY_TYPE;
 
-/** Base (abstract) class for linear non-smooth problems
-
-    Base class for linear non-smooth problems, usually in the form:
-
-    \f$ w =  q + M z \f$
-
-    where
-    - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
-    - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
-
-    examples: LCP, FrictionContact ...
-
+/**
+   Base (abstract) class for linear non-smooth problems
+   
+   Usually in the form:
+   
+   \f$ w =  q + M z \f$
+   
+   where
+   - \f$ w \in R^{n} \f$  and \f$ z \in R^{n} \f$ are the unknowns,
+   - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
+   
+   examples: LCP, FrictionContact ...
+   
 */
 class LinearOSNS : public OneStepNSProblem {
 protected:
-  /* serialization hooks */
+
   ACCEPT_SERIALIZATION(LinearOSNS);
 
   /** vector w of a LinearOSNS system */
@@ -102,12 +103,11 @@ protected:
   LinearOSNS() = default;
 
 public:
-  /**  constructor from a pre-defined solver options set.
-       \param options, the options set,
-       \rst
-       see :ref:`problems_and_solvers` for details.
-       \endrst
-  */
+  /** constructor from a pre-defined solver options set.
+   *   
+   *  \param options the options set
+   *  \param assemblytype the method used to build the assembled matrix - default=REDUCED_BLOCK
+   */
   LinearOSNS(SP::SolverOptions options,
              LINEAROSNS_ASSEMBLY_TYPE assemblyType = REDUCED_BLOCK)
       : OneStepNSProblem(options)
@@ -115,94 +115,120 @@ public:
     _assemblyType = assemblyType;
   };
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~LinearOSNS(){};
 
   // --- W ---
-  /** copy of the current value of vector w
+  /** 
+      copy of the current value of vector w
+      
       \return a SiconosVector
-   */
+  */
   inline const SiconosVector getW() const { return *_w; }
-
-  /** current w vector (pointer link)
+  
+  /** 
+      current w vector (pointer link)
+      
       \return pointer on a SiconosVector
   */
   inline SP::SiconosVector w() const { return _w; }
 
-  /** set w vector (pointer link)
-      \param newPtr the new SP::SiconosVector
+  /**
+     set w vector (pointer link)
+     
+     \param newPtr the new SP::SiconosVector
   */
   inline void setWPtr(SP::SiconosVector newPtr) { _w = newPtr; }
 
   // --- Z ---
-  /** copy of the current value of vector z
-      \return a SiconosVector
-   */
+  /**
+     copy of the current value of vector z
+     
+     \return a SiconosVector
+  */
   inline const SiconosVector getz() const { return *_z; }
 
-  /** current z vector (pointer link)
-      \return pointer on a SiconosVector
+  /**
+     current z vector (pointer link)
+     
+     \return pointer on a SiconosVector
   */
   inline SP::SiconosVector z() const { return _z; }
 
-  /** set z vector (pointer link)
-      \param newPtr the new SP::SiconosVector
+  /**
+     set z vector (pointer link)
+     
+     \param newPtr the new SP::SiconosVector
   */
   inline void setzPtr(SP::SiconosVector newPtr) { _z = newPtr; }
 
-  /** M matrix (pointer link)
+  /** 
+      M matrix (pointer link)
+      
       \return pointer on a OSNSMatrix
-   */
+  */
   inline SP::OSNSMatrix M() const { return _M; }
 
-  /** set M to pointer newPtr
+  /** 
+      set M to pointer newPtr
+      
       \param newM the new M matrix
-   */
+  */
   inline void setMPtr(SP::OSNSMatrix newM) { _M = newM; }
 
   // --- H ---
 
   /** get H
+   *
    *  \return pointer on a OSNSMatrix
    */
   inline SP::OSNSMatrix H() const { return _H; }
 
   /** set the value of H
+   *  
    *  \param H the new matrix
    */
   void setH(SP::OSNSMatrix H) { _H = H; }
 
-  /** get the value of q, the constant vector in the LinearOSNS
-      \return SiconosVector
-   */
+  /**
+     get the value of q, the constant vector in the LinearOSNS
+     
+     \return SiconosVector
+  */
   inline const SiconosVector getQ() const { return *_q; }
-
-  /** get q, the the constant vector in the LinearOSNS
-      \return pointer on a SiconosVector
+  
+  /**
+     get q, the the constant vector in the LinearOSNS
+      
+     \return pointer on a SiconosVector
   */
   inline SP::SiconosVector q() const { return _q; }
-
-  /** set q to pointer newPtr
-      \param newQ the new q vector
-   */
+  
+  /**
+     set q to pointer newPtr
+     
+     \param newQ the new q vector
+  */
   inline void setQPtr(SP::SiconosVector newQ) { _q = newQ; }
 
-  /** get the type of storage used for M
-      \return NM_types (NM_DENSE, NM_SPARSE_BLOCK)
-   */
+  /**
+     get the type of storage used for M
+      
+     \return NM_types (NM_DENSE, NM_SPARSE_BLOCK)
+  */
   inline NM_types getMStorageType() const
   {
     return _numericsMatrixStorageType;
   };
 
   /** set which type of storage will be used for M
-   * \warning this function does not allocate any memory for M,
-   * it just sets an indicator for future use
-   * \param i (NM_DENSE, NM_SPARSE_BLOCK)
+   *  \warning this function does not allocate any memory for M,
+   *  it just sets an indicator for future use
+   *  
+   *  \param i (NM_DENSE, NM_SPARSE_BLOCK)
    */
   inline void setMStorageType(NM_types i) { _numericsMatrixStorageType = i; };
-
+  
   /** set which type of assembly will be used for M
    */
   inline void setAssemblyType(LINEAROSNS_ASSEMBLY_TYPE assemblyType)
@@ -216,59 +242,64 @@ public:
   /** initialize the _M matrix */
   virtual void initOSNSMatrix();
 
-  /** To initialize the LinearOSNS problem(computes topology ...)
-      \param sim the simulation owning this OSNSPB
+  /**
+     To initialize the LinearOSNS problem(computes topology ...)
+     
+     \param sim the simulation owning this OSNSPB
   */
   void initialize(SP::Simulation sim) override;
 
   /** compute extra-diagonal interactionBlock-matrix
+   *
    *  \param ed an edge descriptor
    */
   void
   computeInteractionBlock(const InteractionsGraph::EDescriptor &ed) override;
 
   /** compute diagonal Interaction block
-   * \param vd a vertex descriptor
+   *
+   *  \param vd a vertex descriptor
    */
   void computeDiagonalInteractionBlock(
       const InteractionsGraph::VDescriptor &vd) override;
-  ;
-
-  /** compute matrix M
-   */
+  
+  /** compute matrix M */
   virtual void computeM();
 
-  /** To compute a part of the "q" vector of the OSNS
-      \param vertex, vertex (interaction) which corresponds to the considered
-     block \param pos the position of the first element of yOut to be set
-  */
+  /** To compute a part of the q vector of the OSNS
+   *
+   *  \param vertex vertex (interaction) which corresponds to the considered block
+   *  \param pos the position of the first element of yOut to be set
+   */
   virtual void computeqBlock(InteractionsGraph::VDescriptor &vertex,
                              unsigned int pos);
 
   /** compute vector q
+   *
    *  \param time the current time
    */
   virtual void computeq(double time);
 
-  /** build problem coefficients (if required)
-      \param time the current time
-      \return true if the indexSet is not empty
-   */
+  /**
+     build problem coefficients (if required)
+     
+     \param time the current time
+     \return true if the indexSet is not empty
+  */
   bool preCompute(double time) override;
-  ;
-
+ 
   /** update interactions variables (y and lambda) according to current problem
-   * found solutions.
+   *  found solutions.
    */
   void postCompute() override;
-  ;
-
+ 
   /** print the data to the screen
    */
   void display() const override;
-  ;
-
-  /** choose initialisation behavior for w and z.
+ 
+  /** 
+      choose initialisation behavior for w and z.
+      
       \param val true: init w and z with previous values
       of y and lambda saved in interactions, false: init to 0.
   */
@@ -276,7 +307,6 @@ public:
 
   virtual bool checkCompatibleNSLaw(NonSmoothLaw &nslaw) = 0;
 
-  /* visitors hook */
   ACCEPT_STD_VISITORS();
 };
 

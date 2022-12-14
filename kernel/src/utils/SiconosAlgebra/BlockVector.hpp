@@ -25,19 +25,21 @@
 
 #include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosSerialization.hpp"
+
 class SiconosVector;
 
-/** "Block" vector : container (list) of SiconosVector
- *
- * A block vector is a stl vector that handles pointers to SiconosVector.
- *
- * Insertion of nullptr SP::SiconosVector is not allowed.
- *
- */
+/**
+   "Block" vector : container (list) of SiconosVector
+   
+   A block vector is a stl vector that handles pointers to SiconosVector.
+   
+   Insertion of nullptr SP::SiconosVector is not allowed.
+   
+*/
 class BlockVector
 {
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(BlockVector);
 
   /** Size (ie total number of scalar elements, not number of blocks) */
@@ -59,24 +61,28 @@ public:
   BlockVector();
 
   /** copy contructor
+   *
    *  \param v BlockVector&
    */
   BlockVector(const BlockVector& v);
 
-  /** contructor with a 2 SiconosVectors
+  /** contructor with 2 SiconosVectors
+   *
    *  \param v1 first vector
    *  \param v2 second vector
    */
   BlockVector(SP::SiconosVector v1, SP::SiconosVector v2);
 
   /** contructor with a BlockVector of n (numberOfBlocks) blocks
-   * of the same size (dim) filled with a new vector
+   *  of the same size (dim) filled with a new vector
+   *
    *  \param numberOfBlocks number of blocks
    *  \param dim dimension of the vector
    */
   BlockVector(unsigned int numberOfBlocks, unsigned int dim);
 
   /** contructor with a BlockVector of n (numberOfBlocks) blocks that point on nullptr
+   *
    *  \param numberOfBlocks number of blocks
    */
   BlockVector(unsigned int numberOfBlocks);
@@ -85,12 +91,14 @@ public:
    */
   ~BlockVector(){};
 
-  /** Set a subblock of the current vector with the content (copy) of a SiconosVector
-      \param input the vector to be copied
-      \param size_block size of the block to be copied
-      \param start_in starting position in input vector of the block to be copied
-      \param start_out starting position in current vector of the block to be filled in.
-   */
+  /**
+     Set a subblock of the current vector with the content (copy) of a SiconosVector
+     
+     \param input the vector to be copied
+     \param size_block size of the block to be copied
+     \param start_in starting position in input vector of the block to be copied
+     \param start_out starting position in current vector of the block to be filled in.
+  */
   void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in, unsigned int start_out);
 
   /** \return the size of the vector (sum of the sizes of all its blocks) */
@@ -143,7 +151,8 @@ public:
   void zero();
 
   /** set all values of the vector component to value.
-   * \param a double
+   *
+   *  \param a double
    */
   void fill(double a);
 
@@ -151,37 +160,43 @@ public:
   void display(void) const;
 
   /** put data of the vector into a std::string
-   * \return std::string
+   *
+   *  \return std::string
    */
   std::string toString() const;
 
   /** Get a component of the vector
+   *
    *  \param i index of the required component
    *  \return the component value
    */
   double getValue(unsigned int i) const;
 
   /** set a component of the vector
+   *
    *  \param i index of the required component
    *  \param value of the component
    */
   void setValue(unsigned int i, double value);
 
   /** get a component of the vector
+   *
    *  \param i index of the required component
    *  \return value of the component
    */
   double& operator()(unsigned int i) ;
 
   /** get a component of the vector
+   *
    *  \param i index of the required component
    *  \return value of the component
    */
   double operator()(unsigned int i) const;
 
   /** get a block (SiconosVector) of the vector
-   * \param pos index of the required block
-   * \return the expected block
+   *
+   *  \param pos index of the required block
+   *  \return the expected block
    */
   inline SP::SiconosVector vector(unsigned int pos)
   {
@@ -189,8 +204,9 @@ public:
   };
 
   /** gets a block (SiconosVector) of the vector
-   * \param pos index of the required block
-   * \return the expected block
+   *
+   *  \param pos index of the required block
+   *  \return the expected block
    */
   inline SPC::SiconosVector vector(unsigned int pos) const
   {
@@ -210,21 +226,25 @@ public:
   // SPC::SiconosVector operator [](unsigned int pos) const;
 
   /** set a block with a given vector (copy!)
-   * \param pos index of the block to set
-   * \param v source vector to be copied at position i
+   *
+   *  \param pos index of the block to set
+   *  \param v source vector to be copied at position i
    */
   void setVector(unsigned int pos, const SiconosVector& v);
 
   /** set a block with a given vector (pointer link!)
-   * \param pos index of the block to set
-   * \param v source vector to be inserted at position i
+   *
+   *  \param pos index of the block to set
+   *  \param v source vector to be inserted at position i
    */
   void setVectorPtr(unsigned int pos, SP::SiconosVector v);
 
-  /** Fill the container with a list of SiconosVector.
+  /** 
+      Fill the container with a list of SiconosVector.
       Warning: pointer links, no copy
+      
       \param v the vectors to be inserted
-   */
+  */
   void setAllVect(VectorOfVectors& v);
 
   /** \return a pointer to the index tab
@@ -235,60 +255,77 @@ public:
   }
 
   /** get the number of the vector that handles element at position "pos"
+   *
    *  \param pos unsigned int, position of the element
    *  \return unsigned int number of the searched vector
    */
   unsigned int getNumVectorAtPos(unsigned int pos) const;
 
-  /** Assignment operator
-      \param vIn the vector to be copied
-      \return  BlockVector&
+  /**
+     Assignment operator
+
+     \param vIn the vector to be copied
+     \return  BlockVector&
   */
   BlockVector& operator =(const BlockVector& vIn);
 
-  /** Assignment operator
-      \param data data to put in the BlockVector
-      \return  BlockVector&
+  /**
+     Assignment operator
+     \param data data to put in the BlockVector
+     \return  BlockVector&
   */
   BlockVector& operator = (const double* data);
 
   /** Assignment operator
+   *
    *  \param vIn the vector to be copied
-   * \return  BlockVector&
+   *  \return  BlockVector&
    */
   BlockVector& operator =(const SiconosVector& vIn);
 
-  /** Subtract in place operator
-      \param vIn rhs of the operator
-      \return BlockVector&
+  /**
+     Subtract in place operator
+
+     \param vIn rhs of the operator
+     \return BlockVector&
   */
   BlockVector& operator -=(const BlockVector& vIn);
 
-  /** Add in place operator
+  /** 
+      Add in place operator
+
       \param vIn rhs of the operator
       \return BlockVector&
   */
   BlockVector& operator +=(const BlockVector&);
 
-  /** Add in place operator
+  /** 
+      Add in place operator
+
       \param vIn rhs of the operator
       \return BlockVector&
   */
   BlockVector& operator += (const SiconosVector& vIn);
 
-  /** Subtract in place operator
+  /** 
+      Subtract in place operator
+
       \param vIn rhs of the operator
       \return BlockVector&
   */
   BlockVector& operator -= (const SiconosVector& vIn);
 
-  /** multiply by a scalar, result in place
+  /** 
+      multiply by a scalar, result in place
+
       \param s the scalar factor
       \return BlockVector&
   */
   BlockVector& operator *= (double s);
 
-  /** divide by a scalar, result in place
+  /** 
+      divide by a scalar, result in place
+
       \param s the scalar factor
       \return BlockVector&
   */
@@ -300,6 +337,7 @@ public:
   // void insert(const SiconosVector& v) ;
 
   /** Insert a new block (no allocation and nor copy)
+   *
    *  \param v the vector to be inserted
    */
   void insertPtr(SP::SiconosVector v);
@@ -310,10 +348,13 @@ public:
   /** \return the infinite norm of the vector */
   double normInf() const;
 
-  /** Tranform a BlockVector into a SiconosVector.
-      Required for plugins, that need contiguous memory for their parameters.
-      \return a vector (the result depends on the number of blocks in input.
-      1 block : link to first component of the container, more : copy of all components into a SiconosVector)
+  /**
+     Tranform a BlockVector into a SiconosVector.
+     
+     Required for plugins, that need contiguous memory for their parameters.
+     
+     \return a vector (the result depends on the number of blocks in input.
+     1 block : link to first component of the container, more : copy of all components into a SiconosVector)
   */
   SP::SiconosVector prepareVectorForPlugin() const;
 
@@ -325,9 +366,10 @@ public:
   */
 
   /** offstream operator
-   * \param os An output stream
-   * \param bv a BlockVector
-   * \return The same output stream
+   *
+   *  \param os An output stream
+   *  \param bv a BlockVector
+   *  \return The same output stream
    */
   friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
 

@@ -30,7 +30,7 @@
 class RegularTwisting : public Twisting
 {
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(RegularTwisting);
 
 

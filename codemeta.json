@@ -1,0 +1,93 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "license": "https://spdx.org/licenses/Apache-2.0",
+    "codeRepository": "https://github.com/siconos/siconos",
+    "contIntegration": "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/pipelines",
+    "dateCreated": "2004-01-01",
+    "dateModified": "2021-09-08",
+    "issueTracker": "https://github.com/siconos/siconos/issues",
+    "name": "Siconos",
+    "version": "4.4.0",
+    "identifier": "swh:1:dir:d5467e98f2660aa7fe6c17572afe8a15c5c85952;origin=https://github.com/siconos/siconos;visit=swh:1:snp:e9134ebb67605f12ae98eae0d5ae722c8f460ebf;anchor=swh:1:rev:8314382a93edded48899b08a1e0ab462c1d03e96",
+    "description": "Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems in C++ and in Python",
+    "applicationCategory": "Mechanical systems, Control, Electrical Circuits",
+    "releaseNotes": "https://github.com/siconos/siconos/blob/4.4.x/Changelog",
+    "developmentStatus": "active",
+    "referencePublication": "https://hal.inria.fr/inria-00162911",
+    "keywords": [
+        "Nonsmooth systems",
+        "friction-contact",
+        "complemtarity"
+    ],
+    "programmingLanguage": [
+        "Python",
+        "C++",
+        "Fortran",
+        "C"
+    ],
+    "operatingSystem": [
+        "Linux",
+        "MacOs"
+    ],
+    "softwareRequirements": [
+        "https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/siconos_dep.html",
+        ""
+    ],
+    "relatedLink": [
+        "https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials",
+        "https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/"
+    ],
+    "author": [
+        {
+            "@type": "Person",
+            "givenName": "Vincent",
+            "familyName": "Acary",
+            "email": "vincent.acary@inria.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "INRIA"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Maurice",
+            "familyName": "Bremond",
+            "email": "Maurice.Bremond@inria.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "INRIA"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Olivier",
+            "familyName": "Huber",
+            "email": "olivier.huber@inria.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Humboldt-Universität"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Franck",
+            "familyName": "Perignon",
+            "email": "franck.perignon@imag.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "CNRS"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Roger",
+            "familyName": "Pissard-Gibollet",
+            "email": "roger.pissard-gibollet@inria.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "INRIA"
+            }
+        }
+    ]
+}

@@ -253,62 +253,6 @@ void TimeSteppingD1Minus::advanceToEvent()
   // indexset (I_{k+1}^+) is calculated in Simulation::processEvent
 }
 
-
-void TimeSteppingD1Minus::updateInput(unsigned int level)
-{
-  DEBUG_BEGIN("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
-  OSIIterator itOSI;
-  // 1 - compute input (lambda -> r)
-  if(!_allNSProblems->empty())
-  {
-    for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->updateInput(nextTime(),level);
-    //_nsds->updateInput(nextTime(),levelInput);
-  }
-  DEBUG_END("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
-
-}
-
-
-
-
-// void TimeSteppingD1Minus::updateInput(unsigned int level)
-// {
-//   //  assert(level>=0);
-
-//   double time = nextTime();
-//   SP::Topology topology = _nsds->topology();
-//   InteractionsIterator it;
-
-//   // // set dynamical systems non-smooth part to zero.
-//   // for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end(); ++itOSI)
-//   // {
-//   //   for (DSIterator itDS = (*itOSI)->dynamicalSystems()->begin(); itDS != (*itOSI)->dynamicalSystems()->end(); ++itDS)
-//   //   {
-//   //     Type::Siconos dsType = Type::value(**itDS);
-//   //     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-//   //       THROW_EXCEPTION("TimeSteppingD1Minus::updateInput - not implemented for Dynamical system type: " + dsType);
-//   //     else
-//   //     {
-//   //       SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (*itDS);
-//   //       if (d->p(level)) d->p(level)->zero();
-//   //     }
-//   //   }
-//   // }
-
-//   // Set dynamical systems non-smooth part to zero.
-//   reset(level);
-
-
-//   // we compute input using lambda(level).
-//   for (it = topology->interactions()->begin(); it != topology->interactions()->end(); it++)
-//   {
-//     assert((*it)->lowerLevelForInput() <= level);
-//     assert((*it)->upperLevelForInput() >= level);
-//     (*it)->computeInput(time, level);
-//   }
-// }
-
 void TimeSteppingD1Minus::computeResidu()
 {
   for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)

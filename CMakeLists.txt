@@ -27,7 +27,7 @@
 cmake_minimum_required(VERSION 3.14) 
 
 cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
-cmake_policy(SET CMP0078 OLD) # UseSWIG generates standard target names.
+#cmake_policy(SET CMP0078 NEW) # UseSWIG generates standard target names.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
 cmake_policy(SET CMP0079 NEW) # target_link_libraries() allows use with targets in other directories
 
@@ -156,6 +156,10 @@ endif()
 # enabled options.
 add_subdirectory(docs)
 
+if(WITH_FCLIB)
+  include(fclib_setup)
+endif()
+
 # ========= Setup each required component =========
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
@@ -234,11 +238,19 @@ message(STATUS "Python interpreter is ${Python3_EXECUTABLE}")
 if(WITH_PYTHON_WRAPPER)
   message(STATUS "Python libraries are ${Python3_LIBRARIES}")
 endif()
-message(STATUS "The project will be installed in ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "------------ Installation information ------------\n")
+message("    Please check them with care and be sure to have the proper rights to write in those directories ...\n")
+message("    - The project will be installed in ${CMAKE_INSTALL_PREFIX}")
 if(WITH_PYTHON_WRAPPER)
-  message(STATUS "Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR},")
-  message(STATUS "with the command ${PYTHON_EXECUTABLE} -m pip install ${PIP_INSTALL_OPTIONS} ...")
+  message("    - Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR} (${sicopy_install_mode} mode),")
+  message("    with the command ${PYTHON_EXECUTABLE} -m pip install -U ${PIP_INSTALL_OPTIONS} ...\n")
+  if(NOT sicopy_install_mode STREQUAL "standard")
+    message("    If this path is not in the standard python environment, you'll probably have to fill PYTHONPATH.\n")
+    message("    To check python known paths, run: python3 -c 'import sys; print(sys.path)' \n")
+    message("    If siconos package path is not in sys.path, to add it, execute: export PYTHONPATH=${SICONOS_PYTHON_INSTALL_DIR}")
+  endif()
 endif()
+message(STATUS "------------------------------------- ------------\n")
 message(STATUS "To get more information about dependencies, config or else, ")
 message(STATUS "check CMakeCache.txt file or re-run cmake with -DPRINT_ENV=ON.")
 message(STATUS "=================================================================================================\n")

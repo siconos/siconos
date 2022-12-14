@@ -124,7 +124,7 @@ endif()
 # Always searched and activated if found :
 #    lpsolve, mlcpsimplex, pthread, path (Ferris and VI)
 # Searched if asked in config (WITH_...=TRUE), error if not found :
-#    fclib, suite-sparse, gams
+#    suite-sparse, gams
 
 # - LpSolve -
 find_package(LPSOLVE QUIET)
@@ -146,34 +146,8 @@ endif()
 
 include(FetchContent)
 
-# - Fclib - 
 if(WITH_FCLIB)
-  # Two ways:
-  # - User asks explicitely for a specific (already installed) version of fclib
-  #   by providing fclib_ROOT on cmake command line
-  # - else: use fetchcontent to download and install fclib as a siconos part
-  message(STATUS "Start setup for fclib ... ")
-  if(FCLIB_ROOT)
-    find_package(FCLIB 3.0.0 CONFIG REQUIRED)
-  else()
-    message(STATUS "FCLIB will be downloaded from github repository and installed as a siconos component")
-    FetchContent_Declare(fclib
-      GIT_REPOSITORY    https://github.com/FrictionalContactLibrary/fclib.git
-      GIT_TAG           origin/master
-      GIT_SHALLOW TRUE
-      UPDATE_DISCONNECTED TRUE # Do not update git repo at each run
-      # CMAKE_ARGS FCLIB_HEADER_ONLY=OFF
-      LOG_CONFIGURE TRUE
-      LOG_BUILD TRUE
-      #     LOG_INSTALL TRUE
-      )
-    FetchContent_MakeAvailable(fclib)
-    add_library(FCLIB::fclib ALIAS fclib)
-  endif()
-
   target_link_libraries(numerics PUBLIC FCLIB::fclib)
-  message(STATUS "End setup for fclib ... ")
-
 endif()
 
 # - SuiteSparse -
@@ -293,9 +267,6 @@ if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)
 endif()
 
-if(WITH_PYTHON_WRAPPER)
-  add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
-endif()  
 
 # ---- Installation ----
 # Call siconos_component_install_setup(<COMPONENT>)

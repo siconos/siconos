@@ -35,7 +35,7 @@ void computeT(SP::SiconosVector q, SP::SimpleMatrix T);
 #include "RotationQuaternion.hpp"
 
 /** Compute the force and moment vectors applied to a body with state
- * q from a force vector at a given position. */
+ *  q from a force vector at a given position. */
 void computeExtForceAtPos(SP::SiconosVector q,
                           bool isMextExpressedInInertialFrame,
                           SP::SiconosVector force, bool forceAbsRef,
@@ -43,46 +43,39 @@ void computeExtForceAtPos(SP::SiconosVector q,
                           SP::SiconosVector fExt, SP::SiconosVector mExt,
                           bool accumulate);
 
-/** NewtonEuler non linear dynamical systems
+/** 
+    NewtonEuler non linear dynamical systems
 
-  The equations of motion in the Newton-Euler formalism can be stated as
+    The equations of motion in the Newton-Euler formalism can be stated as
+    
+    \f[
+    \left\{\begin{array}{rcl}
+    M \dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \\
+    I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&
+    M_{ext}(t), \\
+    \dot q &=& T(q) [ v, \Omega] \\
+    \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
+    \end{array}\right.
+    \f]
 
-  \rst
+    with
+    
+    - \f$ x_G,v_G \f$ position and velocity of the center of mass expressed in a
+    inertial frame of reference (world frame)
+    - \f$ \Omega \f$ angular velocity vector expressed in the body-fixed frame (frame attached to the
+    object)
+    - \f$ R \f$ rotation matrix form the inertial frame to the
+    body-fixed frame \f$ R^{-1}=R^T, \det(R)=1 \f$, i.e \f$ R\in SO^+(3) \f$
+    - \f$ M=m\,I_{3\times 3} \f$ diagonal mass matrix with  \f$ m \in \mathbb{R} \f$ the scalar mass
+    - \f$ I \f$ constant inertia matrix
+    - \f$ F_{ext} \f$ and \f$ M_{ext} \f$ are the external applied forces and moment
 
-  .. math::
-     :nowrap:
-
-      \verbatim
-      \left\{\begin{array}{rcl}
-      M \\dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \             \
-      I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&
- M_{ext}(t), \ \
-      \dot q &=& T(q) [ v, \Omega] \                                    \
-      \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
-      \end{array}\right.
-      \endverbatim
- \endrst
-
- with
-  <ul>
-  <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a
- inertial frame of reference (world frame) </li> <li> \f$\Omega\f$ angular
- velocity vector expressed in the body-fixed frame (frame attached to the
- object) </li> <li> \f$R\f$ rotation matrix form the inertial frame to the
- body-fixed frame \f$R^{-1}=R^T, \det(R)=1\f$, i.e \f$ R\in SO^+(3)\f$  </li>
-  <li> \f$M=m\,I_{3\times 3}\f$ diagonal mass matrix with  \f$m \in
- \mathbb{R}\f$ the scalar mass  </li> <li> \f$I\f$ constant inertia matrix </li>
-  <li> \f$F_{ext}\f$ and \f$ M_{ext}\f$ are the external applied forces and
- moment  </li>
-  </ul>
-
-
-  In the current implementation, \f$R\f$ is parametrized by a unit quaternion.
+    In the current implementation, \f$ R \f$ is parametrized by a unit quaternion.
 
 */
 class NewtonEulerDS : public SecondOrderDS {
 protected:
-  /* serialization hooks */
+  
   ACCEPT_SERIALIZATION(NewtonEulerDS);
 
   /** Common code for constructors
@@ -93,10 +86,10 @@ protected:
   // -- MEMBERS --
 
   /** _twist contains the twist of the Newton Euler dynamical system.
-   *  _twist[0:2] : \f$v_G \in \RR^3 \f$ velocity of the center of mass in
-   * the inertial frame of reference (world frame).
-   *  _twist[3:5] : \f$\Omega\in\RR^3\f$ angular velocity expressed in the
-   * body-fixed frame
+   *  _twist[0:2] : \f$ v_G \in \RR^3 \f$ velocity of the center of mass in
+   *  the inertial frame of reference (world frame).
+   *  _twist[3:5] : \f$ \Omega\in\RR^3 \f$ angular velocity expressed in the
+   *  body-fixed frame
    */
   SP::SiconosVector _twist;
 
@@ -104,12 +97,12 @@ protected:
   SP::SiconosVector _twist0;
 
   /** _q contains the representation of the system
-   * In the current implementation, we have
+   *   In the current implementation, we have
    *   _q[0:2] : the coordinates of the center of mass expressed
    *      in the inertial frame of reference (world frame)
    *   _q[3:6] : an unit quaternion representing the orientation of the solid.
    *      This unit quaternion encodes the rotation mapping from the inertial
-   * frame of reference to the body-fixed frame
+   *   frame of reference to the body-fixed frame
    */
   SP::SiconosVector _q;
 
@@ -117,7 +110,7 @@ protected:
    * and  _ndof =6*/
   unsigned int _qDim;
 
-  /** The time derivative of \f$q\f$, \f$\dot q\f$*/
+  /** The time derivative of  \f$ q \f$ ,  \f$ \dot q \f$ */
   SP::SiconosVector _dotq;
 
   /** _acceleration contains the time derivative of the twist
@@ -139,13 +132,13 @@ protected:
   double _scalarMass;
 
   /** Matrix depending on the parametrization of the orientation
-   * \f$v = T(q) \dot q\f$
+   * \f$ v = T(q) \dot q \f$
    */
   SP::SimpleMatrix _T;
 
   /** Time derivative of T.
    *
-   * \f$\dot v = \dot T(q) \dot q + T(q) \ddot q\f$
+   * \f$ \dot v = \dot T(q) \dot q + T(q) \ddot q \f$
    */
   SP::SimpleMatrix _Tdot;
 
@@ -240,56 +233,56 @@ protected:
    *  are not yet used by the numerical scheme.
    *  Will be needed by a fully implicit scheme for instance.
    */
-  /** jacobian_q */
+  /* jacobian_q */
   //  SP::SimpleMatrix _jacobianqmInt;
-  /** jacobian_{qDot} */
+  /* jacobian_{qDot} */
   //  SP::SimpleMatrix _jacobianqDotmInt;
 
-  /** NewtonEulerDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id =
-   * "jacobianFIntq"
-   * @param time : current time
-   * @param sizeOfq : size of vector q
-   * @param q : pointer to the first element of q
-   * @param twist : pointer to the first element of twist
-   * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param  size of vector z
-   * @param[in,out] z  : a vector of user-defined parameters
+  /** NewtonEulerDS plug-in to compute \f$ \nabla_qF_{Int}(\dot q, q, t) \f$, id =
+   *  "jacobianFIntq"
+   *  @param time : current time
+   *  @param sizeOfq : size of vector q
+   *  @param q : pointer to the first element of q
+   *  @param twist : pointer to the first element of twist
+   *  @param[in,out] jacob : pointer to the first element of the jacobian
+   *  @param  size of vector z
+   *  @param[in,out] z  : a vector of user-defined parameters
    */
   SP::PluggedObject _pluginJacqFInt;
 
-  /** NewtonEulerDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q,
-   * t)\f$, id = "jacobianFIntTwist"
-   * @param time : current time
-   * @param sizeOfq : size of vector q
-   * @param q : pointer to the first element of q
-   * @param twist : pointer to the first element of twist
-   * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param  size of vector z
+  /** NewtonEulerDS plug-in to compute \f$ \nabla_{\dot q}F_{Int}(\dot q, q,
+   *  t) \f$, id = "jacobianFIntTwist"
+   *  @param time : current time
+   *  @param sizeOfq : size of vector q
+   *  @param q : pointer to the first element of q
+   *  @param twist : pointer to the first element of twist
+   *  @param[in,out] jacob : pointer to the first element of the jacobian
+   *  @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
   SP::PluggedObject _pluginJactwistFInt;
 
-  /** NewtonEulerDS plug-in to compute \f$\nabla_qM_{Int}(\dot q, q, t)\f$, id =
-   * "jacobianMInttwist"
-   * @param time : current time
-   * @param sizeOfq : size of vector q
-   * @param q : pointer to the first element of q
-   * @param twist : pointer to the first element of twist
-   * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param  size of vector z
-   * @param[in,out] z  : a vector of user-defined parameters
+  /** NewtonEulerDS plug-in to compute \f$ \nabla_qM_{Int}(\dot q, q, t) \f$, id =
+   *  "jacobianMInttwist"
+   *  @param time : current time
+   *  @param sizeOfq : size of vector q
+   *  @param q : pointer to the first element of q
+   *  @param twist : pointer to the first element of twist
+   *  @param[in,out] jacob : pointer to the first element of the jacobian
+   *  @param  size of vector z
+   *  @param[in,out] z  : a vector of user-defined parameters
    */
   SP::PluggedObject _pluginJacqMInt;
 
-  /** NewtonEulerDS plug-in to compute \f$\nabla_{\dot q}M_{Int}(\dot q, q,
-   * t)\f$, id = "jacobianMInttwist"
-   * @param time : current time
-   * @param sizeOfq : size of vector q
-   * @param q : pointer to the first element of q
-   * @param twist : pointer to the first element of twist
-   * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param  size of vector z
-   * @param[in,out] z  : a vector of user-defined parameters
+  /** NewtonEulerDS plug-in to compute \f$ \nabla_{\dot q}M_{Int}(\dot q, q,
+   *  t) \f$, id = "jacobianMInttwist"
+   *  @param time : current time
+   *  @param sizeOfq : size of vector q
+   *  @param q : pointer to the first element of q
+   *  @param twist : pointer to the first element of twist
+   *  @param[in,out] jacob : pointer to the first element of the jacobian
+   *  @param  size of vector z
+   *  @param[in,out] z  : a vector of user-defined parameters
    */
   SP::PluggedObject _pluginJactwistMInt;
 
@@ -304,9 +297,9 @@ protected:
   };
 
   /** A container of matrices to save matrices that are involed in first order
-   * from of NewtonEulerDS system values (jacobianXBloc10, jacobianXBloc11,
-   * zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
-   * protected member.*/
+   *  from of NewtonEulerDS system values (jacobianXBloc10, jacobianXBloc11,
+   *  zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
+   *  protected member.*/
   VectorOfSMatrices _rhsMatrices;
 
   /** Default constructor
@@ -320,6 +313,7 @@ public:
   // === CONSTRUCTORS - DESTRUCTOR ===
 
   /** constructor from a minimum set of data
+   *
    *  \param position initial coordinates of this DynamicalSystem
    *  \param twist initial twist of this DynamicalSystem
    *  \param mass the mass
@@ -331,28 +325,29 @@ public:
   /** destructor */
   virtual ~NewtonEulerDS();
 
-  /*! @name Right-hand side computation */
-  //@{
-
   /** reset the state to the initial state */
   void resetToInitialState() override;
 
   /** allocate (if needed)  and compute rhs and its jacobian.
-   * \param time of initialization
+   *
+   *  \param time of initialization
    */
   void initRhs(double time) override;
 
   /** set nonsmooth input to zero
+   *
    *  \param level input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) override;
 
   /** update right-hand side for the current state
+   *
    *  \param time of interest
    */
   void computeRhs(double time) override;
 
-  /** update \f$\nabla_x rhs\f$ for the current state
+  /** update \f$ \nabla_x rhs \f$ for the current state
+   *
    *  \param time of interest
    */
   void computeJacobianRhsx(double time) override;
@@ -361,12 +356,14 @@ public:
   void resetAllNonSmoothParts() override;
 
   /** set nonsmooth part of the rhs (i.e. p) to zero for a given level
-   * \param level
+   *
+   *  \param level
    */
   void resetNonSmoothPart(unsigned int level) override;
 
   // -- forces --
   /** get forces
+   *
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector forces() const override { return _wrench; }
@@ -374,6 +371,7 @@ public:
   // -- Jacobian Forces w.r.t q --
 
   /** get JacobianqForces
+   *
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianqForces() const override
@@ -382,6 +380,7 @@ public:
   }
 
   /** get JacobianvForces
+   *
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianvForces() const override
@@ -389,37 +388,37 @@ public:
     return _jacobianWrenchTwist;
   }
 
-  ///@}
-
-  /*! @name Attributes access
-    @{ */
-
   /** Returns dimension of vector q */
   virtual inline unsigned int getqDim() const { return _qDim; }
 
   // -- q --
 
   /** get q (pointer link)
+   *
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector q() const override { return _q; }
 
   /** set value of generalized coordinates vector (copy)
+   *
    *  \param newValue
    */
   void setQ(const SiconosVector &newValue) override;
 
   /** set value of generalized coordinates vector (pointer link)
+   *
    *  \param newPtr
    */
   void setQPtr(SP::SiconosVector newPtr) override;
 
   /** set initial state (copy)
+   *
    *  \param newValue
    */
   void setQ0(const SiconosVector &newValue) override;
 
   /** set initial state (pointer link)
+   *
    *  \param newPtr
    */
   void setQ0Ptr(SP::SiconosVector newPtr) override;
@@ -427,14 +426,16 @@ public:
   // -- twist --
 
   /** get twist
+   *
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector twist() const { return _twist; }
 
   /** get twist
+   *
    *  \return pointer on a SiconosVector
-   * this accessor is left to get a uniform access to velocity.
-   * This should be removed with MechanicalDS class
+   *  this accessor is left to get a uniform access to velocity.
+   *  This should be removed with MechanicalDS class
    */
   inline SP::SiconosVector velocity() const override { return _twist; }
 
@@ -442,26 +443,31 @@ public:
 
   inline SP::SiconosVector velocity0() const override { return _twist0; }
   /** set  velocity (copy)
+   *
    *  \param newValue
    */
   void setVelocity(const SiconosVector &newValue) override;
 
   /** set  velocity (pointer link)
+   *
    *  \param newPtr
    */
   void setVelocityPtr(SP::SiconosVector newPtr) override;
 
   /** set initial velocity (copy)
+   *
    *  \param newValue
    */
   void setVelocity0(const SiconosVector &newValue) override;
 
   /** set initial velocity (pointer link)
+   *
    *  \param newPtr
    */
   void setVelocity0Ptr(SP::SiconosVector newPtr) override;
 
   /** get acceleration (pointer link)
+   *
    *  \return pointer on a SiconosVector
    */
   SP::SiconosVector acceleration() const override { return _acceleration; };
@@ -471,45 +477,46 @@ public:
   void computeMass() override{};
 
   /** function to compute the mass
+   *
    *  \param position value used to evaluate the mass matrix
    */
   void computeMass(SP::SiconosVector position) override{};
 
   /** Get the linear velocity in the absolute (inertial) or relative
-   * (body) frame of reference.
-   * \param absoluteRef If true, velocity is returned in the inertial
-   *                    frame, otherwise velocity is returned in the
-   *                    body frame.
-   * \return A SiconosVector of size 3 containing the linear velocity
-   *         of this dynamical system.
+   *  (body) frame of reference.
+   *
+   *  \param absoluteRef If true, velocity is returned in the inertial
+   *  frame, otherwise velocity is returned in the body frame.
+   *  \return A SiconosVector of size 3 containing the linear velocity
+   *  of this dynamical system.
    */
   SP::SiconosVector linearVelocity(bool absoluteRef) const;
 
   /** Fill a SiconosVector with the linear velocity in the absolute
-   * (inertial) or relative (body) frame of reference.
-   * \param absoluteRef If true, velocity is returned in the inertial
-   *                    frame, otherwise velocity is returned in the
-   *                    body frame.
-   * \param v A SiconosVector of size 3 to receive the linear velocity.
+   *  (inertial) or relative (body) frame of reference.
+   *
+   *  \param absoluteRef If true, velocity is returned in the inertial
+   *  frame, otherwise velocity is returned in the body frame.
+   *  \param v A SiconosVector of size 3 to receive the linear velocity.
    */
   void linearVelocity(bool absoluteRef, SiconosVector &v) const;
 
   /** Get the angular velocity in the absolute (inertial) or relative
-   * (body) frame of reference.
-   * \param absoluteRef If true, velocity is returned in the inertial
-   *                    frame, otherwise velocity is returned in the
-   *                    body frame.
-   * \return A SiconosVector of size 3 containing the angular velocity
-   *         of this dynamical system.
+   *  (body) frame of reference.
+   *
+   *  \param absoluteRef If true, velocity is returned in the inertial
+   *  frame, otherwise velocity is returned in the body frame.
+   *  \return A SiconosVector of size 3 containing the angular velocity
+   *  of this dynamical system.
    */
   SP::SiconosVector angularVelocity(bool absoluteRef) const;
 
   /** Fill a SiconosVector with the angular velocity in the absolute
-   * (inertial) or relative (body) frame of reference.
-   * \param absoluteRef If true, velocity is returned in the inertial
-   *                    frame, otherwise velocity is returned in the
-   *                    body frame.
-   * \param w A SiconosVector of size 3 to receive the angular velocity.
+   *  (inertial) or relative (body) frame of reference.
+   *
+   *  \param absoluteRef If true, velocity is returned in the inertial
+   *  frame, otherwise velocity is returned in the body frame.
+   *  \param w A SiconosVector of size 3 to receive the angular velocity.
    */
   void angularVelocity(bool absoluteRef, SiconosVector &w) const;
 
@@ -518,6 +525,7 @@ public:
   // -- Mass --
 
   /** get mass value
+   *
    *  \return a double
    */
   inline double scalarMass() const { return _scalarMass; };
@@ -529,13 +537,14 @@ public:
     updateMassMatrix();
   };
 
-  /* Get the inertia matrix
-   * \return a SP::SimpleMatrix
+  /** \return the inertia matrix
    */
   SP::SiconosMatrix inertia() { return _I; };
 
-  /* Modify the inertia matrix (pointer link)
-     \param newInertia the new inertia matrix
+  /**
+    Modify the inertia matrix (pointer link)
+    
+    \param newInertia the new inertia matrix
   */
   void setInertia(SP::SiconosMatrix newInertia)
   {
@@ -543,10 +552,12 @@ public:
     updateMassMatrix();
   }
 
-  /* Modify the inertia matrix.
-     \param ix x component
-     \param iy y component
-     \param iz z component
+  /**
+    Modify the inertia matrix.
+    
+    \param ix x component
+    \param iy y component
+    \param iz z component
   */
   void setInertia(double ix, double iy, double iz);
 
@@ -555,11 +566,13 @@ public:
 
   // -- Fext --
   /** get fExt
+   *
    *  \return pointer on a plugged vector
    */
   inline SP::SiconosVector fExt() const { return _fExt; }
 
   /** set fExt to pointer newPtr
+   *
    *  \param   newPtr a SP to a Simple vector
    */
   inline void setFExtPtr(SP::SiconosVector newPtr)
@@ -567,8 +580,15 @@ public:
     _fExt = newPtr;
     _hasConstantFExt = true;
   }
+	
+  /** get mExt
+   *
+   *  \return pointer on a plugged vector
+   */
+   inline SP::SiconosVector mExt() const { return _mExt; }
 
   /** set mExt to pointer newPtr
+   *
    *  \param newPtr a SP to a Simple vector
    */
   inline void setMExtPtr(SP::SiconosVector newPtr)
@@ -578,6 +598,7 @@ public:
   }
 
   /** get mGyr
+   *
    *  \return pointer on a plugged vector
    */
   inline SP::SiconosVector mGyr() const { return _mGyr; }
@@ -591,44 +612,38 @@ public:
 
   inline SP::SiconosVector dotq() { return _dotq; }
 
-  /** @} end of members access group. */
-
-  /*! @name Memory vectors management  */
-  //@{
-
   /** get all the values of the state vector q stored in memory
+   *
    *  \return a memory
    */
   inline const SiconosMemory &qMemory() override { return _qMemory; }
 
   /** get all the values of the state vector twist stored in memory
+   *
    *  \return a memory
    */
   inline const SiconosMemory &twistMemory() { return _twistMemory; }
   /** get all the values of the state vector twist stored in memory
+   *
    *  \return a memory
    */
   inline const SiconosMemory &velocityMemory() override { return _twistMemory; }
 
   /** initialize the SiconosMemory objects with a positive size.
-   * \param steps the size of the SiconosMemory (i)
+   *
+   *  \param steps the size of the SiconosMemory (i)
    */
   void initMemory(unsigned int steps) override;
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,
-   * \todo Modify the function swapIn Memory with the new Object Memory
+   *  \todo Modify the function swapIn Memory with the new Object Memory
    */
   void swapInMemory() override;
 
   inline const SiconosMemory &forcesMemory() override { return _forcesMemory; }
 
   inline const SiconosMemory &dotqMemory() { return _dotqMemory; }
-
-  /** @} end of memory group. */
-
-  /*! @name Miscellaneous public methods */
-  //@{
 
   /** To compute the kinetic energy
    */
@@ -655,21 +670,18 @@ public:
 
   virtual void normalizeq();
 
-  /** Allocate memory for the lu factorization of the mass of the system.
+  /** 
+      Allocate memory for the lu factorization of the mass of the system.
       Useful for some integrators with system inversion involving the mass
   */
   void init_inverse_mass() override;
 
-  /** Update the content of the lu factorization of the mass of the system,
+  /** 
+      Update the content of the lu factorization of the mass of the system,
       if required.
   */
   void update_inverse_mass() override;
 
-  //@}
-
-  /*! @name Plugins management  */
-
-  //@{
 
   inline void setComputeJacobianFIntqByFD(bool value)
   {
@@ -689,6 +701,7 @@ public:
   }
 
   /** allow to set a specified function to compute _fExt
+   *
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the name of the function to use in this plugin
    */
@@ -700,7 +713,9 @@ public:
       _fExt.reset(new SiconosVector(3, 0));
     _hasConstantFExt = false;
   }
+  
   /** allow to set a specified function to compute _mExt
+   *
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the name of the function to use in this plugin
    */
@@ -714,6 +729,7 @@ public:
   }
 
   /** set a specified function to compute _fExt
+   *
    *  \param fct a pointer on the plugin function
    */
   void setComputeFExtFunction(FExt_NE fct)
@@ -725,6 +741,7 @@ public:
   }
 
   /** set a specified function to compute _mExt
+   *
    *  \param fct a pointer on the plugin function
    */
   void setComputeMExtFunction(FExt_NE fct)
@@ -736,6 +753,7 @@ public:
   }
 
   /** allow to set a specified function to compute _fInt
+   *
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the name of the function to use in this plugin
    */
@@ -747,6 +765,7 @@ public:
       _fInt.reset(new SiconosVector(3, 0));
   }
   /** allow to set a specified function to compute _mInt
+   *
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the name of the function to use in this plugin
    */
@@ -759,6 +778,7 @@ public:
   }
 
   /** set a specified function to compute _fInt
+   *
    *  \param fct a pointer on the plugin function
    */
   void setComputeFIntFunction(FInt_NE fct)
@@ -769,6 +789,7 @@ public:
   }
 
   /** set a specified function to compute _mInt
+   *
    *  \param fct a pointer on the plugin function
    */
   void setComputeMIntFunction(FInt_NE fct)
@@ -779,92 +800,106 @@ public:
   }
 
   /** allow to set a specified function to compute the jacobian w.r.t q of the
-   * internal forces \param pluginPath std::string : the complete path to the
-   * plugin \param functionName std::string : the name of the function to use in
-   * this plugin
+   *  internal forces 
+   *
+   *  \param pluginPath std::string : the complete path to the plugin
+   *  \param functionName std::string : the name of the function to use in this plugin
    */
   void setComputeJacobianFIntqFunction(const std::string &pluginPath,
                                        const std::string &functionName);
 
   /** allow to set a specified function to compute the jacobian following v of
-   * the internal forces w.r.t. \param pluginPath std::string : the complete
-   * path to the plugin \param functionName std::string : the name of the
-   * function to use in this plugin
+   *  the internal forces w.r.t. 
+   *
+   *  \param pluginPath: the complete path to the plugin
+   *  \param functionName: the name of the function to use in this plugin
    */
   void setComputeJacobianFIntvFunction(const std::string &pluginPath,
                                        const std::string &functionName);
 
   /** set a specified function to compute jacobian following q of the FInt
+   *
    *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianFIntqFunction(FInt_NE fct);
 
   /** set a specified function to compute jacobian following v of the FInt
+   *
    *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianFIntvFunction(FInt_NE fct);
 
   /** allow to set a specified function to compute the jacobian w.r.t q of the
-   * internal forces \param pluginPath std::string : the complete path to the
-   * plugin \param functionName std::string : the name of the function to use in
-   * this plugin
+   *  internal forces
+   *
+   *  \param pluginPath: the complete path to the plugin
+   *  \param functionName: the name of the function to use in this plugin
    */
   void setComputeJacobianMIntqFunction(const std::string &pluginPath,
                                        const std::string &functionName);
   /** allow to set a specified function to compute the jacobian following v of
-   * the internal forces w.r.t. \param pluginPath std::string : the complete
-   * path to the plugin \param functionName std::string : the name of the
-   * function to use in this plugin
+   *  the internal forces w.r.t. 
+   * 
+   *  \param pluginPath: the complete path to the plugin 
+   *  \param functionName: the name of the function to use in this plugin
    */
   void setComputeJacobianMIntvFunction(const std::string &pluginPath,
                                        const std::string &functionName);
 
   /** set a specified function to compute jacobian following q of the FInt
+   *
    *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianMIntqFunction(FInt_NE fct);
 
   /** set a specified function to compute jacobian following v of the FInt
+   *
    *  \param fct a pointer on the plugin function
    */
   void setComputeJacobianMIntvFunction(FInt_NE fct);
 
-  /**  function to compute the external forces
-   * \param time the current time
+  /** function to compute the external forces
+   *
+   *  \param time the current time
    */
   virtual void computeFExt(double time);
 
   /** default function to compute the external forces
-   * \param time the current time
-   * \param fExt the computed external force (in-out param)
+   *
+   *  \param time the current time
+   *  \param fExt the computed external force (in-out param)
    */
   virtual void computeFExt(double time, SP::SiconosVector fExt);
 
   /** function to compute the external moments
-   * The external moments are expressed by default in the body frame, since the
-   * Euler equation for Omega is written in the body--fixed frame. Nevertheless,
-   * if _isMextExpressedInInertialFrame) is set to true, we assume that the
-   * external moment is given in the inertial frame and we perform the rotation
-   * afterwards \param time the current time \param mExt the computed external
-   * moment (in-out param)
+   *  The external moments are expressed by default in the body frame, since the
+   *  Euler equation for Omega is written in the body--fixed frame. Nevertheless,
+   *  if _isMextExpressedInInertialFrame) is set to true, we assume that the
+   *  external moment is given in the inertial frame and we perform the rotation
+   *  afterwards
+   * 
+   *  \param time the current time
+   *  \param mExt the computed external
+   *  moment (in-out param)
    */
   virtual void computeMExt(double time, SP::SiconosVector mExt);
 
   virtual void computeMExt(double time);
 
   /** Adds a force/torque impulse to a body's FExt and MExt vectors in
-   * either absolute (inertial) or relative (body) frame.  Modifies
-   * contents of _fExt and _mExt! Therefore these must have been set
-   * as constant vectors using setFExtPtr and setMExtPtr prior to
-   * calling this function.  Adjustments to _mExt will take into
-   * account the value of _isMextExpressedInInertialFrame.
-   * \param force A force vector to be added.
-   * \param forceAbsRef If true, force is in inertial frame, otherwise
-   *                    it is in body frame.
-   * \param pos A position at which force should be applied.  If nullptr,
-   *            the center of mass is assumed.
-   * \param posAbsRef If true, pos is in inertial frame, otherwise it
-   *                  is in body frame.
+   *  either absolute (inertial) or relative (body) frame.  Modifies
+   *  contents of _fExt and _mExt! Therefore these must have been set
+   *  as constant vectors using setFExtPtr and setMExtPtr prior to
+   *  calling this function.  Adjustments to _mExt will take into
+   *  account the value of _isMextExpressedInInertialFrame.
+   *
+   *  \param force A force vector to be added.
+   *  \param forceAbsRef If true, force is in inertial frame, otherwise
+   *  it is in body frame.
+   *  \param pos A position at which force should be applied.  If nullptr,
+   *  the center of mass is assumed.
+   *  \param posAbsRef If true, pos is in inertial frame, otherwise it
+   *  is in body frame.
    */
   void addExtForceAtPos(SP::SiconosVector force, bool forceAbsRef,
                         SP::SiconosVector pos = SP::SiconosVector(),
@@ -876,44 +911,50 @@ public:
                                                     SP::SiconosVector q);
 
   /** default function to compute the internal forces
+   *
    *  \param time the current time
    */
   // void computeFInt(double time);
 
   /** function to compute the internal forces
-   * \param time the current time
-   * \param q
-   * \param v
+   *
+   *  \param time the current time
+   *  \param q
+   *  \param v
    */
   void computeFInt(double time, SP::SiconosVector q, SP::SiconosVector v);
 
   /** default function to compute the internal forces
-   * \param time the current time
-   * \param q
-   * \param v
-   * \param fInt the computed internal force vector
+   * 
+   *  \param time the current time
+   *  \param q
+   *  \param v
+   *  \param fInt the computed internal force vector
    */
   virtual void computeFInt(double time, SP::SiconosVector q,
                            SP::SiconosVector v, SP::SiconosVector fInt);
 
   /** default function to compute the internal moments
-   * \param time the current time
-   * \param q
-   * \param v
+   *
+   *  \param time the current time
+   *  \param q
+   *  \param v
    */
   void computeMInt(double time, SP::SiconosVector q, SP::SiconosVector v);
 
   /** default function to compute the internal moments
-   * \param time the current time
-   * \param q
-   * \param v
-   * \param mInt the computed internal moment vector
+   *
+   *  \param time the current time
+   *  \param q
+   *  \param v
+   *  \param mInt the computed internal moment vector
    */
   virtual void computeMInt(double time, SP::SiconosVector q,
                            SP::SiconosVector v, SP::SiconosVector mInt);
 
-  /**default function to update the plugins functions using a new time:
-   * \param time  the current time
+  /** default function to update the plugins functions using a new time:
+   *  
+   *  \param time  the current time
    */
   void updatePlugins(double time) override{};
 
@@ -922,49 +963,58 @@ public:
   void init_forces() override;
 
   /** Default function to compute forces
+   *
    *  \param time double, the current time
    */
   virtual void computeForces(double time);
 
   /** function to compute forces with some specific values for q and twist (ie
-   * not those of the current state). \param time double : the current time
+   *  not those of the current state). \param time double : the current time
+   *
    *  \param q SP::SiconosVector: pointers on q
    *  \param twist SP::SiconosVector: pointers on twist
    */
   void computeForces(double time, SP::SiconosVector q, SP::SiconosVector twist) override;
 
   /** Default function to compute the jacobian w.r.t. q of forces
+   *
    *  \param time double, the current time
    */
   void computeJacobianqForces(double time) override;
 
   /** Default function to compute the jacobian w.r.t. v of forces
+   *
    *  \param time double, the current time
    */
   void computeJacobianvForces(double time) override;
 
   /** function to compute gyroscopic forces with some specific values for q and
-   * twist (ie not those of the current state). \param twist SP::SiconosVector:
-   * pointers on  twist vector
+   *  twist (ie not those of the current state).
+   *
+   *  \param twist SP::SiconosVector: pointers on  twist vector
    */
   virtual void computeMGyr(SP::SiconosVector twist);
 
   /** function to compute gyroscopic forces with some specific values for q and
-   * twist (ie not those of the current state). \param twist pointer to twist
-   * vector \param mGyr pointer to gyroscopic forces
+   *  twist (ie not those of the current state).
+   *
+   *  \param twist pointer to twist vector
+   *  \param mGyr pointer to gyroscopic forces
    */
   virtual void computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr);
 
   /** Default function to compute the jacobian following q of mGyr
+   *
    *  \param time the current time
    */
   virtual void computeJacobianMGyrtwist(double time);
 
   /** Default function to compute the jacobian following q of mGyr
-   * by forward finite difference
-   * \param time the current time
-   * \param q current state
-   * \param twist pointer to twist vector
+   *  by forward finite difference
+   *
+   *  \param time the current time
+   *  \param q current state
+   *  \param twist pointer to twist vector
    */
   virtual void computeJacobianMGyrtwistByFD(double time, SP::SiconosVector q,
                                             SP::SiconosVector twist);
@@ -975,88 +1025,100 @@ public:
   // virtual void computeJacobianvForces(double time);
 
   /** To compute the jacobian w.r.t q of the internal forces
+   *
    *  \param time double : the current time
    */
   void computeJacobianFIntq(double time);
 
   /** To compute the jacobian w.r.t v of the internal forces
+   *
    *  \param time double : the current time
    */
   void computeJacobianFIntv(double time);
 
   /** To compute the jacobian w.r.t q of the internal forces
-   * \param time double
-   * \param position SP::SiconosVector
-   * \param twist SP::SiconosVector
+   *
+   *  \param time double
+   *  \param position SP::SiconosVector
+   *  \param twist SP::SiconosVector
    */
   virtual void computeJacobianFIntq(double time, SP::SiconosVector position,
                                     SP::SiconosVector twist);
   /** To compute the jacobian w.r.t q of the internal forces
-   * by forward finite difference
-   * \param time double
-   * \param position SP::SiconosVector
-   * \param twist SP::SiconosVector
+   *  by forward finite difference
+   *
+   *  \param time double
+   *  \param position SP::SiconosVector
+   *  \param twist SP::SiconosVector
    */
   void computeJacobianFIntqByFD(double time, SP::SiconosVector position,
                                 SP::SiconosVector twist);
 
   /** To compute the jacobian w.r.t. v of the internal forces
+   *
    *  \param time double: the current time
-   * \param position SP::SiconosVector
-   * \param twist SP::SiconosVector
+   *  \param position SP::SiconosVector
+   *  \param twist SP::SiconosVector
    */
   virtual void computeJacobianFIntv(double time, SP::SiconosVector position,
                                     SP::SiconosVector twist);
 
   /** To compute the jacobian w.r.t v of the internal forces
-   * by forward finite difference
-   * \param time double
-   * \param position SP::SiconosVector
-   * \param twist SP::SiconosVector
+   *  by forward finite difference
+   *
+   *  \param time double
+   *  \param position SP::SiconosVector
+   *  \param twist SP::SiconosVector
    */
   void computeJacobianFIntvByFD(double time, SP::SiconosVector position,
                                 SP::SiconosVector twist);
 
   /** To compute the jacobian w.r.t q of the internal forces
+   *
    *  \param time double : the current time
    */
   virtual void computeJacobianMIntq(double time);
 
   /** To compute the jacobian w.r.t v of the internal forces
+   *
    *  \param time double : the current time
    */
   virtual void computeJacobianMIntv(double time);
 
   /** To compute the jacobian w.r.t q of the internal forces
+   *
    *  \param time double : the current time,
-   * \param position SP::SiconosVector
-   * \param twist SP::SiconosVector
+   *  \param position SP::SiconosVector
+   *  \param twist SP::SiconosVector
    */
   virtual void computeJacobianMIntq(double time, SP::SiconosVector position,
                                     SP::SiconosVector twist);
 
   /** To compute the jacobian w.r.t q of the internal moments
-   * by forward finite difference
-   * \param time double
-   * \param position SP::SiconosVector
-   * \param twist SP::SiconosVector
+   *  by forward finite difference
+   *
+   *  \param time double
+   *  \param position SP::SiconosVector
+   *  \param twist SP::SiconosVector
    */
   void computeJacobianMIntqByFD(double time, SP::SiconosVector position,
                                 SP::SiconosVector twist);
 
   /** To compute the jacobian w.r.t. v of the internal forces
+   *
    *  \param time double: the current time
-   * \param position SP::SiconosVector
-   * \param twist SP::SiconosVector
+   *  \param position SP::SiconosVector
+   *  \param twist SP::SiconosVector
    */
   virtual void computeJacobianMIntv(double time, SP::SiconosVector position,
                                     SP::SiconosVector twist);
 
   /** To compute the jacobian w.r.t v of the internal moments
-   * by forward finite difference
-   * \param time double
-   * \param position SP::SiconosVector
-   * \param twist SP::SiconosVector
+   *  by forward finite difference
+   *
+   *  \param time double
+   *  \param position SP::SiconosVector
+   *  \param twist SP::SiconosVector
    */
   void computeJacobianMIntvByFD(double time, SP::SiconosVector position,
                                 SP::SiconosVector twist);
@@ -1066,6 +1128,5 @@ public:
   virtual void computeTdot();
 
   ACCEPT_STD_VISITORS();
-  //@}
 };
 #endif // NEWTONEULERNLDS_H

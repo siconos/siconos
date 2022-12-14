@@ -14,138 +14,145 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACTPROBLEM_H
 #define FRICTIONCONTACTPROBLEM_H
 
 /*!\file FrictionContactProblem.h
-  \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
+  Definition of a structure to handle friction-contact (2D or 3D) problems.
 */
-#include <stdio.h>           // for FILE
-#include "NumericsFwd.h"     // for FrictionContactProblem, NumericsMatrix
-#include "NumericsMatrix.h"  // for RawNumericsMatrix
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for FrictionContactProblem, NumericsMatrix
+#include "NumericsMatrix.h" // for RawNumericsMatrix
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
-/** \struct FrictionContactProblem FrictionContactProblem.h
- *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem.
+#include <stdio.h> // for FILE
+
+/**
+    The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)
+    problem.
 */
-struct FrictionContactProblem
-{
+struct FrictionContactProblem {
   /** dimension of the contact space (3D or 2D ) */
   int dimension;
   /** the number of contacts \f$ n_c \f$ */
   int numberOfContacts;
-  /** \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
-     a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure */
-  RawNumericsMatrix* M;
-  /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
-  double* q;
-  /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
-      (\f$ n_c =\f$ numberOfContacts) */
-  double* mu;
+  /** \f$ {M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
+     a matrix with \f$ n = d  n_c \f$ stored in NumericsMatrix structure */
+  RawNumericsMatrix *M;
+  /** \f$ {q} \in {{\mathrm{I\!R}}}^{n} \f$ */
+  double *q;
+  /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
+      (\f$ n_c = \f$ numberOfContacts) */
+  double *mu;
 };
 
-struct SplittedFrictionContactProblem
-{
-  FrictionContactProblem * fc3d;
-  NumericsMatrix * M_nn;
-  NumericsMatrix * M_tn;
-  NumericsMatrix * M_nt;
-  NumericsMatrix * M_tt;
-  double * q_n;
-  double * q_t;
+struct SplittedFrictionContactProblem {
+  FrictionContactProblem *fc3d;
+  NumericsMatrix *M_nn;
+  NumericsMatrix *M_tn;
+  NumericsMatrix *M_nt;
+  NumericsMatrix *M_tt;
+  double *q_n;
+  double *q_t;
 };
-
-
-
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
+/* create an empty FrictionContactProblem
+ * \return an empty fcp */
+FrictionContactProblem *frictionContactProblem_new(void);
 
-  /* create an empty FrictionContactProblem
-   * \return an empty fcp */
-  FrictionContactProblem* frictionContactProblem_new(void);
+/** new FrictionContactProblem from minimal set of data
+ *
+ *  \param[in] dim the problem dimension
+ *  \param[in] nc the number of contact
+ *  \param[in] M the NumericsMatrix
+ *  \param[in] q the q vector
+ *  \param[in] mu the mu vector
+ *  \return a pointer to a FrictionContactProblem structure
+ */
+FrictionContactProblem *frictionContactProblem_new_with_data(int dim, int nc,
+                                                             NumericsMatrix *M,
+                                                             double *q,
+                                                             double *mu);
 
-  /** new FrictionContactProblem from minimal set of data
-   * \param[in] dim the problem dimension
-   * \param[in] nc the number of contact
-   * \param[in] M the NumericsMatrix
-   * \param[in] q the q vector
-   * \param[in] mu the mu vector
-   * \return a pointer to a FrictionContactProblem structure
-   */
-  FrictionContactProblem* frictionContactProblem_new_with_data(int dim, int nc,
-      NumericsMatrix* M, double* q, double* mu);
+/** free a FrictionContactProblem
+ *
+ *  \param problem the problem to free
+ */
+void frictionContactProblem_free(FrictionContactProblem *problem);
 
-  /** free a FrictionContactProblem
-   * \param problem the problem to free
-   */
-  void frictionContactProblem_free(FrictionContactProblem* problem);
+/** display a FrictionContactProblem
+ *
+ *  \param problem the problem to display
+ */
+void frictionContact_display(FrictionContactProblem *problem);
 
+/** print a FrictionContactProblem in a file (numerics .dat format)
+ *
+ *  \param problem the problem to print out
+ *  \param file the dest file
+ *  \return 0 if successfull
+ */
+int frictionContact_printInFile(FrictionContactProblem *problem, FILE *file);
 
-  /** display a FrictionContactProblem
-   * \param problem the problem to display
-   */
-  void frictionContact_display(FrictionContactProblem*  problem);
+/** print a FrictionContactProblem in a file (numerics dat format)
+ *
+ *  \param problem the problem to print out
+ *  \param filename the dest file
+ *  \return 0 if successfull
+ */
+int frictionContact_printInFilename(FrictionContactProblem *problem,
+                                    char *filename);
 
-  /** print a FrictionContactProblem in a file (numerics .dat format)
-   * \param problem the problem to print out
-   * \param file the dest file
-   * \return 0 if successfull
-   */
-  int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file);
+/** read a FrictionContactProblem from a file descriptor
+ *
+ *  \param file descriptor
+ *  \return problem the problem to read
+ */
+FrictionContactProblem *frictionContact_newFromFile(FILE *file);
 
-  /** print a FrictionContactProblem in a file (numerics .dat format) from its filename
-   * \param problem the problem to print out
-   * \param filename the dest file
-   * \return 0 if successfull
-   */
-  int frictionContact_printInFilename(FrictionContactProblem*  problem, char * filename);
+/** read a FrictionContactProblem from a file (.dat or hdf5 if fclib is on) from
+ *  its filename
+ *
+ *  \param filename the name of the input file
+ *  \return problem the problem to read
+ */
+FrictionContactProblem *frictionContact_new_from_filename(const char *filename);
 
-  /** read a FrictionContactProblem from a file descriptor
-   * \param file descriptor
-   * \return problem the problem to read
-   */
-  FrictionContactProblem*  frictionContact_newFromFile(FILE* file);
+void createSplittedFrictionContactProblem(
+    FrictionContactProblem *problem,
+    SplittedFrictionContactProblem *splitted_problem);
 
-  /** read a FrictionContactProblem from a file (.dat or hdf5 if fclib is on) from its filename
-   * \param filename the name of the input file
-   * \return problem the problem to read
-   */
-  FrictionContactProblem* frictionContact_new_from_filename(const char * filename);
+void frictionContactProblem_compute_statistics(FrictionContactProblem *problem,
+                                               double *reaction,
+                                               double *velocity, double tol,
+                                               int do_print);
 
+/**
+    Creates a new FrictionContact problem and initialize its content by copying
+    an existing problem.
 
+    \param problem the source problem to be copied
+    \return a pointer to a new FrictionContactProblem
+*/
+FrictionContactProblem *frictionContact_copy(FrictionContactProblem *problem);
 
-  void createSplittedFrictionContactProblem(FrictionContactProblem* problem, SplittedFrictionContactProblem * splitted_problem);
+/**
+    Rescales M matrix and q vector of a given FrictionContactProblem.
 
-  void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
-                                                 double * reaction,
-                                                 double * velocity,
-                                                 double tol,
-                                                 int do_print)  ;
+    \f[
+    :math:`M = \alpha\gamma^2 M, q=\alpha\gamma q`
+    \f]
 
-  
-  /** Creates a new FrictionContact problem and initialize its content by copying
-      an existing problem.
-      \param problem the source problem to be copied
-      \return a pointer to a new FrictionContactProblem
-  */
-  FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem);
-
-  /** Rescales M matrix and q vector of a given FrictionContactProblem.
-
-      \rst
-      :math:`M = \alpha\gamma^2 M, q=\alpha\gamma q`
-      \endrst
-
-      \param problem to be rescaled
-      \param alpha rescaling factor
-      \param gamma rescaling factor
-  */
-  void frictionContact_rescaling(FrictionContactProblem* problem,  double alpha,  double gamma);
+    \param problem to be rescaled
+    \param alpha rescaling factor
+    \param gamma rescaling factor
+*/
+void frictionContact_rescaling(FrictionContactProblem *problem, double alpha,
+                               double gamma);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

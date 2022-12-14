@@ -497,6 +497,7 @@ void Qx05y(const double * const x, const double * const y, const unsigned int ve
     fx1 = (l1*c1y + dx*c2y)/2;
     fx2 = (dx*c1y + l2*c2y)/2;
     out[j] = fx1 + fx2 - dx*y[j];
+    //    out[j] = cblas_ddot(dimension, x+j, 1, y+j, 1);
     for (int k = 0; k < dimension-1; out[j+k+1] = fx1*xb[k] - fx2*xb[k] + dx*y[j+k+1], k++);
   }
   free(xb);

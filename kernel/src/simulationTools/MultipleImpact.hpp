@@ -37,8 +37,7 @@
  */
 class MultipleImpact : public LinearOSNS {
 private:
-  /** serialization hooks
-   */
+
   ACCEPT_SERIALIZATION(MultipleImpact);
 
   //! Time-like variable (Impulse)

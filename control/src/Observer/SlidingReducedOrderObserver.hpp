@@ -17,8 +17,8 @@
 */
 
 /*! \file SlidingReducedOrderObserver.hpp
-  \brief Discrete-time Sliding Observer
-  */
+  Discrete-time Sliding Observer
+*/
 
 #ifndef SlidingReducedOrderObserver_H
 #define SlidingReducedOrderObserver_H
@@ -29,7 +29,7 @@
 class SlidingReducedOrderObserver : public Observer
 {
 private:
-  /** serialization hooks */
+  
   ACCEPT_SERIALIZATION(SlidingReducedOrderObserver);
 
   /** default constructor */
@@ -51,17 +51,19 @@ protected:
 public:
 
   /** Constructor with the standard interface
-   * \param sensor the SP::ControlSensor that feed us with measurements
-   * \param xHat0 the initial guess for the state
+   *
+   *  \param sensor the SP::ControlSensor that feed us with measurements
+   *  \param xHat0 the initial guess for the state
    */
   SlidingReducedOrderObserver(SP::ControlSensor sensor, const SiconosVector& xHat0):
     Observer(SLIDING_REDUCED_ORDER, sensor, xHat0), _pass(false) {}
 
   /** Constructor with all the data
-   * \param sensor the sensor that feeds the Observer
-   * \param xHat0 the initial guess for the state
-   * \param C observation matrix
-   * \param L gain matrix
+   *
+   *  \param sensor the sensor that feeds the Observer
+   *  \param xHat0 the initial guess for the state
+   *  \param C observation matrix
+   *  \param L gain matrix
    */
   SlidingReducedOrderObserver(SP::ControlSensor sensor, const SiconosVector& xHat0, SP::SimpleMatrix C, SP::SimpleMatrix L):
     Observer(SLIDING_REDUCED_ORDER, sensor, xHat0), _C(C), _L(L), _pass(false) {}
@@ -71,13 +73,15 @@ public:
   virtual void process();
 
   /** Initialization
-   * \param nsds current nonsmooth dynamical system
-   * \param s current simulation setup
+   *
+   *  \param nsds current nonsmooth dynamical system
+   *  \param s current simulation setup
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 
   /** Set the L matrix
-   * \param L the new L matrix
+   *
+   *  \param L the new L matrix
    */
   inline void setLPtr(SP::SimpleMatrix L)
   {
@@ -85,7 +89,8 @@ public:
   };
 
   /** Set the C matrix
-   * \param C the new C matrix
+   *
+   *  \param C the new C matrix
    */
   inline void setCPtr(SP::SimpleMatrix C)
   {

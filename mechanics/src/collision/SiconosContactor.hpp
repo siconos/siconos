@@ -42,8 +42,6 @@ private:
   SiconosContactor() {};
 
 protected:
-  /** serialization hooks
-  */
   ACCEPT_SERIALIZATION(SiconosContactor);
 
 public:
@@ -59,8 +57,6 @@ public:
 class SiconosContactorSet : public std::vector< SP::SiconosContactor >
 {
 protected:
-  /** serialization hooks
-   */
   ACCEPT_SERIALIZATION(SiconosContactorSet);
 
 public:

@@ -926,9 +926,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._output_contact_index_set = 1
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
-        self._ds_positions=None
-        self._ds_boundary_conditions={}
-        
+        self._ds_positions = None
+        self._ds_boundary_conditions = {}
+        self._time_stepping_class = None
+        self._k = None
+        self._k0 = None
+
     def __enter__(self):
         super(MechanicsHdf5Runner, self).__enter__()
 
@@ -2032,8 +2035,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         Output velocities of dynamic objects
         """
-
-        current_line = self._dynamic_data.shape[0]
+        current_line = self._velocities_data.shape[0]
 
         time = self.current_time()
 
@@ -2450,7 +2452,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration)
 
-    def run(self,
+    def run_initialize(self,
             run_options=None,
             with_timer=False,
             time_stepping=None,
@@ -2714,7 +2716,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             interaction_manager = default_manager_class
 
         if run_options['time_stepping'] is None:
-            time_stepping = default_simulation_class
+            self._time_stepping_class = default_simulation_class
+        else:
+            self._time_stepping_class = run_options['time_stepping']
 
         if run_options['output_frequency'] is not None:
             self._output_frequency = run_options['output_frequency']
@@ -2746,14 +2750,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             t0 = float(max(times))
 
         # Time-related parameters for this simulation run
-        k0 = 1 + int(t0 / h)
-        k = k0
-        kT = k0 + int((T - t0) / h)
+        self._k0 = 1 + int(t0 / h)
+        self._k = self._k0
+        kT = self._k0 + int((T - t0) / h)
         if T > t0:
             self.print_verbose('')
             msg = 'Simulation will run from time {0:.4f} '.format(t0)
             msg += 'to {0:.4f}s, '.format(T)
-            msg += 'step {} to step {} (h={}, '.format(k0, kT, h)
+            msg += 'step {} to step {} (h={}, '.format(self._k0, kT, h)
             msg += 'times=[{},{}])'.format(
                 min(times) if len(times) > 0 else '?',
                 max(times) if len(times) > 0 else '?')
@@ -2967,7 +2971,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
-        if time_stepping == sk.TimeSteppingDirectProjection:
+        if self._time_stepping_class == sk.TimeSteppingDirectProjection:
             if solver_options_pos is None:
                 osnspb_pos = sk.MLCPProjectOnConstraints(sn.SICONOS_MLCP_ENUM, 1.0)
             else:
@@ -2978,14 +2982,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # "not yet implemented for sparse storage"
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)
             osnspb_pos.setKeepLambdaAndYState(True)
-            simulation = time_stepping(nsds, timedisc, self._osi,
+            simulation = self._time_stepping_class(nsds, timedisc, self._osi,
                                        osnspb, osnspb_pos)
             simulation.setProjectionMaxIteration(projection_itermax)
             simulation.setConstraintTolUnilateral(
                 projection_tolerance_unilateral)
             simulation.setConstraintTol(projection_tolerance)
         else:
-            simulation = time_stepping(nsds, timedisc)
+            simulation = self._time_stepping_class(nsds, timedisc)
             simulation.insertIntegrator(self._osi)
             simulation.insertNonSmoothProblem(osnspb)
 
@@ -3017,16 +3021,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if controller is not None:
             controller.initialize(self)
 
-        start_run_iteration_hook= run_options.get('start_run_iteration_hook')
-        if start_run_iteration_hook is not None:
-            start_run_iteration_hook.initialize(self)
-        end_run_iteration_hook= run_options.get('end_run_iteration_hook')
-        if end_run_iteration_hook is not None:
-            end_run_iteration_hook.initialize(self)
+        self._start_run_iteration_hook= run_options.get('start_run_iteration_hook')
+        if self._start_run_iteration_hook is not None:
+            self._start_run_iteration_hook.initialize(self)
+        self._end_run_iteration_hook= run_options.get('end_run_iteration_hook')
+        if self._end_run_iteration_hook is not None:
+            self._end_run_iteration_hook.initialize(self)
 
         self.print_verbose('first output static and dynamic objects ...')
         self.output_static_objects()
         self.output_dynamic_objects()
+        self.output_velocities()
+
 
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
@@ -3042,14 +3048,28 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         self.print_verbose('start simulation ...')
         self._initializing = False
-        with_timer= run_options.get('with_timer')
-        while simulation.hasNextEvent():
 
-            if run_options.get('verbose_progress'):
-                self.print_verbose('step', k, 'of', k0 + int((T - t0) / h) - 1)
+    def run_loop(self):
+        verbose = self._run_options.get('verbose')
+        with_timer= self._run_options.get('with_timer')
+        body_class = self._run_options.get('body_class')
+        shape_class = self._run_options.get('shape_class')
+        face_class = self._run_options.get('face_class')
+        edge_class = self._run_options.get('edge_class')
+        controller = self._run_options.get('controller')
+        friction_contact_trace_params = self._run_options.get('friction_contact_trace_params')
+        exit_tolerance = self._run_options.get('exit_tolerance')
+        t0 = self._run_options.get('t0')
+        T = self._run_options.get('T')
+        h = self._run_options.get('h')
+        while self._simulation.hasNextEvent():
 
-            if start_run_iteration_hook is not None:
-                self.log(start_run_iteration_hook.call, with_timer, before=False)(k)
+            if self._run_options.get('verbose_progress'):
+                self.print_verbose('step', self._k, 'of', self._k0 + int((T - t0) / h) - 1)
+
+            if self._start_run_iteration_hook is not None:
+                if False == self.log(self._start_run_iteration_hook.call, with_timer, before=False)(self._k):
+                    break
 
             self.log(self.import_births, with_timer)(body_class,
                                                      shape_class,
@@ -3062,28 +3082,28 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 controller.step()
 
             if friction_contact_trace_params is not None:
-                osnspb._stepcounter = k
+                osnspb._stepcounter = self._k
 
-            if run_options.get('explode_Newton_solve'):
-                if(time_stepping == TimeStepping):
+            if self._run_options.get('explode_Newton_solve'):
+                if(self._time_stepping_class == sk.TimeStepping):
                     self.log(self.explode_Newton_solve, with_timer,
                              before=False)(with_timer)
                 else:
-                    print('simulation of type', type(time_stepping),
+                    self.print_verbose('| [warning]. simulation of type', self._time_stepping_class.__name__,
                           ' has no exploded version')
-                    self.log(simulation.computeOneStep, with_timer)()
+                    self.log(self._simulation.computeOneStep, with_timer)()
             else:
-                self.log(simulation.computeOneStep, with_timer)()
+                self.log(self._simulation.computeOneStep, with_timer)()
 
-            cond = self._output_frequency and (k % self._output_frequency == 0)
-            if cond or k == 1:
+            cond = self._output_frequency and (self._k % self._output_frequency == 0)
+            if cond or self._k == 1:
                 if verbose:
-                    self.print_verbose('output in hdf5 file at step ', k, ' time =', self.current_time())
+                    self.print_verbose('output in hdf5 file at step ', self._k, ' time =', self.current_time())
 
                 self.log(self.output_results, with_timer)()
 
             if self._output_backup:
-                if (k % self._output_backup_frequency == 0) or (k == 1):
+                if (self._k % self._output_backup_frequency == 0) or (self._k == 1):
 
                     # close io file, hdf5 memory is cleaned
                     self._out.close()
@@ -3096,7 +3116,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     finally:
                         self.__enter__()
 
-            self.log(simulation.clearNSDSChangeLog, with_timer)()
+            self.log(self._simulation.clearNSDSChangeLog, with_timer)()
 
             # Note these are not the same and neither is correct.
             # "_interman.statistics" gives the number of contacts
@@ -3115,21 +3135,21 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose('number of contacts',
                                        number_of_contacts,
                                        '(detected)',
-                                       osnspb.getSizeOutput() // self._dimension ,
+                                       self._osnspb.getSizeOutput() // self._dimension ,
                                        '(active at velocity level. approx)')
                     self.print_solver_infos()
 
             else:
-                number_of_contacts = osnspb.getSizeOutput() // self._dimension
+                number_of_contacts = self._osnspb.getSizeOutput() // self._dimension
                 if verbose and number_of_contacts > 0:
                     msg = 'number of active contacts at the velocity level (approx)'
                     self.print_verbose(msg, number_of_contacts)
                     self.print_solver_infos()
 
-            if run_options.get('violation_verbose') and number_of_contacts > 0:
-                if len(simulation.y(0, 0)) > 0:
+            if self._run_options.get('violation_verbose') and number_of_contacts > 0:
+                if len(self._simulation.y(0, 0)) > 0:
                     self.print_verbose('violation info')
-                    y = simulation.y(0, 0)
+                    y = self._simulation.y(0, 0)
                     yplus = np.zeros((2, len(y)))
                     yplus[0, :] = y
                     y = np.min(yplus, axis=1)
@@ -3138,31 +3158,36 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     if self._collision_margin is not None:
                         if(violation_max >= self._collision_margin):
                             self.print_verbose('  violation max is larger than the collision_margin')
-                    lam = simulation.lambda_(1, 0)
+                    lam = self._simulation.lambda_(1, 0)
                     self.print_verbose('  lambda max :', np.max(lam))
                     #print(' lambda : ',lam)
 
-                if len(simulation.y(1, 0)) > 0:
-                    v = simulation.y(1, 0)
+                if len(self._simulation.y(1, 0)) > 0:
+                    v = self._simulation.y(1, 0)
                     vplus = np.zeros((2, len(v)))
                     vplus[0, :] = v
                     v = np.max(vplus, axis=1)
                     self.print_verbose('  velocity max :', np.max(v))
                     self.print_verbose('  velocity min :', np.min(v))
-                #     #print(simulation.output(1,0))
+                #     #print(self._simulation.output(1,0))
 
-            if (run_options.get('exit_tolerance') is not None):
-                solver_options = osnspb.numericsSolverOptions()
+            if (exit_tolerance is not None):
+                solver_options = self._osnspb.numericsSolverOptions()
                 precision = solver_options.dparam[sn.SICONOS_DPARAM_RESIDU]
                 if (precision > exit_tolerance):
                     print('precision is larger exit_tolerance')
                     return False
 
-            self.log(simulation.nextStep, with_timer)()
+            self.log(self._simulation.nextStep, with_timer)()
 
-            if end_run_iteration_hook is not None:
-                self.log(end_run_iteration_hook.call, with_timer)(k)
+            if self._end_run_iteration_hook is not None:
+                if False == self.log(self._end_run_iteration_hook.call, with_timer)(self._k):
+                    break
 
             self.print_verbose('')
-            k += 1
+            self._k += 1
         return True
+
+    def run(self, *args, **kwargs):
+        self.run_initialize(*args, **kwargs)
+        return self.run_loop()

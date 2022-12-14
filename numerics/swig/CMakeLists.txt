@@ -2,78 +2,47 @@
 # cmake utilities to build python-bindings for numerics component
 #================================================================
 
-# wrap - Set extra dependencies
-set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS
-  ${SICONOS_SWIG_SOURCE_DIR}/solverOptions.i
-  ${SICONOS_SWIG_SOURCE_DIR}/start.i
-  ${SICONOS_SWIG_SOURCE_DIR}/end.i
-  ${SICONOS_SWIG_SOURCE_DIR}/numpy.i)
-
-# List of modules to be built in the python bindings
-set(${COMPONENT}_PYTHON_MODULES "./${COMPONENT}")
-
-set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
-# numerics is not written in C++
-set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
-if(NOT WITH_CXX)
-  list(REMOVE_ITEM ${COMPONENT}_SWIG_DEFS "-dirvtable")
-endif()
-
-if(WITH_FCLIB)
-  list(APPEND ${COMPONENT}_PYTHON_MODULES "./fclib")
-  # if(NOT FCLib_FCLIB_HEADER_ONLY)
-  #   list(APPEND CMAKE_SWIG_FLAGS "-DFCLIB_NOT_HEADER_ONLY")
-  # endif()
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
-    set_property(SOURCE fclib.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
-  else() #USE_TARGET_INCLUDE property is not available in old cmake versions.
-    find_package(FCLIB 3.0.0 CONFIG REQUIRED)
-    list(APPEND CMAKE_SWIG_FLAGS "-I${FCLIB_INCLUDE_DIR}")
-  endif()
-else()
-  list(APPEND python_excluded_tests tests/test_fclib.py)
-endif()
-
 if(NOT NO_RUNTIME_BUILD_DEP)
   # -- Scipy --
   # It is required for sparse matrices in numerics
   find_python_module(scipy  REQUIRED)# for sparse
 
-  # -- mpi4py -- 
-  if(WITH_MPI)
-    find_python_module(mpi4py REQUIRED INCLUDES)
-    set(WITH_MPI4PY TRUE)
-    set(numerics_SWIG_DEFS "-I${mpi4py_INCLUDE_DIR};-DWITH_MPI4PY")
-
-  endif()
 endif()
+
 include(swig_python_tools)
 
-swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
-target_link_libraries(_numerics PRIVATE $<BUILD_INTERFACE:externals>)
-target_include_directories(_numerics PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-if(WITH_SERIALIZATION)
-  target_include_directories(_numerics PRIVATE ${CMAKE_SOURCE_DIR}/io/src/serialization)
-endif()
-
-# If WITH_SYSTEM_SUITESPARSE, suite sparse is an imported target
-# that must be taken into account by swig process.
+list(APPEND deps $<BUILD_INTERFACE:externals> numerics)
 if(WITH_SYSTEM_SUITESPARSE)
-  target_link_libraries(_numerics PRIVATE $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
+  list(APPEND SWIG_NUMERICS_DEPS $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
 endif()
-
 
 
 # -- mpi4py -- 
 if(WITH_MPI)
-  target_include_directories(_numerics PRIVATE ${MPI_C_INCLUDE_DIRS})
-  target_link_libraries(_numerics ${MPI_C_LIBRARIES})
+  list(APPEND SWIG_NUMERICS_INCLUDES ${MPI_C_INCLUDE_DIRS})
+  list(APPEND SWIG_NUMERICS_DEPS ${MPI_C_LIBRARIES})
+  
   find_python_module(mpi4py REQUIRED INCLUDES)
-  target_include_directories(_numerics PRIVATE ${mpi4py_INCLUDE_DIR})
   set(WITH_MPI4PY TRUE)
-  target_compile_definitions(_numerics PRIVATE WITH_MPI4PY)
-  #  "-I${mpi4py_INCLUDE_DIR};-DWITH_MPI4PY")
+  list(APPEND SWIG_NUMERICS_INCLUDES ${mpi4py_INCLUDE_DIR})
+  list(APPEND SWIG_NUMERICS_COMPILE_DEFINITIONS WITH_MPI4PY)
+endif()
+
+add_swig_sub_module(
+  FILE numerics.i
+  DEPS ${SWIG_NUMERICS_DEPS} numerics externals
+  INCLUDES ${SWIG_NUMERICS_INCLUDES}
+  COMPILE_DEFINITIONS ${SWIG_NUMERICS_COMPILE_DEFINITIONS})
+
+
+if(WITH_FCLIB)
+  add_swig_sub_module(
+    FILE fclib.i
+    DEPS FCLIB::fclib numerics # fclib swig depends on numerics because of start.i. This is quite illogical ... 
+    )
+else()
+  list(APPEND python_excluded_tests tests/test_fclib.py)
 endif()
 
 

@@ -26,17 +26,12 @@
 #include "Sensor.hpp"
 #include <boost/circular_buffer.hpp>
 
-/** \class ControlSensor
- *  \brief Generic control Sensor to get the output of the system
- *
- * A generic control sensor
- *
+/** Generic control Sensor to get the output of the system
  */
 class ControlSensor : public Sensor
 {
 private:
-  /** serialization hooks
-  */
+  
   ACCEPT_SERIALIZATION(ControlSensor);
 
 protected:
@@ -46,7 +41,7 @@ protected:
   /** delay between the measurement on the DynamicalSystem and the avaibility of the value */
   double _delay;
 
-  /** A buffer to store the value of \f$y_k\f$ if there is a delay */
+  /** A buffer to store the value of \f$ y_k \f$ if there is a delay */
   boost::circular_buffer<SP::SiconosVector> _bufferY;
 
   /** Default constructor
@@ -54,9 +49,10 @@ protected:
   ControlSensor() {};
 
   /** Simple Constructor
-   * \param type the type of the Sensor
-   * \param ds the SP::DynamicalSystem it observes
-   * \param delay the delay between the measurement and the avaibility of the data
+   *
+   *  \param type the type of the Sensor
+   *  \param ds the SP::DynamicalSystem it observes
+   *  \param delay the delay between the measurement and the avaibility of the data
    */
   ControlSensor(unsigned int type, SP::DynamicalSystem ds, double delay = 0):
     Sensor(type, ds), _delay(delay) {}
@@ -66,12 +62,14 @@ public:
   virtual void initialize(const NonSmoothDynamicalSystem& nsds);
 
   /** Get the dimension of the output
-   * \return an unsigned int
+   *
+   *  \return an unsigned int
    */
   unsigned int getYDim() const ;
 
   /** Get a pointer to the output
-   * \return SP::SiconosVector to the output
+   *
+   *  \return SP::SiconosVector to the output
    */
   inline const SiconosVector& y() const
   {
