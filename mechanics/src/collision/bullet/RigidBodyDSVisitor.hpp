@@ -24,16 +24,20 @@
 namespace siconos::collision {
 class RigidBody2dDS;
 class RigidBodyDS;
+
+namespace internal {
+class RigidBodyVisitor;
+}
 }  // namespace siconos::collision
 
 namespace siconos::collision::bullet::internal {
 class SiconosBulletCollisionManager_impl;
 
-class RigidBodyDSVisitor : public siconos::internal::SiconosVisitor {
+class RigidBodyDSVisitor : public siconos::collision::internal::RigidBodyVisitor {
  protected:
   std::shared_ptr<SiconosBulletCollisionManager_impl> impl{nullptr};
 
-  using SiconosVisitor::visit;
+  // using SiconosVisitor::visit;
 
   RigidBodyDSVisitor() = delete;
   RigidBodyDSVisitor(const RigidBodyDSVisitor &) = delete;

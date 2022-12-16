@@ -18,6 +18,8 @@
 
 #include "SiconosBulletCollisionManager_impl.hpp"
 
+#include <BulletCollision/BroadphaseCollision/btAxisSweep3.h>
+#include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 #include <LinearMath/btConvexHullComputer.h>
@@ -32,25 +34,26 @@
 #include "SiconosBulletOptions.hpp"
 #include "SiconosBulletShape.hpp"
 #include "SiconosBulletVisitors.hpp"
+#include "SiconosCollisionManager.hpp"
 #include "SiconosContactor.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "StaticBody.hpp"
 #include "siconos_debug.h"
 
-// ======================= Helper functions ==========================
-// Only used and available in this file --> do not declare them in user interface
+namespace {  // anonymous because only for local use
+             // ======================= Helper functions ==========================
+             // Only used and available in this file --> do not declare them in user interface
 
 // helper to enable polyhedral contact clipping for shape types
 // derived from btPolyhedralConvexShape
-static void initPolyhedralFeatures(btPolyhedralConvexShape &btshape) {
+void initPolyhedralFeatures(btPolyhedralConvexShape &btshape) {
   btshape.initializePolyhedralFeatures();
 }
 
-static void initPolyhedralFeatures(btCollisionShape &btshape) {}
+void initPolyhedralFeatures(btCollisionShape &btshape) {}
 
-static int find_index_closest_point_btConvexHullShape(btVector3 &pointA,
-                                                      btConvexHullShape &btch) {
+int find_index_closest_point_btConvexHullShape(btVector3 &pointA, btConvexHullShape &btch) {
   int numPoints = btch.getNumPoints();
   const btVector3 *points = btch.getPoints();
   btScalar min_dist = 1e30;
@@ -65,7 +68,6 @@ static int find_index_closest_point_btConvexHullShape(btVector3 &pointA,
   return p_idx;
 }
 
-namespace siconos::collision::bullet::internal {
 // If type of SiconosMatrix is the same as btScalar, we can avoid a copy
 template <typename SCALAR>
 std::pair<std::shared_ptr<btTriangleIndexVertexArray>, SCALAR *> make_bt_vertex_array(
@@ -96,7 +98,52 @@ std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> make_bt_verte
       sizeof(btScalar) * 3);
   return std::make_pair(bttris, vertices);
 }
-}  // namespace siconos::collision::bullet::internal
+}  // namespace
+
+bool siconos::collision::bullet::internal::SiconosBulletFilterCallback::
+    needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
+  DEBUG_BEGIN("SiconosBulletFilterCallback :: needBroadphaseCollision\n");
+
+  /* standard filter in Bullet */
+  // bool collides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
+  // collides = collides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask);
+
+  // add some additional logic here that modified 'collides'
+  auto nslaw = interactionManager->nonSmoothLaw(proxy0->m_collisionFilterGroup,
+                                                proxy1->m_collisionFilterGroup);
+
+  bool collides = (bool)nslaw;
+
+  DEBUG_END("SiconosBulletFilterCallback :: needBroadphaseCollision\n");
+  return collides;
+}
+
+siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    SiconosBulletCollisionManager_impl(std::shared_ptr<SiconosBulletOptions> op)
+    : _options(op) {
+  // collision configuration contains default setup for memory, collision setup
+  _collisionConfiguration = std::make_shared<btDefaultCollisionConfiguration>();
+
+  if (_options->perturbationIterations > 0 ||
+      _options->minimumPointsPerturbationThreshold > 0) {
+    _collisionConfiguration->setConvexConvexMultipointIterations(
+        _options->perturbationIterations, _options->minimumPointsPerturbationThreshold);
+    _collisionConfiguration->setPlaneConvexMultipointIterations(
+        _options->perturbationIterations, _options->minimumPointsPerturbationThreshold);
+  }
+
+  // use the default collision dispatcher. For parallel processing you can use a diffent
+  // dispatcher (see Extras/BulletMultiThreaded)
+  _dispatcher = std::make_shared<btCollisionDispatcher>(&*_collisionConfiguration);
+
+  if (_options->useAxisSweep3)
+    _broadphase = std::make_shared<btAxisSweep3>(btVector3(), btVector3());
+  else
+    _broadphase = std::make_shared<btDbvtBroadphase>();
+
+  _collisionWorld = std::make_shared<btCollisionWorld>(&*_dispatcher, &*_broadphase,
+                                                       &*_collisionConfiguration);
+}
 
 template <typename ST, typename BT, typename DST, typename BR>
 std::shared_ptr<btCollisionObject> siconos::collision::bullet::internal::
@@ -393,8 +440,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   // Create Bullet triangle list, either by copying on non-copying method
   // TODO: worldScale on vertices
   std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> datapair(
-      siconos::collision::bullet::internal::make_bt_vertex_array(mesh, (btScalar)0,
-                                                                 (*mesh->vertices())(0, 0)));
+      ::make_bt_vertex_array(mesh, (btScalar)0, (*mesh->vertices())(0, 0)));
   std::shared_ptr<btTriangleIndexVertexArray> bttris(datapair.first);
 
   // Create Bullet mesh object
@@ -460,9 +506,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
           base, ds, heightmap, btheight, bodyShapeMap, contactor, staticBodyShapeMap,
           staticBody);
 
-  // this flag allows to call the call gContactAddedCallback when the callback has just been
-  // in the manifold In the case of the heightmap, we use it to tweak the normal to avoid
-  // internal edge contact.
+  // this flag allows to call the call gContactAddedCallback when the callback has just
+  // been in the manifold In the case of the heightmap, we use it to tweak the normal to
+  // avoid internal edge contact.
   btobject->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 }
 
@@ -645,8 +691,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
       btch = new btConvexHullShape;
       for (int i = 0; i < shrinkCH.vertices.size(); i++) {
         // printf("shrinkCH.original_vertex_index[%i] %i \n", i,
-        // shrinkCH_0.original_vertex_index[i] ); printf("shrinkCH.original_vertex_index[%i]
-        // %i \n", i, shrinkCH.original_vertex_index[i] ); const btVector3
+        // shrinkCH_0.original_vertex_index[i] );
+        // printf("shrinkCH.original_vertex_index[%i] %i \n", i,
+        // shrinkCH.original_vertex_index[i] ); const btVector3
         // &v(shrinkCH.vertices[shrinkCH_0.original_vertex_index[i] ]);
         const btVector3 &v(shrinkCH.vertices[i]);
 #if defined(BT_BULLET_VERSION) && (BT_BULLET_VERSION <= 281)
@@ -682,8 +729,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   if (ch2d->avoidInternalEdgeContact()) {
     // this flag allows to call the call gContactAddedCallback when the callback has just
-    // been in the manifold In the case of the heightmap, we use it to tweak the normal to
-    // avoid internal edge contact.
+    // been in the manifold In the case of the heightmap, we use it to tweak the normal
+    // to avoid internal edge contact.
     btobject->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
     // keep track of the points of the selected edge
@@ -817,7 +864,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
       //      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(), &*_dispatcher);
+      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(),
+      //        &*_dispatcher);
     }
 
     record->shape_version = sphere->version();
@@ -884,7 +932,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
       //      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(), &*_dispatcher);
+      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(),
+      //        &*_dispatcher);
     }
 
     record->shape_version = box->version();
@@ -917,7 +966,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
       //      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(), &*_dispatcher);
+      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(),
+      //        &*_dispatcher);
     }
 
     record->shape_version = cyl->version();
@@ -950,7 +1000,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
       //      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(), &*_dispatcher);
+      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(),
+      //        &*_dispatcher);
     }
 
     record->shape_version = cone->version();
@@ -985,7 +1036,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     if (record->btobject->getBroadphaseHandle()) {
       _collisionWorld->updateSingleAabb(&*record->btobject);
       //      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(), &*_dispatcher);
+      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(),
+      //        &*_dispatcher);
     }
 
     record->shape_version = capsule->version();

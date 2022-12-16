@@ -84,8 +84,6 @@
 // #include "RigidBodyDS.hpp"
 // #include "SiconosBulletCollisionManager.hpp"
 // #include "StaticBody.hpp"
-#include <BulletCollision/BroadphaseCollision/btAxisSweep3.h>
-#include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 // #include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 // #include <BulletCollision/CollisionShapes/btBoxShape.h>
 // #include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
@@ -100,69 +98,25 @@
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleInfoMap.h>
 
-namespace siconos::collision::bullet::internal {
-/* We derive a specific callback for filtering the broadphase of Bullet
- * based on collision group */
-struct SiconosBulletFilterCallback : public btOverlapFilterCallback {
-  std::shared_ptr<siconos::simulation::InteractionManager> _interactionManager{nullptr};
-
-  // return true when pairs need collision
-  virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0,
-                                       btBroadphaseProxy *proxy1) const {
-    DEBUG_BEGIN("SiconosBulletFilterCallback :: needBroadphaseCollision\n");
-
-    /* standard filter in Bullet */
-    // bool collides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
-    // collides = collides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask);
-
-    // add some additional logic here that modified 'collides'
-    auto nslaw = _interactionManager->nonSmoothLaw(proxy0->m_collisionFilterGroup,
-                                                   proxy1->m_collisionFilterGroup);
-
-    bool collides = (bool)nslaw;
-
-    DEBUG_END("SiconosBulletFilterCallback :: needBroadphaseCollision\n");
-    return collides;
-  }
-};
-
-}  // namespace siconos::collision::bullet::internal
-
 siconos::collision::bullet::SiconosBulletCollisionManager::SiconosBulletCollisionManager(
     std::shared_ptr<SiconosBulletOptions> options)
     : SiconosCollisionManager{}, _options{options} {
+  assert(options);
+  // if(not _options)
+  //   _options = std::make_shared<SiconosBulletOptions>(); // Default options set
+
   _impl = std::make_shared<internal::SiconosBulletCollisionManager_impl>(_options);
 
-  // collision configuration contains default setup for memory, collision setup
-  _impl->_collisionConfiguration = std::make_shared<btDefaultCollisionConfiguration>();
 
-  if (_options->perturbationIterations > 0 ||
-      _options->minimumPointsPerturbationThreshold > 0) {
-    _impl->_collisionConfiguration->setConvexConvexMultipointIterations(
-        _options->perturbationIterations, _options->minimumPointsPerturbationThreshold);
-    _impl->_collisionConfiguration->setPlaneConvexMultipointIterations(
-        _options->perturbationIterations, _options->minimumPointsPerturbationThreshold);
-  }
-
-  // use the default collision dispatcher. For parallel processing you can use a diffent
-  // dispatcher (see Extras/BulletMultiThreaded)
-  _impl->_dispatcher =
-      std::make_shared<btCollisionDispatcher>(&*_impl->_collisionConfiguration);
-
-  if (_options->useAxisSweep3)
-    _impl->_broadphase = std::make_shared<btAxisSweep3>(btVector3(), btVector3());
-  else
-    _impl->_broadphase = std::make_shared<btDbvtBroadphase>();
-
-  _impl->_collisionWorld = std::make_shared<btCollisionWorld>(
-      &*_impl->_dispatcher, &*_impl->_broadphase, &*_impl->_collisionConfiguration);
-
-  auto filterCallback = std::make_shared<internal::SiconosBulletFilterCallback>();
-  // btOverlapFilterCallback *filterCallback = new SiconosBulletFilterCallback();
-  // reinterpret_cast<SiconosBulletFilterCallback *>(filterCallback)->_interactionManager =
-  // this;
-  filterCallback->_interactionManager = shared_from_this();
-  _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(filterCallback.get());
+  // SiconosBulletfiltercallback : done in updateInteractions since
+  // we can not call shared_from_this in the constructor.
+  // auto filterCallback =
+  //     std::make_shared<internal::SiconosBulletFilterCallback>(shared_from_this());
+  // // btOverlapFilterCallback *filterCallback = new internal::SiconosBulletFilterCallback();
+  // // auto *filterCallback = new internal::SiconosBulletFilterCallback();
+  // // reinterpret_cast<internal::SiconosBulletFilterCallback *>(filterCallback)
+  // //   ->_interactionManager = shared_from_this();
+  // _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(filterCallback.get());
 
   DEBUG_PRINTF("_options->dimension = %i", _options->dimension);
 
@@ -171,7 +125,8 @@ siconos::collision::bullet::SiconosBulletCollisionManager::SiconosBulletCollisio
     auto m_simplexSolver = std::make_shared<btVoronoiSimplexSolver>();
     // btVoronoiSimplexSolver *m_simplexSolver = new btVoronoiSimplexSolver();
     auto m_pdSolver = std::make_shared<btMinkowskiPenetrationDepthSolver>();
-    // btMinkowskiPenetrationDepthSolver *m_pdSolver = new btMinkowskiPenetrationDepthSolver();
+    // btMinkowskiPenetrationDepthSolver *m_pdSolver = new
+    // btMinkowskiPenetrationDepthSolver();
 
     auto m_convexAlgo2d = std::make_shared<btConvex2dConvex2dAlgorithm::CreateFunc>(
         m_simplexSolver.get(), m_pdSolver.get());
@@ -197,7 +152,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::SiconosBulletCollisio
 }
 
 siconos::collision::bullet::SiconosBulletCollisionManager::SiconosBulletCollisionManager()
-    : SiconosBulletCollisionManager{nullptr} {}
+    : SiconosBulletCollisionManager{std::make_shared<SiconosBulletOptions>()} {}
 
 // siconos::collision::bullet::SiconosBulletCollisionManager::
 //     ~SiconosBulletCollisionManager() noexcept {
@@ -483,6 +438,18 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
   //  CProfileManager::Reset();
   auto start = std::chrono::system_clock::now();
 #endif
+
+  if (not _impl->filterCallback) {
+    _impl->filterCallback = std::make_shared<internal::SiconosBulletFilterCallback>();
+    // Done here, since we are not allowed to call shared_from_this in constructor.
+    // btOverlapFilterCallback *filterCallback = new internal::SiconosBulletFilterCallback();
+    // auto *filterCallback = new internal::SiconosBulletFilterCallback();
+    // reinterpret_cast<internal::SiconosBulletFilterCallback *>(filterCallback)
+    //   ->_interactionManager = shared_from_this();
+    _impl->filterCallback->interactionManager = this->shared_from_this();
+    _impl->_collisionWorld->getPairCache()->setOverlapFilterCallback(
+        _impl->filterCallback.get());
+  }
 
   //  update collision objects from all RigidBodyDS dynamical systems
   auto dsg = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();

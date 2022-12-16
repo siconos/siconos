@@ -31,7 +31,8 @@ class SiconosContactorSet;
 
 namespace siconos::collision {
 
-  class RigidBodyDS : public siconos::modeling::NewtonEulerDS, public std::enable_shared_from_this<RigidBodyDS> {
+class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
+                    public std::enable_shared_from_this<RigidBodyDS> {
  protected:
   ACCEPT_SERIALIZATION(RigidBodyDS);
 
@@ -63,16 +64,14 @@ namespace siconos::collision {
   /** Access the contactor set associated with this body.
    *
    *  \return A std::shared_ptr<SiconosContactorSet> */
-  std::shared_ptr<siconos::collision::SiconosContactorSet> contactors() const
-  {
+  std::shared_ptr<siconos::collision::SiconosContactorSet> contactors() const {
     return _contactors;
   }
 
   /** Provide a set of contactors to the body.
    *
    *  \param c A std::shared_ptr<SiconosContactorSet> */
-  void setContactors(std::shared_ptr<siconos::collision::SiconosContactorSet> c)
-  {
+  void setContactors(std::shared_ptr<siconos::collision::SiconosContactorSet> c) {
     _contactors = c;
   }
 
@@ -80,6 +79,8 @@ namespace siconos::collision {
    *
    *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
   virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
+
+  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
 
   //  ACCEPT_BASE_VISITORS(NewtonEulerDS);
 };

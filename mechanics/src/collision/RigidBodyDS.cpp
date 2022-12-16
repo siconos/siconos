@@ -20,12 +20,16 @@
 
 #include "SiconosContactor.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosVisitor.hpp"
 
 siconos::collision::RigidBodyDS::RigidBodyDS(
     std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertia)
     : siconos::modeling::NewtonEulerDS(position, velocity, mass, inertia),
-      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>())
-{
+      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
+
+void siconos::collision::RigidBodyDS::acceptSP(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
+  tourist->visit(*this);
 }

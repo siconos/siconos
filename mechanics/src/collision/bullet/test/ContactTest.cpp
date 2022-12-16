@@ -24,8 +24,8 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "StaticBody.hpp"
-#include "TimeStepping.hpp"
 #include "TimeDiscretisation.hpp"
+#include "TimeStepping.hpp"
 
 // Experimental settings for SiconosBulletCollisionManager
 extern double extra_margin;
@@ -54,7 +54,8 @@ struct BounceParams {
   double timestep;
   double insideMargin;
   double outsideMargin;
-  std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions> options{nullptr};
+  std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions> options{
+      std::make_shared<siconos::collision::bullet::SiconosBulletOptions>()};
 
   void dump() {
     printf("  trace:              %s\n", trace ? "on" : "off");
@@ -467,11 +468,8 @@ void ContactTest::t4() {
   params.timestep = 0.005;
   params.insideMargin = 0.1;
   params.outsideMargin = 0.1;
-
-  auto options = std::make_shared<siconos::collision::bullet::SiconosBulletOptions>();
-  options->contactBreakingThreshold = 0.4;
-  options->worldScale = 1.0;
-  params.options = options;
+  params.options->contactBreakingThreshold = 0.4;
+  params.options->worldScale = 1.0;
 
   bool success = false;
 

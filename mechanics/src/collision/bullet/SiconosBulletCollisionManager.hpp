@@ -52,9 +52,7 @@ namespace internal {  // An "impl" class to hide implementation. See
 class SiconosBulletCollisionManager_impl;
 }
 
-class SiconosBulletCollisionManager
-    : public siconos::collision::SiconosCollisionManager,
-      std::enable_shared_from_this<SiconosBulletCollisionManager> {
+class SiconosBulletCollisionManager : public siconos::collision::SiconosCollisionManager {
  protected:
   ACCEPT_SERIALIZATION(SiconosBulletCollisionManager);
 

@@ -37,7 +37,7 @@ namespace siconos::simulation {
 
 class Simulation;
 
-class InteractionManager {
+  class InteractionManager : public std::enable_shared_from_this<InteractionManager>{
   InteractionManager(const InteractionManager&) = delete;
   InteractionManager(InteractionManager&&) = delete;
   InteractionManager operator=(const InteractionManager&&) = delete;

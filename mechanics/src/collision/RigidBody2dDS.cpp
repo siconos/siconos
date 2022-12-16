@@ -21,6 +21,7 @@
 #include "SiconosContactor.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
+#include "SiconosVisitor.hpp"
 
 siconos::collision::RigidBody2dDS::RigidBody2dDS(
     std::shared_ptr<siconos::algebra::SiconosVector> position,
@@ -61,4 +62,9 @@ siconos::collision::RigidBody2dDS::RigidBody2dDS(
         "siconos::modeling::RigidBody2dDS::RigidBody2dDS(...). The size of position and "
         "velocity must of size 3");
   }
+}
+
+void siconos::collision::RigidBody2dDS::acceptSP(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
+  tourist->visit(*this);
 }

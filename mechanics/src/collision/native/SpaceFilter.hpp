@@ -46,10 +46,6 @@ namespace siconos::algebra {
 class SiconosMatrix;
 }
 
-namespace siconos::simulation {
-
-class InteractionManager;
-}
 
 namespace siconos::collision::native {
 
@@ -59,8 +55,7 @@ class Hashed;
 
 using DiskPlanRDeclared = std::array<double, 6>;
 
-class SpaceFilter : public siconos::simulation::InteractionManager,
-                    public std::enable_shared_from_this<SpaceFilter> {
+class SpaceFilter : public siconos::simulation::InteractionManager {
  protected:
   ACCEPT_SERIALIZATION(SpaceFilter);
 
@@ -131,7 +126,7 @@ class SpaceFilter : public siconos::simulation::InteractionManager,
      the SpaceFilter hash_table.
    */
   struct _BodyHash;
-  
+
   /* the proximity detection */
   struct _FindInteractions;
 

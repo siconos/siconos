@@ -52,7 +52,9 @@ class NewtonEulerDS;
 
 namespace siconos::simulation {
 class Simulation;
-}
+class InteractionManager;
+}  // namespace siconos::simulation
+
 namespace siconos::collision {
 class RigidBodyDS;
 class RigidBody2dDS;
@@ -114,6 +116,19 @@ using BodyShapeMap =
 using StaticBodyShapeMap = std::map<const siconos::collision::StaticBody *,
                                     std::vector<std::shared_ptr<BodyBulletShapeRecord>>>;
 
+/* We derive a specific callback for filtering the broadphase of Bullet
+ * based on collision group */
+struct SiconosBulletFilterCallback : public btOverlapFilterCallback {
+  std::shared_ptr<siconos::simulation::InteractionManager> interactionManager{nullptr};
+
+  // SiconosBulletFilterCallback(std::shared_ptr<siconos::simulation::InteractionManager> im)
+  //     : interactionManager{im} {};
+
+  // return true when pairs need collision
+  virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0,
+                                       btBroadphaseProxy *proxy1) const override;
+};
+
 class SiconosBulletCollisionManager_impl
     : public std::enable_shared_from_this<SiconosBulletCollisionManager_impl> {
  protected:
@@ -121,6 +136,7 @@ class SiconosBulletCollisionManager_impl
   std::shared_ptr<btDefaultCollisionConfiguration> _collisionConfiguration{nullptr};
   std::shared_ptr<btCollisionDispatcher> _dispatcher{nullptr};
   std::shared_ptr<btBroadphaseInterface> _broadphase{nullptr};
+  std::shared_ptr<SiconosBulletFilterCallback> filterCallback{nullptr};
 
   /* During iteration over DSs for position updates we need to access
    * btCollisionObject, so need a map DS->btXShape. */
@@ -279,8 +295,8 @@ class SiconosBulletCollisionManager_impl
                                 std::shared_ptr<btCollisionShape> btshape);
 
  public:
-  SiconosBulletCollisionManager_impl(std::shared_ptr<SiconosBulletOptions> op)
-      : _options(op) {}
+  SiconosBulletCollisionManager_impl(std::shared_ptr<SiconosBulletOptions> op);
+
   ~SiconosBulletCollisionManager_impl() noexcept = default;
 
   template <class DS>

@@ -70,16 +70,14 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
   void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }
 
   /** \return the contactor set associated with this body */
-  std::shared_ptr<siconos::collision::SiconosContactorSet> contactors() const
-  {
+  std::shared_ptr<siconos::collision::SiconosContactorSet> contactors() const {
     return _contactors;
   }
 
   /** Provide a set of contactors to the body.
    *
    *  \param c A std::shared_ptr<SiconosContactorSet> */
-  void setContactors(std::shared_ptr<siconos::collision::SiconosContactorSet> c)
-  {
+  void setContactors(std::shared_ptr<siconos::collision::SiconosContactorSet> c) {
     _contactors = c;
   }
 
@@ -88,7 +86,7 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
    *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
   virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
 
-  // ACCEPT_BASE_VISITORS(LagrangianLinearTIDS);
+  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
 };
 }  // namespace siconos::collision
 #endif /* RigidBody2dDS_h */
