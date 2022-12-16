@@ -3236,6 +3236,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   NumericsMatrix *Jac=NULL, *Jactmp=NULL; /* Jacobian matrix */
   long Jac_nzmax;
+  int jacobian_is_nan = 0;
 
   NumericsMatrix *J = compute_J_matrix(n); /* use for Jac */
   NumericsMatrix *Jt = NULL;
@@ -4063,12 +4064,19 @@ while(1)
 
 
       /* 3. Solve non-symmetric Newton system without NT scaling via LU factorization */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       NM_LU_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
       residu_LS1_m = dnrm2l(m,rhs_save);
@@ -4161,8 +4169,15 @@ while(1)
       cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
       /* 7. Solve the 2nd linear system */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
@@ -4193,7 +4208,7 @@ while(1)
       else
         NM_LU_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
       residu_LS2_m = dnrm2l(m,rhs_save);
@@ -4351,13 +4366,20 @@ while(1)
 
 
       /* 3. Solve full symmetric Newton system with NT scaling via LDLT factorization */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
       NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -4502,8 +4524,15 @@ while(1)
       cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
       /* 7. Solve the 2nd linear system */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
@@ -4531,7 +4560,7 @@ while(1)
         NM_LDLT_solve(Jac, rhs, 1);
 
 
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
 
@@ -4696,13 +4725,20 @@ while(1)
 
 
       /* 3. Solve full symmetric Newton system with NT scaling via LDLT factorization */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
       NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -4874,9 +4910,15 @@ while(1)
       cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
       /* 7. Solve the 2nd linear system */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
 
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
@@ -4912,7 +4954,7 @@ while(1)
       else
         NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd + n_dplus1)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -5115,13 +5157,20 @@ while(1)
 
 
       /* 3. Solving full symmetric Newton system with NT scaling via LDLT factorization */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
       NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -5317,8 +5366,15 @@ while(1)
 
 
       /* 7. Solve the 2nd linear system */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
@@ -5347,7 +5403,7 @@ while(1)
       else
         NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -5687,13 +5743,20 @@ while(1)
       cblas_dcopy(m + nd, rhs, 1, rhs_save, 1);
 
       /* 3. Solving full symmetric Newton system with NT scaling via LDLT factorization */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       NSM_linearSolverParams(Jac)->solver = NSM_HSL;
       NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -5958,8 +6021,15 @@ while(1)
 
 
       /* 7. Solve the 2nd linear system */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, m + nd)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, m + nd)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
@@ -5988,7 +6058,7 @@ while(1)
       else
         NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, m + nd)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, m + nd)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -6186,13 +6256,20 @@ while(1)
 
 
       /* 3. Solving full symmetric Newton system with NT scaling via LDLT factorization */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, nd)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, nd)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       // NM_Cholesky_solve(Jac, rhs, 1);
       NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, nd)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, nd)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -6347,13 +6424,20 @@ while(1)
 
 
       /* 7. Solve the 2nd linear system */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, nd)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, nd)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       // NM_Cholesky_solve(Jac, rhs, 1);
       NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, nd)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, nd)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -6519,13 +6603,20 @@ while(1)
 
 
       /* 3. Solving full symmetric Newton system with NT scaling via LDLT factorization */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, nd)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, nd)) printf("(1st sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       // NM_Cholesky_solve(Jac, rhs, 1);
       NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, nd)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, nd)) printf("(1st sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -6686,13 +6777,20 @@ while(1)
 
 
       /* 7. Solve the 2nd linear system */
-      print_NAN_in_matrix(Jac);
-      if (NV_isnan(rhs, nd)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+      // print_NAN_in_matrix(Jac);
+      // if (NV_isnan(rhs, nd)) printf("(2nd sys) NaN in RHS before solving, i = %zu\n", iteration);
+
+      jacobian_is_nan = NM_isnan(Jac);
+      if (jacobian_is_nan)
+      {
+        numerics_printf_verbose(0, "The Jacobian matrix contains NaN");
+        break;
+      }
 
       // NM_Cholesky_solve(Jac, rhs, 1);
       NM_LDLT_solve(Jac, rhs, 1);
 
-      if (NV_isnan(rhs, nd)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
+      // if (NV_isnan(rhs, nd)) printf("(2nd sys) NaN in RHS after solving, i = %zu\n", iteration);
 
 
       NM_gemv(1.0, Jac, rhs, -1.0, rhs_save);
@@ -6815,10 +6913,6 @@ while(1)
 
 
 
-    if (hasNotConverged == 3) break;
-
-
-
     // 9. Compute again the affine step-length
     alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
     alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
@@ -6878,45 +6972,6 @@ while(1)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if (NV_isnan(globalVelocity, m) | NV_isnan(velocity, nd) | NV_isnan(reaction, nd))
-    {
-      hasNotConverged = 2;
-      break;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     if (block_1) {block_1 = NM_free(block_1);}
     if (block_2) {block_2 = NM_free(block_2);}
     if (arrowMat_u1) {arrowMat_u1 = NM_free(arrowMat_u1);}
@@ -6956,6 +7011,20 @@ while(1)
     if (chol_UT_csc) chol_UT_csc = cs_spfree(chol_UT_csc);
 
     if (Jac) Jac = NM_free(Jac);
+
+
+
+
+
+
+
+    if (jacobian_is_nan | NV_isnan(globalVelocity, m) | NV_isnan(velocity, nd) | NV_isnan(reaction, nd))
+    {
+      hasNotConverged = 2;
+      break;
+    }
+
+
 
     iteration++;
   } // end of while loop
@@ -7307,9 +7376,9 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_JQJ;
