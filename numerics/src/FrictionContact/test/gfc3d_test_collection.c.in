@@ -98,8 +98,8 @@ int main (int argc, char *argv[])
 //    collection[10].will_fail = 1;
 #endif
 
-  //int out = run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
-  int out = 0;
+  int out = run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
+  //int out = 0;
 
   free_test_collection(collection, number_of_tests);
   free(_data_collection);
