@@ -1166,7 +1166,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, d, n, m, iterates);
 
     // check exit condition
-    totalresidual = fmax(fmax(error[0], error[1]),fmin(error[2], error[5]));
+    //totalresidual = fmax(fmax(error[0], error[1]),fmin(error[2], error[5]));
+    totalresidual = fmax(fmax(error[0], error[1]),error[2]);
 
     // printf("#### %i\n", options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT]);
 
@@ -1178,6 +1179,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       /* if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) */
       /*   printIteresProbMatlabFile(0, globalVelocity, velocity, reaction, d, n, m, iterates); */
 
+      /* if (projerr<udotr) printf("### PROJECTION ERROR < DUALITY GAP ###\n"); */
+      
       double unitur;
       for (int i = 0; i < n; i++)
       {
@@ -2221,14 +2224,14 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QPH;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH;
 
   //options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_NO;
 
   //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
