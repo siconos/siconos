@@ -299,11 +299,19 @@ if(WITH_TESTING)
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
+      
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
+      
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+
 
     # ---------------------------------------------------
     # --- Rolling friction contact problem formulation ---
@@ -316,6 +324,12 @@ if(WITH_TESTING)
     new_tests_collection(
       DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_grfc3d_fclib.c test_ipm_grfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+      
+     new_tests_collection(
+      DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_grfc3d_fclib_full.c test_ipm_grfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
     
