@@ -13,8 +13,16 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License. 
  */
+
+
+/* solver based on Interior Point Method (IPM) for friction-contact 3D problem based on an AVI reformulation
+ * Vincent Acary, Paul Armand, Hoang Minh NGUYEN. High-accuracy computation of rolling friction contact problems. 2022.
+ * https://hal.inria.fr/hal-03741048
+ */
+
+
 
 #include "CSparseMatrix_internal.h"
 #include "gfc3d_Solvers.h"
@@ -42,6 +50,13 @@
 #include "siconos_debug.h"
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
+
+
+/* solver based on Interior Point Method (IPM) for friction-contact 3D problem based on an AVI reformulation
+ * Vincent Acary, Paul Armand, Hoang Minh NGUYEN. High-accuracy computation of rolling friction contact problems. 2022.
+ * https://hal.inria.fr/hal-03741048
+ */
+
 
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";
 
