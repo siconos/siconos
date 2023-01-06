@@ -4544,6 +4544,9 @@ while(1)
         if (NM_LDLT_factorized(A))
         {
           NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+
+#ifdef WITH_MA57
+	  
           if (p->LDLT_solver == NSM_HSL)
           {
             LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
@@ -4554,6 +4557,9 @@ while(1)
 
             if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info);
           }
+#else
+	  numerics_error("grfc3d_ipm", "refinement works only with MA57");
+#endif
         }
       }
       else
@@ -4931,6 +4937,7 @@ while(1)
         if (NM_LDLT_factorized(A))
         {
           NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+#ifdef WITH_MA57
           if (p->LDLT_solver == NSM_HSL)
           {
             LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
@@ -4948,6 +4955,9 @@ while(1)
               fprintf(iterates, "RINFO = [RINFO, %3.50f];\n", residu_refine);
             }
           }
+#else
+	  numerics_error("grfc3d_ipm", "refinement works only with MA57");
+#endif
         }
       }
 
@@ -5387,6 +5397,7 @@ while(1)
         if (NM_LDLT_factorized(A))
         {
           NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+#ifdef WITH_MA57
           if (p->LDLT_solver == NSM_HSL)
           {
             LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
@@ -5397,6 +5408,9 @@ while(1)
 
             if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info);
           }
+#else
+	  numerics_error("grfc3d_ipm", "refinement works only with MA57");
+#endif
         }
       }
 
@@ -6042,6 +6056,7 @@ while(1)
         if (NM_LDLT_factorized(A))
         {
           NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+#ifdef WITH_MA57
           if (p->LDLT_solver == NSM_HSL)
           {
             LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
@@ -6052,6 +6067,9 @@ while(1)
 
             if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info);
           }
+#else
+	  numerics_error("grfc3d_ipm", "refinement works only with MA57");
+#endif
         }
       }
 
