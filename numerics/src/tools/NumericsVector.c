@@ -72,7 +72,7 @@ bool NV_equal(double * x, double * y, int n, double tol)
 {
   for(int i =0; i< n ; i++)
   {
-    if(fabs(x[i] - y[i]) >= tol)
+    if(fabs(x[i] - y[i]) >= tol || (isnan(x[i]) && !isnan(y[i])) || (!isnan(x[i]) && isnan(y[i])))
     {
       DEBUG_PRINTF("error %i = %e\n",i, fabs(x[i]) - y[i]);
       return false;

@@ -72,7 +72,6 @@ extern "C"
   void grfc3d_IPM(GlobalRollingFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
                   int*  info, SolverOptions*  options);
-
   
   /* /\** \addtogroup SetSolverOptions @{ */
   /*  *\/ */

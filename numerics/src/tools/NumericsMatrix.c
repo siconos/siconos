@@ -1301,23 +1301,26 @@ bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
   {
     return false;
   }
+  double a, b;
   for(int i =0; i< A->size0 ; i++)
   {
     for(int j =0; j< A->size1 ; j++)
     {
       /* DEBUG_PRINTF("error %i %i = %e\n",i,j, fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j))); */
-      if(fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)) >= tol)
+      a = NM_get_value(A, i, j);
+      b = NM_get_value(B, i, j);
+      if(fabs(a - b) >= tol || (isnan(a) && !isnan(b)) || (!isnan(a) && isnan(b)))
       {
 
         DEBUG_PRINTF("A(%i,%i) = %e\t, B(%i,%i) = %e\t,  error = %e\n",
-                     i,j, NM_get_value(A, i, j),
-                     i,j, NM_get_value(B, i, j),
-                     fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+                     i,j, a,
+                     i,j, b,
+                     fabs(a - b));
 
         printf("A(%i,%i) = %e\t, B(%i,%i) = %e\t,  error = %e\n",
-                     i,j, NM_get_value(A, i, j),
-                     i,j, NM_get_value(B, i, j),
-                     fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+                     i,j, a,
+                     i,j, b,
+                     fabs(a - b));
         return false;
       }
     }
@@ -6643,4 +6646,77 @@ int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs,
   }
 
   return info;
+}
+
+
+/*
+ * [in/out] x: rhs/solution
+ * [out] no. of iterations
+ * [out] -1 if solution of Ax=b contains NaNs
+ * [out] -2 if solution of A(dx)=b-Ax contains NaNs
+ */
+int NM_LU_refine(NumericsMatrix* A, double *x, double tol, int max_iter, double *residu)
+{
+  assert(A->size0 == A->size1);
+  int vecsize = A->size0;
+  int iteration = 0;
+
+  double *b = (double*)calloc(vecsize, sizeof(double));
+  double *dx = (double*)calloc(vecsize, sizeof(double));
+  // double *x_origin = (double*)calloc(vecsize, sizeof(double));
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+  case NM_SPARSE:
+  {
+    cblas_dcopy(vecsize, x, 1, b, 1);   // b  = rhs
+    cblas_dcopy(vecsize, x, 1, dx, 1);  // dx = rhs
+    iteration = 1;
+
+    NM_LU_solve(A, x, 1);               // solve Ax = b
+    if(NV_isnan(x, vecsize))            // return -1 if solution contains NaNs
+    {
+      free(b);   b = NULL;
+      free(dx); dx = NULL;
+      // free(x_origin); x_origin = NULL;
+      return -1;
+    }
+    // cblas_dcopy(vecsize, x, 1, x_origin, 1);  // save solution
+
+    NM_gemv(-1.0, A, x, 1.0, dx);       // dx = b - Ax
+    *residu = cblas_dnrm2(vecsize, dx, 1);
+
+    while(*residu > tol && iteration < max_iter)
+    {
+      iteration++;
+
+      NM_LU_solve(A, dx, 1);            // solve A(dx) = b - Ax
+      if(NV_isnan(dx, vecsize))         // return -1 if solution contains NaNs
+      {
+        // cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get solution back
+        free(b); b = NULL;
+        free(dx); dx = NULL;
+        // free(x_origin); x_origin = NULL;
+        return -2;
+      }
+
+      NV_add(x, dx, vecsize, x);        // Update sol x+ = x + dx
+
+      cblas_dcopy(vecsize, b, 1, dx, 1);
+      NM_gemv(-1.0, A, x, 1.0, dx);     // dx   = b - Ax
+      *residu = cblas_dnrm2(vecsize, dx, 1);
+    }
+
+    // if (iteration == max_iter) cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get solution back
+  }
+  default:
+    assert (0 && "NM_LU_refine unknown storageType");
+  }
+
+  free(b); b = NULL;
+  free(dx); dx = NULL;
+  // free(x_origin); x_origin = NULL;
+  return iteration;
 }
