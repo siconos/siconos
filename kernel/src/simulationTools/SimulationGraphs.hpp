@@ -119,6 +119,10 @@ struct InteractionProperties {
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>> workMatrices{
       nullptr}; /**< Internal buffers used on simulation size, to store
 jacobians or other temporary matrices. */
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> osi1{
+      nullptr}; /**< Integrator 1  used for the given Interaction */
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> osi2{
+      nullptr}; /**< Integrator 2  used for the given Interaction */
 
   ACCEPT_SERIALIZATION(InteractionProperties);
 };
@@ -207,8 +211,7 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
   ACCEPT_SERIALIZATION(DynamicalSystemsGraph);
 
   // to be installed with INSTALL_GRAPH_PROPERTIES
-  void eraseProperties(_DynamicalSystemsGraph::VDescriptor vd)
-  {
+  void eraseProperties(_DynamicalSystemsGraph::VDescriptor vd) {
     Ad._store->erase(vd);
     AdInt._store->erase(vd);
     Ld._store->erase(vd);
@@ -240,15 +243,13 @@ struct InteractionsGraph : public _InteractionsGraph {
       ((siconos::graphs::Vertex, std::string, name)));
 
   // to be installed with INSTALL_GRAPH_PROPERTIES
-  void eraseProperties(_InteractionsGraph::VDescriptor vd)
-  {
+  void eraseProperties(_InteractionsGraph::VDescriptor vd) {
     blockProj._store->erase(vd);
     name._store->erase(vd);
   }
 
   // to be installed with INSTALL_GRAPH_PROPERTIES
-  void eraseProperties(_InteractionsGraph::EDescriptor ed)
-  {
+  void eraseProperties(_InteractionsGraph::EDescriptor ed) {
     upper_blockProj._store->erase(ed);
     lower_blockProj._store->erase(ed);
   }

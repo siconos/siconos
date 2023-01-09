@@ -44,8 +44,7 @@ namespace ublas = boost::numeric::ublas;
 using complex_matrix = ublas::matrix<std::complex<double>, ublas::column_major>;
 using complex_vector = ublas::vector<std::complex<double>>;
 
-void EigenProblemsTest::setUp()
-{
+void EigenProblemsTest::setUp() {
   size = 5;
   A = std::make_shared<siconos::algebra::SimpleMatrix>(size, size);
   // Initialize A with random values.
@@ -59,8 +58,7 @@ void EigenProblemsTest::setUp()
 
 void EigenProblemsTest::tearDown() {}
 
-void EigenProblemsTest::testSyev()
-{
+void EigenProblemsTest::testSyev() {
   std::cout << "--> Test: syev." << std::endl;
 
   // turn A into a symmetric matrix
@@ -103,8 +101,7 @@ void EigenProblemsTest::testSyev()
   std::cout << "--> Syev test ended with success." << std::endl;
 }
 
-void EigenProblemsTest::testGeev1()
-{
+void EigenProblemsTest::testGeev1() {
   std::cout << "--> Test: geev1." << std::endl;
   // Compute only right eigenvectors.
   complex_matrix fake(1, 1), rightV(size, size);
@@ -119,7 +116,7 @@ void EigenProblemsTest::testGeev1()
 
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testGeev1 1: ", ublas::norm_2(error) < 3000 * std::numeric_limits<double>::epsilon(),
+      "testGeev1 1: ", ublas::norm_2(error) < 12 * std::numeric_limits<double>::epsilon(),
       true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 2: ", (*A) == (*Aref), true);
@@ -138,8 +135,7 @@ void EigenProblemsTest::testGeev1()
   std::cout << "--> geev1 test ended with success." << std::endl;
 }
 
-void EigenProblemsTest::testGeev2()
-{
+void EigenProblemsTest::testGeev2() {
   std::cout << "--> Test: geev2." << std::endl;
   // Compute only left eigenvectors.
   complex_matrix fake(1, 1), leftV(size, size);
@@ -153,7 +149,7 @@ void EigenProblemsTest::testGeev2()
   }
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testGeev2 1: ", ublas::norm_2(error) <  3000 * std::numeric_limits<double>::epsilon(),
+      "testGeev2 1: ", ublas::norm_2(error) < 3000 * std::numeric_limits<double>::epsilon(),
       true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev2 2: ", (*A) == (*Aref), true);
@@ -161,8 +157,7 @@ void EigenProblemsTest::testGeev2()
   std::cout << "--> geev1 test ended with success." << std::endl;
 }
 
-void EigenProblemsTest::testGeev3()
-{
+void EigenProblemsTest::testGeev3() {
   std::cout << "--> Test: geev3." << std::endl;
 
   // Compute left and right eigenvectors.
@@ -187,8 +182,7 @@ void EigenProblemsTest::testGeev3()
   std::cout << "--> geev3 test ended with success." << std::endl;
 }
 
-void EigenProblemsTest::End()
-{
+void EigenProblemsTest::End() {
   std::cout << "======================================" << std::endl;
   std::cout << " ===== End of EigenProblems tests ===== " << std::endl;
   std::cout << "======================================" << std::endl;

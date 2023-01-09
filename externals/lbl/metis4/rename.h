@@ -377,7 +377,8 @@
 
 /* util.c */
 #define errexit				__errexit
-#define GKfree				__GKfree
+//#define GKfree				__GKfree
+void GKfree(void **ptr1,...); /* actual signature to avoid memry corruption when freeing memory */
 #ifndef DMALLOC
 #define imalloc				__imalloc
 #define idxmalloc			__idxmalloc

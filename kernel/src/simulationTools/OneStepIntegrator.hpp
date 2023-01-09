@@ -25,6 +25,7 @@
 
 #include "ExtraAdditionalTerms.hpp"
 #include "OneStepIntegratorTypes.hpp"  // IntegratorType
+#include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
 
 namespace siconos::simulation {
@@ -167,13 +168,11 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   inline IntegratorType getType() const { return _integratorType; }
 
   /**
-     get the graph of dynamical systems associated with the Integrator
+     \return a pointer to the graph of dynamical systems associated with the Integrator
      warning: returns the whole ds graph, not only ds integrated by the present osi.
-
-     \return a std::shared_ptr<DynamicalSystemsGraph>
   */
-  inline std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dynamicalSystemsGraph() const
-  {
+  inline std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dynamicalSystemsGraph()
+      const {
     return _dynamicalSystemsGraph;
   };
 
@@ -181,15 +180,12 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
      set the graph of dynamical systems associated with the Integrator
   */
   inline void setDynamicalSystemsGraph(
-      std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dsg)
-  {
+      std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dsg) {
     _dynamicalSystemsGraph = dsg;
   };
 
-  /** get number of internal memory vectors needed in dynamical systems integrated with this
-   * osi.
-   *
-   *  \return an unsigned int
+  /** \return the number of internal memory vectors needed in dynamical systems integrated with
+   * this osi.
    */
   inline unsigned int getSizeMem() const { return _sizeMem; };
 
@@ -197,8 +193,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    *  \return a pointer to Simulation
    */
-  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const
-  {
+  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const {
     return _simulation;
   }
 
@@ -206,8 +201,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    *  \param newS a pointer to Simulation
    */
-  inline void setSimulationPtr(std::shared_ptr<siconos::simulation::Simulation> newS)
-  {
+  inline void setSimulationPtr(std::shared_ptr<siconos::simulation::Simulation> newS) {
     _simulation = newS;
   }
 
@@ -290,8 +284,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       siconos::graphs::InteractionProperties& interaction_properties);
 
   /** compute the initial state (for dynamical system variables) of the Newton loop. */
-  virtual void computeInitialNewtonState()
-  {
+  virtual void computeInitialNewtonState() {
     // Default behavior :  does nothing and used the current state as starting state of the
     // Newton iteration
   }
@@ -348,7 +341,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
   void resetAllNonSmoothParts();
 
   /** set to zero all the r vectors of the DynamicalSystems of the present OSI for a given
-   * level
+   *  level
    *
    *  \param level
    */
@@ -387,13 +380,17 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    *  \param time current time
    *  \param level level of interest for the dynamics
+   *  \warning VA: 27/10/2022 Whatever the level, the updateInput method loops over indexSet0
+   *  This is sometimes necessary for some OSI but for some others it may burden the
+   *  computational time for nothing. For instance, in standard MoreauJEANOSI, p[1] is only
+   *  defined on indexSet1. we should go towards virtual void updateInput(double time, unsigned
+   *  int pLevel, unsigned int indexSetLevel );
    */
   virtual void updateInput(double time, unsigned int level);
 
   virtual void prepareNewtonIteration(double time) = 0;
 
-  /** print the data to the screen
-   */
+  /** print the data to the screen */
   virtual void display() const = 0;
 
   /** Apply the rule to one Interaction to known if is it should be included
@@ -420,8 +417,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    *  \return the ExtraAdditionalTerms
    */
-  inline std::shared_ptr<ExtraAdditionalTerms> extraAdditionalTerms()
-  {
+  inline std::shared_ptr<ExtraAdditionalTerms> extraAdditionalTerms() {
     return _extraAdditionalTerms;
   }
 
@@ -430,8 +426,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    *  \param eat the ExtraAdditionalTerms to use
    */
-  inline void setExtraAdditionalTerms(std::shared_ptr<ExtraAdditionalTerms> eat)
-  {
+  inline void setExtraAdditionalTerms(std::shared_ptr<ExtraAdditionalTerms> eat) {
     _extraAdditionalTerms = eat;
   }
 
@@ -439,10 +434,9 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
 
       \param dsi the iterator on the node of the graph corresponding to the dynamical system
-     of interest.
-   */
-  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VIterator dsi) const
-  {
+      of interest.
+  */
+  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VIterator dsi) const {
     return (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
   };
 
@@ -450,12 +444,26 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
       True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
 
       \param dsgv the descriptor of the node in the graph corresponding to the dynamical
-     system of interest.
-   */
-  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VDescriptor dsgv) const
-  {
+      system of interest.
+  */
+  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VDescriptor dsgv) const {
     return (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
   };
+
+  /**
+     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+
+     \param dsi the iterator on the node of the graph corresponding to the dynamical system of
+     interest.
+   */
+  inline bool checkInteractionOSI(siconos::graphs::InteractionsGraph& indexSet0,
+                                  siconos::graphs::InteractionsGraph::VIterator ui) {
+    return (indexSet0.properties(*ui).osi1.get()) == this;
+  };
+
+  virtual siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) = 0;
 };
 }  // namespace siconos::integrators
 

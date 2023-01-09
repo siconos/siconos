@@ -24,9 +24,6 @@ shape in a contactor.
 
 #ifndef SICOBULLETDEFINES_H
 
-
-// #define BULLET_TIMER 1
-
 #ifdef BULLET_TIMER
 #define BT_ENABLE_PROFILE 1
 #include <LinearMath/btQuickprof.h>
@@ -67,5 +64,14 @@ shape in a contactor.
 #endif
 #endif
 
+namespace siconos::collision::bullet {
+
+// This value is compared to the initial distance computed
+// at the creation of the interaction
+// if distance < - WARNING_TOLERANCE_AT_CREATION_INTERACTION
+// a warning is raised.
+constexpr double WARNING_TOLERANCE_AT_CREATION_INTERACTION = 1e-5;
+
+}  // namespace siconos::collision::bullet
 
 #endif

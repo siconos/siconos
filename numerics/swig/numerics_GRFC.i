@@ -40,13 +40,13 @@
 
 %{
 #include "GlobalRollingFrictionContactProblem.h"
-#include "global_rolling_fc_Solvers.h"
-#include "gfc3d_compute_error.h"
+#include "grfc3d_Solvers.h"
+#include "grfc3d_compute_error.h"
   
 %}
 
 %include "GlobalRollingFrictionContactProblem.h"
-%include "global_rolling_fc_Solvers.h"
+%include "grfc3d_Solvers.h"
 //%include "gfc3d_compute_error.h"
 
 %extend GlobalRollingFrictionContactProblem

@@ -283,8 +283,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *
    *  \param newGamma a double
    */
-  inline void setGamma(double newGamma)
-  {
+  inline void setGamma(double newGamma) {
     _gamma = newGamma;
     _useGamma = true;
   };
@@ -313,14 +312,12 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *
    *  \param newUseGammaForRelation a Boolean
    */
-  inline void setUseGammaForRelation(bool newUseGammaForRelation)
-  {
+  inline void setUseGammaForRelation(bool newUseGammaForRelation) {
     _useGammaForRelation = newUseGammaForRelation;
     if (_useGammaForRelation) _useGamma = false;
   };
   /** set the constraint activation threshold */
-  inline void setConstraintActivationThreshold(double v)
-  {
+  inline void setConstraintActivationThreshold(double v) {
     _constraintActivationThreshold = v;
   }
 
@@ -337,8 +334,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *
    *  \param newExplicitNewtonEulerDSOperators a Boolean
    */
-  inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators)
-  {
+  inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators) {
     _explicitNewtonEulerDSOperators = newExplicitNewtonEulerDSOperators;
   };
 
@@ -459,6 +455,15 @@ class MoreauJeanOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
+  /** \return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   *  problem
+   */
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
+    return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
+  };
+
   /** Apply the rule to one Interaction to know if it should be included in the
    *  IndexSet of level i
    *
@@ -480,7 +485,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
                                      unsigned int i) override;
 
   /** method to prepare the fist Newton iteration
-   *   \param time
+   *  \param time
    */
   void prepareNewtonIteration(double time) override;
 

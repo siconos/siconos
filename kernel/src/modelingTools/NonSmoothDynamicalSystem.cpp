@@ -38,8 +38,7 @@
 
 //  constructor
 siconos::modeling::NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T)
-    : _t0(t0), _T(T)
-{
+    : _t0(t0), _T(T) {
   // === Builds an empty topology ===
   _topology = std::make_shared<siconos::simulation::Topology>();
   // we push a first element in the list to avoid acces to null when
@@ -54,29 +53,23 @@ siconos::modeling::NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0,
 siconos::modeling::NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem() noexcept { clear(); }
 
 // changelog
-void siconos::modeling::NonSmoothDynamicalSystem::Change::display() const
-{
+void siconos::modeling::NonSmoothDynamicalSystem::Change::display() const {
   std::cout << "Changes display   " << this << std::endl;
   auto changeval = static_cast<std::underlying_type<ChangeType>::type>(typeOfChange);
   if (typeOfChange == ChangeType::addDynamicalSystem) {
     std::cout << "typeOfChange : " << changeval << " : addDynamicalSystem" << std::endl;
-  }
-  else if (typeOfChange == ChangeType::rmDynamicalSystem) {
+  } else if (typeOfChange == ChangeType::rmDynamicalSystem) {
     std::cout << "typeOfChange : " << changeval << " : rmDynamicalSystem" << std::endl;
-  }
-  else if (typeOfChange == ChangeType::addInteraction) {
+  } else if (typeOfChange == ChangeType::addInteraction) {
     std::cout << "typeOfChange : " << changeval << " : addInteraction" << std::endl;
-  }
-  else if (typeOfChange == ChangeType::rmInteraction) {
+  } else if (typeOfChange == ChangeType::rmInteraction) {
     std::cout << "typeOfChange : " << changeval << " : rmInteraction" << std::endl;
-  }
-  else if (typeOfChange == ChangeType::clearTopology) {
+  } else if (typeOfChange == ChangeType::clearTopology) {
     std::cout << "typeOfChange : " << changeval << " : clearTopology" << std::endl;
   }
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeLogIter& it)
-{
+void siconos::modeling::NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeLogIter& it) {
   /* Given an interator into the changelog list, clear everything that
    * comes before it. User must be careful calling this if he has two
    * simulations, but in the one-simulation case (currently 100% of
@@ -92,8 +85,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeL
 
 // === DynamicalSystems management ===
 
-void siconos::modeling::NonSmoothDynamicalSystem::display() const
-{
+void siconos::modeling::NonSmoothDynamicalSystem::display() const {
   std::cout << " ===== Non Smooth Dynamical System display =====\n ";
   std::cout << "---> isBVP = " << _BVP << std::endl;
   dynamicalSystems()->begin();
@@ -104,8 +96,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::display() const
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::insertDynamicalSystem(
-    std::shared_ptr<DynamicalSystem> ds)
-{
+    std::shared_ptr<DynamicalSystem> ds) {
   // some checks here ...
   if (!ds) {
     THROW_EXCEPTION(
@@ -121,61 +112,47 @@ void siconos::modeling::NonSmoothDynamicalSystem::insertDynamicalSystem(
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::removeDynamicalSystem(
-    std::shared_ptr<DynamicalSystem> ds)
-{
+    std::shared_ptr<DynamicalSystem> ds) {
   _topology->removeDynamicalSystem(ds);
   _changeLog.push_back(Change(ChangeType::rmDynamicalSystem, ds));
 }
+
 void siconos::modeling::NonSmoothDynamicalSystem::removeInteraction(
-    std::shared_ptr<Interaction> inter)
-{
+    std::shared_ptr<Interaction> inter) {
   _topology->removeInteraction(inter);
   _changeLog.push_back(Change(ChangeType::rmInteraction, inter));
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::link(std::shared_ptr<Interaction> inter,
                                                        std::shared_ptr<DynamicalSystem> ds1,
-                                                       std::shared_ptr<DynamicalSystem> ds2)
-{
+                                                       std::shared_ptr<DynamicalSystem> ds2) {
   _mIsLinear = (inter->relation()->isLinear() && _mIsLinear);
   _topology->link(inter, ds1, ds2);
   _changeLog.push_back(Change(ChangeType::addInteraction, inter));
 };
 
-void siconos::modeling::NonSmoothDynamicalSystem::clear()
-{
+void siconos::modeling::NonSmoothDynamicalSystem::clear() {
   _topology->clear();
   _changeLog.push_back(Change(ChangeType::clearTopology));
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::setSymmetric(bool val)
-{
+void siconos::modeling::NonSmoothDynamicalSystem::setSymmetric(bool val) {
   _topology->setSymmetric(val);
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::reset()
-{
-  for (auto& vi : *dynamicalSystems()) {
-    dynamicalSystems()->bundle(vi)->resetNonSmoothPart(1);
-  }
-}
-
-void siconos::modeling::NonSmoothDynamicalSystem::reset(unsigned int level)
-{
+void siconos::modeling::NonSmoothDynamicalSystem::resetNonSmoothPart(unsigned int level) {
   for (auto& vi : *dynamicalSystems()) {
     dynamicalSystems()->bundle(vi)->resetNonSmoothPart(level);
   }
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::swapInMemory()
-{
+void siconos::modeling::NonSmoothDynamicalSystem::swapInMemory() {
   // could be better to call bind method
   for (auto& vi : *dynamicalSystems()) {
     dynamicalSystems()->bundle(vi)->swapInMemory();
   }
 }
-void siconos::modeling::NonSmoothDynamicalSystem::pushInteractionsInMemory()
-{
+void siconos::modeling::NonSmoothDynamicalSystem::pushInteractionsInMemory() {
   // Save Interactions state into Memory.
 
   if (_topology->indexSet0()->size() > 0) {
@@ -190,15 +167,14 @@ void siconos::modeling::NonSmoothDynamicalSystem::pushInteractionsInMemory()
     }
   }
 }
-void siconos::modeling::NonSmoothDynamicalSystem::updateDSPlugins(double time)
-{
+void siconos::modeling::NonSmoothDynamicalSystem::updateDSPlugins(double time) {
   // could be better to call bind method
   for (auto& vi : *dynamicalSystems()) {
     dynamicalSystems()->bundle(vi)->updatePlugins(time);
   }
 }
-void siconos::modeling::NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
-{
+void siconos::modeling::NonSmoothDynamicalSystem::updateInput(double time,
+                                                              unsigned int level) {
   DEBUG_BEGIN("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
   DEBUG_PRINTF("with level = %i\n", level);
 
@@ -206,7 +182,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::updateInput(double time, unsig
   //  assert(level>=0);
 
   // Set dynamical systems non-smooth part to zero.
-  reset(level);
+  resetNonSmoothPart(level);
 
   // We compute input using lambda(level).
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -222,8 +198,8 @@ void siconos::modeling::NonSmoothDynamicalSystem::updateInput(double time, unsig
   DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
-{
+void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time,
+                                                               unsigned int level) {
   // To compute output(level) (ie with y[level]) for all Interactions.
   //  assert(level>=0);
 
@@ -244,8 +220,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time, unsi
 
 void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time,
                                                                unsigned int level_min,
-                                                               unsigned int level_max)
-{
+                                                               unsigned int level_max) {
   // To compute output(level) (ie with y[level]) for all Interactions in I0
   // and for a range of levels in a single pass through I0.
   //  assert(level>=0);
@@ -262,8 +237,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::updateOutput(double time,
   }
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::computeInteractionJacobians(double time)
-{
+void siconos::modeling::NonSmoothDynamicalSystem::computeInteractionJacobians(double time) {
   DEBUG_BEGIN(
       "siconos::modeling::NonSmoothDynamicalSystem::computeInteractionJacobians(double "
       "time)\n");
@@ -281,8 +255,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::computeInteractionJacobians(do
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::computeInteractionJacobians(
-    double time, siconos::graphs::InteractionsGraph& indexSet)
-{
+    double time, siconos::graphs::InteractionsGraph& indexSet) {
   DEBUG_BEGIN(
       "siconos::modeling::NonSmoothDynamicalSystem::computeInteractionJacobians(double "
       "time)\n");
@@ -299,8 +272,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::computeInteractionJacobians(
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::visitDynamicalSystems(
-    std::shared_ptr<siconos::internal::SiconosVisitor> visitor)
-{
+    std::shared_ptr<siconos::internal::SiconosVisitor> visitor) {
   auto& dsg = *dynamicalSystems();
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
   std::tie(dsi, dsiend) = dsg.vertices();
@@ -309,84 +281,70 @@ void siconos::modeling::NonSmoothDynamicalSystem::visitDynamicalSystems(
   }
 }
 
-size_t siconos::modeling::NonSmoothDynamicalSystem::getNumberOfDS() const
-{
+size_t siconos::modeling::NonSmoothDynamicalSystem::getNumberOfDS() const {
   return _topology->dSG(0)->size();
 }
 
 const std::shared_ptr<siconos::graphs::DynamicalSystemsGraph>
-siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystems() const
-{
+siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystems() const {
   return _topology->dSG(0);
 }
 
 std::shared_ptr<siconos::modeling::DynamicalSystem>
-siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystem(unsigned int nb) const
-{
+siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystem(unsigned int nb) const {
   return _topology->getDynamicalSystem(nb);
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::displayDynamicalSystems() const
-{
+void siconos::modeling::NonSmoothDynamicalSystem::displayDynamicalSystems() const {
   _topology->displayDynamicalSystems();
 }
 
-size_t siconos::modeling::NonSmoothDynamicalSystem::getNumberOfInteractions() const
-{
+size_t siconos::modeling::NonSmoothDynamicalSystem::getNumberOfInteractions() const {
   return _topology->indexSet0()->size();
 };
 
 const std::shared_ptr<siconos::graphs::InteractionsGraph>
-siconos::modeling::NonSmoothDynamicalSystem::interactions() const
-{
+siconos::modeling::NonSmoothDynamicalSystem::interactions() const {
   return _topology->indexSet0();
 };
 
 std::shared_ptr<siconos::modeling::Interaction>
-siconos::modeling::NonSmoothDynamicalSystem::interaction(unsigned int nb) const
-{
+siconos::modeling::NonSmoothDynamicalSystem::interaction(unsigned int nb) const {
   return _topology->getInteraction(nb);
 }
 
 std::shared_ptr<siconos::modeling::Interaction>
-siconos::modeling::NonSmoothDynamicalSystem::interaction(std::string name) const
-{
+siconos::modeling::NonSmoothDynamicalSystem::interaction(std::string name) const {
   return _topology->getInteraction(name);
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::setName(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const std::string& name)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const std::string& name) {
   _topology->setName(ds, name);
 };
 
 std::string siconos::modeling::NonSmoothDynamicalSystem::name(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   return _topology->name(ds);
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::setName(
-    std::shared_ptr<siconos::modeling::Interaction> interaction, const std::string& name)
-{
+    std::shared_ptr<siconos::modeling::Interaction> interaction, const std::string& name) {
   _topology->setName(interaction, name);
 };
 
 std::string siconos::modeling::NonSmoothDynamicalSystem::name(
-    std::shared_ptr<siconos::modeling::Interaction> inter)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter) {
   return _topology->name(inter);
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::setControlProperty(
-    std::shared_ptr<siconos::modeling::Interaction> inter, const bool isControlInteraction)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, const bool isControlInteraction) {
   _topology->setControlProperty(inter, isControlInteraction);
 }
 
 std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>>
-siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystemsVector() const
-{
+siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystemsVector() const {
   std::vector<std::shared_ptr<DynamicalSystem>> dynamicalSystemsVector;
   auto& dsg = *dynamicalSystems();
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
@@ -398,8 +356,7 @@ siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystemsVector() const
   return dynamicalSystemsVector;
 }
 std::vector<std::shared_ptr<siconos::modeling::Interaction>>
-siconos::modeling::NonSmoothDynamicalSystem::InteractionsVector() const
-{
+siconos::modeling::NonSmoothDynamicalSystem::InteractionsVector() const {
   std::vector<std::shared_ptr<siconos::modeling::Interaction>> interactionsVector;
   auto indexSet0 = _topology->indexSet0();
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;

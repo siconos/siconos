@@ -49,8 +49,7 @@ siconos::simulation::TimeSteppingDirectProjection::TimeSteppingDirectProjection(
     std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
     std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
     unsigned int level)
-    : TimeStepping{nsds, td, osi, osnspb_velo}, _indexSetLevelForProjection{level}
-{
+    : TimeStepping{nsds, td, osi, osnspb_velo}, _indexSetLevelForProjection{level} {
   if (not std::dynamic_pointer_cast<siconos::integrators::MoreauJeanDirectProjectionOSI>(osi))
     THROW_EXCEPTION(
         "siconos::simulation::TimeSteppingDirectProjection::TimeSteppingDirectProjection.  "
@@ -60,8 +59,7 @@ siconos::simulation::TimeSteppingDirectProjection::TimeSteppingDirectProjection(
   insertNonSmoothProblem(osnspb_pos, siconos::simulation::SICONOS_OSNSP_TS_POS);
 }
 
-void siconos::simulation::TimeSteppingDirectProjection::initOSNS()
-{
+void siconos::simulation::TimeSteppingDirectProjection::initOSNS() {
   TimeStepping::initOSNS();
 
   (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]->setIndexSetLevel(
@@ -72,8 +70,7 @@ void siconos::simulation::TimeSteppingDirectProjection::initOSNS()
   (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
 }
 
-void siconos::simulation::TimeSteppingDirectProjection::nextStep()
-{
+void siconos::simulation::TimeSteppingDirectProjection::nextStep() {
   TimeStepping::nextStep();
 
   // Zeroing Lambda Muliplier of indexSet()
@@ -86,8 +83,7 @@ void siconos::simulation::TimeSteppingDirectProjection::nextStep()
   }
 }
 
-void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent()
-{
+void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   initialize();
 
   /** First step, Solve the standard velocity formulation.*/
@@ -165,11 +161,9 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent()
     auto& workVectors = *dsGraph->properties(*aVi2).workVectors;
     if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
-    }
-    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not "
           "from NewtonEulerDS neither from LagrangianDS.");
@@ -239,8 +233,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent()
 
         neds->normalizeq();
         neds->computeT();
-      }
-      else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         auto q = d->q();
         auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
 
@@ -248,8 +241,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent()
           //*q = * qtmp +  *d->p(0);
           *q += *d->p(0);
         }
-      }
-      else
+      } else
         THROW_EXCEPTION(
             "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() :: - Ds is "
             "not from NewtonEulerDS neither from LagrangianDS.");
@@ -306,14 +298,11 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent()
     if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       auto time = nextTime();
       neds->computeForces(time, neds->q(), neds->twist());
-    }
-    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto time = nextTime();
       d->computeForces(time, d->q(), d->velocity());
-    }
-    else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
-    }
-    else
+    } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
+    } else
       THROW_EXCEPTION(
           "TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS "
           "neither from LagrangianDS.");
@@ -446,8 +435,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent()
 }
 
 void siconos::simulation::TimeSteppingDirectProjection::computeCriteria(
-    bool* runningProjection)
-{
+    bool* runningProjection) {
   auto indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
   siconos::graphs::InteractionsGraph::VIterator aVi, viend;
 
@@ -476,8 +464,7 @@ void siconos::simulation::TimeSteppingDirectProjection::computeCriteria(
 
         DEBUG_PRINTF("TSProj newton criteria unilateral true %e.\n", criteria);
       }
-    }
-    else {
+    } else {
       DEBUG_PRINTF("Equality inter->y(0)->normInf() %e.\n", inter->y(0)->normInf());
       if (inter->y(0)->normInf() > maxViolationEquality)
         maxViolationEquality = inter->y(0)->normInf();
@@ -502,8 +489,7 @@ void siconos::simulation::TimeSteppingDirectProjection::computeCriteria(
 }
 
 void siconos::simulation::TimeSteppingDirectProjection::newtonSolve(double criterion,
-                                                                    unsigned int maxStep)
-{
+                                                                    unsigned int maxStep) {
   bool isNewtonConverge = false;
   _newtonNbIterations = 0;  // number of Newton iterations
   int info = 0;
@@ -558,7 +544,7 @@ void siconos::simulation::TimeSteppingDirectProjection::newtonSolve(double crite
       else
         checkSolverOutputProjectOnConstraints(info, this);
 
-      updateInput();
+      updateAllInput();
       updateState();
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info) {
@@ -571,16 +557,14 @@ void siconos::simulation::TimeSteppingDirectProjection::newtonSolve(double crite
             << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps ("
             << maxStep << ") reached." << std::endl;
       }
-    }
-    else if (info && _warnOnNonConvergence) {
+    } else if (info && _warnOnNonConvergence) {
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed."
                 << std::endl;
     }
     //    else
     //      std::cout << "TimeStepping::newtonSolve succed
     //      nbit="<<_newtonNbIterations<<"maxStep="<<maxStep<<endl;
-  }
-  else
+  } else
     THROW_EXCEPTION("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " +
                     siconos::tools::enum_to_string(_newtonOptions));
 }

@@ -107,7 +107,6 @@ siconos::collision::bullet::SiconosBulletCollisionManager::SiconosBulletCollisio
 
   _impl = std::make_shared<internal::SiconosBulletCollisionManager_impl>(_options);
 
-
   // SiconosBulletfiltercallback : done in updateInteractions since
   // we can not call shared_from_this in the constructor.
   // auto filterCallback =
@@ -339,7 +338,7 @@ static void siconosBulletAdjustInternalEdgeContacts(
     newNormal = tri_normal;
     //					cp.m_distance1 = cp.m_distance1 *
     // newNormal.dot(cp.m_normalWorldOnB);
-    btVector3 oldNormal = cp.m_normalWorldOnB;
+    // btVector3 oldNormal = cp.m_normalWorldOnB;
 
     // printf("old normal %e\t%e\t%e\n", oldNormal.x(),  oldNormal.y(), oldNormal.z());
     // printf("new normal %e\t%e\t%e\n", newNormal.x(),  newNormal.y(), newNormal.z());
@@ -365,8 +364,10 @@ static void siconosBulletAdjustInternalEdgeContacts(
 
     // Option 2 - we take in any cases the normal to the triangle face
 
-    btScalar cosine = oldNormal.dot(newNormal);
-    if (cosine < 0.0) {
+    // btScalar cosine =  oldNormal.dot(newNormal);
+    // if (cosine < 0.0)
+    // We assume that the normal to the triangle face must be upward.
+    if (tri_normal.z() < 0.0) {
       newNormal = -1.0 * tri_normal;
     }
     cp.m_normalWorldOnB = newNormal;
@@ -723,10 +724,9 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
           // flag.
-          if (rel->distance() < 0.0) {
+          if (rel->distance() < -WARNING_TOLERANCE_AT_CREATION_INTERACTION) {
             DEBUG_PRINTF(
-                "SiconosBulletCollisionManager :: Interactions must be created with "
-                "positive "
+                "SiconosBulletCollisionManager :: Interactions must be created with positive "
                 "distance (%f).\n",
                 rel->distance());
             _stats.interaction_warnings++;
@@ -763,10 +763,9 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
           // flag.
-          if (rel->distance() < 0.0) {
+          if (rel->distance() < -WARNING_TOLERANCE_AT_CREATION_INTERACTION) {
             DEBUG_PRINTF(
-                "SiconosBulletCollisionManager :: Interactions must be created with "
-                "positive "
+                "SiconosBulletCollisionManager :: Interactions must be created with positive "
                 "distance (%f).\n",
                 rel->distance());
             _stats.interaction_warnings++;
@@ -805,7 +804,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
           // flag.
-          if (rel->distance() < 0.0) {
+          if (rel->distance() < -WARNING_TOLERANCE_AT_CREATION_INTERACTION) {
             DEBUG_PRINTF(
                 "Interactions must be created with positive "
                 "distance (%f).\n",
@@ -848,10 +847,9 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
           // We wish to be sure that no Interactions are created without
           // sufficient warning before contact.  TODO: Replace with exception or
           // flag.
-          if (rel->distance() < 0.0) {
+          if (rel->distance() < -WARNING_TOLERANCE_AT_CREATION_INTERACTION) {
             DEBUG_PRINTF(
-                "SiconosBulletCollisionManager :: Interactions must be created with "
-                "positive "
+                "SiconosBulletCollisionManager :: Interactions must be created with positive "
                 "distance (%f).\n",
                 rel->distance());
             _stats.interaction_warnings++;

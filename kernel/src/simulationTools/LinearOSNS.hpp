@@ -26,9 +26,9 @@
 
 namespace siconos::numerics {
 
-#include "NM_types.h" // For NM_DENSE, NM_types ...
-  // enum NM_types : int;  // explicit type specification is required
-}
+#include "NM_types.h"  // For NM_DENSE, NM_types ...
+// enum NM_types : int;  // explicit type specification is required
+}  // namespace siconos::numerics
 
 namespace siconos::algebra {
 class SiconosVector;
@@ -37,7 +37,6 @@ class SiconosVector;
 namespace siconos::modeling {
 class NonSmoothLaw;
 }
-
 
 namespace siconos::nonsmooth_formulations {
 
@@ -196,8 +195,7 @@ class LinearOSNS : public OneStepNSProblem {
 
      \return NM_types (NM_DENSE, NM_SPARSE_BLOCK)
   */
-  inline siconos::numerics::NM_types getMStorageType() const
-  {
+  inline siconos::numerics::NM_types getMStorageType() const {
     return _numericsMatrixStorageType;
   };
 
@@ -207,15 +205,13 @@ class LinearOSNS : public OneStepNSProblem {
    *
    *  \param i (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  inline void setMStorageType(siconos::numerics::NM_types i)
-  {
+  inline void setMStorageType(siconos::numerics::NM_types i) {
     _numericsMatrixStorageType = i;
   };
 
   /** set which type of assembly will be used for M
    */
-  inline void setAssemblyType(LinearOSNSAssemblyType assemblyType)
-  {
+  inline void setAssemblyType(LinearOSNSAssemblyType assemblyType) {
     _assemblyType = assemblyType;
   };
 

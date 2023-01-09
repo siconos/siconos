@@ -44,8 +44,7 @@
 
 std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
 siconos::integrators::OneStepIntegrator::_initializeDSWorkVectors(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv =
       _dynamicalSystemsGraph->descriptor(ds);
 
@@ -64,8 +63,7 @@ siconos::integrators::OneStepIntegrator::_initializeDSWorkVectors(
   return wv;
 }
 
-void siconos::integrators::OneStepIntegrator::initialize()
-{
+void siconos::integrators::OneStepIntegrator::initialize() {
   if (_extraAdditionalTerms) {
     _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0),
                                 *_simulation->nonSmoothDynamicalSystem(),
@@ -78,8 +76,7 @@ void siconos::integrators::OneStepIntegrator::initialize()
 
 void siconos::integrators::OneStepIntegrator::update_interaction_output(
     siconos::modeling::Interaction& inter, double time,
-    siconos::graphs::InteractionProperties& interaction_properties)
-{
+    siconos::graphs::InteractionProperties& interaction_properties) {
   // - compute interaction output (y) for all levels
   // - swaps in memory
 
@@ -120,8 +117,7 @@ void siconos::integrators::OneStepIntegrator::update_interaction_output(
 }
 
 void siconos::integrators::OneStepIntegrator::_check_and_update_interaction_levels(
-    siconos::modeling::Interaction& inter)
-{
+    siconos::modeling::Interaction& inter) {
   bool isInitializationNeeded = false;
   if (!(inter.lowerLevelForOutput() <= _levelMinForOutput &&
         inter.upperLevelForOutput() >= _levelMaxForOutput)) {
@@ -140,8 +136,7 @@ void siconos::integrators::OneStepIntegrator::_check_and_update_interaction_leve
   if (isInitializationNeeded) inter.reset();
 }
 
-void siconos::integrators::OneStepIntegrator::resetAllNonSmoothParts()
-{
+void siconos::integrators::OneStepIntegrator::resetAllNonSmoothParts() {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
@@ -149,8 +144,7 @@ void siconos::integrators::OneStepIntegrator::resetAllNonSmoothParts()
   }
 }
 
-void siconos::integrators::OneStepIntegrator::resetNonSmoothPart(unsigned int level)
-{
+void siconos::integrators::OneStepIntegrator::resetNonSmoothPart(unsigned int level) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
@@ -158,35 +152,46 @@ void siconos::integrators::OneStepIntegrator::resetNonSmoothPart(unsigned int le
   }
 }
 
-void siconos::integrators::OneStepIntegrator::updateOutput(double time)
-{
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  _simulation->nonSmoothDynamicalSystem()->updateOutput(time, _levelMinForOutput,
-                                                        _levelMaxForOutput);
+void siconos::integrators::OneStepIntegrator::updateOutput(double time, unsigned int level) {
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for (std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui) {
+    if (!checkInteractionOSI(indexSet0, ui)) continue;
+    auto& inter = *indexSet0.bundle(*ui);
+    assert(inter.lowerLevelForOutput() <= level);
+    assert(inter.upperLevelForOutput() >= level);
+    inter.computeOutput(time, level);
+  }
 }
 
-void siconos::integrators::OneStepIntegrator::updateInput(double time)
-{
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  for (unsigned int level = _levelMinForInput; level < _levelMaxForInput + 1; level++)
-    _simulation->nonSmoothDynamicalSystem()->updateInput(time, level);
+void siconos::integrators::OneStepIntegrator::updateOutput(double time) {
+  for (auto level = _levelMinForOutput; level <= _levelMaxForOutput; ++level)
+    updateOutput(time, level);
 }
 
-void siconos::integrators::OneStepIntegrator::updateOutput(double time, unsigned int level)
-{
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  _simulation->nonSmoothDynamicalSystem()->updateOutput(time, level);
+void siconos::integrators::OneStepIntegrator::updateInput(double time) {
+  for (auto level = _levelMinForInput; level < _levelMaxForInput + 1; level++)
+    updateInput(time, level);
 }
 
-void siconos::integrators::OneStepIntegrator::updateInput(double time, unsigned int level)
-{
-  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  _simulation->nonSmoothDynamicalSystem()->updateInput(time, level);
+void siconos::integrators::OneStepIntegrator::updateInput(double time, unsigned int level) {
+  // resetNonSmoothPart(level);
+  // We compute input using lambda(level).
+  //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
+  // resetNonSmoothPart(level);
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for (std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui) {
+    if (!checkInteractionOSI(indexSet0, ui)) continue;
+    auto& inter = *indexSet0.bundle(*ui);
+    assert(inter.lowerLevelForInput() <= level);
+    assert(inter.upperLevelForInput() >= level);
+    inter.computeInput(time, level);
+  }
 }
 
 double siconos::integrators::OneStepIntegrator::computeResiduOutput(
-    double time, std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet)
-{
+    double time, std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) {
   double residu = 0.0;
   THROW_EXCEPTION(
       "siconos::integrators::OneStepIntegrator::computeResiduOutput not implemented for "
@@ -196,8 +201,7 @@ double siconos::integrators::OneStepIntegrator::computeResiduOutput(
   return residu;
 }
 
-double siconos::integrators::OneStepIntegrator::computeResidu()
-{
+double siconos::integrators::OneStepIntegrator::computeResidu() {
   // default : error
   THROW_EXCEPTION("OneStepIntegrator::computeResidu not implemented for integrator of type " +
                   std::to_string(static_cast<std::underlying_type<IntegratorType>::type>(
@@ -205,8 +209,7 @@ double siconos::integrators::OneStepIntegrator::computeResidu()
   return 0.0;
 }
 
-void siconos::integrators::OneStepIntegrator::computeFreeState()
-{
+void siconos::integrators::OneStepIntegrator::computeFreeState() {
   // default : error
   THROW_EXCEPTION(
       "OneStepIntegrator::computeFreeState not implemented for integrator of type " +
@@ -216,8 +219,7 @@ void siconos::integrators::OneStepIntegrator::computeFreeState()
 
 void siconos::integrators::OneStepIntegrator::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   // default : error
   THROW_EXCEPTION(
       "OneStepIntegrator::computeFreeOutput not implemented for integrator of type " +
@@ -226,8 +228,7 @@ void siconos::integrators::OneStepIntegrator::computeFreeOutput(
 }
 
 double siconos::integrators::OneStepIntegrator::computeResiduInput(
-    double time, std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet)
-{
+    double time, std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) {
   double residu = 0.0;
   THROW_EXCEPTION(
       "siconos::integrators::OneStepIntegrator::computeResiduInput not implemented for "
@@ -238,24 +239,21 @@ double siconos::integrators::OneStepIntegrator::computeResiduInput(
 }
 
 bool siconos::integrators::OneStepIntegrator::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   THROW_EXCEPTION(
       "OneStepIntegrator::addInteractionInIndexSet - Should be called at this level");
   return 0;
 };
 
 bool siconos::integrators::OneStepIntegrator::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   THROW_EXCEPTION(
       "OneStepIntegrator::removeInteractionFromIndexSet - Should not be called at this "
       "level");
   return 0;
 };
 
-void siconos::integrators::OneStepIntegrator::display() const
-{
+void siconos::integrators::OneStepIntegrator::display() const {
   std::cout << "==== OneStepIntegrator display =====\n";
   std::cout << "| _integratorType : " << siconos::tools::enum_to_string(_integratorType)
             << "\n";

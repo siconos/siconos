@@ -142,8 +142,7 @@ class OneStepNSProblem {
    *
    *  \return , the numerics structure used to save solver parameters
    */
-  inline std::shared_ptr<siconos::numerics::SolverOptions> numericsSolverOptions() const
-  {
+  inline std::shared_ptr<siconos::numerics::SolverOptions> numericsSolverOptions() const {
     return _numerics_solver_options;
   };
 
@@ -155,8 +154,7 @@ class OneStepNSProblem {
    *
    *  \return a pointer on Simulation
    */
-  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const
-  {
+  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const {
     return _simulation;
   }
 
@@ -164,8 +162,7 @@ class OneStepNSProblem {
    *
    *  \param newS a pointer to Simulation
    */
-  inline void setSimulationPtr(std::shared_ptr<siconos::simulation::Simulation> newS)
-  {
+  inline void setSimulationPtr(std::shared_ptr<siconos::simulation::Simulation> newS) {
     _simulation = newS;
   }
 

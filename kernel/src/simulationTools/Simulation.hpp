@@ -256,8 +256,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   inline const std::shared_ptr<
       std::set<std::shared_ptr<siconos::integrators::OneStepIntegrator>>>
-  oneStepIntegrators() const
-  {
+  oneStepIntegrators() const {
     return _allOSI;
   };
 
@@ -322,8 +321,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    *  \return NonSmoothDynamicalSystem
    */
   inline std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>
-  nonSmoothDynamicalSystem() const
-  {
+  nonSmoothDynamicalSystem() const {
     return _nsds;
   }
   /** set the NonSmoothDynamicalSystem of the Simulation
@@ -331,8 +329,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    *  \param newPtr a pointer on NonSmoothDynamicalSystem
    */
   void setNonSmoothDynamicalSystemPtr(
-      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> newPtr)
-  {
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> newPtr) {
     _nsdsChangeLogPosition = _nsds->changeLogBegin();
     _nsds = newPtr;
   }
@@ -387,8 +384,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    *
    *  \param manager
    */
-  void insertInteractionManager(std::shared_ptr<InteractionManager> manager)
-  {
+  void insertInteractionManager(std::shared_ptr<InteractionManager> manager) {
     _interman = manager;
   }
 
@@ -410,11 +406,13 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   virtual void updateDSPlugins(double time);
 
   /** update input
-   *
    *  \param level lambda order used to compute input
-   *  level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  virtual void updateInput(unsigned int level = 0);
+  virtual void updateInput(unsigned int level);
+
+  /** update all input terms
+   */
+  virtual void updateAllInput();
 
   /** update state of each dynamical system
    */
@@ -432,8 +430,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    *  \param level lambda order used to compute input
    *  level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  void update(unsigned int level = 0)
-  {
+  void update(unsigned int level = 0) {
     updateInput(level);
     updateState(level);
     updateOutput(level);
@@ -464,8 +461,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
       \param use true if relative critarion activated
   */
-  inline void setUseRelativeConvergenceCriteron(bool use)
-  {
+  inline void setUseRelativeConvergenceCriteron(bool use) {
     _useRelativeConvergenceCriterion = use;
   };
   /**\return true if the relative convergence criterion is activated.
@@ -488,8 +484,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    \param newVal a new relative convergence criterion
    *
    */
-  inline void setRelativeConvergenceCriterionHeld(bool newVal)
-  {
+  inline void setRelativeConvergenceCriterionHeld(bool newVal) {
     _relativeConvergenceCriterionHeld = newVal;
   };
   /**

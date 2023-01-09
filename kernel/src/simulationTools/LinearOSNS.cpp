@@ -761,118 +761,16 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
       "Interaction> inter, unsigned int pos)\n");
   auto indexSet = simulation()->indexSet(indexSetLevel());
 
-  // At most 2 DS are linked by an Interaction
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds1;
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds2;
-  // --- Get the dynamical system(s) (edge(s)) connected to the current interaction (vertex)
-  // ---
-  if (indexSet->properties(vertex_inter).source != indexSet->properties(vertex_inter).target) {
-    DEBUG_PRINT("a two DS Interaction\n");
-    ds1 = indexSet->properties(vertex_inter).source;
-    ds2 = indexSet->properties(vertex_inter).target;
-  }
-  else {
-    DEBUG_PRINT("a single DS Interaction\n");
-    ds1 = indexSet->properties(vertex_inter).source;
-    ds2 = ds1;
-    // \warning this looks like some debug code, but it gets executed even with NDEBUG.
-    // may be compiler does something smarter, but still it should be rewritten. --xhub
-    siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
-    for (std::tie(oei, oeiend) = indexSet->out_edges(vertex_inter); oei != oeiend; ++oei) {
-      // note : at most 4 edges
-      ds2 = indexSet->bundle(*oei);
-      if (ds2 != ds1) {
-        assert(false);
-        break;
-      }
-    }
-  }
-  assert(ds1);
-  assert(ds2);
-
-  auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
-  auto& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
-  auto& osi2 = *DSG0.properties(DSG0.descriptor(ds2)).osi;
-
-  auto osi1Type = osi1.getType();
-  auto osi2Type = osi2.getType();
+  auto& osi1 = *indexSet->properties(vertex_inter).osi1;
+  auto& osi2 = *indexSet->properties(vertex_inter).osi2;
 
   auto inter = indexSet->bundle(vertex_inter);
   auto sizeY = inter->nonSmoothLaw()->size();
 
-  // We assume that the osi of ds1 (osi1) is integrating the interaction
-  if ((osi1Type == siconos::integrators::IntegratorType::EULERMOREAUOSI &&
-       osi2Type == siconos::integrators::IntegratorType::EULERMOREAUOSI) ||
-      (osi1Type == siconos::integrators::IntegratorType::ZOHOSI &&
-       osi2Type == siconos::integrators::IntegratorType::ZOHOSI)) {
-    osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
-                             .workVectors)[siconos::integrators::EulerMoreauOSI::OSNSP_RHS];
-    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if (osi1Type == siconos::integrators::IntegratorType::ZOHOSI &&
-           osi2Type == siconos::integrators::IntegratorType::ZOHOSI) {
-    osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
-                             .workVectors)[siconos::integrators::ZeroOrderHoldOSI::OSNSP_RHS];
-    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if ((osi1Type == siconos::integrators::IntegratorType::MOREAUJEANOSI &&
-            osi2Type == siconos::integrators::IntegratorType::MOREAUJEANOSI) ||
-           (osi1Type == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI &&
-            osi2Type == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI)) {
-    osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
-                             .workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
-    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if ((osi1Type == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI &&
-            osi2Type == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI)) {
-    osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs =
-        *(*indexSet->properties(vertex_inter)
-               .workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
-    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if ((osi1Type == siconos::integrators::IntegratorType::LSODAROSI &&
-            osi2Type == siconos::integrators::IntegratorType::LSODAROSI)) {
-    osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
-                             .workVectors)[siconos::integrators::LsodarOSI::OSNSP_RHS];
-    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if ((osi1Type == siconos::integrators::IntegratorType::NEWMARKALPHAOSI &&
-            osi2Type == siconos::integrators::IntegratorType::NEWMARKALPHAOSI)) {
-    osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
-                             .workVectors)[siconos::integrators::NewMarkAlphaOSI::OSNSP_RHS];
-    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if ((osi1Type == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI &&
-            osi2Type == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI)) {
-    osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
-                             .workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
-    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else if ((osi1Type == siconos::integrators::IntegratorType::D1MINUSLINEAROSI &&
-            osi2Type == siconos::integrators::IntegratorType::D1MINUSLINEAROSI)) {
-    osi1.computeFreeOutput(vertex_inter, this);
-    auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
-                             .workVectors)[siconos::integrators::D1MinusLinearOSI::OSNSP_RHS];
-    siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
-  }
-  else {
-    auto t1 = static_cast<std::underlying_type<siconos::integrators::IntegratorType>::type>(
-        osi1Type);
-    auto t2 = static_cast<std::underlying_type<siconos::integrators::IntegratorType>::type>(
-        osi2Type);
-    THROW_EXCEPTION(
-        "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 "
-        "of type " +
-        std::to_string(t1) + std::to_string(t2));
-  }
+  osi1.computeFreeOutput(vertex_inter, this);
+  auto& osnsp_rhs = osi1.osnsp_rhs(vertex_inter, *indexSet);
+  setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+
   DEBUG_EXPR(_q->display());
   DEBUG_END(
       "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(std::shared_ptr<siconos::modeling::"

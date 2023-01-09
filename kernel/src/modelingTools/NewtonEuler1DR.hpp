@@ -109,10 +109,13 @@ class NewtonEuler1DR : public NewtonEulerR {
   /** constructor
    */
   NewtonEuler1DR()
-    : NewtonEulerR(), _Pc1{std::make_shared<siconos::algebra::SiconosVector>(3)}, _Pc2{std::make_shared<siconos::algebra::SiconosVector>(3)},
-      _relPc1{std::make_shared<siconos::algebra::SiconosVector>(3)}, _relPc2{std::make_shared<siconos::algebra::SiconosVector>(3)},
-      _Nc{std::make_shared<siconos::algebra::SiconosVector>(3)}, _relNc{std::make_shared<siconos::algebra::SiconosVector>(3)}
-  {
+      : NewtonEulerR(),
+        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(3)},
+        _Pc2{std::make_shared<siconos::algebra::SiconosVector>(3)},
+        _relPc1{std::make_shared<siconos::algebra::SiconosVector>(3)},
+        _relPc2{std::make_shared<siconos::algebra::SiconosVector>(3)},
+        _Nc{std::make_shared<siconos::algebra::SiconosVector>(3)},
+        _relNc{std::make_shared<siconos::algebra::SiconosVector>(3)} {
     /*_ds1=nullptr;_ds2=nullptr;*/
   }
 
@@ -144,6 +147,16 @@ class NewtonEuler1DR : public NewtonEulerR {
   */
   void computeh(double time, const siconos::algebra::BlockVector &q0,
                 siconos::algebra::SiconosVector &y) override;
+
+  /**
+      to compute the output y = h(t,q,z) of the Relation
+      with the relative contact points
+      \param time current time value
+      \param q coordinates of the dynamical systems involved in the relation
+      \param y the resulting vector
+   */
+  void computehFromRelativeContactPoints(double time, const siconos::algebra::BlockVector &q0,
+                                         siconos::algebra::SiconosVector &y);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

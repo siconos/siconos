@@ -92,8 +92,8 @@ static inline NSM_t nsm_max(const NumericsSparseMatrix* M,
                                NSM_t type1,
                                NSM_t type2)
 {
-  return NSM_version(M, type1) > NSM_version(M, type2) ?
-    type1 : type2;
+  return NSM_version(M, type2) > NSM_version(M, type1) ?
+    type2 : type1;
 }
 
 NSM_t NSM_latest_id(const NumericsSparseMatrix* M)
@@ -141,6 +141,15 @@ void NSM_reset_versions(NumericsSparseMatrix* M)
   NSM_reset_version(M, NSM_CSR);
 }
 
+void NSM_version_sync(NumericsSparseMatrix* M)
+{
+  if (NSM_max_version(M) > 0)
+  {
+    M->origin = NSM_latest_id(M);
+    assert(NSM_latest(M));
+  }
+}
+
 
 void NSM_null(NumericsSparseMatrix* A)
 {
@@ -158,9 +167,7 @@ void NSM_null(NumericsSparseMatrix* A)
 
 double* NSM_data(NumericsSparseMatrix* A)
 {
-  // assert (NSM_latest_id(A) == A->origin);
-  assert (NSM_version(A, A->origin) ==
-            NSM_version(A, NSM_latest_id(A)));
+  assert (NSM_version(A, NSM_latest_id(A)) == NSM_version(A, A->origin));
 
   switch(A->origin)
   {
@@ -727,6 +734,26 @@ NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
   return out;
 }
 
+NumericsSparseMatrix * NSM_triplet_scalar(unsigned int size, double s)
+{
+  int _origin = NSM_TRIPLET;
+  NumericsSparseMatrix * out = NSM_new();
+  out->origin = _origin;
+
+  CSparseMatrix * C = cs_spalloc(size, size, size, 1, 1);
+
+  for(unsigned int k=0 ; k < size; k++)
+  {
+    C->nz++;
+    C->i[k] =k;
+    C->p[k] =k;
+    C->x[k] =s;
+  }
+  assert(out->origin ==NSM_TRIPLET);
+  out->triplet = C;
+  out->origin = NSM_TRIPLET;
+  return out;
+}
 
 static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
 {

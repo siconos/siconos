@@ -125,6 +125,7 @@ extern "C"
    */
   RawNumericsMatrix* NM_new(void);
   RawNumericsMatrix* NM_eye(int size);
+  RawNumericsMatrix* NM_scalar(int size, double s);
 
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    *
@@ -173,7 +174,7 @@ extern "C"
    *  \param threshold if the original matrix is dense, a threshold can be applied
    *  on the absolute value of the entries
    */
-  void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold);
+  void NM_copy_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold);
 
   /** create a NumericsMatrix similar to the another one. The structure is the same
    *
@@ -366,18 +367,14 @@ extern "C"
    */
   void NM_clear_not_SBM(NumericsMatrix* m);
   NumericsMatrix * NM_free_not_SBM(NumericsMatrix* m);
-  
 
 
-
- 
-  /**
-     Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
-     memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
-     Note that this function does not free m.
-     
-     \param m the matrix to be deleted.
-     \param storageType to be kept.
+  /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
+      
+      \param m the matrix to be deleted.
+      \param storageType to be kept.
    */
   void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType);
 
@@ -459,7 +456,7 @@ extern "C"
    */
 
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 2x2 diagonal block of a NumericsMatrix. No allocation is done.
    *
    *  \param[in] M a NumericsMatrix
@@ -526,7 +523,7 @@ extern "C"
       \param[in,out] y the resulting vector
       \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
-  void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* const A, const double* const x, double* y, int init);
+  void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix*  A, const double* const x, double* y, int init);
 
   /** 
       Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
@@ -555,10 +552,8 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
-  
-  /** 
-      Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (2 rows and sizeX columns)
-      
+
+  /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (2 rows and sizeX columns)
       \param[in] sizeX dim of the vector x
       \param[in] block_start block number (only used for SBM)
       \param[in] row_start position of the first row of A (unused if A is SBM)
@@ -618,7 +613,7 @@ extern "C"
 
   // matrix and vector display
 
-  void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B, double threshold);
+  void NM_dense_to_sparse(NumericsMatrix* A, NumericsMatrix* B, double threshold);
 
   /**
      Copy a NumericsMatrix into another with dense storage.
@@ -626,7 +621,7 @@ extern "C"
      \param A source matrix (any kind of storage)
      \param B targeted matrix, must be dense with the same dimension as A
   */
-  int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
+  int NM_to_dense(NumericsMatrix* A, NumericsMatrix* B);
 
   /**
      Screen display of the matrix content stored as a double * array in Fortran style
@@ -857,17 +852,17 @@ extern "C"
    */
   int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
   int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
+  int NM_LU_refine(NumericsMatrix* A, double *x, double tol, int max_iter, double *residu);
   int NM_Cholesky_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
   int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
   int NM_LDLT_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
+  int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs, double tol, int maxitref, int job );
 
 
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
-
-
 
   /** Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    *
@@ -876,7 +871,18 @@ extern "C"
    */
   NumericsMatrix* NM_LU_inv(NumericsMatrix* A);
 
+
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
+
+  /**  Computation of the inverse of a NumericsMatrix A composed of diagonal blocks
+   * for each block a dense inverse is performed and then inserted into the
+   * global inverse
+   * \param[in] A a NumericsMatrix.
+   * \param[in] block_number the number of blocks
+   * \param[in] blocksize the sizes of diagonal blocks
+   * \return the matrix inverse.
+   */
+  NumericsMatrix *  NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number, unsigned int * blocksizes);
 
   /** Direct computation of the solution of a real system of linear
    *  equations: A x = b.
@@ -900,6 +906,9 @@ extern "C"
    *  \return the matrix inverse.
    */
   NumericsMatrix* NM_gesv_inv(NumericsMatrix* A);
+
+
+
 
   /** Set the linear solver
    *
@@ -1089,6 +1098,16 @@ extern "C"
    */
   void NM_reset_versions(NumericsMatrix* M);
 
+  /* Sync storageType from version.
+   * \param M the NumericsMatrix
+   */
+  void NM_version_sync(NumericsMatrix* M);
+
+  /* Check if an entry in the matrix is NaN .
+   *\param M the NumericsMatrix
+   *\return int = 1 if a NaN is found, 0 otherwise
+   */
+  int NM_isnan(NumericsMatrix* M);
 
 #ifdef WITH_OPENSSL
   /** Compute sha1 hash of matrix values. Matrices of differents size and same

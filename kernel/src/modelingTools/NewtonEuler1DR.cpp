@@ -286,6 +286,15 @@ void siconos::modeling::NewtonEuler1DR::computeh(double time,
                                                  const siconos::algebra::BlockVector& q0,
                                                  siconos::algebra::SiconosVector& y)
 {
+  // Contact points and normal are stored in absolute coordinates.
+  // nothing to do here
+
+  NewtonEulerR::computeh(time, q0, y);
+}
+
+void NewtonEuler1DR::computehFromRelativeContactPoints(double time, const BlockVector& q0,
+                              SiconosVector &y)
+{
   // Contact points and normal are stored as relative to q1 and q2, if
   // no q2 then pc2 and normal are absolute.
 

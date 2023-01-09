@@ -368,8 +368,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> forces() const override
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> forces() const override {
     return _wrench;
   }
 
@@ -379,8 +378,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \return pointer on a SiconosMatrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianqForces() const override
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianqForces() const override {
     return _jacobianWrenchq;
   }
 
@@ -388,8 +386,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \return pointer on a SiconosMatrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianvForces() const override
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianvForces() const override {
     return _jacobianWrenchTwist;
   }
 
@@ -442,15 +439,13 @@ class NewtonEulerDS : public SecondOrderDS {
    *  this accessor is left to get a uniform access to velocity.
    *  This should be removed with MechanicalDS class
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity() const override
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity() const override {
     return _twist;
   }
 
   inline std::shared_ptr<siconos::algebra::SiconosVector> twist0() const { return _twist0; }
 
-  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity0() const override
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity0() const override {
     return _twist0;
   }
   /** set  velocity (copy)
@@ -481,8 +476,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> acceleration() const override
-  {
+  std::shared_ptr<siconos::algebra::SiconosVector> acceleration() const override {
     return _acceleration;
   };
 
@@ -545,8 +539,7 @@ class NewtonEulerDS : public SecondOrderDS {
   inline double scalarMass() const { return _scalarMass; };
 
   /** Modify the scalar mass */
-  void setScalarMass(double mass)
-  {
+  void setScalarMass(double mass) {
     _scalarMass = mass;
     updateMassMatrix();
   };
@@ -560,8 +553,7 @@ class NewtonEulerDS : public SecondOrderDS {
 
     \param newInertia the new inertia matrix
   */
-  void setInertia(std::shared_ptr<siconos::algebra::SiconosMatrix> newInertia)
-  {
+  void setInertia(std::shared_ptr<siconos::algebra::SiconosMatrix> newInertia) {
     _I = newInertia;
     updateMassMatrix();
   }
@@ -589,18 +581,22 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param   newPtr a SP to a Simple vector
    */
-  inline void setFExtPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr)
-  {
+  inline void setFExtPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _fExt = newPtr;
     _hasConstantFExt = true;
   }
+
+  /** get mExt
+   *
+   *  \return pointer on a plugged vector
+   */
+  inline std::shared_ptr<siconos::algebra::SiconosVector> mExt() const { return _mExt; }
 
   /** set mExt to pointer newPtr
    *
    *  \param newPtr a SP to a Simple vector
    */
-  inline void setMExtPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr)
-  {
+  inline void setMExtPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _mExt = newPtr;
     _hasConstantMExt = true;
   }
@@ -612,8 +608,7 @@ class NewtonEulerDS : public SecondOrderDS {
   inline std::shared_ptr<siconos::algebra::SiconosVector> mGyr() const { return _mGyr; }
 
   inline std::shared_ptr<siconos::algebra::SimpleMatrix> T() { return _T; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> Tdot()
-  {
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> Tdot() {
     assert(_Tdot);
     return _Tdot;
   }
@@ -635,8 +630,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \return a memory
    */
-  inline const siconos::algebra::SiconosMemory &velocityMemory() override
-  {
+  inline const siconos::algebra::SiconosMemory &velocityMemory() override {
     return _twistMemory;
   }
 
@@ -652,8 +646,7 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   void swapInMemory() override;
 
-  inline const siconos::algebra::SiconosMemory &forcesMemory() override
-  {
+  inline const siconos::algebra::SiconosMemory &forcesMemory() override {
     return _forcesMemory;
   }
 
@@ -691,13 +684,11 @@ class NewtonEulerDS : public SecondOrderDS {
   void update_inverse_mass() override;
 
   inline void setComputeJacobianFIntqByFD(bool value) { _computeJacobianFIntqByFD = value; }
-  inline void setComputeJacobianFIntvByFD(bool value)
-  {
+  inline void setComputeJacobianFIntvByFD(bool value) {
     _computeJacobianFInttwistByFD = value;
   }
   inline void setComputeJacobianMIntqByFD(bool value) { _computeJacobianMIntqByFD = value; }
-  inline void setComputeJacobianMIntvByFD(bool value)
-  {
+  inline void setComputeJacobianMIntvByFD(bool value) {
     _computeJacobianMInttwistByFD = value;
   }
 

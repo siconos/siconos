@@ -33,8 +33,7 @@
 #include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
-void siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus::initOSNS()
-{
+void siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus::initOSNS() {
   // initialize OSNS for InteractionsGraph from Topology
   auto topo = _nsds->topology();
 
@@ -56,21 +55,18 @@ void siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus::initOSNS()
 siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
     std::shared_ptr<TimeDiscretisation> td, int nb)
-    : Simulation(nsds, td)
-{
+    : Simulation(nsds, td) {
   (*_allNSProblems).resize(nb);
 }
 
-void siconos::simulation::TimeSteppingD1Minus::initialize()
-{
+void siconos::simulation::TimeSteppingD1Minus::initialize() {
   Simulation::initialize();
 
   // 7 - First initialization of the simulation
   firstInitialize();
 }
 
-void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i)
-{
+void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) {
   DEBUG_PRINTF(
       "\nsiconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) for i = "
       "%i\n",
@@ -120,9 +116,8 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i)
     if ((!indexSetCurrent->is_vertex(inter)) and (osi.addInteractionInIndexSet(inter, i))) {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
       topo->setHasChanged(true);
-    }
-    else if ((indexSetCurrent->is_vertex(inter)) and
-             !(osi.addInteractionInIndexSet(inter, i))) {
+    } else if ((indexSetCurrent->is_vertex(inter)) and
+               !(osi.addInteractionInIndexSet(inter, i))) {
       indexSetCurrent->remove_vertex(inter);
       topo->setHasChanged(true);
       if (i <= levelMaxForInput) {
@@ -137,8 +132,7 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i)
         DEBUG_EXPR(inter->lambda(i)->display());
         inter->lambda(i)->zero();
       }
-    }
-    else {
+    } else {
       DEBUG_PRINTF("The current interaction is in the indexSet(%i)\n", (int)i);
       DEBUG_EXPR(if (i <= levelMaxForInput) inter->lambda(i)->display());
     }
@@ -148,8 +142,7 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
 }
 
-void siconos::simulation::TimeSteppingD1Minus::run()
-{
+void siconos::simulation::TimeSteppingD1Minus::run() {
   unsigned int count = 0;
   std::cout
       << " ==== Start of TimeSteppingD1Minus simulation - This may take a while ... ====\n";
@@ -163,8 +156,7 @@ void siconos::simulation::TimeSteppingD1Minus::run()
             << " events have been processed. ==== \n";
 }
 
-void siconos::simulation::TimeSteppingD1Minus::advanceToEvent()
-{
+void siconos::simulation::TimeSteppingD1Minus::advanceToEvent() {
   initialize();
 
   // Update interactions if a manager was provided
@@ -239,66 +231,13 @@ void siconos::simulation::TimeSteppingD1Minus::advanceToEvent()
   // indexset (I_{k+1}^+) is calculated in Simulation::processEvent
 }
 
-void siconos::simulation::TimeSteppingD1Minus::updateInput(unsigned int level)
-{
-  DEBUG_BEGIN("siconos::simulation::TimeSteppingD1Minus::updateInput(unsigned int level)\n");
-  // 1 - compute input (lambda -> r)
-  if (!_allNSProblems->empty()) {
-    for (auto osi : *_allOSI) {
-      osi->updateInput(nextTime(), level);
-    }
-    //_nsds->updateInput(nextTime(),levelInput);
-  }
-  DEBUG_END("siconos::simulation::TimeSteppingD1Minus::updateInput(unsigned int level)\n");
-}
-
-// void siconos::simulation::TimeSteppingD1Minus::updateInput(unsigned int level)
-// {
-//   //  assert(level>=0);
-
-//   double time = nextTime();
-//   auto topology = _nsds->topology();
-//   InteractionsIterator it;
-
-//   // // set dynamical systems non-smooth part to zero.
-//   // for (auto osi: *_allOSI)
-//   // {
-//   //   for (DSIterator itDS = (*itOSI)->dynamicalSystems()->begin(); itDS !=
-//   (*itOSI)->dynamicalSystems()->end(); ++itDS)
-//   //   {
-//   //     Type::Siconos dsType = Type::value(**itDS);
-//   //     if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-//   //       THROW_EXCEPTION("siconos::simulation::TimeSteppingD1Minus::updateInput - not
-//   implemented for Dynamical system type: " + dsType);
-//   //     else
-//   //     {
-//   //       auto d = std::static_pointer_cast<LagrangianDS> (*itDS);
-//   //       if (d->p(level)) d->p(level)->zero();
-//   //     }
-//   //   }
-//   // }
-
-//   // Set dynamical systems non-smooth part to zero.
-//   reset(level);
-
-//   // we compute input using lambda(level).
-//   for (it = topology->interactions()->begin(); it != topology->interactions()->end(); it++)
-//   {
-//     assert((*it)->lowerLevelForInput() <= level);
-//     assert((*it)->upperLevelForInput() >= level);
-//     (*it)->computeInput(time, level);
-//   }
-// }
-
-void siconos::simulation::TimeSteppingD1Minus::computeResidu()
-{
+void siconos::simulation::TimeSteppingD1Minus::computeResidu() {
   for (auto osi : *_allOSI) {
     osi->computeResidu();
   }
 }
 
-void siconos::simulation::TimeSteppingD1Minus::computeFreeState()
-{
+void siconos::simulation::TimeSteppingD1Minus::computeFreeState() {
   std::for_each(_allOSI->begin(), _allOSI->end(),
                 std::bind(&siconos::integrators::OneStepIntegrator::computeFreeState,
                           std::placeholders::_1));

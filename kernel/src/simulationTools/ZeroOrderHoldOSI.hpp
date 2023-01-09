@@ -146,6 +146,15 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
+   */
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
+    return *(*indexSet.properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
+  };
+
   /** Apply the rule to one Interaction to known if is it should be included
    *  in the IndexSet of level i
    *

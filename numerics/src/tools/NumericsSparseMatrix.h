@@ -114,6 +114,8 @@ extern "C"
 
   NumericsSparseMatrix * NSM_triplet_eye(unsigned int size);
 
+  NumericsSparseMatrix * NSM_triplet_scalar(unsigned int size, double s);
+
   /** Free allocated space for a NumericsSparseMatrix.
    *
    *  \param A a NumericsSparseMatrix
@@ -305,6 +307,11 @@ extern "C"
    *  \return a pointer on a CSparseMatrix.
    */
   CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M);
+
+  /** Sync matrix origin and version
+   * \param M the NumericsSparseMatrix
+   */
+  void NSM_version_sync(NumericsSparseMatrix* M);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

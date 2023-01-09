@@ -446,15 +446,11 @@ class NonSmoothDynamicalSystem {
    */
   void setSymmetric(bool val);
 
-  /** Set all DS non-smooth part to zero.
-   */
-  void reset();
-
   /** Set all DS non-smooth part to zero for a given level.
    *
    *  \param level the level to will be zeroed
    */
-  void reset(unsigned int level);
+  void resetNonSmoothPart(unsigned int level);
 
   /** save DynamicalSystems and Interactions states in Memories
    */
