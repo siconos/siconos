@@ -38,7 +38,7 @@
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 
 
-void fc3d_unitary_compute_and_add_error(double* restrict r, double* restrict u, double mu, double* restrict error, double * worktmp)
+void fc3d_unitary_compute_and_add_error(double r[3], double u[3], double mu, double* restrict error, double * worktmp)
 {
 
   //double normUT;
@@ -165,7 +165,7 @@ int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z, doub
     return 0;
 }
 
-void fc3d_Tresca_unitary_compute_and_add_error(double *z, double *w, double R, double * error, double * worktmp)
+void fc3d_Tresca_unitary_compute_and_add_error(double z[3], double w[3], double R, double * error, double * worktmp)
 {
   /* Compute the modified local velocity */
   worktmp[0] = z[0] -  w[0];

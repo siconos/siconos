@@ -143,6 +143,21 @@ void JA_inv(const double * const vec, const unsigned int vecSize, const size_t v
  */
 void JA_det(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
 
+/*
+  \return the 2-norm of a vector - uses long double - based on blas_dnrm2
+  \param n size of the vector
+  \param x the input vector
+*/
+float_type dnrm2l(const unsigned int n, const double* x);
+
+
+/*
+  \return the square of 2-norm of a vector - uses long double - based on blas_dnrm2
+  \param n size of the vector
+  \param x the input vector
+*/
+float_type dnrm2sqrl(const unsigned int n, const double* x);
+  
 /* PA: Return the product Q_sqrt(x)*y */
 void Qx05y(const double * const x, const double * const y, const unsigned int vecSize, const size_t varsCount, double * out);
 

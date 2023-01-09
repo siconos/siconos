@@ -29,10 +29,9 @@
 #include "NumericsVector.h"
 #endif
 
-
 void rolling_fc3d_unitary_compute_and_add_error(
-  double* restrict r,
-  double* restrict u,
+  double r[5],
+  double u[5],
   double mu,
   double mur,
   double* restrict error,

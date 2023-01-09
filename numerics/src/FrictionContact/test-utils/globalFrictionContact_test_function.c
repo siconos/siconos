@@ -31,7 +31,7 @@
 #include <time.h>
 #include "SiconosConfig.h"                 // for HAVE_GAMS_C_API // IWYU pragma: keep
 #include <string.h>
-#include "SiconosLapack.h"
+#include "SiconosLapack.h" // for cblas_dnrm2
 
 void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem * problem, FILE * file);
 

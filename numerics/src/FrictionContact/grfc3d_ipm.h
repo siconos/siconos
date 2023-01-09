@@ -16,53 +16,13 @@
  * limitations under the License.
  */
 
-typedef long double float_type;
-/* typedef double float_type; */
-
-
-/* Returns the square of 2-norm of a vector - uses long double - based on blas_dnrm2 */
-static float_type dnrm2sqrl(const unsigned int n, const double * x)
-{
-  float_type norm, scale, ssq, absxi, quo;
-
-  if (n < 1)
-    norm = 0.0;
-  else if (n == 1)
-    norm = fabsl(x[0]);
-  else
-  {
-    scale = 0.0;
-    ssq = 1.0;
-    for (size_t i = 0; i < n; i++)
-    {
-      if (x[i] != 0)
-      {
-        absxi = fabsl(x[i]);
-        if (scale < absxi)
-        {
-          quo = scale/absxi;
-          ssq = 1.0 + ssq * (quo * quo);
-          scale = absxi;
-        }
-        else
-        {
-          quo = absxi/scale;
-          ssq = ssq + (quo * quo);
-        }
-      }
-      norm = scale * scale * ssq;
-    }
-  }
-  return norm;
-}
-
-
+#include "JordanAlgebra.h" // for float_type, dnrm2sqrl
 
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double. */
 static double getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
                      const unsigned int varsCount, const double gamma)
 {
-  unsigned int dimension = (int)(vecSize / varsCount);
+  int dimension = (int)(vecSize / varsCount);
   unsigned int pos;
   float_type aL, bL, cL, dL, alphaL, nxb;
   double min_alpha;

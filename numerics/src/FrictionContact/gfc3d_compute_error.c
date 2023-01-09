@@ -186,7 +186,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
   int m = nc * 3;
-  size_t n = problem->M->size0;
+  int n = (int)problem->M->size0;
   double *mu = problem->mu;
   double *q = problem->q;
 
@@ -204,7 +204,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   NumericsMatrix *M = problem->M;
 
   int d_work_size= 2*n > m ? 2*n : m;
-  if(!options->dWork || options->dWorkSize < d_work_size)
+  if(!options->dWork || (int)options->dWorkSize < d_work_size)
   {
     if (options->dWork)
       free(options->dWork);

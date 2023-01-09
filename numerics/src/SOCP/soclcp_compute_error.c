@@ -31,7 +31,7 @@
 #include "NSSTools.h"  // for max
 #include "SiconosBlas.h"                                  // for cblas_dcopy
 
-void soclcp_unitary_compute_and_add_error(double *z, double *w, unsigned int dim, double mu, double * error,
+void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int dim, double mu, double * error,
     double * worktmp)
 {
 

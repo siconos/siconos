@@ -158,13 +158,13 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   free(cqp->b);
   free(cqp->q);
   free(w);
-  free(cqp);
 
 
   if(internalsolver_options->solverId == SICONOS_CONVEXQP_ADMM)
   {
     convexQP_ADMM_free(cqp, options->internalSolvers[0]);
   }
+  free(cqp);
 
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;

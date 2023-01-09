@@ -152,7 +152,7 @@ if(WITH_TESTING)
   # 3D Friction Contact tests
   #===========================================
 
-  begin_tests(src/FrictionContact/test DEPS "${suitesparse}")
+  begin_tests(src/FrictionContact/test DEPS "${suitesparse};externals")
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_nsgs_1.c)
@@ -220,7 +220,6 @@ if(WITH_TESTING)
   # ---------------------------------------------------
   # --- Global friction contact problem formulation ---
   # ---------------------------------------------------
-
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_first_order_gfc3d_1.c)
@@ -237,7 +236,6 @@ if(WITH_TESTING)
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_admm_gfc3d_1.c )
 
-  
   new_tests_collection(
     DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc2d_1.c test_first_order_gfc2d_1.c )
@@ -300,7 +298,7 @@ if(WITH_TESTING)
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
-      
+
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
