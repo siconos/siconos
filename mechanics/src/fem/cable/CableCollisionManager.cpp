@@ -1,15 +1,15 @@
 #include "CableCollisionManager.h"
 #include "Cable2d3DR.hpp"
+#include "Simulation.hpp"
 //#include "NonSmoothLaw.h"
 
-CableCollisionManager::CableCollisionManager(const std::shared_ptr<CableDS> a_model,
-                        const vector<std::shared_ptr<Support>> &a_supports)
+CableCollisionManager::CableCollisionManager(const std::shared_ptr<CableDS> a_model, const vector<std::shared_ptr<Support>> &a_supports,
+    double a_tolContact)
 {
 	m_model = a_model;
 	m_supports = a_supports;
-	// boucle sur les supports (pulleys, piles)
-	// récupère les positions de contact (fonction du maillage)
-	// ??
+    m_tolContact = a_tolContact;
+
 
     // ==> à mettre dans les suppports dépend si piles ou pulley
 	unsigned int dim = 2; //( friction 2D)
@@ -30,31 +30,48 @@ void CableCollisionManager::updateInteractions(std::shared_ptr < Simulation> sim
   size_t nb = q.size();
 
   unsigned int node_idx=0;
-  for (size_t i=0; i<nb; i+=3) { // boucle par 3 pour récupérer x,y,z
-    ContactPoints *contact = nullptr;// findContactPoint(node_idx);
-    for (auto &s : m_supports) {
-      if (s->isContact(Point(q.getValue(i), q.getValue(i+1), q.getValue(i+2)), m_tolContact)) { // test si le point x,y,z est en contact avec lel support
+  for (size_t i=0; i<nb; i+=3, node_idx++) { // boucle par 3 pour récupérer x,y,z
+    t_contacts::iterator contactItr = m_contacts.find(node_idx);
+    std::shared_ptr < Interaction> contact = nullptr;
+    if (contactItr != m_contacts.end()) {
+        contact = contactItr->second;
+    }
+    std::shared_ptr<SiconosVector> pc1;
+    pc1 = std::make_shared<SiconosVector>(3);
+    for (auto &s : m_supports) {      
+      pc1->setValue(0, q.getValue(i));
+      pc1->setValue(1, q.getValue(i+1));
+      pc1->setValue(2, q.getValue(i+2));
+    
+      if (s->isContact(pc1, m_tolContact)) { // test si le point x,y,z est en contact avec le support
         // récupérer pc2 (projection du point sur l'obstacle), normal, tangent
-        //s.getContact(x, y, z)
-        
+        std::shared_ptr < SiconosVector > pc2 = s->pc2();
+        std::shared_ptr < SiconosVector > normal = s->normal();
+        std::shared_ptr < SiconosVector > tangent = s->tangent();
+                        
         if (contact) {
-            // r = contact->getRelation
-            // r->updateContactPoint(pc1, pc2, normal, tangent);
+            std::shared_ptr<Cable2d3DR> relation = std::static_pointer_cast<Cable2d3DR> (contact->relation());
+            relation->updateContactPoint(pc1, pc2, normal, tangent);
         }       
-        else {
+        else {                              
           // create relation
-          std::shared_ptr<Cable2d3DR> r = make_shared<Cable2d3DR>(node_idx);
-          //r->updateContactPoint(pc1, pc2, normal, tangent);
-
+          std::shared_ptr<Relation> relation;
+          relation = make_shared<Cable2d3DR>(node_idx, pc2, normal, tangent);
+          
           // create interaction
-          // std::shared_ptr<Interaction> inter = std::make_shared<Interaction>(_nslaw, r);
+          std::shared_ptr<Interaction> inter = std::make_shared<Interaction>(s->nslaw(), relation);
+          m_contacts[node_idx] = inter;
+
           // link the interaction and the dynamical system
-          // simulation->link(m_model, inter);    
+          simulation->link(inter, m_model);    
         }        
       }
       else {
         // pas en contact
-        // si existe un contact -> remove        
+        if (contact) {
+            // si existe un contact -> remove        
+            m_contacts.erase(node_idx);
+        }        
       }
     }
   }

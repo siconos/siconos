@@ -27,21 +27,16 @@ class CableCollisionManager : public InteractionManager {
 
 public:
   CableCollisionManager(const std::shared_ptr<CableDS> a_model,
-                        const vector<std::shared_ptr<Support>> &a_supports);
+                        const vector<std::shared_ptr<Support>> &a_supports,
+                        double a_tolContact = 1e-3);
   virtual ~CableCollisionManager();  
   virtual void updateInteractions(std::shared_ptr < Simulation > simulation);
 
 protected:
   std::shared_ptr<CableDS> m_model;
   vector<std::shared_ptr<Support>> m_supports;
-  double m_tolContact {0.1};
+  double m_tolContact;
 
- struct ContactPoints {
-    unsigned int node_idx;
-    unsigned int ostacle_idx;
-    double pc1[3];
-    double pc2[3];
-    std::shared_ptr < Interaction> persistentInteraction = nullptr;
-  } ;
-  std::map < unsigned int, ContactPoints> m_contacts;
+  typedef std::map < unsigned int, std::shared_ptr < Interaction>> t_contacts;
+  t_contacts m_contacts;
 };

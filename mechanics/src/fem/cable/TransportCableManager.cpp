@@ -1,7 +1,15 @@
 #include "TransportCableManager.h"
 #include "TransportCableProfil.h"
 #include "CableDS.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "MoreauJeanOSI.hpp"
+#include "OneStepNSProblem.hpp"
+#include "FrictionContact.hpp"
+#include "TimeStepping.hpp"
+#include "TimeDiscretisation.hpp"
+
 #include "CableCollisionManager.h"
+
 //#include "TCException.h"
 
 
@@ -77,7 +85,7 @@ int TransportCableManager::simulation(const json & a_model, const json & a_args,
 	return vRet;
 }
 
-void TransportCableManager::computeDS()
+void TransportCableManager::computeDS(double a_tolContact, double a_mus, double a_mup)
 {
 	// model is loaded
 	// q0 must be computed
@@ -111,8 +119,67 @@ void TransportCableManager::computeDS()
 	cable->setFExtPtr(m_results.b);
 
 	// contact conditions
-	auto collisions = std::make_shared<CableCollisionManager>(cable, m_results.supports);
+	auto collisions = std::make_shared<CableCollisionManager>(cable, m_results.supports, a_tolContact);
 
+	// frictions
+	size_t ns=m_results.supports.size();
+	for (size_t i = 0; i < ns; i++) {
+		if (i == m_results.puller12idx || i == m_results.puller21idx) {
+			m_results.supports[i]->InitFriction(a_mup);
+		}
+		else {
+			m_results.supports[i]->InitFriction(a_mus);
+		}
+	}
+
+	// simulation
+	double t0 = 0;                   // initial computation time
+	double T = 1e-02;                  // final computation time
+	double h = 1e-05;                // time step
+	double theta = 1.0;              // theta for MoreauJeanOSI integrator
+
+	// model
+	std::shared_ptr<NonSmoothDynamicalSystem> dynamicModel = std::make_shared<NonSmoothDynamicalSystem>(t0, T);
+
+	// add the dynamical system in the non smooth dynamical system
+	dynamicModel->insertDynamicalSystem(cable);
+
+	// -- (1) OneStepIntegrators --
+	std::shared_ptr<MoreauJeanOSI> OSI = std::make_shared<MoreauJeanOSI>(theta);
+	OSI->setIsWSymmetricDefinitePositive(true);
+	OSI->setGamma(0.0);
+
+	// -- (2) Time discretisation --
+	std::shared_ptr<TimeDiscretisation> t = std::make_shared<TimeDiscretisation>(t0, h);
+
+	// -- (3) one step non smooth problem
+	std::shared_ptr<OneStepNSProblem> osnspb = std::make_shared<FrictionContact>(2);
+	//SolverOptions* options = osnspb->numericsSolverOptions().get();
+	//options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+	
+	// -- (4) Simulation setup with (1) (2) (3)
+	std::shared_ptr<TimeStepping> s = std::make_shared<TimeStepping>(dynamicModel, t, OSI, osnspb);
+	s->insertInteractionManager(collisions);
+
+	// --- Time loop ---
+	int k = 1;
+	std::chrono::time_point<std::chrono::system_clock> start, end;
+	start = std::chrono::system_clock::now();
+
+	while (s->hasNextEvent())
+	{
+		s->computeOneStep();
+		
+		/*if (k % 1 == 0)
+			writeDisplacementforPython(mesh, femodel, q, filename);*/
+		
+		s->nextStep();
+		
+		k++;		
+	}
+	end = std::chrono::system_clock::now();
+	int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
+		(end - start).count();
 
 }
 

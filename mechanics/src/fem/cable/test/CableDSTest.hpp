@@ -18,7 +18,8 @@
 #ifndef __CABLEDSTest__
 #define __CABLEDSTest__
 
-#include "CableDS.hpp"
+#include "TransportCableManager.h"
+
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -27,25 +28,23 @@ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(CableDSTest);
 
+  CPPUNIT_TEST(testComputeDS);
   CPPUNIT_TEST(testNoFext);
   CPPUNIT_TEST(testConstantFext);
   CPPUNIT_TEST(testVariableFext);
 
   CPPUNIT_TEST_SUITE_END();
 
+
+  void testComputeDS();
+
   void testNoFext();
   void testConstantFext();
   void testVariableFext();
 
-  
-public:
+  TransportCableManager M;
 
-  int ndof{10};
-  std::shared_ptr<SiconosVector> q0{nullptr};
-  std::shared_ptr<SiconosVector> v0{nullptr};
-  std::shared_ptr<SiconosMatrix> mass{nullptr};
-  
-  
+public:      
   void setUp();
   void tearDown();
 };
