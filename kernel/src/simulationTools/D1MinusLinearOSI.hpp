@@ -250,10 +250,12 @@ class D1MinusLinearOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
   };
 
@@ -279,8 +281,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    *  \param t real end time
    *  \param flag useless flag (for D1MinusLinearOSI, used in LsodarOSI)
    */
-  void integrate(double &ti, double &tf, double &t, int &flag) override
-  {
+  void integrate(double &ti, double &tf, double &t, int &flag) override {
     THROW_EXCEPTION("D1MinusLinearOSI::integrate - not implemented!");
   }
 
@@ -345,16 +346,14 @@ class D1MinusLinearOSI : public OneStepIntegrator {
       std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
 
   /** displays the data of the D1MinusLinearOSI's integrator */
-  void display() const override
-  {
+  void display() const override {
     THROW_EXCEPTION("D1MinusLinearOSI::display - not implemented!");
   }
 
   /** preparations for Newton iteration
    *  \param time time
    */
-  void prepareNewtonIteration(double time) override
-  {
+  void prepareNewtonIteration(double time) override {
     THROW_EXCEPTION("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
   }
 };

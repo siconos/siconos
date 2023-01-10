@@ -44,12 +44,11 @@ struct DynamicalSystemsGraph;
 
 }  // namespace siconos::graphs
 
-namespace siconos::simulation{
+namespace siconos::simulation {
 class BlockCSRMatrix;
 }
 
 namespace siconos::nonsmooth_formulations {
-
 
 /**
  Interface to some specific storage types for matrices used in
@@ -232,12 +231,8 @@ class OSNSMatrix {
    */
   inline void setStorageType(siconos::numerics::NM_types i) { _storageType = i; };
 
-  /** get the numerics-readable structure
-   *
-   *  \return SP::NumericsMatrix
-   */
-  inline std::shared_ptr<siconos::numerics::NumericsMatrix> numericsMatrix()
-  {
+  /** \return the numerics-readable structure */
+  inline std::shared_ptr<siconos::numerics::NumericsMatrix> numericsMatrix() {
     return _numericsMatrix;
   };
 

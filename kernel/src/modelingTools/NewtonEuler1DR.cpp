@@ -28,12 +28,12 @@
 #include "SiconosVectorFriends.hpp"  // inner_prod
 #include "SimpleMatrix.hpp"
 
-//#define NERI_DEBUG
+// #define NERI_DEBUG
 
-//#define NEFC3D_DEBUG
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+// #define NEFC3D_DEBUG
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 /*
 See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter
@@ -41,8 +41,7 @@ See devNotes.pdf for details. A detailed documentation is available in DevNotes.
 velocities'
 */
 void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
-    std::shared_ptr<siconos::algebra::SiconosVector> q1)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> q1) {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
@@ -94,8 +93,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
 
 void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
     std::shared_ptr<siconos::algebra::SiconosVector> q1,
-    std::shared_ptr<siconos::algebra::SiconosVector> q2)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> q2) {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
@@ -158,8 +156,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
     _jachqT->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
 }
 
-void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter)
-{
+void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
   NewtonEulerR::initialize(inter);
   // proj_with_q  _jachqProj =
   // std::make_shared<siconos::algebra::SimpleMatrix>(_jachq->size(0),_jachq->size(1)));
@@ -177,8 +174,7 @@ void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter)
 }
 
 void siconos::modeling::NewtonEuler1DR::computeJachq(
-    double time, Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0)
-{
+    double time, Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler1DR::computeJachq(double time, Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
@@ -206,8 +202,7 @@ void siconos::modeling::NewtonEuler1DR::computeJachq(
                                               _Pc1->getValue(1) - q->getValue(1),
                                               _Pc1->getValue(2) - q->getValue(2));
       quatGP = quatAux;
-    }
-    else {
+    } else {
       sign = -1.0;
       // cout<<"siconos::modeling::NewtonEuler1DR::computeJachq sign is -1 \n";
       boost::math::quaternion<double> quatAux(0, _Pc2->getValue(0) - q->getValue(0),
@@ -258,16 +253,14 @@ void siconos::modeling::NewtonEuler1DR::computeJachq(
 }
 
 void siconos::modeling::NewtonEuler1DR::computeJachqT(
-    Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0)
-{
+    Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler1DR::computeJachqT(Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 \n")
 
   if (q0->numberOfBlocks() > 1) {
     NIcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
-  }
-  else {
+  } else {
     NIcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
 
@@ -276,25 +269,22 @@ void siconos::modeling::NewtonEuler1DR::computeJachqT(
       "std::shared_ptr<siconos::algebra::BlockVector> q0) \n");
 }
 
-double siconos::modeling::NewtonEuler1DR::distance() const
-{
+double siconos::modeling::NewtonEuler1DR::distance() const {
   siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
   return dpc.norm2() * (siconos::algebra::inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::modeling::NewtonEuler1DR::computeh(double time,
                                                  const siconos::algebra::BlockVector& q0,
-                                                 siconos::algebra::SiconosVector& y)
-{
+                                                 siconos::algebra::SiconosVector& y) {
   // Contact points and normal are stored in absolute coordinates.
   // nothing to do here
 
   NewtonEulerR::computeh(time, q0, y);
 }
 
-void NewtonEuler1DR::computehFromRelativeContactPoints(double time, const BlockVector& q0,
-                              SiconosVector &y)
-{
+void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
+    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y) {
   // Contact points and normal are stored as relative to q1 and q2, if
   // no q2 then pc2 and normal are absolute.
 
@@ -327,8 +317,7 @@ void NewtonEuler1DR::computehFromRelativeContactPoints(double time, const BlockV
     (*_Nc)(0) = qnc.R_component_2();
     (*_Nc)(1) = qnc.R_component_3();
     (*_Nc)(2) = qnc.R_component_4();
-  }
-  else {
+  } else {
     *_Pc2 = *_relPc2;
     *_Nc = *_relNc;
   }

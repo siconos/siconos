@@ -172,7 +172,7 @@ siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::computeSizeForP
       siconos::types::type_value(*(inter->nonSmoothLaw())) ==
           siconos::modeling::Type::NewtonImpactNSL) {
     if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-      // SP::NewtonEuler1DR ri = std::static_pointer_cast<NewtonEuler1DR> (inter->relation());
+      // auto ri = std::static_pointer_cast<NewtonEuler1DR> (inter->relation());
       // if(ri->_isOnContact)
       //   equalitySize = 1;
       size = 1;

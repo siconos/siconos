@@ -762,7 +762,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
   auto indexSet = simulation()->indexSet(indexSetLevel());
 
   auto& osi1 = *indexSet->properties(vertex_inter).osi1;
-  auto& osi2 = *indexSet->properties(vertex_inter).osi2;
+  // auto& osi2 = *indexSet->properties(vertex_inter).osi2;
 
   auto inter = indexSet->bundle(vertex_inter);
   auto sizeY = inter->nonSmoothLaw()->size();

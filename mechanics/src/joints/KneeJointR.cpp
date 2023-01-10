@@ -52,6 +52,7 @@ void siconos::joints::KneeJointR::initialize(siconos::modeling::Interaction& int
 void siconos::joints::KneeJointR::checkInitPos(
     std::shared_ptr<siconos::algebra::SiconosVector> x1,
     std::shared_ptr<siconos::algebra::SiconosVector> x2) {
+#if !defined(NDEBUG)
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -69,7 +70,6 @@ void siconos::joints::KneeJointR::checkInitPos(
     q23 = x2->getValue(6);
   }
 
-#if !defined(NDEBUG)
   double X1 = x1->getValue(0);
   double Y1 = x1->getValue(1);
   double Z1 = x1->getValue(2);
@@ -77,7 +77,6 @@ void siconos::joints::KneeJointR::checkInitPos(
   double q11 = x1->getValue(4);
   double q12 = x1->getValue(5);
   double q13 = x1->getValue(6);
-
 #endif
 
   assert(Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23) <
@@ -130,7 +129,8 @@ void siconos::joints::KneeJointR::setBasePositions(
     _G1P0z = _P0->getValue(2);
 
     /* Move to abs frame by applying q1 frame rotation/translation */
-    quatP0_abs = (rot1 * siconos::geometry::posquat(_P0) / rot1) + siconos::geometry::posquat(q1);
+    quatP0_abs =
+        (rot1 * siconos::geometry::posquat(_P0) / rot1) + siconos::geometry::posquat(q1);
   }
 
   /* Calculate G2P0, or set it to P0_abs (i.e. G2=absolute frame) */

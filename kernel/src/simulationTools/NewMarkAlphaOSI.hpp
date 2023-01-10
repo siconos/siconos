@@ -119,8 +119,7 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    * of rho_infty \param rho_infty double : value of rho_infty
    */
 
-  inline void setParametersFromRho_infty(double rho_infty)
-  {
+  inline void setParametersFromRho_infty(double rho_infty) {
     _alpha_m = (2 * rho_infty - 1) / (rho_infty + 1);
     _alpha_f = rho_infty / (rho_infty + 1);
     _gamma = 0.5 + _alpha_f - _alpha_m;
@@ -196,10 +195,12 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,   InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
   };
 

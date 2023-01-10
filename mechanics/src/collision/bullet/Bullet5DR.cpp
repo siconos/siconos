@@ -18,14 +18,10 @@
 
 #include "Bullet5DR.hpp"
 
-// #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/NarrowPhaseCollision/btPersistentManifold.h>
 #include "BulletSiconosCommon.hpp"  // for copyQuatpos
-// #include "RigidBodyDS.hpp"
-// #include "RotationQuaternion.hpp"  // for copyQuatpos
-// #include "SiconosVector.hpp"
-
+#include "SiconosVector.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"

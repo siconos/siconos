@@ -31,6 +31,7 @@
 #endif
 
 #include <SiconosConfig.h>
+
 #include <boost/version.hpp>
 #if !defined(SICONOS_USE_MAP_FOR_HASH)
 #include <unordered_map>
@@ -163,13 +164,11 @@ class SiconosGraph {
 
   const graph_t& storage() const { return g; }
 
-  std::pair<EDescriptor, bool> edge(VDescriptor u, VDescriptor v) const
-  {
+  std::pair<EDescriptor, bool> edge(VDescriptor u, VDescriptor v) const {
     return boost::edge(u, v, g);
   }
 
-  bool edge_exists(const VDescriptor& vd1, const VDescriptor& vd2) const
-  {
+  bool edge_exists(const VDescriptor& vd1, const VDescriptor& vd2) const {
     bool ret = false;
     EDescriptor tmped;
     std::tie(tmped, ret) = edge(vd1, vd2);
@@ -197,8 +196,7 @@ class SiconosGraph {
      This is only needed for AdjointGraph where only 2 edges may be in
      common which correspond to the source and target in primal graph
    */
-  std::pair<EDescriptor, EDescriptor> edges(VDescriptor u, VDescriptor v) const
-  {
+  std::pair<EDescriptor, EDescriptor> edges(VDescriptor u, VDescriptor v) const {
     //    BOOST_STATIC_ASSERT((GProperties::is_adjoint_graph));
 
     OEIterator oei, oeiend;
@@ -210,8 +208,7 @@ class SiconosGraph {
         if (!ifirst) {
           ifirst = true;
           first = *oei;
-        }
-        else {
+        } else {
           isecond = true;
           second = *oei;
           break;
@@ -222,21 +219,17 @@ class SiconosGraph {
     if (ifirst && isecond) {
       if (index(first) < index(second)) {
         return std::pair<EDescriptor, EDescriptor>(first, second);
-      }
-      else {
+      } else {
         return std::pair<EDescriptor, EDescriptor>(second, first);
       }
-    }
-    else if (ifirst) {
+    } else if (ifirst) {
       return std::pair<EDescriptor, EDescriptor>(first, first);
-    }
-    else {
+    } else {
       throw(1);
     }
   }
 
-  bool is_edge(const VDescriptor& vd1, const VDescriptor& vd2, const E& e_bundle) const
-  {
+  bool is_edge(const VDescriptor& vd1, const VDescriptor& vd2, const E& e_bundle) const {
     bool found = false;
     OEIterator oei, oeiend;
     for (std::tie(oei, oeiend) = out_edges(vd1); oei != oeiend; ++oei) {
@@ -248,8 +241,7 @@ class SiconosGraph {
     return found;
   }
 
-  bool adjacent_vertex_exists(const VDescriptor& vd) const
-  {
+  bool adjacent_vertex_exists(const VDescriptor& vd) const {
     bool ret = false;
     VIterator vi, viend;
     for (std::tie(vi, viend) = vertices(); vi != viend; ++vi) {
@@ -270,64 +262,53 @@ class SiconosGraph {
 
   inline V& bundle(const VDescriptor& vd) { return boost::get(vertex_siconos_bundle, g)[vd]; };
 
-  inline const V& bundle(const VDescriptor& vd) const
-  {
+  inline const V& bundle(const VDescriptor& vd) const {
     return boost::get(vertex_siconos_bundle, g)[vd];
   };
 
   inline E& bundle(const EDescriptor& ed) { return boost::get(edge_siconos_bundle, g)[ed]; };
 
-  inline const E& bundle(const EDescriptor& ed) const
-  {
+  inline const E& bundle(const EDescriptor& ed) const {
     return boost::get(edge_siconos_bundle, g)[ed];
   };
 
-  inline boost::default_color_type& color(const VDescriptor& vd)
-  {
+  inline boost::default_color_type& color(const VDescriptor& vd) {
     return boost::get(boost::vertex_color, g)[vd];
   };
 
-  inline const boost::default_color_type& color(const VDescriptor& vd) const
-  {
+  inline const boost::default_color_type& color(const VDescriptor& vd) const {
     return boost::get(boost::vertex_color, g)[vd];
   };
 
-  inline boost::default_color_type& color(const EDescriptor& ed)
-  {
+  inline boost::default_color_type& color(const EDescriptor& ed) {
     return boost::get(boost::edge_color, g)[ed];
   };
 
-  inline const boost::default_color_type& color(const EDescriptor& ed) const
-  {
+  inline const boost::default_color_type& color(const EDescriptor& ed) const {
     return boost::get(boost::edge_color, g)[ed];
   };
 
   inline GProperties& properties() { return boost::get_property(g, graph_properties); };
 
-  inline size_t& index(const VDescriptor& vd)
-  {
+  inline size_t& index(const VDescriptor& vd) {
     return boost::get(boost::vertex_index, g)[vd];
   };
 
-  inline const size_t& index(const VDescriptor& vd) const
-  {
+  inline const size_t& index(const VDescriptor& vd) const {
     return boost::get(boost::vertex_index, g)[vd];
   };
 
   inline size_t& index(const EDescriptor& ed) { return boost::get(boost::edge_index, g)[ed]; };
 
-  inline const size_t& index(const EDescriptor& ed) const
-  {
+  inline const size_t& index(const EDescriptor& ed) const {
     return boost::get(boost::edge_index, g)[ed];
   };
 
-  inline VProperties& properties(const VDescriptor& vd)
-  {
+  inline VProperties& properties(const VDescriptor& vd) {
     return boost::get(vertex_properties, g)[vd];
   };
 
-  inline EProperties& properties(const EDescriptor& ed)
-  {
+  inline EProperties& properties(const EDescriptor& ed) {
     return boost::get(edge_properties, g)[ed];
   };
 
@@ -341,13 +322,11 @@ class SiconosGraph {
   //    return get(edge_descriptor0, g)[ed];
   //  }
 
-  inline bool is_vertex(const V& vertex) const
-  {
+  inline bool is_vertex(const V& vertex) const {
     return (vertex_descriptor.find(vertex) != vertex_descriptor.end());
   }
 
-  inline const VDescriptor& descriptor(const V& vertex) const
-  {
+  inline const VDescriptor& descriptor(const V& vertex) const {
     assert(size() == vertex_descriptor.size());
     assert(vertex_descriptor.find(vertex) != vertex_descriptor.end());
     return (*vertex_descriptor.find(vertex)).second;
@@ -355,29 +334,25 @@ class SiconosGraph {
 
   inline std::pair<VIterator, VIterator> vertices() const { return boost::vertices(g); };
 
-  inline VIterator begin() const
-  {
+  inline VIterator begin() const {
     VIterator vi, viend;
     std::tie(vi, viend) = vertices();
     return vi;
   }
 
-  inline VIterator end() const
-  {
+  inline VIterator end() const {
     VIterator vi, viend;
     std::tie(vi, viend) = vertices();
     return viend;
   }
 
-  inline std::pair<AVIterator, AVIterator> adjacent_vertices(const VDescriptor& vd) const
-  {
+  inline std::pair<AVIterator, AVIterator> adjacent_vertices(const VDescriptor& vd) const {
     return boost::adjacent_vertices(vd, g);
   };
 
   inline std::pair<EIterator, EIterator> edges() const { return boost::edges(g); };
 
-  inline std::pair<OEIterator, OEIterator> out_edges(const VDescriptor& vd) const
-  {
+  inline std::pair<OEIterator, OEIterator> out_edges(const VDescriptor& vd) const {
     return boost::out_edges(vd, g);
   };
 
@@ -385,8 +360,7 @@ class SiconosGraph {
 
   inline VDescriptor source(const EDescriptor& ed) const { return boost::source(ed, g); };
 
-  VDescriptor add_vertex(const V& vertex_bundle)
-  {
+  VDescriptor add_vertex(const V& vertex_bundle) {
     assert(vertex_descriptor.size() == size());
 
     VDescriptor new_vertex_descriptor;
@@ -408,8 +382,7 @@ class SiconosGraph {
 
       index(new_vertex_descriptor) = std::numeric_limits<size_t>::max();
       return new_vertex_descriptor;
-    }
-    else {
+    } else {
       assert(descriptor(vertex_bundle) == current_vertex_iterator->second);
       assert(bundle(descriptor(vertex_bundle)) == vertex_bundle);
       return current_vertex_iterator->second;
@@ -419,8 +392,7 @@ class SiconosGraph {
   }
 
   template <class G>
-  void copy_vertex(const V& vertex_bundle, G& og)
-  {
+  void copy_vertex(const V& vertex_bundle, G& og) {
     // is G similar ?
     BOOST_STATIC_ASSERT((boost::is_same<typename G::vertex_t, vertex_t>::value));
     BOOST_STATIC_ASSERT((boost::is_same<typename G::edge_t, edge_t>::value));
@@ -456,8 +428,7 @@ class SiconosGraph {
     }
   }
 
-  void remove_vertex(const V& vertex_bundle)
-  {
+  void remove_vertex(const V& vertex_bundle) {
     assert(is_vertex(vertex_bundle));
     assert(vertex_descriptor.size() == size());
     assert(bundle(descriptor(vertex_bundle)) == vertex_bundle);
@@ -488,8 +459,7 @@ class SiconosGraph {
 #endif
   }
 
-  EDescriptor add_edge(const VDescriptor& vd1, const VDescriptor& vd2, const E& e_bundle)
-  {
+  EDescriptor add_edge(const VDescriptor& vd1, const VDescriptor& vd2, const E& e_bundle) {
     EDescriptor new_edge;
     bool inserted;
 
@@ -532,8 +502,7 @@ class SiconosGraph {
   std::pair<EDescriptor, typename AdjointG::VDescriptor> add_edge(const VDescriptor& vd1,
                                                                   const VDescriptor& vd2,
                                                                   const E& e_bundle,
-                                                                  AdjointG& ag)
-  {
+                                                                  AdjointG& ag) {
     // adjoint static assertions
     BOOST_STATIC_ASSERT((boost::is_same<typename AdjointG::vertex_t, edge_t>::value));
     BOOST_STATIC_ASSERT((boost::is_same<typename AdjointG::edge_t, vertex_t>::value));
@@ -578,8 +547,11 @@ class SiconosGraph {
 
             assert(!ag.is_edge(new_ve, ag.descriptor(bundle(*ied)), bundle(vdx)));
 
+#if !defined(NDEBUG)
+
             typename AdjointG::EDescriptor aed =
                 ag.add_edge(new_ve, ag.descriptor(bundle(*ied)), bundle(vdx));
+#endif
 
             assert(ag.bundle(aed) == bundle(vdx));
             //            assert(ag.bundle(ag.add_edge(new_ve, ag.descriptor(bundle(*ied)),
@@ -592,8 +564,7 @@ class SiconosGraph {
     return std::pair<EDescriptor, typename AdjointG::VDescriptor>(new_ed, new_ve);
   }
 
-  void remove_edge(const EDescriptor& ed)
-  {
+  void remove_edge(const EDescriptor& ed) {
     assert(adjacent_vertex_exists(target(ed)));
     assert(adjacent_vertex_exists(source(ed)));
 
@@ -605,8 +576,7 @@ class SiconosGraph {
   }
 
   template <class AdjointG>
-  void remove_edge(const EDescriptor& ed, AdjointG& ag)
-  {
+  void remove_edge(const EDescriptor& ed, AdjointG& ag) {
     // adjoint static assertions
     BOOST_STATIC_ASSERT((boost::is_same<typename AdjointG::vertex_t, edge_t>::value));
     BOOST_STATIC_ASSERT((boost::is_same<typename AdjointG::edge_t, vertex_t>::value));
@@ -693,8 +663,7 @@ class SiconosGraph {
 
   int stamp() const { return _stamp; }
 
-  void update_vertices_indices()
-  {
+  void update_vertices_indices() {
     VIterator vi, viend;
     size_t i;
     for (std::tie(vi, viend) = boost::vertices(g), i = 0; vi != viend; ++vi, ++i) {
@@ -703,8 +672,7 @@ class SiconosGraph {
     _stamp++;
   };
 
-  void update_edges_indices()
-  {
+  void update_edges_indices() {
     EIterator ei, eiend;
     size_t i;
     for (std::tie(ei, eiend) = boost::edges(g), i = 0; ei != eiend; ++ei, ++i) {
@@ -713,16 +681,14 @@ class SiconosGraph {
     _stamp++;
   };
 
-  void clear()
-  {
+  void clear() {
     g.clear();
     vertex_descriptor.clear();
   };
 
   VMap vertex_descriptor_map() const { return vertex_descriptor; };
 
-  void display() const
-  {
+  void display() const {
     std::cout << "vertices number :" << vertices_number() << std::endl;
 
     std::cout << "edges number :" << edges_number() << std::endl;
@@ -743,8 +709,7 @@ class SiconosGraph {
   /* debug */
 #ifndef SWIG
 #ifndef NDEBUG
-  bool state_assert() const
-  {
+  bool state_assert() const {
     VIterator vi, viend;
     for (std::tie(vi, viend) = vertices(); vi != viend; ++vi) {
       assert(is_vertex(bundle(*vi)));
@@ -764,8 +729,7 @@ class SiconosGraph {
     return true;
   }
 
-  bool adjacent_vertices_ok() const
-  {
+  bool adjacent_vertices_ok() const {
     VIterator vi, viend;
     for (std::tie(vi, viend) = vertices(); vi != viend; ++vi) {
       assert(is_vertex(bundle(*vi)));

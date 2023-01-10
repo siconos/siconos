@@ -164,8 +164,7 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *
    *  \param newGamma a double
    */
-  inline void setGamma(double newGamma)
-  {
+  inline void setGamma(double newGamma) {
     _gamma = newGamma;
     _useGamma = true;
   };
@@ -194,8 +193,7 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *
    *  \param newUseGammaForRelation a bool
    */
-  inline void setUseGammaForRelation(bool newUseGammaForRelation)
-  {
+  inline void setUseGammaForRelation(bool newUseGammaForRelation) {
     _useGammaForRelation = newUseGammaForRelation;
     if (_useGammaForRelation) _useGamma = false;
   };
@@ -279,10 +277,12 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
   };
 

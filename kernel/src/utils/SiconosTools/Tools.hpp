@@ -26,7 +26,7 @@
 // #include <algorithm>
 #include <iostream>
 // #include <iterator>
-// #include <ranges>
+#include <ranges>
 #include <sstream>
 // #include <string>
 
@@ -37,8 +37,7 @@ constexpr auto PBWIDTH = 60;
 
 /** A function to convert any type to std::string*/
 template <class T>
-std::string toString(const T& obj)
-{
+std::string toString(const T& obj) {
   static std::ostringstream o;
   o.str("");
   o << obj;
@@ -67,8 +66,7 @@ std::string toString(const T& obj)
     \param description anything like a string, a number ... to describe the output
     \param container the object which content must be printed
 */
-void print(auto const description, std::ranges::range auto const& container)
-{
+void print(auto const description, std::ranges::range auto const& container) {
   for (std::cout << description; auto const& e : container) std::cout << e << ' ';
   std::cout << '\n';
 }
@@ -76,8 +74,7 @@ void print(auto const description, std::ranges::range auto const& container)
 void progressBar(double percentage);
 
 template <typename T>
-std::string enum_to_string(T value)
-{
+std::string enum_to_string(T value) {
   return std::to_string(static_cast<typename std::underlying_type<T>::type>(value));
 }
 

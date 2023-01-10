@@ -30,6 +30,7 @@ cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables
 #cmake_policy(SET CMP0078 NEW) # UseSWIG generates standard target names.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
 cmake_policy(SET CMP0079 NEW) # target_link_libraries() allows use with targets in other directories
+cmake_policy(SET CMP0067 NEW) # Honor language standard in try_compile() source-file signature.
 
 # Set cmake modules directories
 # (i.e. the those which contain all user-defined FindXXX.cmake files among other things)
@@ -120,8 +121,28 @@ list(GET COMPONENTS -1 last_component)
 
 if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
-  set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_STANDARD 20)
+
+  # check if the compiler has the required features ...
+  include(CheckCXXSourceCompiles)
+  check_cxx_source_compiles(
+    "
+#include <ranges>
+
+void print(std::ranges::range auto const& container) {
+}
+
+int
+main()
+{}
+" HAS_RANGE)
+  if(NOT HAS_RANGE)
+    message(FATAL_ERROR "A compiler with c++20 feature std::ranges::range is required.")
+  endif()
+
+  # set(BUILD_AS_CPP ON)
+  
 else()
   # we may need to compile only numerics and only in C.
   # Really???

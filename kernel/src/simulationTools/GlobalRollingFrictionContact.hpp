@@ -61,7 +61,7 @@ namespace siconos::nonsmooth_formulations {
    right Numerics driver will be called according to this value.
 
     \b Construction:
-    - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is
+    - Constructor from data (inputs = Simulations*, id, std::shared_ptr<NonSmoothSolver>) - The solver is
    optional. Main functions:
 
     \b Main functions:

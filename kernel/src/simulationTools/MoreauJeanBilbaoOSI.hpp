@@ -104,8 +104,7 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \return pointer to a SiconosMatrix
    */
   inline std::shared_ptr<siconos::algebra::SimpleMatrix> iteration_matrix(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-  {
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
     return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
   }
 
@@ -140,10 +139,12 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
   };
 

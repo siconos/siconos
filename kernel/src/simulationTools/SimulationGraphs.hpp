@@ -80,7 +80,7 @@ namespace siconos::graphs {
  * std::shared_ptr<DynamicalSystemsGraph> DSG
  *
  *       DynamicalSystemsGraph::VDescriptor dsv = DSG->descriptor(ds);
- *       SP::OneStepintegrator osi = DSG->properties(dsv).osi;
+ *       auto osi = DSG->properties(dsv).osi;
  * </li>
  * <li> Optional Properties
  *      They are installed thanks to the macro INSTALL_GRAPH_PROPERTIES.

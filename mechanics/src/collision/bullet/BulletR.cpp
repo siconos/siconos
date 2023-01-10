@@ -20,13 +20,13 @@
 // #define DEBUG_MESSAGES 1
 #include "BulletR.hpp"
 
-#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/NarrowPhaseCollision/btPersistentManifold.h>
 
 #include <iostream>
 
 #include "BulletSiconosCommon.hpp"  // for copyQuatPos etc
+#include "SiconosVector.hpp"
 // #include "siconos_debug.h"
 
 void siconos::collision::bullet::BulletR::updateContactPointsFromManifoldPoint(

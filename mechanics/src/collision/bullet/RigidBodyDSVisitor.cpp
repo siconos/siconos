@@ -17,7 +17,6 @@
  */
 
 #include "RigidBodyDSVisitor.hpp"
-
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
 #include "SiconosBulletCollisionManager_impl.hpp"

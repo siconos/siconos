@@ -19,7 +19,7 @@
 #ifndef RIGIDBODYDS_VISITORS_HPP
 #define RIGIDBODYDS_VISITORS_HPP
 
-#include "SiconosVisitor.hpp"
+#include "RigidBodyVisitor.hpp"
 
 namespace siconos::collision {
 class RigidBody2dDS;

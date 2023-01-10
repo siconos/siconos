@@ -174,12 +174,10 @@ class BlockCSRMatrix {
    */
   unsigned int getNbNonNullBlocks() const;
 
-  /** get the numerics-readable structure
-   *
-   *  \return SP::SparseBlockStructuredMatrix
+  /** \return the numerics-readable structure
    */
-  inline std::shared_ptr<siconos::numerics::SparseBlockStructuredMatrix> getNumericsMatSparse()
-  {
+  inline std::shared_ptr<siconos::numerics::SparseBlockStructuredMatrix>
+  getNumericsMatSparse() {
     return _sparseBlockStructuredMatrix;
   };
 
@@ -194,8 +192,7 @@ class BlockCSRMatrix {
    *  \param i block position
    *  \return unsigned int
    */
-  std::vector<unsigned int>::value_type getSizeOfDiagonalBlock(int i) const
-  {
+  std::vector<unsigned int>::value_type getSizeOfDiagonalBlock(int i) const {
     if (i == 0)
       return _diagsize0->at(0);
     else
@@ -207,8 +204,7 @@ class BlockCSRMatrix {
    *  \param i unsigned int, 0 for rows, 1 for columns
    *  \return std::shared_ptr<std::vector<unsigned int>>
    */
-  inline std::shared_ptr<std::vector<unsigned int>> getPositionsIndex(bool i)
-  {
+  inline std::shared_ptr<std::vector<unsigned int>> getPositionsIndex(bool i) {
     if (i)
       return rowPos;
     else

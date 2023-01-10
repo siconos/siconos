@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "OneStepIntegrator.hpp"
-#include "SiconosConst.hpp"         // MACHINE_PREC
+#include "SiconosConst.hpp"  // MACHINE_PREC
 
 namespace siconos::integrators {
 
@@ -137,18 +137,12 @@ class Hem5OSI : public OneStepIntegrator {
   /** get relative tolerance parameter for Hem5
    *  \return a double*
    */
-  inline const boost::shared_array<double> getRtol() const
-  {
-    return rtol;
-  }
+  inline const boost::shared_array<double> getRtol() const { return rtol; }
 
   /** get absolute tolerance parameter for Hem5
    *  \return a double*
    */
-  inline const boost::shared_array<double> getAtol() const
-  {
-    return atol;
-  }
+  inline const boost::shared_array<double> getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
    *\return an interger
@@ -158,10 +152,7 @@ class Hem5OSI : public OneStepIntegrator {
   /** get real work vector parameter for lsodar
    *  \return a double*
    */
-  inline const boost::shared_array<double> getRwork() const
-  {
-    return rwork;
-  }
+  inline const boost::shared_array<double> getRwork() const { return rwork; }
 
   /** get iwork
    *  \return a pointer to int
@@ -173,17 +164,14 @@ class Hem5OSI : public OneStepIntegrator {
    *  \param rtol double * (rtol)
    *  \param atol double * (atol)
    */
-  void setTol(int itol,
-              boost::shared_array<double> rtol,
-              boost::shared_array<double> atol);
+  void setTol(int itol, boost::shared_array<double> rtol, boost::shared_array<double> atol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for Hem5)
    *  \param itol int (itol value)
    *  \param rtol double (rtol)
    *  \param atol double (atol)
    */
-  void setTol(int itol, double rtol,
-              double atol);
+  void setTol(int itol, double rtol, double atol);
 
   /** set the maximul number of steps for one call of Hem5OSI
    *\param nstepmax an int
@@ -225,17 +213,11 @@ class Hem5OSI : public OneStepIntegrator {
 
   unsigned int numberOfConstraints();
 
-  void f(int *sizeOfX, double *time,
-         double *x, double *xdot);
+  void f(int *sizeOfX, double *time, double *x, double *xdot);
 
-  void g(int *nEq, double *time,
-         double *x, int *ng,
-         double *gOut);
+  void g(int *nEq, double *time, double *x, int *ng, double *gOut);
 
-  void jacobianfx(int *, double *,
-                  double *, int *,
-                  int *, double *,
-                  int *);
+  void jacobianfx(int *, double *, double *, int *, int *, double *, int *);
 
   /** initialization of the integrator
    */
@@ -285,10 +267,12 @@ class Hem5OSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[Hem5OSI::OSNSP_RHS];
   };
 
