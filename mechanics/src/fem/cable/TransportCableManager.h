@@ -29,9 +29,11 @@ private:
 	TransportCableModel m_model;
 	TransportCableResult m_results;
 
+#ifndef NSICONOS
 	void computeDS(double a_tolContact=1e-3, double a_mus=0.8, double a_mup=1.1);
 
     void compute_mass(double elem_length, double elem_rho);
     void compute_external_load(double elem_length, double elem_rho);
+#endif
 };
 

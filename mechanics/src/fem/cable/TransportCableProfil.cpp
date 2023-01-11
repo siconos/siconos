@@ -12,9 +12,8 @@ TransportCableProfil::~TransportCableProfil()
 {
 }
 
-void TransportCableProfil::computeInitialProfil(int nb_nodes, int nodes_per_pulley, double a_tol, int a_nmax)
+void TransportCableProfil::computeInitialProfil(int nb_nodes, double a_tol, int a_nmax)
 {
-
 	// calcul les positions, tensions des cordes
 	Cable meca = r_model.get_cable();
 	Carriers vehicules = r_model.get_carriers();
@@ -24,57 +23,53 @@ void TransportCableProfil::computeInitialProfil(int nb_nodes, int nodes_per_pull
     meca.set_T(r_results.rope1.get_T0());
     r_results.rope2.compute(meca, r_model.get_piles2(), nb_nodes, a_tol, a_nmax);
 
-	  // prépare les supports: pile, station -> support
+	// prépare les supports: pile, station -> support
     r_results.prepareSupport();
-
-
-	/*puller12.compute(nodes_per_pulley);
-	puller21.compute(nodes_per_pulley);*/
-	
-	
-	
 }
 
-void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol, double mu_s,
-                                      double mu_p)
+void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol)
 {  
   std::shared_ptr<Pulley> puller12 =
       std::dynamic_pointer_cast<Pulley>( r_results.supports[r_results.puller12idx]);
 
-  std::shared_ptr<Pulley> puller21 =  std::dynamic_pointer_cast<Pulley>(r_results.supports[r_results.puller12idx]);
+  std::shared_ptr<Pulley> puller21 =  std::dynamic_pointer_cast<Pulley>(r_results.supports[r_results.puller21idx]);
 
 	double Lt = puller12->get_L(r_results.rope2);
 	double Lb = puller21->get_L(r_results.rope1);
-    double L = r_results.rope1.get_L() + Lt + r_results.rope2.get_L() + Lb;
+    r_results.length = r_results.rope1.get_L() + Lt + r_results.rope2.get_L() + Lb;
 
-	int n_Pt = (int)rint(nb_elem*Lt / L);
-	int n_Pb = (int)rint(nb_elem*Lb / L);
+	int n_Pt = (int)rint(nb_elem*Lt / r_results.length);
+	int n_Pb = (int)rint(nb_elem*Lb / r_results.length);
 
-	int n1 = r_results.rope1.computeNbNodes(nb_elem, L);
-    int n2 = r_results.rope2.computeNbNodes(nb_elem, L);
-	int n = n_Pt + n1 + n_Pb + n2;
+	int n1 = r_results.rope1.computeNbNodes(nb_elem, r_results.length);
+    int n2 = r_results.rope2.computeNbNodes(nb_elem, r_results.length);
+	r_results.nb_nodes = n_Pt + n1 + n_Pb + n2;
 
 	vector<Point> &q = r_results.q;
-	q.resize(n);
-    int offset = r_results.rope1.computeMesh(q, 0);
+	q.resize(r_results.nb_nodes);
+	vector<Point> &R = r_results.R;
+	R.resize(r_results.nb_nodes);
+	vector<double> &TS = r_results.TS;
+	TS.resize(r_results.nb_nodes);
+    int offset = r_results.rope1.computeMesh(q, R, TS, 0);
 	offset = puller12->compute(n_Pt + 1, q, offset);
-    offset = r_results.rope2.computeMesh(q, offset);
+    offset = r_results.rope2.computeMesh(q, R, TS, offset);
 	puller21->compute(n_Pb+1, q, offset);
 
-	r_results.elem_length = L / nb_elem;
-	compute_punct_load(n, L);
+	r_results.elem_length = r_results.length / r_results.nb_nodes;
+	compute_punct_load(r_results.nb_nodes, r_results.length);
 
-	compute_ineq_constraint(q, a_tol, mu_s, mu_p);
+	compute_ineq_constraint(q, a_tol);
 	/*dgi = np.zeros(nb_node)
 	dgi[gi <= 0] = gi[gi <= 0]
 	q = q - np.matmul(np.transpose(Gi), 1.1*dgi)*/
 	vector<double> &g = r_results.g;
 	vector<vector<Point>> &G = r_results.G;
     double k = 1 + a_eps;
-	for (size_t i=0; i < n; i++) {
+	for (size_t i=0; i < r_results.nb_nodes; i++) {
 		Point p;
 		if (g[i] < 0) {
-			for (size_t j = 0; j < n; j++) {
+			for (size_t j = 0; j < r_results.nb_nodes; j++) {
 				p.add(p, G[j][i]);
 			}
 			p.mult(k*g[i]);
@@ -111,6 +106,7 @@ void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_p
 		start *= d_prop;
 
 	vector<double> &punct = r_results.punct;
+	punct.clear();
 	punct.resize(nb_elem, 0);
 	size_t k = 1;
 	for (size_t i = 1; i < nb_elem; i++) {
@@ -127,7 +123,7 @@ void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_p
 
 }
 
-void TransportCableProfil::compute_ineq_constraint(const vector<Point> &a_X, double a_tol, double mu_s, double mu_p)
+void TransportCableProfil::compute_ineq_constraint(const vector<Point> &a_X, double a_tol)
 {
 	/*
 	@author: charl
@@ -152,7 +148,7 @@ void TransportCableProfil::compute_ineq_constraint(const vector<Point> &a_X, dou
 	vector<double>& g = r_results.g;
 	vector<vector<Point>>& G = r_results.G;
 	vector<vector<Point>>& T = r_results.T;
-        vector<std::shared_ptr<Support>> &supports = r_results.supports;
+    vector<std::shared_ptr<Support>> &supports = r_results.supports;
 
 	for (auto &s : supports) {
 		size_t i = 0;

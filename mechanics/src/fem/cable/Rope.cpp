@@ -29,7 +29,9 @@ void Rope::compute(const class Cable &a_meca,
 	else {
 		ropeway_inc = get_adm_1C(meca, { pile0, pile1 });
 		q.resize(nb_nodes - 1);
-		get_profile_1C(meca, ropeway_inc, nb_nodes, q);
+		TS.resize(nb_nodes - 1);
+		R.resize(nb_nodes -1);
+		get_profile_1C(meca, ropeway_inc, nb_nodes, q, R, TS);
 
 		Point drk;
 		drk.diff(q[1], q[0]);
@@ -57,10 +59,10 @@ int Rope::computeNbNodes(int nb_elem, double L)
 	return m_nbNodes;
 }
 
-int Rope::computeMesh(vector<Point>& a_q, int q_offset, bool a_reverse)
+int Rope::computeMesh(vector<Point> &a_q, vector<Point> &a_R, vector<double> &a_TS, int q_offset, bool a_reverse)
 {
 	if (!m_last) {		
-		get_profile_1C(meca, ropeway_inc, m_nbNodes + 1, a_q, q_offset, a_reverse);
+		get_profile_1C(meca, ropeway_inc, m_nbNodes + 1, a_q, a_R, a_TS, q_offset, a_reverse);
 	}
 	return m_nbNodes;
 }
@@ -322,6 +324,8 @@ void Rope::get_profile_1C(const Cable & a_meca,
 	const Point & cable_inc,
 	int nb_nodes,
 	vector<Point> &a_q,
+	vector<Point> &a_R,
+	vector<double> &a_TS,
 	int q_offset,
 	bool a_reverse)
 {
@@ -364,9 +368,6 @@ void Rope::get_profile_1C(const Cable & a_meca,
 	double sqL = sqrt(1 + pow(etaY, 2) + pow((etaZ + sq0 * alpha * L), 2));
 	double coef = a_meca.get_T0() / sq0;
 	
-	TS.resize(nb_nodes);
-	R.resize(nb_nodes);
-
 	for (int i = 0; i < nb_nodes; i++) {
 		int j = (a_reverse)? nb_nodes-1-i : i;		
 		double S = L / (nb_nodes - 1) * j;
@@ -381,11 +382,12 @@ void Rope::get_profile_1C(const Cable & a_meca,
 			p.z = zl - etaZ * beta / sq0 * (L - S) - 0.5 * alpha * beta * (pow(L, 2) - pow(S, 2)) - 1 / (sq0 * alpha) * (sqL - sqS);
 		}
 		// Tension
-		TS[i] = coef * sqS;
+		a_TS[i + q_offset] = coef * sqS;
 
 		// internal forces
-		R[i].x = coef;		
-		R[i].y = coef * etaY;
-		R[i].z = coef * (etaZ + alpha * sq0 * S);
+		Point &r = a_R[i + q_offset];
+		r.x = coef;		
+		r.y = coef * etaY;
+		r.z = coef * (etaZ + alpha * sq0 * S);
 	}
 }

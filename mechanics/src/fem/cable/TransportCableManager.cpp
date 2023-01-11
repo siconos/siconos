@@ -1,5 +1,8 @@
 #include "TransportCableManager.h"
 #include "TransportCableProfil.h"
+
+#ifndef NSICONOS
+
 #include "CableDS.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "MoreauJeanOSI.hpp"
@@ -10,6 +13,7 @@
 
 #include "CableCollisionManager.h"
 
+#endif
 //#include "TCException.h"
 
 
@@ -42,7 +46,6 @@ int TransportCableManager::computeFEM(const json & a_args, const string & a_outf
 		
 		P.computeInitialProfil(
 			getParam(a_args, "nb_node0", 50),
-			getParam(a_args, "nodes_per_pulley", 0),
 			getParam(a_args, "tol", 1e-20),
 			getParam(a_args, "nmax", 20)
 		);
@@ -50,14 +53,13 @@ int TransportCableManager::computeFEM(const json & a_args, const string & a_outf
 		P.computeFEM(
 			getParam(a_args, "nb_node", 1400),
 			getParam(a_args, "eps", 0.1),
-			getParam(a_args, "tol_contact", 1e-3),
-			getParam(a_args, "mu_s", 0.8),
-			getParam(a_args, "mu_p", 1.1)
+			getParam(a_args, "tol_contact", 1e-3)
 		);
-
+#ifndef NSICONOS
 		if (method == "all") {
 			computeDS();                 
 		}
+#endif
 		exportTC(a_args, a_outfile, output);
 
 		return EXIT_SUCCESS;
@@ -84,6 +86,8 @@ int TransportCableManager::simulation(const json & a_model, const json & a_args,
 	}
 	return vRet;
 }
+
+#ifndef NSICONOS
 
 void TransportCableManager::computeDS(double a_tolContact, double a_mus, double a_mup)
 {
@@ -218,3 +222,4 @@ void TransportCableManager::compute_external_load(double a_length, double a_rho)
 	}
 }
 
+#endif

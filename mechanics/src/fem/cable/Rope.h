@@ -14,7 +14,7 @@ public:
 		const Point &a_R0);
 	
 	int computeNbNodes(int nb_elem, double L);
-	int computeMesh(vector<Point> &a_q, int q_offset, bool a_reverse = false);
+	int computeMesh(vector<Point> &a_q, vector<Point> &a_R, vector<double> &a_TS, int q_offset, bool a_reverse = false);
 	
 	double get_T0();
 	double get_LastT();
@@ -57,6 +57,8 @@ private:
 		const Point &cable_inc,
 		int nb_nodes,
 		vector<Point> &a_q,
+		vector<Point> &a_R, 
+		vector<double> &a_TS,
 		int q_offset=0,
 		bool a_reverse=false);
 };

@@ -1,7 +1,9 @@
 #include "TransportCableResult.h"
+
+#ifndef NSICONOS
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
-
+#endif
 
 
 TransportCableResult::TransportCableResult()
@@ -28,15 +30,13 @@ void TransportCableResult::prepareSupport()
 
 	supports[puller12idx]->prepare(rope1.get_LastPile(), rope2.get_LastPile(),
                                   rope1.get_LastT());    
-    supports[puller12idx]->prepare(rope2.get_FirstPile(), rope1.get_FirstPile(),
+    supports[puller21idx]->prepare(rope2.get_FirstPile(), rope1.get_FirstPile(),
                                       rope2.get_T0());
 }
 
 void TransportCableResult::prepareIneqConstraint(int nb_node)
 {
-	g.resize(nb_node, 1);
-	act.resize(nb_node, -1);
-	eye_c.resize(nb_node, 0.);
+	g.resize(nb_node, 1);	
 	G.resize(nb_node);	
 	for (auto &gg : G) {
 		gg.resize(nb_node);
@@ -44,15 +44,7 @@ void TransportCableResult::prepareIneqConstraint(int nb_node)
 	T.resize(nb_node);
 	for (auto &tt : T) {
 		tt.resize(nb_node);
-	}
-	blocked.resize(nb_node);
-	blocked_value.resize(nb_node);
-	
-	KT.resize(nb_node*3);
-	for (auto &mm : KT) {
-		mm.resize(nb_node*3);
-	}
-	fi.resize(nb_node*3);
+	}			
 }
 
 int TransportCableResult::exportTC(const std::string & a_fileName, ojson & a_output, const std::string & a_option)
@@ -81,36 +73,28 @@ int TransportCableResult::to_json(ojson & j, const std::string & a_option)
 {
 	if (a_option == "fem") {		
 		j["g"] = g;
-		j["eye_c"] = eye_c;
-		/*j["G"] = G;		!!trop gros!!
-		j["T"] = T;*/
-
-		j["blocked"] = blocked;
-		j["blocked_value"] = blocked_value;
-	}
-	else if (a_option == "cableDS") {
-		// M, b, fi, KT
-		j["elem_length"] = elem_length;
-		//j["b"] = b;
-		j["fi"] = fi;
-	}
+	}	
 	else if (a_option == "ropeway") {
 		rope1.to_json(j["rope1"]);
 		rope2.to_json(j["rope2"]);
 	}
 	else {
         j["supports"] = ojson::array();
-        for (auto &s : supports) {
-	        j["supports"].push_back(*s);
-        }
 		j["pulleys"] = ojson::array();
-		//j["pulleys"].push_back(puller12);
-		//j["pulleys"].push_back(puller21);
-
+		size_t ns = supports.size();
+		for (size_t i = 0; i < ns; i++) {
+			if (i == puller12idx || i == puller21idx) {
+				std::shared_ptr<Pulley> pulley = std::static_pointer_cast<Pulley> (supports[i]);
+				j["pulleys"].push_back(*pulley);
+			}
+			else {
+				j["supports"].push_back(*supports[i]);
+			}
+		}       
 		j["q"] = q;
-		j["punct"] = punct;
-		j["act"] = act;
-
+		j["R"] = R;
+		j["tension"] = TS;
+		j["punct"] = punct;		
 	}
 	return EXIT_SUCCESS;
 }

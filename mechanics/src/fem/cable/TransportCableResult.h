@@ -2,8 +2,6 @@
 #include "Ropeway.h"
 #include "Pulley.h"
 #include "Support.h"
-//#include "SiconosVector.hpp"
-//#include "SimpleMatrix.hpp"
 
 class TransportCableResult
 {
@@ -27,29 +25,28 @@ public:
 
 	vector<std::shared_ptr<Support>> supports;
 
-	vector<Point> q;
+	std::vector<Point> q;	// positions
+	std::vector<Point> R;	// internal forces [x,y,z]-> [H,V,B]
+	std::vector<double> TS; // tension
 
+	int nb_nodes;
+	double length;
 	double elem_length;
 	// à convertir en siconos (vecteur ou matrice)
 	vector<double> punct;
 
-	vector<double> g;
-	vector<int> act;
-	vector<double> eye_c;
+	vector<double> g;	
 	vector<vector<Point>> G;
 	vector<vector<Point>> T;
-	vector<Point> blocked;
-	vector<Point> blocked_value;
-	
+
+
+#ifndef NSICONOS
 	std::shared_ptr<class SiconosVector> q0{nullptr};
     std::shared_ptr<class SiconosVector> v0{nullptr};
 
     std::shared_ptr<class SiconosMatrix> mass{nullptr};
     std::shared_ptr<class SiconosVector> b{nullptr};
+#endif
 
-
-
-	vector<vector<double>> KT;
-	vector<double> fi;
 };
 

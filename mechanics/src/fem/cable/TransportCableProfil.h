@@ -11,21 +11,18 @@ public:
 	virtual ~TransportCableProfil();
 
 	void computeInitialProfil(int nb_nodes, 
-		int nodes_per_pulley=0, 
 		double a_tol = 1e-20,
 		int a_nmax = 20);
 
 	void computeFEM(int nb_elem = 1400, 
 		double a_eps = 0.1,
-		double a_tol = 1e-3, 
-		double mu_s = 0.8, 
-		double mu_p = 1.1);
+		double a_tol = 1e-3);
 	
 private:
 	const TransportCableModel &r_model;
 	TransportCableResult &r_results;
 	
 	void compute_punct_load(int nb_elem, double Lc, double d_prop=0.8);
-	void compute_ineq_constraint(const vector<Point> &a_X, double a_tol=1e-3, double mu_s=0.8, double mu_p=1.1);
+	void compute_ineq_constraint(const vector<Point> &a_X, double a_tol=1e-3);
 };
 

@@ -92,17 +92,17 @@ int Ropeway::computeNbNodes(int nb_elem, double L)
 	return N;
 }
 
-int Ropeway::computeMesh(vector<Point>& a_q, int q_offset)
+int Ropeway::computeMesh(vector<Point> &a_q, vector<Point> &a_R, vector<double> &a_TS, int q_offset)
 {
 	int offset = q_offset;
 	if (!m_down) {
 		for (auto &r : m_ropes) {
-			offset += r.computeMesh(a_q, offset);
+			offset += r.computeMesh(a_q, a_R, a_TS, offset);
 		}
 	}
 	else {
 		for (auto r = m_ropes.rbegin(); r != m_ropes.rend(); r++) {			
-			offset += r->computeMesh(a_q, offset, true);
+			offset += r->computeMesh(a_q, a_R, a_TS, offset, true);
 		}
 	}	
 	return offset;

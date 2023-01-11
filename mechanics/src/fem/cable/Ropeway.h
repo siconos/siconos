@@ -17,7 +17,7 @@ public:
                             int &a_pulleyIdx) const;
 
 	int computeNbNodes(int nb_elem, double L);
-	int computeMesh(vector<Point> &a_q, int q_offset);
+	int computeMesh(vector<Point> &a_q, vector<Point> &a_R, vector<double> &a_TS, int q_offset);
 
 	const Pile &get_FirstPile();
 	const Pile &get_LastPile();

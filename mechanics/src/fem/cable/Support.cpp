@@ -1,17 +1,22 @@
 #include "Support.h"
+#ifndef NSICONOS
 #include "SiconosVector.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#endif
 
 
 Support::Support(const Pile& a_pile) : r_pile(a_pile)
 {
 	m_p = r_pile;
+
+#ifndef NSICONOS
 	m_nslaw = nullptr;
 
 	m_pc2 = std::make_shared<SiconosVector>(3);
 	m_normal = std::make_shared<SiconosVector>(3);
 	m_tangent = std::make_shared<SiconosVector>(3);
+#endif
 }
 
 
@@ -31,7 +36,10 @@ void Support::prepare(const Rope& a_rope)
 	m_p.z -= radius;
 }
 
-void Support::prepare(const Pile& a_start, const Pile& a_end, double T) {}
+void Support::prepare(const Pile& a_start, const Pile& a_end, double T) 
+{
+	// par défaut, ne fait rien
+}
 
 
 void Support::compute(
@@ -55,6 +63,13 @@ void Support::compute(
 	}
 }
 
+void to_json(ojson & j, const Support & s)
+{
+	j["radius"] = s.get_radius();
+	j["p"] = s.m_p;
+}
+
+#ifndef NSICONOS
 bool Support::isContact(const std::shared_ptr<SiconosVector>& a_p, const double& a_tol)
 {
 	double dx = a_p->getValue(0) - m_p.x;
@@ -87,8 +102,4 @@ std::shared_ptr<NonSmoothLaw> Support::nslaw()
 	return m_nslaw;
 }
 
-void to_json(ojson & j, const Support & s)
-{
-	j["radius"] = s.get_radius();
-	j["p"] = s.m_p;	
-}
+#endif

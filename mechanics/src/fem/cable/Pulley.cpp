@@ -61,14 +61,6 @@ void Pulley::compute(const Point &a_p, double a_tol, double &g, Point &G, Point 
   }
 }
 
-bool Pulley::isContact(const Point &a_p, const double &a_tol) 
-{ 
-  double dx = a_p.x - m_p.x;
-  double dy = a_p.y - m_p.y;
-  double go = sqrt(dx * dx + dy * dy) - get_radius();  
-  return (go > a_tol);    
-}
-
 const double & Pulley::get_radius() const
 {
 	return m_radiusP;
@@ -91,3 +83,23 @@ void to_json(ojson & j, const Pulley & p)
 	j["center"] = p.m_p;
 	j["tension"] = p.m_TR;
 }
+
+
+#ifndef NSICONOS
+bool Pulley::isContact(const std::shared_ptr<SiconosVector>& a_p, const double& a_tol)
+{
+	double dx = a_p->getValue(0) - m_p.x;
+	double dy = a_p->getValue(1) - m_p.y;
+	double d = sqrt(dx * dx + dy * dy);
+	double go = d - get_radius();
+	bool isCt = (go <= a_tol);
+	if (isCt) {
+		m_normal->setValue(0, dx / d);
+		m_normal->setValue(1, dy / d);
+		m_tangent->setValue(0, -m_normal->getValue(1));
+		m_tangent->setValue(1, m_normal->getValue(0));
+	}
+	return isCt;
+}
+
+#endif
