@@ -47,20 +47,14 @@ void Support::compute(
 	double a_tol,
 	double& g,
 	Point& G,
-	Point& T)
+	Point& T,
+	int &c)
 {
-	double dx = a_p.x - m_p.x;
-	double dz = a_p.z - m_p.z;
-	double go = sqrt(dx * dx + dz * dz) - get_radius();
-	double nx = dx / (go + get_radius());
-	double nz = dz / (go + get_radius());
-	if (go <= a_tol) {
-		g = go;
-		G.x = nx;
-		G.z = nz;
-		T.x = -nz;
-		T.z = nx;
-	}
+	c = isContact(a_tol, 
+		a_p.x - m_p.x, 0, a_p.z - m_p.z, 
+		g,
+		G.x, G.y, G.z,
+		T.x, T.y, T.z) ? 1 : 0;
 }
 
 void to_json(ojson & j, const Support & s)
@@ -71,7 +65,7 @@ void to_json(ojson & j, const Support & s)
 
 #ifndef NSICONOS
 bool Support::isContact(const std::shared_ptr<SiconosVector>& a_p, const double& a_tol)
-{
+{	
 	double dx = a_p->getValue(0) - m_p.x;
 	double dz = a_p->getValue(2) - m_p.z;
 	double d = sqrt(dx * dx + dz * dz);
@@ -102,4 +96,28 @@ std::shared_ptr<NonSmoothLaw> Support::nslaw()
 	return m_nslaw;
 }
 
+
+
 #endif
+
+
+bool Support::isContact(const double & a_tol, 
+	const double & dx, const double & dy, const double & dz, 
+	double & g, 
+	double & nx, double & ny, double & nz, 
+	double & tx, double & ty, double & tz)
+{
+	double d = sqrt(dx * dx + dy * dy + dz * dz);
+	double go = d - get_radius();
+	bool isCt = (go <= a_tol);
+	if (isCt) {		
+		g = go;
+		nx = dx / d;
+		ny = dy / d;
+		nz = dz / d;				
+		tx = -ny-nz;
+		ty = (ny)? nx : 0.0;
+		tz = (nz)? nx : 0.0;
+	}
+	return isCt;
+}

@@ -45,20 +45,13 @@ int Pulley::compute(int nb, vector<Point> &a_q, int q_offset) const
 	return q_offset + nb-1;
 }
 
-void Pulley::compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T)
+void Pulley::compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T, int &c)
 {
-  double dx = a_p.x - m_p.x;
-  double dy = a_p.y - m_p.y;
-  double go = sqrt(dx * dx + dy * dy) - get_radius();
-  double nx = dx / (go + get_radius());
-  double ny = dy / (go + get_radius());
-  if (go <= a_tol) {
-    g = go;
-    G.x = nx;
-    G.y = ny;
-    T.x = -ny;
-    T.y = nx;
-  }
+	c = isContact(a_tol, 
+		a_p.x - m_p.x, a_p.y - m_p.y, 0, 
+		g,
+		G.x, G.y, G.z,
+		T.x, T.y, T.z) ? 1 : 0;  
 }
 
 const double & Pulley::get_radius() const

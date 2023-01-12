@@ -22,7 +22,8 @@ public:
 		double a_tol, 
 		double &g, 
 		Point &G, 
-		Point &T);
+		Point &T,
+		int &c);
 			
 #ifndef NSICONOS
 	//------------ dynamique -------------

@@ -145,6 +145,7 @@ void TransportCableProfil::compute_ineq_constraint(const vector<Point> &a_X, dou
 	*/	
 	r_results.prepareIneqConstraint((int)a_X.size());
 	
+	vector<int>& c = r_results.contacts;
 	vector<double>& g = r_results.g;
 	vector<vector<Point>>& G = r_results.G;
 	vector<vector<Point>>& T = r_results.T;
@@ -153,7 +154,7 @@ void TransportCableProfil::compute_ineq_constraint(const vector<Point> &a_X, dou
 	for (auto &s : supports) {
 		size_t i = 0;
 		for (auto &p : a_X) {			
-			s->compute(p, a_tol, g[i], G[i][i], T[i][i]);			
+			s->compute(p, a_tol, g[i], G[i][i], T[i][i], c[i]);			
 			i++;
 		}
 	}

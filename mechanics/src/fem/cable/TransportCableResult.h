@@ -28,6 +28,7 @@ public:
 	std::vector<Point> q;	// positions
 	std::vector<Point> R;	// internal forces [x,y,z]-> [H,V,B]
 	std::vector<double> TS; // tension
+	std::vector<int> contacts; // points en contact (=1)
 
 	int nb_nodes;
 	double length;

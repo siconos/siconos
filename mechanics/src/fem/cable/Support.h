@@ -22,7 +22,8 @@ public:
 		double a_tol,
 		double &g, 
 		Point &G,
-		Point &T);
+		Point &T,
+		int &c);
 	
 #ifndef NSICONOS
 	//------------ dynamique -------------
@@ -38,6 +39,23 @@ public:
 
 	//------ Export ----------
 	friend void to_json(ojson &j, const Support &p);
+
+	bool isContact(
+		const double &a_tol,
+		const double &dx,
+		const double &dy,
+		const double &dz,
+		double &g,
+
+		double &nx,
+		double &ny,
+		double &nz,
+
+		double &tx,
+		double &ty,
+		double &tz
+	);
+
 
 protected:
 	const Pile &r_pile;		// reference to the cable model

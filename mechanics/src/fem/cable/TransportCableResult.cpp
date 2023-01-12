@@ -36,13 +36,20 @@ void TransportCableResult::prepareSupport()
 
 void TransportCableResult::prepareIneqConstraint(int nb_node)
 {
+	contacts.clear();
+	contacts.resize(nb_node, 0);
+	g.clear();
 	g.resize(nb_node, 1);	
+	G.clear();
 	G.resize(nb_node);	
 	for (auto &gg : G) {
+		gg.clear();
 		gg.resize(nb_node);
 	}
+	T.clear();
 	T.resize(nb_node);
 	for (auto &tt : T) {
+		tt.clear();
 		tt.resize(nb_node);
 	}			
 }
@@ -95,6 +102,8 @@ int TransportCableResult::to_json(ojson & j, const std::string & a_option)
 		j["R"] = R;
 		j["tension"] = TS;
 		j["punct"] = punct;		
+		j["cable_length"] = length;
+		j["contacts"] = contacts;
 	}
 	return EXIT_SUCCESS;
 }
