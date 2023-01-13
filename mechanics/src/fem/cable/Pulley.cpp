@@ -1,6 +1,10 @@
 #include "Pulley.h"
 #include "Ropeway.h"
-
+#ifndef NSICONOS
+#include "SiconosVector.hpp"
+#include "NonSmoothLaw.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
+#endif
 
 
 Pulley::Pulley(const Pile &a_pile) : Support(a_pile)
@@ -47,7 +51,7 @@ int Pulley::compute(int nb, vector<Point> &a_q, int q_offset) const
 
 void Pulley::compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T, int &c)
 {
-	c = isContact(a_tol, 
+	c = Support::isContact(a_tol, 
 		a_p.x - m_p.x, a_p.y - m_p.y, 0, 
 		g,
 		G.x, G.y, G.z,

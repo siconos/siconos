@@ -94,6 +94,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
    blas_lapack     # For SiconosLapack.h in numerics
    SOL/lumod-c # For lumod_dense.h in numerics
    hairer # For kernel
+   json 
    )
 if (WITH_MA57)
   list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES lbl/include/)

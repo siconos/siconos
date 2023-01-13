@@ -145,9 +145,6 @@ void siconos::mechanics::fem::CableDS::computeJacobianvForces(double time)
   dampingMatrix();
 }
 
-// Probably not needed since mass will be constant. Called  by the integrator at each time step
-// to override mass operator.
-void siconos::mechanics::fem::CableDS::computeMass(std::shared_ptr<SiconosVector> position) {}
 
 void siconos::mechanics::fem::CableDS::tangentStiffnessMatrix(std::shared_ptr<SiconosVector> q)
 {

@@ -90,10 +90,6 @@ public:
   // \f$ \nabla_v F \f$
   void computeJacobianvForces(double time) override;
 
-  // Probably not needed since mass will be constant. Called  by the integrator at each time
-  // step to override mass operator.
-  void computeMass(std::shared_ptr<SiconosVector> position) override;
-
   //
   void computeFExt(double time) override;
 
