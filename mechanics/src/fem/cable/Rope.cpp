@@ -29,8 +29,8 @@ void Rope::compute(const class Cable &a_meca,
 	else {
 		ropeway_inc = get_adm_1C(meca, { pile0, pile1 });
 		q.resize(nb_nodes - 1);
-		TS.resize(nb_nodes - 1);
-		R.resize(nb_nodes -1);
+		TS.resize(nb_nodes);
+		R.resize(nb_nodes);
 		get_profile_1C(meca, ropeway_inc, nb_nodes, q, R, TS);
 
 		Point drk;
