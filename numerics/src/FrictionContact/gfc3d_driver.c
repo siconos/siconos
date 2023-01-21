@@ -92,7 +92,7 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
 
 
 int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double *velocity,
-                 double* globalVelocity,  SolverOptions* options)
+                 double* globalVelocity,  SolverOptions* options, const char* problem_name)
 {
   assert(options->isSet);
   DEBUG_EXPR(NV_display(globalVelocity,problem_ori->M->size0););
@@ -256,7 +256,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
                                              reaction, velocity, globalVelocity);
 
     gfc3d_IPM(balanced_problem, reaction, velocity,
-              globalVelocity, &info, options);
+              globalVelocity, &info, options, problem_name);
 
 
     gfc3d_balancing_check_drift(balanced_problem,problem, reaction, velocity, globalVelocity,

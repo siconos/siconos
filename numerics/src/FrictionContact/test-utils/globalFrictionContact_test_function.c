@@ -43,6 +43,7 @@ int globalFrictionContact_test_function(TestCase* current)
   int k, info = -1 ;
   GlobalFrictionContactProblem* problem = globalFrictionContact_new_from_filename(current->filename);
 
+
   /* globalFrictionContact_display(problem); */
 
   /* /\* print problem data in Matlab file *\/ */
@@ -103,7 +104,7 @@ int globalFrictionContact_test_function(TestCase* current)
   {
     info = gfc3d_driver(problem,
                         reaction, velocity, globalvelocity,
-                        current->options);
+                        current->options, current->filename);
     //    printf("info = %i\n", info);
   }
 

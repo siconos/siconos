@@ -235,7 +235,7 @@ extern "C"
 
   void gfc3d_IPM(GlobalFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
-                  int*  info, SolverOptions*  options);
+                  int*  info, SolverOptions*  options, const char* problem_name);
 
   void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
 
