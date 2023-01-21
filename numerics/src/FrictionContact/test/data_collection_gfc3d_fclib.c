@@ -27,6 +27,7 @@ const char ** data_collection()
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
 
+  // int listprob[7] = {1, 0, 0, 0, 0, 0, 0};
   int listprob[7] = {1, 1, 1, 1, 1, 1, 1};
   /* 0: BoxStacks      #28  problems */
   /* 1: Capsules       #200 problems */

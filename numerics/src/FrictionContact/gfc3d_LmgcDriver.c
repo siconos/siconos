@@ -222,7 +222,7 @@ int gfc3d_LmgcDriver(double *reaction,
                             reaction,
                             velocity,
                             globalVelocity,
-                            numerics_solver_options);
+                            numerics_solver_options, "tmp");
 
 
   iparam[SICONOS_IPARAM_ITER_DONE] = numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE];

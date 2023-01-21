@@ -3216,7 +3216,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   int hasNotConverged = 1;
   size_t iteration = 0;
-  double pinfeas = 1e300;
+  double pinfeas = 1e300; double pinfeas_new = 1e300;
   double dinfeas = 1e300;
   double complem_1 = 1e300;
   double complem_2 = 1e300;
@@ -3320,6 +3320,14 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double *dualConstraint = data->tmp_vault_m[no_m++];
 
   double *primalConstraint = data->tmp_vault_nd[no_nd++];
+
+
+  // //###### Debug for primal contraint increased after some iterations
+  // double *primalConstraint_check = (double*)calloc(nd, sizeof(double));
+  // double *v_plus_dv_check = (double*)calloc(m, sizeof(double));
+  // double *u_plus_du_check = (double*)calloc(nd, sizeof(double));
+
+
 
    // For predictor step
   double *v_plus_dv = data->tmp_vault_nd[no_nd++];                // v_plus_dv = velocity + alpha_primal * d_velocity
@@ -3807,22 +3815,29 @@ while(1)
     }
 
 
-    // if (iteration <= 1)
-    // {
-    //   printf("\n\n========== PRINTING FOR DEBUG 1 ==========\n");
-    //   printf("iteration = %i\n", iteration);
-    //   // printf("Vector v:\n");
-    //   // NM_vector_display(globalVelocity,m);
-    //   // printf("\n\nVector u:\n");
-    //   // NM_vector_display(velocity,nd);
-    //   // printf("\n\nVector r:\n");
-    //   // NM_vector_display(reaction,nd);
 
-    //   printf("primalConstraint = %6.20e\n\n", pinfeas);
-    //   printf("dualConstraint = %6.20e\n\n", dinfeas);
-    //   printf("========== END PRINTING FOR DEBUG 1 ==========\n\n");
-    //   // break;
-    // }
+
+    // Update w
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1 && iteration > 0) // & (totalresidual <= 100*tol))
+    {
+      // printf("update w\n");
+      for(unsigned int i = 0; i < nd; ++ i)
+      {
+        if(i % d == 0)
+        {
+          w[i] = w_origin[i] + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]) + sqrt(velocity[i+3]*velocity[i+3]+velocity[i+4]*velocity[i+4]);
+        }
+      }
+      /* for(unsigned int i = 0; i < nd; ++ i) printf("%20.14e\n",w[i]); */
+    }
+    // primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas_new, tol); // primalConstraint = u - H*v -w
+
+    // // Compute again primalConstraint with new w
+    // NM_gemv(-1.0, H, globalVelocity, 0.0, primalConstraint);  // primalConstraint = -Hv
+    // double max_val = cblas_dnrm2(nd, primalConstraint, 1);
+    // cblas_daxpy(nd, -1.0, w, 1, primalConstraint, 1);         // primalConstraint = -Hv - w
+    // cblas_daxpy(nd, 1.0, velocity, 1, primalConstraint, 1); // primalConstraint = u - Hv - w
+
 
 
 
@@ -3907,9 +3922,6 @@ while(1)
       hasNotConverged = 0;
       break;
     }
-
-
-
 
 
 
@@ -4692,7 +4704,7 @@ while(1)
 
 
       /* Correction of w to take into account the dependence on the tangential velocity */
-      update_w(w, w_origin, velocity, nd, d, options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S]);
+      // update_w(w, w_origin, velocity, nd, d, options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S]);
 
 
 
@@ -4801,6 +4813,33 @@ while(1)
       cblas_dcopy(nd, reaction, 1, r_plus_dr, 1);
       cblas_daxpy(nd, alpha_primal, d_velocity, 1, v_plus_dv, 1);
       cblas_daxpy(nd, alpha_dual, d_reaction, 1, r_plus_dr, 1);
+
+
+
+
+
+      // //###### Debug for primal contraint increased after some iterations
+      // cblas_dcopy(nd, velocity, 1, u_plus_du_check, 1);
+      // cblas_dcopy(m, globalVelocity, 1, v_plus_dv_check, 1);
+      // cblas_daxpy(nd, alpha_primal, d_velocity, 1, u_plus_du_check, 1);
+      // cblas_daxpy(m, alpha_primal, d_globalVelocity, 1, v_plus_dv_check, 1);
+
+      // NM_gemv(-1.0, H, v_plus_dv_check, 0.0, primalConstraint_check);  // primalConstraint = -Hv
+      // max_val = cblas_dnrm2(nd, primalConstraint_check, 1);
+      // cblas_daxpy(nd, -1.0, w, 1, primalConstraint_check, 1);         // primalConstraint = -Hv - w
+      // cblas_daxpy(nd, 1.0, u_plus_du_check, 1, primalConstraint_check, 1); // primalConstraint = u - Hv - w
+
+      // max_val = fmax(max_val, cblas_dnrm2(nd, u_plus_du_check, 1));
+      // max_val = fmax(max_val, cblas_dnrm2(nd, w, 1));
+      // pinfeas_new = (max_val > tol ? cblas_dnrm2(nd, primalConstraint_check, 1)/max_val : cblas_dnrm2(nd, primalConstraint_check, 1));
+
+
+      // printf("|primalConstraint 1| = %e,\t", cblas_dnrm2(nd, primalConstraint_check, 1));
+      // printf("pinfeas 1 = %e, \talpha = %e\n", pinfeas_new, alpha_primal);
+
+
+
+
 
       /* affine barrier parameter */
       barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / (n);
@@ -6958,15 +6997,37 @@ while(1)
 
 
 
+
+    // //###### Debug for primal contraint increased after some iterations
+    // cblas_dcopy(nd, velocity, 1, u_plus_du_check, 1);
+    // cblas_dcopy(m, globalVelocity, 1, v_plus_dv_check, 1);
+    // cblas_daxpy(nd, alpha_primal, d_velocity, 1, u_plus_du_check, 1);
+    // cblas_daxpy(m, alpha_primal, d_globalVelocity, 1, v_plus_dv_check, 1);
+
+    // NM_gemv(-1.0, H, v_plus_dv_check, 0.0, primalConstraint_check);  // primalConstraint = -Hv
+    // max_val = cblas_dnrm2(nd, primalConstraint_check, 1);
+    // cblas_daxpy(nd, -1.0, w, 1, primalConstraint_check, 1);         // primalConstraint = -Hv - w
+    // cblas_daxpy(nd, 1.0, u_plus_du_check, 1, primalConstraint_check, 1); // primalConstraint = u - Hv - w
+
+    // max_val = fmax(max_val, cblas_dnrm2(nd, u_plus_du_check, 1));
+    // max_val = fmax(max_val, cblas_dnrm2(nd, w, 1));
+    // pinfeas_new = (max_val > tol ? cblas_dnrm2(nd, primalConstraint_check, 1)/max_val : cblas_dnrm2(nd, primalConstraint_check, 1));
+
+
+    // printf("|primalConstraint 2| = %e,\t", cblas_dnrm2(nd, primalConstraint_check, 1));
+    // printf("pinfeas 2 = %e, \talpha = %e\n\n", pinfeas_new, alpha_primal);
+
+
+
+
+
+
     // 10. Update variables
     cblas_daxpy(m, alpha_primal, d_globalVelocity, 1, globalVelocity, 1);
     cblas_daxpy(nd, alpha_primal, d_velocity, 1, velocity, 1);
     cblas_daxpy(nd, alpha_dual, d_reaction, 1, reaction, 1);
     cblas_daxpy(n, alpha_dual, d_t, 1, t, 1);
     cblas_daxpy(n, alpha_dual, d_t_prime, 1, t_prime, 1);
-
-
-
 
 
 
@@ -7376,9 +7437,9 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   /* 0: convex case;  1: non-smooth case */
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2;
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_JQinv;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_JQJ;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_invPH;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_JQJ;
