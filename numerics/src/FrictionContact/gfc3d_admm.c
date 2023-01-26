@@ -963,8 +963,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
       }
 
       
-      /* tmp_m =  options->dWork; /\* options->dWork may be reallocated by computeError *\/ */
-      /* tmp_n =  &options->dWork[m]; */
+      tmp_m =  options->dWork; /* options->dWork may be reallocated by computeError */
+      tmp_n =  &options->dWork[m];
   
 
 
