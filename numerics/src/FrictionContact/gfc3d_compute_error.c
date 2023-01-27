@@ -249,7 +249,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
 
 
   /* we re-compute local velocity */
-  /* the error in the equation u = H^T v +b is then accuaret to machine precision */
+  /* the error in the equation u = H^T v +b is then accurate at the machine precision */
 
   /* cblas_dcopy(m, problem->b, 1, velocity, 1); */
   /* NM_tgemv(1, H, globalVelocity, 1.0, velocity); */
@@ -274,8 +274,12 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   double norm_primal_residual = cblas_dnrm2(m, primal_residual, 1);
 
   DEBUG_PRINTF(" norm primal_residual  = %e\n", norm_primal_residual);
+  DEBUG_PRINTF(" relative scaling   = %e\n", relative_scaling);
   if(fabs(relative_scaling) > MIN_RELATIVE_SCALING)
-    *error += norm_primal_residual/relative_scaling;
+    {
+      DEBUG_PRINT(" compute relative error\n");
+      *error += norm_primal_residual/relative_scaling;
+    }
   else
     *error += norm_primal_residual;
 
