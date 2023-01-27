@@ -114,7 +114,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
 
 
   /* we re-compute local velocity */
-  /* the error in the equation u = H^T v +b is then accuaret to machine precision */
+  /* the error in the equation u = H^T v +b is then accurate at the machine precision */
 
   cblas_dcopy(m, problem->b, 1, velocity, 1);
   NM_tgemv(1, H, globalVelocity, 1.0, velocity);
