@@ -31,6 +31,7 @@ private:
   CPPUNIT_TEST(testReadModel);
   CPPUNIT_TEST(testBuildInitialProfile);
   CPPUNIT_TEST(testComputeDS);
+  CPPUNIT_TEST(testComputeBouncingBall);
   CPPUNIT_TEST(testNoFext);
   CPPUNIT_TEST(testConstantFext);
   CPPUNIT_TEST(testVariableFext);
@@ -41,6 +42,7 @@ private:
   void testReadModel();
   void testBuildInitialProfile();
   void testComputeDS();
+  void testComputeBouncingBall();
 
   void testNoFext();
   void testConstantFext();

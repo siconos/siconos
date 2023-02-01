@@ -1,6 +1,6 @@
 #ifndef CABLETOOLS
 #define CABLETOOLS
-
+#include <memory>
 #include <vector>
 
 class SiconosVector;
