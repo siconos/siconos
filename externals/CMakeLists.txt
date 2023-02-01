@@ -78,7 +78,6 @@ endif()
 # No docs for externals.
 set(${COMPONENT}_EXCLUDE_DOXY ${${COMPONENT}_DIRS})
 
-
 # TEST TEST TEST
 # ------ include interface ------
 # What is needed at build time
@@ -94,7 +93,6 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
    blas_lapack     # For SiconosLapack.h in numerics
    SOL/lumod-c # For lumod_dense.h in numerics
    hairer # For kernel
-   json 
    )
 if (WITH_MA57)
   list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES lbl/include/)
@@ -168,8 +166,13 @@ set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_
 # This is ugly, but helps with old lumod code (12.08.2021) --xhub
 target_compile_definitions(externals PRIVATE CLOCKTIME)
 target_compile_options(externals PRIVATE "-w")
+target_compile_options(externals PRIVATE "-Wno-unused-local-typedef") # Else boost bindings lead to many warnings
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
 target_compile_options(externals PRIVATE "-Wno-unused-parameter")
+
+# no warnings in fortran
+target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-w>)
+
 # An awful command asking to add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
 # See https://scivision.co/gfortran-type-mismatch-error/
 if(WITH_FORTRAN)

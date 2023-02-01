@@ -1,5 +1,5 @@
 # ================================================================
-# All the default values for siconos cmake parameters
+# A specific conf for the 'cable' interface.
 #
 # Usage:
 # cmake path-to-sources
@@ -21,7 +21,7 @@
 # for details about components.
 set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 
-option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
+option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" OFF)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 
@@ -55,7 +55,10 @@ option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
 option(WITH_RENDERER "Install OCC renderer. Default = OFF" OFF)
 option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library. Default = ON" ON)
 option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
-option(WITH_JSON "Use a JSON library in c++" OFF)
+option(WITH_JSON "Use a JSON library in c++" ON)
+option(WITH_JSON_INSTALL "Use a JSON library in c++" OFF) # Set this to ON if you want cmake to download and configure json/lohmann lib
+
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "Install mode for siconos python package")
 
 # -- Installation setup ---
 # Set python install mode:

@@ -1,16 +1,18 @@
 #pragma once
-#include "TransportCable.h"
 
-class BaseModel
-{
+#include <nlohmann/json.hpp>
+#include <string>
+
+using json = nlohmann::json;
+using ojson = nlohmann::ordered_json;
+
+class BaseModel {
 public:
-	BaseModel();
-	virtual ~BaseModel();
+  BaseModel();
+  virtual ~BaseModel();
 
-	void from_json(const json &j, const string &a_header);
+  void from_json(const json &j, const std::string &a_header);
 
 protected:
-	virtual void from_json(const json &j) = 0;
-
+  virtual void from_json(const json &j) = 0;
 };
-

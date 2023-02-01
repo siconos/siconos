@@ -14,103 +14,85 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "ioVector.hpp"
+
+#include "SiconosAlgebra.hpp"
+#include "SiconosException.hpp"
 #include "SiconosVector.hpp"
+
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/vector_sparse.hpp>
-#include<fstream>
-#include "SiconosException.hpp"
-#include "SiconosAlgebra.hpp"
+#include <fstream>
+#include <string>
 
-namespace ioVector
-{
-bool read(const std::string& fileName,
-          SiconosVector& m,
-          const openmode& mode,
-          int prec,
-          const std::string& inputType,
-          const std::ios::fmtflags& flags
-         )
+namespace ioVector {
+bool read(const std::string &fileName, SiconosVector &m, const openmode &mode, int prec,
+          const std::string &inputType, const std::ios::fmtflags &flags)
 {
   // Note FP : .c_str() will be useless for std
   std::ifstream infile(fileName.c_str(), mode);
   infile.flags(flags);
-  if(!infile.good())
+  if (!infile.good())
     THROW_EXCEPTION("");
-  if(infile.peek() == std::ifstream::traits_type::eof())
-  {
+  if (infile.peek() == std::ifstream::traits_type::eof()) {
     THROW_EXCEPTION("");
   }
 
   infile.precision(prec);
 
-  if(mode == BINARY_IN)
-  {
-    double * x =  m.getArray();
-    if(inputType != "noDim")
-    {
+  if (mode == BINARY_IN) {
+    double *x = m.getArray();
+    if (inputType != "noDim") {
       unsigned int dim;
-      infile.read((char*)(&dim), sizeof(m.size()));
-
+      infile.read((char *)(&dim), sizeof(m.size()));
     }
-    infile.read((char*)(&x[0]), m.size() * sizeof(double));
+    infile.read((char *)(&x[0]), m.size() * sizeof(double));
   }
-  else
-  {
+  else {
     DenseVect *p = m.dense();
     // Read the dimension of the vector in the first line of the input file
     // Just use to check that sizes are consistents.
-    if(inputType != "noDim")
-    {
+    if (inputType != "noDim") {
       unsigned int dim;
       infile >> dim;
-      if(dim != p->size())
+      if (dim != p->size())
         p->resize(dim);
     }
-    copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(), (p->data()).begin());
+    copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(),
+         (p->data()).begin());
   }
   infile.close();
   return true;
 }
 
-bool write(const std::string& fileName,
-           const SiconosVector& m,
-           const openmode& mode,
-           int prec,
-           const std::string& outputType,
-           const std::ios::fmtflags& flags)
+bool write(const std::string &fileName, const SiconosVector &m, const openmode &mode, int prec,
+           const std::string &outputType, const std::ios::fmtflags &flags)
 {
   std::ofstream outfile(fileName.c_str(), mode);
   outfile.flags(flags);
 
-  if(!outfile.good())
+  if (!outfile.good())
     THROW_EXCEPTION("");
   outfile.precision(prec);
-  if(mode == BINARY_OUT)
-  {
-    double * x = m.getArray();
-    if(outputType != "noDim")
-    {
+  if (mode == BINARY_OUT) {
+    double *x = m.getArray();
+    if (outputType != "noDim") {
       unsigned int dim = m.size();
-      outfile.write((char*)&dim, sizeof(dim));
+      outfile.write((char *)&dim, sizeof(dim));
     }
-    outfile.write((char*)(&x[0]), sizeof(double) * m.size());
-
+    outfile.write((char *)(&x[0]), sizeof(double) * m.size());
   }
-  else
-  {
-    if(outputType != "noDim")
+  else {
+    if (outputType != "noDim")
       outfile << m.size() << std::endl;
 
-    if(m.num() == Siconos::DENSE)
-    {
-      DenseVect*  p = m.dense();
+    if (m.num() == Siconos::DENSE) {
+      DenseVect *p = m.dense();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
     }
-    else if(m.num() == Siconos::SPARSE)
-    {
-      SparseVect* p = m.sparse();
+    else if (m.num() == Siconos::SPARSE) {
+      SparseVect *p = m.sparse();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
     }
   }
@@ -118,4 +100,17 @@ bool write(const std::string& fileName,
   return true;
 }
 
+std::shared_ptr<SiconosVector> readVectorFromJson(const nlohmann::json &jin)
+{
+  std::vector<double> vec;
+  for (auto v : jin)
+    for (auto v : jin)
+      if (v.is_array())
+	for (auto vv : v)
+	  vec.push_back(vv);
+      else
+	vec.push_back(v);
+  return std::make_shared<SiconosVector>(vec);
 }
+
+} // namespace ioVector

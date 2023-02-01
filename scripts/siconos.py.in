@@ -193,7 +193,7 @@ def main():
 siconos_root_dir = Path(__file__).resolve().parent.parent
 
 # Path to cmake setup for siconos (e.g. Find...cmake files)
-siconos_package_dir = Path(siconos_root_dir, '@ConfigPackageLocation@')
+siconos_package_dir = Path(siconos_root_dir, '@SiconosConfigPackageLocation@')
 
 # Path to siconos python package
 siconos_pythonpath = Path('@SICONOS_PYTHON_INSTALL_DIR@')
@@ -651,11 +651,11 @@ def generate_cmakelists(args):
 
     # find siconos package and components
     result += 'set(@PROJECT_NAME@_DIR {}'.format(siconos_root_dir)
-    result += '/@ConfigPackageLocation@)\n'.format(siconos_root_dir)
+    result += '/@SiconosConfigPackageLocation@)\n'.format(siconos_root_dir)
     result += 'find_package(@PROJECT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@'
     result += '.@PATCH_VERSION@ CONFIG REQUIRED)\n'
     result += 'set(CMAKE_MODULE_PATH ${siconos_ROOT}/'
-    result += '@ConfigPackageLocation@)\n'
+    result += '@SiconosConfigPackageLocation@)\n'
 
     # -- Extra headers --
     # It's allowed to put some headers in the driver dir.

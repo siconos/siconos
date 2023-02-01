@@ -45,7 +45,7 @@ namespace siconos::mechanics::fem {
 
   Todo: check and update doc and comments.
 
-  Add ref to Charleli's phd report.
+  Add ref to Charlelie's phd report.
 
 */
 class CableDS : public LagrangianDS {
@@ -59,20 +59,22 @@ protected:
   double _EA{1};
   double _l_e{1};
 
-  std::shared_ptr<SimpleMatrix> TRNp_Np;
+  std::shared_ptr<SimpleMatrix> TRNp_Np{nullptr};
 
-  void matmult(const std::shared_ptr<SiconosVector> &V,
-               size_t a_startIdx, std::shared_ptr<SiconosVector> &R);
-  void matmult2(const std::shared_ptr<SiconosVector> &V, 
-               std::shared_ptr<SimpleMatrix> &R);
-  
+  void matmult(const std::shared_ptr<SiconosVector> &V, size_t a_startIdx,
+               std::shared_ptr<SiconosVector> &R);
+  void matmult2(const std::shared_ptr<SiconosVector> &V, std::shared_ptr<SimpleMatrix> &R);
 
+  CableDS() = delete;
+  CableDS(const CableDS &) = delete;
+  CableDS(CableDS &&) = delete;
+  CableDS &operator=(const CableDS &) = delete;
+  CableDS &operator=(CableDS &&) = delete;
 
 public:
   CableDS(std::shared_ptr<SiconosVector> q0, std::shared_ptr<SiconosVector> velocity0,
-          std::shared_ptr<SiconosMatrix> mass, 
-	  double a_EA, double a_elem_length,
-	  ExternalForcesFunction fext = nullptr);
+          std::shared_ptr<SiconosMatrix> mass, double a_EA, double a_elem_length,
+          ExternalForcesFunction fext = nullptr);
 
   ~CableDS() noexcept = default;
 

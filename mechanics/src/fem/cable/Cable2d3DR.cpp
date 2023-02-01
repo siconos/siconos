@@ -84,7 +84,7 @@ void siconos::mechanics::fem::Cable2d3DR::computeh(const BlockVector& q, BlockVe
 {
   DEBUG_BEGIN("Cable2d3DR::computeh(...)\n");
 
-  LagrangianScleronomousR::computeh(q, z, y);
+  // LagrangianScleronomousR::computeh(q, z, y);
   SiconosVector & position = *((q.getAllVect())[0]);
   _Pc1->setValue(0, position(_node_dof_index));
   _Pc1->setValue(1, position(_node_dof_index+1));

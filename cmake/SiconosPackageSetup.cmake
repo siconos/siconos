@@ -15,7 +15,7 @@ set(cmake_macros
   )
 
 foreach(file IN LISTS cmake_macros)
-  install(FILES cmake/${file} DESTINATION ${ConfigPackageLocation})
+  install(FILES cmake/${file} DESTINATION ${SiconosConfigPackageLocation})
 endforeach()
 
 # =========== uninstall target ===========
@@ -43,7 +43,7 @@ endif()
 if(EXISTS ${CMAKE_SOURCE_DIR}/scripts/CMakeLists.txt.in)
   configure_file(scripts/CMakeLists.txt.in scripts/CMakeLists-temp.txt @ONLY)
   configure_file(${CMAKE_BINARY_DIR}/scripts/CMakeLists-temp.txt ${CMAKE_BINARY_DIR}/scripts/CMakeLists.txt @ONLY)
-  install(FILES ${CMAKE_BINARY_DIR}/scripts/CMakeLists.txt DESTINATION ${ConfigPackageLocation})
+  install(FILES ${CMAKE_BINARY_DIR}/scripts/CMakeLists.txt DESTINATION ${SiconosConfigPackageLocation})
 endif()
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/scripts/siconos.py.in)
@@ -59,7 +59,7 @@ include(CMakePackageConfigHelpers)
 
 # Generate ${PROJECT_NAME}Config.cmake
 configure_package_config_file(siconos-config.cmake.in ${CMAKE_BINARY_DIR}/siconos-config.cmake
-  INSTALL_DESTINATION ${ConfigPackageLocation})
+  INSTALL_DESTINATION ${SiconosConfigPackageLocation})
 
 # Generate siconos-config-version.cmake file.
 write_basic_package_version_file(
@@ -75,12 +75,12 @@ export(EXPORT siconosTargets
 
 install(EXPORT siconosTargets
   NAMESPACE Siconos::
-  DESTINATION ${ConfigPackageLocation}) 
+  DESTINATION ${SiconosConfigPackageLocation}) 
 
 # install config files
 install(
   FILES ${CMAKE_BINARY_DIR}/siconos-config.cmake ${CMAKE_BINARY_DIR}/siconos-config-version.cmake
-  DESTINATION ${ConfigPackageLocation})
+  DESTINATION ${SiconosConfigPackageLocation})
 
 if(WITH_GIT)
   # Save and install a file which contain git references for the current source directory

@@ -28,6 +28,8 @@ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(CableDSTest);
 
+  CPPUNIT_TEST(testReadModel);
+  CPPUNIT_TEST(testBuildInitialProfile);
   CPPUNIT_TEST(testComputeDS);
   CPPUNIT_TEST(testNoFext);
   CPPUNIT_TEST(testConstantFext);
@@ -36,13 +38,14 @@ private:
   CPPUNIT_TEST_SUITE_END();
 
 
+  void testReadModel();
+  void testBuildInitialProfile();
   void testComputeDS();
 
   void testNoFext();
   void testConstantFext();
   void testVariableFext();
-
-  TransportCableManager M;
+  
 
 public:      
   void setUp();

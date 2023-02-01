@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 #pragma once
-#include <InteractionManager.hpp>
 #include <CableDS.hpp>
+#include <InteractionManager.hpp>
 #include <Support.h>
 
 using namespace std;
@@ -29,14 +29,14 @@ public:
   CableCollisionManager(const std::shared_ptr<CableDS> a_model,
                         const vector<std::shared_ptr<Support>> &a_supports,
                         double a_tolContact = 1e-3);
-  virtual ~CableCollisionManager();  
-  virtual void updateInteractions(std::shared_ptr < Simulation > simulation);
+  virtual ~CableCollisionManager();
+  virtual void updateInteractions(std::shared_ptr<Simulation> simulation);
 
 protected:
   std::shared_ptr<CableDS> m_model;
   vector<std::shared_ptr<Support>> m_supports;
   double m_tolContact;
 
-  typedef std::map < unsigned int, std::shared_ptr < Interaction>> t_contacts;
+  typedef std::map<unsigned int, std::shared_ptr<Interaction>> t_contacts;
   t_contacts m_contacts;
 };
