@@ -21,16 +21,11 @@
 #ifndef GlobalFrictionContact_H
 #define GlobalFrictionContact_H
 
+#include "Friction_cst.h"  // contains only enum. Ok.
 #include "LinearOSNS.hpp"
-
-namespace siconos::numerics {
-
-#include <Friction_cst.h>  // contains only enum. Ok.
 
 struct GlobalFrictionContactProblem;
 struct SolverOptions;
-
-}  // namespace siconos::numerics
 
 namespace siconos::nonsmooth_formulations {
 
@@ -61,8 +56,8 @@ namespace siconos::nonsmooth_formulations {
    right Numerics driver will be called according to this value.
 
    \b Construction:
-   - Constructor from data (inputs = Simulations*, id, shared_ptr<NonSmoothSolver>) - The solver is
-   optional. Main functions:
+   - Constructor from data (inputs = Simulations*, id, shared_ptr<NonSmoothSolver>) - The
+   solver is optional. Main functions:
 
    \b Main functions:
    - formalization of the problem: computes M,q using the set of "active" Interactions from the
@@ -87,8 +82,8 @@ class GlobalFrictionContact : public LinearOSNS {
 
   /** Pointer to function of the type used for drivers for GlobalFrictionContact problems in
    * Numerics */
-  typedef int (*GFC3D_Driver)(siconos::numerics::GlobalFrictionContactProblem*, double*,
-                              double*, double*, siconos::numerics::SolverOptions*);
+  typedef int (*GFC3D_Driver)(GlobalFrictionContactProblem*, double*, double*, double*,
+                              SolverOptions*);
 
  protected:
   ACCEPT_SERIALIZATION(GlobalFrictionContact);
@@ -119,14 +114,13 @@ class GlobalFrictionContact : public LinearOSNS {
    *  \param numericsSolverId id of the solver to be used, optional,
    *  default : SICONOS_GLOBAL_FRICTION_3D_NSGS
    */
-  GlobalFrictionContact(
-      int dimPb, int numericsSolverId = siconos::numerics::SICONOS_GLOBAL_FRICTION_3D_NSGS);
+  GlobalFrictionContact(int dimPb, int numericsSolverId = SICONOS_GLOBAL_FRICTION_3D_NSGS);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    */
-  GlobalFrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options);
+  GlobalFrictionContact(int dimPb, std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
@@ -148,8 +142,7 @@ class GlobalFrictionContact : public LinearOSNS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> globalVelocities() const
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> globalVelocities() const {
     return _globalVelocities;
   }
 
@@ -157,8 +150,7 @@ class GlobalFrictionContact : public LinearOSNS {
    *
    *  \param newPtr the new vector
    */
-  inline void setGlobalVelocities(std::shared_ptr<siconos::algebra::SiconosVector> newPtr)
-  {
+  inline void setGlobalVelocities(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _globalVelocities = newPtr;
   }
 
@@ -187,8 +179,7 @@ class GlobalFrictionContact : public LinearOSNS {
 
   /** \return the friction contact problem from Numerics
    */
-  std::shared_ptr<siconos::numerics::GlobalFrictionContactProblem>
-  globalFrictionContactProblem();
+  std::shared_ptr<GlobalFrictionContactProblem> globalFrictionContactProblem();
 
   // /** \return the friction contact problem from Numerics (raw ptr, do not free)
   //  */
@@ -199,8 +190,7 @@ class GlobalFrictionContact : public LinearOSNS {
    *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(
-      std::shared_ptr<siconos::numerics::GlobalFrictionContactProblem> problem = nullptr);
+  int solve(std::shared_ptr<GlobalFrictionContactProblem> problem = nullptr);
 
   /** Construction of the problem
    *

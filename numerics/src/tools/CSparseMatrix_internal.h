@@ -35,16 +35,13 @@
  */
 
 #include "SiconosConfig.h"
-#ifdef SICONOS_INT64
-#define CS_LONG
-#endif
 
-/* Siconos does not need "complex" part of CXSparse, so avoid
- * compilation C++-related problems with this flag (complex_t vs
- * std::complex). */
-#define NCOMPLEX
+/* /\* Siconos does not need "complex" part of CXSparse, so avoid */
+/*  * compilation C++-related problems with this flag (complex_t vs */
+/*  * std::complex). *\/ */
+/* #define NCOMPLEX */
 
-#include "cs.h"
+// #include <cs.h>
 
 #include "CSparseMatrix.h"
 

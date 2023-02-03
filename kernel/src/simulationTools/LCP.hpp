@@ -23,13 +23,8 @@
 #define LCP_H
 
 #include "LinearOSNS.hpp"
-
-namespace siconos::numerics {
-
-#include "lcp_cst.h" // contains only enum. Ok.
-  
+#include "lcp_cst.h"  // contains only enum. Ok.
 struct LinearComplementarityProblem;
-}
 
 namespace siconos::nonsmooth_formulations {
 
@@ -62,20 +57,20 @@ class LCP : public LinearOSNS {
   ACCEPT_SERIALIZATION(LCP);
 
   /** Structure (for Numerics component) that describes the problem to solve */
-  std::shared_ptr<siconos::numerics::LinearComplementarityProblem> _numerics_problem{nullptr};
+  std::shared_ptr<LinearComplementarityProblem> _numerics_problem{nullptr};
 
  public:
   /** constructor from numerics solver id
    *
    *  \param numericsSolverId id of numerics solver, default =  SICONOS_LCP_LEMKE
    */
-  LCP(int numericsSolverId = siconos::numerics::SICONOS_LCP_LEMKE);
+  LCP(int numericsSolverId = SICONOS_LCP_LEMKE);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    */
-  LCP(std::shared_ptr<siconos::numerics::SolverOptions> options);
+  LCP(std::shared_ptr<SolverOptions> options);
 
   /** destructor */
   ~LCP() noexcept = default;

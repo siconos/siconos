@@ -109,10 +109,10 @@ class OSNSMatrixProjectOnConstraints : public OSNSMatrix {
   /** Constructor with dimRow and DimColumn of the matrix
    * \param n row size of the rectangle matrix
    * \param m column size of the rectangle matrix
-   * \param stor storage type (siconos::numerics::NM_DENSE, siconos::numerics::NM_SPARSE_BLOCK)
+   * \param stor storage type (NM_DENSE, NM_SPARSE_BLOCK)
    */
   OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m,
-                                 siconos::numerics::NM_types stor);
+                                 NM_types stor);
 
   /** compute the size of the vector to project for a given Interaction.
    * \param inter the corresponding interaction

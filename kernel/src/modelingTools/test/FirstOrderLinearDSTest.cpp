@@ -16,12 +16,13 @@
  * limitations under the License.
  */
 #include "FirstOrderLinearDSTest.hpp"
+
+#include <limits>
+
+#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosMatrixOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
-
-#include "SiconosAlgebraProd.hpp"
-#include "SiconosMatrixFriends.hpp"
-#include <limits>
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -29,8 +30,7 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(FirstOrderLinearDSTest);
 
-void FirstOrderLinearDSTest::setUp()
-{
+void FirstOrderLinearDSTest::setUp() {
   x0 = std::make_shared<siconos::algebra::SiconosVector>(3);
   (*x0)(0) = 1;
   (*x0)(1) = 2;
@@ -46,13 +46,13 @@ void FirstOrderLinearDSTest::setUp()
 void FirstOrderLinearDSTest::tearDown() {}
 
 // constructor from initial state only
-void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0()
-{
+void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0() {
   std::cout << "--> Test: constructor 1." << std::endl;
   auto ds = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0);
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testBuildFirstOrderLinearDS0 : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
+  //     "testBuildFirstOrderLinearDS0 : ", Type::value(*ds) == Type::FirstOrderLinearDS,
+  //     true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->M() == nullptr, true);
@@ -84,14 +84,14 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0()
 }
 
 // constructor from initial state and plugins
-void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
-{
+void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
   std::cout << "--> Test: constructor 1." << std::endl;
-  auto ds =
-      std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0, "TestPlugin:computeA", "TestPlugin:computeb");
+  auto ds = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0, "TestPlugin:computeA",
+                                                                    "TestPlugin:computeb");
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testBuildFirstOrderLinearDS1 : ", Type::value(*ds) == Type::FirstOrderLinearDS, true);
+  //     "testBuildFirstOrderLinearDS1 : ", Type::value(*ds) == Type::FirstOrderLinearDS,
+  //     true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->M() == nullptr, true);
@@ -139,8 +139,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
 }
 
 // setAPtr
-void FirstOrderLinearDSTest::testSetAPtr()
-{
+void FirstOrderLinearDSTest::testSetAPtr() {
   std::cout << "--> Test: setAPtr." << std::endl;
   auto ds1 = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0);
   ds1->setAPtr(A0);
@@ -149,8 +148,7 @@ void FirstOrderLinearDSTest::testSetAPtr()
 }
 
 // setBPtr
-void FirstOrderLinearDSTest::testSetBPtr()
-{
+void FirstOrderLinearDSTest::testSetBPtr() {
   std::cout << "--> Test: setBPtr." << std::endl;
   auto ds1 = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0);
   ds1->setbPtr(b0);

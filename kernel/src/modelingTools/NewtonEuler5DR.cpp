@@ -21,8 +21,8 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "RotationQuaternion.hpp"  // siconos::geometry::computeRotationMatrix
-#include "SiconosAlgebraProd.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrixOp.hpp"  // for mat prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "op3x3.h"  // numerics: orthobasefromvector
@@ -36,8 +36,7 @@ See devNotes.pdf for details. A detailed documentation is available in DevNotes.
 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case RFC3D: using the local frame local
 velocities'
 */
-void siconos::modeling::NewtonEuler5DR::initialize(Interaction& inter)
-{
+void siconos::modeling::NewtonEuler5DR::initialize(Interaction& inter) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler5DR::siconos::modeling::NewtonEuler5DR::initialize("
       "Interaction& inter)\n");
@@ -54,8 +53,7 @@ void siconos::modeling::NewtonEuler5DR::initialize(Interaction& inter)
       "Interaction& inter)\n");
 }
 void siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(
-    std::shared_ptr<siconos::algebra::SiconosVector> q1)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> q1) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(std::shared_ptr<"
       "siconos::algebra::SiconosVector> q1)\n");
@@ -186,8 +184,7 @@ void siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(
 
 void siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(
     std::shared_ptr<siconos::algebra::SiconosVector> q1,
-    std::shared_ptr<siconos::algebra::SiconosVector> q2)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> q2) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(std::shared_ptr<"
       "siconos::algebra::SiconosVector> q1, std::shared_ptr<siconos::algebra::SiconosVector> "
@@ -304,15 +301,13 @@ void siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(
 }
 
 void siconos::modeling::NewtonEuler5DR::computeJachqT(
-    Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0)
-{
+    Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler5DR::computeJachqT(Interaction& inter,  "
       "std::shared_ptr<siconos::algebra::BlockVector> q0)\n");
   if (q0->numberOfBlocks() > 1) {
     RFC3DcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
-  }
-  else {
+  } else {
     RFC3DcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
   DEBUG_END(

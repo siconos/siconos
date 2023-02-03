@@ -24,11 +24,10 @@
 #include <boost/numeric/ublas/triangular.hpp>
 
 #include "SiconosException.hpp"
-#include "SiconosMatrixFriends.hpp"
+#include "SiconosMatrixOp.hpp"  // for matrix op. declarations
 #include "SimpleMatrix.hpp"
 
-void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, SiconosMatrix &C)
-{
+void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, SiconosMatrix &C) {
   // To compute C = A + B in an "optimized" way (in comparison with operator +)
 
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
@@ -50,12 +49,10 @@ void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
   if (&A == &C)  // A and C have common memory
   {
     C += B;
-  }
-  else if (&B == &C)  // B and C have common memory
+  } else if (&B == &C)  // B and C have common memory
   {
     C += A;
-  }
-  else  // No common memory between C and A or B.
+  } else  // No common memory between C and A or B.
   {
     if (numA == UblasType::ZERO)  // A = 0
       C = B;
@@ -69,14 +66,12 @@ void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
         {
           C = A;
           C += B;
-        }
-        else  // A Block
+        } else  // A Block
         {
           C = B;
           C += A;
         }
-      }
-      else  // if C is a SimpleMatrix
+      } else  // if C is a SimpleMatrix
       {
         if (numA == numB &&
             numA != UblasType::BLOCK)  // A and B are of the same type and NOT block
@@ -92,8 +87,7 @@ void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
               noalias(*C.sparse()) = *A.sparse() + *B.sparse();
             else  // if(numA==UblasType::BANDED)
               noalias(*C.banded()) = *A.banded() + *B.banded();
-          }
-          else  // C and A of different types.
+          } else  // C and A of different types.
           {
             if (numC != UblasType::DENSE)
               THROW_EXCEPTION(
@@ -112,9 +106,8 @@ void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
               noalias(*C.dense()) = *A.banded() + *B.banded();
           }
           C.resetFactorizationFlags();
-        }
-        else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
-                 numA != numB)  // A and B of different types and none is block
+        } else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
+                   numA != numB)  // A and B of different types and none is block
         {
           if (numC != UblasType::DENSE)
             THROW_EXCEPTION(
@@ -243,15 +236,13 @@ void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
           else
             THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
           C.resetFactorizationFlags();
-        }
-        else  // A and/or B is Block
+        } else  // A and/or B is Block
         {
           if (numA != UblasType::BLOCK)  // A Simple, whatever is B
           {
             C = A;
             C += B;
-          }
-          else  // A Block
+          } else  // A Block
           {
             C = B;
             C += A;
@@ -262,8 +253,7 @@ void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
   }
 }
 
-void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, SiconosMatrix &C)
-{
+void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, SiconosMatrix &C) {
   // To compute C = A - B in an "optimized" way (in comparison with operator +)
 
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
@@ -285,23 +275,21 @@ void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
   if (&A == &C)  // A and C have common memory
   {
     C -= B;
-  }
-  else if (&B == &C)  // B and C have common memory
+  } else if (&B == &C)  // B and C have common memory
   {
     if (numB == UblasType::BLOCK || numA == UblasType::BLOCK)  // if A or B(C) is Block
     {
       C *= -1.0;
       C += A;
-    }
-    else {
+    } else {
       if (numC == UblasType::BLOCK)  // if C is Block
       {
         C = A;
         C -= B;
-      }
-      else  // if C is a SimpleMatrix
+      } else  // if C is a SimpleMatrix
       {
-        if (numA == numB && numA != UblasType::BLOCK)  // A and B are of the same type and NOT block
+        if (numA == numB &&
+            numA != UblasType::BLOCK)  // A and B are of the same type and NOT block
         {
           if (numA == UblasType::DENSE)
             *C.dense() = *A.dense() - *B.dense();
@@ -313,9 +301,8 @@ void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
             *C.sparse() = *A.sparse() - *B.sparse();
           else  // if(numA==UblasType::BANDED)
             *C.banded() = *A.banded() - *B.banded();
-        }
-        else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
-                 numA != numB)  // A and B of different types and none is block
+        } else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
+                   numA != numB)  // A and B of different types and none is block
         {
           if (numC != UblasType::DENSE)  // => numB == UblasType::DENSE
             THROW_EXCEPTION(
@@ -336,8 +323,7 @@ void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
             *C.dense() = *A.zero_mat() - *B.dense();
           else  // if(numA==UblasType::IDENTITY)
             *C.dense() = *A.identity() - *B.dense();
-        }
-        else  // A and/or B is Block
+        } else  // A and/or B is Block
         {
           C = A;
           C -= B;
@@ -345,8 +331,7 @@ void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
         C.resetFactorizationFlags();
       }
     }
-  }
-  else  // No common memory between C and A or B.
+  } else  // No common memory between C and A or B.
   {
     if (numB == UblasType::ZERO)  // B = 0
       C = A;
@@ -356,10 +341,10 @@ void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
       {
         C = A;
         C -= B;
-      }
-      else  // if C is a SimpleMatrix
+      } else  // if C is a SimpleMatrix
       {
-        if (numA == numB && numA != UblasType::BLOCK)  // A and B are of the same type and NOT block
+        if (numA == numB &&
+            numA != UblasType::BLOCK)  // A and B are of the same type and NOT block
         {
           if (numC == numA) {
             if (numA == UblasType::DENSE)
@@ -372,8 +357,7 @@ void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
               noalias(*C.sparse()) = *A.sparse() - *B.sparse();
             else  // if(numA==UblasType::BANDED)
               noalias(*C.banded()) = *A.banded() - *B.banded();
-          }
-          else  // C and A of different types.
+          } else  // C and A of different types.
           {
             if (numC != UblasType::DENSE)
               THROW_EXCEPTION(
@@ -392,9 +376,8 @@ void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
               noalias(*C.dense()) = *A.banded() - *B.banded();
           }
           C.resetFactorizationFlags();
-        }
-        else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
-                 numA != numB)  // A and B of different types and none is block
+        } else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
+                   numA != numB)  // A and B of different types and none is block
         {
           if (numC != UblasType::DENSE)
             THROW_EXCEPTION(
@@ -543,8 +526,7 @@ void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, Sicon
           else
             THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
           C.resetFactorizationFlags();
-        }
-        else  // A and/or B is Block
+        } else  // A and/or B is Block
         {
           C = A;
           C -= B;

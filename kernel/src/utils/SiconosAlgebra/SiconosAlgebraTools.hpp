@@ -22,64 +22,41 @@
 #ifndef SICONOSALGEBRATOOLS_H
 #define SICONOSALGEBRATOOLS_H
 
-#include <boost/numeric/ublas/fwd.hpp>
-#include <complex>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/lu.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #include <random>
 namespace siconos::algebra {
 
-class BlockVector;
-class SiconosVector;
-class SiconosMatrix;
+/** Matrix inversion routine.
 
-/** test if two BlockVectors have the same number of blocks with
-    blocks of the same size when at the same position
-    \param v1 first vector to compare with
-    \param v2 second vecstor to compare with
+  Uses lu_factorize and lu_substitute in uBLAS to invert a matrix
+  Reference: Numerical Recipies in C, 2nd ed., by Press, Teukolsky, Vetterling &
+  Flannery.
+  \param input source matrix
+  \param output inverted matrix.
+
 */
-bool isComparableTo(const BlockVector &v1, const BlockVector &v2);
+template <class T, class U, class V>
+bool InvertMatrix(const boost::numeric::ublas::matrix<T, U, V> &input,
+                  boost::numeric::ublas::matrix<T, U, V> &inverse) {
+  // create a working copy of the input
+  boost::numeric::ublas::matrix<T, U, V> A(input);
+  // create a permutation matrix for the LU-factorization
+  boost::numeric::ublas::permutation_matrix<std::size_t> pm(A.size1());
 
-/** test if two matrices have the same number of blocks with
-    blocks of the same dimension when at the same position
-    \param v1 first matrix to compare with
-    \param v2 second matrix to compare with
-*/
-bool isComparableTo(const SiconosMatrix &m1, const SiconosMatrix &m2);
+  // perform LU-factorization
+  int res = boost::numeric::ublas::lu_factorize(A, pm);
+  if (res != 0) return false;
 
-/** Compute the matrix exponential Exp = exp(A) for general matrices,
-    using scaling and Padé approximation. See expm.hpp.
-    \param A : input matrix
-    \param Exp : result = exp(A)
-    \param computeAndAdd : if true, result = result + exp(A)
-**/
-void expm(SiconosMatrix &A, SiconosMatrix &Exp, bool computeAndAdd = false);
+  // create identity matrix of "inverse"
+  inverse.assign(boost::numeric::ublas::identity_matrix<T>(A.size1()));
 
-/** Compute eigenvalues and eigenvectors of a real symmetric matrix A
- *  See examples of use in test/EigenProblemsTest.cpp.
- *  \param[in,out] eigenval : eigenvalues of the matrix
- *  \param[in,out] eigenvec : input matrix A, replace with eigenvectors (columns) in output.
- *  \param[in] withVect : true if eigenvectors are to be computed (default = true).
- *  \return int : return value from lapack routine. 0 if successful.
- */
-int syev(SiconosVector &eigenval, SiconosMatrix &eigenvec, bool withVect = true);
+  // backsubstitute to get the inverse
+  boost::numeric::ublas::lu_substitute(A, pm, inverse);
 
-// /** Compute eigenvalues and eigenvectors of a nonsymmetrix complex matrix
-//  *  See examples of use in test/EigenProblemsTest.cpp.
-//  *  \param[in,out] input_mat SiconosMatrix : input matrix.
-//  *  \param[in,out] eigenval complex_vector : eigenvalues of the matrix
-//  *  \param[in,out] left_eigenvec complex_matrix : matrix of the left eigenvectors
-//  *  \param[in, out] right_eigenvec  complex_matrix : matrix of the right eigenvectors
-//  *  \param[in] withLeft : true if left eigenvectors are to be computed (default = false).
-//  *  \param[in] withRight : true if right  eigenvectors are to be computed (default = true).
-//  *  \return int : return value from lapack routine. 0 if succesful.
-//  */
-int geev(
-    SiconosMatrix &input_mat, boost::numeric::ublas::vector<std::complex<double>> &eigenval,
-    boost::numeric::ublas::matrix<std::complex<double>, boost::numeric::ublas::column_major>
-        &left_eigenvec,
-    boost::numeric::ublas::matrix<std::complex<double>, boost::numeric::ublas::column_major>
-        &right_eigenvec,
-    bool withLeft = false, bool withRight = true);
-
+  return true;
+}
 namespace internal {
 
 template <typename T>
@@ -99,8 +76,7 @@ struct RndIntGen {
 /** Random init of a boost ublas matrix
  */
 template <typename M, typename T = typename M::value_type>
-void randomize(M &m, T min = 0., T max = 100.)
-{
+void randomize(M &m, T min = 0., T max = 100.) {
   // using value_type = typename M::value_type;
   for (auto it = m.begin1(); it != m.end1(); ++it)
     generate(it.begin(), it.end(), RndIntGen<T>(min, max));

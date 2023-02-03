@@ -22,15 +22,10 @@
 #define GlobalRollingFrictionContact_H
 
 #include "GlobalFrictionContact.hpp"
-
-namespace siconos::numerics {
-
-#include <Friction_cst.h>  // contains only enum. Ok.
+#include "Friction_cst.h"  // contains only enum. Ok.
 
 struct GlobalRollingFrictionContactProblem;
 struct SolverOptions;
-
-}  // namespace siconos::numerics
 
 namespace siconos::nonsmooth_formulations {
 
@@ -86,8 +81,8 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
 
   /** Pointer to function of the type used for drivers for GlobalRollingFrictionContact
    * problems in Numerics */
-  typedef int (*GRFC3D_Driver)(siconos::numerics::GlobalRollingFrictionContactProblem*,
-                               double*, double*, double*, siconos::numerics::SolverOptions*);
+  typedef int (*GRFC3D_Driver)(GlobalRollingFrictionContactProblem*,
+                               double*, double*, double*, SolverOptions*);
 
  protected:
   ACCEPT_SERIALIZATION(GlobalRollingFrictionContact);
@@ -111,14 +106,14 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
    */
   GlobalRollingFrictionContact(
       int dimPb,
-      int numericsSolverId = siconos::numerics::SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR);
+      int numericsSolverId = SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    */
   GlobalRollingFrictionContact(int dimPb,
-                               std::shared_ptr<siconos::numerics::SolverOptions> options);
+                               std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
@@ -160,7 +155,7 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
 
   /** \return the friction contact problem from Numerics
    */
-  std::shared_ptr<siconos::numerics::GlobalRollingFrictionContactProblem>
+  std::shared_ptr<GlobalRollingFrictionContactProblem>
   globalRollingFrictionContactProblem();
 
   // /** \return the friction contact problem from Numerics (raw ptr, do not free)
@@ -172,7 +167,7 @@ class GlobalRollingFrictionContact : public GlobalFrictionContact {
    *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(std::shared_ptr<siconos::numerics::GlobalRollingFrictionContactProblem> problem =
+  int solve(std::shared_ptr<GlobalRollingFrictionContactProblem> problem =
                 nullptr);
 
   /** Construction of the problem

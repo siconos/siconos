@@ -17,13 +17,13 @@
  */
 #include "FirstOrderLinearTIR.hpp"
 
-#include "SiconosException.hpp"
+#include <iostream>
+#include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
+#include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
-#include "BlockVector.hpp"
-#include <iostream>
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -33,8 +33,7 @@
 siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : FirstOrderR(RelationSubType::LinearTIR)
-{
+    : FirstOrderR(RelationSubType::LinearTIR) {
   _C = C;
   _B = B;
 }
@@ -46,8 +45,7 @@ siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e,
     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : FirstOrderR(RelationSubType::LinearTIR)
-{
+    : FirstOrderR(RelationSubType::LinearTIR) {
   _C = C;
   _B = B;
   _D = D;
@@ -55,8 +53,7 @@ siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
   _e = e;
 }
 
-void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter)
-{
+void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter) {
   DEBUG_PRINT("siconos::modeling::FirstOrderLinearTIR::initialize(Interaction & inter)\n");
 
   FirstOrderR::initialize(inter);  // ?
@@ -73,8 +70,7 @@ void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter)
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction &inter)
-{
+void siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction &inter) {
   DEBUG_PRINT("siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
   DEBUG_PRINTF("_C->size(0) = %i,\t inter.dimension() = %i\n ", _C->size(0),
                inter.dimension());
@@ -114,8 +110,7 @@ void siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction &inter)
 
 void siconos::modeling::FirstOrderLinearTIR::computeh(
     const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
-    siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y)
-{
+    siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y) {
   // if (_C) C must be allocated. Checksize is there to ensure it.
   siconos::algebra::prod(*_C, x, y, true);
   // else
@@ -129,8 +124,7 @@ void siconos::modeling::FirstOrderLinearTIR::computeh(
 }
 
 void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interaction &inter,
-                                                           unsigned int level)
-{
+                                                           unsigned int level) {
   // We get y and lambda of the interaction (pointers)
   siconos::algebra::SiconosVector &y = *inter.y(level);
   siconos::algebra::SiconosVector &lambda = *inter.lambda(level);
@@ -139,14 +133,12 @@ void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interact
 }
 
 void siconos::modeling::FirstOrderLinearTIR::computeg(
-    const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &r)
-{
+    const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &r) {
   siconos::algebra::prod(*_B, lambda, r, false);
 }
 
 void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction &inter,
-                                                          unsigned int level)
-{
+                                                          unsigned int level) {
   DEBUG_BEGIN(
       "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")
@@ -159,8 +151,7 @@ void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interacti
       "inter, unsigned int level)\n")
 }
 
-void siconos::modeling::FirstOrderLinearTIR::display() const
-{
+void siconos::modeling::FirstOrderLinearTIR::display() const {
   std::cout << " ===== Linear Time Invariant relation display =====\n";
   std::cout << "| C\n";
   if (_C)

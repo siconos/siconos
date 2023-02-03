@@ -26,6 +26,8 @@
 
 namespace siconos::algebra {
 
+class SiconosVector;
+
 /** Iterator for SiconosVector covering both possible types. */
 template <typename V, typename T, typename TRef>
 struct SiconosVectorIteratorTypeTpl {
@@ -43,52 +45,17 @@ struct SiconosVectorIteratorTypeTpl {
   bool operator!=(const SiconosVectorIteratorTypeTpl& it) { return v != it.v || p != it.p; }
   bool operator==(const SiconosVectorIteratorTypeTpl& it) { return v == it.v && p == it.p; }
 
-  SiconosVectorIteratorTypeTpl& operator++()
-  {
+  SiconosVectorIteratorTypeTpl& operator++() {
     if (p < v->size()) p++;
     return *this;
   }
-  SiconosVectorIteratorTypeTpl operator++(int)
-  {
+  SiconosVectorIteratorTypeTpl operator++(int) {
     SiconosVectorIteratorTypeTpl tmp(*this);
     if (p < v->size()) p++;
     return tmp;
   }
 
   TRef operator*() { return (*v)(p); }
-};
-
-/* Note: Derived classes here instead of typedefs only because they
- *       are easier to deal with in SWIG */
-
-/** Specialization for non-const SiconosVector */
-using SiconosVectorIteratorType = SiconosVectorIteratorTypeTpl<SiconosVector, double, double&>;
-
-struct SiconosVectorIterator : public SiconosVectorIteratorType {
-  // SiconosVectorIterator() : SiconosVectorIteratorType() = default;
-
-  SiconosVectorIterator(SiconosVectorIteratorType& it) : SiconosVectorIteratorType(*it.v, it.p)
-  {
-  }
-
-  SiconosVectorIterator(SiconosVector& _v, size_t _p) : SiconosVectorIteratorType(_v, _p) {}
-};
-
-/** Specialization for const SiconosVector */
-using SiconosVectorConstIteratorType =
-    SiconosVectorIteratorTypeTpl<const SiconosVector, const double, double>;
-struct SiconosVectorConstIterator : public SiconosVectorConstIteratorType {
-  // SiconosVectorConstIterator() : SiconosVectorConstIteratorType() = default;
-
-  SiconosVectorConstIterator(SiconosVectorConstIteratorType& it)
-      : SiconosVectorConstIteratorType(*it.v, it.p)
-  {
-  }
-
-  SiconosVectorConstIterator(const SiconosVector& _v, size_t _p)
-      : SiconosVectorConstIteratorType(_v, _p)
-  {
-  }
 };
 
 }  // namespace siconos::algebra

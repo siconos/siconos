@@ -74,30 +74,22 @@ class NonSmoothDynamicalSystem {
    private:
     ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
     Change() = default;
+    // Rule of five
+    Change(const Change&) = delete;
+    Change& operator=(Change&&) = delete;
+    Change& operator=(const Change&) = delete;
 
    public:
     ChangeType typeOfChange;
     std::shared_ptr<DynamicalSystem> ds{nullptr};
     std::shared_ptr<Interaction> i{nullptr};
 
+    Change(Change&&) = default; // Required for push_back ...
     Change(ChangeType t, std::shared_ptr<DynamicalSystem> dsnew)
         : typeOfChange(t), ds(dsnew){};
     Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew){};
     Change(ChangeType t) : typeOfChange(t){};
     void display() const;
-  };
-
-  using ChangeLog = std::list<Change>;
-
-  class ChangeLogIter {
-    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
-
-   public:
-    ChangeLogIter() = default;
-    ChangeLogIter(const ChangeLog& log, const ChangeLog::const_iterator& i)
-        : _log(&log), it(i){};
-    const ChangeLog* _log;
-    ChangeLog::const_iterator it;
   };
 
  private:
@@ -127,7 +119,7 @@ class NonSmoothDynamicalSystem {
   bool _BVP = false;
 
   /** log list of the modifications of the nsds */
-  std::list<Change> _changeLog;
+  std::list<Change> _changeLog = {};
 
   /** the topology of the system */
   std::shared_ptr<siconos::simulation::Topology> _topology{nullptr};
@@ -256,36 +248,14 @@ class NonSmoothDynamicalSystem {
    *
    *  \return a reference to the changelog.
    */
-  inline const ChangeLog& changeLog() { return _changeLog; };
-
-  /** get an iterator to the last item in the changelog.
-   *
-   *  \return an iterator pointing at the last item in the changelog.
-   */
-  inline ChangeLogIter changeLogPosition()
-  {
-    ChangeLogIter it(_changeLog, _changeLog.end());
-    // return iterator to last item, i.e. one less than end
-    --it.it;
-    return it;
-  };
-
-  /** get an iterator to the beginning of the changelog.
-   *
-   *  \return an iterator pointing at the beginning of the changelog.
-   */
-  inline ChangeLogIter changeLogBegin()
-  {
-    ChangeLogIter it(_changeLog, _changeLog.begin());
-    return it;
-  };
+  inline const std::list<Change>& changeLog() { return _changeLog; };
 
   /** clear the changelog up to a given position.
    *
    *  \param it  This iterator must point to somewhere in the changelog
    *             for this NSDS.
    */
-  void clearChangeLogTo(const ChangeLogIter& it);
+  void clearChangeLogTo(const std::list<Change>::const_iterator& it);
 
   // === DynamicalSystems management ===
 

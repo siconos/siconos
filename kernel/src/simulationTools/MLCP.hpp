@@ -22,16 +22,12 @@
 #ifndef MLCP_H
 #define MLCP_H
 
-#include "LinearOSNS.hpp"
-
-namespace siconos::numerics {
-
 #include <mlcp_cst.h>  // contains only enum. Ok.
+
+#include "LinearOSNS.hpp"
 
 struct MixedLinearComplementarityProblem;
 struct SolverOptions;
-
-}  // namespace siconos::numerics
 
 namespace siconos::nonsmooth_formulations {
 
@@ -79,8 +75,7 @@ class MLCP : public LinearOSNS {
   int _curBlock = 0;
 
   /** The MLCP instance */
-  std::shared_ptr<siconos::numerics::MixedLinearComplementarityProblem> _numerics_problem{
-      nullptr};
+  std::shared_ptr<MixedLinearComplementarityProblem> _numerics_problem{nullptr};
 
  public:
   /** constructor from data
@@ -88,13 +83,13 @@ class MLCP : public LinearOSNS {
    *  \param numericsSolverId id of Numerics solver
    *  (optional, default = SICONOS_MLCP_ENUM the enumerative solver)
    */
-  MLCP(int numericsSolverId = siconos::numerics::SICONOS_MLCP_ENUM);
+  MLCP(int numericsSolverId = SICONOS_MLCP_ENUM);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    */
-  MLCP(std::shared_ptr<siconos::numerics::SolverOptions> options);
+  MLCP(std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
@@ -124,11 +119,9 @@ class MLCP : public LinearOSNS {
   // --- numerics MLCP ---
   /** get the pointer on the Numerics MLCP,
    *
-   *  \return std::shared_ptr<siconos::numerics::MixedLinearComplementarityProblem
+   *  \return std::shared_ptr<MixedLinearComplementarityProblem
    */
-  inline std::shared_ptr<siconos::numerics::MixedLinearComplementarityProblem>
-  getNumericsMLCP()
-  {
+  inline std::shared_ptr<MixedLinearComplementarityProblem> getNumericsMLCP() {
     return _numerics_problem;
   }
 

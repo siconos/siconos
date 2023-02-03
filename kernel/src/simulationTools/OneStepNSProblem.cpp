@@ -453,16 +453,16 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
 void siconos::nonsmooth_formulations::OneStepNSProblem::setSolverId(int solverId)
 {
   // And create a new one, with default parameters values.
-  _numerics_solver_options.reset(siconos::numerics::solver_options_create(solverId),
-                                 siconos::numerics::solver_options_delete);
+  _numerics_solver_options.reset(solver_options_create(solverId),
+                                 solver_options_delete);
 }
 
 void siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseMode(bool vMode)
 {
-  siconos::numerics::numerics_set_verbose(vMode);
+  numerics_set_verbose(vMode);
 }
 
 void siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseLevel(int level)
 {
-  siconos::numerics::numerics_set_verbose(level);
+  numerics_set_verbose(level);
 }

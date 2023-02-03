@@ -144,9 +144,10 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   bool _isInitialized{false};
 
   /** current NSDS changelog position */
-  siconos::modeling::NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition;
+  std::list<siconos::modeling::NonSmoothDynamicalSystem::Change>::const_iterator _nsdsChangeLogPosition;
 
-  /** map of not-yet-initialized DS variables for each OSI */
+  /** map of not-yet-initialized DS variables for each OS. This an internal and temporary map
+      that must be empty after initialize. */
   std::map<std::shared_ptr<siconos::integrators::OneStepIntegrator>,
            std::list<std::shared_ptr<siconos::modeling::DynamicalSystem>>>
       _OSIDSmap;
@@ -330,7 +331,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   void setNonSmoothDynamicalSystemPtr(
       std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> newPtr) {
-    _nsdsChangeLogPosition = _nsds->changeLogBegin();
+    _nsdsChangeLogPosition = _nsds->changeLog().begin();
     _nsds = newPtr;
   }
 
@@ -554,7 +555,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   void unlink(std::shared_ptr<siconos::modeling::Interaction> inter);
 
-  /** Call the interaction manager one if is registered, otherwise do nothing. */
+  /** Call the interaction manager if one is registered, otherwise do nothing. */
   void updateInteractions();
 
   /*TS set the ds->q memory, the world (CAD model for example) must be updated.

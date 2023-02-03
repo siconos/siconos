@@ -21,8 +21,8 @@
   detection.
 */
 
-#ifndef SICOBULLETCOLLISION_H
-#define SICOBULLETCOLLISION_H
+#ifndef SICOBULLETCOLLISIONIMPL_H
+#define SICOBULLETCOLLISIONIMPL_H
 
 #include <BulletCollision/BroadphaseCollision/btBroadphaseInterface.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>

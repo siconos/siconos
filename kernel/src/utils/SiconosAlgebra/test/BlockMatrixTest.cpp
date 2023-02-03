@@ -19,13 +19,13 @@
 #include "BlockMatrixTest.hpp"
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <string>
 
 #include "SiconosAlgebraTypes.hpp"
 #include "SiconosConfig.h"
+#include "SiconosMatrixOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
-#include "SiconosMatrixFriends.hpp"
-#include <string>
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -33,11 +33,9 @@
 // on place cette classe de test dans le registry
 CPPUNIT_TEST_SUITE_REGISTRATION(BlockMatrixTest);
 
-
 using BlockMatrix = siconos::algebra::BlockMatrix;
 
-void BlockMatrixTest::setUp()
-{
+void BlockMatrixTest::setUp() {
   tol = 1e-12;
 
   B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2, 1);
@@ -209,8 +207,7 @@ void BlockMatrixTest::testConstructor4()  // Constructor from 4 std::shared_ptr<
 //   std::cout << "--> resize test ended with success." <<std::endl;
 // }
 
-void BlockMatrixTest::testNormInf()
-{
+void BlockMatrixTest::testNormInf() {
   std::cout << "--> Test: normInf." << std::endl;
   auto test = std::make_shared<BlockMatrix>(m, 2, 3);
   test->zero();
@@ -221,8 +218,7 @@ void BlockMatrixTest::testNormInf()
   std::cout << "--> normInf test ended with success." << std::endl;
 }
 
-void BlockMatrixTest::testZero()
-{
+void BlockMatrixTest::testZero() {
   std::cout << "--> Test: zero." << std::endl;
   auto A = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
   A->eye();
@@ -261,8 +257,7 @@ void BlockMatrixTest::testZero()
   std::cout << "--> zero test ended with success." << std::endl;
 }
 
-void BlockMatrixTest::testEye()
-{
+void BlockMatrixTest::testEye() {
   std::cout << "--> Test: eye." << std::endl;
   auto A = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
   auto H = std::make_shared<siconos::algebra::SimpleMatrix>(2, 4);
@@ -310,8 +305,7 @@ void BlockMatrixTest::testEye()
 }
 // Add tests with getDense ...
 
-void BlockMatrixTest::testGetSetRowCol()
-{
+void BlockMatrixTest::testGetSetRowCol() {
   std::cout << "--> Test: get, set Row and Col." << std::endl;
   auto tmp = std::make_shared<siconos::algebra::SiconosVector>(6);
   auto tmp1 = std::make_shared<siconos::algebra::SiconosVector>(6);
@@ -348,8 +342,7 @@ void BlockMatrixTest::testGetSetRowCol()
   std::cout << "--> get, set Row and Col tests ended with success." << std::endl;
 }
 
-void BlockMatrixTest::testAssignment()
-{
+void BlockMatrixTest::testAssignment() {
   std::cout << "--> Test: assignment." << std::endl;
   auto Btmp = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
   auto Ctmp = std::make_shared<siconos::algebra::SimpleMatrix>(2, 5);
@@ -379,8 +372,7 @@ void BlockMatrixTest::testAssignment()
   std::cout << "-->  test assignment ended with success." << std::endl;
 }
 
-void BlockMatrixTest::testOperators1()
-{
+void BlockMatrixTest::testOperators1() {
   std::cout << "--> Test: operators1." << std::endl;
   double tol = 1e-10;
   auto Ab = std::make_shared<BlockMatrix>(m, 2, 3);
@@ -448,8 +440,7 @@ void BlockMatrixTest::testOperators1()
   std::cout << "-->  test operators1 ended with success." << std::endl;
 }
 
-void BlockMatrixTest::End()
-{
+void BlockMatrixTest::End() {
   std::cout << "======================================" << std::endl;
   std::cout << " ===== End of BlockMatrix Tests ===== " << std::endl;
   std::cout << "======================================" << std::endl;

@@ -205,7 +205,7 @@ void siconos::control::CommonSMC::initialize(
   _simulationSMC->associate(_integratorSMC, _DS_SMC);
 
   // OneStepNsProblem
-  _OSNSPB_SMC->numericsSolverOptions()->dparam[siconos::numerics::SICONOS_DPARAM_TOL] = _precision;
+  _OSNSPB_SMC->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = _precision;
   _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
   // Finally we can initialize everything ...
   _simulationSMC->associate(_integratorSMC, _DS_SMC);

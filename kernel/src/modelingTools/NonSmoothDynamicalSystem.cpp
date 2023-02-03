@@ -23,6 +23,7 @@
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "SimulationGraphs.hpp"
+#include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"
 
 // #include <SiconosConfig.h>
@@ -44,7 +45,7 @@ siconos::modeling::NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0,
   // we push a first element in the list to avoid acces to null when
   // we call --_changeLog.end();
   _changeLog.push_back(Change(ChangeType::clearTopology));
-  DEBUG_EXPR((--_changeLog.end())->display());
+  DEBUG_EXPR(std::prev(_changeLog.end())->display());
 
   // see Simulation::initialize() for an explanation of why we
   // implement this changelog
@@ -55,32 +56,29 @@ siconos::modeling::NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem() noexcep
 // changelog
 void siconos::modeling::NonSmoothDynamicalSystem::Change::display() const {
   std::cout << "Changes display   " << this << std::endl;
-  auto changeval = static_cast<std::underlying_type<ChangeType>::type>(typeOfChange);
+  auto changeval = siconos::tools::enum_to_string(typeOfChange);
   if (typeOfChange == ChangeType::addDynamicalSystem) {
-    std::cout << "typeOfChange : " << changeval << " : addDynamicalSystem" << std::endl;
+    std::cout << "typeOfChange : " << changeval << " : addDynamicalSystem\n";
   } else if (typeOfChange == ChangeType::rmDynamicalSystem) {
-    std::cout << "typeOfChange : " << changeval << " : rmDynamicalSystem" << std::endl;
+    std::cout << "typeOfChange : " << changeval << " : rmDynamicalSystem\n";
   } else if (typeOfChange == ChangeType::addInteraction) {
-    std::cout << "typeOfChange : " << changeval << " : addInteraction" << std::endl;
+    std::cout << "typeOfChange : " << changeval << " : addInteraction\n";
   } else if (typeOfChange == ChangeType::rmInteraction) {
-    std::cout << "typeOfChange : " << changeval << " : rmInteraction" << std::endl;
+    std::cout << "typeOfChange : " << changeval << " : rmInteraction\n";
   } else if (typeOfChange == ChangeType::clearTopology) {
-    std::cout << "typeOfChange : " << changeval << " : clearTopology" << std::endl;
+    std::cout << "typeOfChange : " << changeval << " : clearTopology\n";
   }
 }
 
-void siconos::modeling::NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeLogIter& it) {
+void siconos::modeling::NonSmoothDynamicalSystem::clearChangeLogTo(
+    const std::list<Change>::const_iterator& it) {
   /* Given an interator into the changelog list, clear everything that
    * comes before it. User must be careful calling this if he has two
    * simulations, but in the one-simulation case (currently 100% of
    * cases), calling this will prevent changelog from building up
    * forever. Important especially for simulations using an
    * InteractionManager, e.g. mechanics_run.py. */
-  while (_changeLog.begin() != it.it) {
-    _changeLog.pop_front();
-    assert((_changeLog.end() != it.it) && (_changeLog.begin() != _changeLog.end()) &&
-           "NSDS::clearChangeLogTo: iterator not in list!");
-  }
+  _changeLog.erase(_changeLog.begin(), it);
 }
 
 // === DynamicalSystems management ===
@@ -91,7 +89,7 @@ void siconos::modeling::NonSmoothDynamicalSystem::display() const {
   dynamicalSystems()->begin();
   _topology->indexSet0()->display();
   std::cout << "---> last change :\n";
-  (--_changeLog.end())->display();
+  std::prev(_changeLog.end())->display();
   std::cout << "===================================================\n";
 }
 

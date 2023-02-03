@@ -32,17 +32,17 @@
 
 // Constructor from a set of data, use delegated constructor
 siconos::nonsmooth_formulations::MLCP::MLCP(int numericsSolverId)
-    : MLCP(std::shared_ptr<siconos::numerics::SolverOptions>(
-          siconos::numerics::solver_options_create(numericsSolverId),
-          siconos::numerics::solver_options_delete))
+    : MLCP(std::shared_ptr<SolverOptions>(
+          solver_options_create(numericsSolverId),
+          solver_options_delete))
 {
 }
 
 // Constructor from a set of data
-siconos::nonsmooth_formulations::MLCP::MLCP(std::shared_ptr<siconos::numerics::SolverOptions> options)
+siconos::nonsmooth_formulations::MLCP::MLCP(std::shared_ptr<SolverOptions> options)
     : LinearOSNS(options)
 {
-  _numerics_problem = std::make_shared<siconos::numerics::MixedLinearComplementarityProblem>();
+  _numerics_problem = std::make_shared<MixedLinearComplementarityProblem>();
 
   _numerics_problem->blocksRows = (int*)malloc(MLCP_NB_BLOCKS_MAX * sizeof(int));
   _numerics_problem->blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS_MAX * sizeof(int));
@@ -59,7 +59,7 @@ siconos::nonsmooth_formulations::MLCP::~MLCP() noexcept
   _numerics_problem->blocksRows = nullptr;
   if (_numerics_problem->blocksIsComp) free(_numerics_problem->blocksIsComp);
   _numerics_problem->blocksIsComp = nullptr;
-  siconos::numerics::mlcp_driver_reset(&*_numerics_problem, &*_numerics_solver_options);
+  mlcp_driver_reset(&*_numerics_problem, &*_numerics_solver_options);
   _numerics_solver_options.reset();
 }
 
@@ -184,10 +184,10 @@ int siconos::nonsmooth_formulations::MLCP::solve()
 
   // After the first call the mlcp_direct_init must not reset the previous guess
   // But as the problem may change the MLCP update flag is raised
-  _numerics_solver_options->iparam[siconos::numerics::SICONOS_IPARAM_MLCP_UPDATE_REQUIRED] = 1;
+  _numerics_solver_options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED] = 1;
 
   /*If user has not allocted the working memory, do it. */
-  siconos::numerics::mlcp_driver_init(&*_numerics_problem, &*_numerics_solver_options);
+  mlcp_driver_init(&*_numerics_problem, &*_numerics_solver_options);
 
   DEBUG_PRINT("MLCP display");
   // printf("n %d m %d",n,m);
@@ -197,7 +197,7 @@ int siconos::nonsmooth_formulations::MLCP::solve()
   DEBUG_EXPR(display(););
 
   // Call MLCP Driver
-  int info = siconos::numerics::mlcp_driver(&*_numerics_problem, _z->getArray(),
+  int info = mlcp_driver(&*_numerics_problem, _z->getArray(),
                                             _w->getArray(), &*_numerics_solver_options);
 
   return info;

@@ -26,22 +26,22 @@
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "SiconosPointers.hpp"  // For createSPtr
+#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
+#include "SiconosPointers.hpp"        // For createSPtr
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for scal
+#include "SiconosVectorOp.hpp"  // for scal
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"
 #include "TypeName.hpp"  // for siconos::types visitors
+//
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
-{
+double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel() {
   DEBUG_BEGIN(
       "\n "
       "siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()"
@@ -118,8 +118,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       DEBUG_PRINT(
           "work_tdg contains right limit acceleration at t^+_k without contact force :\n");
       DEBUG_EXPR(work_tdg->display());
-    }
-    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       auto& accFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
 
       // get left state from memory
@@ -154,8 +153,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       DEBUG_PRINT(
           "work_tdg contains right limit acceleration at t^+_k without contact force :\n");
       DEBUG_EXPR(work_tdg->display());
-    }
-    else {
+    } else {
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel "
           "- only implemented for "
@@ -214,8 +212,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
           accFree += *(dummy);
 
           DEBUG_EXPR(d->p(2)->display());
-        }
-        else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+        } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
           auto& accFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
 
           std::shared_ptr<siconos::algebra::SiconosVector> dummy =
@@ -228,8 +225,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
           accFree += *(dummy);
 
           DEBUG_EXPR(d->p(2)->display());
-        }
-        else
+        } else
           THROW_EXCEPTION(
               "siconos::integrators::D1MinusLinearOSI::"
               "computeResiduHalfExplicitAccelerationLevel - only implemented for "
@@ -284,8 +280,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
       siconos::algebra::scal(0.5 * h, vold + v, *q, false);
       DEBUG_EXPR(q->display());
-    }
-    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       auto& residuFree =
           *workVectors[siconos::integrators::D1MinusLinearOSI::
                            RESIDU_FREE];  // contains residu without nonsmooth effect
@@ -331,8 +326,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       d->computeT();
       DEBUG_PRINT("new q after normalizing\n");
       DEBUG_EXPR(q.display());
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::"
           "computeResiduHalfExplicitAccelerationLevel - only implemented for "
@@ -373,8 +367,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       DEBUG_PRINT(
           "There is an impact in the step. indexSet3->size() > 0. _isThereImpactInTheTimeStep "
           "= true;\n");
-    }
-    else {
+    } else {
       _isThereImpactInTheTimeStep = false;
       DEBUG_PRINT(
           "There is no  impact in the step. indexSet3->size() = 0. "
@@ -426,8 +419,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
         }
         residuFree -= 0.5 * h * *work_tdg;
         DEBUG_EXPR(residuFree.display());
-      }
-      else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
         auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
         auto v = d->twist();
         auto q = d->q();
@@ -450,15 +442,13 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
         }
         residuFree -= 0.5 * h * *work_tdg;
         DEBUG_EXPR(residuFree.display());
-      }
-      else
+      } else
         THROW_EXCEPTION(
             "siconos::integrators::D1MinusLinearOSI::"
             "computeResiduHalfExplicitAccelerationLevel - only implemented for "
             "Lagrangian or Newton Euler dynamical systems.");
     }
-  }
-  else {
+  } else {
     DEBUG_PRINT(
         "There is no  impact in the step. indexSet3->size() = 0. _isThereImpactInTheTimeStep "
         "= false;\n");
@@ -494,8 +484,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
             "accFree contains left limit acceleration at  t^-_{k+1} without contact force "
             ":\n");
         DEBUG_EXPR(accFree.display());
-      }
-      else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
         auto& accFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
 
         accFree.zero();
@@ -519,8 +508,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
             "accFree contains left limit acceleration at  t^-_{k+1} without contact force "
             ":\n");
         DEBUG_EXPR(accFree.display());
-      }
-      else
+      } else
         THROW_EXCEPTION(
             "siconos::integrators::D1MinusLinearOSI::"
             "computeResiduHalfExplicitAccelerationLevel - only implemented for "
@@ -581,8 +569,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
           residuFree -= 0.5 * h * dummy;
         }
         DEBUG_EXPR(residuFree.display());
-      }
-      else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
         auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
         auto& accFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
         // initialize *it->residuFree
@@ -601,8 +588,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
           residuFree -= 0.5 * h * dummy;
         }
         DEBUG_EXPR(residuFree.display());
-      }
-      else
+      } else
         THROW_EXCEPTION(
             "siconos::integrators::D1MinusLinearOSI::"
             "computeResiduHalfExplicitAccelerationLevel - only implemented for "
@@ -633,8 +619,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
 void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   DEBUG_BEGIN(
       "siconos::integrators::D1MinusLinearOSI::"
       "computeFreeOutputHalfExplicitAccelerationLevel\n");
@@ -665,36 +650,30 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       Xfree = DSlink[siconos::modeling::LagrangianR::q1];
       DEBUG_PRINT("Xfree = DSlink[siconos::modeling::LagrangianR::q1];\n");
-    }
-    else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+    } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
       Xfree = DSlink[siconos::modeling::NewtonEulerR::velocity];
       DEBUG_PRINT("Xfree = DSlink[NewtonEulerR::velocity];\n");
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - unknown relation "
           "type.");
 
     DEBUG_EXPR(Xfree->display());
     assert(Xfree);
-  }
-  else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp) {
+  } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp) {
     /* get the "free" acceleration of the aggregated ds */
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       Xfree = inter_work_block[siconos::integrators::D1MinusLinearOSI::xfree];
-    }
-    else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+    } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
       Xfree = inter_work_block[siconos::integrators::D1MinusLinearOSI::xfree];
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - unknown relation "
           "type.");
     DEBUG_PRINT("Xfree = DSlink[siconos::integrators::D1MinusLinearOSI::FREE];\n");
     DEBUG_EXPR(Xfree->display());
     assert(Xfree);
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - OSNSP neither on "
         "velocity nor on acceleration level.");
@@ -768,8 +747,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
       }
       DEBUG_EXPR(osnsp_rhs.display(););
     }
-  }
-  else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+  } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto CT =
         std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation())
             ->jachqT();
@@ -828,8 +806,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
           osnsp, inter, indexSet->properties(vertex_inter));
       inter->nonSmoothLaw()->accept(*nslEffectOnFreeOutput);
     }
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - not implemented for "
         "Relation of type " +
@@ -843,8 +820,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
 
 bool siconos::integrators::D1MinusLinearOSI::
     addInteractionInIndexSetHalfExplicitAccelerationLevel(
-        std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+        std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   DEBUG_PRINT(
       "siconos::integrators::D1MinusLinearOSI::"
       "addInteractionInIndexSetHalfExplicitAccelerationLevel.\n");
@@ -859,8 +835,7 @@ bool siconos::integrators::D1MinusLinearOSI::
     double y = (*(inter->y(0)))(0);  // current position
     DEBUG_PRINTF("y= %24.16e\n", y);
     return (y <= DEFAULT_TOL_D1MINUS);
-  }
-  else if (i == 2) {
+  } else if (i == 2) {
     DEBUG_PRINT(" level == 2\n");
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
         siconos::modeling::Type::EqualityConditionNSL) {
@@ -874,8 +849,7 @@ bool siconos::integrators::D1MinusLinearOSI::
     DEBUG_EXPR(std::cout << std::boolalpha << (y <= DEFAULT_TOL_D1MINUS) << std::endl;);
     DEBUG_EXPR(std::cout << std::boolalpha << (yDot <= DEFAULT_TOL_D1MINUS) << std::endl;);
     return (y <= DEFAULT_TOL_D1MINUS) && (yDot <= DEFAULT_TOL_D1MINUS);
-  }
-  else if (i == 3) {
+  } else if (i == 3) {
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
         siconos::modeling::Type::EqualityConditionNSL) {
       return false;
@@ -889,8 +863,7 @@ bool siconos::integrators::D1MinusLinearOSI::
     /* if Interaction has not been active in the previous calculation
        and now becomes active */
     return (y <= DEFAULT_TOL_D1MINUS && y_k > DEFAULT_TOL_D1MINUS);
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::D1MinusLinearOSI::"
         "addInteractionInIndexSetHalfExplicitAccelerationLevel, IndexSet[i > 3] does not "
@@ -900,8 +873,7 @@ bool siconos::integrators::D1MinusLinearOSI::
 
 bool siconos::integrators::D1MinusLinearOSI::
     removeInteractionFromIndexSetHalfExplicitAccelerationLevel(
-        std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+        std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   DEBUG_PRINT(
       "siconos::integrators::D1MinusLinearOSI::"
       "removeInteractionFromIndexSetHalfExplicitAccelerationLevel.\n");

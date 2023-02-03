@@ -36,15 +36,15 @@
 // #include <limits>
 
 siconos::nonsmooth_formulations::Relay::Relay(int numericsSolverId)
-    : Relay(std::shared_ptr<siconos::numerics::SolverOptions>(
-          siconos::numerics::solver_options_create(numericsSolverId),
-          siconos::numerics::solver_options_delete))
+    : Relay(std::shared_ptr<SolverOptions>(
+          solver_options_create(numericsSolverId),
+          solver_options_delete))
 {
 }
 
-siconos::nonsmooth_formulations::Relay::Relay(std::shared_ptr<siconos::numerics::SolverOptions> options)
+siconos::nonsmooth_formulations::Relay::Relay(std::shared_ptr<SolverOptions> options)
     : LinearOSNS(
-          options)  //,  _numerics_problem(std::make_shared<siconos::numerics::RelayProblem>())
+          options)  //,  _numerics_problem(std::make_shared<RelayProblem>())
 {
 }
 
@@ -156,7 +156,7 @@ int siconos::nonsmooth_formulations::Relay::compute(double time)
 
   if (_sizeOutput != 0) {
     // The Relay in Numerics format
-    siconos::numerics::RelayProblem numerics_problem;
+    RelayProblem numerics_problem;
     numerics_problem.M = &*_M->numericsMatrix();
     numerics_problem.q = _q->getArray();
     numerics_problem.lb = _lb->getArray();

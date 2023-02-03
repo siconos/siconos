@@ -100,8 +100,6 @@ class TimeSteppingDirectProjection : public TimeStepping {
 
   virtual ~TimeSteppingDirectProjection() noexcept = default;
 
-  void updateWorldFromDS() override {}
-
   /** \return the Number of iteration of projection
    */
   inline unsigned int nbProjectionIteration() { return _nbProjectionIteration; }

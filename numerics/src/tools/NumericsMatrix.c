@@ -237,7 +237,17 @@ void NM_version_sync(NumericsMatrix* M) {
             assert(M->matrix2->csr);
             break;
           }
+          case NSM_UNKNOWN:
+          default: {
+            numerics_error("NM_version_sync", "unknown matrix type");
+            break;
+          }
         }
+      } break;
+      case NM_UNKNOWN:
+      default: {
+        numerics_error("NM_version_sync", "unknown matrix type");
+        break;
       }
     }
 #endif
@@ -1248,7 +1258,7 @@ void NM_display(const NumericsMatrix* const m) {
       if (m->matrix2->diag_indx) {
         printf("========== m->matrix2->diag_indx = %p\n", m->matrix2->diag_indx);
         for (int i = 0; i < m->size0; ++i)
-          printf("diag_indices[%i] = %li\t ", i, m->matrix2->diag_indx[i]);
+          printf("diag_indices[%i] = %" PRCS_INT "\t ", i, m->matrix2->diag_indx[i]);
       } else {
         printf("========== m->matrix2->diag_indx --> NULL\n");
       }
@@ -5657,6 +5667,7 @@ int NM_LU_refine(NumericsMatrix* A, double* x, double tol, int max_iter, double*
 
       // if (iteration == max_iter) cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get solution
       // back
+      break;
     }
     default:
       assert(0 && "NM_LU_refine unknown storageType");

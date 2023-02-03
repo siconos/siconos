@@ -28,7 +28,7 @@
 #include "NewtonEulerDS.hpp"
 #include "RotationQuaternion.hpp"  // for changeFrameBodyToAbs
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for scal
+#include "SiconosVectorOp.hpp"  // for scal
 #include "SimpleMatrix.hpp"
 
 // #define DEBUG_STDOUT

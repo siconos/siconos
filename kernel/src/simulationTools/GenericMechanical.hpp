@@ -21,18 +21,12 @@
 #ifndef GENERICMECHANICAL_H
 #define GENERICMECHANICAL_H
 
-#include "LinearOSNS.hpp"
-
-namespace siconos::numerics {
-
-#include <Friction_cst.h>  // contains only enum. Ok. For SICONOS_FRICTION_3D_ONECONTACT_NSN
-
+#include "Friction_cst.h"  // contains only enum. Ok. For SICONOS_FRICTION_3D_ONECONTACT_NSN
 #include "GenericMechanical_cst.h"  // for SICONOS_GENERIC_MECHANICAL_NSGS
+#include "LinearOSNS.hpp"
 
 struct GenericMechanicalProblem;
 struct SolverOptions;
-
-}  // namespace siconos::numerics
 
 namespace siconos::nonsmooth_formulations {
 /**
@@ -59,7 +53,7 @@ class GenericMechanical : public LinearOSNS {
  protected:
   ACCEPT_SERIALIZATION(GenericMechanical);
 
-  siconos::numerics::GenericMechanicalProblem *_pnumerics_GMP{nullptr};
+  GenericMechanicalProblem *_pnumerics_GMP{nullptr};
 
  public:
   /** constructor from solver id
@@ -67,14 +61,13 @@ class GenericMechanical : public LinearOSNS {
    *  \param numericsSolverId id of the internal friction solver of the generic
    *  problem default = SICONOS_FRICTION_3D_ONECONTACT_NSN
    */
-  GenericMechanical(
-      int FC3D_Solver_Id = siconos::numerics::SICONOS_FRICTION_3D_ONECONTACT_NSN);
+  GenericMechanical(int FC3D_Solver_Id = SICONOS_FRICTION_3D_ONECONTACT_NSN);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    */
-  GenericMechanical(std::shared_ptr<siconos::numerics::SolverOptions> options);
+  GenericMechanical(std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */

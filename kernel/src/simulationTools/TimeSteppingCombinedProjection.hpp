@@ -124,8 +124,6 @@ class TimeSteppingCombinedProjection : public TimeStepping {
 
   virtual ~TimeSteppingCombinedProjection() noexcept = default;
 
-  void updateWorldFromDS() override { ; }
-
   /** get the Number of iteration of projection
    *
    *  \return unsigned int nbProjectionIteration

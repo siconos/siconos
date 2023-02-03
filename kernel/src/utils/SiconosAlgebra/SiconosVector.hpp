@@ -29,10 +29,11 @@
 
 #include "SiconosAlgebraTypes.hpp"   // For UblasType
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
+#include "SiconosVectorIterator.hpp"
 
 namespace siconos::algebra {
 
-struct SiconosVectorIterator;
+// struct SiconosVectorIterator;
 struct SiconosVectorConstIterator;
 class BlockVector;
 class SimpleMatrix;
@@ -103,8 +104,10 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
 
  public:
   // for iterator interface */
-  using iterator = SiconosVectorIterator;
-  using const_iterator = SiconosVectorConstIterator;
+  using iterator =
+      SiconosVectorIteratorTypeTpl<SiconosVector, double, double &>;  // SiconosVectorIterator;
+  using const_iterator = SiconosVectorIteratorTypeTpl<const SiconosVector, const double,
+                                                      double>;  // SiconosVectorConstIterator;
 
   /***************************** CONSTRUCTORS ****************************/
 
@@ -187,8 +190,7 @@ class SiconosVector : public std::enable_shared_from_this<SiconosVector> {
    *
    *  \return an unsigned int
    */
-  siconos::algebra::UblasType num() const
-  {
+  siconos::algebra::UblasType num() const {
     if (_dense)
       return UblasType::DENSE;
     else

@@ -25,13 +25,9 @@ Definition of a compressed row sparse block matrix of SiconosMatrix*
 #include <boost/numeric/ublas/fwd.hpp>  // Boost forward declarations
 #include <vector>
 
+#include "NumericsFwd.h"             // for SparseBlockStructuredMatrix
 #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
 #include "SimulationGraphs.hpp"
-
-namespace siconos::numerics {
-
-#include "NumericsFwd.h"  // for SparseBlockStructuredMatrix
-}
 
 namespace siconos::simulation {
 
@@ -119,8 +115,7 @@ class BlockCSRMatrix {
   std::shared_ptr<CompressedRowMat> _blockCSR{nullptr};
 
   /** Specific structure required when a (Numerics) solver block is used */
-  std::shared_ptr<siconos::numerics::SparseBlockStructuredMatrix> _sparseBlockStructuredMatrix{
-      nullptr};
+  std::shared_ptr<SparseBlockStructuredMatrix> _sparseBlockStructuredMatrix{nullptr};
 
   /** Vector used to save the sum of rows of diagonal blocks of M:
       _diagsize0[i] = _diagsize0[i-1] + ni, ni being the size of the
@@ -176,8 +171,7 @@ class BlockCSRMatrix {
 
   /** \return the numerics-readable structure
    */
-  inline std::shared_ptr<siconos::numerics::SparseBlockStructuredMatrix>
-  getNumericsMatSparse() {
+  inline std::shared_ptr<SparseBlockStructuredMatrix> getNumericsMatSparse() {
     return _sparseBlockStructuredMatrix;
   };
 

@@ -40,7 +40,6 @@ if(WITH_CXX)
     # FP : in which case do we need this, since boost serialization is required ??
     list(APPEND ${COMPONENT}_DIRS boost_serialization)
   endif()
-  
 endif()
 
 # -- Source files to be excluded from build --

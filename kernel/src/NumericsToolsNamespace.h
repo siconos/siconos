@@ -26,13 +26,14 @@
 // WARNING : do not include this file into another header.
 // Cpp include only !
 
-namespace siconos::numerics {
+// namespace siconos::numerics {
 
+#include "CSparseMatrix.h"
 #include "NumericsMatrix.h"
-#include "CSparseMatrix_internal.h"
-#include "NumericsSparseMatrix.h"  
+#include "NumericsSparseMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "numerics_verbose.h"
-}  // namespace siconos::numerics
+
+//}  // namespace siconos::numerics
 
 #endif

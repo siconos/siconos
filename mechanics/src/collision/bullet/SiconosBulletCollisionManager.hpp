@@ -24,10 +24,9 @@
 #ifndef SiconosBulletCollisionManager_h
 #define SiconosBulletCollisionManager_h
 
-#include <SiconosCollisionManager.hpp>
-
 #include "BulletDeclarations.h"
 #include "SiconosBulletOptions.hpp"  // header only, for options and stats
+#include "SiconosCollisionManager.hpp"
 
 // namespace siconos::simulation {
 // class Simulation
@@ -58,6 +57,12 @@ class SiconosBulletCollisionManager : public siconos::collision::SiconosCollisio
 
   using BodiesVariant = std::variant<std::shared_ptr<siconos::collision::RigidBodyDS>,
                                      std::shared_ptr<siconos::collision::RigidBody2dDS>>;
+
+  // This value is compared to the initial distance computed
+  // at the creation of the interaction
+  // if distance < - WARNING_TOLERANCE_AT_CREATION_INTERACTION
+  // a warning is raised.
+  static constexpr double WARNING_TOLERANCE_AT_CREATION_INTERACTION = 1e-5;
 
   std::shared_ptr<internal::SiconosBulletCollisionManager_impl> _impl{nullptr};
 

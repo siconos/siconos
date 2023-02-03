@@ -63,7 +63,7 @@ class MLCPProjectOnConstraints : public MLCP {
    *  \param numericsSolverId solver id
    *  \param alpha alpha parameter value
    */
-  MLCPProjectOnConstraints(int numericsSolverId = siconos::numerics::SICONOS_MLCP_ENUM,
+  MLCPProjectOnConstraints(int numericsSolverId = SICONOS_MLCP_ENUM,
                            double alpha = 1.0);
 
   /**  constructor from a pre-defined solver options set.
@@ -71,7 +71,7 @@ class MLCPProjectOnConstraints : public MLCP {
    *   \param options the options set,
    *   \param alpha alpha parameter value
    */
-  MLCPProjectOnConstraints(std::shared_ptr<siconos::numerics::SolverOptions> options,
+  MLCPProjectOnConstraints(std::shared_ptr<SolverOptions> options,
                            double alpha = 1.0);
 
   /** destructor

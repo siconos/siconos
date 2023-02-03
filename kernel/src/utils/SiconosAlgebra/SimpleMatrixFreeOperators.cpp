@@ -18,9 +18,9 @@
 
 // #include "BlockMatrix.hpp"
 #include "SiconosException.hpp"
-#include "SiconosMatrixFriends.hpp"  // for operators
+#include "SiconosMatrixOp.hpp"  // For matrix operators declaration
 #include "SimpleMatrix.hpp"
-//#define DEBUG_MESSAGES
+// #define DEBUG_MESSAGES
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
@@ -30,15 +30,13 @@
 #include "siconos_debug.h"
 
 std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::algebra::operator*(
-    const std::shared_ptr<SimpleMatrix> A, const std::shared_ptr<SimpleMatrix> B)
-{
+    const std::shared_ptr<SimpleMatrix> A, const std::shared_ptr<SimpleMatrix> B) {
   auto aux = std::make_shared<SimpleMatrix>((DenseMat)prod(*(*A).dense(), *(*B).dense()));
   return aux;
 }
 
 const siconos::algebra::SimpleMatrix siconos::algebra::operator*(const SiconosMatrix &A,
-                                                                 double a)
-{
+                                                                 double a) {
   // To compute B = a * A
 
   auto numA = A.num();
@@ -48,17 +46,14 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator*(const SiconosMa
     // DenseMat p(zero_matrix(A.size(0),A.size(1)));
     // return p;
     return A;
-  }
-  else if (numA == UblasType::IDENTITY) {
+  } else if (numA == UblasType::IDENTITY) {
     return (DenseMat)(a * *A.identity());
-  }
-  else if (numA == UblasType::BLOCK)  // A block
+  } else if (numA == UblasType::BLOCK)  // A block
   {
     SimpleMatrix tmp(A);  // ... copy ...
     tmp *= a;
     return tmp;
-  }
-  else if (numA == UblasType::DENSE)  // dense)
+  } else if (numA == UblasType::DENSE)  // dense)
     return (DenseMat)(a * *A.dense());
   else if (numA == UblasType::TRIANGULAR)
     return (TriangMat)(a * *A.triang());
@@ -73,8 +68,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator*(const SiconosMa
   }
 }
 
-siconos::algebra::SimpleMatrix siconos::algebra::operator*(double a, const SiconosMatrix &A)
-{
+siconos::algebra::SimpleMatrix siconos::algebra::operator*(double a, const SiconosMatrix &A) {
   // To compute B = a * A
 
   auto numA = A.num();
@@ -84,17 +78,14 @@ siconos::algebra::SimpleMatrix siconos::algebra::operator*(double a, const Sicon
     // DenseMat p(zero_matrix(A.size(0),A.size(1)));
     // return p;
     return A;
-  }
-  else if (numA == UblasType::IDENTITY) {
+  } else if (numA == UblasType::IDENTITY) {
     return (DenseMat)(a * *A.identity());
-  }
-  else if (numA == UblasType::BLOCK)  // A block
+  } else if (numA == UblasType::BLOCK)  // A block
   {
     SimpleMatrix tmp(A);  // ... copy ...
     tmp *= a;
     return tmp;
-  }
-  else if (numA == UblasType::DENSE)  // dense)
+  } else if (numA == UblasType::DENSE)  // dense)
     return (DenseMat)(a * *A.dense());
   else if (numA == UblasType::TRIANGULAR)
     return (TriangMat)(a * *A.triang());
@@ -112,8 +103,7 @@ siconos::algebra::SimpleMatrix siconos::algebra::operator*(double a, const Sicon
 }
 
 const siconos::algebra::SimpleMatrix siconos::algebra::operator/(const SiconosMatrix &A,
-                                                                 double a)
-{
+                                                                 double a) {
   // To compute B = A/a
 
   if (a == 0.0) THROW_EXCEPTION("division by zero.");
@@ -125,17 +115,14 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator/(const SiconosMa
     // DenseMat p(zero_matrix(A.size(0),A.size(1)));
     // return p;
     return A;
-  }
-  else if (numA == UblasType::IDENTITY) {
+  } else if (numA == UblasType::IDENTITY) {
     return (DenseMat)(*A.identity() / a);
-  }
-  else if (numA == UblasType::BLOCK)  // A block
+  } else if (numA == UblasType::BLOCK)  // A block
   {
     SimpleMatrix tmp(A);  // ... copy ...
     tmp /= a;
     return tmp;
-  }
-  else if (numA == UblasType::DENSE)  // dense)
+  } else if (numA == UblasType::DENSE)  // dense)
     return (DenseMat)(*A.dense() / a);
   else if (numA == UblasType::TRIANGULAR)
     return (TriangMat)(*A.triang() / a);
@@ -159,20 +146,18 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator/(const SiconosMa
 //   return (DenseMat)(*A.dense() + *B.dense());
 // }
 
-void siconos::algebra::operator +=(std::shared_ptr<SiconosMatrix> A, std::shared_ptr<SimpleMatrix> B)
-{
+void siconos::algebra::operator+=(std::shared_ptr<SiconosMatrix> A,
+                                  std::shared_ptr<SimpleMatrix> B) {
   *A += *B;
 }
 
 std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::algebra::operator+(
-    const std::shared_ptr<SimpleMatrix> A, const std::shared_ptr<SimpleMatrix> B)
-{
+    const std::shared_ptr<SimpleMatrix> A, const std::shared_ptr<SimpleMatrix> B) {
   return std::make_shared<SimpleMatrix>(*A + *B);
 }
 
 const siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SiconosMatrix &A,
-                                                                 const SiconosMatrix &B)
-{
+                                                                 const SiconosMatrix &B) {
   // To compute C = A + B
 
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
@@ -208,22 +193,18 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SiconosMa
       tmp += *B.sparse();
       return tmp;
       // return (SparseMat)(*A.sparse() + *B.sparse());
-    }
-    else if (numA == UblasType::SPARSE_COORDINATE) {
+    } else if (numA == UblasType::SPARSE_COORDINATE) {
       SparseMat tmp(*A.sparseCoordinate());
       tmp += *B.sparseCoordinate();
       return tmp;
-    }
-    else if (numA == UblasType::BANDED) {
+    } else if (numA == UblasType::BANDED) {
       BandedMat tmp(*A.banded());
       tmp += *B.banded();
       return tmp;
-    }
-    else
+    } else
       THROW_EXCEPTION("invalid type of matrix");
-  }
-  else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
-           numA != numB)  // A and B of different types and none is block
+  } else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
+             numA != numB)  // A and B of different types and none is block
   {
     if (numA == UblasType::DENSE) {
       if (numB == UblasType::TRIANGULAR)
@@ -240,8 +221,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SiconosMa
         return (DenseMat)(*A.dense() + *B.identity());
       else
         THROW_EXCEPTION("invalid type of matrix");
-    }
-    else if (numA == UblasType::TRIANGULAR) {
+    } else if (numA == UblasType::TRIANGULAR) {
       if (numB == UblasType::DENSE)
         return (DenseMat)(*A.triang() + *B.dense());
       else if (numB == UblasType::SYMMETRIC)
@@ -256,8 +236,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SiconosMa
         return (DenseMat)(*A.triang() + *B.identity());
       else
         THROW_EXCEPTION("invalid type of matrix");
-    }
-    else if (numA == UblasType::SYMMETRIC) {
+    } else if (numA == UblasType::SYMMETRIC) {
       if (numB == UblasType::DENSE)
         return (DenseMat)(*A.sym() + *B.dense());
       else if (numB == UblasType::TRIANGULAR)
@@ -272,8 +251,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SiconosMa
         return (DenseMat)(*A.sym() + *B.identity());
       else
         THROW_EXCEPTION("invalid type of matrix");
-    }
-    else if (numA == UblasType::SPARSE) {
+    } else if (numA == UblasType::SPARSE) {
       if (numB == UblasType::DENSE)
         return (DenseMat)(*A.sparse() + *B.dense());
       else if (numB == UblasType::TRIANGULAR)
@@ -319,17 +297,14 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SiconosMa
         return (DenseMat)(*A.identity() + *B.sparseCoordinate());
       else if (numB == UblasType::BANDED)
         return (DenseMat)(*A.identity() + *B.banded());
-    }
-    else
+    } else
       THROW_EXCEPTION("invalid type of matrix");
-  }
-  else if (numB != UblasType::BLOCK)  // B Simple, whatever is A
+  } else if (numB != UblasType::BLOCK)  // B Simple, whatever is A
   {
     SimpleMatrix tmp(B);
     tmp += A;
     return tmp;
-  }
-  else  // B Block, A simple or block
+  } else  // B Block, A simple or block
   {
     SimpleMatrix tmp(A);
     tmp += B;
@@ -339,8 +314,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator+(const SiconosMa
 }
 
 const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMatrix &A,
-                                                                 const SiconosMatrix &B)
-{
+                                                                 const SiconosMatrix &B) {
   // To compute C = A - B
 
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
@@ -368,24 +342,20 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMa
       tmp -= *B.sparse();
       return tmp;
       // return (SparseMat)(*A.sparse() - *B.sparse());
-    }
-    else if (numA == UblasType::SPARSE_COORDINATE) {
+    } else if (numA == UblasType::SPARSE_COORDINATE) {
       SparseCoordinateMat tmp(*A.sparseCoordinate());
       tmp -= *B.sparseCoordinate();
       return tmp;
-    }
-    else if (numA == UblasType::BANDED) {
+    } else if (numA == UblasType::BANDED) {
       BandedMat tmp(*A.banded());
       tmp -= *B.banded();
       return tmp;
       // return (BandedMat)(*A.banded() - *B.banded());
-    }
-    else {
+    } else {
       THROW_EXCEPTION("invalid type of matrix");
     }
-  }
-  else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
-           numA != numB)  // A and B of different types and none is block
+  } else if (numA != UblasType::BLOCK && numB != UblasType::BLOCK &&
+             numA != numB)  // A and B of different types and none is block
   {
     if (numA == UblasType::DENSE) {
       if (numB == UblasType::TRIANGULAR)
@@ -403,8 +373,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMa
       else {
         THROW_EXCEPTION("invalid type of matrix");
       }
-    }
-    else if (numA == UblasType::TRIANGULAR) {
+    } else if (numA == UblasType::TRIANGULAR) {
       if (numB == UblasType::DENSE)
         return (DenseMat)(*A.triang() - *B.dense());
       else if (numB == UblasType::SYMMETRIC)
@@ -420,8 +389,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMa
       else {
         THROW_EXCEPTION("invalid type of matrix");
       }
-    }
-    else if (numA == UblasType::SYMMETRIC) {
+    } else if (numA == UblasType::SYMMETRIC) {
       if (numB == UblasType::DENSE)
         return (DenseMat)(*A.sym() - *B.dense());
       else if (numB == UblasType::TRIANGULAR)
@@ -437,8 +405,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMa
       else {
         THROW_EXCEPTION("invalid type of matrix");
       }
-    }
-    else if (numA == UblasType::SPARSE) {
+    } else if (numA == UblasType::SPARSE) {
       if (numB == UblasType::DENSE)
         return (DenseMat)(*A.sparse() - *B.dense());
       else if (numB == UblasType::TRIANGULAR)
@@ -490,8 +457,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMa
       else {
         THROW_EXCEPTION("invalid type of matrix");
       }
-    }
-    else if (numA == UblasType::IDENTITY) {
+    } else if (numA == UblasType::IDENTITY) {
       if (numB == UblasType::DENSE)
         return (DenseMat)(*A.identity() - *B.dense());
       else if (numB == UblasType::TRIANGULAR)
@@ -507,12 +473,10 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMa
       else {
         THROW_EXCEPTION("invalid type of matrix");
       }
-    }
-    else {
+    } else {
       THROW_EXCEPTION("invalid type of matrix");
     }
-  }
-  else  // A and/or B are/is Block
+  } else  // A and/or B are/is Block
   {
     SimpleMatrix tmp(A);
     tmp -= B;
@@ -524,8 +488,7 @@ const siconos::algebra::SimpleMatrix siconos::algebra::operator-(const SiconosMa
 // Matrices comparison
 //========================
 
-bool siconos::algebra::operator==(const SiconosMatrix &m, const SiconosMatrix &x)
-{
+bool siconos::algebra::operator==(const SiconosMatrix &m, const SiconosMatrix &x) {
   //  if( ! isComparableTo( m, x))
   //    return false;
   // Warning : two block matrices may be "equal" but have blocks of different sizes.
@@ -541,8 +504,7 @@ bool siconos::algebra::operator==(const SiconosMatrix &m, const SiconosMatrix &x
   return (norm <= atol + rtol * x.normInf());
 }
 
-bool siconos::algebra::operator!=(const SiconosMatrix &m, const SiconosMatrix &x)
-{
+bool siconos::algebra::operator!=(const SiconosMatrix &m, const SiconosMatrix &x) {
   double norm = (m - x).normInf();
   return (norm > std::numeric_limits<double>::epsilon());
 }

@@ -16,8 +16,6 @@
  * limitations under the License.
  */
 
-#include "SiconosAlgebraScal.hpp"
-
 #include <assert.h>
 
 #include <boost/numeric/ublas/banded.hpp>
@@ -27,14 +25,14 @@
 #include <boost/numeric/ublas/triangular.hpp>
 
 #include "BlockMatrix.hpp"
-#include "SiconosAlgebraTools.hpp"    // for isComparableTo
+#include "SiconosAlgebraTools.hpp"  // for isComparableTo
 #include "SiconosAlgebraTypes.hpp"  // UblasType
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixOp.hpp"  // For isComparableto
 #include "SimpleMatrix.hpp"
 
-void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, bool init)
-{
+void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, bool init) {
   // To compute B = a * A (init = true) or B += a*A (init = false).
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
   if (!B.isBlock()) B.resetFactorizationFlags();
@@ -44,8 +42,7 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
       B *= a;
     else
       B *= (1.0 + a);
-  }
-  else {
+  } else {
     auto numA = A.num();
     auto numB = B.num();
 
@@ -54,18 +51,15 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
 
     if (numA == UblasType::ZERO) {
       if (init) B.zero();  // else nothing
-    }
-    else if (numA == UblasType::IDENTITY) {
+    } else if (numA == UblasType::IDENTITY) {
       if (init) {
         B.eye();
         B *= a;
-      }
-      else {
+      } else {
         // Assuming B is square ...
         for (unsigned int i = 0; i < B.size(0); ++i) B(i, i) += a;
       }
-    }
-    else {
+    } else {
       if (numA == numB)  // if A and B are of the same type ...
       {
         switch (numA) {
@@ -81,14 +75,12 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
                 }
                 itA1++;
               }
-            }
-            else  // if A and B are not "block-consistent"
+            } else  // if A and B are not "block-consistent"
             {
               if (init) {
                 for (unsigned int i = 0; i < A.size(0); ++i)
                   for (unsigned int j = 0; j < A.size(1); ++j) B(i, j) = a * A(i, j);
-              }
-              else {
+              } else {
                 for (unsigned int i = 0; i < A.size(0); ++i)
                   for (unsigned int j = 0; j < A.size(1); ++j) B(i, j) += a * A(i, j);
               }
@@ -128,22 +120,19 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
           default:
             THROW_EXCEPTION("Not implemented for A/B type.");
         }
-      }
-      else  // if A and B are of different types.
+      } else  // if A and B are of different types.
       {
         if (numA == UblasType::BLOCK || numB == UblasType::BLOCK)  // if A or B is block
         {
           if (init) {
             B = A;
             B *= a;
-          }
-          else {
+          } else {
             SimpleMatrix tmp(A);
             tmp *= a;
             B += tmp;  // bof bof ...
           }
-        }
-        else {
+        } else {
           if (numB != UblasType::DENSE)
             THROW_EXCEPTION("Inconsistent types between A and B (must be dense?)");
 
@@ -167,8 +156,7 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
               default:
                 THROW_EXCEPTION("Not implemented for A type.");
             }
-          }
-          else
+          } else
 
           {
             switch (numA) {

@@ -83,7 +83,7 @@ class SimpleMatrix : public SiconosMatrix {
    *  for instance, the LU factorization of a sparse matrix.
    *  It may contains copy or pointer on the SimpleMatrix.
    */
-  std::shared_ptr<siconos::numerics::NumericsMatrix> _numericsMatrix{nullptr};
+  std::shared_ptr<NumericsMatrix> _numericsMatrix{nullptr};
 
   /* computes res = subA*x +res, subA being a submatrix of A (rows from startRow to
    * startRow+sizeY and columns between startCol and startCol+sizeX). If x is a block vector,
@@ -284,7 +284,7 @@ class SimpleMatrix : public SiconosMatrix {
 
   void updateNumericsMatrix() override;
 
-  siconos::numerics::NumericsMatrix* numericsMatrix() const override
+  NumericsMatrix* numericsMatrix() const override
   {
     return _numericsMatrix.get();
   };

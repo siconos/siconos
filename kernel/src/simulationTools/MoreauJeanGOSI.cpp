@@ -24,8 +24,8 @@
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
-#include "SiconosAlgebraProd.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
@@ -36,8 +36,7 @@
 #include "siconos_debug.h"
 
 void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // Get work buffers from the graph
   auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
@@ -57,8 +56,7 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
 
     lds->computeForces(t, lds->q(), lds->velocity());
     lds->swapInMemory();
-  }
-  else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+  } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
     ds_work_vectors.resize(siconos::integrators::MoreauJeanGOSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE] =
         std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
@@ -78,8 +76,7 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
 
 void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   auto ds1 = interProp.source;
   auto ds2 = interProp.target;
   assert(ds1);
@@ -117,8 +114,7 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
     DEBUG_PRINT("ds1 != ds2\n");
     if ((!inter_block_work[xfree]) || (inter_block_work[xfree]->numberOfBlocks() != 2))
       inter_block_work[xfree] = std::make_shared<siconos::algebra::BlockVector>(2);
-  }
-  else {
+  } else {
     if ((!inter_block_work[xfree]) || (inter_block_work[xfree]->numberOfBlocks() != 1))
       inter_block_work[xfree] = std::make_shared<siconos::algebra::BlockVector>(1);
   }
@@ -145,8 +141,7 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
   }
 }
 
-double siconos::integrators::MoreauJeanGOSI::computeResidu()
-{
+double siconos::integrators::MoreauJeanGOSI::computeResidu() {
   DEBUG_PRINT("\nsiconos::integrators::MoreauJeanGOSI::computeResidu(), start\n");
   // This function is used to compute the residu for each "MoreauJeanGOSI-discretized"
   // dynamical system. It then computes the norm of each of them and finally return the
@@ -324,8 +319,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu()
       DEBUG_EXPR(residu.display());
       normResidu = residu.norm2();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
-    }
-    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanGOSI::computeResidu(), dsType == "
           "Type::NewtonEulerDS\n");
@@ -410,8 +404,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu()
 
       normResidu = residu.norm2();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::MoreauJeanGOSI::computeResidu - not yet implemented for this "
           "type of DS\n");
@@ -421,16 +414,14 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu()
   return maxResidu;
 }
 
-void siconos::integrators::MoreauJeanGOSI::computeFreeState()
-{
+void siconos::integrators::MoreauJeanGOSI::computeFreeState() {
   DEBUG_BEGIN("siconos::integrators::MoreauJeanGOSI::computeFreeState()\n");
   DEBUG_END("siconos::integrators::MoreauJeanGOSI::computeFreeState()\n");
 }
 
 void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
     std::shared_ptr<siconos::modeling::Interaction> inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem& osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem& osnsp) {
   if (inter->relation()->getType() == siconos::modeling::RelationType::Lagrangian ||
       inter->relation()->getType() == siconos::modeling::RelationType::NewtonEuler) {
     auto& indexSet = *osnsp.simulation()->indexSet(osnsp.indexSetLevel());
@@ -444,12 +435,9 @@ void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
 }
 
 void siconos::integrators::MoreauJeanGOSI::integrate(double& tinit, double& tend, double& tout,
-                                                     int& notUsed)
-{
-}
+                                                     int& notUsed) {}
 
-void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int)
-{
+void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
   DEBUG_BEGIN("siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int )\n");
 
   auto RelativeTol = _simulation->relativeConvergenceTol();
@@ -485,8 +473,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int)
       //   if(aux > RelativeTol)
       //     _simulation->setRelativeConvergenceCriterionHeld(false);
       // }
-    }
-    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       bool baux = useRCC && _simulation->relativeConvergenceCriterionHeld();
 
       auto& q = *d->q();
@@ -504,15 +491,13 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int)
         double aux = (local_buffer.norm2()) / ds_norm_ref;
         if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
       }
-    }
-    else if (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    } else if (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int ), dsType "
           "== "
           "Type::NewtonEulerDS \n");
       updatePosition(*ds);
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::MoreauJeanGOSI::updateState - not yet implemented for this "
           "kind of ds.")
@@ -520,8 +505,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int)
   DEBUG_END("siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int )\n");
 }
 
-void siconos::integrators::MoreauJeanGOSI::display() const
-{
+void siconos::integrators::MoreauJeanGOSI::display() const {
   OneStepIntegrator::display();
 
   std::cout << "====== MoreauJeanOSI OSI display ======\n";

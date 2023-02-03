@@ -18,27 +18,22 @@
 #include "LinearSensor.hpp"
 
 #include "DynamicalSystem.hpp"
-#include "SiconosAlgebraProd.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 siconos::control::LinearSensor::LinearSensor(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-    : ControlSensor(SensorType::Linear, ds)
-{
-}
+    : ControlSensor(SensorType::Linear, ds) {}
 
 siconos::control::LinearSensor::LinearSensor(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
     std::shared_ptr<siconos::algebra::SimpleMatrix> matC,
     std::shared_ptr<siconos::algebra::SimpleMatrix> matD)
-    : ControlSensor(SensorType::Linear, ds), _matC(matC), _matD(matD)
-{
-}
+    : ControlSensor(SensorType::Linear, ds), _matC(matC), _matD(matD) {}
 
 void siconos::control::LinearSensor::initialize(
-    const siconos::modeling::NonSmoothDynamicalSystem& nsds)
-{
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds) {
   // Call initialize of base class
   ControlSensor::initialize(nsds);
 
@@ -73,8 +68,7 @@ void siconos::control::LinearSensor::initialize(
   *_storedY = siconos::algebra::prod(*_matC, *_DSx);
 }
 
-void siconos::control::LinearSensor::capture()
-{
+void siconos::control::LinearSensor::capture() {
   *_storedY = siconos::algebra::prod(*_matC, *_DSx);
   // untested
   if (_matD)
@@ -86,12 +80,10 @@ void siconos::control::LinearSensor::capture()
     _bufferY.push_back(_storedY);
   }
 }
-void siconos::control::LinearSensor::setC(const siconos::algebra::SimpleMatrix& C)
-{
+void siconos::control::LinearSensor::setC(const siconos::algebra::SimpleMatrix& C) {
   *_matC = C;
 }
 
-void siconos::control::LinearSensor::setD(const siconos::algebra::SimpleMatrix& D)
-{
+void siconos::control::LinearSensor::setD(const siconos::algebra::SimpleMatrix& D) {
   *_matD = D;
 }

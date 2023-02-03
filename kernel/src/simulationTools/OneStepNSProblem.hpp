@@ -28,9 +28,9 @@
 #include "SiconosSerialization.hpp"
 #include "SimulationGraphs.hpp"
 
-namespace siconos::numerics {
+// namespace siconos::numerics {
 struct SolverOptions;
-}
+//}
 
 namespace siconos::simulation {
 class Simulation;
@@ -87,7 +87,7 @@ class OneStepNSProblem {
   ACCEPT_SERIALIZATION(OneStepNSProblem);
 
   /** Numerics solver properties */
-  std::shared_ptr<siconos::numerics::SolverOptions> _numerics_solver_options;
+  std::shared_ptr<SolverOptions> _numerics_solver_options;
 
   /** size of the nonsmooth problem */
   unsigned int _sizeOutput = 0;
@@ -131,7 +131,7 @@ class OneStepNSProblem {
    *
    *  \param options the options set
    */
-  OneStepNSProblem(std::shared_ptr<siconos::numerics::SolverOptions> options)
+  OneStepNSProblem(std::shared_ptr<SolverOptions> options)
       : _numerics_solver_options(options){};
 
   /** destructor
@@ -142,7 +142,7 @@ class OneStepNSProblem {
    *
    *  \return , the numerics structure used to save solver parameters
    */
-  inline std::shared_ptr<siconos::numerics::SolverOptions> numericsSolverOptions() const {
+  inline std::shared_ptr<SolverOptions> numericsSolverOptions() const {
     return _numerics_solver_options;
   };
 

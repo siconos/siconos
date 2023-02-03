@@ -27,13 +27,13 @@
 
 siconos::nonsmooth_formulations::Equality::Equality(int numericsSolverId) : LinearOSNS()
 //:
-// Equality(std::shared_ptr<siconos::numerics::SolverOptions>(siconos::numerics::solver_options_create(numericsSolverId),
-//                            siconos::numerics::solver_options_delete))
+// Equality(std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
+//                            solver_options_delete))
 {
 }
 
 siconos::nonsmooth_formulations::Equality::Equality(
-    std::shared_ptr<siconos::numerics::SolverOptions> options)
+    std::shared_ptr<SolverOptions> options)
     : LinearOSNS(options)
 {
 }
@@ -73,11 +73,11 @@ int siconos::nonsmooth_formulations::Equality::compute(double time)
     auto* q_ = q()->getArray();
     auto* z_ = _z->getArray();
     for (decltype(_sizeOutput) i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
-    // info = siconos::numerics::NM_gesv(&*_M->numericsMatrix(), z_, true);
+    // info = NM_gesv(&*_M->numericsMatrix(), z_, true);
     // info =
-    // siconos::numerics::NM_LU_solve(siconos::numerics::NM_preserve(&*_M->numericsMatrix()),
+    // NM_LU_solve(NM_preserve(&*_M->numericsMatrix()),
     // z_, 1);
-    info = siconos::numerics::NM_LU_solve(&*_M->numericsMatrix(), z_, 1);
+    info = NM_LU_solve(&*_M->numericsMatrix(), z_, 1);
 
     // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();

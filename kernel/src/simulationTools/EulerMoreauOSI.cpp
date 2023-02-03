@@ -27,10 +27,10 @@
 #include "Interaction.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
-#include "SiconosAlgebraProd.hpp"  // for prod and subprod
-#include "SiconosAlgebraScal.hpp"  // for scal
+#include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for scal
+#include "SiconosVectorOp.hpp"  // for scal
+#include "SiconosMatrixOp.hpp"  // for scal
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"

@@ -19,12 +19,11 @@
 
 #include <iostream>
 
-#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 
-void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time)
-{
+void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time) {
   if (_M && !_invM) _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
 
   computeRhs(time);
@@ -44,8 +43,7 @@ void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time)
   }
 }
 
-void siconos::modeling::FirstOrderLinearTIDS::computeRhs(double time)
-{
+void siconos::modeling::FirstOrderLinearTIDS::computeRhs(double time) {
   *_x[1] = *_r;  // Warning: r update is done in Interactions/Relations
 
   if (_A) siconos::algebra::prod(*_A, *_x[0], *_x[1], false);
@@ -60,14 +58,12 @@ void siconos::modeling::FirstOrderLinearTIDS::computeRhs(double time)
   }
 }
 
-void siconos::modeling::FirstOrderLinearTIDS::computeJacobianRhsx(double time)
-{
+void siconos::modeling::FirstOrderLinearTIDS::computeJacobianRhsx(double time) {
   // Nothing to be done: _jacxRhs is constant and computed during initialize. But this function
   // is required to avoid call to base class function.
 }
 
-void siconos::modeling::FirstOrderLinearTIDS::display(bool brief) const
-{
+void siconos::modeling::FirstOrderLinearTIDS::display(bool brief) const {
   std::cout << "===> Linear Time-invariant First Order System display, " << _number << ")."
             << std::endl;
   std::cout << "- A " << std::endl;

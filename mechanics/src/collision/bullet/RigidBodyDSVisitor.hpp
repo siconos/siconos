@@ -19,25 +19,22 @@
 #ifndef RIGIDBODYDS_VISITORS_HPP
 #define RIGIDBODYDS_VISITORS_HPP
 
-#include "RigidBodyVisitor.hpp"
+#include "SiconosVisitor.hpp"
 
 namespace siconos::collision {
 class RigidBody2dDS;
 class RigidBodyDS;
 
-namespace internal {
-class RigidBodyVisitor;
-}
 }  // namespace siconos::collision
 
 namespace siconos::collision::bullet::internal {
 class SiconosBulletCollisionManager_impl;
 
-class RigidBodyDSVisitor : public siconos::collision::internal::RigidBodyVisitor {
+class RigidBodyDSVisitor : public siconos::internal::SiconosVisitor {
  protected:
   std::shared_ptr<SiconosBulletCollisionManager_impl> impl{nullptr};
 
-  // using SiconosVisitor::visit;
+  using SiconosVisitor::visit;
 
   RigidBodyDSVisitor() = delete;
   RigidBodyDSVisitor(const RigidBodyDSVisitor &) = delete;
@@ -47,7 +44,7 @@ class RigidBodyDSVisitor : public siconos::collision::internal::RigidBodyVisitor
 
  public:
   RigidBodyDSVisitor(std::shared_ptr<SiconosBulletCollisionManager_impl> implv)
-      : impl{implv} {};
+      : SiconosVisitor{}, impl{implv} {};
 
   virtual ~RigidBodyDSVisitor() noexcept = default;
 

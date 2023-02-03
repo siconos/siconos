@@ -16,8 +16,10 @@
  * limitations under the License.
  */
 #include "SiconosVectorTest.hpp"
-#include "SiconosVectorFriends.hpp" // for setBlock
+
+#include "SiconosMatrixVectorOp.hpp"  // for outer_prod
 #include "SiconosVectorIterator.hpp"
+#include "SiconosVectorOp.hpp"  // for setBlock
 
 using namespace boost::numeric::ublas;
 namespace ublas = boost::numeric::ublas;
@@ -26,8 +28,7 @@ using SiconosVector = siconos::algebra::SiconosVector;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosVectorTest);
 
-void SiconosVectorTest::setUp()
-{
+void SiconosVectorTest::setUp() {
   tol = 1e-12;
 
   size = 5;
@@ -71,8 +72,7 @@ void SiconosVectorTest::setUp()
 
 void SiconosVectorTest::tearDown() {}
 
-void SiconosVectorTest::testConstructor0()
-{
+void SiconosVectorTest::testConstructor0() {
   std::cout << "====================================" << std::endl;
   std::cout << "===  Simple Vector tests start ...=== " << std::endl;
   std::cout << "====================================" << std::endl;
@@ -90,8 +90,7 @@ void SiconosVectorTest::testConstructor0()
   std::cout << "--> Constructor 0 test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testConstructor1()
-{
+void SiconosVectorTest::testConstructor1() {
   std::cout << "--> Test: constructor 1." << std::endl;
   auto v = std::make_shared<SiconosVector>(3, 2.4);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
@@ -109,8 +108,7 @@ void SiconosVectorTest::testConstructor1()
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testConstructor2()
-{
+void SiconosVectorTest::testConstructor2() {
   std::cout << "--> Test: constructor 2." << std::endl;
   // Copy from a std::vector
   auto v = std::make_shared<SiconosVector>(vq);
@@ -124,8 +122,7 @@ void SiconosVectorTest::testConstructor2()
 }
 
 // copy from a SiconosVector
-void SiconosVectorTest::testConstructor3()
-{
+void SiconosVectorTest::testConstructor3() {
   std::cout << "--> Test: constructor 3." << std::endl;
   auto tmp = std::make_shared<SiconosVector>(vq);
   auto v = std::make_shared<SiconosVector>(*tmp);
@@ -145,8 +142,7 @@ void SiconosVectorTest::testConstructor3()
 }
 
 // Copy from a Dense
-void SiconosVectorTest::testConstructor4()
-{
+void SiconosVectorTest::testConstructor4() {
   std::cout << "--> Test: constructor 4." << std::endl;
   auto v = std::make_shared<SiconosVector>(*dv);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->size() == dv->size(), true);
@@ -158,8 +154,7 @@ void SiconosVectorTest::testConstructor4()
 }
 
 // Copy from a sparse
-void SiconosVectorTest::testConstructor5()
-{
+void SiconosVectorTest::testConstructor5() {
   std::cout << "--> Test: constructor 5." << std::endl;
   auto v = std::make_shared<SiconosVector>(*sv);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == sv->size(), true);
@@ -171,8 +166,7 @@ void SiconosVectorTest::testConstructor5()
 }
 
 // From a file
-void SiconosVectorTest::testConstructor6()
-{
+void SiconosVectorTest::testConstructor6() {
   std::cout << "--> Test: constructor 6." << std::endl;
   auto v = std::make_shared<SiconosVector>("vect.dat", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->size() == 4, true);
@@ -184,8 +178,7 @@ void SiconosVectorTest::testConstructor6()
 }
 
 // EXPLICIT copy from a block
-void SiconosVectorTest::testConstructor7()
-{
+void SiconosVectorTest::testConstructor7() {
   std::cout << "--> Test: constructor 7." << std::endl;
   auto v = std::make_shared<SiconosVector>(*xB);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("init from block : ", v->size() == xB->size(), true);
@@ -197,8 +190,7 @@ void SiconosVectorTest::testConstructor7()
 }
 
 // // zero
-void SiconosVectorTest::testZero()
-{
+void SiconosVectorTest::testZero() {
   std::cout << "--> Test: zero." << std::endl;
   auto v = std::make_shared<SiconosVector>(vq);
   v->zero();
@@ -207,8 +199,7 @@ void SiconosVectorTest::testZero()
   std::cout << "--> zero test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testNorm()
-{
+void SiconosVectorTest::testNorm() {
   std::cout << "--> Test: norm." << std::endl;
   auto v = std::make_shared<SiconosVector>(*dv);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", v->normInf() == norm_inf(*dv), true);
@@ -217,8 +208,7 @@ void SiconosVectorTest::testNorm()
 }
 
 // resize
-void SiconosVectorTest::testResize()
-{
+void SiconosVectorTest::testResize() {
   std::cout << "--> Test: resize." << std::endl;
   auto v = std::make_shared<SiconosVector>(vq);
   v->resize(6);
@@ -232,8 +222,7 @@ void SiconosVectorTest::testResize()
   std::cout << "-->  resize test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testSetBlockFriend()
-{
+void SiconosVectorTest::testSetBlockFriend() {
   std::cout << "--> Test: setBlock (friend)." << std::endl;
   // setBlock friend function
   // Obj: copy block (of size sizeB) ref[posIn...] into subBlock[posOut]
@@ -249,8 +238,7 @@ void SiconosVectorTest::testSetBlockFriend()
   std::cout << "--> setBlock test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testSetBlock()
-{
+void SiconosVectorTest::testSetBlock() {
   std::cout << "--> Test: setBlock." << std::endl;
 
   unsigned int sizeB = 9;
@@ -268,8 +256,7 @@ void SiconosVectorTest::testSetBlock()
 // // OPERATORS
 
 // =
-void SiconosVectorTest::testAssignment()
-{
+void SiconosVectorTest::testAssignment() {
   std::cout << "--> Test: assignment." << std::endl;
 
   auto v = std::make_shared<SiconosVector>(vq.size());
@@ -294,16 +281,14 @@ void SiconosVectorTest::testAssignment()
 }
 
 // ()
-void SiconosVectorTest::testOperators1()
-{
+void SiconosVectorTest::testOperators1() {
   std::cout << "--> Test: operators1." << std::endl;
 
   std::cout << "--> operators1 test ended with success." << std::endl;
 }
 
 // +=, -=, *=, /=
-void SiconosVectorTest::testOperators2()
-{
+void SiconosVectorTest::testOperators2() {
   std::cout << "--> Test: operators2." << std::endl;
 
   // dense +=, -=, ... dense
@@ -376,8 +361,7 @@ void SiconosVectorTest::testOperators2()
 }
 
 // inner_prod
-void SiconosVectorTest::testOperators3()
-{
+void SiconosVectorTest::testOperators3() {
   std::cout << "--> Test: operators3." << std::endl;
   auto v = std::make_shared<SiconosVector>(vq);
   auto w = std::make_shared<SiconosVector>(vq);
@@ -398,8 +382,7 @@ void SiconosVectorTest::testOperators3()
 }
 
 // vector * or / by double or int
-void SiconosVectorTest::testOperators4()
-{
+void SiconosVectorTest::testOperators4() {
   std::cout << "--> Test: operators4." << std::endl;
 
   double a = 2.2;
@@ -573,8 +556,7 @@ void SiconosVectorTest::testOperators4()
 }
 
 // vector * or / by double with function scal
-void SiconosVectorTest::testOperators4Bis()
-{
+void SiconosVectorTest::testOperators4Bis() {
   std::cout << "--> Test: operators4Bis." << std::endl;
 
   double a = 2.2;
@@ -644,8 +626,7 @@ void SiconosVectorTest::testOperators4Bis()
 }
 
 // vector * or / by double with function scal (init = false) =>   z += a*x
-void SiconosVectorTest::testOperators4Ter()
-{
+void SiconosVectorTest::testOperators4Ter() {
   std::cout << "--> Test: operators4Ter." << std::endl;
 
   double a = 2.2;
@@ -699,8 +680,7 @@ void SiconosVectorTest::testOperators4Ter()
 }
 
 // +
-void SiconosVectorTest::testOperators5()
-{
+void SiconosVectorTest::testOperators5() {
   //   // z = x + y
   std::cout << "--> Test: operators5." << std::endl;
 
@@ -760,8 +740,7 @@ void SiconosVectorTest::testOperators5()
   std::cout << "--> operators5 test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testOperators5Bis()
-{
+void SiconosVectorTest::testOperators5Bis() {
   //   // z = x + y with add
   std::cout << "--> Test: operators5Bis." << std::endl;
 
@@ -822,8 +801,7 @@ void SiconosVectorTest::testOperators5Bis()
 }
 
 // -
-void SiconosVectorTest::testOperators6()
-{
+void SiconosVectorTest::testOperators6() {
   //   // z = x - y
   std::cout << "--> Test: operators6." << std::endl;
 
@@ -883,8 +861,7 @@ void SiconosVectorTest::testOperators6()
   std::cout << "--> operators6 test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testOperators6Bis()
-{
+void SiconosVectorTest::testOperators6Bis() {
   //   // z = x - y with sub
   std::cout << "--> Test: operators6Bis." << std::endl;
 
@@ -944,8 +921,7 @@ void SiconosVectorTest::testOperators6Bis()
   std::cout << "--> operators6Bis test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testOperators7()
-{
+void SiconosVectorTest::testOperators7() {
   //   // y = ax + y
   std::cout << "--> Test: operators7." << std::endl;
 
@@ -988,8 +964,7 @@ void SiconosVectorTest::testOperators7()
 }
 
 // outer_prod(v,w) = trans(v)*w
-void SiconosVectorTest::testOperators8()
-{
+void SiconosVectorTest::testOperators8() {
   std::cout << "--> Test: operators8." << std::endl;
 
   auto res = std::make_shared<siconos::algebra::SimpleMatrix>(size1, size);
@@ -1028,8 +1003,7 @@ void SiconosVectorTest::testOperators8()
   std::cout << "--> operators8 test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testSubscal()
-{
+void SiconosVectorTest::testSubscal() {
   std::cout << "--> Test: testSubscal." << std::endl;
   unsigned int size = 12;
   auto xx = std::make_shared<SiconosVector>(size, 1.0);
@@ -1109,14 +1083,12 @@ void SiconosVectorTest::testSubscal()
   std::cout << "-->  subscal test ended with success." << std::endl;
 }
 
-void SiconosVectorTest::testStdOstream()
-{
+void SiconosVectorTest::testStdOstream() {
   auto y = std::make_shared<SiconosVector>(2, 1.0);
   std::cout << *y << std::endl;
 }
 
-void SiconosVectorTest::testStdVectorCast()
-{
+void SiconosVectorTest::testStdVectorCast() {
   auto y = std::make_shared<SiconosVector>(2, 1.0);
   std::vector<double> d(*y);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testStdVectorCast : ", d.size() == y->size(), true);
@@ -1124,18 +1096,15 @@ void SiconosVectorTest::testStdVectorCast()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testStdVectorCast : ", d[1] == 1.0, true);
 }
 
-void SiconosVectorTest::testIterators()
-{
+void SiconosVectorTest::testIterators() {
   auto y = std::make_shared<SiconosVector>(3, 1.0);
-  for (SiconosVector::iterator it = y->begin(); it != y->end(); it++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testIterators : ", *it == 1.0, true);
+  for (auto it : *y) CPPUNIT_ASSERT_EQUAL_MESSAGE("testIterators : ", it == 1.0, true);
 
   auto z = std::make_shared<SiconosVector>(3, 1.0);
-  for (auto& it : *z) CPPUNIT_ASSERT_EQUAL_MESSAGE("testIterators : ", it == 1.0, true);
+  for (auto it : *z) CPPUNIT_ASSERT_EQUAL_MESSAGE("testIterators : ", it == 1.0, true);
 }
 
-void SiconosVectorTest::End()
-{
+void SiconosVectorTest::End() {
   std::cout << "======================================" << std::endl;
   std::cout << " ===== End of SiconosVector Tests ===== " << std::endl;
   std::cout << "======================================" << std::endl;

@@ -23,10 +23,10 @@
 #include "LagrangianScleronomousR.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "SiconosAlgebraScal.hpp"
 #include "SiconosConst.hpp"  // For MACHINE_PREC
 #include "SiconosException.hpp"
+#include "SiconosMatrixOp.hpp"        // scal
+#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
@@ -42,13 +42,10 @@ siconos::integrators::NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double n
       _alpha_f{new_alpha_f},
       _gamma{new_gamma},
       _beta{new_beta},
-      _IsVelocityLevel{flag}
-{
-}
+      _IsVelocityLevel{flag} {}
 
 siconos::integrators::NewMarkAlphaOSI::NewMarkAlphaOSI(double rho_infty, bool flag = false)
-    : OneStepIntegrator(siconos::integrators::IntegratorType::NEWMARKALPHAOSI, 1, 0, 2, 1, 2)
-{
+    : OneStepIntegrator(siconos::integrators::IntegratorType::NEWMARKALPHAOSI, 1, 0, 2, 1, 2) {
   _alpha_m = (2 * rho_infty - 1) / (rho_infty + 1);
   _alpha_f = rho_infty / (rho_infty + 1);
   _gamma = 0.5 + _alpha_f - _alpha_m;
@@ -57,8 +54,7 @@ siconos::integrators::NewMarkAlphaOSI::NewMarkAlphaOSI(double rho_infty, bool fl
 }
 
 std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::NewMarkAlphaOSI::W(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds && "siconos::integrators::NewMarkAlphaOSI::W(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
          "siconos::integrators::NewMarkAlphaOSI::W(ds): W[ds] == nullptr.");
@@ -66,8 +62,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::NewMarkAlp
 }
 
 void siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   if (!ds)
     THROW_EXCEPTION(
         "siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds == "
@@ -90,8 +85,8 @@ void siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(
 }
 
 void siconos::integrators::NewMarkAlphaOSI::computeW(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds, siconos::algebra::SiconosMatrix& W)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+    siconos::algebra::SiconosMatrix& W) {
   auto beta_prime = (1. - _alpha_m) / ((1. - _alpha_f) * _beta);
   auto gamma_prime = _gamma / _beta;
   auto h = _simulation->nextTime() - _simulation->startingTime();  // step size
@@ -109,8 +104,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeW(
       if (K) *K *= -1.0;  // K = -K
       C = ltids->C();     // matrix C
       if (C) *C *= -1.0;  // C = -C
-    }
-    else  // LagrangianLinearDS
+    } else                // LagrangianLinearDS
     {
       K = lds->jacobianqForces();  // jacobian according to q
       C = lds->jacobianvForces();  // jacobian according to velocity
@@ -132,16 +126,14 @@ void siconos::integrators::NewMarkAlphaOSI::computeW(
     std::cout << "Iteration matrix W: ";
     W->display();
 #endif
-  }
-  else {
+  } else {
     THROW_EXCEPTION(
         "In siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(t,ds), this "
         "type of Dynamical System is not yet implemented");
   }
 }
 
-double siconos::integrators::NewMarkAlphaOSI::computeResidu()
-{
+double siconos::integrators::NewMarkAlphaOSI::computeResidu() {
   DEBUG_BEGIN("siconos::integrators::NewMarkAlphaOSI::computeResidu() \n");
   // Compute the residual for each Dynamical system at step n and at iteration k
   // R_{n,k} = M_{n,k} ddotq_{n,k} - F_{n,k} - p_{n,k}
@@ -189,8 +181,7 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu()
         }
         if (K) siconos::algebra::prod(*K, *q, residuFree, false);  // f = M*a + C*v + K*q
         if (C) siconos::algebra::prod(*C, *v, residuFree, false);  // freeR = M*a + C*v
-      }
-      else  // LagrangianDS
+      } else                                                       // LagrangianDS
       {
         // Update mass matrix
         d->computeMass();
@@ -215,8 +206,7 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu()
 
       DEBUG_EXPR(residuFree.display(););
       DEBUG_EXPR(_residu->display(););
-    }
-    else {
+    } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::computeResidu(t,ds), this type of "
           "Dynamical System is not yet implemented");
@@ -227,8 +217,7 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu()
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void siconos::integrators::NewMarkAlphaOSI::computeFreeState()
-{
+void siconos::integrators::NewMarkAlphaOSI::computeFreeState() {
   DEBUG_BEGIN("siconos::integrators::NewMarkAlphaOSI::computeFreeState()\n");
   // Compute delta q_free = - ((W_{n,k})^-1)*R_free
   // Loop through the set of DS
@@ -251,8 +240,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeState()
       qfree *= -1.0;    //_qfree = -(W^-1)*R_free
       //
       DEBUG_EXPR(qfree.display(););
-    }
-    else {
+    } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::computeResidu(t,ds), this type of "
           "Dynamical System is not yet implemented");
@@ -264,8 +252,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeState()
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   DEBUG_BEGIN(
       "siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(siconos::graphs::"
       "InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
@@ -349,9 +336,8 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
         _SclerR->computedotjacqhXqdot(t, *inter);
         siconos::algebra::subprod(*ID, *(_SclerR->dotjacqhXqdot()), osnsp_rhs, xcoord,
                                   false);  // y += NonLinearPart
-      }
-      else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]).get() ==
-               osnsp)  // LCP at position level
+      } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]).get() ==
+                 osnsp)  // LCP at position level
       {
         // Update Jacobian matrix
         inter->relation()->computeJach(t, *inter);
@@ -362,17 +348,15 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
           osnsp_rhs = *(inter->y(0));  // g_{n,k}
         }
         siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, false);
-      }
-      else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() ==
-               osnsp)  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
+      } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() ==
+                 osnsp)  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
       {
         auto h = _simulation->nextTime() - _simulation->startingTime();
         auto gamma_prime = _gamma / _beta;
         inter->computeOutput(t, 1);                        // Update output of level 1
         osnsp_rhs = (h / gamma_prime) * (*(inter->y(1)));  //(h/gamma_prime)*dotg_{n,k}
         siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, false);
-      }
-      else {
+      } else {
         osnsp->display();
         THROW_EXCEPTION(
             "siconos::integrators::NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not "
@@ -381,8 +365,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
     }  // endif(relationSubType == ScleronomousR)
 
     DEBUG_EXPR(osnsp_rhs.display(););
-  }
-  else {
+  } else {
     THROW_EXCEPTION(
         "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput, this type of relation "
         "is not yet implemented");
@@ -393,8 +376,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
 }
 
 void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   DEBUG_BEGIN(
       "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, "
       "std::shared_ptr<siconos::modeling::DynamicalSystem> ds)\n")
@@ -450,8 +432,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS(
     DEBUG_EXPR(lds->display());
 
     lds->swapInMemory();
-  }
-  else {
+  } else {
     THROW_EXCEPTION(
         "In siconos::integrators::NewMarkAlphaOSI::initialize: this type of DS is not yet "
         "implemented");
@@ -463,8 +444,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS(
 }
 void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   DEBUG_BEGIN(
       "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(...)\n")
   auto ds1 = interProp.source;
@@ -510,8 +490,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
     _levelMaxForOutput = 2;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-  }
-  else if (nslType == siconos::modeling::Type::NewtonImpactFrictionNSL) {
+  } else if (nslType == siconos::modeling::Type::NewtonImpactFrictionNSL) {
     _levelMinForOutput = 0;
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
@@ -519,8 +498,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
     THROW_EXCEPTION(
         "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction  not yet "
         "implemented for nonsmooth law of type NewtonImpactFrictionNSL");
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction not yet "
         "implemented  for nonsmooth of type");
@@ -576,8 +554,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
       "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(...)\n")
 }
 
-void siconos::integrators::NewMarkAlphaOSI::prepareNewtonIteration(double time)
-{
+void siconos::integrators::NewMarkAlphaOSI::prepareNewtonIteration(double time) {
   DEBUG_BEGIN("siconos::integrators::NewMarkAlphaOSI::prepareNewtonIteration(double time)\n");
   // Compute matrix W for all Dynamical Systems
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -594,8 +571,7 @@ void siconos::integrators::NewMarkAlphaOSI::prepareNewtonIteration(double time)
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void siconos::integrators::NewMarkAlphaOSI::prediction()
-{
+void siconos::integrators::NewMarkAlphaOSI::prediction() {
   DEBUG_BEGIN("siconos::integrators::NewMarkAlphaOSI::prediction()\n");
   // Step size
   double h = _simulation->nextTime() - _simulation->startingTime();
@@ -641,8 +617,7 @@ void siconos::integrators::NewMarkAlphaOSI::prediction()
       DEBUG_EXPR(_dotq->display(););
       DEBUG_EXPR(_ddotq->display(););
       DEBUG_EXPR(acce_like.display(););
-    }
-    else {
+    } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::prediction: this type of DS is not yet "
           "implemented");
@@ -652,8 +627,7 @@ void siconos::integrators::NewMarkAlphaOSI::prediction()
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void siconos::integrators::NewMarkAlphaOSI::correction()
-{
+void siconos::integrators::NewMarkAlphaOSI::correction() {
   auto h = _simulation->nextTime() - _simulation->startingTime();
   auto beta_prime = (1. - _alpha_m) / ((1. - _alpha_f) * _beta);
   auto gamma_prime = _gamma / _beta;
@@ -696,8 +670,7 @@ void siconos::integrators::NewMarkAlphaOSI::correction()
       DEBUG_EXPR(d->velocity()->display(););
       DEBUG_EXPR(d->acceleration()->display(););
       DEBUG_EXPR(acce_like.display(););
-    }
-    else {
+    } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::updateState: this type of DS is not yet "
           "implemented");
@@ -707,16 +680,14 @@ void siconos::integrators::NewMarkAlphaOSI::correction()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void siconos::integrators::NewMarkAlphaOSI::integrate(double& t_ini, double& t_end,
-                                                      double& t_out, int& flag)
-{
+                                                      double& t_out, int& flag) {
   THROW_EXCEPTION(
       "In siconos::integrators::NewMarkAlphaOSI::integrate, this method does nothing in the "
       "NewMarkAlpha OneStepIntegrator!!!");
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void siconos::integrators::NewMarkAlphaOSI::updateState(const unsigned int level)
-{
+void siconos::integrators::NewMarkAlphaOSI::updateState(const unsigned int level) {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   if (level == 1)  // ie impact case: compute velocity
   {
@@ -727,8 +698,7 @@ void siconos::integrators::NewMarkAlphaOSI::updateState(const unsigned int level
       auto lds = std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds);
       lds->computePostImpactVelocity();
     }
-  }
-  else if (level == 2) {
+  } else if (level == 2) {
     auto time = _simulation->nextTime();
     siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
@@ -736,8 +706,7 @@ void siconos::integrators::NewMarkAlphaOSI::updateState(const unsigned int level
       auto ds = _dynamicalSystemsGraph->bundle(*dsi);
       ds->update(time);
     }
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "In siconos::integrators::NewMarkAlphaOSI::updateState, index is out of range. Index "
         "= " +
@@ -746,8 +715,7 @@ void siconos::integrators::NewMarkAlphaOSI::updateState(const unsigned int level
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   auto h = _simulation->nextTime() - _simulation->startingTime();
 
   auto _vec = std::make_shared<siconos::algebra::SiconosVector>(ds->dimension());
@@ -827,16 +795,14 @@ void siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput(
     std::cout << "Dense output coefficient matrix: " << std::endl;
     _CoeffsDense->display();
 #endif
-  }
-  else {
+  } else {
     THROW_EXCEPTION(
         "In siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput: this type of DS "
         "has not been implemented yet");
   }
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void siconos::integrators::NewMarkAlphaOSI::prepareEventLocalization()
-{
+void siconos::integrators::NewMarkAlphaOSI::prepareEventLocalization() {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
@@ -846,8 +812,7 @@ void siconos::integrators::NewMarkAlphaOSI::prepareEventLocalization()
   }
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs(double t)
-{
+void siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs(double t) {
   // Make sure that all coefficients of the dense output polynomial for all DSs has been
   // computed before
   auto t_n = _simulation->startingTime();
@@ -896,8 +861,7 @@ void siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs(double t)
                              true);  // dotq = Matrix_coeffs*_vec2
       siconos::algebra::prod(coeffsDense, *_vec3, *(d->acceleration()),
                              true);  // ddotq = Matrix_coeffs*_vec3
-    }
-    else {
+    } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs: this type of DS has "
           "not been implemented yet");

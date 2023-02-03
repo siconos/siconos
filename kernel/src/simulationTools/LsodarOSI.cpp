@@ -31,11 +31,11 @@
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
-#include "SiconosAlgebraProd.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // For subscal
-#include "SiconosVisitor.hpp"        // for NSLEffectOnFreeOutput visitor
+#include "SiconosVectorOp.hpp"  // For subscal
+#include "SiconosVisitor.hpp"   // for NSLEffectOnFreeOutput visitor
 #include "SimpleMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -54,16 +54,14 @@ std::shared_ptr<siconos::integrators::LsodarOSI> global_object;
 // This first function must have the same signature as argument F (arg 1) in DLSODAR (see
 // opkdmain.f in Numerics)
 extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot);
-extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot)
-{
+extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot) {
   return global_object->f(sizeOfX, time, x, xdot);
 }
 
 // Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see opkdmain.f in
 // Numerics)
 extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut);
-extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut)
-{
+extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut) {
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
@@ -72,14 +70,12 @@ extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, 
 extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time, double* x, int* ml,
                                             int* mu, double* jacob, int* nrowpd);
 extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time, double* x, int* ml,
-                                            int* mu, double* jacob, int* nrowpd)
-{
+                                            int* mu, double* jacob, int* nrowpd) {
   return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
 
 siconos::integrators::LsodarOSI::LsodarOSI()
-    : OneStepIntegrator(IntegratorType::LSODAROSI, 1, 0, 2, 1, 2)
-{
+    : OneStepIntegrator(IntegratorType::LSODAROSI, 1, 0, 2, 1, 2) {
   _sizeMem = 2;
 
   rtol.reset(new double[_sizeTol]);  // rtol, relative tolerance
@@ -90,8 +86,7 @@ siconos::integrators::LsodarOSI::LsodarOSI()
 }
 
 void siconos::integrators::LsodarOSI::setTol(int newItol, boost::shared_array<double> newRtol,
-                                             boost::shared_array<double> newAtol)
-{
+                                             boost::shared_array<double> newAtol) {
   //            The input parameters ITOL, RTOL, and ATOL determine
   //         the error control performed by the solver.  The solver will
   //         control the vector E = (E(i)) of estimated local errors
@@ -113,35 +108,30 @@ void siconos::integrators::LsodarOSI::setTol(int newItol, boost::shared_array<do
   atol = newAtol;
 }
 
-void siconos::integrators::LsodarOSI::setMinMaxStepSizes(double minStep, double maxStep)
-{
+void siconos::integrators::LsodarOSI::setMinMaxStepSizes(double minStep, double maxStep) {
   _intData[5] = 1;  // set IOPT = 1
   rwork[5] = minStep;
   rwork[6] = maxStep;
 }
 
-void siconos::integrators::LsodarOSI::setMaxNstep(int maxNumberSteps)
-{
+void siconos::integrators::LsodarOSI::setMaxNstep(int maxNumberSteps) {
   _intData[5] = 1;  // set IOPT = 1
   iwork[5] = maxNumberSteps;
 }
 
-void siconos::integrators::LsodarOSI::setTol(int newItol, double newRtol, double newAtol)
-{
+void siconos::integrators::LsodarOSI::setTol(int newItol, double newRtol, double newAtol) {
   _itol = newItol;    // itol
   rtol[0] = newRtol;  // rtol
   atol[0] = newRtol;  // atol
 }
 
-void siconos::integrators::LsodarOSI::setMaxOrder(int maxorderNonStiff, int maxorderStiff)
-{
+void siconos::integrators::LsodarOSI::setMaxOrder(int maxorderNonStiff, int maxorderStiff) {
   _intData[5] = 1;  // set IOPT = 1
   iwork[7] = maxorderNonStiff;
   iwork[8] = maxorderStiff;
 }
 
-void siconos::integrators::LsodarOSI::updateData()
-{
+void siconos::integrators::LsodarOSI::updateData() {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
 
@@ -167,15 +157,13 @@ void siconos::integrators::LsodarOSI::updateData()
   for (int i = 0; i < _intData[1]; i++) jroot[i] = 0;
 }
 
-void siconos::integrators::LsodarOSI::fillXWork(int* sizeOfX, double* x)
-{
+void siconos::integrators::LsodarOSI::fillXWork(int* sizeOfX, double* x) {
   assert((unsigned int)(*sizeOfX) == _xWork->size() &&
          "siconos::integrators::LsodarOSI::fillXWork xWork and sizeOfX have different sizes");
   (*_xWork) = x;
 }
 
-void siconos::integrators::LsodarOSI::computeRhs(double t)
-{
+void siconos::integrators::LsodarOSI::computeRhs(double t) {
   DEBUG_BEGIN(
       "siconos::integrators::LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)\n")
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -205,8 +193,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t)
 }
 
 void siconos::integrators::LsodarOSI::computeJacobianRhs(
-    double t, siconos::graphs::DynamicalSystemsGraph& DSG0)
-{
+    double t, siconos::graphs::DynamicalSystemsGraph& DSG0) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
@@ -219,29 +206,26 @@ void siconos::integrators::LsodarOSI::computeJacobianRhs(
   }
 }
 
-void siconos::integrators::LsodarOSI::f(int* sizeOfX, double* time, double* x, double* xdot)
-{
+void siconos::integrators::LsodarOSI::f(int* sizeOfX, double* time, double* x, double* xdot) {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computef(*this, sizeOfX, time, x, xdot);
 }
 
 void siconos::integrators::LsodarOSI::g(int* nEq, double* time, double* x, int* ng,
-                                        double* gOut)
-{
+                                        double* gOut) {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
 void siconos::integrators::LsodarOSI::jacobianfx(int* sizeOfX, double* time, double* x,
-                                                 int* ml, int* mu, double* jacob, int* nrowpd)
-{
+                                                 int* ml, int* mu, double* jacob,
+                                                 int* nrowpd) {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computeJacobianfx(*this, sizeOfX, time, x, jacob);
 }
 
 void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   DEBUG_BEGIN(
       "siconos::integrators::LsodarOSI::initializeWorkVectorsForDS( double t, "
       "std::shared_ptr<siconos::modeling::DynamicalSystem> ds)\n");
@@ -258,8 +242,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
     ds_work_vectors.resize(siconos::integrators::LsodarOSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::LsodarOSI::FREE] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
-  }
-  else {
+  } else {
     if (!_xWork) _xWork = std::make_shared<siconos::algebra::BlockVector>();
     _xWork->insertPtr(ds->x());
   }
@@ -288,8 +271,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
 
 void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   auto ds1 = interProp.source;
   auto ds2 = interProp.target;
   assert(ds1);
@@ -327,8 +309,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
     _levelMaxForOutput = 2;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-  }
-  else if (nslType == siconos::modeling::Type::NewtonImpactFrictionNSL) {
+  } else if (nslType == siconos::modeling::Type::NewtonImpactFrictionNSL) {
     _levelMinForOutput = 0;
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
@@ -336,8 +317,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
     THROW_EXCEPTION(
         "siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction  not yet "
         "implemented for nonsmooth law of type NewtonImpactFrictionNSL");
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction not yet "
         "implemented  for this type of nonsmoothlaw");
@@ -391,8 +371,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
   }
 }
 
-void siconos::integrators::LsodarOSI::initialize()
-{
+void siconos::integrators::LsodarOSI::initialize() {
   DEBUG_BEGIN("siconos::integrators::LsodarOSI::initialize()\n");
   OneStepIntegrator::initialize();
   // std::string type;
@@ -475,8 +454,7 @@ void siconos::integrators::LsodarOSI::initialize()
 }
 
 void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, double& tout,
-                                                int& istate)
-{
+                                                int& istate) {
   DEBUG_BEGIN(
       "siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, double& tout, "
       "int& istate) with \n");
@@ -569,8 +547,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
       "int& istate)\n");
 }
 
-void siconos::integrators::LsodarOSI::updateState(const unsigned int level)
-{
+void siconos::integrators::LsodarOSI::updateState(const unsigned int level) {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   if (level == 1)  // ie impact case: compute velocity
@@ -581,8 +558,7 @@ void siconos::integrators::LsodarOSI::updateState(const unsigned int level)
           _dynamicalSystemsGraph->bundle(*dsi));
       lds->computePostImpactVelocity();
     }
-  }
-  else if (level == 2) {
+  } else if (level == 2) {
     auto time = _simulation->nextTime();
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
       if (!checkOSI(dsi)) continue;
@@ -591,8 +567,7 @@ void siconos::integrators::LsodarOSI::updateState(const unsigned int level)
         ds->update(time);
       }
     }
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::LsodarOSI::updateState(index), index is out of range. Index "
         "= " +
@@ -617,8 +592,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&) = delete;
   _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&&) = delete;
 
-  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override
-  {
+  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
     e = nslaw.e();
     std::vector<size_t> subCoord(4);
@@ -639,8 +613,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
 
 void siconos::integrators::LsodarOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   auto allOSNS = _simulation->oneStepNSProblems();
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
@@ -691,13 +664,11 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     assert(Xfree);
     //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
-  }
-  else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
+  } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
     Xfree = DSlink[siconos::modeling::LagrangianR::q1];
     //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
     //       Xfree->display();
-  }
-  else
+  } else
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
@@ -729,8 +700,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
         THROW_EXCEPTION(
             "siconos::integrators::LsodarOSI::computeFreeOutput not yet implemented for LCP "
             "at acceleration level with LagrangianRheonomousR");
-      }
-      else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
+      } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
         std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
             ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
                           *DSlink[siconos::modeling::LagrangianR::z]);
@@ -740,8 +710,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
                   inter->relation())
                   ->hDot()),
             osnsp_rhs, xcoord, false);  // y += hDot
-      }
-      else
+      } else
         THROW_EXCEPTION(
             "siconos::integrators::LsodarOSI::computeFreeOutput not implemented for "
             "SICONOS_OSNSP ");
@@ -759,8 +728,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
             osnsp_rhs, xcoord, false);  // y += NonLinearPart
       }
     }
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::LsodarOSI::computeFreeOutput not yet implemented for Relation "
         "of type " +
@@ -777,8 +745,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     }
   }
 }
-void siconos::integrators::LsodarOSI::display() const
-{
+void siconos::integrators::LsodarOSI::display() const {
   OneStepIntegrator::display();
   std::cout << " --- > LsodarOSI specific values: \n";
   std::cout << "Number of equations: " << _intData[0] << "\n";

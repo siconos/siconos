@@ -26,13 +26,13 @@
 #include "NonSmoothLaw.hpp"
 #include "NumericsToolsNamespace.h"  // for SparseBlockStructuredmatrix
 #include "SiconosException.hpp"
-#include "SimpleMatrix.hpp"
-#include "TypeName.hpp"  // for DS type visitor
 #include "SiconosVector.hpp"
-#include "Tools.hpp"  // For print
+#include "SimpleMatrix.hpp"
+#include "Tools.hpp"     // For print
+#include "TypeName.hpp"  // for DS type visitor
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES 1
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
 
 // Only square-blocks matrices for the moment (ie nRow = nr = nrol)
@@ -41,11 +41,9 @@
 // initialized with nr to reserve at first step the maximum possible
 // (according to given nr) space in memory.  Thus a future resize
 // will not require memory allocation or copy.
-siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow) : _nr(nRow), _nc{_nr}
-{
+siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow) : _nr(nRow), _nc{_nr} {
   _blockCSR = std::make_shared<CompressedRowMat>(_nr, _nr);
-  _sparseBlockStructuredMatrix =
-      std::make_shared<siconos::numerics::SparseBlockStructuredMatrix>();
+  _sparseBlockStructuredMatrix = std::make_shared<SparseBlockStructuredMatrix>();
   _diagsize0 = std::make_shared<std::vector<unsigned int>>(_nr);
   _diagsize1 = std::make_shared<std::vector<unsigned int>>(_nr);
   rowPos = std::make_shared<std::vector<unsigned int>>(_nr);
@@ -55,8 +53,7 @@ siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow) : _nr(nRo
 // Basic constructor
 siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(
     siconos::graphs::InteractionsGraph& indexSet)
-    : BlockCSRMatrix(indexSet.size())
-{
+    : BlockCSRMatrix(indexSet.size()) {
   DEBUG_BEGIN("siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(auto indexSet)\n");
   fill(indexSet);
   DEBUG_END(
@@ -66,8 +63,7 @@ siconos::simulation::BlockCSRMatrix::BlockCSRMatrix(
 }
 
 // Fill the SparseMat
-void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGraph& indexSet)
-{
+void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGraph& indexSet) {
   // ======> Aim: find inter1 and inter2 both in indexSets[level] and which
   // have common DynamicalSystems.  Then get the corresponding matrix
   // from map blocks.
@@ -131,8 +127,7 @@ void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGrap
   DEBUG_EXPR(display(););
 }
 
-void siconos::simulation::BlockCSRMatrix::fillW(siconos::graphs::InteractionsGraph& indexSet)
-{
+void siconos::simulation::BlockCSRMatrix::fillW(siconos::graphs::InteractionsGraph& indexSet) {
   /* on adjoint graph a dynamical system may be on several edges */
   std::map<std::shared_ptr<siconos::modeling::DynamicalSystem>, bool> involvedDS;
   siconos::graphs::InteractionsGraph::EIterator ei, eiend;
@@ -148,8 +143,7 @@ void siconos::simulation::BlockCSRMatrix::fillW(siconos::graphs::InteractionsGra
 
         (*_blockCSR)(_nr - 1, _nr - 1) = neds->mass()->getArray();
       }
-    }
-    else {
+    } else {
       THROW_EXCEPTION("siconos::simulation::BlockCSRMatrix::fillW only for Newton EulerDS");
     }
   }
@@ -166,8 +160,7 @@ void siconos::simulation::BlockCSRMatrix::fillW(siconos::graphs::InteractionsGra
   }
 }
 
-void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGraph& indexSet)
-{
+void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGraph& indexSet) {
   /* on adjoint graph a dynamical system may be on several edges */
   std::map<std::shared_ptr<siconos::modeling::DynamicalSystem>, unsigned int> involvedDS;
   siconos::graphs::InteractionsGraph::EIterator ei, eiend;
@@ -200,8 +193,7 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
         first = indexSet.bundle(*oei);
         col = involvedDS[first];
         pos = involvedDS[first];
-      }
-      else {
+      } else {
         if (indexSet.bundle(*oei) != first) {
           pos = involvedDS[indexSet.bundle(*oei)];
         }
@@ -233,8 +225,7 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
 }
 
 // convert _blockCSR to numerics structure
-void siconos::simulation::BlockCSRMatrix::convert()
-{
+void siconos::simulation::BlockCSRMatrix::convert() {
   DEBUG_BEGIN("void siconos::simulation::BlockCSRMatrix::convert()\n");
   _sparseBlockStructuredMatrix->blocknumber0 = _nr;
   _sparseBlockStructuredMatrix->blocknumber1 = _nr;  // nc not always set
@@ -267,8 +258,7 @@ void siconos::simulation::BlockCSRMatrix::convert()
 }
 
 // Display data
-void siconos::simulation::BlockCSRMatrix::display() const
-{
+void siconos::simulation::BlockCSRMatrix::display() const {
   std::cout << "----- Sparse Block Matrix with " << _nr << " blocks in a row/col and "
             << _blockCSR->nnz() << " non-null blocks\n";
   ;
@@ -298,7 +288,6 @@ void siconos::simulation::BlockCSRMatrix::display() const
   siconos::tools::print("_diagsize1 , sum of col sizes of the diagonal blocks\t", *_diagsize1);
 }
 
-unsigned int siconos::simulation::BlockCSRMatrix::getNbNonNullBlocks() const
-{
+unsigned int siconos::simulation::BlockCSRMatrix::getNbNonNullBlocks() const {
   return _blockCSR->nnz();
 };

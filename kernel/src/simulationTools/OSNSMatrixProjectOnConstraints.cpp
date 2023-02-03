@@ -32,7 +32,7 @@
 
 siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::
     OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m,
-                                   siconos::numerics::NM_types stor)
+                                   NM_types stor)
     : OSNSMatrix(n, m, stor)
 {
 }
@@ -84,7 +84,7 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
     _dimRow = _dimColumn;
   }
 
-  if (_storageType == siconos::numerics::NM_DENSE) {
+  if (_storageType == NM_DENSE) {
     // === Memory allocation, if required ===
     // Mem. is allocate only if !M or if its size has changed.
     if (update) {
@@ -143,7 +143,7 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
           std::max(pos, col), std::min(pos, col), *(indexSet.lower_blockProj[*ei]));
     }
   }
-  else  // if _storageType == siconos::numerics::NM_SPARSE_BLOCK
+  else  // if _storageType == NM_SPARSE_BLOCK
   {
     if (!_M2)
       _M2 = std::make_shared<siconos::simulation::BlockCSRMatrix>(indexSet);

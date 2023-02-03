@@ -16,13 +16,15 @@
  * limitations under the License.
  */
 #include "FirstOrderLinearR.hpp"
+
+#include <iostream>
+
+#include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
-#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "BlockVector.hpp"
-#include <iostream>
+#include "SimpleMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -34,8 +36,7 @@
 // Constructor with C and B plug-in names
 siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(const std::string &Cname,
                                                         const std::string &Bname)
-    : FirstOrderR(RelationSubType::LinearR)
-{
+    : FirstOrderR(RelationSubType::LinearR) {
   // Warning: we cannot allocate memory for C/D matrix since no interaction
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the
@@ -50,8 +51,7 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(const std::string &Cname
                                                         const std::string &Fname,
                                                         const std::string &Ename,
                                                         const std::string &Bname)
-    : FirstOrderR(RelationSubType::LinearR)
-{
+    : FirstOrderR(RelationSubType::LinearR) {
   _pluginJachx->setComputeFunction(Cname);
   _pluginJachlambda->setComputeFunction(Dname);
   _pluginJacglambda->setComputeFunction(Bname);
@@ -63,8 +63,7 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(const std::string &Cname
 siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : FirstOrderR(RelationSubType::LinearR)
-{
+    : FirstOrderR(RelationSubType::LinearR) {
   _C = C;
   _B = B;
 }
@@ -76,8 +75,7 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> E,
     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : FirstOrderR(RelationSubType::LinearR)
-{
+    : FirstOrderR(RelationSubType::LinearR) {
   _C = C;
   _B = B;
   _D = D;
@@ -85,8 +83,7 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
   _e = E;
 }
 
-void siconos::modeling::FirstOrderLinearR::initialize(Interaction &inter)
-{
+void siconos::modeling::FirstOrderLinearR::initialize(Interaction &inter) {
   FirstOrderR::initialize(inter);
 
   // get interesting size
@@ -116,8 +113,7 @@ void siconos::modeling::FirstOrderLinearR::initialize(Interaction &inter)
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderLinearR::checkSize(Interaction &inter)
-{
+void siconos::modeling::FirstOrderLinearR::checkSize(Interaction &inter) {
   auto &DSlink = inter.linkToDSVariables();
 
   // get inter and ds sizes
@@ -176,8 +172,7 @@ void siconos::modeling::FirstOrderLinearR::checkSize(Interaction &inter)
 }
 void siconos::modeling::FirstOrderLinearR::computeC(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SimpleMatrix &C)
-{
+                                                    siconos::algebra::SimpleMatrix &C) {
   if (_pluginJachx->fPtr) {
     auto zp = z.prepareVectorForPlugin();
     ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.size(0), C.size(1), &(C)(0, 0), zp->size(),
@@ -188,8 +183,7 @@ void siconos::modeling::FirstOrderLinearR::computeC(double time,
 
 void siconos::modeling::FirstOrderLinearR::computeD(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SimpleMatrix &D)
-{
+                                                    siconos::algebra::SimpleMatrix &D) {
   if (_pluginJachlambda->fPtr) {
     auto zp = z.prepareVectorForPlugin();
     ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, D.size(0), D.size(1), &(D)(0, 0), zp->size(),
@@ -200,8 +194,7 @@ void siconos::modeling::FirstOrderLinearR::computeD(double time,
 
 void siconos::modeling::FirstOrderLinearR::computeF(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SimpleMatrix &F)
-{
+                                                    siconos::algebra::SimpleMatrix &F) {
   if (_pluginf->fPtr) {
     auto zp = z.prepareVectorForPlugin();
     ((FOMatPtr1)(_pluginf->fPtr))(time, F.size(0), F.size(1), &(F)(0, 0), zp->size(),
@@ -212,8 +205,7 @@ void siconos::modeling::FirstOrderLinearR::computeF(double time,
 
 void siconos::modeling::FirstOrderLinearR::computee(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SiconosVector &e)
-{
+                                                    siconos::algebra::SiconosVector &e) {
   if (_plugine->fPtr) {
     auto zp = z.prepareVectorForPlugin();
     ((FOVecPtr)_plugine->fPtr)(time, e.size(), &(e)(0), zp->size(), &(*zp)(0));
@@ -223,8 +215,7 @@ void siconos::modeling::FirstOrderLinearR::computee(double time,
 
 void siconos::modeling::FirstOrderLinearR::computeB(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SimpleMatrix &B)
-{
+                                                    siconos::algebra::SimpleMatrix &B) {
   if (_pluginJacglambda->fPtr) {
     auto zp = z.prepareVectorForPlugin();
     ((FOMatPtr1)_pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), zp->size(),
@@ -236,13 +227,11 @@ void siconos::modeling::FirstOrderLinearR::computeB(double time,
 void siconos::modeling::FirstOrderLinearR::computeh(
     double time, const siconos::algebra::BlockVector &x,
     const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &z,
-    siconos::algebra::SiconosVector &y)
-{
+    siconos::algebra::SiconosVector &y) {
   if (_C) {
     computeC(time, z, *_C);
     siconos::algebra::prod(*_C, x, y, true);
-  }
-  else
+  } else
     y.zero();
 
   if (_D) {
@@ -260,8 +249,7 @@ void siconos::modeling::FirstOrderLinearR::computeh(
 }
 
 void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interaction &inter,
-                                                         unsigned int level)
-{
+                                                         unsigned int level) {
   DEBUG_BEGIN("siconos::modeling::FirstOrderLinearR::computeOutput \n");
   siconos::algebra::SiconosVector &y = *inter.y(level);
   siconos::algebra::SiconosVector &lambda = *inter.lambda(level);
@@ -272,22 +260,19 @@ void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interactio
 
 void siconos::modeling::FirstOrderLinearR::computeg(
     double time, const siconos::algebra::SiconosVector &lambda,
-    siconos::algebra::BlockVector &z, siconos::algebra::BlockVector &r)
-{
+    siconos::algebra::BlockVector &z, siconos::algebra::BlockVector &r) {
   computeB(time, z, *_B);
   siconos::algebra::prod(*_B, lambda, r, false);
 }
 
 void siconos::modeling::FirstOrderLinearR::computeInput(double time, Interaction &inter,
-                                                        unsigned int level)
-{
+                                                        unsigned int level) {
   auto &DSlink = inter.linkToDSVariables();
   siconos::algebra::BlockVector &z = *DSlink[FirstOrderR::z];
   computeg(time, *inter.lambda(level), z, *DSlink[FirstOrderR::r]);
 }
 
-void siconos::modeling::FirstOrderLinearR::display() const
-{
+void siconos::modeling::FirstOrderLinearR::display() const {
   std::cout << " ===== Linear relation display ===== "
             << "\n";
   std::cout << "| C "

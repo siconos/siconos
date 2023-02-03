@@ -23,9 +23,10 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "RotationQuaternion.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "SiconosMatrixOp.hpp"        // for mat prod
+#include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // inner_prod
+#include "SiconosVectorOp.hpp"  // for inner_prod
 #include "SimpleMatrix.hpp"
 
 // #define NERI_DEBUG

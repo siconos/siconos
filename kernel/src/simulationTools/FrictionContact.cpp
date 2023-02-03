@@ -31,27 +31,27 @@
 // #include <fc3d_Solvers.h>
 
 siconos::nonsmooth_formulations::FrictionContact::FrictionContact(int dimPb, int numericsSolverId)
-    : FrictionContact{dimPb, std::shared_ptr<siconos::numerics::SolverOptions>(
-                                 siconos::numerics::solver_options_create(numericsSolverId),
-                                 siconos::numerics::solver_options_delete)}
+    : FrictionContact{dimPb, std::shared_ptr<SolverOptions>(
+                                 solver_options_create(numericsSolverId),
+                                 solver_options_delete)}
 {
 }
 
 siconos::nonsmooth_formulations::FrictionContact::FrictionContact(
-    int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options)
+    int dimPb, std::shared_ptr<SolverOptions> options)
     : LinearOSNS{options}, _contactProblemDim{dimPb}
 {
-  if (dimPb == 2 && options->solverId == siconos::numerics::SICONOS_FRICTION_3D_NSGS) {
+  if (dimPb == 2 && options->solverId == SICONOS_FRICTION_3D_NSGS) {
     _numerics_solver_options.reset(
-        siconos::numerics::solver_options_create(siconos::numerics::SICONOS_FRICTION_2D_NSGS),
-        siconos::numerics::solver_options_delete);
+        solver_options_create(SICONOS_FRICTION_2D_NSGS),
+        solver_options_delete);
   }
 
   if (dimPb == 2) {
-    _frictionContact_driver = &siconos::numerics::fc2d_driver;
+    _frictionContact_driver = &fc2d_driver;
   }
   else if (dimPb == 3) {
-    _frictionContact_driver = &siconos::numerics::fc3d_driver;
+    _frictionContact_driver = &fc3d_driver;
   }
   else
     THROW_EXCEPTION("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
@@ -109,10 +109,10 @@ void siconos::nonsmooth_formulations::FrictionContact::updateMu()
   }
 }
 
-std::shared_ptr<siconos::numerics::FrictionContactProblem>
+std::shared_ptr<FrictionContactProblem>
 siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem()
 {
-  auto numerics_problem = std::make_shared<siconos::numerics::FrictionContactProblem>();
+  auto numerics_problem = std::make_shared<FrictionContactProblem>();
   numerics_problem->dimension = _contactProblemDim;
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->M = &*_M->numericsMatrix();
@@ -133,7 +133,7 @@ siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem()
 // }
 
 int siconos::nonsmooth_formulations::FrictionContact::solve(
-    std::shared_ptr<siconos::numerics::FrictionContactProblem> problem)
+    std::shared_ptr<FrictionContactProblem> problem)
 {
   if (!problem) {
     problem = frictionContactProblem();

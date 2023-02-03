@@ -78,18 +78,18 @@
 // */
 
 siconos::nonsmooth_formulations::AVI::AVI(int numericsSolverId)
-    : AVI(std::shared_ptr<siconos::numerics::SolverOptions>(
-          siconos::numerics::solver_options_create(numericsSolverId),
-          siconos::numerics::solver_options_delete))
+    : AVI(std::shared_ptr<SolverOptions>(
+          solver_options_create(numericsSolverId),
+          solver_options_delete))
 {
 }
 
 siconos::nonsmooth_formulations::AVI::AVI(
-    std::shared_ptr<siconos::numerics::SolverOptions> options)
+    std::shared_ptr<SolverOptions> options)
     : LinearOSNS(options),
-      _numerics_problem(std::make_shared<siconos::numerics::AffineVariationalInequalities>())
+      _numerics_problem(std::make_shared<AffineVariationalInequalities>())
 {
-  _numerics_problem->poly.split = new siconos::numerics::polyhedron;
+  _numerics_problem->poly.split = new polyhedron;
 }
 
 siconos::nonsmooth_formulations::AVI::~AVI() noexcept { delete _numerics_problem->poly.split; }
@@ -117,11 +117,11 @@ void siconos::nonsmooth_formulations::AVI::initialize(
     auto& H = nc.H();
     _numerics_problem->size = nc.size();
     _numerics_problem->d = nullptr;
-    _numerics_problem->poly.split->id = siconos::numerics::SICONOS_SET_POLYHEDRON;
+    _numerics_problem->poly.split->id = SICONOS_SET_POLYHEDRON;
     _numerics_problem->poly.split->size_ineq = K.size();
     _numerics_problem->poly.split->size_eq = 0;
-    _numerics_problem->poly.split->H = siconos::numerics::NM_create_from_data(
-        siconos::numerics::NM_DENSE, K.size(), nc.size(), H.getArray());
+    _numerics_problem->poly.split->H = NM_create_from_data(
+        NM_DENSE, K.size(), nc.size(), H.getArray());
     _numerics_problem->poly.split->K = K.getArray();
     _numerics_problem->poly.split->Heq = nullptr;
     _numerics_problem->poly.split->Keq = nullptr;
@@ -176,7 +176,7 @@ int siconos::nonsmooth_formulations::AVI::compute(double time)
     _numerics_problem->M = _M->numericsMatrix().get();
     _numerics_problem->q = _q->getArray();
 
-    info = siconos::numerics::avi_driver(_numerics_problem.get(), _z->getArray(),
+    info = avi_driver(_numerics_problem.get(), _z->getArray(),
                                          _w->getArray(), _numerics_solver_options.get());
 
     if (info != 0) {

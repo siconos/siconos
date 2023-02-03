@@ -48,7 +48,7 @@ siconos::simulation::Simulation::Simulation(
       std::vector<std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>>();
   _eventsManager = std::make_shared<EventsManager>(td);
   _eventsManager->updateT(_nsds->finalT());
-  _nsdsChangeLogPosition = _nsds->changeLogBegin();
+  _nsdsChangeLogPosition = _nsds->changeLog().begin();
 }
 
 // --- Destructor ---
@@ -154,7 +154,8 @@ void siconos::simulation::Simulation::insertNonSmoothProblem(
 
 void siconos::simulation::Simulation::initializeOSIAssociations() {
   // 1-  OneStepIntegrators initialization ===
-  // we set the simulation pointer and the graph of DS in osi
+  // we set the simulation pointer and the graph of DS in osi for all integrators
+  // declared in the set.
   for (auto osi : *_allOSI) {
     if (!osi->isInitialized()) {
       DEBUG_PRINT("- 1 - set simulation pointer  and the graph of ds in osi\n");
@@ -165,34 +166,33 @@ void siconos::simulation::Simulation::initializeOSIAssociations() {
   }
 
   // 2 - we set the osi of DS that has been defined through associate(ds,osi)
-  std::map<std::shared_ptr<siconos::integrators::OneStepIntegrator>,
-           std::list<std::shared_ptr<siconos::modeling::DynamicalSystem>>>::iterator it;
   std::list<std::shared_ptr<siconos::modeling::DynamicalSystem>>::iterator itlist;
-  for (it = _OSIDSmap.begin(); it != _OSIDSmap.end(); ++it) {
+  for (auto& osi_it : _OSIDSmap) {
     DEBUG_PRINT(
         "- 2 - we set the osi of DS that has been defined through associate(ds,osi)\n");
-    for (itlist = it->second.begin(); itlist != it->second.end(); ++itlist) {
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds = *itlist;
-      auto osi = it->first;
-
-      _nsds->topology()->setOSI(ds, osi);
+    for (auto& ds : osi_it.second) {
+      _nsds->topology()->setOSI(ds, osi_it.first);
     }
-    it->second.clear();
+    // osi_it.second.clear();  // clear the tmp list
   }
+  _OSIDSmap.clear();  // clear the tmp map.
 }
 
 void siconos::simulation::Simulation::initializeNSDSChangelog() {
   // 4- we initialize new  ds and interaction
   /* Changes to the NSDS are tracked by a changelog, making it fast
-   * for the Simulation to scan any changes it has not yet seen and
-   * initialize the associated ata structures.  It is just an
+   * for the Simulation to scan any changes if it has not yet seen and
+   * initialize the associated data structures.  It is just an
    * optimisation over scanning the whole NSDS for new elements at
    * each step. */
   auto DSG = _nsds->topology()->dSG(0);
-  auto& itc = _nsdsChangeLogPosition.it;
+  auto& itc = _nsdsChangeLogPosition;
 
   bool interactionInitialized = false;
   itc++;
+
+  // Loop through the changeLog, starting from the position saved
+  // during last call to initialize ...
   while (itc != _nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n")
@@ -200,9 +200,11 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
     itc++;
 
     DEBUG_EXPR(change.display());
+
+    // ---- A new ds in the NSDS ? ----
     if (change.typeOfChange ==
         siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addDynamicalSystem) {
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds = change.ds;
+      auto ds = change.ds;
       if (!DSG->properties(DSG->descriptor(ds)).osi) {
         if (_allOSI->size() == 0)
           THROW_EXCEPTION(
@@ -220,21 +222,23 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
                     << std::endl;
         }
       }
-      siconos::integrators::OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
+      auto& osi = *DSG->properties(DSG->descriptor(ds)).osi;
       osi.initializeWorkVectorsForDS(getTk(), ds);
     } else if (change.typeOfChange ==
                siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addInteraction) {
-      std::shared_ptr<siconos::modeling::Interaction> inter = change.i;
+      // ---- A new interaction in the NSDS ? ----
+      auto inter = change.i;
       initializeInteraction(getTk(), inter);
       interactionInitialized = true;
     } else if (change.typeOfChange ==
                siconos::modeling::NonSmoothDynamicalSystem::ChangeType::rmDynamicalSystem) {
+      // ---- A ds has been removed from the NDS ? ----
       // also need to force an update in this case since indexSet1 may
       // still have Interactions that refer to DSs that are not in graph
       interactionInitialized = true;
     }
   }
-  _nsdsChangeLogPosition = _nsds->changeLogPosition();
+  _nsdsChangeLogPosition = std::prev(_nsds->changeLog().end());
 
   // (re)initialize OneStepNSProblem(s) if necessary
   if (interactionInitialized || !_isInitialized) {
@@ -268,15 +272,15 @@ void siconos::simulation::Simulation::initializeIndexSets() {
   }
 
   auto topo = _nsds->topology();
-  unsigned int indxSize = topo->indexSetsSize();
+  auto indxSize = topo->indexSetsSize();
   assert(_numberOfIndexSets > 0);
   if ((indxSize == siconos::internal::LEVELMAX) || (indxSize < _numberOfIndexSets)) {
     DEBUG_PRINT("Topology : a different number of indexSets has been found \n");
     DEBUG_PRINT("Topology :  we resize the number of index sets \n");
     topo->indexSetsResize(_numberOfIndexSets);
     // Init if the size has changed
-    for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++)  // ++i ???
-      topo->resetIndexSetPtr(i);
+    for (auto i = indxSize; i < topo->indexSetsSize(); i++)  // ++i ???
+      topo->resetIndexSetPtr(i);                             // Creates the interaction graph
   }
 }
 
@@ -538,7 +542,7 @@ void siconos::simulation::Simulation::unlink(
 }
 
 void siconos::simulation::Simulation::updateInteractions() {
-  // Update interactions if a manager was provided.  Changes will be
+  // Update interactions if a manager has been provided.  Changes will be
   // detected by siconos::simulation::Simulation::initialize() changelog code.
   if (_interman) _interman->updateInteractions(shared_from_this());
 }

@@ -32,17 +32,17 @@
 #include "siconos_debug.h"
 
 siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(int FC3D_Solver_Id)
-    : GenericMechanical(std::shared_ptr<siconos::numerics::SolverOptions>(
-          siconos::numerics::solver_options_create(
-              siconos::numerics::SICONOS_GENERIC_MECHANICAL_NSGS),
-          siconos::numerics::solver_options_delete))
+    : GenericMechanical(std::shared_ptr<SolverOptions>(
+          solver_options_create(
+              SICONOS_GENERIC_MECHANICAL_NSGS),
+          solver_options_delete))
 {
-  siconos::numerics::solver_options_update_internal(_numerics_solver_options.get(), 1,
+  solver_options_update_internal(_numerics_solver_options.get(), 1,
                                                     FC3D_Solver_Id);
 }
 
 siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(
-    std::shared_ptr<siconos::numerics::SolverOptions> options)
+    std::shared_ptr<SolverOptions> options)
     : LinearOSNS(options)
 {
   DEBUG_BEGIN(
@@ -51,8 +51,8 @@ siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(
       "numerics::SolverOptions> options)\n");
   // assert(options->solverId == SICONOS_GENERIC_MECHANICAL_NSGS); this will be checked in the
   // driver
-  _numericsMatrixStorageType = siconos::numerics::NM_SPARSE_BLOCK;
-  _pnumerics_GMP = siconos::numerics::genericMechanicalProblem_new();
+  _numericsMatrixStorageType = NM_SPARSE_BLOCK;
+  _pnumerics_GMP = genericMechanicalProblem_new();
   DEBUG_END(
       "siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(std::shared_ptr<"
       "siconos::"
@@ -61,7 +61,7 @@ siconos::nonsmooth_formulations::GenericMechanical::GenericMechanical(
 
 siconos::nonsmooth_formulations::GenericMechanical::~GenericMechanical() noexcept
 {
-  genericMechanicalProblem_free(_pnumerics_GMP, siconos::numerics::GMP_FREE_GMP);
+  genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
   _pnumerics_GMP = nullptr;
 }
 
@@ -106,21 +106,21 @@ void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteract
     auto size = inter->nonSmoothLaw()->size();
     if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
         siconos::modeling::Type::EqualityConditionNSL) {
-      siconos::numerics::gmp_add(_pnumerics_GMP,
-                                 siconos::numerics::SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
+      gmp_add(_pnumerics_GMP,
+                                 SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
       DEBUG_PRINT("siconos::modeling::Type::EqualityConditionNSL\n");
       // pAux->size= inter->nonSmoothLaw()->size();
     }
     else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
              siconos::modeling::Type::NewtonImpactNSL) {
-      siconos::numerics::gmp_add(_pnumerics_GMP,
-                                 siconos::numerics::SICONOS_NUMERICS_PROBLEM_LCP, size);
+      gmp_add(_pnumerics_GMP,
+                                 SICONOS_NUMERICS_PROBLEM_LCP, size);
       DEBUG_PRINT(" siconos::modeling::Type::NewtonImpactNSL\n");
     }
     else if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
              siconos::modeling::Type::RelayNSL) {
-      auto* pAux = static_cast<siconos::numerics::RelayProblem*>(siconos::numerics::gmp_add(
-          _pnumerics_GMP, siconos::numerics::SICONOS_NUMERICS_PROBLEM_RELAY, size));
+      auto* pAux = static_cast<RelayProblem*>(gmp_add(
+          _pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_RELAY, size));
       auto nsLaw =
           std::static_pointer_cast<siconos::modeling::RelayNSL>(inter->nonSmoothLaw());
       for (decltype(size) i = 0; i < size; i++) {
@@ -133,8 +133,8 @@ void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteract
              siconos::modeling::Type::NewtonImpactFrictionNSL) {
       if (size == 3) {
         auto* pAux =
-            static_cast<siconos::numerics::FrictionContactProblem*>(siconos::numerics::gmp_add(
-                _pnumerics_GMP, siconos::numerics::SICONOS_NUMERICS_PROBLEM_FC3D, size));
+            static_cast<FrictionContactProblem*>(gmp_add(
+                _pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size));
         auto nsLaw = std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
             inter->nonSmoothLaw());
         pAux->dimension = 3;
@@ -145,8 +145,8 @@ void siconos::nonsmooth_formulations::GenericMechanical::computeDiagonalInteract
       }
       else if (size == 2) {
         auto* pAux =
-            static_cast<siconos::numerics::FrictionContactProblem*>(siconos::numerics::gmp_add(
-                _pnumerics_GMP, siconos::numerics::SICONOS_NUMERICS_PROBLEM_FC2D, size));
+            static_cast<FrictionContactProblem*>(gmp_add(
+                _pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC2D, size));
         auto nsLaw = std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
             inter->nonSmoothLaw());
         pAux->dimension = 2;
@@ -214,7 +214,7 @@ int siconos::nonsmooth_formulations::GenericMechanical::compute(double time)
     DEBUG_EXPR(display(););
     // Call Numerics Driver for GenericMechanical
     //    display();
-    info = siconos::numerics::gmp_driver(_pnumerics_GMP, &*_z->getArray(), &*_w->getArray(),
+    info = gmp_driver(_pnumerics_GMP, &*_z->getArray(), &*_w->getArray(),
                                          &*_numerics_solver_options);
     // printf("siconos::nonsmooth_formulations::GenericMechanical::compute : R:\n");
     //_z->display();
@@ -240,8 +240,8 @@ void siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks
   if (!_hasBeenUpdated) {
     //    printf("siconos::nonsmooth_formulations::GenericMechanical::updateInteractionBlocks :
     //    must be updated\n");
-    genericMechanicalProblem_free(_pnumerics_GMP, siconos::numerics::GMP_FREE_GMP);
-    _pnumerics_GMP = siconos::numerics::genericMechanicalProblem_new();
+    genericMechanicalProblem_free(_pnumerics_GMP, GMP_FREE_GMP);
+    _pnumerics_GMP = genericMechanicalProblem_new();
   }
   LinearOSNS::updateInteractionBlocks();
 }

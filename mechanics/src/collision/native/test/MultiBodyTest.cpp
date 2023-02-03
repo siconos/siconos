@@ -231,17 +231,17 @@ void Disks::init(std::string disks_input)
 
     // -- OneStepNsProblem --
     auto osnspb = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>(2);
-    osnspb->numericsSolverOptions()->iparam[siconos::numerics::SICONOS_IPARAM_MAX_ITER] =
+    osnspb->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] =
         100;  // Max number of
     // iterations
     // osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_ITER_DONE] = 20; // compute
     // error
     // iterations
-    osnspb->numericsSolverOptions()->dparam[siconos::numerics::SICONOS_DPARAM_TOL] =
+    osnspb->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] =
         1e-3;  // Tolerance
 
     osnspb->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
-    osnspb->setMStorageType(siconos::numerics::NM_SPARSE_BLOCK);  // Sparse storage
+    osnspb->setMStorageType(NM_SPARSE_BLOCK);  // Sparse storage
     osnspb->setNumericsVerboseMode(0);
 
     osnspb->setKeepLambdaAndYState(true);  // inject previous solution

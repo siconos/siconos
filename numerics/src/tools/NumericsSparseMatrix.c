@@ -34,14 +34,6 @@
 #include "numerics_verbose.h"  // for numerics_error_nonfatal, CHECK_IO
 #include "string.h"            // for memcpy, memset
 
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif
-
 typedef struct
 {
   CS_INT i;
@@ -61,12 +53,6 @@ static int sort_indices_struct_cmp(const void *a, const void *b)
   const sort_indices_struct *sb = (const sort_indices_struct *) b;
   return (sa->i > sb->i) - (sa->i < sb->i);
 }
-#endif
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic pop
 #endif
 
 version_t NSM_version(const NumericsSparseMatrix* M, NSM_t type)

@@ -19,7 +19,7 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "BlockMatrix.hpp"
-#include "SiconosMatrixFriends.hpp"
+#include "SiconosMatrixOp.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);

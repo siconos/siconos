@@ -30,15 +30,15 @@
 #define BOOST_NO_HASH
 #endif
 
-#include <SiconosConfig.h>
-
+#include <boost/config.hpp>
 #include <boost/version.hpp>
+
+#include "SiconosConfig.h"
 #if !defined(SICONOS_USE_MAP_FOR_HASH)
 #include <unordered_map>
 #else
 #include <map>
 #endif
-
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/directed_graph.hpp>
 #include <boost/graph/graph_concepts.hpp>
@@ -72,82 +72,54 @@ BOOST_INSTALL_PROPERTY(edge, siconos_bundle);
 namespace siconos::graphs {
 template <class V, class E, class VProperties, class EProperties, class GProperties>
 class SiconosGraph {
+ private:
+  using proxy_graph_t = boost::adjacency_list<boost::listS, boost::listS, boost::undirectedS>;
+
+  using graph_t = boost::adjacency_list<
+      boost::listS, boost::listS, boost::undirectedS,
+      boost::property<
+          vertex_siconos_bundle_t, V,
+          boost::property<boost::vertex_color_t, boost::default_color_type,
+                          boost::property<boost::vertex_index_t, size_t,
+                                          boost::property<vertex_properties_t, VProperties>>>>,
+      boost::property<
+          edge_siconos_bundle_t, E,
+          boost::property<boost::edge_color_t, boost::default_color_type,
+                          boost::property<boost::edge_index_t, size_t,
+                                          boost::property<edge_properties_t, EProperties>>>>,
+      boost::property<graph_properties_t, GProperties>>;
+
  public:
   /* note : OutEdgeList as multisetS => cannot compile remove_out_edge_if :
      /usr/include/boost/graph/detail/adjacency_list.hpp:440: error: passing 'const ... */
-  typedef boost::adjacency_list<boost::listS, boost::listS, boost::undirectedS> proxy_graph_t;
 
-  typedef typename boost::graph_traits<proxy_graph_t>::edge_descriptor EDescriptor;
-
-  typedef typename boost::graph_traits<proxy_graph_t>::vertex_descriptor VDescriptor;
-
-  typedef boost::adjacency_list<
-      boost::listS, boost::listS, boost::undirectedS,
-      boost::property<vertex_siconos_bundle_t, V,
-                      boost::property<boost::vertex_color_t, boost::default_color_type,
-                                      boost::property<boost::vertex_index_t, size_t,
-                                                      boost::property<vertex_properties_t,
-                                                                      VProperties> > > >,
-      boost::property<edge_siconos_bundle_t, E,
-                      boost::property<boost::edge_color_t, boost::default_color_type,
-                                      boost::property<boost::edge_index_t, size_t,
-                                                      boost::property<edge_properties_t,
-                                                                      EProperties> > > >,
-      boost::property<graph_properties_t, GProperties> >
-      graph_t;
-
-  typedef V vertex_t;
-
-  typedef E edge_t;
-
-  typedef typename boost::graph_traits<graph_t>::edge_iterator EIterator;
-
-  typedef typename boost::graph_traits<graph_t>::vertex_iterator VIterator;
-
-  //  typedef typename
-  //  graph_traits<graph_t>::edge_descriptor EDescriptor;
-
-  //  typedef typename
-  //  graph_traits<graph_t>::vertex_descriptor VDescriptor;
-
-  typedef typename boost::graph_traits<graph_t>::out_edge_iterator OEIterator;
-
-  typedef typename boost::graph_traits<graph_t>::adjacency_iterator AVIterator;
-
-  typedef typename boost::property_map<graph_t, edge_siconos_bundle_t>::type EBundleAccess;
-
-  typedef typename boost::property_map<graph_t, vertex_siconos_bundle_t>::type VBundleAccess;
-
-  typedef typename boost::property_map<graph_t, boost::edge_color_t>::type EColorAccess;
-
-  typedef typename boost::property_map<graph_t, boost::vertex_color_t>::type VColorAccess;
-
-  typedef typename boost::property_map<graph_t, boost::edge_index_t>::type EIndexAccess;
-
-  typedef typename boost::property_map<graph_t, boost::vertex_index_t>::type VIndexAccess;
-
-  typedef typename boost::property_map<graph_t, edge_properties_t>::type EPropertiesAccess;
-
-  typedef typename boost::property_map<graph_t, vertex_properties_t>::type VPropertiesAccess;
+  using vertex_t = V;
+  using edge_t = E;
+  using EDescriptor = boost::graph_traits<proxy_graph_t>::edge_descriptor;
+  using VDescriptor = boost::graph_traits<proxy_graph_t>::vertex_descriptor;
+  using EIterator = typename boost::graph_traits<graph_t>::edge_iterator;
+  using VIterator = typename boost::graph_traits<graph_t>::vertex_iterator;
+  using OEIterator = typename boost::graph_traits<graph_t>::out_edge_iterator;
+  using AVIterator = typename boost::graph_traits<graph_t>::adjacency_iterator;
+  using EIndexAccess = typename boost::property_map<graph_t, boost::edge_index_t>::type;
+  using VIndexAccess = typename boost::property_map<graph_t, boost::vertex_index_t>::type;
 
   // Need some Base, otherwise, we have a compile error with boost >= 1.51
-  //  typedef typename
-  //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
 #if !defined(SICONOS_USE_MAP_FOR_HASH)
-  typedef typename std::unordered_map<V, VDescriptor> VMap;
+  using VMap = std::unordered_map<vertex_t, VDescriptor>;
 #else
-  typedef typename std::map<V, VDescriptor> VMap;
+  using VMap = std::map<vertex_t, VDescriptor>;
 #endif
 
   int _stamp;
   VMap vertex_descriptor;
 
  protected:
-  typedef void serializable;
   template <typename Archive>
-  friend void siconos_io(Archive&, SiconosGraph<V, E, VProperties, EProperties, GProperties>&,
-                         const unsigned int);
+  friend void siconos_io(
+      Archive&, SiconosGraph<vertex_t, edge_t, VProperties, EProperties, GProperties>&,
+      const unsigned int);
   friend class boost::serialization::access;
 
   graph_t g;
@@ -229,7 +201,7 @@ class SiconosGraph {
     }
   }
 
-  bool is_edge(const VDescriptor& vd1, const VDescriptor& vd2, const E& e_bundle) const {
+  bool is_edge(const VDescriptor& vd1, const VDescriptor& vd2, const edge_t& e_bundle) const {
     bool found = false;
     OEIterator oei, oeiend;
     for (std::tie(oei, oeiend) = out_edges(vd1); oei != oeiend; ++oei) {
@@ -254,21 +226,25 @@ class SiconosGraph {
     return ret;
   }
 
-  size_t size() const { return boost::num_vertices(g); };
+  auto size() const { return boost::num_vertices(g); };
 
-  size_t vertices_number() const { return boost::num_vertices(g); };
+  auto vertices_number() const { return boost::num_vertices(g); };
 
-  size_t edges_number() const { return boost::num_edges(g); };
+  auto edges_number() const { return boost::num_edges(g); };
 
-  inline V& bundle(const VDescriptor& vd) { return boost::get(vertex_siconos_bundle, g)[vd]; };
-
-  inline const V& bundle(const VDescriptor& vd) const {
+  inline vertex_t& bundle(const VDescriptor& vd) {
     return boost::get(vertex_siconos_bundle, g)[vd];
   };
 
-  inline E& bundle(const EDescriptor& ed) { return boost::get(edge_siconos_bundle, g)[ed]; };
+  inline const vertex_t& bundle(const VDescriptor& vd) const {
+    return boost::get(vertex_siconos_bundle, g)[vd];
+  };
 
-  inline const E& bundle(const EDescriptor& ed) const {
+  inline edge_t& bundle(const EDescriptor& ed) {
+    return boost::get(edge_siconos_bundle, g)[ed];
+  };
+
+  inline const edge_t& bundle(const EDescriptor& ed) const {
     return boost::get(edge_siconos_bundle, g)[ed];
   };
 
@@ -290,17 +266,15 @@ class SiconosGraph {
 
   inline GProperties& properties() { return boost::get_property(g, graph_properties); };
 
-  inline size_t& index(const VDescriptor& vd) {
+  inline auto& index(const VDescriptor& vd) { return boost::get(boost::vertex_index, g)[vd]; };
+
+  inline const auto& index(const VDescriptor& vd) const {
     return boost::get(boost::vertex_index, g)[vd];
   };
 
-  inline const size_t& index(const VDescriptor& vd) const {
-    return boost::get(boost::vertex_index, g)[vd];
-  };
+  inline auto& index(const EDescriptor& ed) { return boost::get(boost::edge_index, g)[ed]; };
 
-  inline size_t& index(const EDescriptor& ed) { return boost::get(boost::edge_index, g)[ed]; };
-
-  inline const size_t& index(const EDescriptor& ed) const {
+  inline const auto& index(const EDescriptor& ed) const {
     return boost::get(boost::edge_index, g)[ed];
   };
 
@@ -322,11 +296,11 @@ class SiconosGraph {
   //    return get(edge_descriptor0, g)[ed];
   //  }
 
-  inline bool is_vertex(const V& vertex) const {
+  inline bool is_vertex(const vertex_t& vertex) const {
     return (vertex_descriptor.find(vertex) != vertex_descriptor.end());
   }
 
-  inline const VDescriptor& descriptor(const V& vertex) const {
+  inline const VDescriptor& descriptor(const vertex_t& vertex) const {
     assert(size() == vertex_descriptor.size());
     assert(vertex_descriptor.find(vertex) != vertex_descriptor.end());
     return (*vertex_descriptor.find(vertex)).second;
@@ -360,7 +334,7 @@ class SiconosGraph {
 
   inline VDescriptor source(const EDescriptor& ed) const { return boost::source(ed, g); };
 
-  VDescriptor add_vertex(const V& vertex_bundle) {
+  VDescriptor add_vertex(const vertex_t& vertex_bundle) {
     assert(vertex_descriptor.size() == size());
 
     VDescriptor new_vertex_descriptor;
@@ -392,7 +366,7 @@ class SiconosGraph {
   }
 
   template <class G>
-  void copy_vertex(const V& vertex_bundle, G& og) {
+  void copy_vertex(const vertex_t& vertex_bundle, G& og) {
     // is G similar ?
     BOOST_STATIC_ASSERT((boost::is_same<typename G::vertex_t, vertex_t>::value));
     BOOST_STATIC_ASSERT((boost::is_same<typename G::edge_t, edge_t>::value));
@@ -428,38 +402,30 @@ class SiconosGraph {
     }
   }
 
-  void remove_vertex(const V& vertex_bundle) {
+  void remove_vertex(const vertex_t& vertex_bundle) {
     assert(is_vertex(vertex_bundle));
     assert(vertex_descriptor.size() == size());
     assert(bundle(descriptor(vertex_bundle)) == vertex_bundle);
 
     VDescriptor vd = descriptor(vertex_bundle);
-    /*   debug */
-#ifndef NDEBUG
     assert(adjacent_vertices_ok());
-#endif
     boost::clear_vertex(vd, g);
-    /*   debug */
-#ifndef NDEBUG
     assert(adjacent_vertices_ok());
     assert(!adjacent_vertex_exists(vd));
-#endif
     boost::remove_vertex(vd, g);
 
     assert(vertex_descriptor.size() == (size() + 1));
 
     vertex_descriptor.erase(vertex_bundle);
 
-    /*  debug */
-#ifndef NDEBUG
     assert(adjacent_vertices_ok());
     assert(vertex_descriptor.size() == size());
     assert(!is_vertex(vertex_bundle));
     assert(state_assert());
-#endif
   }
 
-  EDescriptor add_edge(const VDescriptor& vd1, const VDescriptor& vd2, const E& e_bundle) {
+  EDescriptor add_edge(const VDescriptor& vd1, const VDescriptor& vd2,
+                       const edge_t& e_bundle) {
     EDescriptor new_edge;
     bool inserted;
 
@@ -501,30 +467,30 @@ class SiconosGraph {
   template <class AdjointG>
   std::pair<EDescriptor, typename AdjointG::VDescriptor> add_edge(const VDescriptor& vd1,
                                                                   const VDescriptor& vd2,
-                                                                  const E& e_bundle,
+                                                                  const edge_t& e_bundle,
                                                                   AdjointG& ag) {
     // adjoint static assertions
     BOOST_STATIC_ASSERT((boost::is_same<typename AdjointG::vertex_t, edge_t>::value));
     BOOST_STATIC_ASSERT((boost::is_same<typename AdjointG::edge_t, vertex_t>::value));
 
-    EDescriptor new_ed = add_edge(vd1, vd2, e_bundle);
+    auto new_ed = add_edge(vd1, vd2, e_bundle);
 
-    typename AdjointG::VDescriptor new_ve = ag.add_vertex(e_bundle);
+    auto new_ve = ag.add_vertex(e_bundle);
 
     assert(bundle(new_ed) == ag.bundle(new_ve));
     assert(ag.size() == edges_number());
 
     // better to build a range [vd1,vd2] or [vd1]...
     bool endl = false;
-    for (VDescriptor vdx = vd1; !endl; vdx = vd2) {
+    for (auto vdx = vd1; !endl; vdx = vd2) {
       assert(vdx == vd1 || vdx == vd2);
 
       if (vdx == vd2) endl = true;
 
 #if !defined(SICONOS_USE_MAP_FOR_HASH)
-      std::unordered_map<E, EDescriptor> Edone;
+      std::unordered_map<edge_t, EDescriptor> Edone;
 #else
-      std::map<E, EDescriptor> Edone;
+      std::map<edge_t, EDescriptor> Edone;
 #endif
 
       OEIterator ied, iedend;
@@ -547,15 +513,12 @@ class SiconosGraph {
 
             assert(!ag.is_edge(new_ve, ag.descriptor(bundle(*ied)), bundle(vdx)));
 
-#if !defined(NDEBUG)
-
-            typename AdjointG::EDescriptor aed =
-                ag.add_edge(new_ve, ag.descriptor(bundle(*ied)), bundle(vdx));
+#ifndef NDEBUG
+            auto aed =
 #endif
+                ag.add_edge(new_ve, ag.descriptor(bundle(*ied)), bundle(vdx));
 
             assert(ag.bundle(aed) == bundle(vdx));
-            //            assert(ag.bundle(ag.add_edge(new_ve, ag.descriptor(bundle(*ied)),
-            //            bundle(vdx))) == bundle(vdx));
           }
         }
       }
@@ -569,10 +532,7 @@ class SiconosGraph {
     assert(adjacent_vertex_exists(source(ed)));
 
     boost::remove_edge(ed, g);
-    /* debug */
-#ifndef NDEBUG
     assert(state_assert());
-#endif
   }
 
   template <class AdjointG>
@@ -589,10 +549,7 @@ class SiconosGraph {
     remove_edge(ed);
 
     assert(ag.size() == edges_number());
-    /* debug */
-#ifndef NDEBUG
     assert(state_assert());
-#endif
   }
 
   /** Remove all the out-edges of vertex u for which the predicate p
@@ -619,10 +576,7 @@ class SiconosGraph {
           }
         }
     */
-    /*  debug */
-#ifndef NDEBUG
     assert(state_assert());
-#endif
   }
 
   /** Remove all the in-edges of vertex u for which the predicate p
@@ -637,10 +591,7 @@ class SiconosGraph {
     BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
 
     boost::remove_in_edge_if(vd, pred, g);
-    /*  debug */
-#ifndef NDEBUG
     assert(state_assert());
-#endif
   }
 
   /** Remove all the in-edges of vertex u for which the predicate p
@@ -655,10 +606,7 @@ class SiconosGraph {
     BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
 
     boost::remove_edge_if(pred, g);
-    /*  debug */
-#ifndef NDEBUG
     assert(state_assert());
-#endif
   }
 
   int stamp() const { return _stamp; }
@@ -706,7 +654,6 @@ class SiconosGraph {
     }
   }
 
-  /* debug */
 #ifndef SWIG
 #ifndef NDEBUG
   bool state_assert() const {

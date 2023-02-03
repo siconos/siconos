@@ -21,8 +21,8 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "RotationQuaternion.hpp"  // siconos::geometry::computeRotationMatrix
-#include "SiconosAlgebraProd.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrixOp.hpp"  // For mat prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "op3x3.h"  // numerics: orthobasefromvector
@@ -37,8 +37,7 @@ See devNotes.pdf for details. A detailed documentation is available in DevNotes.
 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local
 velocities'
 */
-void siconos::modeling::NewtonEuler3DR::initialize(Interaction& inter)
-{
+void siconos::modeling::NewtonEuler3DR::initialize(Interaction& inter) {
   NewtonEuler1DR::initialize(inter);
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
@@ -49,8 +48,7 @@ void siconos::modeling::NewtonEuler3DR::initialize(Interaction& inter)
   //  _isContact=1;
 }
 void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
-    std::shared_ptr<siconos::algebra::SiconosVector> q1)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> q1) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(std::shared_ptr<"
       "siconos::algebra::SiconosVector> q1)\n");
@@ -173,8 +171,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
 
 void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
     std::shared_ptr<siconos::algebra::SiconosVector> q1,
-    std::shared_ptr<siconos::algebra::SiconosVector> q2)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> q2) {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
@@ -262,15 +259,13 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
 }
 
 void siconos::modeling::NewtonEuler3DR::computeJachqT(
-    Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0)
-{
+    Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler3DR::computeJachqT(Interaction& inter,  "
       "std::shared_ptr<siconos::algebra::BlockVector> q0)\n");
   if (q0->numberOfBlocks() > 1) {
     FC3DcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
-  }
-  else {
+  } else {
     FC3DcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
   DEBUG_END(

@@ -69,8 +69,8 @@ void siconos::control::Twisting::setNSdata(double hControl)
   (*K)(3) = -1.0;
 
   _nsLawSMC = std::make_shared<siconos::modeling::NormalConeNSL>(2, H, K);
-  _OSNSPB_SMC = std::make_shared<siconos::simulation::AVI>();
-  _numericsSolverId = siconos::numerics::SICONOS_AVI_CAOFERRIS;
+  _OSNSPB_SMC = std::make_shared<siconos::nonsmooth_formulations::AVI>();
+  _numericsSolverId = SICONOS_AVI_CAOFERRIS;
 }
 
 void siconos::control::Twisting::initialize(

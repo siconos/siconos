@@ -24,21 +24,18 @@ void SiconosGraphTest::setUp() {}
 
 void SiconosGraphTest::tearDown() {}
 
-using G =
-  siconos::graphs::SiconosGraph<std::string, int, boost::no_property, boost::no_property, boost::no_property>;
+using G = siconos::graphs::SiconosGraph<std::string, int, boost::no_property,
+                                        boost::no_property, boost::no_property>;
 
-using AG =
-    siconos::graphs::SiconosGraph<int, std::string, boost::no_property, boost::no_property, boost::no_property>;
+using AG = siconos::graphs::SiconosGraph<int, std::string, boost::no_property,
+                                         boost::no_property, boost::no_property>;
 
 // Default constructor
-void SiconosGraphTest::t1()
-{
+void SiconosGraphTest::t1() {
   G g;
 
-  G::VDescriptor vd1, vd2;
-
-  vd1 = g.add_vertex("hello");
-  vd2 = g.add_vertex("goodbye");
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
 
   CPPUNIT_ASSERT(g.size() == 2);
 
@@ -46,14 +43,11 @@ void SiconosGraphTest::t1()
   CPPUNIT_ASSERT(g.bundle(vd2) == "goodbye");
 }
 
-void SiconosGraphTest::t2()
-{
+void SiconosGraphTest::t2() {
   G g;
 
-  G::VDescriptor vd1, vd2;
-
-  vd1 = g.add_vertex("hello");
-  vd2 = g.add_vertex("goodbye");
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
 
   CPPUNIT_ASSERT(g.bundle(vd1) == "hello");
   CPPUNIT_ASSERT(g.bundle(vd2) == "goodbye");
@@ -62,14 +56,11 @@ void SiconosGraphTest::t2()
   CPPUNIT_ASSERT(g.bundle(g.descriptor(g.bundle(vd2))) == "goodbye");
 }
 
-void SiconosGraphTest::t3()
-{
+void SiconosGraphTest::t3() {
   G g;
 
-  G::VDescriptor vd1, vd2;
-
-  vd1 = g.add_vertex("hello");
-  vd2 = g.add_vertex("goodbye");
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
 
   g.remove_vertex("hello");
 
@@ -92,16 +83,13 @@ void SiconosGraphTest::t3()
   CPPUNIT_ASSERT(g.size() == 0);
 }
 
-void SiconosGraphTest::t4()
-{
+void SiconosGraphTest::t4() {
   G g;
   AG ag;
 
-  G::VDescriptor vd1, vd2, vd3;
-
-  vd1 = g.add_vertex("hello");
-  vd2 = g.add_vertex("goodbye");
-  vd3 = g.add_vertex("bye");
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+  auto vd3 = g.add_vertex("bye");
 
   g.add_edge(vd1, vd2, 1, ag);
   g.add_edge(vd1, vd2, 2, ag);
@@ -116,8 +104,7 @@ void SiconosGraphTest::t4()
 template <class SicGraph, class AdjointSicGraph>
 struct num_inf {
   num_inf(int n, SicGraph& sg, AdjointSicGraph& asg) : _n(n), _sg(sg), _asg(asg) {}
-  bool operator()(typename SicGraph::EDescriptor e)
-  {
+  bool operator()(typename SicGraph::EDescriptor e) {
     std::cout << _sg.bundle(e) << "<?" << _n << std::endl;
     if ((_sg.bundle(e) < _n) && _asg.is_vertex(_sg.bundle(e))) {
       CPPUNIT_ASSERT(_asg.bundle(_asg.descriptor(_sg.bundle(e))) == _sg.bundle(e));
@@ -127,8 +114,7 @@ struct num_inf {
 
       CPPUNIT_ASSERT(!_asg.is_vertex(_sg.bundle(e)));
       return true;
-    }
-    else {
+    } else {
       return (_sg.bundle(e) < _n);
     }
   }
@@ -137,16 +123,13 @@ struct num_inf {
   AdjointSicGraph& _asg;
 };
 
-void SiconosGraphTest::t5()
-{
+void SiconosGraphTest::t5() {
   G g;
   AG ag;
 
-  G::VDescriptor vd1, vd2, vd3;
-
-  vd1 = g.add_vertex("hello");
-  vd2 = g.add_vertex("goodbye");
-  vd3 = g.add_vertex("bye");
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+  auto vd3 = g.add_vertex("bye");
 
   std::cout << "t5:g\n";
 
@@ -186,14 +169,11 @@ void SiconosGraphTest::t5()
   CPPUNIT_ASSERT(ag.size() == 1);
 }
 
-void SiconosGraphTest::t6()
-{
+void SiconosGraphTest::t6() {
   G g;
   AG ag;
 
-  G::VDescriptor vd1;
-
-  vd1 = g.add_vertex("hello");
+  auto vd1 = g.add_vertex("hello");
 
   std::cout << "t6:g\n";
 
@@ -251,19 +231,16 @@ void SiconosGraphTest::t6()
   CPPUNIT_ASSERT(ag.size() == g.edges_number());
 }
 
-void SiconosGraphTest::t7()
-{
+void SiconosGraphTest::t7() {
   G g;
   AG ag;
 
-  G::VDescriptor vd1, vd2, vd3, vd4, vd5, vd6;
-
-  vd1 = g.add_vertex("hello");
-  vd2 = g.add_vertex("goodbye");
-  vd3 = g.add_vertex("bye");
-  vd4 = g.add_vertex("one");
-  vd5 = g.add_vertex("two");
-  vd6 = g.add_vertex("three");
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+  auto vd3 = g.add_vertex("bye");
+  auto vd4 = g.add_vertex("one");
+  auto vd5 = g.add_vertex("two");
+  auto vd6 = g.add_vertex("three");
 
   g.add_edge(vd1, vd2, 1, ag);
   g.add_edge(vd2, vd3, 2, ag);
@@ -292,22 +269,19 @@ void SiconosGraphTest::t7()
     std::cout << "yo " << ag.bundle(*ui) << std::endl;
     tot += k * ag.bundle(*ui);
   }
-  std::cout << tot << std::endl;
+
   CPPUNIT_ASSERT(tot == 300541);
 }
 
-void SiconosGraphTest::t8()
-{
+void SiconosGraphTest::t8() {
   G g;
 
-  G::VDescriptor vd1, vd2, vd3, vd4, vd5, vd6;
-
-  vd1 = g.add_vertex("hello");
-  vd2 = g.add_vertex("goodbye");
-  vd3 = g.add_vertex("bye");
-  vd4 = g.add_vertex("one");
-  vd5 = g.add_vertex("two");
-  vd6 = g.add_vertex("three");
+  auto vd1 = g.add_vertex("hello");
+  auto vd2 = g.add_vertex("goodbye");
+  auto vd3 = g.add_vertex("bye");
+  auto vd4 = g.add_vertex("one");
+  auto vd5 = g.add_vertex("two");
+  auto vd6 = g.add_vertex("three");
 
   CPPUNIT_ASSERT(g.bundle(vd1) == "hello");
   CPPUNIT_ASSERT(g.bundle(vd2) == "goodbye");

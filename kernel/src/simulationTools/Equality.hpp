@@ -61,7 +61,7 @@ class Equality : public LinearOSNS {
        see :ref:`problems_and_solvers` for details.
        \endrst
   */
-  Equality(std::shared_ptr<siconos::numerics::SolverOptions> options);
+  Equality(std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */

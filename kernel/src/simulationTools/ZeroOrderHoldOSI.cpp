@@ -30,9 +30,9 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for subscal
+#include "SiconosVectorOp.hpp"  // for subscal
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
@@ -47,13 +47,10 @@
 
 // --- constructor from a minimum set of data ---
 siconos::integrators::ZeroOrderHoldOSI::ZeroOrderHoldOSI()
-    : OneStepIntegrator{IntegratorType::ZOHOSI, 1, 0, 0, 0, 0}
-{
-}
+    : OneStepIntegrator{IntegratorType::ZOHOSI, 1, 0, 0, 0, 0} {}
 
 void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   DEBUG_BEGIN(
       "void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, "
       "std::shared_ptr<siconos::modeling::DynamicalSystem> ds)\n");
@@ -77,8 +74,7 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
         *ds, *_simulation->nonSmoothDynamicalSystem(),
         _simulation->eventsManager()->timeDiscretisation());
     if (DSG0.Ad.at(dsgVD)->isConst()) DSG0.Ad.at(dsgVD)->integrate();
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already "
         "initialized for ds the DS");
@@ -118,15 +114,13 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
               *ds, *_simulation->nonSmoothDynamicalSystem(),
               _simulation->eventsManager()->timeDiscretisation(), relR.B());
           if (DSG0.Bd.at(dsgVD)->isConst()) DSG0.Bd.at(dsgVD)->integrate();
-        }
-        else {
+        } else {
           DSG0.Bd[dsgVD] = std::make_shared<siconos::simulation::MatrixIntegrator>(
               *ds, *_simulation->nonSmoothDynamicalSystem(),
               _simulation->eventsManager()->timeDiscretisation(), relR.getPluging(),
               inter.dimension());
         }
-      }
-      else {
+      } else {
         //        THROW_EXCEPTION("siconos::integrators::ZeroOrderHoldOSI::initialize - DS
         //        linked with more that one iteraction");
         DEBUG_PRINTF("number of iteraction attached to the process : %d\n", indxIter);
@@ -146,8 +140,7 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
 
 void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   auto ds1 = interProp.source;
   auto ds2 = interProp.target;
   assert(ds1);
@@ -214,14 +207,12 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForInteraction
         std::make_shared<siconos::algebra::BlockVector>();
     inter_work_block[siconos::integrators::ZeroOrderHoldOSI::DELTA_X]->insertPtr(
         workVds1[siconos::integrators::ZeroOrderHoldOSI::DELTA_X_FOR_RELATION]);
-  }
-  else
+  } else
     inter_work_block[siconos::integrators::ZeroOrderHoldOSI::DELTA_X]->setVectorPtr(
         0, workVds1[siconos::integrators::ZeroOrderHoldOSI::DELTA_X_FOR_RELATION]);
 }
 
-double siconos::integrators::ZeroOrderHoldOSI::computeResidu()
-{
+double siconos::integrators::ZeroOrderHoldOSI::computeResidu() {
   DEBUG_BEGIN("double siconos::integrators::ZeroOrderHoldOSI::computeResidu()\n");
   // This function is used to compute the residu for each "MoreauJeanOSI-discretized" dynamical
   // system. It then computes the norm of each of them and finally return the maximum value for
@@ -245,8 +236,7 @@ double siconos::integrators::ZeroOrderHoldOSI::computeResidu()
     // 1 - First Order Linear Systems
     if (std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) {
       // No residu with ZOH ...
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::ZeroOrderHoldOSI::computeResidu - Only implemented for first "
           "order linear systems");
@@ -255,8 +245,7 @@ double siconos::integrators::ZeroOrderHoldOSI::computeResidu()
   return maxResidu;
 }
 
-void siconos::integrators::ZeroOrderHoldOSI::computeFreeState()
-{
+void siconos::integrators::ZeroOrderHoldOSI::computeFreeState() {
   DEBUG_BEGIN("void siconos::integrators::ZeroOrderHoldOSI::computeFreeState()\n");
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
@@ -300,8 +289,7 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeState()
         _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, h, xfree);
       }
       DEBUG_EXPR(xfree.display(););
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::ZeroOrderHoldOSI::computeFreeState - Only implemented for "
           "first "
@@ -310,8 +298,7 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeState()
   DEBUG_END("void siconos::integrators::ZeroOrderHoldOSI::computeFreeState()\n");
 }
 
-void siconos::integrators::ZeroOrderHoldOSI::prepareNewtonIteration(double time)
-{
+void siconos::integrators::ZeroOrderHoldOSI::prepareNewtonIteration(double time) {
   // siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
 
   // for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
@@ -338,8 +325,7 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
 
-  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override
-  {
+  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
     e = nslaw.e();
     auto sizeY = _inter->nonSmoothLaw()->size();
@@ -350,8 +336,7 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
                               false);
   }
 
-  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) const override
-  {
+  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) const override {
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
@@ -361,16 +346,14 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
   }
 
   void visit(const siconos::modeling::EqualityConditionNSL& nslaw) const override { ; }
-  void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) const override
-  {
+  void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) const override {
     ;
   }
 };
 
 void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   DEBUG_BEGIN("void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(...)\n");
   /** \warning: ensures that it can also work with two different osi for two different ds ?
    */
@@ -452,8 +435,7 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
 
         if (_useGammaForRelation) {
           siconos::algebra::subprod(*C, *deltax, osnsp_rhs, coord, true);
-        }
-        else {
+        } else {
           siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
         }
       }
@@ -468,8 +450,7 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
         if (relationSubType == siconos::modeling::RelationSubType::LinearTIR) {
           e = std::static_pointer_cast<siconos::modeling::FirstOrderLinearTIR>(rel)->e();
           F = std::static_pointer_cast<siconos::modeling::FirstOrderLinearTIR>(rel)->F();
-        }
-        else {
+        } else {
           e = std::static_pointer_cast<siconos::modeling::FirstOrderLinearR>(rel)->e();
           F = std::static_pointer_cast<siconos::modeling::FirstOrderLinearR>(rel)->F();
         }
@@ -489,14 +470,12 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
   DEBUG_END("void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(...)\n");
 }
 void siconos::integrators::ZeroOrderHoldOSI::integrate(double& tinit, double& tend,
-                                                       double& tout, int&)
-{
+                                                       double& tout, int&) {
   // This function should not be used
   THROW_EXCEPTION("siconos::integrators::ZeroOrderHoldOSI::integrate - should not be used");
 }
 
-void siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int level)
-{
+void siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int level) {
   DEBUG_BEGIN(
       "siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int level)\n");
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
@@ -538,8 +517,7 @@ void siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int leve
         }
       }
       DEBUG_EXPR(ds->display(););
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::ZeroOrderHoldOSI::updateState - Only implemented for first "
           "order linear DS");
@@ -548,8 +526,7 @@ void siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int leve
 }
 
 bool siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
@@ -569,29 +546,25 @@ bool siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet(
 }
 
 bool siconos::integrators::ZeroOrderHoldOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   return !(addInteractionInIndexSet(inter, i));
 }
 
 const siconos::algebra::SiconosMatrix& siconos::integrators::ZeroOrderHoldOSI::Ad(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
   auto& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
   auto dsgVD = DSG0.descriptor(ds);
   return DSG0.Ad.at(dsgVD)->mat();
 }
 
 const siconos::algebra::SiconosMatrix& siconos::integrators::ZeroOrderHoldOSI::Bd(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
   auto& DSG0 = *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0);
   auto dsgVD = DSG0.descriptor(ds);
   return DSG0.Bd.at(dsgVD)->mat();
 }
 
-void siconos::integrators::ZeroOrderHoldOSI::display() const
-{
+void siconos::integrators::ZeroOrderHoldOSI::display() const {
   OneStepIntegrator::display();
 
   std::cout << "====== ZOH OSI display ======" << std::endl;
@@ -611,8 +584,7 @@ void siconos::integrators::ZeroOrderHoldOSI::display() const
 }
 
 void siconos::integrators::ZeroOrderHoldOSI::updateMatrices(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   //  DynamicalSystemsGraph& DSG0 =
   //  *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0); if
   //  (!DSG0.Ad[dsgVD]->isConst())

@@ -26,9 +26,9 @@
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for subscal
+#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
@@ -46,8 +46,7 @@ siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFree
     : _osnsp(p), _inter(inter), _interProp(interProp){};
 
 void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
-    const siconos::modeling::NewtonImpactNSL& nslaw) const
-{
+    const siconos::modeling::NewtonImpactNSL& nslaw) const {
   double e = nslaw.e();
   std::vector<std::size_t> subCoord = {0, _inter->nonSmoothLaw()->size(), 0, 0};
   siconos::algebra::SiconosVector& osnsp_rhs =
@@ -57,12 +56,9 @@ void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
 
 siconos::integrators::D1MinusLinearOSI::D1MinusLinearOSI(D1MinusType type)
     : OneStepIntegrator{IntegratorType::D1MINUSLINEAROSI, 2, 0, 2, 1, 2},
-      _typeOfD1MinusLinearOSI{type}
-{
-}
+      _typeOfD1MinusLinearOSI{type} {}
 
-unsigned int siconos::integrators::D1MinusLinearOSI::numberOfIndexSets() const
-{
+unsigned int siconos::integrators::D1MinusLinearOSI::numberOfIndexSets() const {
   switch (_typeOfD1MinusLinearOSI) {
     case D1MinusType::halfexplicit_acceleration_level:
       return 4;
@@ -78,8 +74,7 @@ unsigned int siconos::integrators::D1MinusLinearOSI::numberOfIndexSets() const
   return 0;
 }
 void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // Get work buffers from the graph
   auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
@@ -113,8 +108,7 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
     // Compute a first value of the forces to store it in _forcesMemory
     neds->computeForces(t, neds->q(), neds->twist());
     neds->swapInMemory();
-  }
-  else {
+  } else {
     THROW_EXCEPTION(
         "siconos::integrators::D1MinusLinearOSI::initialize - Only implemented for Lagrangian "
         "or NewtonEuler dynamical systems.");
@@ -125,8 +119,7 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
   }
 }
 
-void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems()
-{
+void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
   auto allOSNSP = _simulation->oneStepNSProblems();  // all OSNSP
 
   bool isOSNSPinitialized = false;
@@ -178,8 +171,7 @@ void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems()
 
 void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   DEBUG_BEGIN(
       "siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction(siconos::"
       "modeling::Interaction&inter, siconos::graphs::InteractionProperties& interProp, "
@@ -236,8 +228,7 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
     DEBUG_PRINT("ds1 != ds2\n");
     if ((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() != 2))
       inter_work_block[xfree] = std::make_shared<siconos::algebra::BlockVector>(2);
-  }
-  else {
+  } else {
     if ((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() != 1))
       inter_work_block[xfree] = std::make_shared<siconos::algebra::BlockVector>(1);
   }
@@ -270,8 +261,7 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
     DSlink[siconos::modeling::LagrangianR::q2] =
         std::make_shared<siconos::algebra::BlockVector>();
     DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
-  }
-  else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+  } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
   }
 
   if (ds1 != ds2) {
@@ -279,8 +269,7 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
       DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
       DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
-    }
-    else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+    } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     }
   }
 
@@ -290,8 +279,7 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
       "siconos::graphs::DynamicalSystemsGraph & DSG)\n");
 }
 
-double siconos::integrators::D1MinusLinearOSI::computeResidu()
-{
+double siconos::integrators::D1MinusLinearOSI::computeResidu() {
   DEBUG_PRINT("\n ******************************************************************\n");
   DEBUG_PRINT(" ******************************************************************\n");
   DEBUG_PRINT(" ******************************************************************\n");
@@ -326,8 +314,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResidu()
   return 1;
 }
 
-void siconos::integrators::D1MinusLinearOSI::computeFreeState()
-{
+void siconos::integrators::D1MinusLinearOSI::computeFreeState() {
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::computeFreeState()\n");
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
@@ -357,8 +344,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeState()
       vfree *= -1.;
       vfree += vold;
       DEBUG_EXPR(vfree.display());
-    }
-    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       // NewtonEuler Systems
 
       // get left state from memory
@@ -377,8 +363,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeState()
       vfree *= -1.;
       vfree += vold;
       DEBUG_EXPR(vfree.display());
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeResidu - only implemented for "
           "Lagrangian or Newton Euler dynamical systems.");
@@ -386,8 +371,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeState()
   DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeState()\n");
 }
 
-void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int)
-{
+void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int)\n");
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -448,8 +432,7 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int)
       }
       DEBUG_EXPR(d->q()->display());
       DEBUG_EXPR(d->velocity()->display());
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeResidu - only implemented for "
           "Lagrangian or Newton Euler dynamical systems.");
@@ -460,8 +443,7 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int)
 
 void siconos::integrators::D1MinusLinearOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   DEBUG_PRINT("siconos::integrators::D1MinusLinearOSI::computeFreeOutput(), start\n");
   switch (_typeOfD1MinusLinearOSI) {
     case D1MinusType::halfexplicit_acceleration_level:
@@ -486,8 +468,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutput(
 }
 
 bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet.\n");
   DEBUG_END("siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet.\n");
   switch (_typeOfD1MinusLinearOSI) {
@@ -506,8 +487,7 @@ bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet(
 }
 
 bool siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
   DEBUG_END("siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
   switch (_typeOfD1MinusLinearOSI) {

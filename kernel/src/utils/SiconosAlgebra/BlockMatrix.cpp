@@ -24,19 +24,10 @@
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>  // subrange ...
-
-#include "SiconosMatrixFriends.hpp"  // Friends declarations
-// #include <iostream>  // for operator<<, ostream
-
-// #include "SiconosAlgebra.hpp"
+#include "SiconosMatrixOp.hpp"  // For setBlock, isComparableto ...
 #include "SiconosAlgebraTools.hpp"  // for isComparableTo
-// #include "SiconosException.hpp"
-#include "SiconosMatrixSetBlock.hpp"  // for setBlock
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
-// #include "SimpleMatrixFriends.hpp"
-// #include "Tools.hpp"
-// #include "SiconosPointers.hpp"
 
 // =================================================
 //                CONSTRUCTORS

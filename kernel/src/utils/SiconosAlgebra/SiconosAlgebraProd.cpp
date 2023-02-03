@@ -15,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SiconosAlgebraProd.hpp"
-
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -27,15 +25,17 @@
 #include "BlockVector.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixOp.hpp"        // For prod
+#include "SiconosMatrixVectorOp.hpp"  // For prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorIterator.hpp"
+#include "SiconosVectorOp.hpp"
 #include "SimpleMatrix.hpp"
 
 namespace ublas = boost::numeric::ublas;
 
 void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y,
-                            bool init)
-{
+                            bool init) {
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   unsigned int startRow = 0;
@@ -49,8 +49,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Bloc
 }
 
 void siconos::algebra::prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y,
-                            bool init)
-{
+                            bool init) {
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if (init) y.zero();
@@ -67,8 +66,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const BlockVector& x, Sicono
 }
 
 void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
-                            bool init)
-{
+                            bool init) {
   // To compute y = A * x in an "optimized" way (in comparison with y = prod(A,x) )
   // or y += A*x if init = false.
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
@@ -118,8 +116,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
             noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.dense());
           else  // if(numA==UblasType::BANDED)
             noalias(*y.dense()) = ublas::prod(*A.banded(), *x.dense());
-        }
-        else  // if(numX == UblasType::SPARSE)
+        } else  // if(numX == UblasType::SPARSE)
         {
           if (numY != UblasType::DENSE && numA != UblasType::SPARSE)
             THROW_EXCEPTION(" y (output) must be a dense vector or A a sparse matrix.");
@@ -135,12 +132,10 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
               noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.sparse());
             else
               noalias(*y.sparse()) = ublas::prod(*A.sparse(), *x.sparse());
-          }
-          else  // if(numA==UblasType::BANDED)
+          } else  // if(numA==UblasType::BANDED)
             noalias(*y.dense()) = ublas::prod(*A.banded(), *x.sparse());
         }
-      }
-      else  // if x and y are the same object => alias
+      } else  // if x and y are the same object => alias
       {
         if (numX == UblasType::DENSE) {
           if (numA == UblasType::DENSE)
@@ -153,8 +148,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
             *y.dense() = ublas::prod(*A.sparse(), *x.dense());
           else  // if(numA==UblasType::BANDED)
             *y.dense() = ublas::prod(*A.banded(), *x.dense());
-        }
-        else  // if(numX == UblasType::SPARSE)
+        } else  // if(numX == UblasType::SPARSE)
         {
           if (numA == UblasType::DENSE)
             *y.sparse() = ublas::prod(*A.dense(), *x.sparse());
@@ -168,8 +162,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
             *y.sparse() = ublas::prod(*A.banded(), *x.sparse());
         }
       }
-    }
-    else  // += case
+    } else  // += case
     {
       if (&x != &y)  // if no common memory between x and y.
       {
@@ -186,8 +179,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
             noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.dense());
           else  // if(numA==UblasType::BANDED)
             noalias(*y.dense()) += ublas::prod(*A.banded(), *x.dense());
-        }
-        else  // if(numX == UblasType::SPARSE)
+        } else  // if(numX == UblasType::SPARSE)
         {
           if (numY != UblasType::DENSE && numA != UblasType::SPARSE)
             THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
@@ -203,12 +195,10 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
               noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.sparse());
             else
               noalias(*y.sparse()) += ublas::prod(*A.sparse(), *x.sparse());
-          }
-          else  // if(numA==UblasType::BANDED)
+          } else  // if(numA==UblasType::BANDED)
             noalias(*y.dense()) += ublas::prod(*A.banded(), *x.sparse());
         }
-      }
-      else  // if x and y are the same object => alias
+      } else  // if x and y are the same object => alias
       {
         if (numX == UblasType::DENSE) {
           if (numA == UblasType::DENSE)
@@ -221,8 +211,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
             *y.dense() += ublas::prod(*A.sparse(), *x.dense());
           else  // if(numA==UblasType::BANDED)
             *y.dense() += ublas::prod(*A.banded(), *x.dense());
-        }
-        else  // if(numX == UblasType::SPARSE)
+        } else  // if(numX == UblasType::SPARSE)
         {
           if (numA == UblasType::DENSE)
             *y.sparse() += ublas::prod(*A.dense(), *x.sparse());
@@ -241,8 +230,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
 }
 
 void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y,
-                            bool init)
-{
+                            bool init) {
   // To compute y = trans(A) * x in an "optimized" way, if init = true
   // (or y = trans(A) * x + y if init = false
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
@@ -293,8 +281,7 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
               noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.dense());
             else  // if(numA==UblasType::BANDED)
               noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.dense());
-          }
-          else  // if(numX == UblasType::SPARSE)
+          } else  // if(numX == UblasType::SPARSE)
           {
             if (numY != UblasType::DENSE && numA != UblasType::SPARSE)
               THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
@@ -309,12 +296,10 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
                 noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.sparse());
               else
                 noalias(*y.sparse()) = ublas::prod(trans(*A.sparse()), *x.sparse());
-            }
-            else  // if(numA==UblasType::BANDED)
+            } else  // if(numA==UblasType::BANDED)
               noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.sparse());
           }
-        }
-        else  // if x and y are the same object => alias
+        } else  // if x and y are the same object => alias
         {
           if (numX == UblasType::DENSE) {
             if (numA == UblasType::DENSE)
@@ -327,8 +312,7 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
               *y.dense() = ublas::prod(trans(*A.sparse()), *x.dense());
             else  // if(numA==UblasType::BANDED)
               *y.dense() = ublas::prod(trans(*A.banded()), *x.dense());
-          }
-          else  // if(numX == UblasType::SPARSE)
+          } else  // if(numX == UblasType::SPARSE)
           {
             if (numA == UblasType::DENSE)
               *y.sparse() = ublas::prod(trans(*A.dense()), *x.sparse());
@@ -342,8 +326,7 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
               *y.sparse() = ublas::prod(trans(*A.banded()), *x.sparse());
           }
         }
-      }
-      else  // += case
+      } else  // += case
       {
         if (&x != &y)  // if no common memory between x and y.
         {
@@ -361,8 +344,7 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
               noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.dense());
             else  // if(numA==UblasType::BANDED)
               noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.dense());
-          }
-          else  // if(numX == UblasType::SPARSE)
+          } else  // if(numX == UblasType::SPARSE)
           {
             if (numY != UblasType::DENSE && numA != UblasType::SPARSE)
               THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
@@ -378,12 +360,10 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
                 noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.sparse());
               else
                 noalias(*y.sparse()) += ublas::prod(trans(*A.sparse()), *x.sparse());
-            }
-            else  // if(numA==UblasType::BANDED)
+            } else  // if(numA==UblasType::BANDED)
               noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.sparse());
           }
-        }
-        else  // if x and y are the same object => alias
+        } else  // if x and y are the same object => alias
         {
           if (numX == UblasType::DENSE) {
             if (numA == UblasType::DENSE)
@@ -396,8 +376,7 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
               *y.dense() += ublas::prod(trans(*A.sparse()), *x.dense());
             else  // if(numA==UblasType::BANDED)
               *y.dense() += ublas::prod(trans(*A.banded()), *x.dense());
-          }
-          else  // if(numX == UblasType::SPARSE)
+          } else  // if(numX == UblasType::SPARSE)
           {
             if (numA == UblasType::DENSE)
               *y.sparse() += ublas::prod(trans(*A.dense()), *x.sparse());
@@ -417,8 +396,7 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
 }
 
 void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y,
-                            bool init)
-{
+                            bool init) {
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if (A.size(0) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
@@ -438,8 +416,7 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Bloc
 // ========== Products matrix - vector
 
 siconos::algebra::SiconosVector siconos::algebra::prod(const SiconosMatrix& A,
-                                                       const SiconosVector& x)
-{
+                                                       const SiconosVector& x) {
   // To compute y = A * x
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
@@ -469,8 +446,7 @@ siconos::algebra::SiconosVector siconos::algebra::prod(const SiconosMatrix& A,
         return (DenseVect)(prod(*A.sparse(), *x.dense()));
       else  // if(numA==UblasType::BANDED)
         return (DenseVect)(prod(*A.banded(), *x.dense()));
-    }
-    else  // if(numX == UblasType::SPARSE)
+    } else  // if(numX == UblasType::SPARSE)
     {
       if (numA == UblasType::DENSE)
         return (DenseVect)(prod(*A.dense(), *x.sparse()));
@@ -487,8 +463,7 @@ siconos::algebra::SiconosVector siconos::algebra::prod(const SiconosMatrix& A,
 }
 
 const siconos::algebra::SimpleMatrix siconos::algebra::prod(const SiconosMatrix& A,
-                                                            const SiconosMatrix& B)
-{
+                                                            const SiconosMatrix& B) {
   auto numA = A.num();
   auto numB = B.num();
 
@@ -496,16 +471,14 @@ const siconos::algebra::SimpleMatrix siconos::algebra::prod(const SiconosMatrix&
     SimpleMatrix C(A.size(0), B.size(1), numA);
     prod(A, B, C);
     return C;
-  }
-  else {
+  } else {
     SimpleMatrix C(A.size(0), B.size(1));
     prod(A, B, C);
     return C;
   }
 }
 void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
-                            bool init)
-{
+                            bool init) {
   // To compute C = A * B
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
   assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorizedInPlace in prod !!");
@@ -533,8 +506,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
     if (init) {
       if (&C != &B) C = B;  // if C and B are two different objects.
       // else nothing
-    }
-    else
+    } else
       C += B;
   }
 
@@ -543,8 +515,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
     if (init) {
       if (&C != &A) C = A;  // if C and A are two different objects.
       // else nothing
-    }
-    else
+    } else
       C += A;
   }
 
@@ -552,14 +523,12 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
   {
     if (init) C.zero();
     // else nothing
-  }
-  else if (numC == UblasType::BLOCK)  // if C is Block - Temp. solution
+  } else if (numC == UblasType::BLOCK)  // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     prod(A, B, tmp, init);
     C = tmp;
-  }
-  else  // neither A or B is equal to identity or zero.
+  } else  // neither A or B is equal to identity or zero.
   {
     if (init) {
       if (&C == &A)  // if common memory between A and C
@@ -569,8 +538,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
             if (numB == UblasType::DENSE) {
               *C.dense() = prod(*A.dense(), *B.dense());
               // siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 0.0, *C.dense());
-            }
-            else if (numB == UblasType::TRIANGULAR)
+            } else if (numB == UblasType::TRIANGULAR)
               *C.dense() = prod(*A.dense(), *B.triang());
             else if (numB == UblasType::SYMMETRIC)
               *C.dense() = prod(*A.dense(), *B.sym());
@@ -597,8 +565,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
           default:
             THROW_EXCEPTION("not implemented for A type.");
         }
-      }
-      else if (&C == &B) {
+      } else if (&C == &B) {
         switch (numB) {
           case UblasType::DENSE:
             if (numA == UblasType::DENSE)
@@ -630,8 +597,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
           default:
             THROW_EXCEPTION("not implemented for B type.");
         }
-      }
-      else  // if no alias between C and A or B.
+      } else  // if no alias between C and A or B.
       {
         switch (numC) {
           case UblasType::DENSE:
@@ -646,8 +612,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
                 noalias(*C.dense()) = prod(*A.sparse(), *B.dense());
               else  // if(numA==UblasType::BANDED)
                 noalias(*C.dense()) = prod(*A.banded(), *B.dense());
-            }
-            else if (numB == UblasType::TRIANGULAR) {
+            } else if (numB == UblasType::TRIANGULAR) {
               if (numA == UblasType::DENSE)
                 noalias(*C.dense()) = prod(*A.dense(), *B.triang());
               else if (numA == UblasType::TRIANGULAR)
@@ -658,8 +623,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
                 noalias(*C.dense()) = prod(*A.sparse(), *B.triang());
               else  // if(numA==UblasType::BANDED)
                 noalias(*C.dense()) = prod(*A.banded(), *B.triang());
-            }
-            else if (numB == UblasType::SYMMETRIC) {
+            } else if (numB == UblasType::SYMMETRIC) {
               if (numA == UblasType::DENSE)
                 noalias(*C.dense()) = prod(*A.dense(), *B.sym());
               else if (numA == UblasType::TRIANGULAR)
@@ -670,8 +634,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
                 noalias(*C.dense()) = prod(*A.sparse(), *B.sym());
               else  // if (numA == UblasType::BANDED)
                 noalias(*C.dense()) = prod(*A.banded(), *B.sym());
-            }
-            else if (numB == UblasType::SPARSE) {
+            } else if (numB == UblasType::SPARSE) {
               if (numA == UblasType::DENSE)
                 noalias(*C.dense()) = prod(*A.dense(), *B.sparse());
               else if (numA == UblasType::TRIANGULAR)
@@ -682,8 +645,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
                 noalias(*C.dense()) = prod(*A.sparse(), *B.sparse());
               else  // if(numA==UblasType::BANDED){
                 noalias(*C.dense()) = prod(*A.banded(), *B.sparse());
-            }
-            else  // if(numB==UblasType::BANDED)
+            } else  // if(numB==UblasType::BANDED)
             {
               if (numA == UblasType::DENSE)
                 noalias(*C.dense()) = prod(*A.dense(), *B.banded());
@@ -716,8 +678,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
             THROW_EXCEPTION("not implemented for C type.");
         }
       }
-    }
-    else  // += case
+    } else  // += case
     {
       if (&C == &A)  // if common memory between A and C
       {
@@ -752,8 +713,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
           default:
             THROW_EXCEPTION("not implemented for A type.");
         }
-      }
-      else if (&C == &B) {
+      } else if (&C == &B) {
         switch (numB) {
           case UblasType::DENSE:
             if (numA == UblasType::DENSE)
@@ -785,8 +745,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
           default:
             THROW_EXCEPTION("not yet implemented for A type.");
         }
-      }
-      else  // if no alias between C and A or B.
+      } else  // if no alias between C and A or B.
       {
         switch (numC) {
           case UblasType::DENSE:
@@ -801,8 +760,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
                 noalias(*C.dense()) += prod(*A.sparse(), *B.dense());
               else  // if(numA==UblasType::BANDED)
                 noalias(*C.dense()) += prod(*A.banded(), *B.dense());
-            }
-            else if (numB == UblasType::TRIANGULAR) {
+            } else if (numB == UblasType::TRIANGULAR) {
               if (numA == UblasType::DENSE)
                 noalias(*C.dense()) += prod(*A.dense(), *B.triang());
               else if (numA == UblasType::TRIANGULAR)
@@ -813,8 +771,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
                 noalias(*C.dense()) += prod(*A.sparse(), *B.triang());
               else  // if(numA==UblasType::BANDED)
                 noalias(*C.dense()) += prod(*A.banded(), *B.triang());
-            }
-            else if (numB == UblasType::SYMMETRIC) {
+            } else if (numB == UblasType::SYMMETRIC) {
               if (numA == UblasType::DENSE)
                 noalias(*C.dense()) += prod(*A.dense(), *B.sym());
               else if (numA == UblasType::TRIANGULAR)
@@ -825,8 +782,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
                 noalias(*C.dense()) += prod(*A.sparse(), *B.sym());
               else  // if (numA == BANDED)
                 noalias(*C.dense()) += prod(*A.banded(), *B.sym());
-            }
-            else if (numB == UblasType::SPARSE) {
+            } else if (numB == UblasType::SPARSE) {
               if (numA == UblasType::DENSE)
                 noalias(*C.dense()) += prod(*A.dense(), *B.sparse());
               else if (numA == UblasType::TRIANGULAR)
@@ -837,8 +793,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
                 noalias(*C.dense()) += prod(*A.sparse(), *B.sparse());
               else  // if(numA==UblasType::BANDED){
                 noalias(*C.dense()) += prod(*A.banded(), *B.sparse());
-            }
-            else  // if(numB==UblasType::BANDED)
+            } else  // if(numB==UblasType::BANDED)
             {
               if (numA == UblasType::DENSE)
                 noalias(*C.dense()) += prod(*A.dense(), *B.banded());
@@ -877,8 +832,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, Sico
 }
 
 void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVector& x,
-                            SiconosVector& y, bool init)
-{
+                            SiconosVector& y, bool init) {
   // To compute y = a*A * x in an "optimized" way (in comparison with y = prod(A,x) )
   // or y += a*A*x if init = false.
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
@@ -927,8 +881,7 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
                 noalias(*y.dense()) = a * ublas::prod(*A.sparse(), *x.dense());
               else  // if(numA==UblasType::BANDED)
                 noalias(*y.dense()) = a * ublas::prod(*A.banded(), *x.dense());
-            }
-            else  // if(numX == UblasType::SPARSE)
+            } else  // if(numX == UblasType::SPARSE)
             {
               if (numY != UblasType::DENSE && numA != UblasType::SPARSE)
                 THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
@@ -944,12 +897,10 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
                   noalias(*y.dense()) = a * ublas::prod(*A.sparse(), *x.sparse());
                 else
                   noalias(*y.sparse()) = a * ublas::prod(*A.sparse(), *x.sparse());
-              }
-              else  // if(numA==UblasType::BANDED)
+              } else  // if(numA==UblasType::BANDED)
                 noalias(*y.dense()) = a * ublas::prod(*A.banded(), *x.sparse());
             }
-          }
-          else  // if x and y are the same object => alias
+          } else  // if x and y are the same object => alias
           {
             if (numX == UblasType::DENSE) {
               if (numA == UblasType::DENSE)
@@ -962,8 +913,7 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
                 *y.dense() = a * ublas::prod(*A.sparse(), *x.dense());
               else  // if(numA==UblasType::BANDED)
                 *y.dense() = a * ublas::prod(*A.banded(), *x.dense());
-            }
-            else  // if(numX == UblasType::SPARSE)
+            } else  // if(numX == UblasType::SPARSE)
             {
               if (numA == UblasType::DENSE)
                 *y.sparse() = a * ublas::prod(*A.dense(), *x.sparse());
@@ -977,8 +927,7 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
                 *y.sparse() = a * ublas::prod(*A.banded(), *x.sparse());
             }
           }
-        }
-        else  // += case
+        } else  // += case
         {
           if (&x != &y)  // if no common memory between x and y.
           {
@@ -996,8 +945,7 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
                 noalias(*y.dense()) += a * ublas::prod(*A.sparse(), *x.dense());
               else  // if(numA==UblasType::BANDED)
                 noalias(*y.dense()) += a * ublas::prod(*A.banded(), *x.dense());
-            }
-            else  // if(numX == UblasType::SPARSE)
+            } else  // if(numX == UblasType::SPARSE)
             {
               if (numY != UblasType::DENSE && numA != UblasType::SPARSE)
                 THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
@@ -1013,12 +961,10 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
                   noalias(*y.dense()) += a * ublas::prod(*A.sparse(), *x.sparse());
                 else
                   noalias(*y.sparse()) += a * ublas::prod(*A.sparse(), *x.sparse());
-              }
-              else  // if(numA==UblasType::BANDED)
+              } else  // if(numA==UblasType::BANDED)
                 noalias(*y.dense()) += a * ublas::prod(*A.banded(), *x.sparse());
             }
-          }
-          else  // if x and y are the same object => alias
+          } else  // if x and y are the same object => alias
           {
             if (numX == UblasType::DENSE) {
               if (numA == UblasType::DENSE)
@@ -1031,8 +977,7 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
                 *y.dense() += a * ublas::prod(*A.sparse(), *x.dense());
               else  // if(numA==UblasType::BANDED)
                 *y.dense() += a * ublas::prod(*A.banded(), *x.dense());
-            }
-            else  // if(numX == UblasType::SPARSE)
+            } else  // if(numX == UblasType::SPARSE)
             {
               if (numA == UblasType::DENSE)
                 *y.sparse() += a * ublas::prod(*A.dense(), *x.sparse());
@@ -1054,8 +999,7 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
 
 void siconos::algebra::taxpy(const SiconosVector& x, const SiconosMatrix& A,
                              unsigned int startRow, unsigned int startCol,
-                             std::shared_ptr<SiconosVector> y, bool init)
-{
+                             std::shared_ptr<SiconosVector> y, bool init) {
   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of trans(A), between
   // el. of A of index (col) startCol and startCol + sizeY
@@ -1101,8 +1045,7 @@ void siconos::algebra::taxpy(const SiconosVector& x, const SiconosMatrix& A,
           prod(ublas::subrange(trans(*A.banded()), startRow, startRow + sizeY, startCol,
                                startCol + sizeX),
                *x.dense());
-  }
-  else  // x and y sparse
+  } else  // x and y sparse
   {
     if (numA == UblasType::SPARSE)
       *y->sparse() += prod(ublas::subrange(trans(*A.sparse()), startRow, startRow + sizeY,

@@ -41,3 +41,4 @@ void siconos::collision::bullet::internal::RigidBodyDSVisitor::visit(
     impl->updateAllShapesForDS(*bds);
   }
 }
+  

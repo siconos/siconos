@@ -24,11 +24,7 @@
 #define CommonSMC_H
 
 #include "Actuator.hpp"
-
-namespace siconos::numerics {
-
-#include <relay_cst.h>  // contains only enum. Ok.
-}  // namespace siconos::numerics
+#include "relay_cst.h"  // contains only enum. Ok.
 
 namespace siconos::modeling {
 
@@ -42,9 +38,12 @@ namespace siconos::integrators {
 class OneStepIntegrator;
 }
 
+namespace siconos::nonsmooth_formulations {
+class LinearOSNS;
+}  // namespace siconos::simulation
+
 namespace siconos::simulation {
 class TimeStepping;
-class LinearOSNS;
 class EventsManager;
 
 }  // namespace siconos::simulation
@@ -94,7 +93,7 @@ class CommonSMC : public Actuator {
   std::shared_ptr<siconos::algebra::SiconosVector> _lambda{nullptr};
 
   /** Relay solver type */
-  int _numericsSolverId{siconos::numerics::SICONOS_RELAY_AVI_CAOFERRIS};
+  int _numericsSolverId{SICONOS_RELAY_AVI_CAOFERRIS};
 
   /** Numerical precision expected for the Relay solver */
   double _precision{1e-8};
@@ -118,7 +117,7 @@ class CommonSMC : public Actuator {
   double _thetaSMC{0.5};
 
   /** OneStepNsProblem for the controller */
-  std::shared_ptr<siconos::simulation::LinearOSNS> _OSNSPB_SMC{nullptr};
+  std::shared_ptr<siconos::nonsmooth_formulations::LinearOSNS> _OSNSPB_SMC{nullptr};
 
   /** std::shared_ptr<siconos::simulation::EventsManager> of the SMC Simulation */
   std::shared_ptr<siconos::simulation::EventsManager> _eventsManager{nullptr};

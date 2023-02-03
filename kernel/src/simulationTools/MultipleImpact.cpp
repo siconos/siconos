@@ -20,22 +20,18 @@
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "MultipleImpactNSL.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "OSNSMatrix.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for setBlock
+#include "SiconosVectorOp.hpp"  // for setBlock
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
-// #include "Simulation.hpp"
 #include "io.hpp"  // for siconos::algebra::write
-// #include <boost/numeric/ublas/io.hpp>
-#include "OSNSMatrix.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
 
 siconos::nonsmooth_formulations::MultipleImpact::MultipleImpact(std::string newTypeLaw,
                                                                 double newDelP)
-    : LinearOSNS(), _typeCompLaw(newTypeLaw), _deltaP(newDelP)
-{
+    : LinearOSNS(), _typeCompLaw(newTypeLaw), _deltaP(newDelP) {
   if ((_typeCompLaw != "MonoStiffness") && (_typeCompLaw != "BiStiffness"))
     THROW_EXCEPTION(
         "siconos::nonsmooth_formulations::MultipleImpact::_typeCompLaw type of the compliance "
@@ -43,60 +39,49 @@ siconos::nonsmooth_formulations::MultipleImpact::MultipleImpact(std::string newT
         "be either MonoStiffness or BiStiffness!");
 }
 
-void siconos::nonsmooth_formulations::MultipleImpact::setTolImpact(double newTolZero)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::setTolImpact(double newTolZero) {
   _tolImpact = newTolZero;
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetSaveData(bool var)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetSaveData(bool var) {
   _saveData = var;
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetNameOutput(std::string file_name)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetNameOutput(std::string file_name) {
   _namefile = file_name;
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetTolVel(double _var)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetTolVel(double _var) {
   _Tol_Vel = _var;
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetTolEner(double _var)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetTolEner(double _var) {
   _Tol_Ener = _var;
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetZeroVelEndImp(double _var)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetZeroVelEndImp(double _var) {
   _ZeroVel_EndIm = _var;
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetZeroEnerEndImp(double _var)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetZeroEnerEndImp(double _var) {
   _ZeroEner_EndIm = _var;
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetNstepSave(unsigned int var)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetNstepSave(unsigned int var) {
   _nStepSave = var;
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetNstepMax(unsigned int var)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetNstepMax(unsigned int var) {
   _nStepMax = var;
 };
 
 void siconos::nonsmooth_formulations::MultipleImpact::SetStepMinMaxSave(unsigned int var1,
-                                                                        unsigned int var2)
-{
+                                                                        unsigned int var2) {
   _stepMinSave = var1;
   _stepMaxSave = var2;
 }
 
-void siconos::nonsmooth_formulations::MultipleImpact::set_typeCompLaw(std::string newTypeLaw)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::set_typeCompLaw(std::string newTypeLaw) {
   _typeCompLaw = newTypeLaw;
   if ((_typeCompLaw != "MonoStiffness") && (_typeCompLaw != "BiStiffness"))
     THROW_EXCEPTION(
@@ -105,30 +90,26 @@ void siconos::nonsmooth_formulations::MultipleImpact::set_typeCompLaw(std::strin
         "be either MonoStiffness or BiStiffness!");
 };
 
-void siconos::nonsmooth_formulations::MultipleImpact::SetSizeDataSave(unsigned int var)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SetSizeDataSave(unsigned int var) {
   _sizeDataSave = var;
 }
 //---------------------------------------------------------------------------------------------------
 void siconos::nonsmooth_formulations::MultipleImpact::WriteVectorIntoMatrix(
     const siconos::algebra::SiconosVector& m, const unsigned int pos_row,
-    const unsigned int pos_col)
-{
+    const unsigned int pos_col) {
   for (unsigned int i = 0; i < m.size(); ++i) {
     (*_DataMatrix)(pos_row, pos_col + i) = m(i);
   }
 }
 //----------------------------------------------------------------------------------------------------
-bool siconos::nonsmooth_formulations::MultipleImpact::isZero(double Var)
-{
+bool siconos::nonsmooth_formulations::MultipleImpact::isZero(double Var) {
   if (std::abs(Var) <= _tolImpact)
     return true;
   else
     return false;
 }
 //------------------------------------------------------------------------------------------------
-bool siconos::nonsmooth_formulations::MultipleImpact::isVelNegative(double Var)
-{
+bool siconos::nonsmooth_formulations::MultipleImpact::isVelNegative(double Var) {
   if (Var < -_Tol_Vel)
     return true;
   else
@@ -136,16 +117,14 @@ bool siconos::nonsmooth_formulations::MultipleImpact::isVelNegative(double Var)
 }
 //-------------------------------------------------------------------------------------------------
 
-bool siconos::nonsmooth_formulations::MultipleImpact::isEnerZero(double Var)
-{
+bool siconos::nonsmooth_formulations::MultipleImpact::isEnerZero(double Var) {
   if (std::abs(Var) <= _Tol_Ener)
     return true;
   else
     return false;
 }
 //--------------------------------------------------------------------------------------------------
-unsigned int siconos::nonsmooth_formulations::MultipleImpact::EstimateNdataCols()
-{
+unsigned int siconos::nonsmooth_formulations::MultipleImpact::EstimateNdataCols() {
   unsigned int _numberCols = 1;
   // Number of columns for data at contacts
   auto indexSet = simulation()->indexSet(0);  // get indexSet[0]
@@ -164,8 +143,7 @@ unsigned int siconos::nonsmooth_formulations::MultipleImpact::EstimateNdataCols(
   return (_numberCols);
 }
 //-----------------------------------------------------------------------------------------------
-void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory() {
   if (!_velocityContact)
     _velocityContact = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
   else {
@@ -253,8 +231,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory()
   }
 }
 //=====================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::BuildParaContact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::BuildParaContact() {
   auto indexSet = simulation()->indexSet(1);  // get indexSet[1]
   // Loop over the Interactionof the indexSet(1)
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -283,8 +260,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::BuildParaContact()
   */
 }
 //========================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact() {
   // 1. Get the number of contacts and bodies involved in the impact
   if (indexSetLevel() != 1)
     THROW_EXCEPTION(
@@ -379,8 +355,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact()
   BuildParaContact();
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::InitializeInput()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::InitializeInput() {
   // Loop over alls Interactioninvolved in the indexSet[1]
   auto& indexSet = *simulation()->indexSet(indexSetLevel());  // get indexSet[1]
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -417,8 +392,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::InitializeInput()
 }
 //=========================================================================================
 void siconos::nonsmooth_formulations::MultipleImpact::initialize(
-    std::shared_ptr<siconos::simulation::Simulation> sim)
-{
+    std::shared_ptr<siconos::simulation::Simulation> sim) {
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize(sim);
   // Allocate the memory
@@ -429,18 +403,17 @@ void siconos::nonsmooth_formulations::MultipleImpact::initialize(
   // has been called during OneStepNSProblem::initialize()
 
   if (!_M) {
-    if (_numericsMatrixStorageType == siconos::numerics::NM_DENSE)
-      _M = std::make_shared<OSNSMatrix>(maxSize(), siconos::numerics::NM_DENSE);
+    if (_numericsMatrixStorageType == NM_DENSE)
+      _M = std::make_shared<OSNSMatrix>(maxSize(), NM_DENSE);
 
     else  // if(_numericsMatrixStorageType == 1) size = number of _interactionBlocks
       // = number of Interactionin the largest considered indexSet
       _M = std::make_shared<OSNSMatrix>(simulation()->indexSet(indexSetLevel())->size(),
-                                        siconos::numerics::NM_SPARSE_BLOCK);
+                                        NM_SPARSE_BLOCK);
   }
 };
 //========================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::PrimConVelocity()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::PrimConVelocity() {
   getMin(*_velocityContact, _relativeVelocityPrimaryContact, _primaryContactId);
   _energyPrimaryContact = (*_energyContact)(_primaryContactId);
   if (!isVelNegative(_relativeVelocityPrimaryContact)) {
@@ -457,8 +430,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PrimConVelocity()
   */
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::PrimConEnergy()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::PrimConEnergy() {
   getMax(*_energyContact, _energyPrimaryContact, _primaryContactId);
   _relativeVelocityPrimaryContact = (*_velocityContact)(_primaryContactId);
   if (_energyPrimaryContact < 0.0) {
@@ -475,8 +447,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PrimConEnergy()
   */
 }
 //======================================================================================
-bool siconos::nonsmooth_formulations::MultipleImpact::IsEnermaxZero()
-{
+bool siconos::nonsmooth_formulations::MultipleImpact::IsEnermaxZero() {
   double MaxEner;
   unsigned int IdMax;
   getMax(*_energyContact, MaxEner, IdMax);
@@ -486,8 +457,7 @@ bool siconos::nonsmooth_formulations::MultipleImpact::IsEnermaxZero()
     return false;
 }
 //======================================================================================
-bool siconos::nonsmooth_formulations::MultipleImpact::IsVcminNegative()
-{
+bool siconos::nonsmooth_formulations::MultipleImpact::IsVcminNegative() {
   double MinVelCon;
   unsigned int IdConVmin;
   getMin(*_velocityContact, MinVelCon, IdConVmin);
@@ -497,8 +467,7 @@ bool siconos::nonsmooth_formulations::MultipleImpact::IsVcminNegative()
     return false;
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::Check_stateContact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::Check_stateContact() {
   for (decltype(_nContact) i = 0; i < _nContact; ++i) {
     if (isEnerZero((*_energyContact)(i)))  // potential energy is zero
     {
@@ -509,8 +478,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Check_stateContact()
       {
         (*_stateContact)[i] = 1;
       }
-    }
-    else  // impact happens with not zero potential energy
+    } else  // impact happens with not zero potential energy
     {
       if ((*_stateContact)[i] != 2) {
         (*_stateContact)[i] = 2;
@@ -519,8 +487,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Check_stateContact()
   }
 }
 //=======================================================================================
-bool siconos::nonsmooth_formulations::MultipleImpact::IsMulImpactTerminate()
-{
+bool siconos::nonsmooth_formulations::MultipleImpact::IsMulImpactTerminate() {
   _IsImpactEnd = true;
   for (decltype(_nContact) i = 0; i < _nContact; ++i) {
     if (((*_energyContact)(i) > _ZeroEner_EndIm) ||
@@ -547,15 +514,13 @@ bool siconos::nonsmooth_formulations::MultipleImpact::IsMulImpactTerminate()
   //
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::SelectPrimaContact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SelectPrimaContact() {
   if (IsEnermaxZero())  // case of no potential energy at any contact
   {
     PrimConVelocity();  // Select the primary contact according to the relative velocity at
                         // contact
     _isPrimaryContactEnergy = false;
-  }
-  else {
+  } else {
     PrimConEnergy();  // Select the primary contact according to the potential energy at
                       // contacts
     _isPrimaryContactEnergy = true;
@@ -566,8 +531,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::SelectPrimaContact()
   // _isPrimaryContactEnergy <<std::endl;
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::Compute_distributionVector()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::Compute_distributionVector() {
   // Case 1: if no potential energy at any contact
   double _ratio_mu, ratio_stiff, ratio_ener;
   auto mu_prima = (*_elasticyCoefficientcontact)(
@@ -602,8 +566,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_distributionVector
         (*_distributionVector)(i) =
             std::pow((_ratio_mu * ratio_stiff * ratio_vel), (1.0 + _mu)) *
             std::pow(_deltaP, ((_mu - mu_prima) / (1.0 + mu_prima)));
-      }
-      else {
+      } else {
         (*_distributionVector)(i) = 0.0;
       }
       if ((*_distributionVector)(i) < 0.0)
@@ -631,8 +594,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_distributionVector
               "siconos::nonsmooth_formulations::MultipleImpact::Compute_distributionVector, "
               "the "
               "pre-impact velocity must be negative!!");
-        }
-        else {
+        } else {
           _vel = (*_velocityContact)(i);
           ratio_ener = (std::pow(std::fabs(_vel * _deltaP), (_mu / (_mu + 1.0)))) /
                        (std::pow(_energyPrimaryContact, (mu_prima / (mu_prima + 1.0))));
@@ -646,15 +608,13 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_distributionVector
           (*_distributionVector)(i) =
               std::pow((_ratio_mu * ratio_stiff * ratio_ener), (1.0 + _mu));
         }
-      }
-      else if ((*_stateContact)[i] == 2)  // potential is not zero at this contact
+      } else if ((*_stateContact)[i] == 2)  // potential is not zero at this contact
       {
         _energy = (*_energyContact)(i);  // Potential energy at the current contact
         ratio_ener = (std::pow(_energy, (_mu / (_mu + 1.0)))) /
                      (std::pow(_energyPrimaryContact, (mu_prima / (mu_prima + 1.0))));
         (*_distributionVector)(i) = _ratio_mu * ratio_stiff * ratio_ener;
-      }
-      else  // no impact at this contact
+      } else  // no impact at this contact
       {
         (*_distributionVector)(i) = 0.0;
       };
@@ -667,8 +627,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_distributionVector
   };
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpulseContact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpulseContact() {
   (*_deltaImpulseContact) = (*_distributionVector) * _deltaP;
   (*_tolImpulseContact) = (*_tolImpulseContact) + (*_deltaImpulseContact);
   (*_impulseContactUpdate) = (*_impulseContactUpdate) + (*_deltaImpulseContact);
@@ -686,12 +645,10 @@ void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpulseContact()
             std::pow((*_Kcontact)(i), 1.0 / (1.0 + PowCompLaw)) *
             std::pow((std::fabs((*_velocityContact)(i)) * (*_deltaImpulseContact)(i)),
                      PowCompLaw / (1.0 + PowCompLaw));
-      }
-      else {
+      } else {
         (*_forceContact)(i) = 0.0;
       };
-    }
-    else {
+    } else {
       (*_forceContact)(i) = std::pow((1.0 + PowCompLaw), PowCompLaw / (1.0 + PowCompLaw)) *
                             std::pow((*_Kcontact)(i), 1.0 / (1.0 + PowCompLaw)) *
                             std::pow((*_energyContact)(i), PowCompLaw / (1.0 + PowCompLaw));
@@ -705,8 +662,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpulseContact()
   };
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::Compute_velocityContact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::Compute_velocityContact() {
   (*_oldVelocityContact) =
       (*_velocityContact);  // save the relative velocity at the beginning of the step
   (*_velocityContact) =
@@ -724,8 +680,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_velocityContact()
   //
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::Compute_energyContact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::Compute_energyContact() {
   if (_typeCompLaw == "BiStiffness")
   // For Bistiffness model
   {
@@ -736,8 +691,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_energyContact()
         (*_energyContact)(i) = (*_energyContact)(i)-0.5 *
                                ((*_oldVelocityContact)(i) + (*_velocityContact)(i)) *
                                ((*_deltaImpulseContact)(i));
-      }
-      else  // Contact located in the expansion phase
+      } else  // Contact located in the expansion phase
       {
         if (!isZero((*_restitutionContact)(i))) {
           (*_energyContact)(i) =
@@ -748,8 +702,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_energyContact()
           if ((*_energyContact)(i) < 0.0) {
             (*_energyContact)(i) = 0.0;
           };
-        }
-        else  // restitution coefficient equal to zero
+        } else  // restitution coefficient equal to zero
         {
           (*_energyContact)(i) = 0.0;  // In this case, no potential energy at contacts when
                                        // the contact is located in the compression phase
@@ -763,8 +716,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_energyContact()
             "during compression phase must be positive!!!");
       };
     };
-  }
-  else
+  } else
   // For the mono-stiffness model
   {
     for (unsigned int i = 0; i < _nContact; ++i) {
@@ -801,8 +753,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_energyContact()
   */
 }
 //======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::UpdateDuringImpact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::UpdateDuringImpact() {
   // 1. Copy _velocityContact/_deltaImpulseContact into the vector y/lambda for Interactions
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
   // === Loop through "active" Interactions (ie present in indexSets[1]) ===
@@ -827,8 +778,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::UpdateDuringImpact()
   _impulseContactUpdate->zero();  // reset input[1] to zero after each update
 }
 //--------------------------------------------------------------------------------------
-void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
-{
+void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned int _ithPoint) {
   // Save the total impulse at the primary contacts (time-like independent variable) and the
   // time evolution during impact
   if (_ithPoint >= _DataMatrix->size(0))
@@ -855,8 +805,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned i
       siconos::algebra::setBlock(*_tolImpulseContact, P_inter, P_inter->size(), pos, 0);
       siconos::algebra::setBlock(*_forceContact, F_inter, F_inter->size(), pos, 0);
       siconos::algebra::setBlock(*_energyContact, E_inter, E_inter->size(), pos, 0);
-    }
-    else {
+    } else {
       P_inter->zero();  // no impulse at this Interaction
       F_inter->zero();  // no force at this Interaction
       E_inter->zero();  // no potential at this Interaction
@@ -881,8 +830,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned i
 }
 
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact() {
   _impulseVariable = 0.0;
   _timeVariable = 0.0;
   unsigned int number_step = 1;
@@ -988,8 +936,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact()
   }
 }
 //=======================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::PostComputeImpact()
-{
+void siconos::nonsmooth_formulations::MultipleImpact::PostComputeImpact() {
   // === Get index set from Topology ===
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
   // y and lambda vectors
@@ -1028,8 +975,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PostComputeImpact()
 }
 
 bool siconos::nonsmooth_formulations::MultipleImpact::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw& nslaw)
-{
+    siconos::modeling::NonSmoothLaw& nslaw) {
   float type_number =
       static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
   _nslawtype.insert(type_number);
@@ -1052,8 +998,7 @@ bool siconos::nonsmooth_formulations::MultipleImpact::checkCompatibleNSLaw(
 }
 
 //========================================================================================
-int siconos::nonsmooth_formulations::MultipleImpact::compute(double time)
-{
+int siconos::nonsmooth_formulations::MultipleImpact::compute(double time) {
   // Pre-compute for impact
   PreComputeImpact();
   // solve the multiple impacts
@@ -1068,8 +1013,7 @@ int siconos::nonsmooth_formulations::MultipleImpact::compute(double time)
 }
 
 //========================================================================================
-void siconos::nonsmooth_formulations::MultipleImpact::display() const
-{
+void siconos::nonsmooth_formulations::MultipleImpact::display() const {
   std::cout << "<<<<<<<<<<<<<<<<< Information about the multiple impact >>>>>>>>>>>>>>>>>>>>>"
             << std::endl;
   std::cout << "Type of the contact compliance law: " << _typeCompLaw << std::endl;

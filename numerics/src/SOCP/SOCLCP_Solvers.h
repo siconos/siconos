@@ -53,7 +53,7 @@ typedef void (*Update_soclcp_Ptr)(int,
 typedef void (*PostSolver_soclcp_Ptr)(int, double *);
 
 /** pointer to function used to update v and compute error */
-typedef void (*ComputeError_soclcp_Ptr)(
+typedef int (*ComputeError_soclcp_Ptr)(
     SecondOrderConeLinearComplementarityProblem *, double *, double *, double,
     SolverOptions *, double *);
 

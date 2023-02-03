@@ -21,15 +21,11 @@
 #ifndef RollingFrictionContact_H
 #define RollingFrictionContact_H
 
+#include "Friction_cst.h"  // contains only enum. Ok.
 #include "LinearOSNS.hpp"
-namespace siconos::numerics {
-
-#include <Friction_cst.h>  // contains only enum. Ok.
 
 struct RollingFrictionContactProblem;
 struct SolverOptions;
-
-}  // namespace siconos::numerics
 
 namespace siconos::nonsmooth_formulations {
 
@@ -71,8 +67,8 @@ class RollingFrictionContact : public LinearOSNS {
  protected:
   /** Pointer to function of the type used for drivers for RollingFrictionContact
    * problems in Numerics */
-  typedef int (*RollingDriver)(siconos::numerics::RollingFrictionContactProblem *, double *,
-                               double *, siconos::numerics::SolverOptions *);
+  typedef int (*RollingDriver)(RollingFrictionContactProblem *, double *, double *,
+                               SolverOptions *);
 
   ACCEPT_SERIALIZATION(RollingFrictionContact);
 
@@ -98,16 +94,15 @@ class RollingFrictionContact : public LinearOSNS {
    *  \param numericsSolverId id of the solver to be used, optional,
    *  default : SICONOS_ROLLING_FRICTION_3D_NSGS
    */
-  RollingFrictionContact(
-      int dimPb = 5,
-      int numericsSolverId = siconos::numerics::SICONOS_ROLLING_FRICTION_3D_NSGS);
+  RollingFrictionContact(int dimPb = 5,
+                         int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
 
   /** constructor from a pre-defined solver options set.
    *
    *  \param dim pb dimension, 5 only
    *  \param options the options set
    */
-  RollingFrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options);
+  RollingFrictionContact(int dimPb, std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
@@ -150,8 +145,7 @@ class RollingFrictionContact : public LinearOSNS {
 
       \param newFunction function of prototype Driver
   */
-  inline void setNumericsDriver(RollingDriver newFunction)
-  {
+  inline void setNumericsDriver(RollingDriver newFunction) {
     _rolling_frictionContact_driver = newFunction;
   };
 
@@ -166,7 +160,7 @@ class RollingFrictionContact : public LinearOSNS {
 
   /** \return the friction contact problem from Numerics
    */
-  std::shared_ptr<siconos::numerics::RollingFrictionContactProblem> frictionContactProblem();
+  std::shared_ptr<RollingFrictionContactProblem> frictionContactProblem();
 
   // /** \return the friction contact problem from Numerics (raw ptr, do not free)
   //  */
@@ -177,8 +171,7 @@ class RollingFrictionContact : public LinearOSNS {
    *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(
-      std::shared_ptr<siconos::numerics::RollingFrictionContactProblem> problem = nullptr);
+  int solve(std::shared_ptr<RollingFrictionContactProblem> problem = nullptr);
 
   /** Compute the unknown reaction and velocity and update the Interaction (y
    *  and lambda )

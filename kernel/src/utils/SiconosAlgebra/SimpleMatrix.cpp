@@ -27,18 +27,15 @@
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
-// #include <iostream>                              // for ostream
-// #include <memory>                                // for __sha...
 
 #include "BlockMatrix.hpp"           // for Block...
 #include "NumericsToolsNamespace.h"  // for NumericsMatrix and NumericsSparseMatrix
+#include "SiconosAlgebraTools.hpp"   // for randomize ...
+#include "SiconosAlgebraTypes.hpp"   // for UblasType
 #include "SiconosException.hpp"      // for Sicon...
-#include "SiconosMatrixFriends.hpp"  // friends declarationx
-// #include "Tools.hpp"                // for toString
-#include "SiconosAlgebraTools.hpp"  // for randomize ...
-#include "SiconosAlgebraTypes.hpp"  // for UblasType
-#include "bindings_utils.hpp"       // for fill
-#include "io.hpp"                   // for read
+#include "SiconosMatrixOp.hpp"       // matrix operators declarations
+#include "bindings_utils.hpp"        // for fill
+#include "io.hpp"                    // for read
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 #ifdef DEBUG_MESSAGES
@@ -60,44 +57,35 @@ namespace bindings_blas = boost::numeric::bindings::blas;
 // parameters: dimensions and type.
 siconos::algebra::SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, UblasType typ,
                                              unsigned int upper, unsigned int lower)
-    : SiconosMatrix(UblasType::DENSE)
-{
+    : SiconosMatrix(UblasType::DENSE) {
   if (typ == UblasType::DENSE) {
     mat.Dense = new DenseMat(ublas::zero_matrix<double>(row, col));
     // _num = 1; default value
-  }
-  else if (typ == UblasType::TRIANGULAR) {
+  } else if (typ == UblasType::TRIANGULAR) {
     mat.Triang = new TriangMat(ublas::zero_matrix<double>(row, col));
     _num = UblasType::TRIANGULAR;
-  }
-  else if (typ == UblasType::SYMMETRIC) {
+  } else if (typ == UblasType::SYMMETRIC) {
     mat.Sym = new SymMat(ublas::zero_matrix<double>(row, col));
     _num = UblasType::SYMMETRIC;
-  }
-  else if (typ == UblasType::SPARSE) {
+  } else if (typ == UblasType::SPARSE) {
     mat.Sparse = new SparseMat(row, col, upper);
     _num = UblasType::SPARSE;
     zero();
-  }
-  else if (typ == UblasType::SPARSE_COORDINATE) {
+  } else if (typ == UblasType::SPARSE_COORDINATE) {
     mat.SparseCoordinate = new SparseCoordinateMat(row, col, upper);
     _num = UblasType::SPARSE_COORDINATE;
     zero();
-  }
-  else if (typ == UblasType::BANDED) {
+  } else if (typ == UblasType::BANDED) {
     mat.Banded = new BandedMat(row, col, upper, lower);
     _num = UblasType::BANDED;
     zero();
-  }
-  else if (typ == UblasType::ZERO) {
+  } else if (typ == UblasType::ZERO) {
     mat.Zero = new ZeroMat(row, col);
     _num = UblasType::ZERO;
-  }
-  else if (typ == UblasType::IDENTITY) {
+  } else if (typ == UblasType::IDENTITY) {
     mat.Identity = new IdentityMat(row, col);
     _num = UblasType::IDENTITY;
-  }
-  else
+  } else
     THROW_EXCEPTION("invalid type.");
 }
 
@@ -105,14 +93,12 @@ siconos::algebra::SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col,
 siconos::algebra::SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col,
                                              double inputValue, UblasType typ,
                                              unsigned int upper, unsigned int lower)
-    : SiconosMatrix(typ)
-{
+    : SiconosMatrix(typ) {
   // This constructor has sense only for dense matrices ...
   if (typ == UblasType::DENSE) {
     mat.Dense = new DenseMat(ublas::scalar_matrix<double>(row, col, inputValue));
     // _num = UblasType::DENSE; default value
-  }
-  else
+  } else
     THROW_EXCEPTION("invalid type.");
 }
 
@@ -163,8 +149,7 @@ siconos::algebra::SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col,
 // }
 
 // Copy constructors
-siconos::algebra::SimpleMatrix::SimpleMatrix(const SimpleMatrix &m) : SiconosMatrix(m.num())
-{
+siconos::algebra::SimpleMatrix::SimpleMatrix(const SimpleMatrix &m) : SiconosMatrix(m.num()) {
   _isSymmetric = m.isSymmetric();
   _isPositiveDefinite = m.isPositiveDefinite();
 
@@ -206,8 +191,7 @@ siconos::algebra::SimpleMatrix::SimpleMatrix(const SimpleMatrix &m) : SiconosMat
  */
 siconos::algebra::SimpleMatrix::SimpleMatrix(const SimpleMatrix &A,
                                              const std::vector<std::size_t> &coord)
-    : SiconosMatrix(A.num())
-{
+    : SiconosMatrix(A.num()) {
   if (coord[0] >= coord[1]) THROW_EXCEPTION("Empty row range coord[0]>= coord[1]");
   if (coord[2] >= coord[3]) THROW_EXCEPTION("Empty column range coord[2]>= coord[3]");
   if (coord[1] > A.size(0)) THROW_EXCEPTION("row index too large.");
@@ -217,42 +201,34 @@ siconos::algebra::SimpleMatrix::SimpleMatrix(const SimpleMatrix &A,
     ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]),
                                        ublas::range(coord[2], coord[3]));
     mat.Dense = new DenseMat(subA);
-  }
-  else if (_num == UblasType::TRIANGULAR) {
+  } else if (_num == UblasType::TRIANGULAR) {
     ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]),
                                         ublas::range(coord[2], coord[3]));
     mat.Triang = new TriangMat(subA);
-  }
-  else if (_num == UblasType::SYMMETRIC) {
+  } else if (_num == UblasType::SYMMETRIC) {
     ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]),
                                      ublas::range(coord[2], coord[3]));
     mat.Sym = new SymMat(subA);
-  }
-  else if (_num == UblasType::SPARSE) {
+  } else if (_num == UblasType::SPARSE) {
     ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]),
                                         ublas::range(coord[2], coord[3]));
     mat.Sparse = new SparseMat(subA);
-  }
-  else if (_num == UblasType::SPARSE_COORDINATE) {
+  } else if (_num == UblasType::SPARSE_COORDINATE) {
     ublas::matrix_range<SparseCoordinateMat> subA(*A.sparseCoordinate(),
                                                   ublas::range(coord[0], coord[1]),
                                                   ublas::range(coord[2], coord[3]));
     mat.SparseCoordinate = new SparseCoordinateMat(subA);
-  }
-  else if (_num == UblasType::BANDED) {
+  } else if (_num == UblasType::BANDED) {
     ublas::matrix_range<BandedMat> subA(*A.banded(), ublas::range(coord[0], coord[1]),
                                         ublas::range(coord[2], coord[3]));
     mat.Banded = new BandedMat(subA);
-  }
-  else if (_num == UblasType::ZERO) {
+  } else if (_num == UblasType::ZERO) {
     mat.Zero = new ZeroMat(coord[1] - coord[0], coord[3] - coord[2]);
-  }
-  else  // if(_num == UblasType::IDENTITY)
+  } else  // if(_num == UblasType::IDENTITY)
     mat.Identity = new IdentityMat(coord[1] - coord[0], coord[3] - coord[2]);
 }
 
-siconos::algebra::SimpleMatrix::SimpleMatrix(const SiconosMatrix &m) : SiconosMatrix(m.num())
-{
+siconos::algebra::SimpleMatrix::SimpleMatrix(const SiconosMatrix &m) : SiconosMatrix(m.num()) {
   // _num is set in SiconosMatrix constructor with m.num() ... must be changed if m is Block
   auto numM = m.num();
 
@@ -287,8 +263,7 @@ siconos::algebra::SimpleMatrix::SimpleMatrix(const SiconosMatrix &m) : SiconosMa
       posRow += (*it)->size(0);
       posCol = 0;
     }
-  }
-  else if (_num == UblasType::DENSE) {
+  } else if (_num == UblasType::DENSE) {
     mat.Dense = new DenseMat(m.size(0), m.size(1));
     noalias(*mat.Dense) = (*m.dense());
   }
@@ -316,66 +291,56 @@ siconos::algebra::SimpleMatrix::SimpleMatrix(const SiconosMatrix &m) : SiconosMa
 }
 
 siconos::algebra::SimpleMatrix::SimpleMatrix(const DenseMat &m)
-    : SiconosMatrix(UblasType::DENSE)
-{
+    : SiconosMatrix(UblasType::DENSE) {
   mat.Dense = new DenseMat(m);
 }
 
 siconos::algebra::SimpleMatrix::SimpleMatrix(const TriangMat &m)
-    : SiconosMatrix(UblasType::TRIANGULAR)
-{
+    : SiconosMatrix(UblasType::TRIANGULAR) {
   mat.Triang = new TriangMat(m);
 }
 
 siconos::algebra::SimpleMatrix::SimpleMatrix(const SymMat &m)
-    : SiconosMatrix(UblasType::SYMMETRIC)
-{
+    : SiconosMatrix(UblasType::SYMMETRIC) {
   mat.Sym = new SymMat(m);
 }
 
 siconos::algebra::SimpleMatrix::SimpleMatrix(const SparseMat &m)
-    : SiconosMatrix(UblasType::SPARSE)
-{
+    : SiconosMatrix(UblasType::SPARSE) {
   mat.Sparse = new SparseMat(m);
 }
 
 siconos::algebra::SimpleMatrix::SimpleMatrix(const SparseCoordinateMat &m)
-    : SiconosMatrix(UblasType::SPARSE_COORDINATE)
-{
+    : SiconosMatrix(UblasType::SPARSE_COORDINATE) {
   mat.SparseCoordinate = new SparseCoordinateMat(m);
 }
 
 siconos::algebra::SimpleMatrix::SimpleMatrix(const BandedMat &m)
-    : SiconosMatrix(UblasType::BANDED)
-{
+    : SiconosMatrix(UblasType::BANDED) {
   mat.Banded = new BandedMat(m);
 }
 
-siconos::algebra::SimpleMatrix::SimpleMatrix(const ZeroMat &m) : SiconosMatrix(UblasType::ZERO)
-{
+siconos::algebra::SimpleMatrix::SimpleMatrix(const ZeroMat &m)
+    : SiconosMatrix(UblasType::ZERO) {
   mat.Zero = new ZeroMat(m);
 }
 
 siconos::algebra::SimpleMatrix::SimpleMatrix(const IdentityMat &m)
-    : SiconosMatrix(UblasType::IDENTITY)
-{
+    : SiconosMatrix(UblasType::IDENTITY) {
   mat.Identity = new IdentityMat(m);
 }
 
 siconos::algebra::SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii)
-    : SiconosMatrix(UblasType::DENSE)
-{
+    : SiconosMatrix(UblasType::DENSE) {
   mat.Dense = new DenseMat();
   if (ascii) {
     io::read(file, *this, io::ASCII_IN);
-  }
-  else {
+  } else {
     io::read(file, *this, io::BINARY_IN);
   }
 }
 
-siconos::algebra::SimpleMatrix::~SimpleMatrix() noexcept
-{
+siconos::algebra::SimpleMatrix::~SimpleMatrix() noexcept {
   if (_num == UblasType::DENSE) {
     delete (mat.Dense);
     if (_numericsMatrix) {
@@ -383,8 +348,7 @@ siconos::algebra::SimpleMatrix::~SimpleMatrix() noexcept
       // To avoid double free on this pointer, we set it to NULL before deletion
       if (_numericsMatrix->matrix0) _numericsMatrix->matrix0 = nullptr;
     }
-  }
-  else if (_num == UblasType::TRIANGULAR)
+  } else if (_num == UblasType::TRIANGULAR)
     delete (mat.Triang);
   else if (_num == UblasType::SYMMETRIC)
     delete (mat.Sym);
@@ -400,39 +364,32 @@ siconos::algebra::SimpleMatrix::~SimpleMatrix() noexcept
     delete (mat.Identity);
 }
 
-void siconos::algebra::SimpleMatrix::updateNumericsMatrix()
-{
+void siconos::algebra::SimpleMatrix::updateNumericsMatrix() {
   /* set the numericsMatrix */
-  siconos::numerics::NumericsMatrix *NM;
+  NumericsMatrix *NM;
   if (_num == UblasType::DENSE) {
-    _numericsMatrix.reset(
-        siconos::numerics::NM_new(),
-        siconos::numerics::NM_free_not_dense);  // When we reset, we do not free the matrix0
-                                                // that is linked to the array of the boost
-                                                // container
+    _numericsMatrix.reset(NM_new(),
+                          NM_free_not_dense);  // When we reset, we do not free the matrix0
+                                               // that is linked to the array of the boost
+                                               // container
     NM = _numericsMatrix.get();
     double *data = (double *)(getArray());
     DEBUG_EXPR(NV_display(data, size(0) * size(1)););
-    siconos::numerics::NM_fill(NM, siconos::numerics::NM_DENSE, size(0), size(1),
-                               data);  // Pointer link
-  }
-  else {
+    NM_fill(NM, NM_DENSE, size(0), size(1),
+            data);  // Pointer link
+  } else {
     // For all the other cases, we build a sparse matrix and we call numerics for the
     // factorization of a sparse matrix.
-    _numericsMatrix.reset(
-        siconos::numerics::NM_create(siconos::numerics::NM_SPARSE, size(0), size(1)),
-        siconos::numerics::NM_free);
+    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)), NM_free);
     NM = _numericsMatrix.get();
-    _numericsMatrix->matrix2->origin = siconos::numerics::NSM_CSC;
-    siconos::numerics::NM_csc_alloc(NM, nnz());
-    fillCSC(siconos::numerics::numericsSparseMatrix(NM)->csc,
-            std::numeric_limits<double>::epsilon());
-    DEBUG_EXPR(cs_print(siconos::numerics::numericsSparseMatrix(NM)->csc, 0););
+    _numericsMatrix->matrix2->origin = NSM_CSC;
+    NM_csc_alloc(NM, nnz());
+    fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
+    DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
   }
 }
 
-bool siconos::algebra::SimpleMatrix::checkSymmetry(double tol) const
-{
+bool siconos::algebra::SimpleMatrix::checkSymmetry(double tol) const {
   auto m_trans = std::make_shared<SimpleMatrix>(*this);
   m_trans->trans();
   double err = (*this - *m_trans).normInf();
@@ -447,16 +404,14 @@ bool siconos::algebra::SimpleMatrix::checkSymmetry(double tol) const
 //======================================
 
 const siconos::algebra::DenseMat siconos::algebra::SimpleMatrix::getDense(unsigned int,
-                                                                          unsigned int) const
-{
+                                                                          unsigned int) const {
   if (_num != UblasType::DENSE) THROW_EXCEPTION(" the current matrix is not a Dense matrix");
 
   return *mat.Dense;
 }
 
-const siconos::algebra::TriangMat siconos::algebra::SimpleMatrix::getTriang(unsigned int,
-                                                                            unsigned int) const
-{
+const siconos::algebra::TriangMat siconos::algebra::SimpleMatrix::getTriang(
+    unsigned int, unsigned int) const {
   if (_num != UblasType::TRIANGULAR)
     THROW_EXCEPTION("the current matrix is not a Triangular matrix");
 
@@ -464,49 +419,43 @@ const siconos::algebra::TriangMat siconos::algebra::SimpleMatrix::getTriang(unsi
 }
 
 const siconos::algebra::SymMat siconos::algebra::SimpleMatrix::getSym(unsigned int,
-                                                                      unsigned int) const
-{
+                                                                      unsigned int) const {
   if (_num != UblasType::SYMMETRIC)
     THROW_EXCEPTION("he current matrix is not a Symmetric matrix");
 
   return *mat.Sym;
 }
 
-const siconos::algebra::SparseMat siconos::algebra::SimpleMatrix::getSparse(unsigned int,
-                                                                            unsigned int) const
-{
+const siconos::algebra::SparseMat siconos::algebra::SimpleMatrix::getSparse(
+    unsigned int, unsigned int) const {
   if (_num != UblasType::SPARSE) THROW_EXCEPTION("the current matrix is not a Sparse matrix");
 
   return *mat.Sparse;
 }
 
 const siconos::algebra::SparseCoordinateMat
-siconos::algebra::SimpleMatrix::getSparseCoordinate(unsigned int, unsigned int) const
-{
+siconos::algebra::SimpleMatrix::getSparseCoordinate(unsigned int, unsigned int) const {
   if (_num != UblasType::SPARSE_COORDINATE)
     THROW_EXCEPTION("the current matrix is not a Sparse Coordinate matrix");
 
   return *mat.SparseCoordinate;
 }
-const siconos::algebra::BandedMat siconos::algebra::SimpleMatrix::getBanded(unsigned int,
-                                                                            unsigned int) const
-{
+const siconos::algebra::BandedMat siconos::algebra::SimpleMatrix::getBanded(
+    unsigned int, unsigned int) const {
   if (_num != UblasType::BANDED) THROW_EXCEPTION("the current matrix is not a Banded matrix");
 
   return *mat.Banded;
 }
 
 const siconos::algebra::ZeroMat siconos::algebra::SimpleMatrix::getZero(unsigned int,
-                                                                        unsigned int) const
-{
+                                                                        unsigned int) const {
   if (_num != UblasType::ZERO) THROW_EXCEPTION("the current matrix is not a Zero matrix");
 
   return *mat.Zero;
 }
 
 const siconos::algebra::IdentityMat siconos::algebra::SimpleMatrix::getIdentity(
-    unsigned int, unsigned int) const
-{
+    unsigned int, unsigned int) const {
   if (_num != UblasType::IDENTITY)
     THROW_EXCEPTION("the current matrix is not a Identity matrix");
 
@@ -514,24 +463,22 @@ const siconos::algebra::IdentityMat siconos::algebra::SimpleMatrix::getIdentity(
 }
 
 siconos::algebra::DenseMat *siconos::algebra::SimpleMatrix::dense(unsigned int,
-                                                                  unsigned int) const
-{
+                                                                  unsigned int) const {
   if (_num != UblasType::DENSE) THROW_EXCEPTION("the current matrix is not a Dense matrix");
 
   return mat.Dense;
 }
 
 siconos::algebra::TriangMat *siconos::algebra::SimpleMatrix::triang(unsigned int,
-                                                                    unsigned int) const
-{
+                                                                    unsigned int) const {
   if (_num != UblasType::TRIANGULAR)
     THROW_EXCEPTION("the current matrix is not a Triangular matrix");
 
   return mat.Triang;
 }
 
-siconos::algebra::SymMat *siconos::algebra::SimpleMatrix::sym(unsigned int, unsigned int) const
-{
+siconos::algebra::SymMat *siconos::algebra::SimpleMatrix::sym(unsigned int,
+                                                              unsigned int) const {
   if (_num != UblasType::SYMMETRIC)
     THROW_EXCEPTION("the current matrix is not a Symmetric matrix");
 
@@ -539,16 +486,14 @@ siconos::algebra::SymMat *siconos::algebra::SimpleMatrix::sym(unsigned int, unsi
 }
 
 siconos::algebra::SparseMat *siconos::algebra::SimpleMatrix::sparse(unsigned int,
-                                                                    unsigned int) const
-{
+                                                                    unsigned int) const {
   if (_num != UblasType::SPARSE) THROW_EXCEPTION("the current matrix is not a Sparse matrix");
 
   return mat.Sparse;
 }
 
 siconos::algebra::SparseCoordinateMat *siconos::algebra::SimpleMatrix::sparseCoordinate(
-    unsigned int, unsigned int) const
-{
+    unsigned int, unsigned int) const {
   if (_num != UblasType::SPARSE_COORDINATE)
     THROW_EXCEPTION("the current matrix is not a Sparse matrix");
 
@@ -556,32 +501,28 @@ siconos::algebra::SparseCoordinateMat *siconos::algebra::SimpleMatrix::sparseCoo
 }
 
 siconos::algebra::BandedMat *siconos::algebra::SimpleMatrix::banded(unsigned int,
-                                                                    unsigned int) const
-{
+                                                                    unsigned int) const {
   if (_num != UblasType::BANDED) THROW_EXCEPTION("the current matrix is not a Banded matrix");
 
   return mat.Banded;
 }
 
 siconos::algebra::ZeroMat *siconos::algebra::SimpleMatrix::zero_mat(unsigned int,
-                                                                    unsigned int) const
-{
+                                                                    unsigned int) const {
   if (_num != UblasType::ZERO) THROW_EXCEPTION("the current matrix is not a Zero matrix");
 
   return mat.Zero;
 }
 
 siconos::algebra::IdentityMat *siconos::algebra::SimpleMatrix::identity(unsigned int,
-                                                                        unsigned int) const
-{
+                                                                        unsigned int) const {
   if (_num != UblasType::IDENTITY)
     THROW_EXCEPTION("the current matrix is not a Identity matrix");
 
   return mat.Identity;
 }
 
-double *siconos::algebra::SimpleMatrix::getArray(unsigned int, unsigned int) const
-{
+double *siconos::algebra::SimpleMatrix::getArray(unsigned int, unsigned int) const {
   if (_num == UblasType::SPARSE) THROW_EXCEPTION("not yet implemented for sparse matrix.");
 
   if (_num == UblasType::DENSE)
@@ -593,12 +534,10 @@ double *siconos::algebra::SimpleMatrix::getArray(unsigned int, unsigned int) con
   else if (_num == UblasType::ZERO) {
     ZeroMat::iterator1 it = (*mat.Zero).begin1();
     return const_cast<double *>(&(*it));
-  }
-  else if (_num == UblasType::IDENTITY) {
+  } else if (_num == UblasType::IDENTITY) {
     IdentityMat::iterator1 it = (*mat.Identity).begin1();
     return const_cast<double *>(&(*it));
-  }
-  else
+  } else
     return &(((*mat.Banded).data())[0]);
 }
 
@@ -606,8 +545,7 @@ double *siconos::algebra::SimpleMatrix::getArray(unsigned int, unsigned int) con
 //       fill matrix
 // ===========================
 
-void siconos::algebra::SimpleMatrix::zero()
-{
+void siconos::algebra::SimpleMatrix::zero() {
   unsigned int size1 = size(0);
   unsigned int size2 = size(1);
   if (_num == UblasType::DENSE)
@@ -633,8 +571,7 @@ void siconos::algebra::SimpleMatrix::zero()
   // if _num == UblasType::ZERO: nothing
 }
 
-void siconos::algebra::SimpleMatrix::randomize()
-{
+void siconos::algebra::SimpleMatrix::randomize() {
   if (_num == UblasType::DENSE)
     siconos::algebra::internal::randomize(*mat.Dense);
   else if (_num == UblasType::TRIANGULAR)
@@ -650,8 +587,7 @@ void siconos::algebra::SimpleMatrix::randomize()
   resetFactorizationFlags();
 }
 
-void siconos::algebra::SimpleMatrix::eye()
-{
+void siconos::algebra::SimpleMatrix::eye() {
   unsigned int size1 = size(0);
   unsigned int size2 = size(1);
   if (_num == UblasType::DENSE)
@@ -674,57 +610,48 @@ void siconos::algebra::SimpleMatrix::eye()
   resetFactorizationFlags();
 }
 
-unsigned int siconos::algebra::SimpleMatrix::size(unsigned int index) const
-{
+unsigned int siconos::algebra::SimpleMatrix::size(unsigned int index) const {
   if (_num == UblasType::DENSE) {
     if (index == 0)
       return (*mat.Dense).size1();
     else
       return (*mat.Dense).size2();
-  }
-  else if (_num == UblasType::TRIANGULAR) {
+  } else if (_num == UblasType::TRIANGULAR) {
     if (index == 0)
       return (*mat.Triang).size1();
     else
       return (*mat.Triang).size2();
-  }
-  else if (_num == UblasType::SYMMETRIC) {
+  } else if (_num == UblasType::SYMMETRIC) {
     if (index == 0)
       return (*mat.Sym).size1();
     else
       return (*mat.Sym).size2();
-  }
-  else if (_num == UblasType::SPARSE) {
+  } else if (_num == UblasType::SPARSE) {
     if (index == 0)
       return (*mat.Sparse).size1();
     else
       return (*mat.Sparse).size2();
-  }
-  else if (_num == UblasType::SPARSE_COORDINATE) {
+  } else if (_num == UblasType::SPARSE_COORDINATE) {
     if (index == 0)
       return (*mat.SparseCoordinate).size1();
     else
       return (*mat.SparseCoordinate).size2();
-  }
-  else if (_num == UblasType::BANDED) {
+  } else if (_num == UblasType::BANDED) {
     if (index == 0)
       return (*mat.Banded).size1();
     else
       return (*mat.Banded).size2();
-  }
-  else if (_num == UblasType::ZERO) {
+  } else if (_num == UblasType::ZERO) {
     if (index == 0)
       return (*mat.Zero).size1();
     else
       return (*mat.Zero).size2();
-  }
-  else if (_num == UblasType::IDENTITY) {
+  } else if (_num == UblasType::IDENTITY) {
     if (index == 0)
       return (*mat.Identity).size1();
     else
       return (*mat.Identity).size2();
-  }
-  else
+  } else
     return 0;
 };
 
@@ -734,30 +661,22 @@ unsigned int siconos::algebra::SimpleMatrix::size(unsigned int index) const
 
 void siconos::algebra::SimpleMatrix::resize(unsigned int row, unsigned int col,
                                             unsigned int lower, unsigned int upper,
-                                            bool preserve)
-{
+                                            bool preserve) {
   if (_num == UblasType::DENSE) {
     (*mat.Dense).resize(row, col, preserve);
-  }
-  else if (_num == UblasType::TRIANGULAR) {
+  } else if (_num == UblasType::TRIANGULAR) {
     (*mat.Triang).resize(row, col, preserve);
-  }
-  else if (_num == UblasType::SYMMETRIC) {
+  } else if (_num == UblasType::SYMMETRIC) {
     (*mat.Sym).resize(row, col, preserve);
-  }
-  else if (_num == UblasType::SPARSE) {
+  } else if (_num == UblasType::SPARSE) {
     (*mat.Sparse).resize(row, col, preserve);
-  }
-  else if (_num == UblasType::SPARSE_COORDINATE) {
+  } else if (_num == UblasType::SPARSE_COORDINATE) {
     (*mat.SparseCoordinate).resize(row, col, preserve);
-  }
-  else if (_num == UblasType::BANDED) {
+  } else if (_num == UblasType::BANDED) {
     (*mat.Banded).resize(row, col, lower, upper, preserve);
-  }
-  else if (_num == UblasType::ZERO) {
+  } else if (_num == UblasType::ZERO) {
     (*mat.Zero).resize(row, col, preserve);
-  }
-  else if (_num == UblasType::IDENTITY) {
+  } else if (_num == UblasType::IDENTITY) {
     (*mat.Identity).resize(row, col, preserve);
   }
   resetFactorizationFlags();
@@ -767,8 +686,7 @@ void siconos::algebra::SimpleMatrix::resize(unsigned int row, unsigned int col,
 // screen display
 //=====================
 
-void siconos::algebra::SimpleMatrix::display() const
-{
+void siconos::algebra::SimpleMatrix::display() const {
   if (size(0) == 0 || size(1) == 0) {
     std::cout << "siconos::algebra::SimpleMatrix::display(): empty matrix"
               << "\n";
@@ -781,8 +699,7 @@ void siconos::algebra::SimpleMatrix::display() const
   if (_num == UblasType::DENSE) {
     siconos::algebra::boost_bindings::print_m(*mat.Dense);
     // std::cout << *mat.Dense << "\n";
-  }
-  else if (_num == UblasType::TRIANGULAR)
+  } else if (_num == UblasType::TRIANGULAR)
     std::cout << *mat.Triang << "\n";
   else if (_num == UblasType::SYMMETRIC)
     std::cout << *mat.Sym << "\n";
@@ -790,19 +707,16 @@ void siconos::algebra::SimpleMatrix::display() const
     std::cout << "non zero element (nnz) = " << mat.Sparse->nnz() << "\n";
 
     std::cout << *mat.Sparse << "\n";
-  }
-  else if (_num == UblasType::SPARSE_COORDINATE) {
+  } else if (_num == UblasType::SPARSE_COORDINATE) {
     std::cout << *mat.SparseCoordinate << "\n";
-  }
-  else if (_num == UblasType::BANDED)
+  } else if (_num == UblasType::BANDED)
     std::cout << *mat.Banded << "\n";
   else if (_num == UblasType::ZERO)
     std::cout << *mat.Zero << "\n";
   else if (_num == UblasType::IDENTITY)
     std::cout << *mat.Identity << "\n";
 }
-void siconos::algebra::SimpleMatrix::displayExpert(bool brief) const
-{
+void siconos::algebra::SimpleMatrix::displayExpert(bool brief) const {
   std::cout.setf(std::ios::scientific);
   std::cout.precision(6);
 
@@ -815,8 +729,7 @@ void siconos::algebra::SimpleMatrix::displayExpert(bool brief) const
   if (_num == UblasType::DENSE) {
     siconos::algebra::boost_bindings::print_m(*mat.Dense);
     // std::cout << *mat.Dense << "\n";
-  }
-  else if (_num == UblasType::TRIANGULAR)
+  } else if (_num == UblasType::TRIANGULAR)
     std::cout << *mat.Triang << "\n";
   else if (_num == UblasType::SYMMETRIC)
     std::cout << *mat.Sym << "\n";
@@ -849,8 +762,7 @@ void siconos::algebra::SimpleMatrix::displayExpert(bool brief) const
               << "\n";
 
     std::cout << *mat.Sparse << "\n";
-  }
-  else if (_num == UblasType::SPARSE_COORDINATE) {
+  } else if (_num == UblasType::SPARSE_COORDINATE) {
     std::cout << "non zero element (nnz) = " << mat.SparseCoordinate->nnz() << "\n";
 
     for (size_t i = 0; i < mat.SparseCoordinate->nnz(); ++i) {
@@ -859,8 +771,7 @@ void siconos::algebra::SimpleMatrix::displayExpert(bool brief) const
       std::cout << mat.SparseCoordinate->index2_data()[i] << ") =  ";
       std::cout << mat.SparseCoordinate->value_data()[i] << "\n";
     }
-  }
-  else if (_num == UblasType::BANDED)
+  } else if (_num == UblasType::BANDED)
     std::cout << *mat.Banded << "\n";
   else if (_num == UblasType::ZERO)
     std::cout << *mat.Zero << "\n";
@@ -872,8 +783,7 @@ void siconos::algebra::SimpleMatrix::displayExpert(bool brief) const
 // convert to an ostream
 //=====================
 
-std::ostream &siconos::algebra::operator<<(std::ostream &os, const SimpleMatrix &sm)
-{
+std::ostream &siconos::algebra::operator<<(std::ostream &os, const SimpleMatrix &sm) {
   if (sm._num == UblasType::DENSE)
     os << *sm.mat.Dense;
   else if (sm._num == UblasType::TRIANGULAR)
@@ -891,8 +801,7 @@ std::ostream &siconos::algebra::operator<<(std::ostream &os, const SimpleMatrix 
   return os;
 }
 
-void siconos::algebra::SimpleMatrix::assign(const SimpleMatrix &smat)
-{
+void siconos::algebra::SimpleMatrix::assign(const SimpleMatrix &smat) {
   if (_num != UblasType::SPARSE)
     THROW_EXCEPTION("Assign only implemented for UblasType::SPARSE matrix.");
 
@@ -1110,8 +1019,7 @@ void siconos::algebra::SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // }
 
-unsigned siconos::algebra::SimpleMatrix::copyData(double *data) const
-{
+unsigned siconos::algebra::SimpleMatrix::copyData(double *data) const {
   assert((_num == UblasType::DENSE) &&
          "SiconosMatrix::copyData : forbidden: the current matrix is not dense.");
 

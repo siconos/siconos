@@ -18,22 +18,6 @@
 
 #include "SiconosMatrix.hpp"
 
-#include "SiconosMatrixFriends.hpp"  // declaration of all friend functions
-
-// #include <assert.h>  // for assert
-// #include <float.h>   // for DBL_EPSILON
-// #include <math.h>    // for fabs
-
-// #include <algorithm>                                  // for max, min, lower...
-// #include <boost/numeric/ublas/matrix.hpp>
-// #include <boost/numeric/ublas/detail/config.hpp>      // for noalias, noalia...
-// #include <boost/numeric/ublas/detail/iterator.hpp>    // for bidirectional_i...
-// #include <boost/numeric/ublas/matrix_expression.hpp>  // for matrix_vector_b...
-// #include <boost/numeric/ublas/matrix_proxy.hpp>   // for matrix_range
-// #include <boost/numeric/ublas/matrix_sparse.hpp>  // for compressed_matr...
-// #include <boost/numeric/ublas/storage.hpp>            // for unbounded_array
-// #include <boost/numeric/ublas/vector.hpp>             // for vector
-
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -41,30 +25,23 @@
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
 
-#include "Tools.hpp"  // toString
-
-// #include <memory>                                     // for __shared_ptr_ac...
-// #include <utility>                                    // for swap
-// #include <vector>                                     // for vector, operator==
-
 #include "BlockMatrix.hpp"           // for BlockMatrix
-#include "NumericsToolsNamespace.h" // for CSparseMatrix,  NSM_fix_csc
-#include "SiconosVector.hpp"  // for SiconosVector
-// #include "SimpleMatrixFriends.hpp"  // for isComparableTo
+#include "NumericsToolsNamespace.h"  // for CSparseMatrix,  NSM_fix_csc
+#include "SiconosMatrixOp.hpp"       // for matrix operators declaration
+#include "SiconosVector.hpp"         // for SiconosVector
+#include "Tools.hpp"                 // toString
 
 namespace ublas = boost::numeric::ublas;
 
 siconos::algebra::SiconosMatrix& siconos::algebra::operator*=(SiconosMatrix& m,
-                                                              const double& s)
-{
+                                                              const double& s) {
   if (m._num == UblasType::BLOCK)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     for (auto it = mB._mat->begin1(); it != mB._mat->end1(); ++it) {
       for (auto it2 = it.begin(); it2 != it.end(); ++it2) (**it2) *= s;
     }
-  }
-  else if (m._num == UblasType::DENSE)
+  } else if (m._num == UblasType::DENSE)
     *m.dense() *= s;
   else if (m._num == UblasType::TRIANGULAR)
     *m.triang() *= s;
@@ -85,16 +62,14 @@ siconos::algebra::SiconosMatrix& siconos::algebra::operator*=(SiconosMatrix& m,
 }
 
 siconos::algebra::SiconosMatrix& siconos::algebra::operator/=(SiconosMatrix& m,
-                                                              const double& s)
-{
+                                                              const double& s) {
   if (m._num == UblasType::BLOCK)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     for (auto it = mB._mat->begin1(); it != mB._mat->end1(); ++it) {
       for (auto it2 = it.begin(); it2 != it.end(); ++it2) (**it2) /= s;
     }
-  }
-  else if (m._num == UblasType::DENSE)
+  } else if (m._num == UblasType::DENSE)
     *m.dense() /= s;
   else if (m._num == UblasType::TRIANGULAR)
     *m.triang() /= s;
@@ -114,8 +89,7 @@ siconos::algebra::SiconosMatrix& siconos::algebra::operator/=(SiconosMatrix& m,
   return m;
 }
 
-size_t siconos::algebra::SiconosMatrix::nnz(double tol)
-{
+size_t siconos::algebra::SiconosMatrix::nnz(double tol) {
   size_t nnz = 0;
   if (_num == UblasType::DENSE)  // dense
   {
@@ -125,19 +99,16 @@ size_t siconos::algebra::SiconosMatrix::nnz(double tol)
         nnz++;
       }
     }
-  }
-  else if (_num == UblasType::SPARSE) {
+  } else if (_num == UblasType::SPARSE) {
     nnz = sparse()->nnz();
-  }
-  else
+  } else
     THROW_EXCEPTION("not implemented for the given matrix type");
 
   return nnz;
 }
 
-bool siconos::algebra::SiconosMatrix::fillCSC(siconos::numerics::CSparseMatrix* csc,
-                                              size_t row_off, size_t col_off, double tol)
-{
+bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off,
+                                              size_t col_off, double tol) {
   assert(csc);
   double* Mx = csc->x;  // data
   CS_INT* Mi = csc->i;  // row indx
@@ -170,8 +141,7 @@ bool siconos::algebra::SiconosMatrix::fillCSC(siconos::numerics::CSparseMatrix* 
       // std::cout << "joff" << joff << std::endl;
       Mp[++joff] = pval;
     }
-  }
-  else if (_num == UblasType::SPARSE) {
+  } else if (_num == UblasType::SPARSE) {
     const auto& ptr = sparse()->index1_data();
     const auto& indx = sparse()->index2_data();
     const ublas::unbounded_array<double>& vals = sparse()->value_data();
@@ -189,17 +159,14 @@ bool siconos::algebra::SiconosMatrix::fillCSC(siconos::numerics::CSparseMatrix* 
     for (size_t j = 1, joff = col_off + 1; j < ncol + 1; ++j, ++joff) {
       Mp[joff] = nz + ptr[j];
     }
-  }
-  else {
+  } else {
     THROW_EXCEPTION("not implemented for the given matrix type");
   }
 
   return true;
 }
 
-bool siconos::algebra::SiconosMatrix::fillCSC(siconos::numerics::CSparseMatrix* csc,
-                                              double tol)
-{
+bool siconos::algebra::SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol) {
   assert(csc);
   double* Mx = csc->x;  // data
   CS_INT* Mi = csc->i;  // row indx
@@ -229,8 +196,7 @@ bool siconos::algebra::SiconosMatrix::fillCSC(siconos::numerics::CSparseMatrix* 
       // std::cout << "joff" << joff << std::endl;
       Mp[++joff] = pval;
     }
-  }
-  else if (_num == UblasType::SPARSE) {
+  } else if (_num == UblasType::SPARSE) {
     const auto& ptr = sparse()->index1_data();
     const auto& indx = sparse()->index2_data();
     const ublas::unbounded_array<double>& vals = sparse()->value_data();
@@ -248,16 +214,14 @@ bool siconos::algebra::SiconosMatrix::fillCSC(siconos::numerics::CSparseMatrix* 
     for (size_t j = 0; j < ncol + 1; ++j) {
       Mp[j] = ptr[j];
     }
-  }
-  else {
+  } else {
     THROW_EXCEPTION("not implemented for the given matrix type");
   }
 
   return true;
 }
 
-bool siconos::algebra::SiconosMatrix::fromCSC(siconos::numerics::CSparseMatrix* csc)
-{
+bool siconos::algebra::SiconosMatrix::fromCSC(CSparseMatrix* csc) {
   assert(csc);
 
   NSM_sort_csc(csc);
@@ -317,8 +281,7 @@ bool siconos::algebra::SiconosMatrix::fromCSC(siconos::numerics::CSparseMatrix* 
     // //   ptr[j] = Mp[j]  ;
     // // }
     // for(size_t j = 0 ; j < n+1; ++j) printf("ptr[%i] = %i\t", j, ptr[j]);
-  }
-  else if (_num == UblasType::DENSE) {
+  } else if (_num == UblasType::DENSE) {
     CS_INT pval = 0;
     // push_back in order should be in constant time
     // http://www.guwi17.de/ublas/matrix_sparse_usage.html
@@ -328,16 +291,14 @@ bool siconos::algebra::SiconosMatrix::fromCSC(siconos::numerics::CSparseMatrix* 
         pval++;
       }
     }
-  }
-  else {
+  } else {
     THROW_EXCEPTION("not implemented for the given matrix type");
   }
   return true;
 }
 
-bool siconos::algebra::SiconosMatrix::fillTriplet(siconos::numerics::CSparseMatrix* triplet,
-                                                  size_t row_off, size_t col_off, double tol)
-{
+bool siconos::algebra::SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off,
+                                                  size_t col_off, double tol) {
   assert(triplet);
   size_t nrow = size(0);
   size_t ncol = size(1);
@@ -349,29 +310,25 @@ bool siconos::algebra::SiconosMatrix::fillTriplet(siconos::numerics::CSparseMatr
       for (size_t i = 0; i < nrow; ++i) {
         // col-major
 
-        siconos::numerics::CSparseMatrix_zentry(triplet, i + row_off, j + col_off,
-                                                arr[i + j * nrow],
-                                                std::numeric_limits<double>::epsilon());
+        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j * nrow],
+                             std::numeric_limits<double>::epsilon());
       }
     }
-  }
-  else {
+  } else {
     THROW_EXCEPTION("not implemented for the given matrix type");
   }
 
   return true;
 }
 
-std::ostream& siconos::algebra::operator<<(std::ostream& os, const SiconosMatrix& sm)
-{
+std::ostream& siconos::algebra::operator<<(std::ostream& os, const SiconosMatrix& sm) {
   os << siconos::tools::toString(sm);
   return os;
 }
 
 void siconos::algebra::SiconosMatrix::private_prod(unsigned int startRow,
                                                    const SiconosVector& x, SiconosVector& y,
-                                                   bool init) const
-{
+                                                   bool init) const {
   assert(!(isFactorized()) && "A is Factorized in prod !!");
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of
@@ -388,8 +345,7 @@ void siconos::algebra::SiconosMatrix::private_prod(unsigned int startRow,
  */
 void siconos::algebra::SiconosMatrix::private_addprod(unsigned startRow, unsigned int startCol,
                                                       const SiconosVector& x,
-                                                      SiconosVector& y) const
-{
+                                                      SiconosVector& y) const {
   assert(!(isFactorized()) && "A is Factorized in prod !!");
   assert(!isBlock() &&
          "private_addprod(start,x,y) error: not yet implemented for block matrix.");
@@ -429,8 +385,7 @@ void siconos::algebra::SiconosMatrix::private_addprod(unsigned startRow, unsigne
       noalias(*y.dense()) += prod(
           ublas::subrange(*banded(), startRow, startRow + sizeY, startCol, startCol + sizeX),
           *x.dense());
-  }
-  else  // x and y sparse
+  } else  // x and y sparse
   {
     if (numA == UblasType::SPARSE)
       *y.sparse() += prod(

@@ -24,16 +24,15 @@
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
-#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
 #include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
 siconos::modeling::LagrangianCompliantR::LagrangianCompliantR(
     const std::string& pluginh, const std::string& pluginJacobianhq,
     const std::string& pluginJacobianhlambda)
-    : LagrangianR(RelationSubType::CompliantR)
-{
+    : LagrangianR(RelationSubType::CompliantR) {
   _zeroPlugin();
   setComputehFunction(siconos::plugins::getPluginName(pluginh),
                       siconos::plugins::getPluginFunctionName(pluginh));
@@ -44,14 +43,12 @@ siconos::modeling::LagrangianCompliantR::LagrangianCompliantR(
       siconos::plugins::getPluginFunctionName(pluginJacobianhlambda));
 }
 
-void siconos::modeling::LagrangianCompliantR::_zeroPlugin()
-{
+void siconos::modeling::LagrangianCompliantR::_zeroPlugin() {
   _pluginJachq = std::make_shared<siconos::plugins::PluggedObject>();
   _pluginJachlambda = std::make_shared<siconos::plugins::PluggedObject>();
 }
 
-void siconos::modeling::LagrangianCompliantR::initialize(Interaction& inter)
-{
+void siconos::modeling::LagrangianCompliantR::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
 
   if (!_jachlambda)
@@ -63,8 +60,7 @@ void siconos::modeling::LagrangianCompliantR::checkSize(Interaction& inter) {}
 void siconos::modeling::LagrangianCompliantR::computeh(
     double time, const siconos::algebra::BlockVector& q0,
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z,
-    siconos::algebra::SiconosVector& y)
-{
+    siconos::algebra::SiconosVector& y) {
   if (_pluginh->fPtr) {
     auto qp = q0.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
@@ -76,8 +72,7 @@ void siconos::modeling::LagrangianCompliantR::computeh(
 
 void siconos::modeling::LagrangianCompliantR::computeJachq(
     double time, const siconos::algebra::BlockVector& q0,
-    const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z)
-{
+    const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z) {
   if (_jachq && _pluginJachq->fPtr) {
     auto qp = q0.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
@@ -90,8 +85,7 @@ void siconos::modeling::LagrangianCompliantR::computeJachq(
 
 void siconos::modeling::LagrangianCompliantR::computeJachlambda(
     double time, const siconos::algebra::BlockVector& q0,
-    const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z)
-{
+    const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z) {
   if (_jachlambda && _pluginJachlambda->fPtr) {
     auto qp = q0.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
@@ -103,15 +97,13 @@ void siconos::modeling::LagrangianCompliantR::computeJachlambda(
 }
 
 void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interaction& inter,
-                                                            unsigned int derivativeNumber)
-{
+                                                            unsigned int derivativeNumber) {
   auto& DSlink = inter.linkToDSVariables();
   if (derivativeNumber == 0) {
     auto& y = *inter.y(0);
     auto& lambda = *inter.lambda(0);
     computeh(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z], y);
-  }
-  else {
+  } else {
     auto& y = *inter.y(derivativeNumber);
     auto& lambda = *inter.lambda(derivativeNumber);
     computeJachq(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);
@@ -120,10 +112,9 @@ void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interac
       // y = Jach[0] q1 + Jach[1] lambda
       siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q1], y);
       siconos::algebra::prod(*_jachlambda, lambda, y, false);
-    }
-    else if (derivativeNumber == 2)
+    } else if (derivativeNumber == 2)
       siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q2],
-           y);  // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
+                             y);  // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
     else
       THROW_EXCEPTION(
           "siconos::modeling::LagrangianCompliantR::computeOutput, index out of range or not "
@@ -132,8 +123,7 @@ void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interac
 }
 
 void siconos::modeling::LagrangianCompliantR::computeInput(double time, Interaction& inter,
-                                                           unsigned int level)
-{
+                                                           unsigned int level) {
   // get lambda of the concerned interaction
 
   auto& lambda = *inter.lambda(level);
@@ -143,8 +133,7 @@ void siconos::modeling::LagrangianCompliantR::computeInput(double time, Interact
   siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }
 
-void siconos::modeling::LagrangianCompliantR::computeJach(double time, Interaction& inter)
-{
+void siconos::modeling::LagrangianCompliantR::computeJach(double time, Interaction& inter) {
   auto& DSlink = inter.linkToDSVariables();
   auto& lambda = *inter.lambda(0);
   computeJachq(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);

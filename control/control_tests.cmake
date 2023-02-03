@@ -1,6 +1,7 @@
 include(tools4tests)
 
 if(WITH_TESTING)
+  add_custom_target(control-tests echo "Start control tests")
   # ----  Control tests ----
   begin_tests(src/tests DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
 

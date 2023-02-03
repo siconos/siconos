@@ -224,11 +224,11 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>(3);
 
   // -- Some configuration
-  osnspb->numericsSolverOptions()->iparam[siconos::numerics::SICONOS_IPARAM_MAX_ITER] = 1000;
-  osnspb->numericsSolverOptions()->dparam[siconos::numerics::SICONOS_DPARAM_TOL] = 1e-5;
+  osnspb->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  osnspb->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = 1e-5;
 
   osnspb->setMaxSize(16384);
-  osnspb->setMStorageType(siconos::numerics::NM_SPARSE_BLOCK);
+  osnspb->setMStorageType(NM_SPARSE_BLOCK);
   osnspb->setNumericsVerboseMode(0);
   osnspb->setKeepLambdaAndYState(true);
 

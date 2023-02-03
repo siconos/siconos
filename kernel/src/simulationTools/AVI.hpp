@@ -23,14 +23,10 @@
 #ifndef AVI_H
 #define AVI_H
 
+#include "AVI_cst.h"  // contains only enum. Ok.
 #include "LinearOSNS.hpp"
 
-namespace siconos::numerics {
-
-#include "AVI_cst.h"  // contains only enum. Ok.
-
 struct AffineVariationalInequalities;
-}  // namespace siconos::numerics
 
 namespace siconos::nonsmooth_formulations {
 /**
@@ -55,21 +51,21 @@ class AVI : public LinearOSNS {
   ACCEPT_SERIALIZATION(AVI);
 
   /** contains the numerics problem for the AVI system */
-  std::shared_ptr<siconos::numerics::AffineVariationalInequalities> _numerics_problem{nullptr};
+  std::shared_ptr<AffineVariationalInequalities> _numerics_problem{nullptr};
 
  public:
   /** constructor from numerics solver id
    *
    *  \param numericsSolverId id of numerics solver, default =  SICONOS_AVI_CAOFERRIS
    */
-  AVI(int numericsSolverId = siconos::numerics::SICONOS_AVI_CAOFERRIS);
+  AVI(int numericsSolverId = SICONOS_AVI_CAOFERRIS);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    *
    */
-  AVI(std::shared_ptr<siconos::numerics::SolverOptions> options);
+  AVI(std::shared_ptr<SolverOptions> options);
 
   /** destructor */
   virtual ~AVI() noexcept;

@@ -18,8 +18,8 @@
 #include "ZOHTest.hpp"
 
 #include "EventsManager.hpp"
-#include "SiconosAlgebraProd.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SimpleMatrix.hpp"
 #include "io.hpp"
 
@@ -29,15 +29,13 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(ZOHTest);
 
-void ZOHTest::setUp()
-{
+void ZOHTest::setUp() {
   _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
   _b = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
   _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
 }
 
-void ZOHTest::init()
-{
+void ZOHTest::init() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
@@ -50,8 +48,7 @@ void ZOHTest::init()
 
 void ZOHTest::tearDown() {}
 
-void ZOHTest::testMatrixExp0()
-{
+void ZOHTest::testMatrixExp0() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
@@ -73,8 +70,7 @@ void ZOHTest::testMatrixExp0()
   std::cout << std::endl << std::endl;
 }
 
-void ZOHTest::testMatrixExp1()
-{
+void ZOHTest::testMatrixExp1() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
@@ -97,8 +93,7 @@ void ZOHTest::testMatrixExp1()
   std::cout << std::endl << std::endl;
 }
 
-void ZOHTest::testMatrixIntegration1()
-{
+void ZOHTest::testMatrixIntegration1() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
@@ -144,8 +139,7 @@ void ZOHTest::testMatrixIntegration1()
                                true);
 }
 
-void ZOHTest::testMatrixIntegration2()
-{
+void ZOHTest::testMatrixIntegration2() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
@@ -210,8 +204,7 @@ void ZOHTest::testMatrixIntegration2()
                                true);
 }
 
-void ZOHTest::testMatrixIntegration3()
-{
+void ZOHTest::testMatrixIntegration3() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
@@ -285,8 +278,7 @@ void ZOHTest::testMatrixIntegration3()
                                true);
 }
 
-void ZOHTest::testMatrixIntegration4()
-{
+void ZOHTest::testMatrixIntegration4() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;

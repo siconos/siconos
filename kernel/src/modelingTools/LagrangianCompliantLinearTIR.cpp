@@ -21,8 +21,8 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
 #include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
@@ -30,8 +30,7 @@
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> D)
-    : LagrangianR(RelationSubType::CompliantLinearTIR)
-{
+    : LagrangianR(RelationSubType::CompliantLinearTIR) {
   _jachq = C;
   _jachlambda = D;
 }
@@ -42,8 +41,7 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> D,
     std::shared_ptr<siconos::algebra::SimpleMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubType::CompliantLinearTIR)
-{
+    : LagrangianR(RelationSubType::CompliantLinearTIR) {
   _jachq = C;
   _jachlambda = D;
   _F = F;
@@ -55,19 +53,16 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> D,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubType::CompliantLinearTIR)
-{
+    : LagrangianR(RelationSubType::CompliantLinearTIR) {
   _jachq = C;
   _jachlambda = D;
   _e = e;
 }
 
-void siconos::modeling::LagrangianCompliantLinearTIR::initialize(Interaction& inter)
-{
+void siconos::modeling::LagrangianCompliantLinearTIR::initialize(Interaction& inter) {
   checkSize(inter);
 }
-void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(Interaction& inter)
-{
+void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto& DSlink = inter.linkToDSVariables();
 
@@ -95,8 +90,7 @@ void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(Interaction& int
 
 void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
                                                                    Interaction& inter,
-                                                                   unsigned int level)
-{
+                                                                   unsigned int level) {
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
@@ -104,8 +98,7 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
   siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }
 void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
-    double time, Interaction& inter, unsigned int derivativeNumber)
-{
+    double time, Interaction& inter, unsigned int derivativeNumber) {
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
   auto& lambda = *inter.lambda(derivativeNumber);
@@ -120,8 +113,7 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
   }
 }
 
-void siconos::modeling::LagrangianCompliantLinearTIR::display() const
-{
+void siconos::modeling::LagrangianCompliantLinearTIR::display() const {
   LagrangianR::display();
   std::cout << "===== Lagrangian Linear Relation display ===== " << std::endl;
   std::cout << " C: " << std::endl;

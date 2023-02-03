@@ -230,7 +230,6 @@ function(new_test)
   endforeach()
 
   # -- add dependency to component-tests
-  # At the time, only numerics used such a lib.
   if(TARGET ${COMPONENT}-tests)
     add_dependencies(${COMPONENT}-tests ${TEST_NAME})
   endif()

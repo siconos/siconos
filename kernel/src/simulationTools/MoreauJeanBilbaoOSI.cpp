@@ -24,9 +24,9 @@
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
-#include "SiconosAlgebraProd.hpp"  // for subprod
+#include "SiconosMatrixVectorOp.hpp"  // for subprod
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for subscal
+#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
@@ -37,13 +37,10 @@
 
 // --- constructor from a set of data ---
 siconos::integrators::MoreauJeanBilbaoOSI::MoreauJeanBilbaoOSI()
-    : OneStepIntegrator(IntegratorType::MOREAUJEANBILBAOOSI, 1, 0, 1, 1, 1)
-{
-}
+    : OneStepIntegrator(IntegratorType::MOREAUJEANBILBAOOSI, 1, 0, 1, 1, 1) {}
 
 void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // Get work buffers from the graph and initialize ds state and memory
   auto& work_ds = *_initializeDSWorkVectors(ds);
 
@@ -67,8 +64,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(
     // Update dynamical system components (for memory swap).
     lldds->computeForces(t, lldds->q(), lldds->velocity());
     lldds->swapInMemory();
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForDS - only "
         "implemented for LagrangianLinearDiagonalDS");
@@ -76,8 +72,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(
 
 void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   // Get the dynamical systems linked by inter
   auto ds1 = interProp.source;
   auto ds2 = interProp.target;
@@ -127,8 +122,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForInteract
           std::make_shared<siconos::algebra::BlockVector>();
       inter_work_block[siconos::integrators::MoreauJeanBilbaoOSI::xfree]->insertPtr(
           workVds1[siconos::integrators::MoreauJeanBilbaoOSI::VFREE]);
-    }
-    else {
+    } else {
       inter_work_block[siconos::integrators::MoreauJeanBilbaoOSI::xfree]->setVectorPtr(
           0, workVds1[siconos::integrators::MoreauJeanBilbaoOSI::VFREE]);
     }
@@ -144,8 +138,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForInteract
             workVds2[siconos::integrators::MoreauJeanBilbaoOSI::VFREE]);
         inter_work_block[siconos::integrators::MoreauJeanBilbaoOSI::xfree]->insertPtr(
             workVds2[siconos::integrators::MoreauJeanBilbaoOSI::VFREE]);
-      }
-      else {
+      } else {
         inter_work_block[siconos::integrators::MoreauJeanBilbaoOSI::xfree]->insertPtr(
             workVds2[siconos::integrators::MoreauJeanBilbaoOSI::VFREE]);
       }
@@ -153,16 +146,14 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForInteract
   }
 }
 
-void siconos::integrators::MoreauJeanBilbaoOSI::initialize_nonsmooth_problems()
-{
+void siconos::integrators::MoreauJeanBilbaoOSI::initialize_nonsmooth_problems() {
   auto allOSNS = _simulation->oneStepNSProblems();
   ((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
   ((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
 }
 
 void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // This function:
   // - allocates memory for the matrix W
   // - updates its content for the current (initial) state of the dynamical system, depending
@@ -218,8 +209,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
       (*ds_work_vectors[siconos::integrators::MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR])(k) =
           two * dt_sigma_star;
     }
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::MoreauJeanBilbaoOSI::initialize_iteration_matrix - Only "
         "implemented for LagrangianLinearDiagonalDS");
@@ -228,8 +218,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
 void siconos::integrators::MoreauJeanBilbaoOSI::compute_parameters(double time_step,
                                                                    double omega2, double sigma,
                                                                    double& one_minus_theta,
-                                                                   double& dt_sigma_star)
-{
+                                                                   double& dt_sigma_star) {
   // Computes:
   // 1 - theta
   // sigma_star = dt * sigma^*
@@ -250,8 +239,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::compute_parameters(double time_s
 
 double siconos::integrators::MoreauJeanBilbaoOSI::computeResidu() { return 0.; }
 
-void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState()
-{
+void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
   DEBUG_BEGIN("siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState()")
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
@@ -304,8 +292,7 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
 
-  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override
-  {
+  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
     e = nslaw.e();
     auto sizeY = _inter.nonSmoothLaw()->size();
@@ -319,8 +306,7 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
 
 void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   auto& indexSet = *osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   assert(indexSet.bundle(vertex_inter));
   // current interaction
@@ -357,16 +343,14 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
 }
 
 void siconos::integrators::MoreauJeanBilbaoOSI::integrate(double& tinit, double& tend,
-                                                          double& tout, int& notUsed)
-{
+                                                          double& tout, int& notUsed) {
   THROW_EXCEPTION(
       "siconos::integrators::MoreauJeanBilbaoOSI::integrate - Not yet implemented for "
       "MoreauJeanBilbaoOSI.");
 }
 
 void siconos::integrators::MoreauJeanBilbaoOSI::updatePosition(
-    siconos::modeling::DynamicalSystem& ds)
-{
+    siconos::modeling::DynamicalSystem& ds) {
   // --  Update current position for the last computed velocities --
   // q(i+1) = q(i) + dt v(i+1)
   double time_step = _simulation->timeStep();
@@ -383,8 +367,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updatePosition(
   DEBUG_EXPR(q.display(););
 }
 
-void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int)
-{
+void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) {
   DEBUG_BEGIN("siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int)");
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
@@ -409,8 +392,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int)
       auto ndof = lldds.dimension();
       for (unsigned int k = 0; k < ndof; ++k)
         v(k) = vfree(k) + v(k) * inv_iteration_matrix(k, k);
-    }
-    else
+    } else
       v = vfree;
     DEBUG_EXPR(v.display(););
     // Update positions with the last computed velocities.
@@ -419,8 +401,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int)
   DEBUG_END("siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int)");
 }
 
-void siconos::integrators::MoreauJeanBilbaoOSI::display() const
-{
+void siconos::integrators::MoreauJeanBilbaoOSI::display() const {
   OneStepIntegrator::display();
 
   std::cout << "====== MoreauJeanBilbaoOSI OSI display ======\n";
@@ -442,16 +423,14 @@ void siconos::integrators::MoreauJeanBilbaoOSI::display() const
             << "\n";
 }
 
-void siconos::integrators::MoreauJeanBilbaoOSI::prepareNewtonIteration(double time)
-{
+void siconos::integrators::MoreauJeanBilbaoOSI::prepareNewtonIteration(double time) {
   if (!_explicitJacobiansOfRelation) {
     _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
 }
 
 bool siconos::integrators::MoreauJeanBilbaoOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   DEBUG_PRINT(
       "addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter, "
       "unsigned int i)\n");
@@ -484,7 +463,6 @@ bool siconos::integrators::MoreauJeanBilbaoOSI::addInteractionInIndexSet(
 }
 
 bool siconos::integrators::MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   return !(addInteractionInIndexSet(inter, i));
 }

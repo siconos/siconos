@@ -24,13 +24,9 @@
 
 #include <memory>
 
-#include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
-
-namespace siconos::numerics {
-
 #include "NM_types.h"  // for NM_DENSE etc
 #include "NumericsFwd.h"
-}  // namespace siconos::numerics
+#include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
 
 namespace siconos::algebra {
 
@@ -99,17 +95,17 @@ namespace siconos::nonsmooth_formulations {
 
  Note: at the time the available storage types are:
 
- - full matrix in a SiconosMatrix (_storageType = siconos::numerics::NM_DENSE). In this case,
+ - full matrix in a SiconosMatrix (_storageType = NM_DENSE). In this case,
  for each call to fill(), the SiconosMatrix M is resized
  according  to the sizes of the Interaction present in indexSet and then
  all the required interactionBlocks mij are COPIED into M.
 
- - Sparse Block Storage (_storageType = siconos::numerics::NM_SPARSE_BLOCK): corresponds to
+ - Sparse Block Storage (_storageType = NM_SPARSE_BLOCK): corresponds to
  SparseBlockStructuredMatrix structure of Numerics. Only non-null
  interactionBlocks are saved in the matrix M and there is no copy of
  sub-interactionBlocks, only links thanks to pointers.
 
- - Sparse matrix (_storageType = siconos::numerics::NM_SPARSE): at the time of writting, only
+ - Sparse matrix (_storageType = NM_SPARSE): at the time of writting, only
  csc (compressed-sparse column). Could also be triplet (coo or coordinate) or csr
  (compressed-sparse row).
 */
@@ -124,19 +120,19 @@ class OSNSMatrix {
   unsigned int _dimColumn{0};
 
   /** Storage type used for the present matrix */
-  siconos::numerics::NM_types _storageType{siconos::numerics::NM_DENSE};
+  NM_types _storageType{NM_DENSE};
 
-  /** _triplet_nzmax for memory allocation of siconos::numerics::NM_SPARSE */
+  /** _triplet_nzmax for memory allocation of NM_SPARSE */
   std::size_t _triplet_nzmax{0};
 
   /** Numerics structure to be filled  */
-  std::shared_ptr<siconos::numerics::NumericsMatrix> _numericsMatrix{nullptr};
+  std::shared_ptr<NumericsMatrix> _numericsMatrix{nullptr};
 
-  /** Matrix used for default storage type (_storageType = siconos::numerics::NM_DENSE) */
+  /** Matrix used for default storage type (_storageType = NM_DENSE) */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _M1{nullptr};
 
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
-      (_storageType = siconos::numerics::NM_SPARSE_BLOCK) */
+      (_storageType = NM_SPARSE_BLOCK) */
   std::shared_ptr<siconos::simulation::BlockCSRMatrix> _M2{nullptr};
 
   /** For each Interaction in the graph, compute its absolute position
@@ -170,28 +166,28 @@ class OSNSMatrix {
   /** Constructor with _dimRow. of the matrix
    *
    *  \param n size of the square matrix
-   *  \param stor storage type (siconos::numerics::NM_DENSE or
-   * siconos::numerics::NM_SPARSE_BLOCK)
+   *  \param stor storage type (NM_DENSE or
+   * NM_SPARSE_BLOCK)
    */
-  OSNSMatrix(unsigned int n, siconos::numerics::NM_types stor);
+  OSNSMatrix(unsigned int n, NM_types stor);
 
   /** Constructor with _dimRow and DimColumn of the matrix
    *
    *  \param n row sizes of the rectangle matrix
    *  \param m column size of the rectangle matrix
-   *  \param stor storage type (siconos::numerics::NM_DENSE or
-   * siconos::numerics::NM_SPARSE_BLOCK)
+   *  \param stor storage type (NM_DENSE or
+   * NM_SPARSE_BLOCK)
    */
-  OSNSMatrix(unsigned int n, unsigned int m, siconos::numerics::NM_types stor);
+  OSNSMatrix(unsigned int n, unsigned int m, NM_types stor);
 
   /** Constructor from index set and map
    *
    *  \param indexSet InteractionsGraph* the index set of the active constraints
    *  \param stor storage type
    */
-  OSNSMatrix(siconos::graphs::InteractionsGraph& indexSet, siconos::numerics::NM_types stor);
+  OSNSMatrix(siconos::graphs::InteractionsGraph& indexSet, NM_types stor);
 
-  /** Constructor with copy of a SiconosMatrix => _storageType = siconos::numerics::NM_DENSE
+  /** Constructor with copy of a SiconosMatrix => _storageType = NM_DENSE
    *
    *  \param MSource matrix to be copied
    */
@@ -223,22 +219,20 @@ class OSNSMatrix {
    *
    *  \return unsigned int
    */
-  inline siconos::numerics::NM_types storagetype() const { return _storageType; };
+  inline NM_types storagetype() const { return _storageType; };
 
   /** set which type of storage will be used for current matrix
    *
    *  \param i the type of storage
    */
-  inline void setStorageType(siconos::numerics::NM_types i) { _storageType = i; };
+  inline void setStorageType(NM_types i) { _storageType = i; };
 
   /** \return the numerics-readable structure */
-  inline std::shared_ptr<siconos::numerics::NumericsMatrix> numericsMatrix() {
-    return _numericsMatrix;
-  };
+  inline std::shared_ptr<NumericsMatrix> numericsMatrix() { return _numericsMatrix; };
 
   /** get the matrix used for default storage
    *
-   *  \return std::shared_ptr<siconos::numerics::NumericsMatrix>
+   *  \return std::shared_ptr<NumericsMatrix>
    */
   inline std::shared_ptr<siconos::algebra::SiconosMatrix> defaultMatrix() { return _M1; };
 
@@ -254,8 +248,7 @@ class OSNSMatrix {
    *  \param Winverse the NumericsMatrix that contains the inverse of W
    *  \param Winverse the NumericsMatrix that contains H
    */
-  void computeM(std::shared_ptr<siconos::numerics::NumericsMatrix> Winverse,
-                std::shared_ptr<siconos::numerics::NumericsMatrix> H);
+  void computeM(std::shared_ptr<NumericsMatrix> Winverse, std::shared_ptr<NumericsMatrix> H);
 
   /** fill the current class using an index set with the W matrix of DS
    *

@@ -27,10 +27,10 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
-#include "SiconosAlgebraProd.hpp"  // for prod and subprod
 #include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for subscal
+#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
@@ -72,8 +72,7 @@ void Hem5OSI_fprob_wrapper(int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* L
                            int* INDGC, int* INDFLR, int* INDFLC, double* time, double* q,
                            double* v, double* u, double* xl, double* G, double* GQ, double* F,
                            double* GQQ, double* GT, double* FL, double* QDOT, double* UDOT,
-                           double* AM)
-{
+                           double* AM) {
   return hem5_global_object->_impl->fprob(IFCN, NQ, NV, NU, NL, LDG, LDF, LDA, NBLK, NMRC,
                                           NPGP, NPFL, INDGR, INDGC, INDFLR, INDFLC, time, q, v,
                                           u, xl, G, GQ, F, GQQ, GT, FL, QDOT, UDOT, AM);
@@ -84,8 +83,7 @@ extern "C" siconos::fortran::soloutfunction Hem5OSI_solout_wrapper;
 void Hem5OSI_solout_wrapper(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, int* NL,
                             int* LDG, int* LDF, int* LDA, int* LRDO, int* LIDO,
                             siconos::fortran::fprobpointer FPROB, double* q, double* v,
-                            double* u, double* DOWK, int* IDOWK)
-{
+                            double* u, double* DOWK, int* IDOWK) {
   return hem5_global_object->_impl->solout(MODE, NSTEP, NQ, NV, NU, NL, LDG, LDF, LDA, LRDO,
                                            LIDO, FPROB, q, v, u, DOWK, IDOWK);
 }
@@ -96,21 +94,17 @@ void Hem5OSI_solout_wrapper(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, in
 siconos::integrators::Hem5OSI::Hem5OSI()
     : OneStepIntegrator{IntegratorType::HEM5OSI, 1, 0, 2, 1, 2},
       _idid(0),
-      _impl(std::make_shared<Hem5OSI_impl>(this))
-{
-}
+      _impl(std::make_shared<Hem5OSI_impl>(this)) {}
 
 void siconos::integrators::Hem5OSI::setTol(int newItol, boost::shared_array<double> newRtol,
-                                           boost::shared_array<double> newAtol)
-{
+                                           boost::shared_array<double> newAtol) {
   _intData[4] = newItol;
   // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
   //           dimension NQ + NV + NU (ITOL=1)
   rtol = newRtol;
   atol = newAtol;
 }
-void siconos::integrators::Hem5OSI::setTol(int newItol, double newRtol, double newAtol)
-{
+void siconos::integrators::Hem5OSI::setTol(int newItol, double newRtol, double newAtol) {
   _intData[4] = newItol;
   // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
   //           dimension NQ + NV + NU (ITOL=1)
@@ -120,13 +114,11 @@ void siconos::integrators::Hem5OSI::setTol(int newItol, double newRtol, double n
 
 void siconos::integrators::Hem5OSI::setMaxStepSize(double _maxStep) { rwork[5] = _maxStep; }
 
-void siconos::integrators::Hem5OSI::setMaxNstep(int _maxNumberSteps)
-{
+void siconos::integrators::Hem5OSI::setMaxNstep(int _maxNumberSteps) {
   iwork[11] = _maxNumberSteps;
 }
 
-void siconos::integrators::Hem5OSI::updateIntData()
-{
+void siconos::integrators::Hem5OSI::updateIntData() {
   //   int parameters for HEM5 are saved in vector intData.
 
   // 1 - _intData[0] NQ size of the position vector q
@@ -190,8 +182,7 @@ void siconos::integrators::Hem5OSI::updateIntData()
   _intData[7] *= 2;
 }
 
-void siconos::integrators::Hem5OSI::updateData()
-{
+void siconos::integrators::Hem5OSI::updateData() {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
 
@@ -214,20 +205,17 @@ void siconos::integrators::Hem5OSI::updateData()
   for (int i = 0; i < _intData[6]; i++) rwork[i] = 0.0;
 }
 
-void siconos::integrators::Hem5OSI::fillqWork(int* NQ, double* q)
-{
+void siconos::integrators::Hem5OSI::fillqWork(int* NQ, double* q) {
   unsigned int sizeQ = (unsigned int)(*NQ);
   for (unsigned int i = 0; i < sizeQ; ++i) (*_qWork)(i) = q[i];
 }
 
-void siconos::integrators::Hem5OSI::fillvWork(int* NV, double* v)
-{
+void siconos::integrators::Hem5OSI::fillvWork(int* NV, double* v) {
   unsigned int sizeV = (unsigned int)(*NV);
   for (unsigned int i = 0; i < sizeV; ++i) (*_vWork)(i) = v[i];
 }
 
-void siconos::integrators::Hem5OSI::computeRhs(double t)
-{
+void siconos::integrators::Hem5OSI::computeRhs(double t) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
@@ -236,8 +224,7 @@ void siconos::integrators::Hem5OSI::computeRhs(double t)
   }
 }
 
-void siconos::integrators::Hem5OSI::computeJacobianRhs(double t)
-{
+void siconos::integrators::Hem5OSI::computeJacobianRhs(double t) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
@@ -250,8 +237,7 @@ void siconos::integrators::Hem5OSI_impl::fprob(
     int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF, int* LDA, int* NBLK,
     int* NMRC, int* NPGP, int* NPFL, int* INDGR, int* INDGC, int* INDFLR, int* INDFLC,
     double* time, double* q, double* v, double* u, double* xl, double* G, double* GQ,
-    double* F, double* GQQ, double* GT, double* FL, double* QDOT, double* UDOT, double* AM)
-{
+    double* F, double* GQQ, double* GT, double* FL, double* QDOT, double* UDOT, double* AM) {
   DEBUG_PRINTF(
       "siconos::integrators::Hem5OSI::fprob(int* IFCN,...) with IFCN = "
       "%i \n",
@@ -283,8 +269,7 @@ void siconos::integrators::Hem5OSI_impl::fprob(
               AM[ii + jj * (int)(*NV)] = lds->mass()->getValue(ii, jj);
             }
           }
-        }
-        else {
+        } else {
           for (auto ii = pos; ii < ((unsigned int)(*NV) + pos); ii++) {
             for (auto jj = pos; jj < ((unsigned int)(*NV) + pos); jj++) {
               if (ii == jj)
@@ -295,8 +280,7 @@ void siconos::integrators::Hem5OSI_impl::fprob(
           }
         }
         pos += lds->dimension();
-      }
-      else {
+      } else {
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::fprob(), Only integration of Lagrangian DS is "
             "allowed");
@@ -313,8 +297,7 @@ void siconos::integrators::Hem5OSI_impl::fprob(
         hem5osi->fillqWork(NQ, q);
         hem5osi->fillvWork(NV, v);
         lds->computeForces((double)*time, lds->q(), lds->velocity());
-      }
-      else {
+      } else {
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::fprob(), Only integration of Lagrangian DS is "
             "allowed");
@@ -384,8 +367,7 @@ void siconos::integrators::Hem5OSI_impl::fprob(
           QDOT[i + pos] = v[i + pos];
         }
         pos += dim;
-      }
-      else {
+      } else {
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::fprob(), Only integration of Mechanical DS is "
             "allowed");
@@ -417,8 +399,7 @@ void siconos::integrators::Hem5OSI_impl::fprob(
 //   sizeOfX, time, x, jacob);
 // }
 void siconos::integrators::Hem5OSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // Get work buffers from the graph
   auto& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
@@ -441,8 +422,7 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForDS(
     ds_work_vectors.resize(siconos::integrators::Hem5OSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::Hem5OSI::FREE] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
-  }
-  else {
+  } else {
     THROW_EXCEPTION(
         "siconos::integrators::Hem5OSI::initialize(), Only integration of Lagrangian DS is "
         "allowed");
@@ -453,8 +433,7 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForDS(
 
 void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   auto ds1 = interProp.source;
   auto ds2 = interProp.target;
 
@@ -488,8 +467,7 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
     _levelMaxForOutput = 2;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
-  }
-  else if (nslType == siconos::modeling::Type::NewtonImpactFrictionNSL) {
+  } else if (nslType == siconos::modeling::Type::NewtonImpactFrictionNSL) {
     _levelMinForOutput = 0;
     _levelMaxForOutput = 4;
     _levelMinForInput = 1;
@@ -497,8 +475,7 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
     THROW_EXCEPTION(
         "HEM5OSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law "
         "of type NewtonImpactFrictionNSL");
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "HEM5OSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of "
         "type");
@@ -549,8 +526,7 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
   }
 }
 
-void siconos::integrators::Hem5OSI::initialize()
-{
+void siconos::integrators::Hem5OSI::initialize() {
   DEBUG_PRINT("siconos::integrators::Hem5OSI::initialize(Model& m)\n");
 
   OneStepIntegrator::initialize();
@@ -573,11 +549,9 @@ void siconos::integrators::Hem5OSI_impl::solout(int* MODE, int* NSTEP, int* NQ, 
                                                 double* q, double* v, double* u, double* DOWK,
                                                 int* IDOWK)
 
-{
-}
+{}
 #endif
-unsigned int siconos::integrators::Hem5OSI::numberOfConstraints()
-{
+unsigned int siconos::integrators::Hem5OSI::numberOfConstraints() {
   DEBUG_PRINT("siconos::integrators::Hem5OSI::updateConstraints() \n");
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   auto indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
@@ -592,8 +566,7 @@ unsigned int siconos::integrators::Hem5OSI::numberOfConstraints()
 }
 
 void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, double& tout,
-                                              int& idid)
-{
+                                              int& idid) {
   DEBUG_PRINT(
       "siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, double& tout, "
       "int& idid) with \n");
@@ -621,8 +594,7 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   updateIntData();
   if (!_qtmp) {
     _qtmp = std::make_shared<siconos::algebra::SiconosVector>(_qWork->size());
-  }
-  else
+  } else
     _qtmp->resize((int)_intData[0], true);
 
   DEBUG_PRINTF("siconos::integrators::Hem5OSI::integrate() _intData[0] (NQ) = %i \n",
@@ -630,8 +602,7 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
 
   if (!_vtmp) {
     _vtmp = std::make_shared<siconos::algebra::SiconosVector>(_vWork->size());
-  }
-  else
+  } else
     _vtmp->resize((int)_intData[1], true);
 
   _utmp = std::make_shared<siconos::algebra::SiconosVector>(1);
@@ -640,14 +611,12 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
 
   if (!_atmp) {
     _atmp = std::make_shared<siconos::algebra::SiconosVector>(_vWork->size());
-  }
-  else
+  } else
     _atmp->resize((int)_intData[1], true);
 
   if (!_lambdatmp) {
     _lambdatmp = std::make_shared<siconos::algebra::SiconosVector>(_intData[3], 0.0);
-  }
-  else
+  } else
     _lambdatmp->resize((int)_intData[3], true);
   DEBUG_PRINTF("siconos::integrators::Hem5OSI::integrate() _intData[3] (NL) = %i \n",
                _intData[3]);
@@ -805,8 +774,7 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   tend = tend_DR;   // necessary for next start of HEM5
 }
 
-void siconos::integrators::Hem5OSI::updateState(const unsigned int level)
-{
+void siconos::integrators::Hem5OSI::updateState(const unsigned int level) {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   if (level == 1)  // ie impact case: compute velocity
@@ -817,8 +785,7 @@ void siconos::integrators::Hem5OSI::updateState(const unsigned int level)
           _dynamicalSystemsGraph->bundle(*dsi));
       lds->computePostImpactVelocity();
     }
-  }
-  else if (level == 2) {
+  } else if (level == 2) {
     double time = _simulation->nextTime();
     for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
       if (!checkOSI(dsi)) continue;
@@ -827,8 +794,7 @@ void siconos::integrators::Hem5OSI::updateState(const unsigned int level)
         ds->update(time);
       }
     }
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::Hem5OSI::updateState(index), index is out of range. Index = " +
         std::to_string(level));
@@ -849,8 +815,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp){};
 
-  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override
-  {
+  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
     e = nslaw.e();
     std::vector<std::size_t> subCoord = {0, _inter->nonSmoothLaw()->size(), 0,
@@ -867,8 +832,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
 
 void siconos::integrators::Hem5OSI::computeFreeOutput(
     siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
-    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp)
-{
+    siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   auto allOSNS = _simulation->oneStepNSProblems();
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
@@ -906,13 +870,11 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     assert(Xfree);
     //        std::cout << "Computeqblock Xfree (Gamma)========" << "\n";
     //       Xfree->display();
-  }
-  else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
+  } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
     Xfree = DSlink[siconos::modeling::LagrangianR::q1];
     //        std::cout << "Computeqblock Xfree (Velocity)========" << "\n";
     //       Xfree->display();
-  }
-  else
+  } else
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
@@ -936,8 +898,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::computeFreeOutput not yet implemented for LCP at "
             "acceleration level with LagrangianRheonomousR");
-      }
-      else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
+      } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
         std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
             ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
                           *DSlink[siconos::modeling::LagrangianR::z]);
@@ -947,8 +908,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
                   inter->relation())
                   ->hDot()),
             osnsp_rhs, xcoord, false);  // y += hDot
-      }
-      else
+      } else
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::computeFreeOutput not implemented for "
             "siconos::simulation::SICONOS_OSNSP ");
@@ -966,8 +926,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
             osnsp_rhs, xcoord, false);  // y += NonLinearPart
       }
     }
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "siconos::integrators::Hem5OSI::computeFreeOutput not yet implemented for Relation of "
         "type " +
@@ -981,8 +940,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     }
   }
 }
-void siconos::integrators::Hem5OSI::display() const
-{
+void siconos::integrators::Hem5OSI::display() const {
   OneStepIntegrator::display();
   std::cout << " --- > Hem5OSI specific values: \n";
   std::cout << "Number of equations: " << _intData[0] << "\n";

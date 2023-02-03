@@ -23,13 +23,9 @@
 #define Relay_H
 
 #include "LinearOSNS.hpp"
-
-namespace siconos::numerics {
-
-#include <relay_cst.h>  // contains only enum. Ok.
+#include "relay_cst.h"  // contains only enum. Ok.
 struct RelayProblem;
 struct SolverOptions;
-}  // namespace siconos::numerics
 
 namespace siconos::nonsmooth_formulations {
 
@@ -63,7 +59,7 @@ class Relay : public LinearOSNS {
   std::shared_ptr<siconos::algebra::SiconosVector> _ub{nullptr};
 
   // /** contains the numerics proble for Relay system */
-  // std::shared_ptr < siconos::numerics::RelayProblem _numerics_problem{nullptr};
+  // std::shared_ptr < RelayProblem _numerics_problem{nullptr};
 
   struct _BoundsNSLEffect;
 
@@ -72,13 +68,13 @@ class Relay : public LinearOSNS {
    *
    *  \param numericsSolverId id of numerics solver, default =  SICONOS_RELAY_AVI_CAOFERRIS
    */
-  Relay(int numericsSolverId = siconos::numerics::SICONOS_RELAY_AVI_CAOFERRIS);
+  Relay(int numericsSolverId = SICONOS_RELAY_AVI_CAOFERRIS);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    */
-  Relay(std::shared_ptr<siconos::numerics::SolverOptions> options);
+  Relay(std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */

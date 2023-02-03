@@ -26,7 +26,7 @@
 // WARNING : do not include this file into another header.
 // Cpp include only !
 
-namespace siconos::numerics {
+// namespace siconos::numerics {
 
 #include "AffineVariationalInequalities.h"
 #include "FrictionContactProblem.h"
@@ -42,6 +42,6 @@ namespace siconos::numerics {
 #include "RelayProblem.h"
 #include "RollingFrictionContactProblem.h"
 #include "SolverOptions.h"
-}  // namespace siconos::numerics
+//}  // namespace siconos::numerics
 
 #endif

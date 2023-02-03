@@ -21,7 +21,7 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 // #define DEBUG_NOCOLOR
@@ -32,8 +32,7 @@
 // Minimum data (C as pointer) constructor
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C)
-    : LagrangianR(RelationSubType::LinearTIR)
-{
+    : LagrangianR(RelationSubType::LinearTIR) {
   _jachq = C;
 }
 
@@ -42,8 +41,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SimpleMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubType::LinearTIR)
-{
+    : LagrangianR(RelationSubType::LinearTIR) {
   _jachq = C;
   _F = F;
   _e = e;
@@ -53,14 +51,12 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubType::LinearTIR)
-{
+    : LagrangianR(RelationSubType::LinearTIR) {
   _jachq = C;
   _e = e;
 }
 
-void siconos::modeling::LagrangianLinearTIR::checkSize(Interaction& inter)
-{
+void siconos::modeling::LagrangianLinearTIR::checkSize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto& DSlink = inter.linkToDSVariables();
   if (!(_jachq) || _jachq->size(1) != inter.getSizeOfDS() || _jachq->size(0) != sizeY)
@@ -80,8 +76,7 @@ void siconos::modeling::LagrangianLinearTIR::checkSize(Interaction& inter)
         "matrix and the interaction.");
 }
 void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interaction& inter,
-                                                           unsigned int derivativeNumber)
-{
+                                                           unsigned int derivativeNumber) {
   DEBUG_BEGIN(
       "siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interaction& inter, "
       "unsigned int derivativeNumber)\n");
@@ -104,8 +99,7 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interact
       "unsigned int derivativeNumber)\n");
 }
 void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interaction& inter,
-                                                          unsigned int level)
-{
+                                                          unsigned int level) {
   DEBUG_BEGIN(
       "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")
@@ -122,8 +116,7 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
       "inter, unsigned int level)\n")
 }
 
-void siconos::modeling::LagrangianLinearTIR::display() const
-{
+void siconos::modeling::LagrangianLinearTIR::display() const {
   LagrangianR::display();
   std::cout << "===== Lagrangian Linear Relation display ===== " << std::endl;
   std::cout << " C: " << std::endl;

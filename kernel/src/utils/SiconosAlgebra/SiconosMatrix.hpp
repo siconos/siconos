@@ -23,22 +23,18 @@
 #ifndef SICOMAT
 #define SICOMAT
 
-
 #include <boost/numeric/ublas/fwd.hpp>  // boost::numeric fwd
 #include <memory>                       // shared_ptr
 #include <vector>
 
+#include "CSparseMatrix.h"          // For CSparseMatrix
 #include "SiconosAlgebraTypes.hpp"  // for UblasType
-// #include <iosfwd>  // for ostream
-
 #include "SiconosException.hpp"
 #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
 
-namespace siconos::numerics {
-#include "NumericsFwd.h"  // For NumericsMatrix
-#include "CSparseMatrix.h" 
-
-}  // namespace siconos::numerics
+// #include "NumericsFwd.h"  // For NumericsMatrix
+// typedef struct NumericsMatrix NumericsMatrix;
+struct NumericsMatrix;
 
 namespace siconos::algebra {
 
@@ -169,8 +165,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *
    *  \return a bool
    */
-  inline bool isBlock(void) const
-  {
+  inline bool isBlock(void) const {
     if (_num == UblasType::BLOCK)
       return true;
     else
@@ -235,8 +230,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *
    *  \return true if the matrix is factorized
    */
-  inline virtual bool isFactorized() const
-  {
+  inline virtual bool isFactorized() const {
     return (isPLUFactorized() || isPLUFactorizedInPlace() || isCholeskyFactorized() ||
             isQRFactorized());
   };
@@ -265,8 +259,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *
    *  \return a pointer to a standard vector of int
    */
-  virtual const std::shared_ptr<std::vector<std::size_t>> tabRow() const
-  {
+  virtual const std::shared_ptr<std::vector<std::size_t>> tabRow() const {
     THROW_EXCEPTION(
         "not implemented for this type of matrix (Simple?) reserved to BlockMatrix.");
   }
@@ -275,8 +268,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *
    *  \return a pointer to a standard vector of int
    */
-  virtual const std::shared_ptr<std::vector<std::size_t>> tabCol() const
-  {
+  virtual const std::shared_ptr<std::vector<std::size_t>> tabCol() const {
     THROW_EXCEPTION(
         "not implemented for this type of matrix (Simple?) reserved to BlockMatrix.");
   }
@@ -498,8 +490,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *  \param row unsigned int row
    *  \param col unsigned int col
    */
-  virtual std::shared_ptr<SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0)
-  {
+  virtual std::shared_ptr<SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0) {
     THROW_EXCEPTION("must be implemented");
   };
 
@@ -509,8 +500,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *  \param col unsigned int col
    */
   virtual std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0,
-                                                     unsigned int col = 0) const
-  {
+                                                     unsigned int col = 0) const {
     THROW_EXCEPTION("must be implemented");
   };
 
@@ -582,7 +572,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
 
   virtual void updateNumericsMatrix() = 0;
 
-  virtual siconos::numerics::NumericsMatrix *numericsMatrix() const { return nullptr; };
+  virtual NumericsMatrix *numericsMatrix() const { return nullptr; };
 
   /** computes a LU factorization of a general M-by-N matrix
    *  with partial pivoting and row interchanges.
@@ -596,7 +586,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
   virtual void PLUFactorizationInPlace() = 0;
 
   /** computes a factorization of a general M-by-N matrix
-   *  The implementation is based on an internal siconos::numerics::NumericsMatrix
+   *  The implementation is based on an internal NumericsMatrix
    */
   virtual void Factorize() = 0;
 
@@ -645,16 +635,14 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
   /** set to false all LU indicators. Useful in case of
       assignment for example.
   */
-  virtual void resetLU()
-  {
+  virtual void resetLU() {
     THROW_EXCEPTION(" SiconosMatrix::resetLU not yet implemented for BlockMatrix.");
   };
 
   /** set to false all factorization indicators. Useful in case of
       assignment for example.
   */
-  virtual void resetFactorizationFlags()
-  {
+  virtual void resetFactorizationFlags() {
     THROW_EXCEPTION(
         " SiconosMatrix::resetFactorizationFlags not yet implemented for BlockMatrix.");
   };
@@ -666,7 +654,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    */
   virtual size_t nnz(double tol = 1e-14);
 
-  /** Fill siconos::numerics::CSparseMatrix compresses column sparse matrix
+  /** Fill CSparseMatrix compresses column sparse matrix
    *
    *  \param csc the compressed column sparse matrix
    *  \param row_off
@@ -676,18 +664,17 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *  \warning not clear that it works for an empty csr matrix with row_off =0  and col_off
    * =0
    */
-  bool fillCSC(siconos::numerics::CSparseMatrix *csc, size_t row_off, size_t col_off,
-               double tol = 1e-14);
+  bool fillCSC(CSparseMatrix *csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
-  /** Fill siconos::numerics::CSparseMatrix compresses column sparse matrix
+  /** Fill CSparseMatrix compresses column sparse matrix
    *
    *  \param csc the compressed column sparse matrix
    *  \param tol the tolerance under which a number is considered as equal to zero
    *  \return true if function worked.
    */
-  bool fillCSC(siconos::numerics::CSparseMatrix *csc, double tol = 1e-14);
+  bool fillCSC(CSparseMatrix *csc, double tol = 1e-14);
 
-  bool fromCSC(siconos::numerics::CSparseMatrix *csc);
+  bool fromCSC(CSparseMatrix *csc);
 
   /** return the number of non-zero in the matrix
    *
@@ -697,8 +684,7 @@ class SiconosMatrix  //: public std::enable_shared_from_this<SiconosMatrix>
    *  \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
    *  \return the number of non-zeros
    */
-  bool fillTriplet(siconos::numerics::CSparseMatrix *csc, size_t row_off, size_t col_off,
-                   double tol = 1e-14);
+  bool fillTriplet(CSparseMatrix *csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
   // VIRTUAL_ACCEPT_VISITORS(SiconosMatrix);
 

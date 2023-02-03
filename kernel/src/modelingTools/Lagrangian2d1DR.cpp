@@ -21,15 +21,14 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // inner_prod
+#include "SiconosVectorOp.hpp"  // inner_prod
 #include "SimpleMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-void siconos::modeling::Lagrangian2d1DR::initialize(Interaction& inter)
-{
+void siconos::modeling::Lagrangian2d1DR::initialize(Interaction& inter) {
   // proj_with_q  _jachqProj =
   // std::make_shared<siconos::algebra::SimpleMatrix>(_jachq->size(0),_jachq->size(1)));
 
@@ -43,8 +42,7 @@ void siconos::modeling::Lagrangian2d1DR::initialize(Interaction& inter)
 }
 
 void siconos::modeling::Lagrangian2d1DR::computeJachq(const siconos::algebra::BlockVector& q,
-                                                      siconos::algebra::BlockVector& z)
-{
+                                                      siconos::algebra::BlockVector& z) {
   DEBUG_BEGIN(
       "siconos::modeling::Lagrangian2d1DR::computeJachq(Interaction& inter, "
       "siconos::algebra::BlockVector q0 \n");
@@ -75,8 +73,7 @@ void siconos::modeling::Lagrangian2d1DR::computeJachq(const siconos::algebra::Bl
       "siconos::algebra::BlockVector q0) \n");
 }
 
-double siconos::modeling::Lagrangian2d1DR::distance() const
-{
+double siconos::modeling::Lagrangian2d1DR::distance() const {
   DEBUG_BEGIN("siconos::modeling::Lagrangian2d1DR::distance(...)\n")
   siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
   DEBUG_END("siconos::modeling::Lagrangian2d1DR::distance(...)\n")
@@ -85,8 +82,7 @@ double siconos::modeling::Lagrangian2d1DR::distance() const
 
 void siconos::modeling::Lagrangian2d1DR::computeh(const siconos::algebra::BlockVector& q,
                                                   siconos::algebra::BlockVector& z,
-                                                  siconos::algebra::SiconosVector& y)
-{
+                                                  siconos::algebra::SiconosVector& y) {
   DEBUG_BEGIN("siconos::modeling::Lagrangian2d1DR::computeh(...)\n");
   DEBUG_EXPR(q.display());
 
@@ -96,8 +92,7 @@ void siconos::modeling::Lagrangian2d1DR::computeh(const siconos::algebra::BlockV
   DEBUG_EXPR(display(););
   DEBUG_END("siconos::modeling::Lagrangian2d1DR::computeh(...)\n")
 }
-void siconos::modeling::Lagrangian2d1DR::display() const
-{
+void siconos::modeling::Lagrangian2d1DR::display() const {
   LagrangianR::display();
 
   std::cout << " _Pc1 :" << std::endl;

@@ -17,8 +17,8 @@
  */
 #include "NewtonEulerDSTest.hpp"
 
-#include "SiconosAlgebraProd.hpp"
-#include "SiconosMatrixSetBlock.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
@@ -28,8 +28,7 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(NewtonEulerDSTest);
 
-void NewtonEulerDSTest::setUp()
-{
+void NewtonEulerDSTest::setUp() {
   q0 = std::make_shared<siconos::algebra::SiconosVector>(7);
   (*q0)(0) = 1;
   (*q0)(1) = 2;
@@ -67,8 +66,7 @@ void NewtonEulerDSTest::setUp()
 void NewtonEulerDSTest::tearDown() {}
 
 // constructor from data
-void NewtonEulerDSTest::testBuildNewtonEulerDS1()
-{
+void NewtonEulerDSTest::testBuildNewtonEulerDS1() {
   std::cout << "--> Test: constructor 1." << std::endl;
 
   auto ds = std::make_shared<siconos::modeling::NewtonEulerDS>(q0, velocity0, mass, inertia);
@@ -103,8 +101,7 @@ void NewtonEulerDSTest::testBuildNewtonEulerDS1()
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 // constructor from data
-void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
-{
+void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   std::cout << "--> Test: quaternion 1 from position" << std::endl;
 
   auto axis = std::make_shared<siconos::algebra::SiconosVector>(3);
@@ -265,8 +262,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   std::cout << "--> quaternion 2 test ended with success." << std::endl;
 }
 
-void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
-{
+void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix() {
   std::cout << "--> Test: quaternion 2" << std::endl;
   std::cout << " ---------- test with q03 (rotation of pi/4 about the y-axis)" << std::endl;
   auto q03 = std::make_shared<siconos::algebra::SiconosVector>(7);
@@ -301,7 +297,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
   siconos::algebra::SiconosVector aux(3);
   auto matrix = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
   siconos::geometry::computeRotationMatrix(q03, matrix);  // compute R
-  siconos::algebra::prod(*matrix, *v, aux);                // multiply by R
+  siconos::algebra::prod(*matrix, *v, aux);               // multiply by R
   *v = aux;
   std::cout << "v : " << std::endl;
   v->display();
@@ -313,8 +309,9 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
   (*v)(0) = 1.0;
   (*v)(1) = 1.0;
   (*v)(2) = 1.0;
-  siconos::geometry::computeRotationMatrixTransposed(q03, matrix);  // Compute R^T for the moment
-  siconos::algebra::prod(*v, *matrix, aux);                          // multiply by R^T^T
+  siconos::geometry::computeRotationMatrixTransposed(q03,
+                                                     matrix);  // Compute R^T for the moment
+  siconos::algebra::prod(*v, *matrix, aux);                    // multiply by R^T^T
   *v = aux;
   std::cout << "v : " << std::endl;
   v->display();
@@ -381,12 +378,12 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
 //   auto vf = ds->rhs();
 
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->vector(0)) == *velocity0, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", siconos::algebra::prod(M, *(vf->vector(1))) ==
-//   (copy->getFExt() - copy->getFInt() - copy->getFGyr()) , true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", siconos::algebra::prod(M,
+//   *(vf->vector(1))) == (copy->getFExt() - copy->getFInt() - copy->getFGyr()) , true);
 
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", siconos::algebra::prod(M, *(jx->block(1, 0))) ==
-//   (copy->getJacobianFL(0)) , true); CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ",
-//   siconos::algebra::prod(M, *(jx->block(1, 1))) == (copy->getJacobianFL(1)) , true); std::cout << "-->
-//   computeDS test ended with success." <<std::endl;
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", siconos::algebra::prod(M, *(jx->block(1,
+//   0))) == (copy->getJacobianFL(0)) , true); CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL :
+//   ", siconos::algebra::prod(M, *(jx->block(1, 1))) == (copy->getJacobianFL(1)) , true);
+//   std::cout << "--> computeDS test ended with success." <<std::endl;
 
 // }

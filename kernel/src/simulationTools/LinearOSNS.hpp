@@ -24,11 +24,11 @@
 
 #include "OneStepNSProblem.hpp"
 
-namespace siconos::numerics {
+// namespace siconos::numerics {
 
 #include "NM_types.h"  // For NM_DENSE, NM_types ...
 // enum NM_types : int;  // explicit type specification is required
-}  // namespace siconos::numerics
+//}  // namespace siconos::numerics
 
 namespace siconos::algebra {
 class SiconosVector;
@@ -88,7 +88,7 @@ class LinearOSNS : public OneStepNSProblem {
 
   /** Storage type for M - NM_DENSE: SiconosMatrix (dense), NM_SPARSE_BLOCK:
      Sparse Storage (embedded into OSNSMatrix) */
-  siconos::numerics::NM_types _numericsMatrixStorageType{siconos::numerics::NM_DENSE};
+  NM_types _numericsMatrixStorageType{NM_DENSE};
 
   /** a boolean to decide if _w and _z vectors are initialized with
       previous values of Y and Lambda when a change occurs in problem
@@ -113,7 +113,7 @@ class LinearOSNS : public OneStepNSProblem {
    *  \param assemblytype the method used to build the assembled matrix (enum
    * LinearOSNSAssemblyType)
    */
-  LinearOSNS(std::shared_ptr<siconos::numerics::SolverOptions> options,
+  LinearOSNS(std::shared_ptr<SolverOptions> options,
              LinearOSNSAssemblyType assemblyType = LinearOSNSAssemblyType::REDUCED_BLOCK)
       : OneStepNSProblem{options}, _assemblyType{assemblyType} {};
 
@@ -195,9 +195,7 @@ class LinearOSNS : public OneStepNSProblem {
 
      \return NM_types (NM_DENSE, NM_SPARSE_BLOCK)
   */
-  inline siconos::numerics::NM_types getMStorageType() const {
-    return _numericsMatrixStorageType;
-  };
+  inline NM_types getMStorageType() const { return _numericsMatrixStorageType; };
 
   /** set which type of storage will be used for M
    *  \warning this function does not allocate any memory for M,
@@ -205,9 +203,7 @@ class LinearOSNS : public OneStepNSProblem {
    *
    *  \param i (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  inline void setMStorageType(siconos::numerics::NM_types i) {
-    _numericsMatrixStorageType = i;
-  };
+  inline void setMStorageType(NM_types i) { _numericsMatrixStorageType = i; };
 
   /** set which type of assembly will be used for M
    */

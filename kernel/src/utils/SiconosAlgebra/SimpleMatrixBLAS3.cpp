@@ -32,9 +32,9 @@
 #include <boost/numeric/ublas/operation_sparse.hpp>
 // require for matrix stuff like value_type
 // #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include "SiconosAlgebraProd.hpp"
 #include "SiconosMatrix.hpp"
 #include "SimpleMatrix.hpp"
+#include "SiconosMatrixOp.hpp"  // for matrix operators declaration
 
 namespace ublas = boost::numeric::ublas;
 // namespace bindings_blas = boost::numeric::bindings::blas;
@@ -198,8 +198,7 @@ dim : dim[0] number of raw, dim[1] number of col
 // }
 
 void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
-                                 SiconosMatrix &C, bool init)
-{
+                                 SiconosMatrix &C, bool init) {
   // To compute C = A * B (init = true) or C += A * B (init = false) using ublas axpy_prod.
   // High speedup for sparse matrices.
   // Warning FP: ublas::axpy_prod(A, B, C, init) with init = True is equivalent
@@ -251,15 +250,13 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
 
   else if (numA == UblasType::ZERO || numB == UblasType::ZERO)  // if A or B = 0
   {
-    if (init) C.zero();  // else nothing
-  }
-  else if (numC == UblasType::BLOCK)  // if C is Block - Temp. solution
+    if (init) C.zero();                 // else nothing
+  } else if (numC == UblasType::BLOCK)  // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     axpy_prod(A, B, tmp, init);
     C = tmp;
-  }
-  else  // neither A or B is equal to identity or zero.
+  } else  // neither A or B is equal to identity or zero.
   {
     switch (numC) {
       case UblasType::DENSE:
@@ -274,8 +271,7 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
             ublas::axpy_prod(*A.sparse(), *B.dense(), *C.dense(), init);
           else  // if(numA==UblasType::BANDED)
             ublas::axpy_prod(*A.banded(), *B.dense(), *C.dense(), init);
-        }
-        else if (numB == UblasType::TRIANGULAR) {
+        } else if (numB == UblasType::TRIANGULAR) {
           if (numA == UblasType::DENSE)
             ublas::axpy_prod(*A.dense(), *B.triang(), *C.dense(), init);
           else if (numA == UblasType::TRIANGULAR)
@@ -286,8 +282,7 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
             ublas::axpy_prod(*A.sparse(), *B.triang(), *C.dense(), init);
           else  // if(numA==UblasType::BANDED)
             ublas::axpy_prod(*A.banded(), *B.triang(), *C.dense(), init);
-        }
-        else if (numB == UblasType::SYMMETRIC) {
+        } else if (numB == UblasType::SYMMETRIC) {
           if (numA == UblasType::DENSE)
             ublas::axpy_prod(*A.dense(), *B.sym(), *C.dense(), init);
           else if (numA == UblasType::TRIANGULAR)
@@ -298,8 +293,7 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
             ublas::axpy_prod(*A.sparse(), *B.sym(), *C.dense(), init);
           else  // if (numA == UblasType::BANDED)
             ublas::axpy_prod(*A.banded(), *B.sym(), *C.dense(), init);
-        }
-        else if (numB == UblasType::SPARSE) {
+        } else if (numB == UblasType::SPARSE) {
           if (numA == UblasType::DENSE)
             ublas::axpy_prod(*A.dense(), *B.sparse(), *C.dense(), init);
           else if (numA == UblasType::TRIANGULAR)
@@ -310,8 +304,7 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
             ublas::axpy_prod(*A.sparse(), *B.sparse(), *C.dense(), init);
           else  // if(numA==UblasType::BANDED){
             ublas::axpy_prod(*A.banded(), *B.sparse(), *C.dense(), init);
-        }
-        else  // if(numB==UblasType::BANDED)
+        } else  // if(numB==UblasType::BANDED)
         {
           if (numA == UblasType::DENSE)
             ublas::axpy_prod(*A.dense(), *B.banded(), *C.dense(), init);

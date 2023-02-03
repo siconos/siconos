@@ -23,9 +23,9 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
-#include "PluggedObject.hpp"       // getPluginFunctionname ...
-#include "PluginTypes.hpp"         // FPtr2 ...
-#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
+#include "PluggedObject.hpp"          // getPluginFunctionname ...
+#include "PluginTypes.hpp"            // FPtr2 ...
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
@@ -37,8 +37,7 @@
 // constructor from a set of data
 siconos::modeling::LagrangianScleronomousR::LagrangianScleronomousR(
     const std::string& pluginh, const std::string& pluginJacobianhq)
-    : LagrangianR(RelationSubType::ScleronomousR)
-{
+    : LagrangianR(RelationSubType::ScleronomousR) {
   _zeroPlugin();
   setComputehFunction(siconos::plugins::getPluginName(pluginh),
                       siconos::plugins::getPluginFunctionName(pluginh));
@@ -53,8 +52,7 @@ siconos::modeling::LagrangianScleronomousR::LagrangianScleronomousR(
 siconos::modeling::LagrangianScleronomousR::LagrangianScleronomousR(
     const std::string& pluginh, const std::string& pluginJacobianhq,
     const std::string& pluginDotJacobianhq)
-    : LagrangianR(RelationSubType::ScleronomousR)
-{
+    : LagrangianR(RelationSubType::ScleronomousR) {
   _zeroPlugin();
   setComputehFunction(siconos::plugins::getPluginName(pluginh),
                       siconos::plugins::getPluginFunctionName(pluginh));
@@ -64,15 +62,13 @@ siconos::modeling::LagrangianScleronomousR::LagrangianScleronomousR(
   _plugindotjacqh->setComputeFunction(pluginDotJacobianhq);
 }
 
-void siconos::modeling::LagrangianScleronomousR::_zeroPlugin()
-{
+void siconos::modeling::LagrangianScleronomousR::_zeroPlugin() {
   LagrangianR::_zeroPlugin();
   _pluginJachq = std::make_shared<siconos::plugins::PluggedObject>();
   _plugindotjacqh = std::make_shared<siconos::plugins::PluggedObject>();
 }
 
-void siconos::modeling::LagrangianScleronomousR::initialize(Interaction& inter)
-{
+void siconos::modeling::LagrangianScleronomousR::initialize(Interaction& inter) {
   if (!_jachq) {
     unsigned int sizeY = inter.dimension();
     unsigned int sizeDS = inter.getSizeOfDS();
@@ -84,8 +80,7 @@ void siconos::modeling::LagrangianScleronomousR::checkSize(Interaction& inter) {
 
 void siconos::modeling::LagrangianScleronomousR::computeh(
     const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-    siconos::algebra::SiconosVector& y)
-{
+    siconos::algebra::SiconosVector& y) {
   DEBUG_PRINT(
       " siconos::modeling::LagrangianScleronomousR::computeh(Interaction& inter, "
       "siconos::algebra::BlockVector q, siconos::algebra::BlockVector z)\n");
@@ -101,8 +96,7 @@ void siconos::modeling::LagrangianScleronomousR::computeh(
 }
 
 void siconos::modeling::LagrangianScleronomousR::computeJachq(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
-{
+    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
   if (_jachq && _pluginJachq->fPtr) {
     auto qp = q.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
@@ -115,8 +109,7 @@ void siconos::modeling::LagrangianScleronomousR::computeJachq(
 
 void siconos::modeling::LagrangianScleronomousR::computeDotJachq(
     const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-    const siconos::algebra::BlockVector& qDot)
-{
+    const siconos::algebra::BlockVector& qDot) {
   if (_dotjachq && _plugindotjacqh->fPtr) {
     auto qp = q.prepareVectorForPlugin();
     auto zp = z.prepareVectorForPlugin();
@@ -129,8 +122,7 @@ void siconos::modeling::LagrangianScleronomousR::computeDotJachq(
 }
 
 void siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot(double time,
-                                                                      Interaction& inter)
-{
+                                                                      Interaction& inter) {
   auto& DSlink = inter.linkToDSVariables();
   DEBUG_PRINT("siconos::modeling::LagrangianScleronomousR::computeNonLinearH2dot starts");
   // Compute the H Jacobian dot
@@ -142,8 +134,7 @@ void siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot(double tim
 }
 
 void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Interaction& inter,
-                                                               unsigned int derivativeNumber)
-{
+                                                               unsigned int derivativeNumber) {
   DEBUG_PRINTF(
       "siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Interaction& "
       "inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = %f "
@@ -153,15 +144,13 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
   auto& y = *inter.y(derivativeNumber);
   if (derivativeNumber == 0) {
     computeh(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], y);
-  }
-  else {
+  } else {
     computeJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
 
     if (derivativeNumber == 1) {
       assert(_jachq);
       siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q1], y);
-    }
-    else if (derivativeNumber == 2) {
+    } else if (derivativeNumber == 2) {
       assert(_jachq);
       siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q2], y);
       if (!_dotjachq) {
@@ -172,8 +161,7 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
       computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z],
                       *DSlink[LagrangianR::q1]);
       siconos::algebra::prod(*_dotjachq, *DSlink[LagrangianR::q1], y, false);
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "siconos::modeling::LagrangianScleronomousR::computeOutput(double time, "
           "Interaction& inter, InteractionProperties& interProp, unsigned int "
@@ -182,8 +170,7 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
 }
 
 void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Interaction& inter,
-                                                              unsigned int level)
-{
+                                                              unsigned int level) {
   DEBUG_BEGIN(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "
       "Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
@@ -203,8 +190,7 @@ void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Inter
       "Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
 }
 
-void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Interaction& inter)
-{
+void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Interaction& inter) {
   DEBUG_BEGIN(
       "void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Interaction& "
       "inter) \n");

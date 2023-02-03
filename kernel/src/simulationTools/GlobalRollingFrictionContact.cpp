@@ -27,7 +27,7 @@
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // setBlock
+#include "SiconosVectorOp.hpp"  // setBlock
 #include "Simulation.hpp"
 #include "Topology.hpp"
 // #define DEBUG_NOCOLOR
@@ -39,29 +39,23 @@
 siconos::nonsmooth_formulations::GlobalRollingFrictionContact::GlobalRollingFrictionContact(
     int dimPb, const int numericsSolverId)
     : GlobalRollingFrictionContact(
-          dimPb, std::shared_ptr<siconos::numerics::SolverOptions>(
-                     siconos::numerics::solver_options_create(numericsSolverId),
-                     siconos::numerics::solver_options_delete))
-{
-}
+          dimPb, std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
+                                                solver_options_delete)) {}
 
 // Constructor based on a pre-defined solver options set.
 siconos::nonsmooth_formulations::GlobalRollingFrictionContact::GlobalRollingFrictionContact(
-    int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options)
-    : GlobalFrictionContact(dimPb, options),
-      _g_rolling_driver(&siconos::numerics::g_rolling_fc3d_driver)
-{
+    int dimPb, std::shared_ptr<SolverOptions> options)
+    : GlobalFrictionContact(dimPb, options), _g_rolling_driver(&g_rolling_fc3d_driver) {
   // Only rolling fc3d for the moment.
   if (_contactProblemDim != 5)
     THROW_EXCEPTION("GlobalRollingFrictionContact No solver for 2 dimensional problems");
 
   // Reset default storage type for numerics matrices.
-  _numericsMatrixStorageType = siconos::numerics::NM_SPARSE;
+  _numericsMatrixStorageType = NM_SPARSE;
 }
 
 void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::initialize(
-    std::shared_ptr<siconos::simulation::Simulation> sim)
-{
+    std::shared_ptr<siconos::simulation::Simulation> sim) {
   GlobalFrictionContact::initialize(sim);
   // get topology
   auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
@@ -72,11 +66,9 @@ void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::initialize(
   _mu_r->reserve(I0->size());
 }
 
-std::shared_ptr<siconos::numerics::GlobalRollingFrictionContactProblem>
-siconos::nonsmooth_formulations::GlobalRollingFrictionContact::globalRollingFrictionContactProblem()
-{
-  auto numerics_problem =
-      std::make_shared<siconos::numerics::GlobalRollingFrictionContactProblem>();
+std::shared_ptr<GlobalRollingFrictionContactProblem> siconos::nonsmooth_formulations::
+    GlobalRollingFrictionContact::globalRollingFrictionContactProblem() {
+  auto numerics_problem = std::make_shared<GlobalRollingFrictionContactProblem>();
   numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
@@ -104,8 +96,7 @@ siconos::nonsmooth_formulations::GlobalRollingFrictionContact::globalRollingFric
 // }
 
 bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw& nslaw)
-{
+    siconos::modeling::NonSmoothLaw& nslaw) {
   auto type_number =
       static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
   _nslawtype.insert(type_number);
@@ -128,9 +119,10 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::checkCompati
   return true;
 }
 
-bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(double time)
-{
-  DEBUG_BEGIN("siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(double time)\n");
+bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(double time) {
+  DEBUG_BEGIN(
+      "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(double "
+      "time)\n");
   // This function is used to prepare data for the GlobalRollingFrictionContact problem
   // - computation of M, H _tildeLocalVelocity and q
   // - set _sizeOutput, sizeLocalOutput
@@ -142,7 +134,9 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
   auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
   DEBUG_PRINTF("indexSetLevel = %i\n", indexSetLevel());
   if (indexSetLevel() == siconos::internal::LEVELMAX) {
-    DEBUG_END("siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(double time)\n");
+    DEBUG_END(
+        "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(double "
+        "time)\n");
     return false;
   }
   if (!_hasBeenUpdated) {
@@ -205,15 +199,14 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
         if (std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
           auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
           siconos::algebra::setBlock(vfree, _q, dss, 0, offset);
-        }
-        else if (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+        } else if (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
           auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
           siconos::algebra::setBlock(vfree, _q, dss, 0, offset);
         }
-      }
-      else {
+      } else {
         THROW_EXCEPTION(
-            "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::computeq. Only  implemented "
+            "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::computeq. Only  "
+            "implemented "
             "for MoreauJeanGOSI integrator.");
       }
       offset += dss;
@@ -224,7 +217,7 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
 
     // fill H
     _H->fillH(DSG0, indexSet);
-    DEBUG_EXPR(siconos::numerics::NM_display(_H->numericsMatrix().get()););
+    DEBUG_EXPR(NM_display(_H->numericsMatrix().get()););
 
     _sizeOutput = _H->sizeColumn();
     DEBUG_PRINTF("_sizeOutput = %i\n ", _sizeOutput);
@@ -255,10 +248,10 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
       if (mjgosi1 and std::dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(
                           DSG0.properties(DSG0.descriptor(ds2)).osi)) {
         mjgosi1->NonSmoothLawContributionToOutput(inter, *this);
-      }
-      else {
+      } else {
         THROW_EXCEPTION(
-            "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::computeq. Only  implemented "
+            "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::computeq. Only  "
+            "implemented "
             "for MoreauJeanGOSI integrator.");
       }
       auto& osnsp_rhs = *(*indexSet.properties(*ui)
@@ -284,13 +277,15 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
       _globalVelocities->zero();
     }
   }
-  DEBUG_END("siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(double time)\n");
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(double "
+      "time)\n");
   return true;
 }
 
-int siconos::nonsmooth_formulations::GlobalRollingFrictionContact::compute(double time)
-{
-  DEBUG_BEGIN("siconos::nonsmooth_formulations::GlobalRollingFrictionContact::compute(double time)\n")
+int siconos::nonsmooth_formulations::GlobalRollingFrictionContact::compute(double time) {
+  DEBUG_BEGIN(
+      "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::compute(double time)\n")
   int info = 0;
   // --- Prepare data for GlobalRollingFrictionContact computing ---
   bool cont = preCompute(time);
@@ -301,13 +296,13 @@ int siconos::nonsmooth_formulations::GlobalRollingFrictionContact::compute(doubl
   info = solve();
   DEBUG_EXPR(display(););
   postCompute();
-  DEBUG_END("siconos::nonsmooth_formulations::GlobalRollingFrictionContact::compute(double time)\n")
+  DEBUG_END(
+      "siconos::nonsmooth_formulations::GlobalRollingFrictionContact::compute(double time)\n")
   return info;
 }
 
 int siconos::nonsmooth_formulations::GlobalRollingFrictionContact::solve(
-    std::shared_ptr<siconos::numerics::GlobalRollingFrictionContactProblem> problem)
-{
+    std::shared_ptr<GlobalRollingFrictionContactProblem> problem) {
   if (!problem) {
     problem = globalRollingFrictionContactProblem();
   }
@@ -315,8 +310,7 @@ int siconos::nonsmooth_formulations::GlobalRollingFrictionContact::solve(
                               _globalVelocities->getArray(), &*_numerics_solver_options);
 }
 
-void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMur()
-{
+void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMur() {
   _mu_r->clear();
   auto indexSet = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -327,8 +321,7 @@ void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMur()
             ->muR());
   }
 }
-void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMu()
-{
+void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMu() {
   _mu_r->clear();
   auto indexSet = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -340,8 +333,7 @@ void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMu()
   }
 }
 
-void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::display() const
-{
+void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::display() const {
   std::cout << "===== " << _contactProblemDim << "D Global Rolling Friction Contact Problem "
             << std::endl;
   std::cout << "size (_sizeOutput) " << _sizeOutput << "(ie "
@@ -353,14 +345,14 @@ void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::display() co
   // else std::cout << "-> nullptr" <<std::endl;
   auto* W_NM = _W->numericsMatrix().get();
   if (W_NM) {
-    siconos::numerics::NM_display(W_NM);
+    NM_display(W_NM);
   }
   std::cout << " - Matrix H : \n";
   // if (_H) _H->display();
   // else std::cout << "-> nullptr" <<std::endl;
   auto* H_NM = _H->numericsMatrix().get();
   if (H_NM) {
-    siconos::numerics::NM_display(H_NM);
+    NM_display(H_NM);
   }
 
   std::cout << " - Vector q : \n";
@@ -396,8 +388,7 @@ void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::display() co
   if (_mu) {
     for (auto coeff : *_mu) std::cout << coeff << " ";
     std::cout << "\n";
-  }
-  else
+  } else
     std::cout << "-> nullptr\n";
 
   std::cout << " - Vector mu_r : \n";
@@ -405,8 +396,7 @@ void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::display() co
     for (auto coeff : *_mu_r) std::cout << coeff << " ";
 
     std::cout << std::endl;
-  }
-  else
+  } else
     std::cout << "-> nullptr\n";
   std::cout << "============================================================\n";
 }

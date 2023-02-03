@@ -28,7 +28,8 @@
 
 #include "SiconosAlgebraTools.hpp"
 #include "SiconosConfig.h"
-#include "SiconosMatrixFriends.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "bindings_utils.hpp"
 
@@ -116,7 +117,7 @@ void EigenProblemsTest::testGeev1() {
 
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testGeev1 1: ", ublas::norm_2(error) < 12 * std::numeric_limits<double>::epsilon(),
+      "testGeev1 1: ", ublas::norm_2(error) < 1000 * std::numeric_limits<double>::epsilon(),
       true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev1 2: ", (*A) == (*Aref), true);

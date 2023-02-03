@@ -21,16 +21,12 @@
 #ifndef FrictionContact_H
 #define FrictionContact_H
 
-#include "LinearOSNS.hpp"
-
-namespace siconos::numerics {
-
 #include <Friction_cst.h>  // contains only enum. Ok.
+
+#include "LinearOSNS.hpp"
 
 struct FrictionContactProblem;
 struct SolverOptions;
-
-}  // namespace siconos::numerics
 
 namespace siconos::nonsmooth_formulations {
 
@@ -78,8 +74,7 @@ class FrictionContact : public LinearOSNS {
  protected:
   ACCEPT_SERIALIZATION(FrictionContact);
 
-  typedef int (*Driver)(siconos::numerics::FrictionContactProblem *, double *, double *,
-                        siconos::numerics::SolverOptions *);
+  typedef int (*Driver)(FrictionContactProblem *, double *, double *, SolverOptions *);
 
   /** Type (dimension) of the contact problem (2D or 3D) */
   int _contactProblemDim{3};
@@ -91,7 +86,7 @@ class FrictionContact : public LinearOSNS {
    * problem */
   Driver _frictionContact_driver;
 
-  // std::shared_ptr<siconos::numerics::FrictionContactProblem> _numerics_problem{nullptr};
+  // std::shared_ptr<FrictionContactProblem> _numerics_problem{nullptr};
 
  public:
   /** constructor (solver id and dimension)
@@ -100,14 +95,13 @@ class FrictionContact : public LinearOSNS {
    *  \param numericsSolverId id of the solver to be used default (default:
    * SICONOS_FRICTION_3D_NSGS)
    */
-  FrictionContact(int dimPb = 3,
-                  int numericsSolverId = siconos::numerics::SICONOS_FRICTION_3D_NSGS);
+  FrictionContact(int dimPb = 3, int numericsSolverId = SICONOS_FRICTION_3D_NSGS);
 
   /** constructor from a pre-defined solver options set
    *
    *  \param options the options set
    */
-  FrictionContact(int dimPb, std::shared_ptr<siconos::numerics::SolverOptions> options);
+  FrictionContact(int dimPb, std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
@@ -161,7 +155,7 @@ class FrictionContact : public LinearOSNS {
 
   /** \return the friction contact problem from Numerics
    */
-  std::shared_ptr<siconos::numerics::FrictionContactProblem> frictionContactProblem();
+  std::shared_ptr<FrictionContactProblem> frictionContactProblem();
 
   // /** \return the friction contact problem from Numerics (raw ptr, do not free)
   //  */
@@ -172,7 +166,7 @@ class FrictionContact : public LinearOSNS {
    *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(std::shared_ptr<siconos::numerics::FrictionContactProblem> problem = nullptr);
+  int solve(std::shared_ptr<FrictionContactProblem> problem = nullptr);
 
   /** Compute the unknown reaction and velocity and update the Interaction (y
    *  and lambda )

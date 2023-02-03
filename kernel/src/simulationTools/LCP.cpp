@@ -35,15 +35,15 @@
 #include "siconos_debug.h"
 
 siconos::nonsmooth_formulations::LCP::LCP(int numericsSolverId)
-    : LCP(std::shared_ptr<siconos::numerics::SolverOptions>(
-          siconos::numerics::solver_options_create(numericsSolverId),
-          siconos::numerics::solver_options_delete))
+    : LCP(std::shared_ptr<SolverOptions>(
+          solver_options_create(numericsSolverId),
+          solver_options_delete))
 {
 }
 
-siconos::nonsmooth_formulations::LCP::LCP(std::shared_ptr<siconos::numerics::SolverOptions> options)
+siconos::nonsmooth_formulations::LCP::LCP(std::shared_ptr<SolverOptions> options)
     : LinearOSNS(options),
-      _numerics_problem(std::make_shared<siconos::numerics::LinearComplementarityProblem>())
+      _numerics_problem(std::make_shared<LinearComplementarityProblem>())
 {
 }
 
@@ -77,16 +77,16 @@ int siconos::nonsmooth_formulations::LCP::solve()
   int info = 0;
   // const char * name = &*_numerics_solver_options->solverName;
 
-  if (_numerics_solver_options->solverId == siconos::numerics::SICONOS_LCP_ENUM) {
-    siconos::numerics::lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
+  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM) {
+    lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
   }
 
   // Call LCP Driver
-  info = siconos::numerics::linearComplementarity_driver(
+  info = linearComplementarity_driver(
       &*_numerics_problem, _z->getArray(), _w->getArray(), &*_numerics_solver_options);
 
-  if (_numerics_solver_options->solverId == siconos::numerics::SICONOS_LCP_ENUM) {
-    siconos::numerics::lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
+  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM) {
+    lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
   }
   return info;
 }

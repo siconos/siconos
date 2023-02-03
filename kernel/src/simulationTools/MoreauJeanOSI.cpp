@@ -33,12 +33,12 @@
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and compositionLawLieGroup
-#include "SiconosAlgebraProd.hpp"  // for prod, subprod ...
-#include "SiconosAlgebraScal.hpp"  // for prod, subprod ...
 #include "SiconosException.hpp"
-#include "SiconosPointers.hpp"  // For createSPtr
+#include "SiconosMatrixOp.hpp"        // for prod, scal, ...
+#include "SiconosMatrixVectorOp.hpp"  // for prod, subprod ...
+#include "SiconosPointers.hpp"        // For createSPtr
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"  // for subscal
+#include "SiconosVectorOp.hpp"  // for prod, subprod ...
 #include "SiconosVisitor.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
