@@ -29,6 +29,7 @@
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btConeShape.h>
+#include <BulletCollision/CollisionShapes/btConvex2dShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
@@ -39,10 +40,6 @@
 #include "BodyBulletShapeRecord.hpp"
 #include "SiconosBulletDefines.h"
 #include "SiconosShape.hpp"
-// // 2D shapes
-// #include "BulletCollision/CollisionShapes/btBox2dShape.h"
-#include "BulletCollision/CollisionShapes/btConvex2dShape.h"
-// #include "BulletCollision/CollisionShapes/btConvexShape.h"
 
 namespace siconos::modeling {
 class SecondOrderDS;
@@ -119,11 +116,7 @@ using StaticBodyShapeMap = std::map<const siconos::collision::StaticBody *,
 /* We derive a specific callback for filtering the broadphase of Bullet
  * based on collision group */
 struct SiconosBulletFilterCallback : public btOverlapFilterCallback {
-  std::shared_ptr<siconos::simulation::InteractionManager> interactionManager{nullptr};
-
-  // SiconosBulletFilterCallback(std::shared_ptr<siconos::simulation::InteractionManager> im)
-  //     : interactionManager{im} {};
-
+  siconos::simulation::InteractionManager *interactionManager{nullptr};
   // return true when pairs need collision
   virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0,
                                        btBroadphaseProxy *proxy1) const override;
@@ -136,7 +129,6 @@ class SiconosBulletCollisionManager_impl
   std::shared_ptr<btDefaultCollisionConfiguration> _collisionConfiguration{nullptr};
   std::shared_ptr<btCollisionDispatcher> _dispatcher{nullptr};
   std::shared_ptr<btBroadphaseInterface> _broadphase{nullptr};
-  std::shared_ptr<SiconosBulletFilterCallback> filterCallback{nullptr};
 
   /* During iteration over DSs for position updates we need to access
    * btCollisionObject, so need a map DS->btXShape. */
@@ -179,70 +171,80 @@ class SiconosBulletCollisionManager_impl
                              std::shared_ptr<SiconosContactor> contactor,
                              const std::shared_ptr<StaticBody> staticBody);
 
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosPlane> plane,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosSphere> sphere,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosBox> box,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosCylinder> cyl,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosCone> cone,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosCapsule> capsule,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosConvexHull> ch,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosMesh> mesh,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-
+  /* Create collision objects for each shape type */
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosPlane> plane,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosSphere> sphere,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosBox> box,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosCylinder> cyl,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosCone> cone,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosCapsule> capsule,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosConvexHull> ch,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosMesh> mesh,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
   void createCollisionObject(
       const std::shared_ptr<siconos::algebra::SiconosVector> base,
       const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
       const std::shared_ptr<siconos::collision::SiconosHeightMap> height,
-      const std::shared_ptr<SiconosContactor> contactor,
-      const std::shared_ptr<StaticBody> staticBody);
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
 
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosDisk> disk,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
-  void createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
-                             const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
-                             const std::shared_ptr<siconos::collision::SiconosBox2d> box2d,
-                             const std::shared_ptr<SiconosContactor> contactor,
-                             const std::shared_ptr<StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosDisk> disk,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
+  void createCollisionObject(
+      const std::shared_ptr<siconos::algebra::SiconosVector> base,
+      const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
+      const std::shared_ptr<siconos::collision::SiconosBox2d> box2d,
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
   void createCollisionObject(
       const std::shared_ptr<siconos::algebra::SiconosVector> base,
       const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
       const std::shared_ptr<siconos::collision::SiconosConvexHull2d> ch2d,
-      const std::shared_ptr<SiconosContactor> contactor,
-      const std::shared_ptr<StaticBody> staticBody);
+      const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+      const std::shared_ptr<siconos::collision::StaticBody> staticBody);
 
   /* Call the above functions for each shape associated with a body or contactor. */
   void createCollisionObjectsForStaticBodyContactorSet(
@@ -295,7 +297,8 @@ class SiconosBulletCollisionManager_impl
                                 std::shared_ptr<btCollisionShape> btshape);
 
  public:
-  SiconosBulletCollisionManager_impl(std::shared_ptr<SiconosBulletOptions> op);
+  SiconosBulletCollisionManager_impl(std::shared_ptr<SiconosBulletOptions> op)
+      : _options{op} {};
 
   ~SiconosBulletCollisionManager_impl() noexcept = default;
 
@@ -309,10 +312,8 @@ class SiconosBulletCollisionManager_impl
       updateAllShapesForDS(*bds);
     }
   }
-
-  // friend class SiconosBulletCollisionManager;
-  // friend class CollisionUpdateVisitor;
 };
+
 }  // namespace siconos::collision::bullet::internal
 
 #endif

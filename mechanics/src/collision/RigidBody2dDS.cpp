@@ -20,18 +20,15 @@
 
 #include "SiconosContactor.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "SiconosVisitor.hpp"
+#include "SimpleMatrix.hpp"
 
 siconos::collision::RigidBody2dDS::RigidBody2dDS(
     std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity,
     std::shared_ptr<siconos::algebra::SiconosMatrix> mass)
     : LagrangianLinearTIDS(position, velocity, mass),
-      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()),
-      _useContactorInertia(true),
-      _allowSelfCollide(true)
-{
+      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {
   // Check size of positions, velocities and mass matrix
   if ((position->size() != 3) or (velocity->size() != 3)) {
     THROW_EXCEPTION(
@@ -39,6 +36,7 @@ siconos::collision::RigidBody2dDS::RigidBody2dDS(
         "velocity must of size 3");
   }
 
+  assert(mass);
   _scalarMass = mass->getValue(0, 0);
 }
 
@@ -48,9 +46,7 @@ siconos::collision::RigidBody2dDS::RigidBody2dDS(
     : LagrangianLinearTIDS(position, velocity,
                            std::make_shared<siconos::algebra::SimpleMatrix>(3, 3)),
       _scalarMass(mass),
-      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()),
-      _useContactorInertia(true),
-      _allowSelfCollide(true)
+      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>())
 {
   _mass->setValue(0, 0, mass);
   _mass->setValue(1, 1, mass);

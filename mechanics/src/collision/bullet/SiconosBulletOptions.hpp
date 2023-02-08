@@ -62,7 +62,6 @@ class SiconosBulletStatistics {
   int interaction_destroyed{0};
 
   ~SiconosBulletStatistics() noexcept = default;
-
 };
 
 }  // namespace siconos::collision::bullet

@@ -41,13 +41,19 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
 
   /* Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2{nullptr};
 
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Nc;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Nc{nullptr};
+
+  /** V.A. boolean _isOnCOntact ?? Why is it public members ? F.P --> to private members.
+   *  seems parametrize the projection algorithm
+   *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
+   */
+  bool _isOnContact = false;
 
   /** Set the coordinates of first contact point.  Must only be done
    * in a computeh() override.
@@ -68,13 +74,7 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
   void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Nc = nnc; };
 
  public:
-  /** V.A. boolean _isOnCOntact ?? Why is it public members ?
-   *  seems parametrize the projection algorithm
-   *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
-   */
-  bool _isOnContact = false;
-
-  /** constructorx
+  /** constructor
    */
   Lagrangian2d2DR()
       : LagrangianScleronomousR(),

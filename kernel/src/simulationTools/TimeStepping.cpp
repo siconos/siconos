@@ -303,7 +303,7 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
 
 void siconos::simulation::TimeStepping::initialize() {
   Simulation::initialize();
-
+  initOSNS();
   // 7 - First initialization of the simulation
   firstInitialize();
 }

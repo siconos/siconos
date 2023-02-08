@@ -28,10 +28,6 @@
 #include "SiconosBulletOptions.hpp"  // header only, for options and stats
 #include "SiconosCollisionManager.hpp"
 
-// namespace siconos::simulation {
-// class Simulation
-// }
-
 namespace siconos::collision {
 class RigidBodyDS;
 class RigidBody2dDS;
@@ -40,7 +36,6 @@ class SiconosShape;
 
 namespace siconos::collision::bullet {
 
-class SiconosBulletStatistics;
 class BulletR;
 class Bullet2d3DR;
 class Bullet5DR;
@@ -72,6 +67,8 @@ class SiconosBulletCollisionManager : public siconos::collision::SiconosCollisio
   std::shared_ptr<SiconosBulletOptions> _options{nullptr};
   SiconosBulletStatistics _stats{};
 
+  void initialize_impl();
+
   // callback for contact point removal, and a global for context
   static bool bulletContactClear(void* userPersistentData);
 
@@ -86,48 +83,48 @@ class SiconosBulletCollisionManager : public siconos::collision::SiconosCollisio
    *  See modify_normals.py in examples/Mechanics/Hacks */
   virtual std::shared_ptr<BulletR> makeBulletR(
       std::shared_ptr<siconos::collision::RigidBodyDS> ds1,
-      std::shared_ptr<SiconosShape> shape1,
+      std::shared_ptr<siconos::collision::SiconosShape> shape1,
       std::shared_ptr<siconos::collision::RigidBodyDS> ds2,
-      std::shared_ptr<SiconosShape> shape2, const btManifoldPoint&);
+      std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint&);
 
   /** Provided so that creation of collision points can be overridden.
    *  See modify_normals.py in examples/Mechanics/Hacks */
   virtual std::shared_ptr<Bullet5DR> makeBullet5DR(
       std::shared_ptr<siconos::collision::RigidBodyDS> ds1,
-      std::shared_ptr<SiconosShape> shape1,
+      std::shared_ptr<siconos::collision::SiconosShape> shape1,
       std::shared_ptr<siconos::collision::RigidBodyDS> ds2,
-      std::shared_ptr<SiconosShape> shape2, const btManifoldPoint&);
+      std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint&);
 
   /** Provided so that creation of collision points can be overridden.
    *  See modify_normals.py in examples/Mechanics/Hacks */
   virtual std::shared_ptr<Bullet2dR> makeBullet2dR(
       std::shared_ptr<siconos::collision::RigidBody2dDS> ds1,
-      std::shared_ptr<SiconosShape> shape1,
+      std::shared_ptr<siconos::collision::SiconosShape> shape1,
       std::shared_ptr<siconos::collision::RigidBody2dDS> ds2,
-      std::shared_ptr<SiconosShape> shape2, const btManifoldPoint&);
+      std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint&);
 
   /** Provided so that creation of collision points can be overridden.
    *  See modify_normals.py in examples/Mechanics/Hacks */
   virtual std::shared_ptr<Bullet2d3DR> makeBullet2d3DR(
       std::shared_ptr<siconos::collision::RigidBody2dDS> ds1,
-      std::shared_ptr<SiconosShape> shape1,
+      std::shared_ptr<siconos::collision::SiconosShape> shape1,
       std::shared_ptr<siconos::collision::RigidBody2dDS> ds2,
-      std::shared_ptr<SiconosShape> shape2, const btManifoldPoint&);
+      std::shared_ptr<siconos::collision::SiconosShape> shape2, const btManifoldPoint&);
 
  public:
   SiconosBulletCollisionManager();
   SiconosBulletCollisionManager(std::shared_ptr<SiconosBulletOptions> options);
-  virtual ~SiconosBulletCollisionManager() noexcept = default;
+  virtual ~SiconosBulletCollisionManager() noexcept;
 
   /** Add a static body in the collision detector.
    */
-  std::shared_ptr<StaticBody> addStaticBody(
-      std::shared_ptr<SiconosContactorSet> cs,
+  std::shared_ptr<siconos::collision::StaticBody> addStaticBody(
+      std::shared_ptr<siconos::collision::SiconosContactorSet> cs,
       std::shared_ptr<siconos::algebra::SiconosVector> position = nullptr, int number = 0);
 
   /** Remove a body from the collision detector.
    */
-  void removeStaticBody(const std::shared_ptr<StaticBody>& body);
+  void removeStaticBody(const std::shared_ptr<siconos::collision::StaticBody>& body);
 
   /** Remove a body from the collision detector. This must be done
    *  after removing a body from the NonSmoothDynamicalSystem
@@ -137,9 +134,10 @@ class SiconosBulletCollisionManager : public siconos::collision::SiconosCollisio
 
   void updateInteractions(std::shared_ptr<siconos::simulation::Simulation> simulation);
 
-  std::vector<std::shared_ptr<SiconosCollisionQueryResult>> lineIntersectionQuery(
-      const siconos::algebra::SiconosVector& start, const siconos::algebra::SiconosVector& end,
-      bool closestOnly = false, bool sorted = true);
+  std::vector<std::shared_ptr<siconos::collision::SiconosCollisionQueryResult>>
+  lineIntersectionQuery(const siconos::algebra::SiconosVector& start,
+                        const siconos::algebra::SiconosVector& end, bool closestOnly = false,
+                        bool sorted = true);
 
   void clearOverlappingPairCache();
 

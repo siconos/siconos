@@ -49,7 +49,7 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
  public:
   RigidBody2dDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                 std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-                std::shared_ptr<siconos::algebra::SiconosMatrix> mass = nullptr);
+                std::shared_ptr<siconos::algebra::SiconosMatrix> mass);
 
   RigidBody2dDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                 std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,

@@ -39,7 +39,7 @@ namespace internal {
 class ShapeVisitor;
 }
 
-  class SiconosShape {
+class SiconosShape {
  protected:
   ACCEPT_SERIALIZATION(SiconosShape);
 
