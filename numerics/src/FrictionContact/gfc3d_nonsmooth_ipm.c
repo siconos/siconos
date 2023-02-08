@@ -1470,7 +1470,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       cblas_dcopy(nd, sol+m+nd, 1, d_reaction, 1);
 
       cblas_daxpy(nd, -1.0, dz, 1, u_plus_phiu, 1);     // u_plus_phiu = - [ dz - (u + phi(u) - z) ]
-      cblas_dscal(nd, -1.0, u_plus_phiu, 1);
+      cblas_dscal(nd, -1.0, u_plus_phiu, 1);            // u_plus_phiu = dz - (u + phi(u) - z)
       NM_gemv(1.0, eye_phiu, u_plus_phiu, 0.0, d_velocity);
 
       NM_gemv(1.0, J, sol, -1.0, rhs_2);
@@ -1505,6 +1505,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       alpha_dual = alpha_primal;
     else
       alpha_primal = alpha_dual;
+
+    // if (barr_param < sqrt(tol)) alpha_primal = alpha_dual = 1.;
+    // if (iteration > 6) alpha_primal = alpha_dual = 1.;
 
     /* updating the gamma parameter used to compute the step-length at the next iteration */
 
@@ -1558,12 +1561,20 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   int nR = 0;
   for (int i = 0; i < n; i++)
   {
-    s[0] = velocity[3*i] + reaction[3*i];
-    s[1] = velocity[3*i+1] + reaction[3*i+1];
-    s[2] = velocity[3*i+2] + reaction[3*i+2];
-    dur[0] = velocity[3*i] - reaction[3*i];
-    dur[1] = velocity[3*i+1] - reaction[3*i+1];
-    dur[2] = velocity[3*i+2] - reaction[3*i+2];
+    // s[0] = velocity[3*i] + reaction[3*i];
+    // s[1] = velocity[3*i+1] + reaction[3*i+1];
+    // s[2] = velocity[3*i+2] + reaction[3*i+2];
+    // dur[0] = velocity[3*i] - reaction[3*i];
+    // dur[1] = velocity[3*i+1] - reaction[3*i+1];
+    // dur[2] = velocity[3*i+2] - reaction[3*i+2];
+
+    s[0] = z[3*i] + reaction[3*i];
+    s[1] = z[3*i+1] + reaction[3*i+1];
+    s[2] = z[3*i+2] + reaction[3*i+2];
+    dur[0] = z[3*i] - reaction[3*i];
+    dur[1] = z[3*i+1] - reaction[3*i+1];
+    dur[2] = z[3*i+2] - reaction[3*i+2];
+
 
     ns = s[0] - cblas_dnrm2(2,s+1,1);
     ndur = dur[0] - cblas_dnrm2(2,dur+1,1);
@@ -1710,8 +1721,8 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-2;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
