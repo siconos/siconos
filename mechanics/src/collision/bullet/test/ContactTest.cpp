@@ -26,7 +26,8 @@
 #include "StaticBody.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
-
+#include "test-utils.hpp"  // BounceResult ...
+                           // 
 // Experimental settings for SiconosBulletCollisionManager
 extern double extra_margin;
 extern double breaking_threshold;
@@ -45,43 +46,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ContactTest);
 void ContactTest::setUp() {}
 void ContactTest::tearDown() {}
 
-struct BounceParams {
-  bool trace;
-  bool dynamic;
-  double size;
-  double mass;
-  double position;
-  double timestep;
-  double insideMargin;
-  double outsideMargin;
-  std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions> options{
-      std::make_shared<siconos::collision::bullet::SiconosBulletOptions>()};
-
-  void dump() {
-    printf("  trace:              %s\n", trace ? "on" : "off");
-    printf("  dynamic:            %s\n", trace ? "on" : "off");
-    printf("  size:               %.3g\n", size);
-    printf("  mass:               %.3g\n", mass);
-    printf("  position:           %.3g\n", position);
-    printf("  insideMargin:       %.3g\n", insideMargin);
-    printf("  outsideMargin:      %.3g\n", outsideMargin);
-    printf("  breakingThreshold:  %.3g\n", options->contactBreakingThreshold);
-    printf("  worldScale:         %.3g\n", options->worldScale);
-  }
-};
-
-struct BounceResult {
-  double bounce_error_sum;
-  double bounce_error[6];
-  int n_bounce_error;
-  double final_position;
-  double final_position_std;
-  int num_interactions;
-  int num_interaction_warnings;
-  int max_simultaneous_contacts;
-  double avg_simultaneous_contacts;
-  double displacement_on_first_contact;
-};
 
 static BounceResult bounceTest(std::string moving, std::string ground,
                                const BounceParams &params) {

@@ -16,10 +16,10 @@
 #include "SiconosShape.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
+#include "StaticBody.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
-#include "StaticBody.hpp"
-
+#include "test-utils.hpp"
 
 // Experimental settings for SiconosBulletCollisionManager
 extern double extra_margin;
@@ -38,43 +38,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION(Contact2dTest);
 
 void Contact2dTest::setUp() {}
 void Contact2dTest::tearDown() {}
-
-struct BounceParams {
-  bool trace;
-  bool dynamic;
-  double size;
-  double mass;
-  double position;
-  double timestep;
-  double insideMargin;
-  double outsideMargin;
-  std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions> options{std::make_shared<siconos::collision::bullet::SiconosBulletOptions>()};
-
-  void dump() const {
-    printf("  trace:              %s\n", trace ? "on" : "off");
-    printf("  dynamic:            %s\n", trace ? "on" : "off");
-    printf("  size:               %.3g\n", size);
-    printf("  mass:               %.3g\n", mass);
-    printf("  position:           %.3g\n", position);
-    printf("  insideMargin:       %.3g\n", insideMargin);
-    printf("  outsideMargin:      %.3g\n", outsideMargin);
-    printf("  breakingThreshold:  %.3g\n", options->contactBreakingThreshold);
-    printf("  worldScale:         %.3g\n", options->worldScale);
-  }
-};
-
-struct BounceResult {
-  double bounce_error_sum;
-  double bounce_error[6];
-  int n_bounce_error;
-  double final_position;
-  double final_position_std;
-  int num_interactions;
-  int num_interaction_warnings;
-  int max_simultaneous_contacts;
-  double avg_simultaneous_contacts;
-  double displacement_on_first_contact;
-};
 
 static BounceResult bounceTest(std::string moving, std::string ground,
                                const BounceParams &params) {
@@ -244,7 +207,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   auto collisionMan =
       std::make_shared<siconos::collision::bullet::SiconosBulletCollisionManager>(
           params.options);
-  
+
   simulation->insertInteractionManager(collisionMan);
 
   // Add static shapes (centered at zero by default)
@@ -255,7 +218,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   collisionMan->insertNonSmoothLaw(nslaw, 0, 0);
 
   ///////
-  
+
   int k = 0;
   double std = 0, final_pos = 0;
   double last_pos = position_init, last_vel = 0;

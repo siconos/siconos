@@ -73,10 +73,9 @@ template <typename SCALAR>
 std::pair<std::shared_ptr<btTriangleIndexVertexArray>, SCALAR *> make_bt_vertex_array(
     std::shared_ptr<siconos::collision::SiconosMesh> mesh, SCALAR _s1, SCALAR _s2) {
   assert(mesh->vertices()->size(0) == 3);
-  std::shared_ptr<btTriangleIndexVertexArray> bttris(
-      std::make_shared<btTriangleIndexVertexArray>(
-          mesh->indexes()->size() / 3, (int *)mesh->indexes()->data(), sizeof(int) * 3,
-          mesh->vertices()->size(1), mesh->vertices()->getArray(), sizeof(btScalar) * 3));
+  auto bttris = std::make_shared<btTriangleIndexVertexArray>(
+      mesh->indexes()->size() / 3, (int *)mesh->indexes()->data(), sizeof(int) * 3,
+      mesh->vertices()->size(1), mesh->vertices()->getArray(), sizeof(btScalar) * 3);
 
   return std::make_pair(bttris, (btScalar *)nullptr);
 }
@@ -88,19 +87,17 @@ std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> make_bt_verte
   assert(mesh->vertices()->size(0) == 3);
   unsigned int numIndices = mesh->indexes()->size();
   unsigned int numVertices = mesh->vertices()->size(1);
-  btScalar *vertices = new btScalar[numVertices * 3];
+  auto *vertices = std::make_shared<btScalar[]>(numVertices * 3);  // this requires c++20
   for (unsigned int i = 0; i < numVertices; i++) {
     vertices[i * 3 + 0] = (*mesh->vertices())(0, i);
     vertices[i * 3 + 1] = (*mesh->vertices())(1, i);
     vertices[i * 3 + 2] = (*mesh->vertices())(2, i);
   }
-  std::shared_ptr<btTriangleIndexVertexArray> bttris(
-      std::make_shared<btTriangleIndexVertexArray>(
-          numIndices / 3, (int *)mesh->indexes()->data(), sizeof(int) * 3, numVertices,
-          vertices, sizeof(btScalar) * 3));
+  auto bttris = std::make_shared<btTriangleIndexVertexArray>(
+      numIndices / 3, (int *)mesh->indexes()->data(), sizeof(int) * 3, numVertices, vertices,
+      sizeof(btScalar) * 3);
   return std::make_pair(bttris, vertices);
 }
-
 }  // namespace
 
 bool siconos::collision::bullet::internal::SiconosBulletFilterCallback::
@@ -121,23 +118,23 @@ bool siconos::collision::bullet::internal::SiconosBulletFilterCallback::
   return collides;
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::updateAllShapesForDS(
-    const siconos::modeling::SecondOrderDS &bds) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    updateAllShapesForDS(const siconos::modeling::SecondOrderDS &bds) {
   for (auto &it : bodyShapeMap[&bds])
     std::visit([this](auto rec) { this->updateShape(rec); }, it);
 }
 
 template <typename ST, typename BT, typename DST, typename BR>
-std::shared_ptr<btCollisionObject>
-siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
-    std::shared_ptr<siconos::algebra::SiconosVector> base, const std::shared_ptr<DST> ds,
-    std::shared_ptr<ST> shape, std::shared_ptr<BT> btshape, BodyShapeMap &bodyShapeMap,
-    std::shared_ptr<SiconosContactor> contactor, StaticBodyShapeMap &StaticBodyShapeMap,
-    std::shared_ptr<StaticBody> staticBody) {
+std::shared_ptr<btCollisionObject> siconos::collision::bullet::internal::
+    SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
+        std::shared_ptr<siconos::algebra::SiconosVector> base, const std::shared_ptr<DST> ds,
+        std::shared_ptr<ST> shape, std::shared_ptr<BT> btshape, BodyShapeMap &bodyShapeMap,
+        std::shared_ptr<SiconosContactor> contactor, StaticBodyShapeMap &StaticBodyShapeMap,
+        std::shared_ptr<StaticBody> staticBody) {
   assert(base && "Collision objects must have a base position.");
 
   // create corresponding Bullet object and shape
-  std::shared_ptr<btCollisionObject> btobject(new btCollisionObject());
+  auto btobject = std::make_shared<btCollisionObject>();
 
   // default parameters
   btobject->setContactProcessingThreshold(_options->contactProcessingThreshold);
@@ -168,8 +165,8 @@ siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::create
 
   // create a record to keep track of things
   // (for static contactor, ds=nil)
-  std::shared_ptr<BR> record(
-      std::make_shared<BR>(base, ds, shape, btshape, btobject, contactor, staticBody));
+  auto record =
+      std::make_shared<BR>(base, ds, shape, btshape, btobject, contactor, staticBody);
 
   bodyShapeMap[ds ? &*ds : nullptr].push_back(record);
 
@@ -185,7 +182,8 @@ siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::create
 
   // Allow Bullet to report colliding DSs.  We need to access it from
   // the collision callback as the record base class so down-cast it.
-  btobject->setUserPointer(reinterpret_cast<void *>(static_cast<BodyShapeRecord *>(&*record)));
+  btobject->setUserPointer(
+      reinterpret_cast<void *>(static_cast<siconos::collision::BodyShapeRecord *>(&*record)));
 
   // initial parameter update (change version to make something happen)
   record->shape_version -= 1;
@@ -194,176 +192,26 @@ siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::create
   return btobject;
 }
 
-btTransform siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::offsetTransform(
-    const siconos::algebra::SiconosVector &position,
-    const siconos::algebra::SiconosVector &offset) {
-  /* Adjust offset position according to current rotation */
-  btQuaternion rbase(position(4), position(5), position(6), position(3));
-  btVector3 rboffset = quatRotate(rbase, btVector3(offset(0), offset(1), offset(2)));
-
-  /* Calculate total orientation */
-  btQuaternion roffset(offset(4), offset(5), offset(6), offset(3));
-
-  /* Set the absolute shape position */
-  return btTransform(rbase * roffset,
-                     btVector3(position(0), position(1), position(2)) + rboffset);
+template <typename DS, typename SHAPE>
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<DS> ds, std::shared_ptr<SHAPE> plane,
+                          std::shared_ptr<SiconosContactor> contactor,
+                          const std::shared_ptr<StaticBody> staticBody) {
+  THROW_EXCEPTION("Undefined creation process for this combination of DS and shape.");
 }
 
-btTransform siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::offsetTransform(
-    const siconos::algebra::SiconosVector &position) {
-  /* Adjust offset position according to current rotation */
-  btQuaternion rbase(position(4), position(5), position(6), position(3));
-
-  /* Set the absolute shape position */
-  return btTransform(rbase, btVector3(position(0), position(1), position(2)));
-}
-
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::updateShapePosition(
-    std::shared_ptr<BodyBulletShapeRecord> record) {
-  DEBUG_BEGIN(
-      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
-      "updateShapePosition(...)\n");
-  siconos::algebra::SiconosVector q(7);
-  if (record->base) {
-    DEBUG_EXPR(record->base->display(););
-    if (record->base->size() == 7) {
-      DEBUG_PRINT("3D DS\n");
-      q = *record->base;
-    } else if (record->base->size() == 3) {
-      DEBUG_PRINT("2D DS\n");
-      q(0) = record->base->getValue(0);
-      q(1) = record->base->getValue(1);
-      q(2) = 0.0;
-      double angle = record->base->getValue(2);
-      q(3) = cos(angle / 2.);
-      q(4) = 0.0;
-      q(5) = 0.0;
-      q(6) = sin(angle / 2.);
-    }
-  } else {
-    q.zero();
-    q(3) = 1;
-  }
-  DEBUG_PRINT("Position of the shape given to bullet:")
-  DEBUG_EXPR_WE(q.display(););
-
-  btTransform t;
-  if (record->contactor->offset) {
-    t = offsetTransform(q, *record->contactor->offset);
-  } else {
-    t = offsetTransform(q);
-  }
-
-  t.setOrigin(t.getOrigin() * _options->worldScale);
-  DEBUG_PRINTF("transformation = %f,%f,%f\n", float(t.getOrigin().getX()),
-               float(t.getOrigin().getY()), float(t.getOrigin().getZ()));
-  DEBUG_PRINTF("Rotation axis = %f,%f,%f\n", float(t.getRotation().getAxis().getX()),
-               float(t.getRotation().getAxis().getY()),
-               float(t.getRotation().getAxis().getZ()));
-  record->btobject->setWorldTransform(t);
-  DEBUG_END(
-      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
-      "updateShapePosition(...)\n");
-}
-
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosSphere> sphere,
-    const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
-  // set radius to 1.0 and use scaling instead of setting radius
-  // directly, makes it easier to change during update
-
-#ifdef USE_CONVEXHULL_FOR_SPHERE
-  // A sphere can be represented as a convex hull of a single point, with the
-  // margin equal to the radius size
-  SP::btConvexHullShape btsphere(new btConvexHullShape());
-  {
-    btsphere->addPoint(btVector3(0.0, 0.0, 0.0));
-    btsphere->setMargin(0.0);
-  }
-#else
-  std::shared_ptr<btSphereShape> btsphere(new btSphereShape(1.0));
-  btsphere->setMargin(0.0);
-#endif
-
-  // initialization
-  createCollisionObjectHelper<siconos::collision::SiconosSphere, BTSPHERESHAPE,
-                              siconos::collision::RigidBodyDS, BodySphereRecord>(
-      base, ds, sphere, btsphere, bodyShapeMap, contactor, staticBodyShapeMap, staticBody);
-}
-
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::updateContactorInertia(
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> ds,
-    std::shared_ptr<btCollisionShape> btshape) {
-  btVector3 localinertia;
-  double scale_factor;
-  scale_factor = 1. / (_options->worldScale * _options->worldScale);
-  localinertia[0] = std::numeric_limits<double>::signaling_NaN();
-  localinertia[1] = std::numeric_limits<double>::signaling_NaN();
-  localinertia[2] = std::numeric_limits<double>::signaling_NaN();
-  btshape->calculateLocalInertia(ds->scalarMass(), localinertia);
-
-  localinertia[0] *= scale_factor;
-  localinertia[1] *= scale_factor;
-  localinertia[2] *= scale_factor;
-  assert(!((localinertia.x() == 0.0 && localinertia.y() == 0.0 && localinertia.z() == 0.0) ||
-           std::isinf(localinertia.x()) || std::isinf(localinertia.y()) ||
-           std::isinf(localinertia.z())) &&
-         "calculateLocalInertia() returned garbage");
-  ds->setInertia(localinertia[0], localinertia[1], localinertia[2]);
-}
-
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::update2DContactorInertia(
-    std::shared_ptr<siconos::modeling::LagrangianDS> ds,
-    std::shared_ptr<btCollisionShape> btshape) {
-  // TBD Warningx
-}
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::updateShape(
-    std::shared_ptr<BodySphereRecord> record) {
-  auto sphere = record->shape;
-  auto btsphere = record->btshape;
-
-  if (sphere->version() != record->shape_version) {
-    double r = (sphere->radius() + sphere->outsideMargin()) * _options->worldScale;
-
-    // Update shape parameters
-#ifdef USE_CONVEXHULL_FOR_SPHERE
-    btsphere->setMargin(r);
-#else
-    btsphere->setLocalScaling(btVector3(r, r, r));
-
-    // btSphereShape has an internal margin
-    btsphere->setMargin(sphere->insideMargin() * _options->worldScale);
-#endif
-    auto rbds = std::static_pointer_cast<RigidBodyDS>(record->ds);
-    if (record->ds && rbds->useContactorInertia()) {
-      updateContactorInertia(rbds, btsphere);
-    }
-
-    if (record->btobject->getBroadphaseHandle()) {
-      _collisionWorld->updateSingleAabb(&*record->btobject);
-      //      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-      //        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
-    }
-
-    record->shape_version = sphere->version();
-  }
-
-  updateShapePosition(record);
-}
-
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosPlane> plane,
-    std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+                          std::shared_ptr<siconos::collision::SiconosPlane> plane,
+                          std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+                          const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   // create the initial plane with default parameters
 #ifdef USE_BOX_FOR_PLANE
   btScalar h = (1000 + plane->outsideMargin()) * _options->worldScale;
-  SP::btBoxShape btplane(new btBoxShape(btVector3(h, h, h)));
+  auto btplane = std::make_shared<btBoxShape>(btVector3(h, h, h));
+
   // Internal margin
   btplane->setMargin((plane->insideMargin() + plane->outsideMargin()) * _options->worldScale);
 #else
@@ -372,8 +220,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
   const btScalar pts[] = {
       h, h, 0, h, -h, 0, -h, -h, 0, -h, h, 0,
   };
-  std::shared_ptr<btConvexHullShape> btplane(
-      new btConvexHullShape(pts, 4, sizeof(pts[0]) * 3));
+  auto btplane = std::make_shared<btConvexHullShape>(pts, 4, sizeof(pts[0]) * 3);
 
   // We ignore the desired internal margin for plane and just use a large one.
   plane->setInsideMargin(1000 * _options->worldScale);
@@ -381,7 +228,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
   // External margin
   btplane->setMargin((plane->insideMargin() + plane->outsideMargin()) * _options->worldScale);
 #else
-  SP::btStaticPlaneShape btplane(new btStaticPlaneShape(btVector3(0, 0, 1), 0.0));
+  auto btplane = std::make_shared<btStaticPlaneShape>(btVector3(0, 0, 1), 0.0);
   btplane->setMargin(plane->outsideMargin() * _options->worldScale);
 #endif
 #endif
@@ -422,12 +269,76 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   record->btobject->setWorldTransform(t);
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosBox> box,
-    std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(
+        const std::shared_ptr<siconos::algebra::SiconosVector> base,
+        const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+        std::shared_ptr<siconos::collision::SiconosSphere> sphere,
+        const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+        const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+  // set radius to 1.0 and use scaling instead of setting radius
+  // directly, makes it easier to change during update
+
+#ifdef USE_CONVEXHULL_FOR_SPHERE
+  // A sphere can be represented as a convex hull of a single point, with the
+  // margin equal to the radius size
+  auto btsphere = std::make_shared<btConvexHullShape>();
+  {
+    btsphere->addPoint(btVector3(0.0, 0.0, 0.0));
+    btsphere->setMargin(0.0);
+  }
+#else
+  auto btsphere = std::make_shared<btSphereShape>(1.0);
+  btsphere->setMargin(0.0);
+#endif
+
+  // initialization
+  createCollisionObjectHelper<siconos::collision::SiconosSphere, BTSPHERESHAPE,
+                              siconos::collision::RigidBodyDS, BodySphereRecord>(
+      base, ds, sphere, btsphere, bodyShapeMap, contactor, staticBodyShapeMap, staticBody);
+}
+
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::updateShape(
+    std::shared_ptr<BodySphereRecord> record) {
+  auto sphere = record->shape;
+  auto btsphere = record->btshape;
+
+  if (sphere->version() != record->shape_version) {
+    double r = (sphere->radius() + sphere->outsideMargin()) * _options->worldScale;
+
+    // Update shape parameters
+#ifdef USE_CONVEXHULL_FOR_SPHERE
+    btsphere->setMargin(r);
+#else
+    btsphere->setLocalScaling(btVector3(r, r, r));
+
+    // btSphereShape has an internal margin
+    btsphere->setMargin(sphere->insideMargin() * _options->worldScale);
+#endif
+    auto rbds = std::static_pointer_cast<RigidBodyDS>(record->ds);
+    if (record->ds && rbds->useContactorInertia()) {
+      updateContactorInertia(rbds, btsphere);
+    }
+
+    if (record->btobject->getBroadphaseHandle()) {
+      _collisionWorld->updateSingleAabb(&*record->btobject);
+      //      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+      //        cleanProxyFromPairs(record->btobject->getBroadphaseHandle(),
+      //        &*_dispatcher);
+    }
+
+    record->shape_version = sphere->version();
+  }
+
+  updateShapePosition(record);
+}
+
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+                          std::shared_ptr<siconos::collision::SiconosBox> box,
+                          std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+                          const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   const btScalar half = 0.5;
 
 #ifdef USE_CONVEXHULL_FOR_BOX
@@ -435,12 +346,12 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
       -half, half, -half, -half, -half, -half, -half, -half, half,  -half, half,  half,
       half,  half, half,  half,  half,  -half, half,  -half, -half, half,  -half, half,
   };
-  std::shared_ptr<btConvexHullShape> btbox(new btConvexHullShape(pts, 8, sizeof(pts[0]) * 3));
+  auto btbox = std::make_shared<btConvexHullShape>(pts, 8, sizeof(pts[0]) * 3);
 
   // External margin
   btbox->setMargin(box->outsideMargin());
 #else
-  std::shared_ptr<btBoxShape> btbox(new btBoxShape(btVector3(half, half, half)));
+  auto btbox = std::make_shared<btBoxShape>(btVector3(half, half, half));
 
   // btBoxShape has an internal margin
   btbox->setMargin(box->insideMargin() * _options->worldScale);
@@ -490,12 +401,12 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   updateShapePosition(record);
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosCylinder> cylinder,
-    std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+                          std::shared_ptr<siconos::collision::SiconosCylinder> cylinder,
+                          std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+                          const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   auto btcylinder = std::make_shared<btCylinderShape>(btVector3(1.0, 1.0, 1.0));
 
   // initialization
@@ -538,12 +449,12 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   updateShapePosition(record);
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosCone> cone,
-    std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+                          std::shared_ptr<siconos::collision::SiconosCone> cone,
+                          std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+                          const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   auto btcone = std::make_shared<btConeShape>(1.0, 1.0);
 
   // initialization
@@ -586,12 +497,12 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   updateShapePosition(record);
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosCapsule> capsule,
-    std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+                          std::shared_ptr<siconos::collision::SiconosCapsule> capsule,
+                          std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+                          const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   auto btcapsule = std::make_shared<btCapsuleShape>(1.0, 1.0);
 
   // initialization
@@ -635,12 +546,12 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   updateShapePosition(record);
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosConvexHull> ch,
-    std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+                          std::shared_ptr<siconos::collision::SiconosConvexHull> ch,
+                          std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+                          const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   if (!ch->vertices()) THROW_EXCEPTION("No vertices matrix specified for convex hull.");
 
   if (ch->vertices()->size(1) != 3)
@@ -656,11 +567,11 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
     pts[r * 3 + 2] = (*ch->vertices())(r, 2) * _options->worldScale;
   }
 
-  std::shared_ptr<btConvexHullShape> btch;
+  std::shared_ptr<btConvexHullShape> btch{nullptr};
   if (ch->insideMargin() == 0) {
     // Create a convex hull directly with no further processing.
     // TODO: In case of worldScale=1, maybe we could avoid the copy to pts.
-    btch.reset(new btConvexHullShape(&pts[0], rows, sizeof(btScalar) * 3));
+    btch = std::make_shared<btConvexHullShape>(&pts[0], rows, sizeof(btScalar) * 3);
   } else {
     // Internal margin implemented by shrinking the hull
     // TODO: Do we need the shrink clamp? (last parameter)
@@ -670,10 +581,10 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
     if (shrunkBy < 0) {
       // TODO: Warning
       // "insideMargin is too large, convex hull would be too small.";
-      btch.reset(new btConvexHullShape(&pts[0], rows, sizeof(btScalar) * 3));
+      btch = std::make_shared<btConvexHullShape>(&pts[0], rows, sizeof(btScalar) * 3);
       ch->setInsideMargin(0);
     } else {
-      btch.reset(new btConvexHullShape);
+      btch = std::make_shared<btConvexHullShape>();
       for (int i = 0; i < shrinkCH.vertices.size(); i++) {
         const btVector3 &v(shrinkCH.vertices[i]);
 #if defined(BT_BULLET_VERSION) && (BT_BULLET_VERSION <= 281)
@@ -721,14 +632,12 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   updateShapePosition(record);
 }
 
-
-
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosMesh> mesh,
-    std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+                          std::shared_ptr<siconos::collision::SiconosMesh> mesh,
+                          std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+                          const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   if (!mesh->indexes()) THROW_EXCEPTION("No indexes matrix specified for mesh.");
 
   if ((mesh->indexes()->size() % 3) != 0)
@@ -741,8 +650,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
 
   // Create Bullet triangle list, either by copying on non-copying method
   // TODO: worldScale on vertices
-  std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> datapair(
-      make_bt_vertex_array(mesh, (btScalar)0, (*mesh->vertices())(0, 0)));
+  std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> datapair{
+      make_bt_vertex_array(mesh, (btScalar)0, (*mesh->vertices())(0, 0))};
   std::shared_ptr<btTriangleIndexVertexArray> bttris(datapair.first);
 
   // Create Bullet mesh object
@@ -792,15 +701,15 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   updateShapePosition(record);
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
-    std::shared_ptr<siconos::collision::SiconosHeightMap> heightmap,
-    std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(const std::shared_ptr<siconos::algebra::SiconosVector> base,
+                          const std::shared_ptr<siconos::collision::RigidBodyDS> ds,
+                          std::shared_ptr<siconos::collision::SiconosHeightMap> heightmap,
+                          std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+                          const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   if (!heightmap->height_data()) THROW_EXCEPTION("No height matrix specified for heightmap.");
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> data = heightmap->height_data();
+  auto data = heightmap->height_data();
 
   if (!data || data->size(0) < 2 || data->size(1) < 2)
     THROW_EXCEPTION(
@@ -837,9 +746,10 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
                                   siconos::collision::RigidBodyDS, BodyHeightRecord>(
           base, ds, heightmap, btheight, bodyShapeMap, contactor, staticBodyShapeMap,
           staticBody);
-  // this flag allows to call the call gContactAddedCallback when the callback has just been in
-  // the manifold In the case of the heightmap, we use it to tweak the normal to avoid internal
-  // edge contact.
+
+  // this flag allows to call the call gContactAddedCallback when the callback has just
+  // been in the manifold In the case of the heightmap, we use it to tweak the normal to
+  // avoid internal edge contact.
   btobject->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 }
 
@@ -932,34 +842,35 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
 // 2D shapes
 ///////////////////////////////////////////////////////////////////////////
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
-    std::shared_ptr<siconos::collision::SiconosDisk> disk,
-    const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(
+        const std::shared_ptr<siconos::algebra::SiconosVector> base,
+        const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
+        std::shared_ptr<siconos::collision::SiconosDisk> disk,
+        const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+        const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   DEBUG_BEGIN(
       "void "
-      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(."
-      ".., disk, ...)\n");
+      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
+      "createCollisionObject(..., disk, ...)\n");
   // set radius to 1.0 and use scaling instead of setting radius
   // directly, makes it easier to change during update
 
   // This version is ok
   double SCALING = 1.0;
 
-  btConvexShape *childShape2 = new btCylinderShapeZ(
+  auto *childShape2 = new btCylinderShapeZ(
       btVector3(btScalar(SCALING * 1), btScalar(SCALING * 1), btScalar(_options->Depth2D)));
   // btConvexShape* colShape3= new btConvex2dShape(childShape2);
-  std::shared_ptr<btConvex2dShape> btconvex2d1(new btConvex2dShape(childShape2));
+  auto btconvex2d1 = std::make_shared<btConvex2dShape>(childShape2);
 
   // //This version not
-  // SP::btConvexShape btcylinder(new btCylinderShapeZ(btVector3(1.0, 1.0, 1.0)));
-  // std::shared_ptr<btConvex2dShape> btconvex2d(new btConvex2dShape(btcylinder.get()));
+  // auto btcylinder = std::make_shared<btCylinderShapeZ(btVector3(1.0, 1.0, 1.0)));
+  // auto btconvex2d=std::make_shared< btConvex2dShape(btcylinder.get()));
 
   // //This version not
   // btConvexShape* btcylinder = new btCylinderShapeZ(btVector3(1.0, 1.0, 0.04));
-  // std::shared_ptr<btConvex2dShape> btconvex2d(new btConvex2dShape(btcylinder));
+  // auto btconvex2d= std::make_shared< btConvex2dShape(btcylinder));
   // btcylinder->setMargin(0.0);
 
   // initialization
@@ -968,8 +879,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
       base, ds, disk, btconvex2d1, bodyShapeMap, contactor, staticBodyShapeMap, staticBody);
   DEBUG_END(
       "void "
-      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(."
-      ".., disk, ..) \n");
+      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
+      "createCollisionObject(..., disk, ..) \n");
 }
 
 void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::updateShape(
@@ -1016,16 +927,17 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
       "BodyDiskRecord &record)\n");
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
-    std::shared_ptr<siconos::collision::SiconosBox2d> box2d,
-    const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(
+        const std::shared_ptr<siconos::algebra::SiconosVector> base,
+        const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
+        std::shared_ptr<siconos::collision::SiconosBox2d> box2d,
+        const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+        const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   DEBUG_BEGIN(
       "void "
-      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(."
-      ".., box2d, ...)\n");
+      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
+      "createCollisionObject(..., box2d, ...)\n");
   // set radius to 1.0 and use scaling instead of setting radius
   // directly, makes it easier to change during update
 
@@ -1034,16 +946,16 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
   btConvexShape *childShape0 = new btBoxShape(
       btVector3(btScalar(SCALING * 1), btScalar(SCALING * 1), btScalar(SCALING * 1)));
   // btConvexShape* colShape= new btConvex2dShape(childShape0);
-  std::shared_ptr<btConvex2dShape> btconvex2d(new btConvex2dShape(childShape0));
+  auto btconvex2d = std::make_shared<btConvex2dShape>(childShape0);
 
   // initialization
   createCollisionObjectHelper<siconos::collision::SiconosBox2d, btConvex2dShape,
                               siconos::collision::RigidBody2dDS, BodyBox2dRecord>(
       base, ds, box2d, btconvex2d, bodyShapeMap, contactor, staticBodyShapeMap, staticBody);
   DEBUG_END(
-      "void "
-      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(."
-      ".., box2d, ..) \n");
+      "void  "
+      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
+      "createCollisionObject(..., box2d, ..) \n");
 }
 
 void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::updateShape(
@@ -1098,16 +1010,17 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
       "BodyBox2dRecord &record)\n");
 }
 
-void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(
-    const std::shared_ptr<siconos::algebra::SiconosVector> base,
-    const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
-    std::shared_ptr<siconos::collision::SiconosConvexHull2d> ch2d,
-    const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
-    const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    createCollisionObject(
+        const std::shared_ptr<siconos::algebra::SiconosVector> base,
+        const std::shared_ptr<siconos::collision::RigidBody2dDS> ds,
+        std::shared_ptr<siconos::collision::SiconosConvexHull2d> ch2d,
+        const std::shared_ptr<siconos::collision::SiconosContactor> contactor,
+        const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   DEBUG_BEGIN(
-      "void "
-      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(."
-      ".., ch2d, ...)\n");
+      "void  "
+      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
+      "createCollisionObject(..., ch2d, ...)\n");
   // set radius to 1.0 and use scaling instead of setting radius
   // directly, makes it easier to change during update
   if (!ch2d->vertices()) THROW_EXCEPTION("No vertices matrix specified for convex hull.");
@@ -1155,9 +1068,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
   // This version is ok
   // btConvexHullShape* childShape1 = new btConvexHullShape(&pts[0],rows, sizeof(btScalar)*3);
 
-  btConvexHullShape *btch;
-  btch = new btConvexHullShape(&pts[0], rows,
-                               sizeof(btScalar) * 3);  // Warning: Possible loss of memory
+  auto *btch =
+      new btConvexHullShape(&pts[0], rows,
+                            sizeof(btScalar) * 3);  // Warning: Possible loss of memory
 
   btScalar shrunkBy = 0.0;
 
@@ -1193,16 +1106,17 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
                    shrunkBy);
       DEBUG_PRINT("come back to original convex hull\n");
 
-      // btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning: Possible
-      // loss of memory since we cannot SP here
+      // btch = new btConvexHullShape(&pts[0], rows, sizeof(btScalar)*3);  // Warning:
+      // Possible loss of memory since we cannot SP here
       ch2d->setInsideMargin(0.);
     } else {
       delete (btch);
       btch = new btConvexHullShape;
       for (int i = 0; i < shrinkCH.vertices.size(); i++) {
         // printf("shrinkCH.original_vertex_index[%i] %i \n", i,
-        // shrinkCH_0.original_vertex_index[i] ); printf("shrinkCH.original_vertex_index[%i] %i
-        // \n", i, shrinkCH.original_vertex_index[i] ); const btVector3
+        // shrinkCH_0.original_vertex_index[i] );
+        // printf("shrinkCH.original_vertex_index[%i] %i \n", i,
+        // shrinkCH.original_vertex_index[i] ); const btVector3
         // &v(shrinkCH.vertices[shrinkCH_0.original_vertex_index[i] ]);
         const btVector3 &v(shrinkCH.vertices[i]);
 #if defined(BT_BULLET_VERSION) && (BT_BULLET_VERSION <= 281)
@@ -1221,7 +1135,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
   // recalc bounding box
   btch->recalcLocalAabb();
 
-  std::shared_ptr<btConvex2dShape> btconvex2d(new btConvex2dShape(btch));
+  auto btconvex2d = std::make_shared<btConvex2dShape>(btch);
 
   // Add external margin
   //  set the margin of the  btConvex2dShape. This will set the margin of the child shape
@@ -1237,9 +1151,9 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
           base, ds, ch2d, btconvex2d, bodyShapeMap, contactor, staticBodyShapeMap, staticBody);
 
   if (ch2d->avoidInternalEdgeContact()) {
-    // this flag allows to call the call gContactAddedCallback when the callback has just been
-    // in the manifold In the case of the heightmap, we use it to tweak the normal to avoid
-    // internal edge contact.
+    // this flag allows to call the call gContactAddedCallback when the callback has just
+    // been in the manifold In the case of the heightmap, we use it to tweak the normal
+    // to avoid internal edge contact.
     btobject->setCollisionFlags(btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
     // keep track of the points of the selected edge
@@ -1248,19 +1162,19 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::c
     if (shrunkBy > 0) {
       // find the closest point to original point of index _normal_edge_pointA
       int r = ch2d->_normal_edge_pointA;
-      btVector3 pointA = btVector3(pts[r * 3 + 0], pts[r * 3 + 1], pts[r * 3 + 2]);
+      btVector3 pointA{pts[r * 3 + 0], pts[r * 3 + 1], pts[r * 3 + 2]};
       ch2d->_normal_edge_pointA = find_index_closest_point_btConvexHullShape(pointA, *btch);
       // find the closest point to original point of index _normal_edge_pointB
       r = ch2d->_normal_edge_pointB;
-      btVector3 pointB = btVector3(pts[r * 3 + 0], pts[r * 3 + 1], pts[r * 3 + 2]);
+      btVector3 pointB{pts[r * 3 + 0], pts[r * 3 + 1], pts[r * 3 + 2]};
       ch2d->_normal_edge_pointB = find_index_closest_point_btConvexHullShape(pointB, *btch);
     }
   }
 
   DEBUG_END(
-      "void "
-      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::createCollisionObject(."
-      ".., ch2d, ..) \n");
+      "void  "
+      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
+      "createCollisionObject(..., ch2d, ..) \n");
 }
 
 void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::updateShape(
@@ -1301,6 +1215,54 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
       "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
       "updateShape("
       "BodyCH2dRecord &record)\n");
+}
+
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    updateShapePosition(std::shared_ptr<BodyBulletShapeRecord> record) {
+  DEBUG_BEGIN(
+      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
+      "updateShapePosition(...)\n");
+  siconos::algebra::SiconosVector q(7);
+  if (record->base) {
+    DEBUG_EXPR(record->base->display(););
+    if (record->base->size() == 7) {
+      DEBUG_PRINT("3D DS\n");
+      q = *record->base;
+    } else if (record->base->size() == 3) {
+      DEBUG_PRINT("2D DS\n");
+      q(0) = record->base->getValue(0);
+      q(1) = record->base->getValue(1);
+      q(2) = 0.0;
+      double angle = record->base->getValue(2);
+      q(3) = cos(angle / 2.);
+      q(4) = 0.0;
+      q(5) = 0.0;
+      q(6) = sin(angle / 2.);
+    }
+  } else {
+    q.zero();
+    q(3) = 1;
+  }
+  DEBUG_PRINT("Position of the shape given to bullet:")
+  DEBUG_EXPR_WE(q.display(););
+
+  btTransform t;
+  if (record->contactor->offset) {
+    t = offsetTransform(q, *record->contactor->offset);
+  } else {
+    t = offsetTransform(q);
+  }
+
+  t.setOrigin(t.getOrigin() * _options->worldScale);
+  DEBUG_PRINTF("transformation = %f,%f,%f\n", float(t.getOrigin().getX()),
+               float(t.getOrigin().getY()), float(t.getOrigin().getZ()));
+  DEBUG_PRINTF("Rotation axis = %f,%f,%f\n", float(t.getRotation().getAxis().getX()),
+               float(t.getRotation().getAxis().getY()),
+               float(t.getRotation().getAxis().getZ()));
+  record->btobject->setWorldTransform(t);
+  DEBUG_END(
+      "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
+      "updateShapePosition(...)\n");
 }
 
 void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
@@ -1386,4 +1348,57 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
         "siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::"
         "createCollisionObjectsForBodyContactorSetFromDS(...)\n");
   }
+}
+
+btTransform
+siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::offsetTransform(
+    const siconos::algebra::SiconosVector &position,
+    const siconos::algebra::SiconosVector &offset) {
+  /* Adjust offset position according to current rotation */
+  btQuaternion rbase(position(4), position(5), position(6), position(3));
+  btVector3 rboffset = quatRotate(rbase, btVector3(offset(0), offset(1), offset(2)));
+
+  /* Calculate total orientation */
+  btQuaternion roffset(offset(4), offset(5), offset(6), offset(3));
+
+  /* Set the absolute shape position */
+  return btTransform(rbase * roffset,
+                     btVector3(position(0), position(1), position(2)) + rboffset);
+}
+
+btTransform
+siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::offsetTransform(
+    const siconos::algebra::SiconosVector &position) {
+  /* Adjust offset position according to current rotation */
+  btQuaternion rbase(position(4), position(5), position(6), position(3));
+
+  /* Set the absolute shape position */
+  return btTransform(rbase, btVector3(position(0), position(1), position(2)));
+}
+
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    updateContactorInertia(std::shared_ptr<siconos::modeling::NewtonEulerDS> ds,
+                           std::shared_ptr<btCollisionShape> btshape) {
+  btVector3 localinertia;
+  double scale_factor;
+  scale_factor = 1. / (_options->worldScale * _options->worldScale);
+  localinertia[0] = std::numeric_limits<double>::signaling_NaN();
+  localinertia[1] = std::numeric_limits<double>::signaling_NaN();
+  localinertia[2] = std::numeric_limits<double>::signaling_NaN();
+  btshape->calculateLocalInertia(ds->scalarMass(), localinertia);
+
+  localinertia[0] *= scale_factor;
+  localinertia[1] *= scale_factor;
+  localinertia[2] *= scale_factor;
+  assert(!((localinertia.x() == 0.0 && localinertia.y() == 0.0 && localinertia.z() == 0.0) ||
+           std::isinf(localinertia.x()) || std::isinf(localinertia.y()) ||
+           std::isinf(localinertia.z())) &&
+         "calculateLocalInertia() returned garbage");
+  ds->setInertia(localinertia[0], localinertia[1], localinertia[2]);
+}
+
+void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
+    update2DContactorInertia(std::shared_ptr<siconos::modeling::LagrangianDS> ds,
+                             std::shared_ptr<btCollisionShape> btshape) {
+  // TBD Warningx
 }

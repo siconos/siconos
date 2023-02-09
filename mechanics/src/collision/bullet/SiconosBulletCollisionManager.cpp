@@ -428,23 +428,22 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
   auto dsg = simulation->nonSmoothDynamicalSystem()->dynamicalSystems();
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
   std::tie(dsi, dsiend) = dsg->vertices();
-  // auto visitor = std::make_shared<internal::RigidBodyDSVisitor>(_impl);
+
+  // for (; dsi != dsiend; ++dsi) {
+  //   BodiesVariant bv = dsg->bundle(*dsi);
+  //   std::visit(
+  //       [this](auto ds) {
+  //         _impl->updateShapes(ds);
+  //       },
+  //       bv);
+  // }
+
   for (; dsi != dsiend; ++dsi) {
     auto ds = dsg->bundle(*dsi);
     if (auto bds = std::dynamic_pointer_cast<RigidBodyDS>(ds)) {
-      if (bds->contactors()) {
-        if (_impl->bodyShapeMap.find(&*bds) == _impl->bodyShapeMap.end()) {
-          _impl->createCollisionObjectsForBodyContactorSetFromDS(bds);
-        }
-        _impl->updateAllShapesForDS(*bds);
-      }
+      _impl->updateShapes(bds);
     } else if (auto bds = std::dynamic_pointer_cast<RigidBody2dDS>(ds)) {
-      if (bds->contactors()) {
-        if (_impl->bodyShapeMap.find(&*bds) == _impl->bodyShapeMap.end()) {
-          _impl->createCollisionObjectsForBodyContactorSetFromDS(bds);
-        }
-        _impl->updateAllShapesForDS(*bds);
-      }
+      _impl->updateShapes(bds);
     } else {
       THROW_EXCEPTION("SiconosBulletManager, works only for RigidBodyDS or RigidBody2dDS.")
     }
@@ -855,7 +854,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
     }
     // getchar();
   }
-  // getchar();
+// getchar();
 #ifdef BULLET_TIMER
   end_old = end;
   end = std::chrono::system_clock::now();
