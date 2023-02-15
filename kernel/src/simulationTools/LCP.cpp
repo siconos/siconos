@@ -118,7 +118,6 @@ int siconos::nonsmooth_formulations::LCP::compute(double time)
     info = solve();
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
-
     DEBUG_EXPR(display());
   }
   DEBUG_END("siconos::nonsmooth_formulations::LCP::compute(double time)\n");

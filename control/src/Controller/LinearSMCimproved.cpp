@@ -22,28 +22,25 @@
 
 #include "ControlSensor.hpp"
 #include "FirstOrderLinearDS.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
 siconos::control::LinearSMCimproved::LinearSMCimproved(std::shared_ptr<ControlSensor> sensor)
-    : LinearSMC(sensor, ActuatorType::LinearSMCimproved)
-{
-}
+    : LinearSMC(sensor, ActuatorType::LinearSMCimproved) {}
 
 siconos::control::LinearSMCimproved::LinearSMCimproved(
     std::shared_ptr<ControlSensor> sensor, std::shared_ptr<siconos::algebra::SimpleMatrix> B,
     std::shared_ptr<siconos::algebra::SimpleMatrix> D)
-    : LinearSMC(sensor, B, D, ActuatorType::LinearSMCimproved)
-{
-}
+    : LinearSMC(sensor, B, D, ActuatorType::LinearSMCimproved) {}
 
 void siconos::control::LinearSMCimproved::initialize(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::Simulation& s)
-{
+    const siconos::simulation::Simulation& s) {
   LinearSMC::initialize(nsds, s);
   _up = std::make_shared<siconos::algebra::SiconosVector>(_us->size());
   _measuredPert = std::make_shared<
@@ -53,8 +50,7 @@ void siconos::control::LinearSMCimproved::initialize(
 }
 
 void siconos::control::LinearSMCimproved::predictionPerturbation(
-    const siconos::algebra::SiconosVector& xTk, siconos::algebra::SimpleMatrix& CBstar)
-{
+    const siconos::algebra::SiconosVector& xTk, siconos::algebra::SimpleMatrix& CBstar) {
   if (_us->normInf() < _alpha) {
     if (_inDisceteTimeSlidingPhase) {
       auto& up = *_up;
@@ -63,8 +59,7 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
           _measuredPert->rotate(_measuredPert->end() - 1);
           _predictedPert->rotate(_predictedPert->end() - 1);
         }
-      }
-      else {
+      } else {
         // inject new vector in the case where the measurement vector is not full.
         auto sp1 = std::make_shared<siconos::algebra::SiconosVector>(_us->size(), 0);
         auto sp2 = std::make_shared<siconos::algebra::SiconosVector>(_us->size(), 0);
@@ -110,18 +105,15 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
         up *= _ubPerturbation / norm;
         predictedPertC *= _ubPerturbation / norm;
       }
-    }
-    else
+    } else
       _inDisceteTimeSlidingPhase = true;
-  }
-  else if (_inDisceteTimeSlidingPhase) {
+  } else if (_inDisceteTimeSlidingPhase) {
     _inDisceteTimeSlidingPhase = false;
     _up->zero();
   }
 }
 
-void siconos::control::LinearSMCimproved::actuate()
-{
+void siconos::control::LinearSMCimproved::actuate() {
   auto sDim = _u->size();
   auto tmpM1 = std::make_shared<siconos::algebra::SimpleMatrix>(*_Csurface);
   auto CBstar = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim, 0);
@@ -163,8 +155,7 @@ void siconos::control::LinearSMCimproved::actuate()
   _indx++;
 }
 
-void siconos::control::LinearSMCimproved::setPredictionOrder(unsigned int order)
-{
+void siconos::control::LinearSMCimproved::setPredictionOrder(unsigned int order) {
   _measuredPert->set_capacity(order + 1);
   _predictedPert->set_capacity(order + 1);
 }

@@ -23,27 +23,24 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "LsodarOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorFriends.hpp"
+#include "SiconosVectorOp.hpp"
 #include "SimpleMatrix.hpp"
 #include "TimeDiscretisation.hpp"
 
 siconos::control::LinearSMCOT2::LinearSMCOT2(std::shared_ptr<ControlSensor> sensor)
-    : CommonSMC(ActuatorType::LinearSMCOT2, sensor)
-{
-}
+    : CommonSMC(ActuatorType::LinearSMCOT2, sensor) {}
 
 void siconos::control::LinearSMCOT2::initialize(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::Simulation& s)
-{
+    const siconos::simulation::Simulation& s) {
   if (!_Csurface) {
     THROW_EXCEPTION(
         "CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing "
         "the Actuator");
-  }
-  else {
+  } else {
     if (_Csurface && !_u)
       _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->size(0), 0);
   }
@@ -57,8 +54,8 @@ void siconos::control::LinearSMCOT2::initialize(
   if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(DS)) {
     _DSPhi = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
     _DSPred = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
-  }
-  else if (auto fods = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS)) {
+  } else if (auto fods =
+                 std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS)) {
     auto x0 = std::make_shared<siconos::algebra::SiconosVector>(*fods->x0());
     _DSPhi = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0);
     _DSPred = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0);
@@ -70,8 +67,7 @@ void siconos::control::LinearSMCOT2::initialize(
       _DSPhi->setb(*fods->b());
       _DSPred->setb(*fods->b());
     }
-  }
-  else
+  } else
     THROW_EXCEPTION("LinearSMCOT2 implemented only for first order systems");
 
   // We have to reset _pluginb
@@ -119,8 +115,7 @@ void siconos::control::LinearSMCOT2::initialize(
   _X = _sensor->yTk();
 }
 
-void siconos::control::LinearSMCOT2::actuate()
-{
+void siconos::control::LinearSMCOT2::actuate() {
   auto hCurrent = _tdPhi->timeStep(_indx);
   // Get current value of the state
   // Update it
@@ -155,8 +150,7 @@ void siconos::control::LinearSMCOT2::actuate()
 }
 
 void siconos::control::LinearSMCOT2::setTimeDiscretisation(
-    const siconos::simulation::TimeDiscretisation& td)
-{
+    const siconos::simulation::TimeDiscretisation& td) {
   _tdPhi = std::make_shared<siconos::simulation::TimeDiscretisation>(td);
   _tdPred = std::make_shared<siconos::simulation::TimeDiscretisation>(td);
 }

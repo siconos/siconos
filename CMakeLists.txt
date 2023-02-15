@@ -37,6 +37,10 @@ cmake_policy(SET CMP0067 NEW) # Honor language standard in try_compile() source-
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/docs/cmake)
 
+# If ON, a compile_commands.json file is generated and might be read and used by your editor
+# to improve static verif. of the code source.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
+
 # Improve cmake interface when current version is too old.
 include(new_cmake_functions)
 

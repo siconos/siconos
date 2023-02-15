@@ -59,19 +59,19 @@ class CommonSMC : public Actuator {
 
   /** name of the plugin to add a term to the sliding variable; useful when doing trajectory
    * tracking */
-  std::string _plugineName{"unplugged"};
+  std::string _plugineName;
 
   /** name of the plugin to compute \f$ y = h(x, ...) \f$ for the nonlinear case*/
-  std::string _pluginhName{"unplugged"};
+  std::string _pluginhName;
 
   /** name of the plugin to compute \f$ \nabla_x h \f$ for the nonlinear case*/
-  std::string _pluginJachxName{"unplugged"};
+  std::string _pluginJachxName;
 
   /** name of the plugin to compute \f$ \nabla_\lambda h \f$ for the nonlinear case*/
-  std::string _pluginJachlambdaName{"unplugged"};
+  std::string _pluginJachlambdaName;
 
   /** name of the plugin to compute \f$ \nabla_\lambda g \f$ for the nonlinear case*/
-  std::string _pluginJacglambdaName{"unplugged"};
+  std::string _pluginJacglambdaName;
 
   /** the vector defining the linear contribution of the state to the sliding variable  ( \f$
    * \sigma = Cx \f$ ) */
@@ -233,7 +233,7 @@ class CommonSMC : public Actuator {
    *
    *  \return a reference to the LinearOSNS problem
    */
-  inline const siconos::simulation::LinearOSNS& relay() { return *_OSNSPB_SMC; };
+  inline const siconos::nonsmooth_formulations::LinearOSNS& relay() { return *_OSNSPB_SMC; };
 
   /** get \f$ u^{eq} \f$
    *

@@ -28,14 +28,13 @@
 #include "TimeStepping.hpp"
 #include "Topology.hpp"  //#define DEBUG_BEGIN_END_ONLY
 #include "ZeroOrderHoldOSI.hpp"
-//#define DEBUG_NOCOLOR
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 siconos::control::ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h)
-    : ControlSimulation(t0, T, h)
-{
+    : ControlSimulation(t0, T, h) {
   _processIntegrator = std::make_shared<siconos::integrators::ZeroOrderHoldOSI>();
   std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_processIntegrator)
       ->setExtraAdditionalTerms(std::make_shared<ControlZOHAdditionalTerms>());
@@ -51,33 +50,34 @@ siconos::control::ControlZOHSimulation::ControlZOHSimulation(double t0, double T
   _CM = std::make_shared<ControlManager>(_processSimulation);
 }
 
-void siconos::control::ControlZOHSimulation::run()
-{
+void siconos::control::ControlZOHSimulation::run() {
   DEBUG_BEGIN("void siconos::control::ControlZOHSimulation::run()\n");
   auto& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
   auto start = std::chrono::system_clock::now();
 
+  
   auto& sim = static_cast<siconos::simulation::TimeStepping&>(*_processSimulation);
+  try {
+    while (sim.hasNextEvent()) {
+      auto& nextEvent = *eventsManager.nextEvent();
+      if (nextEvent.getType() == siconos::simulation::EventType::TD) {
+        sim.computeOneStep();
+      }
 
-  while (sim.hasNextEvent()) {
-    auto& nextEvent = *eventsManager.nextEvent();
-    if (nextEvent.getType() == siconos::simulation::EventType::TD) {
-      sim.computeOneStep();
+      sim.nextStep();
+      if (sim.hasNextEvent() &&
+          eventsManager.nextEvent()->getType() ==
+              siconos::simulation::EventType::TD)  // We store only on TD_EVENT
+      {
+        (*_dataM)(k, 0) = sim.startingTime();
+        storeData(k);
+        ++k;
+      }
     }
-
-    sim.nextStep();
-
-    if (sim.hasNextEvent() &&
-        eventsManager.nextEvent()->getType() ==
-            siconos::simulation::EventType::TD)  // We store only on TD_EVENT
-    {
-      (*_dataM)(k, 0) = sim.startingTime();
-      storeData(k);
-      ++k;
-    }
+  } catch (...) {
+    siconos::exception::process();
   }
-
   /* saves last status */
   (*_dataM)(k, 0) = sim.startingTime();
   storeData(k);

@@ -17,10 +17,9 @@
  */
 #include "PIDTest.hpp"
 
-#include <FirstOrderLinearTIDS.hpp>
-
 #include "ControlLsodarSimulation.hpp"
 #include "ControlZOHSimulation.hpp"
+#include "FirstOrderLinearTIDS.hpp"
 #include "LinearSensor.hpp"
 #include "PID.hpp"
 #include "SiconosVector.hpp"
@@ -33,9 +32,8 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(PIDTest);
 
-void PIDTest::setUp()
-{
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
+void PIDTest::setUp() {
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
   (*_A)(0, 1) = 1.0;
   _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
   (*_x0)(0) = 10.0;
@@ -48,8 +46,7 @@ void PIDTest::setUp()
   (*_K)(2) = 2.0;
 }
 
-void PIDTest::init()
-{
+void PIDTest::init() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   auto C = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2, 0);
   (*C)(0, 0) = 1;
@@ -64,8 +61,7 @@ void PIDTest::init()
 
 void PIDTest::tearDown() {}
 
-void PIDTest::testPIDZOH()
-{
+void PIDTest::testPIDZOH() {
   init();
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->addDynamicalSystem(_DS);
@@ -80,13 +76,13 @@ void PIDTest::testPIDZOH()
   siconos::algebra::SimpleMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("PID.ref", dataRef);
+
   std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
             << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", (data - dataRef).normInf() < _tol, true);
 }
 
-void PIDTest::testPIDLsodar()
-{
+void PIDTest::testPIDLsodar() {
   init();
   auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->addDynamicalSystem(_DS);

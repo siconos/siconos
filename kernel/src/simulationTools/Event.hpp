@@ -45,16 +45,19 @@ class Simulation;
 
 /** To set the 'id' (type) of events */
 enum class EventType {
+  // Warning FP: when two events have the same time, their type (EventType)
+  // is used to decide which one will be the first in the events vector.
+  // The smallest the type, the earlier the event.
   /** Time discretisation event */
   TD = 1,
   /** Nonsmooth event */
   NS = 2,
-  /** Actuator (control toolbox) */
-  Actuator,
   /** Sensor (control toolbox) */
   Sensor,
   /** Observer (control toolbox) */
   Observer,
+  /** Actuator (control toolbox) */
+  Actuator,
   /** User defined: extra ids to allow users to define their own events */
   UserDefined1,
   UserDefined2
@@ -163,8 +166,7 @@ class Event {
    */
   inline double getDoubleTimeOfEvent() const { return _dTime; }
 
-  inline void incrementTime(unsigned int step = 1)
-  {
+  inline void incrementTime(unsigned int step = 1) {
     for (unsigned int i = 0; i < step; i++)
       mpz_add(_timeOfEvent, _timeOfEvent, _tickIncrement);
     _dTime = mpz_get_d(_timeOfEvent) * _tick;
@@ -174,8 +176,7 @@ class Event {
    *
    *  \param time the new time
    */
-  inline void setTime(double time)
-  {
+  inline void setTime(double time) {
     _dTime = time;
     mpz_set_d(_timeOfEvent, rint(_dTime / _tick));
   };
@@ -260,21 +261,18 @@ class EventFactory {
       \param type type of the event (must be a EventType (enum))
       \return a pointer to event
   */
-  std::shared_ptr<Event> create(double time, EventType type)
-  {
+  std::shared_ptr<Event> create(double time, EventType type) {
     assert(m_factories.contains(type) && "unknown Event type");
     return m_factories[type](time);
   }
 
   /** access to the (singleton) factory instance */
-  static EventFactory* instance()
-  {
+  static EventFactory* instance() {
     static EventFactory factory;
     return &factory;
   }
 
-  void registerCreator(EventType newtype, EventCreator caller)
-  {
+  void registerCreator(EventType newtype, EventCreator caller) {
     m_factories[newtype] = caller;
   }
 };
@@ -282,8 +280,7 @@ class EventFactory {
 template <class T>
 class EventRegistration {
  public:
-  EventRegistration(EventType newtype)
-  {
+  EventRegistration(EventType newtype) {
     EventFactory::instance()->registerCreator(newtype,
                                               [](double a) { return std::make_shared<T>(a); });
   }

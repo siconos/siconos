@@ -48,7 +48,8 @@ siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFree
 void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
     const siconos::modeling::NewtonImpactNSL& nslaw) const {
   double e = nslaw.e();
-  std::vector<std::size_t> subCoord = {0, _inter->nonSmoothLaw()->size(), 0, 0};
+  std::size_t nsl_size = _inter->nonSmoothLaw()->size();
+  std::vector<std::size_t> subCoord = {0, nsl_size, 0, nsl_size};
   siconos::algebra::SiconosVector& osnsp_rhs =
       *(*_interProp.workVectors)[siconos::integrators::D1MinusLinearOSI::OSNSP_RHS];
   siconos::algebra::subscal(e, osnsp_rhs, osnsp_rhs, subCoord, false);

@@ -21,22 +21,21 @@
 #include "ControlSensor.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
 #include "FirstOrderLinearTIDS.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
-//#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+// #define DEBUG_BEGIN_END_ONLY
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 void siconos::control::LuenbergerObserver::initialize(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::Simulation& s)
-{
+    const siconos::simulation::Simulation& s) {
   DEBUG_BEGIN(
       "void siconos::control::LuenbergerObserver::initialize(const "
       "siconos::modeling::NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
@@ -44,8 +43,7 @@ void siconos::control::LuenbergerObserver::initialize(
     THROW_EXCEPTION(
         "siconos::control::LuenbergerObserver::initialize - you have to set C before "
         "initializing the Observer");
-  }
-  else {
+  } else {
     Observer::initialize(nsds, s);
   }
   bool isDSinDSG0 = true;
@@ -64,17 +62,14 @@ void siconos::control::LuenbergerObserver::initialize(
     if (auto folds =
             std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(observedDS)) {
       _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
-    }
-    else if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(
-                 observedDS)) {
+    } else if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(
+                   observedDS)) {
       _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
-    }
-    else
+    } else
       THROW_EXCEPTION("LuenbergerObserver is only implemented for FirstOrderLinearDS");
     // is it controlled ?
     originaldsgVD = originalDSG0.descriptor(_sensor->getDS());
-  }
-  else {
+  } else {
     // is it controlled ?
     if (originalDSG0.is_vertex(_DS))
       originaldsgVD = originalDSG0.descriptor(_DS);
@@ -127,8 +122,7 @@ void siconos::control::LuenbergerObserver::initialize(
       "siconos::modeling::NonSmoothDynamicalSystem& nsds, const Simulation &s)\n");
 }
 
-void siconos::control::LuenbergerObserver::process()
-{
+void siconos::control::LuenbergerObserver::process() {
   if (!_pass)
     _pass = true;
   else {

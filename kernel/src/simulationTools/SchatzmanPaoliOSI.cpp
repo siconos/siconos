@@ -586,12 +586,11 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
                            .workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
 
   std::shared_ptr<siconos::algebra::SiconosVector> e;
-  std::shared_ptr<siconos::algebra::BlockVector> Xfree =
-      inter_work_block[siconos::integrators::SchatzmanPaoliOSI::xfree];
+  auto Xfree = inter_work_block[siconos::integrators::SchatzmanPaoliOSI::xfree];
   ;
   assert(Xfree);
 
-  std::shared_ptr<siconos::modeling::Interaction> mainInteraction = inter;
+  auto mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
   DEBUG_EXPR(inter->display(););

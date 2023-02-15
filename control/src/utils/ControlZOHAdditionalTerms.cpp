@@ -19,9 +19,9 @@
 #include "ControlZOHAdditionalTerms.hpp"
 
 #include "MatrixIntegrator.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -32,8 +32,7 @@
 void siconos::control::ControlZOHAdditionalTerms::init(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::TimeDiscretisation& td)
-{
+    std::shared_ptr<siconos::simulation::TimeDiscretisation> td) {
   DEBUG_BEGIN("void siconos::control::ControlZOHAdditionalTerms::init(...)\n")
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
@@ -61,8 +60,7 @@ void siconos::control::ControlZOHAdditionalTerms::init(
 void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
-    siconos::algebra::SiconosVector& xfree)
-{
+    siconos::algebra::SiconosVector& xfree) {
   DEBUG_BEGIN("void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(...)\n")
   // check whether we have a system with a control input
   if (DSG0.u.hasKey(dsgVD)) {
@@ -92,7 +90,6 @@ void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
 void siconos::control::ControlZOHAdditionalTerms::addJacobianRhsContribution(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
-    siconos::algebra::SiconosMatrix& jacRhs)
-{
+    siconos::algebra::SiconosMatrix& jacRhs) {
   // nothing to be done here
 }

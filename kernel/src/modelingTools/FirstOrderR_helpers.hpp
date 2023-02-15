@@ -24,52 +24,45 @@
 #define FirstOrderR_helpers_H
 
 #include "FirstOrderR.hpp"
+#include "SiconosException.hpp"
+
 
 namespace siconos::modeling::FirstOrderRHelpers {
 
 static inline void JacglambdaSetter(siconos::modeling::FirstOrderR& rel,
                                     std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-                                    std::string& pluginName)
-{
+                                    std::string& pluginName) {
   if (B) {
     rel.setBPtr(B);
-  }
-  else if (!pluginName.empty()) {
+  } else if (!pluginName.empty()) {
     rel.setComputeJacglambdaFunction(siconos::plugins::getPluginName(pluginName),
                                      siconos::plugins::getPluginFunctionName(pluginName));
-  }
-  else
+  } else
     THROW_EXCEPTION("FirstOrderRHelpers::JacglambdaSetter no B or pluginJacglambda given");
 }
 
 static inline void JachxSetter(siconos::modeling::FirstOrderR& rel,
                                std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                               std::string& pluginName)
-{
+                               std::string& pluginName) {
   if (C) {
     rel.setCPtr(C);
-  }
-  else if (!pluginName.empty()) {
+  } else if (!pluginName.empty()) {
     rel.setComputeJachxFunction(siconos::plugins::getPluginName(pluginName),
                                 siconos::plugins::getPluginFunctionName(pluginName));
-  }
-  else {
+  } else {
     THROW_EXCEPTION("FirstOrderRHelpers::JachxSetter no C or pluginJachx given");
   }
 }
 
 static inline void JachlambdaSetter(siconos::modeling::FirstOrderR& rel,
                                     std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                                    std::string& pluginName)
-{
+                                    std::string& pluginName) {
   if (D) {
     rel.setCPtr(D);
-  }
-  else if (!pluginName.empty()) {
+  } else if (!pluginName.empty()) {
     rel.setComputeJachlambdaFunction(siconos::plugins::getPluginName(pluginName),
                                      siconos::plugins::getPluginFunctionName(pluginName));
-  }
-  else {
+  } else {
     THROW_EXCEPTION("FirstOrderRHelpers::JachlambdaSetter no D or pluginJachlambda given");
   }
 }

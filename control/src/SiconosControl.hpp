@@ -14,31 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file SiconosKernel.hpp
 \brief Include files related to controlTools.
 */
 
-#include "ControlTypeDef.hpp"
-
 // Sensors - generic
-#include "SensorFactory.hpp"
-#include "SensorEvent.hpp"
 #include "ControlSensor.hpp"
+#include "SensorEvent.hpp"
 
 // Sensors - available
 #include "LinearSensor.hpp"
 
 // Actuator - generic
-#include "ActuatorFactory.hpp"
 #include "ActuatorEvent.hpp"
 #include "CommonSMC.hpp"
 // Actuator - available
-#include "PID.hpp"
-#include "LinearSMC.hpp"
 #include "ExplicitLinearSMC.hpp"
+#include "LinearSMC.hpp"
 #include "LinearSMCOT2.hpp"
 #include "LinearSMCimproved.hpp"
+#include "PID.hpp"
 #include "Twisting.hpp"
 
 // Observer - generic
@@ -53,6 +49,5 @@
 #include "MatrixIntegrator.hpp"
 
 // sugar
-#include "ControlZOHSimulation.hpp"
 #include "ControlLsodarSimulation.hpp"
-
+#include "ControlZOHSimulation.hpp"

@@ -23,11 +23,11 @@ message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 # Path must be relative to component path (i.e. to CMAKE_CURRENT_SOURCE_DIR)
 set(${COMPONENT}_DIRS
   src/.
-  # src/utils
-  # src/Controller
-  # src/Observer
+  src/utils
+  src/Controller
+  src/Observer
   src/Sensor
-  # src/Simulation
+  src/Simulation
 )
 
 # -- Documentation --

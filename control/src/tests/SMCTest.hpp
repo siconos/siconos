@@ -14,24 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __SMCTest__
 #define __SMCTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <FirstOrderLinearTIDS.hpp>
-#include "Twisting.hpp"
+
 #include "ExplicitLinearSMC.hpp"
-#include "LinearSensor.hpp"
+#include "FirstOrderLinearTIDS.hpp"
 #include "LinearSMC.hpp"
-#include <SiconosConfig.h>
+#include "LinearSensor.hpp"
+#include "SiconosConfig.h"
+#include "Twisting.hpp"
 
-class SMCTest : public CppUnit::TestFixture
-{
-
-private:
+class SMCTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(SMCTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(SMCTest);
@@ -71,7 +69,7 @@ private:
   double _beta;
   double _xFinal;
   std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _A;
   std::shared_ptr<siconos::algebra::SimpleMatrix> _B;
   std::shared_ptr<siconos::algebra::SimpleMatrix> _C;
   std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface;
@@ -85,17 +83,10 @@ private:
   std::shared_ptr<siconos::control::Twisting> _itw;
 #endif
 
-
-public:
-
-  SMCTest(): _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.1) {}
+ public:
+  SMCTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.1) {}
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

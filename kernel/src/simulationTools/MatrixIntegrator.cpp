@@ -40,10 +40,6 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     std::shared_ptr<TimeDiscretisation> td, std::shared_ptr<siconos::algebra::SiconosMatrix> E)
     : _E(E)
 {
-  std::cout << "M2\n";
-
-  td->display();
-
   // Copy td
   auto tmp = std::make_shared<siconos::simulation::TimeDiscretisation>(*td);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(*td);
@@ -82,7 +78,6 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     _mat = std::make_shared<siconos::algebra::SimpleMatrix>(*E);
     _mat->zero();
   }
-  std::cout << "End \n";
 }
 
 siconos::simulation::MatrixIntegrator::MatrixIntegrator(
@@ -106,7 +101,6 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     std::shared_ptr<TimeDiscretisation> td)
     : MatrixIntegrator{ds, nsds, td, nullptr}
 {
-  std::cout << "M1\n";
   unsigned int n = ds.n();
   _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, n, 0);
 }

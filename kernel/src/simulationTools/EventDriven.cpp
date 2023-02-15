@@ -388,11 +388,6 @@ void siconos::simulation::EventDriven::initialize()
 
   Simulation::initialize();
 
-  // Initialize OneStepNSProblem(s). Depends on the type of simulation.
-  // Warning FP : must be done in any case, even if the interactions set
-  //  is empty.
-  initOSNS();
-
   // First initialization of the simulation
   firstInitialize();
 

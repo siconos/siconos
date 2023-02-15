@@ -22,24 +22,23 @@
 #include "ControlZOHAdditionalTerms.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "SiconosAlgebraProd.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
-//#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+// #define DEBUG_BEGIN_END_ONLY
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 void siconos::control::SlidingReducedOrderObserver::initialize(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::Simulation& s)
-{
+    const siconos::simulation::Simulation& s) {
   DEBUG_BEGIN(
       " siconos::control::SlidingReducedOrderObserver::initialize(const "
       "siconos::modeling::NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
@@ -47,8 +46,7 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
     THROW_EXCEPTION(
         "siconos::control::SlidingReducedOrderObserver::initialize - you have to set C before "
         "initializing the Observer");
-  }
-  else {
+  } else {
     Observer::initialize(nsds, s);
   }
   bool isDSinDSG0 = true;
@@ -67,20 +65,17 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
     if (auto folds =
             std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(observedDS)) {
       _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
-    }
-    else if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(
-                 observedDS)) {
+    } else if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(
+                   observedDS)) {
       DEBUG_PRINT("dsType == Type::FirstOrderLinearDS\n");
       _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
-    }
-    else
+    } else
       THROW_EXCEPTION(
           "SlidingReducedOrderObserver is only implemented for FirstOrderLinearDS");
 
     // is it controlled ?
     originaldsgVD = originalDSG0.descriptor(_sensor->getDS());
-  }
-  else {
+  } else {
     // is it controlled ?
     if (originalDSG0.is_vertex(_DS))
       originaldsgVD = originalDSG0.descriptor(_DS);
@@ -133,8 +128,7 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
       "siconos::modeling::NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
 }
 
-void siconos::control::SlidingReducedOrderObserver::process()
-{
+void siconos::control::SlidingReducedOrderObserver::process() {
   DEBUG_BEGIN("void siconos::control::SlidingReducedOrderObserver::process()\n");
   if (!_pass) {
     DEBUG_PRINT("First pass \n ");
@@ -156,8 +150,7 @@ void siconos::control::SlidingReducedOrderObserver::process()
     _DS->swapInMemory();
     DEBUG_EXPR(_DS->display(););
     DEBUG_EXPR(_DS->xMemory().display(););
-  }
-  else {
+  } else {
     DEBUG_PRINT("Second pass\n");
     // get measurement from sensor
     const auto& y = _sensor->y();

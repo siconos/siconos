@@ -61,7 +61,7 @@ siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus(
 
 void siconos::simulation::TimeSteppingD1Minus::initialize() {
   Simulation::initialize();
-
+  initOSNS();
   // 7 - First initialization of the simulation
   firstInitialize();
 }

@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include "EqualityConditionNSL.hpp"
+#include "EulerMoreauOSI.hpp"
 #include "EventsManager.hpp"
 #include "Interaction.hpp"
 #include "OneStepIntegrator.hpp"
@@ -46,12 +47,6 @@ namespace siconos::simulation {
 static CheckSolverFPtr checkSolverOutput = nullptr;
 
 }  // namespace siconos::simulation
-
-namespace siconos::integrators {
-// TEMP
-class EulerMoreauOSI {};
-
-}  // namespace siconos::integrators
 
 siconos::simulation::TimeStepping::TimeStepping(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,

@@ -88,18 +88,17 @@ void ObserverTest::test_SMO_ZOH()
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->addDynamicalSystem(_DS);
   simZOH->addSensor(_sensor, _h);
-  simZOH->addActuator(_pid, _h);
   auto smo = std::make_shared<siconos::control::SlidingReducedOrderObserver>(_sensor, *_xHat0,
                                                                              _C, _L);
   simZOH->addObserver(smo, _h);
+  simZOH->addActuator(_pid, _h);
   simZOH->initialize();
   simZOH->run();
   auto& data = *simZOH->data();
   siconos::algebra::io::write("SMO_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
-  double error = 0.0;
-  bool test = !((error = siconos::algebra::io::compareRefFile(data, "SMO.ref", _tol)) >= 0.0 &&
-                error > _tol);
+  auto error = siconos::algebra::io::compareRefFile(data, "SMO.ref", _tol);
+  bool test = !(error  > _tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_ZOH : ", test, true);
 }
@@ -110,18 +109,17 @@ void ObserverTest::test_SMO_Lsodar()
   auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->addDynamicalSystem(_DS);
   simLsodar->addSensor(_sensor, _h);
-  simLsodar->addActuator(_pid, _h);
   auto smo = std::make_shared<siconos::control::SlidingReducedOrderObserver>(_sensor, *_xHat0,
                                                                              _C, _L);
   simLsodar->addObserver(smo, _h);
+  simLsodar->addActuator(_pid, _h);
   simLsodar->initialize();
   simLsodar->run();
   auto& data = *simLsodar->data();
   siconos::algebra::io::write("SMO_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   double error = 0.0;
-  bool test = !((error = siconos::algebra::io::compareRefFile(data, "SMO.ref", _tol)) >= 0.0 &&
-                error > _tol);
+  bool test = !((error = siconos::algebra::io::compareRefFile(data, "SMO.ref", _tol)) > _tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_Lsodar : ", test, true);
 }
@@ -132,10 +130,10 @@ void ObserverTest::test_Luenberger_ZOH()
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->addDynamicalSystem(_DS);
   simZOH->addSensor(_sensor, _h);
-  simZOH->addActuator(_pid, _h);
   auto luenberger =
       std::make_shared<siconos::control::LuenbergerObserver>(_sensor, *_xHat0, _C, _L);
   simZOH->addObserver(luenberger, _h);
+  simZOH->addActuator(_pid, _h);
   simZOH->initialize();
   simZOH->run();
   auto& data = *simZOH->data();
@@ -143,8 +141,7 @@ void ObserverTest::test_Luenberger_ZOH()
                               siconos::algebra::io::WriteType::nodim);
   double error = 0.0;
   bool test =
-      !((error = siconos::algebra::io::compareRefFile(data, "Luenberger.ref", _tol)) >= 0.0 &&
-        error > _tol);
+      !((error = siconos::algebra::io::compareRefFile(data, "Luenberger.ref", _tol)) > _tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
@@ -155,10 +152,10 @@ void ObserverTest::test_Luenberger_Lsodar()
   auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->addDynamicalSystem(_DS);
   simLsodar->addSensor(_sensor, _h);
-  simLsodar->addActuator(_pid, _h);
   auto luenberger =
       std::make_shared<siconos::control::LuenbergerObserver>(_sensor, *_xHat0, _C, _L);
   simLsodar->addObserver(luenberger, _h);
+  simLsodar->addActuator(_pid, _h);
   simLsodar->initialize();
   simLsodar->run();
   auto& data = *simLsodar->data();
@@ -166,8 +163,7 @@ void ObserverTest::test_Luenberger_Lsodar()
                               siconos::algebra::io::WriteType::nodim);
   double error = 0.0;
   bool test =
-      !((error = siconos::algebra::io::compareRefFile(data, "Luenberger.ref", _tol)) >= 0.0 &&
-        error > _tol);
+      !((error = siconos::algebra::io::compareRefFile(data, "Luenberger.ref", _tol)) > _tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", test, true);
 }

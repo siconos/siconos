@@ -33,8 +33,7 @@ unsigned long int siconos::simulation::EventsManager::_GapLimit2Events =
 #include "siconos_debug.h"
 
 siconos::simulation::EventsManager::EventsManager(std::shared_ptr<TimeDiscretisation> td)
-    : _td(td)
-{
+    : _td(td) {
   //  === Creates and inserts two events corresponding
   // to times tk and tk+1 of the simulation time-discretisation  ===
   _events.push_back(EventFactory::instance()->create(_td->getTk(0), EventType::TD));
@@ -50,8 +49,7 @@ void siconos::simulation::EventsManager::initialize(double T) { _T = T; }
 
 // Creation and insertion of a new event into the event set.
 siconos::simulation::Event& siconos::simulation::EventsManager::insertEvent(
-    siconos::simulation::EventType type, double time)
-{
+    siconos::simulation::EventType type, double time) {
   DEBUG_BEGIN(
       "Event& siconos::simulation::EventsManager::insertEvent(int type, double time)\n");
   // Uses the events factory to insert the new event.
@@ -61,8 +59,7 @@ siconos::simulation::Event& siconos::simulation::EventsManager::insertEvent(
 }
 
 siconos::simulation::Event& siconos::simulation::EventsManager::insertEvent(
-    siconos::simulation::EventType type, std::shared_ptr<TimeDiscretisation> td)
-{
+    siconos::simulation::EventType type, std::shared_ptr<TimeDiscretisation> td) {
   auto& ev = insertEvent(type, td->getTk(_k));
   ev.setTimeDiscretisation(td);
   return ev;
@@ -70,8 +67,7 @@ siconos::simulation::Event& siconos::simulation::EventsManager::insertEvent(
 
 double siconos::simulation::EventsManager::getTk() { return _td->getTk(_k); }
 
-double siconos::simulation::EventsManager::getTkp1() const
-{
+double siconos::simulation::EventsManager::getTkp1() const {
   double tkp1 = _td->getTk(_k + 1);
   if (tkp1 <= _T + 100.0 * std::numeric_limits<double>::epsilon())
     return tkp1;
@@ -79,8 +75,7 @@ double siconos::simulation::EventsManager::getTkp1() const
     return std::numeric_limits<double>::quiet_NaN();
 };
 
-double siconos::simulation::EventsManager::getTkp2() const
-{
+double siconos::simulation::EventsManager::getTkp2() const {
   double tkp2 = _td->getTk(_k + 2);
   if (tkp2 <= _T + 100.0 * std::numeric_limits<double>::epsilon())
     return tkp2;
@@ -88,8 +83,7 @@ double siconos::simulation::EventsManager::getTkp2() const
     return std::numeric_limits<double>::quiet_NaN();
 };
 
-double siconos::simulation::EventsManager::getTkp3() const
-{
+double siconos::simulation::EventsManager::getTkp3() const {
   double tkp3 = _td->getTk(_k + 3);
   if (tkp3 <= _T + 100.0 * std::numeric_limits<double>::epsilon())
     return tkp3;
@@ -97,8 +91,7 @@ double siconos::simulation::EventsManager::getTkp3() const
     return std::numeric_limits<double>::quiet_NaN();
 };
 
-void siconos::simulation::EventsManager::noSaveInMemory(const Simulation& sim)
-{
+void siconos::simulation::EventsManager::noSaveInMemory(const Simulation& sim) {
   for (auto& it : _events) {
     if (it->getType() == EventType::TD) {
       static_pointer_cast<TimeDiscretisationEvent>(it)->noSaveInMemory();
@@ -114,8 +107,7 @@ void siconos::simulation::EventsManager::noSaveInMemory(const Simulation& sim)
   // }
 }
 
-void siconos::simulation::EventsManager::preUpdate(Simulation& sim)
-{
+void siconos::simulation::EventsManager::preUpdate(Simulation& sim) {
   // Note FP: seems to be unused/obsolete. To be reviewed.
   DEBUG_BEGIN("siconos::simulation::EventsManager::preUpdate(Simulation& sim)\n");
   DEBUG_EXPR(display(););
@@ -129,29 +121,25 @@ void siconos::simulation::EventsManager::preUpdate(Simulation& sim)
         _events[i]->process(sim);
         _events.erase(_events.begin() + i);
       }
-    }
-    else
+    } else
       break;
   }
   DEBUG_END("siconos::simulation::EventsManager::preUpdate(Simulation& sim)\n");
 }
 
-double siconos::simulation::EventsManager::startingTime() const
-{
+double siconos::simulation::EventsManager::startingTime() const {
   if (_events.size() == 0)
     THROW_EXCEPTION(
         "siconos::simulation::EventsManager::startingTime current event is nullptr");
   return _events[0]->getDoubleTimeOfEvent();
 }
 
-double siconos::simulation::EventsManager::nextTime() const
-{
+double siconos::simulation::EventsManager::nextTime() const {
   if (_events.size() <= 1) THROW_EXCEPTION("EventsManager nextTime, next event is nullptr");
   return _events[1]->getDoubleTimeOfEvent();
 }
 
-bool siconos::simulation::EventsManager::needsIntegration() const
-{
+bool siconos::simulation::EventsManager::needsIntegration() const {
   if (_events.size() <= 1) THROW_EXCEPTION("EventsManager nextTime, next event is nullptr");
   return (mpz_cmp(*_events[0]->getTimeOfEvent(), *_events[1]->getTimeOfEvent()) < 0);
 }
@@ -159,12 +147,10 @@ bool siconos::simulation::EventsManager::needsIntegration() const
 // Creates (if required) and update the non smooth event of the set
 // Useful during simulation when a new event is detected.
 void siconos::simulation::EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time,
-                                                                bool yes_update)
-{
+                                                                bool yes_update) {
   if (!_eNonSmooth) {
     _eNonSmooth = EventFactory::instance()->create(time, EventType::NS);
-  }
-  else {
+  } else {
     _eNonSmooth->setTime(time);
   }
 
@@ -203,8 +189,7 @@ void siconos::simulation::EventsManager::scheduleNonSmoothEvent(Simulation& sim,
   mpz_clear(delta_time);
 }
 
-void siconos::simulation::EventsManager::processEvents(Simulation& sim)
-{
+void siconos::simulation::EventsManager::processEvents(Simulation& sim) {
   // process next event
   _events[1]->process(sim);
 
@@ -212,8 +197,7 @@ void siconos::simulation::EventsManager::processEvents(Simulation& sim)
   update(sim);
 }
 
-void siconos::simulation::EventsManager::update(Simulation& sim)
-{
+void siconos::simulation::EventsManager::update(Simulation& sim) {
   // delete last event, since we have processed one
   auto event0Type = _events[0]->getType();
   // reschedule a TD event if needed
@@ -251,8 +235,7 @@ void siconos::simulation::EventsManager::update(Simulation& sim)
   if (_events[0]->getType() == EventType::TD) _k++;
 }
 
-unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event> new_event)
-{
+unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event> new_event) {
   mpz_t* t1 = const_cast<mpz_t*>(new_event->getTimeOfEvent());
   const auto eType = new_event->getType();
   bool inserted = false;
@@ -261,34 +244,42 @@ unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event>
   mpz_init(delta_time);  // initialize delta_time
   mpz_t abs_delta_time;
   mpz_init(abs_delta_time);  // initialize delta_time
+
   // Find a place for the event in the vector
   for (auto it = _events.begin(); it != _events.end(); ++it) {
     auto ev = *it;
-    // delta = t(ev) - t(new_event)
+    // // delta = t(ev) - t(new_event)
     mpz_sub(delta_time, *(ev->getTimeOfEvent()), *t1);
     auto compare = mpz_cmp_ui(delta_time, _GapLimit2Events);
 
     // if (mpz_cmp_ui(delta_time, _GapLimit2Events) > 0)
-    if (compare > 0)  // new event time > current event time ==> insert
+    if (compare > 0)  // current event time > new event time > ==> insert just before
     {
       _events.insert(it, new_event);
       inserted = true;
       break;
-    }
-    else {
+    } else {
       mpz_abs(abs_delta_time, delta_time);
-      // Let us check if the new time is not too close to the time of the current event
+      //Let us check if the new time is not too close to the time of the current event
       if (mpz_cmp_ui(abs_delta_time, _GapLimit2Events) <= 0)  // the two are too close
       {
         // reschedule new_event at the same time as the one of the current event
         // and only if its type is different from the type of the current event
         mpz_set(*t1, *(ev->getTimeOfEvent()));
-        if (eType != ev->getType()) {
-          _events.insert(it, new_event);
-          inserted = true;
-          break;
-        }
       }
+      //   // Warning FP: we use the type (enum) of the event
+      //   // to decide if it must be inserted before or after the current event.
+      //   // So the priority is defined in Event.hpp, with the enum EventType.
+      //   if (eType != ev->getType()) {
+      //     if (ev->getType() == EventType::TD) {
+      // 	    _events.insert(std::next(it), new_event);
+      // 	  pos++;
+      //     //} else
+      //     //  _events.insert(it, new_event);
+      //     inserted = true;
+      //     break;
+      //   }
+      // }
     }
     pos++;
   }
@@ -302,11 +293,42 @@ unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event>
 
 double siconos::simulation::EventsManager::currentTimeStep() { return _td->timeStep(_k); }
 
-void siconos::simulation::EventsManager::display() const
-{
+void siconos::simulation::EventsManager::display() const {
   std::cout << "=== EventsManager data display ===\n";
   std::cout << " - The number of unprocessed events (including current one) is: "
             << _events.size() << "\n";
   for (auto it : _events) it->display();
   std::cout << "===== End of EventsManager display =====\n";
 }
+
+bool siconos::simulation::EventsManager::compareEvents::operator()(std::shared_ptr<Event> e1,
+                                                                   std::shared_ptr<Event> e2) {
+  mpz_t* t1 = const_cast<mpz_t*>(e1->getTimeOfEvent());
+  mpz_t d_time;
+  mpz_init(d_time);  // initialize delta_time
+  mpz_sub(d_time, *(e2->getTimeOfEvent()), *t1);
+  auto compare = mpz_cmp_ui(d_time, _GapLimit2Events);
+  e1->display();
+  e2->display();
+  std::cout << "Compare ?" << compare << "\n";
+  if (compare > 0)  // e1 > e2
+    return false;
+  else {
+    // mpz_t abs_delta_time;
+    // mpz_init(abs_delta_time);  // initialize delta_time
+
+    // mpz_abs(abs_delta_time, d_time);
+    // // Let us check if the new time is not too close to the time of the current event
+    // if (mpz_cmp_ui(abs_delta_time, _GapLimit2Events) <= 0)  // the two are too close
+    // {  // e1.time == e2.time, let's compare types
+    //   auto e1Type = e1->getType();
+    //   auto e2Type = e2->getType();
+    //   if (e1Type <= e2Type)
+    //     return true;
+    //   else if (e1Type > e2Type)
+    //     return false;
+    // }
+    // else
+    return true;
+  }
+};

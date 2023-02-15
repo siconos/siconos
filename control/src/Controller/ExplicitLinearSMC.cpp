@@ -16,35 +16,30 @@
  * limitations under the License.
  */
 
+#include "ExplicitLinearSMC.hpp"
 
 #include "ControlSensor.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "ExplicitLinearSMC.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
 siconos::control::ExplicitLinearSMC::ExplicitLinearSMC(std::shared_ptr<ControlSensor> sensor)
-    : CommonSMC(ActuatorType::ExplicitLinearSMC, sensor)
-{
-}
+    : CommonSMC(ActuatorType::ExplicitLinearSMC, sensor) {}
 
 siconos::control::ExplicitLinearSMC::ExplicitLinearSMC(
     std::shared_ptr<ControlSensor> sensor, std::shared_ptr<siconos::algebra::SimpleMatrix> B)
-    : CommonSMC(ActuatorType::ExplicitLinearSMC, sensor, B)
-{
-}
+    : CommonSMC(ActuatorType::ExplicitLinearSMC, sensor, B) {}
 
 void siconos::control::ExplicitLinearSMC::initialize(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::Simulation& s)
-{
+    const siconos::simulation::Simulation& s) {
   CommonSMC::initialize(nsds, s);
 
   _sigma = std::make_shared<siconos::algebra::SiconosVector>(_u->size());
 }
 
-void siconos::control::ExplicitLinearSMC::actuate()
-{
+void siconos::control::ExplicitLinearSMC::actuate() {
   if (!_noUeq) {
     computeUeq();
   }
@@ -67,8 +62,7 @@ void siconos::control::ExplicitLinearSMC::actuate()
           (*_us)(i) = 0;
       }
     }
-  }
-  else {
+  } else {
     for (decltype(sDim) i = 0; i < sDim; i++) {
       if ((*_sigma)(i) > 0)
         (*_us)(i) = -_alpha;

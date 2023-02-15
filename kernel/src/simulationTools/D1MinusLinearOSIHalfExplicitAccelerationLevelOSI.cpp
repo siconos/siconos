@@ -679,7 +679,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
         "velocity nor on acceleration level.");
 
   // calculate data of interaction
-  std::shared_ptr<siconos::modeling::Interaction> mainInteraction = inter;
+  auto mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
 

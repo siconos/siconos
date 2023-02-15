@@ -117,10 +117,10 @@ class Actuator {
   std::shared_ptr<siconos::algebra::SimpleMatrix> _B{nullptr};
 
   /** name of the plugin for g (nonlinear affine in control system)*/
-  std::string _plugingName{"unplugged"};
+  std::string _plugingName;
 
   /** name of the plugin to compute \f$ \nabla_x g \f$ for the nonlinear case*/
-  std::string _pluginJacgxName{"unplugged"};
+  std::string _pluginJacgxName;
 
   /** ControlSensor feeding the Controller */
   std::shared_ptr<ControlSensor> _sensor{nullptr};

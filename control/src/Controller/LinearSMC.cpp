@@ -20,32 +20,28 @@
 
 #include "ControlSensor.hpp"
 #include "FirstOrderLinearDS.hpp"
-#include "SiconosAlgebraProd.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "TimeStepping.hpp"
-//#define DEBUG_WHERE_MESSAGES
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_STDOUT
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 siconos::control::LinearSMC::LinearSMC(std::shared_ptr<ControlSensor> sensor,
                                        ActuatorType type)
-    : CommonSMC(type, sensor)
-{
-}
+    : CommonSMC(type, sensor) {}
 
 siconos::control::LinearSMC::LinearSMC(std::shared_ptr<ControlSensor> sensor,
                                        std::shared_ptr<siconos::algebra::SimpleMatrix> B,
                                        std::shared_ptr<siconos::algebra::SimpleMatrix> D,
                                        ActuatorType type)
-    : CommonSMC(type, sensor, B, D)
-{
-}
+    : CommonSMC(type, sensor, B, D) {}
 
-void siconos::control::LinearSMC::actuate()
-{
+void siconos::control::LinearSMC::actuate() {
   DEBUG_BEGIN("void siconos::control::LinearSMC::actuate()\n")
 
   if (!_noUeq) {
@@ -71,9 +67,7 @@ void siconos::control::LinearSMC::actuate()
 
   _simulationSMC->computeOneStep();
   //  if (_indx > 0)
-  {
-    _simulationSMC->nextStep();
-  }
+  { _simulationSMC->nextStep(); }
 
   // discontinous part
   *_us = *_lambda;

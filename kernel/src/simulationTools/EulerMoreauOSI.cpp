@@ -185,7 +185,7 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForInteraction(
         // inter_work[siconos::integrators::EulerMoreauOSI::G_ALPHA] =
         // std::make_shared<siconos::algebra::SiconosVector>(sizeOfDS));
         inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA] =
-            std::make_shared<siconos::algebra::BlockVector>();
+            std::make_shared<siconos::algebra::BlockVector>(1, sizeOfDS);
         inter_work[siconos::integrators::EulerMoreauOSI::VEC_RESIDU_R] =
             std::make_shared<siconos::algebra::SiconosVector>(sizeOfDS);
         inter_work_mat[siconos::integrators::EulerMoreauOSI::MAT_KHAT] =

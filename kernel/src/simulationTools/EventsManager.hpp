@@ -277,6 +277,11 @@ class EventsManager {
    *  \param T the new final time
    */
   inline void updateT(double T) { _T = T; };
+
+  static struct compareEvents {
+    bool operator()(std::shared_ptr<Event> e1, std::shared_ptr<Event> e2);
+  } compareEvents;
 };
+
 }  // namespace siconos::simulation
 #endif  // EventsManager_H

@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-#include "SiconosAlgebraProd.hpp"
-#include "SimpleMatrix.hpp"
-#include "SiconosAlgebraScal.hpp"
 #include "CommonSMC.hpp"
+
 #include "ControlSensor.hpp"
+#include "EulerMoreauOSI.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
@@ -28,18 +27,21 @@
 #include "FirstOrderR_helpers.hpp"
 #include "FirstOrderType1R.hpp"
 #include "FirstOrderType2R.hpp"
+#include "Interaction.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#include "NumericsSolversNamespace.h"
+#include "Relay.hpp"
 #include "RelayNSL.hpp"
+#include "SiconosAlgebraTools.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
-#include "Relay.hpp"
-#include "EulerMoreauOSI.hpp"
-#include "ZeroOrderHoldOSI.hpp"
 #include "Topology.hpp"
-#include "NumericsSolversNamespace.h"
-#include "Interaction.hpp"
-#include "InvertMatrix.hpp"
+#include "ZeroOrderHoldOSI.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -47,8 +49,7 @@
 
 void siconos::control::CommonSMC::initialize(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::Simulation& s)
-{
+    const siconos::simulation::Simulation& s) {
   DEBUG_BEGIN(
       "siconos::control::CommonSMC::initialize(const "
       "siconos::modeling::NonSmoothDynamicalSystem & nsds, const "
@@ -58,8 +59,7 @@ void siconos::control::CommonSMC::initialize(
         "siconos::control::CommonSMC::initialize - you have to set either _Csurface or h(.) "
         "before initializing "
         "the Actuator");
-  }
-  else {
+  } else {
     if (_Csurface && !_u)
       _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->size(0), 0);
 
@@ -79,20 +79,18 @@ void siconos::control::CommonSMC::initialize(
     auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_DS_SMC->n(), 0);
     std::static_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(_DS_SMC)->setbPtr(
         dummyb);
-  }
-  else if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS)) {
+  } else if (auto folds =
+                 std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS)) {
     _DS_SMC = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
     std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)
         ->setComputebFunction(nullptr);
     // We have to reset the _pluginb
     auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_DS_SMC->n(), 0);
     std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
-  }
-  else if (auto folds =
-               std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS)) {
+  } else if (auto folds =
+                 std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS)) {
     _DS_SMC = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*folds);
-  }
-  else {
+  } else {
     THROW_EXCEPTION("LinearSMC is only  implemented for FirstOrderNonLinearDS");
   }
   _DS_SMC->setNumber(999999);
@@ -131,8 +129,7 @@ void siconos::control::CommonSMC::initialize(
         _D = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim, 0);
       siconos::modeling::FirstOrderRHelpers::JachlambdaSetter(*_relationSMC, _D,
                                                               _pluginJachlambdaName);
-    }
-    else if (!_pluginJachlambdaName.empty() || _D)  // Type2R ?
+    } else if (!_pluginJachlambdaName.empty() || _D)  // Type2R ?
     {
       DEBUG_PRINT("A FirstOrderType2R is created for the _relationSMC\n");
       _relationSMC = std::make_shared<siconos::modeling::FirstOrderType2R>();
@@ -142,8 +139,7 @@ void siconos::control::CommonSMC::initialize(
                                                          _pluginJachxName);
       siconos::modeling::FirstOrderRHelpers::JachlambdaSetter(*_relationSMC, _D,
                                                               _pluginJachlambdaName);
-    }
-    else  // Type1R
+    } else  // Type1R
     {
       DEBUG_PRINT("A FirstOrderType1R is created for the _relationSMC\n");
       _relationSMC = std::make_shared<siconos::modeling::FirstOrderType1R>();
@@ -163,15 +159,13 @@ void siconos::control::CommonSMC::initialize(
       _simulationSMC->setComputeResiduR(true);
       _simulationSMC->setUseRelativeConvergenceCriteron(false);
     }
-  }
-  else {
+  } else {
     if (!_plugineName.empty()) {
       DEBUG_PRINT("A FirstOrderLinearR is created for the _relationSMC\n");
       _relationSMC = std::make_shared<siconos::modeling::FirstOrderLinearR>(_Csurface, _B);
       _relationSMC->setComputeEFunction(siconos::plugins::getPluginName(_plugineName),
                                         siconos::plugins::getPluginFunctionName(_plugineName));
-    }
-    else {
+    } else {
       DEBUG_PRINT("A FirstOrderLinearTIR is created for the _relationSMC\n");
       _relationSMC = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(_Csurface, _B);
     }
@@ -183,17 +177,17 @@ void siconos::control::CommonSMC::initialize(
   if (!_nsLawSMC)
     _nsLawSMC = std::make_shared<siconos::modeling::RelayNSL>(sDim, -_alpha, _alpha);
   if (!_OSNSPB_SMC)
-    _OSNSPB_SMC = std::make_shared<siconos::simulation::Relay>(_numericsSolverId);
+    _OSNSPB_SMC = std::make_shared<siconos::nonsmooth_formulations::Relay>(_numericsSolverId);
 
   _interactionSMC = std::make_shared<siconos::modeling::Interaction>(_nsLawSMC, _relationSMC);
 
-  if (std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS)){
+  if (std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(DS) || std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS))
+    _integratorSMC = std::make_shared<siconos::integrators::ZeroOrderHoldOSI>();
+  else if(std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS))
     _integratorSMC = std::make_shared<siconos::integrators::EulerMoreauOSI>(_thetaSMC);
-  }
-  else {
-    _integratorSMC = std::make_shared < siconos::integrators::ZeroOrderHoldOSI>();
-  }
-
+  else
+    THROW_EXCEPTION("LinearSMC is only  implemented for FirstOrderNonLinearDS");
+  
   _nsdsSMC->insertDynamicalSystem(_DS_SMC);
   _nsdsSMC->setName(_DS_SMC, "plant_SMC");
   _nsdsSMC->link(_interactionSMC, _DS_SMC);
@@ -233,8 +227,7 @@ void siconos::control::CommonSMC::initialize(
       "Simulation & s)\n");
 }
 
-void siconos::control::CommonSMC::computeUeq()
-{
+void siconos::control::CommonSMC::computeUeq() {
   DEBUG_BEGIN("void siconos::control::CommonSMC::computeUeq()\n");
   assert(std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC) &&
          "siconos::control::CommonSMC::computeUeq the DS should be linear");
@@ -278,50 +271,42 @@ void siconos::control::CommonSMC::computeUeq()
 }
 
 void siconos::control::CommonSMC::setCsurface(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> newC)
-{
+    std::shared_ptr<siconos::algebra::SimpleMatrix> newC) {
   // check dimensions ...
   _Csurface = newC;
 }
 
 void siconos::control::CommonSMC::setSaturationMatrix(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> newSat)
-{
+    std::shared_ptr<siconos::algebra::SimpleMatrix> newSat) {
   // check dimensions ...
   if (newSat->size(1) != _B->size(1)) {
     THROW_EXCEPTION(
         "siconos::control::CommonSMC::setSaturationMatrixPtr - inconstency between the "
         "dimension of the state "
         "space and D");
-  }
-  else {
+  } else {
     _D = newSat;
   }
 }
 
 void siconos::control::CommonSMC::setTimeDiscretisation(
-    const siconos::simulation::TimeDiscretisation& td)
-{
+    const siconos::simulation::TimeDiscretisation& td) {
   _td = std::make_shared<siconos::simulation::TimeDiscretisation>(td);
 }
 
 void siconos::control::CommonSMC::sete(const std::string& plugin) { _plugineName = plugin; }
 
 void siconos::control::CommonSMC::seth(const std::string& plugin) { _pluginhName = plugin; }
-void siconos::control::CommonSMC::setJachx(const std::string& plugin)
-{
+void siconos::control::CommonSMC::setJachx(const std::string& plugin) {
   _pluginJachxName = plugin;
 }
-void siconos::control::CommonSMC::setJachlambda(const std::string& plugin)
-{
+void siconos::control::CommonSMC::setJachlambda(const std::string& plugin) {
   _pluginJachlambdaName = plugin;
 }
 void siconos::control::CommonSMC::setg(const std::string& plugin) { _plugingName = plugin; }
-void siconos::control::CommonSMC::setJacgx(const std::string& plugin)
-{
+void siconos::control::CommonSMC::setJacgx(const std::string& plugin) {
   _pluginJacgxName = plugin;
 }
-void siconos::control::CommonSMC::setJacglambda(const std::string& plugin)
-{
+void siconos::control::CommonSMC::setJacglambda(const std::string& plugin) {
   _pluginJacglambdaName = plugin;
 }

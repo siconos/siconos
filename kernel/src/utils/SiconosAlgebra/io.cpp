@@ -248,6 +248,8 @@ double siconos::algebra::io::compareRefFile(const SimpleMatrix &data, std::strin
       if (error < (*err)(i)) error = (*err)(i);
     }
   }
+  error = std::abs(error);
+
   if (verbose) std::cout << "Error = " << error << "\n";
   if (error > epsilon) {
     if (verbose) {

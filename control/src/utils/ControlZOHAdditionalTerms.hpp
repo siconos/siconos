@@ -35,7 +35,7 @@ struct ControlZOHAdditionalTerms : siconos::integrators::ExtraAdditionalTerms {
    */
   virtual void init(siconos::graphs::DynamicalSystemsGraph& DSG0,
                     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-                    const siconos::simulation::TimeDiscretisation& td);
+                    std::shared_ptr<siconos::simulation::TimeDiscretisation> td);
 
   /** add smooth term to xfree (like the control input, the error correction for an observer)
    * \param DSG0 the graph of DynamicalSystems

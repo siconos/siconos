@@ -16,22 +16,14 @@
  * limitations under the License.
  */
 
-#include "SiconosAlgebraProd.hpp"
 #include "ControlLinearAdditionalTermsTS.hpp"
 
-void siconos::control::ControlLinearAdditionalTermsTS::init(
-    siconos::graphs::DynamicalSystemsGraph& DSG0,
-    const siconos::modeling::NonSmoothDynamicalSystem&,
-    const siconos::simulation::TimeDiscretisation&)
-{
-  // Do nothing here
-}
+#include "SiconosMatrixVectorOp.hpp"
 
 void siconos::control::ControlLinearAdditionalTermsTS::addSmoothTerms(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
-    siconos::algebra::SiconosVector& xfree)
-{
+    siconos::algebra::SiconosVector& xfree) {
   // check whether we have a system with a control input
   if (DSG0.u.hasKey(dsgVD)) {
     assert(DSG0.B.hasKey(dsgVD));
@@ -48,7 +40,6 @@ void siconos::control::ControlLinearAdditionalTermsTS::addSmoothTerms(
 void siconos::control::ControlLinearAdditionalTermsTS::addJacobianRhsContribution(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double t,
-    siconos::algebra::SiconosMatrix& jacRhs)
-{
+    siconos::algebra::SiconosMatrix& jacRhs) {
   // nothing to be done here
 }

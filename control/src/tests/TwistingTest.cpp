@@ -35,8 +35,7 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(TwistingTest);
 
-void TwistingTest::setUp()
-{
+void TwistingTest::setUp() {
   _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
   (*_A)(0, 1) = 1.0;
   (*_A)(1, 0) = 19.0;
@@ -59,8 +58,7 @@ void TwistingTest::setUp()
 
 #ifdef HAS_EXTREME_POINT_ALGO
 
-void TwistingTest::initTwisting()
-{
+void TwistingTest::initTwisting() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
@@ -69,8 +67,7 @@ void TwistingTest::initTwisting()
   _itw->setCsurface(eye);
 }
 
-void TwistingTest::initRegularTwisting()
-{
+void TwistingTest::initRegularTwisting() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _reg_itw = std::make_shared < RegularTwisting(_sensor, 300., _beta);
@@ -80,8 +77,7 @@ void TwistingTest::initRegularTwisting()
 }
 #endif
 
-void TwistingTest::initExplicitTwisting()
-{
+void TwistingTest::initExplicitTwisting() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _expl_tw = std::make_shared<siconos::control::ExplicitTwisting>(_sensor, 300., _beta);
@@ -92,8 +88,7 @@ void TwistingTest::initExplicitTwisting()
 
 void TwistingTest::tearDown() {}
 
-void TwistingTest::test_ExplicitTwisting_ZOH()
-{
+void TwistingTest::test_ExplicitTwisting_ZOH() {
   initExplicitTwisting();
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->setSaveOnlyMainSimulation(true);
@@ -114,8 +109,7 @@ void TwistingTest::test_ExplicitTwisting_ZOH()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
-void TwistingTest::test_ExplicitTwisting_Lsodar()
-{
+void TwistingTest::test_ExplicitTwisting_Lsodar() {
   initExplicitTwisting();
   auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->setSaveOnlyMainSimulation(true);
@@ -129,17 +123,14 @@ void TwistingTest::test_ExplicitTwisting_Lsodar()
   siconos::algebra::io::write("explicitTwisting_Lsodar.dat", data,
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
-  double error = 0.0;
-  bool test =
-      !((error = siconos::algebra::io::compareRefFile(data, "etw_lsodar.ref", _tol)) >= 0.0 &&
-        error > _tol);
+  auto error = siconos::algebra::io::compareRefFile(data, "etw_lsodar.ref", _tol);
+  bool test = !(error > _tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 #ifdef HAS_EXTREME_POINT_ALGO
-void TwistingTest::test_Twisting_ZOH()
-{
+void TwistingTest::test_Twisting_ZOH() {
   initTwisting();
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->setSaveOnlyMainSimulation(true);
@@ -175,8 +166,7 @@ void TwistingTest::test_Twisting_ZOH()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", (data - dataRef).normInf() < _tol, true);
 }
 
-void TwistingTest::test_Twisting_Lsodar()
-{
+void TwistingTest::test_Twisting_Lsodar() {
   initTwisting();
   auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->setSaveOnlyMainSimulation(true);
@@ -213,8 +203,7 @@ void TwistingTest::test_Twisting_Lsodar()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", (data - dataRef).normInf() < _tol, true);
 }
 
-void TwistingTest::test_RegularTwisting_ZOH()
-{
+void TwistingTest::test_RegularTwisting_ZOH() {
   initRegularTwisting();
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->setSaveOnlyMainSimulation(true);
@@ -252,8 +241,7 @@ void TwistingTest::test_RegularTwisting_ZOH()
                                true);
 }
 
-void TwistingTest::test_RegularTwisting_Lsodar()
-{
+void TwistingTest::test_RegularTwisting_Lsodar() {
   initRegularTwisting();
   auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->setSaveOnlyMainSimulation(true);

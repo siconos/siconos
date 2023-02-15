@@ -981,6 +981,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
     //  saved in y !!
     siconos::algebra::setBlock(*_z, lambda, lambda->size(), pos, 0);
     DEBUG_EXPR(lambda->display(););
+
   }
   DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
 }
