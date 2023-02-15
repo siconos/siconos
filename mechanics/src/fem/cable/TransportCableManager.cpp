@@ -54,7 +54,7 @@ int TransportCableManager::computeFEM(const json &a_args, const string &a_outfil
     P.computeFEM(getParam(a_args, "nb_node", 1400), getParam(a_args, "eps", 0.1),
                  getParam(a_args, "tol_contact", 1e-3));
 #ifndef NSICONOS
-    if (method == "all") {
+    if (method == "dynamics") {
       computeDS();
     }
 #endif
