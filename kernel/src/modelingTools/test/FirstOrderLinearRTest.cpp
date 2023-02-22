@@ -33,15 +33,6 @@ void FirstOrderLinearRTest::setUp()
   B = std::make_shared<siconos::algebra::SimpleMatrix>("matB.dat", true);
   F = std::make_shared<siconos::algebra::SimpleMatrix>("matF.dat", true);
   e = std::make_shared<siconos::algebra::SiconosVector>(1);
-  //   Cp.reset=
-  //   std::make_shared<siconos::modeling::FirstOrderLinearR>::PluggedMatrix("TestPlugin:C"));
-  //   Dp.reset=
-  //   std::make_shared<siconos::modeling::FirstOrderLinearR>::PluggedMatrix("TestPlugin:D"));
-  //   Bp.reset=
-  //   std::make_shared<siconos::modeling::FirstOrderLinearR>::PluggedMatrix("TestPlugin:B"));
-  //   Fp.reset=
-  //   std::make_shared<siconos::modeling::FirstOrderLinearR>::PluggedMatrix("TestPlugin:F"));
-  //  ep.reset(new Plugged_Vector_FTime("TestPlugin:e"));
   (*e)(0) = 0.1;
 }
 

@@ -19,7 +19,7 @@
 #include "TimeSteppingCombinedProjection.hpp"
 
 #include "LagrangianLinearTIDS.hpp"
-// #include "MLCPProjectOnConstraints.hpp"
+#include "MLCPProjectOnConstraints.hpp"
 #include "Interaction.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewtonEulerDS.hpp"
@@ -35,11 +35,6 @@
 // #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
-namespace siconos::simulation {
-struct MLCPProjectOnConstraints : siconos::nonsmooth_formulations::OneStepNSProblem {
-  void setDoProjOnEquality(bool){};
-};  // TMPTMPTPTMTP
-}  // namespace siconos::simulation
 
 siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
@@ -48,8 +43,7 @@ siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProject
     std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
     std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
     unsigned int level)
-    : TimeStepping{nsds, td, osi, osnspb_velo}, _indexSetLevelForProjection{level}
-{
+    : TimeStepping{nsds, td, osi, osnspb_velo}, _indexSetLevelForProjection{level} {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, siconos::simulation::SICONOS_OSNSP_TS_POS);
 
@@ -79,8 +73,7 @@ siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProject
 //   void visit(MLCPProjectOnConstraints onsnsp) { std::cout << "hello\n"; }
 // };
 
-void siconos::simulation::TimeSteppingCombinedProjection::initOSNS()
-{
+void siconos::simulation::TimeSteppingCombinedProjection::initOSNS() {
   TimeStepping::initOSNS();
 
   auto osnspb_pos = (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS];
@@ -91,28 +84,14 @@ void siconos::simulation::TimeSteppingCombinedProjection::initOSNS()
   (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
   (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
 
-  // better with visitor but I am not able to fix it.
-  //_SimulationEffectOnOSNSP simulationEffectOnOSNSP(this);
-  // osnspb_pos->accept(simulationEffectOnOSNSP);
-  if (auto toto = std::dynamic_pointer_cast<siconos::simulation::MLCPProjectOnConstraints>(
-          osnspb_pos)) {
-    // std::cout << "Type::name(*osnspb_pos) "<< Type::name(*osnspb_pos) <<std::endl;
-    bool tutu = (bool)_doCombinedProjOnEquality;
-    toto->setDoProjOnEquality(tutu);
+  if (auto mlcp =
+          std::dynamic_pointer_cast<siconos::nonsmooth_formulations::MLCPProjectOnConstraints>(
+              osnspb_pos)) {
+    mlcp->setDoProjOnEquality(_doCombinedProjOnEquality);
   }
 }
 
-void siconos::simulation::TimeSteppingCombinedProjection::advanceToEventOLD()
-{
-  initialize();
-
-  newtonSolve(_newtonTolerance, _newtonMaxIteration);
-
-  assert(0);
-}
-
-void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
-{
+void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
   DEBUG_PRINT("================================================");
   DEBUG_PRINT("siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()");
   DEBUG_PRINT("================================================\n");
@@ -150,8 +129,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
         if (ed2 != ed1) {
           indexSet1->eraseProperties(ed1);
           indexSet1->eraseProperties(ed2);
-        }
-        else {
+        } else {
           indexSet1->eraseProperties(ed1);
         }
       }
@@ -171,8 +149,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
         if (ed2 != ed1) {
           indexSet2->eraseProperties(ed1);
           indexSet2->eraseProperties(ed2);
-        }
-        else {
+        } else {
           indexSet2->eraseProperties(ed1);
         }
       }
@@ -341,11 +318,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
 
       if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
         *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
-      }
-      else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
-      }
-      else
+      } else
         THROW_EXCEPTION(
             "siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() :: - Ds is "
             "not from NewtonEulerDS neither from LagrangianDS.");
@@ -384,9 +359,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
 
       _nsds->updateInput(nextTime(), 0);
 
-      for (auto aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
-        auto ds = dsGraph->bundle(*aVi2);
-        auto& workVectors = *dsGraph->properties(*aVi2).workVectors;
+      for (auto aVi2 : *dsGraph) {
+        auto ds = dsGraph->bundle(aVi2);
+        auto& workVectors = *dsGraph->properties(aVi2).workVectors;
 
         if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
           auto q = neds->q();
@@ -401,8 +376,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
 #ifdef TSPROJ_DEBUG_LEVEL1
           neds->display();
 #endif
-        }
-        else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+        } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
           auto q = d->q();
           auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
           if (d->p(0)) {
@@ -417,8 +391,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
           std::cout << " p(1)=\n";
           d->p(1)->display();
 #endif
-        }
-        else
+        } else
           THROW_EXCEPTION(
               "siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() - Ds is "
               "not from NewtonEulerDS neither from LagrangianDS.");
@@ -480,19 +453,17 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
 
     // We update forces to start the Newton Loop the next tiem step with a correct value in
     // swap
-    for (auto aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
-      auto ds = dsGraph->bundle(*aVi2);
+    for (auto aVi2 : *dsGraph) {
+      auto ds = dsGraph->bundle(aVi2);
       if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
         double time = nextTime();
         neds->computeForces(time, neds->q(), neds->twist());
-      }
-      else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(
+                     ds)) {  // nothing ...
+      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         auto time = nextTime();
         d->computeForces(time, d->q(), d->velocity());
-      }
-      else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
-      }
-      else
+      } else
         THROW_EXCEPTION(
             "siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() - Ds is "
             "not from NewtonEulerDS neither from LagrangianDS.");
@@ -500,8 +471,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
 
     if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection) {
       updateIndexSet(1);
-    }
-    else {
+    } else {
       _isIndexSetsStable = true;
     }
 #ifdef TSPROJ_DEBUG_LEVEL1
@@ -552,8 +522,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()
 }
 
 void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
-    bool* runningProjection)
-{
+    bool* runningProjection) {
   DEBUG_PRINT(
       "siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(bool * "
       "runningProjection)\n");
@@ -579,7 +548,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
             siconos::modeling::Type::NewtonImpactNSL) {
 #ifdef TSPROJ_DEBUG_LEVEL1
       printf(
-          "  siconos::simulation::TimeSteppingCombinedProjection::computeCriteria  Unilateral "
+          "  siconos::simulation::TimeSteppingCombinedProjection::computeCriteria  "
+          "Unilateral "
           "interac->y(0)->getValue(0) %e.\n",
           interac->y(0)->getValue(0));
 #endif
@@ -593,8 +563,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
           printf("TSProj newton criteria unilateral true %e.\n", criteria);
 #endif
         }
-      }
-      else {
+      } else {
         auto criteria = interac->y(0)->getValue(0);
         if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
 
@@ -605,8 +574,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
 #endif
         }
       }
-    }
-    else {
+    } else {
       DEBUG_EXPR(interac->y(0)->display(););
       if (interac->y(0)->normInf() > maxViolationEquality) {
         DEBUG_EXPR(interac->y(0)->display(););
@@ -636,8 +604,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
 #endif
 }
 
-void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
-{
+void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigned int i) {
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
   // boost::default_color_type is used to organize update in InteractionsGraph:
@@ -706,8 +673,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
       if (indexSet0->color(*ui0) == boost::black_color) {
         // reset
         indexSet0->color(*ui0) = boost::white_color;
-      }
-      else {
+      } else {
         if (indexSet0->color(*ui0) == boost::gray_color) {
           // reset
           indexSet0->color(*ui0) = boost::white_color;
@@ -717,8 +683,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
             siconos::types::type_value(*(indexSet0->bundle(*ui0)->interaction()->nonSmoothLaw()))
             == siconos::modeling::Type::EqualityConditionNSL ;
             });*/
-        }
-        else {
+        } else {
           assert(indexSet0->color(*ui0) == boost::white_color);
 
           auto inter0 = indexSet0->bundle(*ui0);
@@ -768,8 +733,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
         if (ed2 != ed1) {
           indexSet2->eraseProperties(ed1);
           indexSet2->eraseProperties(ed2);
-        }
-        else {
+        } else {
           indexSet2->eraseProperties(ed1);
         }
       }

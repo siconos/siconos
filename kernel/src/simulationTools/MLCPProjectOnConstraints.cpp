@@ -346,123 +346,6 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::displayBlocks(
     }
   }
 }
-void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractionBlocksOLD() {
-  auto indexSet = simulation()->indexSet(indexSetLevel());
-
-  bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
-  //  std::cout<<"isLinear: "<<isLinear<<" hasTopologyChanged:
-  //  "<<hasTopologyChanged<<"hasBeenUpdated: "<<_hasBeenUpdated<<endl;
-
-  if (indexSet->properties().symmetric) {
-    THROW_EXCEPTION(
-        "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractionBlocks() "
-        "- symmetric "
-        "case for the "
-        "indexSet is not yet implemented");
-  } else  // not symmetric => follow out_edges for each vertices
-  {
-    if (!_hasBeenUpdated || !isLinear) {
-      if (!_hasBeenUpdated) {
-        //      printf("siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractionBlocks
-        //      must be updated.\n");
-        _n = 0;
-        _m = 0;
-        _curBlock = 0;
-      }
-      siconos::graphs::InteractionsGraph::VIterator vi, viend;
-      for (std::tie(vi, viend) = indexSet->vertices(); vi != viend; ++vi) {
-        auto inter = indexSet->bundle(*vi);
-        auto sizeY = std::static_pointer_cast<OSNSMatrixProjectOnConstraints>(_M)
-                         ->computeSizeForProjection(inter);
-
-        // #ifdef MLCPPROJ_DEBUG
-        //       std::cout<<"\nsiconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractionBlocks()"<<endl;
-        //        std::cout << "indexSet :"<< indexSet << "\n";
-        //       indexSet->display();
-        //        std::cout << "vi :"<< *vi << "\n";
-        //        std::cout << "indexSet->blockProj[*vi]: before"<< indexSet->blockProj[*vi] <<
-        //        std::endl;
-        // #endif
-
-        if (!indexSet->blockProj[*vi]) {
-          indexSet->blockProj[*vi] =
-              std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
-        }
-        // #ifdef MLCPPROJ_DEBUG
-        //        std::cout << "indexSet->blockProj[*vi]: after"<< indexSet->blockProj[*vi] <<
-        //        std::endl;
-        // #endif
-
-        computeDiagonalInteractionBlock(*vi);
-      }
-
-      siconos::graphs::InteractionsGraph::EIterator ei, eiend;
-      for (std::tie(ei, eiend) = indexSet->edges(); ei != eiend; ++ei) {
-        auto inter1 = indexSet->bundle(indexSet->source(*ei));
-        auto inter2 = indexSet->bundle(indexSet->target(*ei));
-        auto sizeY1 = std::static_pointer_cast<OSNSMatrixProjectOnConstraints>(_M)
-                          ->computeSizeForProjection(inter1);
-        auto sizeY2 = std::static_pointer_cast<OSNSMatrixProjectOnConstraints>(_M)
-                          ->computeSizeForProjection(inter2);
-
-        // Memory allocation if needed
-        auto isrc = indexSet->index(indexSet->source(*ei));
-        auto itar = indexSet->index(indexSet->target(*ei));
-        if (itar > isrc)  // upper block
-        {
-          if (!indexSet->upper_blockProj[*ei]) {
-            indexSet->upper_blockProj[*ei] =
-                std::make_shared<siconos::algebra::SimpleMatrix>(sizeY1, sizeY2);
-          }
-        } else  // lower block
-        {
-          if (!indexSet->lower_blockProj[*ei]) {
-            indexSet->lower_blockProj[*ei] =
-                std::make_shared<siconos::algebra::SimpleMatrix>(sizeY1, sizeY2);
-          }
-        }
-
-        // Computation of the diagonal block
-        computeInteractionBlock(*ei);
-
-        // allocation for transposed block
-        // should be avoided
-        if (itar > isrc)  // upper block has been computed
-        {
-          // if (!indexSet->lower_blockProj[*ei])
-          //   {
-          //     indexSet->lower_blockProj[*ei].
-          //  =
-          //  std::make_shared<siconos::algebra::SimpleMatrix>(indexSet->upper_blockProj[*ei]->size(1),
-          //             indexSet->upper_blockProj[*ei]->size(0)));
-          //   }
-          indexSet->lower_blockProj[*ei] = std::make_shared<siconos::algebra::SimpleMatrix>(
-              *(indexSet->upper_blockProj[*ei]));
-          indexSet->lower_blockProj[*ei]->trans();
-          //          indexSet->lower_blockProj[*ei]->trans(*indexSet->upper_blockProj[*ei]);
-        } else {
-          assert(itar < isrc);  // lower block has been computed
-          // if (!indexSet->upper_blockProj[*ei])
-          //   {
-          //     indexSet->upper_blockProj[*ei].
-          //  =
-          //  std::make_shared<siconos::algebra::SimpleMatrix>(indexSet->lower_blockProj[*ei]->size(1),
-          //             indexSet->lower_blockProj[*ei]->size(0)));
-          //   }
-          indexSet->upper_blockProj[*ei] = std::make_shared<siconos::algebra::SimpleMatrix>(
-              *(indexSet->lower_blockProj[*ei]));
-          indexSet->upper_blockProj[*ei]->trans();
-        }
-        // #ifdef MLCPPROJ_DEBUG
-        //             printf("MLCPP upper: %i
-        //             %i\n",indexSet->upper_blockProj[*ei]->size(0),indexSet->upper_blockProj[*ei]->size(1));
-        //             printf("MLCPP lower: %i
-        //             %i\n",indexSet->lower_blockProj[*ei]->size(0),indexSet->lower_blockProj[*ei]->size(1));
-        // #endif
-      }
-    }
-  }
-}
 
 void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
     computeDiagonalInteractionBlock(
@@ -502,9 +385,6 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
   pos2 = indexSet->properties(vd).target_pos;
 
   // We assume that all ds in vertex_inter have the same osi.
-  // auto Osi = indexSet->properties(vd).osi;
-  // //auto Osi = simulation()->integratorOfDS(ds);
-  // siconos::integrators::IntegratorType  osiType = Osi->getType();
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   auto& osi1 = *DSG0.properties(DSG0.descriptor(ds1)).osi;
@@ -562,8 +442,6 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
   // Warning: in the current version, if OSI!=MoreauJeanOSI, this fails.
   // If OSI = MOREAU, centralInteractionBlocks = W if OSI = LSODAR,
   // centralInteractionBlocks = M (mass matrices)
-  /////////////////////////// auto leftInteractionBlock, rightInteractionBlock,
-  /// leftInteractionBlock1;
 
   // General form of the interactionBlock is : interactionBlock =
   // a*extraInteractionBlock + b * leftInteractionBlock * centralInteractionBlocks

@@ -15,15 +15,16 @@
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 
 # --- List of siconos components to build and install ---
-# The complete list is : externals numerics kernel control mechanics mechanisms io
+# The complete list is : externals numerics kernel control mechanics io
 # mechanisms is "off" by default.
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.
 set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 
-option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
-option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" ON)
-option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" ON)
+option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" OFF)
+option(WITH_PYB11_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
+option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
+option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 
 # --- Build/compiling options ---
 set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")

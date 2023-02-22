@@ -101,8 +101,8 @@ siconos::joints::KneeJointR::KneeJointR(std::shared_ptr<siconos::algebra::Sicono
   setPoint(0, P);
   if (d1) {
     setBasePositions(d1->q(),
-                     d2 ? d2->q() : std::make_shared<siconos::algebra::SiconosVector>());
-    checkInitPos(d1->q(), d2 ? d2->q() : std::make_shared<siconos::algebra::SiconosVector>());
+                     d2 ? d2->q() : nullptr);
+    checkInitPos(d1->q(), d2 ? d2->q() : nullptr);
   }
 }
 

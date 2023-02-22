@@ -88,8 +88,8 @@ if(USER_OPTIONS_FILE)
   configure_file(${USER_OPTIONS_FILE} current_options.cmake COPYONLY)
   include(${CMAKE_CURRENT_BINARY_DIR}/current_options.cmake)
 else()
-  message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/cmake/default_options.cmake !!!!! \n")
-  include(default_options)
+  message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/ci_gitlab/siconos_confs/standard.cmake !!!!! \n")
+  include(${CMAKE_SOURCE_DIR}/ci_gitlab/siconos_confs/standard.cmake)
 endif()
 
 # Set target names from components list

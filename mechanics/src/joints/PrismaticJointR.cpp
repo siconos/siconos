@@ -77,7 +77,7 @@ siconos::joints::PrismaticJointR::PrismaticJointR(
   setAxis(0, axis);
   if (d1)
     setBasePositions(d1->q(),
-                     d2 ? d2->q() : std::make_shared<siconos::algebra::SiconosVector>());
+                     d2 ? d2->q() : nullptr);
 }
 
 void siconos::joints::PrismaticJointR::displayInitialPosition() {
@@ -106,7 +106,7 @@ void siconos::joints::PrismaticJointR::setBasePositions(
     _axis0->setValue(2, tmp.R_component_4());
   }
 
-  auto q2i(new siconos::algebra::SiconosVector(7));
+  auto q2i = std::make_shared<siconos::algebra::SiconosVector>(7);
   q2i->zero();
   q2i->setValue(3, 1);
 

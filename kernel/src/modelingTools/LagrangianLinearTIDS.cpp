@@ -48,12 +48,6 @@ siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
 }
 
 void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
-  // _rhsMatrices.resize(numberOfRhsMatrices);
-  // // Copy of Mass into _workMatrix for LU-factorization.
-  // _inverseMass.reset(new SimpleMatrix(*_mass));
-
-  // // compute x[1] (and thus _fExt if required)
-  // computeRhs(time);
 
   LagrangianDS::initRhs(time);
 

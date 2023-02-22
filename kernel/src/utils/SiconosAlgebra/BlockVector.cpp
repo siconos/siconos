@@ -76,7 +76,7 @@ siconos::algebra::BlockVector::BlockVector(std::shared_ptr<SiconosVector> v1,
     // This case is usefull to set xDot in LagrangianDS.
     _sizeV = v2->size();
 
-    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(_sizeV)));
+    _vect.push_back(std::make_shared<SiconosVector>(_sizeV));
     _tabIndex->push_back(_sizeV);
   }
   if (v2) {
@@ -88,7 +88,7 @@ siconos::algebra::BlockVector::BlockVector(std::shared_ptr<SiconosVector> v1,
   {
     // This case is usefull to set xDot in LagrangianDS.
 
-    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(v1->size())));
+    _vect.push_back(std::make_shared<SiconosVector>(v1->size()));
     _sizeV += v1->size();
     _tabIndex->push_back(_sizeV);
   }
@@ -99,7 +99,7 @@ siconos::algebra::BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned
   _tabIndex->reserve(numberOfBlocks);
   _vect.reserve(numberOfBlocks);
   for (unsigned int i = 0; i < numberOfBlocks; ++i) {
-    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(dim)));
+    _vect.push_back(std::make_shared<SiconosVector>(dim));
     _tabIndex->push_back(dim * (i + 1));
   }
   _sizeV = dim * numberOfBlocks;
@@ -366,15 +366,6 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
   }
   return *this;
 }
-
-// void siconos::algebra::BlockVector::insert(const  SiconosVector& v)
-// {
-//   _sizeV += v.size();
-
-//   _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(v))); // Copy
-
-//   _tabIndex->push_back(_sizeV);
-// }
 
 void siconos::algebra::BlockVector::insertPtr(std::shared_ptr<SiconosVector> v) {
   if (!v) THROW_EXCEPTION("v is a nullptr vector.");

@@ -32,16 +32,16 @@ PythonInstallSetup
 
  
  Summary :
- cmake path-to-your-sources -Dpython_install_dir=standard
+ cmake path-to-your-sources -Dsiconos_python_install=standard
  make install
 
- * install_dir = 'user'
+ * siconos_python_install= 'user'
    ---> install python packages with pip install --user 
 
- * install_dir = 'prefix'
+ * siconos_python_install = 'isolated'
    ---> install python packages with pip install --prefix=$CMAKE_INSTALL_PREFIX
 
- * else
+ * else (standard)
    ---> install python packages with pip install ...
 #]=======================================================================]
   

@@ -121,7 +121,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1() {
 
   auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(
       3, 3, siconos::algebra::UblasType::ZERO);
-  siconos::algebra::SimpleMatrix i0(3, 3);  // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
+  siconos::algebra::SimpleMatrix i0(3, 3);
   i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->x0()) == x0, true);
@@ -225,7 +225,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2() {
   siconos::algebra::SiconosVector rhs0(*velocity0, zero);
   auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(
       3, 3, siconos::algebra::UblasType::ZERO);
-  siconos::algebra::SimpleMatrix i0(3, 3);  // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
+  siconos::algebra::SimpleMatrix i0(3, 3);
   i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", *(ds->x0()) == x0, true);

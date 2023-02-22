@@ -47,12 +47,6 @@ class MoreauJeanCombinedProjectionOSI : public MoreauJeanOSI {
  protected:
   ACCEPT_SERIALIZATION(MoreauJeanCombinedProjectionOSI);
 
-  static constexpr unsigned int MOREAUCOMBINEDPROJECTIONOSISTEPSINMEMORY = 1;
-
-  // /** Default constructor
-  //  */
-  // MoreauJeanCombinedProjectionOSI(){};
-
  public:
   /** constructor from theta value only
    *

@@ -41,6 +41,17 @@ See devNotes.pdf for details. A detailed documentation is available in DevNotes.
 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local
 velocities'
 */
+
+siconos::modeling::NewtonEuler1DR::NewtonEuler1DR() : NewtonEulerR{} {
+  _Pc1 = std::make_shared<siconos::algebra::SiconosVector>(3);
+  _Pc2 = std::make_shared<siconos::algebra::SiconosVector>(3);
+  _relPc1 = std::make_shared<siconos::algebra::SiconosVector>(3);
+  _relPc2 = std::make_shared<siconos::algebra::SiconosVector>(3);
+  _Nc = std::make_shared<siconos::algebra::SiconosVector>(3);
+  _relNc = std::make_shared<siconos::algebra::SiconosVector>(3);
+  /*_ds1=nullptr;_ds2=nullptr;*/
+}
+
 void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
     std::shared_ptr<siconos::algebra::SiconosVector> q1) {
   double Nx = _Nc->getValue(0);
@@ -273,15 +284,6 @@ void siconos::modeling::NewtonEuler1DR::computeJachqT(
 double siconos::modeling::NewtonEuler1DR::distance() const {
   siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
   return dpc.norm2() * (siconos::algebra::inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
-}
-
-void siconos::modeling::NewtonEuler1DR::computeh(double time,
-                                                 const siconos::algebra::BlockVector& q0,
-                                                 siconos::algebra::SiconosVector& y) {
-  // Contact points and normal are stored in absolute coordinates.
-  // nothing to do here
-
-  NewtonEulerR::computeh(time, q0, y);
 }
 
 void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(

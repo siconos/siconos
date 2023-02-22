@@ -362,7 +362,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix() {
 // void NewtonEulerDSTest::testcomputeDS()
 // {
 //   std::cout << "-->Test: computeDS." <<std::endl;
-//   DynamicalSystem * ds(new NewtonEulerDS(tmpxml2));
+//   auto  ds = std::make_shared<NewtonEulerDS>(tmpxml2));
 //   std::shared_ptr<NewtonEulerDS> copy =  std::static_pointer_cast<NewtonEulerDS>(ds);
 //   double time = 1.5;
 //   ds->initialize("EventDriven", time);

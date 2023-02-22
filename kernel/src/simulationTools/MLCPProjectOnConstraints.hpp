@@ -106,11 +106,6 @@ class MLCPProjectOnConstraints : public MLCP {
    */
   void updateInteractionBlocks() override;
 
-  /** compute interactionBlocks if necessary (this depends on the type of
-   *  OSNS, on the indexSets ...)
-   */
-  virtual void updateInteractionBlocksOLD();
-
   /** compute diagonal Interaction block
       \param vd a vertex (interaction) descriptor
   */

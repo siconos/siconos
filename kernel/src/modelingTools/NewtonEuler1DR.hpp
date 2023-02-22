@@ -106,18 +106,8 @@ class NewtonEuler1DR : public NewtonEulerR {
    */
   bool _isOnContact = false;
 
-  /** constructor
-   */
-  NewtonEuler1DR()
-      : NewtonEulerR(),
-        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(3)},
-        _Pc2{std::make_shared<siconos::algebra::SiconosVector>(3)},
-        _relPc1{std::make_shared<siconos::algebra::SiconosVector>(3)},
-        _relPc2{std::make_shared<siconos::algebra::SiconosVector>(3)},
-        _Nc{std::make_shared<siconos::algebra::SiconosVector>(3)},
-        _relNc{std::make_shared<siconos::algebra::SiconosVector>(3)} {
-    /*_ds1=nullptr;_ds2=nullptr;*/
-  }
+  /** constructor */
+  NewtonEuler1DR();
 
   /** destructor
    */
@@ -137,16 +127,6 @@ class NewtonEuler1DR : public NewtonEulerR {
    */
   void computeJachqT(Interaction &inter,
                      std::shared_ptr<siconos::algebra::BlockVector> q0) override;
-
-  /**
-      to compute the output y = h(t,q,z) of the Relation
-
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
-  */
-  void computeh(double time, const siconos::algebra::BlockVector &q0,
-                siconos::algebra::SiconosVector &y) override;
 
   /**
       to compute the output y = h(t,q,z) of the Relation
