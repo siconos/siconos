@@ -20,8 +20,8 @@
 
 #include "BoundaryCondition.hpp"
 
-namespace siconos::algebra{
-  class SiconosVector;
+namespace siconos::algebra {
+class SiconosVector;
 }
 
 namespace siconos::modeling {
@@ -40,11 +40,10 @@ class HarmonicBC : public BoundaryCondition {
    * \param omega frequency
    * \param phi phase
    */
-  HarmonicBC(std::shared_ptr<std::vector<unsigned int>> newVelocityIndices, double a, double b,
-             double omega, double phi): BoundaryCondition(newVelocityIndices), _a(a), _b(b), _omega(omega), _phi(phi){};
+  HarmonicBC(Indices&& newVelocityIndices, double a, double b, double omega, double phi)
+    : BoundaryCondition(std::move(newVelocityIndices)), _a(a), _b(b), _omega(omega), _phi(phi){};
 
-  HarmonicBC(std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,
-             std::shared_ptr<siconos::algebra::SiconosVector> a,
+  HarmonicBC(Indices&& newVelocityIndices, std::shared_ptr<siconos::algebra::SiconosVector> a,
              std::shared_ptr<siconos::algebra::SiconosVector> b,
              std::shared_ptr<siconos::algebra::SiconosVector> omega,
              std::shared_ptr<siconos::algebra::SiconosVector> phi);
@@ -64,11 +63,14 @@ class HarmonicBC : public BoundaryCondition {
   /** Constant additive term of the prescribed velocity  */
   double _a = 0.;
   /** Constant multiplicative term of the prescribed velocity  */
-  double _b = 0;;
+  double _b = 0;
+  ;
   /** Constant frequency  */
-  double _omega = 0;;
+  double _omega = 0;
+  ;
   /** Constant phase  */
-  double _phi = 0;;
+  double _phi = 0;
+  ;
 
   /** Constant additive term of the prescribed velocity  */
   std::shared_ptr<siconos::algebra::SiconosVector> _aV{nullptr};

@@ -28,8 +28,8 @@
 void siconos::modeling::FixedBC::computePrescribedVelocity(double time)
 {
   DEBUG_BEGIN("FixedBC::computePrescribedVelocity(double time)\n");
-  if(!_prescribedVelocity) _prescribedVelocity = std::make_shared<siconos::algebra::SiconosVector>((unsigned int)_velocityIndices->size());
-  for(unsigned int k = 0 ; k < _velocityIndices->size(); k++)
+  if(!_prescribedVelocity) _prescribedVelocity = std::make_shared<siconos::algebra::SiconosVector>(_velocityIndices.size());
+  for(unsigned int k = 0 ; k < _velocityIndices.size(); k++)
   {
     _prescribedVelocity->setValue(k,0.0);
     DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n",k, time,_prescribedVelocity->getValue(k));

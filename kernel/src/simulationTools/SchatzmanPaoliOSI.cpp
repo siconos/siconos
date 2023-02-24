@@ -710,15 +710,12 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
 
       // if (d->boundaryConditions())
       // {
-      //   for (vector<unsigned int>::iterator  itindex =
-      //   d->boundaryConditions()->velocityIndices()->begin() ;
-      //        itindex != d->boundaryConditions()->velocityIndices()->end();
-      //        ++itindex)
+      //   for (const auto itindex : d->boundaryConditions()->velocityIndices()){
       //   {
       //     _WBoundaryConditionsMap[ds]->getCol(bc,*columntmp);
       //     /*\warning we assume that W is symmetric in the Lagrangian case*/
       //     double value = - siconos::algebra::inner_prod(*columntmp, *v);
-      //     value += (d->p(level))->getValue(*itindex);
+      //     value += (d->p(level))->getValue(itindex);
       //     /* \warning the computation of reactionToBoundaryConditions take into
       //        account the contact impulse but not the external and internal forces.
       //        A complete computation of the residue should be better */

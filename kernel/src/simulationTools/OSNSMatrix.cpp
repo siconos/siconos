@@ -537,28 +537,25 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
             auto sods = dynamic_cast<siconos::modeling::SecondOrderDS*>(ds.get());
 
             if (sods) {
-              std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
+              // std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
               if (sods->boundaryConditions()) {
                 // bc = sods->boundaryConditions();
                 // NM_dense_display(array,sizeY,sizeDS,sizeY);
                 // array_with_bc = (double *) calloc(sizeY*sizeDS,sizeof(double));
                 // memcpy(array_with_bc, array ,sizeY*sizeDS,sizeof(double));
                 // NM_dense_display(array_with_bc,sizeY,sizeDS,sizeY);
-                // for(std::vector<unsigned int>::iterator itindex =
-                // bc->velocityIndices()->begin() ;
-                //     itindex != bc->velocityIndices()->end();
-                //     ++itindex)
+                // for(const auto itindex: bc->velocityIndices())
                 // {
 
                 //   for (unsigned int row; row < sizeY; row++  )
                 //   {
-                //     array_with_bc[row + (sizeY) * (posBlock + *itindex)] = 0.0
+                //     array_with_bc[row + (sizeY) * (posBlock + itindex)] = 0.0
                 //   }
                 //     // (nslawSize,sizeDS));
                 //   //std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
                 //   std::make_shared<siconos::algebra::SiconosVector>(nslawSize));
                 //   //coltmp->zero();
-                //   std::cout <<  "bc indx "<< *itindex << std::endl;
+                //   std::cout <<  "bc indx "<< itindex << std::endl;
                 // }
 
                 // //getchar();

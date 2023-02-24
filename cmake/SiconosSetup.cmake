@@ -137,7 +137,7 @@ endif()
 
 #Set directory used to save cmake config files
 #required to use Siconos(e.g.to call find_package(siconos))
-set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})
+set(SiconosConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})
 
 #Provides install directory variables as defined by the GNU Coding Standards.
 include(GNUInstallDirs)  # It defines CMAKE_INSTALL_LIBDIR

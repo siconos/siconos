@@ -163,7 +163,7 @@ def main():
         if args.is_python:
             cmd += ['@Python_EXECUTABLE@']
             # for python modules
-            if('PYTHONPATH') in env:
+            if ('PYTHONPATH') in env:
                 env['PYTHONPATH'] += ':' + \
                     siconos_pythonpath.resolve().as_posix()
             else:
@@ -193,7 +193,7 @@ def main():
 siconos_root_dir = Path(__file__).resolve().parent.parent
 
 # Path to cmake setup for siconos (e.g. Find...cmake files)
-siconos_package_dir = Path(siconos_root_dir, '@ConfigPackageLocation@')
+siconos_package_dir = Path(siconos_root_dir, '@SiconosConfigPackageLocation@')
 
 # Path to siconos python package
 siconos_pythonpath = Path('@SICONOS_PYTHON_INSTALL_DIR@')
@@ -300,6 +300,7 @@ def create_build_dir(args):
         args.build_dir.mkdir(parents=False, exist_ok=True)
     args.build_dir = args.build_dir.resolve().as_posix()
 
+
 def siconos_clean(build_dir=None, quiet=True):
     """clean  binary dir
     Parameters
@@ -359,8 +360,8 @@ def parse_command_line():
                         help='Print details regarding Siconos installation.')
 
     # Print details about siconos install
-    parser.add_argument('--pythonpath', action='store_true',
-                        help='Print details regarding the location of Siconos python modules.')
+    msg = 'Print details regarding the location of Siconos python modules.'
+    parser.add_argument('--pythonpath', action='store_true', help=msg)
 
     # -- Directories (source, build, working) management --
     build_mode = parser.add_mutually_exclusive_group()
@@ -579,10 +580,10 @@ def write_plugin(plugin, extra_args):
         result += prepare_target(plugin.name, extra_args)
         result += 'set_target_properties({}'.format(plugin.name)
         result += ' PROPERTIES PREFIX "")\n'
-        #f 'Clang' in compiler_id and cmake_version > version.parse("3.13"):
+        # if 'Clang' in compiler_id and cmake_version > version.parse("3.13"):
         #    result += 'target_link_options({}'.format(plugin.name)
         #    result += ' PRIVATE "-undefined dynamic_lookup")\n'
-        #elif 'Clang' in compiler_id:
+        # elif 'Clang' in compiler_id:
         #    result += 'set_target_properties({} '.format(plugin.name)
         #    result += 'PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")\n'
         result += 'install(TARGETS {}'.format(plugin.name)
@@ -650,12 +651,10 @@ def generate_cmakelists(args):
     result += 'set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)\n'
 
     # find siconos package and components
-    result += 'set(@PROJECT_NAME@_DIR {}'.format(siconos_root_dir)
-    result += '/@ConfigPackageLocation@)\n'.format(siconos_root_dir)
+    result += 'set(@PROJECT_NAME@_DIR {})\n'.format(siconos_package_dir)
     result += 'find_package(@PROJECT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@'
     result += '.@PATCH_VERSION@ CONFIG REQUIRED)\n'
-    result += 'set(CMAKE_MODULE_PATH ${siconos_ROOT}/'
-    result += '@ConfigPackageLocation@)\n'
+    result += 'set(CMAKE_MODULE_PATH ${siconos_DIR})\n'
 
     # -- Extra headers --
     # It's allowed to put some headers in the driver dir.
@@ -668,9 +667,10 @@ def generate_cmakelists(args):
     # boost may be used in examples.
     result += 'if(@WITH_CXX@)\n'
     result += 'set(Boost_NO_BOOST_CMAKE 1)\n'
-    result += 'find_package(Boost @boost_min_version@ COMPONENTS @boost_required_components@)\n'
+    result += 'find_package(Boost @boost_min_version@'
+    result += ' COMPONENTS @boost_required_components@)\n'
     result += 'endif()\n'
-    
+
     # Create executable target
     if not args.is_python and args.driver:
         # -- Main target --
@@ -742,7 +742,7 @@ def build_project(args, configure=True, build=True):
         cmake_cmd = 'cmake'
 
     cmake_source_dir = args.build_dir
-    #env = []
+    # env = []
     if configure:
         format_msg('Configure project (cmake)', args.quiet)
         if cmake_version >= version.parse("3.13"):

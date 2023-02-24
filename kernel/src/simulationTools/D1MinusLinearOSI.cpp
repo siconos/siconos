@@ -55,17 +55,17 @@ void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
   siconos::algebra::subscal(e, osnsp_rhs, osnsp_rhs, subCoord, false);
 }
 
-siconos::integrators::D1MinusLinearOSI::D1MinusLinearOSI(D1MinusType type)
+siconos::integrators::D1MinusLinearOSI::D1MinusLinearOSI(Type type)
     : OneStepIntegrator{IntegratorType::D1MINUSLINEAROSI, 2, 0, 2, 1, 2},
       _typeOfD1MinusLinearOSI{type} {}
 
 unsigned int siconos::integrators::D1MinusLinearOSI::numberOfIndexSets() const {
   switch (_typeOfD1MinusLinearOSI) {
-    case D1MinusType::halfexplicit_acceleration_level:
+    case Type::halfexplicit_acceleration_level:
       return 4;
-    case D1MinusType::halfexplicit_acceleration_level_full:
+    case Type::halfexplicit_acceleration_level_full:
       return 4;
-    case D1MinusType::halfexplicit_velocity_level:
+    case Type::halfexplicit_velocity_level:
       return 3;
   }
   THROW_EXCEPTION(
@@ -125,7 +125,7 @@ void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
 
   bool isOSNSPinitialized = false;
   switch (_typeOfD1MinusLinearOSI) {
-    case D1MinusType::halfexplicit_acceleration_level:
+    case Type::halfexplicit_acceleration_level:
       // set evaluation levels (first is of velocity, second of acceleration type)
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
@@ -137,7 +137,7 @@ void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
       isOSNSPinitialized = true;
       DEBUG_EXPR((*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->display());
       break;
-    case D1MinusType::halfexplicit_acceleration_level_full:
+    case Type::halfexplicit_acceleration_level_full:
       // set evaluation levels (first is of velocity, second of acceleration type)
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
@@ -148,7 +148,7 @@ void siconos::integrators::D1MinusLinearOSI::initialize_nonsmooth_problems() {
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]->initialize(_simulation);
       isOSNSPinitialized = true;
       break;
-    case D1MinusType::halfexplicit_velocity_level:
+    case Type::halfexplicit_velocity_level:
       // set evaluation levels (first is of velocity, second of acceleration type)
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
       (*allOSNSP)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
@@ -292,13 +292,13 @@ double siconos::integrators::D1MinusLinearOSI::computeResidu() {
   DEBUG_PRINTF("time step size %f\n", _simulation->timeStep());
 
   switch (_typeOfD1MinusLinearOSI) {
-    case D1MinusType::halfexplicit_acceleration_level:
+    case Type::halfexplicit_acceleration_level:
       DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
       return computeResiduHalfExplicitAccelerationLevel();
-    case D1MinusType::halfexplicit_velocity_level:
+    case Type::halfexplicit_velocity_level:
       DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
       return computeResiduHalfExplicitVelocityLevel();
-    case D1MinusType::halfexplicit_acceleration_level_full:
+    case Type::halfexplicit_acceleration_level_full:
       DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeResidu()\n");
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeResidu() - not implemented for type "
@@ -447,15 +447,15 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutput(
     siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) {
   DEBUG_PRINT("siconos::integrators::D1MinusLinearOSI::computeFreeOutput(), start\n");
   switch (_typeOfD1MinusLinearOSI) {
-    case D1MinusType::halfexplicit_acceleration_level:
+    case Type::halfexplicit_acceleration_level:
       computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter, osnsp);
       DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeOutput()\n");
       return;
-    case D1MinusType::halfexplicit_acceleration_level_full:
+    case Type::halfexplicit_acceleration_level_full:
       computeFreeOutputHalfExplicitAccelerationLevel(vertex_inter, osnsp);
       DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeOutput()\n");
       return;
-    case D1MinusType::halfexplicit_velocity_level:
+    case Type::halfexplicit_velocity_level:
       computeFreeOutputHalfExplicitVelocityLevel(vertex_inter, osnsp);
       DEBUG_END("siconos::integrators::D1MinusLinearOSI::computeFreeOutput()\n");
       return;
@@ -473,9 +473,9 @@ bool siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet(
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet.\n");
   DEBUG_END("siconos::integrators::D1MinusLinearOSI::addInteractionInIndexSet.\n");
   switch (_typeOfD1MinusLinearOSI) {
-    case D1MinusType::halfexplicit_acceleration_level:
+    case Type::halfexplicit_acceleration_level:
       return addInteractionInIndexSetHalfExplicitAccelerationLevel(inter, i);
-    case D1MinusType::halfexplicit_velocity_level:
+    case Type::halfexplicit_velocity_level:
       return addInteractionInIndexSetHalfExplicitVelocityLevel(inter, i);
     default:
       THROW_EXCEPTION(
@@ -492,9 +492,9 @@ bool siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet(
   DEBUG_BEGIN("siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
   DEBUG_END("siconos::integrators::D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
   switch (_typeOfD1MinusLinearOSI) {
-    case D1MinusType::halfexplicit_acceleration_level:
+    case Type::halfexplicit_acceleration_level:
       return removeInteractionFromIndexSetHalfExplicitAccelerationLevel(inter, i);
-    case D1MinusType::halfexplicit_velocity_level:
+    case Type::halfexplicit_velocity_level:
       return removeInteractionFromIndexSetHalfExplicitVelocityLevel(inter, i);
     default:
       THROW_EXCEPTION(

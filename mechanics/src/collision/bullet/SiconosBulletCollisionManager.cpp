@@ -306,13 +306,11 @@ void siconosBulletAdjustInternalEdgeContacts(btManifoldPoint &cp,
     // getchar();
   }
 
-  btTriangleInfoMap *triangleInfoMapPtr = nullptr;
-
   if (colObj0Wrap->getCollisionObject()->getCollisionShape()->getShapeType() ==
       TERRAIN_SHAPE_PROXYTYPE) {
-    btHeightfieldTerrainShape *heightfield =
-        (btHeightfieldTerrainShape *)colObj0Wrap->getCollisionObject()->getCollisionShape();
-    triangleInfoMapPtr = heightfield->getTriangleInfoMap();
+    // btHeightfieldTerrainShape *heightfield =
+    //    (btHeightfieldTerrainShape *)colObj0Wrap->getCollisionObject()->getCollisionShape();
+    // auto triangleInfoMapPtr = heightfield->getTriangleInfoMap();
 
     btVector3 newNormal = btVector3(0, 0, 1);
 

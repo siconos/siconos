@@ -386,9 +386,9 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) 
     if (lldds.p(_levelMaxForInput) && lldds.p(_levelMaxForInput)->size() > 0) {
       v = *lldds.p(_levelMaxForInput);  // v = p
       if (lldds.boundaryConditions())
-        for (auto itindex = lldds.boundaryConditions()->velocityIndices()->begin();
-             itindex != lldds.boundaryConditions()->velocityIndices()->end(); ++itindex)
-          v.setValue(*itindex, 0.0);
+        for (const auto itindex : lldds.boundaryConditions()->velocityIndices()) {
+          v.setValue(itindex, 0.0);
+        }
       auto ndof = lldds.dimension();
       for (unsigned int k = 0; k < ndof; ++k)
         v(k) = vfree(k) + v(k) * inv_iteration_matrix(k, k);

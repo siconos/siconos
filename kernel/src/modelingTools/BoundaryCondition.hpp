@@ -43,19 +43,22 @@ typedef void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
  */
 class BoundaryCondition {
  public:
+
+  using Indices = std::vector<unsigned int>;
+  
   /** Basic constructor
    *
    *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    */
-
-  BoundaryCondition(std::shared_ptr<std::vector<unsigned int>> newVelocityIndices);
+  BoundaryCondition(Indices&& newVelocityIndices);
+  BoundaryCondition(const Indices& newVelocityIndices);
 
   /** Constructor with constant prescribed values
    *
    *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    *  \param newVelocityValues the values of the prescribed velocities
    */
-  BoundaryCondition(std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,
+  BoundaryCondition(Indices&& newVelocityIndices,
                     std::shared_ptr<siconos::algebra::SiconosVector> newVelocityValues);
 
   /** destructor */
@@ -73,17 +76,13 @@ class BoundaryCondition {
    *
    *  \return a pointer on _velocityIndices
    */
-  inline std::shared_ptr<std::vector<unsigned int>> velocityIndices()
-  {
-    return _velocityIndices;
-  };
+  inline const Indices& velocityIndices() { return _velocityIndices; };
 
   /** to get the prescribedVelocity
    *
    *  \return a pointer on _prescribedVelocity
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> prescribedVelocity()
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> prescribedVelocity() {
     return _prescribedVelocity;
   };
 
@@ -91,8 +90,7 @@ class BoundaryCondition {
    *
    *  \return a pointer on _prescribedVelocityOld
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> prescribedVelocityOld()
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> prescribedVelocityOld() {
     return _prescribedVelocityOld;
   };
 
@@ -110,6 +108,11 @@ class BoundaryCondition {
    */
   virtual void computePrescribedVelocity(double time);
 
+
+  /** \return the number of boundary conditions
+   */
+  auto size(){ return _velocityIndices.size();}
+
   /** display */
   void display();
 
@@ -120,7 +123,7 @@ class BoundaryCondition {
   BoundaryCondition() = default;
 
   /* Indices of the prescribed component of the velocity vector */
-  std::shared_ptr<std::vector<unsigned int>> _velocityIndices{nullptr};
+  Indices _velocityIndices;
 
   /* Values of the prescribed component of the velocity vector */
   std::shared_ptr<siconos::algebra::SiconosVector> _prescribedVelocity{nullptr};

@@ -29,20 +29,23 @@
 #include "siconos_debug.h"
 
 siconos::modeling::HarmonicBC::HarmonicBC(
-    std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,
-    std::shared_ptr<siconos::algebra::SiconosVector> a,
+    Indices&& newVelocityIndices, std::shared_ptr<siconos::algebra::SiconosVector> a,
     std::shared_ptr<siconos::algebra::SiconosVector> b,
     std::shared_ptr<siconos::algebra::SiconosVector> omega,
     std::shared_ptr<siconos::algebra::SiconosVector> phi)
-    : BoundaryCondition(newVelocityIndices), _aV(a), _bV(b), _omegaV(omega), _phiV(phi)
-{
+    : BoundaryCondition(std::move(newVelocityIndices)),
+      _aV(a),
+      _bV(b),
+      _omegaV(omega),
+      _phiV(phi) {
   DEBUG_BEGIN(
       "HarmonicBC::Harmonic((std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,\
                std::shared_ptr<siconos::algebra::SiconosVector> a, std::shared_ptr<siconos::algebra::SiconosVector> b,                \
                std::shared_ptr<siconos::algebra::SiconosVector> omega, std::shared_ptr<siconos::algebra::SiconosVector> phi)\n");
 
-  if (newVelocityIndices->size() != a->size() || newVelocityIndices->size() != b->size() ||
-      newVelocityIndices->size() != omega->size() || newVelocityIndices->size() != phi->size())
+  auto newsize = _velocityIndices.size();
+  if (newsize != a->size() || newsize != b->size() || newsize != omega->size() ||
+      newsize != phi->size())
     THROW_EXCEPTION(
         "HarmonicBC::HarmonicBC indices and vectors of data \
            (a,b,omega,phi) must be of the same size ");
@@ -53,21 +56,19 @@ siconos::modeling::HarmonicBC::HarmonicBC(
            std::shared_ptr<siconos::algebra::SiconosVector> omega, std::shared_ptr<siconos::algebra::SiconosVector> phi)\n");
 };
 
-void siconos::modeling::HarmonicBC::computePrescribedVelocity(double time)
-{
+void siconos::modeling::HarmonicBC::computePrescribedVelocity(double time) {
   DEBUG_BEGIN("HarmonicBC::computePrescribedVelocity(double time)\n");
   if (!_prescribedVelocity)
-    _prescribedVelocity = std::make_shared<siconos::algebra::SiconosVector>(
-        (unsigned int)_velocityIndices->size());
+    _prescribedVelocity =
+        std::make_shared<siconos::algebra::SiconosVector>(_velocityIndices.size());
   if (!_aV) {
-    for (unsigned int k = 0; k < _velocityIndices->size(); k++) {
+    for (unsigned int k = 0; k < _velocityIndices.size(); k++) {
       _prescribedVelocity->setValue(k, _a + _b * cos(_omega * time + _phi));
       DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n", k, time,
                    _prescribedVelocity->getValue(k));
     }
-  }
-  else {
-    for (unsigned int k = 0; k < _velocityIndices->size(); k++) {
+  } else {
+    for (unsigned int k = 0; k < _velocityIndices.size(); k++) {
       _prescribedVelocity->setValue(
           k, (*_aV)(k) + (*_bV)(k)*cos((*_omegaV)(k)*time + (*_phiV)(k)));
       DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n", k, time,

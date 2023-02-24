@@ -450,12 +450,9 @@ void siconos::integrators::MoreauJeanOSI::_initializeIterationMatrixWBoundaryCon
         ds.dimension();  // n for first order systems, ndof for lagrangian.
 
     auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
-    auto bc = d.boundaryConditions();
-
-    auto numberBoundaryConditions = bc->velocityIndices()->size();
     _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions =
         std::make_shared<siconos::algebra::SimpleMatrix>(
-            sizeWBoundaryConditions, numberBoundaryConditions, d.mass()->num());
+            sizeWBoundaryConditions, d.boundaryConditions()->size(), d.mass()->num());
     _computeWBoundaryConditions(ds,
                                 *_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions,
                                 *_dynamicalSystemsGraph->properties(dsv).W);
@@ -490,9 +487,7 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
 
     int columnindex = 0;
 
-    std::vector<unsigned int>::iterator itindex;
     auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
-    auto bc = d.boundaryConditions();
 
     if (!iteration_matrix.checkSymmetry(
             1e-10))  // Warning this operation could be quite expensive
@@ -501,9 +496,8 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
       std::cout << "Warning, we apply boundary conditions assuming W symmetric" << std::endl;
     }
 
-    for (itindex = bc->velocityIndices()->begin(); itindex != bc->velocityIndices()->end();
-         ++itindex) {
-      iteration_matrix.getCol(*itindex, *columntmp);
+    for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+      iteration_matrix.getCol(itindex, *columntmp);
       /*\warning we assume that W is symmetric
         we store only the column and not the row */
       WBoundaryConditions.setCol(columnindex, *columntmp);
@@ -511,13 +505,12 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
     }
 
     columnindex = 0;
-    for (itindex = bc->velocityIndices()->begin(); itindex != bc->velocityIndices()->end();
-         ++itindex) {
-      double diag = iteration_matrix.getValue(*itindex, *itindex);
+    for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+      double diag = iteration_matrix.getValue(itindex, itindex);
       columntmp->zero();
-      (*columntmp)(*itindex) = diag;
-      iteration_matrix.setCol(*itindex, *columntmp);
-      iteration_matrix.setRow(*itindex, *columntmp);
+      (*columntmp)(itindex) = diag;
+      iteration_matrix.setCol(itindex, *columntmp);
+      iteration_matrix.setRow(itindex, *columntmp);
       columnindex++;
     }
     DEBUG_EXPR(iteration_matrix.display(););
@@ -680,19 +673,17 @@ void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
     auto &WBoundaryConditions = *_dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions;
     auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(d.dimension());
 
-    for (std::vector<unsigned int>::iterator itindex =
-             d.boundaryConditions()->velocityIndices()->begin();
-         itindex != d.boundaryConditions()->velocityIndices()->end(); ++itindex) {
+    for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
       double DeltaPrescribedVelocity =
           d.boundaryConditions()->prescribedVelocity()->getValue(columnindex) -
-          v.getValue(*itindex);
+          v.getValue(itindex);
       DEBUG_PRINTF("index  = %i, value = %e\n", *itindex,
                    d.boundaryConditions()->prescribedVelocity()->getValue(columnindex));
       DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
       WBoundaryConditions.getCol(columnindex, *columntmp);
       residu -= *columntmp * (DeltaPrescribedVelocity);
 
-      residu.setValue(*itindex, -columntmp->getValue(*itindex) * (DeltaPrescribedVelocity));
+      residu.setValue(itindex, -columntmp->getValue(itindex) * (DeltaPrescribedVelocity));
 
       columnindex++;
     }
@@ -1645,11 +1636,11 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
                "== nullptr.");
         v = *d.p(_levelMaxForInput);  // v = p
         if (d.boundaryConditions()) {
-          for (std::vector<unsigned int>::iterator itindex =
-                   d.boundaryConditions()->velocityIndices()->begin();
-               itindex != d.boundaryConditions()->velocityIndices()->end(); ++itindex)
-            v.setValue(*itindex, 0.0);
+          for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+            v.setValue(itindex, 0.0);
+          }
         }
+
         if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
           for (unsigned int i = 0; i < d.dimension(); ++i) v(i) = vfree(i) + W(i, i) * v(i);
         } else {
@@ -1665,15 +1656,13 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         int bc = 0;
         auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
 
-        for (std::vector<unsigned int>::iterator itindex =
-                 d.boundaryConditions()->velocityIndices()->begin();
-             itindex != d.boundaryConditions()->velocityIndices()->end(); ++itindex) {
+        for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
           _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
 
           double value = -siconos::algebra::inner_prod(*columntmp, v);
           if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
-            value += (d.p(_levelMaxForInput))->getValue(*itindex);
+            value += (d.p(_levelMaxForInput))->getValue(itindex);
           }
           /* \warning the computation of reactionToBoundaryConditions take into
              account the contact impulse but not the external and internal forces.
@@ -1723,9 +1712,9 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
           B \lambda _{k+1}*/
         v = *d.p(_levelMaxForInput);  // v = p
         if (d.boundaryConditions())
-          for (auto itindex = d.boundaryConditions()->velocityIndices()->begin();
-               itindex != d.boundaryConditions()->velocityIndices()->end(); ++itindex)
-            v.setValue(*itindex, 0.0);
+          for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+            v.setValue(itindex, 0.0);
+          }
 
         _dynamicalSystemsGraph->properties(*dsi).W->Solve(v);
 
@@ -1745,13 +1734,12 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         int bc = 0;
         auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
 
-        for (auto itindex = d.boundaryConditions()->velocityIndices()->begin();
-             itindex != d.boundaryConditions()->velocityIndices()->end(); ++itindex) {
+        for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
           _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = -siconos::algebra::inner_prod(*columntmp, v);
           if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
-            value += (d.p(_levelMaxForInput))->getValue(*itindex);
+            value += (d.p(_levelMaxForInput))->getValue(itindex);
           }
           /* \warning the computation of reactionToBoundaryConditions take into
              account the contact impulse but not the external and internal forces.

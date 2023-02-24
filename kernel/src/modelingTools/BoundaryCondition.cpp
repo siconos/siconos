@@ -17,61 +17,61 @@
  */
 
 #include "BoundaryCondition.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosException.hpp"
-#include "PluggedObject.hpp"
 
 #include <iostream>
 
-siconos::modeling::BoundaryCondition::BoundaryCondition(
-    std::shared_ptr<std::vector<unsigned int>> newVelocityIndices)
-    : _velocityIndices(newVelocityIndices)
-{
-  _prescribedVelocityOld  = std::make_shared<siconos::algebra::SiconosVector>(newVelocityIndices->size());
+#include "PluggedObject.hpp"
+#include "SiconosException.hpp"
+#include "SiconosVector.hpp"
+
+siconos::modeling::BoundaryCondition::BoundaryCondition(const Indices& newVelocityIndices)
+  : _velocityIndices{newVelocityIndices} {
+  _prescribedVelocityOld =
+      std::make_shared<siconos::algebra::SiconosVector>(newVelocityIndices.size());
+  _pluginPrescribedVelocity = std::make_shared<siconos::plugins::PluggedObject>();
+}
+siconos::modeling::BoundaryCondition::BoundaryCondition(Indices&& newVelocityIndices)
+  : _velocityIndices{std::move(newVelocityIndices)} {
+  _prescribedVelocityOld =
+      std::make_shared<siconos::algebra::SiconosVector>(newVelocityIndices.size());
   _pluginPrescribedVelocity = std::make_shared<siconos::plugins::PluggedObject>();
 }
 
 siconos::modeling::BoundaryCondition::BoundaryCondition(
-    std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,
+    Indices&& newVelocityIndices,
     std::shared_ptr<siconos::algebra::SiconosVector> newVelocityValues)
-    : _velocityIndices(newVelocityIndices), _prescribedVelocity(newVelocityValues)
-{
-  if (newVelocityIndices->size() != newVelocityValues->size())
+  : _velocityIndices{std::move(newVelocityIndices)}, _prescribedVelocity(newVelocityValues) {
+  if (newVelocityIndices.size() != newVelocityValues->size())
     THROW_EXCEPTION(
         "siconos::modeling::BoundaryCondition::BoundaryCondition  constructor. "
         "velocityIndices and prescribedVelocity must have the same size");
-  _prescribedVelocityOld = std::make_shared<siconos::algebra::SiconosVector>(*newVelocityValues);
+  _prescribedVelocityOld =
+      std::make_shared<siconos::algebra::SiconosVector>(*newVelocityValues);
   _pluginPrescribedVelocity = std::make_shared<siconos::plugins::PluggedObject>();
 }
 
 void siconos::modeling::BoundaryCondition::setComputePrescribedVelocityFunction(
-    const std::string& pluginPath, const std::string& functionName)
-{
+    const std::string& pluginPath, const std::string& functionName) {
   _pluginPrescribedVelocity->setComputeFunction(pluginPath, functionName);
   if (!_prescribedVelocity)
-    _prescribedVelocity = std::make_shared<siconos::algebra::SiconosVector>(
-        (unsigned int)_velocityIndices->size());
+    _prescribedVelocity =
+        std::make_shared<siconos::algebra::SiconosVector>(_velocityIndices.size());
 }
 
-void siconos::modeling::BoundaryCondition::computePrescribedVelocity(double time)
-{
+void siconos::modeling::BoundaryCondition::computePrescribedVelocity(double time) {
   if (_pluginPrescribedVelocity->fPtr)
-    ((FPtrPrescribedVelocity)_pluginPrescribedVelocity->fPtr)(time, _velocityIndices->size(),
+    ((FPtrPrescribedVelocity)_pluginPrescribedVelocity->fPtr)(time, _velocityIndices.size(),
                                                               &(*_prescribedVelocity)(0));
 }
 
-void siconos::modeling::BoundaryCondition::display()
-{
+void siconos::modeling::BoundaryCondition::display() {
   std::cout << "=====  BoundaryCondition display ===== " << std::endl;
   std::cout << "- indices : " << std::endl;
-  if (_velocityIndices) {
-    for (unsigned int i : *_velocityIndices) {
-      std::cout << i << " ";
-    }
-    std::cout << std::endl;
+  for (auto i : _velocityIndices) {
+    std::cout << i << " ";
   }
-  else
-    std::cout << "-> nullptr" << std::endl;
+  std::cout << std::endl;
+
   std::cout << "- velocities : " << std::endl;
   if (_prescribedVelocity)
     _prescribedVelocity->display();

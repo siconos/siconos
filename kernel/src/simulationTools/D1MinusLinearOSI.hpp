@@ -128,7 +128,7 @@ namespace siconos::integrators {
  */
 class D1MinusLinearOSI : public OneStepIntegrator {
  public:
-  enum class D1MinusType {
+  enum class Type {
     halfexplicit_acceleration_level,
     halfexplicit_acceleration_level_full,
     // explicit_velocity_level,
@@ -154,7 +154,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
   };
 
   bool _isThereImpactInTheTimeStep{false};
-  D1MinusType _typeOfD1MinusLinearOSI{D1MinusType::halfexplicit_acceleration_level};
+  Type _typeOfD1MinusLinearOSI{Type::halfexplicit_acceleration_level};
 
   static constexpr double DEFAULT_TOL_D1MINUS = 1e-8;
 
@@ -175,7 +175,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
-  D1MinusLinearOSI(D1MinusType type);
+  D1MinusLinearOSI(Type type);
 
   /** destructor */
   virtual ~D1MinusLinearOSI() noexcept = default;
@@ -187,7 +187,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
-  D1MinusType typeOfD1MinusLinearOSI() { return _typeOfD1MinusLinearOSI; };
+  Type typeOfD1MinusLinearOSI() { return _typeOfD1MinusLinearOSI; };
 
   /** get the number of index sets required for the simulation
    * \return unsigned int

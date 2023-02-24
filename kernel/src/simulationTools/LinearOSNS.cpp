@@ -486,12 +486,11 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
       auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
       if (d->boundaryConditions()) bc = d->boundaryConditions();
       if (bc) {
-        for (auto itindex = bc->velocityIndices()->begin();
-             itindex != bc->velocityIndices()->end(); ++itindex) {
+        for (const auto itindex : bc->velocityIndices()) {
           // (nslawSize,sizeDS));
           auto coltmp = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
           coltmp->zero();
-          leftInteractionBlock->setCol(*itindex, *coltmp);
+          leftInteractionBlock->setCol(itindex, *coltmp);
         }
       }
 
@@ -688,13 +687,12 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
     if (d->boundaryConditions()) bc = d->boundaryConditions();
     if (bc) {
-      for (std::vector<unsigned int>::iterator itindex = bc->velocityIndices()->begin();
-           itindex != bc->velocityIndices()->end(); ++itindex) {
+      for (const auto itindex : bc->velocityIndices()) {
         // (nslawSize,sizeDS));
         std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
             std::make_shared<siconos::algebra::SiconosVector>(nslawSize1);
         coltmp->zero();
-        leftInteractionBlock->setCol(*itindex, *coltmp);
+        leftInteractionBlock->setCol(itindex, *coltmp);
       }
     }
 
@@ -981,7 +979,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
     //  saved in y !!
     siconos::algebra::setBlock(*_z, lambda, lambda->size(), pos, 0);
     DEBUG_EXPR(lambda->display(););
-
   }
   DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
 }

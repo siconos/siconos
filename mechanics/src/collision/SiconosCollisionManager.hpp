@@ -26,7 +26,8 @@
 #ifndef SiconosCollisionManager_h
 #define SiconosCollisionManager_h
 
-#include <InteractionManager.hpp>
+#include "InteractionManager.hpp"
+#include "StaticBody.hpp"
 
 namespace siconos::modeling {
 
