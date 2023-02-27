@@ -20,15 +20,17 @@
 #include <fstream>
 
 #include "Pulley.h"
+#include "Rope.h"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "Support.h"
-#include "Rope.h"
 
 siconos::fem::cable::TransportCableResult::TransportCableResult() { rope2.set_Down(true); }
 
 void siconos::fem::cable::TransportCableResult::prepareSupport() {
   supports.clear();
+  puller12idx = -1;
+  puller21idx = -1;
   rope1.prepareSupport(supports, puller12idx);
   rope2.prepareSupport(supports, puller21idx);
 

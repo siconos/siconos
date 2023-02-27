@@ -63,10 +63,13 @@ void siconos::fem::cable::TransportCableProfil::computeFEM(int nb_elem, double a
   r_results.nb_nodes = n_Pt + n1 + n_Pb + n2;
 
   auto &q = r_results.q;
+  q.clear();
   q.resize(r_results.nb_nodes);
   auto &R = r_results.R;
+  R.clear();
   R.resize(r_results.nb_nodes);
   auto &TS = r_results.TS;
+  TS.clear();
   TS.resize(r_results.nb_nodes);
   int offset = r_results.rope1.computeMesh(q, R, TS, 0);
   offset = puller12->compute(n_Pt + 1, q, offset);
