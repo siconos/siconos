@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2023 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 
 #include "LagrangianDS.hpp"
 
-namespace siconos::mechanics::fem {
+namespace siconos::fem::cable {
 /**
    Cable-like dynamical systems
 
@@ -48,22 +48,23 @@ namespace siconos::mechanics::fem {
   Add ref to Charlelie's phd report.
 
 */
-class CableDS : public LagrangianDS {
-
-protected:
+class CableDS : public siconos::modeling::LagrangianDS {
+ protected:
   // Proto for functions used to compute external forces
-  using ExternalForcesFunction = std::function<void(double, std::shared_ptr<SiconosVector>)>;
+  using ExternalForcesFunction =
+      std::function<void(double, std::shared_ptr<siconos::algebra::SiconosVector>)>;
 
   ExternalForcesFunction computefext_{nullptr};
 
   double _EA{1};
   double _l_e{1};
 
-  std::shared_ptr<SimpleMatrix> TRNp_Np{nullptr};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> TRNp_Np{nullptr};
 
-  void matmult(const std::shared_ptr<SiconosVector> &V, size_t a_startIdx,
-               std::shared_ptr<SiconosVector> &R);
-  void matmult2(const std::shared_ptr<SiconosVector> &V, std::shared_ptr<SimpleMatrix> &R);
+  void matmult(const std::shared_ptr<siconos::algebra::SiconosVector> &V, size_t a_startIdx,
+               std::shared_ptr<siconos::algebra::SiconosVector> &R);
+  void matmult2(const std::shared_ptr<siconos::algebra::SiconosVector> &V,
+                std::shared_ptr<siconos::algebra::SimpleMatrix> &R);
 
   CableDS() = delete;
   CableDS(const CableDS &) = delete;
@@ -71,10 +72,11 @@ protected:
   CableDS &operator=(const CableDS &) = delete;
   CableDS &operator=(CableDS &&) = delete;
 
-public:
-  CableDS(std::shared_ptr<SiconosVector> q0, std::shared_ptr<SiconosVector> velocity0,
-          std::shared_ptr<SiconosMatrix> mass, double a_EA, double a_elem_length,
-          ExternalForcesFunction fext = nullptr);
+ public:
+  CableDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
+          std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
+          std::shared_ptr<siconos::algebra::SiconosMatrix> mass, double a_EA,
+          double a_elem_length, ExternalForcesFunction fext = nullptr);
 
   ~CableDS() noexcept = default;
 
@@ -83,8 +85,8 @@ public:
   // This function will be called by the integrator at each time
   // step to update  \f$ F(v, q, t, z) \f$
   // --> takes into account fInt and fext
-  void computeForces(double time, std::shared_ptr<SiconosVector> q,
-                     std::shared_ptr<SiconosVector> velocity) override;
+  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
+                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
 
   // \f$ \nabla_q F \f$
   void computeJacobianqForces(double time) override;
@@ -95,12 +97,12 @@ public:
   //
   void computeFExt(double time) override;
 
-  void tangentStiffnessMatrix(std::shared_ptr<SiconosVector> q);
+  void tangentStiffnessMatrix(std::shared_ptr<siconos::algebra::SiconosVector> q);
   void dampingMatrix();
   // + some access op to be added later, if required
 
-  std::shared_ptr<SimpleMatrix> TRNp_NpMatrix();
+  std::shared_ptr<siconos::algebra::SimpleMatrix> TRNp_NpMatrix();
 };
-} // namespace siconos::mechanics::fem
+}  // namespace siconos::fem::cable
 
 #endif

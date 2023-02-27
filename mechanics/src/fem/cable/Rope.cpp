@@ -1,21 +1,38 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2023 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "Rope.h"
 
-#include <cmath> // for pow
+#include <cmath>  // for pow
 #include <iostream>
 
-Rope::Rope(const Pile &a_pile0, const Pile &a_pile1, double a_tol, int a_nmax)
-    : pile0(a_pile0), pile1(a_pile1), tol(a_tol), n_max(a_nmax)
-{
-  m_nbNodes = 0;
+#include "Cable.h"
+#include "Pile.h"
+
+siconos::fem::cable::Rope::Rope(const Pile &a_pile0, const Pile &a_pile1, double a_tol,
+                                int a_nmax)
+    : pile0(a_pile0), pile1(a_pile1), tol(a_tol), n_max(a_nmax) {
   m_last = (&pile0 == &pile1);
 }
 
-Rope::~Rope() {}
-
-void Rope::compute(const class Cable &a_meca, int nb_nodes, double a_T0, const Point &a_R0)
-{
+void siconos::fem::cable::Rope::compute(const class Cable &a_meca, int nb_nodes, double a_T0,
+                                        const Point &a_R0) {
   // Ref: case 2 in C. Bertrand PHD, annexe A.
-
 
   meca = a_meca;
   meca.set_T(a_T0);
@@ -25,9 +42,8 @@ void Rope::compute(const class Cable &a_meca, int nb_nodes, double a_T0, const P
     SR = a_R0;
     q = {pile0};
     TS = {a_T0};
-  }
-  else {
-    ropeway_inc = get_adm_1C(meca, {pile0, pile1});
+  } else {
+    ropeway_inc = get_adm_1C(meca, {pile0, pile1});  // Copy !
     q.resize(nb_nodes - 1);
     TS.resize(nb_nodes);
     R.resize(nb_nodes);
@@ -40,8 +56,7 @@ void Rope::compute(const class Cable &a_meca, int nb_nodes, double a_T0, const P
       for (auto &r : R) {
         r.opposite();
       }
-    }
-    else if (dot == 0) {
+    } else if (dot == 0) {
       for (auto &r : R) {
         r.zero();
       }
@@ -50,8 +65,7 @@ void Rope::compute(const class Cable &a_meca, int nb_nodes, double a_T0, const P
   }
 }
 
-int Rope::computeNbNodes(int nb_elem, double L)
-{
+int siconos::fem::cable::Rope::computeNbNodes(int nb_elem, double L) {
   m_nbNodes = 0;
   if (!m_last) {
     m_nbNodes = (int)rint(nb_elem * get_L() / L);
@@ -59,49 +73,45 @@ int Rope::computeNbNodes(int nb_elem, double L)
   return m_nbNodes;
 }
 
-int Rope::computeMesh(std::vector<Point> &a_q, std::vector<Point> &a_R,
-                      std::vector<double> &a_TS, int q_offset, bool a_reverse)
-{
+int siconos::fem::cable::Rope::computeMesh(std::vector<Point> &a_q, std::vector<Point> &a_R,
+                                           std::vector<double> &a_TS, int q_offset,
+                                           bool a_reverse) {
   if (!m_last) {
     get_profile_1C(meca, ropeway_inc, m_nbNodes + 1, a_q, a_R, a_TS, q_offset, a_reverse);
   }
   return m_nbNodes;
 }
 
-double Rope::get_T0()
-{
+double siconos::fem::cable::Rope::get_T0() {
   if (TS.size())
     return TS.front();
   else
     return 0.0;
 }
 
-double Rope::get_LastT()
-{
+double siconos::fem::cable::Rope::get_LastT() {
   if (TS.size())
     return TS.back();
   else
     return 0.0;
 }
 
-Point Rope::get_LastR()
-{
+siconos::fem::cable::Point siconos::fem::cable::Rope::get_LastR() {
   if (R.size())
     return R.back();
   else
     return Point();
 }
 
-double Rope::get_L() { return ropeway_inc.x; }
+double siconos::fem::cable::Rope::get_L() { return ropeway_inc.x; }
 
-const Point &Rope::get_SR() const { return SR; }
+const siconos::fem::cable::Point &siconos::fem::cable::Rope::get_SR() const { return SR; }
 
-const Cable &Rope::get_meca() const { return meca; }
+const siconos::fem::cable::Cable &siconos::fem::cable::Rope::get_meca() const { return meca; }
 
-const Pile &Rope::get_pile0() const { return pile0; }
+const siconos::fem::cable::Pile &siconos::fem::cable::Rope::get_pile0() const { return pile0; }
 
-void Rope::to_json(ojson &j)
-{
+void siconos::fem::cable::Rope::to_json(ojson &j) {
   if (TS.size()) {
     j["ropeway_inc"].push_back(ropeway_inc.x);
     j["ropeway_inc"].push_back(ropeway_inc.y);
@@ -127,8 +137,7 @@ void Rope::to_json(ojson &j)
     j["meca_global"].push_back(meca.get_T0());
     j["meca_global"].push_back(meca.get_EA());
     j["meca_global"].push_back(meca.get_rho());
-  }
-  else {
+  } else {
     for (auto &elem : q) {
       j["q"].push_back(elem.x);
       j["q"].push_back(elem.y);
@@ -140,10 +149,10 @@ void Rope::to_json(ojson &j)
   }
 }
 
-Point Rope::get_adm_1C(const Cable &a_meca, const std::vector<Pile> &bc)
-{
+siconos::fem::cable::Point siconos::fem::cable::Rope::get_adm_1C(const Cable &a_meca,
+                                                                 const std::vector<Pile> &bc) {
   Point cable_inc = guess(bc);
-  
+
   bool test = true;
   int n = 0;
   Point r;
@@ -189,8 +198,7 @@ Point Rope::get_adm_1C(const Cable &a_meca, const std::vector<Pile> &bc)
   return cable_inc;
 }
 
-Point Rope::guess(const std::vector<Pile> &bc)
-{
+siconos::fem::cable::Point siconos::fem::cable::Rope::guess(const std::vector<Pile> &bc) {
   Point res;
   Point delta;
   delta.diff(bc[1], bc[0]);
@@ -202,9 +210,9 @@ Point Rope::guess(const std::vector<Pile> &bc)
   return res;
 }
 
-void Rope::cable_eq(const Cable &a_meca, const std::vector<Pile> &bc, const Point &cable_inc,
-                    Point &r, std::vector<std::vector<double>> &J)
-{
+void siconos::fem::cable::Rope::cable_eq(const Cable &a_meca, const std::vector<Pile> &bc,
+                                         const Point &cable_inc, Point &r,
+                                         std::vector<std::vector<double>> &J) {
   /*
    @author: charl
 
@@ -302,10 +310,11 @@ void Rope::cable_eq(const Cable &a_meca, const std::vector<Pile> &bc, const Poin
   J = {j1, j2, j3};
 }
 
-void Rope::get_profile_1C(const Cable &a_meca, const Point &cable_inc, int nb_nodes,
-                          std::vector<Point> &a_q, std::vector<Point> &a_R,
-                          std::vector<double> &a_TS, int q_offset, bool a_reverse)
-{
+void siconos::fem::cable::Rope::get_profile_1C(const Cable &a_meca, const Point &cable_inc,
+                                               int nb_nodes, std::vector<Point> &a_q,
+                                               std::vector<Point> &a_R,
+                                               std::vector<double> &a_TS, int q_offset,
+                                               bool a_reverse) {
   /*
    @author: charl
 

@@ -1,9 +1,38 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2023 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*! \file Rope.h
+
+  A discrete piece of cable, between two piles.
+*/
 #pragma once
+
+#include <vector>
+
 #include "Cable.h"
-#include "Pile.h"
+#include "Point.h"
+
+namespace siconos::fem::cable {
+
+class Pile;
 
 class Rope {
-public:
+ public:
   /** Build a rope span (a piece of cable between to pylons)
       \param a_pile1 first pylon supporting the rope
       \param a_pile2 second pylon
@@ -11,8 +40,10 @@ public:
       \param n_max max. number of iterations used in Newton-Raphson
   */
   Rope(const Pile &a_pile0, const Pile &a_pile1, double a_tol, int n_max);
+  Rope(Rope &&) = default;
+  Rope(const Rope &) = default;
 
-  virtual ~Rope();
+  virtual ~Rope() noexcept = default;
 
   /** Compute initial profile of the Rope using Catenary equations
 
@@ -39,24 +70,34 @@ public:
 
   void to_json(ojson &j);
 
-private:
+ private:
   Point ropeway_inc;
-  std::vector<Point> q;   // positions
-  std::vector<Point> R;   // internal forces [x,y,z]-> [H,V,B]
-  std::vector<double> TS; // tension
 
-  Cable meca;        // contient T0, EA, rho
-  const Pile &pile0; // référence vers le support associé
-  const Pile &pile1; // référence vers le support associé
-  Point SR;          // support reaction [H,V,B]
-  bool m_last;
+  /** Positions */
+  std::vector<Point> q = {};
+
+  /** Internal forces  [x,y,z]-> [H,V,B] */
+  std::vector<Point> R = {};
+
+  /** Tension */
+  std::vector<double> TS = {};
+
+  Cable meca;         // contient T0, EA, rho
+  const Pile &pile0;  // référence vers le support associé
+  const Pile &pile1;  // référence vers le support associé
+  Point SR;           // support reaction [H,V,B]
+  bool m_last{false};
 
   /** level of tolerance for the cable equation */
   double tol = 1e-7;
   /** max number of iterations */
   int n_max = 50;
   /** */
-  int m_nbNodes;
+  int m_nbNodes{0};
+
+  Rope() = delete;
+  Rope &operator=(const Rope &) = delete;
+  Rope &operator=(Rope &&) = delete;
 
   /**
       Modifies cable_inc such that the cable equation is satisfied (using tolerance tol and for
@@ -102,3 +143,4 @@ private:
                       std::vector<Point> &a_q, std::vector<Point> &a_R,
                       std::vector<double> &a_TS, int q_offset = 0, bool a_reverse = false);
 };
+}  // namespace siconos::fem::cable

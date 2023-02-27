@@ -1,18 +1,42 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2023 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "TransportCableProfil.h"
 
-TransportCableProfil::TransportCableProfil(const TransportCableModel &a_model,
-                                           TransportCableResult &a_results)
-    : r_model(a_model), r_results(a_results)
-{
-}
+#include "Cable.h"
+#include "CableTools.h"
+#include "Carriers.h"
+#include "Pulley.h"
+#include "Rope.h"
+#include "TransportCableModel.h"
+#include "TransportCableResult.h"
 
-void TransportCableProfil::computeInitialProfil(int nb_nodes, double a_tol, int a_nmax)
-{
+siconos::fem::cable::TransportCableProfil::TransportCableProfil(
+    const TransportCableModel &a_model, TransportCableResult &a_results)
+    : r_model(a_model), r_results(a_results) {}
+
+void siconos::fem::cable::TransportCableProfil::computeInitialProfil(int nb_nodes,
+                                                                     double a_tol,
+                                                                     int a_nmax) {
   // calcul les positions, tensions des cordes
   Cable meca = r_model.get_cable();
-  Carriers vehicules = r_model.get_carriers();
+  Carriers vehicules = r_model.get_carriers();  // Copy !!
   meca.set_rho(meca.get_rho() + vehicules.get_rho());
-
   r_results.rope1.compute(meca, r_model.get_piles1(), nb_nodes, a_tol, a_nmax);
   meca.set_T(r_results.rope1.get_T0());
   r_results.rope2.compute(meca, r_model.get_piles2(), nb_nodes, a_tol, a_nmax);
@@ -21,13 +45,11 @@ void TransportCableProfil::computeInitialProfil(int nb_nodes, double a_tol, int 
   r_results.prepareSupport();
 }
 
-void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol)
-{
-  std::shared_ptr<Pulley> puller12 =
-      std::dynamic_pointer_cast<Pulley>(r_results.supports[r_results.puller12idx]);
+void siconos::fem::cable::TransportCableProfil::computeFEM(int nb_elem, double a_eps,
+                                                           double a_tol) {
+  auto puller12 = std::dynamic_pointer_cast<Pulley>(r_results.supports[r_results.puller12idx]);
 
-  std::shared_ptr<Pulley> puller21 =
-      std::dynamic_pointer_cast<Pulley>(r_results.supports[r_results.puller21idx]);
+  auto puller21 = std::dynamic_pointer_cast<Pulley>(r_results.supports[r_results.puller21idx]);
 
   double Lt = puller12->get_L(r_results.rope2);
   double Lb = puller21->get_L(r_results.rope1);
@@ -40,11 +62,11 @@ void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol)
   int n2 = r_results.rope2.computeNbNodes(nb_elem, r_results.length);
   r_results.nb_nodes = n_Pt + n1 + n_Pb + n2;
 
-  std::vector<Point> &q = r_results.q;
+  auto &q = r_results.q;
   q.resize(r_results.nb_nodes);
-  std::vector<Point> &R = r_results.R;
+  auto &R = r_results.R;
   R.resize(r_results.nb_nodes);
-  std::vector<double> &TS = r_results.TS;
+  auto &TS = r_results.TS;
   TS.resize(r_results.nb_nodes);
   int offset = r_results.rope1.computeMesh(q, R, TS, 0);
   offset = puller12->compute(n_Pt + 1, q, offset);
@@ -58,8 +80,8 @@ void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol)
   /*dgi = np.zeros(nb_node)
   dgi[gi <= 0] = gi[gi <= 0]
   q = q - np.matmul(np.transpose(Gi), 1.1*dgi)*/
-  std::vector<double> &g = r_results.g;
-  std::vector<std::vector<Point>> &G = r_results.G;
+  auto &g = r_results.g;
+  auto &G = r_results.G;
   double k = 1 + a_eps;
   for (auto i = 0; i < r_results.nb_nodes; i++) {
     Point p;
@@ -73,8 +95,8 @@ void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol)
   }
 }
 
-void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_prop)
-{
+void siconos::fem::cable::TransportCableProfil::compute_punct_load(int nb_elem, double Lc,
+                                                                   double d_prop) {
   /*
   get_punct_load(nb_elem,Lc,rho_vehicules,d_inter_vehicules)
 
@@ -88,8 +110,8 @@ void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_p
   Returns a vector which n-th element is the mass hanged to node n the first vehicule is placed
   randomly between 0 and d_inter_vehicules on the cable
   */
-  const Carriers &vehicules = r_model.get_carriers();
-  std::vector<double> lc = linspace(0, 1, nb_elem);
+  const auto &vehicules = r_model.get_carriers();
+  auto lc = siconos::fem::cable::tools::linspace(0, 1, nb_elem);
 
   int nb_vehicules = (int)(lc.back() * Lc / vehicules.get_d_inter_vehicules());
   double m = vehicules.get_rho() * lc.back() * Lc / nb_vehicules;
@@ -100,7 +122,7 @@ void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_p
   else
     start *= d_prop;
 
-  std::vector<double> &punct = r_results.punct;
+  auto &punct = r_results.punct;
   punct.clear();
   punct.resize(nb_elem, 0);
   int k = 1;
@@ -109,16 +131,14 @@ void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_p
     if (ind > k) {
       punct[i - 1] = m;
       k++;
-      if (k > nb_vehicules)
-        break;
+      if (k > nb_vehicules) break;
     }
   }
-  if (k < nb_vehicules)
-    punct[0] = m;
+  if (k < nb_vehicules) punct[0] = m;
 }
 
-void TransportCableProfil::compute_ineq_constraint(const std::vector<Point> &a_X, double a_tol)
-{
+void siconos::fem::cable::TransportCableProfil::compute_ineq_constraint(
+    const std::vector<Point> &a_X, double a_tol) {
   /*
   @author: charl
 
@@ -139,11 +159,11 @@ void TransportCableProfil::compute_ineq_constraint(const std::vector<Point> &a_X
   */
   r_results.prepareIneqConstraint((int)a_X.size());
 
-  std::vector<int> &c = r_results.contacts;
-  std::vector<double> &g = r_results.g;
-  std::vector<std::vector<Point>> &G = r_results.G;
-  std::vector<std::vector<Point>> &T = r_results.T;
-  std::vector<std::shared_ptr<Support>> &supports = r_results.supports;
+  auto &c = r_results.contacts;
+  auto &g = r_results.g;
+  auto &G = r_results.G;
+  auto &T = r_results.T;
+  auto &supports = r_results.supports;
 
   for (auto &s : supports) {
     size_t i = 0;
@@ -154,10 +174,9 @@ void TransportCableProfil::compute_ineq_constraint(const std::vector<Point> &a_X
   }
 }
 
-int TransportCableProfil::to_json(ojson& ro)
-{
+int siconos::fem::cable::TransportCableProfil::to_json(ojson &ro) {
   // j = {}
-   
+
   // r_results.rope1.to_json(out);
   // r_results.rope2.to_json(out);
   return 0;

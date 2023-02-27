@@ -1,25 +1,18 @@
 #include "Pulley.h"
 
-#include "Ropeway.h"
-#ifndef NSICONOS
+#include <numbers>
+
+#include "Cable.h"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NonSmoothLaw.hpp"
+#include "Pile.h"
+#include "Rope.h"
+#include "Ropeway.h"
 #include "SiconosVector.hpp"
-#endif
 
-Pulley::Pulley(const Pile &a_pile) : Support(a_pile)
-{
-  m_radiusP = 0.;
-  m_TR = 0.;
-  dy = 0;
-}
+siconos::fem::cable::Pulley::Pulley(const Pile &a_pile) : Support(a_pile) {}
 
-Pulley::~Pulley() {}
-
-void Pulley::prepare(const Rope &a_rope) {}
-
-void Pulley::prepare(const Pile &a_start, const Pile &a_end, double T)
-{
+void siconos::fem::cable::Pulley::prepare(const Pile &a_start, const Pile &a_end, double T) {
   Point delta;
   delta.diff(a_start, a_end);
   m_radiusP = delta.norm() / 2.0;
@@ -29,15 +22,14 @@ void Pulley::prepare(const Pile &a_start, const Pile &a_end, double T)
   m_TR = T;
 }
 
-int Pulley::compute(int nb, std::vector<Point> &a_q, int q_offset) const
-{
-  double pi2 = M_PI_2;
+int siconos::fem::cable::Pulley::compute(int nb, std::vector<Point> &a_q, int q_offset) const {
+  double pi2 = std::numbers::pi * 0.5;
   if (dy <= 0) {
-    pi2 = -M_PI_2;
+    pi2 = -pi2;
   }
-  size_t n = a_q.size();
+  int n = a_q.size();
   for (int i = 0; i < nb && (i + q_offset) < n; i++) {
-    double theta = pi2 + ((2 * M_PI_2) / (nb - 1)) * i;
+    double theta = pi2 + (std::numbers::pi / (nb - 1)) * i;
 
     Point &p = a_q[i + q_offset];
     p.x = m_p.x + m_radiusP * std::cos(theta);
@@ -47,33 +39,29 @@ int Pulley::compute(int nb, std::vector<Point> &a_q, int q_offset) const
   return q_offset + nb - 1;
 }
 
-void Pulley::compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T, int &c)
-{
+void siconos::fem::cable::Pulley::compute(const Point &a_p, double a_tol, double &g, Point &G,
+                                          Point &T, int &c) {
   c = Support::isContact(a_tol, a_p.x - m_p.x, a_p.y - m_p.y, 0, g, G.x, G.y, G.z, T.x, T.y,
                          T.z)
           ? 1
           : 0;
 }
-
-const double &Pulley::get_radius() const { return m_radiusP; }
-
-const Point &Pulley::get_center() { return m_p; }
-
-double Pulley::get_L(const Ropeway &a_rope) const
-{
-  return m_radiusP * M_PI / (1 + m_TR / a_rope.get_meca0().get_EA());
+const siconos::fem::cable::Point &siconos::fem::cable::Pulley::get_center() const {
+  return m_p;
 }
 
-void to_json(ojson &j, const Pulley &p)
-{
-  j["radius"] = p.m_radiusP;
-  j["center"] = p.m_p;
-  j["tension"] = p.m_TR;
+double siconos::fem::cable::Pulley::get_L(const Ropeway &a_rope) const {
+  return m_radiusP * std::numbers::pi / (1 + m_TR / a_rope.get_meca0().get_EA());
 }
 
-#ifndef NSICONOS
-bool Pulley::isContact(const std::shared_ptr<SiconosVector> &a_p, const double &a_tol)
-{
+void siconos::fem::cable::to_json(ojson &j, const Pulley &p) {
+  j["radius"] = p.get_radius();
+  j["center"] = p.get_center();
+  j["tension"] = p.get_tension();
+}
+
+bool siconos::fem::cable::Pulley::isContact(
+    const std::shared_ptr<siconos::algebra::SiconosVector> &a_p, const double &a_tol) {
   double dx = a_p->getValue(0) - m_p.x;
   double dy = a_p->getValue(1) - m_p.y;
   double d = sqrt(dx * dx + dy * dy);
@@ -87,5 +75,3 @@ bool Pulley::isContact(const std::shared_ptr<SiconosVector> &a_p, const double &
   }
   return isCt;
 }
-
-#endif

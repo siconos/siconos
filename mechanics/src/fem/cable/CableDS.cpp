@@ -21,35 +21,14 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 
-std::shared_ptr<SimpleMatrix> siconos::mechanics::fem::CableDS::TRNp_NpMatrix()
-{
-  auto vTRNp_Np = std::make_shared<SimpleMatrix>(6, 6, Siconos::UBLAS_TYPE::SPARSE);
-  /* vector<vector<double>> TRNp_Np = {{1, 0, 0, -1, 0, 0},
-                                                                         {0, 1, 0, 0, -1, 0},
-                                     {0, 0, 1, 0, 0, -1},
-                                                                         {-1, 0, 0, 1, 0, 0},
-                                     {0, -1, 0, 0, 1, 0},
-                                                                         {0, 0, -1, 0, 0, 1}};
-                                                                         */
-  vTRNp_Np->eye();
-  vTRNp_Np->setValue(3, 1, -1);
-  vTRNp_Np->setValue(4, 2, -1);
-  vTRNp_Np->setValue(5, 3, -1);
-  vTRNp_Np->setIsSymmetric(true);
-
-  return vTRNp_Np;
-}
-
-siconos::mechanics::fem::CableDS::CableDS(std::shared_ptr<SiconosVector> q0,
-                                          std::shared_ptr<SiconosVector> velocity0,
-                                          std::shared_ptr<SiconosMatrix> mass, double a_EA,
-                                          double a_elem_length, ExternalForcesFunction fext)
-  : LagrangianDS(q0, velocity0, mass), computefext_{fext}
-{
-
+siconos::fem::cable::CableDS::CableDS(
+    std::shared_ptr<siconos::algebra::SiconosVector> q0,
+    std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> mass, double a_EA, double a_elem_length,
+    ExternalForcesFunction fext)
+    : LagrangianDS(q0, velocity0, mass), computefext_{fext}, _EA{a_EA}, _l_e{a_elem_length} {
   std::cout << " BUlD CABLE DS \n";
-  _EA = a_EA;
-  _l_e = a_elem_length;
+
   TRNp_Np = TRNp_NpMatrix();
 
   TRNp_Np->display();
@@ -59,7 +38,8 @@ siconos::mechanics::fem::CableDS::CableDS(std::shared_ptr<SiconosVector> q0,
   // inputs Maybe these things are to be computed inside the DS? To be discussed ...
   // The call to LagrangianDS base constructor  ensures a proper allocation of memories for q0,
   // v0 Mass is just a pointer link. Mass alloc : to be done in cable model if mass is a shared
-  // pointer input. _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof,
+  // pointer input. _mass =
+  // std::make_shared<siconos::algebra::siconos::algebra::SimpleMatrix>(_ndof, _ndof,
   // UBLAS_TYPE::SPARSE);
   // We can deal with variable mass later.
   _hasConstantMass = true;
@@ -74,29 +54,28 @@ siconos::mechanics::fem::CableDS::CableDS(std::shared_ptr<SiconosVector> q0,
   // cable
 
   if (fext) {
-    _hasConstantFExt = false; // Indeed, this is the default for SecondOrderDS
-    _fExt = std::make_shared<SiconosVector>(_ndof);
-  }
-  else
+    _hasConstantFExt = false;  // Indeed, this is the default for SecondOrderDS
+    _fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  } else
     _hasConstantFExt = true;
   // In that case _fExt = nullptr
   // setFextPtr is to be called later by cable model to set a constant fext.
 
   // _ndof is given by the size of q0 during SecondOrderDS build
-  _forces = std::make_shared<SiconosVector>(_ndof);
+  _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
 
   // We will use _jacobianqForces and _jacobianvForces to save tangent stiffness and damping
   // matrices.
   // Those are attributes of LagrangianDS class.
 
-  _jacobianqForces = std::make_shared<SimpleMatrix>(_ndof, _ndof, Siconos::UBLAS_TYPE::SPARSE);
+  _jacobianqForces = std::make_shared<siconos::algebra::SimpleMatrix>(
+      _ndof, _ndof, siconos::algebra::UblasType::SPARSE);
 
-  _jacobianqDotForces =
-      std::make_shared<SimpleMatrix>(_ndof, _ndof, Siconos::UBLAS_TYPE::SPARSE);
+  _jacobianqDotForces = std::make_shared<siconos::algebra::SimpleMatrix>(
+      _ndof, _ndof, siconos::algebra::UblasType::SPARSE);
 }
 
-void siconos::mechanics::fem::CableDS::computeFExt(double time)
-{
+void siconos::fem::cable::CableDS::computeFExt(double time) {
   assert(_fExt);
   assert(computefext_);
   // Call the std::function attribute that must be connected to some external function
@@ -104,13 +83,12 @@ void siconos::mechanics::fem::CableDS::computeFExt(double time)
   // ...
 }
 
-void siconos::mechanics::fem::CableDS::computeForces(double time,
-                                                     std::shared_ptr<SiconosVector> q,
-                                                     std::shared_ptr<SiconosVector> velocity)
-{
+void siconos::fem::cable::CableDS::computeForces(
+    double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
+    std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
   assert(_forces);
   // if (!_forces) {
-  //   _forces = std::make_shared<SiconosVector>(_ndof);
+  //   _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
   // } // --> done during constructor call.
   // else
   _forces->zero();
@@ -123,38 +101,33 @@ void siconos::mechanics::fem::CableDS::computeForces(double time,
   tangentStiffnessMatrix(q);
 
   //  - compute external forces in fExt (or just get them if they are constant)
-  if (!_hasConstantFExt)
-    computeFExt(time);
-  if (_fExt)
-    *_forces += *_fExt;
+  if (!_hasConstantFExt) computeFExt(time);
+  if (_fExt) *_forces += *_fExt;
 }
 
 // \f$ \nabla_q F \f$
-void siconos::mechanics::fem::CableDS::computeJacobianqForces(double time)
-{
+void siconos::fem::cable::CableDS::computeJacobianqForces(double time) {
   // Call a local routine which compute tangent stiffness and update a local operator
 
   // tangentStiffnessMatrix();
 }
 
 // \f$ \nabla_v F \f$
-void siconos::mechanics::fem::CableDS::computeJacobianvForces(double time)
-{
-
+void siconos::fem::cable::CableDS::computeJacobianvForces(double time) {
   // Call a local routine to compute damping matrix and update a local operator
   dampingMatrix();
 }
 
-void siconos::mechanics::fem::CableDS::tangentStiffnessMatrix(std::shared_ptr<SiconosVector> q)
-{
+void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
+    std::shared_ptr<siconos::algebra::SiconosVector> q) {
   // must update jacobianqForces
   // KT
   // intforces: K
 
   size_t nb_elem = _ndof - 3;
   double k = _EA / _l_e;
-  std::shared_ptr<SiconosVector> Tq = std::make_shared<SiconosVector>(6);
-  std::shared_ptr<SimpleMatrix> TqqT = std::make_shared<SimpleMatrix>(6, 6);
+  auto Tq = std::make_shared<siconos::algebra::SiconosVector>(6);
+  auto TqqT = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
 
   // tous les points moins le dernier
   for (size_t i = 0; i < nb_elem - 3; i += 3) {
@@ -245,22 +218,15 @@ void siconos::mechanics::fem::CableDS::tangentStiffnessMatrix(std::shared_ptr<Si
   }
 }
 
-void siconos::mechanics::fem::CableDS::dampingMatrix(/** ...*/)
-{
-
+void siconos::fem::cable::CableDS::dampingMatrix(/** ...*/) {
   // must update jacobianqDotForces
   // constant ?
   // C = damp*M
-
-
-  
-  
 }
 
-void siconos::mechanics::fem::CableDS::matmult(const std::shared_ptr<SiconosVector> &V,
-                                               size_t a_startIdx,
-                                               std::shared_ptr<SiconosVector> &R)
-{
+void siconos::fem::cable::CableDS::matmult(
+    const std::shared_ptr<siconos::algebra::SiconosVector> &V, size_t a_startIdx,
+    std::shared_ptr<siconos::algebra::SiconosVector> &R) {
   R->zero();
   assert(TRNp_Np);
   auto n = R->size();
@@ -271,8 +237,7 @@ void siconos::mechanics::fem::CableDS::matmult(const std::shared_ptr<SiconosVect
         (*R)(i) += val * (*V)(j + a_startIdx);
       }
     }
-  }
-  else {
+  } else {
     for (size_t i = 0; i < n; i++) {
       for (size_t j = 0; j < 3; j++) {
         auto val = TRNp_Np->getValue(i, j);
@@ -286,13 +251,31 @@ void siconos::mechanics::fem::CableDS::matmult(const std::shared_ptr<SiconosVect
   }
 }
 
-void siconos::mechanics::fem::CableDS::matmult2(const std::shared_ptr<SiconosVector> &V,
-                                                std::shared_ptr<SimpleMatrix> &R)
-{
+void siconos::fem::cable::CableDS::matmult2(
+    const std::shared_ptr<siconos::algebra::SiconosVector> &V,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> &R) {
   size_t n = V->size();
   for (size_t i = 0; i < n; i++) {
     for (size_t j = 0; j < n; j++) {
       (*R)(i, j) = (*V)(i) * (*V)(j);
     }
   }
+}
+std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::fem::cable::CableDS::TRNp_NpMatrix() {
+  auto vTRNp_Np = std::make_shared<siconos::algebra::SimpleMatrix>(
+      6, 6, siconos::algebra::UblasType::SPARSE);
+  /* vector<vector<double>> TRNp_Np = {{1, 0, 0, -1, 0, 0},
+                                                                         {0, 1, 0, 0, -1, 0},
+                                     {0, 0, 1, 0, 0, -1},
+                                                                         {-1, 0, 0, 1, 0, 0},
+                                     {0, -1, 0, 0, 1, 0},
+                                                                         {0, 0, -1, 0, 0, 1}};
+                                                                         */
+  vTRNp_Np->eye();
+  vTRNp_Np->setValue(3, 1, -1);
+  vTRNp_Np->setValue(4, 2, -1);
+  vTRNp_Np->setValue(5, 3, -1);
+  vTRNp_Np->setIsSymmetric(true);
+
+  return vTRNp_Np;
 }

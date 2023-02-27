@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2023 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,40 @@
  * limitations under the License.
  */
 #pragma once
-#include <CableDS.hpp>
-#include <InteractionManager.hpp>
-#include <Support.h>
+#include "InteractionManager.hpp"
 
-using namespace std;
-using namespace siconos::mechanics::fem;
+/*! \file CableCollisionmanager.h
 
-class CableCollisionManager : public InteractionManager {
+  Manager for interactions in the cable setup.
+ */
 
-public:
+namespace siconos::modeling {
+class Interaction;
+}
+
+namespace siconos::fem::cable {
+
+class CableDS;
+class Support;
+
+class CableCollisionManager : public siconos::simulation::InteractionManager {
+ public:
   CableCollisionManager(const std::shared_ptr<CableDS> a_model,
-                        const vector<std::shared_ptr<Support>> &a_supports,
-                        double a_tolContact = 1e-3);
-  virtual ~CableCollisionManager();
-  virtual void updateInteractions(std::shared_ptr<Simulation> simulation);
+                        const std::vector<std::shared_ptr<Support>> &a_supports,
+                        double a_tolContact = 1e-3)
+      : m_model{a_model}, m_supports{a_supports}, m_tolContact{a_tolContact} {};
 
-protected:
-  std::shared_ptr<CableDS> m_model;
-  vector<std::shared_ptr<Support>> m_supports;
-  double m_tolContact;
+  virtual ~CableCollisionManager() noexcept = default;
 
-  typedef std::map<unsigned int, std::shared_ptr<Interaction>> t_contacts;
+  virtual void updateInteractions(
+      std::shared_ptr<siconos::simulation::Simulation> simulation) override;
+
+ protected:
+  std::shared_ptr<CableDS> m_model{nullptr};
+  std::vector<std::shared_ptr<Support>> m_supports = {};
+  double m_tolContact{1e-3};
+
+  using t_contacts = std::map<unsigned int, std::shared_ptr<siconos::modeling::Interaction>>;
   t_contacts m_contacts;
 };
+}  // namespace siconos::fem::cable
