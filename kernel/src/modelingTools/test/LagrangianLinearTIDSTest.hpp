@@ -18,6 +18,7 @@
 #ifndef __LagrangianLinearTIDSTest__
 #define __LagrangianLinearTIDSTest__
 
+#include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianLinearTIDS.hpp"
 #include "SiconosException.hpp"

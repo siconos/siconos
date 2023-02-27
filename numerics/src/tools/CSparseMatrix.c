@@ -32,6 +32,11 @@
 #include "SiconosCompat.h"  // for SN_PTRDIFF_T_F
 #include "ldl.h"
 #include "numerics_verbose.h"  // for CHECK_IO
+#if defined(_WIN32) || defined(_WIN64)
+/* We are on Windows */
+#define strtok_r strtok_s
+#endif
+
 #if defined(__cplusplus)
 #undef restrict
 #include <sys/cdefs.h>  // for __restrict

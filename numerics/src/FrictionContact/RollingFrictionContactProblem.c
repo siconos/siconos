@@ -20,7 +20,11 @@
 #include <math.h>              // for fabs
 #include <stdio.h>             // for printf, fprintf, fscanf, NULL, fclose
 #include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#if _MSC_VER
+#include <errno.h> // for errno
+#else
 #include <sys/errno.h>         // for errno
+#endif                         //  MSVC
 #include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
 //#define DEBUG_STDOUT

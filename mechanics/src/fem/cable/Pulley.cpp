@@ -1,0 +1,91 @@
+#include "Pulley.h"
+
+#include "Ropeway.h"
+#ifndef NSICONOS
+#include "NewtonImpactFrictionNSL.hpp"
+#include "NonSmoothLaw.hpp"
+#include "SiconosVector.hpp"
+#endif
+
+Pulley::Pulley(const Pile &a_pile) : Support(a_pile)
+{
+  m_radiusP = 0.;
+  m_TR = 0.;
+  dy = 0;
+}
+
+Pulley::~Pulley() {}
+
+void Pulley::prepare(const Rope &a_rope) {}
+
+void Pulley::prepare(const Pile &a_start, const Pile &a_end, double T)
+{
+  Point delta;
+  delta.diff(a_start, a_end);
+  m_radiusP = delta.norm() / 2.0;
+  m_p.add(a_start, a_end);
+  m_p.mult(0.5);
+  dy = a_start.y - m_p.y;
+  m_TR = T;
+}
+
+int Pulley::compute(int nb, std::vector<Point> &a_q, int q_offset) const
+{
+  double pi2 = M_PI_2;
+  if (dy <= 0) {
+    pi2 = -M_PI_2;
+  }
+  size_t n = a_q.size();
+  for (int i = 0; i < nb && (i + q_offset) < n; i++) {
+    double theta = pi2 + ((2 * M_PI_2) / (nb - 1)) * i;
+
+    Point &p = a_q[i + q_offset];
+    p.x = m_p.x + m_radiusP * std::cos(theta);
+    p.y = m_p.y + m_radiusP * std::sin(theta);
+    p.z = m_p.z;
+  }
+  return q_offset + nb - 1;
+}
+
+void Pulley::compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T, int &c)
+{
+  c = Support::isContact(a_tol, a_p.x - m_p.x, a_p.y - m_p.y, 0, g, G.x, G.y, G.z, T.x, T.y,
+                         T.z)
+          ? 1
+          : 0;
+}
+
+const double &Pulley::get_radius() const { return m_radiusP; }
+
+const Point &Pulley::get_center() { return m_p; }
+
+double Pulley::get_L(const Ropeway &a_rope) const
+{
+  return m_radiusP * M_PI / (1 + m_TR / a_rope.get_meca0().get_EA());
+}
+
+void to_json(ojson &j, const Pulley &p)
+{
+  j["radius"] = p.m_radiusP;
+  j["center"] = p.m_p;
+  j["tension"] = p.m_TR;
+}
+
+#ifndef NSICONOS
+bool Pulley::isContact(const std::shared_ptr<SiconosVector> &a_p, const double &a_tol)
+{
+  double dx = a_p->getValue(0) - m_p.x;
+  double dy = a_p->getValue(1) - m_p.y;
+  double d = sqrt(dx * dx + dy * dy);
+  double go = d - get_radius();
+  bool isCt = (go <= a_tol);
+  if (isCt) {
+    m_normal->setValue(0, dx / d);
+    m_normal->setValue(1, dy / d);
+    m_tangent->setValue(0, -m_normal->getValue(1));
+    m_tangent->setValue(1, m_normal->getValue(0));
+  }
+  return isCt;
+}
+
+#endif

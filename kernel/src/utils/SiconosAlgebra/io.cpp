@@ -36,8 +36,7 @@
 
 bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
                                 const std::ios_base::openmode &mode, int prec,
-                                WriteType inputType, const std::ios::fmtflags &flags)
-{
+                                WriteType inputType, const std::ios::fmtflags &flags) {
   // Read and check the file
   std::ifstream infile(fileName, mode);
   std::filesystem::path p1{fileName};
@@ -57,8 +56,7 @@ bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
       infile.read((char *)(&dim), sizeof(m.size()));
     }
     infile.read((char *)(&x[0]), m.size() * sizeof(double));
-  }
-  else {
+  } else {
     DenseVect *p = m.dense();
     // Read the dimension of the vector in the first line of the input file
     // Just use to check that sizes are consistents.
@@ -76,8 +74,7 @@ bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
 
 bool siconos::algebra::io::write(const std::string &fileName, const SiconosVector &m,
                                  const std::ios_base::openmode &mode, int prec,
-                                 const WriteType outputType, const std::ios::fmtflags &flags)
-{
+                                 const WriteType outputType, const std::ios::fmtflags &flags) {
   std::ofstream outfile(fileName, mode);
   outfile.flags(flags);
 
@@ -90,15 +87,13 @@ bool siconos::algebra::io::write(const std::string &fileName, const SiconosVecto
       outfile.write((char *)&dim, sizeof(dim));
     }
     outfile.write((char *)(&x[0]), sizeof(double) * m.size());
-  }
-  else {
+  } else {
     if (outputType == WriteType::python) outfile << m.size() << std::endl;
 
     if (m.num() == UblasType::DENSE) {
       DenseVect *p = m.dense();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
-    }
-    else if (m.num() == UblasType::SPARSE) {
+    } else if (m.num() == UblasType::SPARSE) {
       SparseVect *p = m.sparse();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
     }
@@ -108,8 +103,7 @@ bool siconos::algebra::io::write(const std::string &fileName, const SiconosVecto
 }
 
 bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
-                                const std::ios_base::openmode &mode)
-{
+                                const std::ios_base::openmode &mode) {
   std::ifstream infile(filename, mode);
 
   if (!infile.good()) THROW_EXCEPTION("");
@@ -151,8 +145,7 @@ bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
 }
 
 bool siconos::algebra::io::write(const std::string &filename, const SiconosMatrix &m,
-                                 const std::ios_base::openmode &mode, WriteType outputType)
-{
+                                 const std::ios_base::openmode &mode, WriteType outputType) {
   // Open file and various checks
   std::ofstream outfile(filename, mode);
 
@@ -177,30 +170,26 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
       }
       outfile << std::endl;
     }
-  }
-  else if (m.num() == UblasType::TRIANGULAR) {
+  } else if (m.num() == UblasType::TRIANGULAR) {
     auto p = m.triang();
 
     for (auto row = p->begin1(); row != p->end1(); ++row) {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
       outfile << std::endl;
     }
-  }
-  else if (m.num() == UblasType::SYMMETRIC) {
+  } else if (m.num() == UblasType::SYMMETRIC) {
     auto p = m.sym();
     for (auto row = p->begin1(); row != p->end1(); ++row) {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
       outfile << std::endl;
     }
-  }
-  else if (m.num() == UblasType::SPARSE) {
+  } else if (m.num() == UblasType::SPARSE) {
     auto p = m.sparse();
     for (auto row = p->begin1(); row != p->end1(); ++row) {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
       outfile << std::endl;
     }
-  }
-  else {
+  } else {
     auto p = m.banded();
     for (auto row = p->begin1(); row != p->end1(); ++row) {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
@@ -214,15 +203,13 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
 
 double siconos::algebra::io::compareRefFile(const SimpleMatrix &data, std::string filename,
                                             double epsilon, std::vector<int> index,
-                                            const std::ios_base::openmode mode, bool verbose)
-{
+                                            const std::ios_base::openmode mode, bool verbose) {
   auto ref = std::make_shared<SimpleMatrix>(0, 0);
   bool compare = false;
   // SimpleMatrix ref{0, 0};
   try {
     compare = read(filename, *ref, mode);
-  }
-  catch (...) {
+  } catch (...) {
     if (verbose)
       std::cout << "Warning: reference file " << filename
                 << " not found, no comparison performed." << std::endl;
@@ -242,8 +229,7 @@ double siconos::algebra::io::compareRefFile(const SimpleMatrix &data, std::strin
   if (index.empty()) {
     auto errv = err->dense();
     error = *std::max_element(errv->begin(), errv->end());
-  }
-  else {
+  } else {
     for (auto &i : index) {
       if (error < (*err)(i)) error = (*err)(i);
     }
@@ -259,4 +245,16 @@ double siconos::algebra::io::compareRefFile(const SimpleMatrix &data, std::strin
   }
 
   return error;
+}
+
+std::shared_ptr<siconos::algebra::SiconosVector> siconos::algebra::io::readVectorFromJson(
+    const nlohmann::json &jin) {
+  std::vector<double> vec;
+  for (auto v : jin)
+    for (auto v : jin)
+      if (v.is_array())
+        for (auto vv : v) vec.push_back(vv);
+      else
+        vec.push_back(v);
+  return std::make_shared<SiconosVector>(vec);
 }
