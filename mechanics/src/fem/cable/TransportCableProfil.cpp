@@ -41,10 +41,13 @@ void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol)
   r_results.nb_nodes = n_Pt + n1 + n_Pb + n2;
 
   std::vector<Point> &q = r_results.q;
+  q.clear();
   q.resize(r_results.nb_nodes);
   std::vector<Point> &R = r_results.R;
+  R.clear();
   R.resize(r_results.nb_nodes);
   std::vector<double> &TS = r_results.TS;
+  TS.clear();
   TS.resize(r_results.nb_nodes);
   int offset = r_results.rope1.computeMesh(q, R, TS, 0);
   offset = puller12->compute(n_Pt + 1, q, offset);

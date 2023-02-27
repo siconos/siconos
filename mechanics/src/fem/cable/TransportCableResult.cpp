@@ -8,9 +8,12 @@
 
 TransportCableResult::TransportCableResult() { rope2.set_Down(true); }
 
+
 void TransportCableResult::prepareSupport()
 {
   supports.clear();
+  puller12idx = -1;
+  puller21idx = -1;
   rope1.prepareSupport(supports, puller12idx);
   rope2.prepareSupport(supports, puller21idx);
 
