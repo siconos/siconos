@@ -8,3 +8,4 @@ pyhull
 wheel
 pybind11
 vtk
+packaging
