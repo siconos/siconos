@@ -115,7 +115,7 @@ if(ISOLATED_INSTALL)
     # Overwrite CMAKE_INSTALL_PREFIX with ISOLATED_INSTALL value
   endif()
   set(CMAKE_INSTALL_PREFIX ${ISOLATED_INSTALL} CACHE PATH "Install root directory." FORCE)
-  set(sicopy_install_mode isolated CACHE STRING "Siconos Python packages nstall mode." FORCE)
+  set(sicopy_install_mode isolated CACHE STRING "Siconos Python packages install mode." FORCE)
 else()
   if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(sicopy_install_mode standard CACHE STRING "Siconos Python packages install mode." FORCE)
