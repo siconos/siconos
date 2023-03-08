@@ -313,7 +313,7 @@ if(WITH_TESTING)
   endif()
   if(HAVE_SICONOS_KERNEL)
     find_package(CPPUNIT REQUIRED)
-#File used as main driver for cppunit tests
+    #File used as main driver for cppunit tests
     set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/tests-common/TestMain.cpp CACHE INTERNAL "")
   endif()
   if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
