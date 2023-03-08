@@ -5,11 +5,16 @@ include:
 
 # --- First, build docker images that contains all the required dependencies to build siconos ---
 # This step is optional and run only when the commit message starts with "[docker-build]"
-debian-buster:docker-build:
+debian-bullseye:docker-build:
   variables:
-    IMAGE_NAME: debian-buster
+    IMAGE_NAME: debian-bullseye
   extends: .docker-build
 
+debian-bookworm:docker-build:
+  variables:
+    IMAGE_NAME: debian-bookworm
+  extends: .docker-build
+  
 ubuntu20.4-light:docker-build:
   variables:
     IMAGE_NAME: ubuntu20.04-light
@@ -63,31 +68,31 @@ docker-manual-img:
 
 # -------------- Configure, build and test Siconos --------------
      
-debian-buster:configure:
+debian-bullseye:configure:
   variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
+     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-bullseye
      cdash_submit: 1
      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends:
     - .siconos-configure
     - .full-ci-rules
 
-debian-buster:build:
+debian-bullseye:build:
   variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-bullseye
       cdash_submit: 1
       user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends:
     - .siconos-build
     - .full-ci-rules
-  needs: ["debian-buster:configure"]
+  needs: ["debian-bullseye:configure"]
 
-debian-buster:test:
+debian-bullseye:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-bullseye
       cdash_submit: 1
       user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-    needs: ["debian-buster:build"]
+    needs: ["debian-bullseye:build"]
     extends:
       - .siconos-test
       - .full-ci-rules
@@ -240,7 +245,7 @@ ubuntu22:install:
   extends: .siconos-install
   needs: ["ubuntu22.04:build"]
 
-debian-buster:install:
+debian-bullseye:install:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
     siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-debian-buster

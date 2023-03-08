@@ -1,3 +1,5 @@
+
+
 # ===============================================================================
 # This is the configuration used when cmake is run without  USER_OPTIONS_FILE
 #
@@ -9,7 +11,7 @@
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 
 # --- List of siconos components to build and install ---
-set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics CACHE INTERNAL "List of siconos components to build and install")
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" OFF)
 option(WITH_PYB11_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)

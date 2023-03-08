@@ -87,7 +87,7 @@ std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> make_bt_verte
   assert(mesh->vertices()->size(0) == 3);
   unsigned int numIndices = mesh->indexes()->size();
   unsigned int numVertices = mesh->vertices()->size(1);
-  auto *vertices = std::make_shared<btScalar[]>(numVertices * 3);  // this requires c++20
+  btScalar *vertices = new btScalar[numVertices*3];
   for (unsigned int i = 0; i < numVertices; i++) {
     vertices[i * 3 + 0] = (*mesh->vertices())(0, i);
     vertices[i * 3 + 1] = (*mesh->vertices())(1, i);

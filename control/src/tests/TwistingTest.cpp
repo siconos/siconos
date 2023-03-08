@@ -70,7 +70,7 @@ void TwistingTest::initTwisting() {
 void TwistingTest::initRegularTwisting() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
-  _reg_itw = std::make_shared < RegularTwisting(_sensor, 300., _beta);
+  _reg_itw = std::make_shared<siconos::control::RegularTwisting>(_sensor, 300., _beta);
   auto eye = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
   eye->eye();
   _reg_itw->setCsurface(eye);
