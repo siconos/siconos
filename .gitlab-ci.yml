@@ -247,12 +247,12 @@ ubuntu22:install:
 
 debian-bullseye:install:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
-    siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-debian-buster
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-bullseye
+    siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-debian-bullseye
   extends:
     - .siconos-install
     - .full-ci-rules
-  needs: ["debian-buster:build"]
+  needs: ["debian-bullseye:build"]
 
 
 jupyterlab:install:
