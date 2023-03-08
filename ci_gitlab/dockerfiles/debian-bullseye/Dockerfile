@@ -6,7 +6,7 @@ RUN apt update  && apt install -y -qq \
 	gfortran \
 	vim \
 	python3-dev \
-	python3-pip \
+	python3-full \
 	wget \
 	libopenblas-dev \
 	liblapacke-dev \
@@ -23,7 +23,8 @@ ENV CI_PROJECT_DIR /home
 RUN sh /home/install_boost.sh
 RUN mv /home/deps/boost_1_81_0/boost /usr/local/include
 COPY ci_gitlab/dockerfiles/requirements.txt /home
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install -r /home/requirements.txt
-
+RUN python3 -m venv /home/pysicoenv
+ENV PATH="/home/pysicoenv/bin:$PATH"
+RUN python3 -m pip install -U pip
+RUN python3 -m pip install -U -r /home/requirements.txt 
 
