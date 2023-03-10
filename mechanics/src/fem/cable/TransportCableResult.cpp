@@ -76,6 +76,8 @@ int TransportCableResult::to_json(ojson &j, const std::string &a_option)
     rope2.to_json(j["rope2"]);
   }
   else {
+    rope1.to_json(j["rope1"]);
+    rope2.to_json(j["rope2"]);
     j["supports"] = ojson::array();
     j["pulleys"] = ojson::array();
     int ns = supports.size();

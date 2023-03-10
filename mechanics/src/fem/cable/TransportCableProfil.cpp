@@ -76,7 +76,7 @@ void TransportCableProfil::computeFEM(int nb_elem, double a_eps, double a_tol)
   }
 }
 
-void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_prop)
+void TransportCableProfil::compute_punct_load(int nb_elem, double Lc)
 {
   /*
   get_punct_load(nb_elem,Lc,rho_vehicules,d_inter_vehicules)
@@ -91,33 +91,42 @@ void TransportCableProfil::compute_punct_load(int nb_elem, double Lc, double d_p
   Returns a vector which n-th element is the mass hanged to node n the first vehicule is placed
   randomly between 0 and d_inter_vehicules on the cable
   */
+
+    std::vector<double>& punct = r_results.punct;
+    punct.clear();
+    punct.resize(nb_elem, 0);
+
   const Carriers &vehicules = r_model.get_carriers();
-  std::vector<double> lc = linspace(0, 1, nb_elem);
+  double d = vehicules.get_d_inter_vehicules();
+  if (d) {
+      std::vector<double> lc = linspace(0.0, Lc, nb_elem);
 
-  int nb_vehicules = (int)(lc.back() * Lc / vehicules.get_d_inter_vehicules());
-  double m = vehicules.get_rho() * lc.back() * Lc / nb_vehicules;
+      int nb_vehicules = (int)(Lc / d);
+      double m = vehicules.get_rho() * d;
 
-  double start = vehicules.get_d_inter_vehicules();
-  if (d_prop < 0 || d_prop > 1)
-    start *= (double)rand() / RAND_MAX;
-  else
-    start *= d_prop;
-
-  std::vector<double> &punct = r_results.punct;
-  punct.clear();
-  punct.resize(nb_elem, 0);
-  int k = 1;
-  for (auto i = 1; i < nb_elem; i++) {
-    int ind = (int)((lc[i] * Lc - start) / vehicules.get_d_inter_vehicules());
-    if (ind > k) {
-      punct[i - 1] = m;
-      k++;
-      if (k > nb_vehicules)
-        break;
-    }
-  }
-  if (k < nb_vehicules)
-    punct[0] = m;
+      double d_prop = vehicules.get_d_start();
+      double start = d;
+      if (d_prop < 0 || d_prop > 1)
+          start *= (double)rand() / RAND_MAX;
+      else
+          start *= d_prop;
+      
+      int si = 0;
+      while (si < nb_elem && lc[si] < start) si++;
+      if (si < nb_elem) {
+          int k = 1;
+          punct[si] = m;
+          for (auto i = si; i < nb_elem; i++) {
+              int ind = (int)((lc[i] - start) / d);
+              if (ind > k) {
+                  punct[i] = m;
+                  k++;
+                  if (k > nb_vehicules)
+                      break;
+              }
+          }
+      }
+  }  
 }
 
 void TransportCableProfil::compute_ineq_constraint(const std::vector<Point> &a_X, double a_tol)
