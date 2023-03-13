@@ -19,7 +19,7 @@
 # mechanisms is "off" by default.
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.
-set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics CACHE INTERNAL "List of siconos components to build and install")
 
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" OFF)
 option(WITH_PYB11_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
@@ -62,7 +62,7 @@ option(WITH_JSON "Use a JSON library in c++" OFF)
 # Set python install mode:
 # - user --> pip install --user
 # - standard --> pip install
-set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
+set(siconos_python_install_mode "standard" CACHE STRING "Install mode for siconos python package")
 
 # If OFF, headers from libraries in externals will not be installed.
 option(INSTALL_EXTERNAL_HEADERS

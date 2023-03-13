@@ -1,3 +1,5 @@
+
+
 # ===============================================================================
 # This is the configuration used when cmake is run without  USER_OPTIONS_FILE
 #
@@ -9,7 +11,7 @@
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 
 # --- List of siconos components to build and install ---
-set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics CACHE INTERNAL "List of siconos components to build and install")
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" OFF)
 option(WITH_PYB11_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
@@ -48,7 +50,7 @@ option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
 # Set python install mode:
 # - user --> pip install --user
 # - standard --> pip install
-set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
+set(siconos_python_install_mode "standard" CACHE STRING "Install mode for siconos python package")
 
 # If OFF, headers from libraries in externals will not be installed.
 option(INSTALL_EXTERNAL_HEADERS

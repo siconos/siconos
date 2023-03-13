@@ -183,29 +183,28 @@ void SMCTest::test_itw_ZOH() {
   siconos::algebra::io::write("itw_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  SimpleMatrix dataRef(data);
+  siconos::algebra::SimpleMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("itw.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
-  siconos::algebra::SiconosVector lambda1 {
-    data.size(0);
-    siconos::algebra::SiconosVector lambda2{data.size(0)};
-    data.getCol(3, lambda1);
-    data.getCol(4, lambda2);
-    axpy(_beta, lambda2, lambda1);
-    siconos::algebra::SiconosVector lambda1Ref{data.size(0)};
-    siconos::algebra::SiconosVector lambda2Ref{data.size(0)};
-    dataRef.getCol(3, lambda1Ref);
-    dataRef.getCol(4, lambda2Ref);
-    axpy(_beta, lambda2Ref, lambda1Ref);
-    data.setCol(3, lambda1);
-    dataRef.setCol(3, lambda1Ref);
-    data.resize(data.size(0), 4);
-    dataRef.resize(data.size(0), 4);
-    std::cout << "------- Integration done, error = " << (data - dataRef).normInf()
-              << " -------" << std::endl;
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", (data - dataRef).normInf() < _tol,
-    true);
+  siconos::algebra::SiconosVector lambda1 {data.size(0)};
+  siconos::algebra::SiconosVector lambda2{data.size(0)};
+  data.getCol(3, lambda1);
+  data.getCol(4, lambda2);
+  axpy(_beta, lambda2, lambda1);
+  siconos::algebra::SiconosVector lambda1Ref{data.size(0)};
+  siconos::algebra::SiconosVector lambda2Ref{data.size(0)};
+  dataRef.getCol(3, lambda1Ref);
+  dataRef.getCol(4, lambda2Ref);
+  axpy(_beta, lambda2Ref, lambda1Ref);
+  data.setCol(3, lambda1);
+  dataRef.setCol(3, lambda1Ref);
+  data.resize(data.size(0), 4);
+  dataRef.resize(data.size(0), 4);
+  std::cout << "------- Integration done, error = " << (data - dataRef).normInf()
+	    << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", (data - dataRef).normInf() < _tol,
+			       true);
 }
 
 void SMCTest::test_itw_Lsodar() {
@@ -221,7 +220,7 @@ void SMCTest::test_itw_Lsodar() {
   siconos::algebra::io::write("itw_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  SimpleMatrix dataRef(data);
+  siconos::algebra::SimpleMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("itw.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a unique
