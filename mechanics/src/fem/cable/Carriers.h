@@ -33,6 +33,7 @@ class Carriers : public BaseModel {
   virtual ~Carriers() noexcept = default;
   const double &get_rho() const;
   const double &get_d_inter_vehicules() const;
+  const double &get_d_start() const;
 
  private:
   Carriers(Carriers &&) = delete;
@@ -49,5 +50,12 @@ class Carriers : public BaseModel {
   double m_d{0.};  //
 
   double m_rho{0.};
+
+  /** mass 100% of one vehicule (kg) */
+  double m_loaded_mass{0.};
+
+  double m_up_load{1.};    // % up load
+  double m_down_load{0.};  // % down load
+  double m_d_start{0.};    // % (m_d), distance of the first vehicule
 };
 }  // namespace siconos::fem::cable

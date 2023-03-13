@@ -45,7 +45,7 @@ class TransportCableProfil {
   const TransportCableModel &r_model;
   TransportCableResult &r_results;
 
-  void compute_punct_load(int nb_elem, double Lc, double d_prop = 0.8);
+  void compute_punct_load(int nb_elem, double Lc);
 
   /**
      \param a_X vector of positions, coordinates of cable 'particles'

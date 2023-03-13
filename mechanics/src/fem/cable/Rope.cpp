@@ -113,39 +113,27 @@ const siconos::fem::cable::Pile &siconos::fem::cable::Rope::get_pile0() const { 
 
 void siconos::fem::cable::Rope::to_json(ojson &j) {
   if (TS.size()) {
-    j["ropeway_inc"].push_back(ropeway_inc.x);
-    j["ropeway_inc"].push_back(ropeway_inc.y);
-    j["ropeway_inc"].push_back(ropeway_inc.z);
+    j["ropeway_inc"].push_back(ropeway_inc);
 
     for (auto &elem : q) {
-      j["q"].push_back(elem.x);
-      j["q"].push_back(elem.y);
-      j["q"].push_back(elem.z);
+      j["q"].push_back(elem);
     }
     for (auto &elem : TS) {
       j["TS"].push_back(elem);
     }
     for (auto &elem : R) {
-      j["R"].push_back(elem.x);
-      j["R"].push_back(elem.y);
-      j["R"].push_back(elem.z);
+      j["R"].push_back(elem);
     }
-    j["SR"].push_back(SR.x);
-    j["SR"].push_back(SR.y);
-    j["SR"].push_back(SR.z);
 
-    j["meca_global"].push_back(meca.get_T0());
-    j["meca_global"].push_back(meca.get_EA());
-    j["meca_global"].push_back(meca.get_rho());
+    j["SR"].push_back(SR);
+
+    Point vMeca(meca.get_T0(), meca.get_EA(), meca.get_rho());
+    j["meca_global"].push_back(vMeca);
   } else {
     for (auto &elem : q) {
-      j["q"].push_back(elem.x);
-      j["q"].push_back(elem.y);
-      j["q"].push_back(elem.z);
+      j["q"].push_back(elem);
     }
-    j["SR"].push_back(SR.x);
-    j["SR"].push_back(SR.y);
-    j["SR"].push_back(SR.z);
+    j["SR"].push_back(SR);
   }
 }
 
