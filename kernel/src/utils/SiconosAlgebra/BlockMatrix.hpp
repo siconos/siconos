@@ -25,6 +25,7 @@
 #define BM
 
 #include "SiconosMatrix.hpp"
+// #include <boost/numeric/ublas/fwd.hpp>  // boost::numeric fwd
 
 namespace siconos::algebra {
 
@@ -44,7 +45,7 @@ class BlockMatrix : public SiconosMatrix {
   ACCEPT_SERIALIZATION(BlockMatrix);
 
   using BlocksMatrix =
-      boost::numeric::ublas::compressed_matrix<std::shared_ptr<SiconosMatrix>>;
+      Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic, Eigen::Dynamic>;
 
   /** A container of pointers to SiconosMatrix
    */
@@ -451,7 +452,7 @@ class BlockMatrix : public SiconosMatrix {
 
   //ACCEPT_STD_VISITORS();
 
-  friend class SimpleMatrix;
+  // friend class SimpleMatrix;
   friend void scal(double, const SiconosMatrix &, SiconosMatrix &, bool);
   friend SiconosMatrix &operator*=(SiconosMatrix &m, const double &s);
   friend SiconosMatrix &operator/=(SiconosMatrix &m, const double &s);
