@@ -17,9 +17,9 @@
  */
 #include "EigenProblemsTest.hpp"
 
-#include <boost/numeric/bindings/std/vector.hpp>
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
+// #include <boost/numeric/bindings/std/vector.hpp>
+// #include <boost/numeric/bindings/ublas/matrix.hpp>
+// #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project

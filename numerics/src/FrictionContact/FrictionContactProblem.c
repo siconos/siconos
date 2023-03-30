@@ -16,14 +16,13 @@
  * limitations under the License.
  */
 #include "FrictionContactProblem.h"
-
-#include <assert.h>  // for assert
-#include <errno.h>   // for errno
-#include <math.h>    // for fabs
-#include <stdio.h>   // for printf, fprintf, fscanf, NULL, fclose
-#include <stdlib.h>  // for malloc, free, exit, EXIT_FAILURE
-#include <string.h>  // for memcpy
-
+#include <assert.h>             // for assert
+#include <math.h>               // for fabs
+#include <stdio.h>              // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>             // for malloc, free, exit, EXIT_FAILURE
+#include <errno.h>          // for errno
+#include <string.h>             // for memcpy
+#include "SiconosBlas.h"        // for cblas_dscal
 #include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
 #include "SiconosBlas.h"        // for cblas_dscal
 #include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3

@@ -1,4 +1,3 @@
-
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -21,7 +20,6 @@
 
 #include "BlockVector.hpp"
 #include "EventDriven.hpp"
-#include "ExternalsSolversNamespace.h"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"  // for LagrangianR::p2
@@ -32,6 +30,7 @@
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SiconosException.hpp"
+#include "SiconosFortran.h"           // for lsodar
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // For subscal
@@ -47,46 +46,48 @@ int siconos::integrators::LsodarOSI::count_NFE = 0;
 
 // ===== Out of class objects and functions =====
 
+namespace {  // Anonymous, local scope only
+
 // global object and wrapping functions -> required for function plug-in and call in fortran
 // routine.
-std::shared_ptr<siconos::integrators::LsodarOSI> global_object;
+std::shared_ptr<siconos::integrators::LsodarOSI> global_object{nullptr};
 
 // This first function must have the same signature as argument F (arg 1) in DLSODAR (see
 // opkdmain.f in Numerics)
-extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot);
+// function to compute the righ-hand side of xdot = f(x,t) + Tu
 extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot) {
   return global_object->f(sizeOfX, time, x, xdot);
 }
 
 // Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see opkdmain.f in
 // Numerics)
-extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut);
 extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut) {
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
 // Function to wrap jacobianf: same signature as argument JAC (arg 16) in DLSODAR (see
 // opkdmain.f in Numerics)
-extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time, double* x, int* ml,
-                                            int* mu, double* jacob, int* nrowpd);
+// function to compute the Jacobian/x of the rhs.
 extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time, double* x, int* ml,
                                             int* mu, double* jacob, int* nrowpd) {
   return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
+}  // namespace
 
 siconos::integrators::LsodarOSI::LsodarOSI()
     : OneStepIntegrator(IntegratorType::LSODAROSI, 1, 0, 2, 1, 2) {
-  _sizeMem = 2;
+#if !defined(HAS_FORTRAN)
+  THROW_EXCEPTION(
+      "siconos::integrators::LsodarOSI: the fortran interface is not active. You can not "
+      "create and use Lsodar Solver. Try to configure and reinstall siconos with "
+      "WITH_FORTRAN=ON");
 
-  rtol.reset(new double[_sizeTol]);  // rtol, relative tolerance
-  atol.reset(new double[_sizeTol]);  // atol, absolute tolerance
-  // Set atol and rtol values ...
-  rtol[0] = RTOL_DEFAULT;  // rtol
-  atol[0] = ATOL_DEFAULT;  // atol
+#endif
+  _sizeMem = 2;
 }
 
-void siconos::integrators::LsodarOSI::setTol(int newItol, boost::shared_array<double> newRtol,
-                                             boost::shared_array<double> newAtol) {
+void siconos::integrators::LsodarOSI::setTol(int newItol, std::vector<double>&& newRtol,
+                                             std::vector<double>&& newAtol) {
   //            The input parameters ITOL, RTOL, and ATOL determine
   //         the error control performed by the solver.  The solver will
   //         control the vector E = (E(i)) of estimated local errors
@@ -102,10 +103,9 @@ void siconos::integrators::LsodarOSI::setTol(int newItol, boost::shared_array<do
   //             2     scalar     array      RTOL*ABS(Y(i)) + ATOL(i)
   //             3     array      scalar     RTOL(i)*ABS(Y(i)) + ATOL
   //             4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
-
-  _itol = newItol;  // itol
-  rtol = newRtol;
-  atol = newAtol;
+  rtol = std::move(newRtol);
+  atol = std::move(newAtol);
+  _intData[2] = newItol;  // itol
 }
 
 void siconos::integrators::LsodarOSI::setMinMaxStepSizes(double minStep, double maxStep) {
@@ -120,7 +120,7 @@ void siconos::integrators::LsodarOSI::setMaxNstep(int maxNumberSteps) {
 }
 
 void siconos::integrators::LsodarOSI::setTol(int newItol, double newRtol, double newAtol) {
-  _itol = newItol;    // itol
+  _intData[2] = newItol;    // itol
   rtol[0] = newRtol;  // rtol
   atol[0] = newRtol;  // atol
 }
@@ -135,8 +135,7 @@ void siconos::integrators::LsodarOSI::updateData() {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
 
-  iwork.reset(new int[_intData[7]]);
-  for (int i = 0; i < _intData[7]; i++) iwork[i] = 0;
+  iwork.resize(_intData[7], 0);
 
   // This is for documentation purposes only
   // Set the flag to generate extra printing at method switches.
@@ -150,11 +149,9 @@ void siconos::integrators::LsodarOSI::updateData() {
   // Set   the maximum order to be allowed for the stiff  (BDF) method.
   // iwork[8] = 0;
 
-  rwork.reset(new double[_intData[6]]);
-  for (int i = 0; i < _intData[6]; i++) rwork[i] = 0.0;
+  rwork.resize(_intData[6], 0.);
 
-  jroot.reset(new int[_intData[1]]);
-  for (int i = 0; i < _intData[1]; i++) jroot[i] = 0;
+  jroot.resize(_intData[1], 0);
 }
 
 void siconos::integrators::LsodarOSI::fillXWork(int* sizeOfX, double* x) {
@@ -403,10 +400,11 @@ void siconos::integrators::LsodarOSI::initialize() {
   _intData[1] = std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
                     ->computeSizeOfg();
   // 3 - Itol, itask, iopt
-  _intData[2] = _itol;  // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
-  _intData[3] =
-      1;  // itask, an index specifying the task to be performed. 1: normal computation.
-  _intData[5] = 0;  // iopt: 0 if no optional input else 1.
+  // intData[2,3,4,5] : default values set in class attribute
+  // _intData[2] = 1 if ATOL is a scalar, else 2 (ATOL array)
+  // _intData[3] = 1;
+  // itask, an index specifying the task to be performed. 1: normal computation.
+  // _intData[5] = 0;  // iopt: 0 if no optional input else 1.
 
   // 4 - Istate
   _intData[4] = 1;  // istate, an index used for input and output to specify the state of the
@@ -427,7 +425,7 @@ void siconos::integrators::LsodarOSI::initialize() {
   //                 <0: error. See table below, in integrate function output message.
 
   // 7 - JT, Jacobian type indicator
-  _intData[8] = 2;  // jt, Jacobian type indicator.
+  //_intData[8] = 2;  // jt, Jacobian type indicator.
   //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
   //           2 means an internally generated (difference quotient) full Jacobian (using NEQ
   //           extra calls to f per df/dx value). 4 means a user-supplied banded Jacobian. 5
@@ -470,19 +468,6 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
       shared_from_this());  // Warning: global object must be initialized to current one before
                             // pointers to function initialisation.
 
-#ifdef HAS_FORTRAN
-  // function to compute the righ-hand side of xdot = f(x,t) + Tu
-  siconos::fortran::fpointer pointerToF = LsodarOSI_f_wrapper;
-
-  // function to compute the Jacobian/x of the rhs.
-  siconos::fortran::jacopointer pointerToJacobianF =
-      LsodarOSI_jacobianf_wrapper;  // function to compute the Jacobian/x of the rhs.
-
-  // function to compute the constraints
-  siconos::fortran::gpointer pointerToG;
-  pointerToG = LsodarOSI_g_wrapper;  // function to compute the constraints
-#endif
-
   // === LSODAR CALL ===
   DEBUG_EXPR(_xWork->display(););
   *_xtmp = *_xWork;
@@ -492,18 +477,14 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
 
   _intData[4] = istate;
 
-#ifdef HAS_FORTRAN
   // call LSODAR to integrate dynamical equation
-  CNAME(siconos::fortran::dlsodar)
-  (pointerToF, &(_intData[0]), _xtmp->getArray(), &tinit_DR, &tend_DR, &(_intData[2]),
-   rtol.get(), atol.get(), &(_intData[3]), &(_intData[4]), &(_intData[5]), rwork.get(),
-   &(_intData[6]), iwork.get(), &(_intData[7]), pointerToJacobianF, &(_intData[8]), pointerToG,
-   &(_intData[1]), jroot.get());
-#else
-  THROW_EXCEPTION(
-      "LsodarOSI, Fortran Language is not enabled in siconos kernel. Compile with fortran if "
-      "you need Lsodar");
-#endif
+  siconos::netlib::lsodar(&LsodarOSI_f_wrapper, &(_intData[0]), _xtmp->getArray(), &tinit_DR,
+                          &tend_DR, &(_intData[2]), &rtol.front(), &atol.front(),
+                          &(_intData[3]), &(_intData[4]), &(_intData[5]), &rwork.front(),
+                          &(_intData[6]), &iwork.front(), &(_intData[7]),
+                          &LsodarOSI_jacobianf_wrapper, &(_intData[8]), &LsodarOSI_g_wrapper,
+                          &(_intData[1]), &jroot.front());
+
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
   // === Post ===

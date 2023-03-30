@@ -19,8 +19,6 @@
 // Note Franck : sounds useless. It seems it's defined in bindings
 // (to be checked, especially on windows)
 // #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
-// #include <boost/numeric/bindings/blas/level3.hpp>
-// #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>

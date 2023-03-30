@@ -16,11 +16,6 @@
  * limitations under the License.
  */
 
-#include <boost/numeric/bindings/lapack.hpp>
-#include <boost/numeric/bindings/std/vector.hpp>
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/symmetric.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/lu.hpp>
@@ -39,6 +34,11 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "Tools.hpp"  // enum_to_string
+#include "boost/numeric/bindings/lapack.hpp"
+#include "boost/numeric/bindings/std/vector.hpp"
+#include "boost/numeric/bindings/ublas/matrix.hpp"
+#include "boost/numeric/bindings/ublas/symmetric.hpp"
+#include "boost/numeric/bindings/ublas/vector.hpp"
 #include "determinant.hpp"
 #include "expm.hpp"  // boost contribs expm_pad
 

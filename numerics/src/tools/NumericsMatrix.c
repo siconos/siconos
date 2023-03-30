@@ -33,7 +33,6 @@
 #include "NumericsMatrix_internal.h"  // for NM_internalData_free
 #include "NumericsSparseMatrix.h"     // for NumericsSparseMatrix, NSM_new
 #include "SiconosBlas.h"              // for cblas_ddot, cblas_dgemv, CblasN...
-#include "SiconosCompat.h"            // for SN_SIZE_T_F
 #include "SiconosLapack.h"            // for lapack_int, DGESV, DGETRF, DGETRS, LA_NOTRANS
 #include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
 /* #define DEBUG_NOCOLOR */
@@ -1462,11 +1461,11 @@ NumericsMatrix* NM_new_from_file(FILE* file) {
   void* data = NULL;
 
   CHECK_IO(fscanf(file, "%d", &storageType), &info);
-  CHECK_IO(fscanf(file, SN_SIZE_T_F, &size0), &info);
-  CHECK_IO(fscanf(file, SN_SIZE_T_F, &size1), &info);
+  CHECK_IO(fscanf(file, "%zu", &size0), &info);
+  CHECK_IO(fscanf(file, "%zu", &size1), &info);
 
   if (storageType == NM_DENSE) {
-    CHECK_IO(fscanf(file, SN_SIZE_T_F "\t" SN_SIZE_T_F "\n", &size0, &size1), &info);
+    CHECK_IO(fscanf(file, "%zu\t%zu\n", &size0, &size1), &info);
 
     data = malloc(size1 * size0 * sizeof(double));
     double* data_d = (double*)data;

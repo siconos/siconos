@@ -133,6 +133,9 @@ endfunction()
 #
 function(siconos_component_install_setup COMPONENT)
   
+  set(options NODOC)
+  cmake_parse_arguments(component_install "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
   # libraries
   install(TARGETS ${COMPONENT}
     EXPORT siconosTargets
@@ -174,10 +177,10 @@ function(siconos_component_install_setup COMPONENT)
       $<INSTALL_INTERFACE:include/siconos/${COMPONENT}>)
 
   endif()
-
   # prepare documentation
-  configure_component_documentation(${COMPONENT} HEADERS ${_all_headers})
-
+  if(NOT component_install_NODOC)
+    configure_component_documentation(${COMPONENT} HEADERS ${_all_headers})
+  endif()
   # Set installed_targets list (for siconos-config.cmake file)
   list(APPEND installed_targets ${COMPONENT})
   list(REMOVE_DUPLICATES installed_targets)

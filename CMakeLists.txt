@@ -27,7 +27,6 @@
 cmake_minimum_required(VERSION 3.14) 
 
 cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
-#cmake_policy(SET CMP0078 NEW) # UseSWIG generates standard target names.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
 cmake_policy(SET CMP0079 NEW) # target_link_libraries() allows use with targets in other directories
 cmake_policy(SET CMP0067 NEW) # Honor language standard in try_compile() source-file signature.
@@ -160,8 +159,8 @@ endif()
 # Activate fortran, if needed.
 if(WITH_FORTRAN)
   enable_language(Fortran)
-  include(FCompilerSetup)
   set(HAS_FORTRAN TRUE)
+  set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Modules)
 endif()
 
 # Common setup
@@ -255,20 +254,19 @@ message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIR}.")
 if(WITH_FCLIB)
   message(STATUS "Use fclib installed in ${fclib_ROOT}.")
 endif()
-if(WITH_SYSTEM_SUITESPARSE)
-  message(STATUS "Use system-provided SuiteSparse library, with:")
-  message("    - CXSparse headers path: ${SuiteSparse_CXSparse_INCLUDE_DIR}")
-  message("    - CXSparse library : ${SuiteSparse_CXSparse_LIBRARY}")
-  message("    - LDL headers path: ${SuiteSparse_LDL_INCLUDE_DIR}")
-  message("    - LDL library : ${SuiteSparse_LDL_LIBRARY}")
-else()
-  message(STATUS "Use Siconos-provided SuiteSparse, with:")
-  message("    - CXSparse headers path : externals/SuiteSparse/CXSparse")
-  message("    - LDL headers path : externals/SuiteSparse/LDL")
-endif()
+message(STATUS "Use system-provided SuiteSparse library, with:")
+message("    - CXSparse headers path: ${SuiteSparse_CXSparse_INCLUDE_DIR}")
+message("    - CXSparse library : ${SuiteSparse_CXSparse_LIBRARY}")
+message("    - LDL headers path: ${SuiteSparse_LDL_INCLUDE_DIR}")
+message("    - LDL library : ${SuiteSparse_LDL_LIBRARY}")
 message(STATUS "Python interpreter is ${Python_EXECUTABLE}")
-if(WITH_PYTHON_WRAPPER)
+if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
   message(STATUS "Python libraries are ${Python3_LIBRARIES}")
+else()
+  message("Siconos Python API is off\n")
+endif()
+if(NOT WITH_FORTRAN)
+  message(STATUS "Siconos Fortran API is off. Some integrators won't be available (Lsodar and Hem5).\n")
 endif()
 message(STATUS "------------ Installation information ------------\n")
 message("    Please check them with care and be sure to have the proper rights to write in those directories ...\n")

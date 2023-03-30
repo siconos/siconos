@@ -19,7 +19,6 @@
 #include "Hem5OSI.hpp"
 
 #include "BlockVector.hpp"
-#include "ExternalsSolversNamespace.h"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianRheonomousR.hpp"
@@ -28,6 +27,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosException.hpp"
+#include "SiconosFortran.h"           // for Fortran to C api, fprobpointer ...
 #include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subscal
@@ -41,68 +41,61 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-// initial step size guess (typical value 1e-3)
-
-// ===== Hidden implementation so we don't depend on hairer.h publically =====
-
-namespace siconos::integrators {
-class Hem5OSI_impl {
- public:
-  Hem5OSI_impl(Hem5OSI* h) : hem5osi(h) {}
-  Hem5OSI* hem5osi;
-#ifdef HAS_FORTRAN
-  siconos::fortran::fprobfunction fprob;
-  siconos::fortran::soloutfunction solout;
-#endif
-};
-}  // namespace siconos::integrators
-
 // ===== Out of class objects and functions =====
+
+namespace {  // Anonymous, local scope only
 
 // global object and wrapping functions -> required for function plug-in and call in fortran
 // routine.
-std::shared_ptr<siconos::integrators::Hem5OSI> hem5_global_object;
+std::shared_ptr<siconos::integrators::Hem5OSI> hem5_global_object{nullptr};
 
-#ifdef HAS_FORTRAN
-// This first function must have the same signature as argument FPROB  in HEM5
-extern "C" siconos::fortran::fprobfunction Hem5OSI_fprob_wrapper;
+// // ===== Hidden implementation so we don't depend on hairer.h publically =====
 
-void Hem5OSI_fprob_wrapper(int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF,
-                           int* LDA, int* NBLK, int* NMRC, int* NPGP, int* NPFL, int* INDGR,
-                           int* INDGC, int* INDFLR, int* INDFLC, double* time, double* q,
-                           double* v, double* u, double* xl, double* G, double* GQ, double* F,
-                           double* GQQ, double* GT, double* FL, double* QDOT, double* UDOT,
-                           double* AM) {
+// This function must have the same signature as argument FPROB  in HEM5
+extern "C" void Hem5OSI_fprob_wrapper(int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* LDG,
+                                      int* LDF, int* LDA, int* NBLK, int* NMRC, int* NPGP,
+                                      int* NPFL, int* INDGR, int* INDGC, int* INDFLR,
+                                      int* INDFLC, double* time, double* q, double* v,
+                                      double* u, double* xl, double* G, double* GQ, double* F,
+                                      double* GQQ, double* GT, double* FL, double* QDOT,
+                                      double* UDOT, double* AM) {
   return hem5_global_object->_impl->fprob(IFCN, NQ, NV, NU, NL, LDG, LDF, LDA, NBLK, NMRC,
                                           NPGP, NPFL, INDGR, INDGC, INDFLR, INDFLC, time, q, v,
                                           u, xl, G, GQ, F, GQQ, GT, FL, QDOT, UDOT, AM);
 }
 
-// This first function must have the same signature as argument SOLOUT in HEM5
-extern "C" siconos::fortran::soloutfunction Hem5OSI_solout_wrapper;
-void Hem5OSI_solout_wrapper(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, int* NL,
-                            int* LDG, int* LDF, int* LDA, int* LRDO, int* LIDO,
-                            siconos::fortran::fprobpointer FPROB, double* q, double* v,
-                            double* u, double* DOWK, int* IDOWK) {
+// This function must have the same signature as argument SOLOUT in HEM5
+extern "C" void Hem5OSI_solout_wrapper(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU,
+                                       int* NL, int* LDG, int* LDF, int* LDA, int* LRDO,
+                                       int* LIDO, siconos::hairer::fprobpointer FPROB,
+                                       double* q, double* v, double* u, double* DOWK,
+                                       int* IDOWK) {
   return hem5_global_object->_impl->solout(MODE, NSTEP, NQ, NV, NU, NL, LDG, LDF, LDA, LRDO,
                                            LIDO, FPROB, q, v, u, DOWK, IDOWK);
 }
-#endif
+
+}  // namespace
 
 // ===== Main class implementation ====
 
 siconos::integrators::Hem5OSI::Hem5OSI()
-    : OneStepIntegrator{IntegratorType::HEM5OSI, 1, 0, 2, 1, 2},
-      _idid(0),
-      _impl(std::make_shared<Hem5OSI_impl>(this)) {}
+    : OneStepIntegrator{IntegratorType::HEM5OSI, 1, 0, 2, 1, 2} {
+#if !defined(HAS_FORTRAN)
+  THROW_EXCEPTION(
+      "siconos::integrators::hem5OSI: the fortran interface is not active. You can not "
+      "create and use Hem5 Solver. Try to configure and reinstall siconos with "
+      "WITH_FORTRAN=ON");
 
-void siconos::integrators::Hem5OSI::setTol(int newItol, boost::shared_array<double> newRtol,
-                                           boost::shared_array<double> newAtol) {
+#endif
+}
+
+void siconos::integrators::Hem5OSI::setTol(int newItol, std::vector<double>&& newRtol,
+                                           std::vector<double>&& newAtol) {
   _intData[4] = newItol;
   // ITOL  indicates whether RTOL and ATOL are scalar (ITOL=0), or array of
   //           dimension NQ + NV + NU (ITOL=1)
-  rtol = newRtol;
-  atol = newAtol;
+  rtol = std::move(newRtol);
+  atol = std::move(newAtol);
 }
 void siconos::integrators::Hem5OSI::setTol(int newItol, double newRtol, double newAtol) {
   _intData[4] = newItol;
@@ -191,18 +184,13 @@ void siconos::integrators::Hem5OSI::updateData() {
   //  if(_intData[0]==1) sizeTol = 1;
   //  else sizeTol = _intData[0];
 
-  rtol.reset(new double[sizeTol]);  // rtol, relative tolerance
+  rtol.resize(sizeTol);  // rtol, relative tolerance
 
-  atol.reset(new double[sizeTol]);  // atol, absolute tolerance
-  for (unsigned int i = 0; i < sizeTol; i++) {
-    atol[i] = 0.0;
-  }
+  atol.resize(sizeTol, 0.);  // atol, absolute tolerance
 
-  iwork.reset(new int[_intData[7]]);
-  for (int i = 0; i < _intData[7]; i++) iwork[i] = 0;
+  iwork.resize(_intData[7], 0);
 
-  rwork.reset(new double[_intData[6]]);
-  for (int i = 0; i < _intData[6]; i++) rwork[i] = 0.0;
+  rwork.resize(_intData[6], 0.);
 }
 
 void siconos::integrators::Hem5OSI::fillqWork(int* NQ, double* q) {
@@ -232,8 +220,7 @@ void siconos::integrators::Hem5OSI::computeJacobianRhs(double t) {
     ds->computeJacobianRhsx(t);
   }
 }
-#ifdef HAS_FORTRAN
-void siconos::integrators::Hem5OSI_impl::fprob(
+void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
     int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF, int* LDA, int* NBLK,
     int* NMRC, int* NPGP, int* NPFL, int* INDGR, int* INDGC, int* INDFLR, int* INDFLC,
     double* time, double* q, double* v, double* u, double* xl, double* G, double* GQ,
@@ -381,7 +368,7 @@ void siconos::integrators::Hem5OSI_impl::fprob(
       "IFCN = %i \n \n",
       (int)*IFCN);
 }
-#endif
+
 // void siconos::integrators::Hem5OSI::g(int* nEq,
 // double*  time, double* x,
 // int* ng, double* gOut)
@@ -531,6 +518,9 @@ void siconos::integrators::Hem5OSI::initialize() {
 
   OneStepIntegrator::initialize();
 
+  _impl =
+      std::make_shared<Hem5OSI_impl>(std::static_pointer_cast<Hem5OSI>(shared_from_this()));
+
   // siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   // auto indexSet0
   //   = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
@@ -541,16 +531,13 @@ void siconos::integrators::Hem5OSI::initialize() {
   //   _lambdaWork->insertPtr(inter->lambda(0));
   // }
 }
-#ifdef HAS_FORTRAN
-void siconos::integrators::Hem5OSI_impl::solout(int* MODE, int* NSTEP, int* NQ, int* NV,
-                                                int* NU, int* NL, int* LDG, int* LDF, int* LDA,
-                                                int* LRDO, int* LIDO,
-                                                siconos::fortran::fprobpointer FPROB,
-                                                double* q, double* v, double* u, double* DOWK,
-                                                int* IDOWK)
+
+void siconos::integrators::Hem5OSI::Hem5OSI_impl::solout(
+    int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF, int* LDA,
+    int* LRDO, int* LIDO, siconos::hairer::fprobpointer FPROB, double* q, double* v, double* u,
+    double* DOWK, int* IDOWK)
 
 {}
-#endif
 unsigned int siconos::integrators::Hem5OSI::numberOfConstraints() {
   DEBUG_PRINT("siconos::integrators::Hem5OSI::updateConstraints() \n");
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -580,14 +567,6 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   hem5_global_object = std::static_pointer_cast<Hem5OSI>(
       shared_from_this());  // Warning: global object must be initialized to current one before
                             // pointers to function initialisation.
-
-#ifdef HAS_FORTRAN
-  // function to compute the system to simulation
-  siconos::fortran::fprobpointer pointerToFPROB = Hem5OSI_fprob_wrapper;
-
-  // function to compute the system to simulation
-  siconos::fortran::soloutpointer pointerToSOLOUT = Hem5OSI_solout_wrapper;
-#endif
 
   // === HEM5 CALL ===
 
@@ -709,19 +688,16 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
     pointerToXL = nullptr;
   else
     pointerToXL = &(*_lambdatmp)(0);
-#ifdef HAS_FORTRAN
   // call HEM5 to integrate dynamical equation
-  CNAME(siconos::fortran::hem5)
-  (&(_intData[0]), &(_intData[1]), &(_intData[2]), &(_intData[3]), pointerToFPROB, &tinit_DR,
-   &(*_qtmp)(0), &(*_vtmp)(0), pointerToU, &(*_atmp)(0), pointerToXL, &tend_DR, &_timeStep,
-   rtol.get(), atol.get(), &(_intData[4]), pointerToSOLOUT, &(_intData[5]), rwork.get(),
-   &(_intData[6]), iwork.get(), &(_intData[7]), &_idid);
+  siconos::hairer::hem5(
+      &(_intData[0]), &(_intData[1]), &(_intData[2]), &(_intData[3]), &Hem5OSI_fprob_wrapper,
+      &tinit_DR, &(*_qtmp)(0), &(*_vtmp)(0), pointerToU, &(*_atmp)(0), pointerToXL, &tend_DR,
+      &_timeStep, &rtol.front(), &atol.front(), &(_intData[4]), &Hem5OSI_solout_wrapper,
+      &(_intData[5]), &rwork.front(), &(_intData[6]), &iwork.front(), &(_intData[7]), &_idid);
 
-#else
-  THROW_EXCEPTION(
-      "Hem5, Fortran Language is not enabled in siconos kernel. Compile with fortran if you "
-      "need Hem5");
-#endif
+  // THROW_EXCEPTION(
+  //     "Hem5, Fortran Language is not enabled in siconos kernel. Compile with fortran if you
+  //     " "need Hem5");
   // === Post ===
   if (_idid < 0)  // if istate < 0 => HEM2 failed
   {

@@ -25,10 +25,10 @@
 
 #include "OneStepIntegrator.hpp"
 #include "SiconosConst.hpp"  // MACHINE_PREC
+#include "SiconosFortran.h" // for siconos::hairer
+
 
 namespace siconos::integrators {
-
-class Hem5OSI_impl;
 
 /** Hem5OSI solver (odepack)
  *
@@ -67,13 +67,13 @@ class Hem5OSI : public OneStepIntegrator {
   int _idid{0};
 
   /** relative tolerance */
-  boost::shared_array<double> rtol;
+  std::vector<double> rtol = {};
   /** absolute tolerance */
-  boost::shared_array<double> atol;
+  std::vector<double> atol = {};
   /** real work array */
-  boost::shared_array<double> rwork;
+  std::vector<double> rwork = {};
   /** int work array */
-  boost::shared_array<int> iwork;
+  std::vector<int> iwork = {};
 
   double _timeStep{INITIAL_GUESS_TS};  // initial step size guess
 
@@ -101,9 +101,22 @@ class Hem5OSI : public OneStepIntegrator {
    */
   struct _NSLEffectOnFreeOutput;
 
+  class Hem5OSI_impl {
+   public:
+    std::shared_ptr<siconos::integrators::Hem5OSI> hem5osi{nullptr};
+    void fprob(int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF, int* LDA,
+               int* NBLK, int* NMRC, int* NPGP, int* NPFL, int* INDGR, int* INDGC, int* INDFLR,
+               int* INDFLC, double* time, double* q, double* v, double* u, double* xl,
+               double* G, double* GQ, double* F, double* GQQ, double* GT, double* FL,
+               double* QDOT, double* UDOT, double* AM);
+    void solout(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF,
+                int* LDA, int* LRDO, int* LIDO, siconos::hairer::fprobpointer FPROB, double* q,
+                double* v, double* u, double* DOWK, int* IDOWK);
+    Hem5OSI_impl(std::shared_ptr<siconos::integrators::Hem5OSI> h) : hem5osi(h) {}
+  };
+
  public:
   std::shared_ptr<Hem5OSI_impl> _impl{nullptr};
-  friend class Hem5OSI_impl;
 
   enum Hem5OSI_ds_workVector_id { FREE, WORK_LENGTH };
 
@@ -137,12 +150,12 @@ class Hem5OSI : public OneStepIntegrator {
   /** get relative tolerance parameter for Hem5
    *  \return a double*
    */
-  inline const boost::shared_array<double> getRtol() const { return rtol; }
+  inline const std::vector<double>& getRtol() const { return rtol; }
 
   /** get absolute tolerance parameter for Hem5
    *  \return a double*
    */
-  inline const boost::shared_array<double> getAtol() const { return atol; }
+  inline const std::vector<double>& getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
    *\return an interger
@@ -152,19 +165,19 @@ class Hem5OSI : public OneStepIntegrator {
   /** get real work vector parameter for lsodar
    *  \return a double*
    */
-  inline const boost::shared_array<double> getRwork() const { return rwork; }
+  inline const std::vector<double>& getRwork() const { return rwork; }
 
   /** get iwork
    *  \return a pointer to int
    */
-  inline boost::shared_array<int> getIwork() const { return iwork; }
+  inline const std::vector<int>& getIwork() const { return iwork; }
 
   /** set itol, rtol and atol (tolerance parameters for Hem5)
    *  \param itol int (itol value)
    *  \param rtol double * (rtol)
    *  \param atol double * (atol)
    */
-  void setTol(int itol, boost::shared_array<double> rtol, boost::shared_array<double> atol);
+  void setTol(int itol, std::vector<double>&& rtol, std::vector<double>&& atol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for Hem5)
    *  \param itol int (itol value)
@@ -195,13 +208,13 @@ class Hem5OSI : public OneStepIntegrator {
    *  \param sizex int*, size of x array
    *  \param x double* x:array of double
    */
-  void fillqWork(int *sizex, double *x);
+  void fillqWork(int* sizex, double* x);
 
   /** fill vWork with a double
    *  \param sizex int*, size of x array
    *  \param x double* x:array of double
    */
-  void fillvWork(int *sizex, double *x);
+  void fillvWork(int* sizex, double* x);
 
   /** compute rhs(t) for all dynamical systems in the set
    */
@@ -213,11 +226,11 @@ class Hem5OSI : public OneStepIntegrator {
 
   unsigned int numberOfConstraints();
 
-  void f(int *sizeOfX, double *time, double *x, double *xdot);
+  void f(int* sizeOfX, double* time, double* x, double* xdot);
 
-  void g(int *nEq, double *time, double *x, int *ng, double *gOut);
+  void g(int* nEq, double* time, double* x, int* ng, double* gOut);
 
-  void jacobianfx(int *, double *, double *, int *, int *, double *, int *);
+  void jacobianfx(int*, double*, double*, int*, int*, double*, int*);
 
   /** initialization of the integrator
    */
@@ -237,8 +250,8 @@ class Hem5OSI : public OneStepIntegrator {
    * \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
-      siconos::graphs::DynamicalSystemsGraph &DSG) override;
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) override;
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -251,7 +264,7 @@ class Hem5OSI : public OneStepIntegrator {
    *  \param idid in-out parameter, input: 1 for first call, else 2. Output: 2
    * if no root was found, else 3.
    */
-  void integrate(double &tinit, double &tend, double &tout, int &idid) override;
+  void integrate(double& tinit, double& tend, double& tout, int& idid) override;
 
   /** update the state of the DynamicalSystems attached to this Integrator
    *  \param level level of interest for the dynamics
@@ -264,15 +277,15 @@ class Hem5OSI : public OneStepIntegrator {
    * non-smooth effects into account \param vertex_inter of the interaction
    * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;
 
   /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
    * problem
    */
-  siconos::algebra::SiconosVector &osnsp_rhs(
-      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-      siconos::graphs::InteractionsGraph &indexSet) override {
+  siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[Hem5OSI::OSNSP_RHS];
   };
 

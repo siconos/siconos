@@ -29,7 +29,7 @@
 #include <stdlib.h>  // for realloc, exit, free, malloc, EXIT_FAILURE
 #include <string.h>  // for strtok_r, memcpy, strncmp
 
-#include "SiconosCompat.h"  // for SN_PTRDIFF_T_F
+// #include "SiconosCompat.h"  // for SN_PTRDIFF_T_F
 #include "ldl.h"
 #include "numerics_verbose.h"  // for CHECK_IO
 #if defined(_WIN32) || defined(_WIN64)

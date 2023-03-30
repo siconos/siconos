@@ -237,7 +237,6 @@ void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
 }
 REGISTER_BOOST_SERIALIZATION(SimpleMatrix);
 
-#include <f2c.h>
 template<typename Archive>
 void siconos_io(Archive& ar, LsodarOSI& osi, unsigned int version)
 {

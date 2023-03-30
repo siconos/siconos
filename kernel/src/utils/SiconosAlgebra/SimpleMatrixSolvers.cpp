@@ -23,14 +23,14 @@
 #include "SiconosConfig.h"
 
 //#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
-#include <boost/numeric/bindings/blas.hpp>
-#include <boost/numeric/bindings/lapack.hpp>
-#include <boost/numeric/bindings/std/vector.hpp>
-#include <boost/numeric/bindings/trans.hpp>
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/matrix_proxy.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/bindings/ublas/vector_proxy.hpp>
+#include "boost/numeric/bindings/blas.hpp"
+#include "boost/numeric/bindings/lapack.hpp"
+#include "boost/numeric/bindings/std/vector.hpp"
+#include "boost/numeric/bindings/trans.hpp"
+#include "boost/numeric/bindings/ublas/matrix.hpp"
+#include "boost/numeric/bindings/ublas/matrix_proxy.hpp"
+#include "boost/numeric/bindings/ublas/vector.hpp"
+#include "boost/numeric/bindings/ublas/vector_proxy.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
 #include "BlockMatrix.hpp"

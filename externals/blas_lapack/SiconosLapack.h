@@ -19,9 +19,6 @@
 #ifndef SiconosLAPACK_H
 #define SiconosLAPACK_H
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-
 // Definition of the interface to cblas library. 
 #include "SiconosBlas.h"
 
@@ -264,7 +261,5 @@ extern "C"
 #if defined(__cplusplus)
 }
 #endif
-
-#pragma GCC diagnostic pop
 
 #endif // SICONOSLAPACK_H

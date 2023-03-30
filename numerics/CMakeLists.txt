@@ -106,8 +106,13 @@ endif()
 
 # Links with other Siconos components
 target_link_libraries(numerics PRIVATE externals)
+
+
+# Specific compilation options
 set_source_files_properties(src//FrictionContact/FischerBurmeisterGenerated.c
-                            PROPERTIES COMPILE_FLAGS "-Wno-unused-value")
+  PROPERTIES COMPILE_FLAGS "-Wno-unused-value")
+set_source_files_properties(src/tools/NumericsSparseMatrix.c
+  PROPERTIES COMPILE_OPTIONS "-Wno-unused-function") # To remove all warnings due to include "sort.h"
 
 # Links with non-Siconos libraries
 
@@ -174,21 +179,19 @@ if(NOT DEFINED SICONOS_INT64)
   endif()
 endif()
 
-if(WITH_SYSTEM_SUITESPARSE)
-  #   Note : the CSparse data structures are referred to in
-  #   kernel, but the functions are only called from numerics, so it is
-  #   not a link-time dependency for kernel.
-  find_package(SuiteSparse COMPONENTS CXSparse REQUIRED)
-  # We should turn public to private later (?)
-  # SuiteSparse headers are required by kernel
-  target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
-  target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXSparse_INCLUDE_DIR}>)
+#   Note : the CSparse data structures are referred to in
+#   kernel, but the functions are only called from numerics, so it is
+#   not a link-time dependency for kernel.
+find_package(SuiteSparse COMPONENTS CXSparse REQUIRED)
+# We should turn public to private later (?)
+# SuiteSparse headers are required by kernel
+target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
+target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXSparse_INCLUDE_DIR}>)
 
-  find_package(SuiteSparse COMPONENTS LDL REQUIRED)
-  target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::LDL>)
-  target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
+find_package(SuiteSparse COMPONENTS LDL REQUIRED)
+target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::LDL>)
+target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
 
-endif()
 if(DEFINED SICONOS_INT64) 
   # Use CS_LONG 
   target_compile_definitions(numerics PUBLIC CS_LONG) # used to select CXSparse version (depends on int size), for CS_INT and so on

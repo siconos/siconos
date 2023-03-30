@@ -1,4 +1,3 @@
-
 # cmake utilities to build mechanics component
 #================================================================
 #
@@ -81,13 +80,6 @@ target_link_libraries(mechanics PUBLIC
   externals # for boost/numerics/bindings
   numerics  # for debug.h ...
   kernel)
-
-# Links with non-Siconos libraries
-# dependency upon boost because of line 140 in SiconosPointers.hpp
-# --> need boost::shared_array for HEM5 and lsodar.
-# This should be reviewed (?)
-
-target_include_directories(mechanics PRIVATE ${Boost_INCLUDE_DIRS})
 
 # Bullet setup
 # Different options are available. Check BulletSetup.cmake file

@@ -237,7 +237,7 @@ void siconos::simulation::EventsManager::update(Simulation& sim) {
 
 unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event> new_event) {
   mpz_t* t1 = const_cast<mpz_t*>(new_event->getTimeOfEvent());
-  const auto eType = new_event->getType();
+  // const auto eType = new_event->getType();
   bool inserted = false;
   unsigned int pos = 0;
   mpz_t delta_time;

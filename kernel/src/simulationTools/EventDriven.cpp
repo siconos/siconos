@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "SiconosConfig.h" // for HAS_FORTRAN
 #include "EventDriven.hpp"
 
 #include "BlockMatrix.hpp"
@@ -756,8 +756,8 @@ void siconos::simulation::EventDriven::advanceToEvent()
       //  std::cout << " End of LsodarOSI integration" << "\n";
       // std::shared_ptr<siconos::integrators::LsodarOSI> lsodar =
       // std::static_pointer_cast<LsodarOSI>(it);
-      // boost::shared_array<siconos::fortran::integer> iwork = lsodar->getIwork();
-      // boost::shared_array<double> rwork = lsodar->getRwork();
+      // auto iwork = lsodar->getIwork();
+      // auto rwork = lsodar->getRwork();
       //  std::cout << "Number of steps used: " << iwork[10] <<"\n";
       //  std::cout << "Method order last used: " << iwork[13] <<"\n";
       //  std::cout << "Step size last used: " << rwork[10] <<"\n";
@@ -780,16 +780,6 @@ void siconos::simulation::EventDriven::advanceToEvent()
         if (_printStat)
           statOut << " -----------> New non-smooth event at time " << _tout << "\n";
       }
-      // if(_printStat)
-      //   {
-      //     std::shared_ptr<siconos::integrators::LsodarOSI> lsodar =
-      //     std::static_pointer_cast<LsodarOSI>(it); statOut << "Results at time " << _tout <<
-      //     ":" <<"\n"; boost::shared_array<siconos::fortran::integer> iwork =
-      //     lsodar->getIwork(); boost::shared_array<double> Rwork =
-      //     lsodar->getRwork(); statOut << "Number of steps: " << iwork[10] << ", number of f
-      //     evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "."
-      //     <<"\n";
-      //   }
     }
     // Set model time to _tout
     // update output[0], output[1], output[2]

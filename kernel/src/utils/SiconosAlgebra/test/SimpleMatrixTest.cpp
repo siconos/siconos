@@ -17,7 +17,7 @@
  */
 #include "SimpleMatrixTest.hpp"
 
-#include <boost/numeric/bindings/ublas/matrix.hpp>
+//#include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>

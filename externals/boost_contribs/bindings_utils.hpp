@@ -7,11 +7,11 @@
 
 #include <stddef.h>
 
-#include <boost/numeric/bindings/begin.hpp>
-#include <boost/numeric/bindings/size.hpp>
-#include <boost/numeric/bindings/value_type.hpp>
 #include <iostream>
 
+#include "boost/numeric/bindings/begin.hpp"
+#include "boost/numeric/bindings/size.hpp"
+#include "boost/numeric/bindings/value_type.hpp"
 #include "random.hpp"
 
 /* \file binding_utils.hpp
@@ -40,8 +40,7 @@ struct vct_access_traits<V const> {
 };
 
 template <typename V>
-inline typename vct_access_traits<V>::ref_t elem_v(V& v, size_t i)
-{
+inline typename vct_access_traits<V>::ref_t elem_v(V& v, size_t i) {
   return vct_access_traits<V>::elem(v, i);
 }
 
@@ -62,14 +61,12 @@ struct const_val {
 struct kpp {
   size_t val;
   kpp(size_t v = 0) : val(v) {}
-  size_t operator()(size_t)
-  {
+  size_t operator()(size_t) {
     size_t tmp = val;
     ++val;
     return tmp;
   }
-  size_t operator()(size_t, size_t)
-  {
+  size_t operator()(size_t, size_t) {
     size_t tmp = val;
     ++val;
     return tmp;
@@ -84,16 +81,14 @@ struct times_plus {
 };
 
 template <typename F, typename V>
-void init_v(V& v, F f = F())
-{
+void init_v(V& v, F f = F()) {
   size_t sz = boost::numeric::bindings::size(v);
   for (std::size_t i = 0; i < sz; ++i) elem_v(v, i) = f(i);
 }
 
 // printing:
 template <typename V>
-void print_v(V const& v, char const* ch = nullptr)
-{
+void print_v(V const& v, char const* ch = nullptr) {
   if (ch) std::cout << ch << ": ";
   size_t sz = boost::numeric::bindings::size(v);
   for (std::size_t i = 0; i < sz; ++i) std::cout << elem_v(v, i) << " ";
@@ -132,8 +127,7 @@ struct matr_access_traits<M const> {
 };
 
 template <typename M>
-inline typename matr_access_traits<M>::ref_t elem_m(M& m, size_t i, size_t j)
-{
+inline typename matr_access_traits<M>::ref_t elem_m(M& m, size_t i, size_t j) {
   return matr_access_traits<M>::elem(m, i, j);
 }
 
@@ -152,8 +146,7 @@ struct cls1 {
 };
 
 template <typename F, typename M>
-void init_m(M& m, F f = F())
-{
+void init_m(M& m, F f = F()) {
   size_t sz1 = boost::numeric::bindings::size_row(m);
   size_t sz2 = boost::numeric::bindings::size_column(m);
   for (std::size_t i = 0; i < sz1; ++i)
@@ -161,8 +154,7 @@ void init_m(M& m, F f = F())
 }
 
 template <typename M>
-void init_symm(M& m, char uplo = 'f')
-{
+void init_symm(M& m, char uplo = 'f') {
   size_t n = boost::numeric::bindings::size_row(m);
   for (size_t i = 0; i < n; ++i) {
     elem_m(m, i, i) = n;
@@ -180,8 +172,7 @@ void init_symm(M& m, char uplo = 'f')
 /** Print a boost-ublas matrix
  */
 template <typename M>
-void print_m(M const& m, char const* ch = nullptr)
-{
+void print_m(M const& m, char const* ch = nullptr) {
   if (ch) std::cout << ch << ":\n";
   size_t sz1 = boost::numeric::bindings::size_row(m);
   size_t sz2 = boost::numeric::bindings::size_column(m);
@@ -193,8 +184,7 @@ void print_m(M const& m, char const* ch = nullptr)
 }
 
 template <typename M>
-void print_m_data(M const& m, char const* ch = nullptr)
-{
+void print_m_data(M const& m, char const* ch = nullptr) {
   if (ch) std::cout << ch << " data:\n";
   using namespace boost::numeric::bindings;
   std::copy(begin_value(m), end_value(m),
@@ -202,7 +192,7 @@ void print_m_data(M const& m, char const* ch = nullptr)
   std::cout << std::endl;
 }
 
-}  // namespace siconos::algebra
+}  // namespace siconos::algebra::boost_bindings
 /// @endcond
 
 #endif
