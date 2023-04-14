@@ -233,7 +233,7 @@ if(WITH_TESTING)
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c )
   new_tests_collection(
-    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d_nonsmooth COLLECTION TEST_IPM_COLLECTION_1
+    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d_semismooth COLLECTION TEST_IPM_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c )
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_1
