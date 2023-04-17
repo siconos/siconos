@@ -27,20 +27,20 @@ const char ** data_collection()
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
 
-  // int listprob[7] = {1, 0, 0, 0, 0, 0, 0};
+  // int listprob[7] = {1, 0, 0, 0, 0, 0, 1};
   int listprob[7] = {1, 1, 1, 1, 1, 1, 1};
   /* 0: BoxStacks      #28  problems */
   /* 1: Capsules       #200 problems */
   /* 2: KaplasTower    #240 problems */
   /* 3: PrimitiveSoup  #200 problems */
   /* 4: Spheres        #200 problems */
-  /* 5: Sphere1mm      #41  problems */
+  /* 5: Spheres1mm      #41  problems */
   /* 6: Chute*         #182 problems */
   /*   TOTAL          #1091 problems */
 
   if (listprob[0]==1)
   {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0035-31-0.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0035-31-0.hdf5";     // u = 0
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0049-31-0.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0068-52-1.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-62-2.hdf5";
@@ -51,12 +51,12 @@ const char ** data_collection()
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0099-77-4.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-84-7.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-88-8.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0120-69-3.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0121-69-1.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-73-2.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-82-5.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0132-74-3.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0207-114-3.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0120-69-3.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0121-69-1.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-73-2.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-82-5.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0132-74-3.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0207-114-3.hdf5"; // u != 0
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-466-9.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-33.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-34.hdf5";
@@ -982,7 +982,7 @@ const char ** data_collection()
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10368-nc-2177-3197.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10368-nc-2178-3203.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10368-nc-2195-3200.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10368-nc-2205-3166.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10368-nc-2205-3166.hdf5";    // choose
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10368-nc-2327-3186.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10374-nc-2185-3206.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10524-nc-2229-3224.hdf5";
@@ -1043,9 +1043,9 @@ const char ** data_collection()
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-2688-nc-29-633.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-3306-nc-36-810.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4014-nc-64-1048.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4224-nc-117-1110.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4224-nc-117-1110.hdf5";       // choose
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4224-nc-137-1150.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4224-nc-82-1081.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4224-nc-82-1081.hdf5";       // choose
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-177-1260.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5040-nc-333-1444.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-354-1497.hdf5";
