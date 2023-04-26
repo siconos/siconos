@@ -3051,6 +3051,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     def run_loop(self):
         verbose = self._run_options.get('verbose')
+        self._verbose=verbose
         with_timer= self._run_options.get('with_timer')
         body_class = self._run_options.get('body_class')
         shape_class = self._run_options.get('shape_class')
