@@ -37,6 +37,10 @@ float_type dnrm2l(const unsigned int n, const double * x);
 double getNewtonStepLength(const double * const x, const double * const dx,
                                   const unsigned int vecSize, const unsigned int varsCount, const double gamma);
 
+/* Returns array of step-lengths to the boundary reduced by a factor gamma. Uses long double. */
+double *array_getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
+                     const unsigned int varsCount, const double gamma);
+
 
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double. */
 double getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
@@ -53,7 +57,9 @@ double getStepLength(const double * const x, const double * const dx, const unsi
  * \param rnorm is the relative norm of out = |out|/max{|velocity|, |H x globalVelocity|, |w|}
  */
 void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-		    double * out, double * rnorm, const double tol);
+		    const double * s, double * out, double * rnorm, const double tol);
+// void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
+//                     double * out, double * rnorm, const double tol);
 
 
 /**
