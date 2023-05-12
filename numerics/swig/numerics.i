@@ -33,6 +33,23 @@ Example of usage:
 // basics, mostly numpy.i stuff. 
 %include start.i
 
+#if defined(SMALL_LONG)
+
+typedef long long 		    int64_t;
+typedef unsigned long long 	uint64_t;
+%apply long long { int64_t };
+%apply unsigned long long { uint64_t };
+
+#else
+
+typedef long int 		    int64_t;
+typedef unsigned long int 	uint64_t;
+%apply long int  { int64_t };
+%apply unsigned long int { uint64_t };
+
+#endif
+  
+%include "stdint.i"
 %include exception.i
 
 %{
