@@ -45,7 +45,7 @@
 
 /* From cs.h */
 #ifdef CS_LONG
-#define CS_INT int64_t
+#define CS_INT long
 #else
 #define CS_INT int
 #endif
