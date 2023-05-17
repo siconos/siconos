@@ -185,6 +185,23 @@ struct ForMu : public Question<double>
   }
 };
 
+struct ForE : public Question<double>
+{
+  using SiconosVisitor::visit;
+  void visit(const NewtonImpactFrictionNSL& nsl)
+  {
+    answer = nsl . en();
+  }
+  void visit(const NewtonImpactRollingFrictionNSL& nsl)
+  {
+    answer = nsl . en();
+  }
+  void visit(const NewtonImpactNSL& nsl)
+  {
+    answer = 0.;
+  }
+};
+
 
 /* Get contact informations */
 /* default: a visitor that do nothing */
@@ -544,100 +561,6 @@ void ContactPointVisitor::operator()(const Lagrangian2d3DR& rel)
   answer.setValue(15, id);
 };
 
-/* Get contact informations */
-/* default: a visitor that do nothing */
-struct ContactInfoVisitor : public SiconosVisitor
-{
-  SP::Interaction inter;
-  // std::vector<int> answer; better with a vector of int
-  SiconosVector answer;
-
-  template<typename T>
-  void operator()(const T& rel)
-  {
-  }
-};
-
-/* then specializations : */
-template<>
-void ContactInfoVisitor::operator()(const NewtonEuler3DR& rel)
-{
-  double id = inter->number();
-  answer.resize(10);
-  // answer[0]= id;
-  // answer[1]= 0; // reserve for ds1.number
-  // answer[2]= 0; // reserve for ds2.number
-  answer.setValue(0,id);
-  answer.setValue(1,0);
-  answer.setValue(2,0);
-
-}
-
-
-template<>
-void ContactInfoVisitor::operator()(const ContactR& rel)
-{
-  double id = inter->number();
-  answer.resize(4);
-  answer.setValue(0,id);
-  answer.setValue(1,0);
-  answer.setValue(2,0);
-  if (rel.bodyShapeRecordB->staticBody)
-  {
-    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
-  }
-  else
-    answer.setValue(3, 0);
-}
-
-template<>
-void ContactInfoVisitor::operator()(const Contact5DR& rel)
-{
-  double id = inter->number();
-  answer.resize(4);
-  answer.setValue(0,id);
-  answer.setValue(1,0);
-  answer.setValue(2,0);
-  if (rel.bodyShapeRecordB->staticBody)
-  {
-    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
-  }
-  else
-    answer.setValue(3, 0);
-}
-
-template<>
-void ContactInfoVisitor::operator()(const Contact2dR& rel)
-{
-  double id = inter->number();
-  answer.resize(4);
-  answer.setValue(0,id);
-  answer.setValue(1,0);
-  answer.setValue(2,0);
-  if (rel.bodyShapeRecordB->staticBody)
-  {
-    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
-  }
-  else
-    answer.setValue(3, 0);
-}
-
-template<>
-void ContactInfoVisitor::operator()(const Contact2d3DR& rel)
-{
-  double id = inter->number();
-  answer.resize(4);
-  answer.setValue(0,id);
-  answer.setValue(1,0);
-  answer.setValue(2,0);
-  if (rel.bodyShapeRecordB->staticBody)
-  {
-    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
-  }
-  else
-    answer.setValue(3, 0);
-}
-
 
 
 struct ContactPointDomainVisitor : public SiconosVisitor
@@ -664,6 +587,37 @@ void ContactPointDomainVisitor::operator()(const NewtonEuler3DR& rel)
   answer.setValue(0, rel.pc1()->getValue(0) > 0);
 
   answer.setValue(1, inter->number());
+}
+SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) const
+{
+  SP::SimpleMatrix result(new SimpleMatrix());
+  InteractionsGraph::VIterator vi, viend;
+  if(nsds.topology()->numberOfIndexSet() > 0)
+  {
+    InteractionsGraph& graph =
+      *nsds.topology()->indexSet(1);
+    unsigned int current_row;
+    result->resize(graph.vertices_number(), 2);
+    for(current_row=0, std::tie(vi,viend) = graph.vertices();
+        vi!=viend; ++vi, ++current_row)
+    {
+      DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+
+      typedef Visitor < Classes <
+      NewtonEuler1DR,
+      NewtonEuler3DR,
+      PrismaticJointR,
+      KneeJointR,
+      PivotJointR>,
+      ContactPointDomainVisitor>::Make DomainInspector;
+      DomainInspector inspector;
+      inspector.inter = graph.bundle(*vi);
+      graph.bundle(*vi)->relation()->accept(inspector);
+      const SiconosVector& data = inspector.answer;
+      if(data.size() == 2) result->setRow(current_row, data);
+    }
+  }
+  return result;
 }
 
 template<typename T, typename G>
@@ -789,6 +743,104 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
 
   return result;
 }
+
+/* Get contact informations */
+/* default: a visitor that do nothing */
+struct ContactInfoVisitor : public SiconosVisitor
+{
+  SP::Interaction inter;
+  // std::vector<int> answer; better with a vector of int
+  SiconosVector answer;
+
+  template<typename T>
+  void operator()(const T& rel)
+  {
+  }
+};
+
+/* then specializations : */
+template<>
+void ContactInfoVisitor::operator()(const NewtonEuler3DR& rel)
+{
+  double id = inter->number();
+  answer.resize(10);
+  // answer[0]= id;
+  // answer[1]= 0; // reserve for ds1.number
+  // answer[2]= 0; // reserve for ds2.number
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+
+}
+
+
+template<>
+void ContactInfoVisitor::operator()(const ContactR& rel)
+{
+  double id = inter->number();
+  answer.resize(4);
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+  if (rel.bodyShapeRecordB->staticBody)
+  {
+    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+  }
+  else
+    answer.setValue(3, 0);
+}
+
+template<>
+void ContactInfoVisitor::operator()(const Contact5DR& rel)
+{
+  double id = inter->number();
+  answer.resize(4);
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+  if (rel.bodyShapeRecordB->staticBody)
+  {
+    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+  }
+  else
+    answer.setValue(3, 0);
+}
+
+template<>
+void ContactInfoVisitor::operator()(const Contact2dR& rel)
+{
+  double id = inter->number();
+  answer.resize(4);
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+  if (rel.bodyShapeRecordB->staticBody)
+  {
+    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+  }
+  else
+    answer.setValue(3, 0);
+}
+
+template<>
+void ContactInfoVisitor::operator()(const Contact2d3DR& rel)
+{
+  double id = inter->number();
+  answer.resize(4);
+  answer.setValue(0,id);
+  answer.setValue(1,0);
+  answer.setValue(2,0);
+  if (rel.bodyShapeRecordB->staticBody)
+  {
+    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+  }
+  else
+    answer.setValue(3, 0);
+}
+
+
+
+
 SP::SimpleMatrix MechanicsIO::contactInfo(const NonSmoothDynamicalSystem& nsds,
     unsigned int index_set) const
 {
@@ -800,7 +852,7 @@ SP::SimpleMatrix MechanicsIO::contactInfo(const NonSmoothDynamicalSystem& nsds,
     InteractionsGraph& graph =
       *nsds.topology()->indexSet(index_set);
     unsigned int current_row;
-    result->resize(graph.vertices_number(), 25);
+    result->resize(graph.vertices_number(), 4);
 
     int data_size =0;
     for(current_row=0, std::tie(vi,viend) = graph.vertices();
@@ -851,34 +903,220 @@ SP::SimpleMatrix MechanicsIO::contactInfo(const NonSmoothDynamicalSystem& nsds,
 
   return result;
 }
-SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) const
+
+/* Get contact work information */
+/* default: a visitor that do nothing */
+
+struct ContactContactWorkVisitor : public SiconosVisitor
 {
+  SP::Interaction inter;
+  // std::vector<int> answer; better with a vector of int
+  SiconosVector answer;
+  double tol;
+  template<typename T>
+  void operator()(const T& rel)
+  {
+  }
+};
+
+/* then specializations : */
+template<>
+void ContactContactWorkVisitor::operator()(const NewtonEuler3DR& rel)
+{
+  double id = inter->number();
+  answer.resize(5);
+}
+
+static void compute_contact_work_and_status(SP::Interaction inter, double tol, SiconosVector& answer) {
+  double mu = ask<ForMu>(*inter->nonSmoothLaw());
+  double e = ask<ForE>(*inter->nonSmoothLaw());
+  // Compute normal contact work
+  double vn_minus =  inter->y_k(1).getValue(0);
+  double vn_plus = inter->y(1)->getValue(0);
+  double pn  = inter->lambda(1)->getValue(0);
+
+  double normal_contact_work = 0.5 * ( vn_minus + vn_plus)*pn;
+  answer.setValue(1,normal_contact_work);
+
+  // Compute tangent contact work of impulse
+
+  double vt_1_minus =  inter->y_k(1).getValue(1);
+  double vt_2_minus =  inter->y_k(1).getValue(2);
+  double vt_1_plus = inter->y(1)->getValue(1);
+  double vt_2_plus = inter->y(1)->getValue(2);
+
+  double pt_1  = inter->lambda(1)->getValue(1);
+  double pt_2  = inter->lambda(1)->getValue(2);
+
+  double tangent_contact_work = 0.5 * ( vt_1_minus + vt_1_plus)*pt_1 + 0.5 * (vt_2_minus + vt_2_plus)*pt_2;
+  answer.setValue(2,tangent_contact_work);
+
+  // Compute directly work dissipated by friction impulse
+  double theta=1/2.;
+  double norm_vt_plus =  sqrt(vt_1_plus*vt_1_plus+vt_2_plus*vt_2_plus);
+  double norm_vt_minus = sqrt(vt_1_minus*vt_1_minus+vt_2_minus*vt_2_minus);
+
+  double friction_dissipation = mu* (theta * norm_vt_plus  + (1-theta)*norm_vt_minus) * pn;
+  answer.setValue(3,friction_dissipation);
+  // compute contact status
+
+  double norm_pt = sqrt(pt_1*pt_1 + pt_2*pt_2);
+
+  if ( (pn < tol ) and (vn_plus + e * vn_minus > tol) )
+    answer.setValue(4,0);// take-off = 0
+  else if ( (pn > tol ) and (vn_plus + e * vn_minus  < tol) )
+    {
+      if (     (norm_pt  - mu * pn >  tol))
+	{
+	  //std::cout << "WARNING: the impulse is outside the Coulomb cone  " << std::endl;
+	  answer.setValue(4,-3);// outside the cone = -3
+	}
+      else if ( (norm_pt  - mu*pn < - tol))
+	{
+	  //std::cout << "the impulse is in the *interior* of  the Coulomb cone  " << std::endl;
+	  //std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
+	  if (norm_vt_plus > tol)
+	    {
+	      //std::cout << "WARNING: but the norm of vt is not zero  " << std::endl;
+	      answer.setValue(4,-2);// sticking with a non zero slifing velocity = -2
+	    }
+	  answer.setValue(4,1);// sticking = 1
+	}
+      else
+	{
+	  //std::cout << "the impulse is on the *boundary* of the Coulomb cone  " << std::endl;
+	  //std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
+	  answer.setValue(4,2); // sliding = 2
+	}
+    }
+  else
+    answer.setValue(4,-1);// undetermined = -1
+
+
+
+
+  // std::cout << "id "<< id << std::endl;
+  // std::cout << " e "<< e  << " mu "<< mu << std::endl;
+  // std::cout << "vn_plus "<< vn_plus << std::endl;
+  // std::cout << "vn_minus "<< vn_minus << std::endl;
+  // std::cout << "pn "<< pn << std::endl;
+  // std::cout << "normal_contact_work  "<< normal_contact_work  << std::endl;
+
+  // std::cout << "vt_plus "<< vt_1_plus << " " << vt_2_plus <<  std::endl;
+  // std::cout << "vt_minus "<< vt_1_minus << " " << vt_2_minus <<  std::endl;
+  // std::cout << "pt "<< pt_1 << " "  << pt_2 << std::endl;
+  // std::cout << "tangent_contact_work  "<< tangent_contact_work  << std::endl;
+
+  // std::cout << "friction_dissipation  "<< friction_dissipation << std::endl;
+
+  // std::cout << "norm_pt  "<< norm_pt  << std::endl;
+  // std::cout << "norm_pt - mu* pn  "<< norm_pt -mu *pn   << std::endl;
+  // std::cout << "vn_plus + e * vn_minus  "<< vn_plus + e * vn_minus   << std::endl;
+  // std::cout << "status   "<<   answer.getValue(4) << std::endl;
+}
+
+
+template<>
+void ContactContactWorkVisitor::operator()(const ContactR& rel)
+{
+  double id = inter->number();
+  answer.resize(5);
+  answer.setValue(0,id);
+  compute_contact_work_and_status(inter,  tol, answer);
+}
+
+template<>
+void ContactContactWorkVisitor::operator()(const Contact5DR& rel)
+{
+  double id = inter->number();
+  answer.resize(5);
+  answer.setValue(0,id);
+
+
+  compute_contact_work_and_status(inter,  tol, answer);
+
+}
+
+template<>
+void ContactContactWorkVisitor::operator()(const Contact2dR& rel)
+{
+  double id = inter->number();
+  answer.resize(5);
+  answer.setValue(0,id);
+
+
+  compute_contact_work_and_status(inter,  tol, answer);
+
+}
+
+template<>
+void ContactContactWorkVisitor::operator()(const Contact2d3DR& rel)
+{
+  double id = inter->number();
+  answer.resize(5);
+  answer.setValue(0,id);
+
+
+  compute_contact_work_and_status(inter,  tol, answer);
+
+}
+
+
+SP::SimpleMatrix MechanicsIO::contactContactWork(const NonSmoothDynamicalSystem& nsds,
+						 unsigned int index_set, double tol) const
+{
+  DEBUG_BEGIN("SP::SimpleMatrix MechanicsIO::contactContactWork");
   SP::SimpleMatrix result(new SimpleMatrix());
   InteractionsGraph::VIterator vi, viend;
   if(nsds.topology()->numberOfIndexSet() > 0)
   {
     InteractionsGraph& graph =
-      *nsds.topology()->indexSet(1);
+      *nsds.topology()->indexSet(index_set);
     unsigned int current_row;
-    result->resize(graph.vertices_number(), 2);
+    result->resize(graph.vertices_number(), 25);
+
+    int data_size =0;
     for(current_row=0, std::tie(vi,viend) = graph.vertices();
-        vi!=viend; ++vi, ++current_row)
+        vi!=viend; ++vi)
     {
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
-      typedef Visitor < Classes <
-      NewtonEuler1DR,
-      NewtonEuler3DR,
-      PrismaticJointR,
-      KneeJointR,
-      PivotJointR>,
-      ContactPointDomainVisitor>::Make DomainInspector;
-      DomainInspector inspector;
+      /* create a visitor for specified classes */
+      typedef Visitor < Classes < NewtonEuler3DR,
+                                  ContactR,
+                                  Contact5DR,
+                                  Contact2dR,
+                                  Contact2d3DR>,
+                        ContactContactWorkVisitor>::Make ContactContactWorkInspector;
+      ContactContactWorkInspector inspector;
       inspector.inter = graph.bundle(*vi);
+      inspector.tol = tol;
       graph.bundle(*vi)->relation()->accept(inspector);
-      const SiconosVector& data = inspector.answer;
-      if(data.size() == 2) result->setRow(current_row, data);
+      SiconosVector& data = inspector.answer;
+      data_size = data.size();
+
+      if(data_size ==0)
+      {
+        // Nothing is done since the relation does not appear as a relation
+        // related to a contact points (perhaps a joint)
+      }
+      else
+      {
+
+      }
+      if(result->size(1) != data.size())
+      {
+        result->resize(graph.vertices_number(), data.size());
+      }
+      result->setRow(current_row++, data);
+
     }
+    result->resize(current_row, data_size);
+    DEBUG_EXPR(result->display(););
+
   }
+  DEBUG_END("SP::SimpleMatrix MechanicsIO::contactContactWork");
+
+  //result->display();
   return result;
 }

@@ -824,6 +824,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['osns_assembly_type']= None
         d['output_contact_forces']=True,
         d['output_contact_info']=True,
+        d['output_contact_work']=True,
 
 
         super(self.__class__, self).__init__(d)
@@ -2130,7 +2131,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         return 0
     def output_contact_info(self):
         """
-        Outputs contact forces
+        Outputs contact infos
         _output_contact_index_set default value is 1.
         """
         if self._nsds.\
@@ -2152,6 +2153,36 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                    axis=1)
                 # return the number of contacts
                 return len(contact_info)
+            return 0
+        return 0
+
+    def output_contact_work(self):
+        """
+        Outputs contact contact_work
+        _output_contact_index_set default value is 1.
+        """
+        print("output_contact_work")
+        if self._nsds.\
+                topology().indexSetsSize() > 1:
+            time = self.current_time()
+            contact_work = self._io.contactContactWork(self._nsds,
+                                                       self._output_contact_index_set)
+            #print(contact_work)
+            if contact_work is not None:
+                current_line = self._cf_work.shape[0]
+                # Increase the number of lines in cf_data
+                # (h5 dataset with chunks)
+                self._cf_work.resize(current_line + contact_work.shape[0], 0)
+                times = np.empty((contact_work.shape[0], 1))
+                times.fill(time)
+
+                self._cf_work[current_line:, :] = \
+                    np.concatenate((times,
+                                    contact_work),
+                                   axis=1)
+                # return the number of contacts
+                #print(self._cf_contact_work[:,:])
+                return len(contact_work)
             return 0
         return 0
 
@@ -2213,6 +2244,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:
             self.print_verbose('[warning] output_contact_info is only available with bullet backend for the moment')
             self.print_verbose('          to remove this message set output_contact_info options to False')
+
+        if self._output_contact_work and backend == 'bullet':
+            self.log(self.output_contact_work, with_timer)()
+            if self._run_options['skip_last_update_output'] or self._run_options['skip_last_update_input']:
+                self.print_verbose('[warning] output_contact_work with the options skip_last_update_output=True'
+                                   ' or skip_last_update_output=True could result in wrong output')
+        else:
+            self.print_verbose('[warning] output_contact_work is only available with bullet backend for the moment')
+            self.print_verbose('          to remove this message set output_contact_work options to False')
 
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
@@ -2490,6 +2530,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             output_backup_frequency=None,
             output_contact_forces=True,
             output_contact_info=True,
+            output_contact_work=True,
             friction_contact_trace_params=None,
             output_contact_index_set=1,
             osi=sk.MoreauJeanOSI,
@@ -2697,6 +2738,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['skip_last_update_output']=skip_last_update_output
             run_options['output_contact_forces']=output_contact_forces
             run_options['output_contact_info']=output_contact_info
+            run_options['output_contact_work']=output_contact_work
 
 
 
@@ -2734,6 +2776,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if run_options['output_contact_info'] is not None:
             self._output_contact_info = run_options['output_contact_info']
+
+        if run_options['output_contact_work'] is not None:
+            self._output_contact_work = run_options['output_contact_work']
 
         if run_options['gravity_scale'] is not None:
             self._gravity_scale = run_options['gravity_scale']
