@@ -90,7 +90,8 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
   _plugin = plugin;
   _isConst = false;
   auto n = ds.n();
-  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, p, 0);
+  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, p);
+  _mat->setZero();
   _spo = std::make_shared<siconos::plugins::SubPluggedObject>(*_plugin, n, p);
   std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS)->setPluginB(_spo);
 }
@@ -102,7 +103,8 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     : MatrixIntegrator{ds, nsds, td, nullptr}
 {
   unsigned int n = ds.n();
-  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, n, 0);
+  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, n);
+  _mat->setZero();
 }
 
 void siconos::simulation::MatrixIntegrator::integrate()
@@ -121,7 +123,7 @@ void siconos::simulation::MatrixIntegrator::integrate()
   for (unsigned int i = 0; i < p; i++) {
     x0.zero();
     if (_E)
-      _E->getCol(i, *Ecol);
+      *Ecol = _E->col(i);
     else if (_plugin)
       _spo->setIndex(i);
     else

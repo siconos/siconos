@@ -87,7 +87,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-  siconos::geometry::computeRotationMatrix(q1, _rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(*q1, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
 
   siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
@@ -132,7 +132,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-  siconos::geometry::computeRotationMatrix(q1, _rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(*q1, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
   siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
@@ -156,7 +156,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG2)(2, 1) = (G2x - Px);
   (*_NPG2)(2, 2) = 0;
 
-  siconos::geometry::computeRotationMatrix(q2, _rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(*q2, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
 
   siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);

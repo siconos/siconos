@@ -23,12 +23,12 @@
 #ifndef SICOMAT_OPH
 #define SICOMAT_OPH
 #include <memory>
+#include "SimpleMatrix.hpp"
+#include "BlockMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::algebra {
 
-class SiconosMatrix;
-class SimpleMatrix;
-class BlockMatrix;
 
 /** multiply the current matrix with a scalar
  *

@@ -615,7 +615,8 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
     _atmp->resize((int)_intData[1], true);
 
   if (!_lambdatmp) {
-    _lambdatmp = std::make_shared<siconos::algebra::SiconosVector>(_intData[3], 0.0);
+    _lambdatmp = std::make_shared<siconos::algebra::SiconosVector>(_intData[3]);
+    _lambdatmp->setZero();
   } else
     _lambdatmp->resize((int)_intData[3], true);
   DEBUG_PRINTF("siconos::integrators::Hem5OSI::integrate() _intData[3] (NL) = %i \n",
@@ -679,10 +680,10 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   rtol[0] = HEM5_RTOL_DEFAULT;  // rtol
   atol[0] = HEM5_ATOL_DEFAULT;  // atol
 
-  *_qtmp = *_qWork;  // Copy into a continuous memory chuck
-  *_vtmp = *_vWork;  // Copy into a continuous memory chuck
+  *_qtmp = *(_qWork->toSiconosVector());  // Copy into a continuous memory chuck
+  *_vtmp = *(_vWork->toSiconosVector());  // Copy into a continuous memory chuck
   //*_utmp = *_uWork; // Copy into a continuous memory chuck
-  *_atmp = *_aWork;  // Copy into a continuous memory chuck
+  *_atmp = *(_aWork->toSiconosVector());  // Copy into a continuous memory chuck
 
   DEBUG_EXPR(_qtmp->display(););
   DEBUG_EXPR(_vtmp->display(););

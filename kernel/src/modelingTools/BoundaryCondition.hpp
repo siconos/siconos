@@ -20,6 +20,7 @@
 #include <memory>
 #include <vector>
 
+#include "SiconosVector.hpp"
 #include "SiconosSerialization.hpp"
 
 namespace siconos::plugins {
@@ -27,7 +28,7 @@ class PluggedObject;
 }
 
 namespace siconos::algebra {
-class SiconosVector;
+// class SiconosVector;
 }
 
 namespace siconos::modeling {

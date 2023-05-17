@@ -70,8 +70,8 @@ int siconos::nonsmooth_formulations::Equality::compute(double time)
   // - the global options for Numerics (verbose mode ...)
 
   if (_sizeOutput != 0) {
-    auto* q_ = q()->getArray();
-    auto* z_ = _z->getArray();
+    auto* q_ = q()->data();
+    auto* z_ = _z->data();
     for (decltype(_sizeOutput) i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
     // info = NM_gesv(&*_M->numericsMatrix(), z_, true);
     // info =

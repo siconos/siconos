@@ -53,8 +53,8 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
       _jachq->resize(ySize, qSize);
     } else {
       assert((_jachq->size(1) == qSize && _jachq->size(0) == ySize) ||
-             (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d "
-                     ",_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n",
+             (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %ld "
+                     ",_qsize = %d , _jachq->size(0) = %ld ,_ysize =%d \n",
                      _jachq->size(1), qSize, _jachq->size(0), ySize) &&
               false) ||
              ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between "
@@ -87,8 +87,8 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
 void siconos::modeling::NewtonEulerR::checkSize(Interaction& inter) {
   assert((_jachq->size(1) == 7 * (inter.getSizeOfDS() / 6) &&
           _jachq->size(0) == inter.dimension()) ||
-         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize "
-                 "= %d , _jachq->size(0) = %d ,_ysize =%d \n",
+         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %ld ,_qsize "
+                 "= %d , _jachq->size(0) = %ld ,_ysize =%d \n",
                  _jachq->size(1), 7 * (inter.getSizeOfDS() / 6), _jachq->size(0),
                  inter.dimension()) &&
           false) ||
@@ -298,11 +298,11 @@ void siconos::modeling::NewtonEulerR::computeDotJachq(
     double time, const siconos::algebra::BlockVector& workQ,
     siconos::algebra::BlockVector& workZ, const siconos::algebra::BlockVector& workQdot) {
   if (_dotjachq && _plugindotjacqh->fPtr) {
-    auto zp = workZ.prepareVectorForPlugin();
-    auto qp = workQ.prepareVectorForPlugin();
-    auto qdotp = workQdot.prepareVectorForPlugin();
+    auto zp = workZ.toSiconosVector();
+    auto qp = workQ.toSiconosVector();
+    auto qdotp = workQdot.toSiconosVector();
     ((siconos::plugins::FPtr2)(_plugindotjacqh->fPtr))(
-        workQ.size(), qp->getArray(), workQdot.size(), qdotp->getArray(), &(*_dotjachq)(0, 0),
+        workQ.size(), qp->data(), workQdot.size(), qdotp->data(), &(*_dotjachq)(0, 0),
         zp->size(), &(*zp)(0));
     workZ = *zp;
   }
@@ -387,8 +387,7 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   }
 
   // compute the product of jachqTdot and v
-  siconos::algebra::SiconosVector workVelocity(
-      *DSlink[siconos::modeling::NewtonEulerR::velocity]);
+  siconos::algebra::SiconosVector workVelocity = *(*DSlink[siconos::modeling::NewtonEulerR::velocity]).toSiconosVector(); // TODO : is this correct?
   DEBUG_EXPR(workVelocity.display(););
   siconos::algebra::prod(*jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());

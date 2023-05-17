@@ -26,6 +26,7 @@
 #include <map>
 #include <set>
 
+#include "SiconosVector.hpp"
 #include "NonSmoothDynamicalSystem.hpp"  // To get ChangeLogIter
 #include "SiconosConst.hpp"              // for DEFAULT_TOLERANCE
 #include "SiconosSerialization.hpp"
@@ -33,7 +34,7 @@
 // #include "InteractionManager.hpp"
 
 namespace siconos::algebra {
-class SiconosVector;
+// class SiconosVector;
 }
 
 namespace siconos::integrators {

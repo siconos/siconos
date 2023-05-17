@@ -25,10 +25,12 @@
 
 #include <memory>
 #include <vector>
+#include "SiconosVector.hpp"
+#include "BlockVector.hpp"
 
 namespace siconos::algebra {
-class BlockVector;
-class SiconosVector;
+
+// class SiconosVector;
 
 /** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
  *  of vOut (from index startOut)

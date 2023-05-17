@@ -53,13 +53,17 @@
 
 #include <memory>
 
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "BlockVector.hpp"
+#include "BlockMatrix.hpp"
 #include "SiconosException.hpp"
 
 namespace siconos::algebra {
-class SimpleMatrix;
-class BlockMatrix;
-class SiconosVector;
-class BlockVector;
+// class SimpleMatrix;
+// class BlockMatrix;
+// class SiconosVector;
+// class BlockVector;
 }  // namespace siconos::algebra
 
 // We have to declare all the classes that might be visited.

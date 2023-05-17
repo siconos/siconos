@@ -27,6 +27,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+#include "SiconosException.hpp"
 #include "siconos_debug.h"
 
 // Minimum data (C as pointer) constructor

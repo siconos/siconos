@@ -605,17 +605,17 @@ struct IsDense : public Question<bool>
   // 'plugin' functions like computeh in Relations.
   PyObject * BlockVector_to_numpy(BlockVector & v)
   {
-    return SP_SiconosVector_to_numpy(v.prepareVectorForPlugin());
+    return SP_SiconosVector_to_numpy(v.toSiconosVector());
   }
   PyObject * const_BlockVector_to_numpy(const BlockVector & v)
   {
-    return SP_SiconosVector_to_numpy(v.prepareVectorForPlugin());
+    return SP_SiconosVector_to_numpy(v.toSiconosVector());
   }
 
 
   PyObject * SP_BlockVector_to_numpy(SP::BlockVector v)
   {
-    return SP_SiconosVector_to_numpy(v->prepareVectorForPlugin());
+    return SP_SiconosVector_to_numpy(v->toSiconosVector());
   }
 }
 

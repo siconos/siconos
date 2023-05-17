@@ -32,7 +32,9 @@
 #include "SiconosVectorOp.hpp"
 #include "SimpleMatrix.hpp"
 
-namespace ublas = boost::numeric::ublas;
+// namespace ublas = boost::numeric::ublas;
+
+/*
 
 void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y,
                             bool init) {
@@ -1055,3 +1057,5 @@ void siconos::algebra::taxpy(const SiconosVector& x, const SiconosMatrix& A,
       THROW_EXCEPTION("not yet implemented for x, y  sparse and A not sparse.");
   }
 }
+
+*/

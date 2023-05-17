@@ -26,11 +26,10 @@
 #include <memory>
 #include <vector>
 
+#include "SiconosVector.hpp"
 #include "SiconosSerialization.hpp"
 
 namespace siconos::algebra {
-
-class SiconosVector;
 
 
 /**
@@ -96,14 +95,14 @@ class BlockVector {
    */
   ~BlockVector() noexcept = default;
 
-  /**
-     Set a subblock of the current vector with the content (copy) of a SiconosVector
+  // /**
+  //    Set a subblock of the current vector with the content (copy) of a SiconosVector
 
-     \param input the vector to be copied
-     \param size_block size of the block to be copied
-     \param start_in starting position in input vector of the block to be copied
-     \param start_out starting position in current vector of the block to be filled in.
-  */
+  //    \param input the vector to be copied
+  //    \param size_block size of the block to be copied
+  //    \param start_in starting position in input vector of the block to be copied
+  //    \param start_out starting position in current vector of the block to be filled in.
+  // */
   void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in,
                 unsigned int start_out);
 
@@ -128,8 +127,8 @@ class BlockVector {
   /** \return the number of SiconosVectors in the container */
   inline auto numberOfBlocks() const { return _tabIndex->size(); };
 
-  /** \return true if all SiconosVector in the container are dense **/
-  bool isDense() const;
+//   /** \return true if all SiconosVector in the container are dense **/
+//   bool isDense() const;
 
   /** sets all the values of the vector to 0.0 */
   void zero();
@@ -329,7 +328,7 @@ class BlockVector {
      1 block : link to first component of the container, more : copy of all components into a
      SiconosVector)
   */
-  std::shared_ptr<SiconosVector> prepareVectorForPlugin() const;
+  std::shared_ptr<SiconosVector> toSiconosVector() const;
 
   /** \defgroup BlockVectorFriends
 

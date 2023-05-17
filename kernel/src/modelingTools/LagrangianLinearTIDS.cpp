@@ -57,7 +57,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
     if (!_rhsMatrices[jacobianXBloc10_])
       _rhsMatrices[jacobianXBloc10_] =
           std::make_shared<siconos::algebra::SimpleMatrix>(-1 * *_K);
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10_]);
+    algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc10_]);
   } else
     _rhsMatrices[jacobianXBloc10_] = _rhsMatrices[zeroMatrix_];
 
@@ -66,7 +66,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
     if (!_rhsMatrices[jacobianXBloc11_])
       _rhsMatrices[jacobianXBloc11_] =
           std::make_shared<siconos::algebra::SimpleMatrix>(-1 * *_C);
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11_]);
+    algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc11_]);
   } else
     _rhsMatrices[jacobianXBloc11_] = _rhsMatrices[zeroMatrix_];
 

@@ -100,17 +100,17 @@ void siconos::modeling::FirstOrderType2R::computeh(
     double time, const siconos::algebra::BlockVector& x,
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::SiconosVector& y)
 {
-  auto xp = x.prepareVectorForPlugin();
-  ((Type2PtrH)(_pluginh->fPtr))(xp->size(), xp->getArray(), lambda.size(), lambda.getArray(),
-                                y.size(), y.getArray());
+  auto xp = x.toSiconosVector();
+  ((Type2PtrH)(_pluginh->fPtr))(xp->size(), xp->data(), lambda.size(), const_cast<double*>(lambda.data()),
+                                y.size(), y.data());
 }
 
 void siconos::modeling::FirstOrderType2R::computeg(
     double time, const siconos::algebra::SiconosVector& lambda,
     siconos::algebra::BlockVector& r)
 {
-  auto rp = r.prepareVectorForPlugin();
-  ((Type2PtrG)(_pluging->fPtr))(lambda.size(), lambda.getArray(), rp->size(), rp->getArray());
+  auto rp = r.toSiconosVector();
+  ((Type2PtrG)(_pluging->fPtr))(lambda.size(), const_cast<double*>(lambda.data()), rp->size(), rp->data());
   r = *rp;
 }
 

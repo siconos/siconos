@@ -62,10 +62,10 @@ void siconos::modeling::LagrangianCompliantR::computeh(
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z,
     siconos::algebra::SiconosVector& y) {
   if (_pluginh->fPtr) {
-    auto qp = q0.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
+    auto qp = q0.toSiconosVector();
+    auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr2)(_pluginh->fPtr))(
-        qp->size(), &(*qp)(0), y.size(), lambda.getArray(), &(y)(0), zp->size(), &(*zp)(0));
+        qp->size(), &(*qp)(0), y.size(), const_cast<double*>(lambda.data()), &(y)(0), zp->size(), &(*zp)(0));
     z = *zp;
   }
 }
@@ -74,10 +74,10 @@ void siconos::modeling::LagrangianCompliantR::computeJachq(
     double time, const siconos::algebra::BlockVector& q0,
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z) {
   if (_jachq && _pluginJachq->fPtr) {
-    auto qp = q0.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
+    auto qp = q0.toSiconosVector();
+    auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr2)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), lambda.size(),
-                                                    lambda.getArray(), &(*_jachq)(0, 0),
+                                                    const_cast<double*>(lambda.data()), &(*_jachq)(0, 0),
                                                     zp->size(), &(*zp)(0));
     z = *zp;
   }
@@ -87,10 +87,10 @@ void siconos::modeling::LagrangianCompliantR::computeJachlambda(
     double time, const siconos::algebra::BlockVector& q0,
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z) {
   if (_jachlambda && _pluginJachlambda->fPtr) {
-    auto qp = q0.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
+    auto qp = q0.toSiconosVector();
+    auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr2)_pluginJachlambda->fPtr)(
-        qp->size(), &(*qp)(0), lambda.size(), lambda.getArray(), &(*_jachlambda)(0, 0),
+        qp->size(), &(*qp)(0), lambda.size(), const_cast<double*>(lambda.data()), &(*_jachlambda)(0, 0),
         zp->size(), &(*zp)(0));
     z = *zp;
   }

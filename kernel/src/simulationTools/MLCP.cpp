@@ -177,7 +177,7 @@ int siconos::nonsmooth_formulations::MLCP::solve()
   // Note FP : wrap call to numerics solver inside this function
   // for python API (e.g. to allow profiling without C struct handling)
 
-  _numerics_problem->q = _q->getArray();
+  _numerics_problem->q = _q->data();
   _numerics_problem->M = &*_M->numericsMatrix();
   _numerics_problem->n = _n;
   _numerics_problem->m = _m;
@@ -197,8 +197,8 @@ int siconos::nonsmooth_formulations::MLCP::solve()
   DEBUG_EXPR(display(););
 
   // Call MLCP Driver
-  int info = mlcp_driver(&*_numerics_problem, _z->getArray(),
-                                            _w->getArray(), &*_numerics_solver_options);
+  int info = mlcp_driver(&*_numerics_problem, _z->data(),
+                                            _w->data(), &*_numerics_solver_options);
 
   return info;
 }

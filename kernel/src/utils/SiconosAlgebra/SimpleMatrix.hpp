@@ -25,11 +25,10 @@
 // #include <iosfwd>  // for ostream
 
 #include "SiconosMatrix.hpp"         // for SiconosMatrix, MATRIX_UBL...
+#include "SiconosVector.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 
 namespace siconos::algebra {
-
-class BlockVector;
 
 /**
    Matrix (embedded various types of Boost matrices of double)
@@ -45,6 +44,12 @@ class BlockVector;
 
 */
 using SimpleMatrix = SiconosMatrix;
+
+void normInfByColumn(const SimpleMatrix &m, SiconosVector &v);
+
+void solveInPlace(SimpleMatrix &A, SimpleMatrix &B);
+
+void solveInPlace(SimpleMatrix &A, SimpleMatrix &&B);
 
 }  // namespace siconos::algebra
 

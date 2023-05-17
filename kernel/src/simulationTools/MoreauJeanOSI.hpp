@@ -23,6 +23,7 @@
 
 #include <limits>
 
+#include "SiconosVector.hpp"
 #include "OneStepIntegrator.hpp"
 #include "SiconosVisitor.hpp"
 // namespace siconos::internal {
@@ -30,10 +31,6 @@
 // class SiconosVisitor;
 // }
 
-namespace siconos::algebra {
-
-class SiconosVector;
-}
 
 namespace siconos::modeling {
 

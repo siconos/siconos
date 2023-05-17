@@ -24,10 +24,6 @@
 
 #include "NonSmoothLaw.hpp"
 
-namespace siconos::algebra{
-  class SiconosVector;
-  class SimpleMatrix;
-}
 
 namespace siconos::modeling {
 /**

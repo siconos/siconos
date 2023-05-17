@@ -94,7 +94,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
       /* vFree contains left (right limit) acceleration without contact force */
       if (d->inverseMass()) {
         d->update_inverse_mass();
-        d->inverseMass()->Solve(vFree);
+        siconos::algebra::solveInPlace(*(d->inverseMass()), vFree);
       }
 
       work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
@@ -136,8 +136,8 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
       if (d->inverseMass()) {
         d->update_inverse_mass();
-        d->inverseMass()->Solve(
-            vFree);  // contains left (right limit) acceleration without contact force
+        siconos::algebra::solveInPlace(*(d->inverseMass()), vFree);
+        // contains left (right limit) acceleration without contact force
       }
 
       work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
@@ -229,7 +229,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
       /* we homogenize p(2) to a force for the user output   */
       p2 /= h;
       if (d->inverseMass()) {
-        d->inverseMass()->Solve(dummy);
+        siconos::algebra::solveInPlace(*(d->inverseMass()), dummy);
         DEBUG_EXPR(d->inverseMass()->display(););
       }
       DEBUG_EXPR(vFree.display());
@@ -276,7 +276,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
       if (d->inverseMass()) {
         d->update_inverse_mass();
-        d->inverseMass()->Solve(dummy);
+        siconos::algebra::solveInPlace(*(d->inverseMass()), dummy);
       }
 
       DEBUG_EXPR(vFree.display());
@@ -397,7 +397,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(*work_tdg);
+          siconos::algebra::solveInPlace(*(d->inverseMass()), *work_tdg);
           // contains right (left limit) acceleration without contact force
         }
 
@@ -423,7 +423,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(*work_tdg);
+          siconos::algebra::solveInPlace(*(d->inverseMass()), *work_tdg);
           // contains right (left limit) acceleration without contact force
         }
 
@@ -464,7 +464,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(vFree);
+          siconos::algebra::solveInPlace(*(d->inverseMass()), vFree);
         }
         /* vFree contains right (left limit) acceleration without contact force */
         auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
@@ -495,7 +495,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(vFree);
+          siconos::algebra::solveInPlace(*(d->inverseMass()), vFree);
         }
         /* work_tdg contains right (left limit) acceleration without contact force */
         auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
@@ -565,7 +565,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
 
           if (d->inverseMass()) {
             d->update_inverse_mass();
-            d->inverseMass()->Solve(dummy);
+            siconos::algebra::solveInPlace(*(d->inverseMass()), dummy);
           }
           residuFree -= dummy;
         }
@@ -582,7 +582,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
           p2 *= 2.0 / h;
           if (d->inverseMass()) {
             d->update_inverse_mass();
-            d->inverseMass()->Solve(dummy);
+            siconos::algebra::solveInPlace(*(d->inverseMass()), dummy);
           }
           residuFree -= dummy;
         }

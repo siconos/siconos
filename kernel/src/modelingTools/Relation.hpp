@@ -24,13 +24,16 @@
 #define RELATION_H
 #include <memory>
 #include <string>
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "BlockVector.hpp"
 
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 
 namespace siconos::algebra {
-class SimpleMatrix;
-class SiconosVector;
-class BlockVector;
+// class SimpleMatrix;
+// class SiconosVector;
+// class BlockVector;
 }  // namespace siconos::algebra
 
 namespace siconos::plugins {

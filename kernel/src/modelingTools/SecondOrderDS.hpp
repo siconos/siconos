@@ -27,9 +27,9 @@
 
 #include "DynamicalSystem.hpp"
 #include "SiconosException.hpp"
+#include "SimpleMatrix.hpp"
 
 namespace siconos::algebra {
-class SimpleMatrix;
 
 }
 

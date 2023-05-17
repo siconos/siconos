@@ -72,7 +72,7 @@ int siconos::nonsmooth_formulations::LCP::solve()
 
   // The LCP in Numerics format
   _numerics_problem->M = &*_M->numericsMatrix();
-  _numerics_problem->q = _q->getArray();
+  _numerics_problem->q = _q->data();
   _numerics_problem->size = _sizeOutput;
   int info = 0;
   // const char * name = &*_numerics_solver_options->solverName;
@@ -83,7 +83,7 @@ int siconos::nonsmooth_formulations::LCP::solve()
 
   // Call LCP Driver
   info = linearComplementarity_driver(
-      &*_numerics_problem, _z->getArray(), _w->getArray(), &*_numerics_solver_options);
+      &*_numerics_problem, _z->data(), _w->data(), &*_numerics_solver_options);
 
   if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM) {
     lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);

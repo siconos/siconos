@@ -23,15 +23,14 @@
 #ifndef SICOMATVEC_OPH
 #define SICOMATVEC_OPH
 
-#include <boost/numeric/ublas/fwd.hpp>
+// #include <boost/numeric/ublas/fwd.hpp>
+#include "SimpleMatrix.hpp"
 #include <complex>
+#include "SiconosVector.hpp"
+#include "BlockVector.hpp"
 
 namespace siconos::algebra {
 
-class BlockVector;
-class SiconosVector;
-class SiconosMatrix;
-class SimpleMatrix;
 
 /** compute the product m1 * trans(m2)
  *  \param 2 SiconosVectors
@@ -130,13 +129,13 @@ int syev(SiconosVector& eigenval, SiconosMatrix& eigenvec, bool withVect = true)
  *  \param[in] withRight : true if right  eigenvectors are to be computed (default = true).
  *  \return int : return value from lapack routine. 0 if succesful.
  */
-int geev(SiconosMatrix& input_mat,
-         boost::numeric::ublas::vector<std::complex<double>>& eigenval,
-         boost::numeric::ublas::matrix<std::complex<double>,
-                                       boost::numeric::ublas::column_major>& left_eigenvec,
-         boost::numeric::ublas::matrix<std::complex<double>,
-                                       boost::numeric::ublas::column_major>& right_eigenvec,
-         bool withLeft = false, bool withRight = true);
+// int geev(SiconosMatrix& input_mat,
+//          boost::numeric::ublas::vector<std::complex<double>>& eigenval,
+//          boost::numeric::ublas::matrix<std::complex<double>,
+//                                        boost::numeric::ublas::column_major>& left_eigenvec,
+//          boost::numeric::ublas::matrix<std::complex<double>,
+//                                        boost::numeric::ublas::column_major>& right_eigenvec,
+//          bool withLeft = false, bool withRight = true);
 
 }  // namespace siconos::algebra
 

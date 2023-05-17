@@ -174,7 +174,7 @@ void siconos::modeling::FirstOrderLinearR::computeC(double time,
                                                     siconos::algebra::BlockVector &z,
                                                     siconos::algebra::SimpleMatrix &C) {
   if (_pluginJachx->fPtr) {
-    auto zp = z.prepareVectorForPlugin();
+    auto zp = z.toSiconosVector();
     ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.size(0), C.size(1), &(C)(0, 0), zp->size(),
                                       &(*zp)(0));
     z = *zp;
@@ -185,7 +185,7 @@ void siconos::modeling::FirstOrderLinearR::computeD(double time,
                                                     siconos::algebra::BlockVector &z,
                                                     siconos::algebra::SimpleMatrix &D) {
   if (_pluginJachlambda->fPtr) {
-    auto zp = z.prepareVectorForPlugin();
+    auto zp = z.toSiconosVector();
     ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, D.size(0), D.size(1), &(D)(0, 0), zp->size(),
                                            &(*zp)(0));
     z = *zp;
@@ -196,7 +196,7 @@ void siconos::modeling::FirstOrderLinearR::computeF(double time,
                                                     siconos::algebra::BlockVector &z,
                                                     siconos::algebra::SimpleMatrix &F) {
   if (_pluginf->fPtr) {
-    auto zp = z.prepareVectorForPlugin();
+    auto zp = z.toSiconosVector();
     ((FOMatPtr1)(_pluginf->fPtr))(time, F.size(0), F.size(1), &(F)(0, 0), zp->size(),
                                   &(*zp)(0));
     z = *zp;
@@ -207,7 +207,7 @@ void siconos::modeling::FirstOrderLinearR::computee(double time,
                                                     siconos::algebra::BlockVector &z,
                                                     siconos::algebra::SiconosVector &e) {
   if (_plugine->fPtr) {
-    auto zp = z.prepareVectorForPlugin();
+    auto zp = z.toSiconosVector();
     ((FOVecPtr)_plugine->fPtr)(time, e.size(), &(e)(0), zp->size(), &(*zp)(0));
     z = *zp;
   }
@@ -217,7 +217,7 @@ void siconos::modeling::FirstOrderLinearR::computeB(double time,
                                                     siconos::algebra::BlockVector &z,
                                                     siconos::algebra::SimpleMatrix &B) {
   if (_pluginJacglambda->fPtr) {
-    auto zp = z.prepareVectorForPlugin();
+    auto zp = z.toSiconosVector();
     ((FOMatPtr1)_pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), zp->size(),
                                          &(*zp)(0));
     z = *zp;
@@ -232,7 +232,7 @@ void siconos::modeling::FirstOrderLinearR::computeh(
     computeC(time, z, *_C);
     siconos::algebra::prod(*_C, x, y, true);
   } else
-    y.zero();
+    y.setZero();
 
   if (_D) {
     computeD(time, z, *_D);

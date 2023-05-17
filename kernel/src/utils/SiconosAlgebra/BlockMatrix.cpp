@@ -17,76 +17,35 @@
  */
 
 #include "BlockMatrix.hpp"
-#include <boost/numeric/ublas/banded.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>  // subrange ...
 #include "SiconosMatrixOp.hpp"  // For setBlock, isComparableto ...
 #include "SiconosAlgebraTools.hpp"  // for isComparableTo
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosException.hpp"
 
 // =================================================
 //                CONSTRUCTORS
 // =================================================
 
 siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m)
-    : SiconosMatrix(UblasType::BLOCK), _dimRow(0), _dimCol(0)
 {
   _tabRow = std::make_shared<std::vector<std::size_t>>();
   _tabCol = std::make_shared<std::vector<std::size_t>>();
-  if (m.isBlock()) {
-    const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
-    unsigned int nbRows = m.numberOfBlocks(0);
-    unsigned int nbCols = m.numberOfBlocks(1);
-    _tabRow->reserve(nbRows);
-    _tabCol->reserve(nbCols);
+  
+  _tabRow->reserve(1);
+  _tabCol->reserve(1);
+  // _mat construction
+  _mat = std::make_shared<BlocksMatrix>();
+  _mat->setValue(0, 0, std::make_shared<SimpleMatrix>(m));
 
-    // mat construction
-    _mat = std::make_shared<BlocksMatrix>(nbRows, nbCols, nbRows * nbCols);
-
-    unsigned int i, j;
-    bool firstLoop = true;
-    // We scan all the blocks of m ...
-    for (auto it1 = mB._mat->begin1(); it1 != mB._mat->end1(); ++it1) {
-      _dimRow += (*(it1.begin()))->size(0);
-      _tabRow->push_back(_dimRow);
-      for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-        i = it2.index1();
-        j = it2.index2();
-        if ((*it2)->isBlock())  // if the current matrix is a blockMatrix
-          _mat->insert_element(i, j, std::make_shared<BlockMatrix>(**it2));
-        else
-          _mat->insert_element(i, j, std::make_shared<SimpleMatrix>(**it2));
-        // _dimCol must be incremented only at first "column-loop"
-        if (firstLoop) {
-          _dimCol += (*it2)->size(1);
-          _tabCol->push_back(_dimCol);
-        }
-      }
-      firstLoop = false;
-    }
-  }
-  else  // if m is a SimpleMatrix
-  {
-    _tabRow->reserve(1);
-    _tabCol->reserve(1);
-    // _mat construction
-    _mat = std::make_shared<BlocksMatrix>(1, 1, 1);
-    _mat->insert_element(0, 0, std::make_shared<SimpleMatrix>(m));
-
-    _dimRow = m.size(0);
-    _dimCol = m.size(1);
-    _tabRow->push_back(_dimRow);
-    _tabCol->push_back(_dimCol);
-  }
+  _dimRow = m.size(0);
+  _dimCol = m.size(1);
+  _tabRow->push_back(_dimRow);
+  _tabCol->push_back(_dimCol);
 }
 
 siconos::algebra::BlockMatrix::BlockMatrix(const BlockMatrix &m)
-    : SiconosMatrix(UblasType::BLOCK), _dimRow(0), _dimCol(0)
 {
   unsigned int nbRows = m.numberOfBlocks(0);
   unsigned int nbCols = m.numberOfBlocks(1);
@@ -96,36 +55,31 @@ siconos::algebra::BlockMatrix::BlockMatrix(const BlockMatrix &m)
   _tabCol->reserve(nbCols);
 
   // _mat construction
-  _mat = std::make_shared<BlocksMatrix>(nbRows, nbCols, nbRows * nbCols);
+  _mat = std::make_shared<BlocksMatrix>();
 
-  unsigned int i, j;
+  unsigned int i = 0, j = 0;
   // We scan all the blocks of m ...
   bool firstLoop = true;
   // We scan all the blocks of m ...
-  for (auto it1 = m._mat->begin1(); it1 != m._mat->end1(); ++it1) {
-    _dimRow += (*(it1.begin()))->size(0);
+  for (auto row : m._mat->rowwise()) {
+    _dimRow += row.size();
     _tabRow->push_back(_dimRow);
-    for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-      i = it2.index1();
-      j = it2.index2();
-      if ((*it2)->isBlock())  // if the current _matrix is a blockMatrix
-        _mat->insert_element(i, j, std::make_shared<BlockMatrix>(**it2));
-      else
-        _mat->insert_element(i, j, std::make_shared<SimpleMatrix>(**it2));
-
+    for (auto col : row) {
+        (*_mat)(i, j) = col;
       // _dimCol must be incremented only at first "column-loop"
       if (firstLoop) {
-        _dimCol += (*it2)->size(1);
+        _dimCol += col->size(1);
         _tabCol->push_back(_dimCol);
       }
+      ++j;
     }
+    ++i;
     firstLoop = false;
   }
 }
 
 siconos::algebra::BlockMatrix::BlockMatrix(
     const std::vector<std::shared_ptr<SiconosMatrix>> &m, unsigned int row, unsigned int col)
-    : SiconosMatrix(UblasType::BLOCK), _dimRow(0), _dimCol(0)
 {
   if (m.size() != (row * col))
     THROW_EXCEPTION("number of blocks inconsistent with provided dimensions.");
@@ -136,7 +90,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(
   _tabCol->reserve(col);
 
   // _mat construction
-  _mat = std::make_shared<BlocksMatrix>(row, col, row * col);
+  _mat = std::make_shared<BlocksMatrix>();
 
   unsigned int k = 0;
   bool firstRowLoop = true;
@@ -166,7 +120,6 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> A,
                                            std::shared_ptr<SiconosMatrix> B,
                                            std::shared_ptr<SiconosMatrix> C,
                                            std::shared_ptr<SiconosMatrix> D)
-    : SiconosMatrix(UblasType::BLOCK), _dimRow(0), _dimCol(0)
 {
   if (A->size(0) != B->size(0) || C->size(0) != D->size(0) || A->size(1) != C->size(1) ||
       B->size(1) != D->size(1))
@@ -176,7 +129,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> A,
   //       [ C D ]
 
   // _mat construction
-  _mat = std::make_shared<BlocksMatrix>(2, 2, 4);
+  _mat = std::make_shared<BlocksMatrix>();
 
   _tabRow = std::make_shared<std::vector<std::size_t>>();
   _tabCol = std::make_shared<std::vector<std::size_t>>();
@@ -199,7 +152,8 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> A,
 
 siconos::algebra::BlockMatrix::~BlockMatrix() noexcept
 {
-  _mat->clear();
+  _mat->resize(0, 0);
+  _mat = nullptr;
 
   _tabRow->clear();
   _tabCol->clear();
@@ -221,178 +175,11 @@ unsigned int siconos::algebra::BlockMatrix::numberOfBlocks(unsigned int dim) con
 //        get Ublas component (dense ...)
 // =================================================
 
-// return the boost dense _matrix of the block (i, j)
-const siconos::algebra::DenseMat siconos::algebra::BlockMatrix::getDense(
-    unsigned int row, unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-
-  if (tmp->num() != UblasType::DENSE)
-    THROW_EXCEPTION("the matrix at (row, col) is not a Dense matrix");
-
-  return (tmp->getDense());
-}
-
-// return the boost triangular matrix of the block (i, j)
-const siconos::algebra::TriangMat siconos::algebra::BlockMatrix::getTriang(
-    unsigned int row, unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::TRIANGULAR) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Triangular matrix");
-  }
-  return (tmp->getTriang());
-}
-
-// return the boost symmetric matrix of the block (i, j)
-const siconos::algebra::SymMat siconos::algebra::BlockMatrix::getSym(unsigned int row,
-                                                                     unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::SYMMETRIC) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Symmmetric matrix");
-  }
-  return (tmp->getSym());
-}
-
-// return the boost sparse matrix of the block (i, j)
-const siconos::algebra::SparseMat siconos::algebra::BlockMatrix::getSparse(
-    unsigned int row, unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::SPARSE) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Sparse matrix");
-  }
-  return (tmp->getSparse());
-}
-
-// return the boost sparse matrix of the block (i, j)
-const siconos::algebra::SparseCoordinateMat siconos::algebra::BlockMatrix::getSparseCoordinate(
-    unsigned int row, unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::SPARSE_COORDINATE) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Sparse matrix");
-  }
-  return (tmp->getSparseCoordinate());
-}
-// return the boost banded matrix of the block (i, j)
-const siconos::algebra::BandedMat siconos::algebra::BlockMatrix::getBanded(
-    unsigned int row, unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::BANDED) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Banded matrix");
-  }
-  return (tmp->getBanded());
-}
-
-// return the boost zero matrix of the block (i, j)
-const siconos::algebra::ZeroMat siconos::algebra::BlockMatrix::getZero(unsigned int row,
-                                                                       unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::ZERO) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Zero matrix");
-  }
-  return (tmp->getZero());
-}
-
-// return the boost identity matrix of the block (i, j)
-const siconos::algebra::IdentityMat siconos::algebra::BlockMatrix::getIdentity(
-    unsigned int row, unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::IDENTITY) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Identity matrix");
-  }
-  return (tmp->getIdentity());
-}
-
-// The following functions return the corresponding pointers
-siconos::algebra::DenseMat *siconos::algebra::BlockMatrix::dense(unsigned int row,
-                                                                 unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::DENSE) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Dense matrix");
-  }
-
-  return (tmp->dense());
-}
-
-siconos::algebra::TriangMat *siconos::algebra::BlockMatrix::triang(unsigned int row,
-                                                                   unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::TRIANGULAR) {
-    THROW_EXCEPTION("The matrix at (row, col) is not a Triangular matrix");
-  }
-  return (tmp->triang());
-}
-siconos::algebra::SymMat *siconos::algebra::BlockMatrix::sym(unsigned int row,
-                                                             unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::SYMMETRIC) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Symmmetric matrix");
-  }
-  return (tmp->sym());
-}
-
-siconos::algebra::SparseMat *siconos::algebra::BlockMatrix::sparse(unsigned int row,
-                                                                   unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::SPARSE) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Sparse matrix");
-  }
-  return (tmp->sparse());
-}
-siconos::algebra::SparseCoordinateMat *siconos::algebra::BlockMatrix::sparseCoordinate(
-    unsigned int row, unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::SPARSE_COORDINATE) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Sparse coordinate matrix");
-  }
-  return (tmp->sparseCoordinate());
-}
-
-siconos::algebra::BandedMat *siconos::algebra::BlockMatrix::banded(unsigned int row,
-                                                                   unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::BANDED) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Banded matrix");
-  }
-  return (tmp->banded());
-}
-
-siconos::algebra::ZeroMat *siconos::algebra::BlockMatrix::zero_mat(unsigned int row,
-                                                                   unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::ZERO) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Zero matrix");
-  }
-  return (tmp->zero_mat(row, col));
-}
-
-siconos::algebra::IdentityMat *siconos::algebra::BlockMatrix::identity(unsigned int row,
-                                                                       unsigned int col) const
-{
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(row, col);
-  if (tmp->num() != UblasType::IDENTITY) {
-    THROW_EXCEPTION("the matrix at (row, col) is not a Identity matrix");
-  }
-  return (tmp->identity());
-}
 
 double *siconos::algebra::BlockMatrix::getArray(unsigned int i, unsigned int j) const
 {
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(i, j);
-  return tmp->getArray();
+  return tmp->data();
 }
 
 // ===========================
@@ -401,31 +188,32 @@ double *siconos::algebra::BlockMatrix::getArray(unsigned int i, unsigned int j) 
 
 void siconos::algebra::BlockMatrix::zero()
 {
-  for (auto it = _mat->begin1(); it != _mat->end1(); ++it) {
-    for (auto it2 = it.begin(); it2 != it.end(); ++it2) {
-      (*it2)->zero();
-    }
+  for (auto it : _mat->reshaped() ) {
+    it->zero();
   }
 }
 
 void siconos::algebra::BlockMatrix::randomize()
 {
-  for (auto it = _mat->begin1(); it != _mat->end1(); ++it) {
-    for (auto it2 = it.begin(); it2 != it.end(); ++it2) {
-      (*it2)->randomize();
-    }
+  for (auto it : _mat->reshaped()) {
+    // auto nrows = it->rows();
+    // auto ncols = it->cols();
+    it->setRandom();
   }
 }
 
 void siconos::algebra::BlockMatrix::eye()
 {
-  for (auto it = _mat->begin1(); it != _mat->end1(); ++it) {
-    for (auto it2 = it.begin(); it2 != it.end(); ++it2) {
-      if (it2.index1() == it2.index2())
-        (*it2)->eye();
+  int i = 0, j = 0;
+  for (auto row : _mat->rowwise()) {
+    for (auto col : row) {
+      if (i == j)
+        col->setIdentity();
       else
-        (*it2)->zero();
+        col->setZero();
+      ++j;
     }
+    ++i;
   }
 }
 
@@ -472,9 +260,9 @@ void siconos::algebra::BlockMatrix::display(void) const
 {
   std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1)
             << " blocks): \n";
-  for (auto it = _mat->begin1(); it != _mat->end1(); ++it) {
-    for (auto it2 = it.begin(); it2 != it.end(); ++it2) {
-      (*it2)->display();
+  for (auto row : _mat->rowwise()) {
+    for (auto col : row) {
+      col->display();
     }
   }
   std::cout << "=============================================================================="
@@ -484,9 +272,9 @@ void siconos::algebra::BlockMatrix::displayExpert(bool brief) const
 {
   std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1)
             << " blocks): \n";
-  for (auto it = _mat->begin1(); it != _mat->end1(); ++it) {
-    for (auto it2 = it.begin(); it2 != it.end(); ++it2) {
-      (*it2)->displayExpert(brief);
+  for (auto row : _mat->rowwise()) {
+    for (auto col : row) {
+      // col->displayExpert(brief); // TODO
     }
   }
   std::cout << "=============================================================================="
@@ -500,11 +288,11 @@ void siconos::algebra::BlockMatrix::displayExpert(bool brief) const
 std::ostream &siconos::algebra::operator<<(std::ostream &os, const BlockMatrix &bm)
 {
   os << "[" << bm.numberOfBlocks(0) << "," << bm.numberOfBlocks(1) << "](";
-  for (auto it = bm._mat->begin1(); it != bm._mat->end1(); ++it) {
-    for (auto it2 = it.begin(); it2 != it.end(); ++it2) {
-      if (it2 != it.begin()) os << ",";
-      if (*it2)
-        os << **it2;
+  for (auto row : bm._mat->rowwise()) {
+    for (auto col : row) {
+      if (col != *row.begin()) os << ",";
+      if (col)
+        os << *col;
       else
         os << "(nil)";
     }
@@ -597,400 +385,395 @@ void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
 // Access (get or set) to blocks of elements
 //============================================
 
-void siconos::algebra::BlockMatrix::getRow(unsigned int r, SiconosVector &v) const
-{
-  unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
+// void siconos::algebra::BlockMatrix::getRow(unsigned int r, SiconosVector &v) const
+// {
+//   unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
 
-  if (r > _dimRow) THROW_EXCEPTION("row number is out of range");
+//   if (r > _dimRow) THROW_EXCEPTION("row number is out of range");
 
-  // Verification of the size of the result vector
-  if (v.size() != _dimCol) THROW_EXCEPTION("inconsistent sizes");
+//   // Verification of the size of the result vector
+//   if (v.size() != _dimCol) THROW_EXCEPTION("inconsistent sizes");
 
-  // Find the row-block number where "r" is
-  while (r >= (*_tabRow)[numRow] && numRow < _tabRow->size()) numRow++;
+//   // Find the row-block number where "r" is
+//   while (r >= (*_tabRow)[numRow] && numRow < _tabRow->size()) numRow++;
 
-  // Computation of the value of the index row into this block
-  if (numRow != 0) posRow -= (*_tabRow)[numRow - 1];
+//   // Computation of the value of the index row into this block
+//   if (numRow != 0) posRow -= (*_tabRow)[numRow - 1];
 
-  for (unsigned int j = 0; j < _tabCol->size(); j++) {
-    start = stop;
-    std::shared_ptr<SiconosMatrix> tmp = (*_mat)(numRow, j);
-    stop += tmp->size(1);
-    boost::numeric::ublas::subrange(*(v.dense()), start, stop) =
-        boost::numeric::ublas::row(*(tmp->dense()), posRow);
-  }
-}
+//   for (unsigned int j = 0; j < _tabCol->size(); j++) {
+//     start = stop;
+//     std::shared_ptr<SiconosMatrix> tmp = (*_mat)(numRow, j);
+//     stop += tmp->size(1);
+//     boost::numeric::ublas::subrange(*(v.dense()), start, stop) =
+//         boost::numeric::ublas::row(*(tmp->dense()), posRow);
+//   }
+// }
 
-void siconos::algebra::BlockMatrix::getCol(unsigned int c, SiconosVector &v) const
-{
-  unsigned int numCol = 0, posCol = c, start = 0, stop = 0;
+// void siconos::algebra::BlockMatrix::getCol(unsigned int c, SiconosVector &v) const
+// {
+//   unsigned int numCol = 0, posCol = c, start = 0, stop = 0;
 
-  if (c > _dimCol) THROW_EXCEPTION("column number is out of range");
+//   if (c > _dimCol) THROW_EXCEPTION("column number is out of range");
 
-  // Verification of the size of the result vector
-  if (v.size() != _dimRow) THROW_EXCEPTION("inconsistent sizes");
+//   // Verification of the size of the result vector
+//   if (v.size() != _dimRow) THROW_EXCEPTION("inconsistent sizes");
 
-  // Find the column-block number where "c" is
-  while (c >= (*_tabCol)[numCol] && numCol < _tabCol->size()) numCol++;
+//   // Find the column-block number where "c" is
+//   while (c >= (*_tabCol)[numCol] && numCol < _tabCol->size()) numCol++;
 
-  // Computation of the value of the index column into this block
-  if (numCol != 0) posCol -= (*_tabCol)[numCol - 1];
+//   // Computation of the value of the index column into this block
+//   if (numCol != 0) posCol -= (*_tabCol)[numCol - 1];
 
-  for (unsigned int i = 0; i < _tabRow->size(); i++) {
-    start = stop;
-    std::shared_ptr<SiconosMatrix> tmp = (*_mat)(i, numCol);
-    stop += tmp->size(0);
-    boost::numeric::ublas::subrange(*(v.dense()), start, stop) =
-        boost::numeric::ublas::column(tmp->getDense(), posCol);
-  }
-}
+//   for (unsigned int i = 0; i < _tabRow->size(); i++) {
+//     start = stop;
+//     std::shared_ptr<SiconosMatrix> tmp = (*_mat)(i, numCol);
+//     stop += tmp->size(0);
+//     boost::numeric::ublas::subrange(*(v.dense()), start, stop) =
+//         boost::numeric::ublas::column(tmp->getDense(), posCol);
+//   }
+// }
 
-void siconos::algebra::BlockMatrix::setRow(unsigned int r, const SiconosVector &v)
-{
-  unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
+// void siconos::algebra::BlockMatrix::setRow(unsigned int r, const SiconosVector &v)
+// {
+//   unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
 
-  if (v.size() != _dimCol) THROW_EXCEPTION("inconsistent sizes");
+//   if (v.size() != _dimCol) THROW_EXCEPTION("inconsistent sizes");
 
-  while (r >= (*_tabRow)[numRow] && numRow < _tabRow->size()) numRow++;
+//   while (r >= (*_tabRow)[numRow] && numRow < _tabRow->size()) numRow++;
 
-  if (numRow != 0) posRow -= (*_tabRow)[numRow - 1];
+//   if (numRow != 0) posRow -= (*_tabRow)[numRow - 1];
 
-  for (unsigned int j = 0; j < _tabCol->size(); j++) {
-    start = stop;
-    std::shared_ptr<SiconosMatrix> tmp = (*_mat)(numRow, j);
-    stop += tmp->size(1);
-    boost::numeric::ublas::row(*(tmp->dense()), posRow) =
-        boost::numeric::ublas::subrange(*(v.dense()), start, stop);
-  }
-}
+//   for (unsigned int j = 0; j < _tabCol->size(); j++) {
+//     start = stop;
+//     std::shared_ptr<SiconosMatrix> tmp = (*_mat)(numRow, j);
+//     stop += tmp->size(1);
+//     boost::numeric::ublas::row(*(tmp->dense()), posRow) =
+//         boost::numeric::ublas::subrange(*(v.dense()), start, stop);
+//   }
+// }
 
-void siconos::algebra::BlockMatrix::setCol(unsigned int col, const SiconosVector &v)
-{
-  unsigned int numCol = 0, posCol = col, start = 0, stop = 0;
+// void siconos::algebra::BlockMatrix::setCol(unsigned int col, const SiconosVector &v)
+// {
+//   unsigned int numCol = 0, posCol = col, start = 0, stop = 0;
 
-  if (v.size() != _dimRow) THROW_EXCEPTION("inconsistent sizes");
+//   if (v.size() != _dimRow) THROW_EXCEPTION("inconsistent sizes");
 
-  while (col >= (*_tabCol)[numCol] && numCol < _tabCol->size()) numCol++;
+//   while (col >= (*_tabCol)[numCol] && numCol < _tabCol->size()) numCol++;
 
-  if (numCol != 0) posCol -= (*_tabCol)[numCol - 1];
+//   if (numCol != 0) posCol -= (*_tabCol)[numCol - 1];
 
-  for (unsigned int i = 0; i < _tabRow->size(); i++) {
-    start = stop;
-    std::shared_ptr<SiconosMatrix> tmp = (*_mat)(i, numCol);
-    stop += tmp->size(0);
-    boost::numeric::ublas::column(*(tmp->dense()), posCol) =
-        boost::numeric::ublas::subrange(*(v.dense()), start, stop);
-  }
-}
+//   for (unsigned int i = 0; i < _tabRow->size(); i++) {
+//     start = stop;
+//     std::shared_ptr<SiconosMatrix> tmp = (*_mat)(i, numCol);
+//     stop += tmp->size(0);
+//     boost::numeric::ublas::column(*(tmp->dense()), posCol) =
+//         boost::numeric::ublas::subrange(*(v.dense()), start, stop);
+//   }
+// }
 
-void siconos::algebra::BlockMatrix::addSimple(unsigned int &indRow, unsigned int &indCol,
-                                              const SiconosMatrix &m)
-{
-  // Add a part of m (starting from (indRow,indCol) to the current matrix.
-  // m must be a SimpleMatrix.
+// void siconos::algebra::BlockMatrix::addSimple(unsigned int &indRow, unsigned int &indCol,
+//                                               const SiconosMatrix &m)
+// {
+//   // Add a part of m (starting from (indRow,indCol) to the current matrix.
+//   // m must be a SimpleMatrix.
 
-  // At the end of the present function, indRow (resp. indCol) is equal to indRow + the
-  // corresponding dimension of the added sub-matrix.
+//   // At the end of the present function, indRow (resp. indCol) is equal to indRow + the
+//   // corresponding dimension of the added sub-matrix.
 
-  unsigned int row = m.size(0) - indRow;  // number of rows of the block to be added.
-  unsigned int col = m.size(1) - indCol;  // number of columns of the block to be added.
-  unsigned int initCol = indCol;
+//   unsigned int row = m.size(0) - indRow;  // number of rows of the block to be added.
+//   unsigned int col = m.size(1) - indCol;  // number of columns of the block to be added.
+//   unsigned int initCol = indCol;
 
-  if (row > _dimRow || col > _dimCol) THROW_EXCEPTION("invalid ranges");
+//   if (row > _dimRow || col > _dimCol) THROW_EXCEPTION("invalid ranges");
 
-  auto numM = m.num();
+//   auto numM = m.num();
 
-  // iterators through this
-  unsigned int currentRow = 0, currentCol = 0;
-  UblasType currentNum;
-  for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
-    for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-      if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
-        (std::static_pointer_cast<BlockMatrix>(*it2))->addSimple(indRow, indCol, m);
+//   // iterators through this
+//   unsigned int currentRow = 0, currentCol = 0;
+//   UblasType currentNum;
+//   for (auto it1 = _mat->begin(); it1 != _mat->end(); ++it1) {
+//     for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
+//       if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
+//         (std::static_pointer_cast<BlockMatrix>(*it2))->addSimple(indRow, indCol, m);
 
-      else {
-        currentCol = (*it2)->size(1);
-        currentRow = (*it2)->size(0);
-        currentNum = (*it2)->num();
-        if (numM != currentNum) THROW_EXCEPTION("inconsistent types.");
+//       else {
+//         currentCol = (*it2)->size(1);
+//         currentRow = (*it2)->size(0);
+//         currentNum = (*it2)->num();
+//         if (numM != currentNum) THROW_EXCEPTION("inconsistent types.");
 
-        if (numM == UblasType::DENSE)
-          noalias(*(*it2)->dense()) += boost::numeric::ublas::subrange(
-              *m.dense(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::TRIANGULAR)
-          noalias(*(*it2)->triang()) += boost::numeric::ublas::subrange(
-              *m.triang(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::SYMMETRIC)
-          noalias(*(*it2)->sym()) += boost::numeric::ublas::subrange(
-              *m.sym(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::SPARSE)
-          noalias(*(*it2)->sparse()) += boost::numeric::ublas::subrange(
-              *m.sparse(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::BANDED)
-          noalias(*(*it2)->banded()) += boost::numeric::ublas::subrange(
-              *m.banded(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::ZERO) {
-        }
-        else
-          THROW_EXCEPTION("inconsistent types.");
-      }
-      indCol += currentCol;
-    }
-    indRow += currentRow;
-    indCol = initCol;
-  }
-}
+//         if (numM == UblasType::DENSE)
+//           noalias(*(*it2)->dense()) += boost::numeric::ublas::subrange(
+//               *m.dense(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::TRIANGULAR)
+//           noalias(*(*it2)->triang()) += boost::numeric::ublas::subrange(
+//               *m.triang(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::SYMMETRIC)
+//           noalias(*(*it2)->sym()) += boost::numeric::ublas::subrange(
+//               *m.sym(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::SPARSE)
+//           noalias(*(*it2)->sparse()) += boost::numeric::ublas::subrange(
+//               *m.sparse(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::BANDED)
+//           noalias(*(*it2)->banded()) += boost::numeric::ublas::subrange(
+//               *m.banded(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::ZERO) {
+//         }
+//         else
+//           THROW_EXCEPTION("inconsistent types.");
+//       }
+//       indCol += currentCol;
+//     }
+//     indRow += currentRow;
+//     indCol = initCol;
+//   }
+// }
 
-void siconos::algebra::BlockMatrix::subSimple(unsigned int &indRow, unsigned int &indCol,
-                                              const SiconosMatrix &m)
-{
-  // subtract a part of m (starting from (indRow,indCol) to the current matrix.
-  // m must be a SimpleMatrix.
+// void siconos::algebra::BlockMatrix::subSimple(unsigned int &indRow, unsigned int &indCol,
+//                                               const SiconosMatrix &m)
+// {
+//   // subtract a part of m (starting from (indRow,indCol) to the current matrix.
+//   // m must be a SimpleMatrix.
 
-  // At the end of the present function, indRow (resp. indCol) is equal to indRow + the
-  // corresponding dimension of the subtracted sub-matrix.
+//   // At the end of the present function, indRow (resp. indCol) is equal to indRow + the
+//   // corresponding dimension of the subtracted sub-matrix.
 
-  unsigned int row = m.size(0) - indRow;  // number of rows of the block to be added.
-  unsigned int col = m.size(1) - indCol;  // number of columns of the block to be added.
-  unsigned int initCol = indCol;
-  if (row > _dimRow || col > _dimCol) THROW_EXCEPTION("invalid ranges");
+//   unsigned int row = m.size(0) - indRow;  // number of rows of the block to be added.
+//   unsigned int col = m.size(1) - indCol;  // number of columns of the block to be added.
+//   unsigned int initCol = indCol;
+//   if (row > _dimRow || col > _dimCol) THROW_EXCEPTION("invalid ranges");
 
-  auto numM = m.num();
+//   auto numM = m.num();
 
-  // iterators through this
-  unsigned int currentRow = 0, currentCol = 0;
-  UblasType currentNum;
-  for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
-    for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-      if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
-        (std::static_pointer_cast<BlockMatrix>(*it2))->subSimple(indRow, indCol, m);
+//   // iterators through this
+//   unsigned int currentRow = 0, currentCol = 0;
+//   UblasType currentNum;
+//   for (auto it1 = _mat->begin(); it1 != _mat->end(); ++it1) {
+//     for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
+//       if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
+//         (std::static_pointer_cast<BlockMatrix>(*it2))->subSimple(indRow, indCol, m);
 
-      else {
-        currentCol = (*it2)->size(1);
-        currentRow = (*it2)->size(0);
-        currentNum = (*it2)->num();
-        if (numM != currentNum) THROW_EXCEPTION("inconsistent types.");
+//       else {
+//         currentCol = (*it2)->size(1);
+//         currentRow = (*it2)->size(0);
+//         currentNum = (*it2)->num();
+//         if (numM != currentNum) THROW_EXCEPTION("inconsistent types.");
 
-        if (numM == UblasType::DENSE)
-          noalias(*(*it2)->dense()) -= boost::numeric::ublas::subrange(
-              *m.dense(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::TRIANGULAR)
-          noalias(*(*it2)->triang()) -= boost::numeric::ublas::subrange(
-              *m.triang(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::SYMMETRIC)
-          noalias(*(*it2)->sym()) -= boost::numeric::ublas::subrange(
-              *m.sym(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::SPARSE)
-          noalias(*(*it2)->sparse()) -= boost::numeric::ublas::subrange(
-              *m.sparse(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::BANDED)
-          noalias(*(*it2)->banded()) -= boost::numeric::ublas::subrange(
-              *m.banded(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == UblasType::ZERO) {
-        }
-        else
-          THROW_EXCEPTION("inconsistent types.");
-      }
-      indCol += currentCol;
-    }
-    indRow += currentRow;
-    indCol = initCol;
-  }
-}
+//         if (numM == UblasType::DENSE)
+//           noalias(*(*it2)->dense()) -= boost::numeric::ublas::subrange(
+//               *m.dense(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::TRIANGULAR)
+//           noalias(*(*it2)->triang()) -= boost::numeric::ublas::subrange(
+//               *m.triang(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::SYMMETRIC)
+//           noalias(*(*it2)->sym()) -= boost::numeric::ublas::subrange(
+//               *m.sym(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::SPARSE)
+//           noalias(*(*it2)->sparse()) -= boost::numeric::ublas::subrange(
+//               *m.sparse(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::BANDED)
+//           noalias(*(*it2)->banded()) -= boost::numeric::ublas::subrange(
+//               *m.banded(), indRow, indRow + currentRow, indCol, indCol + currentCol);
+//         else if (numM == UblasType::ZERO) {
+//         }
+//         else
+//           THROW_EXCEPTION("inconsistent types.");
+//       }
+//       indCol += currentCol;
+//     }
+//     indRow += currentRow;
+//     indCol = initCol;
+//   }
+// }
 
 //===============
 //  Assignment
 //===============
 
-siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator=(const SiconosMatrix &m)
-{
-  if (&m == this) return *this;  // auto-assignment.
+// siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator=(const SiconosMatrix &m)
+// {
+//   if (&m == this) return *this;  // auto-assignment.
 
-  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
-    THROW_EXCEPTION("Left and Right values have inconsistent sizes.");
+//   if (m.size(0) != _dimRow || m.size(1) != _dimCol)
+//     THROW_EXCEPTION("Left and Right values have inconsistent sizes.");
 
-  // Warning: we do not reallocate the blocks, but only copy the values. This means that
-  // all blocks are already allocated and that dim of m and mat are to be consistent.
-  // Thus, _tabRow and _tabCol remains unchanged.
-  // If m and mat are not "block-consistent", we use the () operator for a component-wise copy.
+//   // Warning: we do not reallocate the blocks, but only copy the values. This means that
+//   // all blocks are already allocated and that dim of m and mat are to be consistent.
+//   // Thus, _tabRow and _tabCol remains unchanged.
+//   // If m and mat are not "block-consistent", we use the () operator for a component-wise copy.
 
-  if (m.isBlock()) {
-    if (siconos::algebra::isComparableTo(*this, m)) {
-      const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
-      // iterators through this
-      // iterators through m
-      auto itM1 = mB._mat->begin1();
+//   if (m.isBlock()) {
+//     if (siconos::algebra::isComparableTo(*this, m)) {
+//       const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
+//       // iterators through this
+//       // iterators through m
+//       auto itM1 = mB._mat->begin();
 
-      for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
-        auto itM2 = itM1.begin();
-        for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-          (**it2) = (**itM2);
-          itM2++;  // increment column pos. in m.
-        }
-        itM1++;  // increment row pos. in m.
-      }
-    }
-    else {
-      for (unsigned int i = 0; i < _dimRow; ++i)
-        for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) = m(i, j);
-    }
-  }
-  else  // if m is a SimpleMatrix
-  {
-    unsigned int posRow = 0;
-    unsigned int posCol = 0;
-    std::vector<std::size_t> subDim(2);
-    std::vector<std::size_t> subPos(4);
+//       for (auto it1 = _mat->begin(); it1 != _mat->end(); ++it1) {
+//         auto itM2 = itM1.begin();
+//         for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
+//           (**it2) = (**itM2);
+//           itM2++;  // increment column pos. in m.
+//         }
+//         itM1++;  // increment row pos. in m.
+//       }
+//     }
+//     else {
+//       for (unsigned int i = 0; i < _dimRow; ++i)
+//         for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) = m(i, j);
+//     }
+//   }
+//   else  // if m is a SimpleMatrix
+//   {
+//     unsigned int posRow = 0;
+//     unsigned int posCol = 0;
+//     std::vector<std::size_t> subDim(2);
+//     std::vector<std::size_t> subPos(4);
 
-    for (auto it = _mat->begin1(); it != _mat->end1(); ++it) {
-      for (auto it2 = it.begin(); it2 != it.end(); ++it2) {
-        // a sub-block of m is copied into this
-        subDim[0] = (*it2)->size(0);
-        subDim[1] = (*it2)->size(1);
-        subPos[0] = posRow;
-        subPos[1] = posCol;
-        subPos[2] = 0;
-        subPos[3] = 0;
-        siconos::algebra::setBlock(m, *it2, subDim, subPos);
-        posCol += subDim[1];
-      }
-      posRow += (*it)->size(0);
-      posCol = 0;
-    }
-  }
+//     for (auto it = _mat->begin(); it != _mat->end(); ++it) {
+//       for (auto it2 = it.begin(); it2 != it.end(); ++it2) {
+//         // a sub-block of m is copied into this
+//         subDim[0] = (*it2)->size(0);
+//         subDim[1] = (*it2)->size(1);
+//         subPos[0] = posRow;
+//         subPos[1] = posCol;
+//         subPos[2] = 0;
+//         subPos[3] = 0;
+//         siconos::algebra::setBlock(m, *it2, subDim, subPos);
+//         posCol += subDim[1];
+//       }
+//       posRow += (*it)->size(0);
+//       posCol = 0;
+//     }
+//   }
 
-  return *this;
-}
+//   return *this;
+// }
 
-siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator=(const BlockMatrix &m)
-{
-  if (&m == this) return *this;  // auto-assignment.
+// siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator=(const BlockMatrix &m)
+// {
+//   if (&m == this) return *this;  // auto-assignment.
 
-  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
-    THROW_EXCEPTION("Left and Right values have inconsistent sizes.");
+//   if (m.size(0) != _dimRow || m.size(1) != _dimCol)
+//     THROW_EXCEPTION("Left and Right values have inconsistent sizes.");
 
-  // Warning: we do not reallocate the blocks, but only copy the values. This means that
-  // all blocks are already allocated and that dim of m and mat are to be consistent.
-  // Thus, _tabRow and _tabCol remains unchanged.
-  // If m and mat are not "block-consistent", we use the () operator for a componet-wise copy.
+//   // Warning: we do not reallocate the blocks, but only copy the values. This means that
+//   // all blocks are already allocated and that dim of m and mat are to be consistent.
+//   // Thus, _tabRow and _tabCol remains unchanged.
+//   // If m and mat are not "block-consistent", we use the () operator for a componet-wise copy.
 
-  if (siconos::algebra::isComparableTo(*this, m)) {
-    const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
-    // iterators through this
-    // iterators through m
-    auto itM1 = mB._mat->begin1();
+//   if (siconos::algebra::isComparableTo(*this, m)) {
+//     const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
+//     // iterators through this
+//     // iterators through m
+//     auto itM1 = mB._mat->begin();
 
-    for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
-      auto itM2 = itM1.begin();
-      for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-        (**it2) = (**itM2);
-        itM2++;  // increment column pos. in m.
-      }
-      itM1++;  // increment row pos. in m.
-    }
-  }
-  else {
-    for (unsigned int i = 0; i < _dimRow; ++i)
-      for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) = m(i, j);
-  }
-  return *this;
-}
+//     for (auto it1 = _mat->begin(); it1 != _mat->end(); ++it1) {
+//       auto itM2 = itM1.begin();
+//       for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
+//         (**it2) = (**itM2);
+//         itM2++;  // increment column pos. in m.
+//       }
+//       itM1++;  // increment row pos. in m.
+//     }
+//   }
+//   else {
+//     for (unsigned int i = 0; i < _dimRow; ++i)
+//       for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) = m(i, j);
+//   }
+//   return *this;
+// }
 
-siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator=(const DenseMat &m)
-{
-  THROW_EXCEPTION("Not yet implemented.");
-  return *this;
-}
 
 //=================================
 // Op. and assignment (+=, -= ... )
 //=================================
 
-siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator+=(
-    const SiconosMatrix &m)
-{
-  if (&m == this) {
-    for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
-      for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-        **it2 += **it2;
-      }
-    }
-    return *this;
-  }
+// siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator+=(
+//     const SiconosMatrix &m)
+// {
+//   if (&m == this) {
+//     for (auto it1 = _mat->begin(); it1 != _mat->end(); ++it1) {
+//       for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
+//         **it2 += **it2;
+//       }
+//     }
+//     return *this;
+//   }
 
-  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
-    THROW_EXCEPTION("Left and Right values have inconsistent sizes.");
+//   if (m.size(0) != _dimRow || m.size(1) != _dimCol)
+//     THROW_EXCEPTION("Left and Right values have inconsistent sizes.");
 
-  if (m.isBlock()) {
-    if (siconos::algebra::isComparableTo(m, *this)) {
-      const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
-      // iterators through m
-      auto itM1 = mB._mat->begin1();
+//   if (m.isBlock()) {
+//     if (siconos::algebra::isComparableTo(m, *this)) {
+//       const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
+//       // iterators through m
+//       auto itM1 = mB._mat->begin();
 
-      for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
-        auto itM2 = itM1.begin();
-        for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-          (**it2) += (**itM2);
-          itM2++;  // increment column pos. in m.
-        }
-        itM1++;  // increment row pos. in m.
-      }
-    }
-    else {
-      for (unsigned int i = 0; i < _dimRow; ++i)
-        for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) += m(i, j);
-    }
-  }
-  else  // if m is a SimpleMatrix
-  {
-    unsigned int indRow = 0, indCol = 0;
-    addSimple(indRow, indCol, m);  // a sub-block of m is added to each block of this.
-  }
-  return *this;
-}
+//       for (auto it1 = _mat->begin(); it1 != _mat->end(); ++it1) {
+//         auto itM2 = itM1.begin();
+//         for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
+//           (**it2) += (**itM2);
+//           itM2++;  // increment column pos. in m.
+//         }
+//         itM1++;  // increment row pos. in m.
+//       }
+//     }
+//     else {
+//       for (unsigned int i = 0; i < _dimRow; ++i)
+//         for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) += m(i, j);
+//     }
+//   }
+//   else  // if m is a SimpleMatrix
+//   {
+//     unsigned int indRow = 0, indCol = 0;
+//     addSimple(indRow, indCol, m);  // a sub-block of m is added to each block of this.
+//   }
+//   return *this;
+// }
 
-siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator-=(
-    const SiconosMatrix &m)
-{
-  if (&m == this) {
-    for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
-      for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-        **it2 -= **it2;
-      }
-    }
-    return *this;
-  }
+// siconos::algebra::BlockMatrix &siconos::algebra::BlockMatrix::operator-=(
+//     const SiconosMatrix &m)
+// {
+//   if (&m == this) {
+//     for (auto it1 = _mat->begin(); it1 != _mat->end(); ++it1) {
+//       for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
+//         **it2 -= **it2;
+//       }
+//     }
+//     return *this;
+//   }
 
-  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
-    THROW_EXCEPTION("Left and Right values have inconsistent sizes.");
+//   if (m.size(0) != _dimRow || m.size(1) != _dimCol)
+//     THROW_EXCEPTION("Left and Right values have inconsistent sizes.");
 
-  if (m.isBlock()) {
-    if (siconos::algebra::isComparableTo(m, *this)) {
-      const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
-      // iterators through m
-      auto itM1 = mB._mat->begin1();
+//   if (m.isBlock()) {
+//     if (siconos::algebra::isComparableTo(m, *this)) {
+//       const BlockMatrix &mB = static_cast<const BlockMatrix &>(m);
+//       // iterators through m
+//       auto itM1 = mB._mat->begin();
 
-      for (auto it1 = _mat->begin1(); it1 != _mat->end1(); ++it1) {
-        auto itM2 = itM1.begin();
-        for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
-          (**it2) -= (**itM2);
-          itM2++;  // increment column pos. in m.
-        }
-        itM1++;  // increment row pos. in m.
-      }
-    }
-    else {
-      for (unsigned int i = 0; i < _dimRow; ++i)
-        for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) -= m(i, j);
-    }
-  }
-  else  // if m is a SimpleMatrix
-  {
-    unsigned int indRow = 0, indCol = 0;
-    subSimple(indRow, indCol, m);  // a sub-block of m is subtracted to each block of this.
-  }
-  return *this;
-}
+//       for (auto it1 = _mat->begin(); it1 != _mat->end(); ++it1) {
+//         auto itM2 = itM1.begin();
+//         for (auto it2 = it1.begin(); it2 != it1.end(); ++it2) {
+//           (**it2) -= (**itM2);
+//           itM2++;  // increment column pos. in m.
+//         }
+//         itM1++;  // increment row pos. in m.
+//       }
+//     }
+//     else {
+//       for (unsigned int i = 0; i < _dimRow; ++i)
+//         for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) -= m(i, j);
+//     }
+//   }
+//   else  // if m is a SimpleMatrix
+//   {
+//     unsigned int indRow = 0, indCol = 0;
+//     subSimple(indRow, indCol, m);  // a sub-block of m is subtracted to each block of this.
+//   }
+//   return *this;
+// }
 
 void siconos::algebra::BlockMatrix::trans() { THROW_EXCEPTION("not yet implemented."); }
 
@@ -1043,11 +826,29 @@ std::shared_ptr<const siconos::algebra::SiconosMatrix> siconos::algebra::BlockMa
   return std::shared_ptr<SiconosMatrix>((*_mat)(row, col));
 }
 
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::algebra::BlockMatrix::toSiconosMatrix() const
+{
+  // get number of blocks in a row/col of m.
+  auto m = std::make_shared<SiconosMatrix>(this->size(0), this->size(1));
+  unsigned int posRow = 0;
+  unsigned int posCol = 0;
+
+  for (auto it : this->_mat->rowwise()) {
+    for (auto it2 : it) {
+      m->setBlock(posRow, posCol, *it2);
+      posCol += it2->size(1);
+    }
+    posRow += it.size();
+    posCol = 0;
+  }
+  return m;
+}
+
 size_t siconos::algebra::BlockMatrix::nnz(double tol)
 {
   size_t nnz = 0;
-  for (auto it = _mat->begin1(); it != _mat->end1(); ++it) {
-    for (auto it2 = it.begin(); it2 != it.end(); ++it2) nnz += (**it2).nnz();
+  for (auto row : _mat->rowwise()) {
+    for (auto col : row) nnz += (*col).nnz();
   }
   return nnz;
 }

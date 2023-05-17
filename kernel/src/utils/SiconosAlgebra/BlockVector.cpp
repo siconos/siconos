@@ -17,10 +17,10 @@
  */
 
 #include "BlockVector.hpp"
+#include <eigen3/Eigen/src/Core/Matrix.h>
+#include <eigen3/Eigen/src/Core/util/Constants.h>
 
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
-#include <boost/numeric/ublas/vector_sparse.hpp>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 
@@ -33,7 +33,6 @@
 // //#define DEBUG_MESSAGES
 //
 
-namespace ublas = boost::numeric::ublas;
 
 // =================================================
 //                CONSTRUCTORS
@@ -131,9 +130,9 @@ void siconos::algebra::BlockVector::_update() {
 //       fill vector
 // ===========================
 
-bool siconos::algebra::BlockVector::isDense() const {
-  return std::find_if(_vect.begin(), _vect.end(), TestDense()) != _vect.end();
-}
+// bool siconos::algebra::BlockVector::isDense() const {
+//   return std::find_if(_vect.begin(), _vect.end(), TestDense()) != _vect.end();
+// }
 
 void siconos::algebra::BlockVector::zero() {
   for (auto& it : _vect) it->zero();
@@ -276,10 +275,10 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
 siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(const double* data) {
   unsigned indxPos = 0;
 
-  for (auto& it1 : _vect) {
-    SiconosVector& v = *it1;
-    v = &data[indxPos];
-    indxPos += v.size();
+  for (auto& vect : _vect) {
+    double* ptr = const_cast<double*>(&data[indxPos]);  // const_cat needed by Eigne::Map
+    *vect = Eigen::Map<SiconosVector>(ptr, vect->size());
+    indxPos += vect->size();
   }
   return *this;
 }
@@ -305,18 +304,11 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
   unsigned int dim = vIn.size();  // size of the block to be added.
   if (dim > _sizeV) THROW_EXCEPTION("invalid ranges");
 
-  auto numVIn = vIn.num();
   unsigned int currentSize;
-  UblasType currentNum;
   unsigned int index = 0;
-  for (auto& it : _vect) {
-    currentSize = it->size();
-    currentNum = it->num();
-    if (numVIn != currentNum) THROW_EXCEPTION("inconsistent types.");
-    if (numVIn == UblasType::DENSE)
-      noalias(*it->dense()) -= ublas::subrange(*vIn.dense(), index, index + currentSize);
-    else
-      noalias(*it->sparse()) -= ublas::subrange(*vIn.sparse(), index, index + currentSize);
+  for (auto& v : _vect) {
+    currentSize = v->size();
+    *v -= vIn.segment(index, currentSize);
     index += currentSize;
   }
   return *this;
@@ -349,19 +341,12 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
 
   unsigned int dim = vIn.size();  // size of the block to be added.
   if (dim > _sizeV) THROW_EXCEPTION("invalid ranges");
-  auto numVIn = vIn.num();
-  UblasType currentNum;
   unsigned int currentSize;
   unsigned int index = 0;
 
   for (auto& it : _vect) {
     currentSize = it->size();
-    currentNum = it->num();
-    if (numVIn != currentNum) THROW_EXCEPTION("inconsistent types.");
-    if (numVIn == UblasType::DENSE)
-      noalias(*it->dense()) += ublas::subrange(*vIn.dense(), index, index + currentSize);
-    else
-      noalias(*it->sparse()) += ublas::subrange(*vIn.sparse(), index, index + currentSize);
+    *it += vIn.segment(index, currentSize);
     index += currentSize;
   }
   return *this;
@@ -401,7 +386,7 @@ void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn, unsigned 
 
   if (blockOutEnd == blockOutStart)  //
   {
-    vIn.toBlock(*_vect[blockOutStart], sizeB, startIn, posOut);
+    _vect[blockOutStart]->segment(posOut, sizeB) = vIn.segment(startIn, sizeB);
   } else  // More that one block of vOut are concerned
   {
     // The current considered block ...
@@ -413,7 +398,7 @@ void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn, unsigned 
 
     // Set first sub-block (currentBlock) values, between index posOut and posOut+subSizeB,
     // with vIn values from posIn to posIn+subSizeB.
-    vIn.toBlock(*currentBlock, subSizeB, posIn, posOut);
+    currentBlock->segment(posOut, sizeB) = vIn.segment(posIn, sizeB);
 
     // Other blocks, except number blockOutEnd.
     unsigned int currentBlockNum = blockOutStart + 1;
@@ -421,7 +406,7 @@ void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn, unsigned 
       posIn += subSizeB;
       currentBlock = _vect[currentBlockNum];
       subSizeB = currentBlock->size();
-      vIn.toBlock(*currentBlock, subSizeB, posIn, 0);
+      currentBlock->segment(0, subSizeB) = vIn.segment(posIn, subSizeB);
       currentBlockNum++;
     }
     // set last subBlock ...
@@ -432,7 +417,7 @@ void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn, unsigned 
     // Size of the considered sub-block
     subSizeB = endOut - (*_tabIndex)[blockOutEnd - 1];
 
-    vIn.toBlock(*currentBlock, subSizeB, posIn, 0);
+    currentBlock->segment(0, subSizeB) = vIn.segment(posIn, subSizeB);
   }
 }
 
@@ -449,16 +434,24 @@ double siconos::algebra::BlockVector::normInf() const {
   double d = 0;
   for (auto& it : _vect) {
     assert(it);
-    d = fmax(it->normInf(), d);
+    d = fmax(it->lpNorm<Eigen::Infinity>(), d);
   }
   return d;
 }
 
 std::shared_ptr<siconos::algebra::SiconosVector>
-siconos::algebra::BlockVector::prepareVectorForPlugin() const {
+siconos::algebra::BlockVector::toSiconosVector() const {
   {
     if (_tabIndex->size() > 1) {
-      return std::make_shared<SiconosVector>(*this);
+      size_t total_size = 0;
+      for(auto t : *_tabIndex) {
+        total_size += t;
+      }
+      auto vectOut = std::make_shared<SiconosVector>(total_size);
+      for(auto v : _vect) {
+        *vectOut << *v;
+      }
+      return vectOut;
     } else {
       // No copy, just a ref.
       return _vect[0];

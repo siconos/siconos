@@ -23,14 +23,18 @@
 #ifndef FIRSTORDERNONLINEARDS_H
 #define FIRSTORDERNONLINEARDS_H
 
+#include "SiconosMatrix.hpp"
+#include "SimpleMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "SiconosMemory.hpp"
 #include "DynamicalSystem.hpp"
 
 namespace siconos::algebra {
 
-class SiconosMatrix;
-class SimpleMatrix;
-class SiconosVector;
-class SiconosMemory;
+// class SiconosMatrix;
+// class SimpleMatrix;
+// class SiconosVector;
+// class SiconosMemory;
 }  // namespace siconos::algebra
 
 namespace siconos::modeling {

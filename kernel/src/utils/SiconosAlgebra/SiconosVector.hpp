@@ -25,6 +25,7 @@
 // #include <boost/numeric/ublas/fwd.hpp>
 // #include <boost/numeric/ublas/storage.hpp>
 // #include <boost/numeric/ublas/vector.hpp>
+#include "EigenInclude.hpp"
 #include <Eigen/Core>
 // #include <vector>
 
@@ -83,11 +84,8 @@ namespace siconos::algebra {
 
 using SiconosVector = Eigen::VectorXd;
 
-/* functor/predicate used to test vectors type containers such as BlockVector */
-// class TestDense {
-//  public:
-//   bool operator()(std::shared_ptr<SiconosVector> input) const { return input->_dense; }
-// };
+void concatenateVectors(SiconosVector& target, const SiconosVector& a, const SiconosVector& b);
+
 }  // namespace siconos::algebra
 
 #endif

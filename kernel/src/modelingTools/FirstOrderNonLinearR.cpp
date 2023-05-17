@@ -67,10 +67,10 @@ void siconos::modeling::FirstOrderNonLinearR::computeh(
     siconos::algebra::SiconosVector& y)
 {
   if (_pluginh) {
-    auto xp = x.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((FONLR_h)_pluginh->fPtr)(time, xp->size(), xp->getArray(), lambda.size(),
-                              lambda.getArray(), y.getArray(), zp->size(), zp->getArray());
+    auto xp = x.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    ((FONLR_h)_pluginh->fPtr)(time, xp->size(), xp->data(), lambda.size(),
+                              const_cast<double*>(lambda.data()), y.data(), zp->size(), zp->data());
     z = *zp;
   }
   else {
@@ -86,11 +86,11 @@ void siconos::modeling::FirstOrderNonLinearR::computeg(
     siconos::algebra::BlockVector& r)
 {
   if (_pluging) {
-    auto xp = x.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    auto rp = r.prepareVectorForPlugin();
-    ((FONLR_g)_pluging->fPtr)(time, xp->size(), xp->getArray(), lambda.size(),
-                              lambda.getArray(), rp->getArray(), zp->size(), zp->getArray());
+    auto xp = x.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    auto rp = r.toSiconosVector();
+    ((FONLR_g)_pluging->fPtr)(time, xp->size(), xp->data(), lambda.size(),
+                              const_cast<double*>(lambda.data()), rp->data(), zp->size(), zp->data());
     z = *zp;
     r = *rp;
   }
@@ -107,10 +107,10 @@ void siconos::modeling::FirstOrderNonLinearR::computeJachx(
     siconos::algebra::SimpleMatrix& C)
 {
   if (_pluginJachx) {
-    auto xp = x.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((FONLR_C)_pluginJachx->fPtr)(time, xp->size(), xp->getArray(), lambda.size(),
-                                  lambda.getArray(), C.getArray(), zp->size(), zp->getArray());
+    auto xp = x.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    ((FONLR_C)_pluginJachx->fPtr)(time, xp->size(), xp->data(), lambda.size(),
+                                  const_cast<double*>(lambda.data()), C.data(), zp->size(), zp->data());
     z = *zp;
   }
   else
@@ -125,11 +125,11 @@ void siconos::modeling::FirstOrderNonLinearR::computeJachlambda(
     siconos::algebra::SimpleMatrix& D)
 {
   if (_pluginJachlambda) {
-    auto xp = x.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((FONLR_D)_pluginJachlambda->fPtr)(time, xp->size(), xp->getArray(), lambda.size(),
-                                       lambda.getArray(), D.getArray(), zp->size(),
-                                       zp->getArray());
+    auto xp = x.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    ((FONLR_D)_pluginJachlambda->fPtr)(time, xp->size(), xp->data(), lambda.size(),
+                                       const_cast<double*>(lambda.data()), D.data(), zp->size(),
+                                       zp->data());
     z = *zp;
   }
   else
@@ -144,11 +144,11 @@ void siconos::modeling::FirstOrderNonLinearR::computeJacglambda(
     siconos::algebra::SimpleMatrix& B)
 {
   if (_pluginJacglambda) {
-    auto xp = x.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((FONLR_B)_pluginJacglambda->fPtr)(time, xp->size(), xp->getArray(), lambda.size(),
-                                       lambda.getArray(), B.getArray(), zp->size(),
-                                       zp->getArray());
+    auto xp = x.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    ((FONLR_B)_pluginJacglambda->fPtr)(time, xp->size(), xp->data(), lambda.size(),
+                                       const_cast<double*>(lambda.data()), B.data(), zp->size(),
+                                       zp->data());
     z = *zp;
   }
   else
@@ -163,10 +163,10 @@ void siconos::modeling::FirstOrderNonLinearR::computeJacgx(
     siconos::algebra::SimpleMatrix& K)
 {
   if (_pluginJacgx) {
-    auto xp = x.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((FONLR_K)_pluginJacgx->fPtr)(time, xp->size(), xp->getArray(), lambda.size(),
-                                  lambda.getArray(), K.getArray(), zp->size(), zp->getArray());
+    auto xp = x.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    ((FONLR_K)_pluginJacgx->fPtr)(time, xp->size(), xp->data(), lambda.size(),
+                                  const_cast<double*>(lambda.data()), K.data(), zp->size(), zp->data());
     z = *zp;
   }
   else

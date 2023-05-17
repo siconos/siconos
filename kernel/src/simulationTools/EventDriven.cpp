@@ -512,7 +512,7 @@ void siconos::simulation::EventDriven::computeJacobianfx(
     else if (auto lds =
                  std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
       auto jacotmp =
-          std::static_pointer_cast<siconos::algebra::SimpleMatrix>(ds->jacobianRhsx());
+          ds->jacobianRhsx()->block(0, 0); // just one block in JacxRhs
       pos += jacotmp->copyData(&jacob[pos]);
     }
     else {

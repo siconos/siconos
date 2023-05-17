@@ -103,7 +103,7 @@ void siconos::modeling::Lagrangian2d2DR::computeJachq(const siconos::algebra::Bl
   // _jachq->setValue(1,1,Ty);
   // _jachq->setValue(1,2,lever_arm_x*Ty - lever_arm_y*Tx );
 
-  double* array = &*_jachq->getArray();
+  double* array = &*_jachq->data();
   array[0] = Nx;
   array[2] = Ny;
   array[4] = lever_arm_x * Ny - lever_arm_y * Nx;

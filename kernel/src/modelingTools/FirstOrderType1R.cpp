@@ -87,8 +87,8 @@ void siconos::modeling::FirstOrderType1R::computeh(double time,
   assert(_pluginh &&
          "siconos::modeling::FirstOrderType1R::computeOutput() is not linked to a plugin "
          "function");
-  auto xp = x.prepareVectorForPlugin();
-  auto zp = z.prepareVectorForPlugin();
+  auto xp = x.toSiconosVector();
+  auto zp = z.toSiconosVector();
   ((Type1Ptr)(_pluginh->fPtr))(xp->size(), &(*xp)(0), y.size(), &(y)(0), zp->size(),
                                &(*zp)(0));
   z = *zp;
@@ -102,9 +102,9 @@ void siconos::modeling::FirstOrderType1R::computeg(
          "siconos::modeling::FirstOrderType1R::computeInput() is not linked to a plugin "
          "function");
 
-  auto zp = z.prepareVectorForPlugin();
-  auto rp = r.prepareVectorForPlugin();
-  ((Type1Ptr)(_pluging->fPtr))(lambda.size(), lambda.getArray(), rp->size(), &(*rp)(0),
+  auto zp = z.toSiconosVector();
+  auto rp = r.toSiconosVector();
+  ((Type1Ptr)(_pluging->fPtr))(lambda.size(), const_cast<double*>(lambda.data()), rp->size(), &(*rp)(0),
                                zp->size(), &(*zp)(0));
   z = *zp;
   r = *rp;
@@ -146,9 +146,9 @@ void siconos::modeling::FirstOrderType1R::computeJachx(double time,
          "siconos::modeling::FirstOrderType1R::computeJacobianH() failed; not linked to a "
          "plug-in function.");
   if (_pluginJachx) {
-    auto xp = x.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((Type1Ptr)(_pluginJachx->fPtr))(xp->size(), &(*xp)(0), C.size(0), C.getArray(),
+    auto xp = x.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    ((Type1Ptr)(_pluginJachx->fPtr))(xp->size(), &(*xp)(0), C.size(0), C.data(),
                                      zp->size(), &(*zp)(0));
     z = *zp;
   }
@@ -160,9 +160,9 @@ void siconos::modeling::FirstOrderType1R::computeJachz(double time,
                                                        siconos::algebra::SimpleMatrix& F)
 {
   if (_pluginJachz && _pluginJachz->fPtr) {
-    auto xp = x.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((Type1Ptr)(_pluginJachz->fPtr))(xp->size(), &(*xp)(0), F.size(0), F.getArray(),
+    auto xp = x.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    ((Type1Ptr)(_pluginJachz->fPtr))(xp->size(), &(*xp)(0), F.size(0), F.data(),
                                      zp->size(), &(*zp)(0));
     z = *zp;
   }
@@ -176,9 +176,9 @@ void siconos::modeling::FirstOrderType1R::computeJacglambda(
          "siconos::modeling::FirstOrderType1R::computeJacobiang() failed; not linked to a "
          "plug-in function.");
   if (_pluginJacglambda) {
-    auto zp = z.prepareVectorForPlugin();
-    ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), lambda.getArray(), B.size(0),
-                                          B.getArray(), zp->size(), &(*zp)(0));
+    auto zp = z.toSiconosVector();
+    ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), const_cast<double*>(lambda.data()), B.size(0),
+                                          B.data(), zp->size(), &(*zp)(0));
     z = *zp;
   }
 }

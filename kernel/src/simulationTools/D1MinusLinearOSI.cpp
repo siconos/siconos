@@ -400,7 +400,7 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
         /* Compute the velocity jump due to the impulse */
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(*dummy);
+          siconos::algebra::solveInPlace(*(d->inverseMass()), *dummy);
         }
         /* Add the velocity jump to the free velocity */
         *v += *dummy;
@@ -419,7 +419,7 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
             *(d->p(1)));  // value = nonsmooth impulse
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(*dummy);
+          siconos::algebra::solveInPlace(*(d->inverseMass()), *dummy);
         }
         *v += *dummy;  // add free velocity
 

@@ -32,6 +32,7 @@
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
+#include "SiconosException.hpp"
 #include "siconos_debug.h"
 
 // constructor from a set of data
@@ -85,8 +86,8 @@ void siconos::modeling::LagrangianScleronomousR::computeh(
       " siconos::modeling::LagrangianScleronomousR::computeh(Interaction& inter, "
       "siconos::algebra::BlockVector q, siconos::algebra::BlockVector z)\n");
   if (_pluginh && _pluginh->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
+    auto qp = q.toSiconosVector();
+    auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr3)(_pluginh->fPtr))(qp->size(), &(*qp)(0), y.size(), &(y(0)),
                                                 zp->size(), &(*zp)(0));
     z = *zp;
@@ -98,8 +99,8 @@ void siconos::modeling::LagrangianScleronomousR::computeh(
 void siconos::modeling::LagrangianScleronomousR::computeJachq(
     const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
   if (_jachq && _pluginJachq->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
+    auto qp = q.toSiconosVector();
+    auto zp = z.toSiconosVector();
     // get vector lambda of the current interaction
     ((siconos::plugins::FPtr3)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), _jachq->size(0),
                                                     &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
@@ -111,9 +112,9 @@ void siconos::modeling::LagrangianScleronomousR::computeDotJachq(
     const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
     const siconos::algebra::BlockVector& qDot) {
   if (_dotjachq && _plugindotjacqh->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    auto qdotp = qDot.prepareVectorForPlugin();
+    auto qp = q.toSiconosVector();
+    auto zp = z.toSiconosVector();
+    auto qdotp = qDot.toSiconosVector();
     ((siconos::plugins::FPtr2)(_plugindotjacqh->fPtr))(qp->size(), &(*qp)(0), qdotp->size(),
                                                        &(*qdotp)(0), &(*_dotjachq)(0, 0),
                                                        zp->size(), &(*zp)(0));

@@ -32,12 +32,11 @@ void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time) {
   {
     if (_A &&
         !_M)  // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
-      _jacxRhs = _A;
+      _jacxRhs->block(0, 0) = _A;
     else if (_A && _M) {
-      _jacxRhs =
-          std::make_shared<siconos::algebra::SimpleMatrix>(*_A);  // Copy A into _jacxRhs
+      _jacxRhs->block(0, 0) = std::make_shared<siconos::algebra::SimpleMatrix>(*_A);  // Copy A into _jacxRhs
       // Solve M_jacxRhs = A
-      _invM->Solve(*_jacxRhs);
+      algebra::solveInPlace(*_invM, *(_jacxRhs->block(0, 0)));
     }
     // else no allocation, jacobian is equal to 0.
   }
@@ -54,7 +53,8 @@ void siconos::modeling::FirstOrderLinearTIDS::computeRhs(double time) {
   if (_M) {
     // allocate invM at the first call of the present function
     if (!_invM) _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
-    _invM->Solve(*_x[1]);
+    // _invM->Solve(*_x[1]);
+    algebra::solveInPlace(*_invM, *(_x[1]));
   }
 }
 

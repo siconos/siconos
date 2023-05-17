@@ -708,7 +708,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
       // At this point xfree = (ResiduFree - h(1-gamma)*rold)
       // -> Solve WX = xfree and set xfree = X
-      W.Solve(xfree);
+      siconos::algebra::solveInPlace(W, xfree);
 
       // at this point, xfree = W^{-1} (ResiduFree - h(1-gamma)*rold)
       // -> compute real xfree = x - W^{-1} (ResiduFree - h(1-gamma)*rold)
@@ -730,7 +730,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
       // -> Solve WX = g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
       // and set xPartialNS = X
-      W.Solve(xPartialNS);
+      siconos::algebra::solveInPlace(W, xPartialNS);
       siconos::algebra::scal(h, xPartialNS, xPartialNS);
 
       // compute real xPartialNS = xfree + ...
@@ -1101,7 +1101,7 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
         siconos::algebra::scal(h, *d->r(), x);  // x = h*r
       }
 
-      W.Solve(x);  // x = h* W^{-1} *r
+      siconos::algebra::solveInPlace(W, x); // x = h* W^{-1} *r
 
       x += *ds_work_vectors[siconos::integrators::EulerMoreauOSI::FREE];  // x+=xfree
 
@@ -1430,8 +1430,8 @@ double siconos::integrators::EulerMoreauOSI::computeResiduInput(
     auto& DSlink = inter->linkToDSVariables();
     auto& residuR = *inter_work[siconos::integrators::EulerMoreauOSI::VEC_RESIDU_R];
     // Residu_r = r_alpha_k+1 - g_alpha;
-    residuR = *DSlink[siconos::modeling::FirstOrderR::r];
-    residuR -= *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA];
+    residuR = *(DSlink[siconos::modeling::FirstOrderR::r]->toSiconosVector());
+    residuR -= *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]->toSiconosVector();
     DEBUG_EXPR(residuR.display(););
     residu = std::max(residu, residuR.norm2());
   }

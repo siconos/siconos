@@ -18,11 +18,13 @@
 #include "LagrangianDS.hpp"
 
 #include <iostream>
+#include <memory>
 
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
 #include "PluggedObject.hpp"  // for getPluginfunctionname ...
 #include "SiconosConst.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for inner_prod
@@ -163,13 +165,13 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(*_q0, *_velocity0);
+  algebra::concatenateVectors(*_x0, *_q0, *_velocity0);
 
-  _x[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q[0], *_q[1]);
+  algebra::concatenateVectors(*(_x[0]), *_q[0], *_q[1]);
 
   if (!_q[2]) _q[2] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
 
-  _x[1] = std::make_shared<siconos::algebra::SiconosVector>(*_q[1], *_q[2]);
+  algebra::concatenateVectors(*(_x[1]), *_q[1], *_q[2]);
 
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related
   // functions.
@@ -190,7 +192,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
 
     _rhsMatrices[jacobianXBloc10_] =
         std::make_shared<siconos::algebra::SimpleMatrix>(*_jacobianqForces);
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10_]);
+    algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc10_]);
     flag1 = true;
   }
 
@@ -199,17 +201,20 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     computeJacobianqDotForces(time);
     _rhsMatrices[jacobianXBloc11_] =
         std::make_shared<siconos::algebra::SimpleMatrix>(*_jacobianqDotForces);
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11_]);
+    algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc11_]);
     flag2 = true;
   }
 
-  if (!_rhsMatrices[zeroMatrix_])
+  if (!_rhsMatrices[zeroMatrix_]) {
     _rhsMatrices[zeroMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(
-        _ndof, _ndof, siconos::algebra::UblasType::ZERO);
-  if (!_rhsMatrices[idMatrix_])
+        _ndof, _ndof);
+    _rhsMatrices[zeroMatrix_]->zero();
+  }
+  if (!_rhsMatrices[idMatrix_]) {
     _rhsMatrices[idMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(
-        _ndof, _ndof, siconos::algebra::UblasType::IDENTITY);
-
+        _ndof, _ndof);
+    _rhsMatrices[idMatrix_]->setIdentity();
+  }
   if (flag1 && flag2)
     _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
         _rhsMatrices[zeroMatrix_], _rhsMatrices[idMatrix_], _rhsMatrices[jacobianXBloc10_],
@@ -315,7 +320,7 @@ void siconos::modeling::LagrangianDS::computeMass(
   if (_mass && !_hasConstantMass && _pluginMass->fPtr) {
     ((siconos::plugins::FPtr7)_pluginMass->fPtr)(_ndof, &(*position)(0), &(*_mass)(0, 0),
                                                  _z->size(), &(*_z)(0));
-    _mass->resetFactorizationFlags();
+    // _mass->resetFactorizationFlags();
   }
 }
 
@@ -453,7 +458,7 @@ void siconos::modeling::LagrangianDS::computeRhs(double time) {
   }
 
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
-  if (_inverseMass) _inverseMass->Solve(*_q[2]);
+  if (_inverseMass) algebra::solveInPlace(*_inverseMass, *_q[2]);
 
   _x[1]->setBlock(0, *_q[1]);
   _x[1]->setBlock(_ndof, *_q[2]);
@@ -477,14 +482,14 @@ void siconos::modeling::LagrangianDS::computeJacobianRhsx(double time) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianqForces;
-    _inverseMass->Solve(*bloc10);
+    algebra::solveInPlace(*_inverseMass, *bloc10);
   }
 
   if (_jacobianqDotForces) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> bloc11 = _jacxRhs->block(1, 1);
     computeJacobianqDotForces(time);
     *bloc11 = *_jacobianqDotForces;
-    _inverseMass->Solve(*bloc11);
+    algebra::solveInPlace(*_inverseMass, *bloc11);
   }
 }
 
@@ -685,7 +690,7 @@ void siconos::modeling::LagrangianDS::computePostImpactVelocity() {
   // We solve M(v+ - v-) = p - The result is saved in(place of) p[1].
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::computePostImpactV()\n");
   siconos::algebra::SiconosVector tmp(*_p[1]);
-  if (_inverseMass) _inverseMass->Solve(tmp);
+  if (_inverseMass) algebra::solveInPlace(*_inverseMass, tmp);
   *_q[1] += tmp;  // v+ = v- + p
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::computePostImpactV() END \n");
 }

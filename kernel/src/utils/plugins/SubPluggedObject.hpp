@@ -21,9 +21,10 @@
 
 #include "PluggedObject.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::algebra {
-class SiconosMatrix;
+// class SiconosMatrix;
 
 }
 

@@ -180,7 +180,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
       auto& free = *workVectors[siconos::integrators::LsodarOSI::FREE];
       // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
       free = *lds->forces();
-      if (lds->inverseMass()) lds->inverseMass()->Solve(free);
+      if (lds->inverseMass()) siconos::algebra::solveInPlace(*(lds->inverseMass()), free);
       DEBUG_EXPR(free.display(););
     }
     if (_extraAdditionalTerms) {
@@ -201,7 +201,7 @@ void siconos::integrators::LsodarOSI::computeJacobianRhs(
     ds->computeJacobianRhsx(t);
     if (_extraAdditionalTerms) {
       auto dsgVD = DSG0.descriptor(ds);
-      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t, *(ds->jacobianRhsx()));
+      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t, *(ds->jacobianRhsx()->toSiconosMatrix()));
     }
   }
 }
@@ -485,7 +485,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
 
   // === LSODAR CALL ===
   DEBUG_EXPR(_xWork->display(););
-  *_xtmp = *_xWork;
+  *_xtmp = *(_xWork->toSiconosVector());
   if (istate == 3) {
     istate = 1;  // restart TEMPORARY
   }
@@ -495,7 +495,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
 #ifdef HAS_FORTRAN
   // call LSODAR to integrate dynamical equation
   CNAME(siconos::fortran::dlsodar)
-  (pointerToF, &(_intData[0]), _xtmp->getArray(), &tinit_DR, &tend_DR, &(_intData[2]),
+  (pointerToF, &(_intData[0]), _xtmp->data(), &tinit_DR, &tend_DR, &(_intData[2]),
    rtol.get(), atol.get(), &(_intData[3]), &(_intData[4]), &(_intData[5]), rwork.get(),
    &(_intData[6]), iwork.get(), &(_intData[7]), pointerToJacobianF, &(_intData[8]), pointerToG,
    &(_intData[1]), jroot.get());

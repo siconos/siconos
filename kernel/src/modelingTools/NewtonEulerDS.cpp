@@ -190,7 +190,10 @@ void siconos::modeling::NewtonEulerDS::init_forces() {
   // Needed only for integrators with first-order formulation.
 
   if (!_wrench) _wrench = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  if (!_mGyr) _mGyr = std::make_shared<siconos::algebra::SiconosVector>(3, 0.0);
+  if (!_mGyr) {
+    _mGyr = std::make_shared<siconos::algebra::SiconosVector>(3);
+    _mGyr->setZero();
+  }
 
   /** The follwing jacobian are always allocated since we have always
    * Gyroscopical forces that has non linear forces
@@ -266,16 +269,19 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   // dim
   _n = _qDim + 6;
 
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(*_q0, *_twist0);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_q0->size() + _twist0->size());
+  *_x0 << *_q0, *_twist0;
 
-  _x[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q, *_twist);
+  _x[0] = std::make_shared<siconos::algebra::SiconosVector>(_q->size() + _twist->size());
+  *(_x[0]) << *_q, *_twist;
 
   if (!_acceleration) _acceleration = std::make_shared<siconos::algebra::SiconosVector>(6);
 
   // Compute _dotq
   computeT();
   siconos::algebra::prod(*_T, *_twist, *_dotq, true);
-  _x[1] = std::make_shared<siconos::algebra::SiconosVector>(*_dotq, *_acceleration);
+  _x[1] = std::make_shared<siconos::algebra::SiconosVector>(_dotq->size() + _acceleration->size());
+  *(_x[1]) << *_dotq, *_acceleration;
 
   // Nothing to do for the initialization of the wrench
 
@@ -290,8 +296,7 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   computeRhs(time);
 
   /** \warning the derivative of T w.r.t to q is neglected */
-  _rhsMatrices[jacobianXBloc00_] = std::make_shared<siconos::algebra::SimpleMatrix>(
-      _qDim, _qDim, siconos::algebra::UblasType::ZERO);
+  _rhsMatrices[jacobianXBloc00_] = std::make_shared<siconos::algebra::SimpleMatrix>(_qDim, _qDim);
 
   _rhsMatrices[jacobianXBloc01_] = std::make_shared<siconos::algebra::SimpleMatrix>(*_T);
   bool flag1 = false, flag2 = false;
@@ -301,7 +306,7 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
 
     _rhsMatrices[jacobianXBloc10_] =
         std::make_shared<siconos::algebra::SimpleMatrix>(*_jacobianWrenchq);
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10_]);
+    algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc10_]);
     flag1 = true;
   }
 
@@ -310,17 +315,19 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
     computeJacobianvForces(time);
     _rhsMatrices[jacobianXBloc11_] =
         std::make_shared<siconos::algebra::SimpleMatrix>(*_jacobianWrenchTwist);
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11_]);
+    algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc11_]);
     flag2 = true;
   }
 
-  if (!_rhsMatrices[zeroMatrix_])
-    _rhsMatrices[zeroMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(
-        6, 6, siconos::algebra::UblasType::ZERO);
+  if (!_rhsMatrices[zeroMatrix_]) {
+    _rhsMatrices[zeroMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+    _rhsMatrices[zeroMatrix_]->setZero();
+  }
 
-  if (!_rhsMatrices[zeroMatrixqDim_])
-    _rhsMatrices[zeroMatrixqDim_] = std::make_shared<siconos::algebra::SimpleMatrix>(
-        6, _qDim, siconos::algebra::UblasType::ZERO);
+  if (!_rhsMatrices[zeroMatrixqDim_]) {
+    _rhsMatrices[zeroMatrixqDim_] = std::make_shared<siconos::algebra::SimpleMatrix>(6, _qDim);
+    _rhsMatrices[zeroMatrixqDim_]->setZero();
+  }
 
   if (flag1 && flag2)
     _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
@@ -495,7 +502,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMExtqExpressedInInertialFr
 
   auto mExt = std::make_shared<siconos::algebra::SiconosVector>(3);
   computeMExt(time, mExt);
-  if (_isMextExpressedInInertialFrame) siconos::geometry::changeFrameAbsToBody(q, mExt);
+  if (_isMextExpressedInInertialFrame) siconos::geometry::changeFrameAbsToBody(*q, *mExt);
   DEBUG_EXPR(q->display());
   DEBUG_EXPR(mExt->display(););
 
@@ -508,7 +515,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMExtqExpressedInInertialFr
   (*qeps)(3) += _epsilonFD;
   for (int j = 3; j < 7; j++) {
     computeMExt(time, mExt);
-    if (_isMextExpressedInInertialFrame) siconos::geometry::changeFrameAbsToBody(qeps, mExt);
+    if (_isMextExpressedInInertialFrame) siconos::geometry::changeFrameAbsToBody(*qeps, *mExt);
     DEBUG_EXPR(mExt->display(););
     _jacobianMExtq->setValue(0, j, (mExt->getValue(0) - mExt0) / _epsilonFD);
     _jacobianMExtq->setValue(1, j, (mExt->getValue(1) - mExt1) / _epsilonFD);
@@ -530,7 +537,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMExtqExpressedInInertialFr
   _isMextExpressedInInertialFrame = false;
   auto mExt = std::make_shared<siconos::algebra::SiconosVector>(3);
   computeMExt(time, mExt);
-  if (_isMextExpressedInInertialFrame) siconos::geometry::changeFrameAbsToBody(q, mExt);
+  if (_isMextExpressedInInertialFrame) siconos::geometry::changeFrameAbsToBody(*q, *mExt);
   DEBUG_EXPR(q->display());
   DEBUG_EXPR(mExt->display());
 
@@ -798,7 +805,7 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
   *_acceleration += *_wrench;
   DEBUG_EXPR(_wrench->display(););
 
-  if (_inverseMass) _inverseMass->Solve(*_acceleration);
+  if (_inverseMass) algebra::solveInPlace(*_inverseMass, *_acceleration);
 
   // Compute _dotq
   computeT();
@@ -813,13 +820,13 @@ void siconos::modeling::NewtonEulerDS::computeJacobianRhsx(double time) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianWrenchq;
-    _inverseMass->Solve(*bloc10);
+    algebra::solveInPlace(*_inverseMass, *bloc10);
   }
   if (_jacobianWrenchTwist) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> bloc11 = _jacxRhs->block(1, 1);
     computeJacobianvForces(time);
     *bloc11 = *_jacobianWrenchTwist;
-    _inverseMass->Solve(*bloc11);
+    algebra::solveInPlace(*_inverseMass, *bloc11);
   }
 }
 
@@ -844,7 +851,7 @@ static void computeMGyr_internal(std::shared_ptr<siconos::algebra::SiconosMatrix
     omega.setValue(1, twist->getValue(4));
     omega.setValue(2, twist->getValue(5));
     siconos::algebra::prod(*I, omega, iomega, true);
-    cross_product(omega, iomega, *mGyr);
+    siconos::algebra::cross_product(omega, iomega, *mGyr);
   }
 }
 void siconos::modeling::NewtonEulerDS::computeMGyr(
@@ -896,7 +903,7 @@ void siconos::modeling::NewtonEulerDS::computeForces(
       assert(!std::isnan(_mExt->vector_sum()));
       if (_isMextExpressedInInertialFrame) {
         auto mExt = std::make_shared<siconos::algebra::SiconosVector>(*_mExt);
-        siconos::geometry::changeFrameAbsToBody(q, mExt);
+        siconos::geometry::changeFrameAbsToBody(*q, *mExt);
         _wrench->setBlock(3, *mExt);
       } else
         _wrench->setBlock(3, *_mExt);
@@ -1013,8 +1020,8 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMGyrtwist(double time) {
       ei.zero();
       ei.setValue(i, 1.0);
       siconos::algebra::prod(*_I, ei, Iei, true);
-      cross_product(omega, Iei, omega_Iei);
-      cross_product(ei, Iomega, ei_Iomega);
+      siconos::algebra::cross_product(omega, Iei, omega_Iei);
+      siconos::algebra::cross_product(ei, Iomega, ei_Iomega);
       for (int j = 0; j < 3; j++)
         _jacobianMGyrtwist->setValue(j, 3 + i, ei_Iomega.getValue(j) + omega_Iei.getValue(j));
     }
@@ -1138,7 +1145,7 @@ void siconos::modeling::NewtonEulerDS::computeTdot() {
   siconos::modeling::computeT(_dotq, _Tdot);
 }
 
-void siconos::modeling::NewtonEulerDS::normalizeq() { siconos::geometry::normalizeq(_q); }
+void siconos::modeling::NewtonEulerDS::normalizeq() { siconos::geometry::normalizeq(*_q); }
 
 void siconos::modeling::NewtonEulerDS::setComputeFExtFunction(
     const std::string& pluginPath, const std::string& functionName) {
@@ -1338,9 +1345,9 @@ void siconos::modeling::computeExtForceAtPos(
       local_pos(1) -= (*q)(1);
       local_pos(2) -= (*q)(2);
       siconos::geometry::changeFrameAbsToBody(*q, local_pos);
-      cross_product(local_pos, local_frc, moment);
+      siconos::algebra::cross_product(local_pos, local_frc, moment);
     } else {
-      cross_product(*pos, local_frc, moment);
+      siconos::algebra::cross_product(*pos, local_frc, moment);
     }
 
     if (isMextExpressedInInertialFrame) siconos::geometry::changeFrameBodyToAbs(*q, moment);

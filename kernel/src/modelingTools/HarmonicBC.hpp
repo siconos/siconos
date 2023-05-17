@@ -19,9 +19,9 @@
 #define HARMONICBC_HPP
 
 #include "BoundaryCondition.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
-class SiconosVector;
 }
 
 namespace siconos::modeling {

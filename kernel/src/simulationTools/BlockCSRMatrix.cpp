@@ -95,7 +95,7 @@ void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGrap
     assert((*_diagsize1)[indexSet.index(*vi)] > 0);
 
     (*_blockCSR)(indexSet.index(*vi), indexSet.index(*vi)) =
-        indexSet.properties(*vi).block->getArray();
+        indexSet.properties(*vi).block->data();
   }
 
   siconos::graphs::InteractionsGraph::EIterator ei, eiend;
@@ -119,10 +119,10 @@ void siconos::simulation::BlockCSRMatrix::fill(siconos::graphs::InteractionsGrap
     assert(pos != col);
 
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
-        indexSet.properties(*ei).upper_block->getArray();
+        indexSet.properties(*ei).upper_block->data();
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
-        indexSet.properties(*ei).lower_block->getArray();
+        indexSet.properties(*ei).lower_block->data();
   }
   DEBUG_EXPR(display(););
 }
@@ -141,7 +141,7 @@ void siconos::simulation::BlockCSRMatrix::fillW(siconos::graphs::InteractionsGra
         involvedDS[indexSet.bundle(*ei)] = true;
         _blockCSR->resize(_nr, _nr, false);
 
-        (*_blockCSR)(_nr - 1, _nr - 1) = neds->mass()->getArray();
+        (*_blockCSR)(_nr - 1, _nr - 1) = neds->mass()->data();
       }
     } else {
       THROW_EXCEPTION("siconos::simulation::BlockCSRMatrix::fillW only for Newton EulerDS");
@@ -204,13 +204,13 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
         std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
             indexSet.bundle(*vi)->relation())
             ->jachqT()
-            ->getArray();
+            ->data();
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
         std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
             indexSet.bundle(*vi)->relation())
             ->jachqT()
-            ->getArray();
+            ->data();
   }
 
   _diagsize0->resize(involvedDS.size());

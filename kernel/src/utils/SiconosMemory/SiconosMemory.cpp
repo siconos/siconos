@@ -126,7 +126,7 @@ void siconos::algebra::SiconosMemory::display() const
   std::cout << "| _nbVectorsInMemory : " << _nbVectorsInMemory << std::endl;
   for (unsigned int i = 0; i < _nbVectorsInMemory; i++) {
     std::cout << "vector number " << i << ": address = " << &this->at(i) << " | " << std::endl;
-    this->at(i).display();
+    // this->at(i).display();
   }
   std::cout << " ===================================== " << std::endl;
 }

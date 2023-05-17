@@ -359,8 +359,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
     auto &lldds = static_cast<siconos::modeling::LagrangianLinearDiagonalDS &>(*ds);
     auto ndof = lldds.dimension();
     _dynamicalSystemsGraph->properties(dsv).W =
-        std::make_shared<siconos::algebra::SimpleMatrix>(
-            ndof, ndof, siconos::algebra::UblasType::BANDED, 0, 0);
+        std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof); // TODO : Use bandmatrix instead ?
     auto &W = *_dynamicalSystemsGraph->properties(dsv).W;
 
     if (lldds.mass())
@@ -410,8 +409,8 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
 
   if (isWSymmetricDefinitePositive()) {
     auto &W = *_dynamicalSystemsGraph->properties(dsv).W;
-    W.setIsSymmetric(true);
-    W.setIsPositiveDefinite(true);
+    // W.setIsSymmetric(true);
+    // W.setIsPositiveDefinite(true); // TODO : make sure it is not needed!
   }
 
   // Remark: W is not LU-factorized nor inversed here.
@@ -452,7 +451,7 @@ void siconos::integrators::MoreauJeanOSI::_initializeIterationMatrixWBoundaryCon
     auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
     _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions =
         std::make_shared<siconos::algebra::SimpleMatrix>(
-            sizeWBoundaryConditions, d.boundaryConditions()->size(), d.mass()->num());
+            sizeWBoundaryConditions, d.boundaryConditions()->size());
     _computeWBoundaryConditions(ds,
                                 *_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions,
                                 *_dynamicalSystemsGraph->properties(dsv).W);
@@ -483,7 +482,7 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
       dsType == siconos::modeling::Type::NewtonEulerDS ||
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(
-        ds.dimension(), WBoundaryConditions.num());
+        ds.dimension());
 
     int columnindex = 0;
 
@@ -497,7 +496,7 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
     }
 
     for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
-      iteration_matrix.getCol(itindex, *columntmp);
+      *columntmp = iteration_matrix.col(itindex);
       /*\warning we assume that W is symmetric
         we store only the column and not the row */
       WBoundaryConditions.setCol(columnindex, *columntmp);
@@ -609,9 +608,9 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::MoreauJean
     if (keepW) {
       // std::cout << "MoreauJeanOSI keepW" << std::endl;
       auto Wtmp = std::make_shared<siconos::algebra::SimpleMatrix>(*W);
-      Wtmp->Solve(*Winverse);
+      siconos::algebra::solveInPlace(*Wtmp, *Winverse);
     } else {
-      W->Solve(*Winverse);
+      siconos::algebra::solveInPlace(*W, *Winverse);
     }
   } else {
     auto dsType = siconos::types::type_value(*ds);
@@ -622,9 +621,9 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::MoreauJean
       Winverse->eye();
       if (keepW) {
         auto Wtmp = std::make_shared<siconos::algebra::SimpleMatrix>(*W);
-        Wtmp->Solve(*Winverse);
+        siconos::algebra::solveInPlace(*Wtmp, *Winverse);
       } else {
-        W->Solve(*Winverse);
+        siconos::algebra::solveInPlace(*W, *Winverse);
       }
     }
   }
@@ -680,7 +679,7 @@ void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
       DEBUG_PRINTF("index  = %i, value = %e\n", *itindex,
                    d.boundaryConditions()->prescribedVelocity()->getValue(columnindex));
       DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
-      WBoundaryConditions.getCol(columnindex, *columntmp);
+      *columntmp = WBoundaryConditions.col(columnindex);
       residu -= *columntmp * (DeltaPrescribedVelocity);
 
       residu.setValue(itindex, -columntmp->getValue(itindex) * (DeltaPrescribedVelocity));
@@ -1136,7 +1135,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
-      W.Solve(vfree);
+      siconos::algebra::solveInPlace(W, vfree);
       // -> compute real vfree
       vfree *= -1.0;
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
@@ -1489,7 +1488,7 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
         siconos::algebra::scal(coeff, *Fext, v, false);  // v += h*theta * fext(ti+1)
       }
       // -> Solve WX = v and set v = X
-      W->Solve(v);
+      siconos::algebra::solveInPlace(*W, v);
       v += vold;
     } else
       THROW_EXCEPTION(
@@ -1644,7 +1643,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
           for (unsigned int i = 0; i < d.dimension(); ++i) v(i) = vfree(i) + W(i, i) * v(i);
         } else {
-          W.Solve(v);
+          siconos::algebra::solveInPlace(W, v);
           v += vfree;
         }
       } else {
@@ -1657,7 +1656,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
 
         for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
-          _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
+          *columntmp = _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->col(bc);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
 
           double value = -siconos::algebra::inner_prod(*columntmp, v);
@@ -1716,7 +1715,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
             v.setValue(itindex, 0.0);
           }
 
-        _dynamicalSystemsGraph->properties(*dsi).W->Solve(v);
+        siconos::algebra::solveInPlace(*(_dynamicalSystemsGraph->properties(*dsi).W), v);
 
         DEBUG_EXPR(d.p(_levelMaxForInput)->display());
         DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::updatestate W CT lambda\n");
@@ -1735,7 +1734,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
 
         for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
-          _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
+          *columntmp = _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->col(bc);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
           double value = -siconos::algebra::inner_prod(*columntmp, v);
           if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {

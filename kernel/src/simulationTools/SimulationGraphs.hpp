@@ -23,15 +23,15 @@
 #ifndef SimulationGraphs_H
 #define SimulationGraphs_H
 
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "BlockVector.hpp"
 #include "SiconosGraph.hpp"
 #include "SiconosProperties.hpp"
 
 namespace siconos::algebra {
 
-class SiconosMatrix;
-class BlockVector;
-class SimpleMatrix;
-class SiconosVector;
 }  // namespace siconos::algebra
 
 namespace siconos::plugins {

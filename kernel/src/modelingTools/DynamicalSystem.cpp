@@ -64,7 +64,7 @@ siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem &ds)
   if (ds.rhs())
     _x[1] = std::make_shared<siconos::algebra::SiconosVector>(*(ds.rhs()));
   if (ds.jacobianRhsx())
-    _jacxRhs = std::make_shared<siconos::algebra::SimpleMatrix>(*(ds.jacobianRhsx()));
+    *_jacxRhs = *(ds.jacobianRhsx());
 
   _z = std::make_shared<siconos::algebra::SiconosVector>(*(ds.z()));
 
@@ -184,7 +184,7 @@ void siconos::modeling::DynamicalSystem::setRPtr(std::shared_ptr<siconos::algebr
   _r = newPtr;
 }
 
-void siconos::modeling::DynamicalSystem::setJacobianRhsx(const siconos::algebra::SiconosMatrix &newValue)
+void siconos::modeling::DynamicalSystem::setJacobianRhsx(const siconos::algebra::BlockMatrix &newValue)
 {
   // check dimensions ...
   if (newValue.size(0) != _n || newValue.size(1) != _n)
@@ -195,10 +195,10 @@ void siconos::modeling::DynamicalSystem::setJacobianRhsx(const siconos::algebra:
     *_jacxRhs = newValue;
 
   else
-    _jacxRhs = std::make_shared<siconos::algebra::SimpleMatrix>(newValue);
+    _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(newValue);
 }
 
-void siconos::modeling::DynamicalSystem::setJacobianRhsxPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
+void siconos::modeling::DynamicalSystem::setJacobianRhsxPtr(std::shared_ptr<siconos::algebra::BlockMatrix> newPtr)
 {
   // check dimensions ...
   if (newPtr->size(0) != _n || newPtr->size(1) != _n)

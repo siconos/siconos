@@ -483,13 +483,13 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
       //
       //        std::cout<<"LinearOSNS : leftUBlock\n";
       //        work->display();
-      work->trans();
+      work->transposeInPlace();
       //        std::cout<<"LinearOSNS::computeInteractionBlock leftInteractionBlock"<<endl;
       //        leftInteractionBlock->display();
 
       if (_useMassNormalization) {
         auto centralInteractionBlock = getOSIMatrix(osi1, ds);
-        centralInteractionBlock->Solve(*work);
+        siconos::algebra::solveInPlace(*centralInteractionBlock, *work);
         siconos::algebra::prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       } else {
@@ -567,7 +567,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
         auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
         // cout<<"LinearOSNS sizeY="<<sizeY<<": leftUBlock\n";
         // work->display();
-        work->trans();
+        work->transposeInPlace();
         siconos::algebra::prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         // #ifdef MLCPPROJ_DEBUG
         //          std::cout <<
@@ -740,7 +740,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     auto rightInteractionBlock =
         std::make_shared<siconos::algebra::SimpleMatrix>(sizeY2, sizeDS);
     inter2->getLeftInteractionBlockForDSProjectOnConstraints(pos2, rightInteractionBlock);
-    rightInteractionBlock->trans();
+    rightInteractionBlock->transposeInPlace();
     siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
                            *currentInteractionBlock, false);
 #endif
@@ -786,10 +786,10 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
               << "\n";
     centralInteractionBlock->display();
 #endif
-    rightInteractionBlock->trans();
+    rightInteractionBlock->transposeInPlace();
 
     if (_useMassNormalization) {
-      centralInteractionBlock->Solve(*rightInteractionBlock);
+      siconos::algebra::solveInPlace(*centralInteractionBlock, *rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
                              *currentInteractionBlock, false);

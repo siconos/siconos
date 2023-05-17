@@ -247,7 +247,8 @@ void siconos::modeling::Interaction::reset() {
   unsigned int nslawSize = _nslaw->size();
 
   for (unsigned int i = _lowerLevelForOutput; i < _upperLevelForOutput + 1; i++) {
-    _y[i] = std::make_shared<siconos::algebra::SiconosVector>(nslawSize, 0.0);
+    _y[i] = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
+    _y[i]->setZero();
   }
 
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
@@ -701,7 +702,7 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos, u
             static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
 
   auto InteractionBlock =
-      std::make_shared<siconos::algebra::SimpleMatrix>(size, sizeDS, originalMatrix->num());
+      std::make_shared<siconos::algebra::SimpleMatrix>(size, sizeDS);
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
@@ -715,7 +716,7 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos, u
   subPos[1] = pos;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
+  siconos::algebra::setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
   return InteractionBlock;
 }
 
@@ -758,7 +759,7 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
   subPos[1] = pos;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
+  siconos::algebra::setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix>
@@ -794,7 +795,7 @@ siconos::modeling::Interaction::getRightInteractionBlockForDS(unsigned int pos,
             static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock =
-      std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, size, originalMatrix->num());
+      std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, size);
 
   if (!originalMatrix)
     THROW_EXCEPTION(
@@ -814,7 +815,7 @@ siconos::modeling::Interaction::getRightInteractionBlockForDS(unsigned int pos,
   subPos[1] = 0;  //_relativePosition;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
+  siconos::algebra::setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
   return InteractionBlock;
 }
 

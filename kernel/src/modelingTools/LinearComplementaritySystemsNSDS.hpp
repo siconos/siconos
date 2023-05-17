@@ -21,12 +21,12 @@
 #ifndef LinearComplementaritySystemsNSDS_H
 #define LinearComplementaritySystemsNSDS_H
 
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
 namespace siconos::algebra {
 
-class SiconosVector;
-class SimpleMatrix;
 }  // namespace siconos::algebra
 
 namespace siconos::modeling {

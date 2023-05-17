@@ -25,12 +25,9 @@
 
 #include <memory>
 
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 
-namespace siconos::algebra {
-
-class SiconosMatrix;
-}
 
 namespace siconos::modeling {
 

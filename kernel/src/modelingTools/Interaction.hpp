@@ -27,15 +27,19 @@
 
 #include <memory>
 #include <vector>
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
+#include "BlockVector.hpp"
 
 #include "SiconosSerialization.hpp"
 
 namespace siconos::algebra {
 class SiconosMemory;
-class SiconosVector;
-class SiconosMatrix;
-class SimpleMatrix;
-class BlockVector;
+// class SiconosVector;
+// class SiconosMatrix;
+// class SimpleMatrix;
+// class BlockVector;
 }  // namespace siconos::algebra
 
 namespace siconos::modeling {

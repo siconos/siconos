@@ -26,6 +26,7 @@
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include <iostream>
+#include <memory>
 
 #include "siconos_debug.h"
 
@@ -111,9 +112,9 @@ void siconos::modeling::FirstOrderNonLinearDS::initRhs(double time)
   {
     if (_jacobianfx && !_M)  // if M is not defined, then jacobianfx = jacobianRhsx, no memory
                              // allocation for that one.
-      _jacxRhs = _jacobianfx;
+      _jacxRhs->block(0, 0) = _jacobianfx;
     else  //  if (_jacobianfx && _M) or if(!jacobianRhsx)
-      _jacxRhs = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+      _jacxRhs->block(0, 0) = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
 
     // else no allocation, jacobian is equal to 0.
   }
@@ -232,8 +233,8 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianfx(
     double time, std::shared_ptr<siconos::algebra::SiconosVector> state)
 {
   if (_jacobianfx && _pluginJacxf->fPtr)
-    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, state->getArray(), &(*_jacobianfx)(0, 0),
-                                      _z->size(), _z->getArray());
+    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, state->data(), &(*_jacobianfx)(0, 0),
+                                      _z->size(), _z->data());
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time)
@@ -256,8 +257,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time)
       _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
     else if (_pluginM->fPtr)  // if M is plugged, invM must be updated
       *_invM = *_M;
-
-    _invM->Solve(*_x[1]);
+    algebra::solveInPlace(*_invM, *(_x[1]));
   }
 }
 
@@ -274,7 +274,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time)
   computeJacobianfx(time, _x[0]);
   // solve M*jacobianXRhS = jacobianfx
   if (_M && _jacobianfx) {
-    *_jacxRhs = *_jacobianfx;
+    _jacxRhs->block(0, 0) = _jacobianfx;
     // copy _M into _invM for LU-factorisation, at the first call of this function.
 
     computeM(time);
@@ -283,7 +283,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time)
       _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
     else if (_pluginM->fPtr)  // if M is plugged, invM must be updated
       *_invM = *_M;
-    _invM->Solve(*_jacxRhs);
+    algebra::solveInPlace(*_invM, *(_jacxRhs->block(0, 0)));
   }
   // else jacobianRhsx = jacobianfx, pointers equality set in initRhs
 }
@@ -312,7 +312,7 @@ void siconos::modeling::FirstOrderNonLinearDS::display(bool brief) const
   std::cout << " ============================================" << std::endl;
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::resetAllNonSmoothParts() { _r->zero(); }
+void siconos::modeling::FirstOrderNonLinearDS::resetAllNonSmoothParts() { _r->setZero(); }
 
 void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
 {

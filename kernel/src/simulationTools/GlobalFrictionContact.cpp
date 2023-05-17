@@ -104,8 +104,8 @@ siconos::nonsmooth_formulations::GlobalFrictionContact::globalFrictionContactPro
   auto numerics_problem = std::make_shared<GlobalFrictionContactProblem>();
   numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
-  numerics_problem->q = _q->getArray();
-  numerics_problem->b = _b->getArray();
+  numerics_problem->q = _q->data();
+  numerics_problem->b = _b->data();
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->mu = _mu->data();
   numerics_problem->dimension = _contactProblemDim;
@@ -376,8 +376,8 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::solve(
   if (!problem) {
     problem = globalFrictionContactProblem();
   }
-  return (*_gfc_driver)(&*problem, _z->getArray(), _w->getArray(),
-                        _globalVelocities->getArray(), &*_numerics_solver_options);
+  return (*_gfc_driver)(&*problem, _z->data(), _w->data(),
+                        _globalVelocities->data(), &*_numerics_solver_options);
 }
 
 void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {

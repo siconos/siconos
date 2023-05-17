@@ -18,13 +18,13 @@
 // #include "SiconosAlgebra.hpp"
 #include "io.hpp"
 
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/ublas/banded.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/vector_sparse.hpp>
+// #include <boost/numeric/bindings/ublas/matrix.hpp>
+// #include <boost/numeric/bindings/ublas/vector.hpp>
+// #include <boost/numeric/ublas/banded.hpp>
+// #include <boost/numeric/ublas/matrix_sparse.hpp>
+// #include <boost/numeric/ublas/symmetric.hpp>
+// #include <boost/numeric/ublas/triangular.hpp>
+// #include <boost/numeric/ublas/vector_sparse.hpp>
 #include <filesystem>
 #include <fstream>
 
@@ -51,7 +51,7 @@ bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
   infile.precision(prec);
 
   if (mode == BINARY_IN) {
-    double *x = m.getArray();
+    double *x = m.data();
     if (inputType == WriteType::python) {
       unsigned int dim;
       infile.read((char *)(&dim), sizeof(m.size()));
@@ -59,16 +59,15 @@ bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
     infile.read((char *)(&x[0]), m.size() * sizeof(double));
   }
   else {
-    DenseVect *p = m.dense();
     // Read the dimension of the vector in the first line of the input file
     // Just use to check that sizes are consistents.
     if (inputType == WriteType::python) {
       unsigned int dim;
       infile >> dim;
-      if (dim != p->size()) p->resize(dim);
+      if (dim != m.size()) m.resize(dim);
     }
     copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(),
-         (p->data()).begin());
+         (m.begin()));
   }
   infile.close();
   return true;
@@ -84,7 +83,7 @@ bool siconos::algebra::io::write(const std::string &fileName, const SiconosVecto
   if (!outfile.good()) THROW_EXCEPTION("");
   outfile.precision(prec);
   if (mode == BINARY_OUT) {
-    double *x = m.getArray();
+    const double *x = m.data();
     if (outputType == WriteType::python) {
       unsigned int dim = m.size();
       outfile.write((char *)&dim, sizeof(dim));
@@ -93,15 +92,7 @@ bool siconos::algebra::io::write(const std::string &fileName, const SiconosVecto
   }
   else {
     if (outputType == WriteType::python) outfile << m.size() << std::endl;
-
-    if (m.num() == UblasType::DENSE) {
-      DenseVect *p = m.dense();
-      std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
-    }
-    else if (m.num() == UblasType::SPARSE) {
-      SparseVect *p = m.sparse();
-      std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
-    }
+    std::copy(m.begin(), m.end(), std::ostream_iterator<double>(outfile, " "));
   }
   outfile.close();
   return true;
@@ -118,11 +109,8 @@ bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
     THROW_EXCEPTION("the given file is empty!");
   }
 
-  if (m.isBlock()) THROW_EXCEPTION("not yet implemented for block matrix.");
-
   infile.precision(15);
   infile.setf(std::ios::scientific);
-  DenseMat &p = *m.dense();
 
   // Dim of the matrix are given in the first line.
   // Just use to check that sizes are consistents.
@@ -131,7 +119,7 @@ bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
   infile >> s1;
   infile >> s2;
 
-  if (s1 != p.size1() || s2 != p.size2()) p.resize(s1, s2);
+  if (s1 != m.size(0) || s2 != m.size(1)) m.resize(s1, s2);
 
   // Note: using istream stl iterator seems to be 2-times faster than << with a loop over
   // matrix data.
@@ -142,7 +130,7 @@ bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
 
   for (unsigned int i = 0; i < s1; i++) {
     for (unsigned int j = 0; j < s2; j++) {
-      infile >> p(i, j);
+      infile >> m(i, j);
     }
   }
 
@@ -158,7 +146,7 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
 
   if (!outfile.good()) THROW_EXCEPTION("");
 
-  if (m.isBlock()) THROW_EXCEPTION("not yet implemented for BlockMatrix");
+  // if (m.isBlock()) THROW_EXCEPTION("not yet implemented for BlockMatrix");
 
   outfile.precision(15);
   outfile.setf(std::ios::scientific);
@@ -166,46 +154,15 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
 
   if (outputType == WriteType::python) outfile << m.size(0) << " " << m.size(1) << std::endl;
 
-  if (m.num() == UblasType::DENSE) {
-    double tmp;
-    for (decltype(m.size(0)) i = 0; i < m.size(0); i++) {
-      for (decltype(m.size(1)) j = 0; j < m.size(1); j++) {
-        tmp = m(i, j);
-        if (fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
-        outfile << tmp << " ";
-        assert(outfile.good());
-      }
-      outfile << std::endl;
+  double tmp;
+  for (decltype(m.size(0)) i = 0; i < m.size(0); i++) {
+    for (decltype(m.size(1)) j = 0; j < m.size(1); j++) {
+      tmp = m(i, j);
+      if (fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
+      outfile << tmp << " ";
+      assert(outfile.good());
     }
-  }
-  else if (m.num() == UblasType::TRIANGULAR) {
-    auto p = m.triang();
-
-    for (auto row = p->begin1(); row != p->end1(); ++row) {
-      std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
-      outfile << std::endl;
-    }
-  }
-  else if (m.num() == UblasType::SYMMETRIC) {
-    auto p = m.sym();
-    for (auto row = p->begin1(); row != p->end1(); ++row) {
-      std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
-      outfile << std::endl;
-    }
-  }
-  else if (m.num() == UblasType::SPARSE) {
-    auto p = m.sparse();
-    for (auto row = p->begin1(); row != p->end1(); ++row) {
-      std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
-      outfile << std::endl;
-    }
-  }
-  else {
-    auto p = m.banded();
-    for (auto row = p->begin1(); row != p->end1(); ++row) {
-      std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
-      outfile << std::endl;
-    }
+    outfile << std::endl;
   }
 
   outfile.close();
@@ -216,11 +173,11 @@ double siconos::algebra::io::compareRefFile(const SimpleMatrix &data, std::strin
                                             double epsilon, std::vector<int> index,
                                             const std::ios_base::openmode mode, bool verbose)
 {
-  auto ref = std::make_shared<SimpleMatrix>(0, 0);
+  SimpleMatrix ref(0, 0);
   bool compare = false;
   // SimpleMatrix ref{0, 0};
   try {
-    compare = read(filename, *ref, mode);
+    compare = read(filename, ref, mode);
   }
   catch (...) {
     if (verbose)
@@ -232,20 +189,19 @@ double siconos::algebra::io::compareRefFile(const SimpleMatrix &data, std::strin
 
   if (verbose) std::cout << "Comparison with reference file " << filename << std::endl;
 
-  auto err = std::make_shared<SiconosVector>(data.size(1));
-  (data - *ref).normInfByColumn(err);
+  SiconosVector err(data.size(1));
+  siconos::algebra::normInfByColumn(data - ref, err);
 
-  if (verbose) err->display();
+  if (verbose) err.display();
 
   double error = 0.;
   /* Scalar error = max of columns */
   if (index.empty()) {
-    auto errv = err->dense();
-    error = *std::max_element(errv->begin(), errv->end());
+    error = *std::max_element(err.begin(), err.end());
   }
   else {
     for (auto &i : index) {
-      if (error < (*err)(i)) error = (*err)(i);
+      if (error < err(i)) error = err(i);
     }
   }
   error = std::abs(error);

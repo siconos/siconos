@@ -121,8 +121,8 @@ void siconos::nonsmooth_formulations::AVI::initialize(
     _numerics_problem->poly.split->size_ineq = K.size();
     _numerics_problem->poly.split->size_eq = 0;
     _numerics_problem->poly.split->H = NM_create_from_data(
-        NM_DENSE, K.size(), nc.size(), H.getArray());
-    _numerics_problem->poly.split->K = K.getArray();
+        NM_DENSE, K.size(), nc.size(), H.data());
+    _numerics_problem->poly.split->K = K.data();
     _numerics_problem->poly.split->Heq = nullptr;
     _numerics_problem->poly.split->Keq = nullptr;
 
@@ -174,10 +174,10 @@ int siconos::nonsmooth_formulations::AVI::compute(double time)
   if (_sizeOutput != 0) {
     // The AVI in Numerics format
     _numerics_problem->M = _M->numericsMatrix().get();
-    _numerics_problem->q = _q->getArray();
+    _numerics_problem->q = _q->data();
 
-    info = avi_driver(_numerics_problem.get(), _z->getArray(),
-                                         _w->getArray(), _numerics_solver_options.get());
+    info = avi_driver(_numerics_problem.get(), _z->data(),
+                                         _w->data(), _numerics_solver_options.get());
 
     if (info != 0) {
       std::cout << "Warning : Problem in AVI resolution\n";

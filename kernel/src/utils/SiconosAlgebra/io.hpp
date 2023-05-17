@@ -27,13 +27,16 @@
 #include <iostream>
 #include <vector>
 // #include <string>
+#include "SiconosVector.hpp"
+#include "SiconosMatrix.hpp"
+#include "SimpleMatrix.hpp"
 
 /** utilities to handle file input/output for vectors and matrices */
 namespace siconos::algebra {
 
-class SiconosMatrix;
-class SiconosVector;
-class SimpleMatrix;
+// class SiconosMatrix;
+// class SiconosVector;
+// class SimpleMatrix;
 namespace io {
 /** Format to read binary data */
 constexpr std::ios_base::openmode BINARY_IN = std::ios_base::in | std::ios_base::binary;

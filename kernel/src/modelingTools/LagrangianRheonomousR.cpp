@@ -30,6 +30,7 @@
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+#include "SiconosException.hpp"
 #include "siconos_debug.h"
 
 // constructor from a set of data
@@ -77,8 +78,8 @@ void siconos::modeling::LagrangianRheonomousR::computeh(double time,
       "std::shared_ptr<siconos::algebra::BlockVector> z)");
   // arg= time. Unused in this function but required for interface.
   if (_pluginh->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
+    auto qp = q.toSiconosVector();
+    auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr4)(_pluginh->fPtr))(qp->size(), &(*qp)(0), time, y.size(), &(y)(0),
                                                 zp->size(), &(*zp)(0));
     z = *zp;
@@ -88,8 +89,8 @@ void siconos::modeling::LagrangianRheonomousR::computeh(double time,
 void siconos::modeling::LagrangianRheonomousR::computehDot(
     double time, const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
   if (_hDot && _pluginhDot->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
+    auto qp = q.toSiconosVector();
+    auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr4)(_pluginhDot->fPtr))(qp->size(), &(*qp)(0), time, _hDot->size(),
                                                    &(*_hDot)(0), zp->size(), &(*zp)(0));
     z = *zp;
@@ -99,8 +100,8 @@ void siconos::modeling::LagrangianRheonomousR::computehDot(
 void siconos::modeling::LagrangianRheonomousR::computeJachq(
     double time, const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
   if (_jachq && _pluginJachq->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
+    auto qp = q.toSiconosVector();
+    auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr4)(_pluginJachq->fPtr))(
         qp->size(), &(*qp)(0), time, _jachq->size(0), &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
     z = *zp;

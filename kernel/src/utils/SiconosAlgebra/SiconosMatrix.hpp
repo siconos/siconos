@@ -24,14 +24,15 @@
 #define SICOMAT
 
 // #include <boost/numeric/ublas/fwd.hpp>  // boost::numeric fwd
+#include "EigenInclude.hpp"
 #include <Eigen/Core>
-#include <memory>                       // shared_ptr
-#include <vector>
+// #include <memory>                       // shared_ptr
+// #include <vector>
 
-#include "CSparseMatrix.h"          // For CSparseMatrix
-#include "SiconosAlgebraTypes.hpp"  // for UblasType
-#include "SiconosException.hpp"
-#include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
+// #include "CSparseMatrix.h"          // For CSparseMatrix
+// #include "SiconosAlgebraTypes.hpp"  // for UblasType
+// #include "SiconosException.hpp"
+// #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
 
 // #include "NumericsFwd.h"  // For NumericsMatrix
 // typedef struct NumericsMatrix NumericsMatrix;
@@ -39,8 +40,6 @@ struct NumericsMatrix;
 
 namespace siconos::algebra {
 
-class BlockVector;
-// class SiconosVector;
 
 
 /**

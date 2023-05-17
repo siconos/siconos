@@ -34,8 +34,7 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> mass)
     : LagrangianDS(q0, velocity0)
 {
-  _mass = std::make_shared<siconos::algebra::SimpleMatrix>(dimension(), dimension(),
-                                                           siconos::algebra::UblasType::BANDED, 0, 0);
+  _mass = std::make_shared<siconos::algebra::SimpleMatrix>(dimension(), dimension()); //TODO : use Eigen banded matrix?
   for (unsigned int i = 0; i < dimension(); ++i) (*_mass)(i, i) = (*mass)(i);
   _stiffness = stiffness;
   _damping = damping;

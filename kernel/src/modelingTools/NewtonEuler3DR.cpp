@@ -122,7 +122,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
    */
 
   // 4 - Compute the rotation matrix from the body-fixed frame to the absolute frame
-  siconos::geometry::computeRotationMatrix(q1, _rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(*q1, *_rotationBodyToAbsoluteFrame);
   DEBUG_EXPR(_rotationBodyToAbsoluteFrame->display(););
 
   // 5 - compose the body lever arm matrix with the rotation matrix
@@ -233,7 +233,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   (*_NPG2)(2, 1) = (G2x - Px);
   (*_NPG2)(2, 2) = 0;
 
-  siconos::geometry::computeRotationMatrix(q1, _rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(*q1, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
   siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
@@ -245,7 +245,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
-  siconos::geometry::computeRotationMatrix(q2, _rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(*q2, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
   siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 

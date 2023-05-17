@@ -104,7 +104,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       /* accFree contains left (right limit) acceleration without contact force */
       if (d->inverseMass()) {
         d->update_inverse_mass();
-        d->inverseMass()->Solve(accFree);
+        siconos::algebra::solveInPlace(*(d->inverseMass()), accFree);
       }
 
       /* Store the value of accFree in workspace(::FREE_TDG) */
@@ -142,8 +142,8 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
       if (d->inverseMass()) {
         d->update_inverse_mass();
-        d->inverseMass()->Solve(
-            accFree);  // contains left (right limit) acceleration without contact force
+        siconos::algebra::solveInPlace(*(d->inverseMass()), accFree);
+        // contains left (right limit) acceleration without contact force
       }
       *work_tdg = accFree;  // store the value in WorkFreeFree
 
@@ -207,7 +207,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
                   *(d->p(2)));  // value = contact force
           if (d->inverseMass()) {
             d->update_inverse_mass();
-            d->inverseMass()->Solve(*dummy);
+            siconos::algebra::solveInPlace(*(d->inverseMass()), *dummy);
           }
           accFree += *(dummy);
 
@@ -220,7 +220,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
                   *(d->p(2)));  // value = contact force
           if (d->inverseMass()) {
             d->update_inverse_mass();
-            d->inverseMass()->Solve(*dummy);
+            siconos::algebra::solveInPlace(*(d->inverseMass()), *dummy);
           }
           accFree += *(dummy);
 
@@ -415,7 +415,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(*work_tdg);
+          siconos::algebra::solveInPlace(*(d->inverseMass()), *work_tdg);
         }
         residuFree -= 0.5 * h * *work_tdg;
         DEBUG_EXPR(residuFree.display());
@@ -438,7 +438,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(*work_tdg);
+          siconos::algebra::solveInPlace(*(d->inverseMass()), *work_tdg);
         }
         residuFree -= 0.5 * h * *work_tdg;
         DEBUG_EXPR(residuFree.display());
@@ -477,8 +477,8 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(
-              accFree);  // contains right (left limit) acceleration without contact force
+          siconos::algebra::solveInPlace(*(d->inverseMass()), accFree);
+          // contains right (left limit) acceleration without contact force
         }
         DEBUG_PRINT(
             "accFree contains left limit acceleration at  t^-_{k+1} without contact force "
@@ -500,8 +500,8 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
         if (d->inverseMass()) {
           d->update_inverse_mass();
-          d->inverseMass()->Solve(
-              accFree);  // contains right (left limit) acceleration without contact force
+          siconos::algebra::solveInPlace(*(d->inverseMass()), accFree);
+          // contains right (left limit) acceleration without contact force
         }
 
         DEBUG_PRINT(
@@ -563,7 +563,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
           auto dummy(*(d->p(2)));  // value = contact force
           if (d->inverseMass()) {
             d->update_inverse_mass();
-            d->inverseMass()->Solve(dummy);
+            siconos::algebra::solveInPlace(*(d->inverseMass()), dummy);
           }
 
           residuFree -= 0.5 * h * dummy;
@@ -583,7 +583,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
           auto dummy(*(d->p(2)));  // value = contact force
           if (d->inverseMass()) {
             d->update_inverse_mass();
-            d->inverseMass()->Solve(dummy);
+            siconos::algebra::solveInPlace(*(d->inverseMass()), dummy);
           }
           residuFree -= 0.5 * h * dummy;
         }

@@ -32,6 +32,7 @@
 #include "SiconosMatrixOp.hpp"  // For isComparableto
 #include "SimpleMatrix.hpp"
 
+/*
 void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, bool init) {
   // To compute B = a * A (init = true) or B += a*A (init = false).
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
@@ -184,3 +185,4 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
     }
   }
 }
+*/

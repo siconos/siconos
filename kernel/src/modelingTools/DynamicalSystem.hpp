@@ -26,6 +26,9 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include"SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "BlockMatrix.hpp"
 
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
@@ -38,8 +41,8 @@ struct SiconosVisitor;
 
 namespace siconos::algebra {
 
-class SiconosVector;
-class SiconosMatrix;
+// class SiconosVector;
+// class SiconosMatrix;
 }  // namespace siconos::algebra
 
 namespace siconos::modeling {
@@ -118,7 +121,7 @@ class DynamicalSystem {
 
   /** jacobian according to x of the right-hand side (\f$ rhs = \dot x =
       f(x,t) + r \f$) */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacxRhs{nullptr};
+  std::shared_ptr<siconos::algebra::BlockMatrix> _jacxRhs{nullptr};
 
   /** Arbitrary algebraic values vector, z, discrete state of the
       system. */
@@ -308,7 +311,7 @@ class DynamicalSystem {
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianRhsx() const
+  inline std::shared_ptr<siconos::algebra::BlockMatrix> jacobianRhsx() const
   {
     return _jacxRhs;
   }
@@ -317,13 +320,13 @@ class DynamicalSystem {
    *
    *  \param newValue siconos::algebra::SiconosMatrix
    */
-  void setJacobianRhsx(const siconos::algebra::SiconosMatrix &newValue);
+  void setJacobianRhsx(const siconos::algebra::BlockMatrix &newValue);
 
   /** set \f$ \nabla_x rhs() \f$, pointer link
    *
    *  \param newPtr std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  void setJacobianRhsxPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr);
+  void setJacobianRhsxPtr(std::shared_ptr<siconos::algebra::BlockMatrix> newPtr);
 
   /** returns a pointer to \f$ z \f$, the vector of algebraic parameters.
    *

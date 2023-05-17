@@ -23,6 +23,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // inner_prod
 #include "SimpleMatrix.hpp"
+#include "SiconosException.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

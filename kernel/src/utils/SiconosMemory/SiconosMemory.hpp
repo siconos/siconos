@@ -26,12 +26,13 @@
 
 #include <memory>
 #include <vector>
+#include "SiconosVector.hpp"
 
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 
 namespace siconos::algebra {
 
-class SiconosVector;
+// class SiconosVector;
 
 /**
    Interface to stl container of SiconosVector.
