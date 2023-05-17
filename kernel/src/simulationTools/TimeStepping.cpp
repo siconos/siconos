@@ -512,9 +512,9 @@ void TimeStepping::computeInitialNewtonState()
   DEBUG_END("SimulationTimeStepping::computeInitialNewtonState()\n");
 }
 
-void TimeStepping::initializeNewtonLoop()
+void TimeStepping::initializeNewtonSolve()
 {
-  DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
+  DEBUG_BEGIN("TimeStepping::initializeNewtonSolve()\n");
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
@@ -589,7 +589,7 @@ void TimeStepping::initializeNewtonLoop()
       (*itOSI)->computeResiduOutput(tkp1, indexSet0);
     }
   }
-  DEBUG_END("TimeStepping::initializeNewtonLoop()\n");
+  DEBUG_END("TimeStepping::initializeNewtonSolve()\n");
 }
 
 
@@ -603,7 +603,12 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   int info = 0;
   bool isLinear  = _nsds->isLinear();
 
-  initializeNewtonLoop();
+
+  // 1 - initializeNewtonSolve();
+  //  computeInitialNewtonState();
+  //  computeResidu();
+
+  initializeNewtonSolve();
 
   if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
@@ -625,13 +630,14 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     else
       checkSolverOutput(info, this);
 
-    if (!_skip_last_updateInput)
-      updateOutput();
+    if (!_skip_last_updateInput) // warning:  _skip_last_updateInput=True should be only for globalOSI
+      updateAllInput();
 
-    updateAllInput();
     updateState();
+
     if (!_skip_last_updateOutput)
       updateOutput();
+
     hasNSProblems = (!_allNSProblems->empty()) ? true : false;
 
   }
@@ -683,8 +689,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       // --
       if(!_isNewtonConverge && _newtonNbIterations < maxStep)
       {
-        // if you want to update the interactions within the Newton Loop,
-        // you can uncomment this line
+        // if you want to update the interactions (for instance updating index_set 0 with new interactions )
+	// within the Newton Loop, you can uncomment this line below.
         // For stability reasons, we keep fix the interactions in the loop
         // for a good Newton loop, we must have access the Hessian of constraints.
         // updateInteractions();
@@ -696,7 +702,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
       displayNewtonConvergenceInTheLoop();
     } // End of the Newton Loop
-
+    if (!_skip_last_updateOutput)
+      updateOutput();
     _newtonCumulativeNbIterations += _newtonNbIterations;
 
     displayNewtonConvergenceAtTheEnd(info, maxStep);

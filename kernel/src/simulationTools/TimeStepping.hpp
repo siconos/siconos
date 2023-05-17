@@ -228,7 +228,7 @@ public:
    *  It computes the initial residu and set the, if needed to Newton variable
    *  to start the newton algorithm.
    */
-  void initializeNewtonLoop();
+  void initializeNewtonSolve();
 
   void computeInitialNewtonState();
   void prepareNewtonIteration();
