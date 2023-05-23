@@ -27,6 +27,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosVectorOp.hpp"
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_STDOUT
@@ -224,11 +225,11 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         // computes Fext(ti)
         d->computeFExt(told);
         coeff = h * (1 - _theta);
-        scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*(1-_theta) * fext(ti)
+        siconos::algebra::scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
         coeff = h * _theta;
-        scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*_theta * fext(ti+1)
+        siconos::algebra::scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*_theta * fext(ti+1)
       }
       DEBUG_EXPR(free_rhs.display());
 
@@ -280,7 +281,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         // Cheaper version: get forces(ti,vi,qi) from memory
         const auto& fold = lds->forcesMemory().getSiconosVector(0);
         double coef = h * (1 - _theta);
-        scal(coef, fold, free_rhs, false);
+        siconos::algebra::scal(coef, fold, free_rhs, false);
 
         // Expensive computes forces(ti,vi,qi)
         // d->computeForces(told, qold, vold);
@@ -291,7 +292,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
         lds->computeForces(t, q, v);
         coef = h * _theta;
-        scal(coef, *lds->forces(), free_rhs, false);
+        siconos::algebra::scal(coef, *lds->forces(), free_rhs, false);
 
         // or  forces(ti+1, v_k,i+\theta, q(v_k,i+\theta))
         // auto qbasedonv =
@@ -359,7 +360,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         // Cheaper version: get forces(ti,vi,qi) from memory
         const auto& fold = d->forcesMemory().getSiconosVector(0);
         auto coef = h * (1 - _theta);
-        scal(coef, fold, free_rhs, false);
+        siconos::algebra::scal(coef, fold, free_rhs, false);
 
         // Expensive version to check ...
         // d->computeForces(told,qold,vold);
@@ -373,7 +374,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         // computes forces(ti,v,q)
         d->computeForces(t, q, v);
         coef = h * _theta;
-        scal(coef, *d->forces(), free_rhs, false);
+        siconos::algebra::scal(coef, *d->forces(), free_rhs, false);
         DEBUG_PRINT("siconos::integrators::MoreauJeanGOSI:: new forces :\n");
         DEBUG_EXPR(d->forces()->display(););
         DEBUG_EXPR(residu.display(););

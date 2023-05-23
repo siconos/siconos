@@ -359,7 +359,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
     auto &lldds = static_cast<siconos::modeling::LagrangianLinearDiagonalDS &>(*ds);
     auto ndof = lldds.dimension();
     _dynamicalSystemsGraph->properties(dsv).W =
-        std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof); // TODO : Use bandmatrix instead ?
+        std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof); // WARNING : Use bandmatrix instead ?
     auto &W = *_dynamicalSystemsGraph->properties(dsv).W;
 
     if (lldds.mass())
@@ -488,8 +488,7 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
 
     auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
 
-    if (!iteration_matrix.checkSymmetry(
-            1e-10))  // Warning this operation could be quite expensive
+    if (!siconos::algebra::checkSymmetry(iteration_matrix, 1e-10))  // Warning this operation could be quite expensive
     {
       // iteration_matrix.display();
       std::cout << "Warning, we apply boundary conditions assuming W symmetric" << std::endl;
@@ -750,7 +749,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       DEBUG_EXPR(v.display());
 
       residuFree = v;
-      sub(residuFree, vold, residuFree);
+      siconos::algebra::sub(residuFree, vold, residuFree);
       if (d.mass()) {
         d.computeMass(d.q());
         siconos::algebra::prod(*(d.mass()), residuFree,

@@ -43,53 +43,53 @@ namespace siconos::algebra {
 void setBlock(const SiconosVector& vIn, std::shared_ptr<SiconosVector> vOut,
               unsigned int sizeB, unsigned int startIn, unsigned int startOut);
 
-/** A==B when (A-B).normInf()<tolerance
- * \param 2 SiconosVector
- * \return a boolean
- */
-bool operator==(const SiconosVector&, const SiconosVector&);
+// /** A==B when (A-B).normInf()<tolerance
+//  * \param 2 SiconosVector
+//  * \return a boolean
+//  */
+// bool operator==(const SiconosVector&, const SiconosVector&);
 
-/** multiplication of a vector by a scalar
- *  \param a double
- *  \param a SiconosVector
- *  \return a SiconosVector
- */
-SiconosVector operator*(double, const SiconosVector&);
+// /** multiplication of a vector by a scalar
+//  *  \param a double
+//  *  \param a SiconosVector
+//  *  \return a SiconosVector
+//  */
+// SiconosVector operator*(double, const SiconosVector&);
 
-/** multiplication of a vector by a double
- *  \param a SiconosVector
- *  \param a double
- *  \return a SiconosVector
- */
-SiconosVector operator*(const SiconosVector&, double);
+// /** multiplication of a vector by a double
+//  *  \param a SiconosVector
+//  *  \param a double
+//  *  \return a SiconosVector
+//  */
+// SiconosVector operator*(const SiconosVector&, double);
 
-/** division of the vector by a double
- *  \param a SiconosVector
- *  \param a double
- *  \return a SiconosVector
- */
-SiconosVector operator/(const SiconosVector&, double);
+// /** division of the vector by a double
+//  *  \param a SiconosVector
+//  *  \param a double
+//  *  \return a SiconosVector
+//  */
+// SiconosVector operator/(const SiconosVector&, double);
 
-/** Addition of two vectors
- * \param a SiconosVector
- * \param a SiconosVector
- * \return a SiconosVector
- */
-SiconosVector operator+(const SiconosVector&, const SiconosVector&);
+// /** Addition of two vectors
+//  * \param a SiconosVector
+//  * \param a SiconosVector
+//  * \return a SiconosVector
+//  */
+// SiconosVector operator+(const SiconosVector&, const SiconosVector&);
 
 /** formatted output for block vectors
  */
 std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
 
-/** formatted output for siconos vectors
- */
-std::ostream& operator<<(std::ostream& os, const SiconosVector& bv);
+// /** formatted output for siconos vectors
+//  */
+// std::ostream& operator<<(std::ostream& os, const SiconosVector& bv);
 
-/** In place multiplication of a vector by a scalar*/
-SiconosVector& operator*=(SiconosVector& v, const double& s);
+// /** In place multiplication of a vector by a scalar*/
+// SiconosVector& operator*=(SiconosVector& v, const double& s);
 
-/** In place division of a vector by a scalar*/
-SiconosVector& operator/=(SiconosVector& v, const double& s);
+// /** In place division of a vector by a scalar*/
+// SiconosVector& operator/=(SiconosVector& v, const double& s);
 
 /** computes z = x + y
     \param x, a  SiconosVector, IN.
@@ -98,12 +98,12 @@ SiconosVector& operator/=(SiconosVector& v, const double& s);
 */
 void add(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
-/** Subtraction of two vectors
-    \param a SiconosVector (x), IN.
-    \param a SiconosVector (y), IN.
-    \return a SiconosVector
-*/
-SiconosVector operator-(const SiconosVector&, const SiconosVector&);
+// /** Subtraction of two vectors
+//     \param a SiconosVector (x), IN.
+//     \param a SiconosVector (y), IN.
+//     \return a SiconosVector
+// */
+// SiconosVector operator-(const SiconosVector&, const SiconosVector&);
 
 /** computes z = x - y
     \param a SiconosVector (x), IN.

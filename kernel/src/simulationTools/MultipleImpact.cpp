@@ -414,7 +414,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::initialize(
 };
 //========================================================================================
 void siconos::nonsmooth_formulations::MultipleImpact::PrimConVelocity() {
-  getMin(*_velocityContact, _relativeVelocityPrimaryContact, _primaryContactId);
+  siconos::algebra::getMin(*_velocityContact, _relativeVelocityPrimaryContact, _primaryContactId);
   _energyPrimaryContact = (*_energyContact)(_primaryContactId);
   if (!isVelNegative(_relativeVelocityPrimaryContact)) {
     THROW_EXCEPTION(
@@ -431,7 +431,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PrimConVelocity() {
 }
 //=======================================================================================
 void siconos::nonsmooth_formulations::MultipleImpact::PrimConEnergy() {
-  getMax(*_energyContact, _energyPrimaryContact, _primaryContactId);
+  siconos::algebra::getMax(*_energyContact, _energyPrimaryContact, _primaryContactId);
   _relativeVelocityPrimaryContact = (*_velocityContact)(_primaryContactId);
   if (_energyPrimaryContact < 0.0) {
     THROW_EXCEPTION(
@@ -450,7 +450,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PrimConEnergy() {
 bool siconos::nonsmooth_formulations::MultipleImpact::IsEnermaxZero() {
   double MaxEner;
   unsigned int IdMax;
-  getMax(*_energyContact, MaxEner, IdMax);
+  siconos::algebra::getMax(*_energyContact, MaxEner, IdMax);
   if (isEnerZero(MaxEner))
     return true;
   else
@@ -460,7 +460,7 @@ bool siconos::nonsmooth_formulations::MultipleImpact::IsEnermaxZero() {
 bool siconos::nonsmooth_formulations::MultipleImpact::IsVcminNegative() {
   double MinVelCon;
   unsigned int IdConVmin;
-  getMin(*_velocityContact, MinVelCon, IdConVmin);
+  siconos::algebra::getMin(*_velocityContact, MinVelCon, IdConVmin);
   if (isVelNegative(MinVelCon))
     return true;
   else

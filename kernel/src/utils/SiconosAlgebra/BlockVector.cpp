@@ -434,7 +434,7 @@ double siconos::algebra::BlockVector::normInf() const {
   double d = 0;
   for (auto& it : _vect) {
     assert(it);
-    d = fmax(it->lpNorm<Eigen::Infinity>(), d);
+    d = fmax(it->normInf(), d); // WARNING : CORRECT ?
   }
   return d;
 }

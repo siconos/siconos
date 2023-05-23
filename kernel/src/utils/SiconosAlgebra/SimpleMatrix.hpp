@@ -47,6 +47,8 @@ using SimpleMatrix = SiconosMatrix;
 
 void normInfByColumn(const SimpleMatrix &m, SiconosVector &v);
 
+bool checkSymmetry(SiconosMatrix &m, double tol);
+
 void solveInPlace(SimpleMatrix &A, SimpleMatrix &B);
 
 void solveInPlace(SimpleMatrix &A, SimpleMatrix &&B);

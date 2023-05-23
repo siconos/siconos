@@ -1,3 +1,4 @@
+#include <eigen3/Eigen/src/Core/util/Constants.h>
 #include <cassert>
 
 // Setters
@@ -98,12 +99,6 @@ inline void eye() {
     this->setIdentity();
 }
 
-bool checkSymmetry(double tol) {
-    auto m_trans = this->transpose();
-    double err = (*this - m_trans).normInf();
-    if (m_trans.normInf() > 0.0) {
-        err /= (m_trans).normInf();
-    }
-    delete m_trans;
-    return (err < tol);
+inline Scalar normInf() {
+    return this->cwiseAbs().rowwise().sum().maxCoeff();
 }

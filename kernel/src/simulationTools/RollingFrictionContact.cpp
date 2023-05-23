@@ -127,7 +127,7 @@ siconos::nonsmooth_formulations::RollingFrictionContact::frictionContactProblem(
   numerics_problem->dimension = _contactProblemDim;
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->M = &*_M->numericsMatrix();
-  numerics_problem->q = &*_q->getArray();
+  numerics_problem->q = &*_q->data();
   numerics_problem->mu = _mu->data();
   numerics_problem->mu_r = _muR->data();
   return numerics_problem;
@@ -153,7 +153,7 @@ int siconos::nonsmooth_formulations::RollingFrictionContact::solve(
     problem = frictionContactProblem();
   }
 
-  return (*_rolling_frictionContact_driver)(&*problem, &*_z->getArray(), &*_w->getArray(),
+  return (*_rolling_frictionContact_driver)(&*problem, &*_z->data(), &*_w->data(),
                                             &*_numerics_solver_options);
 }
 

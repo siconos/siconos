@@ -30,19 +30,19 @@
 namespace siconos::algebra {
 
 
-/** multiply the current matrix with a scalar
- *
- *  \param m the matrix to operate on
- *  \param s the scalar
- *  \return SiconosMatrix&
- */
-SiconosMatrix& operator*=(SiconosMatrix& m, const double& s);
+// /** multiply the current matrix with a scalar
+//  *
+//  *  \param m the matrix to operate on
+//  *  \param s the scalar
+//  *  \return SiconosMatrix&
+//  */
+// SiconosMatrix& operator*=(SiconosMatrix& m, const double& s);
 
-SiconosMatrix& operator*=(SiconosMatrix& m, const double& s);
+// SiconosMatrix& operator*=(SiconosMatrix& m, const double& s);
 
-SiconosMatrix& operator/=(SiconosMatrix& m, const double& s);
-const SimpleMatrix operator/(const SiconosMatrix& A, double a);
-void operator+=(std::shared_ptr<SiconosMatrix> A, std::shared_ptr<SimpleMatrix> B);
+// SiconosMatrix& operator/=(SiconosMatrix& m, const double& s);
+// const SimpleMatrix operator/(const SiconosMatrix& A, double a);
+// void operator+=(std::shared_ptr<SiconosMatrix> A, std::shared_ptr<SimpleMatrix> B);
 
 // /** multiplication of a matrix by a double
 //  *  \param A a SiconosMatrix
@@ -51,26 +51,26 @@ void operator+=(std::shared_ptr<SiconosMatrix> A, std::shared_ptr<SimpleMatrix> 
 //  */
 // SimpleMatrix operator * (const SiconosMatrix& A, double a);
 
-/** multiplication of a matrix by a double
- *  \param a a double
- *  \param A a SiconosMatrix
- *  \return a SimpleMatrix
- */
-SimpleMatrix operator*(double a, const SiconosMatrix& A);
-
-const SimpleMatrix operator*(const SiconosMatrix&, double);
-
-// /** multiplication of a SimpleMatrix by a SimpleMatrix
-//  *  \param a const SiconosMatrix&
-//  *  \param a const SimpleMatrix&
-//  *  \return a const SimpleMatrix
+// /** multiplication of a matrix by a double
+//  *  \param a a double
+//  *  \param A a SiconosMatrix
+//  *  \return a SimpleMatrix
 //  */
-// //  const SimpleMatrix operator * (const SimpleMatrix&,const SimpleMatrix&);
+// SimpleMatrix operator*(double a, const SiconosMatrix& A);
 
-std::shared_ptr<SimpleMatrix> operator*(const std::shared_ptr<SimpleMatrix>,
-                                        const std::shared_ptr<SimpleMatrix>);
+// const SimpleMatrix operator*(const SiconosMatrix&, double);
 
-const SimpleMatrix operator/(const SiconosMatrix& A, double a);
+// // /** multiplication of a SimpleMatrix by a SimpleMatrix
+// //  *  \param a const SiconosMatrix&
+// //  *  \param a const SimpleMatrix&
+// //  *  \return a const SimpleMatrix
+// //  */
+// // //  const SimpleMatrix operator * (const SimpleMatrix&,const SimpleMatrix&);
+
+// std::shared_ptr<SimpleMatrix> operator*(const std::shared_ptr<SimpleMatrix>,
+//                                         const std::shared_ptr<SimpleMatrix>);
+
+// const SimpleMatrix operator/(const SiconosMatrix& A, double a);
 
 // /** multiplication of a std::shared_ptr<SimpleMatrix> by a std::shared_ptr<SimpleMatrix>
 //  *  \param A a std::shared_ptr<SiconosMatrix>
@@ -80,10 +80,10 @@ const SimpleMatrix operator/(const SiconosMatrix& A, double a);
 // std::shared_ptr<SimpleMatrix> operator * (const std::shared_ptr<SimpleMatrix> A, const
 // std::shared_ptr<SimpleMatrix> B);
 
-/** operator += add B to A
- *  \param[in,out] A a std::shared_ptr<SiconosMatrix>
- *  \param B a std::shared_ptr<SiconosMatrix>
- */
+// /** operator += add B to A
+//  *  \param[in,out] A a std::shared_ptr<SiconosMatrix>
+//  *  \param B a std::shared_ptr<SiconosMatrix>
+//  */
 // void operator +=(std::shared_ptr<SiconosMatrix> A, std::shared_ptr<SimpleMatrix> B);
 
 // /** division of the matrix by a double
@@ -93,20 +93,20 @@ const SimpleMatrix operator/(const SiconosMatrix& A, double a);
 //  */
 // const SimpleMatrix operator /(const SiconosMatrix& A, double a);
 
-/** Addition of two matrices, C = A+B
- * \param A a SiconosMatrix
- * \param B a SiconosMatrix
- * \return a SimpleMatrix C
- */
-const SimpleMatrix operator+(const SiconosMatrix& A, const SiconosMatrix& B);
+// /** Addition of two matrices, C = A+B
+//  * \param A a SiconosMatrix
+//  * \param B a SiconosMatrix
+//  * \return a SimpleMatrix C
+//  */
+// const SimpleMatrix operator+(const SiconosMatrix& A, const SiconosMatrix& B);
 
-/** Addition of two matrices, C = A+B
- * \param A a std::shared_ptr<SiconosMatrix>
- * \param B a std::shared_ptr<SiconosMatrix>
- * \return a std::shared_ptr<SimpleMatrix>
- */
-std::shared_ptr<SimpleMatrix> operator+(const std::shared_ptr<SimpleMatrix> A,
-                                        const std::shared_ptr<SimpleMatrix> B);
+// /** Addition of two matrices, C = A+B
+//  * \param A a std::shared_ptr<SiconosMatrix>
+//  * \param B a std::shared_ptr<SiconosMatrix>
+//  * \return a std::shared_ptr<SimpleMatrix>
+//  */
+// std::shared_ptr<SimpleMatrix> operator+(const std::shared_ptr<SimpleMatrix> A,
+//                                         const std::shared_ptr<SimpleMatrix> B);
 
 // SimpleMatrix operator+(const SimpleMatrix& A, const SimpleMatrix& B);
 
@@ -117,13 +117,13 @@ std::shared_ptr<SimpleMatrix> operator+(const std::shared_ptr<SimpleMatrix> A,
  */
 void add(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
-/** Subtraction of two matrices, C = A-B
- * \param A a SiconosMatrix
- * \param B a SiconosMatrix
- * \return a SimpleMatrix
- */
-const SimpleMatrix operator-(const SiconosMatrix& A, const SiconosMatrix& B);
-//  const SimpleMatrix operator -(const SimpleMatrix&,const SimpleMatrix&);
+// /** Subtraction of two matrices, C = A-B
+//  * \param A a SiconosMatrix
+//  * \param B a SiconosMatrix
+//  * \return a SimpleMatrix
+//  */
+// const SimpleMatrix operator-(const SiconosMatrix& A, const SiconosMatrix& B);
+// //  const SimpleMatrix operator -(const SimpleMatrix&,const SimpleMatrix&);
 
 /** Subtraction of two matrices C = A-B
  *  \param A a SiconosMatrix
@@ -132,19 +132,19 @@ const SimpleMatrix operator-(const SiconosMatrix& A, const SiconosMatrix& B);
  */
 void sub(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
-/**: A==B when (A-B).normInf()<tolerance
-   \param A a SiconosMatrix
-   \param B a SiconosMatrix
-   \return a boolean
- */
-bool operator==(const SiconosMatrix& A, const SiconosMatrix& B);
+// /**: A==B when (A-B).normInf()<tolerance
+//    \param A a SiconosMatrix
+//    \param B a SiconosMatrix
+//    \return a boolean
+//  */
+// bool operator==(const SiconosMatrix& A, const SiconosMatrix& B);
 
-/**: A!=B when (A-B).normInf()>tolerance
- * \param A a SiconosMatrix
- * \param B a SiconosMatrix
- * \return a boolean
- */
-bool operator!=(const SiconosMatrix& A, const SiconosMatrix& B);
+// /**: A!=B when (A-B).normInf()>tolerance
+//  * \param A a SiconosMatrix
+//  * \param B a SiconosMatrix
+//  * \return a boolean
+//  */
+// bool operator!=(const SiconosMatrix& A, const SiconosMatrix& B);
 
 /** multiplication of a matrix by a scalar, B = a*A (init = true) or B += a*A (init = false)
  *  \param a a double
@@ -182,8 +182,8 @@ const SimpleMatrix prod(const SiconosMatrix& A, const SiconosMatrix& B);
  * \param bm a BlockMatrix
  * \return The same output stream
  */
-std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
-std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm);
+// std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
+// std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm);
 std::ostream& operator<<(std::ostream& os, const BlockMatrix& sm);
 
 /** Compute the matrix exponential Exp = exp(A) for general matrices,

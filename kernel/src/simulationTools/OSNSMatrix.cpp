@@ -290,7 +290,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::convert()
       _numericsMatrix.get()->storageType = _storageType;
       _numericsMatrix.get()->size0 = _dimRow;
       _numericsMatrix.get()->size1 = _dimColumn;
-      _numericsMatrix->matrix0 = _M1->getArray();  // Pointer link, be careful when freed.
+      _numericsMatrix->matrix0 = _M1->data();  // Pointer link, be careful when freed.
       DEBUG_EXPR(NM_display(_numericsMatrix.get()););
       DEBUG_EXPR(_M1->display(););
       break;
@@ -353,7 +353,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
           auto ds = DSG.bundle(*dsi);
           auto W = DSG.properties(*dsi).W.get();
           pos = DSG.properties(*dsi).absolute_position;
-          W->fillTriplet(Mtriplet, pos, pos);
+          siconos::algebra::fillTriplet(*W, Mtriplet, pos, pos);
           DEBUG_PRINTF("pos = %u \n", pos);
         }
         _triplet_nzmax = NM_nnz(&M_NM);
@@ -427,7 +427,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
                 "type of OSI  ");
 
           pos = DSG.properties(*dsi).absolute_position;
-          Winverse->fillTriplet(Mtriplet, pos, pos);
+          siconos::algebra::fillTriplet(*Winverse, Mtriplet, pos, pos);
           DEBUG_PRINTF("pos = %u \n", pos);
           // W->display();
         }
@@ -518,7 +518,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
           size_t sizeY = inter.dimension();
           leftInteractionBlock = inter.getLeftInteractionBlock();
 
-          double* array = &*leftInteractionBlock->getArray();
+          double* array = &*leftInteractionBlock->data();
           // double * array_with_bc= nullptr;
 
           auto ds1 = indexSet.properties(*ui).source;

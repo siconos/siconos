@@ -29,7 +29,7 @@
 // #include <memory>                       // shared_ptr
 // #include <vector>
 
-// #include "CSparseMatrix.h"          // For CSparseMatrix
+#include "CSparseMatrix.h"          // For CSparseMatrix
 // #include "SiconosAlgebraTypes.hpp"  // for UblasType
 // #include "SiconosException.hpp"
 // #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
@@ -57,6 +57,16 @@ namespace siconos::algebra {
 */
 
 using SiconosMatrix = Eigen::MatrixXd;
+
+/** return the number of non-zero in the matrix
+   *
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   *  \return the number of non-zeros
+   */
+  bool fillTriplet(SiconosMatrix& m, CSparseMatrix *csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
 }  // namespace siconos::algebra
 #endif

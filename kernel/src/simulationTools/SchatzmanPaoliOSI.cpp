@@ -372,7 +372,7 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
       // -- No need to update W --
 
       residuFree = q_k_1;
-      sub(residuFree, q_k, residuFree);
+      siconos::algebra::sub(residuFree, q_k, residuFree);
       if (d->mass())
         siconos::algebra::prod(*(d->mass()), residuFree,
                                residuFree);  // residuFree = M(-q_{k}+q_{k-1})
@@ -482,7 +482,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeState() {
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       qfree = residuFree;
 
-      W->Solve(qfree);
+      siconos::algebra::solveInPlace(*W, qfree);
       qfree *= -1.0;
       qfree += qold;
     } else
@@ -681,7 +681,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       // To compute q, we solve W(q - qfree) = p
       if (d->p(_levelMaxForInput)) {
         q = *d->p(_levelMaxForInput);  // q = p
-        W->Solve(q);
+        siconos::algebra::solveInPlace(*W, q);
       } else
         q.zero();
 

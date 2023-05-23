@@ -158,9 +158,9 @@ int siconos::nonsmooth_formulations::Relay::compute(double time)
     // The Relay in Numerics format
     RelayProblem numerics_problem;
     numerics_problem.M = &*_M->numericsMatrix();
-    numerics_problem.q = _q->getArray();
-    numerics_problem.lb = _lb->getArray();
-    numerics_problem.ub = _ub->getArray();
+    numerics_problem.q = _q->data();
+    numerics_problem.lb = _lb->data();
+    numerics_problem.ub = _ub->data();
     numerics_problem.size = _sizeOutput;
 
     // int nbSolvers = 1;
@@ -168,7 +168,7 @@ int siconos::nonsmooth_formulations::Relay::compute(double time)
 
     //      Relay_display(&numerics_problem);
 
-    info = relay_driver(&numerics_problem, _z->getArray(), _w->getArray(),
+    info = relay_driver(&numerics_problem, _z->data(), _w->data(),
                         &*_numerics_solver_options);
 
     if (info != 0) {

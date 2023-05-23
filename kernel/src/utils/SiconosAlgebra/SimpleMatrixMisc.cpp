@@ -55,3 +55,14 @@ void siconos::algebra::normInfByColumn(const SimpleMatrix &m, SiconosVector &v)
         v(i) = m.col(i).norm();
     }
 }
+
+bool siconos::algebra::checkSymmetry(SiconosMatrix &m, double tol) {
+    auto m_trans = m.transpose();
+    auto tmp = m - m_trans;
+    double err = tmp.normInf();
+    if (m_trans.normInf() > 0.0) {
+    err /= m_trans.normInf();
+    }
+    // std::cout << "err_rel  ="<< err <<"\n";
+    return (err < tol);
+}

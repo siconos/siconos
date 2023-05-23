@@ -236,7 +236,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeState() {
     // -- Convert the DS into a Lagrangian one.
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       qfree = residuFree;
-      W->Solve(qfree);  //_qfree = (W^-1)*R_free
+      siconos::algebra::solveInPlace(*W, qfree); //_qfree = (W^-1)*R_free
       qfree *= -1.0;    //_qfree = -(W^-1)*R_free
       //
       DEBUG_EXPR(qfree.display(););
@@ -652,7 +652,7 @@ void siconos::integrators::NewMarkAlphaOSI::correction() {
       // Compute delta_q = W_{n+1,k}^{-1}(p_{n+1,k+1} - r_{n+1,k})
       delta_q = std::make_shared<siconos::algebra::SiconosVector>(
           *_p - residuFree);  // copy (p_{n+1,k+1} - r_{n+1,k}) to delta_q
-      W->Solve(*delta_q);
+      siconos::algebra::solveInPlace(*W, *delta_q);
       // Correction q_{n+1,k+1}, dotq_{n+1,k+1}, ddotq_{n+1,k+1}
       *(d->q()) += *delta_q;  // q_{n+1,k+1} = q_{n+1,k} + delta_q
       *(d->velocity()) +=

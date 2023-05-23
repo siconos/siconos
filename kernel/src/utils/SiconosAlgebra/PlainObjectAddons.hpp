@@ -36,6 +36,10 @@ inline Scalar norm2() {
     return this->norm();
 }
 
+// inline Scalar normInf() {
+//     return this->cwiseAbs().rowwise().sum().maxCoeff();
+// }
+
 size_t nnz(double tol = 1e-14) {
     size_t nnz = 0;
     double* arr = this->data();

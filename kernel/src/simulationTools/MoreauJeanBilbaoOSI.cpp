@@ -174,8 +174,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     // Allocate work buffers for:
     // - Iteration matrix
     _dynamicalSystemsGraph->properties(dsv).W =
-        std::make_shared<siconos::algebra::SimpleMatrix>(
-            ndof, ndof, siconos::algebra::UblasType::BANDED, 0, 0);
+        std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof); // WARNING : Use bandmatrix instead ?
 
     // - I - theta
     // ds_work_vectors[siconos::integrators::MoreauJeanBilbaoOSI::ONE_MINUS_THETA] =

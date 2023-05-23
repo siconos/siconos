@@ -169,7 +169,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
                     indexSet->properties(ed1).upper_block->size(1),
                     indexSet->properties(ed1).upper_block->size(0));
           }
-          indexSet->properties(ed1).lower_block->trans(*indexSet->properties(ed1).upper_block);
+          *(indexSet->properties(ed1).lower_block) = (*indexSet->properties(ed1).upper_block).transpose();
           indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
         }
         else {
@@ -180,7 +180,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
                     indexSet->properties(ed1).lower_block->size(1),
                     indexSet->properties(ed1).lower_block->size(0));
           }
-          indexSet->properties(ed1).upper_block->trans(*indexSet->properties(ed1).lower_block);
+          *(indexSet->properties(ed1).upper_block) = (*indexSet->properties(ed1).lower_block).transpose();
           indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
         }
       }
