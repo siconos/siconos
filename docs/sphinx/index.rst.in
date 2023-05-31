@@ -54,15 +54,15 @@ Siconos : nonsmooth numerical simulation |licence|
    :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/commits/master
    :alt: Doc status
 	 
+
 Project status
 --------------
 
 .. csv-table:: 
 
-   `Siconos CI on Travis`_ |travis|, `Cdash reports`_, Documentation build |docbuild|
+   `Cdash reports`_
  
-.. _Siconos CI on Travis: https://travis-ci.org/siconos/siconos
 
-.. _Cdash reports: https://my.cdash.org/index.php?project=Siconos-Dashboard
+.. _Cdash reports: hhttp://siconos-dashboard.univ-grenoble-alpes.fr:8080/index.php?project=siconos
  
-.. _Jenkins: https://ci.inria.fr/siconos--
+
