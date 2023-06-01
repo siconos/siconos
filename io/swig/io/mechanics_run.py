@@ -793,6 +793,8 @@ class MechanicsHdf5Runner_run_options(dict):
         d['Newton_options']=sk.SICONOS_TS_NONLINEAR
         d['Newton_max_iter']=20
         d['Newton_tolerance']=1e-10
+        d['Newton_warning_on_nonconvergence']=True
+        d['Warning_nonsmooth_solver']=True
         d['set_external_forces']=None
         d['solver_options']=None
         d['solver_options_pos']=None
@@ -2998,6 +3000,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         simulation.setNewtonOptions(run_options['Newton_options'])
         simulation.setNewtonMaxIteration(run_options['Newton_max_iter'])
         simulation.setNewtonTolerance(run_options['Newton_tolerance'])
+        simulation.setNewtonWarningOnNonConvergence(run_options['Newton_warning_on_nonconvergence'])
+        simulation.setWarningNonsmoothSolver(run_options['Warning_nonsmooth_solver'])
 
 
         simulation.setSkipLastUpdateOutput(run_options.get('skip_last_update_output'))
