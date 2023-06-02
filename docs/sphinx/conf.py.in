@@ -20,6 +20,7 @@ import importlib
 import textwrap
 from distutils.version import LooseVersion
 import sphinx
+import sphinx_bootstrap_theme
 
 # append siconos package build path to sys
 siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
@@ -212,80 +213,89 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'sphinx_rtd_theme'
-html_theme = 'bootstrap'
-# Note FP : using bootstrap theme results in (very) long
-# times to generate doc from rst files.
-html_theme_options = {
-    # Tab name for entire site. (Default: "Site")
-    'navbar_site_name': "Siconos Documentation",
-    # A list of tuples containing pages or urls to link to.
-    # Valid tuples should be in the following forms:
-    #    (name, page)                 # a link to a page
-    #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
-    #    (name, "http://example.com", True) # arbitrary absolute url
-    # Note the "1" or "True" value above as the third argument to indicate
-    # an arbitrary url.
-    'navbar_links': [
-        ("Sources on github", "https://github.com/siconos/siconos", 1),
-        #("Quickstart", "getting_started/index"),
-        ("Index", "genindex"),
-        ("Documentation", "complete_documentation") ],
-    # Render the next and previous page links in navbar. (Default: true)
-    'navbar_sidebarrel': True,
+#html_theme = 'bootstrap'
+html_theme = 'sphinx_book_theme'
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
-    # Render the current pages TOC in the navbar. (Default: true)
-    'navbar_pagenav': False,
+# Doc: https://sphinx-book-theme.readthedocs.io/en/latest/index.html
 
-    # Tab name for the current pages TOC. (Default: "Page")
-    'navbar_pagenav_name': "Current TOC",
+#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+# # Note FP : using bootstrap theme results in (very) long
+# # times to generate doc from rst files.
+# html_theme_options = {
+#     # Navigation bar title. (Default: ``project`` value)
+#     'navbar_title': "Siconos",
 
-    # Global TOC depth for "site" navbar tab. (Default: 1)
-    # Switching to -1 shows all levels.
-    'globaltoc_depth': -1,
+#     # Tab name for entire site. (Default: "Site")
+#     'navbar_site_name': "Documentation",
 
-    # Include hidden TOCs in Site navbar?
-    #
-    # Note: If this is "false", you cannot have mixed ``:hidden:`` and
-    # non-hidden ``toctree`` directives in the same page, or else the build
-    # will break.
-    #
-    # Values: "true" (default) or "false"
-    'globaltoc_includehidden': "true",
+#     # A list of tuples containing pages or urls to link to.
+#     # Valid tuples should be in the following forms:
+#     #    (name, page)                 # a link to a page
+#     #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
+#     #    (name, "http://example.com", True) # arbitrary absolute url
+#     # Note the "1" or "True" value above as the third argument to indicate
+#     # an arbitrary url.
+#     'navbar_links': [
+#         ("Sources on github", "https://github.com/siconos/siconos", True),
+#         ("Index", "genindex"),
+#     ],
 
-    # HTML navbar class (Default: "navbar") to attach to <div> element.
-    # For black navbar, do "navbar navbar-inverse"
-    'navbar_class': "navbar",
-    
-    # Fix navigation bar to top of page?
-    # Values: "true" (default) or "false"
-    'navbar_fixed_top': "false",
+#     # Render the next and previous page links in navbar. (Default: true)
+#     'navbar_sidebarrel': True,
 
-    # Location of link to source.
-    # Options are "nav" (default), "footer" or anything else to exclude.
-    'source_link_position': "footer",
+#     # Render the current pages TOC in the navbar. (Default: true)
+#     'navbar_pagenav': True,
 
-    # Bootswatch (http://bootswatch.com/) theme.
-    #
-    # Options are nothing (default) or the name of a valid theme
-    # such as "cosmo" or "sandstone".
-    #
-    # The set of valid themes depend on the version of Bootstrap
-    # that's used (the next config option).
-    #
-    # Currently, the supported themes are:
-    # - Bootstrap 2: https://bootswatch.com/2
-    # - Bootstrap 3: https://bootswatch.com/3
-    # 'bootswatch_theme': "united",
-    'bootswatch_theme': "sandstone",
+#     # Tab name for the current pages TOC. (Default: "Page")
+#     'navbar_pagenav_name': "Page",
 
-    # Choose Bootstrap version.
-    # Values: "3" (default) or "2" (in quotes)
-    'bootstrap_version': "3",
+#     # Global TOC depth for "site" navbar tab. (Default: 1)
+#     # Switching to -1 shows all levels.
+#     'globaltoc_depth': -1,
 
+#     # Include hidden TOCs in Site navbar?
+#     #
+#     # Note: If this is "false", you cannot have mixed ``:hidden:`` and
+#     # non-hidden ``toctree`` directives in the same page, or else the build
+#     # will break.
+#     #
+#     # Values: "true" (default) or "false"
+#     'globaltoc_includehidden': "true",
 
-    #'nosidebar': True,
-}
+#     # HTML navbar class (Default: "navbar") to attach to <div> element.
+#     # For black navbar, do "navbar navbar-inverse"
+#     'navbar_class': "navbar",
+
+#     # Fix navigation bar to top of page?
+#     # Values: "true" (default) or "false"
+#     'navbar_fixed_top': "true",
+
+#     # Location of link to source.
+#     # Options are "nav" (default), "footer" or anything else to exclude.
+#     'source_link_position': "footer",
+
+#     # Bootswatch (http://bootswatch.com/) theme.
+#     #
+#     # Options are nothing (default) or the name of a valid theme
+#     # such as "cosmo" or "sandstone".
+#     #
+#     # The set of valid themes depend on the version of Bootstrap
+#     # that's used (the next config option).
+#     #
+#     # Currently, the supported themes are:
+#     # - Bootstrap 2: https://bootswatch.com/2
+#     # - Bootstrap 3: https://bootswatch.com/3
+#     #'bootswatch_theme': "sandstone", #--> for Bootstrap 3 but it
+#     # lacks some options https://stackoverflow.com/questions/18023493/bootstrap-dropdown-sub-menu-missing
+#     'bootswatch_theme': "flatly",
+
+#     # Choose Bootstrap version.
+#     # Values: "3" (default) or "2" (in quotes)
+#     'bootstrap_version': "2",
+
+# }
 
 html_context = {
     "display_github": False,
