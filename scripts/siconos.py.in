@@ -173,7 +173,6 @@ def main():
         cmd += [Path(args.exe_full_name).as_posix()]
         if args.cline_args:
             cmd += args.cline_args
-            print("AKJZAKAZKLAZKLZLKJA ", cmd)
 
         # Execute ...
         format_msg('run ' + ' '.join(cmd), args.quiet)
