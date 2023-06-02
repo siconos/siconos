@@ -19,7 +19,7 @@
 # mechanisms is "off" by default.
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.
-set(COMPONENTS externals numerics kernel CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
