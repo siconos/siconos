@@ -39,30 +39,27 @@ Siconos : nonsmooth numerical simulation |licence|
 
 .. csv-table:: 
 
-   .. include:: teaser.rst, |imag1|, |imag2|, |imag3|, .. include:: contacts.rst
+   .. include:: teaser.rst, |imag1|, |imag2|, |imag3|,
 
 
-.. |travis| image:: https://travis-ci.org/siconos/siconos.svg?branch=master
-   :target: https://travis-ci.org/siconos/siconos
-   :alt: Build Status
+.. include:: contacts.rst
 
+
+**Project status**
+
+.. csv-table:: 
+
+   `Cdash reports`_
+ 
+.. _Cdash reports: http://siconos-dashboard.univ-grenoble-alpes.fr:8080/index.php?project=siconos
+ 
 .. |licence| image:: https://img.shields.io/badge/licence-apache2-yellow.svg
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
-.. |docbuild| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg
+.. |build| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg
    :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/commits/master
-   :alt: Doc status
+   :alt: Build status
 	 
-Project status
---------------
 
-.. csv-table:: 
 
-   `Siconos CI on Travis`_ |travis|, `Cdash reports`_, Documentation build |docbuild|
- 
-.. _Siconos CI on Travis: https://travis-ci.org/siconos/siconos
-
-.. _Cdash reports: https://my.cdash.org/index.php?project=Siconos-Dashboard
- 
-.. _Jenkins: https://ci.inria.fr/siconos--

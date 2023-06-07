@@ -101,7 +101,11 @@ protected:
 
   /** boolean variable to display warning on non-convergence
    */
-  bool _warnOnNonConvergence;
+  bool _newtonWarningOnNonConvergence;
+
+  /** boolean variable to display warning if osnspb is not correcltys olved
+   */
+  bool _warningNonsmoothSolver;
 
   /** boolean variable to resetAllLamda at each step (default true)
    */
@@ -262,10 +266,16 @@ public:
     _displayNewtonConvergence = newval;
   };
 
-  void setWarnOnNonConvergence(bool newval) { _warnOnNonConvergence = newval; };
-  bool warnOnNonConvergence() { return _warnOnNonConvergence; };
-  void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
+  void setNewtonWarningOnNonConvergence(bool newval) { _newtonWarningOnNonConvergence = newval; };
+  bool newtonWarningOnNonConvergence() { return _newtonWarningOnNonConvergence; };
 
+  void setWarningNonsmoothSolver(bool newval) {  _warningNonsmoothSolver=newval;};
+  bool warningNonsmoothSolver() {  return _warningNonsmoothSolver;};
+  
+
+
+  
+  void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
   void displayNewtonConvergenceInTheLoop();
 
   void setResetAllLambda(bool newval) { _resetAllLambda = newval; };
