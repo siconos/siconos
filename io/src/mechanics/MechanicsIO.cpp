@@ -924,7 +924,7 @@ template<>
 void ContactContactWorkVisitor::operator()(const NewtonEuler3DR& rel)
 {
   double id = inter->number();
-  answer.resize(5);
+  answer.resize(6);
 }
 
 static void compute_contact_work_and_status(SP::Interaction inter, double tol, SiconosVector& answer) {
@@ -992,11 +992,19 @@ static void compute_contact_work_and_status(SP::Interaction inter, double tol, S
   else
     answer.setValue(4,-1);// undetermined = -1
 
-
-
-
-  // std::cout << "id "<< id << std::endl;
+  if ( (pn > tol ) and (vn_minus  > tol) )
+    {
+      std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
+      std::cout << "pn " << pn << " vn minus " << vn_minus << " vn plus " << vn_plus
+		<< " normal_contact_work " << normal_contact_work
+		<< " -e * vn_minus   " << -e*vn_minus 
+		<< std::endl;
+      answer.setValue(5, normal_contact_work);
+    }
+  // double id = inter->number();
+  // std::cout << "\nid "<< id << std::endl;
   // std::cout << " e "<< e  << " mu "<< mu << std::endl;
+  // std::cout << " tol "<< tol<< std::endl;
   // std::cout << "vn_plus "<< vn_plus << std::endl;
   // std::cout << "vn_minus "<< vn_minus << std::endl;
   // std::cout << "pn "<< pn << std::endl;
@@ -1011,7 +1019,7 @@ static void compute_contact_work_and_status(SP::Interaction inter, double tol, S
 
   // std::cout << "norm_pt  "<< norm_pt  << std::endl;
   // std::cout << "norm_pt - mu* pn  "<< norm_pt -mu *pn   << std::endl;
-  // std::cout << "vn_plus + e * vn_minus  "<< vn_plus + e * vn_minus   << std::endl;
+  // std::cout << "vn_plus + e * vn_minus  " << vn_plus + e * vn_minus   << std::endl;
   // std::cout << "status   "<<   answer.getValue(4) << std::endl;
 }
 
@@ -1020,7 +1028,7 @@ template<>
 void ContactContactWorkVisitor::operator()(const ContactR& rel)
 {
   double id = inter->number();
-  answer.resize(5);
+  answer.resize(6);
   answer.setValue(0,id);
   compute_contact_work_and_status(inter,  tol, answer);
 }
@@ -1029,7 +1037,7 @@ template<>
 void ContactContactWorkVisitor::operator()(const Contact5DR& rel)
 {
   double id = inter->number();
-  answer.resize(5);
+  answer.resize(6);
   answer.setValue(0,id);
 
 
@@ -1041,7 +1049,7 @@ template<>
 void ContactContactWorkVisitor::operator()(const Contact2dR& rel)
 {
   double id = inter->number();
-  answer.resize(5);
+  answer.resize(6);
   answer.setValue(0,id);
 
 
@@ -1053,7 +1061,7 @@ template<>
 void ContactContactWorkVisitor::operator()(const Contact2d3DR& rel)
 {
   double id = inter->number();
-  answer.resize(5);
+  answer.resize(6);
   answer.setValue(0,id);
 
 
