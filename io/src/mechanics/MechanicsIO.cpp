@@ -994,11 +994,11 @@ static void compute_contact_work_and_status(SP::Interaction inter, double tol, S
 
   if ( (pn > tol ) and (vn_minus  > tol) )
     {
-      std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
-      std::cout << "pn " << pn << " vn minus " << vn_minus << " vn plus " << vn_plus
-		<< " normal_contact_work " << normal_contact_work
-		<< " -e * vn_minus   " << -e*vn_minus 
-		<< std::endl;
+      // std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
+      // std::cout << "pn " << pn << " vn minus " << vn_minus << " vn plus " << vn_plus
+      // 		<< " normal_contact_work " << normal_contact_work
+      // 		<< " -e * vn_minus   " << -e*vn_minus 
+      // 		<< std::endl;
       answer.setValue(5, normal_contact_work);
     }
   // double id = inter->number();
