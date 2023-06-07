@@ -582,7 +582,7 @@ class MechanicsHdf5(object):
             self._cf_info.attrs['info'] += ' [1] : ds 1 number,\n [3] : ds 2 number,\n'
             self._cf_info.attrs['info'] += ' [4] : static body number'
 
-        self._cf_work = data(self._data, 'cf_work', 6,
+        self._cf_work = data(self._data, 'cf_work', 7,
                                     use_compression=self._use_compression)
 
         if self._mode == 'w':
