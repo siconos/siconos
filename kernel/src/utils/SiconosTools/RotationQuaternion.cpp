@@ -22,6 +22,7 @@
 #include "RotationQuaternion.hpp"
 
 #include <boost/math/quaternion.hpp>
+#include <Eigen/Geometry>
 
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
@@ -72,6 +73,7 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
   DEBUG_PRINTF("( q0 = %16.12e,  q1 = %16.12e,  q2= %16.12e,  q3= %16.12e )\n", q0, q1, q2,
                q3);
   assert(v.size() == 3);
+  Eigen::Map<algebra::SiconosVector3> v3(v.data());
 
   // First way. Using the rotation matrix
   // std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix(new
@@ -98,17 +100,16 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
 
   // Direct computation with cross product
   // Works only with unit quaternion
-  siconos::algebra::SiconosVector t(3), tmp(3);
-  siconos::algebra::SiconosVector qvect(3);
+  algebra::SiconosVector3 t, tmp, qvect;
   qvect(0) = q1;
   qvect(1) = q2;
   qvect(2) = q3;
-  t = qvect.cross(v);
+  t = qvect.cross(v3);
   t *= 2.0;
   tmp = qvect.cross(t);
   v += tmp;
   v += q0 * t;
-  DEBUG_EXPR(v.display(););
+  DEBUG_EXPR(v3.display(););
   DEBUG_END(
       "::quaternionRotate(double q0, double q1, double q2, double q3, "
       "std::shared_ptr<siconos::algebra::SiconosVector> v )\n");
@@ -132,9 +133,7 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
   assert(m.size(0) == 3 &&
          "::quaternionRotate(double q0, double q1, double q2, double q3, "
          "std::shared_ptr<siconos::algebra::SimpleMatrix> m ) m must have 3 rows");
-  siconos::algebra::SiconosVector v(3);
-  siconos::algebra::SiconosVector t(3), tmp(3);
-  siconos::algebra::SiconosVector qvect(3);
+  algebra::SiconosVector3 t, tmp, qvect, v;
   qvect(0) = q1;
   qvect(1) = q2;
   qvect(2) = q3;
