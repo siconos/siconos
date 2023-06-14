@@ -186,13 +186,13 @@ const SimpleMatrix prod(const SiconosMatrix& A, const SiconosMatrix& B);
 // std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm);
 std::ostream& operator<<(std::ostream& os, const BlockMatrix& sm);
 
-/** Compute the matrix exponential Exp = exp(A) for general matrices,
-  using scaling and Padé approximation. See expm.hpp.
-  \param A : input matrix
-  \param Exp : result = exp(A)
-  \param computeAndAdd : if true, result = result + exp(A)
-**/
-void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd = false);
+// /** Compute the matrix exponential Exp = exp(A) for general matrices,
+//   using scaling and Padé approximation. See expm.hpp.
+//   \param A : input matrix
+//   \param Exp : result = exp(A)
+//   \param computeAndAdd : if true, result = result + exp(A)
+// **/
+// void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd = false);
 
 /** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are
  *  given in dim and start.
