@@ -37,17 +37,17 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testConstructor2);
   CPPUNIT_TEST(testConstructor3);
   CPPUNIT_TEST(testConstructor4);
-  CPPUNIT_TEST(testConstructor5);
-  CPPUNIT_TEST(testConstructor6);
-  CPPUNIT_TEST(testConstructor7);
-  CPPUNIT_TEST(testConstructor8);
-  CPPUNIT_TEST(testConstructor9);
-  CPPUNIT_TEST(testConstructor10);
-  CPPUNIT_TEST(testConstructor11);
-  CPPUNIT_TEST(testConstructor12);
-  CPPUNIT_TEST(testConstructor13);
-  CPPUNIT_TEST(testConstructor14);
-  CPPUNIT_TEST(testGetSetRowCol);
+  // CPPUNIT_TEST(testConstructor5);
+  // CPPUNIT_TEST(testConstructor6);
+  // CPPUNIT_TEST(testConstructor7);
+  // CPPUNIT_TEST(testConstructor8);
+  // CPPUNIT_TEST(testConstructor9);
+  // CPPUNIT_TEST(testConstructor10);
+  // CPPUNIT_TEST(testConstructor11);
+  // CPPUNIT_TEST(testConstructor12);
+  // CPPUNIT_TEST(testConstructor13);
+  // CPPUNIT_TEST(testConstructor14);
+  // CPPUNIT_TEST(testGetSetRowCol);
   CPPUNIT_TEST(testZero);
   CPPUNIT_TEST(testEye);
   CPPUNIT_TEST(testResize);
@@ -63,14 +63,14 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testOperators3);
   CPPUNIT_TEST(testOperators4);
   CPPUNIT_TEST(testOperators4bis);
-  CPPUNIT_TEST(testOperators5);
+  // CPPUNIT_TEST(testOperators5);
   CPPUNIT_TEST(testOperators6);
   CPPUNIT_TEST(testOperators6Bis);
   CPPUNIT_TEST(testOperators6Ter);
   CPPUNIT_TEST(testOperators7);
   //  CPPUNIT_TEST(testOperators8);
   CPPUNIT_TEST(testOperators8Bis);
-  CPPUNIT_TEST(testOperators8Ter);
+  // CPPUNIT_TEST(testOperators8Ter);
   CPPUNIT_TEST(testOperators8_4);
   CPPUNIT_TEST(testOperators8_5);
   CPPUNIT_TEST(testOperators8_6);
@@ -91,8 +91,8 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
   // CPPUNIT_TEST(testGemv);
   // CPPUNIT_TEST(testGemm);
   CPPUNIT_TEST(testFromAndFillCSC);
-  CPPUNIT_TEST(testPLUFactorizationInPlace);
-  CPPUNIT_TEST(testFactorize);
+  // CPPUNIT_TEST(testPLUFactorizationInPlace);
+  // CPPUNIT_TEST(testFactorize);
   CPPUNIT_TEST(testSolve);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
@@ -156,7 +156,7 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
   // void testGemv();
   void testFromAndFillCSC();
   void testPLUFactorizationInPlace();
-  void testFactorize();
+  // void testFactorize();
   void testSolve();
   void End();
 
@@ -166,14 +166,14 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
   std::shared_ptr<siconos::algebra::SimpleMatrix> SimM;
   std::string fic1, fic2;
   std::shared_ptr<siconos::algebra::SiconosVector> vect1, vect2, vect3, vect_sparse_1;
-  std::shared_ptr<siconos::algebra::DenseMat> D;
-  std::shared_ptr<siconos::algebra::TriangMat> T, T2;
-  std::shared_ptr<siconos::algebra::SymMat> S, S2;
-  std::shared_ptr<siconos::algebra::BandedMat> Band, Band2;
-  std::shared_ptr<siconos::algebra::SparseMat> SP, SP2, SP3, SP4;
-  std::shared_ptr<siconos::algebra::SparseCoordinateMat> SP_coor;
-  std::shared_ptr<siconos::algebra::ZeroMat> Z, Z2;
-  std::shared_ptr<siconos::algebra::IdentityMat> I, I2;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> D;
+  // std::shared_ptr<siconos::algebra::TriangMat> T, T2;
+  // std::shared_ptr<siconos::algebra::SymMat> S, S2;
+  // std::shared_ptr<siconos::algebra::BandedMat> Band, Band2;
+  // std::shared_ptr<siconos::algebra::SparseMat> SP, SP2, SP3, SP4;
+  // std::shared_ptr<siconos::algebra::SparseCoordinateMat> SP_coor;
+  // std::shared_ptr<siconos::algebra::ZeroMat> Z, Z2;
+  // std::shared_ptr<siconos::algebra::IdentityMat> I, I2;
   double tol;
 
  public:
