@@ -16,12 +16,6 @@
  * limitations under the License.
  */
 
-// #include <boost/numeric/bindings/ublas/matrix.hpp>
-// #include <boost/numeric/ublas/banded.hpp>
-// #include <boost/numeric/ublas/matrix_proxy.hpp>
-// #include <boost/numeric/ublas/matrix_sparse.hpp>
-// #include <boost/numeric/ublas/symmetric.hpp>
-// #include <boost/numeric/ublas/triangular.hpp>
 
 #include "SiconosException.hpp"
 #include "SiconosMatrixOp.hpp"  // for matrix op. declarations
