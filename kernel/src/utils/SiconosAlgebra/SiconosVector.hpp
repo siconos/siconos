@@ -83,6 +83,7 @@ namespace siconos::algebra {
 */
 
 using SiconosVector = Eigen::VectorXd;
+using SiconosVector3 = Eigen::Vector3<double_t>;
 
 void concatenateVectors(SiconosVector& target, const SiconosVector& a, const SiconosVector& b);
 
