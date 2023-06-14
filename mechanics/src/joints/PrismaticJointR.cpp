@@ -160,7 +160,7 @@ void siconos::joints::PrismaticJointR::computeV1V2FromAxis() {
   }
   double aux = 1 / _V1->norm2();
   siconos::algebra::scal(aux, *_V1, *_V1);
-  cross_product(*_axis0, *_V1, *_V2);
+  siconos::algebra::cross_product(*_axis0, *_V1, *_V2);
   _V1x = _V1->getValue(0);
   _V1y = _V1->getValue(1);
   _V1z = _V1->getValue(2);
