@@ -29,12 +29,9 @@
 #include <memory>
 #include <string>
 
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 #include "SiconosSerialization.hpp"
-
-namespace siconos::algebra {
-class SiconosVector;
-class SimpleMatrix;
-}  // namespace siconos::algebra
 
 namespace siconos::modeling {
 class NonSmoothDynamicalSystem;

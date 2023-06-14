@@ -20,6 +20,7 @@
 
 #include <cmath>
 
+#include "SiconosException.hpp"
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"

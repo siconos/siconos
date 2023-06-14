@@ -23,14 +23,12 @@
 #ifndef ControlManager_H
 #define ControlManager_H
 
+#include "SiconosVector.hpp"
 #include <memory>
 #include <set>
 
 #include "SiconosSerialization.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-}
 
 namespace siconos::modeling {
 class NonSmoothDynamicalSystem;

@@ -24,10 +24,7 @@
 #define StaticBody_h
 
 #include <memory>
-
-namespace siconos::algebra {
-class SiconosVector;
-}
+#include "SiconosVector.hpp"
 
 namespace siconos::collision {
 

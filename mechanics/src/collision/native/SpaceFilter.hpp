@@ -41,10 +41,7 @@
 #include "FMatrix.hpp"                        // For FMatrix
 #include "InteractionManager.hpp"
 #include "SiconosSerialization.hpp"
-
-namespace siconos::algebra {
-class SiconosMatrix;
-}
+#include "SiconosMatrix.hpp"
 
 
 namespace siconos::collision::native {

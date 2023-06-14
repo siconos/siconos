@@ -27,11 +27,8 @@
 #include <SiconosSerialization.hpp>
 #include <memory>
 #include <vector>
-
-namespace siconos::algebra {
-class SiconosVector;
-class SiconosMatrix;
-}  // namespace siconos::algebra
+#include "SiconosVector.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::collision {
 

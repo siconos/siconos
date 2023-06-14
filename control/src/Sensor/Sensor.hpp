@@ -28,13 +28,11 @@
 #include <memory>
 #include <string>
 
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-class SimpleMatrix;
-class SiconosMatrix;
-}  // namespace siconos::algebra
 namespace siconos::modeling {
 class DynamicalSystem;
 class NonSmoothDynamicalSystem;

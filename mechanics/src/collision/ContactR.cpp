@@ -18,6 +18,7 @@
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
+#include <iostream>
 #include "ContactR.hpp"
 #include "siconos_debug.h"
 #include "BlockVector.hpp"

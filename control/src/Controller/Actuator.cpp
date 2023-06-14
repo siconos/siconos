@@ -24,6 +24,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Tools.hpp"
 #include "PluggedObject.hpp"
+#include "SiconosException.hpp"
 
 siconos::control::Actuator::Actuator(ActuatorType type, std::shared_ptr<ControlSensor> sensor)
     : _type(type), _sensor(sensor)

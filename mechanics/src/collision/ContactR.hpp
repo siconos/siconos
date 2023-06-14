@@ -19,12 +19,10 @@
 #ifndef ContactR_hpp
 #define ContactR_hpp
 
+#include "BlockVector.hpp"
+#include "SiconosVector.hpp"
 #include "NewtonEuler3DR.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-class BlockVector;
-}  // namespace siconos::algebra
 
 namespace siconos::collision {
 class BodyShapeRecord;
