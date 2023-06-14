@@ -1260,9 +1260,46 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double kappa_eps = 0.1, kappa_mu = 1.;
   double tmp_barr_param = 0.;
   barr_param = 0.1;
+  int findKappa = 1;
+
+while(hasNotConverged != 0 && findKappa)
+{
+  findKappa = 0;
+  // Reset vars
+  // r
+  for (unsigned int  i = 0; i<nd; i++)
+      if (i % d == 0) reaction[i] = 0.1;
+      else reaction[i] = 0.01;
+  // v
+  for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = f[i];
+  NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
+  NM_Cholesky_solve(M, globalVelocity, 1);
+  // u
+  for (unsigned int  i = 0; i<nd; i++)
+      if (i % d == 0) velocity[i] = 0.1;
+      else velocity[i] = 0.01;
+
+  // Reset params
+  iteration = 0;
+  hasNotConverged = 1;
+  pinfeas = dinfeas = complem = udotr = projerr = diff_fixp = totalresidual = 1e300;
+  alpha_primal = alpha_dual = 1.;
+  barr_param = 0.1;
+  // kappa_mu = randomFloat(0.05, 0.95);
+  // kappa_eps = randomFloat(0.7, 3.0)*n;
+  kappa_mu = 0.5;
+  kappa_eps = n;
+  printf("\nkappa_mu = %e,\t kappa_eps = n\n", kappa_mu);
+  // printf("\nkappa_mu = %e,\t kappa_eps = %e\n", kappa_mu,kappa_eps);
+
 
   while(iteration < max_iter)
   {
+    if (totalresidual < 1e-4)
+    {
+      kappa_mu = 0.98;
+      // printf("\nkappa_mu = %e,\t kappa_eps = 2n\n", kappa_mu);
+    }
     /** Correction of w to take into account the dependence on the tangential velocity */
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1) // & (totalresidual <= 100*tol))
     {
@@ -1339,8 +1376,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     // barr_param = udotr / n / 1.5;
 
 
-    kappa_mu = 0.852;
-    kappa_eps = 2*n;
+    // kappa_mu = 0.852;
+    // kappa_eps = 2*n;
     // scale = 100;
     if (totalresidual <= kappa_eps*barr_param)
     {
@@ -1375,8 +1412,11 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       hasNotConverged = 0;
       break;
     }
-
-
+    if (alpha_primal < 1e-8)
+    {
+      printf("\nfailure\n\n");
+      break;
+    }
     /*  Build the Jacobian matrix without reducing the linear system.
      *
      *
@@ -2022,6 +2062,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   } // while loop
 
+
+}
+// printf("\n\nFINAL \nkappa_mu = %e,\t kappa_eps = %e\n\n", kappa_mu,kappa_eps);
+
   /* Checking strict complementarity */
   /* For each cone i from 1 to n, one checks if u+r is in the interior of the Lorentz cone */
   /* One first computes the 3 dimensional vector somme = (u+r)/norm(u+r) */
@@ -2214,7 +2258,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 
   //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
