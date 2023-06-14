@@ -234,6 +234,14 @@ if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
   install(FILES ${CMAKE_BINARY_DIR}/man/siconos.1 DESTINATION share/man/man1)
 endif()
 
+# eigen / SiconosAlgebra
+find_package(Eigen3 REQUIRED)
+foreach(comp_ in LISTS ${COMPONENTS})
+  if(comp_ STREQUAL "kernel" OR comp_ STREQUAL "control" OR comp_ STREQUAL "io" OR comp_ STREQUAL "mechanics")
+    target_include_directories(${comp_} PUBLIC $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>)
+  endif()
+endforeach()
+
 # ============= Summary =============
 message(STATUS "\n============================================ Summary ============================================")
 message(STATUS "${PROJECT_NAME} version ${SICONOS_VERSION} is now ready for compilation and installation.")
