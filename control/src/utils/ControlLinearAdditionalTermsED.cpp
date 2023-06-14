@@ -61,8 +61,8 @@ void siconos::control::ControlLinearAdditionalTermsED::addSmoothTerms(
       auto& u = DSG0.u.getRef(dsgVD);
       auto& tmpXdot = DSG0.tmpXdot.getRef(dsgVD);
       ((AdditionalTermsEDfctU)DSG0.pluginU.getRef(dsgVD).fPtr)(
-          t, xdot.size(), ds.getx().getArray(), u.size(), u.getArray(), tmpXdot.getArray(),
-          ds.getz().size(), ds.getz().getArray());
+          t, xdot.size(), const_cast<double*>(ds.getx().data()), u.size(), u.data(), tmpXdot.data(),
+          ds.getz().size(), const_cast<double*>(ds.getz().data()));
       xdot += tmpXdot;  // xdot += g(x, u)
     } else {
       THROW_EXCEPTION(
@@ -86,8 +86,8 @@ void siconos::control::ControlLinearAdditionalTermsED::addJacobianRhsContributio
     auto& u = DSG0.u.getRef(dsgVD);
     auto& tmpJacgx = DSG0.jacgx.getRef(dsgVD);
     ((AdditionalTermsEDfctU)DSG0.pluginJacgx.getRef(dsgVD).fPtr)(
-        t, ds.getx().size(), ds.getx().getArray(), u.size(), u.getArray(), tmpJacgx.getArray(),
-        ds.getz().size(), ds.getz().getArray());
+        t, ds.getx().size(), const_cast<double*>(ds.getx().data()), u.size(), u.data(), tmpJacgx.data(),
+        ds.getz().size(), const_cast<double*>(ds.getz().data()));
     jacRhs += tmpJacgx;  // JacRhs += \nabla_x g(x, u)
   } else {
     THROW_EXCEPTION(
