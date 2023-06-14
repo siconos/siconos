@@ -91,18 +91,18 @@ void siconos::joints::PivotJointR::setBasePositions(
 
   // If provided in absolute coordinates, must be rotated to q1 frame.
   if (_absoluteRef) {
-    boost::math::quaternion<double> rot1{siconos::geometry::rotquat(q1)}, quatBuff;
+    boost::math::quaternion<double> rot1{siconos::geometry::rotquat(*q1)}, quatBuff;
 
     // Move to q1 frame by unapplying q1 frame rotation
-    quatBuff = (1.0 / rot1) * siconos::geometry::posquat(_A) * rot1;
+    quatBuff = (1.0 / rot1) * siconos::geometry::posquat(*_A) * rot1;
     _A->setValue(0, quatBuff.R_component_2());
     _A->setValue(1, quatBuff.R_component_3());
     _A->setValue(2, quatBuff.R_component_4());
   }
 
   // Initial orientation offset between q2 and q1.
-  boost::math::quaternion<double> cq2q10{1.0 / siconos::geometry::rotquat(q2) *
-                                         siconos::geometry::rotquat(q1)};
+  boost::math::quaternion<double> cq2q10{1.0 / siconos::geometry::rotquat(*q2) *
+                                         siconos::geometry::rotquat(*q1)};
 
   _cq2q101 = cq2q10.R_component_1();
   _cq2q102 = cq2q10.R_component_2();

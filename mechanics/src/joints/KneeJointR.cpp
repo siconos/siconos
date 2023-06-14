@@ -110,16 +110,16 @@ void siconos::joints::KneeJointR::setBasePositions(
     std::shared_ptr<siconos::algebra::SiconosVector> q1,
     std::shared_ptr<siconos::algebra::SiconosVector> q2) {
   *_P0 = *_points[0];
-  boost::math::quaternion<double> rot1{siconos::geometry::rotquat(q1)}, quatBuff, quatP0_abs;
+  boost::math::quaternion<double> rot1{siconos::geometry::rotquat(*q1)}, quatBuff, quatP0_abs;
 
   /** Computation of _G1P0 and _G2P0 */
 
   /* Calculate G1P0 and P0_abs */
   if (_absoluteRef) {
-    quatP0_abs = siconos::geometry::posquat(_P0);
+    quatP0_abs = siconos::geometry::posquat(*_P0);
 
     /* Move to q1 frame by unapplying q1 frame translation/rotation */
-    quatBuff = (1.0 / rot1) * (quatP0_abs - siconos::geometry::posquat(q1)) * rot1;
+    quatBuff = (1.0 / rot1) * (quatP0_abs - siconos::geometry::posquat(*q1)) * rot1;
     _G1P0x = quatBuff.R_component_2();
     _G1P0y = quatBuff.R_component_3();
     _G1P0z = quatBuff.R_component_4();
@@ -130,15 +130,15 @@ void siconos::joints::KneeJointR::setBasePositions(
 
     /* Move to abs frame by applying q1 frame rotation/translation */
     quatP0_abs =
-        (rot1 * siconos::geometry::posquat(_P0) / rot1) + siconos::geometry::posquat(q1);
+        (rot1 * siconos::geometry::posquat(*_P0) / rot1) + siconos::geometry::posquat(*q1);
   }
 
   /* Calculate G2P0, or set it to P0_abs (i.e. G2=absolute frame) */
   if (q2) {
-    auto rot2{siconos::geometry::rotquat(q2)};
+    auto rot2{siconos::geometry::rotquat(*q2)};
 
     /* Move to q2 frame by unapplying q2 frame translation/rotation */
-    quatBuff = (1.0 / rot2) * (quatP0_abs - siconos::geometry::posquat(q2)) * rot2;
+    quatBuff = (1.0 / rot2) * (quatP0_abs - siconos::geometry::posquat(*q2)) * rot2;
 
     _G2P0x = quatBuff.R_component_2();
     _G2P0y = quatBuff.R_component_3();

@@ -120,8 +120,8 @@ void siconos::joints::CylindricalJointR::setBasePositions(
 
   if (q2) *q2i = *q2;
 
-  auto quat1{siconos::geometry::rotquat(q1)};
-  auto quat2{siconos::geometry::rotquat(q2i)};
+  auto quat1{siconos::geometry::rotquat(*q1)};
+  auto quat2{siconos::geometry::rotquat(*q2i)};
 
   // Initial orientation offset
   auto tmp = 1.0 / quat2 * quat1;
@@ -133,7 +133,7 @@ void siconos::joints::CylindricalJointR::setBasePositions(
   // Initial G1-P vector in G1 frame is just P.  Initial G2-P vector
   // in G1 frame is calculated by subtracting (P - G2) in the absolute
   // frame and un-rotating from the q2 frame.
-  auto quatG1P0{siconos::geometry::posquat(_G1P0)};
+  auto quatG1P0{siconos::geometry::posquat(*_G1P0)};
   tmp = quat1 * quatG1P0 / quat1;
 
   siconos::algebra::SiconosVector P0_abs(3);
@@ -148,7 +148,7 @@ void siconos::joints::CylindricalJointR::setBasePositions(
 
   auto G2P0_abs = std::make_shared<siconos::algebra::SiconosVector>(3);
   *G2P0_abs = P0_abs - G2_abs;
-  auto quatG2P0_abs{siconos::geometry::posquat(G2P0_abs)};
+  auto quatG2P0_abs{siconos::geometry::posquat(*G2P0_abs)};
   tmp = 1.0 / quat2 * quatG2P0_abs * quat2;
 
   _G2P0 = std::make_shared<siconos::algebra::SiconosVector>(3);
