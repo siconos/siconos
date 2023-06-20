@@ -219,7 +219,7 @@ void primalResidual(const double * velocity, NumericsMatrix * H, const double * 
   rn = fmax(rn, cblas_dnrm2(nd, velocity, 1));
   rn = fmax(rn, cblas_dnrm2(nd, w, 1));
   rn = fmax(rn, cblas_dnrm2(nd/3, s, 1));
-  *rnorm = (rn > tol ? cblas_dnrm2(nd, out, 1)/rn : cblas_dnrm2(nd, out, 1));
+  *rnorm = (rn > tol ? cblas_dnrm2(nd, out, 1) : cblas_dnrm2(nd, out, 1));
 
   /* *rnorm = cblas_dnrm2(nd, out, 1);  */
   // printf("rn = %e, tol = %e\n", rn, tol);
@@ -643,6 +643,88 @@ static void printVectorMatlabFile(int iteration, double * vec, int vecSize, FILE
   return;
 }
 
+// cl: classify
+static void printBlockVec(double * vec, int vecSize, int sizeBlock, int cl)
+{
+  if (cl > 0)
+  {
+    for(unsigned int i=0; i<vecSize; i++)
+    {
+      if (i%sizeBlock == 0) printf("\n%i-%i: ", i, i+sizeBlock-1);
+      printf(" %.8e", vec[i]);
+      if ((i+1)%sizeBlock == 0) printf(",\t x0 - |xb| = %.2e", vec[((i+1)/sizeBlock-1)*sizeBlock] - cblas_dnrm2(sizeBlock-1, vec+((i+1)/sizeBlock-1)*sizeBlock+1, 1));
+    }
+  }
+
+  else
+  {
+    for(unsigned int i=0; i<vecSize; i++)
+    {
+      if (i%sizeBlock == 0) printf("\n%i-%i: ", i, i+sizeBlock-1);
+      printf(" %.15e", vec[i]);
+    }
+  }
+  return;
+}
+
+
+
+static CS_INT cs_print_2 (const cs *A, CS_INT brief)
+{
+    CS_INT p, j, m, n, nzmax, nz, *Ap, *Ai ;
+    CS_ENTRY *Ax ;
+    if (!A) { printf ("(null)\n") ; return (0) ; }
+    m = A->m ; n = A->n ; Ap = A->p ; Ai = A->i ; Ax = A->x ;
+    nzmax = A->nzmax ; nz = A->nz ;
+    printf ("CXSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER,
+        CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
+    if (nz < 0)
+    {
+        printf ("%g-by-%g, nzmax: %g nnz: %g, 1-norm: %g\n", (double) m,
+            (double) n, (double) nzmax, (double) (Ap [n]), cs_norm (A)) ;
+        for (j = 0 ; j < n ; j++)
+        {
+            printf ("    col %g : locations %g to %g\n", (double) j,
+                (double) (Ap [j]), (double) (Ap [j+1]-1)) ;
+            for (p = Ap [j] ; p < Ap [j+1] ; p++)
+            {
+                printf ("      %g : ", (double) (Ai [p])) ;
+#ifdef CS_COMPLEX
+                printf ("(%g, %g)\n",
+                    Ax ? CS_REAL (Ax [p]) : 1, Ax ? CS_IMAG (Ax [p]) : 0) ;
+#else
+                printf ("%.30g\n", Ax ? Ax [p] : 1) ;
+#endif
+                if (brief && p > 20) { printf ("  ...\n") ; return (1) ; }
+            }
+        }
+    }
+    else
+    {
+        printf ("triplet: %g-by-%g, nzmax: %g nnz: %g\n", (double) m,
+            (double) n, (double) nzmax, (double) nz) ;
+        for (p = 0 ; p < nz ; p++)
+        {
+
+            printf ("    %g %g : ", (double) (Ai [p]), (double) (Ap [p])) ;
+#ifdef CS_COMPLEX
+            printf ("(%g, %g)\n",
+                Ax ? CS_REAL (Ax [p]) : 1, Ax ? CS_IMAG (Ax [p]) : 0) ;
+#else
+            printf ("%g\n", Ax ? Ax [p] : 1) ;
+#endif
+            if (brief && p > 20) { printf ("  ...\n") ; return (1) ; }
+        }
+    }
+    return (1) ;
+}
+
+
+
+
+
+
+
 
 /* static int saveMatrix(NumericsMatrix* m, const char * filename) */
 /* { */
@@ -1038,10 +1120,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double complem = 1e300;
   double complem_p = 1e300;
   double dualgap = 1e300;
-  double udotr = 1e300;
+  double udotr = 1e300, udotr_mu = 1e300;
   double projerr = 1e300;
   double error[6];
-  double totalresidual = 1e300;
+  double totalresidual = 1e300, totalresidual_mu = 1e300;
 
   double diff_fixp = 1e300;
 
@@ -1063,7 +1145,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double *dw = (double*)calloc(nd,sizeof(double));
   double *d_s = (double*)calloc(n,sizeof(double));
   double *s = (double*)calloc(n,sizeof(double));
-  for (unsigned int  i = 0; i<n; i++) s[i] = 0.02;
+  for (unsigned int  i = 0; i<n; i++) s[i] = 0.014;
 
   double *rhs = options->dWork;
   double *rhs_2 = (double*)calloc(m+2*nd+n, sizeof(double));
@@ -1176,7 +1258,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     }
 
-  numerics_printf_verbose(-1, "| it  |  dualgap | pinfeas | dinfeas |  <u, r> |  |s-ub| | complem | prj err | barpram |  alpha  |  sigma  |  |dv|   |  |du|   |  |dr|   |  |ds|   | ls prim | ls dual | ls comp | ls fixP |");
+  numerics_printf_verbose(-1, "| it  | pinfeas | dinfeas |  <u, r> | |ur-mu| |  |s-ub| | complem | prj err | barpram |  alpha  |  sigma  |  |dv|   |  |du|   |  |dr|   |  |ds|   | ls prim | ls dual | ls comp | ls fixP |");
   numerics_printf_verbose(-1, "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
   double * p = data->tmp_vault_nd[8];
@@ -1213,24 +1295,27 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   FILE * iterates;
   FILE * matrixH;
 
-  char *str = (char *) malloc(200);
-  strcpy( str, problem_name );
-  const char * separators = "/";
-  char *strToken = strtok( str, separators );
-  for(int i=0; i<5; i++)
-  {
-    if(strToken != NULL) strToken = strtok ( NULL, separators );
-  }
+  // char *str = (char *) malloc(200);
+  // strcpy( str, problem_name );
+  // const char * separators = "/";
+  // char *strToken = strtok( str, separators );
+  // for(int i=0; i<5; i++)
+  // {
+  //   if(strToken != NULL) strToken = strtok ( NULL, separators );
+  // }
 
-  strToken = strtok ( strToken, "." );
-  for(int i=0; i<strlen(strToken); i++)
-  {
-    if(strToken[i] == '-') strToken[i] = '_';
-  }
+  // strToken = strtok ( strToken, "." );
+  // for(int i=0; i<strlen(strToken); i++)
+  // {
+  //   if(strToken[i] == '-') strToken[i] = '_';
+  // }
 
-  char matlab_name[100];
-  sprintf(matlab_name, "%s.m",strToken);
+  char matlab_name[100], probName[100];
 
+  int count=0; for (int i = 13; problem_name[i] != '.'; i++) {probName[count] = problem_name[i]; count++;} probName[count] = '\0';
+  sprintf(matlab_name, "%s.m",probName);
+
+  // sprintf(matlab_name, "%s.m",strToken);
 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
@@ -1259,7 +1344,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double tol_int = 1.;
   double kappa_eps = 0.1, kappa_mu = 1.;
   double tmp_barr_param = 0.;
-  barr_param = 0.1;
   int findKappa = 1;
 
 while(hasNotConverged != 0 && findKappa)
@@ -1284,22 +1368,35 @@ while(hasNotConverged != 0 && findKappa)
   hasNotConverged = 1;
   pinfeas = dinfeas = complem = udotr = projerr = diff_fixp = totalresidual = 1e300;
   alpha_primal = alpha_dual = 1.;
-  barr_param = 0.1;
-  // kappa_mu = randomFloat(0.05, 0.95);
+  // barr_param = 10;
+  barr_param = 1e-6;
+  // kappa_mu = randomFloat(0.1, 0.99);
   // kappa_eps = randomFloat(0.7, 3.0)*n;
   kappa_mu = 0.5;
   kappa_eps = n;
-  printf("\nkappa_mu = %e,\t kappa_eps = n\n", kappa_mu);
+  // kappa_eps = 10;
+  // printf("\nkappa_mu = %e,\t kappa_eps = n\n", kappa_mu);
   // printf("\nkappa_mu = %e,\t kappa_eps = %e\n", kappa_mu,kappa_eps);
 
 
   while(iteration < max_iter)
   {
-    if (totalresidual < 1e-4)
-    {
-      kappa_mu = 0.98;
-      // printf("\nkappa_mu = %e,\t kappa_eps = 2n\n", kappa_mu);
-    }
+    // if (totalresidual >= 1e-2 && totalresidual < 1e-1)
+    // {
+    //   kappa_mu = 0.6;
+    // }
+
+    // if (totalresidual >= 1e-3 && totalresidual < 1e-2)
+    // {
+    //   kappa_mu = 0.4;
+    // }
+
+    // if (totalresidual < 1e-3)
+    // {
+    //   kappa_mu = 0.1;
+    // }
+
+
     /** Correction of w to take into account the dependence on the tangential velocity */
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] == 1) // & (totalresidual <= 100*tol))
     {
@@ -1330,8 +1427,10 @@ while(hasNotConverged != 0 && findKappa)
     dualgap = dualGap(M, f, w, globalVelocity, reaction, nd, m);
     // barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / n / 3;
     complem = complemResidualNorm(velocity, reaction, nd, n);
-    // udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
-    udotr = fabs(cblas_ddot(nd, velocity, 1, reaction, 1) - 2*sigma*barr_param*n);
+    udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
+    udotr_mu = fabs(cblas_ddot(nd, velocity, 1, reaction, 1) - 2*sigma*barr_param*n);
+
+    // printf("\nudotr = %.2e, \t sigma = %.2e, \t barr_param = %.2e, \t ur - mu = %.2e\n", cblas_ddot(nd, velocity, 1, reaction, 1), sigma, barr_param, cblas_ddot(nd, velocity, 1, reaction, 1) - 2*sigma*barr_param*n);
 
     diff_fixp = 0.;
     for (unsigned int i = 0; i<nd; i+=d)
@@ -1367,7 +1466,7 @@ while(hasNotConverged != 0 && findKappa)
     // totalresidual = fmax(fmax(error[0], error[1]),fmin(error[2], error[3]));
     // totalresidual = fmax(fmax(error[0], error[1]),error[2]);
     totalresidual = fmax(fmax(fmax(error[0], error[1]),error[2]),diff_fixp);
-
+    totalresidual_mu = fmax(fmax(fmax(pinfeas, dinfeas),udotr_mu),diff_fixp);
 
     // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
     //   printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, s, d_globalVelocity, d_velocity, d_reaction, d_s, d, n, m, iterates);
@@ -1379,14 +1478,16 @@ while(hasNotConverged != 0 && findKappa)
     // kappa_mu = 0.852;
     // kappa_eps = 2*n;
     // scale = 100;
-    if (totalresidual <= kappa_eps*barr_param)
+    // if (totalresidual_mu <= kappa_eps*barr_param)
+    if (totalresidual_mu <= 1e-10)
     {
       barr_param *= kappa_mu;
-      tmp_barr_param = barr_param;
+      // tmp_barr_param = barr_param;
       // barr_param = fmax(scale_tol*tmp_barr_param, pow(tmp_barr_param,1.3));
       // barr_param = udotr / n / 3;
       // barr_param = fmax(diff_fixp, udotr) / n / 3;
       // tol_int = scale*barr_param;
+      printf("\n");
     }
 
     // if (totalresidual <=)
@@ -1394,8 +1495,8 @@ while(hasNotConverged != 0 && findKappa)
 
     if ( totalresidual <= tol )
     {
-      numerics_printf_verbose(-1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
-                              iteration, fws, dualgap, pinfeas, dinfeas, udotr, diff_fixp, complem, projerr, barr_param);
+      numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+                              iteration, fws, pinfeas, dinfeas, udotr, udotr_mu, diff_fixp, complem, projerr, barr_param);
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
         printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, s, d_globalVelocity, d_velocity, d_reaction, d_s, d, n, m, iterates);
@@ -1422,12 +1523,12 @@ while(hasNotConverged != 0 && findKappa)
      *
      *  In the case where the NT scaling is not used, the matrix to factorize is the following:
      *
-     *         m        nd        nd      s
+     *         m        nd        nd      n
      *      |  M        0        -H^T     0 | m
      *      |                               |
-     *  J = |  0      Arw(r)    Arw(z)    0 | nd
+     *  J = |  0      Arw(r)    Arw(u)    0 | nd
      *      |                               |
-     *      | -H        I          0     -e | nd
+     *      | -H        I          0     -E | nd
      *      |                               |
      *      |  0  [0 -ub'/|ub|]    0      I | n
      *
@@ -1438,7 +1539,7 @@ while(hasNotConverged != 0 && findKappa)
        rhs = -
        [      M*v - H'*r - f      ]  m         dualConstraint
        [          u o r           ]  nd        complemConstraint    u o r - 2 mu sigma e
-       [   u - H*v - w - phi(s)   ]  nd        primalConstraint
+       [     u - H*v - w - Es     ]  nd        primalConstraint
        [         s - |ub|         ]  n
     */
 
@@ -1482,6 +1583,12 @@ while(hasNotConverged != 0 && findKappa)
         //   NM_entry(subdiff_u, i, pos+2, -1/sqrt(2));
         //   printf("Cone %zu: ub = 0\n",i);
         // }
+
+        // if (ub < DBL_EPSILON)
+        // {
+        //   printf("Cone %zu: ub = %.1e, %.1e,\tub/|ub| = %.1e, %.1e\n",i, velocity[pos+1], velocity[pos+2], -velocity[pos+1]/ub, -velocity[pos+2]/ub);
+        // }
+
         NM_entry(subdiff_u, i, pos+1, -velocity[pos+1]/ub);
         NM_entry(subdiff_u, i, pos+2, -velocity[pos+2]/ub);
 
@@ -1526,6 +1633,7 @@ while(hasNotConverged != 0 && findKappa)
       }
 
 
+
       cblas_dcopy(m, dualConstraint, 1, rhs, 1);
 
       JA_prod(velocity, reaction, nd, n, complemConstraint);
@@ -1539,6 +1647,7 @@ while(hasNotConverged != 0 && findKappa)
 
       cblas_dscal(m + 2*nd + n, -1.0, rhs, 1);
       cblas_dcopy(m + 2*nd + n, rhs, 1, rhs_2, 1);    // rhs_2 = old rhs
+
 
 
       // if(iteration == 0)
@@ -1608,57 +1717,54 @@ while(hasNotConverged != 0 && findKappa)
       // }
 
 
+      if(iteration==2)
+      {
+        fprintf(iterates,"Jac_C = [\n");
+        CSparseMatrix_print_in_Matlab_file(NM_triplet(J), 0, iterates);
+        fprintf(iterates,"];\n");
+        fprintf(iterates,"Jac_C = sparse(int32(Jac_C(:,1)), int32(Jac_C(:,2)), Jac_C(:,3));\n");
+
+
+        fprintf(iterates,"rhs_C = [");
+        for(int i = 0; i < m + 2*nd + n; i++)
+        {
+          fprintf(iterates,"%8.20e; ",rhs[i]);
+        }
+        fprintf(iterates,"];\n");
+      }
+
+
 
       // SOLVE
       NM_LU_solve(J, rhs, 1);
 
 
 
-      // if (iteration == 0)
-      // {
-      //   printf("\ndv = ");
-      //   for(unsigned int i=0; i<m; i++)
-      //   {
-      //     if (i%9 == 0) printf("\n%i-%i: ", i, i+9);
-      //     printf(" %.15e", rhs[i]);
-      //   }
-
-      //   printf("\n\ndu = ");
-      //   for(unsigned int i=0; i<nd; i++)
-      //   {
-      //     if (i%9 == 0) printf("\n%i-%i: ", i, i+9);
-      //     printf(" %.15e", rhs[m+i]);
-      //   }
-
-      //   printf("\n\ndr = ");
-      //   for(unsigned int i=0; i<nd; i++)
-      //   {
-      //     if (i%9 == 0) printf("\n%i-%i: ", i, i+9);
-      //     printf(" %.15e", rhs[m+nd+i]);
-      //   }
-
-      //   printf("\n\nds = ");
-      //   for(unsigned int i=0; i<n; i++)
-      //   {
-      //     if (i%9 == 0) printf("\n%i-%i: ", i, i+9);
-      //     printf(" %.15e", rhs[m+2*nd+i]);
-      //   }
-      //   // printf("\n\nM = \n"); NM_display(M);
-      //   // printf("\n\nH = \n"); NM_display(H);
-      //   // printf("\n\nJac = \n"); NM_display(J);
-      // }
-
-
+      if(iteration==2)
+      {
+        fprintf(iterates,"sol_C = [");
+        for(int i = 0; i < m + 2*nd + n; i++)
+        {
+          fprintf(iterates,"%8.20e; ",rhs[i]);
+        }
+        fprintf(iterates,"];\n");
+      }
 
 
       cblas_dcopy(m + 2*nd + n, rhs, 1, sol, 1);
-      cblas_dcopy(m + 2*nd + n, rhs_2, 1, rhs, 1);
+      // cblas_dcopy(m + 2*nd + n, rhs_2, 1, rhs, 1);
       NM_gemv(1.0, J, sol, -1.0, rhs_2);
 
       LS_norm_d = cblas_dnrm2(m, rhs_2, 1);
       LS_norm_c = cblas_dnrm2(nd, rhs_2+m, 1);
       LS_norm_p = cblas_dnrm2(nd, rhs_2+m+nd, 1);
       LS_norm_f = cblas_dnrm2(n, rhs_2+m+2*nd, 1);
+
+      // printf("\n\ndiff = "); printBlockVec(rhs_2, m + 2*nd + n, 5);
+      // printf("\n\n");
+
+      // double LS_norm = cblas_dnrm2(m+2*nd+n, rhs_2, 1);
+      // printf("\t\t\t\t\t\t\t\t\t\t\tLS_norm = %.1e\n", LS_norm);
 
       cblas_dcopy(m, sol, 1, d_globalVelocity, 1);
       cblas_dcopy(nd, sol+m, 1, d_velocity, 1);
@@ -2011,8 +2117,8 @@ while(hasNotConverged != 0 && findKappa)
 
 
 
-    numerics_printf_verbose(-1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
-                            iteration, fws, dualgap, pinfeas, dinfeas, udotr, diff_fixp, complem, projerr, barr_param, alpha_primal, sigma,
+    numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+                            iteration, fws, pinfeas, dinfeas, udotr, udotr_mu, diff_fixp, complem, projerr, barr_param, alpha_primal, sigma,
                             fabs(d_globalVelocity[cblas_idamax(m, d_globalVelocity, 1)]),
                             fabs(d_velocity[cblas_idamax(nd, d_velocity, 1)]),
                             fabs(d_reaction[cblas_idamax(nd, d_reaction, 1)]),
@@ -2036,6 +2142,7 @@ while(hasNotConverged != 0 && findKappa)
     cblas_daxpy(nd, alpha_primal, d_velocity, 1, velocity, 1);
     cblas_daxpy(nd, alpha_dual, d_reaction, 1, reaction, 1);
     cblas_daxpy(n, alpha_primal, d_s, 1, s, 1);
+    // cblas_daxpy(n, 1., d_s, 1, s, 1);
 
     if (NV_isnan(globalVelocity, m) | NV_isnan(velocity, nd) | NV_isnan(reaction, nd) | NV_isnan(s, n))
     {
@@ -2045,11 +2152,11 @@ while(hasNotConverged != 0 && findKappa)
 
     // if (iteration > 20)
     // {
-    //   for(unsigned int i=0; i<nd; i+=d)
-    //   {
-    //     printf("s[%i] = %8.20e,\t|ub[%i]| = %8.20e\n", i/d, s[i/d], i/d, cblas_dnrm2(2, velocity+i+1,1));
-    //   }
-    //   printf("\n");
+      // for(unsigned int i=0; i<nd; i+=d)
+      // {
+      //   printf("s[%i] = %8.20e,\t|ub[%i]| = %8.20e\n", i/d, s[i/d], i/d, cblas_dnrm2(2, velocity+i+1,1));
+      // }
+      // printf("\n");
     // }
 
 
@@ -2059,6 +2166,7 @@ while(hasNotConverged != 0 && findKappa)
     if(J) { J = NM_free(J); J = NULL;}
 
     iteration++;
+    // printf("\nw = "); NV_display(w, nd); printf("\n\n");
 
   } // while loop
 
@@ -2113,27 +2221,31 @@ while(hasNotConverged != 0 && findKappa)
   // printf("\n");
 
   // int pri = 3;
-  // printf("\nv = ");
+  // printf("\nv = "); printBlockVec(globalVelocity, m, 3);
   // for(unsigned int i=0; i<m; i++)
   // {
-  //   if (i%pri == 0) printf("\n%i-%i: ", i, i+pri);
+  //   if (i%pri == 0) printf("\n%i-%i: ", i, i+pri-1);
   //   printf(" %.15e", globalVelocity[i]);
   // }
 
   // printf("\n\nu = ");
   // for(unsigned int i=0; i<nd; i++)
   // {
-  //   if (i%pri == 0) printf("\n%i-%i: ", i, i+pri);
+  //   if (i%pri == 0) printf("\n%i-%i: ", i, i+pri-1);
   //   printf(" %.15e", velocity[i]);
   // }
 
   // printf("\n\nr = ");
   // for(unsigned int i=0; i<nd; i++)
   // {
-  //   if (i%pri == 0) printf("\n%i-%i: ", i, i+pri);
+  //   if (i%pri == 0) printf("\n%i-%i: ", i, i+pri-1);
   //   printf(" %.15e", reaction[i]);
   // }
 
+  printf("\nu_tilde = "); printBlockVec(velocity, nd, 3, 1);
+  printf("\n\nr = "); printBlockVec(reaction, nd, 3, 1);
+  printf("\n\nv = "); printBlockVec(globalVelocity, m, 3, 0);
+  printf("\n\n");
 
   /* printing complementarity products */
 

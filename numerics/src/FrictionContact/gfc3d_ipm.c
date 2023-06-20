@@ -504,22 +504,22 @@
 //   fprintf(file,"n = %6i;\n",n);
 //   fprintf(file,"m = %6i;\n",m);
 
-//   // fprintf(file,"M = [\n");
-//   // CSparseMatrix_print_in_Matlab_file(NM_triplet(M), 0, file);
-//   // fprintf(file,"];\n");
-//   // fprintf(file,"M = sparse(int32(M(:,1)), int32(M(:,2)), M(:,3));\n");
+//   fprintf(file,"M = [\n");
+//   CSparseMatrix_print_in_Matlab_file(NM_triplet(M), 0, file);
+//   fprintf(file,"];\n");
+//   fprintf(file,"M = sparse(int32(M(:,1)), int32(M(:,2)), M(:,3));\n");
 
-//   // fprintf(file,"H = [\n");
-//   // CSparseMatrix_print_in_Matlab_file(NM_triplet(H), 0, file);
-//   // fprintf(file,"];\n");
-//   // fprintf(file,"H = sparse(int32(H(:,1)), int32(H(:,2)), H(:,3));\n");
+//   fprintf(file,"H = [\n");
+//   CSparseMatrix_print_in_Matlab_file(NM_triplet(H), 0, file);
+//   fprintf(file,"];\n");
+//   fprintf(file,"H = sparse(int32(H(:,1)), int32(H(:,2)), H(:,3));\n");
 
-//   // fprintf(file,"f = [");
-//   // for(int i = 0; i < m; i++)
-//   // {
-//   //   fprintf(file,"%22.14e; ",-f[i]);
-//   // }
-//   // fprintf(file,"];\n");
+//   fprintf(file,"f = [");
+//   for(int i = 0; i < m; i++)
+//   {
+//     fprintf(file,"%22.14e; ",-f[i]);
+//   }
+//   fprintf(file,"];\n");
 
 //   fprintf(file,"w = [");
 //   for(int i = 0; i < n*d; i++)
@@ -1163,23 +1163,23 @@
 //   FILE * iterates;
 //   FILE * matrixH;
 
-//   // char *str = (char *) malloc(200);
-//   // strcpy( str, problem_name );
-//   // const char * separators = "/";
-//   // char *strToken = strtok( str, separators );
-//   // for(int i=0; i<5; i++)
-//   // {
-//   //   if(strToken != NULL) strToken = strtok ( NULL, separators );
-//   // }
+//   char *str = (char *) malloc(200);
+//   strcpy( str, problem_name );
+//   const char * separators = "/";
+//   char *strToken = strtok( str, separators );
+//   for(int i=0; i<5; i++)
+//   {
+//     if(strToken != NULL) strToken = strtok ( NULL, separators );
+//   }
 
-//   // strToken = strtok ( strToken, "." );
-//   // for(int i=0; i<strlen(strToken); i++)
-//   // {
-//   //   if(strToken[i] == '-') strToken[i] = '_';
-//   // }
+//   strToken = strtok ( strToken, "." );
+//   for(int i=0; i<strlen(strToken); i++)
+//   {
+//     if(strToken[i] == '-') strToken[i] = '_';
+//   }
 
 //   char matlab_name[100];
-//   // sprintf(matlab_name, "%s.m",strToken);
+//   sprintf(matlab_name, "%s.m",strToken);
 
 
 
@@ -2526,7 +2526,7 @@
 // {
 //   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] = SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
-//   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 1;
+//   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
 //   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH;
 
@@ -2535,12 +2535,12 @@
 
 //   //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
-//   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
+//   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
 
 //   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
 //   options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-//   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+//   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
 //   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
 //   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
 //   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
