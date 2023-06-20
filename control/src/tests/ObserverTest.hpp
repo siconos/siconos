@@ -19,9 +19,10 @@
 #define __ObserverTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <SiconosFwd.hpp>
-#include "SiconosControlFwd.hpp"
 #include <FirstOrderLinearTIDS.hpp>
+#include "LinearSensor.hpp"
+#include "PID.hpp"
+
 
 class ObserverTest : public CppUnit::TestFixture
 {
@@ -56,18 +57,18 @@ private:
   double _T;
   double _tol;
   double _xFinal;
-  SP::FirstOrderLinearTIDS _DS;
-  SP::SiconosMatrix _A;
-  SP::SimpleMatrix _B;
-  SP::SimpleMatrix _C;
-  SP::SimpleMatrix _Csurface;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
-  SP::SiconosVector _xHat0;
-  SP::SiconosVector _K;
-  SP::SimpleMatrix _L;
-  SP::LinearSensor _sensor;
-  SP::PID _pid;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _B{nullptr};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _C{nullptr};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _xHat0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _K{nullptr};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _L{nullptr};
+  std::shared_ptr<siconos::control::LinearSensor> _sensor{nullptr};
+  std::shared_ptr<siconos::control::PID> _pid{nullptr};
 
 
 public:

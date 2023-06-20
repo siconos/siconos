@@ -1,6 +1,7 @@
 include(tools4tests)
 
 if(WITH_TESTING)
+  add_custom_target(numerics-tests echo "Start numerics tests")
 
   # If WITH_SYSTEM_SUITESPARSE, suite sparse is an imported target
   # that must sometimes be taken into account by tests.
@@ -13,11 +14,11 @@ if(WITH_TESTING)
 
   begin_tests(src/tools/test)
 
-  new_test(SOURCES test_op3x3.c)
+  new_test(SOURCES test_op3x3.c DEPS externals)
 
   new_test(SOURCES test_timers_interf.c)
 
-  new_test(SOURCES test_blas_lapack.c)
+  new_test(SOURCES test_blas_lapack.c DEPS externals)
 
   #if(HAS_LAPACK_dgesvd) # Some lapack versions miss dgesvd
   new_test(SOURCES test_pinv.c)# DEPS "externals")
@@ -28,7 +29,7 @@ if(WITH_TESTING)
   new_test(SOURCES NumericsArrays.c)
 
   #  tests for NumericsMatrix
-  new_test(SOURCES NM_test.c DEPS "${suitesparse}")
+  new_test(SOURCES NM_test.c DEPS "${suitesparse};externals")
 
   #  tests for JordanAlgebra
   NEW_TEST(NAME tools_test_JordanAlgebra SOURCES JordanAlgebra_test.c)
@@ -39,14 +40,14 @@ if(WITH_TESTING)
   endif()
   
   # Specfic tests for SBM matrices 
-  new_test(SOURCES SBM_test.c DEPS "${suitesparse}")
+  new_test(SOURCES SBM_test.c DEPS "${suitesparse};externals")
   new_test(SOURCES SBCM_to_SBM.c)
 
   # Specfic tests for sparse matrices 
   new_test(SOURCES SparseMatrix_test.c DEPS "${suitesparse}")
 
   if(HAS_ONE_LP_SOLVER)
-    new_test(SOURCES vertex_problem.c)
+    new_test(SOURCES vertex_problem.c DEPS externals)
   endif(HAS_ONE_LP_SOLVER)
 
   # ----------- LCP solvers tests -----------
@@ -112,7 +113,7 @@ if(WITH_TESTING)
   if(HAVE_SYSTIMES_H AND WITH_CXX)
     new_test(NAME MLCPtest SOURCES main_mlcp.cpp)
   endif()
-  new_test(SOURCES MixedLinearComplementarity_ReadWrite_test.c)
+  new_test(SOURCES MixedLinearComplementarity_ReadWrite_test.c DEPS externals)
 
   # ----------- MCP solvers tests -----------
   begin_tests(src/MCP/test)
@@ -151,7 +152,7 @@ if(WITH_TESTING)
   # 3D Friction Contact tests
   #===========================================
 
-  begin_tests(src/FrictionContact/test DEPS "${suitesparse}")
+  begin_tests(src/FrictionContact/test DEPS "${suitesparse};externals")
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_nsgs_1.c)
@@ -219,7 +220,6 @@ if(WITH_TESTING)
   # ---------------------------------------------------
   # --- Global friction contact problem formulation ---
   # ---------------------------------------------------
-
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_first_order_gfc3d_1.c)
@@ -232,8 +232,10 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c )
+  new_tests_collection(
+    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc3d_1.c test_admm_gfc3d_1.c )
 
-  
   new_tests_collection(
     DRIVER gfc2d_test_collection.c.in FORMULATION gfc2d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc2d_1.c test_first_order_gfc2d_1.c )
@@ -248,6 +250,9 @@ if(WITH_TESTING)
   new_tests_collection(
     DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION
     EXTRA_SOURCES data_collection_rfc3d.c test_first_order_rfc3d_1.c )
+  new_tests_collection(
+    DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_1
+    EXTRA_SOURCES data_collection_grfc3d.c test_ipm_grfc3d_1.c )
       
   if(WITH_FCLIB)
 
@@ -277,6 +282,12 @@ if(WITH_TESTING)
       HDF5 ON
       )
     new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB_PA
+      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+ 
+    new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib_1.c test_solvers_wr_gfc3d_fclib.c DEPS FCLIB::fclib
       HDF5 ON
@@ -287,11 +298,19 @@ if(WITH_TESTING)
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
+
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
+      
+    # new_tests_collection(
+    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
+    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
+    #   HDF5 ON
+    #   )
+
 
     # ---------------------------------------------------
     # --- Rolling friction contact problem formulation ---
@@ -300,6 +319,18 @@ if(WITH_TESTING)
     new_tests_collection(
       DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_rfc3d_fclib.c test_first_order_rfc3d_1.c DEPS FCLIB::fclib)
+
+    new_tests_collection(
+      DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_grfc3d_fclib.c test_ipm_grfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+      
+     # new_tests_collection(
+     #  DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
+     #  EXTRA_SOURCES data_collection_grfc3d_fclib_full.c test_ipm_grfc3d_1.c DEPS FCLIB::fclib
+     #  HDF5 ON
+     #  )
     
   endif()
 
@@ -335,7 +366,7 @@ if(WITH_TESTING)
   begin_tests(src/VI/test)
 
   new_test(SOURCES VI_test_collection_1.c)
-  new_test(SOURCES VI_fc3d_test_collection_1.c)
+  new_test(SOURCES VI_fc3d_test_collection_1.c DEPS externals)
 
   set(SICONOS_VI_SOLVERS
     SICONOS_VI_BOX_QI
@@ -356,7 +387,7 @@ if(WITH_TESTING)
   begin_tests(src/QP/test)
 
   new_test(NAME ConvexQP_test_collection SOURCES ConvexQP_test.c)
-  new_test(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c)
+  new_test(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c DEPS externals)
   
   # ----------- AVI solvers tests -----------
   begin_tests(src/AVI/test)
@@ -387,8 +418,8 @@ if(WITH_TESTING)
   endif()
 
   # For SuiteSparse and SiconosLapack.h 
-  target_link_libraries(numerics-test PUBLIC externals)
-  target_link_libraries(numerics-test PUBLIC LAPACK::LAPACK)
+  # add_dependencies(numerics-tests externals)
+  # add_dependencies(numerics-tests LAPACK::LAPACK)
   #target_include_directories(numerics-test PUBLIC ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
 
 endif()

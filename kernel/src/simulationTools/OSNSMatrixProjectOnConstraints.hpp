@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file OSNSMatrixProjectOnConstraints.hpp
   Specific storage for matrices used in OneStepNSProblem with a projection scheme
 */
@@ -24,6 +24,11 @@
 
 #include "OSNSMatrix.hpp"
 
+namespace siconos::modeling {
+class Interaction;
+}
+
+namespace siconos::nonsmooth_formulations {
 
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
@@ -63,7 +68,7 @@
 
   .. math::
     :nowrap:
-  
+
       M=\left\lbrace\begin{array}{cccc}
       m22 & m23 & m28 &  0 \\
       m32 & m33 & 0   &  0 \\
@@ -89,50 +94,41 @@
  *
  */
 
-
-class OSNSMatrixProjectOnConstraints : public OSNSMatrix
-{
-protected:
-  
+class OSNSMatrixProjectOnConstraints : public OSNSMatrix {
+ protected:
   ACCEPT_SERIALIZATION(OSNSMatrixProjectOnConstraints);
 
   /* default constructor
    */
-  OSNSMatrixProjectOnConstraints() {};
+  OSNSMatrixProjectOnConstraints();
 
   using OSNSMatrix::updateSizeAndPositions;
-  virtual unsigned updateSizeAndPositions(InteractionsGraph& indexSet);
+  virtual unsigned updateSizeAndPositions(siconos::graphs::InteractionsGraph& indexSet);
 
-public:
-
-
+ public:
   /** Constructor with dimRow and DimColumn of the matrix
    * \param n row size of the rectangle matrix
    * \param m column size of the rectangle matrix
    * \param stor storage type (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor);
+  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m,
+                                 NM_types stor);
 
   /** compute the size of the vector to project for a given Interaction.
    * \param inter the corresponding interaction
    * \return  unsigned int
    */
-  unsigned int computeSizeForProjection(SP::Interaction inter);
-
+  unsigned int computeSizeForProjection(std::shared_ptr<siconos::modeling::Interaction> inter);
 
   /** destructor
    */
-  virtual ~OSNSMatrixProjectOnConstraints();
-
+  virtual ~OSNSMatrixProjectOnConstraints() noexcept = default;
 
   /** fill the current class using an index set and a map of interactionBlocks
       \param indexSet the index set of the active constraints
       \param update if true update the size and position
   */
-  void fillM(InteractionsGraph& indexSet, bool update = true);
-
+  void fillM(siconos::graphs::InteractionsGraph& indexSet, bool update = true);
 };
-
-DEFINE_SPTR(OSNSMatrixProjectOnConstraints)
-
+}  // namespace siconos::nonsmooth_formulations
 #endif

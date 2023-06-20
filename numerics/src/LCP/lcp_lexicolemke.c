@@ -26,17 +26,19 @@
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+
 /* #define MAX_PIVOT */
 /* #define INV_PIVOT */
+
+/* #define DEBUG_STDOUT  */
+/* #define DEBUG_MESSAGES  */
 #include "siconos_debug.h"                         // for DEBUG_EXPR_WE, DEBUG_PRINT
 #include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_PIVOTIN...
 #include "numerics_verbose.h"              // for verbose
 
-#ifdef DEBUG_MESSAGES
+//#ifdef DEBUG_MESSAGES
 #include "pivot-utils.h"
-#endif
+//#endif
 
 void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double *wlem, int *info, SolverOptions* options)
 {
@@ -75,8 +77,8 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
     *info = 0;
     options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;   /* Number of iterations done */
     options->dparam[SICONOS_DPARAM_RESIDU] = 0.0; /* Error */
-    if(verbose > 0)
-      printf("lcp_lexicolemke: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+
+    numerics_printf_verbose(1,"lcp_lexicolemke: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
     return ;
   }
 
@@ -130,6 +132,10 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
   }
   assert(problem->q);
 
+  numerics_printf_verbose(1, "lexico_tol_diff = %e",lexico_tol_diff );
+  numerics_printf_verbose(1, "lexico_tol_elt = %e",lexico_tol_elt );
+
+  
   for(ic = 0 ; ic < dim; ++ic) A[ic][0] = problem->q[ic];
 
   for(ic = 0 ; ic < dim; ++ic) A[ic][ic + 1 ] =  1.0;
@@ -141,9 +147,9 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
 {
   for(unsigned int j = 0 ; j < (unsigned int)dim2; ++j)
     {
-      DEBUG_PRINTF("%1.2e ", A[i][j])
+      DEBUG_PRINTF("%1.2e ", A[i][j]);
     }
-    DEBUG_PRINT("\n")
+  DEBUG_PRINT("\n");
   });
   /* End of construction of A */
 
@@ -286,9 +292,11 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
     for(ic = 0 ; ic < dim ; ++ic)
     {
       zb = A[ic][drive];
+      //printf("zb = %e\n", zb);
       if(zb > 0.0)
       {
         z0 = A[ic][0] / zb;
+	//printf("z0 = %e\n", z0);
         if(z0 > ratio) continue;
         if(z0 < ratio)
         {
@@ -303,10 +311,11 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
         }
       }
     }
-
+    numerics_printf_verbose(2,"nb_candidate for pivots = %i, ratio = %e, drive = %d, block = %i  ", nb_candidate, ratio, drive, block);
     if(nb_candidate > 0)
     {
-      DEBUG_PRINTF("pivot_selection_lemke :: lexicomin %d candidates, ratio = %e, drive = %d\n", nb_candidate, ratio, drive);
+      numerics_printf_verbose(2,"pivot_selection_lemke :: lexicomin %d candidates, ratio = %e, drive = %d\n", nb_candidate, ratio, drive);
+
       for(unsigned k = 0; k < nb_candidate; ++k)
       {
         unsigned var = candidate_pivots_indx[k];
@@ -395,22 +404,29 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
 
 
     DEBUG_EXPR_WE(
-      if(max_pivot_helped)
-  {
-    DEBUG_PRINT("pivot_selection_lemke :: lexicomin MAX PIVOT HELPED!\n");
-    });
+		  if(max_pivot_helped)
+		    {
+		      DEBUG_PRINT("pivot_selection_lemke :: lexicomin MAX PIVOT HELPED!\n");
+		    });
     if(block == -1)
     {
-      Ifound = 1;
-      DEBUG_PRINT("The pivot column is nonpositive !\n"
-                  "It either means that the algorithm is not able to finish or that the LCP is infeasible\n"
-                  "Check the class of the M matrix to find out the meaning of this\n");
+      Ifound = 0;
+      numerics_printf_verbose(1, "The pivot column is nonpositive !");
+      numerics_printf_verbose(1, "It either means that the algorithm is not able to finish or that the LCP is infeasible");
+      numerics_printf_verbose(1, "Check the class of the M matrix to find out the meaning of this");
       break;
     }
 
-    DEBUG_PRINTF("leaving variable %s%d entering variable %s%d\n", basis_to_name(basis[block], dim), basis_to_number(basis[block], dim), basis_to_name(drive, dim), basis_to_number(drive, dim));
-    if(basis[block] == dim + 1) Ifound = 1;
-
+    numerics_printf_verbose(2,"leaving variable (block) %s%d entering variable (drive) %s%d", basis_to_name(basis[block], dim), basis_to_number(basis[block], dim), basis_to_name(drive, dim), basis_to_number(drive, dim));
+    if(basis[block] == dim + 1)
+      {
+	Ifound = 1;
+	numerics_printf_verbose(1, "basis[block] == dim + 1 -- sucess");
+	numerics_printf_verbose(1, "leaving variable %s%d entering variable %s%d",
+				basis_to_name(basis[block], dim),
+				basis_to_number(basis[block], dim),
+				basis_to_name(drive, dim), basis_to_number(drive, dim));
+      }
     /* Pivot < block , drive > */
 
     pivot = A[block][drive];
@@ -440,7 +456,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
     nobasis = basis[block];
     basis[block] = drive;
 
-    DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ")
+    DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ");
                   for(unsigned int i = 0; i < (unsigned int)dim; ++i)
   {
     DEBUG_PRINTF("%i ", basis[i]);
@@ -454,7 +470,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
       {
         DEBUG_PRINTF("%1.2e ", A[i][j]);
       }
-      DEBUG_PRINT("\n")
+    DEBUG_PRINT("\n");
     });
     DEBUG_PRINT("lexico_mat\n");
     DEBUG_EXPR_WE(for(unsigned int i = 0; i < (unsigned int)dim; ++i)
@@ -481,10 +497,10 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
 
   } /* end while*/
 
-  DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ")
+DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ");
                 for(unsigned int i = 0; i < (unsigned int)dim; ++i)
 {
-  DEBUG_PRINTF("%i ", basis[i])
+  DEBUG_PRINTF("%i ", basis[i]);
   }
   DEBUG_PRINT("\n"));
 
@@ -513,6 +529,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem, double
     }
   }
 
+  numerics_printf_verbose(1, "lcp_lexicolemke ended after %i pivots", ITER);
   options->iparam[SICONOS_IPARAM_ITER_DONE] = ITER;
 
   if(Ifound) *info = 0;

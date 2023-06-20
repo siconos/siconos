@@ -23,6 +23,7 @@
 #include <stdio.h>                              // for printf
 #include <stdlib.h>                             // for free, malloc, exit
 #include <string.h>                             // for free, malloc, exit
+#include <assert.h>
 #include "MLCP_Solvers.h"                       // for mlcp_compute_error
 #include "LCP_Solvers.h"                        // for mlcp_compute_error
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...

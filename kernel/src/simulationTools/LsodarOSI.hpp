@@ -21,12 +21,12 @@
 #ifndef LsodarOSI_H
 #define LsodarOSI_H
 
-#include "OneStepIntegrator.hpp"
-
 #include <vector>
 
-#define ATOL_DEFAULT 100 * MACHINE_PREC;
-#define RTOL_DEFAULT 10 * MACHINE_PREC;
+#include "OneStepIntegrator.hpp"
+#include "SiconosConst.hpp"  // MACHINE_PREC
+
+namespace siconos::integrators {
 
 /**
    LsodarOSI solver (odepack)
@@ -51,39 +51,42 @@
    Input only.
 */
 class LsodarOSI : public OneStepIntegrator {
-private:
+ private:
   ACCEPT_SERIALIZATION(LsodarOSI);
+
+  static constexpr double ATOL_DEFAULT = 100 * siconos::internal::MACHINE_PREC;
+  static constexpr double RTOL_DEFAULT = 10 * siconos::internal::MACHINE_PREC;
 
   /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
    *  See opkdmain.f and lsodar routine for details on those variables.
    */
-  std::vector<integer> _intData;
+  std::vector<int> _intData = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   /** _sizeTol size of the vector ot tolerances */
-  unsigned int _sizeTol;
+  unsigned int _sizeTol{1};
 
   /** Type of tolerances */
-  unsigned int _itol;
+  unsigned int _itol{1};
 
   /** relative tolerance */
-  SA::doublereal rtol;
+  boost::shared_array<double> rtol;
   /** absolute tolerance */
-  SA::doublereal atol;
+  boost::shared_array<double> atol;
   /** real work array */
-  SA::doublereal rwork;
+  boost::shared_array<double> rwork;
   /** integer work array */
-  SA::integer iwork;
+  boost::shared_array<int> iwork;
   /** integer array used for output of root information */
-  SA::integer jroot;
+  boost::shared_array<int> jroot;
   /** temporary vector to save x values */
-  SP::BlockVector _xWork;
+  std::shared_ptr<siconos::algebra::BlockVector> _xWork{nullptr};
 
-  SP::SiconosVector _xtmp;
+  std::shared_ptr<siconos::algebra::SiconosVector> _xtmp{nullptr};
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
   friend struct _NSLEffectOnFreeOutput;
 
-public:
+ public:
   enum LsodarOSI_ds_workVector_id { FREE, WORK_LENGTH };
 
   enum LsodarOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
@@ -95,25 +98,25 @@ public:
   /** Number of RHS evaluations for the problem so far. */
   static int count_NFE;
 
-  /** Default constructor */
+  /** Default and only constructor */
   LsodarOSI();
 
   /** destructor
    */
-  ~LsodarOSI(){};
+  ~LsodarOSI() noexcept = default;
 
-  /** get vector of integer parameters for lsodar
+  /** get vector of int parameters for lsodar
    *
-   *  \return a vector<integer>
+   *  \return a vector<int>
    */
-  inline const std::vector<integer> intData() const { return _intData; }
+  inline const std::vector<int> intData() const { return _intData; }
 
   /** get _intData[i]
    *
    *  \param i index number (starting from 0)
-   *  \return an integer
+   *  \return an int
    */
-  inline integer intData(unsigned int i) const { return _intData[i]; }
+  inline int intData(unsigned int i) const { return _intData[i]; }
 
   /** set _intData[i]
    *
@@ -124,15 +127,15 @@ public:
 
   /** get relative tolerance parameter for lsodar
    *
-   *  \return a doublereal*
+   *  \return a double*
    */
-  inline const SA::doublereal getRtol() const { return rtol; }
+  inline const boost::shared_array<double> getRtol() const { return rtol; }
 
   /** get absolute tolerance parameter for lsodar
    *
-   *  \return a doublereal*
+   *  \return a double*
    */
-  inline const SA::doublereal getAtol() const { return atol; }
+  inline const boost::shared_array<double> getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
    *
@@ -142,21 +145,21 @@ public:
 
   /** get real work vector parameter for lsodar
    *
-   *  \return a doublereal*
+   *  \return a double*
    */
-  inline const SA::doublereal getRwork() const { return rwork; }
+  inline const boost::shared_array<double> getRwork() const { return rwork; }
 
   /** get iwork
    *
-   *  \return a pointer to integer
+   *  \return a pointer to int
    */
-  inline SA::integer getIwork() const { return iwork; }
+  inline boost::shared_array<int> getIwork() const { return iwork; }
 
   /** get output of root information
    *
-   *  \return a pointer to integer
+   *  \return a pointer to int
    */
-  inline SA::integer getJroot() const { return jroot; }
+  inline boost::shared_array<int> getJroot() const { return jroot; }
 
   /** set Jt value, Jacobian type indicator. Excerpts from the lsodar
    *  documentation. 1 means a user-supplied full (neq by neq) jacobian. 2 means
@@ -167,10 +170,10 @@ public:
    *  if jt = 1 or 4, the user must supply a subroutine jac
    *  (the name is arbitrary) as described above under jac.
    *  if jt = 2 or 5, a dummy argument can be used.
-   *  
+   *
    *  \param newJT new value for the jt parameter.
    */
-  inline void setJT(integer newJT) { _intData[8] = newJT; };
+  inline void setJT(int newJT) { _intData[8] = newJT; };
 
   /** set itol, rtol and atol (tolerance parameters for lsodar)
    *
@@ -178,7 +181,8 @@ public:
    *  \param newRtol rtol value
    *  \param newAtol atol value
    */
-  void setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol);
+  void setTol(int newItol, boost::shared_array<double> newRtol,
+              boost::shared_array<double> newAtol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
    *
@@ -186,38 +190,38 @@ public:
    *  \param newRtol rtol value
    *  \param newAtol atol value
    */
-  void setTol(integer newItol, doublereal newRtol, doublereal newAtol);
+  void setTol(int newItol, double newRtol, double newAtol);
 
   /** set the maximum number of steps for one call of Lsodar
    *
    *  \param maxNumberSteps the maximum number of steps
    */
-  void setMaxNstep(integer maxNumberSteps);
+  void setMaxNstep(int maxNumberSteps);
 
   /** set the minimum and maximum step sizes
    *
    *  \param minStep minimum step size
    *  \param maxStep maximum step size
    */
-  void setMinMaxStepSizes(doublereal minStep, doublereal maxStep);
+  void setMinMaxStepSizes(double minStep, double maxStep);
 
   /** set maximum method order
    *
    *  \param maxorderNonStiff maximum order for nonstiff methods
    *  \param maxorderStiff maximum order for stiff methods
    */
-  void setMaxOrder(integer maxorderNonStiff, integer maxorderStiff);
+  void setMaxOrder(int maxorderNonStiff, int maxorderStiff);
 
   /** update doubleData and iwork memory size, when changes occur in _intData.
    */
   void updateData();
 
-  /** fill xWork with a doublereal
+  /** fill xWork with a double
    *
    *  \param size size of x array
    *  \param array x array of double
    */
-  void fillXWork(integer *size, doublereal *array);
+  void fillXWork(int *size, double *array);
 
   /** compute rhs(t) for all dynamical systems in the set
    *
@@ -230,14 +234,13 @@ public:
    *  \param t current time of simulation
    *  \param DSG0 the graph of DynamicalSystem
    */
-  void computeJacobianRhs(double t, DynamicalSystemsGraph &DSG0);
+  void computeJacobianRhs(double t, siconos::graphs::DynamicalSystemsGraph &DSG0);
 
-  void f(integer *sizeOfX, doublereal *time, doublereal *x, doublereal *xdot);
+  void f(int *sizeOfX, double *time, double *x, double *xdot);
 
-  void g(integer *nEq, doublereal *time, doublereal *x, integer *ng, doublereal *gOut);
+  void g(int *nEq, double *time, double *x, int *ng, double *gOut);
 
-  void jacobianfx(integer *, doublereal *, doublereal *, integer *, integer *, doublereal *,
-                  integer *);
+  void jacobianfx(int *, double *, double *, int *, int *, double *, int *);
 
   /** initialization of the integrator
    */
@@ -249,7 +252,8 @@ public:
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -258,9 +262,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -290,22 +294,24 @@ public:
   /** integrates the Interaction linked to this integrator, without taking
    *  non-smooth effects into account
    *
-   *  \param vertex_descr descriptor vertex of the interaction graph 
+   *  \param vertex_descr descriptor vertex of the interaction graph
    *  \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_descr,
-                         OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_descr,
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[LsodarOSI::OSNSP_RHS];
   };
 
   /** print the data to the screen
    */
-  void display() override;
+  void display() const override;
 
   /** Return current number of rhs call (for all lsodar-like OSIs!)
    *
@@ -318,8 +324,7 @@ public:
    *  \return int
    */
   static int count_steps() { return count_NST; }
-
-  ACCEPT_STD_VISITORS();
 };
+}  // namespace siconos::integrators
 
-#endif // LsodarOSI_H
+#endif  // LsodarOSI_H

@@ -14,55 +14,76 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /** \file Rotationquaternion.hpp
  */
 
 #ifndef ROTATIONQUATERNION_H
 #define ROTATIONQUATERNION_H
-#include "SiconosVector.hpp" // 
+
+#include <boost/math_fwd.hpp>  // for quaternion
+#include <memory>
+
+namespace siconos::algebra {
+
+class SiconosVector;
+class SimpleMatrix;
+}  // namespace siconos::algebra
+
+namespace siconos::geometry {
 
 /* For a given quaternion q, compute the angle/axis representation
  */
-double axisAngleFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector axis);
+double axisAngleFromQuaternion(double q0, double q1, double q2, double q3,
+                               std::shared_ptr<siconos::algebra::SiconosVector> axis);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the angle/axis representation
  */
-double axisAngleFromConfiguration(SP::SiconosVector q, SP::SiconosVector axis);
+double axisAngleFromConfiguration(std::shared_ptr<siconos::algebra::SiconosVector> q,
+                                  std::shared_ptr<siconos::algebra::SiconosVector> axis);
 
 /* For a given quaternion, compute the rotation vector representation
  */
-void rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, SP::SiconosVector rotationVector);
+void rotationVectorFromQuaternion(
+    double q0, double q1, double q2, double q3,
+    std::shared_ptr<siconos::algebra::SiconosVector> rotationVector);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the rotation vector representation
  */
-void rotationVectorFromConfiguration(SP::SiconosVector q, SP::SiconosVector rotationVector);
+void rotationVectorFromConfiguration(
+    std::shared_ptr<siconos::algebra::SiconosVector> q,
+    std::shared_ptr<siconos::algebra::SiconosVector> rotationVector);
 
 /* For a given angle and rotation vector, compute the unit quaternion
  */
-void quaternionFromAxisAngle(SP::SiconosVector axis, double angle, SP::SiconosVector q);
+void quaternionFromAxisAngle(std::shared_ptr<siconos::algebra::SiconosVector> axis,
+                             double angle, std::shared_ptr<siconos::algebra::SiconosVector> q);
 
 /* For a given  rotation vector, compute the quaternion
  */
-void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q);
+void quaternionFromRotationVector(
+    std::shared_ptr<siconos::algebra::SiconosVector> rotationVector,
+    std::shared_ptr<siconos::algebra::SiconosVector> q);
 
-void quaternionFromTwistVector(SiconosVector& twist, SiconosVector& q);
+double sin_x(double x);
+
+void quaternionFromTwistVector(siconos::algebra::SiconosVector& twist,
+                               siconos::algebra::SiconosVector& q);
 
 /* For a given quaternion q, compute the norm
  */
-double quaternionNorm(const SiconosVector &q);
-
-
-/* For a given quaternion q, compute the unit quaternion by normalization
- */
-void normalizeq(SP::SiconosVector q);
+double quaternionNorm(const siconos::algebra::SiconosVector& q);
 
 /* For a given quaternion q, compute the unit quaternion by normalization
  */
-void normalizeq(SiconosVector &q);
+void normalizeq(std::shared_ptr<siconos::algebra::SiconosVector> q);
+
+/* For a given quaternion q, compute the unit quaternion by normalization
+ */
+void normalizeq(siconos::algebra::SiconosVector& q);
 
 /* For a given quaternion q, compute the associated rotation matrix
  * w.r.t the quaternion that parametrize the rotation in q,
@@ -70,7 +91,8 @@ void normalizeq(SiconosVector &q);
  * \param[in,out] v the vector to be rotated
  */
 
-void computeRotationMatrix(double q0, double q1, double q2, double q3, SP::SimpleMatrix rotationMatrix);
+void computeRotationMatrix(double q0, double q1, double q2, double q3,
+                           std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the associated rotation matrix
@@ -79,7 +101,8 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3, SP::Simpl
  * \param[in,out] v the vector to be rotated
  */
 
-void computeRotationMatrix(SP::SiconosVector q,  SP::SimpleMatrix rotationMatrix);
+void computeRotationMatrix(std::shared_ptr<siconos::algebra::SiconosVector> q,
+                           std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the transposed associated rotation matrix
@@ -87,7 +110,9 @@ void computeRotationMatrix(SP::SiconosVector q,  SP::SimpleMatrix rotationMatrix
  * \param[in] q the position vector
  * \param[in,out] v the vector to be rotated
  */
-void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotationMatrix);
+void computeRotationMatrixTransposed(
+    std::shared_ptr<siconos::algebra::SiconosVector> q,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  *  performs the rotation of the vector v
@@ -95,16 +120,20 @@ void computeRotationMatrixTransposed(SP::SiconosVector q, SP::SimpleMatrix rotat
  * \param[in] q the position vector
  * \param[in,out] v the vector to be rotated
  */
-void quaternionRotate(SP::SiconosVector q, SP::SiconosVector v);
+void quaternionRotate(std::shared_ptr<siconos::algebra::SiconosVector> q,
+                      std::shared_ptr<siconos::algebra::SiconosVector> v);
 
 /* For a given quaternion q, compute the associated rotation matrix
  * w.r.t the quaternion that parametrize the rotation in q,
  * \param[in] q the position vector
  * \param[in,out] v the vector to be rotated
  */
-void quaternionRotate(double q0, double q1, double q2, double q3, SiconosVector& v);
-void quaternionRotate(double q0, double q1, double q2, double q3, SP::SiconosVector v);
-void quaternionRotate(double q0, double q1, double q2, double q3, SP::SimpleMatrix m);
+void quaternionRotate(double q0, double q1, double q2, double q3,
+                      siconos::algebra::SiconosVector& v);
+void quaternionRotate(double q0, double q1, double q2, double q3,
+                      std::shared_ptr<siconos::algebra::SiconosVector> v);
+void quaternionRotate(double q0, double q1, double q2, double q3,
+                      std::shared_ptr<siconos::algebra::SimpleMatrix> m);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * performs the rotation of the matrix m
@@ -112,9 +141,8 @@ void quaternionRotate(double q0, double q1, double q2, double q3, SP::SimpleMatr
  * \param[in] q the position vector
  * \param[in,out] m the vector to be rotated
  */
-void quaternionRotate(SP::SiconosVector q, SP::SimpleMatrix m);
-
-
+void quaternionRotate(std::shared_ptr<siconos::algebra::SiconosVector> q,
+                      std::shared_ptr<siconos::algebra::SimpleMatrix> m);
 
 /* For a given  configuration vector q composed of a position and a quaternion,
  * express the vector v given in
@@ -125,16 +153,50 @@ void quaternionRotate(SP::SiconosVector q, SP::SimpleMatrix m);
  * \param[in] q the position vector
  * \param[in,out] v the vector to be reexpressed
  */
-void changeFrameAbsToBody(const SiconosVector& q, SiconosVector& v);
-void changeFrameAbsToBody(SP::SiconosVector q, SP::SiconosVector v);
-void changeFrameAbsToBody(SP::SiconosVector q, SP::SimpleMatrix m);
+void changeFrameAbsToBody(const siconos::algebra::SiconosVector& q,
+                          siconos::algebra::SiconosVector& v);
+void changeFrameAbsToBody(std::shared_ptr<siconos::algebra::SiconosVector> q,
+                          std::shared_ptr<siconos::algebra::SiconosVector> v);
+void changeFrameAbsToBody(std::shared_ptr<siconos::algebra::SiconosVector> q,
+                          std::shared_ptr<siconos::algebra::SimpleMatrix> m);
 
-void changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v);
-void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
-void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
+void changeFrameBodyToAbs(const siconos::algebra::SiconosVector& q,
+                          siconos::algebra::SiconosVector& v);
+void changeFrameBodyToAbs(std::shared_ptr<siconos::algebra::SiconosVector> q,
+                          std::shared_ptr<siconos::algebra::SiconosVector> v);
+void changeFrameBodyToAbs(std::shared_ptr<siconos::algebra::SiconosVector> q,
+                          std::shared_ptr<siconos::algebra::SimpleMatrix> m);
 
-void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b, SiconosVector& ab);
+void compositionLawLieGroup(const siconos::algebra::SiconosVector& a,
+                            siconos::algebra::SiconosVector& b,
+                            siconos::algebra::SiconosVector& ab);
 
-void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b);
+void compositionLawLieGroup(const siconos::algebra::SiconosVector& a,
+                            siconos::algebra::SiconosVector& b);
 
-#endif // ROTATIONQUATERNION_H
+void copyQuatRot(const siconos::algebra::SiconosVector& from,
+                 boost::math::quaternion<double>& to);
+
+void copyQuatPos(const boost::math::quaternion<double>& from,
+                 siconos::algebra::SiconosVector& to);
+
+void copyQuatPos(const siconos::algebra::SiconosVector& from,
+                 boost::math::quaternion<double>& to);
+
+void copyQuatRot2d(const siconos::algebra::SiconosVector& from,
+                   boost::math::quaternion<double>& to);
+
+void copyQuatPos2d(const boost::math::quaternion<double>& from,
+                   siconos::algebra::SiconosVector& to);
+
+void copyQuatPos2d(const siconos::algebra::SiconosVector& from,
+                   boost::math::quaternion<double>& to);
+
+boost::math::quaternion<double> rotquat(
+    const std::shared_ptr<siconos::algebra::SiconosVector>& v);
+
+boost::math::quaternion<double> posquat(
+    const std::shared_ptr<siconos::algebra::SiconosVector>& v);
+
+}  // namespace siconos::geometry
+#endif  // ROTATIONQUATERNION_H

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /** \file CircularDS.hpp
  */
@@ -23,49 +23,32 @@
    Definition of a 2D circular shape - Inherits from LagrangianDS
 */
 
-
 #ifndef CircularDS_h
 #define CircularDS_h
 
-#include "MechanicsFwd.hpp"
 #include "LagrangianDS.hpp"
 
-class CircularDS : public LagrangianDS
-{
-protected:
+namespace siconos::collision::native::bodies {
+class CircularDS : public siconos::modeling::LagrangianDS {
+ protected:
   ACCEPT_SERIALIZATION(CircularDS);
 
-  double radius;
-  double massValue;
+  double radius{0.};
+  double massValue{0.};
 
-  CircularDS(): LagrangianDS() {};
+ public:
+  CircularDS(double, double, std::shared_ptr<siconos::algebra::SiconosVector>,
+             std::shared_ptr<siconos::algebra::SiconosVector>);
 
-public:
+  virtual ~CircularDS() noexcept = default;
 
-  CircularDS(double, double, SP::SiconosVector, SP::SiconosVector);
+  double getQ(unsigned int pos);
 
-  virtual ~CircularDS() {};
+  double getVelocity(unsigned int pos);
 
-  inline double getQ(unsigned int pos)
-  {
-    assert(pos < _ndof);
-    return (*_q[0])(pos);
-  };
-  inline double getVelocity(unsigned int pos)
-  {
-    assert(pos < _ndof);
-    return (*_q[1])(pos);
-  };
+  inline double getMassValue() const { return massValue; };
 
-  inline double getMassValue() const
-  {
-    return massValue;
-  };
-
-  inline double getRadius() const
-  {
-    return radius;
-  };
-
+  inline double getRadius() const { return radius; };
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* CircularDS_h */

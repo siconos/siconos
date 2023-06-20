@@ -14,17 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef MultiBodyTest_h
 #define MultiBodyTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class MultiBodyTest : public CppUnit::TestFixture
-{
-
-private:
-
+class MultiBodyTest : public CppUnit::TestFixture {
+ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(MultiBodyTest);
 
@@ -56,10 +53,9 @@ private:
   void t7();
   void t8();
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

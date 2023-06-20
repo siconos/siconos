@@ -14,35 +14,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
+#include "ControlZOHSimulation.hpp"
 
 #include <chrono>
-#include "TimeStepping.hpp"
-#include "ZeroOrderHoldOSI.hpp"
-#include "EventsManager.hpp"
-#include "Event.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
-#include "SimulationGraphs.hpp"
 
 #include "ControlManager.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
-#include "ControlZOHSimulation.hpp"
-#include "ControlSimulation_impl.hpp"
-
-//#define DEBUG_BEGIN_END_ONLY
-//#define DEBUG_NOCOLOR
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+#include "Event.hpp"
+#include "EventsManager.hpp"
+#include "SimpleMatrix.hpp"
+#include "TimeStepping.hpp"
+#include "Topology.hpp"  //#define DEBUG_BEGIN_END_ONLY
+#include "ZeroOrderHoldOSI.hpp"
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-
-ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
-  ControlSimulation(t0, T, h)
-{
-  _processIntegrator.reset(new ZeroOrderHoldOSI());
-  std::static_pointer_cast<ZeroOrderHoldOSI>(_processIntegrator)->setExtraAdditionalTerms(
-    std::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
-  _processSimulation.reset(new TimeStepping(_nsds,_processTD, 0));
+siconos::control::ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h)
+    : ControlSimulation(t0, T, h) {
+  _processIntegrator = std::make_shared<siconos::integrators::ZeroOrderHoldOSI>();
+  std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_processIntegrator)
+      ->setExtraAdditionalTerms(std::make_shared<ControlZOHAdditionalTerms>());
+  _processSimulation =
+      std::make_shared<siconos::simulation::TimeStepping>(_nsds, _processTD, 0);
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
 
@@ -50,45 +47,46 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
   _IG0 = _nsds->topology()->indexSet0();
 
   // Control part
-  _CM.reset(new ControlManager(_processSimulation));
+  _CM = std::make_shared<ControlManager>(_processSimulation);
 }
 
-void ControlZOHSimulation::run()
-{
-  DEBUG_BEGIN("void ControlZOHSimulation::run()\n");
-  EventsManager& eventsManager = *_processSimulation->eventsManager();
+void siconos::control::ControlZOHSimulation::run() {
+  DEBUG_BEGIN("void siconos::control::ControlZOHSimulation::run()\n");
+  auto& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
-  std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+  auto start = std::chrono::system_clock::now();
 
-  TimeStepping& sim = static_cast<TimeStepping&>(*_processSimulation);
+  
+  auto& sim = static_cast<siconos::simulation::TimeStepping&>(*_processSimulation);
+  try {
+    while (sim.hasNextEvent()) {
+      auto& nextEvent = *eventsManager.nextEvent();
+      if (nextEvent.getType() == siconos::simulation::EventType::TD) {
+        sim.computeOneStep();
+      }
 
-  while(sim.hasNextEvent())
-  {
-    Event& nextEvent = *eventsManager.nextEvent();
-    if(nextEvent.getType() == TD_EVENT)
-    {
-      sim.computeOneStep();
+      sim.nextStep();
+      if (sim.hasNextEvent() &&
+          eventsManager.nextEvent()->getType() ==
+              siconos::simulation::EventType::TD)  // We store only on TD_EVENT
+      {
+        (*_dataM)(k, 0) = sim.startingTime();
+        storeData(k);
+        ++k;
+      }
     }
-
-    sim.nextStep();
-
-    if(sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT)   // We store only on TD_EVENT
-    {
-      (*_dataM)(k, 0) = sim.startingTime();
-      storeData(k);
-      ++k;
-    }
+  } catch (...) {
+    siconos::exception::process();
   }
-
   /* saves last status */
   (*_dataM)(k, 0) = sim.startingTime();
   storeData(k);
   ++k;
 
-  std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+  auto end = std::chrono::system_clock::now();
   std::chrono::duration<double, std::milli> fp_s = end - start;
   _elapsedTime = fp_s.count();
 
   _dataM->resize(k, _nDim + 1);
-  DEBUG_END("void ControlZOHSimulation::run()\n");
+  DEBUG_END("void siconos::control::ControlZOHSimulation::run()\n");
 }

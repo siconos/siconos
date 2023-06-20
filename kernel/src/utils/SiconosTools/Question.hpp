@@ -14,14 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file Question.hpp
   \brief ask something to a class with a visitor */
 
 /** example :
  *
- * struct ForMass : public Question<SP::SiconosMatrix>
+ * struct ForMass : public Question<std::shared_ptr<SiconosMatrix>>
  * {
  *    void visit(const LagrangianDS& ds)
  *    {
@@ -29,37 +29,32 @@
  *    }
  *
  * }
- * SP::DynamicalSystem ds
+ * std::shared_ptr<DynamicalSystem> ds;
  * [...]
  *
- * SP::SiconosMatrix mass = ask<ForMass>(*ds);
+ * auto mass = ask<ForMass>(*ds);
  */
-
-/* use boost array for the initialization of non const reference */
-//#include <boost/type_traits.hpp>
 
 #ifndef Question_hpp
 #define Question_hpp
 
 #include "SiconosVisitor.hpp"
 
-#include <SiconosConfig.h>
-#include <type_traits>
+// #include <SiconosConfig.h>
 #include <array>
+#include <type_traits>
+
+namespace siconos::tools {
 
 /** a generic return value visitor */
 template <class AnswerType>
-struct Question : public SiconosVisitor
-{
+struct Question : public SiconosVisitor {
   typedef AnswerType type;
   type answer;
 
-  Question() : answer(std::array<typename std::remove_reference<AnswerType>::type, 1>()[0])
-  {};
-  Question(AnswerType ref) : answer(ref) {};
-
+  Question() : answer(std::array<typename std::remove_reference<AnswerType>::type, 1>()[0]){};
+  Question(AnswerType ref) : answer(ref){};
 };
-
 
 /** get some value from a visitable object with the help of a
     GeneralQuestion
@@ -73,7 +68,6 @@ typename GeneralQuestion::type ask(const Visitable& v)
   v.accept(t);
 
   return t.answer;
-
 }
 
 /** get some value from a visitable object with the help of a
@@ -89,7 +83,6 @@ typename GeneralQuestion::type ask(const Visitable& v, const Argument& arg)
   v.accept(t);
 
   return t.answer;
-
 }
 
 /** apply a SiconosVisitor to a visitable object
@@ -101,7 +94,6 @@ void apply(const Visitable& v)
   static Visitor t;
 
   v.accept(t);
-
 }
 
 /** apply a parameterized SiconosVisitor to a visitable object
@@ -114,7 +106,6 @@ void apply(const Visitable& v, const Argument& arg)
   VisitorWithArgument t(arg);
 
   v.accept(t);
-
 }
 
 /** apply a parameterized SiconosVisitor to a visitable object
@@ -128,7 +119,6 @@ void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
   VisitorWith2Arguments t(arg1, arg2);
 
   v.accept(t);
-
 }
-
+}  // namespace siconos::tools
 #endif

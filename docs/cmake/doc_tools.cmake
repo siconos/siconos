@@ -84,7 +84,7 @@ function(doxy2rst_sphinx COMPONENT)
     # Create a new target used to create sphinx inputs (rst) from doxygen outputs (xml).
     # It calls a python function defined in gendoctools (create_breathe_files)
     add_custom_target(${COMPONENT}-xml2rst
-      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
       "from gendoctools.cpp2rst import create_breathe_files as f; f('${component_HEADERS}', '${CMAKE_SOURCE_DIR}', '${COMPONENT}', '${SPHINX_DIR}','${DOXYGEN_OUTPUT}/${DOXYGEN_XML_OUTPUT}')"
       VERBATIM
       DEPENDS ${COMPONENT}-doxy2xml
@@ -148,7 +148,7 @@ macro(finalize_doc)
     # depends : doxygen-html
     # Call a python function defined in gendoctools (find_doxygen_diagrams)
     add_custom_target(doxypng2sphinx
-      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
       "from gendoctools.generate_api import find_doxygen_diagrams as f; f('${CMAKE_BINARY_DIR}/docs/build/html/doxygen', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
       VERBATIM
       DEPENDS doxygen-html
@@ -195,7 +195,7 @@ function(docstrings2rst)
   # Calls a python function defined in gendoctools (module_docstrings2rst)
   # --> make <comp>_autodoc
   add_custom_target(${module_NAME}_autodoc
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${PYTHON_EXECUTABLE} -c
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${Python_EXECUTABLE} -c
     "from gendoctools.python2rst import docstrings2rst as f; f('${module_PATH}', '${module_NAME}', '${SPHINX_OUTPUT_DIR}')"
     VERBATIM
     DEPENDS ${SWIG_MODULE_${module_NAME}_REAL_NAME}

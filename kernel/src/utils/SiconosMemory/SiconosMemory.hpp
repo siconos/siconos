@@ -14,63 +14,57 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosMemory.hpp
   \brief class SiconosMemory
 
 */
 
-
 #ifndef SICONOSMEMORY_H
 #define SICONOSMEMORY_H
 
-#include "SiconosPointers.hpp"
-#include <deque>
-#include "SiconosAlgebraTypeDef.hpp"
-#include "SiconosSerialization.hpp" // For ACCEPT_SERIALIZATION
+#include <memory>
+#include <vector>
 
-/** Container used to save vectors in SiconosMemory */
-typedef std::vector<SiconosVector> MemoryContainer;
+#include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 
-/** a set of memory vectors */
-typedef std::vector<SiconosMemory> VectorOfMemories;
+namespace siconos::algebra {
 
-TYPEDEF_SPTR(MemoryContainer)
+class SiconosVector;
 
 /**
    Interface to stl container of SiconosVector.
-   
-   This class is used as a backup during simulation, to save vectors (e.g. state) computed during previous time steps.
-   
+
+   This class is used as a backup during simulation, to save vectors (e.g. state) computed
+   during previous time steps.
+
    - The size of the container is fixed, with a first-in first-out mechanism
    used through swap method.
    - All saved vectors must have the same dimension.
-   
-   This class must be reviewed and backup should probably be moved to graph rather than in this object.
-   
+
+   This class must be reviewed and backup should probably be moved to graph rather than in this
+   object.
+
 */
-class SiconosMemory : public MemoryContainer
-{
-private:
+class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
+ private:
   ACCEPT_SERIALIZATION(SiconosMemory);
 
-  /** the real number of SiconosVectors saved in the Memory (ie the ones for which memory has been allocated) */
-  MemoryContainer::size_type _nbVectorsInMemory = 0;
+  /** the real number of siconos::algebra::SiconosVectors saved in the Memory (ie the ones for
+   * which memory has been allocated) */
+  std::vector<siconos::algebra::SiconosVector>::size_type _nbVectorsInMemory = 0;
 
   /** index to avoid removal and creation of vectors.
    this[_indx] is to the oldest element in the set */
-  MemoryContainer::size_type _indx = 0;
+  std::vector<siconos::algebra::SiconosVector>::size_type _indx = 0;
 
+  //  Forbid  assignment
+  // void operator=(const SiconosMemory&) = delete;
+  SiconosMemory(const std::vector<siconos::algebra::SiconosVector>&) = delete;
+  SiconosMemory& operator=(const std::vector<siconos::algebra::SiconosVector>& V) = delete;
 
-  /* Forbid  assignment */
-  //SiconosMemory(const SiconosMemory& Mem) = delete;
-  //void operator=(const SiconosMemory&) = delete;
-  SiconosMemory(const MemoryContainer&) = delete;
-  void operator=(const MemoryContainer& V);
-
-public:
-
+ public:
   /** creates an empty SiconosMemory. */
   SiconosMemory() = default;
 
@@ -88,65 +82,60 @@ public:
    */
   SiconosMemory(const SiconosMemory& mem);
 
-
   /** destructor */
-  ~SiconosMemory(){};
+  ~SiconosMemory() noexcept = default;
 
   /** Assignment
    */
-  void operator=(const SiconosMemory&);
+  SiconosMemory& operator=(const SiconosMemory&);
 
-  /** To get SiconosVector number i of the memory
+  /** Return the vector number i from the memory
    *
-   *  \param int i: the position in the memory of the wanted SiconosVector
-   *  \return a SP::SiconosVector
+   *  \param int i: the position in the memory of the wanted siconos::algebra::SiconosVector
    */
-  const SiconosVector& getSiconosVector(const unsigned int) const;
+  const siconos::algebra::SiconosVector& getSiconosVector(const unsigned int) const;
 
-  /** To get SiconosVector number i of the memory as mutable reference.
+  /** return vector number if from the memory, as a mutable reference.
    *  Use should be avoided whenever possible.
    *  (Used in LinearSMC::actuate)
    *
-   *  \param int i: the position in the memory of the wanted SiconosVector
-   *  \return a SP::SiconosVector
+   *  \param int i: the position in the memory of the wanted siconos::algebra::SiconosVector
    */
-  SiconosVector& getSiconosVectorMutable(const unsigned int);
+  siconos::algebra::SiconosVector& getSiconosVectorMutable(const unsigned int);
 
   /** set size of the SiconosMemory (number of vectors and size of vector)
    *
    *  \param steps the max size for this SiconosMemory, size of the container
    *  \param vectorSize size of each vector of the container
    */
-  void setMemorySize(const unsigned int steps,
-                     const unsigned int vectorSize);
+  void setMemorySize(const unsigned int steps, const unsigned int vectorSize);
 
-  /** gives the numbers of SiconosVectors currently stored in the memory
+  /** gives the numbers of siconos::algebra::SiconosVectors currently stored in the memory
    *
    *  \return int >= 0
    */
-  inline MemoryContainer::size_type nbVectorsInMemory() const
+  inline std::vector<siconos::algebra::SiconosVector>::size_type nbVectorsInMemory() const
   {
     return _nbVectorsInMemory;
   };
 
-  /** puts a SiconosVector into the memory
+  /** puts a siconos::algebra::SiconosVector into the memory
    *
-   *  \param v the SiconosVector we want to put in memory
+   *  \param v the siconos::algebra::SiconosVector we want to put in memory
    */
-  void swap(const SiconosVector& v);
+  void swap(const siconos::algebra::SiconosVector& v);
 
-  /** puts a SiconosVector into the memory
+  /** puts a siconos::algebra::SiconosVector into the memory
    *
-   *  \param v the SiconosVector we want to put in memory, or do nothing if v is null
+   *  \param v the siconos::algebra::SiconosVector we want to put in memory, or do nothing if v
+   * is null
    */
-  void swap(SP::SiconosVector v);
+  void swap(std::shared_ptr<siconos::algebra::SiconosVector> v);
 
   /** displays the data of the memory object
    */
   void display() const;
-
 };
-
+}  // namespace siconos::algebra
 
 #endif
-

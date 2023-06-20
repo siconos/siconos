@@ -20,7 +20,6 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "SimpleMatrix.hpp"
-#include "EigenProblems.hpp"
 
 class EigenProblemsTest : public CppUnit::TestFixture
 {
@@ -47,7 +46,7 @@ private:
   void End();
 
   unsigned int size;
-  SP::SiconosMatrix A, Aref;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> A, Aref, Asym;
 
 public:
   void setUp();

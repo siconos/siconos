@@ -1,9 +1,10 @@
+wheel
 numpy
 scipy
 lxml
 pytest
 matplotlib
 h5py
-pyhull
-wheel
+pybind11
 vtk
+packaging

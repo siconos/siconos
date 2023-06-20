@@ -1,4 +1,4 @@
-#!/usr/bin/env @PYTHON_EXECUTABLE@
+#!/usr/bin/env @Python_EXECUTABLE@
 """
 Description: Show information about a Siconos mechanics-IO HDF5 file.
 """

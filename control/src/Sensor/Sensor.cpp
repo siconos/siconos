@@ -14,35 +14,31 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "Sensor.hpp"
-#include "SensorEvent.hpp"
-#include "DynamicalSystem.hpp"
-#include "TimeDiscretisation.hpp"
-#include "EventFactory.hpp"
-#include "Simulation.hpp"
+
 #include <iostream>
 
+#include "DynamicalSystem.hpp"
+#include "Tools.hpp"  // enum_to_string
 
-Sensor::Sensor(): _type(0), _id("none")
-{}
-
-Sensor::Sensor(unsigned int type, SP::DynamicalSystem ds): _type(type), _id("none"), _DS(ds)
+siconos::control::Sensor::Sensor(SensorType type,
+                                 std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
+    : _type(type), _id("none"), _DS(ds)
 {
   _DSx = _DS->x();
 }
 
-Sensor::~Sensor()
-{}
-
-void Sensor::display() const
+void siconos::control::Sensor::display() const
 {
-  std::cout << "=====> Sensor of type " << _type << ", named " << _id ;
-  if(_DS)
-    std::cout << " and linked to the DynamicalSystem number " << _DS->number() << "." <<std::endl;
+  std::cout << "=====> Sensor of type " << siconos::tools::enum_to_string(_type) << ", named "
+            << _id;
+  if (_DS)
+    std::cout << " and linked to the DynamicalSystem number " << _DS->number() << "."
+              << std::endl;
   else
-    std::cout << " and not linked to a DynamicalSystem." <<std::endl;
-  std::cout << "======" <<std::endl ;
-  std::cout <<std::endl;
+    std::cout << " and not linked to a DynamicalSystem." << std::endl;
+  std::cout << "======" << std::endl;
+  std::cout << std::endl;
 }

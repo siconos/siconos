@@ -14,32 +14,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /** \file NSLawMatrix.hpp
  *  \brief Base (abstract) class for a symmetric matrix of nonsmooth laws
-*/
+ */
 
 #ifndef NSLAWMATRIX_H
 #define NSLAWMATRIX_H
 
-#include <SiconosSerialization.hpp>
 #include <NonSmoothLaw.hpp>
+#include <SiconosSerialization.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
 
+namespace siconos::modeling {
 /** This class uses (extends) a symmetric matrix to store
  *  NonSmoothLaws associated to pairs of integers.  It can be used
  *  e.g. to maintain a list of non-smooth laws associated with contact
  *  between types of objects. */
-class NSLawMatrix : public boost::numeric::ublas::symmetric_matrix < SP::NonSmoothLaw >
-{
-protected:
-  
+class NSLawMatrix
+    : public boost::numeric::ublas::symmetric_matrix<std::shared_ptr<NonSmoothLaw>> {
+ protected:
   ACCEPT_SERIALIZATION(NSLawMatrix);
 
-public:
+ public:
   NSLawMatrix(NSLawMatrix::size_type i = 1)
-    : boost::numeric::ublas::symmetric_matrix < SP::NonSmoothLaw >(i) {}
+      : boost::numeric::ublas::symmetric_matrix<std::shared_ptr<NonSmoothLaw>>(i)
+  {
+  }
 };
-
+}  // namespace siconos::modeling
 #endif

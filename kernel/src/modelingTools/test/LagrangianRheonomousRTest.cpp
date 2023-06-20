@@ -14,30 +14,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LagrangianRheonomousRTest.hpp"
 
-
-#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
-            if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianRheonomousRTest);
 
+void LagrangianRheonomousRTest::setUp() {}
 
-void LagrangianRheonomousRTest::setUp()
-{}
-
-
-void LagrangianRheonomousRTest::tearDown()
-{}
+void LagrangianRheonomousRTest::tearDown() {}
 
 // data constructor:
 void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
 {
-  SP::LagrangianRheonomousR R1(new LagrangianRheonomousR("TestPlugin:hRheo", "TestPlugin:G0Rheo", "TestPlugin:hDot"));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3a : ", R1->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3b : ", R1->getSubType() == RELATION::RheonomousR, true);
-  std::cout << " data Constructor LagrangianRheonomousR ok" <<std::endl;
+  auto R1 = std::make_shared<siconos::modeling::LagrangianRheonomousR>(
+      "TestPlugin:hRheo", "TestPlugin:G0Rheo", "TestPlugin:hDot");
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3a : ",
+                               R1->getType() == siconos::modeling::RelationType::Lagrangian,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildLagrangianRheonomousR3b : ",
+      R1->getSubType() == siconos::modeling::RelationSubType::RheonomousR, true);
+  std::cout << " data Constructor LagrangianRheonomousR ok" << std::endl;
 }
-

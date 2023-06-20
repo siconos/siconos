@@ -24,10 +24,8 @@
 #define MOREAUPROJECTONCONSTRAINTSOSI_H
 
 #include "MoreauJeanOSI.hpp"
-#include "OneStepIntegrator.hpp"
-#include "SimpleMatrix.hpp"
 
-const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
+namespace siconos::integrators {
 
 /**
     One Step time Integrator for First Order Dynamical Systems  for
@@ -47,19 +45,21 @@ const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
 
 */
 class MoreauJeanDirectProjectionOSI : public MoreauJeanOSI {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(MoreauJeanDirectProjectionOSI);
 
-  /** Default constructor
-   */
-  MoreauJeanDirectProjectionOSI(){};
+  static constexpr unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
+  static constexpr double SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD = 1.e-7;
+  static constexpr double SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD = 0.0;
+  static constexpr double SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD = 1.e-7;
+  static constexpr double SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD = 0.0;
 
-  double _deactivateYPosThreshold;
-  double _deactivateYVelThreshold;
-  double _activateYPosThreshold;
-  double _activateYVelThreshold;
+  double _deactivateYPosThreshold{SICONOS_MPC_DEFAULT_DEACTIVATION_POS_THRESHOLD};
+  double _deactivateYVelThreshold{SICONOS_MPC_DEFAULT_DEACTIVATION_VEL_THRESHOLD};
+  double _activateYPosThreshold{SICONOS_MPC_DEFAULT_ACTIVATION_POS_THRESHOLD};
+  double _activateYVelThreshold{SICONOS_MPC_DEFAULT_ACTIVATION_VEL_THRESHOLD};
 
-public:
+ public:
   /** constructor from theta value only
    *
    *  \param theta value for all these DS.
@@ -75,11 +75,7 @@ public:
 
   /** destructor
    */
-  virtual ~MoreauJeanDirectProjectionOSI(){};
-
-  // --- OTHER FUNCTIONS ---
-
-  // setters and getters
+  virtual ~MoreauJeanDirectProjectionOSI() noexcept = default;
 
   inline double deactivateYPosThreshold() { return _deactivateYPosThreshold; };
 
@@ -109,7 +105,8 @@ public:
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -118,9 +115,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -135,7 +132,8 @@ public:
    *  \param i level
    *  \return bool
    */
-  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
+  bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                unsigned int i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
    *  in the IndexSet of level i
@@ -144,14 +142,13 @@ public:
    *  \param i level
    *  \return bool
    */
-  bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i) override;
+  bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                     unsigned int i) override;
 
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input (_r or _p)
    */
   void computeFreeState() override;
-
-  ACCEPT_STD_VISITORS();
 };
-
-#endif // MOREAUPROJECTONCONSTRAINTSOSI_H
+}  // namespace siconos::integrators
+#endif  // MOREAUPROJECTONCONSTRAINTSOSI_H

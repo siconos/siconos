@@ -23,70 +23,71 @@
 
 #include "TimeStepping.hpp"
 
+namespace siconos::simulation {
+
 /** Time-Stepping scheme
  *
  */
 class TimeSteppingCombinedProjection : public TimeStepping {
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(TimeSteppingCombinedProjection);
 
   /** level of IndexSet on which we project
    *  (default =2 (subset of activated constraint with positive reactions))
    */
-  unsigned int _indexSetLevelForProjection;
+  unsigned int _indexSetLevelForProjection{2};
 
   /** Cumulated Number of steps performed is the Newton Loop */
-  unsigned int _cumulatedNewtonNbIterations;
+  unsigned int _cumulatedNewtonNbIterations{0};
 
   /** Number of iteration of projection
    */
-  unsigned int _nbProjectionIteration;
+  unsigned int _nbProjectionIteration{0};
 
   /** Number of cumulated iteration of projection
    */
-  unsigned int _nbCumulatedProjectionIteration;
+  unsigned int _nbCumulatedProjectionIteration{0};
 
   /** Number of iteration for stabilizating indexsets
    */
-  unsigned int _nbIndexSetsIteration;
+  unsigned int _nbIndexSetsIteration{0};
 
   /** tolerance for the violation of the equality
    *  constraints at the  position level.
    */
-  double _constraintTol;
+  double _constraintTol{1.e-8};
 
   /** tolerance for the violation of the unilateral
    *  constraints at the  position level.
    */
-  double _constraintTolUnilateral;
+  double _constraintTolUnilateral{1.e-8};
 
   /** maximum violation for the violation of the unilateral
    *  constraints at the  position level.
    */
-  double _maxViolationUnilateral;
+  double _maxViolationUnilateral{0.};
 
   /** maximum violation for the violation of the equality
    *  constraints at the  position level.
    */
-  double _maxViolationEquality;
+  double _maxViolationEquality{0.};
 
   /** Default maximum number of projection iteration*/
-  unsigned int _projectionMaxIteration;
+  unsigned int _projectionMaxIteration{50};
 
   /** Default maximum number of index set activation iteration*/
-  unsigned int _kIndexSetMax;
+  unsigned int _kIndexSetMax{50};
 
   /** disabled or enabled projection (Debug Projection) */
-  bool _doCombinedProj;
+  bool _doCombinedProj{true};
 
   /** disabled or enabled projection On Equality (or Unilateral) for unilateral
    * constraints */
-  bool _doCombinedProjOnEquality;
+  bool _doCombinedProjOnEquality{true};
 
   /** Boolean to check if the index sets are stabilized in the Combined
    * Projection Algorithm */
-  bool _isIndexSetsStable;
+  bool _isIndexSetsStable{false};
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions
    *
@@ -94,10 +95,9 @@ protected:
    */
   void updateIndexSet(unsigned int level) override;
 
-  struct _SimulationEffectOnOSNSP;
-  friend struct _SimulationEffectOnOSNSP;
+  // struct _SimulationEffectOnOSNSP;
 
-public:
+ public:
   void initOSNS() override;
 
   /** Constructor with the time-discretisation.
@@ -110,20 +110,20 @@ public:
    *  formulation \param osnspb_pos a one step non smooth problem for the
    *  position formulation \param _level
    */
-  TimeSteppingCombinedProjection(SP::NonSmoothDynamicalSystem nsds,
-                                 SP::TimeDiscretisation td,
-                                 SP::OneStepIntegrator osi,
-                                 SP::OneStepNSProblem osnspb_velo,
-                                 SP::OneStepNSProblem osnspb_pos,
-                                 unsigned int _level = 2);
+  TimeSteppingCombinedProjection(
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+      std::shared_ptr<TimeDiscretisation> td,
+      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
+      unsigned int _level = 2);
 
-  /** default constructor
-   */
-  TimeSteppingCombinedProjection(){};
+  // /** default constructor
+  //  */
+  // TimeSteppingCombinedProjection() = default;
 
-  virtual ~TimeSteppingCombinedProjection();
+  virtual ~TimeSteppingCombinedProjection() noexcept = default;
 
-  void updateWorldFromDS() override { ; }
   /** get the Number of iteration of projection
    *
    *  \return unsigned int nbProjectionIteration
@@ -142,10 +142,7 @@ public:
    *
    *  \return unsigned int
    */
-  inline unsigned int cumulatedNewtonNbIterations()
-  {
-    return _cumulatedNewtonNbIterations;
-  }
+  inline unsigned int cumulatedNewtonNbIterations() { return _cumulatedNewtonNbIterations; }
 
   /** get the Number of iteration for stabilizating indexsets
    *
@@ -155,18 +152,12 @@ public:
 
   inline void setConstraintTol(double v) { _constraintTol = v; }
 
-  inline void setConstraintTolUnilateral(double v)
-  {
-    _constraintTolUnilateral = v;
-  }
+  inline void setConstraintTolUnilateral(double v) { _constraintTolUnilateral = v; }
 
   inline double maxViolationUnilateral() { return _maxViolationUnilateral; }
   inline double maxViolationEquality() { return _maxViolationEquality; }
 
-  inline void setProjectionMaxIteration(unsigned int v)
-  {
-    _projectionMaxIteration = v;
-  }
+  inline void setProjectionMaxIteration(unsigned int v) { _projectionMaxIteration = v; }
 
   inline void setDoCombinedProj(unsigned int v) { _doCombinedProj = v; }
 
@@ -174,13 +165,7 @@ public:
 
   void advanceToEvent() override;
 
-  void advanceToEventOLD();
-
   void computeCriteria(bool *runningProjection);
-
-  ACCEPT_STD_VISITORS();
 };
-
-DEFINE_SPTR(TimeSteppingCombinedProjection)
-
-#endif // TIMESTEPPINGCOMBINEDPROJECTION_H
+}  // namespace siconos::simulation
+#endif  // TIMESTEPPINGCOMBINEDPROJECTION_H

@@ -31,3 +31,4 @@ endif()
 
 # Set module files directory (i.e. where .mod will be created)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Modules)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include)

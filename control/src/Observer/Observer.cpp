@@ -14,53 +14,49 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "Observer.hpp"
-#include "ObserverEvent.hpp"
+#include "Tools.hpp" // enum_to_string
+#include "SiconosException.hpp"
+#include "SiconosVector.hpp"
 #include "TimeDiscretisation.hpp"
-#include "Simulation.hpp"
-#include "EventsManager.hpp"
-#include <iostream>
 
-
-Observer::Observer(): _type(0), _id("none")
+siconos::control::Observer::Observer(ObserverType type, std::shared_ptr<ControlSensor> sensor,
+                                     const siconos::algebra::SiconosVector& xHat0,
+                                     const std::string& newId)
+    : _type(type), _sensor(sensor), _id(newId)
 {
+  _xHat = std::make_shared<siconos::algebra::SiconosVector>(xHat0);
 }
 
-Observer::Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId):
-  _type(type), _sensor(sensor), _id(newId)
+siconos::control::Observer::Observer(ObserverType type, std::shared_ptr<ControlSensor> sensor,
+                                     const siconos::algebra::SiconosVector& xHat0,
+                                     std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                                     const std::string& newId)
+    : _type(type), _DS(ds), _sensor(sensor), _id(newId)
 {
-  _xHat.reset(new SiconosVector(xHat0));
+  _xHat= std::make_shared<siconos::algebra::SiconosVector>(xHat0);
 }
 
-Observer::Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId):
-  _type(type), _DS(ds), _sensor(sensor), _id(newId)
-{
-  _xHat.reset(new SiconosVector(xHat0));
-}
-
-Observer::~Observer()
-{
-}
-
-void Observer::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
+void siconos::control::Observer::initialize(
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    const siconos::simulation::Simulation& s)
 {
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
-  if(!_sensor)
-  {
-    THROW_EXCEPTION("Observer::initialize - the no ControlSensor was given");
+  if (!_sensor) {
+    THROW_EXCEPTION("siconos::control::Observer::initialize - the no ControlSensor was given");
   }
 }
 
-void Observer::display() const
+void siconos::control::Observer::display() const
 {
-  std::cout << "=====> Observer of type " << _type << ", named " << _id ;
-  std::cout << std::endl;
+  std::cout << "=====> Observer of type " << siconos::tools::enum_to_string(_type) << ", named " << _id << "\n";
 }
 
-void Observer::setTimeDiscretisation(const TimeDiscretisation& td)
+void siconos::control::Observer::setTimeDiscretisation(
+    const siconos::simulation::TimeDiscretisation& td)
 {
-  _td.reset(new TimeDiscretisation(td));
+  _td= std::make_shared<siconos::simulation::TimeDiscretisation>(td);
 }

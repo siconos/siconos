@@ -1,4 +1,4 @@
-#!/usr/bin/env @PYTHON_EXECUTABLE@
+#!/usr/bin/env @Python_EXECUTABLE@
 
 import OCC
 

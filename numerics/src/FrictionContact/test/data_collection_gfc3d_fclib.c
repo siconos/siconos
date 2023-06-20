@@ -31,4 +31,3 @@ const char ** data_collection()
   data_collection_1[n_data++] = "---";
   return data_collection_1;
 }
-

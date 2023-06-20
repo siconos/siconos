@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file SensorEvent.hpp
   Sensor Events
 */
@@ -22,59 +22,59 @@
 #define SensorEvent_H
 
 #include "Event.hpp"
-#include "SiconosControlFwd.hpp"
-#include "ControlTypeDef.hpp"
+
+namespace siconos::control {
+
+class Sensor;
 
 /** Events when sensor data capture is done.
  *
  */
-class SensorEvent : public Event
-{
-
-private:
-  
+class SensorEvent : public siconos::simulation::Event {
+ private:
   ACCEPT_SERIALIZATION(SensorEvent);
 
-
+  using EventType = siconos::simulation::EventType;
+  
   /** The sensor linked to the present event */
-  SP::Sensor _sensor;
+  std::shared_ptr<Sensor> _sensor{nullptr};
 
-  /** Default constructor */
-  SensorEvent(): Event(0.0, SENSOR_EVENT, true) {};
+  // /** Default constructor */
+  // SensorEvent() : Event(0.0, EventType::Sensor, true){};
 
-public:
-
+ public:
   /** constructor with time value as a parameter
    *  \param time the starting time of the Event
-   *  \param name the type of the Event
    */
-  SensorEvent(double time, int name): Event(time, name, true) {};
+  SensorEvent(double time) : Event(time, EventType::Sensor, true){};
 
   /** destructor
    */
-  ~SensorEvent() {};
+  ~SensorEvent() noexcept = default;
 
   /** get the Sensor linked to this Event
    *  \return a pointer to the Sensor
    */
-  inline SP::Sensor sensor() const
-  {
-    return _sensor;
-  };
+  inline std::shared_ptr<Sensor> sensor() const { return _sensor; };
 
   /** set the Sensor linked to this Event
-   *  \param newSensor the SP::Sensor
+   *  \param newSensor the std::shared_ptr<Sensor>
    */
-  void setSensorPtr(SP::Sensor newSensor)
-  {
-    _sensor = newSensor;
-  };
+  void setSensorPtr(std::shared_ptr<Sensor> newSensor) { _sensor = newSensor; };
 
   /** Call the capture method of the linked Sensor
-   *  \param sim a SP::Simulation (ignored).
+   *  \param sim a std::shared_ptr<siconos::simulation::Simulation> (ignored).
    */
-  void process(Simulation& sim);
-
+  void process(siconos::simulation::Simulation& sim);
 };
 
-#endif // SensorEvent_H
+
+}  // namespace siconos::control
+
+namespace siconos::simulation{
+
+    // Register the event into the factory
+  static EventRegistration<siconos::control::SensorEvent> reg_SE(EventType::Sensor);
+}
+
+#endif  // SensorEvent_H

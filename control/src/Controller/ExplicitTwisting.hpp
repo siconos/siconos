@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file ExplicitTwisting.hpp
   \brief twisting algorithm with an explicit discretization
@@ -25,42 +25,41 @@
 
 #include "CommonSMC.hpp"
 
+namespace siconos::control {
 
 /** Twisting Controller with an explicit discretization */
-class ExplicitTwisting : public CommonSMC
-{
-private:
-  
+class ExplicitTwisting : public CommonSMC {
+ private:
   ACCEPT_SERIALIZATION(ExplicitTwisting);
 
-
-protected:
-  /** default constructor */
-  ExplicitTwisting() {};
-
-public:
-
+ protected:
+ public:
   /** Constructor for a nonlinear system or the ActuatorFactory
    * \param sensor the ControlSensor feeding the Actuator
    */
-  ExplicitTwisting(SP::ControlSensor sensor);
+  ExplicitTwisting(std::shared_ptr<ControlSensor> sensor);
 
   /** Constructor for the linear case
    * \param sensor the ControlSensor feeding the Actuator
    * \param gain control magnitude
    * \param beta twisting parameter
    */
-  ExplicitTwisting(SP::ControlSensor sensor, double gain, double beta);
+  ExplicitTwisting(std::shared_ptr<ControlSensor> sensor, double gain, double beta);
 
   /** destructor
    */
-  virtual ~ExplicitTwisting();
+  virtual ~ExplicitTwisting() noexcept = default;
 
   /** Compute the new control law at each event
    *  Here we are using the following formula:
    */
   virtual void actuate();
 
-  virtual void initialize(const NonSmoothDynamicalSystem & nsds, const Simulation& s);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 };
+// Register the observer into the factory
+static ActuatorRegistration<ExplicitTwisting> reg_AET(ActuatorType::ExplicitTwisting);
+
+}  // namespace siconos::control
 #endif

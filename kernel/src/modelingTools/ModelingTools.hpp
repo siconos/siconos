@@ -33,7 +33,7 @@ Include files related to modeling part of Siconos.
 
 #include "Interaction.hpp"
 
-#include "RelationTypes.hpp"
+#include "RelationType.hpp"
 #include "FirstOrderType1R.hpp"
 #include "FirstOrderType2R.hpp"
 
@@ -49,8 +49,6 @@ Include files related to modeling part of Siconos.
 #include "BoundaryCondition.hpp"
 #include "HarmonicBC.hpp"
 #include "FixedBC.hpp"
-
-
 
 #include "NonSmoothDynamicalSystem.hpp"
 #include "LinearComplementaritySystemsNSDS.hpp"

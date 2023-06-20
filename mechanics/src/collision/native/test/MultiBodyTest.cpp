@@ -14,129 +14,106 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "MultiBodyTest.hpp"
-#include "SolverOptions.h"
 
-#pragma GCC diagnostic ignored "-Wmissing-declarations"
-
-#ifndef Disks_h
-#define Disks_h
+#include "Circle.hpp"
+#include "Disk.hpp"
+#include "DiskPlanR.hpp"
+#include "FrictionContact.hpp"
+#include "MoreauJeanOSI.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "NumericsSolversNamespace.h"  // for SolverOptions tools
+#include "SiconosBodies.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "SpaceFilter.hpp"
+#include "TimeDiscretisation.hpp"
+#include "TimeStepping.hpp"
 
 // 2D
-#define NDOF 3
+constexpr auto NDOF = 3;
 
 // WALLS, TOP and GROUND
-#define WALL 100
-#define TOP 100
-#define GROUND 0
+constexpr auto WALL = 100;
+constexpr auto TOP = 100;
+constexpr auto GROUND = 0;
 
 // DEFAULT PLANS : a ground and two walls to support a crystal
 
 // CRYSTAL SIZE
-#ifndef Ll
-#define Ll 7
-#endif
+constexpr auto Ll = 7;
 
-#define Rr 1
-
-#define COSPI6  0.866025403784439
-#define SINPI6  0.5
-#define TANPI6  0.577350269189626 // tan(pi/6)
-
-#define SY 3.73205080756888  // ((cos(a)+1)/(cos(a)*sin(a)) - tan(a)) a=pi/6, R=1
-#define SYL 1/TANPI6
-
+constexpr auto Rr = 1;
+constexpr auto COSPI6 = 0.866025403784439;
+constexpr auto SINPI6 = 0.5;
+constexpr auto TANPI6 = 0.577350269189626;  // tan(pi/6)
+constexpr auto SY = 3.73205080756888;  // ((cos(a)+1)/(cos(a)*sin(a)) - tan(a)) a=pi/6, R=1
+constexpr auto SYL = 1 / TANPI6;
 
 // Plan1
-#define P1A COSPI6
-#define P1B -SINPI6
-#define P1C (SY+(Ll-1)*SYL-Rr)*P1B
+constexpr auto P1A = COSPI6;
+constexpr auto P1B = -SINPI6;
+constexpr auto P1C = (SY + (Ll - 1) * SYL - Rr) * P1B;
 
 // Plan2
-#define P2A COSPI6
-#define P2B SINPI6
-#define P2C (SY+(Ll-1)*SYL-Rr)*P2B
+constexpr auto P2A = COSPI6;
+constexpr auto P2B = SINPI6;
+constexpr auto P2C = (SY + (Ll - 1) * SYL - Rr) * P2B;
 
+constexpr auto GROUND_ID = -1;
+constexpr auto MAX_RADIUS = std::numeric_limits<double>::infinity();
 
-#define GROUND_ID -1
-#define MAX_RADIUS INFINITY
+// Disk Plan relation
+using DiskPlanR = siconos::collision::native::bodies::DiskPlanR;
 
-#include "SiconosBodies.hpp"
-#include "Disk.hpp"
-#include "Circle.hpp"
-#include "DiskPlanR.hpp"
-#include "SpaceFilter.hpp"
+// Objects
+using Disk = siconos::collision::native::bodies::Disk;
+using Circle = siconos::collision::native::bodies::Circle;
 
-class Disks : public SiconosBodies, public std::enable_shared_from_this<Disks>
-{
-public:
-  void init()
-  {
-    assert(false);
-  };
+// Interaction manager
+using ContactManager = siconos::collision::native::SpaceFilter;
+
+class Disks : public siconos::collision::native::SiconosBodies,
+              public std::enable_shared_from_this<Disks> {
+ public:
+  void init() { assert(false); };
   void init(std::string);
 };
 
-TYPEDEF_SPTR(Disks)
-
-#endif //Disks_h
-
-// Siconos
-#include <SiconosKernel.hpp>
-#include <SiconosPointers.hpp>
-
-using namespace std;
-
 /* do nothing if solver does not converge */
-void localCheckSolverOuput(int info, Simulation*)
+void localCheckSolverOuput(int info, siconos::simulation::Simulation*)
 {
-  if(info) exit(1);
+  if (info) exit(1);
 }
 
-double A(double t)
-{
-  return 0. ;
-}
-double B(double t)
-{
-  return 1. ;
-}
+double A(double t) { return 0.; }
+double B(double t) { return 1.; }
 double C(double t)
 {
-  return 0.0;//1.1*cos(32.*M_PI*t) ;
+  return 0.0;  // 1.1*cos(32.*M_PI*t) ;
 }
-double DA(double t)
-{
-  return 0. ;
-}
-double DB(double t)
-{
-  return 0. ;
-}
+double DA(double t) { return 0.; }
+double DB(double t) { return 0.; }
 double DC(double t)
 {
-  return 0.0;//-1.1*32.*M_PI*sin(32.*M_PI*t) ;
+  return 0.0;  //-1.1*32.*M_PI*sin(32.*M_PI*t) ;
 }
-
 
 // ================= Creation of the model =======================
 void Disks::init(std::string disks_input)
 {
-
-  SP::TimeDiscretisation timedisc_;
-  SP::FrictionContact osnspb_;
-
   // User-defined main parameters
 
-  double t0 = 0;                   // initial computation time
+  double t0 = 0;  // initial computation time
 
   double T = 10;
 
-  double h = 0.01;                // time step
+  double h = 0.01;  // time step
   double g = 9.81;
 
-  double theta = 0.5;              // theta for MoreauJeanOSI integrator
+  double theta = 0.5;  // theta for MoreauJeanOSI integrator
 
   std::string solverName = "NSGS";
 
@@ -147,28 +124,24 @@ void Disks::init(std::string disks_input)
   double R;
   double m;
 
-  try
-  {
-
+  try {
     // ------------
     // --- Init ---
     // ------------
 
     std::cout << "====> nsds loading ..." << std::endl << std::endl;
 
-    _plans.reset(new SimpleMatrix("plans.dat", true));
-    if(_plans->size(0) == 0)
-    {
+    _plans = std::make_shared<siconos::algebra::SimpleMatrix>("plans.dat", true);
+    if (_plans->size(0) == 0) {
       /* default plans */
       double A1 = P1A;
       double B1 = P1B;
       double C1 = P1C;
-
       double A2 = P2A;
       double B2 = P2B;
       double C2 = P2C;
 
-      _plans.reset(new SimpleMatrix(6, 6));
+      _plans = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
       _plans->zero();
       (*_plans)(0, 0) = 0;
       (*_plans)(0, 1) = 1;
@@ -193,20 +166,18 @@ void Disks::init(std::string disks_input)
       (*_plans)(5, 0) = A2;
       (*_plans)(5, 1) = B2;
       (*_plans)(5, 2) = C2;
-
     }
 
     /* set center positions */
-    for(unsigned int i = 0 ; i < _plans->size(0); ++i)
-    {
-      SP::DiskPlanR tmpr;
-      tmpr.reset(new DiskPlanR(1, (*_plans)(i, 0), (*_plans)(i, 1), (*_plans)(i, 2),
-                               (*_plans)(i, 3), (*_plans)(i, 4), (*_plans)(i, 5)));
+    for (unsigned int i = 0; i < _plans->size(0); ++i) {
+      auto tmpr =
+          std::make_shared<DiskPlanR>(1., (*_plans)(i, 0), (*_plans)(i, 1), (*_plans)(i, 2),
+                                      (*_plans)(i, 3), (*_plans)(i, 4), (*_plans)(i, 5));
       (*_plans)(i, 3) = tmpr->getXCenter();
       (*_plans)(i, 4) = tmpr->getYCenter();
     }
 
-    /*    _moving_plans.reset(new FMatrix(1,6));
+    /*    _moving_plans = std::make_shared<siconos::collision::native::FMatrix>(1,6);
         (*_moving_plans)(0,0) = &A;
         (*_moving_plans)(0,1) = &B;
         (*_moving_plans)(0,2) = &C;
@@ -214,43 +185,33 @@ void Disks::init(std::string disks_input)
         (*_moving_plans)(0,4) = &DB;
         (*_moving_plans)(0,5) = &DC;*/
 
-
-
-    SP::SiconosMatrix Disks;
-    Disks.reset(new SimpleMatrix(disks_input, true));
+    auto Disks = std::make_shared<siconos::algebra::SimpleMatrix>(disks_input, true);
 
     // -- OneStepIntegrators --
-    SP::OneStepIntegrator osi;
-    osi.reset(new MoreauJeanOSI(theta));
+    auto osi = std::make_shared<siconos::integrators::MoreauJeanOSI>(theta);
 
     // -- Model --
 
-    SP::NonSmoothDynamicalSystem nsds;
-    nsds.reset(new NonSmoothDynamicalSystem(t0, T));
+    auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
 
-    for(unsigned int i = 0; i < Disks->size(0); i++)
-    {
+    for (unsigned int i = 0; i < Disks->size(0); i++) {
       R = Disks->getValue(i, 2);
       m = Disks->getValue(i, 3);
 
-      SP::SiconosVector qTmp;
-      SP::SiconosVector vTmp;
-
-      qTmp.reset(new SiconosVector(NDOF));
-      vTmp.reset(new SiconosVector(NDOF));
+      auto qTmp = std::make_shared<siconos::algebra::SiconosVector>(NDOF);
+      auto vTmp = std::make_shared<siconos::algebra::SiconosVector>(NDOF);
       vTmp->zero();
       (*qTmp)(0) = (*Disks)(i, 0);
       (*qTmp)(1) = (*Disks)(i, 1);
 
-      SP::LagrangianDS body;
-      if(R > 0)
-        body.reset(new Disk(R, m, qTmp, vTmp));
+      std::shared_ptr<siconos::modeling::LagrangianDS> body{nullptr};
+      if (R > 0)
+        body = std::make_shared<Disk>(R, m, qTmp, vTmp);
       else
-        body.reset(new Circle(-R, m, qTmp, vTmp));
+        body = std::make_shared<Circle>(-R, m, qTmp, vTmp);
 
       // -- Set external forces (weight) --
-      SP::SiconosVector FExt;
-      FExt.reset(new SiconosVector(NDOF));
+      auto FExt = std::make_shared<siconos::algebra::SiconosVector>(NDOF);
       FExt->zero();
       FExt->setValue(1, -m * g);
       body->setFExtPtr(FExt);
@@ -259,141 +220,111 @@ void Disks::init(std::string disks_input)
       nsds->insertDynamicalSystem(body);
     }
 
-
     nsds->setSymmetric(true);
-
 
     // ------------------
     // --- Simulation ---
     // ------------------
 
     // -- Time discretisation --
-    timedisc_.reset(new TimeDiscretisation(t0, h));
+    auto timedisc = std::make_shared<siconos::simulation::TimeDiscretisation>(t0, h);
 
     // -- OneStepNsProblem --
-    osnspb_.reset(new FrictionContact(2));
-
-    osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] = 100; // Max number of
+    auto osnspb = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>(2);
+    osnspb->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] =
+        100;  // Max number of
     // iterations
-    //osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_ITER_DONE] = 20; // compute error
+    // osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_ITER_DONE] = 20; // compute
+    // error
     // iterations
-    osnspb_->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = 1e-3; // Tolerance
+    osnspb->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] =
+        1e-3;  // Tolerance
 
+    osnspb->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
+    osnspb->setMStorageType(NM_SPARSE_BLOCK);  // Sparse storage
+    osnspb->setNumericsVerboseMode(0);
 
-    osnspb_->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
-    osnspb_->setMStorageType(NM_SPARSE_BLOCK);            // Sparse storage
-    osnspb_->setNumericsVerboseMode(0);
-
-    osnspb_->setKeepLambdaAndYState(true);  // inject previous solution
+    osnspb->setKeepLambdaAndYState(true);  // inject previous solution
 
     // -- Simulation --
-    _sim.reset(new TimeStepping(nsds,timedisc_));
+    _sim = std::make_shared<siconos::simulation::TimeStepping>(nsds, timedisc);
 
-    std::static_pointer_cast<TimeStepping>(_sim)->setNewtonMaxIteration(3);
+    std::static_pointer_cast<siconos::simulation::TimeStepping>(_sim)->setNewtonMaxIteration(
+        3);
 
     _sim->insertIntegrator(osi);
-    _sim->insertNonSmoothProblem(osnspb_);
+    _sim->insertNonSmoothProblem(osnspb);
 
-    std::static_pointer_cast<TimeStepping>(_sim)->setCheckSolverFunction(localCheckSolverOuput);
+    std::static_pointer_cast<siconos::simulation::TimeStepping>(_sim)->setCheckSolverFunction(
+        localCheckSolverOuput);
 
     // --- Simulation initialization ---
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.3, 2));
+    auto nslaw = std::make_shared<siconos::modeling::NewtonImpactFrictionNSL>(0, 0, 0.3, 2);
 
-    _playground.reset(new SpaceFilter(3, 6, _plans, _moving_plans));
+    _playground = std::make_shared<ContactManager>(3, 6, _plans, _moving_plans);
 
     _playground->insertNonSmoothLaw(nslaw, 0, 0);
 
     _sim->insertInteractionManager(_playground);
-
   }
 
-  catch(...)
-  {
-    Siconos::exception::process();
+  catch (...) {
+    siconos::exception::process();
     exit(1);
   }
 }
 
-
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(MultiBodyTest);
 
+void MultiBodyTest::setUp() {}
 
-void MultiBodyTest::setUp()
-{
-}
-
-void MultiBodyTest::tearDown()
-{
-}
-
+void MultiBodyTest::tearDown() {}
 
 // multiples disks
 void MultiBodyTest::t1()
 {
-  SP::Disks disks(new Disks());
-
+  auto disks = std::make_shared<Disks>();
   disks->init("disks.dat");
-
 
   // just try to run a simulation
   // if something is broken with SpaceFilter
   // an exception may occurs
-  for(unsigned int i = 0; i < 20; ++i)
-  {
+  for (unsigned int i = 0; i < 20; ++i) {
     disks->compute();
   }
 
   CPPUNIT_ASSERT(1);
-
 }
 
 // one disk without interaction at the beginning
 void MultiBodyTest::t2()
 {
-  SP::Disks disks(new Disks());
-
+  auto disks = std::make_shared<Disks>();
   disks->init("disks-nointer.dat");
-
 
   // just try to run a simulation
   // if something is broken with SpaceFilter
   // an exception may occurs
   // test fail with rev 3146
-  for(unsigned int i = 0; i < 20; ++i)
-  {
+  for (unsigned int i = 0; i < 20; ++i) {
     disks->compute();
   }
 
   CPPUNIT_ASSERT(1);
-
-
 }
 
-void MultiBodyTest::t3()
-{
-}
+void MultiBodyTest::t3() {}
 
-void MultiBodyTest::t4()
-{
-}
+void MultiBodyTest::t4() {}
 
-void MultiBodyTest::t5()
-{
-}
+void MultiBodyTest::t5() {}
 
-void MultiBodyTest::t6()
-{
-}
+void MultiBodyTest::t6() {}
 
+void MultiBodyTest::t7() {}
 
-void MultiBodyTest::t7()
-{
-}
-
-void MultiBodyTest::t8()
-{
-}
+void MultiBodyTest::t8() {}

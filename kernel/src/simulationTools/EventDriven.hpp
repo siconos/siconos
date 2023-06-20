@@ -21,26 +21,26 @@
 #ifndef EventDriven_H
 #define EventDriven_H
 
-#include "SiconosFwd.hpp" // for OneStepIntegrator, etc
 #include "Simulation.hpp"
 
-/** 
+namespace siconos::simulation {
+
+/**
     Simulation based on event driven method, ie events detection (see
     theoretical manual for more details).
-    
+
     WARNING: at the time only written for Lagrangian systems !!!
-    
+
 */
 class EventDriven : public Simulation {
-private:
-
+ private:
   ACCEPT_SERIALIZATION(EventDriven);
 
   /** flag used in DLSODAR -
    *  As input: 1 if first call, else 2
    *  As output: 2 if no root found, else 3
    */
-  int _istate;
+  int _istate{1};
 
   void initOSNS() override;
 
@@ -50,48 +50,50 @@ private:
   /** Initialize the Rhs of the OSI */
   void initOSIRhs();
 
-protected:
+ protected:
   /** an epsilon to define the contraint g for Interaction in IndexSet[1]
    */
-  static double _TOL_ED;
+  double tolerance_{siconos::internal::DEFAULT_TOL_ED};
 
   /** boolean variable to known whether Newton iterations converges or not */
-  bool _isNewtonConverge;
+  bool _isNewtonConverge{false};
 
   /** Default maximum number of Newton iteration*/
-  unsigned int _newtonMaxIteration;
+  unsigned int _newtonMaxIteration{50};
 
   /** Number of steps performed is the Newton Loop */
-  unsigned int _newtonNbIterations;
+  unsigned int _newtonNbIterations{0};
 
   /** Maximum Residual for the Dynamical system */
-  double _newtonResiduDSMax;
+  double _newtonResiduDSMax{0.};
 
   /** Maximum Residual for the output of the relation */
-  double _newtonResiduYMax;
+  double _newtonResiduYMax{0.};
 
   /** Tolerance to check Newton iteration convergence */
-  double _newtonTolerance;
+  double _newtonTolerance{siconos::internal::DEFAULT_TOL_ED};
 
   /** Maximum number of iterations to localize events */
-  unsigned int _localizeEventMaxIter;
+  unsigned int _localizeEventMaxIter{100};
 
-  /**  number of OneStepNSProblems considered in the simulation */
-  unsigned int _numberOfOneStepNSproblems;
+  /**  number of siconos::nonsmooth_formulations::OneStepNSProblem considered in the simulation
+   */
+  unsigned int _numberOfOneStepNSproblems{2};
 
   /** store the indexSet0 for performance reason (Lsodar)*/
-  SP::InteractionsGraph _indexSet0;
+  std::shared_ptr<siconos::graphs::InteractionsGraph> _indexSet0{nullptr};
 
   /** store the graph of DynamicalSystems for performance reason (Lsodar)*/
-  SP::DynamicalSystemsGraph _DSG0;
+  std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> _DSG0{nullptr};
 
-public:
+ public:
   /** defaut constructor
    *
    *  \param nsds current nonsmooth dynamical system
    *  \param td time discretisation
    */
-  EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
+  EventDriven(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+              std::shared_ptr<TimeDiscretisation> td);
 
   /** constructor with data
    *
@@ -99,12 +101,12 @@ public:
    *  \param td time discretisation
    *  \param nb number of NSProblem
    */
-  EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td,
-              int nb);
+  EventDriven(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+              std::shared_ptr<TimeDiscretisation> td, int nb);
 
-  /** defaut constructor (needed for serialization)
-   */
-  EventDriven() : _isNewtonConverge(false){};
+  // /** defaut constructor (needed for serialization)
+  //  */
+  // EventDriven() = default;
 
   /** destructor
    */
@@ -130,16 +132,16 @@ public:
    */
   inline double istate() { return _istate; }
 
-  /** Set value to _TOL_ED
+  /** Set tolerance value for the event-driven scheme
    *
    *  \param var the new tolerance
    */
-  inline void setToleranceED(double var) { _TOL_ED = var; }
+  inline void setToleranceED(double var) { tolerance_ = var; }
   /** Get value of _epsilon
    *
    *  \return double
    */
-  inline double toleranceED() { return _TOL_ED; }
+  inline double toleranceED() { return tolerance_; }
 
   /** To know if Newton Iteratio is convergent
    *
@@ -157,19 +159,13 @@ public:
    *
    *  \param maxStep maximum number of step
    */
-  void setNewtonMaxIteration(unsigned int maxStep)
-  {
-    _newtonMaxIteration = maxStep;
-  };
+  void setNewtonMaxIteration(unsigned int maxStep) { _newtonMaxIteration = maxStep; };
 
   /** To set maximum number of iterations to localize events
    *
    *  \param maxIter maximum number of iterations
    */
-  void setLocalizeEventsMaxIteration(unsigned int maxIter)
-  {
-    _localizeEventMaxIter = maxIter;
-  }
+  void setLocalizeEventsMaxIteration(unsigned int maxIter) { _localizeEventMaxIter = maxIter; }
 
   /** get the maximum number of Newton iteration
    *
@@ -208,7 +204,7 @@ public:
   double newtonTolerance() { return _newtonTolerance; };
 
   /** Redefine method insertIntegrator of the class Simulation */
-  void insertIntegrator(SP::OneStepIntegrator) override;
+  void insertIntegrator(std::shared_ptr<siconos::integrators::OneStepIntegrator>) override;
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
    *
@@ -230,8 +226,8 @@ public:
    *  \param x state vector
    *  \param xdot derivative of x
    */
-  void computef(OneStepIntegrator &osi, integer *sizeOfX, doublereal *time,
-                doublereal *x, doublereal *xdot);
+  void computef(siconos::integrators::OneStepIntegrator &osi, int *sizeOfX, double *time,
+                double *x, double *xdot);
 
   /** compute jacobian of the right-hand side
    *
@@ -241,8 +237,8 @@ public:
    *  \param x state vector
    *  \param jacob jacobian of f according to x
    */
-  void computeJacobianfx(OneStepIntegrator &osi, integer *sizeOfX,
-                         doublereal *time, doublereal *x, doublereal *jacob);
+  void computeJacobianfx(siconos::integrators::OneStepIntegrator &osi, int *sizeOfX,
+                         double *time, double *x, double *jacob);
 
   /** compute the size of constraint function g(x,t,...) for osi
    *
@@ -253,15 +249,14 @@ public:
   /** compute constraint function g(x,t,...) for osi.
    *
    *  \param osi pointer to OneStepIntegrator.
-   *  \param sizeX integer*, size of vector x
-   *  \param time doublereal*, time
-   *  \param x doublereal*, x:array of double
-   *  \param sizeG integer*, size of vector g (ie number of constraints)
-   *  \param g doublereal*, g (in-out parameter)
+   *  \param sizeX int*, size of vector x
+   *  \param time double*, time
+   *  \param x double*, x:array of double
+   *  \param sizeG int*, size of vector g (ie number of constraints)
+   *  \param g double*, g (in-out parameter)
    */
-  virtual void computeg(SP::OneStepIntegrator osi, integer *sizeX,
-                        doublereal *time, doublereal *x, integer *sizeG,
-                        doublereal *g);
+  virtual void computeg(std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+                        int *sizeX, double *time, double *x, int *sizeG, double *g);
 
   /** update input for impact case (ie compute p[1])
    */
@@ -336,7 +331,6 @@ public:
 
   /** Localize time of the first event */
   void LocalizeFirstEvent();
-
-  ACCEPT_STD_VISITORS();
 };
-#endif // EventDriven_H
+}  // namespace siconos::simulation
+#endif  // EventDriven_H

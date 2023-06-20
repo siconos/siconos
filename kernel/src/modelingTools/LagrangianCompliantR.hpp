@@ -23,56 +23,55 @@
 
 #include "LagrangianR.hpp"
 
+namespace siconos::modeling {
 /**
    Lagrangian Compliant Relation: Scleronomous, Non-Holonomic
    (function of lambda)
-   
+
    \f$
    Y[0] = y = h(q,\lambda(t),z)
    \f$
-   
+
    \f$
    Y[1] = \dot y = G0(q,\lambda(t),z)\dot q + G1((q,\lambda(t),z)\dot\lambda(t)
    \f$
-   
+
    \f$
    p = G0^t(q,\lambda(t),z)\lambda(t)
    \f$
-   
+
    with
    \f$
    G0(q,\lambda(t),z) = \nabla_q h(q,\lambda(t),z)
    \f$
-   
+
    \f$
    G1(q,\lambda(t),z) = \nabla_{\lambda}h(q,\lambda(t),z)
    \f$
-   
+
    h, G0 and G1 are connected to user-defined functions.
-   
+
 */
 class LagrangianCompliantR : public LagrangianR {
-
-protected:
-  
+ protected:
   ACCEPT_SERIALIZATION(LagrangianCompliantR);
 
   /** LagrangianR plug-in to compute h(q,lambda,z)
    *
-   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in
+   * \param sizeDS : sum of the sizes of all the DynamicalSystems involved in
    * the interaction
-   * @param q : pointer to the first element of q
-   * @param sizeY : size of vector y (ie of lambda and of the interaction)
-   * @param lambda : pointer to lambda of the interaction
-   * @param[in,out] y : pointer to the first element of y
-   * @param sizeZ : size of vector z.
-   * @param[in,out] z : a vector of user-defined parameters
+   * \param q : pointer to the first element of q
+   * \param sizeY : size of vector y (ie of lambda and of the interaction)
+   * \param lambda : pointer to lambda of the interaction
+   * \param[in,out] y : pointer to the first element of y
+   * \param sizeZ : size of vector z.
+   * \param[in,out] z : a vector of user-defined parameters
    */
-  SP::PluggedObject _pluginJachlambda{nullptr};
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachlambda{nullptr};
 
   /** default constructor
    */
-  LagrangianCompliantR() : LagrangianR(RELATION::CompliantR){};
+  LagrangianCompliantR() : LagrangianR(RelationSubType::CompliantR){};
 
   /** initialize G matrices or components specific to derived classes
    *
@@ -88,58 +87,59 @@ protected:
 
   void _zeroPlugin() override;
 
-public:
+ public:
   /** constructor from a set of data
    *
    *  \param pluginh the name of the plugin to compute h
    *  \param pluginJacobianhq the name of the plugin to compute the gradient of
    *  h w.r.t q
    *  \param pluginJacobianhlambda the name of the plugin to compute
-   *  the gradient of h w.r.t  \f$ \lambda \f$ 
+   *  the gradient of h w.r.t  \f$ \lambda \f$
    */
-  LagrangianCompliantR(const std::string &pluginh,
-                       const std::string &pluginJacobianhq,
+  LagrangianCompliantR(const std::string &pluginh, const std::string &pluginJacobianhq,
                        const std::string &pluginJacobianhlambda);
 
   /** destructor
    */
   virtual ~LagrangianCompliantR() noexcept = default;
 
-  /** 
+  /**
       to compute the output y = h(q,z) of the Relation
-      
+
       \param time current time value
       \param q coordinates of the dynamical systems involved in the relation
       \param lambda interaction  \f$ \lambda \f$  vector
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector &q,
-                        const SiconosVector &lambda, BlockVector &z,
-                        SiconosVector &y);
+  virtual void computeh(double time, const siconos::algebra::BlockVector &q,
+                        const siconos::algebra::SiconosVector &lambda,
+                        siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
 
-  /** 
+  /**
       to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-      
+
       \param time current time value
       \param q coordinates of the dynamical systems involved in the relation
       \param lambda interaction  \f$ \lambda \f$  vector
       \param z user defined parameters (optional)
   */
-  virtual void computeJachq(double time, const BlockVector &q,
-                            const SiconosVector &lambda, BlockVector &z);
+  virtual void computeJachq(double time, const siconos::algebra::BlockVector &q,
+                            const siconos::algebra::SiconosVector &lambda,
+                            siconos::algebra::BlockVector &z);
 
-  /** 
+  /**
       compute the jacobian of h w.r.t.  \f$ \lambda \f$ . Set attribute _jachlambda
       (access: jacqhlambda())
-      
+
       \param time current time value
       \param q coordinates of the dynamical systems involved in the relation
       \param lambda interaction \f$ \lambda \f$  vector
       \param z user defined parameters
   */
-  virtual void computeJachlambda(double time, const BlockVector &q0,
-                                 const SiconosVector &lambda, BlockVector &z);
+  virtual void computeJachlambda(double time, const siconos::algebra::BlockVector &q0,
+                                 const siconos::algebra::SiconosVector &lambda,
+                                 siconos::algebra::BlockVector &z);
 
   /** to compute output
    *
@@ -155,18 +155,14 @@ public:
    *  \param inter the Interaction owning lambda
    *  \param level "derivative" order of lambda used to compute input
    */
-  void computeInput(double time, Interaction &inter,
-                    unsigned int level = 0) override;
+  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
 
   /** compute all the H Jacobian */
   void computeJach(double time, Interaction &inter) override;
 
   /** compute all the G Jacobian */
   void computeJacg(double time, Interaction &inter) override {}
-
-  ACCEPT_STD_VISITORS();
 };
-
-TYPEDEF_SPTR(LagrangianCompliantR)
+}  // namespace siconos::modeling
 
 #endif

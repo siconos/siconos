@@ -135,11 +135,6 @@ workflow:
     - .docker-manual-rules
     - .docker-create-image
 
-.siconos-next:
-  image: gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/sources/ubuntu20.04
-  script:
-    - echo "bonjour"
-  #needs: []
 
 # Use these rules for jobs that must be created:
 # - when updating master branch

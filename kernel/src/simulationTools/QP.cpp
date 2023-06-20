@@ -14,17 +14,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "QP.hpp"
 
-int QP::compute(double)
+#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+
+int siconos::nonsmooth_formulations::QP::compute(double)
 {
-  THROW_EXCEPTION("QP::compute not yet implemented");
+  THROW_EXCEPTION("siconos::nonsmooth_formulations::QP::compute not yet implemented");
   return 1;
 }
 
-void QP::display() const
+void siconos::nonsmooth_formulations::QP::display() const
 {
-  THROW_EXCEPTION("QP::compute not yet implemented");
+  THROW_EXCEPTION("siconos::nonsmooth_formulations::QP::compute not yet implemented");
+}
+
+void siconos::nonsmooth_formulations::QP::setQ(const siconos::algebra::SiconosMatrix& newValue)
+{
+  *_Q = newValue;
+}
+void siconos::nonsmooth_formulations::QP::setP(const siconos::algebra::SiconosVector& newValue)
+{
+  *_p = newValue;
 }

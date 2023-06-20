@@ -14,29 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SiconosConfig.h"
-#include <boost/numeric/bindings/ublas/vector_proxy.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/bindings/trans.hpp>
-#include <boost/numeric/bindings/blas/level2.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/std/vector.hpp>
+// #include "SiconosConfig.h"
 
-namespace siconosBindings = boost::numeric::bindings;
+// #include <boost/numeric/bindings/blas/level2.hpp>
+// #include <boost/numeric/bindings/std/vector.hpp>
+// #include <boost/numeric/bindings/trans.hpp>
+// #include <boost/numeric/bindings/ublas/matrix.hpp>
+// #include <boost/numeric/bindings/ublas/vector.hpp>
+// #include <boost/numeric/bindings/ublas/vector_proxy.hpp>
+// #include <boost/numeric/ublas/matrix_proxy.hpp>
 
-// for ublas::axpy_prod, ...
-#include <boost/numeric/ublas/operation.hpp>
+// namespace siconosBindings = boost::numeric::bindings;
 
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-#include "BlockMatrixIterators.hpp"
-#include "BlockMatrix.hpp"
-#include "SiconosAlgebra.hpp"
+// // for ublas::axpy_prod, ...
+// #include "BlockMatrix.hpp"
+// #include "SiconosAlgebra.hpp"
+// #include "SiconosVector.hpp"
+// #include "SimpleMatrix.hpp"
 
-using namespace Siconos;
+// #include <boost/numeric/ublas/operation.hpp>
 
 // void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init)
 // {
@@ -49,9 +47,9 @@ using namespace Siconos;
 //   if(A.size(0) != y.size())
 //     THROW_EXCEPTION("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   Siconos::UblasType numA = A.num();
+//   Siconos::UblasType numX = x.num();
+//   Siconos::UblasType numY = y.num();
 
 //   if(numA == 0)  // If A is Block
 //     THROW_EXCEPTION("axpy_prod(A,x,y) error: not yet implemented for block matrices.");
@@ -150,30 +148,33 @@ using namespace Siconos;
 //   }
 // }
 
-// void gemvtranspose(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
+// void gemvtranspose(double a, const SiconosMatrix& A, const SiconosVector& x, double b,
+// SiconosVector& y)
 // {
 //   if(A.isBlock())
 //     THROW_EXCEPTION("gemv(...) not yet implemented for block vectors or matrices.");
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   Siconos::UblasType numA = A.num();
+//   Siconos::UblasType numX = x.num();
+//   Siconos::UblasType numY = y.num();
 //   if(numA != DENSE || numX != DENSE || numY != DENSE)
 //     THROW_EXCEPTION("gemv(...) failed: reserved to dense matrices or vectors.");
 
-//   siconosBindings::blas::gemv(a, siconosBindings::trans(*A.dense()), *x.dense(), b, *y.dense());
+//   siconosBindings::blas::gemv(a, siconosBindings::trans(*A.dense()), *x.dense(), b,
+//   *y.dense());
 // }
 
-// void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
+// void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector&
+// y)
 // {
 //   if(A.isBlock())
 //     THROW_EXCEPTION("gemv(...) not yet implemented for block vectors or matrices.");
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   Siconos::UblasType numA = A.num();
+//   Siconos::UblasType numX = x.num();
+//   Siconos::UblasType numY = y.num();
 //   if(numA != DENSE || numX != DENSE || numY != DENSE)
 //     THROW_EXCEPTION("gemv(...) failed: reserved to dense matrices or vectors.");
 

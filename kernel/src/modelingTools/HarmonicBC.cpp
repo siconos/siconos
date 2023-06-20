@@ -14,69 +14,65 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "HarmonicBC.hpp"
-#include "BoundaryCondition.hpp"
 
+#include <math.h>  // for cos
+
+#include "BoundaryCondition.hpp"
+#include "SiconosException.hpp"
+#include "SiconosVector.hpp"
 
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include "siconos_debug.h"
 
-HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
-                       double a, double b,
-                       double omega, double phi) :
-  BoundaryCondition(newVelocityIndices),_a(a),_b(b),_omega(omega),_phi(phi)
-{
-};
+siconos::modeling::HarmonicBC::HarmonicBC(
+    Indices&& newVelocityIndices, std::shared_ptr<siconos::algebra::SiconosVector> a,
+    std::shared_ptr<siconos::algebra::SiconosVector> b,
+    std::shared_ptr<siconos::algebra::SiconosVector> omega,
+    std::shared_ptr<siconos::algebra::SiconosVector> phi)
+    : BoundaryCondition(std::move(newVelocityIndices)),
+      _aV(a),
+      _bV(b),
+      _omegaV(omega),
+      _phiV(phi) {
+  DEBUG_BEGIN(
+      "HarmonicBC::Harmonic((std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,\
+               std::shared_ptr<siconos::algebra::SiconosVector> a, std::shared_ptr<siconos::algebra::SiconosVector> b,                \
+               std::shared_ptr<siconos::algebra::SiconosVector> omega, std::shared_ptr<siconos::algebra::SiconosVector> phi)\n");
 
-HarmonicBC::HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
-                       SP::SiconosVector a, SP::SiconosVector b,
-                       SP::SiconosVector omega, SP::SiconosVector phi):
-  BoundaryCondition(newVelocityIndices),_aV(a),_bV(b),_omegaV(omega),_phiV(phi)
-{
-  DEBUG_BEGIN("HarmonicBC::Harmonic((SP::UnsignedIntVector newVelocityIndices,\
-               SP::SiconosVector a, SP::SiconosVector b,                \
-               SP::SiconosVector omega, SP::SiconosVector phi)\n");
-
-  if(newVelocityIndices->size() != a->size()     ||
-      newVelocityIndices->size() != b->size()     ||
-      newVelocityIndices->size() != omega->size() ||
-      newVelocityIndices->size() != phi->size())
-    THROW_EXCEPTION("HarmonicBC::HarmonicBC indices and vectors of data \
+  auto newsize = _velocityIndices.size();
+  if (newsize != a->size() || newsize != b->size() || newsize != omega->size() ||
+      newsize != phi->size())
+    THROW_EXCEPTION(
+        "HarmonicBC::HarmonicBC indices and vectors of data \
            (a,b,omega,phi) must be of the same size ");
 
-
-  DEBUG_END("HarmonicBC::Harmonic((SP::UnsignedIntVector newVelocityIndices,\
-           SP::SiconosVector a, SP::SiconosVector b,\
-           SP::SiconosVector omega, SP::SiconosVector phi)\n");
-
-
+  DEBUG_END(
+      "HarmonicBC::Harmonic((std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,\
+           std::shared_ptr<siconos::algebra::SiconosVector> a, std::shared_ptr<siconos::algebra::SiconosVector> b,\
+           std::shared_ptr<siconos::algebra::SiconosVector> omega, std::shared_ptr<siconos::algebra::SiconosVector> phi)\n");
 };
 
-
-HarmonicBC::~HarmonicBC()
-{
-}
-void HarmonicBC::computePrescribedVelocity(double time)
-{
+void siconos::modeling::HarmonicBC::computePrescribedVelocity(double time) {
   DEBUG_BEGIN("HarmonicBC::computePrescribedVelocity(double time)\n");
-  if(!_prescribedVelocity) _prescribedVelocity.reset(new SiconosVector((unsigned int)_velocityIndices->size()));
-  if(!_aV)
-  {
-    for(unsigned int k = 0 ; k < _velocityIndices->size(); k++)
-    {
-      _prescribedVelocity->setValue(k,_a+_b*cos(_omega*time+_phi));
-      DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n",k, time,_prescribedVelocity->getValue(k));
+  if (!_prescribedVelocity)
+    _prescribedVelocity =
+        std::make_shared<siconos::algebra::SiconosVector>(_velocityIndices.size());
+  if (!_aV) {
+    for (unsigned int k = 0; k < _velocityIndices.size(); k++) {
+      _prescribedVelocity->setValue(k, _a + _b * cos(_omega * time + _phi));
+      DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n", k, time,
+                   _prescribedVelocity->getValue(k));
     }
-  }
-  else
-  {
-    for(unsigned int k = 0 ; k < _velocityIndices->size(); k++)
-    {
-      _prescribedVelocity->setValue(k,(*_aV)(k)+(*_bV)(k)*cos((*_omegaV)(k)*time+(*_phiV)(k)));
-      DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n",k, time,_prescribedVelocity->getValue(k));
+  } else {
+    for (unsigned int k = 0; k < _velocityIndices.size(); k++) {
+      _prescribedVelocity->setValue(
+          k, (*_aV)(k) + (*_bV)(k)*cos((*_omegaV)(k)*time + (*_phiV)(k)));
+      DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n", k, time,
+                   _prescribedVelocity->getValue(k));
     }
   }
 

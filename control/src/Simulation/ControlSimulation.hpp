@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file ControlSimulation.hpp
   \brief Abstract class - General interface for all Control Dynamical Systems.
@@ -23,24 +23,45 @@
 #ifndef CONTROLDYNAMICALSYSTEM_H
 #define CONTROLDYNAMICALSYSTEM_H
 
-#include "SiconosPointers.hpp"
-#include "SiconosAlgebraTypeDef.hpp"
-#include "ControlTypeDef.hpp"
-#include "SiconosControlFwd.hpp"
-#include "SiconosFwd.hpp"
-
+#include <memory>
 #include <string>
 
-class ControlSimulation
-{
-private:
-  
+#include "SiconosSerialization.hpp"
+
+namespace siconos::algebra {
+class SimpleMatrix;
+}  // namespace siconos::algebra
+
+namespace siconos::graphs {
+struct DynamicalSystemsGraph;
+struct InteractionsGraph;
+}  // namespace siconos::graphs
+namespace siconos::modeling {
+class NonSmoothDynamicalSystem;
+class DynamicalSystem;
+}  // namespace siconos::modeling
+
+namespace siconos::integrators {
+class OneStepIntegrator;
+}
+
+namespace siconos::simulation {
+class TimeDiscretisation;
+class Simulation;
+}  // namespace siconos::simulation
+
+namespace siconos::control {
+
+class ControlManager;
+class Sensor;
+class Actuator;
+class Observer;
+
+class ControlSimulation {
+ private:
   ACCEPT_SERIALIZATION(ControlSimulation);
 
-protected:
-  /** default constructor */
-  ControlSimulation() {};
-
+ protected:
   /** Constructor with the minimal set of data
    * \param t0 the starting time \f$ t_0 \f$
    * \param T the end time T
@@ -49,63 +70,69 @@ protected:
   ControlSimulation(double t0, double T, double h);
 
   /** Starting time */
-  double _t0;
+  double _t0{0.};
 
   /** End time */
-  double _T;
+  double _T{0.};
 
   /** Simulation step */
-  double _h;
+  double _h{0.};
 
   /** Theta for MoreauJeanOSI */
-  double _theta;
+  double _theta{0.5};
 
   /** Time spent computing */
-  double _elapsedTime;
+  double _elapsedTime{0.};
 
   /** rough estimation of the number of points to save */
-  unsigned _N;
+  unsigned _N{0};
 
   /** Dimension of the state space */
-  unsigned _nDim;
+  unsigned _nDim{0};
 
   /** Save only the data in the main Simulation*/
-  bool _saveOnlyMainSimulation;
+  bool _saveOnlyMainSimulation{false};
 
   /** If true, do not show progress of the simulation */
-  bool _silent;
+  bool _silent{false};
 
   /** Matrix for saving result */
-  SP::SimpleMatrix _dataM;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _dataM{nullptr};
 
   /** Legend for the columns in the matrix _dataM*/
-  std::string _dataLegend;
+  std::string _dataLegend{"none"};
 
   /** NonSmoothDynamicalSystem */
-  SP::NonSmoothDynamicalSystem _nsds;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds{nullptr};
 
   /** TimeDiscretisation for the simulation*/
-  SP::TimeDiscretisation _processTD;
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _processTD{nullptr};
 
   /** The Simulation */
-  SP::Simulation _processSimulation;
+  std::shared_ptr<siconos::simulation::Simulation> _processSimulation{nullptr};
 
   /** The integrator */
-  SP::OneStepIntegrator _processIntegrator;
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> _processIntegrator{nullptr};
 
   /** the ControlManager */
-  SP::ControlManager _CM;
+  std::shared_ptr<ControlManager> _CM{nullptr};
 
-  /** DynamicalSystemsGraph (for convenience)*/
-  SP::DynamicalSystemsGraph _DSG0;
+  /** siconos::graphs::DynamicalSystemsGraph (for convenience)*/
+  std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> _DSG0{nullptr};
 
   /** InteractionsGraph (for convenience)*/
-  SP::InteractionsGraph _IG0;
+  std::shared_ptr<siconos::graphs::InteractionsGraph> _IG0{nullptr};
 
-public:
+  // Rule of five
+  ControlSimulation() = delete;
+  ControlSimulation(const ControlSimulation&) = delete;
+  ControlSimulation(ControlSimulation&&) = delete;
+  ControlSimulation& operator=(const ControlSimulation&) = delete;
+  ControlSimulation& operator=(ControlSimulation&&) = delete;
 
+ public:
   /** destructor */
-  virtual ~ControlSimulation() {};
+  virtual ~ControlSimulation() noexcept = default;
 
   /** Modify the value of theta (for MoreauJeanOSI)
    * \param newTheta the new value of theta */
@@ -119,25 +146,26 @@ public:
    * \param ds the DynamicalSystem to integrate
    * \param name of the ds (optional)
    */
-  void addDynamicalSystem(SP::DynamicalSystem ds, const std::string& name = "");
+  void addDynamicalSystem(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                          const std::string& name = "");
 
   /** Add a Sensor
    * \param sensor the sensor to be added
    * \param h sampling period (or timestep) for the Sensor
    */
-  void addSensor(SP::Sensor sensor, const double h);
+  void addSensor(std::shared_ptr<Sensor> sensor, const double h);
 
   /** Add an Actuator
    * \param actuator the controller to be added
    * \param h sampling period (or timestep) for the Actuator
    */
-  void addActuator(SP::Actuator actuator, const double h);
+  void addActuator(std::shared_ptr<Actuator> actuator, const double h);
 
   /** Add an Observer
    * \param observer the observer to be added
    * \param h sampling period (or timestep) for the Observer
    */
-  void addObserver(SP::Observer observer, const double h);
+  void addObserver(std::shared_ptr<Observer> observer, const double h);
 
   /** store the simulation data in a row of the matrix
    * \param indx the current row index
@@ -146,24 +174,23 @@ public:
 
   /** Return the Simulation
    * \return the simulation for the main simulation
-  */
-  inline SP::Simulation simulation() const
+   */
+  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const
   {
     return _processSimulation;
   };
 
   /** Return the OneStepIntegrator
    * \return the Integrator
-  */
-  inline SP::OneStepIntegrator integrator() const
+   */
+  inline std::shared_ptr<siconos::integrators::OneStepIntegrator> integrator() const
   {
     return _processIntegrator;
   };
 
-  /** Return the NonSmoothDynamicalSystem
-   * \return the NonSmoothDynamicalSystem
-  */
-  inline SP::NonSmoothDynamicalSystem model() const
+  /** \return the siconos::modeling::NonSmoothDynamicalSystem
+   */
+  inline std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> model() const
   {
     return _nsds;
   }
@@ -171,42 +198,27 @@ public:
   /** Return the data matrix
    * \return the data matrix
    */
-  inline SP::SimpleMatrix data() const
-  {
-    return _dataM;
-  }
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> data() const { return _dataM; }
 
   /** get the legend for the matrix
    * \return legend as string of space seperated values
    */
-  inline std::string dataLegend() const
-  {
-    return _dataLegend;
-  }
+  inline std::string dataLegend() const { return _dataLegend; }
 
   /**
      \return the elapsed time computing in seconds
   */
-  inline double elapsedTime() const
-  {
-    return _elapsedTime;
-  }
+  inline double elapsedTime() const { return _elapsedTime; }
 
   /** Return the ControlManager
    * \return the ControlManager
    */
-  inline SP::ControlManager CM() const
-  {
-    return _CM;
-  };
+  inline std::shared_ptr<ControlManager> CM() const { return _CM; };
 
   /** Set the value of _saveOnlyMainSimulation
    * \param v a boolean
    */
-  inline void setSaveOnlyMainSimulation(bool v)
-  {
-    _saveOnlyMainSimulation = v;
-  };
+  inline void setSaveOnlyMainSimulation(bool v) { _saveOnlyMainSimulation = v; };
 
   /** Set the simulation to be silent, e.g. do not show any progress bar
    * \param s is true is silent, else display progress bar */
@@ -215,5 +227,6 @@ public:
   /** Run the simulation */
   virtual void run() = 0;
 };
+}  // namespace siconos::control
 
-#endif // CONTROLDYNAMICALSYSTEM_H
+#endif  // CONTROLDYNAMICALSYSTEM_H

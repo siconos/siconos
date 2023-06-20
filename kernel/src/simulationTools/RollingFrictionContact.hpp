@@ -21,19 +21,17 @@
 #ifndef RollingFrictionContact_H
 #define RollingFrictionContact_H
 
+#include "Friction_cst.h"  // contains only enum. Ok.
 #include "LinearOSNS.hpp"
 
-#include <Friction_cst.h>
-#include <RollingFrictionContactProblem.h>
-/** Pointer to function of the type used for drivers for RollingFrictionContact
- * problems in Numerics */
-typedef int (*RollingDriver)(RollingFrictionContactProblem *, double *,
-                             double *, SolverOptions *);
-TYPEDEF_SPTR(RollingFrictionContactProblem)
+struct RollingFrictionContactProblem;
+struct SolverOptions;
+
+namespace siconos::nonsmooth_formulations {
 
 /**
    Formalization and Resolution of a Friction-Contact Problem
-   
+
    This class is devoted to the formalization and the resolution of
    friction contact problems defined by :
 
@@ -46,15 +44,15 @@ TYPEDEF_SPTR(RollingFrictionContactProblem)
    \f]
 
    and a Coulomb friction law.
-   
+
    With:
    - \f$ velocity \in R^{n} \f$  and \f$ reaction \in R^{n} \f$ the unknowns,
    - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
-   
+
    The dimension of the problem (2D or 3D) is given by the variable
    contactProblemDim and the proper Numerics driver will be called according to
    this value.
-   
+
    Construction: just set Numerics Solver id
 
    Main functions:
@@ -66,47 +64,49 @@ TYPEDEF_SPTR(RollingFrictionContactProblem)
 
  */
 class RollingFrictionContact : public LinearOSNS {
-protected:
+ protected:
+  /** Pointer to function of the type used for drivers for RollingFrictionContact
+   * problems in Numerics */
+  typedef int (*RollingDriver)(RollingFrictionContactProblem *, double *, double *,
+                               SolverOptions *);
 
   ACCEPT_SERIALIZATION(RollingFrictionContact);
 
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int _contactProblemDim;
+  int _contactProblemDim{3};
 
   /** * friction coefficients */
-  SP::MuStorage _mu;
+  std::shared_ptr<std::vector<double>> _mu{nullptr};
 
   /** * friction coefficients */
-  SP::MuStorage _muR;
+  std::shared_ptr<std::vector<double>> _muR{nullptr};
 
   /** Pointer to the function used to call the Numerics driver to solve the
    * problem */
   RollingDriver _rolling_frictionContact_driver;
 
-  RollingFrictionContactProblem _numerics_problem;
+  // RollingFrictionContactProblem _numerics_problem;
 
-public:
+ public:
   /** constructor (solver id and dimension)
    *
    *  \param dimPb dimension, default = 5
    *  \param numericsSolverId id of the solver to be used, optional,
    *  default : SICONOS_ROLLING_FRICTION_3D_NSGS
    */
-  RollingFrictionContact(
-      int dimPb = 5, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
+  RollingFrictionContact(int dimPb = 5,
+                         int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
 
   /** constructor from a pre-defined solver options set.
    *
    *  \param dim pb dimension, 5 only
    *  \param options the options set
    */
-  RollingFrictionContact(int dimPb, SP::SolverOptions options);
+  RollingFrictionContact(int dimPb, std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
-  virtual ~RollingFrictionContact(){};
-
-  // GETTERS/SETTERS
+  virtual ~RollingFrictionContact() noexcept = default;
 
   /** get the type of RollingFrictionContact problem (2D or 3D)
    *
@@ -119,14 +119,14 @@ public:
    *
    *  \return a vector of double
    */
-  inline const MuStorage getMu() const { return *_mu; }
+  inline const std::vector<double> getMu() const { return *_mu; }
 
   /** get a pointer to mu, the list of the friction coefficients
    *
    *  \return pointer on a std::vector<double>
    */
 
-  inline SP::MuStorage mu() const { return _mu; }
+  inline std::shared_ptr<std::vector<double>> mu() const { return _mu; }
 
   /** get the value of the component number i of mu, the vector of the friction
    *  coefficients
@@ -140,13 +140,12 @@ public:
    */
   void updateMu();
 
-  /** 
+  /**
       set the driver-function used to solve the problem
-      
+
       \param newFunction function of prototype Driver
   */
-  inline void setNumericsDriver(RollingDriver newFunction)
-  {
+  inline void setNumericsDriver(RollingDriver newFunction) {
     _rolling_frictionContact_driver = newFunction;
   };
 
@@ -154,26 +153,25 @@ public:
 
   /**
      initialize the RollingFrictionContact problem(compute topology ...)
-      
+
      \param simulation the simulation, owner of this OSNSPB
    */
-  void initialize(SP::Simulation simulation) override;
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> simulation) override;
 
   /** \return the friction contact problem from Numerics
    */
-  SP::RollingFrictionContactProblem frictionContactProblem();
+  std::shared_ptr<RollingFrictionContactProblem> frictionContactProblem();
 
-  /** \return the friction contact problem from Numerics (raw ptr, do not free)
-   */
-  RollingFrictionContactProblem *frictionContactProblemPtr();
+  // /** \return the friction contact problem from Numerics (raw ptr, do not free)
+  //  */
+  // RollingFrictionContactProblem *frictionContactProblemPtr();
 
   /** solve a friction contact problem
    *
    *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(SP::RollingFrictionContactProblem problem =
-                SP::RollingFrictionContactProblem());
+  int solve(std::shared_ptr<RollingFrictionContactProblem> problem = nullptr);
 
   /** Compute the unknown reaction and velocity and update the Interaction (y
    *  and lambda )
@@ -188,9 +186,8 @@ public:
   void display() const override;
 
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(NonSmoothLaw &nslaw) override;
-
-  ACCEPT_STD_VISITORS();
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
 };
+}  // namespace siconos::nonsmooth_formulations
 
-#endif // RollingFrictionContact_H
+#endif  // RollingFrictionContact_H

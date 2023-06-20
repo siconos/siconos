@@ -14,163 +14,103 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "TimeDiscretisation.hpp"
-#include "SiconosException.hpp"
-#include "Tools.hpp"
 
 #include <cmath>
 #include <limits>
 
+#include "SiconosException.hpp"
+#include "Tools.hpp"
 
-TimeDiscretisation::TimeDiscretisation(): _h(0.), _t0(std::numeric_limits<double>::quiet_NaN())
+siconos::simulation::TimeDiscretisation::TimeDiscretisation(double t0, double h)
+    : default_time_step_(h), t0_(t0)
 {
   mpf_init(_hgmp);
   mpf_init(_tkp1);
   mpf_init(_tk);
   mpf_init(_t0gmp);
+  // Set timeStep method
+  timeStep = [this](std::size_t = 0) { return default_time_step_; };
+  getTk = [this](std::size_t indx) { return t0_ + default_time_step_ * indx; };
 }
 
-// --- Straightforward constructors ---
-
-TimeDiscretisation::TimeDiscretisation(const TkVector& tk):
-  _h(0.0)
+siconos::simulation::TimeDiscretisation::TimeDiscretisation(double t0, std::string hstr)
+    : TimeDiscretisation{t0, 0.}
 {
-  mpf_init(_hgmp);
-  mpf_init(_tkp1);
-  mpf_init(_tk);
-  mpf_init(_t0gmp);
+  gmp_is_on_ = true;
+  mpf_set_str(_hgmp, hstr.c_str(), 10);
+  mpf_set_d(_t0gmp, t0);
+  timeStep = [this](std::size_t k = 0) {
+    mpf_mul_ui(_tkp1, _hgmp, k + 1);
+    mpf_mul_ui(_tk, _hgmp, k);
+    mpf_add(_tk, _tk, _t0gmp);
+    mpf_add(_tkp1, _tkp1, _t0gmp);
+    return mpf_get_d(_tkp1) - mpf_get_d(_tk);
+  }; // FP : why don't we only return _hgmp supposed to be constant ???
 
-  _tkV = tk;
-  _t0 = _tkV.at(0);
+  getTk = [this](std::size_t indx) {
+    mpf_mul_ui(_tk, _hgmp, indx);
+    mpf_add(_tk, _tk, _t0gmp);
+    return mpf_get_d(_tk);
+  };
 }
 
-// INPUTS: t0 and h
-TimeDiscretisation::TimeDiscretisation(double t0, double h):
-  _h(h), _t0(t0)
+siconos::simulation::TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0,
+                                                            double T)
+    : TimeDiscretisation{t0, (T - t0) / nSteps}
 {
-  mpf_init(_hgmp);
-  mpf_init(_tkp1);
-  mpf_init(_tk);
-  mpf_init(_t0gmp);
-
 }
 
-// INPUTS: t0 and h
-TimeDiscretisation::TimeDiscretisation(double t0, const std::string& str): _h(0.0), _t0(t0)
+siconos::simulation::TimeDiscretisation::TimeDiscretisation(const std::vector<double>& tk)
+    : time_instants_{tk}
 {
-  mpf_init(_hgmp);
-  mpf_init(_tkp1);
-  mpf_init(_tk);
-  mpf_set_str(_hgmp, str.c_str(), 10);
-  mpf_init_set_d(_t0gmp, t0);
-}
+  step_is_constant_ = false;
+  assert(tk.size() > 1 && "Please provide a vector which size is at least 2.");
+  t0_ = tk[0];
+  timeStep = [this](std::size_t k) { return time_instants_.at(k + 1) - time_instants_.at(k); };
+  // 'at' to throw exception if the requested index does not exist.
 
-TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T):
-  _t0(t0)
-{
-  mpf_init(_hgmp);
-  mpf_init(_tkp1);
-  mpf_init(_tk);
-  mpf_init(_t0gmp);
-
-  _h = (T - t0) / nSteps;
+  getTk = [this](std::size_t indx) { return time_instants_.at(indx); };
 }
 
 // Copy constructor
-TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
+siconos::simulation::TimeDiscretisation::TimeDiscretisation(const TimeDiscretisation& td)
+    : TimeDiscretisation{0, 0.}
 {
-  mpf_init(_hgmp);
-  mpf_init(_tkp1);
-  mpf_init(_tk);
-  mpf_init(_t0gmp);
-
-  if(td.hGmp())
-  {
-    mpf_init_set(_hgmp, *td.currentTimeStep());
-    _h = 0.;
+  if (gmp_is_on_) {
+    mpf_set(_hgmp, *td.currentTimeStep());
+    default_time_step_ = 0.;
   }
-  else if(td.hConst())
-  {
-    _h = td._h;
+  else if (step_is_constant_) {
+    default_time_step_ = td.default_time_step_;
   }
-  else
-  {
-    _h = 0.;
+  else {
+    default_time_step_ = 0.;
   }
-  _t0 = td.getT0();
-  _tkV = td.getTkVector();
+  t0_ = td.getT0();
+  time_instants_ = td.time_instants_;
+  timeStep = td.timeStep;
+  getTk = td.getTk;
 }
 
-
 // --- Destructor ---
-TimeDiscretisation::~TimeDiscretisation()
+siconos::simulation::TimeDiscretisation::~TimeDiscretisation() noexcept
 {
-  if(!_tkV.empty())
-    _tkV.clear();
-
   mpf_clear(_hgmp);
   mpf_clear(_tkp1);
   mpf_clear(_tk);
   mpf_clear(_t0gmp);
-
-}
-
-void TimeDiscretisation::setTkVector(const TkVector& newTk)
-{
-  _tkV.clear();
-  _tkV = newTk;
-}
-
-void TimeDiscretisation::setT0(double val)
-{
-  _t0 = val;
-  if(_h == 0.0)
-    mpf_set_d(_t0gmp, val);
-  if(!_tkV.empty())
-    THROW_EXCEPTION("TimeDiscretisation::setT0 must be called only when the TimeDiscretisation is with a constant h");
-}
-
-double TimeDiscretisation::currentTimeStep(const unsigned int k)
-{
-  if(_tkV.empty())
-  {
-    if(_h > 0.)
-      return _h;
-    else
-    {
-      mpf_mul_ui(_tkp1, _hgmp, k+1);
-      mpf_mul_ui(_tk, _hgmp, k);
-      mpf_add(_tk, _tk, _t0gmp);
-      mpf_add(_tkp1, _tkp1, _t0gmp);
-      return mpf_get_d(_tkp1) - mpf_get_d(_tk);
-    }
-  }
-  else
-    return _tkV.at(k+1) - _tkV.at(k);
-}
-
-double TimeDiscretisation::getTk(const unsigned int indx)
-{
-  if(_tkV.empty())
-  {
-    if(_h > 0.)
-      return _t0 + _h*indx;
-    else
-    {
-      mpf_mul_ui(_tk, _hgmp, indx);
-      mpf_add(_tk, _tk, _t0gmp);
-      return mpf_get_d(_tk);
-    }
-  }
-  else
-    return _tkV.at(indx);
 }
 
 // --- Other functions ---
-void TimeDiscretisation::display() const
+void siconos::simulation::TimeDiscretisation::display() const
 {
-  std::cout << "====> Time Disretisation :" <<std::endl;
-  std::cout << " the current timestep is " << _h << std::endl;
-  std::cout << "====" <<std::endl;
+  if (hConst()) {
+    std::cout << "====> Fixed time-step time discretisation :" << std::endl;
+    std::cout << " the current timestep is " << timeStep(0) << "\n";
+  }
+  else
+    std::cout << "====> Variable time-step time discretisation.\n";
+  std::cout << "====\n";
 }

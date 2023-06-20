@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file Simulation.hpp
   Global interface for simulation process description.
 */
@@ -22,80 +22,104 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include "SiconosConst.hpp"
-#include "SimulationTypeDef.hpp"
-#include "SiconosFwd.hpp"
 #include <fstream>
-#include "NonSmoothDynamicalSystem.hpp"
-#include "InteractionManager.hpp"
+#include <map>
+#include <set>
+
+#include "NonSmoothDynamicalSystem.hpp"  // To get ChangeLogIter
+#include "SiconosConst.hpp"              // for DEFAULT_TOLERANCE
+#include "SiconosSerialization.hpp"
+#include "SimulationTypes.hpp"  // SICONOS_OSNSP_DEFAULT
+// #include "InteractionManager.hpp"
+
+namespace siconos::algebra {
+class SiconosVector;
+}
+
+namespace siconos::integrators {
+
+class OneStepIntegrator;
+}
+
+namespace siconos::nonsmooth_formulations {
+class OneStepNSProblem;
+}
+
+namespace siconos::simulation {
+
+class EventsManager;
+class InteractionManager;
+class TimeDiscretisation;
 
 /**
    Description of the simulation process (integrators, time
    discretisation and so on).
-   
+
    This is an abstract class.
-   
+
    The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.
 */
 
-class Simulation : public std::enable_shared_from_this<Simulation>
-{
-protected:
+class Simulation : public std::enable_shared_from_this<Simulation> {
+ protected:
   ACCEPT_SERIALIZATION(Simulation);
 
   /** name or id of the Simulation */
-  std::string _name;
+  std::string _name{"unamed"};
 
   /** tool to manage all events */
-  SP::EventsManager _eventsManager;
+  std::shared_ptr<EventsManager> _eventsManager{nullptr};
 
   /** current starting time for integration */
-  double _tinit;
+  double _tinit{0.};
 
   /** current ending time for integration */
-  double _tend;
+  double _tend{0.};
 
   /** real ending time for integration (different from tend in case of
       stop during integrate, for example when a root is found in
       an EventDriven strategy)
   */
-  double _tout;
+  double _tout{0.};
 
-  double _T;
+  double _T{0.};
 
   /** the dynamical systems integrators */
-  SP::OSISet _allOSI;
+  std::shared_ptr<std::set<std::shared_ptr<siconos::integrators::OneStepIntegrator>>> _allOSI{
+      nullptr};
 
   /** the non smooth problems (each problem is identified thanks to
       its id) */
-  SP::OneStepNSProblems _allNSProblems;
+  std::shared_ptr<
+      std::vector<std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>>
+      _allNSProblems{nullptr};
 
   /** A pointer to the simulated nonsmooth dynamical system
    */
-  SP::NonSmoothDynamicalSystem _nsds;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds{nullptr};
 
   /** An interaction manager
    */
-  SP::InteractionManager _interman;
+  std::shared_ptr<siconos::simulation::InteractionManager> _interman{nullptr};
 
   /** _numberOfIndexSets is the number of index sets that we need for
    * simulation. It corresponds for most of the simulations to levelMaxForOutput + 1.
    * Nevertheless, some simulations need more sets of indices that the number
    * of outputs that we considered.
    */
-  unsigned int _numberOfIndexSets;
+  unsigned int _numberOfIndexSets{0};
 
   /** tolerance value used to compute the index sets.
       Default: equal to 10 x machine double precision (std::numeric_limits<double>::epsilon)
   */
-  double _tolerance;
+  double _tolerance{siconos::internal::DEFAULT_TOLERANCE};
 
   /** Output setup: if true, display solver stats */
-  bool _printStat;
+  bool _printStat{false};
 
   /** _staticLevels : do not recompute levels once they have been
    * initialized */
-  bool _staticLevels;
+  bool _staticLevels{false};
 
   /** File id for stats outputs.*/
   std::ofstream statOut;
@@ -104,60 +128,53 @@ protected:
    * bool, option specifying if a critere of relative convergence is
    * used. Default value is false.
    */
-  bool _useRelativeConvergenceCriterion;
+  bool _useRelativeConvergenceCriterion{false};
   /**
    * bool used to remind if the relative convergence held(useful for
    * the newton-check-convergence). Modified only if
    * _useRelativeConvergenceCriterion is true.
    */
-  bool _relativeConvergenceCriterionHeld;
+  bool _relativeConvergenceCriterionHeld{false};
   /**
    *double, relative tolerance. Used only if
    *_useRelativeConvergenceCriterion is true.
    */
-  double _relativeConvergenceTol;
+  double _relativeConvergenceTol{10e-3};
 
-  bool _isInitialized;
+  bool _isInitialized{false};
 
   /** current NSDS changelog position */
-  NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition;
+  std::list<siconos::modeling::NonSmoothDynamicalSystem::Change>::const_iterator _nsdsChangeLogPosition;
 
-  /** map of not-yet-initialized DS variables for each OSI */
-  std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
+  /** map of not-yet-initialized DS variables for each OS. This an internal and temporary map
+      that must be empty after initialize. */
+  std::map<std::shared_ptr<siconos::integrators::OneStepIntegrator>,
+           std::list<std::shared_ptr<siconos::modeling::DynamicalSystem>>>
+      _OSIDSmap;
 
+ private:
+  // Rule of five
+  Simulation(const Simulation&) = delete;
+  Simulation(Simulation&&) = delete;
+  Simulation& operator=(const Simulation&) = delete;
+  Simulation& operator=(Simulation&&) = delete;
 
-private:
-
-  /** copy constructor. Private => no copy nor pass-by value.
-   */
-  Simulation(const Simulation&);
-
-  /* assignment of simulation. Private => no copy nor pass-by value.
-   */
-  Simulation& operator=(const Simulation&);
-
-public:
-
+ public:
   /** default constructor, for serialization
    */
-  Simulation() {};
+  Simulation() = default;
 
-  /** default constructor
+  /** standard constructor
    *
    *  \param nsds current nonsmooth dynamical system
    *  \param td the timeDiscretisation for this Simulation
    */
-  Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
-
-  /** constructor with only a TimeDiscretisation
-   *
-   *  \param td the timeDiscretisation for this Simulation
-   */
-  Simulation(SP::TimeDiscretisation td);
+  Simulation(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+             std::shared_ptr<TimeDiscretisation> td);
 
   /** destructor
    */
-  virtual ~Simulation();
+  virtual ~Simulation() noexcept;
 
   /** clear all maps. This function should not exist, but there is a cycle
    *  with the shared_ptr: the OneStepIntegrator and OneStepNSProblem have
@@ -176,18 +193,12 @@ public:
    *
    *  \return std::string : the name of the Simulation
    */
-  inline const std::string name() const
-  {
-    return _name;
-  }
+  inline const std::string name() const { return _name; }
 
   /** set the name of the Simulation
       \param newName the new name
    */
-  inline void setName(const std::string& newName)
-  {
-    _name = newName;
-  }
+  inline void setName(const std::string& newName) { _name = newName; }
 
   /** returns time instant k of the time discretisation  */
   double getTk() const;
@@ -213,10 +224,7 @@ public:
 
   /** returns a pointer to the EventsManager
    */
-  inline SP::EventsManager eventsManager() const
-  {
-    return _eventsManager;
-  };
+  inline std::shared_ptr<EventsManager> eventsManager() const { return _eventsManager; };
 
   /** get "current time" (ie starting point for current integration,
       time of currentEvent of eventsManager.)
@@ -236,10 +244,7 @@ public:
    *
    *  \return a double.
    */
-  inline double timeStep() const
-  {
-    return (nextTime() - startingTime());
-  };
+  inline double timeStep() const { return (nextTime() - startingTime()); };
 
   /** true if a future event is to be treated or not (ie if some
       events remain in the eventsManager).
@@ -248,10 +253,11 @@ public:
 
   /** get all the Integrators of the Simulation
    *
-   *  \return an OSISset
+   *  \return a container of OneStepIntegrator
    */
-  inline const SP::OSISet oneStepIntegrators() const
-  {
+  inline const std::shared_ptr<
+      std::set<std::shared_ptr<siconos::integrators::OneStepIntegrator>>>
+  oneStepIntegrators() const {
     return _allOSI;
   };
 
@@ -259,56 +265,47 @@ public:
    *
    *  \return an unsigned int
    */
-  inline size_t numberOfOSI() const
-  {
-    return _allOSI->size();
-  }
+  inline size_t numberOfOSI() const { return _allOSI->size(); }
 
   /** insert an Integrator into the simulation list of integrators
    *
    *  \param osi the OneStepIntegrator to add
    */
-  virtual void insertIntegrator(SP::OneStepIntegrator osi);
+  virtual void insertIntegrator(std::shared_ptr<siconos::integrators::OneStepIntegrator> osi);
 
   /** associate an OSI with a DS */
-  void associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
+  void associate(std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+                 std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
-  /** 
+  /**
       get a pointer to indexSets[i]
-      
+
       \param i number of the required index set
       \return a graph of interactions
    */
-  SP::InteractionsGraph indexSet(unsigned int i);
+  std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet(unsigned int i);
 
   /** get allNSProblems
    *
-   *  \return a pointer to OneStepNSProblems object (container of
-   *  SP::OneStepNSProblem)
+   *  \return a set of pointers to OneStepNSProblem
    */
-  inline const SP::OneStepNSProblems oneStepNSProblems() const
-  {
-    return _allNSProblems;
-  };
+  inline auto oneStepNSProblems() const { return _allNSProblems; };
 
   /** get the number of OSNSP in the Simulation (ie the size of allNSProblems)
    *
    *  \return an unsigned int
    */
-  inline size_t numberOfOSNSProblems() const
-  {
-    return _allNSProblems->size();
-  }
+  inline size_t numberOfOSNSProblems() const { return _allNSProblems->size(); }
 
   /**
      get a OneStep nonsmooth problem of the simulation, identify with its number.
-     
+
      \param id number of the required osnspb
      \return a pointer to OneStepNSProblem
   */
-  SP::OneStepNSProblem oneStepNSProblem(int id);
+  std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> oneStepNSProblem(int id);
 
-  /** 
+  /**
       add a OneStepNSProblem in the Simulation
 
       \param osns the OneStepNSProblem to insert
@@ -316,24 +313,25 @@ public:
       at impact level SICONOS_OSNSP_ED_IMPACT, at acceleration level
       SICONOS_OSNSP_ED_ACCELERATION
    */
-  virtual void insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id = SICONOS_OSNSP_DEFAULT);
-
+  virtual void insertNonSmoothProblem(
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osns,
+      int Id = SICONOS_OSNSP_DEFAULT);
 
   /** get the NonSmoothDynamicalSystem
    *
    *  \return NonSmoothDynamicalSystem
    */
-  inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const
-  {
+  inline std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>
+  nonSmoothDynamicalSystem() const {
     return _nsds;
   }
   /** set the NonSmoothDynamicalSystem of the Simulation
    *
    *  \param newPtr a pointer on NonSmoothDynamicalSystem
    */
-  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
-  {
-    _nsdsChangeLogPosition = _nsds->changeLogBegin();
+  void setNonSmoothDynamicalSystemPtr(
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> newPtr) {
+    _nsdsChangeLogPosition = _nsds->changeLog().begin();
     _nsds = newPtr;
   }
 
@@ -341,39 +339,27 @@ public:
    *
    *  \return a double
    */
-  double tolerance() const
-  {
-    return _tolerance;
-  };
+  double tolerance() const { return _tolerance; };
 
   /** set the value of offset for q dof vector in dynamical systems
       (to avoid events accumulation)
 
       \param inputVal new tolerance
    */
-  void setTolerance(double inputVal)
-  {
-    _tolerance = inputVal;
-  };
+  void setTolerance(double inputVal) { _tolerance = inputVal; };
 
   /**
      set printStat value: if true, print solver stats.
-     
+
      \param newVal true to activate stats
   */
-  inline void setPrintStat(const bool& newVal)
-  {
-    _printStat = newVal;
-  };
+  inline void setPrintStat(const bool& newVal) { _printStat = newVal; };
 
   /** \return true if stats are activated
    */
-  inline bool getPrintStat() const
-  {
-    return _printStat;
-  };
+  inline bool getPrintStat() const { return _printStat; };
 
-  /** 
+  /**
       update all index sets of the topology, using current y and lambda values of Interactions
    */
   void updateIndexSets();
@@ -386,21 +372,22 @@ public:
   virtual void updateIndexSet(unsigned int level) = 0;
 
   /** Complete initialisation of the Simulation (OneStepIntegrators,
-      OneStepNSProblem, TImediscretisation).
+      siconos::nonsmooth_formulations::OneStepNSProblem, TImediscretisation).
   */
-  virtual void initialize();
+  virtual void initialize() = 0;
 
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
-  virtual void initializeInteraction(double time, SP::Interaction inter);
+  virtual void initializeInteraction(double time,
+                                     std::shared_ptr<siconos::modeling::Interaction> inter);
 
   /** Set an object to automatically manage interactions during the simulation
    *
    *  \param manager
    */
-  void insertInteractionManager(SP::InteractionManager manager)
-    { _interman = manager; }
-
+  void insertInteractionManager(std::shared_ptr<InteractionManager> manager) {
+    _interman = manager;
+  }
 
   /** Compute the residu of all OSI
    */
@@ -408,7 +395,7 @@ public:
 
   /** computes a one step NS problem
    *
-   *  \param nb the id of the OneStepNSProblem to be computed
+   *  \param nb the id of the siconos::nonsmooth_formulations::OneStepNSProblem to be computed
    *  \return information about the solver convergence.
    */
   int computeOneStepNSProblem(int nb);
@@ -423,43 +410,45 @@ public:
    *  \param level lambda order used to compute input
    */
   virtual void updateInput(unsigned int level);
-  
+
   /** update all input terms
    */
   virtual void updateAllInput();
+
   /** update state of each dynamical system
    */
-  virtual void updateState(unsigned int level=0);
+  virtual void updateState(unsigned int level = 0);
 
   /** update output
    *
    *  \param level lambda order used to compute output
    *  level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  virtual void updateOutput(unsigned int level=0);
+  virtual void updateOutput(unsigned int level = 0);
 
   /** update output, state, and input
    *
    *  \param level lambda order used to compute input
    *  level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  void update(unsigned int level=0)
-    { updateInput(level); updateState(level); updateOutput(level); }
+  void update(unsigned int level = 0) {
+    updateInput(level);
+    updateState(level);
+    updateOutput(level);
+  }
 
   /** run the simulation, from t0 to T
    *  with default parameters if any particular settings has been done
    */
   virtual void run();
 
-  /** initialisation for OneStepNSProblem.
+  /** initialisation for siconos::nonsmooth_formulations::OneStepNSProblem.
    */
   virtual void initOSNS() = 0;
-
 
   /** step from current event to next event of EventsManager
    */
   virtual void advanceToEvent() = 0;
-
 
   /** clear the NSDS changelog up to current position.  If you have a
    *  particularly dynamic simulation (DS and Interactions created and
@@ -468,89 +457,74 @@ public:
    */
   void clearNSDSChangeLog();
 
-
   /** Set the option to specify if a relative convergence criterion must
       be used to stop the Newton iterations.
 
       \param use true if relative critarion activated
   */
-  inline void setUseRelativeConvergenceCriteron(bool use)
-  {
+  inline void setUseRelativeConvergenceCriteron(bool use) {
     _useRelativeConvergenceCriterion = use;
   };
   /**\return true if the relative convergence criterion is activated.
    */
-  inline bool useRelativeConvergenceCriteron()
-  {
-    return _useRelativeConvergenceCriterion;
-  };
+  inline bool useRelativeConvergenceCriteron() { return _useRelativeConvergenceCriterion; };
 
   /**
      Set the relative convergence tolerance
-     
+
      \param v tolerance value
   */
-  inline void setRelativeConvergenceTol(double v)
-  {
-    _relativeConvergenceTol = v;
-  };
+  inline void setRelativeConvergenceTol(double v) { _relativeConvergenceTol = v; };
 
   /** \return the relative convergence tolerence.
    *
    */
-  inline double relativeConvergenceTol()
-  {
-    return _relativeConvergenceTol;
-  };
+  inline double relativeConvergenceTol() { return _relativeConvergenceTol; };
 
   /**
    \param newVal a new relative convergence criterion
    *
    */
-  inline void setRelativeConvergenceCriterionHeld(bool newVal)
-  {
+  inline void setRelativeConvergenceCriterionHeld(bool newVal) {
     _relativeConvergenceCriterionHeld = newVal;
   };
   /**
      \return true if the relative convergence criterion held.
    *
    */
-  inline bool relativeConvergenceCriterionHeld()
-  {
-    return _relativeConvergenceCriterionHeld;
-  };
+  inline bool relativeConvergenceCriterionHeld() { return _relativeConvergenceCriterionHeld; };
 
   /**
      return input lambda[level](coor) for all the interactions
 
      \param level lambda min order to be computed
      \param coor the coordinate of interest
-     \return a SP::SiconosVector that contains the concatenated value
+     \return a std::shared_ptr<siconos::algebra::SiconosVector> that contains the concatenated
+     value
   */
-  SP::SiconosVector lambda(unsigned int level = 0, unsigned int coor=0 );
+  std::shared_ptr<siconos::algebra::SiconosVector> lambda(unsigned int level = 0,
+                                                          unsigned int coor = 0);
 
-  /** 
+  /**
       return output y[level](coor) for all the interactions
-      
+
       \param level y min order to be computed
       \param coor the coordinate of interest
-      \return a SP::SiconosVector that contains the concatenated value
+      \return a std::shared_ptr<siconos::algebra::SiconosVector> that contains the concatenated
+     value
   */
-  SP::SiconosVector y(unsigned int level = 0, unsigned int coor=0 );
+  std::shared_ptr<siconos::algebra::SiconosVector> y(unsigned int level = 0,
+                                                     unsigned int coor = 0);
 
   /** call eventsManager processEvents.
    */
   void processEvents();
 
-
   /** set staticLevels
    *
    *  \param b decides whether levels should be computed at each iteration
    */
-  void setStaticLevels(bool b)
-  {
-    _staticLevels = b;
-  }
+  void setStaticLevels(bool b) { _staticLevels = b; }
 
   /** This updates the end of the Simulation.
    *  \warning this should be called only from the Model, to synchronise the 2 values
@@ -565,29 +539,28 @@ public:
 
   /** Add a new Interaction between one or a pair of DSs.
    *
-   *  \param inter the SP::Interaction to add
-   *  \param ds1 the first SP::DynamicalSystem in the Interaction
-   *  \param ds2 the second SP::DynamicalSystem in the Interaction, if any
+   *  \param inter the std::shared_ptr<siconos::modeling::Interaction> to add
+   *  \param ds1 the first std::shared_ptr<siconos::modeling::DynamicalSystem> in the
+   * Interaction \param ds2 the second std::shared_ptr<siconos::modeling::DynamicalSystem> in
+   * the Interaction, if any
    */
-  void link(SP::Interaction inter,
-            SP::DynamicalSystem ds1,
-            SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+  void link(std::shared_ptr<siconos::modeling::Interaction> inter,
+            std::shared_ptr<siconos::modeling::DynamicalSystem> ds1,
+            std::shared_ptr<siconos::modeling::DynamicalSystem> ds2 =
+                std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
   /** Remove an Interaction from the simulation.
    *
-   *  \param inter the SP::Interaction to remove
+   *  \param inter the std::shared_ptr<siconos::modeling::Interaction> to remove
    */
-  void unlink(SP::Interaction inter);
+  void unlink(std::shared_ptr<siconos::modeling::Interaction> inter);
 
-  /** Call the interaction manager one if is registered, otherwise do nothing. */
+  /** Call the interaction manager if one is registered, otherwise do nothing. */
   void updateInteractions();
 
   /*TS set the ds->q memory, the world (CAD model for example) must be updated.
     Overload this method to update user model.*/
-  virtual void updateWorldFromDS()
-  {
-    ;
-  };
+  virtual void updateWorldFromDS() { ; };
 
   /** initialize OSI-DS links in the NSDS graph. */
   void initializeOSIAssociations();
@@ -601,11 +574,9 @@ public:
   void initializeIndexSets();
 
   /** Complete initialisation of the Simulation (OneStepIntegrators,
-      OneStepNSProblem, TImediscretisation).
+      siconos::nonsmooth_formulations::OneStepNSProblem, TImediscretisation).
   */
   virtual void firstInitialize();
-
-  VIRTUAL_ACCEPT_VISITORS(Simulation);
 };
-
-#endif // SIMULATION_H
+}  // namespace siconos::simulation
+#endif  // SIMULATION_H

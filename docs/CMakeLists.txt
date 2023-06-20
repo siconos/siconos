@@ -63,7 +63,7 @@ if(USE_DOXYGEN)
     # A target to filter out doxygen warnings : remove empty files and concatenate the others.
     # call python function from gendoctools (filter_doxygen_warnings_files).
     add_custom_target(filter_warnings
-      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
       "from gendoctools.filters import filter_doxygen_warnings_files as f; f('${CMAKE_BINARY_DIR}/doxygen_warnings', 'SUMMARY.warnings')"
       VERBATIM
       COMMENT "Filter doxygen warnings (result : SUMMARY.warnings)."
@@ -141,7 +141,7 @@ if(WITH_DOCUMENTATION)
   #  1. creates rst files in a breathe-ready format from xml outputs of doxygen run on C/C++ headers
   #  2. creates rst files from 'autodoc' outputs, docstrings, or others python doc. things.
   add_custom_target(rst_api
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
     "from gendoctools.generate_api import build_rst_api as f; f('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
     VERBATIM
     COMMENT "Create main rst files for C/C++ and python API.")
@@ -155,7 +155,7 @@ if(WITH_DOCUMENTATION)
 
   # post command to make html : filter sphinx warnings to a log file.
   add_custom_command(TARGET html POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
     "from gendoctools.filters import filter_sphinx_warnings as f; f('${SPHINX_LOG_FILE}')"
     VERBATIM
     COMMENT "Filtering sphinx logfile into ${SPHINX_LOG_FILE}.")

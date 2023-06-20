@@ -46,10 +46,10 @@ public:
   //  \param mass the mass.
   //  \param inertia the inertia matrix.
   //
-  OccBody(SP::SiconosVector position,
-          SP::SiconosVector velocity,
+  OccBody(std::shared_ptr<siconos::algebra::SiconosVector> position,
+          std::shared_ptr<siconos::algebra::SiconosVector> velocity,
           double mass ,
-          SP::SiconosMatrix inertia);
+          std::shared_ptr<siconos::algebra::SiconosMatrix> inertia);
 
   /** Association of a contact shape.
    * \param shape the contact shape.
@@ -58,8 +58,8 @@ public:
    * \param group contact group default 0
    */
   void addContactShape(SP::OccContactShape shape,
-                       SP::SiconosVector position = SP::SiconosVector(),
-                       SP::SiconosVector orientation = SP::SiconosVector(),
+                       std::shared_ptr<siconos::algebra::SiconosVector> position = std::shared_ptr<siconos::algebra::SiconosVector>(),
+                       std::shared_ptr<siconos::algebra::SiconosVector> orientation = std::shared_ptr<siconos::algebra::SiconosVector>(),
                        unsigned int group=0);
 
 
@@ -69,8 +69,8 @@ public:
    * \param orientation relative orientation quaternion w, x, y, z
    */
   void addShape(SP::TopoDS_Shape shape,
-                SP::SiconosVector position = SP::SiconosVector(),
-                SP::SiconosVector orientation = SP::SiconosVector());
+                std::shared_ptr<siconos::algebra::SiconosVector> position = std::shared_ptr<siconos::algebra::SiconosVector>(),
+                std::shared_ptr<siconos::algebra::SiconosVector> orientation = std::shared_ptr<siconos::algebra::SiconosVector>());
 
   /** Update positions and orientations of contact shapes.
    */

@@ -46,7 +46,7 @@ private:
 
   // Members
 
-  SP::NonSmoothDynamicalSystem nsds;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 
 public:
   void setUp();

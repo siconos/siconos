@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file OneStepNSProblem.hpp
   \brief Interface to formalize and solve Non-Sooth problems
  */
@@ -22,69 +22,78 @@
 #ifndef ONESTEPNSPROBLEM_H
 #define ONESTEPNSPROBLEM_H
 
-#include "SiconosFwd.hpp"
-#include "SiconosVisitor.hpp"
-#include "SimulationTypeDef.hpp"
+// #include <memory>
+#include <set>
+
+#include "SiconosSerialization.hpp"
 #include "SimulationGraphs.hpp"
 
+// namespace siconos::numerics {
+struct SolverOptions;
+//}
+
+namespace siconos::simulation {
+class Simulation;
+}
+
+namespace siconos::nonsmooth_formulations {
+
 /**
-   Non Smooth Problem Formalization and Simulation
-   
-   This is an abstract class, that provides an interface to define a
-   non smooth problem:
-   - a formulation (ie the way the problem is written)
-   - a solver (algorithm and solving formulation, that can be
-   different from problem formulation)
-   - routines to compute the problem solution.
-   
-   Two types of problem formulation are available :
-   - Quadratic Problem
-   - Linear Problem 
-   
-   See derived classes (QP and LinearOSNS) for details. 
-   
-   For Linear problems, the following formulations exists: 
-   - Linear Complementarity (LCP)
-   - Mixed Linear Complementarity (MLCP)
-   - Affine Variational Inequalities (AVI)
-   - FrictionContact
-   - Relay
-   - Equality
-   - GenericMechanical
-   - MultipleImpact
-   - GlobalFrictionContact
+ Non Smooth Problem Formalization and Simulation
 
-   The usual way to build and initialize a one-step nonsmooth problem is :
+ This is an abstract class, that provides an interface to define a
+ non smooth problem:
+ - a formulation (ie the way the problem is written)
+ - a solver (algorithm and solving formulation, that can be
+ different from problem formulation)
+ - routines to compute the problem solution.
 
-   - call constructor with the id of the required Numerics solver.
-   (see Solver class or Numerics documentation for details on algorithm name and parameters).
-   - initialize(simulation)
-   Initialize process is usually done through model->initialize(simulation). 
-   See Examples for practical details.
+ Two types of problem formulation are available :
+ - Quadratic Problem
+ - Linear Problem
 
-   Options for Numerics and the driver for solvers
+ See derived classes (QP and LinearOSNS) for details.
 
-   When the Numerics driver is called a set of solver options (name, tolerance, max. number of iterations ...)
-   is required --> SolverOptions.
+ For Linear problems, the following formulations exists:
+ - Linear Complementarity (LCP)
+ - Mixed Linear Complementarity (MLCP)
+ - Affine Variational Inequalities (AVI)
+ - FrictionContact
+ - Relay
+ - Equality
+ - GenericMechanical
+ - MultipleImpact
+ - GlobalFrictionContact
 
-   Default values are always set in solver options the OneStepNSProblem is built
-   but if you need to set them yourself, please check Users'guide, Numerics solvers part.
+ The usual way to build and initialize a one-step nonsmooth problem is :
 
- */
-class OneStepNSProblem
-{
+ - call constructor with the id of the required Numerics solver.
+ (see Solver class or Numerics documentation for details on algorithm name and parameters).
+ - initialize(simulation)
+ Initialize process is usually done through model->initialize(simulation).
+ See Examples for practical details.
 
-protected:
+ Options for Numerics and the driver for solvers
+
+ When the Numerics driver is called a set of solver options (name, tolerance, max. number of
+ iterations ...) is required --> SolverOptions.
+
+ Default values are always set in solver options the OneStepNSProblem is built
+ but if you need to set them yourself, please check Users'guide, Numerics solvers part.
+
+*/
+class OneStepNSProblem {
+ protected:
   ACCEPT_SERIALIZATION(OneStepNSProblem);
 
   /** Numerics solver properties */
-  SP::SolverOptions _numerics_solver_options;
+  std::shared_ptr<SolverOptions> _numerics_solver_options;
 
   /** size of the nonsmooth problem */
   unsigned int _sizeOutput = 0;
 
   /** link to the simulation that owns the nonsmooth problem */
-  SP::Simulation _simulation;
+  std::shared_ptr<siconos::simulation::Simulation> _simulation;
 
   /** level of index sets that is considered by this osnsp */
   unsigned int _indexSetLevel = 0;
@@ -103,59 +112,49 @@ protected:
   unsigned int _maxSize = 0;
 
   /* set of nslaw types */
-  std::set<float> _nslawtype;
+  std::set<float> _nslawtype = {};
 
-  /*During Newton it, this flag allows to update the numerics matrices only once if necessary.*/
+  /*During Newton it, this flag allows to update the numerics matrices only once if
+   * necessary.*/
   bool _hasBeenUpdated = false;
 
-  // --- CONSTRUCTORS/DESTRUCTOR ---
-  /** default constructor */
   OneStepNSProblem() = default;
 
-private:
-
-  /* copy constructor, forbidden */
+ private:
   OneStepNSProblem(const OneStepNSProblem&) = delete;
-
-  /* assignment, forbidden */
+  OneStepNSProblem(OneStepNSProblem&&) = delete;
   OneStepNSProblem& operator=(const OneStepNSProblem&) = delete;
+  OneStepNSProblem& operator=(OneStepNSProblem&&) = delete;
 
-public:
+ public:
   /** constructor from a pre-defined solver options set.
    *
    *  \param options the options set
    */
-  OneStepNSProblem(SP::SolverOptions options): _numerics_solver_options(options){};
+  OneStepNSProblem(std::shared_ptr<SolverOptions> options)
+      : _numerics_solver_options(options){};
 
   /** destructor
    */
-  virtual ~OneStepNSProblem(){};
-
-  // --- GETTERS/SETTERS ---
-
+  virtual ~OneStepNSProblem() noexcept = default;
 
   /** To get the SolverOptions structure
    *
    *  \return , the numerics structure used to save solver parameters
    */
-  inline SP::SolverOptions numericsSolverOptions() const
-  {
+  inline std::shared_ptr<SolverOptions> numericsSolverOptions() const {
     return _numerics_solver_options;
   };
 
   /** returns the dimension of the nonsmooth problem
    */
-  inline unsigned int getSizeOutput() const
-  {
-    return _sizeOutput;
-  }
+  inline unsigned int getSizeOutput() const { return _sizeOutput; }
 
   /** get the simulation which owns this nonsmooth problem
    *
    *  \return a pointer on Simulation
    */
-  inline SP::Simulation simulation() const
-  {
+  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const {
     return _simulation;
   }
 
@@ -163,8 +162,7 @@ public:
    *
    *  \param newS a pointer to Simulation
    */
-  inline void setSimulationPtr(SP::Simulation newS)
-  {
+  inline void setSimulationPtr(std::shared_ptr<siconos::simulation::Simulation> newS) {
     _simulation = newS;
   }
 
@@ -172,67 +170,49 @@ public:
    *
    *  \return an unsigned int
    */
-  inline unsigned int indexSetLevel() const
-  {
-    return _indexSetLevel;
-  }
+  inline unsigned int indexSetLevel() const { return _indexSetLevel; }
 
   /** set the value of level min
    *
    *  \param newVal an unsigned int
    */
-  inline void setIndexSetLevel(unsigned int newVal)
-  {
-    _indexSetLevel = newVal;
-  }
+  inline void setIndexSetLevel(unsigned int newVal) { _indexSetLevel = newVal; }
 
   /** get the Input/Output level
    *
    *  \return an unsigned int
    */
-  inline unsigned int inputOutputLevel() const
-  {
-    return _inputOutputLevel;
-  }
+  inline unsigned int inputOutputLevel() const { return _inputOutputLevel; }
 
   /** set the value of Input/Output level
    *
    *  \param newVal an unsigned int
    */
-  inline void setInputOutputLevel(unsigned int newVal)
-  {
-    _inputOutputLevel = newVal;
-  }
+  inline void setInputOutputLevel(unsigned int newVal) { _inputOutputLevel = newVal; }
 
   /** get maximum value allowed for the dimension of the problem
    *
    *  \return an unsigned int
    */
-  inline unsigned int maxSize() const
-  {
-    return _maxSize;
-  }
+  inline unsigned int maxSize() const { return _maxSize; }
 
   /** set the value of maxSize
    *
    *  \param newVal an unsigned int
    */
-  inline void setMaxSize(const unsigned int newVal)
-  {
-    _maxSize = newVal;
-  }
+  inline void setMaxSize(const unsigned int newVal) { _maxSize = newVal; }
 
   /** Turn on/off verbose mode in numerics solver*/
   void setNumericsVerboseMode(bool vMode);
 
-  
   /**  set the verbose level in numerics solver*/
   void setNumericsVerboseLevel(int level);
 
-  /** 
+  /**
       Check if the OSNSPb has interactions
 
-      \return bool = true if the  osnsp has interactions, i.e. indexSet(_indexSetLevel)->size >0 
+      \return bool = true if the  osnsp has interactions, i.e. indexSet(_indexSetLevel)->size
+     >0
    */
   bool hasInteractions() const;
 
@@ -242,7 +222,7 @@ public:
    *
    *  \param  indexSet  the concerned index set
    */
-  virtual void displayBlocks(SP::InteractionsGraph indexSet);
+  virtual void displayBlocks(std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet);
 
   /** compute interactionBlocks if necessary (this depends on the type of
    *  OSNS, on the indexSets ...)
@@ -253,36 +233,32 @@ public:
    *
    *  \param ed an edge descriptor
    */
-  virtual void computeInteractionBlock(const InteractionsGraph::EDescriptor& ed ) = 0;
+  virtual void computeInteractionBlock(
+      const siconos::graphs::InteractionsGraph::EDescriptor& ed) = 0;
 
   /** compute diagonal Interaction block
    *
    *  \param vd a vertex descriptor
    */
-  virtual void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd) = 0;
+  virtual void computeDiagonalInteractionBlock(
+      const siconos::graphs::InteractionsGraph::VDescriptor& vd) = 0;
 
   /** \return bool _hasBeenUpdated
    */
-  bool hasBeenUpdated()
-  {
-    return _hasBeenUpdated;
-  }
+  bool hasBeenUpdated() { return _hasBeenUpdated; }
 
-  /** turn activation flag 
+  /** turn activation flag
    *
    *  \param v to set _hasBeenUpdated.
    */
-  void setHasBeenUpdated(bool v)
-  {
-    _hasBeenUpdated = v;
-  }
+  void setHasBeenUpdated(bool v) { _hasBeenUpdated = v; }
 
   /**
      initialize the problem (topology and so on)
-     
+
      \param sim the simulation that owns this OSNSPB
   */
-  virtual void initialize(SP::Simulation sim);
+  virtual void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
 
   /** prepare data of the osns for solving
    *
@@ -302,27 +278,26 @@ public:
    */
   virtual void postCompute() = 0;
 
-  /** 
+  /**
       change the solver type and its default parameters
-      
+
       - clear memory for the existing options set
       - create and initialize a new one
-      
-      \param solverId the new solver 
+
+      \param solverId the new solver
    */
   void setSolverId(int solverId);
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
       (Ex: for MoreauJeanOSI, W)
-      
+
       \param osi the OSI of the concerned dynamical system
       \param ds the concerned dynamical system
       \return the required matrix
   */
-  SP::SimpleMatrix getOSIMatrix(OneStepIntegrator& osi, SP::DynamicalSystem ds);
-
-  VIRTUAL_ACCEPT_VISITORS(OneStepNSProblem);
-  
+  std::shared_ptr<siconos::algebra::SimpleMatrix> getOSIMatrix(
+      siconos::integrators::OneStepIntegrator& osi,
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 };
-
-#endif // ONESTEPNSPROBLEM_H
+}  // namespace siconos::nonsmooth_formulations
+#endif  // ONESTEPNSPROBLEM_H

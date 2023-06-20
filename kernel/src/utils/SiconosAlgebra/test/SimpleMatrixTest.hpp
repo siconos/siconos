@@ -14,24 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __SimpleMatrixTest__
 #define __SimpleMatrixTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 
-class SimpleMatrixTest : public CppUnit::TestFixture
-{
-
-
-private:
-  
+class SimpleMatrixTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(SimpleMatrixTest);
-
 
   // test suite
   CPPUNIT_TEST_SUITE(SimpleMatrixTest);
@@ -85,15 +81,15 @@ private:
   CPPUNIT_TEST(testOperators11);
   CPPUNIT_TEST(testOperators12);
   CPPUNIT_TEST(testOperators13);
-  //CPPUNIT_TEST(testPow);
+  // CPPUNIT_TEST(testPow);
   CPPUNIT_TEST(testProd);
   CPPUNIT_TEST(testProdBis);
   CPPUNIT_TEST(testProdTer);
   CPPUNIT_TEST(testProd4);
   CPPUNIT_TEST(testProd5);
   CPPUNIT_TEST(testProd6);
-  //CPPUNIT_TEST(testGemv);
-  //CPPUNIT_TEST(testGemm);
+  // CPPUNIT_TEST(testGemv);
+  // CPPUNIT_TEST(testGemm);
   CPPUNIT_TEST(testFromAndFillCSC);
   CPPUNIT_TEST(testPLUFactorizationInPlace);
   CPPUNIT_TEST(testFactorize);
@@ -156,8 +152,8 @@ private:
   void testProd4();
   void testProd5();
   void testProd6();
-  //void testGemm();
-  //void testGemv();
+  // void testGemm();
+  // void testGemv();
   void testFromAndFillCSC();
   void testPLUFactorizationInPlace();
   void testFactorize();
@@ -165,25 +161,24 @@ private:
   void End();
 
   unsigned int size, size2;
-  SP::SiconosMatrix SicM, m1, m2, m3, m4, m5, m6, m7, m8, C, Cb, Cb2;
-  SPC::SiconosMatrix A, B, Ab, Bb;
-  SP::SimpleMatrix SimM;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> SicM, m1, m2, m3, m4, m5, m6, m7, m8, C, Cb, Cb2;
+  std::shared_ptr<const siconos::algebra::SiconosMatrix> A, B, Ab, Bb;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> SimM;
   std::string fic1, fic2;
-  SP::SiconosVector vect1, vect2, vect3, vect_sparse_1;
-  SP::DenseMat  D;
-  SP::TriangMat T, T2;
-  SP::SymMat S, S2;
-  SP::BandedMat Band, Band2;
-  SP::SparseMat SP, SP2, SP3, SP4;
-  SP::SparseCoordinateMat SP_coor;
-  SP::ZeroMat  Z, Z2;
-  SP::IdentityMat I, I2;
+  std::shared_ptr<siconos::algebra::SiconosVector> vect1, vect2, vect3, vect_sparse_1;
+  std::shared_ptr<siconos::algebra::DenseMat> D;
+  std::shared_ptr<siconos::algebra::TriangMat> T, T2;
+  std::shared_ptr<siconos::algebra::SymMat> S, S2;
+  std::shared_ptr<siconos::algebra::BandedMat> Band, Band2;
+  std::shared_ptr<siconos::algebra::SparseMat> SP, SP2, SP3, SP4;
+  std::shared_ptr<siconos::algebra::SparseCoordinateMat> SP_coor;
+  std::shared_ptr<siconos::algebra::ZeroMat> Z, Z2;
+  std::shared_ptr<siconos::algebra::IdentityMat> I, I2;
   double tol;
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

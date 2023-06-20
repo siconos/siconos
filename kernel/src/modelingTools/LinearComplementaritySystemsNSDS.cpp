@@ -14,50 +14,49 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LinearComplementaritySystemsNSDS.hpp"
-#include "Interaction.hpp"
-#include "Relation.hpp"
+
+#include "ComplementarityConditionNSL.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
-#include "ComplementarityConditionNSL.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "Interaction.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include "siconos_debug.h"
 
-
-using namespace RELATION;
-
-// --- CONSTRUCTORS/DESTRUCTOR ---
-
 //  constructor
-LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(double t0, double T, SP::SiconosVector x0,
-    SP::SimpleMatrix A,  SP::SimpleMatrix B,
-    SP::SimpleMatrix C,  SP::SimpleMatrix D,
-    SP::SiconosVector a,  SP::SiconosVector b): NonSmoothDynamicalSystem(t0,T)
+siconos::modeling::LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(
+    double t0, double T, std::shared_ptr<siconos::algebra::SiconosVector> x0,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> A,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> B,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+    std::shared_ptr<siconos::algebra::SiconosVector> a,
+    std::shared_ptr<siconos::algebra::SiconosVector> b)
+    : NonSmoothDynamicalSystem(t0, T)
 {
-  _ds.reset(new FirstOrderLinearTIDS(x0, A));
-  if(a)
-  {
-    _ds-> setbPtr(a);
+  _ds = std::make_shared<FirstOrderLinearTIDS>(x0, A);
+  if (a) {
+    _ds->setbPtr(a);
   }
   insertDynamicalSystem(_ds);
 
-  _relation.reset(new FirstOrderLinearTIR(C, B));
+  _relation = std::make_shared<FirstOrderLinearTIR>(C, B);
 
   // todo: check sizes
-  if(D)
-  {
+  if (D) {
     _relation->setDPtr(D);
   }
-  if(b)
-  {
+  if (b) {
     _relation->setePtr(b);
   }
-  _nslaw.reset(new ComplementarityConditionNSL(C->size(0)));
-  _interaction.reset(new Interaction(_nslaw, _relation));
+  _nslaw = std::make_shared<ComplementarityConditionNSL>(C->size(0));
+  _interaction = std::make_shared<Interaction>(_nslaw, _relation);
 
   link(_interaction, _ds);
 

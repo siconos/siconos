@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file MixedComplementarityConditionNSL.hpp
 
 */
@@ -23,51 +23,47 @@
 
 #include "NonSmoothLaw.hpp"
 
-#include "SiconosPointers.hpp"
-
-
+namespace siconos::modeling {
 /** Complementarity NonSmoothLaw
  *
  **/
-class MixedComplementarityConditionNSL : public NonSmoothLaw
-{
-private:
-  
+class MixedComplementarityConditionNSL : public NonSmoothLaw {
+ private:
   ACCEPT_SERIALIZATION(MixedComplementarityConditionNSL);
 
   /** default constructor
    */
-  MixedComplementarityConditionNSL() {};
-  unsigned int _equalitySize;
+  MixedComplementarityConditionNSL() = default;
+  unsigned int _equalitySize{0};
 
-public:
+ public:
   /** basic constructor
    *
    *  \param newSize size of the non smooth law
    *  \param equalitySize size of the equality relation
    */
-  MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize);
+  MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize)
+      : NonSmoothLaw(newSize + equalitySize), _equalitySize{equalitySize} {};
 
   /** Destructor */
-  ~MixedComplementarityConditionNSL();
-
+  ~MixedComplementarityConditionNSL() noexcept = default;
 
   /** print the data to the screen
-  */
-  inline void display()const override {};
+   */
+  inline void display() const override{};
 
   /** get the number of equality present in the MLCP
    *
    *  \return an unsigned int
    */
-  inline unsigned int equalitySize()
+  inline unsigned int equalitySize() { return _equalitySize; };
+
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override
   {
-    return _equalitySize;
-  };
-
-  /** Visitors hook
-   */
-  ACCEPT_STD_VISITORS();
+    tourist.visit(*this);
+  }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
-
-#endif // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H
+}  // namespace siconos::modeling
+#endif  // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H

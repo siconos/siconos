@@ -16,16 +16,9 @@
  * limitations under the License.
 */
 #include "ActuatorEvent.hpp"
-#include "EventFactory.hpp"
 #include "Actuator.hpp"
-#include "TimeDiscretisation.hpp"
 
-
-using namespace EventFactory;
-
-void ActuatorEvent::process(Simulation& sim)
+void siconos::control::ActuatorEvent::process(siconos::simulation::Simulation& sim)
 {
   _actuator->actuate();
 }
-
-AUTO_REGISTER_EVENT(ACTUATOR_EVENT, ActuatorEvent)

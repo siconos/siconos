@@ -19,8 +19,7 @@
 #define __AlgebraToolsTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "AlgebraTools.hpp"
-
+#include "SiconosMatrix.hpp"
 class AlgebraToolsTest : public CppUnit::TestFixture
 {
 
@@ -35,7 +34,7 @@ private:
   void testExpm();
   void End();
 
-  SP::SiconosMatrix A;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> A;
 
 public:
   void setUp();

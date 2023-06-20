@@ -14,35 +14,44 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianR.hpp"
-#include "PluggedObject.hpp"
-#include "SimpleMatrix.hpp"
 
 #include <iostream>
 
-void LagrangianR::_zeroPlugin()
+#include "PluggedObject.hpp"
+#include "SimpleMatrix.hpp"
+#include "SiconosVisitor.hpp"
+
+void siconos::modeling::LagrangianR::_zeroPlugin()
 {
   Relation::_zeroPlugin();
-  _pluginJachq = std::make_shared<PluggedObject>();
+  _pluginJachq = std::make_shared<siconos::plugins::PluggedObject>();
 }
 
-void LagrangianR::display() const
+void siconos::modeling::LagrangianR::display() const
 {
   Relation::display();
-  std::cout << " _jachq :" << "\n";
-  if(_jachq)
-    _jachq->display();
-  std::cout << " _jachqDot :" << "\n";
-  if(_jachqDot)
-    _jachqDot->display();
-  std::cout << " _jachlambda :" << "\n";
-  if(_jachlambda)
+  std::cout << " _jachq :"
+            << "\n";
+  if (_jachq) _jachq->display();
+  std::cout << " _jachqDot :"
+            << "\n";
+  if (_jachqDot) _jachqDot->display();
+  std::cout << " _jachlambda :"
+            << "\n";
+  if (_jachlambda)
     _jachlambda->display();
   else
-    std::cout << " nullptr :" << "\n";
+    std::cout << " nullptr :"
+              << "\n";
+}
 
+void siconos::modeling::LagrangianR::accept(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
+{
+  tourist->visit(*this);
 }

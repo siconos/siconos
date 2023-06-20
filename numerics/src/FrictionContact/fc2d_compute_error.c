@@ -19,6 +19,8 @@
 #include <float.h>                   // for DBL_EPSILON
 #include <math.h>                    // for fabs, sqrt
 #include <stdio.h>                   // for printf
+#include <assert.h>
+
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "NumericsMatrix.h"          // for NM_gemv
 #include "numerics_verbose.h"        // for numerics_error, verbose

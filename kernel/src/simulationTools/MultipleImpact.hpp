@@ -23,21 +23,15 @@
 #define _OSNSMULTIPLEIMPACT_
 
 #include "LinearOSNS.hpp"
-#include "SiconosConst.hpp" // for MACHINE_PREC
 
-#include <string>
-
-#define DEFAULT__tolImpact MACHINE_PREC
-#define DEFAULT_TOL_VEL MACHINE_PREC
-#define DEFAULT_TOL_ENER MACHINE_PREC
+namespace siconos::nonsmooth_formulations {
 
 /** Formalization and Resolution of a Multiple Impact Non-Smooth problem.
 
-\todo write a short introduction about MultipleImpact ...
+\todo write a short introduction about MultipleImpact ...s
  */
 class MultipleImpact : public LinearOSNS {
-private:
-
+ private:
   ACCEPT_SERIALIZATION(MultipleImpact);
 
   //! Time-like variable (Impulse)
@@ -49,24 +43,24 @@ private:
   //! Maximal number of steps for each computation
   unsigned int _nStepMax = 100000;
   //! Tolerance to define zero
-  double _tolImpact = DEFAULT__tolImpact;
+  double _tolImpact = std::numeric_limits<double>::epsilon();
   //! Type of the compliance model
   std::string _typeCompLaw = "BiStiffness";
   // Velocity of bodies during impact
-  // SP::SiconosVector VelAllBody;
+  // std::shared_ptr<siconos::algebra::SiconosVector> VelAllBody;
   //  Relative velocity at all Interactions (with or without contact)
-  // SP::SiconosVector VelAllIteractions;
+  // std::shared_ptr<siconos::algebra::SiconosVector> VelAllIteractions;
   //! Relative velocity during impact (at the end of each calculation step)
-  SP::SiconosVector _velocityContact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _velocityContact{nullptr};
   //! Relative velocity during impact (at the beginning of each calculation
   //! step)
-  SP::SiconosVector _oldVelocityContact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _oldVelocityContact{nullptr};
   //! Potential energy during impact (at the end of each calculation step)
-  SP::SiconosVector _energyContact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _energyContact{nullptr};
   //! Work done during the last compression phase at contact
-  SP::SiconosVector _WorkcContact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _WorkcContact{nullptr};
   //! Distribution vector to distribute the incremental impulse at contact
-  SP::SiconosVector _distributionVector;
+  std::shared_ptr<siconos::algebra::SiconosVector> _distributionVector{nullptr};
   /** State of contacts at the beginning of impact
    if *_stateContact[i] = 0 => no impact at this contact (at contact with
    positive relative velocity and no potential energy, may be the impact has
@@ -74,21 +68,21 @@ private:
    place at this contact without potential energy (beginning of impact or
    repeating impact) if *_stateContact[i] = 2 => impact takes place with
    not-zero potential energy */
-  SP::IndexInt _stateContact;
+  std::shared_ptr<std::vector<unsigned int>> _stateContact{nullptr};
   //! Stiffness at contacts
-  SP::SiconosVector _Kcontact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Kcontact{nullptr};
   //! Restitution coefficient of contacts
-  SP::SiconosVector _restitutionContact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _restitutionContact{nullptr};
   //! Elasticity coefficient of contacts
-  SP::SiconosVector _elasticyCoefficientcontact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _elasticyCoefficientcontact{nullptr};
   //! Incremental impulse at contacts
-  SP::SiconosVector _deltaImpulseContact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _deltaImpulseContact{nullptr};
   //! Total impulse at contacts
-  SP::SiconosVector _tolImpulseContact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _tolImpulseContact{nullptr};
   //! Impulse at contacts for each update time
-  SP::SiconosVector _impulseContactUpdate;
+  std::shared_ptr<siconos::algebra::SiconosVector> _impulseContactUpdate{nullptr};
   //! Force at contacts
-  SP::SiconosVector _forceContact;
+  std::shared_ptr<siconos::algebra::SiconosVector> _forceContact{nullptr};
   //! ID of the primary contact
   unsigned int _primaryContactId = 0;
   /** Indicator about the selection of the primary contact
@@ -110,10 +104,10 @@ private:
       If IsNumberOfStepsEst = true ==> estimate the step size from the state of
      the dynamic system before impact and the number of step needed Number of
      steps after which the data is saved */
-  unsigned int _nStepSave =
-      100; //! If IsNumberOfStepsEst = false ==> user choose the step size
+  unsigned int _nStepSave = 100;
+  //! If IsNumberOfStepsEst = false ==> user choose the step size
   //! Matrix on which the data during impact is saved
-  SP::SiconosMatrix _DataMatrix;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _DataMatrix{nullptr};
   //! Number of points to be save during impacts
   unsigned int _sizeDataSave = 1000;
   /** indicator on the termination of the multiple impact process
@@ -121,22 +115,22 @@ private:
       _IsImpactEnd = false: otherwise */
   bool _IsImpactEnd = true;
   //! Tolerance to define a negligeble value for a velocity grandeur
-  double _Tol_Vel = DEFAULT_TOL_VEL;
+  double _Tol_Vel{std::numeric_limits<double>::epsilon()};
   //! Tolerance to define a negligeable value for a potential energy grandeur
-  double _Tol_Ener = DEFAULT_TOL_ENER;
+  double _Tol_Ener{std::numeric_limits<double>::epsilon()};
   //! Epsilon to define a zero value for relative velocity in termination
   //! condition
-  double _ZeroVel_EndIm = DEFAULT_TOL_VEL;
+  double _ZeroVel_EndIm{std::numeric_limits<double>::epsilon()};
   //! Epsilon to define a zero value for potential energy in termination
   //! condition
-  double _ZeroEner_EndIm = DEFAULT_TOL_ENER;
+  double _ZeroEner_EndIm{std::numeric_limits<double>::epsilon()};
   //! we start to save data from _stepMinSave to _stepMaxSave
   unsigned int _stepMinSave = 1, _stepMaxSave = _nStepMax;
 
-public:
+ public:
   /** default constructor
    */
-  MultipleImpact() : LinearOSNS(){};
+  MultipleImpact() = default;
 
   /** Constructor from data (step size is required here)
    *  \param type  the type of the compliance law
@@ -145,7 +139,7 @@ public:
   MultipleImpact(std::string type, double step = 1.0e-5);
 
   //! Destructor
-  ~MultipleImpact(){};
+  ~MultipleImpact() noexcept = default;
 
   /* To get the type of the compliance law at contact
    * \return std::string
@@ -327,19 +321,19 @@ public:
   /**initialize
    * \param sim
    */
-  void initialize(SP::Simulation sim) override;
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> sim) override;
 
-  bool checkCompatibleNSLaw(NonSmoothLaw &nslaw) override;
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
   /** print the data to the screen */
   void display() const override;
 
-  /** To write a SiconosVector into a matrix
+  /** To write a siconos::algebra::SiconosVector into a matrix
    * \param v
    * \param row position starting to write
    * \param col position starting to write
    */
 
-  void WriteVectorIntoMatrix(const SiconosVector &v, const unsigned int row,
+  void WriteVectorIntoMatrix(const siconos::algebra::SiconosVector &v, const unsigned int row,
                              const unsigned int col);
 
   /** Save data for each step
@@ -350,8 +344,6 @@ public:
    * \return unsigned int
    */
   unsigned int EstimateNdataCols();
-
-  ACCEPT_STD_VISITORS();
 };
-
+}  // namespace siconos::nonsmooth_formulations
 #endif

@@ -14,50 +14,63 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file NewtonEulerR.cpp
 
 */
 
-#include "SiconosVector.hpp"
-#include "BlockVector.hpp"
 #include "NewtonEulerJointR.hpp"
 
-void NewtonEulerJointR::projectVectorDoF(const SiconosVector& v,
-    const BlockVector& q0,
-    SiconosVector& ans, int axis,
-    bool absoluteRef)
-{
-  SiconosVector ax(3);
+#include "BlockVector.hpp"
+#include "SiconosVector.hpp"
+
+void siconos::joints::NewtonEulerJointR::setPoint(
+    unsigned int index, std::shared_ptr<siconos::algebra::SiconosVector> point) {
+  _points[index] = point;
+}
+
+auto siconos::joints::NewtonEulerJointR::point(unsigned int index) { return _points[index]; }
+
+void siconos::joints::NewtonEulerJointR::setAxis(
+    unsigned int index, std::shared_ptr<siconos::algebra::SiconosVector> axis) {
+  _axes[index] = axis;
+}
+
+auto siconos::joints::NewtonEulerJointR::axis(unsigned int index) { return _axes[index]; }
+
+auto& siconos::joints::NewtonEulerJointR::axes() { return _axes; }
+
+void siconos::joints::NewtonEulerJointR::projectVectorDoF(
+    const siconos::algebra::SiconosVector& v, const siconos::algebra::BlockVector& q0,
+    siconos::algebra::SiconosVector& ans, int axis, bool absoluteRef) {
+  siconos::algebra::SiconosVector ax(3);
   normalDoF(ax, q0, axis, absoluteRef);
 
-  double L = v(0)*ax(0) + v(1)*ax(1) + v(2)*ax(2);
+  double L = v(0) * ax(0) + v(1) * ax(1) + v(2) * ax(2);
   ans(0) = ax(0) * L;
   ans(1) = ax(1) * L;
   ans(2) = ax(2) * L;
 }
 
-SP::SiconosVector NewtonEulerJointR::projectVectorDoF(const SiconosVector& v,
-    const BlockVector& q0,
-    int axis,
-    bool absoluteRef)
-{
-  SP::SiconosVector ans(std::make_shared<SiconosVector>(3));
+std::shared_ptr<siconos::algebra::SiconosVector>
+siconos::joints::NewtonEulerJointR::projectVectorDoF(const siconos::algebra::SiconosVector& v,
+                                                     const siconos::algebra::BlockVector& q0,
+                                                     int axis, bool absoluteRef) {
+  auto ans(std::make_shared<siconos::algebra::SiconosVector>(3));
   projectVectorDoF(v, q0, *ans, axis, absoluteRef);
   return ans;
 }
 
-void NewtonEulerJointR::normalDoF(SiconosVector& ans,
-                                  const BlockVector& q0, int axis,
-                                  bool absoluteRef)
-{
+void siconos::joints::NewtonEulerJointR::normalDoF(siconos::algebra::SiconosVector& ans,
+                                                   const siconos::algebra::BlockVector& q0,
+                                                   int axis, bool absoluteRef) {
   _normalDoF(ans, q0, axis, absoluteRef);
 }
 
-SP::SiconosVector NewtonEulerJointR::normalDoF(const BlockVector& q0, int axis,
-    bool absoluteRef)
-{
-  SP::SiconosVector ans(std::make_shared<SiconosVector>(3));
+std::shared_ptr<siconos::algebra::SiconosVector> siconos::joints::NewtonEulerJointR::normalDoF(
+    const siconos::algebra::BlockVector& q0, int axis, bool absoluteRef) {
+
+  auto ans = std::make_shared<siconos::algebra::SiconosVector>(3);
   _normalDoF(*ans, q0, axis, absoluteRef);
   return ans;
 }

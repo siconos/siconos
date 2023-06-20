@@ -14,34 +14,40 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "Equality.hpp"
-#include "Simulation.hpp"
+
+#include "NonSmoothLaw.hpp"
+#include "NumericsSolversNamespace.h"  // solver_options stuff
+#include "NumericsToolsNamespace.h"    // .
 #include "OSNSMatrix.hpp"
-#include "EqualityConditionNSL.hpp"
-#include "SolverOptions.h"
-#include <NumericsMatrix.h>
+#include "SiconosVector.hpp"
+#include "Simulation.hpp"
+#include "TypeName.hpp"  // check nslaw type, should be replaced by dynamic_cast or variant ?
 
-using namespace RELATION;
-
-Equality::Equality(int numericsSolverId)
+siconos::nonsmooth_formulations::Equality::Equality(int numericsSolverId) : LinearOSNS()
 //:
-// Equality(SP::SolverOptions(solver_options_create(numericsSolverId),
+// Equality(std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
 //                            solver_options_delete))
-{}
-
-Equality::Equality(SP::SolverOptions options):
-  LinearOSNS(options)
-{}
-
-bool Equality::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
 {
-  float type_number= (float) (Type::value(nslaw));
+}
+
+siconos::nonsmooth_formulations::Equality::Equality(
+    std::shared_ptr<SolverOptions> options)
+    : LinearOSNS(options)
+{
+}
+
+bool siconos::nonsmooth_formulations::Equality::checkCompatibleNSLaw(
+    siconos::modeling::NonSmoothLaw& nslaw)
+{
+  float type_number = (float)(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
 
-  if (not (Type::value(nslaw) == Type::EqualityConditionNSL))
-  {
-    THROW_EXCEPTION("\nEquality::checkCompatibleNSLaw -  \n\
+  if (not(siconos::types::type_value(nslaw) ==
+          siconos::modeling::Type::EqualityConditionNSL)) {
+    THROW_EXCEPTION(
+        "\nsiconos::nonsmooth_formulations::Equality::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with Equality one step nonsmooth problem. \n \
                       Compatible NonSmoothLaw are: EqualityConditionNSL\n");
     return false;
@@ -49,14 +55,12 @@ bool Equality::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
 
   return true;
 }
-int Equality::compute(double time)
+int siconos::nonsmooth_formulations::Equality::compute(double time)
 {
   int info = 0;
   // --- Prepare data for EQUALITY computing ---
   bool cont = preCompute(time);
-  if(!cont)
-    return info;
-
+  if (!cont) return info;
 
   // --- Call Numerics driver ---
   // Inputs:
@@ -65,15 +69,15 @@ int Equality::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if(_sizeOutput != 0)
-  {
-    double* q_ = q()->getArray();
-    double* z_ =  _z->getArray();
-    for(size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
-    //info = NM_gesv(&*_M->numericsMatrix(), z_, true);
-    //info = NM_LU_solve(NM_preserve(&*_M->numericsMatrix()), z_, 1);
+  if (_sizeOutput != 0) {
+    auto* q_ = q()->getArray();
+    auto* z_ = _z->getArray();
+    for (decltype(_sizeOutput) i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
+    // info = NM_gesv(&*_M->numericsMatrix(), z_, true);
+    // info =
+    // NM_LU_solve(NM_preserve(&*_M->numericsMatrix()),
+    // z_, 1);
     info = NM_LU_solve(&*_M->numericsMatrix(), z_, 1);
-
 
     // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();
@@ -82,37 +86,34 @@ int Equality::compute(double time)
   return info;
 }
 
-void Equality::initialize(SP::Simulation sim)
+void siconos::nonsmooth_formulations::Equality::initialize(
+    std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
-  //SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
-  //_M.reset(new OSNSMatrix(indexSet,_numericsMatrixStorageType));
+  // auto indexSet = simulation()->indexSet(levelMin());
+  //_M = std::make_shared<OSNSMatrix>(indexSet,_numericsMatrixStorageType));
 }
 
-void Equality::updateM()
+void siconos::nonsmooth_formulations::Equality::updateM()
 {
   assert(0);
   // Get index set from Simulation
-  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+  auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
-  if(!_M)
-  {
+  if (!_M) {
     // Creates and fills M using Interactionof indexSet
-    _M.reset(new OSNSMatrix(indexSet, _numericsMatrixStorageType));
+    _M = std::make_shared<OSNSMatrix>(indexSet, _numericsMatrixStorageType);
   }
-  else
-  {
+  else {
     _M->setStorageType(_numericsMatrixStorageType);
     _M->fillM(indexSet);
-
   }
   _sizeOutput = _M->size();
 }
 
-
-void Equality::display() const
+void siconos::nonsmooth_formulations::Equality::display() const
 {
-  std::cout << "======= EQUALITY of size " << _sizeOutput << " with: " <<std::endl;
+  std::cout << "======= EQUALITY of size " << _sizeOutput << " with: \n";
   LinearOSNS::display();
 }

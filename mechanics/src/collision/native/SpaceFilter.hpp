@@ -34,60 +34,83 @@
 #ifndef SpaceFilter_hpp
 #define SpaceFilter_hpp
 
-#include "MechanicsFwd.hpp"
+#include <memory>
+#include <unordered_set>
 
-#include <InteractionManager.hpp>
-#include <SiconosFwd.hpp>
-#include <SiconosSerialization.hpp>
-#include <SiconosVisitor.hpp>
+#include "BodiesAndRelationsDeclaration.hpp"  // For CircularDS, SphereNEDS, DiskPlanR ...
+#include "FMatrix.hpp"                        // For FMatrix
+#include "InteractionManager.hpp"
+#include "SiconosSerialization.hpp"
 
-/* local forwards (see SpaceFilter_impl.hpp) */
-DEFINE_SPTR(space_hash);
-DEFINE_SPTR(DiskDiskRDeclaredPool);
-DEFINE_SPTR(DiskPlanRDeclaredPool);
-DEFINE_SPTR(CircleCircleRDeclaredPool);
-DEFINE_SPTR(Hashed);
+namespace siconos::algebra {
+class SiconosMatrix;
+}
 
-class SpaceFilter : public InteractionManager,
-                    public std::enable_shared_from_this<SpaceFilter> {
 
-protected:
+namespace siconos::collision::native {
 
+namespace internal {
+class Hashed;
+}  // namespace internal
+
+using DiskPlanRDeclared = std::array<double, 6>;
+
+class SpaceFilter : public siconos::simulation::InteractionManager {
+ protected:
   ACCEPT_SERIALIZATION(SpaceFilter);
+
+  using SpaceHash = std::unordered_multiset<std::shared_ptr<internal::Hashed>,
+                                            boost::hash<std::shared_ptr<internal::Hashed>>>;
+
+  /* relations pool */
+  using CircleCircleRDeclared = std::pair<double, double>;
+  using DiskDiskRDeclared = std::pair<double, double>;
+  using CircleCircleRDeclaredPool =
+      std::map<CircleCircleRDeclared,
+               std::shared_ptr<siconos::collision::native::bodies::CircularR>>;
+  using DiskDiskRDeclaredPool =
+      std::map<DiskDiskRDeclared,
+               std::shared_ptr<siconos::collision::native::bodies::CircularR>>;
+  using DiskPlanRDeclaredPool =
+      std::map<DiskPlanRDeclared,
+               std::shared_ptr<siconos::collision::native::bodies::DiskPlanR>>;
 
   /** the bounding box factor is multiplicated by the largest object
       dimension */
-  unsigned int _bboxfactor;
+  unsigned int _bboxfactor{0};
 
   /** the cell size */
-  unsigned int _cellsize;
+  unsigned int _cellsize{0};
 
   /** plans */
-  SP::SiconosMatrix _plans;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _plans{nullptr};
 
   /** moving plans */
-  SP::FMatrix _moving_plans;
+  std::shared_ptr<siconos::collision::native::FMatrix> _moving_plans{nullptr};
 
   /* the hash table */
-  SP::space_hash _hash_table;
+  std::shared_ptr<SpaceHash> _hash_table{nullptr};
 
   /* relations pool */
-  SP::DiskDiskRDeclaredPool diskdisk_relations;
-  SP::DiskPlanRDeclaredPool diskplan_relations;
-  SP::CircleCircleRDeclaredPool circlecircle_relations;
+  std::shared_ptr<DiskDiskRDeclaredPool> diskdisk_relations{nullptr};
+  std::shared_ptr<DiskPlanRDeclaredPool> diskplan_relations{nullptr};
+  std::shared_ptr<CircleCircleRDeclaredPool> circlecircle_relations{nullptr};
 
-  void _PlanCircularFilter(SP::Simulation, double A, double B, double C,
-                           double xCenter, double yCenter, double width,
-                           SP::CircularDS ds);
+  void _PlanCircularFilter(std::shared_ptr<siconos::simulation::Simulation>, double A,
+                           double B, double C, double xCenter, double yCenter, double width,
+                           std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds);
 
-  void _MovingPlanCircularFilter(SP::Simulation, unsigned int i,
-                                 SP::CircularDS ds, double time);
+  void _MovingPlanCircularFilter(
+      std::shared_ptr<siconos::simulation::Simulation>, unsigned int i,
+      std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds, double time);
 
-  void _PlanSphereLDSFilter(SP::Simulation, double A, double B, double C,
-                            double D, SP::SphereLDS ds);
+  void _PlanSphereLDSFilter(std::shared_ptr<siconos::simulation::Simulation>, double A,
+                            double B, double C, double D,
+                            std::shared_ptr<siconos::collision::native::bodies::SphereLDS> ds);
 
-  void _PlanSphereNEDSFilter(SP::Simulation, double A, double B, double C,
-                             double D, SP::SphereNEDS ds);
+  void _PlanSphereNEDSFilter(
+      std::shared_ptr<siconos::simulation::Simulation>, double A, double B, double C, double D,
+      std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> ds);
 
   /* visitors defined as Inner class */
   /* note : cf Thinking in C++, vol2, the inner class idiom. */
@@ -97,7 +120,11 @@ protected:
   struct _SphereLDSFilter;
   struct _SphereNEDSFilter;
 
-  /* the body hasher */
+  /* The body hasher, a visitor
+
+     Its visit functions are supposed to insert a specific ds into
+     the SpaceFilter hash_table.
+   */
   struct _BodyHash;
 
   /* the proximity detection */
@@ -111,39 +138,52 @@ protected:
   /* to compute distance */
   struct _DiskDistance;
 
-  friend struct SpaceFilter::_CircularFilter;
-  friend struct SpaceFilter::_SphereLDSFilter;
-  friend struct SpaceFilter::_SphereNEDSFilter;
-  friend struct SpaceFilter::_BodyHash;
-  friend struct SpaceFilter::_FindInteractions;
-  friend struct SpaceFilter::_IsSameDiskPlanR;
-  friend struct SpaceFilter::_IsSameDiskMovingPlanR;
-  friend struct SpaceFilter::_IsSameSpherePlanR;
-  friend struct SpaceFilter::_DiskDistance;
+  // friend struct SpaceFilter::_CircularFilter;
+  // friend struct SpaceFilter::_SphereLDSFilter;
+  // friend struct SpaceFilter::_SphereNEDSFilter;
+  // friend struct SpaceFilter::_BodyHash;
+  // friend struct SpaceFilter::_FindInteractions;
+  // friend struct SpaceFilter::_IsSameDiskPlanR;
+  // friend struct SpaceFilter::_IsSameDiskMovingPlanR;
+  // friend struct SpaceFilter::_IsSameSpherePlanR;
+  // friend struct SpaceFilter::_DiskDistance;
 
-public:
+  SpaceFilter() = delete;  // Do we need a default?
+  SpaceFilter(const SpaceFilter&) = delete;
+  SpaceFilter(SpaceFilter&&) = delete;
+  SpaceFilter operator=(const SpaceFilter&) = delete;
+  SpaceFilter operator=(SpaceFilter&&) = delete;
+
+ public:
   SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
-              SP::SiconosMatrix plans, SP::FMatrix moving_plans);
+              std::shared_ptr<siconos::algebra::SiconosMatrix> plans,
+              std::shared_ptr<siconos::collision::native::FMatrix> moving_plans);
 
   SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
-              SP::SiconosMatrix plans);
+              std::shared_ptr<siconos::algebra::SiconosMatrix> plans);
 
-  SpaceFilter();
+  // SpaceFilter::SpaceFilter()
+  //     : SpaceFilter(0, 0, nullptr, nullptr)
+  // {
+  // }
+
+  /** Destructor */
+  virtual ~SpaceFilter() noexcept = default;
 
   /** 2D/3D objects insertion
    *
    */
-  void insert(SP::Disk, int, int, int);
+  void insert(std::shared_ptr<siconos::collision::native::bodies::Disk>, int, int, int);
 
-  void insert(SP::Circle, int, int, int);
+  void insert(std::shared_ptr<siconos::collision::native::bodies::Circle>, int, int, int);
 
-  void insert(SP::SphereLDS, int, int, int);
+  void insert(std::shared_ptr<siconos::collision::native::bodies::SphereLDS>, int, int, int);
 
-  void insert(SP::SphereNEDS, int, int, int);
+  void insert(std::shared_ptr<siconos::collision::native::bodies::SphereNEDS>, int, int, int);
 
   /** general hashed object
    */
-  void insert(SP::Hashed);
+  void insert(std::shared_ptr<siconos::collision::native::internal::Hashed>);
 
   /** get parameters
    */
@@ -155,38 +195,31 @@ public:
 
   void setCellsize(unsigned int value) { _cellsize = value; }
 
-  /** get the neighbours
-   * */
-  //  std::pair<space_hash::iterator, space_hash::iterator>
-  //  neighbours(SP::Hashed h);
-
   /**
      Just test the presence of neighbours.
-     
+
      \param h hashed component of a body.
    */
-  bool haveNeighbours(SP::Hashed h);
+  bool haveNeighbours(std::shared_ptr<siconos::collision::native::internal::Hashed> h);
 
   /**
      Give the minimal distance.
-     
+
      \param h hashed component of a body.
    */
-  double minDistance(SP::Hashed h);
+  double minDistance(std::shared_ptr<siconos::collision::native::internal::Hashed> h);
 
   /** Broadphase contact detection: add interactions in indexSet 0.
    *
    *  \param simulation the current simulation setup
    */
-  void updateInteractions(SP::Simulation simulation) override;
+  void updateInteractions(
+      std::shared_ptr<siconos::simulation::Simulation> simulation) override;
 
   void insertLine(double a, double b, double c);
-
-  /** Destructor.
-   */
-  virtual ~SpaceFilter(){};
-
-  ACCEPT_STD_VISITORS();
 };
 
+bool operator==(DiskPlanRDeclared const& a, DiskPlanRDeclared const& b);
+
+}  // namespace siconos::collision::native
 #endif /* SpaceFilter_hpp */

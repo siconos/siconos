@@ -14,18 +14,40 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file NonSmoothDynamicalSystem.hpp
  * container for DynamicalSystem and Interaction
  */
 #ifndef NSDS_H
 #define NSDS_H
 
-#include "SiconosPointers.hpp"
-#include "Topology.hpp"
-#include "DynamicalSystem.hpp"
+#include <list>
+#include <memory>
+#include <string>
+#include <vector>
 
-/** 
+#include "SiconosSerialization.hpp"
+
+namespace siconos::internal {
+struct SiconosVisitor;
+}
+
+namespace siconos::graphs {
+
+struct DynamicalSystemsGraph;
+struct InteractionsGraph;
+}  // namespace siconos::graphs
+
+namespace siconos::simulation {
+class Topology;
+}
+
+namespace siconos::modeling {
+
+class DynamicalSystem;
+class Interaction;
+
+/**
     the NonSmoothDynamicalSystem consists in Dynamical Systems and Interactions
     structured into a graph defined in a Topology.
     In the DynamicalSystem graph, DynamicalSystem objects are nodes and Interaction objects
@@ -38,45 +60,39 @@
     are edges.
 
 */
-class NonSmoothDynamicalSystem
-{
-public:
-  typedef enum
-  {
-    addDynamicalSystem, rmDynamicalSystem, addInteraction, rmInteraction, clearTopology
-  } ChangeType;
+class NonSmoothDynamicalSystem {
+ public:
+  enum class ChangeType {
+    addDynamicalSystem,
+    rmDynamicalSystem,
+    addInteraction,
+    rmInteraction,
+    clearTopology
+  };
 
-  class Change
-  {
-  private:
+  class Change {
+   private:
     ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
     Change() = default;
-  public:
-    ChangeType typeOfChange;
-    SP::DynamicalSystem ds;
-    SP::Interaction i;
+    // Rule of five
+    Change(const Change&) = delete;
+    Change& operator=(Change&&) = delete;
+    Change& operator=(const Change&) = delete;
 
-    Change(ChangeType t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
-    Change(ChangeType t, SP::Interaction inew):typeOfChange(t),i(inew){};
-    Change(ChangeType t):typeOfChange(t){};
+   public:
+    ChangeType typeOfChange;
+    std::shared_ptr<DynamicalSystem> ds{nullptr};
+    std::shared_ptr<Interaction> i{nullptr};
+
+    Change(Change&&) = default; // Required for push_back ...
+    Change(ChangeType t, std::shared_ptr<DynamicalSystem> dsnew)
+        : typeOfChange(t), ds(dsnew){};
+    Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew){};
+    Change(ChangeType t) : typeOfChange(t){};
     void display() const;
   };
 
-  typedef std::list<Change> ChangeLog;
-  class ChangeLogIter
-  {
-    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
-  public:
-    ChangeLogIter(){};
-    ChangeLogIter(const ChangeLog& log,
-                  const ChangeLog::const_iterator& i)
-      : _log(&log), it(i) {};
-    const ChangeLog *_log;
-    ChangeLog::const_iterator it;
-  };
-
-private:
-
+ private:
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
 
   /** initial time of the simulation */
@@ -94,37 +110,32 @@ private:
   double _T = 0.;
 
   /** information concerning the Model */
-  std::string _title = "none",
-    _author = "none",
-    _description = "none",
-    _date="unknown";
+  std::string _title{"none"};
+  std::string _author = "none";
+  std::string _description = "none";
+  std::string _date = "unknown";
 
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
   bool _BVP = false;
 
   /** log list of the modifications of the nsds */
-  std::list<Change> _changeLog;
+  std::list<Change> _changeLog = {};
 
   /** the topology of the system */
-  SP::Topology _topology;
+  std::shared_ptr<siconos::simulation::Topology> _topology{nullptr};
 
   /** False is one of the interaction is non-linear.
    */
   bool _mIsLinear = true;
 
-  /* copy constructor, forbidden */
-  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds) = delete;
+  // Rule of five
+  NonSmoothDynamicalSystem() = delete;
+  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&) = delete;
+  NonSmoothDynamicalSystem(NonSmoothDynamicalSystem&&) = delete;
+  NonSmoothDynamicalSystem& operator=(const NonSmoothDynamicalSystem&) = delete;
+  NonSmoothDynamicalSystem& operator=(NonSmoothDynamicalSystem&&) = delete;
 
-  /* assignment, forbidden */
-  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp) = delete;
-
-  /* Forbid default constructor except for serialization. No use to
-     build a NSDS with t0=T.*/
-protected:
-  NonSmoothDynamicalSystem(){};
-
-public:
-
+ public:
   /** NSDS constructor.
    *
    *  \param t0 initial time
@@ -134,248 +145,158 @@ public:
 
   /** destructor
    */
-  ~NonSmoothDynamicalSystem();
+  ~NonSmoothDynamicalSystem() noexcept;
 
   // --- GETTERS/SETTERS ---
   /** \return the current time value
    */
-  inline double currentTime() const
-  {
-    return _t;
-  }
-  
+  inline double currentTime() const { return _t; }
+
   /** set the current time
    *
    *  \param newValue the new time
    */
-  inline void setCurrentTime(double newValue)
-  {
-    _t = newValue;
-  }
+  inline void setCurrentTime(double newValue) { _t = newValue; }
 
   /** \return initial time
    */
-  inline double t0() const
-  {
-    return _t0;
-  }
+  inline double t0() const { return _t0; }
 
   /** set initial time of the time discretisation
    *
    *  \param newT0
    */
-  inline void sett0(double newT0)
-  {
-    _t0 = newT0;
-  };
+  inline void sett0(double newT0) { _t0 = newT0; };
 
   /** \return final time
    */
-  inline double finalT() const
-  {
-    return _T;
-  }
+  inline double finalT() const { return _T; }
 
   /** set final time
    *
    *  \param newValue the new final time for the Simulatiom
    */
-  void setT(double newValue)
-  {
-    _T = newValue;
-  };
+  void setT(double newValue) { _T = newValue; };
 
   /** get the title of the simulation
    *
    *  \return std::string : the title
    */
-  inline const std::string  title() const
-  {
-    return _title;
-  }
+  inline const std::string title() const { return _title; }
 
   /** set the title of the simulation
    *
    *  \param s : the title
    */
-  inline void setTitle(const std::string & s)
-  {
-    _title = s;
-  }
+  inline void setTitle(const std::string& s) { _title = s; }
 
   /** get the author of the simulation
    *
    *  \return std::string : the author
    */
-  inline const std::string  author() const
-  {
-    return _author;
-  }
+  inline const std::string author() const { return _author; }
 
   /** set the author of the simulation
    *
    *  \param s std::string : the author
    */
-  inline void setAuthor(const std::string & s)
-  {
-    _author = s;
-  }
+  inline void setAuthor(const std::string& s) { _author = s; }
 
   /** allows to get the description of the simulation
    *
    *  \return std::string : the description
    */
-  inline const std::string  description() const
-  {
-    return _description;
-  }
+  inline const std::string description() const { return _description; }
 
   /** set the author of the simulation
    *
    *  \param s std::string : the author
    */
-  inline void setDescription(const std::string & s)
-  {
-    _description = s;
-  }
+  inline void setDescription(const std::string& s) { _description = s; }
 
   /** allows to get the date of the simulation
    *
    *  \return std::string : the date
    */
-  inline const std::string  date() const
-  {
-    return _date;
-  }
+  inline const std::string date() const { return _date; }
 
   /** set the date of the simulation
    *
    *  \param s std::string : the date
    */
-  inline void setDate(const std::string & s)
-  {
-    _date = s;
-  }
+  inline void setDate(const std::string& s) { _date = s; }
 
   /** get problem type (true if BVP)
    *
    *  \return a bool
    */
-  inline bool isBVP() const
-  {
-    return _BVP;
-  }
+  inline bool isBVP() const { return _BVP; }
 
   /** get problem type (true if IVP)
    *
    *  \return a bool
    */
-  inline bool isIVP() const
-  {
-    return !_BVP;
-  }
+  inline bool isIVP() const { return !_BVP; }
 
   /** set the NonSmoothDynamicalSystem to BVP, else it is IVP
    *
    *  \param newBvp true if BVP, false otherwise
    */
-  inline void setBVP(const bool& newBvp)
-  {
-    _BVP = newBvp;
-  }
-
+  inline void setBVP(const bool& newBvp) { _BVP = newBvp; }
 
   /** get a reference to the changelog for an NSDS.
    *
    *  \return a reference to the changelog.
    */
-  inline const ChangeLog& changeLog()
-  {
-    return _changeLog;
-  };
-
-  /** get an iterator to the last item in the changelog.
-   *
-   *  \return an iterator pointing at the last item in the changelog.
-   */
-  inline ChangeLogIter changeLogPosition()
-  {
-    ChangeLogIter it(_changeLog, _changeLog.end());
-    // return iterator to last item, i.e. one less than end
-    --it.it;
-    return it;
-  };
-
-  /** get an iterator to the beginning of the changelog.
-   *
-   *  \return an iterator pointing at the beginning of the changelog.
-   */
-  inline ChangeLogIter changeLogBegin()
-  {
-    ChangeLogIter it(_changeLog, _changeLog.begin());
-    return it;
-  };
+  inline const std::list<Change>& changeLog() { return _changeLog; };
 
   /** clear the changelog up to a given position.
    *
    *  \param it  This iterator must point to somewhere in the changelog
    *             for this NSDS.
    */
-  void clearChangeLogTo(const ChangeLogIter& it);
-
+  void clearChangeLogTo(const std::list<Change>::const_iterator& it);
 
   // === DynamicalSystems management ===
 
   /** \return the number of Dynamical Systems present in the NSDS
    */
-  inline size_t getNumberOfDS() const
-  {
-    return _topology->dSG(0)->size();
-  }
+  size_t getNumberOfDS() const;
 
   /** get all the dynamical systems declared in the NonSmoothDynamicalSystem.
    *
-   *  \return a SP::DynamicalSystemsGraph
+   *  \return a std::shared_ptr<DynamicalSystemsGraph>
    */
-  inline const SP::DynamicalSystemsGraph dynamicalSystems() const
-  {
-    return _topology->dSG(0);
-  }
+  const std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dynamicalSystems() const;
 
   /** get all the dynamical systems declared in the NonSmoothDynamicalSystem.
-   *  into a std::vector<SP::DynamicalSystem>
+   *  into a std::vector<std::shared_ptr<DynamicalSystem>>
    *  Useful for iterates on DynamicalSystems in Python for instance
    *
-   *  \return std::vector<SP::DynamicalSystem>
+   *  \return std::vector<std::shared_ptr<DynamicalSystem>>
    */
-  std::vector<SP::DynamicalSystem> dynamicalSystemsVector() const;
-
+  std::vector<std::shared_ptr<DynamicalSystem>> dynamicalSystemsVector() const;
 
   /** add a dynamical system into the DS graph (as a vertex)
    *
    *  \param ds a pointer to the system to add
    */
-  void insertDynamicalSystem(SP::DynamicalSystem ds);
+  void insertDynamicalSystem(std::shared_ptr<DynamicalSystem> ds);
 
   /** get Dynamical system number I
    *
    *  \param nb the identifier of the DynamicalSystem to get
    *  \return a pointer on DynamicalSystem
    */
-  inline SP::DynamicalSystem dynamicalSystem(unsigned int nb) const
-  {
-    return _topology->getDynamicalSystem(nb);
-  }
-  inline void displayDynamicalSystems() const
-  {
-    _topology->displayDynamicalSystems();
-  }
+  std::shared_ptr<siconos::modeling::DynamicalSystem> dynamicalSystem(unsigned int nb) const;
+
+  void displayDynamicalSystems() const;
 
   /** remove a dynamical system
    *
    *  \param ds a pointer to the dynamical system to remove
    */
-  void removeDynamicalSystem(SP::DynamicalSystem ds);
+  void removeDynamicalSystem(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // === Interactions management ===
 
@@ -383,55 +304,42 @@ public:
    *
    *  \return an unsigned int
    */
-  inline size_t getNumberOfInteractions() const
-  {
-    return _topology->indexSet0()->size();
-  };
+  size_t getNumberOfInteractions() const;
 
   /** return the graph of  Interactions present in the NSDS.
    *
-   *  \return SP::InteractionGraph
+   *  \return std::shared_ptr<InteractionsGraph>
    */
-  inline const SP::InteractionsGraph  interactions() const
-  {
-    return _topology->indexSet0();
-  };
-
+  const std::shared_ptr<siconos::graphs::InteractionsGraph> interactions() const;
 
   /** remove an interaction to the system
    *
    *  \param inter a pointer to the interaction to remove
    *
    */
-  void removeInteraction(SP::Interaction inter);
+  void removeInteraction(std::shared_ptr<siconos::modeling::Interaction> inter);
 
   /** get Interaction number I
    *
    *  \param nb the identifier of the Interaction to get
    *  \return a pointer to an Interaction
    */
-  inline SP::Interaction interaction(unsigned int nb) const
-  {
-    return _topology->getInteraction(nb);
-  }
+  std::shared_ptr<siconos::modeling::Interaction> interaction(unsigned int nb) const;
 
   /** get Interaction named name
    *
    *  \param name of the Interaction to get
    *  \return a pointer to an Interaction
    */
-  inline SP::Interaction interaction(std::string name) const
-  {
-    return _topology->getInteraction(name);
-  }
+  std::shared_ptr<siconos::modeling::Interaction> interaction(std::string name) const;
 
   /** get all the interactions declared in the NonSmoothDynamicalSystem.
-   *  into a std::vector<SP::Interaction>
+   *  into a std::vector<std::shared_ptr<Interaction>>
    *  Useful for iterates on Interaction in Python for instance
    *
-   *  \return std::vector<SP::Interaction>
+   *  \return std::vector<std::shared_ptr<Interaction>>
    */
-  std::vector<SP::Interaction> InteractionsVector() const;
+  std::vector<std::shared_ptr<siconos::modeling::Interaction>> InteractionsVector() const;
 
   /** link an interaction to two dynamical systems
    *
@@ -439,47 +347,40 @@ public:
    *  \param ds1 a DynamicalSystem
    *  \param ds2 a DynamicalSystem (optional)
    */
-  void link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+  void link(std::shared_ptr<siconos::modeling::Interaction> inter,
+            std::shared_ptr<siconos::modeling::DynamicalSystem> ds1,
+            std::shared_ptr<siconos::modeling::DynamicalSystem> ds2 =
+                std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
   /** set the name for this Dynamical System
    *
    *  \param ds a pointer to the system
    *  \param name the name of the DynamicalSystem
    */
-  inline void setName(SP::DynamicalSystem ds, const std::string& name)
-  {
-    _topology->setName(ds, name);
-  };
+  void setName(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+               const std::string& name);
 
   /** get the name for this Dynamical System
    *
    *  \param ds a pointer to the system
    *  \return name the name of the DynamicalSystem, or empty string if not found.
    */
-  std::string name(SP::DynamicalSystem ds)
-  {
-    return _topology->name(ds);
-  }
+  std::string name(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** set the name for this Interaction
    *
    *  \param interaction a pointer to the Interaction
    *  \param name the name of the Interaction
    */
-  inline void setName(SP::Interaction interaction, const std::string& name)
-  {
-    _topology->setName(interaction, name);
-  };
+  void setName(std::shared_ptr<siconos::modeling::Interaction> interaction,
+               const std::string& name);
 
   /** get the name for this Interaction
    *
    *  \param inter a pointer to the Interaction
    *  \return name the name of the Interaction, or empty string if not found.
    */
-  std::string name(SP::Interaction inter)
-  {
-    return _topology->name(inter);
-  }
+  std::string name(std::shared_ptr<siconos::modeling::Interaction> inter);
 
   /** specify id the given Interaction is for controlling the DS
    *
@@ -487,20 +388,14 @@ public:
    *  \param isControlInteraction true if the Interaction is used for
    *  control purposes
    **/
-  void setControlProperty(SP::Interaction inter, const bool isControlInteraction)
-  {
-    _topology->setControlProperty(inter, isControlInteraction);
-  }
-
+  void setControlProperty(std::shared_ptr<siconos::modeling::Interaction> inter,
+                          const bool isControlInteraction);
 
   /** get the topology of the system
    *
    *  \return a pointer on Topology
    */
-  inline SP::Topology topology() const
-  {
-    return _topology;
-  }
+  inline std::shared_ptr<siconos::simulation::Topology> topology() const { return _topology; }
 
   /** display the data of the Non Smooth Dynamical System
    */
@@ -511,10 +406,7 @@ public:
    *
    *  \return a bool
    */
-  inline bool isLinear() const
-  {
-    return _mIsLinear;
-  };
+  inline bool isLinear() const { return _mIsLinear; };
 
   void clear();
 
@@ -574,18 +466,18 @@ public:
   void computeInteractionJacobians(double time);
 
   /** compute Jacobians for all the interactions of a given index set
-   * 
+   *
    *  \param time
    *  \param indexSet InteractionsGraph of interest
    */
-  void computeInteractionJacobians(double time, InteractionsGraph& indexSet);
+  void computeInteractionJacobians(double time, siconos::graphs::InteractionsGraph& indexSet);
 
   /** visit all dynamical systems in this system
    *
-   *  \param visitor an SP::SiconosVisitor that can visit classes derived from DS
+   *  \param visitor a SiconosVisitor that can visit classes derived from DS
    */
-  void visitDynamicalSystems(SP::SiconosVisitor visitor);
+  void visitDynamicalSystems(std::shared_ptr<siconos::internal::SiconosVisitor> visitor);
 };
 
-
+}  // namespace siconos::modeling
 #endif

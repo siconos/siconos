@@ -57,6 +57,13 @@ extern "C"
       \param[out] number of tests
       \return an array of tests, to be executed with run_test_collection
   */
+
+  int globalRollingFrictionContact_test_function(TestCase*);
+
+  /** Solves grfc3d using parameters and reference from a pre-defined TestCase
+      return 1 if the test has succeeded.
+  */
+
   TestCase * build_test_collection(int n_data, const char ** data_collection, int*);
 
 

@@ -14,47 +14,53 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "OSNSPTest.hpp"
-#include "SolverOptions.h"
+
 #include "FrictionContact.hpp"
+#include "NumericsSolversNamespace.h"
+#include "SolverOptions.h"
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(OSNSPTest);
 
+void OSNSPTest::setUp() {}
 
-void OSNSPTest::setUp()
-{}
-
-void OSNSPTest::tearDown()
-{}
+void OSNSPTest::tearDown() {}
 
 void OSNSPTest::testOSNSBuild_default()
 {
   // Build from solver id
-  SP::FrictionContact problem = std::make_shared<FrictionContact>();
+  auto problem = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>();
 
   auto options = problem->numericsSolverOptions();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test solver options : ",  options->solverId == SICONOS_FRICTION_3D_NSGS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test solver options : ",
+      options->solverId == SICONOS_FRICTION_3D_NSGS, true);
 }
-
 
 void OSNSPTest::testOSNSBuild_solverid()
 {
   // Build from solver id
-  SP::FrictionContact problem = std::make_shared<FrictionContact>(3, SICONOS_FRICTION_3D_ADMM);
+  auto problem = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>(
+      3, SICONOS_FRICTION_3D_ADMM);
 
   auto options = problem->numericsSolverOptions();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test solver options : ",  options->solverId == SICONOS_FRICTION_3D_ADMM, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test solver options : ",
+      options->solverId == SICONOS_FRICTION_3D_ADMM, true);
 }
 
 void OSNSPTest::testOSNSBuild_options()
 {
   // Build from solver id
-  SP::SolverOptions options(solver_options_create(SICONOS_FRICTION_3D_ADMM),
-                            solver_options_delete);
-  SP::FrictionContact problem = std::make_shared<FrictionContact>(3, options);
+  std::shared_ptr<SolverOptions> options{
+      solver_options_create(SICONOS_FRICTION_3D_ADMM),
+      solver_options_delete};
+  auto problem = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>(3, options);
 
   auto options_link = problem->numericsSolverOptions();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test solver options : ",  options_link->solverId == SICONOS_FRICTION_3D_ADMM, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test solver options : ",
+      options_link->solverId == SICONOS_FRICTION_3D_ADMM, true);
 }

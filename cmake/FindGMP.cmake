@@ -45,9 +45,14 @@ find_path(GMP_INCLUDE_DIR NAMES gmp.h
   PATH_SUFFIXES include
   ${_GMP_INC_SEARCH_OPTS}
   )
-
+  
 if(NOT GMP_LIBRARIES)
-  find_library(GMP_LIBRARIES NAMES gmp
+if(WIN32)
+    set(GMPLIB mpir)
+else()
+    set(GMPLIB gmp)
+endif()
+  find_library(GMP_LIBRARIES NAMES ${GMPLIB}
     ${_GMP_SEARCH_OPTS}
     PATH_SUFFIXES lib lib64)
   

@@ -14,24 +14,31 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LagrangianLinearTIDS.hpp"
-#include "SimpleMatrixFriends.hpp" // for a*mat
-#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
+
 #include "BlockMatrix.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "siconos_debug.h"
-
 #include <iostream>
 
+#include "siconos_debug.h"
+
 // --- Constructor from a initial conditions and matrix-operators
-LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,
-    SP::SiconosMatrix newMass,  SP::SiconosMatrix newK, SP::SiconosMatrix newC):
-  LagrangianDS(newQ0, newVelocity0, newMass)
-{
-  assert((newK->size(0) == _ndof && newK->size(1) == _ndof) &&
-         "LagrangianLinearTIDS - constructor from data, inconsistent size between K and _ndof");
+siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
+    std::shared_ptr<siconos::algebra::SiconosVector> newQ0,
+    std::shared_ptr<siconos::algebra::SiconosVector> newVelocity0,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newMass,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newK,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newC)
+    : LagrangianDS(newQ0, newVelocity0, newMass) {
+  assert(
+      (newK->size(0) == _ndof && newK->size(1) == _ndof) &&
+      "LagrangianLinearTIDS - constructor from data, inconsistent size between K and _ndof");
 
   assert((newC->size(0) == _ndof && newC->size(1) == _ndof) &&
          "LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
@@ -40,116 +47,109 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosV
   _C = newC;
 }
 
-void LagrangianLinearTIDS::initRhs(double time)
-{
-  // _rhsMatrices.resize(numberOfRhsMatrices);
-  // // Copy of Mass into _workMatrix for LU-factorization.
-  // _inverseMass.reset(new SimpleMatrix(*_mass));
-
-  // // compute x[1] (and thus _fExt if required)
-  // computeRhs(time);
+void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
 
   LagrangianDS::initRhs(time);
 
   // jacobianRhsx
-  if(_K)
-  {
+  if (_K) {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
-    if(!_rhsMatrices[jacobianXBloc10])
-      _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(-1 * *_K));
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10]);
-  }
-  else
-    _rhsMatrices[jacobianXBloc10] = _rhsMatrices[zeroMatrix] ;
+    if (!_rhsMatrices[jacobianXBloc10_])
+      _rhsMatrices[jacobianXBloc10_] =
+          std::make_shared<siconos::algebra::SimpleMatrix>(-1 * *_K);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10_]);
+  } else
+    _rhsMatrices[jacobianXBloc10_] = _rhsMatrices[zeroMatrix_];
 
-  if(_C)
-  {
+  if (_C) {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
-    if(!_rhsMatrices[jacobianXBloc11])
-      _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(-1 * *_C));
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11]);
-  }
-  else
-    _rhsMatrices[jacobianXBloc11] = _rhsMatrices[zeroMatrix] ;
+    if (!_rhsMatrices[jacobianXBloc11_])
+      _rhsMatrices[jacobianXBloc11_] =
+          std::make_shared<siconos::algebra::SimpleMatrix>(-1 * *_C);
+    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11_]);
+  } else
+    _rhsMatrices[jacobianXBloc11_] = _rhsMatrices[zeroMatrix_];
 
-  if(_C || _K)
-    _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
-                                   _rhsMatrices[jacobianXBloc10], _rhsMatrices[jacobianXBloc11]));
-
+  if (_C || _K)
+    _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
+        _rhsMatrices[zeroMatrix_], _rhsMatrices[idMatrix_], _rhsMatrices[jacobianXBloc10_],
+        _rhsMatrices[jacobianXBloc11_]);
 }
 
-void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
-{
-  if(newValue.size(0) != _ndof || newValue.size(1) != _ndof)
+void siconos::modeling::LagrangianLinearTIDS::setK(
+    const siconos::algebra::SiconosMatrix& newValue) {
+  if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
     THROW_EXCEPTION("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
 
-  if(!_K)
-    _K.reset(new SimpleMatrix(newValue));
+  if (!_K)
+    _K = std::make_shared<siconos::algebra::SimpleMatrix>(newValue);
   else
     *_K = newValue;
 }
 
-void LagrangianLinearTIDS::setKPtr(SP::SiconosMatrix newPtr)
-{
-  if(newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
+void siconos::modeling::LagrangianLinearTIDS::setKPtr(
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
+  if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
     THROW_EXCEPTION("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
   _K = newPtr;
 }
 
-void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
-{
-  if(newValue.size(0) != _ndof || newValue.size(1) != _ndof)
+void siconos::modeling::LagrangianLinearTIDS::setC(
+    const siconos::algebra::SiconosMatrix& newValue) {
+  if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
     THROW_EXCEPTION("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
 
-  if(!_C)
-    _C.reset(new SimpleMatrix(newValue));
+  if (!_C)
+    _C = std::make_shared<siconos::algebra::SimpleMatrix>(newValue);
   else
     *_C = newValue;
 }
 
-void LagrangianLinearTIDS::setCPtr(SP::SiconosMatrix newPtr)
-{
-  if(newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
+void siconos::modeling::LagrangianLinearTIDS::setCPtr(
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
+  if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
     THROW_EXCEPTION("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
 
   _C = newPtr;
 }
 
-void LagrangianLinearTIDS::display(bool brief) const
-{
+void siconos::modeling::LagrangianLinearTIDS::display(bool brief) const {
   LagrangianDS::display();
-  std::cout << "===== Lagrangian Linear Time Invariant System display ===== " <<std::endl;
-  std::cout << "- Mass Matrix M : " <<std::endl;
-  if(_mass) _mass->display();
-  else std::cout << "-> nullptr" <<std::endl;
-  std::cout << "- Stiffness Matrix K : " <<std::endl;
-  if(_K) _K->display();
-  else std::cout << "-> nullptr" <<std::endl;
-  std::cout << "- Viscosity Matrix C : " <<std::endl;
-  if(_C) _C->display();
-  else std::cout << "-> nullptr" <<std::endl;
-  std::cout << "=========================================================== " <<std::endl;
+  std::cout << "===== Lagrangian Linear Time Invariant System display ===== " << std::endl;
+  std::cout << "- Mass Matrix M : " << std::endl;
+  if (_mass)
+    _mass->display();
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << "- Stiffness Matrix K : " << std::endl;
+  if (_K)
+    _K->display();
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << "- Viscosity Matrix C : " << std::endl;
+  if (_C)
+    _C->display();
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << "=========================================================== " << std::endl;
 }
 
-void LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
-{
-  DEBUG_PRINT("LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2) \n");
-
-  if(!_forces)
-  {
-    _forces.reset(new SiconosVector(_ndof));
-  }
-  else
+void siconos::modeling::LagrangianLinearTIDS::computeForces(
+    double time, std::shared_ptr<siconos::algebra::SiconosVector> q2,
+    std::shared_ptr<siconos::algebra::SiconosVector> v2) {
+  DEBUG_PRINT(
+      "siconos::modeling::LagrangianLinearTIDS::computeForces(double time, "
+      "std::shared_ptr<siconos::algebra::SiconosVector> q2, "
+      "std::shared_ptr<siconos::algebra::SiconosVector> v2) \n");
+  if (!_forces) {
+    _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  } else
     _forces->zero();
 
-  if(_fExt)
-  {
+  if (_fExt) {
     computeFExt(time);
     *_forces += *_fExt;
   }
-  if(_K)
-    *_forces -= prod(*_K, *q2);
-  if(_C)
-    *_forces -= prod(*_C, *v2);
+  if (_K) *_forces -= siconos::algebra::prod(*_K, *q2);
+  if (_C) *_forces -= siconos::algebra::prod(*_C, *v2);
 }
-

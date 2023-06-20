@@ -106,6 +106,8 @@ endif()
 
 # Links with other Siconos components
 target_link_libraries(numerics PRIVATE externals)
+set_source_files_properties(src//FrictionContact/FischerBurmeisterGenerated.c
+                            PROPERTIES COMPILE_FLAGS "-Wno-unused-value")
 
 # Links with non-Siconos libraries
 
@@ -156,7 +158,9 @@ endif()
 if(NOT DEFINED SICONOS_INT64)
   if(NOT SIZE_OF_CSI)
     include(CheckTypeSize)
-    check_type_size("size_t" SIZE_OF_CSI)
+    check_type_size("size_t" SIZE_OF_CSI LANGUAGE C)
+    # check_type_size("size_t" SIZE_OF_CSIX LANGUAGE CXX)
+
     if(NOT SIZE_OF_CSI) # This won't happen with c11
       message(FATAL_ERROR
         "Could not get size of size_t, please specify SICONOS_INT64.")
@@ -185,6 +189,15 @@ if(WITH_SYSTEM_SUITESPARSE)
   target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
 
 endif()
+if(DEFINED SICONOS_INT64) 
+  # Use CS_LONG 
+  target_compile_definitions(numerics PUBLIC CS_LONG) # used to select CXSparse version (depends on int size), for CS_INT and so on
+  # set(CS_LONG 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
+  # set(LDL_LONG 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
+  target_compile_definitions(numerics PUBLIC LDL_LONG) # we use long interface of ldl (see ldl.h from suitesparse)
+endif()
+target_compile_definitions(numerics PUBLIC NCOMPLEX) # We don't need the complex interface of CXSparse
+#  set(NCOMPLEX 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
 
 # - MLCP Simplex -
 find_package(MlcpSimplex QUIET)
@@ -288,7 +301,7 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   src/Relay
   src/FrictionContact
   # src/FrictionContact/Generated
-  # src/GenericMechanical
+  src/GenericMechanical
   )
 
 # List header files (in dir above) that must not be installed 

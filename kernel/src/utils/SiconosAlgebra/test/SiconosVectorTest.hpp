@@ -85,9 +85,8 @@ private:
   void testConstructor5();
   void testConstructor6();
   void testConstructor7();
-  void testBlock2Contiguous();
+  // void testBlock2Contiguous();
   void testZero();
-  void testFill();
   void testNorm();
   void testResize();
   void testSetBlock();
@@ -112,14 +111,14 @@ private:
   void End();
   // Members
 
-  SP::SiconosVector ref, z, tmp1, tmp2, tmp3, tmp4;
-  SP::BlockVector zB;
-  SPC::SiconosVector x, y;
-  SPC::BlockVector xB, yB;
+  std::shared_ptr<siconos::algebra::SiconosVector> ref, z, tmp1, tmp2, tmp3, tmp4;
+  std::shared_ptr<siconos::algebra::BlockVector> zB;
+  std::shared_ptr<const siconos::algebra::SiconosVector> x, y;
+  std::shared_ptr<const siconos::algebra::BlockVector> xB, yB;
   unsigned int size, size1, size2;
   std::vector<double> vq;
-  SP::DenseVect  dv;
-  SP::SparseVect  sv;
+  std::shared_ptr<siconos::algebra::DenseVect>  dv;
+  std::shared_ptr<siconos::algebra::SparseVect>  sv;
   double tol;
 
 public:

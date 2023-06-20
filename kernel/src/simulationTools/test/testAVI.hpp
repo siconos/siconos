@@ -14,31 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __AVITest__
 #define __AVITest__
 
+#include <SiconosConfig.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "FirstOrderLinearTIDS.hpp"
-#include "TimeStepping.hpp"
-#include "TimeDiscretisation.hpp"
-#include "ioMatrix.hpp"
-#include "FirstOrderLinearTIR.hpp"
-#include "NormalConeNSL.hpp"
-#include "Interaction.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
+
 #include "AVI.hpp"
 #include "EulerMoreauOSI.hpp"
+#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearTIR.hpp"
+#include "Interaction.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "NormalConeNSL.hpp"
+#include "TimeDiscretisation.hpp"
+#include "TimeStepping.hpp"
 
-#include <SiconosConfig.h>
-
-class AVITest : public CppUnit::TestFixture
-{
-
-private:
-  
+class AVITest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(AVITest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(AVITest);
@@ -60,26 +55,19 @@ private:
   double _T;
   double _tol;
   double _theta;
-  SP::NonSmoothDynamicalSystem _nsds;
-  SP::TimeStepping _sim;
-  SP::FirstOrderLinearTIDS _DS;
-  SP::TimeDiscretisation _TD;
-  SP::OneStepIntegrator _osi;
-  SP::SiconosMatrix _A;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds{nullptr};
+  std::shared_ptr<siconos::simulation::TimeStepping> _sim{nullptr};
+  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS{nullptr};
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _TD{nullptr};
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> _osi{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
 
-
-public:
-
-  AVITest(): _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12), _theta(0.5) {}
+ public:
+  AVITest() : _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12), _theta(0.5) {}
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

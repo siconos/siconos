@@ -23,12 +23,20 @@
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
-#include "SiconosVisitor.hpp" // for VIRTUAL_ACCEPT_VISITORS
-#include "SiconosException.hpp"
-#include "SimulationTypeDef.hpp"
-#include "OneStepIntegratorTypes.hpp"
-#include "SimulationGraphs.hpp"
+#include "ExtraAdditionalTerms.hpp"
+#include "OneStepIntegratorTypes.hpp"  // IntegratorType
 #include "Simulation.hpp"
+#include "SimulationGraphs.hpp"
+
+namespace siconos::simulation {
+class Simulation;
+}  // namespace siconos::simulation
+
+namespace siconos::nonsmooth_formulations {
+class OneStepNSProblem;
+}
+
+namespace siconos::integrators {
 
 /**
    Generic class to manage DynamicalSystem(s) time-integration
@@ -49,15 +57,12 @@
    - NewMarkAlphaOSI
    - ZeroOrderHoldOSI
 */
-class OneStepIntegrator :public std::enable_shared_from_this<OneStepIntegrator>
-{
-
-protected:
-
+class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator> {
+ protected:
   ACCEPT_SERIALIZATION(OneStepIntegrator);
 
   /** type/name of the Integrator */
-  OSI::TYPES _integratorType;
+  IntegratorType _integratorType;
 
   /** a graph of dynamical systems to integrate
    *  For the moment, we point to the graph of dynamical systems in
@@ -65,60 +70,68 @@ protected:
    *  system is integrated by this osi. It has to be improved by using a subgraph
    *  to avoid the use of checkOSI
    */
-  SP::DynamicalSystemsGraph _dynamicalSystemsGraph;
+  std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> _dynamicalSystemsGraph{nullptr};
 
   /** size of the memory for the integrator */
-  unsigned int _sizeMem;
+  unsigned int _sizeMem{1};
 
   /** steps of the integrator */
-  unsigned int _steps;
+  unsigned int _steps{0};
 
   /** _levelMinForOutput is the minimum level for the output
    *  needed by the OneStepIntegrator
    */
-  unsigned int _levelMinForOutput;
+  unsigned int _levelMinForOutput{0};
 
   /** _levelMaxForOutput is the maximum level for the output
    *  needed by the OneStepIntegrator
    */
-  unsigned int _levelMaxForOutput;
+  unsigned int _levelMaxForOutput{0};
 
   /** _levelMinForInput is the minimum level for the input
    *  needed by the OneStepIntegrator
    */
-  unsigned int _levelMinForInput;
+  unsigned int _levelMinForInput{0};
 
   /** _levelMaxForInput is the maximum level for the input
    *  needed by the OneStepIntegrator
    */
-  unsigned int _levelMaxForInput;
+  unsigned int _levelMaxForInput{0};
 
-  bool _isInitialized;
+  bool _isInitialized{false};
 
   /** boolean variable to force an explicit evaluation of the Jacobians
    *  mapping of relations only at the beginning of the time--step and
    *  not in the Newton iteration
    */
-
-  bool _explicitJacobiansOfRelation;
-
-
+  bool _explicitJacobiansOfRelation{false};
 
   /** A link to the simulation that owns this OSI */
-  SP::Simulation _simulation;
-
-  /** basic constructor with OSI Id
-   *
-   *  \param type integrator type/name
-   */
-  OneStepIntegrator(const OSI::TYPES& type)
-    : _integratorType(type), _sizeMem(1), _steps(0),
-      _levelMinForOutput(0), _levelMaxForOutput(0),
-      _levelMinForInput(0), _levelMaxForInput(0),
-      _isInitialized(false), _explicitJacobiansOfRelation(false) {};
+  std::shared_ptr<siconos::simulation::Simulation> _simulation{nullptr};
 
   /** struct to add terms in the integration. Useful for Control */
-  SP::ExtraAdditionalTerms _extraAdditionalTerms;
+  std::shared_ptr<ExtraAdditionalTerms> _extraAdditionalTerms{nullptr};
+
+  /** basic constructor with OSI Id and default values for the other variables
+   *
+   *  \param type integrator type/name
+   *  \param steps number of steps of the integrator
+   *  \param lmin_output minimum level for the output
+   *  \param lmax_output minimum level for the output
+   *  \param lmin_input minimum level for the input
+   *  \param lmax_input minimum level for the input
+   */
+  OneStepIntegrator(const IntegratorType& type, unsigned int steps, unsigned int lmin_output,
+                    unsigned int lmax_output, unsigned int lmin_input, unsigned int lmax_input)
+      : _integratorType(type),
+        _steps{steps},
+        _levelMinForOutput{lmin_output},
+        _levelMaxForOutput{lmax_output},
+        _levelMinForInput{lmin_input},
+        _levelMaxForInput{lmax_input} {
+            // Set levels. This may depend on the nonsmooth law and will be updated during
+            // initializeWorkVectorsForInteraction(...) call.
+        };
 
   /**
      Compare interaction and current OSI levels for input and output.
@@ -126,78 +139,61 @@ protected:
 
      \param inter a reference to an Interaction
   */
-  void _check_and_update_interaction_levels(Interaction& inter);
+  void _check_and_update_interaction_levels(siconos::modeling::Interaction& inter);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi -- common code.
    *
    *  \param ds the dynamical system
    */
-  SP::VectorOfVectors _initializeDSWorkVectors(SP::DynamicalSystem ds);
+  std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
+  _initializeDSWorkVectors(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
-  /** default constructor */
-  OneStepIntegrator() {};
+ private:
+  // Rule of five
+  OneStepIntegrator() = delete;
 
-private:
+  OneStepIntegrator(const OneStepIntegrator&) = delete;
+  OneStepIntegrator(OneStepIntegrator&&) = delete;
+  OneStepIntegrator& operator=(const OneStepIntegrator&) = delete;
+  OneStepIntegrator& operator=(OneStepIntegrator&&) = delete;
 
-  /** copy constructor, private, no copy nor pass-by value allowed */
-  OneStepIntegrator(const OneStepIntegrator&);
-
-  /** assignment (private => forbidden)
-   *
-   *  \param  OSI
-   *  \return OneStepIntegrator&
-   */
-  OneStepIntegrator& operator=(const OneStepIntegrator& OSI);
-
-
-public:
-
+ public:
   /** destructor
    */
-  virtual ~OneStepIntegrator() {};
+  virtual ~OneStepIntegrator() noexcept = default;
 
-  /** \return the id of the integrator (see list in OSI::TYPES enum)
+  /** \return the id of the integrator (see list in IntegratorType enum)
    */
-  inline OSI::TYPES getType() const
-  {
-    return _integratorType;
-  }
+  inline IntegratorType getType() const { return _integratorType; }
 
   /**
-     get the graph of dynamical systems associated with the Integrator
+     \return a pointer to the graph of dynamical systems associated with the Integrator
      warning: returns the whole ds graph, not only ds integrated by the present osi.
-
-     \return a SP::DynamicalSystemsGraph
   */
-  inline SP::DynamicalSystemsGraph dynamicalSystemsGraph() const
-  {
+  inline std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dynamicalSystemsGraph()
+      const {
     return _dynamicalSystemsGraph;
   };
 
   /**
      set the graph of dynamical systems associated with the Integrator
   */
-  inline void setDynamicalSystemsGraph(SP::DynamicalSystemsGraph dsg)
-  {
+  inline void setDynamicalSystemsGraph(
+      std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dsg) {
     _dynamicalSystemsGraph = dsg;
   };
 
-  /** get number of internal memory vectors needed in dynamical systems integrated with this osi.
-   *
-   *  \return an unsigned int
+  /** \return the number of internal memory vectors needed in dynamical systems integrated with
+   * this osi.
    */
-  inline unsigned int getSizeMem() const
-  {
-    return _sizeMem;
-  };
+  inline unsigned int getSizeMem() const { return _sizeMem; };
 
   /** get the Simulation that owns the OneStepIntegrator (pointer link)
    *
    *  \return a pointer to Simulation
    */
-  inline SP::Simulation simulation() const
-  {
+  inline std::shared_ptr<siconos::simulation::Simulation> simulation() const {
     return _simulation;
   }
 
@@ -205,8 +201,7 @@ public:
    *
    *  \param newS a pointer to Simulation
    */
-  inline void setSimulationPtr(SP::Simulation newS)
-  {
+  inline void setSimulationPtr(std::shared_ptr<siconos::simulation::Simulation> newS) {
     _simulation = newS;
   }
 
@@ -214,37 +209,25 @@ public:
      minimal level required for output var used with this integration scheme.
      var[level] is the derivative of order 'level' of var.
   */
-  virtual unsigned int levelMinForOutput()
-  {
-    return _levelMinForOutput;
-  }
+  virtual unsigned int levelMinForOutput() { return _levelMinForOutput; }
 
   /**
       maximal level required for output var used with this integration scheme.
       var[level] is the derivative of order 'level' of var.
    */
-  virtual unsigned int levelMaxForOutput()
-  {
-    return _levelMaxForOutput;
-  }
+  virtual unsigned int levelMaxForOutput() { return _levelMaxForOutput; }
 
   /**
       minimal level required for input var used with this integration scheme.
       var[level] is the derivative of order 'level' of var.
    */
-  virtual unsigned int levelMinForInput()
-  {
-    return _levelMinForInput;
-  }
+  virtual unsigned int levelMinForInput() { return _levelMinForInput; }
 
   /**
       maximal level required for input var used with this integration scheme.
       var[level] is the derivative of order 'level' of var.
    */
-  virtual unsigned int levelMaxForInput()
-  {
-    return _levelMaxForInput;
-  }
+  virtual unsigned int levelMaxForInput() { return _levelMaxForInput; }
 
   /** get the number of index sets required for the simulation
    *
@@ -252,19 +235,13 @@ public:
    */
   virtual unsigned int numberOfIndexSets() const = 0;
 
-  inline bool isInitialized(){return _isInitialized;};
+  inline bool isInitialized() { return _isInitialized; };
 
-  inline void setIsInitialized( bool value) {_isInitialized = value;};
+  inline void setIsInitialized(bool value) { _isInitialized = value; };
 
-  bool explicitJacobiansOfRelation()
-  {
-  return  _explicitJacobiansOfRelation;
-  }
+  bool explicitJacobiansOfRelation() { return _explicitJacobiansOfRelation; }
 
-  void setExplicitJacobiansOfRelation(bool newval)
-  {
-    _explicitJacobiansOfRelation = newval;
-  };
+  void setExplicitJacobiansOfRelation(bool newval) { _explicitJacobiansOfRelation = newval; };
 
   /** initialise the integrator
    */
@@ -281,7 +258,8 @@ public:
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
-  virtual void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) = 0 ;
+  virtual void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) = 0;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -290,10 +268,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  virtual void initializeWorkVectorsForInteraction(Interaction &inter,
-                             InteractionProperties& interProp,
-                             DynamicalSystemsGraph & DSG) = 0 ;
-
+  virtual void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
+      siconos::graphs::DynamicalSystemsGraph& DSG) = 0;
 
   /**
      compute interaction output (y) for all levels and swaps in memory
@@ -302,43 +279,36 @@ public:
      \param time value for output computation
      \param interaction_properties properties of the interaction, in the Interaction Graph I0
   */
-  void update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties);
+  void update_interaction_output(
+      siconos::modeling::Interaction& inter, double time,
+      siconos::graphs::InteractionProperties& interaction_properties);
 
   /** compute the initial state (for dynamical system variables) of the Newton loop. */
-  virtual void computeInitialNewtonState(){
-    // Default behavior :  does nothing and used the current state as starting state of the Newton iteration
+  virtual void computeInitialNewtonState() {
+    // Default behavior :  does nothing and used the current state as starting state of the
+    // Newton iteration
   }
 
   /** return the maximum of all norms for the discretized residus of DS
    *
    *  \return a double
    */
-  virtual double computeResidu(){
-    // default : error
-    THROW_EXCEPTION("OneStepIntegrator::computeResidu not implemented for integrator of type " + std::to_string(_integratorType));
-    return 0.0;
-  }
+  virtual double computeResidu();
 
   /**
       integrates the Dynamical System linked to this integrator, without taking constraints
       into account.
   */
-  virtual void computeFreeState()
-  {
-    // default : error
-    THROW_EXCEPTION("OneStepIntegrator::computeFreeState not implemented for integrator of type " + std::to_string(_integratorType));
-  }
+  virtual void computeFreeState();
 
-  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
+  /** integrates the Interaction linked to this integrator, without taking non-smooth effects
+   * into account
    *
    *  \param vertex_inter of the interaction graph
-   *  \param osnsp pointer to OneStepNSProblem
+   *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
-  {
-    // default : error
-    THROW_EXCEPTION("OneStepIntegrator::computeFreeOutput not implemented for integrator of type " + std::to_string(_integratorType));
-  }
+  virtual void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+                                 siconos::nonsmooth_formulations::OneStepNSProblem* osnsp);
 
   /** compute the residu of the output of the relation (y)
    *  This computation depends on the type of OSI
@@ -346,14 +316,16 @@ public:
    *  \param time time of computation
    *  \param indexSet the index set of the interaction that are concerned
    */
-  virtual double computeResiduOutput(double time, SP::InteractionsGraph indexSet);
+  virtual double computeResiduOutput(
+      double time, std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet);
   /** compute the residu of the input of the relation (R or p)
    *  This computation depends on the type of OSI
    *
    *  \param time time of computation
    *  \param indexSet the index set of the interaction that are concerned
    */
-  virtual double computeResiduInput(double time, SP::InteractionsGraph indexSet);
+  virtual double computeResiduInput(
+      double time, std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet);
 
   /** integrate the system, between tinit and tend, with possible stop at tout
    *
@@ -368,7 +340,8 @@ public:
    */
   void resetAllNonSmoothParts();
 
-  /** set to zero all the r vectors of the DynamicalSystems of the present OSI for a given level
+  /** set to zero all the r vectors of the DynamicalSystems of the present OSI for a given
+   *  level
    *
    *  \param level
    */
@@ -408,18 +381,17 @@ public:
    *  \param time current time
    *  \param level level of interest for the dynamics
    *  \warning VA: 27/10/2022 Whatever the level, the updateInput method loops over indexSet0
-   *  This is sometimes necessary for some OSI but for some others it may burden the computational
-   *  time for nothing. For instance, in standard MoreauJEANOSI, p[1] is only defined on indexSet1.
-   *  we should go towards
-   *  virtual void updateInput(double time, unsigned int pLevel, unsigned int indexSetLevel );
+   *  This is sometimes necessary for some OSI but for some others it may burden the
+   *  computational time for nothing. For instance, in standard MoreauJEANOSI, p[1] is only
+   *  defined on indexSet1. we should go towards virtual void updateInput(double time, unsigned
+   *  int pLevel, unsigned int indexSetLevel );
    */
   virtual void updateInput(double time, unsigned int level);
 
   virtual void prepareNewtonIteration(double time) = 0;
 
-  /** print the data to the screen
-   */
-  virtual void display() = 0;
+  /** print the data to the screen */
+  virtual void display() const = 0;
 
   /** Apply the rule to one Interaction to known if is it should be included
    *  in the IndexSet of level i
@@ -428,12 +400,8 @@ public:
    *  \param i
    *  \return bool
    */
-  virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
-  {
-    THROW_EXCEPTION("OneStepIntegrator::addInteractionInIndexSet - Should be called at this level");
-    return 0;
-  }
-  ;
+  virtual bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                        unsigned int i);
 
   /** Apply the rule to one Interaction to know if is it should be removed
    *  from the IndexSet of level i
@@ -442,18 +410,14 @@ public:
    *  \param i
    *  \return bool
    */
-  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
-  {
-    THROW_EXCEPTION("OneStepIntegrator::removeInteractionFromIndexSet - Should not be called at this level");
-    return 0;
-  };
+  virtual bool removeInteractionFromIndexSet(
+      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
 
   /** get the ExtraAdditionalTerms.
    *
    *  \return the ExtraAdditionalTerms
    */
-  inline SP::ExtraAdditionalTerms extraAdditionalTerms()
-  {
+  inline std::shared_ptr<ExtraAdditionalTerms> extraAdditionalTerms() {
     return _extraAdditionalTerms;
   }
 
@@ -462,45 +426,45 @@ public:
    *
    *  \param eat the ExtraAdditionalTerms to use
    */
-  inline void setExtraAdditionalTerms(SP::ExtraAdditionalTerms eat)
-  {
+  inline void setExtraAdditionalTerms(std::shared_ptr<ExtraAdditionalTerms> eat) {
     _extraAdditionalTerms = eat;
   }
-  /**
-     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
 
-     \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
-   */
-  inline bool checkOSI(DynamicalSystemsGraph::VIterator dsi)
-  {
-    return  (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
+  /**
+      True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+
+      \param dsi the iterator on the node of the graph corresponding to the dynamical system
+      of interest.
+  */
+  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VIterator dsi) const {
+    return (_dynamicalSystemsGraph->properties(*dsi).osi.get()) == this;
+  };
+
+  /**
+      True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
+
+      \param dsgv the descriptor of the node in the graph corresponding to the dynamical
+      system of interest.
+  */
+  inline bool checkOSI(siconos::graphs::DynamicalSystemsGraph::VDescriptor dsgv) const {
+    return (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
   };
 
   /**
      True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
 
-     \param dsgv the descriptor of the node in the graph corresponding to the dynamical system of interest.
+     \param dsi the iterator on the node of the graph corresponding to the dynamical system of
+     interest.
    */
-  inline bool checkOSI(DynamicalSystemsGraph::VDescriptor dsgv)
-  {
-    return  (_dynamicalSystemsGraph->properties(dsgv).osi.get()) == this;
+  inline bool checkInteractionOSI(siconos::graphs::InteractionsGraph& indexSet0,
+                                  siconos::graphs::InteractionsGraph::VIterator ui) {
+    return (indexSet0.properties(*ui).osi1.get()) == this;
   };
 
-  /**
-     True if the dynamical system (a vertex in the ds graph) is integrated by this osi.
-
-     \param dsi the iterator on the node of the graph corresponding to the dynamical system of interest.
-   */
-  inline bool checkInteractionOSI(InteractionsGraph & indexSet0, InteractionsGraph::VIterator ui)
-  {
-    return  (indexSet0.properties(*ui).osi1.get()) == this;
-  };
-
-  virtual SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,  InteractionsGraph& indexSet) = 0;
-
-
-  VIRTUAL_ACCEPT_VISITORS(OneStepIntegrator);
-
+  virtual siconos::algebra::SiconosVector& osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
+      siconos::graphs::InteractionsGraph& indexSet) = 0;
 };
+}  // namespace siconos::integrators
 
-#endif // ONESTEPINTEGRATOR_H
+#endif  // ONESTEPINTEGRATOR_H

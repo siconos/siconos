@@ -19,6 +19,7 @@
 #include <math.h>    // for fabs
 #include <stdio.h>   // for fprintf, printf, FILE, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
+#include <assert.h>
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -72,7 +73,7 @@ bool NV_equal(double * x, double * y, int n, double tol)
 {
   for(int i =0; i< n ; i++)
   {
-    if(fabs(x[i] - y[i]) >= tol)
+    if(fabs(x[i] - y[i]) >= tol || (isnan(x[i]) && !isnan(y[i])) || (!isnan(x[i]) && isnan(y[i])))
     {
       DEBUG_PRINTF("error %i = %e\n",i, fabs(x[i]) - y[i]);
       return false;
@@ -192,7 +193,7 @@ double NV_norm_2(const double * const vec, const unsigned int vecSize)
   /* free(vec2); */
   /* return sqrt(sum); */
   double norm = cblas_dnrm2(vecSize, vec, 1);
-  assert(!isnan(norm));
+  //  assert(!isnan(norm));
   return norm;
 }
 

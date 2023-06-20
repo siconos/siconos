@@ -14,24 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
+#include "Contact5DR.hpp"
+
+#include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
-#include "Contact5DR.hpp"
-#include <RigidBodyDS.hpp>
-#include <Interaction.hpp>
-#include <BlockVector.hpp>
-
-Contact5DR::Contact5DR()
-  : NewtonEuler5DR()
-{
-}
-
-void Contact5DR::computeh(double time, const BlockVector& q0, SiconosVector& y)
+void siconos::collision::Contact5DR::computeh(double time,
+                                              const siconos::algebra::BlockVector& q0,
+                                              siconos::algebra::SiconosVector& y)
 {
   DEBUG_BEGIN("Contact5DR::computeh(...)\n");
 
@@ -47,9 +41,9 @@ void Contact5DR::computeh(double time, const BlockVector& q0, SiconosVector& y)
   DEBUG_END("Contact5DR::computeh(...)\n");
 }
 
-void Contact5DR::updateContactPoints(const SiconosVector& pos1,
-                                     const SiconosVector& pos2,
-                                     const SiconosVector& normal)
+void siconos::collision::Contact5DR::updateContactPoints(
+    const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
+    const siconos::algebra::SiconosVector& normal)
 {
   // Copy relative positions
   *_relPc1 = pos1;
@@ -58,6 +52,6 @@ void Contact5DR::updateContactPoints(const SiconosVector& pos1,
   // Update normal
   *_relNc = normal;
 
-  assert(!((*_relNc)(0)==0 && (*_relNc)(1)==0 && (*_relNc)(2)==0)
-         && "nc = 0, problems..\n");
+  assert(!((*_relNc)(0) == 0 && (*_relNc)(1) == 0 && (*_relNc)(2) == 0) &&
+         "nc = 0, problems..\n");
 }

@@ -219,8 +219,6 @@ namespace boost
  // we cannot share data struct
  //%import Numerics.i
 
-%include "SiconosConst.hpp"
-
 %include "SiconosVisitables.hpp"
 
 %import "SiconosVisitor.hpp"
@@ -233,9 +231,9 @@ namespace boost
 
 %include graph.i
 
-%rename (ioMatrix_read) ioMatrix::read;
-%rename (ioMatrix_write) ioMatrix::write;
-%include "ioMatrix.hpp"
+%rename (io_read) io::read;
+%rename (io_write) io::write;
+%include "io.hpp"
 
 %include "SimulationTypeDef.hpp"
 

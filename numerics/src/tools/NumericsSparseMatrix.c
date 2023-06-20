@@ -17,6 +17,7 @@
 */
 #include "CSparseMatrix_internal.h"     // for CSparseMatrix, CS_INT, cs_dl_spfree
 #include "NumericsSparseMatrix.h"
+#include "NumericsDataVersion.h"
 #include <assert.h>            // for assert
 #ifndef __cplusplus
 #include <stdbool.h>           // for bool, false, true
@@ -32,14 +33,6 @@
 #include "siconos_debug.h"             // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
 #include "numerics_verbose.h"  // for numerics_error_nonfatal, CHECK_IO
 #include "string.h"            // for memcpy, memset
-
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif
 
 typedef struct
 {
@@ -60,12 +53,6 @@ static int sort_indices_struct_cmp(const void *a, const void *b)
   const sort_indices_struct *sb = (const sort_indices_struct *) b;
   return (sa->i > sb->i) - (sa->i < sb->i);
 }
-#endif
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif !(__INTEL_COMPILER || __APPLE__ )
-#pragma GCC diagnostic pop
 #endif
 
 version_t NSM_version(const NumericsSparseMatrix* M, NSM_t type)
@@ -733,6 +720,26 @@ NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
   return out;
 }
 
+NumericsSparseMatrix * NSM_triplet_scalar(unsigned int size, double s)
+{
+  int _origin = NSM_TRIPLET;
+  NumericsSparseMatrix * out = NSM_new();
+  out->origin = _origin;
+
+  CSparseMatrix * C = cs_spalloc(size, size, size, 1, 1);
+
+  for(unsigned int k=0 ; k < size; k++)
+  {
+    C->nz++;
+    C->i[k] =k;
+    C->p[k] =k;
+    C->x[k] =s;
+  }
+  assert(out->origin ==NSM_TRIPLET);
+  out->triplet = C;
+  out->origin = NSM_TRIPLET;
+  return out;
+}
 
 static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
 {

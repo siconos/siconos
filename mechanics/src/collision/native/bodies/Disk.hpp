@@ -23,18 +23,19 @@
 #define Disk_H
 
 #include "CircularDS.hpp"
-#include "MechanicsFwd.hpp"
+
+namespace siconos::collision::native::bodies {
 /** \class Disk
  *  \brief Definition of a 2D disk - Inherits from LagrangianDS
  */
 
 class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
-private:
+ private:
   ACCEPT_SERIALIZATION(Disk);
 
   void MassSetup();
 
-public:
+ public:
   /** Constructor
    *
    *  \param radius
@@ -43,13 +44,12 @@ public:
    *  \param velocity vector
    */
 
-  Disk(double radius, double mass, SP::SiconosVector position,
-       SP::SiconosVector velocity);
+  Disk(double radius, double mass, std::shared_ptr<siconos::algebra::SiconosVector> position,
+       std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
   /** destructor
    */
   virtual ~Disk() noexcept = default;
-
-  ACCEPT_BASE_VISITORS(LagrangianDS);
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* Disk_H */

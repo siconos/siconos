@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SiconosCollisionManager.hpp
 \brief A mechanics world is a Siconos InteractionManager that supports
@@ -26,19 +26,31 @@
 #ifndef SiconosCollisionManager_h
 #define SiconosCollisionManager_h
 
-#include <InteractionManager.hpp>
-#include <SiconosContactor.hpp>
-#include <SiconosCollisionQueryResult.hpp>
+#include "InteractionManager.hpp"
+#include "StaticBody.hpp"
 
-class SiconosCollisionManager : public InteractionManager
-{
-protected:
-  
+namespace siconos::modeling {
+
+class SecondOrderDS;
+}
+
+namespace siconos::simulation {
+
+class InteractionManager;
+}
+
+namespace siconos::collision {
+
+class StaticBody;
+class SiconosContactorSet;
+class SiconosCollisionQueryResult;
+
+class SiconosCollisionManager : public siconos::simulation::InteractionManager {
+ protected:
   ACCEPT_SERIALIZATION(SiconosCollisionManager);
 
-public:
-  SiconosCollisionManager() : InteractionManager() {}
-  virtual ~SiconosCollisionManager() {}
+ public:
+  virtual ~SiconosCollisionManager() noexcept = default;
 
   /** An opaque handle can be used to refer to a specific static
    *  contactor set previously added to the collision manager. */
@@ -48,16 +60,20 @@ public:
    *  after removing a body from the NonSmoothDynamicalSystem
    *  otherwise contact will occur with a non-graph body which results
    *  in failure. */
-  virtual void removeBody(const SP::SecondOrderDS& body) {}
+  virtual void removeBody(const std::shared_ptr<siconos::modeling::SecondOrderDS>& body) {}
 
   /** Add a static body in the collision detector.
    */
-  virtual SP::StaticBody addStaticBody(
-    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector(), int number=0) {return SP::StaticBody();};
+  virtual std::shared_ptr<StaticBody> addStaticBody(
+      std::shared_ptr<SiconosContactorSet> cs,
+      std::shared_ptr<siconos::algebra::SiconosVector> position = nullptr, int number = 0)
+  {
+    return std::make_shared<StaticBody>();
+  };
 
   /** Remove a body from the collision detector.
    */
-  virtual void removeStaticBody(const SP::StaticBody& body) {};
+  virtual void removeStaticBody(const std::shared_ptr<StaticBody>& body){};
 
   /**
      Perform an intersection test on all shapes in the contactors and
@@ -74,18 +90,18 @@ public:
      \return A vector of SiconosCollisionQueryResult that contain
      information about the query results.
   */
-  virtual std::vector<SP::SiconosCollisionQueryResult>
-  lineIntersectionQuery(const SiconosVector& start,
-                        const SiconosVector& end,
-                        bool closestOnly=false,
-                        bool sorted=true)
-    { return std::vector<SP::SiconosCollisionQueryResult>(); }
+  virtual std::vector<std::shared_ptr<SiconosCollisionQueryResult>> lineIntersectionQuery(
+      const siconos::algebra::SiconosVector& start, const siconos::algebra::SiconosVector& end,
+      bool closestOnly = false, bool sorted = true)
+  {
+    return std::vector<std::shared_ptr<SiconosCollisionQueryResult>>();
+  }
 
   /**
      Find all shapes that are within a sphere defined by a point and
      a radius and return them in an ordered list based on distance to
      the center
-     
+
      \param center The center of the sphere in inertial frame (world) coordinates.
      \param radius The radius of the sphere.
      \param closestOnly If true, indicates only interested in first
@@ -95,12 +111,12 @@ public:
      \return A vector of SiconosCollisionQueryResult that contain
      information about the query results.
   */
-  virtual std::vector<SP::SiconosCollisionQueryResult>
-  inSphereQuery(const SiconosVector& center,
-                double radius,
-                bool closestOnly=false,
-                bool sorted=true)
-    { return std::vector<SP::SiconosCollisionQueryResult>(); }
+  virtual std::vector<std::shared_ptr<SiconosCollisionQueryResult>> inSphereQuery(
+      const siconos::algebra::SiconosVector& center, double radius, bool closestOnly = false,
+      bool sorted = true)
+  {
+    return std::vector<std::shared_ptr<SiconosCollisionQueryResult>>();
+  }
 
   /**
      Find all shapes that are within a box defined by a center point
@@ -117,12 +133,13 @@ public:
      \return A vector of SiconosCollisionQueryResult that contain
      information about the query results.
   */
-  virtual std::vector<SP::SiconosCollisionQueryResult>
-  inBoxQuery(const SiconosVector& center,
-             const SiconosVector& dimensions,
-             bool closestOnly=false,
-             bool sorted=true)
-    { return std::vector<SP::SiconosCollisionQueryResult>(); }
+  virtual std::vector<std::shared_ptr<SiconosCollisionQueryResult>> inBoxQuery(
+      const siconos::algebra::SiconosVector& center,
+      const siconos::algebra::SiconosVector& dimensions, bool closestOnly = false,
+      bool sorted = true)
+  {
+    return std::vector<std::shared_ptr<SiconosCollisionQueryResult>>();
+  }
 
   /**
      Find all shapes that are inside a half-space, defined by a point
@@ -137,13 +154,14 @@ public:
      \return A vector of SiconosCollisionQueryResult that contain
      information about the query results.
   */
-  virtual std::vector<SP::SiconosCollisionQueryResult>
-  inHalfSpaceQuery(const SiconosVector& point,
-                   const SiconosVector& normal,
-                   bool closestOnly=false,
-                   bool sorted=true)
-    { return std::vector<SP::SiconosCollisionQueryResult>(); }
-
+  virtual std::vector<std::shared_ptr<SiconosCollisionQueryResult>> inHalfSpaceQuery(
+      const siconos::algebra::SiconosVector& point,
+      const siconos::algebra::SiconosVector& normal, bool closestOnly = false,
+      bool sorted = true)
+  {
+    return std::vector<std::shared_ptr<SiconosCollisionQueryResult>>();
+  }
 };
+}  // namespace siconos::collision
 
 #endif /* SiconosCollisionManager.hpp */

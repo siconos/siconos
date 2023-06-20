@@ -14,31 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file DiskDiskR.hpp
  */
 #ifndef DiskDiskR_h
 #define DiskDiskR_h
 
-#include "MechanicsFwd.hpp"
-#include <SiconosVisitor.hpp>
 #include "CircularR.hpp"
 
+namespace siconos::collision::native::bodies {
 
 /** \class DiskDiskR
  *  \brief Two disks relation - Inherits from LagrangianScleronomousR
  */
-class DiskDiskR : public CircularR, public std::enable_shared_from_this<DiskDiskR>
-{
-private:
-
+class DiskDiskR : public CircularR, public std::enable_shared_from_this<DiskDiskR> {
+ private:
   ACCEPT_SERIALIZATION(DiskDiskR);
 
-  double r1pr2;
+  double r1pr2{0.};
 
-public:
-
+ public:
   /** Constructor
    *
    *  \param disk1 radius
@@ -48,26 +44,26 @@ public:
 
   ~DiskDiskR() noexcept = default;
 
-  double distance(double, double, double, double, double, double);
+  double distance(double, double, double, double, double, double) override;
 
   /**
      to compute the output y = h(q,z) of the Relation
-     
+
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
      \param y the resulting vector
   */
-  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  void computeh(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
+                siconos::algebra::SiconosVector& y) override;
 
   /**
      to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-     
+
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector& q, BlockVector& z);
-
-  ACCEPT_VISITORS();
-
+  void computeJachq(const siconos::algebra::BlockVector& q,
+                    siconos::algebra::BlockVector& z) override;
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* DiskDiskR_h */

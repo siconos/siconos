@@ -39,9 +39,9 @@ OccR::OccR(const ContactPoint& contact1,
 }
 
 
-void OccR::computeh(double time, const BlockVector& q0, SiconosVector& y)
+void OccR::computeh(double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)
 {
-  DEBUG_BEGIN("OccR::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
+  DEBUG_BEGIN("OccR::computeh(double time, siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)\n");
   this->_contact2.contactShape().accept(*this->_geometer);
 
   
@@ -70,6 +70,6 @@ void OccR::computeh(double time, const BlockVector& q0, SiconosVector& y)
 
   DEBUG_EXPR(y.display(););
   DEBUG_EXPR(_Nc->display(););
-  DEBUG_END("OccR::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
+  DEBUG_END("OccR::computeh(double time, siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)\n");
 
 }

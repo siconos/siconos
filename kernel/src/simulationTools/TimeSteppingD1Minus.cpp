@@ -14,50 +14,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "TimeSteppingD1Minus.hpp"
-#include "D1MinusLinearOSI.hpp"
-#include "TimeDiscretisation.hpp"
-#include "Topology.hpp"
-//#include "Interaction.hpp"
+
+#include <cassert>
+#include <functional>
+
+#include "EventsManager.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
-#include "LagrangianR.hpp"
-#include "NewtonEulerDS.hpp"
-#include "NewtonEulerR.hpp"
-#include "TypeName.hpp"
-#include "NonSmoothLaw.hpp"
-
+#include "OneStepIntegrator.hpp"
+#include "Topology.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "siconos_debug.h"
-#include "NonSmoothDynamicalSystem.hpp"
-#include "EventsManager.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosVector.hpp"
+#include "siconos_debug.h"
 
-#include <ciso646>
-
-#include <SiconosConfig.h>
-#include <functional>
-using namespace std::placeholders;
-
-
-using namespace RELATION;
-
-void TimeSteppingD1Minus::initOSNS()
-{
+void siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus::initOSNS() {
   // initialize OSNS for InteractionsGraph from Topology
-  SP::Topology topo =  _nsds->topology();
+  auto topo = _nsds->topology();
 
   // there is at least one OSNP
-  if(!_allNSProblems->empty())
-  {
-    if(_allNSProblems->size() != 2)
-      THROW_EXCEPTION("TimeSteppingD1Minus::initOSNS, TimeSteppingD1Minus simulation must have two OneStepNonsmoothProblems.");
+  if (!_allNSProblems->empty()) {
+    if (_allNSProblems->size() != 2)
+      THROW_EXCEPTION(
+          "siconos::simulation::TimeSteppingD1Minus::initOSNS, TimeSteppingD1Minus simulation "
+          "must have two OneStepNonsmoothProblems.");
 
-    //update all index sets
+    // update all index sets
     updateIndexSets();
 
     // update output
@@ -65,119 +52,112 @@ void TimeSteppingD1Minus::initOSNS()
   }
 }
 
-TimeSteppingD1Minus::TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb) : Simulation(nsds, td)
-{
+siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus(
+    std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+    std::shared_ptr<TimeDiscretisation> td, int nb)
+    : Simulation(nsds, td) {
   (*_allNSProblems).resize(nb);
 }
 
-TimeSteppingD1Minus::~TimeSteppingD1Minus()
-{
+void siconos::simulation::TimeSteppingD1Minus::initialize() {
+  Simulation::initialize();
+  initOSNS();
+  // 7 - First initialization of the simulation
+  firstInitialize();
 }
 
-void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
-{
-  DEBUG_PRINTF("\nTimeSteppingD1Minus::updateIndexSet(unsigned int i) for i = %i\n", i);
+void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) {
+  DEBUG_PRINTF(
+      "\nsiconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) for i = "
+      "%i\n",
+      i);
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
 
   assert(_nsds);
   assert(_nsds->topology());
 
-  SP::Topology topo = _nsds->topology();
+  auto topo = _nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
-         "TimeSteppingD1Minus::updateIndexSet(i), indexSets[i] does not exist.");
+         "siconos::simulation::TimeSteppingD1Minus::updateIndexSet(i), indexSets[i] does not "
+         "exist.");
   // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
-  assert(i > 0 &&
-         "TimeSteppingD1Minus::updateIndexSet(i=0), indexSets[0] cannot be updated.");
+  assert(
+      i > 0 &&
+      "siconos::simulation::TimeSteppingD1Minus::updateIndexSet(i=0), indexSets[0] cannot be "
+      "updated.");
 
   // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::InteractionsGraph indexSet0 = topo->indexSet(0); // ALL Interactions : formula (8.30) of Acary2008
-  SP::InteractionsGraph indexSetCurrent = topo->indexSet(i); // ACTIVE Interactions for IMPACTS
+  auto indexSet0 = topo->indexSet(0);        // ALL Interactions : formula (8.30) of Acary2008
+  auto indexSetCurrent = topo->indexSet(i);  // ACTIVE Interactions for IMPACTS
   assert(indexSet0);
   assert(indexSetCurrent);
-  DynamicalSystemsGraph& DSG0= *nonSmoothDynamicalSystem()->dynamicalSystems();
-  topo->setHasChanged(false); // only with changed topology, OSNS will be forced to update themselves
-
+  auto& DSG0 = *nonSmoothDynamicalSystem()->dynamicalSystems();
+  topo->setHasChanged(
+      false);  // only with changed topology, OSNS will be forced to update themselves
 
   DEBUG_PRINTF("\nINDEXSETS BEFORE UPDATE for level i = %i\n", i);
   DEBUG_PRINTF(" indexSet0 size : %ld\n", indexSet0->size());
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
 
-  InteractionsGraph::VIterator uipend, uip;
-  for(std::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
-    /* loop over ALL vertices in indexSet0 */
+  siconos::graphs::InteractionsGraph::VIterator uipend, uip;
+  for (std::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
+  /* loop over ALL vertices in indexSet0 */
   {
-
-    SP::Interaction inter = indexSet0->bundle(*uip);
+    auto inter = indexSet0->bundle(*uip);
 
     // We assume that the integrator of the ds1 drive the update of the index set
-    //SP::OneStepIntegrator Osi = indexSetCurrent->properties(*uip).osi;
-    SP::DynamicalSystem ds1 = indexSetCurrent->properties(*uip).source;
-    OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
-    unsigned int levelMaxForInput = osi.levelMaxForInput();
-    if((!indexSetCurrent->is_vertex(inter))
-        and (osi.addInteractionInIndexSet(inter, i)))
-    {
+    // auto Osi = indexSetCurrent->properties(*uip).osi;
+    auto ds1 = indexSetCurrent->properties(*uip).source;
+    auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+    auto levelMaxForInput = osi.levelMaxForInput();
+    if ((!indexSetCurrent->is_vertex(inter)) and (osi.addInteractionInIndexSet(inter, i))) {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
       topo->setHasChanged(true);
-    }
-    else if((indexSetCurrent->is_vertex(inter))
-            and !(osi.addInteractionInIndexSet(inter, i)))
-    {
+    } else if ((indexSetCurrent->is_vertex(inter)) and
+               !(osi.addInteractionInIndexSet(inter, i))) {
       indexSetCurrent->remove_vertex(inter);
       topo->setHasChanged(true);
-      if(i <= levelMaxForInput)
-      {
+      if (i <= levelMaxForInput) {
         DEBUG_PRINTF("Reset to zero inter->lambda(%i)", i);
         inter->lambda(i)->zero();
       }
     }
 
-    if(!indexSetCurrent->is_vertex(inter))
-    {
-      DEBUG_PRINTF("The current interaction is not in the indexSet(%i)\n",(int)i);
-      if(i <= levelMaxForInput)
-      {
+    if (!indexSetCurrent->is_vertex(inter)) {
+      DEBUG_PRINTF("The current interaction is not in the indexSet(%i)\n", (int)i);
+      if (i <= levelMaxForInput) {
         DEBUG_EXPR(inter->lambda(i)->display());
         inter->lambda(i)->zero();
       }
+    } else {
+      DEBUG_PRINTF("The current interaction is in the indexSet(%i)\n", (int)i);
+      DEBUG_EXPR(if (i <= levelMaxForInput) inter->lambda(i)->display());
     }
-    else
-    {
-      DEBUG_PRINTF("The current interaction is in the indexSet(%i)\n",(int)i);
-      DEBUG_EXPR(if(i <= levelMaxForInput) inter->lambda(i)->display());
-    }
-
-
-
-
   }
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);
   DEBUG_PRINTF(" indexSet0 size : %ld\n", indexSet0->size());
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
 }
 
-void TimeSteppingD1Minus::run()
-{
+void siconos::simulation::TimeSteppingD1Minus::run() {
   unsigned int count = 0;
-  std::cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" <<std::endl;
-  while(_eventsManager->hasNextEvent())
-  {
+  std::cout
+      << " ==== Start of TimeSteppingD1Minus simulation - This may take a while ... ====\n";
+  while (_eventsManager->hasNextEvent()) {
     advanceToEvent();
 
     processEvents();
     count++;
   }
-  std::cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " <<std::endl;
+  std::cout << "===== End of TimeSteppingD1Minus simulation. " << count
+            << " events have been processed. ==== \n";
 }
 
-void TimeSteppingD1Minus::advanceToEvent()
-{
-
+void siconos::simulation::TimeSteppingD1Minus::advanceToEvent() {
   initialize();
-
 
   // Update interactions if a manager was provided
   updateInteractions();
@@ -193,12 +173,10 @@ void TimeSteppingD1Minus::advanceToEvent()
   // * indexset (I_{k+1}^+)
 
   // Initialize lambdas of all interactions.
-  SP::InteractionsGraph indexSet0 = _nsds->
-                                    topology()->indexSet(0);
-  InteractionsGraph::VIterator ui, uiend, vnext;
+  auto indexSet0 = _nsds->topology()->indexSet(0);
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend, vnext;
   std::tie(ui, uiend) = indexSet0->vertices();
-  for(vnext = ui; ui != uiend; ui = vnext)
-  {
+  for (vnext = ui; ui != uiend; ui = vnext) {
     ++vnext;
     indexSet0->bundle(*ui)->resetAllLambda();
   }
@@ -213,7 +191,8 @@ void TimeSteppingD1Minus::advanceToEvent()
   // * calculate free velocity and not v_{k+1}^- in ds->velocity
   computeFreeState();
 
-  // event (impulse) calculation only when there has been a topology change (here: closing contact)
+  // event (impulse) calculation only when there has been a topology change (here: closing
+  // contact)
   // * calculate gap velocity using free velocity with OSI
   // * calculate local impulse (Lambda_{k+1}^+)
   //
@@ -224,25 +203,24 @@ void TimeSteppingD1Minus::advanceToEvent()
   // need an update if graph has changed
   // this should be done in updateIndexSet(i) for all integrators only
   // if a graph has changed
-  //updateIndexSet(1);
+  // updateIndexSet(1);
   //_nsds->topology()->indexSet(1)->update_vertices_indices();
   //_nsds->topology()->indexSet(1)->update_edges_indices();
 
-  //if(_nsds->topology()->hasChanged())
+  // if(_nsds->topology()->hasChanged())
   //{
-  //  for(OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
-  //  {
-  //    (*itOsns)->setHasBeenUpdated(false);
-  //  }
-  //}
+  //   for(auto osns: *_allNSProblems)
+  //   {
+  //     osns->setHasBeenUpdated(false);
+  //   }
+  // }
 
-  if(!_allNSProblems->empty())
-    computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+  if (!_allNSProblems->empty())
+    computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_VELOCITY);
 
-  DEBUG_EXPR(
-    if(_nsds->topology()->indexSet(1)->size() >0)
-    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->display();
-  );
+  DEBUG_EXPR(if (_nsds->topology()->indexSet(1)->size() >
+                 0)(*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]
+                 ->display(););
 
   // update on impulse level
   // * calculate global impulse (p_{k+1}^+)
@@ -253,13 +231,14 @@ void TimeSteppingD1Minus::advanceToEvent()
   // indexset (I_{k+1}^+) is calculated in Simulation::processEvent
 }
 
-void TimeSteppingD1Minus::computeResidu()
-{
-  for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
-    (*it)->computeResidu();
+void siconos::simulation::TimeSteppingD1Minus::computeResidu() {
+  for (auto osi : *_allOSI) {
+    osi->computeResidu();
+  }
 }
 
-void TimeSteppingD1Minus::computeFreeState()
-{
-  std::for_each(_allOSI->begin(), _allOSI->end(), std::bind(&OneStepIntegrator::computeFreeState, _1));
+void siconos::simulation::TimeSteppingD1Minus::computeFreeState() {
+  std::for_each(_allOSI->begin(), _allOSI->end(),
+                std::bind(&siconos::integrators::OneStepIntegrator::computeFreeState,
+                          std::placeholders::_1));
 }

@@ -33,7 +33,6 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/GFC3D_TwoRods1.dat";
   data_collection_1[n_data++] = "---";
 
-
   return data_collection_1;
 }
 

@@ -62,9 +62,9 @@ private:
 
   // Members
 
-  SP::SimpleMatrix C, B, F;
-  SP::SiconosVector e;
-  SP::NonSmoothDynamicalSystem nsds;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F;
+  std::shared_ptr<siconos::algebra::SiconosVector> e;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 
 public:
   void setUp();

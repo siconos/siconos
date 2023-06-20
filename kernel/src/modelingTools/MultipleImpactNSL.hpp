@@ -14,39 +14,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-/*! \file MultipleImpactNSL.hpp 
+/*! \file MultipleImpactNSL.hpp
  */
 
 #ifndef _MULTIPLEIMPACTNSL_
 #define _MULTIPLEIMPACTNSL_
 
 #include "NonSmoothLaw.hpp"
-#include "SiconosPointers.hpp"      // for DEFINE_SPTR
-#include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
-#include "SiconosVisitor.hpp"       // for ACCEPT_STD_VISITORS
 
+namespace siconos::modeling {
 
 class MultipleImpactNSL : public NonSmoothLaw {
-private:
-
+ private:
   ACCEPT_SERIALIZATION(MultipleImpactNSL);
 
   // Energytical restitution coefficient
-  double _ResCof;
+  double _ResCof{0.};
   // Normal stiffness at contact
-  double _Stiff;
+  double _Stiff{0.};
   // Elasticity coefficient
-  double _ElasCof;
+  double _ElasCof{0.};
 
-public:
+ public:
   // Default Constructor
-  MultipleImpactNSL();
+  MultipleImpactNSL() : NonSmoothLaw(1){};
   // Constructor with parameters
   MultipleImpactNSL(double, double, double, unsigned int _dim = 1);
   // Destructor
-  ~MultipleImpactNSL();
+  ~MultipleImpactNSL() noexcept = default;
   // Get the value of the energytical restitution coefficientx
   inline double ResCof() const { return _ResCof; };
   // Get the value of the stiffness
@@ -63,8 +60,12 @@ public:
   bool isVerified() const override;
   // Display the information about the multiple impact law
   void display() const override;
-  // Visitors hook
-  ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override
+  {
+    tourist.visit(*this);
+  }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
-DEFINE_SPTR(MultipleImpactNSL)
+}  // namespace siconos::modeling
 #endif

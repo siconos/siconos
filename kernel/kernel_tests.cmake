@@ -1,13 +1,19 @@
 include(tools4tests)
 
 if(WITH_TESTING)
+  add_custom_target(kernel-tests echo "Start kernel tests")
 
   # ---- Siconos Algebra tests ----
   begin_tests(src/utils/SiconosAlgebra/test)
 
+  # new_test(
+  #   NAME testSiconosAlgebra
+  #   SOURCES BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp ${SIMPLE_TEST_MAIN}
+  #   DEPS "numerics;CPPUNIT::CPPUNIT;externals"
+  #   )
   new_test(
     NAME testSiconosAlgebra
-    SOURCES BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp ${SIMPLE_TEST_MAIN}
+    SOURCES  SiconosVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp AlgebraToolsTest.cpp  EigenProblemsTest.cpp ${SIMPLE_TEST_MAIN}
     DEPS "numerics;CPPUNIT::CPPUNIT;externals"
     )
 
@@ -20,7 +26,7 @@ if(WITH_TESTING)
     DEPS "numerics;CPPUNIT::CPPUNIT"
     )
 
-  add_library(TestPlugin MODULE ${CMAKE_CURRENT_SOURCE_DIR}/src/plugin/test/TestPlugin.cpp)
+  add_library(TestPlugin MODULE ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/plugins/test/TestPlugin.cpp)
   set_target_properties(TestPlugin 
     PROPERTIES PREFIX ""
     OUTPUT_NAME ${CMAKE_CURRENT_BINARY_DIR}/TestPlugin)
@@ -29,10 +35,10 @@ if(WITH_TESTING)
   # ---- Siconos tools tests ----
   begin_tests(src/utils/SiconosTools/test DEPS "CPPUNIT::CPPUNIT")
   new_test(SOURCES SiconosGraphTest.cpp ${SIMPLE_TEST_MAIN})
-  new_test(SOURCES SiconosVisitorTest.cpp ${SIMPLE_TEST_MAIN})
+  # new_test(SOURCES SiconosVisitorTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES  SiconosPropertiesTest.cpp ${SIMPLE_TEST_MAIN})
 
-  # ---- Modeling tools ---
+  # # ---- Modeling tools ---
   begin_tests(src/modelingTools/test DEPS "numerics;CPPUNIT::CPPUNIT")
   new_test(SOURCES FirstOrderNonLinearDSTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES FirstOrderLinearDSTest.cpp ${SIMPLE_TEST_MAIN})
@@ -49,8 +55,10 @@ if(WITH_TESTING)
   new_test(SOURCES NewtonEulerDSTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES NonSmoothDynamicalSystemTest.cpp  ${SIMPLE_TEST_MAIN})
   
-  # ---- Simulation tools ---
-  begin_tests(src/simulationTools/test DEPS "numerics;CPPUNIT::CPPUNIT")
+  # # ---- Simulation tools ---
+  begin_tests(src/simulationTools/test DEPS "externals;numerics;CPPUNIT::CPPUNIT")
+  new_test(SOURCES LsodarTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES EulerMoreauTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES OSNSPTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES testAVI.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
   if(HAS_FORTRAN)

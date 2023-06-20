@@ -14,102 +14,100 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file NewtonEulerJointR.hpp
 
 */
 #ifndef NewtonEulerJointRELATION_H
 #define NewtonEulerJointRELATION_H
 
-#include <MechanicsFwd.hpp>
-#include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
+#include <vector>
 
-/** 
-    This class implements an abstract Joint relation (articulation) between one or two Newton/Euler dynamical systems.
+#include "NewtonEulerR.hpp"
+namespace siconos::joints {
+
+enum class DofType {
+  INVALID = 0,
+  LINEAR = 1,
+  ANGULAR = 2,
+};
+
+/**
+    This class implements an abstract Joint relation (articulation) between one or two
+   Newton/Euler dynamical systems.
 */
-class NewtonEulerJointR : public NewtonEulerR
-{
-protected:
-
+class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
+ protected:
   ACCEPT_SERIALIZATION(NewtonEulerJointR);
 
   /** A flag determining whether this joint should block
    *  "self-collision", i.e., if true, bodies connected by this joint
    *  will not enter into unilateral contact. */
-  bool _allowSelfCollide;
+  bool _allowSelfCollide{false};
 
   /** Points used to defined the joint constraint. */
-  VectorOfVectors _points;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _points = {};
 
   /** Axes used to defined the joint constraint. */
-  VectorOfVectors _axes;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _axes = {};
 
   /** Defines whether points and axes are specified in absolute or
    * relative frame. */
-  bool _absoluteRef;
+  bool _absoluteRef{true};
 
   /** Private version of normalDoF for subclasses to override. */
-  virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
-                          bool absoluteRef=true) {}
+  virtual void _normalDoF(siconos::algebra::SiconosVector& ans,
+                          const siconos::algebra::BlockVector& q0, int axis,
+                          bool absoluteRef = true) {}
 
-public:
+ public:
+  // No constructors : default is implemented in base class NewtonEulerR
 
-  /** Empty constructor. The relation may be initialized later by
-   *  setPoint, setAbsolute, and setBasePositions. */
-  NewtonEulerJointR(): NewtonEulerR()
-                     , _allowSelfCollide(false)
-                     , _absoluteRef(true) {};
+  virtual ~NewtonEulerJointR() noexcept = default;
 
   /** Set a point for this joint. The role of each point is specific
    *  to the joint subclass. Won't take effect until
    *  setBasePositions is called.
    *
    *  \param index The index of the points.
-   *  \param point A SiconosVector of size 3.
+   *  \param point A siconos::algebra::SiconosVector of size 3.
    */
-  void setPoint(unsigned int index, SP::SiconosVector point)
-    { _points[index] = point; }
+  void setPoint(unsigned int index, std::shared_ptr<siconos::algebra::SiconosVector> point);
 
   /** Get a point for this joint.
    *
    *  \param index The index of the point.
    *  \return The requested point.
    */
-  SP::SiconosVector point(unsigned int index)
-    { return _points[index]; }
+  auto point(unsigned int index);
 
   /** Get the vector of points for this joint.
    *
    *  \return The vector of points.
    */
-  VectorOfVectors& points()
-    { return _points; }
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& points() { return _points; }
 
   /** Set an axis for this joint. The role of each axis is specific to
    *  the joint subclass. Won't take effect until setBasePositions
    *  is called.
    *
    *  \param index The index of the points.
-   *  \param axis A SiconosVector of size 3.
+   *  \param axis A siconos::algebra::SiconosVector of size 3.
    */
-  void setAxis(unsigned int index, SP::SiconosVector axis)
-    { _axes[index] = axis; }
+  void setAxis(unsigned int index, std::shared_ptr<siconos::algebra::SiconosVector> axis);
 
   /** Get an axis for this joint.
    *
    *  \param index The index of the point.
    *  \return The requested axis.
    */
-  SP::SiconosVector axis(unsigned int index)
-    { return _axes[index]; }
+  auto axis(unsigned int index);
 
   /** Get the vector of axes for this joint.
    *
    *  \return The vector of axes.
    */
-  VectorOfVectors& axes()
-    { return _axes; }
+  auto& axes();
 
   /** Set whether points and axes should be interpreted in absolute or
    *  relative frame. Won't take effect until setBasePositions is
@@ -117,35 +115,34 @@ public:
    *
    *  \param absoluteRef true for absolute frame, false for relative frame.
    */
-  void setAbsolute(bool absoluteRef)
-    { _absoluteRef = absoluteRef; }
+  void setAbsolute(bool absoluteRef) { _absoluteRef = absoluteRef; }
 
   /** Get whether points and axes are interpreted in absolute or
    *  relative frame.
    *
    *  \return True for absolute frame, false for relative frame.
    */
-  bool absolute()
-    { return _absoluteRef; }
+  bool absolute() { return _absoluteRef; }
 
   /** Initialize the joint constants based on the provided base positions.
    *
-   *  \param q1 A SiconosVector of size 7 indicating translation and
+   *  \param q1 A siconos::algebra::SiconosVector of size 7 indicating translation and
    *  orientation in inertial coordinates.
-   *  \param q2 An optional SiconosVector of size 7 indicating
+   *  \param q2 An optional siconos::algebra::SiconosVector of size 7 indicating
    *  translation and orientation; if null, the inertial
    *  frame will be considered as the second base. */
-  virtual void setBasePositions(SP::SiconosVector q1,
-                                SP::SiconosVector q2=SP::SiconosVector()) = 0;
+  virtual void setBasePositions(
+      std::shared_ptr<siconos::algebra::SiconosVector> q1,
+      std::shared_ptr<siconos::algebra::SiconosVector> q2 = nullptr) = 0;
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, const BlockVector& q0, SiconosVector& y,
-                           unsigned int axis=0) {}
+  virtual void computehDoF(double time, const siconos::algebra::BlockVector& q0,
+                           siconos::algebra::SiconosVector& y, unsigned int axis = 0) {}
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, Interaction& inter,
-                               SP::BlockVector q0, SimpleMatrix& jachq,
-                               unsigned int axis=0) {}
+  virtual void computeJachqDoF(double time, siconos::modeling::Interaction& inter,
+                               std::shared_ptr<siconos::algebra::BlockVector> q0,
+                               siconos::algebra::SimpleMatrix& jachq, unsigned int axis = 0) {}
 
   /** Project a vector onto the given 0-indexed free axis. Useful for
    *  calculating velocities in the axis, or for calculating
@@ -159,13 +156,14 @@ public:
    *  \param absoluteRef If true, v and ans are in the inertial frame,
    *  otherwise the q1 frame is assumed.
    */
-  void projectVectorDoF(const SiconosVector& v, const BlockVector& q0,
-                        SiconosVector& ans, int axis,
-                        bool absoluteRef=true);
+  void projectVectorDoF(const siconos::algebra::SiconosVector& v,
+                        const siconos::algebra::BlockVector& q0,
+                        siconos::algebra::SiconosVector& ans, int axis,
+                        bool absoluteRef = true);
 
-  SP::SiconosVector projectVectorDoF(const SiconosVector& v,
-                                     const BlockVector& q0, int axis,
-                                     bool absoluteRef=true);
+  std::shared_ptr<siconos::algebra::SiconosVector> projectVectorDoF(
+      const siconos::algebra::SiconosVector& v, const siconos::algebra::BlockVector& q0,
+      int axis, bool absoluteRef = true);
 
   /** Retrieve a normal in the direction of a 0-indexed free
    *  axis. Useful for calculating velocities in the axis, or for
@@ -175,15 +173,15 @@ public:
    *
    *  \param ans The vector to receive the projection.
    *  \param q0 The state q of one or more NewtonEulerDS
-   *  \param axis 
+   *  \param axis
    *  \param absoluteRef If true, ans is in the inertial frame,
    *  otherwise the q1 frame is assumed.
    */
-  void normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
-                 bool absoluteRef=true);
+  void normalDoF(siconos::algebra::SiconosVector& ans, const siconos::algebra::BlockVector& q0,
+                 int axis, bool absoluteRef = true);
 
-  SP::SiconosVector normalDoF(const BlockVector& q0, int axis,
-                              bool absoluteRef=true);
+  std::shared_ptr<siconos::algebra::SiconosVector> normalDoF(
+      const siconos::algebra::BlockVector& q0, int axis, bool absoluteRef = true);
 
   /** Return the value of the _allowSelfCollide flag. */
   bool allowSelfCollide() { return _allowSelfCollide; }
@@ -193,31 +191,25 @@ public:
 
   /**
      Get the number of constraints defined in the joint
-     
+
      \return the number of constraints
    */
   virtual unsigned int numberOfConstraints() = 0;
 
   /**
      Return the number of degrees of freedom of this joint.
-     
+
      \return the number of degrees of freedom (DoF)
    */
   virtual unsigned int numberOfDoF() = 0;
 
-  typedef enum {
-    DOF_TYPE_INVALID=0,
-    DOF_TYPE_LINEAR=1,
-    DOF_TYPE_ANGULAR=2,
-  } DoF_Type;
-
   /**
      Return the type of a degree of freedom of this joint.
-     
+
      \return the type of the degree of freedom (DoF)
    */
-  virtual DoF_Type typeOfDoF(unsigned int axis) = 0;
+  virtual DofType typeOfDoF(unsigned int axis) = 0;
 
-  virtual ~NewtonEulerJointR() {};
 };
-#endif  //NewtonEulerJointRELATION_H
+}  // namespace siconos::joints
+#endif  // NewtonEulerJointRELATION_H

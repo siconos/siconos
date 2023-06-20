@@ -22,9 +22,8 @@
 #include <stdio.h>          // for size_t, FILE
 #include "CSparseMatrix.h"  // for CSparseMatrix
 #include "NumericsFwd.h"    // for SparseBlockStructuredMatrix, SparseBlockC...
-
+#include "NumericsDataVersion.h"
 #include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
-#include "NumericsDataVersion.h" // versioning
 
 /*!\file SparseBlockMatrix.h
   Structure definition and functions related to

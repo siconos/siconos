@@ -14,8 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 
 #ifndef MatrixIntegrator_H
 #define MatrixIntegrator_H
@@ -24,92 +23,121 @@
  * \brief Class to integrate a Matrix ODE \f$\dot{X} = AX + E\f$
  */
 
+#include <memory>
+
 #include "SiconosSerialization.hpp"
-#include "SiconosAlgebraTypeDef.hpp"
-#include "SiconosPointers.hpp"
 
-#include "SiconosFwd.hpp"
+namespace siconos::algebra {
 
-class MatrixIntegrator
-{
-private:
-  
+class SiconosMatrix;
+}
+
+namespace siconos::modeling {
+
+class DynamicalSystem;
+class NonSmoothDynamicalSystem;
+}  // namespace siconos::modeling
+
+namespace siconos::plugins {
+class PluggedObject;
+class SubPluggedObject;
+}  // namespace siconos::plugins
+
+namespace siconos::integrators {
+
+class LsodarOSI;
+}
+
+namespace siconos::simulation {
+
+class TimeDiscretisation;
+class EventDriven;
+
+class MatrixIntegrator {
+ private:
   ACCEPT_SERIALIZATION(MatrixIntegrator);
 
-protected:
-
+ protected:
   /** The matrix solution to the ODE */
-  SP::SiconosMatrix _mat;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _mat{nullptr};
 
   /**The entry Matrix E */
-  SP::SiconosMatrix _E;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _E{nullptr};
 
   /**The entry Matrix E, in the plugin form */
-  SP::PluggedObject _plugin;
+  std::shared_ptr<siconos::plugins::PluggedObject> _plugin{nullptr};
 
   /**Plugin to compute the value of a column of E */
-  SP::SubPluggedObject _spo;
+  std::shared_ptr<siconos::plugins::SubPluggedObject> _spo{nullptr};
 
   /** flag to indicate where the Matrix _mat is constant */
-  bool _isConst;
+  bool _isConst{false};
 
-  /** DynamicalSystem to integrate */
-  SP::DynamicalSystem _DS;
+  /** siconos::modeling::DynamicalSystem to integrate */
+  std::shared_ptr<siconos::modeling::DynamicalSystem> _DS{nullptr};
 
   /** NonSmoothDynamicalSystem for integration */
-  SP::NonSmoothDynamicalSystem _nsds;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds{nullptr};
 
   /** TimeDiscretisation for integration */
-  SP::TimeDiscretisation _TD;
+  std::shared_ptr<TimeDiscretisation> _TD{nullptr};
 
   /** Simulation (of EventDriven type) */
-  SP::EventDriven _sim;
+  std::shared_ptr<EventDriven> _sim{nullptr};
 
   /** OneStepIntegrator of type LsodarOSI */
-  SP::LsodarOSI _OSI;
+  std::shared_ptr<siconos::integrators::LsodarOSI> _OSI{nullptr};
 
-  /** */
-  void commonInit(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation & td);
+  // Rule of five
+  MatrixIntegrator() = delete;
+  MatrixIntegrator(const MatrixIntegrator&) = delete;
+  MatrixIntegrator(MatrixIntegrator&&) = delete;
+  MatrixIntegrator& operator=(const MatrixIntegrator&) = delete;
+  MatrixIntegrator& operator=(MatrixIntegrator&&) = delete;
 
-  /** Default constructor */
-  MatrixIntegrator() {};
-
-public:
-
+ public:
   /** Constructor to compute \f$\int exp(A\tau)E\amthrm{d}\tau\f$
-   * \param ds the DynamicalSystem
+   * \param ds the siconos::modeling::DynamicalSystem
    * \param nsds current nonsmooth dynamical system
    * \param td current time discretisation
    * \param E a matrix
    */
-  MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td, const  SP::SiconosMatrix E);
+  MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
+                   const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                   std::shared_ptr<TimeDiscretisation> td,
+                   const std::shared_ptr<siconos::algebra::SiconosMatrix> E);
 
   /** Constructor to compute \f$\int exp(A\tau)E(\tau)\mathrm{d}\tau\f$
-   * \param ds the DynamicalSystem
+   * \param ds the siconos::modeling::DynamicalSystem
    * \param nsds current nonsmooth dynamical system
    * \param td current time discretisation
    * \param plugin the plugin to compute \f$E(t)\f$
    * \param p the number of column in E
    */
-  MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td, SP::PluggedObject plugin, const unsigned int p);
+  MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
+                   const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                   std::shared_ptr<TimeDiscretisation> td,
+                   std::shared_ptr<siconos::plugins::PluggedObject> plugin,
+                   const unsigned int p);
 
   /** Constructor to compute \f$\int exp(A\tau)\mathrm{d}\tau\f$
-   * \param ds the DynamicalSystem
+   * \param ds the siconos::modeling::DynamicalSystem
    * \param nsds current nonsmooth dynamical system
    * \param td current time discretisation
    */
-  MatrixIntegrator(const DynamicalSystem& ds,const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td);
+  MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
+                   const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                   std::shared_ptr<TimeDiscretisation> td);
 
   /** Computes the next value of _mat */
   void integrate();
 
   /** Get the value of _mat, solution of the ODE
    * \return a reference to _mat */
-  inline const SiconosMatrix& mat() const { return *_mat; }
+  inline const siconos::algebra::SiconosMatrix& mat() const { return *_mat; }
 
   /** Check whether the solution of the ODE is time-invariant*/
   inline bool isConst() { return _isConst; }
-
 };
-
+}  // namespace siconos::simulation
 #endif

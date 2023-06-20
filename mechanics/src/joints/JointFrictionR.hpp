@@ -14,70 +14,69 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file JointFrictionR.hpp
 
 */
 #ifndef JointFrictionRELATION_H
 #define JointFrictionRELATION_H
 
-#include <MechanicsFwd.hpp>
-#include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
-#include <NewtonEulerJointR.hpp>
-#include <Tools.hpp>
+#include "NewtonEulerR.hpp"
+#include <vector>
+
+namespace siconos::joints {
+
+class NewtonEulerJointR;
 
 /**
    This class implements a friction on a DoF for any NewtonEulerJointR.
 */
-class JointFrictionR : public NewtonEulerR
-{
-protected:
-
+class JointFrictionR : public siconos::modeling::NewtonEulerR {
+ protected:
   ACCEPT_SERIALIZATION(JointFrictionR);
-  JointFrictionR() : NewtonEulerR() {}
 
-  SP::NewtonEulerJointR _joint;
+  std::shared_ptr<NewtonEulerJointR> _joint{nullptr};
 
-  SP::UnsignedIntVector _axis;
+  std::shared_ptr<std::vector<unsigned int>> _axis{nullptr};
 
-  unsigned int _axisMin, _axisMax;
-  SP::SimpleMatrix _jachqTmp;
+  unsigned int _axisMin{0}, _axisMax{0};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqTmp{nullptr};
 
-public:
-
+ public:
   /** Initialize a joint friction for a common case: a single axis with a
    *  single friction, either positive or negative. For use with
    *  NewtonImpactNSL. */
-  JointFrictionR(SP::NewtonEulerJointR joint, unsigned int axis);
+  JointFrictionR(std::shared_ptr<NewtonEulerJointR> joint, unsigned int axis);
 
   /** Initialize a multidimensional joint friction, e.g. the cone friction on
    *  a ball joint. For use with NewtonImpactFrictionNSL size 2 or 3. */
-  JointFrictionR(SP::NewtonEulerJointR joint,
-                 SP::UnsignedIntVector axes=SP::UnsignedIntVector());
+  JointFrictionR(std::shared_ptr<NewtonEulerJointR> joint,
+                 std::shared_ptr<std::vector<unsigned int>> axes = nullptr);
+
+  virtual ~JointFrictionR() noexcept = default;
 
   /**
      to compute the output y = h(t,q,z) of the Relation
-     
+
      \param time current time value
      \param q coordinates of the dynamical systems involved in the relation
      \param y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
+                        siconos::algebra::SiconosVector& y) override;
 
-  virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
+  virtual void computeJachq(double time, siconos::modeling::Interaction& inter,
+                            std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   virtual unsigned int numberOfConstraints();
 
   /** Return the joint axis number assigned to a friction axis. */
-  unsigned int axis(unsigned int _index) { return _axis->at(_index); }
+  unsigned int axis(unsigned int _index);
 
   /** Return the joint assigned to this friction relation. */
-  SP::NewtonEulerJointR joint() { return _joint; }
+  std::shared_ptr<NewtonEulerJointR> joint() { return _joint; }
 
-  /** Return the number of joint axes indexed by this relation. */
-  unsigned int numberOfAxes() { return _axis->size(); }
-
-  virtual ~JointFrictionR() {};
+  unsigned int numberOfAxes();
 };
-#endif  //JointFrictionRELATION_H
+}  // namespace siconos::joints
+#endif  // JointFrictionRELATION_H

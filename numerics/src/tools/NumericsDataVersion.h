@@ -20,7 +20,6 @@
 
 #include <limits.h>
 #include <stdint.h>
-#include <assert.h>
 
 typedef uint64_t version_t;
 
@@ -45,11 +44,7 @@ static inline void NDV_reset(NumericsDataVersion* v)
   v->number = 0;
 }
 
-static inline void NDV_inc(NumericsDataVersion* v)
-{
-  assert (v->number < UINT64_MAX);
-  v->number += 1;
-}
+void NDV_inc(NumericsDataVersion* v);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

@@ -21,11 +21,29 @@
 #ifndef MoreauJeanOSI_H
 #define MoreauJeanOSI_H
 
-#include "OneStepIntegrator.hpp"
-
 #include <limits>
 
-const unsigned int MOREAUSTEPSINMEMORY = 1;
+#include "OneStepIntegrator.hpp"
+#include "SiconosVisitor.hpp"
+// namespace siconos::internal {
+
+// class SiconosVisitor;
+// }
+
+namespace siconos::algebra {
+
+class SiconosVector;
+}
+
+namespace siconos::modeling {
+
+class SecondOrderDS;
+
+}
+
+namespace siconos::integrators {
+
+constexpr auto MOREAUSTEPSINMEMORY = 1;
 
 /**
    One Step time Integrator, Moreau-Jean algorithm.
@@ -59,8 +77,8 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
    In the numerical practice, we choose to define this set by
 
    \f[
-   \mathcal I_1 = \{\alpha \in \mathcal I \mid G^\top (q_{k} + h v_{k}) + w \leq 0\text{ and } U_k \leq 0 \}.
-   \f]
+   \mathcal I_1 = \{\alpha \in \mathcal I \mid G^\top (q_{k} + h v_{k}) + w \leq 0\text{ and }
+   U_k \leq 0 \}. \f]
 
    For more details, we refer to
 
@@ -114,88 +132,75 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
 
 */
 class MoreauJeanOSI : public OneStepIntegrator {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(MoreauJeanOSI);
 
   /** theta-scheme parameter */
-  double _theta;
+  double _theta{0.};
 
   /** A gamma parameter for the forecast of activation of constraints
    *  leap-frog estimation of the constraints
    *  \f$ \tilde y_k =  y_k + \gamma * h * ydot \f$
    */
-  double _gamma;
+  double _gamma{1. / 2.};
 
   /** a boolean to know if the gamma-parameter must be used or not
    */
-  bool _useGamma;
+  bool _useGamma{false};
 
   /** Constraint activation threshold
    *
    */
-  double _constraintActivationThreshold;
+  double _constraintActivationThreshold{0.};
 
   /** a boolean to know if the parameter must be used or not
    */
-  bool _useGammaForRelation;
+  bool _useGammaForRelation{false};
 
   /** a boolean to force the evaluation of T in an explicit way
    */
-  bool _explicitNewtonEulerDSOperators;
+  bool _explicitNewtonEulerDSOperators{false};
 
   /** a boolean to know if the matrix W is symmetric definite positive
    */
-  bool _isWSymmetricDefinitePositive;
+  bool _isWSymmetricDefinitePositive{false};
 
   /**
       A set of work indices for the selected coordinates when
       we subprod in computeFreeOuput
   */
-  std::vector<std::size_t> _selected_coordinates;
+  std::vector<std::size_t> _selected_coordinates = {0, 0, 0, 0, 0, 0, 0, 0};
 
-  /** nslaw effects
-   */
-  // struct _NSLEffectOnFreeOutput;
-  struct _NSLEffectOnFreeOutput : public SiconosVisitor {
-    using SiconosVisitor::visit;
+ protected:
+  // visitor stuff to handle properly nslaw effects.
+  struct _NSLEffectOnFreeOutput : public siconos::internal::SiconosVisitor {
+    using siconos::internal::SiconosVisitor::visit;
 
-    OneStepNSProblem &_osnsp;
-    Interaction &_inter;
-    InteractionProperties &_interProp;
+    siconos::nonsmooth_formulations::OneStepNSProblem &_osnsp;
+    siconos::modeling::Interaction &_inter;
+    siconos::graphs::InteractionProperties &_interProp;
 
-    _NSLEffectOnFreeOutput(OneStepNSProblem &p, Interaction &inter,
-                           InteractionProperties &interProp)
-        : _osnsp(p), _inter(inter), _interProp(interProp){};
+    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem &p,
+                           siconos::modeling::Interaction &inter,
+                           siconos::graphs::InteractionProperties &interProp);
 
-    void visit(const NewtonImpactNSL &nslaw);
-    void visit(const RelayNSL &nslaw);
-    void visit(const NewtonImpactFrictionNSL &nslaw);
-    void visit(const NewtonImpactRollingFrictionNSL &nslaw);
-    void visit(const EqualityConditionNSL &nslaw);
-    void visit(const MixedComplementarityConditionNSL &nslaw);
-    void visit(const ComplementarityConditionNSL &nslaw);
+    void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const override;
+
+    void visit(const siconos::modeling::RelayNSL &nslaw) const override{};
+    void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const override;
+    void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) const override;
+    void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const override{};
+    void visit(
+        const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const override{};
+    void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const override{};
   };
 
-  friend struct _NSLEffectOnFreeOutput;
+ public:
+  enum MoreauJeanOSI_ds_workVector_id { RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH };
 
-public:
-  enum MoreauJeanOSI_ds_workVector_id {
-    RESIDU_FREE,
-    VFREE,
-    BUFFER,
-    QTMP,
-    WORK_LENGTH
-  };
+  enum MoreauJeanOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
 
-  enum MoreauJeanOSI_interaction_workVector_id {
-    OSNSP_RHS,
-    WORK_INTERACTION_LENGTH
-  };
-
-  enum MoreauJeanOSI_interaction_workBlockVector_id {
-    xfree,
-    BLOCK_WORK_LENGTH
-  };
+  enum MoreauJeanOSI_interaction_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
 
   /** constructor from theta value only
    *
@@ -203,14 +208,11 @@ public:
    *  \param gamma value for all linked DS (default = NaN and gamma is not
    *  used).
    */
-  MoreauJeanOSI(double theta = 0.5,
-                double gamma = std::numeric_limits<double>::quiet_NaN());
+  MoreauJeanOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN());
 
   /** destructor
    */
-  virtual ~MoreauJeanOSI(){};
-
-  // --- GETTERS/SETTERS ---
+  virtual ~MoreauJeanOSI() noexcept = default;
 
   /** get the value of W corresponding to DynamicalSystem ds
    *
@@ -218,24 +220,21 @@ public:
    *  nullptr. get W[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
+  const siconos::algebra::SimpleMatrix getW(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
+          std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
   /** get W corresponding to DynamicalSystem ds
    *
    *  \param ds a pointer to DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  SP::SimpleMatrix W(SP::DynamicalSystem ds);
+  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
-  inline bool isWSymmetricDefinitePositive() const
-  {
-    return _isWSymmetricDefinitePositive;
-  };
+  inline bool isWSymmetricDefinitePositive() const { return _isWSymmetricDefinitePositive; };
 
-  inline void setIsWSymmetricDefinitePositive(bool b)
-  {
-    _isWSymmetricDefinitePositive = b;
-  };
+  inline void setIsWSymmetricDefinitePositive(bool b) { _isWSymmetricDefinitePositive = b; };
 
   // -- WBoundaryConditions --
 
@@ -245,8 +244,9 @@ public:
    *  nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix
-  getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
+  const siconos::algebra::SimpleMatrix getWBoundaryConditions(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
+          std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
    *
@@ -254,7 +254,8 @@ public:
    *  nullptr. get WBoundaryConditions[0] in that case
    *  \return pointer to a SiconosMatrix
    */
-  SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> WBoundaryConditions(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- theta --
 
@@ -282,8 +283,7 @@ public:
    *
    *  \param newGamma a double
    */
-  inline void setGamma(double newGamma)
-  {
+  inline void setGamma(double newGamma) {
     _gamma = newGamma;
     _useGamma = true;
   };
@@ -312,40 +312,29 @@ public:
    *
    *  \param newUseGammaForRelation a Boolean
    */
-  inline void setUseGammaForRelation(bool newUseGammaForRelation)
-  {
+  inline void setUseGammaForRelation(bool newUseGammaForRelation) {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation)
-      _useGamma = false;
+    if (_useGammaForRelation) _useGamma = false;
   };
   /** set the constraint activation threshold */
-  inline void setConstraintActivationThreshold(double v)
-  {
+  inline void setConstraintActivationThreshold(double v) {
     _constraintActivationThreshold = v;
   }
 
   /** get the constraint activation threshold */
-  inline double constraintActivationThreshold()
-  {
-    return _constraintActivationThreshold;
-  }
+  inline double constraintActivationThreshold() { return _constraintActivationThreshold; }
 
   /** get boolean _explicitNewtonEulerDSOperators for the relation
    *
    *  \return a Boolean
    */
-  inline bool explicitNewtonEulerDSOperators()
-  {
-    return _explicitNewtonEulerDSOperators;
-  };
+  inline bool explicitNewtonEulerDSOperators() { return _explicitNewtonEulerDSOperators; };
 
   /** set the boolean to indicate that we use gamma for the relation
    *
    *  \param newExplicitNewtonEulerDSOperators a Boolean
    */
-  inline void
-  setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators)
-  {
+  inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators) {
     _explicitNewtonEulerDSOperators = newExplicitNewtonEulerDSOperators;
   };
 
@@ -369,7 +358,8 @@ public:
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -378,9 +368,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -393,7 +383,8 @@ public:
    *  \param time
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time, SP::SecondOrderDS ds);
+  void initializeIterationMatrixW(double time,
+                                  std::shared_ptr<siconos::modeling::SecondOrderDS> ds);
 
   /** compute W MoreauJeanOSI matrix at time t
    *
@@ -401,7 +392,8 @@ public:
    *  \param ds a  DynamicalSystem
    *  \param W the result in W
    */
-  void computeW(double time, SecondOrderDS &ds, SiconosMatrix &W);
+  void computeW(double time, siconos::modeling::SecondOrderDS &ds,
+                siconos::algebra::SiconosMatrix &W);
 
   /** get and compute if needed W MoreauJeanOSI matrix at time t
    *
@@ -410,7 +402,8 @@ public:
    *  \param Winverse the result in Winverse
    *  \param keepW
    */
-  SP::SimpleMatrix Winverse(SP::SecondOrderDS ds, bool keepW = false);
+  std::shared_ptr<siconos::algebra::SimpleMatrix> Winverse(
+      std::shared_ptr<siconos::modeling::SecondOrderDS> ds, bool keepW = false);
 
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *
@@ -418,9 +411,9 @@ public:
    *  \param WBoundaryConditions write the result in WBoundaryConditions
    *  \param iteration_matrix the OSI iteration matrix (W)
    */
-  void _computeWBoundaryConditions(SecondOrderDS &ds,
-                                   SiconosMatrix &WBoundaryConditions,
-                                   SiconosMatrix &iteration_matrix);
+  void _computeWBoundaryConditions(siconos::modeling::SecondOrderDS &ds,
+                                   siconos::algebra::SiconosMatrix &WBoundaryConditions,
+                                   siconos::algebra::SiconosMatrix &iteration_matrix);
 
   /** initialize iteration matrix WBoundaryConditionsMap[ds] MoreauJeanOSI
    *
@@ -428,11 +421,13 @@ public:
    *  \param dsv a descriptor of the ds on the graph (redundant)
    */
   void _initializeIterationMatrixWBoundaryConditions(
-      SecondOrderDS &ds, const DynamicalSystemsGraph::VDescriptor &dsv);
+      siconos::modeling::SecondOrderDS &ds,
+      const siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv);
 
-  void applyBoundaryConditions(SecondOrderDS &d, SiconosVector &residu,
-                               DynamicalSystemsGraph::VIterator dsi, double t,
-                               const SiconosVector &v);
+  void applyBoundaryConditions(siconos::modeling::SecondOrderDS &d,
+                               siconos::algebra::SiconosVector &residu,
+                               siconos::graphs::DynamicalSystemsGraph::VIterator dsi, double t,
+                               const siconos::algebra::SiconosVector &v);
 
   /** compute the initial state of the Newton loop.
    */
@@ -457,13 +452,15 @@ public:
    *  \param vertex_inter vertex of the interaction graph
    *  \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
-                         OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** \return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   *  problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,   InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanOSI::OSNSP_RHS];
   };
 
@@ -474,7 +471,8 @@ public:
    *  \param i level of the IndexSet
    *  \return Boolean
    */
-  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
+  bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                unsigned int i) override;
 
   /** Apply the rule to one Interaction to know if it should be removed from the
    *  IndexSet of level i
@@ -483,11 +481,11 @@ public:
    *  \param i level of the IndexSet
    *  \return Boolean
    */
-  bool removeInteractionFromIndexSet(SP::Interaction inter,
+  bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
                                      unsigned int i) override;
 
   /** method to prepare the fist Newton iteration
-   *   \param time
+   *  \param time
    */
   void prepareNewtonIteration(double time) override;
 
@@ -499,15 +497,14 @@ public:
    *  \param tout the real end time
    *  \param notUsed useless flag (for MoreauJeanOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout,
-                 int &notUsed) override;
+  void integrate(double &tinit, double &tend, double &tout, int &notUsed) override;
 
   /**
       update the state of the dynamical systems
 
       \param ds the dynamical to update
    */
-  virtual void updatePosition(DynamicalSystem &ds);
+  virtual void updatePosition(siconos::modeling::DynamicalSystem &ds);
 
   /** update the state of the dynamical systems
    *
@@ -515,13 +512,9 @@ public:
    */
   void updateState(const unsigned int level) override;
 
-
-
   /** Displays the data of the MoreauJeanOSI's integrator
    */
-  void display() override;
-
-  ACCEPT_STD_VISITORS();
+  void display() const override;
 };
-
-#endif // MoreauJeanOSI_H
+}  // namespace siconos::integrators
+#endif  // MoreauJeanOSI_H

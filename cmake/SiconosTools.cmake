@@ -6,14 +6,21 @@ function(collect_files)
 
   set(oneValueArgs VAR) # output variable name
   set(multiValueArgs DIRS EXTS)
+  set(options RECURSIVE)
   cmake_parse_arguments(collect "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
   # Scan all dirs and check all exts ...
 
   foreach(DIR IN LISTS collect_DIRS)
     foreach(_EXT IN LISTS collect_EXTS)
-      file(GLOB FILES_LIST
-        RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
-        ${DIR}/*.${_EXT})
+      if(collect_RECURSIVE)
+	file(GLOB_RECURSE FILES_LIST
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
+          ${DIR}/*.${_EXT})
+      else()
+	file(GLOB FILES_LIST
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
+          ${DIR}/*.${_EXT})
+      endif()
       if(FILES_LIST)
 	list(APPEND COLLECTION ${FILES_LIST})
       endif()
@@ -383,9 +390,6 @@ function(apply_compiler_options COMPONENT)
     list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:C>:-Werror=missing-prototypes>)
     # Warn whenever a function is defined with a return type that defaults to int.
     list(APPEND COMP_OPTIONS -Werror=return-type)
-    # warns about cases where the compiler optimizes based on the assumption that signed overflow does not occur.
-    # !! this warning depends on the optimization level. Check doc.
-    list(APPEND COMP_OPTIONS -Wstrict-overflow=4)
     # warns about code that might break the strict aliasing rules that the compiler is using for optimization.
     list(APPEND COMP_OPTIONS -Werror=strict-aliasing)
     # Warn about trampolines generated for pointers to nested functions.
@@ -416,6 +420,9 @@ function(apply_compiler_options COMPONENT)
 
   # More diagnostics ...
   if(COMP_DIAGNOSTICS_LEVEL EQUAL 2)
+    # warns about cases where the compiler optimizes based on the assumption that signed overflow does not occur.
+    # !! this warning depends on the optimization level. Check doc.
+    list(APPEND COMP_OPTIONS -Wstrict-overflow=4)
     # implicit conversions that may alter a value
     list(APPEND COMP_OPTIONS -Wconversion)
 

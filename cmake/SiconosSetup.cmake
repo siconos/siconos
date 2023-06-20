@@ -50,31 +50,39 @@ endif()
 string(TIMESTAMP BUILD_TIMESTAMP)
 
 #-- -- PYTHON SETUP -- --
-#Python interpreter is always required.
-#We force Python3 !
-#In addition, when WITH_PYTHON_WRAPPER is ON,
-#we need python libraries and numpy.
-if(${CMAKE_VERSION} VERSION_LESS "3.14")
-#Our FindPython3 is just a copy of the one distributed
-#with cmake = 3.14
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/extras)
-endif()
+# Python interpreter is always required.
+# We force Python3 !
+# In addition, when WITH_PYTHON_WRAPPER is ON,
+# we need python libraries and numpy.
+# if(${CMAKE_VERSION} VERSION_LESS "3.14")
+# #Our FindPython3 is just a copy of the one distributed
+# #with cmake = 3.14
+#   list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/extras)
+# endif()
 
 #determine the order of preference between Apple - style and unix - style package components
 #--> look for python framework when all other possibilities failed.
-set(Python3_FIND_FRAMEWORK LAST)
-if(WITH_PYTHON_WRAPPER)
-  find_package(Python3 COMPONENTS Development Interpreter NumPy REQUIRED)
-else()
-  find_package(Python3 COMPONENTS Interpreter REQUIRED)
-endif()
-#For backward compat...
-set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
 include(FindPythonModule)
+set(Python_FIND_FRAMEWORK LAST)
+if(WITH_PYTHON_WRAPPER)
+  set(Python3_FIND_FRAMEWORK LAST)
+  find_package(Python3 COMPONENTS Development Interpreter NumPy REQUIRED)
+  #For backward compat...
+  set(Python_EXECUTABLE ${Python3_EXECUTABLE})
+elseif(WITH_PYB11_WRAPPER)
+  include(pybind11_setup)
+else()
+  find_package(Python COMPONENTS Interpreter REQUIRED)
+  # #For backward compat...
+endif()
+if(Python_VERSION_MAJOR VERSION_LESS 3)
+  message(FATAL_ERROR "Python3 is required.")
+endif()
+
 find_python_module(packaging REQUIRED) # for siconos runtime
 find_python_module(wheel REQUIRED) # for siconos runtime
 
-get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
+get_filename_component(PYTHON_EXE_NAME ${Python_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
 #-- - xml schema.Used in tests.-- -
   if(WITH_XML)
@@ -84,6 +92,8 @@ if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
     endif()
   endif()
 endif()
+message(STATUS "End of Python configuration.\n")
+message(STATUS "------------------------------------------------\n")
 
 #-- - End of python conf -- -
 
@@ -105,7 +115,7 @@ if(ISOLATED_INSTALL)
     # Overwrite CMAKE_INSTALL_PREFIX with ISOLATED_INSTALL value
   endif()
   set(CMAKE_INSTALL_PREFIX ${ISOLATED_INSTALL} CACHE PATH "Install root directory." FORCE)
-  set(sicopy_install_mode isolated CACHE STRING "Siconos Python packages nstall mode." FORCE)
+  set(sicopy_install_mode isolated CACHE STRING "Siconos Python packages install mode." FORCE)
 else()
   if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(sicopy_install_mode standard CACHE STRING "Siconos Python packages install mode." FORCE)
@@ -118,7 +128,7 @@ else()
   endif()
 endif()
   
-if(WITH_PYTHON_WRAPPER)
+if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
   if(siconos_python_install_mode)
     message(WARNING "You explicitely set siconos_python_install_mode to ${siconos_python_install_mode}! Be sure to know what you're doing and check the install paths printed after cmake run ... Or remove the whole build dir and start again!")
     set(sicopy_install_mode ${siconos_python_install_mode} CACHE STRING "Siconos Python packages install mode." FORCE)
@@ -127,7 +137,7 @@ endif()
 
 #Set directory used to save cmake config files
 #required to use Siconos(e.g.to call find_package(siconos))
-set(ConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})
+set(SiconosConfigPackageLocation lib/cmake/siconos-${SICONOS_VERSION})
 
 #Provides install directory variables as defined by the GNU Coding Standards.
 include(GNUInstallDirs)  # It defines CMAKE_INSTALL_LIBDIR
@@ -191,7 +201,7 @@ if(WITH_PYTHON_WRAPPER)
   
   #== == == Create(and setup) build / install target == == ==
   add_custom_target(python-install
-    COMMAND ${PYTHON_EXECUTABLE} -m pip install -U ${CMAKE_BINARY_DIR}/wrap ${PIP_INSTALL_OPTIONS} -v 
+    COMMAND ${Python_EXECUTABLE} -m pip install -U ${CMAKE_BINARY_DIR}/wrap ${PIP_INSTALL_OPTIONS} -v 
     VERBATIM USES_TERMINAL
     COMMAND_EXPAND_LISTS
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "build/install siconos python package")
@@ -199,6 +209,28 @@ if(WITH_PYTHON_WRAPPER)
   install(CODE "execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} python-install WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
 
 endif()
+
+if(WITH_PYB11_WRAPPER)
+
+  # Name of the generated Python package
+  set(SICONOS_PYTHON_PACKAGE siconos CACHE INTERNAL "Name of the Siconos python package.")
+  # --------------- Python install setup ---------------
+  # Set path for siconos-python installation (SICONOS_PYTHON_INSTALL_DIR)
+  # and get pip install options (PIP_INSTALL_OPTIONS).
+  include(PythonInstallSetup)
+  set_python_install_path()
+
+  #== == == Create(and setup) build / install target == == ==
+  add_custom_target(python-install
+    COMMAND ${Python_EXECUTABLE} -m pip install -U ${CMAKE_BINARY_DIR}/python ${PIP_INSTALL_OPTIONS} -v 
+    VERBATIM USES_TERMINAL
+    COMMAND_EXPAND_LISTS
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "build/install siconos python package")
+  #execute python - install when target install is called
+  install(CODE "execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} python-install WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
+
+endif()
+
 
 #== == == == == = Blas / Lapack == == == == == =
 #Find package stuff provided by cmake deals
@@ -211,23 +243,22 @@ find_package(LAPACKDEV REQUIRED)
 #check https: // cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
 if(WITH_CXX)
 
-#From boost 1.71, something is wrong in cmake and boost support for multithread
-#https: // github.com/boostorg/boost_install/issues/13
-#https: // gitlab.kitware.com/cmake/cmake/issues/19714
-#set(Boost_USE_MULTITHREADED ON)
+  #From boost 1.71, something is wrong in cmake and boost support for multithread
+  #https: // gitlab.kitware.com/cmake/cmake/issues/19714
+  #set(Boost_USE_MULTITHREADED ON)
   set(Boost_NO_BOOST_CMAKE 1)
-  set(boost_min_version 1.61)
-#Set the list of required boost components
+  set(boost_min_version 1.75) # This is the minimum for c++20 compatibility of ublas.
+  #Set the list of required boost components
   if(WITH_SERIALIZATION)
     list(APPEND boost_required_components serialization filesystem)
   endif()
   if(boost_required_components)
     set(boost_opts COMPONENTS ${boost_required_components})
   endif()
-
-#Search boost...
+  
+  #Search boost...
   find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED)
-
+  
   if(WITH_SERIALIZATION)
     set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
   endif()
@@ -282,10 +313,10 @@ if(WITH_TESTING)
   endif()
   if(HAVE_SICONOS_KERNEL)
     find_package(CPPUNIT REQUIRED)
-#File used as main driver for cppunit tests
+    #File used as main driver for cppunit tests
     set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/tests-common/TestMain.cpp CACHE INTERNAL "")
   endif()
-  if(WITH_PYTHON_WRAPPER)
+  if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
     find_python_module(pytest REQUIRED)
     if(WITH_AGGRESSIVE_PYTHON_TESTS)
       set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")

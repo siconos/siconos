@@ -23,41 +23,43 @@
 #define MLCPProjectOnConstraints_H
 
 #include "MLCP.hpp"
-#include "OSNSMatrixProjectOnConstraints.hpp"
+
+namespace siconos::nonsmooth_formulations {
 /**
    Formalization and Resolution of a Mixed Linear Complementarity Problem
    (MLCP)
-   
+
    This class is devoted to the formalization and the resolution of the
    Mixed Linear Complementarity Problem (MLCP) for the specific problem
    of the projection onto the constraints in Mechanics
-   
+
 */
 class MLCPProjectOnConstraints : public MLCP {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(MLCPProjectOnConstraints);
 
   /** ?? */
-  double _alpha;
+  double _alpha{1.};
 
   /** disabled or enabled projection On Equality (or Unilateral) for unilateral
    * constraints */
-  bool _doProjOnEquality;
+  bool _doProjOnEquality{false};
 
-  bool _useMassNormalization;
+  bool _useMassNormalization{false};
 
-public:
+ public:
   /** compute the number of inequality and equality for a given tuple of
    *  Interactions update the global number of equality(_n) and inequality (_m)
    *  set up _numerics_problem parameters (blocksRows and blocksIsComp )
    *
    *  \param inter1 first interaction considered
    *  \param inter2 second interaction
-  */
-  void computeOptions(SP::Interaction inter1, SP::Interaction inter2) override;
+   */
+  void computeOptions(std::shared_ptr<siconos::modeling::Interaction> inter1,
+                      std::shared_ptr<siconos::modeling::Interaction> inter2) override;
 
   /** constructor from data
-   * 
+   *
    *  \param numericsSolverId solver id
    *  \param alpha alpha parameter value
    */
@@ -69,11 +71,12 @@ public:
    *   \param options the options set,
    *   \param alpha alpha parameter value
    */
-  MLCPProjectOnConstraints(SP::SolverOptions options, double alpha = 1.0);
+  MLCPProjectOnConstraints(std::shared_ptr<SolverOptions> options,
+                           double alpha = 1.0);
 
   /** destructor
    */
-  ~MLCPProjectOnConstraints(){};
+  ~MLCPProjectOnConstraints() noexcept = default;
 
   /**
      \return alpha value
@@ -90,7 +93,7 @@ public:
   /** Display the set of blocks for  a given indexSet
       \param indexSet the graph of interactions
    */
-  void displayBlocks(SP::InteractionsGraph indexSet) override;
+  void displayBlocks(std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) override;
 
   /** print the data to the screen
    */
@@ -103,28 +106,23 @@ public:
    */
   void updateInteractionBlocks() override;
 
-  /** compute interactionBlocks if necessary (this depends on the type of
-   *  OSNS, on the indexSets ...)
-   */
-  virtual void updateInteractionBlocksOLD();
-
   /** compute diagonal Interaction block
       \param vd a vertex (interaction) descriptor
   */
   void computeDiagonalInteractionBlock(
-      const InteractionsGraph::VDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::VDescriptor &vd) override;
 
   /** compute diagonal Interaction block
       \param vd a vertex (interaction) descriptor
   */
-  void
-  computeInteractionBlock(const InteractionsGraph::EDescriptor &vd) override;
+  void computeInteractionBlock(
+      const siconos::graphs::InteractionsGraph::EDescriptor &vd) override;
 
   /** To compute a part of the "q" vector of the OSNS
       \param vd vertex (interaction) which corresponds to the considered block
       \param pos the position of the first element of yOut to be set
   */
-  void computeqBlock(InteractionsGraph::VDescriptor &vd,
+  void computeqBlock(siconos::graphs::InteractionsGraph::VDescriptor &vd,
                      unsigned int pos) override;
 
   /** compute vector q
@@ -141,15 +139,15 @@ public:
       \param inter the considered interaction
       \param pos interaction position in the global vector
   */
-  virtual void postComputeLagrangianR(SP::Interaction inter, unsigned int pos);
+  virtual void postComputeLagrangianR(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                      unsigned int pos);
 
   /** post-treatment for  MLCPProjectOnConstraints for NewtonEulerR
       \param inter the considered interaction
       \param pos interaction position in the global vector
    */
-  virtual void postComputeNewtonEulerR(SP::Interaction inter, unsigned int pos);
-
-  ACCEPT_STD_VISITORS();
+  virtual void postComputeNewtonEulerR(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                       unsigned int pos);
 };
-
-#endif // MLCPProjectOnConstraints_H
+}  // namespace siconos::nonsmooth_formulations
+#endif  // MLCPProjectOnConstraints_H

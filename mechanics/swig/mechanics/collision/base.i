@@ -15,7 +15,7 @@ class SiconosCollisionQueryResult;
 %template(VectorOfSPSiconosCollisionQueryResult) std::vector< std::shared_ptr<SiconosCollisionQueryResult> >;
 
 // Ignore some shadowed (redundant for Python) functions
-%ignore SiconosShape::setDimensions(SP::SiconosVector dim);
+%ignore SiconosShape::setDimensions(std::shared_ptr<siconos::algebra::SiconosVector> dim);
 
 PY_REGISTER_WITHOUT_HEADER(SiconosSphere, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosPlane, Mechanics);

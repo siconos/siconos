@@ -10,7 +10,7 @@
 #include <cadmbtb.hpp>
 
 
-void occ_move(TopoDS_Shape& shape, const SiconosVector& q)
+void occ_move(TopoDS_Shape& shape, const siconos::algebra::SiconosVector& q)
 {
   const gp_Vec translat = gp_Vec(q(0), q(1), q(2));
   const gp_Quaternion rota = gp_Quaternion(q(4), q(5), q(6), q(3));

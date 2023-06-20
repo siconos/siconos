@@ -47,8 +47,8 @@ private:
 
   // Members
 
-  SP::SiconosVector q0, velocity0;
-  SP::SiconosMatrix mass, K, C, rhsK, rhsC, minus_inv_M;
+  std::shared_ptr<siconos::algebra::SiconosVector> q0, velocity0;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> mass, K, C, rhsK, rhsC, minus_inv_M;
 
 public:
   void setUp();

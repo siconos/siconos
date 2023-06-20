@@ -47,7 +47,7 @@ public:
    *  \param q0 : the state vector.
    *  \param y : output vector.
    */
-  void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  void computeh(double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y);
 
   /** Set offset1, offset from first contact.
    *

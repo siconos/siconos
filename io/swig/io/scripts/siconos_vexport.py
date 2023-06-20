@@ -1,4 +1,4 @@
-#!/usr/bin/env @PYTHON_EXECUTABLE@
+#!/usr/bin/env @Python_EXECUTABLE@
 """
 Description: Export a Siconos mechanics-IO HDF5 file in VTK format.
 """

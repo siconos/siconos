@@ -159,7 +159,9 @@ void CreateCoarseGraph(CtrlType *ctrl, GraphType *graph, int cnvtxs, idxtype *ma
             break;
         }
       }
-      if (jj >= 0 && cadjncy[jj] == cnvtxs) { /* This 2nd check is needed for non-adjacent matchings */
+      /* if (jj >= 0 && cadjncy[jj] == cnvtxs) { /\* This 2nd check is needed for non-adjacent matchings *\/ */
+      /* added condition jj < nedges as suggested in https://github.com/coin-or/Ipopt/issues/208#issuecomment-460986757 */
+      if (jj >= 0 && jj < nedges && cadjncy[jj] == cnvtxs) { /* This 2nd check is needed for non-adjacent matchings */cadjwgtsum[cnvtxs] -= cadjwgt[jj];
         cadjwgtsum[cnvtxs] -= cadjwgt[jj];
         cadjncy[jj] = cadjncy[--nedges];
         cadjwgt[jj] = cadjwgt[nedges];

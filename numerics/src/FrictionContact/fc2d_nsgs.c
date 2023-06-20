@@ -158,7 +158,7 @@ double squared_norm(double localreaction[2])
 }
 
 static
-void inline  accumulateLightErrorSum(double *light_error_sum, double localreaction[3],
+inline void accumulateLightErrorSum(double *light_error_sum, double localreaction[2],
                              double *oldreaction)
 {
   double x0 = oldreaction[0] - localreaction[0];
@@ -377,6 +377,7 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
   SparseBlockCoordinateMatrix* diagonal_blocks = fc3d_extract_diagonal_blocks(problem);
 
   double *  diagonal_block_determinant = fc2d_nsgs_compute_local_problem_determinant(diagonal_blocks);
+  unsigned int *freeze_contacts = NULL;
   /* verbose if problem */
   if(!diagonal_block_determinant)
   {
@@ -402,7 +403,6 @@ void fc2d_nsgs(FrictionContactProblem* problem, double *z, double *w,
   double error = INFINITY; /* Current error */
   int has_not_converged = 1;
 
-  unsigned int *freeze_contacts = NULL;
   if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0)
   {
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);

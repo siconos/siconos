@@ -14,223 +14,240 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
-#include "EventsManager.hpp"
-#include "Simulation.hpp"
-#include "Simulation.hpp"
-#include "TimeDiscretisation.hpp"
-#include "OneStepIntegrator.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
+ */
 
 #include "ControlManager.hpp"
-#include "Sensor.hpp"
-#include "SensorFactory.hpp"
-#include "ActuatorFactory.hpp"
-#include "Observer.hpp"
-#include "ObserverFactory.hpp"
-#include "SensorEvent.hpp"
+
+#include "Actuator.hpp"
 #include "ActuatorEvent.hpp"
+#include "EventsManager.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "Observer.hpp"
 #include "ObserverEvent.hpp"
-#include "ExtraAdditionalTerms.hpp"
+#include "OneStepIntegrator.hpp"
+#include "Sensor.hpp"
+#include "SensorEvent.hpp"
+#include "SiconosException.hpp"
+#include "Simulation.hpp"
+#include "Topology.hpp"
 //#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-ControlManager::ControlManager(SP::Simulation sim): _sim(sim)
+siconos::control::ControlManager::ControlManager(
+    std::shared_ptr<siconos::simulation::Simulation> sim)
+    : _sim(sim)
 {
-  if(!_sim)
-    THROW_EXCEPTION("ControlManager::constructor failed. The given Simulation is a NULL pointer.");
+  if (!_sim)
+    THROW_EXCEPTION(
+        "siconos::control::ControlManager::constructor failed. The given Simulation is a NULL "
+        "pointer.");
 }
 
-ControlManager::~ControlManager()
-{}
-
-void ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)
+void siconos::control::ControlManager::initialize(
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds)
 {
-  DEBUG_BEGIN("ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)\n")
+  DEBUG_BEGIN(
+      "siconos::control::ControlManager::initialize(const "
+      "siconos::modeling::NonSmoothDynamicalSystem& nsds)\n")
   // Initialize all the Sensors and insert their events into the
   // EventsManager of the Simulation.
-  for(SensorsIterator itS = _allSensors.begin();
-      itS != _allSensors.end(); ++itS)
-  {
-    (*itS)->initialize(nsds);
+  for (auto itS : _allSensors) {
+    itS->initialize(nsds);
   }
   // Initialize all the Actuators and insert their events into the
   // EventsManager of the Simulation.
-  for(ActuatorsIterator itA = _allActuators.begin();
-      itA != _allActuators.end(); ++itA)
-  {
-    (*itA)->initialize(nsds,*_sim);
+  for (auto itA : _allActuators) {
+    itA->initialize(nsds, *_sim);
   }
 
   // Initialize all the Observer and insert their events into the
   // EventsManager of the Simulation.
-  for(ObserversIterator itO = _allObservers.begin();
-      itO != _allObservers.end(); ++itO)
-  {
-    (*itO)->initialize(nsds,*_sim);
+  for (auto itO : _allObservers) {
+    itO->initialize(nsds, *_sim);
   }
 
   // init the control terms, if any
-  //OSISet& allOSI = *m.simulation()->oneStepIntegrators();
-  OSISet& allOSI = *_sim->oneStepIntegrators();
-  DynamicalSystemsGraph& DSG0 = *nsds.topology()->dSG(0);
-  for(OSIIterator itosi = allOSI.begin(); itosi != allOSI.end(); ++itosi)
-  {
-    if((*itosi)->extraAdditionalTerms())
-    {
+  // OSISet& allOSI = *m.simulation()->oneStepIntegrators();
+  auto& allOSI = *_sim->oneStepIntegrators();
+  auto& DSG0 = *nsds.topology()->dSG(0);
+  for (auto itosi : allOSI) {
+    if (itosi->extraAdditionalTerms()) {
       // would be nice to check is those are for Control
-      (*itosi)->extraAdditionalTerms()->init(DSG0, nsds, _sim->eventsManager()->timeDiscretisation());
+      itosi->extraAdditionalTerms()->init(DSG0, nsds,
+                                          _sim->eventsManager()->timeDiscretisation());
     }
   }
-  DEBUG_END("ControlManager::initialize(const NonSmoothDynamicalSystem& nsds)\n");
+  DEBUG_END(
+      "siconos::control::ControlManager::initialize(const "
+      "siconos::modeling::NonSmoothDynamicalSystem& nsds)\n");
 }
 
-SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds)
+std::shared_ptr<siconos::control::Sensor> siconos::control::ControlManager::addSensor(
+    SensorType type, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
 {
-  SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  SP::Sensor s = (* (_allSensors.insert(regSensor.instantiate(type, ds))).first);
+  auto s = *(_allSensors.insert(SensorFactory::instance()->create(ds, type))).first;
   linkSensorSimulation(s, td);
   return s;
 }
 
-SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation td, SP::DynamicalSystem ds, const NonSmoothDynamicalSystem& nsds)
+std::shared_ptr<siconos::control::Sensor> siconos::control::ControlManager::addAndRecordSensor(
+    SensorType type, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds)
 {
-  SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  SP::Sensor s = *(_allSensors.insert(regSensor.instantiate(type, ds))).first;
+  auto s = *(_allSensors.insert(SensorFactory::instance()->create(ds, type))).first;
   linkSensorSimulation(s, td);
   s->initialize(nsds);
   return s;
 }
 
-SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor)
+std::shared_ptr<siconos::control::Actuator> siconos::control::ControlManager::addActuator(
+    ActuatorType type, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    std::shared_ptr<ControlSensor> sensor)
 {
-  if(!sensor)
-    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
-  ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  SP::Actuator act = (* (_allActuators.insert(regActuator.instantiate(type, sensor))).first);
+  if (!sensor)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - sensor is not valid !");
+  auto act = *(_allActuators.insert(ActuatorFactory::instance()->create(sensor, type))).first;
   linkActuatorSimulation(act, td);
   return act;
 }
 
-SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const NonSmoothDynamicalSystem& nsds)
+std::shared_ptr<siconos::control::Actuator>
+siconos::control::ControlManager::addAndRecordActuator(
+    ActuatorType type, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    std::shared_ptr<ControlSensor> sensor,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds)
 {
-  if(!sensor)
-    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
-  ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  SP::Actuator act = *(_allActuators.insert(regActuator.instantiate(type, sensor))).first;
+  if (!sensor)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - sensor is not valid !");
+  auto act = *(_allActuators.insert(ActuatorFactory::instance()->create(sensor, type))).first;
   linkActuatorSimulation(act, td);
-  act->initialize(nsds,*_sim);
+  act->initialize(nsds, *_sim);
   return act;
 }
 
-SP::Observer ControlManager::addObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0)
+std::shared_ptr<siconos::control::Observer> siconos::control::ControlManager::addObserver(
+    ObserverType type, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    std::shared_ptr<ControlSensor> sensor, const siconos::algebra::SiconosVector& xHat0)
 {
-  if(!sensor)
-    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
-  ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
-  SP::Observer obs = (* (_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first);
+  if (!sensor)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - sensor is not valid !");
+  auto obs =
+      *(_allObservers.insert(ObserverFactory::instance()->create(sensor, xHat0, type))).first;
   linkObserverSimulation(obs, td);
   return obs;
 }
 
-SP::Observer ControlManager::addAndRecordObserver(int type, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0, const NonSmoothDynamicalSystem& nsds)
+std::shared_ptr<siconos::control::Observer>
+siconos::control::ControlManager::addAndRecordObserver(
+    ObserverType type, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    std::shared_ptr<ControlSensor> sensor, const siconos::algebra::SiconosVector& xHat0,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds)
 {
-  ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
-  SP::Observer obs = *(_allObservers.insert(regObserver.instantiate(type, sensor, xHat0))).first;
+  auto obs =
+      *(_allObservers.insert(ObserverFactory::instance()->create(sensor, xHat0, type))).first;
   linkObserverSimulation(obs, td);
-  obs->initialize(nsds,*_sim);
+  obs->initialize(nsds, *_sim);
   return obs;
 }
 
-void ControlManager::addSensorPtr(SP::Sensor s, SP::TimeDiscretisation td)
+void siconos::control::ControlManager::addSensorPtr(
+    std::shared_ptr<Sensor> s, std::shared_ptr<siconos::simulation::TimeDiscretisation> td)
 {
-  if(!s)
-    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
+  if (!s)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - sensor is not valid !");
   _allSensors.insert(s);
   linkSensorSimulation(s, td);
 }
 
-void ControlManager::addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
+void siconos::control::ControlManager::addAndRecordSensorPtr(
+    std::shared_ptr<Sensor> s, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds)
 {
-  if(!s)
-    THROW_EXCEPTION("ControlManager::addActuator - sensor is not valid !");
+  if (!s)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - sensor is not valid !");
   _allSensors.insert(s);
   linkSensorSimulation(s, td);
   s->initialize(nsds);
 }
 
-void ControlManager::addActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td)
+void siconos::control::ControlManager::addActuatorPtr(
+    std::shared_ptr<Actuator> act, std::shared_ptr<siconos::simulation::TimeDiscretisation> td)
 {
-  if(!act)
-    THROW_EXCEPTION("ControlManager::addActuator - actuator is not valid !");
+  if (!act)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - actuator is not valid !");
   _allActuators.insert(act);
   linkActuatorSimulation(act, td);
 }
 
-void ControlManager::addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
+void siconos::control::ControlManager::addAndRecordActuatorPtr(
+    std::shared_ptr<Actuator> act, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds)
 {
-  if(!act)
-    THROW_EXCEPTION("ControlManager::addActuator - actuator is not valid !");
+  if (!act)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - actuator is not valid !");
   _allActuators.insert(act);
   linkActuatorSimulation(act, td);
-  act->initialize(nsds,*_sim);
+  act->initialize(nsds, *_sim);
 }
 
-void ControlManager::addObserverPtr(SP::Observer obs, SP::TimeDiscretisation td)
+void siconos::control::ControlManager::addObserverPtr(
+    std::shared_ptr<Observer> obs, std::shared_ptr<siconos::simulation::TimeDiscretisation> td)
 {
-  if(!obs)
-    THROW_EXCEPTION("ControlManager::addActuator - observer is not valid !");
+  if (!obs)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - observer is not valid !");
   _allObservers.insert(obs);
   linkObserverSimulation(obs, td);
 }
 
-void ControlManager::addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds)
+void siconos::control::ControlManager::addAndRecordObserverPtr(
+    std::shared_ptr<Observer> obs, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds)
 {
-  if(!obs)
-    THROW_EXCEPTION("ControlManager::addActuator - observer is not valid !");
+  if (!obs)
+    THROW_EXCEPTION("siconos::control::ControlManager::addActuator - observer is not valid !");
   _allObservers.insert(obs);
   linkObserverSimulation(obs, td);
-  obs->initialize(nsds,*_sim);
+  obs->initialize(nsds, *_sim);
 }
 
-void ControlManager::linkSensorSimulation(SP::Sensor s, SP::TimeDiscretisation td)
+void siconos::control::ControlManager::linkSensorSimulation(
+    std::shared_ptr<Sensor> s, std::shared_ptr<siconos::simulation::TimeDiscretisation> td)
 {
-  Event& ev = _sim->eventsManager()->insertEvent(SENSOR_EVENT, td);
+  auto& ev = _sim->eventsManager()->insertEvent(siconos::simulation::EventType::Sensor, td);
   static_cast<SensorEvent&>(ev).setSensorPtr(s);
   s->setTimeDiscretisation(*td);
 }
 
-void ControlManager::linkActuatorSimulation(SP::Actuator act, SP::TimeDiscretisation td)
+void siconos::control::ControlManager::linkActuatorSimulation(
+    std::shared_ptr<Actuator> act, std::shared_ptr<siconos::simulation::TimeDiscretisation> td)
 {
-  Event& ev = _sim->eventsManager()->insertEvent(ACTUATOR_EVENT, td);
+  auto& ev = _sim->eventsManager()->insertEvent(siconos::simulation::EventType::Actuator, td);
   static_cast<ActuatorEvent&>(ev).setActuatorPtr(act);
   act->setTimeDiscretisation(*td);
 }
 
-void ControlManager::linkObserverSimulation(SP::Observer obs, SP::TimeDiscretisation td)
+void siconos::control::ControlManager::linkObserverSimulation(
+    std::shared_ptr<Observer> obs, std::shared_ptr<siconos::simulation::TimeDiscretisation> td)
 {
-  Event& ev = _sim->eventsManager()->insertEvent(OBSERVER_EVENT, td);
+  auto& ev = _sim->eventsManager()->insertEvent(siconos::simulation::EventType::Observer, td);
   static_cast<ObserverEvent&>(ev).setObserverPtr(obs);
   obs->setTimeDiscretisation(*td);
 }
 
-void ControlManager::display() const
+void siconos::control::ControlManager::display() const
 {
-  std::cout << "=========> ControlManager " ;
-  std::cout << "It handles the following objects: " <<std::endl;
-  SensorsIterator itS;
-  for(itS = _allSensors.begin(); itS != _allSensors.end(); ++itS)
-    (*itS)->display();
-  ActuatorsIterator itA;
-  for(itA = _allActuators.begin(); itA != _allActuators.end(); ++itA)
-    (*itA)->display();
-  ObserversIterator itO;
-  for(itO = _allObservers.begin(); itO != _allObservers.end(); ++itO)
-    (*itO)->display();
+  std::cout << "=========> ControlManager ";
+  std::cout << "It handles the following objects: " << std::endl;
+  for (auto itS : _allSensors) itS->display();
+
+  for (auto itA : _allActuators) itA->display();
+
+  for (auto itO : _allObservers) itO->display();
   std::cout << "==========" << std::endl;
   std::cout << std::endl;
 }

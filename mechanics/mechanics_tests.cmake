@@ -1,7 +1,7 @@
 include(tools4tests)
 
 if(WITH_TESTING)
-
+  add_custom_target(mechanics-tests echo "Start mechanics tests")
   # ---- Collision/native tests ----
   begin_tests(src/collision/native/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
   new_test(SOURCES MultiBodyTest.cpp ${SIMPLE_TEST_MAIN})

@@ -94,8 +94,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
       info = 0;
       options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;   /* Number of iterations done */
       options->dparam[SICONOS_DPARAM_RESIDU] = 0.0; /* Error */
-      if(verbose > 0)
-        printf("LCP_driver_SparseBlockMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+      numerics_printf_verbose(1,"LCP_driver_SparseBlockMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
       DEBUG_END("lcp_driver_SparseBlockMatrix(...)\n");
       return info;
     }
@@ -107,8 +106,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
 
   /* Solver name */
   //  const char* const  name = options->solverName;
-  if(verbose == 1)
-    printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", solver_options_id_to_name(options->solverId));
+  numerics_printf_verbose(1," ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", solver_options_id_to_name(options->solverId));
 
   /****** Gauss Seidel block solver ******/
   if((options->solverId) == SICONOS_LCP_NSGS_SBM)
@@ -169,8 +167,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z, dou
         }
         info = 0;
         options->dparam[SICONOS_DPARAM_RESIDU] = 0.0; /* Error */
-        if(verbose > 0)
-          printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+	numerics_printf_verbose(1,"LCP_driver_DenseMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
         DEBUG_END("lcp_driver_DenseMatrix(...)\n")
         return info;
       }
@@ -184,8 +181,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z, dou
       z[0] = -q[0] / M[0];
       info = 0;
       options->dparam[SICONOS_DPARAM_RESIDU] = 0.0; /* Error */
-      if(verbose > 0)
-        printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (problem of size 1). \n");
+      numerics_printf_verbose(1,"LCP_driver_DenseMatrix: found trivial solution for the LCP (problem of size 1). \n");
       DEBUG_END("lcp_driver_DenseMatrix(...)\n")
       return info;
     }
@@ -195,8 +191,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z, dou
    *  2 - Call specific solver (if no trivial sol.)
    *************************************************/
 
-  if(verbose == 1)
-    printf(" ========================== Call %s solver for Linear Complementarity problem ==========================\n", solver_options_id_to_name(options->solverId));
+  numerics_printf_verbose(1," ========================== Call %s solver for Linear Complementarity problem ==========================", solver_options_id_to_name(options->solverId));
 
   /****** Lemke algorithm ******/
   /* IN: itermax
@@ -337,7 +332,11 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z, dou
    *************************************************/
   if(options->filterOn > 0)
   {
+    numerics_printf_verbose(1,
+			    "LCP_driver : computes w = Mz + q and checks validity -- solver info = %i", info);
     int info_ = lcp_compute_error(problem, z, w, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
+    numerics_printf_verbose(1,
+			    "LCP_driver : compute error info = %i", info_);
     if(info <= 0)  /* info was not set or the solver was happy */
       info = info_;
   }

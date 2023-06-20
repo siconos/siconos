@@ -30,11 +30,16 @@ cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables
 #cmake_policy(SET CMP0078 NEW) # UseSWIG generates standard target names.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
 cmake_policy(SET CMP0079 NEW) # target_link_libraries() allows use with targets in other directories
+cmake_policy(SET CMP0067 NEW) # Honor language standard in try_compile() source-file signature.
 
 # Set cmake modules directories
 # (i.e. the those which contain all user-defined FindXXX.cmake files among other things)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/docs/cmake)
+
+# If ON, a compile_commands.json file is generated and might be read and used by your editor
+# to improve static verif. of the code source.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
 
 # Improve cmake interface when current version is too old.
 include(new_cmake_functions)
@@ -83,8 +88,8 @@ if(USER_OPTIONS_FILE)
   configure_file(${USER_OPTIONS_FILE} current_options.cmake COPYONLY)
   include(${CMAKE_CURRENT_BINARY_DIR}/current_options.cmake)
 else()
-  message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/cmake/default_options.cmake !!!!! \n")
-  include(default_options)
+  message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/ci_gitlab/siconos_confs/standard.cmake !!!!! \n")
+  include(${CMAKE_SOURCE_DIR}/ci_gitlab/siconos_confs/standard.cmake)
 endif()
 
 # Set target names from components list
@@ -120,7 +125,28 @@ list(GET COMPONENTS -1 last_component)
 
 if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
-  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_STANDARD 20)
+
+  # check if the compiler has the required features ...
+  include(CheckCXXSourceCompiles)
+  check_cxx_source_compiles(
+    "
+#include <ranges>
+
+void print(std::ranges::range auto const& container) {
+}
+
+int
+main()
+{}
+" HAS_RANGE)
+  if(NOT HAS_RANGE)
+    message(FATAL_ERROR "A compiler with c++20 feature std::ranges::range is required.")
+  endif()
+
+  # set(BUILD_AS_CPP ON)
+  
 else()
   # we may need to compile only numerics and only in C.
   # Really???
@@ -160,6 +186,11 @@ if(WITH_FCLIB)
   include(fclib_setup)
 endif()
 
+# # -- New version, with pybind11
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
+endif()
+
 # ========= Setup each required component =========
 foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
@@ -170,6 +201,7 @@ endforeach()
 if(WITH_PYTHON_WRAPPER)
   add_subdirectory(wrap)
 endif()
+
 
 # ========= Documentation setup =========
 # Finalize documentation setups.
@@ -234,16 +266,16 @@ else()
   message("    - CXSparse headers path : externals/SuiteSparse/CXSparse")
   message("    - LDL headers path : externals/SuiteSparse/LDL")
 endif()
-message(STATUS "Python interpreter is ${Python3_EXECUTABLE}")
+message(STATUS "Python interpreter is ${Python_EXECUTABLE}")
 if(WITH_PYTHON_WRAPPER)
   message(STATUS "Python libraries are ${Python3_LIBRARIES}")
 endif()
 message(STATUS "------------ Installation information ------------\n")
 message("    Please check them with care and be sure to have the proper rights to write in those directories ...\n")
 message("    - The project will be installed in ${CMAKE_INSTALL_PREFIX}")
-if(WITH_PYTHON_WRAPPER)
+if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
   message("    - Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR} (${sicopy_install_mode} mode),")
-  message("    with the command ${PYTHON_EXECUTABLE} -m pip install -U ${PIP_INSTALL_OPTIONS} ...\n")
+  message("    with the command ${Python_EXECUTABLE} -m pip install -U ${PIP_INSTALL_OPTIONS} ...\n")
   if(NOT sicopy_install_mode STREQUAL "standard")
     message("    If this path is not in the standard python environment, you'll probably have to fill PYTHONPATH.\n")
     message("    To check python known paths, run: python3 -c 'import sys; print(sys.path)' \n")

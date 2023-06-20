@@ -23,13 +23,12 @@
   \brief Structure definition and functions related to matrix storage in Numerics
 */
 
-#include <assert.h>         // for assert
 #include <stdio.h>          // for size_t, FILE, NULL
-#include <stdlib.h>         // for malloc
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
+#include "NM_types.h" // NM_DENSE ...
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
-#include "NumericsDataVersion.h" // Versioning
 #include "NumericsSparseMatrix.h" // for NSM_linear_solver typedef
+#include "NumericsDataVersion.h"
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
 #ifndef __cplusplus
@@ -39,6 +38,7 @@
 #ifdef WITH_OPENSSL
 #include <openssl/sha.h>
 #endif
+
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -65,14 +65,6 @@ typedef struct
                                                  * the same hash */
 #endif
 } NumericsMatrixInternalData;
-
-/*! Available types of storage for NumericsMatrix */
-typedef enum NumericsMatrix_types {
-  NM_DENSE,        /**< dense format */
-  NM_SPARSE_BLOCK, /**< sparse block format */
-  NM_SPARSE,          /**< compressed column format */
-  NM_UNKNOWN, /**< unset. Used in NM_null */
-} NM_types;
 
 /** \struct NumericsMatrix NumericsMatrix.h
     Interface to different type of matrices in numerics component.
@@ -133,6 +125,7 @@ extern "C"
    */
   RawNumericsMatrix* NM_new(void);
   RawNumericsMatrix* NM_eye(int size);
+  RawNumericsMatrix* NM_scalar(int size, double s);
 
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    *
@@ -374,18 +367,14 @@ extern "C"
    */
   void NM_clear_not_SBM(NumericsMatrix* m);
   NumericsMatrix * NM_free_not_SBM(NumericsMatrix* m);
-  
 
 
-
- 
-  /**
-     Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
-     memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
-     Note that this function does not free m.
-     
-     \param m the matrix to be deleted.
-     \param storageType to be kept.
+  /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
+      memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
+      Note that this function does not free m.
+      
+      \param m the matrix to be deleted.
+      \param storageType to be kept.
    */
   void NM_clear_other_storages(NumericsMatrix* M, NM_types storageType);
 
@@ -467,7 +456,7 @@ extern "C"
    */
 
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 2x2 diagonal block of a NumericsMatrix. No allocation is done.
    *
    *  \param[in] M a NumericsMatrix
@@ -563,10 +552,8 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
-  
-  /** 
-      Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (2 rows and sizeX columns)
-      
+
+  /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (2 rows and sizeX columns)
       \param[in] sizeX dim of the vector x
       \param[in] block_start block number (only used for SBM)
       \param[in] row_start position of the first row of A (unused if A is SBM)
@@ -865,17 +852,17 @@ extern "C"
    */
   int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
   int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
+  int NM_LU_refine(NumericsMatrix* A, double *x, double tol, int max_iter, double *residu);
   int NM_Cholesky_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
   int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B);
   int NM_LDLT_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
+  int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs, double tol, int maxitref, int job );
 
 
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
-
-
 
   /** Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    *
@@ -884,7 +871,18 @@ extern "C"
    */
   NumericsMatrix* NM_LU_inv(NumericsMatrix* A);
 
+
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
+
+  /**  Computation of the inverse of a NumericsMatrix A composed of diagonal blocks
+   * for each block a dense inverse is performed and then inserted into the
+   * global inverse
+   * \param[in] A a NumericsMatrix.
+   * \param[in] block_number the number of blocks
+   * \param[in] blocksize the sizes of diagonal blocks
+   * \return the matrix inverse.
+   */
+  NumericsMatrix *  NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number, unsigned int * blocksizes);
 
   /** Direct computation of the solution of a real system of linear
    *  equations: A x = b.
@@ -908,6 +906,9 @@ extern "C"
    *  \return the matrix inverse.
    */
   NumericsMatrix* NM_gesv_inv(NumericsMatrix* A);
+
+
+
 
   /** Set the linear solver
    *
@@ -990,27 +991,7 @@ extern "C"
    *  \param type expected type
    *  \param M the matrix to check
    */
-    static inline void NM_assert(NM_types type, NumericsMatrix* M)
-  {
-#ifndef NDEBUG
-    assert(M && "NM_assert :: the matrix is NULL");
-    assert(M->storageType == type && "NM_assert :: the matrix has the wrong type");
-    switch(type)
-    {
-      case NM_DENSE:
-        assert(M->matrix0);
-        break;
-      case NM_SPARSE_BLOCK:
-        assert(M->matrix1);
-        break;
-      case NM_SPARSE:
-        assert(M->matrix2);
-        break;
-      default:
-        assert(0 && "NM_assert :: unknown storageType");
-    }
-#endif
-  }
+  void NM_assert(NM_types type, NumericsMatrix* M);
 
   /** Check the matrix (the sparse format for now)
    *
@@ -1122,6 +1103,11 @@ extern "C"
    */
   void NM_version_sync(NumericsMatrix* M);
 
+  /* Check if an entry in the matrix is NaN .
+   *\param M the NumericsMatrix
+   *\return int = 1 if a NaN is found, 0 otherwise
+   */
+  int NM_isnan(NumericsMatrix* M);
 
 #ifdef WITH_OPENSSL
   /** Compute sha1 hash of matrix values. Matrices of differents size and same

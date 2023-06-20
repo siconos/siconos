@@ -27,10 +27,9 @@ set(${COMPONENT}_DIRS
   src/utils
   src/utils/SiconosAlgebra
   src/utils/SiconosMemory
-  src/utils/SiconosSharedLibrary
   src/utils/SiconosTools
   src/utils/ProgressBar
-  src/plugin
+  src/utils/plugins
   src/modelingTools
   src/simulationTools
 )
@@ -64,15 +63,18 @@ include(WindowsKernelSetup)
 include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
-# We require C++ 17. PUBLIC to propagate to other components.
-target_compile_features(kernel PUBLIC cxx_std_17)
+# We require C++ 20. PUBLIC to propagate to other components.
+target_compile_features(kernel PUBLIC cxx_std_20)
 
 # --- Extra setup for the component ---
 # remove boring warnings from boost bindings includes
 set_source_files_properties(
-  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/EigenProblems.cpp
+  #${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/EigenProblems.cpp
   ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixSolvers.cpp
-  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable")
+  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixMisc.cpp # many warnings due to boost bindings headers
+  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable;-Wno-unused-local-typedefs")
+
+
 
 # Links with other Siconos components
 target_link_libraries(kernel PRIVATE externals numerics)
@@ -89,12 +91,17 @@ target_link_libraries(kernel PUBLIC Boost::boost)
 
 if(WITH_BOOST_LOG)
   find_package(Boost 1.61 REQUIRED COMPONENTS log)
-  target_compile_definition(kernel PRIVATE BOOST_LOG_DYN_LINK)
+  target_compile_definitions(kernel PRIVATE BOOST_LOG_DYN_LINK)
 endif()
+
+# target_compile_definitions(kernel PRIVATE BOOST_UBLAS_SHALLOW_ARRAY_ADAPTOR)
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)
+endif()
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
 endif()
 
 # ---- Installation ----

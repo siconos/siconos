@@ -16,24 +16,11 @@
  * limitations under the License.
 */
 #include "NewtonImpactNSL.hpp"
-
+#include "SiconosException.hpp"
 #include <iostream>
 
-NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), _e(0.0)
-{}
 
-NewtonImpactNSL::NewtonImpactNSL(double e):
-  NonSmoothLaw(1), _e(e)
-{}
-
-NewtonImpactNSL::NewtonImpactNSL(unsigned int size, double e):
-  NonSmoothLaw(size), _e(e)
-{}
-
-NewtonImpactNSL::~NewtonImpactNSL()
-{}
-
-bool NewtonImpactNSL::isVerified() const
+bool siconos::modeling::NewtonImpactNSL::isVerified() const
 {
   bool res = false;
   // to do
@@ -41,7 +28,7 @@ bool NewtonImpactNSL::isVerified() const
   return res;
 }
 
-void NewtonImpactNSL::display() const
+void siconos::modeling::NewtonImpactNSL::display() const
 {
   std::cout << "===============================================================================" <<std::endl;
   std::cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << _e <<std::endl;

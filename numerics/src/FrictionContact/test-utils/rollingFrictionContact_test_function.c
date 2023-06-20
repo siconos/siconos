@@ -43,7 +43,7 @@ int rollingFrictionContact_test_function(TestCase* current)
   int info;
   double *reaction = (double*)calloc(dim * NC, sizeof(double));
   double *velocity = (double*)calloc(dim * NC, sizeof(double));
-
+  printf("\n rollingFrictionContact_test_function run\n");
   if(dim == 2)
   {
     info = 1;

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file ControlZOHAdditionalTerms.hpp
  * \brief Functions to add control terms during the integration steps
@@ -22,20 +22,20 @@
 
 #include "ExtraAdditionalTerms.hpp"
 
-struct ControlZOHAdditionalTerms : ExtraAdditionalTerms
-{
-
-private:
-  
+namespace siconos::control {
+struct ControlZOHAdditionalTerms : siconos::integrators::ExtraAdditionalTerms {
+ private:
   ACCEPT_SERIALIZATION(ControlZOHAdditionalTerms);
 
-public:
+ public:
   /** initialize elements in the graph for the computations
    * \param DSG0 the graph of DynamicalSystems
    * \param nsds current nonsmooth dynamical system
    * \param td current time discretisation
    */
-  virtual void init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem & nsds, const TimeDiscretisation & td);
+  virtual void init(siconos::graphs::DynamicalSystemsGraph& DSG0,
+                    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                    std::shared_ptr<siconos::simulation::TimeDiscretisation> td);
 
   /** add smooth term to xfree (like the control input, the error correction for an observer)
    * \param DSG0 the graph of DynamicalSystems
@@ -43,7 +43,9 @@ public:
    * \param h the current timestep
    * \param xfree the free state to modify
    */
-  virtual void addSmoothTerms(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double h, SiconosVector& xfree);
+  virtual void addSmoothTerms(siconos::graphs::DynamicalSystemsGraph& DSG0,
+                              const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD,
+                              const double h, siconos::algebra::SiconosVector& xfree);
 
   /** add contribution to JacRhs for instance if \f$\dot{x} = f(x) + g(x)u\f$
    * \param DSG0 the graph of DynamicalSystems
@@ -51,6 +53,9 @@ public:
    * \param h the current timestep
    * \param jacRhs the jacobian to modify
    */
-  virtual void addJacobianRhsContribution(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double h, SiconosMatrix& jacRhs);
-
+  virtual void addJacobianRhsContribution(
+      siconos::graphs::DynamicalSystemsGraph& DSG0,
+      const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
+      siconos::algebra::SiconosMatrix& jacRhs);
 };
+}

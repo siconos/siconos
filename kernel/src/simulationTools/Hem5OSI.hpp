@@ -21,15 +21,14 @@
 #ifndef Hem5OSI_H
 #define Hem5OSI_H
 
-#include "OneStepIntegrator.hpp"
-
 #include <vector>
 
-#define HEM5_ATOL_DEFAULT 100 * MACHINE_PREC;
-#define HEM5_RTOL_DEFAULT 10 * MACHINE_PREC;
+#include "OneStepIntegrator.hpp"
+#include "SiconosConst.hpp"  // MACHINE_PREC
+
+namespace siconos::integrators {
 
 class Hem5OSI_impl;
-TYPEDEF_SPTR(Hem5OSI_impl);
 
 /** Hem5OSI solver (odepack)
  *
@@ -47,9 +46,11 @@ TYPEDEF_SPTR(Hem5OSI_impl);
  * scalar or an array of length NEQ.  Input only.
  */
 class Hem5OSI : public OneStepIntegrator {
-private:
-
+ private:
   ACCEPT_SERIALIZATION(Hem5OSI);
+  static constexpr auto HEM5_ATOL_DEFAULT = 100 * siconos::internal::MACHINE_PREC;
+  static constexpr auto HEM5_RTOL_DEFAULT = 10 * siconos::internal::MACHINE_PREC;
+  static constexpr double INITIAL_GUESS_TS = 1.e-3;
 
   /** vector of integer data for the integrator
    * _intData[0] NQ size of the position vector q
@@ -61,48 +62,47 @@ private:
    * output formula _intData[6] LWK length of real array rwork _intData[7] LIWK
    * length of integer array iwork See hem5.f
    */
-  std::vector<integer> _intData;
+  std::vector<int> _intData = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-  integer _idid;
+  int _idid{0};
 
   /** relative tolerance */
-  SA::doublereal rtol;
+  boost::shared_array<double> rtol;
   /** absolute tolerance */
-  SA::doublereal atol;
+  boost::shared_array<double> atol;
   /** real work array */
-  SA::doublereal rwork;
-  /** integer work array */
-  SA::integer iwork;
+  boost::shared_array<double> rwork;
+  /** int work array */
+  boost::shared_array<int> iwork;
 
-  doublereal _timeStep; // initial step size guess
+  double _timeStep{INITIAL_GUESS_TS};  // initial step size guess
 
   /** temporary vector to save q values */
-  SP::BlockVector _qWork;
+  std::shared_ptr<siconos::algebra::BlockVector> _qWork{nullptr};
   /** temporary vector to save v values */
-  SP::BlockVector _vWork;
+  std::shared_ptr<siconos::algebra::BlockVector> _vWork{nullptr};
   /** temporary vector to save v values */
-  SP::BlockVector _uWork;
+  std::shared_ptr<siconos::algebra::BlockVector> _uWork{nullptr};
   /** temporary vector to save a values */
-  SP::BlockVector _aWork;
+  std::shared_ptr<siconos::algebra::BlockVector> _aWork{nullptr};
   /** temporary vector to save lambda values */
-  SP::BlockVector _lambdaWork;
+  std::shared_ptr<siconos::algebra::BlockVector> _lambdaWork{nullptr};
   /** temporary vector to save forces values */
-  SP::BlockVector _forcesWork;
+  std::shared_ptr<siconos::algebra::BlockVector> _forcesWork{nullptr};
 
-  SP::SiconosVector _qtmp;
-  SP::SiconosVector _vtmp;
-  SP::SiconosVector _utmp;
-  SP::SiconosVector _atmp;
-  SP::SiconosVector _lambdatmp;
-  SP::SiconosVector _forcestmp;
+  std::shared_ptr<siconos::algebra::SiconosVector> _qtmp{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _vtmp{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _utmp{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _atmp{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _lambdatmp{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _forcestmp{nullptr};
 
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
-  friend struct _NSLEffectOnFreeOutput;
 
-public:
-  SP::Hem5OSI_impl _impl;
+ public:
+  std::shared_ptr<Hem5OSI_impl> _impl{nullptr};
   friend class Hem5OSI_impl;
 
   enum Hem5OSI_ds_workVector_id { FREE, WORK_LENGTH };
@@ -111,42 +111,38 @@ public:
 
   enum Hem5OSI_interaction_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
 
-  /** constructor from a minimum set of data
-   */
+  /** Default and only constructor */
   Hem5OSI();
 
   /** destructor
    */
-  ~Hem5OSI(){};
+  ~Hem5OSI() noexcept = default;
 
-  /** get vector of integer parameters for lsodar
-   *  \return a vector<integer>
+  /** get vector of int parameters for lsodar
+   *  \return a vector<int>
    */
-  inline const std::vector<integer> intData() const { return _intData; }
+  inline const std::vector<int> intData() const { return _intData; }
 
   /** get _intData[i]
    * \param i index
-   * \return an integer
+   * \return an int
    */
-  inline integer intData(unsigned int i) const { return _intData[i]; }
+  inline int intData(unsigned int i) const { return _intData[i]; }
   /** set _intData[i]
    * \param i index
    * \param newValue
    */
-  inline void setIntData(unsigned int i, int newValue)
-  {
-    _intData[i] = newValue;
-  }
+  inline void setIntData(unsigned int i, int newValue) { _intData[i] = newValue; }
 
   /** get relative tolerance parameter for Hem5
-   *  \return a doublereal*
+   *  \return a double*
    */
-  inline const SA::doublereal getRtol() const { return rtol; }
+  inline const boost::shared_array<double> getRtol() const { return rtol; }
 
   /** get absolute tolerance parameter for Hem5
-   *  \return a doublereal*
+   *  \return a double*
    */
-  inline const SA::doublereal getAtol() const { return atol; }
+  inline const boost::shared_array<double> getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
    *\return an interger
@@ -154,38 +150,38 @@ public:
   inline int getMaxNstep() const { return iwork[11]; }
 
   /** get real work vector parameter for lsodar
-   *  \return a doublereal*
+   *  \return a double*
    */
-  inline const SA::doublereal getRwork() const { return rwork; }
+  inline const boost::shared_array<double> getRwork() const { return rwork; }
 
   /** get iwork
-   *  \return a pointer to integer
+   *  \return a pointer to int
    */
-  inline SA::integer getIwork() const { return iwork; }
+  inline boost::shared_array<int> getIwork() const { return iwork; }
 
   /** set itol, rtol and atol (tolerance parameters for Hem5)
-   *  \param itol integer (itol value)
-   *  \param rtol doublereal * (rtol)
-   *  \param atol doublereal * (atol)
+   *  \param itol int (itol value)
+   *  \param rtol double * (rtol)
+   *  \param atol double * (atol)
    */
-  void setTol(integer itol, SA::doublereal rtol, SA::doublereal atol);
+  void setTol(int itol, boost::shared_array<double> rtol, boost::shared_array<double> atol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for Hem5)
-   *  \param itol integer (itol value)
+   *  \param itol int (itol value)
    *  \param rtol double (rtol)
    *  \param atol double (atol)
    */
-  void setTol(integer itol, doublereal rtol, doublereal atol);
+  void setTol(int itol, double rtol, double atol);
 
   /** set the maximul number of steps for one call of Hem5OSI
-   *\param nstepmax an integer
+   *\param nstepmax an int
    */
-  void setMaxNstep(integer nstepmax);
+  void setMaxNstep(int nstepmax);
 
   /** set the minimum and maximum step sizes
    * \param maxstepsize double (maximul step size)
    */
-  void setMaxStepSize(doublereal maxstepsize);
+  void setMaxStepSize(double maxstepsize);
 
   /** update _intData
    */
@@ -195,17 +191,17 @@ public:
    */
   void updateData();
 
-  /** fill qWork with a doublereal
-   *  \param sizex integer*, size of x array
-   *  \param x doublereal* x:array of double
+  /** fill qWork with a double
+   *  \param sizex int*, size of x array
+   *  \param x double* x:array of double
    */
-  void fillqWork(integer *sizex, doublereal *x);
+  void fillqWork(int *sizex, double *x);
 
-  /** fill vWork with a doublereal
-   *  \param sizex integer*, size of x array
-   *  \param x doublereal* x:array of double
+  /** fill vWork with a double
+   *  \param sizex int*, size of x array
+   *  \param x double* x:array of double
    */
-  void fillvWork(integer *sizex, doublereal *x);
+  void fillvWork(int *sizex, double *x);
 
   /** compute rhs(t) for all dynamical systems in the set
    */
@@ -217,13 +213,11 @@ public:
 
   unsigned int numberOfConstraints();
 
-  void f(integer *sizeOfX, doublereal *time, doublereal *x, doublereal *xdot);
+  void f(int *sizeOfX, double *time, double *x, double *xdot);
 
-  void g(integer *nEq, doublereal *time, doublereal *x, integer *ng,
-         doublereal *gOut);
+  void g(int *nEq, double *time, double *x, int *ng, double *gOut);
 
-  void jacobianfx(integer *, doublereal *, doublereal *, integer *, integer *,
-                  doublereal *, integer *);
+  void jacobianfx(int *, double *, double *, int *, int *, double *, int *);
 
   /** initialization of the integrator
    */
@@ -233,7 +227,8 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -241,9 +236,9 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -267,23 +262,23 @@ public:
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to OneStepNSProblem
+   * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
-                         OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[Hem5OSI::OSNSP_RHS];
   };
 
   /** print the data to the screen
    */
-  void display() override;
-
-  ACCEPT_STD_VISITORS();
+  void display() const override;
 };
-
-#endif // Hem5OSI_H
+}  // namespace siconos::integrators
+#endif  // Hem5OSI_H

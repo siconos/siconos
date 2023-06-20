@@ -46,6 +46,8 @@ int main (int argc, char *argv[])
 
   int number_of_tests;
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
+
+
 #if defined(TEST_FIRST_ORDER_COLLECTION)
   collection[8].will_fail = 1; /* RFC3D_NSGS ProjectionOnCone, on ./data/rfc3d_sphere_from_grfc3d_dense.dat */
   collection[9].will_fail = 1; /* RFC3D_NSGS ProjectionOnCone, on ./data/rfc3d_sphere_from_grfc3d.dat */
@@ -55,6 +57,8 @@ int main (int argc, char *argv[])
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
   int out = run_test_collection(collection, number_of_tests, rollingFrictionContact_test_function);
+  //int out = 0;
+
   free_test_collection(collection, number_of_tests);
 
 
