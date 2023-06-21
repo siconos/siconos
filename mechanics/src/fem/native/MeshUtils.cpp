@@ -346,7 +346,7 @@ std::string siconos::mechanics::fem::native::prepareWriteDisplacementforPython(s
 
 void  siconos::mechanics::fem::native::writeDisplacementforPython(std::shared_ptr<Mesh>  mesh,
     std::shared_ptr<FiniteElementModel> femodel,
-    std::shared_ptr<SiconosVector> x, std::string filename)
+    std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename)
 {
   FILE * foutput = fopen(filename.c_str(), "a");
   fprintf(foutput, "x.append(np.array([");

@@ -27,16 +27,16 @@
 #include "siconos_debug.h"
 
 
-void siconos::mechanics::fem::NodeFem1d2DR::initialize(Interaction& inter)
+void siconos::mechanics::fem::NodeFem1d2DR::initialize(modeling::Interaction& inter)
 {
   unsigned int qSize = inter.getSizeOfDS();
-  _jachq.reset(new SimpleMatrix(1, qSize));
+  _jachq.reset(new siconos::algebra::SimpleMatrix(1, qSize));
   
 }
 
-void siconos::mechanics::fem::NodeFem1d2DR::computeJachq(const BlockVector& q, BlockVector& z)
+void siconos::mechanics::fem::NodeFem1d2DR::computeJachq(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
 {
-  DEBUG_BEGIN("NodeFem1d2DR::computeJachq(const BlockVector& q, BlockVector& z \n");
+  DEBUG_BEGIN("NodeFem1d2DR::computeJachq(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z \n");
 
   double Nx = _Normal->getValue(0);
   double Ny = _Normal->getValue(1);
@@ -54,14 +54,14 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeJachq(const BlockVector& q, B
     THROW_EXCEPTION("NodeFem1d2DR is not implemented for node/node contact");
   }
   DEBUG_EXPR(_jachq->display(););
-  DEBUG_END("NodeFem1d2DR::computeJachq(const BlockVector& q, BlockVector& z) \n");
+  DEBUG_END("NodeFem1d2DR::computeJachq(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) \n");
 
 }
 
 double siconos::mechanics::fem::NodeFem1d2DR::distance() const
 {
   DEBUG_BEGIN("NodeFem1d2DR::distance(...)\n")
-  SiconosVector dpc(*_Pc2 - *_Pc1);
+  siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(dpc.display(););
@@ -70,12 +70,12 @@ double siconos::mechanics::fem::NodeFem1d2DR::distance() const
 
 }
 
-void siconos::mechanics::fem::NodeFem1d2DR::computeh(const BlockVector& q, BlockVector& z, SiconosVector& y)
+void siconos::mechanics::fem::NodeFem1d2DR::computeh(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z, siconos::algebra::SiconosVector& y)
 {
   DEBUG_BEGIN("NodeFem1d2DR::computeh(...)\n");
 
   LagrangianScleronomousR::computeh(q, z, y);
-  SiconosVector & displacement = *((q.getAllVect())[0]);
+  siconos::algebra::SiconosVector & displacement = *((q.getAllVect())[0]);
   _Pc1->setValue(0, displacement((*_node->dofIndex())[0])+_node->x());
   _Pc1->setValue(1, displacement((*_node->dofIndex())[1])+_node->y());
   y.setValue(0, distance());

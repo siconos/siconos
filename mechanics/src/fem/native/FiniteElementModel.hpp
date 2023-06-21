@@ -27,14 +27,19 @@
 #include <map>
 
 
-#include "SiconosAlgebraTypeDef.hpp"          //for Index
-#include "SimulationTypeDef.hpp"              //for IndexInt
+//#include "SiconosAlgebraTypeDef.hpp"          //for Index
+//#include "SimulationTypeDef.hpp"              //for IndexInt
 #include "BoundaryCondition.hpp"
+#include "SiconosException.hpp"
+#include "SimpleMatrix.hpp"
 
 #include "Mesh.hpp"
 #include "Material.hpp"
 namespace siconos::mechanics::fem::native
 {
+typedef std::vector<std::size_t> Index;
+typedef std::vector<unsigned int> IndexInt;
+
 // a Finite Element node
 struct FENode
 {
@@ -84,7 +89,7 @@ struct FENode
     std::cout << std::endl;
   };
 };
-DEFINE_SPTR(FENode)
+//DEFINE_SPTR(FENode)
 
 
 
@@ -301,7 +306,7 @@ struct FElement
     }
   };
 };
-DEFINE_SPTR(FElement)
+//DEFINE_SPTR(FElement)
 
 // a finite element model
 class FiniteElementModel
@@ -359,44 +364,44 @@ public:
   unsigned int init();
 
   /* Assembly method for elemetary matrix */
-  void AssembleElementaryMatrix(std::shared_ptr<SiconosMatrix> M,
-                                SimpleMatrix& Me, FElement& fe);
+  void AssembleElementaryMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> M,
+                                siconos::algebra::SimpleMatrix& Me, FElement& fe);
 
   /** compute Mass Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeMassMatrix(std::shared_ptr<SiconosMatrix>, std::map<unsigned int, std::shared_ptr<Material> > & mat);
+  void computeMassMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix>, std::map<unsigned int, std::shared_ptr<Material> > & mat);
 
   /** compute elementary Mass Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeElementaryMassMatrix(SimpleMatrix& Me, FElement& fe,  double massDensity);
+  void computeElementaryMassMatrix(siconos::algebra::SimpleMatrix& Me, FElement& fe,  double massDensity);
 
   /** compute Stiffness Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeStiffnessMatrix(std::shared_ptr<SiconosMatrix>,  std::map<unsigned int, std::shared_ptr<Material> > & mat);
+  void computeStiffnessMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix>,  std::map<unsigned int, std::shared_ptr<Material> > & mat);
 
   /** compute elementary Stiffness Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeElementaryStiffnessMatrix(SimpleMatrix& Me, FElement& fe,
-                                        std::shared_ptr<SimpleMatrix> D, double thickness);
+  void computeElementaryStiffnessMatrix(siconos::algebra::SimpleMatrix& Me, FElement& fe,
+                                        std::shared_ptr<siconos::algebra::SimpleMatrix> D, double thickness);
 
   /** compute elementary Stiffness Matrix with a direct method
    * for linear element
    **/
-  void computeElementaryStiffnessMatrix_direct(SimpleMatrix& Me, FElement& fe,
-      std::shared_ptr<SimpleMatrix> D, double thickness);
+  void computeElementaryStiffnessMatrix_direct(siconos::algebra::SimpleMatrix& Me, FElement& fe,
+      std::shared_ptr<siconos::algebra::SimpleMatrix> D, double thickness);
 
 
   /** apply Dirichlet Boundary conditions for a given tag on element. 
    **/
   void applyDirichletBoundaryConditions(int physical_entity_tag, std::shared_ptr<IndexInt> node_dof_index,
-                                        std::shared_ptr<BoundaryCondition> _boundaryCondition);
+                                        std::shared_ptr<siconos::modeling::BoundaryCondition> _boundaryCondition);
   /** apply Neuman Boundary conditions (nodal forces) for a given tag on element. 
    **/
-  void applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces, std::shared_ptr<SiconosVector> forces);
+  void applyNodalForces(int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces, std::shared_ptr<siconos::algebra::SiconosVector> forces);
   /** get tje list of possible contacting nodesfor a given tag on element. 
    **/
   std::shared_ptr< std::list<std::shared_ptr<FENode> > > contactingNodes(int contact_entity_tag);
@@ -405,7 +410,7 @@ public:
   
   void display(bool brief) const;
 };
-DEFINE_SPTR(FiniteElementModel)
+//DEFINE_SPTR(FiniteElementModel)
 
 } // namespace siconos::mechanics::fem::native
 

@@ -22,8 +22,8 @@
 #include "SimpleMatrix.hpp"
 
 siconos::mechanics::fem::CableDS::CableDS(
-    std::shared_ptr<SiconosVector> q0, std::shared_ptr<SiconosVector> velocity0,
-    std::shared_ptr<SiconosMatrix> mass, ExternalForcesFunction fext)
+    std::shared_ptr<siconos::algebra::SiconosVector> q0, std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> mass, ExternalForcesFunction fext)
     : LagrangianDS(q0, velocity0, mass), computefext_{fext}
 {
   // Constructor with initial state and mass.
@@ -47,7 +47,7 @@ siconos::mechanics::fem::CableDS::CableDS(
 
   if (fext) {
     _hasConstantFExt = false; // Indeed, this is the default for SecondOrderDS
-    _fExt = std::make_shared<SiconosVector>(_ndof);
+    _fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
   }
   else
     _hasConstantFExt = true;
@@ -55,17 +55,17 @@ siconos::mechanics::fem::CableDS::CableDS(
   // setFextPtr is to be called later by cable model to set a constant fext.
 
   // _ndof is given by the size of q0 during SecondOrderDS build
-  _forces = std::make_shared<SiconosVector>(_ndof);
+  _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
 
   // We will use _jacobianqForces and _jacobianvForces to save tangent stiffness and damping
   // matrices.
   // Those are attributes of LagrangianDS class.
 
   _jacobianqForces =
-      std::make_shared<SimpleMatrix>(_ndof, _ndof, Siconos::UBLAS_TYPE::SPARSE);
+      std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, siconos::algebra::UblasType::SPARSE);
 
   _jacobianqDotForces =
-      std::make_shared<SimpleMatrix>(_ndof, _ndof, Siconos::UBLAS_TYPE::SPARSE);
+      std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, siconos::algebra::UblasType::SPARSE);
 }
 
 void siconos::mechanics::fem::CableDS::computeFExt(double time)
@@ -78,12 +78,12 @@ void siconos::mechanics::fem::CableDS::computeFExt(double time)
 }
 
 void siconos::mechanics::fem::CableDS::computeForces(double time,
-                                                     std::shared_ptr<SiconosVector> q,
-                                                     std::shared_ptr<SiconosVector> velocity)
+                                                     std::shared_ptr<siconos::algebra::SiconosVector> q,
+                                                     std::shared_ptr<siconos::algebra::SiconosVector> velocity)
 {
   assert(_forces);
   // if (!_forces) {
-  //   _forces = std::make_shared<SiconosVector>(_ndof);
+  //   _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
   // } // --> done during constructor call.
   // else
   _forces->zero();
@@ -118,7 +118,7 @@ void siconos::mechanics::fem::CableDS::computeJacobianvForces(double time)
 
 // Probably not needed since mass will be constant. Called  by the integrator at each time step
 // to override mass operator.
-void siconos::mechanics::fem::CableDS::computeMass(std::shared_ptr<SiconosVector> position)
+void siconos::mechanics::fem::CableDS::computeMass(std::shared_ptr<siconos::algebra::SiconosVector> position)
 {
 
   // _mass = ...

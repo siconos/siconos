@@ -21,13 +21,15 @@
 #include "Material.hpp"
 #include "SiconosMatrix.hpp"
 #include "BoundaryCondition.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "SimpleMatrixFriends.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
+//#include "SiconosAlgebraProd.hpp"
+//#include "SimpleMatrixFriends.hpp"
 
 
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
+#include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
 #include <stdio.h>
@@ -35,7 +37,7 @@
 
 siconos::mechanics::fem::native::FiniteElementLinearTIDS::FiniteElementLinearTIDS(std::shared_ptr<Mesh> mesh,
     std::map<unsigned int, std::shared_ptr<Material> > materials,
-    Siconos::UBLAS_TYPE storageType):
+    siconos::algebra::UblasType storageType):
   LagrangianLinearTIDS::LagrangianLinearTIDS(), _mesh(mesh), _materials(materials), _storageType(storageType)
 {
   DEBUG_BEGIN("FiniteElementLinearTIDS::FiniteElementLinearTIDS(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material\n");
@@ -43,14 +45,14 @@ siconos::mechanics::fem::native::FiniteElementLinearTIDS::FiniteElementLinearTID
   _FEModel.reset(new FiniteElementModel(mesh));
   _ndof = _FEModel->init();
 
-  _q0.reset(new SiconosVector(_ndof,0.0));
-  _velocity0.reset(new SiconosVector(_ndof,0.0));
+  _q0.reset(new siconos::algebra::SiconosVector(_ndof,0.0));
+  _velocity0.reset(new siconos::algebra::SiconosVector(_ndof,0.0));
 
-  LagrangianDS::_init(_q0,_velocity0);
+//  LagrangianDS::_init(_q0,_velocity0);
 
   if(!_mass)
   {
-    _mass.reset(new SimpleMatrix(_ndof, _ndof, _storageType));
+    _mass.reset(new siconos::algebra::SimpleMatrix(_ndof, _ndof, _storageType));
     _mass->setIsSymmetric(true);
     _mass->setIsPositiveDefinite(true);
   }
@@ -58,7 +60,7 @@ siconos::mechanics::fem::native::FiniteElementLinearTIDS::FiniteElementLinearTID
 
   if(!_K)
   {
-    _K.reset(new SimpleMatrix(_ndof, _ndof, _storageType));
+    _K.reset(new siconos::algebra::SimpleMatrix(_ndof, _ndof, _storageType));
     _K->setIsSymmetric(true);
     _K->setIsPositiveDefinite(true);
   }
@@ -78,22 +80,23 @@ void siconos::mechanics::fem::native::FiniteElementLinearTIDS::applyDirichletBou
 
   if(!_boundaryConditions)
   {
-    std::shared_ptr<IndexInt> bdIndex = std::make_shared<IndexInt>(0);
-    std::shared_ptr<SiconosVector> bdPrescribedVelocity = std::make_shared<SiconosVector>(0);
-    _boundaryConditions = std::make_shared<BoundaryCondition>(bdIndex,bdPrescribedVelocity);
+//    std::shared_ptr<IndexInt> bdIndex = std::make_shared<IndexInt>(0);
+    IndexInt&& bdIndex = IndexInt(0);
+    std::shared_ptr<siconos::algebra::SiconosVector> bdPrescribedVelocity = std::make_shared<siconos::algebra::SiconosVector>(0);
+    _boundaryConditions = std::make_shared<siconos::modeling::BoundaryCondition>(std::move(bdIndex),bdPrescribedVelocity);
   }
 
   _FEModel->applyDirichletBoundaryConditions(physical_entity_tag, node_dof_index, _boundaryConditions);
-  _reactionToBoundaryConditions = std::make_shared<SiconosVector>(_boundaryConditions->velocityIndices()->size());
+  _reactionToBoundaryConditions = std::make_shared<siconos::algebra::SiconosVector>(_boundaryConditions->velocityIndices().size());
 
 };
 
-void siconos::mechanics::fem::native::FiniteElementLinearTIDS::applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces)
+void siconos::mechanics::fem::native::FiniteElementLinearTIDS::applyNodalForces(int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces)
 {
 
   if(!_fExt)
   {
-    _fExt =  std::make_shared<SiconosVector>(dimension());
+    _fExt =  std::make_shared<siconos::algebra::SiconosVector>(dimension());
     _fExt->zero();
   }
 
@@ -105,9 +108,9 @@ void siconos::mechanics::fem::native::FiniteElementLinearTIDS::applyNodalForces(
 double siconos::mechanics::fem::native::FiniteElementLinearTIDS::kineticEnergy() const
 {
 
-  SiconosVector * tmp = new SiconosVector(_ndof);
-  SiconosVector& velocity = *(_q[1]);
-  prod(*_mass, velocity, *tmp, true);
+  siconos::algebra::SiconosVector * tmp = new siconos::algebra::SiconosVector(_ndof);
+  siconos::algebra::SiconosVector& velocity = *(_q[1]);
+  siconos::algebra::prod(*_mass, velocity, *tmp, true);
   double kineticEnergy = 0.5*inner_prod(velocity,*tmp);
   return kineticEnergy;
 }
@@ -115,8 +118,8 @@ double siconos::mechanics::fem::native::FiniteElementLinearTIDS::kineticEnergy()
 double siconos::mechanics::fem::native::FiniteElementLinearTIDS::elasticPotentialEnergy() const
 {
 
-  SiconosVector * tmp = new SiconosVector(_ndof);
-  SiconosVector& displacement = *(_q[0]);
+  siconos::algebra::SiconosVector * tmp = new siconos::algebra::SiconosVector(_ndof);
+  siconos::algebra::SiconosVector& displacement = *(_q[0]);
   prod(*_K, displacement, *tmp, true);
   double potentialEnergy = 0.5*inner_prod(displacement,   *tmp);
   return potentialEnergy;

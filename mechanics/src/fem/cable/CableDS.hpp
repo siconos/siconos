@@ -48,17 +48,17 @@ namespace siconos::mechanics::fem {
   Add ref to Charleli's phd report.
 
 */
-class CableDS : public LagrangianDS {
+class CableDS : public modeling::LagrangianDS {
 
 protected:
   // Proto for functions used to compute external forces
-  using ExternalForcesFunction = std::function<void(double, std::shared_ptr<SiconosVector>)>;
+  using ExternalForcesFunction = std::function<void(double, std::shared_ptr<siconos::algebra::SiconosVector>)>;
 
   ExternalForcesFunction computefext_{nullptr};
 
 public:
-  CableDS(std::shared_ptr<SiconosVector> q0, std::shared_ptr<SiconosVector> velocity0,
-          std::shared_ptr<SiconosMatrix> mass, ExternalForcesFunction fext = nullptr);
+  CableDS(std::shared_ptr<siconos::algebra::SiconosVector> q0, std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
+          std::shared_ptr<siconos::algebra::SiconosMatrix> mass, ExternalForcesFunction fext = nullptr);
 
   ~CableDS() noexcept = default;
 
@@ -67,8 +67,8 @@ public:
   // This function will be called by the integrator at each time
   // step to update  \f$ F(v, q, t, z) \f$
   // --> takes into account fInt and fext
-  void computeForces(double time, std::shared_ptr<SiconosVector> q,
-                     std::shared_ptr<SiconosVector> velocity) override;
+  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
+                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
 
   // \f$ \nabla_q F \f$
   void computeJacobianqForces(double time) override;
@@ -78,7 +78,7 @@ public:
 
   // Probably not needed since mass will be constant. Called  by the integrator at each time
   // step to override mass operator.
-  void computeMass(std::shared_ptr<SiconosVector> position) override;
+  void computeMass(std::shared_ptr<siconos::algebra::SiconosVector> position) override;
 
   //
   void computeFExt(double time) override;

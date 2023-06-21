@@ -23,8 +23,9 @@
 
 #include "LagrangianScleronomousR.hpp"
 #include "FiniteElementLinearTIDS.hpp"
+#include "SiconosVector.hpp"
 
-using namespace RELATION;
+//using namespace RELATION;
 /** NodeFem1d2DR
  *
  * This class is an interface for a relation with impact.  It
@@ -36,7 +37,7 @@ using namespace RELATION;
  *
  */
 namespace siconos::mechanics::fem {
-class NodeFem1d2DR : public LagrangianScleronomousR {
+class NodeFem1d2DR : public modeling::LagrangianScleronomousR {
 protected:
 
   //  ACCEPT_SERIALIZATION(NodeFem1d2DR);
@@ -47,19 +48,19 @@ protected:
 
   /* Current Contact Points */
 
-  std::shared_ptr<SiconosVector> _Pc1;
-  std::shared_ptr<SiconosVector> _Pc2;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;
 
   /* Normal vector at contact.
    */
-  std::shared_ptr<SiconosVector> _Normal;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Normal;
 
   /** Set the coordinates of second contact point.  Must only be done
    *  in a computeh() override.
    *
    *  \param npc new coordinates
    */
-  void setpc2(std::shared_ptr<SiconosVector> npc) { _Pc2 = npc; };
+  void setpc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point.
 
@@ -67,7 +68,7 @@ protected:
    *
    *  \param nnc new coordinates
    */
-  void setnc(std::shared_ptr<SiconosVector> nnc) { _Normal = nnc; };
+  void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Normal = nnc; };
 
 
 public:
@@ -77,20 +78,20 @@ public:
   NodeFem1d2DR(std::shared_ptr<native::FENode> node)
     : LagrangianScleronomousR()
     , _node(node)
-    , _Pc1(new SiconosVector(2))
-    , _Pc2(new SiconosVector(2))
-    , _Normal(new SiconosVector(2))
+    , _Pc1(new siconos::algebra::SiconosVector(2))
+    , _Pc2(new siconos::algebra::SiconosVector(2))
+    , _Normal(new siconos::algebra::SiconosVector(2))
   {
   }
   
   /** constructor
    */
   NodeFem1d2DR(std::shared_ptr<native::FENode>  node,
-	       std::shared_ptr<SiconosVector> pc2,
-	       std::shared_ptr<SiconosVector> normal)
+           std::shared_ptr<siconos::algebra::SiconosVector> pc2,
+           std::shared_ptr<siconos::algebra::SiconosVector> normal)
       : LagrangianScleronomousR()
       , _node(node)
-      , _Pc1(new SiconosVector(2))
+      , _Pc1(new siconos::algebra::SiconosVector(2))
       , _Pc2(pc2)
       , _Normal(normal)
   {
@@ -100,7 +101,7 @@ public:
    */
   virtual ~NodeFem1d2DR() noexcept {};
 
-  void initialize(Interaction &inter) override;
+  void initialize(modeling::Interaction &inter) override;
 
   /**
      to compute the output y = h(q,z) of the Relation
@@ -109,8 +110,8 @@ public:
      \param z user defined parameters (optional)
      \param y the resulting vector
   */
-  void computeh(const BlockVector &q, BlockVector &z,
-                SiconosVector &y) override;
+  void computeh(const siconos::algebra::BlockVector &q, siconos::algebra::BlockVector &z,
+                siconos::algebra::SiconosVector &y) override;
 
   /**
      to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
@@ -118,23 +119,23 @@ public:
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector &q, BlockVector &z) override;
+  void computeJachq(const siconos::algebra::BlockVector &q, siconos::algebra::BlockVector &z) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
   inline std::shared_ptr<native::FENode> node() const {return _node;}
-  inline std::shared_ptr<SiconosVector> pc1() const { return _Pc1; }
-  inline std::shared_ptr<SiconosVector> pc2() const { return _Pc2; }
-  inline std::shared_ptr<SiconosVector> normal() const { return _Normal; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1() const { return _Pc1; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return _Pc2; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> normal() const { return _Normal; }
 
 
   /** update the contact points
    * this method is a bit useless if the relation has been constructed with
    * shared pointer
    */
-  void updateContactPoint(std::shared_ptr<SiconosVector> pc2,
-			  std::shared_ptr<SiconosVector> normal)
+  void updateContactPoint(std::shared_ptr<siconos::algebra::SiconosVector> pc2,
+              std::shared_ptr<siconos::algebra::SiconosVector> normal)
   {
     setpc2(pc2);
     setnc(normal);
@@ -142,8 +143,8 @@ public:
   
   /** update the contact points from references
    */
-  void updateContactPoint(SiconosVector& pc2,
-			  SiconosVector& normal)
+  void updateContactPoint(siconos::algebra::SiconosVector& pc2,
+              siconos::algebra::SiconosVector& normal)
   {
     *_Pc2= pc2;
     *_Normal = normal;

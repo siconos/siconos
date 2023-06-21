@@ -42,7 +42,7 @@ std::string prepareWriteDisplacementforPython(std::string basename);
 
 void  writeDisplacementforPython(std::shared_ptr<Mesh>  mesh,
                                  std::shared_ptr<FiniteElementModel> femodel,
-                                 std::shared_ptr<SiconosVector> x, std::string filename);
+                                 std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename);
 
 }
 #endif

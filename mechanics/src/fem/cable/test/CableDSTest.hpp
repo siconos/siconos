@@ -41,9 +41,9 @@ private:
 public:
 
   int ndof{10};
-  std::shared_ptr<SiconosVector> q0{nullptr};
-  std::shared_ptr<SiconosVector> v0{nullptr};
-  std::shared_ptr<SiconosMatrix> mass{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> q0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> v0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> mass{nullptr};
   
   
   void setUp();

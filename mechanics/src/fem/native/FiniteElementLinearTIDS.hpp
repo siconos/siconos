@@ -25,14 +25,14 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "Mesh.hpp"
 #include "FiniteElementModel.hpp"
-#include "SimulationTypeDef.hpp" //for IndexInt
+//#include "SimulationTypeDef.hpp" //for IndexInt
 
 /** Finite Element discretization of elastic solids that inherits from Lagrangian Linear Systems with time invariant coefficients
  * - \f$M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
  */
 namespace siconos::mechanics::fem::native
 {
-class FiniteElementLinearTIDS : public LagrangianLinearTIDS
+class FiniteElementLinearTIDS : public modeling::LagrangianLinearTIDS
 {
 
 protected:
@@ -49,7 +49,7 @@ protected:
   std::shared_ptr<FiniteElementModel> _FEModel;
 
   /* Storage type for the matrices */
-  Siconos::UBLAS_TYPE _storageType;
+  siconos::algebra::UblasType _storageType;
 
   /** default constructor */
   FiniteElementLinearTIDS():LagrangianLinearTIDS() {};
@@ -63,12 +63,12 @@ public:
    */
   FiniteElementLinearTIDS(std::shared_ptr<Mesh> mesh,
                           std::map<unsigned int, std::shared_ptr<Material> > materials,
-                          Siconos::UBLAS_TYPE storageType=Siconos::DENSE);
+                          siconos::algebra::UblasType storageType=siconos::algebra::UblasType::DENSE);
 
   /** destructor */
   ~FiniteElementLinearTIDS() {};
 
-  void setStorageType(Siconos::UBLAS_TYPE type)
+  void setStorageType(siconos::algebra::UblasType type)
   {
     _storageType=type;
   }
@@ -82,7 +82,7 @@ public:
 
   void applyDirichletBoundaryConditions(int physical_entity_tag, std::shared_ptr<IndexInt> node_dof_index);
 
-  void applyNodalForces(int physical_entity_tag, std::shared_ptr<SiconosVector> nodal_forces);
+  void applyNodalForces(int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces);
 
   /** Compute kinetic energy
    */
@@ -93,7 +93,7 @@ public:
 
 
 
-  ACCEPT_STD_VISITORS();
+//  ACCEPT_STD_VISITORS();
 
 };
 

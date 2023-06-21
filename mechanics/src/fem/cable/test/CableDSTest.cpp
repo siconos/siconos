@@ -18,8 +18,12 @@
 
 #include "CableDSTest.hpp"
 
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 #include "SiconosVectorIterator.hpp"
-#include "ioMatrix.hpp"
+#include "SiconosAlgebraTypes.hpp"  // for UblasType
+
+//#include "ioMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)		\
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -30,9 +34,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION(CableDSTest);
 void CableDSTest::setUp()
 {
   ndof = 10;
-  q0 = std::make_shared<SiconosVector>(ndof);
-  v0 = std::make_shared<SiconosVector>(ndof);
-  mass = std::make_shared<SimpleMatrix>(ndof, ndof, Siconos::UBLAS_TYPE::SPARSE);
+  q0 = std::make_shared<siconos::algebra::SiconosVector>(ndof);
+  v0 = std::make_shared<siconos::algebra::SiconosVector>(ndof);
+  mass = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof, siconos::algebra::UblasType::SPARSE);
   // TODO : read a specific reference problem somewhere ...
 }
 
@@ -49,7 +53,7 @@ void CableDSTest::testNoFext()
 
 void CableDSTest::testConstantFext()
 {
-  auto externalForces = std::make_shared<SiconosVector>(ndof);
+  auto externalForces = std::make_shared<siconos::algebra::SiconosVector>(ndof);
   // fill external forces as you want ...
   for (auto& val : *externalForces) {
     val = 12;
@@ -70,7 +74,7 @@ void CableDSTest::testVariableFext()
 
 {
   // A lambda function example, used to compute external forces
-  auto myforces = [](double time, std::shared_ptr<SiconosVector> result) {
+  auto myforces = [](double time, std::shared_ptr<siconos::algebra::SiconosVector> result) {
     assert(result);
     for (auto& v : *result)
       v = cos(time);
