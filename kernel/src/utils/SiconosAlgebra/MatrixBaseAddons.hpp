@@ -1,5 +1,4 @@
 #include <eigen3/Eigen/src/Core/util/Constants.h>
-#include <cassert>
 
 // Setters
 

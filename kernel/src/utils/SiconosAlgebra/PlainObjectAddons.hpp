@@ -1,4 +1,3 @@
-#include <cassert>
 #include <cstring>
 #include <type_traits>
 
