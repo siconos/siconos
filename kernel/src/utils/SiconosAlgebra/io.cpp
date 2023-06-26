@@ -27,6 +27,7 @@
 // #include <boost/numeric/ublas/vector_sparse.hpp>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
