@@ -238,7 +238,7 @@ endif()
 find_package(Eigen3 REQUIRED)
 foreach(comp_ in LISTS ${COMPONENTS})
   if(comp_ STREQUAL "kernel" OR comp_ STREQUAL "control" OR comp_ STREQUAL "io" OR comp_ STREQUAL "mechanics")
-    target_include_directories(${comp_} PUBLIC $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>)
+    target_include_directories(${comp_} SYSTEM PUBLIC $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>)
   endif()
 endforeach()
 
