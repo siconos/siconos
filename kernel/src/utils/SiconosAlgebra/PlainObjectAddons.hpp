@@ -1,6 +1,3 @@
-#include <cstring>
-#include <type_traits>
-
 inline Index size(unsigned int index) const
 {
     if (index == 0)

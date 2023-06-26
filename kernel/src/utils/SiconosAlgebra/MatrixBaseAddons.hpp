@@ -1,5 +1,3 @@
-#include <eigen3/Eigen/src/Core/util/Constants.h>
-
 // Setters
 
 inline void setValue(Index i, Scalar v) {
