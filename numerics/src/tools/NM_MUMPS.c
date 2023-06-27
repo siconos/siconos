@@ -76,8 +76,8 @@ void NM_MUMPS_set_irn_jcn(NumericsMatrix* A)
 
   iWork [2*nz] = (MUMPS_INT) nz;
 
-  NM_MUMPS_id(A)->irn = (MUMPS_INT*)NM_iWork(A, 0, 0);
-  NM_MUMPS_id(A)->jcn = &((MUMPS_INT*)NM_iWork(A, 0, 0))[nz];
+  NM_MUMPS_id(A)->irn = (MUMPS_INT*)NM_iWork(A, (size_t)(2*nz) + 1, sizeof(MUMPS_INT));
+  NM_MUMPS_id(A)->jcn = &((MUMPS_INT*)NM_iWork(A, (size_t)(2*nz) + 1, sizeof(MUMPS_INT)))[nz];
 }
 
 

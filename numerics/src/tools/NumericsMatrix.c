@@ -5824,6 +5824,7 @@ bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B)
 int NM_Cholesky_factorize(NumericsMatrix* Ao)
 {
   DEBUG_BEGIN("int NM_Cholesky_factorize(NumericsMatrix* Ao) \n");
+  verbose=2;
   lapack_int info = 0;
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
   NumericsMatrix* A = Ao->destructible;
@@ -5930,6 +5931,7 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
             NM_MUMPS_set_verbosity(A, verbose);
           }
           /* NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection */
+	  NM_MUMPS_set_icntl(A, 7, 3); // Use scotch */
           /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
         }
 
@@ -6233,6 +6235,7 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
 
 int NM_LDLT_factorize(NumericsMatrix* Ao)
 {
+  /* verbose=2; */
   DEBUG_BEGIN("int NM_LDLT_factorize(NumericsMatrix* Ao) \n");
   lapack_int info = 0;
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
@@ -6388,7 +6391,9 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
           {
             NM_MUMPS_set_verbosity(A, verbose);
           }
-          /* NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection */
+          NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
+	  NM_MUMPS_set_icntl(A, 7, 3); // Use scotch */
+	  NM_MUMPS_set_icntl(A, 14, 10000); // percentage increase in the estimated working space */
           /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
         }
 
