@@ -5824,7 +5824,6 @@ bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B)
 int NM_Cholesky_factorize(NumericsMatrix* Ao)
 {
   DEBUG_BEGIN("int NM_Cholesky_factorize(NumericsMatrix* Ao) \n");
-  verbose=2;
   lapack_int info = 0;
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
   NumericsMatrix* A = Ao->destructible;

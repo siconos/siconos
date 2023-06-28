@@ -734,8 +734,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
   if (!(NM_is_symmetric(problem->M))) {
     printf("#################### SYMMETRIZATION ####################\n");
     NumericsMatrix *MT = NM_transpose(problem->M);
-    problem->M = NM_add(1 / 2., problem->M, 1 / 2., MT);
-    // problem->M = Msym;
+    NumericsMatrix * MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
+    NM_free(problem->M);
+    problem->M = MSym;
     NM_free(MT);
   }
 
