@@ -841,10 +841,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
 
-
-
-
-
   NumericsMatrix *minus_M = NM_create(
 				      M->storageType, M->size0,
 				      M->size1);  // store the matrix -M to build the matrix of the Newton linear system
@@ -862,12 +858,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
     else
       reaction[i] = 0.01;
 
-
   // computation of the global velocity vector: v = M\(H'*r+f)
   for (unsigned int i = 0; i < m; i++) globalVelocity[i] = f[i];
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
-  
-  NM_Cholesky_solve(M, globalVelocity, 1);
+  NM_Cholesky_solve(NM_preserve(M), globalVelocity, 1);
 
   // computation of the velocity u = proj(H*v + w), then move u in the interior of the cone
   /* for (unsigned int  i = 0; i<nd; i++) */
