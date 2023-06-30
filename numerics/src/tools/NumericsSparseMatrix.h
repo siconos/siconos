@@ -62,6 +62,8 @@ extern "C"
    * solver-specific parameters*/
   struct NSM_linear_solver_params
   {
+
+    NumericsMatrix * parent_matrix;
     NSM_linear_solver solver;
     NSM_linear_solver LDLT_solver;
 

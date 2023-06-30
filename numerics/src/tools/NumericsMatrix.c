@@ -3994,6 +3994,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
         {
           printf("NM_LU_factorize: using MUMPS\n");
         }
+	p->parent_matrix= A;
         if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
         {
           /* the mumps instance is initialized (call with job=-1) */
@@ -4149,6 +4150,7 @@ int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
         {
           printf("NM_LU_solve: using MUMPS\n");
         }
+	p->parent_matrix=A;
 
         assert (NM_MUMPS_id(A)->job); /* this means that least a
                                        * factorization has already been
@@ -4269,6 +4271,7 @@ int NM_LU_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
           assert (NM_MUMPS_id(A)->job); /* this means that at least a
                                          * factorization has already been
                                          * done */
+	  p->parent_matrix=A;
 
           DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
@@ -4538,6 +4541,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         printf("NM_gesv: using MUMPS\n");
       }
+      p->parent_matrix=A;
       if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
       {
         /* the mumps instance is initialized (call with job=-1) */
@@ -4922,6 +4926,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
           printf("NM_posv: using MUMPS\n");
         }
       }
+      p->parent_matrix=A;
       /* construction of lower triangular matrix */
       if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
       {
@@ -5912,6 +5917,7 @@ int NM_Cholesky_factorize(NumericsMatrix* Ao)
         {
           printf("NM_Cholesky_factorize: using MUMPS\n");
         }
+	p->parent_matrix=A;
         if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
         {
           /* the mumps instance is initialized (call with job=-1) */
@@ -6058,7 +6064,7 @@ int NM_Cholesky_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
         assert (NM_MUMPS_id(A)->job); /* this means that least a
                                        * factorization has already been
                                        * done */
-
+	p->parent_matrix=A;
         DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
         NM_MUMPS_set_dense_rhs(A, nrhs, b);
@@ -6175,7 +6181,7 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B)
           assert (NM_MUMPS_id(A)->job); /* this means that at least a
                                          * factorization has already been
                                          * done */
-
+	  p->parent_matrix=A;
           DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
           NM_MUMPS_set_sparse_rhs(A, B);
@@ -6373,6 +6379,7 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
         {
           printf("NM_LDLT_factorize: using MUMPS\n");
         }
+	p->parent_matrix=A;
         if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
         {
           /* the mumps instance is initialized (call with job=-1) */
@@ -6392,7 +6399,7 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
           }
           NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
 	  NM_MUMPS_set_icntl(A, 7, 3); // Use scotch */
-	  NM_MUMPS_set_icntl(A, 14, 10000); // percentage increase in the estimated working space */
+	  NM_MUMPS_set_icntl(A, 14, 1000); // percentage increase in the estimated working space */
           /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
         }
 
@@ -6404,9 +6411,12 @@ int NM_LDLT_factorize(NumericsMatrix* Ao)
 
         info = mumps_id->info[0];
 
-        /* MUMPS can return info codes with negative value */
+
+	/* MUMPS can return info codes with negative value */
         if(info)
         {
+	  numerics_warning("NM_LDLT_factorize", " MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+
           if(verbose > 0)
           {
             fprintf(stderr,"NM_LDLT_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
@@ -6538,7 +6548,7 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
         assert (NM_MUMPS_id(A)->job); /* this means that least a
                                        * factorization has already been
                                        * done */
-
+	p->parent_matrix=A;
         DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
         NM_MUMPS_set_dense_rhs(A, nrhs, b);
@@ -6582,6 +6592,10 @@ int NM_LDLT_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
   NM_version_sync(A);
   return info;
 }
+
+
+
+
 
 int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs, double tol, int maxitref, int job )
 {
@@ -6723,4 +6737,115 @@ int NM_LU_refine(NumericsMatrix* A, double *x, double tol, int max_iter, double 
   free(dx); dx = NULL;
   // free(x_origin); x_origin = NULL;
   return iteration;
+}
+int NM_Linear_solver_finalize(NumericsMatrix* Ao)
+{
+
+  lapack_int info = 1;
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_LDLT_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
+
+  if (NM_LDLT_factorized(A))
+  {
+
+    DEBUG_BEGIN("NM_Linear_solver__finalize(NumericsMatrix* A)\n");
+    assert(A->size0 == A->size1);
+
+    switch (A->storageType)
+    {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
+      numerics_printf_verbose(2, "NM_Linear_solver__finalize. " );
+
+      /* Do not know waht to do in that case for the moment */
+      break;
+    }
+
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
+    {
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      //p= NSM_linearSolverParams_free(p);
+      if(p->solver_free_hook)
+	{
+	  (*p->solver_free_hook)(p);
+	  p->solver_free_hook = NULL;
+	}
+/*       switch (p->LDLT_solver) */
+/*       { */
+/*       case NSM_CSPARSE: */
+/*       { */
+/*         numerics_printf_verbose(2,"NM_Linear_solver__finalize. using SuiteSparse" ); */
+/* 	/\* Do not know waht to do in that case for the moment *\/ */
+/*         break; */
+/*       } */
+/* #ifdef WITH_MA57 */
+/*       case NSM_HSL: */
+/*       { */
+/*         LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;	 */
+/*         // Solve. */
+
+/* 	LBL_Finalize(lbl); // MA57 is able to accept multiple rhs but the C wrapper lbl not. */
+/* 	p->linear_solver_data=NULL; */
+/*         break; */
+/*       } */
+/* #endif */
+/* #ifdef WITH_MUMPS */
+/*       case NSM_MUMPS: */
+/*       { */
+/*         if(verbose >= 2) */
+/*         { */
+/*           printf("NM_LDLT_solve: using MUMPS\n"); */
+/*         } */
+
+/*         assert (NM_MUMPS_id(A)->job); /\* this means that least a */
+/*                                        * factorization has already been */
+/*                                        * done *\/ */
+
+/*         DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A); */
+
+/*         NM_MUMPS(A, -2); /\* Finalize *\/ */
+/*         info = mumps_id->info[0]; */
+
+/*         /\* MUMPS can return info codes with negative value *\/ */
+/*         if(info) */
+/*         { */
+/*           if(verbose > 0) */
+/*           { */
+/*             fprintf(stderr,"NM_Linear_solver__finalize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]); */
+/*           } */
+/*         } */
+/*         break; */
+/*       } */
+/* #endif /\* WITH_MUMPS *\/ */
+/*       default: */
+/*       { */
+/*         fprintf(stderr, "NM_Linear_solver__finalize: unknown sparse linearsolver %d\n", p->LDLT_solver); */
+/*         exit(EXIT_FAILURE); */
+/*       } */
+/*       break; */
+/*       } */
+      break;
+    }
+    default:
+      assert (0 && "NM_Linear_solver__finalize unknown storageType");
+    }
+
+
+    /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+       CHECK_RETURN is ok for cs, but not for MUMPS and others */
+    /* some time we cannot find a solution to a linear system, and its fine, for
+     * instance with the minFBLSA. Therefore, we should not check here for
+     * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+    DEBUG_END("NM_Linear_solver__finalizeNumericsMatrix* A)\n");
+  }
+  NM_version_sync(A);
+  return info;
 }
