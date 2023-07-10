@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2023 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,103 +16,65 @@
  * limitations under the License.
  */
 
-/*! \file Mesh.hpp
+/*! \file Material.hpp
 
  */
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
+namespace siconos::mechanics::fem {
+
+/** Tag analysis types */
+enum class AnalysisType2D { plane_strain, plane_stress, axysymmetric };
 
 /** A simple class for material
+
+    Default = steel
  */
-
-
-
-enum ANALYSIS_TYPE_2D
-{
-  PLANE_STRAIN,
-  PLANE_STRESS,
-  AXYSYMMETRIC
-};
-
-
-
-
-class Material
-{
-
-protected:
-  /* serialization hooks */
-  //ACCEPT_SERIALIZATION(Mesh);
-
+class Material {
+ protected:
   /** mass density */
-  double _massDensity;
+  double _massDensity{7850.};
 
   /** Young Modulus */
-  double _elasticYoungModulus;
+  double _elasticYoungModulus{2.1e11};
 
   /** Poison coefficient */
-  double _poissonCoefficient;
+  double _poissonCoefficient{0.3};
 
   /** Analysis type in 2D */
-  ANALYSIS_TYPE_2D _analysisType2D;
+  AnalysisType2D _analysisType2D{AnalysisType2D::plane_strain};
 
   /** thickness in 2D plane stress analysis */
-  double _thickness;
+  double _thickness{1.0};
 
   /** default constructor */
-  Material() {};
+  Material() = default;
 
-public:
-
-  /** constructor
-   */
-  Material(double massDensity, double ElasticYoungModulus,  double poissonCoefficient):
-    _massDensity(massDensity),
-    _elasticYoungModulus(ElasticYoungModulus),
-    _poissonCoefficient(poissonCoefficient),
-    _analysisType2D(PLANE_STRAIN),
-    _thickness(1.0) {};
-
+ public:
+  /** constructor */
+  Material(double massDensity, double ElasticYoungModulus,
+           double poissonCoefficient)
+      : _massDensity(massDensity),
+        _elasticYoungModulus(ElasticYoungModulus),
+        _poissonCoefficient(poissonCoefficient) {}
 
   /** destructor */
-  ~Material() {};
+  ~Material() noexcept = default;
 
-  double massDensity()
-  {
-    return _massDensity;
-  }
+  auto massDensity() { return _massDensity; }
 
-  double elasticYoungModulus()
-  {
-    return _elasticYoungModulus;
-  }
+  auto elasticYoungModulus() { return _elasticYoungModulus; }
 
-  double poissonCoefficient()
-  {
-    return _poissonCoefficient;
-  }
+  auto poissonCoefficient() { return _poissonCoefficient; }
 
-  ANALYSIS_TYPE_2D analysisType2D()
-  {
-    return _analysisType2D;
-  }
+  auto analysisType2D() { return _analysisType2D; }
 
-  double thickness()
-  {
-    return _thickness;
-  }
-
-  /** print the data of the Material
-   */
-  void display(bool brief = true) const;
-
-  //
-  //ACCEPT_STD_VISITORS();
+  auto thickness() { return _thickness; }
 
 };
-
-#endif // MESH_H
+}  // namespace siconos::mechanics::fem
+#endif 

@@ -825,7 +825,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqDotFunction(
 
 double siconos::modeling::LagrangianDS::computeKineticEnergy() {
   DEBUG_BEGIN("NewtonEulerDS::computeKineticEnergy()\n");
-  std::shared_ptr<siconos::algebra::SiconosVector> velo = velocity();
+  auto velo = velocity();
   assert(velo);
   DEBUG_EXPR(velo->display());
 

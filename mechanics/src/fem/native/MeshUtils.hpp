@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2023 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,27 +22,32 @@
 #ifndef MESHUTILS_H
 #define MESHUTILS_H
 
-#include "Mesh.hpp"
-#include "FiniteElementModel.hpp"
-#include <SiconosKernel.hpp>
-#include <string.h>
+#include <memory>
+#include <string>
 
-namespace siconos::mechanics::fem::native
-{
+namespace siconos::algebra {
+class SiconosVector;
+}
 
-Mesh* create2dMesh2x1();
+namespace siconos::mechanics::fem {
 
-Mesh* create2dMeshnxm(int n, int m, double Lx, double Ly);
+class Mesh;
+class FiniteElementModel;
 
-Mesh* createMeshFromGMSH2(std::string gmsh_filename);
+std::shared_ptr<Mesh> create2dMesh2x1();
 
-void  writeMeshforPython(std::shared_ptr<Mesh>  mesh);
+std::shared_ptr<Mesh> create2dMeshnxm(int n, int m, double Lx, double Ly);
+
+std::shared_ptr<Mesh> createMeshFromGMSH2(std::string gmsh_filename);
+
+void writeMeshforPython(std::shared_ptr<Mesh> mesh);
 
 std::string prepareWriteDisplacementforPython(std::string basename);
 
-void  writeDisplacementforPython(std::shared_ptr<Mesh>  mesh,
-                                 std::shared_ptr<FiniteElementModel> femodel,
-                                 std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename);
+void writeDisplacementforPython(std::shared_ptr<Mesh> mesh,
+                                std::shared_ptr<FiniteElementModel> femodel,
+                                std::shared_ptr<siconos::algebra::SiconosVector> x,
+                                std::string filename);
 
-}
+}  // namespace siconos::mechanics::fem
 #endif

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2020 INRIA.
+ * Copyright 2023 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,222 +22,154 @@
 #ifndef MESH_H
 #define MESH_H
 
+// #include <iostream>
+// #include <string>
 #include <vector>
-#include <iostream>
-#include <string>
 
+#include "FETypes.hpp"
+#include <memory>
 
-
-namespace siconos::mechanics::fem::native
-{
-/** a Mesh container
- */
+namespace siconos::mechanics::fem {
 
 class MElement;
-// a Mesh vertex
-struct MVertex
-{
-  /* Vertex Number */
-  size_t _num;
+
+/** a Mesh vertex */
+class MVertex {
+ private:
+  /** Vertex Number */
+  size_t _num = 0;
 
   /* Vextex Coordinate */
-  double _x;
-  double _y;
-  double _z;
+  double _x = 0.;
+  double _y = 0.;
+  double _z = 0.;
 
   /** elements to which the node belongs **/
-  std::vector<MElement *> _elements;
+  std::vector<std::shared_ptr<MElement>> _elements = {};
 
+  // Rule of five
+  MVertex() = delete;
+  MVertex(MVertex &) = delete;
+  MVertex &operator=(const MVertex &) = delete;
+  MVertex(MVertex &&) = delete;
+  MVertex &operator=(MVertex &&) = delete;
 
+ public:
   /* Constructor from data */
-  MVertex(size_t num, double x, double y, double z):_num(num), _x(x), _y(y), _z(z) {};
+  MVertex(size_t num, double x, double y, double z) : _num{num}, _x{x}, _y{y}, _z{z} {};
 
-  double x()
-  {
-    return _x;
-  };
-  double y()
-  {
-    return _y;
-  };
-  double z()
-  {
-    return _z;
-  };
+  ~MVertex() noexcept = default;
 
+  auto x() { return _x; };
+  auto y() { return _y; };
+  auto z() { return _z; };
 
-  size_t num()
-  {
-    return _num;
-  }
+  auto num() { return _num; }
 
+  auto &elements() { return _elements; };
 
-  std::vector<MElement *> & elements()
-  {
-    return _elements;
-  };
-
-  void display()
-  {
-    std::cout << " - Vertex - number: " << _num
-              << " ; (x,y,z): "
-              << _x <<", "
-              << _y <<", "
-              << _z  ;
-    std::cout << std::endl;
-  };
+  void display();
 };
 
-
-// a mesh element
-class MElement
-{
-protected :
-
+/** a mesh element */
+class MElement {
+ protected:
   /** Element number */
-  size_t _num;
+  size_t _num{0};
 
-  /** type (following gmsh convention) */
-  int _type;
+  /** type (following gmsh convention), default = 2, 3-node triangle */
+  FiniteElementType _type{FiniteElementType::T3};
 
   /** vertices **/
-  std::vector<MVertex *> _vertices;
+  std::vector<std::shared_ptr<MVertex>> _vertices = {};
 
   /** tags **/
-  std::vector<int> _tags;
+  std::vector<int> _tags = {};
 
+  /** Rule of five */
+  MElement() = delete;
+  MElement(MElement &) = delete;
+  MElement &operator=(const MElement &) = delete;
+  MElement(MElement &&) = delete;
+  MElement &operator=(MElement &&) = delete;
 
+ public:
+ public:
+  MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>> &vertices,
+           std::vector<int> tags)
+      : _num{num}, _type{type}, _vertices{vertices}, _tags{tags} {};
 
-  /** default constructor */
-  MElement() {};
+  MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>> vertices)
+      : MElement(num, type, vertices, {0}){};
 
-public:
-  MElement(size_t num, int type, std::vector<MVertex *> vertices):
-    _num(num),_type(type),_vertices(vertices)
-  {
-    _tags.push_back(0);
-  };
+  ~MElement() noexcept = default;
 
-  MElement(size_t num, int type, std::vector<MVertex *> vertices, std::vector<int> tags):
-    _num(num),_type(type),_vertices(vertices),_tags(tags) {};
-
-  int type()
-  {
-    return _type;
-  }
-  size_t num()
-  {
-    return _num;
-  }
-  std::vector<MVertex *>& vertices()
-  {
-    return _vertices;
-  }
-  int tags(int n)
-  {
-    return _tags[n];
-  }
-  void display()
-  {
-    std::cout << " - Element - number: " << _num
-              << " ; type: " << _type
-              << " ; vertices: ";
-
-    for(MVertex * v :_vertices)
-    {
-      std::cout << " " << v->_num ;
-    }
-    std::cout << " - Tags: ";
-    for(int  t :_tags)
-    {
-      std::cout << " " << t ;
-    }
-
-    std::cout << std::endl;
-  };
+  auto type() { return _type; }
+  auto num() { return _num; }
+  auto &vertices() { return _vertices; }
+  auto tags(int n) { return _tags[n]; }
+  void display();
 };
 
-
-class Mesh
-{
-
-protected:
-  /* serialization hooks */
-  //ACCEPT_SERIALIZATION(Mesh);
-
+/** a Mesh container */
+class Mesh {
+ protected:
   /** Space dimension */
-  int _dim;
-
-  /** number of nodes */
-  int _numberOfVertices;
-
-  /** number of elements */
-  int _numberOfElements;
+  int _dim = 2;
 
   /** vertices */
-  std::vector<MVertex *> _vertices;
+  std::vector<std::shared_ptr<MVertex>> _vertices = {};
 
   /** elements */
-  std::vector<MElement *> _elements;
+  std::vector<std::shared_ptr<MElement>> _elements = {};
 
   /** Physical entities
-   * This vector enables to link the tags to Physical entities
+      This vector enables the link from tags to Physical entities
    */
-  std::vector< std::tuple<int, std::string>> _physical_entities;
+  std::vector<std::tuple<int, std::string>> _physical_entities = {};
 
+  /** Rule of five */
+  Mesh() = delete;
+  Mesh(Mesh &) = delete;
+  Mesh &operator=(const Mesh &) = delete;
+  Mesh(Mesh &&) = delete;
+  Mesh &operator=(Mesh &&) = delete;
 
-  /** default constructor */
-  Mesh() {};
-
-public:
-  Mesh(int dim, int numberOfNodes, int numberOfElements);
+ public:
+  /** constructor
+      \param dim dimension
+      \param vertices a vector of vertices
+      \param elements a vector of elements
+      \param physical_entities connection between tags and entities
+  */
+  Mesh(int dim, std::vector<std::shared_ptr<MVertex>> vertices,
+       std::vector<std::shared_ptr<MElement>> elements,
+       std::vector<std::tuple<int, std::string>> physical_entities);
 
   /** constructor
-   *  \param dim dimension
+      \param dim dimension
+      \param vertices a vector of vertices
+      \param elements a vector of elements
    */
-  Mesh(int dim,
-       std::vector<MVertex *> vertices,
-       std::vector<MElement *> elements);
-
-  /** constructor
-   *  \param dim dimension
-   */
-  Mesh(int dim,
-       std::vector<MVertex *> vertices,
-       std::vector<MElement *> elements,
-       std::vector< std::tuple<int, std::string>> physical_entities);
+  Mesh(int dim, std::vector<std::shared_ptr<MVertex>> vertices,
+       std::vector<std::shared_ptr<MElement>> elements)
+      : Mesh(dim, vertices, elements, {}){};
+  ;
 
   /** destructor */
-  ~Mesh() {};
+  ~Mesh() noexcept = default;
 
-  int dim()
-  {
-    return _dim;
-  };
+  auto dim() { return _dim; };
 
-  std::vector<MVertex *> & vertices()
-  {
-    return _vertices;
-  }
+  auto &vertices() { return _vertices; }
 
-  std::vector<MElement *> & elements()
-  {
-    return _elements;
-  }
+  auto &elements() { return _elements; }
 
-  std::vector< std::tuple<int, std::string>> physical_entities()
-  {
-    return _physical_entities;
-  }
-  /** print the data of the Mesh
-   */
+  auto physical_entities() { return _physical_entities; }
+
+  /** print the data of the Mesh */
   void display(bool brief = true) const;
-
-  //
-  //ACCEPT_STD_VISITORS();
-
 };
 
-
-} // namespace siconos::mechanics::fem::native
-#endif // MESH_H
+}  // namespace siconos::mechanics::fem
+#endif  // MESH_H
