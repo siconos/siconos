@@ -31,7 +31,7 @@ set_and_check(siconos_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos")
 set(installed_targets "@installed_targets@")
 
 # Path (relative to siconos install) to cmake extra tools
-set(SICONOS_CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/@ConfigPackageLocation@)
+set(SICONOS_CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/@SiconosConfigPackageLocation@)
 list(APPEND CMAKE_MODULE_PATH ${SICONOS_CMAKE_MODULE_PATH})
 
 
@@ -63,9 +63,7 @@ set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
 if(@WITH_FCLIB@)
-  #if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
-    set(FCLIB_ROOT @FCLIB_ROOT@)
-  #else()
+  set(FCLIB_ROOT @FCLIB_ROOT@)
   if(${CMAKE_VERSION} VERSION_LESS "3.13.0")
     set(FCLIB_DIR @FCLIB_DIR@)
   endif()
