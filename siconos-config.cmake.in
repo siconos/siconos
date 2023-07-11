@@ -75,6 +75,13 @@ if(@WITH_FCLIB@)
   find_dependency(FCLIB 3.0.0 CONFIG REQUIRED)
 endif()
 
+if(@SICONOS_HAS_JSON@)
+  set(nlohmann_json_ROOT @nlohmann_json_DIR@)
+  
+  # Look for nlohmann/json  in default path nlohmann_json_ROOT 
+  find_dependency(nlohmann_json @nlohmann_json_VERSION@ CONFIG REQUIRED)
+endif()
+
 # include siconos project targets
 include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
 

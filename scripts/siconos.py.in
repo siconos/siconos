@@ -651,6 +651,7 @@ def generate_cmakelists(args):
     result += 'set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)\n'
 
     # find siconos package and components
+
     result += 'set(@PROJECT_NAME@_DIR {})\n'.format(siconos_package_dir)
     result += 'find_package(@PROJECT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@'
     result += '.@PATCH_VERSION@ CONFIG REQUIRED)\n'

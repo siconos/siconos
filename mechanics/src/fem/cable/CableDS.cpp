@@ -166,8 +166,8 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
       }
     }
   }
-  // dernier point, Ã  voir si on mets dans une seule boucle avec des if
-  // dernier Ã©lÃ©ment - premier Ã©lÃ©ment
+  // dernier point, à voir si on mets dans une seule boucle avec des if
+  // dernier élément - premier élément
   double n_e = 0;
   for (size_t j = 0; j < 3; j++) {
     double d = ((*q)(nb_elem + j) - (*q)(j));

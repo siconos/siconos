@@ -78,7 +78,6 @@ endif()
 # No docs for externals.
 set(${COMPONENT}_EXCLUDE_DOXY ${${COMPONENT}_DIRS})
 
-
 # TEST TEST TEST
 # ------ include interface ------
 # What is needed at build time
