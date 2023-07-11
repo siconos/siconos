@@ -15,17 +15,6 @@ debian-bookworm:docker-build:
     IMAGE_NAME: debian-bookworm
   extends: .docker-build
   
-ubuntu20.4-light:docker-build:
-  variables:
-    IMAGE_NAME: ubuntu20.04-light
-  extends: .docker-build
-
-ubuntu20.4:docker-build:
-  variables:
-    IMAGE_NAME: ubuntu20.04
-  extends: .docker-build
-  stage: docker-build-layer2
-  needs: ["ubuntu20.4-light:docker-build"]
 
 opensuse-leap-15.0:docker-build:
   variables:
@@ -46,6 +35,12 @@ ubuntu22.04:docker-build:
   variables:
     IMAGE_NAME: ubuntu22.04
   extends: .docker-build
+
+ubuntu23.04:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu23.04
+  extends: .docker-build
+
 
 # A specific image, that will be used to install siconos,
 # get examples and provide some notebooks to
@@ -105,6 +100,7 @@ ubuntu20.04-fclib:configure:
    extends:
     - .siconos-configure
     - .full-ci-rules
+   when: manual
 
 ubuntu20.04-fclib:build:
   variables:
@@ -115,6 +111,7 @@ ubuntu20.04-fclib:build:
     - .siconos-build
     - .full-ci-rules
   needs: ["ubuntu20.04-fclib:configure"]
+  when: manual
 
 ubuntu20.04-fclib:test:
     variables:
@@ -125,6 +122,7 @@ ubuntu20.04-fclib:test:
     extends:
       - .siconos-test
       - .full-ci-rules
+    when: manual
 
 ubuntu22.04:configure:
    variables:
@@ -178,6 +176,31 @@ ubuntu22.04-debug:test:
     extends:
       - .siconos-test
 
+ubuntu23.04:configure:
+   variables:
+     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu23.04
+     cdash_submit: 1
+     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+   extends:
+    - .siconos-configure
+
+ubuntu23.04:build:
+  variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu23.04
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+  extends:
+    - .siconos-build
+  needs: ["ubuntu23.04:configure"]
+
+ubuntu23.04:test:
+    variables:
+      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu23.04
+      cdash_submit: 1
+      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+    needs: ["ubuntu23.04:build"]
+    extends:
+      - .siconos-test
 
 fedora-33:configure:
   variables:
