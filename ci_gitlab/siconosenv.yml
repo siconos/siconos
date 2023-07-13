@@ -25,5 +25,5 @@ dependencies:
   - flake8
   - autopep8
   - pyhull
-
+  - cmake
 
