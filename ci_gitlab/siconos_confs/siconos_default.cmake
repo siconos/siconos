@@ -56,6 +56,7 @@ option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
 option(WITH_RENDERER "Install OCC renderer. Default = OFF" OFF)
 option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library. Default = ON" ON)
 option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
+option(WITH_JSON "Use a JSON library in c++" OFF)
 
 # -- Installation setup ---
 # Set python install mode:

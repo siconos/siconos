@@ -43,7 +43,8 @@ function(begin_tests SOURCE_DIR)
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.xml
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.DAT
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.INI
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.ref)
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.ref
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.json)
 
   # Copy data files from source to binary
   foreach(_F IN LISTS _DATA_FILES)

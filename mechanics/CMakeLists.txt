@@ -35,6 +35,8 @@ set(${COMPONENT}_DIRS
   src/collision/native
   src/collision/native/bodies
   src/joints
+  src/fem/native
+  src/fem/cable
   )
 
 # Then, optional parts ---

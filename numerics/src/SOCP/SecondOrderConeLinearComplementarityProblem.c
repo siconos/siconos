@@ -18,7 +18,9 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"
 #include <assert.h>            // for assert
 #include <stdlib.h>            // for free, malloc, NULL, exit, EXIT_FAILURE
-#include <sys/errno.h>         // for errno
+#include <errno.h>         // for errno
+
+
 #include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

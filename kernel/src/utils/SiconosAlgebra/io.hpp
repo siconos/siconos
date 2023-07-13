@@ -25,6 +25,7 @@
 #define __ioVector__
 
 #include <iostream>
+#include <nlohmann/json.hpp>  // json in/out
 #include <vector>
 // #include <string>
 
@@ -146,6 +147,10 @@ double compareRefFile(const SimpleMatrix &data, std::string filename, double eps
                       const std::ios_base::openmode mode = std::ios_base::in,
                       bool verbose = true);
 
+/** \returns a pointer to a SiconosVector, built from json input
+    \param jin json input
+*/
+std::shared_ptr<SiconosVector> readVectorFromJson(const nlohmann::json &jin);
 }  // namespace io
 }  // namespace siconos::algebra
 #endif

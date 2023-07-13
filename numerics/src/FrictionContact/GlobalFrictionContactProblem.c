@@ -19,7 +19,7 @@
 #include "FrictionContactProblem.h"
 #include <assert.h>            // for assert
 #include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
-#include <sys/errno.h>         // for errno
+#include <errno.h> // for errno
 #include <string.h>            // for memcpy
 #include "SiconosBlas.h"         // for cblas_dscal, cblas_dcopy
 #include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear

@@ -8,3 +8,4 @@ h5py
 pybind11
 vtk
 packaging
+pyhull

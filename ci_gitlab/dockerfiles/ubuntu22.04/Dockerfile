@@ -25,12 +25,13 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 	valgrind \
 	vim \
 	bzip2 \
-	wget
+	wget \
+	nlohmann-json3-dev
 WORKDIR /home
 ENV CI_PROJECT_DIR /home
 COPY ci_gitlab/dockerfiles/install_boost.sh  /home/
 RUN sh /home/install_boost.sh
-RUN mv /home/deps/boost_1_81_0/boost /usr/local/include
+RUN mv $CI_PROJECT_DIR/deps/boost_1_81_0/boost /usr/local/include
 COPY ci_gitlab/dockerfiles/requirements.txt /home
 COPY ci_gitlab/dockerfiles/requirements4doc.txt /home
 RUN python3 -m venv /home/pysicoenv
