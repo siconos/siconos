@@ -15,21 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*! \file SiconosFEM.h
+Include header files required for the FEM toolbox in Siconos
+*/
 
-#include "FENode.hpp"
-
-#include <iostream>
-
+#include  "MeshUtils.hpp"
 #include "Mesh.hpp"
+#include "FENode.hpp"
+#include "FiniteElementModel.hpp"
+#include "Material.hpp"
+#include "FiniteElementLinearTIDS.hpp"
+#include "NodeFem1d2DR.hpp"
+#include "NodeFem2d2DR.hpp"
 
-double siconos::mechanics::fem::FENode::x() { return _mVertex->x(); }
-
-double siconos::mechanics::fem::FENode::y() { return _mVertex->y(); }
-
-double siconos::mechanics::fem::FENode::z() { return _mVertex->z(); }
-
-void siconos::mechanics::fem::FENode::display() {
-  std::cout << "     - Fe Node - number: " << _num
-            << "               - ndof:" << _dofIndex->size()
-            << "               - dofIndex: " << _dofIndex->front() << ":" << _dofIndex->back() << "\n";
-};

@@ -94,7 +94,6 @@ class MElement {
   MElement &operator=(MElement &&) = delete;
 
  public:
- public:
   MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>> &vertices,
            std::vector<int> tags)
       : _num{num}, _type{type}, _vertices{vertices}, _tags{tags} {};
@@ -124,7 +123,8 @@ class Mesh {
   std::vector<std::shared_ptr<MElement>> _elements = {};
 
   /** Physical entities
-      This vector enables the link from tags to Physical entities
+      Connection between the tag and the name of the corresponding physical entity
+      (like Dirichlet BC, Applied force ...)
    */
   std::vector<std::tuple<int, std::string>> _physical_entities = {};
 
@@ -167,7 +167,11 @@ class Mesh {
 
   auto physical_entities() { return _physical_entities; }
 
-  /** print the data of the Mesh */
+  /** print the data of the Mesh
+
+      \param brief true to toggle verbose mode off, default = true
+   */
+  
   void display(bool brief = true) const;
 };
 

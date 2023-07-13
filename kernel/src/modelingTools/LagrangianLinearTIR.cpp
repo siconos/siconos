@@ -59,31 +59,38 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 void siconos::modeling::LagrangianLinearTIR::checkSize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto& DSlink = inter.linkToDSVariables();
-  if (!(_jachq) || _jachq->size(1) != inter.getSizeOfDS() || _jachq->size(0) != sizeY)
+  if (!(_jachq) || _jachq->size(1) != inter.getSizeOfDS() ||
+      _jachq->size(0) != sizeY)
     THROW_EXCEPTION(
-        "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes between H "
+        "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes "
+        "between H "
         "matrix and the interaction.");
 
   if ((_e) && _e->size() != sizeY)
     THROW_EXCEPTION(
-        "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes between e "
+        "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes "
+        "between e "
         "vector and the dimension of the interaction.");
 
-  auto sizeZ = DSlink[LagrangianR::z]->size();
-  if ((_F) && (_F->size(0) != sizeZ || _F->size(1) != sizeZ))
-    THROW_EXCEPTION(
+  if (_F) {
+    auto sizeZ = DSlink[LagrangianR::z]->size();
+    if (_F->size(0) != sizeZ || _F->size(1) != sizeZ)
+	THROW_EXCEPTION(
         "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes between F "
         "matrix and the interaction.");
+  }
 }
-void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interaction& inter,
-                                                           unsigned int derivativeNumber) {
+void siconos::modeling::LagrangianLinearTIR::computeOutput(
+    double time, Interaction& inter, unsigned int derivativeNumber) {
   DEBUG_BEGIN(
-      "siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interaction& inter, "
+      "siconos::modeling::LagrangianLinearTIR::computeOutput(double time, "
+      "Interaction& inter, "
       "unsigned int derivativeNumber)\n");
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
-  siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
+  siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber],
+                         y);
 
   if (derivativeNumber == 0) {
     if (_e) y += *_e;
@@ -95,13 +102,16 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interact
     siconos::algebra::prod(*_jachlambda, lambda, y, false);
   }
   DEBUG_END(
-      "siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interaction& inter, "
+      "siconos::modeling::LagrangianLinearTIR::computeOutput(double time, "
+      "Interaction& inter, "
       "unsigned int derivativeNumber)\n");
 }
-void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interaction& inter,
+void siconos::modeling::LagrangianLinearTIR::computeInput(double time,
+                                                          Interaction& inter,
                                                           unsigned int level) {
   DEBUG_BEGIN(
-      "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interaction& "
+      "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, "
+      "Interaction& "
       "inter, unsigned int level)\n")
   // get lambda of the concerned interaction
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
@@ -110,9 +120,11 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(_jachq->display(););
   DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level],
+                         false);
   DEBUG_END(
-      "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interaction& "
+      "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, "
+      "Interaction& "
       "inter, unsigned int level)\n")
 }
 

@@ -254,7 +254,6 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
   in.close();
 
   return std::make_shared<Mesh>(m, vertices, elements, physical_entities);
-  ;
 }
 
 void siconos::mechanics::fem::writeMeshforPython(std::shared_ptr<Mesh> mesh) {

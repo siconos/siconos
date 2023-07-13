@@ -35,6 +35,7 @@ set(${COMPONENT}_DIRS
   src/collision/native
   src/collision/native/bodies
   src/joints
+  src/fem
   src/fem/native
   src/fem/cable
   )
