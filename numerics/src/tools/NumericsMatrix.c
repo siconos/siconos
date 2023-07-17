@@ -4585,10 +4585,10 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           fprintf(stderr,"NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
         }
       }
-      if(keep != NM_KEEP_FACTORS)
-      {
-        NM_MUMPS(A, -2);
-      }
+      /* if(keep != NM_KEEP_FACTORS) */
+      /* { */
+      /*   NM_MUMPS(A, -2); */
+      /* } */
       if(!p->solver_free_hook)
       {
         p->solver_free_hook = &NM_MUMPS_free;
