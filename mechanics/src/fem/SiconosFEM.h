@@ -25,6 +25,7 @@ Include header files required for the FEM toolbox in Siconos
 #include "FiniteElementModel.hpp"
 #include "Material.hpp"
 #include "FiniteElementLinearTIDS.hpp"
+#include "SolidLinearTIDS.hpp"
 #include "NodeFem1d2DR.hpp"
 #include "NodeFem2d2DR.hpp"
 

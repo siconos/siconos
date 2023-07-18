@@ -30,7 +30,7 @@
  * v = \dot u
  * \dot \sigma = B v \f$
  */
-namespace siconos::mechanics::fem::native
+namespace siconos::mechanics::fem
 {
 class SolidLinearTIDS : public FiniteElementLinearTIDS
 {
@@ -76,5 +76,5 @@ public:
 
 };
 
-} // namespace siconos::mechanics::fem::native
+} // namespace siconos::mechanics::fem
 #endif // SOLIDLAGRANGIANTIDS_H

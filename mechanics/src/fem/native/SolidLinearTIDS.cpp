@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <iostream>
 
-//siconos::mechanics::fem::native::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> mesh,
+//siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> mesh,
 //    std::map<unsigned int, std::shared_ptr<Material> > materials,
 //    siconos::algebra::UblasType storageType):
 //  FiniteElementLinearTIDS::FiniteElementLinearTIDS(mesh, materials, storageType)
@@ -70,7 +70,7 @@
 
 //}
 
-siconos::mechanics::fem::native::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> mesh,
+siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> mesh,
     std::map<unsigned int, std::shared_ptr<Material> > materials,
     siconos::algebra::UblasType storageType) : FiniteElementLinearTIDS::FiniteElementLinearTIDS(mesh,materials,storageType)
 {
@@ -178,7 +178,7 @@ siconos::mechanics::fem::native::SolidLinearTIDS::SolidLinearTIDS(std::shared_pt
 
 
 
-double siconos::mechanics::fem::native::SolidLinearTIDS::kineticEnergy() const
+double siconos::mechanics::fem::SolidLinearTIDS::kineticEnergy() const
 {
 
   siconos::algebra::SiconosVector * tmp = new siconos::algebra::SiconosVector(_ndof);
@@ -188,7 +188,7 @@ double siconos::mechanics::fem::native::SolidLinearTIDS::kineticEnergy() const
   return kineticEnergy;
 }
 
-double siconos::mechanics::fem::native::SolidLinearTIDS::elasticPotentialEnergy() const
+double siconos::mechanics::fem::SolidLinearTIDS::elasticPotentialEnergy() const
 {
 
   siconos::algebra::SiconosVector * tmp = new siconos::algebra::SiconosVector(_ndof);
@@ -198,7 +198,7 @@ double siconos::mechanics::fem::native::SolidLinearTIDS::elasticPotentialEnergy(
   return potentialEnergy;
   
 }
-void siconos::mechanics::fem::native::SolidLinearTIDS::display(bool brief) const
+void siconos::mechanics::fem::SolidLinearTIDS::display(bool brief) const
 {
   std::cout << "===== SolidLinearTIDS display ===== " <<std::endl;
   LagrangianLinearTIDS::display();
