@@ -17,10 +17,13 @@
 */
 
 #include "SolidLinearTIDS.hpp"
+
 #include "FiniteElementModel.hpp"
-#include "Material.hpp"
-#include "SiconosMatrix.hpp"
-#include "BoundaryCondition.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
+#include "SiconosVector.hpp"
+#include "Mesh.hpp"
+#include "SiconosVectorOp.hpp"
+#include "SimpleMatrix.hpp"
 //#include "SiconosAlgebraProd.hpp"
 //#include "SimpleMatrixFriends.hpp"
 
@@ -69,13 +72,12 @@
 
 siconos::mechanics::fem::native::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> mesh,
     std::map<unsigned int, std::shared_ptr<Material> > materials,
-    siconos::algebra::UblasType storageType):
-  FiniteElementLinearTIDS::FiniteElementLinearTIDS()
+    siconos::algebra::UblasType storageType) : FiniteElementLinearTIDS::FiniteElementLinearTIDS(mesh,materials,storageType)
 {
     DEBUG_BEGIN("FiniteElementLinearTIDS::FiniteElementLinearTIDS(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material\n");
-    _mesh = mesh;
-    _materials = materials;
-    _storageType = storageType;
+//    _mesh = mesh;
+//    _materials = materials;
+//    _storageType = storageType;
     std::cout << "In SolidLinearTIDS constructor !" << std::endl;
     _FEModel.reset(new FiniteElementModel(mesh));
     _ndof = _FEModel->init();
@@ -90,78 +92,80 @@ siconos::mechanics::fem::native::SolidLinearTIDS::SolidLinearTIDS(std::shared_pt
 //  LagrangianDS::_init(_q0,_velocity0);
 
 
-   // Mass matrix:
-    if(!_M)
-    {
-      _M.reset(new siconos::algebra::SimpleMatrix(_ndof, _ndof));
-    }
-  std::cout << "M resized !" << std::endl;
-  _FEModel->computeMassMatrix(_M, _materials);
-  std::cout << "M computed !" << std::endl;
+//   // Mass matrix:
+//    if(!_M)
+//    {
+//      _M.reset(new siconos::algebra::SimpleMatrix(_ndof, _ndof));
+//    }
+//  std::cout << "M resized !" << std::endl;
+//  _FEModel->computeMassMatrix(_M, _materials);
+//  std::cout << "M computed !" << std::endl;
   if(!_S)
   {
-    _S.reset(new siconos::algebra::SimpleMatrix(dimStress*nElements,dimStress*nElements));
+      _S = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress*nElements,dimStress*nElements,
+                                                               _storageType);
   }
   _FEModel->computeSMatrix(_S,_materials);
   std::cout << "S computed in constructor!" << std::endl;
   _S->display();
-  if(!_mass)
-  {
-      _mass.reset(new siconos::algebra::SimpleMatrix(dimState, dimState, _storageType));
-      _mass->setIsSymmetric(true);
-      _mass->setIsPositiveDefinite(true);
-  }
-  std::cout << "Setting mass matrix..." << std::endl;
-  for (int i=0;i<_ndof;i++){
-      for (int j=0;j<_ndof;j++){
-          _mass->setValue(i, j, _M->getValue(i,j));
-      }
-  }
-  for (int i=0;i<_ndof;i++){
-      _mass->setValue(i+_ndof, i+_ndof, 1.0);
-  }
-  for (int i=0;i<dimStress*nElements;i++){
-        for (int j=0;j<dimStress*nElements;j++){
-      _mass->setValue(2*_ndof + i, 2*_ndof + j, _S->getValue(i,j));
-        }
-  }
-  std::cout << "mass matrix set !" << std::endl;
+//  if(!_mass)
+//  {
+//      _mass.reset(new siconos::algebra::SimpleMatrix(dimState, dimState, _storageType));
+//      _mass->setIsSymmetric(true);
+//      _mass->setIsPositiveDefinite(true);
+//  }
+//  std::cout << "Setting mass matrix..." << std::endl;
+//  for (int i=0;i<_ndof;i++){
+//      for (int j=0;j<_ndof;j++){
+//          _mass->setValue(i, j, _M->getValue(i,j));
+//      }
+//  }
+//  for (int i=0;i<_ndof;i++){
+//      _mass->setValue(i+_ndof, i+_ndof, 1.0);
+//  }
+//  for (int i=0;i<dimStress*nElements;i++){
+//        for (int j=0;j<dimStress*nElements;j++){
+//      _mass->setValue(2*_ndof + i, 2*_ndof + j, _S->getValue(i,j));
+//        }
+//  }
+//  std::cout << "mass matrix set !" << std::endl;
 
     if(!_B)
     {
-      _B.reset(new siconos::algebra::SimpleMatrix(nElements*dimStress, _ndof, _storageType));
+        _B = std::make_shared<siconos::algebra::SimpleMatrix>(nElements*dimStress, _ndof,
+                                                                 _storageType);
     }
     _FEModel->computeBMatrix(_B, _materials);
 
-    if(!_C)
-    {
-        _C.reset(new siconos::algebra::SimpleMatrix(dimState, dimState, _storageType));
-    }
-    std::cout << "C matrix computation..." << std::endl;
-  for (int i=0;i<_ndof;i++){
-      for (int j=0;j<3*nElements;j++){
-          _C->setValue(i, j+2*_ndof, _B->getValue(j,i));
-      }
-  }
-  for (int i=0;i<3*nElements;i++){
-      for (int j=0;j<_ndof;j++){
-          _C->setValue(i+2*_ndof, j, -_B->getValue(i,j));
-      }
-  }
-  for (int i=0;i<_ndof;i++){
-      _C->setValue(i+_ndof, i, 1.0);
-  }
-  std::cout << "C matrix set !" << std::endl;
+//    if(!_C)
+//    {
+//        _C.reset(new siconos::algebra::SimpleMatrix(dimState, dimState, _storageType));
+//    }
+//    std::cout << "C matrix computation..." << std::endl;
+//  for (int i=0;i<_ndof;i++){
+//      for (int j=0;j<3*nElements;j++){
+//          _C->setValue(i, j+2*_ndof, _B->getValue(j,i));
+//      }
+//  }
+//  for (int i=0;i<3*nElements;i++){
+//      for (int j=0;j<_ndof;j++){
+//          _C->setValue(i+2*_ndof, j, -_B->getValue(i,j));
+//      }
+//  }
+//  for (int i=0;i<_ndof;i++){
+//      _C->setValue(i+_ndof, i, 1.0);
+//  }
+//  std::cout << "C matrix set !" << std::endl;
 
-  std::cout << "display of K in constructor:" << std::endl;
+//  std::cout << "display of K in constructor:" << std::endl;
 
 
-  if(!_K)
-  {
-      _K.reset(new siconos::algebra::SimpleMatrix(dimState, dimState, _storageType));
-  }
-  _K->zero();
-  _K->display();
+//  if(!_K)
+//  {
+//      _K.reset(new siconos::algebra::SimpleMatrix(dimState, dimState, _storageType));
+//  }
+//  _K->zero();
+//  _K->display();
   // if(!_C)
   // {
   //   _C.reset(new SimpleMatrix(_ndof, _ndof, _storageType));
@@ -172,34 +176,6 @@ siconos::mechanics::fem::native::SolidLinearTIDS::SolidLinearTIDS(std::shared_pt
 
 }
 
-void siconos::mechanics::fem::native::SolidLinearTIDS::applyDirichletBoundaryConditions(int physical_entity_tag, std::shared_ptr<IndexInt> node_dof_index)
-{
-
-  if(!_boundaryConditions)
-  {
-//    std::shared_ptr<IndexInt> bdIndex = std::make_shared<IndexInt>(0);
-    IndexInt&& bdIndex = IndexInt(0);
-    std::shared_ptr<siconos::algebra::SiconosVector> bdPrescribedVelocity = std::make_shared<siconos::algebra::SiconosVector>(0);
-    _boundaryConditions = std::make_shared<modeling::BoundaryCondition>(std::move(bdIndex),bdPrescribedVelocity);
-  }
-
-  _FEModel->applyDirichletBoundaryConditions(physical_entity_tag, node_dof_index, _boundaryConditions);
-  _reactionToBoundaryConditions = std::make_shared<siconos::algebra::SiconosVector>(_boundaryConditions->velocityIndices().size());
-
-};
-
-void siconos::mechanics::fem::native::SolidLinearTIDS::applyNodalForces(int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces)
-{
-
-  if(!_fExt)
-  {
-    _fExt =  std::make_shared<siconos::algebra::SiconosVector>(dimension());
-    _fExt->zero();
-  }
-
-  _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, _fExt);
-
-};
 
 
 double siconos::mechanics::fem::native::SolidLinearTIDS::kineticEnergy() const

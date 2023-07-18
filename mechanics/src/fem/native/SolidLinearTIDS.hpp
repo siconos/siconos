@@ -38,18 +38,15 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS
 protected:
   /* serialization hooks */
   ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
-  using siconos::mechanics::fem::native::FiniteElementLinearTIDS::_mesh;
-  using siconos::mechanics::fem::native::FiniteElementLinearTIDS::_materials;
-  using siconos::mechanics::fem::native::FiniteElementLinearTIDS::_storageType;
+  using FiniteElementLinearTIDS::_mesh;
+  using FiniteElementLinearTIDS::_materials;
+  using FiniteElementLinearTIDS::_storageType;
   /** M Matrix */
   std::shared_ptr<siconos::algebra::SimpleMatrix> _M;
   /** Elasticity Matrix */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _S;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _S;
   /** B matrix from FEM */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _B;
-//std::shared_ptr<Mesh> _mesh;
-  /** default constructor */
-  SolidLinearTIDS():FiniteElementLinearTIDS() {};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _B;
 
 
 public:
@@ -64,23 +61,8 @@ public:
 
 
   /** destructor */
-  ~SolidLinearTIDS() {};
+  ~SolidLinearTIDS() noexcept = default;
 
-  void setStorageType(siconos::algebra::UblasType type)
-  {
-    _storageType=type;
-  }
-
-
-  std::shared_ptr<FiniteElementModel> FEModel()
-  {
-    return _FEModel;
-  };
-
-
-  void applyDirichletBoundaryConditions(int physical_entity_tag, std::shared_ptr<IndexInt> node_dof_index);
-
-  void applyNodalForces(int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces);
 
   /** Compute kinetic energy
    */

@@ -108,6 +108,13 @@ class FiniteElementModel {
   void AssembleElementaryMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> M,
                                 siconos::algebra::SimpleMatrix& Me, FElement& fe);
 
+  /* Assembly method specific for elementary fem B matrix */
+  void AssembleElementary_B_Matrix(std::shared_ptr<siconos::algebra::SiconosMatrix> M,
+                                     siconos::algebra::SimpleMatrix& Be, FElement& fe, int elemCnt);
+
+  void AssembleElementary_S_Matrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
+                              siconos::algebra::SimpleMatrix& Se, FElement& fe, int elem_cnt);
+
   /** compute Mass Matrix
    * should be computeMass of LagrangianDS ?
    **/
@@ -139,6 +146,14 @@ class FiniteElementModel {
   void computeElementaryStiffnessMatrix_direct(
       siconos::algebra::SimpleMatrix& Me, FElement& fe,
       std::shared_ptr<siconos::algebra::SimpleMatrix> D, double thickness);
+
+  void computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& Be);
+
+  void computeBMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+    std::map<unsigned int, 	std::shared_ptr<Material> > & mat);
+
+  void computeSMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
+    std::map<unsigned int, 	std::shared_ptr<Material> > & mat);
 
   /** apply Dirichlet Boundary conditions for a given tag on element.
    **/
