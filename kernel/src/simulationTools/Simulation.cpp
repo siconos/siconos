@@ -399,17 +399,20 @@ void Simulation::initialize()
   // 2 - Initialize index sets for OSIs
   initializeIndexSets();
 
-  // 3 - allow the InteractionManager to add/remove any interactions it wants
+  // 3 - Compute a first initial step if it is different the previous state
+  computeInitialStateOfTheStep();
+
+  // 4 - allow the InteractionManager to add/remove any interactions it wants
   updateWorldFromDS();
   updateInteractions();
 
-  // 4 - initialize new ds and interactions
+  // 5 - initialize new ds and interactions
   initializeNSDSChangelog();
 
-  // 5 - updateOutput
+  // 6 - updateOutput
   updateOutput();
 
-  // 6 - Initialize OneStepNSProblem(s)
+  // 7 - Initialize OneStepNSProblem(s)
   DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
 
   //Initialize OneStepNSProblem(s). Depends on the type of simulation.
@@ -661,12 +664,12 @@ void Simulation::updateAllInput()
   OSIIterator itOSI;
 
   //nonSmoothDynamicalSystem()->resetNonSmoothPart();
-  
+
   // 1 - compute input (lambda -> r)
   if(!_allNSProblems->empty())
   {
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->resetAllNonSmoothParts(); 
+      (*itOSI)->resetAllNonSmoothParts();
 
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
       (*itOSI)->updateInput(nextTime());
@@ -681,12 +684,12 @@ void Simulation::updateInput(unsigned int level)
   OSIIterator itOSI;
 
   //nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
-  
+
   // 1 - compute input (lambda -> r)
   if(!_allNSProblems->empty())
   {
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->resetNonSmoothPart(level); 
+      (*itOSI)->resetNonSmoothPart(level);
 
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
 	    (*itOSI)->updateInput(nextTime(),level);

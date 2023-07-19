@@ -2257,7 +2257,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:
             self.print_verbose('[warning] output_contact_work is only available with bullet backend for the moment')
             self.print_verbose('          to remove this message set output_contact_info options to False')
-            
+
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
 
@@ -2322,7 +2322,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         d['start_run_iteration_hook']='not serialized'        # fix it
         d['before_next_step_iteration_hook']='not serialized'          # fix it
         d['end_run_iteration_hook']='not serialized'          # fix it
-        
+
         if d['set_external_forces'] is not None:
             try :
                 d['set_external_forces']= d['set_external_forces'].__name__ + '(name serialized)'
@@ -2398,10 +2398,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     def explode_Newton_solve(self, with_timer):
         s = self._simulation
+
+
+        # 1 - s.initialize:
         #self.log(s.initialize, with_timer)()
         self.log(s.initializeOSIAssociations, with_timer)()
         self.log(s.initializeIndexSets, with_timer)()
-
+        self.log(s.computeInitialStateOfTheStep, with_timer)()
         self.log(s.updateWorldFromDS, with_timer)()
         self.log(s.updateInteractions, with_timer)()
         self.log(s.initializeNSDSChangelog, with_timer)()
@@ -2409,8 +2412,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.initOSNS, with_timer)()
 
         self.log(s.firstInitialize, with_timer)()
+
+        # 2  advanceToEvent:
         if not s.skipResetLambdas():
             self.log(s.resetLambdas, with_timer)()
+
+        # 2.1   newtonSolve:
         # Again the access to s._newtonTolerance generates a segfault due to director
         #newtonTolerance = s.newtonTolerance()
         newtonMaxIteration = s.newtonMaxIteration()
@@ -2425,17 +2432,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         #self.log(s.initializeNewtonLoop, with_timer)()
         if s.newtonOptions() == sk.SICONOS_TS_NONLINEAR :
-            self.log(s.computeInitialNewtonState, with_timer)()
+            self.log(s.updateDSPlugins, with_timer)(s.nextTime())
             self.log(s.computeResidu, with_timer)()
-            self.log(s.updateWorldFromDS, with_timer)()
-            self.log(s.updateInteractions, with_timer)()
-            self.log(s.initializeNSDSChangelog, with_timer)()
-            self.log(s.updateOutput, with_timer)()
-            self.log(s.initOSNS, with_timer)()
-            self.log(s.updateAllInput, with_timer)()
-
-        self.log(s.updateDSPlugins, with_timer)(s.nextTime())
-        self.log(s.computeResidu, with_timer)()
 
         # missing computeResiduY
         # self.log(s.computeResiduY, with_timer)()

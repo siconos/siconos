@@ -32,9 +32,9 @@
 /**
    Description of the simulation process (integrators, time
    discretisation and so on).
-   
+
    This is an abstract class.
-   
+
    The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.
 */
 
@@ -273,9 +273,9 @@ public:
   /** associate an OSI with a DS */
   void associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
 
-  /** 
+  /**
       get a pointer to indexSets[i]
-      
+
       \param i number of the required index set
       \return a graph of interactions
    */
@@ -302,13 +302,13 @@ public:
 
   /**
      get a OneStep nonsmooth problem of the simulation, identify with its number.
-     
+
      \param id number of the required osnspb
      \return a pointer to OneStepNSProblem
   */
   SP::OneStepNSProblem oneStepNSProblem(int id);
 
-  /** 
+  /**
       add a OneStepNSProblem in the Simulation
 
       \param osns the OneStepNSProblem to insert
@@ -358,7 +358,7 @@ public:
 
   /**
      set printStat value: if true, print solver stats.
-     
+
      \param newVal true to activate stats
   */
   inline void setPrintStat(const bool& newVal)
@@ -372,8 +372,9 @@ public:
   {
     return _printStat;
   };
+  virtual void computeInitialStateOfTheStep(){};
 
-  /** 
+  /**
       update all index sets of the topology, using current y and lambda values of Interactions
    */
   void updateIndexSets();
@@ -423,7 +424,7 @@ public:
    *  \param level lambda order used to compute input
    */
   virtual void updateInput(unsigned int level);
-  
+
   /** update all input terms
    */
   virtual void updateAllInput();
@@ -487,7 +488,7 @@ public:
 
   /**
      Set the relative convergence tolerance
-     
+
      \param v tolerance value
   */
   inline void setRelativeConvergenceTol(double v)
@@ -529,9 +530,9 @@ public:
   */
   SP::SiconosVector lambda(unsigned int level = 0, unsigned int coor=0 );
 
-  /** 
+  /**
       return output y[level](coor) for all the interactions
-      
+
       \param level y min order to be computed
       \param coor the coordinate of interest
       \return a SP::SiconosVector that contains the concatenated value

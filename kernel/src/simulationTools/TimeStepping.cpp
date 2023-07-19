@@ -502,15 +502,19 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
   }
 }
 
-void TimeStepping::computeInitialNewtonState()
+void TimeStepping::computeInitialStateOfTheStep()
 {
-  DEBUG_BEGIN("TimeStepping::computeInitialNewtonState()\n");
+  DEBUG_BEGIN("TimeStepping::computeInitialStateOfTheStep()\n");
+  if(_newtonOptions == SICONOS_TS_NONLINEAR || _newtonOptions == SICONOS_TS_NONLINEAR_FULL )
+  {
   for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     {
       (*it)->computeInitialNewtonState();
     }
-  DEBUG_END("SimulationTimeStepping::computeInitialNewtonState()\n");
+  }
+  DEBUG_END("SimulationTimeStepping::computeInitialStateOfTheStep()\n");
 }
+
 
 void TimeStepping::initializeNewtonSolve()
 {
@@ -518,68 +522,12 @@ void TimeStepping::initializeNewtonSolve()
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
-  if(_newtonOptions == SICONOS_TS_NONLINEAR)
-  {
-    //  Compute the initial state for the Newton loop
-    computeInitialNewtonState();
-    computeResidu(); // we compute two times the residu ?
 
+  updateDSPlugins(tkp1); // is it useful since the integrator update the plugin computeResidu?
 
-    // for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
-    // {
-    //   (*it)->computeInitialNewtonState();
-    //   (*it)->computeResidu();
-    // }
+  computeResidu(); // Is is mandatory for SICONOS_TS_LINEAR ? 
 
-    // Predictive contact -- update initial contacts after updating DS positions
-    // for the Newton loop
-    // allow the InteractionManager to add/remove any interactions it wants
-    updateWorldFromDS();
-    updateInteractions();
-
-    // Changes in updateInteractions may require initialization
-    initializeNSDSChangelog();
-
-    updateOutput();
-
-    DEBUG_PRINT("(re)Initialize OneStepNSProblem(s)\n");
-    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
-    // Warning FP : must be done in any case, even if the interactions set
-    // is empty.
-    initOSNS();
-
-
-    updateAllInput(); //??
-
-  }
-  // else  if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT) || isLinear)
-  // {
-  //   // Nothing to do in the linear case since everything has been already done in Simulation::initialize
-  // }
-
-
-  // SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-  // if(indexSet0->size()>0)
-  // {
-  //   for(OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-  //   {
-  //     (*itOSI)->updateOutput(nextTime());
-  //     (*itOSI)->updateInput(nextTime());
-  //   }
-  // }
-
-
-  updateDSPlugins(tkp1);
-
-  // SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
-  // for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
-  // {
-  //   dsGraph->bundle(*vi)->updatePlugins(tkp1);
-  // }
-
-  computeResidu();
-  // for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
-  //   (*it)->computeResidu();
+  updateAllInput(); //??
 
   if(_computeResiduY)
   {
@@ -604,12 +552,11 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   bool isLinear  = _nsds->isLinear();
 
 
-  // 1 - initializeNewtonSolve();
-  //  computeInitialNewtonState();
-  //  computeResidu();
-
+  // 1 - initialize Newton Solve ;
   initializeNewtonSolve();
 
+
+  // 2 - start
   if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
   {
@@ -642,7 +589,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
   }
 
-  else if(_newtonOptions == SICONOS_TS_NONLINEAR)
+  else if(_newtonOptions == SICONOS_TS_NONLINEAR || _newtonOptions == SICONOS_TS_NONLINEAR_FULL)
   {
     //  while((!_isNewtonConverge)&&(_newtonNbIterations < maxStep)&&(!info))
     //_isNewtonConverge = newtonCheckConvergence(criterion);
@@ -689,21 +636,30 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       // --
       if(!_isNewtonConverge && _newtonNbIterations < maxStep)
       {
-        // if you want to update the interactions (for instance updating index_set 0 with new interactions )
-	// within the Newton Loop, you can uncomment this line below.
-        // For stability reasons, we keep fix the interactions in the loop
-        // for a good Newton loop, we must have access the Hessian of constraints.
-        // updateInteractions();
-        // initializeNSDSChangelog();
 
+        // if you want to update the interactions (for instance updating index_set 0 with new interactions )
+	// within the Newton Loop, you can choose SICONOS_TS_NONLINEAR_FULL
+        // For stability reasons, we keep fix the interactions in the loop for SICONOS_TS_NONLINEAR
+        // for a good Newton loop, we must have access the Hessian of constraints.
+	if( _newtonOptions == SICONOS_TS_NONLINEAR_FULL)
+	{
+	  updateInteractions();
+	  initializeNSDSChangelog();
+	}
         updateOutput();
+	if( _newtonOptions == SICONOS_TS_NONLINEAR_FULL)
+	{
+	  initOSNS();
+	}
       }
       _isNewtonConverge = newtonCheckConvergence(criterion);
 
       displayNewtonConvergenceInTheLoop();
     } // End of the Newton Loop
+
     if (!_skip_last_updateOutput)
       updateOutput();
+
     _newtonCumulativeNbIterations += _newtonNbIterations;
 
     displayNewtonConvergenceAtTheEnd(info, maxStep);
@@ -812,7 +768,7 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
   // else: depend on solver
   if(info != 0 and  _warningNonsmoothSolver)
   {
-    
+
     std::cout << "[kernel] TimeStepping::DefaultCheckSolverOutput:" << std::endl;
     std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
     //       std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;
