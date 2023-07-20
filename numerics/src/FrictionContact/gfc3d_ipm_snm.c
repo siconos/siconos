@@ -464,10 +464,10 @@ static float randomFloat(float min, float max) {
 /* --------------------------- Interior-point method implementation ------------------------------ */
 /*
  * Implementation contains the following functions:
- *  - gfc3d_IPM_init - initialize solver (allocate memory)
- *  - gfc3d_IPM_free - deallocate memory
- *  - gfc3d_IPM_setDefaultSolverOptions - setup default solver parameters
- *  - gfc3d_IPM - optimization method
+ *  - gfc3d_IPM_SNM_init - initialize solver (allocate memory)
+ *  - gfc3d_IPM_SNM_free - deallocate memory
+ *  - gfc3d_IPM_SNM_setDefaultSolverOptions - setup default solver parameters
+ *  - gfc3d_IPM_SNM - optimization method
  */
 void gfc3d_IPM_SNM_init(GlobalFrictionContactProblem* problem, SolverOptions* options)
 {
@@ -700,7 +700,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   int internal_allocation=0;
   if(!options->dWork || (options->dWorkSize != (size_t)(m + nd + nd)))
   {
-    gfc3d_IPM_init(problem, options);
+    gfc3d_IPM_SNM_init(problem, options);
     internal_allocation = 1;
   }
 
@@ -1029,6 +1029,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   double tmp_barr_param = 0.;
   double max_uor_2mu = 0., tmp_uor_2mu = 0.;
   int findKappa = 1;
+  double old_diff_fixp = 0.;
 
 
   ComputeErrorGlobalPtr computeError = NULL;
@@ -1055,7 +1056,7 @@ while(hasNotConverged != 0 && findKappa)
   // Reset params
   iteration = 0;
   hasNotConverged = 1;
-  pinfeas = dinfeas = complem = udotr = projerr = diff_fixp = totalresidual = 1e300;
+  pinfeas = dinfeas = complem = udotr = projerr = diff_fixp = totalresidual = old_diff_fixp = 1e300;
   alpha_primal = alpha_dual = 1.;
   barr_param = 10.;
   // barr_param = 1e-5;
@@ -1076,6 +1077,7 @@ while(hasNotConverged != 0 && findKappa)
     diff_fixp += (s[i/d] - cblas_dnrm2(2, velocity+i+1, 1))*(s[i/d] - cblas_dnrm2(2, velocity+i+1, 1));
   }
   diff_fixp = sqrt(diff_fixp);
+  old_diff_fixp = diff_fixp;
   JA_prod(velocity, reaction, nd, n, complemConstraint);
   for (int k = 0; k < nd; complemConstraint[k] -= 2*barr_param, k+=d);
   // complem = complemResidualNorm(velocity, reaction, nd, n);
@@ -2148,7 +2150,7 @@ while(hasNotConverged != 0 && findKappa)
     // kappa_eps = 2*n;
     // scale = 100;
     // if (totalresidual_mu <= kappa_eps*barr_param)
-    if (totalresidual_mu <= 10*barr_param)
+    if (totalresidual_mu <= 10*barr_param && diff_fixp < old_diff_fixp)
     {
       barr_param *= kappa_mu;
       // printf("abs(ub'd_ub - |ub|*|d_ub|) = %e\n", check_sub);
@@ -2284,7 +2286,7 @@ while(hasNotConverged != 0 && findKappa)
 
   if(internal_allocation)
   {
-    gfc3d_IPM_free(problem,options);
+    gfc3d_IPM_SNM_free(problem,options);
   }
 
   if(H_tilde) H_tilde = NM_free(H_tilde);
@@ -2356,7 +2358,7 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 300;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;

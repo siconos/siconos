@@ -22,12 +22,12 @@
 const char ** data_collection()
 {
 
-  int n_data_1=150;
+  int n_data_1=1091;
 
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
 
-  int listprob[7] = {1, 0, 0, 0, 0, 0, 1};
+  int listprob[7] = {1, 0, 0, 0, 0, 0, 0};
   // int listprob[7] = {1, 1, 1, 1, 1, 1, 1};
   /* 0: BoxStacks      #28  problems */   // kappa_mu = 0.1; kappa_eps = n;      // kappa_mu = 0.5 then 0.98 (res<1e-4); kappa_eps = n;
   /* 1: Capsules       #200 problems */
@@ -41,33 +41,33 @@ const char ** data_collection()
   if (listprob[0]==1)
   {
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0035-31-0.hdf5";     // u = 0
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0049-31-0.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0068-52-1.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-62-2.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-90-12.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-10.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-11.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-9.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0099-77-4.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-84-7.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-88-8.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0120-69-3.hdf5"; // u != 0
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0121-69-1.hdf5"; // u != 0
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-73-2.hdf5"; // u != 0
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-82-5.hdf5"; // u != 0
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0132-74-3.hdf5"; // u != 0
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0207-114-3.hdf5"; // u != 0
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-466-9.hdf5";   // semi not converge  // kappa_mu = [0.2,0.6] then kappa_mu = [0.98,0.99]; kappa_eps = n;
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-33.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-34.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-35.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-15.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-19.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-20.hdf5";  // semi not converge // kappa_mu = 0.5 then kappa_mu = [0.7,0.99]; kappa_eps = n;
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-28.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-29.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-556-16.hdf5";  // semi not converge // kappa_mu = [0.4,0.5] then kappa_mu = [0.95,0.99] best = 0.98; kappa_eps = n;
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-557-13.hdf5";  // semi not converge // kappa_mu = [0.1,0.5], best = 0.3 then kappa_mu = 0.99; kappa_eps = n;
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0049-31-0.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0068-52-1.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-62-2.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-90-12.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-10.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-11.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-9.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0099-77-4.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-84-7.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-88-8.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0120-69-3.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0121-69-1.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-73-2.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-82-5.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0132-74-3.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0207-114-3.hdf5"; // u != 0
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-466-9.hdf5";   // semi not converge  // kappa_mu = [0.2,0.6] then kappa_mu = [0.98,0.99]; kappa_eps = n;
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-33.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-34.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-35.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-15.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-19.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-20.hdf5";  // semi not converge // kappa_mu = 0.5 then kappa_mu = [0.7,0.99]; kappa_eps = n;
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-28.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-29.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-556-16.hdf5";  // semi not converge // kappa_mu = [0.4,0.5] then kappa_mu = [0.95,0.99] best = 0.98; kappa_eps = n;
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-557-13.hdf5";  // semi not converge // kappa_mu = [0.1,0.5], best = 0.3 then kappa_mu = 0.99; kappa_eps = n;
   }
 
   if (listprob[1]==1)
