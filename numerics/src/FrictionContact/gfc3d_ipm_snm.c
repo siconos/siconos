@@ -204,9 +204,11 @@ static void printDataProbMatlabFile(NumericsMatrix * M, double * f, NumericsMatr
    n = number of contact points
    m = number of degrees of freedom
 */
+
 static void printIteresProbMatlabFile(int iteration, double * v, double * u, double * r, double * s, double * dv, double * du, double * dr, double * ds, int d, int n, int m, FILE * file)
 // static void printIteresProbMatlabFile(int iteration, double pinfeas, double dinfeas, double udotr, double smub, int d, int n, int m, FILE * file)
 {
+
   fprintf(file,"v(%3i,:) = [",iteration+1);
   for(int i = 0; i < m; i++)
   {
@@ -811,7 +813,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   double barr_param_a, e;
   double norm_f = cblas_dnrm2(m, f, 1);
   double norm_w = cblas_dnrm2(nd, w, 1);
-printf("\n\n OK 004 \n\n");
 
   double *velocity_inv = (double*)calloc(nd,sizeof(double));
   double *d_globalVelocity = (double*)calloc(m,sizeof(double));
@@ -831,7 +832,6 @@ printf("\n\n OK 004 \n\n");
   double *r_plus_dr = data->tmp_vault_nd[5];
   double *vr_prod_sub_iden = data->tmp_vault_nd[6];
   double *dvdr_jprod = data->tmp_vault_nd[7];
-printf("\n\n OK 005a \n\n");
 
   //double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
   NumericsMatrix* r_Qp = NULL;                                                // matrix Qp
@@ -983,24 +983,29 @@ printf("\n\n OK 005a \n\n");
   }
 
   strToken = strtok ( strToken, "." );
-  for(int i=0; i<strlen(strToken); i++)
-  {
-    if(strToken[i] == '-') strToken[i] = '_';
-  }
+  // for(int i=0; i<strlen(strToken); i++)
+  // {
+  //   if(strToken[i] == '-') strToken[i] = '_';
+  // }
 
   char matlab_name[100], probName[100];
 
   // int count=0; for (int i = 13; problem_name[i] != '.'; i++) {probName[count] = problem_name[i]; count++;} probName[count] = '\0';
   // sprintf(matlab_name, "%s.m",probName);
 
-  sprintf(matlab_name, "%s.m",strToken);
+  // sprintf(matlab_name, "%s.m",strToken);
+  sprintf(matlab_name, "iterates.m");
 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
   {
     // iterates = fopen("iterates.m", "w");
-    iterates = fopen(matlab_name, "w");
-    printDataProbMatlabFile(M, f, H, w, d, n, m, problem->mu, iterates);
+    // remove(matlab_name);
+    iterates = fopen(matlab_name, "a+");
+    fprintf(iterates,"%% data = struct;\n");
+    fprintf(iterates,"data(end+1).name = \"%s\";\n", strToken);
+    fprintf(iterates,"data(end).val = [\n");
+    // printDataProbMatlabFile(M, f, H, w, d, n, m, problem->mu, iterates);
   }
 
   // ComputeErrorGlobalPtr computeError = NULL;
@@ -1962,8 +1967,8 @@ while(hasNotConverged != 0 && findKappa)
     }
 
 
-    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
-      printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, s, d_globalVelocity, d_velocity, d_reaction, d_s, d, n, m, iterates);
+    // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
+    //   printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, s, d_globalVelocity, d_velocity, d_reaction, d_s, d, n, m, iterates);
       // printIteresProbMatlabFile(iteration, pinfeas, dinfeas, udotr, diff_fixp, d, n, m, iterates);
 
 
@@ -2085,8 +2090,15 @@ while(hasNotConverged != 0 && findKappa)
     totalresidual = fmax(fmax(fmax(fmax(pinfeas, dinfeas),diff_fixp),2.*max_uor_2mu),4.*barr_param);
     totalresidual_mu = fmax(fmax(fmax(pinfeas, dinfeas),udotr_mu),diff_fixp);
 
-    // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
-    //   printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, s, d_globalVelocity, d_velocity, d_reaction, d_s, d, n, m, iterates);
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
+      // printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, s, d_globalVelocity, d_velocity, d_reaction, d_s, d, n, m, iterates);
+      fprintf(iterates,"%d %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e %.1e;\n",
+            iteration, pinfeas, dinfeas, diff_fixp, udotr_mu, 2.*max_uor_2mu, 4.*barr_param, udotr, projerr, barr_param, alpha_primal,
+            fabs(d_globalVelocity[cblas_idamax(m, d_globalVelocity, 1)]),
+            fabs(d_velocity[cblas_idamax(nd, d_velocity, 1)]),
+            fabs(d_reaction[cblas_idamax(nd, d_reaction, 1)]),
+            fabs(d_s[cblas_idamax(n, d_s, 1)]),
+            LS_norm_p, LS_norm_d, LS_norm_c, LS_norm_f);
 
 
     numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e |   %.1e  | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
@@ -2105,8 +2117,8 @@ while(hasNotConverged != 0 && findKappa)
       // numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
       //                         iteration, fws, pinfeas, dinfeas, diff_fixp, udotr_mu, udotr, complem, projerr, barr_param);
 
-      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
-        printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, s, d_globalVelocity, d_velocity, d_reaction, d_s, d, n, m, iterates);
+      // if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
+      //   printIteresProbMatlabFile(iteration, globalVelocity, velocity, reaction, s, d_globalVelocity, d_velocity, d_reaction, d_s, d, n, m, iterates);
         // printIteresProbMatlabFile(iteration, pinfeas, dinfeas, udotr, diff_fixp, d, n, m, iterates);
 
       double unitur;
@@ -2289,7 +2301,10 @@ while(hasNotConverged != 0 && findKappa)
 
 
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
+  {
+    fprintf(iterates, "];\n\n");
     fclose(iterates);
+  }
 
   //  fclose(dfile);
   if (r_rhs) free(r_rhs);
@@ -2337,7 +2352,7 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
 
   //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
