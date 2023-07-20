@@ -238,7 +238,7 @@ if(WITH_MUMPS)
   else()
     find_package(MUMPS REQUIRED COMPONENTS SEQ)
   endif()
-  target_link_libraries(numerics PRIVATE MUMPS::MUMPS)
+  target_link_libraries(numerics PUBLIC MUMPS::MUMPS)
 endif()
 
 if(WITH_OPENSSL)
