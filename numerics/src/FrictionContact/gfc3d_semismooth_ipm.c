@@ -1073,7 +1073,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     gfc3d_IPM_init(problem, options);
     internal_allocation = 1;
   }
-
+printf("\n\n OK 001 \n\n");
   Gfc3d_IPM_init_data * data = (Gfc3d_IPM_init_data *)options->solverData;
   NumericsMatrix *P_mu = data->P_mu->mat;
   NumericsMatrix *P_mu_inv = data->P_mu->inv_mat;
@@ -1104,7 +1104,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   double *w_ori = (double*)calloc(nd, sizeof(double));
   NV_copy(w, nd, w_ori);
-
+printf("\n\n OK 002 \n\n");
   //cs_print(NM_triplet(H),0);
   //printf("#################### NORM(w) = %g    NORM(f) = %g\n", NV_norm_2(w, nd), NV_norm_2(f,m));
 
@@ -1139,7 +1139,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = f[i];
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
   NM_Cholesky_solve(M, globalVelocity, 1);
-
+printf("\n\n OK 003 \n\n");
   // computation of the velocity u = proj(H*v + w), then move u in the interior of the cone
   /* for (unsigned int  i = 0; i<nd; i++) */
   /*   velocity[i] = w[i]; */
@@ -1192,7 +1192,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double barr_param_a, e;
   double norm_f = cblas_dnrm2(m, f, 1);
   double norm_w = cblas_dnrm2(nd, w, 1);
-
+printf("\n\n OK 004 \n\n");
 
   double *velocity_inv = (double*)calloc(nd,sizeof(double));
   double *d_globalVelocity = (double*)calloc(m,sizeof(double));
@@ -1212,7 +1212,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double *r_plus_dr = data->tmp_vault_nd[5];
   double *vr_prod_sub_iden = data->tmp_vault_nd[6];
   double *dvdr_jprod = data->tmp_vault_nd[7];
-
+printf("\n\n OK 005a \n\n");
 
   //double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
   NumericsMatrix* r_Qp = NULL;                                                // matrix Qp
@@ -1248,15 +1248,19 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double LS_norm_d = 0.; // dual feaqsibility
   double LS_norm_c = 0.; // complementarity
   double LS_norm_f = 0.; // fixed point
-
+  NM_display(M);
+  printf("\n\nM->matrix2->origin = %d\n\n", M->matrix2->origin);
+  NM_display(minus_M);
+printf("\n\n OK 005b \n\n");
   /* Create the matrix -M to build the matrix of the reduced linear system */
   NM_copy(M, minus_M);
+  printf("\n\n OK 005c \n\n");
   NM_scal(-1.0, minus_M);
-
+printf("\n\n OK 006 \n\n");
   NumericsMatrix *J = NULL, *J_dense = NULL;
 
   long J_nzmax;
-
+printf("\n\n OK 007 \n\n");
   size_t H_nzmax = NM_nnz(H);
   size_t M_nzmax = NM_nnz(M);
 

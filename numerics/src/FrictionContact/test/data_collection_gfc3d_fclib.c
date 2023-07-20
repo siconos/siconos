@@ -29,7 +29,7 @@ const char ** data_collection()
 
   int listprob[7] = {1, 0, 0, 0, 0, 0, 0};
   // int listprob[7] = {1, 1, 1, 1, 1, 1, 1};
-  /* 0: BoxStacks      #28  problems */   // kappa_mu = 0.1; kappa_eps = n;
+  /* 0: BoxStacks      #28  problems */   // kappa_mu = 0.1; kappa_eps = n;      // kappa_mu = 0.5 then 0.98 (res<1e-4); kappa_eps = n;
   /* 1: Capsules       #200 problems */
   /* 2: KaplasTower    #240 problems */
   /* 3: PrimitiveSoup  #200 problems */
@@ -41,33 +41,33 @@ const char ** data_collection()
   if (listprob[0]==1)
   {
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0035-31-0.hdf5";     // u = 0
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0049-31-0.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0068-52-1.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-62-2.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-90-12.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-10.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-11.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-9.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0099-77-4.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-84-7.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-88-8.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0120-69-3.hdf5"; // u != 0
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0121-69-1.hdf5"; // u != 0
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-73-2.hdf5"; // u != 0
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-82-5.hdf5"; // u != 0
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0132-74-3.hdf5"; // u != 0
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0207-114-3.hdf5"; // u != 0
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-466-9.hdf5";   // semi not converge  // kappa_mu = [0.2,0.6] then kappa_mu = [0.98,0.99]; kappa_eps = n;
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-33.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-34.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-35.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-15.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-19.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-20.hdf5";  // semi not converge // kappa_mu = 0.5 then kappa_mu = [0.7,0.99]; kappa_eps = n;
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-28.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-29.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-556-16.hdf5";  // semi not converge // kappa_mu = [0.4,0.5] then kappa_mu = [0.95,0.99] best = 0.98; kappa_eps = n;
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-557-13.hdf5";  // semi not converge // kappa_mu = [0.1,0.5], best = 0.3 then kappa_mu = 0.99; kappa_eps = n;
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0049-31-0.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0068-52-1.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-62-2.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0093-90-12.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-10.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-11.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0094-90-9.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0099-77-4.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-84-7.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0102-88-8.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0120-69-3.hdf5"; // u != 0
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0121-69-1.hdf5"; // u != 0
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-73-2.hdf5"; // u != 0
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0122-82-5.hdf5"; // u != 0
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0132-74-3.hdf5"; // u != 0
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i0207-114-3.hdf5"; // u != 0
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-466-9.hdf5";   // semi not converge  // kappa_mu = [0.2,0.6] then kappa_mu = [0.98,0.99]; kappa_eps = n;
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-33.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-34.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-550-35.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-15.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-19.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-20.hdf5";  // semi not converge // kappa_mu = 0.5 then kappa_mu = [0.7,0.99]; kappa_eps = n;
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-28.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-551-29.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-556-16.hdf5";  // semi not converge // kappa_mu = [0.4,0.5] then kappa_mu = [0.95,0.99] best = 0.98; kappa_eps = n;
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/Box_Stacks-i1000-557-13.hdf5";  // semi not converge // kappa_mu = [0.1,0.5], best = 0.3 then kappa_mu = 0.99; kappa_eps = n;
   }
 
   if (listprob[1]==1)
@@ -76,7 +76,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i000436-39-8780.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i000615-40-8814.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i000648-61-11670.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i000679-49-9539.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i000679-49-9539.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i000692-63-11389.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i000944-61-11253.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i000967-60-11995.hdf5";
@@ -120,16 +120,16 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i003802-87-13393.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i003803-17-4627.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i003917-86-13118.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i003978-24-7394.hdf5";    // No converge
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i003978-24-7394.hdf5";    // No converge  // kappa_mu = 0.2 then 0.8 (res<1e-3); kappa_eps = n;
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i004000-107-14641.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i004047-108-14586.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i004105-87-12795.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i004865-106-14177.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i005319-53-10863.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i005511-106-14024.hdf5"; // No converge -> choice
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i005511-106-14024.hdf5"; // No converge -> choice
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i005639-52-10639.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i005867-61-11715.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i005975-119-15271.hdf5"; // No
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i005975-119-15271.hdf5"; // No          // kappa_mu = 0.2 then 0.8 (res<1e-3); kappa_eps = n;
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i006055-81-12522.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i006273-122-15199.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i007021-107-14130.hdf5";
@@ -143,10 +143,10 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i009210-162-18416.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i009369-134-16681.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i009441-98-14145.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i009702-142-16672.hdf5";     // No
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i010111-89-13170.hdf5";      // No
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i009702-142-16672.hdf5";     // No        // kappa_mu = 0.2 then 0.8 (res<1e-3); kappa_eps = n;
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i010111-89-13170.hdf5";      // No
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i010121-141-16682.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i010285-48-9526.hdf5";       // No -> kappa_mu = 0.3; kappa_eps = 2*n,100;
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i010285-48-9526.hdf5";       // No -> kappa_mu = 0.3; kappa_eps = 2*n,100;
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i010570-166-18348.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i010876-144-16865.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-i010950-144-16670.hdf5";
@@ -421,120 +421,120 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i000419-48-244.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i000521-48-204.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i000651-575-15333.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i000905-214-7676.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i000970-214-7677.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001054-214-7686.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001054-214-7688.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001057-214-7687.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001058-214-7680.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001072-214-7678.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001078-214-7684.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001078-214-7685.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001086-214-7682.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001086-214-7690.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001088-214-7691.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001089-214-7679.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001091-214-7694.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001091-214-7695.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001093-214-7681.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001093-214-7692.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001093-214-7693.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i000905-214-7676.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i000970-214-7677.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001054-214-7686.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001054-214-7688.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001057-214-7687.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001058-214-7680.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001072-214-7678.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001078-214-7684.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001078-214-7685.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001086-214-7682.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001086-214-7690.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001088-214-7691.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001089-214-7679.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001091-214-7694.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001091-214-7695.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001093-214-7681.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001093-214-7692.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001093-214-7693.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i001180-575-15311.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002552-302-7933.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002561-302-7929.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002572-302-7924.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002580-643-18915.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002587-643-18914.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002600-643-18951.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002625-302-7930.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002630-304-9384.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002644-304-9391.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002655-304-9395.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002662-304-9385.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002668-304-9382.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002675-304-9377.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002723-304-9390.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002580-643-18915.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002587-643-18914.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002600-643-18951.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002625-302-7930.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002630-304-9384.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002644-304-9391.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002655-304-9395.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002662-304-9385.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002668-304-9382.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002675-304-9377.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002723-304-9390.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002723-643-18943.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002737-304-9388.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002744-304-9380.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002751-304-9379.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002761-304-9392.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002773-643-18853.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002777-304-9378.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002777-304-9394.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002787-304-9381.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002805-304-9383.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002809-643-18946.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002822-304-9376.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002839-643-18933.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002900-643-18948.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002907-643-18891.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002916-643-18947.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002919-643-18852.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002952-643-18932.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002965-643-18950.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002978-643-18942.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002979-643-18949.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i003116-643-18944.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i003638-575-15331.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i003667-636-16991.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i004447-575-15291.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i004690-642-18831.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005331-643-18851.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005595-481-13869.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005670-481-13868.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005679-481-13867.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005859-481-13870.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005971-575-15353.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006162-575-15352.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006404-575-15356.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006481-575-15351.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006703-575-15359.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006711-575-15357.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006717-575-15362.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006720-575-15364.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006729-575-15358.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006736-575-15370.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006743-575-15369.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006746-575-15366.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006755-575-15363.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006769-575-15368.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006780-575-15361.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006786-575-15365.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008045-481-13864.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008071-481-13862.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008144-481-13863.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008260-481-13861.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008292-481-13865.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008367-481-13866.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i009872-643-18941.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i058962-481-13859.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13851.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13852.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13854.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13855.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13856.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13857.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13858.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002737-304-9388.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002744-304-9380.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002751-304-9379.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002761-304-9392.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002773-643-18853.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002777-304-9378.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002777-304-9394.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002787-304-9381.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002805-304-9383.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002809-643-18946.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002822-304-9376.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002839-643-18933.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002900-643-18948.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002907-643-18891.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002916-643-18947.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002919-643-18852.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002952-643-18932.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002965-643-18950.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002978-643-18942.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i002979-643-18949.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i003116-643-18944.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i003638-575-15331.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i003667-636-16991.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i004447-575-15291.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i004690-642-18831.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005331-643-18851.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005595-481-13869.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005670-481-13868.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005679-481-13867.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005859-481-13870.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i005971-575-15353.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006162-575-15352.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006404-575-15356.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006481-575-15351.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006703-575-15359.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006711-575-15357.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006717-575-15362.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006720-575-15364.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006729-575-15358.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006736-575-15370.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006743-575-15369.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006746-575-15366.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006755-575-15363.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006769-575-15368.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006780-575-15361.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i006786-575-15365.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008045-481-13864.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008071-481-13862.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008144-481-13863.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008260-481-13861.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008292-481-13865.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i008367-481-13866.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i009872-643-18941.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i058962-481-13859.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13851.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13852.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13854.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13855.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13856.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13857.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-i100000-481-13858.hdf5";
   }
 
   if (listprob[3]==1)
   {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1018-109.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1022-105.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1032-178.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1038-182.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1078-202.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1099-203.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1106-207.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1153-221.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-116-1.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1018-109.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1022-105.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1032-178.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1038-182.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1078-202.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1099-203.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1106-207.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1153-221.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-116-1.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1172-225.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1197-228.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1203-227.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-121-3.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-122-6.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-123-5.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1203-227.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-121-3.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-122-6.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-123-5.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1230-245.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1239-231.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1247-234.hdf5";
@@ -973,7 +973,7 @@ const char ** data_collection()
 
     if (listprob[6]==1)
   {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-1002-nc-3-41.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-1002-nc-3-41.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10056-nc-2139-3087.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10128-nc-2080-3097.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10206-nc-2094-3115.hdf5";
@@ -1040,7 +1040,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12672-nc-3165-3888.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12672-nc-3187-3889.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12672-nc-3224-3890.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-2688-nc-29-633.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-2688-nc-29-633.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-3306-nc-36-810.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4014-nc-64-1048.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4224-nc-117-1110.hdf5";       // choose
@@ -1049,7 +1049,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-177-1260.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5040-nc-333-1444.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-354-1497.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-367-1521.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-367-1521.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-431-1569.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5496-nc-455-1593.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5502-nc-452-1595.hdf5";
@@ -1058,7 +1058,7 @@ const char ** data_collection()
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5730-nc-419-1628.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5760-nc-458-1651.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5760-nc-496-1660.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5760-nc-521-1696.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5760-nc-521-1696.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5760-nc-532-1692.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5916-nc-584-1722.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5964-nc-566-1729.hdf5";

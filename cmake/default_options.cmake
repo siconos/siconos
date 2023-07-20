@@ -22,7 +22,7 @@
 # set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 set(COMPONENTS externals numerics CACHE INTERNAL "List of siconos components to build and install")
 
-option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
+option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" OFF)
 
 # -- Serialization --
 # Warning : this is highly unstable. Developers only !
