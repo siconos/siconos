@@ -66,7 +66,8 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
     _computeResiduY(false),_computeResiduR(false),
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
-    _warnOnNonConvergence(true),
+    _newtonWarningOnNonConvergence(true),
+    _warningNonsmoothSolver(true),
     _resetAllLambda(true),
     _skip_last_updateOutput(false),
     _skip_last_updateInput(false),
@@ -92,7 +93,8 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisa
     _computeResiduR(false),
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
-    _warnOnNonConvergence(true),
+    _newtonWarningOnNonConvergence(true),
+    _warningNonsmoothSolver(true),
     _resetAllLambda(true),
     _skip_last_updateOutput(false),
     _skip_last_updateInput(false),
@@ -487,7 +489,7 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
 
   if(!_isNewtonConverge)
   {
-    if(_warnOnNonConvergence)
+    if(_newtonWarningOnNonConvergence)
 
       std::cout << "[kernel][warning] TimeStepping::newtonSolve reached max. number of iterations: "
                 << maxStep
@@ -495,7 +497,7 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
                 << _newtonResiduDSMax
                 << std::endl ;
 
-    if(info && _warnOnNonConvergence)
+    if(info && _newtonWarningOnNonConvergence)
       std::cout << "[kernel] TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
   }
 }
@@ -646,7 +648,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       prepareNewtonIteration();
       computeFreeState();
 
-      if(info && _warnOnNonConvergence)
+      if(info && _newtonWarningOnNonConvergence)
         std::cout << "New Newton loop because of nonsmooth solver failed\n" <<std::endl;
 
       // if there is not any Interaction at
@@ -801,8 +803,9 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
 {
   // info = 0 => ok
   // else: depend on solver
-  if(info != 0)
+  if(info != 0 and  _warningNonsmoothSolver)
   {
+    
     std::cout << "[kernel] TimeStepping::DefaultCheckSolverOutput:" << std::endl;
     std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is equal to " << info << std::endl;
     //       std::cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." <<std::endl;

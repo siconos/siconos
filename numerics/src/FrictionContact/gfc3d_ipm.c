@@ -840,8 +840,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   {
     printf("#################### SYMMETRIZATION ####################\n");
     NumericsMatrix *MT = NM_transpose(problem->M);
-    problem->M = NM_add(1/2., problem->M, 1/2., MT );
-    //problem->M = Msym;
+    NumericsMatrix * MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
+    NM_free(problem->M);
+    problem->M = MSym;
     NM_free(MT);
   }
 
@@ -952,6 +953,15 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(nd, data->starting_point->velocity, 1, velocity, 1);
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
+
+  NumericsMatrix *minus_M = NM_create(
+              M->storageType, M->size0,
+              M->size1);  // store the matrix -M to build the matrix of the Newton linear system
+  /* Create the matrix -M to build the matrix of the reduced linear system */
+  NM_copy(M, minus_M);
+  NM_scal(-1.0, minus_M);
+
+
   /* COMPUTATION OF A NEW STARTING POINT */
 
   // set the reaction vector to an arbitrary value in the interior of the cone
@@ -964,7 +974,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   // computation of the global velocity vector: v = M\(H'*r+f)
   for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = f[i];
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
-  NM_Cholesky_solve(M, globalVelocity, 1);
+  NM_Cholesky_solve(NM_preserve(M), globalVelocity, 1);
 
   // computation of the velocity u = proj(H*v + w), then move u in the interior of the cone
   /* for (unsigned int  i = 0; i<nd; i++) */
@@ -1042,7 +1052,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   //double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
   NumericsMatrix* r_Qp = NULL;                                                // matrix Qp
-  NumericsMatrix *minus_M = NM_create(M->storageType, M->size0, M->size1);    // store the matrix -M to build the matrix of the Newton linear system
   //NumericsMatrix *QpH = NM_create(H->storageType, H->size0, H->size1);        // store the matrix Qp*H
   double * r_rhs = (double*)calloc(m+nd, sizeof(double));
   double * r_rhs_2 = (double*)calloc(m+nd, sizeof(double));
@@ -1074,9 +1083,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double LS_norm_d = 0; // dual feaqsibility
   double LS_norm_c = 0; // complementarity
 
-  /* Create the matrix -M to build the matrix of the reduced linear system */
-  NM_copy(M, minus_M);
-  NM_scal(-1.0, minus_M);
 
   NumericsMatrix *J = NULL;
 
@@ -1564,7 +1570,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
       cblas_dcopy(m+2*nd, rhs, 1, rhs_2, 1);
 
-      NSM_linearSolverParams(J)->solver = NSM_HSL;
       NM_LDLT_solve(J, rhs, 1);
 
       cblas_dcopy(m, rhs, 1, d_globalVelocity, 1);
@@ -1619,7 +1624,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 	  break;
 	}
 
-      NSM_linearSolverParams(J)->solver = NSM_HSL;
       if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES )
       {
 	double *rhs_save = (double*)calloc(m+2*nd,sizeof(double));
@@ -1954,7 +1958,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       double * rhs_tmp = (double*)calloc(m+2*nd,sizeof(double));
       cblas_dcopy(m+2*nd, rhs_2, 1, rhs_tmp, 1);
 
-      NSM_linearSolverParams(J)->solver = NSM_HSL;
       NM_LDLT_solve(J, rhs_2, 1);
 
 
@@ -1988,8 +1991,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
       double * rhs_tmp = (double*)calloc(m+2*nd,sizeof(double));
       cblas_dcopy(m+2*nd, rhs_2, 1, rhs_tmp, 1);
-
-      //NSM_linearSolverParams(J)->solver = NSM_HSL;
 
       if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES )
       {

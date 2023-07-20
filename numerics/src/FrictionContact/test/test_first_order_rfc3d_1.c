@@ -20,12 +20,13 @@
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for build_test_collection
+#include "numerics_verbose.h"
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
   int n_solvers = 5;
-  *number_of_tests = n_data * n_solvers;
+  *number_of_tests = n_data * n_solvers +1;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
@@ -85,6 +86,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     current++;
   }
 
+  if ( (current-1) > *number_of_tests )
+    {
+      numerics_warning("build_test_collection", "allocation is too small\n"); 
+    }
   
   *number_of_tests = current;
   return collection;

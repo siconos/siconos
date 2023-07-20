@@ -51,8 +51,8 @@ stdenv.mkDerivation rec {
  cmakeFlags = [ "-DBLA_VENDOR=${blas_name}" ]
     ++ optional (numerics_only == true) [ "-DCOMPONENTS=externals;numerics -DWITH_CXX=OFF" ]
     ++ optional (enable_python != true) [ "-DWITH_PYTHON_WRAPPER=OFF" ]
-    ++ optional (enable_openmp == true) [ "-DWITH_OPENMP=ON" ]
-    ++ optional (enable_python == true) [ "-Dsiconos_python_install=prefix" ];
+    ++ optional (enable_openmp == true) [ "-DWITH_OPENMP=ON" ];
+
     
     
  hardeningDisable = [ "format" ];

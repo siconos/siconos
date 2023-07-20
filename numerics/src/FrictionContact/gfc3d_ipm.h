@@ -56,10 +56,10 @@ double getStepLength(const double * const x, const double * const dx, const unsi
  * \param out is the result velocity - H x globalVelocity - w vector.
  * \param rnorm is the relative norm of out = |out|/max{|velocity|, |H x globalVelocity|, |w|}
  */
-void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-		    const double * s, double * out, double * rnorm, const double tol);
 // void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-//                     double * out, double * rnorm, const double tol);
+// 		    const double * s, double * out, double * rnorm, const double tol);
+void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
+                    double * out, double * rnorm, const double tol);
 
 
 /**

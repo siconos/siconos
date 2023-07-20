@@ -431,6 +431,8 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
   p->LDLT_solver = NSM_HSL;
 #endif
 
+  p->parent_matrix = NULL;
+
   p->linear_solver_data = NULL;
   p->solver_free_hook = NULL;
 

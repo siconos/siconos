@@ -872,6 +872,8 @@ extern "C"
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
+  int NM_Linear_solver_finalize(NumericsMatrix* Ao);
+ 
   /** Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    *
    *  \param[in,out] A a NumericsMatrix.

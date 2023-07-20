@@ -232,7 +232,10 @@ extern "C"
 
   void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
 
-
+  /** solver based on Interior Point Method (IPM) for friction-contact 3D problem based on an AVI reformulation
+   * Vincent Acary, Paul Armand, Hoang Minh NGUYEN. High-accuracy computation of rolling friction contact problems. 2022.
+   * https://hal.inria.fr/hal-03741048
+   */
   void gfc3d_IPM(GlobalFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
                   int*  info, SolverOptions*  options, const char* problem_name);

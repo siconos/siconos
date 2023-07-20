@@ -2400,6 +2400,7 @@ static int NM_inv_test_sparse(void)
 
 static int NM_inverse_diagonal_block_matrix_test(void)
 {
+  printf("========= Starts Numerics tests for NumericsMatrix  NM_inverse_diagonal_block_matrix_test ========= \n");
   int size0 =12;
   int size1 =12;
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
@@ -2439,7 +2440,7 @@ static int NM_inverse_diagonal_block_matrix_test(void)
   NumericsMatrix * Id  = NM_eye(size0);
 
   //NM_display(Id);
-
+  printf("========= End Numerics tests for NumericsMatrix  NM_inverse_diagonal_block_matrix_test ========= \n");
   //getchar();
   return  !NM_equal(AAinv, Id);
 }
@@ -2527,6 +2528,7 @@ static int test_NM_inv(void)
 
 static int test_NM_gesv_expert_unit(NumericsMatrix * M1, double * b)
 {
+  printf("========= start NM_gesv_expert_unit========= \n");
   int n = M1->size0;
   int info =-1;
   double * y = (double*)malloc(n* sizeof(double));
@@ -2542,13 +2544,14 @@ static int test_NM_gesv_expert_unit(NumericsMatrix * M1, double * b)
     info = 1;
   else
     info=0;
+  printf("========= end NM_gesv_expert_unit========= \n");
   return info;
 }
 
 static int test_NM_gesv_expert(void)
 {
 
-  printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
+  printf("========= Starts Numerics tests for NumericsMatrix NM_gesv_expert========= \n");
 
   int i, nmm = 4 ;
   NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
@@ -2573,7 +2576,8 @@ static int test_NM_gesv_expert(void)
   for(int j=0; j < n; j++)
     b[j] =1.0;
   info = test_NM_gesv_expert_unit(M1, b);
-  if(info != 0) return info;
+  free(b);
+  if(info != 0) goto free_memory;
 
   M1=NMM[1];
   n = M1->size0;
@@ -2581,7 +2585,8 @@ static int test_NM_gesv_expert(void)
   for(int j=0; j < n; j++)
     b[j] =1.0;
   info = test_NM_gesv_expert_unit(M1, b);
-  if(info != 0) return info;
+  free(b);
+  if(info != 0) goto free_memory;
 
   M1 = test_matrix_5();
   n = M1->size0;
@@ -2589,22 +2594,20 @@ static int test_NM_gesv_expert(void)
   for(int j=0; j < n; j++)
     b[j] =1.0;
   info = test_NM_gesv_expert_unit(M1, b);
-  if(info != 0) return info;
-
   free(b);
+  if(info != 0) goto free_memory;
 
-  printf("End of NM_gesv...\n");
-  if(info != 0) return info;
+
+ free_memory: 
 
   /* free memory */
-
   for(i = 0 ; i < nmm; i++)
   {
     NM_clear(NMM[i]);
     free(NMM[i]);
   }
   free(NMM);
-  printf("========= End Numerics tests for NumericsMatrix ========= \n");
+  printf("========= End Numerics tests for NumericsMatrix NM_gesv_expert ========= \n");
   return info;
 }
 

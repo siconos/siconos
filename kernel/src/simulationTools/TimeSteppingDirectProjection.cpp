@@ -211,7 +211,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
     DEBUG_EXPR(oneStepNSProblem(SICONOS_OSNSP_TS_POS)->display());
 
 
-    if(info && _warnOnNonConvergence)
+    if(info && _newtonWarningOnNonConvergence)
     {
       std::cout << "[kernel] TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
     }
@@ -356,7 +356,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
 
 
-  if(_nbProjectionIteration == _projectionMaxIteration && _warnOnNonConvergence)
+  if(_nbProjectionIteration == _projectionMaxIteration && _newtonWarningOnNonConvergence)
   {
     std::cout << "[kernel] TimeSteppingDirectProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
     printf("[kernel]                max criteria equality =  %e.\n", _maxViolationEquality);
@@ -605,12 +605,12 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     }
     if(!isNewtonConverge)
     {
-      if(_warnOnNonConvergence)
+      if(_newtonWarningOnNonConvergence)
       {
         std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
       }
     }
-    else if(info && _warnOnNonConvergence)
+    else if(info && _newtonWarningOnNonConvergence)
     {
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." <<std::endl ;
     }

@@ -22,12 +22,12 @@
 const char ** data_collection()
 {
 
-  int n_data_1=1169;
+  int n_data_1=150;
 
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
 
-  int listprob[7] = {1, 0, 0, 0, 0, 0, 0};
+  int listprob[7] = {1, 0, 0, 0, 0, 0, 1};
   // int listprob[7] = {1, 1, 1, 1, 1, 1, 1};
   /* 0: BoxStacks      #28  problems */   // kappa_mu = 0.1; kappa_eps = n;      // kappa_mu = 0.5 then 0.98 (res<1e-4); kappa_eps = n;
   /* 1: Capsules       #200 problems */
@@ -973,8 +973,8 @@ const char ** data_collection()
 
     if (listprob[6]==1)
   {
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-1002-nc-3-41.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10056-nc-2139-3087.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-1002-nc-3-41.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10056-nc-2139-3087.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10128-nc-2080-3097.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10206-nc-2094-3115.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10296-nc-2248-3129.hdf5";
@@ -2285,4 +2285,3 @@ const char ** data_collection()
   data_collection_1[n_data++] = "---";
   return data_collection_1;
 }
-

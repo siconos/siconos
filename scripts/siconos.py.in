@@ -161,7 +161,8 @@ def main():
         env = os.environ
         # If the driver file is python, set python exe
         if args.is_python:
-            cmd += ['@Python3_EXECUTABLE@']
+            pycmd = '@Python3_EXECUTABLE@'
+            cmd += [pycmd]
             # for python modules
             if('PYTHONPATH') in env:
                 env['PYTHONPATH'] += ':' + \
@@ -170,6 +171,8 @@ def main():
                 env['PYTHONPATH'] = siconos_pythonpath.resolve().as_posix()
 
         cmd += [Path(args.exe_full_name).as_posix()]
+        if args.cline_args:
+            cmd += args.cline_args
 
         # Execute ...
         format_msg('run ' + ' '.join(cmd), args.quiet)
@@ -386,6 +389,9 @@ def parse_command_line():
     msg += '(e.g. valgrind, time, gdb ...). '
     msg += 'Try for example "siconos -P lldb toto.cpp" to run debugger.'
     parser.add_argument('-P', '--exec-prefix', help=msg, action='append')
+
+    msg = 'Add extra command line arguments to be sent to the executable (python or c++) '
+    parser.add_argument('--cline-args', '-cla', help=msg, action="extend", nargs="+")#action='append')
 
     # -- Build options (compile, link ...) for main and plugins) --
     compile_group = parser.add_argument_group(

@@ -429,7 +429,7 @@ def load_siconos_mesh(shape_filename, scale=None):
         if scale is not None:
             apoints *= scale
 
-        aindices = np.empty(num_triangles * 3, dtype=np.int)
+        aindices = np.empty(num_triangles * 3, dtype=int)
 
         for i in range(0, num_triangles):
             c = polydata.GetCell(i)
@@ -793,6 +793,8 @@ class MechanicsHdf5Runner_run_options(dict):
         d['Newton_options']=sk.SICONOS_TS_NONLINEAR
         d['Newton_max_iter']=20
         d['Newton_tolerance']=1e-10
+        d['Newton_warning_on_nonconvergence']=True
+        d['Warning_nonsmooth_solver']=True
         d['set_external_forces']=None
         d['solver_options']=None
         d['solver_options_pos']=None
@@ -817,6 +819,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['explode_computeOneStep']=False
         d['display_Newton_convergence']=False
         d['start_run_iteration_hook']=None
+        d['before_next_step_iteration_hook']=None
         d['end_run_iteration_hook']=None
         d['skip_last_update_output']=False
         d['skip_last_update_input']=False
@@ -824,6 +827,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['osns_assembly_type']= None
         d['output_contact_forces']=True,
         d['output_contact_info']=True,
+        d['output_contact_work']=True,
 
 
         super(self.__class__, self).__init__(d)
@@ -926,6 +930,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._output_contact_index_set = 1
         self._start_run_iteration_hook = None
         self._end_run_iteration_hook = None
+        self._before_next_step_iteration_hook=None
         self._ds_positions = None
         self._ds_boundary_conditions = {}
         self._time_stepping_class = None
@@ -2130,7 +2135,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         return 0
     def output_contact_info(self):
         """
-        Outputs contact forces
+        Outputs contact infos
         _output_contact_index_set default value is 1.
         """
         if self._nsds.\
@@ -2152,6 +2157,36 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                    axis=1)
                 # return the number of contacts
                 return len(contact_info)
+            return 0
+        return 0
+
+    def output_contact_work(self):
+        """
+        Outputs contact contact_work
+        _output_contact_index_set default value is 1.
+        """
+        print("output_contact_work")
+        if self._nsds.\
+                topology().indexSetsSize() > 1:
+            time = self.current_time()
+            contact_work = self._io.contactContactWork(self._nsds,
+                                                       self._output_contact_index_set)
+            #print(contact_work)
+            if contact_work is not None:
+                current_line = self._cf_work.shape[0]
+                # Increase the number of lines in cf_data
+                # (h5 dataset with chunks)
+                self._cf_work.resize(current_line + contact_work.shape[0], 0)
+                times = np.empty((contact_work.shape[0], 1))
+                times.fill(time)
+
+                self._cf_work[current_line:, :] = \
+                    np.concatenate((times,
+                                    contact_work),
+                                   axis=1)
+                # return the number of contacts
+                #print(self._cf_contact_work[:,:])
+                return len(contact_work)
             return 0
         return 0
 
@@ -2214,6 +2249,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.print_verbose('[warning] output_contact_info is only available with bullet backend for the moment')
             self.print_verbose('          to remove this message set output_contact_info options to False')
 
+        if self._output_contact_work and backend == 'bullet':
+            self.log(self.output_contact_work, with_timer)()
+            if self._run_options['skip_last_update_output'] or self._run_options['skip_last_update_input']:
+                self.print_verbose('[warning] output_contact_work with the options skip_last_update_output=True'
+                                   ' or skip_last_update_output=True could result in wrong output')
+        else:
+            self.print_verbose('[warning] output_contact_work is only available with bullet backend for the moment')
+            self.print_verbose('          to remove this message set output_contact_info options to False')
+            
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
 
@@ -2276,7 +2320,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         d['time_stepping'] = 'not serialized'        # fix it
 
         d['start_run_iteration_hook']='not serialized'        # fix it
+        d['before_next_step_iteration_hook']='not serialized'          # fix it
         d['end_run_iteration_hook']='not serialized'          # fix it
+        
         if d['set_external_forces'] is not None:
             try :
                 d['set_external_forces']= d['set_external_forces'].__name__ + '(name serialized)'
@@ -2386,7 +2432,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.log(s.initializeNSDSChangelog, with_timer)()
             self.log(s.updateOutput, with_timer)()
             self.log(s.initOSNS, with_timer)()
-            self.log(s.updateInput, with_timer)()
+            self.log(s.updateAllInput, with_timer)()
 
         self.log(s.updateDSPlugins, with_timer)(s.nextTime())
         self.log(s.computeResidu, with_timer)()
@@ -2418,7 +2464,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
                 if not s.skipLastUpdateInput():
-                    self.log(s.updateInput, with_timer)()
+                    self.log(s.updateAllInput, with_timer)()
                 self.log(s.updateState, with_timer)()
                 if not s.skipLastUpdateOutput():
                     self.log(s.updateOutput, with_timer)()
@@ -2441,7 +2487,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     else:
                         info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
                 self.log(s.DefaultCheckSolverOutput, with_timer)(info)
-                self.log(s.updateInput, with_timer)()
+                self.log(s.updateAllInput, with_timer)()
                 self.log(s.updateState, with_timer)()
                 if (not isNewtonConverge) and (newtonNbIterations < newtonMaxIteration):
                     self.log(s.updateOutput, with_timer)()
@@ -2490,6 +2536,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             output_backup_frequency=None,
             output_contact_forces=True,
             output_contact_info=True,
+            output_contact_work=True,
             friction_contact_trace_params=None,
             output_contact_index_set=1,
             osi=sk.MoreauJeanOSI,
@@ -2499,6 +2546,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             display_Newton_convergence=False,
             start_run_iteration_hook=None,
             end_run_iteration_hook=None,
+            before_next_step_iteration_hook=None,
             skip_last_update_output=False
             ):
         """Run a simulation from a set of parameters described in a hdf5 file.
@@ -2693,10 +2741,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['explode_computeOneStep']=False,
             run_options['display_Newton_convergence']=display_Newton_convergence
             run_options['start_run_iteration_hook']=start_run_iteration_hook
+            run_options['before_next_step_iteration_hook']=before_next_step_iteration_hook
             run_options['end_run_iteration_hook']=end_run_iteration_hook
             run_options['skip_last_update_output']=skip_last_update_output
             run_options['output_contact_forces']=output_contact_forces
             run_options['output_contact_info']=output_contact_info
+            run_options['output_contact_work']=output_contact_work
 
 
 
@@ -2734,6 +2784,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if run_options['output_contact_info'] is not None:
             self._output_contact_info = run_options['output_contact_info']
+
+        if run_options['output_contact_work'] is not None:
+            self._output_contact_work = run_options['output_contact_work']
 
         if run_options['gravity_scale'] is not None:
             self._gravity_scale = run_options['gravity_scale']
@@ -2998,6 +3051,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         simulation.setNewtonOptions(run_options['Newton_options'])
         simulation.setNewtonMaxIteration(run_options['Newton_max_iter'])
         simulation.setNewtonTolerance(run_options['Newton_tolerance'])
+        simulation.setNewtonWarningOnNonConvergence(run_options['Newton_warning_on_nonconvergence'])
+        simulation.setWarningNonsmoothSolver(run_options['Warning_nonsmooth_solver'])
 
 
         simulation.setSkipLastUpdateOutput(run_options.get('skip_last_update_output'))
@@ -3027,6 +3082,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._end_run_iteration_hook= run_options.get('end_run_iteration_hook')
         if self._end_run_iteration_hook is not None:
             self._end_run_iteration_hook.initialize(self)
+        self._before_next_step_iteration_hook= run_options.get('before_next_step_iteration_hook')
+        if self._before_next_step_iteration_hook is not None:
+            self._before_next_step_iteration_hook.initialize(self)
 
         self.print_verbose('first output static and dynamic objects ...')
         self.output_static_objects()
@@ -3051,6 +3109,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     def run_loop(self):
         verbose = self._run_options.get('verbose')
+        self._verbose=verbose
         with_timer= self._run_options.get('with_timer')
         body_class = self._run_options.get('body_class')
         shape_class = self._run_options.get('shape_class')
@@ -3082,7 +3141,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 controller.step()
 
             if friction_contact_trace_params is not None:
-                osnspb._stepcounter = self._k
+                self._osnspb._stepcounter = self._k
 
             if self._run_options.get('explode_Newton_solve'):
                 if(self._time_stepping_class == sk.TimeStepping):
@@ -3177,6 +3236,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if (precision > exit_tolerance):
                     print('precision is larger exit_tolerance')
                     return False
+
+            if self._before_next_step_iteration_hook is not None:
+                if False == self.log(self._before_next_step_iteration_hook.call, with_timer)(self._k):
+                    break
 
             self.log(self._simulation.nextStep, with_timer)()
 
