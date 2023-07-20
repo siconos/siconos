@@ -991,7 +991,84 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree->norm2();
     }
+    else if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+      DEBUG_PRINT(
+          "siconos::integrators::MoreauJeanOSI::computeResidu(), dsType == "
+          "siconos::modeling::Type::LagrangianLinearTIDS\n");
+      // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
+      // This formulae is only valid for the first computation of the residual
+      // for v = v_i otherwise the complete formulae must be applied, that is
+      // ResiduFree = M(v - vold) + h*((1-theta)*(C v_i + K q_i) +theta * ( C*v
+      // + K(q_i+h(1-theta)v_i+h theta v)))
+      //                     +hFext_theta     (2)
+      // for v != vi, the formulae (1) is wrong.
+      // in the sequel, only the equation (1) is implemented
 
+      // -- Convert the DS into a Lagrangian one.
+      auto &d = static_cast<siconos::modeling::SolidLinearTIDS &>(ds);
+
+      auto &residuFree =
+          *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
+      auto &free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+
+      // Get state i (previous time step) from Memories -> var. indexed with
+      // "Old"
+      const auto &qold = d.qMemory().getSiconosVector(0);         // qi
+      const auto &vold = d.velocityMemory().getSiconosVector(0);  // vi
+
+      DEBUG_EXPR(qold.display(););
+      DEBUG_EXPR(vold.display(););
+      DEBUG_EXPR(d.q()->display(););
+      DEBUG_EXPR(d.velocity()->display(););
+
+      // --- ResiduFree computation Equation (1) ---
+      residuFree.zero();
+      double coeff;
+      // -- No need to update W --
+
+      if (d.C()) {
+        siconos::algebra::prod(h, *d.C(), vold, residuFree,
+                               false);  // vfree += h*C*vi
+      }
+      if (d.K()) {
+        coeff = h * h * _theta;
+        siconos::algebra::prod(coeff, *d.K(), vold, residuFree,
+                               false);  // vfree += h^2*_theta*K*vi
+        siconos::algebra::prod(h, *d.K(), qold, residuFree,
+                               false);  // vfree += h*K*qi
+      }
+      if (d.B()) {
+        coeff = h * _theta;
+        siconos::algebra::prod(coeff, *d.B(), sigma, residuFree,
+                               false);  // vfree += h*_theta*B*sigma_{k+theta}
+        siconos::algebra::prod(h, *d.K(), qold, residuFree,
+                               false);  // vfree += h*K*qi
+      }
+
+      if (d.fExt()) {
+        // computes Fext(ti)
+        d.computeFExt(told);
+        coeff = -h * (1 - _theta);
+        siconos::algebra::scal(coeff, *(d.fExt()), residuFree,
+                               false);  // vfree -= h*(1-_theta) * fext(ti)
+        // computes Fext(ti+1)
+        d.computeFExt(t);
+        coeff = -h * _theta;
+        siconos::algebra::scal(coeff, *(d.fExt()), residuFree,
+                               false);  // vfree -= h*_theta * fext(ti+1)
+      }
+
+      applyBoundaryConditions(d, residuFree, dsi, t, vold);
+
+      free = residuFree;            // copy residuFree into free
+      if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
+      // We use free as tmp buffer
+      DEBUG_EXPR(free.display());
+      DEBUG_EXPR(residuFree.display());
+
+      normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
+      //     normResidu = realresiduFree->norm2();
+    }
     else if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
       // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
       // This formulae is only valid for the first computation of the residual

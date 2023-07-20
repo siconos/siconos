@@ -71,7 +71,20 @@ public:
 
   void display(bool brief) const override;
 
+  /** get S matrix (pointer link)
+   *
+   *  \return pointer on a SiconosMatrix
+   */
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> S() const { return _S; }
 
+
+  /** get B matrix (pointer link)
+   *
+   *  \return pointer on a SiconosMatrix
+   */
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> B() const { return _B; }
+
+  modeling::Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 
 
 };
