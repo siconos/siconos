@@ -598,6 +598,9 @@ public:
    */
   void initializeNSDSChangelog();
 
+
+  void applyNSDSChangelogForDS();
+
   /** initialize index sets for OSIs */
   void initializeIndexSets();
 
