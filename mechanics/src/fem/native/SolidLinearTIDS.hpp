@@ -38,11 +38,11 @@ class SolidLinearTIDS : public FiniteElementLinearTIDS
 protected:
   /* serialization hooks */
   ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
-  using FiniteElementLinearTIDS::_mesh;
-  using FiniteElementLinearTIDS::_materials;
-  using FiniteElementLinearTIDS::_storageType;
-  /** M Matrix */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _M;
+//  using FiniteElementLinearTIDS::_mesh;
+//  using FiniteElementLinearTIDS::_materials;
+//  using FiniteElementLinearTIDS::_storageType;
+//  /** M Matrix */
+//  std::shared_ptr<siconos::algebra::SimpleMatrix> _M;
   /** Elasticity Matrix */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _S;
   /** B matrix from FEM */
