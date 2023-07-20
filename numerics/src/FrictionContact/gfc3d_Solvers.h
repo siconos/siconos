@@ -246,6 +246,19 @@ extern "C"
 
   void gfc3d_ipm_set_default(SolverOptions* options);
 
+  /*
+   *
+   */
+  void gfc3d_IPM_SNM(GlobalFrictionContactProblem*  problem, double*  reaction,
+                  double*  velocity, double*  globalVelocity,
+                  int*  info, SolverOptions*  options, const char* problem_name);
+
+  void gfc3d_IPM_SNM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void gfc3d_IPM_SNM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void gfc3d_ipm_snm_set_default(SolverOptions* options);
+
   /** \addtogroup SetSolverOptions
    * @{
    */

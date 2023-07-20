@@ -266,6 +266,12 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     break;
 
   }
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_SEMISMOOTH:
+  {
+    gfc3d_IPM_SNM(problem, reaction, velocity,
+              globalVelocity, &info, options, problem_name);
+    break;
+  }
   default:
   {
     fprintf(stderr, "Numerics, gfc3d_driver failed. Unknown solver %d.\n", options->solverId);

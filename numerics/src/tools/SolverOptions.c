@@ -842,7 +842,7 @@ SolverOptions * solver_options_create(int solverId)
 case SICONOS_GLOBAL_FRICTION_3D_IPM_SEMISMOOTH:
   {
     options = solver_options_initialize(solverId, 20000, 1e-6, 0);
-    gfc3d_ipm_set_default(options);
+    gfc3d_ipm_snm_set_default(options);
     break;
   }
   case SICONOS_FRICTION_3D_ONECONTACT_NSN:

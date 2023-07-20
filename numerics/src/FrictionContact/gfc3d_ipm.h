@@ -16,8 +16,64 @@
  * limitations under the License.
  */
 
+typedef struct
+{
+  double * globalVelocity;
+  double * reaction;
+  double * velocity;
+}
+  IPM_starting_point;
+
+typedef struct
+{
+  double * t_globalVelocity;
+  double * t_reaction;
+  double * t_velocity;
+}
+  IPM_tmp_point;
+
+typedef struct
+{
+  NumericsMatrix* mat;
+  NumericsMatrix* inv_mat;
+}
+  IPM_change_of_variable;
+
+typedef struct
+{
+  double alpha_primal; // primal step length
+  double alpha_dual;   // dual step length
+  double sigma;        // centering parameter
+  double barr_param;   // barrier parameter
+}
+  IPM_internal_params;
+
+
+typedef struct
+{
+
+  /* initial interior points */
+  IPM_tmp_point* tmp_point;
+
+  /* initial interior points */
+  IPM_starting_point* starting_point;
+
+  /* change of variable matrix */
+  IPM_change_of_variable* P_mu;
+
+  /* initial internal solver parameters */
+  IPM_internal_params* internal_params;
+
+  double **tmp_vault_nd;
+  double **tmp_vault_m;
+}
+  Gfc3d_IPM_init_data;
+
+
 typedef long double float_type;
 /* typedef double float_type; */
+
+#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
 
 /* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
 float_type dnrm2l(const unsigned int n, const double * x);
@@ -56,8 +112,8 @@ double getStepLength(const double * const x, const double * const dx, const unsi
  * \param out is the result velocity - H x globalVelocity - w vector.
  * \param rnorm is the relative norm of out = |out|/max{|velocity|, |H x globalVelocity|, |w|}
  */
-// void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-// 		    const double * s, double * out, double * rnorm, const double tol);
+void primalResidual_s(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
+		    const double * s, double * out, double * rnorm, const double tol);
 void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
                     double * out, double * rnorm, const double tol);
 

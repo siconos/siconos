@@ -41,79 +41,11 @@
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"
+#include "gfc3d_ipm.h"
 
-#define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
 
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";
-const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SEMISMOOTH_STR = "GFC3D IPM SEMISMOOTH";
 
-
-typedef struct
-{
-  double * globalVelocity;
-  double * reaction;
-  double * velocity;
-}
-  IPM_starting_point;
-
-typedef struct
-{
-  double * t_globalVelocity;
-  double * t_reaction;
-  double * t_velocity;
-}
-  IPM_tmp_point;
-
-typedef struct
-{
-  NumericsMatrix* mat;
-  NumericsMatrix* inv_mat;
-}
-  IPM_change_of_variable;
-
-typedef struct
-{
-  double alpha_primal; // primal step length
-  double alpha_dual;   // dual step length
-  double sigma;        // centering parameter
-  double barr_param;   // barrier parameter
-}
-  IPM_internal_params;
-
-
-typedef struct
-{
-
-  /* initial interior points */
-  IPM_tmp_point* tmp_point;
-
-  /* initial interior points */
-  IPM_starting_point* starting_point;
-
-  /* change of variable matrix */
-  IPM_change_of_variable* P_mu;
-
-  /* initial internal solver parameters */
-  IPM_internal_params* internal_params;
-
-  double **tmp_vault_nd;
-  double **tmp_vault_m;
-}
-  Gfc3d_IPM_init_data;
-
-/* typedef struct */
-/* { */
-/*   NumericsMatrix * mat; */
-/*   NumericsMatrix * inv; */
-/*   NumericsMatrix * sqr; */
-/* } */
-/*   NTmatrix; */
-
-
-typedef long double float_type;
-/* typedef double float_type; */
-
-#include "gfc3d_ipm.h"
 
 /* ------------------------- Helper functions implementation ------------------------------ */
 

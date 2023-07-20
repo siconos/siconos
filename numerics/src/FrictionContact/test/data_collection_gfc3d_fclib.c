@@ -974,7 +974,7 @@ const char ** data_collection()
     if (listprob[6]==1)
   {
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-1002-nc-3-41.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10056-nc-2139-3087.hdf5";
+    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10056-nc-2139-3087.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10128-nc-2080-3097.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10206-nc-2094-3115.hdf5";
     // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10296-nc-2248-3129.hdf5";
