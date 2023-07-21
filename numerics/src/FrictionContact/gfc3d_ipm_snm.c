@@ -1287,7 +1287,7 @@ while(hasNotConverged != 0 && findKappa)
       NM_insert(J, eye_n, m + 2*nd, m + 2*nd);
 
       /* regularization */
-      NM_insert(J, NM_scalar(nd, -1e-7), m + nd, m + nd);
+      /* NM_insert(J, NM_scalar(nd, -1e-7), m + nd, m + nd); */
 
       // if (iteration == 0)
       // {
@@ -2150,7 +2150,7 @@ while(hasNotConverged != 0 && findKappa)
     // kappa_eps = 2*n;
     // scale = 100;
     // if (totalresidual_mu <= kappa_eps*barr_param)
-    if (totalresidual_mu <= 10*barr_param && diff_fixp < old_diff_fixp)
+    if (totalresidual_mu <= 10*barr_param) // && diff_fixp < old_diff_fixp)
     {
       barr_param *= kappa_mu;
       // printf("abs(ub'd_ub - |ub|*|d_ub|) = %e\n", check_sub);
