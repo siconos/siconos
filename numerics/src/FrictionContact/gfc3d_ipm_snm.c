@@ -996,13 +996,23 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   // sprintf(matlab_name, "%s.m",strToken);
   sprintf(matlab_name, "iterates.m");
 
+  iterates = fopen(matlab_name, "r+");
+ 
+  if (iterates == NULL)
+    {
+    /* file doesn't exist */
+      iterates = fopen(matlab_name, "w");
+      fprintf(iterates,"data = [];\n");
+    }
+  fclose(iterates);
+
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
   {
     // iterates = fopen("iterates.m", "w");
     // remove(matlab_name);
     iterates = fopen(matlab_name, "a+");
-    fprintf(iterates,"%% data = struct;\n");
+    //fprintf(iterates,"%% data = struct;\n");
     fprintf(iterates,"data(end+1).name = \"%s\";\n", strToken);
     fprintf(iterates,"data(end).val = [\n");
     // printDataProbMatlabFile(M, f, H, w, d, n, m, problem->mu, iterates);
@@ -1058,12 +1068,12 @@ while(hasNotConverged != 0 && findKappa)
   hasNotConverged = 1;
   pinfeas = dinfeas = complem = udotr = projerr = diff_fixp = totalresidual = old_diff_fixp = 1e300;
   alpha_primal = alpha_dual = 1.;
-  barr_param = 10.;
+  barr_param = 1.0;
   // barr_param = 1e-5;
   // kappa_mu = randomFloat(0.1, 0.99);
   // kappa_eps = randomFloat(0.7, 3.0)*n;
   // kappa_mu = 0.99;
-  kappa_mu = 0.7;
+  kappa_mu = 0.5;
   kappa_eps = n;
   // kappa_eps = 10;
 
@@ -1988,13 +1998,13 @@ while(hasNotConverged != 0 && findKappa)
     }
 
 
-    double check_sub = 0.;
-    for (int k = 0; k < nd; k+=d)
-    {
-      double nub = cblas_dnrm2(2, velocity+k+1, 1);
-      double ndub = cblas_dnrm2(2, d_velocity+k+1, 1);
-      check_sub += fabs(fabs(cblas_ddot(2, velocity+k+1, 1, d_velocity+k+1, 1))-nub*ndub);
-    }
+    /* double check_sub = 0.; */
+    /* for (int k = 0; k < nd; k+=d) */
+    /* { */
+    /*   double nub = cblas_dnrm2(2, velocity+k+1, 1); */
+    /*   double ndub = cblas_dnrm2(2, d_velocity+k+1, 1); */
+    /*   check_sub += fabs(fabs(cblas_ddot(2, velocity+k+1, 1, d_velocity+k+1, 1))-nub*ndub); */
+    /* } */
     // check_sub = sqrt(check_sub);
     // printf("\ndiff = %e\n", check_sub);
 
@@ -2150,7 +2160,7 @@ while(hasNotConverged != 0 && findKappa)
     // kappa_eps = 2*n;
     // scale = 100;
     // if (totalresidual_mu <= kappa_eps*barr_param)
-    if (totalresidual_mu <= 10*barr_param) // && diff_fixp < old_diff_fixp)
+    if (totalresidual_mu <= 0.1*barr_param) // && diff_fixp < old_diff_fixp)
     {
       barr_param *= kappa_mu;
       // printf("abs(ub'd_ub - |ub|*|d_ub|) = %e\n", check_sub);
@@ -2358,8 +2368,8 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 300;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
