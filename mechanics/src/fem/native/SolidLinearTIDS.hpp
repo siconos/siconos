@@ -48,6 +48,15 @@ protected:
   /** B matrix from FEM */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _B;
 
+  /** stress of the system */
+  std::shared_ptr<siconos::algebra::SiconosVector> _sigma{nullptr};
+
+  std::shared_ptr<siconos::algebra::SiconosVector> _plasticRate = {nullptr};
+
+  unsigned int _dimStress{0};
+  /** memory of previous coordinates of the system */
+  siconos::algebra::SiconosMemory _stressMemory;
+  siconos::algebra::SiconosMemory _plasticRateMemory;
 
 public:
 
@@ -83,6 +92,26 @@ public:
    *  \return pointer on a SiconosMatrix
    */
   inline std::shared_ptr<siconos::algebra::SiconosMatrix> B() const { return _B; }
+
+  inline unsigned int stressDimension()  { return _dimStress; }
+
+
+  /** initialize the siconos::algebra::SiconosMemory objects with a positive size.
+   *
+   *  \param size the size of the siconos::algebra::SiconosMemory. must be >= 0
+   */
+  void initMemory(unsigned int size) override;
+
+  inline const siconos::algebra::SiconosMemory &stressMemory()
+  {
+    return _stressMemory;
+  }
+
+  /** push the current values of x, q and r in the stored previous values
+   *  xMemory, qMemory, rMemory,
+   *  \todo Modify the function swapIn Memory with the new Object Memory
+   */
+  void swapInMemory() override;
 
   modeling::Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 

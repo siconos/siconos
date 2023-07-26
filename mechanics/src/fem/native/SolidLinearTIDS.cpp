@@ -83,8 +83,8 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
     _ndof = _FEModel->init();
     int nElements = _FEModel->elements().size();
     int dim = _FEModel->mesh()->dim();
-    int dimStress = dim*(dim+1)/2;
-    int dimState = _ndof*2 + dimStress*nElements;
+    _dimStress = dim*(dim+1)/2;
+    int dimState = _ndof*2 + _dimStress*nElements;
     _n = dimState;
 
     std::cout << "Fe model inintialized !" << std::endl;
@@ -104,7 +104,7 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //  std::cout << "M computed !" << std::endl;
   if(!_S)
   {
-      _S = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress*nElements,dimStress*nElements,
+      _S = std::make_shared<siconos::algebra::SimpleMatrix>(_dimStress*nElements,_dimStress*nElements,
                                                                _storageType);
   }
   _FEModel->computeSMatrix(_S,_materials);
@@ -131,10 +131,9 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //        }
 //  }
 //  std::cout << "mass matrix set !" << std::endl;
-
     if(!_B)
     {
-        _B = std::make_shared<siconos::algebra::SimpleMatrix>(nElements*dimStress, _ndof,
+        _B = std::make_shared<siconos::algebra::SimpleMatrix>(nElements*_dimStress, _ndof,
                                                                  _storageType);
     }
     _FEModel->computeBMatrix(_B, _materials);
@@ -178,7 +177,46 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 
 }
 
+// --- Functions for memory handling ---
+void siconos::mechanics::fem::SolidLinearTIDS::initMemory(unsigned int steps) {
+  DEBUG_PRINTF(
+      "siconos::modeling::LagrangianDS::initMemory(unsigned int steps) with steps = %i\n",
+      steps);
+  if (steps == 0)
+    std::cout << "Warning : LagragianDS::initMemory with size equal to zero" << std::endl;
+  else {
+    _qMemory.setMemorySize(steps, _ndof);
+    _velocityMemory.setMemorySize(steps, _ndof);
 
+    _stressMemory.setMemorySize(steps, _dimStress);
+    _forcesMemory.setMemorySize(steps, _ndof);
+    _pMemory.resize(3);
+
+    // TODO : initMemory in graph + f(OSI/level)
+    for (unsigned int level = 0; level < 3; ++level) {
+      if (_pMemory[level].size() == 0) _pMemory[level].setMemorySize(steps, _ndof);
+    }
+
+    // swapInMemory();
+  }
+}
+
+void siconos::mechanics::fem::SolidLinearTIDS::swapInMemory() {
+  _qMemory.swap(*_q[0]);
+  _velocityMemory.swap(*_q[1]);
+  _stressMemory.swap(*_sigma);
+  if (_forces) _forcesMemory.swap(*_forces);
+
+  // initialization of the reaction force due to the non smooth law
+  // note: these are a no-op if either memory or vector is null
+  _pMemory[0].swap(_p[0]);
+  _pMemory[1].swap(_p[1]);
+  _plasticRateMemory.swap(*_plasticRate);
+
+  _pMemory[2].swap(_p[2]);
+
+  _xMemory.swap(_x[0]);
+}
 
 double siconos::mechanics::fem::SolidLinearTIDS::kineticEnergy() const
 {

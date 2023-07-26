@@ -196,7 +196,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
   };
 
  public:
-  enum MoreauJeanOSI_ds_workVector_id { RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH };
+  enum MoreauJeanOSI_ds_workVector_id { RESIDU_FREE, VFREE, RESIDU_SIGMAFREE, SIGMAFREE, BUFFER, QTMP, WORK_LENGTH };
 
   enum MoreauJeanOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
 
