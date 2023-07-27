@@ -405,7 +405,40 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
     // WBoundaryConditions initialization
     if (d->boundaryConditions())
       _initializeIterationMatrixWBoundaryConditions(*d, dsv);
-  } else if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+  }   else if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+      auto d =
+          std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+      if (d->mass()) {
+        _dynamicalSystemsGraph->properties(dsv).W =
+            std::make_shared<siconos::algebra::SimpleMatrix>(
+                *d->mass());  //*W = *d->mass();
+      } else {
+        _dynamicalSystemsGraph->properties(dsv).W =
+            std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW);
+        _dynamicalSystemsGraph->properties(dsv).W->eye();
+      }
+
+      auto K = d->K();
+      auto C = d->C();
+      auto S = d->S();
+      auto B = d->B();
+      auto W = _dynamicalSystemsGraph->properties(dsv).W;
+      if (d->B()) {
+          auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(1),B->size(0));
+          double coeff = h * h * _theta;
+          d->mass()->Solve(*Btrans); // Btrans = M^-1 B^T
+          siconos::algebra::prod(*B, *Btrans, *W,
+                                 false);  // W = B M^-1 B^T
+          if (S)
+              siconos::algebra::scal(1.0, *S, *W,
+                                     false);  // W += S
+
+      // WBoundaryConditions initialization
+      if (d->boundaryConditions())
+        _initializeIterationMatrixWBoundaryConditions(*d, dsv);
+    }
+
+  else if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     auto &lldds =
         static_cast<siconos::modeling::LagrangianLinearDiagonalDS &>(*ds);
     auto ndof = lldds.dimension();
