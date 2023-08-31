@@ -109,13 +109,11 @@ void siconos::integrators::LsodarOSI::setTol(int newItol, std::vector<double>&& 
 }
 
 void siconos::integrators::LsodarOSI::setMinMaxStepSizes(double minStep, double maxStep) {
-  _intData[5] = 1;  // set IOPT = 1
   rwork[5] = minStep;
   rwork[6] = maxStep;
 }
 
 void siconos::integrators::LsodarOSI::setMaxNstep(int maxNumberSteps) {
-  _intData[5] = 1;  // set IOPT = 1
   iwork[5] = maxNumberSteps;
 }
 
@@ -126,7 +124,6 @@ void siconos::integrators::LsodarOSI::setTol(int newItol, double newRtol, double
 }
 
 void siconos::integrators::LsodarOSI::setMaxOrder(int maxorderNonStiff, int maxorderStiff) {
-  _intData[5] = 1;  // set IOPT = 1
   iwork[7] = maxorderNonStiff;
   iwork[8] = maxorderStiff;
 }
@@ -135,7 +132,7 @@ void siconos::integrators::LsodarOSI::updateData() {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
 
-  iwork.resize(_intData[7], 0);
+  iwork.resize(_intData[5], 0);
 
   // This is for documentation purposes only
   // Set the flag to generate extra printing at method switches.
@@ -149,7 +146,7 @@ void siconos::integrators::LsodarOSI::updateData() {
   // Set   the maximum order to be allowed for the stiff  (BDF) method.
   // iwork[8] = 0;
 
-  rwork.resize(_intData[6], 0.);
+  rwork.resize(_intData[4], 0.);
 
   jroot.resize(_intData[1], 0);
 }
@@ -250,9 +247,9 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
   // 1 - Neq; x vector size.
   _intData[0] = _xWork->size();
   // 5 - lrw, size of rwork
-  _intData[6] = 22 + _intData[0] * std::max(16, (int)_intData[0] + 9) + 3 * _intData[1];
+  _intData[4] = 22 + _intData[0] * std::max(16, (int)_intData[0] + 9) + 3 * _intData[1];
   // 6 - liw, size of iwork
-  _intData[7] = 20 + _intData[0];
+  _intData[5] = 20 + _intData[0];
 
   // memory allocation for double*, according to _intData values
   updateData();
@@ -402,12 +399,9 @@ void siconos::integrators::LsodarOSI::initialize() {
   // 3 - Itol, itask, iopt
   // intData[2,3,4,5] : default values set in class attribute
   // _intData[2] = 1 if ATOL is a scalar, else 2 (ATOL array)
-  // _intData[3] = 1;
-  // itask, an index specifying the task to be performed. 1: normal computation.
-  // _intData[5] = 0;  // iopt: 0 if no optional input else 1.
 
   // 4 - Istate
-  _intData[4] = 1;  // istate, an index used for input and output to specify the state of the
+  _intData[3] = 1;  // istate, an index used for input and output to specify the state of the
                     // calculation.
   // On input:
   //                 1: first call for the problem (initializations will be done).
@@ -425,7 +419,7 @@ void siconos::integrators::LsodarOSI::initialize() {
   //                 <0: error. See table below, in integrate function output message.
 
   // 7 - JT, Jacobian type indicator
-  //_intData[8] = 2;  // jt, Jacobian type indicator.
+  //_intData[6] = 2;  // jt, Jacobian type indicator.
   //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
   //           2 means an internally generated (difference quotient) full Jacobian (using NEQ
   //           extra calls to f per df/dx value). 4 means a user-supplied banded Jacobian. 5
@@ -475,22 +469,22 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
     istate = 1;  // restart TEMPORARY
   }
 
-  _intData[4] = istate;
+  _intData[3] = istate;
 
   // call LSODAR to integrate dynamical equation
   siconos::netlib::lsodar(&LsodarOSI_f_wrapper, &(_intData[0]), _xtmp->getArray(), &tinit_DR,
                           &tend_DR, &(_intData[2]), &rtol.front(), &atol.front(),
-                          &(_intData[3]), &(_intData[4]), &(_intData[5]), &rwork.front(),
-                          &(_intData[6]), &iwork.front(), &(_intData[7]),
-                          &LsodarOSI_jacobianf_wrapper, &(_intData[8]), &LsodarOSI_g_wrapper,
+                          &(_intData[3]), &rwork.front(),
+			  &(_intData[4]), &iwork.front(), &(_intData[5]),
+                          &LsodarOSI_jacobianf_wrapper, &(_intData[6]), &LsodarOSI_g_wrapper,
                           &(_intData[1]), &jroot.front());
 
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
   // === Post ===
-  if (_intData[4] < 0)  // if istate < 0 => LSODAROSI failed
+  if (_intData[3] < 0)  // if istate < 0 => LSODAROSI failed
   {
-    std::cout << "Lsodar::integrate(...) failed - Istate = " << _intData[4] << std::endl;
+    std::cout << "Lsodar::integrate(...) failed - Istate = " << _intData[3] << std::endl;
     std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so small "
                  "tolerance (ATOL and RTOL), or small maximum number of steps for one call "
                  "(MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP"
@@ -509,7 +503,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   }
 
   *_xWork = *_xtmp;
-  istate = _intData[4];
+  istate = _intData[3];
   tout = tinit_DR;  // real ouput time
   tend = tend_DR;   // necessary for next start of DLSODAR
   DEBUG_PRINTF("tout = %g, tinit = %g, tend = %g ", tout, tinit, tend);
@@ -731,9 +725,9 @@ void siconos::integrators::LsodarOSI::display() const {
   std::cout << " --- > LsodarOSI specific values: \n";
   std::cout << "Number of equations: " << _intData[0] << "\n";
   std::cout << "Number of constraints: " << _intData[1] << "\n";
-  std::cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these "
+  std::cout << "itol, istate, lrw, liw, jt: (for details on what are these "
                "variables see opkdmain.f)\n";
-  std::cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5]
-            << ", " << _intData[6] << ", " << _intData[7] << ", " << _intData[8] << "\n";
+  std::cout << _intData[2] << ", " << _intData[3]
+            << ", " << _intData[4] << ", " << _intData[5] << ", " << _intData[6] << "\n";
   std::cout << "====================================\n";
 }

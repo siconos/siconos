@@ -205,8 +205,10 @@ endif()
 # ========= Documentation setup =========
 # Finalize documentation setups.
 # Must be called AFTER each component config.
-finalize_doc()
-
+if(WITH_DOCUMENTATION)
+  finalize_doc()
+endif()
+  
 include(FeatureSummary)
 feature_summary(WHAT ALL)
 

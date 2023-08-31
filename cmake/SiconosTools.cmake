@@ -416,6 +416,8 @@ function(apply_compiler_options COMPONENT)
       $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unknown-warning-option>)
     list(APPEND COMP_OPTIONS
       $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unreachable-code>)
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:IntelLLVM>,$<CXX_COMPILER_ID:IntelLLVM>>:-Rno-debug-disables-optimization>)
   endif()
 
   # More diagnostics ...

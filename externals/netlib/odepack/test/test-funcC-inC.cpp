@@ -20,6 +20,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "SiconosFortran.h"
 
@@ -43,7 +44,6 @@ int main(void) {
   int itol = 1;
   double rtol = 1e-6;
   std::vector<double> atol = {rtol, 0.};
-  int itask = 1;
   int istate = 1;
   int iopt = 0;
   int lrw = 44;
@@ -68,8 +68,8 @@ int main(void) {
 
   int iter = 0;
   while (iter < 5) {
-    siconos::netlib::lsodar(&f1, &neq, &y.front(), &t, &tout, &itol, &rtol, &atol.front(), &itask,
-                            &istate, &iopt, &rwork.front(), &lrw, &iwork.front(), &liw, &jdum,
+    siconos::netlib::lsodar(&f1, &neq, &y.front(), &t, &tout, &itol, &rtol, &atol.front(),
+                            &istate, &rwork.front(), &lrw, &iwork.front(), &liw, &jdum,
                             &jt, &gr1, &ng, &jroot.front());
     auto yt = std::exp(-t * t + 5. * t - 4.);
     auto er = y[0] - yt;

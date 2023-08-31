@@ -1,0 +1,6 @@
+lxml
+pytest
+matplotlib
+h5py
+pybind11
+vtk

@@ -63,7 +63,7 @@ class LsodarOSI : public OneStepIntegrator {
    *  See opkdmain.f and lsodar routine for details on those
    variables.
    */
-  std::vector<int> _intData = {0, 0, 1, 1, 1, 0, 0, 0, 2};
+  std::vector<int> _intData = {0, 0, 1, 1, 0, 0, 2};
 
   /** relative tolerance */
   std::vector<double> rtol = {RTOL_DEFAULT};
@@ -172,7 +172,7 @@ class LsodarOSI : public OneStepIntegrator {
    *
    *  \param newJT new value for the jt parameter.
    */
-  inline void setJT(int newJT) { _intData[8] = newJT; };
+  inline void setJT(int newJT) { _intData[6] = newJT; };
 
   /** set itol, rtol and atol (tolerance parameters for lsodar)
    *

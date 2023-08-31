@@ -59,7 +59,7 @@ endif()
 
 # -- create/setup component target --
 create_siconos_component(externals)
-
+target_compile_options(externals PRIVATE "-w")
 # - lumod part -
 target_sources(externals PRIVATE
   SOL/lumod-c/commonlib.c SOL/lumod-c/lumod_dense.c)

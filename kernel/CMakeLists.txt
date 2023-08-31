@@ -51,7 +51,7 @@ include(ComponentSetup)
 
 create_siconos_component(${COMPONENT} EXCLUDE )
 foreach(dir IN LISTS kernel_DIRS)
-  target_include_directories(kernel PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir})
+  target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
 endforeach()
 
 # We require C++ 20. PUBLIC to propagate to other components.

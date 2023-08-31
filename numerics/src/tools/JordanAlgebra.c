@@ -22,7 +22,7 @@
 #include <stdlib.h>  // for exit
 
 #include "NumericsVector.h"
-#include "cblas.h"
+#include "SiconosBlas.h"
 #include "math.h"
 
 // #define DEBUG_MESSAGES

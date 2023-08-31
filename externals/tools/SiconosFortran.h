@@ -35,14 +35,14 @@ typedef void (*jacopointer)(int*, double*, double*, int*, int*, double*, int*);
 
 #if defined(HAS_FORTRAN)
 extern "C" void lsodar(fpointer, int* NEQ, double* Y, double* T, double* TOUT, int* ITOL,
-                       double* RTOL, double* ATOL, int* ITASK, int* ISTATE, int* IOPT,
+                       double* RTOL, double* ATOL, int* ISTATE,
                        double* RWORK, int* LRW, int* IWORK, int* LIW, jacopointer C_JAC,
                        int* JT, gpointer C_G, int* NG, int* JROOT);
 
 #else
 extern "C" inline void lsodar(fpointer, int* NEQ, double* Y, double* T, double* TOUT,
-                              int* ITOL, double* RTOL, double* ATOL, int* ITASK, int* ISTATE,
-                              int* IOPT, double* RWORK, int* LRW, int* IWORK, int* LIW,
+                              int* ITOL, double* RTOL, double* ATOL, int* ISTATE,
+                              double* RWORK, long* LRW, int* IWORK, int* LIW,
                               jacopointer C_JAC, int* JT, gpointer C_G, int* NG, int* JROOT) {
   printf("Siconos Fortran API is off. This function (lsodar) has no effects.\n");
 }

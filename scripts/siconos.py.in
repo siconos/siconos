@@ -633,11 +633,10 @@ def generate_cmakelists(args):
     if not build_required:
         # exit if no build has been set from command line.
         return False
-    result = 'project({} CXX C)\n'.format(args.exe_name)
     # cmake minimum version
-    result += 'cmake_minimum_required(VERSION 3.7)\n'
-    if cmake_version >= version.parse("3.12"):
-        result += 'cmake_policy(SET CMP0074 NEW)\n'
+    result = 'cmake_minimum_required(VERSION 3.14)\n'
+    result += 'cmake_policy(SET CMP0074 NEW)\n'
+    result += 'project({} CXX C)\n'.format(args.exe_name)
 
     if args.debug:
         build_type = 'Debug'

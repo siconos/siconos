@@ -113,7 +113,7 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
 
 #else
 
-void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
+void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
 {
   printf("You need to compile the lp_solve support");
   exit(EXIT_FAILURE);
