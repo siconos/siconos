@@ -1058,12 +1058,12 @@ while(hasNotConverged != 0 && findKappa)
   hasNotConverged = 1;
   pinfeas = dinfeas = complem = udotr = projerr = diff_fixp = totalresidual = old_diff_fixp = 1e300;
   alpha_primal = alpha_dual = 1.;
-  barr_param = 10.;
+  barr_param = 1.;
   // barr_param = 1e-5;
   // kappa_mu = randomFloat(0.1, 0.99);
   // kappa_eps = randomFloat(0.7, 3.0)*n;
   // kappa_mu = 0.99;
-  kappa_mu = 0.7;
+  // kappa_mu = 0.7;
   kappa_eps = n;
   // kappa_eps = 10;
 
@@ -1077,7 +1077,6 @@ while(hasNotConverged != 0 && findKappa)
     diff_fixp += (s[i/d] - cblas_dnrm2(2, velocity+i+1, 1))*(s[i/d] - cblas_dnrm2(2, velocity+i+1, 1));
   }
   diff_fixp = sqrt(diff_fixp);
-  old_diff_fixp = diff_fixp;
   JA_prod(velocity, reaction, nd, n, complemConstraint);
   for (int k = 0; k < nd; complemConstraint[k] -= 2*barr_param, k+=d);
   // complem = complemResidualNorm(velocity, reaction, nd, n);
@@ -1266,8 +1265,8 @@ while(hasNotConverged != 0 && findKappa)
         //   printf("Cone %zu: ub = %.1e, %.1e,\tub/|ub| = %.1e, %.1e\n",i, velocity[pos+1], velocity[pos+2], -velocity[pos+1]/ub, -velocity[pos+2]/ub);
         // }
 
-        NM_entry(subdiff_u, i, pos+1, -velocity[pos+1]/ub);
-        NM_entry(subdiff_u, i, pos+2, -velocity[pos+2]/ub);
+        NM_entry(subdiff_u, i, pos+1, -0.9*velocity[pos+1]/ub);
+        NM_entry(subdiff_u, i, pos+2, -0.9*velocity[pos+2]/ub);
 
         // fixpConstraint[i] = s[i] - ub;  // fixpConstraint = s - |u_bar|
         fixpConstraint[i] = s[i] - ub;  // fixpConstraint = s - |u_bar|
@@ -1287,7 +1286,7 @@ while(hasNotConverged != 0 && findKappa)
       NM_insert(J, eye_n, m + 2*nd, m + 2*nd);
 
       /* regularization */
-      NM_insert(J, NM_scalar(nd, -1e-7), m + nd, m + nd);
+      // NM_insert(J, NM_scalar(nd, -1e-7), m + nd, m + nd);
 
       // if (iteration == 0)
       // {
@@ -1327,140 +1326,34 @@ while(hasNotConverged != 0 && findKappa)
       cblas_dcopy(m + 2*nd + n, rhs, 1, rhs_2, 1);    // rhs_2 = old rhs
 
 
-      // int target = -5;
-      // if(iteration==target)
-      // {
-      //   fprintf(iterates,"Jac_C = [\n");
-      //   CSparseMatrix_print_in_Matlab_file(NM_triplet(J), 0, iterates);
-      //   fprintf(iterates,"];\n");
-      //   fprintf(iterates,"Jac_C = sparse(int32(Jac_C(:,1)), int32(Jac_C(:,2)), Jac_C(:,3));\n");
-
-
-      //   fprintf(iterates,"rhs_C = [");
-      //   for(int i = 0; i < m + 2*nd + n; i++)
-      //   {
-      //     fprintf(iterates,"%8.20e; ",rhs[i]);
-      //   }
-      //   fprintf(iterates,"];\n");
-
-
-      //   // Compute L, U by LAPACK using dense matrix
-      //   J_dense = NM_create(NM_SPARSE, J->size0, J->size1);
-      //   NM_to_dense(J, J_dense);
-      //   // printf("\nJ_dense"); NM_display(J_dense); printf("\n");
-      //   // printf("\nJ_dense->matrix0\n");
-      //   // for (int i = 0; i < J_dense->size0; i++)
-      //   // {
-      //   //   for (int j = 0; j < J_dense->size1; j++)
-      //   //   {
-      //   //     printf("%.2f ", J_dense->matrix0[i + j * J_dense->size0]);
-      //   //   }
-      //   //   printf("\n");
-      //   // }
-
-      //   lapack_int* ipiv = (lapack_int*)NM_iWork(J_dense, J_dense->size0, sizeof(lapack_int));
-      //   lapack_int info_J = 0;
-
-      //   DGETRF(J_dense->size0, J_dense->size1, J_dense->matrix0, J_dense->size0, ipiv, &info_J);
-
-      //   // Display the L and U factors
-      //   fprintf(iterates,"P_LAP= [\n");
-      //   //printf("P_LAP = ");
-      //   for(int i = 0; i < J_dense->size0; i++)
-      //   {
-      //     fprintf(iterates,"%d ",ipiv[i]);
-      //     // printf("%d ", ipiv[i]);
-      //   }
-      //   fprintf(iterates,"];\n");
-
-      //   fprintf(iterates,"L_LAP = [\n");
-      //   // printf("\n\nL factor:\n");
-      //   for (int i = 0; i < J_dense->size0; i++)
-      //   {
-      //     for (int j = 0; j < J_dense->size1; j++)
-      //     {
-      //         if (i > j)
-      //         {
-      //           fprintf(iterates,"%8.20e ",J_dense->matrix0[i + j * J_dense->size0]);
-      //           // printf("%.2f ", J_dense->matrix0[i + j * J_dense->size0]);
-      //         }
-      //         else if (i == j)
-      //         {
-      //           if (J_dense->matrix0[i + j * J_dense->size0] != 0)
-      //           {
-      //             fprintf(iterates,"%e ", 1.);
-      //             // printf("1.00 ");
-      //           }
-      //           else
-      //           {
-      //             fprintf(iterates,"%e ", 0.);
-      //             // printf("0.00 ");
-      //           }
-      //         }
-      //         else
-      //         {
-      //           fprintf(iterates,"%e ", 0.);
-      //           // printf("0.00 ");
-      //         }
-      //     }
-      //     fprintf(iterates,";\n");
-      //     // printf("\n");
-      //   }
-      //   fprintf(iterates,"];\n");
-
-
-      //   fprintf(iterates,"U_LAP = [\n");
-      //   // printf("\nU factor:\n");
-      //   for (int i = 0; i < J_dense->size0; i++)
-      //   {
-      //     for (int j = 0; j < J_dense->size1; j++)
-      //     {
-      //         if (i <= j)
-      //         {
-      //           fprintf(iterates,"%8.20e ",J_dense->matrix0[i + j * J_dense->size0]);
-      //           // printf("%.2f ", J_dense->matrix0[i + j * J_dense->size0]);
-      //         }
-
-      //         else
-      //         {
-      //           fprintf(iterates,"%e ", 0.);
-      //           // printf("0.00 ");
-      //         }
-
-      //     }
-      //     fprintf(iterates,";\n");
-      //     // printf("\n");
-      //   }
-      //   fprintf(iterates,"];\n");
-      // }
-
-
-
       // SOLVE
-      NM_LU_solve(J, rhs, 1);
-      // cs_lusol_2(1, NM_csc(J), rhs, DBL_EPSILON);
-
-      // if(iteration==target) cs_lusol_2(1, NM_csc(J), rhs, DBL_EPSILON, iterates);
-      // else  NM_LU_solve(J, rhs, 1);
-
-      // J_dense = NM_create(NM_SPARSE, J->size0, J->size1);
-      // NM_to_dense(J, J_dense);
-      // NM_LU_solve(J_dense, rhs, 1);
+      // NM_LU_solve(J, rhs, 1);
 
 
-      // if(iteration==target)
-      // {
-      //   fprintf(iterates,"sol_C = [");
-      //   for(int i = 0; i < m + 2*nd + n; i++)
-      //   {
-      //     fprintf(iterates,"%8.20e; ",rhs[i]);
-      //   }
-      //   fprintf(iterates,"];\n");
-      // }
+      double * rhs_tmp = (double*)calloc(m+2*nd+n,sizeof(double));
+      cblas_dcopy(m+2*nd+n, rhs_2, 1, rhs_tmp, 1);
+      for (int k=0; k<m+2*nd+n; sol[k] = 0., k++);  // reset sol
 
+      int max_refine = 1;
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) max_refine = 10;
 
-      cblas_dcopy(m + 2*nd + n, rhs, 1, sol, 1);
-      // cblas_dcopy(m + 2*nd + n, rhs_2, 1, rhs, 1);
+      for (int itr = 0; itr < max_refine; itr++)
+      {
+        NM_LU_solve(J, rhs_tmp, 1);
+        cblas_daxpy(m+2*nd+n, 1.0, rhs_tmp, 1, sol, 1);
+        cblas_dcopy(m+2*nd+n, rhs_2, 1, rhs_tmp, 1);
+        NM_gemv(-1.0, J, sol, 1.0, rhs_tmp);
+        //printf("refinement iterations = %i %8.2e\n",itr, cblas_dnrm2(m+2*nd, rhs_tmp, 1));
+        if (cblas_dnrm2(m+2*nd+n, rhs_tmp, 1) <= 1e-14)
+        {
+          // printf("\nrefinement iterations = %d %8.2e\n",itr+1, cblas_dnrm2(m+2*nd+n, rhs_tmp, 1));
+          free(rhs_tmp);
+          break;
+        }
+      }
+
+      // cblas_dcopy(m + 2*nd + n, rhs, 1, sol, 1);
+
       NM_gemv(1.0, J, sol, -1.0, rhs_2);
 
       LS_norm_d = cblas_dnrm2(m, rhs_2, 1);
@@ -1507,7 +1400,7 @@ while(hasNotConverged != 0 && findKappa)
        [   u - H*v - w - phi(s)   ]  nd        primalConstraint
        [         s - |ub|         ]  n
     */
-    case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2:
+    case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_QP2:
     {
       // First linear linear system
       J = NM_create(NM_SPARSE, m + 2*nd + n, m + 2*nd + n);
@@ -1769,10 +1662,10 @@ while(hasNotConverged != 0 && findKappa)
     // alpha_dual = getStepLength(reaction, d_reaction, nd, n, gmm);
 
     // printf("alpha_primal:\n");
-    alpha_primal = getStepLength(velocity, d_velocity, nd, n, 0.9);
+    alpha_primal = getStepLength(velocity, d_velocity, nd, n, 0.95);
 
     // printf("\nalpha_dual:\n");
-    alpha_dual = getStepLength(reaction, d_reaction, nd, n, 0.9);
+    alpha_dual = getStepLength(reaction, d_reaction, nd, n, 0.95);
 
     // arr_alpha_primal = array_getStepLength(velocity, d_velocity, nd, n, 0.999);
     // arr_alpha_dual = array_getStepLength(reaction, d_reaction, nd, n, 0.999);
@@ -2146,11 +2039,14 @@ while(hasNotConverged != 0 && findKappa)
     }
 
 
-    // kappa_mu = 0.852;
+    kappa_mu = 0.7;
     // kappa_eps = 2*n;
     // scale = 100;
-    // if (totalresidual_mu <= kappa_eps*barr_param)
-    if (totalresidual_mu <= 10*barr_param && diff_fixp < old_diff_fixp)
+    // if (totalresidual_mu <= 1e-10)
+    if (totalresidual_mu <= 10*barr_param)
+    // if ((barr_param > 1e-6 || totalresidual_mu < tol) && alpha_primal > 1e-1)
+    // if (barr_param > 1e-11 && alpha_primal > 1e-1)
+    // if (barr_param > 1e-11)
     {
       barr_param *= kappa_mu;
       // printf("abs(ub'd_ub - |ub|*|d_ub|) = %e\n", check_sub);
@@ -2158,7 +2054,7 @@ while(hasNotConverged != 0 && findKappa)
       numerics_printf_verbose(-1, "| it  | pinfeas | dinfeas |  |s-ub| | |uor-mu||2max|uor-mu||   4*mu  |  u'r/n  | prj err | barpram |  alpha  |  |dv|   |  |du|   |  |dr|   |  |ds|   | ls prim | ls dual | ls comp | ls fixP |");
     }
 
-
+    if (iteration > 0) old_diff_fixp = diff_fixp;
 
 
 
@@ -2356,10 +2252,10 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES;
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 300;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 5000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
