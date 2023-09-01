@@ -4550,23 +4550,24 @@ while(1)
       {
         cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
 
-        NM_LDLT_factorize(Jac);
-        NumericsMatrix *A = Jac->destructible;
+        /* NM_LDLT_factorize(Jac); */
+        /* NumericsMatrix *A = Jac->destructible; */
 
-        if (NM_LDLT_factorized(A))
-        {
-          NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-          if (p->LDLT_solver == NSM_HSL)
-          {
-            LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
-            lapack_int info = 1;
-            info = Ma57_Refine(lbl->ma57, rhs, rhs_save, NM_half_triplet(A)->x, 100, 2);
-            nRefine = lbl->ma57->info[29];
-            residu_refine = lbl->ma57->rinfo[9];
+        /* if (NM_LDLT_factorized(A)) */
+        /* { */
+        /*   NSM_linear_solver_params* p = NSM_linearSolverParams(A); */
+        /*   if (p->LDLT_solver == NSM_HSL) */
+        /*   { */
+        /*     LBL_Data * lbl = (LBL_Data *)p->linear_solver_data; */
+        /*     lapack_int info = 1; */
+        /*     info = Ma57_Refine(lbl->ma57, rhs, rhs_save, NM_half_triplet(A)->x, 100, 2); */
+        /*     nRefine = lbl->ma57->info[29]; */
+        /*     residu_refine = lbl->ma57->rinfo[9]; */
 
-            if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info);
-          }
-        }
+        /*     if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info); */
+        /*   } */
+        /* } */
+	NM_LDLT_refine(J, rhs, rhs_save, 1, tol, 10, 0);
       }
       else
         NM_LDLT_solve(Jac, rhs, 1);
@@ -4964,32 +4965,32 @@ while(1)
         cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
         // NM_LDLT_refine(Jac, rhs, rhs_save, 1, 1e-14, 200, 0);
 
-        NM_LDLT_factorize(Jac);
-        NumericsMatrix *A = Jac->destructible;
+      /*   NM_LDLT_factorize(Jac); */
+      /*   NumericsMatrix *A = Jac->destructible; */
 
-        if (NM_LDLT_factorized(A))
-        {
-          NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-          if (p->LDLT_solver == NSM_HSL)
-          {
-            LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
-            lapack_int info = 1;
-            info = Ma57_Refine(lbl->ma57, rhs, rhs_save, NM_half_triplet(A)->x, 100, 2);
-            nRefine = lbl->ma57->info[29];
-            residu_refine = lbl->ma57->rinfo[9];
+      /*   if (NM_LDLT_factorized(A)) */
+      /*   { */
+      /*     NSM_linear_solver_params* p = NSM_linearSolverParams(A); */
+      /*     if (p->LDLT_solver == NSM_HSL) */
+      /*     { */
+      /*       LBL_Data * lbl = (LBL_Data *)p->linear_solver_data; */
+      /*       lapack_int info = 1; */
+      /*       info = Ma57_Refine(lbl->ma57, rhs, rhs_save, NM_half_triplet(A)->x, 100, 2); */
+      /*       nRefine = lbl->ma57->info[29]; */
+      /*       residu_refine = lbl->ma57->rinfo[9]; */
 
-            if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info);
+      /*       if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info); */
 
-            // print RINFO(9) Norm of scaled residuals
-            if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
-            {
-              if (iteration==0) fprintf(iterates,"RINFO = [];\n");
-              fprintf(iterates, "RINFO = [RINFO, %3.50f];\n", residu_refine);
-            }
-          }
-        }
-      }
-
+      /*       // print RINFO(9) Norm of scaled residuals */
+      /*       if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE]) */
+      /*       { */
+      /*         if (iteration==0) fprintf(iterates,"RINFO = [];\n"); */
+      /*         fprintf(iterates, "RINFO = [RINFO, %3.50f];\n", residu_refine); */
+      /*       } */
+      /*     } */
+      /*   } */
+	NM_LDLT_refine(J, rhs, rhs_save, 1, tol, 10, 0);
+      } 
       else
         NM_LDLT_solve(Jac, rhs, 1);
 
@@ -5420,23 +5421,24 @@ while(1)
         cblas_dcopy(m + nd, rhs, 1, rhs_save, 1);
         // NM_LDLT_refine(Jac, rhs, rhs_save, 1, 1e-14, 200, 0);
 
-        NM_LDLT_factorize(Jac);
-        NumericsMatrix *A = Jac->destructible;
+        /* NM_LDLT_factorize(Jac); */
+        /* NumericsMatrix *A = Jac->destructible; */
 
-        if (NM_LDLT_factorized(A))
-        {
-          NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-          if (p->LDLT_solver == NSM_HSL)
-          {
-            LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
-            lapack_int info = 1;
-            info = Ma57_Refine(lbl->ma57, rhs, rhs_save, NM_half_triplet(A)->x, 100, 2);
-            nRefine = lbl->ma57->info[29];
-            residu_refine = lbl->ma57->rinfo[9];
+        /* if (NM_LDLT_factorized(A)) */
+        /* { */
+        /*   NSM_linear_solver_params* p = NSM_linearSolverParams(A); */
+        /*   if (p->LDLT_solver == NSM_HSL) */
+        /*   { */
+        /*     LBL_Data * lbl = (LBL_Data *)p->linear_solver_data; */
+        /*     lapack_int info = 1; */
+        /*     info = Ma57_Refine(lbl->ma57, rhs, rhs_save, NM_half_triplet(A)->x, 100, 2); */
+        /*     nRefine = lbl->ma57->info[29]; */
+        /*     residu_refine = lbl->ma57->rinfo[9]; */
 
-            if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info);
-          }
-        }
+        /*     if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info); */
+        /*   } */
+        /* } */
+	NM_LDLT_refine(J, rhs, rhs_save, 1, tol, 10, 0);
       }
 
       else
@@ -6075,23 +6077,24 @@ while(1)
         cblas_dcopy(m + nd, rhs, 1, rhs_save, 1);
         // NM_LDLT_refine(Jac, rhs, rhs_save, 1, 1e-14, 200, 0);
 
-        NM_LDLT_factorize(Jac);
-        NumericsMatrix *A = Jac->destructible;
+        /* NM_LDLT_factorize(Jac); */
+        /* NumericsMatrix *A = Jac->destructible; */
 
-        if (NM_LDLT_factorized(A))
-        {
-          NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-          if (p->LDLT_solver == NSM_HSL)
-          {
-            LBL_Data * lbl = (LBL_Data *)p->linear_solver_data;
-            lapack_int info = 1;
-            info = Ma57_Refine(lbl->ma57, rhs, rhs_save, NM_half_triplet(A)->x, 100, 2);
-            nRefine = lbl->ma57->info[29];
-            residu_refine = lbl->ma57->rinfo[9];
+        /* if (NM_LDLT_factorized(A)) */
+        /* { */
+        /*   NSM_linear_solver_params* p = NSM_linearSolverParams(A); */
+        /*   if (p->LDLT_solver == NSM_HSL) */
+        /*   { */
+        /*     LBL_Data * lbl = (LBL_Data *)p->linear_solver_data; */
+        /*     lapack_int info = 1; */
+        /*     info = Ma57_Refine(lbl->ma57, rhs, rhs_save, NM_half_triplet(A)->x, 100, 2); */
+        /*     nRefine = lbl->ma57->info[29]; */
+        /*     residu_refine = lbl->ma57->rinfo[9]; */
 
-            if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info);
-          }
-        }
+        /*     if(info) printf("Ma57_Refine_2. Error return from Refine: %d\n", info); */
+        /*   } */
+        /* } */
+	NM_LDLT_refine(J, rhs, rhs_save, 1, tol, 10, 0);
       }
 
       else
