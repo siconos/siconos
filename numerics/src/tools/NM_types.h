@@ -22,8 +22,8 @@
   \brief enum related to NumericsMatrix.
 */
 
-// Declared apart from NumericsMatrix.h to facilitate namespace encapsulation of Numerics stuff
-// inside the kernel.
+// Declared apart from NumericsMatrix.h to facilitate namespace encapsulation of
+// Numerics stuff inside the kernel.
 
 /*! Available types of storage for NumericsMatrix */
 typedef enum NumericsMatrix_types {

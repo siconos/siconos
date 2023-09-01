@@ -28,17 +28,17 @@ siconos::modeling::BoundaryCondition::BoundaryCondition(
     const Indices& newVelocityIndices)
     : _velocityIndices{newVelocityIndices},
       _prescribedVelocity{std::make_shared<siconos::algebra::SiconosVector>(
-          newVelocityIndices.size(), 0.)},
+          _velocityIndices.size(), 0.)},
       _prescribedVelocityOld{std::make_shared<siconos::algebra::SiconosVector>(
-          newVelocityIndices.size(), 0.)} {}
+          _velocityIndices.size(), 0.)} {}
 
 siconos::modeling::BoundaryCondition::BoundaryCondition(
     Indices&& newVelocityIndices)
     : _velocityIndices{std::move(newVelocityIndices)},
       _prescribedVelocity{std::make_shared<siconos::algebra::SiconosVector>(
-          newVelocityIndices.size(), 0.)},
+          _velocityIndices.size(), 0.)},
       _prescribedVelocityOld{std::make_shared<siconos::algebra::SiconosVector>(
-          newVelocityIndices.size(), 0.)} {}
+          _velocityIndices.size(), 0.)} {}
 
 siconos::modeling::BoundaryCondition::BoundaryCondition(
     Indices&& newVelocityIndices,

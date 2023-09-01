@@ -115,6 +115,9 @@ if(WITH_DOCUMENTATION)
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static/biblio.css"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_static/biblio.css" COPYONLY)
+  configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static/custom.css"
+    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_static/custom.css" COPYONLY)
 
   # !! conf.py.in must be copied later, after doxygen setup !!
   # Done during finalize_doc call.

@@ -34,7 +34,7 @@
 //
 //
 // with this macro : ok
-
+%include picklable.i
 // SimpleMatrix operators
 %rename  (__add__) operator+;
 %rename  (__less__) operator-;

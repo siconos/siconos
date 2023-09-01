@@ -20,10 +20,15 @@ dependencies:
   - hdf5
   - h5py
   - clang-format
+  - cmake
+  - gmp
+  - cppunit
+  - suitesparse
+  - openblas
+  - lp_solve
   - python-lsp-server
   - black
   - flake8
   - autopep8
   - pyhull
-  - cmake
 

@@ -494,6 +494,7 @@ class MechanicsHdf5(object):
         self._dynamic_data = None
         self._cf_data = None
         self._cf_info = None
+        self._cf_work = None
         self._domain_data = None
         self._solv_data = None
         self._run_options = None
@@ -566,20 +567,28 @@ class MechanicsHdf5(object):
         self._cf_data = data(self._data, 'cf', 26,
                              use_compression=self._use_compression)
         if self._mode == 'w':
-            self._cf_data.attrs['info'] = 'time [0],  mu [1],  contact point A [2:4] ,'
-            self._cf_data.attrs['info'] += 'contact point B [5:7],  contact normal [8:10], '
-            self._cf_data.attrs['info'] += 'reaction impulse (global frame) [11:13],'
-            self._cf_data.attrs['info'] += 'relative gap [14:16], reaction velocity [17:19],'
-            self._cf_data.attrs['info'] += 'reaction impulse (local frame) [20:22],  interaction id [23],'
-            self._cf_data.attrs['info'] += 'ds 1 number [24],  ds 2 number [25]'
+            self._cf_data.attrs['info'] = '[0] : time,\n [1] : mu,\n [2:4] : contact point A,\n'
+            self._cf_data.attrs['info'] += ' [5:7] : contact point B,\n [8:10] : contact normal,\n'
+            self._cf_data.attrs['info'] += ' [11:13] : reaction impulse (global frame),\n'
+            self._cf_data.attrs['info'] += ' [14:16] : relative gap,\n [17:19] : reaction velocity,\n'
+            self._cf_data.attrs['info'] += ' [20:22] : reaction impulse (local frame),\n [23] : interaction id,\n'
+            self._cf_data.attrs['info'] += ' [24] : ds 1 number,\n [25] : ds 2 number'
 
         self._cf_info = data(self._data, 'cf_info', 5,
                              use_compression=self._use_compression)
 
         if self._mode == 'w':
-            self._cf_info.attrs['info'] = 'time [0],  interaction id [1]'
-            self._cf_info.attrs['info'] += 'ds 1 number [2],  ds 2 number [3]'
-            self._cf_info.attrs['info'] += 'static body number [4]'
+            self._cf_info.attrs['info'] = '[0] : time [0],\n [1] : interaction id,\n'
+            self._cf_info.attrs['info'] += ' [1] : ds 1 number,\n [3] : ds 2 number,\n'
+            self._cf_info.attrs['info'] += ' [4] : static body number'
+
+        self._cf_work = data(self._data, 'cf_work', 7,
+                                    use_compression=self._use_compression)
+
+        if self._mode == 'w':
+            self._cf_work.attrs['info'] = '[0] : time,\n [1] : interaction id,\n'
+            self._cf_work.attrs['info'] += ' [2] : normal contact work,\n [3] : tangent contact work,\n'
+            self._cf_work.attrs['info'] += ' [4] : friction dissipation,\n [5] : contact status'
 
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
@@ -662,6 +671,12 @@ class MechanicsHdf5(object):
         Contact points information.
         """
         return self._cf_info
+
+    def contact_work_data(self):
+        """
+        Contact points information.
+        """
+        return self._cf_work
 
     def domains_data(self):
         """
@@ -1201,7 +1216,7 @@ class MechanicsHdf5(object):
             nslaw=self._nslaws_data[name]
             if nslaw.attrs['type'] != 'NewtonImpactRollingFrictionNSL':
                 self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
-                
+
         nslaw.attrs['mu'] = mu
         nslaw.attrs['mu_r'] = mu_r
         nslaw.attrs['e'] = e

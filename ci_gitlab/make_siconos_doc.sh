@@ -20,6 +20,7 @@
 # Check if CI_PROJECT_DIR is set AND not empty
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with the path to 'siconos' repository (absolute) path."}
 
+python3 -m pip install sphinx-book-theme
 mkdir $CI_PROJECT_DIR/build
 cd $CI_PROJECT_DIR/build
 cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$user_file -DWITH_GIT=ON -DCMAKE_INSTALL_PREFIX=/usr/local

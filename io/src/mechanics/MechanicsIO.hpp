@@ -66,12 +66,21 @@ public:
   */
   SP::SimpleMatrix contactPoints(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1) const;
 
-  /** get the coordinates of all contact points, normals, reactions and velocities
+  /** get the contact information that is the ds linked by the interaction
    * \param nsds current nonsmooth dynamical system
    * \param index_set the index set number.
-   \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
+   \return a matrix where the columns are interaction id, ds1 number, ds2 number, static object number (if possible)
   */
+
   SP::SimpleMatrix contactInfo(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1) const;
+
+  /** get the dissipation values  of all contact points
+   * \param nsds current nonsmooth dynamical system
+   * \param index_set the index set number.
+   * \param tol double for the computation of contact status
+   \return a matrix where the columns are id, normal contact work, tangent contact work, friction dissipation, contact status
+  */
+  SP::SimpleMatrix contactContactWork(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1, double tol=1e-08) const;
 
   /** get the domain of each contact point
    * \param nsds current nonsmooth dynamical system

@@ -68,8 +68,9 @@ class TimeStepping : public Simulation {
   unsigned int _newtonCumulativeNbIterations{0};
 
   /** option to update Newton iterations number
-   *  LINEAR or LINEAR_IMPLICIT will force a single iteration of the Newton Solver
-   * NONLINEAR (default) will perform the Newton iterations up to convergence
+   *  LINEAR or LINEAR_IMPLICIT will force a single iteration of the Newton
+   * Solver. NONLINEAR (default) will perform the Newton iterations up to
+   * convergence
    */
   TimeSteppingType _newtonOptions{TimeSteppingType::NONLINEAR};
 
@@ -107,7 +108,12 @@ class TimeStepping : public Simulation {
 
   /** boolean variable to display warning on non-convergence
    */
-  bool _warnOnNonConvergence{true};
+  bool _newtonWarningOnNonConvergence{true};
+
+  /** boolean variable to display warning if osnspb is not correcltys olved
+   */
+  bool _warningNonsmoothSolver{true};
+
 
   /** boolean variable to resetAllLamda at each step (default true)
    */
@@ -151,10 +157,12 @@ class TimeStepping : public Simulation {
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
    */
-  TimeStepping(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-               std::shared_ptr<TimeDiscretisation> td,
-               std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-               std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb);
+  TimeStepping(
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+      std::shared_ptr<TimeDiscretisation> td,
+      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
+          osnspb);
 
   /** Constructor with the time-discretisation.
    *
@@ -162,14 +170,16 @@ class TimeStepping : public Simulation {
    *  \param td pointer to a timeDiscretisation used in the integration
    *  \param nb number of non smooth problem
    */
-  TimeStepping(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-               std::shared_ptr<TimeDiscretisation> td, int nb = 0);
+  TimeStepping(
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+      std::shared_ptr<TimeDiscretisation> td, int nb = 0);
 
   /** insert an Integrator into the simulation list of integrators
    *
    *  \param osi the OneStepIntegrator to add
    */
-  void insertIntegrator(std::shared_ptr<siconos::integrators::OneStepIntegrator> osi) override;
+  void insertIntegrator(
+      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi) override;
 
   /** Destructor.
    */
@@ -178,7 +188,8 @@ class TimeStepping : public Simulation {
   /** Overload Simulation::initialize */
   void initialize() override;
 
-  /** update indexSets[i] of the topology, using current y and lambda values of Interactions
+  /** update indexSets[i] of the topology, using current y and lambda values of
+   * Interactions
    *
    *  \param i the number of the set to be updated
    */
@@ -187,13 +198,15 @@ class TimeStepping : public Simulation {
   // /** Used by the updateIndexSet function in order to deactivate
   // std::shared_ptr<siconos::modeling::Interaction>.
   //  */
-  // virtual bool predictorDeactivate(std::shared_ptr<siconos::modeling::Interaction> inter,
+  // virtual bool
+  // predictorDeactivate(std::shared_ptr<siconos::modeling::Interaction> inter,
   // unsigned int i);
 
   // /** Used by the updateIndexSet function in order to activate
   // std::shared_ptr<siconos::modeling::Interaction>.
   //  */
-  // virtual bool predictorActivate(std::shared_ptr<siconos::modeling::Interaction> inter,
+  // virtual bool
+  // predictorActivate(std::shared_ptr<siconos::modeling::Interaction> inter,
   // unsigned int i);
 
   /** increment model current time according to User TimeDiscretisation and call
@@ -226,7 +239,9 @@ class TimeStepping : public Simulation {
    *
    *  \return  the cumulative number of steps performed by the Newton algorithm
    */
-  unsigned int getNewtonCumulativeNbIterations() { return _newtonCumulativeNbIterations; }
+  unsigned int getNewtonCumulativeNbIterations() {
+    return _newtonCumulativeNbIterations;
+  }
 
   /** initialize the Newton
    *  It computes the initial residu and set the, if needed to Newton variable
@@ -265,17 +280,30 @@ class TimeStepping : public Simulation {
   bool isNewtonConverge() { return _isNewtonConverge; };
 
   bool displayNewtonConvergence() { return _displayNewtonConvergence; };
-  void setDisplayNewtonConvergence(bool newval) { _displayNewtonConvergence = newval; };
+  void setDisplayNewtonConvergence(bool newval) {
+    _displayNewtonConvergence = newval;
+  };
 
-  void setWarnOnNonConvergence(bool newval) { _warnOnNonConvergence = newval; };
-  bool warnOnNonConvergence() { return _warnOnNonConvergence; };
+  void setNewtonWarningOnNonConvergence(bool newval) {
+    _newtonWarningOnNonConvergence = newval;
+  };
+  bool newtonWarningOnNonConvergence() {
+    return _newtonWarningOnNonConvergence;
+  };
+
+  void setWarningNonsmoothSolver(bool newval) {
+    _warningNonsmoothSolver = newval;
+  };
+  bool warningNonsmoothSolver() { return _warningNonsmoothSolver; };
+
   void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
-
   void displayNewtonConvergenceInTheLoop();
 
   void setResetAllLambda(bool newval) { _resetAllLambda = newval; };
 
-  void setSkipLastUpdateOutput(bool newval) { _skip_last_updateOutput = newval; };
+  void setSkipLastUpdateOutput(bool newval) {
+    _skip_last_updateOutput = newval;
+  };
   bool skipLastUpdateOutput() { return _skip_last_updateOutput; };
   void setSkipLastUpdateInput(bool newval) { _skip_last_updateInput = newval; };
   bool skipLastUpdateInput() { return _skip_last_updateInput; };
@@ -322,7 +350,9 @@ class TimeStepping : public Simulation {
    *
    *  \param maxStep maximum number of Newton solver iterations
    */
-  void setNewtonMaxIteration(unsigned int maxStep) { _newtonMaxIteration = maxStep; };
+  void setNewtonMaxIteration(unsigned int maxStep) {
+    _newtonMaxIteration = maxStep;
+  };
 
   /** get the maximum number of Newton iteration
    *

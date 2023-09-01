@@ -527,7 +527,7 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonTolerance)
   (_newtonUpdateInteractionsPerIteration)
   (_resetAllLambda)
-  (_warnOnNonConvergence))
+  (_newtonWarningOnNonConvergence))
 SICONOS_IO_REGISTER(OneStepIntegrator,
   (_dynamicalSystemsGraph)
   (_explicitJacobiansOfRelation)
