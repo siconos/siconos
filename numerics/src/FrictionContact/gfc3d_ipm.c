@@ -27,6 +27,7 @@
 #include <stdio.h>
 
 #include "CSparseMatrix_internal.h"
+#include "Friction_cst.h"
 #include "JordanAlgebra.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -1267,8 +1268,17 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
         cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
         cblas_dcopy(m + 2 * nd, rhs, 1, rhs_2, 1);
-
-        NM_LU_solve(J, rhs, 1);
+	if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
+            SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
+	  double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
+          cblas_dcopy(m + 2 * nd, rhs, 1, rhs_save, 1);
+          //NM_LU_refine(J, rhs, rhs_save, 1, tol, 10, 0);
+	  double residu;
+	  NM_LU_refine(J, rhs,  tol, 10,  &residu);
+          free(rhs_save);
+	}
+	else
+	  NM_LU_solve(J, rhs, 1);
 
         cblas_dcopy(m, rhs, 1, d_globalVelocity, 1);
         cblas_dcopy(nd, rhs + m, 1, d_velocity, 1);
@@ -1581,31 +1591,54 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
         double *rhs_tmp = (double *)calloc(m + 2 * nd, sizeof(double));
         cblas_dcopy(m + 2 * nd, rhs_2, 1, rhs_tmp, 1);
 
-        double *sol = (double *)calloc(m + 2 * nd, sizeof(double));
+        /* double *sol = (double *)calloc(m + 2 * nd, sizeof(double)); */
 
-        for (int itr = 0; itr < 1; itr++) {
-          NM_LU_solve(J, rhs_tmp, 1);
-          cblas_daxpy(m + 2 * nd, 1.0, rhs_tmp, 1, sol, 1);
-          cblas_dcopy(m + 2 * nd, rhs_2, 1, rhs_tmp, 1);
-          NM_gemv(-1.0, J, sol, 1.0, rhs_tmp);
-          // printf("refinement iterations = %i %8.2e\n",itr, cblas_dnrm2(m+2*nd, rhs_tmp, 1));
-          if (cblas_dnrm2(m + 2 * nd, rhs_tmp, 1) <= tol) {
-            break;
-          }
-        }
+        /* for (int itr = 0; itr < 10; itr++) { */
+        /*   NM_LU_solve(J, rhs_tmp, 1); */
 
-        cblas_dcopy(m, sol, 1, d_globalVelocity, 1);
-        cblas_dcopy(nd, sol + m, 1, d_velocity, 1);
-        cblas_dcopy(nd, sol + m + nd, 1, d_reaction, 1);
+        /*   cblas_daxpy(m + 2 * nd, 1.0, rhs_tmp, 1, sol, 1); */
+        /*   cblas_dcopy(m + 2 * nd, rhs_2, 1, rhs_tmp, 1); */
+        /*   NM_gemv(-1.0, J, sol, 1.0, rhs_tmp); */
+        /*   printf("refinement iterations = %i %8.2e < %8.2e\n",itr, cblas_dnrm2(m+2*nd, rhs_tmp, 1), tol); */
+	/*   printf("J size %i %i\n", J->size0, J->size1); */
+	/*   NM_write_in_filename(J, "J_IPM_LU.txt"); */
+        /*   if (cblas_dnrm2(m + 2 * nd, rhs_tmp, 1) <= tol) { */
+        /*     break; */
+        /*   } */
+	/*   getchar(); */
+        /* } */
+        /* cblas_dcopy(m, sol, 1, d_globalVelocity, 1); */
+        /* cblas_dcopy(nd, sol + m, 1, d_velocity, 1); */
+        /* cblas_dcopy(nd, sol + m + nd, 1, d_reaction, 1); */
 
-        NM_gemv(1.0, J, sol, -1.0, rhs_2);
+        /* NM_gemv(1.0, J, sol, -1.0, rhs_2); */
+
+	if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
+            SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
+	  double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
+          cblas_dcopy(m + 2 * nd, rhs_tmp, 1, rhs_save, 1);
+          //NM_LU_refine(J, rhs, rhs_save, 1, tol, 10, 0);
+	  double residu;
+	  NM_LU_refine(J, rhs_tmp,  tol, 10,  &residu);
+          free(rhs_save);
+	}
+	else
+	  NM_LU_solve(J, rhs_tmp, 1);
+
+
+
+
+        cblas_dcopy(m, rhs_tmp, 1, d_globalVelocity, 1);
+        cblas_dcopy(nd, rhs_tmp + m, 1, d_velocity, 1);
+        cblas_dcopy(nd, rhs_tmp + m + nd, 1, d_reaction, 1);
+        NM_gemv(1.0, J, rhs_tmp, -1.0, rhs_2);
 
         LS_norm_d = cblas_dnrm2(m, rhs_2, 1);
         LS_norm_c = cblas_dnrm2(nd, rhs_2 + m, 1);
         LS_norm_p = cblas_dnrm2(nd, rhs_2 + m + nd, 1);
 
         free(rhs_tmp);
-        free(sol);
+        //free(sol);
 
         J = NM_free(J);
 
@@ -2163,6 +2196,8 @@ void gfc3d_ipm_set_default(SolverOptions *options) {
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] =
       SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH;
+  /* options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = */
+  /*   SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL; */
 
   // options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] =
   // SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
