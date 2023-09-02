@@ -1385,8 +1385,18 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       NM_free(arrow_u);
 
 
-
-
+      cblas_dcopy(m + 2 * nd, rhs, 1, rhs_2, 1);
+      if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
+	  SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
+	double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
+	cblas_dcopy(m + 2 * nd, rhs, 1, rhs_save, 1);
+	//NM_LU_refine(J, rhs, rhs_save, 1, tol, 10, 0);
+	double residu;
+	NM_LU_refine(J, rhs,  tol, 10,  &residu);
+	free(rhs_save);
+      }
+      else
+	NM_LU_solve(J, rhs, 1);
 
       // // Create Arw(u) + |ub|I
       // NumericsMatrix * arrow_u = NM_create(NM_SPARSE, nd, nd);
@@ -1804,111 +1814,93 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     switch ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] )
     {
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL:
-    {
-      // Second linear linear system
-
-      // // Create eye_phiu = I + phi(u)
-      // eye_phiu = NM_create(NM_SPARSE, nd, nd);
-      // size_t eye_phiu_nzmax = nd + 2*n;
-      // NM_triplet_alloc(eye_phiu, eye_phiu_nzmax);
-      // NM_fill(eye_phiu, NM_SPARSE, nd, nd, eye_phiu->matrix2);
-
-      // /* Arrow matrix filling */
-      // size_t pos; double ub;
-      // for(size_t i = 0; i < n; ++i)
-      // {
-      //   pos = i * d;
-      //   ub = sqrt(velocity[pos+1]*velocity[pos+1]+velocity[pos+2]*velocity[pos+2]);
-
-      //   NM_entry(eye_phiu, pos, pos, 1.);
-      //   NM_entry(eye_phiu, pos, pos+1, velocity[pos+1]/ub);
-      //   NM_entry(eye_phiu, pos, pos+2, velocity[pos+2]/ub);
-      //   NM_entry(eye_phiu, pos+1, pos+1, 1.);
-      //   NM_entry(eye_phiu, pos+2, pos+2, 1.);
-      // }
-
-      // // d_velocity = (I + phi(u))d^u
-      // NM_gemv(1.0, eye_phiu, rhs+m, 0.0, d_velocity);
-
-      JA_prod(d_velocity, d_reaction, nd, n, dvdr_jprod);
-      cblas_daxpy(nd, -1.0, dvdr_jprod, 1, rhs_2+m, 1);
-      for (int k = 0; k < nd; rhs_2[m+k] += 2*sigma*barr_param, k+=d);
-
-      double * rhs_tmp = (double*)calloc(m+2*nd,sizeof(double));
-      cblas_dcopy(m+2*nd, rhs_2, 1, rhs_tmp, 1);
-
-      double * sol = (double*)calloc(m+2*nd,sizeof(double));
-
-      for (int itr = 0; itr < 1; itr++)
       {
-      	NM_LU_solve(J, rhs_tmp, 1);
-      	cblas_daxpy(m+2*nd, 1.0, rhs_tmp, 1, sol, 1);
-      	cblas_dcopy(m+2*nd, rhs_2, 1, rhs_tmp, 1);
-      	NM_gemv(-1.0, J, sol, 1.0, rhs_tmp);
-      	//printf("refinement iterations = %i %8.2e\n",itr, cblas_dnrm2(m+2*nd, rhs_tmp, 1));
-      	// if (cblas_dnrm2(m+2*nd, rhs_tmp, 1) <= tol)
-      	// {
-      	//   break;
-      	// }
+	// Second linear linear system
+
+	// // Create eye_phiu = I + phi(u)
+	// eye_phiu = NM_create(NM_SPARSE, nd, nd);
+	// size_t eye_phiu_nzmax = nd + 2*n;
+	// NM_triplet_alloc(eye_phiu, eye_phiu_nzmax);
+	// NM_fill(eye_phiu, NM_SPARSE, nd, nd, eye_phiu->matrix2);
+
+	// /* Arrow matrix filling */
+	// size_t pos; double ub;
+	// for(size_t i = 0; i < n; ++i)
+	// {
+	//   pos = i * d;
+	//   ub = sqrt(velocity[pos+1]*velocity[pos+1]+velocity[pos+2]*velocity[pos+2]);
+
+	//   NM_entry(eye_phiu, pos, pos, 1.);
+	//   NM_entry(eye_phiu, pos, pos+1, velocity[pos+1]/ub);
+	//   NM_entry(eye_phiu, pos, pos+2, velocity[pos+2]/ub);
+	//   NM_entry(eye_phiu, pos+1, pos+1, 1.);
+	//   NM_entry(eye_phiu, pos+2, pos+2, 1.);
+	// }
+
+	// // d_velocity = (I + phi(u))d^u
+	// NM_gemv(1.0, eye_phiu, rhs+m, 0.0, d_velocity);
+
+	JA_prod(d_velocity, d_reaction, nd, n, dvdr_jprod);
+        cblas_daxpy(nd, -1.0, dvdr_jprod, 1, rhs_2 + m, 1);
+        for (unsigned int k = 0; k < nd; rhs_2[m + k] += 2 * sigma * barr_param, k += d)
+          ;
+
+        double *rhs_tmp = (double *)calloc(m + 2 * nd, sizeof(double));
+        cblas_dcopy(m + 2 * nd, rhs_2, 1, rhs_tmp, 1);
+
+        /* double *sol = (double *)calloc(m + 2 * nd, sizeof(double)); */
+
+        /* for (int itr = 0; itr < 10; itr++) { */
+        /*   NM_LU_solve(J, rhs_tmp, 1); */
+
+        /*   cblas_daxpy(m + 2 * nd, 1.0, rhs_tmp, 1, sol, 1); */
+        /*   cblas_dcopy(m + 2 * nd, rhs_2, 1, rhs_tmp, 1); */
+        /*   NM_gemv(-1.0, J, sol, 1.0, rhs_tmp); */
+        /*   printf("refinement iterations = %i %8.2e < %8.2e\n",itr, cblas_dnrm2(m+2*nd, rhs_tmp, 1), tol); */
+	/*   printf("J size %i %i\n", J->size0, J->size1); */
+	/*   NM_write_in_filename(J, "J_IPM_LU.txt"); */
+        /*   if (cblas_dnrm2(m + 2 * nd, rhs_tmp, 1) <= tol) { */
+        /*     break; */
+        /*   } */
+	/*   getchar(); */
+        /* } */
+        /* cblas_dcopy(m, sol, 1, d_globalVelocity, 1); */
+        /* cblas_dcopy(nd, sol + m, 1, d_velocity, 1); */
+        /* cblas_dcopy(nd, sol + m + nd, 1, d_reaction, 1); */
+
+        /* NM_gemv(1.0, J, sol, -1.0, rhs_2); */
+
+	if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
+            SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
+	  double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
+          cblas_dcopy(m + 2 * nd, rhs_tmp, 1, rhs_save, 1);
+          //NM_LU_refine(J, rhs, rhs_save, 1, tol, 10, 0);
+	  double residu;
+	  NM_LU_refine(J, rhs_tmp,  tol, 10,  &residu);
+          free(rhs_save);
+	}
+	else
+	  NM_LU_solve(J, rhs_tmp, 1);
+
+
+
+
+        cblas_dcopy(m, rhs_tmp, 1, d_globalVelocity, 1);
+        cblas_dcopy(nd, rhs_tmp + m, 1, d_velocity, 1);
+        cblas_dcopy(nd, rhs_tmp + m + nd, 1, d_reaction, 1);
+        NM_gemv(1.0, J, rhs_tmp, -1.0, rhs_2);
+
+        LS_norm_d = cblas_dnrm2(m, rhs_2, 1);
+        LS_norm_c = cblas_dnrm2(nd, rhs_2 + m, 1);
+        LS_norm_p = cblas_dnrm2(nd, rhs_2 + m + nd, 1);
+
+        free(rhs_tmp);
+        //free(sol);
+
+        J = NM_free(J);
+
+        break;
       }
-
-      cblas_dcopy(m, sol, 1, d_globalVelocity, 1);
-      cblas_dcopy(nd, sol+m, 1, d_velocity, 1);
-      cblas_dcopy(nd, sol+m+nd, 1, d_reaction, 1);
-
-      NM_gemv(1.0, J, sol, -1.0, rhs_2);
-
-      LS_norm_d = cblas_dnrm2(m, rhs_2, 1);
-      LS_norm_c = cblas_dnrm2(nd, rhs_2+m, 1);
-      LS_norm_p = cblas_dnrm2(nd, rhs_2+m+nd, 1);
-
-      free(rhs_tmp);
-      free(sol);
-
-      if(J) J = NM_free(J);
-
-      break;
-    }
-    case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QP2:
-    {
-      // Second linear linear system
-      QNTpz(velocity, reaction, d_velocity, nd, n, d_velocity_t);
-      QNTpinvz(velocity, reaction, d_reaction, nd, n, d_reaction_t);
-      JA_prod(d_velocity_t, d_reaction_t, nd, n, dvdr_jprod);
-      QNTpz(velocity, reaction, velocity, nd, n, velocity_t);
-      JA_inv(velocity_t, nd, n, velocity_t_inv);
-      JA_prod(velocity_t_inv, dvdr_jprod, nd, n, d_velocity_t);
-      QNTpz(velocity, reaction, d_velocity_t, nd, n, dvdr_jprod);
-      cblas_daxpy(nd, -1.0, dvdr_jprod, 1, rhs_2+m, 1);
-
-      JA_inv(velocity, nd, n, d_velocity_t);
-      for (int k = 0; k < nd; rhs_2[m+k] += 2*sigma*barr_param*d_velocity_t[k], k++);
-
-      /* double *rhs_save = (double*)calloc(m+2*nd,sizeof(double)); */
-      /* cblas_dcopy(m+2*nd, rhs_2, 1, rhs_save, 1); */
-
-      double * rhs_tmp = (double*)calloc(m+2*nd,sizeof(double));
-      cblas_dcopy(m+2*nd, rhs_2, 1, rhs_tmp, 1);
-
-      NM_LDLT_solve(J, rhs_2, 1);
-
-
-      cblas_dcopy(m, rhs_2, 1, d_globalVelocity, 1);
-      cblas_dcopy(nd, rhs_2+m, 1, d_velocity, 1);
-      cblas_dcopy(nd, rhs_2+m+nd, 1, d_reaction, 1);
-
-      NM_gemv(1.0, J, rhs_2, -1.0, rhs_tmp);
-
-      LS_norm_d = cblas_dnrm2(m, rhs_tmp, 1);
-      LS_norm_c = cblas_dnrm2(nd, rhs_tmp+m, 1);
-      LS_norm_p = cblas_dnrm2(nd, rhs_tmp+m+nd, 1);
-
-      free(rhs_tmp);
-
-      if(J) J = NM_free(J);
-
-      break;
-    }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_QPH:
 
     {
@@ -2462,7 +2454,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH;
+  //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH;
 
   //options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_BALANCING_MHHT;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_NO;
