@@ -22,6 +22,7 @@
 #include <stdio.h>                    // for printf, fprintf, size_t, fscanf
 #include <stdlib.h>                   // for exit, malloc, free, EXIT_FAILURE
 #include <string.h>                   // for memcpy, memset
+#include "CSparseMatrix.h"
 #include "CSparseMatrix_internal.h"            // for CSparseMatrix, CS_INT, cs_dl_sp...
 #include "NM_MPI.h"                   // for NM_MPI_copy
 #include "NM_MUMPS.h"                 // for NM_MUMPS_copy
@@ -4014,6 +4015,7 @@ int NM_LU_factorize(NumericsMatrix* Ao)
           NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
 	  NM_MUMPS_set_icntl(A, 7, 3); // Use scotch */
           NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
+	  NM_MUMPS_set_icntl(A, 14, 1000); // percentage increase in the estimated working space */
         }
 
         NM_MUMPS_set_matrix(A);
@@ -4025,8 +4027,10 @@ int NM_LU_factorize(NumericsMatrix* Ao)
         info = mumps_id->info[0];
 
         /* MUMPS can return info codes with negative value */
+
         if(info)
         {
+	  numerics_warning("NM_LU_factorize", "MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
           if(verbose > 0)
           {
             fprintf(stderr,"NM_LU_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
@@ -6604,6 +6608,7 @@ int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs,
   lapack_int info = 1;
   /* factorization is done on destructible part only if
    * !A->internalData->isLUfactorized */
+
   NM_LDLT_factorize(Ao);
 
   /* get the destructible part of the matrix */
@@ -6621,6 +6626,9 @@ int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs,
     case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
     case NM_SPARSE:
     {
+
+
+
       NSM_linear_solver_params* p = NSM_linearSolverParams(A);
       switch (p->LDLT_solver)
       {
@@ -6641,9 +6649,45 @@ int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs,
         break;
       }
 #endif
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_LDLT_solve: using MUMPS\n");
+        }
+
+        assert (NM_MUMPS_id(A)->job); /* this means that least a
+                                       * factorization has already been
+                                       * done */
+	p->parent_matrix=A;
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+	int vecsize = A->size0;
+	cblas_dcopy(vecsize, b, 1, x, 1);   // x  = b (rhs_save)
+
+        NM_MUMPS_set_dense_rhs(A, nrhs, x);
+
+        NM_MUMPS_set_icntl(A, 10, maxitref); // mas number of refinement iteration
+	NM_MUMPS_set_cntl(A, 2, tol); // max number of refinement iteration
+
+        NM_MUMPS(A, 3); /* solve */
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_LDLT_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
       default:
       {
-        fprintf(stderr, "NM_LDLT_refine: unknown sparse linearrefiner %d\n", p->LDLT_solver);
+        fprintf(stderr, "NM_LDLT_refine: unknown sparse linear refiner %d\n", p->LDLT_solver);
         exit(EXIT_FAILURE);
       }
       break;
@@ -6674,68 +6718,132 @@ int NM_LDLT_refine(NumericsMatrix* Ao, double *x , double *b, unsigned int nrhs,
  * [out] -1 if solution of Ax=b contains NaNs
  * [out] -2 if solution of A(dx)=b-Ax contains NaNs
  */
-int NM_LU_refine(NumericsMatrix* A, double *x, double tol, int max_iter, double *residu)
+int NM_LU_refine(NumericsMatrix* Ao, double *x, double tol, int max_iter, double *residu)
 {
-  assert(A->size0 == A->size1);
-  int vecsize = A->size0;
+  assert(Ao->size0 == Ao->size1);
+  int vecsize = Ao->size0;
   int iteration = 0;
 
-  double *b = (double*)calloc(vecsize, sizeof(double));
-  double *dx = (double*)calloc(vecsize, sizeof(double));
-  // double *x_origin = (double*)calloc(vecsize, sizeof(double));
 
-  switch (A->storageType)
-  {
-  case NM_DENSE:
-  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
-  case NM_SPARSE:
-  {
-    cblas_dcopy(vecsize, x, 1, b, 1);   // b  = rhs
-    cblas_dcopy(vecsize, x, 1, dx, 1);  // dx = rhs
-    iteration = 1;
+  NM_LU_factorize(Ao);
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
 
-    NM_LU_solve(A, x, 1);               // solve Ax = b
-    if(NV_isnan(x, vecsize))            // return -1 if solution contains NaNs
+  if (NM_LU_factorized(A))
     {
-      free(b);   b = NULL;
-      free(dx); dx = NULL;
-      // free(x_origin); x_origin = NULL;
-      return -1;
+
+      switch (A->storageType)
+	{
+	case NM_DENSE:
+	case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+	case NM_SPARSE:
+	  {
+	    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+	    switch (p->LDLT_solver)
+	      {
+#ifdef WITH_MUMPS
+	      case NSM_MUMPS:
+		{
+		  double *b = (double*)calloc(vecsize, sizeof(double));
+		  cblas_dcopy(vecsize, x, 1, b, 1);   // b  = rhs
+		  if(verbose >= 2)
+		    {
+		      printf("NM_LU_solve: using MUMPS\n");
+		    }
+
+		  assert (NM_MUMPS_id(A)->job); /* this means that least a
+						 * factorization has already been
+						 * done */
+		  p->parent_matrix=A;
+		  DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+		  NM_MUMPS_set_dense_rhs(A, 1, x);
+
+		  NM_MUMPS_set_icntl(A, 10, max_iter); // mas number of refinement iteration
+		  NM_MUMPS_set_cntl(A, 2, tol); // max number of refinement iteration
+		  NM_MUMPS(A, 3); /* solve */
+		  int info = mumps_id->info[0];
+		  NM_gemv(-1.0, A, x, 1.0, b);       // dx = b - Ax
+		  *residu = cblas_dnrm2(vecsize, b, 1);
+		  /* MUMPS can return info codes with negative value */
+		  if(info)
+		    {
+		      numerics_warning("NM_LU_refine","MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+		      if(verbose > 0)
+			{
+			  fprintf(stderr,"NM_LU_refine: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+			}
+		    }
+		  break;
+		}
+#endif /* WITH_MUMPS */
+
+
+		/* case NSM_UNKNOWN: */
+	      default:
+		{
+		  double *b = (double*)calloc(vecsize, sizeof(double));
+		  double *dx = (double*)calloc(vecsize, sizeof(double));
+		  // double *x_origin = (double*)calloc(vecsize, sizeof(double));
+
+		  cblas_dcopy(vecsize, x, 1, b, 1);   // b  = rhs
+		  cblas_dcopy(vecsize, x, 1, dx, 1);  // dx = rhs
+		  iteration = 1;
+
+		  NM_LU_solve(A, x, 1);               // solve Ax = b
+		  if(NV_isnan(x, vecsize))            // return -1 if solution contains NaNs
+		    {
+		      free(b);   b = NULL;
+		      free(dx); dx = NULL;
+		      // free(x_origin); x_origin = NULL;
+		      return -1;
+		    }
+		  // cblas_dcopy(vecsize, x, 1, x_origin, 1);  // save solution
+
+		  NM_gemv(-1.0, A, x, 1.0, dx);       // dx = b - Ax
+		  *residu = cblas_dnrm2(vecsize, dx, 1);
+		  printf("-------------------------------------------------> NM_LU_refine: iteration = %i,\t residu = %e\n", iteration, *residu);
+		  while(*residu > tol && iteration < max_iter)
+		    {
+		      iteration++;
+
+		      NM_LU_solve(A, dx, 1);            // solve A(dx) = b - Ax
+		      if(NV_isnan(dx, vecsize))         // return -1 if solution contains NaNs
+			{
+			  // cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get solution back
+			  free(b); b = NULL;
+			  free(dx); dx = NULL;
+			  // free(x_origin); x_origin = NULL;
+			  return -2;
+			}
+
+		      NV_add(x, dx, vecsize, x);        // Update sol x+ = x + dx
+		      cblas_dcopy(vecsize, b, 1, dx, 1);
+		      NM_gemv(-1.0, A, x, 1.0, dx);     // dx   = b - Ax
+		      *residu = cblas_dnrm2(vecsize, dx, 1);
+		      printf("-------------------------------------------------> NM_LU_refine: iteration = %i,\t residu = %e\n", iteration, *residu);
+		    }
+		  free(b); b = NULL;
+		  free(dx); dx = NULL;
+		  break;
+		}
+		/* default: */
+		/* 	{ */
+		/* 	  fprintf(stderr, "NM_LU_refine: unknown sparse linear refiner %d\n", p->LDLT_solver); */
+		/* 	  exit(EXIT_FAILURE); */
+		/* 	} */
+		break;
+
+
+	      }
+	    // if (iteration == max_iter) cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get solution back
+	    break;
+	  }
+	default:
+	  assert (0 && "NM_LU_refine unknown storageType");
+	}
     }
-    // cblas_dcopy(vecsize, x, 1, x_origin, 1);  // save solution
 
-    NM_gemv(-1.0, A, x, 1.0, dx);       // dx = b - Ax
-    *residu = cblas_dnrm2(vecsize, dx, 1);
-
-    while(*residu > tol && iteration < max_iter)
-    {
-      iteration++;
-
-      NM_LU_solve(A, dx, 1);            // solve A(dx) = b - Ax
-      if(NV_isnan(dx, vecsize))         // return -1 if solution contains NaNs
-      {
-        // cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get solution back
-        free(b); b = NULL;
-        free(dx); dx = NULL;
-        // free(x_origin); x_origin = NULL;
-        return -2;
-      }
-
-      NV_add(x, dx, vecsize, x);        // Update sol x+ = x + dx
-
-      cblas_dcopy(vecsize, b, 1, dx, 1);
-      NM_gemv(-1.0, A, x, 1.0, dx);     // dx   = b - Ax
-      *residu = cblas_dnrm2(vecsize, dx, 1);
-    }
-
-    // if (iteration == max_iter) cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get solution back
-  }
-  default:
-    assert (0 && "NM_LU_refine unknown storageType");
-  }
-
-  free(b); b = NULL;
-  free(dx); dx = NULL;
   // free(x_origin); x_origin = NULL;
   return iteration;
 }
