@@ -27,6 +27,7 @@
 #include "test_utils.h"                  // for TestCase
 #include <time.h>
 #include "SiconosConfig.h" // for WITH_FCLIB, HAVE_GAMS_C_API // IWYU pragma: keep
+#include "SiconosLapack.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
@@ -98,7 +99,7 @@ void frictionContact_test_gams_opts(SolverOptions * options)
 
 int frictionContact_test_function(TestCase* current)
 {
-  int info = -1 ;
+  int k, info = -1 ;
 
   FrictionContactProblem * problem  = frictionContact_new_from_filename(current->filename);
   FILE * foutput  =  fopen("checkinput.dat", "w");
@@ -140,12 +141,16 @@ int frictionContact_test_function(TestCase* current)
   double *reaction = (double*)calloc(dim * NC, sizeof(double));
   double *velocity = (double*)calloc(dim * NC, sizeof(double));
 
+  long clk_tck = CLOCKS_PER_SEC;
+
   solver_options_print(current->options);
 
 // --- Extra setup for options when the solver belongs to GAMS family ---
 #ifdef HAVE_GAMS_C_API
   frictionContact_test_gams_opts(current->options);
 #endif
+
+  clock_t t1 = clock();
 
   if(dim == 2)
   {
@@ -199,7 +204,7 @@ int frictionContact_test_function(TestCase* current)
     printf("test: failure\n");
 
   printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
-  printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
+  printf("%3i %5i     %s\n\n", dim, NC, current->filename);
 
   free(reaction);
   free(velocity);
