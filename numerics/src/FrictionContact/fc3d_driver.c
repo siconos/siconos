@@ -282,6 +282,12 @@ int fc3d_driver(FrictionContactProblem* problem,
     fc3d_lcp_gams_pathvi(problem, reaction, velocity, &info, options);
     break;
   }
+  case SICONOS_FRICTION_3D_IPM_SEMISMOOTH:
+  {
+    numerics_printf(" ========================== Call IPM-SNM solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_IPM_SNM(problem, reaction, velocity, &info, options);
+    break;
+  }
   default:
   {
     char  msg[200];

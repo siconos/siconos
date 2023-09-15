@@ -384,6 +384,19 @@ void fc3d_set_internalsolver_tolerance(FrictionContactProblem *problem,
                                        SolverOptions *internalsolver_options,
                                        double error);
 
+/*
+ * Info to complete
+ */
+void fc3d_IPM_SNM(FrictionContactProblem*  problem, double*  reaction,
+               double*  velocity, int*  info, SolverOptions*  options);
+
+void fc3d_IPM_SNM_init(FrictionContactProblem* problem, SolverOptions* options);
+
+void fc3d_IPM_SNM_free(FrictionContactProblem* problem, SolverOptions* options);
+
+void fc3d_ipm_snm_set_default(SolverOptions* options);
+
+
 /** \addtogroup SetSolverOptions
  * @{
  */

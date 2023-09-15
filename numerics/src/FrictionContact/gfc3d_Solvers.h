@@ -247,7 +247,7 @@ extern "C"
   void gfc3d_ipm_set_default(SolverOptions* options);
 
   /*
-   *
+   * Info to complete
    */
   void gfc3d_IPM_SNM(GlobalFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
