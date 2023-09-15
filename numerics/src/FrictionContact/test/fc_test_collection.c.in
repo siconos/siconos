@@ -58,8 +58,8 @@ int main (int argc, char *argv[])
 
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
-  //int out = run_test_collection(collection, number_of_tests, frictionContact_test_function);
-  int out = 0;
+  int out = run_test_collection(collection, number_of_tests, frictionContact_test_function);
+  //int out = 0;
 
   free_test_collection(collection, number_of_tests);
 
