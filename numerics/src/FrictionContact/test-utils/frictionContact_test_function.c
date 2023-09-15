@@ -25,6 +25,7 @@
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for frictionContact_test_function
 #include "test_utils.h"                  // for TestCase
+#include <time.h>
 #include "SiconosConfig.h" // for WITH_FCLIB, HAVE_GAMS_C_API // IWYU pragma: keep
 
 // avoid a conflict with old csparse.h in case fclib includes it
@@ -166,10 +167,39 @@ int frictionContact_test_function(TestCase* current)
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
   }
 
-  if(!info)
-    printf("test success, residual = %9.2e, info = %d, nb iter = %i\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+
+  clock_t t2 = clock();
+
+  int print_size = 10;
+
+  printf("Norm velocity:  %12.8e\n", cblas_dnrm2(NC*dim, velocity, 1));
+  printf("Norm reaction:  %12.8e\n", cblas_dnrm2(NC*dim, reaction, 1));
+
+  if(dim * NC >= print_size)
+  {
+    printf("First values (%i)\n", print_size);
+    for(k = 0 ; k < print_size; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
+    }
+  }
   else
-    printf("test failure, residual = %9.2e, info = %d, nb iter = %i\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+  {
+    for(k = 0 ; k < dim * NC; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
+    }
+  }
+  printf(" ..... \n");
+
+
+  if(!info)
+    printf("test: success\n");
+  else
+    printf("test: failure\n");
+
+  printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
+  printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
 
   free(reaction);
   free(velocity);
