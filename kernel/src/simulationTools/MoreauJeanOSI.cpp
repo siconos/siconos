@@ -202,7 +202,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
       auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
       ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE] =
           std::make_shared<siconos::algebra::SiconosVector>(solidds->stressDimension());
-      ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE] =
+      ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE] =
           std::make_shared<siconos::algebra::SiconosVector>(solidds->stressDimension());
   }
 
@@ -425,10 +425,14 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       auto W = _dynamicalSystemsGraph->properties(dsv).W;
       if (d->B()) {
           auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(1),B->size(0));
-          double coeff = h * h * _theta;
+          auto BMinvBtrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(0),B->size(0));
           d->mass()->Solve(*Btrans); // Btrans = M^-1 B^T
-          siconos::algebra::prod(*B, *Btrans, *W,
-                                 false);  // W = B M^-1 B^T
+          siconos::algebra::prod(*B, *Btrans, *BMinvBtrans,
+                                 true);  // W = B M^-1 B^T
+          double coeff = h * h * _theta * _theta;
+
+          siconos::algebra::scal(coeff, *BMinvBtrans, *W,
+                                 true);  // W = h^2 * \theta^2 * B M^-1 B^T
           if (S)
               siconos::algebra::scal(1.0, *S, *W,
                                      false);  // W += S
@@ -437,7 +441,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       if (d->boundaryConditions())
         _initializeIterationMatrixWBoundaryConditions(*d, dsv);
     }
-
+}
   else if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     auto &lldds =
         static_cast<siconos::modeling::LagrangianLinearDiagonalDS &>(*ds);
@@ -1038,6 +1042,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanOSI::computeResidu(), dsType == "
           "siconos::modeling::Type::LagrangianLinearTIDS\n");
+      // To be consistent with computeFreeState():
+      // ResiduSigmaFree = S sigma_i + h \theta B vi + h^2\theta^2 B M^{-1} Fext
       // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i + h B sigma_{k+theta} + hFext_theta     (1)
       // This formulae is only valid for the first computation of the residual
       // for v = v_i and sigma = sigma_i otherwise the complete formulae must be applied, that is
@@ -1060,7 +1066,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       // "Old"
       const auto &qold = d.qMemory().getSiconosVector(0);         // qi
       const auto &vold = d.velocityMemory().getSiconosVector(0);  // vi
-      const auto &sigmaold = d.stressMemory().getSiconosVector(0);  // vi
+      const auto &sigmaold = d.stressMemory().getSiconosVector(0);  // sigmai
 
       DEBUG_EXPR(qold.display(););
       DEBUG_EXPR(vold.display(););
@@ -1068,34 +1074,50 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       DEBUG_EXPR(d.velocity()->display(););
 
       // --- ResiduFree computation Equation (1) ---
-      residuFree.zero();
+      residuSigfreed.zero();
       double coeff;
       // -- No need to update W --
 
-      if (d.C()) {
-        siconos::algebra::prod(h, *d.C(), vold, residuFree,
-                               false);  // vfree += h*C*vi
+      if (d.S()) {
+        siconos::algebra::prod(1.0, *d.S(), sigmaold, residuSigfreed,
+                               true);  // residufree = S*sigma_i
       }
-      if (d.K()) {
-        coeff = h * h * _theta;
-        siconos::algebra::prod(coeff, *d.K(), vold, residuFree,
-                               false);  // vfree += h^2*_theta*K*vi
-        siconos::algebra::prod(h, *d.K(), qold, residuFree,
-                               false);  // vfree += h*K*qi
-      }
+//      if (d.K()) {
+//        coeff = h * h * _theta;
+//        siconos::algebra::prod(coeff, *d.K(), vold, residuFree,
+//                               false);  // vfree += h^2*_theta*K*vi
+//        siconos::algebra::prod(h, *d.K(), qold, residuFree,
+//                               false);  // vfree += h*K*qi
+      //      }
       if (d.B()) {
           if (d.S()) {
               auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(d.B()->size(1),d.B()->size(0));
               auto Bvold = std::make_shared<siconos::algebra::SiconosVector>(vold.size());
-              coeff = h * h * _theta;
-              siconos::algebra::prod(coeff, *d.B(), vold, *Bvold,
-                                     true);  // Bvold = h*h*theta*B*v_{i}
-              d.S()->Solve(*Bvold); // Bvold = S^-1 Bvold
-              siconos::algebra::prod(h, *Btrans, *Bvold, residuFree,
-                                     false);  // vfree += h*h*theta*B^T*S^-1*B*vold
+              coeff = h * _theta;
+              siconos::algebra::prod(coeff, *d.B(), vold, residuSigfreed,
+                                     false);  // residufree += h*theta*B*v_{i}
+              if (d.fExt()) {
 
-              siconos::algebra::prod(h, *Btrans, sigmaold, residuFree,
-                                     false);  // vfree += h*B*sigma_{i}
+
+                  // computes Fext(ti)
+                  d.computeFExt(told);
+                  auto fextTheta = std::make_shared<siconos::algebra::SiconosVector>(d.fExt()->size());
+                  coeff = (1 - _theta);
+                  siconos::algebra::scal(coeff, *(d.fExt()), *fextTheta,
+                                         true);  // fext_k+theta = (1-_theta) * fext(ti)
+                  // computes Fext(ti+1)
+                  d.computeFExt(t);
+                  coeff = _theta;
+                  siconos::algebra::scal(coeff, *(d.fExt()), *fextTheta,
+                                         false);  // fext_k+theta += _theta * fext(ti+1)
+
+                  d.mass()->Solve(*fextTheta); // fextTheta = M^-1 fextTheta
+
+                  coeff = h*h*_theta*_theta;
+                  siconos::algebra::prod(coeff, *d.B(), *fextTheta, residuSigfreed,
+                                         false);  // residufree += h*h*theta*theta*B*M^-1*Fext_{k+theta}
+
+              }
           }
       }
 
@@ -1325,7 +1347,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
     // q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
     // -- Convert the DS into a Lagrangian one.
-    auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
+    auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);    
     const auto &vold = d.velocityMemory().getSiconosVector(0);  // vi (vold)
     const auto &v = *d.velocity();                              // v = v_k,i+1
 
@@ -1359,7 +1381,23 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
       // W is diagonal and contains the inverse of the iteration matrix!
       for (unsigned int i = 0; i < d.dimension(); ++i)
         vfree(i) = -W(i, i) * vfree(i) + vold(i);
-    } else {
+    } else if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+        auto &residusigmafree =
+            *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE];
+        auto &sigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE];
+        auto &dSolid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
+
+        const auto &sigmaold = dSolid.stressMemory().getSiconosVector(0);  // sigmai
+        sigmafree = residusigmafree;
+        // -- sigmafree =   W^{-1} ResiduSigmaFree --
+        // At this point sigmafree = residusigmaFree
+        // -> Solve WX = sigmafree and set sigmafree = X
+
+        W.Solve(sigmafree);
+        sigmafree += sigmaold;
+    }
+    else
+    {
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
