@@ -212,6 +212,10 @@ if(WITH_TESTING)
     DRIVER fc_test_collection.c.in FORMULATION fc3d_semismooth COLLECTION TEST_IPM_COLLECTION_1
     EXTRA_SOURCES data_collection_fc3d_fclib_1.c test_ipm_snm_fc3d_1.c)
 
+  new_tests_collection(
+    DRIVER fc_test_collection.c.in FORMULATION fc3d_semismooth COLLECTION TEST_IPM_COLLECTION_2
+    EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_fc3d_1.c)
+
   # --- LMGC driver ---
   new_test(SOURCES fc3d_newFromFortranData.c)
   new_test(SOURCES fc3d_LmgcDriver_test1.c)
