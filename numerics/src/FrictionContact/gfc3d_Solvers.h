@@ -87,6 +87,8 @@ extern "C"
 
   void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
+  void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+
   void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
 
   /** 

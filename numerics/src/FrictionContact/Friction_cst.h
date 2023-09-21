@@ -60,7 +60,7 @@ enum FRICTION_SOLVER
   /** ADMM local formulation */
   SICONOS_FRICTION_3D_ADMM = 523,
   /** IPM-SNM local formulation */
-  SICONOS_FRICTION_3D_IPM_SEMISMOOTH = 524,
+  SICONOS_FRICTION_3D_IPM_SNM = 524,
 
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
 
@@ -107,7 +107,8 @@ enum FRICTION_SOLVER
   SICONOS_GLOBAL_FRICTION_3D_ADMM = 613,
   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR = 614,
   SICONOS_GLOBAL_FRICTION_3D_IPM = 615,
-  SICONOS_GLOBAL_FRICTION_3D_IPM_SEMISMOOTH = 616,
+  SICONOS_GLOBAL_FRICTION_3D_IPM_SNM = 616,
+  SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR = 617,
 
 
   /** Non-smooth Gauss Seidel, local formulation */
@@ -171,7 +172,7 @@ extern const char* const   SICONOS_FRICTION_3D_GAMS_LCP_PATHVI_STR;
 extern const char* const   SICONOS_FRICTION_3D_SOCLCP_STR;
 extern const char* const   SICONOS_FRICTION_3D_ACLMFP_STR;
 extern const char* const   SICONOS_FRICTION_3D_ADMM_STR;
-extern const char* const   SICONOS_FRICTION_3D_IPM_SEMISMOOTH_STR;
+extern const char* const   SICONOS_FRICTION_3D_IPM_SNM_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_PROX_WR_STR ;
@@ -188,7 +189,8 @@ extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR;
-extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SEMISMOOTH_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 

@@ -45,7 +45,7 @@
 #include "siconos_debug.h"
 #include "gfc3d_ipm.h"
 
-const char* const   SICONOS_FRICTION_3D_IPM_SEMISMOOTH_STR = "FC3D IPM SNM";
+const char* const   SICONOS_FRICTION_3D_IPM_SNM_STR = "FC3D IPM SNM";
 
 /* ------------------------- Helper functions implementation ------------------------------ */
 /* Compute the primal constraint vector for local fricprob: out = Wr + q + Es - u
@@ -371,7 +371,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
   // sprintf(matlab_name, "%s.m",probName);
 
   // sprintf(matlab_name, "%s.m",strToken);
-  sprintf(matlab_name, "iterates_local_LowWall_Mehrotra.m");
+  sprintf(matlab_name, "iterates_local.m");
 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])

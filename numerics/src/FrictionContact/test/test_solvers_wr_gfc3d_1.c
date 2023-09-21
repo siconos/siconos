@@ -27,7 +27,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
   int solvers[] = {SICONOS_GLOBAL_FRICTION_3D_NSGS_WR, SICONOS_GLOBAL_FRICTION_3D_PROX_WR,
                    SICONOS_GLOBAL_FRICTION_3D_DSFP_WR, SICONOS_GLOBAL_FRICTION_3D_TFP_WR,
-                   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR
+                   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR, SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR
                   };
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 

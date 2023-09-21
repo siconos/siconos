@@ -37,9 +37,15 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   {
     // GFC3D,IPM
     collection[current].filename = data_collection[d];
-    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_IPM_SEMISMOOTH);
-    //   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_IPM_SNM);
+    // collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
+    // collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
     // collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+
+
+    // collection[current].options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = 0;
+    // collection[current].options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;
+
     current++;
   }
 

@@ -43,7 +43,7 @@
 #include "siconos_debug.h"
 #include "gfc3d_ipm.h"
 
-const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SEMISMOOTH_STR = "GFC3D IPM SNM";
+const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_STR = "GFC3D IPM SNM";
 
 /* ------------------------- Helper functions implementation ------------------------------ */
 

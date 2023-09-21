@@ -49,6 +49,7 @@ const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR = "GFC3D_VI_EG";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR = "GFC3D_ACLMFP";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR = "GFC3D_VI_FPP";
 const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR = "GFC3D_ADMM_WR";
+const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR = "GFC3D_IPM_SNM_WR";
 
 
 static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_problem,
@@ -266,10 +267,16 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     break;
 
   }
-  case SICONOS_GLOBAL_FRICTION_3D_IPM_SEMISMOOTH:
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM:
   {
     gfc3d_IPM_SNM(problem, reaction, velocity,
               globalVelocity, &info, options, problem_name);
+    break;
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR:
+  {
+    gfc3d_ipm_snm_wr(problem, reaction, velocity,
+              globalVelocity, &info, options);
     break;
   }
   default:
