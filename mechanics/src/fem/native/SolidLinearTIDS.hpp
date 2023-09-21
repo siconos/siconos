@@ -28,7 +28,7 @@
  *  to enable easy plasticty implementation using a stress relation.
  * - \f$M\dot v + K u +  B^T \sigma = F_{ext}(t,z) + p
  * v = \dot u
- * \dot \sigma = B v \f$
+ * \dot \sigma = B v + \dot \epsilon_p \f$
  */
 namespace siconos::mechanics::fem
 {
@@ -79,6 +79,23 @@ public:
   double elasticPotentialEnergy() const;
 
   void display(bool brief) const override;
+
+  inline std::shared_ptr<siconos::algebra::SiconosVector> stress() const
+  {
+    return _sigma;
+  }
+
+
+  /** get \dot \epsilon_p
+   *
+   *  \param level unsigned int, required level for p, default = 2
+   *  \return pointer on a siconos::algebra::SiconosVector
+   */
+  inline std::shared_ptr<siconos::algebra::SiconosVector> plasticRate() const
+  {
+    return _plasticRate;
+  }
+
 
   /** get S matrix (pointer link)
    *

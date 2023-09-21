@@ -1804,7 +1804,60 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
       // -> Solve WX = v and set v = X
       W->Solve(v);
       v += vold;
-    } else
+    } else if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+        // get the ds
+        auto d =
+            std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+        // get velocity pointers for current time step
+        auto &sigma = *d->stress();
+        // get q and velocity pointers for previous time step
+        const auto &vold = d->velocityMemory().getSiconosVector(0);
+        const auto &qold = d->qMemory().getSiconosVector(0);
+        // get p pointer
+
+        auto &p = *d->p(1);
+
+        auto &epsilonPointp = *d->plasticRate();
+
+        // stress computation :
+        //
+        // sigma = W^{-1} [S sigmai + h*theta B vi + h*h*theta*theta*B*M^{-1}*(theta*Fext(t) +
+        // h*(1-theta)
+        // * Fext(ti))] + W^{-1}*(h*theta*theta*B*M^{-1}* pi+1 + h*theta * W^{-1}*\dot\epsilon_p
+        //
+
+        sigma = h * _theta * epsilonPointp;
+        d->mass()->Solve(p);
+        double coeff;
+        // -- No need to update W --
+        auto C = d->C();
+        if (C) siconos::algebra::prod(-h, *C, vold, v, false);  // v += -h*C*vi
+
+        auto K = d->K();
+        if (K) {
+          coeff = -h * h * _theta;
+          siconos::algebra::prod(coeff, *K, vold, v,
+                                 false);                   // v += -h^2*theta*K*vi
+          siconos::algebra::prod(-h, *K, qold, v, false);  // v += -h*K*qi
+        }
+
+        std::shared_ptr<siconos::algebra::SiconosVector> Fext = d->fExt();
+        if (Fext) {
+          // computes Fext(ti)
+          d->computeFExt(tinit);
+          coeff = h * (1 - _theta);
+          siconos::algebra::scal(coeff, *Fext, v,
+                                 false);  // v += h*(1-theta) * fext(ti)
+          // computes Fext(ti+1)
+          d->computeFExt(tout);
+          coeff = h * _theta;
+          siconos::algebra::scal(coeff, *Fext, v,
+                                 false);  // v += h*theta * fext(ti+1)
+        }
+        // -> Solve WX = v and set v = X
+        W->Solve(v);
+        v += vold;
+      } else
       THROW_EXCEPTION(
           "siconos::integrators::MoreauJeanOSI::integrate - not yet "
           "implemented for Dynamical "
