@@ -371,7 +371,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
   // sprintf(matlab_name, "%s.m",probName);
 
   // sprintf(matlab_name, "%s.m",strToken);
-  sprintf(matlab_name, "iterates_local.m");
+  sprintf(matlab_name, "iterates_local_Aqueduc_2.m");
 
   /* writing data in a Matlab file */
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
@@ -442,6 +442,8 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
       s[i] *= 1.05;
     }
   }
+
+
 
   int jacobian_is_nan = 0;
   while(iteration < max_iter)
@@ -569,16 +571,18 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
 
         gmm = gmmp1 + gmmp2 * alpha_primal;
 
-        /* ----- Predictor step of Mehrotra ----- */
+        /* ----- Corrector step of Mehrotra ----- */
         cblas_dcopy(nd, velocity, 1, u_plus_du, 1);
         cblas_dcopy(nd, reaction, 1, r_plus_dr, 1);
         cblas_daxpy(nd, alpha_primal, d_velocity, 1, u_plus_du, 1);
         cblas_daxpy(nd, alpha_dual, d_reaction, 1, r_plus_dr, 1);
 
-        // barr_param_a = cblas_ddot(nd, u_plus_du, 1, r_plus_dr, 1) / n / 3;
-        // e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(alpha_primal,2)) : sgmp3;
-        // sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
-        sigma = 0.2;
+        barr_param = cblas_ddot(nd, velocity, 1, reaction, 1) / n;
+        barr_param_a = cblas_ddot(nd, u_plus_du, 1, r_plus_dr, 1) / n;
+        e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * pow(alpha_primal,2)) : sgmp3;
+        // e = 3.;
+        sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
+        // sigma = 0.4;
 
         cblas_dcopy(2*nd + n, rhs_2, 1, rhs, 1);    // Get back value for rhs
         JA_prod(d_velocity, d_reaction, nd, n, dudr_jprod);
@@ -749,10 +753,10 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
     {
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA] == SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA_YES)
       {
-        complemConstraint[k] -= 2*sigma*barr_param;
-        complemConstraint[k] += dudr_jprod[k];
-        complemConstraint[k+1] += dudr_jprod[k+1];
-        complemConstraint[k+2] += dudr_jprod[k+2];
+        // complemConstraint[k] -= 2*sigma*barr_param;
+        // complemConstraint[k] += dudr_jprod[k];
+        // complemConstraint[k+1] += dudr_jprod[k+1];
+        // complemConstraint[k+2] += dudr_jprod[k+2];
       }
       else
       {
@@ -864,7 +868,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
       break;
     }
 
-    if (alpha_primal < 1e-6)
+    if (alpha_primal < 1e-8)
     {
       printf("\nfailure\n\n");
       break;
@@ -873,13 +877,14 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
 
     kappa_mu = 0.7;
     // if (totalresidual_mu <= 1e-8)
-    if (totalresidual_mu <= 10*barr_param)
+    if (totalresidual_mu <= 10*barr_param &&
+        options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA] == SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA_NO)
     // if ((barr_param > 1e-6 || totalresidual_mu < tol) && alpha_primal > 1e-1)
     // if (barr_param > 1e-11 && alpha_primal > 1e-1)
     // if (barr_param > 1e-11)
     {
-      // barr_param *= kappa_mu;
-      barr_param = udotr / 3;
+      barr_param *= kappa_mu;
+      // barr_param = udotr / 3;
 
       printf("\n");
       numerics_printf_verbose(-1, "| it  | pinfeas |  |s-ub| | |uor-mu||2max|uor-mu||   4*mu  |  u'r/n  | prj err | barpram |  alpha  |  |du|   |  |dr|   |  |ds|   | ls prim | ls comp | ls fixP |");
@@ -928,7 +933,10 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
       printf("cone %04i: (u+r)_0 = %9.2e,  |(u+r)_bar| = %9.2e, (u+r)_0 - |(u+r)_bar| = %9.40e\n", i, somme[0], cblas_dnrm2(2,somme+1, 1), ns);
   }
   if (nsc < n)
-    printf("Ratio of Strict complementarity solutions: %4i / %4zu = %4.2f\n", nsc, n, (double)nsc/n);
+  {
+    printf("Ratio of Strict complementarity solutions: %4i / %4zu = %4.2f,\n", nsc, n, (double)nsc/n);
+    printf("Provisional classification BNR: %4i %4i %4i over %4zu number of contact.\n", nB, nN, nR, n);
+  }
   else
     printf("Strict complementarity satisfied: %4i / %4zu  %9.2e %9.2e  %4i %4i %4i\n", nsc, n, ns, ns/cblas_dnrm2(3, somme, 1), nB, nN, nR);
 
@@ -1010,15 +1018,15 @@ void fc3d_ipm_snm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA] = SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA_YES;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA] = SICONOS_FRICTION_3D_IPM_IPARAM_MEHROTRA_NO;
 
   //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 300;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 500;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
