@@ -2,11 +2,11 @@ inline Index size(unsigned int index) const
 {
     if (index == 0)
     {
-        return this->cols();
+        return this->rows();
     }
     else if (index == 1)
     {
-        return this->rows();
+        return this->cols();
     }
     else
     {
