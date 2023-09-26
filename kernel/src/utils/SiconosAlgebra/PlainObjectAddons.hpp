@@ -19,7 +19,7 @@ inline Index size() const {
 }
 
 void display() const {
-    
+    std::cout << *this << std::endl;
 }
 
 
