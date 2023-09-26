@@ -35,8 +35,8 @@ void siconos::algebra::setBlock(const SiconosMatrix &input_matrix,
   // if (input_matrix == output_matrix) // useless op => nothing to be done.
   //   return;
     
-    if(output_matrix->isZero() || output_matrix->isIdentity())
-        THROW_EXCEPTION("output_matrix is read-only (zero or identity matrix?).");
+    // if(output_matrix->isZero() || output_matrix->isIdentity())
+    //     THROW_EXCEPTION("output_matrix is read-only (zero or identity matrix?)."); TODO : deal with this, as there are no read-only matrices in eigen.
 
     // Check dimension
     std::vector<std::size_t> MDim(4);  // dim. of matrices input_matrix and output_matrix.
