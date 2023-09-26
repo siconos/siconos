@@ -236,5 +236,5 @@ void siconos::algebra::taxpy(const SiconosVector& x, const SiconosMatrix& A,
   auto sizeY = y->size();
 
   assert(&*y != &x);
-  y->noalias() += A.block(startRow, startCol, sizeY, sizeX).transpose() * x;
+  y->noalias() += A.transpose().block(startRow, startCol, sizeY, sizeX) * x;
 }
