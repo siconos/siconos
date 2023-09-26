@@ -56,7 +56,7 @@ void siconos::algebra::prod(const SiconosMatrix& A, const BlockVector& x, Sicono
   // columns. private_prod takes also into account the fact that each block of x can also be a
   // block.
   for (auto& it : x) {
-    assert(y != *it);
+    assert(&y != &*it);
     y += A.block(startRow, startCol, y.size(), it->size()) * *it;
     startCol += it->size();
   }
@@ -235,6 +235,6 @@ void siconos::algebra::taxpy(const SiconosVector& x, const SiconosMatrix& A,
   auto sizeX = x.size();
   auto sizeY = y->size();
 
-  assert(*y != x); // WARNING : compare addresses ?
+  assert(&*y != &x);
   y->noalias() += A.block(startRow, startCol, sizeY, sizeX).transpose() * x;
 }
