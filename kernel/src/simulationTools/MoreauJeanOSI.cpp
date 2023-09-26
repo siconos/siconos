@@ -1811,6 +1811,7 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
         // get velocity pointers for current time step
         auto &sigma = *d->stress();
         // get q and velocity pointers for previous time step
+        const auto &sigmaOld = d->stressMemory().getSiconosVector(0);
         const auto &vold = d->velocityMemory().getSiconosVector(0);
         const auto &qold = d->qMemory().getSiconosVector(0);
         // get p pointer
@@ -1822,41 +1823,50 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
         // stress computation :
         //
         // sigma = W^{-1} [S sigmai + h*theta B vi + h*h*theta*theta*B*M^{-1}*(theta*Fext(t) +
-        // h*(1-theta)
-        // * Fext(ti))] + W^{-1}*(h*theta*theta*B*M^{-1}* pi+1 + h*theta * W^{-1}*\dot\epsilon_p
+        // (1-theta)* Fext(ti))] + W^{-1}*(h*theta*theta*B*M^{-1}* pi+1 + h*theta * W^{-1}*\dot\epsilon_p
         //
 
-        sigma = h * _theta * epsilonPointp;
-        d->mass()->Solve(p);
-        double coeff;
-        // -- No need to update W --
-        auto C = d->C();
-        if (C) siconos::algebra::prod(-h, *C, vold, v, false);  // v += -h*C*vi
 
-        auto K = d->K();
-        if (K) {
-          coeff = -h * h * _theta;
-          siconos::algebra::prod(coeff, *K, vold, v,
-                                 false);                   // v += -h^2*theta*K*vi
-          siconos::algebra::prod(-h, *K, qold, v, false);  // v += -h*K*qi
+        sigma = h * _theta * epsilonPointp;
+        auto S= d->S();
+        siconos::algebra::prod(1.0, *S, sigmaOld, sigma, false);  // sigma += S sigma_i
+
+
+        //p = M^{-1}p
+        d->mass()->Solve(p);
+        double coeff = h*_theta*_theta;
+        auto B= d->B();
+        if (B)
+        {
+            siconos::algebra::prod(coeff, *B, p, sigma, false);  // sigma += h*theta*theta*B*M{-1}*p
+            coeff = h*_theta;
+            siconos::algebra::prod(coeff, *B, vold, sigma, false);  // sigma += h*theta*B*vi
         }
+        // -- No need to update W --
 
         std::shared_ptr<siconos::algebra::SiconosVector> Fext = d->fExt();
+        auto FextTheta = std::make_shared<siconos::algebra::SiconosVector>(Fext->size());
         if (Fext) {
           // computes Fext(ti)
           d->computeFExt(tinit);
-          coeff = h * (1 - _theta);
-          siconos::algebra::scal(coeff, *Fext, v,
-                                 false);  // v += h*(1-theta) * fext(ti)
+          coeff = (1 - _theta);
+          siconos::algebra::scal(coeff, *Fext, *FextTheta,
+                                 true);  // FextTheta = (1-theta) * fext(ti)
           // computes Fext(ti+1)
           d->computeFExt(tout);
-          coeff = h * _theta;
-          siconos::algebra::scal(coeff, *Fext, v,
-                                 false);  // v += h*theta * fext(ti+1)
+          coeff = _theta;
+          siconos::algebra::scal(coeff, *Fext, *FextTheta,
+                                 false);  // FextTheta += theta * fext(ti+1)
         }
-        // -> Solve WX = v and set v = X
-        W->Solve(v);
-        v += vold;
+
+        d->mass()->Solve(*FextTheta);
+        //FextTheta = M^{-1} * FextTheta
+
+        coeff = h*h*_theta*_theta;
+        siconos::algebra::prod(coeff, *B, *FextTheta, sigma, false);  // sigma += h*h*_theta*_theta*B*FextTheta
+
+        // -> Solve WX = sigma and set sigma = X
+        W->Solve(sigma);
       } else
       THROW_EXCEPTION(
           "siconos::integrators::MoreauJeanOSI::integrate - not yet "
