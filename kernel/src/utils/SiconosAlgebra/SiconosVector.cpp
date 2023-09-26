@@ -123,26 +123,21 @@ void siconos::algebra::subscal(double a, const SiconosVector& x, SiconosVector& 
 
   if (&x == &y)  // if x and y are the same object
   {
-    SiconosVector subY = y.segment(coord[2], dimY);
     if (coord[0] == coord[2]) {
       if (init)
-        subY *= a;
+        y.segment(coord[2], dimY) *= a;
       else
-        subY *= (1.0 + a);
+        y.segment(coord[2], dimY) *= (1.0 + a);
     } else {
-      SiconosVector subX = x.segment(coord[0], dimX);
       if (init)
-        subY = a * subX;
+        y.segment(coord[2], dimY) = a * x.segment(coord[0], dimX);
       else
-        subY += a * subX;
+        y.segment(coord[2], dimY) += a * x.segment(coord[0], dimX);
     }
   } else {
-    SiconosVector subX = x.segment(coord[0], dimX);
-    SiconosVector subY = y.segment(coord[2], dimY);
-
     if (init)
-      subY.noalias() = a * subX;
+      y.segment(coord[2], dimY).noalias() = a * x.segment(coord[0], dimX);
     else
-      subY.noalias() += a * subX;
+      y.segment(coord[2], dimY).noalias() += a * x.segment(coord[0], dimX);
   }
-} // WARNING : no return value
+}
