@@ -15,8 +15,7 @@ inline Index size(unsigned int index) const
 }
 
 inline Index size() const {
-    assert(this->cols() == 1);
-    return this->rows();
+    return this->rows() * this->cols();
 }
 
 void display() const {
