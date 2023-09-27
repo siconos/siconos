@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include "LinearOSNS.hpp"
+#include <Eigen/src/Core/util/Constants.h>
 
 #include "BoundaryCondition.hpp"
 #include "D1MinusLinearOSI.hpp"
@@ -888,7 +889,7 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
     // Checks z and _w sizes and reset if necessary
 
     if (_z->size() != _sizeOutput) {
-      _z->resize(_sizeOutput, false);
+      _z->resize(_sizeOutput, Eigen::NoChange);
       _z->zero();
     }
 
