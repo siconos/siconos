@@ -213,7 +213,7 @@ int check_merite_function_diffixP(const double alpha, const double omega, const 
  * and
  *
  *   Theta'((v,u,r,s);(dv,du,dr,ds))
- * = -|Mv - H'r - f| - |u - Hv - w - Es| - |uor| + 2*alpha*omega*sigma*(u'r)^2 / n / | u o r | - |s - u_tilde|
+ * = -|Mv - H'r - f| - |u - Hv - w - Es| - |uor| + 2*sigma*(u'r)^2 / n / | u o r | - |s - u_tilde|
  *
  * [in] alpha: step-length
  * [in] omega: a constant could be 0.01, 0.001, 0.0001
@@ -221,13 +221,13 @@ int check_merite_function_diffixP(const double alpha, const double omega, const 
  * [in] numParams: number of parameters must be 15
  * [in] ATTENTION others params must be:
             double *v, double *dv, double *u, double *du, double *r, double *dr, double *s, double *ds,
-            unsigned int nd, unsigned int n, double sigma,
+            unsigned int nd, unsigned int n, double sigma, double pinfeas, double dinfeas, double complem, double diff_fixp,
             NumericsMatrix *M, NumericsMatrix *H, double *f, double *w
  * [out] 1: if satisfy, 0: it not
  */
 int check_merite_function_Theta(const double alpha, const double omega, const double numParams, va_list args)
 {
-  assert(("The number of params must be 15. \nWARNING: Params input must be v, dv, u, du, r, dr, s, ds, vecSize, varsCount, sigma, M, H, f, w", numParams  == 15));
+  assert(("The number of params must be 19. \nWARNING: Params input must be v, dv, u, du, r, dr, s, ds, vecSize, varsCount, sigma, pinfeas, dinfeas, complem, diff_fixp, M, H, f, w", numParams  == 15));
 
   // Read params
   double * v = va_arg(args, double*);
@@ -241,6 +241,10 @@ int check_merite_function_Theta(const double alpha, const double omega, const do
   unsigned int nd = va_arg(args, unsigned int);
   unsigned int n = va_arg(args, unsigned int);
   double sigma = va_arg(args, double);
+  double pinfeas = va_arg(args, double);
+  double dinfeas = va_arg(args, double);
+  double complem = va_arg(args, double);
+  double diff_fixp = va_arg(args, double);
   NumericsMatrix * M = va_arg(args, NumericsMatrix*);
   NumericsMatrix * H = va_arg(args, NumericsMatrix*);
   double * f = va_arg(args, double*);
@@ -258,23 +262,9 @@ int check_merite_function_Theta(const double alpha, const double omega, const do
   double * primalConstraint = (double*)calloc(nd, sizeof(double));
   double * dualConstraint = (double*)calloc(m, sizeof(double));
 
-  double pinfeas = 1e300, dinfeas = 1e300, complem = 1e300, diff_fixp = 1e300;
   double rhs = 0., nub = 0., tol = 1e-10;
 
-
-  // Compute directional derivative Theta'
-  primalResidual_s(u, H, v, w, s, primalConstraint, &pinfeas, tol);
-  dualResidual(M, v, H, r, f, dualConstraint, &dinfeas, tol);
-  complem = complemResidualNorm(u, r, nd, n);
-  diff_fixp = 0.;
-  for (unsigned int i = 0; i<nd; i+=d)
-  {
-    nub = cblas_dnrm2(2, u+i+1, 1);
-    diff_fixp += (s[i/d] - nub)*(s[i/d] - nub);
-  }
-  // diff_fixp = sqrt(diff_fixp);                    // diff_fixp = | s - ub |
-
-  rhs = - dinfeas - pinfeas - complem + 2*alpha*omega*sigma*pow(cblas_ddot(nd, u, 1, r, 1), 2) / n / complem - sqrt(diff_fixp);
+  rhs = - dinfeas - pinfeas - complem + 2*sigma*pow(cblas_ddot(nd, u, 1, r, 1), 2) / n / complem - diff_fixp;
 
   if (rhs >= 0.)
   {
@@ -283,7 +273,7 @@ int check_merite_function_Theta(const double alpha, const double omega, const do
 
 
   // Compute Theta(v,u,r,s)
-  rhs = alpha*omega*rhs + sqrt(pow(pinfeas,2)+pow(dinfeas,2)+pow(complem,2)+diff_fixp);
+  rhs = alpha*omega*rhs + sqrt(pow(pinfeas,2)+pow(dinfeas,2)+pow(complem,2)+pow(diff_fixp,2));
 
 
   // Compute Theta(v+,u+,r+,s+)
@@ -1019,7 +1009,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
 
 
   /* COMPUTATION OF A NEW STARTING POINT */
-
   // set the reaction vector to an arbitrary value in the interior of the cone
   for (unsigned int  i = 0; i<nd; i++)
       if (i % d == 0) reaction[i] = 0.1;
@@ -1062,6 +1051,8 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   double *dualConstraint = data->tmp_vault_m[0];
   double *complemConstraint = data->tmp_vault_nd[2];
   double *fixpConstraint = (double*)calloc(n,sizeof(double));
+  double *arr_norm_theta = (double*)calloc(max_iter,sizeof(double));
+  double norm_theta = 1e300;
 
   double gmm = gmmp1+gmmp2;
   double barr_param_a, e;
@@ -1144,6 +1135,11 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST4:
     {
       numerics_printf_verbose(-1,"Global friction contact problem - TESTING: 4x4 no scaling + backtracking line-search for function Theta\n");
+      break;
+    }
+    case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST5:
+    {
+      numerics_printf_verbose(-1,"Global friction contact problem - TESTING: 4x4 no scaling + non-monotone line search for function Theta\n");
       break;
     }
     default:
@@ -2232,6 +2228,7 @@ while(findParam)
     */
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST3:
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST4:
+    case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST5:
     {
       barr_param = (cblas_ddot(nd, velocity, 1, reaction, 1) / n) * 0.3;
 
@@ -2396,8 +2393,8 @@ while(findParam)
     else if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST4 && iteration > 1)
     {
       alpha_primal = backtrack_linesearch(check_merite_function_Theta, 1e-6, alpha_primal, 1e-2,
-                    15, globalVelocity, d_globalVelocity, velocity, d_velocity, reaction, d_reaction, s, d_s,
-                    nd, n, 0.3, M, H, f, w);
+                    19, globalVelocity, d_globalVelocity, velocity, d_velocity, reaction, d_reaction, s, d_s,
+                    nd, n, 0.3, pinfeas, dinfeas, complem, diff_fixp, M, H, f, w);
     }
 
     /* ----- Update variables ----- */
@@ -2538,9 +2535,19 @@ while(findParam)
     // }
     // printf("\n");
 
-    double norm_theta = sqrt(pow(pinfeas,2)+pow(dinfeas,2)+pow(complem,2)+pow(diff_fixp,2));
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST4)
+    {
+      norm_theta = sqrt(pow(pinfeas,2)+pow(dinfeas,2)+pow(complem,2)+pow(diff_fixp,2));
+    }
 
-    // projerr = projectionError(velocity, reaction, n, tol);
+    else if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST4)
+    {
+      norm_theta = sqrt(pow(pinfeas,2)+pow(dinfeas,2)+pow(complem,2)+pow(diff_fixp,2));
+      arr_norm_theta[iteration] = norm_theta;
+    }
+
+
+    // compute Projection Error
     NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->tmp_point->t_velocity);
     NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
     (*computeError)(problem,
@@ -2864,6 +2871,7 @@ while(findParam)
   if (w_ori) free(w_ori);
   if (fixpConstraint) free(fixpConstraint);
   if (velocity_inv) free(velocity_inv);
+  if (arr_norm_theta) free(arr_norm_theta);
 
   *info = hasNotConverged;
 }
@@ -2884,7 +2892,7 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
 
   //options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
 
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES;
 
