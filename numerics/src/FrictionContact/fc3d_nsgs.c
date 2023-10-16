@@ -864,6 +864,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   }
 
+
   *info = hasNotConverged;
 
 
@@ -896,4 +897,7 @@ void fc3d_nsgs_set_default(SolverOptions* options)
   // Internal solver
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
+
+  // Printing in the same style as in IPM solver
+  options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] = SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE;
 }
