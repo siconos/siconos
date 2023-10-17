@@ -36,7 +36,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m)
   _tabRow->reserve(1);
   _tabCol->reserve(1);
   // _mat construction
-  _mat = std::make_shared<BlocksMatrix>();
+  _mat = std::make_shared<BlocksMatrix>(1, 1);
   _mat->setValue(0, 0, std::make_shared<SimpleMatrix>(m));
 
   _dimRow = m.size(0);
@@ -129,7 +129,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> A,
   //       [ C D ]
 
   // _mat construction
-  _mat = std::make_shared<BlocksMatrix>();
+  _mat = std::make_shared<BlocksMatrix>(2, 2);
 
   _tabRow = std::make_shared<std::vector<std::size_t>>();
   _tabCol = std::make_shared<std::vector<std::size_t>>();
