@@ -1139,6 +1139,14 @@ extern "C"
    */
   int NM_isnan(NumericsMatrix* M);
 
+  /** Delete absolute values less than tol.
+   *
+   *  \param[in] A a NumericsMatrix
+   *  \param[in] tol a tolerance that defines zero
+   *  \param[in,out] C a NumericsMatrix having the same size
+   */
+  RawNumericsMatrix * NM_clear_zero(NumericsMatrix* A, const double tol) ;
+
 #ifdef WITH_OPENSSL
   /** Compute sha1 hash of matrix values. Matrices of differents size and same
    *  values have the same hash.

@@ -6958,3 +6958,49 @@ int NM_Linear_solver_finalize(NumericsMatrix* Ao)
   NM_version_sync(A);
   return info;
 }
+
+NumericsMatrix * NM_clear_zero(NumericsMatrix* A, const double tol)
+{
+  /* Currently, this routine is only useful for type NM_SPARSE */
+  NumericsMatrix * B = NM_create(NM_SPARSE, A->size0, A->size1);
+  size_t B_nzmax = NM_nnz(A);
+  NM_triplet_alloc(B, B_nzmax);
+  B->matrix2->origin = NSM_TRIPLET;
+
+  switch(B->storageType)
+  {
+  case NM_SPARSE:
+  {
+    CSparseMatrix *A_csc = NM_csc(A);
+
+    CS_INT n, *Ap, *Ai;
+    double *Ax ;
+    n = A_csc->n;
+    Ap = A_csc->p;
+    Ai = A_csc->i;
+    Ax = A_csc->x;
+    for(int j=0 ; j<n ; j++)
+    {
+      for(CS_INT p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        if (fabs(Ax [p]) >= tol)
+        {
+          cs_entry(NM_triplet(B), Ai[p], j, Ax [p]);
+        }
+      }
+    }
+  }
+
+  default:
+  {
+    assert(0 && "NM_clear_zero does not support or unknown storageType");
+  }
+  }
+
+  return B;
+}
+
+void NM_display_tol(const NumericsMatrix* const A, const double tol)
+{
+  return;
+}
