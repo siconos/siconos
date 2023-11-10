@@ -49,7 +49,7 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
   if(H->size1 > 0)
   {
     // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
     if(verbose)
@@ -175,7 +175,7 @@ void  gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
   if(H->size1 > 0)
   {
     // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
     
@@ -205,7 +205,7 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
   if(H->size1 > 0)
   {
     // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
     
@@ -237,7 +237,7 @@ void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reac
   if(H->size1 > 0)
   {
     // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+   numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
     if(verbose)
@@ -265,7 +265,7 @@ void  gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction,
   if(H->size1 > 0)
   {
     // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
     DEBUG_EXPR(frictionContact_display(localproblem););
@@ -294,7 +294,7 @@ void  gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *
   if(H->size1 > 0)
   {
     // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
 
@@ -322,7 +322,7 @@ void  gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *r
   if(H->size1 > 0)
   {
     // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
 
@@ -353,7 +353,7 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double *reaction, d
   if(H->size1 > 0)
   {
     // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
 
