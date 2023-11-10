@@ -610,6 +610,16 @@ class MechanicsHdf5(object):
                                      use_compression=self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression=self._use_compression)
+
+
+        try:
+            self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
+                                          use_compression=self._use_compression)
+        except Exception as e:
+            self.print_io_mechanics('Warning -  _data siconos_mechanics_run_options in the hdf5 file')
+            self.print_io_mechanics('        -  data(self._data, siconos_mechanics_run_options, ...) : ', e)
+
+        
         # self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
         #                               use_compression=self._use_compression)
 
