@@ -49,6 +49,7 @@ const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR = "GFC3D_VI_EG";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR = "GFC3D_ACLMFP";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR = "GFC3D_VI_FPP";
 const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR = "GFC3D_ADMM_WR";
+const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_WR_STR = "GFC3D_IPM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR = "GFC3D_IPM_SNM_WR";
 
 
@@ -103,7 +104,9 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
   /* Solver name */
   /*  const char* const  name = options->solverName;*/
 
-
+  FILE *fileName = fopen("problem_name.res", "w");
+  fprintf(fileName, "%s", problem_name);
+  fclose(fileName);
 
   int info = -1 ;
 
@@ -264,6 +267,14 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
                                 options);
 
     balanced_problem = gfc3d_balancing_free(balanced_problem, options);
+    break;
+
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_WR:
+  {
+
+    gfc3d_ipm_wr(problem, reaction, velocity,
+              globalVelocity, &info, options);
     break;
 
   }

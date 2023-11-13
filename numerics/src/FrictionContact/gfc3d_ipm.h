@@ -194,3 +194,10 @@ void setErrorArray(double * error, const double pinfeas, const double dinfeas,
 /* Return the 2-norm of the difference between two vectors */
 double norm2VecDiff (const double * vec1, const double * vec2, const unsigned int vecSize);
 
+int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem,
+                        double*  reaction, double*  velocity,
+                        double*  globalVelocity,
+                        double tolerance,
+                        SolverOptions * options,
+                        double norm_q, double norm_b,
+                        double* restrict error);
