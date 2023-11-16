@@ -34,6 +34,7 @@
 
 #include "BlockMatrix.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
@@ -42,9 +43,7 @@
 #include "Tools.hpp"  // enum_to_string
 #include "determinant.hpp"
 #include "expm.hpp"  // boost contribs expm_pad
-
-// namespace lapack = boost::numeric::bindings::lapack;
-// namespace ublas = boost::numeric::ublas;
+#include "io.hpp"
 
 
 void siconos::algebra::normInfByColumn(const SimpleMatrix &m, SiconosVector &v)
