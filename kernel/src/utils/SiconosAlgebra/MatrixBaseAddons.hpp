@@ -27,7 +27,7 @@ inline void setBlock(Index vectorIndex, const MatrixBase<OtherDerived>& vector) 
   // of the matrix m
 template<typename OtherDerived>
 inline void setBlock(unsigned int row_min, unsigned int col_min, const MatrixBase<OtherDerived>& m) {
-    assert(m != *this);
+    // assert(m != *this);
     assert(row_min < this->rows() && "row is out of range");
     assert(col_min < this->cols() && "column is out of range");
 
