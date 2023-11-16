@@ -6,7 +6,6 @@ inline void setValue(Index i, Scalar v) {
 }
 
 inline void setValue(Index row, Index col, Scalar v) {
-    assert(this->cols() == 1);
     this->operator()(row, col) = v;
 }
 
