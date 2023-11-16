@@ -37,11 +37,9 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Bloc
   // of A corresponding to y[i] position.
   //       // private_prod takes into account the fact that x and y[i] may be block vectors.
   for (auto& it : y) {
-    // A.private_prod(startRow, x, *it, init);
     if(init)
       it->zero();
-    unsigned int startRow = 0;
-    it->noalias() += A.block(startRow, 0, it->size(), x.size()) * *it;
+    it->noalias() += A.block(startRow, 0, it->size(), x.size()) * x;
     startRow += it->size();
   }
 }
