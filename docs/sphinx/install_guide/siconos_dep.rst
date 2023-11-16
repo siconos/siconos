@@ -5,7 +5,7 @@ Siconos required and optional dependencies
 
 * a compiler suite, with c++, c and gfortran compilers.
 
- c++ 17 compatibility is requuired.
+ c++ 17 compatibility is required.
 
 * cmake (version > 3.14) (https://cmake.org)
 
