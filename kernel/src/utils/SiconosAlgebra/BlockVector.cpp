@@ -156,7 +156,8 @@ void siconos::algebra::BlockVector::display() const {
   for (auto& it : _vect) {
     DEBUG_EXPR(std::cout << "(*it)" << (*it) << std::endl;);
     if (it)
-      it->display();
+      {it->display();
+      std::cout << std::endl;}
     else
       std::cout << "(*it)-> nullptr" << std::endl;
   }
