@@ -66,3 +66,14 @@ bool siconos::algebra::checkSymmetry(SiconosMatrix &m, double tol) {
     // std::cout << "err_rel  ="<< err <<"\n";
     return (err < tol);
 }
+
+
+siconos::algebra::SimpleMatrix siconos::algebra::readMatrixFromFile(const std::string &filename, bool ascii) {
+    SimpleMatrix m;
+    if (ascii) {
+        io::read(filename, m, io::ASCII_IN);
+    } else {
+        io::read(filename, m, io::BINARY_IN);
+    }
+    return m;
+}
