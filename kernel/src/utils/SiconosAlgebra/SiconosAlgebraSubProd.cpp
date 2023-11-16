@@ -59,51 +59,51 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
   if (dimX > x.size() || dimY > y.size() || rowA > A.size(0) || colA > A.size(1))
     THROW_EXCEPTION("input index too large.");
 
-  y.segment(coord[6], dimY) = A.block(coord[0], coord[2], rowA, colA) * x.segment(coord[4], dimX);
+  if (init) {
+    y.segment(coord[6], dimY) = A.block(coord[0], coord[2], rowA, colA) * x.segment(coord[4], dimX);
+  } else {
+    y.segment(coord[6], dimY) += A.block(coord[0], coord[2], rowA, colA) * x.segment(coord[4], dimX);
+  }
 }
 
 void siconos::algebra::subprod(const SiconosMatrix &A, const BlockVector &x, SiconosVector &y,
                                const std::vector<std::size_t> &coord, bool init) {
-  // // assert(!(A.isFactorized()) && "A is Factorized in prod !!");
+  // Number of the subvector of x that handles element at position coord[4]
+  auto firstBlockNum = x.getNumVectorAtPos(coord[4]);
+  // Number of the subvector of x that handles element at position coord[5]
+  auto lastBlockNum = x.getNumVectorAtPos(coord[5]);
+  auto subCoord = coord;
+  auto tmp = x.vector(firstBlockNum);
+  auto subSize = static_cast<size_t>(tmp->size());  // Size of the sub-vector
+  auto xTab = x.tabIndex();
+  if (firstBlockNum != 0) {
+    subCoord[4] -= (*xTab)[firstBlockNum - 1];
+    subCoord[5] = std::min(coord[5] - (*xTab)[firstBlockNum - 1], subSize);
+  } else
+    subCoord[5] = std::min(coord[5], subSize);
 
-  // // Number of the subvector of x that handles element at position coord[4]
-  // auto firstBlockNum = x.getNumVectorAtPos(coord[4]);
-  // // Number of the subvector of x that handles element at position coord[5]
-  // auto lastBlockNum = x.getNumVectorAtPos(coord[5]);
-  // auto subCoord = coord;
-  // auto tmp = x(firstBlockNum);
-  // auto subSize = static_cast<size_t>(tmp.size());  // Size of the sub-vector
-  // auto xTab = x.tabIndex();
-  // if (firstBlockNum != 0) {
-  //   subCoord[4] -= (*xTab)[firstBlockNum - 1];
-  //   subCoord[5] = std::min(coord[5] - (*xTab)[firstBlockNum - 1], subSize);
-  // } else
-  //   subCoord[5] = std::min(coord[5], subSize);
-
-  // if (firstBlockNum == lastBlockNum) {
-  //   subprod(A, *tmp, y, subCoord, init);
-  // } else {
-  //   decltype(firstBlockNum) xPos = 0;  // Position in x of the current sub-vector of x
-  //   bool firstLoop = true;
-  //   subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
-  //   for (const auto &vec : x) {
-  //     if (vec->num() == UblasType::BLOCK)
-  //       THROW_EXCEPTION("not yet implemented for x block of blocks ...");
-  //     if (xPos >= firstBlockNum && xPos <= lastBlockNum) {
-  //       tmp = x.vector(xPos);
-  //       if (firstLoop) {
-  //         subprod(A, *tmp, y, subCoord, init);
-  //         firstLoop = false;
-  //       } else {
-  //         subCoord[2] += subCoord[5] - subCoord[4];  // !! old values for 4 and 5
-  //         subSize = tmp->size();
-  //         subCoord[4] = 0;
-  //         subCoord[5] = std::min(coord[5] - (*xTab)[xPos - 1], subSize);
-  //         subCoord[3] = subCoord[2] + subCoord[5] - subCoord[4];
-  //         subprod(A, *tmp, y, subCoord, false);
-  //       }
-  //     }
-  //     xPos++;
-  //   }
-  // }
+  if (firstBlockNum == lastBlockNum) {
+    subprod(A, *tmp, y, subCoord, init);
+  } else {
+    decltype(firstBlockNum) xPos = 0;  // Position in x of the current sub-vector of x
+    bool firstLoop = true;
+    subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
+    for (const auto &vec : x) {
+      if (xPos >= firstBlockNum && xPos <= lastBlockNum) {
+        tmp = x.vector(xPos);
+        if (firstLoop) {
+          subprod(A, *tmp, y, subCoord, init);
+          firstLoop = false;
+        } else {
+          subCoord[2] += subCoord[5] - subCoord[4];  // !! old values for 4 and 5
+          subSize = tmp->size();
+          subCoord[4] = 0;
+          subCoord[5] = std::min(coord[5] - (*xTab)[xPos - 1], subSize);
+          subCoord[3] = subCoord[2] + subCoord[5] - subCoord[4];
+          subprod(A, *tmp, y, subCoord, false);
+        }
+      }
+      xPos++;
+    }
+  }
 }
