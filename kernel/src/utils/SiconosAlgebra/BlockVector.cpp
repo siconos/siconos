@@ -399,6 +399,10 @@ void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn, unsigned 
 
     // Set first sub-block (currentBlock) values, between index posOut and posOut+subSizeB,
     // with vIn values from posIn to posIn+subSizeB.
+    if (currentBlock->size() < sizeB)
+    {
+      currentBlock->resizeLike(vIn);
+    }
     currentBlock->segment(posOut, sizeB) = vIn.segment(posIn, sizeB);
 
     // Other blocks, except number blockOutEnd.
