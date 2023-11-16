@@ -50,7 +50,7 @@
 
 // namespace lapack = boost::numeric::bindings::lapack;
 
-void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &B)
+void siconos::algebra::solveInPlace(SimpleMatrix &A, SiconosVector &B)
 {
   Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd> > lu(A); // InPlace factorization
   SimpleMatrix tmp;
@@ -58,10 +58,10 @@ void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &B)
   B = tmp;
 }
 
-void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &&B)
+void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &B)
 {
-  Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd> > lu(A); // InPlace factorization
-  SimpleMatrix tmp;
-  tmp = lu.solve(B); // TODO : avoid temp copy
-  B = tmp;
+  // Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd> > lu(A); // InPlace factorization
+  // SimpleMatrix tmp;
+  // tmp = lu.solve(B); // TODO : avoid temp copy
+  // B = tmp;
 }
