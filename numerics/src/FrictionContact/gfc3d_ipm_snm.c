@@ -497,39 +497,39 @@ void primalResidual_s(const double * velocity, NumericsMatrix * H, const double 
   rn = fmax(rn, cblas_dnrm2(nd, velocity, 1));
   rn = fmax(rn, cblas_dnrm2(nd, w, 1));
   rn = fmax(rn, cblas_dnrm2(nd/3, s, 1));
-  *rnorm = (rn > tol ? cblas_dnrm2(nd, out, 1)/rn : cblas_dnrm2(nd, out, 1));
+  *rnorm = (rn > tol ? cblas_dnrm2(nd, out, 1) : cblas_dnrm2(nd, out, 1));
 
   /* *rnorm = cblas_dnrm2(nd, out, 1);  */
   // printf("rn = %e, tol = %e\n", rn, tol);
 }
 
 
-/* Computation of the projection error |r - proj(r-u)|/max{|r|, |u|} */
-static double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
-{
-   double worktmp[3];
-   double out = 0.0;
-   double norm_u, norm_r, relative_scaling;
+// /* Computation of the projection error |r - proj(r-u)|/max{|r|, |u|} */
+// static double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
+// {
+//    double worktmp[3];
+//    double out = 0.0;
+//    double norm_u, norm_r, relative_scaling;
 
-   for(int ic = 0 ; ic < nc ; ic++)
-     {
-       worktmp[0] = reaction[3*ic] -  velocity[3*ic] ;
-       worktmp[1] = reaction[3*ic+1] -  velocity[3*ic+1] ;
-       worktmp[2] = reaction[3*ic+2] -  velocity[3*ic+2] ;
-       projectionOnCone(worktmp, 1.0);
-       worktmp[0] = reaction[3*ic] -  worktmp[0];
-       worktmp[1] = reaction[3*ic+1] -  worktmp[1];
-       worktmp[2] = reaction[3*ic+2] -  worktmp[2];
-       out +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
-     }
-   out = sqrt(out);
-   norm_u = cblas_dnrm2(3*nc, velocity, 1);
-   norm_r = cblas_dnrm2(3*nc, reaction, 1);
-   relative_scaling = fmax(norm_u, norm_r);
-   if(relative_scaling > tol)
-     out = out/relative_scaling;
-   return out;
-}
+//    for(int ic = 0 ; ic < nc ; ic++)
+//      {
+//        worktmp[0] = reaction[3*ic] -  velocity[3*ic] ;
+//        worktmp[1] = reaction[3*ic+1] -  velocity[3*ic+1] ;
+//        worktmp[2] = reaction[3*ic+2] -  velocity[3*ic+2] ;
+//        projectionOnCone(worktmp, 1.0);
+//        worktmp[0] = reaction[3*ic] -  worktmp[0];
+//        worktmp[1] = reaction[3*ic+1] -  worktmp[1];
+//        worktmp[2] = reaction[3*ic+2] -  worktmp[2];
+//        out +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+//      }
+//    out = sqrt(out);
+//    norm_u = cblas_dnrm2(3*nc, velocity, 1);
+//    norm_r = cblas_dnrm2(3*nc, reaction, 1);
+//    relative_scaling = fmax(norm_u, norm_r);
+//    if(relative_scaling > tol)
+//      out = out/relative_scaling;
+//    return out;
+// }
 
 
 /* Writing problem data under a Matlab format in a file  */
@@ -701,150 +701,220 @@ static float randomFloat(float min, float max) {
     return min + (float)rand() / ((float)RAND_MAX / (max - min));
 }
 
-typedef struct {
-    int row_index;
-    int col_index;
-    double value;
-} Triplet;
+// typedef struct Triplet {
+//     int row_index;
+//     int col_index;
+//     double value;
+// } Triplet;
 
 // Comparison function for qsort
-int compareTriplets(const void *a, const void *b) {
-    return ((Triplet *)a)->row_index - ((Triplet *)b)->row_index;
-}
+// int compareTriplets(const void *a, const void *b) {
+//     return ((Triplet *)a)->row_index - ((Triplet *)b)->row_index;
+// }
 
-#include <stdlib.h>
-void sortTriplets(Triplet *triplets, size_t num_triplets) {
-    qsort(triplets, num_triplets, sizeof(Triplet), compareTriplets);
-}
+// #include <stdlib.h>
+// void sortTriplets(Triplet *triplets, size_t num_triplets) {
+//     qsort(triplets, num_triplets, sizeof(Triplet), compareTriplets);
+// }
 
-// This function is to delete 3*n columns of matrix H related to an array of cones which needs to be deleted
-// The 1st cone is 0
-// Not allocation and H should be stored as in CSC type after deletion
-void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, int *cones_to_clear)
-{
-  switch(H->storageType)
-  {
-  case NM_SPARSE:
-  {
-    assert(H->matrix2);
-    if (H->matrix2->origin == NSM_CSC)
-    {
-      NM_triplet(H);
-      H->matrix2->origin= NSM_TRIPLET;
-      NM_clearCSC(H);
-    }
+// // This function is to delete 3*n columns of matrix H related to an array of cones which needs to be deleted
+// // The 1st cone is 0
+// // Not allocation and H should be stored as in CSC type after deletion
+// void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, int *cones_to_clear)
+// {
+//   // #include "CSparseMatrix.h"
+//   switch(H->storageType)
+//   {
+//   case NM_SPARSE:
+//   {
+//     assert(H->matrix2);
+//     if (H->matrix2->origin == NSM_CSC)
+//     {
+//       NM_triplet(H);
+//       H->matrix2->origin= NSM_TRIPLET;
+//       NM_clearCSC(H);
+//     }
 
-    if (H->matrix2->origin == NSM_TRIPLET)
-    {
-      // printf("\n\n H = \n"); NM_display(H);
-      CSparseMatrix *H_triplet = H->matrix2->triplet;
-      int first = 0, last = H_triplet->nz-1, delete_counter = 0, stop = 0;
-      cs_long_t *rows = H_triplet->i, *cols = H_triplet->p, target = -1;
-      double *val = H_triplet->x;
-      for (unsigned int i=0; i<n_cones_to_clear; i++)
-      {
-        target = (cs_long_t)cones_to_clear[i]*3;
-        if (target > H_triplet->m)
-        {
-          n_cones_to_clear--;
-          continue;
-        }
-        // printf("\n\ntarget = %lld, first = %d, last = %d\n", target, first, last);
+//     if (H->matrix2->origin == NSM_TRIPLET)
+//     {
+//       CSparseMatrix *H_triplet = H->matrix2->triplet;
+//       int first = 0, last = H_triplet->nz-1, delete_counter = 0, stop = 0;
+//       cs_long_t *rows = H_triplet->i, *cols = H_triplet->p, target = -1;
+//       double *val = H_triplet->x;
+//       for (unsigned int i=0; i<n_cones_to_clear; i++)
+//       {
+//         target = (cs_long_t)cones_to_clear[i]*3;
+//         if (target > H_triplet->m)
+//         {
+//           n_cones_to_clear--;
+//           continue;
+//         }
 
-        first = 0; stop = 0;
-        while (first <= last && target<H_triplet->m && !stop)
-        {
-          if(rows[last] == target || rows[last] == target+1 || rows[last] == target+2) // Last row is to be deleted
-          {
-            last--;
-            delete_counter++;
-          }
-          else
-          {
-            for (unsigned int j=first; j<last; j++)
-            {
-              if (rows[j] == target || rows[j] == target+1 || rows[j] == target+2) // Search is done
-              {
-                // printf("rows[%u] = %lld, delete_counter = %d\n", j, rows[j],delete_counter+1);
-                // Swap this value with the last one
-                rows[j] = rows[last];
-                cols[j] = cols[last];
-                val[j] = val[last];
-                last--;
-                delete_counter++;
-                first = j+1;
-                break;
-              }
-              if (j == last-1) stop = 1;
-            }
-          }
-        }
-      }
-      // Update nz of H
-      H_triplet->nz = last+1;
+//         first = 0; stop = 0;
+//         while (first <= last && target<H_triplet->m && !stop)
+//         {
+//           if(rows[last] == target || rows[last] == target+1 || rows[last] == target+2) // Last row is to be deleted
+//           {
+//             last--;
+//             delete_counter++;
+//           }
+//           else
+//           {
+//             for (unsigned int j=first; j<last; j++)
+//             {
+//               if (rows[j] == target || rows[j] == target+1 || rows[j] == target+2) // Search is done
+//               {
+//                 // Swap this value with the last one
+//                 rows[j] = rows[last];
+//                 cols[j] = cols[last];
+//                 val[j] = val[last];
+//                 last--;
+//                 delete_counter++;
+//                 first = j+1;
+//                 break;
+//               }
+//               if (j == last-1) stop = 1;
+//             }
+//           }
+//         }
+//       }
+//       // Update nz of H
+//       H_triplet->nz = last+1;
 
-      // Deallocation
-      // rows = H_triplet->i+H_triplet->nz;
-      // cols = H_triplet->p+H_triplet->nz;
-      // val = H_triplet->x+H_triplet->nz;
-      // cs_long_t *int_del; double *double_del;
-      // for (int i=0; i<delete_counter; i++)
-      // {
-      //   if(rows) {int_del = rows; rows++; free(int_del);}
-      //   if(cols) {int_del = cols; cols++; free(int_del);}
-      //   if(val) {double_del = val; val++; free(double_del);}
-      // }
+//       // Reduce size of H
+//       H_triplet->m -= 3*n_cones_to_clear;
 
-      // // Reduce size of H
-      // H_triplet->m -= 3*n_cones_to_clear;
+//       // Sort row_index
+//       Triplet *triplets = malloc(H_triplet->nz*sizeof(Triplet));
+//       for (int k=0; k<H_triplet->nz; k++)
+//       {
+//         triplets[k].row_index = rows[k];
+//         triplets[k].col_index = cols[k];
+//         triplets[k].value = val[k];
+//       }
+//       sortTriplets(triplets, H_triplet->nz);
 
-      // // Sort row_index
-      // Triplet *triplets = malloc(H_triplet->nz*sizeof(Triplet));
-      // for (int k=0; k<H_triplet->nz; k++)
-      // {
-      //   triplets[k].row_index = rows[k];
-      //   triplets[k].col_index = cols[k];
-      //   triplets[k].value = val[k];
-      // }
-      // sortTriplets(triplets, H_triplet->nz);
+//       for (int k=0; k<H_triplet->nz; k++)
+//       {
+//         rows[k] = triplets[k].row_index;
+//         cols[k] = triplets[k].col_index;
+//         val[k] = triplets[k].value;
+//       }
 
-      // for (int k=0; k<H_triplet->nz; k++)
-      // {
-      //   rows[k] = triplets[k].row_index;
-      //   cols[k] = triplets[k].col_index;
-      //   val[k] = triplets[k].value;
-      // }
+//       for (unsigned int i=0; i<n_cones_to_clear; i++)
+//       {
+//         target = ((cs_long_t)cones_to_clear[i]-i)*3;
+//         if (target > H_triplet->m) continue;
 
-      // // printf("\n\n H = \n"); NM_display(H);
-      // for (unsigned int i=0; i<n_cones_to_clear; i++)
-      // {
-      //   target = ((cs_long_t)cones_to_clear[i]-i)*3;
-      //   if (target > H_triplet->m) continue;
+//         for (unsigned int j=0; j<=last; j++)
+//         {
+//           if (rows[j] >= target)
+//           {
+//             rows[j] -= 3;
+//           }
+//         }
+//       }
 
-      //   for (unsigned int j=0; j<=last; j++)
-      //   {
-      //     if (rows[j] >= target)
-      //     {
-      //       rows[j] -= 3;
-      //     }
-      //   }
-      // }
+//       NM_csc(H);
+//       H->matrix2->origin= NSM_CSC;
+//     }
+//     else
+//       assert(0 && "NM_clear_cone_matrix_H supports only NSM_TRIPLET and NSM_CSC, or unknown origin");
+//   }
 
-      // printf("\n\n H = \n"); NM_display(H);
-      NM_csc(H);
-      H->matrix2->origin= NSM_CSC;
-    }
-    else
-      assert(0 && "NM_clear_cone_matrix_H supports only NSM_TRIPLET and NSM_CSC, or unknown origin");
-  }
+//   default:
+//   {
+//     assert(0 && "NM_clear_cone_matrix_H supports only NM_SPARSE, or unknown storageType");
+//   }
+//   }
+// }
 
-  default:
-  {
-    assert(0 && "NM_clear_cone_matrix_H supports only NM_SPARSE, or unknown storageType");
-  }
+// /* This function is to extract some rows and columns of a matrix. The new one has a reduced size. For example:
+//  *
+//  *     [ 1 0 3 0 ]                             [ 1 3 ]
+//  * A = [ 0 9 0 0 ]  => Ac = A(:, column 0 2) = [ 0 0 ]
+//  *     [ 0 0 0 4 ]                             [ 0 0 ]
+//  * An allocation is done. All matrices are stored as sparse.
+//  */
+// NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols)
+// {
+//   NumericsMatrix * Ac = NULL;
+//   switch(A->storageType)
+//   {
+//   case NM_SPARSE:
+//   {
+//     assert(A->matrix2);
+//     NM_triplet(A);
+//     if (A->matrix2->origin == NSM_CSC) NM_clearCSC(A);
+//     if (A->matrix2->origin == NSM_CSR) NM_clearCSR(A);
+//     A->matrix2->origin= NSM_TRIPLET;
 
-  }
-}
+//     CSparseMatrix *A_triplet = A->matrix2->triplet;
+//     cs_long_t *A_rows = A_triplet->i, *A_cols = A_triplet->p;
+//     double *A_vals = A_triplet->x;
+//     CS_INT A_nz = A_triplet->nz, Ac_nz = 0;
+//     int out_of_size = 0;
+
+//     Ac = NM_create(NM_SPARSE, n_rows, n_cols);
+
+//     // Count the number of non-zero elements in the target rows and columns
+//     for (int i=0; i<n_rows; i++)
+//       for (int j=0; j<n_cols; j++)
+//         for (int k=0; k<A_nz; k++)
+//         {
+//           if (A_rows[k] == target_rows[i] && A_cols[k] == target_cols[j])
+//             Ac_nz++;
+//           // if (target_rows[i] > A_rows[k] || target_cols[j] > A_cols[k])
+//           //   out_of_size = 1;
+//         }
+
+
+
+//     // if (out_of_size)
+//     // {
+//     //   assert(0 && "NM_extract: Target rows or columns are out of size of the matrix!");
+//     //   return NULL;
+//     // }
+
+//     if (Ac_nz == 0) return NULL;
+
+//     // Create the compressed matrix
+//     CSparseMatrix *Ac_triplet = cs_spalloc(n_rows, n_cols, Ac_nz, 1, 1);
+//     cs_long_t *Ac_rows = Ac_triplet->i, *Ac_cols = Ac_triplet->p;
+//     double *Ac_vals = Ac_triplet->x;
+//     int index = 0;
+
+//     for (int i=0; i<n_rows; i++)
+//       for (int j=0; j<n_cols; j++)
+//         for (int k=0; k<A_nz; k++)
+//           if (A_rows[k] == target_rows[i] && A_cols[k] == target_cols[j])
+//           {
+//             Ac_rows[index] = i;
+//             Ac_cols[index] = j;
+//             Ac_vals[index++] = A_vals[k];
+//             // memcpy(Ac_vals+index, A_vals+k, (size_t)sizeof(double));
+//             // index++;
+//           }
+
+//     assert(index!=Ac_nz && "NM_extract: There is an error in the routine for inserting elements to the new matrix");
+
+//     Ac->matrix2->triplet = Ac_triplet;
+//     Ac->matrix2->origin = NSM_TRIPLET;
+//     Ac->matrix2->triplet->nz = Ac_nz;
+
+//     // printf("NM_extract: check Ac = \n");
+//     // for (int i=0; i<index; i++)
+//     //   printf("%2lld %2lld: %e\n", Ac_rows[i], Ac_cols[i], Ac_vals[i]);
+//   }
+
+//   default:
+//   {
+//     assert(0 && "NM_extract supports only NM_SPARSE, or unknown storageType");
+//   }
+//   }
+
+//   return Ac;
+// }
 
 
 
@@ -1035,9 +1105,8 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
 
 
-
   //for(int i = 0; i < n ; i++) printf("mu[%d] = %g\n", i, problem->mu[i]);
-  for(int i = 0; i < n ; i++) problem->mu[i]=0.3;
+  // for(int i = 0; i < n ; i++) problem->mu[i]=0.3;
 
   /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE,
      we force the copy into a NM_SPARSE storageType */
@@ -1089,6 +1158,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   {
     gfc3d_IPM_SNM_init(problem, options);
     internal_allocation = 1;
+
   }
 
   Gfc3d_IPM_init_data * data = (Gfc3d_IPM_init_data *)options->solverData;
@@ -1103,49 +1173,62 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   NumericsMatrix *H = NM_multiply(P_mu, H_tilde);
   NM_gemv(1.0, P_mu, w_tilde, 0.0, w);
 
-  FILE *file = NULL;
-  // FILE *file = fopen("Hmat3.m", "w");
+  // FILE *file = NULL;
+  // FILE *file = fopen("Hmat.m", "w");
   // fprintf(file,"H = [\n");
   // CSparseMatrix_print_in_Matlab_file(NM_triplet(H), 0, file);
   // fprintf(file,"];\n");
   // fprintf(file,"H = sparse(int32(H(:,1)), int32(H(:,2)), H(:,3));\n");
 
-  int cones_to_clear[] = {28};
+  // fprintf(file,"M = [\n");
+  // CSparseMatrix_print_in_Matlab_file(NM_triplet(M), 0, file);
+  // fprintf(file,"];\n");
+  // fprintf(file,"M = sparse(int32(M(:,1)), int32(M(:,2)), M(:,3));\n");
+
+  // int target_rows[] = {0, 1, 2, 36, 37, 38};
+  // int target_cols[] = {0, 1, 2, 3, 4, 5};
+  // NumericsMatrix *Hc = NM_extract(H, 6, target_rows, 6, target_cols);
+
+  // printf("H = \n"); NM_display(H);
+  // printf("\n\nM = \n"); NM_display(M);
+  // printf("\n\nHc = \n"); NM_display(Hc);
+
+  // int cones_to_clear[] = {28};
   // NM_clear_cone_matrix_H(H, 5, cones_to_clear);
   // n -= 5; nd = n*d;
   // int cones_to_clear[] = {337,352,356,384,400};
-  int n_cones_to_clear = 1;
-  NM_clear_cone_matrix_H(H, n_cones_to_clear, cones_to_clear);
+  // int n_cones_to_clear = 1;
+  // NM_clear_cone_matrix_H(H, n_cones_to_clear, cones_to_clear);
 
 
-  // fprintf(file,"Hredu = [\n");
-  // CSparseMatrix_print_in_Matlab_file(NM_triplet(H), 0, file);
+  // fprintf(file,"Hc = [\n");
+  // CSparseMatrix_print_in_Matlab_file(NM_triplet(Hc), 0, file);
   // fprintf(file,"];\n");
-  // fprintf(file,"Hredu = sparse(int32(Hredu(:,1)), int32(Hredu(:,2)), Hredu(:,3));\n");
+  // fprintf(file,"Hc = sparse(int32(Hc(:,1)), int32(Hc(:,2)), Hc(:,3));\n");
   // fclose(file);
 
-  // Delete the corresponding cones in w
-  int assign_w = 1, count_w = 0;
-  double *w_tmp = (double*)calloc(nd, sizeof(double));
-  for (int i=0; i<nd; i+=d)
-  {
-    assign_w = 1;
-    for(int j=0; j<n_cones_to_clear; j++)
-    {
-      if(i/3 == cones_to_clear[j]) {assign_w = 0; break;}
-    }
+  // // Delete the corresponding cones in w
+  // int assign_w = 1, count_w = 0;
+  // double *w_tmp = (double*)calloc(nd, sizeof(double));
+  // for (int i=0; i<nd; i+=d)
+  // {
+  //   assign_w = 1;
+  //   for(int j=0; j<n_cones_to_clear; j++)
+  //   {
+  //     if(i/3 == cones_to_clear[j]) {assign_w = 0; break;}
+  //   }
 
-    if (assign_w)
-    {
-      w_tmp[count_w++] = w[i];
-      w_tmp[count_w++] = w[i+1];
-      w_tmp[count_w++] = w[i+2];
-    }
-  }
+  //   if (assign_w)
+  //   {
+  //     w_tmp[count_w++] = w[i];
+  //     w_tmp[count_w++] = w[i+1];
+  //     w_tmp[count_w++] = w[i+2];
+  //   }
+  // }
 
-  n -= n_cones_to_clear; nd = n*d;
-  NV_copy(w_tmp, nd, w);
-  free(w_tmp);
+  // n -= n_cones_to_clear; nd = n*d;
+  // NV_copy(w_tmp, nd, w);
+  // free(w_tmp);
 
 
   double *w_ori = (double*)calloc(nd, sizeof(double));
@@ -1279,7 +1362,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
 
   /* ---- IPM iterations ---- */
-  numerics_printf_verbose(-1, "problem dimensions n, nd x m: %1i, %6i x %-6i",n, nd, m);
+  // numerics_printf_verbose(-1, "problem dimensions n, nd x m: %1i, %6i x %-6i",n, nd, m);
       switch ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] )
     {
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_NOSCAL:
@@ -1346,7 +1429,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
   else
   {
-    numerics_printf_verbose(-1, "| it  | pinfeas | dinfeas |  |s-ub| | |u o r| |  u'r/n  | prj err | barpram |  sigma  ||  alpha  |  |dv|   |  |du|   |  |dr|   |  |ds|   | ls prim | ls dual | ls comp | ls fixP |");
+    numerics_printf_verbose(-1, "| it  | pinfeas | dinfeas |  |s-ub| | |u o r| |   u'r   | prj err | barpram |  sigma  ||  alpha  |  |dv|   |  |du|   |  |dr|   |  |ds|   | ls prim | ls dual | ls comp | ls fixP |");
     numerics_printf_verbose(-1, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
   }
 
@@ -1370,16 +1453,17 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   FILE * iterates_2;
   FILE *sol_file;
 
-  char *str = (char *) malloc(200);
-  strcpy( str, problem_name );
-  const char * separators = "/";
-  char *strToken = strtok( str, separators );
-  for(int i=0; i<5; i++)
-  {
-    if(strToken != NULL) strToken = strtok ( NULL, separators );
-  }
+  char *strToken = NULL;
+  // char *str = (char *) malloc(200);
+  // strcpy( str, problem_name );
+  // const char * separators = "/";
+  // char *strToken = strtok( str, separators );
+  // for(int i=0; i<5; i++)
+  // {
+  //   if(strToken != NULL) strToken = strtok ( NULL, separators );
+  // }
 
-  strToken = strtok ( strToken, "." );
+  // strToken = strtok ( strToken, "." );
   // for(int i=0; i<strlen(strToken); i++)
   // {
   //   if(strToken[i] == '-') strToken[i] = '_';
@@ -1409,7 +1493,7 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   double norm_q = cblas_dnrm2(m, problem->q, 1);
   double norm_b = cblas_dnrm2(nd, problem->b, 1);
 
-  double kappa_eps = 0.1, kappa_mu = 0.1;
+  double kappa_eps = 0.1, kappa_mu = 0.3;
   double tmp_barr_param = 0.;
   double max_uor_2mu = 0., tmp_uor_2mu = 0.;
   int findParam = 1;
@@ -1438,6 +1522,7 @@ while(findParam)
   for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = f[i];
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
   NM_Cholesky_solve(M, globalVelocity, 1);
+  // for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = 0.02;
   // u
   for (unsigned int  i = 0; i<nd; i++)
       if (i % d == 0) velocity[i] = 0.1;
@@ -1587,6 +1672,7 @@ while(findParam)
   pinfeas = dinfeas = complem = udotr = projerr = diff_fixp = totalresidual = 1e300;
   alpha_primal = alpha_dual = 1.;
   barr_param = 1.;
+  sigma = 0.1;
 
   // if (iteration == 0)
   // {
@@ -1741,20 +1827,19 @@ while(findParam)
       // printf("u = "); for (int i = 0; i<9; i++) printf(" %.2e", velocity[i]);
       // printf("\n\nr = "); for (int i = 0; i<9; i++) printf(" %.2e", reaction[i]);
       // printf("\n");
-
       primalResidual_s(velocity, H, globalVelocity, w, s, primalConstraint, &pinfeas, tol);
       dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol);
       complem = complemResidualNorm(velocity, reaction, nd, n);
       udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
       // barr_param = udotr /n;
       // if (iteration == 0)
-      barr_param = (udotr / n)*kappa_mu;
+      barr_param = (udotr / n); //*kappa_mu;
 
       JA_prod(velocity, reaction, nd, n, complemConstraint);
       cblas_dcopy(nd, complemConstraint, 1, complemConstraint_mu, 1);
       for (int k = 0; k < nd; k+=d)
       {
-        complemConstraint_mu[k] -= 2*kappa_mu*barr_param;
+        complemConstraint_mu[k] -= 2*sigma*barr_param;
       }
       uor_mu = cblas_dnrm2(nd, complemConstraint_mu, 1);
 
@@ -1787,9 +1872,10 @@ while(findParam)
       // (*computeError)(problem,
       //                 data->tmp_point->t_reaction, data->tmp_point->t_velocity, globalVelocity,
       //                 tol, options, norm_q, norm_b, &projerr);
-      gfc3d_compute_error_r(problem,
-                      data->tmp_point->t_reaction, data->tmp_point->t_velocity, globalVelocity,
-                      tol, options, norm_q, norm_b, &projerr);
+      // gfc3d_compute_error_r(problem,
+      //                 data->tmp_point->t_reaction, data->tmp_point->t_velocity, globalVelocity,
+      //                 tol, options, norm_q, norm_b, &projerr);
+      projerr = projectionError(velocity, reaction, n, tol);
 
       totalresidual = fmax(fmax(fmax(pinfeas, dinfeas),diff_fixp),complem);
       totalresidual_mu = fmax(fmax(fmax(pinfeas, dinfeas),diff_fixp),uor_mu);
@@ -1827,8 +1913,8 @@ while(findParam)
                 LS_norm_p, LS_norm_d, LS_norm_c, LS_norm_f);
         }
 
-        numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||",
-                              iteration, fws, pinfeas, dinfeas, diff_fixp, complem, udotr, projerr, barr_param);
+        numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||",
+                              iteration, fws, pinfeas, dinfeas, diff_fixp, complem, udotr, projerr, barr_param, sigma);
 
         hasNotConverged = 0;
         break;
@@ -1908,15 +1994,15 @@ while(findParam)
 
       /* regularization */
       // NM_insert(J, NM_scalar(nd, -1e-7), m + nd, m + nd);
-      NumericsMatrix * delta = NM_create(NM_SPARSE, n, nd);
-      size_t delta_nzmax = n;
-      NM_triplet_alloc(delta, delta_nzmax);
-      NM_fill(delta, NM_SPARSE, n, nd, delta->matrix2);
-      for(size_t i = 0; i < n; ++i)
-      {
-        NM_entry(delta, i, i*d, -1e-6);
-      }
-      NM_insert(J, delta, m + 2*nd, m + nd);
+      // NumericsMatrix * delta = NM_create(NM_SPARSE, n, nd);
+      // size_t delta_nzmax = n;
+      // NM_triplet_alloc(delta, delta_nzmax);
+      // NM_fill(delta, NM_SPARSE, n, nd, delta->matrix2);
+      // for(size_t i = 0; i < n; ++i)
+      // {
+      //   NM_entry(delta, i, i*d, -1e-6);
+      // }
+      // NM_insert(J, delta, m + 2*nd, m + nd);
 
 
       if(arrow_r) { NM_free(arrow_r); arrow_r = NULL; }
@@ -1990,7 +2076,7 @@ while(findParam)
       alpha_primal = getStepLength(velocity, d_velocity, nd, n, 0.95);
       alpha_dual = getStepLength(reaction, d_reaction, nd, n, 0.95);
       alpha_primal = alpha_dual = fmin(alpha_primal, alpha_dual);
-
+      // if (20 < iteration && iteration < 30) {alpha_primal = alpha_dual = 1.;}
       // if (load_starting_point == 1 && (iteration == 0 || iteration == 49))
       // if (totalresidual < tol*10.)
       // {
@@ -3553,7 +3639,7 @@ while(findParam)
     }
     else
       numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e || %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
-                            iteration, fws, pinfeas, dinfeas, diff_fixp, complem, udotr, projerr, barr_param, kappa_mu, alpha_primal,
+                            iteration, fws, pinfeas, dinfeas, diff_fixp, complem, udotr, projerr, barr_param, sigma, alpha_primal,
                             fabs(d_globalVelocity[cblas_idamax(m, d_globalVelocity, 1)]),
                             fabs(d_velocity[cblas_idamax(nd, d_velocity, 1)]),
                             fabs(d_reaction[cblas_idamax(nd, d_reaction, 1)]),
@@ -3602,10 +3688,10 @@ while(findParam)
     // {
 
 
-      // if (alpha_primal < 1.)
-      //   kappa_mu = 0.49;
-      // else
-      //   kappa_mu = (0.1+kappa_mu)/2.;
+      if (alpha_primal < 1.)
+        sigma = 0.49;
+      else
+        sigma = (0.1+sigma)/2.;
       // barr_param = (udotr / n)*kappa_mu;
     // //   // printf("abs(ub'd_ub - |ub|*|d_ub|) = %e\n", check_sub);
     //   printf("\n");
@@ -3750,6 +3836,13 @@ while(findParam)
   if(internal_allocation)
   {
     gfc3d_IPM_SNM_free(problem,options);
+  }
+
+  if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP)
+  {
+    options->solverData = (double *)malloc(sizeof(double));
+    double *pinfeas_ptr = (double *)options->solverData;
+    *pinfeas_ptr = pinfeas;
   }
 
   if(H_tilde) H_tilde = NM_free(H_tilde);

@@ -6802,7 +6802,7 @@ int NM_LU_refine(NumericsMatrix* Ao, double *x, double tol, int max_iter, double
 
 		  NM_gemv(-1.0, A, x, 1.0, dx);       // dx = b - Ax
 		  *residu = cblas_dnrm2(vecsize, dx, 1);
-		  printf("-------------------------------------------------> NM_LU_refine: iteration = %i,\t residu = %e\n", iteration, *residu);
+		  // printf("-------------------------------------------------> NM_LU_refine: iteration = %i,\t residu = %e\n", iteration, *residu);
 		  while(*residu > tol && iteration < max_iter)
 		    {
 		      iteration++;
@@ -6821,7 +6821,7 @@ int NM_LU_refine(NumericsMatrix* Ao, double *x, double tol, int max_iter, double
 		      cblas_dcopy(vecsize, b, 1, dx, 1);
 		      NM_gemv(-1.0, A, x, 1.0, dx);     // dx   = b - Ax
 		      *residu = cblas_dnrm2(vecsize, dx, 1);
-		      printf("-------------------------------------------------> NM_LU_refine: iteration = %i,\t residu = %e\n", iteration, *residu);
+		      // printf("-------------------------------------------------> NM_LU_refine: iteration = %i,\t residu = %e\n", iteration, *residu);
 		    }
 		  free(b); b = NULL;
 		  free(dx); dx = NULL;
@@ -6993,14 +6993,286 @@ NumericsMatrix * NM_clear_zero(NumericsMatrix* A, const double tol)
 
   default:
   {
-    assert(0 && "NM_clear_zero does not support or unknown storageType");
+    assert(0 && "NM_clear_zero supports only NM_SPARSE, or unknown storageType");
   }
   }
 
   return B;
 }
 
-void NM_display_tol(const NumericsMatrix* const A, const double tol)
+
+int compareTriplets(const void *a, const void *b)
 {
-  return;
+  return ((struct Triplet *)a)->row_index - ((struct Triplet *)b)->row_index;
+}
+
+void sortTriplets(struct Triplet *triplets, size_t num_triplets)
+{
+  qsort(triplets, num_triplets, sizeof(struct Triplet), compareTriplets);
+}
+
+// This function is to delete 3*n columns of matrix H related to an array of cones which needs to be deleted
+// The 1st cone is 0
+// Not allocation and H should be stored as in CSC type after deletion
+void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, int *cones_to_clear)
+{
+  // #include "CSparseMatrix.h"
+  switch(H->storageType)
+  {
+  case NM_SPARSE:
+  {
+    assert(H->matrix2);
+    if (H->matrix2->origin == NSM_CSC)
+    {
+      NM_triplet(H);
+      H->matrix2->origin= NSM_TRIPLET;
+      NM_clearCSC(H);
+    }
+
+    if (H->matrix2->origin == NSM_TRIPLET)
+    {
+      CSparseMatrix *H_triplet = H->matrix2->triplet;
+      int first = 0, last = H_triplet->nz-1, delete_counter = 0, stop = 0;
+      cs_long_t *rows = H_triplet->i, *cols = H_triplet->p, target = -1;
+      double *val = H_triplet->x;
+      for (unsigned int i=0; i<n_cones_to_clear; i++)
+      {
+        target = (cs_long_t)cones_to_clear[i]*3;
+        if (target > H_triplet->m)
+        {
+          n_cones_to_clear--;
+          continue;
+        }
+
+        first = 0; stop = 0;
+        while (first <= last && target<H_triplet->m && !stop)
+        {
+          if(rows[last] == target || rows[last] == target+1 || rows[last] == target+2) // Last row is to be deleted
+          {
+            last--;
+            delete_counter++;
+          }
+          else
+          {
+            for (unsigned int j=first; j<last; j++)
+            {
+              if (rows[j] == target || rows[j] == target+1 || rows[j] == target+2) // Search is done
+              {
+                // Swap this value with the last one
+                rows[j] = rows[last];
+                cols[j] = cols[last];
+                val[j] = val[last];
+                last--;
+                delete_counter++;
+                first = j+1;
+                break;
+              }
+              if (j == last-1) stop = 1;
+            }
+          }
+        }
+      }
+      // Update nz of H
+      H_triplet->nz = last+1;
+
+      // Reduce size of H
+      H_triplet->m -= 3*n_cones_to_clear;
+
+      // Sort row_index
+      struct Triplet *triplets = malloc(H_triplet->nz*sizeof(struct Triplet));
+      for (int k=0; k<H_triplet->nz; k++)
+      {
+        triplets[k].row_index = rows[k];
+        triplets[k].col_index = cols[k];
+        triplets[k].value = val[k];
+      }
+      sortTriplets(triplets, H_triplet->nz);
+
+      for (int k=0; k<H_triplet->nz; k++)
+      {
+        rows[k] = triplets[k].row_index;
+        cols[k] = triplets[k].col_index;
+        val[k] = triplets[k].value;
+      }
+
+      for (unsigned int i=0; i<n_cones_to_clear; i++)
+      {
+        target = ((cs_long_t)cones_to_clear[i]-i)*3;
+        if (target > H_triplet->m) continue;
+
+        for (unsigned int j=0; j<=last; j++)
+        {
+          if (rows[j] >= target)
+          {
+            rows[j] -= 3;
+          }
+        }
+      }
+
+      NM_csc(H);
+      H->matrix2->origin= NSM_CSC;
+    }
+    else
+      assert(0 && "NM_clear_cone_matrix_H supports only NSM_TRIPLET and NSM_CSC, or unknown origin");
+  }
+
+  default:
+  {
+    assert(0 && "NM_clear_cone_matrix_H supports only NM_SPARSE, or unknown storageType");
+  }
+  }
+}
+
+
+struct HashSet* createHashSet(int capacity)
+{
+  struct HashSet* set = (struct HashSet*)malloc(sizeof(struct HashSet));
+  set->capacity = capacity;
+  set->allElements = (int*)malloc(capacity*sizeof(int));
+  for (int i=0; i<capacity; i++) set->allElements[i] = -1;
+  return set;
+}
+
+void addToHashSet(struct HashSet* set, int element, int index)
+{
+  if (element < set->capacity) set->allElements[element] = index;
+}
+
+bool isInHashSet(struct HashSet* set, int element)
+{
+  return element < set->capacity && set->allElements[element] >= 0;
+}
+
+void freeHashSet(struct HashSet* set)
+{
+  free(set->allElements);
+  free(set);
+}
+
+NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols)
+{
+  NumericsMatrix * Ac = NULL;
+  switch(A->storageType)
+  {
+  case NM_SPARSE:
+  {
+    // Get triplet of A
+    assert(A->matrix2);
+    NM_triplet(A);
+    if (A->matrix2->origin == NSM_CSC) NM_clearCSC(A);
+    if (A->matrix2->origin == NSM_CSR) NM_clearCSR(A);
+    A->matrix2->origin= NSM_TRIPLET;
+
+    // Create HashSet for target
+    struct HashSet* target_rows_HS = createHashSet(A->matrix2->triplet->m);
+    struct HashSet* target_cols_HS = createHashSet(A->matrix2->triplet->n);
+    for (int i=0; i<n_rows; i++) addToHashSet(target_rows_HS, target_rows[i], i);
+    for (int i=0; i<n_cols; i++) addToHashSet(target_cols_HS, target_cols[i], i);
+
+
+    // Create compressed matrix
+    Ac = NM_create(NM_SPARSE, n_rows, n_cols);
+
+    CSparseMatrix *A_triplet = A->matrix2->triplet;
+    CS_INT A_nz = A_triplet->nz, Ac_nz = 0;
+    CSparseMatrix *Ac_triplet = cs_spalloc(n_rows, n_cols, A_nz, 1, 1);
+
+    cs_long_t *A_rows  = A_triplet->i,  *A_cols  = A_triplet->p;
+    cs_long_t *Ac_rows = Ac_triplet->i, *Ac_cols = Ac_triplet->p;
+    double *A_vals  = A_triplet->x;
+    double *Ac_vals = Ac_triplet->x;
+
+    int index = 0;
+    cs_long_t min_row = 100000, min_col = 100000;
+    for (int i=0; i<A_nz; i++)
+    {
+      if (isInHashSet(target_rows_HS, A_rows[i]) && isInHashSet(target_cols_HS, A_cols[i]))
+      {
+        Ac_rows[index] = target_rows_HS->allElements[A_rows[i]];
+        Ac_cols[index] = target_cols_HS->allElements[A_cols[i]];
+        Ac_vals[index++] = A_vals[i];
+
+        if (min_row > A_rows[i]) min_row = A_rows[i];
+        if (min_col > A_cols[i]) min_col = A_cols[i];
+        // printf("min_row = %lld, min_col = %lld\n", min_row, min_col);
+      }
+    }
+
+    freeHashSet(target_rows_HS);
+    freeHashSet(target_cols_HS);
+
+    Ac_nz = index;
+    if (Ac_nz == 0) return NULL;
+
+    // printf("\nmin_row = %lld, min_col = %lld\n\n", min_row, min_col);
+
+
+    // for (int i=0; i<Ac_nz; i++)
+    // {
+    //   // printf("\nAc_rows = %lld, min_col = %lld\n\n", min_row, min_col);
+    //   Ac_rows[i] -= min_row;
+    //   Ac_cols[i] -= min_col;
+    // }
+
+
+    // printf("Ac_rows ="); for (int i=0; i<Ac_nz; i++) printf(" %lld", Ac_rows[i]);
+    // printf("\n\nAc_cols ="); for (int i=0; i<Ac_nz; i++) printf(" %lld", Ac_cols[i]);
+    // // Create compressed matrix
+    // CSparseMatrix *A_triplet = A->matrix2->triplet;
+    // cs_long_t *A_rows = A_triplet->i, *A_cols = A_triplet->p;
+    // double *A_vals = A_triplet->x;
+    // CS_INT A_nz = A_triplet->nz, Ac_nz = 0;
+    // int out_of_size = 0;
+
+    // Ac = NM_create(NM_SPARSE, n_rows, n_cols);
+    // // printf("\nn_rows = %d, n_cols = %d, M_nz = %lld\nMc_nz =", n_rows, n_cols, A_nz);
+    // // Count the number of non-zero elements in the target rows and columns
+    // for (int i=0; i<n_rows; i++)
+    //   for (int j=0; j<n_cols; j++)
+    //     for (int k=0; k<A_nz; k++)
+    //     {
+    //       if (A_rows[k] == target_rows[i] && A_cols[k] == target_cols[j])
+    //       {
+    //         Ac_nz++;
+    //         printf(" %lld", Ac_nz);
+    //       }
+    //     }
+
+    // // printf("\nMc_nz all = %lld\n", Ac_nz);
+
+    // if (Ac_nz == 0) return NULL;
+
+    // // Create the compressed matrix
+    // CSparseMatrix *Ac_triplet = cs_spalloc(n_rows, n_cols, Ac_nz, 1, 1);
+    // cs_long_t *Ac_rows = Ac_triplet->i, *Ac_cols = Ac_triplet->p;
+    // double *Ac_vals = Ac_triplet->x;
+    // int index = 0;
+
+    // for (int i=0; i<n_rows; i++)
+    //   for (int j=0; j<n_cols; j++)
+    //     for (int k=0; k<A_nz; k++)
+    //       if (A_rows[k] == target_rows[i] && A_cols[k] == target_cols[j])
+    //       {
+    //         Ac_rows[index] = i;
+    //         Ac_cols[index] = j;
+    //         Ac_vals[index++] = A_vals[k];
+    //       }
+
+    Ac->matrix2->triplet = Ac_triplet;
+    Ac->matrix2->origin = NSM_TRIPLET;
+    Ac->matrix2->triplet->nz = Ac_nz;
+  }
+
+  default:
+  {
+    assert(0 && "NM_extract supports only NM_SPARSE, or unknown storageType");
+  }
+  }
+
+  if (Ac)
+  {
+    NM_csc(Ac);
+    Ac->matrix2->origin= NSM_CSC;
+  }
+  return Ac;
 }

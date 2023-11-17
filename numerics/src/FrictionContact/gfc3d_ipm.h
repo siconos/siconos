@@ -201,3 +201,9 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem,
                         SolverOptions * options,
                         double norm_q, double norm_b,
                         double* restrict error);
+
+void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, int *cones_to_clear);
+
+NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols);
+
+double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol);

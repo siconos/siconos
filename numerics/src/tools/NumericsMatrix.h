@@ -1147,6 +1147,37 @@ extern "C"
    */
   RawNumericsMatrix * NM_clear_zero(NumericsMatrix* A, const double tol) ;
 
+  struct Triplet {
+    int row_index;
+    int col_index;
+    double value;
+  };
+
+  int compareTriplets(const void *a, const void *b);
+  void sortTriplets(struct Triplet *triplets, size_t num_triplets);
+  void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, int *cones_to_clear);
+
+
+  struct HashSet
+  {
+    int capacity;
+    int* allElements;
+  };
+
+  struct HashSet* createHashSet(int capacity);
+  void addToHashSet(struct HashSet* set, int element, int index); // Constructor
+  bool isInHashSet(struct HashSet* set, int element);
+  void freeHashSet(struct HashSet* set);               // Destructor
+
+  /* This function is to extract some rows and columns of a matrix. The new one has a reduced size. For example:
+   *
+   *     [ 1 0 3 0 ]                             [ 1 3 ]
+   * A = [ 0 9 0 0 ]  => Ac = A(:, column 0 2) = [ 0 0 ]
+   *     [ 0 0 0 4 ]                             [ 0 0 ]
+   * An allocation is done. All matrices are stored as sparse.
+   */
+  NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols);
+
 #ifdef WITH_OPENSSL
   /** Compute sha1 hash of matrix values. Matrices of differents size and same
    *  values have the same hash.
