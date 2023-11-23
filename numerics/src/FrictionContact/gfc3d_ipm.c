@@ -250,7 +250,7 @@ double relGap(NumericsMatrix * M, const double * f, const double * w, const doub
 }
 
 /* Computation of the projection error |r - proj(r-u)|/max{|r|, |u|} */
-static double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
+double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
 {
    double worktmp[3];
    double out = 0.0;

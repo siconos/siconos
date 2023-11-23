@@ -701,220 +701,120 @@ static float randomFloat(float min, float max) {
     return min + (float)rand() / ((float)RAND_MAX / (max - min));
 }
 
-// typedef struct Triplet {
-//     int row_index;
-//     int col_index;
-//     double value;
-// } Triplet;
 
-// Comparison function for qsort
-// int compareTriplets(const void *a, const void *b) {
-//     return ((Triplet *)a)->row_index - ((Triplet *)b)->row_index;
-// }
+#include <hdf5.h>
+#include <hdf5_hl.h>
+#include <fclib.h>
+int *read_fricprob_block(const char* path, int type, int blk_index)
+{
+  int *out = NULL;
+  #define NUM_BLOCKS 0
+  #define CONTACT_INDEX 1
+  #define BODY_INDEX 2
+  #define RANK_Hc 3
 
-// #include <stdlib.h>
-// void sortTriplets(Triplet *triplets, size_t num_triplets) {
-//     qsort(triplets, num_triplets, sizeof(Triplet), compareTriplets);
-// }
+  if (type < NUM_BLOCKS || type > RANK_Hc)
+  {
+    fprintf (stderr, "ERROR: out of \"type\"\n");
+    return NULL;
+  }
 
-// // This function is to delete 3*n columns of matrix H related to an array of cones which needs to be deleted
-// // The 1st cone is 0
-// // Not allocation and H should be stored as in CSC type after deletion
-// void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, int *cones_to_clear)
-// {
-//   // #include "CSparseMatrix.h"
-//   switch(H->storageType)
-//   {
-//   case NM_SPARSE:
-//   {
-//     assert(H->matrix2);
-//     if (H->matrix2->origin == NSM_CSC)
-//     {
-//       NM_triplet(H);
-//       H->matrix2->origin= NSM_TRIPLET;
-//       NM_clearCSC(H);
-//     }
+  #include "io_tools.h"
+  int is_hdf5 = check_hdf5_file(path);
+  if(is_hdf5)
+  {
+#if defined(WITH_FCLIB)
+    hid_t  file_id, group_id, subgroup_id, dataset_id, dataspace_id;
+    hssize_t num_elements;
+    if ((file_id = H5Fopen (path, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    {
+      fprintf (stderr, "ERROR: opening file failed\n");
+      return NULL;
+    }
 
-//     if (H->matrix2->origin == NSM_TRIPLET)
-//     {
-//       CSparseMatrix *H_triplet = H->matrix2->triplet;
-//       int first = 0, last = H_triplet->nz-1, delete_counter = 0, stop = 0;
-//       cs_long_t *rows = H_triplet->i, *cols = H_triplet->p, target = -1;
-//       double *val = H_triplet->x;
-//       for (unsigned int i=0; i<n_cones_to_clear; i++)
-//       {
-//         target = (cs_long_t)cones_to_clear[i]*3;
-//         if (target > H_triplet->m)
-//         {
-//           n_cones_to_clear--;
-//           continue;
-//         }
+    // Get number of blocks
+    int numBlk = 0;
+    group_id = H5Gopen (file_id, "/fclib_global/blocks", H5P_DEFAULT);
+    H5LTread_dataset_int (file_id, "/fclib_global/blocks/N", &numBlk);
 
-//         first = 0; stop = 0;
-//         while (first <= last && target<H_triplet->m && !stop)
-//         {
-//           if(rows[last] == target || rows[last] == target+1 || rows[last] == target+2) // Last row is to be deleted
-//           {
-//             last--;
-//             delete_counter++;
-//           }
-//           else
-//           {
-//             for (unsigned int j=first; j<last; j++)
-//             {
-//               if (rows[j] == target || rows[j] == target+1 || rows[j] == target+2) // Search is done
-//               {
-//                 // Swap this value with the last one
-//                 rows[j] = rows[last];
-//                 cols[j] = cols[last];
-//                 val[j] = val[last];
-//                 last--;
-//                 delete_counter++;
-//                 first = j+1;
-//                 break;
-//               }
-//               if (j == last-1) stop = 1;
-//             }
-//           }
-//         }
-//       }
-//       // Update nz of H
-//       H_triplet->nz = last+1;
 
-//       // Reduce size of H
-//       H_triplet->m -= 3*n_cones_to_clear;
+    if (type == NUM_BLOCKS)
+    {
+      out = (int *)calloc(1, sizeof(int));
+      *out = numBlk;
+    }
 
-//       // Sort row_index
-//       Triplet *triplets = malloc(H_triplet->nz*sizeof(Triplet));
-//       for (int k=0; k<H_triplet->nz; k++)
-//       {
-//         triplets[k].row_index = rows[k];
-//         triplets[k].col_index = cols[k];
-//         triplets[k].value = val[k];
-//       }
-//       sortTriplets(triplets, H_triplet->nz);
+    else
+    {
+      if (blk_index < 0)
+      {
+        fprintf (stderr, "ERROR: block index must not be negative\n");
+        return NULL;
+      }
+      else if (blk_index >= numBlk)
+      {
+        fprintf (stderr, "ERROR: block index must be in range [0, %d)\n", numBlk);
+        return NULL;
+      }
 
-//       for (int k=0; k<H_triplet->nz; k++)
-//       {
-//         rows[k] = triplets[k].row_index;
-//         cols[k] = triplets[k].col_index;
-//         val[k] = triplets[k].value;
-//       }
+      char block_X[20] = "block_";
+      char dest_path[50] = "";
+      sprintf(block_X + strlen(block_X), "%d", blk_index);
+      sprintf(dest_path + strlen(dest_path), "%s%s", "/fclib_global/blocks/", block_X);
+      subgroup_id = H5Gopen (file_id, dest_path, H5P_DEFAULT);
 
-//       for (unsigned int i=0; i<n_cones_to_clear; i++)
-//       {
-//         target = ((cs_long_t)cones_to_clear[i]-i)*3;
-//         if (target > H_triplet->m) continue;
+      if (type == CONTACT_INDEX)
+      {
+        sprintf(dest_path + strlen(dest_path), "%s", "/contact");
+        dataset_id = H5Dopen1(file_id, dest_path);
+        dataspace_id = H5Dget_space(dataset_id);
+        num_elements = H5Sget_simple_extent_npoints(dataspace_id); // Get the number of elements of contact vector
 
-//         for (unsigned int j=0; j<=last; j++)
-//         {
-//           if (rows[j] >= target)
-//           {
-//             rows[j] -= 3;
-//           }
-//         }
-//       }
+        out = (int *)calloc(num_elements+1, sizeof(int));
+        out[0] = (int)num_elements;                                // 1st element of returned vector is the number of data elements that the vector contains
+        H5LTread_dataset_int (file_id, dest_path, out+1);          // Get data
+      }
 
-//       NM_csc(H);
-//       H->matrix2->origin= NSM_CSC;
-//     }
-//     else
-//       assert(0 && "NM_clear_cone_matrix_H supports only NSM_TRIPLET and NSM_CSC, or unknown origin");
-//   }
+      else if (type == BODY_INDEX)
+      {
+        sprintf(dest_path + strlen(dest_path), "%s", "/body");
+        dataset_id = H5Dopen1(file_id, dest_path);
+        dataspace_id = H5Dget_space(dataset_id);
+        num_elements = H5Sget_simple_extent_npoints(dataspace_id);
 
-//   default:
-//   {
-//     assert(0 && "NM_clear_cone_matrix_H supports only NM_SPARSE, or unknown storageType");
-//   }
-//   }
-// }
+        out = (int *)calloc(num_elements+1, sizeof(int));
+        out[0] = (int)num_elements;
+        H5LTread_dataset_int (file_id, dest_path, out+1);
+      }
 
-// /* This function is to extract some rows and columns of a matrix. The new one has a reduced size. For example:
-//  *
-//  *     [ 1 0 3 0 ]                             [ 1 3 ]
-//  * A = [ 0 9 0 0 ]  => Ac = A(:, column 0 2) = [ 0 0 ]
-//  *     [ 0 0 0 4 ]                             [ 0 0 ]
-//  * An allocation is done. All matrices are stored as sparse.
-//  */
-// NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols)
-// {
-//   NumericsMatrix * Ac = NULL;
-//   switch(A->storageType)
-//   {
-//   case NM_SPARSE:
-//   {
-//     assert(A->matrix2);
-//     NM_triplet(A);
-//     if (A->matrix2->origin == NSM_CSC) NM_clearCSC(A);
-//     if (A->matrix2->origin == NSM_CSR) NM_clearCSR(A);
-//     A->matrix2->origin= NSM_TRIPLET;
+      else if (type == RANK_Hc)
+      {
+        sprintf(dest_path + strlen(dest_path), "%s", "/rank_H_blk");
+        out = (int *)calloc(1, sizeof(int));
+        H5LTread_dataset_int (file_id, dest_path, out);
+      }
 
-//     CSparseMatrix *A_triplet = A->matrix2->triplet;
-//     cs_long_t *A_rows = A_triplet->i, *A_cols = A_triplet->p;
-//     double *A_vals = A_triplet->x;
-//     CS_INT A_nz = A_triplet->nz, Ac_nz = 0;
-//     int out_of_size = 0;
+      H5Gclose (subgroup_id);
+    }
 
-//     Ac = NM_create(NM_SPARSE, n_rows, n_cols);
+    H5Gclose (group_id);
+    H5Fclose (file_id);
 
-//     // Count the number of non-zero elements in the target rows and columns
-//     for (int i=0; i<n_rows; i++)
-//       for (int j=0; j<n_cols; j++)
-//         for (int k=0; k<A_nz; k++)
-//         {
-//           if (A_rows[k] == target_rows[i] && A_cols[k] == target_cols[j])
-//             Ac_nz++;
-//           // if (target_rows[i] > A_rows[k] || target_cols[j] > A_cols[k])
-//           //   out_of_size = 1;
-//         }
+
+#else
+    numerics_error("gfc3d_IPM_SNM",
+                   "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
+                   path);
+#endif
+  }
+  else
+    numerics_error("gfc3d_IPM_SNM", "Not a hdf5 file ", path);
 
 
 
-//     // if (out_of_size)
-//     // {
-//     //   assert(0 && "NM_extract: Target rows or columns are out of size of the matrix!");
-//     //   return NULL;
-//     // }
+  return out;
+}
 
-//     if (Ac_nz == 0) return NULL;
-
-//     // Create the compressed matrix
-//     CSparseMatrix *Ac_triplet = cs_spalloc(n_rows, n_cols, Ac_nz, 1, 1);
-//     cs_long_t *Ac_rows = Ac_triplet->i, *Ac_cols = Ac_triplet->p;
-//     double *Ac_vals = Ac_triplet->x;
-//     int index = 0;
-
-//     for (int i=0; i<n_rows; i++)
-//       for (int j=0; j<n_cols; j++)
-//         for (int k=0; k<A_nz; k++)
-//           if (A_rows[k] == target_rows[i] && A_cols[k] == target_cols[j])
-//           {
-//             Ac_rows[index] = i;
-//             Ac_cols[index] = j;
-//             Ac_vals[index++] = A_vals[k];
-//             // memcpy(Ac_vals+index, A_vals+k, (size_t)sizeof(double));
-//             // index++;
-//           }
-
-//     assert(index!=Ac_nz && "NM_extract: There is an error in the routine for inserting elements to the new matrix");
-
-//     Ac->matrix2->triplet = Ac_triplet;
-//     Ac->matrix2->origin = NSM_TRIPLET;
-//     Ac->matrix2->triplet->nz = Ac_nz;
-
-//     // printf("NM_extract: check Ac = \n");
-//     // for (int i=0; i<index; i++)
-//     //   printf("%2lld %2lld: %e\n", Ac_rows[i], Ac_cols[i], Ac_vals[i]);
-//   }
-
-//   default:
-//   {
-//     assert(0 && "NM_extract supports only NM_SPARSE, or unknown storageType");
-//   }
-//   }
-
-//   return Ac;
-// }
 
 
 
@@ -1516,8 +1416,8 @@ while(findParam)
   // Reset vars
   // r
   for (unsigned int  i = 0; i<nd; i++)
-    if (i % d == 0) reaction[i] = 0.1;
-    else reaction[i] = 0.01;
+    if (i % d == 0) reaction[i] = 1.;
+    else reaction[i] = 0.1;
   // v
   for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = f[i];
   NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
@@ -1525,8 +1425,8 @@ while(findParam)
   // for (unsigned int  i = 0; i<m; i++) globalVelocity[i] = 0.02;
   // u
   for (unsigned int  i = 0; i<nd; i++)
-      if (i % d == 0) velocity[i] = 0.1;
-      else velocity[i] = 0.01;
+      if (i % d == 0) velocity[i] = 1.;
+      else velocity[i] = 0.1;
   // s
   for (unsigned int  i = 0; i<n; i++)
   {
@@ -1649,22 +1549,6 @@ while(findParam)
       printf("\nThe point is successfully perturbed.\n\n");
     }
   }
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH_TEST;
-  // gfc3d_IPM_fixed(problem, reaction, velocity, globalVelocity, info, options, 1e-4, problem_name);
-  // for(unsigned int i=0; i<n; i+=d)
-  // {
-  //   printf("\n%3i-%3i: r = ", i, i+d-1);
-  //   for(unsigned int j=0; j<d; j++) printf(" %.2e,", reaction[i+j]);
-  //   printf("\tr0-|rb| = %.2e", reaction[i]-cblas_dnrm2(2, reaction+i+1, 1));
-  //   printf("\t\t u = ");
-  //   for(unsigned int j=0; j<d; j++) printf(" %.2e,", velocity[i+j]);
-  //   printf("\tu0-|ub| = %.2e", velocity[i]-cblas_dnrm2(2, velocity+i+1, 1));
-  // }
-  // printf("\n");
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_NOSCAL;
-  // numerics_printf_verbose(-1, "| it  | pinfeas | dinfeas |  |s-ub| | |u o r| |  u'r/n  | prj err | barpram |  sigma  ||  alpha  |  |dv|   |  |du|   |  |dr|   |  |ds|   | ls prim | ls dual | ls comp | ls fixP |");
-  // numerics_printf_verbose(-1, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-
 
   // Reset params
   iteration = 0;
@@ -1674,13 +1558,7 @@ while(findParam)
   barr_param = 1.;
   sigma = 0.1;
 
-  // if (iteration == 0)
-  // {
-  //   primalResidual_s(velocity, H, globalVelocity, w, s, primalConstraint, &pinfeas, tol);
-  //   dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol);
-  //   JA_prod(velocity, reaction, nd, n, complemConstraint);
-  //   for (int k = 0; k < nd; complemConstraint[k] -= 2*barr_param, k+=d);
-  // }
+
 
   while(iteration < max_iter)
   {
@@ -1940,6 +1818,7 @@ while(findParam)
       /* Matrix filling */
       size_t pos;
       scale_sub_diff = 1.;
+      // scale_sub_diff = fmax(0.9, alpha_primal);
       for(size_t i = 0; i < n; ++i)
       {
         pos = i * d;
@@ -3898,7 +3777,7 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES;
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;

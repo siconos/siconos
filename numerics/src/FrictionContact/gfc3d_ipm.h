@@ -207,3 +207,12 @@ void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, in
 NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols);
 
 double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol);
+
+/* Routine is to read matrix-block in hdf5 file
+ * type = 0 : return number of blocks (blk_index is neglected)
+ * = 1: contact indices, = 2: body indices (in this case, the 1st element is the size of vector)
+ * = 3: rank of block-matrix Hc (blk_index is neglected)
+ */
+int *read_fricprob_block(const char* path, int type, int blk_index);
+
+
