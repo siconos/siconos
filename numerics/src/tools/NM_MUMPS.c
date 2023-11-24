@@ -205,13 +205,13 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
 void NM_MUMPS_set_verbosity(NumericsMatrix* A, unsigned int verbosity)
 {
   DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
-  if(verbosity == 0)
+  if(verbosity <= 1)
   {
     mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
     mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
     mumps_id->ICNTL(3) = -1; // Global infos,   standard output stream.
   }
-  else if(verbosity == 1)
+  else if(verbosity > 1)
   {
     mumps_id->ICNTL(1) = 6; // Error messages, standard output stream.
     mumps_id->ICNTL(2) = 6; // Diagnostics,    standard output stream.

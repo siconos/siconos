@@ -672,7 +672,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     }
     else
       numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "unknown strategy for computing rho");
-    numerics_printf("fc3d_AC_initialize""contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e", contact, rho[3*contact], rho[3*contact+1], rho[3*contact+2]);
+    numerics_printf_verbose(2,"fc3d_AC_initialize""contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e", contact, rho[3*contact], rho[3*contact+1], rho[3*contact+2]);
 
   }
 

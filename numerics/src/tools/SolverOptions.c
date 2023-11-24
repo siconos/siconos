@@ -853,6 +853,15 @@ SolverOptions * solver_options_create(int solverId)
     gfc3d_ipm_snm_set_default(options);
     break;
   }
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX:
+  {
+    options = solver_options_initialize(solverId, 20000, 1e-6, 1);
+    gfc3d_ipm_snm_set_default(options);
+    assert(options->numberOfInternalSolvers == 1);
+    options->internalSolvers[0] = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_PROX_WR);
+    
+    break;
+  }
   case SICONOS_FRICTION_3D_ONECONTACT_NSN:
   {
     options = solver_options_initialize(solverId, 10, 1e-14, 0);

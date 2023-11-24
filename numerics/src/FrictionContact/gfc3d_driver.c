@@ -52,6 +52,8 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR = "GFC3D_ADMM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_WR_STR = "GFC3D_IPM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR = "GFC3D_IPM_SNM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP_STR = "GFC3D_IPM_SNM_SEP";
+const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX_STR = "GFC3D IPM SNM PROX";
+
 
 static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_problem,
                                        GlobalFrictionContactProblem* problem,
@@ -282,6 +284,18 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
   {
     gfc3d_IPM_SNM(problem, reaction, velocity,
               globalVelocity, &info, options, problem_name);
+    break;
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX:
+  {
+    verbose=1;
+    gfc3d_IPM_SNM(problem, reaction, velocity,
+              globalVelocity, &info, options, problem_name);
+
+    SolverOptions * nsn_options = options->internalSolvers[0];
+    
+    gfc3d_proximal_wr(problem, reaction, velocity, globalVelocity, &info, nsn_options);
+    numerics_printf_verbose(1, "problem = %s --  NSN_PROX gfc3d_error = %e, prox iterations %i, cumulative newton iterations %i \n",problem_name, nsn_options->dparam[1], nsn_options->iparam[1], nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
     break;
   }
   case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR:
