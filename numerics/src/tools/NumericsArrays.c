@@ -19,6 +19,10 @@
 #include "NumericsArrays.h"
 #include <stdio.h>   // for size_t, printf
 #include <stdlib.h>  // for rand
+#include <limits.h>  // for rand
+
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 void NA_diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
 {
@@ -185,6 +189,25 @@ size_t  NA_merge_and_sort_sorted_arrays(size_t * arr1, size_t * arr2, size_t n1,
   return n3;
 }
 
+size_t NA_max(size_t * arr1,  size_t n1)
+{
+
+  size_t _max = 0;
+  for(size_t j =0 ; j< n1 ; j++)
+    _max = MAX(_max,arr1[j]);
+
+  return _max;
+}
+size_t NA_min(size_t * arr1,  size_t n1)
+{
+
+  size_t _min = ((((size_t)1 << (CHAR_BIT * sizeof(size_t) - 1)) - 1) << 1) + 1;
+  for(size_t j =0 ; j< n1 ; j++)
+    _min = MIN(_min,arr1[j]);
+
+  return _min;
+}
+
 void NA_display(size_t * arr1,  size_t n1)
 {
   printf("Array display:\t[");
@@ -211,4 +234,3 @@ void uint_shuffle(unsigned int *a, unsigned int n)
     uint_swap(&a[i], &a[i + (unsigned int)rand()%(n - i)]);
   }
 }
-
