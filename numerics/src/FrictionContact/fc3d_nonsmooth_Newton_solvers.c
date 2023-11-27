@@ -311,12 +311,8 @@ int globalLineSearchGP(
 
     if(C1 && C2)
     {
-      if(verbose > 0)
-      {
-        printf("             globalLineSearchGP. success. ls_iter = %i  alpha = %.10e, q = %.10e\n", iter, alpha[0], q);
-      }
-
-      return 0;
+      numerics_printf_verbose(2,"globalLineSearchGP. success. ls_iter = %i  alpha = %.10e, q = %.10e\n", iter, alpha[0], q);
+      return iter;
 
     }
     else if(!C1)
@@ -339,11 +335,9 @@ int globalLineSearchGP(
     }
 
   }
-  if(verbose > 0)
-  {
-    printf("global line search reached the  max number of iteration  = %i  with alpha = %.10e \n", maxiter_ls, alpha[0]);
-  }
 
+  numerics_printf_verbose(1,"global line search reached the  max number of iteration  = %i  with alpha = %.10e \n", maxiter_ls, alpha[0]);
+  
   return -1;
 }
 
@@ -576,8 +570,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   assert(tolerance > 0);
 
-  if(verbose > 0)
-    printf("---- FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n", tolerance);
+  numerics_printf_verbose(1,"---- FC3D - NSN - start with tolerance = %g", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
   double norm_q = cblas_dnrm2(problemSize, problem->q, 1);
@@ -680,6 +673,9 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   // velocity <- M*reaction + qfree
   cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
   NM_gemv(1., problem->M, reaction, 1., velocity);
+  
+  numerics_printf_verbose(1, "---- FC3D - NSN | it  | residual | merit    | ls iter  | ls step  |  Ax=b error |");
+  numerics_printf_verbose(1, "---- FC3D - NSN |-----------------------------------------------------|");
 
   double linear_solver_residual=0.0;
 
@@ -756,13 +752,16 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     }
     }
 
-    if(!info_ls)
-      // tmp2 should contains the reaction iterate of the line search
+    if(info_ls >= 0 )
+      {// tmp2 should contains the reaction iterate of the line search
       //  for GP this should be the same as cblas_daxpy(problemSize, alpha, tmp1, 1, reaction, 1);
       cblas_dcopy(problemSize, tmp2, 1, reaction, 1);
+      }
     else
-      cblas_daxpy(problemSize, 1., tmp3, 1., reaction, 1);
-
+      {
+	cblas_daxpy(problemSize, 1., tmp3, 1., reaction, 1);
+	getchar();
+      }
     // velocity <- M*reaction + qfree
     cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
     NM_gemv(1., problem->M, reaction, 1., velocity);
@@ -792,8 +791,9 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       equation->function(equation->data, problemSize,
                          reaction, velocity, equation->problem->mu, rho,
                          F, NULL, NULL);
-
-      printf("   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver residual =%g, residual=%g, ||F||=%g\n", iter, linear_solver_residual, options->dparam[SICONOS_DPARAM_RESIDU],cblas_dnrm2(problemSize, F, 1));
+      numerics_printf_verbose(1, "---- FC3D - NSN | %3i | %.1e | %.1e | %8i | %.1e | %.1e |",
+			      iter, options->dparam[SICONOS_DPARAM_RESIDU], cblas_dnrm2(problemSize, F, 1), info_ls, alpha, 0.0);
+      /* printf("   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver residual =%g, residual=%g, ||F||=%g\n", iter, linear_solver_residual, options->dparam[SICONOS_DPARAM_RESIDU],cblas_dnrm2(problemSize, F, 1)); */
     }
 
     if(options->callback)
@@ -823,10 +823,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   if(verbose > 0)
   {
     if(!info[0])
-      printf("---- FC3D - NSN - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[SICONOS_DPARAM_RESIDU],tolerance);
+      numerics_printf_verbose(1,"---- FC3D - NSN - convergence after %d iterations, residual : %g < %g",  iter, options->dparam[SICONOS_DPARAM_RESIDU],tolerance);
     else
     {
-      printf("---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
+      numerics_printf_verbose(1,"---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g ",  iter, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
     }
   }
 
@@ -855,7 +855,4 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
     free(AWpB);
   }
-  if(verbose > 0)
-    printf("---- FC3D - NSN - End\n");
-
 }
