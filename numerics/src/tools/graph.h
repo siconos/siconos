@@ -48,7 +48,7 @@ struct connectedcomponent_node*  create_node_connectedcomponent(struct node**  v
 void add_node_connectedcomponent(struct node** connectedcomponent, struct node *node);
 
 int len_connectedcomponent(struct node **connectedcomponent);
-void print_node_connectedcomponent(struct node** connectedcomponent);
+void print_connectedcomponent(struct node** connectedcomponent);
 
 
 
@@ -74,7 +74,10 @@ void DFS_connected_connectedcomponent(struct Graph* graph, int vertex, struct no
 
 
 int compute_number_connectedcomponents(struct Graph* graph);
-struct connectedcomponent_node**  compute_connectedcomponents(struct Graph *graph);
+struct connectedcomponent_node** compute_connectedcomponents(struct Graph* graph);
+
+unsigned int len_connectedcomponents(struct connectedcomponent_node** connectedcomponentList);
 struct connectedcomponent_node**  free_connectedcomponents(struct connectedcomponent_node** connectedcomponentList, struct Graph *graph);
+void print_connectedcomponents(struct connectedcomponent_node** connectedcomponentList);
 
 #endif

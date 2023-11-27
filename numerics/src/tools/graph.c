@@ -40,12 +40,12 @@ struct connectedcomponent_node*  create_node_connectedcomponent(struct node**  v
 
 
 
-
-
 int len_connectedcomponent(struct node **connectedcomponent) {
   int len =0;
-  while(connectedcomponent[len] != NULL)
+  struct node * temp = connectedcomponent[0];
+  while(temp != NULL)
     {
+      temp=temp->next;
       len++;
     }
   return len;
@@ -55,10 +55,10 @@ void add_node_connectedcomponent(struct node** connectedcomponent, struct node* 
   int len = len_connectedcomponent(connectedcomponent);
   connectedcomponent[len] = node;
   if (len>0){
-    connectedcomponent[len-1]->next =node; 
+    connectedcomponent[len-1]->next =node;
   }
 }
-void print_node_connectedcomponent(struct node** connectedcomponent) {
+void print_connectedcomponent(struct node** connectedcomponent) {
   struct node* temp = connectedcomponent[0];
   printf("node connectedcomponent : [");
   while (temp != NULL)
@@ -81,7 +81,7 @@ void print_node_connectedcomponent(struct node** connectedcomponent) {
 
 
 
-  
+
 int len_connectedcomponentList(struct connectedcomponent_node ** connectedcomponentList) {
   int len =0;
   while(connectedcomponentList[len] != NULL)
@@ -94,7 +94,7 @@ void add_connectedcomponent_in_connectedcomponentList(struct connectedcomponent_
   int len = len_connectedcomponentList(connectedcomponentList);
   connectedcomponentList[len] = connectedcomponent;
   if (len>0){
-    connectedcomponentList[len-1]->next = connectedcomponent; 
+    connectedcomponentList[len-1]->next = connectedcomponent;
   }
 }
 
@@ -136,7 +136,7 @@ void DFS_connected_connectedcomponent(struct Graph* graph, int vertex, struct no
       {
       DFS_connected_connectedcomponent(graph, connectedVertex, connected_component);
     }
-    temp = temp->next;  
+    temp = temp->next;
   }
 }
 
@@ -147,7 +147,7 @@ struct node** free_adj_list(struct node** adjLists, int size){
     }
   free(adjLists);
   return NULL;
-    
+
 
 }
 
@@ -228,7 +228,7 @@ struct connectedcomponent_node**  compute_connectedcomponents(struct Graph *grap
   for (int i = 0; i < n_vertices; i++) {
     connectedcomponentList[i] = NULL;
   }
-	
+
   for (int n =0; n < n_vertices; n++)
     {
       if (graph->visited[n] ==0)
@@ -238,15 +238,16 @@ struct connectedcomponent_node**  compute_connectedcomponents(struct Graph *grap
 	  for (int i = 0; i < n_vertices; i++) {
 	    connectedcomponent[i] = NULL;
 	  }
-	
+
 	  DFS_connected_connectedcomponent(graph, n, connectedcomponent);
 
 	  // print connectedcomponent
-	  /* print_node_connectedcomponent(connectedcomponent); */
+	  /* print_connectedcomponent(connectedcomponent); */
 
 	  add_connectedcomponent_in_connectedcomponentList(connectedcomponentList, create_node_connectedcomponent(connectedcomponent));
-	  
+
 	  n_connectedcomponent ++;
+	  /* printf("number of connectedcomponent = %i\n",  n_connectedcomponent);  */
 	}
     }
 
@@ -255,7 +256,7 @@ struct connectedcomponent_node**  compute_connectedcomponents(struct Graph *grap
 }
 struct connectedcomponent_node**  free_connectedcomponents(struct connectedcomponent_node** connectedcomponentList, struct Graph *graph) {
 
- 
+
   int n_vertices=graph->numVertices;
   for (int i = 0; i < n_vertices; i++) {
 
@@ -267,10 +268,39 @@ struct connectedcomponent_node**  free_connectedcomponents(struct connectedcompo
 	  if (connectedcomponent[k] != NULL) free(connectedcomponent[k]);
 	}
 	free(connectedcomponent);
-    
 
 	free(connectedcomponentList[i]);
       }
   }
+  return NULL;
+
+
+}
+
+void print_connectedcomponents(struct connectedcomponent_node** connectedcomponentList){
+
+  struct connectedcomponent_node* temp = connectedcomponentList[0];
+  int c =0;
+  while (temp !=NULL)
+    {
+      printf("connected component number %i :\n", c);
+      print_connectedcomponent(temp->connectedcomponent);
+      temp=temp->next;
+      c++;
+    }
+
+
+  printf("number of connectedcomponent = %i\n",  c);
+}
+
+unsigned int len_connectedcomponents(struct connectedcomponent_node** connectedcomponentList){
+  struct connectedcomponent_node* temp = connectedcomponentList[0];
+  unsigned int c =0;
+  while (temp !=NULL)
+    {
+      temp=temp->next;
+      c++;
+    }
+  return c;
 
 }
