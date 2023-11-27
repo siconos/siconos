@@ -23,6 +23,9 @@ if(WITH_TESTING)
   new_test(SOURCES test_pinv.c)# DEPS "externals")
   #endif()
 
+  new_test(SOURCES test_graph.c)
+
+
   new_test(NAME tools_projection SOURCES test_projection.c)
 
   new_test(SOURCES NumericsArrays.c)
