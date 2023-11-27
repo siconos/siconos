@@ -26,11 +26,10 @@ MPI_Comm NM_MPI_comm(NumericsMatrix* A)
 
   if(NM_internalData(A)->mpi_comm == MPI_COMM_NULL)
   {
-    if(verbose)
-    {
-      fprintf(stderr, "siconos/numerics: warning, MPI communicator has not been initialized,\n");
-      fprintf(stderr, "siconos/numerics: MPI_COMM_WORLD will be used.\n");
-    }
+
+    if(verbose>1)
+      numerics_warning("NM_MPI_comm", "warning, MPI communicator has not been initialized, MPI_COMM_WORLD will be used." );   
+
     NM_internalData(A)->mpi_comm = MPI_COMM_WORLD;
   }
   return NM_internalData(A)->mpi_comm = MPI_COMM_WORLD;
