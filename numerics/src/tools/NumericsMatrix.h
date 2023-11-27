@@ -1178,6 +1178,15 @@ extern "C"
    */
   NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols);
 
+
+  struct Graph* NM_create_adjacency_graph(NumericsMatrix* A);
+
+  struct connectedcomponent_node** NM_compute_connectedcomponents(NumericsMatrix* A);
+
+  int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
+				  unsigned int** blocksizes);
+
+
 #ifdef WITH_OPENSSL
   /** Compute sha1 hash of matrix values. Matrices of differents size and same
    *  values have the same hash.
@@ -1223,6 +1232,9 @@ extern "C"
    */
   bool NM_equal_values_sha1(NumericsMatrix* A, NumericsMatrix* B);
 
+
+
+  
 #endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

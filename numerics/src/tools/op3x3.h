@@ -401,7 +401,7 @@ static inline void mvp5x5(const double* restrict a, const double* restrict v, do
 
 }
 
-/** add a matrix vector multiplication scaled by alpha 
+/** add a matrix vector multiplication scaled by alpha
  * \param[in] alpha scalar coeff
  * \param[in] a a[9]
  * \param[in] v v[3]
@@ -1030,6 +1030,40 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
 
   return info;
 }
+
+static inline int inv_3x3_gepp(double* restrict a)
+{
+
+  double b0[3] = {1., 0., 0.};
+  int info = solve_3x3_gepp(a, b0);
+  if (info) return info;
+
+  double b1[3]  = {0., 1., 0.};
+  info = solve_3x3_gepp(a, b1);
+  if (info) return info;
+
+  double b2[3]= {0., 0., 1.};
+  info = solve_3x3_gepp(a, b2);
+  if (info) return info;
+
+
+  a[0]=b0[0];
+  a[1]=b0[1];
+  a[2]=b0[2];
+
+  a[3]=b1[0];
+  a[4]=b1[1];
+  a[5]=b1[2];
+
+  a[6]=b2[0];
+  a[7]=b2[1];
+  a[8]=b2[2];
+
+ return info;
+}
+
+
+
 
 
 #define mat_elem(a, y, x, n) (a + ((y) * (n) + (x)))

@@ -27,6 +27,7 @@
 #include "NM_MPI.h"                   // for NM_MPI_copy
 #include "NM_MUMPS.h"                 // for NM_MUMPS_copy
 #include "NM_conversions.h"           // for NM_csc_to_csr, NM_csc_to_triplet
+#include "NSSTools.h"
 #include "NumericsFwd.h"              // for NumericsMatrix, NumericsSparseM...
 #include "NumericsMatrix.h"           // for NumericsMatrix, NumericsMatrixI...
 #include "NumericsMatrix_internal.h"  // for NM_internalData_free
@@ -35,6 +36,10 @@
 #include "SiconosBlas.h"              // for cblas_ddot, cblas_dgemv, CblasN...
 #include "SiconosLapack.h"            // for lapack_int, DGESV, DGETRF, DGETRS, LA_NOTRANS
 #include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
+#include "graph.h"
+#include "NumericsArrays.h"
+#include "op3x3.h"
+
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -5024,7 +5029,7 @@ int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs
 NumericsMatrix* NM_gesv_inv(NumericsMatrix* A)
 {
 
-  DEBUG_BEGIN("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
+  DEBUG_BEGIN("NM_inv_(NumericsMatrix* A, double *b, unsigned keep)\n");
   assert(A->size0 == A->size1);
   double * b = (double *) malloc(A->size0*sizeof(double));
   for(int i = 0; i < A->size0; ++i)
@@ -5143,6 +5148,8 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A)
 }
 
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 NumericsMatrix *  NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number, unsigned int * blocksizes)
 {
 
@@ -5177,27 +5184,84 @@ NumericsMatrix *  NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned i
 
     A_inv = NM_create(NM_SPARSE, A->size0, A->size1);
     NM_triplet_alloc(A_inv, A->size0);
-    int start_row = 0;
-    for (unsigned b =0; b < block_number; b++)
-    {
-      int block_size= blocksizes[b];
 
-      NumericsMatrix * block_NM = NM_create(NM_DENSE, block_size, block_size);
+    unsigned int  block_size_max= blocksizes[0];
+    unsigned int  block_size_min= blocksizes[0];
+    
+    for (int b =0; b <block_number; b++)
+      {
+	block_size_max = MAX(block_size_max,blocksizes[b]);
+	block_size_min = MIN(block_size_min,blocksizes[b]);
+      }
 
-      double ** block_adress = &block_NM->matrix0  ;
-
-      NM_extract_diag_block(A, b, start_row, block_size, block_adress);
 
 
-      NumericsMatrix* block_NM_inv =  NM_LU_inv(block_NM);
+    /* When the matrix is diagonal */
+    if ((block_size_max ==1) && (block_size_min ==1))
+      {	
+	CSparseMatrix* T=  NM_triplet(A);
+	CSparseMatrix* T_inv=  NM_triplet(A_inv);
+	CS_INT nb_row = T->m;
+	CS_INT nb_col = T->n;
+	CS_INT* Ti = T->i;
+	CS_INT* Tp = T->p;
+	CS_ENTRY *Tx=T->x;
 
-      NM_insert(A_inv, block_NM_inv, start_row, start_row);
+	for(CS_INT indx = 0; indx < T->nz; ++indx)
+	{
+	  CSparseMatrix_entry(T_inv, Ti[indx], Tp[indx], 1.0/Tx[indx]);
+	}
+      }
+    /* When the matrix is block 3x3 diagonal */
+    else if((block_size_max ==3) && (block_size_min ==3)) {
 
-      NM_free(block_NM);
-      NM_free(block_NM_inv);
+      int start_row = 0;
+      for (unsigned b =0; b < block_number; b++)
+	{
 
-      start_row = start_row + block_size;
+	  NumericsMatrix * block_NM = NM_create(NM_DENSE, 3, 3);
 
+	  double ** block_adress = &block_NM->matrix0  ;
+
+	  NM_extract_diag_block(A, b, start_row, 3, block_adress);
+
+	  inv_3x3_gepp(*block_adress);
+
+	  
+	  //NumericsMatrix* block_NM_inv =  NM_LU_inv(block_NM);
+
+	  NM_insert(A_inv, block_NM, start_row, start_row);
+
+	  NM_free(block_NM);
+	  //NM_free(block_NM_inv);
+
+	  start_row = start_row + 3;
+
+	}
+    }
+    else{
+      int start_row = 0;
+      for (unsigned b =0; b < block_number; b++)
+	{
+	  int block_size= blocksizes[b];
+
+	  NumericsMatrix * block_NM = NM_create(NM_DENSE, block_size, block_size);
+
+	  double ** block_adress = &block_NM->matrix0  ;
+
+	  NM_extract_diag_block(A, b, start_row, block_size, block_adress);
+
+
+	  NumericsMatrix* block_NM_inv =  NM_LU_inv(block_NM);
+
+	  NM_insert(A_inv, block_NM_inv, start_row, start_row);
+
+	  NM_free(block_NM);
+	  NM_free(block_NM_inv);
+
+	  start_row = start_row + block_size;
+
+	}
     }
     break;
   }
@@ -7275,4 +7339,129 @@ NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int
     Ac->matrix2->origin= NSM_CSC;
   }
   return Ac;
+}
+struct Graph*  NM_create_adjacency_graph(NumericsMatrix* A) {
+
+  struct Graph* graph =NULL;
+  
+  switch(A->storageType)
+  {
+  case NM_SPARSE:
+    {
+
+   
+
+      CSparseMatrix* T=  NM_triplet(A);
+      CS_INT nb_row = T->m;
+      CS_INT nb_col = T->n;
+      CS_INT* Ti = T->i;
+      CS_INT* Tp = T->p;
+      
+      int n_vertices = max(nb_row,nb_col);
+      graph = create_graph(n_vertices);
+
+   
+      for(CS_INT indx = 0; indx < T->nz; ++indx)
+	{
+	  addEdge(graph, Ti[indx], Tp[indx]);
+	}
+      /* printGraph(graph); */
+      break;
+    }
+  default:
+    {
+      assert(0 && "NM_create_adjacency_graph only NM_SPARSE, or unknown storageType");
+    }
+  }
+  return graph;
+}
+
+struct connectedcomponent_node**   NM_compute_connectedcomponents(NumericsMatrix* A) {
+
+  struct connectedcomponent_node**  connectedcomponents =NULL;
+  
+  switch(A->storageType)
+  {
+  case NM_SPARSE:
+    {
+      struct Graph*  graph = NM_create_adjacency_graph(A);
+      connectedcomponents = compute_connectedcomponents(graph);
+      /* print_connectedcomponents(connectedcomponents); */
+      break;
+    }
+  default:
+    {
+      assert(0 && "NM_compute_connectedcomponents only NM_SPARSE, or unknown storageType");
+    }
+  }
+  return connectedcomponents;
+}
+
+int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
+				unsigned int** blocksizes)
+{
+  assert(A);
+  struct connectedcomponent_node**   connectedcomponents = NM_compute_connectedcomponents(A);
+  unsigned int n_component =  len_connectedcomponents(connectedcomponents);
+  /* print_connectedcomponents(connectedcomponents); */
+
+  int is_diagonal_block_matrix =1;
+  
+  *block_number=0;
+  *blocksizes = (unsigned int*)malloc(n_component*sizeof(unsigned int));
+  
+  struct connectedcomponent_node* temp = connectedcomponents[0];
+  while (temp !=NULL)
+    {
+      /* printf("connected component number %i :\n", *block_number); */
+      struct node**   connectedcomponent = temp->connectedcomponent;
+      /* print_connectedcomponent(connectedcomponent); */
+
+      int len = len_connectedcomponent(connectedcomponent);
+      size_t *  indices = (size_t *)malloc(len*sizeof(size_t));
+
+      struct node* temp1=connectedcomponent[0];
+      int i =0;
+      while (temp1!=NULL)
+	{
+	  indices[i]= temp1->vertex; 
+
+	  temp1=temp1->next;
+	  i++;
+	}
+      NA_sort_bubble(indices,len);
+      /* NA_display(indices,len); */
+
+      
+      for (size_t k =1; k < len; k++)
+	{
+	  if (indices[k]!=indices[k-1]+1)
+	    {
+	      is_diagonal_block_matrix = 0;
+	      free(indices);
+	      free(*blocksizes);
+	      *blocksizes=NULL;
+	    }
+	}
+      
+      if (is_diagonal_block_matrix == 0 )
+	break;
+
+      (*blocksizes)[*block_number]= len;
+      free(indices);
+      
+    
+      temp=temp->next;
+      (*block_number)++;
+
+    }
+
+
+  /* printf("block_number = %i\n", *block_number ); */
+  /* for (unsigned int k = 0; k < n_component; k++) */
+  /*   printf("blocksize[%i] = %i\n", k , (*blocksizes)[k]); */
+
+
+  free(connectedcomponents);
+  return is_diagonal_block_matrix;
 }
