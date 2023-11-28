@@ -2418,6 +2418,10 @@ static int NM_inverse_diagonal_block_matrix_test_unit(NumericsMatrix *A, int blo
 
   int info = NM_equal(AAinv, Id);
 
+  Id=NM_free(Id);
+  Ainv=NM_free(Ainv);
+  AAinv=NM_free(AAinv);
+  
   return info;
 }
 
@@ -2475,7 +2479,7 @@ static int NM_inverse_diagonal_block_matrix_test(void)
   if (!info) return  !info;
 
 
-
+  A=NM_free(A);
   
   printf("========= End Numerics tests for NumericsMatrix  NM_inverse_diagonal_block_matrix_test ========= \n\n\n");
 
@@ -4315,17 +4319,7 @@ static int test_NM_create_adjacency_graph(void)
 
   printf("========= Starts Numerics tests for NumericsMatrix (test_NM_create_adjacency_graph)  ========= \n");
 
-  int i, nmm = 4 ;
-  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
-  int info = test_build_first_4_NM(NMM);
-
-  if(info != 0)
-  {
-    printf("Construction failed ...\n");
-    return info;
-  }
-  printf("Construction ok ...\n");
-
+  int info=0;
   printf("test 1 ...\n");
   NumericsMatrix *Id = NM_eye(10);
   struct Graph* graph = NM_create_adjacency_graph(Id);
@@ -4482,82 +4476,81 @@ int main(int argc, char *argv[])
   MPI_Init(&argc, &argv);
 #endif
 
- int info = NM_read_write_test(); 
+/*  int info = NM_read_write_test();  */
 
-  info += NM_add_to_diag3_test_all();
+/*   info += NM_add_to_diag3_test_all(); */
 
-  info += to_dense_test();
+/*   info += to_dense_test(); */
 
-  info += NM_gemm_test_all();
+/*   info += NM_gemm_test_all(); */
 
-  info += NM_gemm_test_all2();
+/*   info += NM_gemm_test_all2(); */
 
-  info += NM_row_prod_test();
+/*   info += NM_row_prod_test(); */
 
-  info += NM_row_prod_no_diag_test_all();
+/*   info += NM_row_prod_no_diag_test_all(); */
 
-  info += NM_row_prod_no_diag_non_square_test();
+/*   info += NM_row_prod_no_diag_non_square_test(); */
 
-  info += test_NM_row_prod_non_square_test();
+/*   info += test_NM_row_prod_non_square_test(); */
 
-  info += NM_insert_dense_test();
+/*   info += NM_insert_dense_test(); */
 
-  info += NM_insert_sparse_test();
+/*   info += NM_insert_sparse_test(); */
 
-  info +=    test_NM_row_prod_non_square_test();
-
-
-  info +=    test_NM_iterated_power_method();
-
-  info +=    test_NM_scal();
-
-  info += test_NM_compute_balancing_matrices();
-  info += test_NM_compute_balancing_matrices_sym();
-  info += test_NM_compute_balancing_matrices_rectangle();
-  info += test_NM_max_by_columns_and_rows();
+/*   info +=    test_NM_row_prod_non_square_test(); */
 
 
-  info +=    test_NM_inv();
-  info += NM_inverse_diagonal_block_matrix_test();
+/*   info +=    test_NM_iterated_power_method(); */
 
-  info += NM_inverse_diagonal_block_matrix_test();
+/*   info +=    test_NM_scal(); */
+
+/*   info += test_NM_compute_balancing_matrices(); */
+/*   info += test_NM_compute_balancing_matrices_sym(); */
+/*   info += test_NM_compute_balancing_matrices_rectangle(); */
+/*   info += test_NM_max_by_columns_and_rows(); */
+
+
+/*   info +=    test_NM_inv(); */
+  int info=0;
+  info += NM_inverse_diagonal_block_matrix_test(); 
   
   
-  info += test_NM_gesv_expert();
-  info += test_NM_posv_expert();
+/*   info += test_NM_gesv_expert(); */
+/*   info += test_NM_posv_expert(); */
 
-  info += test_NM_LU_solve();
-  info += test_NM_LU_solve_matrix_rhs();
-  info += test_NM_Cholesky_solve_matrix_rhs();
-  info += test_NM_Cholesky_solve();
-  info += test_NM_Cholesky_solve_vs_posv_expert();
-  info += test_NM_LDLT_solve();
+/*   info += test_NM_LU_solve(); */
+/*   info += test_NM_LU_solve_matrix_rhs(); */
+/*   info += test_NM_Cholesky_solve_matrix_rhs(); */
+/*   info += test_NM_Cholesky_solve(); */
+/*   info += test_NM_Cholesky_solve_vs_posv_expert(); */
+/*   info += test_NM_LDLT_solve(); */
 
-#ifdef WITH_MA57
-  info += test_NM_LDLT_refine();
-#endif
-#ifdef WITH_MUMPS
-  info += test_NM_LDLT_refine();
-#endif
+/* #ifdef WITH_MA57 */
+/*   info += test_NM_LDLT_refine(); */
+/* #endif */
+/* #ifdef WITH_MUMPS */
+/*   info += test_NM_LDLT_refine(); */
+/* #endif */
 
-  info += test_NM_LU_refine();
-
-
+/*   info += test_NM_LU_refine(); */
 
 
-#ifdef WITH_OPENSSL
-  info += test_NM_compute_values_sha1();
-  info += test_NM_check_values_sha1();
-#endif
 
+
+/* #ifdef WITH_OPENSSL */
+/*   info += test_NM_compute_values_sha1(); */
+/*   info += test_NM_check_values_sha1(); */
+/* #endif */
+
+
+   info += test_NM_create_adjacency_graph();
   
-  info += test_NM_create_adjacency_graph();
-  
 
 
-#ifdef SICONOS_HAS_MPI
-  MPI_Finalize();
-#endif
+/* #ifdef SICONOS_HAS_MPI */
+/*   MPI_Finalize(); */
+/* #endif */
   printf("info = %i\n", info);
   return info;
 

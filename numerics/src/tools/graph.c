@@ -135,17 +135,24 @@ void DFS_compute_connectedcomponent(struct Graph* graph, int vertex, struct node
   }
 }
 
+
+struct node* free_node_list(struct node* list)
+{
+   struct node* temp = list;
+   /* printf("\n free adjacency list of vertex %d\n ", v); */
+   while (temp) {
+     /* printf("%d -> ", temp->vertex); */
+     struct node* temp_free= temp;
+     temp = temp->next;
+     free(temp_free);
+   }
+}
+
 struct node** free_adj_list(struct node** adjLists, int size){
   int v;
   for (v = 0; v < size; v++) {
-    struct node* temp = adjLists[v];
     /* printf("\n free adjacency list of vertex %d\n ", v); */
-    while (temp) {
-      /* printf("%d -> ", temp->vertex); */
-      struct node* temp_free= temp;
-      temp = temp->next;
-      free(temp_free);
-    }
+    adjLists[v]=free_node_list(adjLists[v]);
     /* printf("\n"); */
   }
   free(adjLists);
@@ -239,8 +246,6 @@ struct connectedcomponent_node*  compute_connectedcomponents(struct Graph *graph
 	  // print connectedcomponent
 	  /* print_connectedcomponent(connectedcomponent); */
 
-	  create_node_connectedcomponent(connectedcomponent);
-
 	  //push_forward
 	  struct connectedcomponent_node* connectedcomponent_node =  create_node_connectedcomponent(connectedcomponent);
 	  connectedcomponent_node->next= connectedcomponentList;
@@ -262,6 +267,7 @@ struct connectedcomponent_node*  free_connectedcomponents(struct connectedcompon
     /* printf("%d -> ", temp->vertex); */
       struct connectedcomponent_node* temp_free= temp;
       temp = temp->next;
+      temp_free->connectedcomponent=free_node_list(temp_free->connectedcomponent);
       free(temp_free);
     }
   return NULL;

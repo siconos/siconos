@@ -7462,7 +7462,7 @@ int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
   /* for (unsigned int k = 0; k < n_component; k++) */
   /*   printf("blocksize[%i] = %i\n", k , (*blocksizes)[k]); */
 
+  connectedcomponents=free_connectedcomponents(connectedcomponents);
 
-  free(connectedcomponents);
   return is_diagonal_block_matrix;
 }

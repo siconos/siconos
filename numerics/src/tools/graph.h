@@ -34,7 +34,7 @@ struct node {
 
 // Create a node
 struct node *create_node(int v);
-
+struct node* free_node_list(struct node* list);
 /* node in a list of connected component
  */
 struct connectedcomponent_node {
