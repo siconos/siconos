@@ -4329,11 +4329,12 @@ static int test_NM_create_adjacency_graph(void)
   printf("test 1 ...\n");
   NumericsMatrix *Id = NM_eye(10);
   struct Graph* graph = NM_create_adjacency_graph(Id);
-  struct connectedcomponent_node** list = NM_compute_connectedcomponents(Id);
+  struct connectedcomponent_node* list = NM_compute_connectedcomponents(Id);
   info = 0;
   if(info != 0) return info;
   NM_clear(Id);
   free(Id);
+  list=free_connectedcomponents(list);
   graph =free_graph(graph);
   printf("test 1 ...ok \n");
 
@@ -4347,18 +4348,19 @@ static int test_NM_create_adjacency_graph(void)
   NM_entry(Z,0,1,1.0);
   NM_entry(Z,1,0,1.0);
   graph = NM_create_adjacency_graph(Z);
-  NM_compute_connectedcomponents(Z);
+  list=NM_compute_connectedcomponents(Z);
   info = 0;
   if(info != 0) return info;
   NM_clear(Z);
   free(Z);
+  list=free_connectedcomponents(list);
   graph =free_graph(graph);
   printf("test 2 ...ok \n");
   
   printf("test 3 ...\n");
   NumericsMatrix *M1 = test_matrix_5();
   graph = NM_create_adjacency_graph(M1);
-  NM_compute_connectedcomponents(M1);
+  list=NM_compute_connectedcomponents(M1);
   
   unsigned int block_number;
   unsigned int * blocksizes= NULL;
@@ -4380,6 +4382,7 @@ static int test_NM_create_adjacency_graph(void)
   NM_clear(M1);
   free(M1);
   if(info != 0) return info;
+  list=free_connectedcomponents(list);
   graph =free_graph(graph);
   free(blocksizes);
   blocksizes =NULL;
@@ -4392,7 +4395,7 @@ static int test_NM_create_adjacency_graph(void)
   fclose(finput);
   //NM_display(Mass);
   graph = NM_create_adjacency_graph(Mass);
-  NM_compute_connectedcomponents(Mass);
+  list= NM_compute_connectedcomponents(Mass);
 
   is_diagonal_block_matrix = NM_is_diagonal_block_matrix(Mass, &block_number,
 							     &blocksizes);
@@ -4414,6 +4417,7 @@ static int test_NM_create_adjacency_graph(void)
   NM_clear(Mass);
   free(Mass);
   if(info != 0) return info;
+  list=free_connectedcomponents(list);
   graph =free_graph(graph);
   free(blocksizes);
   blocksizes =NULL;
@@ -4440,7 +4444,7 @@ static int test_NM_create_adjacency_graph(void)
   
   
   graph = NM_create_adjacency_graph(Z);
-  NM_compute_connectedcomponents(Z);
+  list=NM_compute_connectedcomponents(Z);
 
   is_diagonal_block_matrix = NM_is_diagonal_block_matrix(Z, &block_number,
 							     &blocksizes);
@@ -4460,7 +4464,9 @@ static int test_NM_create_adjacency_graph(void)
   if(info != 0) return info;
   NM_clear(Z);
   free(Z);
+  list=free_connectedcomponents(list);
   graph =free_graph(graph);
+  
   printf("test 5 ...ok \n");
   
   return info;
@@ -4476,74 +4482,75 @@ int main(int argc, char *argv[])
   MPI_Init(&argc, &argv);
 #endif
 
-  int info = NM_read_write_test();
+ int info = NM_read_write_test(); 
 
-/*   info += NM_add_to_diag3_test_all(); */
+  info += NM_add_to_diag3_test_all();
 
-/*   info += to_dense_test(); */
+  info += to_dense_test();
 
-/*   info += NM_gemm_test_all(); */
+  info += NM_gemm_test_all();
 
-/*   info += NM_gemm_test_all2(); */
+  info += NM_gemm_test_all2();
 
-/*   info += NM_row_prod_test(); */
+  info += NM_row_prod_test();
 
-/*   info += NM_row_prod_no_diag_test_all(); */
+  info += NM_row_prod_no_diag_test_all();
 
-/*   info += NM_row_prod_no_diag_non_square_test(); */
+  info += NM_row_prod_no_diag_non_square_test();
 
-/*   info += test_NM_row_prod_non_square_test(); */
+  info += test_NM_row_prod_non_square_test();
 
-/*   info += NM_insert_dense_test(); */
+  info += NM_insert_dense_test();
 
-/*   info += NM_insert_sparse_test(); */
+  info += NM_insert_sparse_test();
 
-/*   info +=    test_NM_row_prod_non_square_test(); */
-
-
-/*   info +=    test_NM_iterated_power_method(); */
-
-/*   info +=    test_NM_scal(); */
-
-/*   info += test_NM_compute_balancing_matrices(); */
-/*   info += test_NM_compute_balancing_matrices_sym(); */
-/*   info += test_NM_compute_balancing_matrices_rectangle(); */
-/*   info += test_NM_max_by_columns_and_rows(); */
+  info +=    test_NM_row_prod_non_square_test();
 
 
-/*   info +=    test_NM_inv(); */
-/*   info += NM_inverse_diagonal_block_matrix_test(); */
+  info +=    test_NM_iterated_power_method();
+
+  info +=    test_NM_scal();
+
+  info += test_NM_compute_balancing_matrices();
+  info += test_NM_compute_balancing_matrices_sym();
+  info += test_NM_compute_balancing_matrices_rectangle();
+  info += test_NM_max_by_columns_and_rows();
+
+
+  info +=    test_NM_inv();
+  info += NM_inverse_diagonal_block_matrix_test();
+
   info += NM_inverse_diagonal_block_matrix_test();
   
   
-/*   info += test_NM_gesv_expert(); */
-/*   info += test_NM_posv_expert(); */
+  info += test_NM_gesv_expert();
+  info += test_NM_posv_expert();
 
-/*   info += test_NM_LU_solve(); */
-/*   info += test_NM_LU_solve_matrix_rhs(); */
-/*   info += test_NM_Cholesky_solve_matrix_rhs(); */
-/*   info += test_NM_Cholesky_solve(); */
-/*   info += test_NM_Cholesky_solve_vs_posv_expert(); */
-/*   info += test_NM_LDLT_solve(); */
+  info += test_NM_LU_solve();
+  info += test_NM_LU_solve_matrix_rhs();
+  info += test_NM_Cholesky_solve_matrix_rhs();
+  info += test_NM_Cholesky_solve();
+  info += test_NM_Cholesky_solve_vs_posv_expert();
+  info += test_NM_LDLT_solve();
 
-/* #ifdef WITH_MA57 */
-/*   info += test_NM_LDLT_refine(); */
-/* #endif */
-/* #ifdef WITH_MUMPS */
-/*   info += test_NM_LDLT_refine(); */
-/* #endif */
+#ifdef WITH_MA57
+  info += test_NM_LDLT_refine();
+#endif
+#ifdef WITH_MUMPS
+  info += test_NM_LDLT_refine();
+#endif
 
-/*   info += test_NM_LU_refine(); */
-
-
+  info += test_NM_LU_refine();
 
 
-/* #ifdef WITH_OPENSSL */
-/*   info += test_NM_compute_values_sha1(); */
-/*   info += test_NM_check_values_sha1(); */
-/* #endif */
 
 
+#ifdef WITH_OPENSSL
+  info += test_NM_compute_values_sha1();
+  info += test_NM_check_values_sha1();
+#endif
+
+  
   info += test_NM_create_adjacency_graph();
   
 

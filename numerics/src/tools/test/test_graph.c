@@ -6,36 +6,36 @@
 struct Graph* graph_1() {
   int n_vertices =8;
   struct Graph* graph = create_graph(n_vertices);
-  addEdge(graph, 0, 1);
-  addEdge(graph, 0, 2);
-  addEdge(graph, 1, 2);
-  addEdge(graph, 2, 3);
+  add_edge(graph, 0, 1);
+  add_edge(graph, 0, 2);
+  add_edge(graph, 1, 2);
+  add_edge(graph, 2, 3);
 
-  addEdge(graph, 0+4, 1+4);
-  addEdge(graph, 0+4, 2+4);
-  addEdge(graph, 1+4, 3+4);
-  addEdge(graph, 2+4, 3+4);
-  printGraph(graph);
+  add_edge(graph, 0+4, 1+4);
+  add_edge(graph, 0+4, 2+4);
+  add_edge(graph, 1+4, 3+4);
+  add_edge(graph, 2+4, 3+4);
+  print_graph(graph);
   return graph;
 }
 
 struct Graph* graph_2() {
   int n_vertices =9;
   struct Graph* graph =  create_graph(n_vertices);
-  addEdge(graph, 0, 1);
-  addEdge(graph, 0, 2);
-  addEdge(graph, 1, 2);
-  addEdge(graph, 2, 3);
+  add_edge(graph, 0, 1);
+  add_edge(graph, 0, 2);
+  add_edge(graph, 1, 2);
+  add_edge(graph, 2, 3);
 
-  addEdge(graph, 0+4, 1+4);
-  addEdge(graph, 0+4, 2+4);
-  addEdge(graph, 1+4, 3+4);
-  addEdge(graph, 2+4, 3+4);
+  add_edge(graph, 0+4, 1+4);
+  add_edge(graph, 0+4, 2+4);
+  add_edge(graph, 1+4, 3+4);
+  add_edge(graph, 2+4, 3+4);
 
-  addEdge(graph, 0, 8);
-  //addEdge(graph, 7, 8);
+  add_edge(graph, 0, 8);
+  //add_edge(graph, 7, 8);
 
-  printGraph(graph);
+  print_graph(graph);
   return graph;
 }
 
@@ -54,12 +54,10 @@ int main(void) {
 
   n_connectedcomponent =0;
   struct Graph* graph2 = graph_2();
-  struct connectedcomponent_node** connectedcomponentList =  compute_connectedcomponents(graph2);
+  struct connectedcomponent_node* connectedcomponentList =  compute_connectedcomponents(graph2);
+  print_connectedcomponents(connectedcomponentList);
 
-
-  connectedcomponentList= free_connectedcomponents(connectedcomponentList, graph2);
-
-  //free(connectedcomponentList);
+  connectedcomponentList= free_connectedcomponents(connectedcomponentList);
   free_graph(graph2);
 
 

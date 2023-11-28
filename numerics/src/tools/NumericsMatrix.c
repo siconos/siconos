@@ -7363,7 +7363,7 @@ struct Graph*  NM_create_adjacency_graph(NumericsMatrix* A) {
    
       for(CS_INT indx = 0; indx < T->nz; ++indx)
 	{
-	  addEdge(graph, Ti[indx], Tp[indx]);
+	  add_edge(graph, Ti[indx], Tp[indx]);
 	}
       /* printGraph(graph); */
       break;
@@ -7376,9 +7376,9 @@ struct Graph*  NM_create_adjacency_graph(NumericsMatrix* A) {
   return graph;
 }
 
-struct connectedcomponent_node**   NM_compute_connectedcomponents(NumericsMatrix* A) {
+struct connectedcomponent_node*   NM_compute_connectedcomponents(NumericsMatrix* A) {
 
-  struct connectedcomponent_node**  connectedcomponents =NULL;
+  struct connectedcomponent_node*  connectedcomponents =NULL;
   
   switch(A->storageType)
   {
@@ -7402,7 +7402,7 @@ int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
 				unsigned int** blocksizes)
 {
   assert(A);
-  struct connectedcomponent_node**   connectedcomponents = NM_compute_connectedcomponents(A);
+  struct connectedcomponent_node*   connectedcomponents = NM_compute_connectedcomponents(A);
   unsigned int n_component =  len_connectedcomponents(connectedcomponents);
   /* print_connectedcomponents(connectedcomponents); */
 
@@ -7411,17 +7411,17 @@ int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
   *block_number=0;
   *blocksizes = (unsigned int*)malloc(n_component*sizeof(unsigned int));
   
-  struct connectedcomponent_node* temp = connectedcomponents[0];
+  struct connectedcomponent_node* temp = connectedcomponents;
   while (temp !=NULL)
     {
       /* printf("connected component number %i :\n", *block_number); */
-      struct node**   connectedcomponent = temp->connectedcomponent;
+      struct node*   connectedcomponent = temp->connectedcomponent;
       /* print_connectedcomponent(connectedcomponent); */
 
       int len = len_connectedcomponent(connectedcomponent);
       size_t *  indices = (size_t *)malloc(len*sizeof(size_t));
 
-      struct node* temp1=connectedcomponent[0];
+      struct node* temp1=connectedcomponent;
       int i =0;
       while (temp1!=NULL)
 	{

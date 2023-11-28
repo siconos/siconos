@@ -25,7 +25,8 @@
 
 
 
-
+/* node in a list of vertices
+ */
 struct node {
   int vertex;
   struct node* next;
@@ -34,22 +35,19 @@ struct node {
 // Create a node
 struct node *create_node(int v);
 
-
+/* node in a list of connected component
+ */
 struct connectedcomponent_node {
-  struct node** connectedcomponent;
+  struct node* connectedcomponent;
   struct connectedcomponent_node* next;
 };
 
+// Create node in connectedcomponent
+struct connectedcomponent_node* create_node_connectedcomponent(struct node* v);
 
+int len_connectedcomponent(struct node* connectedcomponent);
 
-// Create node in Connectedcomponent
-struct connectedcomponent_node*  create_node_connectedcomponent(struct node**  v);
-// Add node in Connectedcomponent
-void add_node_connectedcomponent(struct node** connectedcomponent, struct node *node);
-
-int len_connectedcomponent(struct node **connectedcomponent);
-void print_connectedcomponent(struct node** connectedcomponent);
-
+void print_connectedcomponent(struct node* connectedcomponent);
 
 
 struct Graph {
@@ -63,21 +61,28 @@ struct Graph* create_graph(int vertices);
 struct Graph* free_graph(struct Graph* graph);
 
 // Add edge
-void addEdge(struct Graph* graph, int src, int dest);
+void add_edge(struct Graph* graph, int src, int dest);
 
 // Print the graph
-void printGraph(struct Graph* graph);
-
+void print_graph(struct Graph* graph);
 
 void DFS(struct Graph* graph, int vertex);
-void DFS_connected_connectedcomponent(struct Graph* graph, int vertex, struct node**  connected_component);
 
+
+
+
+
+void DFS_compute_connectedcomponent(struct Graph* graph, int vertex, struct node**  connected_component);
 
 int compute_number_connectedcomponents(struct Graph* graph);
-struct connectedcomponent_node** compute_connectedcomponents(struct Graph* graph);
+struct connectedcomponent_node* compute_connectedcomponents(struct Graph* graph);
 
-unsigned int len_connectedcomponents(struct connectedcomponent_node** connectedcomponentList);
-struct connectedcomponent_node**  free_connectedcomponents(struct connectedcomponent_node** connectedcomponentList, struct Graph *graph);
-void print_connectedcomponents(struct connectedcomponent_node** connectedcomponentList);
+unsigned int len_connectedcomponents(struct connectedcomponent_node* connectedcomponentList);
+
+struct connectedcomponent_node* free_connectedcomponents(
+    struct connectedcomponent_node* connectedcomponentList);
+
+void print_connectedcomponents(struct connectedcomponent_node* connectedcomponentList);
 
 #endif
+

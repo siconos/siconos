@@ -1181,7 +1181,7 @@ extern "C"
 
   struct Graph* NM_create_adjacency_graph(NumericsMatrix* A);
 
-  struct connectedcomponent_node** NM_compute_connectedcomponents(NumericsMatrix* A);
+  struct connectedcomponent_node* NM_compute_connectedcomponents(NumericsMatrix* A);
 
   int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
 				  unsigned int** blocksizes);

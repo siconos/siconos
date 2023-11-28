@@ -31,7 +31,7 @@ struct node* create_node(int v) {
 
 
 
-struct connectedcomponent_node*  create_node_connectedcomponent(struct node**  v) {
+struct connectedcomponent_node*  create_node_connectedcomponent(struct node*  v) {
   struct connectedcomponent_node* newNode = malloc(sizeof(struct connectedcomponent_node));
   newNode->connectedcomponent = v;
   newNode->next = NULL;
@@ -40,9 +40,9 @@ struct connectedcomponent_node*  create_node_connectedcomponent(struct node**  v
 
 
 
-int len_connectedcomponent(struct node **connectedcomponent) {
+int len_connectedcomponent(struct node *connectedcomponent) {
   int len =0;
-  struct node * temp = connectedcomponent[0];
+  struct node * temp = connectedcomponent;
   while(temp != NULL)
     {
       temp=temp->next;
@@ -51,15 +51,9 @@ int len_connectedcomponent(struct node **connectedcomponent) {
   return len;
 }
 
-void add_node_connectedcomponent(struct node** connectedcomponent, struct node* node) {
-  int len = len_connectedcomponent(connectedcomponent);
-  connectedcomponent[len] = node;
-  if (len>0){
-    connectedcomponent[len-1]->next =node;
-  }
-}
-void print_connectedcomponent(struct node** connectedcomponent) {
-  struct node* temp = connectedcomponent[0];
+
+void print_connectedcomponent(struct node* connectedcomponent) {
+  struct node* temp = connectedcomponent;
   printf("node connectedcomponent : [");
   while (temp != NULL)
     {
@@ -67,16 +61,16 @@ void print_connectedcomponent(struct node** connectedcomponent) {
       temp = temp->next;
     }
   printf("]\n");
-  int len = len_connectedcomponent(connectedcomponent);
-  for (int i =0; i < len; i ++ )
-    {
-      printf("(%i", connectedcomponent[i]->vertex);
-      if (connectedcomponent[i]->next != NULL)
-	printf("--> %i)\t", connectedcomponent[i]->next->vertex);
-      else
-	printf("--> NULL)\t");
-    }
-  printf("\n");
+  /* int len = len_connectedcomponent(connectedcomponent); */
+  /* for (int i =0; i < len; i ++ ) */
+  /*   { */
+  /*     printf("(%i", connectedcomponent[i]->vertex); */
+  /*     if (connectedcomponent[i]->next != NULL) */
+  /* 	printf("--> %i)\t", connectedcomponent[i]->next->vertex); */
+  /*     else */
+  /* 	printf("--> NULL)\t"); */
+  /*   } */
+  /* printf("\n"); */
 }
 
 
@@ -120,21 +114,22 @@ void DFS(struct Graph* graph, int vertex) {
 
 
 
-void DFS_connected_connectedcomponent(struct Graph* graph, int vertex, struct node**  connected_component) {
+void DFS_compute_connectedcomponent(struct Graph* graph, int vertex, struct node**  connected_component) {
   struct node* adjList = graph->adjLists[vertex];
   struct node* temp = adjList;
 
   graph->visited[vertex] = 1;
   //printf("Visited %d \n", vertex);
 
-  struct node* new_node = create_node(vertex);
-  add_node_connectedcomponent(connected_component,new_node);
-
   while (temp != NULL) {
     int connectedVertex = temp->vertex;
     if (graph->visited[connectedVertex] == 0)
       {
-      DFS_connected_connectedcomponent(graph, connectedVertex, connected_component);
+	struct node* new_node= create_node(connectedVertex);
+	new_node->next = *connected_component;
+	*connected_component= new_node;
+	
+      DFS_compute_connectedcomponent(graph, connectedVertex, connected_component);
     }
     temp = temp->next;
   }
@@ -185,20 +180,20 @@ struct Graph*  free_graph(struct Graph* graph) {
 
 
 // Add edge
-void addEdge(struct Graph* graph, int src, int dest) {
-  // Add edge from src to dest
+void add_edge(struct Graph* graph, int src, int dest) {
+  // Add edge from src to dest (push_forward)
   struct node* newNode = create_node(dest);
   newNode->next = graph->adjLists[src];
   graph->adjLists[src] = newNode;
 
-  // Add edge from dest to src
+  // Add edge from dest to src (push_forward)
   newNode = create_node(src);
   newNode->next = graph->adjLists[dest];
   graph->adjLists[dest] = newNode;
 }
 
 // Print the graph
-void printGraph(struct Graph* graph) {
+void print_graph(struct Graph* graph) {
   int v;
   for (v = 0; v < graph->numVertices; v++) {
     struct node* temp = graph->adjLists[v];
@@ -226,31 +221,32 @@ int compute_number_connectedcomponents(struct Graph *graph) {
   return n_connectedcomponent;
 }
 
-struct connectedcomponent_node**  compute_connectedcomponents(struct Graph *graph) {
+struct connectedcomponent_node*  compute_connectedcomponents(struct Graph *graph) {
 
   int n_vertices=graph->numVertices;
   int n_connectedcomponent =0;
-  struct connectedcomponent_node** connectedcomponentList =malloc(n_vertices * sizeof(struct connectedcomponent_node*));
-  for (int i = 0; i < n_vertices; i++) {
-    connectedcomponentList[i] = NULL;
-  }
-
+  struct connectedcomponent_node* connectedcomponentList = NULL;
+ 
   for (int n =0; n < n_vertices; n++)
     {
       if (graph->visited[n] ==0)
 	{
 	  /* printf("new connectedcomponent\n"); */
-	  struct node** connectedcomponent=malloc(n_vertices * sizeof(struct node*));
-	  for (int i = 0; i < n_vertices; i++) {
-	    connectedcomponent[i] = NULL;
-	  }
-
-	  DFS_connected_connectedcomponent(graph, n, connectedcomponent);
+	  struct node* connectedcomponent= create_node(n);
+	  
+	  DFS_compute_connectedcomponent(graph, n, &connectedcomponent);
 
 	  // print connectedcomponent
 	  /* print_connectedcomponent(connectedcomponent); */
 
-	  add_connectedcomponent_in_connectedcomponentList(connectedcomponentList, create_node_connectedcomponent(connectedcomponent));
+	  create_node_connectedcomponent(connectedcomponent);
+
+	  //push_forward
+	  struct connectedcomponent_node* connectedcomponent_node =  create_node_connectedcomponent(connectedcomponent);
+	  connectedcomponent_node->next= connectedcomponentList;
+	  connectedcomponentList= connectedcomponent_node;
+	  
+	  //add_connectedcomponent_in_connectedcomponentList(connectedcomponentList, );
 
 	  n_connectedcomponent ++;
 	  /* printf("number of connectedcomponent = %i\n",  n_connectedcomponent);  */
@@ -260,40 +256,21 @@ struct connectedcomponent_node**  compute_connectedcomponents(struct Graph *grap
 
   return connectedcomponentList;
 }
-struct connectedcomponent_node**  free_connectedcomponents(struct connectedcomponent_node** connectedcomponentList, struct Graph *graph) {
-
-
-  int n_vertices=graph->numVertices;
-  for (int i = 0; i < n_vertices; i++) {
-
-    if  (connectedcomponentList[i] != NULL)
-      {
-	struct node** connectedcomponent= connectedcomponentList[i]->connectedcomponent;
-
-	
-	connectedcomponent = free_adj_list(connectedcomponent, n_vertices);
-	
-	/* for (int k = 0; k < n_vertices; k++) { */
-	/*   if (connectedcomponent[k] != NULL) free(connectedcomponent[k]); */
-	/* } */
-
-
-	/* free(connectedcomponent); */
-
-	free(connectedcomponentList[i]);
-      }
-  }
-
-  free(connectedcomponentList);
-  
+struct connectedcomponent_node*  free_connectedcomponents(struct connectedcomponent_node* connectedcomponentList) {
+  struct connectedcomponent_node* temp = connectedcomponentList;
+  while (temp) {
+    /* printf("%d -> ", temp->vertex); */
+      struct connectedcomponent_node* temp_free= temp;
+      temp = temp->next;
+      free(temp_free);
+    }
   return NULL;
-
 
 }
 
-void print_connectedcomponents(struct connectedcomponent_node** connectedcomponentList){
+void print_connectedcomponents(struct connectedcomponent_node* connectedcomponentList){
 
-  struct connectedcomponent_node* temp = connectedcomponentList[0];
+  struct connectedcomponent_node* temp = connectedcomponentList;
   int c =0;
   while (temp !=NULL)
     {
@@ -302,13 +279,11 @@ void print_connectedcomponents(struct connectedcomponent_node** connectedcompone
       temp=temp->next;
       c++;
     }
-
-
   printf("number of connectedcomponent = %i\n",  c);
 }
 
-unsigned int len_connectedcomponents(struct connectedcomponent_node** connectedcomponentList){
-  struct connectedcomponent_node* temp = connectedcomponentList[0];
+unsigned int len_connectedcomponents(struct connectedcomponent_node* connectedcomponentList){
+  struct connectedcomponent_node* temp = connectedcomponentList;
   unsigned int c =0;
   while (temp !=NULL)
     {
