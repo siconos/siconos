@@ -7387,6 +7387,7 @@ struct connectedcomponent_node**   NM_compute_connectedcomponents(NumericsMatrix
       struct Graph*  graph = NM_create_adjacency_graph(A);
       connectedcomponents = compute_connectedcomponents(graph);
       /* print_connectedcomponents(connectedcomponents); */
+      free_graph(graph);
       break;
     }
   default:

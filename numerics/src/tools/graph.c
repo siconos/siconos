@@ -155,8 +155,6 @@ struct node** free_adj_list(struct node** adjLists, int size){
   }
   free(adjLists);
   return NULL;
-
-
 }
 
 // Create graph
@@ -272,10 +270,15 @@ struct connectedcomponent_node**  free_connectedcomponents(struct connectedcompo
       {
 	struct node** connectedcomponent= connectedcomponentList[i]->connectedcomponent;
 
-	for (int k = 0; k < n_vertices; k++) {
-	  if (connectedcomponent[k] != NULL) free(connectedcomponent[k]);
-	}
-	free(connectedcomponent);
+	
+	connectedcomponent = free_adj_list(connectedcomponent, n_vertices);
+	
+	/* for (int k = 0; k < n_vertices; k++) { */
+	/*   if (connectedcomponent[k] != NULL) free(connectedcomponent[k]); */
+	/* } */
+
+
+	/* free(connectedcomponent); */
 
 	free(connectedcomponentList[i]);
       }
