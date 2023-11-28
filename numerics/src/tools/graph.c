@@ -141,10 +141,18 @@ void DFS_connected_connectedcomponent(struct Graph* graph, int vertex, struct no
 }
 
 struct node** free_adj_list(struct node** adjLists, int size){
-  for (int k =0; k< size; k++)
-    {
-      if (adjLists[k] !=NULL) free(adjLists[k]);
+  int v;
+  for (v = 0; v < size; v++) {
+    struct node* temp = adjLists[v];
+    /* printf("\n free adjacency list of vertex %d\n ", v); */
+    while (temp) {
+      /* printf("%d -> ", temp->vertex); */
+      struct node* temp_free= temp;
+      temp = temp->next;
+      free(temp_free);
     }
+    /* printf("\n"); */
+  }
   free(adjLists);
   return NULL;
 
@@ -272,6 +280,9 @@ struct connectedcomponent_node**  free_connectedcomponents(struct connectedcompo
 	free(connectedcomponentList[i]);
       }
   }
+
+  free(connectedcomponentList);
+  
   return NULL;
 
 
