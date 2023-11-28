@@ -4476,72 +4476,72 @@ int main(int argc, char *argv[])
   MPI_Init(&argc, &argv);
 #endif
 
-/*  int info = NM_read_write_test();  */
+ int info = NM_read_write_test();
 
-/*   info += NM_add_to_diag3_test_all(); */
+  info += NM_add_to_diag3_test_all();
 
-/*   info += to_dense_test(); */
+  info += to_dense_test();
 
-/*   info += NM_gemm_test_all(); */
+  info += NM_gemm_test_all();
 
-/*   info += NM_gemm_test_all2(); */
+  info += NM_gemm_test_all2();
 
-/*   info += NM_row_prod_test(); */
+  info += NM_row_prod_test();
 
-/*   info += NM_row_prod_no_diag_test_all(); */
+  info += NM_row_prod_no_diag_test_all();
 
-/*   info += NM_row_prod_no_diag_non_square_test(); */
+  info += NM_row_prod_no_diag_non_square_test();
 
-/*   info += test_NM_row_prod_non_square_test(); */
+  info += test_NM_row_prod_non_square_test();
 
-/*   info += NM_insert_dense_test(); */
+  info += NM_insert_dense_test();
 
-/*   info += NM_insert_sparse_test(); */
+  info += NM_insert_sparse_test();
 
-/*   info +=    test_NM_row_prod_non_square_test(); */
-
-
-/*   info +=    test_NM_iterated_power_method(); */
-
-/*   info +=    test_NM_scal(); */
-
-/*   info += test_NM_compute_balancing_matrices(); */
-/*   info += test_NM_compute_balancing_matrices_sym(); */
-/*   info += test_NM_compute_balancing_matrices_rectangle(); */
-/*   info += test_NM_max_by_columns_and_rows(); */
+  info +=    test_NM_row_prod_non_square_test();
 
 
-/*   info +=    test_NM_inv(); */
-  int info=0;
+  info +=    test_NM_iterated_power_method();
+
+  info +=    test_NM_scal();
+
+  info += test_NM_compute_balancing_matrices();
+  info += test_NM_compute_balancing_matrices_sym();
+  info += test_NM_compute_balancing_matrices_rectangle();
+  info += test_NM_max_by_columns_and_rows();
+
+
+  info +=    test_NM_inv();
+
   info += NM_inverse_diagonal_block_matrix_test(); 
   
   
-/*   info += test_NM_gesv_expert(); */
-/*   info += test_NM_posv_expert(); */
+  info += test_NM_gesv_expert();
+  info += test_NM_posv_expert();
 
-/*   info += test_NM_LU_solve(); */
-/*   info += test_NM_LU_solve_matrix_rhs(); */
-/*   info += test_NM_Cholesky_solve_matrix_rhs(); */
-/*   info += test_NM_Cholesky_solve(); */
-/*   info += test_NM_Cholesky_solve_vs_posv_expert(); */
-/*   info += test_NM_LDLT_solve(); */
+  info += test_NM_LU_solve();
+  info += test_NM_LU_solve_matrix_rhs();
+  info += test_NM_Cholesky_solve_matrix_rhs();
+  info += test_NM_Cholesky_solve();
+  info += test_NM_Cholesky_solve_vs_posv_expert();
+  info += test_NM_LDLT_solve();
 
-/* #ifdef WITH_MA57 */
-/*   info += test_NM_LDLT_refine(); */
-/* #endif */
-/* #ifdef WITH_MUMPS */
-/*   info += test_NM_LDLT_refine(); */
-/* #endif */
+#ifdef WITH_MA57
+  info += test_NM_LDLT_refine();
+#endif
+#ifdef WITH_MUMPS
+  info += test_NM_LDLT_refine();
+#endif
 
-/*   info += test_NM_LU_refine(); */
-
-
+  info += test_NM_LU_refine();
 
 
-/* #ifdef WITH_OPENSSL */
-/*   info += test_NM_compute_values_sha1(); */
-/*   info += test_NM_check_values_sha1(); */
-/* #endif */
+
+
+#ifdef WITH_OPENSSL
+  info += test_NM_compute_values_sha1();
+  info += test_NM_check_values_sha1();
+#endif
 
 
    info += test_NM_create_adjacency_graph();
