@@ -713,16 +713,16 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       }
     }
 
-    if(verbose > 0)
-    {
-      cblas_dcopy_msan(problemSize, F, 1, tmp3, 1);
-      NM_gemv(1., AWpB, tmp1, 1., tmp3);
-      linear_solver_residual = cblas_dnrm2(problemSize, tmp3, 1);
-      /* fprintf(stderr, "fc3d esolve: linear equation residual = %g\n", */
-      /*         cblas_dnrm2(problemSize, tmp3, 1)); */
-      /* for the component wise scaled residual: cf mumps &
-       * http://www.netlib.org/lapack/lug/node81.html */
-    }
+    /* if(verbose > 0) */
+    /* { */
+    /*   cblas_dcopy_msan(problemSize, F, 1, tmp3, 1); */
+    /*   NM_gemv(1., AWpB, tmp1, 1., tmp3); */
+    /*   linear_solver_residual = cblas_dnrm2(problemSize, tmp3, 1); */
+    /*   /\* fprintf(stderr, "fc3d esolve: linear equation residual = %g\n", *\/ */
+    /*   /\*         cblas_dnrm2(problemSize, tmp3, 1)); *\/ */
+    /*   /\* for the component wise scaled residual: cf mumps & */
+    /*    * http://www.netlib.org/lapack/lug/node81.html *\/ */
+    /* } */
     // line search
     double alpha = 1;
     int info_ls = 0;
@@ -760,7 +760,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     else
       {
 	cblas_daxpy(problemSize, 1., tmp3, 1., reaction, 1);
-	getchar();
       }
     // velocity <- M*reaction + qfree
     cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
