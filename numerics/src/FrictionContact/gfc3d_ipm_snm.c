@@ -45,6 +45,16 @@
 #include "gfc3d_ipm.h"
 #include <stdarg.h>         // for va_list, va_start, va_end
 
+#include "io_tools.h"
+
+#if defined(WITH_FCLIB)
+#include <hdf5.h>
+#include <hdf5_hl.h>
+#include <fclib.h>
+#endif
+
+
+
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_STR = "GFC3D IPM SNM";
 
 /* ------------------------- Helper functions implementation ------------------------------ */
@@ -702,9 +712,8 @@ static float randomFloat(float min, float max) {
 }
 
 
-#include <hdf5.h>
-#include <hdf5_hl.h>
-#include <fclib.h>
+
+
 int *read_fricprob_block(const char* path, int type, int blk_index)
 {
   int *out = NULL;
@@ -719,7 +728,7 @@ int *read_fricprob_block(const char* path, int type, int blk_index)
     return NULL;
   }
 
-  #include "io_tools.h"
+
   int is_hdf5 = check_hdf5_file(path);
   if(is_hdf5)
   {

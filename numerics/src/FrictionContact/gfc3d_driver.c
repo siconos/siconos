@@ -30,6 +30,11 @@
 #include "gfc3d_compute_error.h"
 #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
 
+
+#include <string.h>
+#include <time.h>
+#include "gfc3d_ipm.h"
+
 #ifdef  DEBUG_MESSAGES
 #include "NumericsVector.h"
 #include "NumericsMatrix.h"
@@ -311,9 +316,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
   }
   case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP:
   {
-    #include <string.h>
-    #include <time.h>
-    #include "gfc3d_ipm.h"
+
 
     char *str = (char *) malloc(200);
     strcpy( str, problem_name );
