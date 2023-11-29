@@ -336,7 +336,7 @@ void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *ve
 
       fc3d_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
 
-      internalsolver_options->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL] ;
+      //internalsolver_options->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL] ;
 
       //internalsolver_options->dparam[SICONOS_DPARAM_TOL] = error/1000;
 
@@ -440,6 +440,6 @@ void fc3d_proximal_set_default(SolverOptions* options)
 
 
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
-  //options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_NEW);
+  //options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
+  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_NEW);
 }
