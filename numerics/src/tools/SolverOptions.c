@@ -746,7 +746,7 @@ SolverOptions * solver_options_create(int solverId)
     gfc3d_nsn_ac_set_default(options);
     break;
   }
-  case SICONOS_FRICTION_3D_NSN_AC_TEST:
+  case SICONOS_FRICTION_3D_NSN_AC_NEW:
   {
     options = solver_options_initialize(solverId, 1000, 1e-10, 0);
     newton_lsa_set_default(options);

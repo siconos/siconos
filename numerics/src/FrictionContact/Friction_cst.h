@@ -54,7 +54,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_GAMS_LCP_PATHVI = 519,
   /** Non-smooth Newton, natural map, local formulation */
   SICONOS_FRICTION_3D_NSN_NM = 520,
-  SICONOS_FRICTION_3D_NSN_AC_TEST = 521,
+  SICONOS_FRICTION_3D_NSN_AC_NEW = 521,
   /** Panagiotopoulos, fixed point, local formulation */
   SICONOS_FRICTION_3D_PFP = 522,
   /** ADMM local formulation */
@@ -146,7 +146,7 @@ extern const char* const   SICONOS_FRICTION_3D_PROX_STR;
 extern const char* const   SICONOS_FRICTION_3D_TFP_STR ;
 extern const char* const   SICONOS_FRICTION_3D_PFP_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_AC_STR ;
-extern const char* const   SICONOS_FRICTION_3D_NSN_AC_TEST_STR ;
+extern const char* const   SICONOS_FRICTION_3D_NSN_AC_NEW_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_FB_STR ;
 extern const char* const   SICONOS_FRICTION_3D_NSN_NM_STR ;
 extern const char* const   SICONOS_FRICTION_3D_DSFP_STR ;

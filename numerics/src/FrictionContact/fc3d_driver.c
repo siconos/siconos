@@ -38,7 +38,7 @@ const char* const   SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
 const char* const   SICONOS_FRICTION_3D_TFP_STR = "FC3D_TFP";
 const char* const   SICONOS_FRICTION_3D_PFP_STR = "FC3D_PFP";
 const char* const   SICONOS_FRICTION_3D_NSN_AC_STR = "FC3D_NSN_AC";
-const char* const   SICONOS_FRICTION_3D_NSN_AC_TEST_STR = "FC3D_NSN_AC_TEST";
+const char* const   SICONOS_FRICTION_3D_NSN_AC_NEW_STR = "FC3D_NSN_AC_NEW (Newton method LSA)";
 const char* const   SICONOS_FRICTION_3D_NSN_FB_STR = "FC3D_NSN_FB";
 const char* const   SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
 const char* const   SICONOS_FRICTION_3D_DSFP_STR = "FC3D_DeSaxceFixedPoint";
@@ -214,10 +214,10 @@ int fc3d_driver(FrictionContactProblem* problem,
     break;
   }
   /*  XXX to delete */
-  case SICONOS_FRICTION_3D_NSN_AC_TEST:
+  case SICONOS_FRICTION_3D_NSN_AC_NEW:
   {
     numerics_printf(" ========================== Call Alart Curnier solver for Friction-Contact 3D problem ==========================\n");
-    fc3d_nonsmooth_Newton_AlartCurnier2(problem, reaction, velocity, &info, options);
+    fc3d_nonsmooth_Newton_AlartCurnier_new(problem, reaction, velocity, &info, options);
     break;
   }
   /* Fischer Burmeister in local coordinates */

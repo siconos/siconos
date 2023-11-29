@@ -82,7 +82,7 @@ static void FC3D_compute_AWpB(void* data_opaque, double* reaction, double* veloc
   assert(dat->AwpB_data_computed);
   FrictionContactProblem* problem = dat->problem;
   // AW + B
-  computeAWpB(dat->Ax, problem->M, dat->Bx, AWpB);
+  fc3d_nonsmooth_Newton_computeAWpB(dat->Ax, problem->M, dat->Bx, AWpB);
   dat->AwpB_data_computed = false;
 
 }
@@ -91,7 +91,7 @@ static void FC3D_compute_AWpB(void* data_opaque, double* reaction, double* veloc
 
 
 
-void fc3d_nonsmooth_Newton_AlartCurnier2(
+void fc3d_nonsmooth_Newton_AlartCurnier_new(
   FrictionContactProblem* problem,
   double *reaction,
   double *velocity,

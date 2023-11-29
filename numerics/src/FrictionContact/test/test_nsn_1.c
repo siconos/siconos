@@ -43,7 +43,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   for(int d =0; d <n_data; d++)
   {
     collection[current].filename = data_collection[d];
-    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_NEW);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     current++;
@@ -68,7 +68,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   for(int d =0; d <n_data; d++)
   {
     collection[current].filename = data_collection[d];
-    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_NEW);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     current++;
