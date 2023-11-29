@@ -178,7 +178,7 @@ void  gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
     numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
-    
+
     if(verbose)
     {
       printf("Call to the fc3d solver ...\n");
@@ -208,8 +208,8 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
     numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
     FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
     DEBUG_EXPR(frictionContact_display(localproblem););
-    
-    
+
+
     numerics_printf("gfc3d_nonsmooth_Newton_AlartCurnier_wr - Call to the fc3d solver ...\n");
 
     fc3d_nonsmooth_Newton_AlartCurnier(localproblem, reaction, velocity, info, options);
@@ -229,6 +229,38 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
 
 }
 
+void  gfc3d_nonsmooth_Newton_AlartCurnier_new_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+{
+  DEBUG_BEGIN("gfc3d_nonsmooth_Newton_AlartCurnier_new_wr(...)\n");
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if(H->size1 > 0)
+  {
+    // Reformulation
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
+    FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+
+
+    numerics_printf("gfc3d_nonsmooth_Newton_AlartCurnier_new_wr - Call to the fc3d solver ...\n");
+
+    fc3d_nonsmooth_Newton_AlartCurnier_new(localproblem, reaction, velocity, info, options);
+
+    globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+
+    frictionContactProblem_free(localproblem);
+  }
+  else
+  {
+    globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
+
+  DEBUG_END("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
+
+
+}
 void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
   NumericsMatrix *H = problem->H;
@@ -372,5 +404,3 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double *reaction, d
     *info = 0 ;
   }
 }
-
-
