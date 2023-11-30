@@ -32,16 +32,16 @@ PythonInstallSetup
 
  
  Summary :
- cmake path-to-your-sources -Dpython_install_dir=standard
+ cmake path-to-your-sources -Dsiconos_python_install=standard
  make install
 
- * install_dir = 'user'
+ * siconos_python_install= 'user'
    ---> install python packages with pip install --user 
 
- * install_dir = 'prefix'
+ * siconos_python_install = 'isolated'
    ---> install python packages with pip install --prefix=$CMAKE_INSTALL_PREFIX
 
- * else
+ * else (standard)
    ---> install python packages with pip install ...
 #]=======================================================================]
   
@@ -72,12 +72,12 @@ function(set_python_install_path)
     endif()
     
     # -- PY_INSTALL_DIR 
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+    execute_process(COMMAND ${Python_EXECUTABLE} -c
       "import site; print(site.ENABLE_USER_SITE)" OUTPUT_VARIABLE ENABLE_USER_SITE)
     string(STRIP ${ENABLE_USER_SITE} ENABLE_USER_SITE)
 
     if(ENABLE_USER_SITE)
-      execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+      execute_process(COMMAND ${Python_EXECUTABLE} -c
 	"import site; print(site.USER_SITE)" OUTPUT_VARIABLE PY_INSTALL_DIR)
 
       # -- pip options
@@ -87,10 +87,10 @@ function(set_python_install_path)
     endif()
   elseif(sicopy_install_mode STREQUAL "isolated")
     list(APPEND PIP_INSTALL_OPTIONS_LOCAL --prefix=${ISOLATED_INSTALL})
-    set(PY_INSTALL_DIR ${ISOLATED_INSTALL}/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages)
+    set(PY_INSTALL_DIR ${ISOLATED_INSTALL}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages)
   elseif(sicopy_install_mode STREQUAL "standard")  # Default behavior: let pip choose where things will be installed.
     # Anyway, we need PY_INSTALL_DIR for swig/cmake install process.
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+    execute_process(COMMAND ${Python_EXECUTABLE} -c
       "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PY_INSTALL_DIR)
 
   else()

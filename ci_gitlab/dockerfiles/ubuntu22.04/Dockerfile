@@ -27,8 +27,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 	vim
 WORKDIR /home
 COPY ci_gitlab/dockerfiles/requirements4doc.txt /home
-RUN pip3 install -U wheel numpy scipy lxml pytest matplotlib h5py pyhull vtk
-RUN pip3 install -U -r /home/requirements4doc.txt
+COPY ci_gitlab/dockerfiles/requirements.txt /home
+RUN python3 -m pip install -U -r /home/requirements.txt
+RUN python3 -m pip install -U -r /home/requirements4doc.txt
 RUN apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 # Something breaks the swig/docstring/doxygen doc process in bullet. Fix it
 COPY ci_gitlab/dockerfiles/ubuntu22.04/bullet.patch /home

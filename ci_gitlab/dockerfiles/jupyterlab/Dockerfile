@@ -1,18 +1,15 @@
-FROM jupyter/scipy-notebook
+FROM mambaorg/micromamba:1.4.7
 USER root
-ENV JUPYTER_ENABLE_LAB yes
-RUN  apt update && apt install -y -qq \
-        cmake \
+RUN apt update  && apt upgrade -y && apt install -y -qq \
+        git-core \
         make \
+	g++ \
         gfortran \
-        g++ \
-        libgfortran-10-dev \
-        doxygen \
-        libcppunit-dev && apt autoclean -y && apt autoremove -y && rm -rf /var/lib/apt/lists/*
-RUN conda install -c conda-forge pytest lxml pyhull vtk matplotlib -y
-RUN conda install -c conda-forge boost hdf5  swig bullet -y
-RUN conda install -c conda-forge lpsolve55 suitesparse -y
+	libgl-dev
+COPY --chown=$MAMBA_USER:$MAMBA_USER ci_gitlab/sicolabenv.yml /home/sicolabenv.yml
+RUN micromamba config prepend channels conda-forge && micromamba self-update && micromamba config set channel_priority strict
+RUN micromamba install -y -f /home/sicolabenv.yml && \
+    micromamba clean --all --yes
+
 WORKDIR /home
-# COPY ci_gitlab/dockerfiles/install_bullet.sh .
 ENV CI_PROJECT_DIR /home
-# RUN sh /home/install_bullet.sh

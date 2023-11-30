@@ -24,14 +24,14 @@ Read more about Siconos at the [Siconos homepage](http://siconos.gforge.inria.fr
 
 Assuming you have cloned the project into <siconos-sources>, to build and install the libraries and the python interface ::
 
-* Create a user options file. Some templates are provided in <siconos-sources>/ci_gitlab/siconos_confs.
+* Create a user options file. Some templates are provided in <siconos-sources>/config_samples.
 * Run
+
 ```
-mkdir build ;cd build
-cmake -DUSER_OPTIONS_FILE=<your options file> <path-to-siconos-sources> 
-make -j 4 # or the number of cores available on your computer.
-make test # optional
-make install
+cmake -S <path-to-siconos-sources> -B build-siconos -DUSER_OPTIONS_FILE=<your-options-file>
+cmake --build build-siconos -j 4 # or the number of cores available on your computer.
+ctest --test-dir build-siconos   # run tests, optional
+cmake --install build-siconos
 ```
 
 More details in [Siconos download and install guide](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/index.html).

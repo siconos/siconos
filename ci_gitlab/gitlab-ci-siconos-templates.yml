@@ -13,13 +13,15 @@ variables:
   # Default behavior regarding cdash submission
   cdash_submit: 0
   # Default path to siconos conf. files
-  siconos_confs: ci_gitlab/siconos_confs
+  SICONOS_CMAKE_CONF_PATH: $CI_PROJECT_DIR/config_samples
   # By default we allow builds to run in parallel, but certain
   # configurations may require non-parallel builds (cf. swig +
   # serialization requires too much memory)
   allow_parallel_build: 1
   GIT_DEPTH: 1
   #GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
+  # Default build path
+  BUILD_DIR: $CI_PROJECT_DIR/build
 
 
 
@@ -53,6 +55,7 @@ stages:
   - test      
   # To install software, generate a "siconos-ready" docker image and asave it in the registry.
   - install 
+  - release
   # To build and run all examples
   - examples
   # Templates for these jobs : .siconos-build (see below).
@@ -63,42 +66,8 @@ stages:
   - doc-deploy 
 
 
-# Define rules used to create (or not) CI jobs
-# Each rule is checked and if the condition is not true, the next one is checked, until the end. 
-workflow:
-  rules:
-    # No CI when commit message starts with wip
-    - if: $CI_COMMIT_MESSAGE =~ /^wip.*$/
-      when: never
-    # Other cases: delegates the choice of the behavior to each job (see templates)
-    - if: '$CI_COMMIT_BRANCH' 
-  
 # --- Templates definitions ---
 # Each template can be used in CI jobs, with the keyword 'extends'.
-
-.docker-rules:
-   rules:
-    - if: $CI_COMMIT_MESSAGE =~ /\[docker-build\]/
-      when: always
-#    - if: $CI_COMMIT_BRANCH == "master"
-#      when: always
-    - if: $CI_COMMIT_TAG
-      when: always
-    - when: never
-
-.docker-manual-rules:
-    rules:
-    - if: $CI_COMMIT_MESSAGE =~ /\[docker-build\]/
-      when: manual
-    - when: never
-
-# A rule to automatically start CI in child project siconos-tutorials.
-# Rule: commit message must contain [with examples]
-.examples-rules:
-  rules:
-    - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
-      when: always
-    - when: never
 
 
 
@@ -121,9 +90,25 @@ workflow:
     GIT_STRATEGY: clone
   stage: docker-build
   script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - sed -i "s|REGISTRY_PATH|$CI_PROJECT_PATH|g" $CI_PROJECT_DIR/ci_gitlab/dockerfiles/$IMAGE_NAME/Dockerfile
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile ci_gitlab/dockerfiles/$IMAGE_NAME/Dockerfile --destination $CI_REGISTRY_IMAGE/sources/$IMAGE_NAME:latest
+    - export DOCKERFILE_PATH=$CI_PROJECT_DIR/ci_gitlab/dockerfiles/$IMAGE_NAME
+    - /kaniko/executor
+      --context $CI_PROJECT_DIR
+      --dockerfile $DOCKERFILE_PATH/Dockerfile 
+      --destination $CI_REGISTRY_IMAGE/sources/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+      --destination $CI_REGISTRY_IMAGE/sources/$IMAGE_NAME:latest
+      --single-snapshot
+
+.docker-rules:
+   rules:
+    - if: $CI_COMMIT_MESSAGE =~ /\[docker-build\]/ # if commit message contains "[docker-build]"
+    - if: $CI_COMMIT_TAG
+    
+.docker-manual-rules:
+    rules:
+    - if: $CI_COMMIT_MESSAGE =~ /\[docker-build\]/
+      when: manual
+    - when: never
 
 .docker-build:
   extends:
@@ -135,25 +120,29 @@ workflow:
     - .docker-manual-rules
     - .docker-create-image
 
-.siconos-next:
-  image: gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/sources/ubuntu20.04
-  script:
-    - echo "bonjour"
-  #needs: []
 
-# Use these rules for jobs that must be created:
-# - when updating master branch
-# - when the commit message starts with [all-jobs]
-# - when commiting a tag
-.full-ci-rules:
+workflow:
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS # To avoid duplicate pipelines
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # If a source branch of a MR is updated
       when: always
-    - if: $CI_COMMIT_TAG
-      when: always
+    - if: $CI_OPEN_MERGE_REQUESTS # If a MR is created
+    - if: $CI_COMMIT_MESSAGE =~ /\[all-jobs\]/  # If the commit message contains "all jobs"
+    - if: $CI_COMMIT_TAG  
+    - if: $CI_COMMIT_BRANCH       # If a branch is updated -> delegates specific behavior control to the jobs
+
+.full-rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH # If changes are pushed to the default branch
+    - if: $CI_COMMIT_TAG   # If changes are pushed for a tag.
     - if: $CI_COMMIT_MESSAGE =~ /^\[all-jobs\]/
-      when: always
-    - when: never
+
+.devel-rules:
+  rules:
+    - when: always
+
+    
   
 # -- Template used for siconos configure-build-test-install jobs  --
 # .siconos-ctest must be overloaded by a specific template like
@@ -164,18 +153,18 @@ workflow:
 
 .siconos-ctest:
   image: $IMAGE_NAME
+  variables:
+    BUILD_MODE: $CI_JOB_STAGE # stage name is used to set ctest behavior
   script:
-    - "sh ci_gitlab/ctest_siconos.sh $ctest_mode $user_file" 
+    - sh ci_gitlab/ctest_siconos.sh
+  extends: .full-rules   # default behavior = full-rules
   
 # - Template to complete .siconos-ctest
 # Configure (cmake) step.
 # Keeps build directory for next stages (build/install/test)
 .siconos-configure:
-  extends: .siconos-ctest
-  variables:
-    #GIT_STRATEGY: clone
-    ctest_mode: Configure
   stage: configure
+  extends: .siconos-ctest
   artifacts:
     paths:
       - build
@@ -185,34 +174,34 @@ workflow:
 # build (make) step.
 # Gets artifacts from .siconos-configure and keep build dir. as artifact for next stages.
 .siconos-build:
-  extends: .siconos-ctest
-  variables:
-    ctest_mode: Build
-    #GIT_STRATEGY: none
   stage: build
+  extends: .siconos-ctest
   artifacts:
     paths:
       - build
-    expire_in: 2 days  
+    expire_in: 2 days 
 
 # - Template to complete .siconos-ctest
 # test step.
 # Gets artifacts from .siconos-build
 .siconos-test:
+  stage: test
   extends: .siconos-ctest
   variables:
     OPENBLAS_NUM_THREADS: 1
-    ctest_mode: Test
-    #GIT_STRATEGY: none
-  stage: test
+  artifacts:
+      paths:
+        - build/
+      expire_in: 3 days 
+      reports:
+        junit: $BUILD_DIR/test_results.xml
 
 # -- Template to execute a the full pipeline (configure/build/test)
 # Keeps build directory for next stage (install) as artifact.
 .siconos-full:
   extends: .siconos-ctest
   variables:
-    ctest_mode: all
-    #GIT_STRATEGY: clone
+    BUILD_MODE: all
   stage: configure
   artifacts:
     paths:
@@ -225,7 +214,7 @@ workflow:
     ctest_mode: all
   stage: configure
   script:
-    - "sh ci_gitlab/ctest_siconos.sh $ctest_mode $user_file"
+    - sh ci_gitlab/ctest_siconos.sh
     - cd $HOME; git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git
   artifacts:
     paths:
@@ -233,38 +222,48 @@ workflow:
     expire_in: 2 days  
 
 
-# Installs siconos and generates a docker image with a full/uptodate install of siconos
-# Uses output (build from artifacts) from a previous job (e.g. debian:build or similar).
-# The docker image is saved in the project registries.
+# A template to install siconos and generates a docker image with a full/uptodate install of siconos
+# It uses output (build from artifacts) from a previous job (e.g. debian:build or similar).
+# The docker image is saved in the project registries indicated by RESULT_NAME var.
 .siconos-install:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   variables:
-    #GIT_STRATEGY: none
-    #REG_NAME: $CI_REGISTRY_IMAGE
   stage: install
   script:
-    #- cp $CI_PROJECT_DIR/ci_gitlab/dockerfiles/requirements.txt build/
     - cat $CI_PROJECT_DIR/ci_gitlab/dockerfiles/install_template| sed -e "s|IMAGENAME|$IMAGE_NAME|g" > build/Dockerfile
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_DEPLOY_USER\",\"password\":\"$CI_DEPLOY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/build/Dockerfile --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:latest --cleanup
+    - /kaniko/executor
+      --build-arg BUILD_DIR=$BUILD_DIR
+      --context $CI_PROJECT_DIR
+      --dockerfile $CI_PROJECT_DIR/build/Dockerfile
+      --destination $RESULT_NAME-$CI_COMMIT_REF_SLUG:latest
+      --destination $RESULT_NAME-$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHORT_SHA
+      --single-snapshot
+      --cleanup
 
-# Installs siconos and generates a docker image with a full/uptodate install of siconos
-# Uses output (build from artifacts) from a previous job (e.g. debian:build or similar).
-# The docker image is saved in the project registries.
-# It uses a jupyter image and contains siconos-tutorials with its notebooks.
+# A template to installs siconos and generates a docker image with a full/uptodate install of siconos
+# that:
+#   - can be started as a Jupyter notebook.
+#   - contains siconos-tutorials examples
+# 
+# It uses output (build from artifacts) from a previous job (e.g. debian:build or similar).
+# The docker image is saved in the project registries indicated by RESULT_NAME var.
 # Source : ci_gitlab/dockerfiles/siconoslab/Dockerfile
 .siconos-jupyterlab-install:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
-  variables:
-    #GIT_STRATEGY: none
-    #REG_NAME: $CI_REGISTRY_IMAGE
   stage: install
   script:
-    #- cp $CI_PROJECT_DIR/ci_gitlab/dockerfiles/requirements.txt build/
     - cat $CI_PROJECT_DIR/ci_gitlab/dockerfiles/siconoslab/Dockerfile| sed -e "s|IMAGENAME|$IMAGE_NAME|g" > build/Dockerfile
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_DEPLOY_USER\",\"password\":\"$CI_DEPLOY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/build/Dockerfile --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:$CI_COMMIT_SHORT_SHA --destination $CI_REGISTRY/nonsmooth/siconos-tutorials/$siconos_docker_name:latest --cleanup
+    - /kaniko/executor
+      --build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR
+      --context $CI_PROJECT_DIR
+      --dockerfile $CI_PROJECT_DIR/build/Dockerfile
+      --destination $RESULT_NAME-$CI_COMMIT_REF_SLUG:latest
+      --destination $RESULT_NAME-$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHORT_SHA
+      --single-snapshot
+      --cleanup

@@ -20,7 +20,6 @@ import importlib
 import textwrap
 from distutils.version import LooseVersion
 import sphinx
-import sphinx_bootstrap_theme
 
 # append siconos package build path to sys
 siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
