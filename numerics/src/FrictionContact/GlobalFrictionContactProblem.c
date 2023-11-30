@@ -49,6 +49,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void)
   problem->mu = NULL;
   problem->M_inverse = NULL;
   problem->env = NULL;
+  problem->name = NULL;
   problem->numberOfContacts = 0;
   problem->dimension = 0;
   return problem;
@@ -295,6 +296,8 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactPr
   {
     NM_copy(problem->M_inverse, new->M_inverse);
   }
+  if (problem->name)
+    new->name=problem->name;
   new->env = NULL;
   return new;
 }

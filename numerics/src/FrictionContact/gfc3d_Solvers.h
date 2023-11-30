@@ -244,7 +244,7 @@ extern "C"
    */
   void gfc3d_IPM(GlobalFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
-                  int*  info, SolverOptions*  options, const char* problem_name);
+                  int*  info, SolverOptions*  options);
 
   /* This routine is a short version of gfc3d_IPM. It allows to solve the convex model with fixed barrier parameter and s parameter.
    * Param s will be updated (s = || u_bar ||) according to different strategies.
@@ -268,7 +268,7 @@ extern "C"
    */
   void gfc3d_IPM_SNM(GlobalFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
-                  int*  info, SolverOptions*  options, const char* problem_name);
+                  int*  info, SolverOptions*  options);
 
   void gfc3d_IPM_SNM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
 

@@ -987,7 +987,7 @@ void gfc3d_IPM_SNM_free(GlobalFrictionContactProblem* problem, SolverOptions* op
 
 void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
                double* restrict velocity, double* restrict globalVelocity,
-               int* restrict info, SolverOptions* restrict options, const char* problem_name)
+               int* restrict info, SolverOptions* restrict options)
 {
   // verbose = 3;
   // printf("DBL_EPSILON %25.15e\n",DBL_EPSILON);

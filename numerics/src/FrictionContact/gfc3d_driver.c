@@ -101,7 +101,7 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
 
 
 int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double *velocity,
-                 double* globalVelocity,  SolverOptions* options, const char* problem_name)
+                 double* globalVelocity,  SolverOptions* options)
 {
   assert(options->isSet);
   DEBUG_EXPR(NV_display(globalVelocity,problem_ori->M->size0););
@@ -111,10 +111,13 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
   /* Solver name */
   /*  const char* const  name = options->solverName;*/
 
-  FILE *fileName = fopen("problem_name.res", "w");
-  fprintf(fileName, "%s", problem_name);
-  fclose(fileName);
-
+  if (problem->name)
+    {
+      FILE *fileName = fopen("problem_name.res", "w");
+      char * problem_name = problem->name;
+      fprintf(fileName, "%s", problem_name);
+      fclose(fileName);
+    }
   int info = -1 ;
 
   if(problem->dimension != 3)
@@ -267,7 +270,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
                                              reaction, velocity, globalVelocity);
 
     gfc3d_IPM(balanced_problem, reaction, velocity,
-              globalVelocity, &info, options, problem_name);
+              globalVelocity, &info, options);
 
 
     gfc3d_balancing_check_drift(balanced_problem,problem, reaction, velocity, globalVelocity,
@@ -288,20 +291,27 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
   case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM:
   {
     gfc3d_IPM_SNM(problem, reaction, velocity,
-              globalVelocity, &info, options, problem_name);
+              globalVelocity, &info, options);
     break;
   }
   case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX:
   {
     verbose=1;
     gfc3d_IPM_SNM(problem, reaction, velocity,
-              globalVelocity, &info, options, problem_name);
+              globalVelocity, &info, options);
 
     SolverOptions * nsn_options = options->internalSolvers[0];
 
     gfc3d_proximal_wr(problem, reaction, velocity, globalVelocity, &info, nsn_options);
 
-    numerics_printf_verbose(1, "problem = %s --  NSN_PROX gfc3d_error = %e, prox iterations %i, cumulative newton iterations %i \n",problem_name, nsn_options->dparam[1], nsn_options->iparam[1], nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
+    if (problem->name)
+      {
+    numerics_printf_verbose(1, "problem = %s --  NSN_PROX gfc3d_error = %e, prox iterations %i, cumulative newton iterations %i \n",problem->name, nsn_options->dparam[1], nsn_options->iparam[1], nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
+      }
+    else
+      {
+	numerics_printf_verbose(1, " --  NSN_PROX gfc3d_error = %e, prox iterations %i, cumulative newton iterations %i \n", nsn_options->dparam[1], nsn_options->iparam[1], nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
+      }
 
     options->iparam[SICONOS_IPARAM_ITER_DONE]=options->iparam[0]+nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE];
     options->dparam[SICONOS_DPARAM_RESIDU] = nsn_options->dparam[SICONOS_DPARAM_RESIDU];
@@ -316,10 +326,15 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
   }
   case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP:
   {
-
-
     char *str = (char *) malloc(200);
-    strcpy( str, problem_name );
+    if (problem->name)
+      {
+	strcpy( str, problem->name );
+      }
+    else
+      {
+	strcpy( str, "foo_" );
+      }
     char * separators = "/";
     char *strToken_name = strtok( str, separators );
     for(int i=0; i<5; i++)
@@ -511,7 +526,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
       printf("\n********** START sub-problem %d / %d, H (ndxm)/rank = %dx%d / %d *************************************************************\n", blk_i+1, n_blocks, count_contact_full, count_body_full, Hc_rank);
       t1 = clock();
       gfc3d_IPM_SNM(sub_prob, sub_reaction, sub_velocity,
-              sub_globalVelocity, &info, options, problem_name);
+              sub_globalVelocity, &info, options);
       t2 = clock();
       time_sub_probs += (double)(t2-t1)/(double)clk_tck;
       all_iterations += options->iparam[SICONOS_IPARAM_ITER_DONE];
@@ -645,7 +660,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
     printf("\n\n============ Solve the complete problem by gfc3d_IPM_SNM ============\n");
     t1 = clock();
-    gfc3d_IPM_SNM(problem, reaction, velocity, globalVelocity, &info, options, problem_name);
+    gfc3d_IPM_SNM(problem, reaction, velocity, globalVelocity, &info, options);
     t2 = clock();
     time_comple_prob = (double)(t2-t1)/(double)clk_tck;
     printf("Execution time: %.4f,\t\ttest: ", time_comple_prob);
