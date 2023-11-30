@@ -70,7 +70,7 @@ typedef int (*Check_merite_function)(const double, const double, const double, v
  * [in] numParams: number of parameters as input for _func
  * [out] alpha: step-length
  */
-double backtrack_linesearch(Check_merite_function _func, const double lb, const double ub, const double omega, const double numParams, ...)
+static double backtrack_linesearch(Check_merite_function _func, const double lb, const double ub, const double omega, const double numParams, ...)
 {
   assert(("Lower bound <= upper bound", lb <= ub));
   va_list args;
@@ -101,7 +101,7 @@ double backtrack_linesearch(Check_merite_function _func, const double lb, const 
                                unsigned int vecSize, unsigned int varsCount, double sigma
  * [out] 1: if satisfy, 0: it not
  */
-int check_merite_function_complem(const double alpha, const double omega, const double numParams, va_list args)
+static int check_merite_function_complem(const double alpha, const double omega, const double numParams, va_list args)
 {
   assert(("The number of params must be 7. WARNING: Params input must be u, du, r, dr, vecSize, varsCount, sigma", numParams  == 7));
 
@@ -155,7 +155,7 @@ int check_merite_function_complem(const double alpha, const double omega, const 
                                unsigned int vecSize, unsigned int varsCount
  * [out] 1: if satisfy, 0: it not
  */
-int check_merite_function_diffixP(const double alpha, const double omega, const double numParams, va_list args)
+static int check_merite_function_diffixP(const double alpha, const double omega, const double numParams, va_list args)
 {
   assert(("The number of params must be 6. WARNING: Params input must be u, du, s, ds, vecSize, varsCount", numParams  == 6));
 
@@ -236,7 +236,7 @@ int check_merite_function_diffixP(const double alpha, const double omega, const 
             NumericsMatrix *M, NumericsMatrix *H, double *f, double *w, double tol
  * [out] 1: if satisfy, 0: it not
  */
-int check_merite_function_Theta(const double alpha, const double omega, const double numParams, va_list args)
+static int check_merite_function_Theta(const double alpha, const double omega, const double numParams, va_list args)
 {
   assert(("The number of params must be 20. \nWARNING: Params input must be v, dv, u, du, r, dr, s, ds, vecSize, varsCount, \\sigma, pinfeas, dinfeas, complem, diff_fixp, \\M, H, f, w, tol", numParams  == 20));
 
@@ -339,7 +339,7 @@ int check_merite_function_Theta(const double alpha, const double omega, const do
             unsigned int iteration, double *arr_norm_theta, unsigned int p, NumericsMatrix *M, NumericsMatrix *H, double *f, double *w, double tol
  * [out] 1: if satisfy, 0: it not
  */
-int check_merite_function_Theta_nonMonotone(const double alpha, const double omega, const double numParams, va_list args)
+static int check_merite_function_Theta_nonMonotone(const double alpha, const double omega, const double numParams, va_list args)
 {
   assert(("The number of params must be 23. \nWARNING: Params input must be v, dv, u, du, r, dr, s, ds, vecSize, varsCount, \\sigma, pinfeas, dinfeas, complem, diff_fixp, \\iteration, arr_norm_theta, p, M, H, f, w, tol", numParams  == 23));
 

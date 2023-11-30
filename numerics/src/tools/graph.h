@@ -82,6 +82,7 @@ unsigned int len_connectedcomponents(struct connectedcomponent_node* connectedco
 struct connectedcomponent_node* free_connectedcomponents(
     struct connectedcomponent_node* connectedcomponentList);
 
+
 void print_connectedcomponents(struct connectedcomponent_node* connectedcomponentList);
 
 #endif

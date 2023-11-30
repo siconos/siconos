@@ -677,7 +677,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
 
 /* check the solution of the linear system A*x = b  */
 /* return |A*x[p:p+n-1]-b|/|b[p:p+n-1]|            */
-double relative_error_linear_system_solution(NumericsMatrix* const A, const double * x, const double * b, int b_size, int p, int n)
+static double relative_error_linear_system_solution(NumericsMatrix* const A, const double * x, const double * b, int b_size, int p, int n)
 {
   double out;
   double norm_b = cblas_dnrm2(n, b+p, 1);

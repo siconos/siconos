@@ -50,7 +50,7 @@ const char* const   SICONOS_FRICTION_3D_IPM_SNM_STR = "FC3D IPM SNM";
 /* ------------------------- Helper functions implementation ------------------------------ */
 /* Compute the primal constraint vector for local fricprob: out = Wr + q + Es - u
    and the relative 2-norm of this vector: rnorm = |out|/max{|Wr|, |q|, |velocity|, |Es|} */
-void primalResidual_s_for_local_friction(const double * velocity, const double * reaction, NumericsMatrix * W, const double * q,
+static void primalResidual_s_for_local_friction(const double * velocity, const double * reaction, NumericsMatrix * W, const double * q,
                     const double * s, double * out, double * rnorm, const double tol)
 {
   size_t nd = W->size0;

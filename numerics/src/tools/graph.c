@@ -61,36 +61,10 @@ void print_connectedcomponent(struct node* connectedcomponent) {
       temp = temp->next;
     }
   printf("]\n");
-  /* int len = len_connectedcomponent(connectedcomponent); */
-  /* for (int i =0; i < len; i ++ ) */
-  /*   { */
-  /*     printf("(%i", connectedcomponent[i]->vertex); */
-  /*     if (connectedcomponent[i]->next != NULL) */
-  /* 	printf("--> %i)\t", connectedcomponent[i]->next->vertex); */
-  /*     else */
-  /* 	printf("--> NULL)\t"); */
-  /*   } */
-  /* printf("\n"); */
 }
 
 
 
-
-int len_connectedcomponentList(struct connectedcomponent_node ** connectedcomponentList) {
-  int len =0;
-  while(connectedcomponentList[len] != NULL)
-    {
-      len++;
-    }
-  return len;
-}
-void add_connectedcomponent_in_connectedcomponentList(struct connectedcomponent_node** connectedcomponentList, struct  connectedcomponent_node* connectedcomponent) {
-  int len = len_connectedcomponentList(connectedcomponentList);
-  connectedcomponentList[len] = connectedcomponent;
-  if (len>0){
-    connectedcomponentList[len-1]->next = connectedcomponent;
-  }
-}
 
 
 
@@ -146,9 +120,10 @@ struct node* free_node_list(struct node* list)
      temp = temp->next;
      free(temp_free);
    }
+   return NULL;
 }
 
-struct node** free_adj_list(struct node** adjLists, int size){
+static struct node** free_adj_list(struct node** adjLists, int size){
   int v;
   for (v = 0; v < size; v++) {
     /* printf("\n free adjacency list of vertex %d\n ", v); */

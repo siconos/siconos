@@ -1277,7 +1277,7 @@ CS_INT cs_dupl_zeros (cs *A)
 #include "cs.h"
 #include <complex.h>
 /* L = chol (A, [pinv parent cp]), pinv is optional */
-csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
+static csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
 {
     // CS_ENTRY d, lki, *Lx, *x, *Cx ;
     CS_ENTRY *Lx,  *Cx ;
@@ -1997,7 +1997,7 @@ static  NumericsMatrix *  multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *
 
 
 
-NumericsMatrix * compute_factor_U(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
+static NumericsMatrix * compute_factor_U(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
 {
   size_t d3 = (size_t)(vecSize / varsCount); // d3 = 3
   assert(d3 == 3);
@@ -2535,7 +2535,7 @@ static void compute_errors(NumericsMatrix * M, NumericsMatrix * H, const double 
 
 
 
-void print_NAN_in_matrix(const NumericsMatrix* const m)
+static void print_NAN_in_matrix(const NumericsMatrix* const m)
 {
   if(!m)
   {
@@ -2634,7 +2634,7 @@ void print_NAN_in_matrix(const NumericsMatrix* const m)
 
 
 
-void is_in_int_of_Lcone(const double * const x, const size_t vecSize, const size_t varsCount)
+static void is_in_int_of_Lcone(const double * const x, const size_t vecSize, const size_t varsCount)
 {
   size_t dim = vecSize/varsCount, id3 = 0;
   assert(dim == 3);
@@ -2669,7 +2669,7 @@ void is_in_int_of_Lcone(const double * const x, const size_t vecSize, const size
 
 
 
-void update_w(double * w, double * w_origin, const double * velocity, const size_t vecSize, const size_t varsCount, int update)
+static void update_w(double * w, double * w_origin, const double * velocity, const size_t vecSize, const size_t varsCount, int update)
 {
   if (update == 0) return;
 
@@ -2684,7 +2684,7 @@ void update_w(double * w, double * w_origin, const double * velocity, const size
 }
 
 
-double compute_min_steplenght_of4(const double * x, const double * dx,
+static double compute_min_steplenght_of4(const double * x, const double * dx,
                                 const double * y, const double * dy,
                                 const double * z, const double * dz,
                                 const double * t, const double * dt,
@@ -2726,7 +2726,7 @@ double compute_min_steplenght_of4(const double * x, const double * dx,
  *      |                                                                      |
  *      | ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ... ...  |
  */
-NumericsMatrix * compute_JQinv(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
+static NumericsMatrix * compute_JQinv(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
 {
   size_t d3 = (size_t)(vecSize / varsCount); // d3 = 3
   assert(d3 == 3);
@@ -2947,7 +2947,7 @@ static void print_neg_eigval(const double *x, const size_t vecSize, const size_t
 
 
 
-double detMat(NumericsMatrix *A)
+static double detMat(NumericsMatrix *A)
 // double detMat()
 {
   double det = 1.;
