@@ -336,10 +336,10 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
   numerics_printf_verbose(-1, "| it  | pinfeas |  |s-ub| | |uor-mu||2max|uor-mu||   4*mu  |  u'r/n  | prj err | barpram |  alpha  |  |du|   |  |dr|   |  |ds|   | ls prim | ls comp | ls fixP |");
   numerics_printf_verbose(-1, "----------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
-  FILE * iterates;
-  FILE * matrixH;
-  FILE * iterates_2;
-  FILE * sol_file;
+  FILE * iterates = NULL;
+  FILE * matrixH = NULL;
+  FILE * iterates_2 = NULL;
+  FILE * sol_file = NULL;
 
   // Read problem names
   FILE * f_problem_name = fopen("problem_names.res", "r");
@@ -870,7 +870,7 @@ void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict rea
 
     if (alpha_primal < 1e-8)
     {
-      printf("\nfailure\n\n");
+      numerics_printf_verbose(-1," fc3d_ipm_snm :: failure, step alpha is too small");
       break;
     }
 
