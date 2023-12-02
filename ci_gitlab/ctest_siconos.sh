@@ -7,8 +7,8 @@
 # > export ctest_build_model=Experimental or Continuous or Nightly
 # > export cdash_submit=1 or 0
 # > export allow_parallel_build=1 or 0. Set to 1 to allow -jN, 0 to restrict to -j1.
-# 
-# > sh ctest_siconos.sh <ctest_mode> user_option_filename
+# > export BUILD_MODE=Configure, Build or Test
+# > sh ctest_siconos.sh
 #
 # - ctest_mode : choose among 'Configure', 'Build', 'Test' or 'all'
 # - user_option_filename is optional. If not set, siconos build will use <siconos repository>/cmake/default_options.cmake file.
@@ -30,12 +30,14 @@
 : ${ctest_build_model:?"Please set Dashboard client mode. Choose among Experimental, Continuous or Nightly."}
 : ${cdash_submit:?"Please set environment variable cdash_submit to TRUE or FALSE. If true, ctests results will be submitted to cdash server."}
 : ${allow_parallel_build:?"Please set environment variable allow_parallel_build to TRUE or FALSE. If true, ctests will use paralle build option (-jN)".}
+: ${BUILD_MODE:?"Please choose build mode among configure, build or test."}
 
-ctest_mode=$1
-user_file=$2
+# set default config file
+CONF_FILE="${CONF_FILE:=$CI_PROJECT_DIR/config_samples/siconos_ci_default.cmake}"
 
-echo "${ctest_mode} and ${user_file}"
-if [ $1 = "Configure" ] || [ $1 = "all" ]
+
+echo "${BUILD_MODE} and ${CONF_FILE}"
+if [ $BUILD_MODE = "configure" ] || [ $BUILD_MODE = "all" ]
 then
     rm -rf $CI_PROJECT_DIR/build
     mkdir -p $CI_PROJECT_DIR/build
@@ -44,4 +46,4 @@ fi
 # --- Run ctest for Siconos ---
 cd $CI_PROJECT_DIR/build
 
-ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_install_siconos.cmake -Dmodel=$ctest_build_model -DALLOW_PARALLEL_BUILD=$allow_parallel_build -DCDASH_SUBMIT=$cdash_submit -V -DCTEST_MODE=${ctest_mode} -DUSER_FILE=$user_file 
+ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_install_siconos.cmake -Dmodel=$ctest_build_model -DALLOW_PARALLEL_BUILD=$allow_parallel_build -DCDASH_SUBMIT=$cdash_submit -V -DCTEST_MODE=$BUILD_MODE -DUSER_FILE=$CONF_FILE --output-junit test_results.xml

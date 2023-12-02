@@ -9,16 +9,14 @@ include: ci_gitlab/gitlab-ci-siconos-templates.yml
 doc:build:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
-    cdash_submit: 1
-    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_docs.cmake
   extends: .siconos-full
   script:
     - "sh ci_gitlab/make_siconos_doc.sh"
   artifacts:
     paths:
       - build/docs/build/html
-pages:
 
+pages:
   image: python:alpine
   script:
   - mv build/docs/build/html public

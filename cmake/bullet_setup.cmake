@@ -103,7 +103,8 @@ elseif(WITH_BULLET OR Bullet_ROOT)
   # Anyway, find_package is not able to check the version since Bullet does not provide a bullet-config-version or BulettConfigVersion file.
   find_package(Bullet CONFIG REQUIRED)
   include(${Bullet_CONFIG})
- 
+
+  
   if(BULLET_VERSION_STRING VERSION_LESS 3.05)
     set(BULLET_FOUND FALSE)
   endif()
@@ -118,7 +119,7 @@ elseif(WITH_BULLET OR Bullet_ROOT)
     - run cmake for siconos with -DBULLET_INSTALL=ON. Bullet will then be installed in ${CMAKE_INSTALL_PREFIX} and Siconos configured to run with Bullet.")
   endif()
 
-  set(BULLET_INCLUDE_DIRS ${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS})
+  get_filename_component(BULLET_INCLUDE_DIRS  ${BULLET_INCLUDE_DIRS} ABSOLUTE BASE_DIR ${BULLET_ROOT_DIR})
   set_bullet_target()
   message(STATUS "Found bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}")
 

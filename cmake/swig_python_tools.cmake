@@ -114,7 +114,7 @@ function(add_swig_sub_module)
     target_link_libraries(${target_NAME} PRIVATE ${dep})
   endforeach()
   # Python and numpy
-  target_link_libraries(${target_NAME} PRIVATE Python3::NumPy)
+  target_link_libraries(${target_NAME} PRIVATE Python::NumPy)
   target_include_directories(${target_NAME} PRIVATE ${SICONOS_SWIG_SOURCE_DIR})
   target_include_directories(${target_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   target_include_directories(${target_NAME} PRIVATE ${target_INCLUDES})
@@ -178,7 +178,7 @@ function(add_swig_sub_module)
   #   # do not link against the Python library on unix, it is useless
   #   swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
   # else()
-  #   swig_link_libraries(${_name} ${Python3_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
+  #   swig_link_libraries(${_name} ${Python_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
   # endif()
 
   if(WITH_DOCUMENTATION AND WITH_DOXY2SWIG)

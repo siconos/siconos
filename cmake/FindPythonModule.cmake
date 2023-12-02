@@ -6,7 +6,7 @@
 #  find_python_module(sphinx)
 #  find_python_module(mpi4py INCLUDE)
 # 
-#  Warning : use ${PYTHON_EXECUTABLE} as python interpreter
+#  Warning : use ${Python_EXECUTABLE} as python interpreter
 #
 #  If INCLUDE options is provided, it means that the function
 #  is supposed to check for the existence of <path-to-module>/include
@@ -18,7 +18,7 @@ function(find_python_module module)
   set(options REQUIRED INCLUDES) # If INCLUDE options is provided
   set(oneValueArgs VERSION)
   cmake_parse_arguments(${module}_FIND "${options}" "${oneValueArgs}" "" ${ARGN} )
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import ${module} as name; print(name.__file__)"
+  execute_process(COMMAND ${Python_EXECUTABLE} -c "import ${module} as name; print(name.__file__)"
     RESULT_VARIABLE ${module}_FIND_RESULT     # Return code from command above
     OUTPUT_VARIABLE ${module}_FIND_OUTPUT     # Standard output form command above
     ERROR_QUIET # Ignores quietly standard error
@@ -32,14 +32,14 @@ function(find_python_module module)
   endif()
 
   # Save version
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import ${module} as name; print(name.__version__)"
+  execute_process(COMMAND ${Python_EXECUTABLE} -c "import ${module} as name; print(name.__version__)"
     RESULT_VARIABLE ${module}_FIND_RESULT     # Return code from command above
     OUTPUT_VARIABLE ${module}_VERSION    # Standard output form command above
     ERROR_QUIET # Ignores quietly standard error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
   if(${module}_FIND_RESULT)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import ${module} as name; print(name.VERSION)"
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "import ${module} as name; print(name.VERSION)"
       RESULT_VARIABLE ${module}_FIND_RESULT     # Return code from command above
       OUTPUT_VARIABLE ${module}_VERSION    # Standard output form command above
       ERROR_QUIET # Ignores quietly standard error

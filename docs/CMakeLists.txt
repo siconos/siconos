@@ -63,7 +63,7 @@ if(USE_DOXYGEN)
     # A target to filter out doxygen warnings : remove empty files and concatenate the others.
     # call python function from gendoctools (filter_doxygen_warnings_files).
     add_custom_target(filter_warnings
-      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
       "from gendoctools.filters import filter_doxygen_warnings_files as f; f('${CMAKE_BINARY_DIR}/doxygen_warnings', 'SUMMARY.warnings')"
       VERBATIM
       COMMENT "Filter doxygen warnings (result : SUMMARY.warnings)."
@@ -79,14 +79,14 @@ if(WITH_DOCUMENTATION)
   # --- Search dependencies required to build documentation ---
   message("--------------------------------------------------")
   message("------ Start global setup for documentation ------\n")
-  if(Python3_VERSION VERSION_LESS 3.6)
+  if(Python_VERSION VERSION_LESS 3.6)
     message(FATAL_ERROR "Python >= 3.6 is required to generate documentation.")
   endif()
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
   find_python_module(breathe REQUIRED)
   # Sphinx theme for documentation
-  find_python_module(sphinx_bootstrap_theme REQUIRED)
+  find_python_module(sphinx_book_theme REQUIRED)
 
   # --- copy/conf sphinx files into build directory ---
 
@@ -144,7 +144,7 @@ if(WITH_DOCUMENTATION)
   #  1. creates rst files in a breathe-ready format from xml outputs of doxygen run on C/C++ headers
   #  2. creates rst files from 'autodoc' outputs, docstrings, or others python doc. things.
   add_custom_target(rst_api
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
     "from gendoctools.generate_api import build_rst_api as f; f('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
     VERBATIM
     COMMENT "Create main rst files for C/C++ and python API.")
@@ -158,7 +158,7 @@ if(WITH_DOCUMENTATION)
 
   # post command to make html : filter sphinx warnings to a log file.
   add_custom_command(TARGET html POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${Python_EXECUTABLE} -c
     "from gendoctools.filters import filter_sphinx_warnings as f; f('${SPHINX_LOG_FILE}')"
     VERBATIM
     COMMENT "Filtering sphinx logfile into ${SPHINX_LOG_FILE}.")

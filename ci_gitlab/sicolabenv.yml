@@ -1,0 +1,35 @@
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - python >=3.7
+  - swig
+  - jupyterlab
+  - numpy
+  - wheel
+  - scipy
+  - lxml
+  - pytest
+  - matplotlib
+  - pybind11
+  - vtk
+  - packaging
+  - openblas
+  - boost
+  - bullet
+  - openmpi
+  - hdf5
+  - h5py
+  - clang-format
+  - cmake
+  - gmp
+  - cppunit
+  - suitesparse
+  - openblas
+  - lp_solve
+  - python-lsp-server
+  - black
+  - flake8
+  - autopep8
+  - pyhull
+

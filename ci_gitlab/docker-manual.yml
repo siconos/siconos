@@ -1,11 +1,34 @@
-# Tests
+# Manual jobs.
+# Mostly old jobs for outdated OS, kept for the records.
 
 include:
    - ci_gitlab/gitlab-ci-siconos-templates.yml
 
-debian-stretch:docker-build:
+ubuntu20.4:docker-build:
   variables:
-    IMAGE_NAME: debian-stretch
+    IMAGE_NAME: ubuntu20.04
+  stage: docker-build-layer2
+  needs: ["ubuntu20.4-light:docker-build"]
+  extends: .docker-manual
+
+opensuse-leap-15.0:docker-build:
+  variables:
+    IMAGE_NAME: opensuse-leap-15.0
+  extends: .docker-manual
+
+centos-7:docker-build:
+  variables:
+    IMAGE_NAME: centos-7
+  extends: .docker-manual
+
+ubuntu20.4-light:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu20.04-light
+  extends: .docker-manual
+
+debian-buster:docker-build:
+  variables:
+    IMAGE_NAME: debian-buster
   extends: .docker-manual
 
 ubuntu18.04:docker-build:

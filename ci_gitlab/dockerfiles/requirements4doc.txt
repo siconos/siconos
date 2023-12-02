@@ -1,7 +1,6 @@
 sphinx
 breathe
-sphinx-rtd-theme
+sphinx-book-theme
 sphinxcontrib-bibtex
 sphinxcontrib-websupport
-sphinx-bootstrap-theme
 ytsphinx
