@@ -1061,13 +1061,14 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       auto &free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
       auto &residuSigfreed = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE];
       auto &sigfreed = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE];
-
+      auto &W = *_dynamicalSystemsGraph->properties(*dsi)
+                     .W;  // Its W MoreauJeanOSI matrix of iteration.
       // Get state i (previous time step) from Memories -> var. indexed with
       // "Old"
       const auto &qold = d.qMemory().getSiconosVector(0);         // qi
       const auto &vold = d.velocityMemory().getSiconosVector(0);  // vi
       const auto &sigmaold = d.stressMemory().getSiconosVector(0);  // sigmai
-
+      const auto &sigma = d.stress(); //sigmaf
       DEBUG_EXPR(qold.display(););
       DEBUG_EXPR(vold.display(););
       DEBUG_EXPR(d.q()->display(););
@@ -1079,8 +1080,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       // -- No need to update W --
 
       if (d.S()) {
-        siconos::algebra::prod(1.0, *d.S(), sigmaold, residuSigfreed,
-                               true);  // residufree = S*sigma_i
+        siconos::algebra::prod(-1.0, *d.S(), sigmaold, residuSigfreed,
+                               true);  // residufree = -S*sigma_i
       }
 //      if (d.K()) {
 //        coeff = h * h * _theta;
@@ -1094,8 +1095,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
               auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(d.B()->size(1),d.B()->size(0));
               auto Bvold = std::make_shared<siconos::algebra::SiconosVector>(vold.size());
               coeff = h * _theta;
-              siconos::algebra::prod(coeff, *d.B(), vold, residuSigfreed,
-                                     false);  // residufree += h*theta*B*v_{i}
+              siconos::algebra::prod(-coeff, *d.B(), vold, residuSigfreed,
+                                     false);  // residufree += -h*theta*B*v_{i}
               if (d.fExt()) {
 
 
@@ -1113,9 +1114,12 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 
                   d.mass()->Solve(*fextTheta); // fextTheta = M^-1 fextTheta
 
-                  coeff = h*h*_theta*_theta;
+                  coeff = -h*h*_theta*_theta;
                   siconos::algebra::prod(coeff, *d.B(), *fextTheta, residuSigfreed,
-                                         false);  // residufree += h*h*theta*theta*B*M^-1*Fext_{k+theta}
+                                         false);  // residufree += -h*h*theta*theta*B*M^-1*Fext_{k+theta}
+
+                  siconos::algebra::prod(1.0, W, *sigma, residuSigfreed,
+                                         false);  // residufree += Wsigmaf
 
               }
           }
