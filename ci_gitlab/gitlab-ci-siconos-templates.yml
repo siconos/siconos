@@ -95,6 +95,7 @@ stages:
   stage: docker-build
   script:
     - sed -i "s|REGISTRY_PATH|$CI_PROJECT_PATH|g" $CI_PROJECT_DIR/ci_gitlab/dockerfiles/$IMAGE_NAME/Dockerfile
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_DEPLOY_USER\",\"password\":\"$CI_DEPLOY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - export DOCKERFILE_PATH=$CI_PROJECT_DIR/ci_gitlab/dockerfiles/$IMAGE_NAME
     - /kaniko/executor
       --context $CI_PROJECT_DIR

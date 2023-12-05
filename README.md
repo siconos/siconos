@@ -1,6 +1,6 @@
 # Siconos
-[![pipeline status](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master)
-|[![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/master/COPYING)|
+
+[![pipeline status](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master)  [![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/master/COPYING)
 
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
 
