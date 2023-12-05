@@ -1,49 +1,61 @@
 #!bin/bash
 
-# --- Script used in continuous integration to configure, build and test siconos software ---
+# --- Script used to configure, build and test siconos software ---
 #
-# Usage :
+# Warning: this script is call by CI jobs with default values set by CI (template or .gitlab-ci.yml)
+#
+# Those values might be different from the default ones when this script is executed manualy, on the command line
+# 
+# 
+# Usage
+#
+# Required: 
 # > export CI_PROJECT_DIR=<path-to-siconos-repository>
-# > export ctest_build_model=Experimental or Continuous or Nightly
-# > export cdash_submit=1 or 0
-# > export allow_parallel_build=1 or 0. Set to 1 to allow -jN, 0 to restrict to -j1.
-# > export BUILD_MODE=Configure, Build or Test
+# > export BUILD_MODE=configure, build or test
+#
+# Optional:
+# > export CONF_FILE=some_conf.cmake, default = CI_PROJECT_DIR/config_samples/default.cmake
+# > export CTEST_BUILD_MODE=Experimental or Continuous or Nightly
+# > export CDASH_SUBMIT=1 or 0
+# > export PARALLEL_BUILD=1 or 0. Set to 1 to allow -jN, 0 to restrict to -j1.
+#
+# Run:
 # > sh ctest_siconos.sh
 #
-# - ctest_mode : choose among 'Configure', 'Build', 'Test' or 'all'
-# - user_option_filename is optional. If not set, siconos build will use <siconos repository>/cmake/default_options.cmake file.
 #
 # - Will execute :
-#    - ctest_configure (cmake) if ctest_mode=Configure
-#    - ctest_build (make) if ctest_mode=Build
-#    - ctest_test (test) if ctest_mode=Test
+#    - ctest_configure (cmake) if ctest_mode=configure
+#    - ctest_build (make) if ctest_mode=build
+#    - ctest_test (test) if ctest_mode=test
 #    - ctest... all steps if ctest_mode=all
-#  Results will be submitted to cdash if cdash_submit=1.
+#  Results will be submitted to cdash if CDASH_SUBMIT=1.
 # 
 # 
-#  Use absolute path or path relative to $CI_PROJECT_DIR/build
-#
 # The default installation path for siconos is /home/install-siconos.
 # Use -DSICONOS_INSTALL_DIR=<something else> as ctest option to change this location.
 
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}
-: ${ctest_build_model:?"Please set Dashboard client mode. Choose among Experimental, Continuous or Nightly."}
-: ${cdash_submit:?"Please set environment variable cdash_submit to TRUE or FALSE. If true, ctests results will be submitted to cdash server."}
-: ${allow_parallel_build:?"Please set environment variable allow_parallel_build to TRUE or FALSE. If true, ctests will use paralle build option (-jN)".}
 : ${BUILD_MODE:?"Please choose build mode among configure, build or test."}
 
 # set default config file
-CONF_FILE="${CONF_FILE:=$CI_PROJECT_DIR/config_samples/siconos_ci_default.cmake}"
+CONF_FILE="${CONF_FILE:=$CI_PROJECT_DIR/config_samples/default.cmake}"
+# Default build dir, if not set
+BUILD_DIR="${BUILD_DIR:=$CI_PROJECT_DIR/build}" 
+# Default ctest mode
+CTEST_BUILD_MODEL="${CTEST_BUILD_MODEL:=Experimental}"
+# Set to 1 to allow -jN, 0 to restrict to -j1.
+PARALLEL_BUILD="${PARALLEL_BUILD=:=1}"
+# Default: submit to cdash
+CDASH_SUBMIT="${CDASH_SUBMIT=:=1}"
 
-
-echo "${BUILD_MODE} and ${CONF_FILE}"
-if [ $BUILD_MODE = "configure" ] || [ $BUILD_MODE = "all" ]
-then
-    rm -rf $CI_PROJECT_DIR/build
-    mkdir -p $CI_PROJECT_DIR/build
+# Read conf file from previous step, if any
+# The name of the conf. file is required to set CTEST_BUILD_NAME and ensure proper cdash submissions
+if [ $BUILD_MODE != "configure" ] && [ $BUILD_MODE != "all" ] && test -f "$BUILD_DIR/options.env"; then
+    export CONF_FILE="$(cat $BUILD_DIR/options.env)"
 fi
-   
-# --- Run ctest for Siconos ---
-cd $CI_PROJECT_DIR/build
+echo "${BUILD_MODE} and ${CONF_FILE}"
 
-ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_install_siconos.cmake -Dmodel=$ctest_build_model -DALLOW_PARALLEL_BUILD=$allow_parallel_build -DCDASH_SUBMIT=$cdash_submit -V -DCTEST_MODE=$BUILD_MODE -DUSER_FILE=$CONF_FILE --output-junit test_results.xml
+ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_exp.cmake -Dmodel=$CTEST_BUILD_MODEL -DALLOW_PARALLEL_BUILD=$PARALLEL_BUILD -DCDASH_SUBMIT=$CDASH_SUBMIT -V -DCTEST_MODE=$BUILD_MODE -DUSER_OPTIONS_FILE=$CONF_FILE --output-junit test_results.xml -DCTEST_BINARY_DIRECTORY=$BUILD_DIR -DCTEST_SOURCE_DIRECTORY=$CI_PROJECT_DIR
+
+# Save conf name in a file that can be used in next CI step. This is useful to ensure the same site/build name for CDash between jobs.
+echo $CONF_FILE > $BUILD_DIR/options.env # keep the name of options file for next stages

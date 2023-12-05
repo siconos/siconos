@@ -112,8 +112,8 @@ write_notes()
 # - Configure -- 
 if(${CTEST_MODE} STREQUAL "configure" OR ${CTEST_MODE} STREQUAL "all")
 
-  if(USER_FILE)
-    list(APPEND SICONOS_CMAKE_OPTIONS -DUSER_OPTIONS_FILE=${USER_FILE})
+  if(USER_OPTIONS_FILE)
+    list(APPEND SICONOS_CMAKE_OPTIONS -DUSER_OPTIONS_FILE=${USER_OPTIONS_FILE})
   endif()
 
   list(APPEND SICONOS_CMAKE_OPTIONS -DWITH_GIT=ON) # required to generate siconos-commit.txt to tag cdash build in the examples.
