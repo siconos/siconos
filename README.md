@@ -1,7 +1,7 @@
 # Siconos
-[![ubuntu-latest release testing](https://github.com/siconos/siconos/actions/workflows/cmake_ubuntu_latest_release.yml/badge.svg)](https://github.com/siconos/siconos/actions/workflows/cmake_ubuntu_latest_release.yml)
+[![pipeline status](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master)
 |[![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/master/COPYING)|
- 
+
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
 
 Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems:
