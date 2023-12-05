@@ -216,7 +216,7 @@ siconos:install:
   extends:
     - .siconos-install
     - .devel-rules
-  needs: ["ubuntu22.04:build"] 
+  needs: ["ubuntu22-release.04:build"] 
 
 # The image is saved in siconos-tutorials (public) registries
 # Remark: branch name will be appended to image name.
