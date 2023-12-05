@@ -45,7 +45,7 @@ docker-manual-img:
 # ------ ubuntu 22, debug setup -------
 ubuntu22.04-debug:configure:
    variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
      CDASH_SUBMIT: 1
      CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
    extends:
@@ -54,7 +54,7 @@ ubuntu22.04-debug:configure:
 
 ubuntu22.04-debug:build:
   variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
       CDASH_SUBMIT: 1
   extends:
     - .siconos-build
@@ -63,7 +63,7 @@ ubuntu22.04-debug:build:
 
 ubuntu22.04-debug:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
       CDASH_SUBMIT: 1
     needs: ["ubuntu22.04-debug:build"]
     extends:
@@ -73,7 +73,7 @@ ubuntu22.04-debug:test:
 # ------ ubuntu 22, default setup -------
 ubuntu22.04-release:configure:
    variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
      CDASH_SUBMIT: 1
    extends:
     - .siconos-configure
@@ -81,7 +81,7 @@ ubuntu22.04-release:configure:
 
 ubuntu22.04-release:build:
   variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
       CDASH_SUBMIT: 1
   extends:
     - .siconos-build
@@ -90,7 +90,7 @@ ubuntu22.04-release:build:
 
 ubuntu22.04-release:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
       CDASH_SUBMIT: 1
     needs: ["ubuntu22.04-release:build"]
     extends:
@@ -101,7 +101,7 @@ ubuntu22.04-release:test:
 jupyterlab:configure:
   variables:
      OPENBLAS_NUM_THREADS: 1
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab
      CDASH_SUBMIT: 1
      CMAKE_PREFIX_PATH: /opt/conda
   extends:
@@ -110,7 +110,7 @@ jupyterlab:configure:
 
 jupyterlab:build:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
@@ -119,7 +119,7 @@ jupyterlab:build:
 
 jupyterlab:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab
       CDASH_SUBMIT: 1
     needs: ["jupyterlab:build"]
     extends:
@@ -131,7 +131,7 @@ jupyterlab:test:
 # ------ ubuntu 22, numerics only, fclib -------
 ubuntu22.04-numerics-fclib:configure:
    variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
      CDASH_SUBMIT: 1
      CONF_FILE: $SICONOS_CMAKE_CONF_PATH/numerics_with_fclib.cmake
    extends:
@@ -139,7 +139,7 @@ ubuntu22.04-numerics-fclib:configure:
 
 ubuntu22.04-numerics-fclib:build:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
@@ -147,7 +147,7 @@ ubuntu22.04-numerics-fclib:build:
 
 ubuntu22.04-numerics-fclib:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
       CDASH_SUBMIT: 1
     needs: ["ubuntu22.04-numerics-fclib:build"]
     extends:
@@ -156,14 +156,14 @@ ubuntu22.04-numerics-fclib:test:
 # ------ debian bookworm, default setup -------
 debian-bookworm:configure:
   variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-bookworm
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
      CDASH_SUBMIT: 1
   extends:
     - .siconos-configure
 
 debian-bookworm:build:
   variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-bookworm
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
       CDASH_SUBMIT: 1
   extends:
     - .siconos-build
@@ -171,7 +171,7 @@ debian-bookworm:build:
 
 debian-bookworm:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-bookworm
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
       CDASH_SUBMIT: 1
     needs: ["debian-bookworm:build"]
     extends:
@@ -181,14 +181,14 @@ debian-bookworm:test:
 # --- fedora 38, default setup ---
 fedora-38:configure:
   variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-38
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
      CDASH_SUBMIT: 1
   extends:
     - .siconos-configure
 
 fedora-38:build:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-38
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
@@ -196,7 +196,7 @@ fedora-38:build:
 
 fedora-38:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-38
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
       CDASH_SUBMIT: 1
     needs: ["fedora-38:build"]
     extends:
@@ -211,7 +211,7 @@ fedora-38:test:
 # Tag will correspond to the commit ref
 siconos:install:
   variables: 
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconos
   extends:
     - .siconos-install
@@ -223,7 +223,7 @@ siconos:install:
 # Tag will correspond to the commit ref
 jupyterlab:install:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab
     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
   extends:
     - .siconos-jupyterlab-install
@@ -283,7 +283,7 @@ siconos-oce:
 
 ubuntu20.04:full:
       variables:
-        IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
+        IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu20.04
         CDASH_SUBMIT: 1
       extends:
         - .siconos-full

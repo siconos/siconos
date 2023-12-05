@@ -8,6 +8,8 @@
 # include: <path-to-this-file>/gitlab-ci-siconos-templates.yml
 
 variables:
+  # Path to siconos registry - We use nonsmooth/siconos public
+  SICONOS_REGISTRY: $CI_REGISTRY/nonsmooth/siconos
   # Default ctest model. Warning : overwritten if set in schedules variables (as we expect)
   CTEST_BUILD_MODEL: Continuous
   # Default behavior regarding cdash submission
@@ -76,7 +78,7 @@ stages:
 # -- Template used to describe docker-build jobs --
 #
 # - build and push a docker image into siconos project registry
-#   image name : $CI_REGISTRY_IMAGE/$IMAGE_NAME
+#   image name : $CI_REGISTRY/nonsmooth/siconos/$IMAGE_NAME
 # - should be allowed to failed (in order to avoid blocking of the jobs in the next stages)
 # - should run only when commit message starts with [docker build]
 # - use Dockerfile from ci_gitlab/dockerfiles/<IMAGE_NAME>
@@ -97,8 +99,8 @@ stages:
     - /kaniko/executor
       --context $CI_PROJECT_DIR
       --dockerfile $DOCKERFILE_PATH/Dockerfile 
-      --destination $CI_REGISTRY_IMAGE/sources/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-      --destination $CI_REGISTRY_IMAGE/sources/$IMAGE_NAME:latest
+      --destination $SICONOS_REGISTRY/sources/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+      --destination $SICONOS_REGISTRY/sources/$IMAGE_NAME:latest
       --single-snapshot
 
 .docker-rules:
