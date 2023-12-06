@@ -1060,6 +1060,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
           *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
       auto &free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
       auto &residuSigfreed = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE];
+      auto &qSigma = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::Q_SIGMA];
       auto &sigfreed = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE];
       auto &W = *_dynamicalSystemsGraph->properties(*dsi)
                      .W;  // Its W MoreauJeanOSI matrix of iteration.
@@ -1117,6 +1118,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
                   coeff = -h*h*_theta*_theta;
                   siconos::algebra::prod(coeff, *d.B(), *fextTheta, residuSigfreed,
                                          false);  // residufree += -h*h*theta*theta*B*M^-1*Fext_{k+theta}
+                  qSigma = residuSigfreed;
 
                   siconos::algebra::prod(1.0, W, *sigma, residuSigfreed,
                                          false);  // residufree += Wsigmaf
@@ -1389,16 +1391,12 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
         auto &residusigmafree =
             *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE];
         auto &sigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE];
-        auto &dSolid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
+        auto &qSigma = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::Q_SIGMA];
+        sigmafree = qSigma;
+        // -- sigmafree =   W^{-1} q_sigma --
 
-        const auto &sigmaold = dSolid.stressMemory().getSiconosVector(0);  // sigmai
-        sigmafree = residusigmafree;
-        // -- sigmafree =   W^{-1} ResiduSigmaFree --
-        // At this point sigmafree = residusigmaFree
         // -> Solve WX = sigmafree and set sigmafree = X
-
         W.Solve(sigmafree);
-        sigmafree += sigmaold;
     }
     else
     {
@@ -1888,7 +1886,6 @@ void siconos::integrators::MoreauJeanOSI::updatePosition(
       "DynamicalSystem> ds)\n");
 
   double h = _simulation->timeStep();
-
   auto dsType = siconos::types::type_value(ds);
 
   // 1 - Lagrangian Systems
@@ -1910,7 +1907,50 @@ void siconos::integrators::MoreauJeanOSI::updatePosition(
     coeff = h * (1 - _theta);
     siconos::algebra::scal(coeff, vold, q, false);  // q += h(1-theta)*vold
     q += qold;
-  } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
+  }
+  else if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+      auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
+
+      // Compute q
+      auto &v = *d.velocity();
+      auto &q = *d.q();
+      auto &sigma = *d.stress();
+      //  -> get previous time step state
+      const auto &vold = d.velocityMemory().getSiconosVector(0);
+      const auto &qold = d.qMemory().getSiconosVector(0);
+      const auto &sigmaold = d.stressMemory();
+      // *v = *vold + h*theta* M^-1 * ( Fext_{k+\theta} - B^T * sigma )
+      v = vold;
+      std::shared_ptr<siconos::algebra::SiconosVector> Fext = d.fExt();
+      auto FextThetaMinusBsigma = std::make_shared<siconos::algebra::SiconosVector>(v.size());
+      double coeff;
+      if (Fext) {
+          // computes Fext(ti)
+          d.computeFExt(_simulation->startingTime());
+          coeff = (1 - _theta);
+          siconos::algebra::scal(coeff, *Fext, *FextThetaMinusBsigma,
+                                 true);  // FextThetaMinusBsigma = (1-theta) * fext(ti)
+          // computes Fext(ti+1)
+          d.computeFExt(_simulation->nextTime());
+          coeff = _theta;
+          siconos::algebra::scal(coeff, *Fext, *FextThetaMinusBsigma,
+                                 false);  // FextThetaMinusBsigma += theta * fext(ti+1)
+      }
+      auto B = d.B();
+      siconos::algebra::prod(-1.0, *B, sigma, *FextThetaMinusBsigma, false);  // FextThetaMinusBsigma -= B*sigma
+
+      d.mass()->Solve(*FextThetaMinusBsigma); // FextThetaMinusBsigma = M^{-1}*FextThetaMinusBsigma
+      coeff = h*_theta;
+      siconos::algebra::scal(coeff, *FextThetaMinusBsigma, v, false); // v+= h*\theta * M^{-1}*FextThetaMinusBsigma
+
+      siconos::algebra::scal(coeff, v, q);  // q = h*theta*v
+      coeff = h * (1 - _theta);
+      siconos::algebra::scal(coeff, vold, q, false);  // q += h(1-theta)*vold
+      q += qold;
+
+
+  }
+  else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
     // Old Version with projection
     //  NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
     // auto &v = *d.twist();
