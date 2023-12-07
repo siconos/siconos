@@ -64,14 +64,14 @@ except:
     with_run_id = False
 
 if with3D:
-    from OCC.BRepPrimAPI import *
-    from OCC.gp import *
-    from OCC.TopLoc import *
-    from OCC.AIS import *
+    from OCC.Core.BRepPrimAPI import *
+    from OCC.Core.gp import *
+    from OCC.Core.TopLoc import *
+    from OCC.Core.AIS import *
     from OCC.Display.SimpleGui import init_display
     display, start_display, add_menu, add_function_to_menu = init_display()
     cadmbtb.CADMBTB_setGraphicContext(display.Context)
-    v = display.GetView().GetObject()
+    v = display.GetView()
     cadmbtb.CADMBTB_setGraphicView(v)
     display.View_Iso()
 
