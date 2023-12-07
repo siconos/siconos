@@ -86,6 +86,7 @@ target_link_libraries(mechanics PUBLIC
 
 target_include_directories(mechanics PRIVATE ${Boost_INCLUDE_DIRS})
 
+
 # Bullet setup
 # Different options are available. Check BulletSetup.cmake file
 include(bullet_setup)
@@ -96,6 +97,11 @@ include(bullet_setup)
 if(WITH_OCE)
   # Add oce headers and libs to components build
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
+endif()
+
+if(WITH_OCC)
+  # Add oce headers and libs to components build
+  target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
 endif()
 
 # --- python bindings ---

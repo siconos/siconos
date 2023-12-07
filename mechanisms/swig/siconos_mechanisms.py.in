@@ -7,14 +7,14 @@ print('##################################################################')
 print('############## Siconos/Mechanics mechanisms module ###############')
 print('##################################################################')
 
-siconos_pythonpath = "@CURRENT_PYTHON_PATH@"
+siconos_pythonpath = "@CMAKE_CURRENT_SOURCE_DIR@"
 
 # path to data (bodydef, CAD files ...).
 example_path = '@EXAMPLE_PATH@'
 
 sys.path.append(siconos_pythonpath)
 mechanisms_path = os.path.join(siconos_pythonpath,
-                               'siconos/mechanisms')
+                               'mechanisms')
 
 print('############## Enrironment variable                ###############')
 
