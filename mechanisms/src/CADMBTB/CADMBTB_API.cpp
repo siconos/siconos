@@ -500,7 +500,7 @@ void CADMBTB_buildLineArtefactLine(unsigned int id,  double* X1, double* Y1, dou
   assert(id < sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if(sAISArtefacts[id])
   {
-    pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
+    pAIS_InteractiveContext->Erase(sAISArtefacts[id], true);
     sAISArtefacts[id]=nullptr;
   }
   if(!X1)
@@ -544,7 +544,7 @@ void CADMBTB_buildCylinderArtefactLine(unsigned int id,  double* X1, double* Y1,
   assert(id < sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if(sAISArtefacts[id])
   {
-    pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
+    pAIS_InteractiveContext->Erase(sAISArtefacts[id], true);
     sAISArtefacts[id]=nullptr;
   }
   if(!X1)
@@ -591,7 +591,7 @@ void CADMBTB_buildOrientedLineArtefactLine(unsigned int id,  double* X1, double*
   assert(id < sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if(sAISArtefacts[id])
   {
-    pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
+    pAIS_InteractiveContext->Erase(sAISArtefacts[id], true);
     sAISArtefacts[id]=nullptr;
   }
   if(!X1)

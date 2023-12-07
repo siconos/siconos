@@ -11,16 +11,23 @@
 #ifndef _Standard_Integer_HeaderFile
 #include <Standard_Integer.hxx>
 #endif
-#ifndef _Handle_TColgp_HArray2OfPnt_HeaderFile
-#include <Handle_TColgp_HArray2OfPnt.hxx>
-#endif
+// #ifndef _Handle_TColgp_HArray2OfPnt_HeaderFile
+// #include <Handle_TColgp_HArray2OfPnt.hxx>v
+// #endif
+#include <TColgp_HArray2OfPnt.hxx>
+// #include "Standard_Handle.hxx"
+// typedef Handle(TColgp_HArray2OfPnt) TColgp_HArray2OfPnt;
+
+
 #ifndef _myExtrema_FuncExtSS_HeaderFile
 #include "myExtrema_FuncExtSS.hxx"
 #endif
 #ifndef _Adaptor3d_SurfacePtr_HeaderFile
 #include <Adaptor3d_SurfacePtr.hxx>
 #endif
+
 class TColgp_HArray2OfPnt;
+//class Handle_TColgp_HArray2OfPnt;
 class StdFail_NotDone;
 class Standard_OutOfRange;
 class Standard_TypeMismatch;
