@@ -26,6 +26,20 @@ of the file were added first, and each subsequent addition is placed on a line
   Current (in development branch siconos/master) --> 4.5.0.rc
 --------------------------------------------------------------------------------
 
+Main changes:
+	* [numerics] implementation of IPM solver for gfc3d and fc3d with convex
+	relaxation
+	* [numerics] optimisation of fc2s_nsgs
+	* [kernel]  implementation of the reduced direct assembly
+	* [kernel,machanics] simplify 2d and 3d  contact classes
+	* [kernel] simplify interactions (remove useless attributes)
+	* [mechanics] improve 2d convex hull management
+	* [kernel,mechanics] update 2D relation classes avoiding relative contact points
+	* [io] output staticbody_number, cd_info, cd_work,
+	* [kernel] simplify LinearOSNS::computqBlock
+	* [kernel] simplify TimeSteppong methods
+	* [numerics] add MA57 support
+
 --------------------------------------------------------------------------------
   v 4.4.0
 --------------------------------------------------------------------------------
