@@ -7,5 +7,7 @@
 
 #define EIGEN_PLAINOBJECTBASE_PLUGIN "PlainObjectAddons.hpp"
 
+#define EIGEN_MATRIX_PLUGIN "MatrixAddons.hpp"
+
 
 #endif
