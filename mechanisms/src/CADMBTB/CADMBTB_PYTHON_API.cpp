@@ -56,7 +56,7 @@ void CADMBTB_DumpGraphic()
   if(pV3d_View)
   {
     char file[16];
-    sprintf(file,"manual%d.gif",sCmpDumpMan);
+    sprintf(file,"manual%d.jpg",sCmpDumpMan);
     pV3d_View->Dump(file);
     sCmpDumpMan++;
   }

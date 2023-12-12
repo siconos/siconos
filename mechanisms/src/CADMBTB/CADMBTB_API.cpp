@@ -382,8 +382,8 @@ void CADMBTB_updateGraphic()
   pAIS_InteractiveContext->UpdateCurrentViewer() ;
   if(pV3d_View && sDumpGraphic)
   {
-    char file[16];
-    sprintf(file,"toto%d.gif",sCmpDump);
+    char file[24];
+    sprintf(file,"snapshot_%i.jpg",sCmpDump);
     pV3d_View->Dump(file);
     sCmpDump++;
   }
