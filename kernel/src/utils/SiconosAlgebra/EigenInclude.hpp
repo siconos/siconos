@@ -2,6 +2,7 @@
 #define EIGENINCLUDE_HPP
 
 #include <iostream> // TODO : get rid of this!
+#include <memory>   // TODO : get rid of this!
 
 #define EIGEN_MATRIXBASE_PLUGIN "MatrixBaseAddons.hpp"
 

@@ -39,9 +39,9 @@
 
 void siconos::algebra::solveInPlace(SimpleMatrix &A, SiconosVector &B)
 {
-  if(A.isFactorized == false) {
-    A.lu_siconos = new Eigen::FullPivLU<SiconosMatrix>(A);
-    A.isFactorized = true;
+  if(A.lu_siconos == nullptr) {
+    A.lu_siconos.reset(new Eigen::FullPivLU<SiconosMatrix>(A));
+    // A.isFactorized = true;
     B = A.lu_siconos->solve(B); // TODO : avoid temp copy
     // std::cout << "solve results " << std::endl << tmp << std::endl;
   } else {
@@ -54,9 +54,9 @@ void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &B)
   assert(A.rows() == B.rows());
   // std::cout << "A " << std::endl << A << std::endl;
 
-  if(A.isFactorized == true) {
-    A.lu_siconos = new Eigen::FullPivLU<SiconosMatrix>(A);
-    A.isFactorized = true;
+  if(A.lu_siconos == nullptr) {
+    A.lu_siconos.reset(new Eigen::FullPivLU<SiconosMatrix>(A));
+    // A.isFactorized = true;
     B = A.lu_siconos->solve(B); // TODO : avoid temp copy
     // std::cout << "solve results " << std::endl << tmp << std::endl;
   } else {
