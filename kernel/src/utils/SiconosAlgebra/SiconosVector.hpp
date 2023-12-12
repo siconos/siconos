@@ -82,8 +82,8 @@ namespace siconos::algebra {
 
 */
 
-using SiconosVector = Eigen::VectorXd;
-using SiconosVector3 = Eigen::Vector3<double_t>;
+using SiconosVector = Eigen::Matrix<double_t, Eigen::Dynamic, 1, Eigen::ColMajor>;
+using SiconosVector3 = Eigen::Matrix<double_t, 3, 1, Eigen::ColMajor>;
 
 void concatenateVectors(SiconosVector& target, const SiconosVector& a, const SiconosVector& b);
 

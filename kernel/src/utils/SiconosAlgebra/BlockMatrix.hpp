@@ -48,7 +48,7 @@ class BlockMatrix {
   ACCEPT_SERIALIZATION(BlockMatrix);
 
   using BlocksMatrix =
-      Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic, Eigen::Dynamic>;
+      Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 
   /** A container of pointers to SiconosMatrix
    */

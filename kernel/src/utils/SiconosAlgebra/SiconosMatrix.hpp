@@ -56,7 +56,7 @@ namespace siconos::algebra {
 
 */
 
-using SiconosMatrix = Eigen::MatrixXd;
+using SiconosMatrix = Eigen::Matrix<double_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 
 /** return the number of non-zero in the matrix
    *
