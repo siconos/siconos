@@ -24,6 +24,7 @@
 
 // #include <iosfwd>  // for ostream
 
+#include "EigenInclude.hpp"
 #include "SiconosMatrix.hpp"         // for SiconosMatrix, MATRIX_UBL...
 #include "SiconosVector.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
