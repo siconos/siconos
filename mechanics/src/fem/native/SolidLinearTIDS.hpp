@@ -111,6 +111,8 @@ public:
   inline std::shared_ptr<siconos::algebra::SiconosMatrix> B() const { return _B; }
 
   inline unsigned int stressDimension()  { return _dimStress; }
+  inline unsigned int dimension() const override { return _n; }
+  inline unsigned int velocityDimension() const { return _ndof; }
 
 
   /** initialize the siconos::algebra::SiconosMemory objects with a positive size.

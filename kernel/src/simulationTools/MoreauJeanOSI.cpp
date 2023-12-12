@@ -406,41 +406,95 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
     if (d->boundaryConditions())
       _initializeIterationMatrixWBoundaryConditions(*d, dsv);
   }   else if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+      // For SolidLinearTIDS systems, we define W by blocks: W = [M h*theta*B^T; h*theta*B -S]
+      // so that the discretised system is W v_{\sigma} = RHS:
+      // $ \begin{bmatrix}
+//      \boldsymbol M & h\theta {\boldsymbol B}^T \\
+//      h\theta \boldsymbol B & - \boldsymbol S
+//      \end{bmatrix}  \begin{bmatrix} v_{k+\theta} \\
+//      \sigma_{k+\theta}
+//      \end{bmatrix}}
+//      = \begin{bmatrix}
+//      \boldsymbol M v_{k} + h\theta F_{ext,k+\theta} + \theta \boldsymbol H p_{N,k+1}\\
+//      -\boldsymbol S \sigma_{k} -h\theta z_{k+\theta}
+//      \end{bmatrix}$
+
       auto d =
           std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
-      if (d->mass()) {
-        _dynamicalSystemsGraph->properties(dsv).W =
-            std::make_shared<siconos::algebra::SimpleMatrix>(
-                *d->mass());  //*W = *d->mass();
-      } else {
-        _dynamicalSystemsGraph->properties(dsv).W =
-            std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW);
-        _dynamicalSystemsGraph->properties(dsv).W->eye();
-      }
 
       auto K = d->K();
       auto C = d->C();
       auto S = d->S();
       auto B = d->B();
       auto W = _dynamicalSystemsGraph->properties(dsv).W;
-      if (d->B()) {
-          auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(1),B->size(0));
-          auto BMinvBtrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(0),B->size(0));
-          d->mass()->Solve(*Btrans); // Btrans = M^-1 B^T
-          siconos::algebra::prod(*B, *Btrans, *BMinvBtrans,
-                                 true);  // W = B M^-1 B^T
-          double coeff = h * h * _theta * _theta;
 
-          siconos::algebra::scal(coeff, *BMinvBtrans, *W,
-                                 true);  // W = h^2 * \theta^2 * B M^-1 B^T
-          if (S)
-              siconos::algebra::scal(1.0, *S, *W,
-                                     false);  // W += S
+      std::vector<std::size_t> subDim(2);
+      std::vector<std::size_t> subPos(4);
+      subDim[0] = d->velocityDimension();
+      subDim[1] = subDim[0];
+      subPos[0] = 0;
+      subPos[1] = 0;
+      subPos[2] = 0;
+      subPos[3] = 0;
 
-      // WBoundaryConditions initialization
+      siconos::algebra::setBlock(*d->mass(), W, subDim, subPos); // W = [M 0; 0 0]
+
+      subDim[0] = d->stressDimension();
+      subDim[1] = subDim[0];
+      subPos[0] = 0;
+      subPos[1] = 0;
+      subPos[2] = subDim[0];
+      subPos[3] = subDim[0];
+//      std::shared_ptr<siconos::algebra::SiconosMatrix> Z;
+//      Z->zero();
+      std::shared_ptr<siconos::algebra::SiconosMatrix> minusS, hThetaB, hThetaBtrans;
+      auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(1),B->size(0));
+//      siconos::algebra::sub(*Z, *S, *minusS); // S = -S
+      siconos::algebra::scal(-1.0, *S, *minusS,
+                             true);  // minusS = -S
+
+      siconos::algebra::setBlock(*minusS, W, subDim, subPos); // W = [M 0; 0 -S]
+
+      siconos::algebra::scal(h*_theta, *B, *hThetaB,
+                             true);  // hThetaB = h*_theta * B
+      siconos::algebra::scal(h*_theta, *Btrans, *hThetaBtrans,
+                             true);  // hThetaB = h*_theta * B
+
+      subDim[0] = d->stressDimension();
+      subDim[1] = d->velocityDimension();
+      subPos[0] = 0;
+      subPos[1] = 0;
+      subPos[2] = d->velocityDimension();
+      subPos[3] = 0;
+      siconos::algebra::setBlock(*hThetaB, W, subDim, subPos); // W = [M 0; h*theta*B -S]
+      subDim[0] = d->velocityDimension();
+      subDim[1] = d->stressDimension();
+      subPos[0] = 0;
+      subPos[1] = 0;
+      subPos[2] = 0;
+      subPos[3] = d->velocityDimension();
+      siconos::algebra::setBlock(*hThetaBtrans, W, subDim, subPos); // W = [M h*theta*B^T; h*theta*B -S]
       if (d->boundaryConditions())
         _initializeIterationMatrixWBoundaryConditions(*d, dsv);
-    }
+
+//      if (d->B()) {
+//          auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(1),B->size(0));
+//          auto BMinvBtrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(0),B->size(0));
+//          d->mass()->Solve(*Btrans); // Btrans = M^-1 B^T
+//          siconos::algebra::prod(*B, *Btrans, *BMinvBtrans,
+//                                 true);  // W = B M^-1 B^T
+//          double coeff = h * h * _theta * _theta;
+
+//          siconos::algebra::scal(coeff, *BMinvBtrans, *W,
+//                                 true);  // W = h^2 * \theta^2 * B M^-1 B^T
+//          if (S)
+//              siconos::algebra::scal(1.0, *S, *W,
+//                                     false);  // W += S
+
+//      // WBoundaryConditions initialization
+//      if (d->boundaryConditions())
+//        _initializeIterationMatrixWBoundaryConditions(*d, dsv);
+//    }
 }
   else if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     auto &lldds =
@@ -2119,6 +2173,17 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         double aux = (local_buffer.norm2()) / ds_norm_ref;
         if (aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);
+      }
+      else if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+          auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
+          auto &vfree =
+              *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+
+          //    auto *vfree = d.velocityFree();
+          auto &v = *d.velocity();
+
+// TO BE IMPLEMENTED
+
       }
     } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
       DEBUG_PRINT(

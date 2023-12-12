@@ -85,7 +85,7 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
     int dim = _FEModel->mesh()->dim();
     _dimStress = dim*(dim+1)/2;
     int dimState = _ndof*2 + _dimStress*nElements;
-    _n = dimState;
+    _n = _ndof + _dimStress; // aka the true unknowns are v and sigma
 
     std::cout << "Fe model inintialized !" << std::endl;
     _q0.reset(new siconos::algebra::SiconosVector(_ndof,0.0));
