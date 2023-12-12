@@ -39,6 +39,6 @@ void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, 
     if (init)
       B.noalias() = a * A;
     else
-      B.noalias() += a * A;
+      B += a * A;
   }
 }
