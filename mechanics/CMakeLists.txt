@@ -99,11 +99,6 @@ if(WITH_OCE)
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
 endif()
 
-if(WITH_OCC)
-  # Add oce headers and libs to components build
-  target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
-endif()
-
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)

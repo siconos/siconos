@@ -28,11 +28,7 @@ set(${COMPONENT}_DIRS
   src/MBTB
   src/TIMERMBTB)
 
-
-# -- Documentation --
-# List of directories for which no doxygen doc will be generated
-# By default all directories matching "test" are excluded.
-# set(${COMPONENT}_EXCLUDE_DOXY)
+include(occ_setup)
 
 # ------ include interface ------
 # What is needed at build time
@@ -70,17 +66,12 @@ target_link_libraries(mechanisms PUBLIC
 MESSAGE("################################# ${OpenCASCADE_INCLUDE_DIRS}" ${OpenCASCADE_INCLUDE_DIR})
 
 target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
-
-#target_include_directories(${COMPONENT}  PRIVATE ${OpenCASCADE_INCLUDE_DIR})
+target_compile_options(${COMPONENT} PRIVATE "-Wno-zero-as-null-pointer-constant")
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)
 endif()
-
-# if(WITH_PYTHON_WRAPPER)
-#   add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
-# endif()  
 
 # ---- Installation ----
 # Call siconos_component_install_setup(<COMPONENT>)
@@ -96,6 +87,5 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   )
 
 siconos_component_install_setup(${COMPONENT})
-target_compile_options(${COMPONENT} PRIVATE "-Wno-zero-as-null-pointer-constant")
 # --- tests ---
 include(${COMPONENT}_tests.cmake)

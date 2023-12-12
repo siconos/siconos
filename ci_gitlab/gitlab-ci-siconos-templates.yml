@@ -130,6 +130,8 @@ workflow:
   rules:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS # To avoid duplicate pipelines
       when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && CI_PROJECT_NAMESPACE == "nonsmooth/devel" 
+      when: never  # avoid duplicate pipeline: ci with main branch  only for public siconos
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" # If a source branch of a MR is updated
       when: always
     - if: $CI_OPEN_MERGE_REQUESTS # If a MR is created

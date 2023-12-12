@@ -4,7 +4,6 @@ lxml
 pytest
 matplotlib
 h5py
-pyhull
 wheel
 vtk
 packaging

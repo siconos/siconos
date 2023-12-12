@@ -16,8 +16,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
         liblpsolve55-dev \
 	libbullet-dev \
 	libbullet-extras-dev \
-	python3 \
-        python3-pip \
+	python3-full \
 	doxygen \
 	swig \
 	libxrender1 \
@@ -30,9 +29,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 	nlohmann-json3-dev
 WORKDIR /home
 ENV CI_PROJECT_DIR /home
-COPY ci_gitlab/dockerfiles/install_boost.sh  /home/
-RUN sh /home/install_boost.sh
-RUN mv $CI_PROJECT_DIR/deps/boost_1_81_0/boost /usr/local/include
 COPY ci_gitlab/dockerfiles/requirements.txt /home
 COPY ci_gitlab/dockerfiles/requirements4doc.txt /home
 ENV VIRTUAL_ENV=/home/siconosenv

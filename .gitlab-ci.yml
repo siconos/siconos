@@ -153,6 +153,35 @@ ubuntu22.04-numerics-fclib:test:
   extends:
     - .siconos-test
 
+# ------ ubuntu 22, with mechanisms component -------
+ubuntu22.04-mechanisms:configure:
+   variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu-with-opencascade
+     CDASH_SUBMIT: 1
+     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
+   extends:
+    - .siconos-configure
+   when: manual
+    
+ubuntu22.04-mechanisms:build:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu-with-opencascade
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+  needs: ["ubuntu22.04-mechanisms:configure"]
+  when: manual
+
+ubuntu22.04-mechanisms:test:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu-with-opencascade
+    CDASH_SUBMIT: 1
+  needs: ["ubuntu22.04-mechanisms:build"]
+  extends:
+    - .siconos-test
+  when: manual
+
+    
 # ------ debian bookworm, default setup -------
 debian-bookworm:configure:
   variables:

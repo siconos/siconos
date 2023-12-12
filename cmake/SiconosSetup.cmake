@@ -231,11 +231,6 @@ if(WITH_OCE)
   include(oce_setup)
 endif()
 
-#-- Open Cascade standard Edition --
-if(WITH_OpenCASCADE)
-  include(occ_setup)
-endif()
-
 #-- -- Extra 'developers only' options -- --
 #-- The options below should be used with caution
 #and preferably by developers or advanced users--
