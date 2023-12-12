@@ -24,12 +24,22 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 	graphviz \
 	texlive-latex-base \
 	valgrind \
-	vim
+	vim \
+	bzip2 \
+	wget \
+	nlohmann-json3-dev
 WORKDIR /home
-COPY ci_gitlab/dockerfiles/requirements4doc.txt /home
+ENV CI_PROJECT_DIR /home
+COPY ci_gitlab/dockerfiles/install_boost.sh  /home/
+RUN sh /home/install_boost.sh
+RUN mv $CI_PROJECT_DIR/deps/boost_1_81_0/boost /usr/local/include
 COPY ci_gitlab/dockerfiles/requirements.txt /home
-RUN python3 -m pip install -U -r /home/requirements.txt
-RUN python3 -m pip install -U -r /home/requirements4doc.txt
+COPY ci_gitlab/dockerfiles/requirements4doc.txt /home
+ENV VIRTUAL_ENV=/home/siconosenv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+RUN pip install -U -r /home/requirements.txt
+RUN pip install -U -r /home/requirements4doc.txt
 RUN apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 # Something breaks the swig/docstring/doxygen doc process in bullet. Fix it
 COPY ci_gitlab/dockerfiles/ubuntu22.04/bullet.patch /home

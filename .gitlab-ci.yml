@@ -146,12 +146,12 @@ ubuntu22.04-numerics-fclib:build:
   needs: ["ubuntu22.04-numerics-fclib:configure"]
 
 ubuntu22.04-numerics-fclib:test:
-    variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-      CDASH_SUBMIT: 1
-    needs: ["ubuntu22.04-numerics-fclib:build"]
-    extends:
-      - .siconos-test
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+    CDASH_SUBMIT: 1
+  needs: ["ubuntu22.04-numerics-fclib:build"]
+  extends:
+    - .siconos-test
 
 # ------ debian bookworm, default setup -------
 debian-bookworm:configure:
