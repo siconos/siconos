@@ -16,52 +16,52 @@
  * limitations under the License.
  */
 
-#include <boost/numeric/ublas/lu.hpp>
-#include <boost/numeric/ublas/operation.hpp>
-#include <boost/numeric/ublas/operation_sparse.hpp>
-
 #include "SiconosConfig.h"
 
 //#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
-// #include <boost/numeric/bindings/blas.hpp>
-// #include <boost/numeric/bindings/lapack.hpp>
-// #include <boost/numeric/bindings/std/vector.hpp>
-// #include <boost/numeric/bindings/trans.hpp>
-// #include <boost/numeric/bindings/ublas/matrix.hpp>
-// #include <boost/numeric/bindings/ublas/matrix_proxy.hpp>
-// #include <boost/numeric/bindings/ublas/vector.hpp>
-// #include <boost/numeric/bindings/ublas/vector_proxy.hpp>
-// #include <boost/numeric/ublas/matrix_sparse.hpp>
 
-#include <Eigen/Dense>
 #include "BlockMatrix.hpp"
 #include "NumericsToolsNamespace.h"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "cholesky.hpp"
+#include <Eigen/Dense>
+
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 #ifdef DEBUG_MESSAGES
 #include <cs.h>
-
 #endif
 
 // namespace lapack = boost::numeric::bindings::lapack;
 
 void siconos::algebra::solveInPlace(SimpleMatrix &A, SiconosVector &B)
 {
-  Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd> > lu(A); // InPlace factorization
-  SimpleMatrix tmp;
-  tmp = lu.solve(B); // TODO : avoid temp copy
-  B = tmp;
+  if(A.isFactorized == false) {
+    A.lu_siconos = new Eigen::FullPivLU<SiconosMatrix>(A);
+    A.isFactorized = true;
+    B = A.lu_siconos->solve(B); // TODO : avoid temp copy
+    // std::cout << "solve results " << std::endl << tmp << std::endl;
+  } else {
+    B = A.lu_siconos->solve(B);
+  }
 }
 
 void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &B)
 {
-  // Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd> > lu(A); // InPlace factorization
-  // SimpleMatrix tmp;
-  // tmp = lu.solve(B); // TODO : avoid temp copy
-  // B = tmp;
+  assert(A.rows() == B.rows());
+  // std::cout << "A " << std::endl << A << std::endl;
+
+  if(A.isFactorized == true) {
+    A.lu_siconos = new Eigen::FullPivLU<SiconosMatrix>(A);
+    A.isFactorized = true;
+    B = A.lu_siconos->solve(B); // TODO : avoid temp copy
+    // std::cout << "solve results " << std::endl << tmp << std::endl;
+  } else {
+    SimpleMatrix tmp = A.lu().solve(B);
+    B = A.lu_siconos->solve(B);
+  }
+  // std::cout << "A  apres" << std::endl << A << std::endl;
 }
