@@ -24,11 +24,7 @@
 #define LuenbergerObserver_H
 
 #include "Observer.hpp"
-namespace siconos::algebra {
-class SiconosVector;
-class SiconosMatrix;
-class SimpleMatrix;
-}  // namespace siconos::algebra
+
 
 namespace siconos::control {
 

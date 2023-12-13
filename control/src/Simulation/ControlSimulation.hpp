@@ -25,12 +25,13 @@
 
 #include <memory>
 #include <string>
+#include "SimpleMatrix.hpp"
 
 #include "SiconosSerialization.hpp"
 
-namespace siconos::algebra {
-class SimpleMatrix;
-}  // namespace siconos::algebra
+// namespace siconos::algebra {
+// class SimpleMatrix;
+// }  // namespace siconos::algebra
 
 namespace siconos::graphs {
 struct DynamicalSystemsGraph;
