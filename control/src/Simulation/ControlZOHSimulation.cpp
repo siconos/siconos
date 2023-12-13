@@ -32,6 +32,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
+#include "SiconosException.hpp"
 
 siconos::control::ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h)
     : ControlSimulation(t0, T, h) {
