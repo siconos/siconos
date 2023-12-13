@@ -125,8 +125,10 @@ void siconos::control::CommonSMC::initialize(
                                                               _pluginJacglambdaName);
       siconos::modeling::FirstOrderRHelpers::JachxSetter(*_relationSMC, _Csurface,
                                                          _pluginJachxName);
-      if (_pluginJachlambdaName.empty() && !_D)
-        _D = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim, 0);
+      if (_pluginJachlambdaName.empty() && !_D) {
+        _D = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim);
+        _D->zero();
+      }
       siconos::modeling::FirstOrderRHelpers::JachlambdaSetter(*_relationSMC, _D,
                                                               _pluginJachlambdaName);
     } else if (!_pluginJachlambdaName.empty() || _D)  // Type2R ?
@@ -242,7 +244,8 @@ void siconos::control::CommonSMC::computeUeq() {
   auto tmpM1 = std::make_shared<siconos::algebra::SimpleMatrix>(_Csurface->size(0), n);
   auto tmpN = std::make_shared<siconos::algebra::SimpleMatrix>(n, n);
   auto quasiProjB_A = std::make_shared<siconos::algebra::SimpleMatrix>(_invCB->size(0), n);
-  auto tmpW = std::make_shared<siconos::algebra::SimpleMatrix>(n, n, 0);
+  auto tmpW = std::make_shared<siconos::algebra::SimpleMatrix>(n, n);
+  tmpW->zero();
   auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
   tmpW->eye();
   siconos::algebra::prod(*_Csurface, *LinearDS_SMC.A(), *tmpM1);

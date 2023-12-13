@@ -116,7 +116,8 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
 void siconos::control::LinearSMCimproved::actuate() {
   auto sDim = _u->size();
   auto tmpM1 = std::make_shared<siconos::algebra::SimpleMatrix>(*_Csurface);
-  auto CBstar = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim, 0);
+  auto CBstar = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim);
+  CBstar->zero();
   auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
 
   auto& zoh =
