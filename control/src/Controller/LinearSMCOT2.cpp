@@ -132,7 +132,7 @@ void siconos::control::LinearSMCOT2::actuate() {
   _simulPhi->processEvents();
   // XXX small hack here
   auto CS = std::make_shared<siconos::algebra::SiconosVector>(_B->size(0));
-  _Csurface->getRow(0, *CS);
+  *CS = _Csurface->row(0);
   _coeff = -1 / (CS->vector_sum() * hCurrent);
   double uEq = siconos::algebra::inner_prod(*CS, _coeff * (*_XPhi + *_X - *_Xhat));
   double uEqP;
