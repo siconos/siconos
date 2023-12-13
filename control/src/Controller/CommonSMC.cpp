@@ -219,7 +219,8 @@ void siconos::control::CommonSMC::initialize(
         std::make_shared<siconos::algebra::SimpleMatrix>(_Csurface->size(0), _B->size(1));
     _invCB = std::make_shared<siconos::algebra::SimpleMatrix>(*tmpM);
     siconos::algebra::prod(*_Csurface, *_B, *tmpM);
-    siconos::algebra::InvertMatrix(*tmpM->dense(), *_invCB->dense());
+    // siconos::algebra::InvertMatrix(*tmpM->dense(), *_invCB->dense());
+    *_invCB = tmpM->inverse();
   }
   DEBUG_END(
       "siconos::control::CommonSMC::initialize(const "
