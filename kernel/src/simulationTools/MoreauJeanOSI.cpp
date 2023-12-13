@@ -1096,6 +1096,9 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanOSI::computeResidu(), dsType == "
           "siconos::modeling::Type::LagrangianLinearTIDS\n");
+      // Here, for TIDS, computeResidu computes the Right hand side.
+      // We compute the top block of the RHS: ResiduFree = M v_k + h theta Fext_theta
+      // and residuSigmaFree the bottom block: ResiduSigmaFree = -S*sigma_k
       // To be consistent with computeFreeState():
       // ResiduSigmaFree = S sigma_i + h \theta B vi + h^2\theta^2 B M^{-1} Fext
       // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i + h B sigma_{k+theta} + hFext_theta     (1)
@@ -1128,6 +1131,26 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       DEBUG_EXPR(vold.display(););
       DEBUG_EXPR(d.q()->display(););
       DEBUG_EXPR(d.velocity()->display(););
+
+
+      siconos::algebra::prod(1.0, *d.mass(), vold, residuFree, true); // residufree = M*v_i
+      if (d.fExt()) {
+
+
+          // computes Fext(ti)
+          d.computeFExt(told);
+          auto fextTheta = std::make_shared<siconos::algebra::SiconosVector>(d.fExt()->size());
+          double coeff = (1 - _theta);
+          siconos::algebra::scal(coeff, *(d.fExt()), *fextTheta,
+                                 true);  // fext_k+theta = (1-_theta) * fext(ti)
+          // computes Fext(ti+1)
+          d.computeFExt(t);
+          coeff = _theta;
+          siconos::algebra::scal(coeff, *(d.fExt()), *fextTheta,
+                                 false);  // fext_k+theta += _theta * fext(ti+1)
+          residuFree += *fextTheta;
+       }
+
 
       // --- ResiduFree computation Equation (1) ---
       residuSigfreed.zero();
