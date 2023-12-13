@@ -268,7 +268,7 @@ void siconos::control::CommonSMC::computeUeq() {
   // xTk = (e^{Ah}-(1-\theta)\Psi_k\Pi_B A)x_k
   siconos::algebra::prod(_thetaSMC - 1, *tmpN, _sensor->y(), *xTk, false);
   // compute the solution x_{k+1} of the system W*x_{k+1} = x_k
-  tmpW->Solve(*xTk);
+  siconos::algebra::solveInPlace(*tmpW, *xTk);
   // add the contribution from the implicit part to ueq
   siconos::algebra::prod(-_thetaSMC, *quasiProjB_A, *xTk, *_ueq, false);
   DEBUG_END("void siconos::control::CommonSMC::computeUeq()\n");

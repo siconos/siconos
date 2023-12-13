@@ -97,7 +97,7 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
       // Compute the control to counteract the perturbation
       up = predictedPertC;
       up *= -1;
-      CBstar.Solve(up);
+      siconos::algebra::solveInPlace(CBstar, up);
 
       // project onto feasible set
       double norm = up.norm2();
@@ -132,7 +132,7 @@ void siconos::control::LinearSMCimproved::actuate() {
   // compute C(I-e^{Ah})x_k
   siconos::algebra::prod(*tmpM1, *xTk, *_ueq);
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
-  CBstar->Solve(*_ueq);
+  siconos::algebra::solveInPlace(*CBstar, *_ueq);
 
   *(_DS_SMC->x()) = *xTk;
   siconos::algebra::prod(
