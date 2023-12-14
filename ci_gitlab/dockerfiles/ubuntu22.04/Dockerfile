@@ -27,7 +27,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 	vim \
 	bzip2 \
 	wget \
-	nlohmann-json3-dev
+	nlohmann-json3-dev &&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 WORKDIR /home
 ENV CI_PROJECT_DIR /home
 COPY ci_gitlab/dockerfiles/requirements.txt /home
@@ -37,7 +37,6 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install -U -r /home/requirements.txt
 RUN pip install -U -r /home/requirements4doc.txt
-RUN apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 # Something breaks the swig/docstring/doxygen doc process in bullet. Fix it
 COPY ci_gitlab/dockerfiles/ubuntu22.04/bullet.patch /home
 RUN patch --ignore-whitespace -uf /usr/include/bullet/BulletCollision/Gimpact/btGImpactShape.h  -i /home/bullet.patch
