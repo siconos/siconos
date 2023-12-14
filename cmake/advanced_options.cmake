@@ -37,6 +37,12 @@ option(WITH_RENDERER "Install OCC renderer" OFF)
 option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library" ON)
 option(WITH_XML "Enable xml files i/o" OFF)
 
+
+# installation mode
+option(SICONOS_SYSTEM_WIDE_INSTALL "Install in default path (/usr/local ...), requires root's privileges - Use this with care!" OFF)
+option(SICONOS_CUSTOM_INSTALL "Advance user custom install - Use this with care!" OFF)
+cmake_dependent_option(ISOLATED_INSTALL "Install everything (including python packages) in a specific user-defined (with SICONOS_CUSTOM_INSTALL var) place" OFF "SICONOS_CUSTOM_INSTALL" OFF)
+
 # If OFF, headers from libraries in externals will not be installed.
 option(INSTALL_EXTERNAL_HEADERS
   "Whether or not headers for external libraries should be installed" OFF)

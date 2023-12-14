@@ -1,4 +1,6 @@
-FROM ubuntu:22.04
+# Build an image including opencascade
+# Req: opencascade-7.4.0.tgz available where docker is launched
+FROM ubuntu:23.04
 ENV TZ=Europe/Paris
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && apt update  && apt upgrade -y && apt install -y -qq \
         cmake \
@@ -27,17 +29,23 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 	vim \
 	bzip2 \
 	wget \
-	nlohmann-json3-dev
+	nlohmann-json3-dev \
+	wget \
+	libglu1-mesa-dev libgl1-mesa-dev libxmu-dev libxi-dev \
+	libfreetype6-dev tk-dev rapidjson-dev libpcre2-dev
 WORKDIR /home
 ENV CI_PROJECT_DIR /home
 COPY ci_gitlab/dockerfiles/requirements.txt /home
-COPY ci_gitlab/dockerfiles/requirements4doc.txt /home
 ENV VIRTUAL_ENV=/home/siconosenv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install -U -r /home/requirements.txt
-RUN pip install -U -r /home/requirements4doc.txt
+# RUN cd /home ;wget https://dev.opencascade.org/system/files/occt//OCC_7.4.0_release/opencascade-7.4.0.tgz
+COPY opencascade-7.4.0.tgz /home
+RUN cd /home; tar -zxvf opencascade-7.4.0.tgz
+RUN cmake -S /home/opencascade-7.4.0 -B /home/cmake-build -DINSTALL_DIR=/home/install-opencascade -DBUILD_RELEASE_DISABLE_EXCEPTIONS=OFF
+RUN cmake --build /home/cmake-build -j 8
+RUN cmake --install /home/cmake-build
+RUN apt install libpython3-dev -y
 RUN apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
-# Something breaks the swig/docstring/doxygen doc process in bullet. Fix it
-COPY ci_gitlab/dockerfiles/ubuntu22.04/bullet.patch /home
-RUN patch --ignore-whitespace -uf /usr/include/bullet/BulletCollision/Gimpact/btGImpactShape.h  -i /home/bullet.patch
+RUN rm -rf /home/opencascade-7.4.0.tgz  /home/opencascade-7.4.0

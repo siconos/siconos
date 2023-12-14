@@ -47,7 +47,7 @@ endif()
 
 # -- OCE --
 # - add extra mechanics sources, depending on occ/oce, to the build process
-if(WITH_OCE)
+if(WITH_OCE OR WITH_OCC)
   list(APPEND ${COMPONENT}_DIRS src/occ)
 endif()
 
@@ -98,6 +98,13 @@ if(WITH_OCE)
   # Add oce headers and libs to components build
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
 endif()
+
+if(WITH_OCC)
+  include(occ_setup)
+  # Add oce headers and libs to components build
+  target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
+endif()
+
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)

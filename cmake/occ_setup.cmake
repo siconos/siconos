@@ -5,12 +5,16 @@
 # - add OpenCASCADE to the build process
 # - set SICONOS_HAS_OpenCASCADE var (distributed in siconosConfig.cmake)
 
-find_package(OpenCASCADE 7.4 REQUIRED)
+find_package(OpenCASCADE REQUIRED)
 
 if(OpenCASCADE_FOUND)
   message(STATUS "Found OpenCASCADE version ${OpenCASCADE_VERSION}")
   message("    OpenCASCADE libraries : ${OpenCASCADE_LIBRARIES}.")
   message("    OpenCASCADE headers path : ${OpenCASCADE_INCLUDE_DIR}")
+endif()
+
+if(NOT OpenCASCADE_VERSION VERSION_EQUAL 7.4)
+  message(FATAL_ERROR "Uncompatible opencascade version")
 endif()
 
 set(SICONOS_HAS_OpenCASCADE TRUE CACHE INTERNAL "True if OpenCASCADE API has been found and is activated.)")

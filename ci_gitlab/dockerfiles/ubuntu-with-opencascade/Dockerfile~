@@ -17,7 +17,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 	libbullet-dev \
 	libbullet-extras-dev \
 	python3-full \
-	libpython3-dev \
 	doxygen \
 	swig \
 	libxrender1 \

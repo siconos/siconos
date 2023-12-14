@@ -17,7 +17,7 @@ option(WITH_DOCUMENTATION "Build Documentation" OFF)
 
 # --- List of external libraries/dependencies to be searched (or not) ---
 option(WITH_BULLET "compilation with Bullet Bindings" ON)
-option(WITH_OCC "compilation with OCE Bindings" OFF)
+option(WITH_OCE "compilation with OCE Bindings" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver" OFF)
@@ -25,3 +25,4 @@ option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded versi
 option(WITH_FCLIB "link with fclib when this mode is enable" OFF)
 
 
+set(OpenCASCADE_ROOT "/home/install-opencascade" CACHE PATH "") 
