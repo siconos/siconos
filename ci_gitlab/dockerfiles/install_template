@@ -1,7 +1,7 @@
 FROM IMAGENAME
 WORKDIR /home
 ARG BUILD_DIR=build
-RUN cmake --install $BUILD_DIR
+RUN env ; cmake --install $BUILD_DIR
 RUN siconos --info
 
 

@@ -27,7 +27,7 @@ endforeach()
 
 if(SICONOS_HAS_BULLET)
   add_swig_sub_module(
-    FILE mechanics/collision/sicobullet.i
+    FILE mechanics/collision/bullet.i
     DEPS "mechanics;BULLET::BULLET"
     INCLUDES ${CMAKE_SOURCE_DIR}/kernel/swig
     COMPILE_OPTIONS "-w312,322,325,350,351,362,383,389,394,395,401,402,403,503,512,520"
