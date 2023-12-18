@@ -450,7 +450,8 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
 //      std::shared_ptr<siconos::algebra::SiconosMatrix> Z;
 //      Z->zero();
       std::shared_ptr<siconos::algebra::SiconosMatrix> minusS, hThetaB, hThetaBtrans;
-      auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(1),B->size(0));
+      auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(*B);
+      Btrans->trans();
 //      siconos::algebra::sub(*Z, *S, *minusS); // S = -S
       siconos::algebra::scal(-1.0, *S, *minusS,
                              true);  // minusS = -S
@@ -460,7 +461,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       siconos::algebra::scal(h*_theta, *B, *hThetaB,
                              true);  // hThetaB = h*_theta * B
       siconos::algebra::scal(h*_theta, *Btrans, *hThetaBtrans,
-                             true);  // hThetaB = h*_theta * B
+                             true);  // hThetaBtrans = h*_theta * B^T
 
       subDim[0] = d->stressDimension();
       subDim[1] = d->velocityDimension();
@@ -1478,17 +1479,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
             *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE];
         auto &sigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE];
         auto &qSigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::Q_SIGMAFREE];
-        std::vector<std::size_t> subDim(2);
-        std::vector<std::size_t> subPos(4);
-        subDim[0] = d.velocityDimension();
-        subDim[1] = 1;
-        subPos[0] = 0;
-        subPos[1] = 0;
-        subPos[2] = 0;
-        subPos[3] = 0;
-        unsigned int sizeB = 2;
-        unsigned int posIn = 1;
-        unsigned int posOut = 3;
+
         residuFree.toBlock(qSigmafree, d.velocityDimension(), 0, 0);
         residusigmafree.toBlock(qSigmafree, d.stressDimension(), 0, d.velocityDimension());  // q_sigma_free = [residuFree; residuSigmaFree]
 
@@ -1514,7 +1505,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
         subCoord[2] = 0;
         subCoord[3] = d.stressDimension();
         siconos::algebra::subscal(1.0, qSigmafree, sigmafree,
-                                  subCoord, false); // sigmafree += sigmaold + [W^{-1} * qsigmafree](siveV:end)
+                                  subCoord, false); // sigmafree += sigmaold + [W^{-1} * qsigmafree](sizeV:end)
 
         // We don't need to do vfree = -vfree like is done in the following since we computed the real right hand side in computeResidu(), and not its opposite like it is done for generanl lagrangianDS case
     }
@@ -1930,65 +1921,78 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
         // get the ds
         auto d =
             std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
-        // get velocity pointers for current time step
+        // get velocity and stress pointers for current time step
+        auto &v = *d->velocity();
         auto &sigma = *d->stress();
-        // get q and velocity pointers for previous time step
+        auto qSigma = siconos::algebra::SiconosVector(v.size()+sigma.size());
+
+        // get q , sigma and velocity pointers for previous time step
         const auto &sigmaOld = d->stressMemory().getSiconosVector(0);
         const auto &vold = d->velocityMemory().getSiconosVector(0);
         const auto &qold = d->qMemory().getSiconosVector(0);
+
         // get p pointer
-
         auto &p = *d->p(1);
-
+        // get plastic rate pointer
         auto &epsilonPointp = *d->plasticRate();
 
-        // stress computation :
+        // [velocity ; stress] computation :
         //
-        // sigma = W^{-1} [S sigmai + h*theta B vi + h*h*theta*theta*B*M^{-1}*(theta*Fext(t) +
-        // (1-theta)* Fext(ti))] + W^{-1}*(h*theta*theta*B*M^{-1}* pi+1 + h*theta * W^{-1}*\dot\epsilon_p
+        // [v; sigma] = W^{-1} [-h B^T \sigma_i + h F_{ext,i+\theta} ; -h B v_i] + W^{-1}*[p_{i+1}; h \dot \epsilon_{i+\theta}]
         //
 
-
-        sigma = h * _theta * epsilonPointp;
-        auto S= d->S();
-        siconos::algebra::prod(1.0, *S, sigmaOld, sigma, false);  // sigma += S sigma_i
+        v = p;
+        sigma = h * epsilonPointp;
 
 
-        //p = M^{-1}p
-        d->mass()->Solve(p);
-        double coeff = h*_theta*_theta;
+        double coeff;
         auto B= d->B();
+
+
         if (B)
         {
-            siconos::algebra::prod(coeff, *B, p, sigma, false);  // sigma += h*theta*theta*B*M{-1}*p
-            coeff = h*_theta;
-            siconos::algebra::prod(coeff, *B, vold, sigma, false);  // sigma += h*theta*B*vi
+            auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(*B);
+            Btrans->trans();
+            siconos::algebra::prod(-h, *Btrans, sigmaOld, v, false);  // v += -h*B^T*sigma_i
+            siconos::algebra::prod(-h, *B, vold, sigma, false);  // sigma += -h*B*vi
         }
         // -- No need to update W --
 
         std::shared_ptr<siconos::algebra::SiconosVector> Fext = d->fExt();
-        auto FextTheta = std::make_shared<siconos::algebra::SiconosVector>(Fext->size());
         if (Fext) {
           // computes Fext(ti)
           d->computeFExt(tinit);
-          coeff = (1 - _theta);
-          siconos::algebra::scal(coeff, *Fext, *FextTheta,
-                                 true);  // FextTheta = (1-theta) * fext(ti)
+          coeff = h * (1 - _theta);
+          siconos::algebra::scal(coeff, *Fext, v,
+                                 false);  // v += h*(1-theta) * fext(ti)
           // computes Fext(ti+1)
           d->computeFExt(tout);
-          coeff = _theta;
-          siconos::algebra::scal(coeff, *Fext, *FextTheta,
-                                 false);  // FextTheta += theta * fext(ti+1)
+          coeff = h * _theta;
+          siconos::algebra::scal(coeff, *Fext, v,
+                                 false);  // v += h*theta * fext(ti+1)
         }
 
-        d->mass()->Solve(*FextTheta);
-        //FextTheta = M^{-1} * FextTheta
+        v.toBlock(qSigma, d->velocityDimension(), 0, 0);
+        sigma.toBlock(qSigma, d->stressDimension(), 0, d->velocityDimension());  // q_sigma = [v; sigma]
 
-        coeff = h*h*_theta*_theta;
-        siconos::algebra::prod(coeff, *B, *FextTheta, sigma, false);  // sigma += h*h*_theta*_theta*B*FextTheta
+        // -> Solve WX = qSigma and set qSigma = X
+        W->Solve(qSigma);
+        std::vector<std::size_t> subCoord(4);
+        subCoord[0] = 0;
+        subCoord[1] = d->velocityDimension();
+        subCoord[2] = 0;
+        subCoord[3] = d->velocityDimension();
+        siconos::algebra::subscal(1.0, qSigma, v,
+                                  subCoord, false);
+        subCoord[0] = d->velocityDimension();
+        subCoord[1] = qSigma.size();
+        subCoord[2] = 0;
+        subCoord[3] = d->stressDimension();
+        siconos::algebra::subscal(1.0, qSigma, sigma,
+                                  subCoord, false);
 
-        // -> Solve WX = sigma and set sigma = X
-        W->Solve(sigma);
+        v += vold;
+        sigma += sigmaOld;
       } else
       THROW_EXCEPTION(
           "siconos::integrators::MoreauJeanOSI::integrate - not yet "
