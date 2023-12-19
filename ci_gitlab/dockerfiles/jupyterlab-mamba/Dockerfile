@@ -25,3 +25,4 @@ ENV JUPYTER_ENABLE_LAB yes
 EXPOSE $JUPYTER_PORT
 ENV SHELL /bin/bash
 ENTRYPOINT ["/opt/conda/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]
+WORKDIR /home/mambauser

@@ -28,6 +28,8 @@ image4doc:docker-build:
     IMAGE_NAME: ubuntu22.04
     SICONOS_DOCKER_TARGET: siconos-base-doc
   extends: .docker-build
+  stage: docker-build-layer2
+  needs: ["ubuntu22.04:docker-build"]
 
 
 # A specific image, that may be used to install siconos,
@@ -121,31 +123,40 @@ ubuntu22.04-release:test:
 mambalab:configure:
   variables:
      OPENBLAS_NUM_THREADS: 1
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+     # IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
      CDASH_SUBMIT: 1
-     CMAKE_PREFIX_PATH: /opt/conda
+     #      CMAKE_PREFIX_PATH: /opt/conda
   extends:
     - .siconos-configure
     - .devel-rules
+  image:
+    name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+    entrypoint: ["/bin/sh"]
 
 mambalab:build:
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+    #IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
     - .devel-rules
+  image:
+    name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+    entrypoint: ["/bin/sh"]
   needs: ["mambalab:configure"]
 
 mambalab:test:
     variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+      #IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
       CDASH_SUBMIT: 1
     needs: ["mambalab:build"]
     extends:
     - .siconos-test
     - .devel-rules
-
+    image:
+      name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+      entrypoint: ["/bin/sh"]
+    
 # -- Jobs executed for MR or main branch only --
 
 # ------ ubuntu 22, numerics only, fclib -------
@@ -272,7 +283,7 @@ fedora-38:test:
 # Tag will correspond to the commit ref
 jupyterlab:install:
   variables:
-    IMAGENAME: $SICONOS_REGISTRY/sources/jupyterlab
+    IMAGE_NAME: siconolab
     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
     SICONOS_DOCKER_TARGET: siconoslab
   extends:
