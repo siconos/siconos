@@ -28,9 +28,9 @@ namespace siconos::modeling {
 
     Stress Relation with:
 
-    \f$ y= [0 0 C] [v q \sigma] + e + Fz \f$
+    \f$ y= [0 C] [v ; \sigma] + e + Fz \f$
 
-    \f$ p = C^t \lambda \f$
+    \f$ p = [0 C]^t \lambda = [0 C^t \lambda] \f$
 
     C is the only required input to built a StressLinearTIR.
 

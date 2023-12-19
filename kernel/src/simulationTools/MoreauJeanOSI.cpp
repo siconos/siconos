@@ -696,7 +696,8 @@ void siconos::integrators::MoreauJeanOSI::computeW(
   auto dsType = siconos::types::type_value(ds);
 
   if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
-      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS ||
+          dsType == siconos::modeling::Type::SolidLinearTIDS ) {
     // Nothing: W does not depend on time.
   } else if (dsType == siconos::modeling::Type::LagrangianDS) {
     auto &d = static_cast<siconos::modeling::LagrangianDS &>(ds);
@@ -781,7 +782,8 @@ siconos::integrators::MoreauJeanOSI::Winverse(
   } else {
     auto dsType = siconos::types::type_value(*ds);
     if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
-        dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+        dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS ||
+            dsType == siconos::modeling::Type::SolidLinearTIDS ) {
       // Nothing: W does not depend on time.
     } else {
       Winverse->eye();
@@ -2015,7 +2017,8 @@ void siconos::integrators::MoreauJeanOSI::updatePosition(
   // 1 - Lagrangian Systems
   if (dsType == siconos::modeling::Type::LagrangianDS ||
       dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
-      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS ||
+      dsType == siconos::modeling::Type::SolidLinearTIDS) {
     // get dynamical system
     auto &d = static_cast<siconos::modeling::LagrangianDS &>(ds);
 
@@ -2032,48 +2035,48 @@ void siconos::integrators::MoreauJeanOSI::updatePosition(
     siconos::algebra::scal(coeff, vold, q, false);  // q += h(1-theta)*vold
     q += qold;
   }
-  else if (dsType == siconos::modeling::Type::SolidLinearTIDS){
-      auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
+//  else if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+//      auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
 
-      // Compute q
-      auto &v = *d.velocity();
-      auto &q = *d.q();
-      auto &sigma = *d.stress();
-      //  -> get previous time step state
-      const auto &vold = d.velocityMemory().getSiconosVector(0);
-      const auto &qold = d.qMemory().getSiconosVector(0);
-      const auto &sigmaold = d.stressMemory();
-      // *v = *vold + h*theta* M^-1 * ( Fext_{k+\theta} - B^T * sigma )
-      v = vold;
-      std::shared_ptr<siconos::algebra::SiconosVector> Fext = d.fExt();
-      auto FextThetaMinusBsigma = std::make_shared<siconos::algebra::SiconosVector>(v.size());
-      double coeff;
-      if (Fext) {
-          // computes Fext(ti)
-          d.computeFExt(_simulation->startingTime());
-          coeff = (1 - _theta);
-          siconos::algebra::scal(coeff, *Fext, *FextThetaMinusBsigma,
-                                 true);  // FextThetaMinusBsigma = (1-theta) * fext(ti)
-          // computes Fext(ti+1)
-          d.computeFExt(_simulation->nextTime());
-          coeff = _theta;
-          siconos::algebra::scal(coeff, *Fext, *FextThetaMinusBsigma,
-                                 false);  // FextThetaMinusBsigma += theta * fext(ti+1)
-      }
-      auto B = d.B();
-      siconos::algebra::prod(-1.0, *B, sigma, *FextThetaMinusBsigma, false);  // FextThetaMinusBsigma -= B*sigma
+//      // Compute q
+//      auto &v = *d.velocity();
+//      auto &q = *d.q();
+//      auto &sigma = *d.stress();
+//      //  -> get previous time step state
+//      const auto &vold = d.velocityMemory().getSiconosVector(0);
+//      const auto &qold = d.qMemory().getSiconosVector(0);
+//      const auto &sigmaold = d.stressMemory();
+//      // *v = *vold + h*theta* M^-1 * ( Fext_{k+\theta} - B^T * sigma )
+//      v = vold;
+//      std::shared_ptr<siconos::algebra::SiconosVector> Fext = d.fExt();
+//      auto FextThetaMinusBsigma = std::make_shared<siconos::algebra::SiconosVector>(v.size());
+//      double coeff;
+//      if (Fext) {
+//          // computes Fext(ti)
+//          d.computeFExt(_simulation->startingTime());
+//          coeff = (1 - _theta);
+//          siconos::algebra::scal(coeff, *Fext, *FextThetaMinusBsigma,
+//                                 true);  // FextThetaMinusBsigma = (1-theta) * fext(ti)
+//          // computes Fext(ti+1)
+//          d.computeFExt(_simulation->nextTime());
+//          coeff = _theta;
+//          siconos::algebra::scal(coeff, *Fext, *FextThetaMinusBsigma,
+//                                 false);  // FextThetaMinusBsigma += theta * fext(ti+1)
+//      }
+//      auto B = d.B();
+//      siconos::algebra::prod(-1.0, *B, sigma, *FextThetaMinusBsigma, false);  // FextThetaMinusBsigma -= B*sigma
 
-      d.mass()->Solve(*FextThetaMinusBsigma); // FextThetaMinusBsigma = M^{-1}*FextThetaMinusBsigma
-      coeff = h*_theta;
-      siconos::algebra::scal(coeff, *FextThetaMinusBsigma, v, false); // v+= h*\theta * M^{-1}*FextThetaMinusBsigma
+//      d.mass()->Solve(*FextThetaMinusBsigma); // FextThetaMinusBsigma = M^{-1}*FextThetaMinusBsigma
+//      coeff = h*_theta;
+//      siconos::algebra::scal(coeff, *FextThetaMinusBsigma, v, false); // v+= h*\theta * M^{-1}*FextThetaMinusBsigma
 
-      siconos::algebra::scal(coeff, v, q);  // q = h*theta*v
-      coeff = h * (1 - _theta);
-      siconos::algebra::scal(coeff, vold, q, false);  // q += h(1-theta)*vold
-      q += qold;
+//      siconos::algebra::scal(coeff, v, q);  // q = h*theta*v
+//      coeff = h * (1 - _theta);
+//      siconos::algebra::scal(coeff, vold, q, false);  // q += h(1-theta)*vold
+//      q += qold;
 
 
-  }
+//  }
   else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
     // Old Version with projection
     //  NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
@@ -2197,7 +2200,8 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
           for (unsigned int i = 0; i < d.dimension(); ++i)
             v(i) = vfree(i) + W(i, i) * v(i);
-        } else {
+        }
+        else {
           W.Solve(v);
           v += vfree;
         }
@@ -2244,18 +2248,97 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         if (aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);
       }
-      else if (dsType == siconos::modeling::Type::SolidLinearTIDS){
-          auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
-          auto &vfree =
-              *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+    }
+    else if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+        auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
+        auto &v = *d.velocity();
+        auto &vfree =
+            *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
 
-          //    auto *vfree = d.velocityFree();
-          auto &v = *d.velocity();
+        auto &sigma = *d.stress();
+        auto qSigma = siconos::algebra::SiconosVector(v.size()+sigma.size());
+        auto &sigmafree =
+            *ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE];
 
-// TO BE IMPLEMENTED
+        v.toBlock(qSigma, d.velocityDimension(), 0, 0); // q_sigma = [v; 0]
 
-      }
-    } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
+        double h = _simulation->timeStep();
+        if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
+          assert(((d.p(_levelMaxForInput)).get()) &&
+                 " siconos::integrators::MoreauJeanOSI::updateState() "
+                 "*d.p(_levelMaxForInput) "
+                 "== nullptr.");
+          v = *d.p(_levelMaxForInput);  // v = p
+          if (d.boundaryConditions()) {
+            for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+              v.setValue(itindex, 0.0);
+            }
+          }
+        }
+        else
+        {
+            v.zero();
+        }
+
+        if (d.plasticRate() && d.plasticRate()->size() > 0) {
+            siconos::algebra::scal(-h, *d.plasticRate(), sigma, false); // sigma = -h*\dot Epsilon
+        }
+        else
+        {
+            sigma.zero();
+        }
+
+        if ((d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) || (d.plasticRate() && d.plasticRate()->size() > 0)) // si l'on a au moins contact ou plasticité
+        {
+
+            sigma.toBlock(qSigma, d.stressDimension(), 0, d.velocityDimension());  // q_sigma = [v; sigma]
+
+            // -> Solve WX = qSigma and set qSigma = X
+            W.Solve(qSigma);
+            std::vector<std::size_t> subCoord(4);
+            subCoord[0] = 0;
+            subCoord[1] = d.velocityDimension();
+            subCoord[2] = 0;
+            subCoord[3] = d.velocityDimension();
+            siconos::algebra::subscal(1.0, qSigma, v,
+                                      subCoord, false);
+            subCoord[0] = d.velocityDimension();
+            subCoord[1] = qSigma.size();
+            subCoord[2] = 0;
+            subCoord[3] = d.stressDimension();
+            siconos::algebra::subscal(1.0, qSigma, sigma,
+                                      subCoord, false);
+        }
+        else
+        {
+            v += vfree;
+            sigma += sigmafree;
+        }
+
+        if (d.boundaryConditions()) {
+          int bc = 0;
+          auto columntmp =
+              std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
+
+          for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+            _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(
+                bc, *columntmp);
+            /*\warning we assume that W is symmetric in the Lagrangian case*/
+
+            double value = -siconos::algebra::inner_prod(*columntmp, v);
+            if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
+              value += (d.p(_levelMaxForInput))->getValue(itindex);
+            }
+            /* \warning the computation of reactionToBoundaryConditions take into
+               account the contact impulse but not the external and internal
+               forces. A complete computation of the residu should be better */
+            d.reactionToBoundaryConditions()->setValue(bc, value);
+            bc++;
+          }
+        }
+        updatePosition(ds);
+    }
+    else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanOSI::updateState(const unsigned "
           "int), "
