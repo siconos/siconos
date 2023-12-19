@@ -240,13 +240,14 @@ workflow:
   variables:
   stage: install
   script:
-    - cat $CI_PROJECT_DIR/ci_gitlab/dockerfiles/install_template| sed -e "s|IMAGENAME|$IMAGE_NAME|g" > build/Dockerfile
+    #- cat $CI_PROJECT_DIR/ci_gitlab/dockerfiles/install_template| sed -e "s|IMAGENAME|$IMAGE_NAME|g" > build/Dockerfile
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_DEPLOY_USER\",\"password\":\"$CI_DEPLOY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor
       --build-arg BUILD_DIR=$BUILD_DIR
       --build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR
       --context $CI_PROJECT_DIR
       --dockerfile $CI_PROJECT_DIR/build/Dockerfile
+      --target=$SICONOS_DOCKER_TARGET
       --destination $RESULT_NAME-$CI_COMMIT_REF_SLUG:latest
       --destination $RESULT_NAME-$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHORT_SHA
       --single-snapshot
@@ -273,6 +274,7 @@ workflow:
       --build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR
       --context $CI_PROJECT_DIR
       --dockerfile $CI_PROJECT_DIR/build/Dockerfile
+      --target=$SICONOS_DOCKER_TARGET
       --destination $RESULT_NAME-$CI_COMMIT_REF_SLUG:latest
       --destination $RESULT_NAME-$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHORT_SHA
       --single-snapshot

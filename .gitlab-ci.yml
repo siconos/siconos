@@ -258,26 +258,27 @@ fedora-38:test:
 # The image is saved in siconos-tutorials (public) registries
 # Remark: branch name will be appended to image name.
 # Tag will correspond to the commit ref
-siconos:install:
-  variables: 
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-    RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconos
-  extends:
-    - .siconos-install
-    - .devel-rules
-  needs: ["ubuntu22.04-release:build"] 
+# siconos:install:
+#   variables: 
+#     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+#     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconos
+#   extends:
+#     - .siconos-install
+#     - .devel-rules
+#   needs: ["ubuntu22.04-release:build"] 
 
 # The image is saved in siconos-tutorials (public) registries
 # Remark: branch name will be appended to image name.
 # Tag will correspond to the commit ref
 jupyterlab:install:
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab
+    IMAGENAME: $SICONOS_REGISTRY/sources/jupyterlab
     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
+    SICONOS_DOCKER_TARGET: siconoslab
   extends:
     - .siconos-jupyterlab-install
     - .devel-rules
-  needs: ["jupyterlab:build"]
+  needs: ["ubuntu22.04-release:build"]
 
 # Job run when a new tag (release) is created.
 release_job:
