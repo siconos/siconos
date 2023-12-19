@@ -1,15 +1,15 @@
-FROM mambaorg/micromamba:1.5.1 AS mambasiconos
-USER root
-RUN apt update  && apt upgrade -y && apt install -y -qq \
-        git-core \
-        make \
-	g++ \
-        gfortran \
-	libgl-dev
-COPY --chown=$MAMBA_USER:$MAMBA_USER ci_gitlab/sicolabenv.yml /home/sicolabenv.yml
-RUN micromamba config prepend channels conda-forge && micromamba self-update && micromamba config set channel_priority strict
-RUN micromamba install -y -f /home/sicolabenv.yml && \
-    micromamba clean --all --yes
-ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
-WORKDIR /home
-ENV CI_PROJECT_DIR /home
+##  - Prepare an image including (and starting) Jupyter lab
+ARG REGISTRY=gricad-registry.univ-grenoble-alpes.fr
+ARG PROJECT=nonsmooth/siconos
+ARG DEFAULT_IMAGE=sources/ubuntu22.04
+ARG IMAGENAME=$REGISTRY/$PROJECT/$DEFAULT_IMAGE
+# - Prepare a jupyter notebook, based on a Docker image with a complete Siconos install. Add (clone) the siconos-tutorials repository
+FROM $IMAGENAME AS jupyterlab
+RUN pip install --no-cache-dir -U jupyterlab ipykernel
+ENV WORK=/home/siconos-user
+WORKDIR $WORK
+ENV SHELL /bin/bash
+ENV JUPYTER_PORT=8888
+ENV JUPYTER_ENABLE_LAB yes
+EXPOSE $JUPYTER_PORT
+ENTRYPOINT ["siconosenv/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]

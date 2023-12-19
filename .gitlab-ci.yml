@@ -8,27 +8,47 @@ include:
 debian-bookworm:docker-build:
   variables:
     IMAGE_NAME: debian-bookworm
+    SICONOS_DOCKER_TARGET: siconos-base-python
   extends: .docker-build
 
 fedora38:docker-build:
   variables:
     IMAGE_NAME: fedora-38
+    SICONOS_DOCKER_TARGET: siconos-base-python
   extends: .docker-build
 
 ubuntu22.04:docker-build:
   variables:
     IMAGE_NAME: ubuntu22.04
+    SICONOS_DOCKER_TARGET: siconos-base-python
   extends: .docker-build
 
-# A specific image, that will be used to install siconos,
+image4doc:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu22.04
+    SICONOS_DOCKER_TARGET: siconos-base-doc
+  extends: .docker-build
+
+
+# A specific image, that may be used to install siconos,
 # get examples and provide some notebooks to
 # run siconos software.
 jupyter-notebook:docker-build:
   variables:
-    IMAGE_NAME: jupyterlab
+    IMAGE_NAME: siconoslab
+    SICONOS_DOCKER_TARGET: jupyterlab
   extends: .docker-build
-  stage: docker-build
+  stage: docker-build-layer2
+  needs: ["ubuntu22.04:docker-build"]
 
+# The same, based on micromamba.
+jupyter-mamba-notebook:docker-build:
+  variables:
+    IMAGE_NAME: jupyterlab-mamba
+    SICONOS_DOCKER_TARGET: mambalab
+  extends: .docker-build
+   
+  
 # Manual jobs, used to create docker images.
 docker-manual-img:
   extends: .docker-rules

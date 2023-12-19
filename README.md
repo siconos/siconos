@@ -18,7 +18,30 @@ Fluid Mechanics, Computer Graphics, ...
 
 Read more about Siconos at the [Siconos homepage](http://siconos.gforge.inria.fr)
 
-## Installation
+## Usage
+
+### Through your web browser
+
+Perfect to understand and test the software or run lite simulations, demos, teaching ...
+
+Prerequisite: a web browser and a network connection.
+
+Pros: no installation prerequisites, nothing to do
+
+Cons: limited resources. No long/important simulations.
+
+Just click there [under construction]()
+
+### Jupyter Lab environment with siconos ready to use and a set of end-user examples:
+
+Prerequisite: Docker installed and usable on your computer.
+
+
+To use last Siconos release, run the command line
+```bash
+docker run --rm -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest
+```
+
 
 ### From source
 
@@ -36,39 +59,38 @@ cmake --install build-siconos
 
 More details in [Siconos download and install guide](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/index.html).
 
-## Docker images
+<!-- ## Docker images -->
 
-#### Docker images with siconos ready to use:
+<!-- #### Docker images with siconos ready to use: -->
 
-* latest version (development)
+<!-- * latest version (development) -->
 
-```
-docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest
-```
+<!-- ``` -->
+<!-- docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest -->
+<!-- ``` -->
 
-* A specific (release) version X.Y:
+<!-- * A specific (release) version X.Y: -->
 
-```
-docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-release-X.Y:latest
-```
+<!-- ``` -->
+<!-- docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-release-X.Y:latest -->
+<!-- ``` -->
 
-#### Jupyter Lab environment with siconos ready to use and a set of end-user examples:
+<!-- #### Jupyter Lab environment with siconos ready to use and a set of end-user examples: -->
 
-* latest version (development)
+<!-- * latest version (development) -->
 
-```
-docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master
-```
-
-
-* A specific (release) version X.Y:
-
-```
-docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-release-X.Y
-```
+<!-- ``` -->
+<!-- docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master -->
+<!-- ``` -->
 
 
-Then, access in your browser at http://localhost:8888
+<!-- * A specific (release) version X.Y: -->
+
+<!-- ``` -->
+<!-- docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-release-X.Y -->
+<!-- ``` -->
+
+
 
 # Main components
 

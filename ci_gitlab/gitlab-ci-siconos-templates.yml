@@ -99,7 +99,8 @@ stages:
     - export DOCKERFILE_PATH=$CI_PROJECT_DIR/ci_gitlab/dockerfiles/$IMAGE_NAME
     - /kaniko/executor
       --context $CI_PROJECT_DIR
-      --dockerfile $DOCKERFILE_PATH/Dockerfile 
+      --dockerfile $DOCKERFILE_PATH/Dockerfile
+      --target=$SICONOS_DOCKER_TARGET
       --destination $SICONOS_REGISTRY/sources/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA
       --destination $SICONOS_REGISTRY/sources/$IMAGE_NAME:latest
       --single-snapshot

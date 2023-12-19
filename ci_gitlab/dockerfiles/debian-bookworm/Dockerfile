@@ -1,5 +1,6 @@
-FROM debian:bookworm
-RUN apt update  && apt install -y -qq \
+FROM debian:bookworm AS siconos-base
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update  && apt install  --no-install-recommends -y -qq \
         git-core \
 	cmake \
 	make \
@@ -31,11 +32,14 @@ RUN apt update  && apt install -y -qq \
 	libbullet-dev \
 	libbullet-extras-dev \
         vim && apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
-COPY ci_gitlab/dockerfiles/requirements.txt /home
-ENV VIRTUAL_ENV=/home/siconosenv
+RUN useradd -ms /bin/bash siconos-user
+
+FROM siconos-base AS siconos-base-python
+USER siconos-user
+WORKDIR /home/siconos-user
+COPY ci_gitlab/dockerfiles/requirements.txt .
+ENV VIRTUAL_ENV=/home/siconos-user/siconosenv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN pip install -U -r /home/requirements.txt
-WORKDIR /home
-ENV CI_PROJECT_DIR /home
+RUN pip install --no-cache-dir -U -r requirements.txt
 
