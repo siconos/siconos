@@ -35,8 +35,8 @@ image4doc:docker-build:
 # run siconos software.
 jupyter-notebook:docker-build:
   variables:
-    IMAGE_NAME: siconoslab
-    SICONOS_DOCKER_TARGET: jupyterlab
+    IMAGE_NAME: jupyterlab
+    SICONOS_DOCKER_TARGET: jupylab
   extends: .docker-build
   stage: docker-build-layer2
   needs: ["ubuntu22.04:docker-build"]
@@ -118,30 +118,30 @@ ubuntu22.04-release:test:
       - .devel-rules
 
 # --- Siconos inside a notebook, default setup ---
-jupyterlab:configure:
+mambalab:configure:
   variables:
      OPENBLAS_NUM_THREADS: 1
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
      CDASH_SUBMIT: 1
      CMAKE_PREFIX_PATH: /opt/conda
   extends:
     - .siconos-configure
     - .devel-rules
 
-jupyterlab:build:
+mambalab:build:
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
     - .devel-rules
-  needs: ["jupyterlab:configure"]
+  needs: ["mambalab:configure"]
 
-jupyterlab:test:
+mambalab:test:
     variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
       CDASH_SUBMIT: 1
-    needs: ["jupyterlab:build"]
+    needs: ["mambalab:build"]
     extends:
     - .siconos-test
     - .devel-rules

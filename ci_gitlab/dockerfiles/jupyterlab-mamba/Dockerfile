@@ -13,20 +13,15 @@ RUN apt update  && apt upgrade -y && apt install --no-install-recommends -y -qq 
 RUN micromamba config prepend channels conda-forge && micromamba self-update
 
 
-FROM mamba-base AS mamba-siconosenv
+FROM mamba-base AS mambalab
 USER $MAMBA_USER
 RUN micromamba config prepend channels conda-forge && micromamba config set channel_priority strict
 COPY --chown=$MAMBA_USER:$MAMBA_USER ci_gitlab/sicolabenv.yml /home/sicolabenv.yml
 RUN micromamba install -y -f /home/sicolabenv.yml && \
     micromamba clean --all --yes
 ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
-
-# Jupyter setup
-FROM mamba-siconosenv AS mambalab
-ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
 ENV JUPYTER_PORT=8888
 ENV JUPYTER_ENABLE_LAB yes
 EXPOSE $JUPYTER_PORT
-WORKDIR /home/$MAMBA_USER
 ENV SHELL /bin/bash
 ENTRYPOINT ["/opt/conda/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]
