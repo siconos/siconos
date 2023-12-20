@@ -8,7 +8,7 @@ include: ci_gitlab/gitlab-ci-siconos-templates.yml
 # --- Build doc/web site and publish it ---
 doc:build:
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/image4doc
   extends: .siconos-full
   script:
     - "sh ci_gitlab/make_siconos_doc.sh"

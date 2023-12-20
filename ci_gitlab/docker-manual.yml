@@ -73,3 +73,10 @@ archlinux-oce:docker-build:
 #   needs: ["ubuntu18.04:docker-build"]
 
   
+ubuntu20.04:full:
+      variables:
+        IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu20.04
+        CDASH_SUBMIT: 1
+      extends:
+        - .siconos-full
+      when: manual

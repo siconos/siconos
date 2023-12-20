@@ -9,24 +9,28 @@ debian-bookworm:docker-build:
   variables:
     IMAGE_NAME: debian-bookworm
     SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
   extends: .docker-build
 
 fedora38:docker-build:
   variables:
     IMAGE_NAME: fedora-38
     SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora38
   extends: .docker-build
 
 ubuntu22.04:docker-build:
   variables:
     IMAGE_NAME: ubuntu22.04
     SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
   extends: .docker-build
 
 image4doc:docker-build:
   variables:
     IMAGE_NAME: ubuntu22.04
     SICONOS_DOCKER_TARGET: siconos-base-doc
+    RESULT_NAME: $SICONOS_REGISTRY/sources/image4doc
   extends: .docker-build
   stage: docker-build-layer2
   needs: ["ubuntu22.04:docker-build"]
@@ -131,7 +135,7 @@ mambalab:configure:
     - .devel-rules
   image:
     name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-    entrypoint: ["/bin/sh"]
+    entrypoint: ["/bin/bash"]
 
 mambalab:build:
   variables:
@@ -142,7 +146,7 @@ mambalab:build:
     - .devel-rules
   image:
     name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-    entrypoint: ["/bin/sh"]
+    entrypoint: ["/bin/bash"]
   needs: ["mambalab:configure"]
 
 mambalab:test:
@@ -155,7 +159,7 @@ mambalab:test:
     - .devel-rules
     image:
       name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-      entrypoint: ["/bin/sh"]
+      entrypoint: ["/bin/bash"]
     
 # -- Jobs executed for MR or main branch only --
 
@@ -283,7 +287,7 @@ fedora-38:test:
 # Tag will correspond to the commit ref
 jupyterlab:install:
   variables:
-    IMAGE_NAME: siconolab
+    IMAGE_NAME: siconoslab
     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
     SICONOS_DOCKER_TARGET: siconoslab
   extends:
@@ -331,21 +335,3 @@ generate-doc:
       - docs/build-doc.yml
   when: manual
 
-# -- Jobs on demand --
-# Triggered through the interface
-# Build siconos with oce component
-siconos-oce:
-  stage: configure
-  trigger:
-    include:
-      - ci_gitlab/siconos-with-oce.yml
-  when: manual
-
-
-ubuntu20.04:full:
-      variables:
-        IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu20.04
-        CDASH_SUBMIT: 1
-      extends:
-        - .siconos-full
-      when: manual
