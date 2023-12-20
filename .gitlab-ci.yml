@@ -144,7 +144,7 @@ mambalab:configure:
     - .devel-rules
   image:
     name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-    entrypoint: ["/bin/bash"]
+    entrypoint: [ "/bin/bash", "-l", "-c" ]
 
 mambalab:build:
   variables:
@@ -155,7 +155,7 @@ mambalab:build:
     - .devel-rules
   image:
     name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-    entrypoint: ["/bin/bash"]
+    entrypoint: [ "/bin/bash", "-l", "-c" ]
   needs: ["mambalab:configure"]
 
 mambalab:test:
@@ -168,7 +168,7 @@ mambalab:test:
     - .devel-rules
     image:
       name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-      entrypoint: ["/bin/bash"]
+      entrypoint: [ "/bin/bash", "-l", "-c" ]
     
 # -- Jobs executed for MR or main branch only --
 

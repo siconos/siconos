@@ -7,9 +7,10 @@ ARG IMAGENAME=$REGISTRY/$PROJECT/$DEFAULT_IMAGE
 FROM $IMAGENAME AS siconoslab
 ARG BUILD_DIR=build
 ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
-RUN cmake --install $BUILD_DIR
+RUN cmake --version
+# --install $BUILD_DIR
 # install Siconos. Assume a previous built in $BUILD_DIR
-RUN siconos --info
+#RUN siconos --info
 # Clone Siconos examples 
 ARG EXAMPLES_BRANCH_NAME=master
 RUN git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git
