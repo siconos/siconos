@@ -35,6 +35,13 @@ image4doc:docker-build:
   stage: docker-build-layer2
   needs: ["ubuntu22.04:docker-build"]
 
+opencascade:docker-build:
+  variables:
+    IMAGE_NAME: opencascade
+    SICONOS_DOCKER_TARGET: mamba-occenv
+    RESULT_NAME: $SICONOS_REGISTRY/sources/opencascade
+  extends: .docker-build
+  when: manual
 
 # A specific image, that may be used to install siconos,
 # get examples and provide some notebooks to
@@ -43,6 +50,7 @@ jupyter-notebook:docker-build:
   variables:
     IMAGE_NAME: jupyterlab
     SICONOS_DOCKER_TARGET: jupylab
+    RESULT_NAME: $SICONOS_REGISTRY/sources/jupyterlab
   extends: .docker-build
   stage: docker-build-layer2
   needs: ["ubuntu22.04:docker-build"]
@@ -52,16 +60,17 @@ jupyter-mamba-notebook:docker-build:
   variables:
     IMAGE_NAME: jupyterlab-mamba
     SICONOS_DOCKER_TARGET: mambalab
+    RESULT_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
   extends: .docker-build
    
   
 # Manual jobs, used to create docker images.
-docker-manual-img:
-  extends: .docker-rules
-  stage: docker-build-layer2
-  trigger:
-    include:
-      - ci_gitlab/docker-manual.yml
+# docker-manual-img:
+#   extends: .docker-rules
+#   stage: docker-build-layer2
+#   trigger:
+#     include:
+#       - ci_gitlab/docker-manual.yml
 
 
 # -------------- Configure, build and test Siconos --------------
@@ -191,7 +200,7 @@ ubuntu22.04-numerics-fclib:test:
 # ------ ubuntu 22, with mechanisms component -------
 ubuntu22.04-mechanisms:configure:
    variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu-with-opencascade
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
      CDASH_SUBMIT: 1
      CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
    extends:
@@ -200,7 +209,7 @@ ubuntu22.04-mechanisms:configure:
     
 ubuntu22.04-mechanisms:build:
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu-with-opencascade
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
@@ -209,7 +218,7 @@ ubuntu22.04-mechanisms:build:
 
 ubuntu22.04-mechanisms:test:
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu-with-opencascade
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
     CDASH_SUBMIT: 1
   needs: ["ubuntu22.04-mechanisms:build"]
   extends:

@@ -114,9 +114,12 @@ Since make/pip install must be run as root, possibly outside this env., this mig
 	# Change python install path to custom
 	set(PY_INSTALL_DIR ${SICONOS_CUSTOM_INSTALL}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages)
       else()
-	# keep PY_INSTALL_DIR computed during check python env
-	# There, we need to append --user to pip command
-	list(APPEND PIP_INSTALL_OPTIONS_LOCAL --user)
+	set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.siconos CACHE PATH "User install default directory" FORCE)
+	if(IN_VENV OR IN_CONDA)
+	else()
+	  # There, we need to append --user to pip command
+	  list(APPEND PIP_INSTALL_OPTIONS_LOCAL --user)
+	endif()
       endif()
     else() # Default for any other cases
       # Are we in some kind of virtual env?
