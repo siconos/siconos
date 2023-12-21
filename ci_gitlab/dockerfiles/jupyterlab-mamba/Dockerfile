@@ -23,6 +23,8 @@ ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be foun
 ENV JUPYTER_PORT=8888
 ENV JUPYTER_ENABLE_LAB yes
 EXPOSE $JUPYTER_PORT
+SHELL ["/bin/bash", "-l" ,"-c"]
 ENV SHELL /bin/bash
-ENTRYPOINT ["/opt/conda/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]
+ENV PATH /opt/conda/bin:$PATH
+ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "/opt/conda/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]
 WORKDIR /home/mambauser

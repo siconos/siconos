@@ -136,39 +136,30 @@ ubuntu22.04-release:test:
 mambalab:configure:
   variables:
      OPENBLAS_NUM_THREADS: 1
-     # IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
      CDASH_SUBMIT: 1
      #      CMAKE_PREFIX_PATH: /opt/conda
   extends:
     - .siconos-configure
     - .devel-rules
-  image:
-    name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-    entrypoint: [ "/bin/bash", "-l", "-c" ]
 
 mambalab:build:
   variables:
-    #IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
     - .devel-rules
-  image:
-    name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-    entrypoint: [ "/bin/bash", "-l", "-c" ]
   needs: ["mambalab:configure"]
 
 mambalab:test:
     variables:
-      #IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
       CDASH_SUBMIT: 1
     needs: ["mambalab:build"]
     extends:
     - .siconos-test
     - .devel-rules
-    image:
-      name: $SICONOS_REGISTRY/sources/jupyterlab-mamba
-      entrypoint: [ "/bin/bash", "-l", "-c" ]
     
 # -- Jobs executed for MR or main branch only --
 

@@ -164,6 +164,7 @@ workflow:
   variables:
     BUILD_MODE: $CI_JOB_STAGE # stage name is used to set ctest behavior
   script:
+    - env
     - sh ci_gitlab/ctest_siconos.sh
   extends: .full-rules   # default behavior = full-rules
   

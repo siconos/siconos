@@ -8,8 +8,8 @@ FROM $IMAGENAME AS jupylab
 RUN pip install --no-cache-dir -U jupyterlab ipykernel
 ENV WORK=/home/siconos-user
 WORKDIR $WORK
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-#ENV SHELL /bin/bash
+SHELL ["/bin/bash", "-l", "-c"]
+ENV SHELL /bin/bash
 ENV JUPYTER_PORT=8888
 ENV JUPYTER_ENABLE_LAB yes
 EXPOSE $JUPYTER_PORT
