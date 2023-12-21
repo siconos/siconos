@@ -56,11 +56,11 @@ jupyter-notebook:docker-build:
   needs: ["ubuntu22.04:docker-build"]
 
 # The same, based on micromamba.
-jupyter-mamba-notebook:docker-build:
+mambaenv:docker-build:
   variables:
     IMAGE_NAME: jupyterlab-mamba
-    SICONOS_DOCKER_TARGET: mambalab
-    RESULT_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+    SICONOS_DOCKER_TARGET: mambaenv
+    RESULT_NAME: $SICONOS_REGISTRY/sources/mambaenv
   extends: .docker-build
    
   
@@ -79,13 +79,16 @@ jupyter-mamba-notebook:docker-build:
 
 # ------ ubuntu 22, debug setup -------
 ubuntu22.04-debug:configure:
-   variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-     CDASH_SUBMIT: 1
-     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
-   extends:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+    CDASH_SUBMIT: 1
+    CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
+  extends:
     - .siconos-configure
     - .devel-rules
+  needs:
+    - job: ubuntu22.04:docker-build
+      optional: true
 
 ubuntu22.04-debug:build:
   variables:
@@ -100,10 +103,10 @@ ubuntu22.04-debug:test:
     variables:
       IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
       CDASH_SUBMIT: 1
-    needs: ["ubuntu22.04-debug:build"]
     extends:
       - .siconos-test
       - .devel-rules
+    needs: ["ubuntu22.04-debug:build"]
 
 # ------ ubuntu 22, default setup -------
 ubuntu22.04-release:configure:
@@ -111,8 +114,11 @@ ubuntu22.04-release:configure:
      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
      CDASH_SUBMIT: 1
    extends:
-    - .siconos-configure
-    - .devel-rules
+     - .siconos-configure
+     - .devel-rules
+   needs:
+     - job: ubuntu22.04:docker-build
+       optional: true
 
 ubuntu22.04-release:build:
   variables:
@@ -127,25 +133,28 @@ ubuntu22.04-release:test:
     variables:
       IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
       CDASH_SUBMIT: 1
-    needs: ["ubuntu22.04-release:build"]
     extends:
       - .siconos-test
       - .devel-rules
+    needs: ["ubuntu22.04-release:build"]
 
 # --- Siconos inside a notebook, default setup ---
 mambalab:configure:
   variables:
      OPENBLAS_NUM_THREADS: 1
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/mambaenv
      CDASH_SUBMIT: 1
-     #      CMAKE_PREFIX_PATH: /opt/conda
   extends:
     - .siconos-configure
     - .devel-rules
+  needs:
+    - job: mambaenv:docker-build
+      optional: true
+
 
 mambalab:build:
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/mambaenv
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
@@ -154,13 +163,14 @@ mambalab:build:
 
 mambalab:test:
     variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/mambaenv
       CDASH_SUBMIT: 1
-    needs: ["mambalab:build"]
     extends:
-    - .siconos-test
-    - .devel-rules
+      - .siconos-test
+      - .devel-rules
+    needs: ["mambalab:build"]
     
+
 # -- Jobs executed for MR or main branch only --
 
 # ------ ubuntu 22, numerics only, fclib -------
@@ -171,6 +181,9 @@ ubuntu22.04-numerics-fclib:configure:
      CONF_FILE: $SICONOS_CMAKE_CONF_PATH/numerics_with_fclib.cmake
    extends:
     - .siconos-configure
+   needs:
+    - job: ubuntu22.04:docker-build
+      optional: true
 
 ubuntu22.04-numerics-fclib:build:
   variables:
@@ -184,11 +197,12 @@ ubuntu22.04-numerics-fclib:test:
   variables:
     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
     CDASH_SUBMIT: 1
-  needs: ["ubuntu22.04-numerics-fclib:build"]
   extends:
     - .siconos-test
+  needs: ["ubuntu22.04-numerics-fclib:build"]
 
 # ------ ubuntu 22, with mechanisms component -------
+# optional (manual)
 ubuntu22.04-mechanisms:configure:
    variables:
      IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
@@ -197,6 +211,9 @@ ubuntu22.04-mechanisms:configure:
    extends:
     - .siconos-configure
    when: manual
+   needs:
+    - job: opencascade:docker-build
+      optional: true
     
 ubuntu22.04-mechanisms:build:
   variables:
@@ -211,9 +228,9 @@ ubuntu22.04-mechanisms:test:
   variables:
     IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
     CDASH_SUBMIT: 1
-  needs: ["ubuntu22.04-mechanisms:build"]
   extends:
     - .siconos-test
+  needs: ["ubuntu22.04-mechanisms:build"]
   when: manual
 
     
@@ -224,6 +241,9 @@ debian-bookworm:configure:
      CDASH_SUBMIT: 1
   extends:
     - .siconos-configure
+  needs:
+    - job: debian-bookworm:docker-build
+      optional: true
 
 debian-bookworm:build:
   variables:
@@ -237,9 +257,9 @@ debian-bookworm:test:
     variables:
       IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
       CDASH_SUBMIT: 1
-    needs: ["debian-bookworm:build"]
     extends:
       - .siconos-test
+    needs: ["debian-bookworm:build"]
 
       
 # --- fedora 38, default setup ---
@@ -249,6 +269,9 @@ fedora-38:configure:
      CDASH_SUBMIT: 1
   extends:
     - .siconos-configure
+  needs:
+    - job: fedora-38:docker-build
+      optional: true
 
 fedora-38:build:
   variables:
@@ -262,9 +285,9 @@ fedora-38:test:
     variables:
       IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
       CDASH_SUBMIT: 1
-    needs: ["fedora-38:build"]
     extends:
     - .siconos-test
+    needs: ["fedora-38:build"]
 
 
 # --- Jobs to install siconos and produce a Docker image "Siconos ready" ---
@@ -288,12 +311,21 @@ fedora-38:test:
 jupyterlab:install:
   variables:
     IMAGE_NAME: siconoslab
-    RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
+    RESULT_NAME: $CI_REGISTRY/nonsmooth-fp/temp/justatry/siconoslab
     SICONOS_DOCKER_TARGET: siconoslab
   extends:
     - .siconos-jupyterlab-install
     - .devel-rules
   needs: ["ubuntu22.04-release:build"]
+
+mambalab:install:
+    variables:
+      IMAGE_NAME: siconoslab-mamba
+      RESULT_NAME: $CI_REGISTRY/nonsmooth-fp/temp/justatry/siconoslab-mamba
+      SICONOS_DOCKER_TARGET: siconoslab
+    extends:
+      - .siconos-jupyterlab-install
+    needs: ["mambalab:build"]
 
 # Job run when a new tag (release) is created.
 release_job:

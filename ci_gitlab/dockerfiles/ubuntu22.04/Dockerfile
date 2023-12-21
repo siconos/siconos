@@ -27,6 +27,7 @@ RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	wget \
 	nlohmann-json3-dev \
 	libgl-dev \
+	libgl1 \
 	&&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 RUN useradd -ms /bin/bash siconos-user
 
