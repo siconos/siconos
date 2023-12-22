@@ -311,7 +311,7 @@ fedora-38:test:
 jupyterlab:install:
   variables:
     IMAGE_NAME: siconoslab
-    RESULT_NAME: $CI_REGISTRY/nonsmooth-fp/temp/justatry/siconoslab
+    RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
     SICONOS_DOCKER_TARGET: siconoslab
   extends:
     - .siconos-jupyterlab-install
@@ -321,7 +321,7 @@ jupyterlab:install:
 mambalab:install:
     variables:
       IMAGE_NAME: siconoslab-mamba
-      RESULT_NAME: $CI_REGISTRY/nonsmooth-fp/temp/justatry/siconoslab-mamba
+      RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab-mamba
       SICONOS_DOCKER_TARGET: siconoslab
     extends:
       - .siconos-jupyterlab-install

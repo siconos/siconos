@@ -30,7 +30,7 @@ Pros: no installation prerequisites, nothing to do
 
 Cons: limited resources. No long/important simulations.
 
-Just click there [under construction]()
+Just click there [![Binder](https://plmbinder.math.cnrs.fr/binder/badge_logo.svg)](https://plmbinder.math.cnrs.fr/binder/v2/git/https%3A%2F%2Fgricad-gitlab.univ-grenoble-alpes.fr%2Fnonsmooth%2Fsiconos-tutorials.git/HEAD)
 
 ### Jupyter Lab environment with siconos ready to use and a set of end-user examples:
 
@@ -39,8 +39,24 @@ Prerequisite: Docker installed and usable on your computer.
 
 To use last Siconos release, run the command line
 ```bash
-docker run --rm -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest
+docker run --rm -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master:latest
 ```
+You will get something like
+```
+...
+To access the server, open this file in a browser:
+...
+        http://127.0.0.1:8888/lab?token=b8a131ed7aed720c8fe1d7fae034cd2b669dcf686126c598
+```
+Copy this last line into your browser, and there you will be able to start a terminal or a notebook session.
+
+
+You can also start a simple terminal to use Siconos through the command line with
+
+```bash
+docker run --rm --entrypoint /bin/bash  -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master:latest
+```
+
 
 
 ### From source
