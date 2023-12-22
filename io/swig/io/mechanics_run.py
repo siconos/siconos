@@ -2165,7 +2165,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         Outputs contact contact_work
         _output_contact_index_set default value is 1.
         """
-        print("output_contact_work")
         if self._nsds.\
                 topology().indexSetsSize() > 1:
             time = self.current_time()
@@ -2404,6 +2403,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         #self.log(s.initialize, with_timer)()
         self.log(s.initializeOSIAssociations, with_timer)()
         self.log(s.initializeIndexSets, with_timer)()
+        self.log(s.applyNSDSChangelogForDS, with_timer)();
         self.log(s.computeInitialStateOfTheStep, with_timer)()
         self.log(s.updateWorldFromDS, with_timer)()
         self.log(s.updateInteractions, with_timer)()
