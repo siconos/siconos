@@ -1,7 +1,7 @@
 # Siconos
-[![ubuntu-latest release testing](https://github.com/siconos/siconos/actions/workflows/cmake_ubuntu_latest_release.yml/badge.svg)](https://github.com/siconos/siconos/actions/workflows/cmake_ubuntu_latest_release.yml)
-|[![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/master/COPYING)|
- 
+
+[![pipeline status](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg)](https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/commits/master)  [![Version](https://img.shields.io/github/release/siconos/siconos.svg)](https://github.com/siconos/siconos/releases/latest)  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siconos/siconos/blob/master/COPYING)
+
 A software package for the modeling and simulation of nonsmooth dynamical systems in C++ and in Python.
 
 Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems:
@@ -18,57 +18,79 @@ Fluid Mechanics, Computer Graphics, ...
 
 Read more about Siconos at the [Siconos homepage](http://siconos.gforge.inria.fr)
 
-## Installation
+## Usage
+
+### Through your web browser
+
+Perfect to understand and test the software or run lite simulations, demos, teaching ...
+
+Prerequisite: a web browser and a network connection.
+
+Pros: no installation prerequisites, nothing to do
+
+Cons: limited resources. No long/important simulations.
+
+Just click there [under construction]()
+
+### Jupyter Lab environment with siconos ready to use and a set of end-user examples:
+
+Prerequisite: Docker installed and usable on your computer.
+
+
+To use last Siconos release, run the command line
+```bash
+docker run --rm -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest
+```
+
 
 ### From source
 
 Assuming you have cloned the project into <siconos-sources>, to build and install the libraries and the python interface ::
 
-* Create a user options file. Some templates are provided in <siconos-sources>/ci_gitlab/siconos_confs.
+* Create a user options file. Some templates are provided in <siconos-sources>/config_samples.
 * Run
+
 ```
-mkdir build ;cd build
-cmake -DUSER_OPTIONS_FILE=<your options file> <path-to-siconos-sources> 
-make -j 4 # or the number of cores available on your computer.
-make test # optional
-make install
+cmake -S <path-to-siconos-sources> -B build-siconos -DUSER_OPTIONS_FILE=<your-options-file>
+cmake --build build-siconos -j 4 # or the number of cores available on your computer.
+ctest --test-dir build-siconos   # run tests, optional
+cmake --install build-siconos
 ```
 
 More details in [Siconos download and install guide](https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/index.html).
 
-## Docker images
+<!-- ## Docker images -->
 
-#### Docker images with siconos ready to use:
+<!-- #### Docker images with siconos ready to use: -->
 
-* latest version (development)
+<!-- * latest version (development) -->
 
-```
-docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest
-```
+<!-- ``` -->
+<!-- docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-master:latest -->
+<!-- ``` -->
 
-* A specific (release) version X.Y:
+<!-- * A specific (release) version X.Y: -->
 
-```
-docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-release-X.Y:latest
-```
+<!-- ``` -->
+<!-- docker run -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconos-release-X.Y:latest -->
+<!-- ``` -->
 
-#### Jupyter Lab environment with siconos ready to use and a set of end-user examples:
+<!-- #### Jupyter Lab environment with siconos ready to use and a set of end-user examples: -->
 
-* latest version (development)
+<!-- * latest version (development) -->
 
-```
-docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master
-```
-
-
-* A specific (release) version X.Y:
-
-```
-docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-release-X.Y
-```
+<!-- ``` -->
+<!-- docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master -->
+<!-- ``` -->
 
 
-Then, access in your browser at http://localhost:8888
+<!-- * A specific (release) version X.Y: -->
+
+<!-- ``` -->
+<!-- docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-release-X.Y -->
+<!-- ``` -->
+
+
 
 # Main components
 

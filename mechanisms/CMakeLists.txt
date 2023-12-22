@@ -28,11 +28,7 @@ set(${COMPONENT}_DIRS
   src/MBTB
   src/TIMERMBTB)
 
-
-# -- Documentation --
-# List of directories for which no doxygen doc will be generated
-# By default all directories matching "test" are excluded.
-# set(${COMPONENT}_EXCLUDE_DOXY)
+include(occ_setup)
 
 # ------ include interface ------
 # What is needed at build time
@@ -58,21 +54,24 @@ target_link_libraries(mechanisms PUBLIC
   mechanics)
 
 # Links with non-Siconos libraries
-# --- Search component dependencies ---
-if(NOT WITH_OCE)
-  message(FATAL_ERROR "Please run cmake again with option WITH_OCE=ON (required for mechanisms) or do not setup Siconos with mechanisms component.")
-endif()
-# Add oce headers and libs to component build.
-target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
+# # --- Search component dependencies ---
+# if(NOT WITH_OCE)
+#   message(FATAL_ERROR "Please run cmake again with option WITH_OCE=ON (required for mechanisms) or do not setup Siconos with mechanisms component.")
+# endif()
+
+# # Add oce headers and libs to component build.
+# target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
+
+
+MESSAGE("################################# ${OpenCASCADE_INCLUDE_DIRS}" ${OpenCASCADE_INCLUDE_DIR})
+
+target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
+target_compile_options(${COMPONENT} PRIVATE "-Wno-zero-as-null-pointer-constant")
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)
 endif()
-
-if(WITH_PYTHON_WRAPPER)
-  add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
-endif()  
 
 # ---- Installation ----
 # Call siconos_component_install_setup(<COMPONENT>)
@@ -88,6 +87,5 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   )
 
 siconos_component_install_setup(${COMPONENT})
-
 # --- tests ---
 include(${COMPONENT}_tests.cmake)

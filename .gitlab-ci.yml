@@ -5,262 +5,312 @@ include:
 
 # --- First, build docker images that contains all the required dependencies to build siconos ---
 # This step is optional and run only when the commit message starts with "[docker-build]"
-debian-buster:docker-build:
+debian-bookworm:docker-build:
   variables:
-    IMAGE_NAME: debian-buster
+    IMAGE_NAME: debian-bookworm
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
   extends: .docker-build
 
-ubuntu20.4-light:docker-build:
+fedora38:docker-build:
   variables:
-    IMAGE_NAME: ubuntu20.04-light
-  extends: .docker-build
-
-ubuntu20.4:docker-build:
-  variables:
-    IMAGE_NAME: ubuntu20.04
-  extends: .docker-build
-  stage: docker-build-layer2
-  needs: ["ubuntu20.4-light:docker-build"]
-
-opensuse-leap-15.0:docker-build:
-  variables:
-    IMAGE_NAME: opensuse-leap-15.0
-  extends: .docker-build
-
-centos-7:docker-build:
-  variables:
-    IMAGE_NAME: centos-7
-  extends: .docker-build
-
-fedora33:docker-build:
-  variables:
-    IMAGE_NAME: fedora-33
+    IMAGE_NAME: fedora-38
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora38
   extends: .docker-build
 
 ubuntu22.04:docker-build:
   variables:
     IMAGE_NAME: ubuntu22.04
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
   extends: .docker-build
 
-# A specific image, that will be used to install siconos,
+image4doc:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu22.04
+    SICONOS_DOCKER_TARGET: siconos-base-doc
+    RESULT_NAME: $SICONOS_REGISTRY/sources/image4doc
+  extends: .docker-build
+  stage: docker-build-layer2
+  needs: ["ubuntu22.04:docker-build"]
+
+opencascade:docker-build:
+  variables:
+    IMAGE_NAME: opencascade
+    SICONOS_DOCKER_TARGET: mamba-occenv
+    RESULT_NAME: $SICONOS_REGISTRY/sources/opencascade
+  extends: .docker-build
+  when: manual
+
+# A specific image, that may be used to install siconos,
 # get examples and provide some notebooks to
 # run siconos software.
 jupyter-notebook:docker-build:
   variables:
     IMAGE_NAME: jupyterlab
+    SICONOS_DOCKER_TARGET: jupylab
+    RESULT_NAME: $SICONOS_REGISTRY/sources/jupyterlab
   extends: .docker-build
-  stage: docker-build
-
-
-# Manual jobs, used to create docker images.
-docker-manual-img:
-  extends: .docker-rules
   stage: docker-build-layer2
-  trigger:
-    include:
-      - ci_gitlab/docker-manual.yml
+  needs: ["ubuntu22.04:docker-build"]
+
+# The same, based on micromamba.
+jupyter-mamba-notebook:docker-build:
+  variables:
+    IMAGE_NAME: jupyterlab-mamba
+    SICONOS_DOCKER_TARGET: mambalab
+    RESULT_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+  extends: .docker-build
+   
+  
+# Manual jobs, used to create docker images.
+# docker-manual-img:
+#   extends: .docker-rules
+#   stage: docker-build-layer2
+#   trigger:
+#     include:
+#       - ci_gitlab/docker-manual.yml
 
 
 # -------------- Configure, build and test Siconos --------------
-     
-debian-buster:configure:
-  variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
-     cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-  extends:
-    - .siconos-configure
-    - .full-ci-rules
 
-debian-buster:build:
-  variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-  extends:
-    - .siconos-build
-    - .full-ci-rules
-  needs: ["debian-buster:configure"]
+# -- Jobs that will always be executed (rule .devel-rules) --
 
-debian-buster:test:
-    variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-    needs: ["debian-buster:build"]
-    extends:
-      - .siconos-test
-      - .full-ci-rules
-
-ubuntu20.04-fclib:configure:
-   variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
-     cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_fclib.cmake
-   extends:
-    - .siconos-configure
-    - .full-ci-rules
-
-ubuntu20.04-fclib:build:
-  variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
-    cdash_submit: 1
-    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_fclib.cmake
-  extends:
-    - .siconos-build
-    - .full-ci-rules
-  needs: ["ubuntu20.04-fclib:configure"]
-
-ubuntu20.04-fclib:test:
-    variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_fclib.cmake
-    needs: ["ubuntu20.04-fclib:build"]
-    extends:
-      - .siconos-test
-      - .full-ci-rules
-
-ubuntu22.04:configure:
-   variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
-     cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-   extends:
-    - .siconos-configure
-
-ubuntu22.04:build:
-  variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-  extends:
-    - .siconos-build
-  needs: ["ubuntu22.04:configure"]
-
-ubuntu22.04:test:
-    variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-    needs: ["ubuntu22.04:build"]
-    extends:
-      - .siconos-test
- 
+# ------ ubuntu 22, debug setup -------
 ubuntu22.04-debug:configure:
    variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
-     cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+     CDASH_SUBMIT: 1
+     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
    extends:
     - .siconos-configure
+    - .devel-rules
 
 ubuntu22.04-debug:build:
   variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+      CDASH_SUBMIT: 1
   extends:
     - .siconos-build
+    - .devel-rules
   needs: ["ubuntu22.04-debug:configure"]
 
 ubuntu22.04-debug:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+      CDASH_SUBMIT: 1
     needs: ["ubuntu22.04-debug:build"]
     extends:
       - .siconos-test
+      - .devel-rules
 
-
-fedora-33:configure:
-  variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-33
-     cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-  extends:
+# ------ ubuntu 22, default setup -------
+ubuntu22.04-release:configure:
+   variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+     CDASH_SUBMIT: 1
+   extends:
     - .siconos-configure
-    - .full-ci-rules
+    - .devel-rules
 
-fedora-33:build:
+ubuntu22.04-release:build:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-33
-    cdash_submit: 1
-    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+      CDASH_SUBMIT: 1
   extends:
     - .siconos-build
-    - .full-ci-rules
-  needs: ["fedora-33:configure"]
+    - .devel-rules
+  needs: ["ubuntu22.04-release:configure"]
 
-fedora-33:test:
+ubuntu22.04-release:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/fedora-33
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-    needs: ["fedora-33:build"]
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+      CDASH_SUBMIT: 1
+    needs: ["ubuntu22.04-release:build"]
     extends:
-    - .siconos-test
-    - .full-ci-rules
+      - .siconos-test
+      - .devel-rules
 
-jupyterlab:configure:
+# --- Siconos inside a notebook, default setup ---
+mambalab:configure:
   variables:
      OPENBLAS_NUM_THREADS: 1
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
-     cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
-     CMAKE_PREFIX_PATH: /opt/conda
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+     CDASH_SUBMIT: 1
+     #      CMAKE_PREFIX_PATH: /opt/conda
+  extends:
+    - .siconos-configure
+    - .devel-rules
+
+mambalab:build:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+    - .devel-rules
+  needs: ["mambalab:configure"]
+
+mambalab:test:
+    variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/jupyterlab-mamba
+      CDASH_SUBMIT: 1
+    needs: ["mambalab:build"]
+    extends:
+    - .siconos-test
+    - .devel-rules
+    
+# -- Jobs executed for MR or main branch only --
+
+# ------ ubuntu 22, numerics only, fclib -------
+ubuntu22.04-numerics-fclib:configure:
+   variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+     CDASH_SUBMIT: 1
+     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/numerics_with_fclib.cmake
+   extends:
+    - .siconos-configure
+
+ubuntu22.04-numerics-fclib:build:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+  needs: ["ubuntu22.04-numerics-fclib:configure"]
+
+ubuntu22.04-numerics-fclib:test:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+    CDASH_SUBMIT: 1
+  needs: ["ubuntu22.04-numerics-fclib:build"]
+  extends:
+    - .siconos-test
+
+# ------ ubuntu 22, with mechanisms component -------
+ubuntu22.04-mechanisms:configure:
+   variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
+     CDASH_SUBMIT: 1
+     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
+   extends:
+    - .siconos-configure
+   when: manual
+    
+ubuntu22.04-mechanisms:build:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+  needs: ["ubuntu22.04-mechanisms:configure"]
+  when: manual
+
+ubuntu22.04-mechanisms:test:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
+    CDASH_SUBMIT: 1
+  needs: ["ubuntu22.04-mechanisms:build"]
+  extends:
+    - .siconos-test
+  when: manual
+
+    
+# ------ debian bookworm, default setup -------
+debian-bookworm:configure:
+  variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
+     CDASH_SUBMIT: 1
   extends:
     - .siconos-configure
 
-jupyterlab:build:
+debian-bookworm:build:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
-    cdash_submit: 1
-    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
+      CDASH_SUBMIT: 1
   extends:
     - .siconos-build
-  needs: ["jupyterlab:configure"]
+  needs: ["debian-bookworm:configure"]
 
-jupyterlab:test:
+debian-bookworm:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_notebook.cmake
-    needs: ["jupyterlab:build"]
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
+      CDASH_SUBMIT: 1
+    needs: ["debian-bookworm:build"]
+    extends:
+      - .siconos-test
+
+      
+# --- fedora 38, default setup ---
+fedora-38:configure:
+  variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
+     CDASH_SUBMIT: 1
+  extends:
+    - .siconos-configure
+
+fedora-38:build:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+  needs: ["fedora-38:configure"]
+
+fedora-38:test:
+    variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/fedora-38
+      CDASH_SUBMIT: 1
+    needs: ["fedora-38:build"]
     extends:
     - .siconos-test
 
-# Generate sico install
 
-ubuntu22:install:
-  variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu22.04
-    siconos_docker_name: siconos-$CI_COMMIT_REF_NAME
-  extends: .siconos-install
-  needs: ["ubuntu22.04:build"]
+# --- Jobs to install siconos and produce a Docker image "Siconos ready" ---
 
-debian-buster:install:
-  variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/debian-buster
-    siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-debian-buster
-  extends:
-    - .siconos-install
-    - .full-ci-rules
-  needs: ["debian-buster:build"]
+# Chosen OS for the install is ubuntu 22
+# The image is saved in siconos-tutorials (public) registries
+# Remark: branch name will be appended to image name.
+# Tag will correspond to the commit ref
+# siconos:install:
+#   variables: 
+#     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
+#     RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconos
+#   extends:
+#     - .siconos-install
+#     - .devel-rules
+#   needs: ["ubuntu22.04-release:build"] 
 
-
+# The image is saved in siconos-tutorials (public) registries
+# Remark: branch name will be appended to image name.
+# Tag will correspond to the commit ref
 jupyterlab:install:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/jupyterlab
-    siconos_docker_name: siconoslab-$CI_COMMIT_REF_NAME
+    IMAGE_NAME: siconoslab
+    RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab
+    SICONOS_DOCKER_TARGET: siconoslab
   extends:
     - .siconos-jupyterlab-install
-  needs: ["jupyterlab:build"]
+    - .devel-rules
+  needs: ["ubuntu22.04-release:build"]
+
+# Job run when a new tag (release) is created.
+release_job:
+    stage: release
+    image: registry.gitlab.com/gitlab-org/release-cli:latest
+    rules:
+    - if: $CI_COMMIT_TAG                 # Run this job when a tag is created
+      when: always
+    script:
+    - echo "running release_job"
+    release:                               # See https://docs.gitlab.com/ee/ci/yaml/#release for available properties
+      tag_name: '$CI_COMMIT_TAG'
+      description: '$CI_COMMIT_TAG'
 
 # Start CI in siconos-tutorials, when required
 # How? Use [with examples] in your commit message.
-# Based on the specific docker image build and saved during ubuntu22:install step.
+# Based on the specific docker image build and saved during siconos:install step.
 bridge:examples:
   variables:
     SICONOS_DOCKER_NAME: siconos-$CI_COMMIT_REF_NAME
@@ -269,11 +319,10 @@ bridge:examples:
   trigger: 
     project: nonsmooth/siconos-tutorials
     strategy: depend
-  needs: ["ubuntu22:install"]
-  extends:
-    - .examples-rules
+  needs: ["jupyterlab:install"]
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
     
-
 
 # --- Creates a new pipeline to build documentation
 # Trigger : manual.
@@ -286,30 +335,3 @@ generate-doc:
       - docs/build-doc.yml
   when: manual
 
-# -- Jobs on demand --
-# Triggered through the interface
-# Build siconos with oce component
-siconos-oce:
-  stage: configure
-  trigger:
-    include:
-      - ci_gitlab/siconos-with-oce.yml
-  when: manual
-
-ubuntu18.04:full:
-      variables:
-        IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu18.04
-        cdash_submit: 1
-        user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-      extends:
-        - .siconos-full
-      when: manual
-
-ubuntu20.04:full:
-      variables:
-        IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04
-        cdash_submit: 1
-        user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
-      extends:
-        - .siconos-full
-      when: manual

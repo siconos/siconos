@@ -1,4 +1,4 @@
-#!/usr/bin/env @PYTHON_EXECUTABLE@
+#!/usr/bin/env @Python_EXECUTABLE@
 """
 Description: Filter the contents of a Siconos mechanics-IO HDF5 simulation file.
 """

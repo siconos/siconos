@@ -219,9 +219,9 @@ void _MBTB_STEP()
   double * dd =   sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam;
   int * ii =   sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam;
 
-  std::cout<< "     OSNS reached accuracy ="<< dd[2] << " < " << dd [0] <<  std::endl;
-  std::cout<< "     OSNS nb iterations ="<< ii[3] << " < " << ii [0] <<  std::endl;
-  std::cout<< "     Number of Newton iterations = " << sSimu->getNewtonNbIterations() <<std::endl;
+  std::cout<< "        OSNS solver info :: reached accuracy = "<< dd[SICONOS_DPARAM_RESIDU] << " < " << dd [SICONOS_DPARAM_TOL] ;
+  std::cout<< "     nb iterations ="<< ii[SICONOS_IPARAM_ITER_DONE] << " < " << ii [SICONOS_IPARAM_MAX_ITER] <<  std::endl;
+  std::cout<< "        Newton loop info ::  iterations = " << sSimu->getNewtonNbIterations() << " < " << sSimu->newtonMaxIteration() << " residu = " << sSimu->newtonResiduDSMax() << " < " << sSimu->newtonTolerance()  <<std::endl;
 
   Type::Siconos  simuType;
   simuType = Type::value(*sSimu);
@@ -262,7 +262,7 @@ void _MBTB_displayStep()
   // Bodies display output
   if(sDisplayStepBodies)
   {
-    printf("STEP Number = %d\t",sTimerCmp);
+    printf("[mechanisms] Time step  Number %d\t",sTimerCmp);
     for(unsigned int numDS =0; numDS<sNbOfBodies; numDS++)
     {
       printf("Body number %i\n", numDS);
