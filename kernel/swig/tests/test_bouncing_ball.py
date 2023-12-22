@@ -139,7 +139,8 @@ def test_bouncing_ball1(datafile):
     ref = sk.getMatrix(
         sk.SimpleMatrix(datafile("BouncingBallTS.ref"))
     )
-    assert np.linalg.norm(data - ref) < 1e-12
+    error = np.linalg.norm(data - ref)
+    assert error < 1e-12
 
 
 def xtest_bouncing_ball_from_xml():
@@ -232,13 +233,13 @@ def run_simulation_with_two_ds(ball, ball_d, t0):
     data[0, 1] = ball.q()[0]
     data[0, 2] = ball.velocity()[0]
     data[0, 3] = ball.p(1)[0]
-    data[0, 4] = inter.lambda_(1)
+    data[0, 4] = inter.lambda_(1)[0]
 
     data_d[0, 0] = t0
     data_d[0, 1] = ball_d.q()[0]
     data_d[0, 2] = ball_d.velocity()[0]
     data_d[0, 3] = ball_d.p(1)[0]
-    data_d[0, 4] = inter_d.lambda_(1)
+    data_d[0, 4] = inter_d.lambda_(1)[0]
 
     k = 1
 
