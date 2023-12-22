@@ -480,32 +480,38 @@ void Simulation::initialize()
   // 2 - Initialize index sets for OSIs
   initializeIndexSets();
 
-  // 3 - Compute a first initial step if it is different the previous state
+  // 3 - initialize new ds
   applyNSDSChangelogForDS();
+
+  // 3.1- Compute a first initial step if it is different the previous state
   computeInitialStateOfTheStep();
 
-  // 4 - allow the InteractionManager to add/remove any interactions it wants
+  // 4 - update the world from DS
+  // for external contact detection library for instance
   updateWorldFromDS();
+
+  // 5 - call the InteractionManager to add/remove interactions
   updateInteractions();
 
-  // 5 - initialize new ds and interactions
-
+  // 6 - initialize new interactions
   initializeNSDSChangelog();
 
-  // 6 - updateOutput
+  // 7 - updateOutput
+  // we compute the new values of the output needed
+  // by the updateIndexSet method
   updateOutput();
 
-  // 7 - Initialize OneStepNSProblem(s)
+  // 8 - Initialize OneStepNSProblem(s)
   DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
 
   //Initialize OneStepNSProblem(s). Depends on the type of simulation.
+  // this calls in particular updateIndexSet
   //Warning FP : must be done in any case, even if the interactions set
   // is empty.
   if(Type::value(*this) != Type::EventDriven)
   {
     initOSNS();
   }
-
 
   // 7 - First initialization of the simulation
   firstInitialize();
