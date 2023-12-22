@@ -268,7 +268,7 @@ void Simulation::applyNSDSChangelogForDS()
   while(itc != _nsds->changeLog().end())
   {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
-    DEBUG_PRINT("The nsds has changed\n")
+    DEBUG_PRINT("The nsds has changed\n");
     const NonSmoothDynamicalSystem::Change& change = *itc;
     itc++;
 
@@ -276,6 +276,7 @@ void Simulation::applyNSDSChangelogForDS()
     if(change.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
     {
       SP::DynamicalSystem ds = change.ds;
+      DEBUG_PRINTF("ds number : %i\n", ds->number());
       if(!DSG->properties(DSG->descriptor(ds)).osi)
       {
         if(_allOSI->size() == 0)
@@ -343,7 +344,7 @@ void Simulation::initializeNSDSChangelog()
   while(itc != _nsds->changeLog().end())
   {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
-    DEBUG_PRINT("The nsds has changed\n")
+    DEBUG_PRINT("The nsds has changed\n");
     const NonSmoothDynamicalSystem::Change& change = *itc;
     itc++;
 
@@ -414,7 +415,7 @@ void Simulation::initializeIndexSets()
     if(!(*itosi)->isInitialized())
     {
       DEBUG_PRINT("- 4 - we finalize the initialization of osi\n");
-      DEBUG_PRINT("osi->initialize\n")
+      DEBUG_PRINT("osi->initialize\n");
       (*itosi)->initialize();
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
