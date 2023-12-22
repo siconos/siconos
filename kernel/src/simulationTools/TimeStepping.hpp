@@ -42,6 +42,7 @@ typedef void (*CheckSolverFPtr)(int, Simulation *);
 #define SICONOS_TS_LINEAR 1
 #define SICONOS_TS_LINEAR_IMPLICIT 2
 #define SICONOS_TS_NONLINEAR 3
+#define SICONOS_TS_NONLINEAR_FULL 4
 
 class TimeStepping : public Simulation {
 protected:
@@ -228,9 +229,8 @@ public:
    *  It computes the initial residu and set the, if needed to Newton variable
    *  to start the newton algorithm.
    */
-  void initializeNewtonLoop();
-
-  void computeInitialNewtonState();
+  void initializeNewtonSolve();
+  void computeInitialStateOfTheStep() override;
   void prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion

@@ -247,7 +247,7 @@ void Simulation::initializeOSIAssociations()
   }
 }
 
-void Simulation::initializeNSDSChangelog()
+void Simulation::applyNSDSChangelogForDS()
 {
   // 4- we initialize new  ds and interaction
   /* Changes to the NSDS are tracked by a changelog, making it fast
@@ -256,14 +256,19 @@ void Simulation::initializeNSDSChangelog()
    * optimisation over scanning the whole NSDS for new elements at
    * each step. */
   SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
+
+  NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition_save = _nsdsChangeLogPosition;
+  
   NonSmoothDynamicalSystem::ChangeLog::const_iterator& itc = _nsdsChangeLogPosition.it;
 
+
+  
   bool interactionInitialized = false;
   itc++;
   while(itc != _nsds->changeLog().end())
   {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
-    DEBUG_PRINT("The nsds has changed\n")
+    DEBUG_PRINT("The nsds has changed\n");
     const NonSmoothDynamicalSystem::Change& change = *itc;
     itc++;
 
@@ -271,6 +276,7 @@ void Simulation::initializeNSDSChangelog()
     if(change.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
     {
       SP::DynamicalSystem ds = change.ds;
+      DEBUG_PRINTF("ds number : %i\n", ds->number());
       if(!DSG->properties(DSG->descriptor(ds)).osi)
       {
         if(_allOSI->size() == 0)
@@ -289,7 +295,82 @@ void Simulation::initializeNSDSChangelog()
       OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
       osi.initializeWorkVectorsForDS(getTk(),ds);
     }
-    else if(change.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
+    // else if(change.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
+    // {
+    //   SP::Interaction inter = change.i;
+    //   initializeInteraction(getTk(), inter);
+    //   interactionInitialized = true;
+    // }
+    // else if(change.typeOfChange == NonSmoothDynamicalSystem::rmDynamicalSystem)
+    // {
+    //   // also need to force an update in this case since indexSet1 may
+    //   // still have Interactions that refer to DSs that are not in graph
+    //   interactionInitialized = true;
+    // }
+  }
+  _nsdsChangeLogPosition = _nsdsChangeLogPosition_save;
+
+  
+  // _nsdsChangeLogPosition = _nsds->changeLogPosition();
+
+  // // (re)initialize OneStepNSProblem(s) if necessary
+  // if(interactionInitialized || !_isInitialized)
+  // {
+  //   DEBUG_PRINT("(re)Initialize OneStepNSProblem(s)\n");
+  //   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
+  //   // Warning FP : must be done in any case, even if the interactions set
+  //   // is empty.
+  //   initOSNS();
+
+  //   // Since initOSNS calls updateIndexSets() which resets the
+  //   // topology->hasChanged() flag, it must be specified explicitly.
+  //   // Otherwise OneStepNSProblem may fail to update its matrices.
+  //   _nsds->topology()->setHasChanged(true);
+  // }
+}
+void Simulation::initializeNSDSChangelog()
+{
+  // 4- we initialize new  ds and interaction
+  /* Changes to the NSDS are tracked by a changelog, making it fast
+   * for the Simulation to scan any changes it has not yet seen and
+   * initialize the associated ata structures.  It is just an
+   * optimisation over scanning the whole NSDS for new elements at
+   * each step. */
+  SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
+  NonSmoothDynamicalSystem::ChangeLog::const_iterator& itc = _nsdsChangeLogPosition.it;
+
+  bool interactionInitialized = false;
+  itc++;
+  while(itc != _nsds->changeLog().end())
+  {
+    DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
+    DEBUG_PRINT("The nsds has changed\n");
+    const NonSmoothDynamicalSystem::Change& change = *itc;
+    itc++;
+
+    DEBUG_EXPR(change.display());
+    // if(change.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
+    // {
+    //   SP::DynamicalSystem ds = change.ds;
+    //   if(!DSG->properties(DSG->descriptor(ds)).osi)
+    //   {
+    //     if(_allOSI->size() == 0)
+    //       THROW_EXCEPTION
+    //       ("Simulation::initialize - there is no osi in this Simulation !!");
+    //     DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
+    //     SP::OneStepIntegrator osi_default = *_allOSI->begin();
+    //     _nsds->topology()->setOSI(ds, osi_default);
+    //     if(_allOSI->size() > 1)
+    //     {
+    //       std::cout << "Warning. The simulation has multiple OneStepIntegrators "
+    //                 "(OSI) but the DS number " << ds->number() << " is not assigned to an "
+    //                 "OSI. We assign the following OSI to this DS." << std::endl;
+    //     }
+    //   }
+    //   OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
+    //   osi.initializeWorkVectorsForDS(getTk(),ds);
+    // }
+    if(change.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     {
       SP::Interaction inter = change.i;
       initializeInteraction(getTk(), inter);
@@ -334,7 +415,7 @@ void Simulation::initializeIndexSets()
     if(!(*itosi)->isInitialized())
     {
       DEBUG_PRINT("- 4 - we finalize the initialization of osi\n");
-      DEBUG_PRINT("osi->initialize\n")
+      DEBUG_PRINT("osi->initialize\n");
       (*itosi)->initialize();
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
@@ -399,27 +480,38 @@ void Simulation::initialize()
   // 2 - Initialize index sets for OSIs
   initializeIndexSets();
 
-  // 3 - allow the InteractionManager to add/remove any interactions it wants
+  // 3 - initialize new ds
+  applyNSDSChangelogForDS();
+
+  // 3.1- Compute a first initial step if it is different the previous state
+  computeInitialStateOfTheStep();
+
+  // 4 - update the world from DS
+  // for external contact detection library for instance
   updateWorldFromDS();
+
+  // 5 - call the InteractionManager to add/remove interactions
   updateInteractions();
 
-  // 4 - initialize new ds and interactions
+  // 6 - initialize new interactions
   initializeNSDSChangelog();
 
-  // 5 - updateOutput
+  // 7 - updateOutput
+  // we compute the new values of the output needed
+  // by the updateIndexSet method
   updateOutput();
 
-  // 6 - Initialize OneStepNSProblem(s)
+  // 8 - Initialize OneStepNSProblem(s)
   DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
 
   //Initialize OneStepNSProblem(s). Depends on the type of simulation.
+  // this calls in particular updateIndexSet
   //Warning FP : must be done in any case, even if the interactions set
   // is empty.
   if(Type::value(*this) != Type::EventDriven)
   {
     initOSNS();
   }
-
 
   // 7 - First initialization of the simulation
   firstInitialize();
@@ -661,12 +753,12 @@ void Simulation::updateAllInput()
   OSIIterator itOSI;
 
   //nonSmoothDynamicalSystem()->resetNonSmoothPart();
-  
+
   // 1 - compute input (lambda -> r)
   if(!_allNSProblems->empty())
   {
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->resetAllNonSmoothParts(); 
+      (*itOSI)->resetAllNonSmoothParts();
 
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
       (*itOSI)->updateInput(nextTime());
@@ -681,12 +773,12 @@ void Simulation::updateInput(unsigned int level)
   OSIIterator itOSI;
 
   //nonSmoothDynamicalSystem()->resetNonSmoothPart(level);
-  
+
   // 1 - compute input (lambda -> r)
   if(!_allNSProblems->empty())
   {
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-      (*itOSI)->resetNonSmoothPart(level); 
+      (*itOSI)->resetNonSmoothPart(level);
 
     for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
 	    (*itOSI)->updateInput(nextTime(),level);

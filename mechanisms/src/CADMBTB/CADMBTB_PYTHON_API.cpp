@@ -1,7 +1,7 @@
 #include "CADMBTB_DATA.hpp"
 #include "CADMBTB_PYTHON_API.hpp"
 #include <assert.h>
-
+#include <stdio.h>
 AIS_InteractiveContext * pAIS_InteractiveContext=nullptr;
 V3d_View * pV3d_View=nullptr;
 int sCmpDump=0;
@@ -56,7 +56,7 @@ void CADMBTB_DumpGraphic()
   if(pV3d_View)
   {
     char file[16];
-    sprintf(file,"manual%d.jpg",sCmpDumpMan);
+    snprintf(file,16,"manual%d.jpg",sCmpDumpMan);
     pV3d_View->Dump(file);
     sCmpDumpMan++;
   }

@@ -545,7 +545,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
   //cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT "<<endl;
   bool isLinear  = _nsds->isLinear();
   SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
-  initializeNewtonLoop();
+  initializeNewtonSolve();
 
   if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
