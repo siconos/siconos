@@ -16,7 +16,7 @@ fedora38:docker-build:
   variables:
     IMAGE_NAME: fedora-38
     SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora38
+    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora-38
   extends: .docker-build
 
 ubuntu22.04:docker-build:
