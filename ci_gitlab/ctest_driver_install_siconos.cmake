@@ -12,8 +12,37 @@
 
 # ============= setup  ================
 
+# -- CI_PROJECT_DIR is a required environment variable --
+# --> set by default for gitlab-ci, even inside the docker container
+
+if(DEFINED ENV{GITLAB_CI})
+  if($ENV{GITLAB_CI} STREQUAL true)
+    set(CI_GITLAB ON)
+  endif()
+endif()
+  
+# if(NOT DEFINED ENV{CI_PROJECT_DIR} )
+#   message(FATAL_ERROR "Please set env variable CI_PROJECT_DIR to siconos sources directory (git repo).")
+# endif()
+
+
+# - Source dir and path to siconos install
+# if(NOT CTEST_SOURCE_DIRECTORY)
+#   set(CTEST_SOURCE_DIRECTORY $ENV{CI_PROJECT_DIR})
+# endif()
+
+# # - Top level build directory -
+# # If not specified : current dir.
+# if(NOT CTEST_BINARY_DIRECTORY)
+#   set(CTEST_BINARY_DIRECTORY .)
+# endif()
+# Build name (for cdash)
+
+
 if(${CTEST_MODE} STREQUAL "configure" OR ${CTEST_MODE} STREQUAL "all")
 
+  # -- Definition of all variables required for ctest --
+  
   # Parallel build only for siconos_install. For examples it leads to: warning: jobserver unavailable: using -j1. Add `+' to parent make rule.
   #set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/cmake/valgrind.supp)
   
