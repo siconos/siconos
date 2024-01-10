@@ -48,7 +48,8 @@ enum class TimeSteppingType {
   // idem
   LINEAR_IMPLICIT,
   // will perform the newton iterations up to convergence
-  NONLINEAR
+  NONLINEAR,
+  NONLINEAR_FULL
 };
 
 class TimeStepping : public Simulation {
@@ -247,9 +248,8 @@ class TimeStepping : public Simulation {
    *  It computes the initial residu and set the, if needed to Newton variable
    *  to start the newton algorithm.
    */
-  void initializeNewtonLoop();
-
-  void computeInitialNewtonState();
+  void initializeNewtonSolve();
+  void computeInitialStateOfTheStep() override;
   void prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion
