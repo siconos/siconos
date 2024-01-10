@@ -31,8 +31,6 @@
 #  Results will be submitted to cdash if CDASH_SUBMIT=1.
 # 
 # 
-# The default installation path for siconos is /home/install-siconos.
-# Use -DSICONOS_INSTALL_DIR=<something else> as ctest option to change this location.
 
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}
 : ${BUILD_MODE:?"Please choose build mode among configure, build or test."}

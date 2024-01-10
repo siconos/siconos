@@ -4,7 +4,6 @@
 # aims at providing a proper install of siconos for a given configuration.
 #
 # Input variables :
-# - SICONOS_INSTALL_DIR : where to install siconos. Default : /home/install-siconos
 # - USER_OPTIONS_FILE : user option file used by cmake to configure siconos. Default : siconos_conf.cmake.
 #   Warning : always searched in siconos-tutorials/ci directory.
 #   using common commands (lsb_release ...)
@@ -42,12 +41,7 @@ endif()
 
 if(${CTEST_MODE} STREQUAL "configure" OR ${CTEST_MODE} STREQUAL "all")
 
-# -- Definition of all variables required for ctest --
-
-  # Install dir (used as CMAKE_INSTALL_PREFIX)
-  if(NOT SICONOS_INSTALL_DIR)
-    set(SICONOS_INSTALL_DIR /home/install-siconos/)
-  endif()
+  # -- Definition of all variables required for ctest --
   
   # Parallel build only for siconos_install. For examples it leads to: warning: jobserver unavailable: using -j1. Add `+' to parent make rule.
   #set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/cmake/valgrind.supp)
