@@ -31,6 +31,7 @@
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "Topology.hpp"
+#include "Tools.hpp"  // for enum_to_string
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -627,7 +628,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
   } else
     THROW_EXCEPTION(
         "siconos::simulation::TimeStepping::NewtonSolve failed. Unknown newtonOptions: " +
-        std::to_string(_newtonOptions));
+        siconos::tools::enum_to_string(_newtonOptions));
   DEBUG_END("siconos::simulation::TimeStepping::newtonSolve\n");
 }
 

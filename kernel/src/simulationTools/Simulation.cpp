@@ -187,12 +187,13 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
    * each step. */
   auto DSG = _nsds->topology()->dSG(0);
 
-  NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition_save = _nsdsChangeLogPosition;
+  auto _nsdsChangeLogPosition_save = _nsdsChangeLogPosition;
 
-  auto& itc = _nsdsChangeLogPosition.it;
+  auto& itc = _nsdsChangeLogPosition;
 
   bool interactionInitialized = false;
   itc++;
+
   while (itc != _nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n");
@@ -201,7 +202,7 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
 
     DEBUG_EXPR(change.display());
     if (change.typeOfChange ==
-        siconos::modeling::NonSmoothDynamicalSystem::addDynamicalSystem) {
+        siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addDynamicalSystem) {
       auto ds = change.ds;
       DEBUG_PRINTF("ds number : %i\n", ds->number());
       if (!DSG->properties(DSG->descriptor(ds)).osi) {
@@ -262,11 +263,12 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
    * initialize the associated ata structures.  It is just an
    * optimisation over scanning the whole NSDS for new elements at
    * each step. */
-  SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
-  NonSmoothDynamicalSystem::ChangeLog::const_iterator& itc = _nsdsChangeLogPosition.it;
+  auto DSG = _nsds->topology()->dSG(0);
+  auto& itc = _nsdsChangeLogPosition;
 
   bool interactionInitialized = false;
   itc++;
+
   while (itc != _nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n");
@@ -295,7 +297,8 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
     //   OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
     //   osi.initializeWorkVectorsForDS(getTk(),ds);
     // }
-    if (change.typeOfChange == NonSmoothDynamicalSystem::addInteraction) {
+    if (change.typeOfChange ==
+        siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addInteraction) {
       auto inter = change.i;
       initializeInteraction(getTk(), inter);
       interactionInitialized = true;

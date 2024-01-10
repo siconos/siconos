@@ -84,7 +84,7 @@ class NonSmoothDynamicalSystem {
     std::shared_ptr<DynamicalSystem> ds{nullptr};
     std::shared_ptr<Interaction> i{nullptr};
 
-    Change(Change&&) = default; // Required for push_back ...
+    Change(Change&&) = default;  // Required for push_back ...
     Change(ChangeType t, std::shared_ptr<DynamicalSystem> dsnew)
         : typeOfChange(t), ds(dsnew){};
     Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew){};

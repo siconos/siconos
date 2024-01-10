@@ -78,6 +78,37 @@ mambaenv:docker-build:
 # -- Jobs that will always be executed (rule .devel-rules) --
 
 # ------ ubuntu 22, debug setup -------
+ubuntu23.04-debug:configure:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+    CDASH_SUBMIT: 1
+    CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
+  extends:
+    - .siconos-configure
+    - .devel-rules
+  needs:
+    - job: ubuntu23.04:docker-build
+      optional: true
+
+ubuntu23.04-debug:build:
+  variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+      CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+    - .devel-rules
+  needs: ["ubuntu23.04-debug:configure"]
+
+ubuntu23.04-debug:test:
+    variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+      CDASH_SUBMIT: 1
+    extends:
+      - .siconos-test
+      - .devel-rules
+    needs: ["ubuntu23.04-debug:build"]
+
+# ------ ubuntu 22, debug setup -------
 ubuntu22.04-debug:configure:
   variables:
     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04

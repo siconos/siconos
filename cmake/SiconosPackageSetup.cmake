@@ -93,5 +93,5 @@ if(WITH_GIT)
     OUTPUT_STRIP_TRAILING_WHITESPACE
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
   file(WRITE ${CMAKE_BINARY_DIR}/siconos-commit.txt "${COMMIT_REF_NAME}-${SOURCE_ABBREV_GIT_SHA1}")
-  install(FILES ${CMAKE_BINARY_DIR}/siconos-commit.txt DESTINATION share)
+  install(FILES ${CMAKE_BINARY_DIR}/siconos-commit.txt DESTINATION ${SiconosConfigPackageLocation})
 endif()
