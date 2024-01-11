@@ -344,13 +344,12 @@ release_job:
 # How? Use [with examples] in your commit message.
 # Based on the specific docker image build and saved during siconos:install step.
 bridge:examples:
-  variables:
-    SICONOS_DOCKER_NAME: siconos-$CI_COMMIT_REF_NAME
-    TRIGGERED: 1
   stage: examples
   trigger: 
     project: nonsmooth/siconos-tutorials
-    strategy: depend
+    strategy : depend
+    forward :  
+      yaml_variables: false
   needs: ["jupyterlab:install"]
   rules:
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
