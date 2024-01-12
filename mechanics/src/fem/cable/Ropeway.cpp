@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2023 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ void siconos::fem::cable::Ropeway::addSupport(
   if (!rPile0.isStation()) {
     a_supports.push_back(std::make_shared<Support>(rPile0));
     a_supports[a_supports.size() - 1]->prepare(a_rope);
-  } else if (a_pulleyIdx < 0) {  // non déjà ajouté
+  } else if (a_pulleyIdx < 0) {  // non dÃ©jÃ  ajoutÃ©
     a_pulleyIdx = a_supports.size();
     a_supports.push_back(std::make_shared<Pulley>(rPile0));
   }

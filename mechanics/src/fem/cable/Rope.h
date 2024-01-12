@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2023 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,8 +83,8 @@ class Rope {
   std::vector<double> TS = {};
 
   Cable meca;         // contient T0, EA, rho
-  const Pile &pile0;  // référence vers le support associé
-  const Pile &pile1;  // référence vers le support associé
+  const Pile &pile0;  // rÃ©fÃ©rence vers le support associÃ©
+  const Pile &pile1;  // rÃ©fÃ©rence vers le support associÃ©
   Point SR;           // support reaction [H,V,B]
   bool m_last{false};
 

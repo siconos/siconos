@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2023 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class TransportCableResult {
   int nb_nodes{0};
   double length{0.};
   double elem_length{0.};
-  // à convertir en siconos (vecteur ou matrice)
+  // Ã  convertir en siconos (vecteur ou matrice)
   std::vector<double> punct = {};
   ;
 
