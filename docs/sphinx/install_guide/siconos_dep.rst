@@ -3,19 +3,26 @@
 Siconos required and optional dependencies
 ==========================================
 
+.. note::
+
+   Dockerfiles available in `ci_gitlab/dockerfiles directory <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/master/ci_gitlab/dockerfiles?ref_type=heads>`_ of Siconos source dir are a proper source of inspiration to find the list of the required dependencies and how to install them
+
+   
+
+
 * a compiler suite, with c++, c and gfortran compilers.
 
  c++ 17 compatibility is required.
 
-* cmake (version > 3.14) (https://cmake.org)
+* cmake, version > 3.14 - https://cmake.org
 
-  cmake is very easy to install or update, whatever your system is:
+  cmake is very easy to install or update, whatever your system is, e.g.:
 
   .. code-block:: bash
 
      python3 -m pip install cmake
   
-* boost (http://www.boost.org)
+* boost, version > 1.71, http://www.boost.org)
 
 * blas and lapack (see :ref:`about_blas_lapack`)
 
@@ -27,7 +34,15 @@ To generate the documentation, you will need :
 
 For the python bindings:
 
-* python (>= 3.6)
+* python (>= 3.8)
+
+  We strongly recommend to use Conda-like or Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
+
+  See details in :ref:`about_python`
+  
+ 
+  
+  
 * swig (>= 3.0)
 
 To run tests:
@@ -35,6 +50,68 @@ To run tests:
 * cppunit
 
 
+.. _about_python:
+
+About Python
+============
+
+We strongly recommend to use Conda-like or Python virtual environments (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
+  
+
+Siconos venv example
+""""""""""""""""""""
+
+Installation:
+
+.. code-block:: bash
+		
+   python3 -m venv $HOME/siconosenv
+   source $HOME/siconosenv/bin/activate
+   pip install -U -r requirements.txt
+
+
+A requirements.txt file for Siconos is available in the source directory in `ci_gitlab/dockerfiles <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/master/ci_gitlab/dockerfiles?ref_type=heads>`_
+
+Activation:
+
+.. code-block:: bash
+		
+   source $HOME/siconosenv/bin/activate
+ 
+
+Siconos micromamba env example
+""""""""""""""""""""""""""""""
+
+Download the file `siconoslabenv.yml <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/blob/master/ci_gitlab/sicolabenv.yml?ref_type=heads>`_ in Siconos source dir.
+
+Change the name "base" to sicoenv in this file.
+
+
+Installation:
+
+.. code-block:: bash
+		
+   micromamba install -y -f sicolabenv.yml
+
+Activation:
+
+.. code-block:: bash
+
+   micromamba activate sicoenv
+
+
+   
+.. warning::
+   To ensure a proper mamba conf and the right channel, it may be necessary to run the following commands beforehand
+
+   .. code-block::
+
+      micromamba config prepend channels conda-forge
+      micromamba config set channel_priority strict
+      micromamba self-update
+
+  
+   
 .. _about_blas_lapack:
 
 About blas and Lapack
