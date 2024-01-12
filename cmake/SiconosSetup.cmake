@@ -19,30 +19,41 @@ include(FetchContent)
 #Current binary dir, for generated headers.Only at build time !
 include_directories($<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 
-#Add extra logs about git references(branch name, commit number...)
-#Useful for documentation and continuous integration
-option(WITH_GIT "Consider sources are under GIT" OFF)
-
-if(WITH_GIT) # User defined option, default = off
-#Check if git is available
-#and get last commit id(long and short).
-#Saved in SOURCE_ABBREV_GIT_SHA1 and SOURCE_GIT_SHA1
-#These vars are useful for tests logs and 'write_notes' macro.
-  find_package(Git)
-  if(GIT_FOUND)
-    set(CTEST_GIT_COMMAND "${GIT_EXECUTABLE}" )     
-    execute_process(COMMAND 
-      ${GIT_EXECUTABLE} rev-parse --short HEAD
-      OUTPUT_VARIABLE SOURCE_ABBREV_GIT_SHA1
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-    
-    execute_process(COMMAND 
-      ${GIT_EXECUTABLE} rev-parse HEAD
-      OUTPUT_VARIABLE SOURCE_GIT_SHA1
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+# Add extra logs about git references(branch name, commit number...)
+# Useful for documentation and continuous integration
+find_package(Git)
+if(Git_FOUND)
+  execute_process(COMMAND
+    ${GIT_EXECUTABLE} -C ${CMAKE_SOURCE_DIR} rev-parse
+    OUTPUT_VARIABLE NO_GIT
+    ERROR_VARIABLE NO_GIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  if(NO_GIT STREQUAL "")
+    set(WITH_GIT 1 CACHE INTERNAL "True if Git is available and Siconos sources are managed as a git repository.")
+  else()
+    set(WITH_GIT 0 CACHE INTERNAL "True if Git is available and Siconos sources are managed as a git repository.")
   endif()
+else()
+  set(WITH_GIT 0 CACHE INTERNAL "True if Git is available and Siconos sources are managed as a git repository.")
+endif()
+
+if(WITH_GIT)
+# Get last commit id(long and short).
+# Saved in SOURCE_ABBREV_GIT_SHA1 and SOURCE_GIT_SHA1
+# These vars are useful for tests logs and 'write_notes' macro.
+set(CTEST_GIT_COMMAND "${GIT_EXECUTABLE}" )     
+execute_process(COMMAND 
+  ${GIT_EXECUTABLE} rev-parse --short HEAD
+  OUTPUT_VARIABLE SOURCE_ABBREV_GIT_SHA1
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+execute_process(COMMAND 
+  ${GIT_EXECUTABLE} rev-parse HEAD
+  OUTPUT_VARIABLE SOURCE_GIT_SHA1
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
 
 
@@ -175,7 +186,7 @@ if(WITH_CXX)
   #https: // gitlab.kitware.com/cmake/cmake/issues/19714
   #set(Boost_USE_MULTITHREADED ON)
   set(Boost_NO_BOOST_CMAKE 1)
-  set(boost_min_version 1.61)
+  set(boost_min_version 1.71)
 #Set the list of required boost components
   if(WITH_SERIALIZATION)
     list(APPEND boost_required_components serialization filesystem)

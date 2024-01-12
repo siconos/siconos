@@ -40,14 +40,16 @@ For example, start a jupyter container including siconos, all running examples a
 .. code-block:: bash
 
 
-docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-release-4.4
-# Then, access in your browser at http://localhost:8888
-# and start siconos-notebooks/index.ipynb
+   docker run -p 8888:8888 -ti gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/siconoslab-master
 
-Another possible (but unstable) way to start with Siconos, try the tutorial notebooks available here :
+   # Then, access in your browser at http://localhost:8888/...
+   # The exact address will be printed on your screen as a result of the command above.
 
-.. image:: https://mybinder.org/badge.svg
-   :target: https://mybinder.org/v2/git/https%3A%2F%2Fgricad-gitlab.univ-grenoble-alpes.fr%2Fnonsmooth%2Fsiconos-tutorial.git/b08a0514b22b3927b58bddce3c4018f27ac0fc7d?filepath=siconos-notebooks%2Findex.ipynb
+
+Another possible (but unstable) way to start with Siconos, try the tutorial notebooks available here in the directory siconos-notebooks
+
+.. image:: https://plmbinder.math.cnrs.fr/binder/badge_logo.svg
+   :target: https://plmbinder.math.cnrs.fr/binder/v2/git/https%3A%2F%2Fgricad-gitlab.univ-grenoble-alpes.fr%2Fnonsmooth%2Fsiconos-tutorials.git/HEAD
 
 This page proposes a Python interactive interface (notebooks) to Siconos, that you can use through your web browser, online.
 
@@ -111,12 +113,10 @@ And, compile, link and execute (in one shot, thanks to siconos script)::
 
 
 For new simulation, start with the :ref:`template for c++ driver file <template_siconos_driver>`
-or try to mimic one of the examples available at (https://github.com/siconos/siconos-tutorials).
+or try to mimic one of the examples available at https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git.
   
 More
 ----
-     
-We should sort, clean, update the followings ...
 
 .. toctree::
    :maxdepth: 2

@@ -26,57 +26,81 @@ Prerequisites
 Whatever your system is, you will need first to :
 
 * Download the sources of Siconos as explained in :ref:`download`.
-* Create anywhere (but not in *path_to_sources*) a build directory.
 * Check :ref:`siconos_dependencies`. Most of them are commonly or at least easily installed
   on many standard systems.
   
 The quick way
 -------------
 
-If you do not want to bother with all installations details and only need a 'standard' siconos install, just do (first ensure you follow the steps described above : download, check dependencies ...)::
+If you do not want to bother with all installations details and only need a 'standard' siconos install (after ensuring the prerequisite described above):
 
-  cd path_to_build 
-  cmake path_to_sources
-  make -j N
-  make install
+* Start your favorite Python environment (e.g. `Micromaba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_, `venv <https://docs.python.org/3/library/venv.html>`_ ...)
 
+* Run
 
-N being the number of processes available on your system to run the compilation. Note that you'll probably need to run the install
-command as root.
+.. code-block:: bash
+  
+  cmake -S path_to_sources -B build-siconos
+  cmake --build build-siconos -j N
+  cmake --install build-siconos -j N
+  ctest --test-dir build-siconos # optional
+  
 
-If all went fine, you will get a full siconos installation in /usr/local, as detailed in :ref:`siconos_whatsinstalled`
+* N being the number of processes available on your system to run the compilation.
+* path-to-sources: full path to Siconos sources
+* build-siconos: the binary dir (where compilation, link, build take place). Choose any name/path. It must be different from path-to-sources.
+  
+If all went fine, you will get a full siconos installation as detailed in :ref:`siconos_whatsinstalled`
 If not, step to :ref:`siconos_detailed_install`.
 
+To check the install, try
+
+.. code-block:: bash
+
+   siconos --info
+   
 .. _siconos_detailed_install:
    
 Detailed installation
 ---------------------
 
-The first step of the installation process consists in running 'cmake'::
+The first step of the installation process consists in running 'cmake'
 
-   cd path_to_build
-   cmake path_to_sources -DOPTION1_NAME=option1_value -DOPTION2_NAME=option2_value ...
+.. code-block:: bash
 
-This command will explore your system, to generate an appropriate configuration, and some makefiles, for siconos, taking into account
-some extra options, set as shown above. Many extra options exists to customize your build/install process of siconos and most of the available options
-are detailled in :ref:`siconos_cmake_options`.
+   cmake -S path_to_sources -B build-siconos -DOPTION1_NAME=option1_value  ...
 
+This command will explore your system, to generate an appropriate configuration, and some makefiles for Siconos, taking into account
+some extra options, set as shown above. Many extra options exists to customize your build/install process of siconos.
 
-    *Remark : In place of the command-line cmake, you can also run*::
+The easiest way to handle Siconos options is to save them in a config file and to call cmake like this
+
+.. code-block:: bash
+
+   cmake -S path_to_sources -B build-siconos -DUSER_OPTIONS_FILE=option_file.cmake
+
+Examples of options files are available in the directory `config_samples <https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/tree/master/config_samples?ref_type=heads>`_ of Siconos source dir. To write your own file, just copy the file default.cmake somewhere and modify it according to your needs.
+
+Choose any place/name for build-siconos, the only requirement is that it must be different from path_to_sources. This is a temporary directory that can be removed once the installation is done.
+
+.. note::
+   In place of the command-line cmake, you can also run::
 
       ccmake path_to_sources ...
 
-    *to open some dialog-interface to cmake configuration. 'cmake-gui' is also another option. For details check cmake documentation : https://cmake.org/runningcmake/ .*
+   to open some dialog-interface to cmake configuration. 'cmake-gui' is also another option. For details check cmake documentation : https://cmake.org/runningcmake/ .
+   
 
-Once the cmake process is done, you will get many generated files in *path_to_build*, including a Makefile and a CMakeCache.txt. The latter contains all
+Once the cmake process is done, generated files stay in *build-siconos*, including a Makefile and a CMakeCache.txt. The latter contains all
 the variables set during configuration. Do not forget to check the screen output of cmake to be sure that everything went fine.
 
 Then you are ready to build siconos libraries and binaries::
 
-  make -j N
+  cmake --build build-siconos -j N
 
 Or if you want to build a single target::
 
+  cd build-siconos
   make target_name -j N
 
 All available targets are obtained with::
@@ -87,10 +111,78 @@ Optionnaly (if WITH_TESTING is ON), you can run tests to check you build. See :r
 
 The last step is the installation of all required libraries, headers and so on in the right place::
 
-  make install -j N
+  
+  cmake --install build-siconos -j N
 
-Use CMAKE_INSTALL_PREFIX option to choose the path for your installation. If not set a default path is chosen, usually /usr/local (that depends on your system).
- 
+By default, everything will be installed 
+
+- in your python env if it exists ($CONDA_PREFIX or $VIRTUAL_ENV)
+- in $HOME/.siconos if not. In that case, add $HOME/.siconos/bin to your PATH so that siconos command can be found, e.g.::
+
+    export PATH=$HOME/.siconos/bin:$PATH
+  
+Run
+
+.. code-block:: bash
+
+   siconos --info
+
+to collect information about Siconos installation.
+
+.. note::
+   By default, no root privileged are required to run Siconos installation.
+
+   We strongly recommend to retain the default installation mode, but there are other options:
+
+   * use option SICONOS_INSTALL_SYSTEM_WIDE=true to install the software in the standard paths (/usr/local ...).
+     This requires root privileges
+
+   * use SICONOS_CUSTOM_INSTALL=<someplace> to customize Siconos installation path. Siconos binaries and libs will go to <someplace>.
+     In that case, if ISOLATED_INSTALL=false (default) Siconos Python packages will remain in the default python install path.
+     If ISOLATED_INSTALL=true, everything (including Siconos Python packages) will be installed in <someplace>
+
+.. _siconos_whatsinstalled:
+
+What will be installed?
+-----------------------
+
+.. note::
+
+   Check the output of cmake to get info on where things will be installed for your current config
+   
+
+We denote *siconos_install_path* as the Siconos install root dir
+
+* default:
+  
+  * *siconos_install_path* = $CONDA_PREFIX or $VIRTUAL_ENV if they exist
+  * *siconos_install_path* = $HOME/.siconos if not 
+
+* *siconos_install_path* = <someplace> if SICONOS_CUSTOM_INSTALL=<someplace> option was used with cmake
+    
+Then, the following files will be installed:
+
+* *siconos_install_path*/lib/ with all shared libraries of the siconos components you asked for.
+* *siconos_install_path*/include/siconos/ with all headers files needed by siconos
+* *siconos_install_path*/share/siconos/ : extra files like cmake configuration, doc or anything that may be required at runtime
+* *siconos_install_path*/bin/siconos : a script to run siconos simulation (see :ref:`siconos_runexample`).
+* Python Siconos packages:
+
+  * By default in the current default Python site-package ($CONDA_PREFIX, $VIRTUAL_ENV or user site), e.g.
+    $HOME/siconosenv/lib/python3.10/site-packages or $HOME/.local/lib/python3.10/site-packages
+
+  * if SICONOS_CUSTOM_INSTALL=<someplace> and ISOLATED_INSTALL=true in
+    someplace/lib/python3.XY/site-packages (XY being your Python version)
+
+
+.. warning::
+   
+   if *siconos_install_path* is not a standard path of your system, you may need to set some environment variables, mainly:
+
+   * append *siconos_install_path*/bin to PATH
+   * append path to Siconos Python packages to PYTHONPATH
+
+
 .. _siconos_package:
 
 Siconos package description
@@ -126,6 +218,7 @@ To enable tests, use the option WITH_TESTING=ON when running cmake.
 
 Then to run all tests::
 
+  cd build-siconos
   make -j  test
 
 To run only a set of tests, for example number 10 to 14::
@@ -140,75 +233,25 @@ To get a list of all available tests::
 
 To run python tests only::
 
-  cd path_to_build
+  cd build-siconos
   py.test
 
 Or in verbose mode::
   
-  cd path_to_build
+  cd build-siconos
   py.test -s -v
 
 Just a specific python test::
   
-  cd path_to_build
+  cd build-siconos
   py.test -s -v wrap/siconos/tests/test_lcp.py
 
 Concerning py.test, see http://pytest.org/latest/ or::
   py.test -h
 
-  
-.. _siconos_whatsinstalled:
-
-What will be installed?
------------------------
-
-For *siconos_install_path* being the value you choose for siconos install, running 'make install' will result in:
-
-
-* *siconos_install_path*/lib/ with all shared libraries of the siconos components you asked for.
-* *siconos_install_path*/include/siconos/ with all headers files needed by siconos
-* *siconos_install_path*/share/siconos/ : extra files like cmake configuration, doc or anything that may be required at runtime
-* *siconos_install_path*/bin/siconos : a script to run siconos simulation (see :ref:`siconos_runexample`).
-
-.. _siconos_install_note:
-
-Remark
-""""""
-if *siconos_install_path* is not a standard path of your system, you may need to set some environment variables, mainly:
-
-* append *siconos_install_path*/bin to PATH
-
-
-.. _siconos_cmake_options:
-
-CMake options
--------------
-
-Most options are like '-DWITH_XXX=ON or OFF to enable or disable some behavior or some interface to other libraries.
-If ON, the cmake system will search for XXX libraries, headers, or anything required on your system and will end up in error if not found. 
-
-Most common options
-"""""""""""""""""""
-
-* CMAKE_INSTALL_PREFIX=some_path : to change the default path of Siconos installation. Default depends on your system. For example on unix-like
-  system, it is usually /usr/local.
-
-* WITH_DOCUMENTATION=ON (OFF) : to enable (disable) the generation of siconos source code documentation and manuals generation.
-
-* WITH_PYTHON_WRAPPER=ON (OFF) : to enable (disable) the generation of a python interface to siconos.
-
-* WITH_CMAKE_BUILD_TYPE=Debug, Release, ... : to choose the build mode, i.e. the default compiler flags used to build siconos.
-
-* WITH_TESTING : to enable/disable tests
-
-
-.. warning::
-  Sometimes you may try to modify some options without success.
-  This because, when activated during the first run of cmake, some options are persistent. The only way to modify them is to remove the content of
-  the build directory.
 
 Developers or advanced users options
-""""""""""""""""""""""""""""""""""""
+------------------------------------
   
 
 * WARNINGS_LEVEL: to set compiler diagnostics level.
@@ -228,16 +271,6 @@ Developers or advanced users options
 
 	cmake -DFCLIB_ROOT=<path-to-your-fclib-installation> ...
 	
-* WITH_DOXYGEN_WARNINGS=ON/OFF : verbose mode to explore doxygen warnings generated for siconos
-
-* WITH_SERIALIZATION:
-
-* WITH_GENERATION:
-
-* WITH_CXX=ON/OFF : to enable/disable c++ compilation of the numerics package. Must be ON if kernel component is used.
-
-* BUILD_SHARED_LIBS=ON/OFF : to build shared (ON) or static (OFF) for the siconos package.
-
 * WITH_BULLET=ON/OFF : enable/disable bullet (http://bulletphysics.org/wordpress/) for contact detection.
 
   Bullet minimal required version is 3.17.
@@ -262,21 +295,6 @@ Developers or advanced users options
 
 * WITH_OCE=ON/OFF : enable/disable OpenCascade bindings (https://github.com/tpaviot/oce)
 
-* WITH_FREECAD=ON/OFF : enable/disable Freecad python bindings (http://www.freecadweb.org)
-
-* WITH_DOXY2SWIG=ON/OFF : enable/disable conversion of doxygen outputs to python docstrings
-
-For example, to build siconos with documentation for all components, no python bindings and an installation in '/home/myname/mysiconos', just run
-
-.. code-block:: bash
-
-  cd build_directory
-  cmake -DCMAKE_INSTALL_PREFIX='/home/myname/mysiconos' -DWITH_PYTHON_WRAPPER=OFF -DWITH_DOCUMENTATION=ON *path_to_sources*
-
-But when you need a lot of options, this may get a bit tedious, with very long command line. To avoid this, you can use :ref:`siconos_install_with_user_options`.
-
-.. _siconos_install_with_user_options:
-
 .. note::
   for most of the required or optional dependencies, you can add some hints regarding their installation path to
   help cmake find them by using the option 'XXX_ROOT=<install_path>', XXX being the name of the package to be searched.
@@ -284,71 +302,6 @@ But when you need a lot of options, this may get a bit tedious, with very long c
 
     cmake -DFCLIB_ROOT=... 
 
-User-defined option file
-------------------------
-
-To avoid very long and boring command line during cmake call, you can write a 'myoption.cmake' and call::
-
-  cd build_directory
-  cmake -DUSER_OPTIONS_FILE=myoption.cmake path_to_sources
-
-Warnings:
-
-* your file MUST have the '.cmake' extension
-* if you provide only its name to USER_OPTIONS_FILE, your file must be either in *path_to_sources* or in *path_to_build* directory
-  else, you must give the absolute path to your file, for example::
-     
-    cmake -DUSER_OPTIONS_FILE=/home/myname/myoptions_for_siconos.cmake path_to_sources
-
-To write your own file, just copy the file default_options.cmake (in *path_to_sources*/cmake) and modify it according to your needs.
-
-Here is an example, to build numerics and kernel, with documentation, no tests ...::
-
-  # --- List of siconos components to build and install ---
-  # The complete list is : externals numerics kernel control mechanics mechanisms io
-  set(COMPONENTS externals numerics kernel CACHE INTERNAL "List of siconos components to build and install")
-
-  option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
-  option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
-  option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
-
-  # --- Build/compiling options ---
-  set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")
-  option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
-  option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
-  option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
-  option(NO_RUNTIME_BUILD_DEP "Do not check for runtime dependencies. Useful only for packaging. Default = OFF" OFF)
-  option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=OFF" OFF)
-  option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
-  option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)
-  option(WITH_TESTING "Enable 'make test' target" OFF)
-  option(WITH_GIT "If true, try to get info (commit sha ...) from siconos sources git repository." OFF)
-
-  # --- Documentation setup ---
-  option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
-  option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" OFF)
-  option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." ON)
-
-  # --- List of external libraries/dependencies to be searched (or not) ---
-  option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
-  option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
-  option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
-  option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
-  option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)
-  option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version. Default = OFF" OFF)
-  option(WITH_FCLIB "link with fclib when this mode is enable. Default = ON" ON)
-  option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
-  option(WITH_RENDERER "Install OCE renderer. Default = OFF" OFF)
-  option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library. Default = ON" ON)
-  option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
-
-  # If OFF, headers from libraries in externals will not be installed.
-  option(INSTALL_EXTERNAL_HEADERS "Whether or not headers for external libraries should be installed. Default=OFF" OFF)
-
-  # If ON, internal headers will not be installed.
-  option(INSTALL_INTERNAL_HEADERS "Whether or not headers for internal definitions should be installed. Default=OFF" OFF)
-
-  
 .. _siconos_runexample:
 
 Test your installation
@@ -356,18 +309,24 @@ Test your installation
 
 When all the installation process is done, you can test your installation by running a simple example.
 (for non-standard installation path, mind :ref:`siconos_install_note`.). Try one of the numerous files
-provided in Siconos Examples package::
+provided in `Siconos Tutorial project<https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/examples>`_
 
-  siconos BouncingBallTS.cpp
 
+.. code-block:: bash
+
+   git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials
+   cd siconos-tutorials/examples/mechanics/BouncingBall
+
+   siconos BouncingBallTS.cpp
+
+   
 
 You can also test all examples in a raw::
 
-  cd another_build_directory
-  cmake path_to_sources/Examples
-  make -jN
-  make test
-
+  git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials
+  cmake -S siconos-tutorials/examples -B build-examples
+  cmake --build build-examples -jN
+  ctest --test-dir build-examples 
 
 This will compile, link and execute all the examples distributed with siconos.
 
@@ -379,6 +338,9 @@ Repositories
 Install Siconos using the official repositories. We provide packages
 for the distributions listed below.
 
+.. warning::
+
+   The packages below are not frequently updated and the Siconos versions available might be outdated.
 
 Debian bullseye 
 ----------------
