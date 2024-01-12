@@ -35,7 +35,11 @@ for f in flist:
         # print(f)
 
 
+<<<<<<< HEAD
 instring = 'Copyright 2024 INRIA'
+=======
+instring = 'Copyright 2020 INRIA'
+>>>>>>> master
 # instring ='Copyright (C) 2005, 2018 by INRIA'
 # instring ='Siconos-Numerics, Copyright INRIA 2005-2015'
 # instring = 'Siconos, Copyright INRIA 2005-2016'
