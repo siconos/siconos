@@ -52,6 +52,7 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR = "GFC3D_ADMM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_WR_STR = "GFC3D_IPM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR = "GFC3D_IPM_SNM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP_STR = "GFC3D_IPM_SNM_SEP";
+const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX_STR = "GFC3D IPM SNM PROX";
 
 static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_problem,
                                        GlobalFrictionContactProblem* problem,
@@ -284,6 +285,18 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
               globalVelocity, &info, options, problem_name);
     break;
   }
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX:
+  {
+    verbose=1;
+    gfc3d_IPM_SNM(problem, reaction, velocity,
+              globalVelocity, &info, options, problem_name);
+
+    SolverOptions * nsn_options = options->internalSolvers[0];
+
+    gfc3d_proximal_wr(problem, reaction, velocity, globalVelocity, &info, nsn_options);
+    numerics_printf_verbose(1, "problem = %s --  NSN_PROX gfc3d_error = %e, prox iterations %i, cumulative newton iterations %i \n",problem_name, nsn_options->dparam[1], nsn_options->iparam[1], nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
+    break;
+  }
   case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR:
   {
     gfc3d_ipm_snm_wr(problem, reaction, velocity,
@@ -306,6 +319,18 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     }
     strToken_name = strtok ( strToken_name, "." );
 
+
+
+    // TESTING: change of friction coef.
+    double mu_start = 0.;
+    for (int index_mu=0; index_mu<10; index_mu++)
+    {
+      mu_start += 0.1;
+      for(int i = 0; i < problem->numberOfContacts ; i++) problem->mu[i]= mu_start;
+
+
+
+
     char *line = NULL, *saveptr = NULL;
     int load_data = 0, len_prob_name = 0, n_blocks = 0.;
     size_t len = 0;
@@ -326,9 +351,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
           if (strcmp(line, strToken_name) == 0) // Problem names are matched
           {
             load_data = 1;
-            // printf("Matched: problem name = %s,", line);
-            // break;
-            // free(str);
           }
         }
         else
@@ -342,10 +364,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
         if (getline(&line, &len, varsep))     // Read 2nd line = n_blocks
         {
           n_blocks = atoi(line);
-          // printf("2nd line = %s\nn_blocks = %d\n", line, n_blocks);
         }
 
-        // if (load_data) printf(", n_blocks = %d\n", n_blocks);
 
         if (load_data) break;
 
@@ -385,8 +405,19 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     // fprintf(file,"M = sparse(int32(M(:,1)), int32(M(:,2)), M(:,3));\n");
     // fclose(file);
 
-    // TESTING: change of friction coef.
-    // for(int i = 0; i < problem->numberOfContacts ; i++) problem->mu[i]=0.3;
+
+
+
+    /* For statistiques */
+    double somme[3], dur[3], cesp = 1e-8, ns, ndur;
+    int nsc, nN, nB, nR, nT;
+    int nNcomple_vec[problem->numberOfContacts], nBcomple_vec[problem->numberOfContacts], nRcomple_vec[problem->numberOfContacts], nTcomple_vec[problem->numberOfContacts];
+    FILE *stats = fopen("stats_Spheres1mm_4204.m", "a+");
+    // ###########################
+
+
+
+
 
     // Timer
     long clk_tck = CLOCKS_PER_SEC;
@@ -395,10 +426,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
     // for getting pinfeas
     double mean_pinfeas = 0.;
-    // options->solverData = calloc(1,sizeof(double));
-    // double *mean_pinfeas = options->solverData;
-    // *mean_pinfeas = 0.2;
-    // *options->solverData = 0.2;
 
     int all_iterations = 0, n_succ = 0, n_fail = 0;
     for (int blk_i=0; blk_i<n_blocks; blk_i++)
@@ -459,6 +486,10 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
       // for (int i=0; i<count_body_full; i++) printf(" %d", permu_body_full[i]);
       // printf("\nH size nd x m = %d x %d\n\n", count_contact_cp*3, count_body_cp*6);
 
+      /* For statistiques */
+      int nN_vec[count_contact_cp], nB_vec[count_contact_cp], nR_vec[count_contact_cp], nT_vec[count_contact_cp];
+      // ###########################
+
       // Create sub-problem
       GlobalFrictionContactProblem * sub_prob = globalFrictionContactProblem_new();
       sub_prob->dimension = problem->dimension;
@@ -485,6 +516,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
       double *sub_reaction = (double*)calloc(count_contact_full, sizeof(double));
       double *sub_velocity = (double*)calloc(count_contact_full, sizeof(double));
       double *sub_globalVelocity = (double*)calloc(count_body_full, sizeof(double));
+      double *sub_reaction_tmp = (double*)calloc(count_contact_full, sizeof(double));
+      double *sub_velocity_tmp = (double*)calloc(count_contact_full, sizeof(double));
 
       printf("\n********** START sub-problem %d / %d, H (ndxm)/rank = %dx%d / %d *************************************************************\n", blk_i+1, n_blocks, count_contact_full, count_body_full, Hc_rank);
       t1 = clock();
@@ -493,19 +526,78 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
       t2 = clock();
       time_sub_probs += (double)(t2-t1)/(double)clk_tck;
       all_iterations += options->iparam[SICONOS_IPARAM_ITER_DONE];
-      double *pinfeas_ptr = options->solverData;
-      mean_pinfeas += *pinfeas_ptr;
+      double *ptr = options->solverData;
+      mean_pinfeas += *ptr;
+      // mean_pinfeas += ptr[0];
       free(options->solverData); options->solverData = NULL;
+
+
+      /* For statistiques */
+      NumericsMatrix *P_mu_sub = NM_create(NM_SPARSE, count_contact_full, count_contact_full);
+      NumericsMatrix *P_mu_inv_sub = NM_create(NM_SPARSE, count_contact_full, count_contact_full);
+      NM_triplet_alloc(P_mu_sub, count_contact_full);
+      NM_triplet_alloc(P_mu_inv_sub, count_contact_full);
+      P_mu_sub->matrix2->origin = NSM_TRIPLET;
+      P_mu_inv_sub->matrix2->origin = NSM_TRIPLET;
+      for(unsigned int i = 0; i < count_contact_full; ++i)
+        if(i % 3 == 0)
+        {
+          NM_entry(P_mu_sub, i, i, 1.);
+          NM_entry(P_mu_inv_sub, i, i, 1.);
+        }
+        else
+        {
+          NM_entry(P_mu_sub, i, i, sub_prob->mu[(int)(i/3)]);
+          NM_entry(P_mu_inv_sub, i, i, 1.0/sub_prob->mu[(int)(i/3)]);
+        }
+      NM_gemv(1.0, P_mu_sub, sub_velocity, 0.0, sub_velocity_tmp);
+      NM_gemv(1.0, P_mu_inv_sub, sub_reaction, 0.0, sub_reaction_tmp);
+      double projerr_sub = projectionError(sub_velocity_tmp, sub_reaction_tmp, count_contact_cp, options->dparam[SICONOS_DPARAM_TOL]);
+      nsc = 0, nN = 0, nB = 0, nR = 0, nT = 0;
+      for (int i = 0; i < count_contact_cp; i++)
+      {
+        somme[0] = sub_velocity_tmp[3*i] + sub_reaction_tmp[3*i];
+        somme[1] = sub_velocity_tmp[3*i+1] + sub_reaction_tmp[3*i+1];
+        somme[2] = sub_velocity_tmp[3*i+2] + sub_reaction_tmp[3*i+2];
+        dur[0] = sub_velocity_tmp[3*i] - sub_reaction_tmp[3*i];
+        dur[1] = sub_velocity_tmp[3*i+1] - sub_reaction_tmp[3*i+1];
+        dur[2] = sub_velocity_tmp[3*i+2] - sub_reaction_tmp[3*i+2];
+
+        ns = somme[0] - cblas_dnrm2(2,somme+1,1);
+        ndur = dur[0] - cblas_dnrm2(2,dur+1,1);
+        if (ns > cesp*cblas_dnrm2(3, somme, 1))
+        {
+          nsc +=1;
+          if (dur[0] >= cblas_dnrm2(2,dur+1,1))       { nN_vec[nN++] = i+1; }
+          else if (-dur[0] >= cblas_dnrm2(2,dur+1,1)) { nB_vec[nB++] = i+1; }
+          else                                        { nR_vec[nR++] = i+1; }
+        }
+        else
+          nT_vec[nT++] = i+1;
+      }
+
+      fprintf(stats, "stats(end+1) = struct('type', 'sub', 'name', '%s', 'blk_id', %d, 'nBlk', %d, 'mu', %.2e, 'ite', %d, 'residu', %.2e, 'projerr', %.2e,",
+                      strToken_name, blk_i+1, n_blocks, problem->mu[0], options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU], projerr_sub);
+
       if (info)
       {
         printf("test: failure\n");
         n_fail++;
+        fprintf(stats,"'result', 'fail',");
       }
       else
       {
         printf("test: success\n");
         n_succ++;
+        fprintf(stats,"'result', 'succ',");
       }
+
+      fprintf(stats,"'nd', %d, 'm', %d, 'r_H', %d,", count_contact_full, count_body_full, Hc_rank);
+      fprintf(stats,"'B', ["); for (int i=0; i<nB; i++) fprintf(stats, " %d", nB_vec[i]); fprintf(stats,"],");
+      fprintf(stats,"'N', ["); for (int i=0; i<nN; i++) fprintf(stats, " %d", nN_vec[i]); fprintf(stats,"],");
+      fprintf(stats,"'R', ["); for (int i=0; i<nR; i++) fprintf(stats, " %d", nR_vec[i]); fprintf(stats,"],");
+      fprintf(stats,"'T', ["); for (int i=0; i<nT; i++) fprintf(stats, " %d", nT_vec[i]); fprintf(stats,"]);\n");
+      // ###########################
       printf("*************** END sub-problem %d / %d **************************************************************************************\n\n", blk_i+1, n_blocks);
 
       // Copy sub-solutions to main solutions
@@ -522,10 +614,14 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
 
       free(sub_reaction); free(sub_velocity); free(sub_globalVelocity);
+      free(sub_reaction_tmp); free(sub_velocity_tmp);
       globalFrictionContact_free(sub_prob);
 
       free(permu_contact_cp); free(permu_contact_full);
       free(permu_body_cp); free(permu_body_full);
+
+      if(P_mu_sub) {P_mu_sub = NM_free(P_mu_sub); P_mu_sub = NULL;}
+      if(P_mu_inv_sub) {P_mu_inv_sub = NM_free(P_mu_inv_sub); P_mu_inv_sub = NULL;}
     } // loop for n_blocks
 
 
@@ -587,14 +683,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
 
 
-    // Compute residuals
-    // Current velocity = [u0; ub]
-    // for (unsigned int i = 0; i<n; i++) s[i] = cblas_dnrm2(2, velocity+i*d+1, 1);
-    // primalResidual_s(velocity, H, globalVelocity, w, s, primalConstraint, &pinfeas, options->dparam[SICONOS_DPARAM_TOL]);
-    // dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, options->dparam[SICONOS_DPARAM_TOL]);
-    // complem = complemResidualNorm(velocity, reaction, nd, n);
-    // udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
-
     // Compute vars without friction coef.
     NM_gemv(1.0, P_mu, velocity, 0.0, velocity_tmp);
     NM_gemv(1.0, P_mu_inv, reaction, 0.0, reaction_tmp);
@@ -604,15 +692,9 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     complem = complemResidualNorm(velocity_tmp, reaction_tmp, nd, n);
     udotr = cblas_ddot(nd, velocity_tmp, 1, reaction_tmp, 1);
 
-
-    // Return to the original solutions to compute projection error
-    // NM_gemv(1.0, P_mu_inv, velocity, 0.0, velocity_tmp);
-    // NM_gemv(1.0, P_mu, reaction, 0.0, reaction_tmp);
     double norm_q = cblas_dnrm2(m, problem->q, 1);
     double norm_b = cblas_dnrm2(nd, problem->b, 1);
     double projerr, projerr_comple;
-    // gfc3d_compute_error(problem, reaction_tmp, velocity_tmp, globalVelocity, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &projerr);
-    // gfc3d_compute_error(problem, reaction, velocity, globalVelocity, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &projerr);
     projerr = projectionError(velocity_tmp, reaction_tmp, n, options->dparam[SICONOS_DPARAM_TOL]);
 
 
@@ -627,7 +709,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     t2 = clock();
     time_comple_prob = (double)(t2-t1)/(double)clk_tck;
     printf("Execution time: %.4f,\t\ttest: ", time_comple_prob);
-    if (info) printf("failure\n"); else printf("success\n");
+    // if (info) printf("failure\n"); else printf("success\n");
+
 
     // for comparison
     cblas_daxpy(nd, -1, velocity, 1, velocity_tmp, 1);
@@ -637,6 +720,56 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     NM_gemv(1.0, P_mu, velocity, 0.0, velocity_tmp);
     NM_gemv(1.0, P_mu_inv, reaction, 0.0, reaction_tmp);
     projerr_comple = projectionError(velocity_tmp, reaction_tmp, n, options->dparam[SICONOS_DPARAM_TOL]);
+
+
+
+    /* For statistiques */
+    nsc = 0, nN = 0, nB = 0, nR = 0, nT = 0;
+    for (int i = 0; i < problem->numberOfContacts; i++)
+    {
+      somme[0] = velocity_tmp[3*i] + reaction_tmp[3*i];
+      somme[1] = velocity_tmp[3*i+1] + reaction_tmp[3*i+1];
+      somme[2] = velocity_tmp[3*i+2] + reaction[3*i+2];
+      dur[0] = velocity_tmp[3*i] - reaction_tmp[3*i];
+      dur[1] = velocity_tmp[3*i+1] - reaction_tmp[3*i+1];
+      dur[2] = velocity_tmp[3*i+2] - reaction_tmp[3*i+2];
+
+      ns = somme[0] - cblas_dnrm2(2,somme+1,1);
+      ndur = dur[0] - cblas_dnrm2(2,dur+1,1);
+      if (ns > cesp*cblas_dnrm2(3, somme, 1))
+      {
+        nsc +=1;
+        if (dur[0] >= cblas_dnrm2(2,dur+1,1))       { nNcomple_vec[nN++] = i+1; }
+        else if (-dur[0] >= cblas_dnrm2(2,dur+1,1)) { nBcomple_vec[nB++] = i+1; }
+        else                                        { nRcomple_vec[nR++] = i+1; }
+      }
+      else
+        nTcomple_vec[nT++] = i+1;
+    }
+
+    fprintf(stats, "stats(end+1) = struct('type', 'complete', 'name', '%s', 'blk_id', %d, 'nBlk', %d, 'mu', %.2e, 'ite', %d, 'residu', %.2e, 'projerr', %.2e,",
+                    strToken_name, -1, n_blocks, problem->mu[0], options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU], projerr_comple);
+
+    if (info)
+    {
+      printf("failure\n");
+      n_fail++;
+      fprintf(stats,"'result', 'fail',");
+    }
+    else
+    {
+      printf("success\n");
+      n_succ++;
+      fprintf(stats,"'result', 'succ',");
+    }
+
+    fprintf(stats,"'nd', %d, 'm', %d, 'r_H', %d,", nd, m, -1);
+    fprintf(stats,"'B', ["); for (int i=0; i<nB; i++) fprintf(stats, " %d", nBcomple_vec[i]); fprintf(stats,"],");
+    fprintf(stats,"'N', ["); for (int i=0; i<nN; i++) fprintf(stats, " %d", nNcomple_vec[i]); fprintf(stats,"],");
+    fprintf(stats,"'R', ["); for (int i=0; i<nR; i++) fprintf(stats, " %d", nRcomple_vec[i]); fprintf(stats,"],");
+    fprintf(stats,"'T', ["); for (int i=0; i<nT; i++) fprintf(stats, " %d", nTcomple_vec[i]); fprintf(stats,"]);\n");
+    fclose(stats);
+    // ###########################
     printf("=====================================================================\n\n");
 
 
@@ -657,12 +790,10 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     printf("  | r_subs - r_comple | = %.2e\n", diff_r);
     printf("====================================\n\n\n");
 
-    double min_val = mean_pinfeas/n_blocks;
-    min_val = (min_val > dinfeas ? dinfeas : min_val) > complem ? complem : min_val;
-    // min_val = min_val > dinfeas ? dinfeas : min_val;
-    // min_val = min_val > complem ? dinfeas : min_val;
+    double max_val = mean_pinfeas/n_blocks;
+    max_val = (max_val < dinfeas ? dinfeas : max_val) < complem ? complem : max_val;
     printf("sumry total:   %s,\t  n nd x m = %d %d x %d\n",strToken_name, n, nd, m);
-    printf("sumry total: %4d sub-prob, %4d succ, %4d fail,\t %.2e %.2e,\t %.4f (s),\t | u_subs - u_comple | = %.2e\n", n_blocks, n_succ, n_fail, min_val, projerr, time_sub_probs, diff_u);
+    printf("sumry total: %4d sub-prob, %4d succ, %4d fail,\t %.2e %.2e,\t %.4f (s),\t | u_subs - u_comple | = %.2e\n", n_blocks, n_succ, n_fail, max_val, projerr, time_sub_probs, diff_u);
 
     if (info)
       printf("sumry total:   comple prob,   failure           ,");
@@ -672,19 +803,27 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     printf("\t %.2e %.2e,\t %.4f (s),\t | r_subs - r_comple | = %.2e\n",
             options->dparam[SICONOS_DPARAM_RESIDU], projerr_comple, time_comple_prob, diff_r);
 
-    printf("sumry total: --------------------------------------------------------------------------------------------------------------------\n");
+    printf("sumry total: --------------------------------------------------------------------------------------------------------------------\n\n");
+
+
 
 
     if(H_tilde) {H_tilde = NM_free(H_tilde); H_tilde = NULL;}
     if(H) {H = NM_free(H); H = NULL;}
+    if(P_mu) {P_mu = NM_free(P_mu); P_mu = NULL;}
+    if(P_mu_inv) {P_mu_inv = NM_free(P_mu_inv); P_mu_inv = NULL;}
     if (w) {free(w); w = NULL;}
     if (s) {free(s); s = NULL;}
     if (velocity_tmp) {free(velocity_tmp); velocity_tmp = NULL;}
     if (reaction_tmp) {free(reaction_tmp); reaction_tmp = NULL;}
     if (primalConstraint) {free(primalConstraint); primalConstraint = NULL;}
     if (dualConstraint) {free(dualConstraint); dualConstraint = NULL;}
-    free(str);
     fclose(varsep);
+
+
+
+    }
+    free(str);
     break;
   }
   default:
