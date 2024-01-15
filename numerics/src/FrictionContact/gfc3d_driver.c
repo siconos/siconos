@@ -318,18 +318,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
     break;
   }
-  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX:
-  {
-    verbose=1;
-    gfc3d_IPM_SNM(problem, reaction, velocity,
-              globalVelocity, &info, options, problem_name);
-
-    SolverOptions * nsn_options = options->internalSolvers[0];
-
-    gfc3d_proximal_wr(problem, reaction, velocity, globalVelocity, &info, nsn_options);
-    numerics_printf_verbose(1, "problem = %s --  NSN_PROX gfc3d_error = %e, prox iterations %i, cumulative newton iterations %i \n",problem_name, nsn_options->dparam[1], nsn_options->iparam[1], nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
-    break;
-  }
   case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR:
   {
     gfc3d_ipm_snm_wr(problem, reaction, velocity,
