@@ -40,7 +40,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "siconos_debug.h"                                     // for DEBUG_EXPR
-
+#include "NumericsVector.h"
 
 //#define FCLIB_OUTPUT
 
@@ -531,10 +531,6 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
     {
       numerics_printf("------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy to %e", *tolerance);
     }
-
-
-
-
   }
   else
   {
@@ -572,6 +568,11 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   /* Number of contacts */
   unsigned int nc = problem->numberOfContacts;
+
+  // for (int i=0; i<nc; i++)
+  // {
+  //   problem->mu[i] = 0.3;
+  // }
 
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
@@ -643,7 +644,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
       "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
     return;
   }
-
+// FILE *iterates = NULL;
   /*****  NSGS Iterations *****/
 
   /* A special case for the most common options (should correspond
@@ -691,7 +692,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
    * common cases to avoid checking booleans on every iteration. **/
   else
   {
-    /* verbose=1; */
+    verbose=1;
     while((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
@@ -806,6 +807,87 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
 
 
+      // if (options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE)
+      // {
+      //   // FILE *iterates = NULL;
+      //   NumericsMatrix *W = problem->M;
+      //   iterates = fopen("iterates_BoxStacks_GS.m", "a+");
+      //   #include "gfc3d_ipm.h"
+      //   if (iter == 1)
+      //   {
+      //     char *problem_name = (char *) malloc(200);
+
+      //     FILE *fileName = fopen("problem_name.res", "r");
+      //     if (fileName)
+      //     {
+      //       fscanf(fileName, "%s", problem_name);
+      //     }
+      //     else
+      //       printf("\nfc3d_nsgs: can not find the name file!!!\n\n");
+      //     fclose(fileName);
+
+      //     char *str = (char *) malloc(200);
+      //     strcpy( str, problem_name );
+      //     const char * separators = "/";
+      //     char *strToken = strtok( str, separators );
+      //     for(int i=0; i<5; i++)
+      //     {
+      //       if(strToken != NULL) strToken = strtok ( NULL, separators );
+      //     }
+      //     strToken = strtok ( strToken, "." );
+      //     fprintf(iterates,"data(end+1).name = \"%s\";\n", strToken);
+      //     fprintf(iterates,"data(end).val = [\n");
+      //     free(str); free(problem_name);
+      //   }
+
+      //   unsigned int nd = nc*3;
+      //   double *primalConstraint = (double*)calloc(nd, sizeof(double));
+      //   double pinfeas, complem, udotr, projerr, nub;
+      //   double *velocity_tmp = (double*)calloc(nd, sizeof(double));
+
+      //   cblas_dcopy(nd, problem->q, 1, velocity_tmp, 1);
+      //   NM_gemv(1.0, W, reaction, 1.0, velocity_tmp);
+
+      //   for (int i=0; i<nd; i++)
+      //   {
+      //     if (i%3==0)
+      //     {
+      //       nub = cblas_dnrm2(2, velocity_tmp+i+1, 1);
+      //       velocity_tmp[i] = velocity_tmp[i] + problem->mu[(int)(i/3)]*nub;
+      //     }
+      //     else
+      //       velocity_tmp[i] = velocity_tmp[i];
+      //   }
+      //   complem = complemResidualNorm(velocity_tmp, reaction, nd, nc);
+      //   udotr = cblas_ddot(nd, velocity_tmp, 1, reaction, 1)/nc;
+
+      //   // printf("fc3d_nsgs:\n");
+      //   // for(unsigned int i=0; i<nd; i+=3)
+      //   // {
+      //   //   printf("\n%4i-%4i: u = ", i, i+3-1);
+      //   //   for (unsigned int j=0; j<3; j++)
+      //   //     printf(" %.2e", velocity[i+j]);
+      //   //   printf("\t r = ");
+      //   //   for (unsigned int j=0; j<3; j++)
+      //   //     printf(" %.2e", reaction[i+j]);
+      //   // }
+
+
+      //   (*computeError)(problem, reaction, velocity, tolerance, options, norm_q,  &projerr);
+
+      //   if(iter == 1) printf("| it  | |u o r| |  u'r/n  | projerr |\n");
+      //   printf("| %3d | %.1e | %.1e | %.1e |\n", iter, complem, udotr, projerr);
+
+      //   fprintf(iterates,"%d %.10e %.10e %.10e;\n",
+      //           iter, complem, udotr, projerr);
+
+      //   free(velocity_tmp); free(primalConstraint);
+      //   fclose(iterates);
+      // }
+
+
+
+
       if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
       {
         error = calculateLightError(light_error_sum, nc, reaction, norm_r);
@@ -850,6 +932,14 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
       /*   printf("number of frozen contacts %i at iter : %i over number of contacts: %i\n", frozen_contact, iter, nc ); */
       /* } */
     }
+    // if (options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE)
+    // {
+    //   iterates = fopen("iterates_BoxStacks_GS.m", "a+");
+    //   fprintf(iterates, "];\n\n");
+    //   fclose(iterates);
+    // }
+
+
   }
 
 
@@ -878,6 +968,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   (*freeSolver)(problem,localproblem,localsolver_options);
   fc3d_local_problem_free(localproblem, problem);
   if(scontacts) free(scontacts);
+
 }
 
 void fc3d_nsgs_set_default(SolverOptions* options)
@@ -897,7 +988,6 @@ void fc3d_nsgs_set_default(SolverOptions* options)
   // Internal solver
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
-
   // Printing in the same style as in IPM solver
   options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] = SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE;
 }
