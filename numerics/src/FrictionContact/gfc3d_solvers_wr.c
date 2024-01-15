@@ -535,7 +535,6 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double *reaction, d
     *info = 0 ;
   }
 }
-<<<<<<< HEAD
 
 void gfc3d_ipm_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
@@ -567,5 +566,3 @@ void gfc3d_ipm_wr(GlobalFrictionContactProblem* problem, double *reaction, doubl
 }
 
 
-=======
->>>>>>> origin/fc3d_ipm_minh_nonsmooth
