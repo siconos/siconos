@@ -9,7 +9,7 @@ ubuntu20.04-oce:configure:
    variables:
      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
      cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+     user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
    extends:
      - .siconos-configure
    when: manual
@@ -18,7 +18,7 @@ ubuntu20.04-oce:build:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
       cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+      user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
     extends:
       - .siconos-build
     when: manual
@@ -28,7 +28,7 @@ ubuntu20.04-oce:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
       cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+      user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
     needs: ["ubuntu20.04-oce:build"]
     extends:
       - .siconos-test
@@ -48,7 +48,7 @@ archlinux-oce:configure:
    variables:
      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
      cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+     user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
    extends: .siconos-configure
    when: manual
 
@@ -56,7 +56,7 @@ archlinux-oce:build:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
       cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+      user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
     extends: .siconos-build
     needs: ["archlinux-oce:configure"]
 
@@ -64,7 +64,7 @@ archlinux-oce:test:
     variables:
       IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
       cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+      user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
     needs: ["archlinux-oce:build"]
     extends: .siconos-test
 

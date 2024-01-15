@@ -532,8 +532,8 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   SET3(velocity);
   SET3(rho);
   SET3(F);
-  SET3X3(A);
-  SET3X3(B);
+  SET3X3MAYBE(A);
+  SET3X3MAYBE(B);
 
 
   double RVN, RVT, RVS;

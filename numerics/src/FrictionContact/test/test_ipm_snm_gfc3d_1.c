@@ -28,7 +28,7 @@
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
 
-  int n_solvers = 1;
+  int n_solvers = 2;
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
@@ -40,6 +40,20 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM);
     //   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
     // collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+    current++;
+  }
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D,IPM
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX);
+    //   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+    // collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+    SolverOptions * nsn_options = collection[current].options->internalSolvers[0];
+    nsn_options->dparam[0] = 1e-13;
+    nsn_options->iparam[0] = 200;
+    nsn_options->internalSolvers[0]->iparam[0] = 50;
+    //nsn_options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO;
     current++;
   }
 

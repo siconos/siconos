@@ -72,10 +72,10 @@ static SolverOptions* solver_options_initialize(int solver_id, int iter_max, dou
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   options->solverId = solver_id;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(20, sizeof(int));
-  options->dparam = (double *)calloc(20, sizeof(double));
+  options->iSize = 30;
+  options->dSize = 30;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
 
   // The content of iparam and dparam for indices in SICONOS_IPARAM and SICONOS_DPARAM enums
   // enum must be set in this function with a default value.
@@ -746,7 +746,7 @@ SolverOptions * solver_options_create(int solverId)
     gfc3d_nsn_ac_set_default(options);
     break;
   }
-  case SICONOS_FRICTION_3D_NSN_AC_TEST:
+  case SICONOS_FRICTION_3D_NSN_AC_NEW:
   {
     options = solver_options_initialize(solverId, 1000, 1e-10, 0);
     newton_lsa_set_default(options);
@@ -851,6 +851,15 @@ SolverOptions * solver_options_create(int solverId)
   {
     options = solver_options_initialize(solverId, 20000, 1e-6, 0);
     gfc3d_ipm_snm_set_default(options);
+    break;
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX:
+  {
+    options = solver_options_initialize(solverId, 20000, 1e-6, 1);
+    gfc3d_ipm_snm_set_default(options);
+    assert(options->numberOfInternalSolvers == 1);
+    options->internalSolvers[0] = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_PROX_WR);
+    
     break;
   }
   case SICONOS_FRICTION_3D_ONECONTACT_NSN:

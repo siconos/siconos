@@ -82,21 +82,6 @@ if(NOT SICONOS_INSTALL_DIR)
   set(SICONOS_INSTALL_DIR /home/install-siconos/)
 endif()
 
-
-if(USER_FILE)
-  list(APPEND SICONOS_CMAKE_OPTIONS -DUSER_OPTIONS_FILE=${USER_FILE})
-endif()
-
-
-
-list(APPEND SICONOS_CMAKE_OPTIONS -DCMAKE_INSTALL_PREFIX=${SICONOS_INSTALL_DIR})
-list(APPEND SICONOS_CMAKE_OPTIONS -DWITH_GIT=ON) # required to generate siconos-commit.txt to tag cdash build in the examples.
-
-if(DEFINED ENV{OCE_INSTALL}) # set if oce has been installed using oce repo, in install_oce.sh
-  message("Search oce in $ENV{OCE_INSTALL}.")
-  list(APPEND SICONOS_CMAKE_OPTIONS -DOCE_DIR=$ENV{OCE_INSTALL})
-endif()
-
 # Parallel build only for siconos_install. For examples it leads to: warning: jobserver unavailable: using -j1. Add `+' to parent make rule.
 #set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/cmake/valgrind.supp)
 
@@ -120,12 +105,23 @@ endif()
 write_notes()
 
 # =============  Run ctest steps ================
-# Either one by one (to split ci jobs) if CTEST_MODE=Configure, Build, Test or
+# Either one by one (to split ci jobs) if CTEST_MODE=configure, build, test or
 # all in a row if CTEST_MODE=all.
 # Submit : only after test phase except if conf or build failed.
 
 # - Configure -- 
-if(${CTEST_MODE} STREQUAL "Configure" OR ${CTEST_MODE} STREQUAL "all")
+if(${CTEST_MODE} STREQUAL "configure" OR ${CTEST_MODE} STREQUAL "all")
+
+  if(USER_FILE)
+    list(APPEND SICONOS_CMAKE_OPTIONS -DUSER_OPTIONS_FILE=${USER_FILE})
+  endif()
+
+  list(APPEND SICONOS_CMAKE_OPTIONS -DWITH_GIT=ON) # required to generate siconos-commit.txt to tag cdash build in the examples.
+  
+  if(DEFINED ENV{OCE_INSTALL}) # set if oce has been installed using oce repo, in install_oce.sh
+    message("Search oce in $ENV{OCE_INSTALL}.")
+    list(APPEND SICONOS_CMAKE_OPTIONS -DOCE_DIR=$ENV{OCE_INSTALL})
+  endif()
 
   # Current testing model. Priority: 
   # Nightly -> set by scheduler on gricad-gitlab
@@ -156,9 +152,9 @@ if(${CTEST_MODE} STREQUAL "Configure" OR ${CTEST_MODE} STREQUAL "all")
 endif()
  
 # - Build -
-if(${CTEST_MODE} STREQUAL "Build" OR ${CTEST_MODE} STREQUAL "all")
+if(${CTEST_MODE} STREQUAL "build" OR ${CTEST_MODE} STREQUAL "all")
 
-  if(${CTEST_MODE} STREQUAL "Build")
+  if(${CTEST_MODE} STREQUAL "build")
     ctest_start(APPEND) # Restart from existing (configure step) cdash config
   endif()
   # --- Build ---
@@ -179,10 +175,10 @@ if(${CTEST_MODE} STREQUAL "Build" OR ${CTEST_MODE} STREQUAL "all")
 endif()
 
 # - Test -
-if(${CTEST_MODE} STREQUAL "Test" OR ${CTEST_MODE} STREQUAL "all")
+if(${CTEST_MODE} STREQUAL "test" OR ${CTEST_MODE} STREQUAL "all")
   # -- Tests --
   
-  if(${CTEST_MODE} STREQUAL "Test")
+  if(${CTEST_MODE} STREQUAL "test")
     ctest_start(APPEND)
   endif()
   message("\n\n=============== Start ctest_test (nbprocs = ${NP}) =============== ")

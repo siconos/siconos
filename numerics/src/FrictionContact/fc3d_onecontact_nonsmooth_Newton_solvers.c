@@ -122,8 +122,6 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
     }
   }
 
-
-
   double* rho=0;
   for(size_t contact =0; contact <nc ; contact++)
   {
@@ -174,7 +172,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
       avg_rho[1] += rho[1];
       avg_rho[2] += rho[2];
     }
-    numerics_printf("fc3d_AC_initialize""contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e", contact, rho[0], rho[1], rho[2]);
+    numerics_printf_verbose(2,"fc3d_AC_initialize""contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e", contact, rho[0], rho[1], rho[2]);
 
     fc3d_local_problem_fill_M(problem, localproblem, contact);
     double m_row_norm = 0.0, sum;
@@ -187,8 +185,8 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
       }
       m_row_norm = max(sum, m_row_norm);
     }
-    numerics_printf("fc3d_AC_initialize" " inverse of norm of M = %e", 1.0/hypot9(localproblem->M->matrix0));
-    numerics_printf("fc3d_AC_initialize" " inverse of row norm of M = %e", 1.0/m_row_norm);
+    numerics_printf_verbose(2,"fc3d_AC_initialize" " inverse of norm of M = %e", 1.0/hypot9(localproblem->M->matrix0));
+    numerics_printf_verbose(2,"fc3d_AC_initialize" " inverse of row norm of M = %e", 1.0/m_row_norm);
 
     DEBUG_EXPR(NM_display(localproblem->M););
 

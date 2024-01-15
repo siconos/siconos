@@ -375,7 +375,7 @@ void fc3d_lcp_gams_pathvi(FrictionContactProblem *problem, double *reaction,
 int fc3d_checkTrivialCase(FrictionContactProblem *problem, double *velocity,
                           double *reaction, SolverOptions *options);
 
-void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem *problem,
+void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem *problem,
                                          double *reaction, double *velocity,
                                          int *info, SolverOptions *options);
 

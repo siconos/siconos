@@ -27,14 +27,18 @@
 cmake_minimum_required(VERSION 3.14) 
 
 cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
-#cmake_policy(SET CMP0078 NEW) # UseSWIG generates standard target names.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
 cmake_policy(SET CMP0079 NEW) # target_link_libraries() allows use with targets in other directories
+cmake_policy(SET CMP0067 NEW) # Honor language standard in try_compile() source-file signature.
 
 # Set cmake modules directories
 # (i.e. the those which contain all user-defined FindXXX.cmake files among other things)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/docs/cmake)
+
+# If ON, a compile_commands.json file is generated and might be read and used by your editor
+# to improve static verif. of the code source.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
 
 # Improve cmake interface when current version is too old.
 include(new_cmake_functions)
@@ -67,6 +71,7 @@ if(DATE_COMMAND)
   execute_process(COMMAND date "+\"%Y\"" OUTPUT_VARIABLE YEAR)
   string(STRIP ${YEAR} YEAR)
 endif()
+# Read devel or advanced user options
 # Read user option file, if provided on command line
 if(USER_OPTIONS_FILE)
   # Check for tilde in file name (not handled properly by cmake)
@@ -81,11 +86,16 @@ if(USER_OPTIONS_FILE)
   message("\n !!!!! Load user-defined options set from file ${USER_OPTIONS_FILE} !!!!! \n")
   # Configure to take into account any change in ${USER_OPTIONS_FILE}
   configure_file(${USER_OPTIONS_FILE} current_options.cmake COPYONLY)
-  include(${CMAKE_CURRENT_BINARY_DIR}/current_options.cmake)
+  include(${CMAKE_CURRENT_BINARY_DIR}/current_options.cmake
+    RESULT_VARIABLE _CONF_FOUND OPTIONAL)
+  if(NOT _CONF_FOUND)
+    message(FATAL_ERROR "include could not find requested file: ${USER_OPTIONS_FILE}")
+  endif()
 else()
-  message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/cmake/default_options.cmake !!!!! \n")
-  include(default_options)
+  message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/config_samples/default.cmake !!!!! \n")
+  include(${CMAKE_SOURCE_DIR}/config_samples/default.cmake)
 endif()
+include(cmake/advanced_options.cmake)
 
 # Set target names from components list
 if(NOT COMPONENTS)
@@ -174,8 +184,10 @@ endif()
 # ========= Documentation setup =========
 # Finalize documentation setups.
 # Must be called AFTER each component config.
-finalize_doc()
-
+if(WITH_DOCUMENTATION)
+  finalize_doc()
+endif()
+  
 include(FeatureSummary)
 feature_summary(WHAT ALL)
 
@@ -234,16 +246,18 @@ else()
   message("    - CXSparse headers path : externals/SuiteSparse/CXSparse")
   message("    - LDL headers path : externals/SuiteSparse/LDL")
 endif()
-message(STATUS "Python interpreter is ${Python3_EXECUTABLE}")
+message(STATUS "Python interpreter is ${Python_EXECUTABLE}")
 if(WITH_PYTHON_WRAPPER)
-  message(STATUS "Python libraries are ${Python3_LIBRARIES}")
+  message(STATUS "Python libraries are ${Python_LIBRARIES}")
+else()
+  message("Siconos Python API is off\n")
 endif()
 message(STATUS "------------ Installation information ------------\n")
 message("    Please check them with care and be sure to have the proper rights to write in those directories ...\n")
 message("    - The project will be installed in ${CMAKE_INSTALL_PREFIX}")
 if(WITH_PYTHON_WRAPPER)
   message("    - Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR} (${sicopy_install_mode} mode),")
-  message("    with the command ${PYTHON_EXECUTABLE} -m pip install -U ${PIP_INSTALL_OPTIONS} ...\n")
+  message("    with the command ${Python_EXECUTABLE} -m pip install -U ${PIP_INSTALL_OPTIONS} ...\n")
   if(NOT sicopy_install_mode STREQUAL "standard")
     message("    If this path is not in the standard python environment, you'll probably have to fill PYTHONPATH.\n")
     message("    To check python known paths, run: python3 -c 'import sys; print(sys.path)' \n")

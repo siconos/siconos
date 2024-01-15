@@ -28,9 +28,10 @@
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "siconos_debug.h"             // for DEBUG_PRINT
-#include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
 #include "line_search.h"       // for search_data, fill_nm_data, free_ls_data
 #include "numerics_verbose.h"  // for numerics_printf_verbose, numerics_printf
+                               // 
+#include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
 #include "sn_logger.h"         // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
@@ -209,9 +210,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
 
   unsigned log_hdf5 = SN_logh5_loglevel(SN_LOGLEVEL_ALL);
-
   const char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
-  if(!hdf5_filename) hdf5_filename = "test.hdf5";
+  if(!hdf5_filename) hdf5_filename = "newton_lsa.hdf5";
   SN_logh5* logger_s = NULL;
   if(log_hdf5)
   {
@@ -220,7 +220,10 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   }
 
 
-  numerics_printf_verbose(1,"--- newton_LSA :: start iterations");
+  numerics_printf_verbose(1,"---- newton_LSA :: start iterations. current error = %1e required tolerance = %.1e ", err, tol);
+  numerics_printf_verbose(1, "---- newton_LSA | it  | norm of F | norm of grad F | error   | tol     | ls iter | ls step  |  Ax=b error |");
+  numerics_printf_verbose(1, "---- newton_LSA |-----------------------------------------------------------------------------------------|");
+  
   // Newton Iteration
   while((iter < itermax) && (err > tol))
   {
@@ -337,7 +340,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       }
       else
       {
-        numerics_printf("Problem in DGESV, info = %d", info_dir_search);
+        numerics_printf("Problem in NM_LU_solve, info = %d", info_dir_search);
 
         options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
         options->dparam[SICONOS_DPARAM_RESIDU] = theta;
@@ -474,7 +477,11 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       stats_iteration.status = 0;
       options->callback->collectStatsIteration(options->callback->env, (int)n, z, F, err, &stats_iteration);
     }
-    numerics_printf_verbose(1,"--- newton_LSA :: iter = %i,  norm merit function = %e, norm grad. merit function = %e, err = %e > tol = %e",iter, norm_F_merit, norm_JacThetaF_merit, err, tol);
+    numerics_printf_verbose(1, "---- newton_LSA | %3i | %9.2e | %14.2e | %.1e | %.1e | %7i | %8.1e | %11.e |",
+			    iter, norm_F_merit, norm_JacThetaF_merit, err, tol, 0, tau, 0.0);
+
+    /* numerics_printf_verbose(1,"--- newton_LSA :: iter = %i,  norm merit function = %e, norm grad. merit function = %e, err = %e > tol = %e", */
+    /* 			    iter, norm_F_merit, norm_JacThetaF_merit, err, tol); */
   }
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
@@ -483,12 +490,12 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   if(err > tol)
   {
-    numerics_printf_verbose(1,"--- newton_LSA :: No convergence of the Newton algo after %d iterations and residue = %g ", iter, theta);
+    numerics_printf_verbose(1,"--- newton_LSA :: No convergence of the Newton algo after %d iterations, error = %.1e and residue = %.1e ", iter, err, theta);
     *info = 1;
   }
   else
   {
-    numerics_printf_verbose(1,"--- newton_LSA :: Convergence of the Newton algo after %d iterations and residue = %g ", iter, theta);
+    numerics_printf_verbose(1,"--- newton_LSA :: Convergence of the Newton algo after %d iterations, error = %.1e and residue = %.1e ", iter, err, theta);
     *info = 0;
   }
 

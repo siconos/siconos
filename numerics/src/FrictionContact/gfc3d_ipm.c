@@ -677,7 +677,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
 
 /* check the solution of the linear system A*x = b  */
 /* return |A*x[p:p+n-1]-b|/|b[p:p+n-1]|            */
-double relative_error_linear_system_solution(NumericsMatrix* const A, const double * x, const double * b, int b_size, int p, int n)
+static double relative_error_linear_system_solution(NumericsMatrix* const A, const double * x, const double * b, int b_size, int p, int n)
 {
   double out;
   double norm_b = cblas_dnrm2(n, b+p, 1);
@@ -752,7 +752,7 @@ void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* option
 
 void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
                double* restrict velocity, double* restrict globalVelocity,
-               int* restrict info, SolverOptions* restrict options, const char* problem_name)
+               int* restrict info, SolverOptions* restrict options)
 {
   // verbose = 3;
   // printf("DBL_EPSILON %25.15e\n",DBL_EPSILON);
@@ -1157,7 +1157,14 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   FILE * matrixH;
 
   char *str = (char *) malloc(200);
-  strcpy( str, problem_name );
+  if (problem->name)
+    {
+      strcpy( str, problem->name );
+    }
+  else
+    {
+      strcpy( str, "foo_" );
+    }
   const char * separators = "/";
   char *strToken = strtok( str, separators );
   for(int i=0; i<5; i++)

@@ -7,3 +7,5 @@ h5py
 pyhull
 wheel
 vtk
+packaging
+bullet

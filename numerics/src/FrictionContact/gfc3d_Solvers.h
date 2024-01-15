@@ -54,7 +54,7 @@ extern "C"
 
   /**
      Check for trivial solution in the friction-contact 3D problem
-     
+
      \param dim of the problem
      \param q global vector (n)
      \param velocity global vector (n), in-out parameter
@@ -65,7 +65,7 @@ extern "C"
   */
   int gfc3d_checkTrivialCaseGlobal(int dim, double* q, double* velocity, double*reaction, double* globalVelocity, SolverOptions* options);
 
-/** 
+/**
     Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
 
     \param problem the friction-contact 3D problem to solve
@@ -75,9 +75,9 @@ extern "C"
     \param info return 0 if the solution is found
     \param options the solver options :
     iparam[0] : Maximum iteration number
-    iparam[4] : localsolver choice 
+    iparam[4] : localsolver choice
     - 0: projection on Cone,
-    - 1: Newton/AlartCurnier, 
+    - 1: Newton/AlartCurnier,
     - 2: projection on Cone with local iteration,
     dparam[0] : tolerance
     dparam[2] : localtolerance
@@ -93,9 +93,9 @@ extern "C"
 
   void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
 
-  /** 
+  /**
       Proximal point solver with reformulation for friction-contact 3D problem
-  
+
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
@@ -112,7 +112,7 @@ extern "C"
 
   /**
      Fixed Point iteration on De Saxe formulation solver with reformulation for friction-contact 3D problem
-     
+
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -128,7 +128,7 @@ extern "C"
 
   /**
      Fixed Point iteration on Tresca Friction Cylinder with reformulation for friction-contact 3D problem
-     
+
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -144,7 +144,7 @@ extern "C"
 
   /**
      Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
-     
+
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -160,7 +160,7 @@ extern "C"
 
   /**
      Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
-     
+
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -178,9 +178,9 @@ extern "C"
   */
   void gfc3d_nsgs(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, SolverOptions* options);
 
-  /** 
+  /**
       Solver based on the fixed-point iteration proposed by Cadoux for friction-contact 3D problem
-      
+
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
@@ -198,7 +198,7 @@ extern "C"
 
   /**
      solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
-     
+
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -210,7 +210,7 @@ extern "C"
 
   /**
      solver using PATHVI (via GAMS) for friction-contact 3D problem based on an AVI reformulation
-     
+
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
      \param reaction global vector (n), in-out parameters
@@ -223,8 +223,10 @@ extern "C"
 
   void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int *info, SolverOptions* options);
 
+  void  gfc3d_nonsmooth_Newton_AlartCurnier_new_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options);
+
   void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
-  
+
   void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
 
 
@@ -242,7 +244,7 @@ extern "C"
    */
   void gfc3d_IPM(GlobalFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
-                  int*  info, SolverOptions*  options, const char* problem_name);
+                  int*  info, SolverOptions*  options);
 
   /* This routine is a short version of gfc3d_IPM. It allows to solve the convex model with fixed barrier parameter and s parameter.
    * Param s will be updated (s = || u_bar ||) according to different strategies.
@@ -266,7 +268,7 @@ extern "C"
    */
   void gfc3d_IPM_SNM(GlobalFrictionContactProblem*  problem, double*  reaction,
                   double*  velocity, double*  globalVelocity,
-                  int*  info, SolverOptions*  options, const char* problem_name);
+                  int*  info, SolverOptions*  options);
 
   void gfc3d_IPM_SNM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
 

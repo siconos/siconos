@@ -428,7 +428,7 @@ endmacro()
 #  - with PYTHONPATH set to ${CMAKE_BINARY_DIR}/wrap
 # 
 function(add_python_test test_name test_file)
-  add_test(${test_name} ${PYTHON_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${test_file})
+  add_test(${test_name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${test_file})
   set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
 endfunction()

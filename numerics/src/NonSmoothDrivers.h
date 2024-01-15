@@ -161,7 +161,7 @@ extern "C"
   */
   int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction ,
                                      double *velocity, double* globalVelocity,
-                                     SolverOptions* options, const char* problem_name);
+                                     SolverOptions* options);
 
   /**
      General interface to solvers for global rolling friction-contact 3D problem

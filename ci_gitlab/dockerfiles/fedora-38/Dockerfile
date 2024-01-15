@@ -1,14 +1,9 @@
-FROM fedora:33
+FROM fedora:38
 RUN dnf --setopt=deltarpm=false install -y \
 	make \
         cmake \
         python3 \
         python3-devel \
-        python3-lxml \
-        python3-pytest \
-        python3-scipy \
-        python3-matplotlib \
-        python3-packaging \
         lpsolve-devel \
         gcc-gfortran \
         gcc-c++ \
@@ -26,10 +21,10 @@ RUN dnf --setopt=deltarpm=false install -y \
 	libglvnd-glx \
         git-core \
         bullet-devel \
-	python3-h5py  && dnf clean all
+	libXrender-devel \
+	&& dnf clean all
 WORKDIR /home
-RUN python3 -m pip install -U wheel vtk
-COPY ci_gitlab/dockerfiles/install_bullet.sh .
+COPY ci_gitlab/dockerfiles/requirements.txt /home
+RUN python3 -m pip install -U -r /home/requirements.txt
 ENV CI_PROJECT_DIR /home
-RUN sh /home/install_bullet.sh
 

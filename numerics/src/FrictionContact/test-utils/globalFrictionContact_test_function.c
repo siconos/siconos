@@ -43,6 +43,12 @@ int globalFrictionContact_test_function(TestCase* current)
   int k, info = -1 ;
   GlobalFrictionContactProblem* problem = globalFrictionContact_new_from_filename(current->filename);
 
+  // alloc and copy current->filename;
+
+  problem->name  = malloc(1 + strlen(current->filename));
+  strcpy(problem->name, current->filename);
+
+  
 
   /* globalFrictionContact_display(problem); */
 
@@ -104,7 +110,7 @@ int globalFrictionContact_test_function(TestCase* current)
   {
     info = gfc3d_driver(problem,
                         reaction, velocity, globalvelocity,
-                        current->options, current->filename);
+                        current->options);
     //    printf("info = %i\n", info);
   }
 

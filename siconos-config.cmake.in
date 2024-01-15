@@ -31,16 +31,21 @@ set_and_check(siconos_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos")
 set(installed_targets "@installed_targets@")
 
 # Path (relative to siconos install) to cmake extra tools
-set(SICONOS_CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/@ConfigPackageLocation@)
+set(SICONOS_CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/@SiconosConfigPackageLocation@)
 list(APPEND CMAKE_MODULE_PATH ${SICONOS_CMAKE_MODULE_PATH})
 
-set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS @CMAKE_EXPORT_COMPILE_COMMANDS@ CACHE BOOL "" FORCE)
+
+set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
+# Ensure that the same compiler will be used with siconos script
+set(CMAKE_CXX_COMPILER @CMAKE_CXX_COMPILER@)
+set(CMAKE_C_COMPILER @CMAKE_C_COMPILER@)
+set(CMAKE_Fortran_COMPILER @CMAKE_Fortran_COMPILER@)
 # --- Siconos extra components or options ---
 set(HAS_PYTHON_WRAPPER @WITH_PYTHON_WRAPPER@)
 if(HAS_PYTHON_WRAPPER)
-  set(PYTHON_EXECUTABLE  @PYTHON_EXECUTABLE@)
-  set(Python3_EXECUTABLE @Python3_EXECUTABLE@)
+  set(Python_EXECUTABLE  @Python_EXECUTABLE@)
 endif()
 
 # --- Numerics component extras ---
@@ -54,9 +59,7 @@ set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
 if(@WITH_FCLIB@)
-  #if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
-    set(FCLIB_ROOT @FCLIB_ROOT@)
-  #else()
+  set(FCLIB_ROOT @FCLIB_ROOT@)
   if(${CMAKE_VERSION} VERSION_LESS "3.13.0")
     set(FCLIB_DIR @FCLIB_DIR@)
   endif()

@@ -1,8 +1,7 @@
 FROM IMAGENAME
+ARG BUILD_DIR=build
 USER root
-RUN cd /builds/nonsmooth/siconos/build; make install
-#COPY $CI_PROJECT_DIR/build/requirements.txt /home
-RUN python3 -m pip install -U pyhull lxml matplotlib vtk
+RUN cmake --install $BUILD_DIR
 USER $NB_USER
 ENV SICONOS_INSTALL_DIR=/home/install-siconos PATH=/home/install-siconos/bin/:$PATH
 ENV JUPYTER_ENABLE_LAB yes

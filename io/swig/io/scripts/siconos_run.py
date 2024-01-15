@@ -1,4 +1,4 @@
-#!/usr/bin/env @PYTHON_EXECUTABLE@
+#!/usr/bin/env @Python_EXECUTABLE@
 """
 Description: Run a pre-generated Siconos mechanics-IO HDF5 simulation file.
 """
