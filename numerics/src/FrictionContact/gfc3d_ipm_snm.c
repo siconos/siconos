@@ -1050,7 +1050,8 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
     H_tilde = NM_transpose(problem->H);
   }
 
-  printf("nnz H = %8zu density = %9.4f\n",NM_nnz(problem->H), NM_nnz(problem->H)/1.0/nd/m);
+  // printf("nnz H = %8zu density = %9.4f\n",NM_nnz(problem->H), NM_nnz(problem->H)/1.0/nd/m);
+  printf("nnz H = %8zu density = %9.4f, \t mu = %.2e\n",NM_nnz(problem->H), NM_nnz(problem->H)/1.0/nd/m, problem->mu[0]);
 
   // initialize solver if it is not set
   int internal_allocation=0;
@@ -3635,10 +3636,9 @@ while(findParam)
       printf("cone %i %9.2e %9.2e\n", i, somme[0], cblas_dnrm2(2,somme+1, 1));
   }
   if (nsc < n)
-    printf("Ratio of Strict complementarity solutions: %4i / %4i = %4.2f\n", nsc, n, (double)nsc/n);
+    printf("Ratio of Strict complementarity solutions: %4i / %4i = %4.2f \t %4i %4i %4i\n", nsc, n, (double)nsc/n, nB, nN, nR);
   else
     printf("Strict complementarity satisfied: %4i / %4i  %9.2e %9.2e  %4i %4i %4i\n", nsc, n, ns, ns/cblas_dnrm2(3, somme, 1), nB, nN, nR);
-
 
 
   // Store solution into file
@@ -3721,7 +3721,8 @@ while(findParam)
   {
     options->solverData = (double *)malloc(sizeof(double));
     double *pinfeas_ptr = (double *)options->solverData;
-    *pinfeas_ptr = pinfeas;
+    pinfeas_ptr[0] = pinfeas;
+    // pinfeas_ptr[1] = projerr;
   }
 
   if(H_tilde) H_tilde = NM_free(H_tilde);
@@ -3777,7 +3778,7 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES;
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
