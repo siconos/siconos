@@ -284,11 +284,11 @@ if(WITH_TESTING)
       HDF5 ON
       )
 
-    new_tests_collection(
-      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB_FULL
-      EXTRA_SOURCES data_collection_fc3d_fclib_full.c test_ipm_snm_fc3d_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
+    # new_tests_collection(
+    #   DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB_FULL
+    #   EXTRA_SOURCES data_collection_fc3d_fclib_full.c test_ipm_snm_fc3d_1.c DEPS FCLIB::fclib
+    #   HDF5 ON
+    #   )
 
     # new_tests_collection(
     #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSGS_WR_COLLECTION_FCLIB_FULL
@@ -340,29 +340,35 @@ if(WITH_TESTING)
       )
 
 
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
 
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_WR_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_wr_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_WR_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_wr_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
 
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
 
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_SEP_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_sep_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SEP_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_sep_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_SEP_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_ipm_snm_sep_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
 
 
     # ---------------------------------------------------
@@ -379,11 +385,11 @@ if(WITH_TESTING)
       HDF5 ON
       )
 
-     # new_tests_collection(
-     #  DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
-     #  EXTRA_SOURCES data_collection_grfc3d_fclib_full.c test_ipm_grfc3d_1.c DEPS FCLIB::fclib
-     #  HDF5 ON
-     #  )
+     new_tests_collection(
+      DRIVER grfc3d_test_collection.c.in  FORMULATION grfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_grfc3d_fclib_full.c test_ipm_grfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
 
   endif()
 

@@ -834,6 +834,7 @@ SolverOptions * solver_options_create(int solverId)
     break;
   }
   case SICONOS_GLOBAL_FRICTION_3D_IPM:
+  case SICONOS_GLOBAL_FRICTION_3D_IPM_SEP:
   {
     options = solver_options_initialize(solverId, 20000, 1e-6, 0);
     gfc3d_ipm_set_default(options);

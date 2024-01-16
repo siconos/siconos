@@ -112,8 +112,9 @@ enum FRICTION_SOLVER
   SICONOS_GLOBAL_FRICTION_3D_IPM_WR = 616,
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM = 617,
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR = 618,
-  SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP = 619, // separate sub-problems
+  SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP = 619, // separate sub-problems for non-convex case
   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX = 620,
+  SICONOS_GLOBAL_FRICTION_3D_IPM_SEP = 621, // separate sub-problems for convex case
 
 
   /** Non-smooth Gauss Seidel, local formulation */
@@ -196,6 +197,7 @@ extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_WR_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SEP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR;
