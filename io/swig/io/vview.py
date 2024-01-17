@@ -978,14 +978,20 @@ class IOReader(VTKPythonAlgorithmBase):
         self.velo_data = self._ivelo_data[self._id_t_m, :]
 
         static_id_t = max(0, numpy.searchsorted(self._static_times, t, side='right') - 1)
-        if static_id_t < len(self._static_indices)-1:
-            self._static_id_t_m = list(range(self._static_indices[static_id_t],
-                                             self._static_indices[static_id_t+1]))
+
+        if len(self._static_indices) >0:
+            if static_id_t < len(self._static_indices)-1:
+                self._static_id_t_m = list(range(self._static_indices[static_id_t],
+                                                 self._static_indices[static_id_t+1]))
+            else:
+                self._static_id_t_m = [self._static_indices[static_id_t]]
         else:
-            self._static_id_t_m = [self._static_indices[static_id_t]]
-
-        self.pos_static_data = self._ispos_data[self._static_id_t_m, :]
-
+            self._static_id_t_m = None
+        if self._static_id_t_m:
+            self.pos_static_data = self._ispos_data[self._static_id_t_m, :]
+        else:
+            self.pos_static_data = None
+            
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName('pos_data')
 
