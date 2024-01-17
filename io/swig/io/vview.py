@@ -991,7 +991,7 @@ class IOReader(VTKPythonAlgorithmBase):
             self.pos_static_data = self._ispos_data[self._static_id_t_m, :]
         else:
             self.pos_static_data = None
-            
+
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName('pos_data')
 
@@ -2171,7 +2171,8 @@ class VView(object):
         # here the numpy vectorization is used with a column vector and a
         # scalar for the time arg
         self.set_visibility_v = numpy.vectorize(self.set_dynamic_instance_visibility)
-        self.set_visibility_static_v = numpy.vectorize(self.set_static_instance_visibility)
+        if self.static_actors:
+            self.set_visibility_static_v = numpy.vectorize(self.set_static_instance_visibility)
 
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in cc:
@@ -2264,7 +2265,8 @@ class VView(object):
         self.set_visibility_v(list(self.dynamic_actors.keys()), time)
 
     def set_static_actors_visibility(self, time):
-        self.set_visibility_static_v(list(self.static_actors.keys()), time)
+        if len(self.static_actors.keys()) > 0:
+            self.set_visibility_static_v(list(self.static_actors.keys()), time)
 
     # callback maker for scale manipulation
     def make_scale_observer(self, glyphs):

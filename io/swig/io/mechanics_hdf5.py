@@ -73,7 +73,7 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None,
     """
     A context manager for a named temporary file.
     """
-    (_, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
+    (_fid, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
     fid = open(tfilename, 'w')
     if contents is not None:
         fid.write(contents)
@@ -97,6 +97,7 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None,
 
     yield r
     fid.close()
+    os.close(_fid)
     if not debug:
         os.remove(tfilename)
 
@@ -399,6 +400,25 @@ def occ_load_file(filename):
 
     return comp
 
+import os
+import shutil
+import subprocess
+
+
+def get_open_fds() -> int:
+    """Get the number of open file descriptors for the current process."""
+    lsof_path = shutil.which("lsof")
+    if lsof_path is None:
+        raise NotImplementedError("Didn't handle unavailable lsof.")
+    raw_procs = subprocess.check_output(
+        [lsof_path, "-w", "-Ff", "-p", str(os.getpid())]
+    )
+    def filter_fds(lsof_entry: str) -> bool:
+        return lsof_entry.startswith("f") and lsof_entry[1:].isdigit()
+
+    fds = list(filter(filter_fds, raw_procs.decode().split(os.linesep)))
+
+    return len(fds)
 
 def topods_shape_reader(shape, deflection=0.001):
 
@@ -408,6 +428,7 @@ def topods_shape_reader(shape, deflection=0.001):
     import vtk
 
     stl_writer = StlAPI_Writer()
+    reader = vtk.vtkSTLReader()
 
     with tmpfile(suffix='.stl') as tmpf:
         mesh = BRepMesh_IncrementalMesh(shape, deflection)
@@ -417,11 +438,11 @@ def topods_shape_reader(shape, deflection=0.001):
         stl_writer.Write(shape, tmpf[1])
         tmpf[0].flush()
 
-        reader = vtk.vtkSTLReader()
+
         reader.SetFileName(tmpf[1])
         reader.Update()
 
-        return reader
+    return reader
 
 
 def brep_reader(brep_string, indx):
@@ -619,7 +640,7 @@ class MechanicsHdf5(object):
             self.print_io_mechanics('Warning -  _data siconos_mechanics_run_options in the hdf5 file')
             self.print_io_mechanics('        -  data(self._data, siconos_mechanics_run_options, ...) : ', e)
 
-        
+
         # self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
         #                               use_compression=self._use_compression)
 
