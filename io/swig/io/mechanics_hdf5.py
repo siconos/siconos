@@ -253,9 +253,9 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
     inertia
     inertia_matrix
     """
-    from OCC.GProp import GProp_GProps
-    from OCC.BRepGProp import brepgprop_VolumeProperties
-    from OCC.gp import gp_Ax1, gp_Dir
+    from OCC.Core.GProp import GProp_GProps
+    from OCC.Core.BRepGProp import brepgprop_VolumeProperties
+    from OCC.Core.gp import gp_Ax1, gp_Dir
     from siconos.mechanics import occ
 
     system = GProp_GProps()
@@ -330,10 +330,10 @@ def occ_topo_list(shape):
     :return: a list of edges and faces
     """
 
-    from OCC.TopAbs import TopAbs_FACE
-    from OCC.TopAbs import TopAbs_EDGE
-    from OCC.TopExp import TopExp_Explorer
-    from OCC.TopoDS import topods_Face, topods_Edge
+    from OCC.Core.TopAbs import TopAbs_FACE
+    from OCC.Core.TopAbs import TopAbs_EDGE
+    from OCC.Core.TopExp import TopExp_Explorer
+    from OCC.Core.TopoDS import topods_Face, topods_Edge
 
 
     topExp = TopExp_Explorer()
@@ -364,11 +364,11 @@ def occ_load_file(filename):
     :return: a topods_shape
     """
 
-    from OCC.STEPControl import STEPControl_Reader
-    from OCC.IGESControl import IGESControl_Reader
-    from OCC.BRep import BRep_Builder
-    from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+    from OCC.Core.STEPControl import STEPControl_Reader
+    from OCC.Core.IGESControl import IGESControl_Reader
+    from OCC.Core.BRep import BRep_Builder
+    from OCC.Core.TopoDS import TopoDS_Compound
+    from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
     reader_switch = {'stp': STEPControl_Reader,
                      'step': STEPControl_Reader,
@@ -402,8 +402,8 @@ def occ_load_file(filename):
 
 def topods_shape_reader(shape, deflection=0.001):
 
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.BRepMesh import BRepMesh_IncrementalMesh
+    from OCC.Core.StlAPI import StlAPI_Writer
+    from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
 
     import vtk
 
@@ -426,8 +426,8 @@ def topods_shape_reader(shape, deflection=0.001):
 
 def brep_reader(brep_string, indx):
 
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.BRepTools import BRepTools_ShapeSet
+    from OCC.Core.StlAPI import StlAPI_Writer
+    from OCC.Core.BRepTools import BRepTools_ShapeSet
     import vtk
 
     shape_set = BRepTools_ShapeSet()
@@ -894,7 +894,7 @@ class MechanicsHdf5(object):
 
         if name not in self._ref:
 
-            from OCC.STEPControl import STEPControl_Writer, STEPControl_AsIs
+            from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
 
             # step format is used for the storage.
             step_writer = STEPControl_Writer()
