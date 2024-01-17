@@ -1677,7 +1677,7 @@ class VView(object):
                 with io_tmpfile(
                         debug=True,
                         suffix='.{0}'.format(shape_type),
-                        contents=str(self.io.shapes()[shape_name][:][0])) as tmpf:
+                        contents=(self.io.shapes()[shape_name][:][0]).decode("utf-8")) as tmpf:
                     shape = occ_load_file(tmpf[1])
 
                     # whole shape
