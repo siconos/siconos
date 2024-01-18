@@ -111,11 +111,14 @@ double getStepLength(const double * const x, const double * const dx, const unsi
  * \param w is the constraint vector.
  * \param out is the result velocity - H x globalVelocity - w vector.
  * \param rnorm is the relative norm of out = |out|/max{|velocity|, |H x globalVelocity|, |w|}
+ * \param type is the norm type used: 0 = L-2, 1 = L-inf
  */
 void primalResidual_s(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
 		    const double * s, double * out, double * rnorm, const double tol);
 void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
                     double * out, double * rnorm, const double tol);
+void primalResidual_type(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
+                    double * out, double * rnorm, const double tol, const int type);
 
 
 /**
@@ -127,9 +130,12 @@ void primalResidual(const double * velocity, NumericsMatrix * H, const double * 
  * \param f is the constraint vector (vector of internal and external forces).
  * \param out os the result M x globalVelocity + f - H' x reaction vector.
  * \param rnorm is the relative 2-norm of out = |out| / max{|M x globalVelocity|, |f|, |H' x r|}
+ * \param type is the norm type used: 0 = L-2, 1 = L-inf
  */
 void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
 		  double * out, double * rnorm, const double tol);
+void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
+      double * out, double * rnorm, const double tol, const int type);
 
 
 /**

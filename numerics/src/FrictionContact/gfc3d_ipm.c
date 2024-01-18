@@ -106,10 +106,31 @@ void primalResidual(const double * velocity, NumericsMatrix * H, const double * 
   cblas_daxpy(nd, -1.0, w, 1, out, 1);
   rn = fmax(rn, cblas_dnrm2(nd, velocity, 1));
   rn = fmax(rn, cblas_dnrm2(nd, w, 1));
-  *rnorm = (rn > tol ? cblas_dnrm2(nd, out, 1) : cblas_dnrm2(nd, out, 1));
+  *rnorm = (rn > tol ? cblas_dnrm2(nd, out, 1)/rn : cblas_dnrm2(nd, out, 1));
 
   /* *rnorm = cblas_dnrm2(nd, out, 1);  */
   // printf("rn = %e, tol = %e\n", rn, tol);
+}
+
+void primalResidual_type(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
+                    double * out, double * rnorm, const double tol, const int type)
+{
+  size_t nd = H->size0;
+  double rn;
+
+
+  /* The memory for the result vectors should be allocated using calloc
+   * since H is a sparse matrix. In other case the behaviour will be undefined.*/
+  //  double *Hv = (double*)calloc(nd, sizeof(double));
+  //double *u_minus_Hv = (double*)calloc(nd, sizeof(double));
+
+  NM_gemv(-1.0, H, globalVelocity, 0.0, out);
+  rn = NV_norm_type(nd, out, type);
+  cblas_daxpy(nd, 1.0, velocity, 1, out, 1);
+  cblas_daxpy(nd, -1.0, w, 1, out, 1);
+  rn = fmax(rn, NV_norm_type(nd, velocity, type));
+  rn = fmax(rn, NV_norm_type(nd, w, type));
+  *rnorm = (rn > tol ? NV_norm_type(nd, out, type)/rn : NV_norm_type(nd, out, type));
 }
 
 static void primalResidual2(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
@@ -155,8 +176,25 @@ void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMat
   cblas_daxpy(m, -1.0, HTr, 1, out, 1);
   rn = fmax(rn, cblas_dnrm2(m, f, 1));
   rn = fmax(rn, cblas_dnrm2(m, HTr, 1));
-  *rnorm = (rn > tol ? cblas_dnrm2(m, out, 1) : cblas_dnrm2(m, out, 1));
+  *rnorm = (rn > tol ? cblas_dnrm2(m, out, 1)/rn : cblas_dnrm2(m, out, 1));
   /* *rnorm = cblas_dnrm2(m, out, 1); */
+  free(HTr);
+}
+void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
+                  double * out, double * rnorm, const double tol, const int type)
+{
+  double m = H->size1;
+  double *HTr = (double*)calloc(m, sizeof(double));
+  double rn;
+
+  NM_gemv(1.0, M, globalVelocity, 0.0, out);
+  rn = NV_norm_type(m, out, type);
+  cblas_daxpy(m, -1.0, f, 1, out, 1);
+  NM_tgemv(1.0, H, reaction, 0.0, HTr);
+  cblas_daxpy(m, -1.0, HTr, 1, out, 1);
+  rn = fmax(rn, NV_norm_type(m, f, type));
+  rn = fmax(rn, NV_norm_type(m, HTr, type));
+  *rnorm = (rn > tol ? NV_norm_type(m, out, type)/rn : NV_norm_type(m, out, type));
   free(HTr);
 }
 
@@ -1432,18 +1470,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
       //printf("alpha_u = %e,\t", alpha_primal); //printf("diff_pinfeas = %e\n\n", diff_pinfeas);
     }
-
-
-    // for(unsigned int i = 0; i < nd; ++ i)
-    // {
-    //   if(i % d == 0)
-    //   {
-    //     u_plus_phiu[i] = velocity[i] + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
-    //   }
-    //   u_plus_phiu[i] = velocity[i];
-    // }
-
-
 
 
 
@@ -3287,6 +3313,14 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
     gfc3d_IPM_free(problem,options);
   }
 
+  if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SEP)
+  {
+    options->solverData = (double *)malloc(sizeof(double));
+    double *pinfeas_ptr = (double *)options->solverData;
+    pinfeas_ptr[0] = pinfeas;
+    // pinfeas_ptr[1] = projerr;
+  }
+
   if(H_tilde) H_tilde = NM_free(H_tilde);
   if(H) H = NM_free(H);
   if(minus_M) minus_M = NM_free(minus_M);
@@ -3306,9 +3340,9 @@ void gfc3d_ipm_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] = SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
-  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = 1;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = -1;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_AFTER_SOLVING_LS;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_AT_EACH_ITE;
+  // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_AT_EACH_ITE;
 
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH;
