@@ -217,7 +217,7 @@ int NV_isnan(const double * const vec,  const unsigned int vecSize)
   return 0;
 }
 
-double NV_norm_type(const double * const vec, const unsigned int vecSize, const int type)
+double NV_norm_type(const unsigned int vecSize, const double * const vec, const int type)
 {
   double norm = -1;
 
@@ -234,7 +234,7 @@ double NV_norm_type(const double * const vec, const unsigned int vecSize, const 
 
   else
   {
-    printf(stderr, "NV_norm_type: type = %d is undefined.\n", type);
+    fprintf(stderr, "NV_norm_type: type = %d is undefined.\n", type);
     exit(EXIT_FAILURE);
   }
 

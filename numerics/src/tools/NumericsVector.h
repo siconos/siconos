@@ -181,7 +181,7 @@ extern "C"
       \param vecSize the size of the vector vec
       \return a minimum value of vertor
    */
-  double NV_norm_type(const double * const vec, const unsigned int vecSize, const int type);
+  double NV_norm_type(const unsigned int vecSize, const double * const vec, const int type);
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
