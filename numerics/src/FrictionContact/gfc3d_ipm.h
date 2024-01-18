@@ -74,6 +74,8 @@ typedef long double float_type;
 /* typedef double float_type; */
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
+#define NORM_2 0
+#define NORM_INF 1
 
 /* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
 float_type dnrm2l(const unsigned int n, const double * x);
