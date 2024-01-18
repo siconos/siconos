@@ -173,6 +173,15 @@ extern "C"
   
   int NV_isnan(const double * const vec,  const unsigned int vecSize );
   
+  /** Find a norm of vertor depending on type: ()
+   *  0 = L-2 ( sqrt(sum(vec^2)) )
+   *  1 = L-inf ( max(abs(vec)) )
+   *  note: only use CBLAS routines. Extensibility to other types
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+      \return a minimum value of vertor
+   */
+  double NV_norm_type(const double * const vec, const unsigned int vecSize, const unsigned int type);
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
