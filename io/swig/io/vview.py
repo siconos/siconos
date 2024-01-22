@@ -2173,6 +2173,8 @@ class VView(object):
         self.set_visibility_v = numpy.vectorize(self.set_dynamic_instance_visibility)
         if self.static_actors:
             self.set_visibility_static_v = numpy.vectorize(self.set_static_instance_visibility)
+        else:
+            self.set_visibility_static_v = None
 
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in cc:
@@ -2265,7 +2267,7 @@ class VView(object):
         self.set_visibility_v(list(self.dynamic_actors.keys()), time)
 
     def set_static_actors_visibility(self, time):
-        if len(self.static_actors.keys()) > 0:
+        if self.set_visibility_static_v:
             self.set_visibility_static_v(list(self.static_actors.keys()), time)
 
     # callback maker for scale manipulation
