@@ -34,6 +34,7 @@ siconos::modeling::StressLinearTIR::StressLinearTIR(
     std::shared_ptr<siconos::algebra::SimpleMatrix> C)
     : LagrangianLinearTIR() {
   _jachq = C;
+  _subType = siconos::modeling::RelationSubType::StressLinearTIR;
 }
 
 // Constructor from a complete set of data
@@ -45,6 +46,8 @@ siconos::modeling::StressLinearTIR::StressLinearTIR(
   _jachq = C;
   _F = F;
   _e = e;
+  _subType = siconos::modeling::RelationSubType::StressLinearTIR;
+
 }
 
 // Minimum data (C, e as pointers) constructor
@@ -54,6 +57,8 @@ siconos::modeling::StressLinearTIR::StressLinearTIR(
     : LagrangianLinearTIR() {
   _jachq = C;
   _e = e;
+  _subType = siconos::modeling::RelationSubType::StressLinearTIR;
+
 }
 
 void siconos::modeling::StressLinearTIR::checkSize(Interaction& inter) {
@@ -115,11 +120,12 @@ void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& 
   // get lambda of the concerned interaction
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
+
   // computation of p = Ht lambda
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(_jachq->display(););
-  DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  DEBUG_EXPR(DSlink[SolidLinearDS::dotEpsilon]->display(););
+  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::DSlinkSize+SolidLinearDS::dotEpsilon], false);
   DEBUG_END(
       "void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")

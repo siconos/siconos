@@ -75,7 +75,9 @@ enum class RelationSubType {
   /** */
   Type1R,
   /** */
-  Type2R
+  Type2R,
+  /**  */
+  StressLinearTIR
 };
 
 /**

@@ -33,6 +33,8 @@
 #include "FirstOrderR.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
+#include "StressLinearTIR.hpp"
+#include "../../../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
 // #include "FirstOrderLinearTIR.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
@@ -384,24 +386,34 @@ void siconos::modeling::Interaction::__initDSDataFirstOrder(
 }
 
 void siconos::modeling::Interaction::__initDataLagrangian(
-    std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink, DynamicalSystem& ds1,
-    DynamicalSystem& ds2) {
-  DEBUG_PRINT("siconos::modeling::Interaction::initDataLagrangian()\n");
-  DSlink.resize(LagrangianR::DSlinkSize);
+        std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink, DynamicalSystem& ds1,
+        DynamicalSystem& ds2) {
+    DEBUG_PRINT("siconos::modeling::Interaction::initDataLagrangian()\n");
+    auto relationSubType = _relation->getSubType();
+    if(relationSubType != RelationSubType::StressLinearTIR){
+        DSlink.resize(LagrangianR::DSlinkSize);
+    }
+    else
+    {
+        DSlink.resize(LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::solidDSlinkSize);
+    }
 
-  // Default DSlink
-  DSlink[LagrangianR::q0] = std::make_shared<siconos::algebra::BlockVector>();  // displacement
-  DSlink[LagrangianR::q1] = std::make_shared<siconos::algebra::BlockVector>();  // velocity
+    // Default DSlink
+    DSlink[LagrangianR::q0] = std::make_shared<siconos::algebra::BlockVector>();  // displacement
+    DSlink[LagrangianR::q1] = std::make_shared<siconos::algebra::BlockVector>();  // velocity
 
-  // auto relationSubType = _relation->getSubType();
-  // if(relationSubType != LinearTIR)
-  // {
-  //   //we need extra continuous memory vector
-  //   //todo
-  // }
+    // {
+    //   //we need extra continuous memory vector
+    //   //todo
+    // }
 
-  __initDSDataLagrangian(ds1, DSlink);
-  if (&ds1 != &ds2) __initDSDataLagrangian(ds2, DSlink);
+    __initDSDataLagrangian(ds1, DSlink);
+    if (&ds1 != &ds2) __initDSDataLagrangian(ds2, DSlink);
+    if(relationSubType == RelationSubType::StressLinearTIR){
+        auto& lds = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds1);
+        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::dotEpsilon]->insertPtr(lds.plasticRate());
+        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::sigma]->insertPtr(lds.stress());
+    }
 }
 
 void siconos::modeling::Interaction::__initDSDataLagrangian(

@@ -32,7 +32,7 @@ namespace siconos::modeling {
 
     \f$ p = [0 C]^t \lambda = [0 C^t \lambda] \f$
 
-    C is the only required input to built a StressLinearTIR.
+    C will typically be identity for a StressLinearTIR.
 
 */
 class StressLinearTIR : public LagrangianLinearTIR {
@@ -40,6 +40,9 @@ class StressLinearTIR : public LagrangianLinearTIR {
   ACCEPT_SERIALIZATION(StressLinearTIR);
 
  public:
+  enum SolidLinearDS { sigma, dotEpsilon, solidDSlinkSize };
+
+
   /** Default constructor
    */
   StressLinearTIR() : LagrangianLinearTIR(){};
