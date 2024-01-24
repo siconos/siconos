@@ -142,6 +142,15 @@ void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMat
 void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
       double * out, double * rnorm, const double tol, const int type);
 
+  /** Find a norm of vertor depending on:
+   *  type = NORM_2   = L-2 ( sqrt(sum(vec^2)) )
+   *  type = NORM_INF = L-inf ( max(abs(vec)) )
+   *  note: only use CBLAS routines. Extensibility to other types
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+   */
+  double NV_norm_type(const unsigned int vecSize, const double * const vec, const int type);
+
 /**
  * Returns the scalar product of 2 vectors depending on:
  * type = STANDARD  : <x,y>_2     = sum_i ( xi * yi )

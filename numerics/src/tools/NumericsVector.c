@@ -217,29 +217,7 @@ int NV_isnan(const double * const vec,  const unsigned int vecSize)
   return 0;
 }
 
-double NV_norm_type(const unsigned int vecSize, const double * const vec, const int type)
-{
-  double norm = -1;
 
-  if (type == 0) // L-2 norm
-  {
-    norm = cblas_dnrm2(vecSize, vec, 1);
-  }
-
-  else if (type == 1) // L-inf norm
-  {
-    int maxIndex = cblas_idamax(vecSize, vec, 1);
-    norm = fabs(vec[maxIndex - 1]);
-  }
-
-  else
-  {
-    fprintf(stderr, "NV_norm_type: type = %d is undefined.\n", type);
-    exit(EXIT_FAILURE);
-  }
-
-  return norm;
-}
 
 
 

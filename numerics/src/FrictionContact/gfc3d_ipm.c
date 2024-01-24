@@ -198,6 +198,29 @@ void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, Numeri
   free(HTr);
 }
 
+double NV_norm_type(const unsigned int vecSize, const double * const vec, const int type)
+{
+  double norm = -1;
+
+  if (type == NORM_2) // L-2 norm
+  {
+    norm = cblas_dnrm2(vecSize, vec, 1);
+  }
+
+  else if (type == NORM_INF) // L-inf norm
+  {
+    int maxIndex = cblas_idamax(vecSize, vec, 1);
+    norm = fabs(vec[maxIndex]);
+  }
+
+  else
+  {
+    fprintf(stderr, "NV_norm_type: type = %d is undefined.\n", type);
+    exit(EXIT_FAILURE);
+  }
+
+  return norm;
+}
 
 double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, const double * x, const double * y, const int type)
 {
@@ -2903,6 +2926,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     gfc3d_IPM_free(problem,options);
   }
 
+  if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SEP)
+  {
+    options->solverData = (double *)malloc(sizeof(double));
+    double *projerr_ptr = (double *)options->solverData;
+    *projerr_ptr = projerr;
+  }
+
   if(H_tilde) H_tilde = NM_free(H_tilde);
   if(minus_H) minus_H = NM_free(minus_H);
   if(H) H = NM_free(H);
@@ -3369,12 +3399,6 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
     gfc3d_IPM_free(problem,options);
   }
 
-  if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SEP)
-  {
-    options->solverData = (double *)malloc(sizeof(double));
-    double *projerr_ptr = (double *)options->solverData;
-    projerr_ptr[0] = projerr;
-  }
 
   if(H_tilde) H_tilde = NM_free(H_tilde);
   if(H) H = NM_free(H);
