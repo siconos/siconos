@@ -74,8 +74,11 @@ typedef long double float_type;
 /* typedef double float_type; */
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
-#define NORM_2 0
-#define NORM_INF 1
+#define STANDARD 0
+#define NORM_2 1
+#define NORM_INF 2
+#define NORM_2_INF 3
+
 
 /* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
 float_type dnrm2l(const unsigned int n, const double * x);
@@ -113,7 +116,7 @@ double getStepLength(const double * const x, const double * const dx, const unsi
  * \param w is the constraint vector.
  * \param out is the result velocity - H x globalVelocity - w vector.
  * \param rnorm is the relative norm of out = |out|/max{|velocity|, |H x globalVelocity|, |w|}
- * \param type is the norm type used: 0 = L-2, 1 = L-inf
+ * \param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf
  */
 void primalResidual_s(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
 		    const double * s, double * out, double * rnorm, const double tol);
@@ -132,13 +135,21 @@ void primalResidual_type(const double * velocity, NumericsMatrix * H, const doub
  * \param f is the constraint vector (vector of internal and external forces).
  * \param out os the result M x globalVelocity + f - H' x reaction vector.
  * \param rnorm is the relative 2-norm of out = |out| / max{|M x globalVelocity|, |f|, |H' x r|}
- * \param type is the norm type used: 0 = L-2, 1 = L-inf
+ * \param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf
  */
 void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
 		  double * out, double * rnorm, const double tol);
 void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
       double * out, double * rnorm, const double tol, const int type);
 
+/**
+ * Returns the scalar product of 2 vectors depending on:
+ * type = STANDARD  : <x,y>_2     = sum_i ( xi * yi )
+ * type = NORM_INF  : <x,y>_inf   = max_i ( xi * yi )
+ * type = NORM_2_INF: <x,y>_2_inf = max_i norm_2 ( xi o yi )
+ *
+ */
+double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, const double * x, const double * y, const int type);
 
 /**
  * Returns the Inf-norm of primal residual vecor ( velocity - H @ globalVelocity - w )

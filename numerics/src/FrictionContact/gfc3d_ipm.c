@@ -130,7 +130,7 @@ void primalResidual_type(const double * velocity, NumericsMatrix * H, const doub
   cblas_daxpy(nd, -1.0, w, 1, out, 1);
   rn = fmax(rn, NV_norm_type(nd, velocity, type));
   rn = fmax(rn, NV_norm_type(nd, w, type));
-  *rnorm = (rn > tol ? NV_norm_type(nd, out, type)/rn : NV_norm_type(nd, out, type));
+  *rnorm = (rn > tol ? NV_norm_type(nd, out, type) : NV_norm_type(nd, out, type));
 }
 
 static void primalResidual2(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
@@ -194,9 +194,44 @@ void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, Numeri
   cblas_daxpy(m, -1.0, HTr, 1, out, 1);
   rn = fmax(rn, NV_norm_type(m, f, type));
   rn = fmax(rn, NV_norm_type(m, HTr, type));
-  *rnorm = (rn > tol ? NV_norm_type(m, out, type)/rn : NV_norm_type(m, out, type));
+  *rnorm = (rn > tol ? NV_norm_type(m, out, type) : NV_norm_type(m, out, type));
   free(HTr);
 }
+
+
+double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, const double * x, const double * y, const int type)
+{
+  double xdoty = -1;
+
+  if (type == STANDARD)
+    xdoty = cblas_ddot(vecSize, x, 1, y, 1);
+
+  else if (type == NORM_INF)
+    for (int i = 0; i<varsCount; i++)
+    {
+      xdoty = fmax(xdoty, fabs(cblas_ddot(3, x+i*3, 1, y+i*3, 1)));
+    }
+
+  else if (type == NORM_2_INF)
+  {
+    double *xioyi = (double*)calloc(3, sizeof(double));
+    for (int i = 0; i<varsCount; i++)
+    {
+      JA_prod(x+i*3, y+i*3, 3, 1, xioyi);
+      xdoty = fmax(xdoty, cblas_dnrm2(3, xioyi, 1));
+    }
+    free(xioyi);
+  }
+
+  else
+  {
+    fprintf(stderr, "xdoty_type: type = %d is undefined.\n", type);
+    exit(EXIT_FAILURE);
+  }
+
+  return xdoty;
+}
+
 
 /* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product velocity o reaction  */
 double complemResidualNorm(const double * const velocity, const double * const reaction,
@@ -794,6 +829,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 {
   // verbose = 3;
   // printf("DBL_EPSILON %25.15e\n",DBL_EPSILON);
+
+  // int type = NORM_2;
+  int type = NORM_INF;
+
+
+
+
   // the size of the problem detection
   unsigned int m = problem->M->size0;
   unsigned int nd = problem->H->size1;
@@ -1136,7 +1178,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH:
     {
-      numerics_printf_verbose(-1,"LS solution: 2x2 NT scaling with QpH\n");
+      // numerics_printf_verbose(-1,"LS solution: 2x2 NT scaling with QpH\n");
+      if (type == NORM_2)
+        numerics_printf_verbose(-1,"LS solution: 2x2 NT scaling with QpH,\t stopping test: norm 2\n");
+      else if (type == NORM_INF)
+        numerics_printf_verbose(-1,"LS solution: 2x2 NT scaling with QpH,\t stopping test: norm inf\n");
+      else
+        numerics_printf_verbose(-1,"LS solution: 2x2 NT scaling with QpH\n");
       break;
     }
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH:
@@ -1256,13 +1304,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING] == SICONOS_FRICTION_3D_IPM_IPARAM_FINISH_WITHOUT_SCALING_YES )
       if ( (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] != SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL) && (totalresidual <= 1e-10) && (fws==' ') )
       {
-	// To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
-	options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
-	fws = '*';
-	// copy of the current solution into a temporary vector to evaluate the distance of this solution to the final one
-	/* cblas_dcopy(m, globalVelocity, 1, tmpsol, 1); */
-	/* cblas_dcopy(nd, velocity, 1, tmpsol+m, 1); */
-	/* cblas_dcopy(nd, reaction, 1, tmpsol+m+nd, 1); */
+      	// To solve the problem very accurately, the algorithm switches to a direct solution of the linear system without scaling and without reduction //
+      	options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] = SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_NOSCAL;
+      	fws = '*';
+      	// copy of the current solution into a temporary vector to evaluate the distance of this solution to the final one
+      	/* cblas_dcopy(m, globalVelocity, 1, tmpsol, 1); */
+      	/* cblas_dcopy(nd, velocity, 1, tmpsol+m, 1); */
+      	/* cblas_dcopy(nd, reaction, 1, tmpsol+m+nd, 1); */
       }
 
     /** Correction of w to take into account the dependence on the tangential velocity */
@@ -1483,14 +1531,22 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
      - complementarity: u o r
      - projection error: r - proj(r-u)
     */
-    // primalResidual2(velocity, H, globalVelocity, w, s, primalConstraint, &pinfeas, tol); // primalConstraint = u - H*v -w - phi(s)
-    primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, tol); // primalConstraint = u - H*v -w
-    dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol);  // dualConstraint =  M*v - H'*r - f
+    // // primalResidual2(velocity, H, globalVelocity, w, s, primalConstraint, &pinfeas, tol); // primalConstraint = u - H*v -w - phi(s)
+    // primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, tol); // primalConstraint = u - H*v -w
+    // dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol);  // dualConstraint =  M*v - H'*r - f
+    // dualgap = dualGap(M, f, w, globalVelocity, reaction, nd, m);
+    // // barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / n /3.;
+    // complem = complemResidualNorm(velocity, reaction, nd, n);
+    // udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
+    // // barr_param = udotr / 3.;
+
+    // Stopping test using norm type
+    primalResidual_type(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, tol, type);
+    dualResidual_type(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol, type);
+    udotr = xdoty_type(n, nd, velocity, reaction, type);
     dualgap = dualGap(M, f, w, globalVelocity, reaction, nd, m);
-    // barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / n /3.;
     complem = complemResidualNorm(velocity, reaction, nd, n);
-    udotr = cblas_ddot(nd, velocity, 1, reaction, 1);
-    // barr_param = udotr / 3.;
+
 
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_3X3_TEST6 ||
         options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_2X2_QPH_TEST)
