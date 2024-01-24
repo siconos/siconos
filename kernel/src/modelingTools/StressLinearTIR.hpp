@@ -32,7 +32,7 @@ namespace siconos::modeling {
 
     \f$ p = [0 C]^t \lambda = [0 C^t \lambda] \f$
 
-    C will typically be identity for a StressLinearTIR.
+    C will typically be identity for a StressLinearTIR. \lambda will be intepreted as the plastic rate.
 
 */
 class StressLinearTIR : public LagrangianLinearTIR {

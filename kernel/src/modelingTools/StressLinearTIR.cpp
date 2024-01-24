@@ -97,17 +97,13 @@ void siconos::modeling::StressLinearTIR::computeOutput(double time, Interaction&
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
-  siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
+  siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber], y);
 
   if (derivativeNumber == 0) {
     if (_e) y += *_e;
     if (_F) siconos::algebra::prod(*_F, *DSlink[LagrangianR::z], y, false);
   }
 
-  if (_jachlambda) {
-    auto& lambda = *inter.lambda(derivativeNumber);
-    siconos::algebra::prod(*_jachlambda, lambda, y, false);
-  }
   DEBUG_END(
       "siconos::modeling::StressLinearTIR::computeOutput(double time, Interaction& inter, "
       "unsigned int derivativeNumber)\n");
@@ -117,7 +113,9 @@ void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& 
   DEBUG_BEGIN(
       "void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")
+
   // get lambda of the concerned interaction
+  // Here lambda = plastic Rate
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
 
@@ -125,7 +123,7 @@ void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& 
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(_jachq->display(););
   DEBUG_EXPR(DSlink[SolidLinearDS::dotEpsilon]->display(););
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::DSlinkSize+SolidLinearDS::dotEpsilon], false);
+  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::DSlinkSize+SolidLinearDS::dotEpsilon + level], false);
   DEBUG_END(
       "void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")
