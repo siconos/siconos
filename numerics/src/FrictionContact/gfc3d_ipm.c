@@ -3372,9 +3372,8 @@ void gfc3d_IPM_fixed(GlobalFrictionContactProblem* restrict problem, double* res
   if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SEP)
   {
     options->solverData = (double *)malloc(sizeof(double));
-    double *pinfeas_ptr = (double *)options->solverData;
-    pinfeas_ptr[0] = pinfeas;
-    // pinfeas_ptr[1] = projerr;
+    double *projerr_ptr = (double *)options->solverData;
+    projerr_ptr[0] = projerr;
   }
 
   if(H_tilde) H_tilde = NM_free(H_tilde);
