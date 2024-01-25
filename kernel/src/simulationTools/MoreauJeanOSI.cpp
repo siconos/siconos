@@ -179,16 +179,16 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
 
   // Check dynamical system type
   auto dsType = siconos::types::type_value(*ds);
-
   assert(dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
          dsType == siconos::modeling::Type::LagrangianDS ||
          dsType == siconos::modeling::Type::NewtonEulerDS ||
-         dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS);
+         dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS ||
+         dsType == siconos::modeling::Type::SolidLinearTIDS);
 
   // Compute W (iteration matrix)
   auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
-  initializeIterationMatrixW(t, sods);
 
+  initializeIterationMatrixW(t, sods);
   // Initialize work vectors
   auto &ds_work_vectors = *_initializeDSWorkVectors(ds);
   ds_work_vectors.resize(siconos::integrators::MoreauJeanOSI::WORK_LENGTH);
@@ -230,6 +230,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
       "std::shared_ptr<siconos::modeling::DynamicalSystem> ds)\n");
   // Update dynamical system components (for memory swap).
   sods->computeForces(t, sods->q(), sods->velocity());
+  std::cout << " Out of computeForces" << std::endl;
   sods->swapInMemory();
 }
 void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
@@ -428,8 +429,9 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       auto C = d->C();
       auto S = d->S();
       auto B = d->B();
+      _dynamicalSystemsGraph->properties(dsv).W =
+              std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW,d->mass()->num());
       auto W = _dynamicalSystemsGraph->properties(dsv).W;
-
       std::vector<std::size_t> subDim(2);
       std::vector<std::size_t> subPos(4);
       subDim[0] = d->velocityDimension();
@@ -438,18 +440,20 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       subPos[1] = 0;
       subPos[2] = 0;
       subPos[3] = 0;
-
       siconos::algebra::setBlock(*d->mass(), W, subDim, subPos); // W = [M 0; 0 0]
 
       subDim[0] = d->stressDimension();
       subDim[1] = subDim[0];
       subPos[0] = 0;
       subPos[1] = 0;
-      subPos[2] = subDim[0];
-      subPos[3] = subDim[0];
+      subPos[2] = d->velocityDimension();
+      subPos[3] = subPos[2];
 //      std::shared_ptr<siconos::algebra::SiconosMatrix> Z;
 //      Z->zero();
       std::shared_ptr<siconos::algebra::SiconosMatrix> minusS, hThetaB, hThetaBtrans;
+      minusS = std::make_shared<siconos::algebra::SimpleMatrix>(S->size(0), S->size(1));
+      hThetaB = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(0), B->size(1));
+      hThetaBtrans = std::make_shared<siconos::algebra::SimpleMatrix>(B->size(1), B->size(0));
       auto Btrans = std::make_shared<siconos::algebra::SimpleMatrix>(*B);
       Btrans->trans();
 //      siconos::algebra::sub(*Z, *S, *minusS); // S = -S
@@ -457,7 +461,6 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
                              true);  // minusS = -S
 
       siconos::algebra::setBlock(*minusS, W, subDim, subPos); // W = [M 0; 0 -S]
-
       siconos::algebra::scal(h*_theta, *B, *hThetaB,
                              true);  // hThetaB = h*_theta * B
       siconos::algebra::scal(h*_theta, *Btrans, *hThetaBtrans,
@@ -476,6 +479,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       subPos[1] = 0;
       subPos[2] = 0;
       subPos[3] = d->velocityDimension();
+
       siconos::algebra::setBlock(*hThetaBtrans, W, subDim, subPos); // W = [M h*theta*B^T; h*theta*B -S]
       if (d->boundaryConditions())
         _initializeIterationMatrixWBoundaryConditions(*d, dsv);
@@ -575,7 +579,6 @@ void siconos::integrators::MoreauJeanOSI::
   // This function:
   // - allocate memory for a matrix WBoundaryConditions
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
-
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanOSI::"
       "initializeIterationMatrixWBoundaryConditions(std::"
@@ -598,7 +601,8 @@ void siconos::integrators::MoreauJeanOSI::
   if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
       dsType == siconos::modeling::Type::LagrangianDS ||
       dsType == siconos::modeling::Type::NewtonEulerDS ||
-      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS ||
+      dsType == siconos::modeling::Type::SolidLinearTIDS) {
     // Memory allocation for WBoundaryConditions
     auto sizeWBoundaryConditions =
         ds.dimension();  // n for first order systems, ndof for lagrangian.
@@ -640,7 +644,8 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
   if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
       dsType == siconos::modeling::Type::LagrangianDS ||
       dsType == siconos::modeling::Type::NewtonEulerDS ||
-      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+      dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS ||
+      dsType == siconos::modeling::Type::SolidLinearTIDS) {
     auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(
         ds.dimension(), WBoundaryConditions.num());
 
@@ -652,10 +657,8 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
             1e-10))  // Warning this operation could be quite expensive
     {
       // iteration_matrix.display();
-      std::cout << "Warning, we apply boundary conditions assuming W symmetric"
                 << std::endl;
     }
-
     for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
       iteration_matrix.getCol(itindex, *columntmp);
       /*\warning we assume that W is symmetric

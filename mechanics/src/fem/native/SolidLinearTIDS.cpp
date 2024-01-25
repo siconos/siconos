@@ -78,13 +78,14 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //    _mesh = mesh;
 //    _materials = materials;
 //    _storageType = storageType;
-    std::cout << "In SolidLinearTIDS constructor !" << std::endl;
     _FEModel.reset(new FiniteElementModel(mesh));
     _ndof = _FEModel->init();
     int nElements = _FEModel->elements().size();
     int dim = _FEModel->mesh()->dim();
-    _dimStress = dim*(dim+1)/2;
-    int dimState = _ndof*2 + _dimStress*nElements;
+    int dimStressInElem = (dim == 2) ? 4 : 9;
+    _dimStress = dimStressInElem*nElements;
+//    _dimStress = dim*(dim+1)/2;
+
     _n = _ndof + _dimStress; // aka the true unknowns are v and sigma
 
     std::cout << "Fe model inintialized !" << std::endl;
@@ -104,7 +105,7 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //  std::cout << "M computed !" << std::endl;
   if(!_S)
   {
-      _S = std::make_shared<siconos::algebra::SimpleMatrix>(_dimStress*nElements,_dimStress*nElements,
+      _S = std::make_shared<siconos::algebra::SimpleMatrix>(_dimStress,_dimStress,
                                                                _storageType);
   }
   _FEModel->computeSMatrix(_S,_materials);
@@ -133,7 +134,7 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //  std::cout << "mass matrix set !" << std::endl;
     if(!_B)
     {
-        _B = std::make_shared<siconos::algebra::SimpleMatrix>(nElements*_dimStress, _ndof,
+        _B = std::make_shared<siconos::algebra::SimpleMatrix>(_dimStress, _ndof,
                                                                  _storageType);
     }
     _FEModel->computeBMatrix(_B, _materials);

@@ -26,7 +26,11 @@
 #include <cassert>
 #include <string>
 #include <variant>
+//#include "../../../siconos/mechanics/src/fem/native/SolidLinearTIDS.hpp"
 
+namespace siconos::mechanics::fem {
+class SolidLinearTIDS;
+}
 namespace siconos::modeling {
 
 class FirstOrderNonLinearDS;
@@ -101,7 +105,7 @@ struct FindType {
   {
     return siconos::modeling::Type::LagrangianLinearDiagonalDS;
   };
-  auto visit(const siconos::modeling::SolidLinearTIDS&) const
+  auto visit(const siconos::mechanics::fem::SolidLinearTIDS&) const
   {
     return siconos::modeling::Type::SolidLinearTIDS;
   };
