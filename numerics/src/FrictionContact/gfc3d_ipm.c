@@ -226,7 +226,7 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
 {
   double xdoty = -1;
 
-  if (type == STANDARD)
+  if (type == NORM_2)
     xdoty = cblas_ddot(vecSize, x, 1, y, 1);
 
   else if (type == NORM_INF)
@@ -366,7 +366,7 @@ double projectionError(const double * velocity, const double * reaction, const u
    out = sqrt(out);
    norm_u = cblas_dnrm2(3*nc, velocity, 1);
    norm_r = cblas_dnrm2(3*nc, reaction, 1);
-   relative_scaling = fmax(norm_u, norm_r);
+   relative_scaling = fmax(norm_u, norm_r); relative_scaling = 1.;
    if(relative_scaling > tol)
      out = out/relative_scaling;
    return out;
@@ -853,8 +853,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   // verbose = 3;
   // printf("DBL_EPSILON %25.15e\n",DBL_EPSILON);
 
-  // int type = NORM_2;
-  int type = NORM_INF;
+  int type = NORM_2;
+  // int type = NORM_INF;
 
 
 
@@ -1587,7 +1587,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       diff_fixp = cblas_dnrm2(n, diff_fixp_vec, 1);
     }
     else
-      barr_param = udotr / 3.;
+      barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / n /3.;
 
 
 
