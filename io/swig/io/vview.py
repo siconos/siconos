@@ -25,6 +25,10 @@ if hasattr(math, 'inf'):
 else:
     infinity = float('inf')
 
+def print_io_vview( *args, **kwargs):
+    print('[io.vview]', *args, **kwargs)
+
+
 ## Persistent configuration
 class VViewConfig(dict):
     def __init__(self, d={'background_color' : [0., 0. , 0.],
@@ -41,13 +45,13 @@ class VViewConfig(dict):
         if os.path.exists(self.filename):
             try:
                 self.update(json.load(open(self.filename)))
-                print('Loaded configuration from ', self.filename)
+                print_io_vview('Loaded configuration from ', self.filename)
                 for k in self:
-                    print('  ', k,': ', self[k])
+                    print_io_vview('  ', k,': ', self[k])
                 self.should_save_config = True
             except:
                 self.should_save_config = False
-                print("Warning: Error loading configuration `{}'".format(self.filename))
+                print_io_vview("Warning: Error loading configuration `{}'".format(self.filename))
 
     def save_configuration(self, force=False):
         if not force and not self.should_save_config:
@@ -1060,12 +1064,16 @@ class IOReader(VTKPythonAlgorithmBase):
                             self.ids_at_time[mu] = None
 
             else:
-                for mu in self._mu_coefs:
-                    self.cpa_at_time[mu] = [[nan, nan, nan]]
-                    self.cpb_at_time[mu] = [[nan, nan, nan]]
-                    self.cn_at_time[mu] =  [[nan, nan, nan]]
-                    self.cf_at_time[mu] =  [[nan, nan, nan]]
-                    self.ids_at_time[mu] = None
+                try:
+                    for mu in self._mu_coefs:
+                        self.cpa_at_time[mu] = [[nan, nan, nan]]
+                        self.cpb_at_time[mu] = [[nan, nan, nan]]
+                        self.cn_at_time[mu] =  [[nan, nan, nan]]
+                        self.cf_at_time[mu] =  [[nan, nan, nan]]
+                        self.ids_at_time[mu] = None
+                except:
+                    pass
+
             if self._with_contact_forces:
                 for mu in self._mu_coefs:
                     self.cpa[mu] = numpy_support.numpy_to_vtk(

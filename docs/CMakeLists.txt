@@ -79,14 +79,14 @@ if(WITH_DOCUMENTATION)
   # --- Search dependencies required to build documentation ---
   message("--------------------------------------------------")
   message("------ Start global setup for documentation ------\n")
-  if(Python3_VERSION VERSION_LESS 3.6)
+  if(Python_VERSION VERSION_LESS 3.6)
     message(FATAL_ERROR "Python >= 3.6 is required to generate documentation.")
   endif()
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
   find_python_module(breathe REQUIRED)
   # Sphinx theme for documentation
-  find_python_module(sphinx_bootstrap_theme REQUIRED)
+  find_python_module(sphinx_book_theme REQUIRED)
 
   # --- copy/conf sphinx files into build directory ---
 
@@ -115,6 +115,9 @@ if(WITH_DOCUMENTATION)
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static/biblio.css"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_static/biblio.css" COPYONLY)
+  configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static/custom.css"
+    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_static/custom.css" COPYONLY)
 
   # !! conf.py.in must be copied later, after doxygen setup !!
   # Done during finalize_doc call.

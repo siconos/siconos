@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,7 @@ void siconos::simulation::EventsManager::update(Simulation& sim) {
 
 unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event> new_event) {
   mpz_t* t1 = const_cast<mpz_t*>(new_event->getTimeOfEvent());
-  const auto eType = new_event->getType();
+  // const auto eType = new_event->getType();
   bool inserted = false;
   unsigned int pos = 0;
   mpz_t delta_time;

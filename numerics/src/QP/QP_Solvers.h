@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,10 +113,10 @@ extern "C"
 
   */
 
-  void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
-                       double *c , double *d , double *a , double *b , double *xl , double *xu ,
-                       double *x , double *u , int *iout , int *ifail , int *iprint , double *war ,
-                       int *lwar , int *iwar , int *liwar , double *eps);
+  void ql0001(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
+	      double *c , double *d , double *a , double *b , double *xl , double *xu ,
+	      double *x , double *u , int *iout , int *ifail , int *iprint , double *war ,
+	      int *lwar , int *iwar , int *liwar , double *eps);
 
 #ifdef __cplusplus
 }

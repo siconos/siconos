@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,17 @@
 void NM_MUMPS_free(void* p)
 {
   NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
+
+
+  /* we call MUMPS with job =-2 to release internal memory of MUMPS */
+  /* To this aim, we need to have the matrix associated with the MUMPS process
+     in the NSM_linear_solver_params */
+  if (params->parent_matrix)
+    NM_MUMPS(params->parent_matrix,-2);
+
   DMUMPS_STRUC_C* mumps_id;
   mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
+
   if (mumps_id->rhs && (mumps_id->ICNTL(20) > 0))
   {
     /* a rhs has been allocated for sparse rhs calls */
@@ -76,8 +85,8 @@ void NM_MUMPS_set_irn_jcn(NumericsMatrix* A)
 
   iWork [2*nz] = (MUMPS_INT) nz;
 
-  NM_MUMPS_id(A)->irn = (MUMPS_INT*)NM_iWork(A, 0, 0);
-  NM_MUMPS_id(A)->jcn = &((MUMPS_INT*)NM_iWork(A, 0, 0))[nz];
+  NM_MUMPS_id(A)->irn = (MUMPS_INT*)NM_iWork(A, (size_t)(2*nz) + 1, sizeof(MUMPS_INT));
+  NM_MUMPS_id(A)->jcn = &((MUMPS_INT*)NM_iWork(A, (size_t)(2*nz) + 1, sizeof(MUMPS_INT)))[nz];
 }
 
 

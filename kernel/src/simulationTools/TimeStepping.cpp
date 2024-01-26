@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "Topology.hpp"
+#include "Tools.hpp"  // for enum_to_string
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -84,10 +85,11 @@ void siconos::simulation::TimeStepping::insertIntegrator(
 // inter, unsigned int i)
 // {
 //   double h = timeStep();
-//   double y = inter->getYRef(i-1); // for i=1 it is the position -> historic notation y
-//   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
-//   DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot,
-//   y+0.5*h*yDot); y += 0.5*h*yDot; assert(!std::isnan(y)); if(y>0)
+//   double y = inter->getYRef(i-1); // for i=1 it is the position -> historic
+//   notation y double yDot = inter->getYRef(i); // for i=1 it is the velocity
+//   -> historic notation yDot DEBUG_PRINTF("TS::predictorDeactivate yref=%e,
+//   yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot); y += 0.5*h*yDot;
+//   assert(!std::isnan(y)); if(y>0)
 //     DEBUG_PRINTF("TS::predictorDeactivate DEACTIVATE.\n");
 //   return (y>0);
 // }
@@ -97,10 +99,11 @@ void siconos::simulation::TimeStepping::insertIntegrator(
 // inter, unsigned int i)
 // {
 //   double h = timeStep();
-//   double y = inter->getYRef(i-1); // for i=1 it is the position -> historic notation y
-//   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
-//   DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot,
-//   y+0.5*h*yDot); y += 0.5*h*yDot; assert(!std::isnan(y)); if(y<=0)
+//   double y = inter->getYRef(i-1); // for i=1 it is the position -> historic
+//   notation y double yDot = inter->getYRef(i); // for i=1 it is the velocity
+//   -> historic notation yDot DEBUG_PRINTF("TS::predictorActivate yref=%e,
+//   yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot); y += 0.5*h*yDot;
+//   assert(!std::isnan(y)); if(y<=0)
 //     DEBUG_PRINTF("TS::predictorActivate ACTIVATE.\n");
 //   return (y<=0);
 // }
@@ -111,7 +114,8 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
   // boost::default_color_type is used to organize update in InteractionsGraph:
   // - white_color : undiscovered vertex (Interaction)
   // - gray_color : discovered vertex (Interaction) but searching descendants
-  // - black_color : discovered vertex (Interaction) together with the descendants
+  // - black_color : discovered vertex (Interaction) together with the
+  // descendants
 
   assert(_nsds);
   assert(_nsds->topology());
@@ -119,10 +123,13 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
   auto topo = _nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
-         "siconos::simulation::TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
-  // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
+         "siconos::simulation::TimeStepping::updateIndexSet(i), indexSets[i] "
+         "does not exist.");
+  // IndexSets[0] must not be updated in simulation, since it belongs to
+  // Topology.
   assert(i > 0 &&
-         "siconos::simulation::TimeStepping::updateIndexSet(i=0), indexSets[0] cannot be "
+         "siconos::simulation::TimeStepping::updateIndexSet(i=0), indexSets[0] "
+         "cannot be "
          "updated.");
 
   // For all Interactions in indexSet[i-1], compute y[i-1] and
@@ -135,12 +142,14 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
   topo->setHasChanged(false);
 
   DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). update indexSets "
+      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). "
+      "update indexSets "
       "start : indexSet0 size "
       ": %ld\n",
       indexSet0->size());
   DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). update IndexSets "
+      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). "
+      "update IndexSets "
       "start : indexSet1 size "
       ": %ld\n",
       indexSet1->size());
@@ -163,9 +172,9 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
       indexSet0->color(inter1_descr0) = boost::gray_color;
       if (not std::dynamic_pointer_cast<siconos::modeling::EqualityConditionNSL>(
               inter1->nonSmoothLaw())) {
-        // We assume that the integrator of the ds1 drive the update of the index set
-        // std::shared_ptr<siconos::integrators::OneStepIntegrator> Osi =
-        // indexSet1->properties(*ui1).osi;
+        // We assume that the integrator of the ds1 drive the update of the
+        // index set std::shared_ptr<siconos::integrators::OneStepIntegrator>
+        // Osi = indexSet1->properties(*ui1).osi;
         auto ds1 = indexSet1->properties(*ui1).source;
         auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
 
@@ -190,8 +199,8 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
             }
           }
           indexSet1->remove_vertex(inter1);
-          /* \warning V.A. 25/05/2012 : Multiplier lambda are only set to zero if they are
-           * removed from the IndexSet*/
+          /* \warning V.A. 25/05/2012 : Multiplier lambda are only set to zero
+           * if they are removed from the IndexSet*/
           inter1->lambda(1)->zero();
           topo->setHasChanged(true);
         }
@@ -232,7 +241,8 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
 
         assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
         /*assert( { !predictorDeactivate(indexSet0->bundle(*ui0),i) ||
-          Type::value(*(indexSet0->bundle(*ui0)->nonSmoothLaw())) == Type::EqualityConditionNSL
+          Type::value(*(indexSet0->bundle(*ui0)->nonSmoothLaw())) ==
+          Type::EqualityConditionNSL
           ;
           });*/
       } else {
@@ -245,11 +255,13 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
                 inter0->nonSmoothLaw())) &&
             (not std::dynamic_pointer_cast<siconos::modeling::RelayNSL>(
                 inter0->nonSmoothLaw()))) {
-          // Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL &&
+          // Type::value(*(inter0->nonSmoothLaw())) !=
+          // Type::EqualityConditionNSL &&
           //  Type::value(*(inter0->nonSmoothLaw())) != Type::RelayNSL) {
           // std::shared_ptr<siconos::integrators::OneStepIntegrator> Osi =
           // indexSet0->properties(*ui0).osi;
-          //  We assume that the integrator of the ds1 drive the update of the index set
+          //  We assume that the integrator of the ds1 drive the update of the
+          //  index set
           std::shared_ptr<siconos::modeling::DynamicalSystem> ds1 =
               indexSet1->properties(*ui0).source;
           auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
@@ -271,12 +283,14 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
   assert(indexSet1->size() <= indexSet0->size());
 
   DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). update indexSets "
+      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). "
+      "update indexSets "
       "end : indexSet0 size : "
       "%ld\n",
       indexSet0->size());
   DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). update IndexSets "
+      "siconos::simulation::TimeStepping::updateIndexSet(unsigned int i). "
+      "update IndexSets "
       "end : indexSet1 size : "
       "%ld\n",
       indexSet1->size());
@@ -290,8 +304,8 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
 //   // smooth problem.
 //   if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY])
 //      THROW_EXCEPTION
-//        ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already exist. You can
-//        not have more than one.");
+//        ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already
+//        exist. You can not have more than one.");
 
 //   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
 // }
@@ -318,8 +332,9 @@ void siconos::simulation::TimeStepping::initOSNS() {
                                  // built.
   {
     // if (_allNSProblems->size()>1)
-    //   THROW_EXCEPTION("siconos::simulation::TimeStepping::initialize, at the time, a time
-    //   stepping simulation can not have more than one non smooth problem.");
+    //   THROW_EXCEPTION("siconos::simulation::TimeStepping::initialize, at the
+    //   time, a time stepping simulation can not have more than one non smooth
+    //   problem.");
 
     // At the time, we consider that for all systems, levelMin is
     // equal to the minimum value of the relative degree - 1 except
@@ -334,7 +349,8 @@ void siconos::simulation::TimeStepping::initOSNS() {
         osns->initialize(shared_from_this());
       else
         THROW_EXCEPTION(
-            "siconos::simulation::TimeStepping::initOSNS failed. No OneStepNSProblem has been "
+            "siconos::simulation::TimeStepping::initOSNS failed. No "
+            "OneStepNSProblem has been "
             "set. ");
     }
   }
@@ -367,8 +383,8 @@ void siconos::simulation::TimeStepping::run() {
   unsigned int count = 0;  // events counter.
   // do simulation while events remains in the "future events" list of
   // events manager.
-  std::cout << " ==== Start of TimeStepping simulation - This may take a while ... ===="
-            << std::endl;
+  std::cout << " ==== Start of TimeStepping simulation - This may take a while ... ====\n";
+
   while (_eventsManager->hasNextEvent()) {
     advanceToEvent();
 
@@ -376,7 +392,7 @@ void siconos::simulation::TimeStepping::run() {
     count++;
   }
   std::cout << "===== End of TimeStepping simulation. " << count
-            << " events have been processed. ==== " << std::endl;
+            << " events have been processed. ==== \n";
 }
 
 void siconos::simulation::TimeStepping::resetLambdas() {
@@ -411,29 +427,29 @@ void siconos::simulation::TimeStepping::prepareNewtonIteration() {
 
 void siconos::simulation::TimeStepping::displayNewtonConvergenceInTheLoop() {
   if (_displayNewtonConvergence) {
-    std::cout
-        << "[kernel] siconos::simulation::TimeStepping::newtonSolve --  _newtonNbIterations ="
-        << _newtonNbIterations << std::endl;
-    std::cout
-        << "[kernel] siconos::simulation::TimeStepping::newtonSolve --  _newtonResiduDSMax ="
-        << _newtonResiduDSMax << std::endl;
+    std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve --  "
+                 "_newtonNbIterations ="
+              << _newtonNbIterations << std::endl;
+    std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve --  "
+                 "_newtonResiduDSMax ="
+              << _newtonResiduDSMax << std::endl;
     if (_computeResiduY) {
-      std::cout
-          << "[kernel] siconos::simulation::TimeStepping::newtonSolve --  _newtonResiduYMax ="
-          << _newtonResiduYMax << std::endl;
+      std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve -- "
+                   " _newtonResiduYMax ="
+                << _newtonResiduYMax << std::endl;
     } else {
-      std::cout
-          << "[kernel] siconos::simulation::TimeStepping::newtonSolve --  _newtonResiduYMax ="
-          << "not computed" << std::endl;
+      std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve -- "
+                   " _newtonResiduYMax ="
+                << "not computed" << std::endl;
     }
     if (_computeResiduR) {
-      std::cout
-          << "[kernel] siconos::simulation::TimeStepping::newtonSolve --  _newtonResiduRMax ="
-          << _newtonResiduRMax << std::endl;
+      std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve -- "
+                   " _newtonResiduRMax ="
+                << _newtonResiduRMax << std::endl;
     } else {
-      std::cout
-          << "[kernel] siconos::simulation::TimeStepping::newtonSolve --  _newtonResiduRMax ="
-          << "not computed" << std::endl;
+      std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve -- "
+                   " _newtonResiduRMax ="
+                << "not computed" << std::endl;
     }
   } else {
     DEBUG_PRINTF("# _newtonNbIterations = %i\n", _newtonNbIterations);
@@ -453,112 +469,63 @@ void siconos::simulation::TimeStepping::displayNewtonConvergenceAtTheEnd(
   }
 
   if (!_isNewtonConverge) {
-    if (_warnOnNonConvergence)
+    if (_newtonWarningOnNonConvergence)
 
-      std::cout << "[kernel][warning] siconos::simulation::TimeStepping::newtonSolve reached "
+      std::cout << "[kernel][warning] "
+                   "siconos::simulation::TimeStepping::newtonSolve reached "
                    "max. number of iterations: "
                 << maxStep << " with accuracy: " << _newtonResiduDSMax << std::endl;
 
-    if (info && _warnOnNonConvergence)
-      std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve -- nonsmooth "
+    if (info && _newtonWarningOnNonConvergence)
+      std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve -- "
+                   "nonsmooth "
                    "solver failed."
                 << std::endl;
   }
 }
 
-void siconos::simulation::TimeStepping::computeInitialNewtonState() {
+void siconos::simulation::TimeStepping::computeInitialStateOfTheStep() {
   DEBUG_BEGIN("siconos::simulation::TimeStepping::computeInitialNewtonState()\n");
-  for (auto osi : *_allOSI) {
-    osi->computeInitialNewtonState();
+  if (_newtonOptions == TimeSteppingType::NONLINEAR ||
+      _newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
+    for (auto osi : *_allOSI) {
+      osi->computeInitialNewtonState();
+    }
   }
-  DEBUG_END("Simulationsiconos::simulation::TimeStepping::computeInitialNewtonState()\n");
+  DEBUG_END("TimeStepping::computeInitialNewtonState()\n");
 }
 
-void siconos::simulation::TimeStepping::initializeNewtonLoop() {
-  DEBUG_BEGIN("siconos::simulation::TimeStepping::initializeNewtonLoop()\n");
+void siconos::simulation::TimeStepping::initializeNewtonSolve() {
+  DEBUG_BEGIN("siconos::simulation::TimeStepping::initializeNewtonSolve()\n");
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
-  if (_newtonOptions == TimeSteppingType::NONLINEAR) {
-    //  Compute the initial state for the Newton loop
-    computeInitialNewtonState();
-    computeResidu();  // we compute two times the residu ?
+  updateDSPlugins(tkp1);  // is it useful since the integrator update the plugin computeResidu?
 
-    // for(auto itosi : *_allOSI)
-    //  {
-    //    it->computeInitialNewtonState();
-    //    it->computeResidu();
-    //  }
+  computeResidu();  // Is is mandatory for SICONOS_TS_LINEAR ?
 
-    // Predictive contact -- update initial contacts after updating DS positions
-    // for the Newton loop
-    // allow the InteractionManager to add/remove any interactions it wants
-    updateWorldFromDS();
-    updateInteractions();
-
-    // Changes in updateInteractions may require initialization
-    initializeNSDSChangelog();
-
-    updateOutput();
-
-    DEBUG_PRINT("(re)Initialize OneStepNSProblem(s)\n");
-    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
-    // Warning FP : must be done in any case, even if the interactions set
-    // is empty.
-    initOSNS();
-
-    updateAllInput();  //??
-  }
-  // else  if((_newtonOptions == TimeSteppingType::LINEAR || _newtonOptions ==
-  // TimeSteppingType::LINEAR_IMPLICIT) || isLinear)
-  // {
-  //   // Nothing to do in the linear case since everything has been already done in
-  //   Simulation::initialize
-  // }
-
-  // auto indexSet0 = _nsds->topology()->indexSet0();
-  // if(indexSet0->size()>0)
-  // {
-  //   for(auto itOsi : *_allOSI)
-  //   {
-  //     (itOSI)->updateOutput(nextTime());
-  //     (itOSI)->updateInput(nextTime());
-  //   }
-  // }
-
-  updateDSPlugins(tkp1);
-
-  // std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> dsGraph =
-  // _nsds->dynamicalSystems(); for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi
-  // != dsGraph->end(); ++vi)
-  // {
-  //   dsGraph->bundle(*vi)->updatePlugins(tkp1);
-  // }
-
-  computeResidu();
-  //   for(auto it : *_allOSI)
-  //   (*it)->computeResidu();
+  updateAllInput();  //??
 
   if (_computeResiduY) {
     auto indexSet0 = _nsds->topology()->indexSet0();
-    for (auto it : *_allOSI) {
-      it->computeResiduOutput(tkp1, indexSet0);
+    for (auto osi : *_allOSI) {
+      osi->computeResiduOutput(tkp1, indexSet0);
     }
   }
-  DEBUG_END("siconos::simulation::TimeStepping::initializeNewtonLoop()\n");
+  DEBUG_END("TimeStepping::initializeNewtonSolve()\n");
 }
 
 void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned int maxStep) {
-  DEBUG_BEGIN(
-      "siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned int "
-      "maxStep)\n");
+  DEBUG_BEGIN("siconos::simulation::TimeStepping::newtonSolve \n");
   _isNewtonConverge = false;
   _newtonNbIterations = 0;  // number of Newton iterations
   int info = 0;
   bool isLinear = _nsds->isLinear();
 
-  initializeNewtonLoop();
+  // 1 - initialize Newton Solve ;
+  initializeNewtonSolve();
 
+  // 2 - start
   if ((_newtonOptions == TimeSteppingType::LINEAR ||
        _newtonOptions == TimeSteppingType::LINEAR_IMPLICIT) ||
       isLinear) {
@@ -577,15 +544,20 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
     else
       checkSolverOutput(info, this);
 
-    if (!_skip_last_updateInput) updateOutput();
+    if (!_skip_last_updateInput)  // warning:  _skip_last_updateInput=True should be only for
+                                  // globalOSI
+      updateAllInput();
 
-    updateAllInput();
     updateState();
+
     if (!_skip_last_updateOutput) updateOutput();
+
     hasNSProblems = (!_allNSProblems->empty()) ? true : false;
+
   }
 
-  else if (_newtonOptions == TimeSteppingType::NONLINEAR) {
+  else if (_newtonOptions == TimeSteppingType::NONLINEAR ||
+           _newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
     //  while((!_isNewtonConverge)&&(_newtonNbIterations < maxStep)&&(!info))
     //_isNewtonConverge = newtonCheckConvergence(criterion);
     while ((!_isNewtonConverge) && (_newtonNbIterations < maxStep)) {
@@ -595,7 +567,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       prepareNewtonIteration();
       computeFreeState();
 
-      if (info && _warnOnNonConvergence)
+      if (info && _newtonWarningOnNonConvergence)
         std::cout << "New Newton loop because of nonsmooth solver failed\n" << std::endl;
 
       // if there is not any Interaction at
@@ -606,8 +578,8 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
       // is also relevant here.
       // InteractionsGraph& indexSet0 = *_nsds->topology()->indexSet0();
-      // bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true :
-      // false;
+      // bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() >
+      // 0) ? true : false;
 
       bool hasNSProblems = (!_allNSProblems->empty()) ? true : false;
       if (hasNSProblems) {
@@ -629,31 +601,35 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
       // if we compute the boolean before "if", the updateOutput is not done !!
       // --
       if (!_isNewtonConverge && _newtonNbIterations < maxStep) {
-        // if you want to update the interactions within the Newton Loop,
-        // you can uncomment this line
-        // For stability reasons, we keep fix the interactions in the loop
-        // for a good Newton loop, we must have access the Hessian of constraints.
-        // updateInteractions();
-        // initializeNSDSChangelog();
-
+        // if you want to update the interactions (for instance updating index_set 0 with new
+        // interactions ) within the Newton Loop, you can choose SICONOS_TS_NONLINEAR_FULL
+        // For stability reasons, we keep fix the interactions in the loop for
+        // SICONOS_TS_NONLINEAR for a good Newton loop, we must have access the Hessian of
+        // constraints.
+        if (_newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
+          updateInteractions();
+          initializeNSDSChangelog();
+        }
         updateOutput();
+        if (_newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
+          initOSNS();
+        }
       }
       _isNewtonConverge = newtonCheckConvergence(criterion);
 
       displayNewtonConvergenceInTheLoop();
     }  // End of the Newton Loop
 
+    if (!_skip_last_updateOutput) updateOutput();
+
     _newtonCumulativeNbIterations += _newtonNbIterations;
 
     displayNewtonConvergenceAtTheEnd(info, maxStep);
-  }
-  // else
-  //   THROW_EXCEPTION(
-  //       "siconos::simulation::TimeStepping::NewtonSolve failed. Unknown newtonOptions: " +
-  //       std::to_string(_newtonOptions));
-  DEBUG_END(
-      "siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned int "
-      "maxStep)\n");
+  } else
+    THROW_EXCEPTION(
+        "siconos::simulation::TimeStepping::NewtonSolve failed. Unknown newtonOptions: " +
+        siconos::tools::enum_to_string(_newtonOptions));
+  DEBUG_END("siconos::simulation::TimeStepping::newtonSolve\n");
 }
 
 bool siconos::simulation::TimeStepping::newtonCheckConvergence(double criterion) {
@@ -736,36 +712,35 @@ bool siconos::simulation::TimeStepping::newtonCheckConvergence(double criterion)
 void siconos::simulation::TimeStepping::DefaultCheckSolverOutput(int info) {
   // info = 0 => ok
   // else: depend on solver
-  if (info != 0) {
-    std::cout << "[kernel] siconos::simulation::TimeStepping::DefaultCheckSolverOutput:"
-              << std::endl;
+  if (info != 0 and _warningNonsmoothSolver) {
+    std::cout << "[kernel] TimeStepping::DefaultCheckSolverOutput:\n";
     std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is "
                  "equal to "
-              << info << std::endl;
+              << info << "\n";
     //       std::cout << "=> may have failed? (See Numerics solver documentation for details
     //       on the message meaning)." <<std::endl;
-    //      std::cout << "=> may have failed? (See Numerics solver documentation for details on
-    //      the message meaning)." <<std::endl;
+    //      std::cout << "=> may have failed? (See Numerics solver documentation for details
+    //      on the message meaning)." <<std::endl;
     //     THROW_EXCEPTION(" Non smooth problem, solver convergence failed ");
     /*      if(info == 1)
-            std::cout <<" reach max iterations number with solver " << solverName <<std::endl;
-            else if (info == 2)
+            std::cout <<" reach max iterations number with solver " <<
+       solverName <<std::endl; else if (info == 2)
             {
-            if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
-            THROW_EXCEPTION(" negative diagonal term with solver "+solverName);
-            else if (solverName == "QP" || solverName == "NSQP" )
-            THROW_EXCEPTION(" can not satisfy convergence criteria for solver "+solverName);
-            else if (solverName == "Latin")
-            THROW_EXCEPTION(" Choleski factorisation failed with solver Latin");
+            if (solverName == "LexicoLemke" || solverName == "CPG" || solverName
+       == "NLGS") THROW_EXCEPTION(" negative diagonal term with solver
+       "+solverName); else if (solverName == "QP" || solverName == "NSQP" )
+            THROW_EXCEPTION(" can not satisfy convergence criteria for solver
+       "+solverName); else if (solverName == "Latin") THROW_EXCEPTION(" Choleski
+       factorisation failed with solver Latin");
             }
             else if (info == 3 && solverName == "CPG")
             std::cout << "pWp null in solver CPG" <<std::endl;
             else if (info == 3 && solverName == "Latin")
             THROW_EXCEPTION("Null diagonal term with solver Latin");
             else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
-            THROW_EXCEPTION("Length of working array insufficient in solver "+solverName);
-            else
-            THROW_EXCEPTION("Unknown error type in solver "+ solverName);
+            THROW_EXCEPTION("Length of working array insufficient in solver
+       "+solverName); else THROW_EXCEPTION("Unknown error type in solver "+
+       solverName);
     */
   }
 }

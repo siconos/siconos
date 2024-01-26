@@ -71,7 +71,7 @@ set(SICONOS_SWIG_BINARY_DIR ${CMAKE_BINARY_DIR}/wrap
   CACHE INTERNAL "Working/binary for swig and python stuff.")
 
 # -- include dir --
-set(SICONOS_SWIG_INCLUDE_DIRS ${SICONOS_SWIG_SRC_DIRS} ${SICONOS_SWIG_ROOT_DIR} ${Python3_INCLUDE_DIRS}
+set(SICONOS_SWIG_INCLUDE_DIRS ${SICONOS_SWIG_SRC_DIRS} ${SICONOS_SWIG_ROOT_DIR} ${Python_INCLUDE_DIRS}
   CACHE INTERNAL "Directories required for swig includes.")
 
 include_directories(${SICONOS_SWIG_INCLUDE_DIRS})

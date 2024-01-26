@@ -1,0 +1,64 @@
+# Use the targets in this file to build a siconos-ready image that can be run as a
+# jupyter notebook
+#
+# Check readme.md file.
+
+# # - Configure and build Siconos on $IMAGENAME
+# ARG REGISTRY=gricad-registry.univ-grenoble-alpes.fr
+# ARG PROJECT=nonsmooth/siconos
+# ARG DEFAULT_IMAGE=sources/ubuntu22.04
+# ARG IMAGENAME=$REGISTRY/$PROJECT/$DEFAULT_IMAGE
+# # - Prepare a jupyter notebook
+# FROM $IMAGENAME AS jupyterlab
+# RUN pip install --no-cache-dir -U jupyterlab ipykernel
+# ENV SHELL /bin/bash
+# ENV JUPYTER_PORT=8888
+# ENV JUPYTER_ENABLE_LAB yes
+# EXPOSE $JUPYTER_PORT
+# ENTRYPOINT ["siconosenv/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]
+
+# ARG REGISTRY=gricad-registry.univ-grenoble-alpes.fr
+# ARG PROJECT=nonsmooth/siconos
+# ARG DEFAULT_IMAGE=sources/jupyterlab
+# ARG IMAGENAME=$REGISTRY/$PROJECT/$DEFAULT_IMAGE
+# FROM $IMAGENAME AS jupyterlab-mamba
+# ARG MAMBA_DOCKERFILE_ACTIVATE=1 
+# # Jupyter setup 
+# ENV JUPYTER_PORT=8888
+# ENV JUPYTER_ENABLE_LAB yes
+# EXPOSE $JUPYTER_PORT
+# WORKDIR /home/$MAMBA_USER
+# ENV SHELL /bin/bash
+# ENTRYPOINT ["/opt/conda/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]
+
+
+ARG REGISTRY=gricad-registry.univ-grenoble-alpes.fr
+ARG PROJECT=nonsmooth/siconos
+ARG DEFAULT_IMAGE=sources/jupyterlab
+ARG IMAGENAME=$REGISTRY/$PROJECT/$DEFAULT_IMAGE
+# - Install Siconos, from a previous build (CI artifacts from another job)
+FROM $IMAGENAME AS siconos-build
+ARG CI_PROJECT_DIR
+ARG BUILD_DIR=build
+ENV WORK=/home/siconos-user
+WORKDIR $WORK
+COPY . siconos
+ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
+ARG CONF_FILE=/home/siconos-user/siconos/config_samples/numerics_with_fclib.cmake
+RUN cmake -S $WORK/siconos -B $BUILD_DIR  -DUSER_OPTIONS_FILE=$CONF_FILE && cmake --build $BUILD_DIR -j 8 
+
+
+# - Prepare a jupyter notebook, based on a Docker image with a complete Siconos install. Add (clone) the siconos-tutorials repository
+ARG EXAMPLES_BRANCH_NAME=master
+FROM siconos-build AS siconoslab
+ENV WORK=/home/siconos-user
+WORKDIR $WORK
+ENV SHELL /bin/bash
+RUN cmake --install $BUILD_DIR
+# install Siconos. Assume a previous built in $BUILD_DIR
+RUN siconos --info
+# Clone Siconos examples 
+RUN git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials.git
+RUN cd siconos-tutorials; git switch $EXAMPLES_BRANCH_NAME
+
+

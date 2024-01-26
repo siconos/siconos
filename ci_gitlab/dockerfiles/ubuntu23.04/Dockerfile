@@ -1,6 +1,7 @@
-FROM ubuntu:23.04
+FROM ubuntu:23.04 AS siconos-base
 ENV TZ=Europe/Paris
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && apt update  && apt upgrade -y && apt install -y -qq \
+ENV DEBIAN_FRONTEND=noninteractive
+RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq \
         cmake \
         git-core \
         make \
@@ -15,25 +16,26 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
         liblpsolve55-dev \
 	libbullet-dev \
 	libbullet-extras-dev \
-	python3-dev \
         python3-full \
-        doxygen \
-	libxrender1 \
-	graphviz \
-	texlive-latex-base \
+	libpython3-dev \
+ 	libxrender1 \
 	valgrind \
 	vim \
 	bzip2 \
 	wget \
 	libboost1.81-all-dev\
-	nlohmann-json3-dev
-WORKDIR /home
-ENV CI_PROJECT_DIR /home
-COPY ci_gitlab/dockerfiles/requirements.txt /home
-COPY ci_gitlab/dockerfiles/requirements4doc.txt /home
-RUN python3 -m venv /home/pysicoenv
-ENV PATH="/home/pysicoenv/bin:$PATH"
-RUN python3 -m pip install -U pip
-RUN python3 -m pip install -U -r /home/requirements.txt
-RUN python3 -m pip install -U -r /home/requirements4doc.txt
-RUN apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
+	nlohmann-json3-dev \
+	libgl-dev \
+	libgl1 \
+	&&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
+RUN useradd -ms /bin/bash siconos-user
+
+FROM siconos-base AS siconos-base-python
+USER siconos-user
+WORKDIR /home/siconos-user
+COPY ci_gitlab/dockerfiles/requirements.txt .
+ENV VIRTUAL_ENV=/home/siconos-user/siconosenv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+RUN pip install --no-cache-dir -U -r requirements.txt
+

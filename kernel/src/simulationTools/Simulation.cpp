@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,38 +178,36 @@ void siconos::simulation::Simulation::initializeOSIAssociations() {
   _OSIDSmap.clear();  // clear the tmp map.
 }
 
-void siconos::simulation::Simulation::initializeNSDSChangelog() {
+void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
   // 4- we initialize new  ds and interaction
   /* Changes to the NSDS are tracked by a changelog, making it fast
-   * for the Simulation to scan any changes if it has not yet seen and
-   * initialize the associated data structures.  It is just an
+   * for the Simulation to scan any changes it has not yet seen and
+   * initialize the associated ata structures.  It is just an
    * optimisation over scanning the whole NSDS for new elements at
    * each step. */
   auto DSG = _nsds->topology()->dSG(0);
+
+  auto _nsdsChangeLogPosition_save = _nsdsChangeLogPosition;
+
   auto& itc = _nsdsChangeLogPosition;
 
   bool interactionInitialized = false;
   itc++;
 
-  // Loop through the changeLog, starting from the position saved
-  // during last call to initialize ...
   while (itc != _nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
-    DEBUG_PRINT("The nsds has changed\n")
+    DEBUG_PRINT("The nsds has changed\n");
     const auto& change = *itc;
     itc++;
 
     DEBUG_EXPR(change.display());
-
-    // ---- A new ds in the NSDS ? ----
     if (change.typeOfChange ==
         siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addDynamicalSystem) {
       auto ds = change.ds;
+      DEBUG_PRINTF("ds number : %i\n", ds->number());
       if (!DSG->properties(DSG->descriptor(ds)).osi) {
         if (_allOSI->size() == 0)
-          THROW_EXCEPTION(
-              "siconos::simulation::Simulation::initialize - there is no osi in this "
-              "Simulation !!");
+          THROW_EXCEPTION("Simulation::initialize - there is no osi in this Simulation !!");
         DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
         auto osi_default = *_allOSI->begin();
         _nsds->topology()->setOSI(ds, osi_default);
@@ -224,9 +222,83 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
       }
       auto& osi = *DSG->properties(DSG->descriptor(ds)).osi;
       osi.initializeWorkVectorsForDS(getTk(), ds);
-    } else if (change.typeOfChange ==
-               siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addInteraction) {
-      // ---- A new interaction in the NSDS ? ----
+    }
+    // else if(change.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
+    // {
+    //   SP::Interaction inter = change.i;
+    //   initializeInteraction(getTk(), inter);
+    //   interactionInitialized = true;
+    // }
+    // else if(change.typeOfChange == NonSmoothDynamicalSystem::rmDynamicalSystem)
+    // {
+    //   // also need to force an update in this case since indexSet1 may
+    //   // still have Interactions that refer to DSs that are not in graph
+    //   interactionInitialized = true;
+    // }
+  }
+  _nsdsChangeLogPosition = _nsdsChangeLogPosition_save;
+
+  // _nsdsChangeLogPosition = _nsds->changeLogPosition();
+
+  // // (re)initialize OneStepNSProblem(s) if necessary
+  // if(interactionInitialized || !_isInitialized)
+  // {
+  //   DEBUG_PRINT("(re)Initialize OneStepNSProblem(s)\n");
+  //   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
+  //   // Warning FP : must be done in any case, even if the interactions set
+  //   // is empty.
+  //   initOSNS();
+
+  //   // Since initOSNS calls updateIndexSets() which resets the
+  //   // topology->hasChanged() flag, it must be specified explicitly.
+  //   // Otherwise OneStepNSProblem may fail to update its matrices.
+  //   _nsds->topology()->setHasChanged(true);
+  // }
+}
+
+void siconos::simulation::Simulation::initializeNSDSChangelog() {
+  // 4- we initialize new  ds and interaction
+  /* Changes to the NSDS are tracked by a changelog, making it fast
+   * for the Simulation to scan any changes it has not yet seen and
+   * initialize the associated ata structures.  It is just an
+   * optimisation over scanning the whole NSDS for new elements at
+   * each step. */
+  auto DSG = _nsds->topology()->dSG(0);
+  auto& itc = _nsdsChangeLogPosition;
+
+  bool interactionInitialized = false;
+  itc++;
+
+  while (itc != _nsds->changeLog().end()) {
+    DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
+    DEBUG_PRINT("The nsds has changed\n");
+    const auto& change = *itc;
+    itc++;
+
+    DEBUG_EXPR(change.display());
+    // if(change.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
+    // {
+    //   SP::DynamicalSystem ds = change.ds;
+    //   if(!DSG->properties(DSG->descriptor(ds)).osi)
+    //   {
+    //     if(_allOSI->size() == 0)
+    //       THROW_EXCEPTION
+    //       ("Simulation::initialize - there is no osi in this Simulation !!");
+    //     DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
+    //     SP::OneStepIntegrator osi_default = *_allOSI->begin();
+    //     _nsds->topology()->setOSI(ds, osi_default);
+    //     if(_allOSI->size() > 1)
+    //     {
+    //       std::cout << "Warning. The simulation has multiple OneStepIntegrators "
+    //                 "(OSI) but the DS number " << ds->number() << " is not assigned to an "
+    //                 "OSI. We assign the following OSI to this DS." << std::endl;
+    //     }
+    //   }
+    //   OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
+    //   osi.initializeWorkVectorsForDS(getTk(),ds);
+    // }
+    if (change.typeOfChange ==
+        siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addInteraction) {
       auto inter = change.i;
       initializeInteraction(getTk(), inter);
       interactionInitialized = true;
@@ -325,20 +397,31 @@ void siconos::simulation::Simulation::initialize() {
   // 2 - Initialize index sets for OSIs
   initializeIndexSets();
 
-  // 3 - allow the InteractionManager to add/remove any interactions it wants
+  // 3 - initialize new ds
+  applyNSDSChangelogForDS();
+
+  // 3.1- Compute a first initial step if it is different the previous state
+  computeInitialStateOfTheStep();
+
+  // 4 - update the world from DS
+  // for external contact detection library for instance
   updateWorldFromDS();
+
+  // 5 - call the InteractionManager to add/remove interactions
   updateInteractions();
 
-  // 4 - initialize new ds and interactions
+  // 6 - initialize new interactions
   initializeNSDSChangelog();
 
-  // 5 - updateOutput
+  // 7 - updateOutput
+  // we compute the new values of the output needed
+  // by the updateIndexSet method
   updateOutput();
 
-  // Next steps (init OSNS, OSI ... are simulation type dependent
-  // and done in derived classes.
+  // 8 - Initialize OneStepNSProblem(s)
+  DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
 
-  DEBUG_END("siconos::simulation::Simulation::initialize()\n");
+  DEBUG_END("Simulation::initialize()\n");
 }
 
 void siconos::simulation::Simulation::initializeInteraction(

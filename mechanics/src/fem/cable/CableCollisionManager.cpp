@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2023 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ void siconos::fem::cable::CableCollisionManager::updateInteractions(
   size_t nb = q.size();
 
   unsigned int node_idx = 0;
-  for (size_t i = 0; i < nb; i += 3, node_idx++) {  // boucle par 3 pour récupérer x,y,z
+  for (size_t i = 0; i < nb; i += 3, node_idx++) {  // boucle par 3 pour rÃ©cupÃ©rer x,y,z
 
     auto contactItr = m_contacts.find(node_idx);
     std::shared_ptr<siconos::modeling::Interaction> contact = nullptr;
@@ -47,7 +47,7 @@ void siconos::fem::cable::CableCollisionManager::updateInteractions(
     for (auto &s : m_supports) {
       if (s->isContact(pc1, m_tolContact)) {
         // test si le point x,y,z est en contact avec le support
-        // récupérer pc2 (projection du point sur l'obstacle), normal, tangent
+        // rÃ©cupÃ©rer pc2 (projection du point sur l'obstacle), normal, tangent
         auto pc2 = s->pc2();
         auto normal = s->normal();
         auto tangent = s->tangent();

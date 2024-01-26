@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 /*! \file
   LsodarOSI solver (from odepack)
 */
+
 #ifndef LsodarOSI_H
 #define LsodarOSI_H
 
@@ -33,6 +34,7 @@ namespace siconos::integrators {
 
    Many parameters are required as input/output for LSODAR. See the
    documentation of this function in externals/odepack/opkdmain.f to have a full
+
    description of these parameters.
    Most of them are read-only parameters (ie can not be set by user).
 
@@ -58,25 +60,22 @@ class LsodarOSI : public OneStepIntegrator {
   static constexpr double RTOL_DEFAULT = 10 * siconos::internal::MACHINE_PREC;
 
   /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
-   *  See opkdmain.f and lsodar routine for details on those variables.
+   *  See opkdmain.f and lsodar routine for details on those
+   variables.
    */
-  std::vector<int> _intData = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-  /** _sizeTol size of the vector ot tolerances */
-  unsigned int _sizeTol{1};
-
-  /** Type of tolerances */
-  unsigned int _itol{1};
+  std::vector<int> _intData = {0, 0, 1, 1, 0, 0, 2};
 
   /** relative tolerance */
-  boost::shared_array<double> rtol;
+  std::vector<double> rtol = {RTOL_DEFAULT};
   /** absolute tolerance */
-  boost::shared_array<double> atol;
+  std::vector<double> atol = {ATOL_DEFAULT};
+
   /** real work array */
-  boost::shared_array<double> rwork;
+  std::vector<double> rwork = {};
   /** integer work array */
-  boost::shared_array<int> iwork;
+  std::vector<int> iwork = {};
   /** integer array used for output of root information */
-  boost::shared_array<int> jroot;
+  std::vector<int> jroot = {};
   /** temporary vector to save x values */
   std::shared_ptr<siconos::algebra::BlockVector> _xWork{nullptr};
 
@@ -129,13 +128,13 @@ class LsodarOSI : public OneStepIntegrator {
    *
    *  \return a double*
    */
-  inline const boost::shared_array<double> getRtol() const { return rtol; }
+  inline const std::vector<double> &getRtol() const { return rtol; }
 
   /** get absolute tolerance parameter for lsodar
    *
    *  \return a double*
    */
-  inline const boost::shared_array<double> getAtol() const { return atol; }
+  inline const std::vector<double> &getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
    *
@@ -147,19 +146,19 @@ class LsodarOSI : public OneStepIntegrator {
    *
    *  \return a double*
    */
-  inline const boost::shared_array<double> getRwork() const { return rwork; }
+  inline const std::vector<double> &getRwork() const { return rwork; }
 
   /** get iwork
    *
    *  \return a pointer to int
    */
-  inline boost::shared_array<int> getIwork() const { return iwork; }
+  inline const std::vector<int> &getIwork() const { return iwork; }
 
   /** get output of root information
    *
    *  \return a pointer to int
    */
-  inline boost::shared_array<int> getJroot() const { return jroot; }
+  inline const std::vector<int> &getJroot() const { return jroot; }
 
   /** set Jt value, Jacobian type indicator. Excerpts from the lsodar
    *  documentation. 1 means a user-supplied full (neq by neq) jacobian. 2 means
@@ -173,7 +172,7 @@ class LsodarOSI : public OneStepIntegrator {
    *
    *  \param newJT new value for the jt parameter.
    */
-  inline void setJT(int newJT) { _intData[8] = newJT; };
+  inline void setJT(int newJT) { _intData[6] = newJT; };
 
   /** set itol, rtol and atol (tolerance parameters for lsodar)
    *
@@ -181,8 +180,7 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param newRtol rtol value
    *  \param newAtol atol value
    */
-  void setTol(int newItol, boost::shared_array<double> newRtol,
-              boost::shared_array<double> newAtol);
+  void setTol(int newItol, std::vector<double> &&newRtol, std::vector<double> &&newAtol);
 
   /** set itol, rtol and atol (scalar tolerance parameters for lsodar)
    *

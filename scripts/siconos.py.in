@@ -5,7 +5,7 @@ to configure, build and execute siconos examples
 Siconos is a program dedicated to modeling, simulation and control
 of non smooth dynamical systems.
 
-Copyright 2022 INRIA.
+Copyright 2024 INRIA.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -55,6 +55,10 @@ def main():
     # Command : siconos --info
     if args.info:
         print_siconos_info()
+        sys.exit()
+
+    if args.configpath:
+        print_siconos_info("config_path")
         sys.exit()
 
     # -- Display siconos install info --
@@ -170,6 +174,8 @@ def main():
                 env['PYTHONPATH'] = siconos_pythonpath.resolve().as_posix()
 
         cmd += [Path(args.exe_full_name).as_posix()]
+        if args.cline_args:
+            cmd += args.cline_args
 
         # Execute ...
         format_msg('run ' + ' '.join(cmd), args.quiet)
@@ -358,6 +364,8 @@ def parse_command_line():
     # Print details about siconos install
     parser.add_argument('--info', action='store_true',
                         help='Print details regarding Siconos installation.')
+    parser.add_argument('--configpath', action='store_true',
+                        help='Print path to Siconos cmake config files.')
 
     # Print details about siconos install
     msg = 'Print details regarding the location of Siconos python modules.'
@@ -387,6 +395,12 @@ def parse_command_line():
     msg += '(e.g. valgrind, time, gdb ...). '
     msg += 'Try for example "siconos -P lldb toto.cpp" to run debugger.'
     parser.add_argument('-P', '--exec-prefix', help=msg, action='append')
+
+    msg = 'Add extra command line arguments to be sent to'
+    msg += 'the executable (python or c++) '
+    parser.add_argument('--cline-args', '-cla', help=msg,
+                        action="extend", nargs="+")
+    # action='append')
 
     # -- Build options (compile, link ...) for main and plugins) --
     compile_group = parser.add_argument_group(
@@ -633,11 +647,10 @@ def generate_cmakelists(args):
     if not build_required:
         # exit if no build has been set from command line.
         return False
-    result = 'project({} CXX C)\n'.format(args.exe_name)
     # cmake minimum version
-    result += 'cmake_minimum_required(VERSION 3.7)\n'
-    if cmake_version >= version.parse("3.12"):
-        result += 'cmake_policy(SET CMP0074 NEW)\n'
+    result = 'cmake_minimum_required(VERSION 3.14)\n'
+    result += 'cmake_policy(SET CMP0074 NEW)\n'
+    result += 'project({} CXX C)\n'.format(args.exe_name)
 
     if args.debug:
         build_type = 'Debug'
@@ -808,18 +821,21 @@ def format_msg(msg, quiet):
         print('\n[' + msg.center(66, '-') + ']\n')
 
 
-def print_siconos_info():
+def print_siconos_info(what="all"):
     """Display siconos setup information
     (e.g. installed path, dependencies, runner and so on)
     """
-    cartridge()
     root = siconos_root_dir
     py_root = siconos_pythonpath
-    print('- Siconos root (install dir) is : {}.\n'.format(root))
-    print('- Siconos runner is : {}.\n'.format(__file__))
-    print('- Siconos includes : {}/include/siconos .\n'.format(root))
-    print('- Siconos python packages are located in :{}.\n'.format(py_root))
-    print('- Siconos cmake files are in {}.\n'.format(siconos_package_dir))
+    if what == "all":
+        cartridge()
+        print('- Siconos root (install dir) is : {}.\n'.format(root))
+        print('- Siconos runner is : {}.\n'.format(__file__))
+        print('- Siconos includes : {}/include/siconos .\n'.format(root))
+        print('- Siconos python packages location :{}.\n'.format(py_root))
+        print('- Siconos cmake files are in {}.\n'.format(siconos_package_dir))
+    elif what == "config_path":
+        print(siconos_package_dir)
 
 
 if __name__ == "__main__":

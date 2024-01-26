@@ -111,6 +111,9 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
       PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
       NO_DEFAULT_PATH
       )
+  elseif(BLAS_NAME STREQUAL "mkl")
+    # No need to find headers : we will use -qmkl compilation option
+    set(LAPACK_INCLUDE_DIR $ENV{MKLROOT}/include)
   else()
     find_path(LAPACK_INCLUDE_DIR
       NAMES ${LAPACK_HEADER}
@@ -121,6 +124,7 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
 
   # SiconosConfig.h setup
   if(BLAS_NAME STREQUAL "mkl")
+    set(HAS_MKL_CBLAS 1 CACHE BOOL "Blas comes from Intel MKL.")
     set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
   elseif(BLAS_NAME STREQUAL "OpenBlas")
     set(HAS_OpenBLAS 1 CACHE BOOL "Blas comes from OpenBLAS.")   
