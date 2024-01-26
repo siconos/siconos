@@ -1827,8 +1827,8 @@ while(findParam)
 
       /* Matrix filling */
       size_t pos;
-      scale_sub_diff = 1.;
-      // scale_sub_diff = fmax(0.9, alpha_primal);
+      // scale_sub_diff = 1.;
+      scale_sub_diff = fmax(0.9, alpha_primal);
       for(size_t i = 0; i < n; ++i)
       {
         pos = i * d;
@@ -3729,9 +3729,8 @@ while(findParam)
   if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP)
   {
     options->solverData = (double *)malloc(sizeof(double));
-    double *pinfeas_ptr = (double *)options->solverData;
-    pinfeas_ptr[0] = pinfeas;
-    // pinfeas_ptr[1] = projerr;
+    double *projerr_ptr = (double *)options->solverData;
+    *projerr_ptr = projerr;
   }
 
   if(H_tilde) H_tilde = NM_free(H_tilde);
@@ -3788,7 +3787,7 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES;
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-7;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;

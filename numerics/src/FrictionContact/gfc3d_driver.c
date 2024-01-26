@@ -833,13 +833,13 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
 
 
-    // TESTING: change of friction coef.
-    double mu_start = 0.;
-    for (int index_mu=0; index_mu<10; index_mu++)
-    {
-      mu_start += 0.1;
-      for(int i = 0; i < problem->numberOfContacts ; i++) problem->mu[i]= mu_start;
-
+    // // TESTING: change of friction coef.
+    // double mu_start = 0.;
+    // for (int index_mu=0; index_mu<10; index_mu++)
+    // {
+    //   mu_start += 0.1;
+    //   for(int i = 0; i < problem->numberOfContacts ; i++) problem->mu[i]= mu_start;
+    for(int i = 0; i < problem->numberOfContacts ; i++) problem->mu[i]= 0.1;
 
 
 
@@ -924,9 +924,15 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     double somme[3], dur[3], cesp = 1e-8, ns, ndur;
     int nsc, nN, nB, nR, nT;
     int nNcomple_vec[problem->numberOfContacts], nBcomple_vec[problem->numberOfContacts], nRcomple_vec[problem->numberOfContacts], nTcomple_vec[problem->numberOfContacts];
-    FILE *stats = fopen("stats_Spheres1mm_4204.m", "a+");
+    FILE *stats = fopen("stats_Spheres1mm_4204.m", "w");
     // ###########################
 
+
+    // For performance profile
+    FILE *pp_complete = fopen("pp_complete.pp", "a+");
+    FILE *pp_subs = fopen("pp_subs.pp", "a+");
+    int info_subs = 0;
+    // ###########################
 
 
 
@@ -936,8 +942,9 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     clock_t t1, t2;
     double time_sub_probs = 0, time_comple_prob = 0;
 
-    // for getting pinfeas
-    double mean_pinfeas = 0.;
+    // for getting NORM_INF of totalresidu and projection err for all sub-probs
+    double max_residu_subprobs = -1., max_prjerr_subprobs = -1.;
+
 
     int all_iterations = 0, n_succ = 0, n_fail = 0;
     for (int blk_i=0; blk_i<n_blocks; blk_i++)
@@ -1038,9 +1045,9 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
       t2 = clock();
       time_sub_probs += (double)(t2-t1)/(double)clk_tck;
       all_iterations += options->iparam[SICONOS_IPARAM_ITER_DONE];
+      max_residu_subprobs = fmax(options->dparam[SICONOS_DPARAM_RESIDU], max_residu_subprobs);
       double *ptr = options->solverData;
-      mean_pinfeas += *ptr;
-      // mean_pinfeas += ptr[0];
+      max_prjerr_subprobs = fmax(*ptr, max_prjerr_subprobs);
       free(options->solverData); options->solverData = NULL;
 
 
@@ -1090,6 +1097,14 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
       fprintf(stats, "stats(end+1) = struct('type', 'sub', 'name', '%s', 'blk_id', %d, 'nBlk', %d, 'mu', %.2e, 'ite', %d, 'residu', %.2e, 'projerr', %.2e,",
                       strToken_name, blk_i+1, n_blocks, problem->mu[0], options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU], projerr_sub);
+
+
+      // For performance profile
+      // For all sub-problems, if there is only one failure,
+      // solving these sub-problems is considered a failure
+      info_subs += info;
+      // ###########################
+
 
       if (info)
       {
@@ -1285,27 +1300,10 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     printf("=====================================================================\n\n");
 
 
-    printf("====================== Result obtained by solving sub-problems ======================\n");
-    numerics_printf_verbose(-1, "| its  | pinfeas | dinfeas | |u o r| |   u'r   | prj err |");
-    numerics_printf_verbose(-1, "---------------------------------------------------------");
-    numerics_printf_verbose(-1, "| %4i | %.1e | %.1e | %.1e | %.1e | %.1e |",
-                          all_iterations, mean_pinfeas/n_blocks, dinfeas, complem, udotr, projerr);
-    printf("Execution time: %.4f\n", time_sub_probs);
-    printf("%d sub-problems, %4d success, %4d failure\n", n_blocks, n_succ, n_fail);
-    printf("=====================================================================================\n\n");
 
 
-    // Comparison
-
-    printf("============ COMPARISON ============\n");
-    printf("  | u_subs - u_comple | = %.2e\n", diff_u);
-    printf("  | r_subs - r_comple | = %.2e\n", diff_r);
-    printf("====================================\n\n\n");
-
-    double max_val = mean_pinfeas/n_blocks;
-    max_val = (max_val < dinfeas ? dinfeas : max_val) < complem ? complem : max_val;
     printf("sumry total:   %s,\t  n nd x m = %d %d x %d\n",strToken_name, n, nd, m);
-    printf("sumry total: %4d sub-prob, %4d succ, %4d fail,\t %.2e %.2e,\t %.4f (s),\t | u_subs - u_comple | = %.2e\n", n_blocks, n_succ, n_fail, max_val, projerr, time_sub_probs, diff_u);
+    printf("sumry total: %4d sub-prob, %4d succ, %4d fail,\t %.2e %.2e,\t %.4f (s),\t | u_subs - u_comple | = %.2e\n", n_blocks, n_succ, n_fail, max_residu_subprobs, max_prjerr_subprobs, time_sub_probs, diff_u);
 
     if (info)
       printf("sumry total:   comple prob,   failure           ,");
@@ -1318,6 +1316,14 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     printf("sumry total: --------------------------------------------------------------------------------------------------------------------\n\n");
 
 
+    // For performance profile
+    fprintf(pp_subs,"sumry: %d  %9.2e  %5i  %10.4f", info_subs, max_residu_subprobs, all_iterations/n_blocks, time_sub_probs);
+    fprintf(pp_subs,"%3i %5i %5i     %s\n", d, n, m, strToken_name);
+    fprintf(pp_complete,"sumry: %d  %9.2e  %5i  %10.4f", info, options->dparam[SICONOS_DPARAM_RESIDU], options->iparam[SICONOS_IPARAM_ITER_DONE], time_comple_prob);
+    fprintf(pp_complete,"%3i %5i %5i     %s\n", d, n, m, strToken_name);
+    fclose(pp_subs);
+    fclose(pp_complete);
+    // ###########################
 
 
     if(H_tilde) {H_tilde = NM_free(H_tilde); H_tilde = NULL;}
@@ -1334,7 +1340,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
 
 
-    }// End of TESTING: change of friction coef.
+    // }// End of TESTING: change of friction coef.
     free(str);
     break;
   }
