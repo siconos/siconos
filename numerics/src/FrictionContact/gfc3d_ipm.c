@@ -130,7 +130,7 @@ void primalResidual_type(const double * velocity, NumericsMatrix * H, const doub
   cblas_daxpy(nd, -1.0, w, 1, out, 1);
   rn = fmax(rn, NV_norm_type(nd, velocity, type));
   rn = fmax(rn, NV_norm_type(nd, w, type));
-  *rnorm = (rn > tol ? NV_norm_type(nd, out, type) : NV_norm_type(nd, out, type));
+  *rnorm = (rn > tol ? NV_norm_type(nd, out, type)/rn : NV_norm_type(nd, out, type));
 }
 
 static void primalResidual2(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
@@ -194,7 +194,7 @@ void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, Numeri
   cblas_daxpy(m, -1.0, HTr, 1, out, 1);
   rn = fmax(rn, NV_norm_type(m, f, type));
   rn = fmax(rn, NV_norm_type(m, HTr, type));
-  *rnorm = (rn > tol ? NV_norm_type(m, out, type) : NV_norm_type(m, out, type));
+  *rnorm = (rn > tol ? NV_norm_type(m, out, type)/rn : NV_norm_type(m, out, type));
   free(HTr);
 }
 
@@ -366,7 +366,7 @@ double projectionError(const double * velocity, const double * reaction, const u
    out = sqrt(out);
    norm_u = cblas_dnrm2(3*nc, velocity, 1);
    norm_r = cblas_dnrm2(3*nc, reaction, 1);
-   relative_scaling = fmax(norm_u, norm_r); relative_scaling = 1.;
+   relative_scaling = fmax(norm_u, norm_r); //relative_scaling = 1.;
    if(relative_scaling > tol)
      out = out/relative_scaling;
    return out;
@@ -851,10 +851,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
                int* restrict info, SolverOptions* restrict options)
 {
   // verbose = 3;
-  // printf("DBL_EPSILON %25.15e\n",DBL_EPSILON);
 
-  int type = NORM_2;
-  // int type = NORM_INF;
+  // int type = NORM_2;
+  int type = NORM_INF;
 
 
 
@@ -3439,7 +3438,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
