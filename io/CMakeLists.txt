@@ -174,6 +174,13 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     endif()
   endif()
   
+  # Links with non-Siconos libraries
+  if(SICONOS_HAS_OCC)
+    if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
+      target_link_libraries(io PRIVATE ${OpenCASCADE_LIBRARIES})
+    endif()
+  endif()
+  
   # --- Search component dependencies ---
   if(WITH_SERIALIZATION)
     # boost must have been searched for in SiconosSetup ...

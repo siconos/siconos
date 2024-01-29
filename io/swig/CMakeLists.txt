@@ -24,7 +24,11 @@ if(HAVE_SICONOS_MECHANICS)
 
     # -- collect python files for the siconos/io module --
     collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR}/io EXTS py)
-    if(NOT SICONOS_HAS_OCE)
+    if (SICONOS_HAS_OCE)
+       MESSAGE(STATUS "Siconos have OCE")
+    elseif (SICONOS_HAS_OpenCASCADE)
+       MESSAGE(STATUS "Siconos have OpenCASCADE")
+    else()
       list(REMOVE_ITEM pyfiles io/occtools.py)
     endif()
 
