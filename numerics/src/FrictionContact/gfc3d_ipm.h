@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,8 @@ void primalResidual(const double * velocity, NumericsMatrix * H, const double * 
                     double * out, double * rnorm, const double tol);
 void primalResidual_type(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
                     double * out, double * rnorm, const double tol, const int type);
+void primalResidual_s_type(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
+        const double * s, double * out, double * rnorm, const double tol, const int type);
 
 
 /**
