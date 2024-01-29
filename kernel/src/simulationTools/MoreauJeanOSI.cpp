@@ -657,7 +657,8 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
             1e-10))  // Warning this operation could be quite expensive
     {
       // iteration_matrix.display();
-                << std::endl;
+      std::cout << "Warning, we apply boundary conditions assuming W symmetric\n";
+
     }
     for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
       iteration_matrix.getCol(itindex, *columntmp);
