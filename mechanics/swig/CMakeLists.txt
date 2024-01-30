@@ -36,10 +36,10 @@ if(SICONOS_HAS_BULLET)
   find_python_module(vtk REQUIRED) # Required for native (if not present, python_test_native_collision will fail)
 endif()
 
-if(WITH_OCE)
+if(WITH_OpenCASCADE)
   add_swig_sub_module(
     FILE mechanics/occ.i
-    DEPS mechanics
+    DEPS "mechanics;OpenCASCADE::OpenCASCADE"
     INCLUDES ${CMAKE_SOURCE_DIR}/kernel/swig
     )
 endif()
@@ -55,7 +55,7 @@ endif()
 
 # --- Tests ---
 if(WITH_TESTING)
-  if(NOT WITH_OCE)
+  if(NOT WITH_OpenCASCADE)
     list(APPEND python_excluded_tests tests/test_occ_inertia.py)
   else()
     find_python_module(OCC REQUIRED)

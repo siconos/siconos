@@ -3,9 +3,9 @@
 __all__ = ["collision", "joints"]
 
 
-with_oce = "@SICONOS_HAS_OCE@" == "TRUE"
-if with_oce:
-    __all__.append("occ")
+with_oce = "@SICONOS_HAS_OpenCASCADE@" == "TRUE"
+if with_occ:
+    __all__.append("OCC")
 
 
 with_bullet = "@SICONOS_HAS_BULLET@" == "TRUE"

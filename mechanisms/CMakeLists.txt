@@ -54,14 +54,6 @@ target_link_libraries(mechanisms PUBLIC
   mechanics)
 
 # Links with non-Siconos libraries
-# # --- Search component dependencies ---
-# if(NOT WITH_OCE)
-#   message(FATAL_ERROR "Please run cmake again with option WITH_OCE=ON (required for mechanisms) or do not setup Siconos with mechanisms component.")
-# endif()
-
-# # Add oce headers and libs to component build.
-# target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
-
 
 MESSAGE("################################# ${OpenCASCADE_INCLUDE_DIRS}" ${OpenCASCADE_INCLUDE_DIR})
 

@@ -148,7 +148,7 @@ workflow:
 
 .devel-rules:
   rules:
-    - when: always
+    - when: on_success
 
     
   

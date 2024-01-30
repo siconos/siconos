@@ -115,7 +115,7 @@ Example : if cmake is executed with WITH_MPI=ON
 
 // -- Optional parts for mechanics --
 #cmakedefine SICONOS_HAS_BULLET
-#cmakedefine SICONOS_HAS_OCE
+#cmakedefine SICONOS_HAS_OpenCASCADE
 
 // -- Optional parts for io --
 #cmakedefine SICONOS_HAS_VTK

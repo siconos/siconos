@@ -203,11 +203,6 @@ if(WITH_CXX)
   endif()
 endif()
 
-#-- Open Cascade Community Edition --
-if(WITH_OCE)
-  include(oce_setup)
-endif()
-
 #-- -- Extra 'developers only' options -- --
 #-- The options below should be used with caution
 #and preferably by developers or advanced users--

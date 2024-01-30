@@ -35,6 +35,8 @@
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with 'siconos' repository (absolute) path."}
 : ${BUILD_MODE:?"Please choose build mode among configure, build or test."}
 
+set -e
+
 # set default config file
 CONF_FILE="${CONF_FILE:=$CI_PROJECT_DIR/config_samples/siconos_ci_default.cmake}"
 # Default build dir, if not set

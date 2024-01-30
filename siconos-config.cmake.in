@@ -56,7 +56,7 @@ set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
 set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 
 # mechanics (and/or mechanisms) component with oce?
-set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
+set(SICONOS_HAS_OpenCASCADE @SICONOS_HAS_OpenCASCADE@)
 
 if(@WITH_FCLIB@)
   set(FCLIB_ROOT @FCLIB_ROOT@)

@@ -46,7 +46,7 @@ DUMMY(Bullet2d3DR, Lagrangian2d3DR);
 #define OCC_CLASSES() \
   REGISTER(OccBody) \
   REGISTER(OccR)
-#ifdef SICONOS_HAS_OCE
+#ifdef SICONOS_HAS_OpenCASCADE
 #include <OccBody.hpp>
 #include <OccR.hpp>
 #else
