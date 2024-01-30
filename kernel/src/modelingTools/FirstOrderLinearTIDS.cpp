@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,11 @@ void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time) {
   {
     if (_A &&
         !_M)  // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
-      _jacxRhs->block(0, 0) = _A;
+      //////// jacxRhs = _A; /// WARNING FP CONSTRUCTOR IS MISSING
+      std::cout << "NOT IMPLEMENTED\n";
+
     else if (_A && _M) {
-      _jacxRhs->block(0, 0) = std::make_shared<siconos::algebra::SimpleMatrix>(*_A);  // Copy A into _jacxRhs
+      _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*_A);  // Copy A into _jacxRhs
       // Solve M_jacxRhs = A
       algebra::solveInPlace(*_invM, *(_jacxRhs->block(0, 0)));
     }

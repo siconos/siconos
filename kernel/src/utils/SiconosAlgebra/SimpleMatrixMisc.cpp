@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,6 @@
  * limitations under the License.
  */
 
-// #include <boost/numeric/bindings/lapack.hpp>
-// #include <boost/numeric/bindings/std/vector.hpp>
-// #include <boost/numeric/bindings/ublas/matrix.hpp>
-// #include <boost/numeric/bindings/ublas/symmetric.hpp>
-// #include <boost/numeric/bindings/ublas/vector.hpp>
-// #include <boost/numeric/ublas/banded.hpp>
-// #include <boost/numeric/ublas/io.hpp>
-// #include <boost/numeric/ublas/lu.hpp>
-// #include <boost/numeric/ublas/matrix.hpp>
-// #include <boost/numeric/ublas/matrix_proxy.hpp>
-// #include <boost/numeric/ublas/matrix_sparse.hpp>
-// #include <boost/numeric/ublas/symmetric.hpp>
-// #include <boost/numeric/ublas/triangular.hpp>
-// #include <boost/numeric/ublas/vector.hpp>
-// #include <boost/numeric/ublas/vector_proxy.hpp>
 
 #include "BlockMatrix.hpp"
 #include "SiconosException.hpp"
@@ -41,6 +26,11 @@
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
+#include "boost/numeric/bindings/lapack.hpp"
+#include "boost/numeric/bindings/std/vector.hpp"
+#include "boost/numeric/bindings/ublas/matrix.hpp"
+#include "boost/numeric/bindings/ublas/symmetric.hpp"
+#include "boost/numeric/bindings/ublas/vector.hpp"
 #include "determinant.hpp"
 #include "expm.hpp"  // boost contribs expm_pad
 #include "io.hpp"

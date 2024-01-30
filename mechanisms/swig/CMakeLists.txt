@@ -10,8 +10,8 @@ set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 
 # List of modules to be built in the python bindings
 set(${COMPONENT}_PYTHON_MODULES
-  "mechanisms/cadmbtb"
-  "mechanisms/mbtb")
+  "mechanisms/cadmbtb.i"
+  "mechanisms/mbtb.i")
 
 list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/kernel/swig)
 # TMP fix 
@@ -24,7 +24,15 @@ endif()
 
 include(swig_python_tools)
 
-swig_module_setup(${COMPONENT}_PYTHON_MODULES)
+foreach(fname IN LISTS ${COMPONENT}_PYTHON_MODULES)
+  add_swig_sub_module(
+    FILE ${fname}
+    DEPS "mechanics;mechanisms"
+    INCLUDES ${CMAKE_SOURCE_DIR}/kernel/swig
+    #COMPILE_OPTIONS ${swig_mechanisms_options}
+    )
+endforeach()
+
 
 # we need siconos-mechanism for build and install tree with different 'PYTHONPATH' for each of them.
 

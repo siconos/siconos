@@ -1,0 +1,10 @@
+--- /usr/include/bullet/BulletCollision/Gimpact/btGImpactShape.h        2020-10-07 20:28:14.000000000 +0200
++++ fixed-btGImpactShape.h      2022-05-13 11:07:49.503050450 +0200
+@@ -284,7 +284,6 @@
+        {
+        }
+
+-       //!@}
+ };
+
+ //! btGImpactCompoundShape allows to handle multiple btCollisionShape objects at once

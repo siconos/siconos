@@ -43,7 +43,8 @@ function(begin_tests SOURCE_DIR)
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.xml
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.DAT
     ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.INI
-    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.ref)
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.ref
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.json)
 
   # Copy data files from source to binary
   foreach(_F IN LISTS _DATA_FILES)
@@ -294,7 +295,7 @@ function(set_siconos_test_properties)
   set_tests_properties(${TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;ERROR;Assertion")
 
   # env variables (mostly for plugins : the test must be able to find TestPlugin.so if required)
-  set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR};DYLD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}")
+  set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{LD_LIBRARY_PATH};DYLD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}")
   
   
 endfunction()

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,23 +44,28 @@ typedef void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
  */
 class BoundaryCondition {
  public:
-
   using Indices = std::vector<unsigned int>;
-  
+
   /** Basic constructor
    *
-   *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
+   *  \param newVelocityIndices the indices of the velocity subjected to
+   * prescribed velocities
    */
   BoundaryCondition(Indices&& newVelocityIndices);
   BoundaryCondition(const Indices& newVelocityIndices);
 
   /** Constructor with constant prescribed values
    *
-   *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
-   *  \param newVelocityValues the values of the prescribed velocities
+   *  \param newVelocityIndices the indices of the velocity subjected to
+   * prescribed velocities \param newVelocityValues the values of the prescribed
+   * velocities
    */
-  BoundaryCondition(Indices&& newVelocityIndices,
-                    std::shared_ptr<siconos::algebra::SiconosVector> newVelocityValues);
+  BoundaryCondition(
+      Indices&& newVelocityIndices,
+      std::shared_ptr<siconos::algebra::SiconosVector> newVelocityValues);
+  BoundaryCondition(
+      const Indices& newVelocityIndices,
+      std::shared_ptr<siconos::algebra::SiconosVector> newVelocityValues);
 
   /** destructor */
   virtual ~BoundaryCondition() noexcept = default;
@@ -71,29 +76,14 @@ class BoundaryCondition {
   BoundaryCondition(BoundaryCondition&&) = delete;
   BoundaryCondition& operator=(BoundaryCondition&&) = delete;
 
-  // === GETTERS AND SETTERS ===
-
-  /** to get the velocityIndices
-   *
-   *  \return a pointer on _velocityIndices
-   */
+  /** \return indices on which constraints are applied. */
   inline const Indices& velocityIndices() { return _velocityIndices; };
 
-  /** to get the prescribedVelocity
-   *
-   *  \return a pointer on _prescribedVelocity
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> prescribedVelocity() {
-    return _prescribedVelocity;
-  };
+  /** \return values applied for each constrained index */
+  inline auto prescribedVelocity() { return _prescribedVelocity; };
 
-  /** to get the prescribedVelocityOld
-   *
-   *  \return a pointer on _prescribedVelocityOld
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> prescribedVelocityOld() {
-    return _prescribedVelocityOld;
-  };
+  /** \return former values applied for each constrained index */
+  inline auto prescribedVelocityOld() { return _prescribedVelocityOld; };
 
   /** allow to set a specified function to compute prescribedVelocity
    *
@@ -109,14 +99,18 @@ class BoundaryCondition {
    */
   virtual void computePrescribedVelocity(double time);
 
-
   /** \return the number of boundary conditions
    */
-  auto size(){ return _velocityIndices.size();}
+  auto size() { return _velocityIndices.size(); }
 
   /** display */
   void display();
 
+  /** Add a new index on which bc are to be appied
+      \param ind new index value
+  */
+  void appendIndex(unsigned int ind);
+  
  protected:
   ACCEPT_SERIALIZATION(BoundaryCondition);
 
@@ -124,16 +118,18 @@ class BoundaryCondition {
   BoundaryCondition() = default;
 
   /* Indices of the prescribed component of the velocity vector */
-  Indices _velocityIndices;
+  Indices _velocityIndices = {};
 
   /* Values of the prescribed component of the velocity vector */
   std::shared_ptr<siconos::algebra::SiconosVector> _prescribedVelocity{nullptr};
 
   /* Old values of the prescribed component of the velocity vector */
-  std::shared_ptr<siconos::algebra::SiconosVector> _prescribedVelocityOld{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _prescribedVelocityOld{
+      nullptr};
 
   /*plugin defining the function V(t)*/
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginPrescribedVelocity{nullptr};
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginPrescribedVelocity{
+      nullptr};
 };
 }  // namespace siconos::modeling
 

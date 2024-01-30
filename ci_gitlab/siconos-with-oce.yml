@@ -7,18 +7,18 @@ include:
 
 ubuntu20.04-oce:configure:
    variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
-     cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu20.04-oce
+     CDASH_SUBMIT: 1
+     user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
    extends:
      - .siconos-configure
    when: manual
 
 ubuntu20.04-oce:build:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu20.04-oce
+      CDASH_SUBMIT: 1
+      user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
     extends:
       - .siconos-build
     when: manual
@@ -26,9 +26,9 @@ ubuntu20.04-oce:build:
 
 ubuntu20.04-oce:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu20.04-oce
+      CDASH_SUBMIT: 1
+      user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
     needs: ["ubuntu20.04-oce:build"]
     extends:
       - .siconos-test
@@ -36,7 +36,7 @@ ubuntu20.04-oce:test:
 
 ubuntu20-oce:install:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/ubuntu20.04-oce
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu20.04-oce
     siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-ubuntu-fossa
   extends: .siconos-install
   needs: ["ubuntu20.04-oce:build"]
@@ -46,31 +46,31 @@ ubuntu20-oce:install:
 
 archlinux-oce:configure:
    variables:
-     IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
-     cdash_submit: 1
-     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/archlinux-oce
+     CDASH_SUBMIT: 1
+     user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
    extends: .siconos-configure
    when: manual
 
 archlinux-oce:build:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/archlinux-oce
+      CDASH_SUBMIT: 1
+      user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
     extends: .siconos-build
     needs: ["archlinux-oce:configure"]
 
 archlinux-oce:test:
     variables:
-      IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
-      cdash_submit: 1
-      user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/archlinux-oce
+      CDASH_SUBMIT: 1
+      user_file: $SICONOS_CMAKE_CONF_PATH/siconos_with_mechanisms.cmake
     needs: ["archlinux-oce:build"]
     extends: .siconos-test
 
 archlinux-oce:install:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/sources/archlinux-oce
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/archlinux-oce
     siconos_docker_name: siconos-$CI_COMMIT_REF_NAME-archlinux-oce
   extends: .siconos-install
   needs: ["archlinux-oce:build"]

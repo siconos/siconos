@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 #include <math.h>              // for fabs
 #include <stdio.h>             // for printf, fprintf, fscanf, NULL, fclose
 #include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
-#include <sys/errno.h>         // for errno
+#include <errno.h> // for errno
 #include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
 //#define DEBUG_STDOUT

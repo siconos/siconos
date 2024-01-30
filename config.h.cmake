@@ -26,8 +26,6 @@ Example : if cmake is executed with WITH_MPI=ON
 // -- Global options --
 // openmp required and available -
 #cmakedefine WITH_OPENMP
-// Fortran sources included in the build -
-#cmakedefine HAS_FORTRAN
 // Use c++ to build externals and numerics
 #cmakedefine BUILD_AS_CPP
 // Which version of C++ was used to compile siconos, needed for swig

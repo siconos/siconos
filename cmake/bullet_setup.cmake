@@ -1,7 +1,7 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2022 INRIA.
+# Copyright 2024 INRIA.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -103,11 +103,13 @@ elseif(WITH_BULLET OR Bullet_ROOT)
   # Anyway, find_package is not able to check the version since Bullet does not provide a bullet-config-version or BulettConfigVersion file.
   find_package(Bullet CONFIG REQUIRED)
   include(${Bullet_CONFIG})
+
   if(NOT WIN32)
     if(BULLET_VERSION_STRING VERSION_LESS 3.05)
       set(BULLET_FOUND FALSE)
     endif()
   endif()
+
   if(NOT BULLET_FOUND)
     message(FATAL_ERROR "Can not find Bullet in the required version (min 3.05). Please try to install it. \
 
@@ -117,9 +119,8 @@ elseif(WITH_BULLET OR Bullet_ROOT)
 
     - run cmake for siconos with -DBULLET_INSTALL=ON. Bullet will then be installed in ${CMAKE_INSTALL_PREFIX} and Siconos configured to run with Bullet.")
   endif()
-  
   if(NOT WIN32)
-     set(BULLET_INCLUDE_DIRS ${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS})
+    get_filename_component(BULLET_INCLUDE_DIRS  ${BULLET_INCLUDE_DIRS} ABSOLUTE BASE_DIR ${BULLET_ROOT_DIR})
   endif()
   set_bullet_target()
   message(STATUS "Found bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}")

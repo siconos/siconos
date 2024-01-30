@@ -10,7 +10,7 @@ void init_siconos_vector(py::module &m)
              std::shared_ptr<siconos::algebra::SiconosVector>>(m, "SiconosVector",
                                                                py::buffer_protocol())
       .def_buffer([](siconos::algebra::SiconosVector &vec) -> py::buffer_info {
-        return py::buffer_info(vec.getArray(),   /* Pointer to buffer */
+        return py::buffer_info(vec.data(),   /* Pointer to buffer */
                                sizeof(double), /* Size of one scalar */
                                py::format_descriptor<double>::format(), /* Python struct-style
                                                                            format descriptor */
@@ -20,8 +20,7 @@ void init_siconos_vector(py::module &m)
         );
       })
       .def(py::init<>())
-      .def(py::init<unsigned int, siconos::algebra::UblasType>(), py::arg("size"),
-           py::arg("storage_type")=siconos::algebra::UblasType::DENSE)
+      .def(py::init<unsigned int>(), py::arg("size"))
       .def("size", py::overload_cast<>(&siconos::algebra::SiconosVector::size, py::const_))
       .def("__repr__", [](const siconos::algebra::SiconosVector &a) {
         a.display();

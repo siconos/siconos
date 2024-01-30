@@ -27,6 +27,11 @@
 #include "GeomLProp_SLProps.hxx"
 #include "TColgp_HArray1OfVec.hxx"
 #include "Vrml_Normal.hxx"
+
+
+#include <iostream>
+#include <filesystem>
+
 unsigned int sNumberOfObj=0;
 TopoDS_Shape sTopoDS[NB_OBJ];
 unsigned int sTopoDSType[NB_OBJ];
@@ -81,6 +86,9 @@ void CADMBTB_init(unsigned int NumberOfObj,unsigned int NumberOfContacts)
   sWorkD=(double *) calloc(sizeD*sNumberOfContacts,sizeof(double));
   sWorkInt=(int *) malloc(sizeI*sNumberOfContacts*sizeof(int));
 
+  std::filesystem::create_directories("graphic_dump");
+
+  
   return;
   // sTopoDS = (TopoDS_Shape*)malloc(sNumberOfObj*sizeof(TopoDS_Shape));
   // spAISToposDS=(AIS_Shape**)malloc(sNumberOfObj*sizeof(AIS_Shape*));
@@ -380,10 +388,11 @@ void CADMBTB_updateGraphic()
   if(!pAIS_InteractiveContext)
     return;
   pAIS_InteractiveContext->UpdateCurrentViewer() ;
+
   if(pV3d_View && sDumpGraphic)
   {
-    char file[16];
-    sprintf(file,"toto%d.gif",sCmpDump);
+    char file[128];
+    snprintf(file,128,"./graphic_dump/snapshot_%i.jpg",sCmpDump);
     pV3d_View->Dump(file);
     sCmpDump++;
   }
@@ -500,7 +509,7 @@ void CADMBTB_buildLineArtefactLine(unsigned int id,  double* X1, double* Y1, dou
   assert(id < sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if(sAISArtefacts[id])
   {
-    pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
+    pAIS_InteractiveContext->Erase(sAISArtefacts[id], true);
     sAISArtefacts[id]=nullptr;
   }
   if(!X1)
@@ -544,7 +553,7 @@ void CADMBTB_buildCylinderArtefactLine(unsigned int id,  double* X1, double* Y1,
   assert(id < sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if(sAISArtefacts[id])
   {
-    pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
+    pAIS_InteractiveContext->Erase(sAISArtefacts[id], true);
     sAISArtefacts[id]=nullptr;
   }
   if(!X1)
@@ -591,7 +600,7 @@ void CADMBTB_buildOrientedLineArtefactLine(unsigned int id,  double* X1, double*
   assert(id < sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if(sAISArtefacts[id])
   {
-    pAIS_InteractiveContext->Erase(sAISArtefacts[id]);
+    pAIS_InteractiveContext->Erase(sAISArtefacts[id], true);
     sAISArtefacts[id]=nullptr;
   }
   if(!X1)

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #include "SecondOrderConeLinearComplementarityProblem.h"
 #include <assert.h>            // for assert
 #include <stdlib.h>            // for free, malloc, NULL, exit, EXIT_FAILURE
-#include <sys/errno.h>         // for errno
+#include <errno.h>         // for errno
 #include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES

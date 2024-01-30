@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,6 @@
  * limitations under the License.
  */
 
-// Note Franck : sounds useless. It seems it's defined in bindings
-// (to be checked, especially on windows)
-// #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
-// #include <boost/numeric/bindings/blas/level3.hpp>
-// #include <boost/numeric/bindings/ublas/matrix.hpp>
-// #include <boost/numeric/ublas/banded.hpp>
-// #include <boost/numeric/ublas/matrix_sparse.hpp>
-// #include <boost/numeric/ublas/symmetric.hpp>
-// #include <boost/numeric/ublas/triangular.hpp>
-// needed for blas3
 #include <assert.h>
 // for ublas::axpy_prod, ...
 // #include <boost/numeric/ublas/operation.hpp>
@@ -33,8 +23,8 @@
 // require for matrix stuff like value_type
 // #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include "SiconosMatrix.hpp"
-#include "SimpleMatrix.hpp"
 #include "SiconosMatrixOp.hpp"  // for matrix operators declaration
+#include "SimpleMatrix.hpp"
 
 // namespace ublas = boost::numeric::ublas;
 // namespace bindings_blas = boost::numeric::bindings::blas;
@@ -42,7 +32,8 @@
 //======================
 // Product of matrices
 //======================
-// Note FP: this function is never used. We keep it for the record. Remove it later ?
+// Note FP: this function is never used. We keep it for the record. Remove it
+// later ?
 
 // const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
 // {
@@ -58,13 +49,15 @@
 
 //   // == TODO: implement block product ==
 //   if(numA == 0 || numB == 0)
-//     THROW_EXCEPTION("Matrix product ( C=prod(A,B) ): not yet implemented for BlockMatrix
-//     objects.");
+//     THROW_EXCEPTION("Matrix product ( C=prod(A,B) ): not yet implemented for
+//     BlockMatrix objects.");
 
-//   if(numA == UblasType::IDENTITY || numB == UblasType::ZERO)  // A = identity or B = 0
+//   if(numA == UblasType::IDENTITY || numB == UblasType::ZERO)  // A = identity
+//   or B = 0
 //     return SimpleMatrix(B);
 
-//   else if(numB == UblasType::IDENTITY || numA == UblasType::ZERO)  // B = identity or A = 0
+//   else if(numB == UblasType::IDENTITY || numA == UblasType::ZERO)  // B =
+//   identity or A = 0
 //     return SimpleMatrix(A);
 
 //   else // neither A or B is equal to identity or zero.
@@ -145,7 +138,8 @@
 //       else if(numA == UblasType::SPARSE)
 //         return (SparseMat)(prod(*A.sparse(), *B.sparseCoordinate()));
 //       else if(numA == UblasType::SPARSE_COORDINATE)
-//         return (SparseMat)(prod(*A.sparseCoordinate(), *B.sparseCoordinate()));
+//         return (SparseMat)(prod(*A.sparseCoordinate(),
+//         *B.sparseCoordinate()));
 //       else //if(numA==UblasType::BANDED){
 //         return (DenseMat)(prod(*A.banded(), *B.sparseCoordinate()));
 //     }
@@ -174,8 +168,8 @@ dim : dim[0] number of raw, dim[1] number of col
 // void zeroBlock(const SiconosMatrix& A, index indexStart, index dim){
 //   ;
 // }
-// void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, int indexACol,
-// bool init){
+// void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
+// int indexACol, bool init){
 //   // To compute C[indexAcol::] = A * B
 
 //   auto numA = A.num();
@@ -185,11 +179,13 @@ dim : dim[0] number of raw, dim[1] number of col
 //     THROW_EXCEPTION("Matrix function prod(A,B,C,index): inconsistent sizes");
 //   // === if C is zero or identity => read-only ===
 //   if (numC == UblasType::Zero || numC == UblasType::IDENTITY)
-//     THROW_EXCEPTION("Matrix product ( prod(A,B,C,index) ): wrong type for resulting matrix C
-//     (read-only: zero or identity).");
+//     THROW_EXCEPTION("Matrix product ( prod(A,B,C,index) ): wrong type for
+//     resulting matrix C (read-only: zero or identity).");
 
-//   if (numA == UblasType::IDENTITY || numC == UblasType::Zero) // A = identity or 0
-//     THROW_EXCEPTION("Matrix function prod(A,B,C,index): numA == UblasType::IDENTITY || numC
+//   if (numA == UblasType::IDENTITY || numC == UblasType::Zero) // A = identity
+//   or 0
+//     THROW_EXCEPTION("Matrix function prod(A,B,C,index): numA ==
+//     UblasType::IDENTITY || numC
 //     == UblasType::Zero not yet implemented");
 
 //   int rawB = B.size(0);
@@ -199,69 +195,15 @@ dim : dim[0] number of raw, dim[1] number of col
 
 void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
                                  SiconosMatrix &C, bool init) {
-  // To compute C = A * B (init = true) or C += A * B (init = false) using ublas axpy_prod.
-  // High speedup for sparse matrices.
-  // Warning FP: ublas::axpy_prod(A, B, C, init) with init = True is equivalent
-  // to C = A*B with C.clear BEFORE product. So C==A or B must be forbidden.
-  // See http://www.boost.org/doc/libs/1_63_0/libs/numeric/ublas/doc/products.html
+  // To compute C = A * B (init = true) or C += A * B (init = false) using ublas
+  // axpy_prod. High speedup for sparse matrices. Warning FP:
+  // ublas::axpy_prod(A, B, C, init) with init = True is equivalent to C = A*B
+  // with C.clear BEFORE product. So C==A or B must be forbidden. See
+  // http://www.boost.org/doc/libs/1_63_0/libs/numeric/ublas/doc/products.html
   //
 
-  if(init == true)
-  {
+  if (init == true) {
     C.setZero();
   }
   C += A * B;
 }
-
-// Note FP: this function is never used. We keep it for the record. Remove it later ?
-// void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b,
-// SiconosMatrix& C)
-// {
-//   if(A.isBlock() || B.isBlock() || C.isBlock())
-//     THROW_EXCEPTION("gemm(...) not yet implemented for block matrices.");
-//   auto numA = A.num();
-//   auto numB = B.num();
-//   auto numC = C.num();
-//   if(numA != UblasType::DENSE || numB != UblasType::DENSE || numC != UblasType::DENSE)
-//     THROW_EXCEPTION("gemm(...) failed: reserved to dense matrices.");
-
-//   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-
-//   bindings_blas::blas::gemm(a, bindings_blas::trans(*A.dense()),
-//   bindings_blas::trans(*B.dense()), b, *C.dense());
-
-//   C.resetFactorizationFlags();
-// }
-
-// Note FP: this function is never used. We keep it for the record. Remove it later ?
-// void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix&
-// C)
-// {
-//   auto numA = A.num();
-//   auto numB = B.num();
-//   auto numC = C.num();
-//   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-//   C.resetFactorizationFlags();
-
-//   // At the time, only dense output allowed
-//   DenseMat * tmpC = nullptr;
-//   if(numA == 0 || numB == 0 || numC == 0)
-//     THROW_EXCEPTION("gemm(...) not yet implemented for block matrices.");
-
-//   if(numA == UblasType::DENSE && numB == UblasType::DENSE && numC == UblasType::DENSE)
-//     bindings_blas::blas::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
-//   else if(numA == UblasType::DENSE && numB == UblasType::DENSE && numC != UblasType::DENSE)
-//   {
-//     // Copy C into tmpC ...
-//     tmpC = new DenseMat(*C.dense());
-//     bindings_blas::blas::gemm(a, *A.dense(), *B.dense(), b, *tmpC);
-//     std::cout << *tmpC << std::endl;
-//     noalias(*C.dense()) = *tmpC;
-//     delete tmpC;
-//   }
-//   else
-//     THROW_EXCEPTION("gemm(...) not yet implemented for these kinds of matrices.");
-//   C.resetFactorizationFlags();
-// }

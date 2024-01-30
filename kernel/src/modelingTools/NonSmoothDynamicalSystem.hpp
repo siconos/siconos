@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ class NonSmoothDynamicalSystem {
     std::shared_ptr<DynamicalSystem> ds{nullptr};
     std::shared_ptr<Interaction> i{nullptr};
 
-    Change(Change&&) = default; // Required for push_back ...
+    Change(Change&&) = default;  // Required for push_back ...
     Change(ChangeType t, std::shared_ptr<DynamicalSystem> dsnew)
         : typeOfChange(t), ds(dsnew){};
     Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew){};

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,17 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <iostream>
 
-
 int main()
 {
-  // The object to run tests
-  CppUnit::TextUi::TestRunner runner;
-
-  // Get test classes that have been registered
-  CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
-
-  // Put tests into the runner
-  runner.addTest(registry.makeTest());
-
-  // Run tests
-  runner.run("", false, true, false);
+    // The object to run tests
+    CppUnit::TextUi::TestRunner runner;
+    
+    // Get test classes that have been registered
+    CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
+    
+    // Put tests into the runner
+    runner.addTest(registry.makeTest());
+    
+    // Run tests
+    runner.run("", false, true, false);
 }

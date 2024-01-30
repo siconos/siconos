@@ -1,4 +1,4 @@
-/* Copyright 2022 INRIA.
+/* Copyright 2024 INRIA.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -22,16 +22,22 @@
 #include "CSparseMatrix.h"
 
 #include <assert.h>  // for assert
-// #include <cs.h>                // for CS_INT, CS_ID, cs_dl_spalloc, cs_dl_free
+// #include <cs.h>                // for CS_INT, CS_ID, cs_dl_spalloc,
+// cs_dl_free
 #include <float.h>   // for DBL_EPSILON
 #include <math.h>    // for fabs
 #include <stdio.h>   // for fprintf, sscanf, printf, NULL, fgets
 #include <stdlib.h>  // for realloc, exit, free, malloc, EXIT_FAILURE
 #include <string.h>  // for strtok_r, memcpy, strncmp
 
-#include "SiconosCompat.h"  // for SN_PTRDIFF_T_F
+// #include "SiconosCompat.h"  // for SN_PTRDIFF_T_F
 #include "ldl.h"
 #include "numerics_verbose.h"  // for CHECK_IO
+#if defined(_WIN32) || defined(_WIN64)
+/* We are on Windows */
+#define strtok_r strtok_s
+#endif
+
 #if defined(__cplusplus)
 #undef restrict
 #include <sys/cdefs.h>  // for __restrict
@@ -57,14 +63,16 @@ double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j) {
   return 0.0;
 }
 
-void CSparseMatrix_write_in_file_python(const CSparseMatrix *const m, FILE *file) {
+void CSparseMatrix_write_in_file_python(const CSparseMatrix *const m,
+                                        FILE *file) {
   fprintf(file, "m = %" PRCS_INT "; \n", m->m);
   fprintf(file, "n = %" PRCS_INT "; \n", m->n);
   fprintf(file, "data= [");
   for (int i = 0; i < m->m; i++) {
     fprintf(file, "[");
     for (int j = 0; j < m->n; j++) {
-      fprintf(file, "%32.24e,\t ", CSparseMatrix_get_value((CSparseMatrix *)m, i, j));
+      fprintf(file, "%32.24e,\t ",
+              CSparseMatrix_get_value((CSparseMatrix *)m, i, j));
     }
     fprintf(file, "],\n");
   }
@@ -72,8 +80,9 @@ void CSparseMatrix_write_in_file_python(const CSparseMatrix *const m, FILE *file
 }
 
 /* y = alpha*A*x+beta*y */
-int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A, const double *restrict x,
-                         const double beta, double *restrict y) {
+int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
+                         const double *restrict x, const double beta,
+                         double *restrict y) {
   CS_INT n, m, *Ap, *Ai;
   double *Ax;
   if (!CS_CSC(A) || !x || !y) return (0); /* check inputs */
@@ -117,7 +126,8 @@ int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A) {
 int CSparseMatrix_check_triplet(CSparseMatrix *T) {
   if (T->nz < 0) {
     fprintf(stderr,
-            "CSparseMatrix_check_triplet :: given CSparseMatrix is not in a triplet form: nz "
+            "CSparseMatrix_check_triplet :: given CSparseMatrix is not in a "
+            "triplet form: nz "
             "= " CS_ID,
             T->nz);
     return 1;
@@ -133,25 +143,27 @@ int CSparseMatrix_check_triplet(CSparseMatrix *T) {
 
   for (CS_INT indx = 0; indx < T->nz; ++indx) {
     if (Ti[indx] >= nb_row) {
-      printf("CSparseMatrix_check_triplet :: matrix element " CS_ID " has a row number " CS_ID
-             "  > " CS_ID " the number of rows\n",
+      printf("CSparseMatrix_check_triplet :: matrix element " CS_ID
+             " has a row number " CS_ID "  > " CS_ID " the number of rows\n",
              indx, Ti[indx], nb_row);
       info = 1;
     }
     if (Tp[indx] >= nb_col) {
-      printf("CSparseMatrix_check_triplet :: matrix element " CS_ID " has a row number " CS_ID
-             " > " CS_ID " the number of rows\n",
+      printf("CSparseMatrix_check_triplet :: matrix element " CS_ID
+             " has a row number " CS_ID " > " CS_ID " the number of rows\n",
              indx, Tp[indx], nb_col);
       info = 1;
     }
     if (Tp[indx] < max_col) {
-      printf("CSparseMatrix_check_csc :: " CS_ID " at index " CS_ID " > " CS_ID "\n", Tp[indx],
-             indx, max_col);
+      printf("CSparseMatrix_check_csc :: " CS_ID " at index " CS_ID " > " CS_ID
+             "\n",
+             Tp[indx], indx, max_col);
     }
     if (Tp[indx] == cc) {
       if (Ti[indx] <= max_row) {
         printf("CSparseMatrix_check_triplet :: matrix element at column " CS_ID
-               " has a row number " CS_ID "  > " CS_ID " the max on that column\n",
+               " has a row number " CS_ID "  > " CS_ID
+               " the max on that column\n",
                cc, Ti[indx], max_row);
       } else {
         max_row = Ti[indx];
@@ -167,7 +179,8 @@ int CSparseMatrix_check_triplet(CSparseMatrix *T) {
 int CSparseMatrix_check_csc(CSparseMatrix *T) {
   if (T->nz != -1) {
     fprintf(stderr,
-            "CSparseMatrix_check_csc :: given CSparseMatrix is not in a csc form: nz "
+            "CSparseMatrix_check_csc :: given CSparseMatrix is not in a csc "
+            "form: nz "
             "= %" PRCS_INT "\n",
             T->nz);
     return 1;
@@ -188,13 +201,15 @@ int CSparseMatrix_check_csc(CSparseMatrix *T) {
     }
     for (CS_INT p = Tp[j]; p < Tp[j + 1]; ++p) {
       if (Ti[p] <= max_indx) {
-        printf("CSparseMatrix_check_csc :: matrix element (%" PRCS_INT ",%" PRCS_INT
-               ") at index %" PRCS_INT " has a row number < %" PRCS_INT " the previous max\n",
+        printf("CSparseMatrix_check_csc :: matrix element (%" PRCS_INT
+               ",%" PRCS_INT ") at index %" PRCS_INT
+               " has a row number < %" PRCS_INT " the previous max\n",
                Ti[p], j, p, max_indx);
         info = 1;
       } else if (Ti[p] >= nb_row) {
-        printf("CSparseMatrix_check_csc :: matrix element (%" PRCS_INT ",%" PRCS_INT
-               ") at index %" PRCS_INT " has a row number > %" PRCS_INT " the max\n",
+        printf("CSparseMatrix_check_csc :: matrix element (%" PRCS_INT
+               ",%" PRCS_INT ") at index %" PRCS_INT
+               " has a row number > %" PRCS_INT " the max\n",
                Ti[p], j, p, nb_row);
         info = 1;
       } else {
@@ -270,15 +285,19 @@ int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,
 
   /* ordering with amd */
   CS_INT *Perm, *PermInv;
-  cs_ldlt_A->N->pinv = Perm = cs_amd(order, A); /* We used pinv to store Perm !! */
+  cs_ldlt_A->N->pinv = Perm =
+      cs_amd(order, A); /* We used pinv to store Perm !! */
   PermInv = cs_malloc(n, sizeof(CS_INT));
 
-  DEBUG_EXPR(for (int k = 0; k < n + 1; k++) { printf("%li\t", Perm[k]); } printf("\n"););
+  DEBUG_EXPR(for (int k = 0; k < n + 1;
+                  k++) { printf("%li\t", Perm[k]); } printf("\n"););
 
   /* symbolic factorization to get Lp, Parent, Lnz, and Pinv */
   LDL_symbolic(n, Ap, Ai, Lp, Parent, Lnz, Flag, Perm, PermInv);
-  DEBUG_EXPR(for (int k = 0; k < n + 1; k++) { printf("%li\t", Lp[k]); } printf("\n"););
-  DEBUG_EXPR(for (int k = 0; k < n; k++) { printf("%li\t", Flag[k]); } printf("\n"););
+  DEBUG_EXPR(for (int k = 0; k < n + 1;
+                  k++) { printf("%li\t", Lp[k]); } printf("\n"););
+  DEBUG_EXPR(
+      for (int k = 0; k < n; k++) { printf("%li\t", Flag[k]); } printf("\n"););
 
   /* factorization */
   lnz = Lp[n];
@@ -288,10 +307,11 @@ int CSparseMatrix_ldlt_factorization(CS_INT order, const cs *A,
 
   CS_INT *Pattern = cs_malloc(n, sizeof(CS_INT));
   CS_ENTRY *D;
-  cs_ldlt_A->N->B = D =
-      cs_malloc(n, sizeof(CS_ENTRY)); /* We use cs_ldlt_A->N->B  for storing D !! */
+  cs_ldlt_A->N->B = D = cs_malloc(
+      n, sizeof(CS_ENTRY)); /* We use cs_ldlt_A->N->B  for storing D !! */
   CS_ENTRY *Y = cs_malloc(n, sizeof(CS_ENTRY));
-  LDL_numeric(n, Ap, Ai, Ax, Lp, Parent, Lnz, Li, Lx, D, Y, Flag, Pattern, Perm, PermInv);
+  LDL_numeric(n, Ap, Ai, Ax, Lp, Parent, Lnz, Li, Lx, D, Y, Flag, Pattern, Perm,
+              PermInv);
 
   DEBUG_EXPR(cs_print(cs_ldlt_A->N->L, 1););
   DEBUG_EXPR(NV_display(D, n));
@@ -322,7 +342,8 @@ void CSparseMatrix_free_lu_factors(CSparseMatrix_factors *cs_lu_A) {
 
 /* Solve Ax = b with the factorization of A stored in the cs_lu_A
  * This is extracted from cs_lusol, you need to synchronize any changes! */
-CS_INT CSparseMatrix_solve(CSparseMatrix_factors *cs_lu_A, double *x, double *b) {
+CS_INT CSparseMatrix_solve(CSparseMatrix_factors *cs_lu_A, double *x,
+                           double *b) {
   assert(cs_lu_A);
 
   CS_INT ok;
@@ -373,7 +394,8 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors *cs_lu_A, CSparseMatrix *X,
   /* --- 1. First step X = L\B ---------------------------------------------- */
   for (k = 0; k < B->n; k++) {
     /* permutation of the rows  of B(:,k) */
-    for (p = B->p[k]; p < B->p[k + 1]; p++) x[B->i[p]] = B->x[p]; /* scatter B  */
+    for (p = B->p[k]; p < B->p[k + 1]; p++)
+      x[B->i[p]] = B->x[p]; /* scatter B  */
     for (p = B->p[k]; p < B->p[k + 1]; p++) {
       CS_INT i_old = B->i[p];
       B->i[p] = pinv[i_old]; /* permute row indices with N->pinv */
@@ -411,7 +433,8 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors *cs_lu_A, CSparseMatrix *X,
     top = cs_spsolve(N->U, X, k, xi, x, NULL, 0); /* x = U\X(:,col) */
 
     /* store the result in B */
-    if (Bp[k] + n - top > B->nzmax && !cs_sprealloc(B, 2 * (B->nzmax) + n - top)) {
+    if (Bp[k] + n - top > B->nzmax &&
+        !cs_sprealloc(B, 2 * (B->nzmax) + n - top)) {
       return 1; /* (cs_done(X, w, x, 0)) ;   */ /* out of memory */
     }
     Bp = B->p;
@@ -433,7 +456,8 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors *cs_lu_A, CSparseMatrix *X,
   return (ok);
 }
 
-CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors *cs_chol_A, double *x, double *b) {
+CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors *cs_chol_A, double *x,
+                                double *b) {
   assert(cs_chol_A);
 
   CS_INT ok;
@@ -453,8 +477,8 @@ CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors *cs_chol_A, double *x, dou
 /* Solve Ax = B with the factorization of A stored in the cs_chol_A
  * B is a sparse matrix (CSparseMatrix_factors)
  * This is extracted from cs_lusol, you need to synchronize any changes! */
-CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatrix *X,
-                                  CSparseMatrix *B) {
+CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A,
+                                  CSparseMatrix *X, CSparseMatrix *B) {
   DEBUG_BEGIN("CSparseMatrix_chol_spsolve(...)\n");
 
   if (!CS_CSC(X)) return 1; /* check inputs */
@@ -487,7 +511,8 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
   /* --- 1. First step X = L\B ---------------------------------------------- */
   for (k = 0; k < B->n; k++) {
     /* permutation of the rows  of B(:,k) */
-    for (p = B->p[k]; p < B->p[k + 1]; p++) x[B->i[p]] = B->x[p]; /* scatter B  */
+    for (p = B->p[k]; p < B->p[k + 1]; p++)
+      x[B->i[p]] = B->x[p]; /* scatter B  */
     for (p = B->p[k]; p < B->p[k + 1]; p++) {
       CS_INT i_old = B->i[p];
       B->i[p] = pinv[i_old]; /* permute row indices with N->pinv */
@@ -513,7 +538,8 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
   }
   DEBUG_EXPR(cs_print(X, 0););
 
-  /* --- 2. First step B = L'\B ---------------------------------------------- */
+  /* --- 2. First step B = L'\B ----------------------------------------------
+   */
   DEBUG_PRINT("2- Second step B = L'\\X\n");
 
   CSparseMatrix *LT = cs_transpose(N->L, 1);
@@ -526,7 +552,8 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
     top = cs_spsolve(LT, X, k, xi, x, NULL, 0); /* x = U\X(:,col) */
 
     /* store the result in B */
-    if (Bp[k] + n - top > B->nzmax && !cs_sprealloc(B, 2 * (B->nzmax) + n - top)) {
+    if (Bp[k] + n - top > B->nzmax &&
+        !cs_sprealloc(B, 2 * (B->nzmax) + n - top)) {
       return 1; /* (cs_done(X, w, x, 0)) ;   */ /* out of memory */
     }
     Bp = B->p;
@@ -536,8 +563,9 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
     cs_pvec(pinv, x, b, n); /* b = P'*x */
     // for(p = top ; p < n ; p++) b [q ? q [p] : p] = x [p] ;  /* b(q) = x */
     for (p = top; p < n; p++) {
-      i = xi[p];                                           /* x(i) is nonzero */
-      i = pinv[i]; /* permute the indices with S->pinv */  // to be checked carefully
+      i = xi[p]; /* x(i) is nonzero */
+      i = pinv[i];
+          /* permute the indices with S->pinv */  // to be checked carefully
       Bi[bnz] = i;
       Bx[bnz++] = b[i];
     }
@@ -552,7 +580,8 @@ CS_INT CSparseMatrix_chol_spsolve(CSparseMatrix_factors *cs_chol_A, CSparseMatri
   return (ok);
 }
 
-CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors *cs_ldlt_A, double *x, double *b) {
+CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors *cs_ldlt_A, double *x,
+                                double *b) {
   assert(cs_ldlt_A);
 
   CS_INT ok;
@@ -568,7 +597,8 @@ CS_INT CSparseMatrix_ldlt_solve(CSparseMatrix_factors *cs_ldlt_A, double *x, dou
 
   if (ok) {
     CS_INT *P = cs_ldlt_A->N->pinv; /* We used pinv to store Perm !! */
-    CS_ENTRY *D = cs_ldlt_A->N->B;  /* We use cs_ldlt_A->N->B  for storing D !! */
+    CS_ENTRY *D =
+        cs_ldlt_A->N->B; /* We use cs_ldlt_A->N->B  for storing D !! */
 
     L = cs_ldlt_A->N->L;
     Lp = L->p;
@@ -670,8 +700,8 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
   double val3;
   if (out->nz < 0) {
     for (j = 0; j < n; j++) {
-      /* fprintf(file,"    col %lld : locations %lld to %lld\n",  (long long int)j,  (long long
-       * int)Ap [j],  (long long int)Ap [j+1]-1); */
+      /* fprintf(file,"    col %lld : locations %lld to %lld\n",  (long long
+       * int)j,  (long long int)Ap [j],  (long long int)Ap [j+1]-1); */
 
       if (fgets(line, 2047, file) != NULL) {
         DEBUG_PRINTF("line 1 = %s\n", line);
@@ -715,48 +745,54 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
       }
     }
   } else {
-    /* fprintf(file,"triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n",  (long long int)m,  (long
-     * long int)n, */
+    /* fprintf(file,"triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n",  (long
+     * long int)m,  (long long int)n, */
     /*         (long long int)nzmax,  (long long int)nz) ; */
 
     for (p = 0; p < nz; p++) {
-      CHECK_IO(fscanf(file, "    %lld %lld : %32le\n", &val1, &val2, &val3), &info);
+      CHECK_IO(fscanf(file, "    %lld %lld : %32le\n", &val1, &val2, &val3),
+               &info);
       DEBUG_PRINTF("    %lld %lld : %32le\n", val1, val2, val3);
       Ai[p] = (CS_INT)val1;
       Ap[p] = (CS_INT)val2;
       Ax[p] = val3;
-      DEBUG_PRINTF("    %lld %lld : %g\n", (long long int)Ai[p], (long long int)Ap[p],
-                   (double)Ax[p]);
+      DEBUG_PRINTF("    %lld %lld : %g\n", (long long int)Ai[p],
+                   (long long int)Ap[p], (double)Ax[p]);
     }
   }
   return out;
 }
 
 /* add an entry to triplet matrix only if value is not (nearly) null */
-CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x, double threshold) {
+CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x,
+                            double threshold) {
   if (fabs(x) >= threshold) {
     return cs_entry(T, i, j, x);
   } else {
     return 1;
   }
 }
-/* add a block (col-major dense) to triplet matrix only if value is not (nearly) null */
-CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T, CS_INT row_off, CS_INT col_off,
-                                        double *x, CS_INT row_size, CS_INT col_size,
+/* add a block (col-major dense) to triplet matrix only if value is not (nearly)
+ * null */
+CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T, CS_INT row_off,
+                                        CS_INT col_off, double *x,
+                                        CS_INT row_size, CS_INT col_size,
                                         double threshold) {
   for (CS_INT j = 0; j < col_size; ++j) {
     for (CS_INT i = 0; i < row_size; ++i) {
       // col-major
 
-      CSparseMatrix_zentry(T, i + row_off, j + col_off, x[i + j * row_size], DBL_EPSILON);
+      CSparseMatrix_zentry(T, i + row_off, j + col_off, x[i + j * row_size],
+                           DBL_EPSILON);
     }
   }
   return 1;
 }
 
-/* add an entry to a symmetric triplet matrix only if value is not (nearly) null */
-CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x,
-                                      double threshold) {
+/* add an entry to a symmetric triplet matrix only if value is not (nearly) null
+ */
+CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j,
+                                      double x, double threshold) {
   if (fabs(x) >= threshold) {
     if (j <= i) {
       return cs_entry(T, i, j, x);
@@ -776,7 +812,8 @@ CS_INT CSparseMatrix_entry(CSparseMatrix *T, CS_INT i, CS_INT j, double x) {
 }
 
 /* add an entry to a symmetric triplet matrix */
-CS_INT CSparseMatrix_symmetric_entry(CSparseMatrix *T, CS_INT i, CS_INT j, double x) {
+CS_INT CSparseMatrix_symmetric_entry(CSparseMatrix *T, CS_INT i, CS_INT j,
+                                     double x) {
   if (j <= i) {
     return cs_entry(T, i, j, x);
   }
@@ -797,16 +834,18 @@ int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE *file) {
   Ax = A->x;
   nzmax = A->nzmax;
   nz = A->nz;
-  fprintf(file, "CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER, CS_SUBSUB, CS_DATE,
-          CS_COPYRIGHT);
+  fprintf(file, "CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER,
+          CS_SUBSUB, CS_DATE, CS_COPYRIGHT);
   if (nz < 0) {
-    fprintf(file, "%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n", (long long int)m,
-            (long long int)n, (long long int)nzmax, (long long int)Ap[n], cs_norm(A));
+    fprintf(file, "%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n",
+            (long long int)m, (long long int)n, (long long int)nzmax,
+            (long long int)Ap[n], cs_norm(A));
     for (j = 0; j < n; j++) {
       fprintf(file, "    col %lld : locations %lld to %lld\n", (long long int)j,
               (long long int)Ap[j], (long long int)Ap[j + 1] - 1);
       for (p = Ap[j]; p < Ap[j + 1]; p++) {
-        fprintf(file, "      %lld : %g\n", (long long int)Ai[p], Ax ? Ax[p] : 1);
+        fprintf(file, "      %lld : %g\n", (long long int)Ai[p],
+                Ax ? Ax[p] : 1);
         if (brief && p > 20) {
           fprintf(file, "  ...\n");
           return (1);
@@ -814,11 +853,12 @@ int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE *file) {
       }
     }
   } else {
-    fprintf(file, "triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n", (long long int)m,
-            (long long int)n, (long long int)nzmax, (long long int)nz);
+    fprintf(file, "triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n",
+            (long long int)m, (long long int)n, (long long int)nzmax,
+            (long long int)nz);
     for (p = 0; p < nz; p++) {
-      fprintf(file, "    %lld %lld : %g\n", (long long int)Ai[p], (long long int)Ap[p],
-              Ax ? Ax[p] : 1);
+      fprintf(file, "    %lld %lld : %g\n", (long long int)Ai[p],
+              (long long int)Ap[p], Ax ? Ax[p] : 1);
       if (brief && p > 20) {
         fprintf(file, "  ...\n");
         return (1);
@@ -828,7 +868,8 @@ int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE *file) {
   return (1);
 }
 
-int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief, FILE *file) {
+int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief,
+                                       FILE *file) {
   CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai;
   double *Ax;
   if (!A) {
@@ -845,13 +886,15 @@ int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief, FILE *
   /* fprintf(file,"CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER, */
   /*         CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ; */
   if (nz < 0) {
-    fprintf(file, "%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n", (long long int)m,
-            (long long int)n, (long long int)nzmax, (long long int)Ap[n], cs_norm(A));
+    fprintf(file, "%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n",
+            (long long int)m, (long long int)n, (long long int)nzmax,
+            (long long int)Ap[n], cs_norm(A));
     for (j = 0; j < n; j++) {
       fprintf(file, "    col %lld : locations %lld to %lld\n", (long long int)j,
               (long long int)Ap[j], (long long int)Ap[j + 1] - 1);
       for (p = Ap[j]; p < Ap[j + 1]; p++) {
-        fprintf(file, "      %lld : %10.50g\n", (long long int)Ai[p], Ax ? Ax[p] : 1);
+        fprintf(file, "      %lld : %10.50g\n", (long long int)Ai[p],
+                Ax ? Ax[p] : 1);
         if (brief && p > 20) {
           fprintf(file, "  ...\n");
           return (1);
@@ -867,7 +910,8 @@ int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix *A, int brief, FILE *
         return (1);
       }
     }
-    fprintf(file, "    %lld %lld %g\n", (long long int)m, (long long int)n, 0.0);
+    fprintf(file, "    %lld %lld %g\n", (long long int)m, (long long int)n,
+            0.0);
   }
   return (1);
 }
@@ -898,8 +942,8 @@ CS_INT CSparseMatrix_to_dense(const CSparseMatrix *const A, double *B) {
     }
   } else {
     for (j = 0; j < n; j++) {
-      DEBUG_PRINTF("    col %g : locations %g to %g\n", (double)j, (double)(Ap[j]),
-                   (double)(Ap[j + 1] - 1));
+      DEBUG_PRINTF("    col %g : locations %g to %g\n", (double)j,
+                   (double)(Ap[j]), (double)(Ap[j + 1] - 1));
       for (p = Ap[j]; p < Ap[j + 1]; p++) {
         DEBUG_PRINTF("      %g %g : ", (double)(Ai[p]), Ax ? Ax[p] : 1);
         B[Ai[p] + j * m] = Ax[p];
@@ -925,7 +969,9 @@ CSparseMatrix *CSparseMatrix_alloc_for_copy(const CSparseMatrix *const m) {
     out->m = m->m;
     out->n = m->n;
   } else {
-    fprintf(stderr, "NM_copy :: error unknown type " CS_ID " for CSparse matrix\n", m->nz);
+    fprintf(stderr,
+            "NM_copy :: error unknown type " CS_ID " for CSparse matrix\n",
+            m->nz);
     exit(EXIT_FAILURE);
   }
 

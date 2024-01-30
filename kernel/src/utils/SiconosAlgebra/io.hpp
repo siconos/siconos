@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #define __ioVector__
 
 #include <iostream>
+#include <nlohmann/json.hpp>  // json in/out
 #include <vector>
 // #include <string>
 #include "SiconosVector.hpp"
@@ -149,6 +150,10 @@ double compareRefFile(const SimpleMatrix &data, std::string filename, double eps
                       const std::ios_base::openmode mode = std::ios_base::in,
                       bool verbose = true);
 
+/** \returns a pointer to a SiconosVector, built from json input
+    \param jin json input
+*/
+std::shared_ptr<SiconosVector> readVectorFromJson(const nlohmann::json &jin);
 }  // namespace io
 }  // namespace siconos::algebra
 #endif

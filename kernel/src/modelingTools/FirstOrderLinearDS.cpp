@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@
 // --- Constructors ---
 // From a minimum set of data, A and b connected to a plug-in
 siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> newX0, const std::string &APlugin,
-    const std::string &bPlugin)
+    std::shared_ptr<siconos::algebra::SiconosVector> newX0,
+    const std::string &APlugin, const std::string &bPlugin)
     : FirstOrderNonLinearDS(newX0) {
   _zeroPlugin();
   setComputeAFunction(siconos::plugins::getPluginName(APlugin),
@@ -49,7 +49,8 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
   _zeroPlugin();
   if ((newA->size(0) != _n) || (newA->size(1) != _n))
     THROW_EXCEPTION(
-        "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions "
+        "FirstOrderLinearDS - constructor(number,x0,A): inconsistent "
+        "dimensions "
         "with problem size for input matrix A");
   _A = newA;
 }
@@ -70,12 +71,14 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
 
   if ((newA->size(0) != _n) || (newA->size(1) != _n))
     THROW_EXCEPTION(
-        "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with "
+        "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions "
+        "with "
         "problem size for input matrix A");
 
   if (newB->size() != _n)
     THROW_EXCEPTION(
-        "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with "
+        "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions "
+        "with "
         "problem size for input vector b ");
 
   _A = newA;
@@ -83,19 +86,24 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
 }
 
 // Copy constructor
-siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS)
+siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
+    const FirstOrderLinearDS &FOLDS)
     : FirstOrderNonLinearDS(FOLDS) {
   _zeroPlugin();
-  if (FOLDS.A()) _A = std::make_shared<siconos::algebra::SimpleMatrix>(*(FOLDS.A()));
-  if (FOLDS.b()) _b = std::make_shared<siconos::algebra::SiconosVector>(*(FOLDS.b()));
+  if (FOLDS.A())
+    _A = std::make_shared<siconos::algebra::SimpleMatrix>(*(FOLDS.A()));
+  if (FOLDS.b())
+    _b = std::make_shared<siconos::algebra::SiconosVector>(*(FOLDS.b()));
 
   _hasConstantA = FOLDS.hasConstantA();
   _hasConstantB = FOLDS.hasConstantB();
 
   if (not _hasConstantA)
-    _pluginA = std::make_shared<siconos::plugins::PluggedObject>(*(FOLDS.getPluginA()));
+    _pluginA = std::make_shared<siconos::plugins::PluggedObject>(
+        *(FOLDS.getPluginA()));
   if (not _hasConstantB)
-    _pluginb = std::make_shared<siconos::plugins::PluggedObject>(*(FOLDS.getPluginB()));
+    _pluginb = std::make_shared<siconos::plugins::PluggedObject>(
+        *(FOLDS.getPluginB()));
 }
 
 void siconos::modeling::FirstOrderLinearDS::initRhs(double time) {
@@ -103,14 +111,17 @@ void siconos::modeling::FirstOrderLinearDS::initRhs(double time) {
   computeRhs(time);  // If necessary, this will also compute A and b.
   if (!_jacxRhs)     // if not allocated with a set or anything else
   {
-    if (_A &&
-        !_M)  // if M is not defined, then A = jacobianRhsx, no memory allocation for that one.
-      _jacxRhs->block(0, 0) = _A;
-    else if (_A && _M)
-      _jacxRhs->block(0, 0) = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
-    // else no allocation, jacobian is equal to 0.
+    if (_A && !_M) {  // if M is not defined, then A = jacobianRhsx, no memory
+                      // allocation for that one.
+      std::cout << "NOT IMPLEMENTED\n";
+      //////// _jacxRhs = _A; /// WARNING FP: constructor is missing
+    } else if (_A && _M) {
+      auto tmp = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+      _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*tmp);
+      // else no allocation, jacobian is equal to 0.
+    }
+    computeJacobianRhsx(time);
   }
-  computeJacobianRhsx(time);
 }
 
 void siconos::modeling::FirstOrderLinearDS::updatePlugins(double time) {
@@ -126,7 +137,8 @@ void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
   _hasConstantA = false;
 }
 
-void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct) {
+void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
+    LDSPtrFunction fct) {
   if (!_A) _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
   _pluginA->setComputeFunction((void *)fct);
   _hasConstantA = false;
@@ -139,7 +151,8 @@ void siconos::modeling::FirstOrderLinearDS::setComputebFunction(
   _hasConstantB = false;
 }
 
-void siconos::modeling::FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct) {
+void siconos::modeling::FirstOrderLinearDS::setComputebFunction(
+    LDSPtrFunction fct) {
   if (!_b) _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _pluginb->setComputeFunction((void *)fct);
   _hasConstantB = false;
@@ -151,13 +164,15 @@ void siconos::modeling::FirstOrderLinearDS::clearComputebFunction() {
 
 void siconos::modeling::FirstOrderLinearDS::computeA(double time) {
   if (_A && _pluginA->fPtr) {
-    ((computeAfct)_pluginA->fPtr)(time, _n, _n, &(*_A)(0, 0), _z->size(), &(*_z)(0));
+    ((computeAfct)_pluginA->fPtr)(time, _n, _n, &(*_A)(0, 0), _z->size(),
+                                  &(*_z)(0));
   }
 }
 
 void siconos::modeling::FirstOrderLinearDS::computeb(double time) {
   if (_b && _pluginb->fPtr)
-    ((LDSPtrFunction)_pluginb->fPtr)(time, _n, &(*_b)(0), _z->size(), &(*_z)(0));
+    ((LDSPtrFunction)_pluginb->fPtr)(time, _n, &(*_b)(0), _z->size(),
+                                     &(*_z)(0));
 }
 /*This function is called only by LsodarOSI and eventDriven*/
 void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
@@ -256,7 +271,8 @@ void siconos::modeling::FirstOrderLinearDS::_zeroPlugin() {
   _pluginb = std::make_shared<siconos::plugins::PluggedObject>();
 }
 
-void siconos::modeling::FirstOrderLinearDS::setA(const siconos::algebra::SiconosMatrix &newA) {
+void siconos::modeling::FirstOrderLinearDS::setA(
+    const siconos::algebra::SiconosMatrix &newA) {
   if (_A)
     *_A = newA;
   else
@@ -264,7 +280,8 @@ void siconos::modeling::FirstOrderLinearDS::setA(const siconos::algebra::Siconos
   _hasConstantA = true;
 }
 
-void siconos::modeling::FirstOrderLinearDS::setb(const siconos::algebra::SiconosVector &b) {
+void siconos::modeling::FirstOrderLinearDS::setb(
+    const siconos::algebra::SiconosVector &b) {
   if (_b)
     *_b = b;
   else

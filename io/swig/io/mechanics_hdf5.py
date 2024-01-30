@@ -494,6 +494,7 @@ class MechanicsHdf5(object):
         self._dynamic_data = None
         self._cf_data = None
         self._cf_info = None
+        self._cf_work = None
         self._domain_data = None
         self._solv_data = None
         self._run_options = None
@@ -563,45 +564,81 @@ class MechanicsHdf5(object):
             self._dynamic_data.attrs['info'] = 'time,  ds id  ,  translation ,'
             self._dynamic_data.attrs['info'] += 'orientation'
 
-        self._cf_data = data(self._data, 'cf', 26,
-                             use_compression=self._use_compression)
-        if self._mode == 'w':
-            self._cf_data.attrs['info'] = 'time [0],  mu [1],  contact point A [2:4] ,'
-            self._cf_data.attrs['info'] += 'contact point B [5:7],  contact normal [8:10], '
-            self._cf_data.attrs['info'] += 'reaction impulse (global frame) [11:13],'
-            self._cf_data.attrs['info'] += 'relative gap [14:16], reaction velocity [17:19],'
-            self._cf_data.attrs['info'] += 'reaction impulse (local frame) [20:22],  interaction id [23],'
-            self._cf_data.attrs['info'] += 'ds 1 number [24],  ds 2 number [25]'
 
-        self._cf_info = data(self._data, 'cf_info', 5,
-                             use_compression=self._use_compression)
+        verbose_old = self._verbose
+        self._verbose=True
 
-        if self._mode == 'w':
-            self._cf_info.attrs['info'] = 'time [0],  interaction id [1]'
-            self._cf_info.attrs['info'] += 'ds 1 number [2],  ds 2 number [3]'
-            self._cf_info.attrs['info'] += 'static body number [4]'
+        try:
+            self._cf_data = data(self._data, 'cf', 26,
+                             use_compression=self._use_compression)
+            if self._mode == 'w':
+                self._cf_data.attrs['info'] = '[0] : time,\n [1] : mu,\n [2:4] : contact point A,\n'
+                self._cf_data.attrs['info'] += ' [5:7] : contact point B,\n [8:10] : contact normal,\n'
+                self._cf_data.attrs['info'] += ' [11:13] : reaction impulse (global frame),\n'
+                self._cf_data.attrs['info'] += ' [14:16] : relative gap,\n [17:19] : reaction velocity,\n'
+                self._cf_data.attrs['info'] += ' [20:22] : reaction impulse (local frame),\n [23] : interaction id,\n'
+                self._cf_data.attrs['info'] += ' [24] : ds 1 number,\n [25] : ds 2 number'
+        except Exception as e:
+            self.print_io_mechanics('Warning -  cf_data in the hdf5 file')
+            self.print_io_mechanics('        -  group(self._cf_data, log ) : ', e)
+
+
+        try:
+            self._cf_info = data(self._data, 'cf_info', 5,
+                             use_compression=self._use_compression)
+            if self._mode == 'w':
+                self._cf_info.attrs['info'] = '[0] : time [0],\n [1] : interaction id,\n'
+                self._cf_info.attrs['info'] += ' [1] : ds 1 number,\n [3] : ds 2 number,\n'
+                self._cf_info.attrs['info'] += ' [4] : static body number'
+        except Exception as e:
+            self.print_io_mechanics('Warning -  cf_info in the hdf5 file')
+            self.print_io_mechanics('        -  group(self._cf_info, log ) : ', e)
+        try:
+            self._cf_work = data(self._data, 'cf_work', 7,
+                                    use_compression=self._use_compression)
+
+            if self._mode == 'w':
+                self._cf_work.attrs['info'] = '[0] : time,\n [1] : interaction id,\n'
+                self._cf_work.attrs['info'] += ' [2] : normal contact work,\n [3] : tangent contact work,\n'
+                self._cf_work.attrs['info'] += ' [4] : friction dissipation,\n [5] : contact status'
+        except Exception as e:
+            self.print_io_mechanics('Warning -  cf_work in the hdf5 file')
+            self.print_io_mechanics('        -  group(self._cf_work, log ) : ', e)
 
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
                                      use_compression=self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression=self._use_compression)
-        self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
-                                      use_compression=self._use_compression)
+
+
+        try:
+            self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
+                                          use_compression=self._use_compression)
+        except Exception as e:
+            self.print_io_mechanics('Warning -  _data siconos_mechanics_run_options in the hdf5 file')
+            self.print_io_mechanics('        -  data(self._data, siconos_mechanics_run_options, ...) : ', e)
+
+        
+        # self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
+        #                               use_compression=self._use_compression)
+
+        self._verbose=verbose_old
 
         try:
             self._log_data = group(self._data, 'log')
         except Exception as e:
-            print('Warning -  group(self._data, log ) : ', e)
+            self.print_io_mechanics('Warning -  _data in the hdf5 file')
+            self.print_io_mechanics('        -  group(self._data, log ) : ', e)
 
         self._input = group(self._data, 'input')
 
-        # if the hdf5 file contains already some objects, we correcly initialize
-        # the object counter
-        if len(self._input) >= 0:
-            type_obj = [obj.attrs['type'] for  obj in self._input.values()]
-            self._number_of_dynamic_objects = type_obj.count('dynamic')
-            self._number_of_static_objects = type_obj.count('static')
+        # # if the hdf5 file contains already some objects, we correcly initialize
+        # # the object counter
+        # if len(self._input) >= 0:
+        #     type_obj = [obj.attrs['type'] for  obj in self._input.values()]
+        #     self._number_of_dynamic_objects = type_obj.count('dynamic')
+        #     self._number_of_static_objects = type_obj.count('static')
 
         self._nslaws_data = group(self._data, 'nslaws')
         return self
@@ -611,6 +648,9 @@ class MechanicsHdf5(object):
 
     def print_verbose(self, *args, **kwargs):
         if self._verbose:
+            print('[io.mechanics]', *args, **kwargs)
+
+    def print_io_mechanics(self, *args, **kwargs):
             print('[io.mechanics]', *args, **kwargs)
 
     # hdf5 structure
@@ -662,6 +702,12 @@ class MechanicsHdf5(object):
         Contact points information.
         """
         return self._cf_info
+
+    def contact_work_data(self):
+        """
+        Contact points information.
+        """
+        return self._cf_work
 
     def domains_data(self):
         """
@@ -1201,7 +1247,7 @@ class MechanicsHdf5(object):
             nslaw=self._nslaws_data[name]
             if nslaw.attrs['type'] != 'NewtonImpactRollingFrictionNSL':
                 self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
-                
+
         nslaw.attrs['mu'] = mu
         nslaw.attrs['mu_r'] = mu_r
         nslaw.attrs['e'] = e

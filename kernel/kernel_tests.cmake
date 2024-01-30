@@ -8,12 +8,12 @@ if(WITH_TESTING)
 
   # new_test(
   #   NAME testSiconosAlgebra
-  #   SOURCES BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp ${SIMPLE_TEST_MAIN}
+  #   SOURCES  SiconosVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp AlgebraToolsTest.cpp  EigenProblemsTest.cpp ${SIMPLE_TEST_MAIN}
   #   DEPS "numerics;CPPUNIT::CPPUNIT;externals"
   #   )
   new_test(
     NAME testSiconosAlgebra
-    SOURCES  SiconosVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp AlgebraToolsTest.cpp  EigenProblemsTest.cpp ${SIMPLE_TEST_MAIN}
+    SOURCES  SimpleMatrixTest.cpp ${SIMPLE_TEST_MAIN}
     DEPS "numerics;CPPUNIT::CPPUNIT;externals"
     )
 

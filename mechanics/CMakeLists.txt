@@ -1,4 +1,3 @@
-
 # cmake utilities to build mechanics component
 #================================================================
 #
@@ -35,6 +34,9 @@ set(${COMPONENT}_DIRS
   src/collision/native
   src/collision/native/bodies
   src/joints
+  src/fem
+  src/fem/native
+  src/fem/cable
   )
 
 # Then, optional parts ---
@@ -47,7 +49,7 @@ endif()
 
 # -- OCE --
 # - add extra mechanics sources, depending on occ/oce, to the build process
-if(WITH_OCE)
+if(WITH_OCE OR WITH_OCC)
   list(APPEND ${COMPONENT}_DIRS src/occ)
 endif()
 
@@ -79,13 +81,6 @@ target_link_libraries(mechanics PUBLIC
   numerics  # for debug.h ...
   kernel)
 
-# Links with non-Siconos libraries
-# dependency upon boost because of line 140 in SiconosPointers.hpp
-# --> need boost::shared_array for HEM5 and lsodar.
-# This should be reviewed (?)
-
-target_include_directories(mechanics PRIVATE ${Boost_INCLUDE_DIRS})
-
 # Bullet setup
 # Different options are available. Check BulletSetup.cmake file
 include(bullet_setup)
@@ -97,6 +92,13 @@ if(WITH_OCE)
   # Add oce headers and libs to components build
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
 endif()
+
+if(WITH_OCC)
+  include(occ_setup)
+  # Add oce headers and libs to components build
+  target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
+endif()
+
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
