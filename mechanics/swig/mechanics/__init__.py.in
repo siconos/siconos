@@ -3,7 +3,7 @@
 __all__ = ["collision", "joints"]
 
 
-with_oce = "@SICONOS_HAS_OpenCASCADE@" == "TRUE"
+with_occ = "@SICONOS_HAS_OpenCASCADE@" == "TRUE"
 if with_occ:
     __all__.append("OCC")
 
