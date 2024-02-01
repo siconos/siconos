@@ -44,9 +44,9 @@
 #include "SimpleMatrix.hpp"
 // include "SimulationGraphs.hpp"
 #include "Relation.hpp"
+#include "SiconosMatrixOp.hpp"  // For setBlock
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrixOp.hpp" // For setBlock
 #include "siconos_debug.h"
 
 // Test : the following line is allowed only from C++17.

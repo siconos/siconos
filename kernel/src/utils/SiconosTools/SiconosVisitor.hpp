@@ -100,72 +100,57 @@ struct SiconosVisitor {
   // Pros: less virtual functions (no more class hierarchy in nslaws), can use std::visit
   // Cons: must use std::visit. Won't change anything at user level, but it will be a bit
   // more difficult to call functions at low level.
-  virtual void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-  virtual void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-  virtual void visit(const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-  virtual void visit(const siconos::modeling::MultipleImpactNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::MultipleImpactNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-  virtual void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-  virtual void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-  virtual void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-  virtual void visit(const siconos::modeling::NormalConeNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::NormalConeNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-  virtual void visit(const siconos::modeling::RelayNSL &nslaw) const
-  {
+  virtual void visit(const siconos::modeling::RelayNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
 
   // Dynamical Systems
-  virtual void visit(const siconos::modeling::LagrangianDS &ds) const
-  {
+  virtual void visit(const siconos::modeling::LagrangianDS &ds) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
 
-  virtual void visit(const siconos::modeling::FirstOrderNonLinearDS &ds) const
-  {
+  virtual void visit(const siconos::modeling::FirstOrderNonLinearDS &ds) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
 
-  virtual void visit(const siconos::modeling::NewtonEulerDS &ds) const
-  {
+  virtual void visit(const siconos::modeling::NewtonEulerDS &ds) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
 
   // Relations
-  virtual void visit(const siconos::modeling::LagrangianR &) const
-  {
+  virtual void visit(const siconos::modeling::LagrangianR &) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
 
-  virtual void visit(const siconos::modeling::FirstOrderR &) const
-  {
+  virtual void visit(const siconos::modeling::FirstOrderR &) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
 
-  virtual void visit(const siconos::modeling::NewtonEulerR &) const
-  {
+  virtual void visit(const siconos::modeling::NewtonEulerR &) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
 

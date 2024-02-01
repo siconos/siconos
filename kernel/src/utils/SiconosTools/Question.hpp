@@ -42,17 +42,19 @@
 
 // #include <SiconosConfig.h>
 #include <array>
-#include <type_traits>
+// #include <type_traits>
 
-namespace siconos::tools {
+namespace siconos::internal {
 
 /** a generic return value visitor */
-template <class AnswerType>
+template <typename AnswerType>
 struct Question : public SiconosVisitor {
-  typedef AnswerType type;
-  type answer;
+  using type = AnswerType;
 
-  Question() : answer(std::array<typename std::remove_reference<AnswerType>::type, 1>()[0]){};
+  type answer{std::array<typename std::remove_reference<AnswerType>::type, 1>{}[0]};
+
+  Question() = default;
+
   Question(AnswerType ref) : answer(ref){};
 };
 
@@ -61,8 +63,7 @@ struct Question : public SiconosVisitor {
     \param v a visitable object
  */
 template <class GeneralQuestion, class Visitable>
-typename GeneralQuestion::type ask(const Visitable& v)
-{
+typename GeneralQuestion::type ask(const Visitable& v) {
   GeneralQuestion t;
 
   v.accept(t);
@@ -76,8 +77,7 @@ typename GeneralQuestion::type ask(const Visitable& v)
     \param arg the GeneralQuestion argument
  */
 template <class GeneralQuestion, class Visitable, class Argument>
-typename GeneralQuestion::type ask(const Visitable& v, const Argument& arg)
-{
+typename GeneralQuestion::type ask(const Visitable& v, const Argument& arg) {
   GeneralQuestion t(arg);
 
   v.accept(t);
@@ -89,36 +89,35 @@ typename GeneralQuestion::type ask(const Visitable& v, const Argument& arg)
  * \param v a visitable object
  */
 template <class Visitor, class Visitable>
-void apply(const Visitable& v)
-{
+void apply(const Visitable& v) {
   static Visitor t;
 
   v.accept(t);
 }
 
-/** apply a parameterized SiconosVisitor to a visitable object
- * \param v a visitable object
- * \param arg the SiconosVisitor argument
- */
-template <class VisitorWithArgument, class Visitable, class Argument>
-void apply(const Visitable& v, const Argument& arg)
-{
-  VisitorWithArgument t(arg);
+// /** apply a parameterized SiconosVisitor to a visitable object
+//  * \param v a visitable object
+//  * \param arg the SiconosVisitor argument
+//  */
+// template <class VisitorWithArgument, class Visitable, class Argument>
+// void apply(const Visitable& v, const Argument& arg) {
 
-  v.accept(t);
-}
+//   VisitorWithArgument t(arg);
 
-/** apply a parameterized SiconosVisitor to a visitable object
- * \param v a visitable object
- * \param arg1 the first SiconosVisitor argument
- * \param arg2 the second SiconosVisitor argument
- */
-template <class VisitorWith2Arguments, class Visitable, class Argument1, class Argument2>
-void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
-{
-  VisitorWith2Arguments t(arg1, arg2);
+//   v.accept(t);
+// }
 
-  v.accept(t);
-}
-}  // namespace siconos::tools
+// /** apply a parameterized SiconosVisitor to a visitable object
+//  * \param v a visitable object
+//  * \param arg1 the first SiconosVisitor argument
+//  * \param arg2 the second SiconosVisitor argument
+//  */
+// template <class VisitorWith2Arguments, class Visitable, class Argument1, class Argument2>
+// void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2) {
+
+//   VisitorWith2Arguments t(arg1, arg2);
+
+//   v.accept(t);
+// }
+}  // namespace siconos::internal
 #endif

@@ -95,7 +95,7 @@ void OccTest::move()
 
   auto position(new siconos::algebra::SiconosVector(7));
   auto velocity(new siconos::algebra::SiconosVector(6));
-  auto inertia(new SimpleMatrix(3,3));
+  auto inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3,3));
   position->zero();
   (*position)(0) = 1.;
   (*position)(1) = 2.;
@@ -150,7 +150,7 @@ void OccTest::distance()
   auto position1(new siconos::algebra::SiconosVector(7));
   auto position2(new siconos::algebra::SiconosVector(7));
   auto velocity(new siconos::algebra::SiconosVector(6));
-  auto inertia(new SimpleMatrix(3,3));
+  auto inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3,3));
   position1->zero();
   (*position1)(0) = 0.;
   (*position1)(1) = 0.;

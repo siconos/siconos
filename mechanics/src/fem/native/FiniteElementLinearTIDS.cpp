@@ -83,7 +83,7 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
 
   // if(!_C)
   // {
-  //   _C.reset(new SimpleMatrix(_ndof, _ndof, _storageType));
+  //   _C = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, _storageType);
   // }
   // _C->zero();
 
