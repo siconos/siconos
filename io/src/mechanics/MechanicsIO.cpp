@@ -666,7 +666,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
               siconos::collision::native::bodies::DiskPlanR>,
           ContactPointVisitor>::Make;
 
-      auto  inspector = std::make_shared<ContactPointInspector>();
+      auto inspector = std::make_shared<ContactPointInspector>();
       inspector->inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
       siconos::algebra::SiconosVector& data = inspector->answer;

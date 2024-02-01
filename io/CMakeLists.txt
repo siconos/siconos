@@ -148,17 +148,12 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
   
   if(HAVE_SICONOS_MECHANICS)
     target_link_libraries(io PUBLIC mechanics)
+    # This will bring the links with Opencascade, if required ...
   endif()
   
-  #if(HAVE_SICONOS_MECHANISMS)
-  #  target_link_libraries(io PUBLIC mechanisms)
-  #endif()
-
-  # Links with non-Siconos libraries
-  if(SICONOS_HAS_OCE)
-    if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
-      target_link_libraries(io PRIVATE ${OCE_LIBRARIES})
-    endif()
+  if(HAVE_SICONOS_MECHANISMS)
+    target_link_libraries(io PUBLIC mechanisms)
+    # This will bring the links with Opencascade, if required ...
   endif()
   
   # --- Search component dependencies ---

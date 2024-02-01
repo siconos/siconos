@@ -12,8 +12,8 @@ if(WITH_TESTING)
     new_test(SOURCES  Contact2dTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
   
-  if(WITH_OCE)
-    begin_tests(src/occ/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT;${OCE_LIBRARIES}")
+  if(WITH_OpenCASCADE)
+    begin_tests(src/occ/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT;OpenCASCADE::OpenCASCADE")
     new_test(SOURCES  OccTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
 

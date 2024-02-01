@@ -122,8 +122,8 @@ siconos_component_install_setup(externals NODOC)
 install(FILES tools/SiconosFortran.h DESTINATION include/siconos)
 
 # - Optional OCE Renderer setup (install only) -
-if(WITH_OCE)
-  include(oce_renderer)
+if(WITH_OpenCASCADE)
+  include(occ_renderer)
 endif()
 
 if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)

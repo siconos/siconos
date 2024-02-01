@@ -73,7 +73,7 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None,
     """
     A context manager for a named temporary file.
     """
-    (_, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
+    (_fid, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
     fid = open(tfilename, 'w')
     if contents is not None:
         fid.write(contents)
@@ -97,6 +97,7 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None,
 
     yield r
     fid.close()
+    os.close(_fid)
     if not debug:
         os.remove(tfilename)
 
@@ -253,9 +254,9 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
     inertia
     inertia_matrix
     """
-    from OCC.GProp import GProp_GProps
-    from OCC.BRepGProp import brepgprop_VolumeProperties
-    from OCC.gp import gp_Ax1, gp_Dir
+    from OCC.Core.GProp import GProp_GProps
+    from OCC.Core.BRepGProp import brepgprop_VolumeProperties
+    from OCC.Core.gp import gp_Ax1, gp_Dir
     from siconos.mechanics import occ
 
     system = GProp_GProps()
@@ -330,10 +331,10 @@ def occ_topo_list(shape):
     :return: a list of edges and faces
     """
 
-    from OCC.TopAbs import TopAbs_FACE
-    from OCC.TopAbs import TopAbs_EDGE
-    from OCC.TopExp import TopExp_Explorer
-    from OCC.TopoDS import topods_Face, topods_Edge
+    from OCC.Core.TopAbs import TopAbs_FACE
+    from OCC.Core.TopAbs import TopAbs_EDGE
+    from OCC.Core.TopExp import TopExp_Explorer
+    from OCC.Core.TopoDS import topods_Face, topods_Edge
 
 
     topExp = TopExp_Explorer()
@@ -364,11 +365,11 @@ def occ_load_file(filename):
     :return: a topods_shape
     """
 
-    from OCC.STEPControl import STEPControl_Reader
-    from OCC.IGESControl import IGESControl_Reader
-    from OCC.BRep import BRep_Builder
-    from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+    from OCC.Core.STEPControl import STEPControl_Reader
+    from OCC.Core.IGESControl import IGESControl_Reader
+    from OCC.Core.BRep import BRep_Builder
+    from OCC.Core.TopoDS import TopoDS_Compound
+    from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
     reader_switch = {'stp': STEPControl_Reader,
                      'step': STEPControl_Reader,
@@ -399,15 +400,35 @@ def occ_load_file(filename):
 
     return comp
 
+import os
+import shutil
+import subprocess
+
+
+def get_open_fds() -> int:
+    """Get the number of open file descriptors for the current process."""
+    lsof_path = shutil.which("lsof")
+    if lsof_path is None:
+        raise NotImplementedError("Didn't handle unavailable lsof.")
+    raw_procs = subprocess.check_output(
+        [lsof_path, "-w", "-Ff", "-p", str(os.getpid())]
+    )
+    def filter_fds(lsof_entry: str) -> bool:
+        return lsof_entry.startswith("f") and lsof_entry[1:].isdigit()
+
+    fds = list(filter(filter_fds, raw_procs.decode().split(os.linesep)))
+
+    return len(fds)
 
 def topods_shape_reader(shape, deflection=0.001):
 
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.BRepMesh import BRepMesh_IncrementalMesh
+    from OCC.Core.StlAPI import StlAPI_Writer
+    from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
 
     import vtk
 
     stl_writer = StlAPI_Writer()
+    reader = vtk.vtkSTLReader()
 
     with tmpfile(suffix='.stl') as tmpf:
         mesh = BRepMesh_IncrementalMesh(shape, deflection)
@@ -417,17 +438,17 @@ def topods_shape_reader(shape, deflection=0.001):
         stl_writer.Write(shape, tmpf[1])
         tmpf[0].flush()
 
-        reader = vtk.vtkSTLReader()
+
         reader.SetFileName(tmpf[1])
         reader.Update()
 
-        return reader
+    return reader
 
 
 def brep_reader(brep_string, indx):
 
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.BRepTools import BRepTools_ShapeSet
+    from OCC.Core.StlAPI import StlAPI_Writer
+    from OCC.Core.BRepTools import BRepTools_ShapeSet
     import vtk
 
     shape_set = BRepTools_ShapeSet()
@@ -619,7 +640,7 @@ class MechanicsHdf5(object):
             self.print_io_mechanics('Warning -  _data siconos_mechanics_run_options in the hdf5 file')
             self.print_io_mechanics('        -  data(self._data, siconos_mechanics_run_options, ...) : ', e)
 
-        
+
         # self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
         #                               use_compression=self._use_compression)
 
@@ -894,7 +915,7 @@ class MechanicsHdf5(object):
 
         if name not in self._ref:
 
-            from OCC.STEPControl import STEPControl_Writer, STEPControl_AsIs
+            from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
 
             # step format is used for the storage.
             step_writer = STEPControl_Writer()

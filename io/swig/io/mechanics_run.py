@@ -531,10 +531,10 @@ class ShapeCollection():
                             'ShapeCollection.get(), attributes(shape_name)["type"] != vtp ')
 
                 elif self.attributes(shape_name)['type'] in ['step', 'stp']:
-                    from OCC.STEPControl import STEPControl_Reader
-                    from OCC.BRep import BRep_Builder
-                    from OCC.TopoDS import TopoDS_Compound
-                    from OCC.IFSelect import IFSelect_RetDone,\
+                    from OCC.Core.STEPControl import STEPControl_Reader
+                    from OCC.Core.BRep import BRep_Builder
+                    from OCC.Core.TopoDS import TopoDS_Compound
+                    from OCC.Core.IFSelect import IFSelect_RetDone,\
                         IFSelect_ItemsByEntity
 
                     builder = BRep_Builder()
@@ -575,10 +575,10 @@ class ShapeCollection():
                             self._io._keep.append(self._shapes[shape_name])
 
                 elif self.attributes(shape_name)['type'] in ['iges', 'igs']:
-                    from OCC.IGESControl import IGESControl_Reader
-                    from OCC.BRep import BRep_Builder
-                    from OCC.TopoDS import TopoDS_Compound
-                    from OCC.IFSelect import IFSelect_RetDone,\
+                    from OCC.Core.IGESControl import IGESControl_Reader
+                    from OCC.Core.BRep import BRep_Builder
+                    from OCC.Core.TopoDS import TopoDS_Compound
+                    from OCC.Core.IFSelect import IFSelect_RetDone,\
                         IFSelect_ItemsByEntity
 
                     builder = BRep_Builder()
@@ -623,7 +623,7 @@ class ShapeCollection():
 
                         if 'occ_indx' in self.attributes(shape_name):
 
-                            from OCC.BRepTools import BRepTools_ShapeSet
+                            from OCC.Core.BRepTools import BRepTools_ShapeSet
                             shape_set = BRepTools_ShapeSet()
                             shape_set.ReadFromString(
                                 self.shape(shape_name)[:][0])
