@@ -50,6 +50,8 @@ protected:
 
   /** stress of the system */
   std::shared_ptr<siconos::algebra::SiconosVector> _sigma{nullptr};
+  /** Initial stress of the system */
+  std::shared_ptr<siconos::algebra::SiconosVector> _sigma0{nullptr};
 
   std::shared_ptr<siconos::algebra::SiconosVector> _plasticRate = {nullptr};
 
